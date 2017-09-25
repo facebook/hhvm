@@ -30,7 +30,7 @@ class my_class2 extends my_base {}
 
 
 function main() {
-  $obj1 = new my_class1;
+  $obj1 = new my_class1();
   call_user_func(array($obj1, 'nonexistent'), "1", "2");
   call_user_func(array('my_class1', 'nonexistent'), "1", "2");
   call_user_func('my_class1::nonexistent', "1", "2");
@@ -41,7 +41,7 @@ function main() {
   echo "test_self:   "; $obj1->test_self();
   echo "test_parent: "; $obj1->test_parent();
 
-  $obj2 = new my_class2;
+  $obj2 = new my_class2();
   call_user_func(array($obj2, 'nonexistent'), "1", "2");
   call_user_func(array('my_class2', 'nonexistent'), "1", "2");
   call_user_func('my_class2::nonexistent', "1", "2");

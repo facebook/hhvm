@@ -5,4 +5,4 @@ class A {
     return tuple(1,2);
   }
 }
-var_dump((new A)->c());
+var_dump((new A())->c());

@@ -42,7 +42,7 @@ final class SimpleSoftCache2<Tk1, Tk2, Tv> {
   }
 }
 
-$c = new SimpleSoftCache2;
+$c = new SimpleSoftCache2();
 $c->set('a', dict[1=>2,'1'=>'2']);
 $c->set2('a', 'b', 'c');
 $c->set2('d', 'e', 'f');

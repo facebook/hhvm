@@ -22,7 +22,7 @@ function apcOps($key, $val) {
 }
 
 echo "**** Object instance with simple properties\n";
-$o = new C;
+$o = new C();
 apcOps('key', $o);
 
 echo "**** Vector containing object reference\n";
@@ -100,40 +100,40 @@ $m = ImmMap{'a' => 'b', 'c' => 'd'};
 apcOps('key', $m);
 
 echo "**** Object instance containg itself\n";
-$o = new C;
+$o = new C();
 $o->x = $o;
 apcOps('key', $o);
 
 echo "**** Object instance containg itself 2\n";
-$o = new C;
-$o->x = new B;
+$o = new C();
+$o->x = new B();
 $o->x->f = $o;
 apcOps('key', $o);
 
 echo "**** Object instance containg itself 3\n";
-$o = new C;
-$o->x = new B;
+$o = new C();
+$o->x = new B();
 $o->x->f = Vector{};
 $o->x->f[] = $o;
 apcOps('key', $o);
 
 echo "**** Object instance containg itself 4\n";
-$o = new C;
-$o->x = new B;
+$o = new C();
+$o->x = new B();
 $o->x->f = Vector{};
 $o->x->f[] = $o->x;
 apcOps('key', $o);
 
 echo "**** Object instance containg itself 5\n";
-$o = new C;
-$o->x = new B;
+$o = new C();
+$o->x = new B();
 $o->x->f = Vector{};
-$o->x->f[] = new B;
+$o->x->f[] = new B();
 apcOps('key', $o);
 
 echo "**** Object instance containg Vector instace with simple values\n";
-$o = new C;
-$o->x = new B;
+$o = new C();
+$o->x = new B();
 $o->x->f = Vector{};
 $o->x->f[] = 10;
 $o->x->f[] = 'hi';
@@ -141,8 +141,8 @@ $o->x->f[] = strtolower('heLLo');
 apcOps('key', $o);
 
 echo "**** Object instance containg collections instaces\n";
-$o = new C;
-$o->x = new B;
+$o = new C();
+$o->x = new B();
 $o->x->f = Map{};
 $o->x->f['k'] = 10;
 $o->x->f['k1'] = 'hi';

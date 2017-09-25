@@ -1,8 +1,8 @@
 <?hh // strict
 
-function byRef(&$x) {}
+function byRef(int &$x): void {}
 
-function test() {
+function test(): void {
   $x = null;
   byRef($x?->y); // error
 }

@@ -14,5 +14,5 @@ class X {
   }
 }
 
-$x = new X;
+$x = new X();
 $x->fiz();

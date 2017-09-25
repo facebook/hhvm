@@ -37,8 +37,8 @@ class D extends C {
 }
 
 function main() {
-  $c = new C;
-  $d = new D;
+  $c = new C();
+  $d = new D();
   echo "**************\n";
   $c->foo();
   $d->foo();

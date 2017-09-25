@@ -11,7 +11,7 @@ function makeNonStatic($n) {
 function main() {
   $a = array();
   // Insert an object to force $a to become ref-counted in APC.
-  $a['obj'] = new stdClass;
+  $a['obj'] = new stdClass();
   $a['unc'] = makeNonStatic(10);
   var_dump($a);
   apc_store('counted', $a);

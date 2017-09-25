@@ -138,7 +138,7 @@ function propd(&$x) {
   var_dump($x);
 }
 
-$a = new A;
+$a = new A();
 // unset all properties
 $a->unsetall();
 // Prop for visible, accessible property: use __get
@@ -162,7 +162,7 @@ $a->setopprop();
 $a->unsetall();
 $a->incdecprop();
 
-$b = new B;
+$b = new B();
 // unset all properties
 $b->unsetall();
 // SetOpProp: use __get
@@ -171,7 +171,7 @@ $b->setopprop();
 $b->unsetall();
 $b->incdecprop();
 
-$c = new C;
+$c = new C();
 // unset all properties
 $c->unsetall();
 // SetOpProp
@@ -180,7 +180,7 @@ $c->setopprop();
 $c->unsetall();
 $c->incdecprop();
 
-$d = new D;
+$d = new D();
 // unset all properties
 $d->unsetall();
 // Prop for visible, accessible property

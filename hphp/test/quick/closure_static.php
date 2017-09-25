@@ -32,9 +32,9 @@ class A {
   }
 }
 
-(new A)->b();
+(new A())->b();
 A::b();
-(new A)->c();
+(new A())->c();
 A::c();
-(new A)->d();
+(new A())->d();
 A::d();

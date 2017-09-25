@@ -3,7 +3,7 @@
 
 class CatWrapper {
   private resource $proc;
-  private array $pipes;
+  private array<Pipe> $pipes;
 
   public function __construct() {
     $descriptorspec = array(
@@ -34,7 +34,7 @@ class CatWrapper {
   }
 }
 
-function reschedule($priority = 0) {
+function reschedule(int $priority = 0): void {
   $queue = RescheduleWaitHandle::QUEUE_DEFAULT;
   return RescheduleWaitHandle::create($queue, $priority);
 }
@@ -43,7 +43,7 @@ async function correctFrame(Awaitable<int> $awaitable): Awaitable<void> {
   await $awaitable;
 }
 
-function backtrace_contains(array $bt, string $fn_name): bool {
+function backtrace_contains(array<string> $bt, string $fn_name): bool {
   foreach ($bt as $frame) {
     if (idx($frame, 'function') === $fn_name) {
       return true;

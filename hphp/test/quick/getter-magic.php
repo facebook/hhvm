@@ -16,6 +16,6 @@ function test() {
   var_dump($heh->prop);
 }
 
-$heh = new Heh;
+$heh = new Heh();
 var_dump($heh->prop);
 var_dump($heh);

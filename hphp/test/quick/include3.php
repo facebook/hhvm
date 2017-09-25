@@ -13,5 +13,5 @@ class A {
   }
 }
 
-$a = new A;
+$a = new A();
 $a->f();

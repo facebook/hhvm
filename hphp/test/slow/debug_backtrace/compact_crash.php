@@ -15,7 +15,7 @@ class X {
 
 function main() {
   fb_setprofile('profile');
-  (new X)->foo();
+  (new X())->foo();
 }
 
 main();

@@ -19,8 +19,8 @@ class x {
 }
 
 function main() {
-  $a = new a;
-  $x = new x;
+  $a = new a();
+  $x = new x();
 
   echo "Calling a->pub\n";
   $a->pub();

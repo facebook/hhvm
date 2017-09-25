@@ -11,4 +11,4 @@ class someClass2 {
   }
 }
 
-$someClass2 = new someClass2;
+$someClass2 = new someClass2();

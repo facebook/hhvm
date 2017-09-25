@@ -12,10 +12,10 @@ class B extends A {
 
 class C extends A {
   function foo() {
-    $b = new B;
+    $b = new B();
     $b->foo();
   }
 }
 
-$c = new C;
+$c = new C();
 $c->foo();

@@ -16,7 +16,7 @@ class :xhp {
 
 <xhp line={__LINE__} />;
 <xhp line={__LINE__}>text</xhp>;
-<xhp line={__LINE__} some-attr="value" />;
+<xhp line={__LINE__} some_attr="value" />;
 <xhp line={__LINE__} attr1="one" a2={2}>text</xhp>;
 
 echo "pass\n";

@@ -9,7 +9,7 @@ class thing {
 }
 
 function main() {
-  $o = new thing;
+  $o = new thing();
   $local = $o?->a;
   $local = 5;
   var_dump($o->b);

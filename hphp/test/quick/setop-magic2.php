@@ -1,7 +1,7 @@
 <?hh
 
-$bar = new Bar;
-$foo = new Foo;
+$bar = new Bar();
+$foo = new Foo();
 
 class Bar {
   protected $lol;

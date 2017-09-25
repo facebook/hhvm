@@ -103,8 +103,8 @@ function test_pair($k1, $v1, $k2, $v2) {
 }
 
 function test() {
-  $a1 = new A;
-  $a2 = new A;
+  $a1 = new A();
+  $a2 = new A();
   $a3 = new A(new A);
   $a4 = new A(new A);
   $a5 = new A('bar');
@@ -118,17 +118,17 @@ function test() {
   $a13= new A(new DateTime1(100));
   $a14 = new A(new DateTime1(-1));
   $a15 = new A(new DateTime2);
-  $a16 = new A; $a16->c = 999;
+  $a16 = new A(); $a16->c = 999;
   $a17 = new A(NAN);
   $a18 = new A(NAN);
 
-  $b1 = new B;
-  $c1 = new C;
+  $b1 = new B();
+  $c1 = new C();
 
-  $s1 = new ToString;
+  $s1 = new ToString();
   $s2 = new ToString('BAZ');
   $s3 = new ToString('99');
-  $s4 = new ToStringThrower;
+  $s4 = new ToStringThrower();
 
   $t1 = new DateTime1(1000);
   $t2 = new DateTime1(1000);

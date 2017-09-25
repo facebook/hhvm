@@ -8,7 +8,7 @@ class C {
                                       'HH\\num'=>num),
                        'HH\\int'=>int,
                       );
-  const type X = Map<int, shape('foo'=>array, 'bar'=>bool)>;
+  const type X = Map<int, shape('foo'=>vec<int>, 'bar'=>bool)>;
 }
 
 $x = new ReflectionTypeConstant('C', 'T');

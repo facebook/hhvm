@@ -11,7 +11,7 @@ class foo {
   }
 }
 function main() {
-  $l = new foo;
+  $l = new foo();
   $l->bar();
 }
 main();

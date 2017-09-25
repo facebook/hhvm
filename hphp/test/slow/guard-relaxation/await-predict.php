@@ -9,7 +9,7 @@ class thing {
   private $blob;
 
   async function getBlob() {
-    if (!$this->blob) $this->blob = new Blob;
+    if (!$this->blob) $this->blob = new Blob();
     return $this->blob;
   }
 
@@ -19,7 +19,7 @@ class thing {
   }
 }
 
-$t = new thing;
+$t = new thing();
 for ($i = 0; $i < 500; ++$i) {
   $t->wat();
 }

@@ -1,4 +1,4 @@
 <?hh
 
 namespace A;
-new \B;
+new \B();

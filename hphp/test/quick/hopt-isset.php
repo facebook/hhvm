@@ -7,7 +7,7 @@ class B {
 }
 
 function main() {
-  $b = new B;
+  $b = new B();
   $b->foo();
 }
 

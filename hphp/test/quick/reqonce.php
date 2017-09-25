@@ -1,5 +1,5 @@
 <?hh
-$c = new TestClass;
+$c = new TestClass();
 $c->testwithctx();
 testnoctx();
 

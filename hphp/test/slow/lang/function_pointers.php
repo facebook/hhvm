@@ -27,7 +27,7 @@ class C {
 }
 $data = Vector { 1, 2, 3 };
 var_dump($data->filter(class_meth('C', 'isOdd')));
-var_dump((new C)->filter($data));
+var_dump((new C())->filter($data));
 
 $caller = meth_caller(C::class, 'id');
 var_dump($caller(new C(), 'Hello World!'));

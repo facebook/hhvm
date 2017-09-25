@@ -18,7 +18,7 @@ class Cls2 {
 }
 
 function test_cls1() {
-  $x = new Cls1;
+  $x = new Cls1();
   $s = "hello";
 
   $x < $s;
@@ -39,7 +39,7 @@ function test_cls1() {
 }
 
 function test_cls2() {
-  $x = new Cls2;
+  $x = new Cls2();
   $s = "hello";
 
   try { $x < $s; } catch (Exception $e) { echo "Exn: " . $e->getMessage() . "\n"; }

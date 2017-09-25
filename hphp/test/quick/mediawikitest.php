@@ -19,7 +19,7 @@ class PhpRefCallBugTester {
     call_user_func_array( array( $this, 'foo' ), array( &$var ) );
   }
 }
-$test = new PhpRefCallBugTester;
+$test = new PhpRefCallBugTester();
 $test->execute();
 if (!$test->ok) {
   echo "Test failed\n";

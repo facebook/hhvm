@@ -9,5 +9,5 @@ class C {
   const v = 42;
 }
 class D extends C {}
-$c = new D;
+$c = new D();
 var_dump($c instanceof I);

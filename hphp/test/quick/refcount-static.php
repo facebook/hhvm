@@ -8,6 +8,6 @@ class foo {
 }
 
 function main() {
-  (new foo)->setBlob(0);
+  (new foo())->setBlob(0);
 }
 main();

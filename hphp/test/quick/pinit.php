@@ -11,9 +11,9 @@ class Fub {
   );
 }
 
-$f = new Fub;
+$f = new Fub();
 var_dump($f->dub);
 unset($f);
 
-$f = new Fub;
+$f = new Fub();
 var_dump($f->dub);

@@ -113,15 +113,15 @@ function main() {
 
   compare(dict['a' => 12345], dict['a' => "12345"]);
 
-  single_compare(dict[0 => new stdclass],
-                 dict[0 => new stdclass]);
+  single_compare(dict[0 => new stdclass()],
+                 dict[0 => new stdclass()]);
   compare(dict[0 => new ToString('foobaz')],
           dict[0 => 'foobaz']);
-  compare(dict["key" => new Thrower],
+  compare(dict["key" => new Thrower()],
           dict["key" => 'foobaz']);
-  compare(dict[0 => new Thrower],
+  compare(dict[0 => new Thrower()],
           dict[1 => 'foobaz']);
-  compare(dict['a' => 1, 'b' => new Thrower],
+  compare(dict['a' => 1, 'b' => new Thrower()],
           dict['a' => 2, 'b' => 'foobaz']);
 
   compare(dict[], null);
@@ -129,7 +129,7 @@ function main() {
   compare(dict[], 123);
   compare(dict[], 1.2345);
   compare(dict[], 'abc');
-  compare(dict[], new stdclass);
+  compare(dict[], new stdclass());
   compare(dict[], []);
   compare(dict[], vec[]);
   compare(dict[], keyset[]);

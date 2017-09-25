@@ -21,7 +21,7 @@ class MyClass {
 }
 
 function main() {
-  $my = new MyClass;
+  $my = new MyClass();
   var_dump($my->getter());
   $fun = $my->closure_fun();
   $x = $fun();

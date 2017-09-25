@@ -5,7 +5,7 @@ function cmp($x, $y) {
   if ($x > $y) return -1;
   return 0;
 }
-$v = new Vector;
+$v = new Vector();
 $v[] = 'c';
 $v[] = 'a';
 $v[] = 'b';
@@ -14,7 +14,7 @@ foreach ($v as $key => $val) {
   echo $key . ' ' . $val . "\n";
 }
 echo "------------------------\n";
-$m = new Map;
+$m = new Map();
 $m['w'] = 2;
 $m['v'] = 4;
 $m['y'] = 3;

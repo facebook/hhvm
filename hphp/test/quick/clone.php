@@ -14,7 +14,7 @@ class A {
 };
 
 function main() {
-  $a = new A;
+  $a = new A();
   $a->y = "foo";
   $b = clone $a;
   $a->y = "bar";

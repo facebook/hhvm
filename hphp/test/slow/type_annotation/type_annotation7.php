@@ -3,4 +3,4 @@
 class C {
 }
 
-var_dump(type_structure(new C, 'T'));
+var_dump(type_structure(new C(), 'T'));

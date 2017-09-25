@@ -1,6 +1,6 @@
 <?hh // strict
 
-function nullthrows<T>(?T $x, ?string $message = null, ...$sprintf_args): T {
+function nullthrows<T>(?T $x, ?string $message = null, mixed ...$sprintf_args): T {
   if ($x !== null) {
     return $x;
   }
@@ -13,13 +13,13 @@ function nullthrows<T>(?T $x, ?string $message = null, ...$sprintf_args): T {
 }
 
 
-function main($obj) {
+function main(C $obj): void {
   var_dump(nullthrows($obj));
 }
 
 class C { }
 
-$obj = new C;
+$obj = new C();
 
 main($obj);
 main($obj);

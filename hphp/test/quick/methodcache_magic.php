@@ -22,9 +22,9 @@ class goer {
 }
 
 function main() {
-  $go = new goer;
-  $one = new one;
-  $two = new two;
+  $go = new goer();
+  $one = new one();
+  $two = new two();
   $go->go($one);
   foreach (array(1,2,3) as $_) {
     foreach (array($one, $two) as $o) {

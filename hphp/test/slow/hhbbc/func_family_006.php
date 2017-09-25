@@ -17,6 +17,6 @@ function main(Base $b, string $l) {
 }
 
 $l = (string)mt_rand();
-main(new D2, $l);
-main(new D1, $l);
+main(new D2(), $l);
+main(new D1(), $l);
 

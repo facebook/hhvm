@@ -29,4 +29,4 @@ final class Tree {
   }
 }
 
-var_dump(Tree::go(new R));
+var_dump(Tree::go(new R()));

@@ -11,6 +11,6 @@ class invoker {
 }
 
 function foo() {
-  array_map(new invoker, array(new dtor(1), new dtor(2)));
+  array_map(new invoker(), array(new dtor(1), new dtor(2)));
 }
 foo();

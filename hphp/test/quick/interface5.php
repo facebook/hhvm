@@ -7,5 +7,5 @@ class D extends C {
     echo "Done\n";
   }
 }
-$obj = new D;
+$obj = new D();
 $obj->foo();

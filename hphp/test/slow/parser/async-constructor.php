@@ -3,5 +3,5 @@
 class ctor {
   async function __construct() {}
 }
-new ctor;
+new ctor();
 echo "done";

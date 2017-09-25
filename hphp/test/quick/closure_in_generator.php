@@ -12,7 +12,7 @@ class A {
   }
 }
 
-$a = new A;
+$a = new A();
 foreach ($a->b() as $c) {
   print "$c\n";
 }

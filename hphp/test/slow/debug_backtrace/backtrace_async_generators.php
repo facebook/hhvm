@@ -1,7 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function backtrace_contains(array $bt, string $fn_name): bool {
+function backtrace_contains(array<string> $bt, string $fn_name): bool {
   foreach ($bt as $frame) {
     if (idx($frame, 'function') === $fn_name) {
       return true;
@@ -10,7 +10,7 @@ function backtrace_contains(array $bt, string $fn_name): bool {
   return false;
 }
 
-function reschedule($priority = 0) {
+function reschedule(int $priority = 0): RescheduleWaitHandle {
   $queue = RescheduleWaitHandle::QUEUE_DEFAULT;
   return RescheduleWaitHandle::create($queue, $priority);
 }

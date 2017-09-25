@@ -1,3 +1,12 @@
 (4,3)-(4,15) Method declarations require a visibility modifier such as public, private or protected.
+(4,15)-(4,15) A type annotation is required in strict mode.
+(5,22)-(5,22) A type annotation is required in strict mode.
+(6,32)-(6,32) A type annotation is required in strict mode.
 (10,3)-(10,15) Method declarations require a visibility modifier such as public, private or protected.
+(10,15)-(10,15) A type annotation is required in strict mode.
+(11,21)-(11,21) A type annotation is required in strict mode.
+(12,28)-(12,28) A type annotation is required in strict mode.
 (16,3)-(16,15) Method declarations require a visibility modifier such as public, private or protected.
+(16,15)-(16,15) A type annotation is required in strict mode.
+(17,22)-(17,22) A type annotation is required in strict mode.
+(18,30)-(18,30) A type annotation is required in strict mode.

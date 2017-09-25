@@ -128,7 +128,7 @@ test_keyset_hint(false);
 test_keyset_hint(717);
 test_keyset_hint(1.234);
 test_keyset_hint("string");
-test_keyset_hint(new stdclass);
+test_keyset_hint(new stdclass());
 test_keyset_hint([]);
 test_keyset_hint([1, 2, 3]);
 test_keyset_hint(vec[]);

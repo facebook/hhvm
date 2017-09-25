@@ -61,7 +61,7 @@ class C2 {
   }
 }
 function main2() {
-  $obj = new C2;
+  $obj = new C2();
   $obj->test();
 }
 main2();
@@ -105,7 +105,7 @@ class C3 extends B3 {
   }
 }
 function main3() {
-  $obj = new C3;
+  $obj = new C3();
   $obj->test();
 }
 main3();
@@ -146,7 +146,7 @@ class C5 extends B5 {
 }
 
 function main5() {
-  $obj = new C5;
+  $obj = new C5();
   $obj->test();
 }
 main5();

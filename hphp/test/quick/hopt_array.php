@@ -15,7 +15,7 @@ class C {
   }
 }
 
-$c = new C;
+$c = new C();
 $val = $c->foo();
 echo $val;
 echo "\n";

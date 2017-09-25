@@ -20,8 +20,8 @@ class two extends one {
 }
 
 function main() {
-  $one = new one;
-  $two = new two;
+  $one = new one();
+  $two = new two();
   $one->doit($one);
   $one->doit($two);
   $one->doit($two);

@@ -1585,18 +1585,16 @@ module WithExpressionAndStatementAndTypeParser
     let parser1, markup_section = parse_in_statement_parser parser
       (StatementParser.parse_markup_section ~is_leading_section:true)
     in
-    let valid =
-      match markup_section.syntax with
-      (* proceed successfully if we've consumed <?... *)
-      (* TODO: Give an error if there is leading trivia on the < in an hh
-      file. (This work is tracked by task T21653075.) *)
-      (* TODO: Handle the case where the langauge is not a Name. *)
-      | MarkupSection { markup_suffix; _ } -> not (is_missing markup_suffix)
-      | _ -> false
-    in
-    if valid then
-      parser1, markup_section
-    else
+    let at_end = TokenKind.EndOfFile = peek_token_kind parser in
+    match syntax markup_section with
+    (* proceed successfully if we've consumed <?... *)
+    (* TODO: Give an error if there is leading trivia on the < in an hh file *)
+    (* TODO: Handle the case where the langauge is not a Name. *)
+    | MarkupSection { markup_suffix; _ }
+      when not (is_missing markup_suffix) || at_end ->
+        (* If we're at_end, the file is empty and doesn't need a <?-header *)
+        parser1, markup_section
+    | _ ->
       let parser = with_error parser SyntaxError.error1001 in
       let markup_section =
         make_markup_section (make_missing ()) (make_missing ())

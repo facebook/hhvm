@@ -18,6 +18,6 @@ function baz(?A $a) {
   return $a->bar();
 }
 
-foo(new A);
-bar(new A);
-baz(new A);
+foo(new A());
+bar(new A());
+baz(new A());

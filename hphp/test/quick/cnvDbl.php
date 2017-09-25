@@ -12,7 +12,7 @@ var_dump(foo(1.1));
 var_dump(foo("abc"));
 var_dump(foo(array(123)));
 class C { public $foo = "bar"; }
-var_dump(foo(new C));
+var_dump(foo(new C()));
 
 function bar($i) {
   $v1 = "undefined";
@@ -35,7 +35,7 @@ function bar($i) {
     $v6 = 0.0;
     $v7 = "1.1";
     $v8 = "abc";
-    $v9 = new C;
+    $v9 = new C();
     $v10 = array();
     $v11 = array(123);
   }

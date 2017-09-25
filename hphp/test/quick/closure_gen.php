@@ -22,7 +22,7 @@ class c {
 }
 
 function main() {
-  $c = new c;
+  $c = new c();
   $f = $c->genclo();
   foreach ($f() as $v) {
     var_dump($v);

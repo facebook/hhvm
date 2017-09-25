@@ -12,7 +12,7 @@ class A {
 }
 
 function main() {
-  $a = new A;
+  $a = new A();
   var_dump($a->heh(0));
   var_dump($a->getY());
 }

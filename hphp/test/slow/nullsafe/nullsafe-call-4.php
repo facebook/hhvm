@@ -18,7 +18,7 @@ class F {}
 function test(C $c, bool $b): ?F {
   return $c->blah($b)?->bar()->baz();
 }
-function main() {
+function main(): void {
   $c = new C();
   var_dump(test($c, true));
   try {

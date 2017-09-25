@@ -17,6 +17,6 @@ function test($x) {
   foreach ($f($x) as $v) var_dump($v);
 }
 
-test(new X);
-test(new Y);
-test(new Z);
+test(new X());
+test(new Y());
+test(new Z());

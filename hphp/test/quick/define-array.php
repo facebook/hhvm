@@ -62,15 +62,15 @@ function test_bad_array() {
 
   $a = 123;
 
-  define('BADARRAY1', [new stdclass]);
+  define('BADARRAY1', [new stdclass()]);
   define('BADARRAY2', [&$a]);
 
-  define('BADARRAY3', [1, [new stdclass], 3]);
+  define('BADARRAY3', [1, [new stdclass()], 3]);
   define('BADARRAY4', [1, [&$a], 3]);
 
-  define('BADARRAY5', [1, vec[new stdclass], 3]);
+  define('BADARRAY5', [1, vec[new stdclass()], 3]);
 
-  define('BADARRAY6', [1, dict['a' => new stdclass], 3]);
+  define('BADARRAY6', [1, dict['a' => new stdclass()], 3]);
 
   define('BADARRAY7', [$GLOBALS]);
   define('BADARRAY8', [1, [$GLOBALS]]);
@@ -105,14 +105,14 @@ function test_bad_vec() {
 
   $a = 123;
 
-  define('BADVEC1', vec[new stdclass]);
+  define('BADVEC1', vec[new stdclass()]);
 
-  define('BADVEC2', vec[1, vec[new stdclass], 3]);
+  define('BADVEC2', vec[1, vec[new stdclass()], 3]);
 
-  define('BADVEC3', vec[1, [new stdclass], 3]);
+  define('BADVEC3', vec[1, [new stdclass()], 3]);
   define('BADVEC4', vec[1, [&$a], 3]);
 
-  define('BADVEC5', vec[1, dict['a' => new stdclass], 3]);
+  define('BADVEC5', vec[1, dict['a' => new stdclass()], 3]);
 
   define('BADVEC6', vec[$GLOBALS]);
   define('BADVEC7', vec[1, vec[$GLOBALS]]);
@@ -160,14 +160,14 @@ function test_bad_dict() {
 
   $a = 123;
 
-  define('BADDICT1', dict[100 => new stdclass]);
+  define('BADDICT1', dict[100 => new stdclass()]);
 
-  define('BADDICT2', dict[100 => 1, 200 => dict[1 => new stdclass], 300 => 3]);
+  define('BADDICT2', dict[100 => 1, 200 => dict[1 => new stdclass()], 300 => 3]);
 
-  define('BADDICT3', dict[100 => 1, 200 => [new stdclass], 300 => 3]);
+  define('BADDICT3', dict[100 => 1, 200 => [new stdclass()], 300 => 3]);
   define('BADDICT4', dict[100 => 1, 200 => [&$a], 300 => 3]);
 
-  define('BADDICT5', dict[100 => 1, 200 => vec[new stdclass], 300 => 3]);
+  define('BADDICT5', dict[100 => 1, 200 => vec[new stdclass()], 300 => 3]);
 
   define('BADDICT6', dict[100 => $GLOBALS]);
   define('BADDICT7', [100 => 1, dict['abc' => $GLOBALS]]);

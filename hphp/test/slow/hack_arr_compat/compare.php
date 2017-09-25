@@ -58,7 +58,7 @@ function main() {
     dict['a' => 'b', 'c' => 'd'],
     keyset[],
     keyset['a', 'b', 'c'],
-    new stdclass,
+    new stdclass(),
     imagecreate(1, 1),
     [1, [2, 5], [3, 4]],
     [1, 2, vec[3, 4]],

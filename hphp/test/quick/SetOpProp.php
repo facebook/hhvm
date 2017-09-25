@@ -28,7 +28,7 @@ class E {
   }
 }
 
-$o = new C;
+$o = new C();
 $o->a .= "<a>";
 $o->b .= "<b>";
 $o->b .= "<b>";
@@ -37,7 +37,7 @@ $o->q += 1;
 $o->r .= "hello";
 print_r($o);
 
-$o = new D;
+$o = new D();
 $o->a .= "<a>";
 $o->b .= "<b>";
 $o->b .= "<b>";
@@ -46,7 +46,7 @@ $o->q += 1;
 $o->r .= "hello";
 print_r($o);
 
-$o = new E;
+$o = new E();
 $o->a .= "<a>";
 $o->b .= "<b>";
 $o->b .= "<b>";

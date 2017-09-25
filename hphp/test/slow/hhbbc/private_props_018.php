@@ -12,7 +12,7 @@ class StringElem {
 };
 
 function main() {
-  $x = new StringElem;
+  $x = new StringElem();
   var_dump($x->foo());
   var_dump($x->bar());
 }

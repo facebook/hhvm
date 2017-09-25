@@ -1,6 +1,6 @@
 <?hh
 
-$v = new Vector;
+$v = new Vector();
 $v[] = 'c';
 $v[] = 'a';
 $v[] = 'b';
@@ -10,7 +10,7 @@ foreach ($v as $key => $val) {
 }
 
 echo "------------------------\n";
-$m = new Map;
+$m = new Map();
 $m['w'] = 2;
 $m['v'] = 4;
 $m['y'] = 3;

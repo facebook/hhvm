@@ -7,7 +7,7 @@ class X {
   }
 }
 
-$x = new X;
+$x = new X();
 $t = null;
 $x->foo($t);
 

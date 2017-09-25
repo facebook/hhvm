@@ -10,7 +10,7 @@ class C implements I {
     echo 'Hello ' . $x . "\n";
   }
 }
-$o = new C;
+$o = new C();
 $o->foo("5");
 
 print "Test end\n";

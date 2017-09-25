@@ -16,7 +16,7 @@ namespace N {
 
   class D extends C { }
 
-  $c = new C;
+  $c = new C();
 
   M\call('N\sayHi');
   M\call(array('N\C', 'sm'));

@@ -9,5 +9,5 @@ trait T {
 class C {
   use T;
 }
-$obj = new C;
+$obj = new C();
 $obj->test();

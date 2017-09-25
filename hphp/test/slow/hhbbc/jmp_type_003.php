@@ -21,6 +21,6 @@ function main(Blah $x = null) {
   }
 }
 
-main(new Blah);
+main(new Blah());
 main();
 echo "done\n";

@@ -6,6 +6,6 @@ if (!isset($g)) {
   class X {}
   if (!class_exists('Y')) print "ok 1\n";
 } else {
-  var_dump(new Y);
+  var_dump(new Y());
 }
 class Y extends X {}

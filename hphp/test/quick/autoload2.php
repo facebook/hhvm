@@ -6,5 +6,4 @@ function __autoload($cls) {
   }
 }
 $arr = array("C");
-$obj = new $arr[0];
-
+$obj = new $arr[0]();

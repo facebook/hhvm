@@ -19,7 +19,7 @@ async function test3(): Awaitable<void> {
   await genva(f(), g());
 }
 async function test4(): Awaitable<void> {
-  await genva(new MyAwaitable);
+  await genva(new MyAwaitable());
 }
 async function test5() {
   return await genva(f(), h(), f());

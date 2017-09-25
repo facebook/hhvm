@@ -8,7 +8,7 @@ class D {}
 function test(C $c): D {
   return $c?->foo();
 }
-function main() {
+function main(): void {
   $c = new C();
   var_dump(test($c));
   echo "Done\n";

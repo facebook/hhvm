@@ -25,7 +25,7 @@ class D {
   public function foo() {}
   private function bar() {}
 }
-$obj = new D;
+$obj = new D();
 // user public instance method
 var_dump(is_callable(array($obj,'foo')));
 // user private instance method

@@ -29,8 +29,8 @@ function main() {
     public $y = Vector {};
     static public $z = Vector {};
   }
-  $obj1 = new C;
-  $obj2 = new C;
+  $obj1 = new C();
+  $obj2 = new C();
   $v1 = $obj1->y;
   $v2 = $obj2->y;
   $v1[] = 11;
@@ -49,8 +49,8 @@ function main() {
     public $x = Map {'a' => 1};
     public $y = array('a' => 1);
   }
-  $obj1 = new W;
-  $obj2 = new W;
+  $obj1 = new W();
+  $obj2 = new W();
   var_dump($obj1->x === $obj2->x);
   $obj1->x['b'] = 11;
   $obj2->x['c'] = 22;
@@ -70,16 +70,16 @@ function main() {
   class X {
     public $prop = array(Map {'a' => 1});
   }
-  $obj1 = new X;
-  $obj2 = new X;
+  $obj1 = new X();
+  $obj2 = new X();
   $obj1->prop[0]['a']++;
   var_dump($obj1->prop[0]['a']);
   var_dump($obj2->prop[0]['a']);
   class Y {
     public $prop = Vector {array(Map {'a' => 1})};
   }
-  $obj1 = new Y;
-  $obj2 = new Y;
+  $obj1 = new Y();
+  $obj2 = new Y();
   $obj1->prop[0][0]['a']++;
   var_dump($obj1->prop[0][0]['a']);
   var_dump($obj2->prop[0][0]['a']);
@@ -93,9 +93,9 @@ function main() {
     const BAR = "yo";
     public $prop = Map {FOO => BAR, Z::FOO => Z::BAR};
   }
-  $obj1 = new Z;
+  $obj1 = new Z();
   var_dump($obj1->prop[FOO], $obj1->prop[Z::FOO], count($obj1->prop));
-  $obj2 = new Z;
+  $obj2 = new Z();
   $obj1->prop[FOO] = 42;
   $obj1->prop[Z::FOO] = 73;
   var_dump($obj2->prop[FOO], $obj2->prop[Z::FOO]);
@@ -105,8 +105,8 @@ function main() {
   class T {
     public $prop = array(Set {'a'});
   }
-  $obj1 = new T;
-  $obj2 = new T;
+  $obj1 = new T();
+  $obj2 = new T();
   $obj1->prop[0][] = 'b';
   var_dump($obj1->prop[0]->contains('b'));
   var_dump($obj2->prop[0]->contains('b'));

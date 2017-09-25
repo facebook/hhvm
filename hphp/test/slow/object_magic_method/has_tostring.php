@@ -11,8 +11,8 @@ function test(X $obj, string $s) {
 }
 
 function main() {
-  var_dump(test(new X, "X"));
-  var_dump(test(new Y, "Y"));
+  var_dump(test(new X(), "X"));
+  var_dump(test(new Y(), "Y"));
 }
 
 main();

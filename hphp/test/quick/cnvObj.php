@@ -12,7 +12,7 @@ var_dump(foo(1.1));
 var_dump(foo("abc"));
 var_dump(foo(array(123)));
 class C { }
-var_dump(foo(new C));
+var_dump(foo(new C()));
 
 function bar($v) {
   $nonStaticStr = (string)$v;

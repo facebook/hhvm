@@ -45,7 +45,7 @@ function get_empty_single_arr() {
 }
 
 function get_null() { return null; }
-function get_obj() { return new stdclass; }
+function get_obj() { return new stdclass(); }
 
 function get_anything() { return __hhvm_intrinsics\launder_value([1, 2, 3]); }
 

@@ -25,7 +25,7 @@ class C extends B {
    * current instance if there is one.
    */
   public function g() {
-    $obj = new B;
+    $obj = new B();
     $obj->f1(); // B B
     B::f1(); // C C
     forward_static_call(array($obj, 'f1')); // B B (PHP 5.3 outputs C B)
@@ -37,5 +37,5 @@ class C extends B {
     forward_static_call(array('B', 'f2')); // C
   }
 }
-$obj = new C;
+$obj = new C();
 $obj->g();

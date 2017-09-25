@@ -46,8 +46,8 @@ function main() {
     'long  ImmMap' => ImmMap {'w' => 'W', 'x' => 'X', 'y' => 'Y', 'z' => 'Z'},
   );
   $additional_iterable = array(
-    'IterableClass'      => new IterableClass,
-    'KeyedIterableClass' => new KeyedIterableClass,
+    'IterableClass'      => new IterableClass(),
+    'KeyedIterableClass' => new KeyedIterableClass(),
   );
   foreach ($zippable as $name => $container) {
     foreach ($zippable as $name2 => $container2) {

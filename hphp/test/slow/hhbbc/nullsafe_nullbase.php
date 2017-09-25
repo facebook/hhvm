@@ -1,6 +1,6 @@
 <?hh
 
-function err() { throw new exception; }
+function err() { throw new exception(); }
 set_error_handler('err');
 
 class somecls {
@@ -16,4 +16,4 @@ function foo(somecls $z) {
  }
 }
 
-foo(new somecls);
+foo(new somecls());

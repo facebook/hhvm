@@ -1,4 +1,4 @@
 <?hh
 class A extends Exception { }
-((new A));
+((new A()));
 print "parsed";

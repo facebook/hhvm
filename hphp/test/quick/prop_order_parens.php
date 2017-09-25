@@ -35,17 +35,17 @@ var_dump(C::$y[0]());
 var_dump(((C::$z)[0])->prop);
 var_dump(((C::$z)[0])->prop());
 
-$obj = new C;
+$obj = new C();
 $x = array('bar1');
 var_dump(($obj->$x)[0]);
 $x = array('bar2');
 var_dump($obj->$x[0]());
 
-$obj = new C;
+$obj = new C();
 var_dump(($obj->w)[0]->yo);
 var_dump(($obj->w)[0]->yo());
 
-$obj = new C;
+$obj = new C();
 $w = array('baz');
 var_dump(($obj->$w)[0]->blah);
 var_dump($obj->$w[0]->blah());

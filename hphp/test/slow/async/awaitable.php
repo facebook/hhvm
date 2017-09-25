@@ -21,11 +21,11 @@ class F implements Awaitable {
 }
 
 async function foo() {
-  $f = new F;
+  $f = new F();
   $a = await $f;
   var_dump($a);
   await block();
-  $f = new F;
+  $f = new F();
   $a = await $f;
   var_dump($a);
 }

@@ -14,7 +14,7 @@ class c {
 }
 
 function main() {
-  $o = new c;
+  $o = new c();
   c::f($o);
   t::f($o);
 }

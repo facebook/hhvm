@@ -15,7 +15,7 @@ var_dump(foo(1.1));
 var_dump(foo("abc"));
 var_dump(foo(array(123)));
 class C { public function __toString() { return "a C"; } }
-var_dump(foo(new C));
+var_dump(foo(new C()));
 
 function bar($i) {
   $v1 = "undefined";
@@ -58,4 +58,4 @@ function bar($i) {
 bar(1);
 
 class D { }
-var_dump(foo(new D));
+var_dump(foo(new D()));

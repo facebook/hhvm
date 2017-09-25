@@ -64,7 +64,7 @@ class A {
   }
 
 }
-$a = new A;
+$a = new A();
 var_dump($a->testPublic());
 var_dump($a->testUse());
 var_dump($a->testParam());

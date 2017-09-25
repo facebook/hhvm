@@ -15,4 +15,4 @@ class BMTR {
   }
 }
 
-(new BMTR)->init();
+(new BMTR())->init();

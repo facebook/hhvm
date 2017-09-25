@@ -3,7 +3,7 @@
 class A {}
 
 function a() {
-  $b = new A;
+  $b = new A();
   $c = function() use ($b) {
     return $b;
   };

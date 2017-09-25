@@ -4,7 +4,7 @@ class C {
   public int $foo = 123;
 }
 
-$x = new C;
+$x = new C();
 $x->foo = 456;
 $x->bar = 'baz';
 

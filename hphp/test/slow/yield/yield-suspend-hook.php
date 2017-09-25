@@ -13,7 +13,7 @@ function doh($x, $y) {
 fb_setprofile('doh');
 
 function hey() {
-  yield new stdclass;
+  yield new stdclass();
 }
 
 for ($i = 0; $i < 3; ++$i) {

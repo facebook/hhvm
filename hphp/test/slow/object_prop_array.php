@@ -21,5 +21,5 @@ class D extends C {
   public $r;
 }
 
-var_dump(HH\object_prop_array(new C));
-var_dump(HH\object_prop_array(new D));
+var_dump(HH\object_prop_array(new C()));
+var_dump(HH\object_prop_array(new D()));

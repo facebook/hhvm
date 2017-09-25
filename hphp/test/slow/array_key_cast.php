@@ -48,7 +48,7 @@ function make_tests($func) {
     vec[$func(), vec[]],
     vec[$func(), dict[]],
     vec[$func(), keyset[]],
-    vec[$func(), new stdclass]
+    vec[$func(), new stdclass()]
   ];
   return __hhvm_intrinsics\launder_value($tests);
 }

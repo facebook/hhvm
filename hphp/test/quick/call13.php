@@ -23,7 +23,7 @@ class F extends D {
 }
 
 function main() {
-  $obj = new E;
+  $obj = new E();
   $obj->test();
 
   $obj->foo();

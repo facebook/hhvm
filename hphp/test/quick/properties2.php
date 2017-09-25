@@ -15,12 +15,12 @@ class A extends X {
 
 class B extends X {
   function foo() {
-    $a = new A;
+    $a = new A();
     $a->foo();
     $a->field = 123;
     $a->foo();
   }
 };
 
-$b = new B;
+$b = new B();
 $b->foo();

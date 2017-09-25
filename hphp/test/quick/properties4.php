@@ -8,7 +8,7 @@ class C extends B {
     var_dump(get_class_vars('C'));
   }
 }
-$o = new C;
+$o = new C();
 $o->dump_vars();
 
 class D {

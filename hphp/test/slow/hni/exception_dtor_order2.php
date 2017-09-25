@@ -1,6 +1,6 @@
 <?hh
 
-function err() { throw new Exception; }
+function err() { throw new Exception(); }
 set_error_handler('err');
 
 class dtor {

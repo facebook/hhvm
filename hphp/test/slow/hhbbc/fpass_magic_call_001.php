@@ -20,4 +20,4 @@ class A {
   }
 }
 
-(new A)->go();
+(new A())->go();

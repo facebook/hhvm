@@ -11,10 +11,10 @@ function asd($x, $y) {
 fb_setprofile('asd');
 
 function foo() {
-  $x = new stdclass;
-  $y = new stdclass;
-  $z = new stdclass;
-  return new stdclass;
+  $x = new stdclass();
+  $y = new stdclass();
+  $z = new stdclass();
+  return new stdclass();
 }
 
 try {

@@ -12,7 +12,7 @@ class MVecFinalOps {
   private $igen2 = array();
 
   public function __construct() {
-    $this->o = new Other;
+    $this->o = new Other();
     $this->icell = "asd";
   }
 

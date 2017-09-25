@@ -27,7 +27,7 @@ class D {
 }
 
 function main() {
-  $c = new C;
+  $c = new C();
   B::test($c);
   C::test($c);
   D::test($c);

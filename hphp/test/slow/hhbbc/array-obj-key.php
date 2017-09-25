@@ -8,7 +8,7 @@ class A {
 }
 
 function test() {
-  A::set(__hhvm_intrinsics\launder_value(new stdclass));
+  A::set(__hhvm_intrinsics\launder_value(new stdclass()));
   var_dump((bool)A::get());
 }
 test();

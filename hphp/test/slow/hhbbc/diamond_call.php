@@ -20,27 +20,27 @@ function diamond(something $state) {
   echo "done\n";
 }
 
-diamond(new bsd);
-diamond(new bsd);
-diamond(new bsd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-diamond(new asd);
-for ($i = 0; $i < 1000; ++$i) { diamond(new asd); }
+diamond(new bsd());
+diamond(new bsd());
+diamond(new bsd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+diamond(new asd());
+for ($i = 0; $i < 1000; ++$i) { diamond(new asd()); }

@@ -13,5 +13,5 @@ class D extends C {
     echo "D::foo\n";
   }
 }
-$obj = new C;
+$obj = new C();
 $obj->test();

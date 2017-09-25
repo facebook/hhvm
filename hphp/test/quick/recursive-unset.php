@@ -12,7 +12,7 @@ class Foo {
 }
 
 function main1() {
-  $f = new Foo;
+  $f = new Foo();
   unset($f->foo);
 }
 
@@ -26,7 +26,7 @@ class Foo2 {
 }
 
 function main2() {
-  $f = new Foo2;
+  $f = new Foo2();
   unset($f->bar);
 }
 
@@ -43,7 +43,7 @@ class CaseFoo {
 }
 
 function main3() {
-  $f = new CaseFoo;
+  $f = new CaseFoo();
   unset($f->bar);
 }
 

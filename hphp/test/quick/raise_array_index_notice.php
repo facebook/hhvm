@@ -2,7 +2,7 @@
 
 
 function errorHandler($errno, $errstr, $errfile, $errline) {
-  throw new Exception;
+  throw new Exception();
 }
 
 set_error_handler('errorHandler');

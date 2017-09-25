@@ -16,14 +16,14 @@ class A {
 
 
 function caller() {
-  $obj2 = new A;
+  $obj2 = new A();
   call_user_func('A::foo');
   call_user_func(array('A', 'foo'));
   call_user_func(array($obj2, 'foo')); // raises warning; no __callStatic call
 }
 
 function main() {
-  $obja = new A;
+  $obja = new A();
 
   $obja->entry();
   A::static_entry();

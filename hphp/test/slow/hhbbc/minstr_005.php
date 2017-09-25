@@ -16,7 +16,7 @@ class Foo {
 
 function main() {
   $x = new Foo();
-  $x->blah(new SomethingUnrelated);
+  $x->blah(new SomethingUnrelated());
   var_dump($x->getName());
 }
 main();

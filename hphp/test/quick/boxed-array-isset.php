@@ -7,6 +7,6 @@ function main($o) {
   return isset($x[23]) ? true : false;
 }
 
-$o = new stdclass;
+$o = new stdclass();
 $o->prop = array(23 => 'hi');
 echo main($o) ? "true\n" : "false\n";

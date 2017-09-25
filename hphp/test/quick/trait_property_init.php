@@ -66,9 +66,9 @@ class RobustRegularEnterpriseBusiness2 extends RobustEnterpriseBusiness2 {}
 //////////////////////////////////////////////////////////////////////
 
 function main() {
-  $k = new RobustRegularEnterpriseBusiness;
+  $k = new RobustRegularEnterpriseBusiness();
   echo "ok\n";
-  $k = new RobustRegularEnterpriseBusiness2;
+  $k = new RobustRegularEnterpriseBusiness2();
   echo "ok\n";
 }
 main();

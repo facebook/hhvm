@@ -19,7 +19,7 @@ class B {
 }
 
 async function main() {
-  $a = new A;
+  $a = new A();
   $f = $a->f();
   $f = await $f();
   var_dump($f);

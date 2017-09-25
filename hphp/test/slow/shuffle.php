@@ -31,5 +31,5 @@ test(123);
 test('abc');
 test(3.14);
 test(STDIN);
-test(new stdclass);
+test(new stdclass());
 test(Vector{1, 2, 3, 4});

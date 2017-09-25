@@ -48,7 +48,7 @@ class E {
 }
 
 print "--- C ---\n";
-$o = new C;
+$o = new C();
 var_dump(++$o->preInc);
 var_dump(--$o->preDec);
 var_dump($o->postInc++);
@@ -60,7 +60,7 @@ var_dump($o->s--);
 print_r($o);
 
 print "--- D ---\n";
-$o = new D;
+$o = new D();
 var_dump(++$o->a);
 var_dump(++$o->b);
 var_dump(++$o->preInc);
@@ -78,7 +78,7 @@ var_dump($o->s--);
 print_r($o);
 
 print "--- E ---\n";
-$o = new E;
+$o = new E();
 var_dump(++$o->preInc);
 var_dump(--$o->preDec);
 var_dump($o->postInc++);

@@ -2,7 +2,7 @@
 
 class another {}
 abstract class SomethingElse {
-  public function __construct() { return new another; }
+  public function __construct() { return new another(); }
 }
 
 class Something extends SomethingElse {}

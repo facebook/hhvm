@@ -9,12 +9,12 @@
 class Foo {}
 newtype FooBar = Foo;
 
-function dofoo(FooBar $f) {
+function dofoo(FooBar $f): void {
   var_dump($f);
 }
 
 newtype StringAlias = string;
-function dostring(StringAlias $s) {
+function dostring(StringAlias $s): void {
   var_dump($f);
 }
 

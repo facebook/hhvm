@@ -37,8 +37,8 @@ function main() {
     Pair {1, 2},
     (Vector {1, 2, 3})->lazy(),
     (Set {1, 2, 3})->lazy(),
-    new IterableClass,
-    new KeyedIterableClass,
+    new IterableClass(),
+    new KeyedIterableClass(),
   };
 
   foreach ($concatable as $lhs) {

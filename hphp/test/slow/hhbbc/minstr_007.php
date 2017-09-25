@@ -16,8 +16,8 @@ class Foo {
 }
 
 function main() {
-  $foo = new Foo;
-  $a = new A;
+  $foo = new Foo();
+  $a = new A();
   var_dump($foo->getter());
   var_dump($foo->heh($a, 'str'));
   var_dump($foo->getter());

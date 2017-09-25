@@ -16,7 +16,7 @@ function doit(Foo $x) {
 }
 
 function main() {
-  $x = new Bar;
+  $x = new Bar();
   doit($x);
 }
 

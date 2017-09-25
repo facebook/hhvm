@@ -386,7 +386,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
           changed = true;
         }
       } else {
-        killLocEquiv(dst, dstLoc);
+        killLocEquiv(dst, i);
         changed = true;
       }
     }

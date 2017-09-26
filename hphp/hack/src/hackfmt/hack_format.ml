@@ -1527,14 +1527,16 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
   and delimited_nest
       ?(spaces=false)
       ?(split_when_children_split=true)
+      ?(force_newlines=false)
       left_delim
       right_delim
       nodes
     =
     let rule =
-      if split_when_children_split
-      then Rule.Parental
-      else Rule.Simple Cost.Base
+      match () with
+      | _ when force_newlines -> Rule.Always
+      | _ when split_when_children_split -> Rule.Parental
+      | _ -> Rule.Simple Cost.Base
     in
     Span [
       t left_delim;
@@ -1564,13 +1566,10 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
       t right_delim;
     ]
 
-  and after_each_argument ?(force_newlines=false) is_last =
-    if force_newlines
-    then Newline
-    else
-      if is_last
-      then Split
-      else space_split ()
+  and after_each_argument is_last =
+    if is_last
+    then Split
+    else space_split ()
 
   and handle_lambda_body node =
     match syntax node with
@@ -1893,9 +1892,13 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         )
       | _ -> true
     in
-    delimited_nest ~spaces ~split_when_children_split left_p right_p [
-      transform_arg_list ~allow_trailing ~force_newlines arg_list
-    ]
+    delimited_nest
+      ~spaces
+      ~split_when_children_split
+      ~force_newlines
+      left_p
+      right_p
+      [transform_arg_list ~allow_trailing arg_list]
 
   and transform_braced_item left_p item right_p =
     delimited_nest left_p right_p [t item]
@@ -1935,9 +1938,9 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
          trailing commas in all these places reach end-of-life. *)
       [transform_trailing_comma ~allow_trailing:false item comma]
 
-  and transform_arg_list ?(allow_trailing=true) ?(force_newlines=false) items =
+  and transform_arg_list ?(allow_trailing=true) items =
     handle_possible_list items
-      ~after_each:(after_each_argument ~force_newlines)
+      ~after_each:after_each_argument
       ~handle_last:(transform_last_arg ~allow_trailing)
 
   and transform_possible_comma_list ?(allow_trailing=true) ?(spaces=false)

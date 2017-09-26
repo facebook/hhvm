@@ -477,7 +477,7 @@ let rec pHint : hint parser = fun node env ->
         let filename = Relative_path.to_absolute !(lowerer_state.filePath) in
         not (is_missing shape_type_ellipsis) ||
         String_utils.string_ends_with filename "Shapes.hhi" ||
-        not (TypecheckerOptions.experimental_feature_enabled
+        (TypecheckerOptions.experimental_feature_enabled
           !(lowerer_state.popt)
           TypecheckerOptions.experimental_promote_nullable_to_optional_in_shapes
         )

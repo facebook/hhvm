@@ -28,7 +28,6 @@ slow/collection_classes/815.php
 slow/compilation/1238.php
 slow/compilation/1247.php
 slow/compilation/1316.php
-slow/compilation/infinite-static-local.php
 slow/compilation/switch-default-multiple.php
 slow/concat/1573.php
 slow/concat/1575.php
@@ -341,6 +340,5 @@ slow/vec/hh-only1.php
 slow/vec/hh-only2.php
 slow/xhp/attr-syntax-2.php
 slow/xhp/attr-syntax-3.php
-slow/xhp/deprecated_xhp_class_method.php
 slow/yield/2167.php
 slow/yield/2229.php

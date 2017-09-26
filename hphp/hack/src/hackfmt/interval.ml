@@ -14,6 +14,9 @@ open Core
 
 type t = int * int
 
+let contains ((st, ed): t) (point: int) : bool =
+  st <= point && point < ed
+
 let intervals_overlap (a: t) (b: t) : bool =
   let a_start, a_end = a in
   let b_start, b_end = b in

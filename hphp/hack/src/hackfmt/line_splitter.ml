@@ -55,8 +55,10 @@ let solve_chunk_group env ?range source_text chunk_group =
   let rbm =
     match range with
     | Some range
-      when Interval.intervals_overlap range
-             (Chunk_group.get_char_range chunk_group)
+      when
+        let group_range = Chunk_group.get_char_range chunk_group in
+        let st, ed = range in
+        Interval.contains group_range st || Interval.contains group_range ed
       ->
       let source_rbm = Solve_state.rbm_from_source source_text chunk_group in
       List.fold chunk_group.Chunk_group.chunks

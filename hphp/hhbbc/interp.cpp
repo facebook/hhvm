@@ -2300,24 +2300,45 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
   fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun }, op.arg1);
 }
 
-void in(ISS& env, const bc::FPushClsMethod& op) {
-  auto const t1 = takeClsRefSlot(env, op.slot);
-  auto const t2 = popC(env);
+template<typename PushOp>
+void pushClsHelper(ISS& env, const PushOp& op) {
+  auto const t1 = peekClsRefSlot(env, op.slot);
+  auto const t2 = topC(env);
   auto const v2 = tv(t2);
 
+  folly::Optional<res::Class> rcls;
+  auto exactCls = false;
+  if (is_specialized_cls(t1)) {
+    auto dcls = dcls_of(t1);
+    rcls = dcls.cls;
+    exactCls = dcls.type == DCls::Exact;
+  }
   folly::Optional<res::Func> rfunc;
   if (v2 && v2->m_type == KindOfPersistentString) {
+    if (std::is_same<PushOp, bc::FPushClsMethod>::value &&
+        exactCls && rcls) {
+      return reduce(
+        env,
+        bc::DiscardClsRef { op.slot },
+        bc::PopC {},
+        bc::FPushClsMethodD {
+          op.arg1, v2->m_data.pstr, rcls->name(), op.has_unpack
+        }
+      );
+    }
     rfunc = env.index.resolve_method(env.ctx, t1, v2->m_data.pstr);
   }
-  folly::Optional<res::Class> rcls;
-  if (is_specialized_cls(t1)) rcls = dcls_of(t1).cls;
   fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc }, op.arg1);
+  takeClsRefSlot(env, op.slot);
+  popC(env);
+}
+
+void in(ISS& env, const bc::FPushClsMethod& op) {
+  pushClsHelper(env, op);
 }
 
 void in(ISS& env, const bc::FPushClsMethodF& op) {
-  // The difference with FPushClsMethod is what ends up on the
-  // ActRec (late-bound class), which we currently aren't tracking.
-  impl(env, bc::FPushClsMethod { op.arg1, op.slot, op.has_unpack });
+  pushClsHelper(env, op);
 }
 
 void ctorHelper(ISS& env, SString name) {

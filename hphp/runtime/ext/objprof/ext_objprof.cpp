@@ -126,7 +126,8 @@ void tvGetStrings(
   TypedValue tv,
   ObjprofStrings* metrics,
   ObjprofStack* path,
-  std::unordered_set<void*>* pointers);
+  std::unordered_set<void*>* pointers,
+  ObjprofValuePtrStack* val_stack);
 
 std::pair<int, double> getObjSize(
   const ObjectData* obj,
@@ -343,14 +344,22 @@ void stringsOfArray(
   const ArrayData* ad,
   ObjprofStrings* metrics,
   ObjprofStack* path,
-  std::unordered_set<void*>* pointers
+  std::unordered_set<void*>* pointers,
+  ObjprofValuePtrStack* val_stack
 ) {
+  auto ptr_begin = val_stack->begin();
+  auto ptr_end = val_stack->end();
+  if (std::find(ptr_begin, ptr_end, ad) != ptr_end) {
+    return;
+  }
+  val_stack->push_back(ad);
+
   path->push_back(std::string("array()"));
 
   if (ad->hasPackedLayout()) {
     path->push_back(std::string("[]"));
     IterateV(ad, [&] (TypedValue v) {
-      tvGetStrings(v, metrics, path, pointers);
+      tvGetStrings(v, metrics, path, pointers, val_stack);
       return false;
     });
     path->pop_back();
@@ -360,7 +369,7 @@ void stringsOfArray(
         case KindOfPersistentString:
         case KindOfString: {
           auto const str = k.m_data.pstr;
-          tvGetStrings(k, metrics, path, pointers);
+          tvGetStrings(k, metrics, path, pointers, val_stack);
           path->push_back(std::string("[\"" + str->toCppString() + "\"]"));
           break;
         }
@@ -368,7 +377,7 @@ void stringsOfArray(
           auto const num = k.m_data.num;
           auto key_str = std::to_string(num);
           path->push_back(std::string(key_str));
-          tvGetStrings(k, metrics, path, pointers);
+          tvGetStrings(k, metrics, path, pointers, val_stack);
           path->pop_back();
           path->push_back(std::string("[" + key_str + "]"));
           break;
@@ -395,13 +404,14 @@ void stringsOfArray(
           assert(false);
       }
 
-      tvGetStrings(v, metrics, path, pointers);
+      tvGetStrings(v, metrics, path, pointers, val_stack);
       path->pop_back();
       return false;
     });
   }
 
   path->pop_back();
+  val_stack->pop_back();
 }
 
 /**
@@ -602,7 +612,8 @@ void tvGetStrings(
   TypedValue tv,
   ObjprofStrings* metrics,
   ObjprofStack* path,
-  std::unordered_set<void*>* pointers
+  std::unordered_set<void*>* pointers,
+  ObjprofValuePtrStack* val_stack
 ) {
   switch (tv.m_type) {
     case HPHP::KindOfUninit:
@@ -627,13 +638,13 @@ void tvGetStrings(
     case HPHP::KindOfPersistentArray:
     case HPHP::KindOfArray: {
       ArrayData* arr = tv.m_data.parr;
-      stringsOfArray(arr, metrics, path, pointers);
+      stringsOfArray(arr, metrics, path, pointers, val_stack);
       break;
     }
     case HPHP::KindOfRef: {
       RefData* ref = tv.m_data.pref;
       Cell* cell = ref->tv();
-      tvGetStrings(*cell, metrics, path, pointers);
+      tvGetStrings(*cell, metrics, path, pointers, val_stack);
       break;
     }
     case HPHP::KindOfPersistentString:
@@ -887,16 +898,19 @@ void getObjStrings(
     obj
   );
 
+  // used for recursion protection
+  ObjprofValuePtrStack val_stack;
+
   if (obj->isCollection()) {
     auto const arr = collections::asArray(obj);
     path->push_back(obj->getClassName().data());
     if (arr) {
-      stringsOfArray(arr, metrics, path, pointers);
+      stringsOfArray(arr, metrics, path, pointers, &val_stack);
     } else {
       assertx(collections::isType(cls, CollectionType::Pair));
       auto pair = static_cast<const c_Pair*>(obj);
-      tvGetStrings(*pair->get(0), metrics, path, pointers);
-      tvGetStrings(*pair->get(1), metrics, path, pointers);
+      tvGetStrings(*pair->get(0), metrics, path, pointers, &val_stack);
+      tvGetStrings(*pair->get(1), metrics, path, pointers, &val_stack);
     }
     path->pop_back();
     return;
@@ -933,7 +947,7 @@ void getObjStrings(
     if (!is_declared && !is_packed) {
       FTRACE(2, "Inspecting key {} because it's non-declared/packed\n",
         key.c_str());
-      tvGetStrings(key_tv, metrics, path, pointers);
+      tvGetStrings(key_tv, metrics, path, pointers, &val_stack);
       path->push_back(std::string("[\"" + key + "\"]"));
     } else {
       FTRACE(2, "Skipping key {} because it's declared/packed\n", key.c_str());
@@ -941,7 +955,7 @@ void getObjStrings(
     }
 
     FTRACE(2, "Inspecting value for key {}\n", key.c_str());
-    tvGetStrings(val_tv, metrics, path, pointers);
+    tvGetStrings(val_tv, metrics, path, pointers, &val_stack);
     path->pop_back();
     FTRACE(2, "   Finished for key/val {}\n",
       key.c_str()

@@ -17,6 +17,69 @@ open Core
 
 exception NotLiteral
 
+let radix (s : string) : [`Oct | `Hex | `Dec | `Bin ] =
+  if String.length s > 1 && s.[0] = '0' then
+    match s.[1] with
+    (* Binary *)
+    | 'b' | 'B' -> `Bin
+    (* Hex *)
+    | 'x' | 'X' -> `Hex
+    (* Octal *)
+    | _ -> `Oct
+  else `Dec
+
+let float_of_string_radix (s : string) (radix : int) : float =
+  let float_radix = float_of_int radix in
+  let float_of_char (c : char) : float = float_of_int @@ int_of_char c - 48 in
+  let rec loop (idx : int) (acc : float) =
+    print_float acc;
+    if idx < String.length s then
+      loop (idx + 1) ((acc *. float_radix) +. (float_of_char s.[idx]))
+    else
+      acc in
+  loop 0 0.
+
+let float_of_string_custom (s : string) : float =
+  match radix s with
+    | `Bin -> float_of_string_radix (String_utils.string_after s 2) 2
+    | `Hex | `Dec -> float_of_string s
+    | `Oct -> float_of_string_radix (String_utils.string_after s 1) 8
+
+let int64_of_octal_opt (s : string) (truncate : bool) : Int64.t option =
+  (* If we have a partial result that is strictly larger than this value,
+   * then we are in danger of overflowing and should return None *)
+  let limit = Int64.div Int64.max_int (Int64.of_int 8) in
+  let to_int64 c = Int64.of_int @@ int_of_char c - 48 in
+  let is_octal_digit ch = '0' <= ch && ch <= '7' in
+  let rec loop (idx : int) (acc : Int64.t) =
+    (* Given a new least significant digit [digit] and an orginal value [base]
+     * append [digit] to the end of [base]. Example:
+     * [(push 0o133 0o7) = 0o1337]
+     *)
+    let push base digit =
+      Int64.add (Int64.mul base (Int64.of_int 8)) digit in
+    if idx >= String.length s then
+      Some acc
+    else if Int64.compare acc limit > 0 then
+      (** In this case we would overflow *)
+      None
+    else if not (is_octal_digit s.[idx]) then
+      if truncate then Some acc else None
+    else
+      loop (idx + 1) (push acc (to_int64 s.[idx])) in
+  loop 0 Int64.zero
+
+let try_type_intlike (s : string) : TV.t option =
+  match radix s with
+  | `Bin | `Hex | `Dec -> begin
+    match Int64.of_string s with
+      i -> Some (TV.Int i)
+    | exception _ -> None
+  end
+  | `Oct ->
+    Option.map ~f:(fun v -> TV.Int v)
+      (int64_of_octal_opt (String_utils.string_after s 1) true)
+
 (* Literal expressions can be converted into values *)
 (* Restrict_keys flag forces keys to be only ints or strings *)
 let rec expr_to_typed_value
@@ -24,7 +87,11 @@ let rec expr_to_typed_value
   ?(restrict_keys=false)
   ns (_, expr_) =
   match expr_ with
-  | A.Int (_, s) -> TV.Int (Int64.of_string @@ SU.Integer.to_decimal s)
+  | A.Int (_, s) -> begin
+    match try_type_intlike s with
+    | Some v -> v
+    | None -> TV.Float (float_of_string_custom s)
+  end
   | A.True -> TV.Bool true
   | A.False -> TV.Bool false
   | A.Null -> TV.null

@@ -164,11 +164,15 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   let class_id, _ =
     Hhbc_id.Class.elaborate_id namespace ast_class.Ast.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
+  let class_is_interface = ast_is_interface ast_class in
   let class_uses =
     List.filter_map
       ast_class.A.c_body
       (function
-        | A.ClassUse (_, (A.Happly ((_, name), _))) -> Some name
+        | A.ClassUse (pos, (A.Happly ((_, name), _))) ->
+          if class_is_interface
+          then Emit_fatal.raise_fatal_parse pos "Interfaces cannot use traits"
+          else Some name
         | _ -> None)
   in
   let class_use_aliases =
@@ -225,7 +229,6 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
         | A.XhpCategory sl -> Some sl
         | _ -> None)
   in
-  let class_is_interface = ast_is_interface ast_class in
   let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in
   let class_is_final =
     ast_class.A.c_final || class_is_trait || (class_enum_type <> None) in

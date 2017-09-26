@@ -121,20 +121,8 @@ let rec expr_to_typed_value
     let values =
       List.map fields ~f:(afield_to_typed_value_pair ~restrict_keys ns)
     in
-    (* map key -> (the latest value for the given key) *)
-    let unique_values_map = List.fold_left values ~init:TV.TVMap.empty
-      ~f:(fun m (k, v) -> TV.TVMap.add k v m)
-    in
-    let d, _ = List.fold_left values ~init:([], unique_values_map)
-      ~f:(fun (result, uniq_map) (k, _) ->
-        (* map stores the latest value for a key
-           if map has an value for a given key, put value in the result list
-           and remove if from the map to ignore similar keys later *)
-        match TV.TVMap.get k uniq_map with
-        | Some v -> (k, v)::result, TV.TVMap.remove k uniq_map
-        | None -> result, uniq_map)
-    in
-    TV.Dict (List.rev d)
+    let d = update_duplicates_in_map values in
+    TV.Dict d
   | A.Shape fields ->
     shape_to_typed_value ns fields
   | A.Class_const (cid, id) ->
@@ -143,6 +131,22 @@ let rec expr_to_typed_value
     array_to_typed_value ns @@ List.map es ~f:(fun e -> A.AFvalue e)
   | _ ->
     raise NotLiteral
+
+and update_duplicates_in_map kvs =
+  (* map key -> (the latest value for the given key) *)
+  let unique_values_map = List.fold_left kvs ~init:TV.TVMap.empty
+    ~f:(fun m (k, v) -> TV.TVMap.add k v m)
+  in
+  let values, _ = List.fold_left kvs ~init:([], unique_values_map)
+    ~f:(fun (result, uniq_map) (k, _) ->
+      (* map stores the latest value for a key
+         if map has an value for a given key, put value in the result list
+         and remove if from the map to ignore similar keys later *)
+      match TV.TVMap.get k uniq_map with
+      | Some v -> (k, v)::result, TV.TVMap.remove k uniq_map
+      | None -> result, uniq_map)
+  in
+  List.rev values
 
 and class_const_to_typed_value ns cid id =
   if snd id = SN.Members.mClass
@@ -181,7 +185,9 @@ and array_to_typed_value ns fields =
         | A.AFvalue value ->
           (TV.Int maxindex, expr_to_typed_value ns value) :: pairs,
             Int64.add maxindex Int64.one)
-  in TV.Array (List.rev pairs)
+  in
+  let a = update_duplicates_in_map @@ List.rev pairs in
+  TV.Array a
 
 and shape_to_typed_value ns fields =
   TV.Array (

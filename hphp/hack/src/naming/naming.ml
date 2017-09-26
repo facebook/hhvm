@@ -1494,6 +1494,10 @@ module Make (GetLocals : GetLocals) = struct
     | Shape fdl ->
         (* Only check the values because shape field names are always legal *)
         List.iter fdl (fun (_, e) -> check_constant_expr env e)
+    | Call ((_, Id (_, cn)), _, el, uel) when cn = SN.SpecialFunctions.tuple ->
+        (* Tuples are not really function calls, they are just parsed that way*)
+        arg_unpack_unexpected uel;
+        List.iter el (check_constant_expr env)
     | Collection (id, l) ->
       let p, cn = NS.elaborate_id ((fst env).namespace) NS.ElaborateClass id in
       (* Only vec/keyset/dict are allowed because they are value types *)

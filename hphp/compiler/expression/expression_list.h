@@ -49,7 +49,6 @@ struct ExpressionList : Expression {
   void addElement(ExpressionPtr exp) override;
   void insertElement(ExpressionPtr exp, int index = 0) override;
   bool isScalar() const override;
-  int getLocalEffects() const override { return NoEffect; }
   bool isNoObjectInvolved() const;
   void removeElement(int index);
   void clearElements();

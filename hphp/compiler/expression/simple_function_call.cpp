@@ -290,7 +290,6 @@ void SimpleFunctionCall::setupScopes(AnalysisResultConstRawPtr ar) {
   if (func && !func->isRedeclaring()) {
     if (m_funcScope != func) {
       m_funcScope = func;
-      Construct::recomputeEffects();
     }
   }
 }
@@ -553,10 +552,6 @@ const StaticString
   s_GLOBALS("GLOBALS"),
   s_this("this");
 
-int SimpleFunctionCall::getLocalEffects() const {
-  return UnknownEffect;
-}
-
 // Certain simple function calls, like get_class(), can sometimes be evaluated
 // statically. Implementing the virtual isScalar() and getScalarValue() here
 // allows the statically knowable return values of those sorts of calls to be
@@ -578,7 +573,6 @@ bool SimpleFunctionCall::getScalarValue(Variant &value) {
 
   return false;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions

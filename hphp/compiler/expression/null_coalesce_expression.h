@@ -30,7 +30,6 @@ struct NullCoalesceExpression : Expression {
                          ExpressionPtr expSecond);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  int getLocalEffects() const override { return NoEffect; }
 
   ExpressionPtr getFirst() const { return m_expFirst; }
   ExpressionPtr getSecond() const { return m_expSecond; }

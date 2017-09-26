@@ -123,65 +123,6 @@ bool BinaryOpExpression::isLogicalOrOperator() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-int BinaryOpExpression::getLocalEffects() const {
-  int effect = NoEffect;
-  m_canThrow = false;
-  switch (m_op) {
-  case '/':
-  case '%':
-  case T_DIV_EQUAL:
-  case T_MOD_EQUAL: {
-    Variant v2;
-    if (!m_exp2->getScalarValue(v2) || equal(v2, 0)) {
-      effect = CanThrow;
-      m_canThrow = true;
-    }
-    break;
-  }
-  case '.': {
-    // Conservatively assume that a concat with any non-scalar argument can
-    // invoke arbitrary side-effects. This is because it may involve invoking an
-    // object's __toString() method, which can have side-effects.
-    if (!m_exp1->isScalar() || !m_exp2->isScalar()) {
-      effect = UnknownEffect;
-      m_canThrow = true;
-    }
-    break;
-  }
-  case T_PIPE:
-    if (!m_exp1->isScalar() || !m_exp2->isScalar()) {
-      effect = UnknownEffect;
-      m_canThrow = true;
-    }
-    break;
-  case '<':
-  case T_IS_SMALLER_OR_EQUAL:
-  case '>':
-  case T_IS_GREATER_OR_EQUAL:
-  case T_IS_EQUAL:
-  case T_IS_NOT_EQUAL:
-  case T_SPACESHIP:
-  case T_IS_IDENTICAL:
-  case T_IS_NOT_IDENTICAL: {
-    Variant v1;
-    Variant v2;
-    // With HackArrCompatNotices enabled, we'll emit a notice if we compare an
-    // array with something other than an array.
-    if (!m_exp1->getScalarValue(v1) || !m_exp2->getScalarValue(v2) ||
-        (RuntimeOption::EvalHackArrCompatNotices &&
-         v1.isPHPArray() != v2.isPHPArray())) {
-      effect = UnknownEffect;
-      m_canThrow = true;
-    }
-    break;
-  }
-  default:
-    break;
-  }
-  if (m_assign) effect |= AssignEffect;
-  return effect;
-}
-
 ConstructPtr BinaryOpExpression::getNthKid(int n) const {
   switch (n) {
     case 0:
@@ -224,8 +165,6 @@ ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstRawPtr ar) {
       }
       return ExpressionPtr();
     }
-  } else if (m_canThrow && !(getLocalEffects() & CanThrow)) {
-    recomputeEffects();
   }
   ExpressionPtr optExp;
   try {

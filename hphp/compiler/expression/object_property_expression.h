@@ -28,14 +28,12 @@ DECLARE_BOOST_TYPES(ObjectPropertyExpression);
 DECLARE_BOOST_TYPES(ClassScope);
 struct Symbol;
 
-struct ObjectPropertyExpression : Expression, LocalEffectsContainer {
+struct ObjectPropertyExpression : Expression {
   ObjectPropertyExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                            ExpressionPtr object, ExpressionPtr property,
                            PropAccessType propAccessType);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
-  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
   bool isRefable(bool /*checkError*/ = false) const override { return true; }
 

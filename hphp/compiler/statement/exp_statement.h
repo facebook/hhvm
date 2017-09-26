@@ -29,8 +29,6 @@ struct ExpStatement : Statement, IParseHandler {
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
-  int getLocalEffects() const override { return NoEffect;}
-
   ExpressionPtr getExpression() { return m_exp;}
 
   void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;

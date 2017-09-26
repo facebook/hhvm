@@ -29,7 +29,7 @@ namespace HPHP {
 StaticClassName::StaticClassName(ExpressionPtr classExp)
     : m_class(classExp),
       m_self(false), m_parent(false), m_static(false),
-      m_redeclared(false), m_present(false), m_unknown(true) {
+      m_redeclared(false), m_unknown(true) {
   updateClassName();
   auto const isame = [](const std::string& a, const std::string& b) {
     return (a.size() == b.size()) &&
@@ -41,7 +41,6 @@ StaticClassName::StaticClassName(ExpressionPtr classExp)
     m_self = true;
   } else if (isame(m_origClassName, "static")) {
     m_static = true;
-    m_present = true;
     m_class = classExp;
     m_origClassName = "";
   }
@@ -71,14 +70,12 @@ void StaticClassName::updateClassName() {
 }
 
 ClassScopePtr StaticClassName::resolveClass() {
-  m_present = false;
   m_unknown = true;
   if (m_class) return ClassScopePtr();
   auto scope = dynamic_cast<Construct*>(this)->getScope();
   if (m_self) {
     if (ClassScopePtr self = scope->getContainingClass()) {
       m_origClassName = self->getOriginalName();
-      m_present = true;
       m_unknown = false;
       return self;
     }
@@ -86,7 +83,6 @@ ClassScopePtr StaticClassName::resolveClass() {
     if (ClassScopePtr self = scope->getContainingClass()) {
       if (!self->getOriginalParent().empty()) {
         m_origClassName = self->getOriginalParent();
-        m_present = true;
       }
     } else {
       m_parent = false;
@@ -100,13 +96,10 @@ ClassScopePtr StaticClassName::resolveClass() {
       if (c && c->isNamed(m_origClassName)) {
         c.reset();
       }
-      m_present = c.get() != nullptr;
       if (cls->isRedeclaring()) {
         cls = c;
-        if (!m_present) m_redeclared = true;
+        m_redeclared = true;
       }
-    } else {
-      m_present = true;
     }
   }
   return cls;

@@ -141,11 +141,6 @@ void InterfaceStatement::checkArgumentsToPromote(
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-int InterfaceStatement::getLocalEffects() const {
-  ClassScopeRawPtr classScope = getClassScope();
-  return classScope->isVolatile() ? OtherEffect | CanThrow : NoEffect;
-}
-
 std::string InterfaceStatement::getName() const {
   return std::string("Interface ") + m_originalName;
 }

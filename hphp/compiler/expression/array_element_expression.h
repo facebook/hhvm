@@ -24,12 +24,11 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ArrayElementExpression);
 
-struct ArrayElementExpression : Expression, LocalEffectsContainer {
+struct ArrayElementExpression : Expression {
   ArrayElementExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                          ExpressionPtr variable, ExpressionPtr offset);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
 
   bool isRefable(bool /*checkError*/ = false) const override { return true; }
 

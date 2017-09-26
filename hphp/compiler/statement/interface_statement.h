@@ -46,8 +46,6 @@ public:
   // implementing IParseHandler
   void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
 
-  int getLocalEffects() const override;
-
   std::string getName() const override;
   const std::string &getOriginalName() const { return m_originalName; }
   ClassScopeRawPtr getClassScope() const {

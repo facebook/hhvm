@@ -78,7 +78,6 @@ struct AnalysisResult : BlockScope, FunctionContainer {
     KindOfRedeclaredFunction,
     KindOfRedeclaredClass,
     KindOfRedeclaredClassId,
-    KindOfVolatileClass,
     KindOfLazyStaticInitializer,
 
     GlobalSymbolTypeCount

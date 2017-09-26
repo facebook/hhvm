@@ -178,9 +178,6 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
   }
   int rescheduleFlags() const { return m_rescheduleFlags; }
 
-  void incEffectsTag() { m_effectsTag++; }
-  int getEffectsTag() const { return m_effectsTag; }
-
   Mutex &getMutex() { return m_mutex; }
 
   void setNumDepsToWaitFor(int n) {
@@ -221,7 +218,6 @@ private:
   BlockScopeRawPtrFlagsPtrVec  m_orderedDeps;
   BlockScopeRawPtrFlagsVec     m_orderedUsers;
   BlockScopeRawPtrFlagsHashMap m_userMap;
-  int m_effectsTag;
   int m_numDepsToWaitFor;
   Mutex m_mutex;
   bool m_forceRerun;      /* do we need to be re-run (allows deps to run during

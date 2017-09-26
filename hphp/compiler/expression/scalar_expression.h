@@ -39,7 +39,6 @@ struct ScalarExpression : Expression {
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
-  int getLocalEffects() const override { return NoEffect; }
   bool isScalar() const override { return true;}
   bool isLiteralString() const override;
   std::string getLiteralString() const override;

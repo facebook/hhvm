@@ -66,10 +66,6 @@ void SimpleVariable::setContext(Context context) {
   }
 }
 
-int SimpleVariable::getLocalEffects() const {
-  return NoEffect;
-}
-
 void SimpleVariable::updateSymbol(SimpleVariablePtr src) {
   m_sym = getScope()->getVariables()->addSymbol(m_name);
   if (src && src->m_sym) {

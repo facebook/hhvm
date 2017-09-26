@@ -46,7 +46,6 @@ inline void UnaryOpExpression::ctorInit() {
   switch (m_op) {
   case T_INC:
   case T_DEC:
-    m_localEffects = AssignEffect;
     m_exp->setContext(Expression::OprLValue);
     m_exp->setContext(Expression::DeepOprLValue);
     // this is hacky, what we need is LValueWrapper
@@ -55,7 +54,6 @@ inline void UnaryOpExpression::ctorInit() {
     }
     break;
   case T_PRINT:
-    m_localEffects = IOEffect;
     break;
   case T_EXIT:
   case T_INCLUDE:
@@ -64,19 +62,16 @@ inline void UnaryOpExpression::ctorInit() {
   case T_REQUIRE_ONCE:
   case T_EVAL:
   case T_CLONE:
-    m_localEffects = UnknownEffect;
     break;
   case T_ISSET:
   case T_EMPTY:
     setExistContext();
     break;
   case T_UNSET:
-    m_localEffects = AssignEffect;
     m_exp->setContext(UnsetContext);
     break;
   case T_CLASS:
   case T_FUNCTION:
-    m_localEffects = CreateEffect;
     break;
   case T_ARRAY:
   case T_DICT:
@@ -423,7 +418,6 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstRawPtr ar) {
       if (m_exp->isScalar() ||
           (m_exp->is(KindOfExpressionList) &&
            static_pointer_cast<ExpressionList>(m_exp)->getCount() == 0)) {
-        recomputeEffects();
         return CONSTANT("null");
       }
       return ExpressionPtr();

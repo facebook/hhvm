@@ -75,8 +75,6 @@ public:
   bool isRef(int index = -1) const;
   bool isSystem() const;
 
-  int getLocalEffects() const override;
-
   ModifierExpressionPtr getModifiers() {
     return m_modifiers;
   }

@@ -31,7 +31,6 @@ struct StaticClassName : IParseHandler {
   bool isParent() const { return m_parent; }
   bool isStatic() const { return m_static; }
   bool isRedeclared() const { return m_redeclared; }
-  bool isPresent() const { return m_present; }
   bool isUnknown() const { return m_unknown; }
 
   void setRedeclared() { m_redeclared = true; }
@@ -54,7 +53,6 @@ private:
   unsigned m_parent : 1;
   unsigned m_static : 1;
   unsigned m_redeclared : 1;
-  unsigned m_present : 1;
   unsigned m_unknown : 1;
 };
 

@@ -34,7 +34,6 @@ struct ArrayPairExpression : Expression {
   ExpressionPtr getName() { return m_name;}
   ExpressionPtr getValue() { return m_value;}
 
-  int getLocalEffects() const override { return NoEffect; }
   bool isScalarArrayPair() const;
 
   bool isRef() const { return m_ref; }

@@ -37,7 +37,6 @@ struct ConstantExpression : Expression, private IParseHandler {
   void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
   bool isScalar() const override;
   bool isLiteralNull() const override;
-  int getLocalEffects() const override { return NoEffect; }
   bool getScalarValue(Variant &value) override;
 
   const std::string &getName() const { return m_name;}

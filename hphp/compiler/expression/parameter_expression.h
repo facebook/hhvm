@@ -47,7 +47,6 @@ struct ParameterExpression : Expression {
   bool isOptional() const { return m_defaultValue != nullptr;}
   bool isVariadic() const { return m_variadic; }
   const std::string &getName() const { return m_name; }
-  int getLocalEffects() const override { return NoEffect; }
   void rename(const std::string &name) { m_name = name;}
   ExpressionPtr defaultValue() { return m_defaultValue; }
   ExpressionPtr userAttributeList() { return m_attributeList; }

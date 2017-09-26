@@ -37,7 +37,6 @@ ObjectPropertyExpression::ObjectPropertyExpression
  ExpressionPtr object, ExpressionPtr property, PropAccessType propAccessType)
   : Expression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ObjectPropertyExpression)),
-    LocalEffectsContainer(AccessorEffect),
     m_object(object), m_property(property), m_propSym(nullptr) {
   m_valid = false;
   m_propSymValid = false;
@@ -100,11 +99,6 @@ void ObjectPropertyExpression::setContext(Context context) {
     default:
       break;
   }
-  if (!m_valid &&
-      (m_context & (LValue|RefValue)) &&
-      !(m_context & AssignmentLHS)) {
-    setLocalEffect(CreateEffect);
-  }
 }
 void ObjectPropertyExpression::clearContext(Context context) {
   m_context &= ~context;
@@ -123,19 +117,6 @@ void ObjectPropertyExpression::clearContext(Context context) {
       break;
     default:
       break;
-  }
-
-  if (!(m_context & (LValue|RefValue))) {
-    clearLocalEffect(CreateEffect);
-  }
-}
-
-void ObjectPropertyExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_valid && !hasLocalEffect(UnknownEffect) &&
-        !m_object->isThis()) {
-      setLocalEffect(DiagnosticEffect);
-    }
   }
 }
 

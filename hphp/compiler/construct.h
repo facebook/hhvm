@@ -238,9 +238,6 @@ public:
     ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(4,5);
   void analysisTimeFatal(Compiler::ErrorType error,
     ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
-  virtual int getLocalEffects() const { return UnknownEffect;}
-  int getChildrenEffects() const;
-  int getContainedEffects() const;
   virtual bool kidUnused(int /*i*/) const { return false; }
 
   template<typename T>
@@ -323,30 +320,7 @@ private:
   Location::Range m_r;
 protected:
   KindOf m_kindOf;
-  mutable int m_containedEffects;
-  mutable int m_effectsTag;
 };
-
-struct LocalEffectsContainer {
-  int getLocalEffects() const { return m_localEffects; }
-  virtual void effectsCallback() = 0;
-protected:
-  explicit LocalEffectsContainer(Construct::Effect localEffect) :
-    m_localEffects(localEffect) {}
-  LocalEffectsContainer() :
-    m_localEffects(0) {}
-  void setLocalEffect  (Construct::Effect effect);
-  void clearLocalEffect(Construct::Effect effect);
-  bool hasLocalEffect  (Construct::Effect effect) const;
-protected:
-  int m_localEffects;
-};
-
-#define DECL_AND_IMPL_LOCAL_EFFECTS_METHODS \
-  int getLocalEffects() const override { \
-    return LocalEffectsContainer::getLocalEffects(); \
-  } \
-  void effectsCallback() override { recomputeEffects(); }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

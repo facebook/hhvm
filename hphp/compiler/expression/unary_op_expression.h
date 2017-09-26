@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(UnaryOpExpression);
 
 struct Variant;
 
-struct UnaryOpExpression : Expression, LocalEffectsContainer {
+struct UnaryOpExpression : Expression {
 private:
   void ctorInit();
 protected:
@@ -37,7 +37,6 @@ public:
                     ExpressionPtr exp, int op, bool front);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
 
   ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope);

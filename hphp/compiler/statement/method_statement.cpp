@@ -481,12 +481,6 @@ void MethodStatement::addTraitMethodToScope(AnalysisResultConstRawPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-int MethodStatement::getLocalEffects() const {
-  if (m_method) return NoEffect;
-  FunctionScopeRawPtr scope = getFunctionScope();
-  return scope->isVolatile() ? OtherEffect | CanThrow : NoEffect;
-}
-
 ConstructPtr MethodStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

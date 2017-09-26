@@ -42,8 +42,6 @@ Construct::Construct(BlockScopePtr scope,
   , m_flagsVal(0)
   , m_r(r)
   , m_kindOf(kindOf)
-  , m_containedEffects(0)
-  , m_effectsTag(0)
 {
 }
 
@@ -73,54 +71,6 @@ void Construct::resetScope(BlockScopeRawPtr scope) {
       kid->resetScope(scope);
     }
   }
-}
-
-void Construct::recomputeEffects() {
-  BlockScopeRawPtr scope = getScope();
-  if (scope) scope->incEffectsTag();
-}
-
-int Construct::getChildrenEffects() const {
-  int childrenEffects = NoEffect;
-  for (int i = getKidCount(); i--; ) {
-    ConstructPtr child = getNthKid(i);
-    if (child) {
-      if (child->skipRecurse()) continue;
-      childrenEffects |= child->getContainedEffects();
-      if ((childrenEffects & UnknownEffect) == UnknownEffect) {
-        break;
-      }
-    }
-  }
-  return childrenEffects;
-}
-
-int Construct::getContainedEffects() const {
-  BlockScopeRawPtr scope = getScope();
-  int curTag = scope ? scope->getEffectsTag() : m_effectsTag + 1;
-  if (m_effectsTag != curTag) {
-    m_effectsTag = curTag;
-    m_containedEffects = getLocalEffects() | getChildrenEffects();
-  }
-  return m_containedEffects;
-}
-
-void LocalEffectsContainer::setLocalEffect(Construct::Effect effect) {
-  if ((m_localEffects & effect) != effect) {
-    effectsCallback();
-    m_localEffects |= effect;
-  }
-}
-
-void LocalEffectsContainer::clearLocalEffect(Construct::Effect effect) {
-  if (m_localEffects & effect) {
-    effectsCallback();
-    m_localEffects &= ~effect;
-  }
-}
-
-bool LocalEffectsContainer::hasLocalEffect(Construct::Effect effect) const {
-  return m_localEffects & effect;
 }
 
 ExpressionPtr Construct::makeConstant(AnalysisResultConstRawPtr ar,
@@ -169,7 +119,6 @@ void Construct::dumpNode(int spc) {
   std::string scontext;
   std::string value;
   std::string type_info;
-  int ef = 0;
 
   if (isStatement()) {
     Statement *s = static_cast<Statement*>(this);
@@ -180,8 +129,6 @@ void Construct::dumpNode(int spc) {
   } else {
     assert(isExpression());
     Expression *e = static_cast<Expression*>(this);
-
-    ef = e->getLocalEffects();
 
     Expression::KindOf etype = e->getKindOf();
     name = Expression::nameOfKind(etype);
@@ -279,33 +226,12 @@ void Construct::dumpNode(int spc) {
     std::cout << "[" << value << "] ";
   }
 
-  std::string sef;
-  if ((ef & UnknownEffect) == UnknownEffect) {
-    sef = "|UnknownEffect";
-  } else {
-    if (ef & IOEffect) sef += "|IOEffect";
-    if (ef & AssignEffect) sef += "|AssignEffect";
-    if (ef & GlobalEffect) sef += "|GlobalEffect";
-    if (ef & LocalEffect) sef += "|LocalEffect";
-    if (ef & ParamEffect) sef += "|ParamEffect";
-    if (ef & DeepParamEffect) sef += "|DeepParamEffect";
-    if (ef & DynamicParamEffect) sef += "|DynamicParamEffect";
-    if (ef & CanThrow) sef += "|CanThrow";
-    if (ef & AccessorEffect) sef += "|AccessorEffect";
-    if (ef & CreateEffect) sef += "|CreateEffect";
-    if (ef & DiagnosticEffect) sef += "|DiagnosticEffect";
-    if (ef & OtherEffect) sef += "|OtherEffect";
-  }
-  if (sef != "") {
-    sef = " (" + sef.substr(1) + ")";
-  }
-
   std::string objstr;
   if (dynamic_cast<SimpleVariable*>(this) != nullptr) {
     objstr = " (NoObjInfo)";
   }
 
-  std::cout << nkid << scontext << sef << objstr;
+  std::cout << nkid << scontext << objstr;
   if (auto scope = getFileScope()) {
     std::cout << " " << scope->getName() << ":"
       << "[" << m_r.line0 << "@" << m_r.char0 << ", "

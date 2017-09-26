@@ -32,7 +32,6 @@ struct SimpleVariable : Expression {
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
-  int getLocalEffects() const override;
   bool isThis() const override { return m_this;}
   bool isSuperGlobal() const { return m_superGlobal || m_globals; }
   bool isRefable(bool checkError = false) const override {

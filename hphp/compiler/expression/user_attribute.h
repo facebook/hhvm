@@ -32,7 +32,6 @@ struct UserAttribute : Expression {
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   const std::string& getName() { return m_name;}
   ExpressionPtr getExp() { return m_exp;}
-  int getLocalEffects() const override { return NoEffect; }
 
 private:
   std::string m_name;

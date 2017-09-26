@@ -55,8 +55,6 @@ struct ModifierExpression : Expression {
   bool isFinal() const;
   bool isAsync() const;
 
-  int getLocalEffects() const override { return NoEffect; }
-
   bool validForFunction() const;
   bool validForClosure() const;
   bool validForTraitAliasRule() const;

@@ -35,7 +35,6 @@ ArrayElementExpression::ArrayElementExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr variable, ExpressionPtr offset)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ArrayElementExpression)),
-    LocalEffectsContainer(AccessorEffect),
     m_variable(variable), m_offset(offset), m_global(false),
     m_dynamicGlobal(false) {
   m_variable->setContext(Expression::AccessContext);

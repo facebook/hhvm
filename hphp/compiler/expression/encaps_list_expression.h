@@ -32,9 +32,6 @@ struct EncapsListExpression : Expression {
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
-  int getLocalEffects() const override {
-    return m_type == '`' ? UnknownEffect : NoEffect;
-  }
    int getType() { return m_type;}
   ExpressionListPtr getExpressions() { return m_exps; }
   void stripConcat();

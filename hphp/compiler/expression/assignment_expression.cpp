@@ -92,10 +92,6 @@ void AssignmentExpression::onParseRecur(AnalysisResultConstRawPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-int AssignmentExpression::getLocalEffects() const {
-  return AssignEffect;
-}
-
 void AssignmentExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (m_variable->is(Expression::KindOfConstantExpression)) {
     auto exp = dynamic_pointer_cast<ConstantExpression>(m_variable);

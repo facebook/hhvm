@@ -49,7 +49,6 @@ struct AssignmentExpression : Expression, IParseHandler {
   void setVariable(ExpressionPtr v) { m_variable = v; }
   void setValue(ExpressionPtr v) { m_value = v; }
   bool isRhsFirst() { return m_rhsFirst; }
-  int getLocalEffects() const override;
 
   // $GLOBALS[<literal-string>] = <scalar>;
   bool isSimpleGlobalAssign(StringData **name, TypedValue *tv) const;

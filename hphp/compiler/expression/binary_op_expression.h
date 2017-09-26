@@ -30,7 +30,6 @@ struct BinaryOpExpression : Expression {
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
-  int getLocalEffects() const override;
   bool isLiteralString() const override;
   std::string getLiteralString() const override;
 

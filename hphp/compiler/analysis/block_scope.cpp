@@ -41,7 +41,7 @@ BlockScope::BlockScope(const std::string &name, const std::string &docComment,
   : m_docComment(docComment), m_stmt(stmt),
     m_kind(kind), m_loopNestedLevel(0),
     m_pass(0), m_updated(0), m_runId(0), m_mark(MarkWaitingInQueue),
-    m_effectsTag(1), m_numDepsToWaitFor(0),
+    m_numDepsToWaitFor(0),
     m_forceRerun(false),
     m_rescheduleFlags(0), m_selfUser(0) {
   m_scopeName = name;

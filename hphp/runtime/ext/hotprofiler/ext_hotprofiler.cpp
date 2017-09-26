@@ -171,6 +171,35 @@ static int64_t* get_cpu_frequency_from_file(const char *file, int ncpus)
   return freqs;
 }
 
+static int64_t* get_cpu_frequency_from_cpufreq_files(int ncpus)
+{
+  char line[MAX_LINELENGTH];
+  char file[MAX_LINELENGTH];
+  int64_t* freqs = new int64_t[ncpus];
+  for (int i = 0; i < ncpus; ++i) {
+    freqs[i] = 0;
+    sprintf(file, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", i);
+    std::ifstream cpuinfo(file);
+    if (cpuinfo.fail()) {
+      delete[] freqs;
+      return nullptr;
+    }
+    if (cpuinfo.getline(line, sizeof(line))) {
+      float freq;
+      if (sscanf(line, "%f", &freq) == 1) {
+         freqs[i] = nearbyint(freq/1000);
+      }
+    }
+  }
+  for (int i = 0; i < ncpus; ++i) {
+    if (freqs[i] == 0) {
+      delete[] freqs;
+      return nullptr;
+    }
+  }
+  return freqs;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Machine information that we collect just once.
 
@@ -194,15 +223,20 @@ struct MachineInfo {
 public:
   // The number of logical CPUs this machine has.
   int m_cpu_num;
-  // Store the cpu frequency.  Get it from /proc/cpuinfo if we can.
+  // Store the cpu frequency.  Get it from /proc/cpuinfo or
+  //   /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_max_freq if we can.
   int64_t* m_cpu_frequencies;
 
   MachineInfo() {
     m_cpu_num = sysconf(_SC_NPROCESSORS_CONF);
     m_cpu_frequencies = get_cpu_frequency_from_file("/proc/cpuinfo", m_cpu_num);
 
-    if (m_cpu_frequencies)
+    if (!m_cpu_frequencies)
+      m_cpu_frequencies = get_cpu_frequency_from_cpufreq_files(m_cpu_num);
+
+    if (m_cpu_frequencies) {
       return;
+    }
 
     m_cpu_frequencies = new int64_t[m_cpu_num];
     for (int i = 0; i < m_cpu_num; i++) {

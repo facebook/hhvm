@@ -756,6 +756,29 @@ int SimpleFunctionCall::getLocalEffects() const {
   return UnknownEffect;
 }
 
+// Certain simple function calls, like get_class(), can sometimes be evaluated
+// statically. Implementing the virtual isScalar() and getScalarValue() here
+// allows the statically knowable return values of those sorts of calls to be
+// "maximally" inlined early on if desired.
+bool SimpleFunctionCall::isScalar() const {
+  return
+    getScope() &&
+    isCallToFunction("get_class") &&
+    !getParams() &&
+    getClassScope() &&
+    !getClassScope()->isTrait();
+}
+
+bool SimpleFunctionCall::getScalarValue(Variant &value) {
+  if (isScalar()) {
+    value = getClassScope()->getScopeName();
+    return true;
+  }
+
+  return false;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

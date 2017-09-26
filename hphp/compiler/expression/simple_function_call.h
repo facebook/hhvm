@@ -52,6 +52,8 @@ public:
   bool isSimpleDefine(StringData **name, TypedValue *value) const;
 
   int getLocalEffects() const override;
+  bool isScalar() const override;
+  bool getScalarValue(Variant &value) override;
 
   // implementing IParseHandler
   void onParse(AnalysisResultConstRawPtr ar, FileScopePtr fs) override;

@@ -59,20 +59,6 @@ int TryStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool TryStatement::hasDecl() const {
-  if (m_tryStmt && m_tryStmt->hasDecl()) return true;
-  if (m_catches && m_catches->hasDecl()) return true;
-  if (m_finallyStmt && m_finallyStmt->hasDecl()) return true;
-  return false;
-}
-
-bool TryStatement::hasRetExp() const {
-  if (m_tryStmt && m_tryStmt->hasRetExp()) return true;
-  if (m_catches && m_catches->hasRetExp()) return true;
-  if (m_finallyStmt && m_finallyStmt->hasRetExp()) return true;
-  return false;
-}
-
 ConstructPtr TryStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

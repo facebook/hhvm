@@ -228,13 +228,6 @@ int FileScope::popAttribute() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstRawPtr ar) const {
-  if (m_tree) return m_tree->getEffectiveImpl(ar);
-  return ExpressionPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void FileScope::declareConstant(AnalysisResultPtr ar, const std::string &name) {
   ar->declareConst(shared_from_this(), name);
 }

@@ -37,8 +37,6 @@ struct CatchStatement : Statement, StaticClassName {
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
-  bool hasDecl() const override { return m_stmt && m_stmt->hasDecl(); }
-  bool hasRetExp() const override { return m_stmt && m_stmt->hasRetExp(); }
   int getRecursiveCount() const override {
     return (m_stmt ? m_stmt->getRecursiveCount() : 0)
            + (m_finallyStmt ? m_finallyStmt->getRecursiveCount() : 0);

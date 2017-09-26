@@ -43,22 +43,6 @@ int BlockStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool BlockStatement::hasDecl() const {
-  return m_stmts && m_stmts->hasDecl();
-}
-
-bool BlockStatement::hasImpl() const {
-  return m_stmts && m_stmts->hasImpl();
-}
-
-bool BlockStatement::hasBody() const {
-  return m_stmts && m_stmts->hasBody();
-}
-
-bool BlockStatement::hasRetExp() const {
-  return m_stmts && m_stmts->hasRetExp();
-}
-
 ConstructPtr BlockStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

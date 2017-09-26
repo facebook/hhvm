@@ -87,7 +87,6 @@ struct ExpressionList : Expression {
 
   template <typename F> bool getListScalars(F) const;
 private:
-  void optimize(AnalysisResultConstRawPtr ar);
   unsigned int checkLitstrKeys() const;
   enum class ElemsKind: uint8_t { None, ArrayPairs, Collection };
 

@@ -38,15 +38,6 @@ SwitchStatement::SwitchStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, StatementListPtr cases)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(SwitchStatement)),
     m_exp(exp), m_cases(cases) {
-  if (m_cases && m_exp->is(Expression::KindOfSimpleVariable)) {
-    for (int i = m_cases->getCount(); i--; ) {
-      auto c = dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
-      if (c->getCondition() && c->getCondition()->hasEffect()) {
-        m_exp->setContext(Expression::LValue);
-        break;
-      }
-    }
-  }
 }
 
 StatementPtr SwitchStatement::clone() {
@@ -92,14 +83,6 @@ void SwitchStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
       Compiler::Error(Compiler::ConditionalClassLoading, self);
     }
   }
-}
-
-bool SwitchStatement::hasDecl() const {
-  return m_cases && m_cases->hasDecl();
-}
-
-bool SwitchStatement::hasRetExp() const {
-  return m_cases && m_cases->hasRetExp();
 }
 
 ConstructPtr SwitchStatement::getNthKid(int n) const {

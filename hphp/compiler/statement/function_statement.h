@@ -38,8 +38,6 @@ struct FunctionStatement : MethodStatement {
                     ExpressionListPtr attrList);
 
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
-  bool hasDecl() const override { return true; }
-  bool hasImpl() const override;
 
   std::string getName() const override;
 

@@ -36,8 +36,6 @@ struct TryStatement : Statement {
 
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  bool hasDecl() const override;
-  bool hasRetExp() const override;
   int getRecursiveCount() const override;
 
   StatementPtr getBody() const { return m_tryStmt; }

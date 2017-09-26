@@ -109,7 +109,6 @@ struct FunctionScope : BlockScope,
   bool isRefReturn() const { return m_refReturn;}
   bool isDynamicInvoke() const { return m_dynamicInvoke; }
   void setDynamicInvoke();
-  bool hasImpl() const;
   bool isParamCoerceMode() const;
   bool mayContainThis();
   bool isClosure() const;
@@ -164,11 +163,6 @@ struct FunctionScope : BlockScope,
   bool usesVariableArgumentFunc() const;
   bool isReferenceVariableArgument() const;
   void setVariableArgument(int reference);
-
-  /**
-   * Whether this function has no side effects
-   */
-  bool hasEffect() const;
 
   /**
    * Whether this function can be constant folded

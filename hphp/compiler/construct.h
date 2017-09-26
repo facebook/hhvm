@@ -241,7 +241,6 @@ public:
   virtual int getLocalEffects() const { return UnknownEffect;}
   int getChildrenEffects() const;
   int getContainedEffects() const;
-  bool hasEffect() const { return getContainedEffects() != NoEffect;}
   virtual bool kidUnused(int /*i*/) const { return false; }
 
   template<typename T>

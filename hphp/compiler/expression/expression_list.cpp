@@ -109,17 +109,10 @@ bool ExpressionList::isScalar() const {
   if (m_elems_kind != ElemsKind::None) {
     return isScalarArrayPairs();
   }
-  if (m_kind == ListKindParam) {
-    for (unsigned int i = m_exps.size(); i--; ) {
-      if (m_exps[i] && !m_exps[i]->isScalar()) return false;
-    }
-    return true;
+  for (unsigned int i = m_exps.size(); i--; ) {
+    if (m_exps[i] && !m_exps[i]->isScalar()) return false;
   }
-  if (!hasEffect()) {
-    ExpressionPtr v(listValue());
-    return v ? v->isScalar() : false;
-  }
-  return false;
+  return true;
 }
 
 bool ExpressionList::isNoObjectInvolved() const {
@@ -213,7 +206,7 @@ bool ExpressionList::getScalarValue(Variant &value) {
       return false;
     }
   }
-  if (m_kind != ListKindParam && !hasEffect()) {
+  if (m_kind != ListKindParam && isScalar()) {
     ExpressionPtr v(listValue());
     return v ? v->getScalarValue(value) : false;
   }
@@ -327,41 +320,6 @@ bool ExpressionList::isLiteralString() const {
 std::string ExpressionList::getLiteralString() const {
   ExpressionPtr v(listValue());
   return v ? v->getLiteralString() : std::string("");
-}
-
-void ExpressionList::optimize(AnalysisResultConstRawPtr /*ar*/) {
-  bool changed = false;
-  size_t i = m_exps.size();
-  if (m_kind != ListKindParam) {
-    size_t skip = m_kind == ListKindLeft ? 0 : i - 1;
-    while (i--) {
-      if (i != skip) {
-        ExpressionPtr &e = m_exps[i];
-        if (!e || (e->getContainedEffects() == NoEffect)) {
-          removeElement(i);
-          changed = true;
-        } else if (e->is(KindOfExpressionList)) {
-          auto el = static_pointer_cast<ExpressionList>(e);
-          removeElement(i);
-          for (size_t j = el->getCount(); j--; ) {
-            insertElement((*el)[j], i);
-          }
-          changed = true;
-        }
-      }
-    }
-    if (m_exps.size() == 1) {
-      if (m_kind != ListKindWrappedNoWarn) m_kind = ListKindWrapped;
-    } else if (m_kind == ListKindLeft && m_exps[0]->isScalar()) {
-      ExpressionPtr e = m_exps[0];
-      removeElement(0);
-      addElement(e);
-      m_kind = ListKindWrapped;
-    }
-  }
-  if (changed) {
-    getScope()->addUpdates(BlockScope::UseKindSelf);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

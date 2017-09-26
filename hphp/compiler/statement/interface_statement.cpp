@@ -64,10 +64,6 @@ StatementPtr InterfaceStatement::clone() {
   return stmt;
 }
 
-bool InterfaceStatement::hasImpl() const {
-  return true;
-}
-
 int InterfaceStatement::getRecursiveCount() const {
   return m_stmt ? m_stmt->getRecursiveCount() : 0;
 }

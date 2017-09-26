@@ -84,7 +84,3 @@ void ExpStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_exp->outputPHP(cg, ar);
   cg_printf(";\n");
 }
-
-bool ExpStatement::shouldEmitStatement() const {
-  return hasEffect() || Option::KeepStatementsWithNoEffect;
-}

@@ -85,11 +85,6 @@ public:
 
   bool hasReachableLabel() const;
 
-  virtual bool hasDecl() const { return false; }
-  virtual bool hasImpl() const { return hasEffect(); }
-  virtual bool hasBody() const { return true;}
-  virtual bool hasRetExp() const { return false; }
-
   virtual StatementPtr clone() {
     assert(false);
     return StatementPtr();

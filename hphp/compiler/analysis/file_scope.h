@@ -93,12 +93,6 @@ public:
   void serialize(JSON::DocTarget::OutputStream& out) const override;
 
   /**
-   * Whether this file has top level non-declaration statements that
-   * have CPP implementation.
-   */
-  ExpressionPtr getEffectiveImpl(AnalysisResultConstRawPtr ar) const;
-
-  /**
    * Parser functions. Parser only deals with a FileScope object, and these
    * are the only functions a parser calls upon analysis results.
    */

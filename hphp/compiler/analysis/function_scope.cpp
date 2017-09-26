@@ -321,10 +321,6 @@ void FunctionScope::setVariableArgument(int reference) {
   }
 }
 
-bool FunctionScope::hasEffect() const {
-  return (m_attribute & FileScope::NoEffect) == 0;
-}
-
 bool FunctionScope::isFoldable() const {
   // Systemlib (PHP&HNI) builtins
   auto f = Unit::lookupFunc(String(getScopeName()).get());
@@ -341,17 +337,6 @@ void FunctionScope::setContainsBareThis(bool f, bool ref /* = false */) {
   } else {
     m_containsBareThis = 0;
   }
-}
-
-bool FunctionScope::hasImpl() const {
-  if (!isUserFunction()) {
-    return !isAbstract();
-  }
-  if (m_stmt) {
-    auto stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
-    return stmt->getStmts() != nullptr;
-  }
-  return false;
 }
 
 bool FunctionScope::isNamed(const char* n) const {

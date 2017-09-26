@@ -118,7 +118,6 @@ protected:
   ExpressionPtr m_safeDef;
   std::string m_lambda;
 
-  ExpressionPtr optimize(AnalysisResultConstRawPtr ar);
 private:
   FunctionScopePtr
   getFuncScopeFromParams(AnalysisResultPtr ar,

@@ -157,7 +157,3 @@ void FunctionStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     outputPHPBody(cg, ar);
   }
 }
-
-bool FunctionStatement::hasImpl() const {
-  return true;
-}

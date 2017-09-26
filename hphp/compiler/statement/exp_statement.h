@@ -38,7 +38,6 @@ struct ExpStatement : Statement, IParseHandler {
   bool kidUnused(int i) const override { return i == 0; }
 private:
   ExpressionPtr m_exp;
-  bool shouldEmitStatement() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

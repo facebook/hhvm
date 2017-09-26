@@ -31,10 +31,6 @@ struct BlockStatement : Statement {
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
   StatementListPtr getStmts() const { return m_stmts; }
-  bool hasDecl() const override;
-  bool hasImpl() const override;
-  bool hasBody() const override;
-  bool hasRetExp() const override;
   int getRecursiveCount() const override;
 private:
   StatementListPtr m_stmts;

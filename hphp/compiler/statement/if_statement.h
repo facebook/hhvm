@@ -29,8 +29,6 @@ struct IfStatement : Statement {
   IfStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, StatementListPtr stmts);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  bool hasDecl() const override;
-  bool hasRetExp() const override;
   int getRecursiveCount() const override;
 
   StatementListPtr getIfBranches() const { return m_stmts; }

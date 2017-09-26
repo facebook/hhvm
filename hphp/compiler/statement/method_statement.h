@@ -50,8 +50,6 @@ public:
                       attr, docComment, attrList, method) {}
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  bool hasDecl() const override { return true; }
-  bool hasImpl() const override { return false; }
   int getRecursiveCount() const override;
   // implementing IParseHandler
   void onParseRecur(AnalysisResultConstRawPtr ar, FileScopeRawPtr fs,

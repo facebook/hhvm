@@ -262,7 +262,3 @@ void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}\n");
 }
-
-bool ClassStatement::hasImpl() const {
-  return true;
-}

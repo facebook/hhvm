@@ -46,14 +46,6 @@ int FinallyStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool FinallyStatement::hasDecl() const {
-  return (m_stmt && m_stmt->hasDecl());
-}
-
-bool FinallyStatement::hasRetExp() const {
-  return (m_stmt && m_stmt->hasRetExp());
-}
-
 ConstructPtr FinallyStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

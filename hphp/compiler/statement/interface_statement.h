@@ -42,8 +42,6 @@ public:
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
-  bool hasDecl() const override { return true; }
-  bool hasImpl() const override;
   int getRecursiveCount() const override;
   // implementing IParseHandler
   void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;

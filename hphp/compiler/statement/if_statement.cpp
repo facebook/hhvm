@@ -50,14 +50,6 @@ int IfStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool IfStatement::hasDecl() const {
-  return m_stmts && m_stmts->hasDecl();
-}
-
-bool IfStatement::hasRetExp() const {
-  return m_stmts && m_stmts->hasRetExp();
-}
-
 ConstructPtr IfStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

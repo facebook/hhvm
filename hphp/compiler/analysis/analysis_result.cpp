@@ -624,19 +624,6 @@ void AnalysisResult::analyzeProgram() {
   for (auto cls : classes) {
     StringToFunctionScopePtrMap methods;
     cls->collectMethods(ar, methods, true /* include privates */);
-    bool needAbstractMethodImpl =
-      (!cls->isAbstract() && !cls->isInterface() &&
-       cls->derivesFromRedeclaring() == Derivation::Normal &&
-       !cls->getAttribute(ClassScope::UsesUnknownTrait));
-    for (auto& pair : methods) {
-      auto func = pair.second;
-      if (Option::WholeProgram && !func->hasImpl() && needAbstractMethodImpl) {
-        auto tmpFunc = cls->findFunction(ar, func->getScopeName(), true, true);
-        always_assert(!tmpFunc || !tmpFunc->hasImpl());
-        Compiler::Error(Compiler::MissingAbstractMethodImpl,
-                        func->getStmt(), cls->getStmt());
-      }
-    }
   }
 
   for (auto& item : m_systemClasses) {

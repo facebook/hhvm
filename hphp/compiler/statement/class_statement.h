@@ -39,8 +39,6 @@ struct ClassStatement : InterfaceStatement {
 
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
-  bool hasDecl() const override { return true; }
-  bool hasImpl() const override;
 
   void setPromotedParameterCount(int count) {
     m_promotedParameterCount = count;

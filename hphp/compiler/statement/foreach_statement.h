@@ -36,8 +36,6 @@ struct ForEachStatement : LoopStatement {
   ExpressionPtr getNameExp() const { return m_name; }
   ExpressionPtr getValueExp() const { return m_value; }
   StatementPtr getBody() const { return m_stmt; }
-  bool hasDecl() const override { return m_stmt && m_stmt->hasDecl(); }
-  bool hasRetExp() const override { return m_stmt && m_stmt->hasRetExp(); }
   int getRecursiveCount() const override {
     return 1 + (m_stmt ? m_stmt->getRecursiveCount() : 0);
   }

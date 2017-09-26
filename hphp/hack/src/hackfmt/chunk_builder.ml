@@ -27,6 +27,7 @@ type string_type =
   | DocStringClose
   | Number
   | ConcatOp
+  | LineComment
   | Other
 
 let builder = object (this)
@@ -144,12 +145,17 @@ let builder = object (this)
 
     last_string_type <- Other;
 
-  method private set_pending_comma () =
+  method private set_pending_comma present_in_original_source =
     if last_string_type <> DocStringClose then
+      let range =
+        if not present_in_original_source
+        then None
+        else Some (seen_chars, seen_chars + 1)
+      in
       chunks <- (match chunks with
         | hd :: tl when not hd.Chunk.is_appendable ->
-          {hd with Chunk.comma_rule = Some (List.hd_exn rules)} :: tl;
-        | _ -> pending_comma <- Some (List.hd_exn rules); chunks;
+          {hd with Chunk.comma = Some (List.hd_exn rules, range)} :: tl;
+        | _ -> pending_comma <- Some (List.hd_exn rules, range); chunks;
       );
 
   method private add_space () =
@@ -347,6 +353,9 @@ let builder = object (this)
       this#add_string text width;
     | Comment (text, width) ->
       this#add_string ~is_trivia:true text width;
+    | SingleLineComment (text, width) ->
+      this#add_string ~is_trivia:true text width;
+      last_string_type <- LineComment;
     | Ignore (_, width) ->
       this#advance width;
     | MultilineString (strings, width) ->
@@ -424,8 +433,14 @@ let builder = object (this)
         this#consume_doc action;
         this#end_rule ();
       end
-    | TrailingComma ->
-      this#set_pending_comma ()
+    | TrailingComma present_in_original_source ->
+      if last_string_type <> LineComment
+      then this#set_pending_comma present_in_original_source
+      else begin
+        this#add_string "," 1;
+        this#advance (-1);
+      end;
+      last_string_type <- Other;
 end
 
 let build node =

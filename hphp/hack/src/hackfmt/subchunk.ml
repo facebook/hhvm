@@ -115,7 +115,10 @@ let subchunks_of_solve_state (state: Solve_state.t) : t list =
       add_subchunk (Atom {text; range});
     end;
 
-    if Solve_state.has_comma_after_chunk state ~chunk then add_subchunk Comma;
+    if Solve_state.has_comma_after_chunk state ~chunk then
+      match Chunk.get_comma_range chunk with
+      | Some range -> add_subchunk (Atom {text = ","; range})
+      | None -> add_subchunk Comma;
   end;
   (* Every chunk group has a newline trailing it, but chunks are associated with
    * the split preceding them. In order to ensure that we print trailing

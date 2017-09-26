@@ -39,7 +39,11 @@ type t = {
   spans: Span.t list;
   is_appendable: bool;
   space_if_not_split: bool;
-  comma_rule: int option;
+  (* If this chunk would have a trailing comma inserted after it if the next
+   * split is broken on, this will be Some, and the int will be the ID of the
+   * rule governing that split. If a trailing comma was present in the original
+   * source, the Interval is the offset range of that token. *)
+  comma: (int * Interval.t option) option;
   rule: int;
   nesting: Nesting.t;
   start_char: int;
@@ -53,7 +57,7 @@ let default_chunk = {
   spans = [];
   is_appendable = true;
   space_if_not_split = false;
-  comma_rule = None;
+  comma = None;
   rule = Rule.null_rule_id;
   nesting = Nesting.dummy;
   start_char = -1;
@@ -94,7 +98,7 @@ let finalize chunk rule ra space comma end_char =
     is_appendable = false;
     rule;
     space_if_not_split = space;
-    comma_rule = comma;
+    comma;
     end_char;
     atoms = List.rev chunk.atoms;
     length;
@@ -108,6 +112,11 @@ let get_range chunk =
   let first_atom = List.hd_exn chunk.atoms in
   let last_atom = List.last_exn chunk.atoms in
   (fst first_atom.range, snd last_atom.range)
+
+let get_comma_range chunk =
+  match chunk.comma with
+  | None -> failwith "Can't get comma range of chunk with no comma rule"
+  | Some (_, range) -> range
 
 let is_empty chunk =
   match chunk.atoms with

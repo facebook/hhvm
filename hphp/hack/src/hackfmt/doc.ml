@@ -19,6 +19,9 @@ type t =
   | Text of string * int
   (* A comment which will appear in the formatted file *)
   | Comment of string * int
+  (* A comment which must be followed by a Newline. No text may be inserted
+   * between this comment and the Newline following it. *)
+  | SingleLineComment of string * int
   (* Text from the original source which will not appear in the formatted file.
    * Keeping track of these allows range formatting. *)
   | Ignore of string * int
@@ -74,8 +77,9 @@ type t =
   (* Enable this lazy rule only if we are within another region with the same
    * rule kind. Otherwise, enable the rule as a non-lazy rule. *)
   | WithPossibleLazyRule of Rule.kind * t * t
-  (* Add a comma only if the next split is broken on *)
-  | TrailingComma
+  (* Add a comma only if the next split is broken on. The bool indicates whether
+   * a trailing comma was present in the original source. *)
+  | TrailingComma of bool
 
 let space () = Space
 let split () = Split
@@ -86,6 +90,7 @@ let rec has_printable_content node =
   match node with
   | Text _
   | Comment _
+  | SingleLineComment _
   | MultilineString _
   | DocLiteral _
   | NumericLiteral _
@@ -112,7 +117,7 @@ let rec has_printable_content node =
   | Newline
   | BlankLine
   | Space
-  | TrailingComma -> false
+  | TrailingComma _ -> false
 
 (* Add "dump @@" before any Doc.t expression to dump it to stderr. *)
 let dump ?(ignored=false) node =
@@ -126,6 +131,8 @@ let dump ?(ignored=false) node =
       print (sprintf "Text \"%s\"" text)
     | Comment (text, _) ->
       print (sprintf "Comment \"%s\"" text)
+    | SingleLineComment (text, _) ->
+      print (sprintf "SingleLineComment \"%s\"" text)
     | Ignore (text, _) ->
       if ignored then
         print (sprintf "Ignored \"%s\""
@@ -178,8 +185,8 @@ let dump ?(ignored=false) node =
       print "], [";
       dump_list_items [action];
       print "])";
-    | TrailingComma ->
-      print "TrailingComma"
+    | TrailingComma present_in_original_source ->
+      print (sprintf "TrailingComma %b" present_in_original_source)
   and indent = ref 0
   and print s = eprintf "%s%s\n" (String.make !indent ' ') s
   and dump_list name nodes =

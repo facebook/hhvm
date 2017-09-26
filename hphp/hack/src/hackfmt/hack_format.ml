@@ -1909,25 +1909,20 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
      * account for where PHP's parser permits trailing commas, we just never add
      * them in PHP files. *)
     let allow_trailing = allow_trailing && (Env.add_trailing_commas env) in
-    let item, item_trailing = remove_trailing_trivia item in
     match syntax comma with
     | Token tok ->
       Concat [
-        Concat [
-          t item;
-          if allow_trailing then TrailingComma else Nothing;
-          transform_trailing_trivia item_trailing;
-        ];
-        Concat [
-          transform_leading_trivia (leading tok);
-          Ignore (text tok, width tok);
-          transform_trailing_trivia (trailing tok);
-        ]
+        t item;
+        transform_leading_trivia (leading tok);
+        if allow_trailing then TrailingComma true else Nothing;
+        Ignore (text tok, width tok);
+        transform_trailing_trivia (trailing tok);
       ]
     | Missing ->
+      let item, item_trailing = remove_trailing_trivia item in
       Concat [
         t item;
-        if allow_trailing then TrailingComma else Nothing;
+        if allow_trailing then TrailingComma false else Nothing;
         transform_trailing_trivia item_trailing;
       ]
     | _ -> failwith "Expected Token"
@@ -2259,7 +2254,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         make_comment ();
         last_comment := Some (Concat [
           if !currently_leading then Newline else Space;
-          Comment ((Trivia.text triv), (Trivia.width triv));
+          SingleLineComment ((Trivia.text triv), (Trivia.width triv));
         ]);
         last_comment_was_delimited := false;
         currently_leading := false;

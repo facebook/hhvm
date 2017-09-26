@@ -39,7 +39,8 @@ $vec = Vector {
   $foo, // foo
 };
 $vec = Vector {
-  $foo, // foo
+  $foo // foo
+  ,
 };
 
 $vec =
@@ -59,6 +60,6 @@ $vec = Vector {
 };
 $vec = Vector {
   /* leading comment */
-  $foooooooooooooooo,
-  /* trailing comment */
+  $foooooooooooooooo
+  /* trailing comment */,
 };

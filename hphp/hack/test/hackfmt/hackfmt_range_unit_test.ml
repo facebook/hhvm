@@ -90,15 +90,50 @@ let range_test_suite =
      * only if the atom preceding it is printed. *)
     "trailing_comma_inserted_at_start_of_range" >::
     assert_range_formats_to
-      ~src:((String.make 80 'f') ^ "($x,$y)")
-      ~rng:((86,87),")")
+      ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y)")
+      ~rng:((106,107),")")
       ~exp:")\n";
 
     "trailing_comma_inserted_at_end_of_range" >::
     assert_range_formats_to
-      ~src:("<?hh " ^ (String.make 80 'f') ^ "($x,$y)")
-      ~rng:((89,91),"$y")
+      ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y)")
+      ~rng:((104,106),"$y")
       ~exp:"  $y,\n";
+
+    (* If a trailing comma was already present outside the range, don't include
+     * it in the formatted output. *)
+    "trailing_comma_existed_at_start_of_range" >::
+    assert_range_formats_to
+      ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y,)")
+      ~rng:((107,108),")")
+      ~exp:")\n";
+
+    "trailing_comma_existed_at_end_of_range" >::
+    assert_range_formats_to
+      ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y,)")
+      ~rng:((104,106),"$y")
+      ~exp:"  $y";
+
+    "trailing_comma_included_at_start_of_range" >::
+    assert_range_formats_to
+      ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y,)")
+      ~rng:((106,108),",)")
+      ~exp:",\n)\n";
+
+    "trailing_comma_included_at_end_of_range" >::
+    assert_range_formats_to
+      ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y,)")
+      ~rng:((104,107),"$y,")
+      ~exp:"  $y,\n";
+
+    "trailing_comma_is_entire_range" >::
+    assert_range_formats_to
+      ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y,)")
+      ~rng:((106,107),",")
+      ~exp:",\n";
+
+    "deleted_trailing_comma_is_entire_range" >::
+    assert_range_formats_to ~src:("f($x,$y,)") ~rng:((7,8),",") ~exp:"";
   ]
 
 let _ =

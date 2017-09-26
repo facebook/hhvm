@@ -8,8 +8,8 @@ function foo() {
       $long_identifier_two,
       $long_identifier_three,
       $long_identifier_four,
-    ), // array end
-    // comma
+    ) // array end
+    , // comma
   );
 }
 
@@ -34,7 +34,7 @@ function foo() {
       $long_identifier_two,
       $long_identifier_three,
       $long_identifier_four,
-    ), /* array end */
+    ) /* array end */,
     /* comma */
   );
 }

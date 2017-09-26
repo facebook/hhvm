@@ -38,7 +38,7 @@ let rbm_has_split_before_chunk c rbm =
   |> Option.value ~default:false
 
 let rbm_has_comma_after_chunk c rbm =
-  Option.value_map c.Chunk.comma_rule ~default:false ~f:(fun rule_id ->
+  Option.value_map c.Chunk.comma ~default:false ~f:(fun (rule_id, _) ->
     IMap.get rule_id rbm
     |> Option.value ~default:false
   )

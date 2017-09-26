@@ -51,6 +51,7 @@ function ldap_get_values_len($link, $result_entry, $attribute) { }
 function ldap_get_values($link, $result_entry, $attribute) { }
 function ldap_control_paged_result($link, $pagesize, $iscritical = false, $cookie = '') { }
 function ldap_control_paged_result_response($link, $result, &$cookie = null, &$estimated = null) { }
+function ldap_escape(string $value, string $ignore = '', int $flags = 0) { }
 
 const int LDAP_OPT_DEREF = 2;
 const int LDAP_OPT_SIZELIMIT = 3;

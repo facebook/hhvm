@@ -41,9 +41,10 @@ std::set<std::string> dummy_set { "hello" };
 
 int main(int argc, char** argv) {
   // Also for t15096405
-  std::string (*ptr)(std::string&&, const char*) = std::operator+;
+  std::string (*ptr1)(std::string&&, const char*) = std::operator+;
+  std::string (*ptr2)(const char*, std::string&&) = std::operator+;
   if (!argc) {
-    return intptr_t(ptr);
+    return intptr_t(ptr1) + intptr_t(ptr2);
   }
   int len = strlen(argv[0]);
   if (len >= 4 && !strcmp(argv[0] + len - 4, "hphp")) {

@@ -125,10 +125,11 @@ let make_wrapper_body return_type params instrs =
     [] (* static_inits: this is intentionally empty *)
     None (* doc *)
 
-let emit_wrapper_function ~original_id ~renamed_id ast_fun =
+let emit_wrapper_function ~original_id ~renamed_id ~is_method ast_fun =
   Emit_memoize_helpers.check_memoize_possible (fst ast_fun.Ast.f_name)
     ~ret_by_ref: ast_fun.Ast.f_ret_by_ref
-    ~params: ast_fun.Ast.f_params;
+    ~params: ast_fun.Ast.f_params
+    ~is_method;
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let namespace = ast_fun.Ast.f_namespace in
   let pos = ast_fun.Ast.f_span in

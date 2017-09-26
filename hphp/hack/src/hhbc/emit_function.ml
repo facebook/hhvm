@@ -61,7 +61,11 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       is_top in
   if is_memoize
   then [normal_function;
-    Emit_memoize_function.emit_wrapper_function ~original_id ~renamed_id ast_fun]
+    Emit_memoize_function.emit_wrapper_function
+      ~original_id
+      ~renamed_id
+      ~is_method:false
+      ast_fun]
   else [normal_function]
 
 let emit_functions_from_program ast =

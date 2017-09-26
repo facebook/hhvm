@@ -37,7 +37,8 @@ let make_info ast_class class_id ast_methods =
     let pos = fst ast_method.Ast.m_name in
     Emit_memoize_helpers.check_memoize_possible pos
       ~ret_by_ref: ast_method.Ast.m_ret_by_ref
-      ~params: ast_method.Ast.m_params;
+      ~params: ast_method.Ast.m_params
+      ~is_method:true;
     if ast_class.Ast.c_kind = Ast.Cinterface
     then Emit_fatal.raise_fatal_runtime pos
       "<<__Memoize>> cannot be used in interfaces"

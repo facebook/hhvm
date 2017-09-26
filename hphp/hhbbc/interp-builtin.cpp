@@ -431,7 +431,21 @@ folly::Optional<Type> const_fold(ISS& env,
     args[nArgs - i - 1] = *val;
   }
 
-  auto const func = Unit::lookupBuiltin(rfunc.name());
+  auto phpFunc = rfunc.exactFunc();
+  assertx(phpFunc);
+
+  Class* cls = nullptr;
+  auto const func = [&] () -> HPHP::Func* {
+    if (phpFunc->cls) {
+      cls = Unit::lookupClass(phpFunc->cls->name);
+      if (!cls || !(cls->attrs() & AttrBuiltin)) return nullptr;
+      auto const f = cls->lookupMethod(phpFunc->name);
+      if (!f->isStatic()) return nullptr;
+      return f;
+    }
+    return Unit::lookupBuiltin(phpFunc->name);
+  }();
+
   if (!func) return folly::none;
 
   // If the function is variadic, all the variadic parameters are already packed
@@ -454,7 +468,7 @@ folly::Optional<Type> const_fold(ISS& env,
   return eval_cell(
     [&] {
       auto retVal = g_context->invokeFuncFew(
-        func, nullptr, nullptr,
+        func, HPHP::ActRec::encodeClass(cls), nullptr,
         args.size(), args.data(), !env.ctx.unit->useStrictTypes
       );
 

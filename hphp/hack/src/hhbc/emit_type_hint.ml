@@ -78,7 +78,11 @@ let can_be_nullable h =
   | A.Hfun (_, _, _, _)
   | A.Hoption (_, A.Hfun (_, _, _, _))
   | A.Happly ((_, "mixed"), _)
-  | A.Hoption (_, A.Happly ((_, "mixed"), _)) -> false
+  | A.Hoption (_, A.Happly ((_, "mixed"), _))
+  (* HHVM does not emit nullable for type consts that are set to null by default
+   * function(Class::Type $a = null) unless it is explicitly marked as nullable
+   *)
+  | A.Haccess (_, _, _) -> false
   | _ -> true
 
 let rec hint_to_type_constraint ~tparams ~skipawaitable ~namespace (_, h) =

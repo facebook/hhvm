@@ -58,6 +58,24 @@ module Integer = struct
     (* Octal *)
     | _ -> "0o" ^ String_utils.lstrip s "0"
     else s
+
+  (* In order for this to be true, every char has to be a number as well as
+   * if the first digit is a zero, then there cannot be more digits
+   * negative zero is dealt specially as it is not casted to zero
+   *
+   * E.g.:
+   * -1 -> true
+   * -0 -> false (special case)
+   * 08 -> false (octal)
+   * 0b1 -> false (binary)
+   *
+   **)
+  let is_decimal_int s = if s = "-0" then false else
+    let s = String_utils.lstrip s "-" in
+    String_utils.fold_left s
+      ~acc:true
+      ~f:(fun acc i -> String_utils.is_decimal_digit i && acc)
+    && (String.length s = 1 || (s.[0] <> '0'))
 end
 
 module Float = struct

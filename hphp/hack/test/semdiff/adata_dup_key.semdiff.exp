@@ -1,0 +1,8 @@
+Semdiff succeeded
+Distance = 1
+Size = 10
+Similarity = 90.91
+Edits = 
+
+- a:3:{s:1:\"A\";i:1;s:1:\"A\";i:2;s:1:\"B\";i:3;}
++ a:2:{s:1:\"A\";i:2;s:1:\"B\";i:3;}

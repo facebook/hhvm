@@ -10,7 +10,9 @@
 
 (* TODO: change this over to Core *)
 
+module EA = Emit_adata
 module Log = Semdiff_logging
+module SS = String_sequence
 
 let concatstrs = String.concat ""
 
@@ -151,18 +153,18 @@ let list_comparer elt_comparer inbetween = {
      (List.map (fun elt -> elt_comparer.string_of elt ^ inbetween) l)) ^ "]");
 }
 
+(* Compare string of primitives to account for NaN *)
 let primitive_comparer to_string = {
-  comparer = (fun n1 n2 -> if n1=n2 then (0,(1,[]))
-                     else (1,(1,substedit (to_string n1) (to_string n2))));
+  comparer = (fun n1 n2 ->
+    let n1str = to_string n1 in
+    let n2str = to_string n2 in
+    if n1str=n2str then (0,(1,[]))
+    else (1,(1,substedit n1str n2str)));
   size_of = (fun _n -> 1);
   string_of = to_string;
 }
 
-(* TODO: size and string representation and comparison for typed values *)
-let typed_value_to_string v =
- match Typed_value.to_string v with
-  | Some s -> s
-  | None -> "aTypedValue"
+let typed_value_to_string v = SS.seq_to_string @@ EA.adata_to_string_seq v
 
 let typed_value_comparer = primitive_comparer typed_value_to_string
 
@@ -767,16 +769,29 @@ let classes_todosplitter s =
   else let iip = Rhl.IntIntPermSet.choose s in
            Some (iip, Rhl.IntIntPermSet.remove iip s)
 
-let functions_todosplitter s =
+let intintset_todosplitter s =
   if Rhl.IntIntSet.is_empty s then None
   else let ii = Rhl.IntIntSet.choose s in
            Some (ii, Rhl.IntIntSet.remove ii s)
+
+let adata_todosplitter s =
+  if Rhl.StringStringSet.is_empty s then None
+  else let ss = Rhl.StringStringSet.choose s in
+           Some (ss, Rhl.StringStringSet.remove ss s)
+
+let typedef_to_string def =
+  let name = Hhbc_id.Class.to_raw_string @@ Hhas_typedef.name def in
+  match Hhas_typedef.type_structure def with
+  | None -> name
+  | Some structure -> name ^ " = " ^ typed_value_to_string structure
 
 let compare_classes_functions_of_programs p p' =
  Rhl.classes_to_check := Rhl.IntIntPermSet.empty;
  Rhl.classes_checked := Rhl.IntIntSet.empty;
  Rhl.functions_to_check := Rhl.IntIntSet.empty;
  Rhl.functions_checked := Rhl.IntIntSet.empty;
+ Rhl.adata_to_check := Rhl.StringStringSet.empty;
+ Rhl.adata_checked := Rhl.StringStringSet.empty;
  (* clear refs here again just to be on the safe side
     start by comparing top-level stuff
  *)
@@ -784,8 +799,33 @@ let compare_classes_functions_of_programs p p' =
  let rec loop d s e =
   let td = !Rhl.classes_to_check in
    match classes_todosplitter td with
-    | None -> (match functions_todosplitter !Rhl.functions_to_check with
-               | None -> (d,(s,e))
+    | None -> (match intintset_todosplitter !Rhl.functions_to_check with
+               | None -> (match adata_todosplitter !Rhl.adata_to_check with
+                  | None -> (match intintset_todosplitter !Rhl.typedefs_to_check with
+                    | None -> (d,(s,e))
+                    | Some ((tid, tid'), newdefstodo) ->
+                      Rhl.typedefs_to_check := newdefstodo;
+                      if Rhl.IntIntSet.mem (tid, tid') !Rhl.typedefs_checked
+                      then loop d s e (* already checked *)
+                      else
+                        let typedef = List.nth (Hhas_program.typedefs p) tid in
+                        let typedef' = List.nth (Hhas_program.typedefs p') tid' in
+                        Rhl.typedefs_checked := Rhl.IntIntSet.add (tid, tid') !Rhl.typedefs_checked;
+                        let (df, (sf, ef)) = string_comparer.comparer
+                                             (typedef_to_string typedef) (typedef_to_string typedef') in
+                        loop (d+df) (s+sf) (e @ ef)
+                    )
+                  | Some ((id, id'), newdatatodo) ->
+                    Rhl.adata_to_check := newdatatodo;
+                    if Rhl.StringStringSet.mem (id, id') !Rhl.adata_checked
+                    then loop d s e (* already checked *)
+                    else
+                      let adata = List.find (fun x -> (Hhas_adata.id x) = id) (Hhas_program.adata p) in
+                      let adata' = List.find (fun x -> (Hhas_adata.id x) = id') (Hhas_program.adata p') in
+                      Rhl.adata_checked := Rhl.StringStringSet.add (id, id') !Rhl.adata_checked;
+                      let (df, (sf, ef)) = typed_value_comparer.comparer (Hhas_adata.value adata) (Hhas_adata.value adata') in
+                      loop (d+df) (s+sf) (e @ ef)
+                 )
                | Some ((fid,fid'),newftodo) ->
                  Rhl.functions_to_check := newftodo;
                  if Rhl.IntIntSet.mem (fid,fid') !Rhl.functions_checked

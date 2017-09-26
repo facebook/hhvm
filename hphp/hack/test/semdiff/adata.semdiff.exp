@@ -1,0 +1,14 @@
+Semdiff succeeded
+comparing key x
+Semdiff succeeded
+comparing key 86ctor
+Semdiff succeeded
+Distance = 2
+Size = 59
+Similarity = 96.67
+Edits = 
+
+- a:3:{i:0;i:1;i:1;i:4;i:2;i:3;}
++ a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}
+- a:2:{i:1;s:1:\"c\";i:2;s:1:\"b\";}
++ a:2:{i:1;s:1:\"a\";i:2;s:1:\"b\";}

@@ -1,0 +1,13 @@
+# starts here
+.adata A_0 = """a:3:{s:1:\"A\";i:1;s:1:\"A\";i:2;s:1:\"B\";i:3;}""";
+
+.main {
+  .declvars $arr;
+  Array @A_0
+  SetL $arr
+  PopC
+  Int 1
+  RetC
+}
+
+# ends here

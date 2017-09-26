@@ -61,3 +61,4 @@ quick/trailing_comma_bad5.php
 quick/trailing_comma_bad6.php
 quick/traits2.php
 quick/vec/basic-getters.php
+quick/xhp_attribute_type_mixed.php

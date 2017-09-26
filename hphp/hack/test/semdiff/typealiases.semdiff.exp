@@ -1,0 +1,16 @@
+Semdiff succeeded
+comparing key x
+Semdiff succeeded
+comparing key 86ctor
+Semdiff succeeded
+Distance = 3
+Size = 55
+Similarity = 94.64
+Edits = 
+
+- StringAlias = a:1:{s:4:\"kind\";i:1;}
++ StringAlias = a:1:{s:4:\"kind\";i:4;}
+- Point = a:3:{s:21:\"allows_unknown_fields\";b:1;s:4:\"kind\";i:14;s:6:\"fields\";a:2:{s:1:\"x\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}s:1:\"z\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}}}
++ Point = a:3:{s:21:\"allows_unknown_fields\";b:1;s:4:\"kind\";i:14;s:6:\"fields\";a:2:{s:1:\"x\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}s:1:\"y\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}}}
+- Pair = a:2:{s:4:\"kind\";i:10;s:10:\"elem_types\";a:2:{i:0;a:1:{s:4:\"kind\";i:4;}i:1;a:1:{s:4:\"kind\";i:1;}}}
++ Pair = a:2:{s:4:\"kind\";i:10;s:10:\"elem_types\";a:2:{i:0;a:1:{s:4:\"kind\";i:1;}i:1;a:1:{s:4:\"kind\";i:1;}}}

@@ -21,12 +21,6 @@ open Local
 open Hhbc_destruct
 module Log = Semdiff_logging
 
-(* Refs storing the adata for the two programs; they're written in semdiff
-   and accessed in equiv
-*)
-let adata1_ref = ref ([] : Hhas_adata.t list)
-let adata2_ref = ref ([] : Hhas_adata.t list)
-
 (* Ref keeping to-do set for pairs of classes that
    need to be compared. Originally just for closure classes, now
    for all corresponding pairs
@@ -35,18 +29,19 @@ let adata2_ref = ref ([] : Hhas_adata.t list)
 type perm = (int * int) list
 module IntIntPermSet = Set.Make(struct type t = int*int*perm let compare = compare end)
 module IntIntSet = Set.Make(struct type t = int*int let compare = compare end)
+module StringStringSet = Set.Make(struct type t = string*string let compare = compare end)
+
 let classes_to_check = ref IntIntPermSet.empty
 let classes_checked = ref IntIntSet.empty
 
 let functions_to_check = ref IntIntSet.empty
 let functions_checked = ref IntIntSet.empty
 
-let rec lookup_adata id data_dict =
-match data_dict with
- | [] -> failwith "adata lookup failed"
- | ad :: rest -> if Hhas_adata.id ad = id
-                 then Hhas_adata.value ad
-                 else lookup_adata id rest
+let adata_to_check = ref StringStringSet.empty
+let adata_checked = ref StringStringSet.empty
+
+let typedefs_to_check = ref IntIntSet.empty
+let typedefs_checked = ref IntIntSet.empty
 
 (* an individual prop is an equation between local variables
   To start with this means that they are both defined and equal
@@ -674,10 +669,8 @@ let equiv prog prog' startlabelpairs =
         | ILitConst (Dict id), ILitConst (Dict id')
         | ILitConst (Vec id), ILitConst (Vec id')
         | ILitConst (Keyset id), ILitConst (Keyset id') ->
-          let tv = lookup_adata id (!adata1_ref) in
-          let tv' = lookup_adata id' (!adata2_ref) in
-          if tv = tv' then nextins()
-          else try_specials () (* TODO: Log the differences somewhere *)
+          adata_to_check := StringStringSet.add (id,id') !adata_to_check;
+          nextins()
         | ILitConst (Double s), ILitConst (Double s') ->
           (match Scanf.sscanf s "%f" (fun x -> Some x),
                  Scanf.sscanf s' "%f" (fun x -> Some x) with
@@ -711,10 +704,12 @@ let equiv prog prog' startlabelpairs =
         | IIncludeEvalDefine (DefFunc fid), IIncludeEvalDefine (DefFunc fid') ->
             functions_to_check := IntIntSet.add (fid,fid') !functions_to_check;
             nextins ()
+        | IIncludeEvalDefine (DefTypeAlias tid), IIncludeEvalDefine (DefTypeAlias tid') ->
+            typedefs_to_check := IntIntSet.add (tid, tid') !typedefs_to_check;
+            nextins()
         | IIncludeEvalDefine ins, IIncludeEvalDefine ins' ->
            if ins = ins' then nextins()
            else try_specials ()
-
         | ICall ins, ICall ins' ->
             (match check_instruct_call asn ins ins' with
               | None -> try_specials()

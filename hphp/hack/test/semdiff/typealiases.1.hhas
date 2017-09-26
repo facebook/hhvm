@@ -1,0 +1,26 @@
+# starts here
+
+.main {
+  DefTypeAlias 0
+  DefTypeAlias 1
+  DefTypeAlias 2
+  DefCls 0
+  Int 1
+  RetC
+}
+
+.class A {
+  .method [public] <"HH\\void" N  > x() {
+    Null
+    RetC
+  }
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+.alias StringAlias = <"HH\\string"  > """a:1:{s:4:\"kind\";i:4;}""";
+.alias Point = <"array"  > """a:3:{s:21:\"allows_unknown_fields\";b:1;s:4:\"kind\";i:14;s:6:\"fields\";a:2:{s:1:\"x\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}s:1:\"y\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}}}""";
+.alias Pair = <"array"  > """a:2:{s:4:\"kind\";i:10;s:10:\"elem_types\";a:2:{i:0;a:1:{s:4:\"kind\";i:1;}i:1;a:1:{s:4:\"kind\";i:1;}}}""";
+# ends here

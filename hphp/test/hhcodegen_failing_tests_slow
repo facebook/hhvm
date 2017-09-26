@@ -1,6 +1,8 @@
 slow/anon_class/anon_1.php
 slow/anon_class/extend_local.php
 slow/arithmetic/inc-dec-dollar-this.php
+slow/array/188.php
+slow/array/189.php
 slow/array_offset/429.php
 slow/array_offset/433.php
 slow/async/foreach_await_as.php
@@ -25,6 +27,9 @@ slow/class_type_constant/type_constant6.php
 slow/closure/lambda_implicit_this.php
 slow/closure/return_types.php
 slow/collection_classes/815.php
+slow/collection_classes/array-diff-key-1.php
+slow/collection_classes/array-diff-key-2.php
+slow/collection_classes/array-intersect-key-1.php
 slow/compilation/1238.php
 slow/compilation/1247.php
 slow/compilation/1316.php
@@ -53,6 +58,7 @@ slow/dict/init-parse-error4.php
 slow/dict/mixed-to-dict-with-refs.php
 slow/dv_array/hh-only1.php
 slow/dv_array/hh-only2.php
+slow/dv_array/literal.php
 slow/dv_array/parse-error1.php
 slow/dv_array/parse-error2.php
 slow/dv_array/parse-error3.php
@@ -61,6 +67,7 @@ slow/dv_array/parse-error5.php
 slow/dynamic_variables/1164.php
 slow/exceptions/52.php
 slow/exceptions/62.php
+slow/ext_apc/3.php
 slow/ext_function/register_postsend_function-simple.php
 slow/ext_function/register_shutdown_function-simple.php
 slow/ext_mailparse/ext_uudecode.php
@@ -71,6 +78,7 @@ slow/ext_phar/create_zip.php
 slow/ext_process/bad_shell_exec.php
 slow/ext_string/1764.php
 slow/ext_string/setlocale-threaded.php
+slow/ext_wddx/bug41527.php
 slow/finally/finally_break_008.php
 slow/finally/finally_goto_001.php
 slow/finally/finally_goto_002.php
@@ -294,6 +302,10 @@ slow/php7_bcbreak/5/uvs/array_indirect_ref.php
 slow/php7_bcbreak/5/uvs/dimmable_object_access.php
 slow/php7_bcbreak/5/uvs/dimmable_object_call.php
 slow/php7_bcbreak/5/uvs/static_dim_call.php
+slow/print/1442.php
+slow/print/1444.php
+slow/print/1446.php
+slow/print/1448.php
 slow/reflection/1339.php
 slow/reflection/1342.php
 slow/reflection/2695.php
@@ -322,15 +334,18 @@ slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_assertions/1857.php
 slow/type_constraint/parse_super_constraint_bad.php
 slow/typecheck/type_coersion_5.php
+slow/typedef/typedef_mixed_case.php
 slow/typedef/typedef_parent.php
 slow/typedef/typedef_self.php
 slow/types/abstract_function_typehints.php
 slow/types/scalar_names.php
+slow/unary_operators/1437.php
 slow/unpack_args/unpack_call_error.php
 slow/unpack_args/unpack_call_multi.php
 slow/use_function/double_alias.php
 slow/use_function/override.php
 slow/use_namespace_class/double_use_ns.php
+slow/var_export/1450.php
 slow/variadic_args/by_reference_typehints.php
 slow/variadic_args/magic_call.php
 slow/variadic_args/typehints.php
@@ -340,5 +355,6 @@ slow/vec/hh-only1.php
 slow/vec/hh-only2.php
 slow/xhp/attr-syntax-2.php
 slow/xhp/attr-syntax-3.php
+slow/xhp/attr_types.php
 slow/yield/2167.php
 slow/yield/2229.php

@@ -562,6 +562,8 @@ let property_is_static_comparer =
   wrap Hhas_property.is_static (fun _f s -> s) (flag_comparer "static")
 let property_is_deep_init_comparer =
   wrap Hhas_property.is_deep_init (fun _f s -> s) (flag_comparer "deep_init")
+let property_no_serialize_comparer =
+  wrap Hhas_property.no_serialize (fun _f s -> s) (flag_comparer "no_serialize")
 let prop_comparer =
   wrap Hhbc_id.Prop.to_raw_string (fun _ s -> s) string_comparer
 
@@ -570,6 +572,8 @@ let property_name_comparer =
 let property_initial_value_comparer =
  wrap Hhas_property.initial_value (fun _ s -> s)
      (option_comparer typed_value_comparer)
+let property_type_info_comparer =
+ wrap Hhas_property.type_info (fun _ s -> s) (type_info_comparer)
 
 (* TODO: format these much more sensibly *)
 let property_comparer =
@@ -577,7 +581,8 @@ let property_comparer =
   property_is_private_comparer
   [property_is_protected_comparer; property_is_public_comparer;
   property_is_static_comparer; property_is_deep_init_comparer;
-  property_name_comparer; property_initial_value_comparer]
+  property_name_comparer; property_initial_value_comparer;
+  property_no_serialize_comparer; property_type_info_comparer]
 
 (* apply a permutation to the trailing elements of a list
    used to reorder the properties of one closure class to

@@ -352,6 +352,7 @@ slow/use_function/override.php
 slow/use_namespace_class/double_use_ns.php
 slow/var_export/1450.php
 slow/variadic_args/by_reference_typehints.php
+slow/variadic_args/constructors.php
 slow/variadic_args/magic_call.php
 slow/variadic_args/typehints.php
 slow/vec/bad-init1.php

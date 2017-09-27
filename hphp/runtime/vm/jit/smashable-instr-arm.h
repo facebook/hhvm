@@ -77,20 +77,24 @@ constexpr size_t kSmashJccTargetOff = 12;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<typename T>
-static void patchInstr(TCA inst, T target) {
-  *reinterpret_cast<T*>(inst) = target;
-  auto const end = reinterpret_cast<TCA>(inst + sizeof(T));
-  auto const begin = end - sizeof(T);
+template <class T>
+static uint32_t makeTarget32(T target) {
+  assertx(!(reinterpret_cast<intptr_t>(target) >> 32));
+  return static_cast<uint32_t>(reinterpret_cast<intptr_t>(target));
+}
+
+static void patchTarget32(TCA inst, TCA target) {
+  *reinterpret_cast<uint32_t*>(inst) = makeTarget32(target);
+  auto const begin = inst;
+  auto const end = begin + 4;
   DataBlock::syncDirect(begin, end);
 }
 
-using TCA32 = uint32_t;
-
-template <class T>
-static uint32_t makeTCA32(T t) {
-  assertx(!(reinterpret_cast<intptr_t>(t) >> 32));
-  return static_cast<TCA32>(reinterpret_cast<intptr_t>(t));
+static void patchTarget64(TCA inst, TCA target) {
+  *reinterpret_cast<uint64_t*>(inst) = reinterpret_cast<uint64_t>(target);
+  auto const begin = inst;
+  auto const end = begin + 8;
+  DataBlock::syncDirect(begin, end);
 }
 
 }}}

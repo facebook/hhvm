@@ -73,7 +73,7 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   a.  Br    (rAsm);
 
   a.  bind  (&target_data);
-  a.  dc32  (makeTCA32(tc::ustubs().funcPrologueRedispatch));
+  a.  dc32  (makeTarget32(tc::ustubs().funcPrologueRedispatch));
   a.  bind  (&after_data);
 
   cb.sync(begin);

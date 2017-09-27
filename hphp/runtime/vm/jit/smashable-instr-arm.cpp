@@ -111,7 +111,7 @@ TCA emitSmashableJmp(CodeBlock& cb, CGMeta& meta, TCA target) {
 
   // Emit the jmp target into the instruction stream.
   a.    bind (&target_data);
-  a.    dc32 (makeTCA32(target));
+  a.    dc32 (makeTarget32(target));
 
   cb.sync(the_start);
   return the_start;
@@ -144,7 +144,7 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& meta, TCA target,
 
   // Emit the jmp target into the instruction stream.
   a.    bind (&target_data);
-  a.    dc32 (makeTCA32(target));
+  a.    dc32 (makeTarget32(target));
 
   a.    bind (&after_data);
 
@@ -224,7 +224,7 @@ bool isSmashableJcc(TCA inst) {
 
 void smashMovq(TCA inst, uint64_t target) {
   assertx(isSmashableMovq(inst));
-  patchInstr(inst + smashableMovqLen() - sizeof(target), target);
+  patchTarget64(inst + smashableMovqLen() - 8, reinterpret_cast<TCA>(target));
 }
 
 void smashCmpq(TCA /*inst*/, uint32_t /*target*/) {
@@ -234,7 +234,7 @@ void smashCmpq(TCA /*inst*/, uint32_t /*target*/) {
 void smashCall(TCA inst, TCA target) {
   assertx(isSmashableCall(inst));
   // Note: The target is not at the end of the smashableCall.
-  patchInstr(inst + (1 * 4), target);
+  patchTarget64(inst + (1 * 4), target);
 }
 
 void smashJmp(TCA inst, TCA target) {
@@ -245,15 +245,13 @@ void smashJmp(TCA inst, TCA target) {
   if (target > inst && target - inst <= smashableJmpLen()) {
     target = inst + smashableJmpLen();
   }
-  auto const t32 = makeTCA32(target);
-  patchInstr(inst + smashableJmpLen() - sizeof(t32), t32);
+  patchTarget32(inst + smashableJmpLen() - 4, target);
 }
 
 void smashJcc(TCA inst, TCA target) {
   assertx(isSmashableJcc(inst));
   if (smashableJccTarget(inst) != target) {
-    auto const t32 = makeTCA32(target);
-    patchInstr(inst + smashableJccLen() - sizeof(t32), t32);
+    patchTarget32(inst + smashableJccLen() - 4, target);
   }
 }
 
@@ -295,8 +293,7 @@ TCA smashableJmpTarget(TCA inst) {
   if (isSmashableJmp(inst)) {
     assertx((reinterpret_cast<uintptr_t>(target) & 3) == 0);
     const uint32_t target32 = *reinterpret_cast<uint32_t*>(target);
-    const uint64_t target64 = target32;
-    return reinterpret_cast<TCA>(target64);
+    return reinterpret_cast<TCA>(target32);
   }
   return nullptr;
 }
@@ -312,8 +309,7 @@ TCA smashableJccTarget(TCA inst) {
   if (isSmashableJcc(inst)) {
     assertx((reinterpret_cast<uintptr_t>(target) & 3) == 0);
     const uint32_t target32 = *reinterpret_cast<uint32_t*>(target);
-    const uint64_t target64 = target32;
-    return reinterpret_cast<TCA>(target64);
+    return reinterpret_cast<TCA>(target32);
   }
   return nullptr;
 }
@@ -345,8 +341,7 @@ TCA getSmashableFromTargetAddr(TCA addr) {
   using namespace vixl;
 
   const uint32_t target32 = *reinterpret_cast<uint32_t*>(addr);
-  const uint64_t target64 = target32;
-  auto target = reinterpret_cast<TCA>(target64);
+  auto target = reinterpret_cast<TCA>(target32);
 
   auto inst = addr - 3 * kInstructionSize;
   if (smashableJccTarget(inst) == target) return inst;

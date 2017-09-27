@@ -441,17 +441,17 @@ static CodeAddress toReal(Venv& env, CodeAddress a) {
 void Vgen::patch(Venv& env) {
   for (auto& p : env.jmps) {
     auto addr = toReal(env, p.instr);
-    auto target =  makeTCA32(env.addrs[p.target]);
+    auto target = env.addrs[p.target];
     assertx(target);
     // Patch the 32 bit target following the LDR and BR
-    patchInstr(addr + 2 * 4, target);
+    patchTarget32(addr + 2 * 4, target);
   }
   for (auto& p : env.jccs) {
     auto addr = toReal(env, p.instr);
-    auto target =  makeTCA32(env.addrs[p.target]);
-    assertx(target);
+    auto target = env.addrs[p.target];
+    assertx(p.target);
     // Patch the 32 bit target following the B.<CC>, LDR, and BR
-    patchInstr(addr + 3 * 4, target);
+    patchTarget32(addr + 3 * 4, target);
   }
 }
 
@@ -761,7 +761,7 @@ void Vgen::emit(const jcc& i) {
     a->Ldr(rAsm_w, &data);
     a->Br(rAsm);
     a->bind(&data);
-    a->dc32(makeTCA32(a->frontier()));
+    a->dc32(makeTarget32(a->frontier()));
     a->bind(&skip);
   }
   emit(jmp{i.targets[0]});
@@ -786,7 +786,7 @@ void Vgen::emit(const jmp& i) {
   a->Ldr(rAsm_w, &data);
   a->Br(rAsm);
   a->bind(&data);
-  a->dc32(makeTCA32(a->frontier()));
+  a->dc32(makeTarget32(a->frontier()));
 }
 
 void Vgen::emit(const jmpi& i) {
@@ -803,7 +803,7 @@ void Vgen::emit(const jmpi& i) {
     a->Ldr(rAsm_w, &data);
     a->Br(rAsm);
     a->bind(&data);
-    a->dc32(makeTCA32(i.target));
+    a->dc32(makeTarget32(i.target));
   }
 }
 
@@ -827,7 +827,7 @@ void Vgen::emit(const leap& i) {
   a->Ldr(W(i.d), &imm_data);
   a->B(&after_data);
   a->bind(&imm_data);
-  a->dc32(makeTCA32(i.s.r.disp));
+  a->dc32(makeTarget32(i.s.r.disp));
   a->bind(&after_data);
 }
 

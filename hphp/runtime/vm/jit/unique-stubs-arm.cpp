@@ -223,7 +223,7 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
   a.Ldr(rAsm_w, &target_data);
   a.Br(rAsm);
   a.bind(&target_data);
-  a.dc32(makeTCA32(us.enterTCExit));
+  a.dc32(makeTarget32(us.enterTCExit));
 
   cb.sync(begin);
   return begin;

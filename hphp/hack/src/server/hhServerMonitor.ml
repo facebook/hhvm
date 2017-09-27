@@ -24,6 +24,11 @@ module SP = ServerProcess
 module SM = ServerMonitor.Make_monitor
   (HhServerMonitorConfig.HhServerConfig) (HhMonitorInformant);;
 
+let make_tmp_dir () =
+  let tmpdir = Path.make (Tmp.temp_dir GlobalConfig.tmp_dir "files") in
+  Relative_path.set_path_prefix Relative_path.Tmp tmpdir
+
+
 (** Main method of the server monitor daemon. The daemon is responsible for
  * listening to socket requests from hh_client, checking Build ID, and relaying
  * requests to the typechecker process. *)
@@ -48,6 +53,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
   end;
 
   ignore @@ Sys_utils.setsid ();
+  ignore (make_tmp_dir());
   ignore (Hhi.get_hhi_root());
   Relative_path.set_path_prefix Relative_path.Root www_root;
 

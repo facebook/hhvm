@@ -58,10 +58,9 @@ let monitor_daemon_main (options: ServerArgs.options) =
   Relative_path.set_path_prefix Relative_path.Root www_root;
 
   let config, local_config  =
-   ServerConfig.(load filename options) in
-  HackEventLogger.set_lazy_levels
-   (local_config.ServerLocalConfig.lazy_parse)
-   (local_config.ServerLocalConfig.lazy_init);
+    ServerConfig.(load filename options) in
+  if local_config.ServerLocalConfig.incremental_init then
+    HackEventLogger.set_incremental_init ();
   HackEventLogger.set_search_chunk_size
     local_config.ServerLocalConfig.search_chunk_size;
 

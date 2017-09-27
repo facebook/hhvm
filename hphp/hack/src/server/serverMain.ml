@@ -462,8 +462,7 @@ let setup_server ~informant_managed options handle =
     cpu_priority;
     io_priority;
     enable_on_nfs;
-    lazy_parse;
-    lazy_init;
+    incremental_init;
     search_chunk_size;
     load_script_config;
     _
@@ -479,8 +478,7 @@ let setup_server ~informant_managed options handle =
     init_id
     informant_managed
     (Unix.gettimeofday ())
-    lazy_parse
-    lazy_init
+    incremental_init
     saved_state_load_type
     use_sql
     search_chunk_size;

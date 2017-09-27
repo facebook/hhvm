@@ -362,6 +362,7 @@ module ServerInitCommon = struct
     ~f: (fun fn names ->
       SearchServiceRunner.update (fn, (SearchServiceRunner.Fast names));
     );
+    HackEventLogger.update_search_end t;
     Hh_logger.log_duration "Loading search indices" t
 
 
@@ -669,6 +670,7 @@ module ServerIncrementalInit : InitKind = struct
       ~out: ( tmp_dir ^ "%p")
       ~files: dirty_file_paths_list
       ~repo: (Path.to_string root) in
+    HackEventLogger.send_hg_end t;
     pid, Hh_logger.log_duration "Send hg cat command" t
 
   (* Wait for hg cat command to finish *)
@@ -681,8 +683,10 @@ module ServerIncrementalInit : InitKind = struct
       (* Errors don't really matter here, at worst we are just parsing empty
         files and we'll get the real ones during incremental mode *)
       Hh_logger.exc
-        ~prefix:"Exception with hg, continuing: "  err
+        ~prefix:"Exception with hg, continuing: "  err;
+      HackEventLogger.hg_cat_exn err
       end;
+    HackEventLogger.wait_hg_end t;
     Hh_logger.log_duration "Extra time waiting for hg cat" t
 
 
@@ -727,7 +731,6 @@ module ServerIncrementalInit : InitKind = struct
         Relative_path.Set.elements dirty_files in
       let dirty_file_paths_list =
         List.map dirty_file_list (Relative_path.suffix) in
-
       (* Send the hg cat command *)
       let pid, t = send_hg_cat_command
         root corresponding_base_revision dirty_file_paths_list t in

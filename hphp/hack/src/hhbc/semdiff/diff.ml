@@ -503,6 +503,8 @@ let class_is_abstract_comparer =
   wrap Hhas_class.is_abstract (fun _f s -> s) (flag_comparer "abstract")
 let class_is_interface_comparer =
   wrap Hhas_class.is_interface (fun _f s -> s) (flag_comparer "interface")
+let class_is_top_comparer =
+  wrap Hhas_class.is_top (fun _f s -> s) (flag_comparer "top")
 let class_is_trait_comparer =
   wrap Hhas_class.is_trait (fun _f s -> s) (flag_comparer "trait")
 let class_is_xhp_comparer =
@@ -519,7 +521,7 @@ let class_flags_comparer =
  List.fold_left (fun c1 c2 -> join (fun s1 s2 -> s1 ^ " " ^ s2) c1 c2)
   class_is_final_comparer
   [class_is_abstract_comparer; class_is_interface_comparer;
-   class_is_trait_comparer; class_is_xhp_comparer]
+   class_is_top_comparer; class_is_trait_comparer; class_is_xhp_comparer]
 
 let class_attributes_flags_comparer =
  join (fun s1 s2 -> "[" ^ s1 ^ " " ^ s2 ^ "]")

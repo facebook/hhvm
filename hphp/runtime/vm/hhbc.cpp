@@ -712,7 +712,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
   it += sizeof(Offset);                                         \
 } while (false)
 
-#define READV() folly::format(&out, " ()", decode_iva(it));
+#define READV() folly::format(&out, " {}", decode_iva(it));
 
 #define READLA() folly::format(&out, " L:{}", decode_iva(it));
 

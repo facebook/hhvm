@@ -1,0 +1,8 @@
+Warning: array_map() expects parameter 1 to be a valid callback in %s/bad-callable.php on line 6
+NULL
+
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/bad-callable.php on line 7
+NULL
+
+Warning: array_reduce() expects parameter 2 to be a valid callback in %s/bad-callable.php on line 8
+NULL

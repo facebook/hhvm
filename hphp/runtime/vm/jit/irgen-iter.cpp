@@ -277,7 +277,7 @@ void emitIterBreak(IRGS& env, Offset relOffset, const ImmVector& iv) {
 }
 
 void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
-  auto const src        = popC(env);
+  auto const src        = topC(env);
   auto const type       = src->type();
 
   if (type <= TObj) {
@@ -287,6 +287,7 @@ void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
     gen(env, StCufIterFunc, IterId(iterId), fp(env), func);
     gen(env, StCufIterCtx, IterId(iterId), fp(env), src);
     gen(env, StCufIterInvName, IterId(iterId), fp(env), cns(env, TNullptr));
+    discard(env, 1);
     return;
   }
 
@@ -299,9 +300,11 @@ void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
       src,
       fp(env)
     );
+    discard(env, 1);
     decRef(env, src);
     implCondJmp(env, bcOff(env) + relOffset, true, res);
   } else {
+    discard(env, 1);
     decRef(env, src);
     jmpImpl(env, bcOff(env) + relOffset);
   }

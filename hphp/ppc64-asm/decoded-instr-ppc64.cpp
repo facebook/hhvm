@@ -35,7 +35,7 @@ namespace ppc64_asm {
 
 bool DecodedInstruction::couldBeNearBranch() {
   assert(isFarBranch());
-  ptrdiff_t diff = farBranchTarget() - m_ip;
+  ptrdiff_t diff = farBranchTarget() - m_base;
 
   // assert already stated it's a Far branch, but depending if it's conditional
   // or not, an additional range can be used.
@@ -44,13 +44,13 @@ bool DecodedInstruction::couldBeNearBranch() {
 
 uint8_t* DecodedInstruction::nearBranchTarget() const {
   assert(isNearBranch());
-  auto address = reinterpret_cast<uint64_t>(m_ip) + m_dinfo.branchOffset();
+  auto address = reinterpret_cast<uint64_t>(m_base) + m_dinfo.branchOffset();
   return reinterpret_cast<uint8_t*>(address);
 }
 
 bool DecodedInstruction::setNearBranchTarget(uint8_t* target) {
   if (!isNearBranch()) return false;
-  ptrdiff_t diff = target - m_ip;
+  ptrdiff_t diff = target - m_base;
   bool uncond = m_dinfo.isOffsetBranch(AllowCond::OnlyUncond);
   if (fitsOnNearBranch(diff, uncond)) {
     auto pinstr = reinterpret_cast<PPC64Instr*>(m_ip);
@@ -203,7 +203,7 @@ bool DecodedInstruction::setFarBranchTarget(uint8_t* target,
   a.branchFar(target, bp, ImmType::TocOnly, smashable);
 
   // Check if something was overwritten
-  if ((a.frontier() - m_ip) > m_size) {
+  if ((a.frontier() - m_base) > m_size) {
     return false;
   }
 

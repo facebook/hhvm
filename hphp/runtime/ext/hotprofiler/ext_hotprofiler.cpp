@@ -174,7 +174,7 @@ static int64_t* get_cpu_frequency_from_file(const char *file, int ncpus)
 static int64_t* get_cpu_frequency_from_cpufreq_files(int ncpus)
 {
   char line[MAX_LINELENGTH];
-  char file[MAX_LINELENGTH];
+  char file[PATH_MAX];
   int64_t* freqs = new int64_t[ncpus];
   for (int i = 0; i < ncpus; ++i) {
     freqs[i] = 0;
@@ -224,7 +224,7 @@ public:
   // The number of logical CPUs this machine has.
   int m_cpu_num;
   // Store the cpu frequency.  Get it from /proc/cpuinfo or
-  //   /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_max_freq if we can.
+  // /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_max_freq if we can.
   int64_t* m_cpu_frequencies;
 
   MachineInfo() {

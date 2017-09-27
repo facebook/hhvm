@@ -1,0 +1,43 @@
+
+.main {
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > f() {
+  .numiters 1;
+  .declvars $tests $str $key $e;
+  CGetL $tests
+  IterInitK 0 L0 $key $str
+  .try_fault F4 {
+  # Labels occurring immediately before and immediately after
+  # a scope-block are semantically equivalent
+  L3:
+    .try {
+      String "empty"
+      Print
+      PopC
+      Jmp L1
+    } .catch {
+      Dup
+      InstanceOfD "Exception"
+      JmpZ L2
+      SetL $e
+      PopC
+      String "Exception"
+      Print
+      PopC
+      Jmp L1
+    L2:
+      Throw
+    }
+  L1:
+    IterNextK 0 L3 $key $str
+  }
+L0:
+  Null
+  RetC
+F4:
+  IterFree 0
+  Unwind
+}

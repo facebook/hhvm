@@ -307,7 +307,8 @@ let function_is_generator_comparer = wrap Hhas_function.is_generator
                                   (fun _f s -> s) (flag_comparer "isGenerator")
 let function_is_pair_generator_comparer = wrap Hhas_function.is_pair_generator
                               (fun _f s -> s) (flag_comparer "isPairGenerator")
-
+let method_is_abstract_comparer = wrap Hhas_method.is_abstract
+                              (fun _f s -> s) (flag_comparer "isAbstract")
 let method_is_protected_comparer = wrap Hhas_method.is_protected
                               (fun _f s -> s) (flag_comparer "isProtected")
 let method_is_public_comparer = wrap Hhas_method.is_public
@@ -326,6 +327,8 @@ let method_is_pair_generator_comparer = wrap Hhas_method.is_pair_generator
                               (fun _f s -> s) (flag_comparer "isPairGenerator")
 let method_is_closure_body_comparer = wrap Hhas_method.is_closure_body
                               (fun _f s -> s) (flag_comparer "isClosureBody")
+let method_no_injection_comparer = wrap Hhas_method.no_injection
+                              (fun _f s -> s) (flag_comparer "noInjection")
 
 (* Could have used fold earlier here *)
 let method_flags_comparer =
@@ -333,7 +336,8 @@ List.fold_left (join (fun s1 s2 -> s1 ^ s2)) method_is_protected_comparer
 [method_is_public_comparer; method_is_private_comparer;
  method_is_static_comparer; method_is_final_comparer; method_is_async_comparer;
  method_is_generator_comparer; method_is_pair_generator_comparer;
- method_is_closure_body_comparer]
+ method_is_closure_body_comparer; method_is_abstract_comparer;
+ method_no_injection_comparer]
 
 let function_flags_comparer =
  join (fun s1 s2 -> s1 ^ " " ^ s2)

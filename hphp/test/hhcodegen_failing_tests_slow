@@ -15,7 +15,11 @@ slow/async/return-annotation-6.php
 slow/async/return-annotation-7.php
 slow/break_statement/badexp.php
 slow/break_statement/zero.php
+slow/class_constant/abstract_const.php
 slow/class_constant/abstract_const2.php
+slow/class_constant/abstract_const3.php
+slow/class_constant/abstract_const5.php
+slow/class_constant/abstract_const6.php
 slow/class_constant/abstract_const7.php
 slow/class_constant/globals-array.php
 slow/class_constant/reflective_constant.php

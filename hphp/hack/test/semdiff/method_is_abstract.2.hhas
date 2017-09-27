@@ -1,0 +1,28 @@
+# starts here
+
+.main {
+  DefCls 0
+  DefCls 1
+  Int 1
+  RetC
+}
+
+.class [abstract] Foo {
+  .method [public abstract] <"HH\\void" N  > openFoo() {
+    String "Cannot call abstract method Foo::openFoo()"
+    Fatal RuntimeOmitFrame
+  }
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+.class Bar extends Foo {
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+# ends here

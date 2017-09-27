@@ -5,6 +5,7 @@ quick/abs_codegen.php
 quick/all_type_comparison_test.php
 quick/backtick.php
 quick/class_constant.php
+quick/class_constants.php
 quick/closure_recursive_bad.php
 quick/closure_use_this.php
 quick/constIntToString.php

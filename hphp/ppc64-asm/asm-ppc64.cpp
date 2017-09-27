@@ -619,7 +619,8 @@ Label::~Label() {
     assert(m_a && m_address && "Label had jumps but was never set");
   }
   for (auto& ji : m_toPatch) {
-    ji.a->patchBranch(ji.addr, m_address);
+    assert(ji.a->contains(ji.addr));
+    ji.a->patchBranch(ji.a->toDestAddress(ji.addr), m_address);
   }
 }
 

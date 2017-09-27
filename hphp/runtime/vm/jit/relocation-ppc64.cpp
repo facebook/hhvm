@@ -45,6 +45,7 @@ struct JmpOutOfRange : std::exception {};
 size_t relocateImpl(RelocationInfo& rel,
                     CodeBlock& dest_block,
                     TCA start, TCA end,
+                    CodeBlock& src_block,
                     CGMeta& fixups,
                     TCA* exit_addr,
                     JmpSet& far_jmps,
@@ -58,12 +59,12 @@ size_t relocateImpl(RelocationInfo& rel,
   try {
     while (src != end) {
       assertx(src < end);
-      DecodedInstruction di(src);
+      DecodedInstruction di(src_block.toDestAddress(src), src);
       asm_count++;
 
       TCA dest = dest_block.frontier();
-      dest_block.bytes(di.size(), src);
-      DecodedInstruction d2(dest, di.size());
+      dest_block.bytes(di.size(), src_block.toDestAddress(src));
+      DecodedInstruction d2(dest_block.toDestAddress(dest), dest, di.size());
       if (di.isNearBranch()) {
         if (di.isBranch(ppc64_asm::AllowCond::OnlyUncond)) {
           jmp_dest = di.nearBranchTarget();
@@ -78,7 +79,7 @@ size_t relocateImpl(RelocationInfo& rel,
 
           // Near branch will be widen to Far branch. Update d2 in order to be
           // able to read more bytes than only the Near branch
-          d2 = DecodedInstruction(dest);
+          d2 = DecodedInstruction(dest_block.toDestAddress(dest), dest);
           d2.widenBranch(new_target);
 
           // widening a branch makes the dest instruction bigger
@@ -188,10 +189,10 @@ size_t relocateImpl(RelocationInfo& rel,
       src = start;
       bool ok = true;
       while (src != end) {
-        DecodedInstruction di(src);
+        DecodedInstruction di(src_block.toDestAddress(src), src);
         TCA dest = rel.adjustedAddressAfter(src);
         // Avoid set max_size as it would fail when a branch is widen.
-        DecodedInstruction d2(dest);
+        DecodedInstruction d2(dest_block.toDestAddress(dest), dest);
         if (di.isNearBranch()) {
           TCA old_target = di.nearBranchTarget();
           TCA adjusted_target = rel.adjustedAddressAfter(old_target);
@@ -353,8 +354,24 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
   }
 }
 
-void adjustMetaDataForRelocation(RelocationInfo& /*rel*/, AsmInfo* /*asmInfo*/,
-                                 CGMeta& /*meta*/) {}
+void adjustMetaDataForRelocation(RelocationInfo& rel, AsmInfo* /*asmInfo*/,
+                                 CGMeta& meta) {
+  for (auto& li : meta.literals) {
+    if (auto adjusted = rel.adjustedAddressAfter((TCA)li.second)) {
+      li.second = (uint64_t*)adjusted;
+    }
+  }
+
+  decltype(meta.codePointers) updatedCP;
+  for (auto cp : meta.codePointers) {
+    if (auto adjusted = (TCA*)rel.adjustedAddressAfter((TCA)cp)) {
+      updatedCP.emplace(adjusted);
+    } else {
+      updatedCP.emplace(cp);
+    }
+  }
+  updatedCP.swap(meta.codePointers);
+}
 
 /*
  * Adjust potentially live references that point into the relocated
@@ -410,14 +427,14 @@ void findFixups(TCA start, TCA end, CGMeta& meta) {
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& dest_block,
                 TCA start, TCA end,
-                CodeBlock&,
+                DataBlock& src_block,
                 CGMeta& fixups,
                 TCA* exit_addr,
                 AreaIndex) {
   JmpSet far_jmps, near_jmps;
   while (true) {
     try {
-      return relocateImpl(rel, dest_block, start, end,
+      return relocateImpl(rel, dest_block, start, end, src_block,
                           fixups, exit_addr, far_jmps, near_jmps);
     } catch (JmpOutOfRange& j) {
     }

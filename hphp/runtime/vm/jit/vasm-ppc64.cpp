@@ -69,6 +69,19 @@ namespace {
 static_assert(folly::kIsLittleEndian,
   "Code contains little-endian specific optimizations.");
 
+static CodeAddress toReal(Venv& env, CodeAddress a) {
+  if (env.text.main().code.contains(a)) {
+    return env.text.main().code.toDestAddress(a);
+  }
+  if (env.text.cold().code.contains(a)) {
+    return env.text.cold().code.toDestAddress(a);
+  }
+  if (env.text.frozen().code.contains(a)) {
+    return env.text.frozen().code.toDestAddress(a);
+  }
+  return a;
+}
+
 struct Vgen {
   explicit Vgen(Venv& env)
     : env(env)
@@ -84,11 +97,11 @@ struct Vgen {
   static void patch(Venv& env) {
     for (auto& p : env.jmps) {
       assertx(env.addrs[p.target]);
-      Assembler::patchBranch(p.instr, env.addrs[p.target]);
+      Assembler::patchBranch(toReal(env, p.instr), env.addrs[p.target]);
     }
     for (auto& p : env.jccs) {
       assertx(env.addrs[p.target]);
-      Assembler::patchBranch(p.instr, env.addrs[p.target]);
+      Assembler::patchBranch(toReal(env, p.instr), env.addrs[p.target]);
     }
   }
 
@@ -695,7 +708,7 @@ void Vgen::emit(const mcprep& i) {
    */
   auto const mov_addr = emitSmashableMovq(a.code(), env.meta, 0, r64(i.d));
   auto const imm = reinterpret_cast<uint64_t>(mov_addr);
-  smashMovq(mov_addr, (imm << 1) | 1);
+  smashMovq(a.toDestAddress(mov_addr), (imm << 1) | 1);
 
   env.meta.addressImmediates.insert(reinterpret_cast<TCA>(~imm));
 }

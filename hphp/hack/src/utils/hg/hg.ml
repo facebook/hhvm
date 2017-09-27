@@ -14,6 +14,32 @@ module Hg_actual = struct
 
   include Hg_sig.Types
 
+
+(** Given a list of files and their revisions, saves the files to the output
+ * directory. For example,
+ * get_old_version_of_files ~rev:"X" ~files:["file1.php"]
+ * ~out:"/tmp/hh_server/%s" ~repo:"~/www"
+ * runs the command
+ *
+ * hg cat -r X file1.php -o "/tmp/hh_server/%s" --cwd ~/www
+ *
+ * which saves the version of file1.php at revision X in directory
+ * /tmp/hh_server/file1.php
+ *)
+let get_old_version_of_files ~rev ~files ~out ~repo =
+  let process = Process.exec "hg" ([
+    "cat";
+    "-r";
+    "r"^rev;
+    ] @ files @ [
+    "-o";
+    out;
+    "--cwd";
+    repo;
+  ])
+  in
+  Future.make process ignore
+
 (** Returns the closest SVN ancestor in master to the given hg rev.
  *
  * hg log -r 'ancestor(master,hg_rev)' -T '{svnrev}\n'
@@ -133,6 +159,8 @@ module Hg_mock = struct
     Hashtbl.find Mocking.closest_svn_ancestor hg_rev
   let files_changed_since_svn_rev _ _ = !Mocking.files_changed_since_svn_rev
   let update_to_base_rev _ _ = Future.of_value ()
+  let get_old_version_of_files ~rev:_ ~files:_ ~out:_ ~repo:_ = Future.of_value ()
+
 
 end;;
 

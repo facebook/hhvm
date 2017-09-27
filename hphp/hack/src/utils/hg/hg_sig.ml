@@ -7,6 +7,13 @@ end
 module type S = sig
   include module type of Types
 
+  val get_old_version_of_files :
+    rev:svn_rev ->
+    files:string list ->
+    out:string ->
+    repo:string ->
+    unit Future.t
+
   val current_working_copy_hg_rev : string ->
     (** bool indicates if there are working copy changes. *)
     (hg_rev * bool) Future.t

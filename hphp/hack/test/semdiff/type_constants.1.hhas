@@ -1,0 +1,17 @@
+# starts here
+
+.main {
+  DefCls 0
+  Int 1
+  RetC
+}
+
+.class [final] TypeConstants {
+  .const TFacerInfo isType = """a:3:{s:21:\"allows_unknown_fields\";b:1;s:4:\"kind\";i:14;s:6:\"fields\";a:5:{s:12:\"people_count\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}s:9:\"has_smile\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:2;}}s:8:\"has_blur\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:2;}}s:11:\"eyes_closed\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:2;}}s:16:\"suggested_people\";a:1:{s:5:\"value\";a:2:{s:4:\"kind\";i:12;s:13:\"generic_types\";a:2:{i:0;a:1:{s:4:\"kind\";i:1;}i:1;a:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:15:\"EntPersonalUser\";}}}}}}""";
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+# ends here

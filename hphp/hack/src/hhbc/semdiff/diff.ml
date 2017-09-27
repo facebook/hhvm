@@ -453,6 +453,22 @@ let class_attributes_comparer =
   wrap Hhas_class.attributes (fun _ s -> s)
     (list_comparer attribute_comparer " ")
 
+let type_constants_alist c = List.map
+  (fun f -> (Hhas_type_constant.name f, Hhas_type_constant.initializer_t f))
+  (Hhas_class.type_constants c)
+
+let class_constants_alist c = List.map
+  (fun f -> (Hhas_constant.name f, Hhas_constant.value f))
+  (Hhas_class.constants c)
+
+let class_constants_comparer =
+  wrap class_constants_alist (fun _ s -> s)
+    (alist_comparer (option_comparer typed_value_comparer) (fun cname -> cname))
+
+let class_type_constants_comparer =
+  wrap type_constants_alist (fun _ s -> s)
+    (alist_comparer (option_comparer typed_value_comparer) (fun cname -> cname))
+
 let unmangled_name_comparer =
  wrap Hhbc_string_utils.Closures.unmangle_closure
    (fun _ s -> s) (option_comparer string_comparer)
@@ -511,10 +527,24 @@ let class_header_comparer =
   class_attributes_flags_comparer
   class_name_base_implements_comparer
 
-(* TODO: actually plumb in the following:
-    class_uses_comparer
-   class_enum_type_comparer
-*)
+let class_use_alias_string (a, b, c, d) =
+  let a' = match a with
+  | None -> ""
+  | Some a -> a ^ "::" in
+   let c' = match c with
+   | None -> ""
+   | Some c -> " as " ^ c in
+   let d' = match d with
+   | None -> ""
+   | Some d -> Ast_defs.string_of_kind d in
+    a' ^ b ^ c' ^ d'
+
+let class_use_alias_comparer =
+  wrap class_use_alias_string (fun _ s -> s) string_comparer
+
+let class_use_aliases_comparer =
+  wrap Hhas_class.class_use_aliases (fun _f s -> s)
+    (list_comparer class_use_alias_comparer " ")
 
 let property_is_private_comparer =
   wrap Hhas_property.is_private (fun _f s -> s) (flag_comparer "private")
@@ -734,6 +764,7 @@ let functions_alist_comparer =
 let methods_alist_comparer perm =
  alist_comparer (method_header_body_comparer perm) (fun mname -> mname)
 
+
 let class_methods_comparer perm = wrap methods_alist_of_class
                            (fun _c s -> s) (methods_alist_comparer perm)
 
@@ -742,15 +773,26 @@ let class_properties_methods_comparer perm =
       (class_properties_comparer perm)
       (class_methods_comparer perm)
 
+let class_properties_methods_use_aliases_comparer perm =
+ join (fun s1 s2 -> s1 ^ s2)
+      (class_properties_methods_comparer perm)
+      class_use_aliases_comparer
+
+let class_constants_type_constants_comparer =
+ join (fun s1 s2 -> s1 ^ s2)
+      class_constants_comparer
+      class_type_constants_comparer
+
 let class_header_properties_methods_comparer perm =
  join (fun s1 s2 -> s1 ^ "{\n" ^ s2 ^ "}")
    class_header_comparer
-   (class_properties_methods_comparer perm)
-
-
+   (class_properties_methods_use_aliases_comparer perm)
 
 (* TODO: add all the other bits to classes *)
-let class_comparer perm = class_header_properties_methods_comparer perm
+let class_comparer perm =
+ join (fun s1 s2 -> s1 ^ s2)
+   class_constants_type_constants_comparer
+   (class_header_properties_methods_comparer perm)
 
 let program_top_functions_comparer = wrap top_functions_alist_of_program
                            (fun _p s -> s) functions_alist_comparer

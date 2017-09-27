@@ -1,0 +1,16 @@
+Semdiff succeeded
+comparing key SOME_CONSTANT
+comparing key ANOTHER_CONSTANT
+comparing key 86ctor
+Semdiff succeeded
+Distance = 2
+Size = 33
+Similarity = 94.12
+Edits = 
+
+for SOME_CONSTANT:
+- i:3;
++ s:15:\"Constant String\";
+for ANOTHER_CONSTANT:
+- s:15:\"Constant String\";
++ s:17:\"Constant String 2\";

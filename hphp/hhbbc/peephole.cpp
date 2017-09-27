@@ -33,6 +33,11 @@ void BasicPeephole::push_back(const Bytecode& next) {
   if (next.op == Op::Nop) return;
   if (m_next.size()) {
     auto& cur = m_next.back();
+    auto update_cur = [&] (Bytecode bc) {
+      auto srcLoc = cur.srcLoc;
+      cur = std::move(bc);
+      cur.srcLoc = srcLoc;
+    };
 
     if ((cur.op == Op::RGetCNop && next.op == Op::UnboxRNop) ||
         (next.op == Op::PopC && (cur.op == Op::Dup ||
@@ -48,7 +53,7 @@ void BasicPeephole::push_back(const Bytecode& next) {
 
     if (cur.op == Op::Null &&
         (next.op == Op::Same || next.op == Op::NSame)) {
-      cur = bc::IsTypeC { IsTypeOp::Null };
+      update_cur(bc::IsTypeC { IsTypeOp::Null });
       if (next.op == Op::NSame) {
         m_next.push_back(bc::Not {});
       }
@@ -64,7 +69,7 @@ void BasicPeephole::push_back(const Bytecode& next) {
           cur.op == Op::CGetL ? cur.CGetL.loc1 : cur.CGetL2.loc1, IsTypeOp::Null
         };
         if (next.op == Op::NSame) {
-          cur = bc::Not {};
+          update_cur(bc::Not {});
         } else {
           m_next.pop_back();
         }
@@ -75,9 +80,9 @@ void BasicPeephole::push_back(const Bytecode& next) {
     if (cur.op == Op::Not &&
         (next.op == Op::JmpZ || next.op == Op::JmpNZ)) {
       if (next.op == Op::JmpZ) {
-        cur = bc::JmpNZ { next.JmpZ.target };
+        update_cur(bc::JmpNZ { next.JmpZ.target });
       } else {
-        cur = bc::JmpZ { next.JmpNZ.target };
+        update_cur(bc::JmpZ { next.JmpNZ.target });
       }
       return;
     }

@@ -43,6 +43,10 @@ let process_parse_result
 
   if file_mode <> None then begin
     let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
+    (* If this file was parsed from a tmp directory,
+      save it to the main directory instead *)
+    let fn = if Relative_path.prefix fn =
+      Relative_path.Tmp then Relative_path.to_root fn else fn in
     (* We only have to write to the disk heap on initialization, and only *)
     (* if quick mode is on: otherwise Full Asts means the ParserHeap will *)
     (* never use the DiskHeap, and the Ide services update DiskHeap directly *)

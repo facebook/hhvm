@@ -33,6 +33,7 @@ watchman_subscribe_v2 = true
 lazy_decl = true
 lazy_parse = true
 lazy_init = true
+incremental_init = true
 enable_fuzzy_search = false
 """
             )

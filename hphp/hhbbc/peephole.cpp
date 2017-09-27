@@ -87,6 +87,12 @@ void BasicPeephole::push_back(const Bytecode& next) {
       return;
     }
 
+    if (cur.op == Op::PopL && next.op == Op::PushL &&
+        cur.PopL.loc1 == next.PushL.loc1) {
+      update_cur(bc::UnsetL { cur.PopL.loc1 });
+      return;
+    }
+
     if (!m_ctx.func->isGenerator &&
         m_next.size() > 1 &&
         cur.op == Op::UnboxRNop &&

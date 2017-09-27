@@ -32,7 +32,7 @@ target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES} ${EZC_LINK_LIBRARIES} ${HRE_LI
 link_object_libraries(hhvm ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 if (GOLD_FOUND AND ENABLE_LD_GOLD)
   if (NOT IS_AARCH64)
-    set(EXEC_STACK "")
+    set(EXEC_STACK "-Wl,-z,execstack")
     set(ICF "-Wl,--icf=all")
   else()
     set(EXEC_STACK "-Wl,-z,noexecstack,--warn-execstack")

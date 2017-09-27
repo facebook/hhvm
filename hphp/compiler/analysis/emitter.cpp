@@ -6333,16 +6333,17 @@ bool EmitterVisitor::emitInlineGenva(
 ) {
   assert(call->isCallToFunction("genva"));
   const auto params = call->getParams();
-  if (!params) {
+  const auto num_params = params ? params->getCount() : 0;
+  if (!num_params) {
     e.Array(staticEmptyArray());
     return true;
   }
   if (params->containsUnpack()) {
     throw IncludeTimeFatalException(params, "do not use ...$args with genva()");
   }
-  const auto num_params = params->getCount();
-  assertx(num_params > 0);
-
+  if (num_params > ArrayData::MaxElemsOnStack) {
+    return false;
+  }
   for (auto i = int{0}; i < num_params; i++) {
     Label gwh, have_wh;
 

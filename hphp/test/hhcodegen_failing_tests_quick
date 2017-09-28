@@ -9,8 +9,6 @@ quick/defaultVals.php
 quick/dict/basic-getters.php
 quick/finally_break.php
 quick/float-overflow-literals.php
-quick/fsc01.php
-quick/fsc02.php
 quick/func2.php
 quick/func3.php
 quick/hh_bad_end.php

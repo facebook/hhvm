@@ -307,7 +307,6 @@ slow/traits/2070.php
 slow/traits/__class__.php
 slow/traits/duplicate_require.php
 slow/traits/require_constraint_iface_implements_error.php
-slow/traits/self_resolution.php
 slow/type_annotation/shape_typedef_with_multiple_optional_tokens.php
 slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_assertions/1857.php

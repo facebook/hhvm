@@ -344,7 +344,7 @@ and emit_maybe_classname env (p,name) with_string with_instr =
     | Some c when c.A.c_kind = A.Ctrait ->
       let get_cls =
         if name = SN.Classes.cSelf then instr_self else instr_parent in
-      with_instr get_cls
+      with_instr (gather [get_cls; instr_clsrefname])
     | Some c when name = SN.Classes.cSelf -> from_str (snd c.A.c_name)
     | Some c ->
         begin match c.A.c_extends with

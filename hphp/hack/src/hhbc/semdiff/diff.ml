@@ -747,10 +747,22 @@ let body_instrs_comparer = {
                  (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b)));
 }
 
-let body_comparer perm =
+let body_static_inits_comparer =
+  wrap Hhas_body.static_inits (fun _f s -> s)
+    (primitive_set_comparer (fun s -> s))
+
+let body_is_memoize_wrapper_comparer =
+  wrap Hhas_body.is_memoize_wrapper (fun _f s -> s) (flag_comparer "memoize")
+
+let body_iters_cls_ref_slots_decl_vars_instrs_comparer perm =
  join (fun s1 s2 -> s1 ^ "\n" ^ s2)
       (body_iters_cls_ref_slots_decl_vars_comparer perm)
       body_instrs_comparer
+
+let body_comparer perm =
+ List.fold_left (join (fun s1 s2 -> s1 ^ s2)) body_is_memoize_wrapper_comparer
+  [body_static_inits_comparer;
+   body_iters_cls_ref_slots_decl_vars_instrs_comparer perm]
 
 let function_body_comparer =
   wrap Hhas_function.body (fun _ s -> s) (body_comparer [])

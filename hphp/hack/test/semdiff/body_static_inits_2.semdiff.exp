@@ -1,0 +1,20 @@
+Semdiff succeeded
+comparing key f
+Semdiff succeeded
+comparing key bar
+Semdiff succeeded
+comparing key 86ctor
+Semdiff succeeded
+Distance = 8
+Size = 451
+Similarity = 98.23
+Edits = 
+
++ g
++ f
++ e
++ d
++ $d
++ $e
++ $f
++ $g

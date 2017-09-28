@@ -1,0 +1,88 @@
+# starts here
+
+# This file and the corresponding body_memoize_wrapper.2.hhas tests that semdiff
+# can detect a difference between the output of the same PHP method with and without
+# the <<__Memoize>> attribute. The body_memoize_wrapper.2.hhas shows the PHP
+# method without the <<__Memoize>> attribute.
+
+.main {
+  DefCls 0
+  Int 1
+  RetC
+}
+
+.class [final] MemoizeWrappers {
+  .property [private static no_serialize] <"" N  > get$guarded_single$memoize_cache$guard =
+    """b:0;""";
+  .property [private static no_serialize] <"" N  > get$guarded_single$memoize_cache =
+    """N;""";
+  .method [private static "__Memoize"("""a:0:{}""")] <"HH\\this" "HH\\this" hh_type extended_hint > get$memoize_impl() {
+    FPushCtorD 0 "MemoizeWrappers"
+    FCall 0
+    PopR
+    VerifyRetTypeC
+    RetC
+  }
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+  .method [public static "__Memoize"("""a:0:{}""")] <"HH\\this" "HH\\this" hh_type extended_hint > get() {
+    .ismemoizewrapper;
+    .numclsrefslots 1;
+    Null
+    IsMemoType
+    JmpNZ L0
+    String "get$guarded_single$memoize_cache"
+    String "MemoizeWrappers"
+    ClsRefGetC 0
+    CGetS 0
+    Dup
+    IsTypeC Null
+    JmpNZ L1
+    RetC
+  L1:
+    PopC
+  L0:
+    Null
+    MaybeMemoType
+    JmpZ L2
+    String "get$guarded_single$memoize_cache$guard"
+    String "MemoizeWrappers"
+    ClsRefGetC 0
+    CGetS 0
+    JmpZ L2
+    Null
+    RetC
+  L2:
+    Null
+    IsMemoType
+    JmpNZ L3
+    String "get$guarded_single$memoize_cache"
+    String "MemoizeWrappers"
+    ClsRefGetC 0
+    FPushClsMethodD 0 "get$memoize_impl" "MemoizeWrappers"
+    FCall 0
+    UnboxR
+    SetS 0
+    Jmp L4
+  L3:
+    FPushClsMethodD 0 "get$memoize_impl" "MemoizeWrappers"
+    FCall 0
+    UnboxR
+  L4:
+    Null
+    MaybeMemoType
+    JmpZ L5
+    String "get$guarded_single$memoize_cache$guard"
+    String "MemoizeWrappers"
+    ClsRefGetC 0
+    True
+    SetS 0
+    PopC
+  L5:
+    RetC
+  }
+}
+
+# ends here

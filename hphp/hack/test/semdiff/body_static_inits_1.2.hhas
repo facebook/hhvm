@@ -1,0 +1,345 @@
+# /data/users/arkumar/fbsource/fbcode/hphp/test/slow/static_statement/1407.php starts here
+
+
+.filepath "/data/users/arkumar/fbsource/fbcode/hphp/test/slow/static_statement/1407.php";
+
+.main {
+  .numclsrefslots 1;
+  .declvars $a $b $c $d $e $f $g $h $i $v;
+  .static $a;
+  .static $b;
+  .static $c;
+  .static $d;
+  .static $e;
+  .static $f;
+  .static $g;
+  .static $h;
+  .static $i;
+  Int 2
+  StaticLocInit $a "a"
+  Int 3
+  StaticLocInit $b "b"
+  Int 2
+  StaticLocInit $c "c"
+  Int 2
+  StaticLocInit $d "d"
+  Int 1
+  StaticLocInit $e "e"
+  Int 1
+  StaticLocInit $f "f"
+  Null
+  StaticLocInit $g "g"
+  Null
+  StaticLocInit $h "h"
+  Null
+  StaticLocInit $i "i"
+  Null
+  StaticLocInit $i "i"
+  Jmp L0
+  Int 2
+  StaticLocInit $a "a"
+  Int 3
+  StaticLocInit $b "b"
+  Int 2
+  StaticLocInit $c "c"
+  Null
+  StaticLocInit $g "g"
+  Null
+  StaticLocInit $i "i"
+  Int 2
+  SetL $e
+  PopC
+  Jmp L1
+L0:
+  Int 2
+  StaticLocInit $d "d"
+  Null
+  StaticLocInit $h "h"
+  Int 2
+  SetL $f
+  PopC
+L1:
+  CGetL $a
+  Print
+  PopC
+  CGetL $b
+  Print
+  PopC
+  CGetL $c
+  Print
+  PopC
+  CGetL $d
+  Print
+  PopC
+  CGetL $e
+  Print
+  PopC
+  CGetL $f
+  Print
+  PopC
+  CGetL $g
+  Print
+  PopC
+  CGetL $h
+  Print
+  PopC
+  CGetL $i
+  Print
+  PopC
+  FPushFuncD 0 "f"
+  FCall 0
+  PopR
+  DefCls 0
+  String "a"
+  String "foo"
+  ClsRefGetC 0
+  CGetS 0
+  Print
+  PopC
+  String "b"
+  String "foo"
+  ClsRefGetC 0
+  CGetS 0
+  Print
+  PopC
+  FPushCtorD 0 "foo"
+  FCall 0
+  PopR
+  SetL $v
+  PopC
+  CGetL $v
+  FPushObjMethodD 0 "bar" NullThrows
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"" N  > f() {
+  .declvars $a $b $c $d $e $f $g $h $i;
+  .static $a;
+  .static $b;
+  .static $c;
+  .static $d;
+  .static $e;
+  .static $f;
+  .static $g;
+  .static $h;
+  .static $i;
+  Int 2
+  StaticLocInit $a "a"
+  Int 3
+  StaticLocInit $b "b"
+  Int 2
+  StaticLocInit $c "c"
+  Int 2
+  StaticLocInit $d "d"
+  Int 1
+  StaticLocInit $e "e"
+  Int 1
+  StaticLocInit $f "f"
+  Null
+  StaticLocInit $g "g"
+  Null
+  StaticLocInit $h "h"
+  Null
+  StaticLocInit $i "i"
+  Null
+  StaticLocInit $i "i"
+  Jmp L0
+  Int 2
+  StaticLocInit $a "a"
+  Int 3
+  StaticLocInit $b "b"
+  Int 2
+  StaticLocInit $c "c"
+  Null
+  StaticLocInit $g "g"
+  Null
+  StaticLocInit $i "i"
+  Int 2
+  SetL $e
+  PopC
+  Jmp L1
+L0:
+  Int 2
+  StaticLocInit $d "d"
+  Null
+  StaticLocInit $h "h"
+  Int 2
+  SetL $f
+  PopC
+L1:
+  CGetL $a
+  Print
+  PopC
+  CGetL $b
+  Print
+  PopC
+  CGetL $c
+  Print
+  PopC
+  CGetL $d
+  Print
+  PopC
+  CGetL $e
+  Print
+  PopC
+  CGetL $f
+  Print
+  PopC
+  CGetL $g
+  Print
+  PopC
+  CGetL $h
+  Print
+  PopC
+  CGetL $i
+  Print
+  PopC
+  Null
+  RetC
+}
+
+.class foo {
+  .property [public static] <"" N  > a =
+    """i:1;""";
+  .property [public static] <"" N  > b =
+    """i:2;""";
+  .property [public static] <"" N  > c =
+    """i:1;""";
+  .property [public static] <"" N  > d =
+    """i:1;""";
+  .property [public static] <"" N  > e =
+    """i:1;""";
+  .property [public static] <"" N  > f =
+    """i:1;""";
+  .method [public] <"" N  > bar() {
+    .numclsrefslots 1;
+    .declvars $a $b $c $d $e $f $g $h $i;
+    .static $a;
+    .static $b;
+    .static $c;
+    .static $d;
+    .static $e;
+    .static $f;
+    .static $g;
+    .static $h;
+    .static $i;
+    Int 2
+    StaticLocInit $a "a"
+    Int 3
+    StaticLocInit $b "b"
+    Int 2
+    StaticLocInit $c "c"
+    Int 2
+    StaticLocInit $d "d"
+    Int 1
+    StaticLocInit $e "e"
+    Int 1
+    StaticLocInit $f "f"
+    Null
+    StaticLocInit $g "g"
+    Null
+    StaticLocInit $h "h"
+    Null
+    StaticLocInit $i "i"
+    Null
+    StaticLocInit $i "i"
+    Jmp L0
+    Int 2
+    StaticLocInit $a "a"
+    Int 3
+    StaticLocInit $b "b"
+    Int 2
+    StaticLocInit $c "c"
+    Null
+    StaticLocInit $g "g"
+    Null
+    StaticLocInit $i "i"
+    Int 2
+    SetL $e
+    PopC
+    Jmp L1
+  L0:
+    Int 2
+    StaticLocInit $d "d"
+    Null
+    StaticLocInit $h "h"
+    Int 2
+    SetL $f
+    PopC
+  L1:
+    String "a"
+    String "foo"
+    ClsRefGetC 0
+    CGetS 0
+    Print
+    PopC
+    String "b"
+    String "foo"
+    ClsRefGetC 0
+    CGetS 0
+    Print
+    PopC
+    String "c"
+    String "foo"
+    ClsRefGetC 0
+    CGetS 0
+    Print
+    PopC
+    String "d"
+    String "foo"
+    ClsRefGetC 0
+    CGetS 0
+    Print
+    PopC
+    String "e"
+    String "foo"
+    ClsRefGetC 0
+    CGetS 0
+    Print
+    PopC
+    String "f"
+    String "foo"
+    ClsRefGetC 0
+    CGetS 0
+    Print
+    PopC
+    CGetL $a
+    Print
+    PopC
+    CGetL $b
+    Print
+    PopC
+    CGetL $c
+    Print
+    PopC
+    CGetL $d
+    Print
+    PopC
+    CGetL $e
+    Print
+    PopC
+    CGetL $f
+    Print
+    PopC
+    CGetL $g
+    Print
+    PopC
+    CGetL $h
+    Print
+    PopC
+    CGetL $i
+    Print
+    PopC
+    Null
+    RetC
+  }
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+# /data/users/arkumar/fbsource/fbcode/hphp/test/slow/static_statement/1407.php ends here

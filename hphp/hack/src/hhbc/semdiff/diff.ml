@@ -386,12 +386,27 @@ let type_info_type_constraint_comparer = wrap Hhas_type_info.type_constraint
 let type_info_comparer = join (fun s1 s2 -> "<" ^ s1 ^ " " ^s2 ^ ">")
                               type_info_user_type_comparer
                               type_info_type_constraint_comparer
+
+let attribute_comparer =
+  join (fun s1 s2 -> s1 ^ "(" ^ s2 ^ ")")
+       (wrap Hhas_attribute.name (fun _a s -> s) string_comparer)
+       (wrap Hhas_attribute.arguments (fun _l s -> s)
+                                      (list_comparer typed_value_comparer " "))
+
+let param_attributes_comparer =
+  wrap Hhas_param.user_attributes (fun _ s -> s)
+    (list_comparer attribute_comparer " ")
+
 let param_type_info_comparer = wrap Hhas_param.type_info
                                     (fun _p s -> s)
                                     (option_comparer type_info_comparer)
+
+let param_user_attributes_is_variadic_comparer =
+  join (^) param_attributes_comparer param_is_variadic_comparer
+
 let param_variadic_type_info_comparer =
   join (fun s1 s2 -> s1 ^ s2)
-  param_is_variadic_comparer
+  param_user_attributes_is_variadic_comparer
   param_type_info_comparer
 let param_name_reference_comparer =
   join (fun s1 s2 -> s1 ^ s2)
@@ -439,11 +454,6 @@ let method_return_type_comparer =
   wrap Hhas_method.return_type (fun _f s -> s)
                                (option_comparer type_info_comparer)
 
-let attribute_comparer =
-  join (fun s1 s2 -> s1 ^ "(" ^ s2 ^ ")")
-       (wrap Hhas_attribute.name (fun _a s -> s) string_comparer)
-       (wrap Hhas_attribute.arguments (fun _l s -> s)
-                                      (list_comparer typed_value_comparer " "))
 
 let function_attributes_comparer =
  wrap Hhas_function.attributes (fun _ s -> s)

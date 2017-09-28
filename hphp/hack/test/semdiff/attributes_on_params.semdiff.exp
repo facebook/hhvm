@@ -1,0 +1,20 @@
+Semdiff succeeded
+comparing key f
+Semdiff succeeded
+comparing key test
+Semdiff succeeded
+comparing key run
+Semdiff succeeded
+comparing key __construct
+Semdiff succeeded
+Distance = 2
+Size = 214
+Similarity = 99.07
+Edits = 
+
+for f:
+- A11
++ A1
+for __construct:
+- Annotation42
++ Annotation

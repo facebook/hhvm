@@ -1,0 +1,158 @@
+#starts here
+
+.main {
+  DefCls 0
+  FPushFuncD 0 "run"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"" N  > f(["A1"("""a:0:{}""")]$p1, ["A2"("""a:0:{}""")]$p2) {
+  Null
+  RetC
+}
+
+.function <"" N  > test($caption, $parameters, $i, $attribute) {
+  .declvars $p;
+  BaseL $parameters Warn
+  QueryM 0 CGet EL:$i
+  FPushObjMethodD 1 "getAttribute" NullThrows
+  FPassL 0 $attribute Cell
+  FCall 1
+  UnboxR
+  SetL $p
+  PopC
+  String ":"
+  CGetL2 $caption
+  Concat
+  IssetL $p
+  JmpZ L0
+  String "SET"
+  Jmp L1
+L0:
+  String "NOTSET"
+L1:
+  Concat
+  Print
+  PopC
+  String "\\n"
+  Print
+  PopC
+  Null
+  RetC
+}
+
+.function <"" N  > run() {
+  .declvars $cls $ctor $func;
+  FPushCtorD 1 "ReflectionClass"
+  String "A"
+  FPassCE 0 Cell
+  FCall 1
+  PopR
+  SetL $cls
+  PopC
+  CGetL $cls
+  FPushObjMethodD 0 "getConstructor" NullThrows
+  FCall 0
+  UnboxR
+  SetL $ctor
+  PopC
+  FPushFuncD 4 "test"
+  String "1. existing attribute"
+  FPassCE 0 Cell
+  CGetL $ctor
+  FPushObjMethodD 0 "getParameters" NullThrows
+  FCall 0
+  FPassR 1 Cell
+  Int 0
+  FPassCE 2 Cell
+  String "Annotation"
+  FPassCE 3 Cell
+  FCall 4
+  PopR
+  FPushFuncD 4 "test"
+  String "2. missing attribute"
+  FPassCE 0 Cell
+  CGetL $ctor
+  FPushObjMethodD 0 "getParameters" NullThrows
+  FCall 0
+  FPassR 1 Cell
+  Int 0
+  FPassCE 2 Cell
+  String "Annotation-missing"
+  FPassCE 3 Cell
+  FCall 4
+  PopR
+  FPushCtorD 1 "ReflectionFunction"
+  String "f"
+  FPassCE 0 Cell
+  FCall 1
+  PopR
+  SetL $func
+  PopC
+  FPushFuncD 4 "test"
+  String "3. existing attribute"
+  FPassCE 0 Cell
+  CGetL $func
+  FPushObjMethodD 0 "getParameters" NullThrows
+  FCall 0
+  FPassR 1 Cell
+  Int 0
+  FPassCE 2 Cell
+  String "A1"
+  FPassCE 3 Cell
+  FCall 4
+  PopR
+  FPushFuncD 4 "test"
+  String "4. missing attribute"
+  FPassCE 0 Cell
+  CGetL $func
+  FPushObjMethodD 0 "getParameters" NullThrows
+  FCall 0
+  FPassR 1 Cell
+  Int 0
+  FPassCE 2 Cell
+  String "A1-missing"
+  FPassCE 3 Cell
+  FCall 4
+  PopR
+  FPushFuncD 4 "test"
+  String "5. existing attribute"
+  FPassCE 0 Cell
+  CGetL $func
+  FPushObjMethodD 0 "getParameters" NullThrows
+  FCall 0
+  FPassR 1 Cell
+  Int 1
+  FPassCE 2 Cell
+  String "A2"
+  FPassCE 3 Cell
+  FCall 4
+  PopR
+  FPushFuncD 4 "test"
+  String "6. missing attribute"
+  FPassCE 0 Cell
+  CGetL $func
+  FPushObjMethodD 0 "getParameters" NullThrows
+  FCall 0
+  FPassR 1 Cell
+  Int 1
+  FPassCE 2 Cell
+  String "A2-missing"
+  FPassCE 3 Cell
+  FCall 4
+  PopR
+  Null
+  RetC
+}
+
+.class A {
+  .method [public] <"" N  > __construct(["Annotation"("""a:0:{}""")]$property) {
+    Null
+    RetC
+  }
+}
+
+#ends here

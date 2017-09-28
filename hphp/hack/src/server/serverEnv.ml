@@ -117,6 +117,12 @@ type env = {
      * entire global state to be up to date (like global list of errors, build,
      * or find all references) must be preceded by Full_check. *)
     needs_phase2_redecl : Relative_path.Set.t;
+    (* A set of files that we need to still redeclare during a Full Check, but
+      does not need to go through decl_redecl fanout. This contains files
+      that were unchanged, but had a parent class's declarations
+      change unmeaningfully(positional change only).
+    *)
+    needs_redecl : Relative_path.Set.t;
     needs_recheck : Relative_path.Set.t;
     needs_full_check : bool;
     (* The diagnostic subscription information of the current client *)

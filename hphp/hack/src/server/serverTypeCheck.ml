@@ -333,6 +333,13 @@ module type CheckKindType = sig
      env:ServerEnv.env ->
      FileInfo.fast
 
+  val get_defs_to_redecl_pos_changed :
+    decl_defs:FileInfo.fast ->
+    files_info:FileInfo.t Relative_path.Map.t ->
+    to_redecl_phase2:Relative_path.Set.t ->
+    env:ServerEnv.env ->
+    FileInfo.fast * FileInfo.fast
+
   (* Returns a tuple: files to redecl now, files to redecl later *)
   val get_defs_to_redecl_phase2 :
     decl_defs:FileInfo.fast ->
@@ -364,6 +371,7 @@ module type CheckKindType = sig
     failed_decl:Relative_path.Set.t ->
     failed_check:Relative_path.Set.t ->
     needs_phase2_redecl:Relative_path.Set.t ->
+    needs_redecl: Relative_path.Set.t ->
     lazy_check_later:Relative_path.Set.t ->
     diag_subscribe:Diagnostic_subscription.t option ->
     ServerEnv.env
@@ -392,6 +400,14 @@ module FullCheckKind : CheckKindType = struct
     let fast = extend_fast fast files_info env.needs_phase2_redecl in
     fast, Relative_path.Map.empty
 
+  let get_defs_to_redecl_pos_changed
+      ~decl_defs ~files_info ~to_redecl_phase2 ~env =
+      let fast = extend_fast decl_defs files_info to_redecl_phase2 in
+      (* Add decl that was delayed by previous lazy checks to phase 2 *)
+      let fast = extend_fast fast files_info env.needs_redecl in
+      fast, Relative_path.Map.empty
+
+
   let get_to_recheck2_approximation ~to_redecl_phase2_deps:_ ~env:_ =
     (* Full check is computing to_recheck2 set accurately, so there is no need
      * to approximate anything *)
@@ -412,6 +428,7 @@ module FullCheckKind : CheckKindType = struct
       ~failed_decl
       ~failed_check
       ~needs_phase2_redecl:_
+      ~needs_redecl:_
       ~lazy_check_later:_
       ~diag_subscribe =
     {
@@ -433,6 +450,7 @@ module FullCheckKind : CheckKindType = struct
       disk_needs_parsing = Relative_path.Set.empty;
       needs_phase2_redecl = Relative_path.Set.empty;
       needs_recheck = Relative_path.Set.empty;
+      needs_redecl = Relative_path.Set.empty;
       needs_full_check = false;
       diag_subscribe;
       recent_recheck_loop_stats = old_env.recent_recheck_loop_stats;
@@ -464,6 +482,11 @@ module LazyCheckKind : CheckKindType = struct
       ~decl_defs ~files_info ~to_redecl_phase2 ~env:_ =
     (* Do phase2 only for IDE files, delay the fanout until next full check *)
     decl_defs, extend_fast decl_defs files_info to_redecl_phase2
+
+  (* Unchanged files work the same way as defs_to_redecl_phase2 *)
+  let get_defs_to_redecl_pos_changed =
+    (* Do phase2 only for IDE files, delay the fanout until next full check *)
+    get_defs_to_redecl_phase2
 
   let get_related_files dep =
     Typing_deps.get_ideps_from_hash dep |> Typing_deps.get_files
@@ -501,6 +524,7 @@ module LazyCheckKind : CheckKindType = struct
       ~failed_decl:_
       ~failed_check:_
       ~needs_phase2_redecl
+      ~needs_redecl
       ~lazy_check_later
       ~diag_subscribe =
     let needs_recheck =
@@ -510,6 +534,7 @@ module LazyCheckKind : CheckKindType = struct
        failed_naming;
        ide_needs_parsing = Relative_path.Set.empty;
        needs_phase2_redecl;
+       needs_redecl;
        needs_recheck;
        needs_full_check = true;
        diag_subscribe;
@@ -596,7 +621,12 @@ end = functor(CheckKind:CheckKindType) -> struct
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
     debug_print_fast_keys genv "to_redecl_phase1" fast;
     let defs_to_redecl = get_defs fast in
-    let _, _, to_redecl_phase2_deps, to_recheck1 =
+    (*  redo_type_decl returns two lists. deps_decl_changed are deps that have
+    actual meaningful changes to their declarations (and thus need to be run
+    through typechecking in phase 2) while all_changed_deps includes
+    decl_changed_deps plus all the files that need to be redeclared for
+    recomputation of positions. *)
+    let _, _, all_changed_deps, decl_changed_deps =
       Decl_redecl_service.redo_type_decl
         ~bucket_size genv.workers env.tcopt oldified_defs fast defs_to_redecl in
 
@@ -604,8 +634,59 @@ end = functor(CheckKind:CheckKindType) -> struct
      * defs_ro_redecl from oldified_defs *)
     let oldified_defs =
       snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl in
-    let to_redecl_phase2 = Typing_deps.get_files to_redecl_phase2_deps in
-    let to_recheck1 = Typing_deps.get_files to_recheck1 in
+    let all_changed_files = Typing_deps.get_files all_changed_deps in
+    let files_changed_meaningfully =
+      Typing_deps.get_files decl_changed_deps in
+    (* IMPORTANT: Files that are in all_changed_deps that are not in
+      decl_changed_deps only need to be redeclared but their
+      dependencies do not need to be retypechecked unless they were in the list
+      of files to parse.
+
+      If a file is in decl_changed_deps, then in redo_type_decl it must
+      have either changed meaningfully, or been the subclass of a file that
+      changed meaningfully.
+
+      If a file is *only* in all_changed_files and not in changed_meaningfully,
+      and also did not get edited, then it must have only had positional changes
+      in its declaration, and only needs to have its declaration oldified,
+      not retypechecked.
+
+      Thus, all_changed_deps includes deps_changed_meaningfully plus the files
+      we need to redeclare for recomputing of positions. We separate these sets
+      so we explicitly have deps_positions_changed and don't do unneeded work
+      (particularly decl phase 2) on the files that only need recomputing of
+      positions.
+    *)
+    let edited_files = files_to_parse in
+    let to_redecl_phase2, decl_pos_changed_files =
+      Relative_path.Set.partition
+      (fun f ->
+        Relative_path.Set.mem files_changed_meaningfully f ||
+        Relative_path.Set.mem edited_files f
+      )
+      all_changed_files
+      in
+    (* Files which changed meaningfully need to be retypechecked *)
+    let to_recheck1 = files_changed_meaningfully in
+    (* Take the files with only positional changes and declare the ones open in
+      the IDE now, or all of them during a FullCheck *)
+    let decl_pos_changed_now, lazy_decl_later_pos_changed =
+      CheckKind.get_defs_to_redecl_pos_changed
+        fast files_info decl_pos_changed_files env
+    in
+    let decl_pos_changed_now_fast = remove_failed_parsing
+      decl_pos_changed_now stop_at_errors env failed_parsing in
+    let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
+    (* These will not have any errors because positionally changed files have
+      parents that have no changes except by position. *)
+    let _, _ =
+      Decl_service.go
+      ~bucket_size
+      genv.workers
+      env.tcopt
+      decl_pos_changed_now_fast in
+    let t = Hh_logger.log_duration "Redeclaring unchanged files" t in
+
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.first_redecl_end t hs;
@@ -623,6 +704,15 @@ end = functor(CheckKind:CheckKindType) -> struct
     debug_print_fast_keys genv "lazy_decl_later" lazy_decl_later;
 
     let defs_to_oldify = get_defs lazy_decl_later in
+    (* These files were not changed, but their declarations are now old
+      because their parent class was changed non meaningfully. We'll need to
+      add them to env.needs_redecl and redeclare them next Full Check.
+      Thus, we grab their defs, oldify them and add them to needs_redecl.
+    *)
+    let defs_pos_changed = get_defs lazy_decl_later_pos_changed in
+    let needs_redecl =
+      union_set_and_map_keys env.needs_redecl lazy_decl_later_pos_changed in
+    let defs_to_oldify = FileInfo.merge_names defs_to_oldify defs_pos_changed in
     Decl_redecl_service.oldify_type_decl ~bucket_size
       genv.workers files_info oldified_defs defs_to_oldify;
     let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
@@ -641,13 +731,12 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     let to_recheck2 = Typing_deps.get_files to_recheck2 in
     let to_recheck2 = Relative_path.Set.union to_recheck2
-      (CheckKind.get_to_recheck2_approximation to_redecl_phase2_deps env) in
+      (CheckKind.get_to_recheck2_approximation all_changed_deps env) in
     let errorl = Errors.merge errorl' errorl in
 
     (* DECLARING TYPES: merging results of the 2 phases *)
     let fast = Relative_path.Map.union fast fast_redecl_phase2_now in
     let to_recheck = Relative_path.Set.union to_recheck1 to_recheck2 in
-    let to_recheck = Relative_path.Set.union to_recheck to_redecl_phase2 in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.second_redecl_end t hs;
@@ -699,6 +788,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       failed_decl
       failed_check
       needs_phase2_redecl
+      needs_redecl
       lazy_check_later
       diag_subscribe
     in

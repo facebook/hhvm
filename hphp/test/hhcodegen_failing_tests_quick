@@ -14,7 +14,6 @@ quick/ctor_param_promotion_generic.php
 quick/ctor_param_promotion_generic1.php
 quick/ctor_param_promotion_redeclaration.php
 quick/ctor_param_promotion_trait.php
-quick/defaultVals.php
 quick/dict/basic-getters.php
 quick/finally_break.php
 quick/float-overflow-literals.php
@@ -25,14 +24,7 @@ quick/func3.php
 quick/hh_bad_end.php
 quick/hh_bad_start.php
 quick/hh_numbers.php
-quick/impl_abstract_default_vals.php
-quick/impl_abstract_dv_b_Bool.php
-quick/impl_abstract_dv_b_boolean.php
-quick/impl_abstract_dv_i_Int.php
-quick/impl_abstract_dv_i_integer.php
-quick/impl_abstract_dv_ia.php
 quick/instanceofInterface.php
-quick/interface11.php
 quick/keyset/basic-getters.php
 quick/lexer_nowdoc_label_cornercases.php
 quick/method_param_promotion_error.php

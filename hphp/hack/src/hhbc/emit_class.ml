@@ -258,16 +258,19 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   (* TODO: communicate this without looking at the name *)
   let is_closure_class =
     String_utils.string_starts_with (snd ast_class.A.c_name) "Closure$" in
-  let has_constructor_or_invoke = List.exists class_body
+  let has_constructor_or_invoke =
+    let cls_name =
+      String.lowercase_ascii (Hhbc_id.Class.to_raw_string class_id) in
+    List.exists class_body
     (fun elt ->
       match elt with
       | A.Method m ->
-        let method_name = snd m.A.m_name in
+        let method_name = String.lowercase_ascii (snd m.A.m_name) in
         (* HasConstructor in HHVM *)
         method_name = SN.Members.__construct ||
         (* ClassNameConstructor in HHVM *)
-        not class_is_trait
-          && method_name = Hhbc_id.Class.to_raw_string class_id ||
+        not (class_is_trait || class_is_interface)
+          && method_name = cls_name ||
         is_closure_class
           && method_name = "__invoke"
       | _ -> false)

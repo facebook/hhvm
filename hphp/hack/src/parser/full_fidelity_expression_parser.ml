@@ -329,7 +329,7 @@ module WithStatementAndDeclAndTypeParser
 
     let (parser, left_brace) = assert_token parser LeftBrace in
     let (parser1, name_or_keyword_as_name) = next_token_as_name parser in
-    let (parser1, right_brace) = next_token parser1 in
+    let (parser1, right_brace) = next_token_no_trailing parser1 in
     let (parser, expr, right_brace) =
       match Token.kind name_or_keyword_as_name, Token.kind right_brace with
       | Name, RightBrace ->

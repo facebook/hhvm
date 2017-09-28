@@ -166,6 +166,7 @@ let minimal_tests =
     "test_funcall_with_type_arguments";
     "test_nested_namespace_declarations";
     "test_xhp_attributes";
+    "test_spaces_preserved_in_string_containing_expression";
   ] ~f:mapper
 
 let error_tests =

@@ -1015,6 +1015,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Else
     | Elseif
     | Empty
+    | Endif
     | Enum
     | Eval
     | Extends

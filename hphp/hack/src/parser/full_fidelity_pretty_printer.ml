@@ -675,6 +675,47 @@ let rec get_doc node =
     let statement = x.else_statement in
     handle_compound_brace_prefix_indent keyword statement indt
     |> add_break
+  | IfEndIfStatement
+    { if_endif_keyword; if_endif_colon; if_endif_left_paren; if_endif_condition;
+      if_endif_right_paren; if_endif_statement; if_endif_elseif_colon_clauses;
+      if_endif_else_colon_clause; if_endif_endif_keyword; if_endif_semicolon }->
+    let keyword = get_doc if_endif_keyword in
+    let left = get_doc if_endif_left_paren in
+    let condition = get_doc if_endif_condition in
+    let right = get_doc if_endif_right_paren in
+    let colon = get_doc if_endif_colon in
+    let if_stmt = if_endif_statement in
+    let elseif_clause = get_doc if_endif_elseif_colon_clauses in
+    let else_clause = get_doc if_endif_else_colon_clause in
+    let end_kw = get_doc if_endif_endif_keyword in
+    let semicolon = get_doc if_endif_semicolon in
+    let left_part = group_doc (keyword ^^| left) in
+    let right_part = group_doc (right ^^^ colon) in
+    let end_block = group_doc (end_kw ^^^ semicolon) in
+    let start_block = indent_block_no_space left_part condition right_part indt in
+    let if_statement =
+      handle_compound_brace_prefix_indent start_block if_stmt indt in
+    let if_statement = add_break if_statement in
+    group_doc (if_statement ^| elseif_clause ^| else_clause ^| end_block)
+  | ElseifColonClause
+    { elseif_colon_keyword; elseif_colon_left_paren; elseif_colon_condition;
+      elseif_colon_right_paren; elseif_colon_colon; elseif_colon_statement }  ->
+    let keyword = get_doc elseif_colon_keyword in
+    let left = get_doc elseif_colon_left_paren in
+    let condition = get_doc elseif_colon_condition in
+    let right = get_doc elseif_colon_right_paren in
+    let colon = get_doc elseif_colon_colon in
+    let elif_statement_syntax = elseif_colon_statement in
+    let left_part = group_doc (keyword ^^| left) in
+    let right_part = group_doc (right ^^^ colon) in
+    let start_block = indent_block_no_space left_part condition right_part indt in
+    handle_compound_brace_prefix_indent start_block elif_statement_syntax indt
+    |> add_break
+  | ElseColonClause x ->
+    let keyword = get_doc x.else_colon_keyword in
+    let statement = x.else_colon_statement in
+    handle_compound_brace_prefix_indent keyword statement indt
+    |> add_break
   | TryStatement
     { try_keyword;
       try_compound_statement;

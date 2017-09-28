@@ -108,6 +108,9 @@ module WithToken(Token: TokenType) = struct
       | IfStatement                             _ -> SyntaxKind.IfStatement
       | ElseifClause                            _ -> SyntaxKind.ElseifClause
       | ElseClause                              _ -> SyntaxKind.ElseClause
+      | IfEndIfStatement                        _ -> SyntaxKind.IfEndIfStatement
+      | ElseifColonClause                       _ -> SyntaxKind.ElseifColonClause
+      | ElseColonClause                         _ -> SyntaxKind.ElseColonClause
       | TryStatement                            _ -> SyntaxKind.TryStatement
       | CatchClause                             _ -> SyntaxKind.CatchClause
       | FinallyClause                           _ -> SyntaxKind.FinallyClause
@@ -270,6 +273,9 @@ module WithToken(Token: TokenType) = struct
     let is_if_statement                                 = has_kind SyntaxKind.IfStatement
     let is_elseif_clause                                = has_kind SyntaxKind.ElseifClause
     let is_else_clause                                  = has_kind SyntaxKind.ElseClause
+    let is_if_endif_statement                           = has_kind SyntaxKind.IfEndIfStatement
+    let is_elseif_colon_clause                          = has_kind SyntaxKind.ElseifColonClause
+    let is_else_colon_clause                            = has_kind SyntaxKind.ElseColonClause
     let is_try_statement                                = has_kind SyntaxKind.TryStatement
     let is_catch_clause                                 = has_kind SyntaxKind.CatchClause
     let is_finally_clause                               = has_kind SyntaxKind.FinallyClause
@@ -966,6 +972,56 @@ module WithToken(Token: TokenType) = struct
     } = (
       else_keyword,
       else_statement
+    )
+
+    let get_if_endif_statement_children {
+      if_endif_keyword;
+      if_endif_left_paren;
+      if_endif_condition;
+      if_endif_right_paren;
+      if_endif_colon;
+      if_endif_statement;
+      if_endif_elseif_colon_clauses;
+      if_endif_else_colon_clause;
+      if_endif_endif_keyword;
+      if_endif_semicolon;
+    } = (
+      if_endif_keyword,
+      if_endif_left_paren,
+      if_endif_condition,
+      if_endif_right_paren,
+      if_endif_colon,
+      if_endif_statement,
+      if_endif_elseif_colon_clauses,
+      if_endif_else_colon_clause,
+      if_endif_endif_keyword,
+      if_endif_semicolon
+    )
+
+    let get_elseif_colon_clause_children {
+      elseif_colon_keyword;
+      elseif_colon_left_paren;
+      elseif_colon_condition;
+      elseif_colon_right_paren;
+      elseif_colon_colon;
+      elseif_colon_statement;
+    } = (
+      elseif_colon_keyword,
+      elseif_colon_left_paren,
+      elseif_colon_condition,
+      elseif_colon_right_paren,
+      elseif_colon_colon,
+      elseif_colon_statement
+    )
+
+    let get_else_colon_clause_children {
+      else_colon_keyword;
+      else_colon_colon;
+      else_colon_statement;
+    } = (
+      else_colon_keyword,
+      else_colon_colon,
+      else_colon_statement
     )
 
     let get_try_statement_children {
@@ -2624,6 +2680,53 @@ module WithToken(Token: TokenType) = struct
         else_keyword;
         else_statement;
       ]
+      | IfEndIfStatement {
+        if_endif_keyword;
+        if_endif_left_paren;
+        if_endif_condition;
+        if_endif_right_paren;
+        if_endif_colon;
+        if_endif_statement;
+        if_endif_elseif_colon_clauses;
+        if_endif_else_colon_clause;
+        if_endif_endif_keyword;
+        if_endif_semicolon;
+      } -> [
+        if_endif_keyword;
+        if_endif_left_paren;
+        if_endif_condition;
+        if_endif_right_paren;
+        if_endif_colon;
+        if_endif_statement;
+        if_endif_elseif_colon_clauses;
+        if_endif_else_colon_clause;
+        if_endif_endif_keyword;
+        if_endif_semicolon;
+      ]
+      | ElseifColonClause {
+        elseif_colon_keyword;
+        elseif_colon_left_paren;
+        elseif_colon_condition;
+        elseif_colon_right_paren;
+        elseif_colon_colon;
+        elseif_colon_statement;
+      } -> [
+        elseif_colon_keyword;
+        elseif_colon_left_paren;
+        elseif_colon_condition;
+        elseif_colon_right_paren;
+        elseif_colon_colon;
+        elseif_colon_statement;
+      ]
+      | ElseColonClause {
+        else_colon_keyword;
+        else_colon_colon;
+        else_colon_statement;
+      } -> [
+        else_colon_keyword;
+        else_colon_colon;
+        else_colon_statement;
+      ]
       | TryStatement {
         try_keyword;
         try_compound_statement;
@@ -4178,6 +4281,53 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "else_keyword";
         "else_statement";
+      ]
+      | IfEndIfStatement {
+        if_endif_keyword;
+        if_endif_left_paren;
+        if_endif_condition;
+        if_endif_right_paren;
+        if_endif_colon;
+        if_endif_statement;
+        if_endif_elseif_colon_clauses;
+        if_endif_else_colon_clause;
+        if_endif_endif_keyword;
+        if_endif_semicolon;
+      } -> [
+        "if_endif_keyword";
+        "if_endif_left_paren";
+        "if_endif_condition";
+        "if_endif_right_paren";
+        "if_endif_colon";
+        "if_endif_statement";
+        "if_endif_elseif_colon_clauses";
+        "if_endif_else_colon_clause";
+        "if_endif_endif_keyword";
+        "if_endif_semicolon";
+      ]
+      | ElseifColonClause {
+        elseif_colon_keyword;
+        elseif_colon_left_paren;
+        elseif_colon_condition;
+        elseif_colon_right_paren;
+        elseif_colon_colon;
+        elseif_colon_statement;
+      } -> [
+        "elseif_colon_keyword";
+        "elseif_colon_left_paren";
+        "elseif_colon_condition";
+        "elseif_colon_right_paren";
+        "elseif_colon_colon";
+        "elseif_colon_statement";
+      ]
+      | ElseColonClause {
+        else_colon_keyword;
+        else_colon_colon;
+        else_colon_statement;
+      } -> [
+        "else_colon_keyword";
+        "else_colon_colon";
+        "else_colon_statement";
       ]
       | TryStatement {
         try_keyword;
@@ -5836,6 +5986,56 @@ module WithToken(Token: TokenType) = struct
         ElseClause {
           else_keyword;
           else_statement;
+        }
+      | (SyntaxKind.IfEndIfStatement, [
+          if_endif_keyword;
+          if_endif_left_paren;
+          if_endif_condition;
+          if_endif_right_paren;
+          if_endif_colon;
+          if_endif_statement;
+          if_endif_elseif_colon_clauses;
+          if_endif_else_colon_clause;
+          if_endif_endif_keyword;
+          if_endif_semicolon;
+        ]) ->
+        IfEndIfStatement {
+          if_endif_keyword;
+          if_endif_left_paren;
+          if_endif_condition;
+          if_endif_right_paren;
+          if_endif_colon;
+          if_endif_statement;
+          if_endif_elseif_colon_clauses;
+          if_endif_else_colon_clause;
+          if_endif_endif_keyword;
+          if_endif_semicolon;
+        }
+      | (SyntaxKind.ElseifColonClause, [
+          elseif_colon_keyword;
+          elseif_colon_left_paren;
+          elseif_colon_condition;
+          elseif_colon_right_paren;
+          elseif_colon_colon;
+          elseif_colon_statement;
+        ]) ->
+        ElseifColonClause {
+          elseif_colon_keyword;
+          elseif_colon_left_paren;
+          elseif_colon_condition;
+          elseif_colon_right_paren;
+          elseif_colon_colon;
+          elseif_colon_statement;
+        }
+      | (SyntaxKind.ElseColonClause, [
+          else_colon_keyword;
+          else_colon_colon;
+          else_colon_statement;
+        ]) ->
+        ElseColonClause {
+          else_colon_keyword;
+          else_colon_colon;
+          else_colon_statement;
         }
       | (SyntaxKind.TryStatement, [
           try_keyword;
@@ -7624,6 +7824,59 @@ module WithToken(Token: TokenType) = struct
       from_children SyntaxKind.ElseClause [
         else_keyword;
         else_statement;
+      ]
+
+    let make_if_endif_statement
+      if_endif_keyword
+      if_endif_left_paren
+      if_endif_condition
+      if_endif_right_paren
+      if_endif_colon
+      if_endif_statement
+      if_endif_elseif_colon_clauses
+      if_endif_else_colon_clause
+      if_endif_endif_keyword
+      if_endif_semicolon
+    =
+      from_children SyntaxKind.IfEndIfStatement [
+        if_endif_keyword;
+        if_endif_left_paren;
+        if_endif_condition;
+        if_endif_right_paren;
+        if_endif_colon;
+        if_endif_statement;
+        if_endif_elseif_colon_clauses;
+        if_endif_else_colon_clause;
+        if_endif_endif_keyword;
+        if_endif_semicolon;
+      ]
+
+    let make_elseif_colon_clause
+      elseif_colon_keyword
+      elseif_colon_left_paren
+      elseif_colon_condition
+      elseif_colon_right_paren
+      elseif_colon_colon
+      elseif_colon_statement
+    =
+      from_children SyntaxKind.ElseifColonClause [
+        elseif_colon_keyword;
+        elseif_colon_left_paren;
+        elseif_colon_condition;
+        elseif_colon_right_paren;
+        elseif_colon_colon;
+        elseif_colon_statement;
+      ]
+
+    let make_else_colon_clause
+      else_colon_keyword
+      else_colon_colon
+      else_colon_statement
+    =
+      from_children SyntaxKind.ElseColonClause [
+        else_colon_keyword;
+        else_colon_colon;
+        else_colon_statement;
       ]
 
     let make_try_statement

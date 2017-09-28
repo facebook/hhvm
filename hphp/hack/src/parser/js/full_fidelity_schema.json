@@ -1,6 +1,6 @@
 { "description" :
   "Auto-generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-07-24-0001",
+  "version" : "2017-09-12-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -87,6 +87,8 @@
       "token_text" : "elseif" },
     { "token_kind" : "Empty",
       "token_text" : "empty" },
+    { "token_kind" : "Endif",
+      "token_text" : "endif" },
     { "token_kind" : "Enum",
       "token_text" : "enum" },
     { "token_kind" : "Eval",
@@ -886,6 +888,43 @@
       "prefix" : "else",
       "fields" : [
         { "field_name" : "keyword" },
+        { "field_name" : "statement" }
+      ] },
+    { "kind_name" : "IfEndIfStatement",
+      "type_name" : "if_endif_statement",
+      "description" : "if_endif_statement",
+      "prefix" : "if_endif",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "condition" },
+        { "field_name" : "right_paren" },
+        { "field_name" : "colon" },
+        { "field_name" : "statement" },
+        { "field_name" : "elseif_colon_clauses" },
+        { "field_name" : "else_colon_clause" },
+        { "field_name" : "endif_keyword" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "ElseifColonClause",
+      "type_name" : "elseif_colon_clause",
+      "description" : "elseif_colon_clause",
+      "prefix" : "elseif_colon",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "condition" },
+        { "field_name" : "right_paren" },
+        { "field_name" : "colon" },
+        { "field_name" : "statement" }
+      ] },
+    { "kind_name" : "ElseColonClause",
+      "type_name" : "else_colon_clause",
+      "description" : "else_colon_clause",
+      "prefix" : "else_colon",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "colon" },
         { "field_name" : "statement" }
       ] },
     { "kind_name" : "TryStatement",

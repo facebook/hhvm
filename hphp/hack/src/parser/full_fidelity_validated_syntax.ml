@@ -130,6 +130,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.UnsetStatement _ -> tag validate_unset_statement (fun x -> TLDUnset x) x
     | Syntax.WhileStatement _ -> tag validate_while_statement (fun x -> TLDWhile x) x
     | Syntax.IfStatement _ -> tag validate_if_statement (fun x -> TLDIf x) x
+    | Syntax.IfEndIfStatement _ -> tag validate_if_endif_statement (fun x -> TLDIfEndIf x) x
     | Syntax.TryStatement _ -> tag validate_try_statement (fun x -> TLDTry x) x
     | Syntax.DoStatement _ -> tag validate_do_statement (fun x -> TLDDo x) x
     | Syntax.ForStatement _ -> tag validate_for_statement (fun x -> TLDFor x) x
@@ -164,6 +165,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | TLDUnset              thing -> invalidate_unset_statement                (value, thing)
     | TLDWhile              thing -> invalidate_while_statement                (value, thing)
     | TLDIf                 thing -> invalidate_if_statement                   (value, thing)
+    | TLDIfEndIf            thing -> invalidate_if_endif_statement             (value, thing)
     | TLDTry                thing -> invalidate_try_statement                  (value, thing)
     | TLDDo                 thing -> invalidate_do_statement                   (value, thing)
     | TLDFor                thing -> invalidate_for_statement                  (value, thing)
@@ -360,6 +362,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.UnsetStatement _ -> tag validate_unset_statement (fun x -> StmtUnset x) x
     | Syntax.WhileStatement _ -> tag validate_while_statement (fun x -> StmtWhile x) x
     | Syntax.IfStatement _ -> tag validate_if_statement (fun x -> StmtIf x) x
+    | Syntax.IfEndIfStatement _ -> tag validate_if_endif_statement (fun x -> StmtIfEndIf x) x
     | Syntax.TryStatement _ -> tag validate_try_statement (fun x -> StmtTry x) x
     | Syntax.DoStatement _ -> tag validate_do_statement (fun x -> StmtDo x) x
     | Syntax.ForStatement _ -> tag validate_for_statement (fun x -> StmtFor x) x
@@ -387,6 +390,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtUnset              thing -> invalidate_unset_statement                (value, thing)
     | StmtWhile              thing -> invalidate_while_statement                (value, thing)
     | StmtIf                 thing -> invalidate_if_statement                   (value, thing)
+    | StmtIfEndIf            thing -> invalidate_if_endif_statement             (value, thing)
     | StmtTry                thing -> invalidate_try_statement                  (value, thing)
     | StmtDo                 thing -> invalidate_do_statement                   (value, thing)
     | StmtFor                thing -> invalidate_for_statement                  (value, thing)
@@ -1478,6 +1482,74 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.ElseClause
       { Syntax.else_keyword = invalidate_token x.else_keyword
       ; Syntax.else_statement = invalidate_statement x.else_statement
+      }
+    ; Syntax.value = v
+    }
+  and validate_if_endif_statement : if_endif_statement validator = function
+  | { Syntax.syntax = Syntax.IfEndIfStatement x; value = v } -> v,
+    { if_endif_semicolon = validate_token x.Syntax.if_endif_semicolon
+    ; if_endif_endif_keyword = validate_token x.Syntax.if_endif_endif_keyword
+    ; if_endif_else_colon_clause = validate_option_with (validate_else_colon_clause) x.Syntax.if_endif_else_colon_clause
+    ; if_endif_elseif_colon_clauses = validate_list_with (validate_elseif_colon_clause) x.Syntax.if_endif_elseif_colon_clauses
+    ; if_endif_statement = validate_statement x.Syntax.if_endif_statement
+    ; if_endif_colon = validate_token x.Syntax.if_endif_colon
+    ; if_endif_right_paren = validate_token x.Syntax.if_endif_right_paren
+    ; if_endif_condition = validate_expression x.Syntax.if_endif_condition
+    ; if_endif_left_paren = validate_token x.Syntax.if_endif_left_paren
+    ; if_endif_keyword = validate_token x.Syntax.if_endif_keyword
+    }
+  | s -> validation_fail SyntaxKind.IfEndIfStatement s
+  and invalidate_if_endif_statement : if_endif_statement invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.IfEndIfStatement
+      { Syntax.if_endif_keyword = invalidate_token x.if_endif_keyword
+      ; Syntax.if_endif_left_paren = invalidate_token x.if_endif_left_paren
+      ; Syntax.if_endif_condition = invalidate_expression x.if_endif_condition
+      ; Syntax.if_endif_right_paren = invalidate_token x.if_endif_right_paren
+      ; Syntax.if_endif_colon = invalidate_token x.if_endif_colon
+      ; Syntax.if_endif_statement = invalidate_statement x.if_endif_statement
+      ; Syntax.if_endif_elseif_colon_clauses = invalidate_list_with (invalidate_elseif_colon_clause) x.if_endif_elseif_colon_clauses
+      ; Syntax.if_endif_else_colon_clause = invalidate_option_with (invalidate_else_colon_clause) x.if_endif_else_colon_clause
+      ; Syntax.if_endif_endif_keyword = invalidate_token x.if_endif_endif_keyword
+      ; Syntax.if_endif_semicolon = invalidate_token x.if_endif_semicolon
+      }
+    ; Syntax.value = v
+    }
+  and validate_elseif_colon_clause : elseif_colon_clause validator = function
+  | { Syntax.syntax = Syntax.ElseifColonClause x; value = v } -> v,
+    { elseif_colon_statement = validate_statement x.Syntax.elseif_colon_statement
+    ; elseif_colon_colon = validate_token x.Syntax.elseif_colon_colon
+    ; elseif_colon_right_paren = validate_token x.Syntax.elseif_colon_right_paren
+    ; elseif_colon_condition = validate_expression x.Syntax.elseif_colon_condition
+    ; elseif_colon_left_paren = validate_token x.Syntax.elseif_colon_left_paren
+    ; elseif_colon_keyword = validate_token x.Syntax.elseif_colon_keyword
+    }
+  | s -> validation_fail SyntaxKind.ElseifColonClause s
+  and invalidate_elseif_colon_clause : elseif_colon_clause invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.ElseifColonClause
+      { Syntax.elseif_colon_keyword = invalidate_token x.elseif_colon_keyword
+      ; Syntax.elseif_colon_left_paren = invalidate_token x.elseif_colon_left_paren
+      ; Syntax.elseif_colon_condition = invalidate_expression x.elseif_colon_condition
+      ; Syntax.elseif_colon_right_paren = invalidate_token x.elseif_colon_right_paren
+      ; Syntax.elseif_colon_colon = invalidate_token x.elseif_colon_colon
+      ; Syntax.elseif_colon_statement = invalidate_statement x.elseif_colon_statement
+      }
+    ; Syntax.value = v
+    }
+  and validate_else_colon_clause : else_colon_clause validator = function
+  | { Syntax.syntax = Syntax.ElseColonClause x; value = v } -> v,
+    { else_colon_statement = validate_statement x.Syntax.else_colon_statement
+    ; else_colon_colon = validate_token x.Syntax.else_colon_colon
+    ; else_colon_keyword = validate_token x.Syntax.else_colon_keyword
+    }
+  | s -> validation_fail SyntaxKind.ElseColonClause s
+  and invalidate_else_colon_clause : else_colon_clause invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.ElseColonClause
+      { Syntax.else_colon_keyword = invalidate_token x.else_colon_keyword
+      ; Syntax.else_colon_colon = invalidate_token x.else_colon_colon
+      ; Syntax.else_colon_statement = invalidate_statement x.else_colon_statement
       }
     ; Syntax.value = v
     }

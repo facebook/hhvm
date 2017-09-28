@@ -638,6 +638,44 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
           ]
         | _ -> handle_possible_compound_statement x.else_statement
       ]
+      | IfEndIfStatement x ->
+        let (kw, left_p, condition, right_p, colon, if_body,
+          elseif_clauses, else_clause, endif_kw, semicolon) =
+          get_if_endif_statement_children x in
+        Concat [
+          t kw;
+          Space;
+          transform_condition left_p condition right_p;
+          t colon;
+          handle_possible_compound_statement if_body;
+          handle_possible_list elseif_clauses;
+          t else_clause;
+          t endif_kw;
+          t semicolon;
+          Newline;
+        ]
+      | ElseifColonClause x ->
+        let (kw, left_p, condition, right_p, colon, body) =
+          get_elseif_colon_clause_children x
+        in
+        Concat [
+          t kw;
+          Space;
+          transform_condition left_p condition right_p;
+          t colon;
+          handle_possible_compound_statement body;
+        ]
+      | ElseColonClause x ->
+        Concat [
+          t x.else_colon_keyword;
+          match syntax x.else_colon_statement with
+          | IfStatement _ -> Concat [
+              Space;
+              t x.else_colon_statement;
+              Space;
+            ]
+          | _ -> handle_possible_compound_statement x.else_colon_statement
+        ]
     | TryStatement x ->
       (* TODO: revisit *)
       let (kw, body, catch_clauses, finally_clause) =

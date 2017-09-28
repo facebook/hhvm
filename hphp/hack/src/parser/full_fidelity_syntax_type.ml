@@ -359,6 +359,31 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { else_keyword                                       : t
     ; else_statement                                     : t
     }
+  and if_endif_statement =
+    { if_endif_keyword                                   : t
+    ; if_endif_left_paren                                : t
+    ; if_endif_condition                                 : t
+    ; if_endif_right_paren                               : t
+    ; if_endif_colon                                     : t
+    ; if_endif_statement                                 : t
+    ; if_endif_elseif_colon_clauses                      : t
+    ; if_endif_else_colon_clause                         : t
+    ; if_endif_endif_keyword                             : t
+    ; if_endif_semicolon                                 : t
+    }
+  and elseif_colon_clause =
+    { elseif_colon_keyword                               : t
+    ; elseif_colon_left_paren                            : t
+    ; elseif_colon_condition                             : t
+    ; elseif_colon_right_paren                           : t
+    ; elseif_colon_colon                                 : t
+    ; elseif_colon_statement                             : t
+    }
+  and else_colon_clause =
+    { else_colon_keyword                                 : t
+    ; else_colon_colon                                   : t
+    ; else_colon_statement                               : t
+    }
   and try_statement =
     { try_keyword                                        : t
     ; try_compound_statement                             : t
@@ -980,6 +1005,9 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | IfStatement                             of if_statement
   | ElseifClause                            of elseif_clause
   | ElseClause                              of else_clause
+  | IfEndIfStatement                        of if_endif_statement
+  | ElseifColonClause                       of elseif_colon_clause
+  | ElseColonClause                         of else_colon_clause
   | TryStatement                            of try_statement
   | CatchClause                             of catch_clause
   | FinallyClause                           of finally_clause
@@ -1110,6 +1138,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDUnset              of unset_statement
   | TLDWhile              of while_statement
   | TLDIf                 of if_statement
+  | TLDIfEndIf            of if_endif_statement
   | TLDTry                of try_statement
   | TLDDo                 of do_statement
   | TLDFor                of for_statement
@@ -1213,6 +1242,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtUnset              of unset_statement
   | StmtWhile              of while_statement
   | StmtIf                 of if_statement
+  | StmtIfEndIf            of if_endif_statement
   | StmtTry                of try_statement
   | StmtDo                 of do_statement
   | StmtFor                of for_statement
@@ -1612,6 +1642,31 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and else_clause =
     { else_keyword: Token.t value
     ; else_statement: statement value
+    }
+  and if_endif_statement =
+    { if_endif_keyword: Token.t value
+    ; if_endif_left_paren: Token.t value
+    ; if_endif_condition: expression value
+    ; if_endif_right_paren: Token.t value
+    ; if_endif_colon: Token.t value
+    ; if_endif_statement: statement value
+    ; if_endif_elseif_colon_clauses: elseif_colon_clause listesque value
+    ; if_endif_else_colon_clause: else_colon_clause option value
+    ; if_endif_endif_keyword: Token.t value
+    ; if_endif_semicolon: Token.t value
+    }
+  and elseif_colon_clause =
+    { elseif_colon_keyword: Token.t value
+    ; elseif_colon_left_paren: Token.t value
+    ; elseif_colon_condition: expression value
+    ; elseif_colon_right_paren: Token.t value
+    ; elseif_colon_colon: Token.t value
+    ; elseif_colon_statement: statement value
+    }
+  and else_colon_clause =
+    { else_colon_keyword: Token.t value
+    ; else_colon_colon: Token.t value
+    ; else_colon_statement: statement value
     }
   and try_statement =
     { try_keyword: Token.t value

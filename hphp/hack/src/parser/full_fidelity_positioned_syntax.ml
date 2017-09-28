@@ -812,6 +812,59 @@ module FromMinimal = struct
           { else_keyword
           ; else_statement
           }, results
+      | SyntaxKind.IfEndIfStatement
+      , (  if_endif_semicolon
+        :: if_endif_endif_keyword
+        :: if_endif_else_colon_clause
+        :: if_endif_elseif_colon_clauses
+        :: if_endif_statement
+        :: if_endif_colon
+        :: if_endif_right_paren
+        :: if_endif_condition
+        :: if_endif_left_paren
+        :: if_endif_keyword
+        :: results
+        ) ->
+          IfEndIfStatement
+          { if_endif_keyword
+          ; if_endif_left_paren
+          ; if_endif_condition
+          ; if_endif_right_paren
+          ; if_endif_colon
+          ; if_endif_statement
+          ; if_endif_elseif_colon_clauses
+          ; if_endif_else_colon_clause
+          ; if_endif_endif_keyword
+          ; if_endif_semicolon
+          }, results
+      | SyntaxKind.ElseifColonClause
+      , (  elseif_colon_statement
+        :: elseif_colon_colon
+        :: elseif_colon_right_paren
+        :: elseif_colon_condition
+        :: elseif_colon_left_paren
+        :: elseif_colon_keyword
+        :: results
+        ) ->
+          ElseifColonClause
+          { elseif_colon_keyword
+          ; elseif_colon_left_paren
+          ; elseif_colon_condition
+          ; elseif_colon_right_paren
+          ; elseif_colon_colon
+          ; elseif_colon_statement
+          }, results
+      | SyntaxKind.ElseColonClause
+      , (  else_colon_statement
+        :: else_colon_colon
+        :: else_colon_keyword
+        :: results
+        ) ->
+          ElseColonClause
+          { else_colon_keyword
+          ; else_colon_colon
+          ; else_colon_statement
+          }, results
       | SyntaxKind.TryStatement
       , (  try_finally_clause
         :: try_catch_clauses
@@ -2641,6 +2694,56 @@ module FromMinimal = struct
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (else_statement, todo) in
         convert offset todo results else_keyword
+    | { M.syntax = M.IfEndIfStatement
+        { M.if_endif_keyword
+        ; M.if_endif_left_paren
+        ; M.if_endif_condition
+        ; M.if_endif_right_paren
+        ; M.if_endif_colon
+        ; M.if_endif_statement
+        ; M.if_endif_elseif_colon_clauses
+        ; M.if_endif_else_colon_clause
+        ; M.if_endif_endif_keyword
+        ; M.if_endif_semicolon
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (if_endif_semicolon, todo) in
+        let todo = Convert (if_endif_endif_keyword, todo) in
+        let todo = Convert (if_endif_else_colon_clause, todo) in
+        let todo = Convert (if_endif_elseif_colon_clauses, todo) in
+        let todo = Convert (if_endif_statement, todo) in
+        let todo = Convert (if_endif_colon, todo) in
+        let todo = Convert (if_endif_right_paren, todo) in
+        let todo = Convert (if_endif_condition, todo) in
+        let todo = Convert (if_endif_left_paren, todo) in
+        convert offset todo results if_endif_keyword
+    | { M.syntax = M.ElseifColonClause
+        { M.elseif_colon_keyword
+        ; M.elseif_colon_left_paren
+        ; M.elseif_colon_condition
+        ; M.elseif_colon_right_paren
+        ; M.elseif_colon_colon
+        ; M.elseif_colon_statement
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (elseif_colon_statement, todo) in
+        let todo = Convert (elseif_colon_colon, todo) in
+        let todo = Convert (elseif_colon_right_paren, todo) in
+        let todo = Convert (elseif_colon_condition, todo) in
+        let todo = Convert (elseif_colon_left_paren, todo) in
+        convert offset todo results elseif_colon_keyword
+    | { M.syntax = M.ElseColonClause
+        { M.else_colon_keyword
+        ; M.else_colon_colon
+        ; M.else_colon_statement
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (else_colon_statement, todo) in
+        let todo = Convert (else_colon_colon, todo) in
+        convert offset todo results else_colon_keyword
     | { M.syntax = M.TryStatement
         { M.try_keyword
         ; M.try_compound_statement

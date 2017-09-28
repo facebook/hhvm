@@ -183,6 +183,12 @@ class EditableSyntax
       return ElseifClause.from_json(json, position, source);
     case 'else_clause':
       return ElseClause.from_json(json, position, source);
+    case 'if_endif_statement':
+      return IfEndIfStatement.from_json(json, position, source);
+    case 'elseif_colon_clause':
+      return ElseifColonClause.from_json(json, position, source);
+    case 'else_colon_clause':
+      return ElseColonClause.from_json(json, position, source);
     case 'try_statement':
       return TryStatement.from_json(json, position, source);
     case 'catch_clause':
@@ -734,6 +740,8 @@ class EditableToken extends EditableSyntax
        return new ElseifToken(leading, trailing);
     case 'empty':
        return new EmptyToken(leading, trailing);
+    case 'endif':
+       return new EndifToken(leading, trailing);
     case 'enum':
        return new EnumToken(leading, trailing);
     case 'eval':
@@ -1341,6 +1349,13 @@ class EmptyToken extends EditableToken
   constructor(leading, trailing)
   {
     super('empty', leading, trailing, 'empty');
+  }
+}
+class EndifToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('endif', leading, trailing, 'endif');
   }
 }
 class EnumToken extends EditableToken
@@ -7867,6 +7882,513 @@ class ElseClause extends EditableSyntax
         'keyword',
         'statement'];
     return ElseClause._children_keys;
+  }
+}
+class IfEndIfStatement extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_paren,
+    condition,
+    right_paren,
+    colon,
+    statement,
+    elseif_colon_clauses,
+    else_colon_clause,
+    endif_keyword,
+    semicolon)
+  {
+    super('if_endif_statement', {
+      keyword: keyword,
+      left_paren: left_paren,
+      condition: condition,
+      right_paren: right_paren,
+      colon: colon,
+      statement: statement,
+      elseif_colon_clauses: elseif_colon_clauses,
+      else_colon_clause: else_colon_clause,
+      endif_keyword: endif_keyword,
+      semicolon: semicolon });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get condition() { return this.children.condition; }
+  get right_paren() { return this.children.right_paren; }
+  get colon() { return this.children.colon; }
+  get statement() { return this.children.statement; }
+  get elseif_colon_clauses() { return this.children.elseif_colon_clauses; }
+  get else_colon_clause() { return this.children.else_colon_clause; }
+  get endif_keyword() { return this.children.endif_keyword; }
+  get semicolon() { return this.children.semicolon; }
+  with_keyword(keyword){
+    return new IfEndIfStatement(
+      keyword,
+      this.left_paren,
+      this.condition,
+      this.right_paren,
+      this.colon,
+      this.statement,
+      this.elseif_colon_clauses,
+      this.else_colon_clause,
+      this.endif_keyword,
+      this.semicolon);
+  }
+  with_left_paren(left_paren){
+    return new IfEndIfStatement(
+      this.keyword,
+      left_paren,
+      this.condition,
+      this.right_paren,
+      this.colon,
+      this.statement,
+      this.elseif_colon_clauses,
+      this.else_colon_clause,
+      this.endif_keyword,
+      this.semicolon);
+  }
+  with_condition(condition){
+    return new IfEndIfStatement(
+      this.keyword,
+      this.left_paren,
+      condition,
+      this.right_paren,
+      this.colon,
+      this.statement,
+      this.elseif_colon_clauses,
+      this.else_colon_clause,
+      this.endif_keyword,
+      this.semicolon);
+  }
+  with_right_paren(right_paren){
+    return new IfEndIfStatement(
+      this.keyword,
+      this.left_paren,
+      this.condition,
+      right_paren,
+      this.colon,
+      this.statement,
+      this.elseif_colon_clauses,
+      this.else_colon_clause,
+      this.endif_keyword,
+      this.semicolon);
+  }
+  with_colon(colon){
+    return new IfEndIfStatement(
+      this.keyword,
+      this.left_paren,
+      this.condition,
+      this.right_paren,
+      colon,
+      this.statement,
+      this.elseif_colon_clauses,
+      this.else_colon_clause,
+      this.endif_keyword,
+      this.semicolon);
+  }
+  with_statement(statement){
+    return new IfEndIfStatement(
+      this.keyword,
+      this.left_paren,
+      this.condition,
+      this.right_paren,
+      this.colon,
+      statement,
+      this.elseif_colon_clauses,
+      this.else_colon_clause,
+      this.endif_keyword,
+      this.semicolon);
+  }
+  with_elseif_colon_clauses(elseif_colon_clauses){
+    return new IfEndIfStatement(
+      this.keyword,
+      this.left_paren,
+      this.condition,
+      this.right_paren,
+      this.colon,
+      this.statement,
+      elseif_colon_clauses,
+      this.else_colon_clause,
+      this.endif_keyword,
+      this.semicolon);
+  }
+  with_else_colon_clause(else_colon_clause){
+    return new IfEndIfStatement(
+      this.keyword,
+      this.left_paren,
+      this.condition,
+      this.right_paren,
+      this.colon,
+      this.statement,
+      this.elseif_colon_clauses,
+      else_colon_clause,
+      this.endif_keyword,
+      this.semicolon);
+  }
+  with_endif_keyword(endif_keyword){
+    return new IfEndIfStatement(
+      this.keyword,
+      this.left_paren,
+      this.condition,
+      this.right_paren,
+      this.colon,
+      this.statement,
+      this.elseif_colon_clauses,
+      this.else_colon_clause,
+      endif_keyword,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new IfEndIfStatement(
+      this.keyword,
+      this.left_paren,
+      this.condition,
+      this.right_paren,
+      this.colon,
+      this.statement,
+      this.elseif_colon_clauses,
+      this.else_colon_clause,
+      this.endif_keyword,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var condition = this.condition.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var statement = this.statement.rewrite(rewriter, new_parents);
+    var elseif_colon_clauses = this.elseif_colon_clauses.rewrite(rewriter, new_parents);
+    var else_colon_clause = this.else_colon_clause.rewrite(rewriter, new_parents);
+    var endif_keyword = this.endif_keyword.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_paren === this.left_paren &&
+      condition === this.condition &&
+      right_paren === this.right_paren &&
+      colon === this.colon &&
+      statement === this.statement &&
+      elseif_colon_clauses === this.elseif_colon_clauses &&
+      else_colon_clause === this.else_colon_clause &&
+      endif_keyword === this.endif_keyword &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new IfEndIfStatement(
+        keyword,
+        left_paren,
+        condition,
+        right_paren,
+        colon,
+        statement,
+        elseif_colon_clauses,
+        else_colon_clause,
+        endif_keyword,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.if_endif_keyword, position, source);
+    position += keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.if_endif_left_paren, position, source);
+    position += left_paren.width;
+    let condition = EditableSyntax.from_json(
+      json.if_endif_condition, position, source);
+    position += condition.width;
+    let right_paren = EditableSyntax.from_json(
+      json.if_endif_right_paren, position, source);
+    position += right_paren.width;
+    let colon = EditableSyntax.from_json(
+      json.if_endif_colon, position, source);
+    position += colon.width;
+    let statement = EditableSyntax.from_json(
+      json.if_endif_statement, position, source);
+    position += statement.width;
+    let elseif_colon_clauses = EditableSyntax.from_json(
+      json.if_endif_elseif_colon_clauses, position, source);
+    position += elseif_colon_clauses.width;
+    let else_colon_clause = EditableSyntax.from_json(
+      json.if_endif_else_colon_clause, position, source);
+    position += else_colon_clause.width;
+    let endif_keyword = EditableSyntax.from_json(
+      json.if_endif_endif_keyword, position, source);
+    position += endif_keyword.width;
+    let semicolon = EditableSyntax.from_json(
+      json.if_endif_semicolon, position, source);
+    position += semicolon.width;
+    return new IfEndIfStatement(
+        keyword,
+        left_paren,
+        condition,
+        right_paren,
+        colon,
+        statement,
+        elseif_colon_clauses,
+        else_colon_clause,
+        endif_keyword,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (IfEndIfStatement._children_keys == null)
+      IfEndIfStatement._children_keys = [
+        'keyword',
+        'left_paren',
+        'condition',
+        'right_paren',
+        'colon',
+        'statement',
+        'elseif_colon_clauses',
+        'else_colon_clause',
+        'endif_keyword',
+        'semicolon'];
+    return IfEndIfStatement._children_keys;
+  }
+}
+class ElseifColonClause extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_paren,
+    condition,
+    right_paren,
+    colon,
+    statement)
+  {
+    super('elseif_colon_clause', {
+      keyword: keyword,
+      left_paren: left_paren,
+      condition: condition,
+      right_paren: right_paren,
+      colon: colon,
+      statement: statement });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get condition() { return this.children.condition; }
+  get right_paren() { return this.children.right_paren; }
+  get colon() { return this.children.colon; }
+  get statement() { return this.children.statement; }
+  with_keyword(keyword){
+    return new ElseifColonClause(
+      keyword,
+      this.left_paren,
+      this.condition,
+      this.right_paren,
+      this.colon,
+      this.statement);
+  }
+  with_left_paren(left_paren){
+    return new ElseifColonClause(
+      this.keyword,
+      left_paren,
+      this.condition,
+      this.right_paren,
+      this.colon,
+      this.statement);
+  }
+  with_condition(condition){
+    return new ElseifColonClause(
+      this.keyword,
+      this.left_paren,
+      condition,
+      this.right_paren,
+      this.colon,
+      this.statement);
+  }
+  with_right_paren(right_paren){
+    return new ElseifColonClause(
+      this.keyword,
+      this.left_paren,
+      this.condition,
+      right_paren,
+      this.colon,
+      this.statement);
+  }
+  with_colon(colon){
+    return new ElseifColonClause(
+      this.keyword,
+      this.left_paren,
+      this.condition,
+      this.right_paren,
+      colon,
+      this.statement);
+  }
+  with_statement(statement){
+    return new ElseifColonClause(
+      this.keyword,
+      this.left_paren,
+      this.condition,
+      this.right_paren,
+      this.colon,
+      statement);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var condition = this.condition.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var statement = this.statement.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_paren === this.left_paren &&
+      condition === this.condition &&
+      right_paren === this.right_paren &&
+      colon === this.colon &&
+      statement === this.statement)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new ElseifColonClause(
+        keyword,
+        left_paren,
+        condition,
+        right_paren,
+        colon,
+        statement), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.elseif_colon_keyword, position, source);
+    position += keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.elseif_colon_left_paren, position, source);
+    position += left_paren.width;
+    let condition = EditableSyntax.from_json(
+      json.elseif_colon_condition, position, source);
+    position += condition.width;
+    let right_paren = EditableSyntax.from_json(
+      json.elseif_colon_right_paren, position, source);
+    position += right_paren.width;
+    let colon = EditableSyntax.from_json(
+      json.elseif_colon_colon, position, source);
+    position += colon.width;
+    let statement = EditableSyntax.from_json(
+      json.elseif_colon_statement, position, source);
+    position += statement.width;
+    return new ElseifColonClause(
+        keyword,
+        left_paren,
+        condition,
+        right_paren,
+        colon,
+        statement);
+  }
+  get children_keys()
+  {
+    if (ElseifColonClause._children_keys == null)
+      ElseifColonClause._children_keys = [
+        'keyword',
+        'left_paren',
+        'condition',
+        'right_paren',
+        'colon',
+        'statement'];
+    return ElseifColonClause._children_keys;
+  }
+}
+class ElseColonClause extends EditableSyntax
+{
+  constructor(
+    keyword,
+    colon,
+    statement)
+  {
+    super('else_colon_clause', {
+      keyword: keyword,
+      colon: colon,
+      statement: statement });
+  }
+  get keyword() { return this.children.keyword; }
+  get colon() { return this.children.colon; }
+  get statement() { return this.children.statement; }
+  with_keyword(keyword){
+    return new ElseColonClause(
+      keyword,
+      this.colon,
+      this.statement);
+  }
+  with_colon(colon){
+    return new ElseColonClause(
+      this.keyword,
+      colon,
+      this.statement);
+  }
+  with_statement(statement){
+    return new ElseColonClause(
+      this.keyword,
+      this.colon,
+      statement);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var statement = this.statement.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      colon === this.colon &&
+      statement === this.statement)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new ElseColonClause(
+        keyword,
+        colon,
+        statement), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.else_colon_keyword, position, source);
+    position += keyword.width;
+    let colon = EditableSyntax.from_json(
+      json.else_colon_colon, position, source);
+    position += colon.width;
+    let statement = EditableSyntax.from_json(
+      json.else_colon_statement, position, source);
+    position += statement.width;
+    return new ElseColonClause(
+        keyword,
+        colon,
+        statement);
+  }
+  get children_keys()
+  {
+    if (ElseColonClause._children_keys == null)
+      ElseColonClause._children_keys = [
+        'keyword',
+        'colon',
+        'statement'];
+    return ElseColonClause._children_keys;
   }
 }
 class TryStatement extends EditableSyntax
@@ -17932,6 +18454,7 @@ exports.EchoToken = EchoToken;
 exports.ElseToken = ElseToken;
 exports.ElseifToken = ElseifToken;
 exports.EmptyToken = EmptyToken;
+exports.EndifToken = EndifToken;
 exports.EnumToken = EnumToken;
 exports.EvalToken = EvalToken;
 exports.ExtendsToken = ExtendsToken;
@@ -18155,6 +18678,9 @@ exports.WhileStatement = WhileStatement;
 exports.IfStatement = IfStatement;
 exports.ElseifClause = ElseifClause;
 exports.ElseClause = ElseClause;
+exports.IfEndIfStatement = IfEndIfStatement;
+exports.ElseifColonClause = ElseifColonClause;
+exports.ElseColonClause = ElseColonClause;
 exports.TryStatement = TryStatement;
 exports.CatchClause = CatchClause;
 exports.FinallyClause = FinallyClause;

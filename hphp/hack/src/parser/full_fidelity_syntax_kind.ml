@@ -73,6 +73,9 @@ type t =
   | IfStatement
   | ElseifClause
   | ElseClause
+  | IfEndIfStatement
+  | ElseifColonClause
+  | ElseColonClause
   | TryStatement
   | CatchClause
   | FinallyClause
@@ -228,6 +231,9 @@ let to_string kind =
   | IfStatement                             -> "if_statement"
   | ElseifClause                            -> "elseif_clause"
   | ElseClause                              -> "else_clause"
+  | IfEndIfStatement                        -> "if_endif_statement"
+  | ElseifColonClause                       -> "elseif_colon_clause"
+  | ElseColonClause                         -> "else_colon_clause"
   | TryStatement                            -> "try_statement"
   | CatchClause                             -> "catch_clause"
   | FinallyClause                           -> "finally_clause"

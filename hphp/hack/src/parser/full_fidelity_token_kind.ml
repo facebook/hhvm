@@ -56,6 +56,7 @@ type t =
   | Else
   | Elseif
   | Empty
+  | Endif
   | Enum
   | Eval
   | Extends
@@ -255,6 +256,7 @@ let from_string keyword =
   | "else"         -> Some Else
   | "elseif"       -> Some Elseif
   | "empty"        -> Some Empty
+  | "endif"        -> Some Endif
   | "enum"         -> Some Enum
   | "eval"         -> Some Eval
   | "extends"      -> Some Extends
@@ -426,6 +428,7 @@ let to_string kind =
   | Else                          -> "else"
   | Elseif                        -> "elseif"
   | Empty                         -> "empty"
+  | Endif                         -> "endif"
   | Enum                          -> "enum"
   | Eval                          -> "eval"
   | Extends                       -> "extends"

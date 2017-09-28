@@ -645,6 +645,52 @@ let schema : schema_node list =
       ; "statement", Aggregate Statement
       ]
     }
+  ; { kind_name   = "IfEndIfStatement"
+    ; type_name   = "if_endif_statement"
+    ; func_name   = "if_endif_statement"
+    ; description = "if_endif_statement"
+    ; prefix      = "if_endif"
+    ; aggregates  = [ TopLevelDeclaration; Statement ]
+    ; fields =
+      [ "keyword", Token
+      ; "left_paren", Token
+      ; "condition", Aggregate Expression
+      ; "right_paren", Token
+      ; "colon", Token
+      ; "statements", ZeroOrMore (Aggregate Statement)
+      ; "elseif_colon_clauses", ZeroOrMore (Just "ElseifColonClause")
+      ; "else_colon_clause", ZeroOrOne (Just "ElseColonClause")
+      ; "endif_keyword", Token
+      ; "semicolon", Token
+      ]
+    }
+  ; { kind_name   = "ElseifColonClause"
+    ; type_name   = "elseif_colon_clause"
+    ; func_name   = "elseif_colon_clause"
+    ; description = "elseif_colon_clause"
+    ; prefix      = "elseif_colon"
+    ; aggregates  = []
+    ; fields =
+      [ "keyword", Token
+      ; "left_paren", Token
+      ; "condition", Aggregate Expression
+      ; "right_paren", Token
+      ; "colon", Token
+      ; "statements", ZeroOrMore (Aggregate Statement)
+      ]
+    }
+  ; { kind_name   = "ElseColonClause"
+    ; type_name   = "else_colon_clause"
+    ; func_name   = "else_colon_clause"
+    ; description = "else_colon_clause"
+    ; prefix      = "else_colon"
+    ; aggregates  = []
+    ; fields =
+      [ "keyword", Token
+      ; "colon", Token
+      ; "statements", ZeroOrMore (Aggregate Statement)
+      ]
+    }
   ; { kind_name   = "TryStatement"
     ; type_name   = "try_statement"
     ; func_name   = "try_statement"

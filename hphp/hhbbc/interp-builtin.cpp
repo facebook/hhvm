@@ -238,6 +238,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   if (options.ConstantFoldBuiltins && func.isFoldable()) {
     if (auto val = const_fold(env, op.arg1, func)) {
       constprop(env);
+      discard(env, op.arg1);
       return push(env, std::move(*val));
     }
   }
@@ -382,11 +383,6 @@ void finish_builtin(ISS& env,
 
 void reduce_fpass_arg(ISS& env, const Bytecode& bc, uint32_t param, bool byRef,
                       FPassHint hint) {
-  auto ar = fpiTop(env);
-  if (ar.kind == FPIKind::Builtin) {
-    return reduceFPassBuiltin(env, prepKind(env, param), hint, param, bc);
-  }
-
   if (byRef) {
     return reduce(env, bc, bc::FPassVNop { param, hint });
   }
@@ -421,9 +417,6 @@ folly::Optional<Type> const_fold(ISS& env,
                                  const res::Func& rfunc) {
   assert(rfunc.isFoldable());
 
-  // Don't pop the args yet---if the builtin throws at compile time (because
-  // it would raise a warning or something at runtime) we're going to leave
-  // the call alone.
   std::vector<Cell> args(nArgs);
   for (auto i = uint32_t{0}; i < nArgs; ++i) {
     auto const val = tv(topT(env, i));
@@ -471,9 +464,6 @@ folly::Optional<Type> const_fold(ISS& env,
         func, HPHP::ActRec::encodeClass(cls), nullptr,
         args.size(), args.data(), !env.ctx.unit->useStrictTypes
       );
-
-      // If we got here, we didn't throw, so we can pop the inputs.
-      for (auto i = uint32_t{0}; i < nArgs; ++i) popT(env);
 
       assert(cellIsPlausible(retVal));
       return retVal;

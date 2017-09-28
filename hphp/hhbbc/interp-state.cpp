@@ -111,7 +111,7 @@ CollectedInfo::CollectedInfo(const Index& index,
                              const FuncAnalysis* fa)
     : props{index, ctx, cls}
     , publicStatics{publicStatics}
-    , opts{opts}
+    , opts{fa ? opts | CollectionOpts::Optimizing : opts}
 {
   if (fa) {
     localStaticTypes = fa->localStaticTypes;

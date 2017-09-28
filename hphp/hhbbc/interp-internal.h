@@ -424,35 +424,46 @@ void push(ISS& env, Type t, LocalId l) {
  * to the call, or -1 for unknown. We only need the number of args
  * when we know the exact function being called, in order to determine
  * eligibility for folding.
+ *
+ * returns the foldable flag as a convenience.
  */
-void fpiPush(ISS& env, ActRec ar, int32_t nArgs = -1) {
-  if (nArgs >= 0 &&
-      ar.kind != FPIKind::Ctor &&
-      ar.kind != FPIKind::Builtin &&
-      ar.func && !ar.fallbackFunc) {
-    ar.foldable = [&] {
-      auto const func = ar.func->exactFunc();
-      if (!func) return false;
-      if (env.collect.unfoldableFuncs.count(func)) return false;
-      // Foldable builtins are always worth trying
-      if (ar.func->isFoldable()) return true;
-      // Any native functions at this point are known to be
-      // non-foldable, but other builtins might be, even if they
-      // don't have the __Foldable attribute.
-      if (func->nativeInfo) return false;
-      if (func->params.size()) {
-        // Not worth trying if we're going to warn due to missing args
-        return check_nargs_in_range(func, nArgs);
-      }
-      // If the function has no args, we can simply check that its effect free
-      // and returns a literal.
-      return env.index.is_effect_free(*ar.func) &&
-             is_scalar(env.index.lookup_return_type_raw(func));
-    }();
-  }
-  FTRACE(2, "    fpi+: {}\n", show(ar));
+bool fpiPush(ISS& env, ActRec ar, int32_t nArgs) {
+  auto foldable = [&] {
+    if (nArgs < 0 ||
+        ar.kind == FPIKind::Ctor ||
+        ar.kind == FPIKind::Builtin ||
+        !ar.func || ar.fallbackFunc) {
+      return false;
+    }
+    auto const func = ar.func->exactFunc();
+    if (!func) return false;
+    if (env.collect.unfoldableFuncs.count(func)) return false;
+    // Foldable builtins are always worth trying
+    if (ar.func->isFoldable()) return true;
+    // Any native functions at this point are known to be
+    // non-foldable, but other builtins might be, even if they
+    // don't have the __Foldable attribute.
+    if (func->nativeInfo) return false;
+    if (func->params.size()) {
+      // Not worth trying if we're going to warn due to missing args
+      return check_nargs_in_range(func, nArgs);
+    }
+    // If the function has no args, we can simply check that its effect free
+    // and returns a literal.
+    return env.index.is_effect_free(*ar.func) &&
+    is_scalar(env.index.lookup_return_type_raw(func));
+  }();
+  if (foldable) effect_free(env);
+  ar.foldable = foldable;
   ar.pushBlk = env.blk.id;
+
+  FTRACE(2, "    fpi+: {}\n", show(ar));
   env.state.fpiStack.push_back(std::move(ar));
+  return foldable;
+}
+
+void fpiPush(ISS& env, ActRec ar) {
+  fpiPush(env, std::move(ar), -1);
 }
 
 ActRec fpiPop(ISS& env) {
@@ -468,17 +479,32 @@ ActRec& fpiTop(ISS& env) {
   return env.state.fpiStack.back();
 }
 
+void fpiNotFoldable(ISS& env) {
+  // By the time we're optimizing, we should know up front which funcs
+  // are foldable (the analyze phase iterates to convergence, the
+  // optimize phase does not - so its too late to fix now).
+  assertx(!any(env.collect.opts & CollectionOpts::Optimizing));
+
+  auto& ar = fpiTop(env);
+  assertx(ar.func && ar.foldable);
+  auto const func = ar.func->exactFunc();
+  assertx(func);
+  env.collect.unfoldableFuncs.emplace(func);
+  env.propagate(ar.pushBlk, nullptr);
+  ar.foldable = false;
+  // we're going to reprocess the whole fpi region; any results we've
+  // got so far are bogus, so stop prevent further useless work by
+  // marking the next bytecode unreachable
+  unreachable(env);
+  FTRACE(2, "     fpi: not foldable\n");
+}
+
 PrepKind prepKind(ISS& env, uint32_t paramId) {
   auto& ar = fpiTop(env);
   if (ar.func && !ar.fallbackFunc) {
     auto const ret = env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
     if (ar.foldable && ret != PrepKind::Val) {
-      auto const func = ar.func->exactFunc();
-      assertx(func);
-      env.collect.unfoldableFuncs.emplace(func);
-      env.propagate(ar.pushBlk, nullptr);
-      ar.foldable = false;
-      FTRACE(2, "     fpi: not foldable\n");
+      fpiNotFoldable(env);
     }
     if (ret != PrepKind::Unknown) {
       return ret;
@@ -489,15 +515,17 @@ PrepKind prepKind(ISS& env, uint32_t paramId) {
 }
 
 template<class... Bytecodes>
-void reduceFPassBuiltin(ISS& env, PrepKind kind, FPassHint hint, uint32_t arg,
-                        Bytecodes&&... bcs) {
+void killFPass(ISS& env, PrepKind kind, FPassHint hint, uint32_t arg,
+               Bytecodes&&... bcs) {
   assert(kind != PrepKind::Unknown);
 
-  // Since PrepKind is never Unknown for FCallBuiltins we should know statically
-  // if we will throw or not at runtime (PrepKind and FPassHint don't match).
+  // Since PrepKind is never Unknown for buildins or foldables we
+  // should know statically if we will throw or not at runtime
+  // (PrepKind and FPassHint don't match).
   if (fpassCanThrow(env, kind, hint)) {
-    auto ar = fpiTop(env);
-    assert(ar.kind == FPIKind::Builtin && ar.func && !ar.fallbackFunc);
+    auto& ar = fpiTop(env);
+    assertx(ar.foldable || ar.kind == FPIKind::Builtin);
+    assertx(ar.func && !ar.fallbackFunc);
     return reduce(
       env,
       std::forward<Bytecodes>(bcs)...,
@@ -505,6 +533,37 @@ void reduceFPassBuiltin(ISS& env, PrepKind kind, FPassHint hint, uint32_t arg,
     );
   }
   return reduce(env, std::forward<Bytecodes>(bcs)...);
+}
+
+bool shouldKillFPass(ISS& env, FPassHint hint, uint32_t param) {
+  auto& ar = fpiTop(env);
+  if (ar.kind == FPIKind::Builtin) return true;
+  if (!ar.foldable) return false;
+  prepKind(env, param);
+  if (!ar.foldable) return false;
+  auto const ok = [&] {
+    if (hint == FPassHint::Ref) return false;
+    auto const &t = topT(env);
+    if (!is_scalar(t)) return false;
+    auto const callee = ar.func->exactFunc();
+    if (param >= callee->params.size() ||
+        (param + 1 == callee->params.size() &&
+         callee->params.back().isVariadic)) {
+      return true;
+    }
+    auto const constraint = callee->params[param].typeConstraint;
+    if (!constraint.hasConstraint() ||
+        constraint.isTypeVar() ||
+        constraint.isTypeConstant()) {
+      return true;
+    }
+    return env.index.satisfies_constraint(
+      Context { callee->unit, const_cast<php::Func*>(callee), callee->cls },
+      t, constraint);
+  }();
+  if (ok) return true;
+  fpiNotFoldable(env);
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////

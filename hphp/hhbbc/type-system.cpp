@@ -2379,6 +2379,34 @@ bool is_scalar(const Type& t) {
   return tvImpl<bool>(t);
 }
 
+Type scalarize(Type t) {
+  assertx(is_scalar(t));
+
+  switch (t.m_dataTag) {
+    case DataTag::None:
+      assertx(t.subtypeOfAny(TNull, TTrue, TFalse,
+                             TArrE, TVecE, TDictE, TKeysetE));
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Str:
+      return t;
+    case DataTag::ArrLikeVal:
+      t.m_bits = static_cast<trep>(t.m_bits &
+                                   (BSArrN | BSVecN | BSDictN | BSKeysetN));
+      return t;
+    case DataTag::ArrLikeMap:
+    case DataTag::ArrLikePacked:
+      return from_cell(*tv(t));
+    case DataTag::RefInner:
+    case DataTag::ArrLikePackedN:
+    case DataTag::ArrLikeMapN:
+    case DataTag::Obj:
+    case DataTag::Cls:
+      break;
+  }
+  not_reached();
+}
+
 Type type_of_istype(IsTypeOp op) {
   switch (op) {
   case IsTypeOp::Uninit: return TUninit;

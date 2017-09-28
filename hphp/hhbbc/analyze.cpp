@@ -333,6 +333,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
 
       auto propagate = [&] (BlockId target, const State* st) {
         if (!st) {
+          FTRACE(2, "     Force reprocess: {}\n", target);
           incompleteQ.push(rpoId(ai, target));
           return;
         }

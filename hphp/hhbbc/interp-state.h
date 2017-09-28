@@ -356,7 +356,8 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
 enum class CollectionOpts {
   TrackConstantArrays = 1,
   Inlining = 2,
-  EffectFreeOnly = 4
+  EffectFreeOnly = 4,
+  Optimizing = 8
 };
 
 inline CollectionOpts operator|(CollectionOpts o1, CollectionOpts o2) {

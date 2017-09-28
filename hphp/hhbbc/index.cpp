@@ -2893,12 +2893,41 @@ Type Index::lookup_foldable_return_type(Context ctx,
     { func->unit, const_cast<php::Func*>(func), func->cls }, std::move(args)
   };
 
+  auto showArgs DEBUG_ONLY = [] (const std::vector<Type>& a) {
+    std::string ret, sep;
+    for (auto& arg : a) {
+      folly::format(&ret, "{}{}", sep, show(arg));
+      sep = ",";
+    };
+    return ret;
+  };
+
   {
     ContextRetTyMap::const_accessor acc;
     if (m_data->foldableReturnTypeMap.find(acc, calleeCtx)) {
+      FTRACE_MOD(
+        Trace::hhbbc, 4,
+        "Found foldableReturnType for {}{}{} with args {} (hash: {})\n",
+        func->cls ? func->cls->name : empty_string().get(),
+        func->cls ? "::" : "",
+        func->name,
+        showArgs(calleeCtx.args),
+        CallContextHashCompare{}.hash(calleeCtx));
+
       assertx(is_scalar(acc->second));
       return acc->second;
     }
+  }
+
+  if (frozen()) {
+      FTRACE_MOD(
+        Trace::hhbbc, 4,
+        "MISSING: foldableReturnType for {}{}{} with args {} (hash: {})\n",
+        func->cls ? func->cls->name : empty_string().get(),
+        func->cls ? "::" : "",
+        func->name,
+        showArgs(calleeCtx.args),
+        CallContextHashCompare{}.hash(calleeCtx));
   }
 
   if (frozen() || interp_nesting_level > max_interp_nexting_level) return TTop;

@@ -690,7 +690,7 @@ void first_pass(const Index& index,
   auto& fpiStack = ainfo.bdata[blk->id].stateIn.fpiStack;
   auto it = std::remove_if(fpiStack.begin(), fpiStack.end(),
                            [](const ActRec& ar) {
-                             return ar.kind == FPIKind::Builtin;
+                             return ar.kind == FPIKind::Builtin || ar.foldable;
                            });
 
   if (it != fpiStack.end()) {

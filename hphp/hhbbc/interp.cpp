@@ -2186,7 +2186,9 @@ void in(ISS& env, const bc::FPushFuncD& op) {
       return reduce(env, bc::Nop {});
     }
   }
-  fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc }, op.arg1);
+  if (fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc }, op.arg1)) {
+    return reduce(env, bc::Nop {});
+  }
 }
 
 void in(ISS& env, const bc::FPushFunc& op) {
@@ -2228,11 +2230,11 @@ void in(ISS& env, const bc::FPushFuncU& op) {
 }
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
-  auto location = topStkEquiv(env);
-  auto t1 = popC(env);
+  auto t1 = topC(env);
   if (op.subop3 == ObjMethodOp::NullThrows) {
     if (!t1.couldBe(TObj)) {
       fpiPush(env, ActRec { FPIKind::ObjMeth });
+      popC(env);
       return unreachable(env);
     }
     if (is_opt(t1)) {
@@ -2240,6 +2242,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
     }
   } else if (!t1.couldBe(TOptObj)) {
     fpiPush(env, ActRec { FPIKind::ObjMeth });
+    popC(env);
     return unreachable(env);
   }
   auto const clsTy = objcls(t1);
@@ -2248,15 +2251,20 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
     return folly::none;
   }();
 
-  fpiPush(
-    env,
-    ActRec {
-      FPIKind::ObjMeth,
-      rcls,
-      env.index.resolve_method(env.ctx, clsTy, op.str2)
-    },
-    op.arg1
-  );
+  if (fpiPush(
+        env,
+        ActRec {
+          FPIKind::ObjMeth,
+            rcls,
+            env.index.resolve_method(env.ctx, clsTy, op.str2)
+            },
+        op.arg1
+      )) {
+    return reduce(env, bc::PopC {});
+  }
+
+  auto location = topStkEquiv(env);
+  popC(env);
   if (location != NoLocalId) {
     auto ty = peekLocation(env, location);
     if (ty.subtypeOf(TCell)) {
@@ -2297,7 +2305,9 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
     rcls ? clsExact(*rcls) : TCls,
     op.str2
   );
-  fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun }, op.arg1);
+  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun }, op.arg1)) {
+    return reduce(env, bc::Nop {});
+  }
 }
 
 template<typename PushOp>
@@ -2328,7 +2338,11 @@ void pushClsHelper(ISS& env, const PushOp& op) {
     }
     rfunc = env.index.resolve_method(env.ctx, t1, v2->m_data.pstr);
   }
-  fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc }, op.arg1);
+  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc }, op.arg1)) {
+    return reduce(env,
+                  bc::DiscardClsRef { op.slot },
+                  bc::PopC {});
+  }
   takeClsRefSlot(env, op.slot);
   popC(env);
 }
@@ -2501,14 +2515,14 @@ void in(ISS& env, const bc::FPassV& op) {
 void in(ISS& env, const bc::FPassR& op) {
   auto const kind = prepKind(env, op.arg1);
   if (!fpassCanThrow(env, kind, op.subop2)) nothrow(env);
-  if (fpiTop(env).kind == FPIKind::Builtin) {
+  if (shouldKillFPass(env, op.subop2, op.arg1)) {
     switch (kind) {
     case PrepKind::Unknown:
       not_reached();
     case PrepKind::Val:
-      return reduceFPassBuiltin(env, kind, op.subop2, op.arg1, bc::UnboxR {});
+      return killFPass(env, kind, op.subop2, op.arg1, bc::UnboxR {});
     case PrepKind::Ref:
-      return reduceFPassBuiltin(env, kind, op.subop2, op.arg1, bc::BoxR {});
+      return killFPass(env, kind, op.subop2, op.arg1, bc::BoxR {});
     }
   }
 
@@ -2541,47 +2555,18 @@ void in(ISS& env, const bc::FPassR& op) {
 }
 
 void in(ISS& env, const bc::FPassVNop& op) {
-  push(env, popV(env));
-  if (fpiTop(env).kind == FPIKind::Builtin) {
-    return reduceFPassBuiltin(env, prepKind(env, op.arg1), op.subop2, op.arg1,
-                              bc::Nop {});
+  if (shouldKillFPass(env, op.subop2, op.arg1)) {
+    return killFPass(env, prepKind(env, op.arg1), op.subop2, op.arg1,
+                     bc::Nop {});
   }
+  push(env, popV(env));
   if (op.subop2 != FPassHint::Cell) nothrow(env);
 }
 
 void in(ISS& env, const bc::FPassC& op) {
-  auto& ar = fpiTop(env);
-  if (ar.kind == FPIKind::Builtin) {
-    return reduceFPassBuiltin(env, prepKind(env, op.arg1), op.subop2, op.arg1,
-                              bc::Nop {});
-  }
-  if (ar.foldable) {
-    auto const ok = [&] {
-      if (!is_scalar(topT(env))) return false;
-      auto const callee = ar.func->exactFunc();
-      if (op.arg1 >= callee->params.size() ||
-          (op.arg1 + 1 == callee->params.size() &&
-           callee->params.back().isVariadic)) {
-        return true;
-      }
-      auto const constraint = callee->params[op.arg1].typeConstraint;
-      if (!constraint.hasConstraint() ||
-          constraint.isTypeVar() ||
-          constraint.isTypeConstant()) {
-        return true;
-      }
-      return env.index.satisfies_constraint(
-        Context { callee->unit, const_cast<php::Func*>(callee), callee->cls },
-        topC(env), constraint);
-    }();
-    if (!ok) {
-      auto const func = ar.func->exactFunc();
-      assertx(func);
-      env.collect.unfoldableFuncs.emplace(func);
-      env.propagate(ar.pushBlk, nullptr);
-      ar.foldable = false;
-      FTRACE(2, "     fpi: not foldable\n");
-    }
+  if (shouldKillFPass(env, op.subop2, op.arg1)) {
+    return killFPass(env, prepKind(env, op.arg1), op.subop2, op.arg1,
+                     bc::Nop {});
   }
   if (op.subop2 != FPassHint::Ref) effect_free(env);
 }
@@ -2589,7 +2574,7 @@ void in(ISS& env, const bc::FPassC& op) {
 void fpassCXHelper(ISS& env, uint32_t param, bool error, FPassHint hint) {
   auto const& fpi = fpiTop(env);
   auto const kind = prepKind(env, param);
-  if (fpi.kind == FPIKind::Builtin) {
+  if (shouldKillFPass(env, hint, param)) {
     switch (kind) {
       case PrepKind::Unknown:
         not_reached();
@@ -2598,7 +2583,7 @@ void fpassCXHelper(ISS& env, uint32_t param, bool error, FPassHint hint) {
         auto const& params = fpi.func->exactFunc()->params;
         if (param >= params.size() || params[param].mustBeRef) {
           if (error) {
-            return reduceFPassBuiltin(
+            return killFPass(
               env,
               kind,
               hint,
@@ -2607,7 +2592,7 @@ void fpassCXHelper(ISS& env, uint32_t param, bool error, FPassHint hint) {
               bc::Fatal { FatalOp::Runtime }
             );
           } else {
-            return reduceFPassBuiltin(
+            return killFPass(
               env,
               kind,
               hint,
@@ -2653,34 +2638,39 @@ const StaticString s_defined { "defined" };
 const StaticString s_function_exists { "function_exists" };
 
 void fcallKnownImpl(ISS& env, uint32_t numArgs) {
-  auto const ar = fpiPop(env);
+  auto const ar = fpiTop(env);
   always_assert(ar.func.hasValue());
 
   if (options.ConstantFoldBuiltins && ar.foldable) {
-    auto ty = [&] () -> folly::Optional<Type> {
+    auto ty = [&] () {
       if (ar.func->isFoldable()) {
-        return const_fold(env, numArgs, *ar.func);
+        auto ret = const_fold(env, numArgs, *ar.func);
+        return ret ? *ret : TBottom;
       }
       auto const func = ar.func->exactFunc();
       assertx(func);
       std::vector<Type> args(numArgs);
       for (auto i = uint32_t{0}; i < numArgs; ++i) {
-        args[numArgs - i - 1] = topT(env, i);
+        args[numArgs - i - 1] = scalarize(topT(env, i));
       }
 
-      auto const ret = env.index.lookup_foldable_return_type(
+      return env.index.lookup_foldable_return_type(
         env.ctx, func, std::move(args));
-      if (ret == TTop) {
-        env.collect.unfoldableFuncs.emplace(func);
-        env.propagate(ar.pushBlk, nullptr);
-        return folly::none;
-      }
-      discard(env, numArgs);
-      return ret;
     }();
-    if (ty) return push(env, std::move(*ty));
+    if (auto v = tv(ty)) {
+      std::vector<Bytecode> repl { numArgs, bc::PopC {} };
+      repl.push_back(gen_constant(*v));
+      repl.push_back(bc::RGetCNop {});
+      fpiPop(env);
+      return reduce(env, std::move(repl));
+    }
+    fpiNotFoldable(env);
+    fpiPop(env);
+    discard(env, numArgs);
+    return push(env, TBottom);
   }
 
+  fpiPop(env);
   specialFunctionEffects(env, ar);
 
   if (ar.func->name()->isame(s_function_exists.get())) {
@@ -2797,6 +2787,12 @@ void in(ISS& env, const bc::FCallD& op) {
 
 void in(ISS& env, const bc::FCallAwait& op) {
   auto const ar = fpiTop(env);
+  if (ar.foldable) {
+    discard(env, op.arg1);
+    fpiNotFoldable(env);
+    fpiPop(env);
+    return push(env, TBottom);
+  }
   if ((ar.func && ar.func->name() != op.str3) ||
       (ar.cls && ar.cls->name() != op.str2)) {
     // We've found a more precise type for the call, so update it
@@ -2818,7 +2814,12 @@ void fcallArrayImpl(ISS& env, int arg) {
   if (ar.kind == FPIKind::Builtin) {
     return finish_builtin(env, ar.func->exactFunc(), arg, true);
   }
-
+  if (ar.foldable) {
+    discard(env, arg);
+    fpiNotFoldable(env);
+    fpiPop(env);
+    return push(env, TBottom);
+  }
   for (auto i = uint32_t{0}; i < arg; ++i) { popF(env); }
   fpiPop(env);
   specialFunctionEffects(env, ar);

@@ -511,6 +511,7 @@ private:
   friend bool is_opt(const Type&);
   template<typename R>
   friend R tvImpl(const Type&);
+  friend Type scalarize(Type t);
   friend std::string show(const Type&);
   friend ArrKey disect_array_key(const Type&);
   friend std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key);
@@ -946,6 +947,14 @@ folly::Optional<Cell> tv(const Type& t);
  * Otherwise return false.
  */
 bool is_scalar(const Type& t);
+
+/*
+ * Return the canonical scalar type for t - equivalent to
+ * from_cell(*tv(t)).
+ *
+ * pre: is_scalar(t).
+ */
+Type scalarize(Type t);
 
 /*
  * Get the type in our typesystem that corresponds to an hhbc

@@ -15,7 +15,7 @@ Edits =
 + privatestaticget$guarded_single$memoize_cache$guardb:0;no_serialize<  {}>
 + privatestaticget$guarded_single$memoize_cacheN;no_serialize<  {}>
 + get$memoize_impl->[__Memoize([]) ]<HH\this HH\this {hh_type extended_hint }>get$memoize_impl([]) isPrivateisStatic{
-[]numiters = 0
+{}numiters = 0
 numclsrefslots = 0
 []
 [FPushCtorD 0 "MemoizeWrappers"

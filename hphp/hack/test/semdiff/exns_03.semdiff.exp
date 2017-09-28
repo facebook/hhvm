@@ -96,8 +96,8 @@ Todo=[102 58 92 12;102,102 58 92 12;102->{}{}]
 [12;12,12;12->{}{}]
 
 Distance = 1
-Size = 125
-Similarity = 99.21
+Size = 127
+Similarity = 99.22
 Edits = 
 
 for foo:

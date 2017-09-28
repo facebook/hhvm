@@ -4626,7 +4626,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
   let expr env x =
     let env, _te, ty = raw_expr ?lhs_of_null_coalesce ~in_cond:true env x in
     Async.enforce_nullable_or_not_awaitable env (fst x) ty;
-    env, ty
+    check_valid_rvalue (fst x) env ty
   in let condition = condition ?lhs_of_null_coalesce
   in function
   | _, Expr_list [] -> env

@@ -1,0 +1,6 @@
+File "void_usage_5.php", line 12, characters 3-15:
+  array<^(string | void)>
+File "void_usage_5.php", line 13, characters 12-15:
+You are using the return value of a void function (Typing[4119])
+File "void_usage_5.php", line 5, characters 5-6:
+A void function doesn't return a value because this function implicitly returns void

@@ -46,7 +46,7 @@ let float = digit* frac? exp?
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | "\r\n"
 let sillyend = ';' digit+
-let id = (digit* ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '0'-'9' '_' '\\' '$' '#'] | "::")* sillyend?)
+let id = (digit* ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '0'-'9' '_' '\\' '$' '#' '\x7f'-'\xff' ] | "::")* sillyend?)
 let escapequote = "\\\""
 let comment = '#' [^ '\r' '\n']* newline
 let nonquote = [^ '"']
@@ -83,6 +83,8 @@ rule read =
   | ".static"   {STATICDIRECTIVE}
   | ".require"  {REQUIREDIRECTIVE}
   | ".srcloc"   {SRCLOCDIRECTIVE}
+  | "INF"
+  | "inf"       { DOUBLE "INF" }
   | id          {ID (Lexing.lexeme lexbuf)}
   | triplequoted as lxm {TRIPLEQUOTEDSTRING (String.sub lxm 3 (String.length lxm - 6))}
   | escapequote {read_php_escaped_string (Buffer.create 17) lexbuf}

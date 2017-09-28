@@ -564,10 +564,15 @@ let rewrite_class_refs instrseq =
     in
     InstrSeq.flat_map_seq instrseq rewrite_static_instr
 
+let is_srcloc i =
+  match i with
+  | ISrcLoc _ -> true
+  | _ -> false
+
 let first instrs =
   let rec aux instrs =
     match instrs with
-    | Instr_list l -> List.hd l
+    | Instr_list l -> List.find l (fun x -> not (is_srcloc x))
     | Instr_concat l -> List.find_map ~f:aux l
     | Instr_try_fault (t, f) -> match aux t with None -> aux f | v -> v
   in
@@ -576,7 +581,7 @@ let first instrs =
 let is_empty instrs =
   let rec aux instrs =
     match instrs with
-    | Instr_list l -> List.is_empty l
+    | Instr_list l -> List.is_empty l || List.for_all ~f:is_srcloc l
     | Instr_concat l -> List.for_all ~f:aux l
     | Instr_try_fault (t, f) -> aux t && aux f
   in

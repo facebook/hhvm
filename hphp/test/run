@@ -274,8 +274,8 @@ function hh_codegen_cmd($options, $config_file = null) {
   if (isset($config_file)) {
     $cmd .= ' -c "'.$config_file.'"';
   }
+  $cmd .= ' -v Hack.Compiler.SourceMapping=1 ';
   if (isset($options['hackc'])) {
-    $cmd .= ' -vHack.Compiler.SourceMapping=1';
     $cmd .= ' --daemon';
   }
   return $cmd;
@@ -933,9 +933,9 @@ function hhvm_cmd_impl() {
 
     if (isset($options['compare-hh-codegen'])) {
       $args[] = '-vEval.DisableHphpcOpts=1';
+      $args[] = '-vEval.DisassemblerSourceMapping=1';
 
       // TODO(paulbiss): support these
-      $args[] = '-vEval.DisassemblerSourceMapping=0';
       $args[] = '-vEval.DisassemblerPropDocComments=0';
       $args[] = '-vEval.JitEnableRenameFunction=0';
       $args[] = '-vDisassemblerDocComments=0';

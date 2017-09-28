@@ -29,6 +29,7 @@ struct State;
 struct Context;
 struct Bytecode;
 struct FuncAnalysis;
+struct CollectedInfo;
 namespace php { struct Block; }
 
 //////////////////////////////////////////////////////////////////////
@@ -36,8 +37,8 @@ namespace php { struct Block; }
 /*
  * Perform DCE on a single basic block.
  */
-void local_dce(const Index&, const FuncAnalysis&, borrowed_ptr<php::Block>,
-  const State&);
+void local_dce(const Index&, const FuncAnalysis&, CollectedInfo& collect,
+               borrowed_ptr<php::Block>, const State&);
 
 /*
  * Eliminate dead code in a function, across basic blocks, based on

@@ -300,6 +300,7 @@ bool hasObviousStackOutput(const Bytecode& op, const State& state) {
 
 void insert_assertions(const Index& index,
                        const FuncAnalysis& ainfo,
+                       CollectedInfo& collect,
                        borrowed_ptr<php::Block> const blk,
                        State state) {
   std::vector<Bytecode> newBCs;
@@ -310,9 +311,6 @@ void insert_assertions(const Index& index,
 
   std::vector<uint8_t> obviousStackOutputs(state.stack.size(), false);
 
-  CollectedInfo collect {
-    index, ctx, nullptr, nullptr, CollectionOpts::TrackConstantArrays, &ainfo
-  };
   auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
@@ -517,6 +515,7 @@ borrowed_ptr<php::Block> make_fatal_block(FuncAnalysis& ainfo,
 
 void first_pass(const Index& index,
                 FuncAnalysis& ainfo,
+                CollectedInfo& collect,
                 borrowed_ptr<php::Block> const blk,
                 State state) {
   auto const ctx = ainfo.ctx;
@@ -524,9 +523,6 @@ void first_pass(const Index& index,
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
-  CollectedInfo collect {
-    index, ctx, nullptr, nullptr, CollectionOpts::TrackConstantArrays, &ainfo
-  };
   auto interp = Interp { index, ctx, collect, blk, state };
 
   if (options.ConstantProp) collect.propagate_constants = propagate_constants;
@@ -704,6 +700,7 @@ template<class BlockContainer, class AInfo, class Fun>
 void visit_blocks_impl(const char* what,
                        const Index& index,
                        AInfo& ainfo,
+                       CollectedInfo& collect,
                        const BlockContainer& rpoBlocks,
                        Fun fun) {
   FTRACE(1, "|---- {}\n", what);
@@ -717,7 +714,7 @@ void visit_blocks_impl(const char* what,
     // TODO(#3732260): this should probably spend an extra interp pass
     // in debug builds to check that no transformation to the bytecode
     // was made that changes the block output state.
-    fun(index, ainfo, blk, state);
+    fun(index, ainfo, collect, blk, state);
   }
   assert(check(*ainfo.ctx.func));
 }
@@ -726,18 +723,20 @@ template<class Fun>
 void visit_blocks_mutable(const char* what,
                           const Index& index,
                           FuncAnalysis& ainfo,
+                          CollectedInfo& collect,
                           Fun fun) {
   // Make a copy of the block list so it can be mutated by the visitor.
   auto const blocksCopy = ainfo.rpoBlocks;
-  visit_blocks_impl(what, index, ainfo, blocksCopy, fun);
+  visit_blocks_impl(what, index, ainfo, collect, blocksCopy, fun);
 }
 
 template<class Fun>
 void visit_blocks(const char* what,
                   const Index& index,
                   const FuncAnalysis& ainfo,
+                  CollectedInfo& collect,
                   Fun fun) {
-  visit_blocks_impl(what, index, ainfo, ainfo.rpoBlocks, fun);
+  visit_blocks_impl(what, index, ainfo, collect, ainfo.rpoBlocks, fun);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -746,9 +745,16 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
   FTRACE(2, "{:-^70} {}\n", "Optimize Func", ainfo.ctx.func->name);
 
   bool again;
+  folly::Optional<CollectedInfo> collect;
+
+  collect.emplace(
+    index, ainfo.ctx, nullptr, nullptr,
+    CollectionOpts::TrackConstantArrays, &ainfo
+  );
+
   do {
     again = false;
-    visit_blocks_mutable("first pass", index, ainfo, first_pass);
+    visit_blocks_mutable("first pass", index, ainfo, *collect, first_pass);
 
     FTRACE(10, "{}", show(*ainfo.ctx.func));
     /*
@@ -758,7 +764,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
     remove_unreachable_blocks(ainfo);
 
     if (options.LocalDCE) {
-      visit_blocks("local DCE", index, ainfo, local_dce);
+      visit_blocks("local DCE", index, ainfo, *collect, local_dce);
     }
     if (options.GlobalDCE) {
       global_dce(index, ainfo);
@@ -774,6 +780,10 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
       ainfo = analyze_func(index,
                            ainfo.ctx,
                            CollectionOpts::TrackConstantArrays);
+      collect.emplace(
+        index, ainfo.ctx, nullptr, nullptr,
+        CollectionOpts::TrackConstantArrays, &ainfo
+      );
     }
 
     // If we merged blocks, there could be new optimization opportunities
@@ -806,10 +816,11 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
 
   if (pseudomain && func->unit->persistent.load(std::memory_order_relaxed)) {
     auto persistent = true;
-    visit_blocks("persistence check", index, ainfo,
+    visit_blocks("persistence check", index, ainfo, *collect,
                  [&] (const Index&,
                       const FuncAnalysis&,
-                      borrowed_ptr<php::Block> const blk,
+                      CollectedInfo&,
+                      borrowed_ptr<php::Block> blk,
                       const State&) {
                    if (persistent && !persistence_check(blk)) {
                      persistent = false;
@@ -821,7 +832,8 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
   }
 
   if (options.InsertAssertions) {
-    visit_blocks("insert assertions", index, ainfo, insert_assertions);
+    visit_blocks("insert assertions", index, ainfo, *collect,
+                 insert_assertions);
   }
 
   auto fixTypeConstraint = [&] (TypeConstraint& tc, const Type& candidate) {

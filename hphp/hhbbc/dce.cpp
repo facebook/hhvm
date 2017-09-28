@@ -1763,6 +1763,7 @@ struct DceOutState {
 folly::Optional<DceState>
 dce_visit(const Index& index,
           const FuncAnalysis& fa,
+          CollectedInfo& collect,
           borrowed_ptr<const php::Block> const blk,
           const State& stateIn,
           const DceOutState& dceOutState) {
@@ -1779,7 +1780,8 @@ dce_visit(const Index& index,
     return folly::none;
   }
 
-  auto const states = locally_propagated_states(index, fa, blk, stateIn);
+  auto const states = locally_propagated_states(index, fa, collect,
+                                                blk, stateIn);
 
   auto dceState = DceState{ index, fa };
   dceState.liveLocals = dceOutState.locLive;
@@ -1929,10 +1931,12 @@ struct DceAnalysis {
 
 DceAnalysis analyze_dce(const Index& index,
                         const FuncAnalysis& fa,
+                        CollectedInfo& collect,
                         borrowed_ptr<php::Block> const blk,
                         const State& stateIn,
                         const DceOutState& dceOutState) {
-  if (auto dceState = dce_visit(index, fa, blk, stateIn, dceOutState)) {
+  if (auto dceState = dce_visit(index, fa, collect,
+                                blk, stateIn, dceOutState)) {
     return DceAnalysis {
       dceState->liveLocals,
       dceState->liveSlots,
@@ -2043,10 +2047,11 @@ struct DceOptResult {
 DceOptResult
 optimize_dce(const Index& index,
              const FuncAnalysis& fa,
+             CollectedInfo& collect,
              borrowed_ptr<php::Block> const blk,
              const State& stateIn,
              const DceOutState& dceOutState) {
-  auto dceState = dce_visit(index, fa, blk, stateIn, dceOutState);
+  auto dceState = dce_visit(index, fa, collect, blk, stateIn, dceOutState);
 
   if (!dceState) {
     return {std::bitset<kMaxTrackedLocals>{},
@@ -2178,11 +2183,12 @@ void remove_unused_clsref_slots(Context const ctx,
 
 void local_dce(const Index& index,
                const FuncAnalysis& ainfo,
+               CollectedInfo& collect,
                borrowed_ptr<php::Block> const blk,
                const State& stateIn) {
   // For local DCE, we have to assume all variables are in the
   // live-out set for the block.
-  auto const ret = optimize_dce(index, ainfo, blk, stateIn,
+  auto const ret = optimize_dce(index, ainfo, collect, blk, stateIn,
                                 DceOutState{DceOutState::Local{}});
 
   dce_perform(*ainfo.ctx.func, ret.actionMap, ret.replaceMap);
@@ -2193,6 +2199,11 @@ void local_dce(const Index& index,
 void global_dce(const Index& index, const FuncAnalysis& ai) {
   auto rpoId = [&] (BlockId blk) {
     return ai.bdata[blk].rpoId;
+  };
+
+  auto collect = CollectedInfo {
+    index, ai.ctx, nullptr, nullptr,
+    CollectionOpts::TrackConstantArrays, &ai
   };
 
   FTRACE(1, "|---- global DCE analyze ({})\n", show(ai.ctx));
@@ -2358,6 +2369,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     auto const result = analyze_dce(
       index,
       ai,
+      collect,
       blk,
       ai.bdata[blk->id].stateIn,
       blockState
@@ -2438,6 +2450,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     auto ret = optimize_dce(
       index,
       ai,
+      collect,
       b,
       ai.bdata[b->id].stateIn,
       blockStates[b->id]

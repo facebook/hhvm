@@ -205,6 +205,7 @@ ClassAnalysis analyze_class(const Index&, Context);
 std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index&,
                           const FuncAnalysis&,
+                          CollectedInfo& collect,
                           borrowed_ptr<const php::Block>,
                           State stateIn);
 

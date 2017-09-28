@@ -126,7 +126,6 @@ slow/inline-hhas/hello-world.php
 slow/inline-hhas/if.php
 slow/inline-hhas/mixed.php
 slow/inline-hhas/param.php
-slow/integer/bin-format.php
 slow/interpolated_function_call.php
 slow/keyset/hh-only1.php
 slow/keyset/hh-only2.php

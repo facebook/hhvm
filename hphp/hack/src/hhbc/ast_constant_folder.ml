@@ -69,11 +69,14 @@ let int64_of_octal_opt (s : string) (truncate : bool) : Int64.t option =
       loop (idx + 1) (push acc (to_int64 s.[idx])) in
   loop 0 Int64.zero
 
+(* Return None if this overflows *)
 let try_type_intlike (s : string) : TV.t option =
   match radix s with
   | `Bin | `Hex | `Dec -> begin
     match Int64.of_string s with
-      i -> Some (TV.Int i)
+    | i ->
+      if i < 0L then None
+      else Some (TV.Int i)
     | exception _ -> None
   end
   | `Oct ->
@@ -90,7 +93,10 @@ let rec expr_to_typed_value
   | A.Int (_, s) -> begin
     match try_type_intlike s with
     | Some v -> v
-    | None -> TV.Float (float_of_string_custom s)
+    | None ->
+      if Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options
+      then TV.Int Int64.max_int
+      else TV.Float (float_of_string_custom s)
   end
   | A.True -> TV.Bool true
   | A.False -> TV.Bool false

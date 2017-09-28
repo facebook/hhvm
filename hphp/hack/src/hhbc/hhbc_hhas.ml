@@ -1139,11 +1139,19 @@ let string_of_param_default_value_option = function
     ^ (string_of_param_default_value expr)
     ^ "\"\"\")"
 
+let string_of_param_user_attributes p =
+  match Hhas_param.user_attributes p with
+  | [] -> ""
+  | user_attrs ->
+    let attrs = Emit_adata.attributes_to_strings user_attrs in
+    "[" ^ (String.concat " " attrs) ^ "]"
+
 let string_of_param p =
   let param_type_info = Hhas_param.type_info p in
   let param_name = Hhas_param.name p in
   let param_default_value = Hhas_param.default_value p in
-    string_of_is_variadic (Hhas_param.is_variadic p)
+    string_of_param_user_attributes p
+  ^ string_of_is_variadic (Hhas_param.is_variadic p)
   ^ string_of_type_info_option param_type_info
   ^ string_of_is_reference (Hhas_param.is_reference p)
   ^ param_name

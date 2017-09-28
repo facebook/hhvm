@@ -131,6 +131,8 @@ let default_type_check param_name param_type_info param_expr =
 let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
   let param_name = snd p.A.param_id in
   let param_is_variadic = p.Ast.param_is_variadic in
+  let param_user_attributes =
+    Emit_attribute.from_asts namespace p.Ast.param_user_attributes in
   let param_hint =
     if param_is_variadic
     then from_variadic_param_hint_opt p.Ast.param_hint
@@ -161,7 +163,7 @@ let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
   in
   if param_is_variadic && param_name = "..." then None else
   Some (Hhas_param.make param_name p.A.param_is_reference param_is_variadic
-    param_type_info param_default_value)
+    param_user_attributes param_type_info param_default_value)
 
 let rename_params params =
   let names = Core.List.fold_left params

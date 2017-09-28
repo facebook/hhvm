@@ -43,6 +43,7 @@ enum class AttrContext {
   Prop          = 0x4,
   TraitImport   = 0x8,
   Alias         = 0x10,
+  Parameter     = 0x20,
 };
 
 /*

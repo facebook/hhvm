@@ -163,6 +163,7 @@ let rewrite_params_and_body defs used refs params body =
         Hhas_param.make (Hhas_param.name param)
           (Hhas_param.is_reference param)
           (Hhas_param.is_variadic param)
+          (Hhas_param.user_attributes param)
           (Hhas_param.type_info param)
           (Some (relabel l, e)) in
     let params = List.map params rewrite_param in

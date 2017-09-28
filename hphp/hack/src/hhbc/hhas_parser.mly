@@ -176,13 +176,14 @@ is_variadic:
   | /* empty */ {false}
   | DOTDOTDOT {true}
 param:
-    | is_variadic typeinfooption possibleampersand vname paramdefaultvalueopt
+    | attributes is_variadic typeinfooption possibleampersand vname paramdefaultvalueopt
       {Hhas_param.make
-        $4 (* name *)
-        $3 (* is_reference*)
-        $1 (* variadic *)
-        $2 (* type info option *)
-        $5 (* default_value *)}
+        $5 (* name *)
+        $4 (* is_reference*)
+        $2 (* variadic *)
+        (fst $1) (* user_attrs *)
+        $3 (* type info option *)
+        $6 (* default_value *)}
 ;
 vname:
     | DOLLAR ID {"$" ^ $2}

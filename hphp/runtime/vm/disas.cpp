@@ -530,12 +530,32 @@ std::string opt_type_info(const StringData *userType,
   return "";
 }
 
+std::string opt_attrs(AttrContext ctx, Attr attrs,
+                      const UserAttributeMap* userAttrs = nullptr,
+                      bool isTop = true,
+                      bool needPrefix = true) {
+  auto str = folly::trimWhitespace(folly::sformat(
+               "{} {}",
+               attrs_to_string(ctx, attrs), user_attrs(userAttrs))).str();
+  if (!str.empty()) {
+    str = folly::sformat("{}[{}{}]",
+      needPrefix ? " " : "", str, isTop ? "" : " nontop");
+  } else if (!isTop) {
+    str = " [nontop]";
+  }
+  return str;
+}
+
 std::string func_param_list(const FuncInfo& finfo) {
   auto ret = std::string{};
   auto const func = finfo.func;
 
   for (auto i = uint32_t{0}; i < func->numParams(); ++i) {
     if (i != 0) ret += ", ";
+
+    ret += opt_attrs(AttrContext::Parameter,
+        Attr(), &func->params()[i].userAttributes,
+        /*isTop*/true, /*needPrefix*/false);
 
     if (func->params()[i].variadic) {
       ret += "...";
@@ -568,20 +588,6 @@ std::string func_flag_list(const FuncInfo& finfo) {
   std::string strflags = folly::join(" ", flags);
   if (!strflags.empty()) return " " + strflags + " ";
   return " ";
-}
-
-std::string opt_attrs(AttrContext ctx, Attr attrs,
-                      const UserAttributeMap* userAttrs = nullptr,
-                      bool isTop = true) {
-  auto str = folly::trimWhitespace(folly::sformat(
-               "{} {}",
-               attrs_to_string(ctx, attrs), user_attrs(userAttrs))).str();
-  if (!str.empty()) {
-    str = folly::sformat(" [{}{}]", str, isTop ? "" : " nontop");
-  } else if (!isTop) {
-    str = " [nontop]";
-  }
-  return str;
 }
 
 void print_func(Output& out, const Func* func) {

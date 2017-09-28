@@ -1981,6 +1981,8 @@ void parse_parameter_list(AsmState& as) {
       as.error("functions can only have one variadic argument");
     }
 
+    parse_attribute_list(as, AttrContext::Parameter, &param.userAttributes);
+
     if (ch == '.') {
       as.in.getc();
       if (as.in.getc() != '.' ||

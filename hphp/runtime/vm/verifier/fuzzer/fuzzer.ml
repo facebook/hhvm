@@ -702,6 +702,7 @@ let mutate_metadata (input : HP.t)  =
       (param |> Hhas_param.name)
       (param |> Hhas_param.is_reference |> mutate_bool)
       (param |> Hhas_param.is_variadic  |> mutate_bool)
+      (param |> Hhas_param.user_attributes |> List.map mutate_attribute)
       (param |> Hhas_param.type_info    |> option_lift mutate_type_info)
       (param |> Hhas_param.default_value) in
   let mutate_body_data (body : Hhas_body.t) : Hhas_body.t =

@@ -1,5 +1,4 @@
 quick/ClsCases.php
-quick/EmitOO.php
 quick/Xhp.php
 quick/abs_codegen.php
 quick/all_type_comparison_test.php
@@ -15,7 +14,6 @@ quick/ctor_param_promotion_generic1.php
 quick/ctor_param_promotion_redeclaration.php
 quick/ctor_param_promotion_trait.php
 quick/dict/basic-getters.php
-quick/finally_break.php
 quick/float-overflow-literals.php
 quick/fsc01.php
 quick/fsc02.php

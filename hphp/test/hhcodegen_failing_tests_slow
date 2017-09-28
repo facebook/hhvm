@@ -68,7 +68,6 @@ slow/ext_phar/create_zip.php
 slow/ext_process/bad_shell_exec.php
 slow/ext_string/1764.php
 slow/ext_string/setlocale-threaded.php
-slow/finally/finally_break_008.php
 slow/finally/finally_goto_001.php
 slow/finally/finally_goto_002.php
 slow/finally/finally_goto_003.php

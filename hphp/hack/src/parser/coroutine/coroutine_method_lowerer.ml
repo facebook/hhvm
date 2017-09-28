@@ -125,12 +125,12 @@ let create_closure_invocation
   (* (new Closure($continuation, ...)) *)
   let new_closure_syntax =
     make_parenthesized_expression_syntax new_closure_syntax in
-  (* (new Closure($continuation, ...))->doResume *)
+  (* (new Closure($continuation, ...))->doResumeWithReentryGuard *)
   let select_do_resume_member_syntax =
     make_member_selection_expression_syntax
       new_closure_syntax
-      do_resume_member_name_syntax in
-  (* (new Closure($continuation, ...))->doResume(null, null) *)
+      do_resume_with_reentry_guard_member_name_syntax in
+  (* (new Closure($continuation, ...))->doResumeWithReentryGuard(null, null) *)
   let call_do_resume_with_null_syntax =
     make_function_call_expression_syntax
       select_do_resume_member_syntax

@@ -803,6 +803,9 @@ let do_resume_member_name =
 let do_resume_member_name_syntax =
   make_name_syntax do_resume_member_name
 
+let do_resume_with_reentry_guard_member_name_syntax =
+  make_name_syntax "doResumeWithReentryGuard"
+
 let clone_member_name =
   "clone"
 

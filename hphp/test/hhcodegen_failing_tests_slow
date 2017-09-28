@@ -83,7 +83,6 @@ slow/ext_process/bad_shell_exec.php
 slow/ext_string/1764.php
 slow/ext_string/setlocale-threaded.php
 slow/ext_wddx/bug41527.php
-slow/finally/finally_break_008.php
 slow/finally/finally_goto_001.php
 slow/finally/finally_goto_002.php
 slow/finally/finally_goto_003.php
@@ -339,7 +338,6 @@ slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_assertions/1857.php
 slow/type_constraint/parse_super_constraint_bad.php
 slow/typecheck/type_coersion_5.php
-slow/typedef/typedef_mixed_case.php
 slow/typedef/typedef_parent.php
 slow/typedef/typedef_self.php
 slow/types/abstract_function_typehints.php
@@ -361,6 +359,5 @@ slow/vec/hh-only1.php
 slow/vec/hh-only2.php
 slow/xhp/attr-syntax-2.php
 slow/xhp/attr-syntax-3.php
-slow/xhp/attr_types.php
 slow/yield/2167.php
 slow/yield/2229.php

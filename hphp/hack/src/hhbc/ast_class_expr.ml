@@ -24,7 +24,7 @@ let get_original_class_name ~resolve_self scope =
   match Ast_scope.Scope.get_class scope with
   | None ->  None
   | Some cd ->
-    if cd.Ast.c_kind = Ast.Ctrait
+    if cd.Ast.c_kind = Ast.Ctrait || not resolve_self
     then None
     else
     let class_name = snd cd.Ast.c_name in
@@ -43,10 +43,13 @@ let get_parent_class_name cd =
   | [(_, A.Happly((_, parent_cid), _))] -> Some parent_cid
   | _ -> None
 
-let get_original_parent_class_name scope =
+let get_original_parent_class_name ~resolve_self scope =
   match Ast_scope.Scope.get_class scope with
   | None -> None
   | Some cd ->
+    if cd.Ast.c_kind = Ast.Ctrait || not resolve_self
+    then None
+    else
     let class_name = snd cd.Ast.c_name in
     match SU.Closures.unmangle_closure class_name with
     | Some _ ->
@@ -60,7 +63,7 @@ let expr_to_class_expr ~resolve_self scope (_, expr_ as expr) =
   | A.Id (_, id) when id = SN.Classes.cStatic ->
     Class_static, false
   | A.Id (pos, id) when id = SN.Classes.cParent ->
-    begin match get_original_parent_class_name scope with
+    begin match get_original_parent_class_name ~resolve_self scope with
     | Some name -> Class_id (pos, name), true
     | None -> Class_parent, true
     end

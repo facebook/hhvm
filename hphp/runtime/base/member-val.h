@@ -67,7 +67,7 @@ struct member_lval {
   member_lval(HeapObject* base, TypedValue* elem);
 
   /*
-   * The base type which logically contains the referenced value and type.
+   * The base value which logically contains the referenced value and type.
    */
   HeapObject* base() const;
   ArrayData* arr_base() const;
@@ -144,6 +144,11 @@ struct member_rval {
 
   member_rval(const HeapObject* base, ptr_u ptr);
   member_rval(const HeapObject* base, const TypedValue* elem);
+
+  /*
+   * The base value which logically contains the referenced value and type.
+   */
+  const HeapObject* base() const;
 
   /*
    * Whether this member_rval contains a valid reference to a value and type.

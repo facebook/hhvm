@@ -423,18 +423,19 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
       raise_warning("'query' missing from xpath array");
       return false;
     }
-    auto const& tmp = arr.rvalAt(s_query);
-    if (!tmp.isString()) {
+    auto const tmp = tvToCell(arr.rvalAt(s_query));
+    if (!isStringType(tmp.type())) {
       raise_warning("'query' is not a string");
       return false;
     }
-    xquery = tmp.toString();
+    xquery = tvCastToString(tmp.tv());
     ctxp = xmlXPathNewContext(docp);
     ctxp->node = nodep;
     if (arr.exists(s_namespaces)) {
-      Variant temp = arr.rvalAt(s_namespaces);
-      if (temp.isArray()) {
-        for (ArrayIter it = temp.toArray().begin(); it; ++it) {
+      auto const temp = tvToCell(arr.rvalAt(s_namespaces));
+      if (isArrayLikeType(temp.type())) {
+        auto ad = temp.val().parr;
+        for (ArrayIter it = ArrayIter(ad); it; ++it) {
           Variant prefix = it.first();
           Variant tmpns = it.second();
           if (prefix.isString() || tmpns.isString()) {

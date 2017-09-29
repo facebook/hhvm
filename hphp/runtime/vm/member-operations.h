@@ -218,8 +218,8 @@ inline member_rval ElemArrayPre(ArrayData* base, TypedValue key) {
 
   // TODO(#3888164): Array elements can never be KindOfUninit.  This API should
   // be changed.
-  auto tv = ArrNR(base).asArray().rvalAt(cellAsCVarRef(key)).asTypedValue();
-  return member_rval { base, tv->m_type != KindOfUninit ? tv : nullptr };
+  auto const rval = ArrNR(base).asArray().rvalAt(cellAsCVarRef(key));
+  return rval.type() != KindOfUninit ? rval : member_rval { base, nullptr };
 }
 
 /**

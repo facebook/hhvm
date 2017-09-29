@@ -226,7 +226,7 @@ Array create_certinfo(struct curl_certinfo *ci) {
           ":",
           2).toArray();
         if (parts.size() == 2) {
-          certData.set(parts.rvalAt(0), parts.rvalAt(1));
+          certData.set(tvToCell(parts.rvalAt(0)).tv(), parts.rvalAt(1).tv());
         } else {
           raise_warning("Could not extract hash key from certificate info");
         }

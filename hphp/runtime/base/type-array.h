@@ -416,10 +416,8 @@ public:
 
   /*
    * Get an rval to the element at `key'.
-   *
-   * TODO(#9077255): Return member_rval instead.
    */
-  FOR_EACH_KEY_TYPE(rvalAt, const Variant&, const Variant&, const)
+  FOR_EACH_KEY_TYPE(rvalAt, member_rval, member_rval, const)
 
   /*
    * Get an lval to the element at `key'.
@@ -552,7 +550,7 @@ private:
                  PFUNC_CMP key_cmp_function, const void* key_data,
                  PFUNC_CMP value_cmp_function, const void* value_data) const;
 
-  template<typename T> const Variant& rvalAtImpl(const T& key, Flags) const;
+  template<typename T> member_rval rvalAtImpl(const T& key, Flags) const;
   template<typename T> member_lval lvalAtImpl(const T& key, Flags);
   template<typename T> member_lval lvalAtRefImpl(const T& key, Flags);
 

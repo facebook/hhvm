@@ -78,7 +78,7 @@ const StaticString
  */
 Array get_global_array(const String& name) {
   auto const globals = ArrNR(get_global_variables()->asArrayData());
-  return globals.asArray().rvalAt(name).toArray();
+  return tvCastToArrayLike(globals.asArray().rvalAt(name).tv());
 }
 
 /*

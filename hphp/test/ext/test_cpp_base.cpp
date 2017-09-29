@@ -89,18 +89,21 @@ bool TestCppBase::TestVariantArrayRef() {
   arrayRefHelper(arr);
   arr.toArrRef().set(sms, v2);
 
-  VERIFY(arr.toArray().rvalAt(hfc).toInt64() == 77);
+  VERIFY(tvCastToInt64(arr.toArray().rvalAt(hfc).tv()) == 77);
 
   // bidirectional references
   arr.toArrRef().set(hfc, v3);
-  VERIFY(arr.toArray().rvalAt(sms).toInt64() == 99);
+  VERIFY(tvCastToInt64(arr.toArray().rvalAt(sms).tv()) == 99);
 
   VERIFY(ml_arr.toArray().size() == 1);
-  VERIFY(ml_arr.toArray().rvalAt(k1).isArray() == true);
-  VERIFY(ml_arr.toArray().
-         rvalAt(k1).toArray().
-         rvalAt(k2).toArray().
-         rvalAt(k3).toBoolean() == true);
+  VERIFY(isArrayLikeType(tvToCell(ml_arr.toArray().rvalAt(k1)).type()));
+  VERIFY(tvCastToBoolean(
+    tvCastToArrayLike(
+      tvCastToArrayLike(
+        ml_arr.toArray().rvalAt(k1).tv()
+      ).rvalAt(k2).tv()
+    ).rvalAt(k3).tv()
+  ));
   return Count(true);
 }
 

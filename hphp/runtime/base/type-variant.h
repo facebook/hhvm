@@ -82,6 +82,7 @@ struct Variant : private TypedValue {
   enum class StrongBind {};
   enum class Attach {};
   enum class WithRefBind {};
+  enum class Wrap {};
 
   Variant() noexcept { m_type = KindOfUninit; }
   explicit Variant(NullInit) noexcept { m_type = KindOfNull; }
@@ -417,6 +418,10 @@ struct Variant : private TypedValue {
   }
   static Variant attach(RefData* var) noexcept {
     return Variant{var, Attach{}};
+  }
+
+  static Variant wrap(TypedValue tv) noexcept {
+    return Variant{tv, Wrap{}};
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1165,6 +1170,9 @@ struct Variant : private TypedValue {
     }
   }
   Variant(TypedValue tv, Attach) noexcept : TypedValue(tv) {}
+  Variant(TypedValue tv, Wrap) noexcept : TypedValue(tv) {
+    tvIncRefGen(asTypedValue());
+  }
 
   bool isPrimitive() const { return !isRefcountedType(m_type); }
   bool isObjectConvertable() {
@@ -1445,19 +1453,19 @@ void clearBlackHole();
 // breaking circular dependencies
 
 inline Variant Array::operator[](Cell key) const {
-  return rvalAt(key);
+  return Variant::wrap(rvalAt(key).tv());
 }
 inline Variant Array::operator[](int key) const {
-  return rvalAt(key);
+  return Variant::wrap(rvalAt(key).tv());
 }
 inline Variant Array::operator[](int64_t key) const {
-  return rvalAt(key);
+  return Variant::wrap(rvalAt(key).tv());
 }
 inline Variant Array::operator[](const String& key) const {
-  return rvalAt(key);
+  return Variant::wrap(rvalAt(key).tv());
 }
 inline Variant Array::operator[](const Variant& key) const {
-  return rvalAt(key);
+  return Variant::wrap(rvalAt(key).tv());
 }
 
 inline void Array::append(const Variant& v) {

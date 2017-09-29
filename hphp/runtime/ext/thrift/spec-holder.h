@@ -88,12 +88,15 @@ struct SpecHolder {
       field.fieldNum = specIt.first().toInt16();
       Array fieldSpec = specIt.second().toArray();
       field.spec = fieldSpec.get();
-      field.type =
-        (TType)fieldSpec.rvalAt(s_type, AccessFlags::ErrorKey).toInt64();
-      field.name =
-        fieldSpec.rvalAt(s_var, AccessFlags::ErrorKey).toString().get();
-      field.isUnion =
-        fieldSpec.rvalAt(s_union, AccessFlags::Key).toBoolean();
+      field.type = (TType)tvCastToInt64(
+        fieldSpec.rvalAt(s_type, AccessFlags::ErrorKey).tv()
+      );
+      field.name = tvCastToStringData(
+        fieldSpec.rvalAt(s_var, AccessFlags::ErrorKey).tv()
+      );
+      field.isUnion = tvCastToBoolean(
+        fieldSpec.rvalAt(s_union, AccessFlags::Key).tv()
+      );
     }
     if (temp.size() >> 16) {
       thrift_error("Too many keys in TSPEC (expected < 2^16)",

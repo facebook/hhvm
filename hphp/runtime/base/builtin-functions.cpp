@@ -95,12 +95,12 @@ bool array_is_valid_callback(const Array& arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
   }
-  auto const& elem0 = arr.rvalAt(0);
-  if (!elem0.isString() && !elem0.isObject()) {
+  auto const elem0 = tvToCell(arr.rvalAt(0));
+  if (!isStringType(elem0.type()) && !isObjectType(elem0.type())) {
     return false;
   }
-  auto const& elem1 = arr.rvalAt(1);
-  if (!elem1.isString()) {
+  auto const elem1 = tvToCell(arr.rvalAt(1));
+  if (!isStringType(elem1.type())) {
     return false;
   }
   return true;
@@ -137,23 +137,22 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
   }
 
   if (isArrayType(tv_func->m_type)) {
-    const Array& arr = Array(tv_func->m_data.parr);
-    const Variant& clsname = arr.rvalAt(int64_t(0));
-    const Variant& mthname = arr.rvalAt(int64_t(1));
+    auto const arr = Array(tv_func->m_data.parr);
+    auto const clsname = tvToCell(arr.rvalAt(int64_t(0)));
+    auto const mthname = tvToCell(arr.rvalAt(int64_t(1)));
+
     if (arr.size() != 2 ||
-        &clsname == &uninit_variant ||
-        !mthname.isString()) {
+        clsname.base() == nullptr  ||
+        !isStringType(mthname.type())) {
       if (name) *name->var() = array_string;
       return false;
     }
 
-    auto const tv_meth = mthname.asCell();
-    auto const tv_cls = clsname.asCell();
     StringData* clsString = nullptr;
-    if (tv_cls->m_type == KindOfObject) {
-      clsString = tv_cls->m_data.pobj->getClassName().get();
-    } else if (isStringType(tv_cls->m_type)) {
-      clsString = tv_cls->m_data.pstr;
+    if (isObjectType(clsname.type())) {
+      clsString = clsname.val().pobj->getClassName().get();
+    } else if (isStringType(clsname.type())) {
+      clsString = clsname.val().pstr;
     } else {
       if (name) *name->var() = array_string;
       return false;
@@ -162,7 +161,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     if (name) {
       *name->var() = concat3(String{clsString},
                              s_colon2,
-                             String{tv_meth->m_data.pstr});
+                             String{mthname.val().pstr});
     }
     return ret;
   }

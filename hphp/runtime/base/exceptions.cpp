@@ -109,9 +109,9 @@ std::pair<String, int> ExtendedException::getFileAndLine() const {
   int line = 0;
   Array bt = getBacktrace();
   if (!bt.empty()) {
-    Array top = bt.rvalAt(0).toArray();
-    if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
-    if (top.exists(s_line)) line = top.rvalAt(s_line).toInt64();
+    Array top = tvCastToArrayLike(bt.rvalAt(0).tv());
+    if (top.exists(s_file)) file = tvCastToString(top.rvalAt(s_file).tv());
+    if (top.exists(s_line)) line = tvCastToInt64(top.rvalAt(s_line).tv());
   }
   return std::make_pair(file, line);
 }

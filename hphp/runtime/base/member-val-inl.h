@@ -94,6 +94,10 @@ inline member_rval::member_rval(const HeapObject* base,
   , m_ptr(elem)
 {}
 
+inline const HeapObject* member_rval::base() const {
+  return m_base;
+}
+
 inline member_rval::operator bool() const {
   return !!m_ptr;
 }

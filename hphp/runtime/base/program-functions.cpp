@@ -332,8 +332,8 @@ void register_variable(Array& variables, char *name, const Variant& value,
         gpc_elements.back().assignRef(val);
       } else {
         String key(index, index_len, CopyString);
-        auto const& v = symtable->rvalAt(key);
-        if (v.isNull() || !v.isArray()) {
+        auto const v = tvToCell(symtable->rvalAt(key));
+        if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
           symtable->set(key, Array::Create());
         }
         gpc_elements.push_back(uninit_null());

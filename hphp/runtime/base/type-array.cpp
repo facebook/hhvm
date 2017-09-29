@@ -208,7 +208,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
         if (by_value) {
           found = value_cmp_as_string_function(
             VarNR(value),
-            array.rvalAt(key, AccessFlags::Key),
+            VarNR(array.rvalAt(key, AccessFlags::Key).tv()),
             value_data
           ) == 0;
         } else {
@@ -659,9 +659,12 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T> ALWAYS_INLINE
-const Variant& Array::rvalAtImpl(const T& key, AccessFlags flags) const {
-  if (!m_arr) return uninit_variant;
-  return m_arr->get(key, any(flags & AccessFlags::Error));
+member_rval Array::rvalAtImpl(const T& key, AccessFlags flags) const {
+  if (!m_arr) return member_rval { nullptr, uninit_variant.asTypedValue() };
+
+  // TODO(T9077255): Either fix get() or don't call it here.
+  auto const& var = m_arr->get(key, any(flags & AccessFlags::Error));
+  return member_rval { m_arr.get(), var.asTypedValue() };
 }
 
 template<typename T> ALWAYS_INLINE
@@ -752,6 +755,9 @@ template<> bool not_found<bool>() { return false; }
 template<> const Variant& not_found<const Variant&>() { return uninit_variant; }
 template<> Variant& not_found<Variant&>() { return lvalBlackHole(); }
 
+template<> member_rval not_found<member_rval>() {
+  return member_rval { nullptr, uninit_variant.asTypedValue() };
+}
 template<> member_lval not_found<member_lval>() {
   return member_lval { nullptr, lvalBlackHole().asTypedValue() };
 }
@@ -844,7 +850,7 @@ Variant& as_var(member_lval lval) { return tvAsVariant(lval.tv_ptr()); }
     return conv(name##Impl(int64_t(k), fl));            \
   }
 
-FOR_EACH_KEY_TYPE(rvalAt, const Variant&, const Variant&, identity, const)
+FOR_EACH_KEY_TYPE(rvalAt, member_rval, member_rval, identity, const)
 FOR_EACH_KEY_TYPE(lvalAt, member_lval, Variant&, detail::as_var, )
 FOR_EACH_KEY_TYPE(lvalAtRef, member_lval, Variant&, detail::as_var, )
 

@@ -28,12 +28,12 @@ using CUCString = const unsigned char*;
 ALWAYS_INLINE
 static void getAffineMatrixElement(
     const Array& array, const String& key, double& ret) {
-  const Variant& value = array.rvalAt(key);
-  if (value.isNull()) {
+  auto const value = tvToCell(array.rvalAt(key));
+  if (isNullType(value.type())) {
     IMAGICKDRAW_THROW(
       "AffineMatrix must contain keys: sx, rx, ry, sy, tx and ty");
   } else {
-    ret = value.toDouble();
+    ret = cellToDouble(value.tv());
   }
 }
 

@@ -111,7 +111,6 @@ module type S = sig
   val expecting_type_hint_suggest : Pos.t -> string -> unit
   val expecting_return_type_hint : Pos.t -> unit
   val expecting_return_type_hint_suggest : Pos.t -> string -> unit
-  val expecting_awaitable_return_type_hint : Pos.t -> unit
   val field_kinds : Pos.t -> Pos.t -> unit
   val unbound_name_typing : Pos.t -> string -> unit
   val did_you_mean_naming : Pos.t -> string -> Pos.t -> string -> unit

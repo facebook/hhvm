@@ -736,7 +736,6 @@ module Typing                               = struct
   let coroutine_call_outside_of_suspend     = 4171 (* DONT MODIFY!!!! *)
   let function_is_not_coroutine             = 4172 (* DONT MODIFY!!!! *)
   let coroutinness_mismatch                 = 4173 (* DONT MODIFY!!!! *)
-  let expecting_awaitable_return_type_hint  = 4174 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1660,10 +1659,6 @@ let expecting_return_type_hint p =
 let expecting_return_type_hint_suggest p ty =
   add Typing.expecting_return_type_hint_suggest p
     ("Was expecting a return type hint (what about: ': "^ty^"')")
-
-let expecting_awaitable_return_type_hint p =
-  add Typing.expecting_awaitable_return_type_hint p
-    "Was expecting an Awaitable return type hint"
 
 let field_kinds pos1 pos2 =
   add_list Typing.field_kinds

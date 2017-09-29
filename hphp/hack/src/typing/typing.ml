@@ -85,14 +85,6 @@ let suggest_return env p ty =
   | ty -> Errors.expecting_return_type_hint_suggest p ty
   )
 
-let async_suggest_return fkind hint pos =
-  let is_async = Ast_defs.FAsync = fkind in
-  if is_async then
-    let e_func = Errors.expecting_awaitable_return_type_hint in
-    match snd hint with
-    | Happly (s, _) -> if snd s <> Naming_special_names.Classes.cAwaitable then e_func pos
-    | _ -> e_func pos
-
 let err_witness p = Reason.Rwitness p, Terr
 let err_none = Reason.Rnone, Terr
 
@@ -369,18 +361,17 @@ and fun_def tcopt f =
    * have a guarantee that we are using a clean typing environment. *)
   let tfun_def, tenv = Env.fresh_tenv env (
     fun env ->
-      let pos = fst f.f_name in
       let env = Env.set_mode env f.f_mode in
       let env, constraints =
         Phase.localize_generic_parameters_with_bounds env f.f_tparams
                   ~ety_env:(Phase.env_with_self env) in
-      let env = add_constraints pos env constraints in
+      let env = add_constraints (fst f.f_name) env constraints in
       let env =
         localize_where_constraints
           ~ety_env:(Phase.env_with_self env) env f.f_where_constraints in
       let env, hret =
         match f.f_ret with
-        | None -> env, (Reason.Rwitness pos, Tany)
+        | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
         | Some ret ->
           let ty = TI.instantiable_hint env ret in
           Phase.localize_with_self env ty
@@ -398,7 +389,7 @@ and fun_def tcopt f =
           env, T.FVvariadicArg t_vparam, Some ty
         | FVellipsis -> env, T.FVellipsis, None
         | FVnonVariadic -> env, T.FVnonVariadic, None in
-      let env, tb = fun_ env hret pos nb f.f_fun_kind in
+      let env, tb = fun_ env hret (fst f.f_name) nb f.f_fun_kind in
       let env = Env.check_todo env in
       if Env.is_strict env then begin
         List.iter2_exn f.f_params param_tys (check_param env);
@@ -407,9 +398,9 @@ and fun_def tcopt f =
           | _ -> ()
       end;
       begin match f.f_ret with
-        | None when Env.is_strict env -> suggest_return env pos hret
+        | None when Env.is_strict env -> suggest_return env (fst f.f_name) hret
         | None -> Typing_suggest.save_fun_or_method f.f_name
-        | Some hint -> async_suggest_return (f.f_fun_kind) hint pos
+        | Some _ -> ()
       end;
       {
         T.f_mode = f.f_mode;
@@ -5393,7 +5384,7 @@ and method_def env m =
               let id = (Env.get_self_id env) ^ "::" ^ id in
               Typing_suggest.save_fun_or_method (pos, id);
               m.m_ret
-    | Some hint -> async_suggest_return (m.m_fun_kind) hint (fst m.m_name); m.m_ret in
+    | Some _ -> m.m_ret in
   let m = { m with m_ret = m_ret; } in
   Typing_hooks.dispatch_exit_method_def_hook m;
   {

@@ -185,8 +185,6 @@ Variant HHVM_FUNCTION(convert_uuencode,
                       const String& data);
 String HHVM_FUNCTION(str_rot13,
                      const String& str);
-int64_t HHVM_FUNCTION(crc32,
-                      const String& str);
 String HHVM_FUNCTION(crypt,
                      const String& str,
                      const String& salt = "");

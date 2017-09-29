@@ -44,6 +44,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/concurrent-lru-cache.h"
 #include "hphp/zend/html-table.h"
+#include "hphp/zend/zend-string.h"
 
 #include <folly/Unicode.h>
 #include <locale.h>
@@ -1817,8 +1818,8 @@ String HHVM_FUNCTION(str_rot13,
 }
 
 int64_t HHVM_FUNCTION(crc32,
-                      const String& str) {
-  return (uint32_t)StringUtil::CRC32(str);
+                      StringArg str) {
+  return (uint32_t)string_crc32(str.get()->data(), str.get()->size());
 }
 
 String HHVM_FUNCTION(crypt,

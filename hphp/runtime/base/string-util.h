@@ -160,7 +160,6 @@ public:
   static String Translate(const String& input, const String& from,
                           const String& to);
   static String ROT13(const String& input);
-  static int64_t CRC32(const String& input);
   static String Crypt(const String& input, const char *salt = "");
   static String MD5(const String& input, bool raw = false);
   static String MD5(const char *data, uint32_t size, bool raw = false);

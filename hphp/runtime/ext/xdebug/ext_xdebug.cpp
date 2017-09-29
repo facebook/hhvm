@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
+#include "hphp/zend/zend-string.h"
 
 // TODO(#3704) Remove when xdebug fully implemented
 #define XDEBUG_NOTIMPLEMENTED  { throw_not_implemented(__FUNCTION__); }
@@ -130,8 +131,9 @@ static String format_filename(folly::StringPiece dir,
     switch (c) {
       // crc32 of current working directory
       case 'c': {
-        auto const crc32 = HHVM_FN(crc32)(g_context->getCwd());
-        buf.append(crc32);
+        auto const cwd = g_context->getCwd();
+        auto const crc32 = string_crc32(cwd.data(), cwd.size());
+        buf.append((int64_t)(uint32_t)crc32);
         break;
       }
       // process id

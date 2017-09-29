@@ -434,10 +434,6 @@ String StringUtil::ROT13(const String& input) {
                 input.size(), AttachString);
 }
 
-int64_t StringUtil::CRC32(const String& input) {
-  return string_crc32(input.data(), input.size());
-}
-
 String StringUtil::Crypt(const String& input, const char *salt /* = "" */) {
   if (salt && salt[0] == '\0') {
     raise_notice("crypt(): No salt parameter was specified."

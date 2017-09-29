@@ -1840,7 +1840,7 @@ void parse_user_attribute(AsmState& as,
 
   as.in.expectWs(')');
 
-  if (!var.isArray()) {
+  if (!var.isPHPArray()) {
     as.error("user attribute values must be arrays");
   }
 

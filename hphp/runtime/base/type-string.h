@@ -255,14 +255,10 @@ public:
     return m_str ? m_str->isZero() : false;
   }
 
-  /*
-   * Create a sub-string from start with specified length.
-   *
-   * If the start is outside the bounds of the string, or the length is
-   * negative, the empty string is returned.  The range [start, start+length]
-   * gets clamped to [start, size()].
-   */
-  String substr(int start, int length = StringData::MaxSize) const;
+  String substr(int start, int length = StringData::MaxSize) const {
+    return String::attach(
+      m_str ? m_str->substr(start, length) : staticEmptyString());
+  }
 
   /**
    * Find a character or a substring and return its position. "pos" has to be

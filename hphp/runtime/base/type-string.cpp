@@ -143,24 +143,6 @@ String::String(double n) : m_str(buildStringData(n), NoIncRef{}) { }
 ///////////////////////////////////////////////////////////////////////////////
 // informational
 
-String String::substr(int start, int length /* = StringData::MaxSize */) const {
-  if (start < 0 || start >= size() || length <= 0) {
-    return empty_string();
-  }
-
-  auto const max_len = size() - start;
-  if (length > max_len) {
-    length = max_len;
-  }
-
-  assert(length > 0);
-  if (UNLIKELY(length == size())) return *this;
-  if (UNLIKELY(length == 1)) {
-    return String::attach(makeStaticString(data()[start]));
-  }
-  return String(data() + start, length, CopyString);
-}
-
 int String::find(char ch, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;

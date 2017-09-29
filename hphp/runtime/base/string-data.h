@@ -459,6 +459,15 @@ struct StringData final : MaybeCountable,
   int compare(const StringData* v2) const;
 
   /*
+   * Create a sub-string from start with specified length.
+   *
+   * If the start is outside the bounds of the string, or the length is
+   * negative, the empty string is returned.  The range [start, start+length]
+   * gets clamped to [start, size()].
+   */
+  StringData* substr(int start, int length = StringData::MaxSize);
+
+  /*
    * Debug dumping of a StringData to stdout.
    */
   void dump() const;

@@ -935,6 +935,28 @@ int StringData::compare(const StringData *v2) const {
   return ret;
 }
 
+StringData*
+StringData::substr(int start, int length /* = StringData::MaxSize */) {
+  if (start < 0 || start >= size() || length <= 0) {
+    return staticEmptyString();
+  }
+
+  auto const max_len = size() - start;
+  if (length > max_len) {
+    length = max_len;
+  }
+
+  assert(length > 0);
+  if (UNLIKELY(length == size())) {
+    incRefCount();
+    return this;
+  }
+  if (UNLIKELY(length == 1)) {
+    return makeStaticString(data()[start]);
+  }
+  return StringData::Make(data() + start, length, CopyString);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Debug
 

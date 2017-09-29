@@ -234,9 +234,8 @@ public:
     if (!m_cpu_frequencies)
       m_cpu_frequencies = get_cpu_frequency_from_cpufreq_files(m_cpu_num);
 
-    if (m_cpu_frequencies) {
+    if (m_cpu_frequencies)
       return;
-    }
 
     m_cpu_frequencies = new int64_t[m_cpu_num];
     for (int i = 0; i < m_cpu_num; i++) {

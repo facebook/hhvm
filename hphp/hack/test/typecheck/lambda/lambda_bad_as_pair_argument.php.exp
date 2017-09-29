@@ -1,0 +1,6 @@
+File "lambda_bad_as_pair_argument.php", line 32, characters 17-30:
+Could not find method missing_method in an object of type MyClass (Typing[4053])
+File "lambda_bad_as_pair_argument.php", line 22, characters 24-30:
+This is why I think it is an object of type MyClass
+File "lambda_bad_as_pair_argument.php", line 4, characters 7-13:
+Declaration of MyClass is here

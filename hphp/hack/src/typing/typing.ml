@@ -948,14 +948,14 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
   let te = if coalesce then T.NullCoalesce(tc, te2) else T.Eif(tc, te1, te2) in
   env, T.make_typed_expr p ty te, ty
 
-and exprs ?allow_uref env el =
+and exprs ?allow_uref ?expected env el =
   match el with
   | [] ->
     env, [], []
 
   | e::el ->
-    let env, te, ty = expr ?allow_uref env e in
-    let env, tel, tyl = exprs ?allow_uref env el in
+    let env, te, ty = expr ?allow_uref ?expected env e in
+    let env, tel, tyl = exprs ?allow_uref ?expected env el in
     env, te::tel, ty::tyl
 
 and exprs_expected (pos, ur, expected_tyl) env el =
@@ -1023,8 +1023,10 @@ and expr_
   match e with
   | Any -> expr_error env (Reason.Rwitness p)
   | Array [] ->
+    (* TODO: use expected type to determine expected element type *)
     make_result env (T.Array []) (Reason.Rwitness p, Tarraykind AKempty)
   | Array l
+    (* TODO: use expected type to determine expected element type *)
     when Typing_arrays.is_shape_like_array env l &&
       shape_and_tuple_arrays_enabled ->
       let env, (tafl, fdm) = List.fold_left_env env l
@@ -1095,9 +1097,14 @@ and expr_
         (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
 
   | ValCollection (kind, el) ->
-    (* TODO: use expected type to determine element type *)
+      (* Use expected type to determine expected element type *)
+      let env, elem_expected =
+        match expand_expected env expected with
+        | env, Some (pos, ur, (_, Tclass ((_, k), [ty]))) when is_vc_kind k ->
+          env, Some (pos, ur, ty)
+        | _ -> env, None in
       let env, x = Env.fresh_unresolved_type env in
-      let env, tel, tyl = exprs env el in
+      let env, tel, tyl = exprs ?expected:elem_expected env el in
       let env, tyl = List.map_env env tyl Typing_env.unbind in
       let env, tyl = List.map_env env tyl TUtils.unresolved in
       let subtype_val env ty =
@@ -1108,11 +1115,16 @@ and expr_
       let ty = Reason.Rwitness p, tvector in
       make_result env (T.ValCollection (kind, tel)) ty
   | KeyValCollection (kind, l) ->
-      (* TODO: use expected type to determine key and value types *)
+      (* Use expected type to determine expected key and value types *)
+      let env, kexpected, vexpected =
+        match expand_expected env expected with
+        | env, Some (pos, ur, (_, Tclass ((_, k), [kty; vty]))) when is_kvc_kind k ->
+          env, Some (pos, ur, kty), Some (pos, ur, vty)
+        | _ -> env, None, None in
       let kl, vl = List.unzip l in
-      let env, tkl, kl = exprs env kl in
+      let env, tkl, kl = exprs ?expected:kexpected env kl in
       let env, kl = List.map_env env kl Typing_env.unbind in
-      let env, tvl, vl = exprs env vl in
+      let env, tvl, vl = exprs ?expected:vexpected env vl in
       let env, vl = List.map_env env vl Typing_env.unbind in
       let env, k = Env.fresh_unresolved_type env in
       let env, v = Env.fresh_unresolved_type env in
@@ -1374,10 +1386,15 @@ and expr_
       let ty = Reason.Rwitness p, Ttuple tyl in
       make_result env (T.List tel) ty
   | Pair (e1, e2) ->
-    (* TODO: use expected type to determine pair component types *)
-      let env, te1, ty1 = expr env e1 in
+      (* Use expected type to determine expected element types *)
+      let env, expected1, expected2 =
+        match expand_expected env expected with
+        | env, Some (pos, ur, (_, Tclass ((_, k), [ty1; ty2]))) when k = SN.Collections.cPair ->
+          env, Some (pos, ur, ty1), Some (pos, ur, ty2)
+        | _ -> env, None, None in
+      let env, te1, ty1 = expr ?expected:expected1 env e1 in
       let env, ty1 = Typing_env.unbind env ty1 in
-      let env, te2, ty2 = expr env e2 in
+      let env, te2, ty2 = expr ?expected:expected2 env e2 in
       let env, ty2 = Typing_env.unbind env ty2 in
       let ty =
         Reason.Rwitness p, Tclass ((p, SN.Collections.cPair), [ty1; ty2]) in
@@ -1826,11 +1843,25 @@ and expr_
     (* TODO TAST: change AST so that order of shape expressions is preserved.
      * At present, evaluation order is unspecified in TAST *)
   | Shape fdm ->
+      let env, fdm_with_expected =
+        match expand_expected env expected with
+        | env, Some (pos, ur, (_, Tshape (_, expected_fdm))) ->
+          let fdme =
+            ShapeMap.mapi
+              (fun k v ->
+                match ShapeMap.get k expected_fdm with
+                | None -> (v, None)
+                | Some sft -> (v, Some (pos, ur, sft.sft_ty))) fdm in
+          env, fdme
+      | _ ->
+        env, ShapeMap.map (fun v -> (v, None)) fdm in
+
       (* allow_inter adds a type-variable *)
       let env, tfdm =
         ShapeMap.map_env
-          (fun env e -> let env, te, ty = expr env e in env, (te,ty))
-          env fdm in
+          (fun env (e, expected) ->
+            let env, te, ty = expr ?expected env e in env, (te,ty))
+          env fdm_with_expected in
       let env, fdm =
         let convert_expr_and_type_to_shape_field_type env (_, ty) =
           let env, sft_ty = TUtils.unresolved env ty in

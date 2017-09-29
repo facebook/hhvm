@@ -231,15 +231,6 @@ void bindLocalStatic(ISS& env, LocalId id, const Type& t) {
   modifyLocalStatic(env, id, t);
 }
 
-void killLocals(ISS& env) {
-  FTRACE(2, "    killLocals\n");
-  readUnknownLocals(env);
-  modifyLocalStatic(env, NoLocalId, TGen);
-  for (auto& l : env.state.locals) l = TGen;
-  for (auto& e : env.state.stack) e.equivLoc = NoLocalId;
-  env.state.equivLocals.clear();
-}
-
 void doRet(ISS& env, Type t, bool hasEffects) {
   readAllLocals(env);
   assert(env.state.stack.empty());
@@ -610,6 +601,14 @@ void setStkLocal(ISS& env, LocalId loc, uint32_t idx = 0) {
   }
 }
 
+void killThisLocToKill(ISS& env, LocalId l) {
+  if (l != NoLocalId ?
+      env.state.thisLocToKill == l : env.state.thisLocToKill != NoLocalId) {
+    FTRACE(2, "Killing thisLocToKill: {}\n", env.state.thisLocToKill);
+    env.state.thisLocToKill = NoLocalId;
+  }
+}
+
 // Kill all equivalencies involving the given local to stack values
 void killStkEquiv(ISS& env, LocalId l) {
   for (auto& e : env.state.stack) {
@@ -644,6 +643,7 @@ void setLocRaw(ISS& env, LocalId l, Type t) {
   mayReadLocal(env, l);
   killLocEquiv(env, l);
   killStkEquiv(env, l);
+  killThisLocToKill(env, l);
   if (is_volatile_local(env.ctx.func, l)) {
     auto current = env.state.locals[l];
     always_assert_flog(current == TGen, "volatile local was not TGen");
@@ -755,6 +755,7 @@ void refineLocation(ISS& env, LocalId l,
 void setLoc(ISS& env, LocalId l, Type t) {
   killLocEquiv(env, l);
   killStkEquiv(env, l);
+  killThisLocToKill(env, l);
   modifyLocalStatic(env, l, t);
   mayReadLocal(env, l);
   refineLocHelper(env, l, std::move(t));
@@ -780,6 +781,7 @@ void loseNonRefLocalTypes(ISS& env) {
   }
   killAllLocEquiv(env);
   killAllStkEquiv(env);
+  killThisLocToKill(env, NoLocalId);
   modifyLocalStatic(env, NoLocalId, TCell);
 }
 
@@ -791,6 +793,7 @@ void boxUnknownLocal(ISS& env) {
   }
   killAllLocEquiv(env);
   killAllStkEquiv(env);
+  killThisLocToKill(env, NoLocalId);
   // Don't update the local statics here; this is called both for
   // boxing and binding, and the effects on local statics are
   // different.
@@ -802,7 +805,18 @@ void unsetUnknownLocal(ISS& env) {
   for (auto& l : env.state.locals) l |= TUninit;
   killAllLocEquiv(env);
   killAllStkEquiv(env);
+  killThisLocToKill(env, NoLocalId);
   unbindLocalStatic(env, NoLocalId);
+}
+
+void killLocals(ISS& env) {
+  FTRACE(2, "    killLocals\n");
+  readUnknownLocals(env);
+  modifyLocalStatic(env, NoLocalId, TGen);
+  for (auto& l : env.state.locals) l = TGen;
+  killAllLocEquiv(env);
+  killAllStkEquiv(env);
+  killThisLocToKill(env, NoLocalId);
 }
 
 //////////////////////////////////////////////////////////////////////

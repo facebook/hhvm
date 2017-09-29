@@ -1384,6 +1384,9 @@ void in(ISS& env, const bc::NativeImpl&) {
 }
 
 void in(ISS& env, const bc::CGetL& op) {
+  if (op.loc1 == env.state.thisLocToKill) {
+    return reduce(env, bc::BareThis { BareThisOp::Notice });
+  }
   if (!locCouldBeUninit(env, op.loc1)) {
     nothrow(env);
     constprop(env);
@@ -1392,6 +1395,9 @@ void in(ISS& env, const bc::CGetL& op) {
 }
 
 void in(ISS& env, const bc::CGetQuietL& op) {
+  if (op.loc1 == env.state.thisLocToKill) {
+    return reduce(env, bc::BareThis { BareThisOp::NoNotice });
+  }
   nothrow(env);
   constprop(env);
   push(env, locAsCell(env, op.loc1), op.loc1);
@@ -3182,6 +3188,7 @@ void in(ISS& env, const bc::BareThis& op) {
 
 void in(ISS& env, const bc::InitThisLoc& op) {
   setLocRaw(env, op.loc1, TCell);
+  env.state.thisLocToKill = op.loc1;
 }
 
 void in(ISS& env, const bc::StaticLocDef& op) {

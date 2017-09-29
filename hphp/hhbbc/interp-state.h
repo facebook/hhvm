@@ -244,6 +244,7 @@ struct State {
   bool initialized = false;
   bool unreachable = false;
   bool thisAvailable = false;
+  LocalId thisLocToKill = NoLocalId;
   CompactVector<Type> locals;
   CompactVector<Iter> iters;
   CompactVector<Type> clsRefSlots;

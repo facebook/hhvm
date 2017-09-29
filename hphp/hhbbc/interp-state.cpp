@@ -136,6 +136,7 @@ bool operator==(const ActRec& a, const ActRec& b) {
 bool operator==(const State& a, const State& b) {
   return a.initialized == b.initialized &&
     a.thisAvailable == b.thisAvailable &&
+    a.thisLocToKill == b.thisLocToKill &&
     a.locals == b.locals &&
     a.clsRefSlots == b.clsRefSlots &&
     a.stack == b.stack &&
@@ -149,6 +150,7 @@ State without_stacks(const State& src) {
   auto ret          = State{};
   ret.initialized   = src.initialized;
   ret.thisAvailable = src.thisAvailable;
+  ret.thisLocToKill = src.thisLocToKill;
 
   if (UNLIKELY(src.locals.size() > (1LL << 50))) {
     // gcc 4.9 has a bug where it will spit out a warning:
@@ -291,6 +293,13 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   if (available != dst.thisAvailable) {
     changed = true;
     dst.thisAvailable = available;
+  }
+
+  if (dst.thisLocToKill != src.thisLocToKill) {
+    if (dst.thisLocToKill != NoLocalId) {
+      dst.thisLocToKill = NoLocalId;
+      changed = true;
+    }
   }
 
   for (auto i = size_t{0}; i < dst.stack.size(); ++i) {
@@ -519,6 +528,10 @@ std::string state_string(const php::Func& f, const State& st,
   folly::format(&ret, "state{}:\n", st.unreachable ? " (unreachable)" : "");
   if (f.cls) {
     folly::format(&ret, "thisAvailable({})\n", st.thisAvailable);
+  }
+
+  if (st.thisLocToKill != NoLocalId) {
+    folly::format(&ret, "thisLocToKill({})\n", st.thisLocToKill);
   }
 
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {

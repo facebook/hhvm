@@ -642,6 +642,9 @@ Type locRaw(Env& env, LocalId loc) {
 }
 
 bool setLocCouldHaveSideEffects(Env& env, LocalId loc, bool forExit = false) {
+  // A "this" local is protected by the $this in the ActRec.
+  if (loc == env.stateBefore.thisLocToKill) return false;
+
   // Normally, if there's an equivLocal this isn't the last reference,
   // so overwriting it won't run any destructors. But if we're
   // destroying all the locals (eg RetC) they can't all protect each
@@ -1405,6 +1408,12 @@ void dce(Env& env, const bc::PopL& op) {
     addLocGen(env, op.loc1);
   } else {
     addLocKill(env, op.loc1);
+  }
+}
+
+void dce(Env& env, const bc::InitThisLoc& op) {
+  if (!isLocLive(env, op.loc1)) {
+    return markDead(env);
   }
 }
 

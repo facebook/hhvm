@@ -156,9 +156,11 @@ and make_tc_with_flags_if_non_empty_flags
   let tc_flags = List.dedup (flags @ tc_flags) in
   TC.make tc_name tc_flags
 
+let add_nullable ~nullable flags =
+  if nullable then List.dedup (TC.Nullable :: flags) else flags
+
 let try_add_nullable ~nullable h flags =
-  if nullable && can_be_nullable h then List.dedup (TC.Nullable :: flags)
-  else flags
+  add_nullable ~nullable:(nullable && can_be_nullable h) flags
 
 let make_type_info ~tparams ~namespace h tc_name tc_flags =
   let type_info_user_type = Some (fmt_hint ~tparams ~namespace h) in
@@ -207,7 +209,9 @@ let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
     if kind = Return && tc_name <> None
     then List.dedup (TC.ExtendedHint :: tc_flags)
     else tc_flags in
-  let tc_flags = try_add_nullable ~nullable h tc_flags in
+  let tc_flags =
+    if kind = TypeDef then add_nullable ~nullable tc_flags
+    else try_add_nullable ~nullable h tc_flags in
   make_type_info ~tparams ~namespace h tc_name tc_flags
 
 let hint_to_class ~namespace h =

@@ -13,8 +13,9 @@ open Core
 let kind_to_type_info ~tparams ~namespace k =
   match k with
   | Ast.Alias h | Ast.NewType h ->
+    let nullable = match snd h with Ast.Hoption _ -> true | _ -> false in
     Emit_type_hint.(hint_to_type_info
-      ~kind:TypeDef ~skipawaitable:false ~nullable:false ~tparams ~namespace h)
+      ~kind:TypeDef ~skipawaitable:false ~nullable ~tparams ~namespace h)
 
 let kind_to_type_structure ~tparams ~namespace k =
   match k with

@@ -11,8 +11,6 @@ quick/ctor_param_promotion_redeclaration.php
 quick/ctor_param_promotion_trait.php
 quick/finally_break.php
 quick/float-overflow-literals.php
-quick/func2.php
-quick/func3.php
 quick/hh_bad_end.php
 quick/hh_bad_start.php
 quick/hh_numbers.php
@@ -21,7 +19,6 @@ quick/lexer_nowdoc_label_cornercases.php
 quick/method_param_promotion_error.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/ns_existing_names_class.php
-quick/on_list_assign.php
 quick/parse_fail_shapes.php
 quick/parse_fail_shapes2.php
 quick/parse_fail_shapes3.php

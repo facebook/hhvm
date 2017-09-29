@@ -1308,6 +1308,11 @@ and emit_quiet_expr env (_, expr_ as expr) =
  * then this is the i'th parameter to a function
  *)
 and emit_array_get ~need_ref env param_num_hint_opt qop base_expr opt_elem_expr =
+  (* Disallow use of array(..)[] *)
+  match base_expr, opt_elem_expr with
+  | (pos, A.Array _), None ->
+    Emit_fatal.raise_fatal_parse pos "Can't use array() as base in write context"
+  | _ ->
   let mode = get_queryMOpMode need_ref qop in
   let elem_expr_instrs, elem_stack_size = emit_elem_instrs env opt_elem_expr in
   let param_num_opt = Option.map ~f:(fun (n, _h) -> n) param_num_hint_opt in
@@ -2287,7 +2292,7 @@ and emit_lval_op_nonlist env op e rhs_instrs rhs_stack_size =
     setop;
   ]
 
-and emit_lval_op_nonlist_steps env op (_, expr_) rhs_instrs rhs_stack_size =
+and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
   let handle_lvarvar n id final_op =
     if n = 1 then
       let instruction =
@@ -2444,9 +2449,7 @@ and emit_lval_op_nonlist_steps env op (_, expr_) rhs_instrs rhs_stack_size =
     emit_final_named_local_op op
 
   | _ ->
-    emit_nyi "lval expression",
-    rhs_instrs,
-    empty
+    Emit_fatal.raise_fatal_parse pos "Can't use return value in write context"
 
 and from_unop op =
   let ints_overflow_to_ints =

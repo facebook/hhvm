@@ -63,7 +63,7 @@ let analyze_header text script =
       let language = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading) name_width
       in
-      let language = String.lowercase language in
+      let language = String.lowercase_ascii language in
       let mode = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading + name_width) name_trailing
       in

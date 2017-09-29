@@ -1813,7 +1813,12 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         Nest [transform_chain hd];
       ]
     | hd :: tl ->
-      WithLazyRule (Rule.Parental,
+      let rule_type = match hd with
+        | (_, trailing, None)
+        | (_, _, Some (_, _, trailing)) ->
+          if node_has_trailing_newline trailing then Rule.Always else Rule.Parental
+      in
+      WithLazyRule (rule_type,
         Concat [
           t obj;
           Split;
@@ -1984,10 +1989,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
 
   and transform_container_literal
       ?(spaces=false) ?allow_trailing kw left_p members right_p =
-    let force_newlines =
-      let trivia = trailing_trivia left_p in
-      List.exists trivia ~f:(fun x -> Trivia.kind x = TriviaKind.EndOfLine)
-    in
+    let force_newlines = node_has_trailing_newline left_p in
     Concat [
       t kw;
       if spaces then Space else Nothing;
@@ -2358,6 +2360,10 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
       ignore_trailing_invisibles up_to_first_newline;
       transform_leading_invisibles after_newline;
     ]
+
+  and node_has_trailing_newline node =
+    let trivia = Syntax.trailing_trivia node in
+    List.exists trivia ~f:(fun x -> Trivia.kind x = TriviaKind.EndOfLine)
   in
 
   t node

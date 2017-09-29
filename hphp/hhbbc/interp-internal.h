@@ -36,6 +36,11 @@ TRACE_SET_MOD(hhbbc);
 
 const StaticString s_assert("assert");
 const StaticString s_set_frame_metadata("HH\\set_frame_metadata");
+const StaticString s_86metadata("86metadata");
+const StaticString s_func_num_args("func_num_args");
+const StaticString s_func_get_args("func_get_args");
+const StaticString s_func_get_arg("func_get_arg");
+const StaticString s_func_slice_args("__SystemLib\\func_slice_args");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -169,6 +174,13 @@ void jmp_nevertaken(ISS& env) {
   jmp_setdest(env, env.blk.fallthrough);
 }
 
+void readUnknownParams(ISS& env) {
+  for (LocalId p = 0; p < env.ctx.func->params.size(); p++) {
+    if (p == env.flags.mayReadLocalSet.size()) break;
+    env.flags.mayReadLocalSet.set(p);
+  }
+}
+
 void readUnknownLocals(ISS& env) { env.flags.mayReadLocalSet.set(); }
 void readAllLocals(ISS& env)     { env.flags.mayReadLocalSet.set(); }
 
@@ -245,93 +257,6 @@ void doRet(ISS& env, Type t, bool hasEffects) {
 
 void mayUseVV(ISS& env) {
   env.collect.mayUseVV = true;
-}
-
-void specialFunctionEffects(ISS& env, const res::Func& func) {
-  if (func.name()->isame(s_set_frame_metadata.get())) {
-    /*
-     * HH\set_frame_metadata can write to the caller's frame, but does not
-     * require a VV.
-     */
-    readUnknownLocals(env);
-    killLocals(env);
-    return;
-  }
-
-  if (func.name()->isame(s_assert.get())) {
-    /*
-     * Assert is somewhat special. In the most general case, it can read and
-     * write to the caller's frame (and is marked as such). The first parameter,
-     * if a string, will be evaled and can have arbitrary effects. Luckily this
-     * is forbidden in RepoAuthoritative mode, so we can ignore that here. If
-     * the assert fails, it may execute an arbitrary pre-registered callback
-     * which still might try to write to the assert caller's frame. This can't
-     * happen if calling such frame accessing functions dynamically is
-     * forbidden.
-     */
-    if (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON) {
-      return;
-    }
-  }
-
-  /*
-   * Skip-frame functions won't write or read to the caller's frame, but they
-   * might dynamically call a function which can. So, skip-frame functions kill
-   * our locals unless they can't call such functions.
-   */
-  if (func.mightWriteCallerFrame() ||
-      (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
-       func.mightBeSkipFrame())) {
-    readUnknownLocals(env);
-    killLocals(env);
-    mayUseVV(env);
-    return;
-  }
-
-  if (func.mightReadCallerFrame()) {
-    readUnknownLocals(env);
-    mayUseVV(env);
-    return;
-  }
-}
-
-void specialFunctionEffects(ISS& env, ActRec ar) {
-  switch (ar.kind) {
-  case FPIKind::Unknown:
-    // fallthrough
-  case FPIKind::Func:
-    if (!ar.func) {
-      if (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON) {
-        readUnknownLocals(env);
-        killLocals(env);
-        mayUseVV(env);
-      }
-      return;
-    }
-  case FPIKind::Builtin:
-    specialFunctionEffects(env, *ar.func);
-    if (ar.fallbackFunc) specialFunctionEffects(env, *ar.fallbackFunc);
-    break;
-  case FPIKind::Ctor:
-  case FPIKind::ObjMeth:
-  case FPIKind::ClsMeth:
-  case FPIKind::ObjInvoke:
-  case FPIKind::CallableArr:
-    /*
-     * Methods cannot read or write to the caller's frame, but they can be
-     * skip-frame (if they're a builtin). So, its possible they'll dynamically
-     * call a function which reads or writes to the caller's frame. If we don't
-     * forbid this, we have to be pessimistic. Imagine something like
-     * Vector::map calling assert.
-     */
-    if (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
-        (!ar.func || ar.func->mightBeSkipFrame())) {
-      readUnknownLocals(env);
-      killLocals(env);
-      mayUseVV(env);
-    }
-    break;
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -878,6 +803,103 @@ void unsetUnknownLocal(ISS& env) {
   killAllLocEquiv(env);
   killAllStkEquiv(env);
   unbindLocalStatic(env, NoLocalId);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Special functions
+
+void specialFunctionEffects(ISS& env, const res::Func& func) {
+  if (func.name()->isame(s_set_frame_metadata.get())) {
+    /*
+     * HH\set_frame_metadata can write to the local named 86metadata,
+     * but doesn't require a VV.
+     */
+    auto const l = findLocal(env, s_86metadata.get());
+    if (l != NoLocalId) setLoc(env, l, TInitCell);
+    return;
+  }
+
+  if (func.name()->isame(s_assert.get())) {
+    /*
+     * Assert is somewhat special. In the most general case, it can read and
+     * write to the caller's frame (and is marked as such). The first parameter,
+     * if a string, will be evaled and can have arbitrary effects. Luckily this
+     * is forbidden in RepoAuthoritative mode, so we can ignore that here. If
+     * the assert fails, it may execute an arbitrary pre-registered callback
+     * which still might try to write to the assert caller's frame. This can't
+     * happen if calling such frame accessing functions dynamically is
+     * forbidden.
+     */
+    if (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON) {
+      return;
+    }
+  }
+
+  /*
+   * Skip-frame functions won't write or read to the caller's frame, but they
+   * might dynamically call a function which can. So, skip-frame functions kill
+   * our locals unless they can't call such functions.
+   */
+  if (func.mightWriteCallerFrame() ||
+      (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
+       func.mightBeSkipFrame())) {
+    readUnknownLocals(env);
+    killLocals(env);
+    mayUseVV(env);
+    return;
+  }
+
+  if (func.mightReadCallerFrame()) {
+    if (func.name()->isame(s_func_num_args.get())) return;
+    if (func.name()->isame(s_func_get_args.get()) ||
+        func.name()->isame(s_func_get_arg.get()) ||
+        func.name()->isame(s_func_slice_args.get())) {
+      readUnknownParams(env);
+    } else {
+      readUnknownLocals(env);
+    }
+    mayUseVV(env);
+    return;
+  }
+}
+
+void specialFunctionEffects(ISS& env, ActRec ar) {
+  switch (ar.kind) {
+  case FPIKind::Unknown:
+    // fallthrough
+  case FPIKind::Func:
+    if (!ar.func) {
+      if (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON) {
+        readUnknownLocals(env);
+        killLocals(env);
+        mayUseVV(env);
+      }
+      return;
+    }
+  case FPIKind::Builtin:
+    specialFunctionEffects(env, *ar.func);
+    if (ar.fallbackFunc) specialFunctionEffects(env, *ar.fallbackFunc);
+    break;
+  case FPIKind::Ctor:
+  case FPIKind::ObjMeth:
+  case FPIKind::ClsMeth:
+  case FPIKind::ObjInvoke:
+  case FPIKind::CallableArr:
+    /*
+     * Methods cannot read or write to the caller's frame, but they can be
+     * skip-frame (if they're a builtin). So, its possible they'll dynamically
+     * call a function which reads or writes to the caller's frame. If we don't
+     * forbid this, we have to be pessimistic. Imagine something like
+     * Vector::map calling assert.
+     */
+    if (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
+        (!ar.func || ar.func->mightBeSkipFrame())) {
+      readUnknownLocals(env);
+      killLocals(env);
+      mayUseVV(env);
+    }
+    break;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

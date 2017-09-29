@@ -725,14 +725,14 @@ public:
 
 protected:
   /*
-   * Raise a notice that `k' is undefined, and return uninit_variant.
+   * Raise a notice that `k' is undefined, and return an Uninit.
    */
   static const Variant& getNotFound(int64_t k);
   static const Variant& getNotFound(const StringData* k);
 
   /*
    * Raise a notice that `k' is undefined if `error' is set (and if this is not
-   * the globals array), and return uninit_variant.
+   * the globals array), and return an Uninit.
    */
   const Variant& getNotFound(int64_t k, bool error) const;
   const Variant& getNotFound(const StringData* k, bool error) const;

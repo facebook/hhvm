@@ -660,7 +660,7 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
 
 template<typename T> ALWAYS_INLINE
 member_rval Array::rvalAtImpl(const T& key, AccessFlags flags) const {
-  if (!m_arr) return member_rval { nullptr, uninit_variant.asTypedValue() };
+  if (!m_arr) return member_rval { nullptr, &immutable_uninit_base };
 
   // TODO(T9077255): Either fix get() or don't call it here.
   auto const& var = m_arr->get(key, any(flags & AccessFlags::Error));
@@ -756,7 +756,7 @@ template<> const Variant& not_found<const Variant&>() { return uninit_variant; }
 template<> Variant& not_found<Variant&>() { return lvalBlackHole(); }
 
 template<> member_rval not_found<member_rval>() {
-  return member_rval { nullptr, uninit_variant.asTypedValue() };
+  return member_rval { nullptr, &immutable_uninit_base };
 }
 template<> member_lval not_found<member_lval>() {
   return member_lval { nullptr, lvalBlackHole().asTypedValue() };
@@ -778,10 +778,10 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
   // The logic here is a specialization of cellToKey().
   if (key.isNull()) {
     if (!ad->useWeakKeys()) {
-      throwInvalidArrayKeyException(uninit_variant.asTypedValue(), ad);
+      throwInvalidArrayKeyException(&immutable_uninit_base, ad);
     }
     if (RuntimeOption::EvalHackArrCompatNotices) {
-      raiseHackArrCompatImplicitArrayKey(uninit_variant.asTypedValue());
+      raiseHackArrCompatImplicitArrayKey(&immutable_uninit_base);
     }
     return fn(make_tv<KindOfPersistentString>(staticEmptyString()),
               std::forward<Args>(args)...);

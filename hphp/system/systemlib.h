@@ -18,6 +18,7 @@
 #define incl_HPHP_SYSTEMLIB_H_
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/util/portability.h"
 
 namespace HPHP {

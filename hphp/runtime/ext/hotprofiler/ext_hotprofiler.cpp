@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/arch.h"
 #include "hphp/util/cycles.h"
 #include "hphp/util/timer.h"
 
@@ -231,7 +232,7 @@ public:
     m_cpu_num = sysconf(_SC_NPROCESSORS_CONF);
     m_cpu_frequencies = get_cpu_frequency_from_file("/proc/cpuinfo", m_cpu_num);
 
-    if (!m_cpu_frequencies)
+    if ((arch() == Arch::ARM) && !m_cpu_frequencies)
       m_cpu_frequencies = get_cpu_frequency_from_cpufreq_files(m_cpu_num);
 
     if (m_cpu_frequencies)

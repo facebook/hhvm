@@ -918,20 +918,20 @@ FOR_EACH_KEY_TYPE(add)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant& Array::lvalAt() {
+member_lval Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNew(m_arr->cowCheck());
   if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-  assert(lval.tv_ptr());
-  return tvAsVariant(lval.tv_ptr());
+  assert(lval);
+  return lval;
 }
 
-Variant& Array::lvalAtRef() {
+member_lval Array::lvalAtRef() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNewRef(m_arr->cowCheck());
   if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-  assert(lval.tv_ptr());
-  return tvAsVariant(lval.tv_ptr());
+  assert(lval);
+  return lval;
 }
 
 void Array::append(TypedValue v) {

@@ -53,17 +53,11 @@ inline bool member_lval::has_ref() const {
   return !!m_ptr;
 }
 
-inline const Value& member_lval::val() const {
-  return *m_ptr.val;
-}
-inline Value& member_lval::val() {
+inline Value& member_lval::val() const {
   return *m_ptr.val;
 }
 
-inline const DataType& member_lval::type() const {
-  return m_ptr.tv->m_type;
-}
-inline DataType& member_lval::type() {
+inline DataType& member_lval::type() const {
   return m_ptr.tv->m_type;
 }
 

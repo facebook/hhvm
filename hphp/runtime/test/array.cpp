@@ -458,7 +458,9 @@ TEST(ARRAY, Membership) {
   }
   {
     Array arr;
-    arr.lvalAt() = String("test");
+    auto const lval = arr.lvalAt();
+    lval.type() = KindOfString;
+    lval.val().pstr = StringData::Make("test", CopyString);
     EXPECT_TRUE(equal(arr, make_packed_array("test")));
   }
   {

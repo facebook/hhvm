@@ -1212,7 +1212,7 @@ TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
 inline TypedValue* NewElemEmptyish(TypedValue* base) {
   detail::checkPromotion(base);
   Array a = Array::Create();
-  TypedValue* result = const_cast<TypedValue*>(a.lvalAt().asTypedValue());
+  TypedValue* result = a.lvalAt().tv_ptr();
   tvAsVariant(base) = a;
   return result;
 }
@@ -1255,8 +1255,8 @@ inline TypedValue* NewElemArray(TypedValue* base) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
   return reffy ?
-    tvAsVariant(base).asArrRef().lvalAtRef().asTypedValue() :
-    tvAsVariant(base).asArrRef().lvalAt().asTypedValue();
+    tvAsVariant(base).asArrRef().lvalAtRef().tv_ptr() :
+    tvAsVariant(base).asArrRef().lvalAt().tv_ptr();
 }
 
 /**
@@ -2062,7 +2062,7 @@ inline TypedValue* SetOpNewElemEmptyish(SetOpOp op,
                                         TypedValue* base, Cell* rhs) {
   detail::checkPromotion(base);
   Array a = Array::Create();
-  TypedValue* result = (TypedValue*)&a.lvalAt();
+  TypedValue* result = a.lvalAt().tv_ptr();
   tvAsVariant(base) = a;
   setopBody(tvToCell(result), op, rhs);
   return result;
@@ -2114,7 +2114,7 @@ inline TypedValue* SetOpNewElem(TypedValue& tvRef,
     case KindOfPersistentArray:
     case KindOfArray: {
       TypedValue* result;
-      result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
+      result = tvAsVariant(base).asArrRef().lvalAt().tv_ptr();
       setopBody(tvToCell(result), op, rhs);
       return result;
     }
@@ -2312,7 +2312,7 @@ inline Cell IncDecNewElemEmptyish(
 ) {
   detail::checkPromotion(base);
   auto a = Array::Create();
-  auto result = (TypedValue*)&a.lvalAt();
+  auto result = a.lvalAt().tv_ptr();
   tvAsVariant(base) = a;
   assert(result->m_type == KindOfNull);
   return IncDecBody(op, result);
@@ -2366,7 +2366,7 @@ inline Cell IncDecNewElem(
 
     case KindOfPersistentArray:
     case KindOfArray: {
-      TypedValue* result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
+      TypedValue* result = tvAsVariant(base).asArrRef().lvalAt().tv_ptr();
       assert(result->m_type == KindOfNull);
       return IncDecBody(op, tvToCell(result));
     }

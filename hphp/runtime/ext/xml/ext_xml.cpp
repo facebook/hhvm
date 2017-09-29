@@ -628,9 +628,10 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         if (atcnt) {
           tag.set(s_attributes,atr);
         }
-        auto& lval = parser->data.toArrRef().lvalAt();
-        lval.assign(tag);
-        parser->ctag.assignRef(lval);
+        auto lval = parser->data.toArrRef().lvalAt();
+        lval.type() = KindOfArray;
+        lval.val().parr = tag.detach();
+        parser->ctag.assignRef(tvAsVariant(lval.tv_ptr()));
       } else if (parser->level == (XML_MAXLEVEL + 1)) {
         raise_warning("Maximum depth exceeded - Results truncated");
       }

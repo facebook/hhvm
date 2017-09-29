@@ -437,8 +437,8 @@ public:
   /*
    * Get an lval to a newly created element.
    */
-  Variant& lvalAt();
-  Variant& lvalAtRef();
+  member_lval lvalAt();
+  member_lval lvalAtRef();
 
   /////////////////////////////////////////////////////////////////////////////
   // Element access and mutation.

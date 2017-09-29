@@ -83,10 +83,8 @@ struct member_lval {
    *
    * @requires: has_val()
    */
-  const Value& val() const;
-        Value& val();
-  const DataType& type() const;
-        DataType& type();
+  Value& val() const;
+  DataType& type() const;
 
   /*
    * Get a pointer to the referenced TypedValue.

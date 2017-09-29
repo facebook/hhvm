@@ -952,6 +952,11 @@ bool is_scalar(const Type& t);
  * Return the canonical scalar type for t - equivalent to
  * from_cell(*tv(t)).
  *
+ * This can be used to ensure that the arguments in a CallContext are
+ * canonicalized, so that immaterial changes to them (eg TArrN ->
+ * TSArrN or DArrLikeMap -> DArrLikeVal) don't affect which entry gets
+ * looked up.
+ *
  * pre: is_scalar(t).
  */
 Type scalarize(Type t);

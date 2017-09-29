@@ -435,11 +435,11 @@ void killFPass(ISS& env, PrepKind kind, FPassHint hint, uint32_t arg,
                Bytecodes&&... bcs) {
   assert(kind != PrepKind::Unknown);
 
-  // Since PrepKind is never Unknown for buildins or foldables we
+  // Since PrepKind is never Unknown for builtins or foldables we
   // should know statically if we will throw or not at runtime
   // (PrepKind and FPassHint don't match).
   if (fpassCanThrow(env, kind, hint)) {
-    auto& ar = fpiTop(env);
+    auto const& ar = fpiTop(env);
     assertx(ar.foldable || ar.kind == FPIKind::Builtin);
     assertx(ar.func && !ar.fallbackFunc);
     return reduce(
@@ -459,7 +459,7 @@ bool shouldKillFPass(ISS& env, FPassHint hint, uint32_t param) {
   if (!ar.foldable) return false;
   auto const ok = [&] {
     if (hint == FPassHint::Ref) return false;
-    auto const &t = topT(env);
+    auto const& t = topT(env);
     if (!is_scalar(t)) return false;
     auto const callee = ar.func->exactFunc();
     if (param >= callee->params.size() ||

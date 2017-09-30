@@ -374,9 +374,9 @@ NEVER_INLINE void Marker::sweep() {
   heap_.iterate(
     [&](HeapObject* big, size_t big_size) { // onBig
       if (big->kind() == HeaderKind::BigObj) {
-        big = static_cast<MallocNode*>(big) + 1;
-        if (!marked(big)) {
-          mm.freeBigSize(big);
+        HeapObject* h2 = static_cast<MallocNode*>(big) + 1;
+        if (!marked(h2) && h2->kind() != HeaderKind::SmallMalloc) {
+          mm.freeBigSize(h2);
         }
       }
     },

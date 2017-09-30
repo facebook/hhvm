@@ -1055,7 +1055,7 @@ void BigHeap::reset() {
         t_heap_id, m_slabs.size(), m_bigs.size());
   auto const do_free = [&](void* ptr, size_t size) {
     if (RuntimeOption::EvalTrashFillOnRequestExit) {
-      memset(ptr, size, kSmallFreeFill);
+      memset(ptr, kSmallFreeFill, size);
     }
 #ifdef USE_JEMALLOC
     dallocx(ptr, 0);

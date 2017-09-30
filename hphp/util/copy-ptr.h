@@ -16,8 +16,10 @@
 #ifndef incl_HPHP_COPY_PTR_H_
 #define incl_HPHP_COPY_PTR_H_
 
-#include <utility>
+#include <atomic>
+#include <cstdlib>
 #include <memory>
+#include <utility>
 
 namespace HPHP {
 
@@ -30,33 +32,88 @@ namespace HPHP {
 template<class T>
 struct copy_ptr {
   copy_ptr() noexcept {}
-  explicit copy_ptr(T* t) : m_p(t) {}
-  copy_ptr(const copy_ptr& o) = default;
-  copy_ptr(copy_ptr&& o) noexcept = default;
-  copy_ptr& operator=(const copy_ptr& o) = default;
-  copy_ptr& operator=(copy_ptr&& o) noexcept = default;
-
-  explicit operator bool() const { return !!m_p; }
-
-  const T& operator*() const { return *m_p; }
-  const T* operator->() const { return m_p.get(); }
-  const T* get() const { return m_p.get(); }
-  T* mutate() {
-    if (m_p.use_count() != 1) {
-      emplace(*m_p);
-    }
-    return m_p.get();
+  copy_ptr(const copy_ptr& o) {
+    inc_ref(m_p = o.m_p);
+  }
+  copy_ptr(copy_ptr&& o) noexcept {
+    m_p = o.m_p;
+    o.m_p = nullptr;
+  }
+  copy_ptr& operator=(const copy_ptr& o) {
+    auto const save = m_p;
+    inc_ref(m_p = o.m_p);
+    dec_ref(save);
+    return *this;
+  }
+  copy_ptr& operator=(copy_ptr&& o) noexcept {
+    std::swap(m_p, o.m_p);
+    return *this;
   }
 
-  void reset(T* p = nullptr) {
-    m_p.reset(p);
+  explicit operator bool() const { return m_p != nullptr; }
+
+  const T& operator*() const { return *m_p; }
+  const T* operator->() const { return m_p; }
+  const T* get() const { return m_p; }
+  T* mutate() {
+    if (m_p && get_ref(m_p) != 1) {
+      emplace(*m_p);
+    }
+    return m_p;
+  }
+
+  void reset() {
+    dec_ref(m_p);
+    m_p = nullptr;
   }
 
   template <typename... Args> void emplace(Args&&... args) {
-    m_p = std::make_shared<T>(std::forward<Args>(args)...);
+    auto const save = m_p;
+    auto const mem = std::malloc(data_offset() + sizeof(T));
+    if (!mem) throw std::bad_alloc();
+    new (mem) refcount_type{1};
+    m_p = (T*)((char*)mem + data_offset());
+    try {
+      new (m_p) T(std::forward<Args>(args)...);
+    } catch (...) {
+      std::free(m_p);
+      m_p = save;
+      throw;
+    }
+    dec_ref(save);
   }
 private:
-  std::shared_ptr<T> m_p;
+  using refcount_type = std::atomic<uint32_t>;
+
+  T* m_p{};
+
+  static constexpr size_t data_offset() {
+    return alignof(T) >= sizeof(refcount_type) ?
+      alignof(T) : sizeof(refcount_type);
+  }
+
+  static refcount_type* get_ref_ptr(T* p) {
+    return (refcount_type*)((char*)p - data_offset());
+  };
+
+  static uint32_t get_ref(T* p) {
+    return get_ref_ptr(p)->load(std::memory_order_relaxed);
+  };
+
+  static void dec_ref(T* p) {
+    if (!p) return;
+    auto ref = get_ref_ptr(p);
+    if (ref->fetch_sub(1, std::memory_order_relaxed) == 1) {
+      p->~T();
+      ref->~refcount_type();
+      std::free(ref);
+    }
+  }
+
+  static void inc_ref(T* p) {
+    if (!p) return;
+    get_ref_ptr(p)->fetch_add(1, std::memory_order_relaxed);
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

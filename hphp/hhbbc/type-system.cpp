@@ -2555,74 +2555,81 @@ Type intersection_of(Type a, Type b) {
   if (a.subtypeData(b)) return fix(a);
   if (b.subtypeData(a)) return fix(b);
 
-  if (a.m_dataTag == b.m_dataTag) {
-    switch (a.m_dataTag) {
-      case DataTag::None:
-        not_reached();
-      case DataTag::Obj:
-      {
-        auto fixWh = [&] (Type& t) {
-          if (!a.m_data.dobj.whType) {
-            t.m_data.dobj.whType = b.m_data.dobj.whType;
-          } else if (!b.m_data.dobj.whType) {
-            t.m_data.dobj.whType = a.m_data.dobj.whType;
-          } else {
-            auto whType = intersection_of(*a.m_data.dobj.whType,
-                                          *b.m_data.dobj.whType);
-            if (whType == TBottom) return TBottom;
-            *t.m_data.dobj.whType.mutate() = whType;
-          }
-          return fix(t);
-        };
-        if (a.m_data.dobj.type == b.m_data.dobj.type &&
-            a.m_data.dobj.cls.same(b.m_data.dobj.cls)) {
-          return fixWh(a);
-        }
-        if (b.m_data.dobj.type == DObj::Sub &&
-            a.m_data.dobj.cls.subtypeOf(b.m_data.dobj.cls)) {
-          return fixWh(a);
-        }
-        if (a.m_data.dobj.type == DObj::Sub &&
-            b.m_data.dobj.cls.subtypeOf(a.m_data.dobj.cls)) {
-          return fixWh(b);
-        }
-        if (a.m_data.dobj.type == DObj::Sub &&
-            b.m_data.dobj.type == DObj::Sub) {
-          if (a.m_data.dobj.cls.couldBeInterface()) {
-            if (!b.m_data.dobj.cls.couldBeInterface()) {
-              return fixWh(b);
+  auto t = [&] {
+    if (a.m_dataTag == b.m_dataTag) {
+      switch (a.m_dataTag) {
+        case DataTag::None:
+          not_reached();
+        case DataTag::Obj:
+        {
+          auto fixWh = [&] (Type& t) {
+            if (!a.m_data.dobj.whType) {
+              t.m_data.dobj.whType = b.m_data.dobj.whType;
+            } else if (!b.m_data.dobj.whType) {
+              t.m_data.dobj.whType = a.m_data.dobj.whType;
             } else {
-              return Type { isect };
+              auto whType = intersection_of(*a.m_data.dobj.whType,
+                                            *b.m_data.dobj.whType);
+              if (whType == TBottom) return TBottom;
+              *t.m_data.dobj.whType.mutate() = whType;
             }
-          } else if (b.m_data.dobj.cls.couldBeInterface()) {
+            return fix(t);
+          };
+          if (a.m_data.dobj.type == b.m_data.dobj.type &&
+              a.m_data.dobj.cls.same(b.m_data.dobj.cls)) {
             return fixWh(a);
           }
+          if (b.m_data.dobj.type == DObj::Sub &&
+              a.m_data.dobj.cls.subtypeOf(b.m_data.dobj.cls)) {
+            return fixWh(a);
+          }
+          if (a.m_data.dobj.type == DObj::Sub &&
+              b.m_data.dobj.cls.subtypeOf(a.m_data.dobj.cls)) {
+            return fixWh(b);
+          }
+          if (a.m_data.dobj.type == DObj::Sub &&
+              b.m_data.dobj.type == DObj::Sub) {
+            if (a.m_data.dobj.cls.couldBeInterface()) {
+              if (!b.m_data.dobj.cls.couldBeInterface()) {
+                return fixWh(b);
+              } else {
+                return Type { isect };
+              }
+            } else if (b.m_data.dobj.cls.couldBeInterface()) {
+              return fixWh(a);
+            }
+          }
+          return TBottom;
         }
-        return TBottom;
+        case DataTag::Cls:
+        case DataTag::Str:
+        case DataTag::ArrLikeVal:
+        case DataTag::Int:
+        case DataTag::Dbl:
+          // Neither is a subtype of the other, so the intersection is empty
+          return TBottom;
+        case DataTag::RefInner:
+        {
+          auto inner = intersection_of(*a.m_data.inner, *b.m_data.inner);
+          if (inner == TBottom) return TBottom;
+          *a.m_data.inner.mutate() = inner;
+          return fix(a);
+        }
+        case DataTag::ArrLikePacked:
+        case DataTag::ArrLikePackedN:
+        case DataTag::ArrLikeMap:
+        case DataTag::ArrLikeMapN:
+          // will be handled by dual dispatch.
+          break;
       }
-      case DataTag::Cls:
-      case DataTag::Str:
-      case DataTag::ArrLikeVal:
-      case DataTag::Int:
-      case DataTag::Dbl:
-        // Neither is a subtype of the other, so the intersection is empty
-        return TBottom;
-      case DataTag::RefInner:
-      {
-        auto inner = intersection_of(*a.m_data.inner, *b.m_data.inner);
-        if (inner == TBottom) return TBottom;
-        *a.m_data.inner.mutate() = inner;
-        return fix(a);
-      }
-      case DataTag::ArrLikePacked:
-      case DataTag::ArrLikePackedN:
-      case DataTag::ArrLikeMap:
-      case DataTag::ArrLikeMapN:
-        // will be handled by dual dispatch.
-        break;
     }
-  }
-  return a.dualDispatchDataFn(b, DualDispatchIntersection{ isect });
+    return a.dualDispatchDataFn(b, DualDispatchIntersection{ isect });
+  }();
+
+  if (t != TBottom) return t;
+  auto const bits =
+    isect & ~(BInt|BDbl|BSStr|BArrN|BVecN|BDictN|BKeysetN|BObj|BRef);
+  return Type { static_cast<trep>(bits) };
 }
 
 Type Type::unionArrLike(const Type& a, const Type& b) {

@@ -565,7 +565,7 @@ private:
   struct DDHelperFn;
 
 private:
-  static Type unionArrLike(const Type& a, const Type& b);
+  static Type unionArrLike(Type a, Type b);
   template<class Ret, class T, class Function>
   DDHelperFn<Ret,T,Function> ddbind(const Function& f, const T& t) const;
   template<class Ret, class T, class Function>

@@ -2632,12 +2632,17 @@ Type intersection_of(Type a, Type b) {
   return Type { static_cast<trep>(bits) };
 }
 
-Type Type::unionArrLike(const Type& a, const Type& b) {
-  assert(!a.subtypeOf(b));
-  assert(!b.subtypeOf(a));
-
+Type Type::unionArrLike(Type a, Type b) {
   auto const newBits = combine_arr_like_bits(a.m_bits, b.m_bits);
 
+  if (a.subtypeData(b)) {
+    b.m_bits = newBits;
+    return b;
+  }
+  if (b.subtypeData(a)) {
+    a.m_bits = newBits;
+    return a;
+  }
   return a.dualDispatchDataFn(b, DualDispatchUnion{ newBits });
 }
 

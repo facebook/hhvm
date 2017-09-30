@@ -820,6 +820,11 @@ void combineActions(DceActionMap& dst, const DceActionMap& src) {
         ret.first->second.action = DceAction::Replace;
         continue;
       }
+      if (i.second.action == DceAction::Replace ||
+          ret.first->second.action == DceAction::Replace) {
+        ret.first->second.action = DceAction::Replace;
+        continue;
+      }
       if (ret.first->second.action == DceAction::PopInputs ||
           i.second.action == DceAction::PopInputs) {
         ret.first->second.action = DceAction::Kill;

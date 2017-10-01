@@ -2363,10 +2363,10 @@ void in(ISS& env, const bc::FPushClsMethodF& op) {
 
 void ctorHelper(ISS& env, SString name) {
   auto const rcls = env.index.resolve_class(env.ctx, name);
-  push(env, rcls ? objExact(*rcls) : TObj);
-  auto const rfunc =
-    rcls ? env.index.resolve_ctor(env.ctx, *rcls) : folly::none;
+  auto const rfunc = rcls ?
+    env.index.resolve_ctor(env.ctx, *rcls, true) : folly::none;
   fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc });
+  push(env, rcls ? objExact(*rcls) : TObj);
 }
 
 void in(ISS& env, const bc::FPushCtorD& op) {
@@ -2386,6 +2386,12 @@ void in(ISS& env, const bc::FPushCtor& op) {
       return reduce(env, bc::DiscardClsRef { op.slot },
                     bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack });
     }
+
+    auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, false);
+    takeClsRefSlot(env, op.slot);
+    push(env, subObj(dcls.cls));
+    fpiPush(env, ActRec { FPIKind::Ctor, dcls.cls, rfunc });
+    return;
   }
   takeClsRefSlot(env, op.slot);
   push(env, TObj);

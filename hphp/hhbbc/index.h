@@ -510,12 +510,13 @@ struct Index {
   res::Func resolve_method(Context, Type clsType, SString name) const;
 
   /*
-   * Try to resolve a class constructor for the supplied class.
+   * Try to resolve a class constructor for the supplied class type.
    *
-   * Returns: folly::none if we can't figure out which constructor
-   * this would call.
+   * Returns: folly::none if it can't at least figure out a func
+   * family for the call.
    */
-  folly::Optional<res::Func> resolve_ctor(Context, res::Class) const;
+  folly::Optional<res::Func>
+  resolve_ctor(Context, res::Class rcls, bool exact) const;
 
   /*
    * Give the Type in our type system that matches an hhvm

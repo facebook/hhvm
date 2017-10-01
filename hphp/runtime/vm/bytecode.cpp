@@ -188,6 +188,7 @@ const StaticString s___callStatic("__callStatic");
 const StaticString s_file("file");
 const StaticString s_line("line");
 const StaticString s_getWaitHandle("getWaitHandle");
+const StaticString s_construct("__construct");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -4975,7 +4976,9 @@ void iopFCallD(PC& pc, intva_t numArgs, const StringData* /*clsName*/,
   auto ar = arFromSp(numArgs);
   if (!RuntimeOption::EvalJitEnableRenameFunction &&
       !(ar->m_func->attrs() & AttrInterceptable)) {
-    assert(ar->m_func->name()->isame(funcName));
+    assertx(ar->m_func->name()->isame(funcName) ||
+            (funcName == s_construct.get() &&
+             ar->m_func == ar->m_func->cls()->getCtor()));
   }
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);

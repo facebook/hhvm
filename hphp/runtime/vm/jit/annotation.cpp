@@ -55,11 +55,18 @@ const Func* lookupDirectFunc(SrcKey const sk,
   return lookupImmutableFunc(sk.unit(), fname).func;
 }
 
-const Func* lookupDirectCtor(SrcKey const sk, const StringData* clsName) {
+const Func* lookupDirectCtor(SrcKey const sk,
+                             const StringData* clsName,
+                             Op pushOp) {
   if (clsName && !clsName->isame(s_empty.get())) {
     auto const ctx = sk.func()->cls();
     auto const cls = Unit::lookupUniqueClassInContext(clsName, ctx);
-    return lookupImmutableCtor(cls, ctx);
+    auto const func = lookupImmutableCtor(cls, ctx);
+    if (!func ||
+        pushOp == Op::FPushCtorD ||
+        cls->attrs() & AttrNoOverride) {
+      return func;
+    }
   }
 
   return nullptr;
@@ -100,8 +107,8 @@ const void annotate(NormalizedInstruction* i,
   }
 
   auto const func =
-    pushOp == Op::FPushCtorD ?
-    lookupDirectCtor(i->source, clsName) :
+    pushOp == Op::FPushCtorD || pushOp == Op::FPushCtor ?
+    lookupDirectCtor(i->source, clsName, pushOp) :
     lookupDirectFunc(i->source, funcName, clsName, pushOp);
 
   if (func) {

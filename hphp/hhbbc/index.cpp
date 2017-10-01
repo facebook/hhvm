@@ -327,6 +327,7 @@ struct ConstInfo {
  */
 struct FuncFamily {
   bool containsInterceptables = false;
+  bool isCtor = false;
   std::vector<borrowed_ptr<FuncInfo>> possibleFuncs;
 };
 
@@ -642,7 +643,8 @@ SString Func::name() const {
     [&] (FuncName s) { return s.name; },
     [&] (MethodName s) { return s.name; },
     [&] (borrowed_ptr<FuncInfo> fi) { return fi->first->name; },
-    [&] (borrowed_ptr<FuncFamily> fa) {
+    [&] (borrowed_ptr<FuncFamily> fa) -> SString {
+      if (fa->isCtor) return s_construct.get();
       auto const name = fa->possibleFuncs.front()->first->name;
       if (debug) {
         for (DEBUG_ONLY auto& f : fa->possibleFuncs) {
@@ -1365,22 +1367,34 @@ void compute_subclass_list(IndexData& index) {
 }
 
 void define_func_family(IndexData& index, borrowed_ptr<ClassInfo> cinfo,
-                        SString name, borrowed_ptr<const php::Func> /*func*/) {
+                        SString name, borrowed_ptr<const php::Func> func) {
   index.funcFamilies.push_back(std::make_unique<FuncFamily>());
   auto const family = borrow(index.funcFamilies.back());
-
+  family->isCtor = func == cinfo->ctor;
   for (auto& cleaf : cinfo->subclassList) {
-    auto const leafFnIt = cleaf->methods.find(name);
-    if (leafFnIt == end(cleaf->methods)) continue;
-    if (leafFnIt->second.func->attrs & AttrInterceptable) {
+    auto const leafFn = [&] () -> borrowed_ptr<const php::Func> {
+      if (family->isCtor) return cleaf->ctor;
+      auto const leafFnIt = cleaf->methods.find(name);
+      if (leafFnIt == end(cleaf->methods)) return nullptr;
+      return leafFnIt->second.func;
+    }();
+    if (!leafFn) continue;
+    if (leafFn->attrs & AttrInterceptable) {
       family->containsInterceptables = true;
     }
-    auto const finfo = create_func_info(index, leafFnIt->second.func);
+    auto const finfo = create_func_info(index, leafFn);
     family->possibleFuncs.push_back(finfo);
   }
 
   std::sort(begin(family->possibleFuncs), end(family->possibleFuncs),
-            [] (const FuncInfo* a, const FuncInfo* b) {
+            [&] (const FuncInfo* a, const FuncInfo* b) {
+              // We want a canonical order for the family. Putting the
+              // one corresponding to cinfo makes sense, because the
+              // first one is used as the name for FCallD, after that,
+              // sort by name so that different case spellings come in
+              // the same order.
+              if (a == b || b->first == func) return false;
+              if (a->first == func) return true;
               if (auto d = a->first->name->compare(b->first->name)) {
                 return d < 0;
               }
@@ -1418,7 +1432,11 @@ void define_func_families(IndexData& index) {
       auto const func = kv.second.func;
 
       if (func->attrs & (AttrPrivate|AttrNoOverride)) continue;
-      if (is_special_method_name(func->name))         continue;
+      if (func == cinfo->ctor) {
+        define_func_family(index, borrow(cinfo), s_construct.get(), func);
+        continue;
+      }
+      if (is_special_method_name(func->name)) continue;
 
       define_func_family(index, borrow(cinfo), kv.first, func);
     }
@@ -1774,6 +1792,10 @@ void check_invariants(borrowed_ptr<const ClassInfo> cinfo) {
   for (auto& m : cinfo->cls->methods) {
     always_assert(cinfo->methods.count(m->name));
     if (m->attrs & (AttrNoOverride|AttrPrivate)) continue;
+    if (borrow(m) == cinfo->ctor) {
+      always_assert(cinfo->methodFamilies.count(s_construct.get()));
+      continue;
+    }
     if (is_special_method_name(m->name)) continue;
     always_assert(cinfo->methodFamilies.count(m->name));
   }
@@ -1829,6 +1851,7 @@ void check_invariants(IndexData& data) {
   // name.
   for (auto& ffam : data.funcFamilies) {
     always_assert(!ffam->possibleFuncs.empty());
+    if (ffam->isCtor) continue;
     auto const name = ffam->possibleFuncs.front()->first->name;
     for (auto& finfo : ffam->possibleFuncs) {
       always_assert(finfo->first->name->isame(name));
@@ -2595,11 +2618,20 @@ res::Func Index::resolve_method(Context ctx,
 }
 
 folly::Optional<res::Func>
-Index::resolve_ctor(Context /*ctx*/, res::Class rcls) const {
+Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
   auto const cinfo = rcls.val.right();
   if (!cinfo || !cinfo->ctor) return folly::none;
-  if (cinfo->ctor->attrs & AttrInterceptable) return folly::none;
-  return do_resolve(cinfo->ctor);
+  if (exact) {
+    if (cinfo->ctor->attrs & AttrInterceptable) return folly::none;
+    return do_resolve(cinfo->ctor);
+  }
+
+  if (!options.FuncFamilies) return folly::none;
+
+  auto const famIt = cinfo->methodFamilies.find(s_construct.get());
+  if (famIt == end(cinfo->methodFamilies)) return folly::none;
+  if (famIt->second->containsInterceptables) return folly::none;
+  return res::Func { this, famIt->second };
 }
 
 template<class FuncRange>

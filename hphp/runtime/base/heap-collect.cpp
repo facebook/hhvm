@@ -62,9 +62,6 @@ bool hasNativeData(const HeapObject* h) {
 
 constexpr auto MinMark = GCBits(1);
 constexpr auto MaxMark = GCBits(3);
-GCBits operator++(GCBits& x, int) {
-  return x == MaxMark ? MinMark : GCBits(uint8_t(x) + 1);
-}
 
 struct Marker {
   explicit Marker(HeapImpl& heap, APCGCManager* apcgc, GCBits mark_version)
@@ -506,7 +503,8 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   if (t_enable_samples) {
     t_pre_stats = MM().getStatsCopy(); // don't check or trigger OOM
   }
-  mark_version++;
+  mark_version = (mark_version == MaxMark) ? MinMark :
+                 GCBits(uint8_t(mark_version) + 1);
   Marker mkr(
     heap,
     RuntimeOption::EvalGCForAPC ? &APCGCManager::getInstance() : nullptr,

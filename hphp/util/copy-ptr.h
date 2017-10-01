@@ -39,6 +39,7 @@ struct copy_ptr {
     m_p = o.m_p;
     o.m_p = nullptr;
   }
+  ~copy_ptr() { dec_ref(m_p); }
   copy_ptr& operator=(const copy_ptr& o) {
     auto const save = m_p;
     inc_ref(m_p = o.m_p);
@@ -76,7 +77,7 @@ struct copy_ptr {
     try {
       new (m_p) T(std::forward<Args>(args)...);
     } catch (...) {
-      std::free(m_p);
+      std::free(mem);
       m_p = save;
       throw;
     }

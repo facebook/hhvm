@@ -1564,6 +1564,11 @@ void clsRefGetImpl(ISS& env, Type t1, ClsRefSlotId slot) {
 }
 
 void in(ISS& env, const bc::ClsRefGetL& op) {
+  if (op.loc1 == env.state.thisLocToKill) {
+    return reduce(env,
+                  bc::BareThis { BareThisOp::Notice },
+                  bc::ClsRefGetC { op.slot });
+  }
   clsRefGetImpl(env, locAsCell(env, op.loc1), op.slot);
 }
 void in(ISS& env, const bc::ClsRefGetC& op) {
@@ -1693,6 +1698,12 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
 }
 
 void in(ISS& env, const bc::IssetL& op) {
+  if (op.loc1 == env.state.thisLocToKill) {
+    return reduce(env,
+                  bc::BareThis { BareThisOp::NoNotice },
+                  bc::IsTypeC { IsTypeOp::Null },
+                  bc::Not {});
+  }
   nothrow(env);
   constprop(env);
   auto const loc = locAsCell(env, op.loc1);

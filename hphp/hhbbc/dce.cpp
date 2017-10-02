@@ -1138,12 +1138,14 @@ void dce(Env& env, const bc::ClsRefName& op) {
 }
 
 bool clsRefGetHelper(Env& env, const Type& ty, ClsRefSlotId slot) {
-  if (!ty.strictSubtypeOf(TStr)) return false;
-  auto v = tv(ty);
-  if (!v) return false;
-  auto res = env.dceState.index.resolve_class(
-    env.dceState.ainfo.ctx, v->m_data.pstr);
-  if (!res || !res->resolved()) return false;
+  if (!ty.subtypeOf(TObj)) {
+    if (!ty.strictSubtypeOf(TStr)) return false;
+    auto v = tv(ty);
+    if (!v) return false;
+    auto res = env.dceState.index.resolve_class(
+      env.dceState.ainfo.ctx, v->m_data.pstr);
+    if (!res || !res->resolved()) return false;
+  }
   return !isSlotLive(env, slot);
 }
 

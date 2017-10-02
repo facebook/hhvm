@@ -1436,7 +1436,15 @@ void dce(Env& env, const bc::SetL& op) {
            LocalStaticBinding::Bound);
     return markDead(env);
   }
-  stack_ops(env);
+  stack_ops(env, [&] (UseInfo& ui) {
+    if (!allUnusedIfNotLastRef(ui)) return PushFlags::MarkLive;
+    // If the stack result of the SetL is unused, we can replace it
+    // with a PopL.
+    CompactVector<Bytecode> bcs { bc::PopL { op.loc1 } };
+    env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+    ui.actions[env.id] = DceAction::Replace;
+    return PushFlags::MarkDead;
+  });
   if (effects || locRaw(env, op.loc1).couldBe(TRef)) {
     addLocGen(env, op.loc1);
   } else {

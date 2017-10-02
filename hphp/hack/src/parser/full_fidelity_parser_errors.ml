@@ -771,6 +771,14 @@ let methodish_errors node parents is_hack =
     errors
   | _ -> [ ]
 
+let markup_errors node is_hack =
+  match syntax node with
+  | MarkupSection { markup_prefix; markup_text; _ }
+    (* only report the error on the first markup section of a hack file *)
+    when is_hack && (is_missing markup_prefix) && (width markup_text) > 0 ->
+    [ make_error_from_node node SyntaxError.error1001 ]
+  | _ -> []
+
 let params_errors params =
   let errors = [] in
   let errors =
@@ -1083,6 +1091,7 @@ let find_syntax_errors syntax_tree =
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let is_hack = (SyntaxTree.language syntax_tree = "hh") in
   let folder acc node parents =
+    let markup_errs = markup_errors node is_hack in
     let param_errs = parameter_errors node parents is_strict in
     let func_errs = function_errors node parents is_strict in
     let xhp_errs = xhp_errors node parents in
@@ -1102,7 +1111,7 @@ let find_syntax_errors syntax_tree =
         abstract_final_class_nonstatic_method_error node parents in
     let mixed_namespace_acc =
       mixed_namespace_errors node acc.namespace_type in
-    let errors = acc.errors @ param_errs @ func_errs @
+    let errors = acc.errors @ markup_errs @ param_errs @ func_errs @
       xhp_errs @ statement_errs @ methodish_errs @ property_errs @
       expr_errs @ require_errs @ classish_errors @ type_errors @ alias_errors @
       group_use_errors @ const_decl_errors @

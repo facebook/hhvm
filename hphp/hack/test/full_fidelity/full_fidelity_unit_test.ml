@@ -221,6 +221,8 @@ let error_tests =
     "test_xhp_attribute_enum_errors";
     "test_shapes";
     "test_abstract_final_errors";
+    "test_content_before_header";
+    "test_valid_php_no_markup_errors";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

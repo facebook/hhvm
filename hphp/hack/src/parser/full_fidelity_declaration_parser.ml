@@ -1588,8 +1588,8 @@ module WithExpressionAndStatementAndTypeParser
     let valid =
       match markup_section.syntax with
       (* proceed successfully if we've consumed <?... *)
-      (* TODO: Give an error if there is leading trivia on the < in an hh
-      file. (This work is tracked by task T21653075.) *)
+      (* We purposefully ignore leading trivia before the <?hh, and handle
+      the error on a later pass *)
       (* TODO: Handle the case where the langauge is not a Name. *)
       | MarkupSection { markup_suffix; _ } -> not (is_missing markup_suffix)
       | _ -> false

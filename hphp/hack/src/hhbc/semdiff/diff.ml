@@ -827,6 +827,27 @@ let class_comparer perm =
    class_constants_type_constants_comparer
    (class_header_properties_methods_comparer perm)
 
+let typedef_name_comparer =
+  wrap (fun def -> Hhbc_id.Class.to_raw_string @@ Hhas_typedef.name def)
+    (fun _ s ->  s) string_comparer
+
+let typedef_type_info_comparer =
+  wrap Hhas_typedef.type_info (fun _ s -> s) type_info_comparer
+
+let typedef_type_structure_comparer =
+  wrap Hhas_typedef.type_structure
+    (fun _ s -> s) (option_comparer typed_value_comparer)
+
+let typedef_type_info_and_structure_comparer =
+  join (fun s1 s2 -> "< " ^ s1 ^ " > " ^ s2)
+    typedef_type_info_comparer
+    typedef_type_structure_comparer
+
+let typedef_comparer =
+  join (fun s1 s2 -> s1 ^ " = " ^ s2)
+    typedef_name_comparer
+    typedef_type_info_and_structure_comparer
+
 let program_top_functions_comparer = wrap top_functions_alist_of_program
                            (fun _p s -> s) functions_alist_comparer
 
@@ -854,12 +875,6 @@ let adata_todosplitter s =
   else let ss = Rhl.StringStringSet.choose s in
            Some (ss, Rhl.StringStringSet.remove ss s)
 
-let typedef_to_string def =
-  let name = Hhbc_id.Class.to_raw_string @@ Hhas_typedef.name def in
-  match Hhas_typedef.type_structure def with
-  | None -> name
-  | Some structure -> name ^ " = " ^ typed_value_to_string structure
-
 let compare_classes_functions_of_programs p p' =
  Rhl.classes_to_check := Rhl.IntIntPermSet.empty;
  Rhl.classes_checked := Rhl.IntIntSet.empty;
@@ -886,8 +901,7 @@ let compare_classes_functions_of_programs p p' =
                         let typedef = List.nth (Hhas_program.typedefs p) tid in
                         let typedef' = List.nth (Hhas_program.typedefs p') tid' in
                         Rhl.typedefs_checked := Rhl.IntIntSet.add (tid, tid') !Rhl.typedefs_checked;
-                        let (df, (sf, ef)) = string_comparer.comparer
-                                             (typedef_to_string typedef) (typedef_to_string typedef') in
+                        let (df, (sf, ef)) = typedef_comparer.comparer typedef typedef' in
                         loop (d+df) (s+sf) (e @ ef)
                     )
                   | Some ((id, id'), newdatatodo) ->
@@ -898,7 +912,8 @@ let compare_classes_functions_of_programs p p' =
                       let adata = List.find (fun x -> (Hhas_adata.id x) = id) (Hhas_program.adata p) in
                       let adata' = List.find (fun x -> (Hhas_adata.id x) = id') (Hhas_program.adata p') in
                       Rhl.adata_checked := Rhl.StringStringSet.add (id, id') !Rhl.adata_checked;
-                      let (df, (sf, ef)) = typed_value_comparer.comparer (Hhas_adata.value adata) (Hhas_adata.value adata') in
+                      let (df, (sf, ef)) = typed_value_comparer.comparer
+                        (Hhas_adata.value adata) (Hhas_adata.value adata') in
                       loop (d+df) (s+sf) (e @ ef)
                  )
                | Some ((fid,fid'),newftodo) ->

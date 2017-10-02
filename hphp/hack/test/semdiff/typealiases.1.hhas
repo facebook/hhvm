@@ -1,5 +1,9 @@
 # starts here
 
+# This file and the corresponding typealiases.2.hhas test that semdiff can
+# detect differences in the type info and typed value of typedefs/type aliases.
+# The relevant section is the .alias block at the end of the file.
+
 .main {
   DefTypeAlias 0
   DefTypeAlias 1

@@ -289,6 +289,7 @@ slow/print/1446.php
 slow/print/1448.php
 slow/reflection/1342.php
 slow/reflection/2695.php
+slow/reflection/ReflectionTypeAlias7.php
 slow/reflection/dynamic_property2.php
 slow/reflection/ns_closure.php
 slow/reflection/param_tostring_zendcompat.php
@@ -312,6 +313,7 @@ slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_assertions/1857.php
 slow/type_constraint/parse_super_constraint_bad.php
 slow/typecheck/type_coersion_5.php
+slow/typedef/typedef_closure2.php
 slow/typedef/typedef_parent.php
 slow/typedef/typedef_self.php
 slow/types/abstract_function_typehints.php

@@ -493,6 +493,18 @@ let findperm l1 l2 =
                         | None -> None)
       in loop 0 l1 []
 
+(* comparison of string representation of doubles
+   TODO: should be up to some precision?
+*)
+let compare_double_strings s s' =
+ if s=s' then true
+ else match Scanf.sscanf s "%f" (fun x -> Some x),
+            Scanf.sscanf s' "%f" (fun x -> Some x) with
+      | Some f, Some f' -> f = f'
+      | _, _ -> false
+      | exception _ -> false
+
+
 (* Main entry point for equivalence checking *)
 let equiv prog prog' startlabelpairs =
  let (labelmap, trymap) = make_label_try_maps prog in
@@ -672,11 +684,7 @@ let equiv prog prog' startlabelpairs =
           adata_to_check := StringStringSet.add (id,id') !adata_to_check;
           nextins()
         | ILitConst (Double s), ILitConst (Double s') ->
-          (match Scanf.sscanf s "%f" (fun x -> Some x),
-                 Scanf.sscanf s' "%f" (fun x -> Some x) with
-           Some f, Some f' -> if f = f' then nextins() else try_specials ()
-           | exception _ -> try_specials ()
-           | _ -> try_specials ())
+           if compare_double_strings s s' then nextins() else try_specials()
         | ILitConst ins, ILitConst ins' ->
            if ins = ins' then nextins()
            else try_specials ()

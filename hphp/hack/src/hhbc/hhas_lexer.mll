@@ -41,7 +41,7 @@ let octaldigits = octaldigit octaldigit octaldigit
 let digit = ['0'-'9']
 let frac = '.' digit*
 let exp = ['e' 'E'] ['-' '+']? digit+
-let float = digit* frac? exp?
+let float = '-'? ((digit+ frac? exp?) | frac exp?)
 
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | "\r\n"
@@ -83,8 +83,6 @@ rule read =
   | ".static"   {STATICDIRECTIVE}
   | ".require"  {REQUIREDIRECTIVE}
   | ".srcloc"   {SRCLOCDIRECTIVE}
-  | "INF"
-  | "inf"       { DOUBLE "INF" }
   | id          {ID (Lexing.lexeme lexbuf)}
   | triplequoted as lxm {TRIPLEQUOTEDSTRING (String.sub lxm 3 (String.length lxm - 6))}
   | escapequote {read_php_escaped_string (Buffer.create 17) lexbuf}
@@ -110,6 +108,7 @@ rule read =
   | '='         {EQUALS}
   | '&'         {AMPERSAND}
   | '+'         {PLUS}
+  | '-'         {MINUS}
   | eof         {EOF}
   | _           {raise (SyntaxError "read")}
 and read_php_escaped_string buf =

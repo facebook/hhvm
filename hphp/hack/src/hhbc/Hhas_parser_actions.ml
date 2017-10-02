@@ -663,9 +663,20 @@ let switchkindofiarg arg =
     report_error
     @@ Printf.sprintf "bad switch kind: '%s'" @@ stringofiarg arg
 
+let to_inf_nan s =
+ match String.uppercase_ascii s with
+   | "NAN" -> Some "NAN"
+   | "INF" -> Some "INF"
+   | _ -> None
+
 let doubleofiarg arg =
  match arg with
   | IADouble sd -> sd
+  | IAId s -> (match to_inf_nan s with
+                | Some s -> s
+                | None -> report_error "bad double lit cst")
+  (* Remark: the way we use to_inf_nan in two different places is pretty nasty, but seems the
+     quickest way to deal with -INF and variants *)
   | IAInt64 n -> (Int64.to_string n) ^ "." (* ugh *)
   | _ -> report_error "bad double lit cst"
 

@@ -38,7 +38,7 @@ open Hhas_parser_actions
 %token COLON EQUALS
 %token EOF DOLLAR NEWLINE AMPERSAND
 %token QUOTE AT UNDERSCORE
-%token PLUS
+%token PLUS MINUS
 %token TRYCATCHDIRECTIVE
 %token TRYDIRECTIVE
 %token CATCHDIRECTIVE
@@ -505,6 +505,9 @@ iarg:
     | DOUBLE {IADouble $1}
     | AT ID  {IAArrayno $2}
     | ID COLON iarg {IAMemberkey ($1,$3)}
+    | MINUS ID {match to_inf_nan $2 with
+                 | None -> report_error "bad negated pseudo-float"
+                 | Some s -> IADouble ("-" ^ s)}
     | LANGLE iarglist RANGLE {IAArglist $2}
     | LANGLE iterbreaklist RANGLE {IAArglist $2}
 ;

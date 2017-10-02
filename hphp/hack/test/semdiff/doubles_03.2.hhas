@@ -1,0 +1,20 @@
+.main {
+  FPushFuncD 0 "main_foo"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"" N  > main_foo() {
+  .declvars $myinf;
+  Double -INF
+  SetL $myinf
+  PopC
+  FPushFuncD 1 "var_dump"
+  FPassL 0 $myinf Cell
+  FCall 1
+  PopR
+  Null
+  RetC
+}

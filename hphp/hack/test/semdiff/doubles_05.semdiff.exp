@@ -1,0 +1,15 @@
+Semdiff succeeded
+comparing key main_foo
+Semdiff failed
+pc=;0, pc'=;0, i=Double INF i'=Double NAN asn={}{}
+Assumed=
+
+Todo=
+Distance = 1
+Size = 26
+Similarity = 96.30
+Edits = 
+
+for main_foo:
+- Double INF
++ Double NAN

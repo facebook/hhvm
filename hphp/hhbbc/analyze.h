@@ -117,6 +117,10 @@ struct FuncAnalysis {
    * Known types of local statics.
    */
   CompactVector<Type> localStaticTypes;
+
+  // For an 86cinit, any constants that we resolved.
+  // The size_t is the index into ctx.cls->constants
+  CompactVector<std::pair<size_t,TypedValue>> resolvedConstants;
 };
 
 /*
@@ -136,10 +140,6 @@ struct ClassAnalysis {
   // for each closure allocated in the class's context.
   CompactVector<FuncAnalysis> methods;
   CompactVector<FuncAnalysis> closures;
-
-  // Constants which we resolved by evaluating the 86cinit
-  // The size_t is the index into ctx.cls->constants
-  CompactVector<std::pair<size_t,TypedValue>> resolvedConstants;
 
   // Inferred types for private instance and static properties.
   PropState privateProperties;

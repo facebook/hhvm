@@ -460,7 +460,21 @@ FuncAnalysis do_analyze(const Index& index,
     index, ctx, clsAnalysis, nullptr, opts
   };
 
-  return do_analyze_collect(index, ctx, collect, clsAnalysis, knownArgs);
+  auto ret = do_analyze_collect(index, ctx, collect, clsAnalysis, knownArgs);
+  if (ctx.func->name == s_86cinit.get() && !knownArgs) {
+    // We need to try to resolve any dynamic constants
+    size_t idx = 0;
+    for (auto const& c : ctx.cls->constants) {
+      if (c.val && c.val->m_type == KindOfUninit) {
+        auto const fa = analyze_func_inline(index, ctx, { sval(c.name) });
+        if (auto const val = tv(fa.inferredReturn)) {
+          ret.resolvedConstants.emplace_back(idx, *val);
+        }
+      }
+      ++idx;
+    }
+  }
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -669,26 +683,13 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
    * similarly can't play a role in the fixed point computation.
    */
   if (auto f = find_method(ctx.cls, s_86cinit.get())) {
-    auto const cinit_ctx = Context { ctx.unit, f, ctx.cls };
     do_analyze(
       index,
-      cinit_ctx,
+      Context { ctx.unit, f, ctx.cls },
       &clsAnalysis,
       nullptr,
       CollectionOpts::TrackConstantArrays
     );
-    // We do want to use it to resolve as-yet unresolved class
-    // constants, however.
-    size_t idx = 0;
-    for (auto const& c : ctx.cls->constants) {
-      if (c.val && c.val->m_type == KindOfUninit) {
-        auto const fa = analyze_func_inline(index, cinit_ctx, { sval(c.name) });
-        if (auto const val = tv(fa.inferredReturn)) {
-          clsAnalysis.resolvedConstants.emplace_back(idx, *val);
-        }
-      }
-      ++idx;
-    }
   }
 
   // Verify that none of the class properties are TBottom, i.e.

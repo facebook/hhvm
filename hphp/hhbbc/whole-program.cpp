@@ -304,8 +304,12 @@ void analyze_iteratively(Index& index, php::Program& program,
       index.refine_return_type(fa.ctx.func, fa.inferredReturn, deps);
       index.refine_constants(fa, deps);
       index.refine_local_static_types(fa.ctx.func, fa.localStaticTypes);
+      if (fa.resolvedConstants.size()) {
+        index.refine_class_constants(fa.ctx,
+                                     fa.resolvedConstants,
+                                     deps);
+      }
       for (auto& d : deps) revisit.insert(work_item_for(d, mode));
-
       for (auto& kv : fa.closureUseTypes) {
         assert(is_closure(*kv.first));
         if (index.refine_closure_use_vars(kv.first, kv.second)) {
@@ -328,15 +332,6 @@ void analyze_iteratively(Index& index, php::Program& program,
                                    ca.privateStatics);
       for (auto& fa : ca.methods)  update_func(fa);
       for (auto& fa : ca.closures) update_func(fa);
-      if (ca.resolvedConstants.size()) {
-        ContextSet deps;
-        auto const f = find_method(ca.ctx.cls, s_86cinit.get());
-        assertx(f);
-        index.refine_class_constants(Context { ca.ctx.unit, f, ca.ctx.cls },
-                                     ca.resolvedConstants,
-                                     deps);
-        for (auto& d : deps) revisit.insert(work_item_for(d, mode));
-      }
     };
 
     for (auto& result : results) {

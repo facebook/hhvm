@@ -146,7 +146,7 @@ static String format_filename(folly::StringPiece dir,
         break;
       // Script name
       case 's': {
-        auto server = globals->get(s_SERVER).toArray();
+        auto const server = tvCastToArrayLike(globals->get(s_SERVER).tv());
         if (server.exists(s_SCRIPT_NAME) && server[s_SCRIPT_NAME].isString()) {
           const String scriptname(server[s_SCRIPT_NAME].toString(), CopyString);
           replace_special_chars(scriptname.get());
@@ -172,7 +172,7 @@ static String format_filename(folly::StringPiece dir,
       }
       // $_SERVER['HTTP_HOST']
       case 'H': {
-        Array server = globals->get(s_SERVER).toArray();
+        auto const server = tvCastToArrayLike(globals->get(s_SERVER).tv());
         if (server.exists(s_HTTP_HOST) && server[s_HTTP_HOST].isString()) {
           const String hostname(server[s_HTTP_HOST].toString(), CopyString);
           replace_special_chars(hostname.get());
@@ -182,7 +182,7 @@ static String format_filename(folly::StringPiece dir,
       }
       // $_SERVER['REQUEST_URI']
       case 'R': {
-        auto server = globals->get(s_SERVER).toArray();
+        auto const server = tvCastToArrayLike(globals->get(s_SERVER).tv());
         if (globals->exists(s_REQUEST_URI)) {
           const String requri(server[s_REQUEST_URI].toString(), CopyString);
           replace_special_chars(requri.get());
@@ -192,7 +192,7 @@ static String format_filename(folly::StringPiece dir,
       }
       // $_SERVER['UNIQUE_ID']
       case 'U': {
-        auto server = globals->get(s_SERVER).toArray();
+        auto const server = tvCastToArrayLike(globals->get(s_SERVER).tv());
         if (server.exists(s_UNIQUE_ID) && server[s_UNIQUE_ID].isString()) {
           const String uniqueid(server[s_UNIQUE_ID].toString(), CopyString);
           replace_special_chars(uniqueid.get());
@@ -206,7 +206,7 @@ static String format_filename(folly::StringPiece dir,
         // from the cookies
         String session_name;
         if (IniSetting::Get(s_SESSION_NAME, session_name)) {
-          auto cookies = globals->get(s_COOKIE).toArray();
+          auto const cookies = tvCastToArrayLike(globals->get(s_COOKIE).tv());
           if (cookies.exists(session_name) &&
               cookies[session_name].isString()) {
             const String sessionstr(cookies[session_name].toString(),

@@ -383,8 +383,7 @@ static bool arrayFitsSpec(const ArrayData* arr, const ArraySpec spec) {
             auto const specElemType =
               rat_type->tag() == A::Tag::Packed ? rat_type->packedElem(k)
                                                 : rat_type->elemType();
-            if (!tvMatchesRepoAuthType(*(arr->get(k).asTypedValue()),
-                                       specElemType)) {
+            if (!tvMatchesRepoAuthType(arr->get(k).tv(), specElemType)) {
               break;
             }
           }

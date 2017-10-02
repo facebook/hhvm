@@ -660,11 +660,8 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
 
 template<typename T> ALWAYS_INLINE
 member_rval Array::rvalAtImpl(const T& key, AccessFlags flags) const {
-  if (!m_arr) return member_rval { nullptr, &immutable_uninit_base };
-
-  // TODO(T9077255): Either fix get() or don't call it here.
-  auto const& var = m_arr->get(key, any(flags & AccessFlags::Error));
-  return member_rval { m_arr.get(), var.asTypedValue() };
+  return m_arr ? m_arr->get(key, any(flags & AccessFlags::Error))
+               : member_rval::dummy();
 }
 
 template<typename T> ALWAYS_INLINE
@@ -756,7 +753,7 @@ template<> const Variant& not_found<const Variant&>() { return uninit_variant; }
 template<> Variant& not_found<Variant&>() { return lvalBlackHole(); }
 
 template<> member_rval not_found<member_rval>() {
-  return member_rval { nullptr, &immutable_uninit_base };
+  return member_rval::dummy();
 }
 template<> member_lval not_found<member_lval>() {
   return member_lval { nullptr, lvalBlackHole().asTypedValue() };

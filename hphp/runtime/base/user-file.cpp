@@ -414,20 +414,20 @@ static int statFill(Variant stat_array, struct stat* stat_sb)
   auto a = stat_array.getArrayData();
   // make sure to clear all the unset fields (like st_mtim.tv_nsec).
   memset(stat_sb, 0, sizeof(*stat_sb));
-  stat_sb->st_dev = a->get(s_dev.get()).toInt64();
-  stat_sb->st_ino = a->get(s_ino.get()).toInt64();
-  stat_sb->st_mode = a->get(s_mode.get()).toInt64();
-  stat_sb->st_nlink = a->get(s_nlink.get()).toInt64();
-  stat_sb->st_uid = a->get(s_uid.get()).toInt64();
-  stat_sb->st_gid = a->get(s_gid.get()).toInt64();
-  stat_sb->st_rdev = a->get(s_rdev.get()).toInt64();
-  stat_sb->st_size = a->get(s_size.get()).toInt64();
-  stat_sb->st_atime = a->get(s_atime.get()).toInt64();
-  stat_sb->st_mtime = a->get(s_mtime.get()).toInt64();
-  stat_sb->st_ctime = a->get(s_ctime.get()).toInt64();
+  stat_sb->st_dev = tvCastToInt64(a->get(s_dev.get()).tv());
+  stat_sb->st_ino = tvCastToInt64(a->get(s_ino.get()).tv());
+  stat_sb->st_mode = tvCastToInt64(a->get(s_mode.get()).tv());
+  stat_sb->st_nlink = tvCastToInt64(a->get(s_nlink.get()).tv());
+  stat_sb->st_uid = tvCastToInt64(a->get(s_uid.get()).tv());
+  stat_sb->st_gid = tvCastToInt64(a->get(s_gid.get()).tv());
+  stat_sb->st_rdev = tvCastToInt64(a->get(s_rdev.get()).tv());
+  stat_sb->st_size = tvCastToInt64(a->get(s_size.get()).tv());
+  stat_sb->st_atime = tvCastToInt64(a->get(s_atime.get()).tv());
+  stat_sb->st_mtime = tvCastToInt64(a->get(s_mtime.get()).tv());
+  stat_sb->st_ctime = tvCastToInt64(a->get(s_ctime.get()).tv());
 #ifndef _MSC_VER
-  stat_sb->st_blksize = a->get(s_blksize.get()).toInt64();
-  stat_sb->st_blocks = a->get(s_blocks.get()).toInt64();
+  stat_sb->st_blksize = tvCastToInt64(a->get(s_blksize.get()).tv());
+  stat_sb->st_blocks = tvCastToInt64(a->get(s_blocks.get()).tv());
 #endif
   return 0;
 }

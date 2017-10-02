@@ -142,7 +142,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     auto const mthname = tvToCell(arr.rvalAt(int64_t(1)));
 
     if (arr.size() != 2 ||
-        clsname.base() == nullptr  ||
+        clsname.is_dummy() ||
         !isStringType(mthname.type())) {
       if (name) *name->var() = array_string;
       return false;

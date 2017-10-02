@@ -88,6 +88,11 @@ inline member_rval::member_rval(const HeapObject* base,
   , m_ptr(elem)
 {}
 
+inline bool member_rval::operator==(member_rval o) const {
+  return m_base == o.m_base &&
+         m_ptr.tv == o.m_ptr.tv;
+}
+
 inline const HeapObject* member_rval::base() const {
   return m_base;
 }
@@ -118,6 +123,14 @@ inline TypedValue member_rval::tv() const {
 
 inline member_rval::ptr_u member_rval::elem() const {
   return m_ptr;
+}
+
+inline member_rval member_rval::dummy() {
+  return member_rval { nullptr, &immutable_uninit_base };
+}
+
+inline bool member_rval::is_dummy() const {
+  return *this == dummy();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

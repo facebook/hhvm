@@ -43,7 +43,7 @@ void xdebug_print_timestamp(FILE* f) {
 bool xdebug_trigger_set(const String& trigger) {
   auto const globals = get_global_variables()->asArrayData();
   auto const exists = [&] (const StaticString& str) {
-    auto global = globals->get(str).toArray();
+    auto const global = tvCastToArrayLike(globals->get(str).tv());
     return global.exists(trigger);
   };
   return exists(s_COOKIE) || exists(s_GET) || exists(s_POST);

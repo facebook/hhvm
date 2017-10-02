@@ -143,6 +143,8 @@ struct member_rval {
   member_rval(const HeapObject* base, ptr_u ptr);
   member_rval(const HeapObject* base, const TypedValue* elem);
 
+  bool operator==(member_rval) const;
+
   /*
    * The base value which logically contains the referenced value and type.
    */
@@ -186,6 +188,16 @@ struct member_rval {
    * existing ones.
    */
   ptr_u elem() const;
+
+  /*
+   * The canonical non-null "missing" rval.
+   *
+   * Some users of member_rval prefer to use a dummy rval-to-Uninit to
+   * represent a missing element, instead of a nullptr rval, so that tv() is
+   * always valid.  These functions provide and test for such a value.
+   */
+  static member_rval dummy();
+  bool is_dummy() const;
 
 private:
   union {

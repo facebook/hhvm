@@ -424,9 +424,9 @@ public:
   void setVar(StringData* name, const TypedValue* v);
   void bindVar(StringData* name, TypedValue* v);
   Array getLocalDefinedVariables(int frame);
-  const Variant& getEvaledArg(const StringData* val,
-                              const String& namespacedName,
-                              const Unit* funcUnit);
+  Variant getEvaledArg(const StringData* val,
+                       const String& namespacedName,
+                       const Unit* funcUnit);
 
 private:
   template <bool forwarding>

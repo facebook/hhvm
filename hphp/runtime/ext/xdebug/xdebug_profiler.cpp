@@ -565,7 +565,9 @@ void XDebugProfiler::writeProfilingResults() {
 
   // Grab $_SERVER['SCRIPT_NAME'] so we can match xdebug %s filename format
   // option
-  Array server = get_global_variables()->asArrayData()->get(s_SERVER).toArray();
+  auto server = tvCastToArrayLike(
+    get_global_variables()->asArrayData()->get(s_SERVER).tv()
+  );
   const char* scriptname = server[s_SCRIPT_NAME].toString().data();
 
   // Print the header and body

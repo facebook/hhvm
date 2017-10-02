@@ -371,13 +371,14 @@ public:
    * Get the value of the element at key `k'.
    *
    * This behaves like `error ? rvalStrict(k) : rval(k)`, except if the
-   * resultant rval is null, we raise a notice.
+   * resultant rval !has_val(), we raise a notice and return a dummy rval
+   * instead.
    */
-  const Variant& get(Cell k, bool error = false) const;
-  const Variant& get(int64_t k, bool error = false) const;
-  const Variant& get(const StringData* k, bool error = false) const;
-  const Variant& get(const String& k, bool error = false) const;
-  const Variant& get(const Variant& k, bool error = false) const;
+  member_rval get(Cell k, bool error = false) const;
+  member_rval get(int64_t k, bool error = false) const;
+  member_rval get(const StringData* k, bool error = false) const;
+  member_rval get(const String& k, bool error = false) const;
+  member_rval get(const Variant& k, bool error = false) const;
 
   /*
    * Set the element at key `k' to `v', making a copy first if `copy' is set.
@@ -727,15 +728,15 @@ protected:
   /*
    * Raise a notice that `k' is undefined, and return an Uninit.
    */
-  static const Variant& getNotFound(int64_t k);
-  static const Variant& getNotFound(const StringData* k);
+  static member_rval getNotFound(int64_t k);
+  static member_rval getNotFound(const StringData* k);
 
   /*
    * Raise a notice that `k' is undefined if `error' is set (and if this is not
    * the globals array), and return an Uninit.
    */
-  const Variant& getNotFound(int64_t k, bool error) const;
-  const Variant& getNotFound(const StringData* k, bool error) const;
+  member_rval getNotFound(int64_t k, bool error) const;
+  member_rval getNotFound(const StringData* k, bool error) const;
 
   /*
    * Is `k' of an arraykey type (i.e., int or string)?

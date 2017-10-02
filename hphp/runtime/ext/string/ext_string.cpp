@@ -2061,9 +2061,9 @@ bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
   memcpy(key.mutableData(), s + pos, maxlen);
   for (int len = maxlen; len >= minlen; len--) {
     key.setSize(len);
-    auto const& var = arr->get(arr.convertKey(key));
-    if (&var != &uninit_variant) {
-      String replace = var.toString();
+    auto const rval = arr->get(arr.convertKey(key));
+    if (!rval.is_dummy()) {
+      String replace = tvCastToString(rval.tv());
       if (!replace.empty()) {
         result.append(replace);
       }

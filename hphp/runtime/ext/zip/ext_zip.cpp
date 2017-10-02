@@ -489,25 +489,27 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
                        std::string path, int64_t flags, bool glob) {
   std::string removePath;
   if (options->exists(String("remove_path"))) {
-    auto var = options->get(String("remove_path"));
-    if (var.isString()) {
-      removePath.append(var.asCStrRef().c_str());
+    auto const rval = tvToCell(options->get(String("remove_path")));
+    if (isStringType(rval.type())) {
+      auto const sd = rval.val().pstr;
+      removePath.append(sd->data(), sd->size());
     }
   }
 
   bool removeAllPath = false;
   if (options->exists(String("remove_all_path"))) {
-    auto var = options->get(String("remove_all_path"));
-    if (var.isBoolean()) {
-      removeAllPath = var.asBooleanVal();
+    auto const rval = tvToCell(options->get(String("remove_all_path")));
+    if (isBoolType(rval.type())) {
+      removeAllPath = rval.val().num;
     }
   }
 
   std::string addPath;
   if (options->exists(String("add_path"))) {
-    auto var = options->get(String("add_path"));
-    if (var.isString()) {
-      addPath.append(var.asCStrRef().c_str());
+    auto const rval = tvToCell(options->get(String("add_path")));
+    if (isStringType(rval.type())) {
+      auto const sd = rval.val().pstr;
+      addPath.append(sd->data(), sd->size());
     }
   }
 

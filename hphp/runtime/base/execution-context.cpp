@@ -1905,14 +1905,14 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   return ret;
 }
 
-const Variant& ExecutionContext::getEvaledArg(const StringData* val,
-                                              const String& namespacedName,
-                                              const Unit* funcUnit) {
+Variant ExecutionContext::getEvaledArg(const StringData* val,
+                                       const String& namespacedName,
+                                       const Unit* funcUnit) {
   auto key = StrNR(val);
 
   if (m_evaledArgs.get()) {
-    const Variant& arg = m_evaledArgs.get()->get(key);
-    if (&arg != &uninit_variant) return arg;
+    auto const arg = m_evaledArgs.get()->get(key);
+    if (!arg.is_dummy()) return Variant::wrap(arg.tv());
   }
 
   String code;

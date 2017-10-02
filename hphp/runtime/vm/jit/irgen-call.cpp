@@ -73,11 +73,11 @@ findCuf(Op /*op*/, SSATmp* callable, const Func* ctxFunc, const Class*& cls,
     sname = makeStaticString(name.substr(pos + 2).get());
   } else if (arr) {
     if (arr->size() != 2) return nullptr;
-    const Variant& e0 = arr->get(int64_t(0), false);
-    const Variant& e1 = arr->get(int64_t(1), false);
-    if (!e0.isString() || !e1.isString()) return nullptr;
-    sclass = e0.getStringData();
-    sname = e1.getStringData();
+    auto const e0 = tvToCell(arr->get(int64_t(0), false));
+    auto const e1 = tvToCell(arr->get(int64_t(1), false));
+    if (!isStringType(e0.type()) || !isStringType(e1.type())) return nullptr;
+    sclass = e0.val().pstr;
+    sname = e1.val().pstr;
     String name(sname);
     if (name.find("::") != String::npos) return nullptr;
   } else {

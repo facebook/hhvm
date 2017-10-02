@@ -237,14 +237,13 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   assert(!m_map.isNull());
   // Always normalize name before autoloading
   const String& name = normalizeNS(clsName);
-  const Variant& type_map = m_map.get()->get(kind);
-  auto const typeMapCell = type_map.asCell();
-  if (!isArrayType(typeMapCell->m_type)) return Failure;
+  auto const type_map = tvToCell(m_map.get()->get(kind));
+  if (!isArrayType(type_map.type())) return Failure;
   String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
-  const Variant& file = typeMapCell->m_data.parr->get(canonicalName);
+  auto const file = tvToCell(type_map.val().parr->get(canonicalName));
   bool ok = false;
-  if (file.isString()) {
-    String fName{file.toCStrRef().get()};
+  if (isStringType(file.type())) {
+    String fName{file.val().pstr};
     if (fName.get()->data()[0] != '/') {
       if (!m_map_root.empty()) {
         fName = m_map_root + fName;
@@ -300,9 +299,9 @@ AutoloadHandler::loadFromMap(const String& clsName,
     Variant err{Variant::NullInit()};
     Result res = loadFromMapImpl(clsName, kind, toLower, checkExists, err);
     if (res == Success) return Success;
-    const Variant& func = m_map.get()->get(s_failure);
-    if (func.isNull()) return Failure;
-    res = invokeFailureCallback(func, kind, clsName, err);
+    auto const func = m_map.get()->get(s_failure);
+    if (isNullType(tvToCell(func).type())) return Failure;
+    res = invokeFailureCallback(tvAsCVarRef(func.tv_ptr()), kind, clsName, err);
     if (checkExists()) return Success;
     if (res == RetryAutoloading) {
       continue;
@@ -462,9 +461,10 @@ AutoloadHandler::loadFromMapPartial(const String& className,
   }
   assert(res == Failure);
   if (!err.isNull()) {
-    const Variant& func = m_map.get()->get(s_failure);
-    if (!func.isNull()) {
-      res = invokeFailureCallback(func, kind, className, err);
+    auto const func = m_map.get()->get(s_failure);
+    if (!isNullType(tvToCell(func).type())) {
+      res = invokeFailureCallback(tvAsCVarRef(func.tv_ptr()),
+                                  kind, className, err);
       assert(res != Failure);
       if (checkExists()) {
         return Success;
@@ -497,7 +497,7 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
         typeRes = loadFromMapPartial(className, s_type, true, cte, typeErr);
         if (typeRes == Success) return true;
       }
-      const Variant func = m_map.get()->get(s_failure);
+      auto const func = Variant::wrap(m_map.get()->get(s_failure).tv());
       // If we reach this point, then for each map either nothing was found
       // or the file we included didn't define a class or type alias with the
       // specified name, and the failure callback (if one exists) did not throw

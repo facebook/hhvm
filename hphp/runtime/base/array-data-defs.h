@@ -377,17 +377,17 @@ inline member_lval ArrayData::lvalRef(Cell k, bool copy) {
                              : lvalRef(detail::getStringKey(k), copy);
 }
 
-inline const Variant& ArrayData::get(int64_t k, bool error) const {
+inline member_rval ArrayData::get(int64_t k, bool error) const {
   auto r = error ? rvalStrict(k) : rval(k);
-  return r ? tvAsCVarRef(r.tv_ptr()) : getNotFound(k, error);
+  return r ? r : getNotFound(k, error);
 }
 
-inline const Variant& ArrayData::get(const StringData* k, bool error) const {
+inline member_rval ArrayData::get(const StringData* k, bool error) const {
   auto r = error ? rvalStrict(k) : rval(k);
-  return r ? tvAsCVarRef(r.tv_ptr()) : getNotFound(k, error);
+  return r ? r : getNotFound(k, error);
 }
 
-inline const Variant& ArrayData::get(Cell k, bool error) const {
+inline member_rval ArrayData::get(Cell k, bool error) const {
   assert(IsValidKey(k));
   return detail::isIntKey(k) ? get(detail::getIntKey(k), error)
                              : get(detail::getStringKey(k), error);
@@ -473,12 +473,12 @@ inline member_lval ArrayData::lvalRef(const Variant& k, bool copy) {
   return lvalRef(*k.asCell(), copy);
 }
 
-inline const Variant& ArrayData::get(const String& k, bool error) const {
+inline member_rval ArrayData::get(const String& k, bool error) const {
   assert(IsValidKey(k));
   return get(k.get(), error);
 }
 
-inline const Variant& ArrayData::get(const Variant& k, bool error) const {
+inline member_rval ArrayData::get(const Variant& k, bool error) const {
   return get(*k.asCell(), error);
 }
 

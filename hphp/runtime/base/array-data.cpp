@@ -940,7 +940,7 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
     IterateKV(
       ad1,
       [&](Cell k, TypedValue v) {
-        if (!ad2->exists(k) || !tvEqual(v, *ad2->get(k).asTypedValue())) {
+        if (!ad2->exists(k) || !tvEqual(v, ad2->get(k).tv())) {
           equal = false;
           return true;
         }
@@ -972,7 +972,7 @@ int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
         result = 1;
         return true;
       }
-      auto const cmp = tvCompare(v, *ad2->get(k).asTypedValue());
+      auto const cmp = tvCompare(v, ad2->get(k).tv());
       if (cmp != 0) {
         result = cmp;
         return true;
@@ -1159,24 +1159,24 @@ Variant ArrayData::each() {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-const Variant& ArrayData::getNotFound(int64_t k) {
+member_rval ArrayData::getNotFound(int64_t k) {
   raise_notice("Undefined index: %" PRId64, k);
-  return uninit_variant;
+  return member_rval::dummy();
 }
 
-const Variant& ArrayData::getNotFound(const StringData* k) {
+member_rval ArrayData::getNotFound(const StringData* k) {
   raise_notice("Undefined index: %s", k->data());
-  return uninit_variant;
+  return member_rval::dummy();
 }
 
-const Variant& ArrayData::getNotFound(int64_t k, bool error) const {
+member_rval ArrayData::getNotFound(int64_t k, bool error) const {
   return error && kind() != kGlobalsKind ? getNotFound(k) :
-         uninit_variant;
+         member_rval::dummy();
 }
 
-const Variant& ArrayData::getNotFound(const StringData* k, bool error) const {
+member_rval ArrayData::getNotFound(const StringData* k, bool error) const {
   return error && kind() != kGlobalsKind ? getNotFound(k) :
-         uninit_variant;
+         member_rval::dummy();
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {

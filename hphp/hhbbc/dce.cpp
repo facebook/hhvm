@@ -717,6 +717,7 @@ void writeSlot(Env& env, uint32_t id) {
   if (ui.usage != Use::Used &&
       ui.actions.size() &&
       ui.location.blk != NoBlockId) {
+    FTRACE(2, "       force-live: {}\n", id);
     env.dceState.forcedLiveLocations.insert(ui.location);
   }
   env.dceState.slotUsage[id] = UseInfo { Use::Not };
@@ -728,7 +729,10 @@ bool isSlotLive(Env& env, uint32_t id) {
 }
 
 UseInfo slotUsage(Env& env, uint32_t id) {
-  return std::move(env.dceState.slotUsage[id]);
+  auto ret = std::move(env.dceState.slotUsage[id]);
+  // Leaving this set can pessimize block merging
+  env.dceState.slotUsage[id].location.blk = NoBlockId;
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1918,9 +1922,8 @@ dce_visit(const Index& index,
         return from(dceState.slotUsage)
           | mapped(
             [&] (const UseInfo& ui) {
-              if (ui.actions.empty()) return std::string{};
               return folly::sformat("  {}: [{}]\n",
-                                    i++, show(ui.actions));
+                                    i++, show(ui));
             })
           | unsplit<std::string>("");
       }()
@@ -2412,12 +2415,17 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       auto& pbs = blockStates[pred->id];
       auto const oldPredLocLive = pbs.locLive;
       pbs.locLive |= result.locLiveIn;
+      auto changed =
+        mergeUIVecs(pbs.slotUsage, result.slotUsage, blk->id, true);
       auto const oldPredSlotLive = pbs.slotLive;
       pbs.slotLive |= result.slotLiveIn;
-      auto changed =
-        pbs.locLive != oldPredLocLive ||
-        pbs.slotLive != oldPredSlotLive;
-      if (mergeUIVecs(pbs.slotUsage, result.slotUsage, blk->id, true)) {
+      // If any slotUsage entries were forced live, we also have to
+      // mark the slot live.
+      for (auto const& loc : forcedLiveLocations) {
+        if (loc.isSlot && loc.blk == blk->id) pbs.slotLive.set(loc.id);
+      }
+      if (pbs.locLive != oldPredLocLive ||
+          pbs.slotLive != oldPredSlotLive) {
         changed = true;
       }
       if (mergeUIVecs(pbs.dceStack, result.stack, blk->id, false)) {

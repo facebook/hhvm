@@ -1711,7 +1711,7 @@ function strip_hhas_file($file) {
   $h = fopen($file, "r");
   $buf = "";
   while (($s = fgets($h)) !== false) {
-    if (substr($s, 0, 6) === "# NYI:") {
+    if (strpos($s, "HackCNYI") !== false) {
       fclose($h);
       return false;
     }
@@ -1728,7 +1728,7 @@ function strip_hhas_file($file) {
 function contains_nyi_line($file) {
   $h = fopen($file, "r");
   while (($s = fgets($h)) !== false) {
-    if (substr($s, 0, 6) === "# NYI:") {
+    if (strpos($s, "HackCNYI") !== false) {
       fclose($h);
       return true;
     }
@@ -2148,10 +2148,13 @@ function run_test($options, $test) {
 
     $hhas_temp = dump_hh_codegen($options, $test, $test_config);
     if (!$hhas_temp || file_get_contents($hhas_temp) === "") {
-      file_put_contents($test.'.diff', "CODEGEN FAILED");
+      file_put_contents($test.'.diff', "CODEGEN FAILED: NO OUTPUT");
       return false;
     }
-    if (contains_nyi_line($hhas_temp) === true) return 'skip';
+    if (contains_nyi_line($hhas_temp) === true) {
+      file_put_contents($test.'.diff', "CODEGEN FAILED: NYI");
+      return false;
+    }
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
   }
 
@@ -2167,7 +2170,10 @@ function run_test($options, $test) {
       file_put_contents($diff, "HACK CODEGEN FAILED");
       return false;
     }
-    if (contains_nyi_line($hhcg) === true) return 'skip';
+    if (contains_nyi_line($hhcg) === true) {
+      file_put_contents($test.'.diff', "CODEGEN FAILED: NYI");
+      return false;
+    }
 
     if (!isset($options['no-semdiff'])) {
       // Run semantic diff on outputs first

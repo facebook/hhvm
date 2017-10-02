@@ -28,6 +28,30 @@ TRACE_SET_MOD(hhbbc);
 
 //////////////////////////////////////////////////////////////////////
 
+bool poppable(Op op) {
+  switch (op) {
+    case Op::Dup:
+    case Op::Null:
+    case Op::False:
+    case Op::True:
+    case Op::Int:
+    case Op::Double:
+    case Op::String:
+    case Op::Array:
+    case Op::Vec:
+    case Op::Dict:
+    case Op::Keyset:
+    case Op::NewArray:
+    case Op::NewMixedArray:
+    case Op::NewDictArray:
+    case Op::NewLikeArrayL:
+    case Op::NewCol:
+      return true;
+    default:
+      return false;
+  }
+}
+
 void BasicPeephole::push_back(const Bytecode& next) {
   FTRACE(1, "BasicPeephole::push_back {}\n", show(next));
   if (next.op == Op::Nop) return;
@@ -40,13 +64,8 @@ void BasicPeephole::push_back(const Bytecode& next) {
     };
 
     if ((cur.op == Op::RGetCNop && next.op == Op::UnboxRNop) ||
-        (next.op == Op::PopC && (cur.op == Op::Dup ||
-                                 cur.op == Op::Null ||
-                                 cur.op == Op::False ||
-                                 cur.op == Op::True ||
-                                 cur.op == Op::Int ||
-                                 cur.op == Op::Double ||
-                                 cur.op == Op::String))) {
+        (next.op == Op::PopC && poppable(cur.op)) ||
+        (next.op == Op::PopU && cur.op == Op::NullUninit)) {
       m_next.pop_back();
       return;
     }

@@ -1,0 +1,3 @@
+Warning: Item '61' is not valid in %s/test/slow/string/nl_langinfo.php on line 3
+bool(false)
+string(2) "AM"

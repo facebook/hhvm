@@ -42,6 +42,7 @@ let debug_describe_t : type a. a t -> string = function
   | OUTLINE                  _ -> "OUTLINE"
   | IDE_IDLE                   -> "IDE_IDLE"
   | INFER_RETURN_TYPE        _ -> "INFER_RETURN_TYPE"
+  | RAGE                       -> "RAGE"
 
 let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc

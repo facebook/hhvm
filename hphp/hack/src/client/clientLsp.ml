@@ -687,6 +687,27 @@ let do_shutdown (state: state) : state =
   end;
   Post_shutdown
 
+
+let do_rage (state: state) : Rage.result =
+  let open Rage in
+  let stateItem: rageItem = {
+    title = None;
+    data = "LSP adapter state: " ^ (state_to_string state);
+  } in
+  let hack_to_lsp (item: ServerRageTypes.rageItem) : Lsp.Rage.rageItem =
+    {
+      title = item.ServerRageTypes.title;
+      data = item.ServerRageTypes.data;
+    } in
+  match state with
+  | Main_loop menv ->
+    let open Main_env in
+    let items = rpc menv.conn ServerCommandTypes.RAGE in
+    stateItem :: (List.map items ~f:hack_to_lsp)
+  | _ ->
+    [stateItem]
+
+
 let do_didOpen (conn: server_conn) (params: DidOpen.params) : unit =
   let open DidOpen in
   let open TextDocumentItem in
@@ -1430,6 +1451,7 @@ let do_initialize () : Initialize.result =
       documentLinkProvider = None;
       executeCommandProvider = None;
       typeCoverageProvider = true;
+      rageProvider = true;
     }
   }
 
@@ -1674,6 +1696,10 @@ let handle_event
   (* exit notification *)
   | _, Client_message c when c.method_ = "exit" ->
     if !state = Post_shutdown then exit_ok () else exit_fail ()
+
+  (* rage request *)
+  | _, Client_message c when c.method_ = "telemetry/rage" ->
+    do_rage !state |> print_rage |> respond stdout c
 
   (* initialize request *)
   | Pre_init, Client_message c when c.method_ = "initialize" ->

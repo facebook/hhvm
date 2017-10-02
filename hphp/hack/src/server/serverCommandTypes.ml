@@ -77,6 +77,7 @@ type _ t =
   | IDE_IDLE : unit t
   | INFER_RETURN_TYPE : InferReturnTypeService.t ->
       InferReturnTypeService.result t
+  | RAGE : ServerRageTypes.result t
 
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true

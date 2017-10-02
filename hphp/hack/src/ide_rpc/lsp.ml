@@ -305,6 +305,7 @@ module Initialize = struct
     documentLinkProvider: documentLinkOptions option;
     executeCommandProvider: executeCommandOptions option;
     typeCoverageProvider: bool;  (* Nuclide-specific feature *)
+    rageProvider: bool;
     (* omitted: experimental *)
   }
 
@@ -363,6 +364,17 @@ end
 (* Exit notification, method="exit" *)
 module Exit = struct
 end
+
+(* Rage request, method="telemetry/rage" *)
+module Rage = struct
+  type result = rageItem list
+
+  and rageItem = {
+    title: string option;
+    data: string;
+  }
+end
+
 
 (* Hover request, method="textDocument/hover" *)
 module Hover = struct

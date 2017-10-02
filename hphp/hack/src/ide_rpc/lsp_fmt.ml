@@ -255,6 +255,20 @@ let print_shutdown (_r: Shutdown.result) : json =
 
 
 (************************************************************************)
+(** rage request                                                       **)
+(************************************************************************)
+
+let print_rage (r: Rage.result) : json =
+  let open Rage in
+  let print_item (item: rageItem) : json =
+    JSON_Object [
+      "data", JSON_String item.data;
+      "title", match item.title with None -> JSON_Null | Some s -> JSON_String s;
+    ] in
+  JSON_Array (List.map r ~f:print_item)
+
+
+(************************************************************************)
 (** textDocument/didOpen notification                                  **)
 (************************************************************************)
 
@@ -781,6 +795,7 @@ let print_initialize (r: Initialize.result) : json =
         "commands", Jprint.string_array p.commands;
       ]);
       "typeCoverageProvider", Some (JSON_Bool cap.typeCoverageProvider);
+      "rageProvider", Some (JSON_Bool cap.rageProvider);
     ];
   ]
 

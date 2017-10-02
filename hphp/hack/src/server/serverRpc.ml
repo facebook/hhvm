@@ -158,6 +158,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       FileOutline.outline env.popt
     | IDE_IDLE ->
       {env with ide_idle = true;}, ()
+    | RAGE ->
+      env, ServerRage.go genv env
     | INFER_RETURN_TYPE id_info ->
       match id_info with
       | InferReturnTypeService.Function fun_name ->

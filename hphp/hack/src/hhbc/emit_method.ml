@@ -36,7 +36,7 @@ let from_ast_wrapper : bool -> _ ->
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   let (pos, original_name) = ast_method.Ast.m_name in
-  let (_,class_name) = ast_class.Ast.c_name in
+  let (_, class_name) = ast_class.Ast.c_name in
   let class_name = SU.Xhp.mangle @@ Utils.strip_ns class_name in
   let ret = ast_method.Ast.m_ret in
   let method_id = make_name ast_method.Ast.m_name in
@@ -52,6 +52,30 @@ let from_ast_wrapper : bool -> _ ->
   then Emit_fatal.raise_fatal_parse pos
     ("Class " ^ class_name ^ " contains non-static method " ^ original_name
      ^ " and therefore cannot be declared 'abstract final'");
+  (* Restrictions on __construct methods with promoted parameters *)
+  if original_name = Naming_special_names.Members.__construct
+  && List.exists ast_method.Ast.m_params (fun p -> Option.is_some p.Ast.param_modifier)
+  then begin
+    List.iter ast_method.Ast.m_params (fun p ->
+      if List.length (
+        List.filter ast_class.Ast.c_body
+        (function
+         | Ast.ClassVars (_, _, cvl, _) ->
+             List.exists cvl (fun (_,id,_) ->
+               snd id = SU.Locals.strip_dollar (snd p.Ast.param_id))
+         | _ -> false)) > 1
+      then Emit_fatal.raise_fatal_parse pos
+        (Printf.sprintf "Cannot redeclare %s::%s" class_name (snd p.Ast.param_id)));
+    if ast_class.Ast.c_kind = Ast.Cinterface || ast_class.Ast.c_kind = Ast.Ctrait
+    then Emit_fatal.raise_fatal_parse pos
+      "Constructor parameter promotion not allowed on traits or interfaces";
+    if List.mem ast_method.Ast.m_kind Ast.Abstract
+    then Emit_fatal.raise_fatal_parse pos
+      "parameter modifiers not allowed on abstract __construct";
+    if not (List.is_empty ast_method.Ast.m_tparams)
+    then Emit_fatal.raise_fatal_parse pos
+      "parameter modifiers not supported with type variable annotation"
+  end;
   let default_dropthrough =
     if List.mem ast_method.Ast.m_kind Ast.Abstract
     then Some (Emit_fatal.emit_fatal_runtimeomitframe pos

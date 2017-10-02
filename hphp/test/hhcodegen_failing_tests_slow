@@ -255,7 +255,6 @@ slow/parser/use-strict-hack.php
 slow/parser/use-strict.php
 slow/parser/val_colon_colon_class_method.php
 slow/parser/xhp-ambiguity.php
-slow/php7_backported/is_numeric.php
 slow/php7_backported/ns_088.php
 slow/php7_backported/ns_089.php
 slow/php7_backported/ns_090.php
@@ -276,7 +275,6 @@ slow/php7_backported/scalar-types/scalar_strict_declaration_placement_001.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_002.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_003.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_008.php
-slow/php7_backported/scalar-types/strict_nested.php
 slow/php7_backported/varSyntax/indirect-fcall.php
 slow/php7_backported/varSyntax/staticMember.php
 slow/php7_bcbreak/5/uvs/array_indirect_ref.php

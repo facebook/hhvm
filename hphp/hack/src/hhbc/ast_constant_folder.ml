@@ -32,7 +32,6 @@ let float_of_string_radix (s : string) (radix : int) : float =
   let float_radix = float_of_int radix in
   let float_of_char (c : char) : float = float_of_int @@ int_of_char c - 48 in
   let rec loop (idx : int) (acc : float) =
-    print_float acc;
     if idx < String.length s then
       loop (idx + 1) ((acc *. float_radix) +. (float_of_char s.[idx]))
     else

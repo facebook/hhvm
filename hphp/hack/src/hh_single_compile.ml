@@ -34,6 +34,7 @@ type options = {
   config_file     : string option;
   quiet_mode      : bool;
   mode            : mode;
+  input_file_list : string option;
 }
 
 (*****************************************************************************)
@@ -63,6 +64,15 @@ let die str =
   close_out oc;
   exit 2
 
+let foreach_line_in_file str ~f =
+  let inch = open_in str in
+  try
+    while true; do
+      let line = input_line inch |> String.trim in
+      f line; ()
+    done
+  with End_of_file -> ()
+
 let parse_options () =
   let fn_ref = ref None in
   let fallback = ref false in
@@ -73,6 +83,7 @@ let parse_options () =
   let output_file = ref None in
   let config_file = ref None in
   let quiet_mode = ref false in
+  let input_file_list = ref None in
   let usage = P.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
     [ ("--fallback"
@@ -113,23 +124,34 @@ let parse_options () =
       ("--daemon"
       , Arg.Unit (fun () -> mode := DAEMON)
       , " Run a daemon which processes Hack source from standard input"
-      )
+      );
+      ("--input-file-list"
+      , Arg.String (fun str -> input_file_list := Some str)
+      , " read a list of files (one per line) from the file `input-file-list'"
+      );
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
   if !mode = DAEMON then P.printf "%s\n%!" (Compiler_id.get_compiler_id ());
-  let fn = match !fn_ref with
-    | Some fn -> if !mode == CLI then fn else die usage
-    | None -> if !mode == CLI then die usage else read_line () in
-  { filename    = fn
-  ; fallback    = !fallback
-  ; config_list = !config_list
-  ; debug_time  = !debug_time
-  ; parser      = !parser
-  ; output_file = !output_file
-  ; config_file = !config_file
-  ; quiet_mode  = !quiet_mode
-  ; mode        = !mode
+  let needs_file = Option.is_none !input_file_list in
+  let fn =
+    if needs_file then
+      match !fn_ref with
+      | Some fn -> if !mode = CLI then fn else die usage
+      | None    -> if !mode = CLI then die usage else read_line ()
+    else
+      ""
+  in
+  { filename           = fn
+  ; fallback           = !fallback
+  ; config_list        = !config_list
+  ; debug_time         = !debug_time
+  ; parser             = !parser
+  ; output_file        = !output_file
+  ; config_file        = !config_file
+  ; quiet_mode         = !quiet_mode
+  ; mode               = !mode
+  ; input_file_list    = !input_file_list
   }
 
 let load_file_stdin () =
@@ -305,7 +327,13 @@ let decl_and_run_mode compiler_options popt =
   Local_id.track_names := true;
   Ident.track_names := true;
   let process_single_file = process_single_file compiler_options popt in
-  if compiler_options.mode = DAEMON then
+  if Option.is_some compiler_options.input_file_list then
+    let input_file_list = Option.value compiler_options.input_file_list ~default:"" in
+    foreach_line_in_file input_file_list ~f:(fun fn ->
+      let fname = Relative_path.create Relative_path.Dummy fn in
+      process_single_file fname None
+    )
+  else if compiler_options.mode = DAEMON then
     let rec process_next fn = begin
       let fname = Relative_path.create Relative_path.Dummy fn in
       process_single_file fname None;

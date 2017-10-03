@@ -1431,11 +1431,12 @@ void define_func_families(IndexData& index) {
     for (auto& kv : cinfo->methods) {
       auto const func = kv.second.func;
 
-      if (func->attrs & (AttrPrivate|AttrNoOverride)) continue;
+      if (func->attrs & AttrNoOverride) continue;
       if (func == cinfo->ctor) {
         define_func_family(index, borrow(cinfo), s_construct.get(), func);
         continue;
       }
+      if (func->attrs & AttrPrivate) continue;
       if (is_special_method_name(func->name)) continue;
 
       define_func_family(index, borrow(cinfo), kv.first, func);
@@ -1751,15 +1752,24 @@ void mark_no_override_methods(IndexData& index) {
     for (auto& ancestor : cinfo->baseList) {
       if (ancestor == cinfo.get()) continue;
 
+      auto removeNoOverride = [] (const php::Func* func) {
+        if (func->attrs & AttrNoOverride) {
+          FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
+                 func->cls->name, func->name);
+          attribute_setter(func->attrs, false, AttrNoOverride);
+        }
+      };
+
       for (auto& derivedMethod : cinfo->methods) {
-        auto const it = ancestor->methods.find(derivedMethod.first);
-        if (it == end(ancestor->methods)) continue;
-        if (it->second.func != derivedMethod.second.func) {
-          if (it->second.func->attrs & AttrNoOverride) {
-            FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
-              it->second.func->cls->name,
-              it->second.func->name);
-            attribute_setter(it->second.func->attrs, false, AttrNoOverride);
+        if (derivedMethod.second.func == cinfo->ctor) {
+          if (ancestor->ctor && ancestor->ctor != cinfo->ctor) {
+            removeNoOverride(ancestor->ctor);
+          }
+        } else {
+          auto const it = ancestor->methods.find(derivedMethod.first);
+          if (it == end(ancestor->methods)) continue;
+          if (it->second.func != derivedMethod.second.func) {
+            removeNoOverride(it->second.func);
           }
         }
       }
@@ -2618,10 +2628,10 @@ res::Func Index::resolve_method(Context ctx,
 }
 
 folly::Optional<res::Func>
-Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
+Index::resolve_ctor(Context ctx, res::Class rcls, bool exact) const {
   auto const cinfo = rcls.val.right();
   if (!cinfo || !cinfo->ctor) return folly::none;
-  if (exact) {
+  if (exact || cinfo->ctor->attrs & AttrNoOverride) {
     if (cinfo->ctor->attrs & AttrInterceptable) return folly::none;
     return do_resolve(cinfo->ctor);
   }

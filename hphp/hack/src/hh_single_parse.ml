@@ -58,7 +58,7 @@ let run_ast : Relative_path.t -> Parser_hack.parser_return = fun file ->
   result
 
 let run_ffp : Relative_path.t -> Lowerer.result =
-  Lowerer.from_file ~include_line_comments:true
+  Lowerer.from_file ~include_line_comments:true ~keep_errors:true
 
 let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
   let open Full_fidelity_syntax_tree in
@@ -149,13 +149,6 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
     let filename = Relative_path.S.to_string file in
     let ast_result = run_ast file in
     let ast_sexpr = dump_sexpr ast_result.Parser_hack.ast in
-    let unsupported = Str.regexp "Fallthrough\\|Unsafe" in
-    (try
-        ignore (Str.search_forward unsupported ast_sexpr 0);
-        eprintf "Warning: Unsupported features found: %s\n"
-          (Str.matched_group 0 ast_sexpr);
-        exit_with Unsupported
-    with Not_found -> ());
     let ffp_result = run_ffp file in
     let ffp_sexpr =
       match ffp_result.Lowerer.ast with

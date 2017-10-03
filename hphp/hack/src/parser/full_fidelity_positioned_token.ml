@@ -67,6 +67,10 @@ let leading token =
 let trailing token =
   token.trailing
 
+let has_trivia_kind token kind =
+  List.exists (fun t -> PositionedTrivia.kind t = kind) token.leading ||
+  List.exists (fun t -> PositionedTrivia.kind t = kind) token.trailing
+
 let leading_start_offset token =
   token.offset
 

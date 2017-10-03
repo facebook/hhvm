@@ -1,0 +1,95 @@
+.adata A_0 = """D:0:{}""";
+
+.main {
+  Int 1
+  RetC
+}
+
+.function <"HH\\Awaitable<HH\\dict<Tk, Tv>>" "HH\\dict" hh_type extended_hint > HH\Lib\Dict\gen_filter_with_key(<"HH\\KeyedContainer<Tk, Tv>" "HH\\KeyedContainer" hh_type > $traversable, <"(function (Tk, Tv): HH\\Awaitable<HH\\bool>)" N  > $predicate) isAsync {
+  .numiters 1;
+  .declvars $tests $result $k $v;
+  VerifyParamType $traversable
+  CGetL $traversable
+  SetL _6
+  PopC
+  .try_fault F4 {
+    FPushFuncU 2 "HH\\Lib\\Dict\\map_with_key" "map_with_key"
+    FPassL 0 _6 Cell
+# the line above is the tricky one
+    CUGetL $predicate
+    CreateCl 1 0
+# and the two above construct the parameter inline
+# so needed the extension to the fpassl special-case
+# semdiff pattern
+    FPassCE 1 Cell
+    FCall 2
+    UnboxR
+  }
+  UnsetL _6
+  SetL _6
+  PopC
+  .try_fault F5 {
+    FPushFuncU 1 "HH\\Lib\\Dict\\gen" "gen"
+    FPassL 0 _6 Cell
+    FCall 1
+    UnboxR
+  }
+  UnsetL _6
+  Dup
+  IsTypeC Null
+  JmpNZ L0
+  Await
+L0:
+  SetL _6
+  PopC
+  PushL _6
+  SetL $tests
+  PopC
+  Dict @A_0
+  SetL $result
+  PopC
+  CGetL $tests
+  IterInitK 0 L1 $v $k
+  .try_fault F6 {
+  L3:
+    CGetL $v
+    JmpZ L2
+    BaseL $traversable Warn
+    QueryM 0 CGet EL:$k
+    BaseL $result Define
+    SetM 0 EL:$k
+    PopC
+  L2:
+    IterNextK 0 L3 $v $k
+  }
+L1:
+  CGetL $result
+  VerifyRetTypeC
+  RetC
+F4:
+  UnsetL _6
+  Unwind
+F5:
+  UnsetL _6
+  Unwind
+F6:
+  IterFree 0
+  Unwind
+}
+
+
+
+.class [no_override unique nontop] Closure$HH\Lib\Dict\gen_filter_with_key;0 extends Closure {
+  .property [private] <"" N  > predicate =
+    uninit;
+  .method [public static] <"" N  > __invoke($k, $v) isClosureBody {
+    .declvars $0Closure $predicate;
+    CGetL $predicate
+    FPushFunc 2
+    FPassL 0 $k Cell
+    FPassL 1 $v Cell
+    FCall 2
+    UnboxR
+    RetC
+  }
+}

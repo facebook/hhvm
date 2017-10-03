@@ -816,6 +816,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
                 (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
                            (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)) in
 
+(* associativity of string concatenation *)
         let string_concat_concat_pattern =
           (uString $$ uConcat $$ uConcat) $> (fun ((s,_),_) -> s) in
         let concat_string_concat_pattern =
@@ -831,10 +832,36 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
           let newpc' = (hs_of_pc pc', n') in
            check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
 
+(* recognize closure creation *)
+        let named_filter foo =
+          foo $? (function | Local.Unnamed _ -> false
+                           | Local.Named _ -> true)
+              $> (function | Local.Unnamed _ -> failwith "unnamed can't happen"
+                           | Local.Named s -> s) in
+
+        let cugetl_named_pattern = named_filter uCUGetL in
+
+        let cugetl_list_pattern = greedy_kleene cugetl_named_pattern in
+        let cugetl_list_createcl_pattern = cugetl_list_pattern $$ uCreateCl
+           $? (fun (cugets,(np,_cn)) -> np >= List.length cugets) in
+
+(* Special case where FPassL _n is safe
+    A special case of that is where a closure is constructed inline during the
+    sequence of pass instructions
+    There must be other such cases lurking...
+    Note that we discard the local var pushes and the createcl instruction in the
+    return value so this counts as one parameter in the list. Those instructions
+    will get checked again when we move forward (we only consume the FPassL even
+    though the pattern is complex)
+*)
+        let createcl_and_pass_pattern =
+           (cugetl_list_createcl_pattern $$ (uFPassC $| uFPassCW $| uFPassCE))
+           $> (fun (_l,pi) -> pi) in
         let fpassl_fpassl_pattern =
           uFPassL $*$ uFPassL $? (fun ((pn,_l,h),(pn',_l',h')) -> pn=pn' && h=h')
                               $> (fun ((_pn,l,_h),(_pn',l',_h')) -> (l,l')) in
         let any_pass_pattern =
+          createcl_and_pass_pattern $|
           uFPassC $| uFPassCW $| uFPassCE $| uFPassV $| uFPassVNop $| uFPassR $|
           uFPassN $| uFPassG $| (uFPassL $> (fun (param,_,h) -> (param,h))) $|
           (uFPassS $> (fun (param,_,h) -> (param,h))) in
@@ -859,17 +886,8 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
                     check (succ pc) (succ pc') newnewasn
                           (add_assumption (pc,pc') asn assumed) todo)) in
 
-        let named_filter foo =
-           foo $? (function | Local.Unnamed _ -> false
-                            | Local.Named _ -> true)
-               $> (function | Local.Unnamed _ -> failwith "unnamed can't happen"
-                            | Local.Named s -> s) in
 
-        let cugetl_named_pattern = named_filter uCUGetL in
-
-        let cugetl_list_pattern = greedy_kleene cugetl_named_pattern in
-        let cugetl_list_createcl_pattern = cugetl_list_pattern $$ uCreateCl
-          $? (fun (cugets,(np,_cn)) -> np >= List.length cugets) in
+(* Dealing with equivalence of closure creation *)
         let two_cugetl_list_createcl_pattern =
            cugetl_list_createcl_pattern $*$ cugetl_list_createcl_pattern $>
              (fun ((cugets,(np,cn)), (cugets',(np',cn'))) ->

@@ -2280,8 +2280,17 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         let tl = List.tl_exn delimited_lines in
         let hd = Comment (hd, (String.length hd)) in
 
+        let should_break =
+          match Trivia.kind triv with
+          | TriviaKind.UnsafeExpression
+          | TriviaKind.FixMe
+          | TriviaKind.IgnoreError
+            -> false
+          | _ -> !currently_leading
+        in
+
         last_comment := Some (Concat [
-          if !currently_leading then Newline
+          if should_break then Newline
           else if preceded_by_whitespace then Space
           else Nothing;
           Concat (hd :: List.map tl ~f:map_tail);

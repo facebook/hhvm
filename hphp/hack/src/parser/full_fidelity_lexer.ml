@@ -1252,7 +1252,8 @@ we use are:
 * The first newline trivia encountered is the last trailing trivia.
 * The newline which follows a // or # comment is not part of the comment
   but does terminate the trailing trivia.
-* An /*UNSAFE_EXPR*/ is always a leading trivia.
+* A pragma to turn checks off (HH_FIXME, HH_IGNORE_ERROR and UNSAFE_EXPR) is
+* always a leading trivia.
 *)
 
 let scan_leading_trivia scanner lexer =
@@ -1278,7 +1279,10 @@ let scan_trailing_trivia scanner lexer  =
     | Some t -> begin
       match t.Trivia.kind with
       | TriviaKind.EndOfLine -> (lexer1, t :: acc)
-      | TriviaKind.UnsafeExpression -> (lexer, acc)
+      | TriviaKind.FixMe
+      | TriviaKind.IgnoreError
+      | TriviaKind.UnsafeExpression
+        -> (lexer, acc)
       | _ -> aux lexer1 (t :: acc)
       end in
   let (lexer, trivia_list) = aux lexer [] in

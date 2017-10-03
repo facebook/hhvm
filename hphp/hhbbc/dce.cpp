@@ -1301,6 +1301,16 @@ void dce(Env& env, const bc::CGetL2& op) {
     });
 }
 
+void dce(Env& env, const bc::BareThis& op) {
+  stack_ops(env, [&] (UseInfo& ui) {
+      if (allUnusedIfNotLastRef(ui) &&
+          op.subop1 != BareThisOp::Notice) {
+        return PushFlags::MarkUnused;
+      }
+      return PushFlags::MarkLive;
+    });
+}
+
 void dce(Env& env, const bc::RetC&)  { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Throw&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Fatal&) { pop(env); readDtorLocs(env); }

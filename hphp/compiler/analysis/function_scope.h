@@ -137,7 +137,6 @@ struct FunctionScope : BlockScope,
 
   void setSystem() {
     m_system = true;
-    m_volatile = false;
   }
 
   /**
@@ -197,16 +196,11 @@ struct FunctionScope : BlockScope,
    */
   void setRedeclaring(int redecId) {
     m_redeclaring = redecId;
-    setVolatile(); // redeclared function is also volatile
   }
   bool isRedeclaring() const { return m_redeclaring >= 0;}
 
   void setLocalRedeclaring() { m_localRedeclaring = true; }
   bool isLocalRedeclaring() const { return m_localRedeclaring; }
-
-  /* For function_exists */
-  void setVolatile() { m_volatile = true; }
-  bool isVolatile() const { return m_volatile; }
 
   typedef hphp_hash_map<std::string, ExpressionPtr, string_hashi,
     string_eqstri> UserAttributeMap;
@@ -302,7 +296,6 @@ private:
   unsigned m_virtual : 1;
   unsigned m_hasOverride : 1;
   unsigned m_dynamicInvoke : 1;
-  unsigned m_volatile : 1; // for function_exists
   unsigned m_pseudoMain : 1;
   unsigned m_system : 1;
   unsigned m_containsThis : 1;     // contains a usage of $this?

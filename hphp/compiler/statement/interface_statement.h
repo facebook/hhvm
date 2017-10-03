@@ -63,9 +63,6 @@ protected:
   std::string m_docComment;
   StatementListPtr m_stmt;
   ExpressionListPtr m_attrList;
-  void checkVolatile(AnalysisResultConstRawPtr ar);
-private:
-  bool checkVolatileBases(AnalysisResultConstRawPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

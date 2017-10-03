@@ -590,14 +590,6 @@ void AnalysisResult::analyzeProgram() {
 
   markRedeclaringClasses();
 
-  // Analyze some special cases
-  for (auto& cls_name : Option::VolatileClasses) {
-    ClassScopePtr cls = findClass(toLower(cls_name));
-    if (cls && cls->isUserClass()) {
-      cls->setVolatile();
-    }
-  }
-
   checkClassDerivations();
   resolveNSFallbackFuncs();
 

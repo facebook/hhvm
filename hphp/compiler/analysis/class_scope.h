@@ -162,10 +162,6 @@ public:
   void setRedeclaring(AnalysisResultConstRawPtr ar, int redecId);
   bool isRedeclaring() const { return m_redeclaring >= 0;}
 
-  /* For class_exists */
-  void setVolatile();
-  bool isVolatile() const { return m_volatile; }
-
   Derivation derivesFromRedeclaring() const {
     return m_derivesFromRedeclaring;
   }
@@ -510,7 +506,6 @@ private:
     BEING_FLATTENED,
     FLATTENED
   } m_traitStatus;
-  unsigned m_volatile:1; // for class_exists
   int32_t m_numDeclMethods{-1};
 
   // holds the fact that accessing this class declaration is a fatal error

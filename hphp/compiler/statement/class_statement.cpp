@@ -199,8 +199,6 @@ std::string ClassStatement::getName() const {
 }
 
 void ClassStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
-  checkVolatile(ar);
-
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
 
   std::vector<std::string> bases;

@@ -96,7 +96,6 @@ struct Symbol {
   bool isOverride() const { return m_flags.m_override; }
   bool isHidden() const { return m_flags.m_hidden; }
   bool isClosureVar() const { return m_flags.m_closureVar; }
-  bool isClassName() const { return m_flags.m_className; }
 
   void setParameterIndex(int ix) { m_parameter = ix; }
   void setProtected() { m_flags.m_protected = true; }
@@ -107,7 +106,6 @@ struct Symbol {
   void setOverride() { m_flags.m_override = true; }
   void setHidden() { m_flags.m_hidden = true; }
   void setClosureVar() { m_flags.m_closureVar = true; }
-  void setClassName() { m_flags.m_className = true; }
 
   void clearGlobal() { m_flags.m_global = false; }
 
@@ -165,7 +163,6 @@ private:
       unsigned m_override : 1;
       unsigned m_hidden : 1;
       unsigned m_closureVar : 1;
-      unsigned m_className : 1;
     } m_flags;
   };
   static_assert(

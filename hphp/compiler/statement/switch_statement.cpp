@@ -57,34 +57,6 @@ int SwitchStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void SwitchStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll &&
-      m_exp->is(Expression::KindOfSimpleVariable)) {
-    auto exp = dynamic_pointer_cast<SimpleVariable>(m_exp);
-    if (exp && exp->getSymbol() && exp->getSymbol()->isClassName()) {
-      // Mark some classes as volatile since the name is used in switch
-      for (int i = 0; i < m_cases->getCount(); i++) {
-        auto stmt = dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
-        assert(stmt);
-        ExpressionPtr caseCond = stmt->getCondition();
-        if (caseCond && caseCond->isScalar()) {
-          auto name = dynamic_pointer_cast<ScalarExpression>(caseCond);
-          if (name && name->isLiteralString()) {
-            string className = name->getLiteralString();
-            ClassScopePtr cls = ar->findClass(toLower(className));
-            if (cls && cls->isUserClass()) {
-              cls->setVolatile();
-            }
-          }
-        }
-      }
-      // Also note this down as code error
-      ConstructPtr self = shared_from_this();
-      Compiler::Error(Compiler::ConditionalClassLoading, self);
-    }
-  }
-}
-
 ConstructPtr SwitchStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

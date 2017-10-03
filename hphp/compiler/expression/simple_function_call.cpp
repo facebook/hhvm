@@ -343,33 +343,13 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
               break;
             }
             case FunType::FunctionExists:
-              {
-                FunctionScopePtr func = ar->findFunction(toLower(symbol));
-                if (func && func->isUserFunction()) {
-                  func->setVolatile();
-                }
-                break;
-              }
+              break;
             case FunType::InterfaceExists:
             case FunType::ClassExists:
-              {
-                ClassScopePtr cls = ar->findClass(toLower(symbol));
-                if (cls && cls->isUserClass()) {
-                  cls->setVolatile();
-                }
-                break;
-              }
+              break;
             default:
               assert(false);
           }
-        }
-      } else if ((m_type == FunType::InterfaceExists ||
-                  m_type == FunType::ClassExists) &&
-                 value->is(KindOfSimpleVariable)) {
-        auto name = dynamic_pointer_cast<SimpleVariable>(value);
-        if (name && name->getSymbol()) {
-          // name is checked as class name
-          name->getSymbol()->setClassName();
         }
       }
     }

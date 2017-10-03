@@ -143,31 +143,7 @@ std::string InterfaceStatement::getName() const {
   return std::string("Interface ") + m_originalName;
 }
 
-bool InterfaceStatement::checkVolatileBases(AnalysisResultConstRawPtr ar) {
-  ClassScopeRawPtr classScope = getClassScope();
-  assert(!classScope->isVolatile());
-  auto const& bases = classScope->getBases();
-  for (auto it = bases.begin(); it != bases.end(); ++it) {
-    ClassScopePtr base = ar->findClass(*it);
-    if (base && base->isVolatile()) return true;
-  }
-  return false;
-}
-
-void InterfaceStatement::checkVolatile(AnalysisResultConstRawPtr ar) {
-  ClassScopeRawPtr classScope = getClassScope();
-  // redeclared classes/interfaces are automatically volatile
-  if (!classScope->isVolatile()) {
-     if (checkVolatileBases(ar)) {
-       // if any base is volatile, the class is volatile
-       classScope->setVolatile();
-     }
-  }
-}
-
 void InterfaceStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
-  checkVolatile(ar);
-
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
   auto classScope = getClassScope();
   std::vector<std::string> bases;

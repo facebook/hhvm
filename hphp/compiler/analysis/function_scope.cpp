@@ -66,7 +66,7 @@ FunctionScope::FunctionScope(AnalysisResultConstRawPtr ar, bool method,
       m_attribute(attribute), m_modifiers(modifiers), m_hasVoid(false),
       m_method(method), m_refReturn(reference), m_virtual(false),
       m_hasOverride(false),
-      m_volatile(false), m_pseudoMain(inPseudoMain),
+      m_pseudoMain(inPseudoMain),
       m_system(false),
       m_containsThis(false), m_containsBareThis(0),
       m_generator(false),
@@ -115,7 +115,6 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_userAttributes(orig->m_userAttributes), m_hasVoid(orig->m_hasVoid),
       m_method(orig->m_method), m_refReturn(orig->m_refReturn),
       m_virtual(orig->m_virtual), m_hasOverride(orig->m_hasOverride),
-      m_volatile(orig->m_volatile),
       m_pseudoMain(orig->m_pseudoMain),
       m_system(!user),
       m_containsThis(orig->m_containsThis),
@@ -134,10 +133,6 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
 void FunctionScope::init(AnalysisResultConstRawPtr /*ar*/) {
   m_dynamicInvoke = false;
 
-  if (isNamed("__autoload")) {
-    setVolatile();
-  }
-
   // FileScope's flags are from parser, but VariableTable has more flags
   // coming from type inference phase. So we are tranferring these flags
   // just for better modularization between FileScope and VariableTable.
@@ -149,10 +144,6 @@ void FunctionScope::init(AnalysisResultConstRawPtr /*ar*/) {
   }
   if (m_attribute & FileScope::ContainsUnset) {
     m_variables->setAttribute(VariableTable::ContainsUnset);
-  }
-
-  if (m_stmt && Option::AllVolatile && !m_pseudoMain && !m_method) {
-    m_volatile = true;
   }
 
   if (!m_method && RuntimeOption::DynamicInvokeFunctions.count(m_scopeName)) {
@@ -186,7 +177,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_modifiers(ModifierExpressionPtr()), m_hasVoid(false),
       m_method(method), m_refReturn(reference), m_virtual(false),
       m_hasOverride(false),
-      m_volatile(false), m_pseudoMain(false),
+      m_pseudoMain(false),
       m_system(true),
       m_containsThis(false), m_containsBareThis(0),
       m_generator(false),

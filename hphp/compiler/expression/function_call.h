@@ -82,8 +82,6 @@ protected:
   unsigned m_arrayParams : 1;
   bool m_hadBackslash;
 
-  void markRefParams(FunctionScopePtr func, const std::string &name);
-
   /**
    * Each program needs to reset this object's members to revalidate
    * a function call.

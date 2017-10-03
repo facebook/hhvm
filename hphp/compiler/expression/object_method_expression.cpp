@@ -85,7 +85,7 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
       }
     }
 
-    markRefParams(m_funcScope, m_origName);
+    if (m_params) m_params->markParams();
   }
 }
 

@@ -66,7 +66,7 @@ void NewObjectExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
     }
 
     if (m_params) {
-      markRefParams(func, "");
+      m_params->markParams();
     }
   }
 }

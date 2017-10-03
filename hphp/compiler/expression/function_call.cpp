@@ -155,38 +155,6 @@ bool FunctionCall::checkUnpackParams() {
   return true;
 }
 
-void FunctionCall::markRefParams(FunctionScopePtr func,
-                                 const std::string& /*fooBarName*/) {
-  ExpressionList &params = *m_params;
-  if (func) {
-    int mpc = func->getMaxParamCount();
-    for (int i = params.getCount(); i--; ) {
-      ExpressionPtr p = params[i];
-      if (i < mpc ? func->isRefParam(i) :
-          func->isReferenceVariableArgument()) {
-        p->setContext(Expression::RefValue);
-      }
-    }
-  } else if (Option::WholeProgram && !m_origName.empty()) {
-    FunctionScope::FunctionInfoPtr info =
-      FunctionScope::GetFunctionInfo(m_origName);
-    if (info) {
-      for (int i = params.getCount(); i--; ) {
-        if (info->isRefParam(i)) {
-          m_params->markParam(i);
-        }
-      }
-    }
-    // If we cannot find information of the so-named function, it might not
-    // exist, or it might go through __call(), either of which cannot have
-    // reference parameters.
-  } else {
-    for (int i = params.getCount(); i--; ) {
-      m_params->markParam(i);
-    }
-  }
-}
-
 void FunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (isParent()) {
     getFunctionScope()->setContainsThis();

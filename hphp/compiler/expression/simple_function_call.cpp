@@ -410,9 +410,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
       }
     }
 
-    if (m_params) {
-      markRefParams(m_funcScope, m_origName);
-    }
+    if (m_params) m_params->markParams();
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     if (m_type == FunType::Unknown &&
         !m_class && !m_redeclared && !m_dynamicInvoke && !m_funcScope &&

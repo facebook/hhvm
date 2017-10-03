@@ -1208,7 +1208,7 @@ static bool ini_on_update_save_dir(const std::string& value) {
     return false;
   }
   if (g_context.isNull()) return false;
-  const char *path = value.data() + value.rfind(';') + 1;
+  const char *path = value.data() + (value.rfind(';') + 1);
   if (File::TranslatePath(path).empty()) {
     return false;
   }

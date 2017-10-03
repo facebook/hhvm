@@ -1089,7 +1089,6 @@ private:
   void traceStats(const char* when);
 
   static void initHole(void* ptr, uint32_t size);
-  void initHole();
 
   void requestEagerGC();
   void resetEagerGC();

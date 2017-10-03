@@ -457,14 +457,10 @@ void MemoryManager::initHole(void* ptr, uint32_t size) {
   FreeNode::InitFrom(ptr, size, HeaderKind::Hole);
 }
 
-void MemoryManager::initHole() {
+void MemoryManager::initFree() {
   if ((char*)m_front < (char*)m_limit) {
     initHole(m_front, (char*)m_limit - (char*)m_front);
   }
-}
-
-void MemoryManager::initFree() {
-  initHole();
   m_heap.sort();
   reinitFree();
 }

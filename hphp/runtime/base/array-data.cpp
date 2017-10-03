@@ -110,6 +110,12 @@ struct ScalarHash {
   bool equal(const ArrayData* ad1, const ArrayData* ad2) const {
     if (ad1 == ad2) return true;
     if (ad1->size() != ad2->size()) return false;
+    if (ad1->isHackArray()) {
+      if (!ad2->isHackArray()) return false;
+      if (ad1->kind() != ad2->kind()) return false;
+    } else if (ad2->isHackArray()) {
+      return false;
+    }
 
     auto check = [] (const TypedValue& tv1, const TypedValue& tv2) {
       if (tv1.m_type != tv2.m_type) {

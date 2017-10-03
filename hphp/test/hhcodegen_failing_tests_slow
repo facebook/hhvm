@@ -133,7 +133,6 @@ slow/keyset/init-parse-error1.php
 slow/keyset/init-parse-error2.php
 slow/labels/72.php
 slow/lang/deprecated.php
-slow/lang/redefine_function.php
 slow/lang/tuple_non_hh.php
 slow/llvm/switch.php
 slow/memoize/reset.php
@@ -311,7 +310,6 @@ slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_assertions/1857.php
 slow/type_constraint/parse_super_constraint_bad.php
 slow/typecheck/type_coersion_5.php
-slow/typedef/typedef_closure2.php
 slow/typedef/typedef_parent.php
 slow/typedef/typedef_self.php
 slow/types/abstract_function_typehints.php

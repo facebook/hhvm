@@ -17,6 +17,18 @@ module SU = Hhbc_string_utils
 let ast_is_interface ast_class =
   ast_class.A.c_kind = Ast.Cinterface
 
+let pick_method_name_span m = Some (snd m.Ast.m_name, m.Ast.m_span)
+
+let ensure_methods_not_redeclared class_id l =
+  match Emit_function.find_first_redeclaration pick_method_name_span l with
+  | None -> ()
+  | Some (name, _, conflicting_span) ->
+    let message =
+      Printf.sprintf "Redeclared method %s::%s"
+        (Hhbc_id.Class.to_raw_string class_id) name in
+    Emit_fatal.raise_fatal_parse conflicting_span message
+
+
 let make_86method
   ~name ~params ~is_static ~is_private ~is_abstract ~span instrs =
   let method_attributes = [] in
@@ -405,6 +417,9 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     additional_methods @
     ctor_methods @ pinit_methods @ sinit_methods @ cinit_methods in
   let methods = ast_methods class_body in
+
+  ensure_methods_not_redeclared class_id methods;
+
   let class_methods = Emit_method.from_asts ast_class methods in
   let class_methods = class_methods @ additional_methods in
   let class_type_constants =

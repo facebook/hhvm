@@ -12,6 +12,20 @@ open Instruction_sequence
 module A = Ast
 open Core
 
+let find_first_redeclaration pick_name_span l =
+  let rec aux seen l =
+    match l with
+    | [] -> None
+    | x :: xs ->
+      match pick_name_span x with
+      | Some (name, span) ->
+        begin match SMap.get name seen with
+        | None -> aux (SMap.add name span seen) xs
+        | Some original -> Some (name, original, span)
+        end
+      | None -> aux seen xs in
+  aux SMap.empty l
+
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,
  * a wrapper function
  *)

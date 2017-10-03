@@ -92,6 +92,25 @@ let emit_fatal_program ~ignore_message op pos message =
   in
     make [] [] [] [] body
 
+
+let pick_top_function_name_span f =
+  match f with
+  | true, A.Fun f -> Some ((snd f.A.f_name), f.A.f_span)
+  | _ -> None
+
+let ensure_functions_not_redeclared l =
+  match Emit_function.find_first_redeclaration pick_top_function_name_span l with
+  | None -> ()
+  | Some (name, original_span, conflicting_span) ->
+    let message =
+      Printf.sprintf "Cannot redeclare %s() (previously declared in %s:%d)"
+        name
+        (Pos.filename (Pos.to_absolute original_span))
+        (File_pos.line (Pos.pos_start original_span)) in
+    Emit_fatal.raise_fatal_runtime
+      conflicting_span
+      message
+
 let from_ast is_hh_file ast =
   Utils.try_finally
   ~f:begin fun () ->
@@ -102,7 +121,10 @@ let from_ast is_hh_file ast =
       let closed_ast, global_state =
         convert_toplevel_prog ast in
       Emit_env.set_global_state global_state;
-      let flat_closed_ast = List.map (fun (_, y) -> y) closed_ast in
+      let flat_closed_ast = List.map snd closed_ast in
+
+      ensure_functions_not_redeclared closed_ast;
+
       let compiled_defs = emit_main flat_closed_ast in
       let compiled_funs = Emit_function.emit_functions_from_program closed_ast in
       let compiled_classes = Emit_class.emit_classes_from_program closed_ast in

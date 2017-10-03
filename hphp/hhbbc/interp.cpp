@@ -1840,16 +1840,30 @@ void in(ISS& env, const bc::IsMemoType& /*op*/) {
 }
 
 void in(ISS& env, const bc::InstanceOfD& op) {
-  auto const t1 = popC(env);
+  auto t1 = topC(env);
   // Note: InstanceOfD can do autoload if the type might be a type
   // alias, so it's not nothrow unless we know it's an object type.
   if (auto const rcls = env.index.resolve_class(env.ctx, op.str1)) {
-    nothrow(env);
+    auto result = [&] (const Type& r) {
+      nothrow(env);
+      if (r != TBool) constprop(env);
+      popC(env);
+      push(env, r);
+    };
     if (!interface_supports_non_objects(rcls->name())) {
-      isTypeImpl(env, t1, subObj(*rcls));
-      return;
+      auto testTy = subObj(*rcls);
+      if (t1.subtypeOf(testTy)) return result(TTrue);
+      if (!t1.couldBe(testTy)) return result(TFalse);
+      if (is_opt(t1)) {
+        t1 = unopt(std::move(t1));
+        if (t1.subtypeOf(testTy)) {
+          return reduce(env, bc::IsTypeC { IsTypeOp::Null }, bc::Not {});
+        }
+      }
+      return result(TBool);
     }
   }
+  popC(env);
   push(env, TBool);
 }
 

@@ -1,0 +1,15 @@
+Entering main
+5
+string(63) "Call to a member function __dispose() on a non-object (integer)"
+replace in using
+string(62) "Call to a member function __dispose() on a non-object (double)"
+unset in using
+
+Notice: Undefined variable: x in %s/test/slow/using/bad-disposable.php on line 27
+string(60) "Call to a member function __dispose() on a non-object (null)"
+Leaving main
+
+
+Entering mainAsync
+string(68) "Call to a member function __disposeAsync() on a non-object (integer)"
+Leaving mainAsync

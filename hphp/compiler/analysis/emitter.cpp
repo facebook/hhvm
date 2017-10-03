@@ -81,7 +81,6 @@
 #include "hphp/compiler/statement/exp_statement.h"
 #include "hphp/compiler/statement/for_statement.h"
 #include "hphp/compiler/statement/foreach_statement.h"
-#include "hphp/compiler/statement/finally_statement.h"
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/statement/global_statement.h"
 #include "hphp/compiler/statement/goto_statement.h"
@@ -95,6 +94,7 @@
 #include "hphp/compiler/statement/switch_statement.h"
 #include "hphp/compiler/statement/try_statement.h"
 #include "hphp/compiler/statement/unset_statement.h"
+#include "hphp/compiler/statement/using_statement.h"
 #include "hphp/compiler/statement/while_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
 #include "hphp/compiler/statement/class_require_statement.h"
@@ -155,6 +155,8 @@ DECLARE_BOOST_TYPES(SwitchStatement);
 
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace {
 
 TRACE_SET_MOD(emitter);
 
@@ -268,15 +270,11 @@ namespace StackSym {
   }
 }
 
-namespace {
-
 // Placeholder for class-ref slot immediates when emitting a bytecode op. The
 // emitter takes care of assigning slots automatically so you do not need to
 // specify one.
 struct ClsRefSlotPlaceholder {};
 constexpr const ClsRefSlotPlaceholder kClsRefSlotPlaceholder{};
-
-}
 
 struct Emitter {
   Emitter(ConstructPtr node, UnitEmitter& ue, EmitterVisitor& ev)
@@ -596,7 +594,7 @@ struct Region {
     // Entry for finally fault funclets emitted after the body of
     // a function
     FaultFunclet,
-    // Region by a finally clause
+    // Region protected by a finally clause
     TryFinally,
     // Finally block entry (begins after catches ends after finally)
     Finally,
@@ -658,12 +656,33 @@ struct Region {
   // A set of goto labels occurrning inside the statement represented
   // by this entry. This value is used for establishing whether
   // a finally block needs to be executed when performing gotos.
-  std::set<StringData*, string_data_lt> m_gotoLabels;
+  std::unordered_set<StringData*> m_gotoLabels;
   // The label denoting the beginning of a finally block inside the
   // current try. Only used when the entry kind is a try statement.
   Label m_finallyLabel;
   // The parent entry.
   RegionPtr m_parent;
+};
+
+/*
+ * PendingFinally stores the information necessary to emit a finally block, to
+ * be used after the try/catch statements leading up to it are emitted.
+ */
+struct PendingFinally {
+  Offset tryStart;
+  RegionPtr tryRegion;
+  ConstructPtr memoKey;
+  LabelScopePtr labelScope;
+  std::function<void(Emitter&)> body;
+
+  PendingFinally(Offset tryStart, RegionPtr tryRegion, ConstructPtr memoKey,
+                 LabelScopePtr labelScope, std::function<void(Emitter&)> body)
+    : tryStart{tryStart}
+    , tryRegion{std::move(tryRegion)}
+    , memoKey{std::move(memoKey)}
+    , labelScope{std::move(labelScope)}
+    , body{std::move(body)}
+  {}
 };
 
 struct OpEmitContext;
@@ -883,7 +902,7 @@ private:
   bool m_evalStackIsUnknown;
   hphp_hash_map<Offset, SymbolicStack> m_jumpTargetEvalStacks;
   std::deque<Funclet*> m_funclets;
-  std::map<StatementPtr, Funclet*> m_memoizedFunclets;
+  std::unordered_map<ConstructPtr, Funclet*> m_memoizedFunclets;
   std::deque<CatchRegion*> m_catchRegions;
   std::deque<FaultRegion*> m_faultRegions;
   std::deque<FPIRegion*> m_fpiRegions;
@@ -895,6 +914,9 @@ private:
 
   // The stack of all Regions that this EmitterVisitor is currently inside
   std::vector<RegionPtr> m_regions;
+  // Finally blocks to be emitted at the end of currently active try/catch
+  // regions.
+  std::vector<PendingFinally> m_pendingFinallies;
   // The state IDs currently allocated for the "finally router" logic.
   // See FIXME above the registerControlTarget() method.
   std::set<int> m_states;
@@ -1104,11 +1126,31 @@ public:
   void emitIterFree(Emitter& e, IterVec& iters);
   void emitIterFreeForReturn(Emitter& e);
 
-  // A "finally epilogue" is a blob of bytecode that comes after an inline
-  // copy of a "finally" clause body. Finally epilogues are used to ensure
-  // that that the bodies of finally clauses are executed whenever a return,
-  // break, continue, or goto operation jumps out of their corresponding
-  // "try" blocks.
+  /*
+   * Emit a try/catch block, using the given `body' and `catches'. If `finally'
+   * is set, add an entry to m_pendingFinallies and return true. Otherwise,
+   * return false.
+   */
+  bool emitTryCatch(Emitter& e, StatementPtr body,
+                    StatementListPtr catches, StatementPtr finally);
+
+  /*
+   * Emit the top finally block from m_pendingFinallies.
+   */
+  void emitPendingFinally(Emitter& e);
+
+  /*
+   * Emit the finally body from a using block: dispose the value in localId,
+   * optionally unsetting it if wholeFunc == false.
+   */
+  void emitUsingFinally(Emitter& e, Id localId, bool isAsync, bool wholeFunc);
+
+  /*
+   * A "finally epilogue" is a blob of bytecode that comes after an inline copy
+   * of a "finally" clause body. Finally epilogues are used to ensure that that
+   * the bodies of finally clauses are executed whenever a return, break,
+   * continue, or goto operation jumps out of their corresponding "try" blocks.
+   */
   void emitFinallyEpilogue(Emitter& e, Region* entry);
   void emitReturnTrampoline(Emitter& e, Region* entry,
                             std::vector<Label*>& cases, char sym);
@@ -1124,9 +1166,8 @@ public:
   bool shouldEmitVerifyRetType();
 
   Funclet* addFunclet(Thunklet* body);
-  Funclet* addFunclet(StatementPtr stmt,
-                      Thunklet* body);
-  Funclet* getFunclet(StatementPtr stmt);
+  Funclet* addFunclet(ConstructPtr memoKey, Thunklet* body);
+  Funclet* getFunclet(ConstructPtr memoKey);
   void emitFunclets(Emitter& e);
 
   struct FaultIterInfo {
@@ -1153,12 +1194,6 @@ public:
                            Offset end,
                            Thunklet* t,
                            FaultIterInfo = FaultIterInfo { -1, KindOfIter });
-  void
-  newFaultRegionAndFunclet(StatementPtr stmt,
-                           Offset start,
-                           Offset end,
-                           Thunklet* t,
-                           FaultIterInfo = FaultIterInfo { -1, KindOfIter });
 
   void newFPIRegion(Offset start, Offset end, Offset fpOff);
   void copyOverCatchAndFaultRegions(FuncEmitter* fe);
@@ -1176,12 +1211,25 @@ public:
 
   // Helper function for creating entries.
   RegionPtr createRegion(StatementPtr s, Region::Kind kind);
+  RegionPtr createRegion(LabelScopePtr ls, Region::Kind kind);
   // Enter/leave the passed in entry. Note that entries sometimes need be
   // to be constructed before they are entered, or need to be accessed
   // after they are left. This especially applies to constructs such
   // as loops and try blocks.
   void enterRegion(RegionPtr);
   void leaveRegion(RegionPtr);
+
+  /*
+   * Emit all pending finally blocks. Typically used at the end of a function,
+   * to support whole-function try/finally constructs.
+   */
+  void emitPendingFinallies(Emitter& e);
+
+  /*
+   * Discard any pending finally blocks. Typically used as cleanup in
+   * exceptional situations.
+   */
+  void discardPendingFinallies();
 
   // Functions used for handling state IDs allocation.
   // FIXME (#3275259): This should be moved into global / func
@@ -2414,7 +2462,7 @@ EmitterVisitor::registerGoto(StatementPtr /*s*/, Region* region,
     if (r->m_parent.get() == nullptr) {
       // Top of the region hierarchy - allocate a fresh control target.
       t = std::make_shared<ControlTarget>(this);
-      r = r->m_parent.get();
+      r = nullptr;
       break;
     }
   }
@@ -2762,6 +2810,168 @@ void EmitterVisitor::emitContinue(Emitter& e, int depth, StatementPtr s) {
   }
 }
 
+bool EmitterVisitor::emitTryCatch(
+  Emitter& e, StatementPtr body, StatementListPtr catches, StatementPtr finally
+) {
+  if (!m_evalStack.empty()) {
+    InvariantViolation(
+      "Emitter detected that the evaluation stack is not empty "
+      "at the beginning of a try region: %d", m_ue.bcPos());
+  }
+  if (!m_evalStack.clsRefSlotStackEmpty()) {
+    InvariantViolation(
+      "Emitter detected that class-ref slots are in use "
+      "at the beginning of a try region: %d", m_ue.bcPos());
+  }
+
+  auto const start = m_ue.bcPos();
+  Label after;
+
+  if (finally) {
+    auto region = createRegion(body, Region::Kind::TryFinally);
+    enterRegion(region);
+    m_pendingFinallies.emplace_back(
+      start, region, finally, finally->getLabelScope(),
+      [finally](Emitter& e) { e.getEmitterVisitor().visit(finally); }
+    );
+  }
+
+  visit(body);
+  auto const try_end = m_ue.bcPos();
+
+  if (!m_evalStack.empty()) {
+    InvariantViolation("Emitter detected that the evaluation stack "
+                       "is not empty at the end of a try region: %d",
+                       try_end);
+  }
+  if (!m_evalStack.clsRefSlotStackEmpty()) {
+    InvariantViolation("Emitter detected that class-ref slots are in use "
+                       "at the end of a try region: %d",
+                       try_end);
+  }
+  if (m_evalStack.fdescSize()) {
+    InvariantViolation("Emitter detected an open function call at the end "
+                       "of a try region: %d",
+                       try_end);
+  }
+
+  int catch_count = catches->getCount();
+  if (catch_count > 0 && start != try_end) {
+    auto const emitCatchBody = [&] {
+      std::unordered_set<const StringData*> seen;
+
+      for (int i = 0; i < catch_count; i++) {
+        auto c = static_pointer_cast<CatchStatement>((*catches)[i]);
+        StringData* eName = makeStaticString(c->getOriginalClassName());
+
+        if (!seen.insert(eName).second) {
+          // Already seen a catch of this class, skip.
+          continue;
+        }
+
+        Label nextCatch;
+        e.Dup();
+        e.InstanceOfD(eName);
+        e.JmpZ(nextCatch);
+        visit(c);
+        // Safe to jump out of the catch block, as eval stack was empty at
+        // the end of try region.
+        e.Jmp(after);
+        nextCatch.set(e);
+      }
+    };
+
+    emitCatch(e, start, emitCatchBody);
+  }
+
+  if (after.isUsed()) after.set(e);
+
+  return finally != nullptr;
+}
+
+struct FinallyThunklet final : Thunklet {
+  explicit FinallyThunklet(LabelScopePtr labelScope,
+                           std::function<void(Emitter&)> body,
+                           int numLiveIters)
+      : m_labelScope(std::move(labelScope))
+      , m_body(std::move(body))
+      , m_numLiveIters(numLiveIters)
+  {}
+
+  void emit(Emitter& e) override {
+    auto& visitor = e.getEmitterVisitor();
+    auto region =
+      visitor.createRegion(m_labelScope, Region::Kind::FaultFunclet);
+    visitor.enterRegion(region);
+    SCOPE_EXIT { visitor.leaveRegion(region); };
+    visitor.emitUnsetL(e, visitor.getStateLocal());
+    visitor.emitUnsetL(e, visitor.getRetLocal());
+    auto func = visitor.getFuncEmitter();
+    int oldNumLiveIters = func->numLiveIterators();
+    func->setNumLiveIterators(m_numLiveIters);
+    SCOPE_EXIT { func->setNumLiveIterators(oldNumLiveIters); };
+    m_body(e);
+    e.Unwind();
+  }
+private:
+  LabelScopePtr m_labelScope;
+  std::function<void(Emitter&)> m_body;
+  int m_numLiveIters;
+};
+
+void EmitterVisitor::emitPendingFinally(Emitter& e) {
+  assertx(!m_pendingFinallies.empty());
+  auto info = std::move(m_pendingFinallies.back());
+  m_pendingFinallies.pop_back();
+
+  auto const endCatches = m_ue.bcPos();
+  leaveRegion(info.tryRegion);
+  info.tryRegion->m_finallyLabel.set(e);
+
+  {
+    auto finallyRegion = createRegion(info.labelScope, Region::Kind::Finally);
+    enterRegion(finallyRegion);
+    SCOPE_EXIT { leaveRegion(finallyRegion); };
+
+    info.body(e);
+  }
+
+  emitFinallyEpilogue(e, info.tryRegion.get());
+
+  if (info.tryStart != endCatches) {
+    auto func = getFunclet(info.memoKey);
+    if (func == nullptr) {
+      auto thunklet =
+        new FinallyThunklet(info.labelScope, std::move(info.body),
+                            m_curFunc->numLiveIterators());
+      func = addFunclet(info.memoKey, thunklet);
+    }
+    newFaultRegion(info.tryStart, endCatches, &func->m_entry);
+  }
+}
+
+void EmitterVisitor::emitUsingFinally(Emitter& e, Id localId,
+                                      bool isAsync, bool wholeFunc) {
+  emitVirtualLocal(localId);
+  e.CGetL(localId);
+  auto const fpiStart = m_ue.bcPos();
+  static auto const disposeAsync = makeStaticString("__disposeAsync");
+  static auto const dispose = makeStaticString("__dispose");
+  e.FPushObjMethodD(0, isAsync ? disposeAsync : dispose,
+                    ObjMethodOp::NullThrows);
+  FPIRegionRecorder(this, m_ue, m_evalStack, fpiStart);
+  e.FCall(0);
+  if (isAsync) {
+    e.UnboxR();
+    e.Await();
+    e.PopC();
+  } else {
+    e.PopR();
+  }
+
+  if (!wholeFunc) emitUnsetL(e, localId);
+}
+
 void EmitterVisitor::emitFinallyEpilogue(Emitter& e, Region* region) {
   assert(region != nullptr);
   assert(region->isTryFinally());
@@ -3043,23 +3253,25 @@ int Region::getMaxState() {
   return maxState;
 }
 
-RegionPtr
-EmitterVisitor::createRegion(StatementPtr s, Region::Kind kind) {
+RegionPtr EmitterVisitor::createRegion(StatementPtr s, Region::Kind kind) {
+  return createRegion(s ? s->getLabelScope() : nullptr, kind);
+}
+
+RegionPtr EmitterVisitor::createRegion(LabelScopePtr ls, Region::Kind kind) {
   RegionPtr parent = nullptr;
   if (kind != Region::Kind::FuncBody && kind != Region::Kind::FaultFunclet &&
       kind != Region::Kind::Global && !m_regions.empty()) {
     parent = m_regions.back();
   }
   auto region = std::make_shared<Region>(kind, parent);
-  // We preregister all the labels occurring in the provided statement
-  // ahead of the time. Therefore at the time of emitting the actual
-  // goto instructions we can reliably tell which finally blocks to
-  // run.
-  for (auto& label : s->getLabelScope()->getLabels()) {
+  if (ls == nullptr) return region;
+
+  // We preregister all the labels occurring in the provided statement ahead of
+  // the time. Therefore at the time of emitting the actual goto instructions
+  // we can reliably tell which finally blocks to run.
+  for (auto& label : ls->getLabels()) {
     StringData* nName = makeStaticString(label.getName().c_str());
-    if (!region->m_gotoLabels.count(nName)) {
-      region->m_gotoLabels.insert(nName);
-    }
+    region->m_gotoLabels.insert(nName);
   }
   return region;
 }
@@ -3074,6 +3286,19 @@ void EmitterVisitor::leaveRegion(RegionPtr region) {
   assert(m_regions.size() > 0);
   assert(m_regions.back() == region);
   m_regions.pop_back();
+}
+
+void EmitterVisitor::emitPendingFinallies(Emitter& e) {
+  while (!m_pendingFinallies.empty()) {
+    emitPendingFinally(e);
+  }
+}
+
+void EmitterVisitor::discardPendingFinallies() {
+  while (!m_pendingFinallies.empty()) {
+    leaveRegion(m_pendingFinallies.back().tryRegion);
+    m_pendingFinallies.pop_back();
+  }
 }
 
 void EmitterVisitor::registerControlTarget(ControlTarget* t) {
@@ -3559,30 +3784,6 @@ private:
   Id m_id;
 };
 
-struct FinallyThunklet final : Thunklet {
-  explicit FinallyThunklet(FinallyStatementPtr finallyStatement,
-                           int numLiveIters)
-      : m_finallyStatement(finallyStatement), m_numLiveIters(numLiveIters) {}
-  void emit(Emitter& e) override {
-    auto& visitor = e.getEmitterVisitor();
-    auto region =
-      visitor.createRegion(m_finallyStatement, Region::Kind::FaultFunclet);
-    visitor.enterRegion(region);
-    SCOPE_EXIT { visitor.leaveRegion(region); };
-    visitor.emitUnsetL(e, visitor.getStateLocal());
-    visitor.emitUnsetL(e, visitor.getRetLocal());
-    auto* func = visitor.getFuncEmitter();
-    int oldNumLiveIters = func->numLiveIterators();
-    func->setNumLiveIterators(m_numLiveIters);
-    SCOPE_EXIT { func->setNumLiveIterators(oldNumLiveIters); };
-    visitor.visit(m_finallyStatement);
-    e.Unwind();
-  }
-private:
-  FinallyStatementPtr m_finallyStatement;
-  int m_numLiveIters;
-};
-
 /**
  * Helper to deal with emitting list assignment and keeping track of some
  * associated info.  A list assignment can be thought of as a list of "index
@@ -3833,6 +4034,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
     auto region = createRegion(stmts, Region::Kind::Global);
     enterRegion(region);
     SCOPE_EXIT { leaveRegion(region); };
+    SCOPE_EXIT { assertx(m_pendingFinallies.empty()); };
 
     for (i = 0; i < nk; i++) {
       StatementPtr s = (*stmts)[i];
@@ -4148,6 +4350,13 @@ void EmitterVisitor::emitCall(Emitter& e,
   } else {
     e.FCall(numParams);
   }
+}
+
+static bool isNormalLocalVariable(const ExpressionPtr& expr) {
+  SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
+  return (expr->is(Expression::KindOfSimpleVariable) &&
+          !sv->isSuperGlobal() &&
+          !sv->isThis());
 }
 
 bool EmitterVisitor::visit(ConstructPtr node) {
@@ -4573,114 +4782,70 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     return false;
   }
 
-  case Construct::KindOfFinallyStatement: {
-    auto s = static_pointer_cast<Statement>(node);
-    auto region = createRegion(s, Region::Kind::Finally);
-    enterRegion(region);
-    SCOPE_EXIT { leaveRegion(region); };
+  case Construct::KindOfTryStatement: {
+    auto& ts = static_cast<TryStatement&>(*node);
+    if (emitTryCatch(e, ts.getBody(), ts.getCatches(), ts.getFinally())) {
+      emitPendingFinally(e);
+    }
 
-    auto fs = static_pointer_cast<FinallyStatement>(node);
-    visit(fs->getBody());
     return false;
   }
 
-  case Construct::KindOfTryStatement: {
-    auto s = static_pointer_cast<Statement>(node);
-    auto region = createRegion(s, Region::Kind::TryFinally);
-    if (!m_evalStack.empty()) {
-      InvariantViolation(
-        "Emitter detected that the evaluation stack is not empty "
-        "at the beginning of a try region: %d", m_ue.bcPos());
-    }
-    if (!m_evalStack.clsRefSlotStackEmpty()) {
-      InvariantViolation(
-        "Emitter detected that class-ref slots are in use "
-        "at the beginning of a try region: %d", m_ue.bcPos());
-    }
+  case Construct::KindOfUsingStatement: {
+    auto us = static_pointer_cast<UsingStatement>(node);
+    auto const wholeFunc = us->getIsWholeFunc();
+    auto const isAsync = us->getIsAsync();
 
-    auto ts = static_pointer_cast<TryStatement>(node);
-    auto f = static_pointer_cast<FinallyStatement>(ts->getFinally());
+    std::vector<Id> locals;
+    for (auto& expr : *us->getExprs()) {
+      visit(expr);
+      emitConvertToCell(e);
+      Id localId;
 
-    Offset start = m_ue.bcPos();
-    Offset end;
-    Label after;
-
-    {
-      if (f) {
-        enterRegion(region);
-      }
-      SCOPE_EXIT {
-        if (f) {
-          leaveRegion(region);
-        }
+      auto lookupLocalId = [&](ExpressionPtr expr) {
+        return m_curFunc->lookupVarId(
+          makeStaticString(static_cast<SimpleVariable&>(*expr).getName())
+        );
       };
 
-      visit(ts->getBody());
-      end = m_ue.bcPos();
-
-      if (!m_evalStack.empty()) {
-        InvariantViolation("Emitter detected that the evaluation stack "
-                           "is not empty at the end of a try region: %d",
-                           end);
+      if (isNormalLocalVariable(expr)) {
+        localId = lookupLocalId(expr);
+      } else if (expr->is(Construct::KindOfAssignmentExpression) &&
+          isNormalLocalVariable(expr->getStoreVariable())) {
+        localId = lookupLocalId(expr->getStoreVariable());
+      } else {
+        localId = m_curFunc->allocUnnamedLocal();
+        emitSetL(e, localId);
       }
-      if (!m_evalStack.clsRefSlotStackEmpty()) {
-        InvariantViolation("Emitter detected that class-ref slots are in use "
-                           "at the end of a try region: %d",
-                           end);
-      }
-      if (m_evalStack.fdescSize()) {
-        InvariantViolation("Emitter detected an open function call at the end "
-                           "of a try region: %d",
-                           end);
-      }
+      locals.emplace_back(localId);
+      e.PopC();
 
-      StatementListPtr catches = ts->getCatches();
-      int catch_count = catches->getCount();
-      if (catch_count > 0 && start != end) {
-        auto const emitCatchBody = [&] {
-          std::set<StringData*, string_data_lt> seen;
-
-          for (int i = 0; i < catch_count; i++) {
-            auto c = static_pointer_cast<CatchStatement>((*catches)[i]);
-            StringData* eName = makeStaticString(c->getOriginalClassName());
-
-            if (!seen.insert(eName).second) {
-              // Already seen a catch of this class, skip.
-              continue;
-            }
-
-            Label nextCatch;
-            e.Dup();
-            e.InstanceOfD(eName);
-            e.JmpZ(nextCatch);
-            visit(c);
-            // Safe to jump out of the catch block, as eval stack was empty at
-            // the end of try region.
-            e.Jmp(after);
-            nextCatch.set(e);
-          }
-        };
-
-        emitCatch(e, start, emitCatchBody);
-      }
+      auto region = createRegion(us->getLabelScope(), Region::Kind::TryFinally);
+      enterRegion(region);
+      m_pendingFinallies.emplace_back(
+        m_ue.bcPos(), region, expr, nullptr,
+        [localId, wholeFunc, isAsync] (Emitter& e) {
+          e.getEmitterVisitor().emitUsingFinally(e, localId,
+                                                 isAsync, wholeFunc);
+        }
+      );
     }
 
-    Offset end_catches = m_ue.bcPos();
-    if (after.isUsed()) after.set(e);
-
-    if (f) {
-      region->m_finallyLabel.set(e);
-      visit(f);
-      emitFinallyEpilogue(e, region.get());
-      if (start != end_catches) {
-        auto func = getFunclet(f);
-        if (func == nullptr) {
-          auto thunklet =
-            new FinallyThunklet(f, m_curFunc->numLiveIterators());
-          func = addFunclet(f, thunklet);
+    if (!wholeFunc) {
+      // Block-scoped using statement. Emit the block and clean up all the
+      // finallies we entered above, including freeing any unnamed locals.
+      visit(us->getBody());
+      assertx(locals.size() == us->getExprs()->getCount());
+      while (!locals.empty()) {
+        emitPendingFinally(e);
+        if (locals.back() >= m_curFunc->numNamedLocals()) {
+          m_curFunc->freeUnnamedLocal(locals.back());
         }
-        newFaultRegion(start, end_catches, &func->m_entry);
+        locals.pop_back();
       }
+    } else {
+      // Whole-function using statement. Finallies will be emitted by a call to
+      // emitPendingFinallies() after the function body is complete.
     }
 
     return false;
@@ -6316,7 +6481,6 @@ void EmitterVisitor::emitConstMethodCallNoParams(Emitter& e,
   emitConvertToCell(e);
 }
 
-namespace {
 const StaticString
   s_hh_invariant_violation("hh\\invariant_violation"),
   s_invariant_violation("invariant_violation"),
@@ -6325,7 +6489,6 @@ const StaticString
   s_AwaitAllWaitHandle("HH\\AwaitAllWaitHandle"),
   s_WaitHandle("HH\\WaitHandle")
   ;
-}
 
 bool EmitterVisitor::emitInlineGenva(
   Emitter& e,
@@ -7163,13 +7326,6 @@ void EmitterVisitor::emitClosureUseVar(Emitter& e, ExpressionPtr exp,
   } else {
     emitCGet(e);
   }
-}
-
-static bool isNormalLocalVariable(const ExpressionPtr& expr) {
-  SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
-  return (expr->is(Expression::KindOfSimpleVariable) &&
-          !sv->isSuperGlobal() &&
-          !sv->isThis());
 }
 
 void EmitterVisitor::emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp) {
@@ -8568,6 +8724,8 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
 
   Emitter e(meth, m_ue, *this);
   FuncFinisher ff(this, e, m_curFunc);
+  assertx(m_pendingFinallies.empty());
+  SCOPE_FAIL { discardPendingFinallies(); };
   Label topOfBody(e, Label::NoEntryNopFlag{});
   emitMethodPrologue(e, meth);
 
@@ -8586,6 +8744,8 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   visit(meth->getStmts());
   assert(m_evalStack.size() == 0);
   assert(m_evalStack.clsRefSlotStackEmpty());
+
+  emitPendingFinallies(e);
 
   // if the current position is reachable, emit code to return null
   if (currentPositionIsReachable()) {
@@ -9895,8 +10055,6 @@ Id EmitterVisitor::emitClass(Emitter& e,
   return pce->id();
 }
 
-namespace {
-
 struct ForeachIterGuard {
   ForeachIterGuard(EmitterVisitor& ev,
                    Id iterId,
@@ -9912,8 +10070,6 @@ struct ForeachIterGuard {
 private:
   EmitterVisitor& m_ev;
 };
-
-}
 
 void EmitterVisitor::emitForeachListAssignment(Emitter& e,
                                                ListAssignmentPtr la,
@@ -10264,9 +10420,11 @@ void EmitterVisitor::emitMakeUnitFatal(Emitter& e,
   e.Fatal(k);
 }
 
-Funclet* EmitterVisitor::addFunclet(StatementPtr stmt, Thunklet* body) {
-  Funclet* f = addFunclet(body);
-  m_memoizedFunclets.insert(std::make_pair(stmt, f));
+Funclet* EmitterVisitor::addFunclet(ConstructPtr memoKey, Thunklet* body) {
+  auto f = addFunclet(body);
+  auto const DEBUG_ONLY inserted =
+    m_memoizedFunclets.emplace(memoKey, f).second;
+  assertx(inserted);
   return f;
 }
 
@@ -10275,12 +10433,9 @@ Funclet* EmitterVisitor::addFunclet(Thunklet* body) {
   return m_funclets.back();
 }
 
-Funclet* EmitterVisitor::getFunclet(StatementPtr stmt) {
-  if (m_memoizedFunclets.count(stmt)) {
-    return m_memoizedFunclets[stmt];
-  } else {
-    return nullptr;
-  }
+Funclet* EmitterVisitor::getFunclet(ConstructPtr memoKey) {
+  auto it = m_memoizedFunclets.find(memoKey);
+  return it == m_memoizedFunclets.end() ? nullptr : it->second;
 }
 
 void EmitterVisitor::emitFunclets(Emitter& e) {
@@ -10336,19 +10491,6 @@ void EmitterVisitor::newFaultRegionAndFunclet(Offset start,
     return;
   }
   Funclet* f = addFunclet(t);
-  newFaultRegion(start, end, &f->m_entry, iter);
-}
-
-void EmitterVisitor::newFaultRegionAndFunclet(StatementPtr stmt,
-                                              Offset start,
-                                              Offset end,
-                                              Thunklet* t,
-                                              FaultIterInfo iter) {
-  if (start == end) {
-    delete t;
-    return;
-  }
-  Funclet* f = addFunclet(stmt, t);
   newFaultRegion(start, end, &f->m_entry, iter);
 }
 
@@ -10420,6 +10562,7 @@ void EmitterVisitor::saveMaxStackCells(FuncEmitter* fe, int32_t stackPad) {
 // Are you sure you mean to be calling this directly? Would FuncFinisher
 // be more appropriate?
 void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe, int32_t stackPad) {
+  assertx(m_pendingFinallies.empty());
   emitFunclets(e);
   fe->setNumClsRefSlots(m_evalStack.numClsRefSlots());
   m_evalStack.setNumClsRefSlots(0);
@@ -10930,7 +11073,6 @@ typedef hphp_hash_map<const StringData*, GeneratorMethod,
                       string_data_hash, string_data_same> ContMethMap;
 typedef std::map<StaticString, GeneratorMethod> ContMethMapT;
 
-namespace {
 StaticString s_next("next");
 StaticString s_send("send");
 StaticString s_raise("raise");
@@ -10960,7 +11102,6 @@ ContMethMapT s_genMethods = {
     {s_rewind, GeneratorMethod::METH_REWIND},
     {s_getReturn, GeneratorMethod::METH_GETRETURN}
   };
-}
 
 static int32_t emitGeneratorMethod(UnitEmitter& ue,
                                    FuncEmitter* fe,
@@ -11089,8 +11230,6 @@ int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
   throw IncludeTimeFatalException(meth,
     "OpCodeImpl attribute is not applicable to %s", funcName);
 }
-
-namespace {
 
 std::atomic<uint64_t> lastHHBCUnitIndex;
 
@@ -11256,6 +11395,28 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   Repo::get().saveGlobalData(gd);
 }
 
+bool startsWith(const char* big, const char* small) {
+  return strncmp(big, small, strlen(small)) == 0;
+}
+
+bool isFileHack(const char* code, size_t codeLen) {
+  // if the file starts with a shebang
+  if (codeLen > 2 && strncmp(code, "#!", 2) == 0) {
+    // reset code to the next char after the shebang line
+    const char* loc = reinterpret_cast<const char*>(
+        memchr(code, '\n', codeLen));
+    if (!loc) {
+      return false;
+    }
+
+    ptrdiff_t offset = loc - code;
+    code = loc + 1;
+    codeLen -= offset + 1;
+  }
+
+  return codeLen > strlen("<?hh") && startsWith(code, "<?hh");
+}
+
 }
 
 /*
@@ -11395,33 +11556,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
   commitLoop();
   commitGlobalData(std::move(arrTable));
   wp_thread.join();
-}
-
-namespace {
-
-bool startsWith(const char* big, const char* small) {
-  return strncmp(big, small, strlen(small)) == 0;
-}
-
-bool isFileHack(const char* code, size_t codeLen) {
-  // if the file starts with a shebang
-  if (codeLen > 2 && strncmp(code, "#!", 2) == 0) {
-    // reset code to the next char after the shebang line
-    const char* loc = reinterpret_cast<const char*>(
-        memchr(code, '\n', codeLen));
-    if (!loc) {
-      return false;
-    }
-
-    ptrdiff_t offset = loc - code;
-    code = loc + 1;
-    codeLen -= offset + 1;
-  }
-
-  return codeLen > strlen("<?hh") && startsWith(code, "<?hh");
-}
-
-////////////////////////////////////////////////////////////////////////////////
 }
 
 extern "C" {

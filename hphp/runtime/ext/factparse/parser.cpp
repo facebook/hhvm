@@ -378,6 +378,8 @@ void Parser::setTypeVars(Token &out, Token &name) {
 
 void Parser::onScopeLabel(const Token& /*stmt*/, const Token& /*label*/) {}
 
+void Parser::closeActiveUsings() {}
+
 void Parser::onCompleteLabelScope(bool /*fresh*/) {}
 
 void Parser::onName(Token& /*out*/, Token& /*name*/, NameKind /*kind*/) {}
@@ -620,6 +622,8 @@ void Parser::onCatch(Token& /*out*/, Token& /*catches*/, Token& /*className*/,
 void Parser::onFinally(Token& /*out*/, Token& /*stmt*/) {}
 
 void Parser::onThrow(Token& /*out*/, Token& /*expr*/) {}
+
+void Parser::onUsing(Token&, Token&, bool, Token&, Token*) {}
 
 void Parser::onClosureStart(Token& /*name*/) {}
 

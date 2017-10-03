@@ -126,6 +126,7 @@ static int getNextTokenType(int t) {
     case T_YIELD_FROM:
     case T_AWAIT:
     case T_ASYNC:
+    case T_USING:
     case T_NEW:
     case T_INSTANCEOF:
     case T_DOUBLE_ARROW:
@@ -272,6 +273,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"catch"                { RETTOKEN(T_CATCH);}
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
 <ST_IN_SCRIPTING>"throw"                { RETTOKEN(T_THROW);}
+<ST_IN_SCRIPTING>"using"                { HH_ONLY_KEYWORD(T_USING); }
 <ST_IN_SCRIPTING>"if"                   { RETTOKEN(T_IF);}
 <ST_IN_SCRIPTING>"else"{WHITESPACE}*"if"[^a-zA-Z0-9_\x80-\xff] {
   yyless(--yyleng);

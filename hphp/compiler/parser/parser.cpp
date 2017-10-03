@@ -52,43 +52,43 @@
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
 
-#include "hphp/compiler/statement/function_statement.h"
-#include "hphp/compiler/statement/class_statement.h"
-#include "hphp/compiler/statement/interface_statement.h"
-#include "hphp/compiler/statement/class_variable.h"
-#include "hphp/compiler/statement/class_constant.h"
-#include "hphp/compiler/statement/method_statement.h"
-#include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/statement/block_statement.h"
+#include "hphp/compiler/statement/break_statement.h"
+#include "hphp/compiler/statement/case_statement.h"
+#include "hphp/compiler/statement/catch_statement.h"
+#include "hphp/compiler/statement/class_constant.h"
+#include "hphp/compiler/statement/class_require_statement.h"
+#include "hphp/compiler/statement/class_statement.h"
+#include "hphp/compiler/statement/class_variable.h"
+#include "hphp/compiler/statement/continue_statement.h"
+#include "hphp/compiler/statement/declare_statement.h"
+#include "hphp/compiler/statement/do_statement.h"
+#include "hphp/compiler/statement/echo_statement.h"
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/for_statement.h"
+#include "hphp/compiler/statement/foreach_statement.h"
+#include "hphp/compiler/statement/function_statement.h"
+#include "hphp/compiler/statement/global_statement.h"
+#include "hphp/compiler/statement/goto_statement.h"
 #include "hphp/compiler/statement/if_branch_statement.h"
 #include "hphp/compiler/statement/if_statement.h"
-#include "hphp/compiler/statement/while_statement.h"
-#include "hphp/compiler/statement/do_statement.h"
-#include "hphp/compiler/statement/for_statement.h"
-#include "hphp/compiler/statement/switch_statement.h"
-#include "hphp/compiler/statement/case_statement.h"
-#include "hphp/compiler/statement/break_statement.h"
-#include "hphp/compiler/statement/continue_statement.h"
-#include "hphp/compiler/statement/return_statement.h"
-#include "hphp/compiler/statement/global_statement.h"
-#include "hphp/compiler/statement/static_statement.h"
-#include "hphp/compiler/statement/echo_statement.h"
-#include "hphp/compiler/statement/unset_statement.h"
-#include "hphp/compiler/statement/exp_statement.h"
-#include "hphp/compiler/statement/foreach_statement.h"
-#include "hphp/compiler/statement/catch_statement.h"
-#include "hphp/compiler/statement/try_statement.h"
-#include "hphp/compiler/statement/finally_statement.h"
-#include "hphp/compiler/statement/throw_statement.h"
-#include "hphp/compiler/statement/goto_statement.h"
+#include "hphp/compiler/statement/interface_statement.h"
 #include "hphp/compiler/statement/label_statement.h"
-#include "hphp/compiler/statement/use_trait_statement.h"
-#include "hphp/compiler/statement/class_require_statement.h"
-#include "hphp/compiler/statement/trait_prec_statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/return_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/statement/static_statement.h"
+#include "hphp/compiler/statement/switch_statement.h"
+#include "hphp/compiler/statement/throw_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
+#include "hphp/compiler/statement/trait_prec_statement.h"
+#include "hphp/compiler/statement/try_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
+#include "hphp/compiler/statement/unset_statement.h"
 #include "hphp/compiler/statement/use_declaration_statement_fragment.h"
-#include "hphp/compiler/statement/declare_statement.h"
+#include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/using_statement.h"
+#include "hphp/compiler/statement/while_statement.h"
 
 #include "hphp/compiler/analysis/function_scope.h"
 
@@ -334,10 +334,10 @@ LabelScopePtr Parser::getLabelScope() const {
 void Parser::onNewLabelScope(bool fresh) {
   if (fresh) {
     m_labelScopes.emplace_back();
+    m_activeUsings.emplace_back(0);
   }
   assert(!m_labelScopes.empty());
-  auto labelScope = std::make_shared<LabelScope>();
-  m_labelScopes.back().push_back(labelScope);
+  m_labelScopes.back().emplace_back(std::make_shared<LabelScope>());
 }
 
 void Parser::onScopeLabel(const Token& stmt, const Token& label) {
@@ -348,13 +348,34 @@ void Parser::onScopeLabel(const Token& stmt, const Token& label) {
   }
 }
 
+void Parser::closeActiveUsings() {
+  assertx(!m_activeUsings.empty());
+  for (int i = m_activeUsings.back(); i--; ) {
+    onCompleteLabelScope(false);
+    popLabelScope();
+  }
+  m_activeUsings.back() = 0;
+}
+
 void Parser::onCompleteLabelScope(bool fresh) {
-  assert(!m_labelScopes.empty());
-  assert(!m_labelScopes.back().empty());
+  assertx(!m_labelScopes.empty());
+  assertx(!m_labelScopes.back().empty());
+  assertx(m_labelScopes.size() == m_activeUsings.size());
+
   m_labelScopes.back().pop_back();
+
   if (fresh) {
+    assertx(m_activeUsings.back() == 0);
+    m_activeUsings.pop_back();
+
+    assertx(m_labelScopes.back().empty());
     m_labelScopes.pop_back();
   }
+}
+
+void Parser::pushActiveUsing() {
+  assertx(!m_activeUsings.empty());
+  ++m_activeUsings.back();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1773,11 +1794,7 @@ void Parser::addTopStatement(Token &new_stmt) {
 }
 
 void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
-  if (!stmts->stmt) {
-    out->stmt = NEW_STMT0(StatementList);
-  } else {
-    out->stmt = stmts->stmt;
-  }
+  makeStatementList(out, stmts);
   addStatement(out->stmt, new_stmt->stmt);
 }
 
@@ -1785,6 +1802,12 @@ void Parser::addStatement(StatementPtr stmt, StatementPtr new_stmt) {
   if (new_stmt) {
     stmt->addElement(new_stmt);
   }
+}
+
+void Parser::makeStatementList(Token &out, Token &stmt) {
+  assert(stmt->stmt == nullptr ||
+         stmt->stmt->getKindOf() == Construct::KindOfStatementList);
+  out->stmt = stmt->stmt ? stmt->stmt : NEW_STMT0(StatementList);
 }
 
 void Parser::finishStatement(Token &out, Token &stmts) {
@@ -2123,46 +2146,64 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
 
 void Parser::onTry(Token &out, Token &tryStmt, Token &className, Token &var,
                    Token &catchStmt, Token &catches, Token &finallyStmt) {
-  StatementPtr stmtList;
+  StatementListPtr catchList;
   if (catches->stmt) {
-    stmtList = catches->stmt;
+    catchList = static_pointer_cast<StatementList>(catches->stmt);
   } else {
-    stmtList = NEW_STMT0(StatementList);
+    catchList = NEW_STMT0(StatementList);
   }
-  stmtList->insertElement(NEW_STMT(CatchStatement, className->text(),
-                                   var->text(), catchStmt->stmt));
+  catchList->insertElement(NEW_STMT(CatchStatement, className->text(),
+                                    var->text(), catchStmt->stmt));
   out->stmt = NEW_STMT(TryStatement, tryStmt->stmt,
-                       dynamic_pointer_cast<StatementList>(stmtList),
+                       catchList,
                        finallyStmt->stmt);
-  if (tryStmt->stmt) {
-    out->stmt->setLabelScope(stmtList->getLabelScope());
-  }
 }
 
 void Parser::onTry(Token &out, Token &tryStmt, Token &finallyStmt) {
   out->stmt = NEW_STMT(TryStatement, tryStmt->stmt,
-                       dynamic_pointer_cast<StatementList>(NEW_STMT0(StatementList)),
+                       NEW_STMT0(StatementList),
                        finallyStmt->stmt);
-  if (tryStmt->stmt) {
-    out->stmt->setLabelScope(tryStmt->stmt->getLabelScope());
+}
+
+void Parser::onUsing(Token &out, Token &async, bool wholeFunc, Token &usingExpr,
+                     Token *usingStmt) {
+  auto const isAsync = async.num() != 0;
+
+  // usingExpr will either be an ExpressionList or some other
+  // Expression. Canonicalize to an ExpressionList.
+  ExpressionListPtr exprs;
+  if (usingExpr->exp->is(Construct::KindOfExpressionList)) {
+    exprs = static_pointer_cast<ExpressionList>(usingExpr->exp);
+  } else {
+    exprs = NEW_EXP0(ExpressionList);
+    exprs->addElement(usingExpr->exp);
   }
+
+  out->stmt = NEW_STMT(
+    UsingStatement, isAsync, wholeFunc, exprs,
+    static_pointer_cast<StatementList>(usingStmt ? usingStmt->stmt : nullptr)
+  );
+
+  if (isAsync) setIsAsync();
+  if (wholeFunc) pushActiveUsing();
+
+  // TODO (#3271396) This can be greatly improved. In particular
+  // even when a finally block exists inside a function it is often
+  // the case that the unnamed locals state & ret are not needed.
+  // See task description for further details.
+  m_file->setAttribute(FileScope::NeedsFinallyLocals);
 }
 
 void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
                      Token &stmt) {
-  StatementPtr stmtList;
-  if (catches->stmt) {
-    stmtList = catches->stmt;
-  } else {
-    stmtList = NEW_STMT0(StatementList);
-  }
-  stmtList->addElement(NEW_STMT(CatchStatement, className->text(),
-                                var->text(), stmt->stmt));
-  out->stmt = stmtList;
+  makeStatementList(out, catches);
+  out->stmt->addElement(NEW_STMT(CatchStatement, className->text(),
+                                 var->text(), stmt->stmt));
 }
 
 void Parser::onFinally(Token &out, Token &stmt) {
-  out->stmt = NEW_STMT(FinallyStatement, stmt->stmt);
+  makeStatementList(out, stmt);
+
   // TODO (#3271396) This can be greatly improved. In particular
   // even when a finally block exists inside a function it is often
   // the case that the unnamed locals state & ret are not needed.

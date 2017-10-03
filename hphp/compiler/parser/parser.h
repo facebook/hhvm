@@ -248,6 +248,7 @@ public:
   void onMemberModifier(Token &out, Token *modifiers, Token &modifier);
   void onStatementListStart(Token &out);
   void addStatement(Token &out, Token &stmts, Token &new_stmt);
+  void makeStatementList(Token &out, Token &stmt);
   void addTopStatement(Token &new_stmt);
   void onClassStatement(Token &out, Token &stmts, Token &new_stmt) {
     addStatement(out, stmts, new_stmt);
@@ -283,6 +284,8 @@ public:
   void onTry(Token &out, Token &tryStmt, Token &className, Token &var,
              Token &catchStmt, Token &catches, Token &finallyStmt);
   void onTry(Token &out, Token &tryStmt, Token &finallyStmt);
+  void onUsing(Token &out, Token &async, bool wholeFunc, Token &usingExpr,
+               Token *usingStmt);
   void onCatch(Token &out, Token &catches, Token &className, Token &var,
                Token &stmt);
   void onFinally(Token &out, Token &stmt);
@@ -390,10 +393,23 @@ public:
   void onScopeLabel(const Token& stmt, const Token& label);
 
   /*
+   * Called at the end of a function to close any whole-function using
+   * statements.
+   */
+  void closeActiveUsings();
+
+  /*
    * Called whenever a label scope ends. The fresh parameter has the
    * same meaning as for onNewLabelScope.
    */
   void onCompleteLabelScope(bool fresh);
+
+  /*
+   * Called once for each whole-function using
+   * statement. onCompleteLabelScope(true) will clean up any active using
+   * statements at the end of the function.
+   */
+  void pushActiveUsing();
 
   void invalidateGoto(TStatementPtr stmt, GotoError error) override;
   void invalidateLabel(TStatementPtr stmt) override;
@@ -446,6 +462,7 @@ private:
   std::vector<std::string> m_comments; // for docComment stack
   std::vector<std::vector<BlockScopePtr>> m_scopes;
   std::vector<std::vector<LabelScopePtr>> m_labelScopes;
+  std::vector<int> m_activeUsings;
   std::vector<FunctionContext> m_funcContexts;
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::stack<ClassContext> m_clsContexts;

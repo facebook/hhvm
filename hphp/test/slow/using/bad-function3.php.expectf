@@ -1,0 +1,1 @@
+Fatal error: Function 'main' contains 'await' but is not declared as async. in %s/test/slow/using/bad-function3.php on line 5

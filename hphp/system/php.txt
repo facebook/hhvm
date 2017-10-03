@@ -106,6 +106,7 @@ hphp/system/php/date/dateperiod.php
 hphp/system/php/date/datetime_funcs.php
 hphp/system/php/dom/DOMException.php
 hphp/system/php/file_system/Directory.php
+hphp/system/php/lang/Disposable.php
 hphp/system/php/lang/ErrorException.php
 hphp/system/php/lang/fun.ns.php
 hphp/system/php/lang/invariant.ns.php

@@ -338,7 +338,7 @@ Id FuncEmitter::allocUnnamedLocal() {
     ++m_numLocals;
     ++m_numUnnamedLocals;
   }
-  return m_numLocals - m_numUnnamedLocals + (m_activeUnnamedLocals - 1);
+  return numNamedLocals() - 1 + m_activeUnnamedLocals;
 }
 
 

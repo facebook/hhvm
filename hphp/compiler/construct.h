@@ -92,9 +92,9 @@ struct IParseHandler {
   x(UnsetStatement)         \
   x(ExpStatement)           \
   x(ForEachStatement)       \
-  x(FinallyStatement)       \
   x(CatchStatement)         \
   x(TryStatement)           \
+  x(UsingStatement)         \
   x(ThrowStatement)         \
   x(GotoStatement)          \
   x(LabelStatement)         \

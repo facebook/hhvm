@@ -144,6 +144,7 @@ struct FuncEmitter {
    * Count things.
    */
   Id numLocals() const;
+  Id numNamedLocals() const;
   Id numIterators() const;
   Id numLiveIterators() const;
   Id numClsRefSlots() const;
@@ -163,7 +164,9 @@ struct FuncEmitter {
   void allocVarId(const StringData* name);
 
   /*
-   * Allocate and free unnamed locals.
+   * Allocate and free unnamed locals. Unnamed locals must be freed in reverse
+   * allocation order (i.e., it is only ever legal to free the most recently
+   * allocated unnamed local that has not yet been freed).
    */
   Id allocUnnamedLocal();
   void freeUnnamedLocal(Id id);

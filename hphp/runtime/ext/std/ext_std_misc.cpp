@@ -788,7 +788,8 @@ const int UserTokenId_T_KEYSET = 444;
 const int UserTokenId_T_WHERE = 445;
 const int UserTokenId_T_VARRAY = 446;
 const int UserTokenId_T_DARRAY = 447;
-const int MaxUserTokenId = 448; // Marker, not a real user token ID
+const int UserTokenId_T_USING = 448;
+const int MaxUserTokenId = 449; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP

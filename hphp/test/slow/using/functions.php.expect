@@ -1,0 +1,44 @@
+Entering main()
+Constructing id 0
+Entering function
+Constructing id 1
+Leaving function
+Disposing id 1
+Adding another Logger
+Constructing id 2
+Entering lambda
+Constructing id 3
+Leaving lambda
+Disposing id 3
+Entering lambda
+Constructing id 4
+Leaving lambda
+Disposing id 4
+Adding more Loggers
+Constructing id 5
+Constructing id 6
+Done with main
+Disposing id 6
+Disposing id 5
+Disposing id 2
+Disposing id 0
+Returned from main
+Entering mainAsync()
+Constructing id 7
+Constructing id 8
+Constructing id 9
+Leaving mainAsync()
+Disposing id 9
+Async disposing id 8
+Async disposing id 7
+Entering Foo::bar()
+Constructing id 10
+Leaving Foo::bar()
+Disposing id 10
+Entering thrower()
+Constructing id 11
+Constructing id 12
+About to throw
+Disposing id 12
+Disposing id 11
+string(2) "hi"

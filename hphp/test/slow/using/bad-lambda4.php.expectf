@@ -1,0 +1,1 @@
+Fatal error: Call to undefined method Closure$main;%d::__dispose() in %s/test/slow/using/bad-lambda4.php on line 5

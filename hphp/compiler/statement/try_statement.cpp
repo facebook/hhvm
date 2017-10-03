@@ -40,10 +40,8 @@ TryStatement::TryStatement
 StatementPtr TryStatement::clone() {
   TryStatementPtr stmt(new TryStatement(*this));
   stmt->m_tryStmt = Clone(m_tryStmt);
-  if (m_catches)
-    stmt->m_catches = Clone(m_catches);
-  if (m_finallyStmt)
-    stmt->m_finallyStmt = Clone(m_finallyStmt);
+  stmt->m_catches = Clone(m_catches);
+  stmt->m_finallyStmt = Clone(m_finallyStmt);
   return stmt;
 }
 

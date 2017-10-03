@@ -92,12 +92,21 @@ struct ParserBase {
     StaticName
   };
 
+  enum class LabelScopeKind {
+    Invalid,
+    LoopSwitch,
+    Finally,
+    Using,
+  };
+
   static bool IsClosureName(const std::string &name);
   /*
    * Is this the name of an anonymous class (either a closure,
    * or a ClassExpression).
    */
   static bool IsAnonymousClassName(folly::StringPiece name);
+
+  static const char* labelScopeName(LabelScopeKind kind);
 
   std::string newClosureName(
       const std::string &namespaceName,
@@ -168,7 +177,7 @@ public:
 
   // for goto syntax checking
   void pushLabelInfo();
-  void pushLabelScope();
+  void pushLabelScope(LabelScopeKind kind);
   void popLabelScope();
   void addLabel(const std::string &label, const Location::Range& loc,
                 ScannerToken *stmt);
@@ -195,9 +204,16 @@ protected:
   std::vector<bool> m_classes; // used to determine if we are currently
                                // inside a regular class or an XHP class
 
+  struct LabelScopeInfo {
+    LabelScopeInfo(LabelScopeKind kind, int id) : kind(kind), id(id) {}
+
+    LabelScopeKind kind;
+    int id;
+  };
+
   struct LabelStmtInfo {
     TStatementPtr stmt;
-    int scopeId;
+    LabelScopeInfo scopeInfo;
     Location::Range loc;
     bool inTryCatchBlock;
   };
@@ -210,7 +226,7 @@ protected:
   TypevarScopeStack m_typeScopes;
 
   // for goto syntax checking
-  typedef std::vector<int> LabelScopes;
+  using LabelScopes = std::vector<LabelScopeInfo>;
   struct GotoInfo {
     std::string label;
     LabelScopes scopes;

@@ -2076,8 +2076,8 @@ FPushFuncU <num params> <litstr id> <litstr fallback> []  ->  []
   %3. As for FPushFuncD the litstr in %2 and %3 must not start with a '\'
   %character.
 
-FPushObjMethod <num params>                 [C C]  ->  []
-FPushObjMethodD <num params> <litstr id>    [C]  ->  []
+FPushObjMethod <num params> <nullsafe>                 [C C]  ->  []
+FPushObjMethodD <num params> <litstr id> <nullsafe>    [C]  ->  []
 
   FPI push object-based method. First, these instructions load values into x
   and y as given by the following table:
@@ -2087,12 +2087,12 @@ FPushObjMethodD <num params> <litstr id>    [C]  ->  []
       FPushObjMethod   | $2 | $1
       FPushObjMethodD  | $1 | %2
 
-  If x is not an object or if y is not a string, this instruction throws a
-  fatal error. Next, this instruction checks if object x has an accessible
-  method named y. If it does, this instruction pushes a new entry on the FPI
-  stack, initializing it with the number of parameters being passed (given by
-  %1) and a reference to the FPI structure for the method named y from object
-  x.
+  If x is not an object and nullsafe != ObjMethodOp::NullThrows, or if y is not
+  a string, this instruction throws a fatal error. Next, this instruction
+  checks if object x has an accessible method named y. If it does, this
+  instruction pushes a new entry on the FPI stack, initializing it with the
+  number of parameters being passed (given by %1) and a reference to the FPI
+  structure for the method named y from object x.
 
   If object x does not have an accessible method named y, this instruction
   checks if object x has a __call method. If a __call method is found, this

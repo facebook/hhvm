@@ -14,29 +14,37 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FINALLY_STATEMENT_H_
-#define incl_HPHP_FINALLY_STATEMENT_H_
+#ifndef incl_HPHP_USING_STATEMENT_H_
+#define incl_HPHP_USING_STATEMENT_H_
 
+#include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/statement/statement_list.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(StatementList);
-DECLARE_BOOST_TYPES(FinallyStatement);
+DECLARE_BOOST_TYPES(UsingStatement);
 
-struct FinallyStatement : Statement {
-  FinallyStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
-               StatementPtr stmt);
+struct UsingStatement : Statement {
+  UsingStatement(
+    STATEMENT_CONSTRUCTOR_PARAMETERS,
+    bool isAsync, bool isWholeFunc, ExpressionListPtr exp, StatementListPtr body
+  );
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  int getRecursiveCount() const override;
 
-  StatementPtr getBody() const { return m_stmt; }
+  bool getIsAsync() const            { return m_isAsync; }
+  bool getIsWholeFunc() const        { return m_isWholeFunc; }
+  ExpressionListPtr getExprs() const { return m_expr; }
+  StatementListPtr getBody() const   { return m_body; }
+
 private:
-  StatementPtr m_stmt;
+  const bool m_isAsync;
+  const bool m_isWholeFunc;
+  ExpressionListPtr m_expr;
+  StatementListPtr m_body;
 };
 
-///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_FINALLY_STATEMENT_H_
+
+#endif

@@ -92,7 +92,8 @@ public:
 
   virtual int getRecursiveCount() const { return 1; }
 
-  LabelScopePtr getLabelScope() { return m_labelScope; }
+  LabelScopePtr      getLabelScope()       { return m_labelScope; }
+  LabelScopeConstPtr getLabelScope() const { return m_labelScope; }
   void setLabelScope(LabelScopePtr labelScope) { m_labelScope = labelScope; }
 
 protected:

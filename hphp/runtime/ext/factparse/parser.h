@@ -328,6 +328,8 @@ struct Parser : ParserBase {
                Token &stmt);
   void onFinally(Token &out, Token &stmt);
   void onThrow(Token &out, Token &expr);
+  void onUsing(Token &out, Token &async, bool wholeFunc, Token &usingExpr,
+               Token *usingStmt);
 
   void onClosureStart(Token &name);
   Token onClosure(ClosureType type,
@@ -386,6 +388,7 @@ struct Parser : ParserBase {
 
   void onNewLabelScope(bool fresh);
   void onScopeLabel(const Token& stmt, const Token& label);
+  void closeActiveUsings();
   void onCompleteLabelScope(bool fresh);
 
   virtual void invalidateGoto(TStatementPtr stmt, GotoError error);

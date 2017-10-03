@@ -1,0 +1,2 @@
+
+Fatal error: 'goto' into or across using statement is disallowed: (Line: 4, Char: 11) in %s/test/slow/using/bad-goto2.php on line 3

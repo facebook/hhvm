@@ -65,6 +65,10 @@ inline Id FuncEmitter::numLocals() const {
   return m_numLocals;
 }
 
+inline Id FuncEmitter::numNamedLocals() const {
+  return m_numLocals - m_numUnnamedLocals;
+}
+
 inline Id FuncEmitter::numIterators() const {
   return m_numIterators;
 }
@@ -101,8 +105,9 @@ inline Id FuncEmitter::lookupVarId(const StringData* name) const {
   return m_localNames.find(name)->second;
 }
 
-inline void FuncEmitter::freeUnnamedLocal(Id /*id*/) {
-  assert(m_activeUnnamedLocals > 0);
+inline void FuncEmitter::freeUnnamedLocal(Id id) {
+  assertx(m_activeUnnamedLocals > 0);
+  assertx(id == numNamedLocals() - 1 + m_activeUnnamedLocals);
   --m_activeUnnamedLocals;
 }
 

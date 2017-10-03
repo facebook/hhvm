@@ -32,6 +32,17 @@ bool ParserBase::IsAnonymousClassName(folly::StringPiece name) {
   return name.find('$') != std::string::npos;
 }
 
+const char* ParserBase::labelScopeName(LabelScopeKind kind) {
+  switch (kind) {
+    case LabelScopeKind::Invalid:     break;
+    case LabelScopeKind::LoopSwitch:  return "into loop or switch";
+    case LabelScopeKind::Finally:     return "into finally";
+    case LabelScopeKind::Using:       return "into or across using";
+
+  }
+  always_assert(false && "Invalid LabelScope");
+}
+
 std::string ParserBase::newClosureName(
     const std::string &namespaceName,
     const std::string &className,
@@ -75,8 +86,7 @@ ParserBase::ParserBase(Scanner &scanner, const char *fileName)
 
   // global scope
   m_labelInfos.reserve(3);
-  m_labelInfos.resize(1);
-  pushLabelScope();
+  pushLabelInfo();
 }
 
 ParserBase::~ParserBase() {
@@ -178,20 +188,20 @@ bool ParserBase::isTypeVarInImmediateScope(const std::string &name) {
 // checks GOTO label syntax
 
 void ParserBase::pushLabelInfo() {
-  m_labelInfos.resize(m_labelInfos.size() + 1);
-  pushLabelScope();
+  m_labelInfos.emplace_back();
+  pushLabelScope(LabelScopeKind::Invalid);
 }
 
-void ParserBase::pushLabelScope() {
+void ParserBase::pushLabelScope(LabelScopeKind kind) {
   assert(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
-  info.scopes.push_back(++info.scopeId);
+  info.scopes.emplace_back(kind, ++info.scopeId);
 }
 
 void ParserBase::popLabelScope() {
-  assert(!m_labelInfos.empty());
-  LabelInfo &info = m_labelInfos.back();
-  info.scopes.pop_back();
+  assertx(!m_labelInfos.empty());
+  assertx(!m_labelInfos.back().scopes.empty());
+  m_labelInfos.back().scopes.pop_back();
 }
 
 void ParserBase::addLabel(const std::string &label,
@@ -206,12 +216,13 @@ void ParserBase::addLabel(const std::string &label,
     return;
   }
   assert(!info.scopes.empty());
-  LabelStmtInfo labelInfo;
-  labelInfo.scopeId         = info.scopes.back();
-  labelInfo.stmt            = extractStatement(stmt);
-  labelInfo.loc             = loc;
-  labelInfo.inTryCatchBlock = false;
-  info.labels[label]        = labelInfo;
+  auto const stmtInfo = LabelStmtInfo{
+    extractStatement(stmt),
+    info.scopes.back(),
+    loc,
+    false
+  };
+  info.labels.emplace(label, stmtInfo);
 }
 
 void ParserBase::addGoto(const std::string &label,
@@ -230,6 +241,9 @@ void ParserBase::addGoto(const std::string &label,
 void ParserBase::popLabelInfo() {
   assert(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
+  assertx(info.scopes.size() == 1);
+  assertx(info.scopes.back().kind == LabelScopeKind::Invalid);
+
   LabelMap labels = info.labels; // shallow copy
 
   for (unsigned int i = 0; i < info.gotos.size(); i++) {
@@ -242,18 +256,19 @@ void ParserBase::popLabelInfo() {
       continue;
     }
     const LabelStmtInfo &labelInfo = iter->second;
-    int labelScopeId = labelInfo.scopeId;
+    int labelScopeId = labelInfo.scopeInfo.id;
     bool found = false;
     for (int j = gotoInfo.scopes.size() - 1; j >= 0; j--) {
-      if (labelScopeId == gotoInfo.scopes[j]) {
+      if (labelScopeId == gotoInfo.scopes[j].id) {
         found = true;
         break;
       }
     }
     if (!found) {
       invalidateGoto(gotoInfo.stmt, InvalidBlock);
-      error("'goto' into loop or switch statement "
-            "is disallowed: %s", getMessage(gotoInfo.loc).c_str());
+      error("'goto' %s statement is disallowed: %s",
+            labelScopeName(labelInfo.scopeInfo.kind),
+            getMessage(gotoInfo.loc).c_str());
       continue;
     } else {
       labels.erase(gotoInfo.label);

@@ -1,0 +1,84 @@
+Starting main
+Constructing id 0
+In first using
+Disposing id 0
+Empty using
+Constructing id 1
+Disposing id 1
+Constructing id 2
+In second using
+object(Logger)#1 (1) {
+  ["id":"Logger":private]=>
+  int(2)
+}
+Disposing id 2
+bool(false)
+Constructing id 3
+In third using
+Disposing id 3
+bool(false)
+Constructing id 4
+Replacing using variable
+Constructing id 5
+Disposing id 5
+Entering using with null variable
+Constructing id 6
+Disposing id 6
+Constructing id 7
+Constructing id 8
+Constructing id 9
+Triple using!
+Triple using second line
+Disposing id 9
+Disposing id 8
+Disposing id 7
+Constructing id 10
+Nested using
+Constructing id 11
+Inner using
+Disposing id 11
+Disposing id 10
+Trying throwing Logger
+Constructing id 12
+Disposing id 12
+Caught exception Logger id 13
+Throwing inside using
+Constructing id 14
+About to throwDisposing id 14
+Caught exception hi
+Leaving main
+
+
+Starting mainAsync
+Constructing id 15
+Sync create, async dispose
+Async disposing id 15
+Constructing id 16
+Async both
+Async disposing id 16
+Constructing id 17
+Async create, sync dispose
+Disposing id 17
+Constructing id 18
+Async create, sync dispose, variable
+object(Logger)#6 (1) {
+  ["id":"Logger":private]=>
+  int(18)
+}
+Disposing id 18
+bool(false)
+Constructing id 19
+Constructing id 20
+Mixed create, sync dispose
+Disposing id 20
+Disposing id 19
+Constructing id 21
+Disposing id 21
+Caught exception Logger id 22
+Leaving mainAsync
+
+In pseudomain
+Constructing id 23
+Inside using
+Disposing id 23
+Outside using

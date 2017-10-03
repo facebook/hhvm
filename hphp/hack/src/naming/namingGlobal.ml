@@ -139,27 +139,12 @@ end
 module Env = struct
   let check_not_typehint popt (p, name) =
     let x = canon_key (Utils.strip_all_ns name) in
-    match x with
-    | x when (
-        x = SN.Typehints.void ||
-        x = SN.Typehints.noreturn ||
-        x = SN.Typehints.int ||
-        x = SN.Typehints.bool ||
-        x = SN.Typehints.float ||
-        x = SN.Typehints.num ||
-        x = SN.Typehints.string ||
-        x = SN.Typehints.resource ||
-        x = SN.Typehints.mixed ||
-        x = SN.Typehints.array ||
-        x = SN.Typehints.arraykey ||
-        x = SN.Typehints.integer ||
-        x = SN.Typehints.boolean ||
-        x = SN.Typehints.double ||
-        x = SN.Typehints.real
-      ) ->
-        let p, name = GEnv.get_full_pos popt (p, name) in
-        Errors.name_is_reserved name p; false
-    | _ -> true
+    if SN.Typehints.is_reserved_hh_name x ||
+       SN.Typehints.is_reserved_global_name x
+    then
+      let p, name = GEnv.get_full_pos popt (p, name) in
+      Errors.name_is_reserved name p; false
+    else true
 
   (* Dont check for errors, just add to canonical heap *)
   let new_fun_fast fn name =

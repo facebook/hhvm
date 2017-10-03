@@ -13,6 +13,7 @@ open Instruction_sequence
 open Emit_expression
 
 module SU = Hhbc_string_utils
+module SN = Naming_special_names
 
 let ast_is_interface ast_class =
   ast_class.A.c_kind = Ast.Cinterface
@@ -168,9 +169,38 @@ let from_enum_type ~namespace opt =
     Some (Hhas_type_info.make type_info_user_type type_info_type_constraint)
   | _ -> None
 
+let is_hh_namespace ns =
+  Option.value_map ns.Namespace_env.ns_name
+    ~default:false
+    ~f:(fun v -> String.lowercase_ascii v = "hh")
+
+let is_global_namespace ns =
+  Option.is_none ns.Namespace_env.ns_name
+
+let validate_class_name ns (p, class_name) =
+  (* per Parser::checkClassDeclName:
+     global names are always reserved in any namespace.
+     hh_reserved names are checked either if
+     - containing file is hack file and class is in global namespace
+     - class is in HH namespace *)
+  let check_hh_name =
+    (Emit_env.is_hh_file () && is_global_namespace ns) || is_hh_namespace ns in
+  let name = SU.strip_ns class_name in
+  let name_is_reserved =
+    SN.Typehints.is_reserved_global_name name ||
+    (check_hh_name && SN.Typehints.is_reserved_hh_name name) in
+  if name_is_reserved
+  then
+    let message =
+      Printf.sprintf "Cannot use '%s' as class name as it is reserved"
+        class_name in
+    Emit_fatal.raise_fatal_parse p message
+
 let emit_class : A.class_ * bool -> Hhas_class.t =
   fun (ast_class, is_top) ->
   let namespace = ast_class.Ast.c_namespace in
+  validate_class_name namespace ast_class.Ast.c_name;
+
   let class_attributes =
     Emit_attribute.from_asts namespace ast_class.Ast.c_user_attributes in
   let class_id, _ =

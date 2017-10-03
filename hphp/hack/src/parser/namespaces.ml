@@ -297,5 +297,8 @@ module ElaborateDefs = struct
     List.concat (List.rev acc)
 end
 
-let elaborate_defs popt ast =
+let elaborate_toplevel_defs popt ast =
   ElaborateDefs.program (Namespace_env.empty popt) ast
+
+let elaborate_def nsenv def =
+  ElaborateDefs.def nsenv def

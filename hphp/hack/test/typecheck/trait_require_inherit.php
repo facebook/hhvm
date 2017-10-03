@@ -15,11 +15,11 @@ interface IParent {
   public abstract function whatevs();
 }
 
-abstract class Parent implements IParent {
+abstract class ParentClass implements IParent {
   protected function bar() {}
 }
 
-abstract class Kid extends Parent {
+abstract class Kid extends ParentClass {
 }
 
 class Grandkid extends Kid {

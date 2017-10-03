@@ -202,9 +202,20 @@ module Typehints = struct
   let boolean = "boolean"
   let double  = "double"
   let real    = "real"
+  let callable = "callable"
 
   let object_cast = "object"
   let unset_cast = "unset"
+
+  let is_reserved_global_name x =
+    let x = String.lowercase_ascii x in
+    x = array    || x = callable || x = Classes.cSelf || x = Classes.cParent
+
+  let is_reserved_hh_name x =
+    let x = String.lowercase_ascii x in
+    x = void     || x = noreturn || x = int      || x = bool     || x = float ||
+    x = num      || x = string   || x = resource || x = mixed    || x = array ||
+    x = arraykey || x = integer  || x = boolean  || x = double   || x = real
 
 end
 

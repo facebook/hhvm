@@ -2269,7 +2269,7 @@ let lower
     let ast = runP pScript script { saw_yield; errors; max_depth; unsafes } in
     let ast =
       if elaborate_namespaces
-      then Namespaces.elaborate_defs parser_options ast
+      then Namespaces.elaborate_toplevel_defs parser_options ast
       else ast
     in
     let comments, fixmes = scour_comments file source_text script in

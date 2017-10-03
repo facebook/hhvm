@@ -19,13 +19,13 @@ let make_disk_changes base_content = [
 "parent.php",
 "<?hh // strict
 
-abstract class Parent extends Base {
+abstract class ParentClass extends Base {
 }";
 
 "child1.php",
 "<?hh // strict
 
-class Child1 extends Parent {
+class Child1 extends ParentClass {
   public static function meth(int $x): void {}
 
   public static function callParentMeth(): void {
@@ -36,7 +36,7 @@ class Child1 extends Parent {
 "child2.php",
 "<?hh // strict
 
-class Child2 extends Parent {
+class Child2 extends ParentClass {
   public static function meth(int $x): void {}
 }";
 ]

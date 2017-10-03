@@ -470,7 +470,7 @@ let rec program
     Option.iter (List.last !(env.errors)) Errors.parsing_error
   end;
   let ast = if elaborate_namespaces
-    then Namespaces.elaborate_defs env.popt ast
+    then Namespaces.elaborate_toplevel_defs env.popt ast
     else ast in
   {file_mode; comments; ast; content}
 

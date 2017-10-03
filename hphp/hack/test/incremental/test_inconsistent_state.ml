@@ -12,13 +12,13 @@ abstract class Base {
 
 "parent.php",
 "<?hh // strict
-abstract class Parent extends Base {
+abstract class ParentClass extends Base {
 }";
 
 "achild.php",
 "<?hh // strict
 
-class AChild extends Parent {
+class AChild extends ParentClass {
   public static function test(): void {
     $achild = new self();
     $achild->__meth();
@@ -40,7 +40,7 @@ abstract class Base {
 "achild.php",
 "<?hh // strict
 
-class AChild extends Parent {
+class AChild extends ParentClass {
   public static function test(): void {
     $achild = new self();
     $achild->meth();

@@ -614,11 +614,21 @@ and convert_stmt env st stmt =
     let st, cl = List.map_env st cl (convert_catch env) in
     let st, b2 = convert_block env st b2 in
     st, Try (b1, cl, b2)
-  | Def_inline (Class cd) ->
+  | Def_inline ((Class _) as d) ->
+    let cd =
+      (* propagate namespace information to nested classes *)
+      match Namespaces.elaborate_def st.namespace d with
+      | _, [Class cd] -> cd
+      | _ -> failwith "expected single class declaration" in
     let st, cd = convert_class env st cd in
     let st, stub_cd = add_class env st cd in
     st, Def_inline (Class stub_cd)
-  | Def_inline (Fun fd) ->
+  | Def_inline ((Fun _) as d) ->
+    let fd =
+      (* propagate namespace information to nested functions *)
+      match Namespaces.elaborate_def st.namespace d with
+      | _, [Fun fd] -> fd
+      | _ -> failwith "expected single function declaration" in
     let st, fd = convert_fun env st fd in
     let st, stub_fd = add_function env st fd in
     st, Def_inline (Fun stub_fd)

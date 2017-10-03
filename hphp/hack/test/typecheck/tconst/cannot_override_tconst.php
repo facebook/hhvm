@@ -1,9 +1,9 @@
 <?hh // strict
 
-class Parent {
+class ParentClass {
   const type ID = arraykey;
 }
 
-class Child extends Parent {
+class Child extends ParentClass {
   const type ID = int;
 }

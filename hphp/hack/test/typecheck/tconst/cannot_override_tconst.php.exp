@@ -1,7 +1,7 @@
 File "cannot_override_tconst.php", line 7, characters 7-11:
 Class Child does not correctly implement all required methods  (Typing[4110])
-File "cannot_override_tconst.php", line 7, characters 21-26:
-Some methods are incompatible with those declared in type Parent
+File "cannot_override_tconst.php", line 7, characters 21-31:
+Some methods are incompatible with those declared in type ParentClass
 Read the following to see why:
 File "cannot_override_tconst.php", line 8, characters 14-15:
 The assigned type of this type constant is inconsistent with its parent

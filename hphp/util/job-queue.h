@@ -247,7 +247,7 @@ public:
           // since we timed out, maybe we can turn idle without holding memory
           if (m_jobCount == 0) {
             ScopedUnlock unlock(this);
-#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
             thread_huge_tcache_flush();
 #endif
             flush_thread_caches();

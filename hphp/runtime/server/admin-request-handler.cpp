@@ -617,7 +617,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (strncmp(cmd.c_str(), "hugepage", 9) == 0) {
-#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
       transport->sendString(ManagedArena::reportStats(), 200);
 #else
       transport->sendString("", 200);

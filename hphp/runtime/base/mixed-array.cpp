@@ -319,7 +319,7 @@ NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE static bool UncountedMixedArrayOnHugePage() {
-#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
   return high_huge1g_arena && RuntimeOption::EvalUncountedMixedArrayHuge;
 #else
   return false;

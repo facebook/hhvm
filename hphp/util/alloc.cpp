@@ -232,7 +232,7 @@ void set_numa_binding(int node) {}
 #ifdef USE_JEMALLOC
 unsigned low_arena = 0;
 
-#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
 unsigned low_huge1g_arena = 0;
 unsigned high_huge1g_arena = 0;
 // Explicit per-thread tcache for huge arenas.  -1 means no tcache.
@@ -400,7 +400,7 @@ void set_numa_binding(int node) {
 static void numa_purge_arena() {}
 #endif
 
-#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
 /*
  * Get `pages` (at most 2) 1G huge pages and map to the low memory that grows
  * down from 4G.  We can do either one (3G-4G) or two pages (2G-4G).
@@ -520,7 +520,7 @@ struct JEMallocInitializer {
     assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
     highest_lowmall_addr = (char*)sbrk(0) - 1;
 
-#if defined USE_JEMALLOC_CUSTOM_HOOKS && defined __linux__
+#if defined USE_JEMALLOC_EXTENT_HOOKS
     // Number of 1G huge pages for data in low memeory
     int low_1g_pages = 0;
     if (char* buffer = getenv("HHVM_LOW_1G_PAGE")) {
@@ -631,7 +631,7 @@ void low_malloc_skip_huge(void* start, void* end) {
   }
 }
 
-#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
 void* low_malloc_huge1g_impl(size_t size) {
   if (size == 0) return nullptr;
   if (low_huge1g_arena == 0) return low_malloc(size);
@@ -696,7 +696,7 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
   }
 }
 
-#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
 
 void thread_huge_tcache_create() {
   if (high_huge1g_arena) {

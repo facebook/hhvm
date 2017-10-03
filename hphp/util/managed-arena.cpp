@@ -16,7 +16,7 @@
 
 #include "hphp/util/managed-arena.h"
 
-#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
 
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/numa.h"
@@ -27,38 +27,6 @@
 
 namespace HPHP {
 
-#ifdef USE_JEMALLOC_CHUNK_HOOKS
-// jemalloc chunk hooks
-static bool chunk_dalloc(void* chunk, size_t size,
-                         bool committed, unsigned arena_ind) {
-  return true;
-}
-
-static bool chunk_commit(void* chunk, size_t size, size_t offset,
-                         size_t length, unsigned arena_ind) {
-  return false;
-}
-
-static bool chunk_decommit(void* chunk, size_t size, size_t offset,
-                           size_t length, unsigned arena_ind) {
-  return true;
-}
-
-static bool chunk_purge(void* chunk, size_t size, size_t offset,
-                        size_t length, unsigned arena_ind) {
-  return true;
-}
-
-static bool chunk_split(void* chunk, size_t size, size_t sizea, size_t sizeb,
-                        bool comitted, unsigned arena_ind) {
-  return false;
-}
-
-static bool chunk_merge(void* chunka, size_t sizea, void* chunkb, size_t sizeb,
-                        bool committed, unsigned arena_ind) {
-  return false;
-}
-#elif defined USE_JEMALLOC_EXTENT_HOOKS
 // jemalloc extent hooks
 static bool
 extent_dalloc(extent_hooks_t* /*extent_hooks*/, void* /*addr*/, size_t /*size*/,
@@ -113,9 +81,6 @@ static extent_hooks_t custom_extent_hooks {
   extent_split,
   extent_merge
 };
-#else
-# error "Missing jemalloc custom hook definitions."
-#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -146,27 +111,6 @@ ManagedArena::ManagedArena(void* base, size_t maxCap,
   // the system anyway.
   ssize_t decay_time = -1;
 
-#ifdef USE_JEMALLOC_CHUNK_HOOKS
-  chunk_hooks_t hooks {
-    ManagedArena::chunk_alloc,
-    chunk_dalloc,
-    chunk_commit,
-    chunk_decommit,
-    chunk_purge,
-    chunk_split,
-    chunk_merge
-  };
-  char command[32];
-  std::snprintf(command, sizeof(command), "arena.%d.chunk_hooks", m_arenaId);
-  sz = sizeof(hooks);
-  if (mallctl(command, nullptr, nullptr, &hooks, sz)) {
-    throw std::runtime_error("error in setting chunk hooks");
-  }
-  std::snprintf(command, sizeof(command), "arena.%d.decay_time", m_arenaId);
-  if (mallctl(command, nullptr, nullptr, &decay_time, sizeof(decay_time))) {
-    throw std::runtime_error("error when turning off decaying");
-  }
-#else
   char command[32];
   std::snprintf(command, sizeof(command), "arena.%d.extent_hooks", m_arenaId);
   extent_hooks_t *hooks_ptr = &custom_extent_hooks;
@@ -184,19 +128,12 @@ ManagedArena::ManagedArena(void* base, size_t maxCap,
   if (mallctl(command, nullptr, nullptr, &decay_time, sizeof(decay_time))) {
     throw std::runtime_error("error when turning off decaying");
   }
-#endif
   s_arenas[m_arenaId] = this;
 }
 
-#ifdef USE_JEMALLOC_CHUNK_HOOKS
-void* ManagedArena::chunk_alloc(void* addr, size_t size,
-                                size_t alignment, bool* zero, bool* commit,
-                                unsigned arena_ind) {
-#else
 void* ManagedArena::extent_alloc(extent_hooks_t* /*extent_hooks*/, void* addr,
                                  size_t size, size_t alignment, bool* zero,
                                  bool* commit, unsigned arena_ind) {
-#endif
   if (addr != nullptr) return nullptr;
   if (size > size1g) return nullptr;
 
@@ -313,4 +250,4 @@ std::string ManagedArena::reportStats() {
 }
 
 }
-#endif // USE_JEMALLOC_CUSTOM_HOOKS
+#endif // USE_JEMALLOC_EXTENT_HOOKS

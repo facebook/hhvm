@@ -70,7 +70,7 @@ std::aligned_storage<
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE static bool UncountedStringOnHugePage() {
-#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
   return high_huge1g_arena && RuntimeOption::EvalUncountedStringHuge;
 #else
   return false;

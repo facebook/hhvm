@@ -35,13 +35,7 @@ struct StaticMemberExpression : Expression, StaticClassName {
   ExpressionPtr getExp() { return m_exp; }
 
 private:
-  bool findMember(AnalysisResultConstRawPtr ar,
-                  std::string &name, Symbol *&sym);
-
   ExpressionPtr    m_exp;
-  bool             m_valid;
-  ClassScopeRawPtr m_resolvedClass;
-  bool             m_dynamicClass;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

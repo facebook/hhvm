@@ -36,8 +36,7 @@ StaticMemberExpression::StaticMemberExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr classExp, ExpressionPtr exp)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(StaticMemberExpression)),
-    StaticClassName(classExp), m_exp(exp), m_valid(false),
-    m_dynamicClass(false) {
+    StaticClassName(classExp), m_exp(exp) {
   if (exp->is(KindOfSimpleVariable)) {
     auto s = dynamic_pointer_cast<SimpleVariable>(exp);
     m_exp = ExpressionPtr
@@ -63,54 +62,8 @@ ExpressionPtr StaticMemberExpression::clone() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-bool StaticMemberExpression::findMember(AnalysisResultConstRawPtr ar,
-                                        std::string &name, Symbol *&sym) {
-  if (m_exp->is(Expression::KindOfScalarExpression)) {
-    auto var = dynamic_pointer_cast<ScalarExpression>(m_exp);
-    name = var->getString();
-  }
-
-  if (m_class) return false;
-
-  sym = nullptr;
-  m_resolvedClass = resolveClass();
-  if (!m_resolvedClass) return isRedeclared();
-
-  if (m_resolvedClass->derivesFromRedeclaring() == Derivation::Redeclaring) {
-    m_dynamicClass = true;
-  }
-
-  if (m_dynamicClass) return true;
-
-  if (!name.empty()) {
-    ClassScopePtr parent = m_resolvedClass;
-    sym = m_resolvedClass->findProperty(parent, name, ar);
-    if (sym && sym->isStatic()) {
-      m_resolvedClass = parent;
-    } else {
-      sym = nullptr;
-    }
-  }
-
-  return true;
-}
-
 void StaticMemberExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
-  if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
-    Symbol *sym;
-    std::string name;
-    if (findMember(ar, name, sym)) {
-      if (m_resolvedClass) {
-        m_resolvedClass->addUse(getScope(), BlockScope::UseKindStaticRef);
-        if (!sym && !m_dynamicClass && !name.empty() &&
-            ar->getPhase() == AnalysisResult::AnalyzeFinal &&
-            !m_resolvedClass->isTrait()) {
-          Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
-        }
-      }
-    }
-  }
+  resolveClass();
 }
 
 ConstructPtr StaticMemberExpression::getNthKid(int n) const {

@@ -277,15 +277,7 @@ void SimpleFunctionCall::setupScopes(AnalysisResultConstRawPtr ar) {
       }
     }
   } else {
-    ClassScopePtr cls = resolveClass();
-    if (cls) {
-      m_classScope = cls;
-      if (isNamed("__construct")) {
-        func = cls->findConstructor(ar, true);
-      } else {
-        func = cls->findFunction(ar, m_origName, true, true);
-      }
-    }
+    resolveClass();
   }
   if (func && !func->isRedeclaring()) {
     if (m_funcScope != func) {

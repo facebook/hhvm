@@ -28,21 +28,21 @@ namespace HPHP {
 
 StaticClassName::StaticClassName(ExpressionPtr classExp)
     : m_class(classExp),
-      m_self(false), m_parent(false), m_static(false),
-      m_redeclared(false), m_unknown(true) {
-  updateClassName();
-  auto const isame = [](const std::string& a, const std::string& b) {
-    return (a.size() == b.size()) &&
-           !strncasecmp(a.c_str(), b.c_str(), a.size());
-  };
-  if (isame(m_origClassName, "parent")) {
+      m_self(false), m_parent(false), m_static(false) {
+  if (m_class && m_class->is(Expression::KindOfScalarExpression)) {
+    auto s = dynamic_pointer_cast<ScalarExpression>(m_class);
+    auto const& className = s->getString();
+    m_origClassName = className;
+    m_class.reset();
+  }
+  if (isNamed("parent")) {
     m_parent = true;
-  } else if (isame(m_origClassName, "self")) {
+  } else if (isNamed("self")) {
     m_self = true;
-  } else if (isame(m_origClassName, "static")) {
+  } else if (isNamed("static")) {
     m_static = true;
     m_class = classExp;
-    m_origClassName = "";
+    m_origClassName.clear();
   }
 }
 
@@ -57,27 +57,13 @@ bool StaticClassName::isNamed(folly::StringPiece clsName) const {
   return bstrcasecmp(m_origClassName, clsName) == 0;
 }
 
-void StaticClassName::updateClassName() {
-  if (m_class && m_class->is(Expression::KindOfScalarExpression) &&
-      !m_static) {
-    auto s = dynamic_pointer_cast<ScalarExpression>(m_class);
-    auto const& className = s->getString();
-    m_origClassName = className;
-    m_class.reset();
-  } else {
-    m_origClassName = "";
-  }
-}
-
-ClassScopePtr StaticClassName::resolveClass() {
-  m_unknown = true;
-  if (m_class) return ClassScopePtr();
+void StaticClassName::resolveClass() {
+  if (m_class) return;
   auto scope = dynamic_cast<Construct*>(this)->getScope();
   if (m_self) {
     if (ClassScopePtr self = scope->getContainingClass()) {
       m_origClassName = self->getOriginalName();
-      m_unknown = false;
-      return self;
+      return;
     }
   } else if (m_parent) {
     if (ClassScopePtr self = scope->getContainingClass()) {
@@ -88,21 +74,6 @@ ClassScopePtr StaticClassName::resolveClass() {
       m_parent = false;
     }
   }
-  ClassScopePtr cls = scope->getContainingProgram()->findClass(m_origClassName);
-  if (cls) {
-    m_unknown = false;
-    if (cls->isVolatile()) {
-      ClassScopeRawPtr c = scope->getContainingClass();
-      if (c && c->isNamed(m_origClassName)) {
-        c.reset();
-      }
-      if (cls->isRedeclaring()) {
-        cls = c;
-        m_redeclared = true;
-      }
-    }
-  }
-  return cls;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -192,12 +192,12 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
  * bools or objects, etc.  We might consider making stack flavors have
  * subtypes and adding this to the opcode table.
  */
-bool hasObviousStackOutput(const Bytecode& op, const State& state) {
+bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   // Generally consider CGetL obvious because if we knew the type of the local,
   // we'll assert that right before the CGetL.
   auto cgetlObvious = [&] (LocalId l, int idx) {
-    return !state.locals[l].couldBe(TRef) ||
-      !state.stack[state.stack.size() - idx - 1].
+    return !interp.state.locals[l].couldBe(TRef) ||
+      !interp.state.stack[interp.state.stack.size() - idx - 1].
          type.strictSubtypeOf(TInitCell);
   };
   switch (op.op) {
@@ -270,6 +270,16 @@ bool hasObviousStackOutput(const Bytecode& op, const State& state) {
   case Op::IsUninit:
   case Op::OODeclExists:
   case Op::AliasCls:
+  case Op::FPassC:
+    return true;
+
+  case Op::This:
+  case Op::BareThis:
+    if (auto tt = thisType(interp)) {
+      auto t = interp.state.stack.back().type;
+      if (is_opt(t)) t = unopt(std::move(t));
+      return !t.strictSubtypeOf(*tt);
+    }
     return true;
 
   case Op::CGetL:
@@ -336,13 +346,13 @@ void insert_assertions(const Index& index,
 
     if (op.op == Op::CGetL2) {
       obviousStackOutputs.emplace(obviousStackOutputs.end() - 1,
-                                  hasObviousStackOutput(op, state));
+                                  hasObviousStackOutput(op, interp));
     } else {
       for (int i = 0; i < op.numPop(); i++) {
         obviousStackOutputs.pop_back();
       }
       for (auto i = op.numPush(); i--; ) {
-        obviousStackOutputs.emplace_back(hasObviousStackOutput(op, state));
+        obviousStackOutputs.emplace_back(hasObviousStackOutput(op, interp));
       }
     }
 

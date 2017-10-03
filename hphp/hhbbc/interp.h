@@ -221,6 +221,8 @@ bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp);
 folly::Optional<Type>
 const_fold(ISS& env, uint32_t nArgs, const res::Func& rfunc);
 
+folly::Optional<Type> thisType(const Interp& interp);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

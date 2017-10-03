@@ -3823,6 +3823,10 @@ void default_dispatch(ISS& env, const Bytecode& op) {
   dispatch(env, op);
 }
 
+folly::Optional<Type> thisType(const Interp& interp) {
+  return thisTypeHelper(interp.index, interp.ctx);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

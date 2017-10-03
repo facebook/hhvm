@@ -967,20 +967,24 @@ bool thisAvailable(ISS& env) { return env.state.thisAvailable; }
 // Returns the type $this would have if it's not null.  Generally
 // you have to check thisIsAvailable() before assuming it can't be
 // null.
-folly::Optional<Type> thisType(ISS& env) {
-  if (!env.ctx.cls) return folly::none;
+folly::Optional<Type> thisTypeHelper(const Index& index, Context ctx) {
+  if (!ctx.cls) return folly::none;
 
   // Due to `bindTo`, we can't conclude the type of $this.
-  if (RuntimeOption::EvalAllowScopeBinding && env.ctx.func->isClosureBody) {
+  if (RuntimeOption::EvalAllowScopeBinding && ctx.func->isClosureBody) {
     return folly::none;
   }
 
   // Due to unflattened traits in non-repo mode, we can't conclude $this type.
-  if (!RuntimeOption::RepoAuthoritative && env.ctx.cls->attrs & AttrTrait) {
+  if (!RuntimeOption::RepoAuthoritative && ctx.cls->attrs & AttrTrait) {
     return folly::none;
   }
 
-  return subObj(env.index.resolve_class(env.ctx.cls));
+  return subObj(index.resolve_class(ctx.cls));
+}
+
+folly::Optional<Type> thisType(ISS& env) {
+  return thisTypeHelper(env.index, env.ctx);
 }
 
 folly::Optional<Type> selfCls(ISS& env) {

@@ -184,9 +184,6 @@ struct FunctionScope : BlockScope,
     return hasVariadicParam() ? (m_numDeclParams-1) : m_numDeclParams;
   }
 
-  void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
-  FunctionOptPtr getOptFunction() const { return m_optFunction; }
-
   /**
    * Whether this is a virtual function that needs dynamic dispatch
    */
@@ -323,7 +320,6 @@ private:
 
   int m_redeclaring; // multiple definition of the same function
   int m_inlineIndex;
-  FunctionOptPtr m_optFunction;
 
   // holds the fact that defining this function is a fatal error
   const StringData* m_fatal_error_msg = nullptr;

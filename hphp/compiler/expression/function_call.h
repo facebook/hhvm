@@ -54,7 +54,6 @@ public:
   const ExpressionListPtr& getParams() const { return m_params; }
   void deepCopy(FunctionCallPtr exp);
 
-  FunctionScopeRawPtr getFuncScope() const { return m_funcScope; }
   void setArrayParams() { m_arrayParams = true; }
   bool isValid() const { return m_valid; }
   bool hadBackslash() const { return m_hadBackslash; }
@@ -69,12 +68,6 @@ protected:
   ExpressionPtr m_nameExp;
   std::string m_origName;
   ExpressionListPtr m_params;
-
-  // Pointers to the corresponding function scope and class scope for this
-  // function call, set during the AnalyzeAll phase. These pointers may be
-  // null if the function scope or class scope could not be resolved.
-  FunctionScopeRawPtr m_funcScope;
-  ClassScopeRawPtr m_classScope;
 
   bool m_valid;
   unsigned m_variableArgument : 1;

@@ -265,31 +265,9 @@ void SimpleFunctionCall::resolveNSFallbackFunc(
 // static analysis functions
 
 void SimpleFunctionCall::setupScopes(AnalysisResultConstRawPtr ar) {
-  FunctionScopePtr func;
-  if (!m_class && !hasStaticClass()) {
-    if (!m_dynamicInvoke) {
-      func = ar->findFunction(m_origName);
-      if (!func && !hadBackslash() && Option::WholeProgram) {
-        int pos = m_origName.rfind('\\');
-        auto short_name = m_origName.substr(pos + 1);
-        func = ar->findFunction(m_origName);
-        if (func) m_origName = short_name;
-      }
-    }
-  } else {
+  if (m_class || hasStaticClass()) {
     resolveClass();
   }
-  if (func && !func->isRedeclaring()) {
-    if (m_funcScope != func) {
-      m_funcScope = func;
-    }
-  }
-}
-
-void SimpleFunctionCall::addLateDependencies(AnalysisResultConstRawPtr ar) {
-  m_funcScope.reset();
-  m_classScope.reset();
-  setupScopes(ar);
 }
 
 ConstructPtr SimpleFunctionCall::getNthKid(int n) const {
@@ -311,13 +289,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
     ConstructPtr self = shared_from_this();
     // Look up the corresponding FunctionScope and ClassScope
     // for this function call
-    m_funcScope.reset();
-    m_classScope.reset();
     setupScopes(ar);
-    if (m_funcScope && m_funcScope->getOptFunction()) {
-      auto self = static_pointer_cast<SimpleFunctionCall>(shared_from_this());
-      (m_funcScope->getOptFunction())(0, ar, self, 1);
-    }
 
     // check for dynamic constant and volatile function/class
     if (!m_class && !hasStaticClass() &&
@@ -403,34 +375,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
     }
 
     if (m_params) m_params->markParams();
-  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_type == FunType::Unknown &&
-        !m_class && !m_redeclared && !m_dynamicInvoke && !m_funcScope &&
-        (!hasStaticClass() ||
-         (m_classScope &&
-          !m_classScope->isTrait() &&
-          m_classScope->derivesFromRedeclaring() == Derivation::Normal &&
-          !m_classScope->getAttribute(
-            ClassScope::HasUnknownStaticMethodHandler) &&
-          !m_classScope->getAttribute(
-            ClassScope::InheritsUnknownStaticMethodHandler)))) {
-      bool ok = false;
-      if (m_classScope && getClassScope()) {
-        FunctionScopeRawPtr fs = getFunctionScope();
-        if (fs && !fs->isStatic() &&
-            (m_classScope->getAttribute(
-              ClassScope::HasUnknownMethodHandler) ||
-             m_classScope->getAttribute(
-               ClassScope::InheritsUnknownMethodHandler))) {
-          ok = true;
-        }
-      }
-      if (!ok) {
-        if (m_classScope || !Unit::lookupFunc(String(m_origName).get())) {
-          Compiler::Error(Compiler::UnknownFunction, shared_from_this());
-        }
-      }
-    }
   }
 }
 
@@ -444,22 +388,6 @@ bool SimpleFunctionCall::writesLocals() const {
 }
 
 void SimpleFunctionCall::updateVtFlags() {
-  FunctionScopeRawPtr f = getFunctionScope();
-  if (f) {
-    if (m_funcScope) {
-      if ((m_classScope && (isSelf() || isParent()) &&
-           m_funcScope->usesLSB()) ||
-          isStatic() ||
-          m_type == FunType::FBCallUserFuncSafe ||
-          isNamed("call_user_func") ||
-          isNamed("call_user_func_array") ||
-          isNamed("forward_static_call") ||
-          isNamed("forward_static_call_array") ||
-          isNamed("get_called_class")) {
-        f->setNextLSB(true);
-      }
-    }
-  }
   if (m_type != FunType::Unknown) {
     VariableTablePtr vt = getScope()->getVariables();
     switch (m_type) {
@@ -577,258 +505,4 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (m_params) m_params->outputPHP(cg, ar);
   cg_printf(")");
-}
-
-FunctionScopePtr
-SimpleFunctionCall::getFuncScopeFromParams(AnalysisResultPtr ar,
-                                           BlockScopeRawPtr scope,
-                                           ExpressionPtr clsName,
-                                           ExpressionPtr funcName,
-                                           ClassScopePtr &clsScope) {
-  clsScope.reset();
-  auto clsName0 = dynamic_pointer_cast<ScalarExpression>(clsName);
-  auto funcName0 = dynamic_pointer_cast<ScalarExpression>(funcName);
-  if (clsName0 && funcName0) {
-    auto const cname = clsName0->getLiteralString();
-    auto const fname = funcName0->getLiteralString();
-    if (!fname.empty()) {
-      if (!cname.empty()) {
-        ClassScopePtr cscope(ar->findClass(cname));
-        if (cscope && cscope->isRedeclaring()) {
-          cscope = scope->findExactClass(cscope);
-        }
-        if (cscope) {
-          FunctionScopePtr fscope(cscope->findFunction(ar, fname, true));
-          if (fscope) {
-            clsScope = cscope;
-          }
-          return fscope;
-        }
-      } else {
-        FunctionScopePtr fscope(ar->findFunction(fname));
-        return fscope;
-      }
-    }
-  }
-  return FunctionScopePtr();
-}
-
-SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-  AnalysisResultConstRawPtr ar, SimpleFunctionCallPtr call, int testOnly,
-  int firstParam, bool &error) {
-  error = false;
-  ExpressionListPtr params = call->getParams();
-  if (params && params->getCount() >= firstParam) {
-    ExpressionPtr p0 = (*params)[0];
-    Variant v;
-    if (p0->isScalar() && p0->getScalarValue(v)) {
-      if (v.isString()) {
-        Variant t = StringUtil::Explode(v.toString(), "::", 3);
-        if (!t.isArray() || t.toArray().size() != 2) {
-          auto name = toLower(v.toString().slice());
-          FunctionScopePtr func = ar->findFunction(name);
-          if (!func || func->isDynamicInvoke()) {
-            error = !func;
-            return SimpleFunctionCallPtr();
-          }
-          if (testOnly < 0) return SimpleFunctionCallPtr();
-          ExpressionListPtr p2;
-          if (testOnly) {
-            p2 = ExpressionListPtr(
-              new ExpressionList(call->getScope(), call->getRange()));
-            p2->addElement(call->makeScalarExpression(ar, v));
-            name = "function_exists";
-          } else {
-            p2 = static_pointer_cast<ExpressionList>(params->clone());
-            while (firstParam--) {
-              p2->removeElement(0);
-            }
-          }
-          SimpleFunctionCallPtr rep(
-            NewSimpleFunctionCall(call->getScope(), call->getRange(),
-                                  name, false, p2, ExpressionPtr()));
-          return rep;
-        }
-        v = t;
-      }
-      if (v.isArray()) {
-        Array arr = v.toArray();
-        if (arr.size() != 2 || !arr.exists(0) || !arr.exists(1)) {
-          error = true;
-          return SimpleFunctionCallPtr();
-        }
-        Variant classname = arr[0];
-        Variant methodname = arr[1];
-        if (!methodname.isString()) {
-          error = true;
-          return SimpleFunctionCallPtr();
-        }
-        if (!classname.isString()) {
-          return SimpleFunctionCallPtr();
-        }
-        std::string sclass = classname.toString().data();
-        auto smethod = toLower(methodname.toString().slice());
-
-        ClassScopePtr cls;
-        if (sclass == "self") {
-          cls = call->getClassScope();
-        }
-        if (!cls) {
-          if (sclass == "parent") {
-            cls = call->getClassScope();
-            if (cls && !cls->getOriginalParent().empty()) {
-              sclass = cls->getOriginalParent();
-            }
-          }
-          cls = ar->findClass(sclass);
-          if (!cls) {
-            error = true;
-            return SimpleFunctionCallPtr();
-          }
-          if (cls->isRedeclaring()) {
-            cls = call->getScope()->findExactClass(cls);
-          }
-          if (!cls) {
-            return SimpleFunctionCallPtr();
-          }
-        }
-
-        if (testOnly < 0) return SimpleFunctionCallPtr();
-
-        size_t c = smethod.find("::");
-        if (c != 0 && c != std::string::npos && c+2 < smethod.size()) {
-          auto const name = smethod.substr(0, c);
-          if (!cls->isNamed(name)) {
-            if (!cls->derivesFrom(ar, name, true, false)) {
-              error = cls->derivesFromRedeclaring() == Derivation::Normal;
-              return SimpleFunctionCallPtr();
-            }
-          }
-          smethod = smethod.substr(c+2);
-        }
-
-        FunctionScopePtr func = cls->findFunction(ar, smethod, true);
-        if (!func) {
-          error = true;
-          return SimpleFunctionCallPtr();
-        }
-        if (func->isPrivate() ?
-            (cls != call->getClassScope() ||
-             !cls->findFunction(ar, smethod, false)) :
-            (func->isProtected() &&
-             (!call->getClassScope() ||
-              !call->getClassScope()->derivesFrom(ar, sclass,
-                                                     true, false)))) {
-          error = true;
-          return SimpleFunctionCallPtr();
-        }
-        ExpressionPtr cl(call->makeScalarExpression(ar, classname));
-        ExpressionListPtr p2;
-        if (testOnly) {
-          p2 = ExpressionListPtr(
-            new ExpressionList(call->getScope(), call->getRange()));
-          p2->addElement(cl);
-          cl.reset();
-          smethod = "class_exists";
-        } else {
-          p2 = static_pointer_cast<ExpressionList>(params->clone());
-          while (firstParam--) {
-            p2->removeElement(0);
-          }
-        }
-        SimpleFunctionCallPtr rep(
-          NewSimpleFunctionCall(call->getScope(), call->getRange(),
-                                smethod, false, p2, cl));
-        return rep;
-      }
-    }
-  }
-  return SimpleFunctionCallPtr();
-}
-
-namespace HPHP {
-
-ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
-                                      AnalysisResultConstRawPtr ar,
-                                      SimpleFunctionCallPtr call, int mode) {
-  bool error = false;
-  if (!cg && mode <= 1 && Option::WholeProgram) {
-    bool isArray = call->isNamed("call_user_func_array");
-    if (call->isNamed("call_user_func") || isArray) {
-      SimpleFunctionCallPtr rep(
-        SimpleFunctionCall::GetFunctionCallForCallUserFunc(ar, call,
-                                                           mode ? -1 : 0,
-                                                           1, error));
-      if (!mode) {
-        if (error) {
-          rep.reset();
-        } else if (rep) {
-          if (!isArray) {
-            rep->setSafeCall(-1);
-            rep->addLateDependencies(ar);
-            if (isArray) rep->setArrayParams();
-          } else {
-            rep.reset();
-          }
-        }
-        return rep;
-      }
-    }
-  }
-  return ExpressionPtr();
-}
-
-ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
-                                         AnalysisResultConstRawPtr ar,
-                                         SimpleFunctionCallPtr call, int mode) {
-  bool error = false;
-  if (!cg && mode <= 1 && Option::WholeProgram) {
-    bool isArray = call->isNamed("fb_call_user_func_array_safe");
-    bool safe_ret = call->isNamed("fb_call_user_func_safe_return");
-    if (isArray || safe_ret || call->isNamed("fb_call_user_func_safe")) {
-      SimpleFunctionCallPtr rep(
-        SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-          ar, call, mode ? -1 : 0, safe_ret ? 2 : 1, error));
-      if (!mode) {
-        if (error) {
-          if (!Option::WholeProgram) {
-            rep.reset();
-          } else if (safe_ret) {
-            return (*call->getParams())[1];
-          } else {
-            Array ret(Array::Create(0, false));
-            ret.set(1, init_null());
-            return call->makeScalarExpression(ar, ret);
-          }
-        }
-      }
-    }
-  }
-  return ExpressionPtr();
-}
-
-ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
-                                   AnalysisResultConstRawPtr ar,
-                                   SimpleFunctionCallPtr call, int mode) {
-  if (!cg && mode <= 1 && Option::WholeProgram) {
-    ExpressionListPtr params = call->getParams();
-    if (params && params->getCount() == 1) {
-      bool error = false;
-      SimpleFunctionCallPtr rep(
-        SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-          ar, call, mode ? 1 : -1, 1, error));
-      if (error && !mode) {
-        if (!Option::WholeProgram) {
-          rep.reset();
-        } else {
-          return call->makeConstant(ar, "false");
-        }
-      }
-      return rep;
-    }
-  }
-
-  return ExpressionPtr();
-}
-
 }

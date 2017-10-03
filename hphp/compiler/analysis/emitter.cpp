@@ -8279,14 +8279,6 @@ Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   auto const& info = Native::GetBuiltinFunction(funcname, classname,
                                                 modifiers->isStatic());
 
-  if (!classname && (
-        !strcasecmp(funcname, "fb_call_user_func_safe") ||
-        !strcasecmp(funcname, "fb_call_user_func_safe_return") ||
-        !strcasecmp(funcname, "fb_call_user_func_array_safe"))) {
-    // Legacy optimization functions
-    funcScope->setOptFunction(hphp_opt_fb_call_user_func);
-  }
-
   int nativeAttrs = fe->parseNativeAttributes(attributes);
   BuiltinFunction bif = nullptr, nif = nullptr;
   Native::getFunctionPointers(info, nativeAttrs, bif, nif);

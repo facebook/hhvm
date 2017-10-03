@@ -57,14 +57,10 @@ public:
   // implementing IParseHandler
   void onParse(AnalysisResultConstRawPtr ar, FileScopePtr fs) override;
 
-  void addLateDependencies(AnalysisResultConstRawPtr ar);
   void setSafeCall(int flag) { m_safe = flag; }
   void setSafeDefault(ExpressionPtr def) { m_safeDef = def; }
   ConstructPtr getNthKid(int n) const override;
   void setNthKid(int n, ConstructPtr cp) override;
-  static SimpleFunctionCallPtr GetFunctionCallForCallUserFunc(
-    AnalysisResultConstRawPtr ar, SimpleFunctionCallPtr call, int testOnly,
-    int firstParam, bool &error);
   void setupScopes(AnalysisResultConstRawPtr ar);
   bool readsLocals() const;
   bool writesLocals() const;
@@ -118,12 +114,6 @@ protected:
   std::string m_lambda;
 
 private:
-  FunctionScopePtr
-  getFuncScopeFromParams(AnalysisResultPtr ar,
-                         BlockScopeRawPtr scope,
-                         ExpressionPtr clsName,
-                         ExpressionPtr funcName,
-                         ClassScopePtr &clsScope);
   std::string getThisString(bool withArrow);
   void mungeIfSpecialFunction(AnalysisResultConstRawPtr ar, FileScopePtr fs);
 

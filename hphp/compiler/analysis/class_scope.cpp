@@ -72,8 +72,7 @@ ClassScope::ClassScope(FileScopeRawPtr fs,
   : BlockScope(originalName, docComment, stmt, BlockScope::ClassScope),
     m_parent(parent), m_bases(bases), m_attribute(0), m_redeclaring(-1),
     m_kindOf(kindOf), m_derivesFromRedeclaring(Derivation::Normal),
-    m_traitStatus(NOT_FLATTENED), m_volatile(false),
-    m_persistent(false) {
+    m_traitStatus(NOT_FLATTENED), m_volatile(false) {
 
   m_volatile = Option::AllVolatile;
 
@@ -102,7 +101,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_kindOf(KindOf::ObjectClass),
     m_derivesFromRedeclaring(Derivation::Normal),
     m_traitStatus(NOT_FLATTENED),
-    m_volatile(false), m_persistent(false) {
+    m_volatile(false) {
   for (auto f : methods) {
     if (f->isNamed("__construct")) setAttribute(HasConstructor);
     else if (f->isNamed("__destruct")) setAttribute(HasDestructor);

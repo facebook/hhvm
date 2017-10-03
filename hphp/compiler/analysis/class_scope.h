@@ -165,8 +165,6 @@ public:
   /* For class_exists */
   void setVolatile();
   bool isVolatile() const { return m_volatile; }
-  bool isPersistent() const { return m_persistent; }
-  void setPersistent(bool p) { m_persistent = p; }
 
   Derivation derivesFromRedeclaring() const {
     return m_derivesFromRedeclaring;
@@ -513,7 +511,6 @@ private:
     FLATTENED
   } m_traitStatus;
   unsigned m_volatile:1; // for class_exists
-  unsigned m_persistent:1;
   int32_t m_numDeclMethods{-1};
 
   // holds the fact that accessing this class declaration is a fatal error

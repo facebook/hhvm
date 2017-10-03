@@ -74,8 +74,6 @@ void FunctionStatement::onParse(AnalysisResultConstRawPtr ar,
   FunctionScope::RecordFunctionInfo(m_originalName, fs);
   scope->addFunction(ar, fs);
 
-  fs->setPersistent(false);
-
   if (isNamed("__autoload")) {
     if (m_params && m_params->getCount() != 1) {
       parseTimeFatal(scope,

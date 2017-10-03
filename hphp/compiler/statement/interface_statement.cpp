@@ -97,8 +97,6 @@ void InterfaceStatement::onParse(AnalysisResultConstRawPtr ar,
   setBlockScope(classScope);
   scope->addClass(ar, classScope);
 
-  classScope->setPersistent(false);
-
   if (m_stmt) {
     for (int i = 0; i < m_stmt->getCount(); i++) {
       auto ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);

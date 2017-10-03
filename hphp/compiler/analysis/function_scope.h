@@ -207,8 +207,6 @@ struct FunctionScope : BlockScope,
   /* For function_exists */
   void setVolatile() { m_volatile = true; }
   bool isVolatile() const { return m_volatile; }
-  bool isPersistent() const { return m_persistent; }
-  void setPersistent(bool p) { m_persistent = p; }
 
   typedef hphp_hash_map<std::string, ExpressionPtr, string_hashi,
     string_eqstri> UserAttributeMap;
@@ -305,7 +303,6 @@ private:
   unsigned m_hasOverride : 1;
   unsigned m_dynamicInvoke : 1;
   unsigned m_volatile : 1; // for function_exists
-  unsigned m_persistent : 1;
   unsigned m_pseudoMain : 1;
   unsigned m_system : 1;
   unsigned m_containsThis : 1;     // contains a usage of $this?

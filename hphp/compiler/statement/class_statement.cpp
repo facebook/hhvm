@@ -109,8 +109,6 @@ void ClassStatement::onParse(AnalysisResultConstRawPtr ar, FileScopePtr fs) {
     return;
   }
 
-  classScope->setPersistent(false);
-
   if (m_stmt) {
     MethodStatementPtr constructor = nullptr;
     MethodStatementPtr destructor = nullptr;

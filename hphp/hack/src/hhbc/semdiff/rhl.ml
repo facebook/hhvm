@@ -200,12 +200,12 @@ let labasnsmaptostring asnmap = String.concat ""
 (* add equality between v1 and v2 to an assertion
    removing any existing relation between them *)
 let addeq_asn v1 v2 (props,vs,vs') =
-  let stripped = PropSet.filter (fun (x1,x2) -> x1 != v1 && x2 != v2) props in
+  let stripped = PropSet.filter (fun (x1,x2) -> x1 <> v1 && x2 <> v2) props in
       (PropSet.add (v1,v2) stripped, VarSet.add v1 vs, VarSet.add v2 vs')
 
 (* Unset both v1 and v2, could remove overlap with above and make one-sided *)
 let addunseteq_asn v1 v2 (props,vs,vs') =
-  let stripped = PropSet.filter (fun (x1,x2) -> x1 != v1 && x2 != v2) props in
+  let stripped = PropSet.filter (fun (x1,x2) -> x1 <> v1 && x2 <> v2) props in
     (stripped, VarSet.add v1 vs, VarSet.add v2 vs')
 
 (* simple-minded entailment between assertions *)
@@ -483,7 +483,7 @@ let add_assumption (pc,pc') asn assumed =
 
 (* compute permutation, not very efficiently, but lists should always be very small *)
 let findperm l1 l2 =
- if List.contains_dup l1 || (List.length l1 != List.length l2)
+ if List.contains_dup l1 || (List.length l1 <> List.length l2)
  then None
  else let rec loop n l p =
         match l with
@@ -568,7 +568,7 @@ let equiv prog prog' startlabelpairs =
     (* that's a clumsy attempt at entailment asn => \bigcup prev_asses *)
     then donext assumed todo
     else
-      if AsnSet.cardinal previous_assumptions > 2 (* arbitrary bound *)
+      if AsnSet.cardinal previous_assumptions > 3 (* arbitrary bound *)
       then try_specials ()
       else
        let i = prog_array.(ip_of_pc pc) in
@@ -664,11 +664,11 @@ let equiv prog prog' startlabelpairs =
         | IContFlow _, IContFlow _ -> try_specials ()
         (* Special treatment for Unset instructions *)
         | IMutator (UnsetL l), _ ->
-           let newprops = PropSet.filter (fun (x1,_x2) -> x1 != l) props in
+           let newprops = PropSet.filter (fun (x1,_x2) -> x1 <> l) props in
            let newasn = (newprops, VarSet.remove l vs, vs') in
              check (succ pc) pc' newasn (add_assumption (pc,pc') asn assumed) todo
         | _, IMutator (UnsetL l') ->
-           let newprops = PropSet.filter (fun (_x1,x2) -> x2 != l') props in
+           let newprops = PropSet.filter (fun (_x1,x2) -> x2 <> l') props in
            let newasn = (newprops, vs, VarSet.remove l' vs') in
              check pc (succ pc') newasn (add_assumption (pc,pc') asn assumed) todo
         (* next block have no interesting controls flow or local
@@ -783,7 +783,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
 
         let set_pop_get_action_left =
          (set_pop_get_pattern $*$ parse_any) $>> (fun (l, _) ((_,n),(_,n')) ->
-           let newprops = PropSet.filter (fun (x1,_x2) -> x1 != l) props in
+           let newprops = PropSet.filter (fun (x1,_x2) -> x1 <> l) props in
            let newasn = (newprops, VarSet.remove l vs, vs') in
            let newpc = (hs_of_pc pc, n) in
            let newpc' = (hs_of_pc pc', n') in (* always = pc' in fact *)
@@ -792,7 +792,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
 
         let set_pop_get_action_right =
          (parse_any $*$ set_pop_get_pattern) $>> (fun (_, l) ((_,n),(_,n')) ->
-         let newprops = PropSet.filter (fun (_x1,x2) -> x2 != l) props in
+         let newprops = PropSet.filter (fun (_x1,x2) -> x2 <> l) props in
          let newasn = (newprops, vs, VarSet.remove l vs') in
          let newpc = (hs_of_pc pc, n) in
          let newpc' = (hs_of_pc pc', n') in
@@ -949,7 +949,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
                   let newpc =(hs_of_pc pc, ip) in
                   let newpc' = (hs_of_pc pc', ip') in
                   let newprops = PropSet.filter
-                   (fun (x,x') -> x != Local.Unnamed n1 && x' != Local.Unnamed n1') some_props in
+                   (fun (x,x') -> x <> Local.Unnamed n1 && x' <> Local.Unnamed n1') some_props in
                   let final_asn = (newprops, VarSet.remove (Local.Unnamed n1) some_vs,
                                    VarSet.remove (Local.Unnamed n1') some_vs') in
                   check newpc newpc' final_asn (add_assumption (pc,pc') asn assumed) todo in
@@ -993,7 +993,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
               let newpc =(hs_of_pc pc, ip) in
               let newpc' = (hs_of_pc pc', ip') in
               let newprops = PropSet.filter
-               (fun (x,x') -> x != Local.Unnamed n && x' != Local.Unnamed n') some_props in
+               (fun (x,x') -> x <> Local.Unnamed n && x' <> Local.Unnamed n') some_props in
               let final_asn = (newprops, VarSet.remove (Local.Unnamed n) some_vs,
                                VarSet.remove (Local.Unnamed n') some_vs') in
               check newpc newpc' final_asn (add_assumption (pc,pc') asn assumed) todo in

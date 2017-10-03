@@ -468,9 +468,13 @@ void unwindPhp() {
 
     do {
       // Note: we skip catch/finally clauses if we have a pending C++
-      // exception as part of our efforts to avoid running more PHP code
-      // in the face of such exceptions.
-      if (ThreadInfo::s_threadInfo->m_pendingException != nullptr) {
+      // exception as part of our efforts to avoid running more PHP
+      // code in the face of such exceptions. Similarly, if the frame
+      // has already been torn down (eg an exception thrown by a user
+      // profiler on function exit), we can't execute any handlers in
+      // *this* frame.
+      if (ThreadInfo::s_threadInfo->m_pendingException != nullptr ||
+          UNLIKELY(fp->localsDecRefd())) {
         continue;
       }
 

@@ -97,9 +97,9 @@ type MyShape = shape(
     TypeWhichIsAlsoQuiteLengthy,
 );
 
-$my_query = GitHubRepositoryEntity::queryAll(
-  $this->context->obtainContextObject(),
-)->orderBy(
-  GitHubRepositoryEntitySpec::isDeleted(),
-  Ordering::desc(GitHubRepositoryEntitySpec::isManaged()),
-);
+$my_query =
+  GitHubRepositoryEntity::queryAll($this->context->obtainContextObject())
+    ->orderBy(
+      GitHubRepositoryEntitySpec::isDeleted(),
+      Ordering::desc(GitHubRepositoryEntitySpec::isManaged()),
+    );

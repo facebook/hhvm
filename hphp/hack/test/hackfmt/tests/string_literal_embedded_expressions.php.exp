@@ -3,8 +3,7 @@
 $sql = "DELETE FROM `foo` WHERE `left` BETWEEN {$res->left} AND {$res
   ->right} ORDER BY `level` DESC";
 
-$str = "embedded: {$a_long_object_name
-  ->a_long_property_name
+$str = "embedded: {$a_long_object_name->a_long_property_name
   ->an_array_property_name[0]} <- braced expression";
 
 $str = "embedded: {$a_long_array_name[

@@ -1809,7 +1809,9 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
     | hd :: [] ->
       Concat [
         Span [t obj];
-        SplitWith Cost.SimpleMemberSelection;
+        if node_has_trailing_newline obj
+        then Newline
+        else SplitWith Cost.SimpleMemberSelection;
         Nest [transform_chain hd];
       ]
     | hd :: tl ->
@@ -1818,15 +1820,20 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         | (_, _, Some (_, _, trailing)) ->
           if node_has_trailing_newline trailing then Rule.Always else Rule.Parental
       in
-      WithLazyRule (rule_type,
-        Concat [
-          t obj;
-          Split;
-        ],
-        Nest [
-          transform_chain hd;
-          Concat (List.map tl ~f:(fun x -> Concat [Split; transform_chain x]));
-        ])
+      Span [
+        WithLazyRule (rule_type,
+          Concat [
+            t obj;
+            if node_has_trailing_newline obj
+            then Newline
+            else SplitWith Cost.Base;
+          ],
+          Concat [
+            (* This needs to be nested separately due to the above SplitWith *)
+            Nest [transform_chain hd];
+            Nest (List.map tl ~f:(fun x -> Concat [Split; transform_chain x]))
+          ])
+      ]
     | _ -> failwith "Expected a chain of at least length 1"
 
   and transform_fn_decl_name async coroutine kw amp name type_params leftp =

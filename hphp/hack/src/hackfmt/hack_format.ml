@@ -2113,7 +2113,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         Space;
         t operator;
         Space;
-        SplitWith Cost.Base;
+        SplitWith Cost.NoCost;
         Nest [t right];
       ]
     else

@@ -194,7 +194,9 @@ struct shared_ptr final  {
 
 template<class T, class... Args>
 shared_ptr<T> make_shared(Args&&... args) {
-  std::shared_ptr<T> r = std::make_shared<T>(std::forward<Args>(args)...);
+  ConservativeAllocator<T> alloc;
+  std::shared_ptr<T> r = std::allocate_shared<T>(alloc,
+      std::forward<Args>(args)...);
   return shared_ptr<T>(r, sizeof(*r), type_scan::getIndexForScan<T>());
 }
 

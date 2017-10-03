@@ -739,7 +739,8 @@ void Vgen::emit(const decqmlock& i) {
   a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
   if (RuntimeOption::EvalJitArmLse) {
     a->Mov(rVixlScratch0, -1);
-    a->stadd(rVixlScratch0, adr);
+    a->ldaddal(rVixlScratch0, rVixlScratch0, adr);
+    a->Sub(rAsm, rVixlScratch0, 1, SetFlags);
   } else {
     vixl::Label again;
     a->bind(&again);

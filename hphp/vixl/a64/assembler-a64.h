@@ -1119,8 +1119,8 @@ class Assembler {
   void stnp(const CPURegister& rt, const CPURegister& rt2,
             const MemOperand& dst);
 
-  // Store Add - Large System Extension
-  void stadd(const Register& rt, const MemOperand& src);
+  // Load Add - Large System Extension
+  void ldaddal(const Register& rs, const Register& rt, const MemOperand& src);
 
   // Load literal to register.
   void ldr(const Register& rt, uint64_t imm);

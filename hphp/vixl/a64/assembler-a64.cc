@@ -1136,11 +1136,11 @@ void Assembler::ldr(const FPRegister& ft, double imm) {
 }
 
 
-void Assembler::stadd(const Register& rt, const MemOperand& src) {
+void Assembler::ldaddal(const Register& rs, const Register& rt, const MemOperand& src) {
   assert(src.IsImmediateOffset() && (src.offset() == 0));
-  // ldadd alias
-  uint32_t op = rt.Is64Bits() ? LSELD_ADD_x : LSELD_ADD_w;
-  Emit(op | Rs(rt) | Rt(xzr) | RnSP(src.base()));
+  // aquire/release semantics
+  uint32_t op = rt.Is64Bits() ? LSELD_ADD_alx : LSELD_ADD_alw;
+  Emit(op | Rs(rs) | Rt(rt) | RnSP(src.base()));
 }
 
 

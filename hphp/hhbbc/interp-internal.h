@@ -234,16 +234,15 @@ void bindLocalStatic(ISS& env, LocalId id, const Type& t) {
 void doRet(ISS& env, Type t, bool hasEffects) {
   readAllLocals(env);
   assert(env.state.stack.empty());
-  if (!hasEffects) {
-    for (auto const& l : env.state.locals) {
-      if (could_run_destructor(l)) {
-        hasEffects = true;
-        break;
-      }
-    }
-    if (!hasEffects) effect_free(env);
-  }
   env.flags.returned = t;
+  if (hasEffects) return;
+  nothrow(env);
+  for (auto const& l : env.state.locals) {
+    if (could_run_destructor(l)) {
+      return;
+    }
+  }
+  effect_free(env);
 }
 
 void mayUseVV(ISS& env) {

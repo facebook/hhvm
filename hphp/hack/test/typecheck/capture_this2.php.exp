@@ -1,2 +1,2 @@
-File "closure.php", line 16, characters 28-32:
+File "capture_this2.php", line 5, characters 26-30:
 Cannot use $this as lexical variable (Naming[2077])

@@ -2317,8 +2317,14 @@ module Make (GetLocals : GetLocals) = struct
         exprl env uel)
     | Efun (f, idl) ->
         let idl = List.map idl fst in
-        let idl = List.filter idl
-          (function (_, x) -> (x <> SN.SpecialIdents.this)) in
+        let idl =
+          List.fold_right idl
+            ~init:[]
+            ~f:(fun ((p, x) as id) acc ->
+               if x = SN.SpecialIdents.this
+               then (Errors.this_as_lexical_variable p; acc)
+               else id :: acc)
+        in
         let idl' = List.map idl (Env.lvar env) in
         let env = (fst env, Env.empty_local UBMErr) in
         List.iter2_exn idl idl' (Env.add_lvar env);

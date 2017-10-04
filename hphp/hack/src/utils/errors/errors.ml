@@ -518,6 +518,7 @@ module Naming                               = struct
   let goto_label_defined_in_finally         = 2074 (* DONT MODIFY!!!! *)
   let goto_invoked_in_finally               = 2075 (* DONT MODIFY!!!! *)
   let dynamic_class_property_name_in_strict_mode  = 2076 (* DONT MODIFY!!!! *)
+  let this_as_lexical_variable              = 2077 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -2264,6 +2265,9 @@ let coroutinness_mismatch pos1_is_coroutine pos1 pos2 =
       pos1, if pos1_is_coroutine then m1 else m2;
       pos2, if pos1_is_coroutine then m2 else m1;
     ]
+
+let this_as_lexical_variable pos =
+  add Naming.this_as_lexical_variable pos "Cannot use $this as lexical variable"
 
 (*****************************************************************************)
 (* Typing decl errors *)

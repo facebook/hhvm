@@ -490,6 +490,10 @@ and convert_lambda env st p fd use_vars_opt =
   let st = { st with total_count = total_count + 1; } in
   let st = enter_lambda st in
   let old_env = env in
+  Option.iter use_vars_opt
+    ~f:(List.iter ~f:(fun ((p, id), _) ->
+      if id = SN.SpecialIdents.this
+      then Emit_fatal.raise_fatal_parse p "Cannot use $this as lexical variable"));
   let env = if Option.is_some use_vars_opt
             then env_with_longlambda env false fd
             else env_with_lambda env fd in

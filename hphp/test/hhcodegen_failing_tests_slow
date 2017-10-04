@@ -281,7 +281,6 @@ slow/using/closure.php
 slow/using/empty-exprs.php
 slow/using/functions.php
 slow/using/goto.php
-slow/using/names.php
 slow/var_export/1450.php
 slow/variadic_args/by_reference_typehints.php
 slow/variadic_args/magic_call.php

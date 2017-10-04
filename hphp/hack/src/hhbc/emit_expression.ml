@@ -965,7 +965,8 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Lvarvar (n, id) -> emit_lvarvar ~need_ref n id
   | A.Id_type_arguments (id, _) -> emit_id env id
   | A.Omitted -> empty
-  | A.Unsafeexpr e -> emit_expr ~need_ref env e
+  | A.Unsafeexpr _ ->
+    failwith "Unsafe expression should be removed during closure conversion"
   | A.Suspend _ ->
     failwith "Codegen for 'suspend' operator is not supported"
   | A.List _ ->

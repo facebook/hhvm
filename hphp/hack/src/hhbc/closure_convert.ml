@@ -455,8 +455,8 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, el = convert_exprs env st el in
     st, (p, Xml(id, pairs, el))
   | Unsafeexpr e ->
-    let st, e = convert_expr env st e in
-    st, (p, Unsafeexpr e)
+    (* remove unsafe expressions from the AST, they are not used during codegen *)
+    convert_expr env st e
   | BracedExpr e ->
     let st, e = convert_expr env st e in
     st, (p, BracedExpr e)

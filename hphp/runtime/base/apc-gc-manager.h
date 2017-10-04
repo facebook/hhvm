@@ -57,8 +57,8 @@ namespace HPHP {
  * Set -Eval.GCForAPC=true to use it. It won't do anything in server mode, but
  * will do GC on APC in script mode.
  * Following things will be changed with -Eval.GCForAPC=true:
- * 1. Heap collector will call APCGCManager::sweep() during Marker::sweep(),
- * call APCGCManager::mark() during Marker::checkedEnqueue()
+ * 1. Heap collector will call APCGCManager::sweep() during Collector::sweep(),
+ * call APCGCManager::mark() during Collector::checkedEnqueue()
  * 2. Treadmill will call APCGCManager::registerPendingDeletion(handle, size)
  * when enqueue a deletion. This function will register all related allocations
  * by traversing the data recursively.

@@ -9,6 +9,7 @@
 *)
 
 module SU = Hhbc_string_utils
+module SN = Naming_special_names
 
 open Core
 open Instruction_sequence
@@ -65,6 +66,11 @@ let from_ast_wrapper : bool -> _ ->
   then Emit_fatal.raise_fatal_parse pos
     ("Class " ^ class_name ^ " contains non-static method " ^ original_name
      ^ " and therefore cannot be declared 'abstract final'");
+  if not method_is_static then
+    List.iter ast_method.Ast.m_params (fun p ->
+      let pos, id = p.Ast.param_id in
+      if id = SN.SpecialIdents.this then
+      Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this");
   (* Restrictions on __construct methods with promoted parameters *)
   if original_name = Naming_special_names.Members.__construct
   && List.exists ast_method.Ast.m_params (fun p -> Option.is_some p.Ast.param_modifier)

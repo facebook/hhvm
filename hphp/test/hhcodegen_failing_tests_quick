@@ -24,7 +24,6 @@ quick/parse_type_not_typedef.php
 quick/post_try_error.php
 quick/prop_order.php
 quick/prop_order_parens.php
-quick/reassign_this3.php
 quick/selfparent.php
 quick/serialize2.php
 quick/syntax-error.php

@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
 *)
+module SN = Naming_special_names
 
 let quote_string s = "\"" ^ Php_escaping.escape s ^ "\""
 let quote_string_with_escape s = "\\\"" ^ Php_escaping.escape s ^ "\\\""
@@ -32,6 +33,17 @@ let cmp ?(case_sensitive=true) ?(ignore_ns=false) s1 s2 =
   in
   s1 = s2
 
+let is_self s =
+  String.lowercase_ascii s = SN.Classes.cSelf
+
+let is_parent s =
+  String.lowercase_ascii s = SN.Classes.cParent
+
+let is_static s =
+  String.lowercase_ascii s = SN.Classes.cStatic
+
+let is_class s =
+  String.lowercase_ascii s = SN.Members.mClass
 
 module Types = struct
   let fix_casing s = match String.lowercase_ascii s with

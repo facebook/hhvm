@@ -13,6 +13,7 @@ open Hhbc_ast
 open Core
 module A = Ast
 module SN = Naming_special_names
+module SU = Hhbc_string_utils
 
 (* Follow HHVM rules here: see EmitterVisitor::requiresDeepInit *)
 let rec expr_requires_deep_init (_, expr_) =
@@ -37,11 +38,10 @@ let rec expr_requires_deep_init (_, expr_) =
   | _ -> true
 
 and class_const_requires_deep_init s p =
-  p <> SN.Members.mClass ||
-  s = SN.Classes.cSelf   ||
-  s = SN.Classes.cSelf   ||
-  s = SN.Classes.cParent ||
-  s = SN.Classes.cStatic
+  not (SU.is_class p) ||
+  SU.is_self s ||
+  SU.is_parent s ||
+  SU.is_static s
 
 and shape_field_requires_deep_init (n, v) =
   match n with

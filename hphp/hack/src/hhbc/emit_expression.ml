@@ -334,18 +334,18 @@ and emit_maybe_classname env (p,name) with_string with_instr =
     let e_id, _ =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) (p,s) in
     with_string e_id in
-  if name = SN.Classes.cStatic then
+  if SU.is_static name then
     let get_static =
       gather [ instr_fcallbuiltin 0 0 "get_called_class"; instr_unboxr_nop ] in
     with_instr get_static
-  else if name = SN.Classes.cSelf || name = SN.Classes.cParent then
+  else if SU.is_self name || SU.is_parent name then
     let cls = Scope.get_class (Emit_env.get_scope env) in
     match cls with
     | Some c when c.A.c_kind = A.Ctrait ->
       let get_cls =
-        if name = SN.Classes.cSelf then instr_self else instr_parent in
+        if SU.is_self name then instr_self else instr_parent in
       with_instr (gather [get_cls; instr_clsrefname])
-    | Some c when name = SN.Classes.cSelf -> from_str (snd c.A.c_name)
+    | Some c when SU.is_self name -> from_str (snd c.A.c_name)
     | Some c ->
         begin match c.A.c_extends with
         | (_, A.Happly ((_, parent), _)) :: _ -> from_str parent
@@ -517,7 +517,8 @@ and emit_load_class_ref env cexpr =
 
 and emit_load_class_const env cexpr id =
   let load_const =
-    if id = SN.Members.mClass then instr (IMisc (ClsRefName 0))
+    if SU.is_class id
+    then instr (IMisc (ClsRefName 0))
     else instr (ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id, 0)))
   in
   gather [
@@ -572,7 +573,7 @@ and emit_class_const env cid (_, id) =
   | Class_id cid ->
     let fq_id, _id_opt =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
-    if id = SN.Members.mClass
+    if SU.is_class id
     then instr_string (Hhbc_id.Class.to_raw_string fq_id)
     else instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id, fq_id)))
   | _ ->
@@ -1386,10 +1387,8 @@ and emit_obj_get ~need_ref env param_num_hint_opt qop expr prop null_flavor =
     ]
 
 and is_special_class_constant_accessed_with_class_id (_, cName) id =
-  id = SN.Members.mClass &&
-  cName <> SN.Classes.cSelf &&
-  cName <> SN.Classes.cParent &&
-  cName <> SN.Classes.cStatic
+  SU.is_class id &&
+  not (SU.is_self cName || SU.is_parent cName || SU.is_static cName)
 
 and emit_elem_instrs env opt_elem_expr =
   match opt_elem_expr with

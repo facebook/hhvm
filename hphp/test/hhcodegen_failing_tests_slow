@@ -10,7 +10,6 @@ slow/break_statement/zero.php
 slow/class_constant/abstract_const2.php
 slow/class_constant/abstract_const7.php
 slow/class_constant/globals-array.php
-slow/class_constant/reflective_constant.php
 slow/class_type_constant/type_constant.php
 slow/class_type_constant/type_constant2.php
 slow/class_type_constant/type_constant3.php

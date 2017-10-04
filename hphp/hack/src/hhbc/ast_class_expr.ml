@@ -60,14 +60,14 @@ let get_original_parent_class_name ~resolve_self scope =
 (* Return true in second component if this is a forwarding reference *)
 let expr_to_class_expr ~resolve_self scope (_, expr_ as expr) =
   match expr_ with
-  | A.Id (_, id) when id = SN.Classes.cStatic ->
+  | A.Id (_, id) when SU.is_static id ->
     Class_static, false
-  | A.Id (pos, id) when id = SN.Classes.cParent ->
+  | A.Id (pos, id) when SU.is_parent id ->
     begin match get_original_parent_class_name ~resolve_self scope with
     | Some name -> Class_id (pos, name), true
     | None -> Class_parent, true
     end
-  | A.Id (pos, id) when id = SN.Classes.cSelf ->
+  | A.Id (pos, id) when SU.is_self id ->
     begin match get_original_class_name ~resolve_self scope with
     | Some name -> Class_id (pos, name), true
     | None -> Class_self, true

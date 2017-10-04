@@ -147,7 +147,12 @@ bool consumeInput(Env& env, const InputInfo& input) {
   if (input.dontGuard) return true;
   auto const type = irgen::predictedType(env.irgs, input.loc);
 
-  if (env.profiling && type <= TBoxedCell &&
+  if (/* env.profiling &&
+       * FIXME: T21872803:
+       * This check is only intended for profiling translations.  We enabled it
+       * for live translations to avoid a bug tracking type dependences for
+       * boxed values. */
+      type <= TBoxedCell &&
       (env.region->blocks().size() > 1 || !env.region->entry()->empty())) {
     // We don't want side exits when profiling, so only allow instructions that
     // consume refs at the beginning of the region.

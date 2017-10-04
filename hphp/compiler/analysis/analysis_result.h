@@ -127,6 +127,8 @@ public:
   }
   void finish();
 
+  Mutex &getMutex() { return m_mutex; }
+
   /**
    * create_function() generates extra PHP code that defines the lambda.
    * Stores the code in a temporary string, so we can parse this as an
@@ -274,6 +276,8 @@ public:
   AnalysisResultConstRawPtr shared_from_this() const = delete;
 
 private:
+  Mutex m_mutex;
+
   std::vector<BlockScopePtr> m_ignoredScopes;
 
   // Temporary vector of lambda expressions; populated
@@ -315,11 +319,6 @@ private:
   void resolveNSFallbackFuncs();
 
   int getFileSize(FileScopePtr fs);
-
-public:
-  static DECLARE_THREAD_LOCAL(BlockScopeRawPtr, s_currentScopeThreadLocal);
-  static DECLARE_THREAD_LOCAL(BlockScopeRawPtrFlagsHashMap,
-                              s_changedScopesMapThreadLocal);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

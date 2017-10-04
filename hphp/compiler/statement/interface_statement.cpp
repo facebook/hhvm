@@ -145,7 +145,6 @@ std::string InterfaceStatement::getName() const {
 
 void InterfaceStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
-  auto classScope = getClassScope();
   std::vector<std::string> bases;
   if (m_base) m_base->getStrings(bases);
   for (unsigned int i = 0; i < bases.size(); i++) {
@@ -156,9 +155,6 @@ void InterfaceStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
           Compiler::InvalidDerivation,
           shared_from_this(),
           cls->getOriginalName() + " must be an interface");
-      }
-      if (cls->isUserClass()) {
-        cls->addUse(classScope, BlockScope::UseKindParentRef);
       }
     }
   }

@@ -42,7 +42,7 @@ ConstantExpression::ConstantExpression
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ConstantExpression)),
     m_name(name), m_origName(name), m_hadBackslash(hadBackslash),
     m_docComment(docComment), m_valid(false), m_dynamic(false),
-    m_visited(false), m_depsSet(false) {
+    m_visited(false) {
 }
 
 void ConstantExpression::onParse(AnalysisResultConstRawPtr ar,
@@ -53,7 +53,6 @@ void ConstantExpression::onParse(AnalysisResultConstRawPtr ar,
 ExpressionPtr ConstantExpression::clone() {
   ConstantExpressionPtr exp(new ConstantExpression(*this));
   Expression::deepCopy(exp);
-  m_depsSet = false;
   return exp;
 }
 
@@ -129,13 +128,6 @@ void ConstantExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
       if (sym && !sym->isSystem()) {
         if (sym->isDynamic()) {
           m_dynamic = true;
-        } else {
-          ConstructPtr decl = sym->getDeclaration();
-          if (decl) {
-            decl->getScope()->addUse(
-              getScope(), BlockScope::UseKindConstRef);
-            m_depsSet = true;
-          }
         }
       }
     }

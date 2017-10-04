@@ -38,7 +38,7 @@ ClassConstantExpression::ClassConstantExpression
  ExpressionPtr classExp, const std::string &varName)
   : Expression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ClassConstantExpression)),
-    StaticClassName(classExp), m_varName(varName), m_depsSet(false),
+    StaticClassName(classExp), m_varName(varName),
     m_originalScopeSet(false) {
 }
 
@@ -46,7 +46,6 @@ ExpressionPtr ClassConstantExpression::clone() {
   auto exp = std::make_shared<ClassConstantExpression>(*this);
   Expression::deepCopy(exp);
   exp->m_class = Clone(m_class);
-  exp->m_depsSet = false;
   exp->m_originalScopeSet = true;
   exp->m_originalScope = m_originalScope ? m_originalScope : getScope();
   return exp;

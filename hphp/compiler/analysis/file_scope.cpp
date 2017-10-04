@@ -286,13 +286,6 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstRawPtr ar) {
   return pseudoMain;
 }
 
-static void getFuncScopesSet(BlockScopeRawPtrQueue &v,
-                             const StringToFunctionScopePtrMap &funcMap) {
-  for (const auto& iter : funcMap) {
-    v.push_back(iter.second);
-  }
-}
-
 void FileScope::getClassesFlattened(std::vector<ClassScopePtr>& classes) const {
   for (const auto& clsVec : m_classes) {
     for (auto cls : clsVec.second) {

@@ -44,7 +44,6 @@ struct ClassConstantExpression : Expression, StaticClassName {
   }
 private:
   std::string m_varName;
-  bool m_depsSet;
   bool m_originalScopeSet;
   BlockScopeRawPtr m_originalScope;
 };

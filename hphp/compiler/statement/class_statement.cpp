@@ -216,9 +216,6 @@ void ClassStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
                         "You are extending " + cls->getOriginalName() +
                           " which is an interface or a trait");
       }
-      if (cls->isUserClass()) {
-        cls->addUse(getScope(), BlockScope::UseKindParentRef);
-      }
     }
   }
 }

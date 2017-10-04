@@ -65,12 +65,6 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 // initialization
 
-IMPLEMENT_THREAD_LOCAL(BlockScopeRawPtr,
-                       AnalysisResult::s_currentScopeThreadLocal);
-
-IMPLEMENT_THREAD_LOCAL(BlockScopeRawPtrFlagsHashMap,
-                       AnalysisResult::s_changedScopesMapThreadLocal);
-
 AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
     m_package(nullptr), m_parseOnDemand(false), m_phase(ParseAllFiles) {

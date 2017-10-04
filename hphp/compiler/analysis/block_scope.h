@@ -46,21 +46,6 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 
-typedef hphp_hash_map<BlockScopeRawPtr, int,
-                      smart_pointer_hash<BlockScopeRawPtr>
-                      > BlockScopeRawPtrFlagsHashMap;
-typedef hphp_hash_set<BlockScopeRawPtr,
-                      smart_pointer_hash<BlockScopeRawPtr>
-                      > BlockScopeRawPtrHashSet;
-
-typedef std::list<BlockScopeRawPtr>   BlockScopeRawPtrQueue;
-typedef std::vector<BlockScopeRawPtrFlagsHashMap::
-                    value_type*> BlockScopeRawPtrFlagsVec;
-typedef std::pair< BlockScopeRawPtr, int* >
-        BlockScopeRawPtrFlagsPtrPair;
-typedef std::vector< std::pair< BlockScopeRawPtr, int* > >
-        BlockScopeRawPtrFlagsPtrVec;
-
 /**
  * Base class of ClassScope and FunctionScope.
  */
@@ -70,29 +55,6 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
     FunctionScope,
     FileScope,
     ProgramScope,
-  };
-
-  enum UseKinds {
-    UseKindSelf           = 0x1 << 0,
-    /* Static references */
-    UseKindStaticRef      = 0x1 << 1,
-
-    /* Constants */
-    UseKindConstRef       = 0x1 << 2,
-
-    /* Other types */
-    UseKindParentRef      = 0x1 << 3,
-    UseKindAny            = (unsigned)-1
-  };
-
-  enum Marks {
-    MarkWaitingInQueue,
-    MarkProcessingDeps,
-    MarkReady,
-    MarkWaiting,
-    MarkProcessing,
-    MarkProcessedInQueue,
-    MarkProcessed
   };
 
   BlockScope(const BlockScope&) = delete;
@@ -120,16 +82,6 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
 
   ClassScopeRawPtr findExactClass(ClassScopeRawPtr cls);
 
-  bool hasUser(BlockScopeRawPtr user, int useFlags) const;
-  void addUse(BlockScopeRawPtr user, int useFlags);
-
-  /**
-   * Helpers for keeping track of break/continue nested level.
-   */
-  void incLoopNestedLevel();
-  void decLoopNestedLevel();
-  int getLoopNestedLevel() const { return m_loopNestedLevel;}
-
   const std::string &getDocComment() const { return m_docComment;}
   void setDocComment(const std::string &doc) { m_docComment = doc;}
 
@@ -150,55 +102,8 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
   BlockScopePtr getOuterScope() { return m_outerScope.lock(); }
   bool isOuterScope() { return m_outerScope.expired(); }
 
-  const BlockScopeRawPtrFlagsPtrVec &getDeps() const {
-    return m_orderedDeps;
-  }
-  const BlockScopeRawPtrFlagsVec &getOrderedUsers() const {
-    return m_orderedUsers;
-  }
-
-  void setMark(Marks m) { m_mark = m;    }
-  Marks getMark() const { return m_mark; }
-
-  void setLockedMark(Marks m) { Lock l(s_jobStateMutex); m_mark = m;    }
-  Marks getLockedMark() const { Lock l(s_jobStateMutex); return m_mark; }
-
   void incPass() { m_pass++; }
   bool isFirstPass() const { return !m_pass; }
-
-  void incRunId() { m_runId++; }
-  int getRunId() const { return m_runId; }
-
-  void clearUpdated() { m_updated = 0; }
-  void addUpdates(int f);
-  int getUpdated() const { return m_updated; }
-
-  void setRescheduleFlags(int rescheduleFlags) {
-    m_rescheduleFlags = rescheduleFlags;
-  }
-  int rescheduleFlags() const { return m_rescheduleFlags; }
-
-  Mutex &getMutex() { return m_mutex; }
-
-  void setNumDepsToWaitFor(int n) {
-    assert(n >= 0);
-    m_numDepsToWaitFor = n;
-  }
-  int getNumDepsToWaitFor() const {
-    return m_numDepsToWaitFor;
-  }
-  int incNumDepsToWaitFor() {
-    return ++m_numDepsToWaitFor;
-  }
-  int decNumDepsToWaitFor() {
-    assert(m_numDepsToWaitFor > 0);
-    return --m_numDepsToWaitFor;
-  }
-
-  void setForceRerun(bool v) { m_forceRerun = v; }
-  bool forceRerun() const { return m_forceRerun; }
-
-  int selfUser() const { return m_selfUser; }
 
 protected:
   std::string m_scopeName;
@@ -209,24 +114,8 @@ protected:
   ConstantTablePtr m_constants;
   BlockScopeRawPtr m_outerScope;
 
-  int m_loopNestedLevel;
   int m_pass;
-  int m_updated;
-  int m_runId;
-private:
-  Marks m_mark;
-  BlockScopeRawPtrFlagsPtrVec  m_orderedDeps;
-  BlockScopeRawPtrFlagsVec     m_orderedUsers;
-  BlockScopeRawPtrFlagsHashMap m_userMap;
-  int m_numDepsToWaitFor;
-  Mutex m_mutex;
-  bool m_forceRerun;      /* do we need to be re-run (allows deps to run during
-                           * re-schedule) */
-  int  m_rescheduleFlags; /* who do we need to run after a re-schedule */
-  int  m_selfUser;
 public:
-  static Mutex s_jobStateMutex;
-  static Mutex s_depsMutex;
   static Mutex s_constMutex;
 };
 

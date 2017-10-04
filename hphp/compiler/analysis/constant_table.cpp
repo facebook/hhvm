@@ -72,10 +72,6 @@ void ConstantTable::setDynamic(AnalysisResultConstRawPtr /*ar*/, Symbol* sym) {
   if (!sym->isDynamic()) {
     Lock lock(BlockScope::s_constMutex);
     sym->setDynamic();
-    if (sym->getDeclaration()) {
-      sym->getDeclaration()->getScope()->
-        addUpdates(BlockScope::UseKindConstRef);
-    }
     m_hasDynamic = true;
   }
 }

@@ -13,9 +13,22 @@ module SU = Hhbc_string_utils
 open Core
 open Instruction_sequence
 
+let has_valid_access_modifiers kind_list =
+  let count_of_modifiers = List.fold_right kind_list
+    ~f:(fun x acc ->
+        if x = Ast.Private || x = Ast.Public || x = Ast.Protected
+        then acc + 1 else acc)
+    ~init:0
+  in
+  (* Either only one modifier or none *)
+  count_of_modifiers <= 1
+
 let from_ast_wrapper : bool -> _ ->
   Ast.class_ -> Ast.method_ -> Hhas_method.t =
   fun privatize make_name ast_class ast_method ->
+  if not (has_valid_access_modifiers ast_method.Ast.m_kind) then
+    Emit_fatal.raise_fatal_parse Pos.none
+      "Multiple access type modifiers are not allowed";
   let method_is_abstract =
     List.mem ast_method.Ast.m_kind Ast.Abstract ||
     ast_class.Ast.c_kind = Ast.Cinterface in

@@ -176,7 +176,6 @@ slow/parser/hh-namespace-conflict-4.php
 slow/parser/hh-namespace-conflict-5.php
 slow/parser/hh-namespace-conflict-6.php
 slow/parser/memory_exhaust.php
-slow/parser/multiple_access_modifiers.php
 slow/parser/namespace_use_trailing_comma.php
 slow/parser/php-namespace-conflict-1.php
 slow/parser/php-namespace-conflict-2.php

@@ -32,7 +32,8 @@
         "documentFormattingProvider": true,
         "documentRangeFormattingProvider": true,
         "renameProvider": false,
-        "typeCoverageProvider": true
+        "typeCoverageProvider": true,
+        "rageProvider": true
       }
     }
   },

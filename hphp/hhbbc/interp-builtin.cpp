@@ -163,6 +163,46 @@ bool builtin_function_exists(ISS& env, const bc::FCallBuiltin& op) {
   return handle_function_exists(env, op.arg1, true);
 }
 
+bool handle_oodecl_exists(ISS& env,
+                          const bc::FCallBuiltin& op,
+                          OODeclExistsOp subop) {
+  if (op.arg1 != 2) return false;
+  auto const& name = topT(env, 1);
+  if (name.subtypeOf(TStr)) {
+    if (!topT(env).subtypeOf(TBool)) {
+      reduce(env,
+             bc::CastBool {},
+             bc::OODeclExists { subop },
+             bc::RGetCNop {});
+      return true;
+    }
+    reduce(env, bc::OODeclExists { subop }, bc::RGetCNop {});
+    return true;
+  }
+  if (!topT(env).strictSubtypeOf(TBool)) return false;
+  auto const v = tv(topT(env));
+  assertx(v);
+  reduce(env,
+         bc::PopC {},
+         bc::CastString {},
+         gen_constant(*v),
+         bc::OODeclExists { subop },
+         bc::RGetCNop {});
+  return true;
+}
+
+bool builtin_class_exists(ISS& env, const bc::FCallBuiltin& op) {
+  return handle_oodecl_exists(env, op, OODeclExistsOp::Class);
+}
+
+bool builtin_interface_exists(ISS& env, const bc::FCallBuiltin& op) {
+  return handle_oodecl_exists(env, op, OODeclExistsOp::Interface);
+}
+
+bool builtin_trait_exists(ISS& env, const bc::FCallBuiltin& op) {
+  return handle_oodecl_exists(env, op, OODeclExistsOp::Trait);
+}
+
 bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = topC(env);
@@ -211,6 +251,9 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
   X(strlen, strlen)                                                     \
   X(defined, defined)                                                   \
   X(function_exists, function_exists)                                   \
+  X(class_exists, class_exists)                                         \
+  X(interface_exists, interface_exists)                                 \
+  X(trait_exists, trait_exists)                                         \
   X(array_key_cast, HH\\array_key_cast)                                 \
 
 #define X(x, y)    const StaticString s_##x(#y);

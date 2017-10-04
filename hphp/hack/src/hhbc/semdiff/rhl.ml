@@ -414,8 +414,10 @@ let check_instruct_final asn i i' =
     when n=n' -> reads_member_key asn mk mk'
    | UnsetM (n, mk), UnsetM (n', mk')
     when n=n' -> reads_member_key asn mk mk'
-    (* I'm guessing a bit here! *)
-   | SetWithRefRML l, SetWithRefRML l' -> reads asn l l'
+   | SetWithRefRML _, SetWithRefRML _ ->
+    (* COMPLETENESS: HackC/HHVM do not generate this instruction, so reject it
+      for now. *)
+    None
    | SetWithRefLML _, _ | QueryM _, _ | VGetM _, _ | FPassM _, _ | SetM _, _
    | IncDecM _, _ | SetOpM _, _ | BindM _, _ | UnsetM _, _ | SetWithRefRML _, _
     -> None

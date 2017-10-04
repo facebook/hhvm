@@ -234,7 +234,7 @@ let reads asn l l' =
   if asn_entails_equal asn l l'
                  then Some asn
                  else None
-  | _, _ -> None
+  | Named _, _ | Unnamed _, _ -> None
 
 let check_instruct_get asn i i' =
 match i, i' with
@@ -251,8 +251,13 @@ match i, i' with
    when s=s' -> Some asn
  | VGetL _, _
  | _, VGetL _ -> None (* can't handle the possible  aliasing here, so bail *)
- (* default case, require literally equal instructions *)
- | _, _ -> if i = i' then Some asn else None
+ | CGetL _, _ | CGetQuietL _, _ | CGetL2 _, _ | CGetL3 _, _ | CUGetL _, _
+ | PushL _, _ | ClsRefGetL _, _ -> None
+ (* Whitelist the instructions where equality implies equivalence
+   (e.g. they do not access locals). *)
+ | CGetN, _ | CGetQuietN, _ | CGetG, _ | CGetQuietG, _ | CGetS _, _ | VGetN, _
+ | VGetG, _ | VGetS _, _ | ClsRefGetC _, _ ->
+    if i = i' then Some asn else None
 
  let check_instruct_isset asn i i' =
  match i, i' with
@@ -261,7 +266,12 @@ match i, i' with
   -> reads asn l l'
  | IsTypeL (l,op), IsTypeL (l',op') ->
    if op = op' then reads asn l l' else None
- | _,_ -> if i=i' then Some asn else None
+ | IssetL _, _ | EmptyL _, _ | IsTypeL _, _ -> None
+ (* Whitelist the instructions where equality implies equivalence
+   (e.g. they do not access locals). *)
+ | IssetC, _ | IssetN, _ | IssetG, _ | IssetS _, _ | EmptyN, _ | EmptyG, _
+ | EmptyS _, _ | IsTypeC _, _ ->
+    if i=i' then Some asn else None
 
 (* TODO: allow one-sided writes to dead variables - this shows up
   in one of the tests *)
@@ -270,7 +280,7 @@ match l, l' with
  | Named s, Named s' -> if s=s' then Some asn else None
  | Unnamed _, Unnamed _ ->
     Some (addeq_asn l l' asn)
- | _, _ -> None
+ | Named _, _ | Unnamed _, _ -> None
 
 (* We could be a bit more refined in tracking set/unset status of named locals
    but it might not make much difference, so leaving it out for now
@@ -280,7 +290,7 @@ match l, l' with
   | Named s, Named s' -> if s=s' then Some asn else None
   | Unnamed _, Unnamed _ ->
      Some (addunseteq_asn l l' asn)
-  | _, _ -> None
+  | Named _, _ | Unnamed _, _ -> None
 
 let check_instruct_mutator asn i i' =
  match i, i' with
@@ -302,7 +312,13 @@ let check_instruct_mutator asn i i' =
      | None -> None
      | Some newasn -> writes newasn l l'
     else None
-  | _,_ -> if i=i' then Some asn else None
+  | SetL _, _ | BindL _, _ | UnsetL _, _ | SetOpL _, _ | IncDecL _, _ -> None
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | SetN, _ | SetG, _ | SetS _, _ | SetOpN _, _ | SetOpG _, _ | SetOpS _, _
+  | IncDecN _, _ | IncDecG _, _ | IncDecS _, _ | BindN, _ | BindG, _
+  | BindS _, _ | UnsetN, _ | UnsetG, _ | CheckProp _, _ | InitProp _, _  ->
+    if i=i' then Some asn else None
 
 let check_instruct_call asn i i' =
  match i, i' with
@@ -311,7 +327,31 @@ let check_instruct_call asn i i' =
   | FPassL (_,_,_), _
   | _, FPassL (_,_,_) -> None (* if this is pass by reference, might get
                                  aliasing so just wimp out for now *)
-  | _,_ -> if i=i' then Some asn else None
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | FPushFunc _, _ | FPushFuncD _, _ | FPushFuncU _, _ | FPushObjMethod _, _
+  | FPushObjMethodD _, _ | FPushClsMethod _, _ | FPushClsMethodF _, _
+  | FPushClsMethodD _, _ | FPushCtor _, _ | FPushCtorD _, _ | FPushCtorI _, _
+  | DecodeCufIter _, _ | FPushCufIter _, _ | FPushCuf _, _ | FPushCufF _, _
+  | FPushCufSafe _, _ | CufSafeArray, _ | CufSafeReturn, _ | FPassC _, _
+  | FPassCW _, _ | FPassCE _, _ | FPassV _, _ | FPassVNop _, _ | FPassR _, _
+  | FPassN _, _ | FPassG _, _ | FPassS _, _ | FCall _, _ | FCallD _, _
+  | FCallArray, _ | FCallAwait _, _ | FCallUnpack _, _ | FCallBuiltin _, _ ->
+    if i=i' then Some asn else None
+
+(* Asserts equivalence for reading from member keys. For example, checks
+  equivalence for reading an element or property via a local variable. *)
+let reads_member_key asn m m' =
+  match m, m' with
+  | MemberKey.EL l, MemberKey.EL l'
+  | MemberKey.PL l, MemberKey.PL l'
+    -> reads asn l l'
+  (* Whitelist the keys where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | MemberKey.EC _, _ | MemberKey.ET _, _ | MemberKey.EI _, _
+  | MemberKey.PC _, _ | MemberKey.PT _, _ | MemberKey.QT _, _ | MemberKey.W, _
+    -> if m=m' then Some asn else None
+  | MemberKey.EL _, _ | MemberKey.PL _, _ -> None
 
 let check_instruct_base asn i i' =
  match i,i' with
@@ -338,13 +378,18 @@ let check_instruct_base asn i i' =
   | FPassBaseL (n,l), FPassBaseL (n',l') ->
     if n = n' then reads asn l l'
     else None
-  | Dim (mode,MemberKey.EL l), Dim (mode',MemberKey.EL l')
-  | Dim (mode,MemberKey.PL l), Dim (mode',MemberKey.PL l')
-    when mode=mode' -> reads asn l l'
-    | FPassDim(n,MemberKey.EL l), FPassDim(n',MemberKey.EL l')
-  | FPassDim(n,MemberKey.PL l), FPassDim(n',MemberKey.PL l')
-    when n=n' -> reads asn l l'
-  | _, _ -> if i=i' then Some asn else None
+  | Dim (mode, mk), Dim (mode', mk') ->
+    if mode=mode' then reads_member_key asn mk mk' else None
+  | FPassDim(n, mk), FPassDim(n', mk') ->
+    if n=n' then reads_member_key asn mk mk' else None
+  | BaseNL _, _ | FPassBaseNL _, _ | BaseGL _, _ | FPassBaseGL _, _
+  | BaseSL _, _ | BaseL _, _ | FPassBaseL _, _ | Dim _, _ | FPassDim _, _ ->
+    None
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | BaseNC _, _ | FPassBaseNC _, _ | BaseGC _, _ | FPassBaseGC _, _
+  | BaseSC _, _ | BaseC _, _ | BaseR _, _ | BaseH, _ ->
+    if i=i' then Some asn else None
 
 let check_instruct_final asn i i' =
   match i, i' with
@@ -353,33 +398,27 @@ let check_instruct_final asn i i' =
         | None -> None
         | Some newasn -> reads newasn l2 l2')
    (* TODO: abstraction, we've heard of it *)
-   | QueryM (n,op,MemberKey.EL l), QueryM (n',op',MemberKey.EL l')
-   | QueryM (n,op,MemberKey.PL l), QueryM (n',op',MemberKey.PL l')
-    when n=n' && op=op' -> reads asn l l'
-   | VGetM (n, MemberKey.EL l), VGetM (n', MemberKey.EL l')
-   | VGetM (n, MemberKey.PL l), VGetM (n', MemberKey.PL l')
-    when n=n' -> reads asn l l'
-   | FPassM (m,n,MemberKey.EL l,h), FPassM (m',n',MemberKey.EL l',h')
-   | FPassM (m,n,MemberKey.PL l,h), FPassM (m',n',MemberKey.PL l',h')
-    when m=m' && n=n' && h=h' -> reads asn l l'
-   | SetM (n, MemberKey.EL l), SetM (n', MemberKey.EL l')
-   | SetM (n, MemberKey.PL l), SetM (n', MemberKey.PL l')
-    when n=n' -> reads asn l l'
-   | IncDecM (m,op,MemberKey.EL l), IncDecM (m',op',MemberKey.EL l')
-   | IncDecM (m,op,MemberKey.PL l), IncDecM (m',op',MemberKey.PL l')
-    when m=m' && op=op' -> reads asn l l'
-   | SetOpM (m,op,MemberKey.EL l), SetOpM (m',op',MemberKey.EL l')
-   | SetOpM (m,op,MemberKey.PL l), SetOpM (m',op',MemberKey.PL l')
-    when m=m' && op=op' -> reads asn l l'
-   | BindM (n, MemberKey.EL l), BindM (n', MemberKey.EL l')
-   | BindM (n, MemberKey.PL l), BindM (n', MemberKey.PL l')
-    when n=n' -> reads asn l l'
-   | UnsetM (n, MemberKey.EL l), UnsetM (n', MemberKey.EL l')
-   | UnsetM (n, MemberKey.PL l), UnsetM (n', MemberKey.PL l')
-    when n=n' -> reads asn l l'
+   | QueryM (n,op,mk), QueryM (n',op',mk')
+    when n=n' && op=op' -> reads_member_key asn mk mk'
+   | VGetM (n, mk), VGetM (n', mk')
+    when n=n' -> reads_member_key asn mk mk'
+   | FPassM (m,n,mk,h), FPassM (m',n',mk',h')
+    when m=m' && n=n' && h=h' -> reads_member_key asn mk mk'
+   | SetM (n, mk), SetM (n', mk')
+    when n=n' -> reads_member_key asn mk mk'
+   | IncDecM (m,op,mk), IncDecM (m',op',mk')
+    when m=m' && op=op' -> reads_member_key asn mk mk'
+   | SetOpM (m,op,mk), SetOpM (m',op',mk')
+    when m=m' && op=op' -> reads_member_key asn mk mk'
+   | BindM (n, mk), BindM (n', mk')
+    when n=n' -> reads_member_key asn mk mk'
+   | UnsetM (n, mk), UnsetM (n', mk')
+    when n=n' -> reads_member_key asn mk mk'
     (* I'm guessing a bit here! *)
    | SetWithRefRML l, SetWithRefRML l' -> reads asn l l'
-   | _, _ -> if i=i' then Some asn else None
+   | SetWithRefLML _, _ | QueryM _, _ | VGetM _, _ | FPassM _, _ | SetM _, _
+   | IncDecM _, _ | SetOpM _, _ | BindM _, _ | UnsetM _, _ | SetWithRefRML _, _
+    -> None
 
 (* Iterators. My understanding is that the initializers either jump to the
 specified label with no access to locals, or write the first value of the
@@ -415,7 +454,14 @@ let check_instruct_iterator asn i i' =
   | IterBreak (_,_) , _
   | _ , IterBreak (_,_) -> (None,[]) (* should have been dealt with
                                         along with other control flow *)
-  | _ , _ -> if i=i' then (Some asn,[]) else (None,[])
+  | IterInit _, _ | WIterInit _, _ | MIterInit _, _ | IterNext _, _
+  | WIterNext _, _ | MIterNext _, _ | IterInitK _, _ | WIterInitK _, _
+  | MIterInitK _, _ | IterNextK _, _ | WIterNextK _, _ | MIterNextK _, _ ->
+    (None, [])
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | IterFree _, _ | MIterFree _, _ | CIterFree _, _  ->
+    if i=i' then (Some asn,[]) else (None,[])
 
 let check_instruct_misc asn i i' =
  match i,i' with
@@ -466,7 +512,127 @@ let check_instruct_misc asn i i' =
      (classes_to_check := IntIntPermSet.add (cln,cln',[]) (!classes_to_check);
      Some asn)
    else None (* fail in this case *)
-  | _, _ -> if i=i' then Some asn else None
+  | InitThisLoc _, _ | StaticLocCheck _, _ | StaticLocDef _, _
+  | StaticLocInit _, _ | AssertRATL _, _ | Silence _, _ | CreateCl _, _ ->
+    None
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | This, _ | BareThis _, _ | CheckThis, _ | Catch, _ | OODeclExists _, _
+  | VerifyParamType _, _ | VerifyRetTypeC, _ | VerifyRetTypeV, _ | Self _, _
+  | Parent _, _ | LateBoundCls _, _ | ClsRefName _, _ | NativeImpl, _
+  | IncStat _, _ | AKExists, _ | Idx, _ | ArrayIdx, _
+  | AssertRATStk _, _ | BreakTraceHint, _ | VarEnvDynCall, _ | IsUninit, _
+  | CGetCUNop, _ | UGetCUNop, _ | IsMemoType, _ | MaybeMemoType, _ ->
+    if i=i' then Some asn else None
+
+let check_instruct_basic i i' =
+  match i, i' with
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | Nop, _ | EntryNop, _ | PopC, _ | PopV, _ | PopR, _ | PopU, _ | Dup, _
+  | Box, _ | Unbox, _ | BoxR, _ | UnboxR, _ | UnboxRNop, _ | RGetCNop, _ ->
+    if i=i' then Some () else None
+
+(* comparison of string representation of doubles
+   TODO: should be up to some precision?
+*)
+let compare_double_strings s s' =
+ if s=s' then true
+ else match Scanf.sscanf s "%f" (fun x -> Some x),
+            Scanf.sscanf s' "%f" (fun x -> Some x) with
+      | Some f, Some f' -> f = f'
+      | _, _ -> false
+      | exception _ -> false
+
+let check_instruct_lit_const asn i i' =
+  match i, i' with
+  | Array id, Array id'
+  | Dict id, Dict id'
+  | Vec id, Vec id'
+  | Keyset id, Keyset id' ->
+    adata_to_check := StringStringSet.add (id,id') !adata_to_check;
+    Some asn
+  | Double s, Double s' ->
+    if compare_double_strings s s' then Some asn else None
+  | NewLikeArrayL (l, n), NewLikeArrayL (l', n') ->
+    if n=n'
+    then reads asn l l'
+    else None
+  | Array _, _ | Dict _, _ | Vec _, _ | Keyset _, _ | Double _, _
+  | NewLikeArrayL _, _ -> None
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | NYI _, _ | Null, _ | True, _ | False, _ | NullUninit, _ | Int _, _
+  | String _, _ | TypedValue _, _ | NewArray _, _
+  | NewMixedArray _, _ | NewDictArray _, _ | NewPackedArray _, _
+  | NewStructArray _, _ | NewVecArray _, _ | NewKeysetArray _, _ | NewPair, _
+  | AddElemC, _ | AddElemV, _ | AddNewElemC, _ | AddNewElemV, _ | NewCol _, _
+  | ColFromArray _, _ | MapAddElemC, _ | Cns _, _ | CnsE _, _ | CnsU _, _
+  | ClsCns _, _ | ClsCnsD _, _ | File, _ | Dir, _ | Method, _ | NameA, _ ->
+    if i=i' then Some asn else None
+
+(* Returns true if the instruction terminates the program. *)
+let check_instruct_operator i i' =
+  match i, i' with
+  | Hhbc_ast.Exit, Hhbc_ast.Exit ->
+      Some true
+  | Fatal op, Fatal op' ->
+      if op=op' then Some true
+      else None
+  | Hhbc_ast.Exit, _ | Fatal _, _ ->
+    None
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | Concat, _ | Abs, _ | Add, _ | Sub, _ | Mul, _ | AddO, _ | SubO, _ | MulO, _
+  | Div, _ | Mod, _ | Pow, _ | Sqrt, _ | Xor, _ | Not, _ | Same, _ | NSame, _
+  | Eq, _ | Neq, _ | Lt, _ | Lte, _ | Gt, _ | Gte, _ | Cmp, _ | BitAnd, _
+  | BitOr, _ | BitXor, _ | BitNot, _ | Shl, _ | Shr, _ | Floor, _ | Ceil, _
+  | CastBool, _ | CastInt, _ | CastDouble, _ | CastString, _ | CastArray, _
+  | CastObject, _ | CastVec, _ | CastDict, _ | CastKeyset, _ | CastVArray, _
+  | CastDArray, _ | InstanceOf, _ | InstanceOfD _, _ | Print, _ | Clone, _ ->
+    if i=i' then Some false else None
+
+let check_instruct_special_flow i i' =
+  match i, i' with
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | Continue _, _ | Break _, _ ->
+    if i = i' then Some () else None
+
+let check_instruct_async_functions i i' =
+  match i, i' with
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | WHResult, _ | Await, _ ->
+    if i = i' then Some () else None
+
+let check_instruct_gen_creation_execution i i' =
+  match i, i' with
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | CreateCont, _ | ContEnter, _ | ContRaise, _ | Yield, _ | YieldK, _
+  | ContCheck _, _ | ContValid, _ | ContStarted, _ | ContKey, _
+  | ContGetReturn, _ ->
+    if i=i' then Some () else None
+
+let check_instruct_eval_defined i i' =
+  match i, i' with
+  | DefCls cid, DefCls cid' ->
+    classes_to_check := IntIntPermSet.add (cid,cid',[]) !classes_to_check;
+    Some ()
+  | DefFunc fid, DefFunc fid' ->
+    functions_to_check := IntIntSet.add (fid,fid') !functions_to_check;
+    Some ()
+  | DefTypeAlias tid, DefTypeAlias tid' ->
+    typedefs_to_check := IntIntSet.add (tid, tid') !typedefs_to_check;
+    Some ()
+  | DefCls _, _ | DefFunc _, _ | DefTypeAlias _, _ ->
+    None
+  (* Whitelist the instructions where equality implies equivalence
+    (e.g. they do not access locals). *)
+  | Incl, _ | InclOnce, _ | Req, _ | ReqOnce, _ | ReqDoc, _ | Eval, _
+  | AliasCls _, _ | DefClsNop _, _ | DefCns _, _ ->
+    if i=i' then Some() else None
 
 (* abstracting this out in case we want to change it from a list later *)
 let add_todo (pc,pc') asn todo = ((pc,pc'),asn) :: todo
@@ -492,18 +658,6 @@ let findperm l1 l2 =
                         | Some (j,_) -> loop (n+1) xs ((n,j)::p)
                         | None -> None)
       in loop 0 l1 []
-
-(* comparison of string representation of doubles
-   TODO: should be up to some precision?
-*)
-let compare_double_strings s s' =
- if s=s' then true
- else match Scanf.sscanf s "%f" (fun x -> Some x),
-            Scanf.sscanf s' "%f" (fun x -> Some x) with
-      | Some f, Some f' -> f = f'
-      | _, _ -> false
-      | exception _ -> false
-
 
 (* Main entry point for equivalence checking *)
 let equiv prog prog' startlabelpairs =
@@ -601,67 +755,70 @@ let equiv prog prog' startlabelpairs =
                          (hs_of_pc pc', LabelMap.find lab' labelmap') asn
                          (add_assumption (pc,pc') asn assumed) todo
               else try_specials ()
-        | IContFlow (JmpZ lab), IContFlow (JmpZ lab')
-        | IContFlow (JmpNZ lab), IContFlow (JmpNZ lab') ->
-           check (succ pc) (succ pc') asn
-             (add_assumption (pc,pc') asn assumed)
-             (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
-                (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)
-        | IContFlow RetC, IContFlow RetC
-        | IContFlow RetV, IContFlow RetV ->
-           donext assumed todo
-        | IContFlow Unwind, IContFlow Unwind ->
-           (* TODO: this should be one side at a time, except it's
-            a bit messy to deal with the case where we leave this
-            frame altogether, in which case the two should agree, so
-            I'm only dealing with the matching case
-            *)
-            (match hs_of_pc pc, hs_of_pc pc' with
-               | [],[] -> (Log.debug (Tty.Normal Tty.Red) "unwind not in handler"; try_specials ())
-                                               (* unwind not in handler! should be hard failure? *)
-               | [Fault_handler _h], [Fault_handler _h'] -> donext assumed todo (* both jump out *)
-               | (Fault_handler _h :: Fault_handler next :: hs),
-                 (Fault_handler _h' :: Fault_handler next' :: hs') ->
-                 check (Fault_handler next :: hs, next) (Fault_handler next' :: hs', next') asn
-                       (add_assumption (pc,pc') asn assumed) todo
-               | (Fault_handler _h :: Catch_handler next :: _hs),
-                 (Fault_handler _h' :: Catch_handler next' :: _hs') ->
-                  check ([Catch_handler next] , next) ([Catch_handler next'], next') asn
-                        (add_assumption (pc,pc') asn assumed) todo
-               | _, _ -> try_specials ())
-        | IContFlow Throw, IContFlow Throw ->
-            (match IMap.get (ip_of_pc pc) exnmap,
-                   IMap.get (ip_of_pc pc') exnmap' with
-             | None, None ->  donext assumed todo (* both leave *)
-             | Some [], Some [] -> donext assumed todo
-             | Some (Fault_handler h as handler :: rest),
-               Some (Fault_handler h' as handler' :: rest') ->
-              let newstack = handler :: (rest @ hs_of_pc pc) in
-              let newstack' = handler' :: (rest' @ hs_of_pc pc') in
-              check (newstack, h) (newstack', h')
-                    asn (add_assumption (pc,pc') asn assumed)
-                    todo
-             | Some (Catch_handler h as handler :: _rest),
-               Some (Catch_handler h' as handler' :: _rest') ->
-               check ([handler],h) ([handler'], h')
-                     asn (add_assumption (pc,pc') asn assumed)
-                     todo
-             | _,_ -> try_specials ())
-        | IContFlow (Switch (kind, offset, labs)), IContFlow (Switch (kind', offset', labs'))
-          when kind=kind' && offset=offset' ->
-           (match List.zip labs labs' with
-             | None -> try_specials () (* feebly, give up if different lengths *)
-             | Some lab_pairs ->
-                let hs = hs_of_pc pc in
-                let hs' = hs_of_pc pc' in
-                let newtodo = List.fold_right ~f:(fun (lab,lab') accum ->
-                 add_todo ((hs, LabelMap.find lab labelmap), (hs', LabelMap.find lab' labelmap'))
-                          asn accum) ~init:todo lab_pairs in
-                donext (add_assumption (pc,pc') asn assumed) newtodo)
         | IContFlow (SSwitch _), _
         | _, IContFlow (SSwitch _) ->
           failwith "SSwitch not implemented"
-        | IContFlow _, IContFlow _ -> try_specials ()
+        | IContFlow ins, IContFlow ins' ->
+          begin match ins, ins' with
+          | JmpZ lab, JmpZ lab'
+          | JmpNZ lab, JmpNZ lab' ->
+              check (succ pc) (succ pc') asn
+                (add_assumption (pc,pc') asn assumed)
+                (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
+                  (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)
+          | RetC, RetC
+          | RetV, RetV ->
+              donext assumed todo
+          | Unwind, Unwind ->
+              (* TODO: this should be one side at a time, except it's
+              a bit messy to deal with the case where we leave this
+              frame altogether, in which case the two should agree, so
+              I'm only dealing with the matching case
+              *)
+              (match hs_of_pc pc, hs_of_pc pc' with
+                  | [],[] -> (Log.debug (Tty.Normal Tty.Red) "unwind not in handler"; try_specials ())
+                                                  (* unwind not in handler! should be hard failure? *)
+                  | [Fault_handler _h], [Fault_handler _h'] -> donext assumed todo (* both jump out *)
+                  | (Fault_handler _h :: Fault_handler next :: hs),
+                    (Fault_handler _h' :: Fault_handler next' :: hs') ->
+                    check (Fault_handler next :: hs, next) (Fault_handler next' :: hs', next') asn
+                          (add_assumption (pc,pc') asn assumed) todo
+                  | (Fault_handler _h :: Catch_handler next :: _hs),
+                    (Fault_handler _h' :: Catch_handler next' :: _hs') ->
+                    check ([Catch_handler next] , next) ([Catch_handler next'], next') asn
+                          (add_assumption (pc,pc') asn assumed) todo
+                  | _, _ -> try_specials ())
+          | Throw, Throw ->
+              (match IMap.get (ip_of_pc pc) exnmap,
+                      IMap.get (ip_of_pc pc') exnmap' with
+                | None, None ->  donext assumed todo (* both leave *)
+                | Some [], Some [] -> donext assumed todo
+                | Some (Fault_handler h as handler :: rest),
+                  Some (Fault_handler h' as handler' :: rest') ->
+                let newstack = handler :: (rest @ hs_of_pc pc) in
+                let newstack' = handler' :: (rest' @ hs_of_pc pc') in
+                check (newstack, h) (newstack', h')
+                      asn (add_assumption (pc,pc') asn assumed)
+                      todo
+                | Some (Catch_handler h as handler :: _rest),
+                  Some (Catch_handler h' as handler' :: _rest') ->
+                  check ([handler],h) ([handler'], h')
+                        asn (add_assumption (pc,pc') asn assumed)
+                        todo
+                | _,_ -> try_specials ())
+          | Switch (kind, offset, labs), Switch (kind', offset', labs')
+            when kind=kind' && offset=offset' ->
+              (match List.zip labs labs' with
+                | None -> try_specials () (* feebly, give up if different lengths *)
+                | Some lab_pairs ->
+                  let hs = hs_of_pc pc in
+                  let hs' = hs_of_pc pc' in
+                  let newtodo = List.fold_right ~f:(fun (lab,lab') accum ->
+                    add_todo ((hs, LabelMap.find lab labelmap), (hs', LabelMap.find lab' labelmap'))
+                            asn accum) ~init:todo lab_pairs in
+                  donext (add_assumption (pc,pc') asn assumed) newtodo)
+          | _, _ -> try_specials ()
+          end
         (* Special treatment for Unset instructions *)
         | IMutator (UnsetL l), _ ->
            let newprops = PropSet.filter (fun (x1,_x2) -> x1 <> l) props in
@@ -675,49 +832,43 @@ let equiv prog prog' startlabelpairs =
            variable effects
         *)
         | IBasic ins, IBasic ins' ->
-           if ins = ins' then nextins()
-           else try_specials ()
-        | ILitConst (Array id), ILitConst (Array id')
-        | ILitConst (Dict id), ILitConst (Dict id')
-        | ILitConst (Vec id), ILitConst (Vec id')
-        | ILitConst (Keyset id), ILitConst (Keyset id') ->
-          adata_to_check := StringStringSet.add (id,id') !adata_to_check;
-          nextins()
-        | ILitConst (Double s), ILitConst (Double s') ->
-           if compare_double_strings s s' then nextins() else try_specials()
+          begin match check_instruct_basic ins ins' with
+          | None -> try_specials ()
+          | Some () -> nextins ()
+          end
         | ILitConst ins, ILitConst ins' ->
-           if ins = ins' then nextins()
-           else try_specials ()
+          begin match check_instruct_lit_const asn ins ins' with
+          | None -> try_specials ()
+          | Some newasn -> nextinsnewasn newasn
+          end
         (* special cases for exiting the whole program *)
-        | IOp Hhbc_ast.Exit, IOp Hhbc_ast.Exit ->
-           donext assumed todo
-        | IOp (Fatal op), IOp (Fatal op') ->
-           if op=op' then donext assumed todo
-           else try_specials ()
         | IOp ins, IOp ins' ->
-           if ins = ins' then nextins()
-           else try_specials ()
+          begin match check_instruct_operator ins ins' with
+          | None -> try_specials ()
+          | Some termination -> if termination
+            then donext assumed todo
+            else nextins ()
+          end
         | ISpecialFlow ins, ISpecialFlow ins' ->
-           if ins = ins' then nextins()
-           else try_specials ()
+          begin match check_instruct_special_flow ins ins' with
+          | None -> try_specials ()
+          | Some () -> nextins ()
+          end
         | IAsync ins, IAsync ins' ->
-           if ins = ins' then nextins()
-           else try_specials ()
+          begin match check_instruct_async_functions ins ins' with
+          | None -> try_specials ()
+          | Some () -> nextins ()
+          end
         | IGenerator ins, IGenerator ins' ->
-           if ins = ins' then nextins()
-           else try_specials ()
-        | IIncludeEvalDefine (DefCls cid), IIncludeEvalDefine (DefCls cid') ->
-            classes_to_check := IntIntPermSet.add (cid,cid',[]) !classes_to_check;
-            nextins ()
-        | IIncludeEvalDefine (DefFunc fid), IIncludeEvalDefine (DefFunc fid') ->
-            functions_to_check := IntIntSet.add (fid,fid') !functions_to_check;
-            nextins ()
-        | IIncludeEvalDefine (DefTypeAlias tid), IIncludeEvalDefine (DefTypeAlias tid') ->
-            typedefs_to_check := IntIntSet.add (tid, tid') !typedefs_to_check;
-            nextins()
+          begin match check_instruct_gen_creation_execution ins ins' with
+          | None -> try_specials ()
+          | Some () -> nextins ()
+          end
         | IIncludeEvalDefine ins, IIncludeEvalDefine ins' ->
-           if ins = ins' then nextins()
-           else try_specials ()
+          begin match check_instruct_eval_defined ins ins' with
+          | None -> try_specials ()
+          | Some () -> nextins ()
+          end
         | ICall ins, ICall ins' ->
             (match check_instruct_call asn ins ins' with
               | None -> try_specials()

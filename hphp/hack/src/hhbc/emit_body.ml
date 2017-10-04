@@ -162,6 +162,12 @@ let emit_deprecation_warning scope = function
       instr_popr;
     ]
 
+let rec is_awaitable h =
+  match h with
+  | _, A.Happly ((_, ("WaitHandle" | "Awaitable")), ([] | [_])) -> true
+  | _, (A.Hsoft h | A.Hoption h) -> is_awaitable h
+  | _ -> false
+
 let emit_body
   ~pos
   ~scope
@@ -175,6 +181,28 @@ let emit_body
   ~return_value
   ~namespace
   ~doc_comment params ret body =
+  if is_async && skipawaitable
+  then begin
+    let report_error =
+      not (Option.value_map ret ~default:true ~f:is_awaitable) in
+    if report_error
+    then begin
+      let message =
+        if is_closure_body
+        then "Return type hint for async closure must be awaitable"
+        else
+          let kind, name =
+            match scope with
+            | Ast_scope.ScopeItem.Function fd :: _ ->
+              "function", snd fd.A.f_name
+            | Ast_scope.ScopeItem.Method md :: Ast_scope.ScopeItem.Class cd :: _ ->
+              "method", (snd cd.A.c_name) ^ "::" ^ (snd md.A.m_name)
+            | _ -> assert false in
+          Printf.sprintf "Return type hint for async %s %s() must be awaitable"
+            kind name in
+      Emit_fatal.raise_fatal_runtime pos message
+      end;
+  end;
   let tparams =
     List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
   Label.reset_label ();

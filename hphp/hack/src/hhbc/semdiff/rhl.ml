@@ -327,17 +327,22 @@ let check_instruct_call asn i i' =
   | FPassL (_,_,_), _
   | _, FPassL (_,_,_) -> None (* if this is pass by reference, might get
                                  aliasing so just wimp out for now *)
+  | DecodeCufIter _, DecodeCufIter _ ->
+    (* COMPLETENESS: HackC does not currently generate this instruction, so
+      reject it for now. *)
+    None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
   | FPushFunc _, _ | FPushFuncD _, _ | FPushFuncU _, _ | FPushObjMethod _, _
   | FPushObjMethodD _, _ | FPushClsMethod _, _ | FPushClsMethodF _, _
   | FPushClsMethodD _, _ | FPushCtor _, _ | FPushCtorD _, _ | FPushCtorI _, _
-  | DecodeCufIter _, _ | FPushCufIter _, _ | FPushCuf _, _ | FPushCufF _, _
-  | FPushCufSafe _, _ | CufSafeArray, _ | CufSafeReturn, _ | FPassC _, _
-  | FPassCW _, _ | FPassCE _, _ | FPassV _, _ | FPassVNop _, _ | FPassR _, _
-  | FPassN _, _ | FPassG _, _ | FPassS _, _ | FCall _, _ | FCallD _, _
-  | FCallArray, _ | FCallAwait _, _ | FCallUnpack _, _ | FCallBuiltin _, _ ->
+  | FPushCufIter _, _ | FPushCuf _, _ | FPushCufF _, _ | FPushCufSafe _, _
+  | CufSafeArray, _ | CufSafeReturn, _ | FPassC _, _ | FPassCW _, _
+  | FPassCE _, _ | FPassV _, _ | FPassVNop _, _ | FPassR _, _ | FPassN _, _
+  | FPassG _, _ | FPassS _, _ | FCall _, _ | FCallD _, _ | FCallArray, _
+  | FCallAwait _, _ | FCallUnpack _, _ | FCallBuiltin _, _ ->
     if i=i' then Some asn else None
+  | _, _ -> None
 
 (* Asserts equivalence for reading from member keys. For example, checks
   equivalence for reading an element or property via a local variable. *)

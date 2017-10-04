@@ -868,7 +868,7 @@ match s with
  | "FPushCtor" -> ICall (FPushCtor (intofiarg arg1, intofiarg arg2))
  | "FPushCtorD" -> ICall (FPushCtorD (intofiarg arg1, class_id_of_iarg arg2))
  | "FPushCtorI" -> ICall (FPushCtorI (intofiarg arg1, intofiarg arg2))
- | "DecodeCufIter" -> ICall (DecodeCufIter (intofiarg arg1, labelofiarg arg2))
+ | "DecodeCufIter" -> ICall (DecodeCufIter (iterofiarg arg1, labelofiarg arg2))
  | "FPushCufIter" -> ICall (FPushCufIter (intofiarg arg1, iterofiarg arg2))
  | "FPassC" -> ICall(FPassC (intofiarg arg1, fpasshintof arg2))
  | "FPassCW" -> ICall(FPassCW (intofiarg arg1, fpasshintof arg2))

@@ -355,8 +355,7 @@ let mut_imms (is : IS.t) : IS.t =
                               else Ast_defs.OG_nullsafe)
     | FPushCtor     (i, id) -> FPushCtor  (i, mutate_int        id !mag)
     | FPushCtorI    (i, id) -> FPushCtorI (i, mutate_int        id !mag)
-    | DecodeCufIter (i, id) -> DecodeCufIter (mutate_int        i  !mag,
-                                              mutate_label data id)
+    | DecodeCufIter (i, id) -> DecodeCufIter (i, mutate_label data id)
     | FPassS        (i, id, h) -> FPassS     (mutate_int        i  !mag,
                                               mutate_int        id !mag,
                                               mutate_fpasshint  h)

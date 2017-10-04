@@ -384,7 +384,7 @@ type instruct_call =
   | FPushCtor of num_params * classref_id
   | FPushCtorD of num_params * class_id
   | FPushCtorI of num_params * classref_id
-  | DecodeCufIter of num_params * Label.t
+  | DecodeCufIter of Iterator.t * Label.t
   | FPushCufIter of num_params * Iterator.t
   | FPushCuf of num_params
   | FPushCufF of num_params

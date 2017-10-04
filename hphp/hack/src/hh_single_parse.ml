@@ -205,6 +205,44 @@ let compare_fixmes ast_fixmes ffp_fixmes =
     flush Pervasives.stderr;
     exit_with CmpDifferent
 
+let compare_pos ast_result ffp_result =
+  let fetch_posses ast =
+    let pos_fetcher = object(self)
+      inherit [_] Ast_visitors.iter
+      val mutable result = []
+      method! on_Pos_t () p = result <- p :: result
+      method get = result
+    end in
+    pos_fetcher#on_program () ast;
+    pos_fetcher#get
+  in
+  let ast = List.rev @@ fetch_posses ast_result in
+  let ffp =
+    match List.rev @@ fetch_posses ffp_result with
+    | (p::ps) when Pos.line p = 1 -> ps (* header is dropped by Parser_hack *)
+    | ps -> ps
+  in
+  let ast_count = List.length ast in
+  let ffp_count = List.length ffp in
+  if ast_count = ffp_count then
+    let diff_pos x y = if Pos.compare x y <> 0 then begin
+      Printf.eprintf " ): legacy: %s\n    ffp:    %s\n"
+        (Pos.print_verbose_relative x)
+        (Pos.print_verbose_relative y)
+    end in
+    List.iter2 diff_pos ast ffp
+  else begin
+    let show_pos p =
+      Printf.eprintf "     - %s\n" @@ Pos.string_no_file @@ Pos.to_absolute p
+    in
+    Printf.eprintf " ): legacy has %d positions and ffp has %d:\n"
+      ast_count ffp_count;
+    Printf.eprintf "    Legacy\n    ------\n";
+    List.iter show_pos ast;
+    Printf.eprintf "    FFP\n    ---\n";
+    List.iter show_pos ffp
+  end
+
 let compare_comments filename ast_result ffp_result =
   let open Printf in
   let is_pragma_free (_, s) =
@@ -277,6 +315,7 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
     let ffp_result = run_ffp file in
     let ffp_fixmes = Fixmes.HH_FIXMES.get file in
     let sexpr = compare_asts filename diff_cmd ast_result ffp_result in
+    let () = compare_pos ast_result.Parser_hack.ast ffp_result.Lowerer.ast in
     let () = compare_fixmes ast_fixmes ffp_fixmes in
     let () = compare_comments filename ast_result ffp_result in
     printf "%s\n" sexpr
@@ -302,9 +341,6 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
       Printf.printf "FAIL, %s\n" filename;
       exit_with CmpDifferent
     end
-
-
-
 
 let () =
   Printexc.record_backtrace true;

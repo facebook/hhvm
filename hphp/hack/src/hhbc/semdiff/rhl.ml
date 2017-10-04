@@ -619,7 +619,8 @@ let check_instruct_gen_creation_execution i i' =
 
 let check_instruct_eval_defined i i' =
   match i, i' with
-  | DefCls cid, DefCls cid' ->
+  | DefCls cid, DefCls cid'
+  | DefClsNop cid, DefClsNop cid' ->
     classes_to_check := IntIntPermSet.add (cid,cid',[]) !classes_to_check;
     Some ()
   | DefFunc fid, DefFunc fid' ->
@@ -628,12 +629,12 @@ let check_instruct_eval_defined i i' =
   | DefTypeAlias tid, DefTypeAlias tid' ->
     typedefs_to_check := IntIntSet.add (tid, tid') !typedefs_to_check;
     Some ()
-  | DefCls _, _ | DefFunc _, _ | DefTypeAlias _, _ ->
+  | DefCls _, _ | DefClsNop _, _ | DefFunc _, _ | DefTypeAlias _, _ ->
     None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
   | Incl, _ | InclOnce, _ | Req, _ | ReqOnce, _ | ReqDoc, _ | Eval, _
-  | AliasCls _, _ | DefClsNop _, _ | DefCns _, _ ->
+  | AliasCls _, _ | DefCns _, _ ->
     if i=i' then Some() else None
 
 (* abstracting this out in case we want to change it from a list later *)

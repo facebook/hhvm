@@ -11,6 +11,45 @@ import tempfile
 import json
 
 
+def split_as_files(lines, size, utf8=True):
+    """take a source of lines and a batch size,
+    write the contents to a series of files in a temporary directory
+    and then return the name of each file as it is completed"""
+    if lines in (list, tuple):
+        lines = iter(lines)
+    assert hasattr(lines, '__iter__') and not isinstance(lines, (str, bytes))
+    assert size >= 1
+
+    tempdir_path = tempfile.mkdtemp()
+    name = None
+    nonzero_items = False
+    nth_file = 1
+    try:
+        while True:
+            name = path.join(tempdir_path, ("batch-%08d.txt" % nth_file))
+            nth_file += 1
+            nonzero_items = False
+            print(name, nth_file)
+            with open(name, "wb") as fh:
+                for _x in range(size):
+                    line = next(lines)
+                    nonzero_items = True
+                    l = line.strip()
+                    if utf8 and not isinstance(l, bytes):
+                        l = bytes(l, 'utf-8')
+                    fh.write(l)
+                    fh.write(b"\n")
+            yield name
+    except StopIteration:
+        pass
+    if nonzero_items:
+        yield name
+
+
+devnull_source = open(os.devnull, 'rb')
+devnull_sink = open(os.devnull, 'wb')
+
+
 def get_ocaml_build_rule_output_path(build_target, folder="bin"):
     # some_path/foo.par -> some_path/foo/foo.opt
     out = re.sub(
@@ -46,13 +85,40 @@ def walkdir_skip_hidden(directory, extension=None):
                 yield fullpath
 
 
-def main(argv):
+def devserver_clean_environment(fbsource_path=None, www_path=None):
+    "clean the environment on a dev server in preparation for running this test"
+    old_cwd = os.getcwd()
+    try:
+        if fbsource_path is None:
+            fbsource_path = path.join(os.getenv("HOME"), "fbsource")
+        if www_path is None:
+            www_path = path.join(os.getenv("HOME"), "www")
+
+        os.chdir(fbsource_path)
+        subprocess.check_call(["buck", "clean"])
+        os.chdir("fbcode")
+        subprocess.check_call(["buck", "build", "//hphp/hack/src:hh_single_compile"])
+
+        os.chdir(www_path)
+        subprocess.check_call(["hg", "checkout", "master"])
+        subprocess.check_call(["arc", "pull"])
+    finally:
+        os.chdir(old_cwd)
+    return None
+
+
+def run_hh_single_compile(www_path=None):
+    """run the hh_single_compile over the www director
+    processing one file at a time.
+    """
+    if www_path is None:
+        www_path = path.join(os.getenv("HOME"), "www")
+
     start = None
     hh_single_compile_path = get_ocaml_build_rule_output_path(
         r'@hphp/hack/src:hh_single_compile',
         folder='gen',
     )
-    www_path = path.join(os.getenv("HOME"), "www")
 
     with tempfile.NamedTemporaryFile() as tempf:
         for filepath in walkdir_skip_hidden(www_path, extension=".php"):
@@ -60,26 +126,38 @@ def main(argv):
         tempf.flush()
 
         start = time.time()
-        subprocess.check_call(
-            [hh_single_compile_path, "--input-file-list", tempf.name])
+        with open(tempf.name, "rb") as fh:
+            it = split_as_files(fh, 1000)
+            for filepath in it:
+                subprocess.check_call(
+                    [hh_single_compile_path, "--input-file-list", filepath],
+                    stdin=devnull_source,
+                    stdout=devnull_sink,
+                    stderr=None,
+                )
 
     stop = time.time()
 
     result = {
-        "parse_www_time": (stop - start)
+        "parse_www_time": (stop - start),
+        "parse_www_batch_size": 1000,
     }
     try:
         subprocess.check_call([
             "scribe_cat",
             "perfpipe_hh_ffp_cold_start",
-            json.dump(result)
+            json.dumps(result)
         ])
     except OSError as e:
         print("got an os error!")
         print(e)
-        pass
 
     print("elapsed time %s" % (stop - start))
+
+
+def main(argv):
+    devserver_clean_environment()
+    run_hh_single_compile()
 
 
 if __name__ == "__main__":

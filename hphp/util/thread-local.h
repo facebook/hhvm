@@ -276,102 +276,6 @@ template<typename T> using ThreadLocal = ThreadLocalImpl<true,T>;
 template<typename T> using ThreadLocalNoCheck = ThreadLocalImpl<false,T>;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Singleton thread-local storage for T
-
-/*
- * T must define:
- *
- *   static void Create(void* storage)
- *     which should call new (storage) T, and is called on first getCheck.
- *
- *   static void Delete(T* singleton), and
- *   static void OnThreadExit(T* singleton)
- *     which should both call singleton->~T; Delete is called on manual
- *     destruction, while OnThreadExit is called automatically. The argument
- *     'singleton' is redundant (getters still work), but is for convenience.
- *     These are only called if the singleton was actually created.
- */
-template <typename T>
-struct ThreadLocalSingleton {
-  // Call once per process just to guarantee order of initialization.
-  ThreadLocalSingleton() { s_inited = true; }
-
-  NEVER_INLINE static T *getCheck();
-
-  static T* getNoCheck() {
-    assert(s_inited);
-    assert(singleton() == (T*)&s_storage);
-    return (T*)&s_storage;
-  }
-
-  static bool isNull() { return singleton() == nullptr; }
-
-  static void destroy() {
-    assert(!singleton() || singleton() == (T*)&s_storage);
-    T* p = singleton();
-    if (p) {
-      T::Delete(p);
-      s_node.m_p = nullptr;
-    }
-  }
-
-  T *operator->() const {
-    return getNoCheck();
-  }
-
-  T &operator*() const {
-    return *getNoCheck();
-  }
-
-private:
-  using NodeType = ThreadLocalNode<T>;
-
-  static T* singleton() {
-    return s_node.m_p;
-  }
-
-  static void OnThreadExit(void* p) {
-    NodeType* pNode = (NodeType*)p;
-    assert(pNode == &s_node);
-    if (pNode->m_p) {
-      T::OnThreadExit(pNode->m_p);
-      pNode->m_p = nullptr;
-    }
-  }
-
-  static __thread NodeType s_node;
-  typedef typename std::aligned_storage<sizeof(T), 16>::type
-          StorageType;
-  static __thread StorageType s_storage;
-  static bool s_inited; // no-fast-TLS requires construction so be consistent
-};
-
-template<typename T>
-bool ThreadLocalSingleton<T>::s_inited = false;
-
-template<typename T>
-T *ThreadLocalSingleton<T>::getCheck() {
-  assert(s_inited);
-  if (!singleton()) {
-    T* p = (T*) &s_storage;
-    T::Create(p);
-    s_node.m_p = p;
-    // Register exit hook at most once; doing it twice makes TLM's list cyclic.
-    if (!s_node.m_on_thread_exit_fn) {
-      s_node.m_on_thread_exit_fn = OnThreadExit;
-      ThreadLocalManager::PushTop(s_node);
-    }
-  }
-  return singleton();
-}
-
-template<typename T> __thread typename ThreadLocalSingleton<T>::NodeType
-                              ThreadLocalSingleton<T>::s_node;
-template<typename T> __thread typename ThreadLocalSingleton<T>::StorageType
-                              ThreadLocalSingleton<T>::s_storage;
-
-
-///////////////////////////////////////////////////////////////////////////////
 // some classes don't need new/delete at all
 
 template<typename T>
@@ -419,7 +323,8 @@ struct ThreadLocalProxy {
 template<typename T>
 struct ThreadLocalFlat {
   T* get() const { return (T*)&m_value; }
-  bool isNull() const { return !m_node.m_on_thread_exit_fn; }
+  bool isNull() const { return !m_node.m_p; }
+  T* getNoCheck() const { return get(); }
   T* operator->() const { return get(); }
   T& operator*() const { return *get(); }
   explicit operator bool() const { return !isNull(); }
@@ -430,16 +335,25 @@ struct ThreadLocalFlat {
     node->m_p = nullptr;
   }
   T* getCheck() {
-    if (!m_node.m_on_thread_exit_fn) {
-      m_node.m_on_thread_exit_fn = onThreadExit;
-      ThreadLocalManager::PushTop(m_node);
-      assert(!m_node.m_p);
+    if (!m_node.m_p) {
+      if (!m_node.m_on_thread_exit_fn) {
+        m_node.m_on_thread_exit_fn = onThreadExit;
+        ThreadLocalManager::PushTop(m_node);
+      }
       new (&m_value) T();
       m_node.m_p = this;
     } else {
       assert(m_node.m_p == this);
+      assert(m_node.m_on_thread_exit_fn);
     }
     return get();
+  }
+
+  void destroy() {
+    if (m_node.m_p) {
+      get()->~T();
+      m_node.m_p = nullptr;
+    }
   }
 
   // We manage initialization explicitly

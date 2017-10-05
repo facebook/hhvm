@@ -97,6 +97,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   enum {
     RealPropCreate = 1,    // Property should be created if it doesn't exist
+    RealPropBind = 2,      // Property should be boxed
     RealPropUnchecked = 8, // Don't check property accessibility
     RealPropExist = 16,    // For property_exists
   };

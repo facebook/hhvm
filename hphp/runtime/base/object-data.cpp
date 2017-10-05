@@ -331,21 +331,24 @@ Variant* ObjectData::realPropImpl(const String& propName, int flags,
   }
 
   auto const lookup = getPropImpl(ctx, propName.get(), copyDynArray);
-  auto const prop = lookup.prop;
+  auto prop = lookup.prop;
 
   if (!prop) {
     // Property is not declared, and not dynamically created yet.
     if (!(flags & RealPropCreate)) return nullptr;
 
-    return &tvAsVariant(makeDynProp(propName, AccessFlags::Key));
+    prop = makeDynProp(propName, AccessFlags::Key);
+    if (flags & RealPropBind) tvBoxIfNeeded(prop);
+    return &tvAsVariant(prop);
   }
 
   // Property is non-NULL if we reach here.
-  if ((lookup.accessible && prop->m_type != KindOfUninit) ||
-      (flags & (RealPropUnchecked|RealPropExist))) {
-    return &tvAsVariant(prop);
+  if ((!lookup.accessible || prop->m_type == KindOfUninit) &&
+      !(flags & (RealPropUnchecked|RealPropExist))) {
+    return nullptr;
   }
-  return nullptr;
+  if (flags & RealPropBind) tvBoxIfNeeded(prop);
+  return &tvAsVariant(prop);
 }
 
 Variant* ObjectData::o_realProp(const String& propName, int flags,

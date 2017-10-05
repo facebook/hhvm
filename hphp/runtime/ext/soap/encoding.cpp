@@ -1196,11 +1196,12 @@ static bool get_zval_property(Variant &object, const char* name,
   String sname(name);
   if (object.isObject()) {
     Object obj = object.toObject();
-    if (Variant* t = obj->o_realProp(sname, ObjectData::RealPropUnchecked)) {
-      if (t->isInitialized()) {
-        if (ret) ret->assignRef(*t);
-        return true;
-      }
+    auto t = obj->o_realProp(sname,
+      ObjectData::RealPropUnchecked|ObjectData::RealPropBind);
+    if (t && t->isInitialized()) {
+      assert(t->asTypedValue()->m_type == KindOfRef); // assignRef won't box
+      if (ret) ret->assignRef(*t);
+      return true;
     }
     return false;
   }

@@ -1684,20 +1684,12 @@ zend_read_property(zend_class_entry* scope, zval* object, const char* name,
                    int name_length, zend_bool /*silent*/ TSRMLS_DC) {
   HPHP::String prop_name(name, name_length, HPHP::CopyString);
   HPHP::String scope_name(scope->name, scope->name_length, HPHP::CopyString);
-  HPHP::Class* ctx = nullptr;
-  if (!scope_name.empty()) {
-    ctx = HPHP::Unit::lookupClass(scope_name.get());
-  }
-
-  auto const lookup = Z_OBJVAL_P(object)->getProp(ctx, prop_name.get());
-  auto const prop = lookup.prop;
-
-  if (!lookup.accessible || prop->m_type == HPHP::KindOfUninit) return nullptr;
-
-  if (prop->m_type != HPHP::KindOfRef) {
-    tvBox(prop);
-  }
-  return prop->m_data.pref;
+  auto obj = Z_OBJVAL_P(object);
+  auto const prop = obj->o_realProp(prop_name,
+                                    HPHP::ObjectData::RealPropBind, scope_name);
+  if (!prop) return nullptr;
+  assert(prop->asTypedValue()->m_type == HPHP::KindOfRef);
+  return prop->asTypedValue()->m_data.pref;
 }
 
 ZEND_API zval*

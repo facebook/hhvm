@@ -1014,278 +1014,325 @@ let equiv prog prog' startlabelpairs =
     | [] -> None (* success *)
     | ((pc,pc'),asn)::rest -> check pc pc' asn assumed rest
 
-  (* check is more or less uniform - it deals with matching instructions
-     modulo local variable matching, and simple control-flow differences.
-     specials deals with slightly deeper, ad hoc properties of particular
-     instructions, or sequences.
-     We assume we've already called check on the two pcs, so don't have
-     an appropriate assumed assertion, and the instructions aren't the same
-     *)
-and specials pc pc' ((props,vs,vs') as asn) assumed todo =
-        (* a funny almost no-op that shows up sometimes *)
-        let set_pop_get_pattern =
-         (uSetL $$ uPopC $$ uPushL) $? (fun ((l1,_),l2) -> l1=l2) $> (fun ((l,_),_) -> l) in
+  (* Check for ad-hoc equivalences.
 
-        let set_pop_get_action_left =
-         (set_pop_get_pattern $*$ parse_any) $>> (fun (l, _) ((_,n),(_,n')) ->
-           let newprops = PropSet.filter (fun (x1,_x2) -> x1 <> l) props in
-           let newasn = (newprops, VarSet.remove l vs, vs') in
-           let newpc = (hs_of_pc pc, n) in
-           let newpc' = (hs_of_pc pc', n') in (* always = pc' in fact *)
-             check newpc newpc' newasn
-                   (add_assumption (pc,pc') asn assumed) todo) in
+    Check is more or less uniform - it deals with matching instructions modulo
+    local variable matching, and simple control-flow differences. `specials` deals
+    with slightly deeper, ad hoc properties of particular instructions, or
+    sequences. We assume we've already called check on the two pcs, so don't have
+    an appropriate assumed assertion, and the instructions aren't the same.
+  *)
+  and specials pc pc' ((props,vs,vs') as asn) assumed todo =
+    (* a funny almost no-op that shows up sometimes *)
+    let set_pop_get_pattern =
+      (uSetL $$ uPopC $$ uPushL)
+      $? (fun ((l1,_),l2) -> l1=l2)
+      $> (fun ((l,_),_) -> l) in
 
-        let set_pop_get_action_right =
-         (parse_any $*$ set_pop_get_pattern) $>> (fun (_, l) ((_,n),(_,n')) ->
-         let newprops = PropSet.filter (fun (_x1,x2) -> x2 <> l) props in
-         let newasn = (newprops, vs, VarSet.remove l vs') in
-         let newpc = (hs_of_pc pc, n) in
-         let newpc' = (hs_of_pc pc', n') in
-           check newpc newpc' newasn
-                    (add_assumption (pc,pc') asn assumed) todo) in
+    let set_pop_get_action_left =
+      (set_pop_get_pattern $*$ parse_any)
+      $>> (fun (l, _) ((_,n),(_,n')) ->
+        let newprops = PropSet.filter (fun (x1,_x2) -> x1 <> l) props in
+        let newasn = (newprops, VarSet.remove l vs, vs') in
+        let newpc = (hs_of_pc pc, n) in
+        let newpc' = (hs_of_pc pc', n') in (* always = pc' in fact *)
+        check newpc newpc' newasn (add_assumption (pc,pc') asn assumed) todo) in
 
-        let not_jmpnz_pattern = uNot $$ uJmpNZ $> (fun (_,l) -> l) in
-        let not_jmpz_pattern = uNot $$ uJmpZ $> (fun (_,l) -> l) in
-        let jmpz_not_jmpnz_pattern = uJmpZ $*$ not_jmpnz_pattern in
-        let not_jmpnz_jmpz_pattern = not_jmpnz_pattern $*$ uJmpZ in
-        let jmpnz_not_jmpz_pattern = uJmpNZ $*$ not_jmpz_pattern in
-        let not_jmpz_jmpnz_pattern = not_jmpz_pattern $*$ uJmpNZ in
-        let notjmp_action =
-        ( jmpz_not_jmpnz_pattern $|
-          not_jmpnz_jmpz_pattern $|
-          not_jmpz_jmpnz_pattern $|
-          jmpnz_not_jmpz_pattern) $>> (fun (lab,lab') ((_,n),(_,n')) ->
-           let newpc = (hs_of_pc pc, n) in
-           let newpc' = (hs_of_pc pc', n') in
-           check newpc newpc' asn (add_assumption (pc,pc') asn assumed)
-                (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
-                           (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)) in
+    let set_pop_get_action_right =
+      (parse_any $*$ set_pop_get_pattern)
+      $>> (fun (_, l) ((_,n),(_,n')) ->
+        let newprops = PropSet.filter (fun (_x1,x2) -> x2 <> l) props in
+        let newasn = (newprops, vs, VarSet.remove l vs') in
+        let newpc = (hs_of_pc pc, n) in
+        let newpc' = (hs_of_pc pc', n') in
+        check newpc newpc' newasn (add_assumption (pc,pc') asn assumed) todo) in
 
-(* associativity of string concatenation *)
-        let string_concat_concat_pattern =
-          (uString $$ uConcat $$ uConcat) $> (fun ((s,_),_) -> s) in
-        let concat_string_concat_pattern =
-          (uConcat $$ uString $$ uConcat) $> (fun ((_,s),_) -> s) in
-        let concat_string_either_pattern =
-          (string_concat_concat_pattern $*$ concat_string_concat_pattern) $|
-          (concat_string_concat_pattern $*$ string_concat_concat_pattern) $?
-          (fun (s,s') -> s=s') in
-        let concat_string_either_action =
-          concat_string_either_pattern $> (fun (s,_) -> s) $>>
-          (fun _s ((_,n), (_,n')) ->
-          let newpc = (hs_of_pc pc, n) in
-          let newpc' = (hs_of_pc pc', n') in
-           check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
+    let not_jmpnz_pattern = uNot $$ uJmpNZ $> (fun (_,l) -> l) in
+    let not_jmpz_pattern = uNot $$ uJmpZ $> (fun (_,l) -> l) in
+    let jmpz_not_jmpnz_pattern = uJmpZ $*$ not_jmpnz_pattern in
+    let not_jmpnz_jmpz_pattern = not_jmpnz_pattern $*$ uJmpZ in
+    let jmpnz_not_jmpz_pattern = uJmpNZ $*$ not_jmpz_pattern in
+    let not_jmpz_jmpnz_pattern = not_jmpz_pattern $*$ uJmpNZ in
+    let notjmp_action =
+      (jmpz_not_jmpnz_pattern
+        $| not_jmpnz_jmpz_pattern
+        $| not_jmpz_jmpnz_pattern
+        $| jmpnz_not_jmpz_pattern)
+      $>> (fun (lab,lab') ((_,n),(_,n')) ->
+        let newpc = (hs_of_pc pc, n) in
+        let newpc' = (hs_of_pc pc', n') in
+        let newTodo = (
+          (hs_of_pc pc, LabelMap.find lab labelmap),
+          (hs_of_pc pc', LabelMap.find lab' labelmap')) in
+        check newpc newpc' asn (add_assumption (pc,pc') asn assumed)
+          (add_todo newTodo asn todo)) in
 
-(* recognize closure creation *)
-        let named_filter foo =
-          foo $? (function | Local.Unnamed _ -> false
-                           | Local.Named _ -> true)
-              $> (function | Local.Unnamed _ -> failwith "unnamed can't happen"
-                           | Local.Named s -> s) in
+    (* associativity of string concatenation *)
+    let string_concat_concat_pattern =
+      (uString $$ uConcat $$ uConcat)
+      $> (fun ((s,_),_) -> s) in
+    let concat_string_concat_pattern =
+      (uConcat $$ uString $$ uConcat)
+      $> (fun ((_,s),_) -> s) in
+    let concat_string_either_pattern =
+      (string_concat_concat_pattern $*$ concat_string_concat_pattern) $|
+      (concat_string_concat_pattern $*$ string_concat_concat_pattern) $?
+      (fun (s,s') -> s=s') in
+    let concat_string_either_action =
+      concat_string_either_pattern
+      $> (fun (s,_) -> s)
+      $>> (fun _s ((_,n), (_,n')) ->
+        let newpc = (hs_of_pc pc, n) in
+        let newpc' = (hs_of_pc pc', n') in
+          check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
 
-        let cugetl_named_pattern = named_filter uCUGetL in
+    (* recognize closure creation *)
+    let named_filter foo =
+      foo
+      $? (function | Local.Unnamed _ -> false | Local.Named _ -> true)
+      $> (function
+        | Local.Unnamed _ -> failwith "unnamed can't happen"
+        | Local.Named s -> s) in
 
-        let cugetl_list_pattern = greedy_kleene cugetl_named_pattern in
-        let cugetl_list_createcl_pattern = cugetl_list_pattern $$ uCreateCl
-           $? (fun (cugets,(np,_cn)) -> np >= List.length cugets) in
+    let cugetl_named_pattern = named_filter uCUGetL in
 
-(* Special case where FPassL _n is safe
-    A special case of that is where a closure is constructed inline during the
-    sequence of pass instructions
-    There must be other such cases lurking...
-    Note that we discard the local var pushes and the createcl instruction in the
-    return value so this counts as one parameter in the list. Those instructions
-    will get checked again when we move forward (we only consume the FPassL even
-    though the pattern is complex)
-*)
-        let createcl_and_pass_pattern =
-           (cugetl_list_createcl_pattern $$ (uFPassC $| uFPassCW $| uFPassCE))
-           $> (fun (_l,pi) -> pi) in
-        let fpassl_fpassl_pattern =
-          uFPassL $*$ uFPassL $? (fun ((pn,_l,h),(pn',_l',h')) -> pn=pn' && h=h')
-                              $> (fun ((_pn,l,_h),(_pn',l',_h')) -> (l,l')) in
-        let any_pass_pattern =
-          createcl_and_pass_pattern $|
-          uFPassC $| uFPassCW $| uFPassCE $| uFPassV $| uFPassVNop $| uFPassR $|
-          uFPassN $| uFPassG $| (uFPassL $> (fun (param,_,h) -> (param,h))) $|
-          (uFPassS $> (fun (param,_,h) -> (param,h))) in
-        let any_pass_list_pattern = greedy_kleene any_pass_pattern in
-        let any_call_pattern =
-          uFCall $| (uFCallD $> (fun (np,_,_) -> np)) $|
-          (uFCallAwait $> (fun (np,_,_) -> np)) $| uFCallUnpack $|
-          (uFCallBuiltin $> (fun (_,np2,_) -> np2)) in
-        let passes_call_pattern = any_pass_list_pattern $$ any_call_pattern in
-        let two_passes_call_pattern =
-         (passes_call_pattern $*$ passes_call_pattern) $? (fun ((pass_list,np),(pass_list',np')) ->
-            pass_list = pass_list' && np = np' && np > List.length pass_list) in
-        let fpassl_action =
-        (fpassl_fpassl_pattern $$ two_passes_call_pattern) $>>
-          (fun ((l,l'),_) _ ->
-            match reads asn l l' with
-             | None -> Some (pc, pc', asn, assumed, todo) (* really bail, no subsequent patterns *)
-             | Some newasn ->
-               (match writes newasn l l' with
-                 | None -> Some (pc, pc', asn, assumed, todo)
-                 | Some newnewasn ->
-                    check (succ pc) (succ pc') newnewasn
-                          (add_assumption (pc,pc') asn assumed) todo)) in
+    let cugetl_list_pattern = greedy_kleene cugetl_named_pattern in
+    let cugetl_list_createcl_pattern =
+      cugetl_list_pattern
+      $$ uCreateCl
+      $? (fun (cugets,(np,_cn)) -> np >= List.length cugets) in
 
+    (* Special case where FPassL _n is safe.
+      A special case of that is where a closure is constructed inline during the
+      sequence of pass instructions. There must be other such cases lurking...
+      Note that we discard the local var pushes and the createcl instruction in
+      the return value so this counts as one parameter in the list. Those
+      instructions will get checked again when we move forward (we only consume
+      the FPassL even though the pattern is complex). *)
+    let createcl_and_pass_pattern =
+      (cugetl_list_createcl_pattern $$ (uFPassC $| uFPassCW $| uFPassCE))
+      $> (fun (_l,pi) -> pi) in
+    let fpassl_fpassl_pattern =
+      uFPassL $*$ uFPassL
+      $? (fun ((pn,_l,h),(pn',_l',h')) -> pn=pn' && h=h')
+      $> (fun ((_pn,l,_h),(_pn',l',_h')) -> (l,l')) in
 
-(* Dealing with equivalence of closure creation *)
-        let two_cugetl_list_createcl_pattern =
-           cugetl_list_createcl_pattern $*$ cugetl_list_createcl_pattern $>
-             (fun ((cugets,(np,cn)), (cugets',(np',cn'))) ->
-               (findperm cugets cugets', np, cn, np', cn'))
-           $? (function | (Some _perm, np, _cn, np', _cn') -> np=np' | _ -> false)
-           $> (function | (Some perm,_np,cn,_np',cn') -> (perm,cn,cn')
-                        | _ -> failwith "perms can't happen") in
-        let two_cugetl_list_createcl_action =
-          two_cugetl_list_createcl_pattern $>>
-           (fun (perm,cn,cn') ((_,n),(_,n')) ->
-             Log.debug (Tty.Normal Tty.Blue) @@
-               Printf.sprintf "create cl pattern at lines %d, %d" n n';
-             let newpc = (hs_of_pc pc, n) in
-             let newpc' = (hs_of_pc pc', n') in
-               classes_to_check := IntIntPermSet.add (cn,cn',perm) (!classes_to_check);
-               check newpc newpc' asn assumed todo) in
+    let any_pass_pattern =
+      createcl_and_pass_pattern
+      $| uFPassC $| uFPassCW $| uFPassCE $| uFPassV $| uFPassVNop $| uFPassR
+      $| uFPassN $| uFPassG
+      $| (uFPassL $> (fun (param,_,h) -> (param,h)))
+      $| (uFPassS $> (fun (param,_,h) -> (param,h))) in
+    let any_pass_list_pattern = greedy_kleene any_pass_pattern in
+    let any_call_pattern =
+      uFCall
+      $| (uFCallD $> (fun (np,_,_) -> np))
+      $| (uFCallAwait $> (fun (np,_,_) -> np))
+      $| uFCallUnpack
+      $| (uFCallBuiltin $> (fun (_,np2,_) -> np2)) in
+    let passes_call_pattern = any_pass_list_pattern $$ any_call_pattern in
+    let two_passes_call_pattern =
+      (passes_call_pattern $*$ passes_call_pattern)
+      $? (fun ((pass_list,np),(pass_list',np')) ->
+        pass_list = pass_list' && np = np' && np > List.length pass_list) in
+    let fpassl_action =
+      (fpassl_fpassl_pattern $$ two_passes_call_pattern)
+      $>> (fun ((l,l'),_) _ ->
+        match reads asn l l' with
+        | None ->
+          (* ???: really bail, no subsequent patterns *)
+          Some (pc, pc', asn, assumed, todo)
+        | Some newasn ->
+          begin match writes newasn l l' with
+          | None -> Some (pc, pc', asn, assumed, todo)
+          | Some newnewasn ->
+            check (succ pc) (succ pc') newnewasn
+              (add_assumption (pc,pc') asn assumed) todo
+          end) in
 
-        let string_fatal_pattern = uString $$ uFatal in
-        let two_string_fatal_pattern =
-          (string_fatal_pattern $*$ string_fatal_pattern) $? (fun ((_s,fop),(_s',fop')) ->
-            fop = fop') in
-        let two_string_fatal_action = two_string_fatal_pattern $>>
-          (fun _ _ -> donext assumed todo) in (* success, nothing more to check here *)
+    (* Dealing with equivalence of closure creation *)
+    let two_cugetl_list_createcl_pattern =
+      cugetl_list_createcl_pattern $*$ cugetl_list_createcl_pattern
+      $> (fun ((cugets,(np,cn)), (cugets',(np',cn'))) ->
+        findperm cugets cugets', np, cn, np', cn')
+      $? (function | (Some _perm, np, _cn, np', _cn') -> np=np' | _ -> false)
+      $> (function
+        | (Some perm,_np,cn,_np',cn') -> (perm,cn,cn')
+        | _ -> failwith "perms can't happen") in
+    let two_cugetl_list_createcl_action =
+      two_cugetl_list_createcl_pattern
+      $>> (fun (perm,cn,cn') ((_,n),(_,n')) ->
+        Log.debug (Tty.Normal Tty.Blue) @@
+          Printf.sprintf "create cl pattern at lines %d, %d" n n';
+        let newpc = (hs_of_pc pc, n) in
+        let newpc' = (hs_of_pc pc', n') in
+        classes_to_check := IntIntPermSet.add (cn,cn',perm) (!classes_to_check);
+        check newpc newpc' asn assumed todo) in
 
-        let unnamed_filter foo =
-          foo $? (function | Local.Unnamed _ -> true | Local.Named _ -> false)
-              $> (function | Local.Unnamed n -> n
-                           | Local.Named _ -> failwith "named can't happen") in
+    let string_fatal_pattern = uString $$ uFatal in
+    let two_string_fatal_pattern =
+      (string_fatal_pattern $*$ string_fatal_pattern)
+      $? (fun ((_s,fop),(_s',fop')) -> fop = fop') in
+    let two_string_fatal_action =
+      two_string_fatal_pattern
+      (* success, nothing more to check here *)
+      $>> (fun _ _ -> donext assumed todo) in
 
-        (* patterns for cases in which VGetL _n is generated by unnatural foreach
-           statements. Although we briefly take a reference, it behaves like a read of
-           that local followed by unsetting, so the ref doesn't escape.
-          In the basel-bindm case we also read the local that goes into base and
-          possibly a local that's used as a memberkey *)
-        let vget_unnamed_pattern = unnamed_filter uVGetL in
-        let unsetl_unnamed_pattern = unnamed_filter uUnsetL in
-        let vget_base_pattern =
-          (vget_unnamed_pattern $$
-           uBaseL $$
-           uBindM $$
-           uPopV $$
-           unsetl_unnamed_pattern)
-           $? (fun ((((n1,(_loc,_op)),(_n,_key)),_),n2) -> n1=n2)
-           $> (fun ((((n1,(loc,op)),(n,key)),_),_n2) -> (n1,loc,op,n,key)) in
-        let two_vget_base_pattern =
-         vget_base_pattern $*$ vget_base_pattern
-         $? (fun ((_n1,_loc,op,n,_key),(_n1',_loc',op',n',_key')) -> op=op' && n=n')
-         $> (fun ((n1,loc,_op,_n,key),(n1',loc',_op',_n',key')) ->((n1,loc,key),(n1',loc',key'))) in
-        let two_vget_base_action = two_vget_base_pattern $>>
-         (fun ((n1,loc,key),(n1',loc',key')) ((_,ip),(_,ip')) ->
-           Log.debug (Tty.Normal Tty.Blue) @@ Printf.sprintf "vget base pattern %d to %d" n1 n1';
-           match reads asn (Local.Unnamed n1) (Local.Unnamed n1') with
-            | None -> Some (pc, pc', asn, assumed, todo) (* fail *)
-            | Some new_asn ->
-            (match reads new_asn loc loc' with
-               | None -> Some (pc, pc', asn, assumed, todo)
-               | Some new_asn2 ->
-                let continuation ((some_props,some_vs,some_vs') as _some_asn) =
-                  let newpc =(hs_of_pc pc, ip) in
-                  let newpc' = (hs_of_pc pc', ip') in
-                  let newprops = PropSet.filter
-                   (fun (x,x') -> x <> Local.Unnamed n1 && x' <> Local.Unnamed n1') some_props in
-                  let final_asn = (newprops, VarSet.remove (Local.Unnamed n1) some_vs,
-                                   VarSet.remove (Local.Unnamed n1') some_vs') in
-                  check newpc newpc' final_asn (add_assumption (pc,pc') asn assumed) todo in
-                (match key, key' with
-                  | MemberKey.EL l, MemberKey.EL l'
-                  | MemberKey.PL l, MemberKey.PL l' ->
-                     (match reads new_asn2 l l' with
-                       | None -> Some (pc,pc',asn,assumed,todo) (*fail *)
-                       | Some new_asn3 -> continuation new_asn3)
-                  | _,_ -> if key=key' then continuation new_asn2
-                           else Some (pc,pc',asn,assumed,todo))
-           )
-         ) in
+    let unnamed_filter foo =
+      foo
+      $? (function | Local.Unnamed _ -> true | Local.Named _ -> false)
+      $> (function
+        | Local.Unnamed n -> n
+        | Local.Named _ -> failwith "named can't happen") in
 
-        let vget_cget_pattern =
-            (vget_unnamed_pattern $$ uCGetL2 $> (fun (n,loc) -> (n, Some loc)))
-         $| (uCGetL $$ vget_unnamed_pattern $> (fun (loc,n) -> (n, Some loc)))
-         $| (vget_unnamed_pattern $> (fun n -> (n, None))) in
-        let vget_cget_bind_pattern =
-          (vget_cget_pattern
-           $$ uBindN
-           $$ uPopV
-           $$ uUnsetL)
-         $? (fun ((((n1,_optl),_),_),n2) -> Local.Unnamed n1 = n2)
-         $> (fun ((((n,optl),_),_),_) -> (n,optl)) in
-        let two_vget_cget_bind_pattern =
-          vget_cget_bind_pattern $*$ vget_cget_bind_pattern
-          $? (fun ((_n,optl),(_n',optl')) ->
-               match optl,optl' with
-                | None, None
-                | Some _, Some _ -> true
-                | _,_ -> false) in
-        let two_vget_cget_bind_action =
-          two_vget_cget_bind_pattern $>>
-         (fun ((n,optl),(n',optl')) ((_,ip),(_,ip')) ->
-           Log.debug (Tty.Normal Tty.Blue) @@ Printf.sprintf "vget cget pattern %d to %d" n n';
-           match reads asn (Local.Unnamed n) (Local.Unnamed n') with
-            | None -> Some(pc,pc',asn,assumed,todo)
-            | Some new_asn ->
+    (* patterns for cases in which VGetL _n is generated by unnatural foreach
+        statements. Although we briefly take a reference, it behaves like a read of
+        that local followed by unsetting, so the ref doesn't escape.
+      In the basel-bindm case we also read the local that goes into base and
+      possibly a local that's used as a memberkey *)
+    let vget_unnamed_pattern = unnamed_filter uVGetL in
+    let unsetl_unnamed_pattern = unnamed_filter uUnsetL in
+    let vget_base_pattern =
+      (vget_unnamed_pattern
+        $$ uBaseL
+        $$ uBindM
+        $$ uPopV
+        $$ unsetl_unnamed_pattern)
+      $? (fun ((((n1,(_loc,_op)),(_n,_key)),_),n2) -> n1=n2)
+      $> (fun ((((n1,(loc,op)),(n,key)),_),_n2) -> (n1,loc,op,n,key)) in
+    let two_vget_base_pattern =
+      vget_base_pattern $*$ vget_base_pattern
+      $? (fun ((_n1,_loc,op,n,_key),(_n1',_loc',op',n',_key')) ->
+        op=op' && n=n')
+      $> (fun ((n1,loc,_op,_n,key),(n1',loc',_op',_n',key')) ->
+        ((n1,loc,key),(n1',loc',key'))) in
+    let two_vget_base_action =
+      two_vget_base_pattern
+      $>> (fun ((n1,loc,key),(n1',loc',key')) ((_,ip),(_,ip')) ->
+        Log.debug (Tty.Normal Tty.Blue) @@
+          Printf.sprintf "vget base pattern %d to %d" n1 n1';
+        match reads asn (Local.Unnamed n1) (Local.Unnamed n1') with
+        | None -> Some (pc, pc', asn, assumed, todo) (* fail *)
+        | Some new_asn ->
+          begin match reads new_asn loc loc' with
+          | None -> Some (pc, pc', asn, assumed, todo)
+          | Some new_asn2 ->
             let continuation ((some_props,some_vs,some_vs') as _some_asn) =
               let newpc =(hs_of_pc pc, ip) in
               let newpc' = (hs_of_pc pc', ip') in
-              let newprops = PropSet.filter
-               (fun (x,x') -> x <> Local.Unnamed n && x' <> Local.Unnamed n') some_props in
-              let final_asn = (newprops, VarSet.remove (Local.Unnamed n) some_vs,
-                               VarSet.remove (Local.Unnamed n') some_vs') in
-              check newpc newpc' final_asn (add_assumption (pc,pc') asn assumed) todo in
-             match optl,optl' with
-              | None, None -> continuation new_asn
-              | Some l, Some l' ->
-              (match reads new_asn l l' with
-                | None -> Some(pc,pc',asn,assumed,todo)
-                | Some new_asn2 -> continuation new_asn2)
-              | _,_ -> failwith "vget cget can't happen") in
+              let newprops = PropSet.filter (fun (x,x') ->
+                x <> Local.Unnamed n1 && x' <> Local.Unnamed n1') some_props in
+              let final_asn = (
+                newprops,
+                VarSet.remove (Local.Unnamed n1) some_vs,
+                VarSet.remove (Local.Unnamed n1') some_vs') in
+              check newpc newpc' final_asn
+                (add_assumption (pc,pc') asn assumed) todo in
+            begin match key, key' with
+            | MemberKey.EL l, MemberKey.EL l'
+            | MemberKey.PL l, MemberKey.PL l' ->
+              begin match reads new_asn2 l l' with
+              | None -> Some (pc,pc',asn,assumed,todo) (*fail *)
+              | Some new_asn3 -> continuation new_asn3
+              end
+            | _,_ ->
+              if key=key'
+              then continuation new_asn2
+              else Some (pc,pc',asn,assumed,todo)
+            end
+          end
+      ) in
 
-        let vget_retv_pattern =
-          vget_unnamed_pattern $$ uRetV $> (fun (n,_) -> n) in
-        let two_vget_retv_pattern = vget_retv_pattern $*$ vget_retv_pattern in
-        let two_vget_retv_pattern_action =
-          two_vget_retv_pattern $>>
-         (fun (n,n') (_,_) ->
-           match reads asn (Local.Unnamed n) (Local.Unnamed n') with
+    let vget_cget_pattern =
+      (vget_unnamed_pattern $$ uCGetL2 $> (fun (n,loc) -> (n, Some loc)))
+      $| (uCGetL $$ vget_unnamed_pattern $> (fun (loc,n) -> (n, Some loc)))
+      $| (vget_unnamed_pattern $> (fun n -> (n, None))) in
+    let vget_cget_bind_pattern =
+      (vget_cget_pattern
+        $$ uBindN
+        $$ uPopV
+        $$ uUnsetL)
+      $? (fun ((((n1,_optl),_),_),n2) -> Local.Unnamed n1 = n2)
+      $> (fun ((((n,optl),_),_),_) -> (n,optl)) in
+    let two_vget_cget_bind_pattern =
+      vget_cget_bind_pattern $*$ vget_cget_bind_pattern
+      $? (fun ((_n,optl),(_n',optl')) ->
+        match optl,optl' with
+        | None, None
+        | Some _, Some _ -> true
+        | _,_ -> false) in
+    let two_vget_cget_bind_action =
+      two_vget_cget_bind_pattern
+      $>> (fun ((n,optl),(n',optl')) ((_,ip),(_,ip')) ->
+        Log.debug (Tty.Normal Tty.Blue)
+          @@ Printf.sprintf "vget cget pattern %d to %d" n n';
+        match reads asn (Local.Unnamed n) (Local.Unnamed n') with
+        | None -> Some(pc,pc',asn,assumed,todo)
+        | Some new_asn ->
+          let continuation ((some_props,some_vs,some_vs') as _some_asn) =
+            let newpc =(hs_of_pc pc, ip) in
+            let newpc' = (hs_of_pc pc', ip') in
+            let newprops = PropSet.filter (fun (x,x') ->
+              x <> Local.Unnamed n && x' <> Local.Unnamed n') some_props in
+            let final_asn = (
+              newprops,
+              VarSet.remove (Local.Unnamed n) some_vs,
+              VarSet.remove (Local.Unnamed n') some_vs') in
+            check newpc newpc' final_asn
+              (add_assumption (pc,pc') asn assumed) todo in
+          begin match optl,optl' with
+          | None, None -> continuation new_asn
+          | Some l, Some l' ->
+            begin match reads new_asn l l' with
             | None -> Some(pc,pc',asn,assumed,todo)
-            | Some _new_asn ->
-               donext (add_assumption (pc,pc') asn assumed) todo
-         ) in
+            | Some new_asn2 -> continuation new_asn2
+            end
+          | _,_ -> failwith "vget cget can't happen"
+          end) in
 
-        (* last, failure, case for use in bigmatch *)
-        let failure_pattern_action =
-         parse_any $>> (fun _ _ -> Some (pc, pc', asn, assumed, todo)) in
+    let vget_retv_pattern =
+      vget_unnamed_pattern
+      $$ uRetV
+      $> (fun (n,_) -> n) in
+    let two_vget_retv_pattern = vget_retv_pattern $*$ vget_retv_pattern in
+    let two_vget_retv_pattern_action =
+      two_vget_retv_pattern
+      $>> (fun (n,n') (_,_) ->
+        match reads asn (Local.Unnamed n) (Local.Unnamed n') with
+        | None -> Some(pc,pc',asn,assumed,todo)
+        | Some _new_asn ->
+          donext (add_assumption (pc,pc') asn assumed) todo
+      ) in
 
-        let bigmatch_action = bigmatch [
-          set_pop_get_action_left;
-          set_pop_get_action_right;
-          notjmp_action;
-          concat_string_either_action;
-          fpassl_action;
-          two_string_fatal_action;
-          two_cugetl_list_createcl_action;
-          two_vget_base_action;
-          two_vget_cget_bind_action;
-          two_vget_retv_pattern_action;
-          failure_pattern_action;
-         ] in
-        bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))
-in
- (* We always start from ip,ip'=0 for the top entry to the function/method, but
-  also take startlabelpairs, which is  list of pairs of labels from the two
-  programs, as alternative entry points. These are used for default param
-  values *)
-  let initialtodo = List.map ~f:(fun (lab,lab') ->
-   ((([],LabelMap.find lab labelmap), ([],LabelMap.find lab' labelmap')),
-     entry_assertion )) startlabelpairs in
- check ([],0) ([],0)  entry_assertion PcpMap.empty initialtodo
+    (* last, failure, case for use in bigmatch *)
+    let failure_pattern_action =
+      parse_any
+      $>> (fun _ _ -> Some (pc, pc', asn, assumed, todo)) in
+
+    let bigmatch_action = bigmatch [
+      set_pop_get_action_left;
+      set_pop_get_action_right;
+      notjmp_action;
+      concat_string_either_action;
+      fpassl_action;
+      two_string_fatal_action;
+      two_cugetl_list_createcl_action;
+      two_vget_base_action;
+      two_vget_cget_bind_action;
+      two_vget_retv_pattern_action;
+      failure_pattern_action;
+      ] in
+    bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))
+  in
+
+  (* We always start from ip,ip'=0 for the top entry to the function/method, but
+    also take startlabelpairs, which is  list of pairs of labels from the two
+    programs, as alternative entry points. These are used for default param
+    values *)
+  let initialtodo = List.map startlabelpairs
+    ~f:(fun (lab,lab') -> (
+      (([],LabelMap.find lab labelmap), ([],LabelMap.find lab' labelmap')),
+      entry_assertion
+    )) in
+
+  check ([],0) ([],0) entry_assertion PcpMap.empty initialtodo

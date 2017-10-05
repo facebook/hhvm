@@ -43,20 +43,19 @@ let adata_checked = ref StringStringSet.empty
 let typedefs_to_check = ref IntIntSet.empty
 let typedefs_checked = ref IntIntSet.empty
 
-(* an individual prop is an equation between local variables
-  To start with this means that they are both defined and equal
-  or that they are both undefined
-  We can usefully use more refined relations, but let's try
-  the simplest for now
+(* An individual prop is an equation between local variables. To start with,
+  this means that they are both defined and equal or that they are both
+  undefined.
+  Note: We can usefully use more refined relations, but we try the simplest for
+  now.
 *)
 type prop = Local.t * Local.t
 module PropSet = Set.Make(struct type t = prop let compare = compare end)
 module VarSet = Set.Make(struct type t = Local.t let compare = compare end)
 
-(* along with pc, we track the current exception handler context
-   this should be understood as a list of which exception handlers
-   we are currently (dynamically) already within. The static part
-   is dealt with via parents *)
+(* Along with pc, we track the current exception handler context. This should be
+  understood as a list of which exception handlers we are currently
+  (dynamically) already within. The static part is dealt with via parents. *)
 type exnmapvalue = Fault_handler of int | Catch_handler of int
 let ip_of_emv emv = match emv with
   | Fault_handler n
@@ -72,26 +71,41 @@ let hs_of_pc (hs,_pc) = hs
 
 module PcpMap = MyMap.Make(struct type t = epc*epc let compare=compare end)
 
-(* now an assertion is a set of props, read as conjunction
-   paired with two sets of local variables
-   The reading is
-   s,s' \in [[props, vs, vs']] iff
-    \forall (v,v')\in props, s v = s' v' /\
-    \forall v\in Vars\vs, s v = unset /\
-    \forall v'\in Vars\vs', s' v' = unset
+(* Assertions.
+  An assertion tracks a conjunction of known equalities between local variables,
+  and which ones *may* be set. Concretely, it is
+  1. a set of `prop`s (a pair of local-ids), each denoting a known equality
+    between the local variables;
+  2. a set of local-ids that are *not* known to be unset for program A; and
+  3. a set of local-ids that are *not* known to be unset for program B.
+
+  An assertion is satisfied by a pair of states, i.e.
+    s,s' \in [[props, vs, vs']]
+  iff
+    \forall (v,v') \in props, s v = s' v' /\
+    \forall v  \notin vs,  s v   = unset /\
+    \forall v' \notin vs', s' v' = unset
    *)
 type assertion = PropSet.t * VarSet.t * VarSet.t
+(* The assertion that holds at the beginning of a program: there are no known
+  equalities (of interest) between local variables and all local-ids are unset.
+*)
 let (entry_assertion : assertion) = (PropSet.empty,VarSet.empty,VarSet.empty)
+(* A set of assertions.
+  Each pair of program counters maps to a set of assertions, each representing a
+  possible state that may hold that those points. I.e. this is a disjunction of
+  assertions. *)
 module AsnSet = Set.Make(struct type t = assertion let compare=compare end)
 
 exception Labelexn
 module  LabelMap = MyMap.Make(struct type t = Label.t let compare = compare end)
 
-(* Refactored version of exception table structures, to improve efficiency a bit
-   and to cope with new try-catch-end structure, which doesn't have explicit
-   labels for the handlers
-   First pass constructs labelmap and a map from the indices of TryCatchBegin
-   instructions to the index of their matching TryCatchMiddle
+(*
+  Refactored version of exception table structures, to improve efficiency a bit
+  and to cope with new try-catch-end structure, which doesn't have explicit
+  labels for the handlers. First pass constructs labelmap and a map from the
+  indices of TryCatchBegin instructions to the index of their matching
+  TryCatchMiddle.
 *)
 type tcstackentry = Stack_label of Label.t | Stack_tc of int
 let make_label_try_maps prog =
@@ -123,14 +137,15 @@ let make_label_try_maps prog =
      | _ -> loop is (n+1) trycatchstack labelmap trymap) in
   loop prog 0 [] LabelMap.empty IMap.empty
 
-(* Second pass constructs exception table. Revised version maps instruction indices to
-   a list of handler indices. Previous parent relation is removed, as it doesn't track
-   the right information.
-   Still a question mark over whether the whole stack needs to go into the handler lists
-   or if it should be somehow truncated when we reach a catch handler. For now, I'm trying
-   with remembering everything, though I suspect that might lead to runaway stacks.
-*)
+(* Second pass constructsan an exception table. Revised version maps instruction
+  indices to a list of handler indices. Previous parent relation is removed, as
+  it doesn't track the right information.
 
+  Still a question mark over whether the whole stack needs to go into the
+  handler lists or if it should be somehow truncated when we reach a catch
+  handler. For now, I'm trying with remembering everything, though I suspect
+  that might lead to runaway stacks.
+*)
 let make_exntable prog labelmap trymap =
  let rec loop p n trycatchstack exnmap =
   match p with
@@ -197,18 +212,21 @@ let labasnlisttostring l = String.concat "" (List.map ~f:labasntostring l)
 let labasnsmaptostring asnmap = String.concat ""
  (List.map ~f:labasnstostring (PcpMap.bindings asnmap))
 
-(* add equality between v1 and v2 to an assertion
-   removing any existing relation between them *)
-let addeq_asn v1 v2 (props,vs,vs') =
-  let stripped = PropSet.filter (fun (x1,x2) -> x1 <> v1 && x2 <> v2) props in
-      (PropSet.add (v1,v2) stripped, VarSet.add v1 vs, VarSet.add v2 vs')
-
 (* Unset both v1 and v2, could remove overlap with above and make one-sided *)
 let addunseteq_asn v1 v2 (props,vs,vs') =
   let stripped = PropSet.filter (fun (x1,x2) -> x1 <> v1 && x2 <> v2) props in
     (stripped, VarSet.add v1 vs, VarSet.add v2 vs')
 
-(* simple-minded entailment between assertions *)
+(* Add equality between v1 and v2 to an assertion, removing any existing
+  relation between them. Mark v1 and v2 as being possibly set. *)
+let addeq_asn v1 v2 asn =
+  let (props, vs, vs') = addunseteq_asn v1 v2 asn in
+  (PropSet.add (v1,v2) props, vs, vs')
+
+(* Simple-minded entailment between assertions.
+  In general, asn2 entails asn1 iff (s,s') \in asn2 implies (s,s') \in asn1 for
+  all states s and s'.
+*)
 let entails_asns (props2,vs2,vs2') (props1,vs1,vs1') =
   (PropSet.for_all (fun ((v,v') as prop) -> PropSet.mem prop props2
                     || not (VarSet.mem v vs2 || VarSet.mem v' vs2')) props1)
@@ -217,16 +235,24 @@ let entails_asns (props2,vs2,vs2') (props1,vs1,vs1') =
   &&
   VarSet.subset vs2' vs1'
 
-
-(* need to deal with the many local-manipulating instructions
+(* Need to deal with the many local-manipulating instructions.
    Want to know when two instructions are equal up to an assertion
-   and also to return a modified assertion in case that holds
+   and also to return a modified assertion in case that holds.
    Note that we only track unnamed locals
 *)
+
+(* An assertion entails that locals l and l' are equal either if it has a
+  relation between them or knows that both are unset. *)
 let asn_entails_equal (props,vs,vs') l l' =
  PropSet.mem (l,l') props
  || not (VarSet.mem l vs || VarSet.mem l' vs')
 
+(* A pair of instructions that read from locals l and l', respectively, will
+  have equivalent behavior (assuming all else equal) if l and l' are "equal".
+  Tracking named variables is hard because they can be accessed by dynamically-
+  computed strings, so we require the names to be equal. Unnamed variable
+  equivalences are decided by the assertion.
+*)
 let reads asn l l' =
  match l, l' with
   | Named s, Named s' -> if s=s' then Some asn else None
@@ -655,7 +681,8 @@ let add_assumption (pc,pc') asn assumed =
   let updated = AsnSet.add asn prev in (* this is a clumsy union *)
   PcpMap.add (pc,pc') updated assumed
 
-(* compute permutation, not very efficiently, but lists should always be very small *)
+(* Compute the permutation mapping. Not very efficiently, but lists should
+  always be very small. *)
 let findperm l1 l2 =
  if List.contains_dup l1 || (List.length l1 <> List.length l2)
  then None
@@ -679,10 +706,9 @@ let equiv prog prog' startlabelpairs =
  let rec check pc pc' ((props,vs,vs') as asn) assumed todo =
    let try_specials () = specials pc pc' asn assumed todo in
 
-   (* This could be more one-sided, but can't allow one side to leave the
-      frame and the other to go to a handler.
-      Still, seems no real reason to require the same kind of
-      handler on both sides
+    (* This could be more one-sided, but can't allow one side to leave the
+      frame and the other to go to a handler. Still, seems no real reason to
+      require the same kind of handler on both sides.
     *)
    let exceptional_todo () =
     match IMap.get (ip_of_pc pc) exnmap, IMap.get (ip_of_pc pc') exnmap' with
@@ -827,6 +853,7 @@ let equiv prog prog' startlabelpairs =
                   donext (add_assumption (pc,pc') asn assumed) newtodo)
           | _, _ -> try_specials ()
           end
+
         (* Special treatment for Unset instructions *)
         | IMutator (UnsetL l), _ ->
            let newprops = PropSet.filter (fun (x1,_x2) -> x1 <> l) props in

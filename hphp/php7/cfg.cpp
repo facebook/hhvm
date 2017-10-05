@@ -222,6 +222,13 @@ CFG&& CFG::replace(const std::string& label, CFG cfg) {
   return self();
 }
 
+CFG&& CFG::tagSrcLoc(uint32_t lineno) {
+  for (auto& blk : m_blocks) {
+    blk->tagSrcLoc(lineno);
+  }
+  return self();
+}
+
 CFG&& CFG::makeExitsReal() {
   // we must avoid creating a new block for any exit since this would change
   // the region that we, e.g. throw from
@@ -413,33 +420,39 @@ CFG&& CFG::inRegion(std::unique_ptr<Region> reg) {
 
 namespace {
 
+struct ExitTargetVisitor {
+  std::vector<Block*> targets;
+  void bytecode(const Jmp& j) { targets.push_back(j.imm1); }
+  void bytecode(const JmpNS& j) { targets.push_back(j.imm1); }
+  void bytecode(const JmpZ& j) { targets.push_back(j.imm1); }
+  void bytecode(const JmpNZ& j) { targets.push_back(j.imm1); }
+  void bytecode(const Switch& s) {
+    targets.insert(targets.end(), s.imm3.begin(), s.imm3.end());
+  }
+  void bytecode(const SSwitch& s) {
+    const StringOffsetVector& sov = s.imm1;
+    for (const auto& pair : sov.branches) {
+      targets.push_back(pair.second);
+    }
+    targets.push_back(sov.defaultBranch);
+  }
+  void bytecode(const RetC& /*r*/) {}
+  void bytecode(const RetV& /*r*/) {}
+  void bytecode(const Unwind& /*u*/) {}
+  void bytecode(const Throw& /*t*/) {}
+  void bytecode(const Fatal& /*t*/) {}
+
+  template<typename T>
+  void bytecode(const T&) {
+    panic("This visitor is for exits only.");
+  }
+};
+
 /* Find all blocks this exit can target */
 std::vector<Block*> exitOpTargets(const ExitOp& exit) {
-  std::vector<Block*> targets;
-
-  match<void>(exit,
-    [&](const Jmp& j) { targets.push_back(j.imm1); },
-    [&](const JmpNS& j) { targets.push_back(j.imm1); },
-    [&](const JmpZ& j) { targets.push_back(j.imm1); },
-    [&](const JmpNZ& j) { targets.push_back(j.imm1); },
-    [&](const Switch& s) {
-      targets.insert(targets.end(), s.imm3.begin(), s.imm3.end());
-    },
-    [&](const SSwitch& s) {
-      const StringOffsetVector& sov = s.imm1;
-      for (const auto& pair : sov.branches) {
-        targets.push_back(pair.second);
-      }
-      targets.push_back(sov.defaultBranch);
-    },
-    [&](const RetC& /*r*/) {},
-    [&](const RetV& /*r*/) {},
-    [&](const Unwind& /*u*/) {},
-    [&](const Throw& /*t*/) {},
-    [&](const Fatal& /*t*/) {}
-  );
-
-  return targets;
+  ExitTargetVisitor v;
+  exit.visit(v);
+  return v.targets;
 }
 
 /* Compute the regions you have to enter to move from prev to next
@@ -533,18 +546,15 @@ void CFG::visit(CFGVisitor&& visitor) const {
     visited.insert(blk);
 
     // add all of the exit targets to the queue
-    const auto& exits = blk->exits;
-    for (auto riter = exits.rbegin(); riter != exits.rend(); riter++) {
-      for (Block* child : exitOpTargets(*riter)) {
-        if (0 == encountered.count(child)) {
-          breadcrumbs.push_front(child);
-          encountered.insert(child);
-          visitor.tree_edge(blk, child);
-        } else if (finished.count(child)) {
-          visitor.edge(blk, child);
-        } else {
-          visitor.back_edge(blk, child);
-        }
+    for (Block* child : blk->exitTargets()) {
+      if (0 == encountered.count(child)) {
+        breadcrumbs.push_front(child);
+        encountered.insert(child);
+        visitor.tree_edge(blk, child);
+      } else if (finished.count(child)) {
+        visitor.edge(blk, child);
+      } else {
+        visitor.back_edge(blk, child);
       }
     }
   }
@@ -552,14 +562,14 @@ void CFG::visit(CFGVisitor&& visitor) const {
 
 std::vector<Block*> Block::exitTargets() const {
   std::vector<Block*> allTargets;
-  for (const auto& exit : exits) {
+  visit([](auto){}, [](auto){}, [&allTargets] (const ExitOp& exit) {
     auto targets = exitOpTargets(exit);
     allTargets.insert(
       allTargets.end(),
       targets.begin(),
       targets.end()
     );
-  }
+  });
   return allTargets;
 }
 

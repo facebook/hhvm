@@ -84,6 +84,7 @@ void compileProgram(Unit* unit, const zend_ast* ast) {
     .then(Int{1})
     .thenReturn(Flavor::Cell)
     .makeExitsReal()
+    .tagSrcLoc(zend_ast_get_lineno(ast))
     .inRegion(std::make_unique<Region>(Region::Kind::Entry));
   simplifyCFG(pseudomain->cfg);
 }
@@ -117,12 +118,14 @@ CFG compileClass(Unit* unit, const zend_ast* ast) {
     compileClassStatement(cls, statements->child[i]);
   }
 
+  uint32_t lineno = zend_ast_get_lineno(ast);
   /* Force the creation of a ctor if we don't have one yet */
-  cls->getConstructor();
+  cls->getConstructor(lineno);
 
-  cls->buildPropInit();
+  cls->buildPropInit(lineno);
 
-  return CFG(DefCls{cls->index});
+  return CFG(DefCls{cls->index})
+    .tagSrcLoc(lineno);
 }
 
 void panic(const std::string& msg) {
@@ -138,6 +141,8 @@ void buildFunction(Function* func, const zend_ast* ast) {
   auto body = decl->child[2];
 
   func->name = name;
+  func->startLineno = decl->start_lineno;
+  func->endLineno = decl->end_lineno;
 
   if (decl->flags & ZEND_ACC_RETURN_REFERENCE) {
     func->attr |= Attr::AttrReference;
@@ -166,6 +171,7 @@ void buildFunction(Function* func, const zend_ast* ast) {
       ? Flavor::Ref
       : Flavor::Cell)
     .makeExitsReal()
+    .tagSrcLoc(zend_ast_get_lineno(ast))
     .inRegion(std::make_unique<Region>(Region::Kind::Entry));
   simplifyCFG(func->cfg);
 }
@@ -566,70 +572,72 @@ CFG compileClassref(const zend_ast* ast, ClassrefSlot slot,
 }
 
 CFG compileExpression(const zend_ast* ast, Destination dest) {
-  switch (ast->kind) {
-    case ZEND_AST_ZVAL:
-      return compileZvalLiteral(zend_ast_get_zval(ast))
-        .then(fixFlavor(dest, Flavor::Cell));
-    case ZEND_AST_CONST:
-      return compileConstant(ast)
-        .then(fixFlavor(dest, Flavor::Cell));
-    case ZEND_AST_UNARY_MINUS:
-    case ZEND_AST_UNARY_PLUS:
-    case ZEND_AST_UNARY_OP:
-      return compileUnaryOp(ast)
-        .then(fixFlavor(dest, Flavor::Cell));
-    case ZEND_AST_BINARY_OP:
-    case ZEND_AST_GREATER:
-    case ZEND_AST_GREATER_EQUAL:
-      return CFG()
-        .then(compileExpression(ast->child[0], Flavor::Cell))
-        .then(compileExpression(ast->child[1], Flavor::Cell))
-        .then(opForBinaryOp(ast))
-        .then(fixFlavor(dest, Flavor::Cell));
-    case ZEND_AST_POST_INC:
-    case ZEND_AST_POST_DEC:
-    case ZEND_AST_PRE_INC:
-    case ZEND_AST_PRE_DEC:
-      return compileIncDec(ast)
-        .then(fixFlavor(dest, Flavor::Cell));
-    case ZEND_AST_VAR:
-    case ZEND_AST_DIM:
-    case ZEND_AST_PROP:
-    case ZEND_AST_STATIC_PROP:
-      return compileVar(ast, dest);
-    case ZEND_AST_ASSIGN:
-      return compileAssignment(ast)
-        .then(fixFlavor(dest, Flavor::Cell));
-    case ZEND_AST_ASSIGN_REF:
-      return compileBind(ast)
-        .then(fixFlavor(dest, Flavor::Ref));
-      break;
-    case ZEND_AST_ASSIGN_OP:
-      return compileAssignOp(ast)
-        .then(fixFlavor(dest, Flavor::Cell));
-    case ZEND_AST_CALL:
-      return compileFunctionCall(ast)
-        .then(fixFlavor(dest, Flavor::Return));
-    case ZEND_AST_METHOD_CALL:
-      return compileMethodCall(ast)
-        .then(fixFlavor(dest, Flavor::Return));
-    case ZEND_AST_STATIC_CALL:
-      return compileStaticCall(ast)
-        .then(fixFlavor(dest, Flavor::Return));
-    case ZEND_AST_NEW:
-      return compileNew(ast)
-        .then(fixFlavor(dest, Flavor::Cell));
-    case ZEND_AST_ARRAY:
-      return compileArray(ast)
-        .then(fixFlavor(dest, Flavor::Cell));
-    case ZEND_AST_INCLUDE_OR_EVAL:
-      return compileIncludeEval(ast)
-        .then(fixFlavor(dest, Flavor::Cell));
-    case ZEND_AST_CONDITIONAL:
-      return compileConditional(ast, dest);
-    default:
-      panic("unsupported expression");
-  }
+  return [&]() {
+    switch (ast->kind) {
+      case ZEND_AST_ZVAL:
+        return compileZvalLiteral(zend_ast_get_zval(ast))
+          .then(fixFlavor(dest, Flavor::Cell));
+      case ZEND_AST_CONST:
+        return compileConstant(ast)
+          .then(fixFlavor(dest, Flavor::Cell));
+      case ZEND_AST_UNARY_MINUS:
+      case ZEND_AST_UNARY_PLUS:
+      case ZEND_AST_UNARY_OP:
+        return compileUnaryOp(ast)
+          .then(fixFlavor(dest, Flavor::Cell));
+      case ZEND_AST_BINARY_OP:
+      case ZEND_AST_GREATER:
+      case ZEND_AST_GREATER_EQUAL:
+        return CFG()
+          .then(compileExpression(ast->child[0], Flavor::Cell))
+          .then(compileExpression(ast->child[1], Flavor::Cell))
+          .then(opForBinaryOp(ast))
+          .then(fixFlavor(dest, Flavor::Cell));
+      case ZEND_AST_POST_INC:
+      case ZEND_AST_POST_DEC:
+      case ZEND_AST_PRE_INC:
+      case ZEND_AST_PRE_DEC:
+        return compileIncDec(ast)
+          .then(fixFlavor(dest, Flavor::Cell));
+      case ZEND_AST_VAR:
+      case ZEND_AST_DIM:
+      case ZEND_AST_PROP:
+      case ZEND_AST_STATIC_PROP:
+        return compileVar(ast, dest);
+      case ZEND_AST_ASSIGN:
+        return compileAssignment(ast)
+          .then(fixFlavor(dest, Flavor::Cell));
+      case ZEND_AST_ASSIGN_REF:
+        return compileBind(ast)
+          .then(fixFlavor(dest, Flavor::Ref));
+        break;
+      case ZEND_AST_ASSIGN_OP:
+        return compileAssignOp(ast)
+          .then(fixFlavor(dest, Flavor::Cell));
+      case ZEND_AST_CALL:
+        return compileFunctionCall(ast)
+          .then(fixFlavor(dest, Flavor::Return));
+      case ZEND_AST_METHOD_CALL:
+        return compileMethodCall(ast)
+          .then(fixFlavor(dest, Flavor::Return));
+      case ZEND_AST_STATIC_CALL:
+        return compileStaticCall(ast)
+          .then(fixFlavor(dest, Flavor::Return));
+      case ZEND_AST_NEW:
+        return compileNew(ast)
+          .then(fixFlavor(dest, Flavor::Cell));
+      case ZEND_AST_ARRAY:
+        return compileArray(ast)
+          .then(fixFlavor(dest, Flavor::Cell));
+      case ZEND_AST_INCLUDE_OR_EVAL:
+        return compileIncludeEval(ast)
+          .then(fixFlavor(dest, Flavor::Cell));
+      case ZEND_AST_CONDITIONAL:
+        return compileConditional(ast, dest);
+      default:
+        panic("unsupported expression");
+    }
+  }().tagSrcLoc(zend_ast_get_lineno(ast));
 }
 
 namespace {
@@ -702,60 +710,62 @@ CFG fixFlavor(Destination dest, Flavor actual) {
 } // namespace
 
 CFG compileStatement(Function* func, const zend_ast* ast) {
-  switch (ast->kind) {
-    case ZEND_AST_STMT_LIST: {
-      // just a block, so recur please :)
-      CFG cfg;
-      auto list = zend_ast_get_list(ast);
-      for (uint32_t i = 0; i < list->children; i++) {
-        if (!list->child[i]) {
-          continue;
+  return [&]() {
+    switch (ast->kind) {
+      case ZEND_AST_STMT_LIST: {
+        // just a block, so recur please :)
+        CFG cfg;
+        auto list = zend_ast_get_list(ast);
+        for (uint32_t i = 0; i < list->children; i++) {
+          if (!list->child[i]) {
+            continue;
+          }
+          cfg.then(compileStatement(func, list->child[i]));
         }
-        cfg.then(compileStatement(func, list->child[i]));
+        return cfg;
       }
-      return cfg;
+      case ZEND_AST_ECHO:
+        return CFG()
+          .then(compileExpression(ast->child[0], Flavor::Cell))
+          .then(Print{})
+          .then(PopC{});
+      case ZEND_AST_IF:
+        return compileIf(func, ast);
+      case ZEND_AST_WHILE:
+        return compileWhile(func, ast->child[0], ast->child[1], false);
+      case ZEND_AST_DO_WHILE:
+        return compileWhile(func, ast->child[1], ast->child[0], true);
+      case ZEND_AST_FOR:
+        return compileFor(func, ast);
+      case ZEND_AST_BREAK:
+        return CFG().thenBreak();
+      case ZEND_AST_GLOBAL:
+        return compileGlobalDeclaration(ast);
+      case ZEND_AST_CONTINUE:
+        return CFG().thenContinue();
+      case ZEND_AST_RETURN: {
+        auto flavor = func->returnsByReference()
+          ? Flavor::Ref
+          : Flavor::Cell;
+        auto expr = ast->child[0]
+          ? compileExpression(ast->child[0], flavor)
+          : CFG(Null{}).then(fixFlavor(flavor, Flavor::Cell));
+        return expr.thenReturn(flavor);
+      }
+      case ZEND_AST_TRY:
+        return compileTry(func, ast);
+      case ZEND_AST_THROW:
+        return compileExpression(ast->child[0], Flavor::Cell)
+          .thenThrow();
+      case ZEND_AST_FUNC_DECL:
+        compileFunction(func->parent, ast);
+        return CFG();
+      case ZEND_AST_CLASS:
+        return compileClass(func->parent, ast);
+      default:
+        return compileExpression(ast, Flavor::Drop);
     }
-    case ZEND_AST_ECHO:
-      return CFG()
-        .then(compileExpression(ast->child[0], Flavor::Cell))
-        .then(Print{})
-        .then(PopC{});
-    case ZEND_AST_IF:
-      return compileIf(func, ast);
-    case ZEND_AST_WHILE:
-      return compileWhile(func, ast->child[0], ast->child[1], false);
-    case ZEND_AST_DO_WHILE:
-      return compileWhile(func, ast->child[1], ast->child[0], true);
-    case ZEND_AST_FOR:
-      return compileFor(func, ast);
-    case ZEND_AST_BREAK:
-      return CFG().thenBreak();
-    case ZEND_AST_GLOBAL:
-      return compileGlobalDeclaration(ast);
-    case ZEND_AST_CONTINUE:
-      return CFG().thenContinue();
-    case ZEND_AST_RETURN: {
-      auto flavor = func->returnsByReference()
-        ? Flavor::Ref
-        : Flavor::Cell;
-      auto expr = ast->child[0]
-        ? compileExpression(ast->child[0], flavor)
-        : CFG(Null{}).then(fixFlavor(flavor, Flavor::Cell));
-      return expr.thenReturn(flavor);
-    }
-    case ZEND_AST_TRY:
-      return compileTry(func, ast);
-    case ZEND_AST_THROW:
-      return compileExpression(ast->child[0], Flavor::Cell)
-        .thenThrow();
-    case ZEND_AST_FUNC_DECL:
-      compileFunction(func->parent, ast);
-      return CFG();
-    case ZEND_AST_CLASS:
-      return compileClass(func->parent, ast);
-    default:
-      return compileExpression(ast, Flavor::Drop);
-  }
+  }().tagSrcLoc(zend_ast_get_lineno(ast));
 }
 
 namespace {

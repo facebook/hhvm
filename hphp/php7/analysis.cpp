@@ -62,9 +62,13 @@ struct LocalsVisitor : CFGVisitor {
   void endRegion() override {}
 
   void block(Block* blk) override {
-    for (const auto& bc : blk->code) {
-      bc.visit(*this);
-    }
+    blk->visit(
+      [](auto){},
+      [&](auto& bc) {
+        bc.visit(*this);
+      },
+      [](auto){}
+    );
   }
 
   template <class T>
@@ -123,9 +127,13 @@ struct ClassrefVisitor : CFGVisitor {
 
   void block(Block* blk) override {
     m_curBlock = blk;
-    for (auto& bc : blk->code) {
-      bc.visit(*this);
-    }
+    blk->visit(
+      [](auto){},
+      [&](auto& bc) {
+        bc.visit(*this);
+      },
+      [](auto){}
+    );
   }
 
   uint32_t classrefSlotsUsed() const {
@@ -225,11 +233,12 @@ struct BlockCoalescingVisitor : CFGVisitor {
   void block(Block* blk) override {
     // finds the given block's single unconditional exit if it has one
     const auto hasFallthrough = [&](Block* blk) -> Block* {
+      assert(blk->fullyTagged());
       // if this block has one exit ...
       if (blk->exits.size() == 1) {
         auto exit = blk->exits[0];
         // ... that's an unconditional jump ...
-        if (auto jmp = boost::get<bc::Jmp>(&exit)) {
+        if (auto jmp = exit.get<bc::Jmp>()) {
           Block* target = jmp->imm1;
           // ... to a block other than itself ...
           if (target != blk) {

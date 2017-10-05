@@ -19,6 +19,7 @@
 
 #include "hphp/php7/bytecode.h"
 
+#include <folly/Optional.h>
 #include <folly/Unit.h>
 
 #include <memory>
@@ -38,10 +39,8 @@ struct Region;
  */
 struct Block {
 #define EXIT(name) void emit(bc::name) = delete;
-#define EXIT_LAST EXIT
   EXIT_OPS
 #undef EXIT
-#undef EXIT_LAST
   void emit(ExitOp op) = delete;
   /* Add a normal instruction to the end of this block.
    *
@@ -49,13 +48,77 @@ struct Block {
    * instructions can be added */
   void emit(Bytecode bc) {
     assert(!exited);
-    code.push_back(std::move(bc));
+    m_fully_tagged = false;
+    code.emplace_back(std::move(bc));
   }
 
   /* Add an exit instruction to the end of this block */
   void exit(ExitOp op) {
+    m_fully_tagged = false;
     exited = true;
-    exits.push_back(std::move(op));
+    exits.emplace_back(std::move(op));
+  }
+
+  /* Tag all untagged bytecodes with a source location. */
+  void tagSrcLoc(uint32_t lineno) {
+    m_fully_tagged = true;
+    for (auto& inst : code) {
+      if (inst.lineno == bc::kInvalidLineNo) {
+        inst.lineno = lineno;
+      }
+    }
+    for (auto& exit : exits) {
+      if (exit.lineno == bc::kInvalidLineNo) {
+        exit.lineno = lineno;
+      }
+    }
+  }
+
+  bool fullyTagged() const {
+    return m_fully_tagged;
+  }
+
+  /* Apply lambdas to all the components of the block in the order they will
+   * appear when emitted.
+   */
+  template<typename Lsrcloc, typename Lbytecode, typename Lexit>
+  void visit(Lsrcloc lsrcloc, Lbytecode lbytecode, Lexit lexit) {
+    assert(fullyTagged());
+    auto lineno = bc::kInvalidLineNo;
+    for (auto& inst : code) {
+      if (lineno != inst.lineno) {
+        lineno = inst.lineno;
+        lsrcloc(lineno);
+      }
+      lbytecode(inst);
+    }
+    for (auto& exit : exits) {
+      if (lineno != exit.lineno) {
+        lineno = exit.lineno;
+        lsrcloc(lineno);
+      }
+      lexit(exit);
+    }
+  }
+
+  template<typename Lsrcloc, typename Lbytecode, typename Lexit>
+  void visit(Lsrcloc lsrcloc, Lbytecode lbytecode, Lexit lexit) const {
+    assert(fullyTagged());
+    auto lineno = bc::kInvalidLineNo;
+    for (const auto& inst : code) {
+      if (lineno != inst.lineno) {
+        lineno = inst.lineno;
+        lsrcloc(lineno);
+      }
+      lbytecode(inst);
+    }
+    for (const auto& exit : exits) {
+      if (lineno != exit.lineno) {
+        lineno = exit.lineno;
+        lsrcloc(lineno);
+      }
+      lexit(exit);
+    }
   }
 
   /* Find blocks that this block has exits to */
@@ -64,11 +127,15 @@ struct Block {
   /* identifies this block in its function */
   uint64_t id;
 
+  Region* region;
+  bool exited{false};
+
   // code associated with this block
   std::vector<Bytecode> code;
   std::vector<ExitOp> exits;
-  Region* region;
-  bool exited{false};
+
+private:
+  bool m_fully_tagged{true};
 };
 
 /* A region is a way of keeping bytecode contiguous in the output unit and to
@@ -330,6 +397,9 @@ struct CFG {
 
   /* replace the given label and strip it out */
   CFG&& replace(const std::string& label, CFG cfg);
+
+  /* Source location tagging. */
+  CFG&& tagSrcLoc(uint32_t lineno);
 
   /* Finalize all exits and raise errors if:
    *  - any continue or break hasn't been matched with a loop

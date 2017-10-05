@@ -53,6 +53,8 @@ struct Function {
   Class* definingClass;
   CFG cfg;
   std::vector<Param> params;
+  uint32_t startLineno;
+  uint32_t endLineno;
 };
 
 struct Class {
@@ -72,8 +74,8 @@ struct Class {
     CFG cfg;
   };
 
-  Function* getConstructor();
-  void buildPropInit();
+  Function* getConstructor(uint32_t lineno);
+  void buildPropInit(uint32_t lineno);
 
   Unit* parent;
   std::string name;

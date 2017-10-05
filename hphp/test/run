@@ -294,7 +294,7 @@ function php7_compile_cmd() {
   if (!is_file($cmd)) {
     error("Could not find php7 compiler");
   }
-  return $cmd . " --daemon";
+  return $cmd . " --daemon" . " --lineno";
 }
 
 

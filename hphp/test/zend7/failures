@@ -206,7 +206,6 @@ zend7/Zend/tests/bug38623.php
 zend7/Zend/tests/bug38772.php
 zend7/Zend/tests/bug38779.php
 zend7/Zend/tests/bug38779_1.php
-zend7/Zend/tests/bug38942.php
 zend7/Zend/tests/bug39003.php
 zend7/Zend/tests/bug39017.php
 zend7/Zend/tests/bug39018.php
@@ -225,9 +224,7 @@ zend7/Zend/tests/bug39944.php
 zend7/Zend/tests/bug39990.php
 zend7/Zend/tests/bug40261.php
 zend7/Zend/tests/bug40509.php
-zend7/Zend/tests/bug40621.php
 zend7/Zend/tests/bug40705.php
-zend7/Zend/tests/bug40784.php
 zend7/Zend/tests/bug40809.php
 zend7/Zend/tests/bug40833.php
 zend7/Zend/tests/bug40899.php
@@ -317,7 +314,6 @@ zend7/Zend/tests/bug48215.php
 zend7/Zend/tests/bug48215_2.php
 zend7/Zend/tests/bug48248.php
 zend7/Zend/tests/bug48409.php
-zend7/Zend/tests/bug48533.php
 zend7/Zend/tests/bug48667_1.php
 zend7/Zend/tests/bug48667_2.php
 zend7/Zend/tests/bug48693.php
@@ -652,7 +648,6 @@ zend7/Zend/tests/call_static_006.php
 zend7/Zend/tests/call_static_007.php
 zend7/Zend/tests/call_user_func_001.php
 zend7/Zend/tests/call_user_func_003.php
-zend7/Zend/tests/call_user_func_004.php
 zend7/Zend/tests/call_user_func_005.php
 zend7/Zend/tests/call_user_func_006.php
 zend7/Zend/tests/call_user_func_009.php
@@ -837,7 +832,6 @@ zend7/Zend/tests/dereference_014.php
 zend7/Zend/tests/div_002.php
 zend7/Zend/tests/double_array_cast.php
 zend7/Zend/tests/duplicate_label_error.php
-zend7/Zend/tests/dynamic_call_001.php
 zend7/Zend/tests/dynamic_call_005.php
 zend7/Zend/tests/dynamic_call_006.php
 zend7/Zend/tests/dynamic_call_007.php
@@ -901,8 +895,6 @@ zend7/Zend/tests/exception_008.php
 zend7/Zend/tests/exception_009.php
 zend7/Zend/tests/exception_010.php
 zend7/Zend/tests/exception_013.php
-zend7/Zend/tests/exception_014.php
-zend7/Zend/tests/exception_015.php
 zend7/Zend/tests/exception_016.php
 zend7/Zend/tests/exception_017.php
 zend7/Zend/tests/exception_018.php
@@ -1865,7 +1857,6 @@ zend7/tests/lang/bug17115.php
 zend7/tests/lang/bug18872.php
 zend7/tests/lang/bug19943.php
 zend7/tests/lang/bug20175.php
-zend7/tests/lang/bug21094.php
 zend7/tests/lang/bug21600.php
 zend7/tests/lang/bug21669.php
 zend7/tests/lang/bug21849.php
@@ -1893,6 +1884,7 @@ zend7/tests/lang/bug25652.php
 zend7/tests/lang/bug25922.php
 zend7/tests/lang/bug26182.php
 zend7/tests/lang/bug26696.php
+zend7/tests/lang/bug26866.php
 zend7/tests/lang/bug26869.php
 zend7/tests/lang/bug27439.php
 zend7/tests/lang/bug27535.php

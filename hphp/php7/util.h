@@ -36,6 +36,10 @@ inline const zend_ast_decl* zend_ast_get_decl(const zend_ast* ast) {
   return reinterpret_cast<const zend_ast_decl*>(ast);
 }
 
+inline uint32_t zend_ast_get_lineno(const zend_ast* ast) {
+  return zend_ast_get_lineno(const_cast<zend_ast*>(ast));
+}
+
 inline std::string zval_to_string(const zval* zv) {
   std::string out;
   switch (Z_TYPE_P(zv)) {

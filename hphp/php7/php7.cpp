@@ -19,9 +19,10 @@
 #include "hphp/php7/zend/zend_language_scanner_defs.h"
 #include "hphp/php7/bytecode.h"
 #include "hphp/php7/hhas.h"
-#include "hphp/util/embedded-data.h"
-
+#include "hphp/php7/options.h"
 #include "hphp/php7/zend/zend.h"
+
+#include "hphp/util/embedded-data.h"
 
 #include <folly/Format.h>
 #include <folly/io/IOBuf.h>
@@ -30,6 +31,10 @@
 #include <string>
 #include <iostream>
 
+namespace HPHP {
+Options g_opts;
+}
+
 namespace {
 
 using HPHP::php7::CompilerException;
@@ -37,11 +42,6 @@ using HPHP::php7::LanguageException;
 using HPHP::php7::compile;
 using HPHP::php7::dump_asm;
 using HPHP::php7::makeFatalUnit;
-
-struct Options {
-  bool daemonEnabled{false};
-};
-
 
 std::string getBuildId() {
   HPHP::embedded_data data;
@@ -157,11 +157,13 @@ int runDaemon() {
   }
 }
 
-void parseFlags(int argc, char** argv, Options& opts) {
+void parseFlags(int argc, char** argv) {
   for (int i = 1; i < argc; i++) {
     const char* s = argv[i];
     if (strcmp(s, "--daemon") == 0) {
-      opts.daemonEnabled = true;
+      HPHP::g_opts.daemonEnabled = true;
+    } else if (strcmp(s, "--lineno") == 0) {
+      HPHP::g_opts.linenoEnabled = true;
     } else {
       throw std::runtime_error(folly::sformat("Unrecognized flag: {}", s));
     }
@@ -171,12 +173,10 @@ void parseFlags(int argc, char** argv, Options& opts) {
 } // namespace
 
 int main(int argc, char** argv) {
-  Options opts;
-
   try {
-    parseFlags(argc, argv, opts);
+    parseFlags(argc, argv);
 
-    if (opts.daemonEnabled) {
+    if (HPHP::g_opts.daemonEnabled) {
       return runDaemon();
     } else {
       auto buf = readAll(std::cin);

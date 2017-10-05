@@ -21,6 +21,8 @@
 
 #include <boost/variant.hpp>
 
+#include <folly/Optional.h>
+
 #include <unordered_map>
 #include <vector>
 
@@ -37,6 +39,7 @@ enum Flavor {
 };
 
 namespace bc {
+auto constexpr kInvalidLineNo = std::numeric_limits<uint32_t>::max();
 
 struct StringOffsetVector {
   std::unordered_map<std::string, Block*> branches;
@@ -208,13 +211,25 @@ OPCODES
 
 } // namespace bc
 
+namespace {
+template<typename T>
+struct GetVisitor {
+  folly::Optional<T> result{folly::none};
+  void bytecode(T& op) {
+    result.emplace(op);
+  }
+  template<typename Other>
+  void bytecode(Other& op) {}
+};
+}
+
 // too many opcodes for us to use boost::variant so we'll roll our own :)
 struct Bytecode {
   Bytecode()
     : code(Op::Nop),
       Nop() {}
 
-#define O(opcode, imms, inputs, outputs, flags) \
+#define O(opcode, ...) \
   /* implicit */ Bytecode(const bc::opcode& data) \
     : code(Op::opcode) { \
     new (&opcode) bc::opcode(data); \
@@ -223,6 +238,7 @@ OPCODES
 #undef O
 
   Bytecode(const Bytecode& b) {
+    lineno = b.lineno;
     code = b.code;
     switch(code) {
 #define O(opcode, ...) \
@@ -233,6 +249,7 @@ OPCODES
   }
 
   Bytecode(Bytecode&& b) {
+    lineno = b.lineno;
     code = b.code;
     switch (code) {
 #define O(opcode, ...) \
@@ -244,6 +261,7 @@ OPCODES
 
   Bytecode& operator=(const Bytecode& b) {
     destroy_op();
+    lineno = b.lineno;
     code = b.code;
     switch(code) {
 #define O(opcode, ...) case Op::opcode: opcode = b.opcode; break;
@@ -255,6 +273,7 @@ OPCODES
 
   Bytecode& operator=(Bytecode&& b) {
     destroy_op();
+    lineno = b.lineno;
     code = b.code;
     switch(code) {
 #define O(opcode, ...) case Op::opcode: opcode = std::move(b.opcode); break;
@@ -266,6 +285,13 @@ OPCODES
 
   ~Bytecode() {
     destroy_op();
+  }
+
+  template<typename Opcode>
+  folly::Optional<Opcode> get() const {
+    GetVisitor<Opcode> v;
+    visit(v);
+    return v.result;
   }
 
   template<class Visitor>
@@ -286,7 +312,8 @@ OPCODES
     }
   }
 
- private:
+  uint32_t lineno{bc::kInvalidLineNo};
+ protected:
   void destroy_op() {
     using namespace bc;
     switch(code) {
@@ -298,7 +325,7 @@ OPCODES
 
   Op code;
   union {
-#define O(opcode, imms, inputs, outputs, flags) \
+#define O(opcode, ...) \
   bc::opcode opcode;
     OPCODES
 #undef O
@@ -318,15 +345,16 @@ OPCODES
   EXIT(RetV) \
   EXIT(Unwind) \
   EXIT(Throw) \
-  EXIT_LAST(Fatal)
+  EXIT(Fatal)
 
-#define EXIT(name) bc::name,
-#define EXIT_LAST(name) bc::name
-typedef boost::variant<
+struct ExitOp : Bytecode {
+  ExitOp() = delete;
+#define EXIT(name) \
+  /* implicit */ ExitOp(const bc::name& data) \
+    : Bytecode(data) {}
   EXIT_OPS
-> ExitOp;
 #undef EXIT
-#undef EXIT_LAST
+};
 
 }}  // HPHP::php7
 

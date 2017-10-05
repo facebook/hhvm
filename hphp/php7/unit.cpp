@@ -29,12 +29,13 @@ std::unique_ptr<Unit> makeFatalUnit(const std::string& filename,
     .then(bc::String{msg})
     .then(bc::Fatal{FatalOp::Parse})
     .makeExitsReal()
+    .tagSrcLoc(0)
     .inRegion(std::make_unique<Region>(Region::Kind::Entry));
 
   return unit;
 }
 
-Function* Class::getConstructor() {
+Function* Class::getConstructor(uint32_t lineno) {
   for (const auto& func : methods) {
     if (func->name == "__construct" || func->name == "86ctor") {
       return func.get();
@@ -50,12 +51,13 @@ Function* Class::getConstructor() {
     Null{},
     RetC{}
   }).makeExitsReal()
+    .tagSrcLoc(lineno)
     .inRegion(std::make_unique<Region>(Region::Kind::Entry));
 
   return func;
 }
 
-void Class::buildPropInit() {
+void Class::buildPropInit(uint32_t lineno) {
   using namespace bc;
   bool needPropInit = false;
   auto cfg = CFG{};
@@ -88,6 +90,7 @@ void Class::buildPropInit() {
         .then(Null{})
         .then(RetC{})
     } .makeExitsReal()
+      .tagSrcLoc(lineno)
       .inRegion(std::make_unique<Region>(Region::Kind::Entry));
     simplifyCFG(func->cfg);
   }

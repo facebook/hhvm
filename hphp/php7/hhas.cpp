@@ -18,6 +18,8 @@
 
 #include "hphp/php7/analysis.h"
 #include "hphp/php7/cfg.h"
+#include "hphp/php7/options.h"
+
 #include "hphp/util/match.h"
 
 #include <folly/Format.h>
@@ -300,12 +302,22 @@ struct AssemblyVisitor : public boost::static_visitor<void>
 
   void block(Block* blk) override {
     label(blk);
-    for (const auto& bc : blk->code) {
-      bc.visit(*this);
-    }
-    for (const auto& ex : blk->exits) {
-      exit(ex);
-    }
+    blk->visit(
+      [&](uint32_t lineno) {
+        if (g_opts.linenoEnabled) {
+          doIndent();
+          // We list -1 as the character position since PHP's parser does not
+          // include this information.
+          folly::format(&out, ".srcloc {}:-1,{}:-1;\n", lineno, lineno);
+        }
+      },
+      [&](const auto& bc) {
+        bc.visit(*this);
+      },
+      [&](const auto& ex) {
+        ex.visit(*this);
+      }
+    );
   }
 
   void label(Block* blk) {
@@ -313,7 +325,7 @@ struct AssemblyVisitor : public boost::static_visitor<void>
     // actually emit the instruction
     if (nextUnconditionalDestination
         && nextUnconditionalDestination != blk) {
-      bytecode(bc::Jmp{nextUnconditionalDestination});
+      dump(bc::Jmp{nextUnconditionalDestination});
     }
     nextUnconditionalDestination = nullptr;
     doIndent();
@@ -322,31 +334,26 @@ struct AssemblyVisitor : public boost::static_visitor<void>
 
   void end() {
     if (nextUnconditionalDestination) {
-      bytecode(bc::Jmp{nextUnconditionalDestination});
+      dump(bc::Jmp{nextUnconditionalDestination});
       nextUnconditionalDestination = nullptr;
     }
   }
 
-  void operator()(const bc::Jmp& j) {
+  void bytecode(const bc::Jmp& j) {
     nextUnconditionalDestination = j.imm1;
   }
 
-  void operator()(const bc::JmpNS& j) {
+  void bytecode(const bc::JmpNS& j) {
     nextUnconditionalDestination = j.imm1;
-  }
-
-  template<class Exit>
-  void operator()(const Exit& e) {
-    bytecode(e);
   }
 
   void bytecode(const Bytecode& bc) {
-    doIndent();
-    bc.visit(instr);
+    dump(bc);
   }
 
-  void exit(const ExitOp& exit) {
-    boost::apply_visitor(*this, exit);
+  void dump(const Bytecode& bc) {
+    doIndent();
+    bc.visit(instr);
   }
 
   std::string& out;
@@ -354,6 +361,14 @@ struct AssemblyVisitor : public boost::static_visitor<void>
   Block* nextUnconditionalDestination{nullptr};
   unsigned indent{1};
 };
+
+std::string dump_lineno(const Function& func) {
+  std::string out;
+  if (g_opts.linenoEnabled) {
+    folly::format(&out, "({},{}) ", func.startLineno, func.endLineno);
+  }
+  return out;
+}
 
 std::string dump_pseudomain(const Function& func) {
   std::string out;
@@ -366,6 +381,7 @@ std::string dump_pseudomain(const Function& func) {
 std::string dump_function(const Function& func) {
   std::string out;
   out.append(".function ");
+  out.append(dump_lineno(func));
   out.append(func.name);
   out.append("(");
   for (const auto& param : func.params) {
@@ -445,6 +461,7 @@ std::string dump_method(const Function& func) {
   }
 
   out.append(" ] ");
+  out.append(dump_lineno(func));
   out.append(func.name);
   out.append("(");
   for (const auto& param : func.params) {

@@ -64,7 +64,7 @@ CFG compileIncludeEval(const zend_ast* op);
 
 CFG fixFlavor(Destination dest, Flavor actual);
 
-Attr getMemberModifiers(uint32_t flags);
+Attr translateAttr(uint32_t flags);
 void compileClassStatement(Class* cls, const zend_ast* ast);
 void compileMethod(Class* cls, const zend_ast* ast);
 void compileProp(Class* cls, const zend_ast* ast);
@@ -96,7 +96,6 @@ void compileFunction(Unit* unit, const zend_ast* ast) {
 CFG compileClass(Unit* unit, const zend_ast* ast) {
   auto decl = zend_ast_get_decl(ast);
   auto name = ZSTR_VAL(decl->name);
-  auto attr = decl->flags;
   auto parent = decl->child[0];
   auto implements = decl->child[1];
   auto statements = zend_ast_get_list(decl->child[2]);
@@ -104,12 +103,7 @@ CFG compileClass(Unit* unit, const zend_ast* ast) {
   auto cls = unit->makeClass();
   cls->name = name;
 
-  if (attr & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
-    cls->attr |= Attr::AttrAbstract;
-  }
-  if (attr & ZEND_ACC_FINAL) {
-    cls->attr |= Attr::AttrFinal;
-  }
+  cls->attr = translateAttr(decl->flags);
 
   if (parent) {
     cls->parentName = zval_to_string(zend_ast_get_zval(parent));
@@ -154,9 +148,7 @@ void buildFunction(Function* func, const zend_ast* ast) {
   func->startLineno = decl->start_lineno;
   func->endLineno = decl->end_lineno;
 
-  if (decl->flags & ZEND_ACC_RETURN_REFERENCE) {
-    func->attr |= Attr::AttrReference;
-  }
+  func->attr = translateAttr(decl->flags);
 
   func->params.reserve(params->children);
   for (uint32_t i = 0; i < params->children; i++) {
@@ -216,7 +208,7 @@ CFG compileConstant(const zend_ast* ast) {
     } else if (strcasecmp(str, "null") == 0) {
       return { Null{} };
     } else {
-      panic("unknown unqualified constant");
+      return { Cns{str} };
     }
   } else {
     panic("unknown constant");
@@ -962,9 +954,11 @@ CFG compileFor(Function* func, const zend_ast* ast) {
   return cfg;
 }
 
-Attr getMemberModifiers(uint32_t flags) {
+Attr translateAttr(uint32_t flags) {
   Attr attr{};
   if (flags & ZEND_ACC_PUBLIC) {
+    // We don't mark flags & ZEND_ACC_IMPLICIT_PUBLIC as public because hhvm
+    // should implicitly mark them as public as well.
     attr |= Attr::AttrPublic;
   }
   if (flags & ZEND_ACC_PROTECTED) {
@@ -976,13 +970,95 @@ Attr getMemberModifiers(uint32_t flags) {
   if (flags & ZEND_ACC_STATIC) {
     attr |= Attr::AttrStatic;
   }
-  if (flags & ZEND_ACC_ABSTRACT) {
+  if (flags & ZEND_ACC_ABSTRACT
+      || flags & ZEND_ACC_IMPLEMENTED_ABSTRACT
+      || flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS
+      || flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
     attr |= Attr::AttrAbstract;
   }
   if (flags & ZEND_ACC_FINAL) {
     attr |= Attr::AttrFinal;
   }
+  if (flags & ZEND_ACC_INTERFACE) {
+    attr |= Attr::AttrInterface;
+  }
+  if (flags & ZEND_ACC_TRAIT) {
+    attr |= Attr::AttrTrait;
+  }
+  if (flags & ZEND_ACC_RETURN_REFERENCE) {
+    attr |= Attr::AttrReference;
+  }
+
   return attr;
+  // Unused flags:
+  //
+  // method flag (bc only), any method that has this flag can be used statically
+  // and non statically.
+  // ZEND_ACC_ALLOW_STATIC
+  //
+  // ZEND_ACC_CHANGED
+  //
+  // method flags (special method detection)
+  // ZEND_ACC_CTOR
+  // ZEND_ACC_DTOR
+  //
+  // method flag used by Closure::__invoke()
+  // ZNED_ACC_USER_ARG_INFO
+  //
+  // shadow of parent's private method/property
+  // ZEND_ACC_SHADOW
+  //
+  // deprecation flag
+  // ZEND_ACC_DEPRECATED
+  //
+  // ZEND_ACC_CLOSURE
+  // ZEND_ACC_FAKE_CLOSURE
+  // ZEND_ACC_GENERATOR
+  //
+  // ZEND_ACC_NO_RT_ARENA
+  //
+  // call through user function trampoline. e.g. __call, __callstatic
+  // ZEND_ACC_CALL_VIA_TRAMPOLINE
+  //
+  // call through internal function handler. e.g. Closure::invoke()
+  // ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
+  //
+  // disable inline caching
+  // ZEND_ACC_NEVER_CACHE
+  //
+  // ZEND_ACC_VARIADIC
+  //
+  // ZEND_ACC_RETURN_REFERENCE
+  // ZEND_ACC_DONE_PASS_TWO
+  //
+  // class has magic methods __get/__set/__unset/__isset that use guards
+  // ZEND_ACC_USE_GUARDS
+  //
+  // function has typed arguments
+  // ZEND_ACC_HAS_TYPE_HINTS
+  //
+  // op_array has finally blocks
+  // ZEND_ACC_HAS_FINALLY_BLOCK
+  //
+  // internal function is allocated at arena
+  // ZEND_ACC_ARENA_ALLOCATED
+  //
+  // Function has a return type (or class has such non-private function)
+  // ZEND_ACC_HAS_RETURN_TYPE
+  //
+  // op_array uses strict mode types
+  // ZEND_ACC_STRICT_TYPES
+  //
+  // ZEND_ACC_ANON_CLASS
+  // ZEND_ACC_ANON_BOUND
+  // ZEND_ACC_INHERITED
+  //
+  // class implement interface(s) flag
+  // ZEND_ACC_IMPLEMENT_INTERFACES
+  // ZEND_ACC_IMPLEMENT_TRAITS
+  //
+  // class constants updated
+  // ZEND_ACC_CONSTANTS_UPDATED
 }
 
 CFG compileIncludeEval(const zend_ast* ast) {
@@ -1017,6 +1093,16 @@ void compileClassStatement(Class* cls, const zend_ast* ast) {
     case ZEND_AST_PROP_DECL:
       compileProp(cls, ast);
       break;
+    case ZEND_AST_USE_TRAIT: {
+      assert(ast->child[0]->kind == ZEND_AST_NAME_LIST);
+      auto list = zend_ast_get_list(ast->child[0]);
+      for (uint32_t i = 0; i < list->children; i++) {
+        auto item = list->child[i];
+
+        cls->traits.emplace_back(zval_to_string(zend_ast_get_zval(item)));
+      }
+      break;
+    }
     default:
       panic("unsupported class statement");
   }
@@ -1025,7 +1111,31 @@ void compileClassStatement(Class* cls, const zend_ast* ast) {
 void compileMethod(Class* cls, const zend_ast* ast) {
   auto func = cls->makeMethod();
   buildFunction(func, ast);
-  func->attr |= getMemberModifiers(zend_ast_get_decl(ast)->flags);
+  if (func->attr & Attr::AttrAbstract) {
+
+    if (func->attr & Attr::AttrPrivate
+        || func->attr & Attr::AttrFinal) {
+      throw LanguageException(
+        folly::sformat(
+          "Cannot declare abstract method {}::{}() {}",
+          cls->name,
+          func->name,
+          func->attr & Attr::AttrPrivate ? "private" : "final"
+        )
+      );
+    }
+    if (!(cls->attr & Attr::AttrAbstract)
+        && !(cls->attr & Attr::AttrInterface)) {
+      throw LanguageException(
+        folly::sformat(
+          "Class {} contains abstract {} and must therefore be declared "
+          "abstract",
+          cls->name,
+          func->name
+        )
+      );
+    }
+  }
 }
 
 bool serializeZval(std::string& out, const zval* zv) {
@@ -1141,14 +1251,14 @@ void compileProp(Class* cls, const zend_ast* ast) {
   if (staticInit) {
     cls->properties.emplace_back(Class::Property{
       Z_STRVAL_P(zv),
-      getMemberModifiers(ast->attr),
+      translateAttr(ast->attr),
       initString,
       CFG{},
     });
   } else {
     cls->properties.emplace_back(Class::Property{
       Z_STRVAL_P(zv),
-      getMemberModifiers(ast->attr),
+      translateAttr(ast->attr),
       "uninit",
       compileExpression(init, Flavor::Cell),
     });

@@ -106,7 +106,12 @@ void dump_ast(
       dump_ast_node_name(out, ast);
       decl = reinterpret_cast<zend_ast_decl*>(ast);
       do_indent(out, pretty, indent);
-      out << decl->name->val << folly::format("[{:08x}]", decl->flags);
+      if (decl->name) {
+        out << decl->name->val;
+      } else {
+        out << "<anonymous>";
+      }
+      out << folly::format("[{:08x}]", decl->flags);
       for (int i = 0; i < 4; i++) {
         if (!decl->child[i]) {
           continue;

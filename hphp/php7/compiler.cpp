@@ -28,6 +28,11 @@ namespace HPHP { namespace php7 {
 
 namespace {
 
+// CGS holds the Compile Global State for the compilation.
+struct CGS {
+  Unit* unit;
+} g_cgs;
+
 void buildFunction(Function* func, const zend_ast* ast);
 
 CFG compileZvalLiteral(const zval* ast);
@@ -64,7 +69,10 @@ CFG compileIncludeEval(const zend_ast* op);
 
 CFG fixFlavor(Destination dest, Flavor actual);
 
-Attr translateAttr(uint32_t flags);
+// Zend reuses the visibility bits to tag classes with additional info.
+// pppok should be set to true when visibility attributes are desired.
+Attr translateAttr(uint32_t flags, bool pppok);
+
 void compileClassStatement(Class* cls, const zend_ast* ast);
 void compileMethod(Class* cls, const zend_ast* ast);
 void compileProp(Class* cls, const zend_ast* ast);
@@ -79,6 +87,7 @@ void compileProgram(Unit* unit, const zend_ast* ast) {
   assert(ast->kind == ZEND_AST_STMT_LIST);
 
   auto pseudomain = unit->getPseudomain();
+  g_cgs.unit = unit;
 
   pseudomain->cfg = compileStatement(pseudomain, ast)
     .then(Int{1})
@@ -95,15 +104,17 @@ void compileFunction(Unit* unit, const zend_ast* ast) {
 
 CFG compileClass(Unit* unit, const zend_ast* ast) {
   auto decl = zend_ast_get_decl(ast);
-  auto name = ZSTR_VAL(decl->name);
   auto parent = decl->child[0];
   auto implements = decl->child[1];
   auto statements = zend_ast_get_list(decl->child[2]);
 
   auto cls = unit->makeClass();
+
+  auto name = decl->name ? ZSTR_VAL(decl->name)
+                         : folly::sformat("class@anonymous$;{}", cls->index);
   cls->name = name;
 
-  cls->attr = translateAttr(decl->flags);
+  cls->attr = translateAttr(decl->flags, false);
 
   if (parent) {
     cls->parentName = zval_to_string(zend_ast_get_zval(parent));
@@ -148,7 +159,7 @@ void buildFunction(Function* func, const zend_ast* ast) {
   func->startLineno = decl->start_lineno;
   func->endLineno = decl->end_lineno;
 
-  func->attr = translateAttr(decl->flags);
+  func->attr = translateAttr(decl->flags, true);
 
   func->params.reserve(params->children);
   for (uint32_t i = 0; i < params->children; i++) {
@@ -468,6 +479,14 @@ CFG compileNew(const zend_ast* ast) {
     })
       .then(compileCall(params))
       .then(PopR{});
+  } else if (cls->kind == ZEND_AST_CLASS) {
+    // Anonymous class
+    auto index = g_cgs.unit->nextClassId();
+
+    return compileClass(g_cgs.unit, cls)
+      .then(FPushCtorI{params->children, index})
+      .then(compileCall(params))
+      .then(PopR{});
   } else {
     panic("new with variable classref");
   }
@@ -636,6 +655,12 @@ CFG compileExpression(const zend_ast* ast, Destination dest) {
           .then(fixFlavor(dest, Flavor::Cell));
       case ZEND_AST_CONDITIONAL:
         return compileConditional(ast, dest);
+      case ZEND_AST_INSTANCEOF:
+        return CFG()
+          .then(compileExpression(ast->child[0], Flavor::Cell))
+          .then(compileExpression(ast->child[1], Flavor::Cell))
+          .then(InstanceOf{})
+          .then(fixFlavor(dest, Flavor::Cell));
       default:
         panic("unsupported expression");
     }
@@ -712,6 +737,7 @@ CFG fixFlavor(Destination dest, Flavor actual) {
 } // namespace
 
 CFG compileStatement(Function* func, const zend_ast* ast) {
+  if (!ast) return CFG{};
   return [&]() {
     switch (ast->kind) {
       case ZEND_AST_STMT_LIST: {
@@ -954,18 +980,20 @@ CFG compileFor(Function* func, const zend_ast* ast) {
   return cfg;
 }
 
-Attr translateAttr(uint32_t flags) {
+Attr translateAttr(uint32_t flags, bool pppok) {
   Attr attr{};
-  if (flags & ZEND_ACC_PUBLIC) {
-    // We don't mark flags & ZEND_ACC_IMPLICIT_PUBLIC as public because hhvm
-    // should implicitly mark them as public as well.
-    attr |= Attr::AttrPublic;
-  }
-  if (flags & ZEND_ACC_PROTECTED) {
-    attr |= Attr::AttrProtected;
-  }
-  if (flags & ZEND_ACC_PRIVATE) {
-    attr |= Attr::AttrPrivate;
+  if (flags & ZEND_ACC_PPP_MASK && pppok) {
+    if (flags & ZEND_ACC_PUBLIC) {
+      // We don't mark flags & ZEND_ACC_IMPLICIT_PUBLIC as public because hhvm
+      // should implicitly mark them as public as well.
+      attr |= Attr::AttrPublic;
+    }
+    if (flags & ZEND_ACC_PROTECTED) {
+      attr |= Attr::AttrProtected;
+    }
+    if (flags & ZEND_ACC_PRIVATE) {
+      attr |= Attr::AttrPrivate;
+    }
   }
   if (flags & ZEND_ACC_STATIC) {
     attr |= Attr::AttrStatic;
@@ -1251,14 +1279,14 @@ void compileProp(Class* cls, const zend_ast* ast) {
   if (staticInit) {
     cls->properties.emplace_back(Class::Property{
       Z_STRVAL_P(zv),
-      translateAttr(ast->attr),
+      translateAttr(ast->attr, true),
       initString,
       CFG{},
     });
   } else {
     cls->properties.emplace_back(Class::Property{
       Z_STRVAL_P(zv),
-      translateAttr(ast->attr),
+      translateAttr(ast->attr, true),
       "uninit",
       compileExpression(init, Flavor::Cell),
     });

@@ -101,8 +101,12 @@ struct Unit {
     return functions.back().get();
   }
 
+  uint32_t nextClassId() {
+    return classes.size();
+  }
+
   Class* makeClass() {
-    classes.emplace_back(std::make_unique<Class>(this, classes.size()));
+    classes.emplace_back(std::make_unique<Class>(this, nextClassId()));
     return classes.back().get();
   }
 

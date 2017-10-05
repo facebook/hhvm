@@ -16,9 +16,10 @@
 #ifndef incl_HPHP_UTIL_NUMA_H
 #define incl_HPHP_UTIL_NUMA_H
 
+#include <atomic>
+
 #ifdef HAVE_NUMA
 
-#include <atomic>
 #include <vector>
 #include <numa.h>
 #include <stdint.h>

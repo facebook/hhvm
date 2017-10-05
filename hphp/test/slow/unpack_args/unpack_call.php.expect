@@ -320,9 +320,9 @@ array(4) {
 * C::__callStatic for stMagic
 array(5) {
   [0]=>
-  string(21) "also passed regularly"
-  [1]=>
   string(16) "passed regularly"
+  [1]=>
+  string(21) "also passed regularly"
   [2]=>
   string(1) "a"
   [3]=>
@@ -353,9 +353,9 @@ array(4) {
 * C::__call for magic
 array(5) {
   [0]=>
-  string(21) "also passed regularly"
-  [1]=>
   string(16) "passed regularly"
+  [1]=>
+  string(21) "also passed regularly"
   [2]=>
   string(1) "a"
   [3]=>
@@ -548,9 +548,9 @@ array(4) {
 * C::__callStatic for stMagic
 array(5) {
   [0]=>
-  string(21) "also passed regularly"
-  [1]=>
   string(16) "passed regularly"
+  [1]=>
+  string(21) "also passed regularly"
   [2]=>
   string(1) "a"
   [3]=>
@@ -581,9 +581,9 @@ array(4) {
 * C::__call for magic
 array(5) {
   [0]=>
-  string(21) "also passed regularly"
-  [1]=>
   string(16) "passed regularly"
+  [1]=>
+  string(21) "also passed regularly"
   [2]=>
   string(1) "a"
   [3]=>

@@ -1232,10 +1232,14 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
       stack.pushArray(args.m_data.parr);
     } else {
       PackedArrayInit ai(nargs + nregular);
+      // The arguments are pushed in order, so we should refer them by
+      // index instead of taking the top, that would lead to reverse order.
+      for (int i = nregular - 1; i >= 0; --i) {
+        // appendWithRef bumps the refcount and splits if necessary,
+        // to compensate for the upcoming pop from the stack
+        ai.appendWithRef(tvAsVariant(stack.indTV(i)));
+      }
       for (int i = 0; i < nregular; ++i) {
-        // appendWithRef bumps the refcount and splits if necessary, to
-        // compensate for the upcoming pop from the stack
-        ai.appendWithRef(tvAsVariant(stack.top()));
         stack.popTV();
       }
       assert(stack.top() == (void*) ar);

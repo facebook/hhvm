@@ -53,6 +53,9 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
     fmt_name_or_prim ~tparams ~namespace h1 ^ "::" ^
       String.concat "::" (List.map (h2::accesses) snd)
 
+  (* Follow HHVM order: soft -> option *)
+  | A.Hoption (_, A.Hsoft t) -> "@?" ^ fmt_hint ~tparams ~namespace t
+
   | A.Hoption t -> "?" ^ fmt_hint ~tparams ~namespace t
 
   | A.Hsoft h -> "@" ^ fmt_hint ~tparams ~namespace h
@@ -99,22 +102,22 @@ match h with
   TC.make tc_name tc_flags
 
   (* Elide the Awaitable class for async return types only *)
-| A.Happly ((_, "WaitHandle"), [(_, A.Happly((_, "void"), []))])
-| A.Happly ((_, "Awaitable"), [(_, A.Happly((_, "void"), []))])
+| A.Happly ((_, ("WaitHandle" | "Awaitable")), [(_, A.Happly((_, "void"), []))])
   when skipawaitable ->
   TC.make None []
 
-| A.Happly ((_, "WaitHandle"), [h])
-| A.Hoption (_, A.Happly ((_, "WaitHandle"), [h]))
-| A.Happly ((_, "Awaitable"), [h])
-| A.Hoption (_, A.Happly ((_, "Awaitable"), [h]))
+| A.Happly ((_, ("WaitHandle" | "Awaitable")), [h])
+| A.Hoption (_, A.Happly ((_, ("WaitHandle" | "Awaitable")), [h]))
   when skipawaitable ->
   hint_to_type_constraint ~tparams ~skipawaitable:false ~namespace h
 
-| A.Happly ((_, "WaitHandle"), [])
-| A.Hoption (_, A.Happly ((_, "WaitHandle"), []))
-| A.Happly ((_, "Awaitable"), [])
-| A.Hoption (_, A.Happly ((_, "Awaitable"), []))
+| A.Hoption (_, A.Hsoft (_, A.Happly ((_, ("WaitHandle" | "Awaitable")), [h])))
+  when skipawaitable ->
+  make_tc_with_flags_if_non_empty_flags ~tparams ~skipawaitable ~namespace
+    h [TC.Soft; TC.HHType; TC.ExtendedHint]
+
+| A.Happly ((_, ("WaitHandle" | "Awaitable")), [])
+| A.Hoption (_, A.Happly ((_, ("WaitHandle" | "Awaitable")), []))
   when skipawaitable ->
   TC.make None []
 

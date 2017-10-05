@@ -54,8 +54,8 @@
 #if defined(__cplusplus)
 #define NORETURN [[noreturn]]
 
-struct ParseException : public std::logic_error {
-  explicit ParseException(const std::string& what)
+struct ZendException : public std::logic_error {
+  explicit ZendException(const std::string& what)
     : std::logic_error(what) {}
 };
 
@@ -93,8 +93,8 @@ char* estrndup(const char*, size_t);
 ////////////////////////////////////////////////////////////////////////////////
 // from zend.h
 
-NORETURN void zend_error_noreturn(int type, const char*fmt, ...);
-void zend_error(int type, const char*fmt, ...);
+  NORETURN void zend_error_noreturn(int type, const char*fmt, ...);
+  void zend_error(int type, const char*fmt, ...);
 
 #define SIZEOF_SIZE_T 8
 
@@ -114,49 +114,49 @@ void zend_error(int type, const char*fmt, ...);
 #define ZSTR_EMPTY_ALLOC() zend_string_init("", 0, 0)
 
 
-void zend_string_release(zend_string*);
-zend_string* zend_string_init(const char*, size_t, int);
-zend_string* zend_string_extend(zend_string*, size_t, int);
+  void zend_string_release(zend_string*);
+  zend_string* zend_string_init(const char*, size_t, int);
+  zend_string* zend_string_extend(zend_string*, size_t, int);
 
 #define ZEND_STR_STATIC "static"
 
-// hacks ahead
+  // hacks ahead
 #define ZSTR_KNOWN(str) zend_string_init(str, strlen(str), 0)
 
-////////////////////////////////////////////////////////////////////////////////
-// zend_API.h
+  ////////////////////////////////////////////////////////////////////////////////
+  // zend_API.h
 
 #define ZVAL_STRINGL(z, s, l) do {				\
-		ZVAL_NEW_STR(z, zend_string_init(s, l, 0));		\
-	} while (0)
+      ZVAL_NEW_STR(z, zend_string_init(s, l, 0));		\
+    } while (0)
 
 #define ZVAL_STRING(z, s) do {					\
-		const char *_s = (s);					\
-		ZVAL_STRINGL(z, _s, strlen(_s));		\
-	} while (0)
+      const char *_s = (s);					\
+      ZVAL_STRINGL(z, _s, strlen(_s));		\
+    } while (0)
 
 
-////////////////////////////////////////////////////////////////////////////////
-// adapted from zend_compile.h
+  ////////////////////////////////////////////////////////////////////////////////
+  // adapted from zend_compile.h
 
-// what on *earth* this was doing in zend_compile nobody knows
-typedef union _zend_parser_stack_elem {
-	zend_ast *ast;
-	zend_string *str;
-	zend_ulong num;
-} zend_parser_stack_elem;
+  // what on *earth* this was doing in zend_compile nobody knows
+  typedef union _zend_parser_stack_elem {
+    zend_ast *ast;
+    zend_string *str;
+    zend_ulong num;
+  } zend_parser_stack_elem;
 
-zend_ast* zend_ast_append_str(zend_ast*, zend_ast*);
-zend_ast *zend_negate_num_string(zend_ast *ast);
+  zend_ast* zend_ast_append_str(zend_ast*, zend_ast*);
+  zend_ast *zend_negate_num_string(zend_ast *ast);
 
 #define RESET_DOC_COMMENT() do { \
-	if (CG(doc_comment)) { \
-		zend_string_release(CG(doc_comment)); \
-		CG(doc_comment) = NULL; \
-	} \
-} while (0)
+    if (CG(doc_comment)) { \
+      zend_string_release(CG(doc_comment)); \
+      CG(doc_comment) = NULL; \
+    } \
+  } while (0)
 
-/* class fetches */
+  /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
 #define ZEND_FETCH_CLASS_PARENT		2
@@ -182,7 +182,7 @@ zend_ast *zend_negate_num_string(zend_ast *ast);
 #define ZEND_ARRAY_SYNTAX_LONG 2  /* array() */
 #define ZEND_ARRAY_SYNTAX_SHORT 3 /* [] */
 
-/* var status for backpatching */
+  /* var status for backpatching */
 #define BP_VAR_R			0
 #define BP_VAR_W			1
 #define BP_VAR_RW			2
@@ -190,7 +190,7 @@ zend_ast *zend_negate_num_string(zend_ast *ast);
 #define BP_VAR_FUNC_ARG		4
 #define BP_VAR_UNSET		5
 
-/* Bottom 3 bits are the type, top bits are arg num for BP_VAR_FUNC_ARG */
+  /* Bottom 3 bits are the type, top bits are arg num for BP_VAR_FUNC_ARG */
 #define BP_VAR_SHIFT 3
 #define BP_VAR_MASK  7
 
@@ -201,7 +201,7 @@ zend_ast *zend_negate_num_string(zend_ast *ast);
 #define	ZEND_EVAL_CODE						4
 #define ZEND_OVERLOADED_FUNCTION_TEMPORARY	5
 
-/* A quick check (type == ZEND_USER_FUNCTION || type == ZEND_EVAL_CODE) */
+  /* A quick check (type == ZEND_USER_FUNCTION || type == ZEND_EVAL_CODE) */
 #define ZEND_USER_CODE(type) ((type & 1) == 0)
 
 #define ZEND_INTERNAL_CLASS         1
@@ -216,7 +216,7 @@ zend_ast *zend_negate_num_string(zend_ast *ast);
 #define ZEND_CT	(1<<0)
 #define ZEND_RT (1<<1)
 
-/* global/local fetches */
+  /* global/local fetches */
 #define ZEND_FETCH_GLOBAL			0x00000000
 #define ZEND_FETCH_LOCAL			0x10000000
 #define ZEND_FETCH_GLOBAL_LOCK		0x40000000
@@ -240,14 +240,14 @@ zend_ast *zend_negate_num_string(zend_ast *ast);
 
 #define ZEND_DIM_IS 1
 
-/* method flags (types) */
+  /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
 #define ZEND_ACC_ABSTRACT		0x02
 #define ZEND_ACC_FINAL			0x04
 #define ZEND_ACC_IMPLEMENTED_ABSTRACT		0x08
 
-/* method flags (visibility) */
-/* The order of those must be kept - public < protected < private */
+  /* method flags (visibility) */
+  /* The order of those must be kept - public < protected < private */
 #define ZEND_ACC_PUBLIC		0x100
 #define ZEND_ACC_PROTECTED	0x200
 #define ZEND_ACC_PRIVATE	0x400
@@ -256,20 +256,20 @@ zend_ast *zend_negate_num_string(zend_ast *ast);
 #define ZEND_ACC_CHANGED	0x800
 #define ZEND_ACC_IMPLICIT_PUBLIC	0x1000
 
-/* method flags (special method detection) */
+  /* method flags (special method detection) */
 #define ZEND_ACC_CTOR		0x2000
 #define ZEND_ACC_DTOR		0x4000
 
-/* method flag used by Closure::__invoke() */
+  /* method flag used by Closure::__invoke() */
 #define ZEND_ACC_USER_ARG_INFO 0x80
 
-/* method flag (bc only), any method that has this flag can be used statically and non statically. */
+  /* method flag (bc only), any method that has this flag can be used statically and non statically. */
 #define ZEND_ACC_ALLOW_STATIC	0x10000
 
-/* shadow of parent's private method/property */
+  /* shadow of parent's private method/property */
 #define ZEND_ACC_SHADOW 0x20000
 
-/* deprecation flag */
+  /* deprecation flag */
 #define ZEND_ACC_DEPRECATED 0x40000
 
 #define ZEND_ACC_CLOSURE              0x100000
@@ -278,13 +278,13 @@ zend_ast *zend_negate_num_string(zend_ast *ast);
 
 #define ZEND_ACC_NO_RT_ARENA          0x80000
 
-/* call through user function trampoline. e.g. __call, __callstatic */
+  /* call through user function trampoline. e.g. __call, __callstatic */
 #define ZEND_ACC_CALL_VIA_TRAMPOLINE  0x200000
 
-/* call through internal function handler. e.g. Closure::invoke() */
+  /* call through internal function handler. e.g. Closure::invoke() */
 #define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
 
-/* disable inline caching */
+  /* disable inline caching */
 #define ZEND_ACC_NEVER_CACHE          0x400000
 
 #define ZEND_ACC_VARIADIC				0x1000000
@@ -292,22 +292,22 @@ zend_ast *zend_negate_num_string(zend_ast *ast);
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
-/* class has magic methods __get/__set/__unset/__isset that use guards */
+  /* class has magic methods __get/__set/__unset/__isset that use guards */
 #define ZEND_ACC_USE_GUARDS				0x1000000
 
-/* function has typed arguments */
+  /* function has typed arguments */
 #define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
 
-/* op_array has finally blocks */
+  /* op_array has finally blocks */
 #define ZEND_ACC_HAS_FINALLY_BLOCK		0x20000000
 
-/* internal function is allocated at arena */
+  /* internal function is allocated at arena */
 #define ZEND_ACC_ARENA_ALLOCATED		0x20000000
 
-/* Function has a return type (or class has such non-private function) */
+  /* Function has a return type (or class has such non-private function) */
 #define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
 
-/* op_array uses strict mode types */
+  /* op_array uses strict mode types */
 #define ZEND_ACC_STRICT_TYPES			0x80000000
 
 #define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
@@ -318,25 +318,25 @@ zend_ast *zend_negate_num_string(zend_ast *ast);
 #define ZEND_ACC_ANON_BOUND                 0x200
 #define ZEND_ACC_INHERITED                  0x400
 
-/* class implement interface(s) flag */
+  /* class implement interface(s) flag */
 #define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
 #define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
 
-/* class constants updated */
+  /* class constants updated */
 #define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
 
-/* user class has methods with static variables */
+  /* user class has methods with static variables */
 #define ZEND_HAS_STATIC_IN_METHODS    0x800000
 
-int lex_scan(zval*);
-int zendlex(zend_parser_stack_elem*);
-void startup_scanner();
+  int lex_scan(zval*);
+  int zendlex(zend_parser_stack_elem*);
+  void startup_scanner();
 
-static inline uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
-{
-	uint32_t new_flags = flags | new_flag;
-	if ((flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flag & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
+  static inline uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
+  {
+    uint32_t new_flags = flags | new_flag;
+    if ((flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flag & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+      zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
 	}
 	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");

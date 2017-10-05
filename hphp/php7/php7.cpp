@@ -113,7 +113,7 @@ std::string runCompiler(const std::string& filename, const folly::IOBuf& buf) {
     return dump_asm(*unit);
   } catch (const LanguageException& e) {
     return dump_asm(*makeFatalUnit(filename, e.what()));
-  } catch (const ParseException& e) {
+  } catch (const ZendException& e) {
     return dump_asm(*makeFatalUnit(filename, e.what()));
   }
 }

@@ -6,7 +6,7 @@
 
 // handles parse errors
 void zenderror(const char* msg) {
-  throw ParseException("Parse error: " + std::string(msg));
+  throw ZendException("Parse error: " + std::string(msg));
 }
 
 void zend_handle_encoding_declaration(zend_ast* /*declare_list*/) {
@@ -78,10 +78,12 @@ char* estrndup(const char* str, size_t n) {
 }
 
 zend_class_entry* zend_ce_parse_error = (zend_class_entry*)42;
-void zend_throw_exception(zend_class_entry* /*cls*/, const char* msg,
+void zend_throw_exception(zend_class_entry* cls, const char* msg,
                           zend_long /*code*/) {
-  std::cerr << msg << std::endl;
-  std::abort();
+  if (cls == zend_ce_parse_error) {
+    throw ZendException("Parse error: " + std::string(msg));
+  }
+  throw ZendException("Uncaught error: " + std::string(msg));
 }
 
 void zend_error(int /*type*/, const char* fmt, ...) {
@@ -95,8 +97,18 @@ void zend_error_noreturn(int /*type*/, const char* fmt, ...) {
   va_list argp;
   va_start(argp, fmt);
 
-  vfprintf(stderr, fmt, argp);
+  int len = vsnprintf(nullptr, 0, fmt, argp);
+  va_end(argp);
+  va_start(argp, fmt);
+  if (len + 1 > 0) {
+    std::string msg;
+    msg.resize(len + 1);
+    vsnprintf(&msg[0], len + 1, fmt, argp);
+    throw ZendException("Uncaught error: " + msg);
+  }
   std::abort();
+
+  vfprintf(stderr, fmt, argp);
 }
 
 static thread_local parser_state* state_ = nullptr;

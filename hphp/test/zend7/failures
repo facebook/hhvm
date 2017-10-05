@@ -20,19 +20,11 @@ zend7/Zend/tests/036.php
 zend7/Zend/tests/037.php
 zend7/Zend/tests/038.php
 zend7/Zend/tests/abstract-static.php
-zend7/Zend/tests/access_modifiers_001.php
-zend7/Zend/tests/access_modifiers_002.php
-zend7/Zend/tests/access_modifiers_003.php
-zend7/Zend/tests/access_modifiers_004.php
-zend7/Zend/tests/access_modifiers_005.php
-zend7/Zend/tests/access_modifiers_006.php
-zend7/Zend/tests/access_modifiers_007.php
 zend7/Zend/tests/access_modifiers_008.php
 zend7/Zend/tests/access_modifiers_009.php
 zend7/Zend/tests/access_modifiers_010.php
 zend7/Zend/tests/access_modifiers_011.php
 zend7/Zend/tests/access_modifiers_012.php
-zend7/Zend/tests/access_modifiers_013.php
 zend7/Zend/tests/add_002.php
 zend7/Zend/tests/add_003.php
 zend7/Zend/tests/add_004.php
@@ -814,8 +806,6 @@ zend7/Zend/tests/errmsg_004.php
 zend7/Zend/tests/errmsg_005.php
 zend7/Zend/tests/errmsg_007.php
 zend7/Zend/tests/errmsg_008.php
-zend7/Zend/tests/errmsg_009.php
-zend7/Zend/tests/errmsg_010.php
 zend7/Zend/tests/errmsg_011.php
 zend7/Zend/tests/errmsg_012.php
 zend7/Zend/tests/errmsg_013.php
@@ -1084,7 +1074,6 @@ zend7/Zend/tests/grammar/semi_reserved_009.php
 zend7/Zend/tests/grammar/semi_reserved_010.php
 zend7/Zend/tests/halt01.php
 zend7/Zend/tests/halt02.php
-zend7/Zend/tests/halt03.php
 zend7/Zend/tests/halt_compiler1.php
 zend7/Zend/tests/halt_compiler2.php
 zend7/Zend/tests/halt_compiler3.php
@@ -1846,7 +1835,6 @@ zend7/tests/lang/foreachLoopObjects.005.php
 zend7/tests/lang/foreachLoopObjects.006.php
 zend7/tests/lang/foreach_with_object_001.php
 zend7/tests/lang/foreach_with_references_001.php
-zend7/tests/lang/invalid_octal.php
 zend7/tests/lang/operators/add_variationStr.php
 zend7/tests/lang/operators/bitwiseAnd_variationStr.php
 zend7/tests/lang/operators/bitwiseNot_variationStr.php
@@ -1892,10 +1880,4 @@ zend7/tests/lang/static_basic_001.php
 zend7/tests/lang/static_basic_002.php
 zend7/tests/lang/static_variation_001.php
 zend7/tests/lang/static_variation_002.php
-zend7/tests/lang/string/unicode_escape_empty.php
-zend7/tests/lang/string/unicode_escape_incomplete.php
-zend7/tests/lang/string/unicode_escape_large_codepoint.php
-zend7/tests/lang/string/unicode_escape_sign.php
-zend7/tests/lang/string/unicode_escape_sign2.php
-zend7/tests/lang/string/unicode_escape_whitespace.php
 zend7/tests/lang/string_decimals_001.php

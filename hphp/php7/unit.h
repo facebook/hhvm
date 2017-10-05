@@ -80,6 +80,7 @@ struct Class {
   Unit* parent;
   std::string name;
   folly::Optional<std::string> parentName;
+  std::vector<std::string> implements;
   uint32_t index;
   Attr attr{Attr::AttrNone};
   std::vector<std::unique_ptr<Function>> methods;

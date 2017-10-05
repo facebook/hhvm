@@ -98,6 +98,7 @@ CFG compileClass(Unit* unit, const zend_ast* ast) {
   auto name = ZSTR_VAL(decl->name);
   auto attr = decl->flags;
   auto parent = decl->child[0];
+  auto implements = decl->child[1];
   auto statements = zend_ast_get_list(decl->child[2]);
 
   auto cls = unit->makeClass();
@@ -112,6 +113,15 @@ CFG compileClass(Unit* unit, const zend_ast* ast) {
 
   if (parent) {
     cls->parentName = zval_to_string(zend_ast_get_zval(parent));
+  }
+  if (implements) {
+    assertx(implements->kind == ZEND_AST_NAME_LIST);
+    auto list = zend_ast_get_list(implements);
+    for (uint32_t i = 0; i < list->children; i++) {
+      auto item = list->child[i];
+
+      cls->implements.emplace_back(zval_to_string(zend_ast_get_zval(item)));
+    }
   }
 
   for (uint32_t i = 0; i < statements->children; i++) {

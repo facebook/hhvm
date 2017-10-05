@@ -21,7 +21,6 @@ zend7/Zend/tests/035.php
 zend7/Zend/tests/036.php
 zend7/Zend/tests/037.php
 zend7/Zend/tests/038.php
-zend7/Zend/tests/ArrayAccess_indirect_append.php
 zend7/Zend/tests/abstract-static.php
 zend7/Zend/tests/access_modifiers_001.php
 zend7/Zend/tests/access_modifiers_002.php
@@ -74,7 +73,6 @@ zend7/Zend/tests/argument_restriction_001.php
 zend7/Zend/tests/argument_restriction_002.php
 zend7/Zend/tests/argument_restriction_003.php
 zend7/Zend/tests/argument_restriction_004.php
-zend7/Zend/tests/argument_restriction_005.php
 zend7/Zend/tests/argument_restriction_006.php
 zend7/Zend/tests/array_hash_zero.php
 zend7/Zend/tests/array_literal_next_element_error.php
@@ -126,10 +124,8 @@ zend7/Zend/tests/bug29883.php
 zend7/Zend/tests/bug29890.php
 zend7/Zend/tests/bug29896.php
 zend7/Zend/tests/bug29944.php
-zend7/Zend/tests/bug30346.php
 zend7/Zend/tests/bug30394.php
 zend7/Zend/tests/bug30407.php
-zend7/Zend/tests/bug30519.php
 zend7/Zend/tests/bug30702.php
 zend7/Zend/tests/bug30725.php
 zend7/Zend/tests/bug30820.php
@@ -160,7 +156,6 @@ zend7/Zend/tests/bug33171.php
 zend7/Zend/tests/bug33257.php
 zend7/Zend/tests/bug33512.php
 zend7/Zend/tests/bug33558.php
-zend7/Zend/tests/bug33710.php
 zend7/Zend/tests/bug33732.php
 zend7/Zend/tests/bug33771.php
 zend7/Zend/tests/bug33802.php
@@ -314,8 +309,6 @@ zend7/Zend/tests/bug48215.php
 zend7/Zend/tests/bug48215_2.php
 zend7/Zend/tests/bug48248.php
 zend7/Zend/tests/bug48409.php
-zend7/Zend/tests/bug48667_1.php
-zend7/Zend/tests/bug48667_2.php
 zend7/Zend/tests/bug48693.php
 zend7/Zend/tests/bug48770.php
 zend7/Zend/tests/bug48770_2.php
@@ -324,7 +317,6 @@ zend7/Zend/tests/bug48912.php
 zend7/Zend/tests/bug48930.php
 zend7/Zend/tests/bug49269.php
 zend7/Zend/tests/bug49472.php
-zend7/Zend/tests/bug49908.php
 zend7/Zend/tests/bug50146.php
 zend7/Zend/tests/bug50255.php
 zend7/Zend/tests/bug50261.php
@@ -426,7 +418,6 @@ zend7/Zend/tests/bug64239_1.php
 zend7/Zend/tests/bug64239_2.php
 zend7/Zend/tests/bug64239_3.php
 zend7/Zend/tests/bug64239_4.php
-zend7/Zend/tests/bug64354.php
 zend7/Zend/tests/bug64417.php
 zend7/Zend/tests/bug64515.php
 zend7/Zend/tests/bug64555.php
@@ -663,7 +654,6 @@ zend7/Zend/tests/catch.php
 zend7/Zend/tests/class_alias_001.php
 zend7/Zend/tests/class_alias_005.php
 zend7/Zend/tests/class_alias_008.php
-zend7/Zend/tests/class_alias_009.php
 zend7/Zend/tests/class_alias_011.php
 zend7/Zend/tests/class_alias_012.php
 zend7/Zend/tests/class_alias_013.php
@@ -868,8 +858,6 @@ zend7/Zend/tests/errmsg_029.php
 zend7/Zend/tests/errmsg_032.php
 zend7/Zend/tests/errmsg_033.php
 zend7/Zend/tests/errmsg_034.php
-zend7/Zend/tests/errmsg_035.php
-zend7/Zend/tests/errmsg_036.php
 zend7/Zend/tests/errmsg_037.php
 zend7/Zend/tests/errmsg_038.php
 zend7/Zend/tests/errmsg_039.php
@@ -1166,7 +1154,6 @@ zend7/Zend/tests/inter_01.php
 zend7/Zend/tests/inter_02.php
 zend7/Zend/tests/inter_03.php
 zend7/Zend/tests/inter_04.php
-zend7/Zend/tests/inter_05.php
 zend7/Zend/tests/interface_exists_001.php
 zend7/Zend/tests/interface_exists_002.php
 zend7/Zend/tests/invalid_parent_const_ref_leak.php
@@ -1391,9 +1378,6 @@ zend7/Zend/tests/objects_006.php
 zend7/Zend/tests/objects_007.php
 zend7/Zend/tests/objects_008.php
 zend7/Zend/tests/objects_009.php
-zend7/Zend/tests/objects_012.php
-zend7/Zend/tests/objects_013.php
-zend7/Zend/tests/objects_014.php
 zend7/Zend/tests/objects_018.php
 zend7/Zend/tests/objects_019.php
 zend7/Zend/tests/objects_020.php
@@ -1406,7 +1390,6 @@ zend7/Zend/tests/objects_028.php
 zend7/Zend/tests/objects_029.php
 zend7/Zend/tests/objects_030.php
 zend7/Zend/tests/objects_031.php
-zend7/Zend/tests/objects_032.php
 zend7/Zend/tests/oct_overflow_char.php
 zend7/Zend/tests/offset_array.php
 zend7/Zend/tests/offset_assign.php
@@ -1529,7 +1512,6 @@ zend7/Zend/tests/this_in_isset.php
 zend7/Zend/tests/this_in_parse_str.php
 zend7/Zend/tests/this_in_unset.php
 zend7/Zend/tests/this_reassign.php
-zend7/Zend/tests/throwable_003.php
 zend7/Zend/tests/trait_exists_001.php
 zend7/Zend/tests/trait_exists_002.php
 zend7/Zend/tests/trait_exists_003.php
@@ -1589,7 +1571,6 @@ zend7/Zend/tests/traits/error_004.php
 zend7/Zend/tests/traits/error_005.php
 zend7/Zend/tests/traits/error_006.php
 zend7/Zend/tests/traits/error_007.php
-zend7/Zend/tests/traits/error_008.php
 zend7/Zend/tests/traits/error_009.php
 zend7/Zend/tests/traits/error_010.php
 zend7/Zend/tests/traits/error_011.php

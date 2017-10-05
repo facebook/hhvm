@@ -402,6 +402,14 @@ std::string dump_class(const Class& cls) {
   if (cls.parentName) {
     folly::format(&out, " extends {}", *cls.parentName);
   }
+  if (!cls.implements.empty()) {
+    out.append(" implements (");
+    for (const auto& name : cls.implements) {
+      out.append(" ");
+      out.append(name);
+    }
+    out.append(" )");
+  }
   out.append(" {\n");
   for (const auto& property : cls.properties) {
     out.append(dump_property(property));

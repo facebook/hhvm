@@ -1699,6 +1699,12 @@ and emit_arg env i (pos, expr_ as expr) =
       set_instrs;
       instr_fpassl i local hint;
     ]
+  | A.Call _ when with_ref ->
+    let instrs, _ = emit_flavored_expr env (pos, expr_) in
+    gather [
+      instrs;
+      instr_fpassr i hint;
+    ]
 
   | _ ->
     let instrs, flavor = emit_flavored_expr env expr in

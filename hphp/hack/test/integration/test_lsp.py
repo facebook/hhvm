@@ -120,6 +120,13 @@ class TestLsp(LspTestDriver, unittest.TestCase):
             self.get_received_items(observed_transcript)
         )
 
+        # If the server's busy, maybe the machine's just under too much pressure
+        # to give results in a timely fashion. Doing a retry would only defer
+        # the question of what to do in that case, so instead we'll just skip.
+        if "'message': 'Server busy'" in str(observed_transcript):
+            raise unittest.SkipTest('Hack server busy')
+            return
+
         # validation checks that the number of items matches and that
         # the responses are exactly identical to what we expect
         self.assertEqual(len(expected_items), len(observed_items))

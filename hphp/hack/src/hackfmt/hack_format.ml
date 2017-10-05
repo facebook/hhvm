@@ -2091,6 +2091,8 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
     let operator_has_surrounding_spaces op = not (is_concat op) in
     let operator_is_leading op =
       get_operator_type op = Full_fidelity_operator.PipeOperator in
+    let operator_preserves_newlines op =
+      get_operator_type op = Full_fidelity_operator.PipeOperator in
 
     let (left, operator, right) = get_binary_expression_children expr in
     let operator_t = get_operator_type operator in
@@ -2145,6 +2147,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
           WithLazyRule (Rule.Parental,
             transform_operand hd,
             let expression =
+              let last_operand = ref hd in
               let last_op = ref (List.hd_exn tl) in
               List.mapi tl ~f:(fun i x ->
                 if i mod 2 = 0 then begin
@@ -2152,8 +2155,14 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
                   last_op := op;
                   let op_has_spaces = operator_has_surrounding_spaces op in
                   let op_is_leading = operator_is_leading op in
+                  let newline_before_op =
+                    operator_preserves_newlines op &&
+                    node_has_trailing_newline !last_operand
+                  in
                   Concat [
-                    if op_is_leading
+                    if newline_before_op then Newline
+                    else
+                      if op_is_leading
                       then (if op_has_spaces then space_split () else Split)
                       else (if op_has_spaces then Space else Nothing);
                     if is_concat op
@@ -2163,6 +2172,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
                 end
                 else begin
                   let operand = x in
+                  last_operand := x;
                   let op_has_spaces =
                     operator_has_surrounding_spaces !last_op
                   in

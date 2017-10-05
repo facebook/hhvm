@@ -30,7 +30,6 @@ namespace HPHP {
 uint32_t numa_node_set;
 uint32_t numa_num_nodes;
 uint32_t numa_node_mask;
-std::atomic<uint32_t> numa_cur_node;
 std::vector<bitmask*> node_to_cpu_mask;
 bool use_numa = false;
 bool threads_bind_local = false;
@@ -77,19 +76,14 @@ void initNuma() {
   numa_node_mask = folly::nextPowTwo(numa_num_nodes) - 1;
 }
 
-int next_numa_node() {
+int next_numa_node(std::atomic_int& curr_node) {
   if (!use_numa) return 0;
   int node;
   do {
-    node = numa_cur_node.fetch_add(1, std::memory_order_relaxed);
+    node = curr_node.fetch_add(1, std::memory_order_relaxed);
     node &= numa_node_mask;
   } while (!((numa_node_set >> node) & 1));
   return node;
-}
-
-int num_numa_nodes() {
-  if (!use_numa) return 1;
-  return numa_num_nodes;
 }
 
 void numa_interleave(void* start, size_t size) {

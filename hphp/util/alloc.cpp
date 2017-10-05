@@ -423,10 +423,9 @@ void setup_low_1g_arena(int pages) {
     } else {
 #ifdef HAVE_NUMA
       // Tell the arena hook to interleave between all possible nodes, and try
-      // to grab the first page from Node 0 if it is allowed..
+      // to grab the first page from Node 0 if it is allowed.
       ma = new ManagedArena(reinterpret_cast<void*>(size1g * 4),
-                            size1g * pages,
-                            0, numa_node_set);
+                            size1g * pages, 0);
 #endif
     }
     if (ma) low_huge1g_arena = ma->id();
@@ -459,8 +458,7 @@ void setup_high_1g_arena(int pages) {
       // to grab the first page from a node other than the one where the first
       // page for low-1G arena lives.
       ma = new ManagedArena(reinterpret_cast<void*>(size1g * 16),
-                            size1g * pages,
-                            max_node / 2 + 1, numa_node_set);
+                            size1g * pages, max_node / 2 + 1);
 #endif
     }
     if (ma) high_huge1g_arena = ma->id();

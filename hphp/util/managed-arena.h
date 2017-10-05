@@ -38,8 +38,7 @@ namespace HPHP {
  */
 struct ManagedArena {
  public:
-  ManagedArena(void* base, size_t maxCap,
-               int nextNode = -1, int nodeMask = -1);
+  ManagedArena(void* base, size_t maxCap, int nextNode = -1);
 
   inline void* malloc(size_t size) {
     if (m_base == nullptr || m_maxCapacity == 0) return nullptr;
@@ -70,8 +69,7 @@ struct ManagedArena {
   size_t m_maxCapacity{0};
   size_t m_currCapacity{0};             // Change protected by s_lock
   std::atomic_size_t m_size{0};
-  int m_nextNode{-1};
-  int const m_nodeMask{-1};
+  std::atomic_int m_nextNode{-1};
   unsigned m_arenaId{static_cast<unsigned>(-1)};
 
   // Hold this lock while adding new pages to any arena.  This is not a member

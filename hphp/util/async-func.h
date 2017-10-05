@@ -170,6 +170,8 @@ private:
   static void* s_initFuncArg;
   static void* s_finiFuncArg;
   static std::atomic<uint32_t> s_count;
+  static std::atomic_int s_curr_numa_node; // for round robin NUMA binding
+
   void* m_threadStack;
   pthread_attr_t m_attr;
   pthread_t m_threadId;

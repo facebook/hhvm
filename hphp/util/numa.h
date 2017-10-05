@@ -28,27 +28,25 @@ namespace HPHP {
 extern uint32_t numa_node_set;
 extern uint32_t numa_node_mask;
 extern uint32_t numa_num_nodes;
-extern std::atomic<uint32_t> numa_cur_node;
 extern std::vector<bitmask*> node_to_cpu_mask;
 extern bool use_numa;
 
 void initNuma();
+
 /*
- * Determine the node that the next thread should run on.
+ * Determine the next NUMA node according to state maintained in `curr_node`.
  */
-int next_numa_node();
+int next_numa_node(std::atomic_int& curr_node);
 /*
  * The number of numa nodes in the system
  */
-int num_numa_nodes();
+inline int num_numa_nodes() {
+  return use_numa ? numa_num_nodes : 1;
+}
 /*
  * Enable numa interleaving for the specified address range
  */
 void numa_interleave(void* start, size_t size);
-/*
- * Allocate the specified address range on the local node
- */
-void numa_local(void* start, size_t size);
 /*
  * Allocate the specified address range on the given node
  */
@@ -65,10 +63,9 @@ inline bool numa_node_allowed(int node) {
 namespace HPHP {
 
 inline void initNuma() {}
-inline int next_numa_node() { return 0; }
+inline int next_numa_node(std::atomic_int& curr_node) { return 0; }
 inline int num_numa_nodes() { return 1; }
 inline void numa_interleave(void* start, size_t size) {}
-inline void numa_local(void* start, size_t size) {}
 inline void numa_bind_to(void* start, size_t size, int node) {}
 inline bool numa_node_allowed(int node) { return true; }
 

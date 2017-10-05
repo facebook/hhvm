@@ -36,6 +36,7 @@ PFN_THREAD_FUNC* AsyncFuncImpl::s_finiFunc = nullptr;
 void* AsyncFuncImpl::s_finiFuncArg = nullptr;
 
 std::atomic<uint32_t> AsyncFuncImpl::s_count { 0 };
+std::atomic_int AsyncFuncImpl::s_curr_numa_node { 0 };
 
 AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
     : m_obj(obj), m_func(func),
@@ -61,7 +62,7 @@ void *AsyncFuncImpl::ThreadFunc(void *obj) {
 void AsyncFuncImpl::start() {
   struct rlimit rlim;
 
-  m_node = next_numa_node();
+  m_node = next_numa_node(s_curr_numa_node);
   // Allocate the thread-stack
   pthread_attr_init(&m_attr);
 

@@ -87,13 +87,10 @@ static extent_hooks_t custom_extent_hooks {
 std::atomic_bool ManagedArena::s_lock;
 ManagedArena* ManagedArena::s_arenas[MAX_HUGE_ARENA_COUNT];
 
-ManagedArena::ManagedArena(void* base, size_t maxCap,
-                           int nextNode /* = -1 */,
-                           int nodeMask /* = -1 */)
+ManagedArena::ManagedArena(void* base, size_t maxCap, int nextNode /* = -1 */)
   : m_base(static_cast<char*>(base))
   , m_maxCapacity(maxCap)
   , m_nextNode(nextNode)
-  , m_nodeMask(nodeMask)
 {
   assert(reinterpret_cast<uintptr_t>(base) % size1g == 0);
   assert(maxCap % size1g == 0);
@@ -197,13 +194,7 @@ void* ManagedArena::extent_alloc(extent_hooks_t* /*extent_hooks*/, void* addr,
         }
       } else {
 #ifdef HAVE_NUMA
-        if (arena->m_nodeMask == 0) return nullptr;
-        auto targetNode = arena->m_nextNode & numa_node_mask;
-        while ((arena->m_nodeMask & (1 << targetNode)) == 0) {
-          targetNode = (targetNode + 1) & numa_node_mask;
-        }
-        arena->m_nextNode = (targetNode + 1) & numa_node_mask;
-        assert(arena->m_nodeMask & (1 << targetNode));
+        int targetNode = next_numa_node(arena->m_nextNode);
         if (mmap_1g(newPageStart, targetNode)) {
           arena->m_currCapacity += size1g;
         } else if (++failCount == numa_num_nodes) {
@@ -239,7 +230,7 @@ std::string ManagedArena::reportStats() {
                     "Arena %d on NUMA mask %d: capacity %zd, "
                     "max_capacity %zd, used %zd\n",
                     i,
-                    arena->m_nodeMask,
+                    numa_node_mask,
                     arena->m_currCapacity,
                     arena->m_maxCapacity,
                     arena->m_size.load(std::memory_order_relaxed));

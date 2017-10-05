@@ -817,7 +817,7 @@ void RuntimeOption::Load(
 
   // Intialize the memory manager here because various settings and
   // initializations that we do here need it
-  MemoryManager::TlsWrapper::getCheck();
+  s_memory_manager.getCheck();
 
   // Get the ini (-d) and hdf (-v) strings, which may override some
   // of options that were set from config files. We also do these

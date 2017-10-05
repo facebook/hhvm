@@ -92,7 +92,7 @@ void* start_routine_wrapper(void *arg) {
   pthread_t self = pthread_self();
   auto& info = *reinterpret_cast<PthreadInfo*>(arg);
 
-  MemoryManager::TlsWrapper::getCheck();
+  s_memory_manager.getCheck();
   info.mm = &MM();
   assert(info.mm);
   info.mm->resetExternalStats();

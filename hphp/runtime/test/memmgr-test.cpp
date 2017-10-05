@@ -25,7 +25,7 @@ namespace HPHP {
 
 static void allocAndJoin(size_t size, bool free) {
   std::thread thread([&]() {
-      MemoryManager::TlsWrapper::getCheck();
+      s_memory_manager.getCheck();
       if (free) {
         String str(size, ReserveString);
       } else {

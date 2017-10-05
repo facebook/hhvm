@@ -1643,7 +1643,7 @@ static int execute_program_impl(int argc, char** argv) {
   zend_startup_strtod();
 #endif
 
-  MemoryManager::TlsWrapper::getCheck();
+  s_memory_manager.getCheck();
   if (RuntimeOption::ServerExecutionMode()) {
     // Create the hardware counter before reading options,
     // so that the main thread never has inherit set in server
@@ -2129,7 +2129,7 @@ void hphp_thread_init() {
   zend_get_bigint_data();
   zend_rand_init();
   get_server_note();
-  MemoryManager::TlsWrapper::getCheck();
+  s_memory_manager.getCheck();
 
   assert(ThreadInfo::s_threadInfo.isNull());
   ThreadInfo::s_threadInfo.getCheck()->init();
@@ -2176,11 +2176,7 @@ void hphp_process_init() {
   BootStats::mark("Process::InitProcessStatics");
 
   HHProf::Init();
-
-  {
-    (void)type_scan::getIndexForMalloc<MArrayIter>();
-    MIterTable::TlsWrapper tls;
-  }
+  s_miter_table.getCheck();
 
   // initialize the tzinfo cache.
   timezone_init();

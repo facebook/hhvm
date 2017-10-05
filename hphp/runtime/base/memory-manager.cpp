@@ -49,6 +49,7 @@ namespace HPHP {
 
 const unsigned kInvalidSweepIndex = 0xffffffff;
 __thread bool tl_sweeping;
+IMPLEMENT_THREAD_LOCAL_FLAT(MemoryManager, s_memory_manager);
 
 TRACE_SET_MOD(mm);
 
@@ -101,25 +102,6 @@ void MemoryManager::threadStats(uint64_t*& allocated, uint64_t*& deallocated) {
 }
 #endif
 
-static void* MemoryManagerInit() {
-  MemoryManager::TlsWrapper tls;
-  return (void*)tls.getNoCheck;
-}
-
-void* MemoryManager::TlsInitSetup = MemoryManagerInit();
-
-void MemoryManager::Create(void* storage) {
-  new (storage) MemoryManager();
-}
-
-void MemoryManager::Delete(MemoryManager* mm) {
-  mm->~MemoryManager();
-}
-
-void MemoryManager::OnThreadExit(MemoryManager* mm) {
-  mm->~MemoryManager();
-}
-
 MemoryManager::MemoryManager() {
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated);
@@ -152,9 +134,9 @@ MemoryManager::~MemoryManager() {
 
 void MemoryManager::resetRuntimeOptions() {
   if (debug) checkHeap("resetRuntimeOptions");
-
-  MemoryManager::TlsWrapper::destroy(); // ~MemoryManager()
-  MemoryManager::TlsWrapper::getCheck(); // new MemoryManager()
+  void* mem = this;
+  this->~MemoryManager();
+  new (mem) MemoryManager();
 }
 
 void MemoryManager::traceStats(const char* event) {

@@ -412,6 +412,44 @@ struct ThreadLocalProxy {
   TYPE_SCAN_IGNORE_FIELD(m_node);
 };
 
+// Wraps a __thread storage instance of T with a similar api to
+// ThreadLocalProxy. Importantly, inlining a method of T via operator-> or
+// operator* allows the C++ compiler to emit direct access to fields of
+// T using the native thread-local segment pointer.
+template<typename T>
+struct ThreadLocalFlat {
+  T* get() const { return (T*)&m_value; }
+  bool isNull() const { return !m_node.m_on_thread_exit_fn; }
+  T* operator->() const { return get(); }
+  T& operator*() const { return *get(); }
+  explicit operator bool() const { return !isNull(); }
+  static void onThreadExit(void* p) {
+    auto node = (ThreadLocalNode<ThreadLocalFlat<T>>*)p;
+    auto value = (T*)&node->m_p->m_value;
+    value->~T();
+    node->m_p = nullptr;
+  }
+  T* getCheck() {
+    if (!m_node.m_on_thread_exit_fn) {
+      m_node.m_on_thread_exit_fn = onThreadExit;
+      ThreadLocalManager::PushTop(m_node);
+      assert(!m_node.m_p);
+      new (&m_value) T();
+      m_node.m_p = this;
+    } else {
+      assert(m_node.m_p == this);
+    }
+    return get();
+  }
+
+  // We manage initialization explicitly
+  typename std::aligned_storage<sizeof(T),alignof(T)>::type m_value;
+  ThreadLocalNode<ThreadLocalFlat<T>> m_node;
+  TYPE_SCAN_CUSTOM() {
+    scanner.scan(*get());
+  }
+};
+
 /*
  * How to use the thread-local macros:
  *
@@ -440,6 +478,11 @@ struct ThreadLocalProxy {
   __thread HPHP::ThreadLocalProxy<T> f
 #define IMPLEMENT_THREAD_LOCAL_PROXY(T, f) \
   __thread HPHP::ThreadLocalProxy<T> f
+
+#define DECLARE_THREAD_LOCAL_FLAT(T, f) \
+  __thread HPHP::ThreadLocalFlat<T> f
+#define IMPLEMENT_THREAD_LOCAL_FLAT(T, f) \
+  __thread HPHP::ThreadLocalFlat<T> f
 
 } // namespace HPHP
 

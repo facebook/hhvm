@@ -642,22 +642,6 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MemoryManager {
-  /*
-   * Lifetime managed with a ThreadLocalSingleton.  Use MM() to access
-   * the current thread's MemoryManager.
-   */
-  using TlsWrapper = ThreadLocalSingleton<MemoryManager>;
-
-  static void Create(void*);
-  static void Delete(MemoryManager*);
-  static void OnThreadExit(MemoryManager*);
-
-  /////////////////////////////////////////////////////////////////////////////
-
-  /*
-   * Id that is used when registering roots with the memory manager.
-   */
-  using RootId = size_t;
 
   /*
    * This is an RAII wrapper to temporarily mask counting allocations from
@@ -672,6 +656,11 @@ struct MemoryManager {
    * An RAII wrapper to suppress OOM checking in a region.
    */
   struct SuppressOOM;
+
+  MemoryManager();
+  MemoryManager(const MemoryManager&) = delete;
+  MemoryManager& operator=(const MemoryManager&) = delete;
+  ~MemoryManager();
 
   /////////////////////////////////////////////////////////////////////////////
   // Allocation.
@@ -1064,12 +1053,6 @@ private:
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  MemoryManager();
-  MemoryManager(const MemoryManager&) = delete;
-  MemoryManager& operator=(const MemoryManager&) = delete;
-  ~MemoryManager();
-
-private:
   void storeTail(void* tail, uint32_t tailBytes);
   void splitTail(void* tail, uint32_t tailBytes, unsigned nSplit,
                  uint32_t splitUsable, unsigned splitInd);
@@ -1127,8 +1110,6 @@ private:
   // Peak memory threshold callback (installed via setMemThresholdCallback)
   size_t m_memThresholdCallbackPeakUsage{SIZE_MAX};
 
-  static void* TlsInitSetup;
-
   // pointers to jemalloc-maintained allocation counters
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
@@ -1144,6 +1125,8 @@ private:
 
   TYPE_SCAN_IGNORE_ALL; // heap-scan handles MM fields itself.
 };
+
+extern DECLARE_THREAD_LOCAL_FLAT(MemoryManager, s_memory_manager);
 
 //////////////////////////////////////////////////////////////////////
 

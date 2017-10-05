@@ -23,7 +23,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 inline MIterTable& miter_table() {
-  return *MIterTable::TlsWrapper::getNoCheck();
+  return *s_miter_table;
 }
 
 /*
@@ -32,7 +32,7 @@ inline MIterTable& miter_table() {
  * guarded on checking this first, and placed in an unlikely path.
  */
 inline bool strong_iterators_exist() {
-  return !MIterTable::TlsWrapper::isNull() &&
+  return !s_miter_table.isNull() &&
          miter_table().ents[0].array != nullptr;
 }
 

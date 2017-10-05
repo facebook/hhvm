@@ -603,7 +603,7 @@ std::string FileUtil::normalizeDir(const std::string &dirname) {
    * in Runtime option parsing, when MemoryManager may not have been
    * initialized
    */
-  MemoryManager::TlsWrapper::getCheck();
+  s_memory_manager.getCheck();
   string ret = FileUtil::canonicalize(dirname).toCppString();
   if (!ret.empty() && !isDirSeparator(ret[ret.length() - 1])) {
     ret += getDirSeparator();

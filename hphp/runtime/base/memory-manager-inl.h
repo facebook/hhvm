@@ -32,7 +32,7 @@ static_assert(
 );
 
 inline MemoryManager& MM() {
-  return *MemoryManager::TlsWrapper::getNoCheck();
+  return *s_memory_manager;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -424,15 +424,15 @@ inline HeapObject* MemoryManager::find(const void* p) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool MemoryManager::sweeping() {
-  return !TlsWrapper::isNull() && tl_sweeping;
+  return !s_memory_manager.isNull() && tl_sweeping;
 }
 
 inline bool MemoryManager::exiting() {
-  return !TlsWrapper::isNull() && MM().m_exiting;
+  return !s_memory_manager.isNull() && MM().m_exiting;
 }
 
 inline void MemoryManager::setExiting() {
-  if (!TlsWrapper::isNull()) MM().m_exiting = true;
+  if (!s_memory_manager.isNull()) MM().m_exiting = true;
 }
 
 inline StringDataNode& MemoryManager::getStringList() {

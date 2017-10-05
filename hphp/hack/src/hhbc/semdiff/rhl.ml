@@ -344,6 +344,11 @@ let writesunset asn l l' =
     Some (addunseteq_asn l l' asn)
   | Named _, _ | Unnamed _, _ -> None
 
+let readswrites asn l l' =
+  match reads asn l l' with
+  | None -> None
+  | Some newasn -> writes newasn l l' (* actually, newasn=asn, of course *)
+
 let check_instruct_mutator asn i i' =
   match i, i' with
   | SetL l, SetL l'
@@ -352,18 +357,9 @@ let check_instruct_mutator asn i i' =
   | UnsetL l, UnsetL l'
     -> writesunset asn l l'
   | SetOpL (l,op), SetOpL (l',op') ->
-     if op=op' then
-      match reads asn l l' with
-       | None -> None
-       | Some newasn -> writes newasn l l' (* actually, newasn=asn, of course *)
-     else None
-     (* that's something that both reads and writes *)
+    if op=op' then readswrites asn l l' else None
   | IncDecL (l,op), IncDecL (l',op') ->
-    if op=op' then
-    match reads asn l l' with
-     | None -> None
-     | Some newasn -> writes newasn l l'
-    else None
+    if op=op' then readswrites asn l l' else None
   | SetL _, _ | BindL _, _ | UnsetL _, _ | SetOpL _, _ | IncDecL _, _ -> None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)

@@ -128,7 +128,10 @@ class TestLsp(LspTestDriver, unittest.TestCase):
 
     def prepare_environment(self):
         self.write_load_config()
-        self.check_cmd(['No errors!'])
+        (output, err, _) = self.run_check()
+        if 'Error: Ran out of retries' in err:
+            raise unittest.SkipTest('Hack server could not be launched')
+        self.assertEqual(output.strip(), 'No errors!')
 
     def load_and_run(self, test_name, variables):
         test, expected = self.load_test_data(test_name, variables)

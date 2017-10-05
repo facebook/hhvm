@@ -101,29 +101,28 @@ ManagedArena::ManagedArena(void* base, size_t maxCap, int nextNode /* = -1 */)
     throw std::runtime_error{"error when creating new arena."};
   }
   if (m_arenaId >= MAX_HUGE_ARENA_COUNT) {
-    always_assert(false);               // testing
     throw std::runtime_error{"too many arenas, check MAX_HUGE_ARENA_COUNT"};
   }
-  // Disable purging in this arena, as we won't be able to return the memory to
-  // the system anyway.
-  ssize_t decay_time = -1;
-
   char command[32];
   std::snprintf(command, sizeof(command), "arena.%d.extent_hooks", m_arenaId);
   extent_hooks_t *hooks_ptr = &custom_extent_hooks;
   sz = sizeof(hooks_ptr);
   if (mallctl(command, nullptr, nullptr, &hooks_ptr, sz)) {
-    throw std::runtime_error("error in setting extent hooks");
+    throw std::runtime_error{"error in setting extent hooks"};
   }
+
+  // Disable purging in this arena, as we won't be able to return the memory to
+  // the system anyway.
+  ssize_t decay_time = -1;
   std::snprintf(command, sizeof(command),
                 "arena.%d.dirty_decay_ms", m_arenaId);
   if (mallctl(command, nullptr, nullptr, &decay_time, sizeof(decay_time))) {
-    throw std::runtime_error("error when turning off decaying");
+    throw std::runtime_error{"error when turning off decaying"};
   }
   std::snprintf(command, sizeof(command),
                 "arena.%d.muzzy_decay_ms", m_arenaId);
   if (mallctl(command, nullptr, nullptr, &decay_time, sizeof(decay_time))) {
-    throw std::runtime_error("error when turning off decaying");
+    throw std::runtime_error{"error when turning off decaying"};
   }
   s_arenas[m_arenaId] = this;
 }

@@ -40,15 +40,6 @@ struct ManagedArena {
  public:
   ManagedArena(void* base, size_t maxCap, int nextNode = -1);
 
-  inline void* malloc(size_t size) {
-    if (m_base == nullptr || m_maxCapacity == 0) return nullptr;
-    return mallocx(size, MALLOCX_ARENA(m_arenaId) | MALLOCX_TCACHE_NONE);
-  }
-
-  inline void free(void* ptr) {
-    if (ptr) dallocx(ptr, MALLOCX_ARENA(m_arenaId) | MALLOCX_TCACHE_NONE);
-  }
-
   inline unsigned id() const {
     return m_arenaId;
   }

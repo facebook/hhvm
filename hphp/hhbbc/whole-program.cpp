@@ -245,6 +245,7 @@ WorkItem work_item_for(Context ctx, AnalyzeMode mode) {
  * now.)
  *
  * Repeat until the work list is empty.
+ *
  */
 void analyze_iteratively(Index& index, php::Program& program,
                          AnalyzeMode mode) {
@@ -345,6 +346,7 @@ void analyze_iteratively(Index& index, php::Program& program,
       }
     }
 
+    index.update_class_aliases();
     work.assign(begin(revisit), end(revisit));
   }
 }
@@ -524,36 +526,46 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
 
   state_after("parse", *program);
 
-  Index index{borrow(program)};
+  folly::Optional<Index> index;
+  index.emplace(borrow(program));
   if (!options.NoOptimizations) {
-    assert(check(*program));
-    constant_pass(index, *program);
-    analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
-    if (options.AnalyzePublicStatics) {
-      analyze_public_statics(index, *program);
-      analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
+    while (true) {
+      try {
+        assert(check(*program));
+        constant_pass(*index, *program);
+        analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);
+        if (options.AnalyzePublicStatics) {
+          analyze_public_statics(*index, *program);
+          analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);
+        }
+        final_pass(*index, *program);
+        index->mark_persistent_classes_and_functions(*program);
+        state_after("optimize", *program);
+        break;
+      } catch (Index::rebuild& rebuild) {
+        FTRACE(1, "whole_program: rebuilding index\n");
+        index.emplace(borrow(program), &rebuild);
+        continue;
+      }
     }
-    final_pass(index, *program);
-    index.mark_persistent_classes_and_functions(*program);
-    state_after("optimize", *program);
   }
 
   if (options.AnalyzePublicStatics) {
-    mark_persistent_static_properties(index, *program);
+    mark_persistent_static_properties(*index, *program);
   }
 
-  debug_dump_program(index, *program);
-  print_stats(index, *program);
+  debug_dump_program(*index, *program);
+  print_stats(*index, *program);
 
   LitstrTable::fini();
   LitstrTable::init();
   LitstrTable::get().setWriting();
-  make_unit_emitters(index, *program, [&] (std::unique_ptr<UnitEmitter> ue) {
+  make_unit_emitters(*index, *program, [&] (std::unique_ptr<UnitEmitter> ue) {
     ueq.push(std::move(ue));
   });
   LitstrTable::get().setReading();
 
-  return std::move(index.array_table_builder());
+  return std::move(index->array_table_builder());
 }
 
 //////////////////////////////////////////////////////////////////////

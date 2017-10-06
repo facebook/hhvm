@@ -16,7 +16,6 @@
 #include "hphp/hhbbc/parse.h"
 
 #include <thread>
-#include <mutex>
 #include <unordered_map>
 #include <map>
 
@@ -63,6 +62,7 @@ const StaticString s_86cinit("86cinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s_86pinit("86pinit");
 const StaticString s_attr_Deprecated("__Deprecated");
+const StaticString s_class_alias("class_alias");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -489,6 +489,16 @@ void populate_block(ParseUnitState& puState,
   auto createcl = [&] (const Bytecode& b) {
     puState.createClMap[b.CreateCl.arg2].insert(&func);
   };
+  auto fpushfuncu = [&] (const Bytecode& b) {
+    if (b.FPushFuncU.str3 == s_class_alias.get()) {
+      puState.constPassFuncs[&func] |= php::Program::ForAnalyze;
+    }
+  };
+  auto fpushfuncd = [&] (const Bytecode& b) {
+    if (b.FPushFuncD.str2 == s_class_alias.get()) {
+      puState.constPassFuncs[&func] |= php::Program::ForAnalyze;
+    }
+  };
   auto has_call_unpack = [&] {
     auto const fpi = Func::findFPI(&*fe.fpitab.begin(),
                                    &*fe.fpitab.end(), pc - ue.bc());
@@ -583,10 +593,12 @@ void populate_block(ParseUnitState& puState,
       if (Op::opcode == Op::DefCns) defcns();                      \
       if (Op::opcode == Op::AddElemC ||                            \
           Op::opcode == Op::AddNewElemC) addelem();                \
-      if (Op::opcode == Op::DefCls)    defcls(b);                  \
-      if (Op::opcode == Op::DefClsNop) defclsnop(b);               \
-      if (Op::opcode == Op::AliasCls) aliascls(b);                 \
-      if (Op::opcode == Op::CreateCl)  createcl(b);                \
+      if (Op::opcode == Op::DefCls)      defcls(b);                \
+      if (Op::opcode == Op::DefClsNop)   defclsnop(b);             \
+      if (Op::opcode == Op::AliasCls)    aliascls(b);              \
+      if (Op::opcode == Op::CreateCl)    createcl(b);              \
+      if (Op::opcode == Op::FPushFuncU)  fpushfuncu(b);            \
+      if (Op::opcode == Op::FPushFuncD)  fpushfuncd(b);            \
       blk.hhbcs.push_back(std::move(b));                           \
       assert(pc == next);                                          \
     }                                                              \

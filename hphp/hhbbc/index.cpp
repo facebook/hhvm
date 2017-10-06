@@ -759,6 +759,7 @@ struct IndexData {
   ~IndexData() = default;
 
   bool frozen{false};
+  bool ever_frozen{false};
   bool any_interceptable_functions{false};
 
   std::unique_ptr<ArrayTypeTable::Builder> arrTableBuilder;
@@ -849,6 +850,13 @@ struct IndexData {
    * bytecode could be modified while we do so.
    */
   ContextRetTyMap foldableReturnTypeMap;
+
+  /*
+   * Vector of class aliases that need to be added to the index when
+   * its safe to do so (see update_class_aliases).
+   */
+  std::vector<std::pair<SString, SString>> pending_class_aliases;
+  std::mutex pending_class_aliases_mutex;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2101,7 +2109,8 @@ PublicSPropEntry lookup_public_static_impl(
 
 //////////////////////////////////////////////////////////////////////
 
-Index::Index(borrowed_ptr<php::Program> program)
+Index::Index(borrowed_ptr<php::Program> program,
+             rebuild* rebuild_exception)
   : m_data(std::make_unique<IndexData>())
 {
   trace_time tracer("create index");
@@ -2111,6 +2120,14 @@ Index::Index(borrowed_ptr<php::Program> program)
   m_data->arrTableBuilder.reset(new ArrayTypeTable::Builder());
 
   add_system_constants_to_index(*m_data);
+
+  if (rebuild_exception) {
+    for (auto& ca : rebuild_exception->class_aliases) {
+      m_data->classAliases.insert(ca.first);
+      m_data->classAliases.insert(ca.second);
+    }
+    rebuild_exception->class_aliases.clear();
+  }
 
   for (auto& u : program->units) {
     add_unit_to_index(*m_data, *u);
@@ -2229,6 +2246,32 @@ void Index::mark_persistent_classes_and_functions(php::Program& program) {
                      check_persistent(*c),
                      AttrPersistent);
   }
+}
+
+bool Index::register_class_alias(SString orig, SString alias) const {
+  auto check = [&] (SString name) {
+    if (m_data->classAliases.count(name)) return true;
+
+    auto const classes = find_range(m_data->classInfo, name);
+    if (begin(classes) != end(classes)) {
+      return !(begin(classes)->second->cls->attrs & AttrUnique);
+    }
+    auto const tas = find_range(m_data->typeAliases, name);
+    if (begin(tas) == end(tas)) return true;
+    return !(begin(tas)->second->attrs & AttrUnique);
+  };
+  if (check(orig) && check(alias)) return true;
+  if (m_data->ever_frozen) return false;
+  std::lock_guard<std::mutex> lock{m_data->pending_class_aliases_mutex};
+  m_data->pending_class_aliases.emplace_back(orig, alias);
+  return true;
+}
+
+void Index::update_class_aliases() {
+  if (m_data->pending_class_aliases.empty()) return;
+  FTRACE(1, "Index needs rebuilding due to {} class aliases\n",
+         m_data->pending_class_aliases.size());
+  throw rebuild { std::move(m_data->pending_class_aliases) };
 }
 
 const CompactVector<borrowed_ptr<const php::Class>>*
@@ -3537,6 +3580,7 @@ bool Index::frozen() const {
 
 void Index::freeze() {
   m_data->frozen = true;
+  m_data->ever_frozen = true;
 }
 
 void Index::thaw() {

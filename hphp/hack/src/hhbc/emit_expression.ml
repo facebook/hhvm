@@ -666,10 +666,11 @@ and emit_xhp env p id attributes children =
    *  3) filename, for debugging
    *  4) line number, for debugging
    *)
-  let convert_xml_attr (name, v) = (A.SFlit name, v) in
-  let attributes = List.map ~f:convert_xml_attr attributes in
+  let convert_attr (name, v) = (A.SFlit name, Html_entities.decode_expr v) in
+  let attributes = List.map ~f:convert_attr attributes in
   let attribute_map = p, A.Shape attributes in
-  let children_vec = make_varray p children in
+  let dec_children = List.map ~f:Html_entities.decode_expr children in
+  let children_vec = make_varray p dec_children in
   let filename = p, A.Id (p, "__FILE__") in
   let line = p, A.Id (p, "__LINE__") in
   emit_expr ~need_ref:false env @@

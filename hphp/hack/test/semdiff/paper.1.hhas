@@ -1,0 +1,117 @@
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/paperexample.php starts here
+
+
+.filepath "/data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/paperexample.php";
+.adata A_0 = """v:0:{}""";
+.adata A_1 = """v:3:{a:2:{i:0;i:1;i:1;i:2;}a:2:{i:0;i:3;i:1;i:4;}a:2:{i:0;i:5;i:1;i:6;}}""";
+
+.main {
+  FPushFuncD 0 "test"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"HH\\vec<(Ta, Tc)>" "HH\\vec" hh_type extended_hint > silly(<"HH\\Traversable<(Ta, Tb)>" "HH\\Traversable" hh_type > $pairs, <"(function (Ta, Tb): Tc)" N  > $f) {
+  .numiters 1;
+  .declvars $result $a $b $e;
+  VerifyParamType $pairs
+  Vec @A_0
+  SetL $result
+  PopC
+  .try {
+    CGetL $pairs
+    IterInit 0 L0 _6
+    .try_fault F4 {
+      .try_fault F5 {
+      L1:
+        BaseL _6 Warn
+        QueryM 0 CGet EI:1
+        SetL $b
+        PopC
+        BaseL _6 Warn
+        QueryM 0 CGet EI:0
+        SetL $a
+        PopC
+        UnsetL _6
+      }
+      CGetL $f
+      FPushFunc 2
+      FPassL 0 $a Cell
+      FPassL 1 $b Cell
+      FCall 2
+      UnboxR
+      SetL _7
+      PopC
+      .try_fault F6 {
+        CGetL $a
+        CGetL _7
+        NewPackedArray 2
+      }
+      UnsetL _7
+      BaseL $result Define
+      SetM 0 W
+      PopC
+      IterNext 0 L1 _6
+    }
+  L0:
+    Jmp L2
+  } .catch {
+    Dup
+    InstanceOfD "Exception"
+    JmpZ L3
+    SetL $e
+    PopC
+    Jmp L2
+  L3:
+    Throw
+  }
+L2:
+  CGetL $result
+  VerifyRetTypeC
+  RetC
+F5:
+  UnsetL _6
+  Unwind
+F6:
+  UnsetL _7
+  Unwind
+F4:
+  IterFree 0
+  Unwind
+}
+
+.function <"HH\\void" N  > test() {
+  .declvars $p $f;
+  Vec @A_1
+  SetL $p
+  PopC
+  CreateCl 0 0
+  SetL $f
+  PopC
+  FPushFuncD 1 "var_dump"
+  FPushFuncD 2 "silly"
+  FPassL 0 $p Cell
+  FPassL 1 $f Cell
+  FCall 2
+  FPassR 0 Cell
+  FCall 1
+  PopR
+  Null
+  RetC
+}
+
+.class [no_override unique nontop] Closure$test;0 extends Closure {
+  .method [public static] <"" N  > __invoke(<"HH\\int" "HH\\int" hh_type > $x, <"HH\\int" "HH\\int" hh_type > $y) isClosureBody {
+    .declvars $0Closure;
+    VerifyParamType $x
+    VerifyParamType $y
+    CGetL $y
+    CGetL2 $x
+    Add
+    RetC
+  }
+}
+
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/paperexample.php ends here

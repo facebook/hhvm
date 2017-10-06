@@ -1067,6 +1067,7 @@ let equiv prog prog' startlabelpairs =
         check newpc newpc' asn (add_assumption (pc,pc') asn assumed)
           (add_todo newTodo asn todo)) in
 
+
     (* associativity of string concatenation *)
     let string_concat_concat_pattern =
       (uString $$ uConcat $$ uConcat)
@@ -1085,6 +1086,17 @@ let equiv prog prog' startlabelpairs =
         let newpc = (hs_of_pc pc, n) in
         let newpc' = (hs_of_pc pc', n') in
           check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
+
+     (* genuinely flipped conditional branches *)
+     let flipped_jump_pattern = (uJmpZ $*$ uJmpNZ) $| (uJmpNZ $*$ uJmpZ) in
+     let flipped_jump_action =
+       flipped_jump_pattern $>> (fun (lab,lab') ((_,n), (_,n')) ->
+         let newpc = (hs_of_pc pc, n) in
+         let newpc' = (hs_of_pc pc', n') in
+         let brpc = (hs_of_pc pc, LabelMap.find lab labelmap) in
+         let brpc' = (hs_of_pc pc', LabelMap.find lab' labelmap') in
+         check newpc brpc' asn (add_assumption (pc, pc') asn assumed)
+             (add_todo (brpc, newpc') asn todo)) in
 
     (* recognize closure creation *)
     let named_filter foo =
@@ -1313,6 +1325,7 @@ let equiv prog prog' startlabelpairs =
       set_pop_get_action_left;
       set_pop_get_action_right;
       notjmp_action;
+      flipped_jump_action;
       concat_string_either_action;
       fpassl_action;
       two_string_fatal_action;

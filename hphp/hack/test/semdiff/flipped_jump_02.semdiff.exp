@@ -1,0 +1,16 @@
+Semdiff failed
+pc=;2, pc'=;5, i=Int 0 i'=Int 1 asn={}{}
+Assumed=
+[;0,;0-><{}{}>]
+[;1,;1-><{}{}>]
+[;2,;4-><{}{}>]
+
+Todo=[;4,;2->{}{}]
+
+Distance = 1
+Size = 10
+Similarity = 90.91
+Edits = 
+
+- JmpNZ L1
++ JmpZ L1

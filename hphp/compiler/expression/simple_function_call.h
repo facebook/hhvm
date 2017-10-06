@@ -68,7 +68,6 @@ public:
   void setLocalThis(const std::string& name) { m_localThis = name; }
   bool isCallToFunction(folly::StringPiece name) const;
   std::string getFullName() const;
-  void resolveNSFallbackFunc(AnalysisResultConstRawPtr ar, FileScopePtr fs);
 
   void changeToBytecode() {
     m_changedToBytecode = true;

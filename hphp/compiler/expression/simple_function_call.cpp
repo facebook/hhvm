@@ -244,23 +244,6 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstRawPtr ar,
   }
 }
 
-void SimpleFunctionCall::resolveNSFallbackFunc(
-    AnalysisResultConstRawPtr ar, FileScopePtr fs) {
-  if (ar->findFunction(m_origName)) {
-    // the fully qualified name for this function exists, nothing to do
-    return;
-  }
-
-  int pos = m_origName.rfind('\\');
-  m_origName = m_origName.substr(pos + 1);
-  auto iter = FunctionTypeMap.find(m_origName);
-  assert(iter != FunctionTypeMap.end());
-  m_type = iter->second;
-  mungeIfSpecialFunction(ar, fs);
-  updateVtFlags();
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 

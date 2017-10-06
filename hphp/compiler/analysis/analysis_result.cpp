@@ -437,16 +437,6 @@ void AnalysisResult::checkClassDerivations() {
   }
 }
 
-void AnalysisResult::resolveNSFallbackFuncs() {
-  for (auto &pair : m_nsFallbackFuncs) {
-    auto sfc = static_pointer_cast<SimpleFunctionCall>(pair.first);
-    sfc->resolveNSFallbackFunc(
-      AnalysisResultConstRawPtr{this},
-      pair.second
-    );
-  }
-}
-
 void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
   for (const auto& iter : fs->getFunctions()) {
     FunctionScopePtr func = iter.second;
@@ -585,7 +575,6 @@ void AnalysisResult::analyzeProgram() {
   markRedeclaringClasses();
 
   checkClassDerivations();
-  resolveNSFallbackFuncs();
 
   // Analyze All
   Logger::Verbose("Analyzing All");

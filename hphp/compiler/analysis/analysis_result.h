@@ -316,8 +316,6 @@ private:
    */
   void checkClassDerivations();
 
-  void resolveNSFallbackFuncs();
-
   int getFileSize(FileScopePtr fs);
 };
 

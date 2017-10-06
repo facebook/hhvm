@@ -195,7 +195,6 @@ public:
   /**
    * Declarations
    */
-  bool declareFunction(FunctionScopePtr funcScope) const;
   bool declareClass(ClassScopePtr classScope) const;
   void declareUnknownClass(const std::string &name);
   bool declareConst(FileScopePtr fs, const std::string &name);
@@ -214,7 +213,6 @@ public:
    */
   std::vector<ClassScopePtr> findClasses(const std::string &className) const;
   ClassScopePtr findExactClass(ConstructPtr cs, const std::string &name) const;
-  FunctionScopePtr findFunction(const std::string &funcName) const ;
   BlockScopeConstPtr findConstantDeclarer(const std::string &constName) const {
     return const_cast<AnalysisResult*>(this)->findConstantDeclarer(constName);
   }
@@ -254,8 +252,6 @@ private:
   std::map<std::string, std::string> m_extraCodes;
 
   StringToClassScopePtrMap m_systemClasses;
-  StringToFunctionScopePtrMap m_functionDecs;
-  StringToFunctionScopePtrVecMap m_functionReDecs;
   StringToClassScopePtrVecMap m_classDecs;
   StringToFileScopePtrMap m_constDecs;
   std::set<std::string> m_constRedeclared;

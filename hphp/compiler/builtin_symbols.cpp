@@ -133,16 +133,12 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
       }
       cls->setSystem();
       ar->addSystemClass(cls);
-      for (const auto& func : cls->getFunctions()) {
-        FunctionScope::RecordFunctionInfo(func.first, func.second);
-      }
     }
 
     const auto& functions = file.second->getFunctions();
     for (const auto& func : functions) {
       func.second->setSystem();
       ar->addSystemFunction(func.second);
-      FunctionScope::RecordFunctionInfo(func.first, func.second);
     }
   }
 

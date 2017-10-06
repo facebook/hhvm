@@ -71,7 +71,7 @@ void FunctionStatement::onParse(AnalysisResultConstRawPtr ar,
   // as a function may be declared inside a class's method, yet this function
   // is a global function, not a class method.
   FunctionScopePtr fs = onInitialParse(ar, scope);
-  FunctionScope::RecordFunctionInfo(m_originalName, fs);
+  fs->recordParams();
   scope->addFunction(ar, fs);
 
   if (isNamed("__autoload")) {

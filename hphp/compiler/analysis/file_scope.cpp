@@ -160,27 +160,24 @@ void FileScope::makeParseFatal(AnalysisResultConstRawPtr ar,
   makeFatalMeth(*this, ar, msg, line, meth);
 }
 
-bool FileScope::addFunction(AnalysisResultConstRawPtr ar,
+void FileScope::addFunction(AnalysisResultConstRawPtr ar,
                             FunctionScopePtr funcScope) {
-  if (ar->declareFunction(funcScope)) {
-    FunctionScopePtr &fs = m_functions[funcScope->getScopeName()];
-    if (fs) {
-      if (!m_redeclaredFunctions) {
-        m_redeclaredFunctions = new StringToFunctionScopePtrVecMap;
-      }
-      auto& funcVec = (*m_redeclaredFunctions)[funcScope->getScopeName()];
-      if (!funcVec.size()) {
-        fs->setLocalRedeclaring();
-        funcVec.push_back(fs);
-      }
-      funcScope->setLocalRedeclaring();
-      funcVec.push_back(funcScope);
-    } else {
-      fs = funcScope;
-    }
-    return true;
+  FunctionScopePtr &fs = m_functions[funcScope->getScopeName()];
+  if (!fs) {
+    fs = funcScope;
+    return;
   }
-  return false;
+
+  if (!m_redeclaredFunctions) {
+    m_redeclaredFunctions = new StringToFunctionScopePtrVecMap;
+  }
+  auto& funcVec = (*m_redeclaredFunctions)[funcScope->getScopeName()];
+  if (!funcVec.size()) {
+    fs->setLocalRedeclaring();
+    funcVec.push_back(fs);
+  }
+  funcScope->setLocalRedeclaring();
+  funcVec.push_back(funcScope);
 }
 
 bool FileScope::addClass(AnalysisResultConstRawPtr ar,

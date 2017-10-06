@@ -120,8 +120,6 @@ struct FunctionScope : BlockScope,
   bool isFromTrait() const { return m_fromTrait; }
   void setFromTrait(bool f) { m_fromTrait = f; }
 
-  int nextInlineIndex() { return ++m_inlineIndex; }
-
   bool usesLSB() const { return !m_noLSB; }
   bool nextLSB() const { return m_nextLSB; }
   void setNextLSB(bool f) { m_nextLSB = f; }
@@ -191,14 +189,6 @@ struct FunctionScope : BlockScope,
   void setHasOverride() { m_hasOverride = true; }
   bool hasOverride() const { return m_hasOverride; }
 
-  /**
-   * Whether same function name was declared twice or more.
-   */
-  void setRedeclaring(int redecId) {
-    m_redeclaring = redecId;
-  }
-  bool isRedeclaring() const { return m_redeclaring >= 0;}
-
   void setLocalRedeclaring() { m_localRedeclaring = true; }
   bool isLocalRedeclaring() const { return m_localRedeclaring; }
 
@@ -224,48 +214,6 @@ struct FunctionScope : BlockScope,
     return m_pseudoMain;
   }
 
-  struct FunctionInfo {
-    explicit FunctionInfo(int rva = -1)
-      /*
-       * Note: m_maybeRefReturn used to implement an optimization to
-       * avoid unbox checks when we call functions where we know no
-       * function with that name returns by reference.  This isn't
-       * correct, however, because __call can return by reference, so
-       * it's disabled here.  (The default to enable it should be
-       * 'false'.)
-       */
-      : m_maybeRefReturn(true)
-      , m_refVarArg(rva)
-    {}
-
-    bool isRefParam(int p) const {
-      if (m_refVarArg >= 0 && p >= m_refVarArg) return true;
-      return (m_refParams.find(p) != m_refParams.end());
-    }
-
-    void setRefVarArg(int rva) {
-      if (rva > m_refVarArg) m_refVarArg = rva;
-    }
-
-    void setRefParam(int p) {
-      m_refParams.insert(p);
-    }
-
-    void setMaybeRefReturn() { m_maybeRefReturn = true; }
-    bool getMaybeRefReturn() { return m_maybeRefReturn; }
-
-  private:
-    bool m_maybeRefReturn;
-    int m_refVarArg; // -1: no ref varargs;
-                     // otherwise, any arg >= m_refVarArg is a reference
-    std::set<int> m_refParams; // set of ref arg positions
-  };
-
-  using FunctionInfoPtr = std::shared_ptr<FunctionInfo>;
-  using StringToFunctionInfoPtrMap = hphp_string_imap<FunctionInfoPtr>;
-  static void RecordFunctionInfo(std::string fname, FunctionScopePtr func);
-  static FunctionInfoPtr GetFunctionInfo(const std::string& fname);
-
   const StringData* getFatalMessage() const {
     return m_fatal_error_msg;
   }
@@ -276,10 +224,9 @@ struct FunctionScope : BlockScope,
     assert(m_fatal_error_msg != nullptr);
   }
 
+  void recordParams();
 private:
   void init(AnalysisResultConstRawPtr ar);
-
-  static StringToFunctionInfoPtrMap s_refParamInfo;
 
   int m_coerceMode{0};
   int m_minParam;
@@ -307,9 +254,6 @@ private:
   unsigned m_nextLSB : 1;
   unsigned m_localRedeclaring : 1;
   unsigned m_fromTrait : 1;
-
-  int m_redeclaring; // multiple definition of the same function
-  int m_inlineIndex;
 
   // holds the fact that defining this function is a fatal error
   const StringData* m_fatal_error_msg = nullptr;

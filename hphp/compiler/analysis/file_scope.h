@@ -103,7 +103,7 @@ public:
   void makeParseFatal(AnalysisResultConstRawPtr ar,
                       const std::string& msg, int line);
 
-  bool addFunction(AnalysisResultConstRawPtr ar, FunctionScopePtr funcScope);
+  void addFunction(AnalysisResultConstRawPtr ar, FunctionScopePtr funcScope);
   bool addClass(AnalysisResultConstRawPtr ar, ClassScopePtr classScope);
   const StringToFunctionScopePtrVecMap *getRedecFunctions() {
     return m_redeclaredFunctions;

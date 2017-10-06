@@ -371,7 +371,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstRawPtr ar,
       }
     }
   }
-  FunctionScope::RecordFunctionInfo(m_originalName, funcScope);
+  funcScope->recordParams();
 }
 
 void MethodStatement::fixupSelfAndParentTypehints(ClassScopePtr scope) {
@@ -475,7 +475,7 @@ void MethodStatement::addTraitMethodToScope(AnalysisResultConstRawPtr ar,
   FileScopeRawPtr fileScope = getFileScope();
   classScope->addFunction(ar, fileScope, funcScope);
   setSpecialMethod(fileScope, classScope);
-  FunctionScope::RecordFunctionInfo(m_originalName, funcScope);
+  funcScope->recordParams();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

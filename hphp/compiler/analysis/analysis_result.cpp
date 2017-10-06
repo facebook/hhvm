@@ -186,19 +186,6 @@ FileScopePtr AnalysisResult::findFileScope(const std::string &name) const {
   return FileScopePtr();
 }
 
-FunctionScopePtr AnalysisResult::findFunction(
-  const std::string &funcName) const {
-  auto bit = m_functions.find(funcName);
-  if (bit != m_functions.end()) {
-    return bit->second;
-  }
-  auto iter = m_functionDecs.find(funcName);
-  if (iter != m_functionDecs.end()) {
-    return iter->second;
-  }
-  return bit != m_functions.end() ? bit->second : FunctionScopePtr();
-}
-
 BlockScopePtr AnalysisResult::findConstantDeclarer(
   const std::string &name) {
   if (getConstants()->isPresent(name)) return shared_from_this();
@@ -271,29 +258,6 @@ int AnalysisResult::getClassCount() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
-  assert(m_phase < AnalyzeAll);
-
-  // System functions override
-  auto it = m_functions.find(funcScope->getScopeName());
-  if (it != m_functions.end()) {
-    // we need someone to hold on to a reference to it
-    // even though we're not going to do anything with it
-    this->lock()->m_ignoredScopes.push_back(funcScope);
-
-    std::string msg;
-    string_printf(
-      msg,
-      Strings::REDECLARE_BUILTIN,
-      funcScope->getScopeName().c_str()
-    );
-    funcScope->setFatal(msg);
-    return false;
-  }
-
-  return true;
-}
 
 bool AnalysisResult::declareClass(ClassScopePtr classScope) const {
   assert(m_phase < AnalyzeAll);
@@ -438,46 +402,6 @@ void AnalysisResult::checkClassDerivations() {
 }
 
 void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
-  for (const auto& iter : fs->getFunctions()) {
-    FunctionScopePtr func = iter.second;
-    if (!func->inPseudoMain()) {
-      FunctionScopePtr &funcDec = m_functionDecs[iter.first];
-      if (funcDec) {
-        assert(!funcDec->isSystem());
-        assert(!func->isSystem());
-        auto& funcVec = m_functionReDecs[iter.first];
-        int sz = funcVec.size();
-        if (!sz) {
-          funcDec->setRedeclaring(sz++);
-          funcVec.push_back(funcDec);
-        }
-        func->setRedeclaring(sz++);
-        funcVec.push_back(func);
-      } else {
-        funcDec = func;
-      }
-    }
-  }
-
-  if (const auto redec = fs->getRedecFunctions()) {
-    for (const auto &iter : *redec) {
-      auto i = iter.second.begin();
-      auto e = iter.second.end();
-      auto& funcDec = m_functionDecs[iter.first];
-      assert(funcDec); // because the first one was in funcs above
-      auto& funcVec = m_functionReDecs[iter.first];
-      int sz = funcVec.size();
-      if (!sz) {
-        funcDec->setRedeclaring(sz++);
-        funcVec.push_back(funcDec);
-      }
-      while (++i != e) { // we already added the first one
-        (*i)->setRedeclaring(sz++);
-        funcVec.push_back(*i);
-      }
-    }
-  }
-
   for (const auto& iter : fs->getClasses()) {
     auto& clsVec = m_classDecs[iter.first];
     clsVec.insert(clsVec.end(), iter.second.begin(), iter.second.end());

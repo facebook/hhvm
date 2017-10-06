@@ -72,8 +72,7 @@ FunctionScope::FunctionScope(AnalysisResultConstRawPtr ar, bool method,
       m_generator(false),
       m_async(false),
       m_noLSB(false), m_nextLSB(false), m_localRedeclaring(false),
-      m_fromTrait(false),
-      m_redeclaring(-1), m_inlineIndex(0) {
+      m_fromTrait(false) {
   init(ar);
 
   for (unsigned i = 0; i < attrs.size(); ++i) {
@@ -123,9 +122,7 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_async(orig->m_async),
       m_noLSB(orig->m_noLSB),
       m_nextLSB(orig->m_nextLSB), m_localRedeclaring(orig->m_localRedeclaring),
-      m_fromTrait(orig->m_fromTrait),
-      m_redeclaring(orig->m_redeclaring),
-      m_inlineIndex(orig->m_inlineIndex) {
+      m_fromTrait(orig->m_fromTrait) {
   init(ar);
   setParamCounts(ar, m_minParam, m_numDeclParams);
 }
@@ -183,7 +180,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_generator(false),
       m_async(false),
       m_noLSB(false), m_nextLSB(false), m_localRedeclaring(false),
-      m_fromTrait(false), m_redeclaring(-1), m_inlineIndex(0) {
+      m_fromTrait(false) {
   m_dynamicInvoke = false;
   if (!method && RuntimeOption::DynamicInvokeFunctions.count(name)) {
     setDynamicInvoke();
@@ -410,11 +407,7 @@ std::vector<ScalarExpressionPtr> FunctionScope::getUserAttributeParams(
 }
 
 std::string FunctionScope::getDocName() const {
-  auto const& name = getScopeName();
-  if (m_redeclaring < 0) {
-    return name;
-  }
-  return name + Option::IdPrefix + folly::to<std::string>(m_redeclaring);
+  return getScopeName();
 }
 
 std::string FunctionScope::getDocFullName() const {
@@ -484,42 +477,11 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.done();
 }
 
-FunctionScope::StringToFunctionInfoPtrMap FunctionScope::s_refParamInfo;
-static Mutex s_refParamInfoLock;
-
-void FunctionScope::RecordFunctionInfo(std::string fname,
-                                       FunctionScopePtr func) {
-  VariableTablePtr variables = func->getVariables();
-  if (Option::WholeProgram) {
-    Lock lock(s_refParamInfoLock);
-    FunctionInfoPtr &info = s_refParamInfo[fname];
-    if (!info) {
-      info = std::make_shared<FunctionInfo>();
-    }
-    if (func->isRefReturn()) {
-      info->setMaybeRefReturn();
-    }
-    if (func->isReferenceVariableArgument()) {
-      info->setRefVarArg(func->getMaxParamCount());
-    }
-    for (int i = 0; i < func->getMaxParamCount(); i++) {
-      if (func->isRefParam(i)) info->setRefParam(i);
-    }
-  }
-  auto limit = func->getDeclParamCount();
+void FunctionScope::recordParams() {
+  auto const variables = getVariables();
+  auto limit = getDeclParamCount();
   for (int i = 0; i < limit; i++) {
-    variables->addParam(func->getParamName(i),
+    variables->addParam(getParamName(i),
                         AnalysisResultPtr(), ConstructPtr());
   }
-}
-
-FunctionScope::FunctionInfoPtr FunctionScope::GetFunctionInfo(
-  const std::string& fname
-) {
-  assert(Option::WholeProgram);
-  auto it = s_refParamInfo.find(fname);
-  if (it == s_refParamInfo.end()) {
-    return FunctionInfoPtr();
-  }
-  return it->second;
 }

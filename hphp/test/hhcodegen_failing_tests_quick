@@ -15,7 +15,6 @@ quick/method_param_promotion_error.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/ns_existing_names_class.php
 quick/parse_fail_shapes.php
-quick/parse_fail_shapes2.php
 quick/parse_fail_shapes3.php
 quick/parse_fail_strict_hashbang_whitespace_start.php
 quick/parse_fail_type_constraint.php

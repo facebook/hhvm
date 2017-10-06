@@ -28,7 +28,7 @@ using CUCString = const unsigned char*;
 ALWAYS_INLINE
 static void getAffineMatrixElement(
     const Array& array, const String& key, double& ret) {
-  auto const value = tvToCell(array.rvalAt(key));
+  auto const value = array.rvalAt(key).unboxed();
   if (isNullType(value.type())) {
     IMAGICKDRAW_THROW(
       "AffineMatrix must contain keys: sx, rx, ry, sy, tx and ty");

@@ -285,7 +285,7 @@ const StaticString
   s_PHP_ROOT("PHP_ROOT");
 
 std::string& SourceRootInfo::initPhpRoot() {
-  auto const v = tvToCell(php_global(s_SERVER).toArray().rvalAt(s_PHP_ROOT));
+  auto const v = php_global(s_SERVER).toArray().rvalAt(s_PHP_ROOT).unboxed();
   if (isStringType(v.type())) {
     *s_phproot.getCheck() = std::string(v.val().pstr->data()) + "/";
   } else {

@@ -357,7 +357,7 @@ static Variant collator_convert_object_to_string(const Variant& obj) {
 static void collator_convert_array_from_utf16_to_utf8(Array &array,
                                                       UErrorCode * status) {
   for (ArrayIter iter(array); iter; ++iter) {
-    auto const rval = tvToCell(iter.secondRval());
+    auto const rval = iter.secondRval().unboxed();
     /* Process string values only. */
     if (!isStringType(rval.type())) continue;
     String str = intl_convert_str_utf16_to_utf8(
@@ -376,7 +376,7 @@ static void collator_convert_array_from_utf16_to_utf8(Array &array,
 static void collator_convert_array_from_utf8_to_utf16(Array &array,
                                                       UErrorCode * status) {
   for (ArrayIter iter(array); iter; ++iter) {
-    auto const rval = tvToCell(iter.secondRval());
+    auto const rval = iter.secondRval().unboxed();
     /* Process string values only. */
     if (!isStringType(rval.type())) continue;
     String str = intl_convert_str_utf8_to_utf16(

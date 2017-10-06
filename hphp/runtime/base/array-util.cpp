@@ -249,8 +249,7 @@ Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
 Variant ArrayUtil::CountValues(const Array& input) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    auto const rval = iter.secondRval();
-    auto const inner = tvToCell(rval);
+    auto const inner = iter.secondRval().unboxed();
     if (isIntType(inner.type()) || isStringType(inner.type())) {
       if (!ret.exists(inner.tv())) {
         ret.set(inner.tv(), make_tv<KindOfInt64>(1));

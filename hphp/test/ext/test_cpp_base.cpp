@@ -96,7 +96,7 @@ bool TestCppBase::TestVariantArrayRef() {
   VERIFY(tvCastToInt64(arr.toArray().rvalAt(sms).tv()) == 99);
 
   VERIFY(ml_arr.toArray().size() == 1);
-  VERIFY(isArrayLikeType(tvToCell(ml_arr.toArray().rvalAt(k1)).type()));
+  VERIFY(isArrayLikeType(ml_arr.toArray().rvalAt(k1).unboxed().type()));
   VERIFY(tvCastToBoolean(
     tvCastToArrayLike(
       tvCastToArrayLike(

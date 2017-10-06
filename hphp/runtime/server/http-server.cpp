@@ -276,13 +276,11 @@ void HttpServer::runOrExitProcess() {
             for (int i = 0; i < bt.size(); i++) {
               auto f = tvCastToArrayLike(bt.rvalAt(i).tv());
               if (f.exists(s_file)) {
-                auto s = tvCastToString(
-                  tvToCell(f.rvalAt(s_file)).tv()
-                ).toCppString();
+                auto s = tvCastToString(f.rvalAt(s_file).tv()).toCppString();
                 if (f.exists(s_line)) {
                   s += folly::sformat(
                     ":{}",
-                    tvCastToInt64(tvToCell(f.rvalAt(s_line)).tv())
+                    tvCastToInt64(f.rvalAt(s_line).tv())
                   );
                 }
                 frameStrings.emplace_back(std::move(s));

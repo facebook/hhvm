@@ -199,6 +199,16 @@ struct member_rval {
   static member_rval dummy();
   bool is_dummy() const;
 
+  /////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * Return `this' if the referenced value is already unboxed, else a rval to
+   * the inner value.
+   */
+  member_rval unboxed() const;
+
+  /////////////////////////////////////////////////////////////////////////////
+
 private:
   union {
     const HeapObject* m_base;

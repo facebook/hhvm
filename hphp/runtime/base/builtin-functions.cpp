@@ -95,11 +95,11 @@ bool array_is_valid_callback(const Array& arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
   }
-  auto const elem0 = tvToCell(arr.rvalAt(0));
+  auto const elem0 = arr.rvalAt(0).unboxed();
   if (!isStringType(elem0.type()) && !isObjectType(elem0.type())) {
     return false;
   }
-  auto const elem1 = tvToCell(arr.rvalAt(1));
+  auto const elem1 = arr.rvalAt(1).unboxed();
   if (!isStringType(elem1.type())) {
     return false;
   }
@@ -138,8 +138,8 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
 
   if (isArrayType(tv_func->m_type)) {
     auto const arr = Array(tv_func->m_data.parr);
-    auto const clsname = tvToCell(arr.rvalAt(int64_t(0)));
-    auto const mthname = tvToCell(arr.rvalAt(int64_t(1)));
+    auto const clsname = arr.rvalAt(int64_t(0)).unboxed();
+    auto const mthname = arr.rvalAt(int64_t(1)).unboxed();
 
     if (arr.size() != 2 ||
         clsname.is_dummy() ||

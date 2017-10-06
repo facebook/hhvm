@@ -237,10 +237,10 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   assert(!m_map.isNull());
   // Always normalize name before autoloading
   const String& name = normalizeNS(clsName);
-  auto const type_map = tvToCell(m_map.get()->get(kind));
+  auto const type_map = m_map.get()->get(kind).unboxed();
   if (!isArrayType(type_map.type())) return Failure;
   String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
-  auto const file = tvToCell(type_map.val().parr->get(canonicalName));
+  auto const file = type_map.val().parr->get(canonicalName).unboxed();
   bool ok = false;
   if (isStringType(file.type())) {
     String fName{file.val().pstr};
@@ -300,7 +300,7 @@ AutoloadHandler::loadFromMap(const String& clsName,
     Result res = loadFromMapImpl(clsName, kind, toLower, checkExists, err);
     if (res == Success) return Success;
     auto const func = m_map.get()->get(s_failure);
-    if (isNullType(tvToCell(func).type())) return Failure;
+    if (isNullType(func.unboxed().type())) return Failure;
     res = invokeFailureCallback(tvAsCVarRef(func.tv_ptr()), kind, clsName, err);
     if (checkExists()) return Success;
     if (res == RetryAutoloading) {
@@ -462,7 +462,7 @@ AutoloadHandler::loadFromMapPartial(const String& className,
   assert(res == Failure);
   if (!err.isNull()) {
     auto const func = m_map.get()->get(s_failure);
-    if (!isNullType(tvToCell(func).type())) {
+    if (!isNullType(func.unboxed().type())) {
       res = invokeFailureCallback(tvAsCVarRef(func.tv_ptr()),
                                   kind, className, err);
       assert(res != Failure);

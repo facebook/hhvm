@@ -288,7 +288,7 @@ std::vector<PointInfo> toPointInfoArray(const Array& coordinates) {
   int idx = 0;
 
   for (ArrayIter it(coordinates); it; ++it) {
-    auto const element = tvToCell(it.secondRvalPlus());
+    auto const element = it.secondRvalPlus().unboxed();
     if (!isArrayLikeType(element.type())) {
       return {};
     }

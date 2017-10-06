@@ -38,7 +38,7 @@
   name##_decrefs.reserve(params.size());              \
                                                       \
   for (ArrayIter iter(params); iter; ++iter) {        \
-    auto const param = tvToCell(iter.secondRval());   \
+    auto const param = iter.secondRval().unboxed();   \
     if (isNullType(param.type())) {                   \
       name.push_back(nullptr);                        \
     } else {                                          \

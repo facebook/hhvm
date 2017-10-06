@@ -583,7 +583,7 @@ struct CompactReader {
       while (fieldType != T_STOP) {
         bool readComplete = false;
 
-        auto const fieldSpecVariant = tvToCell(spec.rvalAt(fieldNum));
+        auto const fieldSpecVariant = spec.rvalAt(fieldNum).unboxed();
         if (!isNullType(fieldSpecVariant.type())) {
           auto fieldSpec = tvCastToArrayLike(fieldSpecVariant.tv());
 
@@ -715,7 +715,7 @@ struct CompactReader {
           return init_null();
 
         case T_STRUCT: {
-            auto const className = tvToCell(spec.rvalAt(s_class));
+            auto const className = spec.rvalAt(s_class).unboxed();
             if (isNullType(className.type())) {
               thrift_error("no class type in spec", ERR_INVALID_DATA);
             }

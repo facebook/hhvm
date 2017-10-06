@@ -333,7 +333,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
         gpc_elements.back().assignRef(tvAsVariant(lval.tv_ptr()));
       } else {
         String key(index, index_len, CopyString);
-        auto const v = tvToCell(symtable->rvalAt(key));
+        auto const v = symtable->rvalAt(key).unboxed();
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
           symtable->set(key, Array::Create());
         }

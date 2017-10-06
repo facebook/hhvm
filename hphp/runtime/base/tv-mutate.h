@@ -89,10 +89,10 @@ ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
 ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }
-ALWAYS_INLINE member_rval tvToCell(member_rval tv) {
-  return LIKELY(tv.type() != KindOfRef)
-    ? tv
-    : member_rval { tv.val().pref, tv.val().pref->tv() };
+inline member_rval member_rval::unboxed() const {
+  return LIKELY(type() != KindOfRef)
+    ? *this
+    : member_rval { val().pref, val().pref->tv() };
 }
 
 /*

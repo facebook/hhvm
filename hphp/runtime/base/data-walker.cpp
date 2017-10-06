@@ -43,7 +43,7 @@ void DataWalker::traverseData(ArrayData* data,
       if (canStopWalk(features)) return;
     }
 
-    auto const inner = tvToCell(rval);
+    auto const inner = rval.unboxed();
     // cheap enough, do it always
     features.hasRefCountReference = isRefcountedType(inner.type());
     if (inner.type() == KindOfObject) {

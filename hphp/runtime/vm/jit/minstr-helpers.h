@@ -986,7 +986,7 @@ uint64_t arrayIssetImpl(ArrayData* a, key_type<keyType> key) {
     : a->rval(key);
   return !rval
     ? 0
-    : !isNullType(tvToCell(rval).type());
+    : !isNullType(rval.unboxed().type());
 }
 
 #define ARRAY_ISSET_HELPER_TABLE(m)                             \

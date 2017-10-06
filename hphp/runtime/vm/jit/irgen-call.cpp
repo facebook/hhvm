@@ -73,8 +73,8 @@ findCuf(Op /*op*/, SSATmp* callable, const Func* ctxFunc, const Class*& cls,
     sname = makeStaticString(name.substr(pos + 2).get());
   } else if (arr) {
     if (arr->size() != 2) return nullptr;
-    auto const e0 = tvToCell(arr->get(int64_t(0), false));
-    auto const e1 = tvToCell(arr->get(int64_t(1), false));
+    auto const e0 = arr->get(int64_t(0), false).unboxed();
+    auto const e1 = arr->get(int64_t(1), false).unboxed();
     if (!isStringType(e0.type()) || !isStringType(e1.type())) return nullptr;
     sclass = e0.val().pstr;
     sname = e1.val().pstr;

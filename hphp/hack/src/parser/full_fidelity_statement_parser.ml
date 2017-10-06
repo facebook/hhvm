@@ -41,6 +41,10 @@ module WithExpressionAndDeclAndTypeParser
     | Foreach -> parse_foreach_statement parser
     | Do -> parse_do_statement parser
     | While -> parse_while_statement parser
+    | Using -> parse_using_statement parser (make_missing ())
+    | Await when peek_token_kind ~lookahead:1 parser = Using ->
+      let parser, await_kw = assert_token parser Await in
+      parse_using_statement parser await_kw
     | If -> parse_if_statement parser
     | Switch -> parse_switch_statement parser
     | Try -> parse_try_statement parser
@@ -262,6 +266,31 @@ module WithExpressionAndDeclAndTypeParser
     let syntax = make_while_statement while_keyword_token left_paren_token
       expr_node right_paren_token statement_node in
     (parser, syntax)
+
+  (* SPEC:
+    using-statement:
+      await-opt   using   expression   ;
+      await-opt   using   (   expression-list   )   compound-statement
+
+    TODO: Update the specification of the grammar
+   *)
+  and parse_using_statement parser await_kw =
+    let (parser, using_kw) = assert_token parser Using in
+    (* Decision point - Are we at a function scope or a body scope *)
+    let (parser1, expr) = parse_expression parser in
+    let (parser1, token) = next_token parser1 in
+    match Token.kind token with
+    | Semicolon ->
+      let semi = make_token token in
+      parser1, make_using_statement_function_scoped await_kw using_kw expr semi
+    | _ ->
+      let (parser, left_paren) = require_left_paren parser in
+      let (parser, expressions) = parse_comma_list
+        parser RightParen SyntaxError.error1015 parse_expression in
+      let (parser, right_paren) = require_right_paren parser in
+      let (parser, statements) = parse_statement parser in
+      parser, make_using_statement_block_scoped
+        await_kw using_kw left_paren expressions right_paren statements
 
   and parse_unset_statement parser =
     (*

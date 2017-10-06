@@ -590,6 +590,34 @@ let schema : schema_node list =
       ; "semicolon", Token
       ]
     }
+  ; { kind_name   = "UsingStatementBlockScoped"
+    ; type_name   = "using_statement_block_scoped"
+    ; func_name   = "using_statement_block_scoped"
+    ; description = "using_statement_block_scoped"
+    ; prefix      = "using_block"
+    ; aggregates  = [ TopLevelDeclaration; Statement ]
+    ; fields =
+      [ "await_keyword", ZeroOrOne Token
+      ; "using_keyword", Token
+      ; "left_paren", Token
+      ; "expressions", ZeroOrMore (Aggregate Expression)
+      ; "right_paren", Token
+      ; "body", Aggregate Statement
+      ]
+    }
+  ; { kind_name   = "UsingStatementFunctionScoped"
+    ; type_name   = "using_statement_function_scoped"
+    ; func_name   = "using_statement_function_scoped"
+    ; description = "using_statement_function_scoped"
+    ; prefix      = "using_function"
+    ; aggregates  = [ TopLevelDeclaration; Statement ]
+    ; fields =
+      [ "await_keyword", ZeroOrOne Token
+      ; "using_keyword", Token
+      ; "expression", Aggregate Expression
+      ; "semicolon", Token
+      ]
+    }
   ; { kind_name   = "WhileStatement"
     ; type_name   = "while_statement"
     ; func_name   = "while_statement"
@@ -657,7 +685,7 @@ let schema : schema_node list =
       ; "condition", Aggregate Expression
       ; "right_paren", Token
       ; "colon", Token
-      ; "statements", ZeroOrMore (Aggregate Statement)
+      ; "statement", ZeroOrMore (Aggregate Statement)
       ; "elseif_colon_clauses", ZeroOrMore (Just "ElseifColonClause")
       ; "else_colon_clause", ZeroOrOne (Just "ElseColonClause")
       ; "endif_keyword", Token
@@ -676,7 +704,7 @@ let schema : schema_node list =
       ; "condition", Aggregate Expression
       ; "right_paren", Token
       ; "colon", Token
-      ; "statements", ZeroOrMore (Aggregate Statement)
+      ; "statement", ZeroOrMore (Aggregate Statement)
       ]
     }
   ; { kind_name   = "ElseColonClause"
@@ -688,7 +716,7 @@ let schema : schema_node list =
     ; fields =
       [ "keyword", Token
       ; "colon", Token
-      ; "statements", ZeroOrMore (Aggregate Statement)
+      ; "statement", ZeroOrMore (Aggregate Statement)
       ]
     }
   ; { kind_name   = "TryStatement"

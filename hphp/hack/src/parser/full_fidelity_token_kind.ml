@@ -114,6 +114,7 @@ type t =
   | Type
   | Unset
   | Use
+  | Using
   | Var
   | Varray
   | Vec
@@ -314,6 +315,7 @@ let from_string keyword =
   | "type"         -> Some Type
   | "unset"        -> Some Unset
   | "use"          -> Some Use
+  | "using"        -> Some Using
   | "var"          -> Some Var
   | "varray"       -> Some Varray
   | "vec"          -> Some Vec
@@ -486,6 +488,7 @@ let to_string kind =
   | Type                          -> "type"
   | Unset                         -> "unset"
   | Use                           -> "use"
+  | Using                         -> "using"
   | Var                           -> "var"
   | Varray                        -> "varray"
   | Vec                           -> "vec"

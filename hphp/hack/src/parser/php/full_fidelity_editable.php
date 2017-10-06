@@ -238,6 +238,10 @@ abstract class EditableSyntax implements ArrayAccess {
       return MarkupSuffix::from_json($json, $position, $source);
     case 'unset_statement':
       return UnsetStatement::from_json($json, $position, $source);
+    case 'using_statement_block_scoped':
+      return UsingStatementBlockScoped::from_json($json, $position, $source);
+    case 'using_statement_function_scoped':
+      return UsingStatementFunctionScoped::from_json($json, $position, $source);
     case 'while_statement':
       return WhileStatement::from_json($json, $position, $source);
     case 'if_statement':
@@ -961,6 +965,8 @@ abstract class EditableToken extends EditableSyntax {
        return new UnsetToken($leading, $trailing);
     case 'use':
        return new UseToken($leading, $trailing);
+    case 'using':
+       return new UsingToken($leading, $trailing);
     case 'var':
        return new VarToken($leading, $trailing);
     case 'varray':
@@ -2594,6 +2600,21 @@ final class UseToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): UseToken {
     return new UseToken($this->leading(), $trailing);
+  }
+}
+final class UsingToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('using', $leading, $trailing, 'using');
+  }
+
+  public function with_leading(EditableSyntax $leading): UsingToken {
+    return new UsingToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): UsingToken {
+    return new UsingToken($this->leading(), $trailing);
   }
 }
 final class VarToken extends EditableToken {
@@ -9257,6 +9278,278 @@ final class UnsetStatement extends EditableSyntax {
     yield $this->_left_paren;
     yield $this->_variables;
     yield $this->_right_paren;
+    yield $this->_semicolon;
+    yield break;
+  }
+}
+final class UsingStatementBlockScoped extends EditableSyntax {
+  private EditableSyntax $_await_keyword;
+  private EditableSyntax $_using_keyword;
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_expressions;
+  private EditableSyntax $_right_paren;
+  private EditableSyntax $_body;
+  public function __construct(
+    EditableSyntax $await_keyword,
+    EditableSyntax $using_keyword,
+    EditableSyntax $left_paren,
+    EditableSyntax $expressions,
+    EditableSyntax $right_paren,
+    EditableSyntax $body) {
+    parent::__construct('using_statement_block_scoped');
+    $this->_await_keyword = $await_keyword;
+    $this->_using_keyword = $using_keyword;
+    $this->_left_paren = $left_paren;
+    $this->_expressions = $expressions;
+    $this->_right_paren = $right_paren;
+    $this->_body = $body;
+  }
+  public function await_keyword(): EditableSyntax {
+    return $this->_await_keyword;
+  }
+  public function using_keyword(): EditableSyntax {
+    return $this->_using_keyword;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function expressions(): EditableSyntax {
+    return $this->_expressions;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function body(): EditableSyntax {
+    return $this->_body;
+  }
+  public function with_await_keyword(EditableSyntax $await_keyword): UsingStatementBlockScoped {
+    return new UsingStatementBlockScoped(
+      $await_keyword,
+      $this->_using_keyword,
+      $this->_left_paren,
+      $this->_expressions,
+      $this->_right_paren,
+      $this->_body);
+  }
+  public function with_using_keyword(EditableSyntax $using_keyword): UsingStatementBlockScoped {
+    return new UsingStatementBlockScoped(
+      $this->_await_keyword,
+      $using_keyword,
+      $this->_left_paren,
+      $this->_expressions,
+      $this->_right_paren,
+      $this->_body);
+  }
+  public function with_left_paren(EditableSyntax $left_paren): UsingStatementBlockScoped {
+    return new UsingStatementBlockScoped(
+      $this->_await_keyword,
+      $this->_using_keyword,
+      $left_paren,
+      $this->_expressions,
+      $this->_right_paren,
+      $this->_body);
+  }
+  public function with_expressions(EditableSyntax $expressions): UsingStatementBlockScoped {
+    return new UsingStatementBlockScoped(
+      $this->_await_keyword,
+      $this->_using_keyword,
+      $this->_left_paren,
+      $expressions,
+      $this->_right_paren,
+      $this->_body);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): UsingStatementBlockScoped {
+    return new UsingStatementBlockScoped(
+      $this->_await_keyword,
+      $this->_using_keyword,
+      $this->_left_paren,
+      $this->_expressions,
+      $right_paren,
+      $this->_body);
+  }
+  public function with_body(EditableSyntax $body): UsingStatementBlockScoped {
+    return new UsingStatementBlockScoped(
+      $this->_await_keyword,
+      $this->_using_keyword,
+      $this->_left_paren,
+      $this->_expressions,
+      $this->_right_paren,
+      $body);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $await_keyword = $this->await_keyword()->rewrite($rewriter, $new_parents);
+    $using_keyword = $this->using_keyword()->rewrite($rewriter, $new_parents);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $expressions = $this->expressions()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    $body = $this->body()->rewrite($rewriter, $new_parents);
+    if (
+      $await_keyword === $this->await_keyword() &&
+      $using_keyword === $this->using_keyword() &&
+      $left_paren === $this->left_paren() &&
+      $expressions === $this->expressions() &&
+      $right_paren === $this->right_paren() &&
+      $body === $this->body()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new UsingStatementBlockScoped(
+        $await_keyword,
+        $using_keyword,
+        $left_paren,
+        $expressions,
+        $right_paren,
+        $body), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $await_keyword = EditableSyntax::from_json(
+      $json->using_block_await_keyword, $position, $source);
+    $position += $await_keyword->width();
+    $using_keyword = EditableSyntax::from_json(
+      $json->using_block_using_keyword, $position, $source);
+    $position += $using_keyword->width();
+    $left_paren = EditableSyntax::from_json(
+      $json->using_block_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $expressions = EditableSyntax::from_json(
+      $json->using_block_expressions, $position, $source);
+    $position += $expressions->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->using_block_right_paren, $position, $source);
+    $position += $right_paren->width();
+    $body = EditableSyntax::from_json(
+      $json->using_block_body, $position, $source);
+    $position += $body->width();
+    return new UsingStatementBlockScoped(
+        $await_keyword,
+        $using_keyword,
+        $left_paren,
+        $expressions,
+        $right_paren,
+        $body);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_await_keyword;
+    yield $this->_using_keyword;
+    yield $this->_left_paren;
+    yield $this->_expressions;
+    yield $this->_right_paren;
+    yield $this->_body;
+    yield break;
+  }
+}
+final class UsingStatementFunctionScoped extends EditableSyntax {
+  private EditableSyntax $_await_keyword;
+  private EditableSyntax $_using_keyword;
+  private EditableSyntax $_expression;
+  private EditableSyntax $_semicolon;
+  public function __construct(
+    EditableSyntax $await_keyword,
+    EditableSyntax $using_keyword,
+    EditableSyntax $expression,
+    EditableSyntax $semicolon) {
+    parent::__construct('using_statement_function_scoped');
+    $this->_await_keyword = $await_keyword;
+    $this->_using_keyword = $using_keyword;
+    $this->_expression = $expression;
+    $this->_semicolon = $semicolon;
+  }
+  public function await_keyword(): EditableSyntax {
+    return $this->_await_keyword;
+  }
+  public function using_keyword(): EditableSyntax {
+    return $this->_using_keyword;
+  }
+  public function expression(): EditableSyntax {
+    return $this->_expression;
+  }
+  public function semicolon(): EditableSyntax {
+    return $this->_semicolon;
+  }
+  public function with_await_keyword(EditableSyntax $await_keyword): UsingStatementFunctionScoped {
+    return new UsingStatementFunctionScoped(
+      $await_keyword,
+      $this->_using_keyword,
+      $this->_expression,
+      $this->_semicolon);
+  }
+  public function with_using_keyword(EditableSyntax $using_keyword): UsingStatementFunctionScoped {
+    return new UsingStatementFunctionScoped(
+      $this->_await_keyword,
+      $using_keyword,
+      $this->_expression,
+      $this->_semicolon);
+  }
+  public function with_expression(EditableSyntax $expression): UsingStatementFunctionScoped {
+    return new UsingStatementFunctionScoped(
+      $this->_await_keyword,
+      $this->_using_keyword,
+      $expression,
+      $this->_semicolon);
+  }
+  public function with_semicolon(EditableSyntax $semicolon): UsingStatementFunctionScoped {
+    return new UsingStatementFunctionScoped(
+      $this->_await_keyword,
+      $this->_using_keyword,
+      $this->_expression,
+      $semicolon);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $await_keyword = $this->await_keyword()->rewrite($rewriter, $new_parents);
+    $using_keyword = $this->using_keyword()->rewrite($rewriter, $new_parents);
+    $expression = $this->expression()->rewrite($rewriter, $new_parents);
+    $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
+    if (
+      $await_keyword === $this->await_keyword() &&
+      $using_keyword === $this->using_keyword() &&
+      $expression === $this->expression() &&
+      $semicolon === $this->semicolon()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new UsingStatementFunctionScoped(
+        $await_keyword,
+        $using_keyword,
+        $expression,
+        $semicolon), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $await_keyword = EditableSyntax::from_json(
+      $json->using_function_await_keyword, $position, $source);
+    $position += $await_keyword->width();
+    $using_keyword = EditableSyntax::from_json(
+      $json->using_function_using_keyword, $position, $source);
+    $position += $using_keyword->width();
+    $expression = EditableSyntax::from_json(
+      $json->using_function_expression, $position, $source);
+    $position += $expression->width();
+    $semicolon = EditableSyntax::from_json(
+      $json->using_function_semicolon, $position, $source);
+    $position += $semicolon->width();
+    return new UsingStatementFunctionScoped(
+        $await_keyword,
+        $using_keyword,
+        $expression,
+        $semicolon);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_await_keyword;
+    yield $this->_using_keyword;
+    yield $this->_expression;
     yield $this->_semicolon;
     yield break;
   }

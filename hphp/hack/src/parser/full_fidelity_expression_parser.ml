@@ -1071,6 +1071,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Type
     | Unset
     | Use
+    | Using
     | Var
     | Varray
     | Vec

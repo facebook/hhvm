@@ -104,6 +104,8 @@ module WithToken(Token: TokenType) = struct
       | MarkupSection                           _ -> SyntaxKind.MarkupSection
       | MarkupSuffix                            _ -> SyntaxKind.MarkupSuffix
       | UnsetStatement                          _ -> SyntaxKind.UnsetStatement
+      | UsingStatementBlockScoped               _ -> SyntaxKind.UsingStatementBlockScoped
+      | UsingStatementFunctionScoped            _ -> SyntaxKind.UsingStatementFunctionScoped
       | WhileStatement                          _ -> SyntaxKind.WhileStatement
       | IfStatement                             _ -> SyntaxKind.IfStatement
       | ElseifClause                            _ -> SyntaxKind.ElseifClause
@@ -269,6 +271,8 @@ module WithToken(Token: TokenType) = struct
     let is_markup_section                               = has_kind SyntaxKind.MarkupSection
     let is_markup_suffix                                = has_kind SyntaxKind.MarkupSuffix
     let is_unset_statement                              = has_kind SyntaxKind.UnsetStatement
+    let is_using_statement_block_scoped                 = has_kind SyntaxKind.UsingStatementBlockScoped
+    let is_using_statement_function_scoped              = has_kind SyntaxKind.UsingStatementFunctionScoped
     let is_while_statement                              = has_kind SyntaxKind.WhileStatement
     let is_if_statement                                 = has_kind SyntaxKind.IfStatement
     let is_elseif_clause                                = has_kind SyntaxKind.ElseifClause
@@ -918,6 +922,34 @@ module WithToken(Token: TokenType) = struct
       unset_variables,
       unset_right_paren,
       unset_semicolon
+    )
+
+    let get_using_statement_block_scoped_children {
+      using_block_await_keyword;
+      using_block_using_keyword;
+      using_block_left_paren;
+      using_block_expressions;
+      using_block_right_paren;
+      using_block_body;
+    } = (
+      using_block_await_keyword,
+      using_block_using_keyword,
+      using_block_left_paren,
+      using_block_expressions,
+      using_block_right_paren,
+      using_block_body
+    )
+
+    let get_using_statement_function_scoped_children {
+      using_function_await_keyword;
+      using_function_using_keyword;
+      using_function_expression;
+      using_function_semicolon;
+    } = (
+      using_function_await_keyword,
+      using_function_using_keyword,
+      using_function_expression,
+      using_function_semicolon
     )
 
     let get_while_statement_children {
@@ -2630,6 +2662,32 @@ module WithToken(Token: TokenType) = struct
         unset_right_paren;
         unset_semicolon;
       ]
+      | UsingStatementBlockScoped {
+        using_block_await_keyword;
+        using_block_using_keyword;
+        using_block_left_paren;
+        using_block_expressions;
+        using_block_right_paren;
+        using_block_body;
+      } -> [
+        using_block_await_keyword;
+        using_block_using_keyword;
+        using_block_left_paren;
+        using_block_expressions;
+        using_block_right_paren;
+        using_block_body;
+      ]
+      | UsingStatementFunctionScoped {
+        using_function_await_keyword;
+        using_function_using_keyword;
+        using_function_expression;
+        using_function_semicolon;
+      } -> [
+        using_function_await_keyword;
+        using_function_using_keyword;
+        using_function_expression;
+        using_function_semicolon;
+      ]
       | WhileStatement {
         while_keyword;
         while_left_paren;
@@ -4231,6 +4289,32 @@ module WithToken(Token: TokenType) = struct
         "unset_variables";
         "unset_right_paren";
         "unset_semicolon";
+      ]
+      | UsingStatementBlockScoped {
+        using_block_await_keyword;
+        using_block_using_keyword;
+        using_block_left_paren;
+        using_block_expressions;
+        using_block_right_paren;
+        using_block_body;
+      } -> [
+        "using_block_await_keyword";
+        "using_block_using_keyword";
+        "using_block_left_paren";
+        "using_block_expressions";
+        "using_block_right_paren";
+        "using_block_body";
+      ]
+      | UsingStatementFunctionScoped {
+        using_function_await_keyword;
+        using_function_using_keyword;
+        using_function_expression;
+        using_function_semicolon;
+      } -> [
+        "using_function_await_keyword";
+        "using_function_using_keyword";
+        "using_function_expression";
+        "using_function_semicolon";
       ]
       | WhileStatement {
         while_keyword;
@@ -5932,6 +6016,34 @@ module WithToken(Token: TokenType) = struct
           unset_variables;
           unset_right_paren;
           unset_semicolon;
+        }
+      | (SyntaxKind.UsingStatementBlockScoped, [
+          using_block_await_keyword;
+          using_block_using_keyword;
+          using_block_left_paren;
+          using_block_expressions;
+          using_block_right_paren;
+          using_block_body;
+        ]) ->
+        UsingStatementBlockScoped {
+          using_block_await_keyword;
+          using_block_using_keyword;
+          using_block_left_paren;
+          using_block_expressions;
+          using_block_right_paren;
+          using_block_body;
+        }
+      | (SyntaxKind.UsingStatementFunctionScoped, [
+          using_function_await_keyword;
+          using_function_using_keyword;
+          using_function_expression;
+          using_function_semicolon;
+        ]) ->
+        UsingStatementFunctionScoped {
+          using_function_await_keyword;
+          using_function_using_keyword;
+          using_function_expression;
+          using_function_semicolon;
         }
       | (SyntaxKind.WhileStatement, [
           while_keyword;
@@ -7766,6 +7878,36 @@ module WithToken(Token: TokenType) = struct
         unset_variables;
         unset_right_paren;
         unset_semicolon;
+      ]
+
+    let make_using_statement_block_scoped
+      using_block_await_keyword
+      using_block_using_keyword
+      using_block_left_paren
+      using_block_expressions
+      using_block_right_paren
+      using_block_body
+    =
+      from_children SyntaxKind.UsingStatementBlockScoped [
+        using_block_await_keyword;
+        using_block_using_keyword;
+        using_block_left_paren;
+        using_block_expressions;
+        using_block_right_paren;
+        using_block_body;
+      ]
+
+    let make_using_statement_function_scoped
+      using_function_await_keyword
+      using_function_using_keyword
+      using_function_expression
+      using_function_semicolon
+    =
+      from_children SyntaxKind.UsingStatementFunctionScoped [
+        using_function_await_keyword;
+        using_function_using_keyword;
+        using_function_expression;
+        using_function_semicolon;
       ]
 
     let make_while_statement

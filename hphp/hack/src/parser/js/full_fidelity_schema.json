@@ -1,6 +1,6 @@
 { "description" :
   "Auto-generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-09-12-0001",
+  "version" : "2017-10-02-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -203,6 +203,8 @@
       "token_text" : "unset" },
     { "token_kind" : "Use",
       "token_text" : "use" },
+    { "token_kind" : "Using",
+      "token_text" : "using" },
     { "token_kind" : "Var",
       "token_text" : "var" },
     { "token_kind" : "Varray",
@@ -845,6 +847,28 @@
         { "field_name" : "left_paren" },
         { "field_name" : "variables" },
         { "field_name" : "right_paren" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "UsingStatementBlockScoped",
+      "type_name" : "using_statement_block_scoped",
+      "description" : "using_statement_block_scoped",
+      "prefix" : "using_block",
+      "fields" : [
+        { "field_name" : "await_keyword" },
+        { "field_name" : "using_keyword" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "expressions" },
+        { "field_name" : "right_paren" },
+        { "field_name" : "body" }
+      ] },
+    { "kind_name" : "UsingStatementFunctionScoped",
+      "type_name" : "using_statement_function_scoped",
+      "description" : "using_statement_function_scoped",
+      "prefix" : "using_function",
+      "fields" : [
+        { "field_name" : "await_keyword" },
+        { "field_name" : "using_keyword" },
+        { "field_name" : "expression" },
         { "field_name" : "semicolon" }
       ] },
     { "kind_name" : "WhileStatement",

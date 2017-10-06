@@ -642,6 +642,32 @@ let rec get_doc node =
     let start_block = indent_block_no_space left_part condition right indt in
     handle_compound_brace_prefix_indent start_block while_body indt
     |> add_break
+  | UsingStatementBlockScoped
+    { using_block_await_keyword
+    ; using_block_using_keyword
+    ; using_block_left_paren
+    ; using_block_expressions
+    ; using_block_right_paren
+    ; using_block_body } ->
+    let await_keyword = get_doc using_block_await_keyword in
+    let using_keyword = get_doc using_block_using_keyword in
+    let left = get_doc using_block_left_paren in
+    let expressions = get_doc using_block_expressions in
+    let right = get_doc using_block_right_paren in
+    let left_part = group_doc (await_keyword ^| using_keyword ^| left) in
+    let start_block = indent_block_no_space left_part expressions right indt in
+    handle_compound_brace_prefix_indent start_block using_block_body indt
+    |> add_break
+  | UsingStatementFunctionScoped
+    { using_function_await_keyword
+    ; using_function_using_keyword
+    ; using_function_expression
+    ; using_function_semicolon } ->
+    let await_keyword = get_doc using_function_await_keyword in
+    let using_keyword = get_doc using_function_using_keyword in
+    let expression = get_doc using_function_expression in
+    let semi = get_doc using_function_semicolon in
+    group_doc (await_keyword ^| using_keyword ^| expression ^^^ semi)
   | IfStatement
     { if_keyword; if_left_paren; if_condition; if_right_paren; if_statement;
       if_elseif_clauses; if_else_clause }->

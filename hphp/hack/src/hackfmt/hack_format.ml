@@ -605,6 +605,32 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         handle_possible_compound_statement x.while_body;
         Newline;
       ]
+    | UsingStatementBlockScoped x ->
+      Concat [
+        t x.using_block_await_keyword;
+        when_present x.using_block_await_keyword space;
+        t x.using_block_using_keyword;
+        Space;
+        t x.using_block_left_paren;
+        Split;
+        WithRule (Rule.Parental, Concat [
+          Nest [handle_possible_list x.using_block_expressions];
+          Split;
+          t x.using_block_right_paren;
+        ]);
+        handle_possible_compound_statement x.using_block_body;
+        Newline;
+      ]
+    | UsingStatementFunctionScoped x ->
+      Concat [
+        t x.using_function_await_keyword;
+        when_present x.using_function_await_keyword space;
+        t x.using_function_using_keyword;
+        Space;
+        t x.using_function_expression;
+        t x.using_function_semicolon;
+        Newline;
+      ]
     | IfStatement x ->
       let (kw, left_p, condition, right_p, if_body,
         elseif_clauses, else_clause) = get_if_statement_children x in

@@ -754,6 +754,36 @@ module FromMinimal = struct
           ; unset_right_paren
           ; unset_semicolon
           }, results
+      | SyntaxKind.UsingStatementBlockScoped
+      , (  using_block_body
+        :: using_block_right_paren
+        :: using_block_expressions
+        :: using_block_left_paren
+        :: using_block_using_keyword
+        :: using_block_await_keyword
+        :: results
+        ) ->
+          UsingStatementBlockScoped
+          { using_block_await_keyword
+          ; using_block_using_keyword
+          ; using_block_left_paren
+          ; using_block_expressions
+          ; using_block_right_paren
+          ; using_block_body
+          }, results
+      | SyntaxKind.UsingStatementFunctionScoped
+      , (  using_function_semicolon
+        :: using_function_expression
+        :: using_function_using_keyword
+        :: using_function_await_keyword
+        :: results
+        ) ->
+          UsingStatementFunctionScoped
+          { using_function_await_keyword
+          ; using_function_using_keyword
+          ; using_function_expression
+          ; using_function_semicolon
+          }, results
       | SyntaxKind.WhileStatement
       , (  while_body
         :: while_right_paren
@@ -2640,6 +2670,34 @@ module FromMinimal = struct
         let todo = Convert (unset_variables, todo) in
         let todo = Convert (unset_left_paren, todo) in
         convert offset todo results unset_keyword
+    | { M.syntax = M.UsingStatementBlockScoped
+        { M.using_block_await_keyword
+        ; M.using_block_using_keyword
+        ; M.using_block_left_paren
+        ; M.using_block_expressions
+        ; M.using_block_right_paren
+        ; M.using_block_body
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (using_block_body, todo) in
+        let todo = Convert (using_block_right_paren, todo) in
+        let todo = Convert (using_block_expressions, todo) in
+        let todo = Convert (using_block_left_paren, todo) in
+        let todo = Convert (using_block_using_keyword, todo) in
+        convert offset todo results using_block_await_keyword
+    | { M.syntax = M.UsingStatementFunctionScoped
+        { M.using_function_await_keyword
+        ; M.using_function_using_keyword
+        ; M.using_function_expression
+        ; M.using_function_semicolon
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (using_function_semicolon, todo) in
+        let todo = Convert (using_function_expression, todo) in
+        let todo = Convert (using_function_using_keyword, todo) in
+        convert offset todo results using_function_await_keyword
     | { M.syntax = M.WhileStatement
         { M.while_keyword
         ; M.while_left_paren

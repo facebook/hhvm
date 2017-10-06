@@ -128,6 +128,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.MarkupSection _ -> tag validate_markup_section (fun x -> TLDMarkupSection x) x
     | Syntax.MarkupSuffix _ -> tag validate_markup_suffix (fun x -> TLDMarkupSuffix x) x
     | Syntax.UnsetStatement _ -> tag validate_unset_statement (fun x -> TLDUnset x) x
+    | Syntax.UsingStatementBlockScoped _ -> tag validate_using_statement_block_scoped (fun x -> TLDUsingStatementBlockScoped x) x
+    | Syntax.UsingStatementFunctionScoped _ -> tag validate_using_statement_function_scoped (fun x -> TLDUsingStatementFunctionScoped x) x
     | Syntax.WhileStatement _ -> tag validate_while_statement (fun x -> TLDWhile x) x
     | Syntax.IfStatement _ -> tag validate_if_statement (fun x -> TLDIf x) x
     | Syntax.IfEndIfStatement _ -> tag validate_if_endif_statement (fun x -> TLDIfEndIf x) x
@@ -148,38 +150,40 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | s -> aggregation_fail Def.TopLevelDeclaration s
   and invalidate_top_level_declaration : top_level_declaration invalidator = fun (value, thing) ->
     match thing with
-    | TLDEndOfFile          thing -> invalidate_end_of_file                    (value, thing)
-    | TLDEnum               thing -> invalidate_enum_declaration               (value, thing)
-    | TLDAlias              thing -> invalidate_alias_declaration              (value, thing)
-    | TLDNamespace          thing -> invalidate_namespace_declaration          (value, thing)
-    | TLDNamespaceUse       thing -> invalidate_namespace_use_declaration      (value, thing)
-    | TLDNamespaceGroupUse  thing -> invalidate_namespace_group_use_declaration (value, thing)
-    | TLDFunction           thing -> invalidate_function_declaration           (value, thing)
-    | TLDClassish           thing -> invalidate_classish_declaration           (value, thing)
-    | TLDConst              thing -> invalidate_const_declaration              (value, thing)
-    | TLDInclusionDirective thing -> invalidate_inclusion_directive            (value, thing)
-    | TLDCompound           thing -> invalidate_compound_statement             (value, thing)
-    | TLDExpression         thing -> invalidate_expression_statement           (value, thing)
-    | TLDMarkupSection      thing -> invalidate_markup_section                 (value, thing)
-    | TLDMarkupSuffix       thing -> invalidate_markup_suffix                  (value, thing)
-    | TLDUnset              thing -> invalidate_unset_statement                (value, thing)
-    | TLDWhile              thing -> invalidate_while_statement                (value, thing)
-    | TLDIf                 thing -> invalidate_if_statement                   (value, thing)
-    | TLDIfEndIf            thing -> invalidate_if_endif_statement             (value, thing)
-    | TLDTry                thing -> invalidate_try_statement                  (value, thing)
-    | TLDDo                 thing -> invalidate_do_statement                   (value, thing)
-    | TLDFor                thing -> invalidate_for_statement                  (value, thing)
-    | TLDForeach            thing -> invalidate_foreach_statement              (value, thing)
-    | TLDSwitchFallthrough  thing -> invalidate_switch_fallthrough             (value, thing)
-    | TLDReturn             thing -> invalidate_return_statement               (value, thing)
-    | TLDGotoLabel          thing -> invalidate_goto_label                     (value, thing)
-    | TLDGoto               thing -> invalidate_goto_statement                 (value, thing)
-    | TLDThrow              thing -> invalidate_throw_statement                (value, thing)
-    | TLDBreak              thing -> invalidate_break_statement                (value, thing)
-    | TLDContinue           thing -> invalidate_continue_statement             (value, thing)
-    | TLDFunctionStatic     thing -> invalidate_function_static_statement      (value, thing)
-    | TLDEcho               thing -> invalidate_echo_statement                 (value, thing)
-    | TLDGlobal             thing -> invalidate_global_statement               (value, thing)
+    | TLDEndOfFile                    thing -> invalidate_end_of_file                    (value, thing)
+    | TLDEnum                         thing -> invalidate_enum_declaration               (value, thing)
+    | TLDAlias                        thing -> invalidate_alias_declaration              (value, thing)
+    | TLDNamespace                    thing -> invalidate_namespace_declaration          (value, thing)
+    | TLDNamespaceUse                 thing -> invalidate_namespace_use_declaration      (value, thing)
+    | TLDNamespaceGroupUse            thing -> invalidate_namespace_group_use_declaration (value, thing)
+    | TLDFunction                     thing -> invalidate_function_declaration           (value, thing)
+    | TLDClassish                     thing -> invalidate_classish_declaration           (value, thing)
+    | TLDConst                        thing -> invalidate_const_declaration              (value, thing)
+    | TLDInclusionDirective           thing -> invalidate_inclusion_directive            (value, thing)
+    | TLDCompound                     thing -> invalidate_compound_statement             (value, thing)
+    | TLDExpression                   thing -> invalidate_expression_statement           (value, thing)
+    | TLDMarkupSection                thing -> invalidate_markup_section                 (value, thing)
+    | TLDMarkupSuffix                 thing -> invalidate_markup_suffix                  (value, thing)
+    | TLDUnset                        thing -> invalidate_unset_statement                (value, thing)
+    | TLDUsingStatementBlockScoped    thing -> invalidate_using_statement_block_scoped   (value, thing)
+    | TLDUsingStatementFunctionScoped thing -> invalidate_using_statement_function_scoped (value, thing)
+    | TLDWhile                        thing -> invalidate_while_statement                (value, thing)
+    | TLDIf                           thing -> invalidate_if_statement                   (value, thing)
+    | TLDIfEndIf                      thing -> invalidate_if_endif_statement             (value, thing)
+    | TLDTry                          thing -> invalidate_try_statement                  (value, thing)
+    | TLDDo                           thing -> invalidate_do_statement                   (value, thing)
+    | TLDFor                          thing -> invalidate_for_statement                  (value, thing)
+    | TLDForeach                      thing -> invalidate_foreach_statement              (value, thing)
+    | TLDSwitchFallthrough            thing -> invalidate_switch_fallthrough             (value, thing)
+    | TLDReturn                       thing -> invalidate_return_statement               (value, thing)
+    | TLDGotoLabel                    thing -> invalidate_goto_label                     (value, thing)
+    | TLDGoto                         thing -> invalidate_goto_statement                 (value, thing)
+    | TLDThrow                        thing -> invalidate_throw_statement                (value, thing)
+    | TLDBreak                        thing -> invalidate_break_statement                (value, thing)
+    | TLDContinue                     thing -> invalidate_continue_statement             (value, thing)
+    | TLDFunctionStatic               thing -> invalidate_function_static_statement      (value, thing)
+    | TLDEcho                         thing -> invalidate_echo_statement                 (value, thing)
+    | TLDGlobal                       thing -> invalidate_global_statement               (value, thing)
   and validate_expression : expression validator = fun x ->
     match Syntax.syntax x with
     | Syntax.LiteralExpression _ -> tag validate_literal_expression (fun x -> ExprLiteral x) x
@@ -360,6 +364,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.MarkupSection _ -> tag validate_markup_section (fun x -> StmtMarkupSection x) x
     | Syntax.MarkupSuffix _ -> tag validate_markup_suffix (fun x -> StmtMarkupSuffix x) x
     | Syntax.UnsetStatement _ -> tag validate_unset_statement (fun x -> StmtUnset x) x
+    | Syntax.UsingStatementBlockScoped _ -> tag validate_using_statement_block_scoped (fun x -> StmtUsingStatementBlockScoped x) x
+    | Syntax.UsingStatementFunctionScoped _ -> tag validate_using_statement_function_scoped (fun x -> StmtUsingStatementFunctionScoped x) x
     | Syntax.WhileStatement _ -> tag validate_while_statement (fun x -> StmtWhile x) x
     | Syntax.IfStatement _ -> tag validate_if_statement (fun x -> StmtIf x) x
     | Syntax.IfEndIfStatement _ -> tag validate_if_endif_statement (fun x -> StmtIfEndIf x) x
@@ -382,31 +388,33 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | s -> aggregation_fail Def.Statement s
   and invalidate_statement : statement invalidator = fun (value, thing) ->
     match thing with
-    | StmtInclusionDirective thing -> invalidate_inclusion_directive            (value, thing)
-    | StmtCompound           thing -> invalidate_compound_statement             (value, thing)
-    | StmtExpression         thing -> invalidate_expression_statement           (value, thing)
-    | StmtMarkupSection      thing -> invalidate_markup_section                 (value, thing)
-    | StmtMarkupSuffix       thing -> invalidate_markup_suffix                  (value, thing)
-    | StmtUnset              thing -> invalidate_unset_statement                (value, thing)
-    | StmtWhile              thing -> invalidate_while_statement                (value, thing)
-    | StmtIf                 thing -> invalidate_if_statement                   (value, thing)
-    | StmtIfEndIf            thing -> invalidate_if_endif_statement             (value, thing)
-    | StmtTry                thing -> invalidate_try_statement                  (value, thing)
-    | StmtDo                 thing -> invalidate_do_statement                   (value, thing)
-    | StmtFor                thing -> invalidate_for_statement                  (value, thing)
-    | StmtForeach            thing -> invalidate_foreach_statement              (value, thing)
-    | StmtSwitch             thing -> invalidate_switch_statement               (value, thing)
-    | StmtSwitchFallthrough  thing -> invalidate_switch_fallthrough             (value, thing)
-    | StmtReturn             thing -> invalidate_return_statement               (value, thing)
-    | StmtGotoLabel          thing -> invalidate_goto_label                     (value, thing)
-    | StmtGoto               thing -> invalidate_goto_statement                 (value, thing)
-    | StmtThrow              thing -> invalidate_throw_statement                (value, thing)
-    | StmtBreak              thing -> invalidate_break_statement                (value, thing)
-    | StmtContinue           thing -> invalidate_continue_statement             (value, thing)
-    | StmtFunctionStatic     thing -> invalidate_function_static_statement      (value, thing)
-    | StmtEcho               thing -> invalidate_echo_statement                 (value, thing)
-    | StmtGlobal             thing -> invalidate_global_statement               (value, thing)
-    | StmtTypeConstant       thing -> invalidate_type_constant                  (value, thing)
+    | StmtInclusionDirective           thing -> invalidate_inclusion_directive            (value, thing)
+    | StmtCompound                     thing -> invalidate_compound_statement             (value, thing)
+    | StmtExpression                   thing -> invalidate_expression_statement           (value, thing)
+    | StmtMarkupSection                thing -> invalidate_markup_section                 (value, thing)
+    | StmtMarkupSuffix                 thing -> invalidate_markup_suffix                  (value, thing)
+    | StmtUnset                        thing -> invalidate_unset_statement                (value, thing)
+    | StmtUsingStatementBlockScoped    thing -> invalidate_using_statement_block_scoped   (value, thing)
+    | StmtUsingStatementFunctionScoped thing -> invalidate_using_statement_function_scoped (value, thing)
+    | StmtWhile                        thing -> invalidate_while_statement                (value, thing)
+    | StmtIf                           thing -> invalidate_if_statement                   (value, thing)
+    | StmtIfEndIf                      thing -> invalidate_if_endif_statement             (value, thing)
+    | StmtTry                          thing -> invalidate_try_statement                  (value, thing)
+    | StmtDo                           thing -> invalidate_do_statement                   (value, thing)
+    | StmtFor                          thing -> invalidate_for_statement                  (value, thing)
+    | StmtForeach                      thing -> invalidate_foreach_statement              (value, thing)
+    | StmtSwitch                       thing -> invalidate_switch_statement               (value, thing)
+    | StmtSwitchFallthrough            thing -> invalidate_switch_fallthrough             (value, thing)
+    | StmtReturn                       thing -> invalidate_return_statement               (value, thing)
+    | StmtGotoLabel                    thing -> invalidate_goto_label                     (value, thing)
+    | StmtGoto                         thing -> invalidate_goto_statement                 (value, thing)
+    | StmtThrow                        thing -> invalidate_throw_statement                (value, thing)
+    | StmtBreak                        thing -> invalidate_break_statement                (value, thing)
+    | StmtContinue                     thing -> invalidate_continue_statement             (value, thing)
+    | StmtFunctionStatic               thing -> invalidate_function_static_statement      (value, thing)
+    | StmtEcho                         thing -> invalidate_echo_statement                 (value, thing)
+    | StmtGlobal                       thing -> invalidate_global_statement               (value, thing)
+    | StmtTypeConstant                 thing -> invalidate_type_constant                  (value, thing)
   and validate_switch_label : switch_label validator = fun x ->
     match Syntax.syntax x with
     | Syntax.CaseLabel _ -> tag validate_case_label (fun x -> SwitchCase x) x
@@ -1407,6 +1415,46 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
+  and validate_using_statement_block_scoped : using_statement_block_scoped validator = function
+  | { Syntax.syntax = Syntax.UsingStatementBlockScoped x; value = v } -> v,
+    { using_block_body = validate_statement x.Syntax.using_block_body
+    ; using_block_right_paren = validate_token x.Syntax.using_block_right_paren
+    ; using_block_expressions = validate_list_with (validate_expression) x.Syntax.using_block_expressions
+    ; using_block_left_paren = validate_token x.Syntax.using_block_left_paren
+    ; using_block_using_keyword = validate_token x.Syntax.using_block_using_keyword
+    ; using_block_await_keyword = validate_option_with (validate_token) x.Syntax.using_block_await_keyword
+    }
+  | s -> validation_fail SyntaxKind.UsingStatementBlockScoped s
+  and invalidate_using_statement_block_scoped : using_statement_block_scoped invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.UsingStatementBlockScoped
+      { Syntax.using_block_await_keyword = invalidate_option_with (invalidate_token) x.using_block_await_keyword
+      ; Syntax.using_block_using_keyword = invalidate_token x.using_block_using_keyword
+      ; Syntax.using_block_left_paren = invalidate_token x.using_block_left_paren
+      ; Syntax.using_block_expressions = invalidate_list_with (invalidate_expression) x.using_block_expressions
+      ; Syntax.using_block_right_paren = invalidate_token x.using_block_right_paren
+      ; Syntax.using_block_body = invalidate_statement x.using_block_body
+      }
+    ; Syntax.value = v
+    }
+  and validate_using_statement_function_scoped : using_statement_function_scoped validator = function
+  | { Syntax.syntax = Syntax.UsingStatementFunctionScoped x; value = v } -> v,
+    { using_function_semicolon = validate_token x.Syntax.using_function_semicolon
+    ; using_function_expression = validate_expression x.Syntax.using_function_expression
+    ; using_function_using_keyword = validate_token x.Syntax.using_function_using_keyword
+    ; using_function_await_keyword = validate_option_with (validate_token) x.Syntax.using_function_await_keyword
+    }
+  | s -> validation_fail SyntaxKind.UsingStatementFunctionScoped s
+  and invalidate_using_statement_function_scoped : using_statement_function_scoped invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.UsingStatementFunctionScoped
+      { Syntax.using_function_await_keyword = invalidate_option_with (invalidate_token) x.using_function_await_keyword
+      ; Syntax.using_function_using_keyword = invalidate_token x.using_function_using_keyword
+      ; Syntax.using_function_expression = invalidate_expression x.using_function_expression
+      ; Syntax.using_function_semicolon = invalidate_token x.using_function_semicolon
+      }
+    ; Syntax.value = v
+    }
   and validate_while_statement : while_statement validator = function
   | { Syntax.syntax = Syntax.WhileStatement x; value = v } -> v,
     { while_body = validate_statement x.Syntax.while_body
@@ -1491,7 +1539,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; if_endif_endif_keyword = validate_token x.Syntax.if_endif_endif_keyword
     ; if_endif_else_colon_clause = validate_option_with (validate_else_colon_clause) x.Syntax.if_endif_else_colon_clause
     ; if_endif_elseif_colon_clauses = validate_list_with (validate_elseif_colon_clause) x.Syntax.if_endif_elseif_colon_clauses
-    ; if_endif_statement = validate_statement x.Syntax.if_endif_statement
+    ; if_endif_statement = validate_list_with (validate_statement) x.Syntax.if_endif_statement
     ; if_endif_colon = validate_token x.Syntax.if_endif_colon
     ; if_endif_right_paren = validate_token x.Syntax.if_endif_right_paren
     ; if_endif_condition = validate_expression x.Syntax.if_endif_condition
@@ -1507,7 +1555,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; Syntax.if_endif_condition = invalidate_expression x.if_endif_condition
       ; Syntax.if_endif_right_paren = invalidate_token x.if_endif_right_paren
       ; Syntax.if_endif_colon = invalidate_token x.if_endif_colon
-      ; Syntax.if_endif_statement = invalidate_statement x.if_endif_statement
+      ; Syntax.if_endif_statement = invalidate_list_with (invalidate_statement) x.if_endif_statement
       ; Syntax.if_endif_elseif_colon_clauses = invalidate_list_with (invalidate_elseif_colon_clause) x.if_endif_elseif_colon_clauses
       ; Syntax.if_endif_else_colon_clause = invalidate_option_with (invalidate_else_colon_clause) x.if_endif_else_colon_clause
       ; Syntax.if_endif_endif_keyword = invalidate_token x.if_endif_endif_keyword
@@ -1517,7 +1565,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and validate_elseif_colon_clause : elseif_colon_clause validator = function
   | { Syntax.syntax = Syntax.ElseifColonClause x; value = v } -> v,
-    { elseif_colon_statement = validate_statement x.Syntax.elseif_colon_statement
+    { elseif_colon_statement = validate_list_with (validate_statement) x.Syntax.elseif_colon_statement
     ; elseif_colon_colon = validate_token x.Syntax.elseif_colon_colon
     ; elseif_colon_right_paren = validate_token x.Syntax.elseif_colon_right_paren
     ; elseif_colon_condition = validate_expression x.Syntax.elseif_colon_condition
@@ -1533,13 +1581,13 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; Syntax.elseif_colon_condition = invalidate_expression x.elseif_colon_condition
       ; Syntax.elseif_colon_right_paren = invalidate_token x.elseif_colon_right_paren
       ; Syntax.elseif_colon_colon = invalidate_token x.elseif_colon_colon
-      ; Syntax.elseif_colon_statement = invalidate_statement x.elseif_colon_statement
+      ; Syntax.elseif_colon_statement = invalidate_list_with (invalidate_statement) x.elseif_colon_statement
       }
     ; Syntax.value = v
     }
   and validate_else_colon_clause : else_colon_clause validator = function
   | { Syntax.syntax = Syntax.ElseColonClause x; value = v } -> v,
-    { else_colon_statement = validate_statement x.Syntax.else_colon_statement
+    { else_colon_statement = validate_list_with (validate_statement) x.Syntax.else_colon_statement
     ; else_colon_colon = validate_token x.Syntax.else_colon_colon
     ; else_colon_keyword = validate_token x.Syntax.else_colon_keyword
     }
@@ -1549,7 +1597,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.ElseColonClause
       { Syntax.else_colon_keyword = invalidate_token x.else_colon_keyword
       ; Syntax.else_colon_colon = invalidate_token x.else_colon_colon
-      ; Syntax.else_colon_statement = invalidate_statement x.else_colon_statement
+      ; Syntax.else_colon_statement = invalidate_list_with (invalidate_statement) x.else_colon_statement
       }
     ; Syntax.value = v
     }

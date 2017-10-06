@@ -332,6 +332,20 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; unset_right_paren                                  : t
     ; unset_semicolon                                    : t
     }
+  and using_statement_block_scoped =
+    { using_block_await_keyword                          : t
+    ; using_block_using_keyword                          : t
+    ; using_block_left_paren                             : t
+    ; using_block_expressions                            : t
+    ; using_block_right_paren                            : t
+    ; using_block_body                                   : t
+    }
+  and using_statement_function_scoped =
+    { using_function_await_keyword                       : t
+    ; using_function_using_keyword                       : t
+    ; using_function_expression                          : t
+    ; using_function_semicolon                           : t
+    }
   and while_statement =
     { while_keyword                                      : t
     ; while_left_paren                                   : t
@@ -1001,6 +1015,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | MarkupSection                           of markup_section
   | MarkupSuffix                            of markup_suffix
   | UnsetStatement                          of unset_statement
+  | UsingStatementBlockScoped               of using_statement_block_scoped
+  | UsingStatementFunctionScoped            of using_statement_function_scoped
   | WhileStatement                          of while_statement
   | IfStatement                             of if_statement
   | ElseifClause                            of elseif_clause
@@ -1121,38 +1137,40 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | MissingList
   | SingletonList of 'a value
   and top_level_declaration =
-  | TLDEndOfFile          of end_of_file
-  | TLDEnum               of enum_declaration
-  | TLDAlias              of alias_declaration
-  | TLDNamespace          of namespace_declaration
-  | TLDNamespaceUse       of namespace_use_declaration
-  | TLDNamespaceGroupUse  of namespace_group_use_declaration
-  | TLDFunction           of function_declaration
-  | TLDClassish           of classish_declaration
-  | TLDConst              of const_declaration
-  | TLDInclusionDirective of inclusion_directive
-  | TLDCompound           of compound_statement
-  | TLDExpression         of expression_statement
-  | TLDMarkupSection      of markup_section
-  | TLDMarkupSuffix       of markup_suffix
-  | TLDUnset              of unset_statement
-  | TLDWhile              of while_statement
-  | TLDIf                 of if_statement
-  | TLDIfEndIf            of if_endif_statement
-  | TLDTry                of try_statement
-  | TLDDo                 of do_statement
-  | TLDFor                of for_statement
-  | TLDForeach            of foreach_statement
-  | TLDSwitchFallthrough  of switch_fallthrough
-  | TLDReturn             of return_statement
-  | TLDGotoLabel          of goto_label
-  | TLDGoto               of goto_statement
-  | TLDThrow              of throw_statement
-  | TLDBreak              of break_statement
-  | TLDContinue           of continue_statement
-  | TLDFunctionStatic     of function_static_statement
-  | TLDEcho               of echo_statement
-  | TLDGlobal             of global_statement
+  | TLDEndOfFile                    of end_of_file
+  | TLDEnum                         of enum_declaration
+  | TLDAlias                        of alias_declaration
+  | TLDNamespace                    of namespace_declaration
+  | TLDNamespaceUse                 of namespace_use_declaration
+  | TLDNamespaceGroupUse            of namespace_group_use_declaration
+  | TLDFunction                     of function_declaration
+  | TLDClassish                     of classish_declaration
+  | TLDConst                        of const_declaration
+  | TLDInclusionDirective           of inclusion_directive
+  | TLDCompound                     of compound_statement
+  | TLDExpression                   of expression_statement
+  | TLDMarkupSection                of markup_section
+  | TLDMarkupSuffix                 of markup_suffix
+  | TLDUnset                        of unset_statement
+  | TLDUsingStatementBlockScoped    of using_statement_block_scoped
+  | TLDUsingStatementFunctionScoped of using_statement_function_scoped
+  | TLDWhile                        of while_statement
+  | TLDIf                           of if_statement
+  | TLDIfEndIf                      of if_endif_statement
+  | TLDTry                          of try_statement
+  | TLDDo                           of do_statement
+  | TLDFor                          of for_statement
+  | TLDForeach                      of foreach_statement
+  | TLDSwitchFallthrough            of switch_fallthrough
+  | TLDReturn                       of return_statement
+  | TLDGotoLabel                    of goto_label
+  | TLDGoto                         of goto_statement
+  | TLDThrow                        of throw_statement
+  | TLDBreak                        of break_statement
+  | TLDContinue                     of continue_statement
+  | TLDFunctionStatic               of function_static_statement
+  | TLDEcho                         of echo_statement
+  | TLDGlobal                       of global_statement
   and expression =
   | ExprLiteral                       of literal_expression
   | ExprVariable                      of variable_expression
@@ -1234,31 +1252,33 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | BodyXHPCategory       of xhp_category_declaration
   | BodyXHPClassAttribute of xhp_class_attribute_declaration
   and statement =
-  | StmtInclusionDirective of inclusion_directive
-  | StmtCompound           of compound_statement
-  | StmtExpression         of expression_statement
-  | StmtMarkupSection      of markup_section
-  | StmtMarkupSuffix       of markup_suffix
-  | StmtUnset              of unset_statement
-  | StmtWhile              of while_statement
-  | StmtIf                 of if_statement
-  | StmtIfEndIf            of if_endif_statement
-  | StmtTry                of try_statement
-  | StmtDo                 of do_statement
-  | StmtFor                of for_statement
-  | StmtForeach            of foreach_statement
-  | StmtSwitch             of switch_statement
-  | StmtSwitchFallthrough  of switch_fallthrough
-  | StmtReturn             of return_statement
-  | StmtGotoLabel          of goto_label
-  | StmtGoto               of goto_statement
-  | StmtThrow              of throw_statement
-  | StmtBreak              of break_statement
-  | StmtContinue           of continue_statement
-  | StmtFunctionStatic     of function_static_statement
-  | StmtEcho               of echo_statement
-  | StmtGlobal             of global_statement
-  | StmtTypeConstant       of type_constant
+  | StmtInclusionDirective           of inclusion_directive
+  | StmtCompound                     of compound_statement
+  | StmtExpression                   of expression_statement
+  | StmtMarkupSection                of markup_section
+  | StmtMarkupSuffix                 of markup_suffix
+  | StmtUnset                        of unset_statement
+  | StmtUsingStatementBlockScoped    of using_statement_block_scoped
+  | StmtUsingStatementFunctionScoped of using_statement_function_scoped
+  | StmtWhile                        of while_statement
+  | StmtIf                           of if_statement
+  | StmtIfEndIf                      of if_endif_statement
+  | StmtTry                          of try_statement
+  | StmtDo                           of do_statement
+  | StmtFor                          of for_statement
+  | StmtForeach                      of foreach_statement
+  | StmtSwitch                       of switch_statement
+  | StmtSwitchFallthrough            of switch_fallthrough
+  | StmtReturn                       of return_statement
+  | StmtGotoLabel                    of goto_label
+  | StmtGoto                         of goto_statement
+  | StmtThrow                        of throw_statement
+  | StmtBreak                        of break_statement
+  | StmtContinue                     of continue_statement
+  | StmtFunctionStatic               of function_static_statement
+  | StmtEcho                         of echo_statement
+  | StmtGlobal                       of global_statement
+  | StmtTypeConstant                 of type_constant
   and switch_label =
   | SwitchCase    of case_label
   | SwitchDefault of default_label
@@ -1616,6 +1636,20 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; unset_right_paren: Token.t value
     ; unset_semicolon: Token.t value
     }
+  and using_statement_block_scoped =
+    { using_block_await_keyword: Token.t option value
+    ; using_block_using_keyword: Token.t value
+    ; using_block_left_paren: Token.t value
+    ; using_block_expressions: expression listesque value
+    ; using_block_right_paren: Token.t value
+    ; using_block_body: statement value
+    }
+  and using_statement_function_scoped =
+    { using_function_await_keyword: Token.t option value
+    ; using_function_using_keyword: Token.t value
+    ; using_function_expression: expression value
+    ; using_function_semicolon: Token.t value
+    }
   and while_statement =
     { while_keyword: Token.t value
     ; while_left_paren: Token.t value
@@ -1649,7 +1683,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; if_endif_condition: expression value
     ; if_endif_right_paren: Token.t value
     ; if_endif_colon: Token.t value
-    ; if_endif_statement: statement value
+    ; if_endif_statement: statement listesque value
     ; if_endif_elseif_colon_clauses: elseif_colon_clause listesque value
     ; if_endif_else_colon_clause: else_colon_clause option value
     ; if_endif_endif_keyword: Token.t value
@@ -1661,12 +1695,12 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; elseif_colon_condition: expression value
     ; elseif_colon_right_paren: Token.t value
     ; elseif_colon_colon: Token.t value
-    ; elseif_colon_statement: statement value
+    ; elseif_colon_statement: statement listesque value
     }
   and else_colon_clause =
     { else_colon_keyword: Token.t value
     ; else_colon_colon: Token.t value
-    ; else_colon_statement: statement value
+    ; else_colon_statement: statement listesque value
     }
   and try_statement =
     { try_keyword: Token.t value

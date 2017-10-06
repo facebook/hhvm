@@ -175,6 +175,10 @@ class EditableSyntax
       return MarkupSuffix.from_json(json, position, source);
     case 'unset_statement':
       return UnsetStatement.from_json(json, position, source);
+    case 'using_statement_block_scoped':
+      return UsingStatementBlockScoped.from_json(json, position, source);
+    case 'using_statement_function_scoped':
+      return UsingStatementFunctionScoped.from_json(json, position, source);
     case 'while_statement':
       return WhileStatement.from_json(json, position, source);
     case 'if_statement':
@@ -856,6 +860,8 @@ class EditableToken extends EditableSyntax
        return new UnsetToken(leading, trailing);
     case 'use':
        return new UseToken(leading, trailing);
+    case 'using':
+       return new UsingToken(leading, trailing);
     case 'var':
        return new VarToken(leading, trailing);
     case 'varray':
@@ -1755,6 +1761,13 @@ class UseToken extends EditableToken
   constructor(leading, trailing)
   {
     super('use', leading, trailing, 'use');
+  }
+}
+class UsingToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('using', leading, trailing, 'using');
   }
 }
 class VarToken extends EditableToken
@@ -7385,6 +7398,262 @@ class UnsetStatement extends EditableSyntax
         'right_paren',
         'semicolon'];
     return UnsetStatement._children_keys;
+  }
+}
+class UsingStatementBlockScoped extends EditableSyntax
+{
+  constructor(
+    await_keyword,
+    using_keyword,
+    left_paren,
+    expressions,
+    right_paren,
+    body)
+  {
+    super('using_statement_block_scoped', {
+      await_keyword: await_keyword,
+      using_keyword: using_keyword,
+      left_paren: left_paren,
+      expressions: expressions,
+      right_paren: right_paren,
+      body: body });
+  }
+  get await_keyword() { return this.children.await_keyword; }
+  get using_keyword() { return this.children.using_keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get expressions() { return this.children.expressions; }
+  get right_paren() { return this.children.right_paren; }
+  get body() { return this.children.body; }
+  with_await_keyword(await_keyword){
+    return new UsingStatementBlockScoped(
+      await_keyword,
+      this.using_keyword,
+      this.left_paren,
+      this.expressions,
+      this.right_paren,
+      this.body);
+  }
+  with_using_keyword(using_keyword){
+    return new UsingStatementBlockScoped(
+      this.await_keyword,
+      using_keyword,
+      this.left_paren,
+      this.expressions,
+      this.right_paren,
+      this.body);
+  }
+  with_left_paren(left_paren){
+    return new UsingStatementBlockScoped(
+      this.await_keyword,
+      this.using_keyword,
+      left_paren,
+      this.expressions,
+      this.right_paren,
+      this.body);
+  }
+  with_expressions(expressions){
+    return new UsingStatementBlockScoped(
+      this.await_keyword,
+      this.using_keyword,
+      this.left_paren,
+      expressions,
+      this.right_paren,
+      this.body);
+  }
+  with_right_paren(right_paren){
+    return new UsingStatementBlockScoped(
+      this.await_keyword,
+      this.using_keyword,
+      this.left_paren,
+      this.expressions,
+      right_paren,
+      this.body);
+  }
+  with_body(body){
+    return new UsingStatementBlockScoped(
+      this.await_keyword,
+      this.using_keyword,
+      this.left_paren,
+      this.expressions,
+      this.right_paren,
+      body);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var await_keyword = this.await_keyword.rewrite(rewriter, new_parents);
+    var using_keyword = this.using_keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var expressions = this.expressions.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
+    if (
+      await_keyword === this.await_keyword &&
+      using_keyword === this.using_keyword &&
+      left_paren === this.left_paren &&
+      expressions === this.expressions &&
+      right_paren === this.right_paren &&
+      body === this.body)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new UsingStatementBlockScoped(
+        await_keyword,
+        using_keyword,
+        left_paren,
+        expressions,
+        right_paren,
+        body), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let await_keyword = EditableSyntax.from_json(
+      json.using_block_await_keyword, position, source);
+    position += await_keyword.width;
+    let using_keyword = EditableSyntax.from_json(
+      json.using_block_using_keyword, position, source);
+    position += using_keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.using_block_left_paren, position, source);
+    position += left_paren.width;
+    let expressions = EditableSyntax.from_json(
+      json.using_block_expressions, position, source);
+    position += expressions.width;
+    let right_paren = EditableSyntax.from_json(
+      json.using_block_right_paren, position, source);
+    position += right_paren.width;
+    let body = EditableSyntax.from_json(
+      json.using_block_body, position, source);
+    position += body.width;
+    return new UsingStatementBlockScoped(
+        await_keyword,
+        using_keyword,
+        left_paren,
+        expressions,
+        right_paren,
+        body);
+  }
+  get children_keys()
+  {
+    if (UsingStatementBlockScoped._children_keys == null)
+      UsingStatementBlockScoped._children_keys = [
+        'await_keyword',
+        'using_keyword',
+        'left_paren',
+        'expressions',
+        'right_paren',
+        'body'];
+    return UsingStatementBlockScoped._children_keys;
+  }
+}
+class UsingStatementFunctionScoped extends EditableSyntax
+{
+  constructor(
+    await_keyword,
+    using_keyword,
+    expression,
+    semicolon)
+  {
+    super('using_statement_function_scoped', {
+      await_keyword: await_keyword,
+      using_keyword: using_keyword,
+      expression: expression,
+      semicolon: semicolon });
+  }
+  get await_keyword() { return this.children.await_keyword; }
+  get using_keyword() { return this.children.using_keyword; }
+  get expression() { return this.children.expression; }
+  get semicolon() { return this.children.semicolon; }
+  with_await_keyword(await_keyword){
+    return new UsingStatementFunctionScoped(
+      await_keyword,
+      this.using_keyword,
+      this.expression,
+      this.semicolon);
+  }
+  with_using_keyword(using_keyword){
+    return new UsingStatementFunctionScoped(
+      this.await_keyword,
+      using_keyword,
+      this.expression,
+      this.semicolon);
+  }
+  with_expression(expression){
+    return new UsingStatementFunctionScoped(
+      this.await_keyword,
+      this.using_keyword,
+      expression,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new UsingStatementFunctionScoped(
+      this.await_keyword,
+      this.using_keyword,
+      this.expression,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var await_keyword = this.await_keyword.rewrite(rewriter, new_parents);
+    var using_keyword = this.using_keyword.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      await_keyword === this.await_keyword &&
+      using_keyword === this.using_keyword &&
+      expression === this.expression &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new UsingStatementFunctionScoped(
+        await_keyword,
+        using_keyword,
+        expression,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let await_keyword = EditableSyntax.from_json(
+      json.using_function_await_keyword, position, source);
+    position += await_keyword.width;
+    let using_keyword = EditableSyntax.from_json(
+      json.using_function_using_keyword, position, source);
+    position += using_keyword.width;
+    let expression = EditableSyntax.from_json(
+      json.using_function_expression, position, source);
+    position += expression.width;
+    let semicolon = EditableSyntax.from_json(
+      json.using_function_semicolon, position, source);
+    position += semicolon.width;
+    return new UsingStatementFunctionScoped(
+        await_keyword,
+        using_keyword,
+        expression,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (UsingStatementFunctionScoped._children_keys == null)
+      UsingStatementFunctionScoped._children_keys = [
+        'await_keyword',
+        'using_keyword',
+        'expression',
+        'semicolon'];
+    return UsingStatementFunctionScoped._children_keys;
   }
 }
 class WhileStatement extends EditableSyntax
@@ -18512,6 +18781,7 @@ exports.TupleToken = TupleToken;
 exports.TypeToken = TypeToken;
 exports.UnsetToken = UnsetToken;
 exports.UseToken = UseToken;
+exports.UsingToken = UsingToken;
 exports.VarToken = VarToken;
 exports.VarrayToken = VarrayToken;
 exports.VecToken = VecToken;
@@ -18674,6 +18944,8 @@ exports.ExpressionStatement = ExpressionStatement;
 exports.MarkupSection = MarkupSection;
 exports.MarkupSuffix = MarkupSuffix;
 exports.UnsetStatement = UnsetStatement;
+exports.UsingStatementBlockScoped = UsingStatementBlockScoped;
+exports.UsingStatementFunctionScoped = UsingStatementFunctionScoped;
 exports.WhileStatement = WhileStatement;
 exports.IfStatement = IfStatement;
 exports.ElseifClause = ElseifClause;

@@ -43,7 +43,7 @@ abstract class TaoDataType2 {
 
   abstract protected function createQuery(): this::TQuery;
 
-  final public async function gen(): mixed {
+  final public async function gen(): Awaitable<mixed> {
     $query = $this->createQuery();
     $result = Test::genw($query);
     return $result;

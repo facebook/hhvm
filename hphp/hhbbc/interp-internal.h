@@ -359,6 +359,17 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs) {
     // non-foldable, but other builtins might be, even if they
     // don't have the __Foldable attribute.
     if (func->nativeInfo) return false;
+
+    // Don't try to fold functions which aren't guaranteed to be accessible at
+    // this call site.
+    if (func->attrs & AttrPrivate) {
+      if (env.ctx.cls != func->cls) return false;
+    } else if (func->attrs & AttrProtected) {
+      if (!env.ctx.cls) return false;
+      if (!env.index.must_be_derived_from(env.ctx.cls, func->cls) &&
+          !env.index.must_be_derived_from(func->cls, env.ctx.cls)) return false;
+    }
+
     if (func->params.size()) {
       // Not worth trying if we're going to warn due to missing args
       return check_nargs_in_range(func, nArgs);

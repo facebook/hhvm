@@ -1,0 +1,18 @@
+====================== test1 =======================
+
+Fatal error: Call to private A::func1() from invalid context in %s/inaccessible-folding.php on line 22
+====================== test2 =======================
+
+Fatal error: Call to protected A::func2() from invalid context in %s/inaccessible-folding.php on line 23
+====================== test3 =======================
+
+Fatal error: Call to private method A::func1() from context 'B' in %s/inaccessible-folding.php on line 14
+====================== test4 =======================
+
+Fatal error: Call to protected method A::func2() from context 'B' in %s/inaccessible-folding.php on line 15
+====================== test5 =======================
+
+Fatal error: Call to private method A::func1() from context 'C' in %s/inaccessible-folding.php on line 19
+====================== test6 =======================
+
+Fatal error: Call to private method A::func1() from context 'D' in %s/inaccessible-folding.php on line 5

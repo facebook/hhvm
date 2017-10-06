@@ -833,6 +833,14 @@ struct Index {
    * WaitH<Type>.
    */
   void fixup_return_type(borrowed_ptr<const php::Func>, Type&) const;
+
+  /*
+   * Return true if we know for sure that one php::Class must derive
+   * from another at runtime, in all possible instantiations.
+   */
+  bool must_be_derived_from(borrowed_ptr<const php::Class>,
+                            borrowed_ptr<const php::Class>) const;
+
 private:
   Index(const Index&) = delete;
   Index& operator=(Index&&) = delete;
@@ -841,8 +849,6 @@ private:
   template<class FuncRange>
   res::Func resolve_func_helper(const FuncRange&, SString) const;
   res::Func do_resolve(borrowed_ptr<const php::Func>) const;
-  bool must_be_derived_from(borrowed_ptr<const php::Class>,
-                            borrowed_ptr<const php::Class>) const;
   bool could_be_related(borrowed_ptr<const php::Class>,
                         borrowed_ptr<const php::Class>) const;
 

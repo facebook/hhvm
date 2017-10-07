@@ -66,7 +66,11 @@ let from_ast_wrapper : bool -> _ ->
   then Emit_fatal.raise_fatal_parse pos
     ("Class " ^ class_name ^ " contains non-static method " ^ original_name
      ^ " and therefore cannot be declared 'abstract final'");
-  if not method_is_static then
+ (* TODO: use something that can't be faked in user code *)
+ let method_is_closure_body =
+    original_name = "__invoke"
+    && String_utils.string_starts_with class_name "Closure$" in
+  if not (method_is_static || method_is_closure_body) then
     List.iter ast_method.Ast.m_params (fun p ->
       let pos, id = p.Ast.param_id in
       if id = SN.SpecialIdents.this then
@@ -105,10 +109,6 @@ let from_ast_wrapper : bool -> _ ->
   let scope =
     [Ast_scope.ScopeItem.Method ast_method;
      Ast_scope.ScopeItem.Class ast_class] in
-  (* TODO: use something that can't be faked in user code *)
-  let method_is_closure_body =
-   original_name = "__invoke"
-   && String_utils.string_starts_with class_name "Closure$" in
   let scope =
     if method_is_closure_body
     then Ast_scope.ScopeItem.Lambda :: scope else scope in

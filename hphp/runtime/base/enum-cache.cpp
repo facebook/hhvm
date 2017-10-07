@@ -56,10 +56,10 @@ const EnumValues* EnumCache::getValuesBuiltin(const Class* klass) {
 void EnumCache::deleteValues(const Class* klass) {
   // it's unlikely a class is in the cache so check first
   // without write lock
-  if (s_cache.getEnumValuesIfDefined(getKey(klass, false)) != nullptr) {
+  if (s_cache.getEnumValuesIfDefined(getKey(klass, false), false) != nullptr) {
     s_cache.deleteEnumValues(getKey(klass, false));
   }
-  if (s_cache.getEnumValuesIfDefined(getKey(klass, true)) != nullptr) {
+  if (s_cache.getEnumValuesIfDefined(getKey(klass, true), false) != nullptr) {
     s_cache.deleteEnumValues(getKey(klass, true));
   }
 }
@@ -136,13 +136,11 @@ const EnumValues* EnumCache::loadEnumValues(const Class* klass,
       value = klass->clsCnsGet(consts[i].name);
     }
     assert(value.m_type != KindOfUninit);
-    if (UNLIKELY(!(isIntType(value.m_type) ||
-        (tvIsString(&value) && value.m_data.pstr->isStatic())))) {
-      // only int and string values allowed for enums. Moreover the strings
-      // must be static
+    if (UNLIKELY(!(isIntType(value.m_type) || tvIsString(&value)))) {
+      // only int and string values allowed for enums.
       std::string msg;
       msg += klass->name()->data();
-      msg += " enum can only contain static string and int values";
+      msg += " enum can only contain string and int values";
       EnumCache::failLookup(msg);
     }
     values.set(StrNR(consts[i].name), cellAsCVarRef(value));
@@ -165,12 +163,13 @@ const EnumValues* EnumCache::loadEnumValues(const Class* klass,
 }
 
 const EnumValues* EnumCache::getEnumValuesIfDefined(
-  intptr_t key) const {
+  intptr_t key, bool checkLocal) const {
   EnumValuesMap::const_accessor acc;
   if (m_enumValuesMap.find(acc, key)) {
     return acc->second;
   }
-  if (!m_nonScalarEnumValuesMap.bound() ||
+  if (!checkLocal ||
+      !m_nonScalarEnumValuesMap.bound() ||
       !m_nonScalarEnumValuesMap.isInit()) {
     return nullptr;
   }
@@ -197,13 +196,6 @@ void EnumCache::deleteEnumValues(intptr_t key) {
   if (m_enumValuesMap.find(acc, key)) {
     delete acc->second;
     m_enumValuesMap.erase(acc);
-    return;
-  }
-
-  if (m_nonScalarEnumValuesMap.bound() &&
-      m_nonScalarEnumValuesMap.isInit()) {
-    auto data = *m_nonScalarEnumValuesMap;
-    data->erase(key);
   }
 }
 

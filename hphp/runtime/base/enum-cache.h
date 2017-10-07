@@ -93,7 +93,8 @@ private:
     Array&& names,
     Array&& values);
 
-  const EnumValues* getEnumValuesIfDefined(intptr_t key) const;
+  const EnumValues* getEnumValuesIfDefined(intptr_t key,
+    bool checkLocal = true) const;
   const EnumValues* getEnumValues(const Class* klass, bool recurse);
   const EnumValues* loadEnumValues(const Class* klass, bool recurse);
   void deleteEnumValues(intptr_t key);

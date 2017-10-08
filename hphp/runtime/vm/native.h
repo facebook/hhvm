@@ -277,12 +277,7 @@ enum class ZendFuncType {};
 template <class T>
 struct NativeArg {
   /*
-   * If we define, or delete a copy/move constructor,
-   * the class will be passed by address, which would
-   * defeat the point.
-   * However, deleting a move assignment operator causes
-   * the copy constructor to be implicitly deleted, and
-   * its still passed in registers. tada!
+   * Delete move assignment operator to make this non-copyable.
    */
   NativeArg& operator=(NativeArg&&) = delete;
   T* operator->()        { return m_px; }
@@ -290,6 +285,12 @@ struct NativeArg {
   bool operator!() const { return m_px == nullptr; }
   bool isNull() const    { return m_px == nullptr; }
 private:
+  /*
+   * To be able to pass the values of this class as function parameters
+   * by value, define default copy constructor (See Itanium C++ ABI p3.1.1).
+   * Make it private to satisfy the non-copyable requirement.
+   */
+  NativeArg(const NativeArg&) = default;
   T* m_px;
 };
 }

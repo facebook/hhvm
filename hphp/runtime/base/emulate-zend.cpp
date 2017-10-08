@@ -34,19 +34,6 @@ namespace HPHP {
 
 int execute_program(int argc, char **argv);
 
-bool check_option(const char *option) {
-#ifndef _MSC_VER
-  // Parameters that can be directly passed through to hhvm.
-  static const char *passthru[] = {
-  };
-
-  for (int i = 0; i < sizeof(passthru) / sizeof(const char *); i++) {
-    if (strcmp(option, passthru[i]) == 0) return true;
-  }
-#endif
-  return false;
-}
-
 static int get_tempfile_if_not_exists(int ini_fd, char ini_path[]) {
   if (ini_fd == -1) {
 #ifdef _MSC_VER
@@ -80,10 +67,6 @@ int emulate_zend(int argc, char** argv) {
   int cnt = 1;
   bool ignore_default_configs = ::getenv("HHVM_NO_DEFAULT_CONFIGS") != nullptr;
   while (cnt < argc) {
-    if (check_option(argv[cnt])) {
-      newargv.push_back(argv[cnt++]);
-      continue;
-    }
     if (strcmp(argv[cnt], "-a") == 0 ||
         strcmp(argv[cnt], "--interactive") == 0) {
       need_file = false;

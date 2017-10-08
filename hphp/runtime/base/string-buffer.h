@@ -153,15 +153,15 @@ struct StringBuffer {
    */
   void set(uint32_t offset, char c) {
     assert(offset < m_len);
-    m_buffer[offset] = c;
+    m_str->mutableData()[offset] = c;
   }
 
   /*
    * Append various types of things to this string.
    */
   void append(char c) {
-    if (m_buffer && m_len < m_cap) {
-      m_buffer[m_len++] = c;
+    if (m_str && m_len < m_cap) {
+      m_str->mutableData()[m_len++] = c;
       return;
     }
     appendHelper(c);
@@ -174,8 +174,8 @@ struct StringBuffer {
   void append(folly::StringPiece s) { append(s.data(), s.size()); }
   void append(const char* s, int len) {
     assert(len >= 0);
-    if (m_buffer && len <= m_cap - m_len) {
-      memcpy(m_buffer + m_len, s, len);
+    if (m_str && len <= m_cap - m_len) {
+      memcpy(m_str->mutableData() + m_len, s, len);
       m_len += len;
       return;
     }
@@ -210,11 +210,10 @@ private:
   void appendHelper(char c);
   void growBy(int spaceRequired);
   void makeValid(uint32_t minCap);
-  bool valid() const { return m_buffer != nullptr; }
+  bool valid() const { return m_str != nullptr; }
 
 private:
   StringData* m_str;
-  char *m_buffer;
   uint32_t m_initialCap;
   uint32_t m_maxBytes;
   uint32_t m_cap;                    // doesn't include null terminator

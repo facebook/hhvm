@@ -38,9 +38,7 @@ StringBuffer::StringBuffer(uint32_t initialSize /* = SmallStringReserve */)
   , m_len(0)
 {
   m_str = StringData::Make(initialSize);
-  auto const s = m_str->bufferSlice();
-  m_buffer = s.data();
-  m_cap = s.size();
+  m_cap = m_str->capacity();
 }
 
 StringBuffer::~StringBuffer() {
@@ -52,20 +50,20 @@ StringBuffer::~StringBuffer() {
 }
 
 const char* StringBuffer::data() const {
-  if (m_buffer && m_len) {
-    m_buffer[m_len] = '\0'; // fixup
-    return m_buffer;
+  if (m_str && m_len) {
+    auto buffer = m_str->mutableData();
+    buffer[m_len] = '\0'; // fixup
+    return buffer;
   }
   return nullptr;
 }
 
 String StringBuffer::detach() {
-  if (m_buffer && m_len) {
-    assert(m_str && m_str->hasExactlyOneRef());
+  if (m_str && m_len) {
+    assert(m_str->hasExactlyOneRef());
     auto str = String::attach(m_str);
     str.setSize(m_len);
     m_str = nullptr;
-    m_buffer = nullptr;
     m_len = 0;
     m_cap = 0;
     return str;
@@ -82,17 +80,14 @@ void StringBuffer::absorb(StringBuffer& buf) {
     StringData* str = m_str;
 
     m_str = buf.m_str;
-    m_buffer = buf.m_buffer;
     m_len = buf.m_len;
     m_cap = buf.m_cap;
 
     buf.m_str = str;
     if (str) {
-      buf.m_buffer = (char*)str->data();
       buf.m_len = str->size();
       buf.m_cap = str->capacity();
     } else {
-      buf.m_buffer = nullptr;
       buf.m_len = 0;
       buf.m_cap = 0;
     }
@@ -111,12 +106,11 @@ void StringBuffer::release() {
   if (m_str) {
     assert(m_str->hasExactlyOneRef());
     if (debug) {
-      m_buffer[m_len] = 0; // appease StringData::checkSane()
+      m_str->mutableData()[m_len] = 0; // appease StringData::checkSane()
     }
     m_str->release();
   }
   m_str = nullptr;
-  m_buffer = nullptr;
   m_len = m_cap = 0;
 }
 
@@ -128,7 +122,7 @@ void StringBuffer::resize(uint32_t size) {
 }
 
 char* StringBuffer::appendCursor(int size) {
-  if (!m_buffer) {
+  if (!m_str) {
     makeValid(size);
   } else if (m_cap - m_len < size) {
     m_str->setSize(m_len);
@@ -138,11 +132,9 @@ char* StringBuffer::appendCursor(int size) {
       m_str->release();
       m_str = tmp;
     }
-    auto const s = m_str->bufferSlice();
-    m_buffer = s.data();
-    m_cap = s.size();
+    m_cap = m_str->capacity();
   }
-  return m_buffer + m_len;
+  return m_str->mutableData() + m_len;
 }
 
 void StringBuffer::append(int n) {
@@ -211,14 +203,13 @@ void StringBuffer::appendHelper(char ch) {
   if (m_len == m_cap) {
     growBy(1);
   }
-  m_buffer[m_len++] = ch;
+  m_str->mutableData()[m_len++] = ch;
 }
 
 void StringBuffer::makeValid(uint32_t minCap) {
   assert(!valid());
   assert(!m_len);
   m_str = StringData::Make(std::max(m_initialCap, minCap));
-  m_buffer = (char*)m_str->data();
   m_cap = m_str->capacity();
 }
 
@@ -232,7 +223,7 @@ void StringBuffer::appendHelper(const char *s, int len) {
   if (len > m_cap - m_len) {
     growBy(len);
   }
-  memcpy(m_buffer + m_len, s, len);
+  memcpy(m_str->mutableData() + m_len, s, len);
   m_len += len;
 }
 
@@ -269,7 +260,7 @@ void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
       growBy(page_size);
       buffer_size = m_cap - m_len;
     }
-    size_t len = fread(m_buffer + m_len, 1, buffer_size, in);
+    size_t len = fread(m_str->mutableData() + m_len, 1, buffer_size, in);
     if (len == 0) break;
     m_len += len;
   }
@@ -286,7 +277,7 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
       growBy(page_size);
       buffer_size = m_cap - m_len;
     }
-    int64_t len = in->readImpl(m_buffer + m_len, buffer_size);
+    int64_t len = in->readImpl(m_str->mutableData() + m_len, buffer_size);
     assert(len >= 0);
     if (len == 0) break;
     m_len += len;
@@ -316,7 +307,6 @@ void StringBuffer::growBy(int spaceRequired) {
     }
   }
 
-  m_buffer[m_len] = 0;
   m_str->setSize(m_len);
   auto const tmp = m_str->reserve(new_size);
   if (UNLIKELY(tmp != m_str)) {
@@ -324,9 +314,7 @@ void StringBuffer::growBy(int spaceRequired) {
     m_str->release();
     m_str = tmp;
   }
-  auto const s = m_str->bufferSlice();
-  m_buffer = s.data();
-  m_cap = s.size();
+  m_cap = m_str->capacity();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -677,6 +677,10 @@ end = functor(CheckKind:CheckKindType) -> struct
     let decl_pos_changed_now_fast = remove_failed_parsing
       decl_pos_changed_now stop_at_errors env failed_parsing in
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
+    let hs = SharedMem.heap_size () in
+    Hh_logger.log "Heap size: %d" hs;
+    HackEventLogger.first_redecl_end t hs;
+    let t = Hh_logger.log_duration "Determining changes" t in
     (* These will not have any errors because positionally changed files have
       parents that have no changes except by position. *)
     let _, _ =
@@ -686,11 +690,6 @@ end = functor(CheckKind:CheckKindType) -> struct
       env.tcopt
       decl_pos_changed_now_fast in
     let t = Hh_logger.log_duration "Redeclaring unchanged files" t in
-
-    let hs = SharedMem.heap_size () in
-    Hh_logger.log "Heap size: %d" hs;
-    HackEventLogger.first_redecl_end t hs;
-    let t = Hh_logger.log_duration "Determining changes" t in
 
     (* DECLARING TYPES: Phase2 *)
     let fast_redecl_phase2_now, lazy_decl_later =

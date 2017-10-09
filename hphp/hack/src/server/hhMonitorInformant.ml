@@ -301,6 +301,7 @@ module Revision_tracker = struct
     | Watchman.Watchman_synchronous _ ->
       None
     | Watchman.Watchman_pushed (Watchman.Changed_merge_base (rev, _)) ->
+      let () = Hh_logger.log "Changed_merge_base: %s" rev in
       Some (Changed_merge_base rev)
     | Watchman.Watchman_pushed (Watchman.State_enter (state, json))
         when state = "hg.update" ->

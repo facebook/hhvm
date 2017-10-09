@@ -59,6 +59,101 @@
   {
     "jsonrpc": "2.0",
     "id": 3,
+    "result": [
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 11,
+            "character": 18
+          },
+          "end": {
+            "line": 11,
+            "character": 29
+          }
+        }
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": [
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 11,
+            "character": 18
+          },
+          "end": {
+            "line": 11,
+            "character": 29
+          }
+        }
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 5,
+    "result": [
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 11,
+            "character": 18
+          },
+          "end": {
+            "line": 11,
+            "character": 29
+          }
+        }
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 6,
+    "result": [
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 21,
+            "character": 18
+          },
+          "end": {
+            "line": 21,
+            "character": 29
+          }
+        }
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 7,
+    "result": [
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 26,
+            "character": 6
+          },
+          "end": {
+            "line": 26,
+            "character": 8
+          }
+        }
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 99,
     "result": null
   }
 ]

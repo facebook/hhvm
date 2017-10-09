@@ -24,6 +24,7 @@
    }
 },
 {
+  "comment": "definition of `b_definition()`",
   "jsonrpc": "2.0",
   "method": "textDocument/definition",
   "id": 2,
@@ -35,8 +36,68 @@
    }
 },
 {
+  "comment": "call to `new BB(1)`",
   "jsonrpc": "2.0",
+  "method": "textDocument/definition",
   "id": 3,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "position": {"line": 29, "character": 13}
+   }
+},
+{
+  "comment": "call to `new CC(1)`",
+  "jsonrpc": "2.0",
+  "method": "textDocument/definition",
+  "id": 4,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "position": {"line": 30, "character": 13}
+   }
+},
+{
+  "comment": "call to `new DD(1)`",
+  "jsonrpc": "2.0",
+  "method": "textDocument/definition",
+  "id": 5,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "position": {"line": 31, "character": 13}
+   }
+},
+{
+  "comment": "call to `new EE(1)`",
+  "jsonrpc": "2.0",
+  "method": "textDocument/definition",
+  "id": 6,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "position": {"line": 32, "character": 13}
+   }
+},
+{
+  "comment": "call to `new FF(1)`",
+  "jsonrpc": "2.0",
+  "method": "textDocument/definition",
+  "id": 7,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "position": {"line": 33, "character": 13}
+   }
+},
+{
+  "jsonrpc": "2.0",
+  "id": 99,
   "method": "shutdown",
   "params": {}
 }

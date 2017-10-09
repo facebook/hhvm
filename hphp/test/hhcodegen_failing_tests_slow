@@ -4,7 +4,6 @@ slow/arithmetic/inc-dec-dollar-this.php
 slow/array_offset/429.php
 slow/array_offset/433.php
 slow/async/foreach_await_as.php
-slow/async/return-annotation-1.php
 slow/break_statement/badexp.php
 slow/break_statement/zero.php
 slow/class_constant/abstract_const2.php

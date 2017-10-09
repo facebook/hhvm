@@ -3,7 +3,6 @@ quick/Xhp.php
 quick/backtick.php
 quick/class_constant.php
 quick/closure_recursive_bad.php
-quick/closure_use_this.php
 quick/finally_break.php
 quick/float-overflow-literals.php
 quick/hh_bad_end.php

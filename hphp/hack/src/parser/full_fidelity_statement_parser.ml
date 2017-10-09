@@ -30,6 +30,7 @@ module WithExpressionAndDeclAndTypeParser
   let rec parse_statement parser =
     match peek_token_kind parser with
     | Async
+    | Coroutine
     | Function -> parse_possible_php_function parser
     | Abstract
     | Final
@@ -145,8 +146,14 @@ module WithExpressionAndDeclAndTypeParser
     let kind0 = peek_token_kind ~lookahead:0 parser in
     let kind1 = peek_token_kind ~lookahead:1 parser in
     match kind0, kind1 with
+    | Async, Function
+      when peek_token_kind ~lookahead:2 parser = LeftParen ->
+      parse_expression_statement parser
+    | Coroutine, Function
+      when peek_token_kind ~lookahead:2 parser = LeftParen ->
+      parse_expression_statement parser
     | Function, LeftParen (* Verbose-style lambda *)
-    | Async, LeftParen (* Async, compact-style lambda *)
+    | (Async | Coroutine), LeftParen (* Async / coroutine, compact-style lambda *)
     | Async, LeftBrace (* Async block *)
       -> parse_expression_statement parser
     | _ -> parse_php_function parser

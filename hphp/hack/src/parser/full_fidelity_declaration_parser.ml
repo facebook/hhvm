@@ -1322,6 +1322,16 @@ module WithExpressionAndStatementAndTypeParser
       (parser, make_simple_initializer (make_token token) default_value)
     | _ -> (parser, make_missing())
 
+  and parse_function_declaration_or_expression_statement parser attribute_specification =
+    if is_missing attribute_specification then
+      (* if attribute section is missing - it might be either
+         function declaration or expression statement containing
+         anonymous function - use statement parser to determine in which case
+         we are currently in *)
+      parse_in_statement_parser parser StatementParser.parse_possible_php_function
+    else
+      parse_function_declaration parser attribute_specification
+
   and parse_function parser =
     parse_function_declaration parser (make_missing())
 
@@ -1533,7 +1543,7 @@ module WithExpressionAndStatementAndTypeParser
     | Type | Newtype ->
       parse_alias_declaration parser attribute_specification
     | Async | Coroutine | Function ->
-      parse_function_declaration parser attribute_specification
+      parse_function_declaration_or_expression_statement parser attribute_specification
     | Abstract
     | Final
     | Interface
@@ -1568,7 +1578,8 @@ module WithExpressionAndStatementAndTypeParser
       | Class -> parse_classish_declaration parser (make_missing())
       | Async
       | Coroutine
-      | Function -> parse_function_declaration parser (make_missing())
+      | Function ->
+        parse_function_declaration_or_expression_statement parser (make_missing())
       | LessThanLessThan ->
         parse_enum_or_classish_or_function_declaration parser
         (* TODO figure out what global const differs from class const *)

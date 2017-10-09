@@ -14,6 +14,58 @@ module WEWClient = WatchmanEventWatcherClient
 module WEWConfig = WatchmanEventWatcherConfig
 
 
+(** We need to query mercurial to convert an hg revision into a numerical
+ * SVN revision. These queries need to be non-blocking, so we keep a cache
+ * of the mapping in here, as well as the Futures corresponding to
+ * th queries. *)
+module Revision_map = struct
+
+    (**
+     * Running and finished queries. A query gets the SVN revision for a
+     * given HG Revision.
+     *)
+    type t =
+      {
+        svn_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Hashtbl.t;
+      }
+
+    let create () =
+      {
+        svn_queries = Hashtbl.create 200;
+      }
+
+    let add_query ~hg_rev root t =
+      (** Don't add if we already have an entry for this. *)
+      try ignore @@ Hashtbl.find t.svn_queries hg_rev
+      with
+      | Not_found ->
+        let future = Hg.get_closest_svn_ancestor hg_rev (Path.to_string root) in
+        Hashtbl.add t.svn_queries hg_rev future
+
+    (** Wrap Future.get. If process exits abnormally, returns 0. *)
+    let svn_rev_of_future future =
+      let parse_svn_rev svn_rev =
+        try int_of_string svn_rev
+        with Failure "int_of_string" ->
+          Hh_logger.log "Revision_tracker failed to parse svn_rev: %s" svn_rev;
+          0
+      in
+      try begin
+        let result = Future.get future in
+        parse_svn_rev result
+      end with
+      | Future_sig.Process_failure _ -> 0
+
+    let find hg_rev t =
+      let future = Hashtbl.find t.svn_queries hg_rev in
+      if Future.is_ready future then
+        Some (svn_rev_of_future future)
+      else
+        None
+
+end
+
+
 (**
  * The Revision tracker tracks the latest known SVN Revision of the repo,
  * the corresponding SVN revisions of Hg revisions, and the sequence of
@@ -78,11 +130,7 @@ module Revision_tracker = struct
      * when a State_leave is handled. *)
     current_base_revision : int ref;
 
-    (**
-     * Running queries and cached results. A query gets the SVN revision for a
-     * given HG Revision.
-     *)
-    queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Hashtbl.t;
+    rev_map : Revision_map.t;
 
     (**
      * Timestamp and HG revision of state change events.
@@ -129,25 +177,11 @@ module Revision_tracker = struct
     let () = Hh_logger.log "Revision_tracker setting base rev: %d" svn_rev in
     env.current_base_revision := svn_rev
 
-  (** Wrap Future.get. If process exits abnormally, returns 0. *)
-  let svn_rev_of_future future =
-    let parse_svn_rev svn_rev =
-      try int_of_string svn_rev
-      with Failure "int_of_string" ->
-        Hh_logger.log "Revision_tracker failed to parse svn_rev: %s" svn_rev;
-        0
-    in
-    try begin
-      let result = Future.get future in
-      parse_svn_rev result
-    end with
-    | Future_sig.Process_failure _ -> 0
-
   let active_env init_settings base_svn_rev =
     {
       inits = init_settings;
       current_base_revision = ref base_svn_rev;
-      queries = Hashtbl.create 200;
+      rev_map = Revision_map.create ();
       state_changes = Queue.create() ;
     }
 
@@ -160,12 +194,8 @@ module Revision_tracker = struct
     distance > (float_of_int min_distance_restart)
       && (elapsed_t <= 0.0 || ((distance /. elapsed_t) > 2.0))
 
-  let cached_svn_rev queries hg_rev =
-    let future = Hashtbl.find queries hg_rev in
-    if Future.is_ready future then
-      Some (svn_rev_of_future future)
-    else
-      None
+  let cached_svn_rev revision_map hg_rev =
+    Revision_map.find hg_rev revision_map
 
   (**
    * If we have a cached svn_rev for this hg_rev, returns whether or not this
@@ -179,7 +209,7 @@ module Revision_tracker = struct
       | State_leave hg_rev
       | Changed_merge_base hg_rev -> hg_rev
     in
-    match cached_svn_rev env.queries hg_rev with
+    match cached_svn_rev env.rev_map hg_rev with
     | None ->
       None
     | Some svn_rev ->
@@ -263,15 +293,6 @@ module Revision_tracker = struct
       let has_significant = churn_ready_changes ~acc:false env in
       form_decision has_significant last_transition server_state
 
-  let maybe_add_query hg_rev env =
-    (** Don't add if we already have an entry for this. *)
-    try ignore @@ Hashtbl.find env.queries hg_rev
-    with
-    | Not_found ->
-      let future = Hg.get_closest_svn_ancestor
-        hg_rev (Path.to_string env.inits.root) in
-      Hashtbl.add env.queries hg_rev future
-
   let get_change env =
     let watchman, change = Watchman.get_changes !(env.inits.watchman) in
     env.inits.watchman := watchman;
@@ -343,13 +364,13 @@ module Revision_tracker = struct
     let early_decision = match change with
     | None -> None
     | Some (State_enter hg_rev) ->
-      let () = maybe_add_query hg_rev env in
+      let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
       preprocess server_state (State_enter hg_rev) env
     | Some (State_leave hg_rev) ->
-      let () = maybe_add_query hg_rev env in
+      let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
       preprocess server_state (State_leave hg_rev) env
     | Some (Changed_merge_base hg_rev) ->
-      let () = maybe_add_query hg_rev env in
+      let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
       preprocess server_state (Changed_merge_base hg_rev) env
     in
     (** If we make an "early" decision to either kill or restart, we toss
@@ -401,7 +422,7 @@ module Revision_tracker = struct
     | Initializing (init_settings, future) ->
       if Future.is_ready future
       then
-        let svn_rev = svn_rev_of_future future in
+        let svn_rev = Revision_map.svn_rev_of_future future in
         let () = Hh_logger.log "Initialized Revision_tracker to SVN rev: %d"
           svn_rev in
         let env = active_env init_settings svn_rev in

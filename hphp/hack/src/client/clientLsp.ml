@@ -632,12 +632,20 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
     client_log Lsp.MessageType.ErrorMessage (Printf.sprintf "%s [%i]\n%s" message code stack)
 
 
-(* dismiss_indicators: dismisses all dialogs, progress- and action-required   *)
-(* indicators in a state.                                                     *)
-let dismiss_indicators (state: state) : state =
+(* dismiss_ui: dismisses all dialogs, progress- and action-required           *)
+(* indicators and diagnostics in a state.                                     *)
+let dismiss_ui (state: state) : state =
   let dismiss_dialog (cancel: (unit->unit) option) : (unit->unit) option =
     let () = Option.call ~f:cancel () in
     None
+  in
+  let dismiss_diagnostic (uri: string) : unit =
+    let message = { Lsp.PublishDiagnostics.uri; diagnostics = []; } in
+    message |> print_diagnostics |> notify stdout "textDocument/publishDiagnostics"
+  in
+  let dismiss_diagnostics (diagnostic_uris: SSet.t) : SSet.t =
+    let () = SSet.iter dismiss_diagnostic diagnostic_uris in
+    SSet.empty
   in
   match state with
   | In_init ienv ->
@@ -649,6 +657,7 @@ let dismiss_indicators (state: state) : state =
   | Main_loop menv ->
     let open Main_env in
     Main_loop { menv with
+      uris_with_diagnostics = dismiss_diagnostics menv.uris_with_diagnostics;
       dialog_cancel = dismiss_dialog menv.dialog_cancel;
       progress_id = notify_progress menv.progress_id None;
       actionRequired_id = notify_actionRequired menv.actionRequired_id None;
@@ -668,7 +677,7 @@ let dismiss_indicators (state: state) : state =
 (************************************************************************)
 
 let do_shutdown (state: state) : state =
-  let state = dismiss_indicators state in
+  let state = dismiss_ui state in
   begin match state with
   | Main_loop menv ->
     (* In Main_loop state, we're expected to unsubscribe diagnostics and tell *)
@@ -1197,21 +1206,6 @@ let do_diagnostics
   SSet.union (SSet.diff uris_with_diagnostics uris_without) uris_with
 
 
-(* do_diagnostics_flush: sends out "no more diagnostics for these files"      *)
-let do_diagnostics_flush
-    (diagnostic_uris: SSet.t)
-  : unit =
-  let per_uri uri =
-    { Lsp.PublishDiagnostics.uri = uri;
-      diagnostics = [];
-    }
-    |> print_diagnostics
-    |> notify stdout "textDocument/publishDiagnostics"
-  in
-  SSet.iter per_uri diagnostic_uris
-
-
-
 let report_connect_start
     (ienv: In_init_env.t)
   : state =
@@ -1275,7 +1269,7 @@ let report_connect_end
     (ienv: In_init_env.t)
   : state =
   let open In_init_env in
-  let _state = dismiss_indicators (In_init ienv) in
+  let _state = dismiss_ui (In_init ienv) in
   let menv =
     { Main_env.
       conn = ienv.In_init_env.conn;
@@ -1506,7 +1500,7 @@ let reconnect_from_lost_if_necessary
       let new_state = connect () in
       (* if that succeeded without exception, then it's safe for us to have the *)
       (* side-effect of dismissing dialog+indicator on the client.              *)
-      let _state = dismiss_indicators state in
+      let _state = dismiss_ui state in
       new_state
   else
     state
@@ -1517,7 +1511,7 @@ let reconnect_from_lost_if_necessary
 (* of getting the server back.                                                *)
 let do_lost_server (state: state) (p: Lost_env.params) : state =
   let open Lost_env in
-  let state = dismiss_indicators state in
+  let state = dismiss_ui state in
   let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
 
   let prev_hhconfig_version = match state with
@@ -1883,8 +1877,7 @@ let handle_event
     raise (Error.InvalidRequest "already received shutdown request")
 
   (* server shut-down request *)
-  | Main_loop menv, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
-    do_diagnostics_flush menv.uris_with_diagnostics;
+  | Main_loop _menv, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
     state := dismiss_ready_dialog_if_necessary !state event;
     state := do_lost_server !state { Lost_env.
       message = "hh_server is active in another window.";

@@ -28,6 +28,10 @@ module type S = sig
   (** Just wrap a value inside a future. *)
   val of_value : 'a -> 'a t
 
+  (** Like of_value, except returns false "delays" number of times of
+   * calling is_ready on it before returning true. *)
+  val delayed_value : delays:int -> 'a -> 'a t
+
   (** Returns true if "get" will not block. *)
   val is_ready : 'a t -> bool
 end

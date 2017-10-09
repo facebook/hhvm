@@ -17,6 +17,9 @@
 
 type 'a promise =
   | Complete : 'a -> 'a promise
+    (** Delayed is useful for testing. Must be tapped by "is ready"
+     * the given number of times before it is ready. *)
+  | Delayed : (int * 'a) -> 'a promise
   | Incomplete of Process_types.t * (string -> 'a)
 type 'a t = 'a promise ref
 
@@ -25,10 +28,17 @@ let make process transformer =
 
 let of_value v = ref @@ Complete v
 
+let delayed_value ~delays v =
+  ref (Delayed (delays, v))
+
 let get : 'a t -> 'a =
   let open Process_types in
   fun promise -> match !promise with
   | Complete v -> v
+  | Delayed (i, v) when i <= 0 ->
+    v
+  | Delayed _ ->
+    raise (Future_sig.Timed_out "Delayed value not ready yet")
   | Incomplete (process, transformer) ->
     match Process.read_and_wait_pid ~timeout:30 process with
     | Result.Ok (stdout, _stderr) ->
@@ -47,5 +57,9 @@ let get : 'a t -> 'a =
 
 let is_ready promise = match !promise with
   | Complete _ -> true
+  | Delayed (i, _) when i <= 0 -> true
+  | Delayed (i, v) ->
+    promise := Delayed(i - 1, v);
+    false
   | Incomplete (process, _) ->
     Process.is_ready process

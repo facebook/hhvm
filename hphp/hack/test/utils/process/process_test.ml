@@ -70,6 +70,17 @@ let test_future_is_ready () =
     else
       false
 
+let test_delayed_future () =
+  let future = Future.delayed_value ~delays:3 "Delayed value" in
+  Bool_asserter.assert_equals false (Future.is_ready future) "First delay";
+  Bool_asserter.assert_equals false (Future.is_ready future) "Second delay";
+  Bool_asserter.assert_equals false (Future.is_ready future) "Third delay";
+  Bool_asserter.assert_equals true (Future.is_ready future)
+    "After third delay should be ready";
+  String_asserter.assert_equals "Delayed value" (Future.get future)
+    "retrieve delayed value";
+  true
+
 (** Send "hello" to stdin and use sed to replace hello to world. *)
 let test_stdin_input () =
   let process = Process.exec "sed" ~input:"hello" [ "s/hello/world/g"; ] in

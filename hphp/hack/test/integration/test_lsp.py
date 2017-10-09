@@ -129,7 +129,10 @@ class TestLsp(LspTestDriver, unittest.TestCase):
 
         # validation checks that the number of items matches and that
         # the responses are exactly identical to what we expect
-        self.assertEqual(len(expected_items), len(observed_items))
+        self.assertEqual(len(expected_items), len(observed_items),
+                         'Wrong count. Observed this:\n' +
+                         json.dumps(observed_transcript, indent=2,
+                                    separators=(',', ': ')))
         for i in range(len(expected_items)):
             self.assertEqual(observed_items[i], expected_items[i])
 

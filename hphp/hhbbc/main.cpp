@@ -288,7 +288,7 @@ void write_output(
   gd.UsedHHBBC                   = true;
   gd.EnableHipHopSyntax          = RuntimeOption::EnableHipHopSyntax;
   gd.HardTypeHints               = RuntimeOption::EvalHardTypeHints;
-  gd.CheckThisTypeHints          = RuntimeOption::EvalCheckThisTypeHints;
+  gd.ThisTypeHintLevel           = RuntimeOption::EvalThisTypeHintLevel;
   gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;
   gd.HardPrivatePropInference    = options.HardPrivatePropInference;
   gd.DisallowDynamicVarEnvFuncs  = RuntimeOption::DisallowDynamicVarEnvFuncs;

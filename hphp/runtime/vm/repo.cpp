@@ -195,7 +195,6 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
     HHBBC::options.ElideAutoloadInvokes     = s_globalData.ElideAutoloadInvokes;
     RuntimeOption::AutoprimeGenerators      = s_globalData.AutoprimeGenerators;
     RuntimeOption::EnableHipHopSyntax       = s_globalData.EnableHipHopSyntax;
-    RuntimeOption::EvalCheckThisTypeHints     = s_globalData.CheckThisTypeHints;
     RuntimeOption::EvalHardTypeHints          = s_globalData.HardTypeHints;
     RuntimeOption::EvalUseHHBBC               = s_globalData.UsedHHBBC;
     RuntimeOption::PHP7_Builtins              = s_globalData.PHP7_Builtins;
@@ -207,6 +206,9 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
 
     if (s_globalData.HardReturnTypeHints) {
       RuntimeOption::EvalCheckReturnTypeHints = 3;
+    }
+    if (s_globalData.ThisTypeHintLevel == 3) {
+      RuntimeOption::EvalThisTypeHintLevel = s_globalData.ThisTypeHintLevel;
     }
 
     if (RuntimeOption::ServerExecutionMode() &&

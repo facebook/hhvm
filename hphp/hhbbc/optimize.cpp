@@ -851,7 +851,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
         tc.isSoft() ||
         tc.isTypeVar() ||
         tc.isTypeConstant() ||
-        (tc.isThis() && !RuntimeOption::EvalCheckThisTypeHints) ||
+        (tc.isThis() && RuntimeOption::EvalThisTypeHintLevel != 3) ||
         tc.type() != AnnotType::Object) {
       return;
     }

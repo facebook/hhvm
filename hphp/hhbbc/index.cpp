@@ -2839,8 +2839,14 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
        * typehints (ex. "(function(..): ..)" typehints).
        */
       return TGen;
-    case AnnotMetaType::Self:
     case AnnotMetaType::This:
+      if (auto s = selfCls(ctx)) {
+        if (!(*s).couldBeOverriden()) {
+          return subObj(*s);
+        }
+      }
+      break;
+    case AnnotMetaType::Self:
       if (auto s = selfCls(ctx)) return subObj(*s);
       break;
     case AnnotMetaType::Parent:
@@ -3373,7 +3379,7 @@ void Index::init_return_type(const php::Func* func) {
 
   auto const constraint = func->retTypeConstraint;
   if (constraint.isSoft() ||
-      (!RuntimeOption::EvalCheckThisTypeHints && constraint.isThis())) {
+      (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis())) {
     return;
   }
 

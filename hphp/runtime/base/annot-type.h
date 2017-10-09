@@ -18,6 +18,7 @@
 #define incl_HPHP_ANNOT_TYPE_H_
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -167,11 +168,15 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::Self:
     case AnnotMetaType::Parent:
-    case AnnotMetaType::This:
       // For "self" and "parent", if `dt' is not an object we know
       // it's not compatible, otherwise more checks are required
       return (dt == KindOfObject)
         ? AnnotAction::ObjectCheck : AnnotAction::Fail;
+    case AnnotMetaType::This:
+      return (dt == KindOfObject)
+        ? AnnotAction::ObjectCheck
+        : (RuntimeOption::EvalThisTypeHintLevel == 0)
+          ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::Callable:
       // For "callable", if `dt' is not string/array/object we know
       // it's not compatible, otherwise more checks are required

@@ -3335,7 +3335,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
    * references if it re-enters, even if Option::HardTypeHints is
    * on.
    */
-  if (!RuntimeOption::EvalCheckThisTypeHints && constraint.isThis()) {
+  if (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis()) {
     return;
   }
   if (constraint.hasConstraint() && !constraint.isTypeVar() &&
@@ -3365,7 +3365,7 @@ void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
   // then there are no optimizations we can safely do here, so
   // just leave the top of stack as is.
   if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft()
-      || (!RuntimeOption::EvalCheckThisTypeHints && constraint.isThis())) {
+      || (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis())) {
     return;
   }
 

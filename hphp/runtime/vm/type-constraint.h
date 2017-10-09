@@ -262,6 +262,7 @@ struct TypeConstraint {
 
   // Can not be private; used by the translator.
   void selfToClass(const Func* func, const Class **cls) const;
+  void thisToClass(const Class **cls) const;
   void parentToClass(const Func* func, const Class **cls) const;
   void verifyFail(const Func* func, TypedValue* tv, int id,
                   bool useStrictTypes) const;

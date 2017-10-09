@@ -627,15 +627,22 @@ ALWAYS_INLINE
 static bool VerifyTypeSlowImpl(const Class* cls,
                                const Class* constraint,
                                const HPHP::TypeConstraint* expected) {
-  // This helper should only be called for the Object, Self, and Parent cases
-  assertx(expected->isObject() || expected->isSelf() || expected->isParent());
-  // For the Self and Parent cases, we must always have a resolved class for
-  // the constraint
+  // This helper should only be called for the Object, This, Self, and Parent
+  // cases
+  assertx(expected->isObject() || expected->isSelf() || expected->isParent()
+          || expected->isThis());
+  // For the This, Self and Parent cases, we must always have a resolved class
+  // for the constraint
   assertx(IMPLIES(
-    expected->isSelf() || expected->isParent(), constraint != nullptr));
+    expected->isSelf() || expected->isParent() || expected->isThis(),
+    constraint != nullptr
+  ));
   // If we have a resolved class for the constraint, all we have to do is
   // check if the value's class is compatible with it
   if (LIKELY(constraint != nullptr)) {
+    if (expected->isThis() && RuntimeOption::EvalThisTypeHintLevel >= 2) {
+      return cls == constraint;
+    }
     return cls->classof(constraint);
   }
   // The Self and Parent cases should never reach here because they were

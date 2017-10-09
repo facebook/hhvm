@@ -475,34 +475,8 @@ Triggered E_WARNING: Value returned from closure must be of type @callable, xhp_
 calling f21
 
 calling f22
-Caught exception: Value returned from closure must be of type this, null given
-Caught exception: Value returned from closure must be of type this, int given
-Caught exception: Value returned from closure must be of type this, string given
-Caught exception: Value returned from closure must be of type this, bool given
-Caught exception: Value returned from closure must be of type this, float given
-Caught exception: Value returned from closure must be of type this, gd given
-Caught exception: Value returned from closure must be of type this, array given
-Caught exception: Value returned from closure must be of type this, Closure given
-Caught exception: Value returned from closure must be of type this, Figure given
-Caught exception: Value returned from closure must be of type this, Square given
-Caught exception: Value returned from closure must be of type this, Fractal given
-Caught exception: Value returned from closure must be of type this, xhp_div given
-Caught exception: Value returned from closure must be of type this, A given
 
 calling f22_soft
-Triggered E_WARNING: Value returned from closure must be of type @this, null given
-Triggered E_WARNING: Value returned from closure must be of type @this, int given
-Triggered E_WARNING: Value returned from closure must be of type @this, string given
-Triggered E_WARNING: Value returned from closure must be of type @this, bool given
-Triggered E_WARNING: Value returned from closure must be of type @this, float given
-Triggered E_WARNING: Value returned from closure must be of type @this, gd given
-Triggered E_WARNING: Value returned from closure must be of type @this, array given
-Triggered E_WARNING: Value returned from closure must be of type @this, Closure given
-Triggered E_WARNING: Value returned from closure must be of type @this, Figure given
-Triggered E_WARNING: Value returned from closure must be of type @this, Square given
-Triggered E_WARNING: Value returned from closure must be of type @this, Fractal given
-Triggered E_WARNING: Value returned from closure must be of type @this, xhp_div given
-Triggered E_WARNING: Value returned from closure must be of type @this, A given
 
 calling f23
 Caught exception: Value returned from closure must be of type B, null given

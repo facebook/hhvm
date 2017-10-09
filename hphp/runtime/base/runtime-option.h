@@ -501,6 +501,15 @@ struct RuntimeOption {
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
+  /* The following option enables the runtime checks for `this` typehints.
+   * There are 4 possible options:
+   * 0 - No checking of `this` typehints.
+   * 1 - Check `this` as hard `self` typehints.
+   * 2 - Check `this` typehints as soft `this` typehints
+   * 3 - Check `this` typehints as hard `this` typehints (unless explicitly
+   *     soft).  This is the only option which enable optimization in HHBBC.
+   */                                                                   \
+  F(int32_t, ThisTypeHintLevel,        0)                               \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.
      1 - Raises E_WARNING if a return type hint fails.
@@ -514,11 +523,6 @@ struct RuntimeOption {
          error handler returns something other than boolean false,
          the runtime will throw a fatal error. */                       \
   F(int32_t, CheckReturnTypeHints,     2)                               \
-  /* Whether to assume that `this` types will be verified by Verify*Type
-     instructions at runtime. This changes program behavior because
-     this type hints that are checked at runtime will enable additional
-     HHBBC optimizations. This is serialized in Repo::GlobalData */     \
-  F(bool, CheckThisTypeHints,          false)                           \
   /* Whether or not to assume that VerifyParamType instructions must
      throw if the parameter does not match the associated type
      constraint. This changes program behavior because parameter type

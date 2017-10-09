@@ -76,7 +76,7 @@ struct Repo::GlobalData {
    * This changes program behavior because this type hints that are checked
    * at runtime will enable additional HHBBC optimizations.
    */
-  bool CheckThisTypeHints = true;
+  int32_t ThisTypeHintLevel = 0;
 
   /*
    * Indicates whether a repo was compiled with HardPrivatePropInference.
@@ -160,7 +160,7 @@ struct Repo::GlobalData {
       (InitialNamedEntityTableSize)
       (InitialStaticStringTableSize)
       (HardTypeHints)
-      (CheckThisTypeHints)
+      (ThisTypeHintLevel)
       (HardReturnTypeHints)
       (HardPrivatePropInference)
       (DisallowDynamicVarEnvFuncs)

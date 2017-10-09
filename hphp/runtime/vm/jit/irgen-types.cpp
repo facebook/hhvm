@@ -141,7 +141,8 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
   auto func = curFunc(env);
   auto const& tc = isReturnType ? func->returnTypeConstraint()
                                 : func->params()[id].typeConstraint;
-  if (tc.isMixed() || (!RuntimeOption::EvalCheckThisTypeHints && tc.isThis())) {
+  if (tc.isMixed() || (RuntimeOption::EvalThisTypeHintLevel == 0
+                       && tc.isThis())) {
     return;
   }
 
@@ -177,8 +178,10 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
       curUnit(env)->isHHFile() ||
       !RuntimeOption::PHP7_ScalarTypes;
 
-    auto const failHard = strictTypes &&
-      RuntimeOption::RepoAuthoritative && !tc.isSoft();
+    auto const failHard = strictTypes
+      && RuntimeOption::RepoAuthoritative
+      && !tc.isSoft()
+      && !(tc.isThis() && RuntimeOption::EvalThisTypeHintLevel == 2);
 
     if (isReturnType) {
       updateMarker(env);
@@ -246,6 +249,25 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     return;
   }
 
+  // At this point we know valType is Obj.
+  if (tc.isThis() && RuntimeOption::EvalThisTypeHintLevel >= 2) {
+    // For this type checks, the class needs to be an exact match.
+    auto const ctxCls = gen(env, LdClsCtx, ldCtx(env));
+    auto const objClass = gen(env, LdObjClass, val);
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        gen(env, JmpZero, taken, gen(env, EqCls, ctxCls, objClass));
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        genFail();
+      }
+    );
+    return;
+  }
+  assert(IMPLIES(tc.isThis(), RuntimeOption::EvalThisTypeHintLevel == 1));
+
   // If we reach here then valType is Obj and tc is Object, Self, or Parent
   const StringData* clsName;
   const Class* knownConstraint = nullptr;
@@ -261,7 +283,8 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
       clsName = tc.typeName();
     }
   } else {
-    if (tc.isSelf() || tc.isThis()) {
+    if (tc.isSelf()
+        || (tc.isThis() && RuntimeOption::EvalThisTypeHintLevel == 1)) {
       tc.selfToClass(curFunc(env), &knownConstraint);
     } else {
       assertx(tc.isParent());
@@ -274,12 +297,11 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     }
     clsName = knownConstraint->preClass()->name();
   }
-  assertx(clsName);
 
   // For "self" and "parent", knownConstraint should always be
   // non-null at this point
-  assertx(IMPLIES(tc.isSelf() || tc.isThis() || tc.isParent(),
-        knownConstraint != nullptr));
+  assertx(IMPLIES(tc.isSelf() || tc.isParent(), knownConstraint != nullptr));
+  assertx(IMPLIES(tc.isSelf() || tc.isParent(), clsName != nullptr));
 
   auto const checkCls = ldClassSafe(env, clsName, knownConstraint);
   auto const fastIsInstance = implInstanceCheck(env, val, clsName, checkCls);

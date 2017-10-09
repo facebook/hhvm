@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -391,8 +392,25 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
     } else {
       switch (metaType()) {
         case MetaType::Self:
-        case MetaType::This:
           selfToClass(func, &c);
+          break;
+        case MetaType::This:
+          switch (RuntimeOption::EvalThisTypeHintLevel) {
+            case 0:   // Like Mixed.
+              return true;
+              break;
+            case 1:   // Like Self.
+              selfToClass(func, &c);
+              break;
+            case 2:   // Soft this in irgen verifyTypeImpl and verifyFail.
+            case 3:   // Hard this.
+              thisToClass(&c);
+              if (c) {
+                return tv->m_data.pobj->getVMClass() == c;
+              }
+              return false;
+              break;
+          }
           break;
         case MetaType::Parent:
           parentToClass(func, &c);
@@ -525,7 +543,8 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
           givenType
         ).str();
     }
-    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
+    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()
+        && (!isThis() || RuntimeOption::EvalThisTypeHintLevel != 2)) {
       raise_return_typehint_error(msg);
     } else {
       raise_warning_unsampled(msg);
@@ -555,7 +574,8 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
   }
 
   // Handle parameter type constraint failures
-  if (isExtended() && isSoft()) {
+  if (isExtended() &&
+      (isSoft() || (isThis() && RuntimeOption::EvalThisTypeHintLevel == 2))) {
     // Soft extended type hints raise warnings instead of recoverable
     // errors, to ease migration.
     raise_warning_unsampled(
@@ -587,6 +607,18 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
           id + 1, func->fullName(), name, givenType
         ).str()
       );
+    }
+  }
+}
+
+void TypeConstraint::thisToClass(const Class **cls) const {
+  const ActRec* ar = vmfp();
+  if (ar->func()->cls()) {
+    if (ar->hasThis()) {
+      *cls = ar->getThis()->getVMClass();
+    } else {
+      assertx(ar->hasClass());
+      *cls = ar->getClass();
     }
   }
 }

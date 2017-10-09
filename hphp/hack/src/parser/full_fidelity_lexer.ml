@@ -29,6 +29,8 @@ let invalid = '\000'
 let make text =
   { text; start = 0; offset = 0; errors = [] }
 
+let empty = make SourceText.empty
+
 let source lexer =
   lexer.text
 
@@ -1376,8 +1378,14 @@ let scan_next_token_as_keyword = scan_next_token false
 (* Entrypoints *)
 (* TODO: Instead of passing Boolean flags, create a flags enum? *)
 
-let next_token lexer =
-  scan_next_token_as_keyword scan_token_outside_type lexer
+(* This function is the inner loop of the parser, is pure, and
+is frequently called twice in a row with the same lexer due to the
+design of the parser. We get a big win by memoizing it. *)
+let next_token = (* takes a lexer, returns a (lexer, token) *)
+  let next_token_cache = Little_cache.make empty
+    (empty, Full_fidelity_minimal_token.make TokenKind.EndOfFile 0 [] []) in
+  Little_cache.memoize next_token_cache
+    (scan_next_token_as_keyword scan_token_outside_type)
 
 let next_token_no_trailing lexer =
   let tokenizer lexer =

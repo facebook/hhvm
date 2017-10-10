@@ -227,7 +227,7 @@ module Revision_tracker = struct
    *
    * Non-blocking.
    *)
-  let rec churn_ready_changes ~acc env =
+  let rec churn_ready_changes ~acc env server_state =
     let maybe_set_base_rev transition svn_rev env = match transition with
       | State_enter _
       | State_leave _ ->
@@ -243,15 +243,24 @@ module Revision_tracker = struct
       | None ->
         acc
       | Some (significant, svn_rev) ->
+        let open Informant_sig in
         (** We already peeked the value above. Can ignore here. *)
         let _ = Queue.pop env.state_changes in
         let _ = State_prefetcher.run svn_rev env.inits.prefetcher in
         (** Maybe setting the base revision must be done after
          * computing distance. *)
         maybe_set_base_rev transition svn_rev env;
-        churn_ready_changes ~acc:(significant || acc) env
+        let decision = form_decision significant transition server_state in
+        let decision = match acc, decision with
+          | Restart_server, _
+          | _, Restart_server ->
+            Restart_server
+          | _, _ ->
+            Move_along
+        in
+        churn_ready_changes ~acc:decision env server_state
 
-  let form_decision has_significant last_transition server_state =
+  and form_decision has_significant last_transition server_state =
     let open Informant_sig in
     match has_significant, last_transition, server_state with
     | _, State_leave _, Server_not_yet_started ->
@@ -277,10 +286,6 @@ module Revision_tracker = struct
     | true, Changed_merge_base _, _ ->
       Restart_server
 
-  let queue_peek_last q =
-    let first = Queue.peek q in
-    Queue.fold (fun _ v -> v) first q
-
   (**
    * Run through the ready changs in the queue; then make a decision.
    *)
@@ -289,9 +294,7 @@ module Revision_tracker = struct
     if Queue.is_empty env.state_changes then
       Move_along
     else
-      let last_transition, _ = queue_peek_last env.state_changes in
-      let has_significant = churn_ready_changes ~acc:false env in
-      form_decision has_significant last_transition server_state
+      churn_ready_changes ~acc:Move_along env server_state
 
   let get_change env =
     let watchman, change = Watchman.get_changes !(env.inits.watchman) in

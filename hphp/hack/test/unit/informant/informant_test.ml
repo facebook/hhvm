@@ -33,13 +33,16 @@ module Tools = struct
     | State_enter
     | Changed_merge_base
 
-  let set_hg_to_svn_map () =
+  let set_hg_to_svn_map ?delay_rev_3 () =
     Hg.Mocking.closest_svn_ancestor_bind_value hg_rev_1
       @@ Future.of_value svn_1;
     Hg.Mocking.closest_svn_ancestor_bind_value hg_rev_2
       @@ Future.of_value svn_2;
     Hg.Mocking.closest_svn_ancestor_bind_value hg_rev_3
-      @@ Future.of_value svn_3;
+      begin match delay_rev_3 with
+        | None -> Future.of_value svn_3
+        | Some i -> Future.delayed_value ~delays:i svn_3
+      end;
     Hg.Mocking.closest_svn_ancestor_bind_value hg_rev_4
       @@ Future.of_value svn_4
 
@@ -161,6 +164,60 @@ let test_informant_restarts_significant_move temp_dir =
     "Changed merge base significant distance";
   true
 
+(** This test is similar to the above (but shorter) except the
+ * query for the SVN revision for the Changed_merge_base revision is
+ * delayed. *)
+let test_informant_restarts_significant_move_delayed temp_dir =
+  (** We delay it by 8. It seems an odd number, but the state
+   * transition queue can get pumped multiple times at each
+   * Informant.report call. This occurs because Revision_tracker.report
+   * calls itself recursively if something arrived on the Watchman
+   * subscription. *)
+  Tools.set_hg_to_svn_map ~delay_rev_3:8 ();
+  Watchman.Mocking.init_returns @@ Some "test_mock_basic";
+  Hg.Mocking.current_working_copy_base_rev_returns
+    (Future.of_value Tools.svn_1);
+  Watchman.Mocking.get_changes_returns
+    (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
+  let informant = HhMonitorInformant.init {
+    HhMonitorInformant.root = temp_dir;
+    state_prefetcher = State_prefetcher.dummy;
+    allow_subscriptions = true;
+    min_distance_restart = 100;
+    use_dummy = false;
+  } in
+  let report = HhMonitorInformant.report
+    informant Informant_sig.Server_alive in
+  Report_asserter.assert_equals Informant_sig.Move_along report
+    "no distance moved" ;
+
+  (** Start with a significant Changed Merge Base to a revision that's mapped
+   * SVN revision is delayed by a few cycles. *)
+  Tools.test_transition
+    informant Tools.Changed_merge_base Tools.hg_rev_3
+    Informant_sig.Server_alive Informant_sig.Move_along
+    "Changed_merge_base significant distance, but delayed should not restart";
+
+  (** Informant now sitting at revision 200, but informant doesn't know it yet
+   * because of the delayed computation. we nudge it twice. *)
+  Tools.test_transition
+    informant Tools.State_enter Tools.hg_rev_4
+    Informant_sig.Server_alive Informant_sig.Move_along
+    "Nudge delayed future with State_enter";
+  Tools.test_transition
+    informant Tools.State_leave Tools.hg_rev_4
+    Informant_sig.Server_alive Informant_sig.Move_along
+    "Nudge delayed future with State_leave";
+
+  (** Now we come back to 200, but this last nudge of the delayed value produces
+   * the actual SVN rev for 200. So the Restart_server from the
+   * Changed_merge_base above shows up now. *)
+  Tools.test_transition
+    informant Tools.State_enter Tools.hg_rev_3
+    Informant_sig.Server_alive Informant_sig.Restart_server
+    "Trigger last delayed value for prior Changed_merge_base svn rev mapping";
+  true
+
 (** We emulate the repo being in a mid-update state when the informant
  * starts. i.e., the .hg/updatestate file is present. *)
 let test_repo_starts_midupdate temp_dir =
@@ -220,6 +277,8 @@ let tests =
   [
     "test_informant_restarts_significant_move", (fun () ->
       Tempfile.with_tempdir test_informant_restarts_significant_move);
+    "test_informant_restarts_significant_move_delayed", (fun () ->
+      Tempfile.with_tempdir test_informant_restarts_significant_move_delayed);
     "test_repo_starts_midupdate", (fun () ->
       Tempfile.with_tempdir test_repo_starts_midupdate);
     "test_watcher_in_unknown_state", (fun () ->

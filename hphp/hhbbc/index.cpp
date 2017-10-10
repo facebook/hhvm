@@ -906,48 +906,17 @@ void find_deps(IndexData& data,
 
 bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
                         borrowed_ptr<const ClassInfo> rparent,
-                        bool directIface) {
+                        bool fromTrait) {
   if (!rparent) return true;
 
   auto const isIface = rparent->cls->attrs & AttrInterface;
 
-  /*
-   * Make a table of all the constants on this class.
-   *
-   * Duplicate class constants override parent class constants, but
-   * its an error for two different interfaces to define the same
-   * constant, or for a class to override a constant thats defined in
-   * one of its declared interfaces.
-   *
-   */
-  for (auto& c : rparent->cls->constants) {
-    auto& cptr = rleaf->clsConstants[c.name];
-    if (!cptr) {
-      cptr = &c;
-      continue;
-    }
-
-    if (isIface &&
-        cptr->val.hasValue() &&
-        c.val.hasValue() &&
-        cptr->cls != rparent->cls) {
-      if ((cptr->cls->attrs & AttrInterface) || directIface) {
-        ITRACE(2,
-               "build_cls_info_rec failed for `{}' because "
-               "`{}' was defined by both `{}' and `{}'",
-               rleaf->cls->name, c.name,
-               rparent->cls->name, cptr->cls->name);
-        return false;
-      }
-    }
-  }
-
   if (!build_cls_info_rec(rleaf, rparent->parent, false)) return false;
   for (auto const iface : rparent->declInterfaces) {
-    if (!build_cls_info_rec(rleaf, iface, rparent == rleaf)) return false;
+    if (!build_cls_info_rec(rleaf, iface, fromTrait)) return false;
   }
   for (auto const trait : rparent->usedTraits) {
-    if (!build_cls_info_rec(rleaf, trait, false)) return false;
+    if (!build_cls_info_rec(rleaf, trait, true)) return false;
   }
 
   /*
@@ -955,6 +924,47 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
    */
   if (isIface) {
     rleaf->implInterfaces[rparent->cls->name] = rparent;
+  }
+
+  for (auto& c : rparent->cls->constants) {
+    auto& cptr = rleaf->clsConstants[c.name];
+    if (!cptr) {
+      cptr = &c;
+      continue;
+    }
+
+    // Same constant (from an interface via two different paths) is ok
+    if (cptr->cls == rparent->cls) continue;
+
+    if (cptr->isTypeconst != c.isTypeconst) {
+      ITRACE(2,
+             "build_cls_info_rec failed for `{}' because `{}' was defined by "
+             "`{}' as a {}constant and by `{}' as a {}constant\n",
+             rleaf->cls->name, c.name,
+             rparent->cls->name, c.isTypeconst ? "type " : "",
+             cptr->cls->name, cptr->isTypeconst ? "type " : "");
+      return false;
+    }
+
+    // Ignore abstract constants
+    if (!c.val) continue;
+
+    if (cptr->val) {
+      // Constants from interfaces implemented by traits silently lose
+      if (fromTrait) continue;
+
+      // A constant from an interface collides with an existing constant.
+      if (isIface) {
+        ITRACE(2,
+               "build_cls_info_rec failed for `{}' because "
+               "`{}' was defined by both `{}' and `{}'\n",
+               rleaf->cls->name, c.name,
+               rparent->cls->name, cptr->cls->name);
+        return false;
+      }
+    }
+
+    cptr = &c;
   }
 
   /*
@@ -1292,7 +1302,7 @@ void resolve_combinations(IndexData& index,
   if (cls->parentName) {
     cinfo->parent   = env.lookup(cls->parentName);
     cinfo->baseList = cinfo->parent->baseList;
-    if (cinfo->parent->cls->attrs & AttrInterface) {
+    if (cinfo->parent->cls->attrs & (AttrInterface | AttrTrait)) {
       ITRACE(2,
              "Resolve combinations failed for `{}' because "
              "its parent `{}' is not a class\n",
@@ -1332,6 +1342,9 @@ void resolve_combinations(IndexData& index,
   if (Trace::moduleEnabled(Trace::hhbbc_index, 3)) {
     for (auto const DEBUG_ONLY& iface : cinfo->implInterfaces) {
       ITRACE(3, "    implements: {}\n", iface.second->cls->name);
+    }
+    for (auto const DEBUG_ONLY& trait : cinfo->usedTraits) {
+      ITRACE(3, "          uses: {}\n", trait->cls->name);
     }
   }
   index.allClassInfos.push_back(std::move(cinfo));

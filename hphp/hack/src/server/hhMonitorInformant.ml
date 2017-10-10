@@ -197,65 +197,9 @@ module Revision_tracker = struct
   let cached_svn_rev revision_map hg_rev =
     Revision_map.find hg_rev revision_map
 
-  (**
-   * If we have a cached svn_rev for this hg_rev, returns whether or not this
-   * hg_rev is a significant distance away, and its svn_rev.
-   *
-   * Nonblocking.
-   *)
-  let maybe_significant timestamp transition env =
-    let hg_rev = match transition with
-      | State_enter hg_rev
-      | State_leave hg_rev
-      | Changed_merge_base hg_rev -> hg_rev
-    in
-    match cached_svn_rev env.rev_map hg_rev with
-    | None ->
-      None
-    | Some svn_rev ->
-      let distance = float_of_int @@ get_distance svn_rev env in
-      let elapsed_t = (Unix.time () -. timestamp) in
-      let significant = is_significant
-        ~min_distance_restart:env.inits.min_distance_restart
-        distance elapsed_t in
-      Some (significant, svn_rev)
-
-  (**
-   * Keep popping state_changes queue until we reach a non-ready result.
-   *
-   * Returns a list of the decisions from processing each ready change
-   * in the queue; the list is ordered most-recent to oldest.
-   *
-   * Non-blocking.
-   *)
-  let rec churn_ready_changes ~acc env server_state =
-    let maybe_set_base_rev transition svn_rev env = match transition with
-      | State_enter _
-      | State_leave _ ->
-        ()
-      | Changed_merge_base _ ->
-        set_base_revision svn_rev env
-    in
-    if Queue.is_empty env.state_changes then
-      acc
-    else
-      let transition, timestamp = Queue.peek env.state_changes in
-      match maybe_significant timestamp transition env with
-      | None ->
-        acc
-      | Some (significant, svn_rev) ->
-        (** We already peeked the value above. Can ignore here. *)
-        let _ = Queue.pop env.state_changes in
-        let _ = State_prefetcher.run svn_rev env.inits.prefetcher in
-        (** Maybe setting the base revision must be done after
-         * computing distance. *)
-        maybe_set_base_rev transition svn_rev env;
-        let decision = form_decision significant transition server_state in
-        churn_ready_changes ~acc:(decision :: acc) env server_state
-
-  and form_decision has_significant last_transition server_state =
+  let form_decision is_significant transition server_state =
     let open Informant_sig in
-    match has_significant, last_transition, server_state with
+    match is_significant, transition, server_state with
     | _, State_leave _, Server_not_yet_started ->
      (** This case should be unreachable since Server_not_yet_started
       * should be handled by "should_start_first_server" and not by the
@@ -278,6 +222,61 @@ module Revision_tracker = struct
       Move_along
     | true, Changed_merge_base _, _ ->
       Restart_server
+
+  (**
+   * If we have a cached svn_rev for this hg_rev, make a decision on
+   * this transition and returns that decision.  If not, returns None.
+   *
+   * Nonblocking.
+   *)
+  let make_decision timestamp transition server_state env =
+    let hg_rev = match transition with
+      | State_enter hg_rev
+      | State_leave hg_rev
+      | Changed_merge_base hg_rev -> hg_rev
+    in
+    match cached_svn_rev env.rev_map hg_rev with
+    | None ->
+      None
+    | Some svn_rev ->
+      let distance = float_of_int @@ get_distance svn_rev env in
+      let elapsed_t = (Unix.time () -. timestamp) in
+      let significant = is_significant
+        ~min_distance_restart:env.inits.min_distance_restart
+        distance elapsed_t in
+      Some (form_decision significant transition server_state, svn_rev)
+
+  (**
+   * Keep popping state_changes queue until we reach a non-ready result.
+   *
+   * Returns a list of the decisions from processing each ready change
+   * in the queue; the list is ordered most-recent to oldest.
+   *
+   * Non-blocking.
+   *)
+  let rec churn_ready_changes ~acc env server_state =
+    let maybe_set_base_rev transition svn_rev env = match transition with
+      | State_enter _
+      | State_leave _ ->
+        ()
+      | Changed_merge_base _ ->
+        set_base_revision svn_rev env
+    in
+    if Queue.is_empty env.state_changes then
+      acc
+    else
+      let transition, timestamp = Queue.peek env.state_changes in
+      match make_decision timestamp transition server_state env with
+      | None ->
+        acc
+      | Some (decision, svn_rev) ->
+        (** We already peeked the value above. Can ignore here. *)
+        let _ = Queue.pop env.state_changes in
+        let _ = State_prefetcher.run svn_rev env.inits.prefetcher in
+        (** Maybe setting the base revision must be done after
+         * computing distance. *)
+        maybe_set_base_rev transition svn_rev env;
+        churn_ready_changes ~acc:(decision :: acc) env server_state
 
   (**
    * Run through the ready changs in the queue; then make a decision.
@@ -325,13 +324,12 @@ module Revision_tracker = struct
       None
 
   let preprocess server_state transition env =
-    match maybe_significant (Unix.time ()) transition env with
+    match make_decision (Unix.time ()) transition server_state env with
     | None ->
       None
-    | Some (significant, svn_rev) ->
-      if significant
+    | Some (decision, svn_rev) ->
+      if decision <> Informant_sig.Move_along
         then ignore @@ State_prefetcher.run svn_rev env.inits.prefetcher;
-      let decision = form_decision significant transition server_state in
       Some (decision, svn_rev)
 
   let handle_change_then_churn server_state change env = begin

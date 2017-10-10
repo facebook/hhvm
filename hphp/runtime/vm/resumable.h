@@ -86,7 +86,7 @@ struct alignas(16) Resumable {
   static Resumable* Create(size_t frameSize, size_t totalSize) {
     // Allocate memory.
     (void)type_scan::getIndexForMalloc<ActRec>();
-    auto node = new (MM().objMalloc(totalSize))
+    auto node = new (tl_heap->objMalloc(totalSize))
                 NativeNode(HeaderKind::AsyncFuncFrame,
                            sizeof(NativeNode) + frameSize + sizeof(Resumable));
     auto frame = reinterpret_cast<char*>(node + 1);
@@ -141,7 +141,7 @@ struct alignas(16) Resumable {
   template<class T> static void Destroy(size_t size, T* obj) {
     auto const base = reinterpret_cast<char*>(obj + 1) - size;
     obj->~T();
-    MM().objFree(base, size);
+    tl_heap->objFree(base, size);
   }
 
   ActRec* actRec() { return &m_actRec; }

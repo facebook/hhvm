@@ -22,18 +22,13 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-inline MIterTable& miter_table() {
-  return *s_miter_table;
-}
-
 /*
  * Fast check for whether any strong iterators exist in the entire
  * program.  Most strong iterator operations from arrays should be
  * guarded on checking this first, and placed in an unlikely path.
  */
 inline bool strong_iterators_exist() {
-  return !s_miter_table.isNull() &&
-         miter_table().ents[0].array != nullptr;
+  return tl_miter_table && tl_miter_table->ents[0].array != nullptr;
 }
 
 template<class Fn> NEVER_INLINE
@@ -53,7 +48,7 @@ template<class Fn>
 void for_each_strong_iterator(Fn fn) {
   static_assert(MIterTable::ents_size == 7, "");
   assert(strong_iterators_exist());
-  auto& table = miter_table();
+  auto& table = *tl_miter_table;
   fn(table.ents[0]);
   fn(table.ents[1]);
   fn(table.ents[2]);

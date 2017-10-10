@@ -62,7 +62,7 @@ void  free_big(void*);
  * Request local memory in HHVM is managed by a thread local object
  * called MemoryManager.
  *
- * The object may be accessed with MM(), but higher-level apis are
+ * The object may be accessed with tl_heap, but higher-level apis are
  * also provided.
  *
  * The MemoryManager serves the following functions in hhvm:
@@ -77,7 +77,6 @@ void  free_big(void*);
  *     malloc implementation.  (This feature is gated on being
  *     compiled with jemalloc.)
  */
-MemoryManager& MM();
 
 //////////////////////////////////////////////////////////////////////
 
@@ -459,7 +458,7 @@ struct NativeNode : HeapObject,
   NativeNode(HeaderKind k, uint32_t off) : obj_offset(off) {
     initHeader_32(k, 0);
   }
-  uint32_t sweep_index; // index in MM::m_natives
+  uint32_t sweep_index; // index in MemoryManager::m_natives
   uint32_t obj_offset; // byte offset from this to ObjectData*
   uint16_t& typeIndex() { return m_aux16; }
   uint16_t typeIndex() const { return m_aux16; }
@@ -648,7 +647,7 @@ struct MemoryManager {
    * stats tracking in a scoped region.
    *
    * Usage:
-   *   MemoryManager::MaskAlloc masker(MM());
+   *   MemoryManager::MaskAlloc masker(tl_heap);
    */
   struct MaskAlloc;
 
@@ -895,7 +894,7 @@ struct MemoryManager {
    * This behaves just like the OOM check in refreshStatsImpl().  If the
    * m_couldOOM flag is already unset, we return false, but if otherwise we
    * would exceed the limit, we unset the flag and register an OOM fatal
-   * (though we do not modify the MM's stats).
+   * (though we do not modify the MemoryManager's stats).
    */
   bool preAllocOOM(int64_t size);
 
@@ -1123,10 +1122,10 @@ private:
 
   int64_t m_req_start_micros;
 
-  TYPE_SCAN_IGNORE_ALL; // heap-scan handles MM fields itself.
+  TYPE_SCAN_IGNORE_ALL; // heap-scan handles MemoryManager fields itself.
 };
 
-extern DECLARE_THREAD_LOCAL_FLAT(MemoryManager, s_memory_manager);
+extern DECLARE_THREAD_LOCAL_FLAT(MemoryManager, tl_heap);
 
 //////////////////////////////////////////////////////////////////////
 

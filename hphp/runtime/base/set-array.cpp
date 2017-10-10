@@ -274,7 +274,7 @@ void SetArray::Release(ArrayData* in) {
     // We better not have strong iterators associated with keysets.
     assert(!has_strong_iterator(ad));
   }
-  MM().objFree(ad, ad->heapSize());
+  tl_heap->objFree(ad, ad->heapSize());
   AARCH64_WALKABLE_FRAME();
 }
 

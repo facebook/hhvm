@@ -20,19 +20,19 @@
 namespace HPHP {
 
 static bool HHVM_FUNCTION(gc_enabled) {
-  return MM().isGCEnabled();
+  return tl_heap->isGCEnabled();
 }
 
 static void HHVM_FUNCTION(gc_enable) {
-  MM().setGCEnabled(true);
+  tl_heap->setGCEnabled(true);
 }
 
 static void HHVM_FUNCTION(gc_disable) {
-  MM().setGCEnabled(false);
+  tl_heap->setGCEnabled(false);
 }
 
 static int64_t HHVM_FUNCTION(gc_collect_cycles) {
-  MM().collect("gc_collect_cycles");
+  tl_heap->collect("gc_collect_cycles");
   return 0; // seriously, count cycles?
 }
 
@@ -42,7 +42,7 @@ static int64_t HHVM_FUNCTION(gc_mem_caches) {
 }
 
 static void HHVM_FUNCTION(gc_check_heap) {
-  MM().checkHeap("gc_check_heap");
+  tl_heap->checkHeap("gc_check_heap");
 }
 
 void StandardExtension::initGc() {

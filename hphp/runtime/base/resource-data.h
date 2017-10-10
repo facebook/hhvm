@@ -272,14 +272,14 @@ ALWAYS_INLINE void decRefRes(ResourceHdr* res) {
     constexpr auto size = sizeof(ResourceHdr) + sizeof(T);      \
     auto h = static_cast<ResourceData*>(p)->hdr();              \
     assert(h->heapSize() == size);                              \
-    MM().freeSmallSize(h, size);                                \
+    tl_heap->freeSmallSize(h, size);                            \
   }
 
 #define DECLARE_RESOURCE_ALLOCATION(T)                          \
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                       \
   void sweep() override;
 
-#define IMPLEMENT_RESOURCE_ALLOCATION_NS(NS, T)                          \
+#define IMPLEMENT_RESOURCE_ALLOCATION_NS(NS, T)                        \
   static_assert(std::is_base_of<HPHP::ResourceData,NS::T>::value, ""); \
   void NS::T::sweep() { this->~T(); }
 
@@ -297,7 +297,7 @@ typename std::enable_if<
   constexpr auto size = sizeof(ResourceHdr) + sizeof(T);
   static_assert(uint16_t(size) == size && size < kMaxSmallSize, "");
   static_assert(std::is_convertible<T*,ResourceData*>::value, "");
-  auto const b = static_cast<ResourceHdr*>(MM().mallocSmallSize(size));
+  auto const b = static_cast<ResourceHdr*>(tl_heap->mallocSmallSize(size));
   // initialize HeapObject
   b->init(size, type_scan::getIndexForMalloc<T>());
   try {
@@ -305,7 +305,7 @@ typename std::enable_if<
     assert(r->hasExactlyOneRef());
     return req::ptr<T>::attach(r);
   } catch (...) {
-    MM().freeSmallSize(b, size);
+    tl_heap->freeSmallSize(b, size);
     throw;
   }
 }

@@ -253,7 +253,7 @@ inline int64_t cpu_ns() {
 NEVER_INLINE void Collector::init() {
   auto const t0 = cpu_ns();
   SCOPE_EXIT { init_ns_ = cpu_ns() - t0; };
-  MM().initFree();
+  tl_heap->initFree();
   initfree_ns_ = cpu_ns() - t0;
 
   heap_.iterate(
@@ -319,7 +319,7 @@ NEVER_INLINE void Collector::trace() {
 // another pass through the heap, this time using the PtrMap we computed
 // in init(). Free and maybe quarantine unmarked objects.
 NEVER_INLINE void Collector::sweep() {
-  auto& mm = MM();
+  auto& mm = *tl_heap;
   auto const t0 = cpu_ns();
   auto const usage0 = mm.currentUsage();
   MemoryManager::FreelistArray quarantine;
@@ -413,7 +413,7 @@ StructuredLogEntry logCommon() {
   StructuredLogEntry sample;
   sample.setInt("req_num", t_req_num);
   // MemoryUsageStats
-  sample.setInt("memory_limit", MM().getMemoryLimit());
+  sample.setInt("memory_limit", tl_heap->getMemoryLimit());
   sample.setInt("usage", t_pre_stats.usage());
   sample.setInt("mm_usage", t_pre_stats.mmUsage);
   sample.setInt("aux_usage", t_pre_stats.auxUsage());
@@ -505,7 +505,7 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
     t_enable_samples = StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
   }
   if (t_enable_samples) {
-    t_pre_stats = MM().getStatsCopy(); // don't check or trigger OOM
+    t_pre_stats = tl_heap->getStatsCopy(); // don't check or trigger OOM
   }
   mark_version = (mark_version == MaxMark) ? MinMark :
                  GCBits(uint8_t(mark_version) + 1);

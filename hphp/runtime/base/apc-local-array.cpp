@@ -102,8 +102,8 @@ void APCLocalArray::Release(ArrayData* ad) {
     tvDecRefGen(tv);
   }
   a->m_arr->unreference();
-  MM().removeApcArray(a);
-  MM().objFree(a, size);
+  tl_heap->removeApcArray(a);
+  tl_heap->objFree(a, size);
 }
 
 size_t APCLocalArray::Vsize(const ArrayData*) { not_reached(); }

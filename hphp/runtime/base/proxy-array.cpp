@@ -68,7 +68,7 @@ ArrayData* ProxyArray::innerArr(const ArrayData* ad) {
 }
 
 ProxyArray* ProxyArray::Make(ArrayData* ad) {
-  auto ret = static_cast<ProxyArray*>(MM().objMalloc(sizeof(ProxyArray)));
+  auto ret = static_cast<ProxyArray*>(tl_heap->objMalloc(sizeof(ProxyArray)));
   ret->m_size            = -1;
   ret->m_pos             = 0;
   ret->initHeader(HeaderKind::Proxy, OneReference);
@@ -79,7 +79,7 @@ ProxyArray* ProxyArray::Make(ArrayData* ad) {
 
 void ProxyArray::Release(ArrayData*ad) {
   decRefRef(asProxyArray(ad)->m_ref);
-  MM().objFree(ad, sizeof(ProxyArray));
+  tl_heap->objFree(ad, sizeof(ProxyArray));
 }
 
 void ProxyArray::reseatable(const ArrayData* oldArr, ArrayData* newArr) {

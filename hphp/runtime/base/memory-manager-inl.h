@@ -31,10 +31,6 @@ static_assert(
   "Size-specified small block alloc functions assume this"
 );
 
-inline MemoryManager& MM() {
-  return *s_memory_manager;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 inline SparseHeap::~SparseHeap() {
@@ -424,15 +420,15 @@ inline HeapObject* MemoryManager::find(const void* p) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool MemoryManager::sweeping() {
-  return !s_memory_manager.isNull() && tl_sweeping;
+  return tl_heap && tl_sweeping;
 }
 
 inline bool MemoryManager::exiting() {
-  return !s_memory_manager.isNull() && MM().m_exiting;
+  return tl_heap && tl_heap->m_exiting;
 }
 
 inline void MemoryManager::setExiting() {
-  if (!s_memory_manager.isNull()) MM().m_exiting = true;
+  if (tl_heap) tl_heap->m_exiting = true;
 }
 
 inline StringDataNode& MemoryManager::getStringList() {

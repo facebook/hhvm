@@ -265,10 +265,10 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
     if (StickyFlags & PendingGCFlag) {
       clearSurpriseFlag(PendingGCFlag);
     }
-    if (MM().isGCEnabled()) {
-      MM().collect("surprise");
+    if (tl_heap->isGCEnabled()) {
+      tl_heap->collect("surprise");
     } else {
-      MM().checkHeap("surprise");
+      tl_heap->checkHeap("surprise");
     }
   }
   if (flags & SignaledFlag) {

@@ -97,7 +97,7 @@ void XDebugProfiler::collectFrameData(FrameData& frameData,
   // is enabled, or on function end if computerized tracing output is enabled
   if ((is_func_begin && (m_tracingEnabled || m_collectMemory)) ||
       (m_tracingEnabled && (m_tracingOpts & k_XDEBUG_TRACE_COMPUTERIZED))) {
-    frameData.memory_usage = MM().getStats().usage();
+    frameData.memory_usage = tl_heap->getStats().usage();
   } else {
     frameData.memory_usage = 0;
   }

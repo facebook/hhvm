@@ -1643,7 +1643,7 @@ static int execute_program_impl(int argc, char** argv) {
   zend_startup_strtod();
 #endif
 
-  s_memory_manager.getCheck();
+  tl_heap.getCheck();
   if (RuntimeOption::ServerExecutionMode()) {
     // Create the hardware counter before reading options,
     // so that the main thread never has inherit set in server
@@ -1759,7 +1759,7 @@ static int execute_program_impl(int argc, char** argv) {
     RuntimeOption::SafeFileAccess = false;
   }
   IniSetting::s_system_settings_are_set = true;
-  MM().resetRuntimeOptions();
+  tl_heap->resetRuntimeOptions();
 
   auto opened_logs = open_server_log_files();
   if (po.mode == "daemon") {
@@ -2129,7 +2129,7 @@ void hphp_thread_init() {
   zend_get_bigint_data();
   zend_rand_init();
   get_server_note();
-  s_memory_manager.getCheck();
+  tl_heap.getCheck();
 
   assert(ThreadInfo::s_threadInfo.isNull());
   ThreadInfo::s_threadInfo.getCheck()->init();
@@ -2176,7 +2176,7 @@ void hphp_process_init() {
   BootStats::mark("Process::InitProcessStatics");
 
   HHProf::Init();
-  s_miter_table.getCheck();
+  tl_miter_table.getCheck();
 
   // initialize the tzinfo cache.
   timezone_init();
@@ -2331,7 +2331,7 @@ void hphp_session_init() {
   AsioSession::Init();
   Socket::clearLastError();
   TI().onSessionInit();
-  MM().resetExternalStats();
+  tl_heap->resetExternalStats();
 
   g_thread_safe_locale_handler->reset();
   Treadmill::startRequest();
@@ -2404,7 +2404,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
     return false;
   }
 
-  MM().resetCouldOOM(isStandardRequest());
+  tl_heap->resetCouldOOM(isStandardRequest());
   RID().resetTimer();
 
   bool ret = true;
@@ -2485,7 +2485,7 @@ void hphp_context_exit(bool shutdown /* = true */) {
 }
 
 void hphp_memory_cleanup() {
-  auto& mm = MM();
+  auto& mm = *tl_heap;
   // sweep functions are allowed to access g_context,
   // so we can't destroy it yet
   mm.sweep();
@@ -2549,7 +2549,7 @@ void hphp_session_exit(const Transport* transport) {
     hphp_memory_cleanup();
   }
 
-  assert(MM().empty());
+  assert(tl_heap->empty());
 
   s_sessionInitialized = false;
   s_extra_request_nanoseconds = 0;

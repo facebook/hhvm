@@ -25,7 +25,7 @@ namespace HPHP {
 
 static void allocAndJoin(size_t size, bool free) {
   std::thread thread([&]() {
-      s_memory_manager.getCheck();
+      tl_heap.getCheck();
       if (free) {
         String str(size, ReserveString);
       } else {
@@ -157,12 +157,12 @@ TEST(MemoryManager, Find) {
     auto const n = static_cast<MallocNode*>(p) - 1;
     auto p2 = req::malloc_noptrs(kMaxSmallSize/2);
     auto const n2 = static_cast<MallocNode*>(p2) - 1;
-    EXPECT_TRUE(MM().find(n));
-    EXPECT_TRUE(MM().find(n2));
+    EXPECT_TRUE(tl_heap->find(n));
+    EXPECT_TRUE(tl_heap->find(n2));
     req::free(p);
     req::free(p2);
-    EXPECT_FALSE(MM().find(n));
-    EXPECT_TRUE(MM().find(n2));
+    EXPECT_FALSE(tl_heap->find(n));
+    EXPECT_TRUE(tl_heap->find(n2));
   }
 }
 
@@ -171,9 +171,9 @@ TEST(MemoryManager, Contains) {
   for (size_t index = 0; index < 1000; ++index) {
     auto p = req::malloc_noptrs(kMaxSmallSize/2);
     auto const n = static_cast<MallocNode*>(p) - 1;
-    EXPECT_TRUE(MM().contains(n));
+    EXPECT_TRUE(tl_heap->contains(n));
     req::free(p);
-    EXPECT_TRUE(MM().contains(n));
+    EXPECT_TRUE(tl_heap->contains(n));
   }
 }
 

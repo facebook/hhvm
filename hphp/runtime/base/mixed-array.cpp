@@ -403,7 +403,7 @@ void MixedArray::Release(ArrayData* in) {
       free_strong_iterators(ad);
     }
   }
-  MM().objFree(ad, ad->heapSize());
+  tl_heap->objFree(ad, ad->heapSize());
   AARCH64_WALKABLE_FRAME();
 }
 

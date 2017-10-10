@@ -585,13 +585,13 @@ static bool HHVM_FUNCTION(xdebug_is_enabled) {
 
 static int64_t HHVM_FUNCTION(xdebug_memory_usage) {
   // With jemalloc, the usage can go negative (see memory_get_usage)
-  auto const usage = MM().getStats().usage();
+  auto const usage = tl_heap->getStats().usage();
   assert(use_jemalloc || usage >= 0);
   return std::max<int64_t>(usage, 0);
 }
 
 static int64_t HHVM_FUNCTION(xdebug_peak_memory_usage) {
-  return MM().getStats().peakUsage;
+  return tl_heap->getStats().peakUsage;
 }
 
 // TODO(#3704) This requires var_dump, error handling, and stack trace printing

@@ -195,7 +195,7 @@ struct HashTable : HashTableCommon {
   static ALWAYS_INLINE
   ArrayType* reqAlloc(uint32_t scale) {
     auto const allocBytes = computeAllocBytes(scale);
-    return static_cast<ArrayType*>(MM().objMalloc(allocBytes));
+    return static_cast<ArrayType*>(tl_heap->objMalloc(allocBytes));
   }
 
   static ALWAYS_INLINE

@@ -972,7 +972,7 @@ Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
   ObjprofStrings metrics;
 
   std::unordered_set<void*> pointers;
-  MM().forEachObject([&](const ObjectData* obj) {
+  tl_heap->forEachObject([&](const ObjectData* obj) {
     ObjprofStack path;
     getObjStrings(obj, &metrics, &path, &pointers);
   });
@@ -1014,7 +1014,7 @@ Array HHVM_FUNCTION(objprof_get_data,
     exclude_classes.insert(iter.second().toString().data());
   }
 
-  MM().forEachObject([&](const ObjectData* obj) {
+  tl_heap->forEachObject([&](const ObjectData* obj) {
     if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
     std::vector<const void*> val_stack;
     auto objsizePair = getObjSize(
@@ -1084,7 +1084,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
     exclude_classes.insert(iter.second().toString().data());
   }
 
-  MM().forEachObject([&](const ObjectData* obj) {
+  tl_heap->forEachObject([&](const ObjectData* obj) {
       if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
       auto cls = obj->getVMClass();
       auto& metrics = histogram[std::make_pair(cls, "")];
@@ -1281,7 +1281,7 @@ void HHVM_FUNCTION(set_mem_threshold_callback,
   g_context->m_memThresholdCallback = callback;
 
   // Notify MM that surprise flag should be set upon reaching the threshold
-  MM().setMemThresholdCallback(threshold);
+  tl_heap->setMemThresholdCallback(threshold);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

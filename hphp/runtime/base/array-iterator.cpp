@@ -586,11 +586,11 @@ Variant ArrayIter::iterValue(VersionableSparse) {
 
 //////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_FLAT(MIterTable, s_miter_table);
+IMPLEMENT_THREAD_LOCAL_FLAT(MIterTable, tl_miter_table);
 
 void MIterTable::clear() {
-  if (s_miter_table.isNull()) return;
-  auto t = &miter_table();
+  if (!tl_miter_table) return;
+  auto t = tl_miter_table.get();
   t->ents.fill({nullptr, nullptr});
   if (!t->extras.empty()) {
     t->extras.release_if([](const MIterTable::Ent& /*e*/) { return true; });
@@ -628,7 +628,7 @@ X(6);
 // delegates to slow.
 ALWAYS_INLINE
 MIterTable::Ent* find_empty_strong_iter() {
-  auto& table = *s_miter_table.getCheck();
+  auto& table = *tl_miter_table.getCheck();
   if (LIKELY(!table.ents[0].array)) {
     return &table.ents[0];
   }
@@ -668,7 +668,7 @@ void free_strong_iterator_impl(Cond cond) {
     }
   };
 
-  auto& table = miter_table();
+  auto& table = *tl_miter_table;
   if (cond(table.ents[0])) {
     table.ents[0].iter->setContainer(nullptr);
     table.ents[0].array = nullptr;

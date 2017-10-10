@@ -219,7 +219,8 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
   int round = 0;
 
   do {
-    if (UNLIKELY(retsize >= kMaxSmallSize && MM().preAllocOOM(retsize + 1))) {
+    if (UNLIKELY(retsize >= kMaxSmallSize) &&
+        UNLIKELY(tl_heap->preAllocOOM(retsize + 1))) {
       VMRegAnchor _;
       assert(checkSurpriseFlags());
       handle_request_surprise();

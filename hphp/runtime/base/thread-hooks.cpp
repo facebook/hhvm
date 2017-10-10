@@ -92,8 +92,7 @@ void* start_routine_wrapper(void *arg) {
   pthread_t self = pthread_self();
   auto& info = *reinterpret_cast<PthreadInfo*>(arg);
 
-  s_memory_manager.getCheck();
-  info.mm = &MM();
+  info.mm = tl_heap.getCheck();
   assert(info.mm);
   info.mm->resetExternalStats();
 #ifdef __linux__

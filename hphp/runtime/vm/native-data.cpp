@@ -96,7 +96,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   size_t size = ObjectData::sizeForNProps(nProps) + nativeDataSize;
 
   auto node = reinterpret_cast<NativeNode*>(
-    MM().objMalloc(size)
+    tl_heap->objMalloc(size)
   );
   node->obj_offset = nativeDataSize;
   assert(type_scan::isKnownType(ndi->tyindex));
@@ -109,7 +109,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
     ndi->init(obj);
   }
   if (ndi->sweep) {
-    MM().addNativeObject(node);
+    tl_heap->addNativeObject(node);
   }
   return obj;
 }
@@ -141,10 +141,10 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
   }
   auto node = getNativeNode(obj, ndi);
   if (ndi->sweep) {
-    MM().removeNativeObject(node);
+    tl_heap->removeNativeObject(node);
   }
 
-  MM().objFree(node, ObjectData::sizeForNProps(nProps) + ndsize(obj, ndi));
+  tl_heap->objFree(node, ObjectData::sizeForNProps(nProps) + ndsize(obj, ndi));
 }
 
 Variant nativeDataSleep(const ObjectData* obj) {

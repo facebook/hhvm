@@ -1196,7 +1196,7 @@ Array VariableUnserializer::unserializeArray() {
   auto const allocsz = MixedArray::computeAllocBytes(scale);
 
   // For large arrays, do a naive pre-check for OOM.
-  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
 
@@ -1253,7 +1253,7 @@ Array VariableUnserializer::unserializeDict() {
   auto const allocsz = MixedArray::computeAllocBytes(scale);
 
   // For large arrays, do a naive pre-check for OOM.
-  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
 
@@ -1314,7 +1314,7 @@ Array VariableUnserializer::unserializeVec() {
   auto const allocsz = MixedArray::computeAllocBytes(scale);
 
   // For large arrays, do a naive pre-check for OOM.
-  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
 
@@ -1355,7 +1355,7 @@ Array VariableUnserializer::unserializeVArray() {
   auto const allocsz = kSizeIndex2PackedArrayCapacity[sizeClass];
 
   // For large arrays, do a naive pre-check for OOM.
-  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
 
@@ -1394,7 +1394,7 @@ Array VariableUnserializer::unserializeKeyset() {
   auto const allocsz = SetArray::computeAllocBytes(scale);
 
   // For large arrays, do a naive pre-check for OOM.
-  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
 

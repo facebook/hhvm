@@ -652,9 +652,9 @@ struct json_parser {
         tl_buffer.raw = nullptr;
       }
       sb_cap = 0;
-      if (!MM().preAllocOOM(bufSize)) {
+      if (!tl_heap->preAllocOOM(bufSize)) {
         tl_buffer.raw = (char*)malloc(bufSize);
-        if (!tl_buffer.raw) MM().forceOOM();
+        if (!tl_buffer.raw) tl_heap->forceOOM();
       }
       check_non_safepoint_surprise();
       always_assert(tl_buffer.raw);

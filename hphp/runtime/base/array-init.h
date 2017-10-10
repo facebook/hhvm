@@ -529,7 +529,7 @@ struct PackedArrayInitBase : ArrayInitBase<TArray, DT> {
     ArrayInitBase<TArray, DT>(n, CheckAllocation{})
   {
     auto allocsz = sizeof(ArrayData) + sizeof(TypedValue) * n;
-    if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+    if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
       check_non_safepoint_surprise();
     }
     this->m_arr = TArray::MakeReserve(n);

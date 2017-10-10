@@ -207,7 +207,7 @@ void HttpRequestHandler::setupRequest(Transport* transport) {
 }
 
 void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
-  SCOPE_EXIT { always_assert(MM().empty()); };
+  SCOPE_EXIT { always_assert(tl_heap->empty()); };
 
   const VirtualHost *vhost = VirtualHost::GetCurrent();
   GetAccessLog().log(transport, vhost);

@@ -615,7 +615,7 @@ struct ApcLoadWorker {
   }
   void doJob(std::shared_ptr<ApcLoadJob> job) {
     char func_name[128];
-    MemoryManager::SuppressOOM so(MM());
+    MemoryManager::SuppressOOM so(*tl_heap);
     snprintf(func_name, sizeof(func_name), "_apc_load_%d", job->m_index);
     apc_load_func(job->m_handle, func_name)();
   }

@@ -603,8 +603,7 @@ struct MIterTable {
   TlsPodBag<Ent,req::Allocator<Ent>> extras;
 };
 static_assert(sizeof(MIterTable) == 2*64, "want multiple of cache line size");
-extern DECLARE_THREAD_LOCAL_FLAT(MIterTable, s_miter_table);
-MIterTable& miter_table();
+extern DECLARE_THREAD_LOCAL_FLAT(MIterTable, tl_miter_table);
 
 void free_strong_iterators(ArrayData*);
 void move_strong_iterators(ArrayData* dest, ArrayData* src);

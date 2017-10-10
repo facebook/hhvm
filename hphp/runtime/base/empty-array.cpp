@@ -120,7 +120,7 @@ ArrayData* EmptyArray::Copy(const ArrayData*) { return staticEmptyArray(); }
 ALWAYS_INLINE
 member_lval EmptyArray::MakePackedInl(TypedValue tv) {
   auto const ad = static_cast<ArrayData*>(
-    MM().mallocSmallIndex(PackedArray::SmallSizeIndex)
+    tl_heap->mallocSmallIndex(PackedArray::SmallSizeIndex)
   );
   ad->initHeader_16(
     HeaderKind::Packed,

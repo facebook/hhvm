@@ -91,7 +91,7 @@ protected:
 
     // rpc threads keep things live between requests, but other
     // requests should not have allocated anything yet.
-    assertx(vmStack().isAllocated() || MM().empty());
+    assertx(vmStack().isAllocated() || tl_heap->empty());
 
     SCOPE_EXIT { m_handler->teardownRequest(transport); };
 

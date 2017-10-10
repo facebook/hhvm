@@ -874,14 +874,14 @@ Variant HHVM_FUNCTION(ini_set,
 }
 
 static int64_t HHVM_FUNCTION(memory_get_allocation) {
-  auto total = MM().getStatsCopy().totalAlloc;
+  auto total = tl_heap->getStatsCopy().totalAlloc;
   assert(total >= 0);
   return total;
 }
 
 static int64_t HHVM_FUNCTION(hphp_memory_get_interval_peak_usage,
                              bool real_usage /*=false */) {
-  auto const stats = MM().getStatsCopy();
+  auto const stats = tl_heap->getStatsCopy();
   int64_t ret = real_usage ? stats.peakIntervalUsage :
                 stats.peakIntervalCap;
   assert(ret >= 0);
@@ -890,14 +890,14 @@ static int64_t HHVM_FUNCTION(hphp_memory_get_interval_peak_usage,
 
 static int64_t HHVM_FUNCTION(memory_get_peak_usage,
                              bool real_usage /*=false */) {
-  auto const stats = MM().getStatsCopy();
+  auto const stats = tl_heap->getStatsCopy();
   int64_t ret = real_usage ? stats.peakUsage : stats.peakCap;
   assert(ret >= 0);
   return ret;
 }
 
 static int64_t HHVM_FUNCTION(memory_get_usage, bool real_usage /*=false */) {
-  auto const stats = MM().getStatsCopy();
+  auto const stats = tl_heap->getStatsCopy();
   int64_t ret = real_usage ? stats.usage() : stats.capacity;
   // Since we don't always alloc and dealloc a shared structure from the same
   // thread it is possible that this can go negative when we are tracking
@@ -909,21 +909,21 @@ static int64_t HHVM_FUNCTION(memory_get_usage, bool real_usage /*=false */) {
 static int64_t HHVM_FUNCTION(hphp_memory_heap_usage) {
   // This corresponds to PHP memory_get_usage(false), only counting
   // allocations via MemoryManager.
-  return MM().getStatsCopy().mmUsage;
+  return tl_heap->getStatsCopy().mmUsage;
 }
 
 static int64_t HHVM_FUNCTION(hphp_memory_heap_capacity) {
   // This happens to match HHVM memory_get_usage(false), and
   // PHP memory_get_usage(true).
-  return MM().getStatsCopy().capacity;
+  return tl_heap->getStatsCopy().capacity;
 }
 
 static bool HHVM_FUNCTION(hphp_memory_start_interval) {
-  return MM().startStatsInterval();
+  return tl_heap->startStatsInterval();
 }
 
 static bool HHVM_FUNCTION(hphp_memory_stop_interval) {
-  return MM().stopStatsInterval();
+  return tl_heap->stopStatsInterval();
 }
 
 const StaticString s_srv("srv"), s_cli("cli");

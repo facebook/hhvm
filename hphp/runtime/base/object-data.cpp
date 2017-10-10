@@ -183,7 +183,7 @@ void ObjectData::releaseNoObjDestructCheck() noexcept {
   auto const size =
     reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(this);
   assert(size == sizeForNProps(nProps));
-  MM().objFree(this, size);
+  tl_heap->objFree(this, size);
   AARCH64_WALKABLE_FRAME();
 }
 
@@ -920,8 +920,8 @@ template<bool Big>
 ObjectData* ObjectData::newInstanceRaw(Class* cls, size_t size) {
   assert(cls->getODAttrs() == DefaultAttrs);
   assert(Big || size <= kMaxSmallSize);
-  auto mem = Big ? MM().mallocBigSize<MemoryManager::Unzeroed>(size) :
-             MM().mallocSmallSize(size);
+  auto mem = Big ? tl_heap->mallocBigSize<MemoryManager::Unzeroed>(size) :
+             tl_heap->mallocSmallSize(size);
   return new (mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
 }
 
@@ -930,8 +930,8 @@ template<bool Big>
 ObjectData* ObjectData::newInstanceRawAttrs(Class* cls, size_t size,
                                             uint16_t attrs) {
   assert(Big || size <= kMaxSmallSize);
-  auto mem = Big ? MM().mallocBigSize<MemoryManager::Unzeroed>(size) :
-             MM().mallocSmallSize(size);
+  auto mem = Big ? tl_heap->mallocBigSize<MemoryManager::Unzeroed>(size) :
+             tl_heap->mallocSmallSize(size);
   return new (mem) ObjectData(cls, InitRaw{}, attrs);
 }
 

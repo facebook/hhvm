@@ -78,7 +78,7 @@ struct c_ExternalThreadEventWaitHandle;
   static void instanceDtor(ObjectData* obj, const Class*) { \
     auto wh = wait_handle<c_##cn>(obj); \
     wh->~c_##cn(); \
-    MM().objFree(obj, sizeof(c_##cn)); \
+    tl_heap->objFree(obj, sizeof(c_##cn)); \
   }
 
 template<class T>

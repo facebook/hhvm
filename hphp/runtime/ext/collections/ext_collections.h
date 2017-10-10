@@ -31,7 +31,7 @@ extern const StaticString
     assertx(obj->getVMClass() == c_##name::classof());      \
     auto coll = static_cast<c_##name*>(obj);                \
     coll->~c_##name();                                      \
-    MM().objFree(obj, sizeof(c_##name));                    \
+    tl_heap->objFree(obj, sizeof(c_##name));                \
   }
 
 #define DECLARE_COLLECTIONS_CLASS(name)                     \

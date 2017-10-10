@@ -676,7 +676,7 @@ void RequestInjectionData::setMemoryLimit(folly::StringPiece limit) {
       newInt = std::numeric_limits<int64_t>::max();
     }
   }
-  MM().setMemoryLimit(newInt);
+  tl_heap->setMemoryLimit(newInt);
   m_maxMemoryNumeric = newInt;
 }
 

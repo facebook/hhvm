@@ -87,7 +87,9 @@ struct BaseGenerator {
 
   template<class T>
   static ObjectData* Alloc(Class* cls, size_t totalSize) {
-    auto const node = reinterpret_cast<NativeNode*>(MM().objMalloc(totalSize));
+    auto const node = reinterpret_cast<NativeNode*>(
+        tl_heap->objMalloc(totalSize)
+    );
     auto const obj_offset = totalSize - sizeof(ObjectData);
     auto const objmem = reinterpret_cast<char*>(node) + obj_offset;
     auto const datamem = objmem - sizeof(T);

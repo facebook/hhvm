@@ -27,7 +27,7 @@ namespace HPHP {
 namespace req {
 
 uint32_t req::root_handle::addRootHandle() {
-  auto& handles = MM().m_root_handles;
+  auto& handles = tl_heap->m_root_handles;
   auto id = safe_cast<uint32_t>(handles.size());
   handles.push_back(this);
   return id;
@@ -35,7 +35,7 @@ uint32_t req::root_handle::addRootHandle() {
 
 uint32_t req::root_handle::stealRootHandle(root_handle* s) {
   assert(s->m_id != INVALID);
-  auto& handles = MM().m_root_handles;
+  auto& handles = tl_heap->m_root_handles;
   auto id = s->m_id;
   handles[id] = this;
   s->m_id = INVALID;
@@ -43,7 +43,7 @@ uint32_t req::root_handle::stealRootHandle(root_handle* s) {
 }
 
 void req::root_handle::delRootHandle() {
-  auto& handles = MM().m_root_handles;
+  auto& handles = tl_heap->m_root_handles;
   auto last = handles.back();
   handles[last->m_id = m_id] = last;
   m_id = INVALID;

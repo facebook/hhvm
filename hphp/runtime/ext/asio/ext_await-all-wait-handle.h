@@ -39,7 +39,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
     auto wh = wait_handle<c_AwaitAllWaitHandle>(obj);
     auto const sz = wh->heapSize();
     wh->~c_AwaitAllWaitHandle();
-    MM().objFree(obj, sz);
+    tl_heap->objFree(obj, sz);
   }
 
   explicit c_AwaitAllWaitHandle(unsigned cap = 0)

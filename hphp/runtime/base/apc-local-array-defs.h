@@ -30,7 +30,7 @@ inline APCLocalArray::APCLocalArray(const APCArray* source)
 {
   m_size = m_arr->size();
   source->reference();
-  MM().addApcArray(this);
+  tl_heap->addApcArray(this);
   memset(localCache(), KindOfUninit, m_size * sizeof(TypedValue));
   assert(hasExactlyOneRef());
 }
@@ -41,7 +41,7 @@ inline size_t APCLocalArray::heapSize() const {
 
 inline APCLocalArray* APCLocalArray::Make(const APCArray* aa) {
   auto size = sizeof(APCLocalArray) + aa->size() * sizeof(TypedValue);
-  auto local = new (MM().objMalloc(size)) APCLocalArray(aa);
+  auto local = new (tl_heap->objMalloc(size)) APCLocalArray(aa);
   assert(local->heapSize() == size);
   return local;
 }

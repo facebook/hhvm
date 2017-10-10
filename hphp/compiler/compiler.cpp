@@ -405,7 +405,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Logger::LogLevel = Logger::LogInfo;
   }
 
-  s_memory_manager.getCheck();
+  tl_heap.getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   for (auto& file : po.config) {

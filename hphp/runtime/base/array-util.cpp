@@ -175,13 +175,13 @@ namespace {
 void rangeCheckAlloc(double estNumSteps) {
   // An array can hold at most INT_MAX elements
   if (estNumSteps > std::numeric_limits<int32_t>::max()) {
-    MM().forceOOM();
+    tl_heap->forceOOM();
     check_non_safepoint_surprise();
     return;
   }
 
   int32_t numElms = static_cast<int32_t>(estNumSteps);
-  if (MM().preAllocOOM(MixedArray::computeAllocBytesFromMaxElms(numElms))) {
+  if (tl_heap->preAllocOOM(MixedArray::computeAllocBytesFromMaxElms(numElms))) {
     check_non_safepoint_surprise();
   }
 }

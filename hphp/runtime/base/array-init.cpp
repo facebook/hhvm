@@ -25,13 +25,13 @@ ArrayInit::ArrayInit(size_t n, Map, CheckAllocation)
   : ArrayInitBase(n, CheckAllocation{})
 {
   if (n > std::numeric_limits<int>::max()) {
-    MM().forceOOM();
+    tl_heap->forceOOM();
     check_non_safepoint_surprise();
   }
   auto const allocsz = MixedArray::computeAllocBytes(
                          MixedArray::computeScaleFromSize(n)
                        );
-  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
   m_arr = MixedArray::MakeReserveMixed(n);
@@ -43,13 +43,13 @@ DictInit::DictInit(size_t n, CheckAllocation)
   : ArrayInitBase(n, CheckAllocation{})
 {
   if (n > std::numeric_limits<int>::max()) {
-    MM().forceOOM();
+    tl_heap->forceOOM();
     check_non_safepoint_surprise();
   }
   auto const allocsz = MixedArray::computeAllocBytes(
                          MixedArray::computeScaleFromSize(n)
                        );
-  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
   m_arr = MixedArray::MakeReserveDict(n);
@@ -61,13 +61,13 @@ KeysetInit::KeysetInit(size_t n, CheckAllocation)
   : ArrayInitBase(n, CheckAllocation{})
 {
   if (n > std::numeric_limits<int>::max()) {
-    MM().forceOOM();
+    tl_heap->forceOOM();
     check_non_safepoint_surprise();
   }
   auto const allocsz = SetArray::computeAllocBytes(
                          SetArray::computeScaleFromSize(n)
                        );
-  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
   m_arr = SetArray::MakeReserveSet(n);

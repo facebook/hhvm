@@ -79,7 +79,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   } else {
     size_t nProps = cls->numDeclProperties();
     size_t size = sizeForNProps(nProps);
-    auto& mm = MM();
+    auto& mm = *tl_heap;
     obj = new (mm.objMalloc(size)) ObjectData(cls);
     assert(obj->hasExactlyOneRef());
     assertx(!obj->hasInstanceDtor());
@@ -103,7 +103,7 @@ inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
 
   size_t nProps = cls->numDeclProperties();
   size_t size = sizeForNProps(nProps);
-  auto const obj = new (MM().objMalloc(size))
+  auto const obj = new (tl_heap->objMalloc(size))
                    ObjectData(cls, InitRaw{}, cls->getODAttrs());
   assert(obj->hasExactlyOneRef());
   return obj;

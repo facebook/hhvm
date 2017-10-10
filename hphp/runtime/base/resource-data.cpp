@@ -41,7 +41,7 @@ void ResourceHdr::setId(int id) {
 }
 
 ResourceData::ResourceData() {
-  assert(MM().checkContains(this));
+  assert(tl_heap->checkContains(this));
   // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   if (s_max_resource_id < 3) s_max_resource_id = 3;
   hdr()->setRawId(++s_max_resource_id);

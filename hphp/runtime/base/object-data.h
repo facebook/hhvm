@@ -522,14 +522,14 @@ typename std::enable_if<
   std::is_convertible<T*, ObjectData*>::value,
   req::ptr<T>
 >::type make(Args&&... args) {
-  auto const mem = MM().mallocSmallSize(sizeof(T));
+  auto const mem = tl_heap->mallocSmallSize(sizeof(T));
   (void)type_scan::getIndexForMalloc<T>(); // ensure T* ptrs are interesting
   try {
     auto t = new (mem) T(std::forward<Args>(args)...);
     assert(t->hasExactlyOneRef());
     return req::ptr<T>::attach(t);
   } catch (...) {
-    MM().freeSmallSize(mem, sizeof(T));
+    tl_heap->freeSmallSize(mem, sizeof(T));
     throw;
   }
 }

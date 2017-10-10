@@ -125,7 +125,7 @@ HeapGraph makeHeapGraph(bool include_free) {
   // parse the heap once to create a PtrMap for pointer filtering. Create
   // one node for every parsed block, including NativeData and AsyncFuncFrame
   // blocks. Only include free blocks if requested.
-  MM().forEachHeapObject([&](HeapObject* h, size_t alloc_size) {
+  tl_heap->forEachHeapObject([&](HeapObject* h, size_t alloc_size) {
     if (h->kind() != HeaderKind::Free || include_free) {
       blocks.insert(h, alloc_size); // adds interval [h, h+alloc_size[
     }

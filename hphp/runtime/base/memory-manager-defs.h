@@ -625,7 +625,7 @@ template<class Fn> void MemoryManager::forEachHeapObject(Fn fn) {
 }
 
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
-  if (debug) checkHeap("MM::forEachObject");
+  if (debug) checkHeap("MemoryManager::forEachObject");
   std::vector<const ObjectData*> ptrs;
   forEachHeapObject([&](HeapObject* h, size_t) {
     if (auto obj = innerObj(h)) {

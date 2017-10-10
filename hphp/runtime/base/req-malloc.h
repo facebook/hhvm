@@ -24,7 +24,7 @@
  *
  * This is the most generic entry point to the request local
  * allocator.  If you easily know the size of the allocation at free
- * time, it might be more efficient to use MM() apis directly.
+ * time, it might be more efficient to use MemoryManager apis directly.
  *
  * These functions behave like C's malloc/free, but get memory from
  * the current thread's MemoryManager instance.  At request-end, any

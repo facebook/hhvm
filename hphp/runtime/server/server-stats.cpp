@@ -710,7 +710,7 @@ void ServerStats::startRequest(const char *url, const char *clientIP,
                                const char *vhost) {
   ++m_threadStatus.m_requestCount;
 
-  m_threadStatus.m_mm = &MM();
+  m_threadStatus.m_mm = tl_heap.get();
   gettimeofday(&m_threadStatus.m_start, 0);
   memset(&m_threadStatus.m_done, 0, sizeof(m_threadStatus.m_done));
   m_threadStatus.m_mode = ThreadMode::Processing;
@@ -849,7 +849,7 @@ ServerStatsHelper::~ServerStatsHelper() {
 #endif
 
     if (m_track & TRACK_MEMORY) {
-      auto const stats = MM().getStatsCopy();
+      auto const stats = tl_heap->getStatsCopy();
       ServerStats::Log(string("mem.") + m_section, stats.peakUsage);
       ServerStats::Log(string("mem.allocated.") + m_section,
                        stats.peakCap);

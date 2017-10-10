@@ -669,7 +669,7 @@ void ExecutionContext::onShutdownPreSend() {
     try { obFlushAll(); } catch (...) {}
   };
 
-  MM().resetCouldOOM(isStandardRequest());
+  tl_heap->resetCouldOOM(isStandardRequest());
   executeFunctions(ShutDown);
 }
 
@@ -677,7 +677,7 @@ extern void ext_session_request_shutdown();
 
 void ExecutionContext::onShutdownPostSend() {
   ServerStats::SetThreadMode(ServerStats::ThreadMode::PostProcessing);
-  MM().resetCouldOOM(isStandardRequest());
+  tl_heap->resetCouldOOM(isStandardRequest());
   try {
     try {
       ServerStatsHelper ssh("psp", ServerStatsHelper::TRACK_HWINST);
@@ -942,7 +942,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 }
 
 bool ExecutionContext::onFatalError(const Exception &e) {
-  MM().resetCouldOOM(isStandardRequest());
+  tl_heap->resetCouldOOM(isStandardRequest());
   RID().resetTimer();
   // need to restore the error reporting level, because the fault
   // handler for silencers won't be run on fatals, and we might be

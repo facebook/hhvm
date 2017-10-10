@@ -246,8 +246,7 @@ uint64_t
 get_allocs()
 {
 #ifdef USE_JEMALLOC
-  auto& mm = MM();
-  return mm.getAllocated();
+  return tl_heap->getAllocated();
 #endif
 #ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {
@@ -264,8 +263,7 @@ uint64_t
 get_frees()
 {
 #ifdef USE_JEMALLOC
-  auto& mm = MM();
-  return mm.getDeallocated();
+  return tl_heap->getDeallocated();
 #endif
 #ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {
@@ -507,7 +505,7 @@ public:
     }
 
     if (m_flags & TrackMemory) {
-      auto const stats = MM().getStats();
+      auto const stats = tl_heap->getStats();
       frame->m_mu_start  = stats.usage();
       frame->m_pmu_start = stats.peakUsage;
     } else if (m_flags & TrackMalloc) {
@@ -531,7 +529,7 @@ public:
     }
 
     if (m_flags & TrackMemory) {
-      auto const stats = MM().getStats();
+      auto const stats = tl_heap->getStats();
       int64_t mu_end = stats.usage();
       int64_t pmu_end = stats.peakUsage;
       counts.memory += mu_end - frame->m_mu_start;
@@ -832,7 +830,7 @@ struct TraceProfiler final : Profiler {
                    m_traceBuffer[m_nextTraceEntry++]);
     }
     {
-      MemoryManager::MaskAlloc masker(MM());
+      MemoryManager::MaskAlloc masker(*tl_heap);
       auto r = (TraceEntry*)realloc((void*)m_traceBuffer,
                                     new_array_size * sizeof(TraceEntry));
 
@@ -883,7 +881,7 @@ struct TraceProfiler final : Profiler {
       te.cpu = cpuTime(m_MHz);
     }
     if (m_flags & TrackMemory) {
-      auto const stats = MM().getStats();
+      auto const stats = tl_heap->getStats();
       te.memory = stats.usage();
       te.peak_memory = stats.peakUsage;
     } else if (m_flags & TrackMalloc) {

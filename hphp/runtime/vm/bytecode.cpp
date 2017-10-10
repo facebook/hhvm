@@ -354,7 +354,7 @@ VarEnv::VarEnv()
 {
   TRACE(3, "Creating VarEnv %p [global scope]\n", this);
   auto globals_var = Variant::attach(
-    new (MM().objMalloc(sizeof(GlobalsArray))) GlobalsArray(&m_nvTable)
+    new (tl_heap->objMalloc(sizeof(GlobalsArray))) GlobalsArray(&m_nvTable)
   );
   m_nvTable.set(s_GLOBALS.get(), globals_var.asTypedValue());
 }
@@ -706,7 +706,7 @@ void flush_evaluation_stack() {
     RPCRequestHandler::cleanupState();
   }
 
-  MM().flush();
+  tl_heap->flush();
 
   if (!t_se.isNull()) {
     t_se->flush();
@@ -714,7 +714,7 @@ void flush_evaluation_stack() {
   rds::flush();
   json_parser_flush_caches();
 
-  always_assert(MM().empty());
+  always_assert(tl_heap->empty());
 }
 
 static std::string toStringElm(const TypedValue* tv) {

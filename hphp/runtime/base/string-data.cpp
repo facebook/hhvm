@@ -50,7 +50,7 @@ ALWAYS_INLINE StringData* allocFlat(size_t len) {
     raiseStringLengthExceededError(len);
   }
   auto const sizeIndex = MemoryManager::size2Index(len + kStringOverhead);
-  auto sd = static_cast<StringData*>(MM().objMallocIndex(sizeIndex));
+  auto sd = static_cast<StringData*>(tl_heap->objMallocIndex(sizeIndex));
   // Refcount initialized to 1.
   sd->initHeader_16(HeaderKind::String, OneReference, sizeIndex);
   assert(sd->capacity() >= len);
@@ -182,7 +182,7 @@ ALWAYS_INLINE void StringData::delist() {
 }
 
 unsigned StringData::sweepAll() {
-  auto& head = MM().getStringList();
+  auto& head = tl_heap->getStringList();
   auto count = 0;
   for (StringDataNode *next, *n = head.next; n != &head; n = next) {
     count++;
@@ -340,7 +340,7 @@ StringData* StringData::Make(folly::StringPiece r1, folly::StringPiece r2,
 
 ALWAYS_INLINE void StringData::enlist() {
   assert(isProxy());
-  auto& head = MM().getStringList();
+  auto& head = tl_heap->getStringList();
   // insert after head
   auto const next = head.next;
   auto& payload = *proxy();
@@ -361,7 +361,7 @@ StringData* StringData::MakeProxy(const APCString* apcstr) {
   assert(size_t(apcstr->getStringData()->size()) <= size_t(MaxSize));
 
   auto const sd = static_cast<StringData*>(
-    MM().mallocSmallSize(sizeof(StringData) + sizeof(Proxy))
+    tl_heap->mallocSmallSize(sizeof(StringData) + sizeof(Proxy))
   );
   auto const data = apcstr->getStringData();
   sd->m_data = const_cast<char*>(data->m_data);
@@ -391,7 +391,7 @@ void StringData::unProxy() {
 NEVER_INLINE
 void StringData::releaseProxy() {
   unProxy();
-  MM().freeSmallSize(this, sizeof(StringData) + sizeof(Proxy));
+  tl_heap->freeSmallSize(this, sizeof(StringData) + sizeof(Proxy));
 }
 
 void StringData::release() noexcept {
@@ -402,7 +402,7 @@ void StringData::release() noexcept {
     AARCH64_WALKABLE_FRAME();
     return;
   }
-  MM().objFreeIndex(this, m_aux16);
+  tl_heap->objFreeIndex(this, m_aux16);
   AARCH64_WALKABLE_FRAME();
 }
 

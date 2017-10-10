@@ -11582,7 +11582,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
   }
 
   // Do not count memory used during parsing/emitting towards OOM.
-  MemoryManager::SuppressOOM so(MM());
+  MemoryManager::SuppressOOM so(*tl_heap);
 
   SCOPE_ASSERT_DETAIL("hphp_compiler_parse") { return filename; };
   std::unique_ptr<Unit> unit;

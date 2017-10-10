@@ -313,7 +313,7 @@ template<class Fn> void iterateRoots(Fn fn) {
   ThreadLocalManager::GetManager().iterate(fn);
 
   // Root handles & sweep lists
-  MM().iterateRoots(fn);
+  tl_heap->iterateRoots(fn);
 
   // Zend compat resources
 #ifdef ENABLE_ZEND_COMPAT

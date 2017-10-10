@@ -413,14 +413,14 @@ void record_perf_mem_event(PerfEvent kind, const perf_event_sample* sample) {
     /*
      * What we'd like to do here is:
      *
-     * if (auto const hdr = MM().find(addr)) {
+     * if (auto const hdr = tl_heap->find(addr)) {
      *    return record_request_heap_mem_event(addr, hdr, record);
      * }
      *
      * but what appears to be a multithreaded use-after-free bug prevents us
      * from doing so safely.
      */
-    if (MM().contains(const_cast<void*>(addr))) {
+    if (tl_heap->contains(const_cast<void*>(addr))) {
       (void)record_request_heap_mem_event; // shoosh warnings
       record.setStr("location", "request_heap");
       return true;

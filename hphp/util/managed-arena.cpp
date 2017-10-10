@@ -127,6 +127,31 @@ ManagedArena::ManagedArena(void* base, size_t maxCap, int nextNode /* = -1 */)
   s_arenas[m_arenaId] = this;
 }
 
+bool ManagedArena::tryGrab1G(size_t newSize) {
+  // Must hold `s_lock` when calling this.
+  assertx(s_lock.load(std::memory_order_relaxed));
+
+  // Before we do anything, check if someone already added a page (after we
+  // realized the need for a new page but before we got `s_lock`).
+  if (newSize <= m_currCapacity) return true;
+
+  int targetNode = -1; // in `mmap_1g()`, passing -1 as node indicating no NUMA
+  if (m_nextNode.load(std::memory_order_relaxed) >= 0) {
+    // Non-negative `m_nextNode` indicates that we do care about NUMA.
+    targetNode = next_numa_node(m_nextNode);
+    assertx(targetNode >=0 && numa_node_allowed(targetNode));
+  }
+
+  char* newPageStart = m_base - m_currCapacity - size1g;
+  assertx(reinterpret_cast<uintptr_t>(newPageStart) % size1g == 0);
+
+  if (mmap_1g(newPageStart, targetNode)) {
+    m_currCapacity += size1g;
+    return true;
+  }
+  return false;
+}
+
 void* ManagedArena::extent_alloc(extent_hooks_t* /*extent_hooks*/, void* addr,
                                  size_t size, size_t alignment, bool* zero,
                                  bool* commit, unsigned arena_ind) {
@@ -136,30 +161,35 @@ void* ManagedArena::extent_alloc(extent_hooks_t* /*extent_hooks*/, void* addr,
   ManagedArena* arena = s_arenas[arena_ind];
   if (arena == nullptr) return nullptr;
 
-  // Just in case size is too big (negative)
-  if (size > arena->m_maxCapacity) return nullptr;
-
   assert(folly::isPowTwo(alignment));
   auto const mask = alignment - 1;
   size_t startOffset;
-  int failCount = 0;
+  uint32_t failCount = 0;
   do {
     size_t oldSize = arena->m_size.load(std::memory_order_relaxed);
     startOffset = (oldSize + size + mask) & ~mask;
     size_t newSize = startOffset;
-    if (newSize > arena->m_maxCapacity) return nullptr;
+
     if (newSize > arena->m_currCapacity) {
-      // Check if any huge page is available.
-      HugePageInfo info = get_huge1g_info();
-      if (info.nr_hugepages == num_1g_pages()) {
-        // We've got all possible pages, don't try to grab more in future.
-        arena->m_maxCapacity = arena->m_currCapacity;
+      if (arena->m_outOf1GPages) {
+        // TODO (T11400255): we plan add some normal pages here if we run out of
+        // huge pages.
         return nullptr;
       }
+
+      if (arena->m_currCapacity >= arena->m_maxCapacity) {
+        arena->m_outOf1GPages = true;
+        continue;
+      }
+      HugePageInfo info = get_huge1g_info();
+      if (info.nr_hugepages == num_1g_pages()) {
+        arena->m_outOf1GPages = true;
+        continue;
+      }
       if (info.free_hugepages <= 0) {
-        // We haven't got all possible pages reserved, but someone else is
-        // holding some of the pages, so we cannot get them now.  We can still
-        // try again later.
+        // We haven't got all huge pages we want, but someone else is holding
+        // some of the pages, so we cannot get them now.  We can try again
+        // later.
         return nullptr;
       }
 
@@ -173,41 +203,13 @@ void* ManagedArena::extent_alloc(extent_hooks_t* /*extent_hooks*/, void* addr,
       // We have the lock, remember to unlock.
       SCOPE_EXIT { s_lock.store(false, std::memory_order_relaxed); };
 
-      // Before we do anything, check if someone already added a page (after we
-      // realized a new page is needed but before we tried to grab the lock).
-      if (newSize <= arena->m_currCapacity) {
-        continue;
-      }
+      if (arena->tryGrab1G(newSize)) continue;
 
-      // OK. It is our duty to add a new page.
-      char* newPageStart = arena->m_base - arena->m_currCapacity - size1g;
-      assert(reinterpret_cast<uintptr_t>(newPageStart) % size1g == 0);
+      // This test works even if NUMA is not supported, or if there is only 1
+      // NUMA node, in which cases we just return nullptr after the first try.
+      if (++failCount >= numa_num_nodes) return nullptr;
 
-      if (arena->m_nextNode < 0) {
-        if (mmap_1g(newPageStart)) {
-          arena->m_currCapacity += size1g;
-        } else {
-          // I thought a page was available, hmmm..  Maybe some other process
-          // got the page?
-          return nullptr;
-        }
-      } else {
-#ifdef HAVE_NUMA
-        int targetNode = next_numa_node(arena->m_nextNode);
-        if (mmap_1g(newPageStart, targetNode)) {
-          arena->m_currCapacity += size1g;
-        } else if (++failCount == numa_num_nodes) {
-          // We tried on all the nodes, but couldn't get a page, even
-          // though a page appeared available.
-          return nullptr;
-        }
-#else
-        // Shouldn't specify next node if NUMA is unavailable.
-        return nullptr;
-#endif
-      }
-      // We have successfully added a page to the arena, or have failed for a
-      // specific node, move to the next node and retry.
+      // We haven't tried on all NUMA nodes yet, so retry in the next iteration.
       continue;
     }
     if (arena->m_size.compare_exchange_weak(oldSize, newSize)) {

@@ -56,13 +56,19 @@ struct ManagedArena {
                             size_t size, size_t alignment, bool* zero,
                             bool* commit, unsigned arena_ind);
  private:
+  // Try to add a 1G huge page from `nextNode`.  Return whether we got enough
+  // space to make the arena at least `newSize` big.  Hold `s_lock` when calling
+  // this.
+  bool tryGrab1G(size_t newSize);
+
+ private:
   char* const m_base{nullptr};
   size_t m_maxCapacity{0};
   size_t m_currCapacity{0};             // Change protected by s_lock
   std::atomic_size_t m_size{0};
   std::atomic_int m_nextNode{-1};
   unsigned m_arenaId{static_cast<unsigned>(-1)};
-
+  bool m_outOf1GPages{false};
   // Hold this lock while adding new pages to any arena.  This is not a member
   // to each arena, because we don't want multiple threads to grab huge pages
   // simultaneously.

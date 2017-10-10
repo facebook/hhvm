@@ -247,6 +247,7 @@ module type S = sig
   val yield_in_coroutine : Pos.t -> unit
   val suspend_outside_of_coroutine : Pos.t -> unit
   val suspend_in_finally : Pos.t -> unit
+  val break_continue_n_not_supported : Pos.t -> unit
   val magic : Pos.t * string -> unit
   val non_interface : Pos.t -> string -> string -> unit
   val toString_returns_string : Pos.t -> unit

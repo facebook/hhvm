@@ -376,8 +376,12 @@ class virtual ['self] iter =
     method on_Expr = self#on_expr
     method on_Omitted env = ()
     method on_Block = self#on_block
-    method on_Break env pos level_opt = self#on_Pos_t env pos
-    method on_Continue env pos level_opt = self#on_Pos_t env pos
+    method on_Break env pos level_opt =
+      self#on_Pos_t env pos;
+      self#on_option self#on_expr env level_opt
+    method on_Continue env pos level_opt =
+      self#on_Pos_t env pos;
+      self#on_option self#on_expr env level_opt
     method on_Throw = self#on_expr
     method on_Return env c0 c1 =
       self#on_Pos_t env c0;

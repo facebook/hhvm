@@ -1426,9 +1426,7 @@ and pMarkup node env =
   | _ -> failwith "invalid node"
 
 and pBreak_or_continue_level env level =
-  match mpOptional pExpr level env with
-  | Some (_, Int(_, s)) -> Some (int_of_string s)
-  | _ -> None
+  mpOptional pExpr level env
 
 and pTConstraintTy : hint parser = fun node ->
   match syntax node with

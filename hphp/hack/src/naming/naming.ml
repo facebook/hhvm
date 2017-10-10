@@ -1060,6 +1060,10 @@ module Make (GetLocals : GetLocals) = struct
   let check_tparams_shadow class_tparam_names methods =
     List.iter methods (check_method_tparams class_tparam_names)
 
+  let check_break_continue_level p level_opt =
+    if Option.is_some level_opt
+    then Errors.break_continue_n_not_supported p
+
   (* Naming of a class *)
   let rec class_ nenv c =
     let constraints = make_constraints c.c_tparams in
@@ -1744,8 +1748,12 @@ module Make (GetLocals : GetLocals) = struct
     | Noop                 -> N.Noop
     | Markup (_, None)     -> N.Noop (* ignore markup *)
     | Markup (_, Some e)   -> N.Expr (expr env e)
-    | Break (p, _)              -> N.Break p
-    | Continue (p, _)           -> N.Continue p
+    | Break (p, level_opt) ->
+      check_break_continue_level p level_opt;
+      N.Break p
+    | Continue (p, level_opt) ->
+      check_break_continue_level p level_opt;
+      N.Continue p
     | Throw e              -> let terminal = not (fst env).in_try in
                               N.Throw (terminal, expr env e)
     | Return (p, e)        -> N.Return (p, oexpr env e)

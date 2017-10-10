@@ -897,9 +897,6 @@ and string_of_fun f use_list =
 and string_of_optional_expr e =
   string_of_optional_value string_of_expression e
 
-and string_of_optional_int i =
-  string_of_optional_value string_of_int i
-
 and string_of_block_ ~start_indent ~block_indent ~end_indent block =
   let lines =
     (String.concat "" @@ List.map (string_of_statement ~indent:block_indent) block) in
@@ -926,9 +923,9 @@ and string_of_statement ~indent stmt =
     | A.Expr e ->
       string_of_expression e, true
     | A.Break (_, level_opt) ->
-      "break" ^ (string_of_optional_int level_opt), true
+      "break" ^ (string_of_optional_expr level_opt), true
     | A.Continue (_, level_opt) ->
-      "continue" ^ (string_of_optional_int level_opt), true
+      "continue" ^ (string_of_optional_expr level_opt), true
     | A.Throw e ->
       "throw " ^ (string_of_expression e), true
     | A.Block block ->

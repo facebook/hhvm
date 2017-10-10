@@ -40,7 +40,8 @@ class virtual ['b] reduce :
                    Ast_visitors_ancestors.expr -> 'd;
         on_Block : 'c -> Ast_visitors_ancestors.block -> 'd;
         on_BracedExpr : 'c -> Ast_visitors_ancestors.expr -> 'd;
-        on_Break : 'c -> Ast_visitors_ancestors.pos_t -> int option -> 'd;
+        on_Break : 'c -> Ast_visitors_ancestors.pos_t ->
+                   Ast_visitors_ancestors.expr option -> 'd;
         on_CA_enum : 'c -> string list -> 'd;
         on_CA_field : 'c -> Ast_visitors_ancestors.ca_field -> 'd;
         on_CA_hint : 'c -> Ast_visitors_ancestors.hint -> 'd;
@@ -97,7 +98,8 @@ class virtual ['b] reduce :
         on_Constant : 'c -> Ast_visitors_ancestors.gconst -> 'd;
         on_Constraint_as : 'c -> 'd; on_Constraint_eq : 'c -> 'd;
         on_Constraint_super : 'c -> 'd;
-        on_Continue : 'c -> Ast_visitors_ancestors.pos_t -> int option -> 'd;
+        on_Continue : 'c -> Ast_visitors_ancestors.pos_t ->
+                      Ast_visitors_ancestors.expr option -> 'd;
         on_Contravariant : 'c -> 'd; on_Covariant : 'c -> 'd;
         on_Cst_const : 'c -> 'd; on_Cst_define : 'c -> 'd;
         on_Ctrait : 'c -> 'd;
@@ -388,7 +390,8 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr -> 'd
     method on_Block : 'c -> Ast_visitors_ancestors.block -> 'd
     method on_BracedExpr : 'c -> Ast_visitors_ancestors.expr -> 'd
-    method on_Break : 'c -> Ast_visitors_ancestors.pos_t -> int option -> 'd
+    method on_Break : 'c -> Ast_visitors_ancestors.pos_t ->
+                      Ast_visitors_ancestors.expr option -> 'd
     method on_CA_enum : 'c -> string list -> 'd
     method on_CA_field : 'c -> Ast_visitors_ancestors.ca_field -> 'd
     method on_CA_hint : 'c -> Ast_visitors_ancestors.hint -> 'd
@@ -449,7 +452,8 @@ class virtual ['b] reduce :
     method on_Constraint_as : 'c -> 'd
     method on_Constraint_eq : 'c -> 'd
     method on_Constraint_super : 'c -> 'd
-    method on_Continue : 'c -> Ast_visitors_ancestors.pos_t -> int option -> 'd
+    method on_Continue : 'c -> Ast_visitors_ancestors.pos_t ->
+      Ast_visitors_ancestors.expr option -> 'd
     method on_Contravariant : 'c -> 'd
     method on_Covariant : 'c -> 'd
     method on_Cst_const : 'c -> 'd

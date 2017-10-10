@@ -30,7 +30,7 @@ class type ['a] ast_visitor_type = object
   method on_binop : 'a -> bop -> expr -> expr -> 'a
   method on_pipe : 'a -> expr -> expr -> 'a
   method on_block : 'a -> block -> 'a
-  method on_break : 'a -> Pos.t -> int option -> 'a
+  method on_break : 'a -> Pos.t -> expr option -> 'a
   method on_call : 'a -> expr -> hint list -> expr list -> expr list -> 'a
   method on_case : 'a -> case -> 'a
   method on_cast : 'a -> hint -> expr -> 'a
@@ -40,7 +40,7 @@ class type ['a] ast_visitor_type = object
   method on_class_get : 'a -> id -> expr -> 'a
   method on_clone : 'a -> expr -> 'a
   method on_collection: 'a -> id -> afield list -> 'a
-  method on_continue : 'a -> Pos.t -> int option -> 'a
+  method on_continue : 'a -> Pos.t -> expr option -> 'a
   method on_darray : 'a -> (expr * expr) list -> 'a
   method on_def_inline : 'a -> def -> 'a
   method on_do : 'a -> block -> expr -> 'a
@@ -147,7 +147,10 @@ end
 
 class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
-  method on_break acc _ _ = acc
+  method on_break acc _ level_opt =
+    match level_opt with
+    | Some e -> this#on_expr acc e
+    | None -> acc
   method on_continue acc _ _ = acc
   method on_noop acc = acc
   method on_fallthrough acc = acc

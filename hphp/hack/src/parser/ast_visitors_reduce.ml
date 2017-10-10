@@ -412,8 +412,14 @@ class virtual ['self] reduce =
     method on_Fallthrough _ = self#e
     method on_Expr = self#on_expr
     method on_Block = self#on_block
-    method on_Break env pos level_opt = self#on_Pos_t env pos
-    method on_Continue env pos level_opt = self#on_Pos_t env pos
+    method on_Break env pos level_opt =
+      let r0 = self#on_Pos_t env pos in
+      let r1 = self#on_option self#on_expr env level_opt in
+      self#add r0 r1
+    method on_Continue env pos level_opt =
+      let r0 = self#on_Pos_t env pos in
+      let r1 = self#on_option self#on_expr env level_opt in
+      self#add r0 r1
     method on_Throw = self#on_expr
     method on_Return env c0 c1 =
       let r0 = self#on_Pos_t env c0 in

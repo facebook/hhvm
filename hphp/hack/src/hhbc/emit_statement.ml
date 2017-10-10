@@ -97,6 +97,17 @@ let emit_markup env s echo_expr_opt ~check_for_hashbang =
     echo
   ]
 
+let get_level p op e =
+  match Ast_utils.get_break_continue_level e with
+  | Ast_utils.Level_ok (Some i) -> i
+  | Ast_utils.Level_ok None -> 1
+  | Ast_utils.Level_non_positive ->
+    Emit_fatal.raise_fatal_parse
+      p ("'" ^ op ^ "' operator accepts only positive numbers")
+  | Ast_utils.Level_non_literal ->
+    Emit_fatal.raise_fatal_parse
+      p ("'" ^ op ^ "' with non-constant operand is not supported")
+
 let rec emit_stmt env st =
   match st with
   | A.Expr (_, A.Yield_break) ->
@@ -225,9 +236,9 @@ let rec emit_stmt env st =
   | A.While (e, b) ->
     emit_while env e (A.Block b)
   | A.Break (pos, level_opt) ->
-    emit_break env pos (Option.value level_opt ~default:1)
+    emit_break env pos (get_level pos "break" level_opt)
   | A.Continue (pos, level_opt) ->
-    emit_continue env pos (Option.value level_opt ~default:1)
+    emit_continue env pos (get_level pos "continue" level_opt)
   | A.Do (b, e) ->
     emit_do env (A.Block b) e
   | A.For (e1, e2, e3, b) ->

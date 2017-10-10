@@ -4,8 +4,6 @@ slow/arithmetic/inc-dec-dollar-this.php
 slow/array_offset/429.php
 slow/array_offset/433.php
 slow/async/foreach_await_as.php
-slow/break_statement/badexp.php
-slow/break_statement/zero.php
 slow/class_constant/abstract_const2.php
 slow/class_constant/abstract_const7.php
 slow/class_constant/globals-array.php
@@ -31,8 +29,6 @@ slow/constant/globals-array-constant.php
 slow/constant/realias.php
 slow/constant/true_false_null.php
 slow/continue_statement/1416.php
-slow/continue_statement/badexp.php
-slow/continue_statement/zero.php
 slow/ctor_param_promotion_bad_mod.php
 slow/dict/hh-only1.php
 slow/dict/hh-only2.php

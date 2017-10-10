@@ -563,6 +563,7 @@ module NastCheck                            = struct
   let yield_in_coroutine                    = 3037 (* DONT MODIFY!!!! *)
   let suspend_outside_of_coroutine          = 3038 (* DONT MODIFY!!!! *)
   let suspend_in_finally                    = 3039 (* DONT MODIFY!!!! *)
+  let break_continue_n_not_supported        = 3040 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1308,6 +1309,10 @@ let suspend_outside_of_coroutine p =
 let suspend_in_finally p =
   add NastCheck.suspend_in_finally p
     "suspend is not allowed inside finally blocks."
+
+let break_continue_n_not_supported p =
+  add NastCheck.break_continue_n_not_supported p
+    "Break/continue N operators are not supported."
 
 let magic (p, s) =
   add NastCheck.magic p

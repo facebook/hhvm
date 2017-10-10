@@ -541,9 +541,13 @@ class virtual ['self] map =
     method on_Block env c0 =
       let r0 = self#on_block env c0 in Block r0
     method on_Break env c0 level_opt =
-      let r0 = self#on_Pos_t env c0 in Break (r0, level_opt)
+      let r0 = self#on_Pos_t env c0 in
+      let r1 = self#on_option self#on_expr env level_opt in
+      Break (r0, r1)
     method on_Continue env c0 level_opt =
-      let r0 = self#on_Pos_t env c0 in Continue (r0, level_opt)
+      let r0 = self#on_Pos_t env c0 in
+      let r1 = self#on_option self#on_expr env level_opt in
+      Continue (r0, r1)
     method on_Throw env c0 =
       let r0 = self#on_expr env c0 in Throw r0
     method on_Return env c0 c1 =

@@ -102,7 +102,7 @@ class virtual ['b] endo :
         on_Break : 'c ->
                    Ast_visitors_ancestors.stmt ->
                    Ast_visitors_ancestors.pos_t ->
-                   int option ->
+                   Ast_visitors_ancestors.expr option ->
                    Ast_visitors_ancestors.stmt;
         on_CA_enum : 'c ->
                      Ast_visitors_ancestors.ca_type ->
@@ -221,7 +221,7 @@ class virtual ['b] endo :
         on_Continue : 'c ->
                       Ast_visitors_ancestors.stmt ->
                       Ast_visitors_ancestors.pos_t ->
-                      int option ->
+                      Ast_visitors_ancestors.expr option ->
                       Ast_visitors_ancestors.stmt;
         on_Contravariant : 'c ->
                            Ast_visitors_ancestors.variance ->
@@ -971,7 +971,7 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.stmt ->
       Ast_visitors_ancestors.pos_t ->
-      int option -> Ast_visitors_ancestors.stmt
+      Ast_visitors_ancestors.expr option -> Ast_visitors_ancestors.stmt
     method on_CA_enum :
       'c ->
       Ast_visitors_ancestors.ca_type ->
@@ -1101,7 +1101,7 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.stmt ->
       Ast_visitors_ancestors.pos_t ->
-      int option -> Ast_visitors_ancestors.stmt
+      Ast_visitors_ancestors.expr option -> Ast_visitors_ancestors.stmt
     method on_Contravariant :
       'c ->
       Ast_visitors_ancestors.variance -> Ast_visitors_ancestors.variance

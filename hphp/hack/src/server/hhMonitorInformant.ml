@@ -223,7 +223,8 @@ module Revision_tracker = struct
   (**
    * Keep popping state_changes queue until we reach a non-ready result.
    *
-   * Returns if any of the popped changes resulted in a "significant" change
+   * Returns a list of the decisions from processing each ready change
+   * in the queue; the list is ordered most-recent to oldest.
    *
    * Non-blocking.
    *)
@@ -243,7 +244,6 @@ module Revision_tracker = struct
       | None ->
         acc
       | Some (significant, svn_rev) ->
-        let open Informant_sig in
         (** We already peeked the value above. Can ignore here. *)
         let _ = Queue.pop env.state_changes in
         let _ = State_prefetcher.run svn_rev env.inits.prefetcher in
@@ -251,14 +251,7 @@ module Revision_tracker = struct
          * computing distance. *)
         maybe_set_base_rev transition svn_rev env;
         let decision = form_decision significant transition server_state in
-        let decision = match acc, decision with
-          | Restart_server, _
-          | _, Restart_server ->
-            Restart_server
-          | _, _ ->
-            Move_along
-        in
-        churn_ready_changes ~acc:decision env server_state
+        churn_ready_changes ~acc:(decision :: acc) env server_state
 
   and form_decision has_significant last_transition server_state =
     let open Informant_sig in
@@ -294,7 +287,13 @@ module Revision_tracker = struct
     if Queue.is_empty env.state_changes then
       Move_along
     else
-      churn_ready_changes ~acc:Move_along env server_state
+      let decisions = churn_ready_changes ~acc:[] env server_state in
+      let select_relevant left right = match left, right with
+        | Restart_server, _ -> Restart_server
+        | _, Restart_server -> Restart_server
+        | _, _ -> Move_along
+      in
+      List.fold_left select_relevant Move_along decisions
 
   let get_change env =
     let watchman, change = Watchman.get_changes !(env.inits.watchman) in

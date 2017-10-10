@@ -450,7 +450,7 @@ int recordedFuncs();
  * Record a jmp at address toSmash to SrcRec sr.
  *
  * When a translation is reclaimed we remove all annotations from all SrcRecs
- * containing IBs from the translation so that they cannot be inadvertantly
+ * containing IBs from the translation so that they cannot be inadvertently
  * smashed in the process of replaceOldTranslations()
  */
 void recordJump(TCA toSmash, SrcRec* sr);

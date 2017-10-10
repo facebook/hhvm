@@ -4374,9 +4374,6 @@ and unop ?(allow_uref=false) p env uop te ty =
       if Env.is_strict env && not allow_uref then
         Errors.reference_expr p;
       make_result env te ty
-  | Ast.Usplat ->
-      (* TODO(13988978) Splat operator not supported at use sites yet. *)
-      make_result env te ty
   | Ast.Usilence ->
       (* Silencing does not change the type *)
       make_result env te ty

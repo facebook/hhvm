@@ -105,7 +105,7 @@ type uop =
 | Utild
 | Unot | Uplus | Uminus | Uincr
 | Udecr | Upincr | Updecr
-| Uref | Usplat | Usilence
+| Uref | Usilence
 [@@deriving show]
 
 (*****************************************************************************)

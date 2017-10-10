@@ -763,7 +763,6 @@ class virtual ['self] reduce =
     method on_Upincr _ = self#e
     method on_Updecr _ = self#e
     method on_Uref _ = self#e
-    method on_Usplat _ = self#e
     method on_Usilence _ = self#e
     method on_uop env = function
       | Utild -> self#on_Utild env
@@ -775,7 +774,6 @@ class virtual ['self] reduce =
       | Upincr -> self#on_Upincr env
       | Updecr -> self#on_Updecr env
       | Uref -> self#on_Uref env
-      | Usplat -> self#on_Usplat env
       | Usilence -> self#on_Usilence env
     method on_Default = self#on_block
     method on_Case env c0 c1 =

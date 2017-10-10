@@ -688,7 +688,6 @@ class virtual ['self] iter =
     method on_Upincr env = ()
     method on_Updecr env = ()
     method on_Uref env = ()
-    method on_Usplat env = ()
     method on_Usilence env = ()
     method on_uop env = function
       | Utild -> self#on_Utild env
@@ -700,7 +699,6 @@ class virtual ['self] iter =
       | Upincr -> self#on_Upincr env
       | Updecr -> self#on_Updecr env
       | Uref -> self#on_Uref env
-      | Usplat -> self#on_Usplat env
       | Usilence -> self#on_Usilence env
     method on_Default = self#on_block
     method on_Case env c0 c1 =

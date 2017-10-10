@@ -834,7 +834,7 @@ and string_of_uop = function
   | A.Usilence -> "@"
   | A.Upincr
   | A.Updecr
-  | A.Usplat -> failwith "string_of_uop - should have been captures earlier"
+    -> failwith "string_of_uop - should have been captures earlier"
 
 and string_of_hint ~ns h =
   let h =
@@ -1065,7 +1065,6 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
     match uop with
     | A.Upincr -> e ^ "++"
     | A.Updecr -> e ^ "--"
-    | A.Usplat -> e
     | _ -> string_of_uop uop ^ e
   end
   | A.Obj_get (e1, e2, f) ->

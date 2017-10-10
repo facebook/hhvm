@@ -1,5 +1,5 @@
 (* @generated from ast_defs.src.ml by hphp/hack/tools/ppx/ppx_gen. *)
-(* SourceShasum<<b18049774c9103f2fd210b5b90b74f91cac2e8c9>> *)
+(* SourceShasum<<7fa441a303446d919ae954f72b09406785402be6>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -334,7 +334,6 @@ type uop =
   | Upincr 
   | Updecr 
   | Uref 
-  | Usplat 
   | Usilence [@@deriving show]
 let rec (pp_uop : Format.formatter -> uop -> Ppx_deriving_runtime.unit) =
   ((let open! Ppx_deriving_runtime in
@@ -349,7 +348,6 @@ let rec (pp_uop : Format.formatter -> uop -> Ppx_deriving_runtime.unit) =
         | Upincr  -> Format.pp_print_string fmt "Upincr"
         | Updecr  -> Format.pp_print_string fmt "Updecr"
         | Uref  -> Format.pp_print_string fmt "Uref"
-        | Usplat  -> Format.pp_print_string fmt "Usplat"
         | Usilence  -> Format.pp_print_string fmt "Usilence")
   [@ocaml.warning "-A"])
 

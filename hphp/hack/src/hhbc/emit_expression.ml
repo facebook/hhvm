@@ -159,7 +159,7 @@ let istype_op id =
   | _ -> None
 
 (* See EmitterVisitor::getPassByRefKind in emitter.cpp *)
-let get_passByRefKind expr =
+let get_passByRefKind is_splatted expr  =
   let open PassByRefKind in
   let rec from_non_list_assignment permissive_kind expr =
     match snd expr with
@@ -170,7 +170,6 @@ let get_passByRefKind expr =
     | A.Array_get(_, Some _) -> permissive_kind
     | A.Binop(A.Eq _, _, _) -> WarnOnCell
     | A.Unop((A.Uincr | A.Udecr | A.Usilence), _) -> WarnOnCell
-    | A.Unop((A.Usplat, _)) -> AllowCell
     | A.Call((_, A.Id (_, "eval")), _, [_], []) ->
       WarnOnCell
     | A.Call((_, A.Id (_, "array_key_exists")), _, [_; _], []) ->
@@ -181,7 +180,7 @@ let get_passByRefKind expr =
       AllowCell
     | A.Xml _ ->
       AllowCell
-    | _ -> ErrorOnCell in
+    | _ -> if is_splatted then AllowCell else ErrorOnCell in
   from_non_list_assignment AllowCell expr
 
 let get_queryMOpMode need_ref op =
@@ -1653,7 +1652,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
                    then BaseR base_offset else BaseC base_offset)),
      1
 
-and emit_arg env i (pos, expr_ as expr) =
+and emit_arg env i is_splatted (pos, expr_ as expr) =
   let force_hh =
     Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
   let is_hh = Emit_env.is_hh_file () in
@@ -1665,7 +1664,20 @@ and emit_arg env i (pos, expr_ as expr) =
   let expr_ = match expr_ with
   | A.Unop (A.Uref, (_, e)) -> e
   | _ -> expr_ in
+  let default () =
+    let instrs, flavor = emit_flavored_expr env expr in
+    let fpass_kind = match flavor with
+      | Flavor.Cell -> instr_fpass (get_passByRefKind is_splatted expr) i hint
+      | Flavor.Ref -> instr_fpassv i hint
+      | Flavor.ReturnVal -> instr_fpassr i hint
+    in
+    gather [
+      instrs;
+      fpass_kind;
+    ] in
   Emit_pos.emit_pos_then pos @@
+  if is_splatted then default ()
+  else
   match expr_ with
   | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
     gather [
@@ -1712,18 +1724,7 @@ and emit_arg env i (pos, expr_ as expr) =
       instrs;
       instr_fpassr i hint;
     ]
-
-  | _ ->
-    let instrs, flavor = emit_flavored_expr env expr in
-    let fpass_kind = match flavor with
-      | Flavor.Cell -> instr_fpass (get_passByRefKind expr) i hint
-      | Flavor.Ref -> instr_fpassv i hint
-      | Flavor.ReturnVal -> instr_fpassr i hint
-    in
-    gather [
-      instrs;
-      fpass_kind;
-    ]
+  | _ -> default ()
 
 and emit_ignored_expr env e =
   match snd e with
@@ -1735,17 +1736,14 @@ and emit_ignored_expr env e =
       instr_pop flavor;
     ]
 
-and is_splatted = function
-  | _, A.Unop (A.Usplat, _) -> true
-  | _ -> false
-
 (* Emit code to construct the argument frame and then make the call *)
 and emit_args_and_call env args uargs =
+  let args_count = List.length args in
   let all_args = args @ uargs in
-  let is_splatted = List.exists ~f:is_splatted args in
+  let is_splatted =  not (List.is_empty uargs) in
   let nargs = List.length all_args in
   gather [
-    gather (List.mapi all_args (emit_arg env));
+    gather (List.mapi all_args (fun i e -> emit_arg env i (i >= args_count) e));
     if uargs = [] && not is_splatted
     then instr (ICall (FCall nargs))
     else instr (ICall (FCallUnpack nargs))
@@ -2473,7 +2471,7 @@ and from_unop op =
   | A.Unot -> instr (IOp Not)
   | A.Uplus -> instr (IOp (if ints_overflow_to_ints then Add else AddO))
   | A.Uminus -> instr (IOp (if ints_overflow_to_ints then Sub else SubO))
-  | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usplat | A.Usilence ->
+  | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usilence ->
     emit_nyi "unop - probably does not need translation"
 
 and emit_expr_as_ref env e = emit_expr ~need_ref:true env e
@@ -2507,8 +2505,6 @@ and emit_unop ~need_ref env op e =
       emit_box_if_necessary need_ref instr
     end
   | A.Uref -> emit_expr_as_ref env e
-  | A.Usplat ->
-    emit_expr ~need_ref:false env e
   | A.Usilence ->
     Local.scope @@ fun () ->
       let fault_label = Label.next_fault () in

@@ -1180,7 +1180,6 @@ class virtual ['self] endo =
     method on_Upincr env this = this
     method on_Updecr env this = this
     method on_Uref env this = this
-    method on_Usplat env this = this
     method on_Usilence env this = this
     method on_uop env this =
       match this with
@@ -1193,7 +1192,6 @@ class virtual ['self] endo =
       | Upincr -> self#on_Upincr env this
       | Updecr -> self#on_Updecr env this
       | Uref -> self#on_Uref env this
-      | Usplat -> self#on_Usplat env this
       | Usilence -> self#on_Usilence env this
     method on_Default env this c0 =
       let r0 = self#on_block env c0 in

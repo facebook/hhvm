@@ -806,8 +806,20 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         end
       in
       let recv = pExpr recv env in
-      let args = couldMap ~f:pExpr args env in
-      Call (recv, hints, args, [])
+      (match List.rev (as_list args) with
+      | { syntax = DecoratedExpression
+          { decorated_expression_decorator =
+            { syntax = Token { Token.kind = Token.TokenKind.DotDotDot; _ }; _ }
+          ; decorated_expression_expression = e
+          }
+        ; _
+        } :: xs
+        -> let args = List.rev_map xs (fun x -> pExpr x env) in
+           let vararg = pExpr e env in
+           Call (recv, hints, args, [vararg])
+      | _ -> let args = couldMap ~f:pExpr args env in
+             Call (recv, hints, args, [])
+      )
     | FunctionCallWithTypeArgumentsExpression
       { function_call_with_type_arguments_receiver = recv
       ; function_call_with_type_arguments_type_args = type_args
@@ -889,7 +901,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.Plus                    -> Unop (Uplus,  expr)
         | Some TK.Minus                   -> Unop (Uminus, expr)
         | Some TK.Ampersand               -> Unop (Uref,   expr)
-        | Some TK.DotDotDot               -> Unop (Usplat, expr)
         | Some TK.At                      -> Unop (Usilence, expr)
         | Some TK.Await                   -> Await expr
         | Some TK.Suspend                 -> Suspend expr
@@ -981,6 +992,22 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       )
     | ObjectCreationExpression
       { object_creation_type; object_creation_argument_list; _ } ->
+      let args, varargs =
+        match List.rev (as_list object_creation_argument_list) with
+        | { syntax = DecoratedExpression
+            { decorated_expression_decorator =
+              { syntax = Token { Token.kind = Token.TokenKind.DotDotDot; _ }
+              ; _ }
+            ; decorated_expression_expression = e
+            }
+          ; _
+          } :: xs
+          -> let args = List.rev_map xs (fun x -> pExpr x env) in
+             let vararg = pExpr e env in
+             args, [vararg]
+        | _ -> let args = couldMap ~f:pExpr object_creation_argument_list env in
+               args, []
+      in
       New
       ( (match syntax object_creation_type with
         | GenericTypeSpecifier { generic_class_type; generic_argument_list } ->
@@ -999,8 +1026,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           -> let name = pos_name object_creation_type in fst name, Id name
         | _ -> pExpr object_creation_type env
         )
-      , couldMap ~f:pExpr object_creation_argument_list env
-      , []
+      , args
+      , varargs
       )
     | GenericTypeSpecifier
       { generic_class_type

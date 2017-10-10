@@ -115,6 +115,25 @@ let variadic_params_with_default_value params =
     | _ :: t -> aux t in
   aux (syntax_to_list_with_separators params)
 
+let param_missing_default_value params =
+  (* TODO: This error is also reported in the type checker; when we switch
+  over to the FFP, we can remove the error detection from the type checker. *)
+  let rec aux seen_default params =
+    match params with
+    | [] -> None
+    | x :: t ->
+      if is_variadic_parameter_declaration x then
+        None (* Stop looking. If this happens to not be the last parameter,
+          we'll give an error in a different check. *)
+      else
+        let has_default = is_parameter_with_default_value x in
+        if seen_default && not has_default then
+          Some x (* We saw a defaulted parameter, and this one has no
+            default value. Give an error, and stop looking for more. *)
+        else
+          aux has_default t in
+  aux false (syntax_to_list_no_separators params)
+
 (* True or false: the first item in this list matches the predicate? *)
 let matches_first f items =
   match items with
@@ -779,8 +798,14 @@ let markup_errors node is_hack =
     [ make_error_from_node node SyntaxError.error1001 ]
   | _ -> []
 
-let params_errors params =
-  let errors = [] in
+let default_value_params_errors params is_hack =
+  if not is_hack then []
+  else match param_missing_default_value params with
+  | None -> []
+  | Some param -> [ make_error_from_node param SyntaxError.error2066 ]
+
+let params_errors params is_hack =
+  let errors = default_value_params_errors params is_hack in
   let errors =
     match ends_with_variadic_comma params with
     | None -> errors
@@ -798,16 +823,16 @@ let params_errors params =
       (make_error_from_node default_argument SyntaxError.error2065) :: errors in
   errors
 
-let parameter_errors node parents is_strict =
+let parameter_errors node parents is_strict is_hack =
   match syntax node with
   | ParameterDeclaration { parameter_type; _}
     when is_strict && (is_missing parameter_type) &&
     (parameter_type_is_required parents) ->
       [ make_error_from_node node SyntaxError.error2001 ]
   | FunctionDeclarationHeader { function_parameter_list; _ } ->
-    params_errors function_parameter_list
+    params_errors function_parameter_list is_hack
   | AnonymousFunction { anonymous_parameters; _ } ->
-    params_errors anonymous_parameters
+    params_errors anonymous_parameters is_hack
   | _ -> []
 
 
@@ -1092,7 +1117,7 @@ let find_syntax_errors syntax_tree =
   let is_hack = (SyntaxTree.language syntax_tree = "hh") in
   let folder acc node parents =
     let markup_errs = markup_errors node is_hack in
-    let param_errs = parameter_errors node parents is_strict in
+    let param_errs = parameter_errors node parents is_strict is_hack in
     let func_errs = function_errors node parents is_strict in
     let xhp_errs = xhp_errors node parents in
     let statement_errs = statement_errors node parents in

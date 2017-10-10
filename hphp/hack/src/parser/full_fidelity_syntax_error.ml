@@ -212,3 +212,7 @@ let error2062 = "Non-static methods are not allowed in abstract final classes."
 let error2063 = "Expected integer or string literal."
 let error2064 = "Reference methods are not allowed in strict mode."
 let error2065 = "A variadic argument ('...') must not have a default value."
+(* This was typing error 4077. *)
+let error2066 = "A previous parameter has a default value. Remove all the " ^
+  "default values for the preceding parameters, or add a default value to " ^
+  "this one."

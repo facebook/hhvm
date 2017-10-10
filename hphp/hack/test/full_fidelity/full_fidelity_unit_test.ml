@@ -174,6 +174,7 @@ let error_tests =
     make_test_case_from_files testname test_errors in
   List.map
   [
+    "test_default_param_errors";
     "test_alias_errors";
     "test_method_modifier_errors";
     "test_errors_not_strict";

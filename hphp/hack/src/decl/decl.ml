@@ -187,7 +187,9 @@ and ret_from_fun_kind pos kind =
     | Ast.FCoroutine -> ty_any
 
 and fun_decl_in_env env f =
-  let arity_min, params = make_params env f.f_params in
+  check_params env f.f_params;
+  let arity_min = minimum_arity f.f_params in
+  let params = make_params env f.f_params in
   let ret_ty = match f.f_ret with
     | None -> ret_from_fun_kind (fst f.f_name) f.f_fun_kind
     | Some ty -> Decl_hint.hint env ty in
@@ -222,37 +224,46 @@ and type_param env (variance, x, cstrl) =
 and where_constraint env (ty1, ck, ty2) =
   (Decl_hint.hint env ty1, ck, Decl_hint.hint env ty2)
 
-and check_default pos mandatory e =
-  if not mandatory && e = None
-  then Errors.previous_default pos
-  else ()
-
 (* Functions building the types for the parameters of a function *)
 (* It's not completely trivial because of optional arguments  *)
-and make_param env mandatory arity param =
-  let ty = make_param_ty env param in
-  let mandatory =
-    if param.param_is_variadic then begin
-      assert(param.param_expr = None);
-      false
-    end else begin
-      check_default param.param_pos mandatory param.param_expr;
-      mandatory && param.param_expr = None
-    end
+
+and minimum_arity paraml =
+  (* We're looking for the minimum number of arguments that must be specified
+  in a call to this method. Variadic "..." parameters need not be specified,
+  parameters with default values need not be specified, so this method counts
+  non-default-value, non-variadic parameters. *)
+  let f param = (not param.param_is_variadic) && param.param_expr = None in
+  List.count paraml f
+
+and check_params env paraml =
+  (* We wish to give an error on the first non-default parameter
+  after a default parameter. That is:
+  function foo(int $x, ?int $y = null, int $z)
+  is an error on $z. *)
+  (* TODO: This check doesn't need to be done at type checking time; it is
+  entirely syntactic. When we switch over to the FFP, remove this code. *)
+  let rec loop seen_default paraml =
+    match paraml with
+    | [] -> ()
+    | param :: rl ->
+        if param.param_is_variadic then
+          () (* Assume that a variadic parameter is the last one we need
+            to check. We've already given a parse error if the variadic
+            parameter is not last. *)
+        else if seen_default && param.param_expr = None then
+          Errors.previous_default param.param_pos
+          (* We've seen at least one required parameter, and there's an
+          optional parameter after it.  Given an error, and then stop looking
+          for more errors in this parameter list. *)
+        else
+          loop (param.param_expr <> None) rl
   in
-  let arity = if mandatory then arity + 1 else arity in
-  arity, mandatory, ty
+  (* PHP allows non-default valued parameters after default valued parameters. *)
+  if (env.Decl_env.mode <> FileInfo.Mphp) then
+    loop false paraml
 
 and make_params env paraml =
-  let rec loop mandatory arity paraml =
-    match paraml with
-    | [] -> arity, []
-    | param :: rl ->
-        let arity, mandatory, ty = make_param env mandatory arity param in
-        let arity, rest = loop mandatory arity rl in
-        arity, ty :: rest
-  in
-  loop true 0 paraml
+  List.map paraml ~f:(make_param_ty env)
 
 (*****************************************************************************)
 (* Section declaring the type of a class *)
@@ -670,7 +681,9 @@ and typeconst_decl env c (acc, acc2) {
       acc, acc2
 
 and method_decl env m =
-  let arity_min, params = make_params env m.m_params in
+  check_params env m.m_params;
+  let arity_min = minimum_arity m.m_params in
+  let params = make_params env m.m_params in
   let ret = match m.m_ret with
     | None -> ret_from_fun_kind (fst m.m_name) m.m_fun_kind
     | Some ret -> Decl_hint.hint env ret in

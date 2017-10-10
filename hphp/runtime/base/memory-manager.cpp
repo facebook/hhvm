@@ -129,7 +129,7 @@ MemoryManager::~MemoryManager() {
                     header_names[size_t(h->kind())]);
     });
   }
-  // ~BigHeap releases its slabs/bigs.
+  // ~SparseHeap releases its slabs/bigs.
 }
 
 void MemoryManager::resetRuntimeOptions() {
@@ -271,7 +271,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     // because of the MaskAlloc capability, which updates m_resetAllocated.
 
     // stats.heapAllocVolume is only used for contiguous heap, it would always
-    // be 0 in default BigHeap.
+    // be 0 in default SparseHeap.
     stats.totalAlloc = curAllocated - m_resetAllocated + stats.heapAllocVolume;
     FTRACE(1, "heap-id {} after sync extUsage {} totalAlloc: {}\n",
       t_heap_id, stats.extUsage, stats.totalAlloc);
@@ -1028,8 +1028,8 @@ void MemoryManager::setGCEnabled(bool isGCEnabled) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void BigHeap::reset() {
-  TRACE(1, "heap-id %lu BigHeap-reset: slabs %lu bigs %lu\n",
+void SparseHeap::reset() {
+  TRACE(1, "heap-id %lu SparseHeap-reset: slabs %lu bigs %lu\n",
         t_heap_id, m_slabs.size(), m_bigs.size());
   auto const do_free = [&](void* ptr, size_t size) {
     if (RuntimeOption::EvalTrashFillOnRequestExit) {
@@ -1047,13 +1047,13 @@ void BigHeap::reset() {
   m_bigs.clear();
 }
 
-void BigHeap::flush() {
+void SparseHeap::flush() {
   assert(empty());
   m_slabs = std::vector<MemBlock>{};
   m_bigs = std::vector<MallocNode*>{};
 }
 
-MemBlock BigHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
+MemBlock SparseHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
 #ifdef USE_JEMALLOC
   void* slab = mallocx(size, 0);
   auto usable = sallocx(slab, 0);
@@ -1067,15 +1067,16 @@ MemBlock BigHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
   return {slab, usable};
 }
 
-void BigHeap::enlist(MallocNode* n, HeaderKind kind,
-                     size_t size, type_scan::Index tyindex) {
+void SparseHeap::enlist(MallocNode* n, HeaderKind kind,
+                        size_t size, type_scan::Index tyindex) {
   n->initHeader_32_16(kind, m_bigs.size(), tyindex);
   n->nbytes = size;
   m_bigs.push_back(n);
 }
 
-MemBlock BigHeap::allocBig(size_t bytes, HeaderKind kind,
-                           type_scan::Index tyindex, MemoryUsageStats& stats) {
+MemBlock SparseHeap::allocBig(size_t bytes, HeaderKind kind,
+                              type_scan::Index tyindex,
+                              MemoryUsageStats& stats) {
 #ifdef USE_JEMALLOC
   auto n = static_cast<MallocNode*>(mallocx(bytes + sizeof(MallocNode), 0));
   auto cap = sallocx(n, 0);
@@ -1089,8 +1090,9 @@ MemBlock BigHeap::allocBig(size_t bytes, HeaderKind kind,
   return {n + 1, cap - sizeof(MallocNode)};
 }
 
-MemBlock BigHeap::callocBig(size_t nbytes, HeaderKind kind,
-                            type_scan::Index tyindex, MemoryUsageStats& stats) {
+MemBlock SparseHeap::callocBig(size_t nbytes, HeaderKind kind,
+                               type_scan::Index tyindex,
+                               MemoryUsageStats& stats) {
 #ifdef USE_JEMALLOC
   auto n = static_cast<MallocNode*>(
       mallocx(nbytes + sizeof(MallocNode), MALLOCX_ZERO)
@@ -1106,7 +1108,7 @@ MemBlock BigHeap::callocBig(size_t nbytes, HeaderKind kind,
   return {n + 1, cap - sizeof(MallocNode)};
 }
 
-bool BigHeap::contains(void* ptr) const {
+bool SparseHeap::contains(void* ptr) const {
   auto const ptrInt = reinterpret_cast<uintptr_t>(ptr);
   auto it = std::find_if(std::begin(m_slabs), std::end(m_slabs),
     [&] (MemBlock slab) {
@@ -1117,7 +1119,7 @@ bool BigHeap::contains(void* ptr) const {
   return it != std::end(m_slabs);
 }
 
-void BigHeap::freeBig(void* ptr) {
+void SparseHeap::freeBig(void* ptr) {
   auto n = static_cast<MallocNode*>(ptr) - 1;
   auto i = n->index();
   auto last = m_bigs.back();
@@ -1131,8 +1133,8 @@ void BigHeap::freeBig(void* ptr) {
 #endif
 }
 
-MemBlock BigHeap::resizeBig(void* ptr, size_t newsize,
-                            MemoryUsageStats& stats) {
+MemBlock SparseHeap::resizeBig(void* ptr, size_t newsize,
+                               MemoryUsageStats& stats) {
   // Since we don't know how big it is (i.e. how much data we should memcpy),
   // we have no choice but to ask malloc to realloc for us.
   auto const n = static_cast<MallocNode*>(ptr) - 1;
@@ -1156,7 +1158,7 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize,
   return {newNode + 1, newNode->nbytes - sizeof(MallocNode)};
 }
 
-void BigHeap::sort() {
+void SparseHeap::sort() {
   std::sort(std::begin(m_slabs), std::end(m_slabs),
     [] (const MemBlock& l, const MemBlock& r) {
       assertx(static_cast<char*>(l.ptr) + l.size <= r.ptr ||
@@ -1177,7 +1179,7 @@ void BigHeap::sort() {
  *
  * If that fails, we return nullptr.
  */
-HeapObject* BigHeap::find(const void* p) {
+HeapObject* SparseHeap::find(const void* p) {
   sort();
   auto const slab = std::lower_bound(
     std::begin(m_slabs), std::end(m_slabs), p,

@@ -476,7 +476,7 @@ HdrBlock SlabHeader<LineSize>::find_if(HeapObject* h, Fn fn) const {
 }
 
 template<class OnBig, class OnSlab>
-void BigHeap::iterate(OnBig onBig, OnSlab onSlab) {
+void SparseHeap::iterate(OnBig onBig, OnSlab onSlab) {
   // slabs and bigs are sorted; walk through both in address order
   const auto SENTINEL = (HeapObject*) ~0LL;
   auto slab = std::begin(m_slabs);
@@ -498,7 +498,7 @@ void BigHeap::iterate(OnBig onBig, OnSlab onSlab) {
   }
 }
 
-template<class Fn> void BigHeap::iterate(Fn fn) {
+template<class Fn> void SparseHeap::iterate(Fn fn) {
   // slabs and bigs are sorted; walk through both in address order
   const auto SENTINEL = (HeapObject*) ~0LL;
   auto slab = std::begin(m_slabs);
@@ -534,7 +534,7 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
 // call onBigFn() on big blocks, call onSlabFn() on slabs.
 // This function is used in GC Marker init and Marker sweep
 template<class OnBigFn, class OnSlabFn>
-void ContiguousBigHeap::iterate(OnBigFn onBigFn, OnSlabFn onSlabFn) {
+void ContiguousHeap::iterate(OnBigFn onBigFn, OnSlabFn onSlabFn) {
   // [m_base,m_front) iterate the whole heap
   find_if(true, [&](HeapObject* h, size_t size) {
     switch (h->kind()) {
@@ -555,7 +555,7 @@ void ContiguousBigHeap::iterate(OnBigFn onBigFn, OnSlabFn onSlabFn) {
 // The parameter Fn is a lambda function.
 // When calling this function, iterate the whole heap, call fn() on every
 // HeapObject(skip slab Header).
-template<class Fn> void ContiguousBigHeap::iterate(Fn fn) {
+template<class Fn> void ContiguousHeap::iterate(Fn fn) {
   find_if(false, [&](HeapObject* h, size_t size) {
     fn(h, size);
     return false;
@@ -571,7 +571,7 @@ template<class Fn> void ContiguousBigHeap::iterate(Fn fn) {
 //       [--------][--------][--------][--------][--------][--------]
 //       ^usedStart          ^usedEnd                               ^endIndex
 template<class Fn>
-HeapObject* ContiguousBigHeap::find_if(bool wholeSlab, Fn fn) {
+HeapObject* ContiguousHeap::find_if(bool wholeSlab, Fn fn) {
   assert(check_invariants());
   size_t endIndex   = chunk_index(m_front);
   size_t startIndex = chunk_index(m_base);

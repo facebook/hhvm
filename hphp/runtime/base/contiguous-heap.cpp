@@ -51,7 +51,7 @@
 //                                                                            //
 //   The Purger struct, which is a thread_local variable, is used for memory  //
 //   purge (use madvise(DONTNEED)) when we want to clean the memory space of  //
-//   ContiguousBigHeap.                                                       //
+//   ContiguousHeap.                                                          //
 ////////////////////////////////////////////////////////////////////////////////
 namespace HPHP {
 
@@ -217,18 +217,18 @@ const int64_t Purger::kPageSize{sysconf(_SC_PAGESIZE)};
 thread_local Purger purger;
 }
 
-ContiguousBigHeap::ContiguousBigHeap()
-  : m_base((char*)alloc_heap(ContiguousBigHeap::HeapCap))
-  , m_limit(m_base + ContiguousBigHeap::HeapCap)
+ContiguousHeap::ContiguousHeap()
+  : m_base((char*)alloc_heap(ContiguousHeap::HeapCap))
+  , m_limit(m_base + ContiguousHeap::HeapCap)
   , m_front(m_base){
 }
 
-ContiguousBigHeap::~ContiguousBigHeap() {
+ContiguousHeap::~ContiguousHeap() {
   free_heap(m_base, m_limit-m_base);
 }
 
-void ContiguousBigHeap::reset() {
-  TRACE(1, "BigHeap-reset: %lu\n", m_front - m_base);
+void ContiguousHeap::reset() {
+  TRACE(1, "ContiguousHeap-reset: %lu\n", m_front - m_base);
   // This fill0 now saves the memory manager from needing to fill0
   // when m_front grows.
   fill0(m_freebits, 0, chunk_index(m_front));
@@ -237,12 +237,12 @@ void ContiguousBigHeap::reset() {
   assert(check_invariants());
 }
 
-void ContiguousBigHeap::flush() {
+void ContiguousHeap::flush() {
   assert(empty());
   purger.flush(m_base);
 }
 
-char* ContiguousBigHeap::grow(size_t size) {
+char* ContiguousHeap::grow(size_t size) {
   assert(size % ChunkSize == 0);
   assert(check_invariants());
   // Raise OOM error if it exceeds memory limit
@@ -269,7 +269,7 @@ char* ContiguousBigHeap::grow(size_t size) {
 // Trying to find a contiguous space for n free chunks (n = size /ChunkSize),
 // start searching from the first free Chunk up to m_front,
 // if it fails to find enough space for all n chunks, then grow m_front.
-char* ContiguousBigHeap::raw_alloc(size_t size) {
+char* ContiguousHeap::raw_alloc(size_t size) {
   assert(size >= ChunkSize && size % ChunkSize == 0);
   auto n = size/ChunkSize;
   // Scan forward looking for a range of n free chunks,
@@ -306,7 +306,7 @@ char* ContiguousBigHeap::raw_alloc(size_t size) {
   return grow(size);
 }
 
-void ContiguousBigHeap::raw_free(char* p, size_t size) {
+void ContiguousHeap::raw_free(char* p, size_t size) {
   auto startIndex = chunk_index(p), n = size/ChunkSize;
   assert(findFirst1(m_freebits, startIndex, startIndex + n) == startIndex + n);
   // Free [startIndex,startIndex+n), update the hole header
@@ -322,7 +322,7 @@ void ContiguousBigHeap::raw_free(char* p, size_t size) {
   }
 }
 
-MemBlock ContiguousBigHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
+MemBlock ContiguousHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
   assert(size % ChunkSize == 0);
   auto p = raw_alloc(size);
   stats.heapAllocVolume += size;
@@ -347,8 +347,9 @@ MemBlock ContiguousBigHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
 // And we should also figure out that how small can we make ChunkSize before
 // performance starts to get really bad (in normal operation, and with
 // m_bypassSlabAlloc=true)
-MemBlock ContiguousBigHeap::allocBig(size_t bytes, HeaderKind kind,
-                           type_scan::Index tyindex, MemoryUsageStats& stats) {
+MemBlock ContiguousHeap::allocBig(size_t bytes, HeaderKind kind,
+                                  type_scan::Index tyindex,
+                                  MemoryUsageStats& stats) {
   // Round up to the nearest multiple of ChunkSize
   auto cap = (bytes + sizeof(MallocNode) + ChunkSize - 1) & ~(ChunkSize - 1);
   auto n = (MallocNode*)raw_alloc(cap);
@@ -360,27 +361,28 @@ MemBlock ContiguousBigHeap::allocBig(size_t bytes, HeaderKind kind,
   return {n + 1, cap - sizeof(MallocNode)};
 }
 
-MemBlock ContiguousBigHeap::callocBig(size_t bytes, HeaderKind kind,
-                            type_scan::Index tyindex, MemoryUsageStats& stats) {
+MemBlock ContiguousHeap::callocBig(size_t bytes, HeaderKind kind,
+                                   type_scan::Index tyindex,
+                                   MemoryUsageStats& stats) {
   auto b = allocBig(bytes, kind, tyindex, stats);
   memset(b.ptr, 0, b.size);
   return b;
 }
 
 // Return true if the pointer is in the range and has not been freed
-bool ContiguousBigHeap::contains(void* ptr) const {
+bool ContiguousHeap::contains(void* ptr) const {
   auto p = static_cast<char*>(ptr);
   auto index = chunk_index(p);
   return p >= m_base && p < m_front && !m_freebits.test(index);
 }
 
-void ContiguousBigHeap::freeBig(void* ptr) {
+void ContiguousHeap::freeBig(void* ptr) {
   auto n = static_cast<MallocNode*>(ptr) - 1;
   raw_free((char*)n, n->nbytes);
 }
 
-MemBlock ContiguousBigHeap::resizeBig(void* ptr, size_t newsize,
-                                      MemoryUsageStats& stats) {
+MemBlock ContiguousHeap::resizeBig(void* ptr, size_t newsize,
+                                   MemoryUsageStats& stats) {
   auto newcap = (newsize + sizeof(MallocNode) + ChunkSize-1) & ~(ChunkSize-1);
   auto n = static_cast<MallocNode*>(ptr) - 1;
   if (newcap == n->nbytes) {
@@ -402,7 +404,7 @@ MemBlock ContiguousBigHeap::resizeBig(void* ptr, size_t newsize,
  * To find `ptr', we first find the last Hole before p and start searching,
  * stop as soon as we pass p. If the search fails, return nullptr.
  */
-HeapObject* ContiguousBigHeap::find(const void* ptr) {
+HeapObject* ContiguousHeap::find(const void* ptr) {
   assert(check_invariants());
   auto p = (char*)ptr;
   auto pChunk = chunk_index(p);
@@ -428,7 +430,7 @@ HeapObject* ContiguousBigHeap::find(const void* ptr) {
 }
 
 // Make sure that there is no free Chunks after m_front
-bool ContiguousBigHeap::check_invariants() const {
+bool ContiguousHeap::check_invariants() const {
   assert(m_base <= m_front && m_front <= m_limit);
   for (size_t DEBUG_ONLY i = chunk_index(m_front),
               DEBUG_ONLY e = chunk_index(m_limit); i < e; ++i) {

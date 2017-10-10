@@ -480,9 +480,9 @@ using HdrBlock = MemRange<HeapObject*>;
 /*
  * Allocator for slabs and big blocks.
  */
-struct BigHeap {
-  BigHeap() {}
-  ~BigHeap();
+struct SparseHeap {
+  SparseHeap() {}
+  ~SparseHeap();
 
   /*
    * Is the heap empty?
@@ -557,13 +557,13 @@ struct BigHeap {
 /*
  * Contiguous heap allocator for chunks
  */
-struct ContiguousBigHeap {
+struct ContiguousHeap {
   static constexpr size_t ChunkSize = kSlabSize;              // 2MB
   static constexpr size_t HeapCap = 8 * 1024*1024*1024UL;     // 8G
   static constexpr size_t FreebitsSize = HeapCap / ChunkSize; // 4096
-  ContiguousBigHeap();
+  ContiguousHeap();
 
-  ~ContiguousBigHeap();
+  ~ContiguousHeap();
 
   /*
    * Is the heap empty?
@@ -635,9 +635,9 @@ private:
 };
 
 #ifdef USE_CONTIGUOUS_HEAP
-  using HeapImpl = ContiguousBigHeap;
+  using HeapImpl = ContiguousHeap;
 #else
-  using HeapImpl = BigHeap;
+  using HeapImpl = SparseHeap;
 #endif
 ///////////////////////////////////////////////////////////////////////////////
 

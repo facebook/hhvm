@@ -37,19 +37,19 @@ inline MemoryManager& MM() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline BigHeap::~BigHeap() {
+inline SparseHeap::~SparseHeap() {
   reset();
 }
 
-inline bool BigHeap::empty() const {
+inline bool SparseHeap::empty() const {
   return m_slabs.empty() && m_bigs.empty();
 }
 
-inline bool ContiguousBigHeap::empty() const {
+inline bool ContiguousHeap::empty() const {
   return m_base == m_front;
 }
 
-inline size_t ContiguousBigHeap::chunk_index(char* p) const {
+inline size_t ContiguousHeap::chunk_index(char* p) const {
   assert(p >= m_base);
   return (p - m_base) / ChunkSize;
 }

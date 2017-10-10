@@ -27,11 +27,15 @@ module Revision_map = struct
     type t =
       {
         svn_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Hashtbl.t;
+        xdb_queries : (int, Xdb.sql_result list Future.t) Hashtbl.t;
+        use_xdb : bool;
       }
 
-    let create () =
+    let create use_xdb =
       {
         svn_queries = Hashtbl.create 200;
+        xdb_queries = Hashtbl.create 200;
+        use_xdb;
       }
 
     let add_query ~hg_rev root t =
@@ -56,12 +60,61 @@ module Revision_map = struct
       end with
       | Future_sig.Process_failure _ -> 0
 
-    let find hg_rev t =
+    let find_svn_rev hg_rev t =
       let future = Hashtbl.find t.svn_queries hg_rev in
       if Future.is_ready future then
         Some (svn_rev_of_future future)
       else
         None
+
+    (**
+     * Does an async query to XDB to find nearest saved state match.
+     * If no match is found, returns an empty list.
+     * If query is not ready returns None.
+     *
+     * Non-blocking.
+     *)
+    let find_xdb_match svn_rev t =
+      let query = try Some (Hashtbl.find t.xdb_queries svn_rev) with
+        | Not_found ->
+          let hhconfig_hash, _config = Config_file.parse
+            (Relative_path.to_absolute ServerConfig.filename) in
+          (** Query doesn't exist yet, so we create one and consume it when
+           * it's ready. *)
+          let future = begin match hhconfig_hash with
+          | None ->
+            (** Have no config file hash.
+             * Just return a fake empty list of XDB results. *)
+            Future.of_value []
+          | Some hhconfig_hash ->
+            Xdb.find_nearest
+              ~db:Xdb.hack_db_name
+              ~db_table:Xdb.mini_saved_states_table
+              ~svn_rev
+              ~hh_version:Build_id.build_revision
+              ~hhconfig_hash
+          end in
+          let () = Hashtbl.add t.xdb_queries svn_rev future in
+          None
+      in
+      let open Option in
+      query >>= fun future ->
+        if Future.is_ready future then
+          let results = Future.get future in
+          Some results
+        else
+          None
+
+    let find hg_rev t =
+      let svn_rev = find_svn_rev hg_rev t in
+      let open Option in
+      svn_rev >>= fun svn_rev ->
+        if t.use_xdb then
+          find_xdb_match svn_rev t
+          >>= fun xdb_results ->
+            Some(svn_rev, xdb_results)
+        else
+          Some(svn_rev, [])
 
 end
 
@@ -121,6 +174,7 @@ module Revision_tracker = struct
     root : Path.t;
     prefetcher : State_prefetcher.t;
     min_distance_restart : int;
+    use_xdb : bool;
   }
 
   type env = {
@@ -163,12 +217,13 @@ module Revision_tracker = struct
    * make it responsible for maintaining its own instance. *)
   type t = instance ref
 
-  let init ~min_distance_restart watchman prefetcher root =
+  let init ~min_distance_restart ~use_xdb watchman prefetcher root =
     let init_settings = {
       watchman = ref watchman;
       prefetcher;
       root;
       min_distance_restart;
+      use_xdb;
   } in
     ref @@ Initializing (init_settings,
       Hg.current_working_copy_base_rev (Path.to_string root))
@@ -181,7 +236,7 @@ module Revision_tracker = struct
     {
       inits = init_settings;
       current_base_revision = ref base_svn_rev;
-      rev_map = Revision_map.create ();
+      rev_map = Revision_map.create init_settings.use_xdb;
       state_changes = Queue.create() ;
     }
 
@@ -197,10 +252,10 @@ module Revision_tracker = struct
   let cached_svn_rev revision_map hg_rev =
     Revision_map.find hg_rev revision_map
 
-  let form_decision is_significant transition server_state =
+  let form_decision ~use_xdb is_significant transition server_state xdb_results =
     let open Informant_sig in
-    match is_significant, transition, server_state with
-    | _, State_leave _, Server_not_yet_started ->
+    match is_significant, transition, server_state, xdb_results with
+    | _, State_leave _, Server_not_yet_started, _ ->
      (** This case should be unreachable since Server_not_yet_started
       * should be handled by "should_start_first_server" and not by the
       * revision tracker. Restart anyway which, at worst, could result in a
@@ -208,19 +263,23 @@ module Revision_tracker = struct
       Hh_logger.log "Hit unreachable Server_not_yet_started match in %s"
         "Revision_tracker.form_decision";
       Restart_server
-    | _, State_leave _, Server_dead ->
+    | _, State_leave _, Server_dead, _ ->
       (** Regardless of whether we had a significant change or not, when the
        * server is not alive, we restart it on a state leave.*)
       Restart_server
-    | false, _, _ ->
+    | false, _, _, _ ->
       Move_along
-    | true, State_enter _, _
-    | true, State_leave _, _ ->
+    | true, State_enter _, _, _
+    | true, State_leave _, _, _ ->
       (** We use the State enter and leave events to kick off asynchronous
        * computations off the hg revisions when they arrive (during preprocess)
        * But actual actions are taken only on changed_merge_base below. *)
       Move_along
-    | true, Changed_merge_base _, _ ->
+    | true, Changed_merge_base _, _, [] when use_xdb ->
+      (** No XDB results, so w don't restart. *)
+      let () = Printf.eprintf "Got no XDB results on merge base change\n" in
+      Move_along
+    | true, Changed_merge_base _, _, _ ->
       Restart_server
 
   (**
@@ -238,13 +297,14 @@ module Revision_tracker = struct
     match cached_svn_rev env.rev_map hg_rev with
     | None ->
       None
-    | Some svn_rev ->
+    | Some (svn_rev, xdb_results) ->
       let distance = float_of_int @@ get_distance svn_rev env in
       let elapsed_t = (Unix.time () -. timestamp) in
       let significant = is_significant
         ~min_distance_restart:env.inits.min_distance_restart
         distance elapsed_t in
-      Some (form_decision significant transition server_state, svn_rev)
+      Some (form_decision ~use_xdb:env.inits.use_xdb significant
+        transition server_state xdb_results, svn_rev)
 
   (**
    * Keep popping state_changes queue until we reach a non-ready result.
@@ -469,6 +529,7 @@ let init {
   state_prefetcher;
   use_dummy;
   min_distance_restart;
+  use_xdb;
 } =
   if use_dummy then
     Resigned
@@ -490,6 +551,7 @@ let init {
       {
         revision_tracker = Revision_tracker.init
           ~min_distance_restart
+          ~use_xdb
           (Watchman.Watchman_alive watchman_env)
           (** TODO: Put the prefetcher here. *)
           state_prefetcher root;

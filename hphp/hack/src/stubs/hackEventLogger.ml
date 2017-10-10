@@ -95,6 +95,7 @@ let informant_induced_restart _ = ()
 let informant_prefetcher_success _ = ()
 let informant_prefetcher_failed _ _ = ()
 let informant_state_leave _ = ()
+let xdb_malformed_result _ = ()
 
 (** Watchman Event Watcher client running in the informant *)
 let informant_watcher_not_available _ = ()

@@ -86,6 +86,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
       use_dummy = local_config.ServerLocalConfig.use_dummy_informant;
       min_distance_restart =
         local_config.ServerLocalConfig.informant_min_distance_restart;
+      use_xdb = local_config.ServerLocalConfig.informant_use_xdb;
     } in
     let max_purgatory_clients =
       local_config.ServerLocalConfig.max_purgatory_clients in

@@ -41,6 +41,7 @@ type t = {
   (** See HhMonitorInformant. *)
   use_dummy_informant : bool;
   informant_min_distance_restart: int;
+  informant_use_xdb: bool;
   load_script_config: LoadScriptConfig.t;
 }
 
@@ -68,6 +69,7 @@ let default = {
   start_with_recorder_on = false;
   use_dummy_informant = true;
   informant_min_distance_restart = 100;
+  informant_use_xdb = false;
   load_script_config = LoadScriptConfig.default;
 }
 
@@ -119,6 +121,8 @@ let load_ fn ~silent =
     ~default:default.use_dummy_informant config in
   let informant_min_distance_restart = int_ "informant_min_distance_restart"
     ~default:default.informant_min_distance_restart config in
+  let informant_use_xdb = bool_ "informant_use_xdb"
+    ~default:default.informant_use_xdb config in
   let type_decl_bucket_size = int_ "type_decl_bucket_size"
     ~default:default.type_decl_bucket_size config in
   let watchman_init_timeout = int_ "watchman_init_timeout"
@@ -167,6 +171,7 @@ let load_ fn ~silent =
     start_with_recorder_on;
     use_dummy_informant;
     informant_min_distance_restart;
+    informant_use_xdb;
     load_script_config;
   }
 

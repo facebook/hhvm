@@ -144,9 +144,10 @@ module Make_asserter (Comp : Comparator) = struct
     if Comp.is_equal exp actual then
       ()
     else
-      let () = Printf.eprintf "Expected: %s; But Found: %s\n"
+      let () = Printf.eprintf
+        "Error: assertion failure. Expected: %s; But Found: %s\n"
         (Comp.to_string exp) (Comp.to_string actual) in
-      let () = Printf.eprintf "%s" failure_msg in
+      let () = Printf.eprintf "Assertion msg: %s\n" failure_msg in
       assert false
 
   let assert_list_equals exp actual failure_msg =
@@ -160,9 +161,9 @@ module Make_asserter (Comp : Comparator) = struct
       let exp_strs = List.map Comp.to_string exp in
       let actual_strs = List.map Comp.to_string actual in
       let () = Printf.eprintf
-        "Expected:\n%s\n\n But Found:\n%s\n"
+        "Error: Assertion failure. Expected:\n%s\n\n But Found:\n%s\n"
         (String.concat "\n" exp_strs) (String.concat "\n" actual_strs) in
-      let () = Printf.eprintf "%s" failure_msg in
+      let () = Printf.eprintf "Assertion msg: %s" failure_msg in
       assert false
 
   let assert_option_equals exp actual failure_msg =

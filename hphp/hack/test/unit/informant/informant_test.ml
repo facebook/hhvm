@@ -70,13 +70,45 @@ module Tools = struct
         informant server_status in
       Report_asserter.assert_equals expected_report report
         assert_msg
+
+  let set_xdb ~svn_rev ~everstore_handle =
+    let hh_version = Build_id.build_revision in
+    let hg_hash = match svn_rev with
+      | 1 -> hg_rev_1
+      | 5 -> hg_rev_2
+      | 200 -> hg_rev_3
+      | 230 -> hg_rev_4
+      | _ ->
+        Printf.eprintf "Error: Invalid svn_rev number\n";
+        assert false
+    in
+    let hhconfig_hash, _config = Config_file.parse "/tmp/.hhconfig" in
+    match hhconfig_hash with
+    | None ->
+      Printf.eprintf "Error: Failed to get hash of config file. Cannot continue.\n";
+      assert false
+    | Some hhconfig_hash ->
+      let result = {
+        Xdb.svn_rev = svn_rev;
+        hg_hash;
+        everstore_handle;
+        hh_version;
+        hhconfig_hash;
+      } in
+      let result = Future.of_value [result] in
+      Xdb.Mocking.find_nearest_returns ~db:Xdb.hack_db_name
+        ~db_table:Xdb.mini_saved_states_table ~svn_rev ~hh_version ~hhconfig_hash result
 end;;
 
 
 (** When base revision has changed significantly, informant asks
- * for server restart. *)
+ * for server restart. Also, ensures that there are entries in XDB
+ * table for those revisions. *)
 let test_informant_restarts_significant_move temp_dir =
   Tools.set_hg_to_svn_map ();
+  (** In XDB table, add an entry for svn rev 200. *)
+  Tools.set_xdb ~svn_rev:200 ~everstore_handle:"dummy_handle_for_svn_200";
+  Tools.set_xdb ~svn_rev:5 ~everstore_handle:"dummy_handle_for_svn_5";
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
   Hg.Mocking.current_working_copy_base_rev_returns
     (Future.of_value Tools.svn_1);
@@ -88,6 +120,7 @@ let test_informant_restarts_significant_move temp_dir =
     allow_subscriptions = true;
     min_distance_restart = 100;
     use_dummy = false;
+    use_xdb = true;
   } in
   let report = HhMonitorInformant.report
     informant Informant_sig.Server_alive in
@@ -185,6 +218,7 @@ let test_informant_restarts_significant_move_delayed temp_dir =
     allow_subscriptions = true;
     min_distance_restart = 100;
     use_dummy = false;
+    use_xdb = false;
   } in
   let report = HhMonitorInformant.report
     informant Informant_sig.Server_alive in
@@ -218,6 +252,37 @@ let test_informant_restarts_significant_move_delayed temp_dir =
     "Trigger last delayed value for prior Changed_merge_base svn rev mapping";
   true
 
+(** This test is similar to the above (but shorter) except the
+ * we are going to svn_4 which has no entry in the XDB table,
+ * and thus we get no restart report.
+ *)
+let test_informant_no_saved_state_no_restart temp_dir =
+  Tools.set_hg_to_svn_map ();
+  Watchman.Mocking.init_returns @@ Some "test_mock_basic";
+  Hg.Mocking.current_working_copy_base_rev_returns
+    (Future.of_value Tools.svn_1);
+  Watchman.Mocking.get_changes_returns
+    (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
+  let informant = HhMonitorInformant.init {
+    HhMonitorInformant.root = temp_dir;
+    state_prefetcher = State_prefetcher.dummy;
+    allow_subscriptions = true;
+    min_distance_restart = 100;
+    use_dummy = false;
+    use_xdb = true;
+  } in
+  let report = HhMonitorInformant.report
+    informant Informant_sig.Server_alive in
+  Report_asserter.assert_equals Informant_sig.Move_along report
+    "no distance moved" ;
+
+  (** There's no saved state for rev 4, so we don't restart. *)
+  Tools.test_transition
+    informant Tools.Changed_merge_base Tools.hg_rev_4
+    Informant_sig.Server_alive Informant_sig.Move_along
+    "Significantly changed merge base, but no saved state for this rev";
+    true
+
 (** We emulate the repo being in a mid-update state when the informant
  * starts. i.e., the .hg/updatestate file is present. *)
 let test_repo_starts_midupdate temp_dir =
@@ -235,6 +300,7 @@ let test_repo_starts_midupdate temp_dir =
     state_prefetcher = State_prefetcher.dummy;
     allow_subscriptions = true;
     use_dummy = false;
+    use_xdb = false;
   } in
   let should_start_first_server =
     HhMonitorInformant.should_start_first_server informant in
@@ -266,6 +332,7 @@ let test_watcher_in_unknown_state temp_dir =
     state_prefetcher = State_prefetcher.dummy;
     allow_subscriptions = true;
     use_dummy = false;
+    use_xdb = false;
   } in
   let should_start_first_server =
     HhMonitorInformant.should_start_first_server informant in
@@ -273,18 +340,30 @@ let test_watcher_in_unknown_state temp_dir =
     should_start_first_server "Should start when repo is in unknown state";
     true
 
+let run_test test =
+  Xdb.Mocking.reset_find_nearest ();
+  Tempfile.with_tempdir test
+
 let tests =
   [
     "test_informant_restarts_significant_move", (fun () ->
-      Tempfile.with_tempdir test_informant_restarts_significant_move);
+      run_test test_informant_restarts_significant_move);
     "test_informant_restarts_significant_move_delayed", (fun () ->
-      Tempfile.with_tempdir test_informant_restarts_significant_move_delayed);
+      run_test test_informant_restarts_significant_move_delayed);
+    "test_informant_no_saved_state_no_restart", (fun () ->
+      run_test test_informant_no_saved_state_no_restart);
     "test_repo_starts_midupdate", (fun () ->
-      Tempfile.with_tempdir test_repo_starts_midupdate);
+      run_test test_repo_starts_midupdate);
     "test_watcher_in_unknown_state", (fun () ->
-      Tempfile.with_tempdir test_watcher_in_unknown_state);
+      run_test test_watcher_in_unknown_state);
   ]
 
-let () =
+let setup_global_test_state () =
   EventLogger.init EventLogger.Event_logger_fake 0.0;
+  Relative_path.(set_path_prefix Root (Path.make "/tmp"));
+  let hhconfig_path = Relative_path.(create Root "/tmp/.hhconfig") in
+  Disk.write_file (Relative_path.to_absolute hhconfig_path) "assume_php = false"
+
+let () =
+  setup_global_test_state ();
   Unit_test.run_all tests

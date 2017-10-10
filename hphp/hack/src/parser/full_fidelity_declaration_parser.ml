@@ -1253,11 +1253,10 @@ module WithExpressionAndStatementAndTypeParser
       default-argument-specifier-opt
     *)
     (* ERROR RECOVERY
-       In strict mode, we require a type specifier. This error is not caught
-       at parse time but rather by a later pass.
-       TODO: Visibility modifiers are only legal in constructor parameter
-       lists; give an error in a later pass.
-       (This work is tracked by task T21651107.)
+      * In strict mode, we require a type specifier. This error is not caught
+        at parse time but rather by a later pass.
+      * Visibility modifiers are only legal in constructor parameter
+        lists; we give an error in a later pass.
     *)
     let (parser, attrs) = parse_attribute_specification_opt parser in
     let (parser, visibility) = parse_visibility_modifier_opt parser in

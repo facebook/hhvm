@@ -19,9 +19,6 @@ slow/compilation/1238.php
 slow/compilation/1247.php
 slow/compilation/1316.php
 slow/compilation/switch-default-multiple.php
-slow/concat/1573.php
-slow/concat/1575.php
-slow/concat/1576.php
 slow/concat/1577.php
 slow/concat/1578.php
 slow/constant/casing.php
@@ -125,7 +122,6 @@ slow/labels/72.php
 slow/lang/deprecated.php
 slow/lang/tuple_non_hh.php
 slow/llvm/switch.php
-slow/memoize/reset.php
 slow/memory/uninit-leak.php
 slow/namespace/double_use1.php
 slow/namespace/double_use2.php
@@ -213,10 +209,6 @@ slow/php7_bcbreak/5/uvs/array_indirect_ref.php
 slow/php7_bcbreak/5/uvs/dimmable_object_access.php
 slow/php7_bcbreak/5/uvs/dimmable_object_call.php
 slow/php7_bcbreak/5/uvs/static_dim_call.php
-slow/print/1442.php
-slow/print/1444.php
-slow/print/1446.php
-slow/print/1448.php
 slow/reflection/1342.php
 slow/reflection/2695.php
 slow/reflection/ReflectionTypeAlias7.php
@@ -247,7 +239,6 @@ slow/typedef/typedef_parent.php
 slow/typedef/typedef_self.php
 slow/types/abstract_function_typehints.php
 slow/types/scalar_names.php
-slow/unary_operators/1437.php
 slow/unpack_args/unpack_call_error.php
 slow/unpack_args/unpack_call_multi.php
 slow/use_function/double_alias.php
@@ -274,7 +265,6 @@ slow/using/closure.php
 slow/using/empty-exprs.php
 slow/using/functions.php
 slow/using/goto.php
-slow/var_export/1450.php
 slow/variadic_args/by_reference_typehints.php
 slow/variadic_args/magic_call.php
 slow/variadic_args/typehints.php

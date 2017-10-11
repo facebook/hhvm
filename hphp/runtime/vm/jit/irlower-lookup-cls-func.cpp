@@ -334,7 +334,7 @@ void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   try {
     loadFuncContextImpl<OnFail::Fatal>(ArrNR(arr), preLiveAR, fp);
   } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
+    *arPreliveOverwriteCells(preLiveAR) = make_array_like_tv(arr);
     throw;
   }
 }
@@ -358,7 +358,7 @@ static bool strHasColon(StringData* sd) {
 
 void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   try {
-    if (UNLIKELY(!arr->isPacked() || arr->getSize() != 2)) {
+    if (UNLIKELY(!arr->hasPackedLayout() || arr->getSize() != 2)) {
       return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
     }
 
@@ -392,7 +392,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
     inst->incRefCount();
     preLiveAR->setThis(inst);
   } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
+    *arPreliveOverwriteCells(preLiveAR) = make_array_like_tv(arr);
     throw;
   }
 }

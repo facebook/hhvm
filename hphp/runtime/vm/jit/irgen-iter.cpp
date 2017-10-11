@@ -291,7 +291,7 @@ void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
     return;
   }
 
-  if (type.subtypeOfAny(TArr, TStr)) {
+  if (type.subtypeOfAny(TArr, TVec, TStr)) {
     auto const res = gen(
       env,
       DecodeCufIter,

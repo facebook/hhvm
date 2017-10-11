@@ -4401,10 +4401,12 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
     return;
   }
 
-  if (isArrayType(c1->m_type) || isStringType(c1->m_type)) {
+  if (isArrayLikeType(c1->m_type) || isStringType(c1->m_type)) {
     // support:
     //   array($instance, 'method')
     //   array('Class', 'method'),
+    //   vec[$instance, 'method'],
+    //   vec['Class', 'method'],
     //   'func_name'
     //   'class::method'
     // which are all valid callables
@@ -4423,7 +4425,7 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
       DecodeFlags::NoWarn
     );
     if (func == nullptr) {
-      if (isArrayType(origCell.m_type)) {
+      if (isArrayLikeType(origCell.m_type)) {
         raise_error("Invalid callable (array)");
       } else {
         assert(isStringType(origCell.m_type));
@@ -4446,7 +4448,7 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
     if (UNLIKELY(invName != nullptr)) {
       ar->setMagicDispatch(invName);
     }
-    if (origCell.m_type == KindOfArray) {
+    if (isArrayLikeType(origCell.m_type)) {
       decRefArr(origCell.m_data.parr);
     } else if (origCell.m_type == KindOfString) {
       decRefStr(origCell.m_data.pstr);

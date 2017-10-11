@@ -1315,13 +1315,13 @@ To string conversions:
   Try to load a cached non-static __invoke Func from the Class in S0, or branch
   to block B if it is not present.
 
-| LdArrFuncCtx<offset>, ND, S(Arr) S(StkPtr) S(FramePtr), Er
+| LdArrFuncCtx<offset>, ND, S(Arr,Vec) S(StkPtr) S(FramePtr), Er
 
   Try to load an array as a function context. This is for use translating
   FPushFunc when the callee is an array. This instruction attempts to populate
   a partially created ActRec pointed to by S1 + `offset' (in cells).
 
-| LdArrFPushCuf<offset>, ND, S(Arr) S(StkPtr) S(FramePtr), Er
+| LdArrFPushCuf<offset>, ND, S(Arr,Vec) S(StkPtr) S(FramePtr), Er
 
 | LdStrFPushCuf<offset>, ND, S(Str) S(StkPtr) S(FramePtr), Er
 
@@ -2491,7 +2491,7 @@ To string conversions:
   Free the iterator variable whose index is given by S1 in the stack frame
   pointed to by S0.
 
-| DecodeCufIter<iterId>, D(Bool), S(Arr,Obj,Str)  S(FramePtr), Er
+| DecodeCufIter<iterId>, D(Bool), S(Arr,Vec,Obj,Str)  S(FramePtr), Er
 
   Decode S0 as a callable, and write the decoded values to the iterator
   specified by IterId. Returns true iff it successfully decoded the callable.

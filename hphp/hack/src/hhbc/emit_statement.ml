@@ -448,9 +448,11 @@ and emit_switch env scrutinee_expr cl =
   (* If there is no default clause, add an empty one at the end *)
   let is_default c = match c with A.Default _ -> true | _ -> false in
   let cl =
-    if List.exists cl is_default
-    then cl
-    else cl @ [A.Default []] in
+    match List.count cl is_default with
+    | 0 -> cl @ [A.Default []]
+    | 1 -> cl
+    | _ -> Emit_fatal.raise_fatal_runtime
+      Pos.none "Switch statements may only contain one 'default' clause." in
   (* "continue" in a switch in PHP has the same semantics as break! *)
   let cl =
     Emit_env.do_in_switch_body break_label env @@

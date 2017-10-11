@@ -18,7 +18,6 @@ slow/collection_classes/815.php
 slow/compilation/1238.php
 slow/compilation/1247.php
 slow/compilation/1316.php
-slow/compilation/switch-default-multiple.php
 slow/concat/1577.php
 slow/concat/1578.php
 slow/constant/casing.php

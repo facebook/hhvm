@@ -224,6 +224,8 @@ let error_tests =
     "test_abstract_final_errors";
     "test_content_before_header";
     "test_valid_php_no_markup_errors";
+    "test_question_mark_end_tag_errors";
+    "test_php_blocks_errors";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

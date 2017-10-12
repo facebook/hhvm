@@ -89,6 +89,8 @@ module WithExpressionAndDeclAndTypeParser
     let parser, prefix =
       (* for markup section at the beginning of the file
          treat ?> as a part of markup text *)
+      (* The closing ?> tag is not legal hack, but accept it here and give an
+         error in a later pass *)
       if not is_leading_section
         && peek_token_kind parser = TokenKind.QuestionGreaterThan then
         let (parser, prefix) = next_token parser in

@@ -216,3 +216,5 @@ let error2065 = "A variadic argument ('...') must not have a default value."
 let error2066 = "A previous parameter has a default value. Remove all the " ^
   "default values for the preceding parameters, or add a default value to " ^
   "this one."
+let error2067 = "A hack source file cannot contain '?>'."
+let error2068 = "hh blocks and php blocks cannot be mixed."

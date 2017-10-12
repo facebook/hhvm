@@ -796,6 +796,14 @@ let markup_errors node is_hack =
     (* only report the error on the first markup section of a hack file *)
     when is_hack && (is_missing markup_prefix) && (width markup_text) > 0 ->
     [ make_error_from_node node SyntaxError.error1001 ]
+  | MarkupSection { markup_prefix; markup_text; _ }
+    when is_hack && (token_kind markup_prefix) = Some TokenKind.QuestionGreaterThan ->
+    [ make_error_from_node node SyntaxError.error2067 ]
+  | MarkupSuffix { markup_suffix_less_than_question; markup_suffix_name; }
+    when not is_hack
+    && ((token_kind markup_suffix_less_than_question) = Some TokenKind.LessThanQuestion)
+    && ((PositionedSyntax.text markup_suffix_name) <> "php") ->
+    [ make_error_from_node node SyntaxError.error2068 ]
   | _ -> []
 
 let default_value_params_errors params is_hack =

@@ -48,9 +48,6 @@ extern RawDestructor g_destructors[kDestrTableSize];
 ALWAYS_INLINE bool tvDecRefWillCallHelper(const TypedValue tv) {
   return isRefcountedType(tv.m_type) && tv.m_data.pcnt->decWillRelease();
 }
-ALWAYS_INLINE bool tvDecRefWillCallHelper(const TypedValue* tv) {
-  return tvDecRefWillCallHelper(*tv);
-}
 
 /*
  * Return true iff decreffing `tv' will free heap-allocated data.
@@ -76,9 +73,6 @@ ALWAYS_INLINE bool tvDecRefWillRelease(TypedValue tv) {
 ALWAYS_INLINE RefCount tvGetCount(TypedValue tv) {
   assert(isRefcountedType(tv.m_type));
   return tv.m_data.pcnt->count();
-}
-ALWAYS_INLINE RefCount tvGetCount(const TypedValue* tv) {
-  return tvGetCount(*tv);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -178,18 +172,18 @@ ALWAYS_INLINE void tvDecRefRef(const TypedValue* tv) {
  *
  * @requires: isRefcountedType(tv->m_type)
  */
-ALWAYS_INLINE void tvIncRefCountable(const TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
-  assert(isRefcountedType(tv->m_type));
-  tv->m_data.pcnt->incRefCount();
+ALWAYS_INLINE void tvIncRefCountable(TypedValue tv) {
+  assert(tvIsPlausible(tv));
+  assert(isRefcountedType(tv.m_type));
+  tv.m_data.pcnt->incRefCount();
 }
 
 /*
  * Incref `tv', or do nothing if it's not refcounted.
  */
-ALWAYS_INLINE void tvIncRefGen(const TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
-  if (isRefcountedType(tv->m_type)) {
+ALWAYS_INLINE void tvIncRefGen(TypedValue tv) {
+  assert(tvIsPlausible(tv));
+  if (isRefcountedType(tv.m_type)) {
     tvIncRefCountable(tv);
   }
 }

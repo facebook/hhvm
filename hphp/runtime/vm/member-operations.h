@@ -430,7 +430,7 @@ inline member_rval ElemObject(TypedValue& tvRef,
     auto res = collections::get(base->m_data.pobj, &scratch);
     if (!res) {
       res = &tvRef;
-      tvWriteNull(res);
+      tvWriteNull(*res);
     }
     return member_rval { base->m_data.pobj, res };
   }
@@ -777,7 +777,7 @@ inline TypedValue* ElemDEmptyish(TypedValue* base, key_type<keyType> key) {
  */
 inline TypedValue* ElemDScalar(TypedValue& tvRef) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&tvRef);
+  tvWriteNull(tvRef);
   return &tvRef;
 }
 
@@ -1223,7 +1223,7 @@ inline TypedValue* NewElemEmptyish(TypedValue* base) {
  */
 inline TypedValue* NewElemInvalid(TypedValue& tvRef) {
   raise_warning("Cannot use a scalar value as an array");
-  tvWriteNull(&tvRef);
+  tvWriteNull(tvRef);
   return &tvRef;
 }
 
@@ -1336,7 +1336,7 @@ inline void SetElemScalar(Cell* value) {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
   tvDecRefGen((TypedValue*)value);
-  tvWriteNull((TypedValue*)value);
+  tvWriteNull(*(TypedValue*)value);
 }
 
 /**
@@ -1375,7 +1375,7 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
   if (baseLen == 0) {
     SetElemEmptyish<keyType>(base, key, value);
     if (!setResult) {
-      tvIncRefGen(value);
+      tvIncRefGen(*value);
       throw InvalidSetMException(*value);
     }
     return nullptr;
@@ -1390,7 +1390,7 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
       throw InvalidSetMException(make_tv<KindOfNull>());
     }
     tvDecRefGen(value);
-    tvWriteNull(value);
+    tvWriteNull(*value);
     return nullptr;
   }
 
@@ -1568,7 +1568,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
   // Assignment failed, so the result is null rather than the RHS.
   if (setResult) {
     tvDecRefGen(value);
-    tvWriteNull(value);
+    tvWriteNull(*value);
   } else {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
@@ -1782,7 +1782,7 @@ inline void SetNewElemScalar(Cell* value) {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
   tvDecRefGen((TypedValue*)value);
-  tvWriteNull((TypedValue*)value);
+  tvWriteNull(*(TypedValue*)value);
 }
 
 /**
@@ -1962,7 +1962,7 @@ inline TypedValue* SetOpElemEmptyish(SetOpOp op, Cell* base,
  */
 inline TypedValue* SetOpElemScalar(TypedValue& tvRef) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&tvRef);
+  tvWriteNull(tvRef);
   return &tvRef;
 }
 
@@ -2069,7 +2069,7 @@ inline TypedValue* SetOpNewElemEmptyish(SetOpOp op,
 }
 inline TypedValue* SetOpNewElemScalar(TypedValue& tvRef) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&tvRef);
+  tvWriteNull(tvRef);
   return &tvRef;
 }
 inline TypedValue* SetOpNewElem(TypedValue& tvRef,
@@ -2830,7 +2830,7 @@ bool IssetEmptyElem(TypedValue* base, key_type<keyType> key) {
 
 template<MOpMode mode>
 inline TypedValue* propPreNull(TypedValue& tvRef) {
-  tvWriteNull(&tvRef);
+  tvWriteNull(tvRef);
   if (mode == MOpMode::Warn) {
     raise_notice("Cannot access property on non-object");
   }
@@ -2900,7 +2900,7 @@ TypedValue* propPreStdclass(TypedValue& tvRef, TypedValue* base) {
     // See the comments above. Although promoteToStdClass will have
     // either thrown an exception, or promoted base to an object, an
     // installed error handler might have caused it to be overwritten
-    tvWriteNull(&tvRef);
+    tvWriteNull(tvRef);
     return &tvRef;
   }
 
@@ -2960,7 +2960,7 @@ inline TypedValue* nullSafeProp(TypedValue& tvRef,
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      tvWriteNull(&tvRef);
+      tvWriteNull(tvRef);
       return &tvRef;
     case KindOfBoolean:
     case KindOfInt64:
@@ -2976,7 +2976,7 @@ inline TypedValue* nullSafeProp(TypedValue& tvRef,
     case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
-      tvWriteNull(&tvRef);
+      tvWriteNull(tvRef);
       raise_notice("Cannot access property on non-object");
       return &tvRef;
     case KindOfObject:
@@ -3051,7 +3051,7 @@ inline void SetPropNull(Cell* val) {
   raise_warning("Cannot access property on non-object");
   if (setResult) {
     tvDecRefGen(val);
-    tvWriteNull(val);
+    tvWriteNull(*val);
   } else {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
@@ -3125,7 +3125,7 @@ inline void SetProp(Class* ctx, TypedValue* base, key_type<keyType> key,
 
 inline TypedValue* SetOpPropNull(TypedValue& tvRef) {
   raise_warning("Attempt to assign property of non-object");
-  tvWriteNull(&tvRef);
+  tvWriteNull(tvRef);
   return &tvRef;
 }
 
@@ -3138,7 +3138,7 @@ inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
     [&] (ObjectData* obj) {
       StringData* keySD = prepareKey(key);
       SCOPE_EXIT { decRefStr(keySD); };
-      tvWriteNull(&tvRef);
+      tvWriteNull(tvRef);
       setopBody(tvAssertCell(&tvRef), op, rhs);
       obj->setProp(nullptr, keySD, tvAssertCell(tvRef));
     });
@@ -3216,7 +3216,7 @@ inline Cell IncDecPropStdclass(IncDecOp op, TypedValue* base,
       StringData* keySD = prepareKey(key);
       SCOPE_EXIT { decRefStr(keySD); };
       TypedValue tv;
-      tvWriteNull(&tv);
+      tvWriteNull(tv);
       dest = IncDecBody(op, &tv);
       obj->setProp(nullptr, keySD, dest);
       assert(!isRefcountedType(tv.m_type));

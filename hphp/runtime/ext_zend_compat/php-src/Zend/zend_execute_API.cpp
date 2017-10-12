@@ -132,7 +132,7 @@ namespace {
     catch (HPHP::Object& e) {
       HPHP::TypedValue tv = HPHP::make_tv<HPHP::KindOfObject>(e.get());
       EG(exception) = HPHP::RefData::Make(tv);
-      tvIncRefCountable(EG(exception)->tv());
+      tvIncRefCountable(*EG(exception)->tv());
     }
 
     catch (std::exception& e) {

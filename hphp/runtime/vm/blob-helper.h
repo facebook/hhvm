@@ -286,7 +286,7 @@ struct BlobDecoder {
   }
 
   void decode(TypedValue& tv) {
-    tvWriteUninit(&tv);
+    tvWriteUninit(tv);
 
     String s = decodeString();
     assert(!!s);

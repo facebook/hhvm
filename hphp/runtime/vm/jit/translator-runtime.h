@@ -77,7 +77,7 @@ struct TypeConstraint;
 inline TypedValue* arPreliveOverwriteCells(ActRec *preLiveAR) {
   auto actRecCell = reinterpret_cast<TypedValue*>(preLiveAR);
   for (size_t ar_cell = 0; ar_cell < HPHP::kNumActRecCells; ++ar_cell) {
-    tvWriteNull(actRecCell + ar_cell);
+    tvWriteNull(*(actRecCell + ar_cell));
   }
   return actRecCell + HPHP::kNumActRecCells - 1;
 }

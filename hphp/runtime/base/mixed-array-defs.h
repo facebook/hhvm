@@ -193,10 +193,10 @@ ArrayData* MixedArray::updateRef(K k, Variant& data) {
   assert(!isFull());
   auto p = insert(k);
   if (p.found) {
-    tvBind(data.asRef(), &p.tv);
+    tvBind(*data.asRef(), p.tv);
     return this;
   }
-  tvBoxIfNeeded(data.asTypedValue());
+  tvBoxIfNeeded(*data.asTypedValue());
   refDup(*data.asTypedValue(), p.tv);
   return this;
 }
@@ -206,7 +206,7 @@ member_lval MixedArray::addLvalImpl(K k) {
   assert(!isFull());
   auto p = insert(k);
   if (!p.found) {
-    tvWriteNull(&p.tv);
+    tvWriteNull(p.tv);
     if (warn && RuntimeOption::EvalHackArrCompatNotices) {
       raise_hackarr_compat_notice("Lval on missing array element");
     }

@@ -304,9 +304,9 @@ member_rval::ptr_u APCLocalArray::NvGetStr(const ArrayData* ad,
 Cell APCLocalArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asApcArray(ad);
   Variant k = a->m_arr->getKey(pos);
-  auto const tv = k.asTypedValue();
+  auto const tv = *k.asTypedValue();
   tvIncRefGen(tv);
-  return *tv;
+  return tv;
 }
 
 ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad, SortFunction sf) {

@@ -4085,7 +4085,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
 
           visit(s);
           if (notMergeOnly) {
-            tvWriteUninit(&mainReturn);
+            tvWriteUninit(mainReturn);
             m_ue.m_returnSeen = true;
             continue;
           }
@@ -4095,7 +4095,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
             Variant v((Variant::NullInit()));
             if (r->getRetExp() &&
                 !r->getRetExp()->getScalarValue(v)) {
-              tvWriteUninit(&mainReturn);
+              tvWriteUninit(mainReturn);
               notMergeOnly = true;
               continue;
             }
@@ -4175,7 +4175,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
     if (!notMergeOnly) {
       m_ue.m_mergeOnly = true;
       if (mainReturn.m_type == kInvalidDataType) {
-        tvWriteUninit(&mainReturn);
+        tvWriteUninit(mainReturn);
         if (boost::algorithm::ends_with(filename, EVAL_FILENAME_SUFFIX)) {
           tvAsVariant(&mainReturn) = init_null();
         } else {
@@ -6291,7 +6291,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     // Instance properties---one for each use var, and one for
     // each static local.
     TypedValue uninit;
-    tvWriteUninit(&uninit);
+    tvWriteUninit(uninit);
     for (auto& useVar : useVars) {
       pce->addProperty(useVar.first, AttrPrivate, staticEmptyString(), nullptr,
                        &uninit, RepoAuthType{});
@@ -8343,7 +8343,7 @@ void EmitterVisitor::emitPostponedMeths() {
 
     if (fe->isClosureBody) {
       TypedValue uninit;
-      tvWriteUninit(&uninit);
+      tvWriteUninit(uninit);
       for (auto& sv : m_curFunc->staticVars) {
         auto const str = makeStaticString(
           folly::format("86static_{}", sv.name->data()).str());
@@ -9922,7 +9922,7 @@ Id EmitterVisitor::emitClass(Emitter& e,
             if (vNode->isScalar()) {
               initScalar(tvVal, vNode);
             } else {
-              tvWriteUninit(&tvVal);
+              tvWriteUninit(tvVal);
               if (!(declAttrs & AttrStatic)) {
                 if (requiresDeepInit(vNode)) {
                   propAttrs = propAttrs | AttrDeepInit;
@@ -9939,7 +9939,7 @@ Id EmitterVisitor::emitClass(Emitter& e,
               }
             }
           } else {
-            tvWriteNull(&tvVal);
+            tvWriteNull(tvVal);
           }
           bool added UNUSED =
             pce->addProperty(propName, propAttrs, typeConstraint,
@@ -9977,7 +9977,7 @@ Id EmitterVisitor::emitClass(Emitter& e,
             } else if (vNode->isScalar()) {
               initScalar(tvVal, vNode);
             } else {
-              tvWriteUninit(&tvVal);
+              tvWriteUninit(tvVal);
               if (nonScalarConstVec == nullptr) {
                 nonScalarConstVec = new NonScalarVec();
               }
@@ -10713,7 +10713,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
   }();
   if (scalar) {
     TypedValue tv;
-    tvWriteUninit(&tv);
+    tvWriteUninit(tv);
     initScalar(tv, el, kind);
     if (isDict) {
       assert(tv.m_data.parr->isDict());

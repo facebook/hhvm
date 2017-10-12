@@ -357,7 +357,7 @@ void trimExtraArgs(ActRec* ar) {
 
   auto limit = tvArgs + numExtra;
   do {
-    if (UNLIKELY(tvDecRefWillCallHelper(tvArgs))) {
+    if (UNLIKELY(tvDecRefWillCallHelper(*tvArgs))) {
       trimExtraArgsMayReenter(ar, tvArgs, limit);
       return;
     }
@@ -408,7 +408,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
   auto tvIncr = tvArgs;
   // An incref is needed to compensate for discarding from the stack.
   for (uint32_t i = 0; i < numExtra; ++i, ++tvIncr) {
-    tvIncRefGen(tvIncr);
+    tvIncRefGen(*tvIncr);
   }
   // Write into the last (variadic) param.
   auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;

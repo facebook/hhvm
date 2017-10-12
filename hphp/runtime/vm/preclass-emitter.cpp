@@ -294,7 +294,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     const Const& const_ = m_constMap[i];
     TypedValueAux tvaux;
     if (const_.isAbstract()) {
-      tvWriteUninit(&tvaux);
+      tvWriteUninit(tvaux);
       tvaux.constModifiers().isAbstract = true;
     } else {
       tvCopy(const_.val(), tvaux);

@@ -309,7 +309,7 @@ bool PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
         return false;
       }
     }
-    tvIncRefGen(elm);
+    tvIncRefGen(*elm);
   }
   return true;
 }
@@ -813,7 +813,7 @@ ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k, Variant& v,
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
 
   return MutableOpInt(adIn, k, copy,
-    [&] (ArrayData* ad) { tvBind(v.asRef(), &packedData(ad)[k]); return ad; },
+    [&] (ArrayData* ad) { tvBind(*v.asRef(), packedData(ad)[k]); return ad; },
     [&] { return AppendRef(adIn, v, copy); },
     // TODO(#2606310): Make use of our knowledge that the key is missing.
     [&] (MixedArray* mixed) { return mixed->updateRef(k, v); }

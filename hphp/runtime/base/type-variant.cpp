@@ -88,7 +88,7 @@ Variant::Variant(StringData *v) noexcept {
 // the version of the high frequency function that is not inlined
 NEVER_INLINE
 Variant::Variant(const Variant& v) noexcept {
-  cellDup(tvToInitCell(v.asTypedValue()), *asTypedValue());
+  cellDup(tvToInitCell(*v.asTypedValue()), *asTypedValue());
 }
 
 /*
@@ -226,7 +226,7 @@ IMPLEMENT_STEAL(ResourceHdr, pres, KindOfResource)
 #undef IMPLEMENT_STEAL
 
 int Variant::getRefCount() const noexcept {
-  return isRefcountedType(m_type) ? tvGetCount(asTypedValue()) : 1;
+  return isRefcountedType(m_type) ? tvGetCount(*asTypedValue()) : 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

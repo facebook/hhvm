@@ -436,7 +436,7 @@ struct HashCollection : ObjectData {
     assert(!isTombstoneType(frE.data.m_type));
     memcpy(&toE, &frE, sizeof(Elm));
     if (toE.hasStrKey()) toE.skey->incRefCount();
-    tvIncRefGen(&toE.data);
+    tvIncRefGen(toE.data);
   }
 
   MixedArray* arrayData() { return m_arr; }

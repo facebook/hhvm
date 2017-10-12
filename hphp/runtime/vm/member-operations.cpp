@@ -206,7 +206,7 @@ Cell incDecBodySlow(IncDecOp op, Cell* fr) {
   assert(cellIsPlausible(*fr));
   assert(fr->m_type != KindOfUninit);
 
-  auto dup = [&]() { tvIncRefGen(fr); return *fr; };
+  auto dup = [&]() { tvIncRefGen(*fr); return *fr; };
 
   switch (op) {
   case IncDecOp::PreInc:

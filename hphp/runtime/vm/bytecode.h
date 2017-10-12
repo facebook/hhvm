@@ -538,27 +538,27 @@ public:
   void box() {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvBox(m_top);
+    tvBox(*m_top);
   }
 
   ALWAYS_INLINE
   void unbox() {
     assert(m_top != m_base);
-    tvUnbox(m_top);
+    tvUnbox(*m_top);
   }
 
   ALWAYS_INLINE
   void pushUninit() {
     assert(m_top != m_elms);
     m_top--;
-    tvWriteUninit(m_top);
+    tvWriteUninit(*m_top);
   }
 
   ALWAYS_INLINE
   void pushNull() {
     assert(m_top != m_elms);
     m_top--;
-    tvWriteNull(m_top);
+    tvWriteNull(*m_top);
   }
 
   ALWAYS_INLINE

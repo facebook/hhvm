@@ -2114,7 +2114,7 @@ void Class::setProperties() {
       if (traitOffset < -sProp.idx) {
         traitOffset = -sProp.idx;
       }
-      tvWriteUninit(&sProp.val);
+      tvWriteUninit(sProp.val);
       curSPropMap.add(sProp.name, sProp);
     }
   }

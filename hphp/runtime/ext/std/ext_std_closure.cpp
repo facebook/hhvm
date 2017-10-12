@@ -138,7 +138,7 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
     tvCopy(*--beforeCurUseVar, *curProperty++);
   }
   for (; i < numDeclProperties; ++i) {
-    tvWriteUninit(curProperty++);
+    tvWriteUninit(*curProperty++);
   }
 }
 

@@ -144,7 +144,7 @@ private:
 
     MapData& operator[](const TypedValue& tv) {
       auto& elm = m_mapping[tv];
-      if (!elm.m_count) tvIncRefGen(&tv);
+      if (!elm.m_count) tvIncRefGen(tv);
       return elm;
     }
 

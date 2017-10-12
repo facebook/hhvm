@@ -113,7 +113,7 @@ ExecutionContext::ExecutionContext()
 
   VariableSerializer::serializationSizeLimit =
     RuntimeOption::SerializationSizeLimit;
-  tvWriteUninit(&m_headerCallback);
+  tvWriteUninit(m_headerCallback);
 }
 
 // See header for why this is required.

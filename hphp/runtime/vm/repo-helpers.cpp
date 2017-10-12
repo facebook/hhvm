@@ -415,7 +415,7 @@ void RepoQuery::getTypedValue(int iCol, TypedValue& tv) {
   const void* blob;
   size_t size;
   getBlob(iCol, blob, size);
-  tvWriteUninit(&tv);
+  tvWriteUninit(tv);
   if (size > 0) {
     String s = String((const char*)blob, size, CopyString);
     Variant v = unserialize_from_string(s);

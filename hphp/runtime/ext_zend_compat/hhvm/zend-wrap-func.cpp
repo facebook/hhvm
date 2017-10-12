@@ -28,7 +28,7 @@ namespace HPHP {
 
 void zBoxAndProxy(TypedValue* arg) {
   if (arg->m_type != KindOfRef) {
-    tvBox(arg);
+    tvBox(*arg);
   }
   auto inner = arg->m_data.pref->tv();
   assert(!isHackArrayType(inner->m_type));
@@ -68,11 +68,11 @@ TypedValue* zend_wrap_func(ActRec* ar) {
   // Using Variant so exceptions will decref them
   Variant return_value_var(Variant::NullInit{});
   auto const return_value = return_value_var.asTypedValue();
-  tvBox(return_value);
+  tvBox(*return_value);
 
   Variant this_ptr_var(Variant::NullInit{});
   auto const this_ptr = this_ptr_var.asTypedValue();
-  tvBox(this_ptr);
+  tvBox(*this_ptr);
 
   if (ar->func()->cls() && ar->hasThis()) {
     tvWriteObject(
@@ -128,10 +128,10 @@ TypedValue* zend_wrap_func(ActRec* ar) {
   frame_free_locals_inl(ar, ar->func()->numLocals(), &return_value_copy);
   if (ar->func()->isReturnRef()) {
     if (!return_value_copy.m_data.pref->isReferenced()) {
-      tvUnbox(&return_value_copy);
+      tvUnbox(return_value_copy);
     }
   } else {
-    tvUnbox(&return_value_copy);
+    tvUnbox(return_value_copy);
   }
   auto ret_slot = ar->retSlot();
   tvCopy(return_value_copy, *ret_slot);

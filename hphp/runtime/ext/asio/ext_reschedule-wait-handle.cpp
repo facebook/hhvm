@@ -68,7 +68,7 @@ void c_RescheduleWaitHandle::run() {
 
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
-  tvWriteNull(&m_resultOrException);
+  tvWriteNull(m_resultOrException);
   parentChain.unblock();
 }
 

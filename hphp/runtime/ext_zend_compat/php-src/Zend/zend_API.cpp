@@ -1118,7 +1118,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval* callable, zval* /*object_ptr*/,
 
   if (callable_name) {
     *callable_name = NULL;
-    tvBox(name.asTypedValue());
+    tvBox(*name.asTypedValue());
     nameRef = name.asTypedValue()->m_data.pref;
   }
   if (callable_name_len == NULL) {
@@ -1713,7 +1713,7 @@ zend_read_static_property(zend_class_entry* scope, const char* name,
   if (!prop || !lookup.accessible) return nullptr;
 
   if (prop->m_type != HPHP::KindOfRef) {
-    tvBox(prop);
+    tvBox(*prop);
   }
   return prop->m_data.pref;
 }

@@ -727,7 +727,7 @@ static std::string toStringElm(const TypedValue* tv) {
   if (isRefcountedType(tv->m_type) &&
       !tv->m_data.pcnt->checkCount()) {
     // OK in the invoking frame when running a destructor.
-    os << " ??? inner_count " << tvGetCount(tv) << " ";
+    os << " ??? inner_count " << tvGetCount(*tv) << " ";
     return os.str();
   }
 
@@ -737,7 +737,7 @@ static std::string toStringElm(const TypedValue* tv) {
     } else if (tv->m_data.pcnt->isUncounted()) {
       os << ":c(uncounted)";
     } else {
-      os << ":c(" << tvGetCount(tv) << ")";
+      os << ":c(" << tvGetCount(*tv) << ")";
     }
   };
 
@@ -1100,7 +1100,7 @@ static void shuffleExtraStackArgs(ActRec* ar) {
       // Incref the args (they're already referenced in extraArgs) but now
       // additionally referenced in varArgsArray ...
       auto tv = tvArgs; uint32_t i = 0;
-      for (; i < numVarArgs; ++i, ++tv) { tvIncRefGen(tv); }
+      for (; i < numVarArgs; ++i, ++tv) { tvIncRefGen(*tv); }
       // ... and now remove them from the stack
       stack.ndiscard(numVarArgs);
       auto const ad = varArgsArray.detach();
@@ -1293,7 +1293,7 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
      * uninitialized value(s) at the top of the eval stack so that the
      * unwinder doesn't choke */                                       \
     stack.discard();                                                   \
-    if (retval) { tvWriteNull(retval); }                               \
+    if (retval) { tvWriteNull(*retval); }                              \
     throw;                                                             \
   }
 
@@ -1318,7 +1318,7 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
           if (skipCufOnInvalidParams) {
             stack.discard();
             cleanupParamsAndActRec(stack, ar, nullptr, &i);
-            if (retval) { tvWriteNull(retval); }
+            if (retval) { tvWriteNull(*retval); }
             return false;
           }
         }
@@ -1704,7 +1704,7 @@ static inline void lookupd_var(ActRec* fp,
     val = fp->m_varEnv->lookup(name);
     if (val == nullptr) {
       TypedValue tv;
-      tvWriteNull(&tv);
+      tvWriteNull(tv);
       fp->m_varEnv->set(name, &tv);
       val = fp->m_varEnv->lookup(name);
     }
@@ -1726,7 +1726,7 @@ static inline void lookupd_gbl(ActRec* /*fp*/, StringData*& name,
   val = varEnv->lookup(name);
   if (val == nullptr) {
     TypedValue tv;
-    tvWriteNull(&tv);
+    tvWriteNull(tv);
     varEnv->set(name, &tv);
     val = varEnv->lookup(name);
   }
@@ -1767,7 +1767,7 @@ static inline Class* lookupClsRef(Cell* input) {
 static UNUSED int innerCount(const TypedValue* tv) {
   if (isRefcountedType(tv->m_type)) {
     return tv->m_type == KindOfRef ? tv->m_data.pref->getRealCount() :
-           tvGetCount(tv);
+           tvGetCount(*tv);
   }
   return -1;
 }
@@ -1789,11 +1789,11 @@ static inline TypedValue* ratchetRefs(TypedValue* result, TypedValue& tvRef,
     if (isRefcountedType(tvRef2.m_type)) {
       tvDecRefCountable(&tvRef2);
       TRACE(5, "Ratchet: decref tvref2\n");
-      tvWriteUninit(&tvRef2);
+      tvWriteUninit(tvRef2);
     }
 
     memcpy(&tvRef2, &tvRef, sizeof(TypedValue));
-    tvWriteUninit(&tvRef);
+    tvWriteUninit(tvRef);
     // Update result to point to relocated reference. This can be done
     // unconditionally here because we maintain the invariant throughout that
     // either tvRef is KindOfUninit, or tvRef contains a valid object that
@@ -1876,7 +1876,7 @@ OPTBLD_INLINE void iopUnbox() {
 OPTBLD_INLINE void iopBoxR() {
   TypedValue* tv = vmStack().topTV();
   if (tv->m_type != KindOfRef) {
-    tvBox(tv);
+    tvBox(*tv);
   }
 }
 
@@ -3096,7 +3096,7 @@ OPTBLD_INLINE void cgetl_body(ActRec* fp,
   if (fr->m_type == KindOfUninit) {
     // `to' is uninitialized here, so we need to tvWriteNull before
     // possibly causing stack unwinding.
-    tvWriteNull(to);
+    tvWriteNull(*to);
     if (warn) raise_undefined_local(fp, pind);
   } else {
     cgetl_inner_body(fr, to);
@@ -3143,7 +3143,7 @@ OPTBLD_INLINE void cgetn_body(bool warn) {
   if (fr == nullptr || fr->m_type == KindOfUninit) {
     if (warn) raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     tvDecRefGen(to);
-    tvWriteNull(to);
+    tvWriteNull(*to);
   } else {
     tvDecRefGen(to);
     cgetl_inner_body(fr, to);
@@ -3164,11 +3164,11 @@ OPTBLD_INLINE void cgetg_body(bool warn) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
     tvDecRefGen(to);
-    tvWriteNull(to);
+    tvWriteNull(*to);
   } else if (fr->m_type == KindOfUninit) {
     if (warn) raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     tvDecRefGen(to);
-    tvWriteNull(to);
+    tvWriteNull(*to);
   } else {
     tvDecRefGen(to);
     cgetl_inner_body(fr, to);
@@ -3211,7 +3211,7 @@ template<bool box> void getS(clsref_slot slot) {
   }
   if (box) {
     if (ss.val->m_type != KindOfRef) {
-      tvBox(ss.val);
+      tvBox(*ss.val);
     }
     refDup(*ss.val, *ss.output);
   } else {
@@ -3225,8 +3225,8 @@ OPTBLD_INLINE void iopCGetS(clsref_slot slot) {
 
 static inline MInstrState& initMState() {
   auto& mstate = vmMInstrState();
-  tvWriteUninit(&mstate.tvRef);
-  tvWriteUninit(&mstate.tvRef2);
+  tvWriteUninit(mstate.tvRef);
+  tvWriteUninit(mstate.tvRef2);
   return mstate;
 }
 
@@ -3247,7 +3247,7 @@ static inline void baseNGImpl(TypedValue* key, MOpMode mode,
     if (mode == MOpMode::Warn) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
-    tvWriteNull(&mstate.tvTempBase);
+    tvWriteNull(mstate.tvTempBase);
     mstate.base = &mstate.tvTempBase;
     return;
   }
@@ -3560,7 +3560,7 @@ static OPTBLD_INLINE void vGetMImpl(MemberKey mk, int32_t nDiscard) {
   auto& mstate = vmMInstrState();
   TypedValue result;
   dimDispatch(MOpMode::Define, mk, true);
-  if (mstate.base->m_type != KindOfRef) tvBox(mstate.base);
+  if (mstate.base->m_type != KindOfRef) tvBox(*mstate.base);
   refDup(*mstate.base, result);
   mFinal(mstate, nDiscard, result);
 }
@@ -3663,7 +3663,7 @@ OPTBLD_INLINE void iopSetOpM(intva_t nDiscard, SetOpOp subop, MemberKey mk) {
 
   vmStack().popC();
   result = tvToCell(result);
-  tvIncRefGen(result);
+  tvIncRefGen(*result);
   mFinal(mstate, nDiscard, *result);
 }
 
@@ -3672,7 +3672,7 @@ OPTBLD_INLINE void iopBindM(intva_t nDiscard, MemberKey mk) {
   auto const rhs = *vmStack().topV();
 
   dimDispatch(MOpMode::Define, mk, true);
-  tvBind(&rhs, mstate.base);
+  tvBind(rhs, *mstate.base);
 
   vmStack().discard();
   mFinal(mstate, nDiscard, rhs);
@@ -3767,7 +3767,7 @@ OPTBLD_INLINE void iopMemoSet(intva_t nDiscard,
 
 static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
   if (fr->m_type != KindOfRef) {
-    tvBox(fr);
+    tvBox(*fr);
   }
   refDup(*fr, *to);
 }
@@ -4016,7 +4016,7 @@ OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
   }();
 
   if (UNLIKELY(loc.ptr->m_type == KindOfUninit)) {
-    tvWriteNull(loc.ptr);
+    tvWriteNull(*loc.ptr);
     raise_undefined_local(vmfp(), loc.index);
   }
 
@@ -4044,7 +4044,7 @@ OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
       case MK::Str:
       case MK::StrOrNull:
         if (tvIsString(loc.ptr)) {
-          tvIncRefGen(loc.ptr);
+          tvIncRefGen(*loc.ptr);
           return *loc.ptr;
         } else {
           assertx(loc.ptr->m_type == KindOfNull);
@@ -4052,7 +4052,7 @@ OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
         }
       case MK::IntOrStr:
         assertx(tvIsString(loc.ptr) || loc.ptr->m_type == KindOfInt64);
-        tvIncRefGen(loc.ptr);
+        tvIncRefGen(*loc.ptr);
         return *loc.ptr;
       case MK::None:
         // Use the generic scheme, which is performed by
@@ -4240,10 +4240,10 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot slot) {
 
 OPTBLD_INLINE void iopIncDecL(local_var fr, IncDecOp op) {
   TypedValue* to = vmStack().allocTV();
-  tvWriteUninit(to);
+  tvWriteUninit(*to);
   if (UNLIKELY(fr.ptr->m_type == KindOfUninit)) {
     raise_undefined_local(vmfp(), fr.index);
-    tvWriteNull(fr.ptr);
+    tvWriteNull(*fr.ptr);
   } else {
     fr.ptr = tvToCell(fr.ptr);
   }
@@ -4290,7 +4290,7 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op, clsref_slot slot) {
 
 OPTBLD_INLINE void iopBindL(local_var to) {
   Ref* fr = vmStack().topV();
-  tvBind(fr, to.ptr);
+  tvBind(*fr, *to.ptr);
 }
 
 OPTBLD_INLINE void iopBindN() {
@@ -4301,7 +4301,7 @@ OPTBLD_INLINE void iopBindN() {
   lookupd_var(vmfp(), name, nameTV, to);
   SCOPE_EXIT { decRefStr(name); };
   assert(to != nullptr);
-  tvBind(fr, to);
+  tvBind(*fr, *to);
   memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
   vmStack().discard();
 }
@@ -4314,7 +4314,7 @@ OPTBLD_INLINE void iopBindG() {
   lookupd_gbl(vmfp(), name, nameTV, to);
   SCOPE_EXIT { decRefStr(name); };
   assert(to != nullptr);
-  tvBind(fr, to);
+  tvBind(*fr, *to);
   memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
   vmStack().discard();
 }
@@ -4334,7 +4334,7 @@ OPTBLD_INLINE void iopBindS(clsref_slot slot) {
                 cls->name()->data(),
                 name->data());
   }
-  tvBind(fr, val);
+  tvBind(*fr, *val);
   tvDecRefGen(propn);
   memcpy(output, fr, sizeof(TypedValue));
   vmStack().ndiscard(1);
@@ -4896,7 +4896,7 @@ OPTBLD_INLINE void iopFPassR(intva_t paramId, FPassHint hint) {
   if (func->byRef(paramId)) {
     TypedValue* tv = vmStack().topTV();
     if (tv->m_type != KindOfRef) {
-      tvBox(tv);
+      tvBox(*tv);
     }
   } else {
     if (vmStack().topTV()->m_type == KindOfRef) {
@@ -5480,9 +5480,9 @@ OPTBLD_INLINE void iopInitThisLoc(local_var thisLoc) {
   if (vmfp()->func()->cls() && vmfp()->hasThis()) {
     thisLoc->m_data.pobj = vmfp()->getThis();
     thisLoc->m_type = KindOfObject;
-    tvIncRefCountable(thisLoc.ptr);
+    tvIncRefCountable(*thisLoc.ptr);
   } else {
-    tvWriteUninit(thisLoc.ptr);
+    tvWriteUninit(*thisLoc.ptr);
   }
 }
 
@@ -5521,7 +5521,7 @@ OPTBLD_INLINE void iopStaticLocCheck(local_var loc, const StringData* var) {
   if (!ref) return vmStack().pushBool(false);
 
   auto const tmpTV = make_tv<KindOfRef>(ref);
-  tvBind(&tmpTV, loc.ptr);
+  tvBind(tmpTV, *loc.ptr);
   vmStack().pushBool(true);
 }
 
@@ -5534,7 +5534,7 @@ OPTBLD_INLINE void iopStaticLocDef(local_var loc, const StringData* var) {
       auto const val = lookupClosureStatic(var, vmfp());
       assertx(val->m_type == KindOfUninit);
       cellCopy(*initVal, *val);
-      tvBox(val);
+      tvBox(*val);
       return val->m_data.pref;
     }
 
@@ -5550,7 +5550,7 @@ OPTBLD_INLINE void iopStaticLocDef(local_var loc, const StringData* var) {
   }();
 
   auto const tmpTV = make_tv<KindOfRef>(ref);
-  tvBind(&tmpTV, loc.ptr);
+  tvBind(tmpTV, *loc.ptr);
   vmStack().discard();
 }
 
@@ -5563,7 +5563,7 @@ OPTBLD_INLINE void iopStaticLocInit(local_var loc, const StringData* var) {
       auto const val = lookupClosureStatic(var, vmfp());
       if (val->m_type == KindOfUninit) {
         cellCopy(*initVal, *val);
-        tvBox(val);
+        tvBox(*val);
       }
       return val->m_data.pref;
     }
@@ -5578,7 +5578,7 @@ OPTBLD_INLINE void iopStaticLocInit(local_var loc, const StringData* var) {
   }();
 
   auto const tmpTV = make_tv<KindOfRef>(ref);
-  tvBind(&tmpTV, loc.ptr);
+  tvBind(tmpTV, *loc.ptr);
   vmStack().discard();
 }
 
@@ -5982,7 +5982,7 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
   // ContAssignDelegate will remove our delegate and just send us to
   // YieldFromDelegate to return our null.
   if (UNLIKELY(gen->m_delegate.m_type == KindOfNull)) {
-    tvWriteNull(vmStack().topTV());
+    tvWriteNull(*vmStack().topTV());
     return nullptr;
   }
 
@@ -5990,7 +5990,7 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
   auto arr = it->arr();
   if (arr.end()) {
     // Push our null return value onto the stack
-    tvWriteNull(vmStack().topTV());
+    tvWriteNull(*vmStack().topTV());
     return nullptr;
   }
 

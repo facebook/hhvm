@@ -124,9 +124,9 @@ void discardMemberTVRefs(PC pc) {
   if (UNLIKELY(isMemberDimOp(throwOp) || isMemberFinalOp(throwOp))) {
     auto& mstate = vmMInstrState();
     tvDecRefGen(mstate.tvRef);
-    tvWriteUninit(&mstate.tvRef);
+    tvWriteUninit(mstate.tvRef);
     tvDecRefGen(mstate.tvRef2);
-    tvWriteUninit(&mstate.tvRef2);
+    tvWriteUninit(mstate.tvRef2);
   }
 }
 

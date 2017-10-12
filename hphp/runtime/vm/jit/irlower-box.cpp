@@ -42,6 +42,8 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedValue* tvBoxHelper(TypedValue* tv) { tvBox(*tv); return tv; }
+
 void cgBoxPtr(IRLS& env, const IRInstruction* inst) {
   auto const base = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
@@ -54,8 +56,8 @@ void cgBoxPtr(IRLS& env, const IRInstruction* inst) {
            [&](Vout& v) {
              auto const args = argGroup(env, inst).ssa(0 /* addr */);
              auto const ret = v.makeReg();
-             cgCallHelper(v, env, CallSpec::direct(tvBox), callDest(ret),
-                          SyncOptions::None, args);
+             cgCallHelper(v, env, CallSpec::direct(tvBoxHelper),
+                          callDest(ret), SyncOptions::None, args);
              return ret;
            });
     });

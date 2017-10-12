@@ -1529,8 +1529,8 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
         return 0;
       }
 
-      if (UNLIKELY(tvDecRefWillCallHelper(valOut)) ||
-          UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
+      if (UNLIKELY(tvDecRefWillCallHelper(*valOut)) ||
+          UNLIKELY(tvDecRefWillCallHelper(*keyOut))) {
         goto cold;
       }
       tvDecRefGenNZ(valOut);
@@ -1559,8 +1559,8 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
       }
     } while (UNLIKELY(mixed->isTombstone(pos)));
 
-    if (UNLIKELY(tvDecRefWillCallHelper(valOut)) ||
-        UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
+    if (UNLIKELY(tvDecRefWillCallHelper(*valOut)) ||
+        UNLIKELY(tvDecRefWillCallHelper(*keyOut))) {
       goto cold;
     }
     tvDecRefGenNZ(valOut);
@@ -1680,7 +1680,7 @@ int64_t iter_next_cold_inc_val(Iter* it,
    * So it's safe to just bump the refcount back up here, and pretend
    * like nothing ever happened.
    */
-  tvIncRefGen(valOut);
+  tvIncRefGen(*valOut);
   return iter_next_cold<false>(it, valOut, keyOut);
 }
 

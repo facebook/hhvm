@@ -188,7 +188,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     assert(!elm.isEmpty());
-    tvIncRefGen(&elm.tv);
+    tvIncRefGen(elm.tv);
   }
 
   assert(ad->m_kind == HeaderKind::Keyset);
@@ -395,7 +395,7 @@ SetArray* SetArray::grow(bool copy) {
     for (uint32_t i = 0; iter != stop; ++iter, ++i) {
       auto& e = *iter;
       if (UNLIKELY(e.isTombstone())) continue;
-      tvIncRefGen(&e.tv);
+      tvIncRefGen(e.tv);
       *ad->findForNewInsert(table, mask, e.hash()) = i;
     }
   } else {

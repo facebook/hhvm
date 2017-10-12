@@ -131,7 +131,7 @@ member_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
   TypedValue* tv = a->m_tab->lookup(k);
   if (!tv) {
     TypedValue nulVal;
-    tvWriteNull(&nulVal);
+    tvWriteNull(nulVal);
     tv = a->m_tab->set(k, &nulVal);
   }
   return member_lval { a, tv };

@@ -51,7 +51,7 @@ namespace HPHP {
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   bool b;
 
   do {
@@ -126,7 +126,7 @@ bool tvCastToBoolean(TypedValue tv) {
 
 void tvCastToDoubleInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   double d;
 
   do {
@@ -192,7 +192,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
 
 void tvCastToInt64InPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
 
   assert(cellIsPlausible(*tv));
   int64_t i;
@@ -318,7 +318,7 @@ const StaticString
 
 void tvCastToStringInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
 
   auto string = [&](StringData* s) {
     tv->m_type = KindOfString;
@@ -503,7 +503,7 @@ Array tvCastToArrayLike(TypedValue tv) {
 
 void tvCastToArrayInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
   do {
@@ -608,7 +608,7 @@ static Array arrayFromCollection(ObjectData* obj) {
 
 void tvCastToVecInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
   do {
@@ -711,7 +711,7 @@ void tvCastToVecInPlace(TypedValue* tv) {
 
 void tvCastToDictInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
   do {
@@ -813,7 +813,7 @@ void tvCastToDictInPlace(TypedValue* tv) {
 
 void tvCastToKeysetInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
   do {
@@ -915,7 +915,7 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
 
 void tvCastToVArrayInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
   do {
@@ -1028,7 +1028,7 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
 
 void tvCastToDArrayInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   ArrayData* a;
 
   do {
@@ -1180,7 +1180,7 @@ Object tvCastToObject(TypedValue tv) {
 
 void tvCastToObjectInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   ObjectData* o;
 
   do {
@@ -1249,7 +1249,7 @@ void tvCastToNullableObjectInPlace(TypedValue* tv) {
 
 void tvCastToResourceInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
 
   do {
     switch (tv->m_type) {
@@ -1280,7 +1280,7 @@ void tvCastToResourceInPlace(TypedValue* tv) {
 bool tvCoerceParamToBooleanInPlace(TypedValue* tv,
                                    bool builtin) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
     case KindOfNull:
@@ -1368,7 +1368,7 @@ static bool tvCanBeCoercedToNumber(const TypedValue* tv,
 bool tvCoerceParamToInt64InPlace(TypedValue* tv,
                                  bool builtin) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   if (!tvCanBeCoercedToNumber(tv, builtin)) {
     return false;
   }
@@ -1386,7 +1386,7 @@ bool tvCoerceParamToInt64InPlace(TypedValue* tv,
 bool tvCoerceParamToDoubleInPlace(TypedValue* tv,
                                   bool builtin) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   if (!tvCanBeCoercedToNumber(tv, builtin)) {
     return false;
   }
@@ -1397,7 +1397,7 @@ bool tvCoerceParamToDoubleInPlace(TypedValue* tv,
 bool tvCoerceParamToStringInPlace(TypedValue* tv,
                                   bool builtin) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
     case KindOfNull:
@@ -1444,7 +1444,7 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv,
 
 bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
     case KindOfUninit:
@@ -1483,7 +1483,7 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
 
 bool tvCoerceParamToVecInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
     case KindOfUninit:
@@ -1515,7 +1515,7 @@ bool tvCoerceParamToVecInPlace(TypedValue* tv, bool /*builtin*/) {
 
 bool tvCoerceParamToDictInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
     case KindOfUninit:
@@ -1547,7 +1547,7 @@ bool tvCoerceParamToDictInPlace(TypedValue* tv, bool /*builtin*/) {
 
 bool tvCoerceParamToKeysetInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
 
   switch (tv->m_type) {
     case KindOfUninit:
@@ -1579,13 +1579,13 @@ bool tvCoerceParamToKeysetInPlace(TypedValue* tv, bool /*builtin*/) {
 
 bool tvCoerceParamToObjectInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   return tv->m_type == KindOfObject;
 }
 
 bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   if (isNullType(tv->m_type)) {
     // See comment in tvCastToNullableObjectInPlace
     tv->m_data.pobj = nullptr;
@@ -1596,7 +1596,7 @@ bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv, bool /*builtin*/) {
 
 bool tvCoerceParamToResourceInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
+  tvUnboxIfNeeded(*tv);
   return tv->m_type == KindOfResource;
 }
 

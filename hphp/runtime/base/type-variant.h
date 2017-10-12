@@ -235,12 +235,12 @@ struct Variant : private TypedValue {
   Variant(const Variant& v, CellDup) noexcept {
     m_type = v.m_type;
     m_data = v.m_data;
-    tvIncRefGen(asTypedValue());
+    tvIncRefGen(*asTypedValue());
   }
 
   Variant(StrongBind, Variant& v) {
     assert(tvIsPlausible(v));
-    tvBoxIfNeeded(v.asTypedValue());
+    tvBoxIfNeeded(*v.asTypedValue());
     refDup(*v.asTypedValue(), *asTypedValue());
   }
 
@@ -693,13 +693,13 @@ struct Variant : private TypedValue {
    * Operators
    */
   Variant& assign(const Variant& v) noexcept {
-    tvSet(tvToInitCell(v.asTypedValue()), *asTypedValue());
+    tvSet(tvToInitCell(*v.asTypedValue()), *asTypedValue());
     return *this;
   }
   Variant& assignRef(Variant& v) noexcept {
     assert(&v != &uninit_variant);
-    tvBoxIfNeeded(v.asTypedValue());
-    tvBind(v.asTypedValue(), asTypedValue());
+    tvBoxIfNeeded(*v.asTypedValue());
+    tvBind(*v.asTypedValue(), *asTypedValue());
     return *this;
   }
   Variant& assignRef(VRefParam v) = delete;
@@ -1036,7 +1036,7 @@ struct Variant : private TypedValue {
    * Access this Variant as a Ref, converting it to a Ref it isn't
    * one.
    */
-  Ref* asRef() { tvBoxIfNeeded(asTypedValue()); return this; }
+  Ref* asRef() { tvBoxIfNeeded(*asTypedValue()); return this; }
 
   TypedValue detach() noexcept {
     auto tv = *asTypedValue();
@@ -1171,7 +1171,7 @@ struct Variant : private TypedValue {
   }
   Variant(TypedValue tv, Attach) noexcept : TypedValue(tv) {}
   Variant(TypedValue tv, Wrap) noexcept : TypedValue(tv) {
-    tvIncRefGen(asTypedValue());
+    tvIncRefGen(*asTypedValue());
   }
 
   bool isPrimitive() const { return !isRefcountedType(m_type); }
@@ -1235,7 +1235,7 @@ private:
     assert(v.m_type == KindOfRef);
     m_type = v.m_data.pref->tv()->m_type; // Can't be KindOfUninit.
     m_data = v.m_data.pref->tv()->m_data;
-    tvIncRefGen(asTypedValue());
+    tvIncRefGen(*asTypedValue());
     decRefRef(v.m_data.pref);
     v.m_type = KindOfNull;
   }

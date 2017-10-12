@@ -794,7 +794,7 @@ void VariableUnserializer::unserializeVariant(
       int64_t id = readInt();
       Variant *v = getByVal(id);
       if (!v) throwOutOfRange(id);
-      tvSet(tvToInitCell(v->asTypedValue()), *self.asTypedValue());
+      tvSet(tvToInitCell(*v->asTypedValue()), *self.asTypedValue());
     }
     break;
   case 'R':

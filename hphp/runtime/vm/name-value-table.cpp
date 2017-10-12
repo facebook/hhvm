@@ -158,9 +158,9 @@ TypedValue* NameValueTable::set(const StringData* name, const TypedValue* val) {
 TypedValue* NameValueTable::bind(const StringData* name, TypedValue* val) {
   TypedValue* target = findTypedValue(name);
   if (val->m_type != KindOfRef) {
-    tvBox(val);
+    tvBox(*val);
   }
-  tvBind(val, target);
+  tvBind(*val, *target);
   return target;
 }
 
@@ -180,7 +180,7 @@ TypedValue* NameValueTable::lookup(const StringData* name) {
 TypedValue* NameValueTable::lookupAdd(const StringData* name) {
   auto tv = findTypedValue(name);
   if (tv->m_type == KindOfUninit) {
-    tvWriteNull(tv);
+    tvWriteNull(*tv);
   }
   return tv;
 }
@@ -226,7 +226,7 @@ TypedValue* NameValueTable::derefNamedLocal(TypedValue* tv) const {
 TypedValue* NameValueTable::findTypedValue(const StringData* name) {
   Elm* elm = insert(name);
   if (elm->m_tv.m_type == kInvalidDataType) {
-    tvWriteNull(&elm->m_tv);
+    tvWriteNull(elm->m_tv);
     return &elm->m_tv;
   }
   return derefNamedLocal(&elm->m_tv);

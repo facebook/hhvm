@@ -338,7 +338,7 @@ Variant* ObjectData::realPropImpl(const String& propName, int flags,
     if (!(flags & RealPropCreate)) return nullptr;
 
     prop = makeDynProp(propName, AccessFlags::Key);
-    if (flags & RealPropBind) tvBoxIfNeeded(prop);
+    if (flags & RealPropBind) tvBoxIfNeeded(*prop);
     return &tvAsVariant(prop);
   }
 
@@ -347,7 +347,7 @@ Variant* ObjectData::realPropImpl(const String& propName, int flags,
       !(flags & (RealPropUnchecked|RealPropExist))) {
     return nullptr;
   }
-  if (flags & RealPropBind) tvBoxIfNeeded(prop);
+  if (flags & RealPropBind) tvBoxIfNeeded(*prop);
   return &tvAsVariant(prop);
 }
 
@@ -551,7 +551,7 @@ size_t getPropertyIfAccessible(ObjectData* obj,
   if (lookup.accessible && val->m_type != KindOfUninit) {
     --propLeft;
     if (mode == ObjectData::CreateRefs) {
-      if (val->m_type != KindOfRef) tvBox(val);
+      if (val->m_type != KindOfRef) tvBox(*val);
 
       properties.setRef(StrNR(key), tvAsVariant(val), true /* isKey */);
     } else if (mode == ObjectData::EraseRefs) {
@@ -903,13 +903,13 @@ const StaticString
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps) {
-  auto* dst = propVec;
-  auto* src = propData;
+  auto dst = propVec;
+  auto src = propData;
   for (; src != propData + nProps; ++src, ++dst) {
     *dst = *src;
     // m_aux.u_deepInit is true for properties that need "deep" initialization
     if (src->deepInit()) {
-      tvIncRefGen(dst);
+      tvIncRefGen(*dst);
       collections::deepCopy(dst);
     }
   }
@@ -1033,7 +1033,7 @@ ObjectData::PropLookup<const TypedValue*> ObjectData::getProp(
 
 inline InvokeResult::InvokeResult(bool ok, Variant&& v) :
   val(*v.asTypedValue()) {
-  tvWriteUninit(v.asTypedValue());
+  tvWriteUninit(*v.asTypedValue());
   val.m_aux.u_ok = ok;
 }
 
@@ -1433,7 +1433,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
         SCOPE_EXIT { tvDecRefGen(r.val); };
         // don't unbox until after setopBody; see longer comment below
         setopBody(tvToCell(&r.val), op, val);
-        tvUnboxIfNeeded(&r.val);
+        tvUnboxIfNeeded(r.val);
         if (getAttribute(UseSet)) {
           cellDup(tvAssertCell(r.val), tvRef);
           if (invokeSet(key, tvAssertCell(tvRef))) {
@@ -1469,14 +1469,14 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
 
   if (useGet && !useSet) {
     auto r = invokeGet(key);
-    if (!r) tvWriteNull(&r.val);
+    if (!r) tvWriteNull(r.val);
     SCOPE_EXIT { tvDecRefGen(r.val); };
 
     // Note: the tvUnboxIfNeeded comes *after* the setop on purpose
     // here, even though it comes before the IncDecOp in the analogous
     // situation in incDecProp.  This is to match zend 5.5 behavior.
     setopBody(tvToCell(&r.val), op, val);
-    tvUnboxIfNeeded(&r.val);
+    tvUnboxIfNeeded(r.val);
 
     if (prop) raise_error("Cannot access protected property");
     prop = makeDynProp(StrNR(key), AccessFlags::Key);
@@ -1521,19 +1521,19 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     if (prop->m_type == KindOfUninit && getAttribute(UseGet)) {
       if (auto r = invokeGet(key)) {
         SCOPE_EXIT { tvDecRefGen(r.val); };
-        tvUnboxIfNeeded(&r.val);
+        tvUnboxIfNeeded(r.val);
         auto const dest = IncDecBody(op, tvAssertCell(&r.val));
         if (getAttribute(UseSet)) {
           invokeSet(key, tvAssertCell(r.val));
           return dest;
         }
         cellCopy(tvAssertCell(r.val), *prop);
-        tvWriteNull(&r.val); // suppress decref
+        tvWriteNull(r.val); // suppress decref
         return dest;
       }
     }
     if (prop->m_type == KindOfUninit) {
-      tvWriteNull(prop);
+      tvWriteNull(*prop);
     } else {
       prop = tvToCell(prop);
     }
@@ -1546,7 +1546,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   if (getAttribute(HasNativePropHandler)) {
     if (auto r = invokeNativeGetProp(key)) {
       SCOPE_EXIT { tvDecRefGen(r.val); };
-      tvUnboxIfNeeded(&r.val);
+      tvUnboxIfNeeded(r.val);
       auto const dest = IncDecBody(op, tvAssertCell(&r.val));
       if (invokeNativeSetProp(key, tvAssertCell(r.val))) {
         return dest;
@@ -1559,9 +1559,9 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
 
   if (useGet && !useSet) {
     auto r = invokeGet(key);
-    if (!r) tvWriteNull(&r.val);
+    if (!r) tvWriteNull(r.val);
     SCOPE_EXIT { tvDecRefGen(r.val); };
-    tvUnboxIfNeeded(&r.val);
+    tvUnboxIfNeeded(r.val);
     auto const dest = IncDecBody(op, tvAssertCell(&r.val));
     if (prop) raise_error("Cannot access protected property");
     prop = makeDynProp(StrNR(key), AccessFlags::Key);
@@ -1577,7 +1577,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   if (useGet && useSet) {
     if (auto r = invokeGet(key)) {
       SCOPE_EXIT { tvDecRefGen(r.val); };
-      tvUnboxIfNeeded(&r.val);
+      tvUnboxIfNeeded(r.val);
       auto const dest = IncDecBody(op, tvAssertCell(&r.val));
       invokeSet(key, tvAssertCell(r.val));
       return dest;

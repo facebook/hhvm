@@ -37,7 +37,7 @@ WeakRefDataHandle& WeakRefDataHandle::operator=(
   acquire_count = other.acquire_count;
 
   if (acquire_count > 0 && wr_data->pointee.m_type != KindOfUninit) {
-    tvIncRefCountable(&(wr_data->pointee));
+    tvIncRefCountable(wr_data->pointee);
   }
   if (old_acquire_count > 0 && old_wr_data->pointee.m_type != KindOfUninit) {
     tvDecRefCountable(&(old_wr_data->pointee));
@@ -72,7 +72,7 @@ bool HHVM_METHOD(WeakRef, acquire) {
   if (LIKELY(wr_data_handle->wr_data->pointee.m_type != KindOfUninit)) {
     wr_data_handle->acquire_count++;
     if (wr_data_handle->acquire_count == 1) {
-      tvIncRefCountable(&(wr_data_handle->wr_data->pointee));
+      tvIncRefCountable(wr_data_handle->wr_data->pointee);
     }
     assert(wr_data_handle->acquire_count > 0);
     return true;
@@ -83,7 +83,7 @@ bool HHVM_METHOD(WeakRef, acquire) {
 TypedValue HHVM_METHOD(WeakRef, get) {
   auto wr_data_handle = Native::data<WeakRefDataHandle>(this_);
   if (wr_data_handle->wr_data->pointee.m_type != KindOfUninit) {
-    tvIncRefCountable(&(wr_data_handle->wr_data->pointee));
+    tvIncRefCountable(wr_data_handle->wr_data->pointee);
     return (wr_data_handle->wr_data->pointee);
   } else {
     return make_tv<KindOfNull>();

@@ -478,7 +478,7 @@ TypedValue* unimplementedWrapper(ActRec* ar) {
   if (cls) {
     raise_error("Call to unimplemented native method %s::%s()",
                 cls->name()->data(), func->name()->data());
-    tvWriteNull(ar->retSlot());
+    tvWriteNull(*ar->retSlot());
     if (func->isStatic()) {
       frame_free_locals_no_this_inl(ar, func->numParams(), ar->retSlot());
     } else {
@@ -487,7 +487,7 @@ TypedValue* unimplementedWrapper(ActRec* ar) {
   } else {
     raise_error("Call to unimplemented native function %s()",
                 func->displayName()->data());
-    tvWriteNull(ar->retSlot());
+    tvWriteNull(*ar->retSlot());
     frame_free_locals_no_this_inl(ar, func->numParams(), ar->retSlot());
   }
   return ar->retSlot();

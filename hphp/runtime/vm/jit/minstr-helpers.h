@@ -126,14 +126,14 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
                                  const TypedValue* result) {
   if (LIKELY(result != &localTvRef)) {
     result = tvToCell(result);
-    tvIncRefGen(result);
+    tvIncRefGen(*result);
   } else {
     // If a magic getter or array access method returned by reference, we have
     // to incref the inner cell and drop our reference to the RefData.
     // Otherwise we do nothing, since we already own a reference to result.
     if (UNLIKELY(localTvRef.m_type == KindOfRef)) {
       auto inner = *localTvRef.m_data.pref->tv();
-      tvIncRefGen(&inner);
+      tvIncRefGen(inner);
       decRefRef(localTvRef.m_data.pref);
       return inner;
     }
@@ -195,7 +195,7 @@ inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key) {
 inline RefData* vGetRefShuffle(const TypedValue& localTvRef,
                                TypedValue* result) {
   if (LIKELY(result != &localTvRef)) {
-    if (result->m_type != KindOfRef) tvBox(result);
+    if (result->m_type != KindOfRef) tvBox(*result);
     auto ref = result->m_data.pref;
     ref->incRefCount();
     return ref;
@@ -249,7 +249,7 @@ void bindPropImpl(RefData* val, PropImpl prop_impl) {
     // it now.
     tvDecRefGen(localTvRef);
   } else {
-    tvBindRef(val, prop);
+    tvBindRef(val, *prop);
   }
 }
 
@@ -1102,8 +1102,8 @@ ISSET_EMPTY_ELEM_HELPER_TABLE(X)
 
 template<KeyType keyType>
 TypedValue mapGetImpl(c_Map* map, key_type<keyType> key) {
-  TypedValue* ret = map->at(key);
-  tvIncRefGen(ret);
+  auto const ret = map->at(key);
+  tvIncRefGen(*ret);
   return *ret;
 }
 

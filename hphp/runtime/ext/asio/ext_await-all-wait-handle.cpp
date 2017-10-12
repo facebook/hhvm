@@ -271,7 +271,7 @@ void c_AwaitAllWaitHandle::onUnblocked(uint32_t idx) {
 void c_AwaitAllWaitHandle::markAsFinished() {
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
-  tvWriteNull(&m_resultOrException);
+  tvWriteNull(m_resultOrException);
   parentChain.unblock();
   decRefObj(this);
 }

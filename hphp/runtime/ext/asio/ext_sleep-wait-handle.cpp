@@ -115,7 +115,7 @@ bool c_SleepWaitHandle::process() {
 
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
-  tvWriteNull(&m_resultOrException);
+  tvWriteNull(m_resultOrException);
   parentChain.unblock();
 
   auto session = AsioSession::Get();

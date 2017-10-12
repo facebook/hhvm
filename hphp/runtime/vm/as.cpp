@@ -2031,10 +2031,10 @@ void parse_parameter_list(AsmState& as) {
         String str = parse_long_string(as);
         param.phpCode = makeStaticString(str);
         TypedValue tv;
-        tvWriteUninit(&tv);
+        tvWriteUninit(tv);
         if (str.size() == 4) {
           if (!strcasecmp("null", str.data())) {
-            tvWriteNull(&tv);
+            tvWriteNull(tv);
           } else if (!strcasecmp("true", str.data())) {
             tv = make_tv<KindOfBoolean>(true);
           }
@@ -2190,7 +2190,7 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
   as.in.skipWhitespace();
 
   TypedValue tvInit;
-  tvWriteNull(&tvInit); // Don't confuse Variant with uninit data
+  tvWriteNull(tvInit); // Don't confuse Variant with uninit data
 
   int what = as.in.getc();
   if (what == '=') {
@@ -2203,7 +2203,7 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
                  "const/property initializer");
       }
       as.in.expectWs(';');
-      tvWriteUninit(&tvInit);
+      tvWriteUninit(tvInit);
       return tvInit;
     }
 

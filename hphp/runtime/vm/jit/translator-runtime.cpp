@@ -1053,7 +1053,7 @@ void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
     return;
   }
 
-  tvBindRef(val, elem);
+  tvBindRef(val, *elem);
 }
 
 template void bindElemC<true>(TypedValue*, TypedValue, RefData*);
@@ -1101,7 +1101,7 @@ void bindNewElem(TypedValue* base, RefData* val) {
     return;
   }
 
-  tvBindRef(val, elem);
+  tvBindRef(val, *elem);
 }
 
 TypedValue* elemVecID(TypedValue* base, int64_t key) {

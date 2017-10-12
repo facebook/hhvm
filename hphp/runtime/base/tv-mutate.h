@@ -36,18 +36,17 @@ namespace HPHP {
 /*
  * Box `tv' in place.
  */
-ALWAYS_INLINE TypedValue* tvBox(TypedValue* tv) {
-  assert(cellIsPlausible(*tv));
-  tv->m_data.pref = RefData::Make(*tv);
-  tv->m_type = KindOfRef;
-  return tv;
+ALWAYS_INLINE void tvBox(TypedValue& tv) {
+  assert(cellIsPlausible(tv));
+  tv.m_data.pref = RefData::Make(tv);
+  tv.m_type = KindOfRef;
 }
 
 /*
  * Box `tv' in place, if it's not already boxed.
  */
-ALWAYS_INLINE void tvBoxIfNeeded(TypedValue* tv) {
-  if (tv->m_type != KindOfRef) tvBox(tv);
+ALWAYS_INLINE void tvBoxIfNeeded(TypedValue& tv) {
+  if (tv.m_type != KindOfRef) tvBox(tv);
 }
 
 /*
@@ -55,26 +54,26 @@ ALWAYS_INLINE void tvBoxIfNeeded(TypedValue* tv) {
  *
  * @requires: tv->m_type == KindOfRef
  */
-ALWAYS_INLINE void tvUnbox(TypedValue* tv) {
-  assert(refIsPlausible(*tv));
+ALWAYS_INLINE void tvUnbox(TypedValue& tv) {
+  assert(refIsPlausible(tv));
 
-  auto const r = tv->m_data.pref;
+  auto const r = tv.m_data.pref;
   auto const inner = r->tv();
   assert(cellIsPlausible(*inner));
 
-  tv->m_data.num = inner->m_data.num;
-  tv->m_type = inner->m_type;
+  tv.m_data.num = inner->m_data.num;
+  tv.m_type = inner->m_type;
   tvIncRefGen(tv);
   decRefRef(r);
 
-  assert(tvIsPlausible(*tv));
+  assert(tvIsPlausible(tv));
 }
 
 /*
  * Unbox `tv' in place, if it's a ref.
  */
-ALWAYS_INLINE void tvUnboxIfNeeded(TypedValue* tv) {
-  if (tv->m_type == KindOfRef) tvUnbox(tv);
+ALWAYS_INLINE void tvUnboxIfNeeded(TypedValue& tv) {
+  if (tv.m_type == KindOfRef) tvUnbox(tv);
 }
 
 /*
@@ -110,9 +109,6 @@ ALWAYS_INLINE Cell tvToInitCell(TypedValue tv) {
   }
   if (tv.m_type == KindOfUninit) return make_tv<KindOfNull>();
   return tv;
-}
-ALWAYS_INLINE Cell tvToInitCell(const TypedValue* tv) {
-  return tvToInitCell(*tv);
 }
 
 /*
@@ -176,7 +172,7 @@ ALWAYS_INLINE void refCopy(const Ref fr, Ref& to) {
  */
 ALWAYS_INLINE void tvDup(const TypedValue& fr, TypedValue& to) {
   tvCopy(fr, to);
-  tvIncRefGen(&to);
+  tvIncRefGen(to);
 }
 
 /*
@@ -185,7 +181,7 @@ ALWAYS_INLINE void tvDup(const TypedValue& fr, TypedValue& to) {
 ALWAYS_INLINE void cellDup(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
-  tvIncRefGen(&to);
+  tvIncRefGen(to);
 }
 ALWAYS_INLINE void refDup(const Ref fr, Ref& to) {
   assert(refIsPlausible(fr));
@@ -206,7 +202,7 @@ void tvDupWithRef(const TypedValue& fr, TypedValue& to, Fn should_demote) {
   tvCopy(fr, to);
   if (!isRefcountedType(fr.m_type)) return;
   if (fr.m_type != KindOfRef) {
-    tvIncRefCountable(&to);
+    tvIncRefCountable(to);
     return;
   }
   auto ref = fr.m_data.pref;
@@ -256,11 +252,11 @@ void tvDupWithRef(const TypedValue& fr, TypedValue& to,
 /*
  * Write a value to `to', with Dup semantics.
  */
-ALWAYS_INLINE void tvWriteUninit(TypedValue* to) {
-  to->m_type = KindOfUninit;
+ALWAYS_INLINE void tvWriteUninit(TypedValue& to) {
+  to.m_type = KindOfUninit;
 }
-ALWAYS_INLINE void tvWriteNull(TypedValue* to) {
-  to->m_type = KindOfNull;
+ALWAYS_INLINE void tvWriteNull(TypedValue& to) {
+  to.m_type = KindOfNull;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -400,10 +396,10 @@ ALWAYS_INLINE void tvSetWithRef(const TypedValue fr, TypedValue& to) {
  *
  * @requires: fr->m_type == KindOfRef
  */
-ALWAYS_INLINE void tvBind(const TypedValue* fr, TypedValue* to) {
-  assert(fr->m_type == KindOfRef);
-  auto const old = *to;
-  refDup(*fr, *to);
+ALWAYS_INLINE void tvBind(const TypedValue fr, TypedValue& to) {
+  assert(fr.m_type == KindOfRef);
+  auto const old = to;
+  refDup(fr, to);
   tvDecRefGen(old);
 }
 
@@ -412,10 +408,10 @@ ALWAYS_INLINE void tvBind(const TypedValue* fr, TypedValue* to) {
  *
  * Like tvBind(), except with a raw RefData* instead of a TypedValue.
  */
-ALWAYS_INLINE void tvBindRef(RefData* fr, TypedValue* to) {
-  auto const old = *to;
+ALWAYS_INLINE void tvBindRef(RefData* fr, TypedValue& to) {
+  auto const old = to;
   fr->incRefCount();
-  tvCopy(make_tv<KindOfRef>(fr), *to);
+  tvCopy(make_tv<KindOfRef>(fr), to);
   tvDecRefGen(old);
 }
 
@@ -426,7 +422,7 @@ ALWAYS_INLINE void tvBindRef(RefData* fr, TypedValue* to) {
  */
 ALWAYS_INLINE void tvUnset(TypedValue& to) {
   auto const old = to;
-  tvWriteUninit(&to);
+  tvWriteUninit(to);
   tvDecRefGen(old);
 }
 
@@ -437,7 +433,7 @@ ALWAYS_INLINE void tvUnset(TypedValue& to) {
  */
 ALWAYS_INLINE void cellSetNull(Cell& to) {
   auto const old = to;
-  tvWriteNull(&to);
+  tvWriteNull(to);
   tvDecRefGen(old);
 }
 

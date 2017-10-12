@@ -19,7 +19,6 @@ zend/good/tests/lang/028.php
 zend/good/tests/lang/033.php
 zend/good/tests/lang/bug18872.php
 zend/good/tests/lang/bug24054.php
-zend/good/tests/lang/bug24403.php
 zend/good/tests/lang/bug44654.php
 zend/good/tests/lang/comments.php
 zend/good/tests/lang/engine_assignExecutionOrder_001.php

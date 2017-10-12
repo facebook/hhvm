@@ -1061,9 +1061,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.BinaryLiteral             -> Int    (pos, eliminate_underscores s)
         | Some TK.FloatingLiteral           -> Float  (pos, s)
         | Some TK.SingleQuotedStringLiteral -> String (pos, mkStr Php_escaping.unescape_single s)
-        | Some TK.DoubleQuotedStringLiteral
+        | Some TK.DoubleQuotedStringLiteral -> String (pos, mkStr Php_escaping.unescape_double s)
         | Some TK.HeredocStringLiteral
-        | Some TK.NowdocStringLiteral       -> String (pos, mkStr Php_escaping.unescape_double s)
+        | Some TK.NowdocStringLiteral       -> String (pos, mkStr Php_escaping.unescape_heredoc s)
         | Some TK.NullLiteral               -> Null
         | Some TK.BooleanLiteral            ->
           (match String.lowercase_ascii s with

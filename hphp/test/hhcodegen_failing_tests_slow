@@ -49,6 +49,7 @@ slow/ext_phar/composer.php
 slow/ext_phar/create_tar.php
 slow/ext_phar/create_zip.php
 slow/ext_process/bad_shell_exec.php
+slow/ext_std/minmax_splat.php
 slow/ext_string/setlocale-threaded.php
 slow/finally/finally_break_006.php
 slow/finally/finally_break_007.php

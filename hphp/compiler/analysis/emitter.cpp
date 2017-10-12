@@ -5541,12 +5541,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         return true;
       }
     } else if (call->isCallToFunction("max")) {
-      if (params && params->getCount() == 2) {
+      if (params && params->getCount() == 2 && !call->hasUnpack()) {
         emitFuncCall(e, call, "__SystemLib\\max2", params);
         return true;
       }
     } else if (call->isCallToFunction("min")) {
-      if (params && params->getCount() == 2) {
+      if (params && params->getCount() == 2 && !call->hasUnpack()) {
         emitFuncCall(e, call, "__SystemLib\\min2", params);
         return true;
       }

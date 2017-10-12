@@ -9,7 +9,6 @@ quick/hh_bad_end.php
 quick/hh_bad_start.php
 quick/hh_numbers.php
 quick/instanceofInterface.php
-quick/lexer_nowdoc_label_cornercases.php
 quick/method_param_promotion_error.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/ns_existing_names_class.php

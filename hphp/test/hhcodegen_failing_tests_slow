@@ -86,7 +86,6 @@ slow/hack_mode/2214.php
 slow/hack_mode/closing-tag-asp.php
 slow/hack_mode/closing-tag-php.php
 slow/hack_mode/closing-tag-script.php
-slow/hack_mode/hh-3.php
 slow/hack_mode/typedef_namespace.php
 slow/hash_not_bang.php
 slow/hashbang_regression.php
@@ -131,7 +130,6 @@ slow/namespace/dynamic_extra_slash_func.php
 slow/namespace/hashbang_2.php
 slow/namespace/nested-ns.php
 slow/now_doc/1906.php
-slow/now_doc/1907.php
 slow/nullsafe/nullsafe-prop-11.php
 slow/nullsafe/nullsafe-prop-2.php
 slow/nullsafe/nullsafe-prop-3.php

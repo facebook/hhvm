@@ -1,0 +1,76 @@
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/wtf.php starts here
+
+
+.filepath "/data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/wtf.php";
+
+.main {
+  DefCls 0
+  FPushFuncD 0 "mymain"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"" N  > f(&$x) {
+  Int 3
+  SetL $x
+  PopC
+  Null
+  RetC
+}
+
+.function <"" N  > h(&$z) {
+  VGetL $z
+  RetV
+}
+
+.function <"" N  > mymain() {
+  .declvars $f $a $b;
+  FPushCtorD 0 "F"
+  FCall 0
+  PopR
+  SetL $f
+  PopC
+  Int 1
+  SetL $a
+  PopC
+  VGetL $a
+  BindL $b
+  PopV
+  CGetL $f
+  FPushObjMethodD 1 "m" NullThrows
+  FPushFuncD 1 "h"
+  FPassL 0 $b Cell
+  FCall 1
+  FPassR 0 Cell
+  FCall 1
+  PopR
+  FPushFuncD 1 "var_dump"
+  FPassL 0 $a Cell
+  FCall 1
+  PopR
+  FPushFuncD 1 "var_dump"
+  FPassL 0 $b Cell
+  FCall 1
+  PopR
+  Null
+  RetC
+}
+
+.class F {
+  .method [public] <"" N  > m(&$y) {
+    FPushFuncD 1 "f"
+    FPassL 0 $y Cell
+    FCall 1
+    PopR
+    Null
+    RetC
+  }
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/wtf.php ends here

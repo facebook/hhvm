@@ -215,10 +215,13 @@ let add_to_time_ref r t0 =
   t
 
 let print_debug_time_info filename debug_time =
-  P.eprintf "File %s:\n" (Relative_path.to_absolute filename);
+  let stat = Gc.stat () in
+  (P.eprintf "File %s:\n" (Relative_path.to_absolute filename);
   P.eprintf "Parsing: %0.3f s\n" !(debug_time.parsing_t);
   P.eprintf "Codegen: %0.3f s\n" !(debug_time.codegen_t);
-  P.eprintf "Printing: %0.3f s\n" !(debug_time.printing_t)
+  P.eprintf "Printing: %0.3f s\n" !(debug_time.printing_t);
+  P.eprintf "MinorWords: %0.3f\n" stat.Gc.minor_words;
+  P.eprintf "PromotedWords: %0.3f\n" stat.Gc.promoted_words)
 
 let do_compile filename compiler_options opt_ast debug_time =
   let t = Unix.gettimeofday () in

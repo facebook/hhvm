@@ -25,7 +25,7 @@ function server_warmup_status(): string;
  * i.e., once it returns empty string, it will keep returning empty string.
  */
 <<__Native>>
-function sever_warmup_status_monotonic(): string;
+function server_warmup_status_monotonic(): string;
 
 /**
  * Returns a description of the context in which the request is executing.

@@ -2651,6 +2651,7 @@ xhp_bareword:
   | T_TYPE                             { $$ = $1;}
   | T_NEWTYPE                          { $$ = $1;}
   | T_SHAPE                            { $$ = $1;}
+  | T_USING                            { $$ = $1;}
 ;
 
 simple_function_call:

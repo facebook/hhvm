@@ -1182,6 +1182,10 @@ private:
                                      const StringData* methName);
     static void errorInconsistentInsteadOf(const Class* cls,
                                            const StringData* methName);
+    template <class Rule>
+    static void errorMultiplyExcluded(const Rule& rule,
+                                      const StringData* traitName,
+                                      const StringData* methName);
   };
 
   friend struct TMIOps;

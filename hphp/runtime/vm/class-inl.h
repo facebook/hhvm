@@ -540,6 +540,13 @@ Class::TMIOps::errorInconsistentInsteadOf(const Class* cls,
               cls->name()->data(), cls->name()->data());
 }
 
+template <class Rule>
+inline void Class::TMIOps::errorMultiplyExcluded(const Rule& rule,
+                                                 const StringData* traitName,
+                                                 const StringData* methName) {
+  raise_error(Strings::MULTIPLY_EXCLUDED, traitName->data(), methName->data());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Non-member functions.
 

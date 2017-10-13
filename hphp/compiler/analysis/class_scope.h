@@ -459,6 +459,17 @@ private:
         cs->getOriginalName().c_str()
       );
     }
+    template <class Stmt>
+    static void errorMultiplyExcluded(Stmt stmt,
+                                      const std::string& traitName,
+                                      const std::string& methName) {
+      stmt->analysisTimeFatal(
+        Compiler::InconsistentInsteadOf,
+        Strings::MULTIPLY_EXCLUDED,
+        traitName.c_str(),
+        methName.c_str()
+      );
+    }
   };
 
   friend struct TMIOps;

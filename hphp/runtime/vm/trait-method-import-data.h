@@ -101,6 +101,9 @@ namespace HPHP {
  *    void errorUnknownTrait(alias_type rule, const String& traitName);
  *    void errorDuplicateMethod(Context ctx, const String& methName);
  *    void errorInconsistentInsteadOf(Context ctx, const String& methName);
+ *    void errorMultiplyExcluded(Context ctx,
+ *                               const String& traitName,
+ *                               const String& methName);
  * }
  */
 template <class TraitMethod,

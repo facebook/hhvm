@@ -129,8 +129,13 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
     Ops::errorUnknownTrait(rule, selectedTraitName);
   }
   for (auto const& traitName : otherTraitNames) {
-    auto trait = Ops::findTraitClass(ctx, traitName);
-    if (Ops::findTraitMethod(ctx, trait, methName)) {
+    if (auto trait = Ops::findTraitClass(ctx, traitName)) {
+      if (Ops::findTraitMethod(ctx, trait, methName)) {
+        // The trait exists, and defines the method, but it wasn't in methods,
+        // so it must have been removed by a previous prec rule.
+        Ops::errorMultiplyExcluded(rule, traitName, methName);
+      }
+    } else {
       Ops::errorUnknownTrait(rule, traitName);
     }
   }

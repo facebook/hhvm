@@ -521,7 +521,17 @@ ClassScope::TMIOps::findSingleTraitWithMethod(ClassScope* cs,
 ClassScopePtr
 ClassScope::TMIOps::findTraitClass(ClassScope* cs,
                                    const std::string& traitName) {
-  return cs->getContainingProgram()->findClass(traitName);
+  auto ret = cs->getContainingProgram()->findClass(traitName);
+  if (!ret) return ret;
+  if (std::find_if(cs->m_usedTraitNames.begin(),
+                   cs->m_usedTraitNames.end(),
+                   [&] (const std::string& name) {
+                     return name.size() == traitName.size() &&
+                       bstrcaseeq(name.c_str(), traitName.c_str(), name.size());
+                   }) == cs->m_usedTraitNames.end()) {
+    return ClassScopePtr{};
+  }
+  return ret;
 }
 
 MethodStatementPtr

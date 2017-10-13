@@ -3084,9 +3084,18 @@ Class::TMIOps::findSingleTraitWithMethod(const Class* cls,
   return traitCls;
 }
 
-const Class* Class::TMIOps::findTraitClass(const Class* /*cls*/,
+const Class* Class::TMIOps::findTraitClass(const Class* cls,
                                            const StringData* traitName) {
-  return Unit::loadClass(traitName);
+  auto ret = Unit::loadClass(traitName);
+  if (!ret) return nullptr;
+  auto const& usedTraits = cls->preClass()->usedTraits();
+  if (std::find_if(usedTraits.begin(), usedTraits.end(),
+                   [&] (auto const name) {
+                     return traitName->isame(name);
+                   }) == usedTraits.end()) {
+    return nullptr;
+  }
+  return ret;
 }
 
 void Class::applyTraitRules(TMIData& tmid) {

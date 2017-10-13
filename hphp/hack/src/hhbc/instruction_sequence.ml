@@ -21,15 +21,21 @@ module A = Ast
  * instructions which can easily be flattened at the end.
  *)
 type t =
+| Instr_empty
+| Instr_one of instruct
 | Instr_list of instruct list
 | Instr_concat of t list
 | Instr_try_fault of t * t
 
 (* Some helper constructors *)
-let instr x = Instr_list [x]
+let instr x = Instr_one x
 let instrs x = Instr_list x
-let gather x = Instr_concat x
-let empty = Instr_list []
+let gather x =
+  match List.filter x (function Instr_empty -> false | _ -> true) with
+  | [] -> Instr_empty
+  | [x] -> x
+  | x -> Instr_concat x
+let empty = Instr_empty
 let optional b instrs = if b then gather instrs else empty
 
 let class_ref_rewrite_sentinel = -100
@@ -279,6 +285,13 @@ module InstrSeq = struct
   let rec flat_map instrseq ~f =
     let flat_map_list items ~f = Core.List.bind items f in
     match instrseq with
+    | Instr_empty -> Instr_empty
+    | Instr_one x ->
+      begin match f x with
+      | [] -> Instr_empty
+      | [x] -> Instr_one x
+      | x -> Instr_list x
+      end
     | Instr_try_fault (try_body, fault_body) ->
       Instr_try_fault ((flat_map try_body ~f), (flat_map fault_body ~f))
     | Instr_list instrl ->
@@ -289,6 +302,8 @@ module InstrSeq = struct
   (* f takes an instruction and produces an instrseq to replace it. *)
   let rec flat_map_seq instrseq ~f =
     match instrseq with
+    | Instr_empty -> Instr_empty
+    | Instr_one x -> f x
     | Instr_try_fault (try_body, fault_body) ->
       Instr_try_fault ((flat_map_seq try_body ~f), (flat_map_seq fault_body ~f))
     | Instr_list instrl ->
@@ -300,6 +315,8 @@ module InstrSeq = struct
     let fold_instrseq init instrseq =
       fold_left instrseq ~f ~init in
     match instrseq with
+    | Instr_empty -> init
+    | Instr_one x -> f init x
     | Instr_try_fault (try_body, fault_body) ->
       fold_left fault_body ~init:(fold_left try_body ~f ~init) ~f
     | Instr_list instrl ->
@@ -309,6 +326,12 @@ module InstrSeq = struct
 
   let rec filter_map instrseq ~f =
     match instrseq with
+    | Instr_empty -> Instr_empty
+    | Instr_one x ->
+      begin match f x with
+      | Some x -> Instr_one x
+      | None -> Instr_empty
+      end
     | Instr_try_fault (try_body, fault_body) ->
       Instr_try_fault ((filter_map try_body ~f), (filter_map fault_body ~f))
     | Instr_list instrl ->
@@ -327,6 +350,8 @@ let rec instr_seq_to_list_aux sl result =
   | [] -> List.rev result
   | s::sl ->
     match s with
+    | Instr_empty -> instr_seq_to_list_aux sl result
+    | Instr_one x -> instr_seq_to_list_aux sl (x :: result)
     (* NOTE we discard fault blocks when linearizing an instruction sequence *)
     | Instr_try_fault (try_body, _fault_body) ->
       instr_seq_to_list_aux (try_body :: sl) result
@@ -373,6 +398,8 @@ let instr_try_catch_end = instr (ITry TryCatchEnd)
 let extract_fault_instructions instrseq =
   let rec aux instrseq acc =
     match instrseq with
+    | Instr_empty
+    | Instr_one _ -> acc
     | Instr_try_fault (try_body, fault_body) ->
     (* collect fault handlers in try body, then prepend
        the outer fault handler *)
@@ -428,6 +455,11 @@ let rewrite_user_labels_instr name_label_map instruction =
 let rewrite_user_labels instrseq =
   let rec aux instrseq name_label_map =
     match instrseq with
+    | Instr_empty ->
+      Instr_empty, name_label_map
+    | Instr_one i ->
+      let i, map = rewrite_user_labels_instr name_label_map i in
+      (Instr_one i), map
     | Instr_try_fault (try_body, fault_body) ->
       let try_body, name_label_map = aux try_body name_label_map in
       let fault_body, name_label_map = aux fault_body name_label_map in
@@ -479,6 +511,11 @@ let rewrite_class_refs_instr num = function
 let rewrite_class_refs instrseq =
   let rec aux instrseq num =
     match instrseq with
+    | Instr_empty ->
+      Instr_empty, num
+    | Instr_one i ->
+      let n, i = rewrite_class_refs_instr num i in
+      Instr_one i, n
     | Instr_try_fault (try_body, fault_body) ->
       let try_body, num = aux try_body num in
       let fault_body, num = aux fault_body num in
@@ -572,6 +609,8 @@ let is_srcloc i =
 let first instrs =
   let rec aux instrs =
     match instrs with
+    | Instr_empty -> None
+    | Instr_one i -> if is_srcloc i then None else Some i
     | Instr_list l -> List.find l (fun x -> not (is_srcloc x))
     | Instr_concat l -> List.find_map ~f:aux l
     | Instr_try_fault (t, f) -> match aux t with None -> aux f | v -> v
@@ -581,6 +620,8 @@ let first instrs =
 let is_empty instrs =
   let rec aux instrs =
     match instrs with
+    | Instr_empty -> true
+    | Instr_one i -> is_srcloc i
     | Instr_list l -> List.is_empty l || List.for_all ~f:is_srcloc l
     | Instr_concat l -> List.for_all ~f:aux l
     | Instr_try_fault (t, f) -> aux t && aux f

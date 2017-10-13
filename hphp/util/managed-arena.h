@@ -44,8 +44,19 @@ struct ManagedArena {
     return m_arenaId;
   }
 
+  // Number of bytes given to the underlying jemalloc arena
   inline size_t size() const {
     return m_size;
+  }
+
+  // Number of bytes actively used in the arena, excluding retained
+  size_t activeSize() const;
+
+  // Number of bytes in the mapped 1G pages but not actively used.  This helps
+  // to adjust the hugetlb mapping sizes to get the "real" usage by the
+  // application.
+  size_t unusedSize() const {
+    return m_currCapacity - activeSize();
   }
 
   // Report usage.

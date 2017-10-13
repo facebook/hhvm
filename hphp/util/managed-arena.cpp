@@ -221,6 +221,23 @@ void* ManagedArena::extent_alloc(extent_hooks_t* /*extent_hooks*/, void* addr,
   return arena->m_base - startOffset;
 }
 
+size_t ManagedArena::activeSize() const {
+  // update jemalloc stats
+  uint64_t epoch = 1;
+  mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
+  size_t pactive = 0;
+  size_t sz = sizeof(pactive);
+  char buffer[32];
+  std::snprintf(buffer, sizeof(buffer),
+                "stats.arenas.%d.pactive", m_arenaId);
+  if (mallctl(buffer, &pactive, &sz, nullptr, 0) != 0) {
+    return size();
+  }
+  auto const activeSize = pactive * s_pageSize;
+  assertx(activeSize <= size());
+  return activeSize;
+}
+
 std::string ManagedArena::reportStats() {
   std::string result;
   for (unsigned i = 1; i < MAX_HUGE_ARENA_COUNT; ++i) {
@@ -234,7 +251,7 @@ std::string ManagedArena::reportStats() {
                     numa_node_mask,
                     arena->m_currCapacity,
                     arena->m_maxCapacity,
-                    arena->m_size.load(std::memory_order_relaxed));
+                    arena->activeSize());
       result += buffer;
     }
   }

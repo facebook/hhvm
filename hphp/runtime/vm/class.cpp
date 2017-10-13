@@ -1421,8 +1421,7 @@ void Class::setSpecial() {
 
   auto matchedClassOrIsTrait = [this](const StringData* sd) {
     auto func = lookupMethod(sd);
-    if (func && (func->preClass() == m_preClass.get() ||
-                 func->preClass()->attrs() & AttrTrait)) {
+    if (func && func->cls() == this) {
       m_ctor = func;
       return true;
     }
@@ -1432,8 +1431,9 @@ void Class::setSpecial() {
   // Look for __construct() declared in either this class or a trait
   if (matchedClassOrIsTrait(s_construct.get())) {
     auto func = lookupMethod(m_preClass->name());
-    if (func && (func->preClass()->attrs() & AttrTrait ||
-                 m_ctor->preClass()->attrs() & AttrTrait)) {
+    if (func && func->cls() == this &&
+        (func->preClass()->attrs() & AttrTrait ||
+         m_ctor->preClass()->attrs() & AttrTrait)) {
       throw Exception(
         "%s has colliding constructor definitions coming from traits",
         m_preClass->name()->data()

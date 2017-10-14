@@ -1215,10 +1215,11 @@ bool ObjectData::invokeNativeUnsetProp(const StringData* key) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<MOpMode mode>
+template<ObjectData::PropMode mode>
 TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
                                  const StringData* key) {
-  auto constexpr write = (mode == MOpMode::Define) || (mode == MOpMode::Unset);
+  auto constexpr write = (mode == PropMode::DimForWrite) ||
+                         (mode == PropMode::Bind);
   auto const lookup = getPropImpl(ctx, key, write);
   auto const prop = lookup.prop;
 
@@ -1235,8 +1236,8 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
         }
       }
 
-      if (mode == MOpMode::Warn) raiseUndefProp(key);
-      if (mode == MOpMode::Define) return prop;
+      if (mode == PropMode::ReadWarn) raiseUndefProp(key);
+      if (write) return prop;
       return const_cast<TypedValue*>(&immutable_null_base);
     }
 
@@ -1282,11 +1283,8 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
     throw_invalid_property_name(StrNR(key));
   }
 
-  if (mode == MOpMode::Warn) raiseUndefProp(key);
-  if (mode == MOpMode::Define) {
-    return makeDynProp(StrNR(key), AccessFlags::Key);
-  }
-
+  if (mode == PropMode::ReadWarn) raiseUndefProp(key);
+  if (write) return makeDynProp(StrNR(key), AccessFlags::Key);
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
@@ -1295,15 +1293,7 @@ TypedValue* ObjectData::prop(
   const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<MOpMode::None>(tvRef, ctx, key);
-}
-
-TypedValue* ObjectData::propD(
-  TypedValue* tvRef,
-  const Class* ctx,
-  const StringData* key
-) {
-  return propImpl<MOpMode::Define>(tvRef, ctx, key);
+  return propImpl<PropMode::ReadNoWarn>(tvRef, ctx, key);
 }
 
 TypedValue* ObjectData::propW(
@@ -1311,7 +1301,23 @@ TypedValue* ObjectData::propW(
   const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<MOpMode::Warn>(tvRef, ctx, key);
+  return propImpl<PropMode::ReadWarn>(tvRef, ctx, key);
+}
+
+TypedValue* ObjectData::propD(
+  TypedValue* tvRef,
+  const Class* ctx,
+  const StringData* key
+) {
+  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key);
+}
+
+TypedValue* ObjectData::propB(
+  TypedValue* tvRef,
+  const Class* ctx,
+  const StringData* key
+) {
+  return propImpl<PropMode::Bind>(tvRef, ctx, key);
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {

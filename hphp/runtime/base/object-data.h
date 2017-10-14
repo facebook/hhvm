@@ -375,7 +375,14 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                                       bool copyDynArray);
 
  private:
-  template<MOpMode mode>
+  enum class PropMode : int {
+    ReadNoWarn,
+    ReadWarn,
+    DimForWrite,
+    Bind,
+  };
+
+  template<PropMode mode>
   TypedValue* propImpl(TypedValue* tvRef, const Class* ctx,
                        const StringData* key);
 
@@ -401,23 +408,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                      Array& props, std::vector<bool>& inserted) const;
 
  public:
-  TypedValue* prop(
-    TypedValue* tvRef,
-    const Class* ctx,
-    const StringData* key
-  );
-
-  TypedValue* propD(
-    TypedValue* tvRef,
-    const Class* ctx,
-    const StringData* key
-  );
-
-  TypedValue* propW(
-    TypedValue* tvRef,
-    const Class* ctx,
-    const StringData* key
-  );
+  TypedValue* prop(TypedValue* tvRef, const Class* ctx, const StringData* key);
+  TypedValue* propW(TypedValue* tvRef, const Class* ctx, const StringData* key);
+  TypedValue* propD(TypedValue* tvRef, const Class* ctx, const StringData* key);
+  TypedValue* propB(TypedValue* tvRef, const Class* ctx, const StringData* key);
 
   bool propIsset(const Class* ctx, const StringData* key);
   bool propEmpty(const Class* ctx, const StringData* key);

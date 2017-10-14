@@ -3359,19 +3359,29 @@ OPTBLD_INLINE void iopBaseH() {
   mstate.base = &mstate.tvTempBase;
 }
 
-static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key) {
+static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key,
+                                       bool reffy) {
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
 
   auto result = [&]{
     switch (mode) {
       case MOpMode::None:
+        assert(!reffy);
         return Prop<MOpMode::None>(mstate.tvRef, ctx, mstate.base, key);
       case MOpMode::Warn:
+        assert(!reffy);
         return Prop<MOpMode::Warn>(mstate.tvRef, ctx, mstate.base, key);
       case MOpMode::Define:
-        return Prop<MOpMode::Define>(mstate.tvRef, ctx, mstate.base, key);
+        if (reffy) {
+          return Prop<MOpMode::Define,KeyType::Any,true>(mstate.tvRef, ctx,
+                                                         mstate.base, key);
+        } else {
+          return Prop<MOpMode::Define,KeyType::Any,false>(mstate.tvRef, ctx,
+                                                          mstate.base, key);
+        }
       case MOpMode::Unset:
+        assert(!reffy);
         return Prop<MOpMode::Unset>(mstate.tvRef, ctx, mstate.base, key);
     }
     always_assert(false);
@@ -3474,7 +3484,7 @@ static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk,
   if (mk.mcode == MQT) {
     propQDispatch(mode, key, reffy);
   } else if (mcodeIsProp(mk.mcode)) {
-    propDispatch(mode, key);
+    propDispatch(mode, key, reffy);
   } else if (mcodeIsElem(mk.mcode)) {
     elemDispatch(mode, key, reffy);
   } else {

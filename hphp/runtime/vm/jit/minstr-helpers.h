@@ -210,30 +210,30 @@ inline RefData* vGetRefShuffle(const TypedValue& localTvRef,
   return localTvRef.m_data.pref;
 }
 
-#define VGET_PROP_HELPER_TABLE(m)       \
-  /* name        keyType     */\
-  m(vGetPropC,   KeyType::Any)  \
-  m(vGetPropS,   KeyType::Str)  \
+#define VGET_PROP_HELPER_TABLE(m) \
+  /* name        keyType     */   \
+  m(vGetPropC,   KeyType::Any)    \
+  m(vGetPropS,   KeyType::Str)
 
-#define X(nm, kt)                                                     \
-inline RefData* nm(Class* ctx, TypedValue* base, key_type<kt> key) {  \
-  TypedValue localTvRef;                                              \
-  auto result = Prop<MOpMode::Define,kt>(localTvRef, ctx, base, key);\
-  return vGetRefShuffle(localTvRef, result);                          \
+#define X(nm, kt)                                                          \
+inline RefData* nm(Class* ctx, TypedValue* base, key_type<kt> key) {       \
+  TypedValue localTvRef;                                                   \
+  auto result = Prop<MOpMode::Define,kt,true>(localTvRef, ctx, base, key); \
+  return vGetRefShuffle(localTvRef, result);                               \
 }
 VGET_PROP_HELPER_TABLE(X)
 #undef X
 
-#define VGET_OBJ_PROP_HELPER_TABLE(m)       \
-  /* name        keyType      */\
-  m(vGetPropCO,  KeyType::Any)  \
+#define VGET_OBJ_PROP_HELPER_TABLE(m) \
+  /* name        keyType      */      \
+  m(vGetPropCO,  KeyType::Any)        \
   m(vGetPropSO,  KeyType::Str)
 
-#define X(nm, kt)                                                     \
-inline RefData* nm(Class* ctx, ObjectData* base, key_type<kt> key) {  \
-  TypedValue localTvRef;                                              \
-  auto result = PropObj<MOpMode::Define,kt>(localTvRef, ctx, base, key);\
-  return vGetRefShuffle(localTvRef, result);\
+#define X(nm, kt)                                                             \
+inline RefData* nm(Class* ctx, ObjectData* base, key_type<kt> key) {          \
+  TypedValue localTvRef;                                                      \
+  auto result = PropObj<MOpMode::Define,kt,true>(localTvRef, ctx, base, key); \
+  return vGetRefShuffle(localTvRef, result);                                  \
 }
 VGET_OBJ_PROP_HELPER_TABLE(X)
 #undef X
@@ -256,14 +256,14 @@ void bindPropImpl(RefData* val, PropImpl prop_impl) {
 inline void bindPropC(Class* ctx, TypedValue* base, TypedValue key,
                       RefData* val) {
   bindPropImpl(val, [&](TypedValue& tvref) {
-    return Prop<MOpMode::Define,KeyType::Any>(tvref, ctx, base, key);
+    return Prop<MOpMode::Define,KeyType::Any,true>(tvref, ctx, base, key);
   });
 }
 
 inline void bindPropCO(Class* ctx, ObjectData* base, TypedValue key,
                       RefData* val) {
   bindPropImpl(val, [&](TypedValue& tvref) {
-    return PropObj<MOpMode::Define,KeyType::Any>(tvref, ctx, base, key);
+    return PropObj<MOpMode::Define,KeyType::Any,true>(tvref, ctx, base, key);
   });
 }
 

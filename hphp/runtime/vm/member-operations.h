@@ -2993,26 +2993,32 @@ inline TypedValue* nullSafeProp(TypedValue& tvRef,
  * Returns a pointer to a number of possible places, but does not unbox it.
  * (The returned pointer is never pointing into a RefData.)
  */
-template<MOpMode mode, KeyType keyType = KeyType::Any>
+template<MOpMode mode, KeyType keyType = KeyType::Any, bool reffy = false>
 inline TypedValue* PropObj(TypedValue& tvRef, const Class* ctx,
                            ObjectData* instance, key_type<keyType> key) {
-  auto constexpr warn   = mode == MOpMode::Warn;
-  auto constexpr define = mode == MOpMode::Define;
-  auto constexpr unset  = mode == MOpMode::Unset;
-
   auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
   // Get property.
-  if (warn) {
+  if (mode == MOpMode::Define) {
+    if (reffy) {
+      return instance->propB(&tvRef, ctx, keySD);
+    } else {
+      return instance->propD(&tvRef, ctx, keySD);
+    }
+  }
+  assert(!reffy);
+  if (mode == MOpMode::None) {
+    return instance->prop(&tvRef, ctx, keySD);
+  }
+  if (mode == MOpMode::Warn) {
     return instance->propW(&tvRef, ctx, keySD);
   }
-
-  if (define || unset) return instance->propD(&tvRef, ctx, keySD);
-  return instance->prop(&tvRef, ctx, keySD);
+  assert(mode == MOpMode::Unset);
+  return instance->propD(&tvRef, ctx, keySD);
 }
 
-template<MOpMode mode, KeyType keyType = KeyType::Any>
+template<MOpMode mode, KeyType keyType = KeyType::Any, bool reffy = false>
 inline TypedValue* Prop(TypedValue& tvRef,
                         const Class* ctx,
                         TypedValue* base,
@@ -3023,7 +3029,7 @@ inline TypedValue* Prop(TypedValue& tvRef,
   }
   assertx(result->m_type == KindOfObject);
   auto instance = instanceFromTv(result);
-  return PropObj<mode,keyType>(tvRef, ctx, instance, key);
+  return PropObj<mode,keyType,reffy>(tvRef, ctx, instance, key);
 }
 
 template <bool useEmpty, KeyType kt>

@@ -586,7 +586,7 @@ Variant ArrayIter::iterValue(VersionableSparse) {
 
 //////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_FLAT(MIterTable, tl_miter_table);
+THREAD_LOCAL_FLAT(MIterTable, tl_miter_table);
 
 void MIterTable::clear() {
   if (!tl_miter_table) return;

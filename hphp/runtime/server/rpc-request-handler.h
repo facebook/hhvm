@@ -76,7 +76,7 @@ private:
   std::string getSourceFilename(const std::string &path,
                                 SourceRootInfo &sourceRootInfo);
 
-  static DECLARE_THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
+  static THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
   static AccessLog s_accessLog;
 
   static AccessLog::ThreadData* getAccessLogThreadData() {

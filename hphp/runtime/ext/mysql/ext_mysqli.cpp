@@ -67,7 +67,7 @@ struct MysqliIniSetting {
   std::string m_default_pw;
 };
 
-IMPLEMENT_THREAD_LOCAL(MysqliIniSetting, s_ini_setting);
+THREAD_LOCAL(MysqliIniSetting, s_ini_setting);
 
 // System-wide ini settings -- PHP_INI_SYSTEM
 static bool allow_local_infile = true;

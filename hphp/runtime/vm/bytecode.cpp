@@ -637,7 +637,7 @@ struct StackElms {
 private:
   TypedValue* m_elms{nullptr};
 };
-IMPLEMENT_THREAD_LOCAL(StackElms, t_se);
+THREAD_LOCAL(StackElms, t_se);
 
 const int Stack::sSurprisePageSize = sysconf(_SC_PAGESIZE);
 // We reserve the bottom page of each stack for use as the surprise

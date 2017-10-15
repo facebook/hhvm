@@ -64,7 +64,7 @@ struct ResolverInit {
     return m_res;
   }
 
-  static DECLARE_THREAD_LOCAL(ResolverInit, s_res);
+  static THREAD_LOCAL(ResolverInit, s_res);
 private:
   void initRes(void) {
     if (m_res) {
@@ -78,7 +78,7 @@ private:
 
   struct __res_state *m_res;
 };
-IMPLEMENT_THREAD_LOCAL(ResolverInit, ResolverInit::s_res);
+THREAD_LOCAL(ResolverInit, ResolverInit::s_res);
 
 /* just a hack to free resources allocated by glibc in __res_nsend()
  * See also:

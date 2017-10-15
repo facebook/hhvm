@@ -893,7 +893,7 @@ static CallbackMap s_system_ini_callbacks;
 //   * server mode: the contents of user map are     destructed N-1 times
 //   * CLI    mode: the contents of user map are NOT destructed on SIGTERM
 //
-static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_user_callbacks);
+static THREAD_LOCAL(CallbackMap, s_user_callbacks);
 
 struct SystemSettings {
   std::unordered_map<std::string,Variant> settings;
@@ -915,7 +915,7 @@ struct LocalSettings {
 static SystemSettings s_system_settings;
 
 // Changed during the course of the request
-static IMPLEMENT_THREAD_LOCAL(LocalSettings, s_saved_defaults);
+static THREAD_LOCAL(LocalSettings, s_saved_defaults);
 
 struct IniSettingExtension final : Extension {
   IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}

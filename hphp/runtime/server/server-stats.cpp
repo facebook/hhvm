@@ -260,7 +260,7 @@ Mutex ServerStats::s_lock;
 std::vector<ServerStats*> ServerStats::s_loggers;
 bool ServerStats::s_profile_network = false;
 HealthLevel ServerStats::m_ServerHealthLevel = HealthLevel::Bold;
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(ServerStats, ServerStats::s_logger);
+THREAD_LOCAL_NO_CHECK(ServerStats, ServerStats::s_logger);
 
 void ServerStats::LogPage(const string& url, int code) {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {

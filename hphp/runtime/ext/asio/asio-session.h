@@ -159,7 +159,7 @@ private:
   friend AsioSession* req::make_raw<AsioSession>();
 
 private:
-  static DECLARE_THREAD_LOCAL_PROXY(AsioSession, s_current);
+  static THREAD_LOCAL_PROXY(AsioSession, s_current);
   req::vector<AsioContext*> m_contexts;
   req::vector<c_SleepWaitHandle*> m_sleepEvents;
   AsioExternalThreadEventQueue m_externalThreadEventQueue;

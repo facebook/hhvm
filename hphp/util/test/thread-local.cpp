@@ -32,7 +32,7 @@ struct Foo {
   int m_bar;
 };
 
-static IMPLEMENT_THREAD_LOCAL_FLAT(Foo, s_foo);
+static THREAD_LOCAL_FLAT(Foo, s_foo);
 
 TEST(ThreadLocalFlat, OnThreadExit) {
   s_destructs = 0;

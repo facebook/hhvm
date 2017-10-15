@@ -122,7 +122,7 @@ namespace {
  * RandData is large, and we don't want our non-PHP threads to be needlessly
  * holding it in TLS.
  */
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(RandData, s_data);
+THREAD_LOCAL_NO_CHECK(RandData, s_data);
 
 void php_mt_initialize(uint32_t seed, uint32_t* state) {
   /* Initialize generator state with seed

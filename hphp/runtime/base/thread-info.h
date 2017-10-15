@@ -61,7 +61,7 @@ struct ThreadInfo {
    * Returns number of on-request threads
    */
   static int SetPendingGCForAllOnRequestThread();
-  static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
+  static THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
   /*
    * This is the amount of "slack" in stack usage checks - if the stack pointer

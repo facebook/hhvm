@@ -128,7 +128,7 @@ private:
   Array m_SERVER;
   Array m_ENV;
 };
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(FilterRequestData, s_filter_request_data);
+THREAD_LOCAL_NO_CHECK(FilterRequestData, s_filter_request_data);
 
 static struct FilterExtension final : Extension {
   FilterExtension() : Extension("filter", "0.11.0") {}

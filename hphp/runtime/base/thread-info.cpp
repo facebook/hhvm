@@ -57,7 +57,7 @@ __thread char* t_stackbase = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
+THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
 ThreadInfo::ThreadInfo() {
   assert(!t_stackbase);

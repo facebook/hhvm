@@ -38,7 +38,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_PROXY(AsioSession, AsioSession::s_current);
+THREAD_LOCAL_PROXY(AsioSession, AsioSession::s_current);
 
 namespace {
   const context_idx_t MAX_CONTEXT_DEPTH =

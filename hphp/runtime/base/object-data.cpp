@@ -1083,7 +1083,7 @@ namespace {
  * to a recursion error.
  */
 
-IMPLEMENT_THREAD_LOCAL(PropRecurInfo, propRecurInfo);
+THREAD_LOCAL(PropRecurInfo, propRecurInfo);
 
 template <class Invoker>
 InvokeResult

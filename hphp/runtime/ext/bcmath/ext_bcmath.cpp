@@ -35,7 +35,7 @@ struct bcmath_data {
   }
   BCMathGlobals data;
 };
-static IMPLEMENT_THREAD_LOCAL(bcmath_data, s_globals);
+static THREAD_LOCAL(bcmath_data, s_globals);
 
 ///////////////////////////////////////////////////////////////////////////////
 

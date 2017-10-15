@@ -454,7 +454,7 @@ struct MemcachedData {
   }
 
   typedef std::map<std::string, ImplPtr> ImplMap;
-  static DECLARE_THREAD_LOCAL(ImplMap, s_persistentMap);
+  static THREAD_LOCAL(ImplMap, s_persistentMap);
 };
 
 void HHVM_METHOD(Memcached, __construct,
@@ -1188,7 +1188,7 @@ bool HHVM_METHOD(Memcached, touchbykey,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL(MemcachedData::ImplMap, MemcachedData::s_persistentMap);
+THREAD_LOCAL(MemcachedData::ImplMap, MemcachedData::s_persistentMap);
 
 const StaticString s_Memcached("Memcached");
 

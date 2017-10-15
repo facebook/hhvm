@@ -88,7 +88,7 @@ private:
 
   static Mutex s_lock;
   static std::vector<ServerStats*> s_loggers;
-  static DECLARE_THREAD_LOCAL_NO_CHECK(ServerStats, s_logger);
+  static THREAD_LOCAL_NO_CHECK(ServerStats, s_logger);
 
   using CounterMap = std::unordered_map<std::string, int64_t>;
 

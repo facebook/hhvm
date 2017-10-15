@@ -28,7 +28,7 @@ struct RootMapTestData {
   RootMap<DummyResource> resources;
   RootMap<c_Vector> objects;
 };
-IMPLEMENT_THREAD_LOCAL(RootMapTestData, s_root);
+THREAD_LOCAL(RootMapTestData, s_root);
 
 TEST(RootMaps, Resources) {
   {

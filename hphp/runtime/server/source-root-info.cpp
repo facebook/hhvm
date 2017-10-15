@@ -31,8 +31,8 @@ using std::map;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(std::string, SourceRootInfo::s_path);
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(std::string, SourceRootInfo::s_phproot);
+THREAD_LOCAL_NO_CHECK(std::string, SourceRootInfo::s_path);
+THREAD_LOCAL_NO_CHECK(std::string, SourceRootInfo::s_phproot);
 
 const StaticString s_default("default");
 const StaticString s___builtin("__builtin");

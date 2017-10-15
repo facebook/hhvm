@@ -19,7 +19,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static IMPLEMENT_THREAD_LOCAL_NO_CHECK(ServerNote, s_note);
+static THREAD_LOCAL_NO_CHECK(ServerNote, s_note);
 
 ServerNote* get_server_note() {
   return s_note.getCheck();

@@ -49,8 +49,7 @@ private:
 #endif
 };
 
-extern DECLARE_THREAD_LOCAL(ThreadSafeLocaleHandler,
-                            g_thread_safe_locale_handler);
+extern THREAD_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
 
 }
 

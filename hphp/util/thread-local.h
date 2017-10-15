@@ -79,10 +79,9 @@ inline uintptr_t tlsBase() {
 // __thread on cygwin and mingw uses pthreads emulation not native tls so
 // the emulation for thread local must be used as well
 //
-// So we use __thread on gcc, icc and clang, unless we are on OSX. On OSX, we
-// use our own emulation. Use the DECLARE_THREAD_LOCAL() and
-// IMPLEMENT_THREAD_LOCAL() macros to access either __thread or the emulation
-// as appropriate.
+// So we use __thread on gcc, icc and clang, and OSX, falling back to
+// emulation on unsupported platforms. Use the THREAD_LOCAL() macro to
+// hide the decl details.
 //
 // See thread-local-emulate.h for the emulated versions; they're in a
 // separate header to avoid confusion; this is a long header file and it's
@@ -132,11 +131,11 @@ typedef struct __darwin_pthread_handler_rec darwin_pthread_handler;
  * between different threads (hence no locking) but those variables are not
  * on stack in local scope. To use it, just do something like this,
  *
- *   IMPLEMENT_THREAD_LOCAL(MyClass, static_object);
+ *   THREAD_LOCAL(MyClass, static_object);
  *     static_object->data_ = ...;
  *     static_object->doSomething();
  *
- *   IMPLEMENT_THREAD_LOCAL(int, static_number);
+ *   THREAD_LOCAL(int, static_number);
  *     int value = *static_number;
  *
  * So, syntax-wise it's similar to pointers. The type parameter can be a
@@ -367,36 +366,21 @@ struct ThreadLocalFlat {
 /*
  * How to use the thread-local macros:
  *
- * Use DECLARE_THREAD_LOCAL to declare a *static* class field as thread local:
+ * Use THREAD_LOCAL to declare a *static* class field or global as thread local:
  *   struct SomeClass {
- *     static DECLARE_THREAD_LOCAL(SomeFieldType, f);
- *   }
+ *     static THREAD_LOCAL(SomeFieldType, field);
+ *   };
+ *   extern THREAD_LOCAL(SomeGlobal, tl_myglobal);
  *
- * Use IMPLEMENT_THREAD_LOCAL in the cpp file to implement the field:
- *   IMPLEMENT_THREAD_LOCAL(SomeFieldType, SomeClass::f);
- *
- * Remember: *Never* write IMPLEMENT_THREAD_LOCAL in a header file.
+ * Use THREAD_LOCAL in the cpp file to implement the field:
+ *   THREAD_LOCAL(SomeFieldType, SomeClass::f);
+ *   THREAD_LOCAL(SomeGlobal, tl_myglobal);
  */
 
-#define DECLARE_THREAD_LOCAL(T, f) \
-  __thread HPHP::ThreadLocal<T> f
-#define IMPLEMENT_THREAD_LOCAL(T, f) \
-  __thread HPHP::ThreadLocal<T> f
-
-#define DECLARE_THREAD_LOCAL_NO_CHECK(T, f) \
-  __thread HPHP::ThreadLocalNoCheck<T> f
-#define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) \
-  __thread HPHP::ThreadLocalNoCheck<T> f
-
-#define DECLARE_THREAD_LOCAL_PROXY(T, f) \
-  __thread HPHP::ThreadLocalProxy<T> f
-#define IMPLEMENT_THREAD_LOCAL_PROXY(T, f) \
-  __thread HPHP::ThreadLocalProxy<T> f
-
-#define DECLARE_THREAD_LOCAL_FLAT(T, f) \
-  __thread HPHP::ThreadLocalFlat<T> f
-#define IMPLEMENT_THREAD_LOCAL_FLAT(T, f) \
-  __thread HPHP::ThreadLocalFlat<T> f
+#define THREAD_LOCAL(T, f) __thread HPHP::ThreadLocal<T> f
+#define THREAD_LOCAL_NO_CHECK(T, f) __thread HPHP::ThreadLocalNoCheck<T> f
+#define THREAD_LOCAL_PROXY(T, f) __thread HPHP::ThreadLocalProxy<T> f
+#define THREAD_LOCAL_FLAT(T, f) __thread HPHP::ThreadLocalFlat<T> f
 
 } // namespace HPHP
 

@@ -282,7 +282,7 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
   }
 }
 
-static IMPLEMENT_THREAD_LOCAL(int, s_response_code);
+static THREAD_LOCAL(int, s_response_code);
 
 Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
   Transport *transport = g_context->getTransport();

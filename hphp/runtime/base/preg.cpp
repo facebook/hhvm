@@ -237,7 +237,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // Data
 
-IMPLEMENT_THREAD_LOCAL(PCREglobals, tl_pcre_globals);
+THREAD_LOCAL(PCREglobals, tl_pcre_globals);
 
 static PCRECache s_pcreCache;
 

@@ -70,7 +70,7 @@ ServiceData::ExportedCounter* Logger::s_errorLines =
 ServiceData::ExportedCounter* Logger::s_errorBytes =
     ServiceData::createCounter("errorlog_bytes");
 
-IMPLEMENT_THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
+THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
 std::map<std::string, Logger*> Logger::s_loggers = {
   {Logger::DEFAULT, new Logger()},

@@ -148,7 +148,7 @@ public:
   String id;
 };
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(SessionRequestData, s_session);
+THREAD_LOCAL_NO_CHECK(SessionRequestData, s_session);
 
 void SessionRequestData::requestShutdownImpl() {
   if (mod_is_open()) {
@@ -837,7 +837,7 @@ private:
     return nrdels;
   }
 };
-IMPLEMENT_THREAD_LOCAL(FileSessionData, s_file_session_data);
+THREAD_LOCAL(FileSessionData, s_file_session_data);
 
 struct FileSessionModule : SessionModule {
   FileSessionModule() : SessionModule("files") {

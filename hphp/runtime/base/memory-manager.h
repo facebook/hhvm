@@ -1125,7 +1125,7 @@ private:
   TYPE_SCAN_IGNORE_ALL; // heap-scan handles MemoryManager fields itself.
 };
 
-extern DECLARE_THREAD_LOCAL_FLAT(MemoryManager, tl_heap);
+extern THREAD_LOCAL_FLAT(MemoryManager, tl_heap);
 
 //////////////////////////////////////////////////////////////////////
 

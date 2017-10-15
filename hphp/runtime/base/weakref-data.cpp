@@ -23,7 +23,7 @@ namespace HPHP {
 
 // Maps object ids to the WeakRefData associated to them.
 using weakref_data_map = req::hash_map<uintptr_t, req::weak_ptr<WeakRefData>>;
-IMPLEMENT_THREAD_LOCAL(weakref_data_map, s_weakref_data);
+THREAD_LOCAL(weakref_data_map, s_weakref_data);
 
 void weakref_cleanup() {
   s_weakref_data.destroy();

@@ -48,7 +48,7 @@ struct json_state {
     json_tokener_error parser_code;
 };
 
-IMPLEMENT_THREAD_LOCAL(json_state, s_json_state);
+THREAD_LOCAL(json_state, s_json_state);
 
 json_error_codes json_get_last_error_code() {
     return s_json_state->error_code;

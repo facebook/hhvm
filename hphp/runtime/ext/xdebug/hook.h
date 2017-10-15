@@ -137,8 +137,7 @@ struct XDebugThreadBreakpoints {
   int m_nextBreakpointId = 0;
 };
 
-extern DECLARE_THREAD_LOCAL_NO_CHECK(XDebugThreadBreakpoints,
-                                     s_xdebug_breakpoints);
+extern THREAD_LOCAL_NO_CHECK(XDebugThreadBreakpoints, s_xdebug_breakpoints);
 
 // Breakpoint entrypoints for other files
 #define XDEBUG_ADD_BREAKPOINT(bp) \

@@ -64,7 +64,7 @@ struct DateGlobals {
   double sunset_zenith;
   double sunrise_zenith;
 };
-IMPLEMENT_THREAD_LOCAL(DateGlobals, s_date_globals);
+THREAD_LOCAL(DateGlobals, s_date_globals);
 
 #define IMPLEMENT_GET_CLASS(cls)                                               \
   Class* cls::getClass() {                                                     \

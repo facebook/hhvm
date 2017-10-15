@@ -25,7 +25,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-static IMPLEMENT_THREAD_LOCAL_PROXY(GlobalsArray, g_variables);
+static THREAD_LOCAL_PROXY(GlobalsArray, g_variables);
 
 GlobalsArray* get_global_variables() {
   assertx(!g_variables.isNull());

@@ -51,7 +51,7 @@ struct ImagickExtension final : Extension {
     bool m_progress_monitor;
   };
 
-  static DECLARE_THREAD_LOCAL(ImagickIniSetting, s_ini_setting);
+  static THREAD_LOCAL(ImagickIniSetting, s_ini_setting);
 };
 
 //////////////////////////////////////////////////////////////////////////////

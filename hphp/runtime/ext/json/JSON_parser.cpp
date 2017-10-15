@@ -678,7 +678,7 @@ struct json_parser {
   }
 };
 
-IMPLEMENT_THREAD_LOCAL(json_parser, s_json_parser);
+THREAD_LOCAL(json_parser, s_json_parser);
 
 // In Zend, the json_parser struct is publicly
 // accessible. Thus the fields could be accessed

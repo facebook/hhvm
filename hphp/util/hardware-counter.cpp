@@ -45,8 +45,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(HardwareCounter,
-    HardwareCounter::s_counter);
+THREAD_LOCAL_NO_CHECK(HardwareCounter, HardwareCounter::s_counter);
 
 static bool s_recordSubprocessTimes = false;
 static bool s_excludeKernel = false;

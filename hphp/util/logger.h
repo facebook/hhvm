@@ -138,7 +138,7 @@ protected:
     bool threadLogOnly{false};
     LoggerHook* hook{nullptr};
   };
-  static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
+  static THREAD_LOCAL(ThreadData, s_threadData);
 
   static void LogImpl(LogLevelType level, const std::string &msg,
                       const StackTrace *stackTrace,

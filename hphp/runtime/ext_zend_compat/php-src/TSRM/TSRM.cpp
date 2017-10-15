@@ -24,7 +24,7 @@ struct tsrm_resource_type {
 
 namespace HPHP {
   std::vector<tsrm_resource_type> resource_types_table;
-  IMPLEMENT_THREAD_LOCAL(TSRMStorageVector, tsrm_thread_resources);
+  THREAD_LOCAL(TSRMStorageVector, tsrm_thread_resources);
 }
 
 #define TSRM_ERROR(args)

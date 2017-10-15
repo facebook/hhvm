@@ -5,7 +5,7 @@
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 #include "hphp/runtime/base/php-globals.h"
 
-static IMPLEMENT_THREAD_LOCAL(_php_core_globals, s_php_core_globals);
+static THREAD_LOCAL(_php_core_globals, s_php_core_globals);
 
 BEGIN_EXTERN_C()
 zval** PG_http_globals() {

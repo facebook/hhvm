@@ -360,7 +360,7 @@ bool XDebugThreadBreakpoints::updateBreakpointHitValue(int id, int hitValue) {
   return true;
 }
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(XDebugThreadBreakpoints, s_xdebug_breakpoints);
+THREAD_LOCAL_NO_CHECK(XDebugThreadBreakpoints, s_xdebug_breakpoints);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Debug Hook Handling

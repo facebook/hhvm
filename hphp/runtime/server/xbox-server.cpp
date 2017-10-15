@@ -105,9 +105,8 @@ String XboxTransport::getResults(int &code, int timeout_ms /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static IMPLEMENT_THREAD_LOCAL(std::shared_ptr<XboxServerInfo>,
-  s_xbox_server_info);
-static IMPLEMENT_THREAD_LOCAL(std::string, s_xbox_prev_req_init_doc);
+static THREAD_LOCAL(std::shared_ptr<XboxServerInfo>, s_xbox_server_info);
+static THREAD_LOCAL(std::string, s_xbox_prev_req_init_doc);
 
 struct XboxRequestHandler : RPCRequestHandler {
   XboxRequestHandler() : RPCRequestHandler(
@@ -117,7 +116,7 @@ struct XboxRequestHandler : RPCRequestHandler {
 
 bool XboxRequestHandler::Info = false;
 
-static IMPLEMENT_THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
+static THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -49,12 +49,12 @@
 
 namespace HPHP {
 
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_string);
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_comment);
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_keyword);
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_default);
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_html);
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_display_errors);
+THREAD_LOCAL(std::string, s_misc_highlight_default_string);
+THREAD_LOCAL(std::string, s_misc_highlight_default_comment);
+THREAD_LOCAL(std::string, s_misc_highlight_default_keyword);
+THREAD_LOCAL(std::string, s_misc_highlight_default_default);
+THREAD_LOCAL(std::string, s_misc_highlight_default_html);
+THREAD_LOCAL(std::string, s_misc_display_errors);
 
 const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
 const double k_INF = std::numeric_limits<double>::infinity();

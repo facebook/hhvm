@@ -606,7 +606,7 @@ template<>
 #endif
 void ThreadLocalNoCheck<ExecutionContext>::destroy();
 
-extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
+extern THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -47,8 +47,7 @@ using std::set;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL(AccessLog::ThreadData,
-                       RPCRequestHandler::s_accessLogThreadData);
+THREAD_LOCAL(AccessLog::ThreadData, RPCRequestHandler::s_accessLogThreadData);
 
 AccessLog RPCRequestHandler::s_accessLog(
   &(RPCRequestHandler::getAccessLogThreadData));

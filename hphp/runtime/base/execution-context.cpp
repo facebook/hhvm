@@ -78,7 +78,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 TRACE_SET_MOD(bcinterp);
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
+THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 
 ExecutionContext::ExecutionContext()
   : m_transport(nullptr)

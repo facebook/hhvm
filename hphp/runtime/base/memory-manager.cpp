@@ -49,7 +49,7 @@ namespace HPHP {
 
 const unsigned kInvalidSweepIndex = 0xffffffff;
 __thread bool tl_sweeping;
-IMPLEMENT_THREAD_LOCAL_FLAT(MemoryManager, tl_heap);
+THREAD_LOCAL_FLAT(MemoryManager, tl_heap);
 
 TRACE_SET_MOD(mm);
 

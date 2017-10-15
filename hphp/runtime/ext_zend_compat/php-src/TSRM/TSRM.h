@@ -138,7 +138,7 @@ struct EzcResource {
 };
 extern std::vector<tsrm_resource_type> resource_types_table;
 using TSRMStorageVector = std::vector<void*>;
-extern DECLARE_THREAD_LOCAL(TSRMStorageVector, tsrm_thread_resources);
+extern THREAD_LOCAL(TSRMStorageVector, tsrm_thread_resources);
 void * ts_init_resource(int id);
 
 static inline

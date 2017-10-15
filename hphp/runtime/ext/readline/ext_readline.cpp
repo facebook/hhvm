@@ -34,7 +34,7 @@ struct ReadlineVars {
   Array array;
 };
 
-IMPLEMENT_THREAD_LOCAL(ReadlineVars, s_readline);
+THREAD_LOCAL(ReadlineVars, s_readline);
 
 static Variant HHVM_FUNCTION(readline, const Variant& prompt /* = null */) {
   auto result = readline(

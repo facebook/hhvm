@@ -59,7 +59,7 @@ void initialize_repo() {
   }
 }
 
-IMPLEMENT_THREAD_LOCAL(Repo, t_dh);
+THREAD_LOCAL(Repo, t_dh);
 
 Repo& Repo::get() {
   return *t_dh.get();

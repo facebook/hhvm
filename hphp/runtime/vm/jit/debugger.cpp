@@ -86,7 +86,7 @@ struct DebuggerCatches {
   req::Optional<req::hash_map<const ActRec*, TCA>> catches;
 };
 
-IMPLEMENT_THREAD_LOCAL(DebuggerCatches, tl_debuggerCatches);
+THREAD_LOCAL(DebuggerCatches, tl_debuggerCatches);
 
 void stashDebuggerCatch(const ActRec* fp) {
   if (auto const catchBlock = getCatchTrace(TCA(fp->m_savedRip))) {

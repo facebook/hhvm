@@ -443,7 +443,7 @@ using namespace detail;
 
 __thread void* tl_base = nullptr;
 
-IMPLEMENT_THREAD_LOCAL_PROXY(ArrayData, s_constantsStorage);
+THREAD_LOCAL_PROXY(ArrayData, s_constantsStorage);
 
 // All threads tl_bases are kept in a set, to allow iterating Local
 // and Normal RDS sections across threads.

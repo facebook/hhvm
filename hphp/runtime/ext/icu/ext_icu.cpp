@@ -237,9 +237,9 @@ struct LowerCaseTransliterator : ICUTransliterator {
 
 
 // Thread-local globals.
-IMPLEMENT_THREAD_LOCAL(SpaceMatcher, s_spaceMatcher);
-IMPLEMENT_THREAD_LOCAL(NumMatcher, s_numMatcher);
-IMPLEMENT_THREAD_LOCAL(LowerCaseTransliterator, s_lctranslit);
+THREAD_LOCAL(SpaceMatcher, s_spaceMatcher);
+THREAD_LOCAL(NumMatcher, s_numMatcher);
+THREAD_LOCAL(LowerCaseTransliterator, s_lctranslit);
 
 
 /* Normalize a unicode string depending on its type.

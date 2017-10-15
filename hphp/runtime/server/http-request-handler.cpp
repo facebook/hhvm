@@ -115,8 +115,7 @@ void setProxyOriginPercentage(const std::string& origin, int percentage) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL(AccessLog::ThreadData,
-                       HttpRequestHandler::s_accessLogThreadData);
+THREAD_LOCAL(AccessLog::ThreadData, HttpRequestHandler::s_accessLogThreadData);
 
 AccessLog HttpRequestHandler::s_accessLog(
   &(HttpRequestHandler::getAccessLogThreadData));

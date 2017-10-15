@@ -99,8 +99,7 @@ using std::string;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL(AccessLog::ThreadData,
-                       AdminRequestHandler::s_accessLogThreadData);
+THREAD_LOCAL(AccessLog::ThreadData, AdminRequestHandler::s_accessLogThreadData);
 
 AccessLog AdminRequestHandler::s_accessLog(
   &(AdminRequestHandler::getAccessLogThreadData));

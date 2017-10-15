@@ -98,7 +98,7 @@ ServiceData::ExportedTimeSeries* RequestWorkloadStats::s_interps;
 
 
 // Setup RequestWorkloadStats to have init and request callbacks.
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(RequestWorkloadStats, s_request_workload_stats);
+THREAD_LOCAL_NO_CHECK(RequestWorkloadStats, s_request_workload_stats);
 InitFiniNode init(RequestWorkloadStats::LoggingInit,
                   InitFiniNode::When::ProcessInit);
 InitFiniNode t_init([] () { s_request_workload_stats.getCheck(); },

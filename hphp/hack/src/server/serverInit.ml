@@ -432,8 +432,18 @@ module ServerInitCommon = struct
    * current files in the repository (fast). We grab the declarations from both
    * , to account for both the declaratons that were deleted and those that
    * are newly created. Then we use the deptable to figure out the files
-   * that referred to them. Finally we recheck the lot. *)
-  let type_check_dirty genv env old_fast fast dirty_files t =
+   * that referred to them. Finally we recheck the lot.
+   * Args:
+   *
+   * genv, env : environments
+   * old_fast: old file-ast from saved state
+   * fast: newly parsed file ast
+   * dirty_files: we need to typecheck these and,
+   *    since their decl have changed, also all of their dependencies
+   * similar_files: we only need to typecheck these,
+   *    not their dependencies since their decl are unchanged
+   **)
+  let type_check_dirty genv env old_fast fast dirty_files similar_files t =
     let start_time = Unix.gettimeofday () in
     let fast = get_dirty_fast old_fast fast dirty_files in
     let names = Relative_path.Map.fold fast ~f:begin fun _k v acc ->
@@ -441,6 +451,8 @@ module ServerInitCommon = struct
     end ~init:FileInfo.empty_names in
     let deps = get_all_deps names in
     let to_recheck = Typing_deps.get_files deps in
+    (* We still need to typecheck files whose declarations did not change *)
+    let to_recheck = Relative_path.Set.union to_recheck similar_files in
     let fast = extend_fast fast env.files_info to_recheck in
     let result = type_check genv env fast t in
     HackEventLogger.type_check_dirty start_time
@@ -636,7 +648,7 @@ module ServerEagerInit : InitKind = struct
         failed_parsing =
           Relative_path.Set.union env.failed_parsing changed_while_parsing;
       } in
-      type_check_dirty genv env old_fast fast dirty_files t, state
+      type_check_dirty genv env old_fast fast dirty_files Relative_path.Set.empty t, state
     | Error err ->
       (* Fall back to type-checking everything *)
       SharedMem.cleanup_sqlite ();
@@ -872,6 +884,28 @@ module ServerLazyInit : InitKind = struct
         failed_parsing =
           Relative_path.Set.union env.failed_parsing changed_while_parsing;
       } in
+
+      (* Separate the dirty files from the files whose decl only changed *)
+      (* Here, for each dirty file, we compare its hash to the one saved
+      in the saved state. If the hashes are the same, then the declarations
+      on the file have not changed and we only need to retypecheck that file,
+      not all of its dependencies.
+      We call these files "similar" to their previous versions. *)
+      let similar_files, dirty_files = Relative_path.Set.partition
+      (fun f ->
+          let info1 = Relative_path.Map.get old_info f in
+          let info2 = Relative_path.Map.get env.files_info f in
+          match info1, info2 with
+          | Some x, Some y ->
+            (match x.FileInfo.hash, y.FileInfo.hash with
+            | Some x, Some y ->
+              Digest.equal x y
+            | _ ->
+              false)
+          | _ ->
+            false
+        ) dirty_files in
+
       let env = { env with
         files_info=Relative_path.Map.union env.files_info old_info;
       } in
@@ -879,7 +913,8 @@ module ServerLazyInit : InitKind = struct
       let t = update_files genv env.files_info t in
 
       let t = update_search old_saved t in
-      type_check_dirty genv env old_fast fast dirty_files t, state
+
+      type_check_dirty genv env old_fast fast dirty_files similar_files t, state
     | Error err ->
       (* Fall back to type-checking everything *)
       fallback_init genv env err, state

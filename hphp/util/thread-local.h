@@ -44,9 +44,7 @@ inline uintptr_t tlsBase() {
   // tpidr_el0 == "thread process id register for exception level 0"
   asm ("mrs %0, tpidr_el0" : "=r" (retval));
 #elif defined (__powerpc64__)
-  asm ("xor %0,%0,%0\n\t"
-       "or  %0,%0,13\n\t"
-      : "=r" (retval));
+  asm ("mr  %0,13" : "=r" (retval));
 #elif defined(_M_X64)
   retval = (uintptr_t)__readgsqword(88);
   retval = *(uintptr_t*)(retval + (_tls_index * 8));

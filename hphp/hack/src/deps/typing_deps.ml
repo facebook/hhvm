@@ -187,6 +187,7 @@ let update_files fileInfo =
          consts;
          comments = _;
          file_mode = _;
+         hash = _;
         } = info in
     let consts = List.fold_left consts ~f: begin fun acc (_, const_id) ->
       DepSet.add acc (Dep.make (Dep.GConst const_id))

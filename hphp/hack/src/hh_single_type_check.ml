@@ -495,6 +495,7 @@ let parse_name_and_decl popt files_contents tcopt =
         let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
         { FileInfo.
           file_mode; funs; classes; typedefs; consts; comments = Some comments;
+          hash = None;
         }
       end parsed_files in
 

@@ -46,11 +46,15 @@ type mode =
 type name_type = Fun | Class | Typedef | Const
 type pos = Full of Pos.t | File of name_type * Relative_path.t
 type id = pos  * string
+(* The hash value of a decl AST.
+  We use this to see if two versions of a file are "similar", i.e. their
+  declarations only differ by position information.  *)
 
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
 type t = {
+  hash : Digest.t option;
   file_mode : mode option;
   funs : id list;
   classes : id list;
@@ -61,6 +65,7 @@ type t = {
 }
 
 let empty_t = {
+  hash = None;
   file_mode = None;
   funs = [];
   classes = [];
@@ -90,6 +95,7 @@ type names = {
 (* Data structure stored in the saved state *)
 type saved = {
   s_names : names;
+  s_hash : Digest.t option;
   s_mode: mode option;
 }
 
@@ -125,7 +131,7 @@ let saved_to_hack_files fast =
 let saved_to_info fast =
   Relative_path.Map.fold fast ~init:Relative_path.Map.empty
   ~f:(fun fn saved acc ->
-    let {s_names; s_mode} = saved in
+    let {s_names; s_mode; s_hash} = saved in
     let {n_funs; n_classes; n_types; n_consts;} = s_names in
     let funs = List.map (SSet.elements n_funs)
       (fun x -> File (Fun, fn), x) in
@@ -137,6 +143,7 @@ let saved_to_info fast =
       (fun x -> File (Const, fn), x) in
     let fileinfo = {
       file_mode= s_mode;
+      hash = s_hash;
       funs;
       classes;
       typedefs;
@@ -149,17 +156,19 @@ let saved_to_info fast =
 let info_to_saved fileinfo =
   Relative_path.Map.map fileinfo
     (fun info ->
-      let {funs; classes; typedefs; consts; file_mode= s_mode; comments = _; } = info in
+      let {funs; classes; typedefs; consts; file_mode= s_mode;
+          hash= s_hash; comments = _; } = info in
       let n_funs    = name_set_of_idl funs in
       let n_classes = name_set_of_idl classes in
       let n_types   = name_set_of_idl typedefs in
       let n_consts  = name_set_of_idl consts in
+
       let s_names = { n_funs; n_classes; n_types; n_consts; } in
-      { s_names; s_mode })
+      { s_names; s_mode; s_hash; })
 
 let simplify info =
   let {funs; classes; typedefs; consts; file_mode = _; comments = _;
-      } = info in
+      hash = _;} = info in
   let n_funs    = name_set_of_idl funs in
   let n_classes = name_set_of_idl classes in
   let n_types   = name_set_of_idl typedefs in

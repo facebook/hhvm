@@ -169,6 +169,7 @@ let remove_decls env fast_parsed =
              consts = constl;
              file_mode = _;
              comments = _;
+             hash = _;
            } ->
       let funs = set_of_idl funl in
       let classes = set_of_idl classel in

@@ -37,6 +37,9 @@ enum Attr {
   // Does this function return by reference?     |          |         //
   AttrReference            = (1 <<  0), //       |          |    X    //
                                         //       |          |         //
+  // Class forbids dynamic properties?  //       |          |         //
+  AttrForbidDynamicProps   = (1 <<  0), //   X   |          |         //
+                                        //       |          |         //
   // Method visibility.  The relative ordering of these is important. //
   // N.B. the values are overlayed with some of the no-override bits for magic
   // class methods (next), since they don't apply to classes.
@@ -135,6 +138,12 @@ enum Attr {
   // Set on all properties that should not be serialized (e.g.
   // <<__Memoize> caches).  Reuses the AttrBuiltin bit.
   AttrNoSerialize          = (1 << 20), //       |    X     |         //
+                                        //       |          |         //
+  // Set on properties to indicate they can't be changed after construction
+  // and on classes to indicate that all that class' properties are immutable.
+  AttrIsImmutable          = (1 << 21), //    X  |    X     |         //
+  // Set on classes to indicate that they have at least one immutable property.
+  AttrHasImmutable         = (1 << 22), //    X  |          |         //
                                         //       |          |         //
   // Indicates that the frame should be ignored when searching for context
   // (e.g., array_map evalutates its callback in the context of the caller).

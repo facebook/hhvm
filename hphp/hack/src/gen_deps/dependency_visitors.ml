@@ -14,6 +14,7 @@
  *)
 open Ast
 open Typing_deps
+open Core
 
 
 type dep_env = {
@@ -23,6 +24,9 @@ type dep_env = {
 
   (* The namespace we are currently in *)
   nsenv: Namespace_env.env option;
+
+  (* Whether to add extends dependencies *)
+  extends: bool
 }
 
 
@@ -30,6 +34,7 @@ let default_env popt = {
   popt;
   top = None;
   nsenv = None;
+  extends = false;
 }
 
 let debug_mode = ref false
@@ -49,11 +54,10 @@ let add_dep root obj =
     else
     Typing_deps.add_idep r obj
 
-
 (* Check if the hint refers to a class of some sort,
   and then add a dependency if it's the case *)
 let add_class_dep dep_env id =
-  let {popt; top; nsenv } = dep_env in
+  let {popt; top; nsenv; extends} = dep_env in
   match nsenv with
   | None -> assert (top = None)
   | Some nsenv ->
@@ -61,7 +65,10 @@ let add_class_dep dep_env id =
   let (_, ty_name) = elaborate_id nsenv ElaborateClass id in
   match NamingGlobal.GEnv.type_info popt ty_name with
   | Some _ ->
-    add_dep top (Dep.Class ty_name)
+    if extends then
+      add_dep top (Dep.Extends ty_name)
+    else
+      add_dep top (Dep.Class ty_name)
   | None -> ()
 
 let add_fun_dep dep_env id =
@@ -80,7 +87,7 @@ let add_fun_dep dep_env id =
 
 
 let add_const_dep dep_env id =
-  let {top; nsenv; popt;} = dep_env in
+  let {top; nsenv; popt; _} = dep_env in
   match nsenv with
   | None -> ()
   | Some nsenv ->
@@ -117,12 +124,25 @@ class dependency_visitor = object(this)
     } in
     super#on_fun_ dep_env f
 
+  (* Given a list of hints, add extends deps to all of them *)
+  method add_extends_deps dep_env l =
+  List.iter l
+  ~f:(fun h ->
+    this#on_hint { dep_env with extends=true } h
+  );
+
+  method! on_ClassUse dep_env h =
+    this#add_extends_deps dep_env [h];
+    super#on_ClassUse dep_env h
+
   method! on_class_ dep_env c =
     let dep_env = {
       dep_env with
       top = Some (Dep.Class (snd c.c_name));
       nsenv = Some c.c_namespace;
     } in
+    this#add_extends_deps dep_env c.c_extends;
+    this#add_extends_deps dep_env c.c_implements;
     super#on_class_ dep_env c
 
   method! on_typedef dep_env t =

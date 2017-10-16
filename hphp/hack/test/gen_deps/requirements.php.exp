@@ -4,5 +4,9 @@ Class \Foo -> Class \Bar
 Class \Foo -> Class \FooParent
 Class \Foo -> Class \G
 Class \Foo -> Class \IFoo
+Class \Foo -> Extends \Bar
+Class \Foo -> Extends \FooParent
+Class \Foo -> Extends \G
+Class \Foo -> Extends \IFoo
 Class \IFoo -> Class \FooParent
 Class \IFoo -> Class \G

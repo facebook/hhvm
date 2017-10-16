@@ -1,4 +1,8 @@
 Class \Bar -> Class \Foo
+Class \Bar -> Extends \Foo
 Class \Baz -> Class \Bar
+Class \Baz -> Extends \Bar
 Class \N\Bar -> Class \N\Foo
+Class \N\Bar -> Extends \N\Foo
 Class \Qux -> Class \N\Foo
+Class \Qux -> Extends \N\Foo

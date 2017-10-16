@@ -399,53 +399,55 @@ let serve genv env in_fd _ =
     flag := next_iteration_flag;
   done
 
+let resolve_init_approach genv =
+  if not genv.local_config.ServerLocalConfig.use_mini_state then
+    None, "Local_config_mini_state_disabled"
+  else if ServerArgs.no_load genv.options then
+    None, "Server_args_no_load"
+  else if ServerArgs.save_filename genv.options <> None then
+    None, "Server_args_saving_state"
+  else
+    match
+      (ServerConfig.load_mini_script genv.config),
+      (genv.local_config.ServerLocalConfig.load_state_natively),
+      (ServerArgs.with_mini_state genv.options) with
+      | None, _, None ->
+        None, "No_mini_script_or_precomputed"
+      | Some _, true, None ->
+        (** Use native loading only if the config specifies a load script,
+         * and the local config prefers native. *)
+        Some ServerInit.Load_state_natively, "Load_state_natively"
+      | Some load_mini_script, false, None ->
+        Some (ServerInit.Load_mini_script load_mini_script), "Load_mini_script"
+      | None, _, Some target ->
+        Some (ServerInit.Precomputed target), "Precomputed"
+      | Some _, _, Some target ->
+        Hh_logger.log "Warning - Both a mini script in the server config %s"
+          "and a mini state target in server args are configured";
+        Hh_logger.log "Ignoring the script and using precomputed target";
+        Some (ServerInit.Precomputed target), "Precompute_override"
+
 let program_init genv =
+  let load_mini_approach, approach_name = resolve_init_approach genv in
   let env, init_type, state_distance =
-    (* If we are saving, always start from a fresh state -- just in case
-     * incremental mode introduces any errors. *)
-    if genv.local_config.ServerLocalConfig.use_mini_state &&
-      not (ServerArgs.no_load genv.options) &&
-      ServerArgs.save_filename genv.options = None then
-      let load_mini_approach = match
-        (ServerConfig.load_mini_script genv.config),
-        (genv.local_config.ServerLocalConfig.load_state_natively),
-        (ServerArgs.with_mini_state genv.options) with
-        | None, _, None ->
-          None
-        | Some _, true, None ->
-          (** Use native loading only if the config specifies a load script,
-           * and the local config prefers native. *)
-          Some ServerInit.Load_state_natively
-        | Some load_mini_script, false, None ->
-          Some (ServerInit.Load_mini_script load_mini_script)
-        | None, _, Some target ->
-          Some (ServerInit.Precomputed target)
-        | Some _, _, Some target ->
-          Hh_logger.log "Warning - Both a mini script in the server config %s"
-            "and a mini state target in server args are configured";
-          Hh_logger.log "Ignoring the script and using precomputed target";
-          Some (ServerInit.Precomputed target)
-      in
-      match load_mini_approach with
-      | None ->
-        let env, _ = ServerInit.init genv in
-        env, "fresh", None
-      | Some load_mini_approach ->
-        let env, init_result = ServerInit.init ~load_mini_approach genv in
-        match init_result with
-          | ServerInit.Mini_load distance -> env, "mini_load", distance
-          | ServerInit.Mini_load_failed err -> env, err, None
-    else
+    match load_mini_approach with
+    | None ->
       let env, _ = ServerInit.init genv in
       env, "fresh", None
+    | Some load_mini_approach ->
+      let env, init_result = ServerInit.init ~load_mini_approach genv in
+      begin match init_result with
+        | ServerInit.Mini_load distance -> env, "mini_load", distance
+        | ServerInit.Mini_load_failed err -> env, err, None
+      end
   in
   let timeout = genv.local_config.ServerLocalConfig.load_mini_script_timeout in
   EventLogger.set_init_type init_type;
-  HackEventLogger.init_end ~state_distance init_type timeout;
+  HackEventLogger.init_end ~state_distance ~approach_name init_type timeout;
   Hh_logger.log "Waiting for daemon(s) to be ready...";
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
-  HackEventLogger.init_really_end ~state_distance init_type;
+  HackEventLogger.init_really_end ~state_distance ~approach_name init_type;
   env
 
 let setup_server ~informant_managed options handle =

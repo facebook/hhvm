@@ -15,89 +15,113 @@ module SyntaxError = Full_fidelity_syntax_error
 module Trivia = Full_fidelity_minimal_trivia
 module Token = Full_fidelity_minimal_token
 
-type t = {
-  text : SourceText.t;
-  start : int;  (* Both start and offset are absolute offsets in the text. *)
-  offset : int;
-  errors : SyntaxError.t list
-}
+module Lexer : sig
+  type t
+  val make : SourceText.t -> t
+  val start : t -> int
+  val source : t -> SourceText.t
+  val errors : t -> SyntaxError.t list
+  val offset : t -> int
 
-type lexer = t
+  val with_error : t -> string -> t
+  val with_offset : t -> int -> t
+  val with_offset_errors : t -> int -> SyntaxError.t list -> t
+  val start_new_lexeme : t -> t
+  val advance : t -> int -> t
+end = struct
+  type t = {
+    text : SourceText.t;
+    start : int;  (* Both start and offset are absolute offsets in the text. *)
+    offset : int;
+    errors : SyntaxError.t list
+  }
+
+  let make text =
+    { text; start = 0; offset = 0; errors = [] }
+
+  let start  x = x.start
+  let source x = x.text
+  let errors x = x.errors
+  let offset x = x.offset
+
+  let with_error lexer message =
+    let error = SyntaxError.make lexer.start lexer.offset message in
+    { lexer with errors = error :: lexer.errors }
+
+  let with_offset lexer offset = {lexer with offset = offset}
+
+  let with_offset_errors lexer offset errors = {
+    lexer with offset = offset; errors = errors
+  }
+
+  let start_new_lexeme lexer =
+    { lexer with start = lexer.offset }
+
+  let advance lexer index =
+    { lexer with offset = lexer.offset + index }
+end
+
+type lexer = Lexer.t
+type t = lexer
+
+let make = Lexer.make
+let start = Lexer.start
+let source = Lexer.source
+let errors = Lexer.errors
+let offset = Lexer.offset
+let with_error = Lexer.with_error
+let with_offset = Lexer.with_offset
+let start_new_lexeme = Lexer.start_new_lexeme
+let advance = Lexer.advance
+let with_offset_errors = Lexer.with_offset_errors
+
+let start_offset = start
+let end_offset = offset
 
 let invalid = '\000'
 
-let make text =
-  { text; start = 0; offset = 0; errors = [] }
-
 let empty = make SourceText.empty
-
-let source lexer =
-  lexer.text
-
-let errors lexer =
-  lexer.errors
-
-let with_error lexer message =
-  let error = SyntaxError.make lexer.start lexer.offset message in
-  { lexer with errors = error :: lexer.errors }
 
 (* Housekeeping *)
 
-let start_new_lexeme lexer =
-  { lexer with start = lexer.offset }
-
 let peek_char lexer index =
-  let i = lexer.offset + index in
-  if i >= SourceText.length lexer.text || i < 0 then invalid
-  else SourceText.get lexer.text i
+  let i = offset lexer + index in
+  if i >= SourceText.length (source lexer) || i < 0 then invalid
+  else SourceText.get (source lexer) i
 
 let peek_string lexer size =
-  let r = (SourceText.length lexer.text) - lexer.offset in
+  let r = (SourceText.length (source lexer)) - offset lexer in
   if r < 0 then ""
-  else if r < size then SourceText.sub lexer.text lexer.offset r
-  else SourceText.sub lexer.text lexer.offset size
+  else if r < size then SourceText.sub (source lexer) (offset lexer) r
+  else SourceText.sub (source lexer) (offset lexer) size
 
 let match_string lexer s =
   s = peek_string lexer (String.length s)
 
 let make_error_with_location (l : lexer) (msg : string) =
-  SyntaxError.make l.start l.offset msg
-
-let advance lexer index =
-  match index with
-  | 0 -> lexer
-  | _ -> { lexer with offset = lexer.offset + index }
-
-let with_offset lexer offset =
-  if offset = lexer.offset then lexer else {lexer with offset = offset}
+  SyntaxError.make (start l) (offset l) msg
 
 let width lexer =
-  lexer.offset - lexer.start
+  (offset lexer) - (start lexer)
 
 let current_text lexer =
-  SourceText.sub lexer.text lexer.start (width lexer)
+  SourceText.sub (source lexer) (start lexer) (width lexer)
 
 let current_text_at lexer length relative_start =
-  SourceText.sub lexer.text (lexer.start + relative_start) length
+  SourceText.sub (source lexer) ((start lexer) + relative_start) length
 
 let at_end lexer =
-  lexer.offset >= SourceText.length lexer.text
+  (offset lexer) >= SourceText.length (source lexer)
 
 let remaining lexer =
-  let r = (SourceText.length lexer.text) - lexer.offset in
+  let r = (SourceText.length (source lexer)) - offset lexer in
   if r < 0 then 0 else r
 
-let start_offset lexer =
-  lexer.start
-
-let end_offset lexer =
-  lexer.offset
-
 let text_len (l : lexer) =
-  SourceText.length l.text
+  SourceText.length (source l)
 
 let peek (l : lexer) i =
-  SourceText.get l.text i
+  SourceText.get (source l) i
 
 (* Character classification *)
 
@@ -132,13 +156,13 @@ let is_name_letter ch =
 (* create a new lexer where the offset is advanced as
  * long as the predicate is true *)
 let skip_while (l : lexer) (p : char -> bool) =
-  let n = SourceText.length l.text in
-  let peek = SourceText.get l.text in
+  let n = SourceText.length (source l) in
+  let peek = SourceText.get (source l) in
 
   let rec aux i =
     if i < n && p (peek i) then aux (i + 1) else i in
 
-  with_offset l (aux l.offset)
+  with_offset l (aux (offset l))
 
 let skip_whitespace (l : lexer) =
   let is_space ch = (ch = '\t' || ch = ' ') in
@@ -159,7 +183,7 @@ let skip_to_end_of_line_or_end_tag (l : lexer) =
       (is_newline ch) || (ch = '?' && peek_def (succ i) = '>')
     end in
 
-  let i = ref l.offset in
+  let i = ref (offset l) in
   while (not (should_stop !i)) do incr i done;
   with_offset l !i
 
@@ -233,7 +257,7 @@ let scan_with_underscores (l : lexer) accepted_char =
         aux (2 + i)
       else i in
 
-  with_offset l (aux l.offset)
+  with_offset l (aux (offset l))
 
 let scan_decimal_digits (l : lexer) =
   skip_while l is_decimal_digit
@@ -359,8 +383,8 @@ let scan_execution_string_literal (l : lexer) =
   TODO: Are there any illegal characters in execution strings?
   *)
 
-  let n = SourceText.length l.text in
-  let peek = SourceText.get l.text in
+  let n = SourceText.length (source l) in
+  let peek = SourceText.get (source l) in
 
   let has_error0012 = ref false in
   let has_error0006 = ref false in
@@ -376,17 +400,17 @@ let scan_execution_string_literal (l : lexer) =
       | _      -> (last_pos (1 + i))
     end in
 
-  let new_offset = last_pos (1 + l.offset) in
+  let new_offset = last_pos (1 + (offset l)) in
 
   let new_errors =
     let err msg = make_error_with_location l msg in
     match (!has_error0006, !has_error0012) with
-    | (true, true) -> (err SyntaxError.error0006 :: err SyntaxError.error0012 :: l.errors)
-    | (true, false) -> (err SyntaxError.error0006 :: l.errors)
-    | (false, true) -> (err SyntaxError.error0012 :: l.errors)
-    | (false, false) -> l.errors in
+    | (true, true) -> (err SyntaxError.error0006 :: err SyntaxError.error0012 :: (errors l))
+    | (true, false) -> (err SyntaxError.error0006 :: (errors l))
+    | (false, true) -> (err SyntaxError.error0012 :: (errors l))
+    | (false, false) -> (errors l) in
 
-  let res = { l with errors = new_errors; offset = new_offset } in
+  let res = with_offset_errors l new_offset new_errors in
   (res, TokenKind.ExecutionString)
 
 let scan_single_quote_string_literal (l : lexer) =
@@ -410,8 +434,8 @@ let scan_single_quote_string_literal (l : lexer) =
 
   *)
 
-  let n = SourceText.length l.text in
-  let peek = SourceText.get l.text in
+  let n = SourceText.length (source l) in
+  let peek = SourceText.get (source l) in
 
   let has_error0012 = ref false in
   let has_error0006 = ref false in
@@ -428,17 +452,17 @@ let scan_single_quote_string_literal (l : lexer) =
       | _ -> stepper (1+i)
     end in
 
-  let new_offset = stepper (1 + l.offset) in
+  let new_offset = stepper (1 + (offset l)) in
 
   let new_errors =
     let err msg = make_error_with_location l msg in
     match (!has_error0006, !has_error0012) with
-    | (true, true) -> (err SyntaxError.error0006 :: err SyntaxError.error0012 :: l.errors)
-    | (true, false) -> (err SyntaxError.error0006 :: l.errors)
-    | (false, true) -> (err SyntaxError.error0012 :: l.errors)
-    | (false, false) -> l.errors in
+    | (true, true) -> (err SyntaxError.error0006 :: err SyntaxError.error0012 :: (errors l))
+    | (true, false) -> (err SyntaxError.error0006 :: (errors l))
+    | (false, true) -> (err SyntaxError.error0012 :: (errors l))
+    | (false, false) -> (errors l) in
 
-  let res = { l with errors = new_errors; offset = new_offset } in
+  let res = with_offset_errors l new_offset new_errors in
   (res, TokenKind.SingleQuotedStringLiteral)
 
 let scan_hexadecimal_escape lexer =
@@ -676,7 +700,7 @@ let scan_string_literal_in_progress lexer name =
       let (lexer1, _) as literal = scan_integer_literal lexer in
       if errors lexer == errors lexer1 then literal else
         (* If we failed to scan a literal, do not interpret the literal *)
-        ({ lexer with offset = lexer1.offset }, TokenKind.StringLiteralBody)
+        (with_offset lexer (offset lexer1), TokenKind.StringLiteralBody)
     | _ ->
       (* Nothing interesting here. Skip it and find the next
          interesting character. *)
@@ -719,7 +743,7 @@ let scan_docstring_name_actual lexer =
   if is_name_nondigit ch then
     let end_lexer = skip_name_end (advance lexer 1) in
     let name = SourceText.sub
-      lexer.text lexer.offset (end_lexer.offset - lexer.offset) in
+      (source lexer) (offset lexer) (offset end_lexer - offset lexer) in
     (end_lexer, name)
   else
     let lexer = with_error lexer SyntaxError.error0008 in
@@ -1120,7 +1144,7 @@ let scan_single_line_comment lexer =
   let lexer_ws = skip_whitespace lexer in
   let lexer = skip_to_end_of_line_or_end_tag lexer_ws in
   let w = width lexer in
-  let remainder = lexer.offset - lexer_ws.offset in
+  let remainder = offset lexer - offset lexer_ws in
   let c =
     if remainder = 11 && peek_string lexer_ws 11 = "FALLTHROUGH" then
       Trivia.make_fallthrough w
@@ -1363,7 +1387,7 @@ let scan_assert_progress tokenizer lexer  =
       (lexer, token)
   else begin
     let message = Printf.sprintf
-      "failed to make progress at %d\n" lexer.offset in
+      "failed to make progress at %d\n" (offset lexer) in
     print_endline message;
     assert false
   end
@@ -1447,8 +1471,8 @@ let next_xhp_element_token ~no_trailing ~attribute lexer =
   let (lexer, token) = scan_assert_progress tokenizer lexer in
   let token_width = Token.width token in
   let trailing_width = Token.trailing_width token in
-  let token_start_offset = lexer.offset - trailing_width - token_width in
-  let token_text = SourceText.sub lexer.text token_start_offset token_width in
+  let token_start_offset = (offset lexer) - trailing_width - token_width in
+  let token_text = SourceText.sub (source lexer) token_start_offset token_width in
   (lexer, token, token_text)
 
 let next_xhp_body_token lexer =

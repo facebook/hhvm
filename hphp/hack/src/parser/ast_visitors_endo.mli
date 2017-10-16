@@ -1224,6 +1224,11 @@ class virtual ['b] endo :
             Ast_visitors_ancestors.stmt ->
             Ast_visitors_ancestors.pstring ->
             Ast_visitors_ancestors.stmt
+    method on_Markup : 'c ->
+            Ast_visitors_ancestors.stmt ->
+            Ast_visitors_ancestors.pstring ->
+            Ast_visitors_ancestors.expr option ->
+            Ast_visitors_ancestors.stmt
     method on_Gt :
       'c -> Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop
     method on_Gte :

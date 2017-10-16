@@ -51,8 +51,8 @@ let handle_errors : Errors.t -> unit = fun errorl ->
     exit_with ParseError
   end
 
-let run_ast : Relative_path.t -> Parser_hack.parser_return = fun file ->
-  let parse_call () = Parser_hack.from_file ParserOptions.default file in
+let run_ast ?(quick=false) file =
+  let parse_call () = Parser_hack.from_file ParserOptions.default ~quick file in
   let errorl, result, _ = Errors.do_ parse_call in
   handle_errors errorl;
   result
@@ -300,9 +300,15 @@ let compare_comments filename ast_result ffp_result =
   " filename (String.concat "" diff);
   end
 
-let run_parsers (file : Relative_path.t) (conf : parser_config)
+let run_parsers (file : Relative_path.t) (conf : parser_config) ~hash
   = match conf with
-  | AST -> Printf.printf "%s" (dump_sexpr (run_ast file).Parser_hack.ast)
+  | AST ->
+    let ast = (run_ast file).Parser_hack.ast in
+    if hash then
+    let decl_hash = Ast_utils.generate_ast_decl_hash ast in
+    Printf.printf "%s" (Digest.to_hex decl_hash)  
+    else
+    Printf.printf "%s" (dump_sexpr ast)
   | FFP -> Printf.printf "%s" (dump_sexpr (run_ffp file).Lowerer.ast)
   | ValidatedFFP ->
     Printf.printf "%s" (dump_sexpr (run_validated_ffp file).Lowerer.ast)
@@ -346,6 +352,7 @@ let () =
   Printexc.record_backtrace true;
   let use_parser = ref "ast"  in
   let use_diff   = ref "diff" in
+  let hash = ref false in
   let filename   = ref ""     in
   Arg.(parse
     [ ("--parser", Set_string use_parser,
@@ -354,6 +361,10 @@ let () =
     ; ("--diff", Set_string use_diff,
         "Which diff tool to compare different S-Expressions with [def: vimdiff]"
       )
+    ; ("--hash", Set hash,
+      "Get the decl level parsing hash of a given file "
+      )
+    ;
     ]) (fun fn -> filename := fn) usage;
   let parse_function = match !use_parser with
     | "ast"       -> AST
@@ -368,5 +379,5 @@ let () =
   let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   Unix.handle_unix_error (fun fn ->
     let file = Relative_path.create Relative_path.Dummy fn in
-    run_parsers file parse_function
+    run_parsers file ~hash:!hash parse_function
   ) !filename

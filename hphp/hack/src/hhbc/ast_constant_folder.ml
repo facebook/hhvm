@@ -393,7 +393,6 @@ object (self)
       end
     | _, _ -> default ()
 
-  method on_Markup _ parent _ _ = parent
 end
 
 let fold_expr ns e =

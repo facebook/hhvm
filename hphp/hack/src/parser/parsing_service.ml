@@ -56,9 +56,9 @@ let process_parse_result
     let mode = if quick then Parser_heap.Decl else Parser_heap.Full in
     Parser_heap.ParserHeap.write_through fn (ast, mode);
     let comments = Some comments in
-    (* In the diff above, this gets updated *)
+    let hash = Some (Ast_utils.generate_ast_decl_hash ast) in
     let defs =
-      {FileInfo.funs; classes; typedefs; consts; comments; file_mode; hash=None}
+      {FileInfo.hash; funs; classes; typedefs; consts; comments; file_mode}
     in
     let acc = Relative_path.Map.add acc ~key:fn ~data:defs in
     let errorl = Errors.merge errorl' errorl in

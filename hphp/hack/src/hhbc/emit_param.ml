@@ -38,7 +38,6 @@ object(_)
     let cid = resolve_class_id ~scope cid in
     A.Class_const (cid, id)
 
-  method on_Markup _ parent _ _ = parent
 end
 
 let get_hint_display_name hint =

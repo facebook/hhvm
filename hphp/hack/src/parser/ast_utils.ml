@@ -62,6 +62,28 @@ class ast_get_defs_visitor = object (this)
     def :: acc
 end
 
+let ast_no_pos_mapper = object (self)
+  inherit [_] Ast_visitors.endo
+  method! private on_Pos_t () pos = Pos.none
+  (* Skip all blocks because we don't care about method bodies *)
+  method! on_block env _ = self#on_list self#on_stmt env [Ast.Noop]
+end
+
+(* Given an AST, return an AST with no position info *)
+let remove_pos ast =
+  ast_no_pos_mapper#on_program () ast
+
+(* Given an AST, generate a unique hash for its decl tree. *)
+let generate_ast_decl_hash ast =
+  (* Why we marshal it into a string first: regular Hashtbl.hash will
+    collide improperly because it doesn't compare ADTs with strings correctly.
+    Using Marshal, we guarantee that the two ASTs are represented by a single
+    primitive type, which we hash.
+  *)
+  let str = Marshal.to_string (remove_pos ast) [] in
+  Digest.string str
+
+
 let get_def_nodes ast =
   List.rev ((new ast_get_defs_visitor)#on_program [] ast)
 

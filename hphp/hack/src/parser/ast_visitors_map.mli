@@ -812,6 +812,9 @@ class virtual ['c] map :
     method on_Cst_const : 'd -> Ast_visitors_ancestors.cst_kind
     method on_Cst_define : 'd -> Ast_visitors_ancestors.cst_kind
     method on_Ctrait : 'd -> Ast_visitors_ancestors.class_kind
+    method on_Def_inline : 'd ->
+                    Ast_visitors_ancestors.def ->
+                    Ast_visitors_ancestors.stmt
     method on_Default :
       'd -> Ast_visitors_ancestors.block -> Ast_visitors_ancestors.case
     method on_Diff : 'd -> Ast_visitors_ancestors.bop
@@ -872,6 +875,10 @@ class virtual ['c] map :
     method on_Goto : 'd ->
               Ast_visitors_ancestors.pstring ->
               Ast_visitors_ancestors.stmt
+    method on_Markup : 'd ->
+                    Ast_visitors_ancestors.pstring ->
+                    Ast_visitors_ancestors.expr option ->
+                    Ast_visitors_ancestors.stmt
     method on_Gt : 'd -> Ast_visitors_ancestors.bop
     method on_Gte : 'd -> Ast_visitors_ancestors.bop
     method on_Gtgt : 'd -> Ast_visitors_ancestors.bop

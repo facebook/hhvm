@@ -3420,7 +3420,15 @@ void Index::init_return_type(const php::Func* func) {
       tcT = loosen_all(std::move(tcT));
     }
   }
+  FTRACE(4, "Pre-fixup return type for {}{}{}: {}\n",
+         func->cls ? func->cls->name->data() : "",
+         func->cls ? "::" : "",
+         func->name, show(tcT));
   fixup_return_type(func, tcT);
+  FTRACE(3, "Initial return type for {}{}{}: {}\n",
+         func->cls ? func->cls->name->data() : "",
+         func->cls ? "::" : "",
+         func->name, show(tcT));
   fdata.returnTy = std::move(tcT);
 }
 

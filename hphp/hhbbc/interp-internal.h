@@ -726,10 +726,19 @@ void refineLocHelper(ISS& env, LocalId l, Type t) {
 
 template<typename F>
 void refineLocation(ISS& env, LocalId l, F fun) {
+  auto refine = [&] (Type t) {
+    auto r1 = fun(t);
+    auto r2 = intersection_of(r1, t);
+    // In unusual edge cases (mainly intersection of two unrelated
+    // interfaces) the intersection may not be a subtype of its inputs.
+    // In that case, always choose fun's type.
+    if (r2.subtypeOf(r1)) return r2;
+    return r1;
+  };
   if (l == StackDupId) {
     auto stk = &env.state.stack.back();
     while (true) {
-      stk->type = fun(std::move(stk->type));
+      stk->type = refine(std::move(stk->type));
       if (stk->equivLoc != StackDupId) break;
       assertx(stk != &env.state.stack.front());
       --stk;
@@ -740,11 +749,11 @@ void refineLocation(ISS& env, LocalId l, F fun) {
   auto equiv = findLocEquiv(env, l);
   if (equiv != NoLocalId) {
     do {
-      refineLocHelper(env, equiv, fun(peekLocRaw(env, equiv)));
+      refineLocHelper(env, equiv, refine(peekLocRaw(env, equiv)));
       equiv = findLocEquiv(env, equiv);
     } while (equiv != l);
   }
-  refineLocHelper(env, l, fun(peekLocRaw(env, l)));
+  refineLocHelper(env, l, refine(peekLocRaw(env, l)));
 }
 
 template<typename PreFun, typename PostFun>

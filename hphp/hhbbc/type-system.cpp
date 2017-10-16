@@ -1523,16 +1523,25 @@ bool Type::couldBeData(const Type& o) const {
     not_reached();
   case DataTag::Obj:
   {
-    if ((m_data.dobj.type == o.m_data.dobj.type &&
-         m_data.dobj.cls.same(o.m_data.dobj.cls)) ||
-        ((m_data.dobj.type == DObj::Sub || o.m_data.dobj.type == DObj::Sub) &&
-         m_data.dobj.cls.couldBe(o.m_data.dobj.cls))) {
-      return
-        !o.m_data.dobj.whType ||
-        !m_data.dobj.whType ||
-        m_data.dobj.whType->couldBe(*o.m_data.dobj.whType);
-    }
-    return false;
+    auto couldBe = [&] {
+      if (m_data.dobj.type == o.m_data.dobj.type &&
+          m_data.dobj.cls.same(o.m_data.dobj.cls)) {
+        return true;
+      }
+      if (m_data.dobj.type == DObj::Sub) {
+        if (o.m_data.dobj.type == DObj::Sub) {
+          return o.m_data.dobj.cls.couldBe(m_data.dobj.cls);
+        }
+        return o.m_data.dobj.cls.subtypeOf(m_data.dobj.cls);
+      }
+      if (o.m_data.dobj.type == DObj::Sub) {
+        return m_data.dobj.cls.subtypeOf(o.m_data.dobj.cls);
+      }
+      return false;
+    }();
+    return couldBe && (!o.m_data.dobj.whType ||
+                       !m_data.dobj.whType ||
+                       m_data.dobj.whType->couldBe(*o.m_data.dobj.whType));
   }
   case DataTag::Cls:
     if (m_data.dcls.type == o.m_data.dcls.type &&

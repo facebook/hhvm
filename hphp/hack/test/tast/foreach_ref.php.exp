@@ -52,7 +52,7 @@
              (AnnotatedAST.Expr
                 ((Some _),
                  (AnnotatedAST.Call (Cnormal,
-                    ((Some (function<...>($expression): _)),
+                    ((Some (function($expression, ...): _)),
                      (AnnotatedAST.Id (<p>, "\\var_dump"))),
                     [],
                     [((Some array<int>),

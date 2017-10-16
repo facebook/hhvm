@@ -23,7 +23,7 @@ File "type_structure1.php", line 42, characters 5-48:
 File "type_structure1.php", line 43, characters 5-68:
   classname<C<int>>
 File "type_structure1.php", line 46, characters 5-17:
-  shape(unset fields:)(bar => shape(type => TypeStructure<shape(unset fields:)(x => shape(type => (num, num)))>), foo => shape(type => TypeStructure<D>))
+  shape('bar' => TypeStructure<shape('x' => (num, num), ...)>, 'foo' => TypeStructure<D>, ...)
 File "type_structure1.php", line 47, characters 5-24:
   TypeStructure<D>
 File "type_structure1.php", line 48, characters 5-56:

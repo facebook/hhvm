@@ -1,9 +1,9 @@
 File "shape26.php", line 25, characters 3-13:
-  ^(shape(x => shape(type => ^(int))) | shape(y => shape(type => ^(string))))
+  ^(shape('x' => ^(int)) | shape('y' => ^(string)))
 File "shape26.php", line 33, characters 3-13:
-  ^(shape(x => shape(type => ^(string | int))))
+  ^(shape('x' => ^(string | int)))
 File "shape26.php", line 41, characters 3-13:
-  ^(shape(unset fields:)(x => shape(type => int)) | shape(unset fields:)(x => shape(type => int), y => shape(type => ?string)))
+  ^(shape('x' => int, ...) | shape('x' => int, 'y' => ?string, ...))
 File "shape26.php", line 49, characters 3-13:
-  ^(shape(x => shape(type => ^(int))) | shape(unset fields:)(x => shape(type => int), y => shape(type => ?string)))
+  ^(shape('x' => ^(int)) | shape('x' => int, 'y' => ?string, ...))
 No errors

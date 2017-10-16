@@ -1,0 +1,9 @@
+File "shapes.php", line 11, characters 3-13:
+  shape('a' => int, ?'b' => bool, ?'c' => ?float)
+File "shapes.php", line 19, characters 3-13:
+  shape('a' => int, ...)
+File "shapes.php", line 22, characters 3-13:
+  shape(...)
+File "shapes.php", line 31, characters 3-13:
+  shape('x' => int, ...)(unset fields: b )
+No errors

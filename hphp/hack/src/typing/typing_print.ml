@@ -348,16 +348,6 @@ module Full = struct
     | Tobject -> o "object"
     | Tshape (fields_known, fdm) ->
       o "shape";
-      begin match fields_known with
-      | FieldsFullyKnown -> ()
-      | FieldsPartiallyKnown unset_fields -> begin
-          o "(unset fields:";
-            Nast.ShapeMap.iter begin fun k _ ->
-              o (Env.get_shape_field_name k); o " "
-            end unset_fields;
-          o ")"
-        end
-      end;
       o "(";
       let optional_shape_field_enabled =
         TypecheckerOptions.experimental_feature_enabled
@@ -366,21 +356,39 @@ module Full = struct
       let o_field (shape_map_key, { sft_optional; sft_ty }) =
         if optional_shape_field_enabled then
           begin
-            o (Env.get_shape_field_name shape_map_key);
-            o " => shape(";
-            if sft_optional then o "optional => true, ";
-            o "type => ";
+            if sft_optional then o "?";
+            o "'"; o (Env.get_shape_field_name shape_map_key); o "'";
+            o " => ";
             k sft_ty;
-            o ")"
           end
         else
           begin
-            o (Env.get_shape_field_name shape_map_key);
+            o "'"; o (Env.get_shape_field_name shape_map_key); o "'";
             o " => ";
             k sft_ty
           end in
       shape_map o fdm o_field;
-      o ")"
+      begin match fields_known with
+      | FieldsFullyKnown -> ()
+      | FieldsPartiallyKnown _ -> (match Nast.ShapeMap.elements fdm with
+        | [] -> ()
+        | _ -> o ", "
+        );
+        o "..."
+      end;
+      o ")";
+      begin match fields_known with
+      | FieldsFullyKnown -> ()
+      | FieldsPartiallyKnown unset_fields ->
+        (match Nast.ShapeMap.elements unset_fields with
+          | [] -> ()
+          | _ -> o "(unset fields: ";
+              Nast.ShapeMap.iter begin fun k _ ->
+                o (Env.get_shape_field_name k); o " "
+              end unset_fields;
+            o ")"
+        )
+      end;
 
   and prim o x =
     o (match x with
@@ -397,15 +405,20 @@ module Full = struct
 
   and fun_type: type a. _ -> _ -> _ -> _ -> a fun_type -> _ =
     fun tcopt st env o ft ->
-    (match ft.ft_tparams, ft.ft_arity with
-      | [], Fstandard _ -> ()
-      | [], _ -> o "<...>"
-      | l, Fstandard _ ->
-          (o "<"; list_sep o ", " (tparam tcopt st o env) l; o ">")
-      | l, _ ->
-          (o "<"; list_sep o ", " (tparam tcopt st o env) l; o "..."; o ">")
+    (match ft.ft_tparams with
+      | [] -> ()
+      | l -> (o "<"; list_sep o ", " (tparam tcopt st o env) l; o ">")
     );
-    o "("; list_sep o ", " (fun_param tcopt st env o) ft.ft_params; o "): ";
+    o "("; list_sep o ", " (fun_param tcopt st env o) ft.ft_params;
+    (match ft.ft_arity with
+      | Fstandard _ -> ()
+      | _ -> (match ft.ft_params with
+        | [] -> ()
+        | _ -> o ", "
+        );
+        o "..."
+    );
+    o "): ";
     ty tcopt st env o ft.ft_ret
 
   and fun_param: type a. _ -> _ -> _ -> _ -> a fun_param -> _ =

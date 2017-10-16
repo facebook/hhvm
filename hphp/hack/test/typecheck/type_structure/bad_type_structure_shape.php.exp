@@ -5,7 +5,7 @@ File "bad_type_structure_shape.php", line 5, characters 3-23:
 File "bad_type_structure_shape.php", line 6, characters 3-22:
   ?string
 File "bad_type_structure_shape.php", line 7, characters 3-24:
-  shape(unset fields:)()
+  shape(...)
 File "bad_type_structure_shape.php", line 10, characters 3-27:
   _
 File "bad_type_structure_shape.php", line 11, characters 3-26:
@@ -27,7 +27,7 @@ File "bad_type_structure_shape.php", line 23, characters 3-23:
 File "bad_type_structure_shape.php", line 24, characters 3-22:
   ?string
 File "bad_type_structure_shape.php", line 25, characters 3-24:
-  shape(unset fields:)()
+  shape(...)
 File "bad_type_structure_shape.php", line 28, characters 3-27:
   _
 File "bad_type_structure_shape.php", line 29, characters 3-26:

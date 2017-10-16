@@ -1,0 +1,5 @@
+File "variadic_functions.php", line 5, characters 3-13:
+  (function(...): void)
+File "variadic_functions.php", line 8, characters 3-13:
+  (function(int, ...): void)
+No errors

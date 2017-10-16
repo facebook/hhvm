@@ -2,11 +2,11 @@
 
 require 'logger.inc';
 
-function thrower() {
+function thrower():void {
   throw new Exception('hi');
 }
 
-function main() {
+function main():void {
   echo "Starting main\n";
   using (new Logger()) {
     echo "In first using\n";
@@ -42,7 +42,6 @@ function main() {
 
   using (new Logger(), new Logger(), new Logger()) {
     echo "Triple using!\n";
-    echo "Triple using second line\n";
   }
 
   using (new Logger()) {
@@ -70,12 +69,12 @@ function main() {
   } catch (Exception $e) {
     printf("Caught exception %s\n", $e->getMessage());
   }
-
   echo "Leaving main\n\n";
 }
 
 async function mainAsync() {
   echo "\nStarting mainAsync\n";
+
   await using (new Logger()) {
     echo "Sync create, async dispose\n";
   }
@@ -105,15 +104,15 @@ async function mainAsync() {
   } catch (Exception $e) {
     printf("Caught exception %s\n", $e->getMessage());
   }
-
   echo "Leaving mainAsync\n\n";
 }
-
+/*
 main();
 HH\Asio\join(mainAsync());
 
 echo "In pseudomain\n";
-using (new Logger()) {
+using (new Logger) {
   echo "Inside using\n";
 }
 echo "Outside using\n";
+*/

@@ -97,6 +97,7 @@ class type ['a] ast_visitor_type = object
   method on_try : 'a -> block -> catch list -> block -> 'a
   method on_unop : 'a -> uop -> expr -> 'a
   method on_unsafe: 'a -> 'a
+  method on_using: 'a -> bool -> expr -> block -> 'a
   method on_varray : 'a -> expr list -> 'a
   method on_while : 'a -> expr -> block -> 'a
   method on_xml : 'a -> id -> (pstring * expr) list -> expr list -> 'a
@@ -227,6 +228,11 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = this#on_block acc b in
     acc
 
+  method on_using acc has_await e b =
+    let acc = this#on_expr acc e in
+    let acc = this#on_block acc b in
+    acc
+
   method on_switch acc e cl =
     let acc = this#on_expr acc e in
     let acc = List.fold_left this#on_case acc cl in
@@ -301,6 +307,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Static_var el           -> this#on_static_var acc el
     | Global_var el           -> this#on_global_var acc el
     | Markup (s, e)           -> this#on_markup acc s e
+    | Using (has_await, e, b) -> this#on_using acc has_await e b
 
   method on_def_inline acc d =
     this#on_def acc d

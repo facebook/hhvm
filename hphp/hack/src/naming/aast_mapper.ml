@@ -153,6 +153,7 @@ struct
     | S.If(e, b1, b2) -> T.If (map_expr f e, map_block f b1, map_block f b2)
     | S.Do(b, e) -> T.Do(map_block f b, map_expr f e)
     | S.While(e, b) -> T.While(map_expr f e, map_block f b)
+    | S.Using(has_await, e, b) -> T.Using(has_await, map_expr f e, map_block f b)
     | S.For(e1, e2, e3, b) ->
       T.For(map_expr f e1, map_expr f e2, map_expr f e3, map_block f b)
     | S.Switch(e, cl) -> T.Switch(map_expr f e, List.map cl map_case)

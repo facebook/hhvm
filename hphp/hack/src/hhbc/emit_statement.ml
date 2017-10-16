@@ -235,6 +235,8 @@ let rec emit_stmt env st =
     emit_if env condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
     emit_while env e (A.Block b)
+  | A.Using _ ->
+    failwith "Using statement not implemented in code generator yet"
   | A.Break (pos, level_opt) ->
     emit_break env pos (get_level pos "break" level_opt)
   | A.Continue (pos, level_opt) ->

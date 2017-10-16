@@ -79,6 +79,7 @@ end = struct
         if not (Nast.Visitor.HasBreak.block b) then raise Exit
     | Do _
     | While _
+    | Using _
     | For _
     | Foreach _
     | Noop
@@ -162,6 +163,7 @@ end = struct
         with Exit -> terminal_catchl env catches)
     | Do _
     | While _
+    | Using _
     | For _
     | Foreach _
     | Noop

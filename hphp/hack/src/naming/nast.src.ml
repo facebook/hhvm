@@ -159,6 +159,7 @@ type stmt =
   | If of expr * block * block
   | Do of block * expr
   | While of expr * block
+  | Using of bool (* await? *) * expr * block
   | For of expr * expr * expr * block
   | Switch of expr * case list
   (* Dropped the Pos.t option *)
@@ -520,6 +521,7 @@ class type ['a] visitor_type = object
   method on_throw : 'a -> is_terminal -> expr -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
   method on_while : 'a -> expr -> block -> 'a
+  method on_using : 'a -> bool -> expr -> block -> 'a
   method on_as_expr : 'a -> as_expr -> 'a
   method on_array : 'a -> afield list -> 'a
   method on_shape : 'a -> expr ShapeMap.t -> 'a
@@ -615,6 +617,11 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     let acc = this#on_block acc b in
     acc
 
+  method on_using acc _has_await e b =
+    let acc = this#on_expr acc e in
+    let acc = this#on_block acc b in
+    acc
+
   method on_for acc e1 e2 e3 b =
     let acc = this#on_expr acc e1 in
     let acc = this#on_expr acc e2 in
@@ -675,6 +682,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | If      (e, b1, b2)     -> this#on_if acc e b1 b2
     | Do      (b, e)          -> this#on_do acc b e
     | While   (e, b)          -> this#on_while acc e b
+    | Using   (has_await, e, b) -> this#on_using acc has_await e b
     | For     (e1, e2, e3, b) -> this#on_for acc e1 e2 e3 b
     | Switch  (e, cl)         -> this#on_switch acc e cl
     | Foreach (e, ae, b)      -> this#on_foreach acc e ae b

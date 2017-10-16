@@ -1764,6 +1764,7 @@ module Make (GetLocals : GetLocals) = struct
     | If (e, b1, b2)       -> if_stmt env st e b1 b2
     | Do (b, e)            -> do_stmt env b e
     | While (e, b)         -> while_stmt env e b
+    | Using (has_await, e, b) -> using_stmt env has_await e b
     | For (st1, e, st2, b) -> for_stmt env st1 e st2 b
     | Switch (e, cl)       -> switch_stmt env st e cl
     | Foreach (e, aw, ae, b)-> foreach_stmt env e aw ae b
@@ -1825,6 +1826,10 @@ module Make (GetLocals : GetLocals) = struct
   and while_stmt env e b =
     let e = expr env e in
     N.While (e, block env b)
+
+  and using_stmt env has_await e b =
+    let e = expr env e in
+    N.Using (has_await, e, block env b)
 
   and for_stmt env e1 e2 e3 b =
     let e1 = expr env e1 in

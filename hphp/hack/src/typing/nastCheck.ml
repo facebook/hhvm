@@ -99,6 +99,10 @@ module CheckFunctionBody = struct
         expr f_type env e;
         block f_type env b;
         ()
+    | _, Using (_has_await, e, b) ->
+        expr_allow_await_list f_type env e;
+        block f_type env b;
+        ()
     | _, For (init, cond, incr, b) ->
         expr f_type env init;
         expr f_type env cond;
@@ -143,6 +147,13 @@ module CheckFunctionBody = struct
 
   and expr f_type env (p, e) =
     expr_ p f_type env e
+
+  and expr_allow_await_list f_type env ((_, exp) as e) =
+    match exp with
+    | Expr_list el ->
+      List.iter el (expr_allow_await f_type env)
+    | _ ->
+      expr_allow_await f_type env e
 
   and expr_allow_await f_type env (p, exp) = match f_type, exp with
     | Ast.FAsync, Await e
@@ -823,6 +834,10 @@ and stmt env = function
   | While (e, b) ->
       expr env e;
       block { env with imm_ctrl_ctx = LoopContext } b;
+      ()
+  | Using (_has_await, e, b) ->
+      expr env e;
+      block env b;
       ()
   | For (e1, e2, e3, b) ->
       expr env e1;

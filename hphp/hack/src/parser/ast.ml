@@ -282,6 +282,7 @@ and stmt =
   | Def_inline of def
   | Noop
   | Markup of pstring * expr option
+  | Using of bool (* await? *) * expr * block
 
 and as_expr =
   | As_v of expr

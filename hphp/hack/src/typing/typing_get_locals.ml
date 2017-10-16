@@ -61,6 +61,7 @@ and terminal_ tcopt nsenv ~in_try = function
   | Markup _
   | Do _
   | While _
+  | Using _
   | For _
   | Foreach _
   | Def_inline _
@@ -137,7 +138,7 @@ let rec stmt tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
   | Fallthrough
   | Markup _
   | Expr _ | Break _ | Continue _ | Throw _
-  | Do _ | While _ | For _ | Foreach _
+  | Do _ | While _ | Using _ | For _ | Foreach _
   | Return _ | GotoLabel _ | Goto _ | Static_var _
   | Global_var _ | Def_inline _ | Noop -> acc
   | Block b -> block tcopt acc b

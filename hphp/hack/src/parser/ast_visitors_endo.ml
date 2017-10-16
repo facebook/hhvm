@@ -815,6 +815,7 @@ class virtual ['self] endo =
           self#on_Def_inline env this c0
       | Noop -> self#on_Noop env this
       | Markup (c0, c1) -> self#on_Markup env this c0 c1
+      | Using (c0, c1, c2) -> self#on_Using env this c0 c1 c2
     method on_As_v env this c0 =
       let r0 = self#on_expr env c0 in
       if c0 == r0 then this else As_v r0
@@ -1180,6 +1181,12 @@ class virtual ['self] endo =
     method on_Upincr env this = this
     method on_Updecr env this = this
     method on_Uref env this = this
+    method on_Using env this c0 c1 c2 =
+      let r1 = self#on_expr env c1 in
+      let r2 = self#on_block env c2 in
+      if c1 == r1 && c2 == r2
+      then this
+      else Using (c0, r1, r2)
     method on_Usilence env this = this
     method on_uop env this =
       match this with

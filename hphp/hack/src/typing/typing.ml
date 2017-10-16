@@ -607,6 +607,10 @@ and stmt env = function
       let env = LEnv.fully_integrate env parent_lenv in
       let env = condition env false e in
       env, T.While (te, tb)
+  | Using (has_await, e, b) ->
+      let env, te, _ = expr env e in
+      let env, tb = block env b in
+      env, T.Using (has_await, te, tb)
   | For (e1, e2, e3, b) as st ->
       (* For loops leak their initalizer, but nothing that's defined in the
          body

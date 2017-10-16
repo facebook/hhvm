@@ -2067,6 +2067,22 @@ and statement_list env =
       then L.next_newline_or_close_cb env.lb;
       stmt :: statement_list env
 
+and using_statement_list env =
+  match L.token env.file env.lb with
+  | Trcb | Teof -> []
+  | Tlcb ->
+      let block = statement_list env in
+      Block block :: statement_list env
+  | Tsc ->
+      using_statement_list env
+  | _ ->
+      L.back env.lb;
+      let error_state = !(env.errors) in
+      let stmt = statement env in
+      if !(env.errors) != error_state
+      then L.next_newline_or_close_cb env.lb;
+      stmt :: using_statement_list env
+
 and statement env =
   match L.token env.file env.lb with
   | Tword ->
@@ -2116,6 +2132,8 @@ and statement_word env = function
   | "if"       -> statement_if env
   | "do"       -> statement_do env
   | "while"    -> statement_while env
+  | "await"    -> statement_await env
+  | "using"    -> statement_using false env
   | "for"      -> statement_for env
   | "switch"   -> statement_switch env
   | "foreach"  -> statement_foreach env
@@ -2373,6 +2391,69 @@ and statement_while env =
   let e = paren_expr env in
   let st = statement env in
   While (e, [st])
+
+(* Comma-separated expression list between parentheses *)
+and using_expr_list_rest env =
+  match L.token env.file env.lb with
+  | Trp ->
+      Pos.make env.file env.lb, []
+  | Tcomma ->
+    let e = expr env in
+    let last, el = using_expr_list_rest env in
+    last, e :: el
+  | _ ->
+    error_expect env ", or )";
+    Pos.make env.file env.lb, []
+
+(* Await is followed by a statement or a using construct *)
+and statement_await env =
+  let start = Pos.make env.file env.lb in
+  match L.token env.file env.lb with
+  | Tword when Lexing.lexeme env.lb = "using" ->
+    statement_using true env
+  | _ ->
+    L.back env.lb;
+    let e = expr_await env start in
+    expect env Tsc;
+    Expr e
+
+(* Block-scoped or function-scoped using, optionally prefixed by `await`. At
+ * this point we have lexed `await using` or `using`.
+ *)
+and statement_using has_await env =
+  (* If there is an opening `(` then this could be either block-scoped or
+   * function-scoped. If no opening `(` then it's definitely function-scoped.
+   *)
+  let start = Pos.make env.file env.lb in
+  match L.token env.file env.lb with
+  | Tlp ->
+    let e = expr env in
+    (* Parse the remaining comma-separated expression list enclosed in parentheses *)
+    let last, el = using_expr_list_rest env in
+    let e = Pos.btw start last, Expr_list (e::el) in
+    statement_using_block_or_rest has_await e env
+  | _ ->
+    L.back env.lb;
+    let e = expr env in
+    let st = using_statement_list env in
+    (* Step back over closing brace *)
+    L.back env.lb;
+    Using (has_await, e, st)
+
+
+and statement_using_block_or_rest has_await e env =
+    match L.token env.file env.lb with
+    | Tlcb ->
+      (* Block-scoped using *)
+      Using (has_await, e, statement_list env)
+    | Tsc ->
+      let st = using_statement_list env in
+      (* Step back over closing brace *)
+      L.back env.lb;
+      Using (has_await, e, st)
+    | _ ->
+      error_expect env "{";
+      Noop
 
 (*****************************************************************************)
 (* For statement *)

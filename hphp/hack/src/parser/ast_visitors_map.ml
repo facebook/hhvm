@@ -614,6 +614,7 @@ class virtual ['self] map =
       | Def_inline c0 ->
         self#on_Def_inline env c0
       | Noop -> self#on_Noop env
+      | Using (c0, c1, c2) -> self#on_Using env c0 c1 c2
     method on_As_v env c0 =
       let r0 = self#on_expr env c0 in As_v r0
     method on_As_kv env c0 c1 =
@@ -901,6 +902,10 @@ class virtual ['self] map =
     method on_Updecr env = Updecr
     method on_Uref env = Uref
     method on_Usilence env = Usilence
+    method on_Using env c0 c1 c2 =
+      let r0 = self#on_expr env c1 in
+      let r1 = self#on_block env c2 in
+      Using (c0, r0, r1)
     method on_uop env this =
       match this with
       | Utild -> self#on_Utild env

@@ -419,6 +419,11 @@ class virtual ['c] map :
         on_Uplus : 'd -> Ast_visitors_ancestors.uop;
         on_Uref : 'd -> Ast_visitors_ancestors.uop;
         on_Usilence : 'd -> Ast_visitors_ancestors.uop;
+        on_Using : 'd ->
+                  bool ->
+                  Ast_visitors_ancestors.expr ->
+                  Ast_visitors_ancestors.block ->
+                  Ast_visitors_ancestors.stmt;
         on_Utild : 'd -> Ast_visitors_ancestors.uop;
         on_While : 'd ->
                    Ast_visitors_ancestors.expr ->
@@ -1053,6 +1058,11 @@ class virtual ['c] map :
     method on_Uplus : 'd -> Ast_visitors_ancestors.uop
     method on_Uref : 'd -> Ast_visitors_ancestors.uop
     method on_Usilence : 'd -> Ast_visitors_ancestors.uop
+    method on_Using : 'd ->
+      bool ->
+      Ast_visitors_ancestors.expr ->
+      Ast_visitors_ancestors.block ->
+      Ast_visitors_ancestors.stmt
     method on_Utild : 'd -> Ast_visitors_ancestors.uop
     method on_While :
       'd ->

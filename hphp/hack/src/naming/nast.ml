@@ -1,5 +1,5 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/ppx_gen. *)
-(* SourceShasum<<5df516ab9028bc5102e73e88e28dee4c73b917cc>> *)
+(* SourceShasum<<2d6a17113442af3fd1189bed925765fc5a66718c>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -535,6 +535,7 @@ module AnnotatedAST(Annotation:AnnotationType) =
       | If of expr* block* block 
       | Do of block* expr 
       | While of expr* block 
+      | Using of bool* expr* block 
       | For of expr* expr* expr* block 
       | Switch of expr* case list 
       | Foreach of expr* as_expr* block 
@@ -661,27 +662,31 @@ module AnnotatedAST(Annotation:AnnotationType) =
       ua_name: sid ;
       ua_params: expr list }[@@deriving show]
     let rec pp_stmt : Format.formatter -> stmt -> Ppx_deriving_runtime.unit =
-      let __29 () = pp_block
+      let __31 () = pp_block
       
-      and __28 () = pp_catch
+      and __30 () = pp_catch
       
-      and __27 () = pp_block
+      and __29 () = pp_block
       
-      and __26 () = pp_block
+      and __28 () = pp_block
       
-      and __25 () = pp_as_expr
+      and __27 () = pp_as_expr
+      
+      and __26 () = pp_expr
+      
+      and __25 () = pp_case
       
       and __24 () = pp_expr
       
-      and __23 () = pp_case
+      and __23 () = pp_block
       
       and __22 () = pp_expr
       
-      and __21 () = pp_block
+      and __21 () = pp_expr
       
       and __20 () = pp_expr
       
-      and __19 () = pp_expr
+      and __19 () = pp_block
       
       and __18 () = pp_expr
       
@@ -809,19 +814,27 @@ module AnnotatedAST(Annotation:AnnotationType) =
                   Format.fprintf fmt ",@ ";
                   ((__17 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
+            | Using (a0,a1,a2) ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Using (@,";
+                 (((Format.fprintf fmt "%B") a0;
+                   Format.fprintf fmt ",@ ";
+                   ((__18 ()) fmt) a1);
+                  Format.fprintf fmt ",@ ";
+                  ((__19 ()) fmt) a2);
+                 Format.fprintf fmt "@,))@]")
             | For (a0,a1,a2,a3) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.For (@,";
-                 (((((__18 ()) fmt) a0;
+                 (((((__20 ()) fmt) a0;
                     Format.fprintf fmt ",@ ";
-                    ((__19 ()) fmt) a1);
+                    ((__21 ()) fmt) a1);
                    Format.fprintf fmt ",@ ";
-                   ((__20 ()) fmt) a2);
+                   ((__22 ()) fmt) a2);
                   Format.fprintf fmt ",@ ";
-                  ((__21 ()) fmt) a3);
+                  ((__23 ()) fmt) a3);
                  Format.fprintf fmt "@,))@]")
             | Switch (a0,a1) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Switch (@,";
-                 (((__22 ()) fmt) a0;
+                 (((__24 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
                   ((fun x  ->
                       Format.fprintf fmt "@[<2>[";
@@ -830,21 +843,21 @@ module AnnotatedAST(Annotation:AnnotationType) =
                            (fun sep  ->
                               fun x  ->
                                 if sep then Format.fprintf fmt ";@ ";
-                                ((__23 ()) fmt) x;
+                                ((__25 ()) fmt) x;
                                 true) false x);
                       Format.fprintf fmt "@,]@]")) a1);
                  Format.fprintf fmt "@,))@]")
             | Foreach (a0,a1,a2) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Foreach (@,";
-                 ((((__24 ()) fmt) a0;
+                 ((((__26 ()) fmt) a0;
                    Format.fprintf fmt ",@ ";
-                   ((__25 ()) fmt) a1);
+                   ((__27 ()) fmt) a1);
                   Format.fprintf fmt ",@ ";
-                  ((__26 ()) fmt) a2);
+                  ((__28 ()) fmt) a2);
                  Format.fprintf fmt "@,))@]")
             | Try (a0,a1,a2) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Try (@,";
-                 ((((__27 ()) fmt) a0;
+                 ((((__29 ()) fmt) a0;
                    Format.fprintf fmt ",@ ";
                    ((fun x  ->
                        Format.fprintf fmt "@[<2>[";
@@ -853,11 +866,11 @@ module AnnotatedAST(Annotation:AnnotationType) =
                             (fun sep  ->
                                fun x  ->
                                  if sep then Format.fprintf fmt ";@ ";
-                                 ((__28 ()) fmt) x;
+                                 ((__30 ()) fmt) x;
                                  true) false x);
                        Format.fprintf fmt "@,]@]")) a1);
                   Format.fprintf fmt ",@ ";
-                  ((__29 ()) fmt) a2);
+                  ((__31 ()) fmt) a2);
                  Format.fprintf fmt "@,))@]")
             | Noop  -> Format.pp_print_string fmt "AnnotatedAST.Noop")
         [@ocaml.warning "-A"])
@@ -2846,6 +2859,7 @@ module AnnotatedAST(Annotation:AnnotationType) =
             method  on_throw : 'a -> is_terminal -> expr -> 'a
             method  on_try : 'a -> block -> catch list -> block -> 'a
             method  on_while : 'a -> expr -> block -> 'a
+            method  on_using : 'a -> bool -> expr -> block -> 'a
             method  on_as_expr : 'a -> as_expr -> 'a
             method  on_array : 'a -> afield list -> 'a
             method  on_shape : 'a -> expr ShapeMap.t -> 'a
@@ -2922,6 +2936,9 @@ module AnnotatedAST(Annotation:AnnotationType) =
             method on_while acc e b =
               let acc = this#on_expr acc e  in
               let acc = this#on_block acc b  in acc
+            method on_using acc _has_await e b =
+              let acc = this#on_expr acc e  in
+              let acc = this#on_block acc b  in acc
             method on_for acc e1 e2 e3 b =
               let acc = this#on_expr acc e1  in
               let acc = this#on_expr acc e2  in
@@ -2965,6 +2982,7 @@ module AnnotatedAST(Annotation:AnnotationType) =
               | If (e,b1,b2) -> this#on_if acc e b1 b2
               | Do (b,e) -> this#on_do acc b e
               | While (e,b) -> this#on_while acc e b
+              | Using (has_await,e,b) -> this#on_using acc has_await e b
               | For (e1,e2,e3,b) -> this#on_for acc e1 e2 e3 b
               | Switch (e,cl) -> this#on_switch acc e cl
               | Foreach (e,ae,b) -> this#on_foreach acc e ae b

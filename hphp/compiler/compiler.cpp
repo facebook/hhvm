@@ -32,6 +32,7 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/system/systemlib.h"
 
@@ -45,6 +46,9 @@
 #include "hphp/util/process-exec.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/timer.h"
+#ifndef _MSC_VER
+#include "hphp/util/light-process.h"
+#endif
 
 #include "hphp/hhvm/process-init.h"
 
@@ -515,6 +519,16 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 ///////////////////////////////////////////////////////////////////////////////
 
 int process(const CompilerOptions &po) {
+#ifndef _MSC_VER
+  LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
+                           RuntimeOption::LightProcessCount,
+                           RuntimeOption::EvalRecordSubprocessTimes,
+                           {});
+
+  // Initialize external compilers.
+  compilers_init();
+#endif
+
   if (po.coredump) {
 #ifdef _MSC_VER
 /**

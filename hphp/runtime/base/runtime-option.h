@@ -488,9 +488,6 @@ struct RuntimeOption {
   /* Whether or not to fallback to hphpc if hh_single_compile fails for
      any reason. */                                                     \
   F(bool, HackCompilerFallback,        false)                           \
-  /* Whether to run the verifier on units produced by
-     hh_single_compile. */                                              \
-  F(bool, HackCompilerVerify,          true)                            \
   /* Whether to write verbose log messages to the error log and include
      the hhas from failing units in the fatal error messages produced by
      bad hh_single_compile units. */                                    \
@@ -680,7 +677,8 @@ struct RuntimeOption {
   F(double, GCTriggerPct,              0.5)                             \
   F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
-  F(bool, Verify,                      getenv("HHVM_VERIFY"))           \
+  F(bool, Verify,                      (getenv("HHVM_VERIFY") ||        \
+    !EvalHackCompilerCommand.empty() || EvalPHP7CompilerEnabled))       \
   F(bool, VerifyOnly,                  false)                           \
   F(uint32_t, StaticContentsLogRate,   100)                             \
   F(uint32_t, LogUnitLoadRate,         0)                               \

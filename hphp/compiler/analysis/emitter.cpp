@@ -110,7 +110,6 @@
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/job-queue.h"
-#include "hphp/util/match.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -11395,28 +11394,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   Repo::get().saveGlobalData(gd);
 }
 
-bool startsWith(const char* big, const char* small) {
-  return strncmp(big, small, strlen(small)) == 0;
-}
-
-bool isFileHack(const char* code, size_t codeLen) {
-  // if the file starts with a shebang
-  if (codeLen > 2 && strncmp(code, "#!", 2) == 0) {
-    // reset code to the next char after the shebang line
-    const char* loc = reinterpret_cast<const char*>(
-        memchr(code, '\n', codeLen));
-    if (!loc) {
-      return false;
-    }
-
-    ptrdiff_t offset = loc - code;
-    code = loc + 1;
-    codeLen -= offset + 1;
-  }
-
-  return codeLen > strlen("<?hh") && startsWith(code, "<?hh");
-}
-
 }
 
 /*
@@ -11620,50 +11597,14 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       }
     }
 
-    // maybe run external compilers, but not until we've done all of systemlib
-    if (SystemLib::s_inited) {
-      auto const hcMode = hackc_mode();
-
-      // Use the PHP7 compiler if it is configured and the file is PHP
-      if (RuntimeOption::EvalPHP7CompilerEnabled &&
-          !RuntimeOption::EnableHipHopSyntax &&
-          !isFileHack(code, codeLen)) {
-        auto res = php7_compile(code, codeLen, filename, md5);
-        match<void>(res,
-          [&] (std::unique_ptr<Unit>& u) {
-            unit = std::move(u);
-          },
-          [&] (std::string& err) {
-            ue = createFatalUnit(
-              makeStaticString(filename),
-              md5,
-              FatalOp::Runtime,
-              makeStaticString(err)
-            );
-          }
-        );
-      // otherwise, use hackc if we're allowed to try
-      } else if (hcMode != HackcMode::kNever) {
-        auto res = hackc_compile(code, codeLen, filename, md5);
-        match<void>(
-          res,
-          [&] (std::unique_ptr<Unit>& u) {
-            unit = std::move(u);
-          },
-          [&] (std::string& err) {
-            if (hcMode == HackcMode::kFallback) return;
-            ue = createFatalUnit(
-              makeStaticString(filename),
-              md5,
-              FatalOp::Runtime,
-              makeStaticString(err)
-            );
-          }
-        );
-      }
+    if (auto uc = UnitCompiler::create(code, codeLen, filename, md5)) {
+      ue = uc->compile();
     }
 
-    if (!ue && !unit) {
+    // !ue should only happen for HackC at this point if
+    // !RuntimeOption::EvalHackCompilerFallback. (Otherwise ue should be a fatal
+    // unit.)
+    if (!ue) {
       auto parseit = [=] (AnalysisResultPtr ar) {
         Scanner scanner(code, codeLen,
                         RuntimeOption::GetScannerType(), filename);
@@ -11686,13 +11627,10 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       ue.reset(emitHHBCUnitEmitter(ar, fsp, md5));
     }
 
-    if (!unit) {
-      // NOTE: Repo errors are ignored!
-      Repo::get().commitUnit(ue.get(), unitOrigin);
-
-      unit = ue->create();
-      ue.reset();
-    }
+    // NOTE: Repo errors are ignored!
+    Repo::get().commitUnit(ue.get(), unitOrigin);
+    unit = ue->create();
+    ue.reset();
 
     if (unit->sn() == -1) {
       // the unit was not committed to the Repo, probably because
@@ -11702,6 +11640,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
         return u.release();
       }
     }
+
     return unit.release();
   } catch (const std::exception&) {
     // extern "C" function should not be throwing exceptions...

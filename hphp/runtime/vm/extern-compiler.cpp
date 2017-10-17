@@ -16,19 +16,20 @@
 
 #include "hphp/runtime/vm/extern-compiler.h"
 
-#include "hphp/runtime/vm/as.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/verifier/check.h"
-#include "hphp/util/atomic-vector.h"
-#include "hphp/util/light-process.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/md5.h"
-
 #include <condition_variable>
 #include <mutex>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/util/atomic-vector.h"
+#include "hphp/util/light-process.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/match.h"
+#include "hphp/util/md5.h"
 
 namespace HPHP {
 
@@ -48,7 +49,6 @@ struct CompilerException : Exception {
 
 struct CompilerOptions {
   bool verboseErrors;
-  bool verifyUnit;
   uint64_t maxRetries;
   uint64_t workers;
   std::string command;
@@ -56,12 +56,13 @@ struct CompilerOptions {
 
 struct ExternCompiler {
   explicit ExternCompiler(const CompilerOptions& options)
-    : m_options(options) {}
+      : m_options(options)
+    {}
   ExternCompiler(ExternCompiler&&) = default;
   ExternCompiler& operator=(ExternCompiler&&) = default;
   ~ExternCompiler() { if (isRunning()) stop(); }
 
-  std::unique_ptr<Unit> compile(
+  std::unique_ptr<UnitEmitter> compile(
     const char* filename,
     const MD5& md5,
     folly::StringPiece code
@@ -79,23 +80,13 @@ struct ExternCompiler {
       m_compilations++;
       writeProgram(filename, md5, code);
       prog = readProgram();
-      auto ue = assemble_string(
+      return assemble_string(
         prog.data(),
         prog.length(),
         filename,
         md5,
         false /* swallow errors */
       );
-
-      auto origin = *filename ? UnitOrigin::File : UnitOrigin::Eval;
-      Repo::get().commitUnit(ue.get(), origin);
-
-      u = ue->create();
-      if (m_options.verifyUnit) {
-        Verifier::checkUnit(u.get(), Verifier::kThrow);
-      }
-
-      return u;
     } catch (CompilerException& ex) {
       stop();
       if (m_options.verboseErrors) {
@@ -109,14 +100,10 @@ struct ExternCompiler {
           "========== PHP Source ==========\n"
           "{}\n"
           "========== ExternCompiler Result ==========\n"
-          "{}\n"
-          "============ Assembler Result ===========\n"
           "{}\n",
           ex.what(),
           code,
-          prog,
-          u ? u->toString().c_str() : "No unit was produced."
-        );
+          prog);
         Logger::FError("ExternCompiler Generated a bad unit: {}", msg);
 
         // Throw the extended message to ensure the fataling unit contains the
@@ -162,8 +149,10 @@ struct CompilerPool {
   void releaseCompiler(size_t id, ExternCompiler* ptr);
   void start();
   void shutdown();
-  CompilerResult compile(const char* code, int len,
-      const char* filename, const MD5& md5);
+  CompilerResult compile(const char* code,
+                         int len,
+                         const char* filename,
+                         const MD5& md5);
   std::string getVersionString() { return m_version; }
   bool started() const { return m_started.load(std::memory_order_relaxed); }
 
@@ -249,8 +238,10 @@ void CompilerPool::shutdown() {
   }
 }
 
-CompilerResult CompilerPool::compile(const char* code, int len,
-    const char* filename, const MD5& md5) {
+CompilerResult CompilerPool::compile(const char* code,
+                                     int len,
+                                     const char* filename,
+                                     const MD5& md5) {
   assert(started());
 
   CompilerGuard compiler(*this);
@@ -262,7 +253,9 @@ CompilerResult CompilerPool::compile(const char* code, int len,
   );
   while (retry++ < max) {
     try {
-      return compiler->compile(filename, md5, folly::StringPiece(code, len));
+      return compiler->compile(filename,
+                               md5,
+                               folly::StringPiece(code, len));
     } catch (CompilerException& ex) {
       // Swallow and retry, we return infra errors in bulk once the retry limit
       // is exceeded.
@@ -446,7 +439,6 @@ folly::Optional<CompilerOptions> hackcConfiguration() {
 
   return CompilerOptions{
     RuntimeOption::EvalHackCompilerVerboseErrors,
-    RuntimeOption::EvalHackCompilerVerify,
     RuntimeOption::EvalHackCompilerMaxRetries,
     RuntimeOption::EvalHackCompilerWorkers,
     RuntimeOption::EvalHackCompilerCommand
@@ -460,7 +452,6 @@ folly::Optional<CompilerOptions> php7Configuration() {
 
   return CompilerOptions{
     true, // verboseErrors
-    true, // verifyUnit
     0, // maxRetries
     1, // workers
     RuntimeOption::EvalPHP7CompilerCommand, // command
@@ -481,6 +472,7 @@ HackcMode hackc_mode() {
   }
 
   if (RuntimeOption::EvalHackCompilerFallback) return HackcMode::kFallback;
+
   return HackcMode::kFatal;
 }
 
@@ -558,6 +550,97 @@ std::string php7c_version() {
   return s_php7_pool->getVersionString();
 }
 
+bool startsWith(const char* big, const char* small) {
+  return strncmp(big, small, strlen(small)) == 0;
+}
+
+bool isFileHack(const char* code, size_t codeLen) {
+  // if the file starts with a shebang
+  if (codeLen > 2 && strncmp(code, "#!", 2) == 0) {
+    // reset code to the next char after the shebang line
+    const char* loc = reinterpret_cast<const char*>(
+        memchr(code, '\n', codeLen));
+    if (!loc) {
+      return false;
+    }
+
+    ptrdiff_t offset = loc - code;
+    code = loc + 1;
+    codeLen -= offset + 1;
+  }
+
+  return codeLen > strlen("<?hh") && startsWith(code, "<?hh");
+}
+
+std::unique_ptr<UnitCompiler> UnitCompiler::create(const char* code,
+                                                   int codeLen,
+                                                   const char* filename,
+                                                   const MD5& md5) {
+  if (SystemLib::s_inited) {
+    auto const hcMode = hackc_mode();
+    if (RuntimeOption::EvalPHP7CompilerEnabled &&
+        !RuntimeOption::EnableHipHopSyntax &&
+        !isFileHack(code, codeLen) &&
+        s_php7_pool &&
+        s_php7_pool->started()) {
+      return std::make_unique<Php7UnitCompiler>(
+        code, codeLen, filename, md5);
+    } else if (hcMode != HackcMode::kNever &&
+               s_hackc_pool &&
+               s_hackc_pool->started()) {
+      return std::make_unique<HackcUnitCompiler>(
+        code, codeLen, filename, md5, hcMode);
+    }
+  }
+
+  return nullptr;
+}
+
+std::unique_ptr<UnitEmitter> Php7UnitCompiler::compile() const {
+  auto res = php7_compile(m_code, m_codeLen, m_filename, m_md5);
+  std::unique_ptr<UnitEmitter> unitEmitter;
+  match<void>(
+    res,
+    [&] (std::unique_ptr<UnitEmitter>& ue) {
+      unitEmitter = std::move(ue);
+    },
+    [&] (std::string& err) {
+      unitEmitter = createFatalUnit(
+        makeStaticString(m_filename),
+        m_md5,
+        FatalOp::Runtime,
+        makeStaticString(err)
+      );
+    }
+  );
+
+  return unitEmitter;
+}
+
+std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile() const {
+  auto res = hackc_compile(m_code,
+                           m_codeLen,
+                           m_filename,
+                           m_md5);
+  std::unique_ptr<UnitEmitter> unitEmitter;
+  match<void>(
+    res,
+    [&] (std::unique_ptr<UnitEmitter>& ue) {
+      unitEmitter = std::move(ue);
+    },
+    [&] (std::string& err) {
+      if (m_hackcMode != HackcMode::kFallback) {
+        unitEmitter = createFatalUnit(
+          makeStaticString(m_filename),
+          m_md5,
+          FatalOp::Runtime,
+          makeStaticString(err));
+      }
+    }
+  );
+
+  return unitEmitter;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 }

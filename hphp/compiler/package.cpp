@@ -15,33 +15,37 @@
 */
 
 #include "hphp/compiler/package.h"
-#include <sys/types.h>
-#include <sys/stat.h>
+
 #include <fstream>
 #include <map>
 #include <memory>
 #include <set>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <utility>
 #include <vector>
+
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
 #include <folly/portability/Unistd.h>
+
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/analysis/symbol_table.h"
 #include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/option.h"
 #include "hphp/compiler/json.h"
-#include "hphp/util/process.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/exception.h"
-#include "hphp/util/job-queue.h"
-#include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/file-util-defs.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/parser/parser.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/file-util-defs.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/job-queue.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
 #include "hphp/zend/zend-string.h"
 
 using namespace HPHP;
@@ -346,6 +350,32 @@ bool Package::parseImpl(const std::string* fileName) {
       Lock lock(m_ar->getMutex());
       m_ar->addHhasFile(std::move(ue));
       return true;
+    }
+  }
+
+  {
+    std::ifstream s(*fileName);
+    std::string content {
+      std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
+    MD5 md5{string_md5(content)};
+
+    // If we're set up to use an external compiler, invoke it now. If we
+    // successfully obtain an external compiler but it fails to compile the file
+    // at hand, we don't fall back on the internal compiler but log an error and
+    // skip the file.
+    if (auto uc = UnitCompiler::create(
+          content.data(), content.size(), fileName->c_str(), md5)) {
+      if (auto ue = uc->compile()) {
+        Lock lock(m_ar->getMutex());
+        m_ar->addHhasFile(std::move(ue));
+        return true;
+      } else {
+        Logger::Error(
+          "Unable to compile using %s compiler: %s",
+          uc->getName(),
+          fullPath.c_str());
+        return false;
+      }
     }
   }
 

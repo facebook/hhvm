@@ -341,6 +341,29 @@ let convert_id (env:env) p (pid, str as id) =
   | _ ->
     (p, Id id)
 
+let check_if_in_async_context { scope; _ } =
+  let p = Pos.none in
+  let check_valid_fun_kind (_, name) =
+    function | FAsync | FAsyncGenerator -> ()
+             | _ -> Emit_fatal.raise_fatal_parse p @@
+    "Function '"
+    ^ (SU.strip_global_ns name)
+    ^ "' contains 'await' but is not declared as async."
+  in
+  match scope with
+  | [] -> Emit_fatal.raise_fatal_parse p
+            "'await' can only be used inside a function"
+  | ScopeItem.Lambda :: _
+  | ScopeItem.LongLambda _ :: _ ->
+   (* TODO: In a lambda, we dont see whether there is a
+    * async keyword in front or not >.> so assume this is fine, for now. *)
+    ()
+  | ScopeItem.Class _ :: _ -> () (* Syntax error, wont get here *)
+  | ScopeItem.Function fd :: _ ->
+    check_valid_fun_kind fd.f_name fd.f_fun_kind
+  | ScopeItem.Method md :: _ ->
+    check_valid_fun_kind md.m_name md.m_fun_kind
+
 let rec convert_expr env st (p, expr_ as expr) =
   match expr_ with
   | Varray es ->
@@ -403,6 +426,7 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, af = convert_afield env st af in
     st, (p, Yield af)
   | Await e ->
+    check_if_in_async_context env;
     let st, e = convert_expr env st e in
     st, (p, Await e)
   | List el ->
@@ -609,6 +633,7 @@ and convert_stmt env st stmt =
     let st, cl = List.map_env st cl (convert_case env) in
     st, Switch (e, cl)
   | Foreach (e, p, ae, b) ->
+    if p <> None then check_if_in_async_context env;
     let st, e = convert_expr env st e in
     let st, ae = convert_as_expr env st ae in
     let st, b = convert_block env st b in

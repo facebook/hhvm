@@ -643,6 +643,10 @@ and convert_stmt env st stmt =
     let st, cl = List.map_env st cl (convert_catch env) in
     let st, b2 = convert_block env st b2 in
     st, Try (b1, cl, b2)
+  | Using (has_await, e, b) ->
+    let st, e = convert_expr env st e in
+    let st, b = convert_block env st b in
+    st, Using (has_await, e, b)
   | Def_inline ((Class _) as d) ->
     let cd =
       (* propagate namespace information to nested classes *)

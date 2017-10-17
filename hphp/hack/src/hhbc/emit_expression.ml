@@ -855,6 +855,17 @@ and emit_class_alias es =
     instr_alias_cls c1 c2
   ]
 
+and emit_await env e =
+  let after_await = Label.next_regular () in
+  gather [
+    emit_expr ~need_ref:false env e;
+    instr_dup;
+    instr_istypec OpNull;
+    instr_jmpnz after_await;
+    instr_await;
+    instr_label after_await;
+  ]
+
 and emit_expr env (pos, expr_ as expr) ~need_ref =
   Emit_pos.emit_pos_then pos @@
   match expr_ with
@@ -942,7 +953,7 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     emit_box_if_necessary need_ref @@ emit_clone env e
   | A.Shape fl ->
     emit_box_if_necessary need_ref @@ emit_shape env expr fl
-  | A.Await _ -> emit_nyi "complex await expression"
+  | A.Await e -> emit_await env e
   | A.Yield e -> emit_yield env e
   | A.Yield_break ->
     failwith "yield break should be in statement position"

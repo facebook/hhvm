@@ -235,8 +235,8 @@ let rec emit_stmt env st =
     emit_if env condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
     emit_while env e (A.Block b)
-  | A.Using _ ->
-    failwith "Using statement not implemented in code generator yet"
+  | A.Using (has_await, e, b) ->
+    emit_using env has_await e (A.Block b)
   | A.Break (pos, level_opt) ->
     emit_break env pos (get_level pos "break" level_opt)
   | A.Continue (pos, level_opt) ->
@@ -280,17 +280,6 @@ and emit_break env pos level =
 
 and emit_continue env pos level =
   TFR.emit_break_or_continue ~is_break:false ~in_finally_epilogue:false env pos level
-
-and emit_await env e =
-  let after_await = Label.next_regular () in
-  gather [
-    emit_expr ~need_ref:false env e;
-    instr_dup;
-    instr_istypec OpNull;
-    instr_jmpnz after_await;
-    instr_await;
-    instr_label after_await;
-  ]
 
 and emit_if env condition consequence alternative =
   match alternative with
@@ -390,6 +379,51 @@ and emit_while env e b =
     emit_jmpnz env e start_label;
     instr_label break_label;
   ]
+
+and emit_using env has_await e b =
+  match snd e with
+  | A.Expr_list es ->
+    emit_stmt env @@ List.fold_right es
+      ~f:(fun e acc -> A.Using (has_await, e, [acc]))
+      ~init:b
+  | _ ->
+    let local, preamble = match snd e with
+      | A.Binop (A.Eq None, (_, A.Lvar (_, id)), _)
+      | A.Lvar (_, id) ->
+        Local.Named id, emit_ignored_expr env e
+      | _ ->
+        let l = Local.get_unnamed_local () in
+        l, gather [emit_expr ~need_ref:false env e; instr_setl l; instr_popc]
+    in
+    let fault_label = Label.next_fault () in
+    let body = emit_stmt env b in
+    let fn_name = Hhbc_id.Method.from_raw_string @@
+      if has_await then "__disposeAsync" else "__dispose"
+    in
+    let epilogue =
+      if has_await then
+        gather [
+          instr_unboxr;
+          instr_await;
+          instr_popc
+        ]
+      else
+        instr_popr
+    in
+    let finally = gather [
+        instr_cgetl local;
+        instr_fpushobjmethodd 0 fn_name A.OG_nullthrows;
+        instr_fcall 0;
+        epilogue;
+        instr_unsetl local
+      ]
+    in
+    let fault = gather [ finally; instr_unwind ] in
+    gather [
+      preamble;
+      instr_try_fault fault_label body fault;
+      finally
+    ]
 
 and emit_do env b e =
   let cont_label = Label.next_regular () in

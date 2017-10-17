@@ -548,6 +548,11 @@ end
 (* Function parameters *)
 (*****************************************************************************)
 
+let safe_pass_by_ref_enabled env =
+  TypecheckerOptions.experimental_feature_enabled
+    (Env.get_options env)
+    TypecheckerOptions.experimental_safe_pass_by_ref
+
 let default_fun_param ty : 'a fun_param = {
   fp_pos = Pos.none;
   fp_name = None;

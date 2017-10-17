@@ -337,6 +337,7 @@ module type S = sig
   val final_property : Pos.t -> unit
   val pass_by_ref_annotation :
     should_add:bool -> Pos.t -> (Pos.t * string) list -> unit
+  val bad_pass_by_ref_override : Pos.t -> Pos.t -> unit
 
 
   val to_json : Pos.absolute error_ -> Hh_json.json

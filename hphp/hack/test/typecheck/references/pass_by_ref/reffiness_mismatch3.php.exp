@@ -1,0 +1,11 @@
+File "reffiness_mismatch3.php", line 9, characters 7-7:
+Class C does not correctly implement all required methods  (Typing[4175])
+  File "reffiness_mismatch3.php", line 9, characters 17-17:
+  Some methods are incompatible with those declared in type B
+Read the following to see why:
+  File "reffiness_mismatch3.php", line 10, characters 19-19:
+  Member f has the wrong type
+  File "reffiness_mismatch3.php", line 4, characters 26-27:
+  This parameter is passed by reference
+  File "reffiness_mismatch3.php", line 10, characters 21-22:
+  It is incompatible with a normal parameter

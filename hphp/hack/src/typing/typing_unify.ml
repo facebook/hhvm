@@ -533,10 +533,16 @@ and unify_params env l1 l2 var1_opt =
     env, { fp2 with fp_name = name } :: rl
   | l, [], _ -> env, l
   | fp1 :: rl1, fp2 :: rl2, _ ->
-    let { fp_name = name1; fp_type = x1; _ } = fp1 in
-    let { fp_name = name2; fp_type = x2; _ } = fp2 in
+    let { fp_name = name1; fp_type = x1; fp_pos = p1; _ } = fp1 in
+    let { fp_name = name2; fp_type = x2; fp_pos = p2; _ } = fp2 in
     let name = if name1 = name2 then name1 else None in
     let env = { env with Env.pos = Reason.to_pos (fst x1) } in
+    if TUtils.safe_pass_by_ref_enabled env then begin
+      match fp1.fp_is_ref, fp2.fp_is_ref with
+      | true, false -> Errors.bad_pass_by_ref_override p1 p2
+      | false, true -> Errors.bad_pass_by_ref_override p2 p1
+      | _ -> ()
+    end;
     let env, _ = unify env x2 x1 in
     let env, rl = unify_params env rl1 rl2 var1_opt in
     env, { fp2 with fp_name = name } :: rl

@@ -2027,10 +2027,8 @@ and anon_make tenv p f ft idl =
           then env
           else fun_implicit_return env p hret nb.fnb_nast f.f_fun_kind
         in
-        begin match el with
-        | Some el -> iter2_shortest check_pass_by_ref ft.ft_params el
-        | None -> ()
-        end;
+        if TUtils.safe_pass_by_ref_enabled env
+        then Option.iter el ~f:(iter2_shortest check_pass_by_ref ft.ft_params);
         is_typing_self := false;
         let tfun_ = {
           T.f_mode = f.f_mode;
@@ -4195,9 +4193,7 @@ and check_pass_by_ref { fp_pos; fp_is_ref; _ } (pos, e) =
     | _ -> ()
 
 and call_ ~expected pos env fty el uel =
-  let safe_pass_by_ref_enabled =
-    TypecheckerOptions.experimental_feature_enabled
-      (Env.get_options env) TypecheckerOptions.experimental_safe_pass_by_ref in
+  let safe_pass_by_ref = TUtils.safe_pass_by_ref_enabled env in
   let env, efty = Env.expand_type env fty in
   (match efty with
   | _, (Terr | Tany | Tunresolved []) ->
@@ -4253,7 +4249,7 @@ and call_ ~expected pos env fty el uel =
               let env, te, ty =
                 expr ~allow_uref:true
                   ~expected:(pos, Reason.URparam, param.fp_type) env e in
-              let env = call_param ~safe_pass_by_ref_enabled env param (e, ty) in
+              let env = call_param ~safe_pass_by_ref env param (e, ty) in
               env, Some (te, ty)
             | None ->
               let env, te, ty = expr ~allow_uref:true env e in
@@ -4294,7 +4290,7 @@ and call_ ~expected pos env fty el uel =
               match opt_param with
               | None -> env
               | Some param ->
-                let env = call_param ~safe_pass_by_ref_enabled env param (e, ty) in
+                let env = call_param ~safe_pass_by_ref env param (e, ty) in
                 check_elements env tyl paraml in
           let env = check_elements env tyl paraml in
           env, [te], List.length el + List.length tyl, true
@@ -4324,9 +4320,7 @@ and call_ ~expected pos env fty el uel =
       | Some (_, anon) ->
         let () = check_arity pos fpos (List.length tyl) arity in
         let tyl = List.map tyl TUtils.default_fun_param in
-        let env, _, ty = if safe_pass_by_ref_enabled
-          then anon ~el env tyl
-          else anon env tyl in
+        let env, _, ty = anon ~el env tyl in
         env, tel, [], ty)
   | _, Tarraykind _ when not (Env.is_strict env) ->
     (* Relaxing call_user_func to work with an array in partial mode *)
@@ -4336,12 +4330,12 @@ and call_ ~expected pos env fty el uel =
     env, [], [], err_none
   )
 
-and call_param ~safe_pass_by_ref_enabled env param ((pos, _ as e), arg_ty) =
+and call_param ~safe_pass_by_ref env param ((pos, _ as e), arg_ty) =
   (match param.fp_name with
   | None -> ()
   | Some name -> Typing_suggest.save_param name env param.fp_type arg_ty
   );
-  if safe_pass_by_ref_enabled then check_pass_by_ref param e;
+  if safe_pass_by_ref then check_pass_by_ref param e;
   let env, arg_ty = check_valid_rvalue pos env arg_ty in
 
   (* When checking params the type 'x' may be expression dependent. Since

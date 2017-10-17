@@ -739,6 +739,7 @@ module Typing                               = struct
   let function_is_not_coroutine             = 4172 (* DONT MODIFY!!!! *)
   let coroutinness_mismatch                 = 4173 (* DONT MODIFY!!!! *)
   let expecting_awaitable_return_type_hint  = 4174 (* DONT MODIFY!!!! *)
+  let bad_pass_by_ref_override              = 4175 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2477,6 +2478,11 @@ let pass_by_ref_annotation ~should_add p witness =
     then "This argument should be annotated with &"
     else "This argument should not be annotated with &" in
   add_list Typing.pass_by_ref_annotation_mismatch ((p, msg) :: witness)
+
+let bad_pass_by_ref_override pos1 pos2 =
+  let msg1 = pos1, "This parameter is passed by reference" in
+  let msg2 = pos2, "It is incompatible with a normal parameter" in
+  add_list Typing.bad_pass_by_ref_override [msg1; msg2]
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

@@ -78,19 +78,19 @@ constexpr size_t kSmashJccTargetOff = 12;
 ///////////////////////////////////////////////////////////////////////////////
 
 template <class T>
-static uint32_t makeTarget32(T target) {
+inline uint32_t makeTarget32(T target) {
   assertx(!(reinterpret_cast<intptr_t>(target) >> 32));
   return static_cast<uint32_t>(reinterpret_cast<intptr_t>(target));
 }
 
-static void patchTarget32(TCA inst, TCA target) {
+inline void patchTarget32(TCA inst, TCA target) {
   *reinterpret_cast<uint32_t*>(inst) = makeTarget32(target);
   auto const begin = inst;
   auto const end = begin + 4;
   DataBlock::syncDirect(begin, end);
 }
 
-static void patchTarget64(TCA inst, TCA target) {
+inline void patchTarget64(TCA inst, TCA target) {
   *reinterpret_cast<uint64_t*>(inst) = reinterpret_cast<uint64_t>(target);
   auto const begin = inst;
   auto const end = begin + 8;

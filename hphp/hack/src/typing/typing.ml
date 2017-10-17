@@ -315,10 +315,16 @@ let make_param_local_ty env param =
   let ty = match ty with
     | _, t when param.param_is_variadic ->
       (* when checking the body of a function with a variadic
-       * argument, "f(C ...$args)", $args is an array<C> *)
+       * argument, "f(C ...$args)", $args is a varray<C> *)
       let r = Reason.Rvar_param param.param_pos in
       let arr_values = r, t in
-      r, Tarraykind (AKvec arr_values)
+      let akind =
+        if TypecheckerOptions.experimental_feature_enabled
+          (Env.get_options env)
+          TypecheckerOptions.experimental_darray_and_varray
+        then AKvarray arr_values
+        else AKvec arr_values in
+      r, Tarraykind akind
     | x -> x
   in
   Typing_hooks.dispatch_infer_ty_hook ty param.param_pos env;

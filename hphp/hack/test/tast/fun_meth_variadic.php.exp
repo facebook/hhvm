@@ -28,7 +28,7 @@
        (AnnotatedAST.NamedBody
           { AnnotatedAST.fnb_nast =
             [(AnnotatedAST.Foreach (
-                ((Some array<string>),
+                ((Some varray<string>),
                  (AnnotatedAST.Lvar (<p>, $args))),
                 (AnnotatedAST.As_v
                    ((Some string),

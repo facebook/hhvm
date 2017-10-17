@@ -3199,6 +3199,10 @@ object_method_call:
     object_operator
     object_method_name hh_typeargs_opt '('
     function_call_parameter_list ')' { _p->onObjectMethodCall($$,$2,$4.num(),$5,$8);}
+  | '(' expr_no_variable ')'
+    object_operator
+    object_method_name hh_typeargs_opt '('
+    function_call_parameter_list ')' { _p->onObjectMethodCall($$,$2,$4.num(),$5,$8);}
 ;
 
 class_method_call:

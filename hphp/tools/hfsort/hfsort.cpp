@@ -16,13 +16,17 @@
 
 #include "hphp/tools/hfsort/hfutil.h"
 
-#include <stdio.h>
-#include <zlib.h>
 #include <ctype.h>
 #include <cxxabi.h>
+#include <stdio.h>
+#include <zlib.h>
+
+#include <fstream>
 #include <unordered_map>
 
 #include <folly/Format.h>
+#include <folly/String.h>
+
 #include "hphp/util/text-util.h"
 
 namespace HPHP { namespace hfsort {
@@ -103,6 +107,27 @@ void readPerfData(CallGraph& cg, gzFile file, bool computeArcWeight) {
 
   if (!computeArcWeight) return;
 
+  cg.normalizeArcWeights();
+}
+
+void readSymbolCntData(CallGraph& cg, std::ifstream& file) {
+  std::string line;
+  while (std::getline(file, line)) {
+    std::string caller, top;
+    int32_t count;
+    folly::split(" ", line, caller, top, count);
+    TargetId idTop = cg.funcToTargetId(top);
+    if (idTop == InvalidId) continue;
+    cg.targets[idTop].samples += count;
+    HFTRACE(2, "readSymbolCntData: idTop: %u %s\n", idTop,
+            cg.funcs[idTop].mangledNames[0].c_str());
+
+    TargetId idCaller = cg.funcToTargetId(caller);
+    if (idCaller == InvalidId) continue;
+    cg.incArcWeight(idCaller, idTop, count);
+    HFTRACE(2, "readSymbolCntData: idCaller: %u %s\n", idCaller,
+            cg.funcs[idCaller].mangledNames[0].c_str());
+  }
   cg.normalizeArcWeights();
 }
 
@@ -267,10 +292,11 @@ int main(int argc, char* argv[]) {
   char* symbFileName = nullptr;
   char* perfFileName = nullptr;
   char* edgcntFileName = nullptr;
+  char* symbolCntFileName = nullptr;
   bool useWildcards = false;
 
   FILE*  symbFile;
-  gzFile perfFile;
+  gzFile perfFile = Z_NULL;
   FILE*  edgcntFile;
 
   Algorithm algorithm = Algorithm::Hfsort;
@@ -280,7 +306,7 @@ int main(int argc, char* argv[]) {
   extern char* optarg;
   extern int optind;
   int c;
-  while ((c = getopt(argc, argv, "pae:w")) != -1) {
+  while ((c = getopt(argc, argv, "pae:s:w")) != -1) {
     switch (c) {
       case 'p':
         algorithm = Algorithm::PettisHansen;
@@ -291,6 +317,9 @@ int main(int argc, char* argv[]) {
       case 'e':
         edgcntFileName = optarg;
         break;
+      case 's':
+        symbolCntFileName = optarg;
+        break;
       case 'w':
         useWildcards = true;
         break;
@@ -299,31 +328,45 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  if ((optind + 2) != argc) {
+  if (argc < optind + 1 || argc > optind + 2) {
     error(
-      "Usage: hfsort [-p] [-e <EDGCNT_FILE>] [-w] <SYMBOL_FILE> <PERF_DATA_FILE>\n"
+      "Usage: hfsort [-p] [-e <EDGCNT_FILE>] [-s <SYMBOLCNT_FILE>] [-w]"
+      " <SYMBOL_FILE> [<PERF_DATA_FILE>]\n"
       "   -p,               use pettis-hansen algorithm for code layout\n"
       "   -a,               use hfsort-plus algorithm for code layout\n"
       "   -e <EDGCNT_FILE>, use edge profile result to build the call graph\n"
+      "   -s <SYMBOL_CNT_FILE>  use a file with 'symbol symbol count'\n"
+      "                     triplets to build the call graph \n"
       "   -w                use wildcards instead of suffixes in function names"
     );
   }
 
   symbFileName = argv[optind];
-  perfFileName = argv[optind + 1];
-
+  if (argc == optind + 2) {
+    perfFileName = argv[optind + 1];
+  }
   if (!(symbFile = fopen(symbFileName, "rt"))) {
     error("Error opening symbol file\n");
   }
-  if (!(perfFile = gzopen(perfFileName, "r"))) {
+  if (perfFileName && !(perfFile = gzopen(perfFileName, "r"))) {
     error("Error opening perf data file\n");
   }
   if (edgcntFileName && !(edgcntFile = fopen(edgcntFileName, "rt"))) {
     error("Error opening edge count file\n");
   }
+  std::ifstream symbolCntFile(symbolCntFileName);
+  if (symbolCntFileName && !symbolCntFile.is_open()) {
+    error("Error opening symbol count file\n");
+  }
 
   readSymbols(cg, symbFile);
-  readPerfData(cg, perfFile, (edgcntFileName == nullptr));
+  if (symbolCntFileName != nullptr) {
+    readSymbolCntData(cg, symbolCntFile);
+    symbolCntFile.close();
+  }
+  if (perfFileName != nullptr) {
+    readPerfData(cg, perfFile, (edgcntFileName == nullptr));
+  }
   if (edgcntFileName != nullptr) {
     readEdgcntData(cg, edgcntFile);
     fclose(edgcntFile);
@@ -356,7 +399,9 @@ int main(int argc, char* argv[]) {
   print(cg, filename, clusters, useWildcards);
 
   fclose(symbFile);
-  gzclose(perfFile);
+  if (perfFile != Z_NULL) {
+    gzclose(perfFile);
+  }
 
   return 0;
 }

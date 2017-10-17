@@ -38,6 +38,7 @@ bool CallGraph::addFunc(
   }
   auto id = addTarget(size);
   funcs.emplace_back(name, addr, group);
+  func2TargetId[name] = id;
   addr2TargetId[addr] = id;
   HFTRACE(2, "Func: adding (%u): %016lx %s %u\n", id, (long)addr, name.c_str(),
           size);
@@ -55,6 +56,14 @@ TargetId CallGraph::addrToTargetId(uint64_t addr) const {
     return InvalidId;
   }
   return it->second;
+}
+
+TargetId CallGraph::funcToTargetId(const std::string &func) const {
+  auto it = func2TargetId.find(func);
+  if (it != func2TargetId.end()) {
+    return it->second;
+  }
+  return InvalidId;
 }
 
 std::string CallGraph::toString(TargetId id) const {

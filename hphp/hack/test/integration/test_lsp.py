@@ -60,7 +60,8 @@ class TestLsp(LspTestDriver, unittest.TestCase):
 
     def write_observed(self, test_name, observed_transcript):
         file = os.path.join(self.template_repo, test_name + '.observed.log')
-        text = json.dumps(self.get_received_items(observed_transcript), indent=2)
+        text = json.dumps(list(
+            self.get_important_received_items(observed_transcript)), indent=2)
         with open(file, "w") as f:
             f.write(text)
 
@@ -97,9 +98,17 @@ class TestLsp(LspTestDriver, unittest.TestCase):
     def serialize_responses(self, responses):
         return [json.dumps(response, indent=2) for response in responses]
 
-    # extracts a list of received responses from an LSP communication transcript
-    def get_received_items(self, transcript):
-        return [entry['received'] for entry in transcript.values() if entry['received']]
+    # generates received responses from an LSP communication transcript
+    # ignoring the non-deterministic ones "progress" and "actionRequired"
+    def get_important_received_items(self, transcript):
+        for entry in transcript.values():
+            received = entry.get("received") or None
+            if received is None:
+                continue
+            method = received.get("method") or ""
+            if method == "window/progress" or method == "window/actionRequired":
+                continue
+            yield received
 
     # gets a set of loaded responses ready for validation by sorting them
     # by id and serializing them for precise text comparison
@@ -117,7 +126,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
 
         expected_items = self.prepare_responses(expected)
         observed_items = self.prepare_responses(
-            self.get_received_items(observed_transcript)
+            list(self.get_important_received_items(observed_transcript))
         )
 
         # If the server's busy, maybe the machine's just under too much pressure

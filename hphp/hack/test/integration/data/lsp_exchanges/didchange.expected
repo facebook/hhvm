@@ -39,38 +39,6 @@
   },
   {
     "jsonrpc": "2.0",
-    "method": "window/progress",
-    "params": {
-      "id": 1,
-      "label": "Hack: preparing to check edits"
-    }
-  },
-  {
-    "jsonrpc": "2.0",
-    "method": "window/progress",
-    "params": {
-      "id": 1,
-      "label": "Hack: checking edits"
-    }
-  },
-  {
-    "jsonrpc": "2.0",
-    "method": "window/actionRequired",
-    "params": {
-      "id": 2,
-      "label": "Hack: save any file to do a whole-program check"
-    }
-  },
-  {
-    "jsonrpc": "2.0",
-    "method": "window/progress",
-    "params": {
-      "id": 1,
-      "label": null
-    }
-  },
-  {
-    "jsonrpc": "2.0",
     "method": "textDocument/publishDiagnostics",
     "params": {
       "uri": "${php_file_uri}",

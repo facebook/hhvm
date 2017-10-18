@@ -1382,6 +1382,9 @@ and expr_
       let r = Reason.Rplaceholder p in
       let ty = r, Tprim Tvoid in
       make_result env (T.Lplaceholder p) ty
+  | Dollardollar _ when valkind = `lvalue ->
+      Errors.dollardollar_lvalue p;
+      expr_error env (Reason.Rwitness p)
   | Dollardollar ((_, x) as id) ->
       let env, ty =
         Env.get_local env x in

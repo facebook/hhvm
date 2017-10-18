@@ -740,6 +740,7 @@ module Typing                               = struct
   let coroutinness_mismatch                 = 4173 (* DONT MODIFY!!!! *)
   let expecting_awaitable_return_type_hint  = 4174 (* DONT MODIFY!!!! *)
   let bad_pass_by_ref_override              = 4175 (* DONT MODIFY!!!! *)
+  let dollardollar_lvalue                   = 4176 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2279,6 +2280,10 @@ let coroutinness_mismatch pos1_is_coroutine pos1 pos2 =
 
 let this_as_lexical_variable pos =
   add Naming.this_as_lexical_variable pos "Cannot use $this as lexical variable"
+
+let dollardollar_lvalue pos =
+  add Typing.dollardollar_lvalue pos
+    "Cannot assign a value to the special pipe variable ($$)"
 
 (*****************************************************************************)
 (* Typing decl errors *)

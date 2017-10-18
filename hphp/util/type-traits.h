@@ -47,6 +47,47 @@ struct is_any<T,U,V,Tail...> : std::integral_constant<
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Identity functor.
+ */
+template<typename T> struct ident { using type = T; };
+template<typename T> using ident_t = typename ident<T>::type;
+
+/*
+ * Stateless tuple for parameter unpacking.
+ */
+template<typename...> struct pack {};
+
+/*
+ * Clone of std::conjunction<>.
+ */
+template<class...> struct conjunction : std::true_type { };
+template<class B1> struct conjunction<B1> : B1 { };
+template<class B1, class... Bn>
+struct conjunction<B1, Bn...>
+  : std::conditional_t<bool(B1::value), conjunction<Bn...>, B1> {};
+
+/*
+ * Clone of std::disjunction<>.
+ */
+template<class...> struct disjunction : std::false_type { };
+template<class B1> struct disjunction<B1> : B1 { };
+template<class B1, class... Bn>
+struct disjunction<B1, Bn...>
+  : std::conditional_t<bool(B1::value), B1, disjunction<Bn...>> {};
+
+/*
+ * Helper for appending a type parameter to a template class's variadic
+ * parameter list.
+ */
+template<typename Head, typename Tail> struct cons;
+template<template<typename...> class List, typename T, typename... Args>
+struct cons<T, List<Args...>> {
+  using type = List<T, Args...>;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Whether `T' and `U' are the same type, with the outermost const-qualifier
  * stripped away.
  */

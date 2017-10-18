@@ -65,9 +65,19 @@ inline TypedValue* member_lval::tv_ptr() const {
   return m_ptr.tv;
 }
 
+inline TypedValue member_lval::tv() const {
+  return *m_ptr.tv;
+}
+
 inline member_lval::ptr_u member_lval::elem() const {
   return m_ptr;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE DataType& type(member_lval lval) { return lval.type(); }
+ALWAYS_INLINE Value& val(member_lval lval) { return lval.val(); }
+ALWAYS_INLINE TypedValue as_tv(member_lval lval) { return lval.tv(); }
 
 ///////////////////////////////////////////////////////////////////////////////
 

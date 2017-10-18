@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/datatype.h"
 
 #include "hphp/util/type-scan.h"
+#include "hphp/util/type-traits.h"
 
 #include <cstdint>
 #include <cstdlib>
@@ -298,6 +299,47 @@ typename std::enable_if<
   return reinterpret_cast<typename DataTypeCPPType<DType>::type>
            (tv->m_data.pstr);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * TV-lval "concept"-like trait.
+ *
+ * This enables us to take functions that logically operate on a TypedValue&
+ * and parametrize them over any opaque mutable reference to a DataType tag and
+ * a Value data element.  This decouples the representation of a TypedValue
+ * from its actual memory layout.
+ *
+ * See tv-mutate.h for usage examples.
+ */
+template<typename T, typename Ret = void>
+struct enable_if_lval : std::enable_if<
+  conjunction<
+    std::is_same<
+      ident_t<decltype((type(std::declval<T>())))>,
+      DataType&
+    >,
+    std::is_same<
+      ident_t<decltype((val(std::declval<T>())))>,
+      Value&
+    >,
+    std::is_same<
+      ident_t<decltype((as_tv(std::declval<T>())))>,
+      TypedValue
+    >
+  >::value,
+  Ret
+> {};
+
+template<typename T, typename Ret = void>
+using enable_if_lval_t = typename enable_if_lval<T,Ret>::type;
+
+/*
+ * TV-lval API for TypedValue.
+ */
+ALWAYS_INLINE DataType& type(TypedValue& tv) { return tv.m_type; }
+ALWAYS_INLINE Value& val(TypedValue& tv) { return tv.m_data; }
+ALWAYS_INLINE TypedValue as_tv(TypedValue& tv) { return tv; }
 
 ///////////////////////////////////////////////////////////////////////////////
 

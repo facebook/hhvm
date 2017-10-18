@@ -97,12 +97,29 @@ struct member_lval {
   TypedValue* tv_ptr() const;
 
   /*
+   * Get a copy of the referenced value and type as a TypedValue.
+   *
+   * @requires: has_ref()
+   */
+  TypedValue tv() const;
+
+  /*
    * Opaque element pointer.
    *
    * This should only be used for constructing new member_lval objects from
    * existing ones.
    */
   ptr_u elem() const;
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * Return `this' if the referenced value is already unboxed, else a rval to
+   * the inner value.
+   */
+  member_lval unboxed() const;
+
+  /////////////////////////////////////////////////////////////////////////////
 
 private:
   union {
@@ -111,6 +128,13 @@ private:
   };
   ptr_u m_ptr;
 };
+
+/*
+ * TV-lval API for member_lval.
+ */
+DataType& type(member_lval);
+Value& val(member_lval);
+TypedValue as_tv(member_lval);
 
 ///////////////////////////////////////////////////////////////////////////////
 

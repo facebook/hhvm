@@ -36,17 +36,19 @@ namespace HPHP {
 /*
  * Box `tv' in place.
  */
-ALWAYS_INLINE void tvBox(TypedValue& tv) {
-  assert(cellIsPlausible(tv));
-  tv.m_data.pref = RefData::Make(tv);
-  tv.m_type = KindOfRef;
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvBox(T&& tv) {
+  assert(cellIsPlausible(as_tv(tv)));
+  val(tv).pref = RefData::Make(as_tv(tv));
+  type(tv) = KindOfRef;
 }
 
 /*
  * Box `tv' in place, if it's not already boxed.
  */
-ALWAYS_INLINE void tvBoxIfNeeded(TypedValue& tv) {
-  if (tv.m_type != KindOfRef) tvBox(tv);
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvBoxIfNeeded(T&& tv) {
+  if (type(tv) != KindOfRef) tvBox(tv);
 }
 
 /*
@@ -54,32 +56,37 @@ ALWAYS_INLINE void tvBoxIfNeeded(TypedValue& tv) {
  *
  * @requires: tv->m_type == KindOfRef
  */
-ALWAYS_INLINE void tvUnbox(TypedValue& tv) {
-  assert(refIsPlausible(tv));
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvUnbox(T&& tv) {
+  assert(refIsPlausible(as_tv(tv)));
 
-  auto const r = tv.m_data.pref;
+  auto const r = val(tv).pref;
   auto const inner = r->tv();
   assert(cellIsPlausible(*inner));
 
-  tv.m_data.num = inner->m_data.num;
-  tv.m_type = inner->m_type;
-  tvIncRefGen(tv);
+  val(tv).num = inner->m_data.num;
+  type(tv) = inner->m_type;
+  tvIncRefGen(as_tv(tv));
   decRefRef(r);
 
-  assert(tvIsPlausible(tv));
+  assert(tvIsPlausible(as_tv(tv)));
 }
 
 /*
  * Unbox `tv' in place, if it's a ref.
  */
-ALWAYS_INLINE void tvUnboxIfNeeded(TypedValue& tv) {
-  if (tv.m_type == KindOfRef) tvUnbox(tv);
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvUnboxIfNeeded(T&& tv) {
+  if (type(tv) == KindOfRef) tvUnbox(tv);
 }
 
 /*
  * Return a reference to an unboxed `tv'.
  */
-ALWAYS_INLINE Cell tvToCell(TypedValue tv) {
+ALWAYS_INLINE Cell& tvToCell(TypedValue& tv) {
+  return LIKELY(tv.m_type != KindOfRef) ? tv : *tv.m_data.pref->tv();
+}
+ALWAYS_INLINE Cell tvToCell(const TypedValue& tv) {
   return LIKELY(tv.m_type != KindOfRef) ? tv : *tv.m_data.pref->tv();
 }
 ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
@@ -87,6 +94,14 @@ ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
 }
 ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
+}
+ALWAYS_INLINE member_lval tvToCell(member_lval lval) {
+  return LIKELY(lval.type() != KindOfRef)
+    ? lval
+    : member_lval { lval.val().pref, lval.val().pref->tv() };
+}
+inline member_lval member_lval::unboxed() const {
+  return tvToCell(*this);
 }
 inline member_rval member_rval::unboxed() const {
   return LIKELY(type() != KindOfRef)
@@ -146,20 +161,23 @@ ALWAYS_INLINE const Cell* tvAssertCell(const TypedValue* tv) {
  * Copies the m_data and m_type fields, but not m_aux.  (For that you need
  * TypedValue::operator=.)
  */
-ALWAYS_INLINE void tvCopy(const TypedValue& fr, TypedValue& to) {
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvCopy(const TypedValue& fr, T&& to) {
   assert(tvIsPlausible(fr));
-  to.m_data.num = fr.m_data.num;
-  to.m_type = fr.m_type;
+  val(to).num = fr.m_data.num;
+  type(to) = fr.m_type;
 }
 
 /*
  * tvCopy() with added assertions, for Cells and Refs.
  */
-ALWAYS_INLINE void cellCopy(const Cell fr, Cell& to) {
+template<typename C> ALWAYS_INLINE
+enable_if_lval_t<C&&, void> cellCopy(const Cell fr, C&& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
 }
-ALWAYS_INLINE void refCopy(const Ref fr, Ref& to) {
+template<typename R> ALWAYS_INLINE
+enable_if_lval_t<R&&, void> refCopy(const Ref fr, R&& to) {
   assert(refIsPlausible(fr));
   tvCopy(fr, to);
 }
@@ -170,24 +188,27 @@ ALWAYS_INLINE void refCopy(const Ref fr, Ref& to) {
  * Copies the m_data and m_type fields, and increfs `fr', but does not decref
  * `to' (i.e., `to' is assumed to be dead, or decref'd elsewhere).
  */
-ALWAYS_INLINE void tvDup(const TypedValue& fr, TypedValue& to) {
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvDup(const TypedValue& fr, T&& to) {
   tvCopy(fr, to);
-  tvIncRefGen(to);
+  tvIncRefGen(as_tv(to));
 }
 
 /*
  * tvDup() with added assertions, for Cells and Refs.
  */
-ALWAYS_INLINE void cellDup(const Cell fr, Cell& to) {
+template<typename C> ALWAYS_INLINE
+enable_if_lval_t<C&&, void> cellDup(const Cell fr, C&& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
-  tvIncRefGen(to);
+  tvIncRefGen(as_tv(to));
 }
-ALWAYS_INLINE void refDup(const Ref fr, Ref& to) {
+template<typename R> ALWAYS_INLINE
+enable_if_lval_t<R&&, void> refDup(const Ref fr, R&& to) {
   assert(refIsPlausible(fr));
-  to.m_type = KindOfRef;
-  to.m_data.pref = fr.m_data.pref;
-  to.m_data.pref->incRefCount();
+  type(to) = KindOfRef;
+  val(to).pref = fr.m_data.pref;
+  val(to).pref->incRefCount();
 }
 
 namespace detail {
@@ -195,14 +216,15 @@ namespace detail {
 /*
  * Duplicate `fr' to `to' with custom reference demotion semantics.
  */
-template<class Fn>
-void tvDupWithRef(const TypedValue& fr, TypedValue& to, Fn should_demote) {
+template<typename T, typename Fn>
+enable_if_lval_t<T&&, void>
+tvDupWithRef(const TypedValue& fr, T&& to, Fn should_demote) {
   assert(tvIsPlausible(fr));
 
   tvCopy(fr, to);
   if (!isRefcountedType(fr.m_type)) return;
   if (fr.m_type != KindOfRef) {
-    tvIncRefCountable(to);
+    tvIncRefCountable(as_tv(to));
     return;
   }
   auto ref = fr.m_data.pref;
@@ -210,8 +232,8 @@ void tvDupWithRef(const TypedValue& fr, TypedValue& to, Fn should_demote) {
     cellDup(*ref->tv(), to);
     return;
   }
-  assert(to.m_type == KindOfRef);
-  to.m_data.pref->incRefCount();
+  assert(type(to) == KindOfRef);
+  val(to).pref->incRefCount();
 }
 
 }
@@ -225,8 +247,9 @@ void tvDupWithRef(const TypedValue& fr, TypedValue& to, Fn should_demote) {
  *
  * In other words, this is a tvDup() that unboxes single-reference refs.
  */
-ALWAYS_INLINE
-void tvDupWithRef(const TypedValue& fr, TypedValue& to) {
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void>
+tvDupWithRef(const TypedValue& fr, T&& to) {
   detail::tvDupWithRef(fr, to, [] (RefData* ref) {
     return !ref->isReferenced();
   });
@@ -238,9 +261,9 @@ void tvDupWithRef(const TypedValue& fr, TypedValue& to) {
  * Just like tvDupWithRef(fr, to), except we won't demote if the ref's
  * inner value is `container'.
  */
-ALWAYS_INLINE
-void tvDupWithRef(const TypedValue& fr, TypedValue& to,
-                  const ArrayData* container) {
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void>
+tvDupWithRef(const TypedValue& fr, T&& to, const ArrayData* container) {
   assert(container);
   detail::tvDupWithRef(fr, to, [&] (RefData* ref) {
     return !ref->isReferenced() &&
@@ -252,11 +275,13 @@ void tvDupWithRef(const TypedValue& fr, TypedValue& to,
 /*
  * Write a value to `to', with Dup semantics.
  */
-ALWAYS_INLINE void tvWriteUninit(TypedValue& to) {
-  to.m_type = KindOfUninit;
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvWriteUninit(T&& to) {
+  type(to) = KindOfUninit;
 }
-ALWAYS_INLINE void tvWriteNull(TypedValue& to) {
-  to.m_type = KindOfNull;
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvWriteNull(T&& to) {
+  type(to) = KindOfNull;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -288,11 +313,12 @@ ALWAYS_INLINE void tvWriteNull(TypedValue& to) {
  * If `to' is KindOfRef, places the value of `fr' in the RefData pointed to by
  * `to' instead.
  */
-ALWAYS_INLINE void tvMove(const Cell fr, TypedValue& to) {
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvMove(const Cell fr, T&& to) {
   assert(cellIsPlausible(fr));
-  auto const cell = tvToCell(&to);
-  auto const old = *cell;
-  cellCopy(fr, *cell);
+  auto&& cell = tvToCell(to);
+  auto const old = as_tv(cell);
+  cellCopy(fr, cell);
   tvDecRefGen(old);
 }
 
@@ -302,16 +328,17 @@ ALWAYS_INLINE void tvMove(const Cell fr, TypedValue& to) {
  * Just like tvMove(), except we always overwrite `to' itself rather than its
  * inner value if it has type KindOfRef.
  */
-ALWAYS_INLINE void tvMoveIgnoreRef(const Cell fr, TypedValue& to) {
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvMoveIgnoreRef(const Cell fr, T&& to) {
   assert(cellIsPlausible(fr));
-  auto const old = to;
+  auto const old = as_tv(to);
   cellCopy(fr, to);
   tvDecRefGen(old);
   // NB: If we're in a pseudo-main, the dec-ref on "old" may trigger a
   // destructor which can bind or change the value in "to", so there's no
   // guarantee that "from" and "to" contain the same value at this point (or
   // that "to" is even still a cell).
-  assert(tvIsPlausible(to));
+  assert(tvIsPlausible(as_tv(to)));
 }
 
 /*
@@ -319,9 +346,10 @@ ALWAYS_INLINE void tvMoveIgnoreRef(const Cell fr, TypedValue& to) {
  *
  * Just like tvMove() or tvMoveIgnoreRef() with added assertions for `to'.
  */
-ALWAYS_INLINE void cellMove(const Cell fr, Cell& to) {
+template<typename C> ALWAYS_INLINE
+enable_if_lval_t<C&&, void> cellMove(const Cell fr, C&& to) {
   assert(cellIsPlausible(fr));
-  assert(cellIsPlausible(to));
+  assert(cellIsPlausible(as_tv(to)));
   tvMoveIgnoreRef(fr, to);
 }
 
@@ -332,11 +360,12 @@ ALWAYS_INLINE void cellMove(const Cell fr, Cell& to) {
  * If `to' has type KindOfRef, places the value of `fr' in the RefData pointed
  * to by `to'.
  */
-ALWAYS_INLINE void tvSet(const Cell fr, TypedValue& to) {
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvSet(const Cell fr, T&& to) {
   assert(cellIsPlausible(fr));
-  auto const cell = tvToCell(&to);
-  auto const old = *cell;
-  cellDup(fr, *cell);
+  auto&& cell = tvToCell(to);
+  auto const old = as_tv(cell);
+  cellDup(fr, cell);
   tvDecRefGen(old);
 }
 
@@ -347,16 +376,17 @@ ALWAYS_INLINE void tvSet(const Cell fr, TypedValue& to) {
  * Just like tvSet(), except we always overwrite `to' itself rather than its
  * inner value if it has type KindOfRef.
  */
-ALWAYS_INLINE void tvSetIgnoreRef(const Cell fr, TypedValue& to) {
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvSetIgnoreRef(const Cell fr, T&& to) {
   assert(cellIsPlausible(fr));
-  auto const old = to;
+  auto const old = as_tv(to);
   cellDup(fr, to);
   tvDecRefGen(old);
   // NB: If we're in a pseudo-main, the dec-ref on "old" may trigger a
   // destructor which can bind or change the value in "to", so there's no
   // guarantee that "from" and "to" contain the same value at this point (or
   // that "to" is even still a cell).
-  assert(tvIsPlausible(to));
+  assert(tvIsPlausible(as_tv(to)));
 }
 
 /*
@@ -365,9 +395,10 @@ ALWAYS_INLINE void tvSetIgnoreRef(const Cell fr, TypedValue& to) {
  *
  * Just like tvSet() or tvSetIgnoreRef() with added assertions for `to'.
  */
-ALWAYS_INLINE void cellSet(const Cell fr, Cell& to) {
+template<typename C> ALWAYS_INLINE
+enable_if_lval_t<C&&, void> cellSet(const Cell fr, C&& to) {
   assert(cellIsPlausible(fr));
-  assert(cellIsPlausible(to));
+  assert(cellIsPlausible(as_tv(to)));
   tvSetIgnoreRef(fr, to);
 }
 
@@ -378,12 +409,13 @@ ALWAYS_INLINE void cellSet(const Cell fr, Cell& to) {
  * Unlike the other Set functions, this accepts any TypedValue as `fr', since
  * it is ref-preserving (modulo demotion).
  */
-ALWAYS_INLINE void tvSetWithRef(const TypedValue fr, TypedValue& to) {
-  assert(tvIsPlausible(to));
-  auto const old = to;
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvSetWithRef(const TypedValue fr, T&& to) {
+  assert(tvIsPlausible(as_tv(to)));
+  auto const old = as_tv(to);
   tvDupWithRef(fr, to);
   tvDecRefGen(old);
-  assert(tvIsPlausible(to));
+  assert(tvIsPlausible(as_tv(to)));
 }
 
 /*
@@ -396,9 +428,10 @@ ALWAYS_INLINE void tvSetWithRef(const TypedValue fr, TypedValue& to) {
  *
  * @requires: fr->m_type == KindOfRef
  */
-ALWAYS_INLINE void tvBind(const TypedValue fr, TypedValue& to) {
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvBind(const TypedValue fr, T&& to) {
   assert(fr.m_type == KindOfRef);
-  auto const old = to;
+  auto const old = as_tv(to);
   refDup(fr, to);
   tvDecRefGen(old);
 }
@@ -408,8 +441,9 @@ ALWAYS_INLINE void tvBind(const TypedValue fr, TypedValue& to) {
  *
  * Like tvBind(), except with a raw RefData* instead of a TypedValue.
  */
-ALWAYS_INLINE void tvBindRef(RefData* fr, TypedValue& to) {
-  auto const old = to;
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvBindRef(RefData* fr, T&& to) {
+  auto const old = as_tv(to);
   fr->incRefCount();
   tvCopy(make_tv<KindOfRef>(fr), to);
   tvDecRefGen(old);
@@ -420,8 +454,9 @@ ALWAYS_INLINE void tvBindRef(RefData* fr, TypedValue& to) {
  *
  * Equivalent to tvSetIgnoreRef(make_tv<KindOfUninit>(), to).
  */
-ALWAYS_INLINE void tvUnset(TypedValue& to) {
-  auto const old = to;
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvUnset(T&& to) {
+  auto const old = as_tv(to);
   tvWriteUninit(to);
   tvDecRefGen(old);
 }
@@ -431,8 +466,9 @@ ALWAYS_INLINE void tvUnset(TypedValue& to) {
  *
  * Equivalent to tvSetIgnoreRef(make_tv<KindOfNull>(), to).
  */
-ALWAYS_INLINE void cellSetNull(Cell& to) {
-  auto const old = to;
+template<typename C> ALWAYS_INLINE
+enable_if_lval_t<C&&, void> cellSetNull(C&& to) {
+  auto const old = as_tv(to);
   tvWriteNull(to);
   tvDecRefGen(old);
 }
@@ -445,32 +481,36 @@ ALWAYS_INLINE void cellSetNull(Cell& to) {
  *
  * Equivalent to tvSet(make_tv<KindOfNull>(), to).
  */
-ALWAYS_INLINE void tvSetNull(TypedValue& to) {
-  cellSetNull(*tvToCell(&to));
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvSetNull(T&& to) {
+  cellSetNull(tvToCell(to));
 }
 
 /*
  * tvSet() analogues for raw data elements.
  */
-ALWAYS_INLINE void tvSetBool(bool val, TypedValue& inTo) {
-  Cell* to = tvToCell(&inTo);
-  auto const old = *to;
-  to->m_type = KindOfBoolean;
-  to->m_data.num = val;
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvSetBool(bool v, T&& inTo) {
+  auto&& to = tvToCell(inTo);
+  auto const old = as_tv(to);
+  type(to) = KindOfBoolean;
+  val(to).num = v;
   tvDecRefGen(old);
 }
-ALWAYS_INLINE void tvSetInt(int64_t val, TypedValue& inTo) {
-  Cell* to = tvToCell(&inTo);
-  auto const old = *to;
-  to->m_type = KindOfInt64;
-  to->m_data.num = val;
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvSetInt(int64_t v, T&& inTo) {
+  auto&& to = tvToCell(inTo);
+  auto const old = as_tv(to);
+  type(to) = KindOfInt64;
+  val(to).num = v;
   tvDecRefGen(old);
 }
-ALWAYS_INLINE void tvSetDouble(double val, TypedValue& inTo) {
-  Cell* to = tvToCell(&inTo);
-  auto const old = *to;
-  to->m_type = KindOfDouble;
-  to->m_data.dbl = val;
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvSetDouble(double v, T&& inTo) {
+  auto&& to = tvToCell(inTo);
+  auto const old = as_tv(to);
+  type(to) = KindOfDouble;
+  val(to).dbl = v;
   tvDecRefGen(old);
 }
 

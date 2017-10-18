@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Ast
 
 (* Given a Ast.program, give me the list of entities it defines *)
 let get_defs ast =
@@ -72,6 +73,51 @@ end
 (* Given an AST, return an AST with no position info *)
 let remove_pos ast =
   ast_no_pos_mapper#on_program () ast
+
+
+type ignore_attribute_env = {
+  ignored_attributes: string list
+}
+
+let ast_deregister_attributes_mapper = object (self)
+  inherit [_] Ast_visitors.endo as super
+
+  method ignored_attr env l =
+    List.exists l
+      (fun attr -> List.mem (env.ignored_attributes) (snd attr.ua_name))
+
+  (* Filter all functions and classes with the user attributes banned *)
+  method! on_program env toplevels =
+    let toplevels = List.filter toplevels (fun toplevel ->
+      match toplevel with
+      | Fun f when self#ignored_attr env f.f_user_attributes ->
+        false
+      | Class c when self#ignored_attr env c.c_user_attributes ->
+        false
+      | _ -> true
+    ) in
+    super#on_program env toplevels
+
+  method! on_class_ env this =
+    (* Filter out class elements which are methods with wrong attributes *)
+    let body = this.c_body in
+    let body = List.filter body (fun elt ->
+      match elt with
+      | Method m when self#ignored_attr env m.m_user_attributes ->
+        false
+      | _ -> true
+    ) in
+    let this = { this with c_body = body } in
+    super#on_class_ env this
+end
+
+let deregister_ignored_attributes ast =
+  let env = {
+    (* For now, only ignore the __PHPStdLib *)
+    ignored_attributes = [Naming_special_names.UserAttributes.uaPHPStdLib]
+  } in
+  (ast_deregister_attributes_mapper)#on_program env ast
+
 
 (* Given an AST, generate a unique hash for its decl tree. *)
 let generate_ast_decl_hash ast =

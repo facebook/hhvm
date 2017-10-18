@@ -16,6 +16,7 @@ type t = {
   tco_experimental_features : SSet.t;
   tco_migration_flags : SSet.t;
   po_auto_namespace_map : (string * string) list;
+  po_deregister_php_stdlib : bool;
   ignored_fixme_codes : ISet.t;
 }
 
@@ -162,6 +163,7 @@ let default = {
  tco_experimental_features = tco_experimental_all;
  tco_migration_flags = SSet.empty;
  po_auto_namespace_map = [];
+ po_deregister_php_stdlib = false;
  ignored_fixme_codes = ISet.empty;
 }
 
@@ -181,6 +183,7 @@ let make_permissive tcopt =
 let make ~tco_assume_php
          ~tco_safe_array
          ~tco_safe_vector_array
+         ~po_deregister_php_stdlib
          ~tco_user_attrs
          ~tco_experimental_features
          ~tco_migration_flags
@@ -194,6 +197,7 @@ let make ~tco_assume_php
                    tco_migration_flags;
                    po_auto_namespace_map;
                    ignored_fixme_codes;
+                   po_deregister_php_stdlib;
         }
 let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
@@ -207,4 +211,5 @@ let tco_experimental_feature_enabled t s =
 let tco_migration_flag_enabled t s =
   SSet.mem s t.tco_migration_flags
 let po_auto_namespace_map t = t.po_auto_namespace_map
+let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
 let ignored_fixme_codes t = t.ignored_fixme_codes

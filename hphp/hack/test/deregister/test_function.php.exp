@@ -1,0 +1,2 @@
+File "test_function.php", line 9, characters 3-9:
+Unbound name: ignored (a global function) (Naming[2049])

@@ -128,6 +128,7 @@ let parse_options () =
   let safe_vector_array = ref false in
   let forbid_nullable_cast = ref false in
   let safe_pass_by_ref = ref false in
+  let deregister_attributes = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -135,6 +136,9 @@ let parse_options () =
     "--all-errors",
       Arg.Unit (set_mode AllErrors),
       " List all errors not just the first one";
+    "--deregister-attributes",
+      Arg.Set deregister_attributes,
+      " Ignore all functions with attribute '__PHPStdLib'";
     "--auto-complete",
       Arg.Unit (set_mode Autocomplete),
       " Produce autocomplete suggestions";
@@ -249,6 +253,7 @@ let parse_options () =
     GlobalOptions.default with
       GlobalOptions.tco_safe_array = !safe_array;
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
+      GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;
   } in
   let tcopt = {
     tcopt with
@@ -491,7 +496,12 @@ let parse_name_and_decl popt files_contents tcopt =
     let files_info =
       Relative_path.Map.mapi begin fun fn parsed_file ->
         let {Parser_hack.file_mode; comments; ast; _} = parsed_file in
+        let ast = if ParserOptions.deregister_php_stdlib popt then
+          Ast_utils.deregister_ignored_attributes ast else ast in
+
         Parser_heap.ParserHeap.add fn (ast, Parser_heap.Full);
+        (* If the feature is turned on, deregister functions with attribute
+        __PHPStdLib. This does it for all functions, not just hhi files *)
         let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
         { FileInfo.
           file_mode; funs; classes; typedefs; consts; comments = Some comments;
@@ -834,9 +844,8 @@ let decl_and_run_mode ({filename; mode; no_builtins; tcopt; _} as opts) popt =
   handle_mode mode filename opts popt files_contents files_info
     (Errors.get_error_list errors)
 
-let main_hack ({filename; mode; no_builtins; _} as opts) =
+let main_hack ({filename; mode; no_builtins; tcopt; _} as opts) =
   (* TODO: We should have a per file config *)
-  let popt = ParserOptions.default in
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init EventLogger.Event_logger_fake 0.0;
@@ -847,7 +856,7 @@ let main_hack ({filename; mode; no_builtins; _} as opts) =
   | Ai ai_options ->
     Ai.do_ Typing_check_utils.check_defs filename ai_options
   | _ ->
-    decl_and_run_mode opts popt
+    decl_and_run_mode opts tcopt
 
 (* command line driver *)
 let _ =

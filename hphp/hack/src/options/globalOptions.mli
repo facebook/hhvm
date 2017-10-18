@@ -63,6 +63,9 @@ type t = {
  (* Namespace aliasing map *)
  po_auto_namespace_map : (string * string) list;
 
+ (* Flag for disabling functions in HHI files with the __PHPStdLib attribute *)
+ po_deregister_php_stdlib : bool;
+
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
 }
@@ -70,6 +73,7 @@ val make :
   tco_assume_php: bool ->
   tco_safe_array: bool ->
   tco_safe_vector_array: bool ->
+  po_deregister_php_stdlib: bool ->
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
   tco_migration_flags: SSet.t ->
@@ -83,6 +87,7 @@ val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_migration_flag_enabled : t -> SSet.elt -> bool
 val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list
+val po_deregister_php_stdlib : t -> bool
 val default : t
 val make_permissive : t -> t
 val tco_experimental_instanceof : string

@@ -200,6 +200,7 @@ let load config_filename options =
     (bool_ "assume_php" ~default:true config)
     (bool_ "safe_array" ~default:false config)
     (bool_ "safe_vector_array" ~default:false config)
+    (bool_ "deregister_php_stdlib" ~default:false config)
     (config_user_attributes config)
     (config_experimental_tc_features config)
     (config_tc_migration_flags config)

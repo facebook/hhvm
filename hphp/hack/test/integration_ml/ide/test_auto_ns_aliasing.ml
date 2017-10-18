@@ -21,7 +21,7 @@ function foo() : void {}
 "
 
 let autocomplete_contents1 =
-"<?hh
+"<?hh // strict
 
 function testTypecheck(): void {
   ShortName\\foAUTO332;
@@ -47,6 +47,7 @@ let () =
     ~tco_migration_flags: SSet.empty
     ~po_auto_namespace_map:
       [("ShortName", "HH\\LongName\\EvenLonger\\ShortName")]
+    ~po_deregister_php_stdlib: true
     ~ignored_fixme_codes: ISet.empty
   in
   let custom_config = ServerConfig.default_config in

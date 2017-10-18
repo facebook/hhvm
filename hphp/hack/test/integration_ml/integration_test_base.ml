@@ -15,6 +15,7 @@ open ServerCommandTypes
 open SearchServiceRunner
 
 let root = "/"
+let hhi = "/hhi"
 let () = Hh_logger.Level.set_min_level Hh_logger.Level.Off
 let server_config = ServerEnvBuild.default_genv.ServerEnv.config
 let global_opts = GlobalOptions.make
@@ -25,6 +26,7 @@ let global_opts = GlobalOptions.make
   ~tco_experimental_features: GlobalOptions.tco_experimental_all
   ~tco_migration_flags: SSet.empty
   ~po_auto_namespace_map: []
+  ~po_deregister_php_stdlib:true
   ~ignored_fixme_codes: ISet.empty
 
 let server_config = ServerConfig.set_tc_options server_config global_opts
@@ -35,14 +37,29 @@ let genv = ref { ServerEnvBuild.default_genv with
   ServerEnv.config = server_config
 }
 
-let setup_server ?custom_config ()  =
+(* Hhi files are loaded during server setup. If given a list of string + contents, we add them
+to the test disk and add them to disk_needs_parsing. After one server run loop, they will be loaded.
+This isn't exactly the same as how initialization does it, but the purpose is not to test the hhi
+files, but to test incremental mode behavior with Hhi files present.
+*)
+let setup_server ?custom_config ?(hhi_files = []) ()  =
   Printexc.record_backtrace true;
   EventLogger.init EventLogger.Event_logger_fake 0.0;
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
+  Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi);
   let _ = SharedMem.init GlobalConfig.default_sharedmem_config in
-  match custom_config with
+
+  List.iter hhi_files ~f:(fun (fn, contents) ->
+    TestDisk.set (Filename.concat hhi fn) contents
+  );
+
+  let result = match custom_config with
   | Some config -> ServerEnvBuild.make_env config
-  | None -> ServerEnvBuild.make_env !genv.ServerEnv.config
+  | None -> ServerEnvBuild.make_env !genv.ServerEnv.config in
+  let hhi_file_list = List.map hhi_files ~f:(fun (fn, _) ->
+    Relative_path.create (Relative_path.Hhi) (Filename.concat hhi fn)) in
+  let hhi_set = Relative_path.Set.of_list hhi_file_list in
+  { result with ServerEnv.disk_needs_parsing = hhi_set }
 
 
 let default_loop_input = {

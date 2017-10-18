@@ -1,0 +1,6 @@
+File "test_method.php", line 19, characters 7-9:
+Could not find method foo in an object of type Foo (Typing[4053])
+File "test_method.php", line 17, characters 8-16:
+This is why I think it is an object of type Foo
+File "test_method.php", line 4, characters 7-9:
+Declaration of Foo is here

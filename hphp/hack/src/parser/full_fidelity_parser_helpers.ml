@@ -18,7 +18,7 @@ module SourceText = Full_fidelity_source_text
 open Full_fidelity_minimal_syntax
 
 module type ParserType = sig
-  module Lexer : Full_fidelity_lexer_sig.Lexer_S
+  module Lexer : Full_fidelity_lexer_sig.MinimalLexer_S
   type t
   val errors : t -> SyntaxError.t list
   val with_errors : t -> SyntaxError.t list -> t

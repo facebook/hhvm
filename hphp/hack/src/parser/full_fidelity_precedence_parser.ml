@@ -9,7 +9,7 @@
  *)
 
 module SyntaxError = Full_fidelity_syntax_error
-module Lexer = Full_fidelity_lexer
+module Lexer = Full_fidelity_minimal_lexer
 module Operator = Full_fidelity_operator
 module Context = Full_fidelity_parser_context
 

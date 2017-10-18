@@ -8,7 +8,7 @@
  *
  *)
 
-module type Lexer_S = sig
+module type MinimalLexer_S = sig
   type t
   val source : t -> Full_fidelity_source_text.t
   val start_offset : t -> int

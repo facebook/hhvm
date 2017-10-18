@@ -12,9 +12,6 @@ module TriviaKind = Full_fidelity_trivia_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
-module Trivia = Full_fidelity_minimal_trivia
-module Token = Full_fidelity_minimal_token
-
 module Lexer : sig
   type t
   val make : SourceText.t -> t
@@ -29,6 +26,7 @@ module Lexer : sig
   val start_new_lexeme : t -> t
   val advance : t -> int -> t
 end = struct
+
   type t = {
     text : SourceText.t;
     start : int;  (* Both start and offset are absolute offsets in the text. *)
@@ -60,6 +58,10 @@ end = struct
   let advance lexer index =
     { lexer with offset = lexer.offset + index }
 end
+
+module WithToken(Token: Lexable_token_sig.LexableToken_S) = struct
+
+module Trivia = Token.Trivia
 
 type lexer = Lexer.t
 type t = lexer
@@ -1306,7 +1308,7 @@ let scan_trailing_trivia scanner lexer  =
     match trivia with
     | None -> (lexer1, acc)
     | Some t -> begin
-      match t.Trivia.kind with
+      match Trivia.kind t with
       | TriviaKind.EndOfLine -> (lexer1, t :: acc)
       | TriviaKind.FixMe
       | TriviaKind.IgnoreError
@@ -1410,7 +1412,7 @@ is frequently called twice in a row with the same lexer due to the
 design of the parser. We get a big win by memoizing it. *)
 let next_token = (* takes a lexer, returns a (lexer, token) *)
   let next_token_cache = Little_cache.make empty
-    (empty, Full_fidelity_minimal_token.make TokenKind.EndOfFile 0 [] []) in
+    (empty, Token.make TokenKind.EndOfFile 0 [] []) in
   Little_cache.memoize next_token_cache
     (scan_next_token_as_keyword scan_token_outside_type)
 
@@ -1463,7 +1465,8 @@ let next_xhp_element_token ~no_trailing ~attribute lexer =
     match kind with
     | TokenKind.GreaterThan when no_trailing ->
       (lexer, Token.make kind w leading [])
-    | TokenKind.XHPElementName when attribute && token1.Token.kind = TokenKind.Colon ->
+    | TokenKind.XHPElementName
+      when attribute && Token.kind token1 = TokenKind.Colon ->
       (* TODO(T21789285): Take this hack out when illtyped xhp is gone *)
       let (lexer, dropped) = scan_xhp_colon_trivia lexer in
       let (lexer, trailing) = scan_trailing_xhp_trivia lexer in
@@ -1576,3 +1579,5 @@ let scan_xhp_category_name lexer =
 
 let next_xhp_category_name lexer =
   scan_token_and_trivia scan_xhp_category_name false lexer
+
+end (* WithToken *)

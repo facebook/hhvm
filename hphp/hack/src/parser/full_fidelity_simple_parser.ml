@@ -11,7 +11,7 @@
 module SyntaxError = Full_fidelity_syntax_error
 module Context = Full_fidelity_parser_context
 
-module WithLexer(Lexer : Full_fidelity_lexer_sig.Lexer_S) = struct
+module WithLexer(Lexer : Full_fidelity_lexer_sig.MinimalLexer_S) = struct
   module Lexer = Lexer
 
   type t = {

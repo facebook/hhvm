@@ -16,25 +16,25 @@
  *)
 
 module TokenKind = Full_fidelity_token_kind
-module MinimalTrivia = Full_fidelity_minimal_trivia
+module Trivia = Full_fidelity_minimal_trivia
 module TriviaKind = Full_fidelity_trivia_kind
 
 type t = {
   kind: TokenKind.t;
   width: int;
-  leading: MinimalTrivia.t list;
-  trailing: MinimalTrivia.t list
+  leading: Trivia.t list;
+  trailing: Trivia.t list
 }
 
 let make kind width leading trailing =
   { kind; width; leading; trailing }
 
 let leading_width token =
-  let folder sum t = sum + (MinimalTrivia.width t) in
+  let folder sum t = sum + (Trivia.width t) in
   List.fold_left folder 0 token.leading
 
 let trailing_width token =
-  let folder sum t = sum + (MinimalTrivia.width t) in
+  let folder sum t = sum + (Trivia.width t) in
   List.fold_left folder 0 token.trailing
 
 let width token =
@@ -57,7 +57,7 @@ let trailing token =
 
 let has_leading_end_of_line token =
   Core.List.exists token.leading
-    ~f:(fun trivia ->  MinimalTrivia.kind trivia = TriviaKind.EndOfLine)
+    ~f:(fun trivia ->  Trivia.kind trivia = TriviaKind.EndOfLine)
 
 let with_leading leading token =
   { token with leading }
@@ -67,5 +67,5 @@ let to_json token =
   JSON_Object [
     ("kind", JSON_String (TokenKind.to_string token.kind));
     ("width", int_ token.width);
-    ("leading", JSON_Array (List.map MinimalTrivia.to_json token.leading));
-    ("trailing", JSON_Array (List.map MinimalTrivia.to_json token.trailing)) ]
+    ("leading", JSON_Array (List.map Trivia.to_json token.leading));
+    ("trailing", JSON_Array (List.map Trivia.to_json token.trailing)) ]

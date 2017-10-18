@@ -9,9 +9,9 @@
  *)
 module type DeclarationParserType = sig
   type t
-  val make : Full_fidelity_lexer.t -> Full_fidelity_syntax_error.t list
+  val make : Full_fidelity_minimal_lexer.t -> Full_fidelity_syntax_error.t list
     -> Full_fidelity_parser_context.t -> t
-  val lexer : t -> Full_fidelity_lexer.t
+  val lexer : t -> Full_fidelity_minimal_lexer.t
   val errors : t -> Full_fidelity_syntax_error.t list
   val parse_script : t -> t * Full_fidelity_minimal_syntax.t
   val parse_function : t -> t * Full_fidelity_minimal_syntax.t

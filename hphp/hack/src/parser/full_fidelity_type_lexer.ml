@@ -11,22 +11,24 @@
 (* This lexer is exactly the same as a regular lexer, except that it tokenizes
    C<D<E>> as C < D < E > >, and not C < D < E >> *)
 
-type t = Full_fidelity_lexer.t
+module Lexer = Full_fidelity_minimal_lexer
 
-let source = Full_fidelity_lexer.source
-let start_offset = Full_fidelity_lexer.start_offset
-let end_offset = Full_fidelity_lexer.end_offset
-let next_token = Full_fidelity_lexer.next_token_in_type
-let next_token_no_trailing = Full_fidelity_lexer.next_token_no_trailing
-let next_token_in_string = Full_fidelity_lexer.next_token_in_string
-let next_token_as_name = Full_fidelity_lexer.next_token_as_name
-let next_docstring_header = Full_fidelity_lexer.next_docstring_header
-let next_xhp_class_name = Full_fidelity_lexer.next_xhp_class_name
-let is_next_xhp_class_name = Full_fidelity_lexer.is_next_xhp_class_name
-let is_next_name = Full_fidelity_lexer.is_next_name
-let next_xhp_name = Full_fidelity_lexer.next_xhp_name
-let scan_markup = Full_fidelity_lexer.scan_markup
-let is_next_xhp_category_name = Full_fidelity_lexer.is_next_xhp_category_name
-let next_xhp_category_name = Full_fidelity_lexer.next_xhp_category_name
-let errors = Full_fidelity_lexer.errors
-let current_text_at = Full_fidelity_lexer.current_text_at
+type t = Lexer.t
+
+let source = Lexer.source
+let start_offset = Lexer.start_offset
+let end_offset = Lexer.end_offset
+let next_token = Lexer.next_token_in_type
+let next_token_no_trailing = Lexer.next_token_no_trailing
+let next_token_in_string = Lexer.next_token_in_string
+let next_token_as_name = Lexer.next_token_as_name
+let next_docstring_header = Lexer.next_docstring_header
+let next_xhp_class_name = Lexer.next_xhp_class_name
+let is_next_xhp_class_name = Lexer.is_next_xhp_class_name
+let is_next_name = Lexer.is_next_name
+let next_xhp_name = Lexer.next_xhp_name
+let scan_markup = Lexer.scan_markup
+let is_next_xhp_category_name = Lexer.is_next_xhp_category_name
+let next_xhp_category_name = Lexer.next_xhp_category_name
+let errors = Lexer.errors
+let current_text_at = Lexer.current_text_at

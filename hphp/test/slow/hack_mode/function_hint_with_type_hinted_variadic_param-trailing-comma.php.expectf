@@ -1,0 +1,1 @@
+Fatal error: syntax error, unexpected ',', expecting ')' in %s/test/slow/hack_mode/function_hint_with_type_hinted_variadic_param-trailing-comma.php on line 8

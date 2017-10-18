@@ -1516,19 +1516,19 @@ method_parameter_list:
     non_empty_method_parameter_list ','
     optional_user_attributes
     parameter_modifiers
-    hh_type_opt "..." T_VARIABLE
+    hh_type_opt T_ELLIPSIS T_VARIABLE
                                       { _p->onVariadicParam($$,&$1,$5,$7,false,
                                                             &$3,&$4); }
   | non_empty_method_parameter_list ','
     optional_user_attributes
     parameter_modifiers
-    hh_type_opt '&' "..." T_VARIABLE
+    hh_type_opt '&' T_ELLIPSIS T_VARIABLE
                                       { _p->onVariadicParam($$,&$1,$5,$8,true,
                                                             &$3,&$4); }
   | non_empty_method_parameter_list ','
     optional_user_attributes
     parameter_modifiers
-    hh_type_opt "..."
+    hh_type_opt T_ELLIPSIS
                                       { validate_hh_variadic_variant(
                                           _p, $3, $5, &$4);
                                         $$ = $1; }
@@ -1536,17 +1536,17 @@ method_parameter_list:
     hh_possible_comma                 { $$ = $1;}
   | optional_user_attributes
     parameter_modifiers
-    hh_type_opt "..." T_VARIABLE
+    hh_type_opt T_ELLIPSIS T_VARIABLE
                                       { _p->onVariadicParam($$,NULL,$3,$5,false,
                                                             &$1,&$2); }
   | optional_user_attributes
     parameter_modifiers
-    hh_type_opt '&' "..." T_VARIABLE
+    hh_type_opt '&' T_ELLIPSIS T_VARIABLE
                                       { _p->onVariadicParam($$,NULL,$3,$6,true,
                                                             &$1,&$2); }
   | optional_user_attributes
     parameter_modifiers
-    hh_type_opt "..."
+    hh_type_opt T_ELLIPSIS
                                       { validate_hh_variadic_variant(
                                           _p, $1, $3, &$2);
                                         $$.reset(); }
@@ -1599,32 +1599,32 @@ non_empty_method_parameter_list:
 parameter_list:
     non_empty_parameter_list ','
     optional_user_attributes
-    hh_type_opt "..." T_VARIABLE
+    hh_type_opt T_ELLIPSIS T_VARIABLE
                                       { _p->onVariadicParam($$,&$1,$4,$6,
                                         false,&$3,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
-    hh_type_opt '&' "..." T_VARIABLE
+    hh_type_opt '&' T_ELLIPSIS T_VARIABLE
                                       { _p->onVariadicParam($$,&$1,$4,$7,
                                         true,&$3,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
-    hh_type_opt "..."
+    hh_type_opt T_ELLIPSIS
                                       { validate_hh_variadic_variant(
                                           _p, $3, $4, NULL);
                                         $$ = $1; }
   | non_empty_parameter_list
     hh_possible_comma                 { $$ = $1;}
   | optional_user_attributes
-    hh_type_opt "..." T_VARIABLE
+    hh_type_opt T_ELLIPSIS T_VARIABLE
                                       { _p->onVariadicParam($$,NULL,$2,$4,
                                                             false,&$1,NULL); }
   | optional_user_attributes
-    hh_type_opt '&' "..." T_VARIABLE
+    hh_type_opt '&' T_ELLIPSIS T_VARIABLE
                                       { _p->onVariadicParam($$,NULL,$2,$5,
                                                             true,&$1,NULL); }
   | optional_user_attributes
-    hh_type_opt "..."
+    hh_type_opt T_ELLIPSIS
                                       { validate_hh_variadic_variant(
                                           _p, $1, $2, NULL);
                                         $$.reset(); }
@@ -1674,11 +1674,11 @@ function_call_parameter_list:
 non_empty_fcall_parameter_list:
   expr                               { _p->onCallParam($$,NULL,$1,false,false);}
 | '&' variable                       { _p->onCallParam($$,NULL,$2,true,false);}
-| "..." expr                         { _p->onCallParam($$,NULL,$2,false,true);}
+| T_ELLIPSIS expr                    { _p->onCallParam($$,NULL,$2,false,true);}
 | non_empty_fcall_parameter_list
 ',' expr                           { _p->onCallParam($$,&$1,$3,false, false);}
 | non_empty_fcall_parameter_list
-',' "..." expr                     { _p->onCallParam($$,&$1,$4,false,true);}
+',' T_ELLIPSIS expr                { _p->onCallParam($$,&$1,$4,false,true);}
 | non_empty_fcall_parameter_list
 ',' '&' variable                   { _p->onCallParam($$,&$1,$4,true, false);}
 ;
@@ -3503,9 +3503,9 @@ hh_type_list:
 
 hh_func_type_list:
     hh_non_empty_type_list
-    ',' T_ELLIPSIS                     { $$ = $1; }
+    ',' hh_type_opt T_ELLIPSIS         { $$ = $1; }
   | hh_type_list                       { $$ = $1; }
-  | T_ELLIPSIS                         { $$.reset(); }
+  | hh_type_opt T_ELLIPSIS             { $$.reset(); }
   |                                    { $$.reset(); }
 ;
 

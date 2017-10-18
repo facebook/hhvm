@@ -86,6 +86,8 @@ slow/hack_mode/2214.php
 slow/hack_mode/closing-tag-asp.php
 slow/hack_mode/closing-tag-php.php
 slow/hack_mode/closing-tag-script.php
+slow/hack_mode/function_hint_with_single_type_hinted_variadic_param.php
+slow/hack_mode/function_hint_with_type_hinted_variadic_param.php
 slow/hack_mode/typedef_namespace.php
 slow/hash_not_bang.php
 slow/hashbang_regression.php

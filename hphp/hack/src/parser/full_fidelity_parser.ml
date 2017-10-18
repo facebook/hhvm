@@ -8,14 +8,8 @@
  *
  *)
 
-module Token = Full_fidelity_minimal_token
-module Syntax = Full_fidelity_minimal_syntax
-module SyntaxKind = Full_fidelity_syntax_kind
-module TokenKind = Full_fidelity_token_kind
-module SourceText = Full_fidelity_source_text
-module SyntaxError = Full_fidelity_syntax_error
 module Lexer = Full_fidelity_minimal_lexer
-module Operator = Full_fidelity_operator
+module SyntaxError = Full_fidelity_syntax_error
 module Context = Full_fidelity_parser_context
 module rec ExpressionParser :
   Full_fidelity_expression_parser_type.ExpressionParserType =

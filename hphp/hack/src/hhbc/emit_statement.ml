@@ -463,7 +463,7 @@ and emit_for env e1 e2 e3 b =
       | h1 :: t1 -> emit_ignored_expr env h :: expr_list h1 t1
     in
     match e2 with
-    | _, A.Expr_list [] -> empty
+    | _, A.Expr_list [] -> if jmpz then empty else instr_jmp label
     | _, A.Expr_list (h::t) -> gather @@ expr_list h t
     | cond -> final cond
   in

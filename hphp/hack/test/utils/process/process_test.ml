@@ -3,7 +3,7 @@ open Asserter
 let test_echo () =
   let process = Process.exec "echo" [ "hello world"; ] in
   match Process.read_and_wait_pid ~timeout:2 process with
-  | Result.Ok (result, _err) ->
+  | Ok (result, _err) ->
     let () = String_asserter.assert_equals "hello world\n" result "" in
     true
   | _ ->
@@ -13,14 +13,14 @@ let test_process_read_idempotent () =
   let process = Process.exec "echo" [ "hello world"; ] in
   let result = Process.read_and_wait_pid ~timeout:2 process in
   let () = match result with
-    | Result.Ok (result, _err) ->
+    | Ok (result, _err) ->
       String_asserter.assert_equals "hello world\n" result ""
     | _ ->
       ()
   in
   let result = Process.read_and_wait_pid ~timeout:2 process in
   match result with
-  | Result.Ok (result, _err) ->
+  | Ok (result, _err) ->
     String_asserter.assert_equals "hello world\n" result "";
     true
   | _ ->
@@ -29,7 +29,7 @@ let test_process_read_idempotent () =
 let test_env_variable () =
   let process = Process.exec "printenv" ~env:[ "NAME=world" ] [ ] in
   match Process.read_and_wait_pid ~timeout:2 process with
-  | Result.Ok (result, _stderr) ->
+  | Ok (result, _stderr) ->
     let () = String_asserter.assert_equals "NAME=world\n" result "" in
     true
   | _ ->
@@ -38,7 +38,7 @@ let test_env_variable () =
 let test_process_timeout () =
   let process = Process.exec "sleep" [ "2"; ] in
   match Process.read_and_wait_pid ~timeout:1 process with
-  | Result.Error (Process_types.Timed_out _) ->
+  | Error (Process_types.Timed_out _) ->
     true
   | _ ->
     false
@@ -46,7 +46,7 @@ let test_process_timeout () =
 let test_process_finishes_within_timeout () =
   let process = Process.exec "sleep" [ "1"; ] in
   match Process.read_and_wait_pid ~timeout:2 process with
-  | Result.Ok _ ->
+  | Ok _ ->
     true
   | _ ->
     false
@@ -85,11 +85,11 @@ let test_delayed_future () =
 let test_stdin_input () =
   let process = Process.exec "sed" ~input:"hello" [ "s/hello/world/g"; ] in
   match Process.read_and_wait_pid ~timeout:3 process with
-  | Result.Ok (msg, _) ->
+  | Ok (msg, _) ->
     String_asserter.assert_equals "world" msg
       "sed should replace hello with world";
     true
-  | Result.Error failure ->
+  | Error failure ->
     Printf.eprintf "Error %s" (Process.failure_msg failure);
     false
 
@@ -103,7 +103,7 @@ let test_entry_point () =
   let process = Process.run_entry print_string_entry "hello" in
   let result = Process.read_and_wait_pid ~timeout:10 process in
   match result with
-  | Result.Ok (out, _err) ->
+  | Ok (out, _err) ->
     let () = String_asserter.assert_equals "hello\n" out "" in
     true
   | _ ->
@@ -113,16 +113,16 @@ let test_chdir () =
   let process = Process.exec ~cwd:"/tmp" "pwd" [] in
   let result = Process.read_and_wait_pid ~timeout:10 process in
   match result with
-  | Result.Ok (out, _err) ->
+  | Ok (out, _err) ->
     let () = String_asserter.assert_equals "/tmp\n" out "" in
     true
-  | Result.Error (Process_types.Timed_out _) ->
+  | Error (Process_types.Timed_out _) ->
     Printf.eprintf "Process timed out\n";
     false
-  | Result.Error Process_types.Process_aborted_input_too_large ->
+  | Error Process_types.Process_aborted_input_too_large ->
     Printf.eprintf "Unexpected error process input too large\n";
     false
-  | Result.Error (Process_types.Process_exited_abnormally
+  | Error (Process_types.Process_exited_abnormally
     (_, stdout, stderr)) ->
       Printf.eprintf "Process exited abnormally\n";
       Printf.eprintf "See stdout: %s\n" stdout;

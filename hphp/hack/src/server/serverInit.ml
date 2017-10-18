@@ -16,8 +16,8 @@ open Utils
 open String_utils
 open SearchServiceRunner
 
-open Result.Export
-open Result.Monad_infix
+open Core_result.Export
+open Core_result.Monad_infix
 
 module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
@@ -152,7 +152,7 @@ module ServerInitCommon = struct
       Daemon.to_channel oc @@ Error e
 
   let with_loader_timeout timeout stage f =
-    Result.join @@ Result.try_with @@ fun () ->
+    Core_result.join @@ Core_result.try_with @@ fun () ->
     Timeout.with_timeout ~timeout ~do_:(fun _ -> f ())
       ~on_timeout:(fun _ -> raise @@ Loader_timeout stage)
 
@@ -162,7 +162,7 @@ module ServerInitCommon = struct
    *)
   let mk_state_future root cmd =
     let start_time = Unix.gettimeofday () in
-    Result.try_with @@ fun () ->
+    Core_result.try_with @@ fun () ->
     let log_file =
       Sys_utils.make_link_of_timestamped (ServerFiles.load_log root) in
     let log_fd = Daemon.fd_of_path log_file in
@@ -199,14 +199,14 @@ module ServerInitCommon = struct
             List.map dirty_files Relative_path.from_root in
             HackEventLogger.vcs_changed_files_end t (List.length dirty_files);
             let _ = Hh_logger.log_duration "Finding changed files" t in
-            Result.Ok (
+            Ok (
               fn,
               corresponding_base_revision,
               Relative_path.set_of_list dirty_files,
               old_saved,
               state_distance)
         end in
-        Result.Ok get_dirty_files
+        Ok get_dirty_files
     with e ->
       (* We have failed to load the saved state in the allotted time. Kill
        * the daemon so it doesn't write to shared memory while the type-decl
@@ -225,14 +225,14 @@ module ServerInitCommon = struct
      let changes = Relative_path.set_of_list changes in
      let chan = open_in saved_state_fn in
      let old_saved = Marshal.from_channel chan in
-     let get_dirty_files = (fun () -> Result.Ok (
+     let get_dirty_files = (fun () -> Ok (
        saved_state_fn,
        corresponding_base_revision,
        changes,
        old_saved,
        None
      )) in
-     Result.try_with (fun () -> fun () -> Result.Ok get_dirty_files)
+     Core_result.try_with (fun () -> fun () -> Ok get_dirty_files)
    | Load_state_natively ->
      let result = State_loader.mk_state_future
        (ServerConfig.config_hash genv.config) root in
@@ -243,7 +243,7 @@ module ServerInitCommon = struct
        let dirty_files = Future.get result.State_loader.dirty_files in
        let dirty_files = List.map dirty_files Relative_path.from_root in
        let dirty_files = Relative_path.set_of_list dirty_files in
-       Result.Ok (
+       Ok (
          result.State_loader.saved_state_fn,
          result.State_loader.corresponding_base_rev,
          dirty_files,
@@ -251,7 +251,7 @@ module ServerInitCommon = struct
          Some result.State_loader.state_distance
        )
      ) in
-     Result.try_with (fun () -> fun () -> Result.Ok get_dirty_files)
+     Core_result.try_with (fun () -> fun () -> Ok get_dirty_files)
 
   let is_check_mode options =
     ServerArgs.check_mode options &&
@@ -539,14 +539,14 @@ type state_distance = int option
 type state_result =
  (saved_state_fn * corresponding_base_rev * Relative_path.Set.t
    * Relative_path.Set.t * FileInfo.saved_state_info * state_distance, exn)
- Result.t
+ result
 
 (* Laziness *)
 type lazy_level = Off | Decl | Parse | Init | Incremental
 
 module type InitKind = sig
   val init :
-    load_mini_approach:(load_mini_approach, exn) Result.t ->
+    load_mini_approach:(load_mini_approach, exn) result ->
     ServerEnv.genv ->
     lazy_level ->
     ServerEnv.env ->
@@ -1006,7 +1006,7 @@ let init_to_save_state genv =
 (* entry point *)
 let init ?load_mini_approach genv =
   let lazy_lev = get_lazy_level genv in
-  let load_mini_approach = Result.of_option load_mini_approach
+  let load_mini_approach = Core_result.of_option load_mini_approach
     ~error:No_loader in
   let env = ServerEnvBuild.make_env genv.config in
   let root = ServerArgs.root genv.options in
@@ -1024,7 +1024,7 @@ let init ?load_mini_approach genv =
   SharedMem.init_done ();
   ServerUtils.print_hash_stats ();
   let result = match state with
-    | Result.Ok (
+    | Ok (
       _saved_state_fn,
       _corresponding_base_revision,
       _dirty_files,
@@ -1032,7 +1032,7 @@ let init ?load_mini_approach genv =
       _old_saved,
       state_distance) ->
         Mini_load state_distance
-    | Result.Error e ->
+    | Error e ->
       Mini_load_failed (Printexc.to_string e)
   in
   env, result

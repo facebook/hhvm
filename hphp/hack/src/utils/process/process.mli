@@ -44,11 +44,11 @@ val run_entry : ?input:string -> 'a Entry.t -> 'a -> Process_types.t
  * Idempotent.
  *
  * If process exits with something other than (Unix.WEXITED 0), will return a
- * Result.Error
+ * Error
  *)
 val read_and_wait_pid :
   timeout: int -> Process_types.t ->
-  ((string * string), failure) Result.t
+  ((string * string), failure) result
 
 val failure_msg : failure -> string
 

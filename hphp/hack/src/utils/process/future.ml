@@ -41,18 +41,18 @@ let get : 'a t -> 'a =
     raise (Future_sig.Timed_out "Delayed value not ready yet")
   | Incomplete (process, transformer) ->
     match Process.read_and_wait_pid ~timeout:30 process with
-    | Result.Ok (stdout, _stderr) ->
+    | Ok (stdout, _stderr) ->
       let result = transformer stdout in
       let () = promise := Complete result in
       result
-    | Result.Error (Process_exited_abnormally
+    | Error (Process_exited_abnormally
         (status, _, stderr)) ->
       (** TODO: Prefer monad over exceptions. *)
       raise (Future_sig.Process_failure (status, stderr))
-    | Result.Error (Timed_out (_, stderr)) ->
+    | Error (Timed_out (_, stderr)) ->
       (** TODO: Prefer monad over exceptions. *)
       raise (Future_sig.Timed_out stderr)
-    | Result.Error Process_aborted_input_too_large ->
+    | Error Process_aborted_input_too_large ->
       raise Future_sig.Process_aborted
 
 let is_ready promise = match !promise with

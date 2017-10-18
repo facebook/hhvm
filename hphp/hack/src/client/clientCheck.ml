@@ -422,10 +422,10 @@ let main args =
       in
       let result = rpc args @@ Rpc.INFER_RETURN_TYPE action in
       match result with
-      | Result.Error error_str ->
+      | Error error_str ->
         Printf.eprintf "%s\n" error_str;
         raise Exit_status.(Exit_with Input_error)
-      | Result.Ok ty ->
+      | Ok ty ->
         if args.output_json then
           print_endline Hh_json.(json_to_string (JSON_String ty))
         else

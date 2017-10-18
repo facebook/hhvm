@@ -10,14 +10,14 @@
 
 open Core
 open Nast
-open Result
+open Core_result
 open Typing_infer_return
 
 type t =
 | Function of string
 | Method of string * string
 
-type result = (string, string) Result.t
+type result = (string, string) Pervasives.result
 
 let add_ns name =
   if String_utils.string_starts_with name "\\" then name else "\\" ^ name

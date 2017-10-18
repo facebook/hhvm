@@ -211,7 +211,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   in
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
-  | Result.Ok (ic, oc) ->
+  | Ok (ic, oc) ->
       if env.do_post_handoff_handshake then begin
         try
           wait_for_server_hello ic retries env.progress_callback start_time
@@ -224,7 +224,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           raise Exit_status.(Exit_with No_server_running))
       end;
       (ic, oc)
-  | Result.Error e ->
+  | Error e ->
     if first_attempt then
       Printf.eprintf
         "For more detailed logs, try `tail -f $(hh_client --monitor-logname) \

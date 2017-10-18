@@ -400,13 +400,13 @@ let check_errors opts errors files_info =
   end ~init:errors
 
 let create_nasts opts files_info =
-  let open Result in
+  let open Core_result in
   let open Nast in
   let build_nast fn {FileInfo.funs; classes; typedefs; consts; _} =
-    List.map ~f:Result.ok_or_failwith (
+    List.map ~f:Core_result.ok_or_failwith (
       List.map funs begin fun (_, x) ->
         Parser_heap.find_fun_in_file ~full:true opts fn x
-        |> Result.of_option ~error:(Printf.sprintf "Couldn't find function %s" x)
+        |> Core_result.of_option ~error:(Printf.sprintf "Couldn't find function %s" x)
         >>| Naming.fun_ opts
         >>| (fun f -> {f with f_body = (NamedBody (Typing_naming_body.func_body opts f))})
         >>| (fun f -> Nast.Fun f)
@@ -414,7 +414,7 @@ let create_nasts opts files_info =
       @
       List.map classes begin fun (_, x) ->
         Parser_heap.find_class_in_file ~full:true opts fn x
-        |> Result.of_option ~error:(Printf.sprintf "Couldn't find class %s" x)
+        |> Core_result.of_option ~error:(Printf.sprintf "Couldn't find class %s" x)
         >>| Naming.class_ opts
         >>| Typing_naming_body.class_meth_bodies opts
         >>| (fun c -> Nast.Class c)
@@ -422,14 +422,14 @@ let create_nasts opts files_info =
       @
       List.map typedefs begin fun (_, x) ->
         Parser_heap.find_typedef_in_file ~full:true opts fn x
-        |> Result.of_option ~error:(Printf.sprintf "Couldn't find typedef %s" x)
+        |> Core_result.of_option ~error:(Printf.sprintf "Couldn't find typedef %s" x)
         >>| Naming.typedef opts
         >>| (fun t -> Nast.Typedef t)
       end
       @
       List.map consts begin fun (_, x) ->
         Parser_heap.find_const_in_file ~full:true opts fn x
-        |> Result.of_option ~error:(Printf.sprintf "Couldn't find const %s" x)
+        |> Core_result.of_option ~error:(Printf.sprintf "Couldn't find const %s" x)
         >>| Naming.global_const opts
         >>| fun g -> Nast.Constant g
       end
@@ -437,7 +437,7 @@ let create_nasts opts files_info =
   in Relative_path.Map.mapi (build_nast) files_info
 
 let nast_to_tast_tenv opts nast =
-  let open Result in
+  let open Core_result in
   let open Nast in
   let def_conv = function
     | Fun f -> Ok f
@@ -454,7 +454,7 @@ let nast_to_tast_tenv opts nast =
       >>| Typing.typedef_def opts
       >>| (fun (td, tenv) -> Tast.Typedef td, tenv)
   in
-  List.map nast (Fn.compose Result.ok_or_failwith def_conv)
+  List.map nast (Fn.compose Core_result.ok_or_failwith def_conv)
 
 let with_named_body opts n_fun =
   (** In the naming heap, the function bodies aren't actually named yet, so

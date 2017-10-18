@@ -24,16 +24,16 @@ let assert_errors_equal expected got =
   )
 
 let expect_error_helper expected = function
-  | Result.Ok _ -> fail "Expected an error"
-  | Result.Error got -> assert_errors_equal expected got
+  | Ok _ -> fail "Expected an error"
+  | Error got -> assert_errors_equal expected got
 
 let expect_error expected got = expect_error_helper expected got.result
 
 let expect_value get_fun expected got : unit = match got.result with
-  | Result.Error e ->
+  | Error e ->
     fail (Printf.sprintf "Unexpected error: %s"
       (Ide_rpc_protocol_parser.error_t_to_string e))
-  | Result.Ok got ->
+  | Ok got ->
     (* TODO: without struct printing, this error is not very useful *)
     if expected <> (get_fun got) then fail "Got unexpected result"
 

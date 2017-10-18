@@ -88,8 +88,8 @@ let test_invalid_edit () =
       ed = {line = 2; column = 1}};
     text = "just "} in
   match edit_file content [edit] with
-  | Result.Error _ -> true
-  | Result.Ok _ -> false
+  | Error _ -> true
+  | Ok _ -> false
 
 let test_empty_edit () =
   let content = "" in

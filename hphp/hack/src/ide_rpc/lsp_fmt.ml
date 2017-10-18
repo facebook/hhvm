@@ -42,7 +42,7 @@ module Jget = struct
   let get_opt hhjson_getter json key = match json with
     | None -> None
     | Some json -> match hhjson_getter key (json, []) with
-      | Result.Ok (r, _keytrace) -> Some r
+      | Ok (r, _keytrace) -> Some r
       | _ -> None
 
   let get_exn opt_getter json key = match opt_getter json key with

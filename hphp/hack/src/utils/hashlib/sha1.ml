@@ -35,7 +35,7 @@ let strip_output_filename digest =
 let digest message =
   let process = Process.exec "sha1sum" ~input:message [] in
   match Process.read_and_wait_pid ~timeout:30 process with
-  | Result.Ok (stdout, _) ->
+  | Ok (stdout, _) ->
     strip_output_filename stdout
-  | Result.Error _ ->
+  | Error _ ->
     None

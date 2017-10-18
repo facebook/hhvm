@@ -48,7 +48,7 @@ let rec connect_persistent env retries start_time =
   in
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
-  | Result.Ok (ic, oc) ->
+  | Ok (ic, oc) ->
       (try
         ClientConnect.wait_for_server_hello ic (Some retries)
           ClientConnect.tty_progress_reporter start_time None;
@@ -57,7 +57,7 @@ let rec connect_persistent env retries start_time =
         Exit_status.exit Exit_status.No_server_running
       );
       (ic, oc)
-  | Result.Error e ->
+  | Error e ->
     match e with
     | SMUtils.Monitor_connection_failure
     | SMUtils.Monitor_socket_not_ready
@@ -258,9 +258,9 @@ let handle_request conn id protocol = function
     print_response id protocol (Highlight_references_response r)
   | Format args ->
     begin match rpc conn (Rpc.IDE_FORMAT (ServerFormatTypes.Range args)) with
-      | Result.Ok r -> print_response id protocol
+      | Ok r -> print_response id protocol
                          (Format_response r.ServerFormatTypes.new_text)
-      | Result.Error e -> handle_error id protocol (Server_error e)
+      | Error e -> handle_error id protocol (Server_error e)
     end
   | Coverage_levels filename ->
     let filename = ServerUtils.FileName filename in
@@ -293,16 +293,16 @@ let handle_stdin conn =
     ~version:!init_version
   in
   let protocol = match protocol with
-    | Result.Ok protocol -> protocol
-    | Result.Error _ -> !init_protocol
+    | Ok protocol -> protocol
+    | Error _ -> !init_protocol
   in
   let id = match id with
-    | Result.Ok x -> x
-    | Result.Error _ -> None
+    | Ok x -> x
+    | Error _ -> None
   in
   match result with
-  | Result.Ok request -> handle_request conn id protocol request
-  | Result.Error e -> handle_error id protocol e
+  | Ok request -> handle_request conn id protocol request
+  | Error e -> handle_error id protocol e
 
 let handle_server fd =
   begin try get_next_push_message fd with

@@ -40,11 +40,11 @@ let make_result status stdout stderr =
   let open Process_types in
   match status with
   | Unix.WEXITED 0 ->
-    Result.Ok (stdout, stderr)
+    Ok (stdout, stderr)
   | Unix.WEXITED _
   | Unix.WSIGNALED _
   | Unix.WSTOPPED _ ->
-    Result.Error (Process_exited_abnormally (status, stdout, stderr))
+    Error (Process_exited_abnormally (status, stdout, stderr))
 
 (** Read from the FD if there is something to be read. FD is a reference
  * so when EOF is read from it, it is set to None. *)
@@ -140,7 +140,7 @@ let rec read_and_wait_pid ~retries process =
   | Process_exited status ->
     make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)
   | Process_aborted Input_too_large ->
-    Result.Error Process_aborted_input_too_large
+    Error Process_aborted_input_too_large
   | Process_running pid ->
   let fds = filter_none [stdout_fd; stderr_fd;] in
   if fds = []
@@ -159,7 +159,7 @@ let rec read_and_wait_pid ~retries process =
        * non-blocking waitpid, so we insert a select here. *)
       let _, _, _ = Unix.select fds [] [] sleep_seconds_per_retry in
       if retries <= 0 then
-        Result.Error (Timed_out
+        Error (Timed_out
           ((Stack.merge_bytes acc), (Stack.merge_bytes acc_err)))
       else
         (** And here we switch from waitpid back to reading. *)

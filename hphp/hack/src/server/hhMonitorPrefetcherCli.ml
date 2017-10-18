@@ -75,13 +75,13 @@ let () =
     "============================================="
   in
   match Process.read_and_wait_pid ~timeout:30 process with
-  | Result.Ok _ ->
+  | Ok _ ->
     exit 0
-  | Result.Error Process_types.Process_aborted_input_too_large ->
+  | Error Process_types.Process_aborted_input_too_large ->
     Printf.eprintf "Process_aborted_input_too_large\n";
     exit 1
-  | Result.Error (Process_types.Process_exited_abnormally (_, _, stderr))
-  | Result.Error (Process_types.Timed_out (_, stderr)) ->
+  | Error (Process_types.Process_exited_abnormally (_, _, stderr))
+  | Error (Process_types.Timed_out (_, stderr)) ->
     Printf.eprintf
       "Exited abnormally. See also stderr:%s" (wrap_text_block stderr);
     exit 1

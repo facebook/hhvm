@@ -339,29 +339,29 @@ let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
 
 let shape_field_name_ env field =
   let open Nast in match field with
-    | String name -> Result.Ok (Ast.SFlit name)
-    | Class_const (CI (x, _), y) -> Result.Ok (Ast.SFclass_const (x, y))
+    | String name -> Ok (Ast.SFlit name)
+    | Class_const (CI (x, _), y) -> Ok (Ast.SFclass_const (x, y))
     | Class_const (CIself, y) ->
       let _, c_ty = Env.get_self env in
       (match c_ty with
       | Tclass (sid, _) ->
-        Result.Ok (Ast.SFclass_const(sid, y))
+        Ok (Ast.SFclass_const(sid, y))
       | _ ->
-        Result.Error `Expected_class)
-    | _ -> Result.Error `Invalid_shape_field_name
+        Error `Expected_class)
+    | _ -> Error `Invalid_shape_field_name
 
 let maybe_shape_field_name env field =
   match shape_field_name_ env field with
-    | Result.Ok x -> Some x
-    | Result.Error _ -> None
+    | Ok x -> Some x
+    | Error _ -> None
 
 let shape_field_name env p field =
   match shape_field_name_ env field with
-    | Result.Ok x -> Some x
-    | Result.Error `Expected_class ->
+    | Ok x -> Some x
+    | Error `Expected_class ->
         Errors.expected_class p;
         None
-    | Result.Error `Invalid_shape_field_name ->
+    | Error `Invalid_shape_field_name ->
         Errors.invalid_shape_field_name p;
         None
 

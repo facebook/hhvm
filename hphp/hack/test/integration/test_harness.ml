@@ -55,13 +55,13 @@ let exec_hh_client args harness =
 let get_server_logs harness =
   let process = exec_hh_client ["--logname"] harness in
   match Process.read_and_wait_pid ~timeout:5 process with
-  | Result.Ok (log_path, _) ->
+  | Ok (log_path, _) ->
     let log_path = Path.make (String.trim log_path) in
     (try Some (Sys_utils.cat (Path.to_string log_path)) with
     | Sys_error(m)
       when Sys_utils.string_contains m "No such file or directory" ->
       None)
-  | Result.Error failure ->
+  | Error failure ->
     raise @@ Process_failed failure
 
 let wait_until_lock_free lock_file _harness =
@@ -90,17 +90,17 @@ let check_cmd harness =
   let process = exec_hh_client ["check"] harness in
   Printf.eprintf "Waiting for process\n%!";
   match Process.read_and_wait_pid ~timeout:30 process with
-  | Result.Ok (result, _) ->
+  | Ok (result, _) ->
     Sys_utils.split_lines result
-  | Result.Error failure ->
+  | Error failure ->
     raise @@ Process_failed failure
 
 let stop_server harness =
   let process = exec_hh_client ["stop"] harness in
   match Process.read_and_wait_pid ~timeout:30 process with
-  | Result.Ok (result, _) ->
+  | Ok (result, _) ->
     result
-  | Result.Error failure ->
+  | Error failure ->
     raise @@ Process_failed failure
 
 let run_test ?(stop_server_in_teardown=true)

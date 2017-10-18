@@ -40,10 +40,10 @@ type error_t =
   | Server_error of string
 
 type 'a return_t = {
-  protocol : (protocol, error_t) Result.t;
+  protocol : (protocol, error_t) result;
   (* Optional, since JSON RPC notifications don't have id field *)
-  id : (int option, error_t) Result.t;
-  result : ('a, error_t) Result.t
+  id : (int option, error_t) result;
+  result : ('a, error_t) result
 }
 
 type t = {

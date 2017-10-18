@@ -23,5 +23,5 @@ let rec static_string_exn = function
   | p, _ -> raise (Not_static_exn p)
 
 let static_string expr =
-  try Result.Ok (static_string_exn expr)
-  with Not_static_exn p -> Result.Error p
+  try Ok (static_string_exn expr)
+  with Not_static_exn p -> Error p

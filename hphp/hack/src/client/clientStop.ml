@@ -34,7 +34,7 @@ let nice_kill env =
   Printf.eprintf "Attempting to nicely kill server for %s\n%!" root_s;
   try begin
     match ServerUtils.shut_down_server env.root with
-    | Result.Ok shutdown_result ->
+    | Ok shutdown_result ->
       begin match shutdown_result with
       | SMUtils.SHUTDOWN_VERIFIED ->
         Printf.eprintf "Successfully killed server for %s\n%!" root_s
@@ -44,11 +44,11 @@ let nice_kill env =
           root_s;
         raise FailedToKill
       end
-    | Result.Error SMUtils.Build_id_mismatched _->
+    | Error SMUtils.Build_id_mismatched _->
       Printf.eprintf "Successfully killed server for %s\n%!" root_s
-    | Result.Error SMUtils.Server_missing ->
+    | Error SMUtils.Server_missing ->
       Printf.eprintf "No server to kill for %s\n%!" root_s
-    | Result.Error _ ->
+    | Error _ ->
       Printf.eprintf "Failed to kill server nicely for %s\n%!" root_s;
       raise FailedToKill
   end

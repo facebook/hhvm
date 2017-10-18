@@ -8,4 +8,4 @@
  *
  *)
 
-val static_string : Nast.expr -> (string, Pos.t) Result.t
+val static_string : Nast.expr -> (string, Pos.t) result

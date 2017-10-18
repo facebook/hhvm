@@ -9,7 +9,7 @@
  *)
 
 open Ide_rpc_protocol_parser_types
-open Result.Monad_infix
+open Core_result.Monad_infix
 
 let parse_method version rpc_parser_result =
   let result =

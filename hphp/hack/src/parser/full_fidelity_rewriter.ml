@@ -26,7 +26,7 @@ module WithSyntax(Syntax: RewritableType) = struct
      parents      : [node]  ->
      current_node : node ->
      current_acc  : accumulator ->
-     (accumulator, node Result.t)
+     (accumulator, node result)
 
      The tree is walked in post order; leaves are rewritten first. After all
      the children of a node are rewritten, then f is called on the rewritten
@@ -36,7 +36,7 @@ module WithSyntax(Syntax: RewritableType) = struct
      *)
   let parented_aggregating_rewrite_post f node init_acc =
     (* aux takes parents node accumulator and returns
-      (acc, node Result.t)  *)
+      (acc, node result)  *)
     let rec aux parents node acc =
       (* Start by rewriting all the children.
          We begin by obtaining a node list, and then from it producing

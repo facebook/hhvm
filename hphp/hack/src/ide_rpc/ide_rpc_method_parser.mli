@@ -18,4 +18,4 @@ val parse :
   protocol:protocol ->
   method_name:method_name ->
   params:Hh_json.json option ->
-  (Ide_message.client_request, error_t) Result.t
+  (Ide_message.client_request, error_t) result

@@ -7,14 +7,14 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
- open Result.Monad_infix
+ open Core_result.Monad_infix
 
 (* TODO t14922604: Further improve error handling *)
 let call_external_formatter
   (cmd : string)
   (content : string)
   (args : string list)
-  : (string list, string) Result.t =
+  : (string list, string) result =
   let args = Array.of_list (cmd :: args) in
   let reader timeout ic oc =
     output_string oc content;
@@ -28,15 +28,15 @@ let call_external_formatter
       with End_of_file -> ()
     end;
     match Timeout.close_process_in ic with
-    | Unix.WEXITED 0 -> Result.Ok (List.rev !lines)
-    | Unix.WEXITED v -> Result.Error (Hackfmt_error.get_error_string_from_exit_value v)
-    | _ -> Result.Error "Call to hackfmt was killed"
+    | Unix.WEXITED 0 -> Ok (List.rev !lines)
+    | Unix.WEXITED v -> Error (Hackfmt_error.get_error_string_from_exit_value v)
+    | _ -> Error "Call to hackfmt was killed"
   in
   Timeout.read_process
     ~timeout:2
     ~on_timeout:(fun _ ->
       Hh_logger.log "Formatter timeout";
-      Result.Error "Call to hackfmt timed out"
+      Error "Call to hackfmt timed out"
     )
     ~reader
     cmd
@@ -60,16 +60,16 @@ let go_hackfmt genv ?filename ~content args =
   then call_external_formatter path content args
   else begin
     Hh_logger.log "Formatter not found";
-    Result.Error ("Could not locate formatter on provided path: " ^ path)
+    Error ("Could not locate formatter on provided path: " ^ path)
   end
 
 let hh_format_result_to_response x =
   let open Format_hack in
   match x with
-  | Disabled_mode -> Result.Error ("Not a Hack file")
-  | Parsing_error _ -> Result.Error ("File has parse errors")
-  | Internal_error -> Result.Error ("Formatter internal error")
-  | Success s -> Result.Ok s
+  | Disabled_mode -> Error ("Not a Hack file")
+  | Parsing_error _ -> Error ("File has parse errors")
+  | Internal_error -> Error ("Formatter internal error")
+  | Success s -> Ok s
 
 let go_hh_format _ content from to_ =
     let modes = [Some FileInfo.Mstrict; Some FileInfo.Mpartial] in
@@ -136,7 +136,7 @@ let go_ide
     ~(range : Ide_api_types.range)
     : ServerFormatTypes.ide_result =
     old_format_result
-      |> Result.map ~f:(fun new_text -> {new_text; range;})
+      |> Core_result.map ~f:(fun new_text -> {new_text; range;})
   in
 
   match action with
@@ -174,8 +174,8 @@ let go_ide
        from the first line and forward it to the client so that it knows where
        to apply the edit. *)
     begin match lines with
-    | range_line :: lines -> Result.Ok (range_line, lines)
-    | _ -> Result.Error "Got no lines in at-position formatting"
+    | range_line :: lines -> Ok (range_line, lines)
+    | _ -> Error "Got no lines in at-position formatting"
     end >>= fun (range_line, lines) ->
 
     (* Extract the offsets in the first line that form the range.
@@ -183,7 +183,7 @@ let go_ide
        afterwards by `Str.matched_group`. *)
     let does_range_match = Str.string_match range_regexp range_line 0 in
     if not does_range_match
-    then Result.Error "Range not found on first line of --at-char output"
+    then Error "Range not found on first line of --at-char output"
     else
 
     let from0 = int_of_string (Str.matched_group 1 range_line) in
@@ -193,4 +193,4 @@ let go_ide
       ed = offset_to_position content to0;
     } in
     let new_text = String.concat "\n" lines in
-    Result.Ok {new_text; range;}
+    Ok {new_text; range;}

@@ -12,28 +12,28 @@ open Hh_json
 open Ide_rpc_protocol_parser_types
 
 val get_string_field :
-  string -> json -> (string, error_t) Result.t
+  string -> json -> (string, error_t) result
 
 val maybe_get_number_field :
-  string -> json -> (string option, error_t) Result.t
+  string -> json -> (string option, error_t) result
 
 val get_int_field :
-  string -> json -> (int, error_t) Result.t
+  string -> json -> (int, error_t) result
 
 val maybe_get_int_field :
-  string -> json -> (int option, error_t) Result.t
+  string -> json -> (int option, error_t) result
 
 val maybe_get_obj_field :
-  string ->  json -> (json option, error_t) Result.t
+  string ->  json -> (json option, error_t) result
 
 val get_obj_field :
-  string -> json -> (json, error_t) Result.t
+  string -> json -> (json, error_t) result
 
 val get_number_field :
-  string -> json -> (string, error_t) Result.t
+  string -> json -> (string, error_t) result
 
 val get_array_field :
-  string -> json -> (json list, error_t) Result.t
+  string -> json -> (json list, error_t) result
 
 (* Map optional value v to [("label", f v)] or [] *)
 val opt_field:
@@ -43,4 +43,4 @@ val opt_field:
   (string * Hh_json.json) list
 
 val not_implemented :
-  ('a, error_t) Result.t
+  ('a, error_t) result

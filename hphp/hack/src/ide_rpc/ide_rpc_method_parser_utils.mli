@@ -13,28 +13,28 @@ open Ide_rpc_protocol_parser_types
 open Hh_json
 
 val assert_params_required :
-  string -> 'a option -> ('a, error_t) Result.t
+  string -> 'a option -> ('a, error_t) result
 
 val get_line_field :
-  json -> (int, error_t) Result.t
+  json -> (int, error_t) result
 
 val get_column_field :
-  json -> (int, error_t) Result.t
+  json -> (int, error_t) result
 
 val get_text_field :
-  json -> (string, error_t) Result.t
+  json -> (string, error_t) result
 
 val get_filename_field :
-  json -> (string, error_t) Result.t
+  json -> (string, error_t) result
 
 val get_position_field :
-  json -> (position, error_t) Result.t
+  json -> (position, error_t) result
 
 val get_file_position_field :
-  json -> (file_position, error_t) Result.t
+  json -> (file_position, error_t) result
 
 val parse_range_field :
-  json -> (range, error_t) Result.t
+  json -> (range, error_t) result
 
 val get_file_range_field :
-  json -> (file_range, error_t) Result.t
+  json -> (file_range, error_t) result

@@ -275,18 +275,18 @@ let init root =
   if not (Lock.grab lock_file) then begin
     Hh_logger.log "Can't grab lock; terminating.\n%!";
     HackEventLogger.lock_stolen lock_file;
-    Result.Error Failure_daemon_already_running
+    Error Failure_daemon_already_running
   end else
   let watchman = init_watchman root in
   match watchman with
   | None ->
     Hh_logger.log "Error failed to initialize watchman";
-    Result.Error Failure_watchman_init
+    Error Failure_watchman_init
   | Some wenv ->
     let socket = Socket.init_unix_socket (Config.socket_file root) in
     Hh_logger.log "initialized and listening on %s"
       (Config.socket_file root);
-    Result.Ok {
+    Ok {
       watchman = Watchman.Watchman_alive wenv;
       state = Unknown;
       socket;
@@ -303,15 +303,15 @@ let main root =
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
   let result = init root in
   match result with
-  | Result.Ok env -> begin
+  | Ok env -> begin
       try serve env with
       | e ->
         let () = Hh_logger.exc
           ~prefix:"WatchmanEventWatcheer uncaught exception. exiting." e in
         raise e
     end
-  | Result.Error Failure_daemon_already_running
-  | Result.Error Failure_watchman_init ->
+  | Error Failure_daemon_already_running
+  | Error Failure_watchman_init ->
     exit 1
 
 let log_file root =
@@ -322,15 +322,15 @@ let log_file root =
 
 let daemon_main_ root oc =
   match init root with
-  | Result.Ok env ->
+  | Ok env ->
     to_channel_no_exn oc Init_success;
     serve env
-  | Result.Error Failure_watchman_init ->
+  | Error Failure_watchman_init ->
     to_channel_no_exn oc (Init_failure Failure_watchman_init);
     Hh_logger.log "Watchman init failed. Exiting.";
     HackEventLogger.init_watchman_failed ();
     exit 1;
-  | Result.Error Failure_daemon_already_running ->
+  | Error Failure_daemon_already_running ->
     Hh_logger.log "Daemon already running. Exiting.";
     exit 1
 

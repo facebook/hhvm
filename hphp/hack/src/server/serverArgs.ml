@@ -129,8 +129,8 @@ let verify_with_mini_state v = match !v with
           >>= parse_mini_state_json
     in
     match
-      (Result.ok_fst data_dump_parse_result),
-      (Result.ok_fst from_file_parse_result) with
+      (Core_result.ok_fst data_dump_parse_result),
+      (Core_result.ok_fst from_file_parse_result) with
     | (`Fst (parsed_data_dump, _)), (`Fst (_parsed_from_file, _)) ->
       Hh_logger.log "Warning - %s"
         ("Parsed mini state target from both JSON blob data dump" ^

@@ -22,22 +22,22 @@ let run_and_log (script, svn_rev) =
     (Path.to_string script) [(string_of_int svn_rev)] in
   (** We can block since this is already daemonized in a separate process. *)
   match Process.read_and_wait_pid ~timeout:30 process with
-  | Result.Ok _ ->
+  | Ok _ ->
     Hh_logger.log "Prefetcher finished successfully.";
     HackEventLogger.informant_prefetcher_success start_t;
     exit 0
-  | Result.Error (Process_types.Process_exited_abnormally (es, _, stderr)) ->
+  | Error (Process_types.Process_exited_abnormally (es, _, stderr)) ->
     let exit_kind, exit_code = Exit_status.unpack es in
     let msg = Printf.sprintf "%s %d. stderr: %s" exit_kind exit_code stderr in
     Hh_logger.log "Prefetcher failed. %s" msg;
     HackEventLogger.informant_prefetcher_failed start_t msg;
     exit exit_code
-  | Result.Error (Process_types.Timed_out (_, stderr)) ->
+  | Error (Process_types.Timed_out (_, stderr)) ->
     let msg = Printf.sprintf "Timed out. stderr: %s" stderr in
     Hh_logger.log "Prefetcher timed out. %s" msg;
     HackEventLogger.informant_prefetcher_failed start_t msg;
     exit 1
-  | Result.Error (Process_types.Process_aborted_input_too_large) ->
+  | Error (Process_types.Process_aborted_input_too_large) ->
     (** This is impossible. Consider making Process a GADT to avoid this. *)
     Hh_logger.log ("Prefetcher failed. Process_aborted_input_too_large, " ^^
       "but this should never happen since no input was given.");

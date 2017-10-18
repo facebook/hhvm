@@ -13,4 +13,4 @@ open Ide_rpc_protocol_parser_types
 val parse:
   method_name:method_name ->
   params:Hh_json.json option ->
-  (Ide_message.client_request, error_t) Result.t
+  (Ide_message.client_request, error_t) result

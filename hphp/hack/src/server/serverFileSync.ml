@@ -75,8 +75,8 @@ let edit_file env path edits =
     | None ->
         try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "" in
     let edited_fc = match edit_file fc edits with
-      | Result.Ok r -> r
-      | Result.Error e ->
+      | Ok r -> r
+      | Error e ->
         Hh_logger.log "%s" e;
         (* TODO: do not crash, but surface this to the client somehow *)
         assert false

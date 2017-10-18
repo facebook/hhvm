@@ -50,7 +50,7 @@ let test_access_object_string () =
     >>= get_string "baz"
   in
   match result with
-  | Result.Ok ("hello", _) ->
+  | Ok ("hello", _) ->
     true
   | _ ->
     false
@@ -65,7 +65,7 @@ let test_access_object_bool () =
     >>= get_bool "baz"
   in
   match result with
-  | Result.Ok (true, _) ->
+  | Ok (true, _) ->
     true
   | _ ->
     false
@@ -80,7 +80,7 @@ let test_access_object_number () =
     >>= get_number "baz"
   in
   match result with
-  | Result.Ok ("5", _) ->
+  | Ok ("5", _) ->
     true
   | _ ->
     false
@@ -95,7 +95,7 @@ let test_access_object_val () =
     >>= get_val "baz"
   in
   match result with
-  | Result.Ok (Hh_json.JSON_Number "5", _) ->
+  | Ok (Hh_json.JSON_Number "5", _) ->
     true
   | _ ->
     false
@@ -110,7 +110,7 @@ let test_access_object_key_doesnt_exist () =
     >>= get_number "oops"
   in
   match result with
-  | Result.Error (Missing_key_error("oops", ["bar"; "foo"])) ->
+  | Error (Missing_key_error("oops", ["bar"; "foo"])) ->
     true
   | _ ->
     false
@@ -125,7 +125,7 @@ let test_access_object_type_invalid () =
     >>= get_string "baz"
   in
   match result with
-  | Result.Error (Wrong_type_error(["baz"; "bar"; "foo"], Hh_json.String_t)) ->
+  | Error (Wrong_type_error(["baz"; "bar"; "foo"], Hh_json.String_t)) ->
     true
   | _ ->
     false
@@ -144,7 +144,7 @@ let test_access_object_error_in_middle () =
     >>= get_number "qux"
   in
   match result with
-  | Result.Error (Missing_key_error ("oops", ["bar"; "foo"])) ->
+  | Error (Missing_key_error ("oops", ["bar"; "foo"])) ->
     true
   | _ ->
     false
@@ -176,18 +176,18 @@ let test_access_3_keys_one_object () =
     }
   in
   match result with
-  | Result.Error access_failure ->
+  | Error access_failure ->
     Printf.eprintf "Error failed to parse. See: %s\n"
       (access_failure_to_string access_failure);
     false
-  | Result.Ok (v, _) ->
+  | Ok (v, _) ->
     Asserter.Bool_asserter.assert_equals v.foo true "foo value mismatch";
     Asserter.String_asserter.assert_equals v.bar "hello" "bar value mismatch";
     Asserter.Int_asserter.assert_equals v.baz 5 "baz value mismatch";
     true
 
 (** We access exactly as we do above, but "bar" actually is an array instead
- * of a string, so we should expect to get a Result.Error. *)
+ * of a string, so we should expect to get a Error. *)
 let test_access_3_keys_one_object_wrong_type_middle () =
   let json = Hh_json.json_of_string (
     "{\n"^
@@ -209,13 +209,13 @@ let test_access_3_keys_one_object_wrong_type_middle () =
     }
   in
   match result with
-  | Result.Error access_failure ->
+  | Error access_failure ->
     Asserter.String_asserter.assert_equals
       "Value expected to be String (at field [bar])"
       (access_failure_to_string access_failure)
       "Not the access failure we expected";
     true
-  | Result.Ok (v, _) ->
+  | Ok (v, _) ->
     Printf.eprintf "Expected failure, but successfully traversed json.\n";
     false
 

@@ -10,7 +10,7 @@
 
 
 type action = string * int * int (* file contents, offset start, offset end *)
-type result = (Ide_message.format_response, string) Result.t
+type result = (Ide_message.format_response, string) Pervasives.result
 
 
 type ide_action =
@@ -23,4 +23,4 @@ type ide_response = {
   range: Ide_api_types.range; (* what range was actually replaced? *)
 }
 
-type ide_result = (ide_response, string) Result.t
+type ide_result = (ide_response, string) Pervasives.result

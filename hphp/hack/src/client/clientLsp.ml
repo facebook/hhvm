@@ -1095,9 +1095,9 @@ let do_formatting_common
   let command = ServerCommandTypes.IDE_FORMAT args in
   let response: ServerFormatTypes.ide_result = rpc conn command in
   match response with
-  | Result.Error message ->
+  | Error message ->
     raise (Error.InternalError message)
-  | Result.Ok r ->
+  | Ok r ->
     let range = ide_range_to_lsp r.range in
     let newText = r.new_text in
     [{TextEdit.range; newText;}]

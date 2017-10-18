@@ -12,8 +12,8 @@ open Hh_json
 
 let to_json result =
   let error, result, internal_error = match result with
-    | Result.Ok s -> "", s, false
-    | Result.Error s -> s, "", true
+    | Ok s -> "", s, false
+    | Error s -> s, "", true
   in
   JSON_Object [
     "error_message",  JSON_String error;
@@ -25,7 +25,7 @@ let print_json res =
   print_endline (Hh_json.json_to_string (to_json res))
 
 let print_readable = function
-  | Result.Ok res -> print_string res
+  | Ok res -> print_string res
   | _ -> ()
 
 let go res output_json =

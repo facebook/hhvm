@@ -9,32 +9,32 @@
  *)
 
 open Ide_rpc_protocol_parser_types
-open Result.Monad_infix
+open Core_result.Monad_infix
 
 let json_result_to_api_result = function
-  | Result.Ok v ->
-    Result.Ok (fst v)
-  | Result.Error e ->
-    Result.Error (Invalid_request (Hh_json.Access.access_failure_to_string e))
+  | Ok v ->
+    Ok (fst v)
+  | Error e ->
+    Error (Invalid_request (Hh_json.Access.access_failure_to_string e))
 
 let missing_key_error_to_none = function
-  | Result.Ok v -> Hh_json.Access.return (Some (fst v))
-  | Result.Error (Hh_json.Access.Missing_key_error _) ->
+  | Ok v -> Hh_json.Access.return (Some (fst v))
+  | Error (Hh_json.Access.Missing_key_error _) ->
     Hh_json.Access.return None
-  | Result.Error e -> Result.Error e
+  | Error e -> Error e
 
 let number_to_int s =
   try
-    Result.Ok (int_of_string s)
-  with Failure _ -> Result.Error (Invalid_request
+    Ok (int_of_string s)
+  with Failure _ -> Error (Invalid_request
     (Printf.sprintf "field must be an integer, got: %s" s))
 
 let maybe_number_to_int = function
-  | None -> Result.Ok None
+  | None -> Ok None
   | Some s ->
    try
-     Result.Ok (Some (int_of_string s))
-   with Failure _ -> Result.Error (Invalid_request
+     Ok (Some (int_of_string s))
+   with Failure _ -> Error (Invalid_request
      (Printf.sprintf "field must be an integer or null, got: %s" s))
 
 let no_transform x = x
@@ -93,4 +93,4 @@ let opt_field ~v_opt ~label ~f =
     ~f:(fun x -> [label, f x])
     ~default:[]
 
-let not_implemented = Result.Error (Internal_error "Not implemented")
+let not_implemented = Error (Internal_error "Not implemented")

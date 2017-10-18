@@ -99,19 +99,19 @@ let should_start env =
   match ServerUtils.connect_to_monitor
     ~timeout:3
     env.root handoff_options with
-  | Result.Ok _conn -> false
-  | Result.Error
+  | Ok _conn -> false
+  | Error
       ( SMUtils.Server_missing
       | SMUtils.Build_id_mismatched _
       | SMUtils.Server_died
       ) -> true
-  | Result.Error SMUtils.Server_dormant ->
+  | Error SMUtils.Server_dormant ->
     Printf.eprintf
       "Server already exists but is dormant";
     false
-  | Result.Error SMUtils.Monitor_socket_not_ready
-  | Result.Error SMUtils.Monitor_establish_connection_timeout
-  | Result.Error SMUtils.Monitor_connection_failure ->
+  | Error SMUtils.Monitor_socket_not_ready
+  | Error SMUtils.Monitor_establish_connection_timeout
+  | Error SMUtils.Monitor_connection_failure ->
     Printf.eprintf "Replacing unresponsive server for %s\n%!" root_s;
     ClientStop.kill_server env.root;
     true

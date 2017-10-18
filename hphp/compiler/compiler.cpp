@@ -443,6 +443,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   RuntimeOption::RepoAuthoritative = false;
   RuntimeOption::EvalJit = false;
 
+  if (!Option::FlattenTraits) RuntimeOption::EvalUseHHBBC=false;
+
   initialize_repo();
 
   std::vector<std::string> badnodes;
@@ -506,8 +508,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     po.optimizeLevel = RuntimeOption::EvalDisableHphpcOpts ? 0 : 1;
   }
 
-  // we always do pre/post opt no matter the opt level
-  Option::PreOptimization = !RuntimeOption::EvalDisableHphpcOpts;
   if (po.optimizeLevel == 0) {
     // --optimize-level=0 is equivalent to --opts=none
     Option::ParseTimeOpts = false;

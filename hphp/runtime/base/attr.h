@@ -93,7 +93,7 @@ enum Attr {
   //  but we haven't done so at this point.)     |          |         //
   AttrInterceptable        = (1 << 11), //       |          |    X    //
                                         //       |          |         //
-  // FIXME: I have no documentation.    //       |          |         //
+  // Traits have been flattened on this class.
   AttrNoExpandTrait        = (1 << 12), //    X  |          |         //
                                         //       |          |         //
   // Set on functions where the $this class may not be a subclass of the

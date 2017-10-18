@@ -376,7 +376,7 @@ void AnalysisResult::addSystemClass(ClassScopeRawPtr cs) {
 
 void AnalysisResult::checkClassDerivations() {
   auto const ar = shared_from_this();
-  {
+  if (Option::FlattenTraits) {
     Timer timer(Timer::WallTime, "importUsedTraits");
     for (auto& pair : m_classDecs) {
       for (ClassScopePtr cls : pair.second) {

@@ -9796,7 +9796,7 @@ Id EmitterVisitor::emitClass(Emitter& e,
     attr = attr | AttrFinal;
   }
 
-  if (Option::WholeProgram) {
+  if (Option::FlattenTraits) {
     if (cNode->getUsedTraitNames().size()) {
       attr = attr | AttrNoExpandTrait;
     }

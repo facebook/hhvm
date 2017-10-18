@@ -103,7 +103,7 @@ struct Option {
   /**
    * Optimization flags
    */
-  static bool PreOptimization;
+  static bool FlattenTraits;
 
   /**
    * CodeGenerator options for PHP.

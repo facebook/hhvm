@@ -148,6 +148,8 @@ namespace {
 unsigned loadUsedTraits(PreClass* preClass,
                         std::vector<ClassPtr>& usedTraits) {
   unsigned methodCount = 0;
+
+  auto const traitsFlattened = !!(preClass->attrs() & AttrNoExpandTrait);
   for (auto const& traitName : preClass->usedTraits()) {
     Class* classPtr = Unit::loadClass(traitName);
     if (classPtr == nullptr) {
@@ -159,13 +161,13 @@ unsigned loadUsedTraits(PreClass* preClass,
                   classPtr->name()->data());
     }
 
-    if (RuntimeOption::RepoAuthoritative) {
+    if (traitsFlattened) {
       // In RepoAuthoritative mode (with the WholeProgram compiler
-      // optimizations), the contents of traits are flattened away into the
-      // preClasses of "use"r classes. Continuing here allows us to avoid
-      // unnecessarily attempting to re-import trait methods and
-      // properties, only to fail due to (surprise surprise!) the same
-      // method/property existing on m_preClass.
+      // optimizations), the contents of traits can be flattened into
+      // the preClasses of "use"r classes. Continuing here allows us
+      // to avoid unnecessarily attempting to re-import trait methods
+      // and properties, only to fail due to (surprise surprise!) the
+      // same method/property existing on m_preClass.
       continue;
     }
 
@@ -174,11 +176,11 @@ unsigned loadUsedTraits(PreClass* preClass,
 
   }
 
-  if (!RuntimeOption::RepoAuthoritative) {
+  if (!traitsFlattened) {
     // Trait aliases can increase method count. Get an estimate of the
     // number of aliased functions. This doesn't need to be done in
-    // RepoAuthoritative mode due to trait flattening ensuring that added
-    // methods are already present in the preclass.
+    // classes with flattened traits because those methods are already
+    // present in the preclass.
     for (auto const& rule : preClass->traitAliasRules()) {
       auto origName = rule.origMethodName();
       auto newName = rule.newMethodName();
@@ -222,11 +224,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
 
   std::vector<ClassPtr> usedTraits;
   auto numTraitMethodsEstimate = loadUsedTraits(preClass, usedTraits);
-  // In RepoAuthoritative mode, trait methods are already flattened
-  // into the preClass, so we don't need to add in the estimate here.
-  if (!RuntimeOption::RepoAuthoritative) {
-    funcVecLen += numTraitMethodsEstimate;
-  }
+  funcVecLen += numTraitMethodsEstimate;
 
   // We need to pad this allocation so that the actual start of the Class is
   // 8-byte aligned.
@@ -2120,7 +2118,7 @@ void Class::setProperties() {
   }
 
   Slot traitIdx = m_preClass->numProperties();
-  if (RuntimeOption::RepoAuthoritative) {
+  if (m_preClass->attrs() & AttrNoExpandTrait) {
     for (auto const& traitName : m_preClass->usedTraits()) {
       Class* classPtr = Unit::loadClass(traitName);
       traitIdx -= classPtr->m_declProperties.size() +
@@ -2437,7 +2435,7 @@ void Class::importTraitStaticProp(Class* /*trait*/, SProp& traitProp,
 
       prevPropVal = prevSProps[prevPropInd].val;
     }
-    if (prevProp.attrs != traitProp.attrs ||
+    if ((prevProp.attrs ^ traitProp.attrs) & ~AttrPersistent ||
         !compatibleTraitPropInit(traitProp.val, prevPropVal)) {
       raise_error("trait declaration of property '%s' is incompatible with "
                   "previous declaration", traitProp.name->data());
@@ -2797,9 +2795,9 @@ void Class::setRequirements() {
       }
       addReq(&req);
     }
-  } else if (attrs() & AttrTrait || RuntimeOption::RepoAuthoritative) {
+  } else if (attrs() & (AttrTrait | AttrNoExpandTrait)) {
     // Check that requirements are semantically valid.
-    // Note that in repo-auth mode, trait flatening could have migrated
+    // Note that trait flattening could have migrated
     // requirements onto a class's preClass.
     for (auto const& req : m_preClass->requirements()) {
       auto const reqName = req.name();
@@ -2879,7 +2877,7 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
   if (req->is_implements()) {
     // "require implements" is only allowed on traits.
 
-    assert(RuntimeOption::RepoAuthoritative ||
+    assert(attrs() & AttrNoExpandTrait ||
            (m_extra && m_extra->m_usedTraits.size() > 0));
     for (auto const& traitCls : m_extra->m_usedTraits) {
       if (traitCls->allRequirements().contains(reqName)) {
@@ -2890,7 +2888,7 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
       }
     }
 
-    if (RuntimeOption::RepoAuthoritative) {
+    if (attrs() & AttrNoExpandTrait) {
       // As a result of trait flattening, the PreClass of this normal class
       // contains a requirement. To save space, we don't include the source
       // trait in the requirement. For details, see
@@ -2927,7 +2925,7 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
     }
   }
 
-  if (RuntimeOption::RepoAuthoritative) {
+  if (attrs() & AttrNoExpandTrait) {
     // A result of trait flattening, as with the is_implements case above
     assert(!m_extra || m_extra->m_usedTraits.size() == 0);
     assert(m_preClass->requirements().size() > 0);

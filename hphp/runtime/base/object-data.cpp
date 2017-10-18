@@ -602,7 +602,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
     }
     klass = klass->parent();
   }
-  if (!RuntimeOption::RepoAuthoritative && accessibleProps > 0) {
+  if (!(m_cls->attrs() & AttrNoExpandTrait) && accessibleProps > 0) {
     // we may have properties from traits
     for (auto const& prop : m_cls->declProperties()) {
       auto const key = prop.name.get();

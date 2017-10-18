@@ -16,10 +16,14 @@ let ast_attribute_name: A.user_attribute -> Litstr.id =
   Litstr.to_string @@ snd ast_attr.Ast.ua_name
 
 let from_attribute_base namespace attribute_name arguments =
-  let attribute_arguments =
-    Ast_constant_folder.literals_from_exprs_with_index
-      namespace arguments in
-  Hhas_attribute.make attribute_name attribute_arguments
+  try
+    let attribute_arguments =
+      Ast_constant_folder.literals_from_exprs_with_index namespace arguments
+    in
+    Hhas_attribute.make attribute_name attribute_arguments
+  with Ast_constant_folder.UserDefinedConstant ->
+    Emit_fatal.raise_fatal_parse Pos.none
+      "User-defined constants are not allowed in user attribute expressions"
 
 let from_ast : Namespace_env.env -> A.user_attribute -> Hhas_attribute.t =
   fun namespace ast_attr ->

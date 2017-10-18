@@ -16,6 +16,7 @@ open Ast_class_expr
 open Core
 
 exception NotLiteral
+exception UserDefinedConstant
 
 let radix (s : string) : [`Oct | `Hex | `Dec | `Bin ] =
   if String.length s > 1 && s.[0] = '0' then
@@ -134,6 +135,7 @@ let rec expr_to_typed_value
     class_const_to_typed_value ns cid id
   | A.Call ((_, A.Id (_, "tuple")), _, es, _) ->
     array_to_typed_value ns @@ List.map es ~f:(fun e -> A.AFvalue e)
+  | A.Id _ | A.Class_get _ -> raise UserDefinedConstant
   | _ ->
     raise NotLiteral
 
@@ -161,9 +163,9 @@ and class_const_to_typed_value ns cid id =
     | Class_id cid ->
       let fq_id, _ = Hhbc_id.Class.elaborate_id ns cid in
       TV.String (Hhbc_id.Class.to_raw_string fq_id)
-    | _ -> raise NotLiteral
+    | _ -> raise UserDefinedConstant
     end
-  else raise NotLiteral
+  else raise UserDefinedConstant
 
 and array_to_typed_value ns fields =
   let pairs, _ =
@@ -251,7 +253,7 @@ and keyset_value_afield_to_typed_value ns afield =
 let expr_to_opt_typed_value ?(restrict_keys=false) ?(allow_maps=false) ns e =
   match expr_to_typed_value ~restrict_keys ~allow_maps ns e with
   | x -> Some x
-  | exception NotLiteral -> None
+  | exception (NotLiteral | UserDefinedConstant) -> None
 
 (* Any value can be converted into a literal expression *)
 let rec value_to_expr_ p v =

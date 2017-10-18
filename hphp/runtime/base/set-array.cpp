@@ -779,8 +779,9 @@ ArrayData* SetArray::Dequeue(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* SetArray::Prepend(ArrayData* ad, Cell v, bool /*copy*/) {
+ArrayData* SetArray::Prepend(ArrayData* ad, Cell v, bool copy) {
   auto a = asSet(ad);
+  if (copy) a = a->copySet();
   Elm e;
   assert(ClearElms(&e, 1));
   if (isIntType(v.m_type)) {

@@ -1221,8 +1221,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
   in
   let env = { env with unsafes } in
   begin match syntax node with
+  | BracedExpression        { braced_expression_expression        = expr; _ }
   | ParenthesizedExpression { parenthesized_expression_expression = expr; _ } ->
-    (* peel of parenthesised expresions:
+    (* peel of braced or parenthesised expresions:
        if there is a XHP inside - we want XHP node to have its own positions,
        not positions of enclosing parenthesised expression *)
     leading_unsafe @@ pExpr ~location expr env

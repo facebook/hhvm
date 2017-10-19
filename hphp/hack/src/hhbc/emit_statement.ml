@@ -479,6 +479,13 @@ and emit_for env e1 e2 e3 b =
   ]
 
 and emit_switch env scrutinee_expr cl =
+  if List.is_empty cl
+  then
+    gather [
+      emit_expr ~need_ref:false env scrutinee_expr;
+      instr_popc
+    ]
+  else
   stash_in_local env scrutinee_expr
   begin fun local break_label ->
   (* If there is no default clause, add an empty one at the end *)

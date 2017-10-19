@@ -1,0 +1,4 @@
+File "interface_static_method.php", line 17, characters 3-10:
+Cannot call C::foo(); C is an interface (Typing[4177])
+File "interface_static_method.php", line 8, characters 26-28:
+Declaration is here

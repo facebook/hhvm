@@ -741,6 +741,7 @@ module Typing                               = struct
   let expecting_awaitable_return_type_hint  = 4174 (* DONT MODIFY!!!! *)
   let bad_pass_by_ref_override              = 4175 (* DONT MODIFY!!!! *)
   let dollardollar_lvalue                   = 4176 (* DONT MODIFY!!!! *)
+  let static_method_on_interface            = 4177 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1815,6 +1816,13 @@ let classname_abstract_call cname meth_name call_pos decl_pos =
   let cname = Utils.strip_ns cname in
   add_list Typing.abstract_call [
     call_pos, ("Cannot call "^cname^"::"^meth_name^"(); it is abstract");
+    decl_pos, "Declaration is here"
+  ]
+
+let static_method_on_interface cname meth_name call_pos decl_pos =
+  let cname = Utils.strip_ns cname in
+  add_list Typing.static_method_on_interface [
+    call_pos, ("Cannot call "^cname^"::"^meth_name^"(); "^cname^" is an interface");
     decl_pos, "Declaration is here"
   ]
 

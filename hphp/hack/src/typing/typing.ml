@@ -3179,6 +3179,18 @@ and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_
             | _ -> ())
         | CI (c, _) when is_abstract_ft fty ->
           Errors.classname_abstract_call (snd c) (snd m) p (Reason.to_pos (fst fty))
+        | CI ((_, classname), _) ->
+          (match Typing_heap.Classes.get classname with
+          | Some class_def ->
+            if class_def.tc_kind = Ast_defs.Cinterface then
+              Errors.static_method_on_interface classname (snd m) p (Reason.to_pos (fst fty))
+            else
+              ()
+          | None ->
+            (* This technically should be an error, but if we throw here we'll break a ton of our
+            tests since they reference classes that only exist in www, and any missing classes will
+            get caught elsewhere in the pipeline. *)
+            ())
         | _ -> () in
       check_coroutine_call env fty;
       let env, tel, tuel, ty = call ~expected p env fty el uel in

@@ -72,32 +72,9 @@ let get_pos : node -> Pos.t = fun node ->
   else begin
     let pos_file = !(lowerer_state.filePath) in
     let text = source_text node in
-    (* TODO(8086635) Figure out where this off-by-one comes from *)
-    let start_offset =
-      (*should be removed after resolving TODO above *)
-      let start_offset = start_offset node in
-      if start_offset = 0 then 0 else start_offset - 1
-    in
-    let end_offset =
-      (*should be removed after resolving TODO above *)
-      let end_offset = end_offset node in
-      if end_offset = 0 then 0 else end_offset - 1
-    in
-    let s_line, s_column = SourceText.offset_to_position text start_offset in
-    let e_line, e_column = SourceText.offset_to_position text end_offset in
-    let pos_start =
-      File_pos.of_line_column_offset
-        ~line:s_line
-        ~column:s_column
-        ~offset:start_offset
-    in
-    let pos_end =
-      File_pos.of_line_column_offset
-        ~line:e_line
-        ~column:e_column
-        ~offset:end_offset
-    in
-    Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
+    let start_offset = start_offset node in
+    let end_offset = end_offset node in
+    SourceText.relative_pos pos_file text start_offset end_offset
   end
 
 exception Lowerer_invariant_failure of string * string

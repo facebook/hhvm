@@ -12,16 +12,40 @@ open Core
 module ULS = Unique_list_string
 module SN = Naming_special_names
 
+type decl_vars_state = {
+  dvs_locals: ULS.t;
+  dvs_has_dynamic_var: bool;
+  dvs_has_bare_this: bool;
+}
+
+let with_dynamic_var s =
+  if s.dvs_has_dynamic_var then s
+  else { s with dvs_has_dynamic_var = true }
+
+let with_local name s =
+  { s with dvs_locals = ULS.add s.dvs_locals name }
+
+let with_this is_bare s =
+  if is_bare && s.dvs_has_bare_this then s
+  else
+  { s with
+      dvs_has_bare_this = s.dvs_has_bare_this || is_bare;
+      dvs_locals = ULS.add s.dvs_locals SN.SpecialIdents.this }
+
+let dvs_empty = {
+  dvs_locals = ULS.empty;
+  dvs_has_dynamic_var = false;
+  dvs_has_bare_this = false; }
+
 (* Add a local to the accumulated list. Don't add if it's $GLOBALS or
  * the pipe variable $$. If it's $this, add it, and if this variable appears
  * "bare" (because bareparam=true), remember for needs_local_this *)
-let add_local ~bareparam (needs_local_this, locals) (_, name) =
+let add_local ~bareparam s (_, name) =
   if name = SN.Superglobals.globals || name = SN.SpecialIdents.dollardollar
-  then needs_local_this, locals
-  else
-  if name = SN.SpecialIdents.this
-  then (bareparam || needs_local_this), ULS.add locals name
-  else needs_local_this, ULS.add locals name
+  then s
+  else if name = SN.SpecialIdents.this
+  then with_this bareparam s
+  else with_local name s
 
 (* Add locals for an expression for which $this counts as "bare" *)
 let add_bare_expr this acc expr =
@@ -53,7 +77,7 @@ let on_class_get this acc recv prop ~is_call_target =
   | _ -> this#on_expr acc prop
 
 class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
-  inherit [bool * ULS.t] Ast_visitor.ast_visitor as super
+  inherit [decl_vars_state] Ast_visitor.ast_visitor as super
 
   method! on_global_var acc exprs =
     List.fold_left exprs ~init:acc
@@ -98,7 +122,8 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
 
   method! on_lvar acc id =
     add_local ~bareparam:false acc id
-  method! on_lvarvar acc _ id = add_local ~bareparam:false acc id
+  method! on_lvarvar acc _ id =
+    with_dynamic_var (add_local ~bareparam:false acc id)
   method! on_class_get acc id prop =
     on_class_get this acc id prop ~is_call_target:false
   method! on_efun acc fn use_list =
@@ -171,20 +196,26 @@ let uls_from_ast ~is_closure_body ~has_this
   ~get_param_name ~get_param_default_value
   ~explicit_use_set_opt b =
   let visitor = new declvar_visitor explicit_use_set_opt is_in_static_method in
-  let needs_local_this, decl_vars =
+  let state =
     (* pull variables used in default values *)
-    let acc = List.fold_left params ~init:(false, ULS.empty) ~f:(
+    let acc = List.fold_left params ~init:dvs_empty ~f:(
       fun acc p -> Option.fold (get_param_default_value p) ~init:acc ~f:visitor#on_expr)
     in
     visitor#on_program acc b in
-  let needs_local_this = needs_local_this || is_in_static_method in
+  let needs_local_this =
+    state.dvs_has_bare_this ||
+    is_in_static_method ||
+    (* local this is necessary if we have 'this' in list of locals and function
+    also uses dynamic variables *)
+    (state.dvs_has_dynamic_var
+     && SSet.mem SN.SpecialIdents.this (ULS.items_set state.dvs_locals)) in
   let param_names =
     List.fold_left
       params
         ~init:ULS.empty
         ~f:(fun l p -> ULS.add l @@ get_param_name p)
   in
-  let decl_vars = ULS.diff decl_vars param_names in
+  let decl_vars = ULS.diff state.dvs_locals param_names in
   let decl_vars =
     if needs_local_this || is_closure_body || not has_this || is_toplevel
     then decl_vars

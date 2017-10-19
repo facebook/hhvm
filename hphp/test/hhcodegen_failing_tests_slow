@@ -223,7 +223,6 @@ slow/switch_statement/1754.php
 slow/switch_statement/1755.php
 slow/switch_statement/1756.php
 slow/traits/1981.php
-slow/traits/2070.php
 slow/traits/__class__.php
 slow/traits/duplicate_require.php
 slow/traits/require_constraint_iface_implements_error.php
@@ -260,4 +259,3 @@ slow/vec/hh-only1.php
 slow/vec/hh-only2.php
 slow/xhp/attr-syntax-2.php
 slow/xhp/attr-syntax-3.php
-slow/yield/2167.php

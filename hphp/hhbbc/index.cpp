@@ -198,10 +198,14 @@ struct PublicSPropEntry {
  * that name, since it will call that one instead.
  */
 struct MethTabEntry {
-  MethTabEntry(borrowed_ptr<const php::Func> func,
-               bool hpa) : func(func), hasPrivateAncestor(hpa) {}
+  MethTabEntry(borrowed_ptr<const php::Func> func, Attr a, bool hpa, bool tl) :
+      func(func), attrs(a), hasPrivateAncestor(hpa), topLevel(tl) {}
   borrowed_ptr<const php::Func> func = nullptr;
+  // A method could be imported from a trait, and its attributes changed
+  Attr attrs {};
+  bool hasAncestor = false;
   bool hasPrivateAncestor = false;
+  bool topLevel = false;
 };
 
 }
@@ -210,7 +214,12 @@ struct MethTabEntryPair : ISStringToOneT<MethTabEntry>::value_type {};
 
 namespace {
 
-inline MethTabEntryPair* fromIt(ISStringToOneT<MethTabEntry>::iterator it) {
+inline MethTabEntryPair* mteFromElm(
+  ISStringToOneT<MethTabEntry>::value_type& elm) {
+  return static_cast<MethTabEntryPair*>(&elm);
+}
+
+inline MethTabEntryPair* mteFromIt(ISStringToOneT<MethTabEntry>::iterator it) {
   return static_cast<MethTabEntryPair*>(&*it);
 }
 
@@ -413,7 +422,7 @@ struct ClassInfo {
   /*
    * The constructor for this class, if we know what it is.
    */
-  borrowed_ptr<const php::Func> ctor = nullptr;
+  const MethTabEntryPair* ctor = nullptr;
 
   /*
    * Subclasses of this class, including this class itself (unless it
@@ -655,7 +664,7 @@ SString Func::name() const {
     [&] (FuncName s) { return s.name; },
     [&] (MethodName s) { return s.name; },
     [&] (borrowed_ptr<FuncInfo> fi) { return fi->first->name; },
-    [&] (borrowed_ptr<MethTabEntryPair> mte) { return mte->first; },
+    [&] (borrowed_ptr<const MethTabEntryPair> mte) { return mte->first; },
     [&] (borrowed_ptr<FuncFamily> fa) -> SString {
       if (fa->isCtor) return s_construct.get();
       auto const name = fa->possibleFuncs.front()->first;
@@ -673,21 +682,23 @@ borrowed_ptr<const php::Func> Func::exactFunc() const {
   using Ret = borrowed_ptr<const php::Func>;
   return match<Ret>(
     val,
-    [&](FuncName /*s*/) { return Ret{}; },
-    [&](MethodName /*s*/) { return Ret{}; },
-    [&](borrowed_ptr<FuncInfo> fi) { return fi->first; },
-    [&](borrowed_ptr<MethTabEntryPair> mte) { return mte->second.func; },
-    [&](borrowed_ptr<FuncFamily> /*fa*/) { return Ret{}; }
+    [&](FuncName /*s*/)                           { return Ret{}; },
+    [&](MethodName /*s*/)                         { return Ret{}; },
+    [&](borrowed_ptr<FuncInfo> fi)                { return fi->first; },
+    [&](borrowed_ptr<const MethTabEntryPair> mte) { return mte->second.func; },
+    [&](borrowed_ptr<FuncFamily> /*fa*/)          { return Ret{}; }
   );
 }
 
 bool Func::cantBeMagicCall() const {
-  return match<bool>(val,
-                     [&](FuncName)                       { return true; },
-                     [&](MethodName)                     { return false; },
-                     [&](borrowed_ptr<FuncInfo>)         { return true; },
-                     [&](borrowed_ptr<MethTabEntryPair>) { return true; },
-                     [&](borrowed_ptr<FuncFamily>)       { return true; });
+  return match<bool>(
+    val,
+    [&](FuncName)                             { return true; },
+    [&](MethodName)                           { return false; },
+    [&](borrowed_ptr<FuncInfo>)               { return true; },
+    [&](borrowed_ptr<const MethTabEntryPair>) { return true; },
+    [&](borrowed_ptr<FuncFamily>)             { return true; }
+  );
 }
 
 bool Func::mightReadCallerFrame() const {
@@ -702,7 +713,7 @@ bool Func::mightReadCallerFrame() const {
     [&](borrowed_ptr<FuncInfo> fi) {
       return fi->first->attrs & AttrReadsCallerFrame;
     },
-    [&](borrowed_ptr<MethTabEntryPair>) { return false; },
+    [&](borrowed_ptr<const MethTabEntryPair>) { return false; },
     [&](borrowed_ptr<FuncFamily> fa) {
       for (auto const pf : fa->possibleFuncs) {
         if (pf->second.func->attrs & AttrReadsCallerFrame) return true;
@@ -723,7 +734,7 @@ bool Func::mightWriteCallerFrame() const {
     [&](borrowed_ptr<FuncInfo> fi) {
       return fi->first->attrs & AttrWritesCallerFrame;
     },
-    [&](borrowed_ptr<MethTabEntryPair>) { return false; },
+    [&](borrowed_ptr<const MethTabEntryPair>) { return false; },
     [&](borrowed_ptr<FuncFamily> fa) {
       for (auto const pf : fa->possibleFuncs) {
         if (pf->second.func->attrs & AttrWritesCallerFrame) return true;
@@ -738,7 +749,7 @@ bool Func::isFoldable() const {
                      [&](borrowed_ptr<FuncInfo> fi) {
                        return fi->first->attrs & AttrIsFoldable;
                      },
-                     [&](borrowed_ptr<MethTabEntryPair> mte) {
+                     [&](borrowed_ptr<const MethTabEntryPair> mte) {
                        return mte->second.func->attrs & AttrIsFoldable;
                      },
                      [&](borrowed_ptr<FuncFamily> fa) {
@@ -754,7 +765,7 @@ bool Func::mightBeSkipFrame() const {
     [&](FuncName /*s*/) { return false; },
     [&](MethodName /*s*/) { return true; },
     [&](borrowed_ptr<FuncInfo> fi) { return fi->first->attrs & AttrSkipFrame; },
-    [&](borrowed_ptr<MethTabEntryPair> mte) {
+    [&](borrowed_ptr<const MethTabEntryPair> mte) {
       return mte->second.func->attrs & AttrSkipFrame;
     },
     [&](borrowed_ptr<FuncFamily> fa) {
@@ -770,7 +781,7 @@ std::string show(const Func& f) {
   match<void>(f.val,
               [&](Func::FuncName) {}, [&](Func::MethodName) {},
               [&](borrowed_ptr<FuncInfo> /*fi*/) { ret += "*"; },
-              [&](borrowed_ptr<MethTabEntryPair> /*mte*/) { ret += "*"; },
+              [&](borrowed_ptr<const MethTabEntryPair> /*mte*/) { ret += "*"; },
               [&](borrowed_ptr<FuncFamily> /*fa*/) { ret += "+"; });
   return ret;
 }
@@ -1027,6 +1038,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
       (rparent == rleaf || !(rparent->cls->attrs & AttrTrait))) {
     auto methodOverride = [&] (auto& it,
                                const php::Func* meth,
+                               Attr attrs,
                                SString name) {
       if (it->second.func->attrs & AttrFinal) {
         if (!is_mock_class(rparent->cls)) {
@@ -1038,16 +1050,18 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
           return false;
         }
       }
-      if (it->second.func->attrs & AttrPrivate) {
-        it->second.hasPrivateAncestor =
-        it->second.hasPrivateAncestor || it->second.func->cls != rparent->cls;
-      }
       ITRACE(9,
              "  {}: adding trait override {}::{} originally from {}\n",
              rleaf->cls->name,
              meth->cls->name, name,
              it->second.func->name);
+      if (it->second.func->attrs & AttrPrivate) {
+        it->second.hasPrivateAncestor = true;
+      }
       it->second.func = meth;
+      it->second.attrs = attrs;
+      it->second.hasAncestor = true;
+      it->second.topLevel = rparent == rleaf;
       if (it->first != name) {
         auto mte = it->second;
         rleaf->methods.erase(it);
@@ -1058,7 +1072,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
     for (auto& m : rparent->cls->methods) {
       auto res = rleaf->methods.emplace(
         m->name,
-        MethTabEntry { borrow(m), false }
+        MethTabEntry { borrow(m), m->attrs, false, rparent == rleaf }
       );
       if (res.second) {
         ITRACE(9,
@@ -1071,47 +1085,67 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
         // abstract methods from traits never override anything.
         continue;
       }
-      if (!methodOverride(res.first, borrow(m), m->name)) return false;
+      if (!methodOverride(res.first, borrow(m), m->attrs, m->name)) {
+        return false;
+      }
     }
   }
 
   return true;
 }
 
-borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
+bool find_constructor(borrowed_ptr<ClassInfo> cinfo) {
   if (cinfo->cls->attrs & (AttrInterface|AttrTrait)) {
+    return true;
+  }
+
+  auto find_toplevel = [&] (SString name) -> const MethTabEntryPair* {
+    auto const cit = cinfo->methods.find(name);
+    if (cit != end(cinfo->methods) && cit->second.topLevel) {
+      return mteFromIt(cit);
+    }
     return nullptr;
+  };
+
+  auto const construct       = find_toplevel(s_construct.get());
+  auto const named_construct = find_toplevel(cinfo->cls->name);
+
+  if (construct) {
+    if (named_construct) {
+      // If both constructors exist, and at least one came
+      // from a trait we'll fatal at runtime.
+      if (named_construct->second.func->cls->attrs & AttrTrait ||
+          construct->second.func->cls->attrs & AttrTrait) {
+        ITRACE(2,
+               "find_constructor failed for `{}' due to colliding constructors"
+               "from traits: {} and {}\n",
+               named_construct->second.func->cls->name,
+               construct->second.func->cls->name);
+        return false;
+      }
+    }
+    cinfo->ctor = construct;
+    return true;
   }
 
-  auto cit = cinfo->methods.find(s_construct.get());
-  if (cit != end(cinfo->methods) && cit->second.func->cls == cinfo->cls) {
-    return cit->second.func;
-  }
-
-  // Try old style class name constructors.  We need to check
-  // AttrTrait on the function in case it came from a pre-flattened
-  // trait (that doesn't count as a constructor).
-  assert(!(cinfo->cls->attrs & AttrTrait) &&
-         "We shouldn't be resolving traits right now");
-  cit = cinfo->methods.find(cinfo->cls->name);
-  if (cit != end(cinfo->methods)) {
-    if (cit->second.func->cls == cinfo->cls) return cit->second.func;
+  if (named_construct) {
+    cinfo->ctor = named_construct;
+    return true;
   }
 
   // Parent class constructor if it isn't named 86ctor.
   if (cinfo->parent && cinfo->parent->ctor &&
-      cinfo->parent->ctor->name != s_86ctor.get()) {
-    return cinfo->parent->ctor;
+      cinfo->parent->ctor->first != s_86ctor.get()) {
+    cinfo->ctor = cinfo->parent->ctor;
+    return true;
   }
 
   // Use the generated 86ctor.  Unless the class is abstract, this
   // must exist at this point or the bytecode is ill-formed.
-  if (cinfo->cls->attrs & AttrAbstract) return nullptr;
-  cit = cinfo->methods.find(s_86ctor.get());
-  if (cit == end(cinfo->methods)) {
-    always_assert(!"no 86ctor found on class");
-  }
-  return cit->second.func;
+  if (cinfo->cls->attrs & AttrAbstract) return true;
+  cinfo->ctor = find_toplevel(s_86ctor.get());
+  always_assert(cinfo->ctor);
+  return true;
 }
 
 /*
@@ -1125,7 +1159,7 @@ borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
 bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
   if (!build_cls_info_rec(cinfo, cinfo, false)) return false;
 
-  cinfo->ctor = find_constructor(cinfo);
+  if (!find_constructor(cinfo)) return false;
 
   for (auto& prop : cinfo->cls->properties) {
     if (!(prop.attrs & AttrPublic) || !(prop.attrs & AttrStatic)) {
@@ -1164,6 +1198,15 @@ void add_system_constants_to_index(IndexData& index) {
 
 //////////////////////////////////////////////////////////////////////
 
+// We want const qualifiers on various index data structures for php
+// object pointers, but during index creation time we need to
+// manipulate some of their attributes (changing the representation).
+// This little wrapper keeps the const_casting out of the main line of
+// code below.
+void attribute_setter(const Attr& attrs, bool set, Attr attr) {
+  attrSetter(const_cast<Attr&>(attrs), set, attr);
+}
+
 void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   std::unordered_map<
     borrowed_ptr<const php::Class>,
@@ -1178,6 +1221,7 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
     index.classes.insert({c->name, borrow(c)});
 
     for (auto& m : c->methods) {
+      attribute_setter(m->attrs, false, AttrNoOverride);
       index.methods.insert({m->name, borrow(m)});
       if (m->attrs & AttrInterceptable) {
         index.any_interceptable_functions = true;
@@ -1454,18 +1498,17 @@ void compute_subclass_list(IndexData& index) {
 }
 
 void define_func_family(IndexData& index, borrowed_ptr<ClassInfo> cinfo,
-                        SString name, borrowed_ptr<const php::Func> func) {
+                        SString name, const MethTabEntryPair* mte) {
   index.funcFamilies.push_back(std::make_unique<FuncFamily>());
   auto const family = borrow(index.funcFamilies.back());
-  family->isCtor = func == cinfo->ctor;
+  family->isCtor = mte == cinfo->ctor;
   auto& funcs = family->possibleFuncs;
   for (auto& cleaf : cinfo->subclassList) {
     auto const leafFn = [&] () -> const MethTabEntryPair* {
-      if (family->isCtor && !cleaf->ctor) return nullptr;
-      auto const leafFnIt = cleaf->methods.find(
-        family->isCtor ? cleaf->ctor->name.get() : name);
+      if (family->isCtor) return cleaf->ctor;
+      auto const leafFnIt = cleaf->methods.find(name);
       if (leafFnIt == end(cleaf->methods)) return nullptr;
-      return fromIt(leafFnIt);
+      return mteFromIt(leafFnIt);
     }();
     if (!leafFn) continue;
     if (leafFn->second.func->attrs & AttrInterceptable) {
@@ -1481,9 +1524,9 @@ void define_func_family(IndexData& index, borrowed_ptr<ClassInfo> cinfo,
               // the first one is used as the name for FCallD, after
               // that, sort by name so that different case spellings
               // come in the same order.
-              if (a->second.func == b->second.func) return false;
-              if (b->second.func == func)           return false;
-              if (a->second.func == func)           return true;
+              if (a->second.func == b->second.func)   return false;
+              if (b->second.func == mte->second.func) return false;
+              if (a->second.func == mte->second.func) return true;
               if (auto d = a->first->compare(b->first)) {
                 return d < 0;
               }
@@ -1520,18 +1563,23 @@ void define_func_family(IndexData& index, borrowed_ptr<ClassInfo> cinfo,
 
 void define_func_families(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
+    auto didCtor = false;
     for (auto& kv : cinfo->methods) {
-      auto const func = kv.second.func;
+      auto const mte = mteFromElm(kv);
 
-      if (func->attrs & AttrNoOverride) continue;
-      if (func == cinfo->ctor) {
-        define_func_family(index, borrow(cinfo), s_construct.get(), func);
+      if (mte->second.attrs & AttrNoOverride) continue;
+      if (mte == cinfo->ctor) {
+        define_func_family(index, borrow(cinfo), s_construct.get(), mte);
+        didCtor = true;
         continue;
       }
-      if (func->attrs & AttrPrivate) continue;
-      if (is_special_method_name(func->name)) continue;
+      if (mte->second.attrs & AttrPrivate) continue;
+      if (is_special_method_name(mte->first)) continue;
 
-      define_func_family(index, borrow(cinfo), kv.first, func);
+      define_func_family(index, borrow(cinfo), mte->first, mte);
+    }
+    if (cinfo->ctor && !didCtor) {
+      define_func_family(index, borrow(cinfo), s_construct.get(), cinfo->ctor);
     }
   }
 }
@@ -1799,15 +1847,6 @@ void find_magic_methods(IndexData& index) {
   }
 }
 
-// We want const qualifiers on various index data structures for php
-// object pointers, but during index creation time we need to
-// manipulate some of their attributes (changing the representation).
-// This little wrapper keeps the const_casting out of the main line of
-// code below.
-void attribute_setter(const Attr& attrs, bool set, Attr attr) {
-  attrSetter(const_cast<Attr&>(attrs), set, attr);
-}
-
 void mark_no_override_classes(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     auto const set = (cinfo->subclassList.size() == 1 &&
@@ -1829,13 +1868,19 @@ void mark_no_override_classes(IndexData& index) {
 }
 
 void mark_no_override_methods(IndexData& index) {
-  // First, mark every (non-interface, non-special) method as AttrNoOverride.
-  for (auto& meth : index.methods) {
-    auto const set =
-      !(meth.second->cls->attrs & AttrInterface) &&
-      (meth.second->cls->attrs & AttrUnique) &&
-      !(is_special_method_name(meth.second->name));
-    attribute_setter(meth.second->attrs, set, AttrNoOverride);
+  // We removed any AttrNoOverride flags from all methods while adding
+  // the units to the index.  Now start by, marking every
+  // (non-interface, non-special) method as AttrNoOverride.
+  for (auto& cinfo : index.allClassInfos) {
+    if (cinfo->cls->attrs & AttrInterface) continue;
+    if (!(cinfo->cls->attrs & AttrUnique)) continue;
+
+    for (auto& m : cinfo->methods) {
+      if (!(is_special_method_name(m.first))) {
+        attribute_setter(m.second.attrs, true, AttrNoOverride);
+        attribute_setter(m.second.func->attrs, true, AttrNoOverride);
+      }
+    }
   }
 
   // Then run through every ClassInfo, and for each of its parent classes clear
@@ -1844,16 +1889,17 @@ void mark_no_override_methods(IndexData& index) {
     for (auto& ancestor : cinfo->baseList) {
       if (ancestor == cinfo.get()) continue;
 
-      auto removeNoOverride = [] (const php::Func* func) {
-        if (func->attrs & AttrNoOverride) {
+      auto removeNoOverride = [] (auto it) {
+        if (it->second.attrs & AttrNoOverride) {
           FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
-                 func->cls->name, func->name);
-          attribute_setter(func->attrs, false, AttrNoOverride);
+                 it->second.func->cls->name, it->first);
+          attribute_setter(it->second.attrs, false, AttrNoOverride);
+          attribute_setter(it->second.func->attrs, false, AttrNoOverride);
         }
       };
 
       for (auto& derivedMethod : cinfo->methods) {
-        if (derivedMethod.second.func == cinfo->ctor) {
+        if (&derivedMethod == cinfo->ctor) {
           if (ancestor->ctor && ancestor->ctor != cinfo->ctor) {
             removeNoOverride(ancestor->ctor);
           }
@@ -1861,7 +1907,7 @@ void mark_no_override_methods(IndexData& index) {
           auto const it = ancestor->methods.find(derivedMethod.first);
           if (it == end(ancestor->methods)) continue;
           if (it->second.func != derivedMethod.second.func) {
-            removeNoOverride(it->second.func);
+            removeNoOverride(it);
           }
         }
       }
@@ -1892,9 +1938,10 @@ void check_invariants(borrowed_ptr<const ClassInfo> cinfo) {
   // entry in its ClassInfo method table, and if it's not special,
   // AttrNoOverride, or private, an entry in the family table.
   for (auto& m : cinfo->cls->methods) {
-    always_assert(cinfo->methods.count(m->name));
-    if (m->attrs & (AttrNoOverride|AttrPrivate)) continue;
-    if (borrow(m) == cinfo->ctor) {
+    auto const it = cinfo->methods.find(m->name);
+    always_assert(it != cinfo->methods.end());
+    if (it->second.attrs & (AttrNoOverride|AttrPrivate)) continue;
+    if (cinfo->ctor && borrow(m) == cinfo->ctor->second.func) {
       always_assert(cinfo->methodFamilies.count(s_construct.get()));
       continue;
     }
@@ -2613,11 +2660,8 @@ res::Func Index::resolve_method(Context ctx,
    * Whether or not the context class has a private method with the
    * same name as the the method we're trying to call.
    */
-  auto const contextHasPrivateWithSameName = folly::lazy([&]() -> bool {
+  auto const contextMayHavePrivateWithSameName = folly::lazy([&]() -> bool {
     if (!ctx.cls) return false;
-    // We can use any representative ClassInfo for the context class
-    // to check this, since the private method list cannot change
-    // for different realizations of the class.
     auto const range = find_range(m_data->classInfo, ctx.cls->name);
     if (begin(range) == end(range)) {
       // This class had no pre-resolved ClassInfos, which means it
@@ -2626,10 +2670,15 @@ res::Func Index::resolve_method(Context ctx,
       // class are unreachable code).
       return true;
     }
-    auto const ctxInfo = begin(range)->second;
-    auto const iter    = ctxInfo->methods.find(name);
-    if (iter != end(ctxInfo->methods)) {
-      return iter->second.func->attrs & AttrPrivate;
+    // Because of traits, each instantiation of the class could have
+    // different private methods; we need to check them all.
+    for (auto ctxInfo : range) {
+      auto const iter = ctxInfo.second->methods.find(name);
+      if (iter != end(ctxInfo.second->methods) &&
+          iter->second.attrs & AttrPrivate &&
+          iter->second.topLevel) {
+        return true;
+      }
     }
     return false;
   });
@@ -2639,7 +2688,7 @@ res::Func Index::resolve_method(Context ctx,
    */
   auto const methIt = cinfo->methods.find(name);
   if (methIt == end(cinfo->methods)) return name_only();
-  if (methIt->second.func->attrs & AttrInterceptable) return name_only();
+  if (methIt->second.attrs & AttrInterceptable) return name_only();
   auto const ftarget = methIt->second.func;
 
   // We need to revisit the hasPrivateAncestor code if we start being
@@ -2661,7 +2710,7 @@ res::Func Index::resolve_method(Context ctx,
       ctx.cls &&
       ctx.cls != ftarget->cls) {
     if (could_be_related(ctx.cls, cinfo->cls)) {
-      if (contextHasPrivateWithSameName()) {
+      if (contextMayHavePrivateWithSameName()) {
         return name_only();
       }
     }
@@ -2687,24 +2736,45 @@ res::Func Index::resolve_method(Context ctx,
   // or may not be accessible.
   auto const couldBeInaccessible = [&] {
     // Public is always accessible.
-    if (ftarget->attrs & AttrPublic) return false;
+    if (methIt->second.attrs & AttrPublic) return false;
     // An anonymous context won't have access if it wasn't public.
     if (!ctx.cls) return true;
     // If the calling context class is the same as the target class,
-    // and method is defined on this class, it must be accessible.
-    if (ctx.cls == cinfo->cls && ftarget->cls == cinfo->cls) {
+    // and the method is defined on this class or is protected, it
+    // must be accessible.
+    if (ctx.cls == cinfo->cls &&
+        (methIt->second.topLevel || methIt->second.attrs & AttrProtected)) {
       return false;
     }
     // If the method is private, the above case is the only case where
     // we'd know it was accessible.
-    if (ftarget->attrs & AttrPrivate) return true;
+    if (methIt->second.attrs & AttrPrivate) return true;
     /*
      * For the protected method case: if the context class must be
      * derived from the class that first defined the protected method
-     * we know it is accessible.
+     * we know it is accessible.  First check against the class of the
+     * method (or cinfo for trait methods).
      */
-    if (must_be_derived_from(ctx.cls, ftarget->cls)) {
+    if (must_be_derived_from(
+          ctx.cls,
+          ftarget->cls->attrs & AttrTrait ? cinfo->cls : ftarget->cls)) {
       return false;
+    }
+    if (methIt->second.hasAncestor ||
+        (ftarget->cls->attrs & AttrTrait && !methIt->second.topLevel)) {
+      // Now we have find the first class that defined the method, and
+      // check if *that* is an ancestor of the context class.
+      auto parent = cinfo->parent;
+      while (true) {
+        assertx(parent);
+        auto it = parent->methods.find(name);
+        assertx(it != parent->methods.end());
+        if (!it->second.hasAncestor && it->second.topLevel) {
+          if (must_be_derived_from(ctx.cls, parent->cls)) return false;
+          break;
+        }
+        parent = parent->parent;
+      }
     }
     /*
      * On the other hand, if the class that defined the method must be
@@ -2714,8 +2784,8 @@ res::Func Index::resolve_method(Context ctx,
      * method, which currently we don't ever resolve---we've removed
      * it from the method table in the classInfo.)
      */
-    if (must_be_derived_from(ftarget->cls, ctx.cls)) {
-      if (!contextHasPrivateWithSameName()) {
+    if (must_be_derived_from(cinfo->cls, ctx.cls)) {
+      if (!contextMayHavePrivateWithSameName()) {
         return false;
       }
     }
@@ -2727,7 +2797,7 @@ res::Func Index::resolve_method(Context ctx,
 
   auto resolve = [&] {
     create_func_info(*m_data, ftarget);
-    return res::Func { this, fromIt(methIt) };
+    return res::Func { this, mteFromIt(methIt) };
   };
 
   switch (dcls.type) {
@@ -2740,7 +2810,7 @@ res::Func Index::resolve_method(Context ctx,
     if (cinfo->magicCall.derivedHas || cinfo->magicCallStatic.derivedHas) {
       if (couldBeInaccessible()) return name_only();
     }
-    if (ftarget->attrs & AttrNoOverride) {
+    if (methIt->second.attrs & AttrNoOverride) {
       return resolve();
     }
     if (!options.FuncFamilies) return name_only();
@@ -2763,9 +2833,10 @@ folly::Optional<res::Func>
 Index::resolve_ctor(Context ctx, res::Class rcls, bool exact) const {
   auto const cinfo = rcls.val.right();
   if (!cinfo || !cinfo->ctor) return folly::none;
-  if (exact || cinfo->ctor->attrs & AttrNoOverride) {
-    if (cinfo->ctor->attrs & AttrInterceptable) return folly::none;
-    return do_resolve(cinfo->ctor);
+  if (exact || cinfo->ctor->second.attrs & AttrNoOverride) {
+    if (cinfo->ctor->second.attrs & AttrInterceptable) return folly::none;
+    create_func_info(*m_data, cinfo->ctor->second.func);
+    return res::Func { this, cinfo->ctor };
   }
 
   if (!options.FuncFamilies) return folly::none;
@@ -2975,7 +3046,7 @@ bool Index::is_async_func(res::Func rfunc) const {
     [&](borrowed_ptr<FuncInfo> finfo) {
       return finfo->first->isAsync && !finfo->first->isGenerator;
     },
-    [&](borrowed_ptr<MethTabEntryPair> mte) {
+    [&](borrowed_ptr<const MethTabEntryPair> mte) {
       return mte->second.func->isAsync && !mte->second.func->isGenerator;
     },
     [&](borrowed_ptr<FuncFamily> fam) {
@@ -2996,7 +3067,7 @@ bool Index::is_effect_free(res::Func rfunc) const {
     [&](borrowed_ptr<FuncInfo> finfo) {
       return finfo->second.effectFree;
     },
-    [&](borrowed_ptr<MethTabEntryPair> mte) {
+    [&](borrowed_ptr<const MethTabEntryPair> mte) {
       return func_info(*m_data, mte->second.func)->second.effectFree;
     },
     [&](borrowed_ptr<FuncFamily> fam) {
@@ -3152,7 +3223,7 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
       add_dependency(*m_data, finfo->first, ctx, Dep::ReturnTy);
       return finfo->second.returnTy;
     },
-    [&](borrowed_ptr<MethTabEntryPair> mte) {
+    [&](borrowed_ptr<const MethTabEntryPair> mte) {
       add_dependency(*m_data, mte->second.func, ctx, Dep::ReturnTy);
       auto const finfo = func_info(*m_data, mte->second.func);
       if (!finfo->first) return TInitGen;
@@ -3183,7 +3254,7 @@ Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
       add_dependency(*m_data, finfo->first, callCtx.caller, Dep::ReturnTy);
       return context_sensitive_return_type(*this, finfo, callCtx);
     },
-    [&](borrowed_ptr<MethTabEntryPair> mte) {
+    [&](borrowed_ptr<const MethTabEntryPair> mte) {
       add_dependency(*m_data, mte->second.func, callCtx.caller, Dep::ReturnTy);
       auto const finfo = func_info(*m_data, mte->second.func);
       if (!finfo->first) return TInitGen;
@@ -3265,7 +3336,7 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
     [&] (borrowed_ptr<FuncInfo> finfo) {
       return func_param_prep(finfo->first, paramId);
     },
-    [&] (borrowed_ptr<MethTabEntryPair> mte) {
+    [&] (borrowed_ptr<const MethTabEntryPair> mte) {
       return func_param_prep(mte->second.func, paramId);
     },
     [&] (borrowed_ptr<FuncFamily> fam) {

@@ -321,7 +321,7 @@ private:
   using Rep = boost::variant< FuncName
                             , MethodName
                             , borrowed_ptr<FuncInfo>
-                            , borrowed_ptr<MethTabEntryPair>
+                            , borrowed_ptr<const MethTabEntryPair>
                             , borrowed_ptr<FuncFamily>
                             >;
 

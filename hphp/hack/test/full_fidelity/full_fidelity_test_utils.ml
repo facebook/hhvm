@@ -17,9 +17,28 @@ module MinimalToken = Full_fidelity_minimal_token
 module MinimalTrivia = Full_fidelity_minimal_trivia
 module Rewriter = Full_fidelity_rewriter.WithSyntax(MinimalSyntax)
 
+module EditableSyntax = Full_fidelity_editable_syntax
+module EditableToken = Full_fidelity_editable_token
+module EditableRewriter = Full_fidelity_rewriter.WithSyntax(EditableSyntax)
+
 open Core
 
 let identity x = x
+
+let rewrite_editable_tree_no_trivia node =
+  let trivia = ref [] in
+  let rewrite n =
+    match EditableSyntax.syntax n with
+    | EditableSyntax.Token t ->
+      let kind = EditableToken.kind t in
+      let text = EditableToken.text t in
+      let leading = EditableToken.leading t in
+      let trailing = EditableToken.trailing t in
+      let token = EditableToken.make kind text [] [] in
+      trivia := !trivia @ leading @ trailing;
+      EditableRewriter.Replace (EditableSyntax.make_token token)
+    | _ -> EditableRewriter.Keep in
+  ((EditableRewriter.rewrite_post rewrite node), !trivia)
 
 let rewrite_tree_no_trivia node =
   let rewrite n =

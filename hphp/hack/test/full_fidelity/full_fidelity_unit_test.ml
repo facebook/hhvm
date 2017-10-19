@@ -6,14 +6,16 @@
  * LICENSE file in the "hack" directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
- *)
+*)
 
+module EditableTrivia = Full_fidelity_editable_trivia
 module SourceText = Full_fidelity_source_text
 module SyntaxTree = Full_fidelity_syntax_tree
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module ParserErrors = Full_fidelity_parser_errors
 module SyntaxError = Full_fidelity_syntax_error
 module TestUtils = Full_fidelity_test_utils
+module TriviaKind = Full_fidelity_trivia_kind
 
 open Core
 open Ocaml_overrides
@@ -24,12 +26,12 @@ let fix_output_text_header text =
   (*TODO: will be removed in a diff that updates all test baselines *)
   let replacements = [
     "(script(list(markup_section(missing)((markup))(markup_suffix((<?))((name)\
-      (end_of_line)))(missing))",
+     (end_of_line)))(missing))",
     "(script(header((<))((?))((name)(end_of_line)))(list";
     "(script(list(markup_section(missing)((markup))(markup_suffix((<?))((name)\
-      (whitespace)(single_line_comment)(end_of_line)))(missing))",
+     (whitespace)(single_line_comment)(end_of_line)))(missing))",
     "(script(header((<))((?))((name)(whitespace)(single_line_comment)\
-      (end_of_line)))(list"
+     (end_of_line)))(list"
   ] in
   let starts_with s = String_utils.string_starts_with text s in
   match List.find ~f:(fun (s, _) -> starts_with s) replacements with
@@ -49,12 +51,21 @@ type test_case = {
 
 let ident str = str
 
+let write_file name contents =
+  let path = Filename.concat test_files_dir name in
+  let oc = open_out path in
+  Printf.fprintf oc "%s" contents;
+  close_out oc
+
+let write_expectation_to_file name expected =
+  write_file (name ^ ".out") expected
+
 let cat_file name =
   let path = Filename.concat test_files_dir name in
   let raw = Sys_utils.cat path in
   (** cat adds an extra newline at the end. *)
   if (String.length raw > 0) &&
-      (String.get raw (String.length raw - 1)) == '\n' then
+     (String.get raw (String.length raw - 1)) == '\n' then
     String.sub raw 0 (String.length raw - 1)
   else
     raw
@@ -71,7 +82,6 @@ let make_test_case_from_files
     expected = expected;
     test_function = test_function;
   }
-
 
 let remove_whitespace text =
   let length = String.length text in
@@ -92,6 +102,21 @@ let test_minimal source =
   let source_text = SourceText.make file_path source in
   let syntax_tree = SyntaxTree.make source_text in
   TestUtils.minimal_to_string (SyntaxTree.root syntax_tree)
+
+let test_trivia source =
+  let file_path = Relative_path.(create Dummy "<test_trivia>") in
+  let source_text = SourceText.make file_path source in
+  let syntax_tree = SyntaxTree.make source_text in
+  let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
+  let (no_trivia_tree, trivia) = TestUtils.rewrite_editable_tree_no_trivia editable in
+  let pretty_no_trivia = Full_fidelity_pretty_printer.pretty_print no_trivia_tree in
+  let formatted_trivia = List.map trivia
+      (fun t ->
+        Printf.sprintf "%s: (%s)"
+          (TriviaKind.to_string @@ EditableTrivia.kind t)
+          (EditableTrivia.text t)
+      ) in
+  Printf.sprintf "%s\n%s" (String.trim pretty_no_trivia) (String.concat "\n" formatted_trivia)
 
 let test_mode source =
   let file_path = Relative_path.(create Dummy "<test_mode>") in
@@ -115,59 +140,62 @@ let test_errors source =
   let errors = List.map errors ~f:mapper in
   Printf.sprintf "%s" (String.concat "\n" errors)
 
+let trivia_tests =
+  [make_test_case_from_files "test_trivia" test_trivia]
+
 let minimal_tests =
   let mapper testname =
     make_test_case_from_files
       ~preprocess_exp:remove_whitespace testname test_minimal in
   List.map
-  [
-    "test_simple";
-(*  TODO: This test is temporarily disabled because
-    $a ? $b : $c = $d
-    does not parse in the FF parser as it did in the original Hack parser,
-    due to a precedence issue. Re-enable this test once we either fix that,
-    or decide to take the breaking change.
-    "test_conditional"; *)
-    "test_statements";
-    "test_for_statements";
-    "test_try_statement";
-    "test_list_precedence";
-    "test_list_expression";
-    "test_foreach_statements";
-    "test_types_type_const";
-    "test_function_call";
-    "test_array_expression";
-    "test_varray_darray_expressions";
-    "test_varray_darray_types";
-    "test_attribute_spec";
-    "test_array_key_value_precedence";
-    "test_enum";
-    "test_class_with_attributes";
-    "test_class_with_qualified_name";
-    "test_namespace";
-    "test_empty_class";
-    "test_class_method_declaration";
-    "test_constructor_destructor";
-    "test_trait";
-    "test_type_const";
-    "test_class_const";
-    "test_type_alias";
-    "test_indirection";
-    "test_eval_deref";
-    "test_global_constant";
-    "test_closure_type";
-    "test_inclusion_directive";
-    "test_awaitable_creation";
-    "test_literals";
-    "test_variadic_type_hint";
-    "test_tuple_type_keyword";
-    "test_trailing_commas";
-    "context/test_extra_error_trivia";
-    "test_funcall_with_type_arguments";
-    "test_nested_namespace_declarations";
-    "test_xhp_attributes";
-    "test_spaces_preserved_in_string_containing_expression";
-  ] ~f:mapper
+    [
+      "test_simple";
+      (*  TODO: This test is temporarily disabled because
+          $a ? $b : $c = $d
+          does not parse in the FF parser as it did in the original Hack parser,
+          due to a precedence issue. Re-enable this test once we either fix that,
+          or decide to take the breaking change.
+          "test_conditional"; *)
+      "test_statements";
+      "test_for_statements";
+      "test_try_statement";
+      "test_list_precedence";
+      "test_list_expression";
+      "test_foreach_statements";
+      "test_types_type_const";
+      "test_function_call";
+      "test_array_expression";
+      "test_varray_darray_expressions";
+      "test_varray_darray_types";
+      "test_attribute_spec";
+      "test_array_key_value_precedence";
+      "test_enum";
+      "test_class_with_attributes";
+      "test_class_with_qualified_name";
+      "test_namespace";
+      "test_empty_class";
+      "test_class_method_declaration";
+      "test_constructor_destructor";
+      "test_trait";
+      "test_type_const";
+      "test_class_const";
+      "test_type_alias";
+      "test_indirection";
+      "test_eval_deref";
+      "test_global_constant";
+      "test_closure_type";
+      "test_inclusion_directive";
+      "test_awaitable_creation";
+      "test_literals";
+      "test_variadic_type_hint";
+      "test_tuple_type_keyword";
+      "test_trailing_commas";
+      "context/test_extra_error_trivia";
+      "test_funcall_with_type_arguments";
+      "test_nested_namespace_declarations";
+      "test_xhp_attributes";
+      "test_spaces_preserved_in_string_containing_expression";
+    ] ~f:mapper
 
 let error_tests =
   let mapper testname =
@@ -228,50 +256,57 @@ let error_tests =
     "test_php_blocks_errors";
   ] ~f:mapper
 
-let test_data = minimal_tests @ error_tests @
-[
-  {
-    name = "test_mode_1";
-    source = "<?hh   ";
-    expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
-    test_function = test_mode;
-  };
-  {
-    name = "test_mode_2";
-    source = "";
-    expected = "Lang:phpMode:Strict:falseHack:falsePhp:true";
-    test_function = test_mode;
-  };
-  {
-    name = "test_mode_3";
-    source = "<?hh // strict ";
-    expected = "Lang:hhMode:strictStrict:trueHack:truePhp:false";
-    test_function = test_mode;
-  };
-  {
-    name = "test_mode_4";
-    source = "<?php // strict "; (* Not strict! *)
-    expected = "Lang:phpMode:strictStrict:falseHack:falsePhp:true";
-    test_function = test_mode;
-  };
-  {
-    name = "test_mode_5";
-    source = "<?hh/";
-    expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
-    test_function = test_mode;
-  };
-  {
-    name = "test_mode_6";
-    source = "<?hh//";
-    expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
-    test_function = test_mode;
-  }
-]
+let test_data = minimal_tests @ trivia_tests @ error_tests @
+                [
+                  {
+                    name = "test_mode_1";
+                    source = "<?hh   ";
+                    expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
+                    test_function = test_mode;
+                  };
+                  {
+                    name = "test_mode_2";
+                    source = "";
+                    expected = "Lang:phpMode:Strict:falseHack:falsePhp:true";
+                    test_function = test_mode;
+                  };
+                  {
+                    name = "test_mode_3";
+                    source = "<?hh // strict ";
+                    expected = "Lang:hhMode:strictStrict:trueHack:truePhp:false";
+                    test_function = test_mode;
+                  };
+                  {
+                    name = "test_mode_4";
+                    source = "<?php // strict "; (* Not strict! *)
+                    expected = "Lang:phpMode:strictStrict:falseHack:falsePhp:true";
+                    test_function = test_mode;
+                  };
+                  {
+                    name = "test_mode_5";
+                    source = "<?hh/";
+                    expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
+                    test_function = test_mode;
+                  };
+                  {
+                    name = "test_mode_6";
+                    source = "<?hh//";
+                    expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
+                    test_function = test_mode;
+                  }
+                ]
+
+let assert_equal_or_write_file test_name expected actual =
+  if expected <> actual then
+    write_expectation_to_file test_name actual;
+
+  assert_equal expected actual
 
 let driver test () =
   let actual = test.test_function test.source in
   let actual = fix_output_text_header actual in
-  assert_equal test.expected actual
+
+  assert_equal_or_write_file test.name test.expected actual
 
 let run_test test =
   test.name >:: (driver test)

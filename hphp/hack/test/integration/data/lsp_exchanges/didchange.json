@@ -39,10 +39,10 @@
        },
        "contentChanges": [{
          "range": {
-           "start": {"line":2, "character":9},
-           "end": {"line":2, "character":12}
+           "start": {"line":7, "character":11},
+           "end": {"line":7, "character":11}
          },
-         "text":"***"
+         "text":"a"
        }]
    }
 }

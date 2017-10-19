@@ -46,18 +46,18 @@
         {
           "range": {
             "start": {
-              "line": 2,
-              "character": 9
+              "line": 7,
+              "character": 11
             },
             "end": {
-              "line": 2,
-              "character": 11
+              "line": 7,
+              "character": 12
             }
           },
           "severity": 1,
           "code": 1002,
           "source": "Hack",
-          "message": "Expected identifier",
+          "message": "Expected ;",
           "relatedLocations": []
         }
       ]

@@ -1120,7 +1120,7 @@ let mixed_namespace_errors node namespace_type =
     { errors; namespace_type }
   | _ -> { errors = [ ]; namespace_type }
 
-let find_syntax_errors syntax_tree =
+let find_syntax_errors hhvm_compatiblity_mode syntax_tree =
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let is_hack = (SyntaxTree.language syntax_tree = "hh") in
   let folder acc node parents =
@@ -1157,7 +1157,7 @@ let find_syntax_errors syntax_tree =
     { errors = []; namespace_type = Unspecified } node in
   acc.errors
 
-type error_level = Minimum | Typical | Maximum
+type error_level = Minimum | Typical | Maximum | HHVMCompatibility
 
 let parse_errors ?(level=Typical) syntax_tree =
   (*
@@ -1171,5 +1171,5 @@ let parse_errors ?(level=Typical) syntax_tree =
   | _ -> SyntaxTree.errors syntax_tree in
   let errors2 =
     if level = Minimum && errors1 <> [] then []
-    else find_syntax_errors syntax_tree in
+    else find_syntax_errors (level = HHVMCompatibility) syntax_tree in
   List.sort SyntaxError.compare (errors1 @ errors2)

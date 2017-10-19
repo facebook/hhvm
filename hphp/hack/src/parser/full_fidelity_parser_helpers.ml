@@ -28,6 +28,7 @@ module type ParserType = sig
   val skipped_tokens : t -> Token.t list
   val with_skipped_tokens : t -> Token.t list -> t
   val clear_skipped_tokens : t -> t
+  val hhvm_compat_mode : t -> bool
 end
 
 module WithParser(Parser : ParserType) = struct

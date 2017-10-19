@@ -9,6 +9,7 @@
  *)
 
 type t
-val make : Full_fidelity_source_text.t -> t
+val make : ?hhvm_compat_mode:bool -> Full_fidelity_source_text.t -> t
 val errors : t -> Full_fidelity_syntax_error.t list
+val hhvm_compat_mode : t -> bool
 val parse_script : t -> t * Full_fidelity_minimal_syntax.t

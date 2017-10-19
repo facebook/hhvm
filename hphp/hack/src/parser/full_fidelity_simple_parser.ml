@@ -17,17 +17,23 @@ module WithLexer(Lexer : Full_fidelity_lexer_sig.MinimalLexer_S) = struct
   type t = {
     lexer : Lexer.t;
     errors : SyntaxError.t list;
-    context : Context.t
+    context : Context.t;
+    hhvm_compat_mode : bool;
   }
 
-  let make lexer errors context =
-    { lexer; errors; context }
+  let make ?(hhvm_compat_mode=false) lexer errors context =
+    { lexer; errors; context; hhvm_compat_mode }
 
   let errors parser =
     parser.errors @ (Lexer.errors parser.lexer)
 
+  let hhvm_compat_mode parser =
+    parser.hhvm_compat_mode
+
   let with_errors parser errors =
-    { parser with errors }
+    match errors with
+    | e::_ when parser.hhvm_compat_mode -> failwith (SyntaxError.message e)
+    | _ -> { parser with errors }
 
   let lexer parser =
     parser.lexer

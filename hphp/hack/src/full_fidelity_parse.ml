@@ -47,6 +47,7 @@ module FullFidelityParseArgs = struct
     pretty_print : bool;
     schema: bool;
     show_file_name : bool;
+    hhvm_compat_mode : bool;
     files : string list
   }
 
@@ -60,6 +61,7 @@ module FullFidelityParseArgs = struct
     program_text
     pretty_print
     schema
+    hhvm_compat_mode
     show_file_name
     files = {
     full_fidelity_json;
@@ -71,6 +73,7 @@ module FullFidelityParseArgs = struct
     program_text;
     pretty_print;
     schema;
+    hhvm_compat_mode;
     show_file_name;
     files }
 
@@ -95,6 +98,8 @@ module FullFidelityParseArgs = struct
     let set_pretty_print () = pretty_print := true in
     let schema = ref false in
     let set_schema () = schema := true in
+    let hhvm_compat_mode = ref false in
+    let set_hhvm_compat_mode () = hhvm_compat_mode := true in
     let show_file_name = ref false in
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
@@ -130,6 +135,9 @@ No errors are filtered out.";
       "--schema",
         Arg.Unit set_schema,
         "Displays the parser version and schema of nodes.";
+      "--hhvm_compat_mode",
+        Arg.Unit set_hhvm_compat_mode,
+        "Enforce HHVM compatibility (especially in what errors to ignore)";
       "--show-file-name",
         Arg.Unit set_show_file_name,
         "Displays the file name.";
@@ -145,6 +153,7 @@ No errors are filtered out.";
       !program_text
       !pretty_print
       !schema
+      !hhvm_compat_mode
       !show_file_name
       (List.rev !files)
 end
@@ -164,9 +173,7 @@ let print_full_fidelity_error source_text error =
 
 (* Computes and prints list of all FFP errors from syntax pass and parser pass.
  * Specifying all_errors=false will attempt to filter out duplicate errors. *)
-let print_full_fidelity_errors ~syntax_tree ~source_text ~all_errors =
-  let level =
-    if all_errors then ParserErrors.Maximum else ParserErrors.Typical in
+let print_full_fidelity_errors ~syntax_tree ~source_text ~level =
   let errors = ParserErrors.parse_errors ~level syntax_tree in
   List.iter (print_full_fidelity_error source_text) errors
 
@@ -214,13 +221,16 @@ let handle_existing_file args filename =
     let pretty = Full_fidelity_pretty_printer.pretty_print editable in
     Printf.printf "%s\n" pretty
   end;
-  if args.full_fidelity_errors then begin
-    let all_errors = false in
-    print_full_fidelity_errors ~syntax_tree ~source_text ~all_errors
-  end;
-  if args.full_fidelity_errors_all then begin
-    let all_errors = true in
-    print_full_fidelity_errors ~syntax_tree ~source_text ~all_errors
+  if args.hhvm_compat_mode then
+    print_full_fidelity_errors ~syntax_tree ~source_text
+      ~level:ParserErrors.HHVMCompatibility
+  else begin
+    if args.full_fidelity_errors then
+      print_full_fidelity_errors ~syntax_tree ~source_text
+        ~level:ParserErrors.Typical;
+    if args.full_fidelity_errors_all then
+      print_full_fidelity_errors ~syntax_tree ~source_text
+        ~level:ParserErrors.Maximum
   end;
   if args.full_fidelity_s_expr then begin
     let str = Debug.dump_full_fidelity syntax_tree in

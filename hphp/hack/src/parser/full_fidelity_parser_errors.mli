@@ -8,7 +8,7 @@
  *
  *)
 
-type error_level = Minimum | Typical | Maximum
+type error_level = Minimum | Typical | Maximum | HHVMCompatibility
 
 val parse_errors : ?level:error_level -> Full_fidelity_syntax_tree.t ->
   Full_fidelity_syntax_error.t list

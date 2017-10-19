@@ -2358,12 +2358,13 @@ let from_text
   ?(quick                 = false)
   ?(suppress_output       = false)
   ?(lower_coroutines      = true)
+  ?hhvm_compat_mode
   ?(parser_options        = ParserOptions.default)
   (file        : Relative_path.t)
   (source_text : Full_fidelity_source_text.t)
   : result =
     let open Full_fidelity_syntax_tree in
-    let tree   = make source_text in
+    let tree   = make ?hhvm_compat_mode source_text in
     let script = Full_fidelity_positioned_syntax.from_tree tree in
     let script = from_positioned_syntax script in
     let script =
@@ -2408,6 +2409,7 @@ let from_file
   ?(quick                 = false)
   ?(suppress_output       = false)
   ?lower_coroutines
+  ?hhvm_compat_mode
   ?(parser_options        = ParserOptions.default)
   (path : Relative_path.t)
   : result =
@@ -2419,6 +2421,7 @@ let from_file
       ~quick
       ~suppress_output
       ?lower_coroutines
+      ?hhvm_compat_mode
       ~parser_options
       path
       (Full_fidelity_source_text.from_file path)
@@ -2442,6 +2445,7 @@ let from_text_with_legacy
   ?(quick                 = false)
   ?(suppress_output       = false)
   ?lower_coroutines
+  ?hhvm_compat_mode
   ?(parser_options        = ParserOptions.default)
   (file    : Relative_path.t)
   (content : string)
@@ -2454,6 +2458,7 @@ let from_text_with_legacy
       ~quick
       ~suppress_output
       ?lower_coroutines
+      ?hhvm_compat_mode
       ~parser_options
       file
       (Full_fidelity_source_text.make file content)
@@ -2466,6 +2471,7 @@ let from_file_with_legacy
   ?(quick                 = false)
   ?(suppress_output       = false)
   ?lower_coroutines
+  ?hhvm_compat_mode
   ?(parser_options        = ParserOptions.default)
   (file : Relative_path.t)
   : Parser_hack.parser_return =
@@ -2477,5 +2483,6 @@ let from_file_with_legacy
       ~quick
       ~suppress_output
       ?lower_coroutines
+      ?hhvm_compat_mode
       ~parser_options
       file

@@ -101,8 +101,8 @@ let remove_duplicates errors equals =
   let result = aux errors [] in
   List.rev result
 
-let make text =
-  let parser = Parser.make text in
+let make ?(hhvm_compat_mode = false) text =
+  let parser = Parser.make ~hhvm_compat_mode text in
   let (parser, root) = Parser.parse_script parser in
   (* We've got the lexical errors and the parser errors together, both
   with lexically later errors earlier in the list. We want to reverse the

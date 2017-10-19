@@ -176,16 +176,17 @@ let parse_text compiler_options popt fn text =
       ~parser_options:popt
       ~ignore_pos
       ~suppress_output:true
+      ~hhvm_compat_mode:true
       fn text
   | Legacy ->
     Parser_hack.program popt fn text
 
 let parse_file compiler_options popt filename text =
   try
-    Some (Errors.do_ begin fun () ->
+    `ParseResult (Errors.do_ begin fun () ->
       parse_text compiler_options popt filename text
     end)
-  with Failure _ -> None
+  with Failure s -> `ParseFailure s
 
 
 let hhvm_unix_call config filename =
@@ -223,15 +224,15 @@ let print_debug_time_info filename debug_time =
   P.eprintf "MinorWords: %0.3f\n" stat.Gc.minor_words;
   P.eprintf "PromotedWords: %0.3f\n" stat.Gc.promoted_words)
 
-let do_compile filename compiler_options opt_ast debug_time =
+let do_compile filename compiler_options fail_or_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
   let hhas_prog =
-    match opt_ast with
-    | None ->
+    match fail_or_ast with
+    | `ParseFailure s ->
       Hhas_program.emit_fatal_program ~ignore_message:true
-        Hhbc_ast.FatalOp.Parse Pos.none "Syntax error"
-    | Some (errors, parser_return, _) ->
+        Hhbc_ast.FatalOp.Parse Pos.none s
+    | `ParseResult (errors, parser_return, _) ->
       let is_hh_file =
         Option.value_map parser_return.Parser_hack.file_mode
           ~default:false ~f:(fun v -> v <> FileInfo.Mphp)
@@ -273,10 +274,10 @@ let process_single_file compiler_options popt filename outputfile =
       Hhbc_options.get_options_from_config config compiler_options.config_list
     in
     Hhbc_options.set_compiler_options options;
-    let opt_ast = parse_file compiler_options popt filename text in
+    let fail_or_ast = parse_file compiler_options popt filename text in
     let debug_time = new_debug_time () in
     ignore @@ add_to_time_ref debug_time.parsing_t t;
-    let text = do_compile filename compiler_options opt_ast debug_time in
+    let text = do_compile filename compiler_options fail_or_ast debug_time in
     if compiler_options.mode = DAEMON then
       Printf.printf "%i\n%!" (String.length text);
     match outputfile with

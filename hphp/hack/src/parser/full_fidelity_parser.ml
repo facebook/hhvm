@@ -30,14 +30,22 @@ and TypeParser :
 type t = {
   lexer : Lexer.t;
   errors : SyntaxError.t list;
-  context: Context.t
+  context: Context.t;
+  hhvm_compat_mode: bool;
 }
 
-let make text =
-  { lexer = Lexer.make text; errors = []; context = Context.empty }
+let make ?(hhvm_compat_mode = false) text =
+  { lexer = Lexer.make text
+  ; errors = []
+  ; context = Context.empty
+  ; hhvm_compat_mode
+  }
 
 let errors parser =
   parser.errors @ (Lexer.errors parser.lexer)
+
+let hhvm_compat_mode parser =
+  parser.hhvm_compat_mode
 
 let parse_script parser =
   let decl_parser = DeclParser.make parser.lexer

@@ -17,14 +17,18 @@ type t = {
   lexer : Lexer.t;
   errors : SyntaxError.t list;
   context: Context.t;
-  precedence : int
+  precedence : int;
+  hhvm_compat_mode : bool;
 }
 
-let make lexer errors context =
-  { lexer; errors; context; precedence = 0 }
+let make ?(hhvm_compat_mode=false) lexer errors context =
+  { lexer; errors; context; precedence = 0 ; hhvm_compat_mode }
 
 let errors parser =
   parser.errors @ (Lexer.errors parser.lexer)
+
+let hhvm_compat_mode parser =
+  parser.hhvm_compat_mode
 
 let with_errors parser errors =
   { parser with errors }

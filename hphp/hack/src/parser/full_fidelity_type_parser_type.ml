@@ -10,8 +10,8 @@
 
 module type TypeParserType = sig
   type t
-  val make : Full_fidelity_minimal_lexer.t -> Full_fidelity_syntax_error.t list
-    -> Full_fidelity_parser_context.t -> t
+  val make : ?hhvm_compat_mode:bool -> Full_fidelity_minimal_lexer.t
+    -> Full_fidelity_syntax_error.t list -> Full_fidelity_parser_context.t -> t
   val lexer : t -> Full_fidelity_minimal_lexer.t
   val errors : t -> Full_fidelity_syntax_error.t list
   val parse_type_specifier : ?allow_var:bool -> t ->

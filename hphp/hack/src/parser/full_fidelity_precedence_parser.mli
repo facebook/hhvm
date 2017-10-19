@@ -17,12 +17,16 @@ type t = {
   lexer : Lexer.t;
   errors : SyntaxError.t list;
   context: Context.t;
-  precedence : int
+  precedence : int;
+  hhvm_compat_mode : bool;
 }
 
-val make : Lexer.t -> SyntaxError.t list -> Context.t -> t
+val make :
+  ?hhvm_compat_mode:bool -> Lexer.t -> SyntaxError.t list -> Context.t -> t
 
 val errors : t -> SyntaxError.t list
+
+val hhvm_compat_mode : t -> bool
 
 val with_errors : t -> SyntaxError.t list -> t
 

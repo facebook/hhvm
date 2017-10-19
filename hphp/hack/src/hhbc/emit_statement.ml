@@ -490,10 +490,10 @@ and emit_switch env scrutinee_expr cl =
   begin fun local break_label ->
   (* If there is no default clause, add an empty one at the end *)
   let is_default c = match c with A.Default _ -> true | _ -> false in
-  let cl =
+  let cl, has_default =
     match List.count cl is_default with
-    | 0 -> cl @ [A.Default []]
-    | 1 -> cl
+    | 0 -> cl @ [A.Default []], false
+    | 1 -> cl, true
     | _ -> Emit_fatal.raise_fatal_runtime
       Pos.none "Switch statements may only contain one 'default' clause." in
   (* "continue" in a switch in PHP has the same semantics as break! *)
@@ -502,12 +502,22 @@ and emit_switch env scrutinee_expr cl =
       fun env -> List.map cl ~f:(emit_case env)
   in
   let bodies = gather @@ List.map cl ~f:snd in
+  let default_label_to_shift =
+    if has_default
+    then List.find_map cl ~f: (fun ((e, l), _) ->
+      if Option.is_none e then Some l else None)
+    else None in
   let init = gather @@ List.map cl
     ~f: begin fun x ->
           let (e_opt, l) = fst x in
           match e_opt with
           | None ->
-            instr_jmp l
+            (* jmp to default case should be emitted as the
+            very last 'else' case so do not emit it if it appear in the
+            middle of emitted if/elseif clauses *)
+            if Option.is_none default_label_to_shift
+            then instr_jmp l
+            else empty
           | Some e ->
             (* Special case for simple scrutinee *)
             match scrutinee_expr with
@@ -527,6 +537,7 @@ and emit_switch env scrutinee_expr cl =
   in
   gather [
     init;
+    Option.value_map default_label_to_shift ~default:empty ~f:instr_jmp;
     bodies;
   ]
   end

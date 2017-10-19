@@ -119,7 +119,6 @@ slow/keyset/init-parse-error2.php
 slow/labels/72.php
 slow/lang/deprecated.php
 slow/lang/tuple_non_hh.php
-slow/llvm/switch.php
 slow/namespace/double_use1.php
 slow/namespace/double_use2.php
 slow/namespace/double_use3.php
@@ -218,8 +217,6 @@ slow/sanity/3.php
 slow/sanity/4.php
 slow/sanity/5.php
 slow/string/164.php
-slow/switch_statement/1755.php
-slow/switch_statement/1756.php
 slow/traits/1981.php
 slow/traits/__class__.php
 slow/traits/duplicate_require.php

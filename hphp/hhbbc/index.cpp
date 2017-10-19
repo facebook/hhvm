@@ -198,9 +198,21 @@ struct PublicSPropEntry {
  * that name, since it will call that one instead.
  */
 struct MethTabEntry {
+  MethTabEntry(borrowed_ptr<const php::Func> func,
+               bool hpa) : func(func), hasPrivateAncestor(hpa) {}
   borrowed_ptr<const php::Func> func = nullptr;
   bool hasPrivateAncestor = false;
 };
+
+}
+
+struct MethTabEntryPair : ISStringToOneT<MethTabEntry>::value_type {};
+
+namespace {
+
+inline MethTabEntryPair* fromIt(ISStringToOneT<MethTabEntry>::iterator it) {
+  return static_cast<MethTabEntryPair*>(&*it);
+}
 
 struct CallContextHashCompare {
   bool equal(const CallContext& a, const CallContext& b) const {
@@ -328,7 +340,7 @@ struct ConstInfo {
 struct FuncFamily {
   bool containsInterceptables = false;
   bool isCtor = false;
-  std::vector<borrowed_ptr<FuncInfo>> possibleFuncs;
+  std::vector<const MethTabEntryPair*> possibleFuncs;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -643,12 +655,13 @@ SString Func::name() const {
     [&] (FuncName s) { return s.name; },
     [&] (MethodName s) { return s.name; },
     [&] (borrowed_ptr<FuncInfo> fi) { return fi->first->name; },
+    [&] (borrowed_ptr<MethTabEntryPair> mte) { return mte->first; },
     [&] (borrowed_ptr<FuncFamily> fa) -> SString {
       if (fa->isCtor) return s_construct.get();
-      auto const name = fa->possibleFuncs.front()->first->name;
+      auto const name = fa->possibleFuncs.front()->first;
       if (debug) {
-        for (DEBUG_ONLY auto& f : fa->possibleFuncs) {
-          assert(f->first->name->isame(name));
+        for (DEBUG_ONLY auto const f : fa->possibleFuncs) {
+          assert(f->first->isame(name));
         }
       }
       return name;
@@ -658,17 +671,23 @@ SString Func::name() const {
 
 borrowed_ptr<const php::Func> Func::exactFunc() const {
   using Ret = borrowed_ptr<const php::Func>;
-  return match<Ret>(val, [&](FuncName /*s*/) { return Ret{}; },
-                    [&](MethodName /*s*/) { return Ret{}; },
-                    [&](borrowed_ptr<FuncInfo> fi) { return fi->first; },
-                    [&](borrowed_ptr<FuncFamily> /*fa*/) { return Ret{}; });
+  return match<Ret>(
+    val,
+    [&](FuncName /*s*/) { return Ret{}; },
+    [&](MethodName /*s*/) { return Ret{}; },
+    [&](borrowed_ptr<FuncInfo> fi) { return fi->first; },
+    [&](borrowed_ptr<MethTabEntryPair> mte) { return mte->second.func; },
+    [&](borrowed_ptr<FuncFamily> /*fa*/) { return Ret{}; }
+  );
 }
 
 bool Func::cantBeMagicCall() const {
-  return match<bool>(val, [&](FuncName /*s*/) { return true; },
-                     [&](MethodName /*s*/) { return false; },
-                     [&](borrowed_ptr<FuncInfo> /*fi*/) { return true; },
-                     [&](borrowed_ptr<FuncFamily> /*fa*/) { return true; });
+  return match<bool>(val,
+                     [&](FuncName)                       { return true; },
+                     [&](MethodName)                     { return false; },
+                     [&](borrowed_ptr<FuncInfo>)         { return true; },
+                     [&](borrowed_ptr<MethTabEntryPair>) { return true; },
+                     [&](borrowed_ptr<FuncFamily>)       { return true; });
 }
 
 bool Func::mightReadCallerFrame() const {
@@ -683,9 +702,10 @@ bool Func::mightReadCallerFrame() const {
     [&](borrowed_ptr<FuncInfo> fi) {
       return fi->first->attrs & AttrReadsCallerFrame;
     },
+    [&](borrowed_ptr<MethTabEntryPair>) { return false; },
     [&](borrowed_ptr<FuncFamily> fa) {
-      for (auto const& finfo : fa->possibleFuncs) {
-        if (finfo->first->attrs & AttrReadsCallerFrame) return true;
+      for (auto const pf : fa->possibleFuncs) {
+        if (pf->second.func->attrs & AttrReadsCallerFrame) return true;
       }
       return false;
     });
@@ -703,9 +723,10 @@ bool Func::mightWriteCallerFrame() const {
     [&](borrowed_ptr<FuncInfo> fi) {
       return fi->first->attrs & AttrWritesCallerFrame;
     },
+    [&](borrowed_ptr<MethTabEntryPair>) { return false; },
     [&](borrowed_ptr<FuncFamily> fa) {
-      for (auto const& finfo : fa->possibleFuncs) {
-        if (finfo->first->attrs & AttrWritesCallerFrame) return true;
+      for (auto const pf : fa->possibleFuncs) {
+        if (pf->second.func->attrs & AttrWritesCallerFrame) return true;
       }
       return false;
     });
@@ -716,6 +737,9 @@ bool Func::isFoldable() const {
                      [&](MethodName /*s*/) { return false; },
                      [&](borrowed_ptr<FuncInfo> fi) {
                        return fi->first->attrs & AttrIsFoldable;
+                     },
+                     [&](borrowed_ptr<MethTabEntryPair> mte) {
+                       return mte->second.func->attrs & AttrIsFoldable;
                      },
                      [&](borrowed_ptr<FuncFamily> fa) {
                        return false;
@@ -730,9 +754,12 @@ bool Func::mightBeSkipFrame() const {
     [&](FuncName /*s*/) { return false; },
     [&](MethodName /*s*/) { return true; },
     [&](borrowed_ptr<FuncInfo> fi) { return fi->first->attrs & AttrSkipFrame; },
+    [&](borrowed_ptr<MethTabEntryPair> mte) {
+      return mte->second.func->attrs & AttrSkipFrame;
+    },
     [&](borrowed_ptr<FuncFamily> fa) {
-      for (auto const& finfo : fa->possibleFuncs) {
-        if (finfo->first->attrs & AttrSkipFrame) return true;
+      for (auto const pf : fa->possibleFuncs) {
+        if (pf->second.func->attrs & AttrSkipFrame) return true;
       }
       return false;
     });
@@ -740,8 +767,10 @@ bool Func::mightBeSkipFrame() const {
 
 std::string show(const Func& f) {
   std::string ret = f.name()->data();
-  match<void>(f.val, [&](Func::FuncName) {}, [&](Func::MethodName) {},
+  match<void>(f.val,
+              [&](Func::FuncName) {}, [&](Func::MethodName) {},
               [&](borrowed_ptr<FuncInfo> /*fi*/) { ret += "*"; },
+              [&](borrowed_ptr<MethTabEntryPair> /*mte*/) { ret += "*"; },
               [&](borrowed_ptr<FuncFamily> /*fa*/) { ret += "+"; });
   return ret;
 }
@@ -875,11 +904,18 @@ void add_dependency(IndexData& data,
   current = current | newMask;
 }
 
+std::mutex func_info_mutex;
+
 borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
                                         borrowed_ptr<const php::Func> f) {
   auto fi = &data.funcInfo[f->idx];
   if (UNLIKELY(fi->first == nullptr)) {
     if (f->nativeInfo) {
+      std::lock_guard<std::mutex> g{func_info_mutex};
+      if (fi->first) {
+        assert(fi->first == f);
+        return fi;
+      }
       // We'd infer this anyway when we look at the bytecode body
       // (NativeImpl) for the HNI function, but just initializing it
       // here saves on whole-program iterations.
@@ -889,6 +925,12 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
   }
 
   assert(fi->first == f);
+  return fi;
+}
+
+borrowed_ptr<FuncInfo> func_info(IndexData& data,
+                                 borrowed_ptr<const php::Func> f) {
+  auto const fi = &data.funcInfo[f->idx];
   return fi;
 }
 
@@ -983,29 +1025,53 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
    */
   if (!isIface &&
       (rparent == rleaf || !(rparent->cls->attrs & AttrTrait))) {
-    for (auto& m : rparent->cls->methods) {
-      auto& ent = rleaf->methods[m->name];
-      if (ent.func) {
-        if (m->attrs & AttrTrait && m->attrs & AttrAbstract) {
-          // abstract methods from traits never override anything.
-          continue;
-        }
-        if (ent.func->attrs & AttrFinal) {
-          if (!is_mock_class(rleaf->cls)) {
-            ITRACE(2,
-                   "build_cls_info_rec failed for `{}' because "
-                   "`{}' tried to override final method `{}'",
-                   rleaf->cls->name, rparent->cls->name,
-                   ent.func->name);
-            return false;
-          }
-        }
-        if (ent.func->attrs & AttrPrivate) {
-          ent.hasPrivateAncestor =
-            ent.hasPrivateAncestor || ent.func->cls != rleaf->cls;
+    auto methodOverride = [&] (auto& it,
+                               const php::Func* meth,
+                               SString name) {
+      if (it->second.func->attrs & AttrFinal) {
+        if (!is_mock_class(rparent->cls)) {
+          ITRACE(2,
+                 "build_cls_info_rec failed for `{}' because "
+                 "`{}' tried to override final method `{}::{}'\n",
+                 rleaf->cls->name,
+                 rparent->cls->name, it->second.func->cls->name, name);
+          return false;
         }
       }
-      ent.func = borrow(m);
+      if (it->second.func->attrs & AttrPrivate) {
+        it->second.hasPrivateAncestor =
+        it->second.hasPrivateAncestor || it->second.func->cls != rparent->cls;
+      }
+      ITRACE(9,
+             "  {}: adding trait override {}::{} originally from {}\n",
+             rleaf->cls->name,
+             meth->cls->name, name,
+             it->second.func->name);
+      it->second.func = meth;
+      if (it->first != name) {
+        auto mte = it->second;
+        rleaf->methods.erase(it);
+        it = rleaf->methods.emplace(name, mte).first;
+      }
+      return true;
+    };
+    for (auto& m : rparent->cls->methods) {
+      auto res = rleaf->methods.emplace(
+        m->name,
+        MethTabEntry { borrow(m), false }
+      );
+      if (res.second) {
+        ITRACE(9,
+               "  {}: adding method {}::{}\n",
+               rleaf->cls->name,
+               rparent->cls->name, m->name);
+        continue;
+      }
+      if (m->attrs & AttrTrait && m->attrs & AttrAbstract) {
+        // abstract methods from traits never override anything.
+        continue;
+      }
+      if (!methodOverride(res.first, borrow(m), m->name)) return false;
     }
   }
 
@@ -1392,38 +1458,43 @@ void define_func_family(IndexData& index, borrowed_ptr<ClassInfo> cinfo,
   index.funcFamilies.push_back(std::make_unique<FuncFamily>());
   auto const family = borrow(index.funcFamilies.back());
   family->isCtor = func == cinfo->ctor;
+  auto& funcs = family->possibleFuncs;
   for (auto& cleaf : cinfo->subclassList) {
-    auto const leafFn = [&] () -> borrowed_ptr<const php::Func> {
-      if (family->isCtor) return cleaf->ctor;
-      auto const leafFnIt = cleaf->methods.find(name);
+    auto const leafFn = [&] () -> const MethTabEntryPair* {
+      if (family->isCtor && !cleaf->ctor) return nullptr;
+      auto const leafFnIt = cleaf->methods.find(
+        family->isCtor ? cleaf->ctor->name.get() : name);
       if (leafFnIt == end(cleaf->methods)) return nullptr;
-      return leafFnIt->second.func;
+      return fromIt(leafFnIt);
     }();
     if (!leafFn) continue;
-    if (leafFn->attrs & AttrInterceptable) {
+    if (leafFn->second.func->attrs & AttrInterceptable) {
       family->containsInterceptables = true;
     }
-    auto const finfo = create_func_info(index, leafFn);
-    family->possibleFuncs.push_back(finfo);
+    funcs.push_back(leafFn);
   }
 
-  std::sort(begin(family->possibleFuncs), end(family->possibleFuncs),
-            [&] (const FuncInfo* a, const FuncInfo* b) {
+  std::sort(begin(funcs), end(funcs),
+            [&] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
               // We want a canonical order for the family. Putting the
-              // one corresponding to cinfo makes sense, because the
-              // first one is used as the name for FCallD, after that,
-              // sort by name so that different case spellings come in
-              // the same order.
-              if (a == b || b->first == func) return false;
-              if (a->first == func) return true;
-              if (auto d = a->first->name->compare(b->first->name)) {
+              // one corresponding to cinfo first makes sense, because
+              // the first one is used as the name for FCallD, after
+              // that, sort by name so that different case spellings
+              // come in the same order.
+              if (a->second.func == b->second.func) return false;
+              if (b->second.func == func)           return false;
+              if (a->second.func == func)           return true;
+              if (auto d = a->first->compare(b->first)) {
                 return d < 0;
               }
-              return std::less<const void*>{}(a, b);
+              return std::less<const void*>{}(a->second.func, b->second.func);
             });
-  family->possibleFuncs.erase(
-    std::unique(begin(family->possibleFuncs), end(family->possibleFuncs)),
-    end(family->possibleFuncs)
+  funcs.erase(
+    std::unique(begin(funcs), end(funcs),
+                [] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
+                  return a->second.func == b->second.func;
+                }),
+    end(funcs)
   );
 
   /*
@@ -1442,7 +1513,7 @@ void define_func_family(IndexData& index, borrowed_ptr<ClassInfo> cinfo,
    * For now we're leaving that alone, which gives the invariant that
    * every FuncFamily we create here is non-empty.
    */
-  always_assert(!family->possibleFuncs.empty());
+  always_assert(!funcs.empty());
 
   cinfo->methodFamilies.emplace(name, family);
 }
@@ -1883,9 +1954,9 @@ void check_invariants(IndexData& data) {
   for (auto& ffam : data.funcFamilies) {
     always_assert(!ffam->possibleFuncs.empty());
     if (ffam->isCtor) continue;
-    auto const name = ffam->possibleFuncs.front()->first->name;
-    for (auto& finfo : ffam->possibleFuncs) {
-      always_assert(finfo->first->name->isame(name));
+    auto const name = ffam->possibleFuncs.front()->first;
+    for (auto const pf : ffam->possibleFuncs) {
+      always_assert(pf->first->isame(name));
     }
   }
 
@@ -2035,7 +2106,7 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
   struct FuncFind {
     using F = borrowed_ptr<const php::Func>;
     static F get(std::pair<SString,F> p) { return p.second; }
-    static F get(borrowed_ptr<FuncInfo> finfo) { return finfo->first; }
+    static F get(const MethTabEntryPair* mte) { return mte->second.func; }
   };
 
   folly::Optional<PrepKind> prep;
@@ -2654,18 +2725,23 @@ res::Func Index::resolve_method(Context ctx,
     return true;
   };
 
+  auto resolve = [&] {
+    create_func_info(*m_data, ftarget);
+    return res::Func { this, fromIt(methIt) };
+  };
+
   switch (dcls.type) {
   case DCls::Exact:
     if (cinfo->magicCall.thisHas || cinfo->magicCallStatic.thisHas) {
       if (couldBeInaccessible()) return name_only();
     }
-    return do_resolve(ftarget);
+    return resolve();
   case DCls::Sub:
     if (cinfo->magicCall.derivedHas || cinfo->magicCallStatic.derivedHas) {
       if (couldBeInaccessible()) return name_only();
     }
     if (ftarget->attrs & AttrNoOverride) {
-      return do_resolve(ftarget);
+      return resolve();
     }
     if (!options.FuncFamilies) return name_only();
 
@@ -2899,9 +2975,12 @@ bool Index::is_async_func(res::Func rfunc) const {
     [&](borrowed_ptr<FuncInfo> finfo) {
       return finfo->first->isAsync && !finfo->first->isGenerator;
     },
+    [&](borrowed_ptr<MethTabEntryPair> mte) {
+      return mte->second.func->isAsync && !mte->second.func->isGenerator;
+    },
     [&](borrowed_ptr<FuncFamily> fam) {
-      for (auto const& finfo : fam->possibleFuncs) {
-        if (!finfo->first->isAsync || finfo->first->isGenerator) {
+      for (auto const pf : fam->possibleFuncs) {
+        if (!pf->second.func->isAsync || pf->second.func->isGenerator) {
           return false;
         }
       }
@@ -2916,6 +2995,9 @@ bool Index::is_effect_free(res::Func rfunc) const {
     [&](res::Func::MethodName /*s*/) { return false; },
     [&](borrowed_ptr<FuncInfo> finfo) {
       return finfo->second.effectFree;
+    },
+    [&](borrowed_ptr<MethTabEntryPair> mte) {
+      return func_info(*m_data, mte->second.func)->second.effectFree;
     },
     [&](borrowed_ptr<FuncFamily> fam) {
       return false;
@@ -2987,7 +3069,7 @@ Type Index::lookup_foldable_return_type(Context ctx,
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
 
-  auto const& finfo = m_data->funcInfo[func->idx];
+  auto const& finfo = *func_info(*m_data, func);
   if (finfo.second.effectFree && is_scalar(finfo.second.returnTy)) {
     return finfo.second.returnTy;
   }
@@ -3070,11 +3152,19 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
       add_dependency(*m_data, finfo->first, ctx, Dep::ReturnTy);
       return finfo->second.returnTy;
     },
+    [&](borrowed_ptr<MethTabEntryPair> mte) {
+      add_dependency(*m_data, mte->second.func, ctx, Dep::ReturnTy);
+      auto const finfo = func_info(*m_data, mte->second.func);
+      if (!finfo->first) return TInitGen;
+      return finfo->second.returnTy;
+    },
     [&](borrowed_ptr<FuncFamily> fam) {
       auto ret = TBottom;
-      for (auto& f : fam->possibleFuncs) {
-        add_dependency(*m_data, f->first, ctx, Dep::ReturnTy);
-        ret |= f->second.returnTy;
+      for (auto const pf : fam->possibleFuncs) {
+        add_dependency(*m_data, pf->second.func, ctx, Dep::ReturnTy);
+        auto const finfo = func_info(*m_data, pf->second.func);
+        if (!finfo->first) return TInitGen;
+        ret |= finfo->second.returnTy;
       }
       return ret;
     });
@@ -3091,6 +3181,12 @@ Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
     },
     [&](borrowed_ptr<FuncInfo> finfo) {
       add_dependency(*m_data, finfo->first, callCtx.caller, Dep::ReturnTy);
+      return context_sensitive_return_type(*this, finfo, callCtx);
+    },
+    [&](borrowed_ptr<MethTabEntryPair> mte) {
+      add_dependency(*m_data, mte->second.func, callCtx.caller, Dep::ReturnTy);
+      auto const finfo = func_info(*m_data, mte->second.func);
+      if (!finfo->first) return TInitGen;
       return context_sensitive_return_type(*this, finfo, callCtx);
     },
     [&](borrowed_ptr<FuncFamily> /*fam*/) {
@@ -3112,7 +3208,7 @@ Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func) const {
 }
 
 Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
-  auto it = &m_data->funcInfo[f->idx];
+  auto it = func_info(*m_data, f);
   if (it->first) {
     assertx(it->first == f);
     return it->second.returnTy;
@@ -3122,7 +3218,7 @@ Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
 
 CompactVector<Type>
 Index::lookup_local_static_types(borrowed_ptr<const php::Func> f) const {
-  auto it = &m_data->funcInfo[f->idx];
+  auto it = func_info(*m_data, f);
   if (it->first) {
     assertx(it->first == f);
     return it->second.localStaticTypes;
@@ -3168,6 +3264,9 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
     },
     [&] (borrowed_ptr<FuncInfo> finfo) {
       return func_param_prep(finfo->first, paramId);
+    },
+    [&] (borrowed_ptr<MethTabEntryPair> mte) {
+      return func_param_prep(mte->second.func, paramId);
     },
     [&] (borrowed_ptr<FuncFamily> fam) {
       assert(RuntimeOption::RepoAuthoritative);

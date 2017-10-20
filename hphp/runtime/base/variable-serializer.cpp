@@ -1707,23 +1707,21 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         }
 
         auto const lookup = obj_cls->getDeclPropIndex(ctx, memberName.get());
-        auto const propIdx = lookup.prop;
+        auto const slot = lookup.prop;
 
-        if (propIdx != kInvalidSlot) {
-          if (lookup.accessible) {
-            auto const prop = &obj->propVec()[propIdx];
-            if (prop->m_type != KindOfUninit) {
-              auto const attrs = obj_cls->declProperties()[propIdx].attrs;
-              if (attrs & AttrPrivate) {
-                memberName = concat4(s_zero, ctx->nameStr(),
-                                     s_zero, memberName);
-              } else if (attrs & AttrProtected) {
-                memberName = concat(s_protected_prefix, memberName);
-              }
-              if (!attrMask || (attrMask & attrs) == attrMask) {
-                wanted.set(memberName, tvAsCVarRef(prop));
-                continue;
-              }
+        if (slot != kInvalidSlot && lookup.accessible) {
+          auto const prop = obj->propRvalAtOffset(slot);
+          if (prop.type() != KindOfUninit) {
+            auto const attrs = obj_cls->declProperties()[slot].attrs;
+            if (attrs & AttrPrivate) {
+              memberName = concat4(s_zero, ctx->nameStr(),
+                                   s_zero, memberName);
+            } else if (attrs & AttrProtected) {
+              memberName = concat(s_protected_prefix, memberName);
+            }
+            if (!attrMask || (attrMask & attrs) == attrMask) {
+              wanted.set(memberName, prop.tv());
+              continue;
             }
           }
         }

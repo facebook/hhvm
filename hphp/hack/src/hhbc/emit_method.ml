@@ -76,29 +76,36 @@ let from_ast_wrapper : bool -> _ ->
       if id = SN.SpecialIdents.this then
       Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this");
   (* Restrictions on __construct methods with promoted parameters *)
-  if original_name = Naming_special_names.Members.__construct
-  && List.exists ast_method.Ast.m_params (fun p -> Option.is_some p.Ast.param_modifier)
-  then begin
-    List.iter ast_method.Ast.m_params (fun p ->
-      if List.length (
-        List.filter ast_class.Ast.c_body
-        (function
-         | Ast.ClassVars (_, _, cvl, _) ->
-             List.exists cvl (fun (_,id,_) ->
-               snd id = SU.Locals.strip_dollar (snd p.Ast.param_id))
-         | _ -> false)) > 1
+  let has_param_promotion = List.exists ast_method.Ast.m_params
+    (fun p -> Option.is_some p.Ast.param_modifier)
+  in
+  if has_param_promotion then
+    if original_name = Naming_special_names.Members.__construct
+    then begin
+      List.iter ast_method.Ast.m_params (fun p ->
+        if List.length (
+          List.filter ast_class.Ast.c_body
+          (function
+           | Ast.ClassVars (_, _, cvl, _) ->
+               List.exists cvl (fun (_,id,_) ->
+                 snd id = SU.Locals.strip_dollar (snd p.Ast.param_id))
+           | _ -> false)) > 1
+        then Emit_fatal.raise_fatal_parse pos
+          (Printf.sprintf "Cannot redeclare %s::%s" class_name (snd p.Ast.param_id)));
+      if ast_class.Ast.c_kind = Ast.Cinterface || ast_class.Ast.c_kind = Ast.Ctrait
       then Emit_fatal.raise_fatal_parse pos
-        (Printf.sprintf "Cannot redeclare %s::%s" class_name (snd p.Ast.param_id)));
-    if ast_class.Ast.c_kind = Ast.Cinterface || ast_class.Ast.c_kind = Ast.Ctrait
-    then Emit_fatal.raise_fatal_parse pos
-      "Constructor parameter promotion not allowed on traits or interfaces";
-    if List.mem ast_method.Ast.m_kind Ast.Abstract
-    then Emit_fatal.raise_fatal_parse pos
-      "parameter modifiers not allowed on abstract __construct";
-    if not (List.is_empty ast_method.Ast.m_tparams)
-    then Emit_fatal.raise_fatal_parse pos
-      "parameter modifiers not supported with type variable annotation"
-  end;
+        "Constructor parameter promotion not allowed on traits or interfaces";
+      if List.mem ast_method.Ast.m_kind Ast.Abstract
+      then Emit_fatal.raise_fatal_parse pos
+        "parameter modifiers not allowed on abstract __construct";
+      if not (List.is_empty ast_method.Ast.m_tparams)
+      then Emit_fatal.raise_fatal_parse pos
+        "parameter modifiers not supported with type variable annotation"
+        end
+    else
+      (* not in __construct *)
+      Emit_fatal.raise_fatal_parse
+        pos "Parameters modifiers not allowed on methods";
   let default_dropthrough =
     if List.mem ast_method.Ast.m_kind Ast.Abstract
     then Some (Emit_fatal.emit_fatal_runtimeomitframe pos

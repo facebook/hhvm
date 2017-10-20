@@ -26,7 +26,8 @@ module WithStatementAndDeclAndTypeParser
   Full_fidelity_expression_parser_type.ExpressionParserType = struct
 
   include PrecedenceParser
-  include Full_fidelity_parser_helpers.WithParser(PrecedenceParser)
+  include Full_fidelity_parser_helpers.
+    MinimalParserHelper.WithParser(PrecedenceParser)
 
   type binary_expression_prefix_kind =
     | Prefix_byref_assignment | Prefix_assignment | Prefix_none

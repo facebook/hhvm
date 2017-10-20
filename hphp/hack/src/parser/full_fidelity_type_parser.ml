@@ -24,7 +24,8 @@ module WithExpressionParser (ExpressionParser :
   Full_fidelity_type_parser_type.TypeParserType = struct
 
 include SimpleParser
-include Full_fidelity_parser_helpers.WithParser(SimpleParser)
+include
+  Full_fidelity_parser_helpers.MinimalTypeParserHelper.WithParser(SimpleParser)
 
 let parse_expression parser =
   let expr_parser = ExpressionParser.make

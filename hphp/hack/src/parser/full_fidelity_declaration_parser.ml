@@ -27,7 +27,8 @@ module WithExpressionAndStatementAndTypeParser
   Full_fidelity_declaration_parser_type.DeclarationParserType = struct
 
   include SimpleParser
-  include Full_fidelity_parser_helpers.WithParser(SimpleParser)
+  include
+    Full_fidelity_parser_helpers.MinimalParserHelper.WithParser(SimpleParser)
 
   (* Types *)
 

@@ -26,7 +26,8 @@ module WithExpressionAndDeclAndTypeParser
   Full_fidelity_statement_parser_type.StatementParserType = struct
 
   include SimpleParser
-  include Full_fidelity_parser_helpers.WithParser(SimpleParser)
+  include
+    Full_fidelity_parser_helpers.MinimalParserHelper.WithParser(SimpleParser)
 
   let rec parse_statement parser =
     match peek_token_kind parser with

@@ -106,6 +106,12 @@ let from_ast_wrapper : bool -> _ ->
       (* not in __construct *)
       Emit_fatal.raise_fatal_parse
         pos "Parameters modifiers not allowed on methods";
+  let has_variadic_param = List.exists ast_method.Ast.m_params
+    (fun p -> p.Ast.param_is_variadic)
+  in
+  if has_variadic_param && original_name = Naming_special_names.Members.__call
+  then Emit_fatal.raise_fatal_parse pos @@
+    Printf.sprintf "Method %s::__call() cannot take a variadic argument" class_name;
   let default_dropthrough =
     if List.mem ast_method.Ast.m_kind Ast.Abstract
     then Some (Emit_fatal.emit_fatal_runtimeomitframe pos

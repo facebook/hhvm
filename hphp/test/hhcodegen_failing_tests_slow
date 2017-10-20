@@ -208,9 +208,6 @@ slow/using/bad-goto1.php
 slow/using/bad-goto2.php
 slow/using/bad-name.php
 slow/using/goto.php
-slow/variadic_args/by_reference_typehints.php
-slow/variadic_args/magic_call.php
-slow/variadic_args/typehints.php
 slow/vec/bad-init2.php
 slow/vec/hh-only1.php
 slow/vec/hh-only2.php

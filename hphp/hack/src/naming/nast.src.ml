@@ -573,6 +573,20 @@ class type ['a] visitor_type = object
   method on_field: 'a -> field -> 'a
   method on_afield: 'a -> afield -> 'a
 
+  method on_func_named_body: 'a -> func_named_body -> 'a
+  method on_func_unnamed_body: 'a -> func_unnamed_body -> 'a
+  method on_func_body: 'a -> func_body -> 'a
+  method on_method_: 'a -> method_ -> 'a
+
+  method on_fun_: 'a -> fun_ -> 'a
+  method on_class_: 'a -> class_ -> 'a
+  method on_gconst: 'a -> gconst -> 'a
+  method on_typedef: 'a -> typedef -> 'a
+
+  method on_hint: 'a -> hint -> 'a
+
+  method on_def: 'a -> def -> 'a
+  method on_program: 'a -> program -> 'a
 end
 
 (*****************************************************************************)
@@ -904,6 +918,72 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
         let acc = this#on_expr acc e1 in
         let acc = this#on_expr acc e2 in
         acc
+
+  method on_hint acc _ = acc
+
+  method on_fun_ acc f =
+    let acc = this#on_id acc f.f_name in
+    let acc = this#on_func_body acc f.f_body in
+    let acc = match f.f_ret with
+      | Some h -> this#on_hint acc h
+      | None -> acc in
+    acc
+
+  method on_func_named_body acc fnb =
+    this#on_block acc fnb.fnb_nast
+
+  method on_func_unnamed_body acc _ = acc
+
+  method on_func_body acc = function
+    | UnnamedBody unb -> this#on_func_unnamed_body acc unb
+    | NamedBody nb -> this#on_func_named_body acc nb
+
+  method on_method_ acc m =
+    let acc = this#on_id acc m.m_name in
+    let acc = this#on_func_body acc m.m_body in
+    acc
+
+  method on_class_ acc c =
+    let acc = this#on_id acc c.c_name in
+    let acc = List.fold_left this#on_hint acc c.c_extends in
+    let acc = List.fold_left this#on_hint acc c.c_uses in
+    let acc = List.fold_left this#on_hint acc c.c_implements in
+
+    let acc = match c.c_constructor with
+      | Some ctor -> this#on_method_ acc ctor
+      | None -> acc in
+    let acc = List.fold_left this#on_method_ acc c.c_methods in
+    let acc = List.fold_left this#on_method_ acc c.c_static_methods in
+    acc
+
+  method on_gconst acc g =
+    let acc = this#on_id acc g.cst_name in
+    let acc = match g.cst_value with
+      | Some e -> this#on_expr acc e
+      | None -> acc in
+    let acc = match g.cst_type with
+      | Some h -> this#on_hint acc h
+      | None -> acc in
+    acc
+
+  method on_typedef acc t =
+    let acc = this#on_id acc t.t_name in
+    let acc = this#on_hint acc t.t_kind in
+    let acc = match t.t_constraint with
+      | Some c -> this#on_hint acc c
+      | None -> acc in
+    acc
+
+  method on_def acc = function
+    | Fun f -> this#on_fun_ acc f
+    | Class c -> this#on_class_ acc c
+    | Typedef t -> this#on_typedef acc t
+    | Constant g -> this#on_gconst acc g
+
+  method on_program acc p =
+    let acc = List.fold_left begin fun acc d ->
+      this#on_def acc d end acc p in
+    acc
 end
 
 (*****************************************************************************)

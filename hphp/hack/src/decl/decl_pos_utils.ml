@@ -82,6 +82,7 @@ let rec reason = function
   | Rinstanceof (p, f)       -> Rinstanceof (pos p, f)
   | Rfinal_property p        -> Rfinal_property (pos p)
   | Rvarray_or_darray_key p -> Rvarray_or_darray_key (pos p)
+  | Rusing p                 -> Rusing (pos p)
 let string_id (p, x) = pos p, x
 
 let rec ty (p, x) =

@@ -742,6 +742,9 @@ module Typing                               = struct
   let bad_pass_by_ref_override              = 4175 (* DONT MODIFY!!!! *)
   let dollardollar_lvalue                   = 4176 (* DONT MODIFY!!!! *)
   let static_method_on_interface            = 4177 (* DONT MODIFY!!!! *)
+  let duplicate_using_var                   = 4178 (* DONT MODIFY!!!! *)
+  let illegal_disposable                    = 4179 (* DONT MODIFY!!!! *)
+  let escaping_disposable                   = 4180 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1673,6 +1676,17 @@ let expecting_return_type_hint_suggest p ty =
 let expecting_awaitable_return_type_hint p =
   add Typing.expecting_awaitable_return_type_hint p
     "Was expecting an Awaitable return type hint"
+
+let duplicate_using_var pos =
+  add Typing.duplicate_using_var pos "Local variable already used in 'using' statement"
+
+let illegal_disposable pos verb =
+  add Typing.illegal_disposable pos
+    ("Disposable objects must only be " ^ verb ^ " in a 'using' statement")
+
+let escaping_disposable pos =
+  add Typing.escaping_disposable pos
+    ("Disposable object might escape the scope of the 'using' statement")
 
 let field_kinds pos1 pos2 =
   add_list Typing.field_kinds

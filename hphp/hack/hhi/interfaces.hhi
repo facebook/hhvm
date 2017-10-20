@@ -873,3 +873,25 @@ interface IMemoizeParam {
    */
   public function getInstanceKey(): string;
 }
+
+/**
+  * Objects that implement IDisposable may be used in using statements
+  */
+interface IDisposable {
+  /**
+   * This method is invoked exactly once at the end of the scope of the
+   * using statement, unless the program terminates with a fatal error.
+   */
+  public function __dispose(): void;
+}
+
+/**
+  * Objects that implement IAsyncDisposable may be used in await using statements
+  */
+interface IAsyncDisposable {
+  /**
+   * This method is invoked exactly once at the end of the scope of the
+   * await using statement, unless the program terminates with a fatal error.
+   */
+  public function __disposeAsync(): Awaitable<void>;
+}

@@ -1,0 +1,18 @@
+File "using_bad.php", line 16, characters 5-10:
+Disposable objects must only be assigned in a 'using' statement (Typing[4179])
+File "using_bad.php", line 20, characters 29-30:
+Local variable already used in 'using' statement (Typing[4178])
+File "using_bad.php", line 26, characters 9-10:
+Local variable already used in 'using' statement (Typing[4178])
+File "using_bad.php", line 29, characters 15-31:
+Using cannot be used on non-disposable expression (Typing[4110])
+  File "using_bad.php", line 29, characters 15-31:
+  This is an object of type IDisposable because it was assigned in a 'using' clause
+  File "using_bad.php", line 29, characters 15-31:
+  It is incompatible with an object of type AsyncHandle
+File "using_bad.php", line 33, characters 20-31:
+Using cannot be used on non-disposable expression (Typing[4110])
+  File "using_bad.php", line 33, characters 20-31:
+  This is an object of type IAsyncDisposable because it was assigned in a 'using' clause
+  File "using_bad.php", line 33, characters 20-31:
+  It is incompatible with an object of type Handle

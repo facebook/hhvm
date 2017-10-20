@@ -1,0 +1,10 @@
+File "using_bad_escaping.php", line 17, characters 10-11:
+Disposable object might escape the scope of the 'using' statement (Typing[4180])
+File "using_bad_escaping.php", line 20, characters 18-19:
+Disposable object might escape the scope of the 'using' statement (Typing[4180])
+File "using_bad_escaping.php", line 23, characters 12-13:
+Disposable object might escape the scope of the 'using' statement (Typing[4180])
+File "using_bad_escaping.php", line 26, characters 12-13:
+Disposable object might escape the scope of the 'using' statement (Typing[4180])
+File "using_bad_escaping.php", line 29, characters 17-18:
+Disposable object might escape the scope of the 'using' statement (Typing[4180])

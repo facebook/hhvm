@@ -19,6 +19,8 @@ val get_cont_option :
 val get_cont : Typing_continuations.t -> local_types -> local Local_id.Map.t
 val add_to_cont :
   Typing_continuations.t -> Local_id.t -> local -> local_types -> local_types
+val remove_from_cont :
+  Typing_continuations.t -> Local_id.t -> local_types -> local_types
 val drop_cont : Typing_continuations.t -> local_types -> local_types
 val replace_cont :
   Typing_continuations.t -> local Local_id.Map.t -> local_types -> local_types

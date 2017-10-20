@@ -1829,7 +1829,10 @@ module Make (GetLocals : GetLocals) = struct
 
   and using_stmt env has_await e b =
     let e = expr env e in
-    N.Using (has_await, e, block env b)
+    Env.scope env (
+      fun env ->
+        N.Using (has_await, e, block env b)
+    )
 
   and for_stmt env e1 e2 e3 b =
     let e1 = expr env e1 in

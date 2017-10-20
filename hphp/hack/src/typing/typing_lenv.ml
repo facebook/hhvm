@@ -56,6 +56,7 @@ let intersect_fake fake1 fake2 =
  *)
 let intersect env parent_lenv lenv1 lenv2 =
   let fake_members = intersect_fake lenv1.fake_members lenv2.fake_members in
+  let local_using_vars = parent_lenv.local_using_vars in
   let tpenv = env.lenv.tpenv in
   let lenv1_locals_with_hist = Env.merge_locals_and_history lenv1 in
   let lenv2_locals_with_hist = Env.merge_locals_and_history lenv2 in
@@ -66,7 +67,7 @@ let intersect env parent_lenv lenv1 lenv2 =
       | None -> env, locals
       | Some (all_types2, ty2, eid2) ->
           (* If the local has different expression ids then we generate a
-           * new one when interecting
+           * new one when intersecting
            *)
           let eid = if eid1 = eid2 then eid1 else Ident.tmp() in
           let env, ty1 = TUtils.unresolved env ty1 in
@@ -88,6 +89,7 @@ let intersect env parent_lenv lenv1 lenv2 =
     { fake_members;
       local_types = locals;
       local_type_history = history;
+      local_using_vars;
       tpenv;
     }
   }
@@ -126,6 +128,7 @@ let intersect env parent_lenv lenv1 lenv2 =
  * The conservative local environment is built with fully_integrate.
  *)
 let integrate env parent_lenv child_lenv =
+  let local_using_vars = parent_lenv.local_using_vars in
   let parent_locals_with_hist = Env.merge_locals_and_history parent_lenv in
   let child_locals_with_hist = Env.merge_locals_and_history child_lenv in
   let new_locals =
@@ -150,6 +153,7 @@ let integrate env parent_lenv child_lenv =
     { fake_members = child_lenv.fake_members;
       local_types = locals;
       local_type_history = history;
+      local_using_vars;
       tpenv = env.lenv.tpenv;
     }
   }
@@ -178,6 +182,7 @@ let intersect_list env parent_lenv term_lenv_l =
  * values of locals (cf: integrate).
  *)
 let fully_integrate env parent_lenv =
+  let local_using_vars = parent_lenv.local_using_vars in
   let child_lenv = env.Env.lenv in
   let parent_locals_with_hist = Env.merge_locals_and_history parent_lenv in
   let child_locals_with_hist = Env.merge_locals_and_history child_lenv in
@@ -225,6 +230,7 @@ let fully_integrate env parent_lenv =
     { fake_members;
       local_types = locals;
       local_type_history = history;
+      local_using_vars;
       tpenv = child_lenv.tpenv } }
 
 let env_with_empty_fakes env =

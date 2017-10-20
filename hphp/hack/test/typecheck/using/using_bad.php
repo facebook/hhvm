@@ -12,34 +12,23 @@ class AsyncHandle implements IAsyncDisposable {
 
 function testit():void {
   using ($x = new Handle()) {
-    $x->foo();
+    // Should not be able to assign $x as it's a using variable
+    $x = 3;
   }
 
-  // Should be able to re-use $x as it's now unset
-  $x = 3;
-
-  // Even here this should be ok
-  using ($x = new Handle(), $y = new Handle()) {
-    $x->foo(); $y->foo();
-    // Nested
-    using ($z = new Handle()) {
-      $z->foo();
-    }
-    $z = 'a';
+  // Repeated variables in same using clause
+  using ($x = new Handle(), $x = new Handle()) {
+    $x->foo();
   }
 
   // Now with function scope
   using $x = new Handle();
-  $x->foo();
+  using $x = new Handle();
 
-  await using ($a = new AsyncHandle()) {
+  // Should have await here
+  using ($a = new AsyncHandle()) {
     $a->bar();
   }
-  $a = 23;
-  await using $a = new AsyncHandle();
-  $a->bar();
-  using (new Handle()) {
-    // Still in scope
-    $a->bar();
-  }
+  // Shouldn't have await here
+  await using $b = new Handle();
 }

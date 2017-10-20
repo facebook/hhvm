@@ -158,7 +158,7 @@ let autocomplete_lvar_typing id env =
     Autocomplete.auto_complete_pos := Some (fst id);
     (* Get the types of all the variables in scope at this point *)
     SMap.iter !Autocomplete.auto_complete_vars begin fun x ident ->
-      let _, ty = Typing_env.get_local env ident in
+      let ty = Typing_env.get_local env ident in
       add_partial_result x (Phase.locl ty) Variable_kind
     end;
     (* Add $this if we're in a instance method *)

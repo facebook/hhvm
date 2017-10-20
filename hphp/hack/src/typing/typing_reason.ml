@@ -72,6 +72,7 @@ type t =
   | Rinstanceof      of Pos.t * string
   | Rfinal_property  of Pos.t
   | Rvarray_or_darray_key of Pos.t
+  | Rusing           of Pos.t
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -200,6 +201,8 @@ let rec to_string prefix r =
         "This is varray_or_darray, which requires arraykey-typed keys when \
         used with an array (used like a hashtable)"
       )]
+  | Rusing p ->
+    [(p, prefix ^ " because it was assigned in a 'using' clause")]
 
 
 and to_pos = function
@@ -260,6 +263,7 @@ and to_pos = function
   | Rinstanceof (p, _) -> p
   | Rvarray_or_darray_key p
   | Rfinal_property p -> p
+  | Rusing p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -321,6 +325,7 @@ type ureason =
   | URsubsume_tconst_assign
   | URfinal_property
   | URclone
+  | URusing
 
 let index_array = URindex "array"
 let index_tuple = URindex "tuple"
@@ -368,6 +373,7 @@ let string_of_ureason = function
   | URfinal_property ->
       "Property cannot be declared final"
   | URclone -> "Clone cannot be called on non-object"
+  | URusing -> "Using cannot be used on non-disposable expression"
 
 let compare r1 r2 =
   let get_pri = function

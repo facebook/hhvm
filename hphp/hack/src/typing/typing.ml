@@ -483,6 +483,75 @@ and fun_implicit_return env pos ret _b = function
 and block env stl =
   List.map_env env stl stmt
 
+(* Set a local; must not be already assigned if it is a using variable *)
+and set_local ?(is_using_clause = false) env (pos,x) ty =
+  if Env.is_using_var env x
+  then
+    if is_using_clause
+    then Errors.duplicate_using_var pos
+    else Errors.illegal_disposable pos "assigned";
+  let env = Env.set_local env x ty in
+  if is_using_clause then Env.set_using_var env x else env
+
+(* Check an individual component in the expression `e` in the
+ * `using (e) { ... }` statement.
+ * This consists of either
+ *   a simple assignment `$x = e`, in which `$x` is the using variable, or
+ *   an arbitrary expression `e`, in which case a temporary is the using
+ *      variable, inaccessible in the source.
+ * Return the typed expression and its type, and any variables that must
+ * be designated as "using variables" for avoiding escapes.
+ *)
+and check_using_expr has_await env ((pos, content) as using_clause) =
+  match content with
+    (* Simple assignment to local of form `$lvar = e` *)
+  | Binop (Ast.Eq None, (lvar_pos, Lvar lvar), e) ->
+    let env, te, ty = expr env e in
+    let env = enforce_is_disposable env has_await (fst e) ty in
+    let env = set_local ~is_using_clause:true env lvar ty in
+    (* We are assigning a new value to the local variable, so we need to
+     * generate a new expression id
+     *)
+    let env = Env.set_local_expr_id env (snd lvar) (Ident.tmp()) in
+    env, (T.make_typed_expr pos ty (T.Binop (Ast.Eq None,
+      T.make_typed_expr lvar_pos ty (T.Lvar lvar), te)), [snd lvar])
+
+    (* Arbitrary expression. This will be assigned to a temporary *)
+  | _ ->
+    let env, typed_using_clause, ty = expr env using_clause in
+    let env = enforce_is_disposable env has_await pos ty in
+    env, (typed_using_clause, [])
+
+(* Check the using clause e in
+ * `using (e) { ... }` statement (`has_await = false`) or
+ * `await using (e) { ... }` statement (`has_await = true`).
+ * The expression consists of a comma-separated list of expressions (Expr_list)
+ * or a single expression.
+ * Return the typed expression, and any variables that must
+ * be designated as "using variables" for avoiding escapes.
+ *)
+and check_using_clause env has_await ((pos, content) as using_clause) =
+  match content with
+  | Expr_list using_clauses ->
+    let env, pairs = List.map_env env using_clauses (check_using_expr has_await) in
+    let typed_using_clauses, vars_list = List.unzip pairs in
+    env, T.make_implicitly_typed_expr pos (T.Expr_list typed_using_clauses),
+      List.concat vars_list
+  | _ ->
+    let env, (typed_using_clause, vars) = check_using_expr has_await env using_clause in
+    env, typed_using_clause, vars
+
+(* Ensure that `ty` is a subtype of IDisposable (for `using`) or
+ * IAsyncDisposable (for `await using`)
+ *)
+and enforce_is_disposable env has_await pos ty =
+  let class_name =
+    if has_await
+    then SN.Classes.cIAsyncDisposable
+    else SN.Classes.cIDisposable in
+  let disposable_ty = (Reason.Rusing pos, Tclass ((pos, class_name), [])) in
+  Type.sub_type pos Reason.URusing env ty disposable_ty
+
 and stmt env = function
   | Fallthrough ->
       env, T.Fallthrough
@@ -613,10 +682,13 @@ and stmt env = function
       let env = LEnv.fully_integrate env parent_lenv in
       let env = condition env false e in
       env, T.While (te, tb)
-  | Using (has_await, e, b) ->
-      let env, te, _ = expr env e in
-      let env, tb = block env b in
-      env, T.Using (has_await, te, tb)
+  | Using (has_await, using_clause, using_block) ->
+      let env, typed_using_clause, using_vars = check_using_clause env has_await using_clause in
+      let env, typed_using_block = block env using_block in
+      (* Remove any using variables from the environment, as they should not
+       * be in scope outside the block *)
+      let env = List.fold_left using_vars ~init:env ~f:Env.unset_local in
+      env, T.Using (has_await, typed_using_clause, typed_using_block)
   | For (e1, e2, e3, b) as st ->
       (* For loops leak their initalizer, but nothing that's defined in the
          body
@@ -847,7 +919,7 @@ and catch parent_lenv after_try env (sid, exn, b) =
   let env, _, _ = instantiable_cid ety_p env cid in
   let env, _te, ety = static_class_id ety_p env cid in
   let env = exception_ty ety_p env ety in
-  let env = Env.set_local env (snd exn) ety in
+  let env = set_local env exn ety in
   let env, tb = block env b in
   (* Only keep the local bindings if this catch is non-terminal *)
   env, env.Env.lenv, (sid, exn, tb)
@@ -899,17 +971,18 @@ and bind_as_expr env ty aexpr =
     | _ -> (* TODO Probably impossible, should check that *)
       assert false
 
-and expr ?expected ?allow_uref env e =
+and expr ?expected ?(is_receiver = false) ?allow_uref env e =
   begin match expected with
   | None -> ()
   | Some (_, r, ty) ->
     Typing_log.log_types 1 (fst e) env
     [Typing_log.Log_sub ("Typing.expr " ^ Typing_reason.string_of_ureason r,
        [Typing_log.Log_type ("expected_ty", ty)])] end;
-  raw_expr ?allow_uref ?expected ~in_cond:false env e
+  raw_expr ~is_receiver ?allow_uref ?expected ~in_cond:false env e
 
 and raw_expr
   ~in_cond
+  ?(is_receiver = false)
   ?expected
   ?lhs_of_null_coalesce
   ?allow_uref
@@ -917,7 +990,7 @@ and raw_expr
   env e =
   debug_last_pos := fst e;
   let env, te, ty =
-    expr_ ~in_cond ?expected ?lhs_of_null_coalesce ?allow_uref ~valkind env e in
+    expr_ ~in_cond ~is_receiver ?expected ?lhs_of_null_coalesce ?allow_uref ~valkind env e in
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
     | None -> () in
@@ -994,6 +1067,7 @@ and exprs_expected (pos, ur, expected_tyl) env el =
 and expr_
   ?expected
   ~in_cond
+  ?(is_receiver = false)
   ?lhs_of_null_coalesce
   ?allow_uref
   ~(valkind: [> `lvalue | `lvalue_subexpr | `other ])
@@ -1178,7 +1252,7 @@ and expr_
       let r, _ = Env.get_self env in
       if r = Reason.Rnone
       then Errors.this_var_outside_class p;
-      let env, (_, ty) = Env.get_local env this in
+      let (_, ty) = Env.get_local env this in
       let r = Reason.Rwitness p in
       let ty = (r, ty) in
       let ty = r, TUtils.this_of ty in
@@ -1386,12 +1460,13 @@ and expr_
       Errors.dollardollar_lvalue p;
       expr_error env (Reason.Rwitness p)
   | Dollardollar ((_, x) as id) ->
-      let env, ty =
-        Env.get_local env x in
+      let ty = Env.get_local env x in
       make_result env (T.Dollardollar id) ty
-  | Lvar ((_, x) as id) ->
+  | Lvar ((pos, x) as id) ->
       Typing_hooks.dispatch_lvar_hook id env;
-      let env, ty = Env.get_local env x in
+      if not is_receiver && Env.is_using_var env x
+      then Errors.escaping_disposable pos;
+      let ty = Env.get_local env x in
       make_result env (T.Lvar id) ty
   | Lvarvar (i, id) ->
       Typing_hooks.dispatch_lvar_hook id env;
@@ -1525,11 +1600,11 @@ and expr_
         binop in_cond p env bop (fst e1) te1 ty1 (fst e2) te2 ty2 in
       Typing_hooks.dispatch_binop_hook p bop ty1 ty2;
       env, te3, ty
-  | Pipe ((_, id) as e0, e1, e2) ->
+  | Pipe (e0, e1, e2) ->
       let env, te1, ty = expr env e1 in
       (** id is the ID of the $$ that is implicitly declared by the pipe.
        * Set the local type for the $$ in the RHS. *)
-      let env = Env.set_local env id ty in
+      let env = set_local env e0 ty in
       let env, te2, ty2 = expr env e2 in
       (**
        * Return ty2 since the type of the pipe expression is the type of the
@@ -1621,7 +1696,7 @@ and expr_
           | OG_nullthrows -> None
           | OG_nullsafe -> Some p
         ) in
-      let env, te1, ty1 = expr env e1 in
+      let env, te1, ty1 = expr ~is_receiver:true env e1 in
       let env, result =
         obj_get ~is_method:false ~nullsafe env ty1 (CIexpr e1) m (fun x -> x) in
       let has_lost_info = Env.FakeMembers.is_invalid env e1 (snd m) in
@@ -1977,7 +2052,7 @@ and anon_check_param env param =
   | None -> env
   | Some hty ->
       let env, hty = Phase.hint_locl env hty in
-      let env, paramty = Env.get_local env (Local_id.get param.param_name) in
+      let paramty = Env.get_local env (Local_id.get param.param_name) in
       let hint_pos = Reason.to_pos (fst hty) in
       let env = Type.sub_type hint_pos Reason.URhint env paramty hty in
       env
@@ -2333,7 +2408,7 @@ and check_valid_rvalue p env ty =
 
 and set_valid_rvalue p env x ty =
   let env, ty = check_valid_rvalue p env ty in
-  let env = Env.set_local env x ty in
+  let env = set_local env (p, x) ty in
   (* We are assigning a new value to the local variable, so we need to
    * generate a new expression id
    *)
@@ -3200,7 +3275,7 @@ and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_
   (* Call instance method *)
   | Obj_get(e1, (pos_id, Id m), nullflavor) ->
       let is_method = call_type = Cnormal in
-      let env, te1, ty1 = expr env e1 in
+      let env, te1, ty1 = expr ~is_receiver:true env e1 in
       let nullsafe =
         (match nullflavor with
           | OG_nullthrows -> None
@@ -4642,16 +4717,17 @@ and non_null env ty =
       env, ty
 
 and condition_var_non_null env = function
-  | _, Lvar (_, x)
-  | _, Dollardollar (_, x) ->
-      let env, x_ty = Env.get_local env x in
+  | _, Lvar x
+  | _, Dollardollar x ->
+      let x_ty = Env.get_local env (snd x) in
       let env, x_ty = non_null env x_ty in
-      Env.set_local env x x_ty
+      set_local env x x_ty
   | p, Class_get (cname, (_, member_name)) as e ->
       let env, _te, ty = expr env e in
       let env, local = Env.FakeMembers.make_static p env cname member_name in
-      let env = Env.set_local env local ty in
-      let local = p, Lvar (p, local) in
+      let lvar = (p, local) in
+      let env = set_local env lvar ty in
+      let local = p, Lvar lvar in
       condition_var_non_null env local
     (* TODO TAST: generate an assignment to the fake local in the TAST *)
   | p, Obj_get ((_, This | _, Lvar _ as obj),
@@ -4659,8 +4735,9 @@ and condition_var_non_null env = function
                 _) as e ->
       let env, _te, ty = expr env e in
       let env, local = Env.FakeMembers.make p env obj member_name in
-      let env = Env.set_local env local ty in
-      let local = p, Lvar (p, local) in
+      let lvar = (p, local) in
+      let env = set_local env lvar ty in
+      let local = p, Lvar lvar in
       condition_var_non_null env local
   | _ -> env
 
@@ -4764,7 +4841,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
       let env, _te, x_ty = raw_expr ~in_cond:false env ivar in
 
       (* What is the local variable bound to the expression? *)
-      let env, (ivar_pos, x) = get_instance_var env ivar in
+      let env, ((ivar_pos, _) as ivar) = get_instance_var env ivar in
 
       (* The position p here is not really correct... it's the position
        * of the instanceof expression, not the class id. But we don't store
@@ -4900,7 +4977,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
           env, (Reason.Rwitness ivar_pos, Tobject)
       in
       let env, x_ty = resolve_obj env obj_ty in
-      Env.set_local env x x_ty
+      set_local env ivar x_ty
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null))
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e) ->
       let env, _ = expr env e in
@@ -4952,12 +5029,12 @@ and is_type env e tprim r =
   match e with
     | p, Class_get (cname, (_, member_name)) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
-      Env.set_local env local (r, Tprim tprim)
+      set_local env (p, local) (r, Tprim tprim)
     | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
       let env, local = Env.FakeMembers.make p env obj member_name in
-      Env.set_local env local (r, Tprim tprim)
-    | _, Lvar (_px, x) ->
-      Env.set_local env x (r, Tprim tprim)
+      set_local env (p, local) (r, Tprim tprim)
+    | _, Lvar lvar ->
+      set_local env lvar (r, Tprim tprim)
     | _ -> env
 
 (* Refine type for is_array, is_vec, is_keyset and is_dict tests
@@ -4997,12 +5074,12 @@ and is_array env ty p pred_name arg_expr =
   match arg_expr with
   | (_, Class_get (cname, (_, member_name))) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
-      Env.set_local env local refined_ty
+      set_local env (p, local) refined_ty
   | (_, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _)) ->
       let env, local = Env.FakeMembers.make p env obj member_name in
-      Env.set_local env local refined_ty
-  | (_, Lvar (_, x)) ->
-      Env.set_local env x refined_ty
+      set_local env (p, local) refined_ty
+  | (_, Lvar lvar) ->
+      set_local env lvar refined_ty
   | _ -> env
 
 and string2 env idl =

@@ -44,6 +44,9 @@ module Classes = struct
   let cIMemoizeParam = "\\IMemoizeParam"
   let cClassname = "\\classname"
   let cTypename = "\\typename"
+
+  let cIDisposable = "\\IDisposable"
+  let cIAsyncDisposable = "\\IAsyncDisposable"
 end
 
 module Collections = struct
@@ -92,6 +95,8 @@ module Members = struct
   let __get        = "__get"
   let __unset      = "__unset"
 
+  let __dispose    = "__dispose"
+  let __disposeAsync = "__disposeAsync"
 
   (* Any data- or aria- attribute is always valid, even if it is not declared
    * for a given XHP element *)

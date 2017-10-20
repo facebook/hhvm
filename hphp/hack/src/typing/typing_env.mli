@@ -91,7 +91,10 @@ module FakeMembers :
   end
 val unbind : env -> locl ty -> env * locl ty
 val set_local : env -> Local_id.t -> locl ty -> env
-val get_local : env -> Local_id.t -> env * locl ty
+val is_using_var : env -> Local_id.t -> bool
+val set_using_var : env -> Local_id.t -> env
+val unset_local : env -> Local_id.t -> env
+val get_local : env -> Local_id.t -> locl ty
 val set_local_expr_id : env -> Local_id.t -> expression_id -> env
 val get_local_expr_id : env -> Local_id.t -> expression_id option
 val get_lower_bounds : env -> string -> tparam_bounds
@@ -103,7 +106,7 @@ val union_global_tpenv : tpenv -> tpenv -> tpenv
 val add_upper_bound_global : env -> string -> locl ty -> env
 val add_lower_bound_global : env -> string -> locl ty -> env
 val env_with_tpenv : env -> tpenv -> env
-val env_with_global_tpenv : env -> tpenv -> env 
+val env_with_global_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val is_generic_parameter : env -> string -> bool
 val get_generic_parameters : env -> string list

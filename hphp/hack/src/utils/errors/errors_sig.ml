@@ -390,4 +390,7 @@ module type S = sig
   val coroutinness_mismatch : bool -> Pos.t -> Pos.t -> unit
   val this_as_lexical_variable : Pos.t -> unit
   val dollardollar_lvalue : Pos.t -> unit
+  val duplicate_using_var : Pos.t -> unit
+  val illegal_disposable : Pos.t -> string -> unit
+  val escaping_disposable : Pos.t -> unit
 end

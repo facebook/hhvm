@@ -38,6 +38,11 @@ let add_to_cont name key value m =
   let cont = LMap.add key value cont in
   CMap.add name cont m
 
+let remove_from_cont name key m =
+  match CMap.get name m with
+  | None -> m
+  | Some c -> CMap.add name (LMap.remove key c) m
+
 let drop_cont = CMap.remove
 
 let replace_cont key value map = CMap.add key value map

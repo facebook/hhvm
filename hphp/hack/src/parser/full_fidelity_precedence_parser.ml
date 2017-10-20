@@ -11,7 +11,8 @@
 module SyntaxError = Full_fidelity_syntax_error
 module Lexer = Full_fidelity_minimal_lexer
 module Operator = Full_fidelity_operator
-module Context = Full_fidelity_parser_context
+module Context =
+  Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token)
 
 type t = {
   lexer : Lexer.t;

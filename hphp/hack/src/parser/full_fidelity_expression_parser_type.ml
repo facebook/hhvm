@@ -9,8 +9,11 @@
  *)
 module type ExpressionParserType = sig
   type t
-  val make : ?hhvm_compat_mode:bool -> Full_fidelity_minimal_lexer.t
-    -> Full_fidelity_syntax_error.t list -> Full_fidelity_parser_context.t -> t
+  val make : ?hhvm_compat_mode:bool
+    -> Full_fidelity_minimal_lexer.t
+    -> Full_fidelity_syntax_error.t list
+    -> Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token).t
+    -> t
   val lexer : t -> Full_fidelity_minimal_lexer.t
   val errors : t -> Full_fidelity_syntax_error.t list
   val parse_expression : t -> t * Full_fidelity_minimal_syntax.t

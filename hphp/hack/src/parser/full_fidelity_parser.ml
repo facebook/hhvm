@@ -10,7 +10,8 @@
 
 module Lexer = Full_fidelity_minimal_lexer
 module SyntaxError = Full_fidelity_syntax_error
-module Context = Full_fidelity_parser_context
+module Context =
+  Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token)
 module rec ExpressionParser :
   Full_fidelity_expression_parser_type.ExpressionParserType =
   Full_fidelity_expression_parser.WithStatementAndDeclAndTypeParser

@@ -19,7 +19,6 @@
  *)
 
 module TokenKind = Full_fidelity_token_kind
-module MinimalToken = Full_fidelity_minimal_token
 module TriviaKind = Full_fidelity_trivia_kind
 
 module Scope = struct
@@ -32,9 +31,11 @@ module Scope = struct
     fold append scope ">> "
 end
 
+module WithToken(Token: Lexable_token_sig.LexableToken_S) = struct
+
 type t = {
   expected : Scope.t list;
-  skipped_tokens : MinimalToken.t list
+  skipped_tokens : Token.t list
 }
 
 let empty =
@@ -103,3 +104,5 @@ let print_expected context =
     Scope.iter print_token_kind scope;
     Printf.printf "\n%!"; in
   Core.List.iter expected print_scope
+
+end (* WithToken *)

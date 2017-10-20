@@ -5661,3 +5661,23 @@ and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
 
 (* Optional ~expected *)
 let expr ?allow_uref env e = expr ?allow_uref env e
+
+let nast_to_tast_tenv opts nast =
+  let open Core_result in
+  let def_conv = function
+    | Nast.Fun f -> Ok f
+      >>| fun_def opts
+      >>| (fun (f, tenv) -> Tast.Fun f, tenv)
+    | Nast.Class c -> Ok c
+      >>| class_def opts
+      >>= of_option
+        ~error:(Printf.sprintf "Error with class %s definition" (snd c.c_name))
+      >>| (fun (c, tenv) -> Tast.Class c, tenv)
+    | Nast.Constant gc -> Ok gc
+      >>| (fun x -> gconst_def x opts)
+      >>| (fun (gc, tenv) -> Tast.Constant gc, tenv)
+    | Nast.Typedef td -> Ok td
+      >>| typedef_def opts
+      >>| (fun (td, tenv) -> Tast.Typedef td, tenv)
+  in
+  List.map nast (Fn.compose ok_or_failwith def_conv)

@@ -23,6 +23,9 @@ val typedef_def:
 val gconst_def:
   Nast.gconst -> TypecheckerOptions.t -> Tast.gconst * Typing_env.env
 
+val nast_to_tast_tenv:
+  TypecheckerOptions.t -> Nast.program -> (Tast.def * Typing_env.env) list
+
 val expr:
   ?allow_uref:bool ->
   Typing_env.env -> Nast.expr ->

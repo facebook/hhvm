@@ -441,26 +441,6 @@ let create_nasts opts files_info =
     )
   in Relative_path.Map.mapi (build_nast) files_info
 
-let nast_to_tast_tenv opts nast =
-  let open Core_result in
-  let open Nast in
-  let def_conv = function
-    | Fun f -> Ok f
-      >>| Typing.fun_def opts
-      >>| (fun (f, tenv) -> Tast.Fun f, tenv)
-    | Class c -> Ok c
-      >>| Typing.class_def opts
-      >>= of_option ~error:(Printf.sprintf "Error with class %s definition" (snd c.c_name))
-      >>| (fun (c, tenv) -> Tast.Class c, tenv)
-    | Constant gc -> Ok gc
-      >>| (fun x -> Typing.gconst_def x opts)
-      >>| (fun (gc, tenv) -> Tast.Constant gc, tenv)
-    | Typedef td -> Ok td
-      >>| Typing.typedef_def opts
-      >>| (fun (td, tenv) -> Tast.Typedef td, tenv)
-  in
-  List.map nast (Fn.compose Core_result.ok_or_failwith def_conv)
-
 let with_named_body opts n_fun =
   (** In the naming heap, the function bodies aren't actually named yet, so
    * we need to invoke naming here.
@@ -612,7 +592,7 @@ let filter_positions s = (Str.global_replace
 let get_tast_tenv opts filename files_info =
   let nasts = create_nasts opts files_info in
   let nast = Relative_path.Map.find filename nasts in
-  nast_to_tast_tenv opts nast
+  Typing.nast_to_tast_tenv opts nast
 
 let handle_mode mode filename opts popt files_contents files_info errors =
   let filter_output =

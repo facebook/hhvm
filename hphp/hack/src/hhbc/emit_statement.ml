@@ -765,10 +765,12 @@ and emit_load_list_element path i v =
       instr_dim MemberOpMode.Warn (MemberKey.EI (Int64.of_int i))
     in
     emit_load_list_elements (dim_instr::path) exprs
+    (* TODO: what about properties, array elements, etc? *)
   | _ -> failwith "impossible, expected variables or lists"
 
 (* Assigns a location to store values for foreach-key and foreach-value and
    creates a code to populate them.
+   NOT suitable for foreach (... await ...) which uses different code-gen
    Returns: key_local_opt * value_local * key_preamble * value_preamble
    where:
    - key_local_opt - local variable to store a foreach-key value if it is
@@ -817,6 +819,35 @@ and emit_iterator_key_value_storage env iterator =
         emit_iterator_lvalue_storage env expr_v value_local in
       None, value_local, value_preamble, value_load
     end
+
+(* Emit code for either the key or value l-value operation in foreach await.
+ * `indices` is the initial prefix of the array indices ([0] for key or [1] for
+ * value) that is prepended onto the indices needed for list destructuring
+ *)
+and emit_foreach_await_lvalue_storage env expr1 indices local =
+  let instrs1, instrs2 = emit_lval_op_list env (Some local) indices expr1 in
+    gather [
+      instrs1;
+      instrs2;
+    ]
+
+(* Emit code for the value and possibly key l-value operation in a foreach
+ * await statement. `local` is the temporary into which the result of invoking
+ * the `next` method has been stored. For example:
+ *   foreach (foo() await as $a->f => list($b[0], $c->g)) { ... }
+ * Here, we need to construct l-value operations that access the [0] (for $a->f)
+ * and [1;0] (for $b[0]) and [1;1] (for $c->g) indices of the array returned
+ * from the `next` method.
+ *)
+and emit_foreach_await_key_value_storage env iterator local =
+  match iterator with
+  | A.As_kv (expr_k, expr_v) ->
+    let key_instrs = emit_foreach_await_lvalue_storage env expr_k [0] local in
+    let value_instrs = emit_foreach_await_lvalue_storage env expr_v [1] local in
+    gather [key_instrs; value_instrs]
+
+  | A.As_v expr_v ->
+    emit_foreach_await_lvalue_storage env expr_v [1] local
 
 (*Generates a code to initialize a given foreach-* value.
   Returns: preamble * load_code
@@ -888,23 +919,9 @@ and emit_foreach_await env pos collection iterator block =
   let iter_temp_local = Local.get_unnamed_local () in
   let collection_expr = emit_expr ~need_ref:false env collection in
   let result_temp_local = Local.get_unnamed_local () in
-  let key_local_opt, value_local, key_preamble, value_preamble =
-    emit_iterator_key_value_storage env iterator in
   let next_meth = Hhbc_id.Method.from_raw_string "next" in
-  let fault_block_local local = gather [
-    instr_unsetl local;
-    instr_unwind
-  ] in
-  let set_from_result idx local preamble = gather [
-    instr_basel result_temp_local MemberOpMode.Warn;
-    instr_querym 0 QueryOp.CGet (MemberKey.EI (Int64.of_int idx));
-    instr_setl local;
-    instr_popc;
-    wrap_non_empty_block_in_fault empty preamble (fault_block_local local)
-  ] in
-  let set_key = match key_local_opt with
-  | Some (key_local) -> set_from_result 0 key_local key_preamble
-  | None -> empty in
+  let set_key_and_value =
+    emit_foreach_await_key_value_storage env iterator result_temp_local in
   gather [
     collection_expr;
     instr_setl iter_temp_local;
@@ -923,10 +940,7 @@ and emit_foreach_await env pos collection iterator block =
       instr_popc;
       instr_istypel result_temp_local OpNull;
       instr_jmpnz exit_label;
-      with_temp_local result_temp_local begin fun _ _ -> gather [
-        set_key;
-        set_from_result 1 value_local value_preamble;
-      ] end;
+      with_temp_local result_temp_local begin fun _ _ -> set_key_and_value end;
       instr_unsetl result_temp_local;
       (Emit_env.do_in_loop_body exit_label next_label env @@ fun env ->
         emit_stmt env block);

@@ -378,13 +378,12 @@ req::ptr<DateTime> DateTimeData::unwrap(const Object& datetime) {
     return data->m_dt;
   }
   if (datetime->instanceof(SystemLib::s_DateTimeImmutableClass)) {
-    auto lookup = datetime->getProp(
+    auto rval = datetime->getProp(
       SystemLib::s_DateTimeImmutableClass,
       s_data.get()
     );
-    auto tv = lookup.prop;
-    assert(tv->m_type == KindOfObject);
-    Object impl(tv->m_data.pobj);
+    assert(rval.has_val() && rval.type() == KindOfObject);
+    Object impl(rval.val().pobj);
     return unwrap(impl);
   }
   return req::ptr<DateTime>();

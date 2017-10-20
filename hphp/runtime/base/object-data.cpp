@@ -64,14 +64,13 @@ const StaticString
   s_clone("__clone");
 
 static Array convert_to_array(const ObjectData* obj, Class* cls) {
-  auto const lookup = obj->getProp(cls, s_storage.get());
-  auto const prop = lookup.prop;
+  auto const prop = obj->getProp(cls, s_storage.get());
 
   // We currently do not special case ArrayObjects / ArrayIterators in
   // reflectionClass. Until, either ArrayObject moves to HNI or a special
   // case is added to reflection unset should be turned off.
-  assert(prop && lookup.accessible /* && prop.m_type != KindOfUninit */);
-  return tvAsCVarRef(prop).toArray();
+  assert(prop.has_val() /* && prop.type() != KindOfUninit */);
+  return tvAsCVarRef(prop.tv_ptr()).toArray();
 }
 
 #ifdef _MSC_VER
@@ -514,11 +513,11 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
     assert(instanceof(SimpleXMLElement_classof()));
     return SimpleXMLElement_objectCast(this, KindOfArray).toArray();
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
-    auto const lookup = getProp(SystemLib::s_ArrayObjectClass, s_flags.get());
-    auto const flags = lookup.prop;
+    auto const flags = getProp(SystemLib::s_ArrayObjectClass, s_flags.get());
+    assert(flags.has_val());
 
-    if (UNLIKELY(flags->m_type == KindOfInt64 &&
-                 flags->m_data.num == ARRAYOBJ_STD_PROP_LIST)) {
+    if (UNLIKELY(flags.type() == KindOfInt64 &&
+                 flags.val().num == ARRAYOBJ_STD_PROP_LIST)) {
       auto ret = Array::Create();
       o_getArray(ret, true);
       return ret;
@@ -545,22 +544,22 @@ size_t getPropertyIfAccessible(ObjectData* obj,
                                ObjectData::IterMode mode,
                                Array& properties,
                                size_t propLeft) {
-  auto const lookup = obj->getPropImpl(ctx, key, false);
-  auto const val = lookup.prop;
-
-  if (lookup.accessible && val->m_type != KindOfUninit) {
-    --propLeft;
-    if (mode == ObjectData::CreateRefs) {
-      if (val->m_type != KindOfRef) tvBox(*val);
-
-      properties.setRef(StrNR(key), tvAsVariant(val), true /* isKey */);
-    } else if (mode == ObjectData::EraseRefs) {
-      properties.set(StrNR(key), tvAsCVarRef(val), true /* isKey */);
-    } else {
-      properties.setWithRef(
-        make_tv<KindOfString>(const_cast<StringData*>(key)),
-        *val, true /* isKey */
-      );
+  if (mode == ObjectData::CreateRefs) {
+    auto const prop = obj->getPropLval(ctx, key);
+    if (prop.has_ref() && prop.type() != KindOfUninit) {
+      --propLeft;
+      tvBoxIfNeeded(prop);
+      properties.setRef(StrNR(key), tvAsVariant(prop.tv_ptr()), true);
+    }
+  } else {
+    auto const prop = obj->getProp(ctx, key);
+    if (prop.has_val() && prop.type() != KindOfUninit) {
+      --propLeft;
+      if (mode == ObjectData::EraseRefs) {
+        properties.set(StrNR(key), prop.tv(), true);
+      } else {
+        properties.setWithRef(StrNR(key), prop.tv(), true);
+      }
     }
   }
   return propLeft;
@@ -1013,20 +1012,19 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
   return PropLookup<TypedValue*> { nullptr, false };
 }
 
-ObjectData::PropLookup<TypedValue*> ObjectData::getProp(
-  const Class* ctx,
-  const StringData* key
-) {
-  return getPropImpl(ctx, key, true);
+member_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
+  auto const lookup = getPropImpl(ctx, key, true);
+  return member_lval {
+    this, lookup.prop && lookup.accessible ? lookup.prop : nullptr
+  };
 }
 
-ObjectData::PropLookup<const TypedValue*> ObjectData::getProp(
-  const Class* ctx,
-  const StringData* key
-) const {
-  auto const lookup = const_cast<ObjectData*>(this)->
-    getPropImpl(ctx, key, false);
-  return PropLookup<const TypedValue*> { lookup.prop, lookup.accessible };
+member_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
+  auto const lookup = const_cast<ObjectData*>(this)
+    ->getPropImpl(ctx, key, false);
+  return member_rval {
+    this, lookup.prop && lookup.accessible ? lookup.prop : nullptr
+  };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1390,7 +1388,7 @@ bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
 }
 
 void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
-  auto const lookup = getProp(ctx, key);
+  auto const lookup = getPropImpl(ctx, key, true);
   auto const prop = lookup.prop;
 
   if (prop && lookup.accessible) {
@@ -1430,7 +1428,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
                                   SetOpOp op,
                                   const StringData* key,
                                   Cell* val) {
-  auto const lookup = getProp(ctx, key);
+  auto const lookup = getPropImpl(ctx, key, true);
   auto prop = lookup.prop;
 
   if (prop && lookup.accessible) {
@@ -1520,7 +1518,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
 }
 
 Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
-  auto const lookup = getProp(ctx, key);
+  auto const lookup = getPropImpl(ctx, key, true);
   auto prop = lookup.prop;
 
   if (prop && lookup.accessible) {
@@ -1601,7 +1599,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
 }
 
 void ObjectData::unsetProp(Class* ctx, const StringData* key) {
-  auto const lookup = getProp(ctx, key);
+  auto const lookup = getPropImpl(ctx, key, true);
   auto const prop = lookup.prop;
   auto const propInd = declPropInd(prop);
 

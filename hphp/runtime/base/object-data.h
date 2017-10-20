@@ -366,20 +366,19 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   inline Variant o_setImpl(const String& propName, const Variant& v,
                            const String& context);
  public:
+  member_lval getPropLval(const Class*, const StringData*);
+  member_rval getProp(const Class*, const StringData*) const;
 
+ private:
   template <class T>
   struct PropLookup {
     T prop;
     bool accessible;
   };
 
-  PropLookup<TypedValue*> getProp(const Class*, const StringData*);
-  PropLookup<const TypedValue*> getProp(const Class*, const StringData*) const;
-
   PropLookup<TypedValue*> getPropImpl(const Class*, const StringData*,
                                       bool copyDynArray);
 
- private:
   enum class PropMode : int {
     ReadNoWarn,
     ReadWarn,

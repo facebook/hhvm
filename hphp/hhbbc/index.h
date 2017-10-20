@@ -96,7 +96,29 @@ inline bool operator<(Context a, Context b) {
          std::make_tuple(b.unit, b.func, b.cls);
 }
 
-using ContextSet = std::unordered_set<Context, Context::Hash>;
+/*
+ * A DependencyContext encodes enough of the context to record a
+ * dependency - either a php::Func, or, if we're doing private
+ * property analysis and its a suitable class, a php::Class
+ */
+using DependencyContext = Either<borrowed_ptr<php::Func>,
+                                 borrowed_ptr<const php::Class>>;
+
+struct DependencyContextLess {
+  bool operator()(const DependencyContext& a,
+                  const DependencyContext& b) const {
+    return a.toOpaque() < b.toOpaque();
+  }
+};
+
+struct DependencyContextHash {
+  size_t operator()(const DependencyContext& d) const {
+    return pointer_hash<void>{}(reinterpret_cast<void*>(d.toOpaque()));
+  }
+};
+
+using DependencyContextSet = std::unordered_set<DependencyContext,
+                                                DependencyContextHash>;
 
 std::string show(Context);
 
@@ -714,6 +736,19 @@ struct Index {
   Slot lookup_iface_vtable_slot(borrowed_ptr<const php::Class>) const;
 
   /*
+   * Return the DependencyContext for ctx.
+   */
+  DependencyContext dependency_context(const Context& ctx) const;
+
+  /*
+   * Determine whether to use class-at-a-time, or function-at-a-time
+   * dependencies.
+   *
+   * Must be called in single-threaded context.
+   */
+  void use_class_dependencies(bool f);
+
+  /*
    * Refine the types of the class constants defined by an 86cinit,
    * based on a round of analysis.
    *
@@ -726,7 +761,7 @@ struct Index {
   void refine_class_constants(
     const Context& ctx,
     const CompactVector<std::pair<size_t, TypedValue>>& resolved,
-    ContextSet& deps);
+    DependencyContextSet& deps);
 
   /*
    * Refine the types of the constants defined by a function, based on
@@ -740,7 +775,7 @@ struct Index {
    * Merges the set of Contexts that depended on the constants defined
    * by this php::Func into deps.
    */
-  void refine_constants(const FuncAnalysis& fa, ContextSet& deps);
+  void refine_constants(const FuncAnalysis& fa, DependencyContextSet& deps);
 
   /*
    * Refine the types of the local statics owned by the function.
@@ -764,7 +799,7 @@ struct Index {
    * this php::Func into deps.
    */
   void refine_return_type(borrowed_ptr<const php::Func>, Type,
-                          ContextSet& deps);
+                          DependencyContextSet& deps);
 
   /*
    * Refine the used var types for a closure, based on a round of

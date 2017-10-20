@@ -163,7 +163,7 @@ bool has_dep(Dep m, Dep t) {
 using DepMap =
   tbb::concurrent_hash_map<
     borrowed_ptr<const php::Func>,
-    std::map<Context,Dep>
+    std::map<DependencyContext,Dep,DependencyContextLess>
   >;
 
 //////////////////////////////////////////////////////////////////////
@@ -878,6 +878,7 @@ struct IndexData {
     std::vector<Type>
   > closureUseVars;
 
+  bool useClassDependencies;
   DepMap dependencyMap;
 
   /*
@@ -905,13 +906,23 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+DependencyContext dep_context(IndexData& data, const Context& ctx) {
+  if (!ctx.cls || !data.useClassDependencies) return ctx.func;
+  auto const cls = ctx.cls->closureContextCls ?
+    ctx.cls->closureContextCls : ctx.cls;
+  return cls;
+}
+
 void add_dependency(IndexData& data,
                     borrowed_ptr<const php::Func> src,
                     const Context& dst,
                     Dep newMask) {
+  if (data.frozen) return;
+
+  auto d = dep_context(data, dst);
   DepMap::accessor acc;
   data.dependencyMap.insert(acc, src);
-  auto& current = acc->second[dst];
+  auto& current = acc->second[d];
   current = current | newMask;
 }
 
@@ -948,7 +959,7 @@ borrowed_ptr<FuncInfo> func_info(IndexData& data,
 void find_deps(IndexData& data,
                borrowed_ptr<const php::Func> src,
                Dep mask,
-               ContextSet& deps) {
+               DependencyContextSet& deps) {
   DepMap::const_accessor acc;
   if (data.dependencyMap.find(acc, src)) {
     for (auto& kv : acc->second) {
@@ -3422,10 +3433,21 @@ Index::lookup_iface_vtable_slot(borrowed_ptr<const php::Class> cls) const {
 
 //////////////////////////////////////////////////////////////////////
 
+DependencyContext Index::dependency_context(const Context& ctx) const {
+  return dep_context(*m_data, ctx);
+}
+
+void Index::use_class_dependencies(bool f) {
+  if (f != m_data->useClassDependencies) {
+    m_data->dependencyMap.clear();
+    m_data->useClassDependencies = f;
+  }
+}
+
 void Index::refine_class_constants(
   const Context& ctx,
   const CompactVector<std::pair<size_t, TypedValue>>& resolved,
-  ContextSet& deps) {
+  DependencyContextSet& deps) {
   if (!resolved.size()) return;
   auto& constants = ctx.func->cls->constants;
   for (auto const& c : resolved) {
@@ -3437,7 +3459,8 @@ void Index::refine_class_constants(
   find_deps(*m_data, ctx.func, Dep::ClsConst, deps);
 }
 
-void Index::refine_constants(const FuncAnalysis& fa, ContextSet& deps) {
+void Index::refine_constants(const FuncAnalysis& fa,
+                             DependencyContextSet& deps) {
   auto const func = fa.ctx.func;
   for (auto const& it : fa.cnsMap) {
     if (it.second.m_type == kReadOnlyConstant) {
@@ -3490,7 +3513,7 @@ void Index::refine_constants(const FuncAnalysis& fa, ContextSet& deps) {
       find_deps(*m_data, func, Dep::ConstVal, deps);
     }
   }
-  if (fa.readsUntrackedConstants) deps.emplace(fa.ctx);
+  if (fa.readsUntrackedConstants) deps.emplace(dep_context(*m_data, fa.ctx));
 }
 
 void Index::fixup_return_type(borrowed_ptr<const php::Func> func,
@@ -3603,7 +3626,7 @@ void Index::init_return_type(const php::Func* func) {
 }
 
 void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,
-                               ContextSet& deps) {
+                               DependencyContextSet& deps) {
   auto const fdata = create_func_info(*m_data, func);
 
   always_assert_flog(

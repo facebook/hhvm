@@ -130,6 +130,15 @@ class dependency_visitor = object(this)
   ~f:(fun h ->
     this#on_hint { dep_env with extends=true } h
   );
+  method! on_catch dep_env (c0, c1, c2) =
+    (* Add exceptions as class dependencies *)
+    add_class_dep dep_env c0;
+    super#on_catch dep_env (c0, c1, c2)
+
+  method! on_Xml dep_env c0 c1 c2 =
+    (* Add XHP classes *)
+    add_class_dep dep_env c0;
+    super#on_Xml dep_env c0 c1 c2
 
   method! on_ClassUse dep_env h =
     this#add_extends_deps dep_env [h];
@@ -141,6 +150,10 @@ class dependency_visitor = object(this)
       top = Some (Dep.Class (snd c.c_name));
       nsenv = Some c.c_namespace;
     } in
+    (* Add special enum class *)
+    if c.c_kind = Ast_defs.Cenum then
+      add_class_dep dep_env
+      (Pos.none, Naming_special_names.Classes.cHH_BuiltinEnum);
     this#add_extends_deps dep_env c.c_extends;
     this#add_extends_deps dep_env c.c_implements;
     super#on_class_ dep_env c

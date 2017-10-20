@@ -32,15 +32,7 @@ module WithLexer(Lexer : Full_fidelity_lexer_sig.MinimalLexer_S) = struct
     parser.hhvm_compat_mode
 
   let with_errors parser errors =
-    match errors with
-    (*
-    TODO: temporary disable error throwing in HHVM compatibility mode.
-    Currently we often do speculative parsing and then check absence of errors
-    as criteria whether parsing succeeded - exceptions should not be thrown
-    during speculative parsing.
-    | e::_ when parser.hhvm_compat_mode -> failwith (SyntaxError.message e)
-    *)
-    | _ -> { parser with errors }
+    { parser with errors }
 
   let lexer parser =
     parser.lexer

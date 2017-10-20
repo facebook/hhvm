@@ -1,5 +1,4 @@
 quick/ClsCases.php
-quick/Xhp.php
 quick/backtick.php
 quick/closure_recursive_bad.php
 quick/finally_break.php
@@ -12,16 +11,11 @@ quick/method_param_promotion_error.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/ns_existing_names_class.php
 quick/parse_fail_shapes.php
-quick/parse_fail_shapes3.php
 quick/parse_fail_strict_hashbang_whitespace_start.php
 quick/parse_fail_type_constraint.php
 quick/parse_type_constraint_where_clauses.php
 quick/parse_type_not_typedef.php
-quick/post_try_error.php
 quick/prop_order.php
 quick/prop_order_parens.php
 quick/selfparent.php
 quick/serialize2.php
-quick/syntax-error.php
-quick/trailing_comma_bad5.php
-quick/trailing_comma_bad6.php

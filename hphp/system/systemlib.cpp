@@ -67,12 +67,15 @@ Object createAndConstructThrowable(Class* cls, const Variant& message) {
           cls->getCtor() == s_ExceptionClass->getCtor());
 
   Object inst{cls};
-  auto props = inst->propVec();
-  assertx(isStringType(props[s_messageIdx].m_type));
-  assertx(props[s_messageIdx].m_data.pstr == staticEmptyString());
-  assertx(isIntType(props[s_codeIdx].m_type));
-  assertx(props[s_codeIdx].m_data.num == 0);
-  cellDup(*message.asCell(), props[s_messageIdx]);
+  if (debug) {
+    DEBUG_ONLY auto const code_prop = inst->propRvalAtOffset(s_codeIdx);
+    assertx(isIntType(code_prop.type()));
+    assertx(code_prop.val().num == 0);
+  }
+  auto const message_prop = inst->propLvalAtOffset(s_messageIdx);
+  assertx(isStringType(message_prop.type()));
+  assertx(message_prop.val().pstr == staticEmptyString());
+  cellDup(*message.asCell(), message_prop);
   return inst;
 }
 

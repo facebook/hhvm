@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/weakref-data.h"
+#include "hphp/runtime/base/member-val.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -346,6 +347,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // accessors for the declared properties area
   TypedValue* propVec();
   const TypedValue* propVec() const;
+
+  // accessors for declared properties at known offsets
+  member_lval propLvalAtOffset(Slot);
+  member_rval propRvalAtOffset(Slot) const;
 
  public:
   const Func* methodNamed(const StringData*) const;

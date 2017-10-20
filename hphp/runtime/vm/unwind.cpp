@@ -321,32 +321,47 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   return phpException;
 }
 
+namespace {
+
 const StaticString s_previous("previous");
+const Slot s_previousIdx{6};
+
+DEBUG_ONLY bool is_throwable(ObjectData* throwable) {
+  auto const erCls = SystemLib::s_ErrorClass;
+  auto const exCls = SystemLib::s_ExceptionClass;
+  return throwable->instanceof(erCls) || throwable->instanceof(exCls);
+}
+
+DEBUG_ONLY bool throwable_has_expected_props() {
+  auto const erCls = SystemLib::s_ErrorClass;
+  auto const exCls = SystemLib::s_ExceptionClass;
+  return
+    erCls->lookupDeclProp(s_previous.get()) == s_previousIdx &&
+    exCls->lookupDeclProp(s_previous.get()) == s_previousIdx;
+}
+
+}
 
 void chainFaultObjects(ObjectData* top, ObjectData* prev) {
+  assertx(throwable_has_expected_props());
   while (true) {
-    auto const lookup = top->getProp(
-      top->instanceof(SystemLib::s_ExceptionClass)
-        ? SystemLib::s_ExceptionClass
-        : SystemLib::s_ErrorClass,
-      s_previous.get()
-    );
-    auto const top_tv = lookup.prop;
-    assert(top_tv != nullptr);
-
-    assert(top_tv->m_type != KindOfUninit && lookup.accessible);
-    if (top_tv->m_type != KindOfObject ||
-        !top_tv->m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
+    assertx(is_throwable(top));
+    auto const prev_lval = top->propLvalAtOffset(s_previousIdx);
+    assert(prev_lval.type() != KindOfUninit);
+    if (
+      prev_lval.type() != KindOfObject ||
+      !prev_lval.val().pobj->instanceof(SystemLib::s_ThrowableClass)
+    ) {
       // Since we are overwriting, decref.
-      tvDecRefGen(top_tv);
+      tvDecRefGen(prev_lval.tv_ptr());
       // Objects held in m_faults are not refcounted, therefore we need to
       // increase the ref count here.
-      top_tv->m_type = KindOfObject;
-      top_tv->m_data.pobj = prev;
+      prev_lval.type() = KindOfObject;
+      prev_lval.val().pobj = prev;
       prev->incRefCount();
       break;
     }
-    top = top_tv->m_data.pobj;
+    top = prev_lval.val().pobj;
   }
 }
 

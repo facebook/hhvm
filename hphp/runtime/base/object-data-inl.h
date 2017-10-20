@@ -235,6 +235,16 @@ inline const TypedValue* ObjectData::propVec() const {
   return const_cast<ObjectData*>(this)->propVec();
 }
 
+inline member_lval ObjectData::propLvalAtOffset(Slot idx) {
+  assertx(idx < m_cls->numDeclProperties());
+  return member_lval {this, &propVec()[idx]};
+}
+
+inline member_rval ObjectData::propRvalAtOffset(Slot idx) const {
+  assertx(idx < m_cls->numDeclProperties());
+  return member_rval {this, &propVec()[idx]};
+}
+
 inline bool ObjectData::hasDynProps() const {
   return getAttribute(HasDynPropArr) && dynPropArray().size() != 0;
 }

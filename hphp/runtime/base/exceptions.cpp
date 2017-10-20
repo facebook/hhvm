@@ -220,10 +220,10 @@ void throwable_init_file_and_line_from_builtin(ObjectData* throwable) {
   assertx(is_throwable(throwable));
   assertx(throwable_has_expected_props());
 
-  auto const traceTv = throwable->propVec()[s_traceIdx];
+  auto const trace_rval = throwable->propRvalAtOffset(s_traceIdx);
 
-  if (traceTv.m_type == KindOfResource) {
-    auto bt = dyn_cast<CompactTrace>(Resource(traceTv.m_data.pres));
+  if (trace_rval.type() == KindOfResource) {
+    auto bt = dyn_cast<CompactTrace>(Resource(trace_rval.val().pres));
     assertx(bt);
 
     for (auto& f : bt->frames()) {
@@ -238,16 +238,20 @@ void throwable_init_file_and_line_from_builtin(ObjectData* throwable) {
       }
 
       auto const ln = f.func->unit()->getLineNumber(f.prevPc - pcAdjust);
-      tvSetIgnoreRef(make_tv<KindOfInt64>(ln), throwable->propVec()[s_lineIdx]);
+      tvSetIgnoreRef(
+        make_tv<KindOfInt64>(ln),
+        throwable->propLvalAtOffset(s_lineIdx)
+      );
 
       if (auto fn = f.func->originalFilename()) {
         tvSetIgnoreRef(
-          make_tv<KindOfPersistentString>(fn), throwable->propVec()[s_fileIdx]
+          make_tv<KindOfPersistentString>(fn),
+          throwable->propLvalAtOffset(s_fileIdx)
         );
       } else {
         tvSetIgnoreRef(
           make_tv<KindOfPersistentString>(f.func->unit()->filepath()),
-          throwable->propVec()[s_fileIdx]
+          throwable->propLvalAtOffset(s_fileIdx)
         );
       }
       return;
@@ -255,8 +259,8 @@ void throwable_init_file_and_line_from_builtin(ObjectData* throwable) {
     return;
   }
 
-  assertx(isArrayType(traceTv.m_type));
-  auto const trace = traceTv.m_data.parr;
+  assertx(isArrayType(trace_rval.type()));
+  auto const trace = trace_rval.val().parr;
   for (ArrayIter iter(trace); iter; ++iter) {
     assertx(iter.second().asTypedValue()->m_type == KindOfArray);
     auto const frame = iter.second().asTypedValue()->m_data.parr;
@@ -265,11 +269,17 @@ void throwable_init_file_and_line_from_builtin(ObjectData* throwable) {
     if (file || line) {
       if (file) {
         auto const tv = file.tv();
-        tvSetIgnoreRef(tvAssertCell(tv), throwable->propVec()[s_fileIdx]);
+        tvSetIgnoreRef(
+          tvAssertCell(tv),
+          throwable->propLvalAtOffset(s_fileIdx)
+        );
       }
       if (line) {
         auto const tv = line.tv();
-        tvSetIgnoreRef(tvAssertCell(tv), throwable->propVec()[s_lineIdx]);
+        tvSetIgnoreRef(
+          tvAssertCell(tv),
+          throwable->propLvalAtOffset(s_lineIdx)
+        );
       }
       return;
     }
@@ -280,7 +290,7 @@ void throwable_init(ObjectData* throwable) {
   assertx(is_throwable(throwable));
   assertx(throwable_has_expected_props());
 
-  auto& prop = throwable->propVec()[s_traceIdx];
+  auto const trace_lval = throwable->propLvalAtOffset(s_traceIdx);
   auto opts = exception_get_trace_options();
   auto const filterOpts = opts & ~k_DEBUG_BACKTRACE_IGNORE_ARGS;
   if (
@@ -289,10 +299,11 @@ void throwable_init(ObjectData* throwable) {
      opts != k_DEBUG_BACKTRACE_IGNORE_ARGS)
     ) {
     auto trace = HHVM_FN(debug_backtrace)(opts);
-    cellMove(make_tv<KindOfArray>(trace.detach()), prop);
+    cellMove(make_tv<KindOfArray>(trace.detach()), trace_lval);
   } else {
     cellMove(
-      make_tv<KindOfResource>(createCompactBacktrace().detach()->hdr()), prop
+      make_tv<KindOfResource>(createCompactBacktrace().detach()->hdr()),
+      trace_lval
     );
   }
 
@@ -305,8 +316,14 @@ void throwable_init(ObjectData* throwable) {
     auto const unit = fp->func()->unit();
     auto const file = const_cast<StringData*>(unit->filepath());
     auto const line = unit->getLineNumber(unit->offsetOf(vmpc()));
-    tvSetIgnoreRef(make_tv<KindOfString>(file), throwable->propVec()[s_fileIdx]);
-    tvSetIgnoreRef(make_tv<KindOfInt64>(line), throwable->propVec()[s_lineIdx]);
+    tvSetIgnoreRef(
+      make_tv<KindOfString>(file),
+      throwable->propLvalAtOffset(s_fileIdx)
+    );
+    tvSetIgnoreRef(
+      make_tv<KindOfInt64>(line),
+      throwable->propLvalAtOffset(s_lineIdx)
+    );
   }
 }
 

@@ -8,15 +8,13 @@
  *
  *)
 
-module SyntaxError = Full_fidelity_syntax_error
 module Lexer = Full_fidelity_minimal_lexer
-module Operator = Full_fidelity_operator
 module Context =
   Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token)
 
 type t = {
   lexer : Lexer.t;
-  errors : SyntaxError.t list;
+  errors : Full_fidelity_syntax_error.t list;
   context: Context.t;
   precedence : int;
   hhvm_compat_mode : bool;
@@ -94,7 +92,7 @@ let with_numeric_precedence parser new_precedence parse_function =
   (parser, result)
 
 let with_operator_precedence parser operator parse_function =
-  let new_precedence = Operator.precedence operator in
+  let new_precedence = Full_fidelity_operator.precedence operator in
   with_numeric_precedence parser new_precedence parse_function
 
 let with_reset_precedence parser parse_function =

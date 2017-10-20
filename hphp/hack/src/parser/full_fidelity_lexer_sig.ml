@@ -37,4 +37,7 @@ module type MinimalLexer_S = sig
   val next_xhp_name : t -> t * Full_fidelity_minimal_token.t
   val is_next_xhp_category_name : t -> bool
   val next_xhp_category_name : t -> t * Full_fidelity_minimal_token.t
+  val next_xhp_element_token : no_trailing:bool ->  attribute:bool ->t
+    -> t * Full_fidelity_minimal_token.t * String.t
+  val next_xhp_body_token : t -> t * Full_fidelity_minimal_token.t
 end

@@ -8,13 +8,11 @@
  *
  *)
 
-module SyntaxError = Full_fidelity_syntax_error
 module Lexer = Full_fidelity_minimal_lexer
-module Operator = Full_fidelity_operator
 
 type t = {
   lexer : Lexer.t;
-  errors : SyntaxError.t list;
+  errors : Full_fidelity_syntax_error.t list;
   context:
     Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token).t;
   precedence : int;
@@ -23,15 +21,15 @@ type t = {
 
 val make : ?hhvm_compat_mode:bool
   -> Lexer.t
-  -> SyntaxError.t list
+  -> Full_fidelity_syntax_error.t list
   -> Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token).t
   -> t
 
-val errors : t -> SyntaxError.t list
+val errors : t -> Full_fidelity_syntax_error.t list
 
 val hhvm_compat_mode : t -> bool
 
-val with_errors : t -> SyntaxError.t list -> t
+val with_errors : t -> Full_fidelity_syntax_error.t list -> t
 
 val with_lexer : t -> Lexer.t -> t
 
@@ -69,7 +67,8 @@ val with_precedence : t -> int -> t
 
 val with_numeric_precedence : t -> int -> (t -> t * 'a) -> t * 'a
 
-val with_operator_precedence : t -> Operator.t -> (t -> t * 'a) -> t * 'a
+val with_operator_precedence : t ->
+  Full_fidelity_operator.t -> (t -> t * 'a) -> t * 'a
 
 val with_reset_precedence : t -> (t -> t * 'a) -> t * 'a
 

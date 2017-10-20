@@ -116,14 +116,6 @@ slow/namespace/dynamic_extra_slash_func.php
 slow/namespace/hashbang_2.php
 slow/namespace/nested-ns.php
 slow/now_doc/1906.php
-slow/nullsafe/nullsafe-prop-11.php
-slow/nullsafe/nullsafe-prop-2.php
-slow/nullsafe/nullsafe-prop-3.php
-slow/nullsafe/nullsafe-prop-4.php
-slow/nullsafe/nullsafe-prop-6.php
-slow/nullsafe/nullsafe-prop-7.php
-slow/nullsafe/nullsafe-prop-8.php
-slow/nullsafe/nullsafe-prop-9.php
 slow/object/672.php
 slow/object_property_expression/798.php
 slow/parser/1851.php

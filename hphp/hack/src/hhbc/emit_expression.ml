@@ -1368,40 +1368,47 @@ and emit_array_get ~need_ref env param_num_hint_opt qop base_expr opt_elem_expr 
  * then this is the i'th parameter to a function
  *)
 and emit_obj_get ~need_ref env param_num_hint_opt qop expr prop null_flavor =
-  match snd prop with
-  | A.Id (_, s) when SU.Xhp.is_xhp s ->
-    emit_xhp_obj_get ~need_ref env param_num_hint_opt expr s null_flavor
+  match snd expr with
+  | A.Lvar (_, id)
+    when id = SN.SpecialIdents.this && null_flavor = A.OG_nullsafe ->
+    Emit_fatal.raise_fatal_parse
+      Pos.none "?-> is not allowed with $this"
   | _ ->
-    let param_num_opt = Option.map ~f:(fun (n, _h) -> n) param_num_hint_opt in
-    let mode = get_queryMOpMode need_ref qop in
-    let prop_expr_instrs, prop_stack_size = emit_prop_instrs env prop in
-    let base_expr_instrs_begin,
-        base_expr_instrs_end,
-        base_setup_instrs,
-        base_stack_size =
-      emit_base
-        ~is_object:true ~notice:Notice
-        env mode prop_stack_size param_num_opt expr
-    in
-    let mk = get_prop_member_key env null_flavor 0 prop in
-    let total_stack_size = prop_stack_size + base_stack_size in
-    let final_instr =
-      instr (IFinal (
-        match param_num_hint_opt with
-        | None ->
-          if need_ref then
-            VGetM (total_stack_size, mk)
-          else
-            QueryM (total_stack_size, qop, mk)
-        | Some (i, h) -> FPassM (i, total_stack_size, mk, h)
-      )) in
-    gather [
-      base_expr_instrs_begin;
-      prop_expr_instrs;
-      base_expr_instrs_end;
-      base_setup_instrs;
-      final_instr
-    ]
+    begin match snd prop with
+    | A.Id (_, s) when SU.Xhp.is_xhp s ->
+      emit_xhp_obj_get ~need_ref env param_num_hint_opt expr s null_flavor
+    | _ ->
+      let param_num_opt = Option.map ~f:(fun (n, _h) -> n) param_num_hint_opt in
+      let mode = get_queryMOpMode need_ref qop in
+      let prop_expr_instrs, prop_stack_size = emit_prop_instrs env prop in
+      let base_expr_instrs_begin,
+          base_expr_instrs_end,
+          base_setup_instrs,
+          base_stack_size =
+        emit_base
+          ~is_object:true ~notice:Notice
+          env mode prop_stack_size param_num_opt expr
+      in
+      let mk = get_prop_member_key env null_flavor 0 prop in
+      let total_stack_size = prop_stack_size + base_stack_size in
+      let final_instr =
+        instr (IFinal (
+          match param_num_hint_opt with
+          | None ->
+            if need_ref then
+              VGetM (total_stack_size, mk)
+            else
+              QueryM (total_stack_size, qop, mk)
+          | Some (i, h) -> FPassM (i, total_stack_size, mk, h)
+        )) in
+      gather [
+        base_expr_instrs_begin;
+        prop_expr_instrs;
+        base_expr_instrs_end;
+        base_setup_instrs;
+        final_instr
+      ]
+    end
 
 and is_special_class_constant_accessed_with_class_id (_, cName) id =
   SU.is_class id &&
@@ -2300,6 +2307,11 @@ and emit_lval_op env op expr1 opt_expr2 =
               instr_popc;
               instr_pushl temp;
             ], 1
+          | Some (_, A.Unop (A.Uref, (_, A.Obj_get (_, _, A.OG_nullsafe)
+                                    | _, A.Array_get ((_,
+                                      A.Obj_get (_, _, A.OG_nullsafe)), _)))) ->
+            Emit_fatal.raise_fatal_runtime
+              Pos.none "?-> is not allowed in write context"
           | Some e -> emit_expr_and_unbox_if_necessary ~need_ref:false env e, 1
         in
         emit_lval_op_nonlist env op expr1 rhs_instrs rhs_stack_size
@@ -2407,6 +2419,8 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
     ]
 
   | A.Obj_get (e1, e2, null_flavor) ->
+    if null_flavor = A.OG_nullsafe then
+     Emit_fatal.raise_fatal_parse pos "?-> is not allowed in write context";
     let mode =
       match op with
       | LValOp.Unset -> MemberOpMode.Unset

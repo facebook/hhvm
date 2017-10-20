@@ -11449,89 +11449,95 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
   decltype(ues) ues_to_print;
   auto const outputPath = ar->getOutputPath();
 
-  SCOPE_EXIT {
-    genText(ues_to_print, outputPath);
-  };
-
-  auto commitSome = [&] (decltype(ues)& emitters) {
-    batchCommit(emitters);
-    if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
-      std::move(emitters.begin(), emitters.end(),
-                std::back_inserter(ues_to_print));
-    }
-    emitters.clear();
-  };
-
-  if (!RuntimeOption::EvalUseHHBBC && ues.size()) {
-    commitSome(ues);
-  }
-
-  auto dispatcherThread = std::thread([&] {
-    dispatcher.waitEmpty();
-    s_ueq.push(nullptr);
-  });
-
-  auto commitLoop = [&] {
-    // kBatchSize needs to strike a balance between reducing transaction commit
-    // overhead (bigger batches are better), and limiting the cost incurred by
-    // failed commits due to identical units that require rollback and retry
-    // (smaller batches have less to lose).  Empirical results indicate that a
-    // value in the 2-10 range is reasonable.
-    static const unsigned kBatchSize = 8;
-
-    while (auto ue = s_ueq.pop()) {
-      ues.push_back(std::move(ue));
-      if (ues.size() == kBatchSize) {
-        commitSome(ues);
-      }
-    }
-    if (ues.size()) commitSome(ues);
-  };
-
-  if (Option::GenerateBinaryHHBC && !RuntimeOption::EvalUseHHBBC) {
-    commitLoop();
-  }
-
-  dispatcherThread.join();
-
-  LitstrTable::get().setReading();
-  ar->finish();
-  ar.reset();
-
-  if (!Option::GenerateBinaryHHBC || RuntimeOption::EvalUseHHBBC) {
-    s_ueq.fetch(RuntimeOption::EvalUseHHBBC ? ues : ues_to_print);
-  }
-
-  s_ueq.reset();
-
-  if (!RuntimeOption::EvalUseHHBBC) {
-    if (Option::GenerateBinaryHHBC) {
-      commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{});
-    }
-    return;
-  }
-
-  RuntimeOption::EvalJit = false; // For HHBBC to invoke builtins.
-
-  std::unique_ptr<ArrayTypeTable::Builder> arrTable;
-  auto wp_thread = std::thread([&] {
-    Timer timer(Timer::WallTime, "running HHBBC");
-    hphp_thread_init();
-    hphp_session_init();
+  std::thread wp_thread;
+  {
     SCOPE_EXIT {
-      hphp_context_exit();
-      hphp_session_exit();
-      hphp_thread_exit();
+      genText(ues_to_print, outputPath);
     };
 
-    arrTable = HHBBC::whole_program(
-      std::move(ues), s_ueq,
-      Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0);
-    s_ueq.push(nullptr);
-  });
+    auto commitSome = [&] (decltype(ues)& emitters) {
+      batchCommit(emitters);
+      if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
+        std::move(emitters.begin(), emitters.end(),
+                  std::back_inserter(ues_to_print));
+      }
+      emitters.clear();
+    };
 
-  commitLoop();
-  commitGlobalData(std::move(arrTable));
+    if (!RuntimeOption::EvalUseHHBBC && ues.size()) {
+      commitSome(ues);
+    }
+
+    auto dispatcherThread = std::thread([&] {
+        dispatcher.waitEmpty();
+        s_ueq.push(nullptr);
+      });
+
+    auto commitLoop = [&] {
+      folly::Optional<Timer> commitTime;
+      // kBatchSize needs to strike a balance between reducing
+      // transaction commit overhead (bigger batches are better), and
+      // limiting the cost incurred by failed commits due to identical
+      // units that require rollback and retry (smaller batches have
+      // less to lose).  Empirical results indicate that a value in
+      // the 2-10 range is reasonable.
+      static const unsigned kBatchSize = 8;
+
+      while (auto ue = s_ueq.pop()) {
+        if (!commitTime) {
+          commitTime.emplace(Timer::WallTime, "committing units to repo");
+        }
+        ues.push_back(std::move(ue));
+        if (ues.size() == kBatchSize) {
+          commitSome(ues);
+        }
+      }
+      if (ues.size()) commitSome(ues);
+    };
+
+    if (Option::GenerateBinaryHHBC && !RuntimeOption::EvalUseHHBBC) {
+      commitLoop();
+    }
+
+    dispatcherThread.join();
+
+    LitstrTable::get().setReading();
+    ar->finish();
+    ar.reset();
+
+    if (!Option::GenerateBinaryHHBC || RuntimeOption::EvalUseHHBBC) {
+      s_ueq.fetch(RuntimeOption::EvalUseHHBBC ? ues : ues_to_print);
+    }
+
+    s_ueq.reset();
+
+    if (!RuntimeOption::EvalUseHHBBC) {
+      if (Option::GenerateBinaryHHBC) {
+        commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{});
+      }
+      return;
+    }
+
+    RuntimeOption::EvalJit = false; // For HHBBC to invoke builtins.
+    std::unique_ptr<ArrayTypeTable::Builder> arrTable;
+    wp_thread = std::thread([&] {
+        Timer timer(Timer::WallTime, "running HHBBC");
+        hphp_thread_init();
+        hphp_session_init();
+        SCOPE_EXIT {
+          hphp_context_exit();
+          hphp_session_exit();
+          hphp_thread_exit();
+        };
+
+        HHBBC::whole_program(
+          std::move(ues), s_ueq, arrTable,
+          Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0);
+      });
+
+    commitLoop();
+    commitGlobalData(std::move(arrTable));
+  }
   wp_thread.join();
 }
 

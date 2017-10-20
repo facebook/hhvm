@@ -510,10 +510,10 @@ void UnitEmitterQueue::reset() {
 
 //////////////////////////////////////////////////////////////////////
 
-std::unique_ptr<ArrayTypeTable::Builder>
-whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
-              UnitEmitterQueue& ueq,
-              int num_threads) {
+void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
+                   UnitEmitterQueue& ueq,
+                   std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
+                   int num_threads) {
   trace_time tracer("whole program");
 
   RuntimeOption::EvalLowStaticArrays = false;
@@ -564,8 +564,8 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
     ueq.push(std::move(ue));
   });
   LitstrTable::get().setReading();
-
-  return std::move(index->array_table_builder());
+  arrTable = std::move(index->array_table_builder());
+  ueq.push(nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////

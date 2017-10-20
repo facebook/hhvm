@@ -73,10 +73,10 @@ struct UnitEmitterQueue : Synchronizable {
  * expects traits are already flattened (it might be wrong if they
  * aren't).
  */
-std::unique_ptr<ArrayTypeTable::Builder>
-whole_program(std::vector<std::unique_ptr<UnitEmitter>>,
-              UnitEmitterQueue& ueq,
-              int num_threads = 0);
+void whole_program(std::vector<std::unique_ptr<UnitEmitter>>,
+                   UnitEmitterQueue& ueq,
+                   std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
+                   int num_threads = 0);
 
 //////////////////////////////////////////////////////////////////////
 

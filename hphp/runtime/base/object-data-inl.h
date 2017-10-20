@@ -117,14 +117,14 @@ inline void ObjectData::instanceInit(Class* cls) {
       assert(propInitVec != nullptr);
       assert(nProps == propInitVec->size());
       if (!cls->hasDeepInitProps()) {
-        memcpy16_inline(propVec(),
+        memcpy16_inline(propVecForWrite(),
                         &(*propInitVec)[0], nProps * sizeof(TypedValue));
       } else {
-        deepInitHelper(propVec(), &(*propInitVec)[0], nProps);
+        deepInitHelper(propVecForWrite(), &(*propInitVec)[0], nProps);
       }
     } else {
       assert(nProps == cls->declPropInit().size());
-      memcpy16_inline(propVec(),
+      memcpy16_inline(propVecForWrite(),
                       &cls->declPropInit()[0], nProps * sizeof(TypedValue));
     }
   }
@@ -227,17 +227,18 @@ inline const Func* ObjectData::methodNamed(const StringData* sd) const {
   return getVMClass()->lookupMethod(sd);
 }
 
-inline TypedValue* ObjectData::propVec() {
-  return reinterpret_cast<TypedValue*>(uintptr_t(this + 1));
+inline TypedValue* ObjectData::propVecForWrite() {
+  // TODO(alexeyt): assert no immutable properties or we're constructing
+  return const_cast<TypedValue*>(propVec());
 }
 
 inline const TypedValue* ObjectData::propVec() const {
-  return const_cast<ObjectData*>(this)->propVec();
+  return reinterpret_cast<const TypedValue*>(uintptr_t(this + 1));
 }
 
 inline member_lval ObjectData::propLvalAtOffset(Slot idx) {
   assertx(idx < m_cls->numDeclProperties());
-  return member_lval {this, &propVec()[idx]};
+  return member_lval {this, &propVecForWrite()[idx]};
 }
 
 inline member_rval ObjectData::propRvalAtOffset(Slot idx) const {

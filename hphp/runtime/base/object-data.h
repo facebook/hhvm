@@ -345,7 +345,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   Array& setDynPropArray(const Array&);
 
   // accessors for the declared properties area
-  TypedValue* propVec();
+  TypedValue* propVecForWrite();
   const TypedValue* propVec() const;
 
   // accessors for declared properties at known offsets

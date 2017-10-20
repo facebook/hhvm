@@ -772,7 +772,7 @@ ObjectData* ObjectData::clone() {
   // clone prevents a leak if something throws before clone() returns
   Object clone = Object::attach(obj);
   auto const nProps = m_cls->numDeclProperties();
-  auto const clonePropVec = clone->propVec();
+  auto const clonePropVec = clone->propVecForWrite();
   auto const props = m_cls->declProperties();
   for (auto i = Slot{0}; i < nProps; i++) {
     if (props[i].attrs & AttrNoSerialize) {
@@ -991,7 +991,10 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
       }
     }
 
-    return PropLookup<TypedValue*> { prop, lookup.accessible };
+    return PropLookup<TypedValue*> {
+     const_cast<TypedValue*>(prop),
+     lookup.accessible
+   };
   }
 
   // We could not find a visible declared property. We need to check for a

@@ -239,7 +239,7 @@ struct CompactWriter {
       // Write each member
       for (int i = 0; i < numFields; ++i) {
         if (i <= numProps && fields[i].name == prop[i].name) {
-          Variant fieldVal = tvAsVariant(&objProp[i]);
+          auto const& fieldVal = tvAsCVarRef(&objProp[i]);
           if (!fieldVal.isNull()) {
             TType fieldType = fields[i].type;
             ArrNR fieldSpec(fields[i].spec);
@@ -625,7 +625,7 @@ struct CompactReader {
       if (cls->numDeclProperties() < numFields) {
         return readStructSlow(dest, spec, fieldNum, fieldType);
       }
-      auto objProp = dest->propVec();
+      auto objProp = dest->propVecForWrite();
       auto prop = cls->declProperties().begin();
       int i = -1;
       while (fieldType != T_STOP) {

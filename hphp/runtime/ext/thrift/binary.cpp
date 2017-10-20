@@ -480,7 +480,7 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
     int16_t fieldNum = transport.readI16();
     return binary_deserialize_slow(dest, spec, fieldNum, fieldType, transport);
   }
-  auto objProp = dest->propVec();
+  auto objProp = dest->propVecForWrite();
   auto prop = cls->declProperties().begin();
   int i = -1;
   TType fieldType = static_cast<TType>(transport.readI8());
@@ -648,7 +648,7 @@ void binary_serialize_spec(const Object& obj, PHPOutputTransport& transport,
   // Write each member
   for (int i = 0; i < numFields; ++i) {
     if (i <= numProps && fields[i].name == prop[i].name) {
-      Variant fieldVal = tvAsVariant(&objProp[i]);
+      auto const& fieldVal = tvAsCVarRef(&objProp[i]);
       if (!fieldVal.isNull()) {
         TType fieldType = fields[i].type;
         ArrNR fieldSpec(fields[i].spec);

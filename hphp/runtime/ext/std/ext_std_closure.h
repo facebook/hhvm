@@ -99,10 +99,10 @@ struct c_Closure final : ObjectData {
   /*
    * Use and static local variables.
    *
-   * Returns obj->propVec()
+   * Returns obj->propVecForWrite()
    * but with runtime generalized checks replaced with assertions
    */
-  TypedValue* getUseVars() { return propVec(); }
+  TypedValue* getUseVars() { return propVecForWrite(); }
 
   TypedValue* getStaticVar(Slot s) {
     assertx(getVMClass()->numDeclProperties() > s);

@@ -28,6 +28,3 @@ zend/good/tests/lang/foreachLoop.017.php
 zend/good/tests/lang/foreachLoopIteratorAggregate.001.php
 zend/good/tests/lang/script_tag.php
 zend/good/tests/lang/static_variation_002.php
-zend/good/tests/run-test/test001.php
-zend/good/tests/run-test/test002.php
-zend/good/tests/run-test/test003.php

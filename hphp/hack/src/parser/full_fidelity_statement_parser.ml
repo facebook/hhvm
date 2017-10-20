@@ -171,8 +171,9 @@ module WithExpressionAndDeclAndTypeParser
   and use_decl_parser
       (f : DeclParser.t -> DeclParser.t * Full_fidelity_minimal_syntax.t)
       parser =
-    let decl_parser = DeclParser.make parser.lexer
-      parser.errors parser.context in
+    let decl_parser = DeclParser.make
+      ~hhvm_compat_mode: parser.hhvm_compat_mode
+      parser.lexer parser.errors parser.context in
     let decl_parser, node = f decl_parser in
     let lexer = DeclParser.lexer decl_parser in
     let errors = DeclParser.errors decl_parser in
@@ -546,7 +547,9 @@ module WithExpressionAndDeclAndTypeParser
           parser, make_missing ()
         | _ ->
           let type_parser =
-            TypeParser.make parser.lexer parser.errors parser.context
+            TypeParser.make
+            ~hhvm_compat_mode:parser.hhvm_compat_mode
+            parser.lexer parser.errors parser.context
           in
           let (type_parser, node) =
             TypeParser.parse_type_specifier type_parser
@@ -833,8 +836,9 @@ module WithExpressionAndDeclAndTypeParser
     with_expression_parser parser ExpressionParser.parse_simple_variable
 
   and with_expression_parser parser f =
-    let expression_parser = ExpressionParser.make parser.lexer
-      parser.errors parser.context in
+    let expression_parser = ExpressionParser.make
+      ~hhvm_compat_mode:parser.hhvm_compat_mode
+      parser.lexer parser.errors parser.context in
     let (expression_parser, node) = f expression_parser in
     let lexer = ExpressionParser.lexer expression_parser in
     let errors = ExpressionParser.errors expression_parser in

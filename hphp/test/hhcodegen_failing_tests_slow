@@ -16,7 +16,6 @@ slow/closure/lambda_implicit_this.php
 slow/closure/return_types.php
 slow/collection_classes/815.php
 slow/compilation/1238.php
-slow/compilation/1247.php
 slow/concat/1578.php
 slow/constant/casing.php
 slow/constant/globals-array-constant.php
@@ -212,7 +211,6 @@ slow/reflection/ns_closure.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection/scalar_param_types/php-noforcehh.php
 slow/reflection_classes/xhp.php
-slow/sanity/1.php
 slow/sanity/3.php
 slow/sanity/4.php
 slow/sanity/5.php

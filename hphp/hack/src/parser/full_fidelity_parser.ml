@@ -49,8 +49,8 @@ let hhvm_compat_mode parser =
   parser.hhvm_compat_mode
 
 let parse_script parser =
-  let decl_parser = DeclParser.make parser.lexer
-    parser.errors parser.context in
+  let decl_parser = DeclParser.make ~hhvm_compat_mode:parser.hhvm_compat_mode
+    parser.lexer parser.errors parser.context in
   let (decl_parser, node) = DeclParser.parse_script decl_parser in
   let lexer = DeclParser.lexer decl_parser in
   let errors = DeclParser.errors decl_parser in

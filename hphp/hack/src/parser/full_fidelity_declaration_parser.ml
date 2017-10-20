@@ -32,8 +32,9 @@ module WithExpressionAndStatementAndTypeParser
   (* Types *)
 
   let parse_in_type_parser parser type_parser_function =
-    let type_parser = TypeParser.make parser.lexer
-      parser.errors parser.context in
+    let type_parser = TypeParser.make
+      ~hhvm_compat_mode: parser.hhvm_compat_mode
+      parser.lexer parser.errors parser.context in
     let (type_parser, node) = type_parser_function type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
@@ -57,8 +58,9 @@ module WithExpressionAndStatementAndTypeParser
 
   (* Expressions *)
   let parse_in_expression_parser parser expression_parser_function =
-    let expr_parser = ExpressionParser.make parser.lexer
-      parser.errors parser.context in
+    let expr_parser = ExpressionParser.make
+      ~hhvm_compat_mode: parser.hhvm_compat_mode
+      parser.lexer parser.errors parser.context in
     let (expr_parser, node) = expression_parser_function expr_parser in
     let lexer = ExpressionParser.lexer expr_parser in
     let errors = ExpressionParser.errors expr_parser in
@@ -70,8 +72,9 @@ module WithExpressionAndStatementAndTypeParser
 
   (* Statements *)
   let parse_in_statement_parser parser statement_parser_function =
-    let statement_parser = StatementParser.make parser.lexer
-      parser.errors parser.context in
+    let statement_parser = StatementParser.make
+      ~hhvm_compat_mode: parser.hhvm_compat_mode
+      parser.lexer parser.errors parser.context in
     let (statement_parser, node) = statement_parser_function
        statement_parser in
     let lexer = StatementParser.lexer statement_parser in
@@ -1189,8 +1192,9 @@ module WithExpressionAndStatementAndTypeParser
   and parse_generic_type_parameter_list_opt parser =
     let (parser1, open_angle) = next_token parser in
     if (Token.kind open_angle) = LessThan then
-        let type_parser = TypeParser.make parser.lexer
-          parser.errors parser.context in
+        let type_parser = TypeParser.make
+          ~hhvm_compat_mode:parser.hhvm_compat_mode
+          parser.lexer parser.errors parser.context in
         let (type_parser, node) =
           TypeParser.parse_generic_type_parameter_list type_parser in
         let lexer = TypeParser.lexer type_parser in
@@ -1605,7 +1609,8 @@ module WithExpressionAndStatementAndTypeParser
       | MarkupSection { markup_suffix; _ } -> not (is_missing markup_suffix)
       | _ -> false
     in
-    if valid then
+    (* Do not attempt to recover in HHVM compatibility mode *)
+    if valid || hhvm_compat_mode parser then
       parser1, markup_section
     else
       let parser = with_error parser SyntaxError.error1001 in

@@ -33,6 +33,7 @@ module WithStatementAndDeclAndTypeParser
 
   let parse_type_specifier parser =
     let type_parser = TypeParser.make parser.lexer
+      ~hhvm_compat_mode:parser.hhvm_compat_mode
       parser.errors parser.context in
     let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
     let lexer = TypeParser.lexer type_parser in
@@ -42,6 +43,7 @@ module WithStatementAndDeclAndTypeParser
 
   let parse_generic_type_arguments_opt parser =
     let type_parser = TypeParser.make parser.lexer
+      ~hhvm_compat_mode:parser.hhvm_compat_mode
       parser.errors parser.context in
     let (type_parser, node) =
       TypeParser.parse_generic_type_argument_list_opt type_parser
@@ -53,6 +55,7 @@ module WithStatementAndDeclAndTypeParser
 
   let parse_return_type parser =
     let type_parser = TypeParser.make parser.lexer
+      ~hhvm_compat_mode:parser.hhvm_compat_mode
       parser.errors parser.context in
     let (type_parser, node) = TypeParser.parse_return_type type_parser in
     let lexer = TypeParser.lexer type_parser in
@@ -61,8 +64,9 @@ module WithStatementAndDeclAndTypeParser
     (parser, node)
 
   let parse_parameter_list_opt parser =
-    let decl_parser = DeclParser.make parser.lexer parser.errors
-      parser.context in
+    let decl_parser = DeclParser.make
+      ~hhvm_compat_mode:parser.hhvm_compat_mode
+      parser.lexer parser.errors parser.context in
     let (decl_parser, right, params, left ) =
       DeclParser.parse_parameter_list_opt decl_parser in
     let lexer = DeclParser.lexer decl_parser in
@@ -71,7 +75,9 @@ module WithStatementAndDeclAndTypeParser
     (parser, right, params, left)
 
   let parse_compound_statement parser =
-    let statement_parser = StatementParser.make parser.lexer
+    let statement_parser = StatementParser.make
+      ~hhvm_compat_mode:parser.hhvm_compat_mode
+      parser.lexer
       parser.errors parser.context in
     let (statement_parser, node) =
       StatementParser.parse_compound_statement statement_parser in

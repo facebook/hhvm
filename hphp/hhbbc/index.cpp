@@ -46,6 +46,7 @@
 
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/trait-method-import-data.h"
 #include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/hhbbc/type-builtins.h"
@@ -80,6 +81,7 @@ const StaticString s_isset("__isset");
 const StaticString s_unset("__unset");
 const StaticString s_callStatic("__callStatic");
 const StaticString s_toBoolean("__toBoolean");
+const StaticString s_invoke("__invoke");
 const StaticString s_86ctor("86ctor");
 const StaticString s_86cinit("86cinit");
 const StaticString s_Closure("Closure");
@@ -189,13 +191,8 @@ struct PublicSPropEntry {
  * Entries in the ClassInfo method table need to track some additional
  * information.
  *
- * The reason for this is that in php, you can override private
- * methods with public or protected ones, which is a feature of a
- * given class hierarchy (ClassInfo), not a property of the class
- * definition itself.  When there's a private ancestor, we need to do
- * additional checks in resolve_method to make sure we're not possibly
- * calling from an ancestor class that defined a private method of
- * that name, since it will call that one instead.
+ * The reason for this is that we need to record attributes of the
+ * class hierarchy.
  */
 struct MethTabEntry {
   MethTabEntry(borrowed_ptr<const php::Func> func, Attr a, bool hpa, bool tl) :
@@ -205,6 +202,8 @@ struct MethTabEntry {
   Attr attrs {};
   bool hasAncestor = false;
   bool hasPrivateAncestor = false;
+  // This method came from the ClassInfo that owns the MethTabEntry,
+  // or one of its used traits.
   bool topLevel = false;
 };
 
@@ -427,6 +426,10 @@ struct ClassInfo {
   /*
    * Subclasses of this class, including this class itself (unless it
    * is an interface).
+   *
+   * For traits, this is the list of classes that use the trait where
+   * the trait wasn't flattened into the class (including the trait
+   * itself).
    *
    * Note, unlike baseList, the order of the elements in this vector
    * is unspecified.
@@ -822,6 +825,11 @@ struct IndexData {
     CompactVector<borrowed_ptr<const php::Class>>
   > classClosureMap;
 
+  std::unordered_map<
+    borrowed_ptr<const php::Class>,
+    std::set<borrowed_ptr<php::Func>>
+  > classExtraMethodMap;
+
   /*
    * Map from each class name to ClassInfo objects for all
    * not-known-to-be-impossible resolutions of the class at runtime.
@@ -910,6 +918,7 @@ DependencyContext dep_context(IndexData& data, const Context& ctx) {
   if (!ctx.cls || !data.useClassDependencies) return ctx.func;
   auto const cls = ctx.cls->closureContextCls ?
     ctx.cls->closureContextCls : ctx.cls;
+  if (is_used_trait(*cls)) return ctx.func;
   return cls;
 }
 
@@ -968,19 +977,189 @@ void find_deps(IndexData& data,
   }
 }
 
-bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
+struct TraitMethod {
+  using class_type = const ClassInfo*;
+  using method_type = const php::Func*;
+  using modifiers_type = Attr;
+
+  TraitMethod(class_type trait_, method_type method_, modifiers_type modifiers_)
+      : trait(trait_)
+      , method(method_)
+      , modifiers(modifiers_)
+    {}
+
+  const class_type trait;
+  const method_type method;
+  modifiers_type modifiers;
+};
+
+struct TMIOps {
+  using prec_type  = const PreClass::TraitPrecRule&;
+  using alias_type = const PreClass::TraitAliasRule&;
+  using string_type = LSString;
+  using class_type = TraitMethod::class_type;
+  using method_type = TraitMethod::method_type;
+  using modifiers_type = TraitMethod::modifiers_type;
+
+  struct TMIException : std::exception {
+    explicit TMIException(std::string msg) : msg(msg) {}
+    const char* what() const noexcept override { return msg.c_str(); }
+  private:
+    std::string msg;
+  };
+
+  // Whether `str' is empty.
+  static bool strEmpty(string_type str) { return str->empty(); }
+
+  // Return the name for the trait class.
+  static const string_type clsName(class_type traitCls) {
+    return traitCls->cls->name;
+  }
+
+  // Is-a methods.
+  static bool isTrait(class_type traitCls) {
+    return traitCls->cls->attrs & AttrTrait;
+  }
+  static bool isAbstract(modifiers_type modifiers) {
+    return modifiers & AttrAbstract;
+  }
+
+  // Whether to exclude methods with name `methName' when adding.
+  static bool exclude(string_type methName) {
+    return Func::isSpecial(methName);
+  }
+
+  // TraitMethod constructor.
+  static TraitMethod traitMethod(class_type traitCls,
+                                 method_type traitMeth,
+                                 alias_type rule) {
+    return TraitMethod { traitCls, traitMeth, rule.modifiers() };
+  }
+
+  // Accessors for the precedence rule type.
+  static string_type precMethodName(prec_type rule) {
+    return rule.methodName();
+  }
+  static string_type precSelectedTraitName(prec_type rule) {
+    return rule.selectedTraitName();
+  }
+  static TraitNameSet      precOtherTraitNames(prec_type rule) {
+    return rule.otherTraitNames();
+  }
+
+  // Accessors for the alias rule type.
+  static string_type aliasTraitName(alias_type rule) {
+    return rule.traitName();
+  }
+
+  static string_type aliasOrigMethodName(alias_type rule) {
+    return rule.origMethodName();
+  }
+  static string_type aliasNewMethodName(alias_type rule) {
+    return rule.newMethodName();
+  }
+  static modifiers_type aliasModifiers(alias_type rule) {
+    return rule.modifiers();
+  }
+
+  // Register a trait alias once the trait class is found.
+  static void addTraitAlias(const ClassInfo* cls, alias_type rule,
+                            class_type traitCls) {
+    // purely a runtime thing... nothing to do
+  }
+
+  // Trait class/method finders.
+  static class_type findSingleTraitWithMethod(class_type cls,
+                                              string_type origMethName) {
+    class_type traitCls = nullptr;
+
+    for (auto const t : cls->usedTraits) {
+      // Note: m_methods includes methods from parents/traits recursively.
+      if (t->methods.count(origMethName)) {
+        if (traitCls != nullptr) {
+          return nullptr;
+        }
+        traitCls = t;
+      }
+    }
+    return traitCls;
+  }
+
+  static class_type findTraitClass(class_type cls,
+                                   string_type traitName) {
+    for (auto const t : cls->usedTraits) {
+      if (traitName->isame(t->cls->name)) return t;
+    }
+    return nullptr;
+  }
+
+  static method_type findTraitMethod(class_type cls,
+                                     class_type traitCls,
+                                     string_type origMethName) {
+    auto it = traitCls->methods.find(origMethName);
+    if (it == traitCls->methods.end()) return nullptr;
+    return it->second.func;
+  }
+
+  // Errors.
+  static void errorUnknownMethod(prec_type rule) {
+    throw TMIException(folly::sformat("Unknown method '{}'",
+                                      rule.methodName()));
+  }
+  static void errorUnknownMethod(alias_type rule,
+                                 string_type methName) {
+    throw TMIException(folly::sformat("Unknown method '{}'", methName));
+  }
+  template <class Rule>
+  static void errorUnknownTrait(const Rule& rule,
+                                string_type traitName) {
+    throw TMIException(folly::sformat("Unknown trait '{}'", traitName));
+  }
+  static void errorDuplicateMethod(class_type cls,
+                                   string_type methName) {
+    auto const& m = cls->cls->methods;
+    if (std::find_if(m.begin(), m.end(),
+                     [&] (auto const& f) {
+                       return f->name->isame(methName);
+                     }) != m.end()) {
+      // the duplicate methods will be overridden by the class method.
+      return;
+    }
+    throw TMIException(folly::sformat("DuplicateMethod: {}", methName));
+  }
+  static void errorInconsistentInsteadOf(class_type cls,
+                                         string_type methName) {
+    throw TMIException(folly::sformat("InconsistentInsteadOf: {} {}",
+                                      methName, cls->cls->name));
+  }
+  static void errorMultiplyExcluded(prec_type rule,
+                                    string_type traitName,
+                                    string_type methName) {
+    throw TMIException(folly::sformat("MultiplyExcluded: {}::{}",
+                                      traitName, methName));
+  }
+};
+
+using TMIData = TraitMethodImportData<TraitMethod,
+                                      TMIOps,
+                                      SString,
+                                      string_data_hash,
+                                      string_data_isame>;
+
+bool build_cls_info_rec(IndexData& index,
+                        borrowed_ptr<ClassInfo> rleaf,
                         borrowed_ptr<const ClassInfo> rparent,
                         bool fromTrait) {
   if (!rparent) return true;
 
   auto const isIface = rparent->cls->attrs & AttrInterface;
 
-  if (!build_cls_info_rec(rleaf, rparent->parent, false)) return false;
+  if (!build_cls_info_rec(index, rleaf, rparent->parent, false)) return false;
   for (auto const iface : rparent->declInterfaces) {
-    if (!build_cls_info_rec(rleaf, iface, fromTrait)) return false;
+    if (!build_cls_info_rec(index, rleaf, iface, fromTrait)) return false;
   }
   for (auto const trait : rparent->usedTraits) {
-    if (!build_cls_info_rec(rleaf, trait, true)) return false;
+    if (!build_cls_info_rec(index, rleaf, trait, true)) return false;
   }
 
   /*
@@ -1100,6 +1279,74 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
         return false;
       }
     }
+
+    if (!(rparent->cls->attrs & AttrNoExpandTrait)) {
+      try {
+        TMIData tmid;
+        for (auto const t : rparent->usedTraits) {
+          for (auto const& m : t->methods) {
+            auto const meth = m.second.func;
+
+            TraitMethod traitMethod { t, meth, meth->attrs };
+            tmid.add(traitMethod, m.first);
+          }
+          if (rparent == rleaf) {
+            for (auto const c : index.classClosureMap[t->cls]) {
+              auto const invoke = find_method(c, s_invoke.get());
+              assertx(invoke);
+              index.classExtraMethodMap[rleaf->cls].insert(invoke);
+            }
+          }
+        }
+
+        for (auto const& precRule : rparent->cls->traitPrecRules) {
+          tmid.applyPrecRule(precRule, rparent);
+        }
+        for (auto const& aliasRule : rparent->cls->traitAliasRules) {
+          tmid.applyAliasRule(aliasRule, rparent);
+        }
+        auto traitMethods = tmid.finish(rparent);
+
+        // Import the methods.
+        for (auto const& mdata : traitMethods) {
+          auto const method = mdata.tm.method;
+          auto attrs = mdata.tm.modifiers;
+          if (attrs == AttrNone) {
+            attrs = method->attrs;
+          } else {
+            Attr attrMask = (Attr)(AttrPublic | AttrProtected | AttrPrivate |
+                                   AttrAbstract | AttrFinal);
+            attrs = (Attr)((attrs         &  attrMask) |
+                           (method->attrs & ~attrMask));
+          }
+          auto res = rleaf->methods.emplace(
+            mdata.name,
+            MethTabEntry { method, attrs, false, rparent == rleaf }
+          );
+          if (res.second) {
+            ITRACE(9,
+                   "  {}: adding trait method {}::{}\n",
+                   rleaf->cls->name,
+                   method->cls->name, method->name);
+          } else {
+            if (attrs & AttrAbstract) continue;
+            if (res.first->second.func->cls == rparent->cls) continue;
+            if (!methodOverride(res.first, method, attrs, mdata.name)) {
+              return false;
+            }
+          }
+          if (rparent == rleaf) {
+            index.classExtraMethodMap[rleaf->cls].insert(
+              const_cast<php::Func*>(method));
+          }
+        }
+      } catch (TMIOps::TMIException& ex) {
+        ITRACE(2,
+               "build_cls_info_rec failed for `{}' importing traits: {}\n",
+               rleaf->cls->name, ex.what());
+        return false;
+      }
+    }
   }
 
   return true;
@@ -1167,8 +1414,8 @@ bool find_constructor(borrowed_ptr<ClassInfo> cinfo) {
  * This function return false if we are certain instantiating rleaf
  * would be a fatal at runtime.
  */
-bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
-  if (!build_cls_info_rec(cinfo, cinfo, false)) return false;
+bool build_cls_info(IndexData& index, borrowed_ptr<ClassInfo> cinfo) {
+  if (!build_cls_info_rec(index, cinfo, cinfo, false)) return false;
 
   if (!find_constructor(cinfo)) return false;
 
@@ -1457,7 +1704,7 @@ void resolve_combinations(IndexData& index,
     cinfo->usedTraits.push_back(trait);
   }
 
-  if (!build_cls_info(borrow(cinfo))) return;
+  if (!build_cls_info(index, borrow(cinfo))) return;
 
   ITRACE(2, "  resolved: {}\n", cls->name);
   if (Trace::moduleEnabled(Trace::hhbbc_index, 3)) {
@@ -1500,10 +1747,40 @@ void preresolve(IndexData& index, NamingEnv& env, SString clsName) {
          clsName, index.classInfo.count(clsName));
 }
 
+void compute_subclass_list_rec(IndexData& index,
+                               ClassInfo* cinfo,
+                               ClassInfo* csub) {
+  for (auto const ctrait : csub->usedTraits) {
+    auto const ct = const_cast<ClassInfo*>(ctrait);
+    ct->subclassList.push_back(cinfo);
+    compute_subclass_list_rec(index, cinfo, ct);
+  }
+}
+
 void compute_subclass_list(IndexData& index) {
+  auto fixupTraits = false;
   for (auto& cinfo : index.allClassInfos) {
     for (auto& cparent : cinfo->baseList) {
       cparent->subclassList.push_back(borrow(cinfo));
+    }
+    if (!(cinfo->cls->attrs & AttrNoExpandTrait) &&
+        cinfo->usedTraits.size()) {
+      fixupTraits = true;
+      compute_subclass_list_rec(index, borrow(cinfo), borrow(cinfo));
+    }
+  }
+  if (fixupTraits) {
+    // traits can be reached by multiple paths, so we need to uniquify
+    // their subclassLists.
+    for (auto& cinfo : index.allClassInfos) {
+      if (cinfo->cls->attrs & AttrTrait) {
+        auto& sub = cinfo->subclassList;
+        std::sort(begin(sub), end(sub));
+        sub.erase(
+          std::unique(begin(sub), end(sub)),
+          end(sub)
+        );
+      }
     }
   }
 }
@@ -1574,6 +1851,7 @@ void define_func_family(IndexData& index, borrowed_ptr<ClassInfo> cinfo,
 
 void define_func_families(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
+    if (cinfo->cls->attrs & AttrTrait) continue;
     auto didCtor = false;
     for (auto& kv : cinfo->methods) {
       auto const mte = mteFromElm(kv);
@@ -1860,10 +2138,13 @@ void find_magic_methods(IndexData& index) {
 
 void mark_no_override_classes(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
-    auto const set = (cinfo->subclassList.size() == 1 &&
-                      !(cinfo->cls->attrs & AttrInterface) &&
-                      cinfo->cls->attrs & AttrUnique);
-    assert(!set || cinfo->subclassList.front() == borrow(cinfo));
+    auto const set = [&] {
+      if (!(cinfo->cls->attrs & AttrUnique) ||
+          cinfo->cls->attrs & AttrInterface) {
+        return false;
+      }
+      return cinfo->subclassList.size() == 1;
+    }();
     attribute_setter(cinfo->cls->attrs, set, AttrNoOverride);
 
     for (auto& kv : magicMethodMap) {
@@ -1942,22 +2223,24 @@ void mark_unique_entities(ISStringToMany<T>& entities, F marker) {
 //////////////////////////////////////////////////////////////////////
 
 void check_invariants(borrowed_ptr<const ClassInfo> cinfo) {
-  // All the following invariants only apply to non-interfaces.
+  // All the following invariants only apply to classes
   if (cinfo->cls->attrs & AttrInterface) return;
 
-  // For non-interface classes, each method in a php class has an
-  // entry in its ClassInfo method table, and if it's not special,
-  // AttrNoOverride, or private, an entry in the family table.
-  for (auto& m : cinfo->cls->methods) {
-    auto const it = cinfo->methods.find(m->name);
-    always_assert(it != cinfo->methods.end());
-    if (it->second.attrs & (AttrNoOverride|AttrPrivate)) continue;
-    if (cinfo->ctor && borrow(m) == cinfo->ctor->second.func) {
-      always_assert(cinfo->methodFamilies.count(s_construct.get()));
-      continue;
+  if (!(cinfo->cls->attrs & AttrTrait)) {
+    // For non-interface classes, each method in a php class has an
+    // entry in its ClassInfo method table, and if it's not special,
+    // AttrNoOverride, or private, an entry in the family table.
+    for (auto& m : cinfo->cls->methods) {
+      auto const it = cinfo->methods.find(m->name);
+      always_assert(it != cinfo->methods.end());
+      if (it->second.attrs & (AttrNoOverride|AttrPrivate)) continue;
+      if (cinfo->ctor && borrow(m) == cinfo->ctor->second.func) {
+        always_assert(cinfo->methodFamilies.count(s_construct.get()));
+        continue;
+      }
+      if (is_special_method_name(m->name)) continue;
+      always_assert(cinfo->methodFamilies.count(m->name));
     }
-    if (is_special_method_name(m->name)) continue;
-    always_assert(cinfo->methodFamilies.count(m->name));
   }
 
   // The subclassList is non-empty, contains this ClassInfo, and
@@ -2185,6 +2468,21 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
   return *prep;
 }
 
+template<typename F>
+auto visit_public_statics(const ClassInfo* cinfo, F fun) ->
+  decltype(fun(cinfo)) {
+  for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
+    if (auto const ret = fun(ci)) return ret;
+    if (ci->cls->attrs & AttrNoExpandTrait) continue;
+    for (auto ct : ci->usedTraits) {
+      if (auto const ret = visit_public_statics(ct, fun)) {
+        return ret;
+      }
+    }
+  }
+  return {};
+}
+
 PublicSPropEntry lookup_public_static_impl(
   const IndexData& data,
   borrowed_ptr<const ClassInfo> cinfo,
@@ -2196,15 +2494,17 @@ PublicSPropEntry lookup_public_static_impl(
     return noInfo;
   }
 
-  auto const knownClsPart = [&] () -> borrowed_ptr<const PublicSPropEntry> {
-    for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
+  auto const knownClsPart = visit_public_statics(
+    cinfo,
+    [&] (const ClassInfo* ci) -> const PublicSPropEntry* {
       auto const it = ci->publicStaticProps.find(prop);
       if (it != end(ci->publicStaticProps)) {
         return &it->second;
       }
+      return nullptr;
     }
-    return nullptr;
-  }();
+  );
+
   auto const unkPart = [&]() -> borrowed_ptr<const Type> {
     auto unkIt = data.unknownClassSProps.find(prop);
     if (unkIt != end(data.unknownClassSProps)) {
@@ -2425,6 +2725,16 @@ Index::lookup_closures(borrowed_ptr<const php::Class> cls) const {
   return nullptr;
 }
 
+const std::set<borrowed_ptr<php::Func>>*
+Index::lookup_extra_methods(borrowed_ptr<const php::Class> cls) const {
+  if (cls->attrs & AttrNoExpandTrait) return nullptr;
+  auto const it = m_data->classExtraMethodMap.find(cls);
+  if (it != end(m_data->classExtraMethodMap)) {
+    return &it->second;
+  }
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 res::Class Index::resolve_class(borrowed_ptr<const php::Class> cls) const {
@@ -2505,10 +2815,7 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
 }
 
 folly::Optional<res::Class> Index::selfCls(const Context& ctx) const {
-  if (!ctx.cls) return folly::none;
-  if (!RuntimeOption::RepoAuthoritative && ctx.cls->attrs & AttrTrait) {
-    return folly::none;
-  }
+  if (!ctx.cls || is_used_trait(*ctx.cls)) return folly::none;
   return resolve_class(ctx.cls);
 }
 
@@ -3679,6 +3986,7 @@ template<class Container>
 void refine_propstate(Container& cont,
                       borrowed_ptr<const php::Class> cls,
                       const PropState& state) {
+  assertx(!is_used_trait(*cls));
   auto it = cont.find(cls);
   if (it == end(cont)) {
     cont[cls] = state;
@@ -3855,37 +4163,39 @@ Index::could_be_related(borrowed_ptr<const php::Class> cls,
 
 //////////////////////////////////////////////////////////////////////
 
-void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
-  auto const vname = tv(name);
-
-  FTRACE(2, "merge_public_static: {} {} {}\n",
-    show(tcls), show(name), show(val));
-
+void PublicSPropIndexer::merge(Context ctx,
+                               const Type& tcls,
+                               const Type& name,
+                               const Type& val) {
   // Figure out which class this can affect.  If we have a DCls::Sub we have to
   // assume it could affect any subclass, so we repeat this merge for all exact
   // class types deriving from that base.
-  auto const maybe_cinfo = [&]() -> folly::Optional<borrowed_ptr<ClassInfo>> {
-    if (!is_specialized_cls(tcls)) {
-      return nullptr;
-    }
+  if (is_specialized_cls(tcls)) {
     auto const dcls = dcls_of(tcls);
-    switch (dcls.type) {
-    case DCls::Exact:
-      return dcls.cls.val.right();
-    case DCls::Sub:
-      if (!dcls.cls.val.right()) return nullptr;
-      for (auto& sub : dcls.cls.val.right()->subclassList) {
-        auto const rcls = res::Class { m_index, sub };
-        merge(ctx, clsExact(rcls), name, val);
+    if (auto const cinfo = dcls.cls.val.right()) {
+      switch (dcls.type) {
+        case DCls::Exact:
+          return merge(ctx, cinfo, name, val);
+        case DCls::Sub:
+          for (auto const sub : cinfo->subclassList) {
+            merge(ctx, sub, name, val);
+          }
+          return;
       }
-      return folly::none;
+      not_reached();
     }
-    not_reached();
-  }();
-  if (!maybe_cinfo) return;
+  }
 
-  auto const cinfo = *maybe_cinfo;
-  bool const unknownName = !vname ||
+  merge(ctx, nullptr, name, val);
+}
+
+void PublicSPropIndexer::merge(Context ctx, ClassInfo* cinfo,
+                               const Type& name, const Type& val) {
+  FTRACE(2, "merge_public_static: {} {} {}\n",
+         cinfo ? cinfo->cls->name->data() : "<unknown>", show(name), show(val));
+
+  auto const vname = tv(name);
+  auto const unknownName = !vname ||
     (vname && vname->m_type != KindOfPersistentString);
 
   if (!cinfo) {
@@ -3926,11 +4236,13 @@ void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
    * merge the type for every property in the class hierarchy.
    */
   if (unknownName) {
-    for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
-      for (auto& kv : ci->publicStaticProps) {
-        merge(ctx, tcls, sval(kv.first), val);
-      }
-    }
+    visit_public_statics(cinfo,
+                         [&] (const ClassInfo* ci) {
+                           for (auto& kv : ci->publicStaticProps) {
+                             merge(ctx, cinfo, sval(kv.first), val);
+                           }
+                           return false;
+                         });
     return;
   }
 
@@ -3946,14 +4258,17 @@ void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
    * is a fatal at class declaration time (you can't redeclare a public static
    * property with narrower access in a subclass).
    */
-  auto const affectedCInfo = [&]() -> borrowed_ptr<ClassInfo> {
-    for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
-      if (ci->publicStaticProps.count(vname->m_data.pstr)) {
-        return ci;
+  auto const affectedCInfo = const_cast<ClassInfo*>(
+    visit_public_statics(
+      cinfo,
+      [&] (const ClassInfo* ci) -> const ClassInfo* {
+        if (ci->publicStaticProps.count(vname->m_data.pstr)) {
+          return ci;
+        }
+        return nullptr;
       }
-    }
-    return nullptr;
-  }();
+    )
+  );
 
   if (!affectedCInfo) {
     // Either this was a mutation that's going to fatal (property doesn't
@@ -3968,6 +4283,21 @@ void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
     acc->second = val;
   } else {
     acc->second |= val;
+  }
+}
+
+void PublicSPropIndexer::merge(Context ctx,
+                               const php::Class& cls,
+                               const Type& name,
+                               const Type& val) {
+  auto range = find_range(m_index->m_data->classInfo, cls.name);
+  for (auto const& pair : range) {
+    auto const cinfo = pair.second;
+    if (cinfo->cls != &cls) continue;
+    // Note that this works for both traits and regular classes
+    for (auto const sub : cinfo->subclassList) {
+      merge(ctx, sub, name, val);
+    }
   }
 }
 

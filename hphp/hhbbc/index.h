@@ -450,6 +450,13 @@ struct Index {
     lookup_closures(borrowed_ptr<const php::Class>) const;
 
   /*
+   * Find all the extra methods associated with a class from its
+   * traits.
+   */
+  const std::set<borrowed_ptr<php::Func>>*
+    lookup_extra_methods(borrowed_ptr<const php::Class>) const;
+
+  /*
    * Attempt to record a new alias in the index. May be called from
    * multi-threaded contexts, so doesn't actually update the index
    * (call update_class_aliases to do that). Returns false if it would
@@ -883,6 +890,7 @@ private:
   Index& operator=(Index&&) = delete;
 
 private:
+  friend struct PublicSPropIndexer;
   template<class FuncRange>
   res::Func resolve_func_helper(const FuncRange&, SString) const;
   res::Func do_resolve(borrowed_ptr<const php::Func>) const;
@@ -927,7 +935,11 @@ struct PublicSPropIndexer {
    * This routine may be safely called concurrently by multiple analysis
    * threads.
    */
-  void merge(Context ctx, Type cls, Type name, Type val);
+  void merge(Context ctx, const Type& cls, const Type& name, const Type& val);
+  void merge(Context ctx, ClassInfo* cinfo,
+             const Type& name, const Type& val);
+  void merge(Context ctx, const php::Class& cls,
+             const Type& name, const Type& val);
 
 private:
   friend struct Index;

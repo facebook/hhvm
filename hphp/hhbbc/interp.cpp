@@ -2522,7 +2522,7 @@ void in(ISS& env, const bc::FPassS& op) {
         }
       }
       if (auto c = env.collect.publicStatics) {
-        c->merge(env.ctx, std::move(tcls), tname, TInitGen);
+        c->merge(env.ctx, tcls, tname, TInitGen);
       }
     }
     return push(env, TInitGen);
@@ -3542,9 +3542,7 @@ void in(ISS& env, const bc::InitProp& op) {
     case InitPropOp::Static:
       mergeSelfProp(env, op.str1, t);
       if (auto c = env.collect.publicStatics) {
-        auto const cls = selfClsExact(env);
-        always_assert(!!cls);
-        c->merge(env.ctx, *cls, sval(op.str1), t);
+        c->merge(env.ctx, *env.ctx.cls, sval(op.str1), t);
       }
       break;
     case InitPropOp::NonStatic:

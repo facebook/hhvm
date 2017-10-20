@@ -60,6 +60,18 @@ bool is_special_method_name(SString name);
  */
 bool is_mock_class(borrowed_ptr<const php::Class>);
 
+/*
+ * Returns true if cls is a trait which will not be imported into any
+ * classes at runtime (probably because it was flattened into them).
+ */
+bool is_unused_trait(const php::Class& cls);
+
+/*
+ * Returns true if cls is a trait which could be imported into a class
+ * at runtime.
+ */
+bool is_used_trait(const php::Class& cls);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

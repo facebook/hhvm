@@ -579,7 +579,8 @@ FuncAnalysis analyze_func_inline(const Index& index,
 
 ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
-  assert(ctx.cls && !ctx.func);
+  assertx(ctx.cls && !ctx.func && !is_used_trait(*ctx.cls));
+
   {
     Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
         is_systemlib_part(*ctx.unit)};
@@ -588,6 +589,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
   ClassAnalysis clsAnalysis(ctx, index.any_interceptable_functions());
   auto const associatedClosures = index.lookup_closures(ctx.cls);
+  auto const associatedMethods  = index.lookup_extra_methods(ctx.cls);
   auto const isHNIBuiltin       = ctx.cls->attrs & AttrBuiltin;
 
   /*
@@ -744,7 +746,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     }
 
     if (associatedClosures) {
-      for (auto& c : *associatedClosures) {
+      for (auto const c : *associatedClosures) {
         auto const invoke = borrow(c->methods[0]);
         closureResults.push_back(
           do_analyze(
@@ -754,6 +756,21 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
             nullptr,
             CollectionOpts::TrackConstantArrays
           )
+        );
+      }
+    }
+
+    if (associatedMethods) {
+      for (auto const m : *associatedMethods) {
+        // We throw the results of the analysis away. We're only doing
+        // this for the effects on the private properties, and the
+        // results aren't meaningful outside of this context.
+        do_analyze(
+          index,
+          Context { m->unit, m, ctx.cls },
+          &clsAnalysis,
+          nullptr,
+          CollectionOpts::TrackConstantArrays
         );
       }
     }

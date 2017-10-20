@@ -70,6 +70,16 @@ bool is_closure(const php::Class& c) {
   return c.parentName && c.parentName->isame(s_Closure.get());
 }
 
+bool is_unused_trait(const php::Class& c) {
+  return
+    (c.attrs & (AttrTrait | AttrNoOverride)) == (AttrTrait | AttrNoOverride);
+}
+
+bool is_used_trait(const php::Class& c) {
+  return
+    (c.attrs & (AttrTrait | AttrNoOverride)) == AttrTrait;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

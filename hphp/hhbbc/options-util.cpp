@@ -28,7 +28,8 @@ bool method_map_contains(const MethodMap& mmap,
   std::string const clsname = cls ? cls->name->data() : "";
   auto it = mmap.find(clsname);
   if (it == end(mmap)) return false;
-  return it->second.count((func->name->empty() ?
+  return it->second.count(func == nullptr ? "" :
+                          (func->name->empty() ?
                            func->unit->filename : func->name)->data());
 }
 

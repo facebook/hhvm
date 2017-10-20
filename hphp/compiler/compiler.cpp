@@ -443,8 +443,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   RuntimeOption::RepoAuthoritative = false;
   RuntimeOption::EvalJit = false;
 
-  if (!Option::FlattenTraits) RuntimeOption::EvalUseHHBBC=false;
-
   initialize_repo();
 
   std::vector<std::string> badnodes;

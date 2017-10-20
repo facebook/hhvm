@@ -192,8 +192,15 @@ std::vector<WorkItem> initial_work(const php::Program& program,
         // with a class context are analyzed as part of that context.
         continue;
       }
-      ret.emplace_back(WorkType::Class,
-                       Context { borrow(u), nullptr, borrow(c) });
+      if (is_used_trait(*c)) {
+        for (auto& f : c->methods) {
+          ret.emplace_back(WorkType::Func,
+                           Context { borrow(u), borrow(f), f->cls });
+        }
+      } else {
+        ret.emplace_back(WorkType::Class,
+                         Context { borrow(u), nullptr, borrow(c) });
+      }
     }
     for (auto& f : u->funcs) {
       ret.emplace_back(WorkType::Func, Context { borrow(u), borrow(f) });
@@ -211,7 +218,8 @@ std::vector<WorkItem> initial_work(const php::Program& program,
 WorkItem work_item_for(DependencyContext d, AnalyzeMode mode) {
   if (auto const cls = d.right()) {
     assertx(mode != AnalyzeMode::ConstPass &&
-            options.HardPrivatePropInference);
+            options.HardPrivatePropInference &&
+            !is_used_trait(*cls));
     return WorkItem { WorkType::Class, Context { cls->unit, nullptr, cls } };
   }
 
@@ -222,11 +230,11 @@ WorkItem work_item_for(DependencyContext d, AnalyzeMode mode) {
     func->cls->closureContextCls : func->cls;
   assertx(!cls ||
           mode == AnalyzeMode::ConstPass ||
-          !options.HardPrivatePropInference);
+          !options.HardPrivatePropInference ||
+          is_used_trait(*cls));
 
   return WorkItem { WorkType::Func, Context { func->unit, func, cls } };
 }
-
 
 /*
  * Algorithm:

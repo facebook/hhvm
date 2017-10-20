@@ -242,16 +242,16 @@ static Variant HHVM_METHOD(mysqli, get_charset) {
   VALIDATE_CONN_CONNECTED(conn);
   mysql_get_character_set_info(conn->get(), &cs);
 
-  auto ret = SystemLib::AllocStdClassObject();
-  ret.o_set(s_charset, String(cs.csname, CopyString));
-  ret.o_set(s_collation, String(cs.name, CopyString));
-  ret.o_set(s_dir, String(cs.dir, CopyString));
-  ret.o_set(s_min_length, (int64_t)cs.mbminlen);
-  ret.o_set(s_max_length, (int64_t)cs.mbmaxlen);
-  ret.o_set(s_number, (int64_t)cs.number);
-  ret.o_set(s_state, (int64_t)cs.state);
-  ret.o_set(s_comment, String(cs.comment, CopyString));
-  return ret;
+  ArrayInit props(8, ArrayInit::Map{});
+  props.set(s_charset, String(cs.csname, CopyString));
+  props.set(s_collation, String(cs.name, CopyString));
+  props.set(s_dir, String(cs.dir, CopyString));
+  props.set(s_min_length, (int64_t)cs.mbminlen);
+  props.set(s_max_length, (int64_t)cs.mbmaxlen);
+  props.set(s_number, (int64_t)cs.number);
+  props.set(s_state, (int64_t)cs.state);
+  props.set(s_comment, String(cs.comment, CopyString));
+  return ObjectData::FromArray(props.create());
 }
 
 //static Variant HHVM_METHOD(mysqli, get_connection_stats) {
@@ -788,22 +788,21 @@ static Variant HHVM_METHOD(mysqli_result, fetch_field) {
     return false;
   }
 
-  auto obj = SystemLib::AllocStdClassObject();
-  obj->o_set("name",       info->name);
-  obj->o_set("orgname",    info->org_name);
-  obj->o_set("table",      info->table);
-  obj->o_set("orgtable",   info->org_table);
-  obj->o_set("def",        info->def);
-  obj->o_set("db",         info->db);
-  obj->o_set("catalog",    s_def);
-  obj->o_set("max_length", info->max_length);
-  obj->o_set("length",     info->length);
-  obj->o_set("charsetnr",  (int64_t)info->charsetnr);
-  obj->o_set("flags",      (int64_t)info->flags);
-  obj->o_set("type",       info->type);
-  obj->o_set("decimals",   (int64_t)info->decimals);
-
-  return obj;
+  ArrayInit props(13, ArrayInit::Map{});
+  props.set("name",       info->name);
+  props.set("orgname",    info->org_name);
+  props.set("table",      info->table);
+  props.set("orgtable",   info->org_table);
+  props.set("def",        info->def);
+  props.set("db",         info->db);
+  props.set("catalog",    s_def);
+  props.set("max_length", info->max_length);
+  props.set("length",     info->length);
+  props.set("charsetnr",  (int64_t)info->charsetnr);
+  props.set("flags",      (int64_t)info->flags);
+  props.set("type",       info->type);
+  props.set("decimals",   (int64_t)info->decimals);
+  return ObjectData::FromArray(props.create());
 }
 
 // Consts to be used on PHP and C++ side.

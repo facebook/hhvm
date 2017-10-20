@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/array-init.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -551,9 +552,9 @@ Object Variant::toObjectHelper() const {
     case KindOfPersistentString:
     case KindOfString:
     case KindOfResource: {
-      auto obj = SystemLib::AllocStdClassObject();
-      obj->o_set(s_scalar, *this, false);
-      return obj;
+      ArrayInit props(1, ArrayInit::Map{});
+      props.set(s_scalar, *this);
+      return ObjectData::FromArray(props.create());
     }
 
 

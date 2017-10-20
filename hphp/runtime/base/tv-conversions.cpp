@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/datatype.h"
@@ -1145,9 +1146,9 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
     case KindOfPersistentString:
     case KindOfString:
     case KindOfResource: {
-      auto o = SystemLib::AllocStdClassObject();
-      o->o_set(s_scalar, VarNR(tv));
-      return o.detach();
+      ArrayInit props(1, ArrayInit::Map{});
+      props.set(s_scalar, tv);
+      return ObjectData::FromArray(props.create()).detach();
     }
 
     case KindOfPersistentVec:
@@ -1194,16 +1195,20 @@ void tvCastToObjectInPlace(TypedValue* tv) {
       case KindOfInt64:
       case KindOfDouble:
       case KindOfPersistentString:
-      case KindOfResource:
-        o = SystemLib::AllocStdClassObject().detach();
-        o->o_set(s_scalar, tvAsVariant(tv));
+      case KindOfResource: {
+        ArrayInit props(1, ArrayInit::Map{});
+        props.set(s_scalar, *tv);
+        o = ObjectData::FromArray(props.create()).detach();
         continue;
+      }
 
-      case KindOfString:
-        o = SystemLib::AllocStdClassObject().detach();
-        o->o_set(s_scalar, tvAsVariant(tv));
+      case KindOfString: {
+        ArrayInit props(1, ArrayInit::Map{});
+        props.set(s_scalar, *tv);
+        o = ObjectData::FromArray(props.create()).detach();
         tvDecRefStr(tv);
         continue;
+      }
 
       case KindOfPersistentVec:
       case KindOfVec:

@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/request-event-handler.h"
@@ -224,165 +225,153 @@ static char *_php_rfc822_write_address(ADDRESS *addresslist) {
   return strdup(address);
 }
 
-#define OBJ_SET_ENTRY(ret, obj, name, entry)                            \
-  if (obj->entry) ret.o_set(name, String((const char*)obj->entry, CopyString));
+#define ARR_SET_ENTRY(arr, obj, name, entry) \
+  if (obj->entry) arr.set(name, String((const char*)obj->entry, CopyString));
 
-static char* _php_imap_parse_address(ADDRESS *addresslist, Array &paddress) {
-  ADDRESS *addresstmp = addresslist;
-  char *fulladdress = _php_rfc822_write_address(addresstmp);
-  do {
-    auto tmpvals = SystemLib::AllocStdClassObject();
-    OBJ_SET_ENTRY(tmpvals, addresstmp, "personal", personal);
-    OBJ_SET_ENTRY(tmpvals, addresstmp, "adl",      adl);
-    OBJ_SET_ENTRY(tmpvals, addresstmp, "mailbox",  mailbox);
-    OBJ_SET_ENTRY(tmpvals, addresstmp, "host",     host);
-    paddress.append(std::move(tmpvals));
-  } while ((addresstmp = addresstmp->next));
-  return fulladdress;
-}
+static void set_address(ArrayInit &ai, const char *prop, ADDRESS *addr) {
+  if (!addr) return;
 
-static void set_address(Object &ret, const char *prop, ADDRESS *addr) {
-  if (addr) {
-    Array paddress(Array::Create());
-    char *fulladdress = _php_imap_parse_address(addr, paddress);
-    if (fulladdress) {
-      ret.o_set(String(prop) + "address", String(fulladdress, AttachString));
-    }
-    ret.o_set(prop, paddress);
+  auto const fulladdress = _php_rfc822_write_address(addr);
+  if (fulladdress) {
+    ai.set(String(prop) + "address", String(fulladdress, AttachString));
   }
+
+  auto paddress = Array::Create();
+  do {
+    ArrayInit props(4, ArrayInit::Map{});
+    ARR_SET_ENTRY(props, addr, "personal", personal);
+    ARR_SET_ENTRY(props, addr, "adl",      adl);
+    ARR_SET_ENTRY(props, addr, "mailbox",  mailbox);
+    ARR_SET_ENTRY(props, addr, "host",     host);
+    paddress.append(ObjectData::FromArray(props.create()));
+  } while ((addr = addr->next));
+  ai.set(prop, paddress);
 }
 
-static Object _php_make_header_object(ENVELOPE *en) {
-  auto ret = SystemLib::AllocStdClassObject();
+static Array _php_make_header_props(ENVELOPE *en) {
+  ArrayInit ai(24, ArrayInit::Map{});
 
-  OBJ_SET_ENTRY(ret, en, "remail",      remail);
-  OBJ_SET_ENTRY(ret, en, "date",        date);
-  OBJ_SET_ENTRY(ret, en, "Date",        date);
-  OBJ_SET_ENTRY(ret, en, "subject",     subject);
-  OBJ_SET_ENTRY(ret, en, "Subject",     subject);
-  OBJ_SET_ENTRY(ret, en, "in_reply_to", in_reply_to);
-  OBJ_SET_ENTRY(ret, en, "message_id",  message_id);
-  OBJ_SET_ENTRY(ret, en, "newsgroups",  newsgroups);
-  OBJ_SET_ENTRY(ret, en, "followup_to", followup_to);
-  OBJ_SET_ENTRY(ret, en, "references",  references);
+  ARR_SET_ENTRY(ai, en, "remail",      remail);
+  ARR_SET_ENTRY(ai, en, "date",        date);
+  ARR_SET_ENTRY(ai, en, "Date",        date);
+  ARR_SET_ENTRY(ai, en, "subject",     subject);
+  ARR_SET_ENTRY(ai, en, "Subject",     subject);
+  ARR_SET_ENTRY(ai, en, "in_reply_to", in_reply_to);
+  ARR_SET_ENTRY(ai, en, "message_id",  message_id);
+  ARR_SET_ENTRY(ai, en, "newsgroups",  newsgroups);
+  ARR_SET_ENTRY(ai, en, "followup_to", followup_to);
+  ARR_SET_ENTRY(ai, en, "references",  references);
 
-  set_address(ret, "to",          en->to);
-  set_address(ret, "from",        en->from);
-  set_address(ret, "cc",          en->cc);
-  set_address(ret, "bcc",         en->bcc);
-  set_address(ret, "reply_to",    en->reply_to);
-  set_address(ret, "sender",      en->sender);
-  set_address(ret, "return_path", en->return_path);
+  set_address(ai, "to",          en->to);
+  set_address(ai, "from",        en->from);
+  set_address(ai, "cc",          en->cc);
+  set_address(ai, "bcc",         en->bcc);
+  set_address(ai, "reply_to",    en->reply_to);
+  set_address(ai, "sender",      en->sender);
+  set_address(ai, "return_path", en->return_path);
 
-  return ret;
+  return ai.toArray();
 }
 
-static void _php_imap_add_body(Object &ret, BODY *body, bool do_multipart) {
+static Object _php_imap_body(BODY *body, bool do_multipart) {
+  ArrayInit props(17, ArrayInit::Map{});
 
   if (body->type <= TYPEMAX) {
-   ret.o_set("type", body->type);
+   props.set("type", body->type);
   }
 
   if (body->encoding <= ENCMAX) {
-    ret.o_set("encoding", body->encoding);
+    props.set("encoding", body->encoding);
   }
 
   if (body->subtype) {
-    ret.o_set("ifsubtype", 1);
-    ret.o_set("subtype", String((const char*)body->subtype, CopyString));
+    props.set("ifsubtype", 1);
+    props.set("subtype", String((const char*)body->subtype, CopyString));
   } else {
-    ret.o_set("ifsubtype", 0);
+    props.set("ifsubtype", 0);
   }
 
   if (body->description) {
-    ret.o_set("ifdescription", 1);
-    ret.o_set("description",
+    props.set("ifdescription", 1);
+    props.set("description",
       String((const char*)body->description, CopyString));
   } else {
-    ret.o_set("ifdescription", 0);
+    props.set("ifdescription", 0);
   }
 
   if (body->id) {
-    ret.o_set("ifid", 1);
-    ret.o_set("id", String((const char*)body->id, CopyString));
+    props.set("ifid", 1);
+    props.set("id", String((const char*)body->id, CopyString));
   } else {
-    ret.o_set("ifid", 0);
+    props.set("ifid", 0);
   }
 
 
   if (body->size.lines) {
-    ret.o_set("lines", (int64_t)body->size.lines);
+    props.set("lines", (int64_t)body->size.lines);
   }
 
   if (body->size.bytes) {
-    ret.o_set("bytes", (int64_t)body->size.bytes);
+    props.set("bytes", (int64_t)body->size.bytes);
   }
 
   if (body->disposition.type) {
-    ret.o_set("ifdisposition", 1);
-    ret.o_set("disposition",
+    props.set("ifdisposition", 1);
+    props.set("disposition",
       String((const char*)body->disposition.type, CopyString));
   } else {
-    ret.o_set("ifdisposition", 0);
+    props.set("ifdisposition", 0);
   }
 
   if (body->disposition.parameter) {
-    PARAMETER *dpar;
-    dpar = body->disposition.parameter;
-    ret.o_set("ifdparameters", 1);
+    props.set("ifdparameters", 1);
 
-    Array dparametres(Array::Create());
-    do {
-      auto dparam = SystemLib::AllocStdClassObject();
-      dparam.o_set("attribute",
-        String((const char*)dpar->attribute, CopyString));
-      dparam.o_set("value", String((const char*)dpar->value, CopyString));
-      dparametres.append(std::move(dparam));
-    } while ((dpar = dpar->next));
-    ret.o_set("dparameters", dparametres);
+    auto dparams = Array::Create();
+    for (auto dpar = body->disposition.parameter; dpar; dpar = dpar->next) {
+      ArrayInit dparam(2, ArrayInit::Map{});
+      dparam.set("attribute", String((const char*)dpar->attribute, CopyString));
+      dparam.set("value", String((const char*)dpar->value, CopyString));
+      dparams.append(ObjectData::FromArray(dparam.create()));
+    }
+    props.set("dparameters", dparams);
   } else {
-    ret.o_set("ifdparameters", 0);
+    props.set("ifdparameters", 0);
   }
 
-  PARAMETER *par;
-  Array parametres(Array::Create());
+  if (body->parameter) {
+    props.set("ifparameters", 1);
 
-  if ((par = body->parameter)) {
-    ret.o_set("ifparameters", 1);
-    do {
-      auto param = SystemLib::AllocStdClassObject();
-      OBJ_SET_ENTRY(param, par, "attribute", attribute);
-      OBJ_SET_ENTRY(param, par, "value", value);
-      parametres.append(std::move(param));
-    } while ((par = par->next));
-    ret.o_set("parameters", parametres);
+    auto params = Array::Create();
+    for (auto par = body->parameter; par; par = par->next) {
+      ArrayInit param(2, ArrayInit::Map{});
+      ARR_SET_ENTRY(param, par, "attribute", attribute);
+      ARR_SET_ENTRY(param, par, "value", value);
+      params.append(ObjectData::FromArray(param.create()));
+    }
+    props.set("parameters", std::move(params));
   } else {
-    ret.o_set("ifparameters", 0);
+    props.set("ifparameters", 0);
   }
 
   if (do_multipart) {
     /* multipart message ? */
     if (body->type == TYPEMULTIPART) {
-      parametres.clear();
-      PART *part;
-      for (part = body->nested.part; part; part = part->next) {
-        auto param = SystemLib::AllocStdClassObject();
-        _php_imap_add_body(param, &part->body, do_multipart);
-        parametres.append(std::move(param));
+      auto parts = Array::Create();
+      for (auto part = body->nested.part; part; part = part->next) {
+        parts.append(_php_imap_body(&part->body, do_multipart));
       }
-      ret.o_set("parts", parametres);
+      props.set("parts", std::move(parts));
     }
 
     /* encapsulated message ? */
     if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
-      body = body->nested.msg->body;
-      parametres.clear();
-      auto param = SystemLib::AllocStdClassObject();
-      _php_imap_add_body(param, body, do_multipart);
-      parametres.append(std::move(param));
-      ret.o_set("parts", parametres);
+      auto parts = Array::Create();
+      parts.append(_php_imap_body(body->nested.msg->body, do_multipart));
+      props.set("parts", parts);
     }
   }
+
+  return ObjectData::FromArray(props.create());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -791,7 +780,6 @@ static Variant HHVM_FUNCTION(imap_bodystruct, const Resource& imap_stream,
   if (!obj->checkMsgNumber(msg_number)) {
     return false;
   }
-  auto ret = SystemLib::AllocStdClassObject();
 
   BODY *body;
   body = mail_body(obj->m_stream, msg_number, (unsigned char *)section.data());
@@ -799,8 +787,7 @@ static Variant HHVM_FUNCTION(imap_bodystruct, const Resource& imap_stream,
     return false;
   }
 
-  _php_imap_add_body(ret, body, false);
-  return ret;
+  return _php_imap_body(body, false);
 }
 
 static Variant HHVM_FUNCTION(imap_check, const Resource& imap_stream) {
@@ -809,15 +796,15 @@ static Variant HHVM_FUNCTION(imap_check, const Resource& imap_stream) {
     return false;
   }
   if (obj->m_stream && obj->m_stream->mailbox) {
-    auto ret = SystemLib::AllocStdClassObject();
+    ArrayInit props(5, ArrayInit::Map{});
     char date[100];
     rfc822_date(date);
-    ret.o_set("Date", String(date, CopyString));
-    ret.o_set("Driver", String(obj->m_stream->dtb->name, CopyString));
-    ret.o_set("Mailbox", String(obj->m_stream->mailbox, CopyString));
-    ret.o_set("Nmsgs", (int64_t)obj->m_stream->nmsgs);
-    ret.o_set("Recent", (int64_t)obj->m_stream->recent);
-    return ret;
+    props.set("Date", String(date, CopyString));
+    props.set("Driver", String(obj->m_stream->dtb->name, CopyString));
+    props.set("Mailbox", String(obj->m_stream->mailbox, CopyString));
+    props.set("Nmsgs", (int64_t)obj->m_stream->nmsgs);
+    props.set("Recent", (int64_t)obj->m_stream->recent);
+    return ObjectData::FromArray(props.create());
   }
   return false;
 }
@@ -919,40 +906,40 @@ static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
       if (((elt = mail_elt(obj->m_stream, i))->sequence) &&
           (env = mail_fetch_structure(obj->m_stream, i, NIL, NIL))) {
 
-        auto myoverview = SystemLib::AllocStdClassObject();
-        OBJ_SET_ENTRY(myoverview, env, "subject", subject);
+        ArrayInit props(16, ArrayInit::Map{});
+        ARR_SET_ENTRY(props, env, "subject", subject);
 
         if (env->from) {
           env->from->next = NULL;
           char *address = _php_rfc822_write_address(env->from);
           if (address) {
-            myoverview.o_set("from", String(address, AttachString));
+            props.set("from", String(address, AttachString));
           }
         }
         if (env->to) {
           env->to->next = NULL;
           char *address = _php_rfc822_write_address(env->to);
           if (address) {
-            myoverview.o_set("to", String(address, AttachString));
+            props.set("to", String(address, AttachString));
           }
         }
 
-        OBJ_SET_ENTRY(myoverview, env, "date",        date);
-        OBJ_SET_ENTRY(myoverview, env, "message_id",  message_id);
-        OBJ_SET_ENTRY(myoverview, env, "references",  references);
-        OBJ_SET_ENTRY(myoverview, env, "in_reply_to", in_reply_to);
+        ARR_SET_ENTRY(props, env, "date",        date);
+        ARR_SET_ENTRY(props, env, "message_id",  message_id);
+        ARR_SET_ENTRY(props, env, "references",  references);
+        ARR_SET_ENTRY(props, env, "in_reply_to", in_reply_to);
 
-        myoverview.o_set("size",     (int64_t)elt->rfc822_size);
-        myoverview.o_set("uid",      (int64_t)mail_uid(obj->m_stream, i));
-        myoverview.o_set("msgno",    (int64_t)i);
-        myoverview.o_set("recent",   (int64_t)elt->recent);
-        myoverview.o_set("flagged",  (int64_t)elt->flagged);
-        myoverview.o_set("answered", (int64_t)elt->answered);
-        myoverview.o_set("deleted",  (int64_t)elt->deleted);
-        myoverview.o_set("seen",     (int64_t)elt->seen);
-        myoverview.o_set("draft",    (int64_t)elt->draft);
+        props.set("size",     (int64_t)elt->rfc822_size);
+        props.set("uid",      (int64_t)mail_uid(obj->m_stream, i));
+        props.set("msgno",    (int64_t)i);
+        props.set("recent",   (int64_t)elt->recent);
+        props.set("flagged",  (int64_t)elt->flagged);
+        props.set("answered", (int64_t)elt->answered);
+        props.set("deleted",  (int64_t)elt->deleted);
+        props.set("seen",     (int64_t)elt->seen);
+        props.set("draft",    (int64_t)elt->draft);
 
-        ret.append(std::move(myoverview));
+        ret.append(ObjectData::FromArray(props.create()));
       }
     }
   }
@@ -1051,10 +1038,7 @@ static Variant HHVM_FUNCTION(imap_fetchstructure, const Resource& imap_stream,
     return false;
   }
 
-  auto ret = SystemLib::AllocStdClassObject();
-  _php_imap_add_body(ret, body, true);
-
-  return ret;
+  return _php_imap_body(body, true);
 }
 
 static bool HHVM_FUNCTION(imap_gc, const Resource& imap_stream,
@@ -1094,41 +1078,41 @@ HHVM_FUNCTION(imap_headerinfo, const Resource& imap_stream, int64_t msg_number,
 
   /* call a function to parse all the text, so that we can use the
      same function to parse text from other sources */
-  Object ret = _php_make_header_object(en);
+  Array props = _php_make_header_props(en);
 
   /* now run through properties that are only going to be returned
      from a server, not text headers */
-  ret.o_set("Recent",   cache->recent ? (cache->seen ? "R": "N") : " ");
-  ret.o_set("Unseen",   (cache->recent | cache->seen) ? " " : "U");
-  ret.o_set("Flagged",  cache->flagged  ? "F" : " ");
-  ret.o_set("Answered", cache->answered ? "A" : " ");
-  ret.o_set("Deleted",  cache->deleted  ? "D" : " ");
-  ret.o_set("Draft",    cache->draft    ? "X" : " ");
+  props.set(String("Recent"),   cache->recent ? (cache->seen ? "R": "N") : " ");
+  props.set(String("Unseen"),   (cache->recent | cache->seen) ? " " : "U");
+  props.set(String("Flagged"),  cache->flagged  ? "F" : " ");
+  props.set(String("Answered"), cache->answered ? "A" : " ");
+  props.set(String("Deleted"),  cache->deleted  ? "D" : " ");
+  props.set(String("Draft"),    cache->draft    ? "X" : " ");
 
   char dummy[2000], fulladdress[MAILTMPLEN + 1];
   snprintf(dummy, sizeof(dummy), "%4ld", cache->msgno);
-  ret.o_set("Msgno", String(dummy, CopyString));
+  props.set(String("Msgno"), String(dummy, CopyString));
 
   mail_date(dummy, cache);
-  ret.o_set("MailDate", String(dummy, CopyString));
+  props.set(String("MailDate"), String(dummy, CopyString));
 
   snprintf(dummy, sizeof(dummy), "%ld", cache->rfc822_size);
-  ret.o_set("Size", String(dummy, CopyString));
+  props.set(String("Size"), String(dummy, CopyString));
 
-  ret.o_set("udate", (int64_t)mail_longdate(cache));
+  props.set(String("udate"), (int64_t)mail_longdate(cache));
 
   if (en->from && fromlength) {
     fulladdress[0] = 0x00;
     mail_fetchfrom(fulladdress, obj->m_stream, msg_number, fromlength);
-    ret.o_set("fetchfrom", String(fulladdress, CopyString));
+    props.set(String("fetchfrom"), String(fulladdress, CopyString));
   }
   if (en->subject && subjectlength) {
     fulladdress[0] = 0x00;
     mail_fetchsubject(fulladdress, obj->m_stream, msg_number, subjectlength);
-    ret.o_set("fetchsubject", String(fulladdress, CopyString));
+    props.set(String("fetchsubject"), String(fulladdress, CopyString));
   }
 
-  return ret;
+  return ObjectData::FromArray(props.detach());
 }
 
 static Variant HHVM_FUNCTION(imap_header, const Resource& imap_stream,
@@ -1258,7 +1242,6 @@ static bool HHVM_FUNCTION(imap_mail, const String& to, const String& subject,
 
 static Variant HHVM_FUNCTION(imap_mailboxmsginfo, const Resource& imap_stream) {
   auto obj = cast<ImapStream>(imap_stream);
-  auto ret = SystemLib::AllocStdClassObject();
 
   int64_t unreadmsg = 0, deletedmsg = 0, msize = 0;
 
@@ -1276,19 +1259,19 @@ static Variant HHVM_FUNCTION(imap_mailboxmsginfo, const Resource& imap_stream) {
     msize = msize + cache->rfc822_size;
   }
 
-  ret.o_set("Unread", (int64_t)unreadmsg);
-  ret.o_set("Deleted", (int64_t)deletedmsg);
-  ret.o_set("Nmsgs", (int64_t)obj->m_stream->nmsgs);
-  ret.o_set("Size", (int64_t)msize);
-
   char date[100];
   rfc822_date(date);
-  ret.o_set("Date", String(date, CopyString));
-  ret.o_set("Driver", String(obj->m_stream->dtb->name, CopyString));
-  ret.o_set("Mailbox", String(obj->m_stream->mailbox, CopyString));
-  ret.o_set("Recent", (int64_t)msize);
 
-  return ret;
+  ArrayInit props(8, ArrayInit::Map{});
+  props.set("Unread", (int64_t)unreadmsg);
+  props.set("Deleted", (int64_t)deletedmsg);
+  props.set("Nmsgs", (int64_t)obj->m_stream->nmsgs);
+  props.set("Size", (int64_t)msize);
+  props.set("Date", String(date, CopyString));
+  props.set("Driver", String(obj->m_stream->dtb->name, CopyString));
+  props.set("Mailbox", String(obj->m_stream->mailbox, CopyString));
+  props.set("Recent", (int64_t)msize);
+  return ObjectData::FromArray(props.create());
 }
 
 static Variant HHVM_FUNCTION(imap_msgno, const Resource& imap_stream,
@@ -1447,30 +1430,29 @@ static bool HHVM_FUNCTION(imap_setflag_full, const Resource& imap_stream,
 static Variant HHVM_FUNCTION(imap_status, const Resource& imap_stream,
                              const String& mailbox, int64_t options /* = 0 */) {
   auto obj = cast<ImapStream>(imap_stream);
-  auto ret = SystemLib::AllocStdClassObject();
 
-  if (mail_status(obj->m_stream, (char *)mailbox.data(), options)) {
-    ret.o_set("flags", (int64_t)IMAPG(status_flags));
-
-    if (IMAPG(status_flags) & SA_MESSAGES) {
-      ret.o_set("messages", (int64_t)IMAPG(status_messages));
-    }
-    if (IMAPG(status_flags) & SA_RECENT) {
-      ret.o_set("recent", (int64_t)IMAPG(status_recent));
-    }
-    if (IMAPG(status_flags) & SA_UNSEEN) {
-      ret.o_set("unseen", (int64_t)IMAPG(status_unseen));
-    }
-    if (IMAPG(status_flags) & SA_UIDNEXT) {
-      ret.o_set("uidnext", (int64_t)IMAPG(status_uidnext));
-    }
-    if (IMAPG(status_flags) & SA_UIDVALIDITY) {
-      ret.o_set("uidvalidity", (int64_t)IMAPG(status_uidvalidity));
-    }
-  } else {
+  if (!mail_status(obj->m_stream, (char *)mailbox.data(), options)) {
     return false;
   }
-  return ret;
+
+  ArrayInit props(6, ArrayInit::Map{});
+  props.set("flags", (int64_t)IMAPG(status_flags));
+  if (IMAPG(status_flags) & SA_MESSAGES) {
+    props.set("messages", (int64_t)IMAPG(status_messages));
+  }
+  if (IMAPG(status_flags) & SA_RECENT) {
+    props.set("recent", (int64_t)IMAPG(status_recent));
+  }
+  if (IMAPG(status_flags) & SA_UNSEEN) {
+    props.set("unseen", (int64_t)IMAPG(status_unseen));
+  }
+  if (IMAPG(status_flags) & SA_UIDNEXT) {
+    props.set("uidnext", (int64_t)IMAPG(status_uidnext));
+  }
+  if (IMAPG(status_flags) & SA_UIDVALIDITY) {
+    props.set("uidvalidity", (int64_t)IMAPG(status_uidvalidity));
+  }
+  return ObjectData::FromArray(props.create());
 }
 
 static bool HHVM_FUNCTION(imap_subscribe, const Resource& imap_stream,

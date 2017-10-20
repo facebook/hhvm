@@ -21,6 +21,7 @@
 #include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/actrec-args.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
@@ -911,21 +912,21 @@ static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
   MySQLFieldInfo *info;
   if (!(info = res->fetchFieldInfo())) return false;
 
-  auto obj = SystemLib::AllocStdClassObject();
-  obj->o_set("name",         info->name);
-  obj->o_set("table",        info->table);
-  obj->o_set("def",          info->def);
-  obj->o_set("max_length",   (int)info->max_length);
-  obj->o_set("not_null",     IS_NOT_NULL(info->flags)? 1 : 0);
-  obj->o_set("primary_key",  IS_PRI_KEY(info->flags)? 1 : 0);
-  obj->o_set("multiple_key", info->flags & MULTIPLE_KEY_FLAG? 1 : 0);
-  obj->o_set("unique_key",   info->flags & UNIQUE_KEY_FLAG? 1 : 0);
-  obj->o_set("numeric",      IS_NUM(info->type)? 1 : 0);
-  obj->o_set("blob",         IS_BLOB(info->flags)? 1 : 0);
-  obj->o_set("type",         php_mysql_get_field_name(info->type));
-  obj->o_set("unsigned",     info->flags & UNSIGNED_FLAG? 1 : 0);
-  obj->o_set("zerofill",     info->flags & ZEROFILL_FLAG? 1 : 0);
-  return obj;
+  ArrayInit props(13, ArrayInit::Map{});
+  props.set("name",         info->name);
+  props.set("table",        info->table);
+  props.set("def",          info->def);
+  props.set("max_length",   (int)info->max_length);
+  props.set("not_null",     IS_NOT_NULL(info->flags)? 1 : 0);
+  props.set("primary_key",  IS_PRI_KEY(info->flags)? 1 : 0);
+  props.set("multiple_key", info->flags & MULTIPLE_KEY_FLAG? 1 : 0);
+  props.set("unique_key",   info->flags & UNIQUE_KEY_FLAG? 1 : 0);
+  props.set("numeric",      IS_NUM(info->type)? 1 : 0);
+  props.set("blob",         IS_BLOB(info->flags)? 1 : 0);
+  props.set("type",         php_mysql_get_field_name(info->type));
+  props.set("unsigned",     info->flags & UNSIGNED_FLAG? 1 : 0);
+  props.set("zerofill",     info->flags & ZEROFILL_FLAG? 1 : 0);
+  return ObjectData::FromArray(props.create());
 }
 
 static bool HHVM_FUNCTION(mysql_field_seek, const Resource& result, int field) {

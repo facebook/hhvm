@@ -1280,6 +1280,16 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let (parser, async) = optional_token parser Async in
     let (parser, coroutine) = optional_token parser Coroutine in
     let (parser, signature) = parse_lambda_signature parser in
+
+    (* TODO(T21285960): Remove this bug-port, stemming from T22184312 *)
+    if not (is_missing async) &&
+      trailing_width async = 0 &&
+      full_width coroutine = 0 &&
+      leading_width signature = 0
+    then
+      failwith "syntax error, unexpected T_LAMBDA_ARROW";
+    (* End of bug-port *)
+
     let (parser, arrow) = require_lambda_arrow parser in
     let (parser, body) = parse_lambda_body parser in
     let result = make_lambda_expression async coroutine signature arrow body in

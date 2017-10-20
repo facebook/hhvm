@@ -70,6 +70,7 @@ std::atomic<int> singleJitConcurrentCount;
 __thread bool acquiredSingleJitConcurrent = false;
 std::atomic<int> singleJitRequests;
 std::atomic<int> relocateRequests;
+__thread bool nonVMThread = false;
 
 /*
  * RFH, or "requests served in first hour" is used as a performance metric that
@@ -86,6 +87,15 @@ const std::vector<int64_t> rfhBuckets = {
 };
 std::atomic<size_t> nextRFH{0};
 
+}
+
+ProfileNonVMThread::ProfileNonVMThread() {
+  always_assert(!nonVMThread);
+  nonVMThread = true;
+}
+
+ProfileNonVMThread::~ProfileNonVMThread() {
+  nonVMThread = false;
 }
 
 void setRelocateRequests(int32_t n) {
@@ -196,6 +206,7 @@ static inline bool doneProfiling() {
 }
 
 static inline RequestKind getRequestKind() {
+  if (nonVMThread) return RequestKind::NonVM;
   if (warmingUp) return RequestKind::Warmup;
   if (doneProfiling()) return RequestKind::Standard;
   if (RuntimeOption::ServerExecutionMode() ||
@@ -279,7 +290,7 @@ static void checkRFH(int64_t finished) {
 }
 
 void profileRequestEnd() {
-  if (warmingUp) return;
+  if (warmingUp || requestKind == RequestKind::NonVM) return;
   auto const finished = numRequests.fetch_add(1, std::memory_order_relaxed) + 1;
   static auto const requestSeries = ServiceData::createTimeSeries(
     "vm.requests",

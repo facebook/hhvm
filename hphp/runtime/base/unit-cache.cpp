@@ -585,6 +585,7 @@ void logLoad(
   case RequestKind::Warmup: ent.setStr("request_kind", "warmup"); break;
   case RequestKind::Profile: ent.setStr("request_kind", "profile"); break;
   case RequestKind::Standard: ent.setStr("request_kind", "standard"); break;
+  case RequestKind::NonVM: ent.setStr("request_kind", "nonVM"); break;
   }
   ent.setInt("request_count", requestCount());
 

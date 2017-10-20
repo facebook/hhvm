@@ -34,6 +34,7 @@
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/base/program-functions.h"
@@ -100,6 +101,8 @@ struct OptimizeData {
 
 struct TranslateWorker : JobQueueWorker<OptimizeData*, void*, true, true> {
   void doJob(OptimizeData* d) override {
+    ProfileNonVMThread nonVM;
+
     hphp_session_init();
     SCOPE_EXIT {
       hphp_context_exit();

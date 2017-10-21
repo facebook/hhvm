@@ -1241,10 +1241,10 @@ bool build_cls_info_rec(IndexData& index,
         }
       }
       ITRACE(9,
-             "  {}: adding trait override {}::{} originally from {}\n",
+             "  {}: overriding method {}::{} with {}::{}\n",
              rleaf->cls->name,
-             meth->cls->name, name,
-             it->second.func->name);
+             it->second.func->cls->name, it->second.func->name,
+             meth->cls->name, name);
       if (it->second.func->attrs & AttrPrivate) {
         it->second.hasPrivateAncestor = true;
       }

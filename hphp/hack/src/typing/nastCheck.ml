@@ -510,6 +510,13 @@ and class_ tenv c =
     (check_is_interface (env, "require implementation of"));
   List.iter c.c_req_extends (check_is_class env);
   List.iter c.c_uses (check_is_trait env);
+  let disallow_static_memoized = TypecheckerOptions.experimental_feature_enabled
+    (Env.get_options env.tenv) "disallow_static_memoized" in
+  if disallow_static_memoized && not c.c_final then
+    begin
+    List.iter c.c_static_methods (check_static_memoized_function);
+    maybe (fun _ m -> check_static_memoized_function m) () c.c_constructor
+    end
   end;
   ()
 
@@ -754,9 +761,15 @@ and add_constraint pos tenv (ty1, ck, ty2) =
 and add_constraints pos tenv (cstrs: locl where_constraint list) =
   List.fold_left cstrs ~init:tenv ~f:(add_constraint pos)
 
+and check_static_memoized_function m =
+  if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes then
+    Errors.static_memoized_function (fst m.m_name);
+  ()
+
 and method_ (env, is_static) m =
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
+
   let p, _ = m.m_name in
   check_coroutines_enabled (m.m_fun_kind = Ast.FCoroutine) env p;
   (* Add method type parameters to environment and localize the bounds *)

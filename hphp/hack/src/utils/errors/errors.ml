@@ -564,7 +564,7 @@ module NastCheck                            = struct
   let suspend_outside_of_coroutine          = 3038 (* DONT MODIFY!!!! *)
   let suspend_in_finally                    = 3039 (* DONT MODIFY!!!! *)
   let break_continue_n_not_supported        = 3040 (* DONT MODIFY!!!! *)
-  (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+  let static_memoized_function   = 3041 (* DONT MODIFY!!!! *)
 end
 
 module Typing                               = struct
@@ -1319,6 +1319,10 @@ let suspend_in_finally p =
 let break_continue_n_not_supported p =
   add NastCheck.break_continue_n_not_supported p
     "Break/continue N operators are not supported."
+
+let static_memoized_function p =
+  add NastCheck.static_memoized_function p
+    "memoize is not allowed on static methods in classes that aren't final "
 
 let magic (p, s) =
   add NastCheck.magic p

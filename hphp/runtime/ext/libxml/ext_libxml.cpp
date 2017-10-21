@@ -517,12 +517,23 @@ static void libxml_error_handler(void* /*userData*/, xmlErrorPtr error) {
 
 static Object create_libxmlerror(xmlError &error) {
   Object ret{s_LibXMLError_class};
-  ret->o_set(s_level,   error.level);
-  ret->o_set(s_code,    error.code);
-  ret->o_set(s_column,  error.int2);
-  ret->o_set(s_message, String(error.message, CopyString));
-  ret->o_set(s_file,    String(error.file, CopyString));
-  ret->o_set(s_line,    error.line);
+  ret->setProp(nullptr, s_level.get(), make_tv<KindOfInt64>(error.level));
+  ret->setProp(nullptr, s_code.get(), make_tv<KindOfInt64>(error.code));
+  ret->setProp(nullptr, s_column.get(), make_tv<KindOfInt64>(error.int2));
+  if (error.message) {
+    String message(error.message);
+    ret->setProp(nullptr, s_message.get(),
+                 make_tv<KindOfString>(message.get()));
+  } else {
+    ret->setProp(nullptr, s_message.get(), make_tv<KindOfNull>());
+  }
+  if (error.file) {
+    String file(error.file);
+    ret->setProp(nullptr, s_file.get(), make_tv<KindOfString>(file.get()));
+  } else {
+    ret->setProp(nullptr, s_file.get(), make_tv<KindOfNull>());
+  }
+  ret->setProp(nullptr, s_line.get(), make_tv<KindOfInt64>(error.line));
   return ret;
 }
 

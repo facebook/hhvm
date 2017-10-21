@@ -144,7 +144,7 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
 
     if (!assoc) {
       if (key.empty()) {
-        var.getObjectData()->o_set(s_empty, tmpvar);
+        var.getObjectData()->setProp(nullptr, s_empty.get(), *tmpvar.asCell());
       } else {
         var.getObjectData()->o_set(key, tmpvar);
       }

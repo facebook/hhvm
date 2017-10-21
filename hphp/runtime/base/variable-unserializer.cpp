@@ -200,6 +200,7 @@ void throwInvalidClassName() {
 }
 
 const StaticString
+  s_serialized("serialized"),
   s_unserialize("unserialize"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
@@ -998,7 +999,8 @@ void VariableUnserializer::unserializeVariant(
         }
       } else {
         obj = Object{SystemLib::s___PHP_Incomplete_ClassClass};
-        obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
+        obj->setProp(nullptr, s_PHP_Incomplete_Class_Name.get(),
+                     make_tv<KindOfString>(clsName.get()));
       }
       assert(!obj.isNull());
       tvSet(make_tv<KindOfObject>(obj.get()), *self.asTypedValue());
@@ -1147,8 +1149,10 @@ void VariableUnserializer::unserializeVariant(
           raise_error("unknown class %s", clsName.data());
         }
         Object ret = create_object_only(s_PHP_Incomplete_Class);
-        ret->o_set(s_PHP_Incomplete_Class_Name, clsName);
-        ret->o_set("serialized", serialized);
+        ret->setProp(nullptr, s_PHP_Incomplete_Class_Name.get(),
+                     make_tv<KindOfString>(clsName.get()));
+        ret->setProp(nullptr, s_serialized.get(),
+                     make_tv<KindOfString>(serialized.get()));
         return ret;
       }();
 

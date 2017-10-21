@@ -517,10 +517,13 @@ static Object pdo_stmt_instantiate(sp_PDOResource dbh, const String& clsname,
   return Object{cls};
 }
 
+const StaticString s_queryString("queryString");
+
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
                                const String& clsname,
                                const Variant& ctor_args) {
-  object->o_set("queryString", stmt->query_string);
+  object->setProp(nullptr, s_queryString.get(),
+                  make_tv<KindOfString>(stmt->query_string.get()));
   if (clsname.empty()) {
     return;
   }

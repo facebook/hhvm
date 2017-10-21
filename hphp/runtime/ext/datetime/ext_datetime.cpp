@@ -293,9 +293,15 @@ Array HHVM_METHOD(DateTime, __sleep) {
   DateTimeData* data = Native::data<DateTimeData>(this_);
   int zoneType = data->m_dt->zoneType();
 
-  this_->o_set(s_date, data->format(s_ISOformat));
-  this_->o_set(s_timezone_type, zoneType);
-  this_->o_set(s_timezone, zone_type_to_string(zoneType, data->m_dt));
+  this_->setProp(nullptr, s_date.get(),
+                 make_tv<KindOfString>(data->format(s_ISOformat).get()));
+  this_->setProp(nullptr, s_timezone_type.get(),
+                 make_tv<KindOfInt64>(zoneType));
+  this_->setProp(
+    nullptr,
+    s_timezone.get(),
+    make_tv<KindOfString>(zone_type_to_string(zoneType, data->m_dt).get())
+  );
   return make_packed_array(s_date, s_timezone_type, s_timezone);
 }
 

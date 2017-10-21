@@ -1206,6 +1206,8 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunction *function,
   return use;
 }
 
+const StaticString s_headerfault("headerfault");
+
 static xmlDocPtr serialize_response_call(
     std::shared_ptr<sdlFunction> function,
     const char *function_name,
@@ -1278,14 +1280,14 @@ static xmlDocPtr serialize_response_call(
           }
         }
         hdr_ret = ht->m_data;
-        obj->o_set("headerfault", hdr_ret);
+        obj->setProp(nullptr, s_headerfault.get(), *hdr_ret.asCell());
       }
 
       if (h->function) {
         if (serialize_response_call2(head, h->function,
                                      h->function_name.data(), uri,
                                      hdr_ret, version, 0) == SOAP_ENCODED) {
-          obj->o_set("headerfault", hdr_ret);
+          obj->setProp(nullptr, s_headerfault.get(), *hdr_ret.asCell());
           use = SOAP_ENCODED;
         }
       } else {
@@ -3002,12 +3004,24 @@ void HHVM_METHOD(SoapVar, __construct,
       return;
     }
   }
-  this_->o_set(s_enc_type, ntype);
-  if (data.toBoolean())        this_->o_set(s_enc_value,  data);
-  if (!type_name.empty())      this_->o_set(s_enc_stype,  type_name);
-  if (!type_namespace.empty()) this_->o_set(s_enc_ns,     type_namespace);
-  if (!node_name.empty())      this_->o_set(s_enc_name,   node_name);
-  if (!node_namespace.empty()) this_->o_set(s_enc_namens, node_namespace);
+  this_->setProp(nullptr, s_enc_type.get(), make_tv<KindOfInt64>(ntype));
+  if (data.toBoolean()) this_->setProp(nullptr, s_enc_value.get(), *data.asCell());
+  if (!type_name.empty()) {
+    this_->setProp(nullptr, s_enc_stype.get(),
+                   make_tv<KindOfString>(type_name.get()));
+  }
+  if (!type_namespace.empty()) {
+    this_->setProp(nullptr, s_enc_ns.get(),
+                   make_tv<KindOfString>(type_namespace.get()));
+  }
+  if (!node_name.empty()) {
+    this_->setProp(nullptr, s_enc_name.get(),
+                   make_tv<KindOfString>(node_name.get()));
+  }
+  if (!node_namespace.empty()) {
+    this_->setProp(nullptr, s_enc_namens.get(),
+                   make_tv<KindOfString>(node_namespace.get()));
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3065,10 +3079,11 @@ void HHVM_METHOD(SoapHeader, __construct,
   nativeData->m_data = data;
   nativeData->m_mustUnderstand = mustunderstand;
 
-  this_->o_set(s_namespace, ns);
-  this_->o_set(s_name, name);
-  this_->o_set(s_data, data);
-  this_->o_set(s_mustUnderstand, mustunderstand);
+  this_->setProp(nullptr, s_namespace.get(), make_tv<KindOfString>(ns.get()));
+  this_->setProp(nullptr, s_name.get(), make_tv<KindOfString>(name.get()));
+  this_->setProp(nullptr, s_data.get(), *data.asCell());
+  this_->setProp(nullptr, s_mustUnderstand.get(),
+                 make_tv<KindOfBoolean>(mustunderstand));
 
   if (actor.isInteger() &&
       (actor.toInt64() == SOAP_ACTOR_NEXT ||

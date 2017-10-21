@@ -897,7 +897,7 @@ static void object_set(Variant &var,
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
     if (key.empty()) {
-      var.getObjectData()->o_set(s__empty_, value);
+      var.getObjectData()->setProp(nullptr, s__empty_.get(), *value.asCell());
     } else {
       var.getObjectData()->o_set(key, value);
     }

@@ -1728,7 +1728,7 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
   // It is possible that $name does not get serialized. If a class derives
   // from ReflectionClass and the return value of its __sleep() function does
   // not contain 'name', $name gets ignored. So, we restore $name here.
-  obj->o_set(s_name, result);
+  obj->setProp(nullptr, s_name.get(), make_tv<KindOfString>(result.get()));
 }
 
 static Variant reflection_extension_name_get(const Object& this_) {

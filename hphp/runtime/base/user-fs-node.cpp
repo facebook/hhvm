@@ -25,6 +25,7 @@
 namespace HPHP {
 
 StaticString s_call("__call");
+StaticString s_context("context");
 
 UserFSNode::UserFSNode(Class* cls,
                        const req::ptr<StreamContext>& context /*= nullptr */) {
@@ -37,7 +38,12 @@ UserFSNode::UserFSNode(Class* cls,
   }
 
   m_obj = Object{m_cls};
-  m_obj.o_set("context", Variant(context));
+  if (context.get()) {
+    m_obj->setProp(nullptr, s_context.get(),
+                   make_tv<KindOfResource>(context.get()->hdr()));
+  } else {
+    m_obj->setProp(nullptr, s_context.get(), make_tv<KindOfNull>());
+  }
   auto ret = Variant::attach(
     g_context->invokeFuncFew(ctor, m_obj.get())
   );

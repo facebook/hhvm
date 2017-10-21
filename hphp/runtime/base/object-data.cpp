@@ -409,14 +409,14 @@ ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName,
   if (Variant* t = o_realProp(propName, flags, context)) {
     if (!useSet || t->isInitialized()) {
       *t = v;
-      return variant(v);
+      return v;
     }
   }
 
   if (useSet) {
     invokeSet(propName.get(), *v.asCell());
   }
-  return variant(v);
+  return v;
 }
 
 Variant ObjectData::o_set(const String& propName, const Variant& v) {

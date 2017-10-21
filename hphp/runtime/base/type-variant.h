@@ -1265,7 +1265,8 @@ struct VRefParamValue {
 
   /* implicit */ VRefParamValue() : m_var(Variant::NullInit()) {}
   /* implicit */ VRefParamValue(RefResult v)
-    : m_var(Variant::StrongBind{}, const_cast<Variant&>(variant(v))) {} // XXX
+    : m_var(Variant::StrongBind{},
+            const_cast<Variant&>(reinterpret_cast<const Variant&>(v))) {} // XXX
   template <typename T>
   Variant &operator=(const T &v) const = delete;
   operator const Variant&() const { return m_var; }

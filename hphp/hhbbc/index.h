@@ -149,11 +149,7 @@ using PropState = std::map<LSString,Type>;
 //////////////////////////////////////////////////////////////////////
 
 // private types
-struct IndexData;
-struct FuncFamily;
-struct FuncInfo;
 struct ClassInfo;
-struct MethTabEntryPair;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -330,6 +326,11 @@ struct Func {
    * looking for a caller's frame.
    */
   bool mightBeSkipFrame() const;
+
+  struct FuncInfo;
+  struct MethTabEntryPair;
+  struct FuncFamily;
+
 private:
   friend struct ::HPHP::HHBBC::Index;
   struct FuncName {
@@ -885,6 +886,7 @@ struct Index {
   bool must_be_derived_from(borrowed_ptr<const php::Class>,
                             borrowed_ptr<const php::Class>) const;
 
+  struct IndexData;
 private:
   Index(const Index&) = delete;
   Index& operator=(Index&&) = delete;

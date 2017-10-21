@@ -209,9 +209,12 @@ struct MethTabEntry {
 
 }
 
-struct MethTabEntryPair : ISStringToOneT<MethTabEntry>::value_type {};
+struct res::Func::MethTabEntryPair :
+      ISStringToOneT<MethTabEntry>::value_type {};
 
 namespace {
+
+using MethTabEntryPair = res::Func::MethTabEntryPair;
 
 inline MethTabEntryPair* mteFromElm(
   ISStringToOneT<MethTabEntry>::value_type& elm) {
@@ -262,6 +265,8 @@ PropState make_unknown_propstate(borrowed_ptr<const php::Class> cls,
   return ret;
 }
 
+}
+
 /*
  * Currently inferred information about a PHP function.
  *
@@ -270,7 +275,8 @@ PropState make_unknown_propstate(borrowed_ptr<const php::Class> cls,
  * not complete information), because we may deduce other facts based
  * on it.
  */
-struct FuncInfoValue {
+struct res::Func::FuncInfo {
+  borrowed_ptr<const php::Func> func = nullptr;
   /*
    * The best-known return type of the function, if we have any
    * information.  May be TBottom if the function is known to never
@@ -308,6 +314,8 @@ struct FuncInfoValue {
   bool effectFree{false};
 };
 
+namespace {
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -330,6 +338,10 @@ struct ConstInfo {
   bool                          readonly;
 };
 
+using FuncFamily       = res::Func::FuncFamily;
+using FuncInfo         = res::Func::FuncInfo;
+using MethTabEntryPair = res::Func::MethTabEntryPair;
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -345,15 +357,13 @@ struct ConstInfo {
  * to a FuncFamily that contains references to all the possible
  * overriding-functions.
  */
-struct FuncFamily {
+struct res::Func::FuncFamily {
   bool containsInterceptables = false;
   bool isCtor = false;
   std::vector<const MethTabEntryPair*> possibleFuncs;
 };
 
 //////////////////////////////////////////////////////////////////////
-
-struct FuncInfo : std::pair<borrowed_ptr<const php::Func>, FuncInfoValue> {};
 
 /*
  * Known information about a particular possible instantiation of a
@@ -666,7 +676,7 @@ SString Func::name() const {
     val,
     [&] (FuncName s) { return s.name; },
     [&] (MethodName s) { return s.name; },
-    [&] (borrowed_ptr<FuncInfo> fi) { return fi->first->name; },
+    [&] (borrowed_ptr<FuncInfo> fi) { return fi->func->name; },
     [&] (borrowed_ptr<const MethTabEntryPair> mte) { return mte->first; },
     [&] (borrowed_ptr<FuncFamily> fa) -> SString {
       if (fa->isCtor) return s_construct.get();
@@ -687,7 +697,7 @@ borrowed_ptr<const php::Func> Func::exactFunc() const {
     val,
     [&](FuncName /*s*/)                           { return Ret{}; },
     [&](MethodName /*s*/)                         { return Ret{}; },
-    [&](borrowed_ptr<FuncInfo> fi)                { return fi->first; },
+    [&](borrowed_ptr<FuncInfo> fi)                { return fi->func; },
     [&](borrowed_ptr<const MethTabEntryPair> mte) { return mte->second.func; },
     [&](borrowed_ptr<FuncFamily> /*fa*/)          { return Ret{}; }
   );
@@ -714,7 +724,7 @@ bool Func::mightReadCallerFrame() const {
     },
     [&](MethodName /*s*/) { return false; },
     [&](borrowed_ptr<FuncInfo> fi) {
-      return fi->first->attrs & AttrReadsCallerFrame;
+      return fi->func->attrs & AttrReadsCallerFrame;
     },
     [&](borrowed_ptr<const MethTabEntryPair>) { return false; },
     [&](borrowed_ptr<FuncFamily> fa) {
@@ -735,7 +745,7 @@ bool Func::mightWriteCallerFrame() const {
     },
     [&](MethodName /*s*/) { return false; },
     [&](borrowed_ptr<FuncInfo> fi) {
-      return fi->first->attrs & AttrWritesCallerFrame;
+      return fi->func->attrs & AttrWritesCallerFrame;
     },
     [&](borrowed_ptr<const MethTabEntryPair>) { return false; },
     [&](borrowed_ptr<FuncFamily> fa) {
@@ -750,7 +760,7 @@ bool Func::isFoldable() const {
   return match<bool>(val, [&](FuncName /*s*/) { return false; },
                      [&](MethodName /*s*/) { return false; },
                      [&](borrowed_ptr<FuncInfo> fi) {
-                       return fi->first->attrs & AttrIsFoldable;
+                       return fi->func->attrs & AttrIsFoldable;
                      },
                      [&](borrowed_ptr<const MethTabEntryPair> mte) {
                        return mte->second.func->attrs & AttrIsFoldable;
@@ -767,7 +777,7 @@ bool Func::mightBeSkipFrame() const {
     // uniquely resolvable. Methods are more complicated though.
     [&](FuncName /*s*/) { return false; },
     [&](MethodName /*s*/) { return true; },
-    [&](borrowed_ptr<FuncInfo> fi) { return fi->first->attrs & AttrSkipFrame; },
+    [&](borrowed_ptr<FuncInfo> fi) { return fi->func->attrs & AttrSkipFrame; },
     [&](borrowed_ptr<const MethTabEntryPair> mte) {
       return mte->second.func->attrs & AttrSkipFrame;
     },
@@ -795,7 +805,7 @@ std::string show(const Func& f) {
 
 using IfaceSlotMap = std::unordered_map<borrowed_ptr<const php::Class>, Slot>;
 
-struct IndexData {
+struct Index::IndexData {
   IndexData() = default;
   IndexData(const IndexData&) = delete;
   IndexData& operator=(const IndexData&) = delete;
@@ -914,6 +924,8 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+using IndexData = Index::IndexData;
+
 DependencyContext dep_context(IndexData& data, const Context& ctx) {
   if (!ctx.cls || !data.useClassDependencies) return ctx.func;
   auto const cls = ctx.cls->closureContextCls ?
@@ -940,22 +952,22 @@ std::mutex func_info_mutex;
 borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
                                         borrowed_ptr<const php::Func> f) {
   auto fi = &data.funcInfo[f->idx];
-  if (UNLIKELY(fi->first == nullptr)) {
+  if (UNLIKELY(fi->func == nullptr)) {
     if (f->nativeInfo) {
       std::lock_guard<std::mutex> g{func_info_mutex};
-      if (fi->first) {
-        assert(fi->first == f);
+      if (fi->func) {
+        assert(fi->func == f);
         return fi;
       }
       // We'd infer this anyway when we look at the bytecode body
       // (NativeImpl) for the HNI function, but just initializing it
       // here saves on whole-program iterations.
-      fi->second.returnTy = native_function_return_type(f);
+      fi->returnTy = native_function_return_type(f);
     }
-    fi->first = f;
+    fi->func = f;
   }
 
-  assert(fi->first == f);
+  assert(fi->func == f);
   return fi;
 }
 
@@ -2311,7 +2323,7 @@ void check_invariants(IndexData& data) {
 Type context_sensitive_return_type(const Index& index,
                                    borrowed_ptr<FuncInfo> finfo,
                                    CallContext callCtx) {
-  auto const callInsensitiveType = finfo->second.returnTy;
+  auto const callInsensitiveType = finfo->returnTy;
 
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
@@ -2322,21 +2334,21 @@ Type context_sensitive_return_type(const Index& index,
   // $this.)
   bool const tryContextSensitive = [&] {
     if (!options.ContextSensitiveInterp ||
-        finfo->first->params.empty() ||
+        finfo->func->params.empty() ||
         interp_nesting_level + 1 >= max_interp_nexting_level ||
         callInsensitiveType == TBottom) {
       return false;
     }
 
-    if (callCtx.args.size() < finfo->first->params.size()) return true;
+    if (callCtx.args.size() < finfo->func->params.size()) return true;
     auto ctx = Context {
-      finfo->first->unit,
-      const_cast<php::Func*>(finfo->first),
-      finfo->first->cls
+      finfo->func->unit,
+      const_cast<php::Func*>(finfo->func),
+      finfo->func->cls
     };
-    for (auto i = 0; i < finfo->first->params.size(); i++) {
+    for (auto i = 0; i < finfo->func->params.size(); i++) {
       if (RuntimeOption::EvalHardTypeHints) {
-        auto const constraint = finfo->first->params[i].typeConstraint;
+        auto const constraint = finfo->func->params[i].typeConstraint;
         if (constraint.hasConstraint() && !constraint.isTypeVar() &&
             !constraint.isTypeConstant()) {
           auto t = index.lookup_constraint(ctx, constraint);
@@ -2360,14 +2372,14 @@ Type context_sensitive_return_type(const Index& index,
 
   if (index.frozen()) {
     ContextRetTyMap::const_accessor acc;
-    if (finfo->second.contextualReturnTypes.find(acc, callCtx)) {
+    if (finfo->contextualReturnTypes.find(acc, callCtx)) {
       return maybe_loosen_staticness(acc->second);
     }
     return callInsensitiveType;
   }
 
   ContextRetTyMap::accessor acc;
-  if (finfo->second.contextualReturnTypes.insert(acc, callCtx)) {
+  if (finfo->contextualReturnTypes.insert(acc, callCtx)) {
     acc->second = TTop;
   } else if (acc->second == TBottom || is_scalar(acc->second)) {
     return maybe_loosen_staticness(acc->second);
@@ -2378,9 +2390,9 @@ Type context_sensitive_return_type(const Index& index,
     SCOPE_EXIT { --interp_nesting_level; };
 
     auto const calleeCtx = Context {
-      finfo->first->unit,
-      const_cast<borrowed_ptr<php::Func>>(finfo->first),
-      finfo->first->cls
+      finfo->func->unit,
+      const_cast<borrowed_ptr<php::Func>>(finfo->func),
+      finfo->func->cls
     };
     return analyze_func_inline(index, calleeCtx, callCtx.args).inferredReturn;
   }();
@@ -3362,7 +3374,7 @@ bool Index::is_async_func(res::Func rfunc) const {
     rfunc.val, [&](res::Func::FuncName /*s*/) { return false; },
     [&](res::Func::MethodName /*s*/) { return false; },
     [&](borrowed_ptr<FuncInfo> finfo) {
-      return finfo->first->isAsync && !finfo->first->isGenerator;
+      return finfo->func->isAsync && !finfo->func->isGenerator;
     },
     [&](borrowed_ptr<const MethTabEntryPair> mte) {
       return mte->second.func->isAsync && !mte->second.func->isGenerator;
@@ -3383,10 +3395,10 @@ bool Index::is_effect_free(res::Func rfunc) const {
     [&](res::Func::FuncName /*s*/) { return false; },
     [&](res::Func::MethodName /*s*/) { return false; },
     [&](borrowed_ptr<FuncInfo> finfo) {
-      return finfo->second.effectFree;
+      return finfo->effectFree;
     },
     [&](borrowed_ptr<const MethTabEntryPair> mte) {
-      return func_info(*m_data, mte->second.func)->second.effectFree;
+      return func_info(*m_data, mte->second.func)->effectFree;
     },
     [&](borrowed_ptr<FuncFamily> fam) {
       return false;
@@ -3459,8 +3471,8 @@ Type Index::lookup_foldable_return_type(Context ctx,
   static __thread uint32_t interp_nesting_level;
 
   auto const& finfo = *func_info(*m_data, func);
-  if (finfo.second.effectFree && is_scalar(finfo.second.returnTy)) {
-    return finfo.second.returnTy;
+  if (finfo.effectFree && is_scalar(finfo.returnTy)) {
+    return finfo.returnTy;
   }
   add_dependency(*m_data, func, ctx, Dep::ReturnTy);
 
@@ -3538,22 +3550,22 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
     rfunc.val, [&](res::Func::FuncName /*s*/) { return TInitGen; },
     [&](res::Func::MethodName /*s*/) { return TInitGen; },
     [&](borrowed_ptr<FuncInfo> finfo) {
-      add_dependency(*m_data, finfo->first, ctx, Dep::ReturnTy);
-      return finfo->second.returnTy;
+      add_dependency(*m_data, finfo->func, ctx, Dep::ReturnTy);
+      return finfo->returnTy;
     },
     [&](borrowed_ptr<const MethTabEntryPair> mte) {
       add_dependency(*m_data, mte->second.func, ctx, Dep::ReturnTy);
       auto const finfo = func_info(*m_data, mte->second.func);
-      if (!finfo->first) return TInitGen;
-      return finfo->second.returnTy;
+      if (!finfo->func) return TInitGen;
+      return finfo->returnTy;
     },
     [&](borrowed_ptr<FuncFamily> fam) {
       auto ret = TBottom;
       for (auto const pf : fam->possibleFuncs) {
         add_dependency(*m_data, pf->second.func, ctx, Dep::ReturnTy);
         auto const finfo = func_info(*m_data, pf->second.func);
-        if (!finfo->first) return TInitGen;
-        ret |= finfo->second.returnTy;
+        if (!finfo->func) return TInitGen;
+        ret |= finfo->returnTy;
       }
       return ret;
     });
@@ -3569,13 +3581,13 @@ Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
       return lookup_return_type(callCtx.caller, rfunc);
     },
     [&](borrowed_ptr<FuncInfo> finfo) {
-      add_dependency(*m_data, finfo->first, callCtx.caller, Dep::ReturnTy);
+      add_dependency(*m_data, finfo->func, callCtx.caller, Dep::ReturnTy);
       return context_sensitive_return_type(*this, finfo, callCtx);
     },
     [&](borrowed_ptr<const MethTabEntryPair> mte) {
       add_dependency(*m_data, mte->second.func, callCtx.caller, Dep::ReturnTy);
       auto const finfo = func_info(*m_data, mte->second.func);
-      if (!finfo->first) return TInitGen;
+      if (!finfo->func) return TInitGen;
       return context_sensitive_return_type(*this, finfo, callCtx);
     },
     [&](borrowed_ptr<FuncFamily> /*fam*/) {
@@ -3598,9 +3610,9 @@ Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func) const {
 
 Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
   auto it = func_info(*m_data, f);
-  if (it->first) {
-    assertx(it->first == f);
-    return it->second.returnTy;
+  if (it->func) {
+    assertx(it->func == f);
+    return it->returnTy;
   }
   return TInitGen;
 }
@@ -3608,9 +3620,9 @@ Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
 CompactVector<Type>
 Index::lookup_local_static_types(borrowed_ptr<const php::Func> f) const {
   auto it = func_info(*m_data, f);
-  if (it->first) {
-    assertx(it->first == f);
-    return it->second.localStaticTypes;
+  if (it->func) {
+    assertx(it->func == f);
+    return it->localStaticTypes;
   }
   return {};
 }
@@ -3652,7 +3664,7 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
       return kind == PrepKind::Ref ? PrepKind::Unknown : kind;
     },
     [&] (borrowed_ptr<FuncInfo> finfo) {
-      return func_param_prep(finfo->first, paramId);
+      return func_param_prep(finfo->func, paramId);
     },
     [&] (borrowed_ptr<const MethTabEntryPair> mte) {
       return func_param_prep(mte->second.func, paramId);
@@ -3841,31 +3853,31 @@ void Index::fixup_return_type(borrowed_ptr<const php::Func> func,
 }
 
 void Index::refine_effect_free(borrowed_ptr<const php::Func> func, bool flag) {
-  auto& fdata = create_func_info(*m_data, func)->second;
+  auto const finfo = create_func_info(*m_data, func);
   always_assert_flog(
-    !fdata.effectFree || flag,
+    !finfo->effectFree || flag,
     "Index effectFree changed from true to false in {} {}{}.\n",
     func->unit->filename,
     func->cls ? folly::to<std::string>(func->cls->name->data(), "::") :
     std::string{},
     func->name);
 
-  fdata.effectFree = flag;
+  finfo->effectFree = flag;
 }
 
 void Index::refine_local_static_types(
   borrowed_ptr<const php::Func> func,
   const CompactVector<Type>& localStaticTypes) {
 
-  auto& fdata = create_func_info(*m_data, func)->second;
+  auto const finfo = create_func_info(*m_data, func);
   if (localStaticTypes.empty()) {
-    fdata.localStaticTypes.clear();
+    finfo->localStaticTypes.clear();
     return;
   }
 
-  fdata.localStaticTypes.resize(localStaticTypes.size(), TTop);
+  finfo->localStaticTypes.resize(localStaticTypes.size(), TTop);
   for (auto i = size_t{0}; i < localStaticTypes.size(); i++) {
-    auto& indexTy = fdata.localStaticTypes[i];
+    auto& indexTy = finfo->localStaticTypes[i];
     auto const& newTy = localStaticTypes[i];
     always_assert_flog(
       newTy.subtypeOf(indexTy),
@@ -3896,7 +3908,7 @@ void Index::init_return_type(const php::Func* func) {
     return;
   }
 
-  auto& fdata = create_func_info(*m_data, func)->second;
+  auto const finfo = create_func_info(*m_data, func);
 
   auto tcT = lookup_constraint(
     Context {
@@ -3929,15 +3941,15 @@ void Index::init_return_type(const php::Func* func) {
          func->cls ? func->cls->name->data() : "",
          func->cls ? "::" : "",
          func->name, show(tcT));
-  fdata.returnTy = std::move(tcT);
+  finfo->returnTy = std::move(tcT);
 }
 
 void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,
                                DependencyContextSet& deps) {
-  auto const fdata = create_func_info(*m_data, func);
+  auto const finfo = create_func_info(*m_data, func);
 
   always_assert_flog(
-    t.subtypeOf(fdata->second.returnTy),
+    t.subtypeOf(finfo->returnTy),
     "Index return type invariant violated in {} {}{}.\n"
     "   {} is not a subtype of {}\n",
     func->unit->filename->data(),
@@ -3945,18 +3957,18 @@ void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,
               : std::string{},
     func->name->data(),
     show(t),
-    show(fdata->second.returnTy)
+    show(finfo->returnTy)
   );
 
-  if (!t.strictSubtypeOf(fdata->second.returnTy)) return;
-  if (fdata->second.returnRefinments + 1 < options.returnTypeRefineLimit) {
-    fdata->second.returnTy = t;
-    ++fdata->second.returnRefinments;
+  if (!t.strictSubtypeOf(finfo->returnTy)) return;
+  if (finfo->returnRefinments + 1 < options.returnTypeRefineLimit) {
+    finfo->returnTy = t;
+    ++finfo->returnRefinments;
     find_deps(*m_data, func, Dep::ReturnTy, deps);
     return;
   }
   FTRACE(1, "maxed out return type refinements on {}:{}\n",
-    func->unit->filename, func->name);
+         func->unit->filename, func->name);
 }
 
 bool Index::refine_closure_use_vars(borrowed_ptr<const php::Class> cls,

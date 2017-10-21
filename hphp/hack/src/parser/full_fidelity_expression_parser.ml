@@ -54,6 +54,11 @@ module WithStatementAndDeclAndTypeParser
     let parser = { parser with lexer; errors } in
     (parser, node)
 
+  let is_valid_type_argument_list type_arguments parser0 parser1 =
+    kind type_arguments = SyntaxKind.TypeArguments
+    && List.for_all (fun c -> not (is_missing c)) (children type_arguments)
+    && parser0.errors = parser1.errors
+
   let parse_return_type parser =
     let type_parser = TypeParser.make parser.lexer
       ~hhvm_compat_mode:parser.hhvm_compat_mode
@@ -630,16 +635,15 @@ module WithStatementAndDeclAndTypeParser
   and parse_remaining_expression_or_specified_function_call parser term
       prefix_kind =
     let parser1, type_arguments = parse_generic_type_arguments_opt parser in
-    if kind type_arguments <> SyntaxKind.TypeArguments
-    || List.exists is_missing @@ children type_arguments
-    || parser1.errors <> parser.errors
-    then parse_remaining_binary_expression parser term prefix_kind
-    else
+    if is_valid_type_argument_list type_arguments parser parser1
+    then
       let (parser, left, args, right) = parse_expression_list_opt parser1 in
       let result = make_function_call_with_type_arguments_expression
         term type_arguments left args right
       in
       parse_remaining_expression parser result
+    else
+      parse_remaining_binary_expression parser term prefix_kind
 
   (* checks if t is a prefix unary expression where operator has expected kind
      and and operand matched predicate *)
@@ -1666,7 +1670,18 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let name = make_token token in
     match peek_token_kind parser with
     | LeftBrace ->
+      let name = make_simple_type_specifier name in
       parse_collection_literal_expression parser name
+    | LessThan ->
+      let parser1, type_arguments =
+        parse_generic_type_arguments_opt parser in
+      if is_valid_type_argument_list type_arguments parser parser1
+         && peek_token_kind parser1 = LeftBrace
+      then
+        let name = make_generic_type_specifier name type_arguments in
+        parse_collection_literal_expression parser1 name
+      else
+        (parser, make_qualified_name_expression name)
     | _ ->
       (parser, make_qualified_name_expression name)
 

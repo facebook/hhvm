@@ -743,11 +743,20 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       { vector_intrinsic_keyword = kw
       ; vector_intrinsic_members = members
       ; _ }
-    | CollectionLiteralExpression
-      { collection_literal_name         = kw
-      ; collection_literal_initializers = members
-      ; _ }
       -> Collection (pos_name kw, couldMap ~f:pAField members env)
+    | CollectionLiteralExpression
+      { collection_literal_name         = collection_name
+      ; collection_literal_initializers = members
+      ; _ } ->
+      let collection_name =
+        match syntax collection_name with
+        | SimpleTypeSpecifier { simple_type_specifier = class_type }
+        (* TODO: currently type arguments are dropped on the floor,
+           though they should be properly propagated to the typechecker *)
+        | GenericTypeSpecifier { generic_class_type = class_type; _ } ->
+          pos_name class_type
+        | _ -> pos_name collection_name in
+      Collection (collection_name, couldMap ~f:pAField members env)
 
     | VarrayIntrinsicExpression { varray_intrinsic_members = members; _ } ->
       Varray (couldMap ~f:pExpr members env)

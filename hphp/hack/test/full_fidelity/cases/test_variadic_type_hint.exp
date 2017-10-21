@@ -13,6 +13,6 @@
       (expression_statement((rparen))(missing))
       (expression_statement((:)(whitespace))(missing))
       (expression_statement(collection_literal_expression(
-        (name)(whitespace))(({))(missing)((})))(missing)
+        simple_type_specifier((name)(whitespace)))(({))(missing)((})))(missing)
       )
     )(missing)))))

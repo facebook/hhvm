@@ -1983,7 +1983,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; list_right_paren: Token.t value
     }
   and collection_literal_expression =
-    { collection_literal_name: Token.t value
+    { collection_literal_name: specifier value
     ; collection_literal_left_brace: Token.t value
     ; collection_literal_initializers: constructor_expression listesque value
     ; collection_literal_right_brace: Token.t value

@@ -1342,7 +1342,7 @@ let schema : schema_node list =
     ; prefix      = "collection_literal"
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
-      [ "name", Token
+      [ "name",  Aggregate Specifier
       ; "left_brace", Token
       ; "initializers", ZeroOrMore (Aggregate ConstructorExpression)
       ; "right_brace", Token

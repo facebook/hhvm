@@ -11,7 +11,6 @@ slow/class_type_constant/type_constant4.php
 slow/class_type_constant/type_constant6.php
 slow/closure/lambda_implicit_this.php
 slow/closure/return_types.php
-slow/collection_classes/815.php
 slow/concat/1578.php
 slow/constant/1597.php
 slow/constant/casing.php
@@ -30,7 +29,6 @@ slow/dynamic_variables/1164.php
 slow/exceptions/62.php
 slow/ext_function/register_postsend_function-simple.php
 slow/ext_function/register_shutdown_function-simple.php
-slow/ext_mailparse/ext_uudecode.php
 slow/ext_misc/ext_misc.php
 slow/ext_phar/composer.php
 slow/ext_phar/create_tar.php

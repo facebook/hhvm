@@ -2454,13 +2454,13 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { collection_literal_right_brace = validate_token x.Syntax.collection_literal_right_brace
     ; collection_literal_initializers = validate_list_with (validate_constructor_expression) x.Syntax.collection_literal_initializers
     ; collection_literal_left_brace = validate_token x.Syntax.collection_literal_left_brace
-    ; collection_literal_name = validate_token x.Syntax.collection_literal_name
+    ; collection_literal_name = validate_specifier x.Syntax.collection_literal_name
     }
   | s -> validation_fail SyntaxKind.CollectionLiteralExpression s
   and invalidate_collection_literal_expression : collection_literal_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.CollectionLiteralExpression
-      { Syntax.collection_literal_name = invalidate_token x.collection_literal_name
+      { Syntax.collection_literal_name = invalidate_specifier x.collection_literal_name
       ; Syntax.collection_literal_left_brace = invalidate_token x.collection_literal_left_brace
       ; Syntax.collection_literal_initializers = invalidate_list_with (invalidate_constructor_expression) x.collection_literal_initializers
       ; Syntax.collection_literal_right_brace = invalidate_token x.collection_literal_right_brace

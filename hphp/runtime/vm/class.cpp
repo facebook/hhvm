@@ -2727,7 +2727,11 @@ void Class::setInterfaceVtables() {
     auto const nMethods = iface->numMethods();
     auto const vtable = reinterpret_cast<LowPtr<Func>*>(cursor);
     cursor += nMethods * sizeof(LowPtr<Func>);
-    always_assert(vtableVec[slot].vtable == nullptr);
+    if (vtableVec[slot].vtable != nullptr) {
+      raise_error("Static analysis failure: "
+                  "%s was expected to fatal at runtime, but didn't",
+                  m_preClass->name()->data());
+    }
     vtableVec[slot].vtable = vtable;
     vtableVec[slot].iface = iface;
 

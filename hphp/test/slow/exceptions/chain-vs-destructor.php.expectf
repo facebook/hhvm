@@ -1,0 +1,19 @@
+string(13) "X::__destruct"
+string(7) "complex"
+object(Exception)#1 (7) {
+  ["message":protected]=>
+  string(6) "simple"
+  ["string":"Exception":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(%d) "%s/chain-vs-destructor.php"
+  ["line":protected]=>
+  int(%d)
+  ["trace":"Exception":private]=>
+  array(0) {
+  }
+  ["previous":"Exception":private]=>
+  NULL
+}

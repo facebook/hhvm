@@ -352,13 +352,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
       prev_lval.type() != KindOfObject ||
       !prev_lval.val().pobj->instanceof(SystemLib::s_ThrowableClass)
     ) {
-      // Since we are overwriting, decref.
-      tvDecRefGen(prev_lval.tv_ptr());
-      // Objects held in m_faults are not refcounted, therefore we need to
-      // increase the ref count here.
-      prev_lval.type() = KindOfObject;
-      prev_lval.val().pobj = prev;
-      prev->incRefCount();
+      tvSetIgnoreRef(make_tv<KindOfObject>(prev), prev_lval);
       break;
     }
     top = prev_lval.val().pobj;

@@ -1572,7 +1572,11 @@ module WithExpressionAndStatementAndTypeParser
       | Require
       | Require_once -> parse_inclusion_directive parser
       | Type
-      | Newtype -> parse_alias_declaration parser (make_missing())
+      | Newtype when
+         match peek_token_kind parser1 with
+         | Name | Classname -> true
+         | _ -> false ->
+        parse_alias_declaration parser (make_missing())
       | Enum -> parse_enum_declaration parser (make_missing())
       | Namespace -> parse_namespace_declaration parser
       | Use -> parse_namespace_use_declaration parser

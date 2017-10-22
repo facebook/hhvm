@@ -7,7 +7,6 @@ quick/hh_numbers.php
 quick/instanceofInterface.php
 quick/ns_existing_names_class.php
 quick/parse_type_constraint_where_clauses.php
-quick/parse_type_not_typedef.php
 quick/prop_order.php
 quick/prop_order_parens.php
 quick/selfparent.php

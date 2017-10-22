@@ -161,3 +161,4 @@ val error2065 : string
 val error2066 : string
 val error2067 : string
 val error2068 : string
+val error2069 : string

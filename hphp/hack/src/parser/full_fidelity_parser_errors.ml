@@ -992,6 +992,8 @@ let invalid_shape_field_check node =
 
 let expression_errors node parents is_hack hhvm_compat_mode =
   match syntax node with
+  | SafeMemberSelectionExpression _ when not is_hack ->
+    [ make_error_from_node node SyntaxError.error2069 ]
   | SubscriptExpression { subscript_left_bracket; _}
     when not hhvm_compat_mode && is_left_brace subscript_left_bracket ->
     [ make_error_from_node node SyntaxError.error2020 ]

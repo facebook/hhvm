@@ -1379,10 +1379,14 @@ module WithExpressionAndStatementAndTypeParser
     (parser, result)
 
   and parse_where_constraint_list_item parser =
-    let (parser, where_constraint) = parse_where_constraint parser in
-    let (parser, comma) = optional_token parser Comma in
-    let result = make_list_item where_constraint comma in
-    (parser, result)
+    match peek_token_kind parser with
+    | Semicolon | LeftBrace ->
+      (parser, None)
+    | _ ->
+      let (parser, where_constraint) = parse_where_constraint parser in
+      let (parser, comma) = optional_token parser Comma in
+      let result = make_list_item where_constraint comma in
+      (parser, Some result)
 
   and parse_where_clause parser =
     (* TODO: Add this to the specification
@@ -1393,11 +1397,9 @@ module WithExpressionAndStatementAndTypeParser
       constraint-list:
         constraint
         constraint-list , constraint
-
-      Note that a trailing comma is not accepted in a constraint list
     *)
     let (parser, keyword) = assert_token parser Where in
-    let (parser, constraints) = parse_list_until_no_comma
+    let (parser, constraints) = parse_list_until_none
       parser parse_where_constraint_list_item in
     let result = make_where_clause keyword constraints in
     (parser, result)

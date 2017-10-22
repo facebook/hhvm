@@ -24,6 +24,7 @@ module Trivia = Full_fidelity_positioned_trivia
 module TriviaKind = Full_fidelity_trivia_kind
 module SourceData = Full_fidelity_editable_positioned_original_source_data
 module SourceText = Full_fidelity_source_text
+module ParserErrors = Full_fidelity_parser_errors
 open Prim_defs
 
 open Core
@@ -2375,7 +2376,8 @@ let from_text
     let open Full_fidelity_syntax_tree in
     let tree   = make ?hhvm_compat_mode source_text in
     if Option.value hhvm_compat_mode ~default:false
-    then begin match errors tree with
+    then begin
+    match ParserErrors.parse_errors ~level:ParserErrors.HHVMCompatibility tree with
     | [] -> ()
     | e :: _ -> failwith (Full_fidelity_syntax_error.message e)
     end;

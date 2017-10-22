@@ -193,11 +193,16 @@ module Lost_env = struct
     lock_file: string;
     dialog_cancel: (unit -> unit) option; (* "hh_server stopped" dialog *)
     actionRequired_id: actionRequired_id; (* "hh_server stopped" *)
+    progress_id: progress_id; (* "hh_server monitor is waiting for a rebase to settle" *)
   }
 
+  and how_to_explain_loss_to_user =
+    | Action_required of string (* explain via dialog and actionRequired *)
+    | Wait_required of string (* explain via progress *)
+
   and params = {
-    message: string; (* e.g. "hh_server has crashed." *)
-    restart_on_click: bool; (* if user clicks Restart, do we ClientStart before reconnecting? *)
+    explanation: how_to_explain_loss_to_user;
+    start_on_click: bool; (* if user clicks Restart, do we ClientStart before reconnecting? *)
     trigger_on_lsp: bool; (* reconnect if we receive any LSP request/notification *)
     trigger_on_lock_file: bool; (* reconnect if lockfile is created *)
   }
@@ -674,6 +679,7 @@ let dismiss_ui (state: state) : state =
     Lost_server { lenv with
       dialog_cancel = dismiss_dialog lenv.dialog_cancel;
       actionRequired_id = notify_actionRequired lenv.actionRequired_id None;
+      progress_id = notify_progress lenv.progress_id None;
     }
   | Pre_init -> Pre_init
   | Post_shutdown -> Post_shutdown
@@ -1350,7 +1356,6 @@ let rec connect_client
     ~(autostart: bool)
   : server_conn =
   let open Exit_status in
-  let open Lsp.Error in
   (* This basically does the same connection attempt as "hh_client check":  *)
   (* it makes repeated attempts to connect; it prints useful messages to    *)
   (* stderr; in case of failure it will raise an exception. Below we're     *)
@@ -1377,42 +1382,10 @@ let rec connect_client
     let hhconfig_version = read_hhconfig_version root in
     { ic; oc; hhconfig_version; pending_messages; }
   with
-  | Exit_with No_server_running ->
-    (* Raised when (1) the server's simply not running, or there's some other *)
-    (* reason why the connection was refused/timed-out and no lockfile is     *)
-    (* present; (2) server was dormant and had already received too many      *)
-    (* pending connection requests.                                           *)
-    raise (ServerErrorStart ("no server running", { Lsp.Initialize.retry = true; }))
-  | Exit_with Out_of_retries
-  | Exit_with Out_of_time ->
-    (* Raised when we couldn't complete the handshake up to handoff           *)
-    (* within 3 attempts over 3 seconds. Unexpected.                          *)
-    raise (ServerErrorStart ("server isn't responsive", { Lsp.Initialize.retry = true; }))
   | Exit_with Build_id_mismatch when !can_autostart_after_mismatch ->
     (* Raised when the server was running an old version. We'll retry once.   *)
     can_autostart_after_mismatch := false;
     connect_client root ~autostart:true
-
-
-let connect () : state =
-  let start_time = Unix.time () in
-  let root = match get_root () with
-    | None -> failwith "we should have root after an initialize request"
-    | Some root -> root
-  in
-  let tail_env = Tail.create_env (Sys_utils.readlink_no_fail (ServerFiles.log_link root)) in
-  let conn = connect_client root ~autostart:false
-  in
-  In_init { In_init_env.
-    conn;
-    start_time;
-    uris_with_unsaved_changes = SSet.empty;
-    file_edits = ImmQueue.empty;
-    tail_env;
-    has_reported_progress = false;
-    dialog_cancel = None;
-    progress_id = Progress_none;
-  }
 
 
 let do_initialize () : Initialize.result =
@@ -1479,7 +1452,60 @@ let start_server (root: Path.t) : unit =
   ()
 
 
-let reconnect_from_lost_if_necessary
+(* connect: this method either connects to the monitor and leaves in an       *)
+(* In_init state waiting for the server hello, or it fails to connect and     *)
+(* leaves in a Lost_server state.                                             *)
+let rec connect (state: state) : state =
+  let start_time = Unix.time () in
+  let root = match get_root () with
+    | None -> failwith "we should have root after an initialize request"
+    | Some root -> root
+  in
+  try
+    let conn = connect_client root ~autostart:false in
+    let tail_env = Tail.create_env (Sys_utils.readlink_no_fail (ServerFiles.log_link root)) in
+    let _state = dismiss_ui state in
+    In_init { In_init_env.
+      conn;
+      start_time;
+      uris_with_unsaved_changes = SSet.empty;
+      file_edits = ImmQueue.empty;
+      tail_env;
+      has_reported_progress = false;
+      dialog_cancel = None;
+      progress_id = Progress_none;
+    }
+  with e ->
+    (* Exit_with Out_of_retries, Exit_with Out_of_time: raised when we        *)
+    (*   couldn't complete the handshake up to handoff within 3 attempts over *)
+    (*   3 seconds. Maybe the informant is stopping anything from happening   *)
+    (*   until a rebase has settled?                                          *)
+    (* Exit_with No_server_running: raised when (1) the server's simply not   *)
+    (*   running, or there's some other reason why the connection was refused *)
+    (*   or timed-out and no lockfile is present; (2) the server was dormant  *)
+    (*   and had already received too many pending connection requests.       *)
+    let stack = Printexc.get_backtrace () in
+    let (code, message, _data) = Lsp_fmt.get_error_info e in
+    let longMessage = Printf.sprintf "connect failed: %s [%i]\n%s" message code stack in
+    let () = client_log Lsp.MessageType.ErrorMessage longMessage in
+    let open Exit_status in
+    let explanation = match e with
+      | Exit_with Out_of_retries
+      | Exit_with Out_of_time ->
+        Lost_env.Wait_required "hh_server is waiting for things to settle"
+      | _ ->
+        Lost_env.Action_required ("hh_server: " ^ message)
+    in
+    do_lost_server state ~allow_immediate_reconnect:false
+      { Lost_env.
+        explanation;
+        start_on_click = true;
+        trigger_on_lock_file = true;
+        trigger_on_lsp = false;
+      }
+
+
+and reconnect_from_lost_if_necessary
     (state: state)
     (reason: [> `Event of event | `Force_regain ])
   : state =
@@ -1513,20 +1539,22 @@ let reconnect_from_lost_if_necessary
       client_log Lsp.MessageType.InfoMessage message;
       exit_fail ()
     else
-      let new_state = connect () in
-      (* if that succeeded without exception, then it's safe for us to have the *)
-      (* side-effect of dismissing dialog+indicator on the client.              *)
-      let _state = dismiss_ui state in
-      new_state
+      connect state
   else
     state
 
 
-(* do_lost_server: handles the various ways we might lose the server. We keep *)
+(* do_lost_server: handles the various ways we might lose hh_server. We keep  *)
 (* the LSP server alive, and will (elsewhere) listen for the various triggers *)
 (* of getting the server back.                                                *)
-let do_lost_server (state: state) (p: Lost_env.params) : state =
+and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_env.params) : state =
   let open Lost_env in
+
+  let no_op = match p.explanation, state with
+    | Wait_required _, Lost_server { p = { explanation = Wait_required _; _ }; _ } -> true
+    | _ -> false in
+  if no_op then state else
+
   let state = dismiss_ui state in
   let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
 
@@ -1541,7 +1569,8 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
     | None -> assert false
     | Some root -> ServerFiles.lock_file root
   in
-  let reconnect_immediately = p.trigger_on_lock_file && MonitorConnection.server_exists lock_file
+  let reconnect_immediately = allow_immediate_reconnect &&
+    p.trigger_on_lock_file && MonitorConnection.server_exists lock_file
   in
 
   (* These helper functions are for the dialog *)
@@ -1559,7 +1588,7 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
       ~f:(Hh_json_helpers.get_string_val "title" ~default:"") in
     match result, state with
     | "Restart", Lost_server _ ->
-      if p.restart_on_click then begin
+      if p.start_on_click then begin
         let root = match get_root () with
           | None -> failwith "we should have root by now"
           | Some root -> root
@@ -1578,22 +1607,31 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
       lock_file;
       dialog_cancel = None;
       actionRequired_id = ActionRequired_none;
+      progress_id = Progress_none;
     } in
+    client_log Lsp.MessageType.InfoMessage "Reconnecting immediately to hh_server";
     let new_state = reconnect_from_lost_if_necessary lost_state `Force_regain in
     new_state
   else
-    let actionRequired_id = notify_actionRequired ActionRequired_none (Some p.message) in
-    let dialog = print_showMessageRequest MessageType.ErrorMessage p.message ["Restart"]
-      |> request stdout handle_result handle_error "window/showMessageRequest" in
-    let lost_state = Lost_server { Lost_env.
+    let progress_id, actionRequired_id, dialog_cancel = match p.explanation with
+      | Wait_required msg ->
+        let progress_id = notify_progress Progress_none (Some msg) in
+        progress_id, ActionRequired_none, None
+      | Action_required msg ->
+        let actionRequired_id = notify_actionRequired ActionRequired_none (Some msg) in
+        let dialog_cancel = print_showMessageRequest MessageType.ErrorMessage msg ["Restart"]
+          |> request stdout handle_result handle_error "window/showMessageRequest" in
+        Progress_none, actionRequired_id, Some dialog_cancel
+    in
+    Lost_server { Lost_env.
       p;
       prev_hhconfig_version;
       uris_with_unsaved_changes;
       lock_file;
-      dialog_cancel = Some dialog;
+      dialog_cancel;
       actionRequired_id;
-    } in
-    lost_state
+      progress_id;
+    }
 
 
 let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
@@ -1714,26 +1752,7 @@ let handle_event
   (* initialize request *)
   | Pre_init, Client_message c when c.method_ = "initialize" ->
     initialize_params := Some (parse_initialize c.params);
-    state := begin try
-      connect ()
-      (* This tries to open connection to the monitor. If it succeeds,  *)
-      (* it returns In_init state, waiting for a Hello from the server. *)
-    with e ->
-      (* If it failed to open a connection to the monitor then we'll    *)
-      (* report the problem and trasition to Lost_server state.         *)
-      let stack = Printexc.get_backtrace () in
-      let (code, message, _data) = Lsp_fmt.get_error_info e in
-      client_log Lsp.MessageType.ErrorMessage (Printf.sprintf "%s [%i]\n%s" message code stack);
-      do_lost_server !state
-        { Lost_env.
-          message = "hh_server is stopped: " ^ message;
-          restart_on_click = true;
-          trigger_on_lock_file = true;
-          trigger_on_lsp = false;
-        }
-    end;
-    (* But regardless of whether we went to In_init or Lost_server, we'll  *)
-    (* still report success to the LSP client for the "initialize" method. *)
+    state := connect !state;
     do_initialize () |> print_initialize |> respond stdout c
 
   (* any request/notification if we haven't yet initialized *)
@@ -1896,8 +1915,8 @@ let handle_event
   | Main_loop _menv, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
     state := dismiss_ready_dialog_if_necessary !state event;
     state := do_lost_server !state { Lost_env.
-      message = "hh_server is active in another window.";
-      restart_on_click = false;
+      explanation = Lost_env.Action_required "hh_server is active in another window.";
+      start_on_click = false;
       trigger_on_lock_file = false;
       trigger_on_lsp = true;
     };
@@ -1988,8 +2007,8 @@ let main (env: env) : 'a =
         (* next time around the loop.                                           *)
         deferred_action := Some (fun () ->
           state := do_lost_server !state { Lost_env.
-            message = "hh_server has stopped.";
-            restart_on_click = true;
+            explanation = Lost_env.Action_required "hh_server has stopped";
+            start_on_click = true;
             trigger_on_lock_file = true;
             trigger_on_lsp = false;
           })

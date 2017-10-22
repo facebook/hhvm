@@ -165,7 +165,7 @@ module Main_env = struct
     conn: server_conn;
     needs_idle: bool;
     uris_with_diagnostics: SSet.t;
-    uris_with_unsaved_changes: SSet.t;
+    uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     dialog_cancel: (unit -> unit) option; (* "hack server is now ready" dialog *)
     progress_id: progress_id; (* "typechecking..." *)
     actionRequired_id: actionRequired_id; (* "save any file to trigger a global recheck" *)
@@ -177,7 +177,7 @@ module In_init_env = struct
     conn: server_conn;
     start_time: float;
     file_edits: Jsonrpc_queue.jsonrpc_message ImmQueue.t;
-    uris_with_unsaved_changes: SSet.t;
+    uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     tail_env: Tail.env;
     has_reported_progress: bool;
     dialog_cancel: (unit -> unit) option; (* "hack server is busy" dialog *)
@@ -189,7 +189,7 @@ module Lost_env = struct
   type t = {
     p: params;
     prev_hhconfig_version: string option;
-    uris_with_unsaved_changes: SSet.t;
+    uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     lock_file: string;
     dialog_cancel: (unit -> unit) option; (* "hh_server stopped" dialog *)
     actionRequired_id: actionRequired_id; (* "hh_server stopped" *)
@@ -232,12 +232,9 @@ type event =
   | Client_message of Jsonrpc_queue.jsonrpc_message
   | Tick (* once per second, on idle *)
 
-(* Here are some exit points. The "exit_fail_delay" is in case the user    *)
-(* restarted hh_server themselves: we'll give them a chance to start it up *)
-(* rather than letting our client aggressively start it up first.          *)
+(* Here are some exit points. *)
 let exit_ok () = exit 0
 let exit_fail () = exit 1
-let exit_fail_delay () = Unix.sleep 2; exit 1
 
 (* The following connection exceptions inform the main LSP event loop how to  *)
 (* respond to an exception: was the exception a connection-related exception  *)
@@ -292,6 +289,16 @@ let state_to_string (state: state) : string =
   | Post_shutdown -> "Post_shutdown"
 
 
+(* get_uris_with_unsaved_changes is the set of files for which we've          *)
+(* received didChange but haven't yet received didSave/didOpen. It is purely  *)
+(* a description of what we've heard of the editor, and is independent of     *)
+(* whether or not they've yet been synced with hh_server.                     *)
+(* As it happens: in Main_loop state all these files will already have been   *)
+(* sent to hh_server; in In_init state all these files will have been queued  *)
+(* up inside file_edits ready to be sent when we receive the hello; in        *)
+(* Lost_server state they're not even queued up, and if ever we see hh_server *)
+(* ready then we'll terminate the LSP server and trust the client to relaunch *)
+(* us and resend a load of didOpen/didChange events.                          *)
 let get_uris_with_unsaved_changes (state: state): SSet.t =
   match state with
   | Main_loop menv -> menv.Main_env.uris_with_unsaved_changes
@@ -1487,14 +1494,23 @@ let reconnect_from_lost_if_necessary
   in
   if should_reconnect then
     let has_unsaved_changes = not (SSet.is_empty (get_uris_with_unsaved_changes state)) in
-    let has_different_version = match state, get_root () with
-      | Lost_server lenv, Some root -> lenv.prev_hhconfig_version <> read_hhconfig_version root
+    let prev_version, current_version = match state, get_root () with
+      | Lost_server lenv, Some root -> lenv.prev_hhconfig_version, read_hhconfig_version root
       | _ -> assert false in
-    let needs_to_terminate = has_unsaved_changes || has_different_version in
+    let needs_to_terminate = has_unsaved_changes || prev_version <> current_version in
     if needs_to_terminate then
       (* In these cases we have to terminate our LSP server, and trust the    *)
       (* client to restart us. Note that we can't do clientStart because that *)
       (* would start our (old) version of hh_server, not the new one!         *)
+      let unsaved = get_uris_with_unsaved_changes state |> SSet.elements in
+      let unsaved_str = if unsaved = [] then "[None]" else String.concat "\n" unsaved in
+      let prev_version_str = Option.value prev_version ~default: "[None]" in
+      let current_version_str = Option.value current_version ~default: "[None]" in
+      let message = "Unsaved files:\n" ^ unsaved_str ^
+        "\nVersion in hhconfig that spawned the current hh_client: " ^ prev_version_str ^
+        "\nVersion in hhconfig currently: " ^ current_version_str ^
+        "\n" in
+      client_log Lsp.MessageType.InfoMessage message;
       exit_fail ()
     else
       let new_state = connect () in
@@ -1895,8 +1911,8 @@ let handle_event
     raise (Server_fatal_connection_exception { message; stack; })
 
   (* server fatal shutdown *)
-  | _, Server_message ServerCommandTypes.FATAL_EXCEPTION _ ->
-    exit_fail_delay ()
+  | _, Server_message ServerCommandTypes.FATAL_EXCEPTION e ->
+    raise (Server_fatal_connection_exception e)
 
   (* idle tick. No-op. *)
   | _, Tick ->

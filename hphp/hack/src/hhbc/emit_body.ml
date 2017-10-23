@@ -59,10 +59,32 @@ let rec emit_def env def =
   | _ ->
     empty
 
+and check_namespace_update env ns =
+  let p = Pos.none in
+  let prev_ns = Emit_env.get_namespace env in
+  let check_map2 prev curr =
+    (* Check whether any definition updates an earlier definition *)
+    SMap.iter (fun key value ->
+                match SMap.get key prev with
+                | None -> () (* new element, it is fine *)
+                | Some v ->
+                  if v = value then () (* same element, it is fine *)
+                  else Emit_fatal.raise_fatal_parse p @@ Printf.sprintf
+                    ("Cannot use %s as %s because the name was explicitly used "
+                    ^^ "earlier via a `use' statement")
+                    (SU.strip_global_ns value) key
+                ) curr
+  in
+  check_map2 prev_ns.Namespace_env.ns_ns_uses ns.Namespace_env.ns_ns_uses;
+  check_map2 prev_ns.Namespace_env.ns_class_uses ns.Namespace_env.ns_class_uses;
+  check_map2 prev_ns.Namespace_env.ns_fun_uses ns.Namespace_env.ns_fun_uses;
+  check_map2 prev_ns.Namespace_env.ns_const_uses ns.Namespace_env.ns_const_uses
+
 and emit_defs env defs =
   let rec aux env defs =
     match defs with
     | Ast.SetNamespaceEnv ns :: defs ->
+      check_namespace_update env ns;
       let env = Emit_env.with_namespace ns env in
       aux env defs
     | [] -> Emit_statement.emit_dropthrough_return env

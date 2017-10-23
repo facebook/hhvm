@@ -44,16 +44,9 @@
 namespace HPHP {
 
 struct APCLocalArray;
-struct MemoryManager;
-struct ObjectData;
-struct ResourceData;
 
 namespace req {
 struct root_handle;
-void* malloc_big(size_t, type_scan::Index);
-void* calloc_big(size_t, type_scan::Index);
-void* realloc_big(void*, size_t);
-void  free_big(void*);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -673,12 +666,6 @@ struct MemoryManager {
    * Pre: requested <= kMaxSmallSize
    */
   static size_t smallSizeClass(size_t requested);
-
-  /*
-   * Return a lower bound estimate of the capacity that will be returned for
-   * the requested size.
-   */
-  static size_t estimateCap(size_t requested);
 
   /*
    * Allocate/deallocate a small memory block in a given small size class.

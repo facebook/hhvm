@@ -144,11 +144,6 @@ inline void MemoryManager::FreeList::push(void* val) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline size_t MemoryManager::estimateCap(size_t requested) {
-  return requested <= kMaxSmallSize ? smallSizeClass(requested)
-                                    : requested;
-}
-
 inline size_t MemoryManager::bsrq(size_t x) {
 #if defined(__x86_64__)
   size_t ret;

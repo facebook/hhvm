@@ -166,6 +166,12 @@ struct StringData final : MaybeCountable,
   static StringData* MakeEmpty();
 
   /*
+   * return estimated capacity for a string of the given size, due to
+   * size-class rounding.
+   */
+  static size_t estimateCap(size_t size);
+
+  /*
    * Offset accessors for the JIT compiler.
    */
 #ifndef NO_M_DATA

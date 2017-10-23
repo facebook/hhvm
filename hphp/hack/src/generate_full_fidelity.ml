@@ -499,17 +499,21 @@ module GenerateFFSyntax = struct
       x.kind_name fields x.kind_name fields
 
   let to_constructor_methods x =
-    let mapper1 (f,_) = sprintf "      %s_%s\n" x.prefix f in
-    let mapper2 (f,_) = sprintf "        %s_%s;\n" x.prefix f in
+    let mapper1 (f,_) = sprintf "        %s_%s\n" x.prefix f in
     let fields1 = map_and_concat mapper1 x.fields in
+    let mapper2 (f,_) = sprintf "          %s_%s;\n" x.prefix f in
     let fields2 = map_and_concat mapper2 x.fields in
-    sprintf "    let make_%s
-%s    =
-      from_children SyntaxKind.%s [
-%s      ]
+    let mapper3 (f,_) = sprintf "          %s_%s;\n" x.prefix f in
+    let fields3 = map_and_concat mapper3 x.fields in
+    sprintf "      let make_%s
+%s      =
+        let value = ValueBuilder.value_from_children SyntaxKind.%s [
+%s        ] in
+        make (%s {
+%s        }) value
 
 "
-      x.type_name fields1 x.kind_name fields2
+    x.type_name fields1 x.kind_name fields2 x.kind_name fields3
 
   let full_fidelity_syntax_template = make_header MLStyle "
  * With these factory methods, nodes can be built up from their child nodes. A

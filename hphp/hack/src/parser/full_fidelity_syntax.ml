@@ -7329,1932 +7329,2819 @@ module WithToken(Token: TokenType) = struct
         | [] -> make_missing()
         | _ -> from_children SyntaxKind.SyntaxList items
 
-    let make_end_of_file
-      end_of_file_token
-    =
-      from_children SyntaxKind.EndOfFile [
-        end_of_file_token;
-      ]
-
-    let make_script
-      script_declarations
-    =
-      from_children SyntaxKind.Script [
-        script_declarations;
-      ]
-
-    let make_simple_type_specifier
-      simple_type_specifier
-    =
-      from_children SyntaxKind.SimpleTypeSpecifier [
-        simple_type_specifier;
-      ]
-
-    let make_literal_expression
-      literal_expression
-    =
-      from_children SyntaxKind.LiteralExpression [
-        literal_expression;
-      ]
-
-    let make_variable_expression
-      variable_expression
-    =
-      from_children SyntaxKind.VariableExpression [
-        variable_expression;
-      ]
-
-    let make_qualified_name_expression
-      qualified_name_expression
-    =
-      from_children SyntaxKind.QualifiedNameExpression [
-        qualified_name_expression;
-      ]
-
-    let make_pipe_variable_expression
-      pipe_variable_expression
-    =
-      from_children SyntaxKind.PipeVariableExpression [
-        pipe_variable_expression;
-      ]
-
-    let make_enum_declaration
-      enum_attribute_spec
-      enum_keyword
-      enum_name
-      enum_colon
-      enum_base
-      enum_type
-      enum_left_brace
-      enum_enumerators
-      enum_right_brace
-    =
-      from_children SyntaxKind.EnumDeclaration [
-        enum_attribute_spec;
-        enum_keyword;
-        enum_name;
-        enum_colon;
-        enum_base;
-        enum_type;
-        enum_left_brace;
-        enum_enumerators;
-        enum_right_brace;
-      ]
-
-    let make_enumerator
-      enumerator_name
-      enumerator_equal
-      enumerator_value
-      enumerator_semicolon
-    =
-      from_children SyntaxKind.Enumerator [
-        enumerator_name;
-        enumerator_equal;
-        enumerator_value;
-        enumerator_semicolon;
-      ]
-
-    let make_alias_declaration
-      alias_attribute_spec
-      alias_keyword
-      alias_name
-      alias_generic_parameter
-      alias_constraint
-      alias_equal
-      alias_type
-      alias_semicolon
-    =
-      from_children SyntaxKind.AliasDeclaration [
-        alias_attribute_spec;
-        alias_keyword;
-        alias_name;
-        alias_generic_parameter;
-        alias_constraint;
-        alias_equal;
-        alias_type;
-        alias_semicolon;
-      ]
-
-    let make_property_declaration
-      property_modifiers
-      property_type
-      property_declarators
-      property_semicolon
-    =
-      from_children SyntaxKind.PropertyDeclaration [
-        property_modifiers;
-        property_type;
-        property_declarators;
-        property_semicolon;
-      ]
-
-    let make_property_declarator
-      property_name
-      property_initializer
-    =
-      from_children SyntaxKind.PropertyDeclarator [
-        property_name;
-        property_initializer;
-      ]
-
-    let make_namespace_declaration
-      namespace_keyword
-      namespace_name
-      namespace_body
-    =
-      from_children SyntaxKind.NamespaceDeclaration [
-        namespace_keyword;
-        namespace_name;
-        namespace_body;
-      ]
-
-    let make_namespace_body
-      namespace_left_brace
-      namespace_declarations
-      namespace_right_brace
-    =
-      from_children SyntaxKind.NamespaceBody [
-        namespace_left_brace;
-        namespace_declarations;
-        namespace_right_brace;
-      ]
-
-    let make_namespace_empty_body
-      namespace_semicolon
-    =
-      from_children SyntaxKind.NamespaceEmptyBody [
-        namespace_semicolon;
-      ]
-
-    let make_namespace_use_declaration
-      namespace_use_keyword
-      namespace_use_kind
-      namespace_use_clauses
-      namespace_use_semicolon
-    =
-      from_children SyntaxKind.NamespaceUseDeclaration [
-        namespace_use_keyword;
-        namespace_use_kind;
-        namespace_use_clauses;
-        namespace_use_semicolon;
-      ]
-
-    let make_namespace_group_use_declaration
-      namespace_group_use_keyword
-      namespace_group_use_kind
-      namespace_group_use_prefix
-      namespace_group_use_left_brace
-      namespace_group_use_clauses
-      namespace_group_use_right_brace
-      namespace_group_use_semicolon
-    =
-      from_children SyntaxKind.NamespaceGroupUseDeclaration [
-        namespace_group_use_keyword;
-        namespace_group_use_kind;
-        namespace_group_use_prefix;
-        namespace_group_use_left_brace;
-        namespace_group_use_clauses;
-        namespace_group_use_right_brace;
-        namespace_group_use_semicolon;
-      ]
-
-    let make_namespace_use_clause
-      namespace_use_clause_kind
-      namespace_use_name
-      namespace_use_as
-      namespace_use_alias
-    =
-      from_children SyntaxKind.NamespaceUseClause [
-        namespace_use_clause_kind;
-        namespace_use_name;
-        namespace_use_as;
-        namespace_use_alias;
-      ]
-
-    let make_function_declaration
-      function_attribute_spec
-      function_declaration_header
-      function_body
-    =
-      from_children SyntaxKind.FunctionDeclaration [
-        function_attribute_spec;
-        function_declaration_header;
-        function_body;
-      ]
-
-    let make_function_declaration_header
-      function_async
-      function_coroutine
-      function_keyword
-      function_ampersand
-      function_name
-      function_type_parameter_list
-      function_left_paren
-      function_parameter_list
-      function_right_paren
-      function_colon
-      function_type
-      function_where_clause
-    =
-      from_children SyntaxKind.FunctionDeclarationHeader [
-        function_async;
-        function_coroutine;
-        function_keyword;
-        function_ampersand;
-        function_name;
-        function_type_parameter_list;
-        function_left_paren;
-        function_parameter_list;
-        function_right_paren;
-        function_colon;
-        function_type;
-        function_where_clause;
-      ]
-
-    let make_where_clause
-      where_clause_keyword
-      where_clause_constraints
-    =
-      from_children SyntaxKind.WhereClause [
-        where_clause_keyword;
-        where_clause_constraints;
-      ]
-
-    let make_where_constraint
-      where_constraint_left_type
-      where_constraint_operator
-      where_constraint_right_type
-    =
-      from_children SyntaxKind.WhereConstraint [
-        where_constraint_left_type;
-        where_constraint_operator;
-        where_constraint_right_type;
-      ]
-
-    let make_methodish_declaration
-      methodish_attribute
-      methodish_modifiers
-      methodish_function_decl_header
-      methodish_function_body
-      methodish_semicolon
-    =
-      from_children SyntaxKind.MethodishDeclaration [
-        methodish_attribute;
-        methodish_modifiers;
-        methodish_function_decl_header;
-        methodish_function_body;
-        methodish_semicolon;
-      ]
-
-    let make_classish_declaration
-      classish_attribute
-      classish_modifiers
-      classish_keyword
-      classish_name
-      classish_type_parameters
-      classish_extends_keyword
-      classish_extends_list
-      classish_implements_keyword
-      classish_implements_list
-      classish_body
-    =
-      from_children SyntaxKind.ClassishDeclaration [
-        classish_attribute;
-        classish_modifiers;
-        classish_keyword;
-        classish_name;
-        classish_type_parameters;
-        classish_extends_keyword;
-        classish_extends_list;
-        classish_implements_keyword;
-        classish_implements_list;
-        classish_body;
-      ]
-
-    let make_classish_body
-      classish_body_left_brace
-      classish_body_elements
-      classish_body_right_brace
-    =
-      from_children SyntaxKind.ClassishBody [
-        classish_body_left_brace;
-        classish_body_elements;
-        classish_body_right_brace;
-      ]
-
-    let make_trait_use_precedence_item
-      trait_use_precedence_item_name
-      trait_use_precedence_item_keyword
-      trait_use_precedence_item_removed_names
-    =
-      from_children SyntaxKind.TraitUsePrecedenceItem [
-        trait_use_precedence_item_name;
-        trait_use_precedence_item_keyword;
-        trait_use_precedence_item_removed_names;
-      ]
-
-    let make_trait_use_alias_item
-      trait_use_alias_item_aliasing_name
-      trait_use_alias_item_keyword
-      trait_use_alias_item_visibility
-      trait_use_alias_item_aliased_name
-    =
-      from_children SyntaxKind.TraitUseAliasItem [
-        trait_use_alias_item_aliasing_name;
-        trait_use_alias_item_keyword;
-        trait_use_alias_item_visibility;
-        trait_use_alias_item_aliased_name;
-      ]
-
-    let make_trait_use_conflict_resolution
-      trait_use_conflict_resolution_keyword
-      trait_use_conflict_resolution_names
-      trait_use_conflict_resolution_left_brace
-      trait_use_conflict_resolution_clauses
-      trait_use_conflict_resolution_right_brace
-    =
-      from_children SyntaxKind.TraitUseConflictResolution [
-        trait_use_conflict_resolution_keyword;
-        trait_use_conflict_resolution_names;
-        trait_use_conflict_resolution_left_brace;
-        trait_use_conflict_resolution_clauses;
-        trait_use_conflict_resolution_right_brace;
-      ]
-
-    let make_trait_use
-      trait_use_keyword
-      trait_use_names
-      trait_use_semicolon
-    =
-      from_children SyntaxKind.TraitUse [
-        trait_use_keyword;
-        trait_use_names;
-        trait_use_semicolon;
-      ]
-
-    let make_require_clause
-      require_keyword
-      require_kind
-      require_name
-      require_semicolon
-    =
-      from_children SyntaxKind.RequireClause [
-        require_keyword;
-        require_kind;
-        require_name;
-        require_semicolon;
-      ]
-
-    let make_const_declaration
-      const_abstract
-      const_keyword
-      const_type_specifier
-      const_declarators
-      const_semicolon
-    =
-      from_children SyntaxKind.ConstDeclaration [
-        const_abstract;
-        const_keyword;
-        const_type_specifier;
-        const_declarators;
-        const_semicolon;
-      ]
-
-    let make_constant_declarator
-      constant_declarator_name
-      constant_declarator_initializer
-    =
-      from_children SyntaxKind.ConstantDeclarator [
-        constant_declarator_name;
-        constant_declarator_initializer;
-      ]
-
-    let make_type_const_declaration
-      type_const_abstract
-      type_const_keyword
-      type_const_type_keyword
-      type_const_name
-      type_const_type_constraint
-      type_const_equal
-      type_const_type_specifier
-      type_const_semicolon
-    =
-      from_children SyntaxKind.TypeConstDeclaration [
-        type_const_abstract;
-        type_const_keyword;
-        type_const_type_keyword;
-        type_const_name;
-        type_const_type_constraint;
-        type_const_equal;
-        type_const_type_specifier;
-        type_const_semicolon;
-      ]
-
-    let make_decorated_expression
-      decorated_expression_decorator
-      decorated_expression_expression
-    =
-      from_children SyntaxKind.DecoratedExpression [
-        decorated_expression_decorator;
-        decorated_expression_expression;
-      ]
-
-    let make_parameter_declaration
-      parameter_attribute
-      parameter_visibility
-      parameter_type
-      parameter_name
-      parameter_default_value
-    =
-      from_children SyntaxKind.ParameterDeclaration [
-        parameter_attribute;
-        parameter_visibility;
-        parameter_type;
-        parameter_name;
-        parameter_default_value;
-      ]
-
-    let make_variadic_parameter
-      variadic_parameter_ellipsis
-    =
-      from_children SyntaxKind.VariadicParameter [
-        variadic_parameter_ellipsis;
-      ]
-
-    let make_attribute_specification
-      attribute_specification_left_double_angle
-      attribute_specification_attributes
-      attribute_specification_right_double_angle
-    =
-      from_children SyntaxKind.AttributeSpecification [
-        attribute_specification_left_double_angle;
-        attribute_specification_attributes;
-        attribute_specification_right_double_angle;
-      ]
-
-    let make_attribute
-      attribute_name
-      attribute_left_paren
-      attribute_values
-      attribute_right_paren
-    =
-      from_children SyntaxKind.Attribute [
-        attribute_name;
-        attribute_left_paren;
-        attribute_values;
-        attribute_right_paren;
-      ]
-
-    let make_inclusion_expression
-      inclusion_require
-      inclusion_filename
-    =
-      from_children SyntaxKind.InclusionExpression [
-        inclusion_require;
-        inclusion_filename;
-      ]
-
-    let make_inclusion_directive
-      inclusion_expression
-      inclusion_semicolon
-    =
-      from_children SyntaxKind.InclusionDirective [
-        inclusion_expression;
-        inclusion_semicolon;
-      ]
-
-    let make_compound_statement
-      compound_left_brace
-      compound_statements
-      compound_right_brace
-    =
-      from_children SyntaxKind.CompoundStatement [
-        compound_left_brace;
-        compound_statements;
-        compound_right_brace;
-      ]
-
-    let make_expression_statement
-      expression_statement_expression
-      expression_statement_semicolon
-    =
-      from_children SyntaxKind.ExpressionStatement [
-        expression_statement_expression;
-        expression_statement_semicolon;
-      ]
-
-    let make_markup_section
-      markup_prefix
-      markup_text
-      markup_suffix
-      markup_expression
-    =
-      from_children SyntaxKind.MarkupSection [
-        markup_prefix;
-        markup_text;
-        markup_suffix;
-        markup_expression;
-      ]
-
-    let make_markup_suffix
-      markup_suffix_less_than_question
-      markup_suffix_name
-    =
-      from_children SyntaxKind.MarkupSuffix [
-        markup_suffix_less_than_question;
-        markup_suffix_name;
-      ]
-
-    let make_unset_statement
-      unset_keyword
-      unset_left_paren
-      unset_variables
-      unset_right_paren
-      unset_semicolon
-    =
-      from_children SyntaxKind.UnsetStatement [
-        unset_keyword;
-        unset_left_paren;
-        unset_variables;
-        unset_right_paren;
-        unset_semicolon;
-      ]
-
-    let make_using_statement_block_scoped
-      using_block_await_keyword
-      using_block_using_keyword
-      using_block_left_paren
-      using_block_expressions
-      using_block_right_paren
-      using_block_body
-    =
-      from_children SyntaxKind.UsingStatementBlockScoped [
-        using_block_await_keyword;
-        using_block_using_keyword;
-        using_block_left_paren;
-        using_block_expressions;
-        using_block_right_paren;
-        using_block_body;
-      ]
-
-    let make_using_statement_function_scoped
-      using_function_await_keyword
-      using_function_using_keyword
-      using_function_expression
-      using_function_semicolon
-    =
-      from_children SyntaxKind.UsingStatementFunctionScoped [
-        using_function_await_keyword;
-        using_function_using_keyword;
-        using_function_expression;
-        using_function_semicolon;
-      ]
-
-    let make_while_statement
-      while_keyword
-      while_left_paren
-      while_condition
-      while_right_paren
-      while_body
-    =
-      from_children SyntaxKind.WhileStatement [
-        while_keyword;
-        while_left_paren;
-        while_condition;
-        while_right_paren;
-        while_body;
-      ]
-
-    let make_if_statement
-      if_keyword
-      if_left_paren
-      if_condition
-      if_right_paren
-      if_statement
-      if_elseif_clauses
-      if_else_clause
-    =
-      from_children SyntaxKind.IfStatement [
-        if_keyword;
-        if_left_paren;
-        if_condition;
-        if_right_paren;
-        if_statement;
-        if_elseif_clauses;
-        if_else_clause;
-      ]
-
-    let make_elseif_clause
-      elseif_keyword
-      elseif_left_paren
-      elseif_condition
-      elseif_right_paren
-      elseif_statement
-    =
-      from_children SyntaxKind.ElseifClause [
-        elseif_keyword;
-        elseif_left_paren;
-        elseif_condition;
-        elseif_right_paren;
-        elseif_statement;
-      ]
-
-    let make_else_clause
-      else_keyword
-      else_statement
-    =
-      from_children SyntaxKind.ElseClause [
-        else_keyword;
-        else_statement;
-      ]
-
-    let make_if_endif_statement
-      if_endif_keyword
-      if_endif_left_paren
-      if_endif_condition
-      if_endif_right_paren
-      if_endif_colon
-      if_endif_statement
-      if_endif_elseif_colon_clauses
-      if_endif_else_colon_clause
-      if_endif_endif_keyword
-      if_endif_semicolon
-    =
-      from_children SyntaxKind.IfEndIfStatement [
-        if_endif_keyword;
-        if_endif_left_paren;
-        if_endif_condition;
-        if_endif_right_paren;
-        if_endif_colon;
-        if_endif_statement;
-        if_endif_elseif_colon_clauses;
-        if_endif_else_colon_clause;
-        if_endif_endif_keyword;
-        if_endif_semicolon;
-      ]
-
-    let make_elseif_colon_clause
-      elseif_colon_keyword
-      elseif_colon_left_paren
-      elseif_colon_condition
-      elseif_colon_right_paren
-      elseif_colon_colon
-      elseif_colon_statement
-    =
-      from_children SyntaxKind.ElseifColonClause [
-        elseif_colon_keyword;
-        elseif_colon_left_paren;
-        elseif_colon_condition;
-        elseif_colon_right_paren;
-        elseif_colon_colon;
-        elseif_colon_statement;
-      ]
-
-    let make_else_colon_clause
-      else_colon_keyword
-      else_colon_colon
-      else_colon_statement
-    =
-      from_children SyntaxKind.ElseColonClause [
-        else_colon_keyword;
-        else_colon_colon;
-        else_colon_statement;
-      ]
-
-    let make_try_statement
-      try_keyword
-      try_compound_statement
-      try_catch_clauses
-      try_finally_clause
-    =
-      from_children SyntaxKind.TryStatement [
-        try_keyword;
-        try_compound_statement;
-        try_catch_clauses;
-        try_finally_clause;
-      ]
-
-    let make_catch_clause
-      catch_keyword
-      catch_left_paren
-      catch_type
-      catch_variable
-      catch_right_paren
-      catch_body
-    =
-      from_children SyntaxKind.CatchClause [
-        catch_keyword;
-        catch_left_paren;
-        catch_type;
-        catch_variable;
-        catch_right_paren;
-        catch_body;
-      ]
-
-    let make_finally_clause
-      finally_keyword
-      finally_body
-    =
-      from_children SyntaxKind.FinallyClause [
-        finally_keyword;
-        finally_body;
-      ]
-
-    let make_do_statement
-      do_keyword
-      do_body
-      do_while_keyword
-      do_left_paren
-      do_condition
-      do_right_paren
-      do_semicolon
-    =
-      from_children SyntaxKind.DoStatement [
-        do_keyword;
-        do_body;
-        do_while_keyword;
-        do_left_paren;
-        do_condition;
-        do_right_paren;
-        do_semicolon;
-      ]
-
-    let make_for_statement
-      for_keyword
-      for_left_paren
-      for_initializer
-      for_first_semicolon
-      for_control
-      for_second_semicolon
-      for_end_of_loop
-      for_right_paren
-      for_body
-    =
-      from_children SyntaxKind.ForStatement [
-        for_keyword;
-        for_left_paren;
-        for_initializer;
-        for_first_semicolon;
-        for_control;
-        for_second_semicolon;
-        for_end_of_loop;
-        for_right_paren;
-        for_body;
-      ]
-
-    let make_foreach_statement
-      foreach_keyword
-      foreach_left_paren
-      foreach_collection
-      foreach_await_keyword
-      foreach_as
-      foreach_key
-      foreach_arrow
-      foreach_value
-      foreach_right_paren
-      foreach_body
-    =
-      from_children SyntaxKind.ForeachStatement [
-        foreach_keyword;
-        foreach_left_paren;
-        foreach_collection;
-        foreach_await_keyword;
-        foreach_as;
-        foreach_key;
-        foreach_arrow;
-        foreach_value;
-        foreach_right_paren;
-        foreach_body;
-      ]
-
-    let make_switch_statement
-      switch_keyword
-      switch_left_paren
-      switch_expression
-      switch_right_paren
-      switch_left_brace
-      switch_sections
-      switch_right_brace
-    =
-      from_children SyntaxKind.SwitchStatement [
-        switch_keyword;
-        switch_left_paren;
-        switch_expression;
-        switch_right_paren;
-        switch_left_brace;
-        switch_sections;
-        switch_right_brace;
-      ]
-
-    let make_switch_section
-      switch_section_labels
-      switch_section_statements
-      switch_section_fallthrough
-    =
-      from_children SyntaxKind.SwitchSection [
-        switch_section_labels;
-        switch_section_statements;
-        switch_section_fallthrough;
-      ]
-
-    let make_switch_fallthrough
-      fallthrough_keyword
-      fallthrough_semicolon
-    =
-      from_children SyntaxKind.SwitchFallthrough [
-        fallthrough_keyword;
-        fallthrough_semicolon;
-      ]
-
-    let make_case_label
-      case_keyword
-      case_expression
-      case_colon
-    =
-      from_children SyntaxKind.CaseLabel [
-        case_keyword;
-        case_expression;
-        case_colon;
-      ]
-
-    let make_default_label
-      default_keyword
-      default_colon
-    =
-      from_children SyntaxKind.DefaultLabel [
-        default_keyword;
-        default_colon;
-      ]
-
-    let make_return_statement
-      return_keyword
-      return_expression
-      return_semicolon
-    =
-      from_children SyntaxKind.ReturnStatement [
-        return_keyword;
-        return_expression;
-        return_semicolon;
-      ]
-
-    let make_goto_label
-      goto_label_name
-      goto_label_colon
-    =
-      from_children SyntaxKind.GotoLabel [
-        goto_label_name;
-        goto_label_colon;
-      ]
-
-    let make_goto_statement
-      goto_statement_keyword
-      goto_statement_label_name
-      goto_statement_semicolon
-    =
-      from_children SyntaxKind.GotoStatement [
-        goto_statement_keyword;
-        goto_statement_label_name;
-        goto_statement_semicolon;
-      ]
-
-    let make_throw_statement
-      throw_keyword
-      throw_expression
-      throw_semicolon
-    =
-      from_children SyntaxKind.ThrowStatement [
-        throw_keyword;
-        throw_expression;
-        throw_semicolon;
-      ]
-
-    let make_break_statement
-      break_keyword
-      break_level
-      break_semicolon
-    =
-      from_children SyntaxKind.BreakStatement [
-        break_keyword;
-        break_level;
-        break_semicolon;
-      ]
-
-    let make_continue_statement
-      continue_keyword
-      continue_level
-      continue_semicolon
-    =
-      from_children SyntaxKind.ContinueStatement [
-        continue_keyword;
-        continue_level;
-        continue_semicolon;
-      ]
-
-    let make_function_static_statement
-      static_static_keyword
-      static_declarations
-      static_semicolon
-    =
-      from_children SyntaxKind.FunctionStaticStatement [
-        static_static_keyword;
-        static_declarations;
-        static_semicolon;
-      ]
-
-    let make_static_declarator
-      static_name
-      static_initializer
-    =
-      from_children SyntaxKind.StaticDeclarator [
-        static_name;
-        static_initializer;
-      ]
-
-    let make_echo_statement
-      echo_keyword
-      echo_expressions
-      echo_semicolon
-    =
-      from_children SyntaxKind.EchoStatement [
-        echo_keyword;
-        echo_expressions;
-        echo_semicolon;
-      ]
-
-    let make_global_statement
-      global_keyword
-      global_variables
-      global_semicolon
-    =
-      from_children SyntaxKind.GlobalStatement [
-        global_keyword;
-        global_variables;
-        global_semicolon;
-      ]
-
-    let make_simple_initializer
-      simple_initializer_equal
-      simple_initializer_value
-    =
-      from_children SyntaxKind.SimpleInitializer [
-        simple_initializer_equal;
-        simple_initializer_value;
-      ]
-
-    let make_anonymous_function
-      anonymous_static_keyword
-      anonymous_async_keyword
-      anonymous_coroutine_keyword
-      anonymous_function_keyword
-      anonymous_left_paren
-      anonymous_parameters
-      anonymous_right_paren
-      anonymous_colon
-      anonymous_type
-      anonymous_use
-      anonymous_body
-    =
-      from_children SyntaxKind.AnonymousFunction [
-        anonymous_static_keyword;
-        anonymous_async_keyword;
-        anonymous_coroutine_keyword;
-        anonymous_function_keyword;
-        anonymous_left_paren;
-        anonymous_parameters;
-        anonymous_right_paren;
-        anonymous_colon;
-        anonymous_type;
-        anonymous_use;
-        anonymous_body;
-      ]
-
-    let make_anonymous_function_use_clause
-      anonymous_use_keyword
-      anonymous_use_left_paren
-      anonymous_use_variables
-      anonymous_use_right_paren
-    =
-      from_children SyntaxKind.AnonymousFunctionUseClause [
-        anonymous_use_keyword;
-        anonymous_use_left_paren;
-        anonymous_use_variables;
-        anonymous_use_right_paren;
-      ]
-
-    let make_lambda_expression
-      lambda_async
-      lambda_coroutine
-      lambda_signature
-      lambda_arrow
-      lambda_body
-    =
-      from_children SyntaxKind.LambdaExpression [
-        lambda_async;
-        lambda_coroutine;
-        lambda_signature;
-        lambda_arrow;
-        lambda_body;
-      ]
-
-    let make_lambda_signature
-      lambda_left_paren
-      lambda_parameters
-      lambda_right_paren
-      lambda_colon
-      lambda_type
-    =
-      from_children SyntaxKind.LambdaSignature [
-        lambda_left_paren;
-        lambda_parameters;
-        lambda_right_paren;
-        lambda_colon;
-        lambda_type;
-      ]
-
-    let make_cast_expression
-      cast_left_paren
-      cast_type
-      cast_right_paren
-      cast_operand
-    =
-      from_children SyntaxKind.CastExpression [
-        cast_left_paren;
-        cast_type;
-        cast_right_paren;
-        cast_operand;
-      ]
-
-    let make_scope_resolution_expression
-      scope_resolution_qualifier
-      scope_resolution_operator
-      scope_resolution_name
-    =
-      from_children SyntaxKind.ScopeResolutionExpression [
-        scope_resolution_qualifier;
-        scope_resolution_operator;
-        scope_resolution_name;
-      ]
-
-    let make_member_selection_expression
-      member_object
-      member_operator
-      member_name
-    =
-      from_children SyntaxKind.MemberSelectionExpression [
-        member_object;
-        member_operator;
-        member_name;
-      ]
-
-    let make_safe_member_selection_expression
-      safe_member_object
-      safe_member_operator
-      safe_member_name
-    =
-      from_children SyntaxKind.SafeMemberSelectionExpression [
-        safe_member_object;
-        safe_member_operator;
-        safe_member_name;
-      ]
-
-    let make_embedded_member_selection_expression
-      embedded_member_object
-      embedded_member_operator
-      embedded_member_name
-    =
-      from_children SyntaxKind.EmbeddedMemberSelectionExpression [
-        embedded_member_object;
-        embedded_member_operator;
-        embedded_member_name;
-      ]
-
-    let make_yield_expression
-      yield_keyword
-      yield_operand
-    =
-      from_children SyntaxKind.YieldExpression [
-        yield_keyword;
-        yield_operand;
-      ]
-
-    let make_yield_from_expression
-      yield_from_yield_keyword
-      yield_from_from_keyword
-      yield_from_operand
-    =
-      from_children SyntaxKind.YieldFromExpression [
-        yield_from_yield_keyword;
-        yield_from_from_keyword;
-        yield_from_operand;
-      ]
-
-    let make_prefix_unary_expression
-      prefix_unary_operator
-      prefix_unary_operand
-    =
-      from_children SyntaxKind.PrefixUnaryExpression [
-        prefix_unary_operator;
-        prefix_unary_operand;
-      ]
-
-    let make_postfix_unary_expression
-      postfix_unary_operand
-      postfix_unary_operator
-    =
-      from_children SyntaxKind.PostfixUnaryExpression [
-        postfix_unary_operand;
-        postfix_unary_operator;
-      ]
-
-    let make_binary_expression
-      binary_left_operand
-      binary_operator
-      binary_right_operand
-    =
-      from_children SyntaxKind.BinaryExpression [
-        binary_left_operand;
-        binary_operator;
-        binary_right_operand;
-      ]
-
-    let make_instanceof_expression
-      instanceof_left_operand
-      instanceof_operator
-      instanceof_right_operand
-    =
-      from_children SyntaxKind.InstanceofExpression [
-        instanceof_left_operand;
-        instanceof_operator;
-        instanceof_right_operand;
-      ]
-
-    let make_conditional_expression
-      conditional_test
-      conditional_question
-      conditional_consequence
-      conditional_colon
-      conditional_alternative
-    =
-      from_children SyntaxKind.ConditionalExpression [
-        conditional_test;
-        conditional_question;
-        conditional_consequence;
-        conditional_colon;
-        conditional_alternative;
-      ]
-
-    let make_eval_expression
-      eval_keyword
-      eval_left_paren
-      eval_argument
-      eval_right_paren
-    =
-      from_children SyntaxKind.EvalExpression [
-        eval_keyword;
-        eval_left_paren;
-        eval_argument;
-        eval_right_paren;
-      ]
-
-    let make_empty_expression
-      empty_keyword
-      empty_left_paren
-      empty_argument
-      empty_right_paren
-    =
-      from_children SyntaxKind.EmptyExpression [
-        empty_keyword;
-        empty_left_paren;
-        empty_argument;
-        empty_right_paren;
-      ]
-
-    let make_define_expression
-      define_keyword
-      define_left_paren
-      define_argument_list
-      define_right_paren
-    =
-      from_children SyntaxKind.DefineExpression [
-        define_keyword;
-        define_left_paren;
-        define_argument_list;
-        define_right_paren;
-      ]
-
-    let make_isset_expression
-      isset_keyword
-      isset_left_paren
-      isset_argument_list
-      isset_right_paren
-    =
-      from_children SyntaxKind.IssetExpression [
-        isset_keyword;
-        isset_left_paren;
-        isset_argument_list;
-        isset_right_paren;
-      ]
-
-    let make_function_call_expression
-      function_call_receiver
-      function_call_left_paren
-      function_call_argument_list
-      function_call_right_paren
-    =
-      from_children SyntaxKind.FunctionCallExpression [
-        function_call_receiver;
-        function_call_left_paren;
-        function_call_argument_list;
-        function_call_right_paren;
-      ]
-
-    let make_function_call_with_type_arguments_expression
-      function_call_with_type_arguments_receiver
-      function_call_with_type_arguments_type_args
-      function_call_with_type_arguments_left_paren
-      function_call_with_type_arguments_argument_list
-      function_call_with_type_arguments_right_paren
-    =
-      from_children SyntaxKind.FunctionCallWithTypeArgumentsExpression [
-        function_call_with_type_arguments_receiver;
-        function_call_with_type_arguments_type_args;
-        function_call_with_type_arguments_left_paren;
-        function_call_with_type_arguments_argument_list;
-        function_call_with_type_arguments_right_paren;
-      ]
-
-    let make_parenthesized_expression
-      parenthesized_expression_left_paren
-      parenthesized_expression_expression
-      parenthesized_expression_right_paren
-    =
-      from_children SyntaxKind.ParenthesizedExpression [
-        parenthesized_expression_left_paren;
-        parenthesized_expression_expression;
-        parenthesized_expression_right_paren;
-      ]
-
-    let make_braced_expression
-      braced_expression_left_brace
-      braced_expression_expression
-      braced_expression_right_brace
-    =
-      from_children SyntaxKind.BracedExpression [
-        braced_expression_left_brace;
-        braced_expression_expression;
-        braced_expression_right_brace;
-      ]
-
-    let make_embedded_braced_expression
-      embedded_braced_expression_left_brace
-      embedded_braced_expression_expression
-      embedded_braced_expression_right_brace
-    =
-      from_children SyntaxKind.EmbeddedBracedExpression [
-        embedded_braced_expression_left_brace;
-        embedded_braced_expression_expression;
-        embedded_braced_expression_right_brace;
-      ]
-
-    let make_list_expression
-      list_keyword
-      list_left_paren
-      list_members
-      list_right_paren
-    =
-      from_children SyntaxKind.ListExpression [
-        list_keyword;
-        list_left_paren;
-        list_members;
-        list_right_paren;
-      ]
-
-    let make_collection_literal_expression
-      collection_literal_name
-      collection_literal_left_brace
-      collection_literal_initializers
-      collection_literal_right_brace
-    =
-      from_children SyntaxKind.CollectionLiteralExpression [
-        collection_literal_name;
-        collection_literal_left_brace;
-        collection_literal_initializers;
-        collection_literal_right_brace;
-      ]
-
-    let make_object_creation_expression
-      object_creation_new_keyword
-      object_creation_type
-      object_creation_left_paren
-      object_creation_argument_list
-      object_creation_right_paren
-    =
-      from_children SyntaxKind.ObjectCreationExpression [
-        object_creation_new_keyword;
-        object_creation_type;
-        object_creation_left_paren;
-        object_creation_argument_list;
-        object_creation_right_paren;
-      ]
-
-    let make_array_creation_expression
-      array_creation_left_bracket
-      array_creation_members
-      array_creation_right_bracket
-    =
-      from_children SyntaxKind.ArrayCreationExpression [
-        array_creation_left_bracket;
-        array_creation_members;
-        array_creation_right_bracket;
-      ]
-
-    let make_array_intrinsic_expression
-      array_intrinsic_keyword
-      array_intrinsic_left_paren
-      array_intrinsic_members
-      array_intrinsic_right_paren
-    =
-      from_children SyntaxKind.ArrayIntrinsicExpression [
-        array_intrinsic_keyword;
-        array_intrinsic_left_paren;
-        array_intrinsic_members;
-        array_intrinsic_right_paren;
-      ]
-
-    let make_darray_intrinsic_expression
-      darray_intrinsic_keyword
-      darray_intrinsic_left_bracket
-      darray_intrinsic_members
-      darray_intrinsic_right_bracket
-    =
-      from_children SyntaxKind.DarrayIntrinsicExpression [
-        darray_intrinsic_keyword;
-        darray_intrinsic_left_bracket;
-        darray_intrinsic_members;
-        darray_intrinsic_right_bracket;
-      ]
-
-    let make_dictionary_intrinsic_expression
-      dictionary_intrinsic_keyword
-      dictionary_intrinsic_left_bracket
-      dictionary_intrinsic_members
-      dictionary_intrinsic_right_bracket
-    =
-      from_children SyntaxKind.DictionaryIntrinsicExpression [
-        dictionary_intrinsic_keyword;
-        dictionary_intrinsic_left_bracket;
-        dictionary_intrinsic_members;
-        dictionary_intrinsic_right_bracket;
-      ]
-
-    let make_keyset_intrinsic_expression
-      keyset_intrinsic_keyword
-      keyset_intrinsic_left_bracket
-      keyset_intrinsic_members
-      keyset_intrinsic_right_bracket
-    =
-      from_children SyntaxKind.KeysetIntrinsicExpression [
-        keyset_intrinsic_keyword;
-        keyset_intrinsic_left_bracket;
-        keyset_intrinsic_members;
-        keyset_intrinsic_right_bracket;
-      ]
-
-    let make_varray_intrinsic_expression
-      varray_intrinsic_keyword
-      varray_intrinsic_left_bracket
-      varray_intrinsic_members
-      varray_intrinsic_right_bracket
-    =
-      from_children SyntaxKind.VarrayIntrinsicExpression [
-        varray_intrinsic_keyword;
-        varray_intrinsic_left_bracket;
-        varray_intrinsic_members;
-        varray_intrinsic_right_bracket;
-      ]
-
-    let make_vector_intrinsic_expression
-      vector_intrinsic_keyword
-      vector_intrinsic_left_bracket
-      vector_intrinsic_members
-      vector_intrinsic_right_bracket
-    =
-      from_children SyntaxKind.VectorIntrinsicExpression [
-        vector_intrinsic_keyword;
-        vector_intrinsic_left_bracket;
-        vector_intrinsic_members;
-        vector_intrinsic_right_bracket;
-      ]
-
-    let make_element_initializer
-      element_key
-      element_arrow
-      element_value
-    =
-      from_children SyntaxKind.ElementInitializer [
-        element_key;
-        element_arrow;
-        element_value;
-      ]
-
-    let make_subscript_expression
-      subscript_receiver
-      subscript_left_bracket
-      subscript_index
-      subscript_right_bracket
-    =
-      from_children SyntaxKind.SubscriptExpression [
-        subscript_receiver;
-        subscript_left_bracket;
-        subscript_index;
-        subscript_right_bracket;
-      ]
-
-    let make_embedded_subscript_expression
-      embedded_subscript_receiver
-      embedded_subscript_left_bracket
-      embedded_subscript_index
-      embedded_subscript_right_bracket
-    =
-      from_children SyntaxKind.EmbeddedSubscriptExpression [
-        embedded_subscript_receiver;
-        embedded_subscript_left_bracket;
-        embedded_subscript_index;
-        embedded_subscript_right_bracket;
-      ]
-
-    let make_awaitable_creation_expression
-      awaitable_async
-      awaitable_coroutine
-      awaitable_compound_statement
-    =
-      from_children SyntaxKind.AwaitableCreationExpression [
-        awaitable_async;
-        awaitable_coroutine;
-        awaitable_compound_statement;
-      ]
-
-    let make_xhp_children_declaration
-      xhp_children_keyword
-      xhp_children_expression
-      xhp_children_semicolon
-    =
-      from_children SyntaxKind.XHPChildrenDeclaration [
-        xhp_children_keyword;
-        xhp_children_expression;
-        xhp_children_semicolon;
-      ]
-
-    let make_xhp_children_parenthesized_list
-      xhp_children_list_left_paren
-      xhp_children_list_xhp_children
-      xhp_children_list_right_paren
-    =
-      from_children SyntaxKind.XHPChildrenParenthesizedList [
-        xhp_children_list_left_paren;
-        xhp_children_list_xhp_children;
-        xhp_children_list_right_paren;
-      ]
-
-    let make_xhp_category_declaration
-      xhp_category_keyword
-      xhp_category_categories
-      xhp_category_semicolon
-    =
-      from_children SyntaxKind.XHPCategoryDeclaration [
-        xhp_category_keyword;
-        xhp_category_categories;
-        xhp_category_semicolon;
-      ]
-
-    let make_xhp_enum_type
-      xhp_enum_keyword
-      xhp_enum_left_brace
-      xhp_enum_values
-      xhp_enum_right_brace
-    =
-      from_children SyntaxKind.XHPEnumType [
-        xhp_enum_keyword;
-        xhp_enum_left_brace;
-        xhp_enum_values;
-        xhp_enum_right_brace;
-      ]
-
-    let make_xhp_required
-      xhp_required_at
-      xhp_required_keyword
-    =
-      from_children SyntaxKind.XHPRequired [
-        xhp_required_at;
-        xhp_required_keyword;
-      ]
-
-    let make_xhp_class_attribute_declaration
-      xhp_attribute_keyword
-      xhp_attribute_attributes
-      xhp_attribute_semicolon
-    =
-      from_children SyntaxKind.XHPClassAttributeDeclaration [
-        xhp_attribute_keyword;
-        xhp_attribute_attributes;
-        xhp_attribute_semicolon;
-      ]
-
-    let make_xhp_class_attribute
-      xhp_attribute_decl_type
-      xhp_attribute_decl_name
-      xhp_attribute_decl_initializer
-      xhp_attribute_decl_required
-    =
-      from_children SyntaxKind.XHPClassAttribute [
-        xhp_attribute_decl_type;
-        xhp_attribute_decl_name;
-        xhp_attribute_decl_initializer;
-        xhp_attribute_decl_required;
-      ]
-
-    let make_xhp_simple_class_attribute
-      xhp_simple_class_attribute_type
-    =
-      from_children SyntaxKind.XHPSimpleClassAttribute [
-        xhp_simple_class_attribute_type;
-      ]
-
-    let make_xhp_attribute
-      xhp_attribute_name
-      xhp_attribute_equal
-      xhp_attribute_expression
-    =
-      from_children SyntaxKind.XHPAttribute [
-        xhp_attribute_name;
-        xhp_attribute_equal;
-        xhp_attribute_expression;
-      ]
-
-    let make_xhp_open
-      xhp_open_left_angle
-      xhp_open_name
-      xhp_open_attributes
-      xhp_open_right_angle
-    =
-      from_children SyntaxKind.XHPOpen [
-        xhp_open_left_angle;
-        xhp_open_name;
-        xhp_open_attributes;
-        xhp_open_right_angle;
-      ]
-
-    let make_xhp_expression
-      xhp_open
-      xhp_body
-      xhp_close
-    =
-      from_children SyntaxKind.XHPExpression [
-        xhp_open;
-        xhp_body;
-        xhp_close;
-      ]
-
-    let make_xhp_close
-      xhp_close_left_angle
-      xhp_close_name
-      xhp_close_right_angle
-    =
-      from_children SyntaxKind.XHPClose [
-        xhp_close_left_angle;
-        xhp_close_name;
-        xhp_close_right_angle;
-      ]
-
-    let make_type_constant
-      type_constant_left_type
-      type_constant_separator
-      type_constant_right_type
-    =
-      from_children SyntaxKind.TypeConstant [
-        type_constant_left_type;
-        type_constant_separator;
-        type_constant_right_type;
-      ]
-
-    let make_vector_type_specifier
-      vector_type_keyword
-      vector_type_left_angle
-      vector_type_type
-      vector_type_trailing_comma
-      vector_type_right_angle
-    =
-      from_children SyntaxKind.VectorTypeSpecifier [
-        vector_type_keyword;
-        vector_type_left_angle;
-        vector_type_type;
-        vector_type_trailing_comma;
-        vector_type_right_angle;
-      ]
-
-    let make_keyset_type_specifier
-      keyset_type_keyword
-      keyset_type_left_angle
-      keyset_type_type
-      keyset_type_trailing_comma
-      keyset_type_right_angle
-    =
-      from_children SyntaxKind.KeysetTypeSpecifier [
-        keyset_type_keyword;
-        keyset_type_left_angle;
-        keyset_type_type;
-        keyset_type_trailing_comma;
-        keyset_type_right_angle;
-      ]
-
-    let make_tuple_type_explicit_specifier
-      tuple_type_keyword
-      tuple_type_left_angle
-      tuple_type_types
-      tuple_type_right_angle
-    =
-      from_children SyntaxKind.TupleTypeExplicitSpecifier [
-        tuple_type_keyword;
-        tuple_type_left_angle;
-        tuple_type_types;
-        tuple_type_right_angle;
-      ]
-
-    let make_varray_type_specifier
-      varray_keyword
-      varray_left_angle
-      varray_type
-      varray_trailing_comma
-      varray_right_angle
-    =
-      from_children SyntaxKind.VarrayTypeSpecifier [
-        varray_keyword;
-        varray_left_angle;
-        varray_type;
-        varray_trailing_comma;
-        varray_right_angle;
-      ]
-
-    let make_vector_array_type_specifier
-      vector_array_keyword
-      vector_array_left_angle
-      vector_array_type
-      vector_array_right_angle
-    =
-      from_children SyntaxKind.VectorArrayTypeSpecifier [
-        vector_array_keyword;
-        vector_array_left_angle;
-        vector_array_type;
-        vector_array_right_angle;
-      ]
-
-    let make_type_parameter
-      type_variance
-      type_name
-      type_constraints
-    =
-      from_children SyntaxKind.TypeParameter [
-        type_variance;
-        type_name;
-        type_constraints;
-      ]
-
-    let make_type_constraint
-      constraint_keyword
-      constraint_type
-    =
-      from_children SyntaxKind.TypeConstraint [
-        constraint_keyword;
-        constraint_type;
-      ]
-
-    let make_darray_type_specifier
-      darray_keyword
-      darray_left_angle
-      darray_key
-      darray_comma
-      darray_value
-      darray_trailing_comma
-      darray_right_angle
-    =
-      from_children SyntaxKind.DarrayTypeSpecifier [
-        darray_keyword;
-        darray_left_angle;
-        darray_key;
-        darray_comma;
-        darray_value;
-        darray_trailing_comma;
-        darray_right_angle;
-      ]
-
-    let make_map_array_type_specifier
-      map_array_keyword
-      map_array_left_angle
-      map_array_key
-      map_array_comma
-      map_array_value
-      map_array_right_angle
-    =
-      from_children SyntaxKind.MapArrayTypeSpecifier [
-        map_array_keyword;
-        map_array_left_angle;
-        map_array_key;
-        map_array_comma;
-        map_array_value;
-        map_array_right_angle;
-      ]
-
-    let make_dictionary_type_specifier
-      dictionary_type_keyword
-      dictionary_type_left_angle
-      dictionary_type_members
-      dictionary_type_right_angle
-    =
-      from_children SyntaxKind.DictionaryTypeSpecifier [
-        dictionary_type_keyword;
-        dictionary_type_left_angle;
-        dictionary_type_members;
-        dictionary_type_right_angle;
-      ]
-
-    let make_closure_type_specifier
-      closure_outer_left_paren
-      closure_coroutine
-      closure_function_keyword
-      closure_inner_left_paren
-      closure_parameter_types
-      closure_inner_right_paren
-      closure_colon
-      closure_return_type
-      closure_outer_right_paren
-    =
-      from_children SyntaxKind.ClosureTypeSpecifier [
-        closure_outer_left_paren;
-        closure_coroutine;
-        closure_function_keyword;
-        closure_inner_left_paren;
-        closure_parameter_types;
-        closure_inner_right_paren;
-        closure_colon;
-        closure_return_type;
-        closure_outer_right_paren;
-      ]
-
-    let make_classname_type_specifier
-      classname_keyword
-      classname_left_angle
-      classname_type
-      classname_trailing_comma
-      classname_right_angle
-    =
-      from_children SyntaxKind.ClassnameTypeSpecifier [
-        classname_keyword;
-        classname_left_angle;
-        classname_type;
-        classname_trailing_comma;
-        classname_right_angle;
-      ]
-
-    let make_field_specifier
-      field_question
-      field_name
-      field_arrow
-      field_type
-    =
-      from_children SyntaxKind.FieldSpecifier [
-        field_question;
-        field_name;
-        field_arrow;
-        field_type;
-      ]
-
-    let make_field_initializer
-      field_initializer_name
-      field_initializer_arrow
-      field_initializer_value
-    =
-      from_children SyntaxKind.FieldInitializer [
-        field_initializer_name;
-        field_initializer_arrow;
-        field_initializer_value;
-      ]
-
-    let make_shape_type_specifier
-      shape_type_keyword
-      shape_type_left_paren
-      shape_type_fields
-      shape_type_ellipsis
-      shape_type_right_paren
-    =
-      from_children SyntaxKind.ShapeTypeSpecifier [
-        shape_type_keyword;
-        shape_type_left_paren;
-        shape_type_fields;
-        shape_type_ellipsis;
-        shape_type_right_paren;
-      ]
-
-    let make_shape_expression
-      shape_expression_keyword
-      shape_expression_left_paren
-      shape_expression_fields
-      shape_expression_right_paren
-    =
-      from_children SyntaxKind.ShapeExpression [
-        shape_expression_keyword;
-        shape_expression_left_paren;
-        shape_expression_fields;
-        shape_expression_right_paren;
-      ]
-
-    let make_tuple_expression
-      tuple_expression_keyword
-      tuple_expression_left_paren
-      tuple_expression_items
-      tuple_expression_right_paren
-    =
-      from_children SyntaxKind.TupleExpression [
-        tuple_expression_keyword;
-        tuple_expression_left_paren;
-        tuple_expression_items;
-        tuple_expression_right_paren;
-      ]
-
-    let make_generic_type_specifier
-      generic_class_type
-      generic_argument_list
-    =
-      from_children SyntaxKind.GenericTypeSpecifier [
-        generic_class_type;
-        generic_argument_list;
-      ]
-
-    let make_nullable_type_specifier
-      nullable_question
-      nullable_type
-    =
-      from_children SyntaxKind.NullableTypeSpecifier [
-        nullable_question;
-        nullable_type;
-      ]
-
-    let make_soft_type_specifier
-      soft_at
-      soft_type
-    =
-      from_children SyntaxKind.SoftTypeSpecifier [
-        soft_at;
-        soft_type;
-      ]
-
-    let make_type_arguments
-      type_arguments_left_angle
-      type_arguments_types
-      type_arguments_right_angle
-    =
-      from_children SyntaxKind.TypeArguments [
-        type_arguments_left_angle;
-        type_arguments_types;
-        type_arguments_right_angle;
-      ]
-
-    let make_type_parameters
-      type_parameters_left_angle
-      type_parameters_parameters
-      type_parameters_right_angle
-    =
-      from_children SyntaxKind.TypeParameters [
-        type_parameters_left_angle;
-        type_parameters_parameters;
-        type_parameters_right_angle;
-      ]
-
-    let make_tuple_type_specifier
-      tuple_left_paren
-      tuple_types
-      tuple_right_paren
-    =
-      from_children SyntaxKind.TupleTypeSpecifier [
-        tuple_left_paren;
-        tuple_types;
-        tuple_right_paren;
-      ]
-
-    let make_error
-      error_error
-    =
-      from_children SyntaxKind.ErrorSyntax [
-        error_error;
-      ]
-
-    let make_list_item
-      list_item
-      list_separator
-    =
-      from_children SyntaxKind.ListItem [
-        list_item;
-        list_separator;
-      ]
+      let make_end_of_file
+        end_of_file_token
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.EndOfFile [
+          end_of_file_token;
+        ] in
+        make (EndOfFile {
+          end_of_file_token;
+        }) value
+
+      let make_script
+        script_declarations
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.Script [
+          script_declarations;
+        ] in
+        make (Script {
+          script_declarations;
+        }) value
+
+      let make_simple_type_specifier
+        simple_type_specifier
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.SimpleTypeSpecifier [
+          simple_type_specifier;
+        ] in
+        make (SimpleTypeSpecifier {
+          simple_type_specifier;
+        }) value
+
+      let make_literal_expression
+        literal_expression
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.LiteralExpression [
+          literal_expression;
+        ] in
+        make (LiteralExpression {
+          literal_expression;
+        }) value
+
+      let make_variable_expression
+        variable_expression
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.VariableExpression [
+          variable_expression;
+        ] in
+        make (VariableExpression {
+          variable_expression;
+        }) value
+
+      let make_qualified_name_expression
+        qualified_name_expression
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.QualifiedNameExpression [
+          qualified_name_expression;
+        ] in
+        make (QualifiedNameExpression {
+          qualified_name_expression;
+        }) value
+
+      let make_pipe_variable_expression
+        pipe_variable_expression
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.PipeVariableExpression [
+          pipe_variable_expression;
+        ] in
+        make (PipeVariableExpression {
+          pipe_variable_expression;
+        }) value
+
+      let make_enum_declaration
+        enum_attribute_spec
+        enum_keyword
+        enum_name
+        enum_colon
+        enum_base
+        enum_type
+        enum_left_brace
+        enum_enumerators
+        enum_right_brace
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.EnumDeclaration [
+          enum_attribute_spec;
+          enum_keyword;
+          enum_name;
+          enum_colon;
+          enum_base;
+          enum_type;
+          enum_left_brace;
+          enum_enumerators;
+          enum_right_brace;
+        ] in
+        make (EnumDeclaration {
+          enum_attribute_spec;
+          enum_keyword;
+          enum_name;
+          enum_colon;
+          enum_base;
+          enum_type;
+          enum_left_brace;
+          enum_enumerators;
+          enum_right_brace;
+        }) value
+
+      let make_enumerator
+        enumerator_name
+        enumerator_equal
+        enumerator_value
+        enumerator_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.Enumerator [
+          enumerator_name;
+          enumerator_equal;
+          enumerator_value;
+          enumerator_semicolon;
+        ] in
+        make (Enumerator {
+          enumerator_name;
+          enumerator_equal;
+          enumerator_value;
+          enumerator_semicolon;
+        }) value
+
+      let make_alias_declaration
+        alias_attribute_spec
+        alias_keyword
+        alias_name
+        alias_generic_parameter
+        alias_constraint
+        alias_equal
+        alias_type
+        alias_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.AliasDeclaration [
+          alias_attribute_spec;
+          alias_keyword;
+          alias_name;
+          alias_generic_parameter;
+          alias_constraint;
+          alias_equal;
+          alias_type;
+          alias_semicolon;
+        ] in
+        make (AliasDeclaration {
+          alias_attribute_spec;
+          alias_keyword;
+          alias_name;
+          alias_generic_parameter;
+          alias_constraint;
+          alias_equal;
+          alias_type;
+          alias_semicolon;
+        }) value
+
+      let make_property_declaration
+        property_modifiers
+        property_type
+        property_declarators
+        property_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.PropertyDeclaration [
+          property_modifiers;
+          property_type;
+          property_declarators;
+          property_semicolon;
+        ] in
+        make (PropertyDeclaration {
+          property_modifiers;
+          property_type;
+          property_declarators;
+          property_semicolon;
+        }) value
+
+      let make_property_declarator
+        property_name
+        property_initializer
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.PropertyDeclarator [
+          property_name;
+          property_initializer;
+        ] in
+        make (PropertyDeclarator {
+          property_name;
+          property_initializer;
+        }) value
+
+      let make_namespace_declaration
+        namespace_keyword
+        namespace_name
+        namespace_body
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.NamespaceDeclaration [
+          namespace_keyword;
+          namespace_name;
+          namespace_body;
+        ] in
+        make (NamespaceDeclaration {
+          namespace_keyword;
+          namespace_name;
+          namespace_body;
+        }) value
+
+      let make_namespace_body
+        namespace_left_brace
+        namespace_declarations
+        namespace_right_brace
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.NamespaceBody [
+          namespace_left_brace;
+          namespace_declarations;
+          namespace_right_brace;
+        ] in
+        make (NamespaceBody {
+          namespace_left_brace;
+          namespace_declarations;
+          namespace_right_brace;
+        }) value
+
+      let make_namespace_empty_body
+        namespace_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.NamespaceEmptyBody [
+          namespace_semicolon;
+        ] in
+        make (NamespaceEmptyBody {
+          namespace_semicolon;
+        }) value
+
+      let make_namespace_use_declaration
+        namespace_use_keyword
+        namespace_use_kind
+        namespace_use_clauses
+        namespace_use_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.NamespaceUseDeclaration [
+          namespace_use_keyword;
+          namespace_use_kind;
+          namespace_use_clauses;
+          namespace_use_semicolon;
+        ] in
+        make (NamespaceUseDeclaration {
+          namespace_use_keyword;
+          namespace_use_kind;
+          namespace_use_clauses;
+          namespace_use_semicolon;
+        }) value
+
+      let make_namespace_group_use_declaration
+        namespace_group_use_keyword
+        namespace_group_use_kind
+        namespace_group_use_prefix
+        namespace_group_use_left_brace
+        namespace_group_use_clauses
+        namespace_group_use_right_brace
+        namespace_group_use_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.NamespaceGroupUseDeclaration [
+          namespace_group_use_keyword;
+          namespace_group_use_kind;
+          namespace_group_use_prefix;
+          namespace_group_use_left_brace;
+          namespace_group_use_clauses;
+          namespace_group_use_right_brace;
+          namespace_group_use_semicolon;
+        ] in
+        make (NamespaceGroupUseDeclaration {
+          namespace_group_use_keyword;
+          namespace_group_use_kind;
+          namespace_group_use_prefix;
+          namespace_group_use_left_brace;
+          namespace_group_use_clauses;
+          namespace_group_use_right_brace;
+          namespace_group_use_semicolon;
+        }) value
+
+      let make_namespace_use_clause
+        namespace_use_clause_kind
+        namespace_use_name
+        namespace_use_as
+        namespace_use_alias
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.NamespaceUseClause [
+          namespace_use_clause_kind;
+          namespace_use_name;
+          namespace_use_as;
+          namespace_use_alias;
+        ] in
+        make (NamespaceUseClause {
+          namespace_use_clause_kind;
+          namespace_use_name;
+          namespace_use_as;
+          namespace_use_alias;
+        }) value
+
+      let make_function_declaration
+        function_attribute_spec
+        function_declaration_header
+        function_body
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.FunctionDeclaration [
+          function_attribute_spec;
+          function_declaration_header;
+          function_body;
+        ] in
+        make (FunctionDeclaration {
+          function_attribute_spec;
+          function_declaration_header;
+          function_body;
+        }) value
+
+      let make_function_declaration_header
+        function_async
+        function_coroutine
+        function_keyword
+        function_ampersand
+        function_name
+        function_type_parameter_list
+        function_left_paren
+        function_parameter_list
+        function_right_paren
+        function_colon
+        function_type
+        function_where_clause
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.FunctionDeclarationHeader [
+          function_async;
+          function_coroutine;
+          function_keyword;
+          function_ampersand;
+          function_name;
+          function_type_parameter_list;
+          function_left_paren;
+          function_parameter_list;
+          function_right_paren;
+          function_colon;
+          function_type;
+          function_where_clause;
+        ] in
+        make (FunctionDeclarationHeader {
+          function_async;
+          function_coroutine;
+          function_keyword;
+          function_ampersand;
+          function_name;
+          function_type_parameter_list;
+          function_left_paren;
+          function_parameter_list;
+          function_right_paren;
+          function_colon;
+          function_type;
+          function_where_clause;
+        }) value
+
+      let make_where_clause
+        where_clause_keyword
+        where_clause_constraints
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.WhereClause [
+          where_clause_keyword;
+          where_clause_constraints;
+        ] in
+        make (WhereClause {
+          where_clause_keyword;
+          where_clause_constraints;
+        }) value
+
+      let make_where_constraint
+        where_constraint_left_type
+        where_constraint_operator
+        where_constraint_right_type
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.WhereConstraint [
+          where_constraint_left_type;
+          where_constraint_operator;
+          where_constraint_right_type;
+        ] in
+        make (WhereConstraint {
+          where_constraint_left_type;
+          where_constraint_operator;
+          where_constraint_right_type;
+        }) value
+
+      let make_methodish_declaration
+        methodish_attribute
+        methodish_modifiers
+        methodish_function_decl_header
+        methodish_function_body
+        methodish_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.MethodishDeclaration [
+          methodish_attribute;
+          methodish_modifiers;
+          methodish_function_decl_header;
+          methodish_function_body;
+          methodish_semicolon;
+        ] in
+        make (MethodishDeclaration {
+          methodish_attribute;
+          methodish_modifiers;
+          methodish_function_decl_header;
+          methodish_function_body;
+          methodish_semicolon;
+        }) value
+
+      let make_classish_declaration
+        classish_attribute
+        classish_modifiers
+        classish_keyword
+        classish_name
+        classish_type_parameters
+        classish_extends_keyword
+        classish_extends_list
+        classish_implements_keyword
+        classish_implements_list
+        classish_body
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ClassishDeclaration [
+          classish_attribute;
+          classish_modifiers;
+          classish_keyword;
+          classish_name;
+          classish_type_parameters;
+          classish_extends_keyword;
+          classish_extends_list;
+          classish_implements_keyword;
+          classish_implements_list;
+          classish_body;
+        ] in
+        make (ClassishDeclaration {
+          classish_attribute;
+          classish_modifiers;
+          classish_keyword;
+          classish_name;
+          classish_type_parameters;
+          classish_extends_keyword;
+          classish_extends_list;
+          classish_implements_keyword;
+          classish_implements_list;
+          classish_body;
+        }) value
+
+      let make_classish_body
+        classish_body_left_brace
+        classish_body_elements
+        classish_body_right_brace
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ClassishBody [
+          classish_body_left_brace;
+          classish_body_elements;
+          classish_body_right_brace;
+        ] in
+        make (ClassishBody {
+          classish_body_left_brace;
+          classish_body_elements;
+          classish_body_right_brace;
+        }) value
+
+      let make_trait_use_precedence_item
+        trait_use_precedence_item_name
+        trait_use_precedence_item_keyword
+        trait_use_precedence_item_removed_names
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TraitUsePrecedenceItem [
+          trait_use_precedence_item_name;
+          trait_use_precedence_item_keyword;
+          trait_use_precedence_item_removed_names;
+        ] in
+        make (TraitUsePrecedenceItem {
+          trait_use_precedence_item_name;
+          trait_use_precedence_item_keyword;
+          trait_use_precedence_item_removed_names;
+        }) value
+
+      let make_trait_use_alias_item
+        trait_use_alias_item_aliasing_name
+        trait_use_alias_item_keyword
+        trait_use_alias_item_visibility
+        trait_use_alias_item_aliased_name
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TraitUseAliasItem [
+          trait_use_alias_item_aliasing_name;
+          trait_use_alias_item_keyword;
+          trait_use_alias_item_visibility;
+          trait_use_alias_item_aliased_name;
+        ] in
+        make (TraitUseAliasItem {
+          trait_use_alias_item_aliasing_name;
+          trait_use_alias_item_keyword;
+          trait_use_alias_item_visibility;
+          trait_use_alias_item_aliased_name;
+        }) value
+
+      let make_trait_use_conflict_resolution
+        trait_use_conflict_resolution_keyword
+        trait_use_conflict_resolution_names
+        trait_use_conflict_resolution_left_brace
+        trait_use_conflict_resolution_clauses
+        trait_use_conflict_resolution_right_brace
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TraitUseConflictResolution [
+          trait_use_conflict_resolution_keyword;
+          trait_use_conflict_resolution_names;
+          trait_use_conflict_resolution_left_brace;
+          trait_use_conflict_resolution_clauses;
+          trait_use_conflict_resolution_right_brace;
+        ] in
+        make (TraitUseConflictResolution {
+          trait_use_conflict_resolution_keyword;
+          trait_use_conflict_resolution_names;
+          trait_use_conflict_resolution_left_brace;
+          trait_use_conflict_resolution_clauses;
+          trait_use_conflict_resolution_right_brace;
+        }) value
+
+      let make_trait_use
+        trait_use_keyword
+        trait_use_names
+        trait_use_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TraitUse [
+          trait_use_keyword;
+          trait_use_names;
+          trait_use_semicolon;
+        ] in
+        make (TraitUse {
+          trait_use_keyword;
+          trait_use_names;
+          trait_use_semicolon;
+        }) value
+
+      let make_require_clause
+        require_keyword
+        require_kind
+        require_name
+        require_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.RequireClause [
+          require_keyword;
+          require_kind;
+          require_name;
+          require_semicolon;
+        ] in
+        make (RequireClause {
+          require_keyword;
+          require_kind;
+          require_name;
+          require_semicolon;
+        }) value
+
+      let make_const_declaration
+        const_abstract
+        const_keyword
+        const_type_specifier
+        const_declarators
+        const_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ConstDeclaration [
+          const_abstract;
+          const_keyword;
+          const_type_specifier;
+          const_declarators;
+          const_semicolon;
+        ] in
+        make (ConstDeclaration {
+          const_abstract;
+          const_keyword;
+          const_type_specifier;
+          const_declarators;
+          const_semicolon;
+        }) value
+
+      let make_constant_declarator
+        constant_declarator_name
+        constant_declarator_initializer
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ConstantDeclarator [
+          constant_declarator_name;
+          constant_declarator_initializer;
+        ] in
+        make (ConstantDeclarator {
+          constant_declarator_name;
+          constant_declarator_initializer;
+        }) value
+
+      let make_type_const_declaration
+        type_const_abstract
+        type_const_keyword
+        type_const_type_keyword
+        type_const_name
+        type_const_type_constraint
+        type_const_equal
+        type_const_type_specifier
+        type_const_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TypeConstDeclaration [
+          type_const_abstract;
+          type_const_keyword;
+          type_const_type_keyword;
+          type_const_name;
+          type_const_type_constraint;
+          type_const_equal;
+          type_const_type_specifier;
+          type_const_semicolon;
+        ] in
+        make (TypeConstDeclaration {
+          type_const_abstract;
+          type_const_keyword;
+          type_const_type_keyword;
+          type_const_name;
+          type_const_type_constraint;
+          type_const_equal;
+          type_const_type_specifier;
+          type_const_semicolon;
+        }) value
+
+      let make_decorated_expression
+        decorated_expression_decorator
+        decorated_expression_expression
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.DecoratedExpression [
+          decorated_expression_decorator;
+          decorated_expression_expression;
+        ] in
+        make (DecoratedExpression {
+          decorated_expression_decorator;
+          decorated_expression_expression;
+        }) value
+
+      let make_parameter_declaration
+        parameter_attribute
+        parameter_visibility
+        parameter_type
+        parameter_name
+        parameter_default_value
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ParameterDeclaration [
+          parameter_attribute;
+          parameter_visibility;
+          parameter_type;
+          parameter_name;
+          parameter_default_value;
+        ] in
+        make (ParameterDeclaration {
+          parameter_attribute;
+          parameter_visibility;
+          parameter_type;
+          parameter_name;
+          parameter_default_value;
+        }) value
+
+      let make_variadic_parameter
+        variadic_parameter_ellipsis
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.VariadicParameter [
+          variadic_parameter_ellipsis;
+        ] in
+        make (VariadicParameter {
+          variadic_parameter_ellipsis;
+        }) value
+
+      let make_attribute_specification
+        attribute_specification_left_double_angle
+        attribute_specification_attributes
+        attribute_specification_right_double_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.AttributeSpecification [
+          attribute_specification_left_double_angle;
+          attribute_specification_attributes;
+          attribute_specification_right_double_angle;
+        ] in
+        make (AttributeSpecification {
+          attribute_specification_left_double_angle;
+          attribute_specification_attributes;
+          attribute_specification_right_double_angle;
+        }) value
+
+      let make_attribute
+        attribute_name
+        attribute_left_paren
+        attribute_values
+        attribute_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.Attribute [
+          attribute_name;
+          attribute_left_paren;
+          attribute_values;
+          attribute_right_paren;
+        ] in
+        make (Attribute {
+          attribute_name;
+          attribute_left_paren;
+          attribute_values;
+          attribute_right_paren;
+        }) value
+
+      let make_inclusion_expression
+        inclusion_require
+        inclusion_filename
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.InclusionExpression [
+          inclusion_require;
+          inclusion_filename;
+        ] in
+        make (InclusionExpression {
+          inclusion_require;
+          inclusion_filename;
+        }) value
+
+      let make_inclusion_directive
+        inclusion_expression
+        inclusion_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.InclusionDirective [
+          inclusion_expression;
+          inclusion_semicolon;
+        ] in
+        make (InclusionDirective {
+          inclusion_expression;
+          inclusion_semicolon;
+        }) value
+
+      let make_compound_statement
+        compound_left_brace
+        compound_statements
+        compound_right_brace
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.CompoundStatement [
+          compound_left_brace;
+          compound_statements;
+          compound_right_brace;
+        ] in
+        make (CompoundStatement {
+          compound_left_brace;
+          compound_statements;
+          compound_right_brace;
+        }) value
+
+      let make_expression_statement
+        expression_statement_expression
+        expression_statement_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ExpressionStatement [
+          expression_statement_expression;
+          expression_statement_semicolon;
+        ] in
+        make (ExpressionStatement {
+          expression_statement_expression;
+          expression_statement_semicolon;
+        }) value
+
+      let make_markup_section
+        markup_prefix
+        markup_text
+        markup_suffix
+        markup_expression
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.MarkupSection [
+          markup_prefix;
+          markup_text;
+          markup_suffix;
+          markup_expression;
+        ] in
+        make (MarkupSection {
+          markup_prefix;
+          markup_text;
+          markup_suffix;
+          markup_expression;
+        }) value
+
+      let make_markup_suffix
+        markup_suffix_less_than_question
+        markup_suffix_name
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.MarkupSuffix [
+          markup_suffix_less_than_question;
+          markup_suffix_name;
+        ] in
+        make (MarkupSuffix {
+          markup_suffix_less_than_question;
+          markup_suffix_name;
+        }) value
+
+      let make_unset_statement
+        unset_keyword
+        unset_left_paren
+        unset_variables
+        unset_right_paren
+        unset_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.UnsetStatement [
+          unset_keyword;
+          unset_left_paren;
+          unset_variables;
+          unset_right_paren;
+          unset_semicolon;
+        ] in
+        make (UnsetStatement {
+          unset_keyword;
+          unset_left_paren;
+          unset_variables;
+          unset_right_paren;
+          unset_semicolon;
+        }) value
+
+      let make_using_statement_block_scoped
+        using_block_await_keyword
+        using_block_using_keyword
+        using_block_left_paren
+        using_block_expressions
+        using_block_right_paren
+        using_block_body
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.UsingStatementBlockScoped [
+          using_block_await_keyword;
+          using_block_using_keyword;
+          using_block_left_paren;
+          using_block_expressions;
+          using_block_right_paren;
+          using_block_body;
+        ] in
+        make (UsingStatementBlockScoped {
+          using_block_await_keyword;
+          using_block_using_keyword;
+          using_block_left_paren;
+          using_block_expressions;
+          using_block_right_paren;
+          using_block_body;
+        }) value
+
+      let make_using_statement_function_scoped
+        using_function_await_keyword
+        using_function_using_keyword
+        using_function_expression
+        using_function_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.UsingStatementFunctionScoped [
+          using_function_await_keyword;
+          using_function_using_keyword;
+          using_function_expression;
+          using_function_semicolon;
+        ] in
+        make (UsingStatementFunctionScoped {
+          using_function_await_keyword;
+          using_function_using_keyword;
+          using_function_expression;
+          using_function_semicolon;
+        }) value
+
+      let make_while_statement
+        while_keyword
+        while_left_paren
+        while_condition
+        while_right_paren
+        while_body
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.WhileStatement [
+          while_keyword;
+          while_left_paren;
+          while_condition;
+          while_right_paren;
+          while_body;
+        ] in
+        make (WhileStatement {
+          while_keyword;
+          while_left_paren;
+          while_condition;
+          while_right_paren;
+          while_body;
+        }) value
+
+      let make_if_statement
+        if_keyword
+        if_left_paren
+        if_condition
+        if_right_paren
+        if_statement
+        if_elseif_clauses
+        if_else_clause
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.IfStatement [
+          if_keyword;
+          if_left_paren;
+          if_condition;
+          if_right_paren;
+          if_statement;
+          if_elseif_clauses;
+          if_else_clause;
+        ] in
+        make (IfStatement {
+          if_keyword;
+          if_left_paren;
+          if_condition;
+          if_right_paren;
+          if_statement;
+          if_elseif_clauses;
+          if_else_clause;
+        }) value
+
+      let make_elseif_clause
+        elseif_keyword
+        elseif_left_paren
+        elseif_condition
+        elseif_right_paren
+        elseif_statement
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ElseifClause [
+          elseif_keyword;
+          elseif_left_paren;
+          elseif_condition;
+          elseif_right_paren;
+          elseif_statement;
+        ] in
+        make (ElseifClause {
+          elseif_keyword;
+          elseif_left_paren;
+          elseif_condition;
+          elseif_right_paren;
+          elseif_statement;
+        }) value
+
+      let make_else_clause
+        else_keyword
+        else_statement
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ElseClause [
+          else_keyword;
+          else_statement;
+        ] in
+        make (ElseClause {
+          else_keyword;
+          else_statement;
+        }) value
+
+      let make_if_endif_statement
+        if_endif_keyword
+        if_endif_left_paren
+        if_endif_condition
+        if_endif_right_paren
+        if_endif_colon
+        if_endif_statement
+        if_endif_elseif_colon_clauses
+        if_endif_else_colon_clause
+        if_endif_endif_keyword
+        if_endif_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.IfEndIfStatement [
+          if_endif_keyword;
+          if_endif_left_paren;
+          if_endif_condition;
+          if_endif_right_paren;
+          if_endif_colon;
+          if_endif_statement;
+          if_endif_elseif_colon_clauses;
+          if_endif_else_colon_clause;
+          if_endif_endif_keyword;
+          if_endif_semicolon;
+        ] in
+        make (IfEndIfStatement {
+          if_endif_keyword;
+          if_endif_left_paren;
+          if_endif_condition;
+          if_endif_right_paren;
+          if_endif_colon;
+          if_endif_statement;
+          if_endif_elseif_colon_clauses;
+          if_endif_else_colon_clause;
+          if_endif_endif_keyword;
+          if_endif_semicolon;
+        }) value
+
+      let make_elseif_colon_clause
+        elseif_colon_keyword
+        elseif_colon_left_paren
+        elseif_colon_condition
+        elseif_colon_right_paren
+        elseif_colon_colon
+        elseif_colon_statement
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ElseifColonClause [
+          elseif_colon_keyword;
+          elseif_colon_left_paren;
+          elseif_colon_condition;
+          elseif_colon_right_paren;
+          elseif_colon_colon;
+          elseif_colon_statement;
+        ] in
+        make (ElseifColonClause {
+          elseif_colon_keyword;
+          elseif_colon_left_paren;
+          elseif_colon_condition;
+          elseif_colon_right_paren;
+          elseif_colon_colon;
+          elseif_colon_statement;
+        }) value
+
+      let make_else_colon_clause
+        else_colon_keyword
+        else_colon_colon
+        else_colon_statement
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ElseColonClause [
+          else_colon_keyword;
+          else_colon_colon;
+          else_colon_statement;
+        ] in
+        make (ElseColonClause {
+          else_colon_keyword;
+          else_colon_colon;
+          else_colon_statement;
+        }) value
+
+      let make_try_statement
+        try_keyword
+        try_compound_statement
+        try_catch_clauses
+        try_finally_clause
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TryStatement [
+          try_keyword;
+          try_compound_statement;
+          try_catch_clauses;
+          try_finally_clause;
+        ] in
+        make (TryStatement {
+          try_keyword;
+          try_compound_statement;
+          try_catch_clauses;
+          try_finally_clause;
+        }) value
+
+      let make_catch_clause
+        catch_keyword
+        catch_left_paren
+        catch_type
+        catch_variable
+        catch_right_paren
+        catch_body
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.CatchClause [
+          catch_keyword;
+          catch_left_paren;
+          catch_type;
+          catch_variable;
+          catch_right_paren;
+          catch_body;
+        ] in
+        make (CatchClause {
+          catch_keyword;
+          catch_left_paren;
+          catch_type;
+          catch_variable;
+          catch_right_paren;
+          catch_body;
+        }) value
+
+      let make_finally_clause
+        finally_keyword
+        finally_body
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.FinallyClause [
+          finally_keyword;
+          finally_body;
+        ] in
+        make (FinallyClause {
+          finally_keyword;
+          finally_body;
+        }) value
+
+      let make_do_statement
+        do_keyword
+        do_body
+        do_while_keyword
+        do_left_paren
+        do_condition
+        do_right_paren
+        do_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.DoStatement [
+          do_keyword;
+          do_body;
+          do_while_keyword;
+          do_left_paren;
+          do_condition;
+          do_right_paren;
+          do_semicolon;
+        ] in
+        make (DoStatement {
+          do_keyword;
+          do_body;
+          do_while_keyword;
+          do_left_paren;
+          do_condition;
+          do_right_paren;
+          do_semicolon;
+        }) value
+
+      let make_for_statement
+        for_keyword
+        for_left_paren
+        for_initializer
+        for_first_semicolon
+        for_control
+        for_second_semicolon
+        for_end_of_loop
+        for_right_paren
+        for_body
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ForStatement [
+          for_keyword;
+          for_left_paren;
+          for_initializer;
+          for_first_semicolon;
+          for_control;
+          for_second_semicolon;
+          for_end_of_loop;
+          for_right_paren;
+          for_body;
+        ] in
+        make (ForStatement {
+          for_keyword;
+          for_left_paren;
+          for_initializer;
+          for_first_semicolon;
+          for_control;
+          for_second_semicolon;
+          for_end_of_loop;
+          for_right_paren;
+          for_body;
+        }) value
+
+      let make_foreach_statement
+        foreach_keyword
+        foreach_left_paren
+        foreach_collection
+        foreach_await_keyword
+        foreach_as
+        foreach_key
+        foreach_arrow
+        foreach_value
+        foreach_right_paren
+        foreach_body
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ForeachStatement [
+          foreach_keyword;
+          foreach_left_paren;
+          foreach_collection;
+          foreach_await_keyword;
+          foreach_as;
+          foreach_key;
+          foreach_arrow;
+          foreach_value;
+          foreach_right_paren;
+          foreach_body;
+        ] in
+        make (ForeachStatement {
+          foreach_keyword;
+          foreach_left_paren;
+          foreach_collection;
+          foreach_await_keyword;
+          foreach_as;
+          foreach_key;
+          foreach_arrow;
+          foreach_value;
+          foreach_right_paren;
+          foreach_body;
+        }) value
+
+      let make_switch_statement
+        switch_keyword
+        switch_left_paren
+        switch_expression
+        switch_right_paren
+        switch_left_brace
+        switch_sections
+        switch_right_brace
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.SwitchStatement [
+          switch_keyword;
+          switch_left_paren;
+          switch_expression;
+          switch_right_paren;
+          switch_left_brace;
+          switch_sections;
+          switch_right_brace;
+        ] in
+        make (SwitchStatement {
+          switch_keyword;
+          switch_left_paren;
+          switch_expression;
+          switch_right_paren;
+          switch_left_brace;
+          switch_sections;
+          switch_right_brace;
+        }) value
+
+      let make_switch_section
+        switch_section_labels
+        switch_section_statements
+        switch_section_fallthrough
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.SwitchSection [
+          switch_section_labels;
+          switch_section_statements;
+          switch_section_fallthrough;
+        ] in
+        make (SwitchSection {
+          switch_section_labels;
+          switch_section_statements;
+          switch_section_fallthrough;
+        }) value
+
+      let make_switch_fallthrough
+        fallthrough_keyword
+        fallthrough_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.SwitchFallthrough [
+          fallthrough_keyword;
+          fallthrough_semicolon;
+        ] in
+        make (SwitchFallthrough {
+          fallthrough_keyword;
+          fallthrough_semicolon;
+        }) value
+
+      let make_case_label
+        case_keyword
+        case_expression
+        case_colon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.CaseLabel [
+          case_keyword;
+          case_expression;
+          case_colon;
+        ] in
+        make (CaseLabel {
+          case_keyword;
+          case_expression;
+          case_colon;
+        }) value
+
+      let make_default_label
+        default_keyword
+        default_colon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.DefaultLabel [
+          default_keyword;
+          default_colon;
+        ] in
+        make (DefaultLabel {
+          default_keyword;
+          default_colon;
+        }) value
+
+      let make_return_statement
+        return_keyword
+        return_expression
+        return_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ReturnStatement [
+          return_keyword;
+          return_expression;
+          return_semicolon;
+        ] in
+        make (ReturnStatement {
+          return_keyword;
+          return_expression;
+          return_semicolon;
+        }) value
+
+      let make_goto_label
+        goto_label_name
+        goto_label_colon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.GotoLabel [
+          goto_label_name;
+          goto_label_colon;
+        ] in
+        make (GotoLabel {
+          goto_label_name;
+          goto_label_colon;
+        }) value
+
+      let make_goto_statement
+        goto_statement_keyword
+        goto_statement_label_name
+        goto_statement_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.GotoStatement [
+          goto_statement_keyword;
+          goto_statement_label_name;
+          goto_statement_semicolon;
+        ] in
+        make (GotoStatement {
+          goto_statement_keyword;
+          goto_statement_label_name;
+          goto_statement_semicolon;
+        }) value
+
+      let make_throw_statement
+        throw_keyword
+        throw_expression
+        throw_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ThrowStatement [
+          throw_keyword;
+          throw_expression;
+          throw_semicolon;
+        ] in
+        make (ThrowStatement {
+          throw_keyword;
+          throw_expression;
+          throw_semicolon;
+        }) value
+
+      let make_break_statement
+        break_keyword
+        break_level
+        break_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.BreakStatement [
+          break_keyword;
+          break_level;
+          break_semicolon;
+        ] in
+        make (BreakStatement {
+          break_keyword;
+          break_level;
+          break_semicolon;
+        }) value
+
+      let make_continue_statement
+        continue_keyword
+        continue_level
+        continue_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ContinueStatement [
+          continue_keyword;
+          continue_level;
+          continue_semicolon;
+        ] in
+        make (ContinueStatement {
+          continue_keyword;
+          continue_level;
+          continue_semicolon;
+        }) value
+
+      let make_function_static_statement
+        static_static_keyword
+        static_declarations
+        static_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.FunctionStaticStatement [
+          static_static_keyword;
+          static_declarations;
+          static_semicolon;
+        ] in
+        make (FunctionStaticStatement {
+          static_static_keyword;
+          static_declarations;
+          static_semicolon;
+        }) value
+
+      let make_static_declarator
+        static_name
+        static_initializer
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.StaticDeclarator [
+          static_name;
+          static_initializer;
+        ] in
+        make (StaticDeclarator {
+          static_name;
+          static_initializer;
+        }) value
+
+      let make_echo_statement
+        echo_keyword
+        echo_expressions
+        echo_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.EchoStatement [
+          echo_keyword;
+          echo_expressions;
+          echo_semicolon;
+        ] in
+        make (EchoStatement {
+          echo_keyword;
+          echo_expressions;
+          echo_semicolon;
+        }) value
+
+      let make_global_statement
+        global_keyword
+        global_variables
+        global_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.GlobalStatement [
+          global_keyword;
+          global_variables;
+          global_semicolon;
+        ] in
+        make (GlobalStatement {
+          global_keyword;
+          global_variables;
+          global_semicolon;
+        }) value
+
+      let make_simple_initializer
+        simple_initializer_equal
+        simple_initializer_value
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.SimpleInitializer [
+          simple_initializer_equal;
+          simple_initializer_value;
+        ] in
+        make (SimpleInitializer {
+          simple_initializer_equal;
+          simple_initializer_value;
+        }) value
+
+      let make_anonymous_function
+        anonymous_static_keyword
+        anonymous_async_keyword
+        anonymous_coroutine_keyword
+        anonymous_function_keyword
+        anonymous_left_paren
+        anonymous_parameters
+        anonymous_right_paren
+        anonymous_colon
+        anonymous_type
+        anonymous_use
+        anonymous_body
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.AnonymousFunction [
+          anonymous_static_keyword;
+          anonymous_async_keyword;
+          anonymous_coroutine_keyword;
+          anonymous_function_keyword;
+          anonymous_left_paren;
+          anonymous_parameters;
+          anonymous_right_paren;
+          anonymous_colon;
+          anonymous_type;
+          anonymous_use;
+          anonymous_body;
+        ] in
+        make (AnonymousFunction {
+          anonymous_static_keyword;
+          anonymous_async_keyword;
+          anonymous_coroutine_keyword;
+          anonymous_function_keyword;
+          anonymous_left_paren;
+          anonymous_parameters;
+          anonymous_right_paren;
+          anonymous_colon;
+          anonymous_type;
+          anonymous_use;
+          anonymous_body;
+        }) value
+
+      let make_anonymous_function_use_clause
+        anonymous_use_keyword
+        anonymous_use_left_paren
+        anonymous_use_variables
+        anonymous_use_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.AnonymousFunctionUseClause [
+          anonymous_use_keyword;
+          anonymous_use_left_paren;
+          anonymous_use_variables;
+          anonymous_use_right_paren;
+        ] in
+        make (AnonymousFunctionUseClause {
+          anonymous_use_keyword;
+          anonymous_use_left_paren;
+          anonymous_use_variables;
+          anonymous_use_right_paren;
+        }) value
+
+      let make_lambda_expression
+        lambda_async
+        lambda_coroutine
+        lambda_signature
+        lambda_arrow
+        lambda_body
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.LambdaExpression [
+          lambda_async;
+          lambda_coroutine;
+          lambda_signature;
+          lambda_arrow;
+          lambda_body;
+        ] in
+        make (LambdaExpression {
+          lambda_async;
+          lambda_coroutine;
+          lambda_signature;
+          lambda_arrow;
+          lambda_body;
+        }) value
+
+      let make_lambda_signature
+        lambda_left_paren
+        lambda_parameters
+        lambda_right_paren
+        lambda_colon
+        lambda_type
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.LambdaSignature [
+          lambda_left_paren;
+          lambda_parameters;
+          lambda_right_paren;
+          lambda_colon;
+          lambda_type;
+        ] in
+        make (LambdaSignature {
+          lambda_left_paren;
+          lambda_parameters;
+          lambda_right_paren;
+          lambda_colon;
+          lambda_type;
+        }) value
+
+      let make_cast_expression
+        cast_left_paren
+        cast_type
+        cast_right_paren
+        cast_operand
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.CastExpression [
+          cast_left_paren;
+          cast_type;
+          cast_right_paren;
+          cast_operand;
+        ] in
+        make (CastExpression {
+          cast_left_paren;
+          cast_type;
+          cast_right_paren;
+          cast_operand;
+        }) value
+
+      let make_scope_resolution_expression
+        scope_resolution_qualifier
+        scope_resolution_operator
+        scope_resolution_name
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ScopeResolutionExpression [
+          scope_resolution_qualifier;
+          scope_resolution_operator;
+          scope_resolution_name;
+        ] in
+        make (ScopeResolutionExpression {
+          scope_resolution_qualifier;
+          scope_resolution_operator;
+          scope_resolution_name;
+        }) value
+
+      let make_member_selection_expression
+        member_object
+        member_operator
+        member_name
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.MemberSelectionExpression [
+          member_object;
+          member_operator;
+          member_name;
+        ] in
+        make (MemberSelectionExpression {
+          member_object;
+          member_operator;
+          member_name;
+        }) value
+
+      let make_safe_member_selection_expression
+        safe_member_object
+        safe_member_operator
+        safe_member_name
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.SafeMemberSelectionExpression [
+          safe_member_object;
+          safe_member_operator;
+          safe_member_name;
+        ] in
+        make (SafeMemberSelectionExpression {
+          safe_member_object;
+          safe_member_operator;
+          safe_member_name;
+        }) value
+
+      let make_embedded_member_selection_expression
+        embedded_member_object
+        embedded_member_operator
+        embedded_member_name
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.EmbeddedMemberSelectionExpression [
+          embedded_member_object;
+          embedded_member_operator;
+          embedded_member_name;
+        ] in
+        make (EmbeddedMemberSelectionExpression {
+          embedded_member_object;
+          embedded_member_operator;
+          embedded_member_name;
+        }) value
+
+      let make_yield_expression
+        yield_keyword
+        yield_operand
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.YieldExpression [
+          yield_keyword;
+          yield_operand;
+        ] in
+        make (YieldExpression {
+          yield_keyword;
+          yield_operand;
+        }) value
+
+      let make_yield_from_expression
+        yield_from_yield_keyword
+        yield_from_from_keyword
+        yield_from_operand
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.YieldFromExpression [
+          yield_from_yield_keyword;
+          yield_from_from_keyword;
+          yield_from_operand;
+        ] in
+        make (YieldFromExpression {
+          yield_from_yield_keyword;
+          yield_from_from_keyword;
+          yield_from_operand;
+        }) value
+
+      let make_prefix_unary_expression
+        prefix_unary_operator
+        prefix_unary_operand
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.PrefixUnaryExpression [
+          prefix_unary_operator;
+          prefix_unary_operand;
+        ] in
+        make (PrefixUnaryExpression {
+          prefix_unary_operator;
+          prefix_unary_operand;
+        }) value
+
+      let make_postfix_unary_expression
+        postfix_unary_operand
+        postfix_unary_operator
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.PostfixUnaryExpression [
+          postfix_unary_operand;
+          postfix_unary_operator;
+        ] in
+        make (PostfixUnaryExpression {
+          postfix_unary_operand;
+          postfix_unary_operator;
+        }) value
+
+      let make_binary_expression
+        binary_left_operand
+        binary_operator
+        binary_right_operand
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.BinaryExpression [
+          binary_left_operand;
+          binary_operator;
+          binary_right_operand;
+        ] in
+        make (BinaryExpression {
+          binary_left_operand;
+          binary_operator;
+          binary_right_operand;
+        }) value
+
+      let make_instanceof_expression
+        instanceof_left_operand
+        instanceof_operator
+        instanceof_right_operand
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.InstanceofExpression [
+          instanceof_left_operand;
+          instanceof_operator;
+          instanceof_right_operand;
+        ] in
+        make (InstanceofExpression {
+          instanceof_left_operand;
+          instanceof_operator;
+          instanceof_right_operand;
+        }) value
+
+      let make_conditional_expression
+        conditional_test
+        conditional_question
+        conditional_consequence
+        conditional_colon
+        conditional_alternative
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ConditionalExpression [
+          conditional_test;
+          conditional_question;
+          conditional_consequence;
+          conditional_colon;
+          conditional_alternative;
+        ] in
+        make (ConditionalExpression {
+          conditional_test;
+          conditional_question;
+          conditional_consequence;
+          conditional_colon;
+          conditional_alternative;
+        }) value
+
+      let make_eval_expression
+        eval_keyword
+        eval_left_paren
+        eval_argument
+        eval_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.EvalExpression [
+          eval_keyword;
+          eval_left_paren;
+          eval_argument;
+          eval_right_paren;
+        ] in
+        make (EvalExpression {
+          eval_keyword;
+          eval_left_paren;
+          eval_argument;
+          eval_right_paren;
+        }) value
+
+      let make_empty_expression
+        empty_keyword
+        empty_left_paren
+        empty_argument
+        empty_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.EmptyExpression [
+          empty_keyword;
+          empty_left_paren;
+          empty_argument;
+          empty_right_paren;
+        ] in
+        make (EmptyExpression {
+          empty_keyword;
+          empty_left_paren;
+          empty_argument;
+          empty_right_paren;
+        }) value
+
+      let make_define_expression
+        define_keyword
+        define_left_paren
+        define_argument_list
+        define_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.DefineExpression [
+          define_keyword;
+          define_left_paren;
+          define_argument_list;
+          define_right_paren;
+        ] in
+        make (DefineExpression {
+          define_keyword;
+          define_left_paren;
+          define_argument_list;
+          define_right_paren;
+        }) value
+
+      let make_isset_expression
+        isset_keyword
+        isset_left_paren
+        isset_argument_list
+        isset_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.IssetExpression [
+          isset_keyword;
+          isset_left_paren;
+          isset_argument_list;
+          isset_right_paren;
+        ] in
+        make (IssetExpression {
+          isset_keyword;
+          isset_left_paren;
+          isset_argument_list;
+          isset_right_paren;
+        }) value
+
+      let make_function_call_expression
+        function_call_receiver
+        function_call_left_paren
+        function_call_argument_list
+        function_call_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.FunctionCallExpression [
+          function_call_receiver;
+          function_call_left_paren;
+          function_call_argument_list;
+          function_call_right_paren;
+        ] in
+        make (FunctionCallExpression {
+          function_call_receiver;
+          function_call_left_paren;
+          function_call_argument_list;
+          function_call_right_paren;
+        }) value
+
+      let make_function_call_with_type_arguments_expression
+        function_call_with_type_arguments_receiver
+        function_call_with_type_arguments_type_args
+        function_call_with_type_arguments_left_paren
+        function_call_with_type_arguments_argument_list
+        function_call_with_type_arguments_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.FunctionCallWithTypeArgumentsExpression [
+          function_call_with_type_arguments_receiver;
+          function_call_with_type_arguments_type_args;
+          function_call_with_type_arguments_left_paren;
+          function_call_with_type_arguments_argument_list;
+          function_call_with_type_arguments_right_paren;
+        ] in
+        make (FunctionCallWithTypeArgumentsExpression {
+          function_call_with_type_arguments_receiver;
+          function_call_with_type_arguments_type_args;
+          function_call_with_type_arguments_left_paren;
+          function_call_with_type_arguments_argument_list;
+          function_call_with_type_arguments_right_paren;
+        }) value
+
+      let make_parenthesized_expression
+        parenthesized_expression_left_paren
+        parenthesized_expression_expression
+        parenthesized_expression_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ParenthesizedExpression [
+          parenthesized_expression_left_paren;
+          parenthesized_expression_expression;
+          parenthesized_expression_right_paren;
+        ] in
+        make (ParenthesizedExpression {
+          parenthesized_expression_left_paren;
+          parenthesized_expression_expression;
+          parenthesized_expression_right_paren;
+        }) value
+
+      let make_braced_expression
+        braced_expression_left_brace
+        braced_expression_expression
+        braced_expression_right_brace
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.BracedExpression [
+          braced_expression_left_brace;
+          braced_expression_expression;
+          braced_expression_right_brace;
+        ] in
+        make (BracedExpression {
+          braced_expression_left_brace;
+          braced_expression_expression;
+          braced_expression_right_brace;
+        }) value
+
+      let make_embedded_braced_expression
+        embedded_braced_expression_left_brace
+        embedded_braced_expression_expression
+        embedded_braced_expression_right_brace
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.EmbeddedBracedExpression [
+          embedded_braced_expression_left_brace;
+          embedded_braced_expression_expression;
+          embedded_braced_expression_right_brace;
+        ] in
+        make (EmbeddedBracedExpression {
+          embedded_braced_expression_left_brace;
+          embedded_braced_expression_expression;
+          embedded_braced_expression_right_brace;
+        }) value
+
+      let make_list_expression
+        list_keyword
+        list_left_paren
+        list_members
+        list_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ListExpression [
+          list_keyword;
+          list_left_paren;
+          list_members;
+          list_right_paren;
+        ] in
+        make (ListExpression {
+          list_keyword;
+          list_left_paren;
+          list_members;
+          list_right_paren;
+        }) value
+
+      let make_collection_literal_expression
+        collection_literal_name
+        collection_literal_left_brace
+        collection_literal_initializers
+        collection_literal_right_brace
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.CollectionLiteralExpression [
+          collection_literal_name;
+          collection_literal_left_brace;
+          collection_literal_initializers;
+          collection_literal_right_brace;
+        ] in
+        make (CollectionLiteralExpression {
+          collection_literal_name;
+          collection_literal_left_brace;
+          collection_literal_initializers;
+          collection_literal_right_brace;
+        }) value
+
+      let make_object_creation_expression
+        object_creation_new_keyword
+        object_creation_type
+        object_creation_left_paren
+        object_creation_argument_list
+        object_creation_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ObjectCreationExpression [
+          object_creation_new_keyword;
+          object_creation_type;
+          object_creation_left_paren;
+          object_creation_argument_list;
+          object_creation_right_paren;
+        ] in
+        make (ObjectCreationExpression {
+          object_creation_new_keyword;
+          object_creation_type;
+          object_creation_left_paren;
+          object_creation_argument_list;
+          object_creation_right_paren;
+        }) value
+
+      let make_array_creation_expression
+        array_creation_left_bracket
+        array_creation_members
+        array_creation_right_bracket
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ArrayCreationExpression [
+          array_creation_left_bracket;
+          array_creation_members;
+          array_creation_right_bracket;
+        ] in
+        make (ArrayCreationExpression {
+          array_creation_left_bracket;
+          array_creation_members;
+          array_creation_right_bracket;
+        }) value
+
+      let make_array_intrinsic_expression
+        array_intrinsic_keyword
+        array_intrinsic_left_paren
+        array_intrinsic_members
+        array_intrinsic_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ArrayIntrinsicExpression [
+          array_intrinsic_keyword;
+          array_intrinsic_left_paren;
+          array_intrinsic_members;
+          array_intrinsic_right_paren;
+        ] in
+        make (ArrayIntrinsicExpression {
+          array_intrinsic_keyword;
+          array_intrinsic_left_paren;
+          array_intrinsic_members;
+          array_intrinsic_right_paren;
+        }) value
+
+      let make_darray_intrinsic_expression
+        darray_intrinsic_keyword
+        darray_intrinsic_left_bracket
+        darray_intrinsic_members
+        darray_intrinsic_right_bracket
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.DarrayIntrinsicExpression [
+          darray_intrinsic_keyword;
+          darray_intrinsic_left_bracket;
+          darray_intrinsic_members;
+          darray_intrinsic_right_bracket;
+        ] in
+        make (DarrayIntrinsicExpression {
+          darray_intrinsic_keyword;
+          darray_intrinsic_left_bracket;
+          darray_intrinsic_members;
+          darray_intrinsic_right_bracket;
+        }) value
+
+      let make_dictionary_intrinsic_expression
+        dictionary_intrinsic_keyword
+        dictionary_intrinsic_left_bracket
+        dictionary_intrinsic_members
+        dictionary_intrinsic_right_bracket
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.DictionaryIntrinsicExpression [
+          dictionary_intrinsic_keyword;
+          dictionary_intrinsic_left_bracket;
+          dictionary_intrinsic_members;
+          dictionary_intrinsic_right_bracket;
+        ] in
+        make (DictionaryIntrinsicExpression {
+          dictionary_intrinsic_keyword;
+          dictionary_intrinsic_left_bracket;
+          dictionary_intrinsic_members;
+          dictionary_intrinsic_right_bracket;
+        }) value
+
+      let make_keyset_intrinsic_expression
+        keyset_intrinsic_keyword
+        keyset_intrinsic_left_bracket
+        keyset_intrinsic_members
+        keyset_intrinsic_right_bracket
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.KeysetIntrinsicExpression [
+          keyset_intrinsic_keyword;
+          keyset_intrinsic_left_bracket;
+          keyset_intrinsic_members;
+          keyset_intrinsic_right_bracket;
+        ] in
+        make (KeysetIntrinsicExpression {
+          keyset_intrinsic_keyword;
+          keyset_intrinsic_left_bracket;
+          keyset_intrinsic_members;
+          keyset_intrinsic_right_bracket;
+        }) value
+
+      let make_varray_intrinsic_expression
+        varray_intrinsic_keyword
+        varray_intrinsic_left_bracket
+        varray_intrinsic_members
+        varray_intrinsic_right_bracket
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.VarrayIntrinsicExpression [
+          varray_intrinsic_keyword;
+          varray_intrinsic_left_bracket;
+          varray_intrinsic_members;
+          varray_intrinsic_right_bracket;
+        ] in
+        make (VarrayIntrinsicExpression {
+          varray_intrinsic_keyword;
+          varray_intrinsic_left_bracket;
+          varray_intrinsic_members;
+          varray_intrinsic_right_bracket;
+        }) value
+
+      let make_vector_intrinsic_expression
+        vector_intrinsic_keyword
+        vector_intrinsic_left_bracket
+        vector_intrinsic_members
+        vector_intrinsic_right_bracket
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.VectorIntrinsicExpression [
+          vector_intrinsic_keyword;
+          vector_intrinsic_left_bracket;
+          vector_intrinsic_members;
+          vector_intrinsic_right_bracket;
+        ] in
+        make (VectorIntrinsicExpression {
+          vector_intrinsic_keyword;
+          vector_intrinsic_left_bracket;
+          vector_intrinsic_members;
+          vector_intrinsic_right_bracket;
+        }) value
+
+      let make_element_initializer
+        element_key
+        element_arrow
+        element_value
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ElementInitializer [
+          element_key;
+          element_arrow;
+          element_value;
+        ] in
+        make (ElementInitializer {
+          element_key;
+          element_arrow;
+          element_value;
+        }) value
+
+      let make_subscript_expression
+        subscript_receiver
+        subscript_left_bracket
+        subscript_index
+        subscript_right_bracket
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.SubscriptExpression [
+          subscript_receiver;
+          subscript_left_bracket;
+          subscript_index;
+          subscript_right_bracket;
+        ] in
+        make (SubscriptExpression {
+          subscript_receiver;
+          subscript_left_bracket;
+          subscript_index;
+          subscript_right_bracket;
+        }) value
+
+      let make_embedded_subscript_expression
+        embedded_subscript_receiver
+        embedded_subscript_left_bracket
+        embedded_subscript_index
+        embedded_subscript_right_bracket
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.EmbeddedSubscriptExpression [
+          embedded_subscript_receiver;
+          embedded_subscript_left_bracket;
+          embedded_subscript_index;
+          embedded_subscript_right_bracket;
+        ] in
+        make (EmbeddedSubscriptExpression {
+          embedded_subscript_receiver;
+          embedded_subscript_left_bracket;
+          embedded_subscript_index;
+          embedded_subscript_right_bracket;
+        }) value
+
+      let make_awaitable_creation_expression
+        awaitable_async
+        awaitable_coroutine
+        awaitable_compound_statement
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.AwaitableCreationExpression [
+          awaitable_async;
+          awaitable_coroutine;
+          awaitable_compound_statement;
+        ] in
+        make (AwaitableCreationExpression {
+          awaitable_async;
+          awaitable_coroutine;
+          awaitable_compound_statement;
+        }) value
+
+      let make_xhp_children_declaration
+        xhp_children_keyword
+        xhp_children_expression
+        xhp_children_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPChildrenDeclaration [
+          xhp_children_keyword;
+          xhp_children_expression;
+          xhp_children_semicolon;
+        ] in
+        make (XHPChildrenDeclaration {
+          xhp_children_keyword;
+          xhp_children_expression;
+          xhp_children_semicolon;
+        }) value
+
+      let make_xhp_children_parenthesized_list
+        xhp_children_list_left_paren
+        xhp_children_list_xhp_children
+        xhp_children_list_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPChildrenParenthesizedList [
+          xhp_children_list_left_paren;
+          xhp_children_list_xhp_children;
+          xhp_children_list_right_paren;
+        ] in
+        make (XHPChildrenParenthesizedList {
+          xhp_children_list_left_paren;
+          xhp_children_list_xhp_children;
+          xhp_children_list_right_paren;
+        }) value
+
+      let make_xhp_category_declaration
+        xhp_category_keyword
+        xhp_category_categories
+        xhp_category_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPCategoryDeclaration [
+          xhp_category_keyword;
+          xhp_category_categories;
+          xhp_category_semicolon;
+        ] in
+        make (XHPCategoryDeclaration {
+          xhp_category_keyword;
+          xhp_category_categories;
+          xhp_category_semicolon;
+        }) value
+
+      let make_xhp_enum_type
+        xhp_enum_keyword
+        xhp_enum_left_brace
+        xhp_enum_values
+        xhp_enum_right_brace
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPEnumType [
+          xhp_enum_keyword;
+          xhp_enum_left_brace;
+          xhp_enum_values;
+          xhp_enum_right_brace;
+        ] in
+        make (XHPEnumType {
+          xhp_enum_keyword;
+          xhp_enum_left_brace;
+          xhp_enum_values;
+          xhp_enum_right_brace;
+        }) value
+
+      let make_xhp_required
+        xhp_required_at
+        xhp_required_keyword
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPRequired [
+          xhp_required_at;
+          xhp_required_keyword;
+        ] in
+        make (XHPRequired {
+          xhp_required_at;
+          xhp_required_keyword;
+        }) value
+
+      let make_xhp_class_attribute_declaration
+        xhp_attribute_keyword
+        xhp_attribute_attributes
+        xhp_attribute_semicolon
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPClassAttributeDeclaration [
+          xhp_attribute_keyword;
+          xhp_attribute_attributes;
+          xhp_attribute_semicolon;
+        ] in
+        make (XHPClassAttributeDeclaration {
+          xhp_attribute_keyword;
+          xhp_attribute_attributes;
+          xhp_attribute_semicolon;
+        }) value
+
+      let make_xhp_class_attribute
+        xhp_attribute_decl_type
+        xhp_attribute_decl_name
+        xhp_attribute_decl_initializer
+        xhp_attribute_decl_required
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPClassAttribute [
+          xhp_attribute_decl_type;
+          xhp_attribute_decl_name;
+          xhp_attribute_decl_initializer;
+          xhp_attribute_decl_required;
+        ] in
+        make (XHPClassAttribute {
+          xhp_attribute_decl_type;
+          xhp_attribute_decl_name;
+          xhp_attribute_decl_initializer;
+          xhp_attribute_decl_required;
+        }) value
+
+      let make_xhp_simple_class_attribute
+        xhp_simple_class_attribute_type
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPSimpleClassAttribute [
+          xhp_simple_class_attribute_type;
+        ] in
+        make (XHPSimpleClassAttribute {
+          xhp_simple_class_attribute_type;
+        }) value
+
+      let make_xhp_attribute
+        xhp_attribute_name
+        xhp_attribute_equal
+        xhp_attribute_expression
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPAttribute [
+          xhp_attribute_name;
+          xhp_attribute_equal;
+          xhp_attribute_expression;
+        ] in
+        make (XHPAttribute {
+          xhp_attribute_name;
+          xhp_attribute_equal;
+          xhp_attribute_expression;
+        }) value
+
+      let make_xhp_open
+        xhp_open_left_angle
+        xhp_open_name
+        xhp_open_attributes
+        xhp_open_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPOpen [
+          xhp_open_left_angle;
+          xhp_open_name;
+          xhp_open_attributes;
+          xhp_open_right_angle;
+        ] in
+        make (XHPOpen {
+          xhp_open_left_angle;
+          xhp_open_name;
+          xhp_open_attributes;
+          xhp_open_right_angle;
+        }) value
+
+      let make_xhp_expression
+        xhp_open
+        xhp_body
+        xhp_close
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPExpression [
+          xhp_open;
+          xhp_body;
+          xhp_close;
+        ] in
+        make (XHPExpression {
+          xhp_open;
+          xhp_body;
+          xhp_close;
+        }) value
+
+      let make_xhp_close
+        xhp_close_left_angle
+        xhp_close_name
+        xhp_close_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.XHPClose [
+          xhp_close_left_angle;
+          xhp_close_name;
+          xhp_close_right_angle;
+        ] in
+        make (XHPClose {
+          xhp_close_left_angle;
+          xhp_close_name;
+          xhp_close_right_angle;
+        }) value
+
+      let make_type_constant
+        type_constant_left_type
+        type_constant_separator
+        type_constant_right_type
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TypeConstant [
+          type_constant_left_type;
+          type_constant_separator;
+          type_constant_right_type;
+        ] in
+        make (TypeConstant {
+          type_constant_left_type;
+          type_constant_separator;
+          type_constant_right_type;
+        }) value
+
+      let make_vector_type_specifier
+        vector_type_keyword
+        vector_type_left_angle
+        vector_type_type
+        vector_type_trailing_comma
+        vector_type_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.VectorTypeSpecifier [
+          vector_type_keyword;
+          vector_type_left_angle;
+          vector_type_type;
+          vector_type_trailing_comma;
+          vector_type_right_angle;
+        ] in
+        make (VectorTypeSpecifier {
+          vector_type_keyword;
+          vector_type_left_angle;
+          vector_type_type;
+          vector_type_trailing_comma;
+          vector_type_right_angle;
+        }) value
+
+      let make_keyset_type_specifier
+        keyset_type_keyword
+        keyset_type_left_angle
+        keyset_type_type
+        keyset_type_trailing_comma
+        keyset_type_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.KeysetTypeSpecifier [
+          keyset_type_keyword;
+          keyset_type_left_angle;
+          keyset_type_type;
+          keyset_type_trailing_comma;
+          keyset_type_right_angle;
+        ] in
+        make (KeysetTypeSpecifier {
+          keyset_type_keyword;
+          keyset_type_left_angle;
+          keyset_type_type;
+          keyset_type_trailing_comma;
+          keyset_type_right_angle;
+        }) value
+
+      let make_tuple_type_explicit_specifier
+        tuple_type_keyword
+        tuple_type_left_angle
+        tuple_type_types
+        tuple_type_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TupleTypeExplicitSpecifier [
+          tuple_type_keyword;
+          tuple_type_left_angle;
+          tuple_type_types;
+          tuple_type_right_angle;
+        ] in
+        make (TupleTypeExplicitSpecifier {
+          tuple_type_keyword;
+          tuple_type_left_angle;
+          tuple_type_types;
+          tuple_type_right_angle;
+        }) value
+
+      let make_varray_type_specifier
+        varray_keyword
+        varray_left_angle
+        varray_type
+        varray_trailing_comma
+        varray_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.VarrayTypeSpecifier [
+          varray_keyword;
+          varray_left_angle;
+          varray_type;
+          varray_trailing_comma;
+          varray_right_angle;
+        ] in
+        make (VarrayTypeSpecifier {
+          varray_keyword;
+          varray_left_angle;
+          varray_type;
+          varray_trailing_comma;
+          varray_right_angle;
+        }) value
+
+      let make_vector_array_type_specifier
+        vector_array_keyword
+        vector_array_left_angle
+        vector_array_type
+        vector_array_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.VectorArrayTypeSpecifier [
+          vector_array_keyword;
+          vector_array_left_angle;
+          vector_array_type;
+          vector_array_right_angle;
+        ] in
+        make (VectorArrayTypeSpecifier {
+          vector_array_keyword;
+          vector_array_left_angle;
+          vector_array_type;
+          vector_array_right_angle;
+        }) value
+
+      let make_type_parameter
+        type_variance
+        type_name
+        type_constraints
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TypeParameter [
+          type_variance;
+          type_name;
+          type_constraints;
+        ] in
+        make (TypeParameter {
+          type_variance;
+          type_name;
+          type_constraints;
+        }) value
+
+      let make_type_constraint
+        constraint_keyword
+        constraint_type
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TypeConstraint [
+          constraint_keyword;
+          constraint_type;
+        ] in
+        make (TypeConstraint {
+          constraint_keyword;
+          constraint_type;
+        }) value
+
+      let make_darray_type_specifier
+        darray_keyword
+        darray_left_angle
+        darray_key
+        darray_comma
+        darray_value
+        darray_trailing_comma
+        darray_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.DarrayTypeSpecifier [
+          darray_keyword;
+          darray_left_angle;
+          darray_key;
+          darray_comma;
+          darray_value;
+          darray_trailing_comma;
+          darray_right_angle;
+        ] in
+        make (DarrayTypeSpecifier {
+          darray_keyword;
+          darray_left_angle;
+          darray_key;
+          darray_comma;
+          darray_value;
+          darray_trailing_comma;
+          darray_right_angle;
+        }) value
+
+      let make_map_array_type_specifier
+        map_array_keyword
+        map_array_left_angle
+        map_array_key
+        map_array_comma
+        map_array_value
+        map_array_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.MapArrayTypeSpecifier [
+          map_array_keyword;
+          map_array_left_angle;
+          map_array_key;
+          map_array_comma;
+          map_array_value;
+          map_array_right_angle;
+        ] in
+        make (MapArrayTypeSpecifier {
+          map_array_keyword;
+          map_array_left_angle;
+          map_array_key;
+          map_array_comma;
+          map_array_value;
+          map_array_right_angle;
+        }) value
+
+      let make_dictionary_type_specifier
+        dictionary_type_keyword
+        dictionary_type_left_angle
+        dictionary_type_members
+        dictionary_type_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.DictionaryTypeSpecifier [
+          dictionary_type_keyword;
+          dictionary_type_left_angle;
+          dictionary_type_members;
+          dictionary_type_right_angle;
+        ] in
+        make (DictionaryTypeSpecifier {
+          dictionary_type_keyword;
+          dictionary_type_left_angle;
+          dictionary_type_members;
+          dictionary_type_right_angle;
+        }) value
+
+      let make_closure_type_specifier
+        closure_outer_left_paren
+        closure_coroutine
+        closure_function_keyword
+        closure_inner_left_paren
+        closure_parameter_types
+        closure_inner_right_paren
+        closure_colon
+        closure_return_type
+        closure_outer_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ClosureTypeSpecifier [
+          closure_outer_left_paren;
+          closure_coroutine;
+          closure_function_keyword;
+          closure_inner_left_paren;
+          closure_parameter_types;
+          closure_inner_right_paren;
+          closure_colon;
+          closure_return_type;
+          closure_outer_right_paren;
+        ] in
+        make (ClosureTypeSpecifier {
+          closure_outer_left_paren;
+          closure_coroutine;
+          closure_function_keyword;
+          closure_inner_left_paren;
+          closure_parameter_types;
+          closure_inner_right_paren;
+          closure_colon;
+          closure_return_type;
+          closure_outer_right_paren;
+        }) value
+
+      let make_classname_type_specifier
+        classname_keyword
+        classname_left_angle
+        classname_type
+        classname_trailing_comma
+        classname_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ClassnameTypeSpecifier [
+          classname_keyword;
+          classname_left_angle;
+          classname_type;
+          classname_trailing_comma;
+          classname_right_angle;
+        ] in
+        make (ClassnameTypeSpecifier {
+          classname_keyword;
+          classname_left_angle;
+          classname_type;
+          classname_trailing_comma;
+          classname_right_angle;
+        }) value
+
+      let make_field_specifier
+        field_question
+        field_name
+        field_arrow
+        field_type
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.FieldSpecifier [
+          field_question;
+          field_name;
+          field_arrow;
+          field_type;
+        ] in
+        make (FieldSpecifier {
+          field_question;
+          field_name;
+          field_arrow;
+          field_type;
+        }) value
+
+      let make_field_initializer
+        field_initializer_name
+        field_initializer_arrow
+        field_initializer_value
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.FieldInitializer [
+          field_initializer_name;
+          field_initializer_arrow;
+          field_initializer_value;
+        ] in
+        make (FieldInitializer {
+          field_initializer_name;
+          field_initializer_arrow;
+          field_initializer_value;
+        }) value
+
+      let make_shape_type_specifier
+        shape_type_keyword
+        shape_type_left_paren
+        shape_type_fields
+        shape_type_ellipsis
+        shape_type_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ShapeTypeSpecifier [
+          shape_type_keyword;
+          shape_type_left_paren;
+          shape_type_fields;
+          shape_type_ellipsis;
+          shape_type_right_paren;
+        ] in
+        make (ShapeTypeSpecifier {
+          shape_type_keyword;
+          shape_type_left_paren;
+          shape_type_fields;
+          shape_type_ellipsis;
+          shape_type_right_paren;
+        }) value
+
+      let make_shape_expression
+        shape_expression_keyword
+        shape_expression_left_paren
+        shape_expression_fields
+        shape_expression_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ShapeExpression [
+          shape_expression_keyword;
+          shape_expression_left_paren;
+          shape_expression_fields;
+          shape_expression_right_paren;
+        ] in
+        make (ShapeExpression {
+          shape_expression_keyword;
+          shape_expression_left_paren;
+          shape_expression_fields;
+          shape_expression_right_paren;
+        }) value
+
+      let make_tuple_expression
+        tuple_expression_keyword
+        tuple_expression_left_paren
+        tuple_expression_items
+        tuple_expression_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TupleExpression [
+          tuple_expression_keyword;
+          tuple_expression_left_paren;
+          tuple_expression_items;
+          tuple_expression_right_paren;
+        ] in
+        make (TupleExpression {
+          tuple_expression_keyword;
+          tuple_expression_left_paren;
+          tuple_expression_items;
+          tuple_expression_right_paren;
+        }) value
+
+      let make_generic_type_specifier
+        generic_class_type
+        generic_argument_list
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.GenericTypeSpecifier [
+          generic_class_type;
+          generic_argument_list;
+        ] in
+        make (GenericTypeSpecifier {
+          generic_class_type;
+          generic_argument_list;
+        }) value
+
+      let make_nullable_type_specifier
+        nullable_question
+        nullable_type
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.NullableTypeSpecifier [
+          nullable_question;
+          nullable_type;
+        ] in
+        make (NullableTypeSpecifier {
+          nullable_question;
+          nullable_type;
+        }) value
+
+      let make_soft_type_specifier
+        soft_at
+        soft_type
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.SoftTypeSpecifier [
+          soft_at;
+          soft_type;
+        ] in
+        make (SoftTypeSpecifier {
+          soft_at;
+          soft_type;
+        }) value
+
+      let make_type_arguments
+        type_arguments_left_angle
+        type_arguments_types
+        type_arguments_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TypeArguments [
+          type_arguments_left_angle;
+          type_arguments_types;
+          type_arguments_right_angle;
+        ] in
+        make (TypeArguments {
+          type_arguments_left_angle;
+          type_arguments_types;
+          type_arguments_right_angle;
+        }) value
+
+      let make_type_parameters
+        type_parameters_left_angle
+        type_parameters_parameters
+        type_parameters_right_angle
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TypeParameters [
+          type_parameters_left_angle;
+          type_parameters_parameters;
+          type_parameters_right_angle;
+        ] in
+        make (TypeParameters {
+          type_parameters_left_angle;
+          type_parameters_parameters;
+          type_parameters_right_angle;
+        }) value
+
+      let make_tuple_type_specifier
+        tuple_left_paren
+        tuple_types
+        tuple_right_paren
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.TupleTypeSpecifier [
+          tuple_left_paren;
+          tuple_types;
+          tuple_right_paren;
+        ] in
+        make (TupleTypeSpecifier {
+          tuple_left_paren;
+          tuple_types;
+          tuple_right_paren;
+        }) value
+
+      let make_error
+        error_error
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ErrorSyntax [
+          error_error;
+        ] in
+        make (ErrorSyntax {
+          error_error;
+        }) value
+
+      let make_list_item
+        list_item
+        list_separator
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.ListItem [
+          list_item;
+          list_separator;
+        ] in
+        make (ListItem {
+          list_item;
+          list_separator;
+        }) value
 
 
 

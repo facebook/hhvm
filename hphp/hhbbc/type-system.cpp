@@ -2975,6 +2975,26 @@ Type loosen_staticness(Type t) {
   return t;
 }
 
+// This shouldn't be necessary; we should never produce
+// definitely-not-static types. This is a simple fix for T22932823,
+// and should be removed with a more general fix to prevent such
+// types.
+Type loosen_unstaticness(Type t) {
+#define check(a) \
+  if (t.m_bits & BC##a) t.m_bits = static_cast<trep>(t.m_bits | BS##a)
+  check(Str);
+  check(ArrE);
+  check(ArrN);
+  check(VecE);
+  check(VecN);
+  check(DictE);
+  check(DictN);
+  check(KeysetE);
+  check(KeysetN);
+#undef check
+  return t;
+}
+
 Type loosen_arrays(Type a) {
   if (a.couldBe(TArr))    a |= TArr;
   if (a.couldBe(TVec))    a |= TVec;

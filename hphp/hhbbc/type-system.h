@@ -545,6 +545,7 @@ private:
   friend Type keyset_val(SArray);
   friend bool could_run_destructor(const Type&);
   friend Type loosen_staticness(Type);
+  friend Type loosen_unstaticness(Type);
   friend Type loosen_values(Type);
   friend Type loosen_emptiness(Type);
   friend Type add_nonemptiness(Type);
@@ -1089,6 +1090,12 @@ Type stack_flav(Type a);
  * type otherwise.
  */
 Type loosen_staticness(Type);
+
+/*
+ * Make sure the corresponding static type is present for any
+ * non-static type that is present.
+ */
+Type loosen_unstaticness(Type);
 
 /*
  * Force any type which might contain any sub-types of Arr, Vec, Dict, and

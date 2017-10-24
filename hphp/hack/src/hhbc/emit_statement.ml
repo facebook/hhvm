@@ -718,14 +718,14 @@ and get_id_of_simple_lvar_opt ~is_key v =
     when not (SN.Superglobals.is_superglobal id) -> Some id
   | _ -> None
 
-and emit_load_list_elements path vs =
+and emit_load_list_elements env path vs =
   let preamble, load_value =
-    List.mapi ~f:(emit_load_list_element path) vs
+    List.mapi ~f:(emit_load_list_element env path) vs
     |> List.unzip
   in
   List.concat preamble, List.concat load_value
 
-and emit_load_list_element path i v =
+and emit_load_list_element env path i v =
   let query_value = gather [
     gather @@ List.rev path;
     instr_querym 0 QueryOp.CGet (MemberKey.EI (Int64.of_int i));
@@ -764,9 +764,11 @@ and emit_load_list_element path i v =
     let dim_instr =
       instr_dim MemberOpMode.Warn (MemberKey.EI (Int64.of_int i))
     in
-    emit_load_list_elements (dim_instr::path) exprs
-    (* TODO: what about properties, array elements, etc? *)
-  | _ -> failwith "impossible, expected variables or lists"
+    emit_load_list_elements env (dim_instr::path) exprs
+  | _ ->
+    let set_instrs = emit_lval_op_nonlist env LValOp.Set v query_value 1 in
+    let load_value = [set_instrs; instr_popc] in
+    [], [gather load_value]
 
 (* Assigns a location to store values for foreach-key and foreach-value and
    creates a code to populate them.
@@ -867,7 +869,7 @@ and emit_iterator_lvalue_storage env v local =
     Emit_fatal.raise_fatal_parse pos "Can't use return value in write context"
   | _, A.List exprs ->
     let preamble, load_values =
-      emit_load_list_elements [instr_basel local MemberOpMode.Warn] exprs
+      emit_load_list_elements env [instr_basel local MemberOpMode.Warn] exprs
     in
     let load_values = [
       gather @@ (List.rev load_values);

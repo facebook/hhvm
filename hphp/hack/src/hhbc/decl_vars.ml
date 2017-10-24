@@ -186,7 +186,7 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
     acc
 
   method! on_catch acc (_, x, b) =
-    this#on_block (add_local ~bareparam:false acc x) b
+    this#on_block (add_local ~bareparam:true acc x) b
   method! on_class_ acc _ = acc
   method! on_fun_ acc _ = acc
 end

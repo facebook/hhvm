@@ -24,7 +24,6 @@ slow/dv_array/hh-only1.php
 slow/dv_array/parse-error4.php
 slow/dv_array/parse-error5.php
 slow/dynamic_variables/1164.php
-slow/exceptions/62.php
 slow/ext_function/register_postsend_function-simple.php
 slow/ext_function/register_shutdown_function-simple.php
 slow/ext_misc/ext_misc.php

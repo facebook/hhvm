@@ -1,0 +1,2 @@
+File "bad_inout_use_lvalue4.php", line 10, characters 11-35:
+Array-like class consts are not valid lvalues (Parsing[1002])

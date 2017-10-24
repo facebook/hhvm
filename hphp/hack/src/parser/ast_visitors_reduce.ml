@@ -650,6 +650,10 @@ class virtual ['self] reduce =
       let r0 = self#on_pstring env c0 in
       let r1 = self#on_option self#on_expr env c1 in
       self#add r0 r1
+    method on_Callconv env c0 c1 =
+      let r0 = self#on_param_kind env c0 in
+      let r1 = self#on_expr env c1 in
+      self#add r0 r1
     method on_expr_ env = function
       | Array c0 -> self#on_Array env c0
       | Darray c0 -> self#on_Darray env c0
@@ -695,6 +699,7 @@ class virtual ['self] reduce =
       | Unsafeexpr c0 -> self#on_Unsafeexpr env c0
       | Import (c0, c1) -> self#on_Import env c0 c1
       | Omitted         -> self#on_Omitted env
+      | Callconv (c0, c1) -> self#on_Callconv env c0 c1
     method on_Include _ = self#e
     method on_Require _ = self#e
     method on_IncludeOnce _ = self#e

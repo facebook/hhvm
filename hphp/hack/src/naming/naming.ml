@@ -2386,6 +2386,10 @@ module Make (GetLocals : GetLocals) = struct
       N.Any
     | Omitted ->
       N.Any
+    | Callconv _ ->
+      (* TODO(mqian) implement *)
+      Errors.unimplemented_feature p "inout arguments";
+      N.Any
 
   and expr_lambda env f =
     let h = Option.map f.f_ret (hint ~allow_retonly:true env) in

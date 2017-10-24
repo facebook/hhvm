@@ -866,6 +866,10 @@ and emit_await env e =
     instr_label after_await;
   ]
 
+and emit_callconv _env _kind _e =
+  (* TODO(mqian) implement *)
+  emit_nyi "inout argument"
+
 and emit_expr env (pos, expr_ as expr) ~need_ref =
   Emit_pos.emit_pos_then pos @@
   match expr_ with
@@ -979,6 +983,8 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Id id -> emit_id env id
   | A.Xml (id, attributes, children) ->
     emit_xhp env (fst expr) id attributes children
+  | A.Callconv (kind, e) ->
+    emit_box_if_necessary need_ref @@ emit_callconv env kind e
   | A.Import (flavor, e) -> emit_import env flavor e
   | A.Lvarvar (n, id) -> emit_lvarvar ~need_ref n id
   | A.Id_type_arguments (id, _) -> emit_id env id

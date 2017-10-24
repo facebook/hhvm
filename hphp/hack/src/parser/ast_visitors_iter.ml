@@ -575,6 +575,9 @@ class virtual ['self] iter =
     method on_Using env _c0 c1 c2 =
       self#on_expr env c1;
       self#on_block env c2;
+    method on_Callconv env c0 c1 =
+      self#on_param_kind env c0;
+      self#on_expr env c1;
     method on_expr_ env = function
       | Array c0 -> self#on_Array env c0
       | Darray c0 -> self#on_Darray env c0
@@ -620,6 +623,7 @@ class virtual ['self] iter =
       | Unsafeexpr c0 -> self#on_Unsafeexpr env c0
       | Import (c0, c1) -> self#on_Import env c0 c1
       | Omitted         -> self#on_Omitted env
+      | Callconv (c0, c1) -> self#on_Callconv env c0 c1
     method on_Include env = ()
     method on_Require env = ()
     method on_IncludeOnce env = ()

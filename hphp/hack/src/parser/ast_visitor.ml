@@ -32,6 +32,7 @@ class type ['a] ast_visitor_type = object
   method on_block : 'a -> block -> 'a
   method on_break : 'a -> Pos.t -> expr option -> 'a
   method on_call : 'a -> expr -> hint list -> expr list -> expr list -> 'a
+  method on_callconv : 'a -> param_kind -> expr -> 'a
   method on_case : 'a -> case -> 'a
   method on_cast : 'a -> hint -> expr -> 'a
   method on_catch : 'a -> catch -> 'a
@@ -77,6 +78,7 @@ class type ['a] ast_visitor_type = object
   method on_noop : 'a -> 'a
   method on_null : 'a -> 'a
   method on_obj_get : 'a -> expr -> expr -> 'a
+  method on_param_kind : 'a -> param_kind -> 'a
   method on_pstring : 'a -> pstring -> 'a
   method on_require: 'a -> 'a
   method on_requireOnce: 'a -> 'a
@@ -372,6 +374,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Xml         (id, attrl, el) -> this#on_xml acc id attrl el
    | Omitted                     -> this#on_omitted  acc
    | Suspend e  -> this#on_suspend acc e
+   | Callconv    (kind, e)   -> this#on_callconv acc kind e
 
   method on_array acc afl =
     List.fold_left this#on_afield acc afl
@@ -558,6 +561,13 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | RequireOnce -> this#on_requireOnce acc
 
   method on_lfun acc l = this#on_fun_ acc l
+
+  method on_param_kind acc _ = acc
+
+  method on_callconv acc kind e =
+    let acc = this#on_param_kind acc kind in
+    let acc = this#on_expr acc e in
+    acc
 
 
 

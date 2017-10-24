@@ -52,6 +52,9 @@ class virtual ['b] iter :
                   Ast_visitors_ancestors.hint list ->
                   Ast_visitors_ancestors.expr list ->
                   Ast_visitors_ancestors.expr list -> unit;
+        on_Callconv : 'c ->
+                      Ast_visitors_ancestors.param_kind ->
+                      Ast_visitors_ancestors.expr -> unit;
         on_Case : 'c ->
                   Ast_visitors_ancestors.expr ->
                   Ast_visitors_ancestors.block -> unit;
@@ -417,6 +420,10 @@ class virtual ['b] iter :
       Ast_visitors_ancestors.hint list ->
       Ast_visitors_ancestors.expr list ->
       Ast_visitors_ancestors.expr list -> unit
+    method on_Callconv :
+      'c ->
+      Ast_visitors_ancestors.param_kind ->
+      Ast_visitors_ancestors.expr -> unit
     method on_Case :
       'c ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.block -> unit

@@ -1,0 +1,2 @@
+File "bad_inout_use_byref.php", line 7, characters 11-13:
+Unexpected reference (Parsing[1002])

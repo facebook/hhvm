@@ -351,6 +351,7 @@ and expr_ =
   | Xml of id * (id * expr) list * expr list
   | Unsafeexpr of expr
   | Import of import_flavor * expr
+  | Callconv of param_kind * expr
 
 and import_flavor =
   | Include

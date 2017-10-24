@@ -265,7 +265,7 @@ let rec check_lvalue env = function
   | String _ | String2 _ | Yield _ | Yield_break | Yield_from _
   | Await _ | Suspend _ | Expr_list _ | Cast _ | Unop _
   | Binop _ | Eif _ | NullCoalesce _ | InstanceOf _ | New _ | Efun _ | Lfun _
-  | Xml _ | Import _ | Pipe _) ->
+  | Xml _ | Import _ | Pipe _ | Callconv _) ->
       error_at env pos "Invalid lvalue"
 
 (* The bound variable of a foreach can be a reference (but not inside
@@ -3240,6 +3240,8 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
       expr_yield env pos
   | "clone" ->
       expr_clone env pos
+  | "inout" ->
+      expr_callconv env pos ~flavor:Pinout
   | "list" ->
       expr_php_list env pos
   | r when is_import r ->
@@ -3394,6 +3396,20 @@ and expr_call_list env =
   expect env Tlp;
   expr_call_list_remain env
 
+and expr_call_list_element env =
+  let error_state = !(env.errors) in
+  let e = expr { env with priority = 0 } in
+  match L.token env.file env.lb with
+    | Trp -> [e], []
+    | Tcomma ->
+      if !(env.errors) != error_state
+      then [e], []
+      else begin
+        let reg, unpack = expr_call_list_remain env
+        in e :: reg, unpack
+      end
+    | _ -> error_expect env ")"; [e], []
+
 and expr_call_list_remain env =
   match L.token env.file env.lb with
     | Trp -> [], []
@@ -3408,18 +3424,7 @@ and expr_call_list_remain env =
         | _ -> error_expect env ")"; [], [unpack_e])
     | _ ->
       L.back env.lb;
-      let error_state = !(env.errors) in
-      let e = expr { env with priority = 0 } in
-      match L.token env.file env.lb with
-        | Trp -> [e], []
-        | Tcomma ->
-          if !(env.errors) != error_state
-          then [e], []
-          else begin
-            let reg, unpack = expr_call_list_remain env
-            in e :: reg, unpack
-          end
-        | _ -> error_expect env ")"; [e], []
+      expr_call_list_element env
 
 (*****************************************************************************)
 (* Collections *)
@@ -4209,6 +4214,27 @@ and expr_array_get env e1 =
         expect env Trb;
         let end_ = Pos.make env.file env.lb in
         Pos.btw (fst e1) end_, Array_get (e1, Some e2)
+  end
+
+(*****************************************************************************)
+(* Parameter calling convention modifiers *)
+(*****************************************************************************)
+
+and expr_callconv env start ~(flavor:param_kind) =
+  with_base_priority env begin fun env ->
+    let pos, _ as e = match expr env with
+      | p, Unop (Uref, e1) -> error_at env p "Unexpected reference"; e1
+      | x -> x in
+    begin match snd e with
+      | Call _ | Omitted ->
+        error_at env pos "Invalid lvalue"
+      | List _ ->
+        error_at env pos (Printf.sprintf
+          "Cannot pass list intrinsic for an %s parameter"
+          (string_of_param_kind flavor))
+      | _ -> check_lvalue env e
+    end;
+    Pos.btw start pos, Callconv (flavor, e)
   end
 
 (*****************************************************************************)

@@ -1052,6 +1052,11 @@ class virtual ['self] endo =
     method on_Goto env this c0 =
       let r0 = self#on_pstring env c0 in
       if c0 == r0 then this else Goto r0
+    method on_Callconv env this c0 c1 =
+      let r0 = self#on_param_kind env c0 in
+      let r1 = self#on_expr env c1 in if c0 == r0 && c1 == r1
+      then this
+      else Callconv (r0, r1)
     method on_expr_ env this =
       match this with
       | Array c0 -> self#on_Array env this c0
@@ -1103,6 +1108,7 @@ class virtual ['self] endo =
       | Unsafeexpr c0 -> self#on_Unsafeexpr env this c0
       | Import (c0, c1) -> self#on_Import env this c0 c1
       | Omitted         -> self#on_Omitted env this
+      | Callconv (c0, c1) -> self#on_Callconv env this c0 c1
     method on_Include env this = this
     method on_Require env this = this
     method on_IncludeOnce env this = this

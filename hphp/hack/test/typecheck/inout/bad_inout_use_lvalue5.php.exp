@@ -1,0 +1,2 @@
+File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
+Cannot pass list intrinsic for an inout parameter (Parsing[1002])

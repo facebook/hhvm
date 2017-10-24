@@ -95,6 +95,10 @@ class virtual ['c] map :
                   Ast_visitors_ancestors.expr list ->
                   Ast_visitors_ancestors.expr list ->
                   Ast_visitors_ancestors.expr_;
+        on_Callconv : 'd ->
+                      Ast_visitors_ancestors.param_kind ->
+                      Ast_visitors_ancestors.expr ->
+                      Ast_visitors_ancestors.expr_;
         on_Case : 'd ->
                   Ast_visitors_ancestors.expr ->
                   Ast_visitors_ancestors.block -> Ast_visitors_ancestors.case;
@@ -746,6 +750,10 @@ class virtual ['c] map :
       Ast_visitors_ancestors.hint list ->
       Ast_visitors_ancestors.expr list ->
       Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
+    method on_Callconv :
+      'd ->
+      Ast_visitors_ancestors.param_kind ->
+      Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
     method on_Case :
       'd ->
       Ast_visitors_ancestors.expr ->

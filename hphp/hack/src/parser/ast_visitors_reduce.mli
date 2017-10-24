@@ -52,6 +52,9 @@ class virtual ['b] reduce :
                   Ast_visitors_ancestors.hint list ->
                   Ast_visitors_ancestors.expr list ->
                   Ast_visitors_ancestors.expr list -> 'd;
+        on_Callconv : 'c ->
+                      Ast_visitors_ancestors.param_kind ->
+                      Ast_visitors_ancestors.expr -> 'd;
         on_Case : 'c ->
                   Ast_visitors_ancestors.expr ->
                   Ast_visitors_ancestors.block -> 'd;
@@ -408,6 +411,10 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.hint list ->
       Ast_visitors_ancestors.expr list ->
       Ast_visitors_ancestors.expr list -> 'd
+    method on_Callconv :
+      'c ->
+      Ast_visitors_ancestors.param_kind ->
+      Ast_visitors_ancestors.expr -> 'd
     method on_Case :
       'c -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.block -> 'd
     method on_Cast :

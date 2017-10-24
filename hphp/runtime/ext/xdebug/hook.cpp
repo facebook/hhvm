@@ -454,12 +454,20 @@ static bool is_breakpoint_hit(XDebugBreakpoint& bp) {
 }
 
 static Variant get_breakpoint_message(const BreakInfo& bi) {
-  if (auto eb = boost::get<ExnBreak>(&bi)) return VarNR(eb->message);
+  if (auto eb = boost::get<ExnBreak>(&bi)) {
+    if (eb->message) {
+      return Variant(eb->message->data());
+    }
+  }
   return init_null();
 }
 
 static Variant get_breakpoint_exception_name(const BreakInfo& bi) {
-  if (auto eb = boost::get<ExnBreak>(&bi)) return VarNR(eb->name);
+  if (auto eb = boost::get<ExnBreak>(&bi)) {
+    if (eb->name) {
+      return Variant(eb->name->data());
+    }
+  }
   return init_null();
 }
 

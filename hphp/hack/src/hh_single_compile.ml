@@ -172,11 +172,14 @@ let parse_text compiler_options popt fn text =
   | FFP ->
     let ignore_pos =
       not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
+    let enable_hh_syntax =
+      Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
     Full_fidelity_ast.from_text_with_legacy
       ~parser_options:popt
       ~ignore_pos
       ~suppress_output:true
       ~hhvm_compat_mode:true
+      ~enable_hh_syntax
       fn text
   | Legacy ->
     Parser_hack.program popt fn text

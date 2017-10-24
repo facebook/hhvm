@@ -843,19 +843,19 @@ let is_hashbang text =
   let r = Str.regexp "^#!.*\n" in
   Str.string_match r text 0 && Str.matched_string text = text
 
-let markup_errors node is_hack hhvm_compat_mode =
+let markup_errors node is_hack_file hhvm_compat_mode =
   match syntax node with
   | MarkupSection { markup_prefix; markup_text; _ }
     (* only report the error on the first markup section of a hack file *)
-    when is_hack && (is_missing markup_prefix) &&
+    when is_hack_file && (is_missing markup_prefix) &&
     (* hashbang is allowed before <?hh *)
     (width markup_text) > 0 && not (is_hashbang markup_text) ->
     [ make_error_from_node node SyntaxError.error1001 ]
   | MarkupSection { markup_prefix; markup_text; _ }
-    when is_hack && (token_kind markup_prefix) = Some TokenKind.QuestionGreaterThan ->
+    when is_hack_file && (token_kind markup_prefix) = Some TokenKind.QuestionGreaterThan ->
     [ make_error_from_node node SyntaxError.error2067 ]
   | MarkupSuffix { markup_suffix_less_than_question; markup_suffix_name; }
-    when not hhvm_compat_mode && not is_hack
+    when not hhvm_compat_mode && not is_hack_file
     && ((token_kind markup_suffix_less_than_question) = Some TokenKind.LessThanQuestion)
     && ((PositionedSyntax.text markup_suffix_name) <> "php") ->
     [ make_error_from_node node SyntaxError.error2068 ]
@@ -1195,12 +1195,13 @@ let mixed_namespace_errors node namespace_type =
     { errors; namespace_type }
   | _ -> { errors = [ ]; namespace_type }
 
-let find_syntax_errors hhvm_compatiblity_mode syntax_tree =
+let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
   let is_strict = SyntaxTree.is_strict syntax_tree in
-  let is_hack = (SyntaxTree.language syntax_tree = "hh") in
+  let is_hack_file = (SyntaxTree.language syntax_tree = "hh") in
+  let is_hack = is_hack_file || enable_hh_syntax in
   let folder acc node parents =
     let markup_errs =
-      markup_errors node is_hack hhvm_compatiblity_mode in
+      markup_errors node is_hack_file hhvm_compatiblity_mode in
     let param_errs =
       parameter_errors node parents is_strict is_hack hhvm_compatiblity_mode in
     let func_errs =
@@ -1246,7 +1247,7 @@ let find_syntax_errors hhvm_compatiblity_mode syntax_tree =
 
 type error_level = Minimum | Typical | Maximum | HHVMCompatibility
 
-let parse_errors ?(level=Typical) syntax_tree =
+let parse_errors ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =
   (*
   Minimum: suppress cascading errors; no second-pass errors if there are
   any first-pass errors.
@@ -1258,5 +1259,5 @@ let parse_errors ?(level=Typical) syntax_tree =
   | _ -> SyntaxTree.errors syntax_tree in
   let errors2 =
     if level = Minimum && errors1 <> [] then []
-    else find_syntax_errors (level = HHVMCompatibility) syntax_tree in
+    else find_syntax_errors ~enable_hh_syntax (level = HHVMCompatibility) syntax_tree in
   List.sort SyntaxError.compare (errors1 @ errors2)

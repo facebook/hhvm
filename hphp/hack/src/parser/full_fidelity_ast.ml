@@ -2368,6 +2368,7 @@ let from_text
   ?(quick                 = false)
   ?(suppress_output       = false)
   ?(lower_coroutines      = true)
+  ?(enable_hh_syntax       = false)
   ?hhvm_compat_mode
   ?(parser_options        = ParserOptions.default)
   (file        : Relative_path.t)
@@ -2377,7 +2378,9 @@ let from_text
     let tree   = make ?hhvm_compat_mode source_text in
     if Option.value hhvm_compat_mode ~default:false
     then begin
-    match ParserErrors.parse_errors ~level:ParserErrors.HHVMCompatibility tree with
+    match ParserErrors.parse_errors
+      ~enable_hh_syntax
+      ~level:ParserErrors.HHVMCompatibility tree with
     | [] -> ()
     | e :: _ -> failwith (Full_fidelity_syntax_error.message e)
     end;
@@ -2424,6 +2427,7 @@ let from_file
   ?(ignore_pos            = false)
   ?(quick                 = false)
   ?(suppress_output       = false)
+  ?(enable_hh_syntax      = false)
   ?lower_coroutines
   ?hhvm_compat_mode
   ?(parser_options        = ParserOptions.default)
@@ -2436,6 +2440,7 @@ let from_file
       ~ignore_pos
       ~quick
       ~suppress_output
+      ~enable_hh_syntax
       ?lower_coroutines
       ?hhvm_compat_mode
       ~parser_options
@@ -2460,6 +2465,7 @@ let from_text_with_legacy
   ?(ignore_pos            = false)
   ?(quick                 = false)
   ?(suppress_output       = false)
+  ?(enable_hh_syntax      = false)
   ?lower_coroutines
   ?hhvm_compat_mode
   ?(parser_options        = ParserOptions.default)
@@ -2473,6 +2479,7 @@ let from_text_with_legacy
       ~ignore_pos
       ~quick
       ~suppress_output
+      ~enable_hh_syntax
       ?lower_coroutines
       ?hhvm_compat_mode
       ~parser_options
@@ -2486,6 +2493,7 @@ let from_file_with_legacy
   ?(ignore_pos            = false)
   ?(quick                 = false)
   ?(suppress_output       = false)
+  ?(enable_hh_syntax      = false)
   ?lower_coroutines
   ?hhvm_compat_mode
   ?(parser_options        = ParserOptions.default)
@@ -2498,6 +2506,7 @@ let from_file_with_legacy
       ~ignore_pos
       ~quick
       ~suppress_output
+      ~enable_hh_syntax
       ?lower_coroutines
       ?hhvm_compat_mode
       ~parser_options

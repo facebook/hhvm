@@ -274,8 +274,13 @@ bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
 bool Scanner::tryParseNonEmptyLambdaParams(TokenStore::iterator& pos) {
   for (;; nextLookahead(pos)) {
     if (pos->t == ')' || pos->t == T_LAMBDA_CP) return true;
+    bool inout_param = false;
+    if (pos->t == T_INOUT) {
+      inout_param = true;
+      nextLookahead(pos);
+    }
     if (pos->t != T_VARIABLE) {
-      if (pos->t == T_ELLIPSIS) {
+      if (!inout_param && pos->t == T_ELLIPSIS) {
         nextLookahead(pos);
         return true;
       }
@@ -286,7 +291,7 @@ bool Scanner::tryParseNonEmptyLambdaParams(TokenStore::iterator& pos) {
       if (pos->t != T_VARIABLE) return false;
     }
     nextLookahead(pos);
-    if (pos->t == '=') {
+    if (!inout_param && pos->t == '=') {
       nextLookahead(pos);
       parseApproxParamDefVal(pos);
     }
@@ -397,6 +402,9 @@ bool Scanner::tryParseFuncTypeList(TokenStore::iterator& pos) {
     if (pos->t == T_ELLIPSIS) {
       nextLookahead(pos);
       return true;
+    }
+    if (pos->t == T_INOUT) {
+      nextLookahead(pos);
     }
     auto cpPos = pos;
     if (!tryParseNSType(cpPos)) {
@@ -601,6 +609,7 @@ static bool isValidClassConstantName(int tokid) {
   case T_KEYSET:
   case T_VARRAY:
   case T_DARRAY:
+  case T_INOUT:
     return true;
   default:
     return false;

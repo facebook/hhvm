@@ -804,6 +804,7 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
         param.phpCode,
         param.userAttributes,
         param.builtinType,
+        param.inout,
         param.byRef,
         param.byRef,
         param.variadic

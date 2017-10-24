@@ -142,6 +142,7 @@ static int getNextTokenType(int t) {
     case T_UNSET_CAST:
     case T_UNRESOLVED_LT:
     case T_AS:
+    case T_INOUT:
       return NextTokenType::XhpTag |
              NextTokenType::XhpClassName |
              NextTokenType::LambdaMaybe;
@@ -502,6 +503,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"vec"                { HH_ONLY_KEYWORD(T_VEC);}
 <ST_IN_SCRIPTING>"varray"             { HH_ONLY_KEYWORD(T_VARRAY);}
 <ST_IN_SCRIPTING>"darray"             { HH_ONLY_KEYWORD(T_DARRAY);}
+<ST_IN_SCRIPTING>"inout"              { HH_ONLY_KEYWORD(T_INOUT);}
 <ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff(${] {
   HH_ONLY_KEYWORD(T_ASYNC);
 }

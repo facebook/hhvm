@@ -1,0 +1,2 @@
+
+Fatal error: Parameter 1 on function C::foo was not declared inout but is declared inout on abstract function I::foo in %s/bad-interface.php on line 7

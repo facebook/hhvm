@@ -120,6 +120,9 @@
 
 using namespace HPHP::HPHP_PARSER_NS;
 using LS = Parser::LabelScopeKind;
+
+using ParamMode = HPHP::ParamMode;
+
 typedef HPHP::ClosureType ClosureType;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -355,7 +358,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
     Token cls;     _p->onName(cls, parent, Parser::StringName);
     Token fname2;   fname2.setText("__xhpAttributeDeclaration");
     Token param1;  _p->onCall(param1, 0, fname2, dummy, &cls);
-    Token params1; _p->onCallParam(params1, NULL, param1, false, false);
+    Token params1; _p->onCallParam(params1, NULL, param1, ParamMode::In, false);
 
     for (unsigned int i = 0; i < classes.size(); i++) {
       Token parent2;  parent2.set(T_STRING, classes[i]);
@@ -363,12 +366,13 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
       Token fname3;   fname3.setText("__xhpAttributeDeclaration");
       Token param;   _p->onCall(param, 0, fname3, dummy, &cls2);
 
-      Token params; _p->onCallParam(params, &params1, param, false, false);
+      Token params; _p->onCallParam(params, &params1, param, ParamMode::In,
+                                    false);
       params1 = params;
     }
 
     Token params2; _p->onCallParam(params2, &params1, arrAttributes,
-                                   false, false);
+                                   ParamMode::In, false);
 
     Token name;    name.set(T_STRING, "array_merge");
     Token call;    _p->onCall(call, 0, name, params2, NULL);
@@ -632,6 +636,7 @@ static int yylex(YYSTYPE* token, HPHP::Location* loc, Parser* _p) {
 %token T_PIPE_VAR
 %token T_NUM_STRING
 %token T_INLINE_HTML
+%token T_INOUT
 %token T_HASHBANG
 %token T_CHARACTER
 %token T_BAD_CHARACTER
@@ -906,6 +911,7 @@ ident_for_class_const:
   /** The following must be made semi-reserved since they were keywords in HHVM
     * but not PHP. */
   | T_UNSET
+  | T_INOUT
 ;
 
 ident:
@@ -1556,43 +1562,62 @@ method_parameter_list:
 non_empty_method_parameter_list:
     optional_user_attributes
     parameter_modifiers
-    hh_type_opt T_VARIABLE             { _p->onParam($$,NULL,$3,$4,0,
+    hh_type_opt T_VARIABLE             { _p->onParam($$,NULL,$3,$4,
+                                                     ParamMode::In,
                                                      NULL,&$1,&$2);}
   | optional_user_attributes
+    T_INOUT
+    hh_type_opt T_VARIABLE             { _p->onParam($$,NULL,$3,$4,
+                                                     ParamMode::InOut,
+                                                     NULL,&$1,NULL);}
+  | optional_user_attributes
     parameter_modifiers
-    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,NULL,$3,$5,1,
+    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,NULL,$3,$5,
+                                                     ParamMode::Ref,
                                                      NULL,&$1,&$2);}
   | optional_user_attributes
     parameter_modifiers
     hh_type_opt '&' T_VARIABLE
-    '=' expr                           { _p->onParam($$,NULL,$3,$5,1,
+    '=' expr                           { _p->onParam($$,NULL,$3,$5,
+                                                     ParamMode::Ref,
                                                      &$7,&$1,&$2);}
   | optional_user_attributes
     parameter_modifiers
     hh_type_opt T_VARIABLE
-    '=' expr                           { _p->onParam($$,NULL,$3,$4,0,
+    '=' expr                           { _p->onParam($$,NULL,$3,$4,
+                                                     ParamMode::In,
                                                      &$6,&$1,&$2);}
   | non_empty_method_parameter_list ','
     optional_user_attributes
     parameter_modifiers
-    hh_type_opt T_VARIABLE             { _p->onParam($$,&$1,$5,$6,0,
+    hh_type_opt T_VARIABLE             { _p->onParam($$,&$1,$5,$6,
+                                                     ParamMode::In,
                                                      NULL,&$3,&$4);}
   | non_empty_method_parameter_list ','
     optional_user_attributes
+    T_INOUT
+    hh_type_opt T_VARIABLE             { _p->onParam($$,&$1,$5,$6,
+                                                     ParamMode::InOut,
+                                                     NULL,&$3,NULL);}
+  | non_empty_method_parameter_list ','
+    optional_user_attributes
     parameter_modifiers
-    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,&$1,$5,$7,1,
+    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,&$1,$5,$7,
+                                                     ParamMode::Ref,
                                                      NULL,&$3,&$4);}
   | non_empty_method_parameter_list ','
     optional_user_attributes
     parameter_modifiers
     hh_type_opt '&' T_VARIABLE
-    '=' expr                           { _p->onParam($$,&$1,$5,$7,1,
+    '=' expr                           { _p->onParam($$,&$1,$5,$7,
+                                                     ParamMode::Ref,
                                                      &$9,&$3,&$4);}
   | non_empty_method_parameter_list ','
     optional_user_attributes
     parameter_modifiers
     hh_type_opt T_VARIABLE
-    '=' expr                           { _p->onParam($$,&$1,$5,$6,0,
+    '=' expr                           { _p->onParam($$,&$1,$5,$6,
+                                                     ParamMode::In,
                                                      &$8,&$3,&$4);}
 ;
 
@@ -1633,37 +1658,60 @@ parameter_list:
 
 non_empty_parameter_list:
     optional_user_attributes
-    hh_type_opt T_VARIABLE             { _p->onParam($$,NULL,$2,$3,false,
+    hh_type_opt T_VARIABLE             { _p->onParam($$,NULL,$2,$3,
+                                                     ParamMode::In,
                                                      NULL,&$1,NULL); }
   | optional_user_attributes
-    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,NULL,$2,$4,true,
+    T_INOUT hh_type_opt T_VARIABLE     { _p->onParam($$,NULL,$3,$4,
+                                                     ParamMode::InOut,
+                                                     NULL,&$1,NULL); }
+  | optional_user_attributes
+    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,NULL,$2,$4,
+                                                     ParamMode::Ref,
                                                      NULL,&$1,NULL); }
   | optional_user_attributes
     hh_type_opt '&' T_VARIABLE
-    '=' expr                           { _p->onParam($$,NULL,$2,$4,true,
+    '=' expr                           { _p->onParam($$,NULL,$2,$4,
+                                                     ParamMode::Ref,
                                                      &$6,&$1,NULL); }
   | optional_user_attributes
     hh_type_opt T_VARIABLE
-    '=' expr                           { _p->onParam($$,NULL,$2,$3,false,
+    '=' expr                           { _p->onParam($$,NULL,$2,$3,
+                                                     ParamMode::In,
                                                      &$5,&$1,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
-    hh_type_opt T_VARIABLE             { _p->onParam($$,&$1,$4,$5,false,
+    hh_type_opt T_VARIABLE             { _p->onParam($$,&$1,$4,$5,
+                                                     ParamMode::In,
                                                      NULL,&$3,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
-    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,&$1,$4,$6,true,
+    T_INOUT hh_type_opt T_VARIABLE     { _p->onParam($$,&$1,$5,$6,
+                                                     ParamMode::InOut,
+                                                     NULL,&$3,NULL); }
+  | non_empty_parameter_list ','
+    optional_user_attributes
+    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,&$1,$4,$6,
+                                                     ParamMode::Ref,
                                                      NULL,&$3,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
     hh_type_opt '&' T_VARIABLE
-    '=' expr                           { _p->onParam($$,&$1,$4,$6,true,
+    '=' expr                           { _p->onParam($$,&$1,$4,$6,
+                                                     ParamMode::Ref,
                                                      &$8,&$3,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
     hh_type_opt T_VARIABLE
-    '=' expr                           { _p->onParam($$,&$1,$4,$5,false,
+    '=' expr                           { _p->onParam($$,&$1,$4,$5,
+                                                     ParamMode::In,
                                                      &$7,&$3,NULL); }
+;
+
+inout_variable:
+    inout_variable '[' dim_offset ']'  { _p->onRefDim($$, $1, $3);}
+  | T_VARIABLE                         { _p->onSimpleVariable($$, $1);}
+  | T_PIPE_VAR                         { _p->onPipeVariable($$);}
 ;
 
 function_call_parameter_list:
@@ -1672,15 +1720,26 @@ function_call_parameter_list:
   |                                    { $$.reset();}
 ;
 non_empty_fcall_parameter_list:
-  expr                               { _p->onCallParam($$,NULL,$1,false,false);}
-| '&' variable                       { _p->onCallParam($$,NULL,$2,true,false);}
-| T_ELLIPSIS expr                    { _p->onCallParam($$,NULL,$2,false,true);}
+  expr                               { _p->onCallParam($$,NULL,$1,
+                                                       ParamMode::In,false);}
+| T_INOUT inout_variable             { _p->onCallParam($$,NULL,$2,
+                                                       ParamMode::InOut,false);}
+| '&' variable                       { _p->onCallParam($$,NULL,$2,
+                                                       ParamMode::Ref,false);}
+| T_ELLIPSIS expr                         { _p->onCallParam($$,NULL,$2,
+                                                       ParamMode::In,true);}
 | non_empty_fcall_parameter_list
-',' expr                           { _p->onCallParam($$,&$1,$3,false, false);}
+',' expr                           { _p->onCallParam($$,&$1,$3,
+                                                     ParamMode::In,false);}
 | non_empty_fcall_parameter_list
-',' T_ELLIPSIS expr                { _p->onCallParam($$,&$1,$4,false,true);}
+',' T_ELLIPSIS expr                { _p->onCallParam($$,&$1,$4,
+                                                     ParamMode::In,true);}
 | non_empty_fcall_parameter_list
-',' '&' variable                   { _p->onCallParam($$,&$1,$4,true, false);}
+',' '&' variable                   { _p->onCallParam($$,&$1,$4,
+                                                     ParamMode::Ref,false);}
+| non_empty_fcall_parameter_list
+',' T_INOUT inout_variable         { _p->onCallParam($$,&$1,$4,
+                                                     ParamMode::InOut,false);}
 ;
 
 global_var_list:
@@ -2198,7 +2257,8 @@ lambda_expression:
                                          _p->onClosureStart(t);
                                          _p->pushLabelInfo();
                                          Token u;
-                                         _p->onParam($2,NULL,u,$2,0,
+                                         _p->onParam($2,NULL,u,$2,
+                                                     ParamMode::In,
                                                      NULL,NULL,NULL);}
     lambda_body                        { Token v; Token w; Token x;
                                          $1 = T_ASYNC;
@@ -2254,7 +2314,8 @@ lambda_expression:
                                          _p->onClosureStart(t);
                                          _p->pushLabelInfo();
                                          Token u;
-                                         _p->onParam($1,NULL,u,$1,0,
+                                         _p->onParam($1,NULL,u,$1,
+                                                     ParamMode::In,
                                                      NULL,NULL,NULL);}
     lambda_body                        { Token v; Token w; Token x;
                                          _p->finishStatement($3, $3); $3 = 1;
@@ -2508,10 +2569,14 @@ xhp_tag_body:
                                          Token t2; _p->onArray(t2,$2);
                                          Token file; scalar_file(_p, file);
                                          Token line; scalar_line(_p, line);
-                                         _p->onCallParam($1,NULL,t1,0,0);
-                                         _p->onCallParam($$, &$1,t2,0,0);
-                                         _p->onCallParam($1, &$1,file,0,0);
-                                         _p->onCallParam($1, &$1,line,0,0);
+                                         _p->onCallParam($1,NULL,t1,
+                                                         ParamMode::In,0);
+                                         _p->onCallParam($$, &$1,t2,
+                                                         ParamMode::In,0);
+                                         _p->onCallParam($1, &$1,file,
+                                                         ParamMode::In,0);
+                                         _p->onCallParam($1, &$1,line,
+                                                         ParamMode::In,0);
                                          $$.setText("");}
   | xhp_attributes T_XHP_TAG_GT
     xhp_children T_XHP_TAG_LT '/'
@@ -2519,10 +2584,14 @@ xhp_tag_body:
                                          Token line; scalar_line(_p, line);
                                          _p->onArray($4,$1);
                                          _p->onArray($5,$3);
-                                         _p->onCallParam($2,NULL,$4,0,0);
-                                         _p->onCallParam($$, &$2,$5,0,0);
-                                         _p->onCallParam($2, &$2,file,0,0);
-                                         _p->onCallParam($2, &$2,line,0,0);
+                                         _p->onCallParam($2,NULL,$4,
+                                                         ParamMode::In,0);
+                                         _p->onCallParam($$, &$2,$5,
+                                                         ParamMode::In,0);
+                                         _p->onCallParam($2, &$2,file,
+                                                         ParamMode::In,0);
+                                         _p->onCallParam($2, &$2,line,
+                                                         ParamMode::In,0);
                                          $$.setText($6.text());}
 ;
 xhp_opt_end_label:
@@ -2652,6 +2721,7 @@ xhp_bareword:
   | T_NEWTYPE                          { $$ = $1;}
   | T_SHAPE                            { $$ = $1;}
   | T_USING                            { $$ = $1;}
+  | T_INOUT                            { $$ = $1;}
 ;
 
 simple_function_call:
@@ -3501,12 +3571,28 @@ hh_type_list:
     possible_comma                     { $$ = $1; }
 ;
 
+hh_non_empty_func_type_list:
+    hh_type                                         { Token t; t.reset();
+                                                        _p->onTypeList($1, t);
+                                                        $$ = $1; }
+  | T_INOUT hh_type                                 { Token t; t.reset();
+                                                        _p->onTypeList($2, t);
+                                                        $$ = $2; }
+  | hh_non_empty_func_type_list ',' T_INOUT hh_type { _p->onTypeList($1, $4);
+                                                        $$ = $1; }
+  | hh_non_empty_func_type_list ','  hh_type        { _p->onTypeList($1, $3);
+                                                        $$ = $1; }
+  | hh_non_empty_func_type_list ',' T_INOUT           { _p->onTypeList($1, $3);
+                                                        $$ = $1; }
+  | T_INOUT                                           { $$.reset(); }
+;
+
 hh_func_type_list:
-    hh_non_empty_type_list
-    ',' hh_type_opt T_ELLIPSIS         { $$ = $1; }
-  | hh_type_list                       { $$ = $1; }
-  | hh_type_opt T_ELLIPSIS             { $$.reset(); }
-  |                                    { $$.reset(); }
+    hh_non_empty_func_type_list
+    ',' hh_type_opt T_ELLIPSIS                 { $$ = $1; }
+  | hh_non_empty_func_type_list possible_comma { $$ = $1; }
+  | hh_type_opt T_ELLIPSIS                     { $$.reset(); }
+  |                                            { $$.reset(); }
 ;
 
 opt_type_constraint_where_clause:

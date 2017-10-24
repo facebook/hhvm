@@ -139,9 +139,14 @@ enum Attr {
   // <<__Memoize> caches).  Reuses the AttrBuiltin bit.
   AttrNoSerialize          = (1 << 20), //       |    X     |         //
                                         //       |          |         //
+  // Set on all functions which take at least one inout parameter. Also implies
+  // that the function takes no parameters by reference.
+  AttrTakesInOutParams     = (1 << 21), //       |          |    X    //
+                                        //       |          |         //
   // Set on properties to indicate they can't be changed after construction
   // and on classes to indicate that all that class' properties are immutable.
   AttrIsImmutable          = (1 << 21), //    X  |    X     |         //
+                                        //       |          |         //
   // Set on classes to indicate that they have at least one immutable property.
   AttrHasImmutable         = (1 << 22), //    X  |          |         //
                                         //       |          |         //

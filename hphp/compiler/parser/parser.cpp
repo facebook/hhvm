@@ -535,18 +535,21 @@ ExpressionPtr Parser::createDynamicVariable(ExpressionPtr exp) {
 }
 
 void Parser::onCallParam(Token &out, Token *params, Token &expr,
-                         bool ref, bool unpack) {
+                         ParamMode mode, bool unpack) {
   if (!params) {
     out->exp = NEW_EXP0(ExpressionList);
   } else {
     out->exp = params->exp;
   }
-  if (ref) {
+  if (mode == ParamMode::Ref) {
     if (scanner().isHHSyntaxEnabled()) {
       expr->exp->setContext(Expression::RefParameter);
     } else {
       PARSE_ERROR("Call-time pass-by-reference has been removed");
     }
+  } else if (mode == ParamMode::InOut) {
+    checkAllowedInWriteContext(expr->exp);
+    expr->exp->setContext(Expression::InOutParameter);
   }
   if (unpack) {
     (dynamic_pointer_cast<ExpressionList>(out->exp))->setContainsUnpack();
@@ -1086,8 +1089,8 @@ void Parser::onConst(Token& /*out*/, Token& name, Token& value) {
   Token sname;   onScalar(sname, T_CONSTANT_ENCAPSED_STRING, name);
 
   Token fname;   fname.setText("define");
-  Token params1; onCallParam(params1, nullptr, sname, false, false);
-  Token params2; onCallParam(params2, &params1, value, false, false);
+  Token params1; onCallParam(params1, nullptr, sname, ParamMode::In, false);
+  Token params2; onCallParam(params2, &params1, value, ParamMode::In, false);
   Token call;    onCall(call, false, fname, params2, nullptr);
   Token expr;    onExpStatement(expr, call);
 
@@ -1388,7 +1391,8 @@ void Parser::onVariadicParam(Token &out, Token *params,
 
   expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation,
                               m_scanner.isHHSyntaxEnabled(), var->text(),
-                              ref, (modifier) ? modifier->num() : 0,
+                              ref ? ParamMode::Ref : ParamMode::In,
+                              modifier ? modifier->num() : 0,
                               ExpressionPtr(),
                               attrList,
                               /* variadic */ true));
@@ -1396,7 +1400,8 @@ void Parser::onVariadicParam(Token &out, Token *params,
 }
 
 void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
-                     bool ref, Token *defValue, Token *attr, Token *modifier) {
+                     ParamMode mode, Token *defValue, Token *attr,
+                     Token *modifier) {
   ExpressionPtr expList;
   if (params) {
     expList = params->exp;
@@ -1411,7 +1416,7 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
   TypeAnnotationPtr typeAnnotation = type.typeAnnotation;
   expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation,
                               m_scanner.isHHSyntaxEnabled(), var->text(),
-                              ref, (modifier) ? modifier->num() : 0,
+                              mode, (modifier) ? modifier->num() : 0,
                               defValue ? defValue->exp : ExpressionPtr(),
                               attrList));
   out->exp = expList;
@@ -2316,7 +2321,8 @@ void Parser::onClosureParam(Token &out, Token *params, Token &param,
   }
   expList->addElement(NEW_EXP(ParameterExpression, TypeAnnotationPtr(),
                               m_scanner.isHHSyntaxEnabled(), param->text(),
-                              ref, 0, ExpressionPtr(), ExpressionPtr()));
+                              ref ? ParamMode::Ref : ParamMode::In, 0,
+                              ExpressionPtr(), ExpressionPtr()));
   out->exp = expList;
 }
 

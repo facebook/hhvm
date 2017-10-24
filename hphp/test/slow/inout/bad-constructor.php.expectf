@@ -1,0 +1,2 @@
+
+Fatal error: Parameters may not be marked inout on constructors in %s/bad-constructor.php on line %i

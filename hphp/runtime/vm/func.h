@@ -57,6 +57,16 @@ using BuiltinFunction = TypedValue* (*)(ActRec* ar);
  */
 using DVFuncletsVec = std::vector<std::pair<int, Offset>>;
 
+/*
+ * Call ABI for a function parameter: input only (normal behavior), by
+ * reference (RefData), or inout (desugars to multiple return values).
+ */
+enum class ParamMode : uint8_t {
+  In,
+  Ref,
+  InOut,
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // EH and FPI tables.
 
@@ -137,6 +147,8 @@ struct Func final {
     bool variadic{false};
     // Does this use a NativeArg?
     bool nativeArg{false};
+    // Is this an inout parameter?
+    bool inout{false};
     // DV initializer funclet offset.
     Offset funcletOff{InvalidAbsoluteOffset};
     // Set to Uninit if there is no DV, or if there's a nonscalar DV.
@@ -540,6 +552,11 @@ struct Func final {
    * are never used.
    */
   bool discardExtraArgs() const;
+
+  /*
+   * Whether any of the parameters to this function are inout parameters.
+   */
+  bool takesInOutParams() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and stack.                                      [const]

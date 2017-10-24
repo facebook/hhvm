@@ -161,6 +161,7 @@ TRACE_SET_MOD(emitter);
 
 const StaticString
   s_ini_get("ini_get"),
+  s_construct("__construct"),
   s_is_deprecated("deprecated function"),
   s_trigger_error("trigger_error"),
   s_trigger_sampled_error("trigger_sampled_error"),
@@ -6264,7 +6265,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       for (int i = 0; i < useCount; ++i) {
         auto var = static_pointer_cast<ParameterExpression>((*useList)[i]);
         StringData* varName = makeStaticString(var->getName());
-        useVars.push_back(ClosureUseVar(varName, var->isRef()));
+        useVars.push_back(
+          ClosureUseVar(varName, var->mode() == ParamMode::Ref)
+        );
       }
     }
 
@@ -8145,6 +8148,10 @@ buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe, bool /*top*/) {
   attrs = static_cast<Attr>(
     attrs & ~(AttrParamCoerceModeNull | AttrParamCoerceModeFalse));
 
+  for (auto pi : fe->params) {
+    if (pi.inout) attrs |= AttrTakesInOutParams;
+  }
+
   return attrs;
 }
 
@@ -8567,12 +8574,48 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
 void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
                                            ExpressionListPtr params,
                                            bool coerce_params /*= false */) {
+  ParamMode refMode = ParamMode::In;
   int numParam = params ? params->getCount() : 0;
   for (int i = 0; i < numParam; i++) {
     auto par = static_pointer_cast<ParameterExpression>((*params)[i]);
     StringData* parName = makeStaticString(par->getName());
 
     FuncEmitter::ParamInfo pi;
+
+    // Currently inout parameters are not allowed on generators, async funcs,
+    // or constructors.
+    if (par->mode() == ParamMode::InOut) {
+      if (fe->isAsync || fe->isGenerator) {
+        auto const async = fe->isAsync ? "async " : "";
+        auto const kind = fe->isGenerator ? "generators" : "functions";
+        throw IncludeTimeFatalException(
+          par, "Parameters may not be marked inout on %s%s", async, kind
+        );
+      }
+
+      if (fe->isMethod() && !(fe->attrs & AttrStatic)) {
+        auto const scope = params->getClassScope();
+        if (fe->name->equal(s_construct.get()) ||
+            (scope->classNameCtor() && scope->isNamed(fe->name->data()))) {
+          throw IncludeTimeFatalException(
+            par, "Parameters may not be marked inout on constructors"
+          );
+        }
+      }
+
+      pi.inout = true;
+    }
+
+    if (par->mode() != ParamMode::In) {
+      if (refMode != ParamMode::In && refMode != par->mode()) {
+        throw IncludeTimeFatalException(
+          par, "Functions may not use both reference and inout parameters"
+        );
+      }
+      refMode = par->mode();
+      pi.byRef = par->mode() == ParamMode::Ref;
+    }
+
     auto const typeConstraint = determine_type_constraint(par);
     if (typeConstraint.hasConstraint()) {
       pi.typeConstraint = typeConstraint;
@@ -8633,7 +8676,6 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
       }
     }
 
-    pi.byRef = par->isRef();
     pi.variadic = par->isVariadic();
     fe->appendParam(parName, pi);
   }
@@ -9045,6 +9087,11 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
         meth,
         "<<__Memoize>> cannot be used on functions with args passed by "
         "reference"
+      );
+    } else if (m_curFunc->params[i].inout) {
+      throw IncludeTimeFatalException(
+        meth,
+        "<<__Memoize>> cannot be used on functions with inout parameters"
       );
     }
 

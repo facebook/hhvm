@@ -1,0 +1,2 @@
+
+Fatal error: Parameters may not be marked inout on generators in %s/bad-generator.php on line 3

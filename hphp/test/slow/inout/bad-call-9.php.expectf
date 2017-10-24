@@ -1,0 +1,2 @@
+
+Fatal error: syntax error, unexpected T_STRING, expecting T_VARIABLE or T_PIPE_VAR in %s/bad-call-9.php on line 3

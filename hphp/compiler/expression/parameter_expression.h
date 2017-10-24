@@ -20,6 +20,7 @@
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/json.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/parser/scanner.h"
 
 namespace HPHP {
@@ -35,7 +36,7 @@ struct ParameterExpression : Expression {
                       TypeAnnotationPtr type,
                       bool hhType,
                       const std::string &name,
-                      bool ref,
+                      ParamMode mode,
                       TokenID modifier,
                       ExpressionPtr defaultValue,
                       ExpressionPtr attributeList,
@@ -43,7 +44,8 @@ struct ParameterExpression : Expression {
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
-  bool isRef() const { return m_ref;}
+  ParamMode mode() const { return m_mode;}
+  bool isRef() const { return m_mode == ParamMode::Ref;}
   bool isOptional() const { return m_defaultValue != nullptr;}
   bool isVariadic() const { return m_variadic; }
   const std::string &getName() const { return m_name; }
@@ -74,7 +76,7 @@ private:
   TypeAnnotationPtr m_originalType;
   std::string m_name;
   bool m_hhType;
-  bool m_ref;
+  ParamMode m_mode;
   TokenID m_modifier;
   ExpressionPtr m_defaultValue;
   ExpressionPtr m_attributeList;

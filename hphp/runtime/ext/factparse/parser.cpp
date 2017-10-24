@@ -304,11 +304,11 @@ void Parser::onCallParam(
   Token &out,
   Token *prevParams,
   Token &expr,
-  bool ref,
+  ParamMode mode,
   bool unpack)
 {
   // References or var-args are never the pattern we want
-  if (ref || unpack) {
+  if (mode == ParamMode::Ref || unpack) {
     out.m_constArgs = -1;
   } else {
     if (prevParams) {
@@ -509,7 +509,7 @@ void Parser::onVariadicParam(Token& /*out*/, Token* /*params*/, Token& /*type*/,
                              Token* /*modifier*/) {}
 
 void Parser::onParam(Token& /*out*/, Token* /*params*/, Token& /*type*/,
-                     Token& /*var*/, bool /*ref*/, Token* /*defValue*/,
+                     Token& /*var*/, ParamMode /*mode*/, Token* /*defValue*/,
                      Token* /*attr*/, Token* /*modifier*/) {}
 
 void Parser::onClassExpressionStart() {

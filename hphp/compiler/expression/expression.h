@@ -71,7 +71,7 @@ public:
     LValue       = 1,            // assignment exp; foreach stmt
     Declaration  = LValue | 2,   // global or static stmt, or delayed var
     RefValue  = 8,               // &exp
-    // Unused       0x10,
+    InOutParameter = 0x10,       // inout exp
     ObjectContext = 0x20,        // $obj->
     InParameterExpression = 0x40,// for default value expression
     ExistContext = 0x80,         // isset(...) or empty(...) recursively

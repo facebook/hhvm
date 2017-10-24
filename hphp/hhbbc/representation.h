@@ -31,6 +31,7 @@
 #include "hphp/util/md5.h"
 
 #include "hphp/runtime/base/user-attributes.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -216,6 +217,11 @@ struct Param {
   folly::Optional<DataType> builtinType;
 
   /*
+   * Whether this parameter is passed as inout.
+   */
+  bool inout: 1;
+
+  /*
    * Whether this parameter is passed by reference.
    */
   bool byRef: 1;
@@ -223,7 +229,7 @@ struct Param {
   /*
    * Whether this parameter must be passed by reference.
    * The FPassCE and FPassCW opcodes will only produce
-   * an error/warnging if this is set.
+   * an error/warning if this is set.
    */
   bool mustBeRef: 1;
 

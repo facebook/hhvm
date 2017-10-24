@@ -36,7 +36,7 @@ ParameterExpression::ParameterExpression(
      TypeAnnotationPtr type,
      bool hhType,
      const std::string &name,
-     bool ref,
+     ParamMode mode,
      TokenID modifier,
      ExpressionPtr defaultValue,
      ExpressionPtr attributeList,
@@ -45,7 +45,7 @@ ParameterExpression::ParameterExpression(
   , m_originalType(type)
   , m_name(name)
   , m_hhType(hhType)
-  , m_ref(ref)
+  , m_mode(mode)
   , m_modifier(modifier)
   , m_defaultValue(defaultValue)
   , m_attributeList(attributeList)
@@ -313,8 +313,9 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
 // code generation functions
 
 void ParameterExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+  if (m_mode == ParamMode::InOut) cg_printf("inout ");
   if (!m_type.empty()) cg_printf("%s ", m_originalType->vanillaName().c_str());
-  if (m_ref) cg_printf("&");
+  if (m_mode == ParamMode::Ref) cg_printf("&");
   cg_printf("$%s", m_name.c_str());
   if (m_defaultValue) {
     cg_printf(" = ");

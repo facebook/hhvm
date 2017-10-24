@@ -1420,6 +1420,10 @@ void Class::setSpecial() {
   auto matchedClassOrIsTrait = [this](const StringData* sd) {
     auto func = lookupMethod(sd);
     if (func && func->cls() == this) {
+      if (func->attrs() & AttrTakesInOutParams) {
+        raise_error("Parameters may not be marked inout on constructors");
+      }
+
       m_ctor = func;
       return true;
     }
@@ -1525,6 +1529,40 @@ static bool checkTypeConstraint(const PreClass* implCls, const Class* iface,
   return tc.compat(itc);
 }
 
+inline void checkRefCompat(const char* kind, const Func* self,
+                           const Func* inherit) {
+  // Shadowing is okay, if we inherit a private method we can't access it
+  // anyway.
+  if (inherit->attrs() & AttrPrivate) return;
+
+  // Short-circuit: no one uses inout parameters.
+  if (!self->takesInOutParams() && !inherit->takesInOutParams()) return;
+
+  auto const sname = self->fullDisplayName()->data();
+  auto const iname = inherit->fullDisplayName()->data();
+  auto const& sparams = self->params();
+  auto const& iparams = inherit->params();
+  auto const smax = self->numNonVariadicParams();
+  auto const imax = inherit->numNonVariadicParams();
+  auto const max = std::max(smax, imax);
+
+  for (int i = 0; i < max; ++i) {
+    auto const smode = i < smax && sparams[i].inout;
+    auto const imode = i < imax && iparams[i].inout;
+    if (smode != imode) {
+      if (smode) {
+        raise_error("Parameter %i on function %s was declared inout but is not "
+                    "declared %son %s function %s", i + 1, sname,
+                    i < imax ? "inout " : "", kind, iname);
+      } else {
+        raise_error("Parameter %i on function %s was not declared %sbut is "
+                    "declared inout on %s function %s", i + 1, sname,
+                    i < smax ? "inout " : "", kind, iname);
+      }
+    }
+  }
+}
+
 // Check compatibility vs interface and abstract declarations
 void checkDeclarationCompat(const PreClass* preClass,
                             const Func* func, const Func* imeth) {
@@ -1612,6 +1650,12 @@ void checkDeclarationCompat(const PreClass* preClass,
       }
     }
   }
+
+  checkRefCompat(
+    imeth->attrs() & AttrAbstract ? "abstract" : "interface",
+    func,
+    imeth
+  );
 }
 
 } // namespace
@@ -1694,6 +1738,8 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
   if (!(method->attrs() & AttrAbstract) &&
       (baseMethod->attrs() & AttrAbstract)) {
     checkDeclarationCompat(m_preClass.get(), method, baseMethod);
+  } else {
+    checkRefCompat("parent", method, parentMethod);
   }
 }
 

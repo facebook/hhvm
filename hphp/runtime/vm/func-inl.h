@@ -50,6 +50,7 @@ inline void Func::ParamInfo::serde(SerDe& sd) {
     (variadic)
     (userAttributes)
     (userType)
+    (inout)
     ;
 }
 
@@ -293,6 +294,10 @@ inline bool Func::hasVariadicCaptureParam() const {
 
 inline bool Func::discardExtraArgs() const {
   return !(m_attrs & (AttrMayUseVV | AttrVariadicParam));
+}
+
+inline bool Func::takesInOutParams() const {
+  return m_attrs & AttrTakesInOutParams;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

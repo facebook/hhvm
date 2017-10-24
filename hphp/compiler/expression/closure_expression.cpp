@@ -291,7 +291,7 @@ void ClosureExpression::setCaptureList(
       TypeAnnotationPtr(),
       true /* hhType */,
       name,
-      false /* ref */,
+      ParamMode::In,
       0 /* token modifier thing */,
       ExpressionPtr(),
       ExpressionPtr()

@@ -1,0 +1,2 @@
+
+Fatal error: Parameter 1 on function C::foo was declared inout but is not declared inout on abstract function I::foo in %s/bad-trait-1.php on line 11

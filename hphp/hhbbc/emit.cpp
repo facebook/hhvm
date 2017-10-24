@@ -624,6 +624,7 @@ void emit_locals_and_params(FuncEmitter& fe,
       pinfo.userAttributes = param.userAttributes;
       pinfo.builtinType = param.builtinType;
       pinfo.byRef = param.byRef;
+      pinfo.inout = param.inout;
       pinfo.variadic = param.isVariadic;
       fe.appendParam(func.locals[id].name, pinfo);
       auto const dv = param.dvEntryPoint;

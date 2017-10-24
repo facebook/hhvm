@@ -1,0 +1,2 @@
+
+Fatal error: Parameters may not be marked inout on async generators in %s/bad-async-generator.php on line 3

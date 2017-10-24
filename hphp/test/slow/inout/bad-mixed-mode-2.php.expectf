@@ -1,0 +1,2 @@
+
+Fatal error: Functions may not use both reference and inout parameters in %s/bad-mixed-mode-2.php on line 3

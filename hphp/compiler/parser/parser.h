@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/parser/parser.h"
 #include "hphp/compiler/construct.h"
 #include "hphp/compiler/option.h"
@@ -166,7 +167,7 @@ public:
   void onStaticMember(Token &out, Token &cls, Token &name);
   void onRefDim(Token &out, Token &var, Token &offset);
   void onCallParam(Token &out, Token *params, Token &expr,
-                   bool ref, bool unpack);
+                   ParamMode mode, bool unpack);
   void onCall(Token &out, bool dynamic, Token &name, Token &params, Token *cls);
   void onEncapsList(Token &out, int type, Token &list);
   void addEncap(Token &out, Token *list, Token &expr, int type);
@@ -219,7 +220,7 @@ public:
                        Token &type, Token &var,
                        bool ref, Token *attr, Token *modifier);
   void onParam(Token &out, Token *params, Token &type, Token &var,
-               bool ref, Token *defValue, Token *attr, Token *modifier);
+               ParamMode mode, Token *defValue, Token *attr, Token *modifier);
   void onClassStart(int type, Token &name);
   void onClass(Token &out, int type, Token &name, Token &base,
                Token &baseInterface, Token &stmt, Token *attr,

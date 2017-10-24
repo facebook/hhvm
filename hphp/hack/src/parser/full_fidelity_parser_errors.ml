@@ -438,6 +438,15 @@ let xhp_errors node _parents hhvm_compat_mode =
       (syntax_to_list_no_separators enumType.xhp_enum_values) in
     let mapper item = make_error_from_node item SyntaxError.error2063 in
     List.map mapper invalid_enum_items
+  |  XHPExpression
+    { xhp_open =
+      { syntax = XHPOpen { xhp_open_name; _ }; _ }
+    ; xhp_close =
+      { syntax = XHPClose { xhp_close_name; _ }; _ }
+    ; _ } when text xhp_open_name <> text xhp_close_name ->
+    [ make_error_from_node node (SyntaxError.error2070
+      ~open_tag:(text xhp_open_name)
+      ~close_tag:(text xhp_close_name)) ]
   | _ -> [ ]
 
 let classish_duplicate_modifiers hhvm_compat_mode node =

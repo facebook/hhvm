@@ -219,3 +219,6 @@ let error2066 = "A previous parameter has a default value. Remove all the " ^
 let error2067 = "A hack source file cannot contain '?>'."
 let error2068 = "hh blocks and php blocks cannot be mixed."
 let error2069 = "Operator '?->' is only allowed in Hack."
+let error2070 ~open_tag ~close_tag =
+  Printf.sprintf "XHP: mismatched tag: '%s' not the same as '%s'"
+    open_tag close_tag

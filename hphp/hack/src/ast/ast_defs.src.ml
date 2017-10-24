@@ -68,6 +68,10 @@ type kind =
   | Protected
   [@@deriving show]
 
+type param_kind =
+  | Pinout
+  [@@deriving show]
+
 type og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe
@@ -126,6 +130,9 @@ let string_of_kind = function
   | Private -> "private"
   | Public -> "public"
   | Protected -> "protected"
+
+let string_of_param_kind = function
+  | Pinout -> "inout"
 
 module ShapeField = struct
   type t = shape_field_name

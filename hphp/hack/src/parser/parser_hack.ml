@@ -2646,12 +2646,18 @@ and parameter_list_remain env =
       | _ ->
           error_expect env ")"; [p]
 
-and parameter_default_with_variadic is_variadic env =
+and parameter_default_with_checks param_kind is_variadic env =
   let default = parameter_default env in
-  if default <> None && is_variadic then begin
-    error env "A variadic parameter cannot have a default value."
-  end;
-  if is_variadic then None else default
+  match default, param_kind, is_variadic with
+  | None, _, _ -> None
+  | _, _, true ->
+      error env "A variadic parameter cannot have a default value.";
+      None
+  | _, Some pk, _ ->
+      error env (Printf.sprintf "An %s parameter cannot have a default value."
+        (string_of_param_kind pk));
+      None
+  | _ -> default
 
 and parameter_varargs env =
   (* We were looking for a parameter; we got "...".  We are now expecting
@@ -2663,7 +2669,7 @@ and parameter_varargs env =
     | _ ->
       L.back env.lb;
       let param_id = variable env in
-      let _ = parameter_default_with_variadic true env in
+      let _ = parameter_default_with_checks None true env in
       expect env Trp;
       make_param_ellipsis param_id
     )
@@ -2675,6 +2681,7 @@ and make_param_ellipsis param_id =
     param_id;
     param_expr = None;
     param_modifier = None;
+    param_callconv = None;
     param_user_attributes = [];
   }
 
@@ -2687,14 +2694,26 @@ and param env =
   *)
   let param_user_attributes = attribute env in
   let param_modifier = parameter_modifier env in
+  let param_callconv = parameter_call_modifier env in
   let param_hint = parameter_hint env in
   let param_is_reference = ref_opt env in
+  if param_is_reference then begin
+    Option.iter param_callconv ~f:(fun pk ->
+      error env (Printf.sprintf
+        "An %s parameter cannot be passed by reference."
+        (string_of_param_kind pk)))
+  end;
   let param_is_variadic = ellipsis_opt env in
-  if param_is_reference && param_is_variadic then begin
-    error env "A variadic parameter may not be passed by reference."
+  if param_is_variadic then begin
+    if param_is_reference then
+      error env "A variadic parameter may not be passed by reference.";
+    Option.iter param_callconv ~f:(fun pk ->
+      error env (Printf.sprintf "A variadic parameter cannot be marked %s."
+        (string_of_param_kind pk)))
   end;
   let param_id = variable env in
-  let param_expr = parameter_default_with_variadic param_is_variadic env in
+  let param_expr =
+    parameter_default_with_checks param_callconv param_is_variadic env in
   if param_is_variadic then begin
     expect env Trp;
     L.back env.lb
@@ -2705,6 +2724,7 @@ and param env =
     param_id;
     param_expr;
     param_modifier;
+    param_callconv;
     param_user_attributes;
   }
 
@@ -2715,6 +2735,15 @@ and parameter_modifier env =
       | "private" -> Some Private
       | "public" -> Some Public
       | "protected" -> Some Protected
+      | _ -> L.back env.lb; None
+      )
+  | _ -> L.back env.lb; None
+
+and parameter_call_modifier env =
+  match L.token env.file env.lb with
+  | Tword ->
+      (match Lexing.lexeme env.lb with
+      | "inout" -> Some Pinout
       | _ -> L.back env.lb; None
       )
   | _ -> L.back env.lb; None
@@ -3033,6 +3062,7 @@ and make_lambda_param : id -> fun_param = fun var_id ->
     param_id = var_id;
     param_expr = None;
     param_modifier = None;
+    param_callconv = None;
     param_user_attributes = [];
   }
 

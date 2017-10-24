@@ -1,0 +1,2 @@
+File "bad_inout_decl_byref1.php", line 3, characters 25-25:
+An inout parameter cannot be passed by reference. (Parsing[1002])

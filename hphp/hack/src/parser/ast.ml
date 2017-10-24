@@ -204,6 +204,7 @@ and fun_param = {
    * can be only Public or Protected or Private.
    *)
   param_modifier: kind option;
+  param_callconv: param_kind option;
   param_user_attributes: user_attribute list;
 }
 

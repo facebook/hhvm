@@ -413,6 +413,7 @@ let param_template node =
   ; param_id              = pos_name node
   ; param_expr            = None
   ; param_modifier        = None
+  ; param_callconv        = None
   ; param_user_attributes = []
   }
 
@@ -618,6 +619,7 @@ and pFunParam : fun_param parser = fun node env ->
       mpOptional pSimpleInitializer parameter_default_value env
     ; param_user_attributes = List.concat @@
       couldMap ~f:pUserAttribute parameter_attribute env
+    ; param_callconv        = None
     (* implicit field via constructor parameter.
      * This is always None except for constructors and the modifier
      * can be only Public or Protected or Private.

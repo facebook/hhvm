@@ -1,5 +1,5 @@
 (* @generated from ast_defs.src.ml by hphp/hack/tools/ppx/ppx_gen. *)
-(* SourceShasum<<7fa441a303446d919ae954f72b09406785402be6>> *)
+(* SourceShasum<<1630fb13c3d3f2a93bdf3c568525edbedf9a889e>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -171,6 +171,18 @@ let rec (pp_kind : Format.formatter -> kind -> Ppx_deriving_runtime.unit) =
 
 and show_kind : kind -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_kind x
+
+type param_kind =
+  | Pinout [@@deriving show]
+let rec (pp_param_kind :
+          Format.formatter -> param_kind -> Ppx_deriving_runtime.unit)
+  =
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  -> function | Pinout  -> Format.pp_print_string fmt "Pinout")
+  [@ocaml.warning "-A"])
+
+and show_param_kind : param_kind -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_param_kind x
 
 type og_null_flavor =
   | OG_nullthrows 
@@ -369,6 +381,7 @@ let string_of_kind =
   | Private  -> "private"
   | Public  -> "public"
   | Protected  -> "protected" 
+let string_of_param_kind = function | Pinout  -> "inout" 
 module ShapeField =
   struct
     type t = shape_field_name

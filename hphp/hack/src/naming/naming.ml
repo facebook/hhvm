@@ -1666,16 +1666,22 @@ module Make (GetLocals : GetLocals) = struct
         variadicity, x :: rl
 
   and fun_param env param =
-    let p, x = param.param_id in
-    let ident = Local_id.get x in
+    let p, name = param.param_id in
+    let ident = Local_id.get name in
     Env.add_lvar env param.param_id (p, ident);
     let ty = Option.map param.param_hint (hint env) in
     let eopt = Option.map param.param_expr (expr env) in
+    let inout_params_enabled =
+      TypecheckerOptions.experimental_feature_enabled
+        (fst env).tcopt
+        TypecheckerOptions.experimental_inout_params in
+    if param.param_callconv <> None && not inout_params_enabled
+    then Errors.experimental_feature p "inout parameters";
     { N.param_hint = ty;
       param_is_reference = param.param_is_reference;
       param_is_variadic = param.param_is_variadic;
-      param_pos = fst param.param_id;
-      param_name = snd param.param_id;
+      param_pos = p;
+      param_name = name;
       param_expr = eopt;
     }
 

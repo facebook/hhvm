@@ -130,6 +130,12 @@ let tco_experimental_disallow_static_memoized = "disallow_static_memoized"
 let tco_experimental_coroutines =
   "coroutines"
 
+(**
+ * Support for in-out function parameters. This feature is incomplete and
+ * under development, see T21979562 for details and progress.
+ *)
+let tco_experimental_inout_params = "inout_params"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -151,6 +157,7 @@ let tco_experimental_all =
      tco_experimental_safe_pass_by_ref;
      tco_experimental_coroutines;
      tco_experimental_disallow_static_memoized;
+     tco_experimental_inout_params;
    ]
 
 let tco_migration_flags_all =

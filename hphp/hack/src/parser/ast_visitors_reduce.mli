@@ -214,6 +214,7 @@ class virtual ['b] reduce :
                      Ast_visitors_ancestors.expr ->
                      Ast_visitors_ancestors.og_null_flavor -> 'd;
         on_Percent : 'c -> 'd;
+        on_Pinout : 'c -> 'd;
         on_Pipe : 'c ->
                   Ast_visitors_ancestors.expr ->
                   Ast_visitors_ancestors.expr -> 'd;
@@ -338,6 +339,7 @@ class virtual ['b] reduce :
         on_method_ : 'c -> Ast_visitors_ancestors.method_ -> 'd;
         on_ns_kind : 'c -> Ast_visitors_ancestors.ns_kind -> 'd;
         on_og_null_flavor : 'c -> Ast_visitors_ancestors.og_null_flavor -> 'd;
+        on_param_kind : 'c -> Ast_visitors_ancestors.param_kind -> 'd;
         on_program : 'c -> Ast_visitors_ancestors.program -> 'd;
         on_pstring : 'c -> Ast_visitors_ancestors.pstring -> 'd;
         on_shape_field : 'c -> Ast_visitors_ancestors.shape_field -> 'd;
@@ -592,6 +594,7 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.expr ->
       Ast_visitors_ancestors.og_null_flavor -> 'd
     method on_Percent : 'c -> 'd
+    method on_Pinout : 'c -> 'd
     method on_Pipe :
       'c -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr -> 'd
     method on_Plus : 'c -> 'd
@@ -728,6 +731,7 @@ class virtual ['b] reduce :
       'c -> Ast_visitors_ancestors.og_null_flavor -> 'd
     method private on_option :
       'env 'a. ('env -> 'a -> 'd) -> 'env -> 'a option -> 'd
+    method on_param_kind : 'c -> Ast_visitors_ancestors.param_kind -> 'd
     method on_program : 'c -> Ast_visitors_ancestors.program -> 'd
     method on_pstring : 'c -> Ast_visitors_ancestors.pstring -> 'd
     method on_shape_field : 'c -> Ast_visitors_ancestors.shape_field -> 'd

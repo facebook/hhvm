@@ -344,6 +344,7 @@ class virtual ['c] map :
                      Ast_visitors_ancestors.og_null_flavor ->
                      Ast_visitors_ancestors.expr_;
         on_Percent : 'd -> Ast_visitors_ancestors.bop;
+        on_Pinout : 'd -> Ast_visitors_ancestors.param_kind;
         on_Pipe : 'd ->
                   Ast_visitors_ancestors.expr ->
                   Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_;
@@ -614,6 +615,9 @@ class virtual ['c] map :
         on_og_null_flavor : 'd ->
                             Ast_visitors_ancestors.og_null_flavor ->
                             Ast_visitors_ancestors.og_null_flavor;
+        on_param_kind : 'd ->
+                        Ast_visitors_ancestors.param_kind ->
+                        Ast_visitors_ancestors.param_kind;
         on_program : 'd ->
                      Ast_visitors_ancestors.program ->
                      Ast_visitors_ancestors.program;
@@ -989,6 +993,7 @@ class virtual ['c] map :
       Ast_visitors_ancestors.expr ->
       Ast_visitors_ancestors.og_null_flavor -> Ast_visitors_ancestors.expr_
     method on_Percent : 'd -> Ast_visitors_ancestors.bop
+    method on_Pinout : 'd -> Ast_visitors_ancestors.param_kind
     method on_Pipe :
       'd ->
       Ast_visitors_ancestors.expr ->
@@ -1266,6 +1271,10 @@ class virtual ['c] map :
       Ast_visitors_ancestors.og_null_flavor
     method private on_option :
       'env 'a 'b. ('env -> 'a -> 'b) -> 'env -> 'a option -> 'b option
+    method on_param_kind :
+      'd ->
+      Ast_visitors_ancestors.param_kind ->
+      Ast_visitors_ancestors.param_kind
     method on_program :
       'd -> Ast_visitors_ancestors.program -> Ast_visitors_ancestors.program
     method on_pstring :

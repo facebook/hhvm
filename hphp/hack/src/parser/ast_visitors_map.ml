@@ -342,6 +342,10 @@ class virtual ['self] map =
       | Private -> self#on_Private env
       | Public -> self#on_Public env
       | Protected -> self#on_Protected env
+    method on_Pinout env = Pinout
+    method on_param_kind env this =
+      match this with
+      | Pinout -> self#on_Pinout env
     method on_OG_nullthrows env = OG_nullthrows
     method on_OG_nullsafe env = OG_nullsafe
     method on_og_null_flavor env this =
@@ -412,7 +416,8 @@ class virtual ['self] map =
       let r4 = self#on_option self#on_expr env this.param_expr in
       let r5 = self#on_option self#on_kind env this.param_modifier in
 
-      let r6 =
+      let r6 = self#on_option self#on_param_kind env this.param_callconv in
+      let r7 =
         self#on_list self#on_user_attribute env
           this.param_user_attributes
       in
@@ -423,7 +428,8 @@ class virtual ['self] map =
         param_id = r3;
         param_expr = r4;
         param_modifier = r5;
-        param_user_attributes = r6
+        param_callconv = r6;
+        param_user_attributes = r7
       }
     method on_fun_ env this =
       let r0 = self#on_FileInfo_mode env this.f_mode in

@@ -1,0 +1,2 @@
+File "bad_inout_decl_variadic.php", line 3, characters 25-27:
+A variadic parameter cannot be marked inout. (Parsing[1002])

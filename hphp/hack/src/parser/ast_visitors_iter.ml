@@ -254,6 +254,9 @@ class virtual ['self] iter =
       | Private -> self#on_Private env
       | Public -> self#on_Public env
       | Protected -> self#on_Protected env
+    method on_Pinout env = ()
+    method on_param_kind env = function
+      | Pinout -> self#on_Pinout env
     method on_OG_nullthrows env = ()
     method on_OG_nullsafe env = ()
     method on_og_null_flavor env = function
@@ -301,6 +304,7 @@ class virtual ['self] iter =
       self#on_option self#on_expr env this.param_expr;
       self#on_option self#on_kind env this.param_modifier;
 
+      self#on_option self#on_param_kind env this.param_callconv;
       begin
         self#on_list self#on_user_attribute env
           this.param_user_attributes

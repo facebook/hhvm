@@ -99,10 +99,10 @@ let simple_expected_1 = "(AProgram
     (f_params:
      (((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
        (param_is_variadic: false) (param_id: (p $a)) (param_expr: ())
-       (param_modifier: ()) (param_user_attributes: ()))
+       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))
       ((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
        (param_is_variadic: false) (param_id: (p $b)) (param_expr: ())
-       (param_modifier: ()) (param_user_attributes: ()))))
+       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))))
     (f_body:
      ((Return p ((p (Binop Plus (p (Lvar (p $a))) (p (Lvar (p $b)))))))))
     (f_user_attributes: ()) (f_fun_kind: FSync)
@@ -125,10 +125,10 @@ let simple_expected_2 = "(AProgram
     (f_params:
      (((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
        (param_is_variadic: false) (param_id: (p $a)) (param_expr: ())
-       (param_modifier: ()) (param_user_attributes: ()))
+       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))
       ((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
        (param_is_variadic: false) (param_id: (p $b)) (param_expr: ())
-       (param_modifier: ()) (param_user_attributes: ()))))
+       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))))
     (f_body: (\"\")) (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
      ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))

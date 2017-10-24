@@ -91,6 +91,10 @@ let modifier_of_fun_kind acc = function
   | Ast.FAsync | Ast.FAsyncGenerator -> Async :: acc
   | _ -> acc
 
+let modifier_of_param_kind acc = function
+  | Some Ast.Pinout -> Inout :: acc
+  | _ -> acc
+
 let summarize_typeconst class_name t =
   let pos, name = t.Ast.tconst_name in
   let kind = Typeconst in
@@ -113,8 +117,9 @@ let summarize_param param =
   let pos, name = param.Ast.param_id in
   let param_start = Option.value_map param.Ast.param_hint ~f:fst ~default:pos in
   let param_end = Option.value_map param.Ast.param_expr ~f:fst ~default:pos in
-  let modifiers =
-    modifiers_of_ast_kinds (Option.to_list param.Ast.param_modifier) in
+  let modifiers = modifier_of_param_kind [] param.Ast.param_callconv in
+  let param_vis = Option.to_list param.Ast.param_modifier in
+  let modifiers = (modifiers_of_ast_kinds param_vis) @ modifiers in
   let kind = Param in
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in

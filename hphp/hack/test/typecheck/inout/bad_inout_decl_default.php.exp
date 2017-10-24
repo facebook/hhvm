@@ -1,0 +1,2 @@
+File "bad_inout_decl_default.php", line 3, characters 32-31:
+An inout parameter cannot have a default value. (Parsing[1002])

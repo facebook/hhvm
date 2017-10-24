@@ -2225,7 +2225,9 @@ void in(ISS& env, const bc::FPushFuncD& op) {
 void in(ISS& env, const bc::FPushFunc& op) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
-  if (v1 && v1->m_type == KindOfPersistentString) {
+  // FPushFuncD and FPushFuncU require that the names of inout functions be
+  // mangled, so skip those for now.
+  if (v1 && v1->m_type == KindOfPersistentString && op.argv.size() == 0) {
     auto const name = normalizeNS(v1->m_data.pstr);
     // FPushFuncD doesn't support class-method pair strings yet.
     if (isNSNormalized(name) && notClassMethodPair(name)) {
@@ -2317,7 +2319,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
 void in(ISS& env, const bc::FPushObjMethod& op) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
-  if (v1 && v1->m_type == KindOfPersistentString) {
+  if (v1 && v1->m_type == KindOfPersistentString && op.argv.size() == 0) {
     return reduce(
       env,
       bc::PopC {},
@@ -2355,7 +2357,7 @@ void pushClsHelper(ISS& env, const PushOp& op) {
     exactCls = dcls.type == DCls::Exact;
   }
   folly::Optional<res::Func> rfunc;
-  if (v2 && v2->m_type == KindOfPersistentString) {
+  if (v2 && v2->m_type == KindOfPersistentString && op.argv.size() == 0) {
     if (std::is_same<PushOp, bc::FPushClsMethod>::value &&
         exactCls && rcls) {
       return reduce(
@@ -3348,6 +3350,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
 }
 
 void in(ISS& /*env*/, const bc::VerifyRetTypeV& /*op*/) {}
+void in(ISS& /*env*/, const bc::VerifyOutType& /*op*/) {}
 
 void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
   auto const constraint = env.ctx.func->retTypeConstraint;

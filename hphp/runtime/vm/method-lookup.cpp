@@ -78,9 +78,7 @@ const Func* lookupMethodCtx(const Class* cls,
       // We didn't find any methods with the specified name in cls's method
       // table, handle the failure as appropriate.
       if (raise) {
-        raise_error("Call to undefined method %s::%s()",
-                    cls->name()->data(),
-                    methodName->data());
+        raise_call_to_undefined(methodName, cls);
       }
       return nullptr;
     }

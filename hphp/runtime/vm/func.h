@@ -558,6 +558,17 @@ struct Func final {
    */
   bool takesInOutParams() const;
 
+  /*
+   * When isInOutWrapper() is true--
+   *
+   * If takesInOutParams() this function has inout params and wraps a function
+   * which takes parameters by reference
+   *
+   * If !takesInOutParams() this function has reference parameters and wraps a
+   * function with inout paramaters.
+   */
+  bool isInOutWrapper() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and stack.                                      [const]
 

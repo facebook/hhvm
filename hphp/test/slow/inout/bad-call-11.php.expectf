@@ -1,0 +1,5 @@
+
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Parameters marked inout must be contained in locals, vecs, dicts, keysets, and arrays' in %s/bad-call-11.php:7
+Stack trace:
+#0 %s/bad-call-11.php(10): main()
+#1 {main}

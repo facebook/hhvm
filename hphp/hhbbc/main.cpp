@@ -305,6 +305,7 @@ void write_global_data(
   gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.APCProfile                  = std::move(apcProfile);
+  gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
 
   gd.InitialNamedEntityTableSize  =
     RuntimeOption::EvalInitialNamedEntityTableSize;

@@ -515,6 +515,8 @@ inline const TypedValue* Elem(TypedValue& tvRef,
     return ElemKeyset<mode, keyType>(base->m_data.parr, key).tv_ptr();
   }
 
+  if (mode == MOpMode::InOut) throw_invalid_inout_base();
+
   return ElemSlow<mode, keyType, intishWarn>(tvRef, base, key).tv_ptr();
 }
 

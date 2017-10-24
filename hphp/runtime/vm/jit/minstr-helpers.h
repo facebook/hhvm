@@ -467,26 +467,32 @@ TypedValue* elemImpl(TypedValue* base,
   m(elemCD,    KeyType::Any,   MOpMode::Define, false)         \
   m(elemCU,    KeyType::Any,   MOpMode::Unset,  false)         \
   m(elemCW,    KeyType::Any,   MOpMode::Warn,   false)         \
+  m(elemCIO,   KeyType::Any,   MOpMode::InOut,  false)         \
   m(elemI,     KeyType::Int,   MOpMode::None,   false)         \
   m(elemID,    KeyType::Int,   MOpMode::Define, false)         \
   m(elemIU,    KeyType::Int,   MOpMode::Unset,  false)         \
   m(elemIW,    KeyType::Int,   MOpMode::Warn,   false)         \
+  m(elemIIO,   KeyType::Int,   MOpMode::InOut,  false)         \
   m(elemS,     KeyType::Str,   MOpMode::None,   false)         \
   m(elemSD,    KeyType::Str,   MOpMode::Define, false)         \
   m(elemSU,    KeyType::Str,   MOpMode::Unset,  false)         \
   m(elemSW,    KeyType::Str,   MOpMode::Warn,   false)         \
+  m(elemSIO,   KeyType::Str,   MOpMode::InOut,  false)         \
   m(elemC_W,   KeyType::Any,   MOpMode::None,   true)          \
   m(elemCD_W,  KeyType::Any,   MOpMode::Define, true)          \
   m(elemCU_W,  KeyType::Any,   MOpMode::Unset,  true)          \
   m(elemCW_W,  KeyType::Any,   MOpMode::Warn,   true)          \
+  m(elemCIO_W, KeyType::Any,   MOpMode::InOut,  true)          \
   m(elemI_W,   KeyType::Int,   MOpMode::None,   true)          \
   m(elemID_W,  KeyType::Int,   MOpMode::Define, true)          \
   m(elemIU_W,  KeyType::Int,   MOpMode::Unset,  true)          \
   m(elemIW_W,  KeyType::Int,   MOpMode::Warn,   true)          \
+  m(elemIIO_W, KeyType::Int,   MOpMode::InOut,  true)          \
   m(elemS_W,   KeyType::Str,   MOpMode::None,   true)          \
   m(elemSD_W,  KeyType::Str,   MOpMode::Define, true)          \
   m(elemSU_W,  KeyType::Str,   MOpMode::Unset,  true)          \
   m(elemSW_W,  KeyType::Str,   MOpMode::Warn,   true)          \
+  m(elemSIO_W, KeyType::Str,   MOpMode::InOut,  true)          \
 
 #define X(nm, keyType, mode, intishWarn)                      \
 inline TypedValue* nm(TypedValue* base,                       \
@@ -746,20 +752,26 @@ TypedValue cGetElemImpl(TypedValue* base, key_type<keyType> key) {
   return cGetRefShuffle(localTvRef, result);
 }
 
-#define CGETELEM_HELPER_TABLE(m)                                   \
-  /* name            key           mode           intishWarn */    \
-  m(cGetElemCQuiet,  KeyType::Any, MOpMode::None, false)           \
-  m(cGetElemIQuiet,  KeyType::Int, MOpMode::None, false)           \
-  m(cGetElemSQuiet,  KeyType::Str, MOpMode::None, false)           \
-  m(cGetElemC,       KeyType::Any, MOpMode::Warn, false)           \
-  m(cGetElemI,       KeyType::Int, MOpMode::Warn, false)           \
-  m(cGetElemS,       KeyType::Str, MOpMode::Warn, false)           \
-  m(cGetElemCQuietW, KeyType::Any, MOpMode::None, true)            \
-  m(cGetElemIQuietW, KeyType::Int, MOpMode::None, true)            \
-  m(cGetElemSQuietW, KeyType::Str, MOpMode::None, true)            \
-  m(cGetElemCW,      KeyType::Any, MOpMode::Warn, true)            \
-  m(cGetElemIW,      KeyType::Int, MOpMode::Warn, true)            \
-  m(cGetElemSW,      KeyType::Str, MOpMode::Warn, true)            \
+#define CGETELEM_HELPER_TABLE(m)                                    \
+  /* name            key           mode           intishWarn */     \
+  m(cGetElemCQuiet,  KeyType::Any, MOpMode::None,  false)           \
+  m(cGetElemIQuiet,  KeyType::Int, MOpMode::None,  false)           \
+  m(cGetElemSQuiet,  KeyType::Str, MOpMode::None,  false)           \
+  m(cGetElemC,       KeyType::Any, MOpMode::Warn,  false)           \
+  m(cGetElemI,       KeyType::Int, MOpMode::Warn,  false)           \
+  m(cGetElemS,       KeyType::Str, MOpMode::Warn,  false)           \
+  m(cGetElemCIO,     KeyType::Any, MOpMode::InOut, false)           \
+  m(cGetElemIIO,     KeyType::Int, MOpMode::InOut, false)           \
+  m(cGetElemSIO,     KeyType::Str, MOpMode::InOut, false)           \
+  m(cGetElemCQuietW, KeyType::Any, MOpMode::None,  true)            \
+  m(cGetElemIQuietW, KeyType::Int, MOpMode::None,  true)            \
+  m(cGetElemSQuietW, KeyType::Str, MOpMode::None,  true)            \
+  m(cGetElemCW,      KeyType::Any, MOpMode::Warn,  true)            \
+  m(cGetElemIW,      KeyType::Int, MOpMode::Warn,  true)            \
+  m(cGetElemSW,      KeyType::Str, MOpMode::Warn,  true)            \
+  m(cGetElemCIOW,    KeyType::Any, MOpMode::InOut, true)            \
+  m(cGetElemIIOW,    KeyType::Int, MOpMode::InOut, true)            \
+  m(cGetElemSIOW,    KeyType::Str, MOpMode::InOut, true)            \
 
 #define X(nm, kt, mode, intishWarn)                                     \
 inline TypedValue nm(TypedValue* base, key_type<kt> key) {              \

@@ -103,6 +103,13 @@ bool MethodStatement::isRef(int index /* = -1 */) const {
   return param->isRef();
 }
 
+bool MethodStatement::isInOut(int index) const {
+  assert(index >= 0 && index < m_params->getCount());
+  auto param =
+    dynamic_pointer_cast<ParameterExpression>((*m_params)[index]);
+  return param->mode() == ParamMode::InOut;
+}
+
 bool MethodStatement::isSystem() const {
   return getFunctionScope()->isSystem();
 }

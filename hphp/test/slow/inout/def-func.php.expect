@@ -1,0 +1,8 @@
+nontop, main
+string(3) "foo"
+int(42)
+int(24)
+nontop, main
+string(3) "foo"
+int(81)
+int(18)

@@ -30,7 +30,7 @@ namespace HPHP { namespace jit { namespace {
 template<typename T> constexpr unsigned bitWidth() {
   return std::is_same<T, bool>::value ? 1
     : std::is_same<T, KeyType>::value ? 2
-    : std::is_same<T, MOpMode>::value ? 2
+    : std::is_same<T, MOpMode>::value ? 3
     : sizeof(T) * CHAR_BIT;
 }
 

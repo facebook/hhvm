@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
+#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -41,6 +42,7 @@
 #include "hphp/util/logger.h"
 
 #include <folly/Bits.h>
+#include <folly/MapUtil.h>
 #include <folly/Optional.h>
 
 #include <algorithm>
@@ -1420,7 +1422,7 @@ void Class::setSpecial() {
   auto matchedClassOrIsTrait = [this](const StringData* sd) {
     auto func = lookupMethod(sd);
     if (func && func->cls() == this) {
-      if (func->attrs() & AttrTakesInOutParams) {
+      if (func->takesInOutParams() || func->isInOutWrapper()) {
         raise_error("Parameters may not be marked inout on constructors");
       }
 
@@ -1535,29 +1537,58 @@ inline void checkRefCompat(const char* kind, const Func* self,
   // anyway.
   if (inherit->attrs() & AttrPrivate) return;
 
-  // Short-circuit: no one uses inout parameters.
-  if (!self->takesInOutParams() && !inherit->takesInOutParams()) return;
+  // Because of name mangling inout functions should only have the same names as
+  // other inout functions.
+  assert(self->takesInOutParams() == inherit->takesInOutParams());
+
+  // Inout functions have the parameter offsets of their inout parameters
+  // mangled into their names, so doing this check on them would be meaningless,
+  // instead we will check their wrappers.
+  if (self->takesInOutParams()) {
+    // When reffiness invariance is disabled we cannot create wrappers for ref
+    // functions, as those wrappers would violate our invariance rules for inout
+    // functions.
+    assert(RuntimeOption::EvalReffinessInvariance || !self->isInOutWrapper());
+    return;
+  }
+
+  // When ReffinessInvariance is set we check the invariance of all functions,
+  // otherwise we only check the reffiness of functions which wrap inout
+  // inout functions.
+  if (!RuntimeOption::EvalReffinessInvariance) {
+    if (!self->isInOutWrapper() && !inherit->isInOutWrapper()) return;
+  } else {
+    if (!self->anyByRef() && !inherit->anyByRef()) return;
+  }
 
   auto const sname = self->fullDisplayName()->data();
   auto const iname = inherit->fullDisplayName()->data();
-  auto const& sparams = self->params();
-  auto const& iparams = inherit->params();
-  auto const smax = self->numNonVariadicParams();
-  auto const imax = inherit->numNonVariadicParams();
-  auto const max = std::max(smax, imax);
+  auto const max = std::max(
+    self->numNonVariadicParams(),
+    inherit->numNonVariadicParams()
+  );
+
+  auto const both_wrap = self->isInOutWrapper() == inherit->isInOutWrapper();
 
   for (int i = 0; i < max; ++i) {
-    auto const smode = i < smax && sparams[i].inout;
-    auto const imode = i < imax && iparams[i].inout;
-    if (smode != imode) {
-      if (smode) {
-        raise_error("Parameter %i on function %s was declared inout but is not "
-                    "declared %son %s function %s", i + 1, sname,
-                    i < imax ? "inout " : "", kind, iname);
+    // Since we're looking at ref wrappers of inout functions we need to check
+    // byRef, but if one of the functions isn't a wrapper we do actually have
+    // a mismatch.
+    auto const smode = self->byRef(i);
+    auto const imode = inherit->byRef(i);
+    if (smode != imode || (smode && !both_wrap)) {
+      if (smode && (!imode || self->isInOutWrapper() || both_wrap)) {
+        auto const sdecl = self->isInOutWrapper() ? "inout " : "'&' ";
+        auto const idecl = i >= inherit->numNonVariadicParams() ? "" : sdecl;
+        raise_error("Parameter %i on function %s was declared %sbut is not "
+                    "declared %son %s function %s", i + 1, sname, sdecl, idecl,
+                    kind, iname);
       } else {
+        auto const idecl = inherit->isInOutWrapper() ? "inout " : "'&' ";
+        auto const sdecl = i >= self->numNonVariadicParams() ? "" : idecl;
         raise_error("Parameter %i on function %s was not declared %sbut is "
-                    "declared inout on %s function %s", i + 1, sname,
-                    i < smax ? "inout " : "", kind, iname);
+                    "declared %son %s function %s", i + 1, sname, sdecl, idecl,
+                    kind, iname);
       }
     }
   }
@@ -1760,7 +1791,7 @@ void Class::setMethods() {
         // static locals, we want to make a copy of the Func so that it
         // gets a distinct set of static locals variables. We defer making
         // a copy of the parent method until the end because it might get
-        // overriden below.
+        // overridden below.
         parentMethodsWithStaticLocals.push_back(i);
       }
       assert(builder.size() == i);
@@ -3222,12 +3253,31 @@ void Class::importTraitMethod(const TMIData::MethodData& mdata,
 void Class::importTraitMethods(MethodMapBuilder& builder) {
   TMIData tmid;
 
+  // For inout functions we cannot apply the trait aliasing rules (as their
+  // names have been mangled). All of these functions must either be wrappers
+  // for unmangled by-ref functions, or having unmangled wrappers, and so we
+  // retain a map of unmangled function -> mangled inout wrapper. After the
+  // trait rules have been applied to all unmangled functions we use the map
+  // to apply the same modifications to both the mangled and unmangled forms
+  // of each inout function.
+
+  // Map of ref wrapper -> inout function
+  std::unordered_map<const Func*, Func*> inoutFunctions;
+
   // Find all methods to be imported.
   for (auto const& t : m_extra->m_usedTraits) {
     Class* trait = t.get();
     for (Slot i = 0; i < trait->m_methods.size(); ++i) {
       Func* method = trait->getMethod(i);
       const StringData* methName = method->name();
+
+      if (method->takesInOutParams()) {
+        auto const wrapper = trait->lookupMethod(stripInOutSuffix(methName));
+        assert(wrapper);
+
+        inoutFunctions.emplace(wrapper, method);
+        continue; // Don't apply any trait rules to the inout function
+      }
 
       TraitMethod traitMethod { trait, method, method->attrs() };
       tmid.add(traitMethod, methName);
@@ -3238,9 +3288,26 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
   applyTraitRules(tmid);
   auto traitMethods = tmid.finish(this);
 
+  auto getSuffix = [] (const StringData* name) {
+    auto start = name->data() + name->size() - sizeof(kInOutSuffix);
+    for (; *start != '$'; --start) assert(start != name->data());
+    return folly::StringPiece(start, name->size() - (start - name->data()));
+  };
+
   // Import the methods.
   for (auto const& mdata : traitMethods) {
     importTraitMethod(mdata, builder);
+
+    if (auto io = folly::get_default(inoutFunctions, mdata.tm.method)) {
+      auto const sfx = getSuffix(io->name());
+      auto tm = mdata.tm;
+      tm.method = io;
+      auto ioData = TMIData::MethodData {
+        makeStaticString(folly::to<std::string>(mdata.name->data(), sfx)),
+        tm
+      };
+      importTraitMethod(ioData, builder);
+    }
   }
 }
 

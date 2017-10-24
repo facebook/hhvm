@@ -34,6 +34,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct Class;
 struct Func;
 struct StringData;
 
@@ -132,6 +133,8 @@ void raise_return_typehint_error(const std::string& msg);
 void raise_disallowed_dynamic_call(const Func* f);
 
 void raise_intish_index_cast();
+
+void raise_call_to_undefined(const StringData* name, const Class* c = nullptr);
 
 // RAII mechanism to temporarily suppress Hack array compat notices within a
 // scope.

@@ -1,0 +1,5 @@
+[4096] Argument 2 returned from foo() as an inout parameter must be of type int, string given
+[4096] Value returned from function foo() must be of type string, int given
+int(100)
+int(58)
+int(42)

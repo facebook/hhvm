@@ -63,6 +63,12 @@ function f<T>(inout vec<T> $v, ...) {}
 function g($q, inout dict<string,vec<int>> $r, ...) {}
 function h(inout $a, inout $b, $t, inout bool $c, $a = 12) {}
 
+function fptr<T as (function(inout int, inout bool, inout float): arraykey)>(
+  inout $a,
+  (function(inout int, inout Foo, inout float): Bar) $b
+): (function(inout double, inout int, float): int) {
+}
+
 function main($a, $b, inout $c, $d, $e) {
   if ($c === 3) return;
 

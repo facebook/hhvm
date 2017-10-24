@@ -444,7 +444,9 @@ void interpOne(IRGS& env,
 
 #define INTERP interpOne(env, *env.currentNormalizedInstruction);
 
-void emitFPushObjMethod(IRGS& env, uint32_t, ObjMethodOp) { INTERP }
+void emitFPushObjMethod(IRGS& env, uint32_t, ObjMethodOp, const ImmVector&) {
+  INTERP
+}
 
 void emitAddElemV(IRGS& env)                  { INTERP }
 void emitAddNewElemV(IRGS& env)               { INTERP }
@@ -491,6 +493,7 @@ void emitYieldFromDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
 void emitContUnsetDelegate(IRGS& env, CudOp, int32_t)
                                               { INTERP }
+void emitVerifyOutType(IRGS& env, uint32_t)   { INTERP }
 
 //////////////////////////////////////////////////////////////////////
 

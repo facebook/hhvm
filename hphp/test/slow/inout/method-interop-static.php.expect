@@ -1,0 +1,30 @@
+foo, main
+foo, main
+foo, main
+int(42)
+int(42)
+int(42)
+bar, main
+bar, main
+bar, main
+int(9)
+int(9)
+int(9)
+Hello, world!
+Hello, world!
+Hello, world!
+fizz, main
+fizz, main
+fizz, main
+int(24)
+int(24)
+int(24)
+buzz, main
+buzz, main
+buzz, main
+int(19)
+int(19)
+int(19)
+FIZZ, BUZZ
+FIZZ, BUZZ
+FIZZ, BUZZ

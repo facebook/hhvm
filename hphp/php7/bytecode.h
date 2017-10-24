@@ -127,6 +127,7 @@ struct WriteClassref {
 #define IMM_TYPE_BLA std::vector<Block*>
 #define IMM_TYPE_SLA StringOffsetVector
 #define IMM_TYPE_ILA void*
+#define IMM_TYPE_I32LA std::vector<uint32_t>
 #define IMM_TYPE_IVA uint32_t
 #define IMM_TYPE_I64A int64_t
 #define IMM_TYPE_LA Local
@@ -181,6 +182,7 @@ OPCODES
 #undef IMM_TYPE_BLA
 #undef IMM_TYPE_SLA
 #undef IMM_TYPE_ILA
+#undef IMM_TYPE_I32LA
 #undef IMM_TYPE_IVA
 #undef IMM_TYPE_I64A
 #undef IMM_TYPE_LA

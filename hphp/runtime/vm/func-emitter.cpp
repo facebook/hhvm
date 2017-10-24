@@ -153,7 +153,8 @@ static std::vector<EHEnt> toFixed(const std::vector<EHEntEmitter>& vec) {
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]) ||
-    ParserBase::IsClosureName(name->toCppString());
+    ParserBase::IsClosureName(name->toCppString()) ||
+    needsStripInOut(name);
 
   Attr attrs = this->attrs;
   if (preClass && preClass->attrs() & AttrInterface) {

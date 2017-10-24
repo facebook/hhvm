@@ -154,6 +154,8 @@ int immSize(PC origPC, int idx) {
       vecElemSz = 2 * sizeof(uint32_t);
     } else if (itype == VSA) {
       vecElemSz = sizeof(Id);
+    } else if (itype == I32LA) {
+      vecElemSz = sizeof(uint32_t);
     } else {
       assert(itype == SLA);
       vecElemSz = sizeof(StrVecItem);
@@ -167,7 +169,8 @@ int immSize(PC origPC, int idx) {
 
 bool immIsVector(Op opcode, int idx) {
   ArgType type = immType(opcode, idx);
-  return type == BLA || type == SLA || type == ILA || type == VSA;
+  return type == BLA || type == SLA || type == ILA || type == VSA ||
+         type == I32LA;
 }
 
 bool hasImmVector(Op opcode) {
@@ -251,6 +254,7 @@ Offset* instrJumpOffset(PC const origPC) {
 #define IMM_BA 1
 #define IMM_BLA 0  // these are jump offsets, but must be handled specially
 #define IMM_ILA 0
+#define IMM_I32LA 0
 #define IMM_SLA 0
 #define IMM_LA 0
 #define IMM_IA 0
@@ -280,6 +284,7 @@ Offset* instrJumpOffset(PC const origPC) {
 #undef IMM_BA
 #undef IMM_BLA
 #undef IMM_ILA
+#undef IMM_I32LA
 #undef IMM_SLA
 #undef IMM_OA
 #undef IMM_VSA
@@ -763,6 +768,17 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
   out += ">";                                           \
 } while (false)
 
+#define READI32VEC() do {                                      \
+  int sz = decode_raw<uint32_t>(it);                           \
+  out += " <";                                                 \
+  const char* sep = "";                                        \
+  for (int i = 0; i < sz; ++i) {                               \
+    folly::format(&out, "{}{}", sep, decode_raw<uint32_t>(it));\
+    sep = ", ";                                                \
+  }                                                            \
+  out += ">";                                                  \
+} while (false)
+
 #define READIVEC() do {                                 \
   int sz = decode_raw<int>(it);                         \
   out += " <";                                          \
@@ -789,6 +805,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define H_BLA READSVEC()
 #define H_SLA READSVEC()
 #define H_ILA READIVEC()
+#define H_I32LA READI32VEC()
 #define H_IVA READIVA()
 #define H_I64A READ(int64_t)
 #define H_LA READLA()
@@ -835,6 +852,7 @@ OPCODES
 #undef H_BLA
 #undef H_SLA
 #undef H_ILA
+#undef H_I32LA
 #undef H_IVA
 #undef H_I64A
 #undef H_LA
@@ -1076,7 +1094,7 @@ ImmVector getImmVector(PC opcode) {
   int numImm = numImmediates(op);
   for (int k = 0; k < numImm; ++k) {
     ArgType t = immType(op, k);
-    if (t == BLA || t == SLA || t == ILA) {
+    if (t == BLA || t == SLA || t == ILA || t == I32LA) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
         static_cast<const int32_t*>(vp)

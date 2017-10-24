@@ -152,6 +152,12 @@ struct Repo::GlobalData {
    */
   bool EnableIntrinsicsExtension = false;
 
+  /*
+   * Should we enforce that reffiness annotations are invaraint in overridden
+   * methods?
+   */
+  bool ReffinessInvariance = false;
+
   std::vector<const StringData*> APCProfile;
 
   template<class SerDe> void serde(SerDe& sd) {

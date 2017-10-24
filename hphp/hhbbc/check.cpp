@@ -235,9 +235,10 @@ bool check(const php::Class& c) {
     assert(isClo);
   }
   if (isClo) {
-    assert(c.methods.size() == 1);
+    assert(c.methods.size() == 1 || c.methods.size() == 2);
     assert(c.methods[0]->name->isame(s_invoke.get()));
     assert(c.methods[0]->isClosureBody);
+    assert(c.methods.size() == 1 || (c.methods[1]->attrs & AttrIsInOutWrapper));
   } else {
     assert(!c.closureContextCls);
   }

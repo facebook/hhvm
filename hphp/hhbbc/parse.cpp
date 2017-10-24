@@ -471,6 +471,15 @@ void populate_block(ParseUnitState& puState,
     return ret;
   };
 
+  auto decode_argv = [&] {
+    CompactVector<uint32_t> ret;
+    auto const vecLen = decode<uint32_t>(pc);
+    for (uint32_t i = 0; i < vecLen; ++i) {
+      ret.emplace_back(decode<uint32_t>(pc));
+    }
+    return ret;
+  };
+
   auto defcns = [&] () {
     puState.constPassFuncs[&func] |= php::Program::ForAnalyze;
   };
@@ -509,6 +518,7 @@ void populate_block(ParseUnitState& puState,
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
 #define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
 #define IMM_ILA(n)     auto iterTab = decode_itertab();
+#define IMM_I32LA(n)   auto argv = decode_argv();
 #define IMM_IVA(n)     auto arg##n = decode_iva(pc);
 #define IMM_I64A(n)    auto arg##n = decode<int64_t>(pc);
 #define IMM_LA(n)      auto loc##n = [&] {                       \
@@ -672,6 +682,7 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_ILA
+#undef IMM_I32LA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

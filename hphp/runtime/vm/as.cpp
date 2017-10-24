@@ -1093,6 +1093,27 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   not_reached();
 }
 
+// Read a vector of IVAs, with format <int, int, int, ...>, the vector may be
+// excluded entirely if it is empty.
+std::vector<uint32_t> read_argv(AsmState& as) {
+  as.in.skipSpaceTab();
+  if (as.in.peek() != '<') return {};
+  as.in.getc();
+
+  std::vector<uint32_t> result;
+  for (;;) {
+    auto const num = as.in.readint();
+    if (num < 0) as.error("Was expecting a positive integer");
+    result.push_back(num);
+    as.in.skipWhitespace();
+    if (as.in.peek() == '>') break;
+    as.in.expectWs(',');
+  }
+  as.in.expectWs('>');
+
+  return result;
+}
+
 // Read in a vector of iterators the format for this vector is:
 // <(TYPE) ID, (TYPE) ID, ...>
 // Where TYPE := Iter | MIter | CIter
@@ -1291,6 +1312,14 @@ std::map<std::string,ParserFunc> opcode_parsers;
   for (auto& i : vecImm) {                         \
     as.ue->emitInt32(i);                           \
   }                                                \
+} while (0)
+
+#define IMM_I32LA do {                          \
+  std::vector<uint32_t> vecImm = read_argv(as); \
+  as.ue->emitInt32(vecImm.size());              \
+  for (auto i : vecImm) {                       \
+    as.ue->emitInt32(i);                        \
+  }                                             \
 } while (0)
 
 #define IMM_BLA do {                                    \
@@ -1969,9 +1998,12 @@ void parse_parameter_list(AsmState& as) {
   as.in.getc();
 
   bool seenVariadic = false;
+  bool seenRef = false;
 
   for (;;) {
     FuncEmitter::ParamInfo param;
+    param.byRef = false;
+    param.inout = false;
 
     as.in.skipWhitespace();
     int ch = as.in.peek();
@@ -1995,12 +2027,30 @@ void parse_parameter_list(AsmState& as) {
       as.fe->attrs |= AttrVariadicParam;
     }
 
+    if (as.in.tryConsume("inout")) {
+      if (seenVariadic) {
+        as.error("inout parameters cannot be variadic");
+      }
+      if (seenRef) {
+        as.error("functions cannot contain both inout and ref parameters");
+      }
+      param.inout = true;
+      as.fe->attrs |= AttrTakesInOutParams;
+    }
+
     std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
 
     as.in.skipWhitespace();
     ch = as.in.getc();
 
     if (ch == '&') {
+      if (param.inout) {
+        as.error("parameters cannot be marked both inout and ref");
+      }
+      if (as.fe->attrs & AttrTakesInOutParams) {
+        as.error("functions cannot contain both inout and ref parameters");
+      }
+      seenRef = true;
       param.byRef = true;
       ch = as.in.getc();
     }

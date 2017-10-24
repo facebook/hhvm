@@ -3383,6 +3383,8 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key,
       case MOpMode::Unset:
         assert(!reffy);
         return Prop<MOpMode::Unset>(mstate.tvRef, ctx, mstate.base, key);
+      case MOpMode::InOut:
+        always_assert_flog(false, "MOpMode::InOut can only occur on Elem");
     }
     always_assert(false);
   }();
@@ -3404,6 +3406,8 @@ static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key,
       break;
     case MOpMode::Define:
       if (reffy) raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
+    case MOpMode::InOut:
+      always_assert_flog(false, "MOpMode::InOut can only occur on Elem");
     case MOpMode::Unset:
       always_assert(false);
   }
@@ -3430,6 +3434,13 @@ void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
           UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)
             ? Elem<MOpMode::Warn, true>(mstate.tvRef, mstate.base, key)
             : Elem<MOpMode::Warn, false>(mstate.tvRef, mstate.base, key)
+        );
+      case MOpMode::InOut:
+        // We're not actually going to modify it, so this is "safe".
+        return const_cast<TypedValue*>(
+          UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)
+            ? Elem<MOpMode::InOut, true>(mstate.tvRef, mstate.base, key)
+            : Elem<MOpMode::InOut, false>(mstate.tvRef, mstate.base, key)
         );
       case MOpMode::Define:
         if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
@@ -3531,6 +3542,11 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
   auto& mstate = vmMInstrState();
   TypedValue result;
   switch (op) {
+    case QueryMOp::InOut:
+      always_assert_flog(
+        mcodeIsElem(mk.mcode), "QueryM InOut is only compatible with Elem"
+      );
+      // fallthrough
     case QueryMOp::CGet:
     case QueryMOp::CGetQuiet:
       dimDispatch(getQueryMOpMode(op), mk, false);
@@ -4386,14 +4402,32 @@ OPTBLD_INLINE ActRec* fPushFuncImpl(const Func* func, int numArgs) {
   return ar;
 }
 
-OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
+ALWAYS_INLINE std::string concat_arg_list(int32_t n, imm_array<uint32_t> args) {
+  assert(n != 0);
+  std::string ret;
+  folly::toAppend(args[0], &ret);
+  for (int i = 1; i != n; ++i) folly::toAppend(";", args[i], &ret);
+  return ret;
+}
+
+OPTBLD_INLINE void iopFPushFunc(intva_t numArgs, int32_t n,
+                                imm_array<uint32_t> args) {
+  std::string arglist;
+  if (UNLIKELY(n)) {
+    arglist = concat_arg_list(n, args);
+  }
+
   Cell* c1 = vmStack().topC();
   if (c1->m_type == KindOfObject) {
     // this covers both closures and functors
     static StringData* invokeName = makeStaticString("__invoke");
     ObjectData* origObj = c1->m_data.pobj;
     const Class* cls = origObj->getVMClass();
-    auto const func = cls->lookupMethod(invokeName);
+    auto const func = LIKELY(!n)
+      ? cls->lookupMethod(invokeName)
+      : cls->lookupMethod(
+        makeStaticString(folly::sformat("__invoke${}$inout", arglist))
+      );
     if (func == nullptr) {
       raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
     }
@@ -4411,7 +4445,28 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
     return;
   }
 
+  auto appendSuffix = [&] (const StringData* s) {
+    return StringData::Make(s, folly::sformat("${}$inout", arglist));
+  };
+
   if (isArrayLikeType(c1->m_type) || isStringType(c1->m_type)) {
+    Variant v = Variant::wrap(*c1);
+
+    // Handle inout name mangling
+    if (UNLIKELY(n)) {
+      if (isStringType(c1->m_type)) {
+        v = Variant::attach(appendSuffix(c1->m_data.pstr));
+      } else if (c1->m_data.parr->size() == 2){
+        auto s = c1->m_data.parr->at(1);
+        if (isStringType(s.m_type)) {
+          PackedArrayInit ai(2);
+          ai.append(c1->m_data.parr->at(int64_t(0)));
+          ai.append(Variant::attach(appendSuffix(s.m_data.pstr)));
+          v = ai.toVariant();
+        }
+      }
+    }
+
     // support:
     //   array($instance, 'method')
     //   array('Class', 'method'),
@@ -4426,7 +4481,7 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
     StringData* invName = nullptr;
 
     auto const func = vm_decode_function(
-      tvAsCVarRef(c1),
+      v,
       vmfp(),
       /* forwarding */ false,
       thiz,
@@ -4439,8 +4494,7 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
         raise_error("Invalid callable (array)");
       } else {
         assert(isStringType(origCell.m_type));
-        raise_error("Call to undefined function %s()",
-                    origCell.m_data.pstr->data());
+        raise_call_to_undefined(origCell.m_data.pstr);
       }
     }
 
@@ -4474,8 +4528,7 @@ OPTBLD_FLT_INLINE void iopFPushFuncD(intva_t numArgs, Id id) {
     vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::loadFunc(nep.second, nep.first);
   if (func == nullptr) {
-    raise_error("Call to undefined function %s()",
-                vmfp()->m_func->unit()->lookupLitstrId(id)->data());
+    raise_call_to_undefined(vmfp()->m_func->unit()->lookupLitstrId(id));
   }
   ActRec* ar = fPushFuncImpl(func, numArgs);
   ar->trashThis();
@@ -4489,8 +4542,7 @@ OPTBLD_INLINE void iopFPushFuncU(intva_t numArgs, Id nsFunc, Id globalFunc) {
     const NamedEntityPair nep2 = unit->lookupNamedEntityPairId(globalFunc);
     func = Unit::loadFunc(nep2.second, nep2.first);
     if (func == nullptr) {
-      const char *funcName = unit->lookupLitstrId(nsFunc)->data();
-      raise_error("Call to undefined function %s()", funcName);
+      raise_call_to_undefined(unit->lookupLitstrId(nsFunc));
     }
   }
   ActRec* ar = fPushFuncImpl(func, numArgs);
@@ -4551,11 +4603,24 @@ static void throw_call_non_object(const char* methodName,
   raise_fatal_error(msg.c_str());
 }
 
-OPTBLD_INLINE void iopFPushObjMethod(intva_t numArgs, ObjMethodOp op) {
+ALWAYS_INLINE StringData* mangleInOutName(
+  const StringData* name,
+  int32_t n,
+  imm_array<uint32_t> args
+) {
+  return
+    StringData::Make(
+      name, folly::sformat("${}$inout", concat_arg_list(n, args))
+    );
+}
+
+OPTBLD_INLINE void iopFPushObjMethod(intva_t numArgs, ObjMethodOp op,
+                                     int32_t n, imm_array<uint32_t> args) {
   Cell* c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
   }
+
   Cell* c2 = vmStack().indC(1); // Object.
   if (c2->m_type != KindOfObject) {
     if (UNLIKELY(op == ObjMethodOp::NullThrows || !isNullType(c2->m_type))) {
@@ -4569,6 +4634,12 @@ OPTBLD_INLINE void iopFPushObjMethod(intva_t numArgs, ObjMethodOp op) {
   }
   ObjectData* obj = c2->m_data.pobj;
   StringData* name = c1->m_data.pstr;
+
+  if (UNLIKELY(n)) {
+    String s = String::attach(name);
+    name = mangleInOutName(name, n, args);
+  }
+
   // We handle decReffing obj and name in fPushObjMethodImpl
   vmStack().ndiscard(2);
   fPushObjMethodImpl(name, obj, numArgs);
@@ -4638,13 +4709,20 @@ void pushClsMethodImpl(Class* cls, StringData* name, int numArgs) {
   setTypesFlag(vmfp(), ar);
 }
 
-OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs, clsref_slot slot) {
+OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs, clsref_slot slot,
+                                     int32_t n, imm_array<uint32_t> args) {
   Cell* c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   Class* cls = slot.take();
   StringData* name = c1->m_data.pstr;
+
+  if (UNLIKELY(n)) {
+    String s = String::attach(name);
+    name = mangleInOutName(name, n, args);
+  }
+
   // pushClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
   assert(cls && name);
@@ -4662,13 +4740,20 @@ void iopFPushClsMethodD(intva_t numArgs, const StringData* name, Id classId) {
   pushClsMethodImpl<false>(cls, const_cast<StringData*>(name), numArgs);
 }
 
-OPTBLD_INLINE void iopFPushClsMethodF(intva_t numArgs, clsref_slot slot) {
+OPTBLD_INLINE void iopFPushClsMethodF(intva_t numArgs, clsref_slot slot,
+                                      int32_t n, imm_array<uint32_t> args) {
   Cell* c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   Class* cls = slot.take();
   StringData* name = c1->m_data.pstr;
+
+  if (UNLIKELY(n)) {
+    String s = String::attach(name);
+    name = mangleInOutName(name, n, args);
+  }
+
   // pushClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
   pushClsMethodImpl<true>(cls, name, numArgs);
@@ -5624,6 +5709,27 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   }
 }
 
+OPTBLD_INLINE void iopVerifyOutType(intva_t paramId) {
+  auto const func = vmfp()->m_func;
+  assert(paramId < func->numParams());
+  assert(func->numParams() == int(func->params().size()));
+  auto const& tc = func->params()[paramId].typeConstraint;
+  assert(tc.hasConstraint());
+  if (!tc.isTypeVar() && !tc.isTypeConstant() &&
+      !tc.check(vmStack().topTV(), func)) {
+    raise_return_typehint_error(
+      folly::sformat(
+        "Argument {} returned from {}() as an inout parameter must be of type "
+        "{}, {} given",
+        paramId.n + 1,
+        func->fullDisplayName(),
+        tc.displayName(func),
+        describe_actual_type(vmStack().topTV(), tc.isHHType())
+      )
+    );
+  }
+}
+
 OPTBLD_INLINE void implVerifyRetType() {
   if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
     return;
@@ -6560,6 +6666,28 @@ TCA iopWrapper(Op, void(*fn)(intva_t,clsref_slot), PC& pc) {
 }
 
 OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(intva_t,clsref_slot,int32_t,imm_array<uint32_t>),
+               PC& pc) {
+  auto n1 = decode_intva(pc);
+  auto s = decode_clsref_slot(pc);
+  auto count = decode<int32_t>(pc);
+  auto args = imm_array<uint32_t>(pc);
+  pc += count * sizeof(uint32_t);
+  fn(n1, s, count, args);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(intva_t,int32_t,imm_array<uint32_t>), PC& pc) {
+  auto n1 = decode_intva(pc);
+  auto count = decode<int32_t>(pc);
+  auto args = imm_array<uint32_t>(pc);
+  pc += count * sizeof(uint32_t);
+  fn(n1, count, args);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
 TCA iopWrapper(Op, void(*fn)(intva_t,LocalRange), PC& pc) {
   auto n1 = decode_intva(pc);
   auto n2 = decodeLocalRange(pc);
@@ -7015,10 +7143,15 @@ iopWrapper(Op /*op*/, void (*fn)(intva_t, int, int), PC& pc) {
 }
 
 OPTBLD_INLINE static TCA
-iopWrapper(Op /*op*/, void (*fn)(intva_t, ObjMethodOp), PC& pc) {
+iopWrapper(Op /*op*/,
+           void (*fn)(intva_t,ObjMethodOp,int32_t,imm_array<uint32_t>),
+           PC& pc) {
   auto n = decode_intva(pc);
   auto subop = decode_oa<ObjMethodOp>(pc);
-  fn(n, subop);
+  auto count = decode<int32_t>(pc);
+  auto args = imm_array<uint32_t>(pc);
+  pc += count * sizeof(uint32_t);
+  fn(n, subop, count, args);
   return nullptr;
 }
 

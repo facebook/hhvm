@@ -454,6 +454,21 @@ bool FuncChecker::checkImmSLA(PC& pc, PC const /*instr*/) {
   return checkImmVec(pc, sizeof(Id) + sizeof(Offset));
 }
 
+bool FuncChecker::checkImmI32LA(PC& pc, PC const instr) {
+  auto inst_copy = instr;
+  decode_op(inst_copy);
+  auto const nargs = decode_iva(inst_copy);
+  auto const count = decode_raw<uint32_t>(pc);
+  for (int i = 0; i < count; ++i) {
+    auto const num = decode_raw<uint32_t>(pc);
+    if (nargs <= num) {
+      error("invalid argument number (%i) in inout argument vector\n", i);
+      return false;
+    }
+  }
+  return true;
+}
+
 bool FuncChecker::checkImmILA(PC& pc, PC const /*instr*/) {
   auto ids = iterBreakIds(pc);
   if (ids.size() < 1) {
@@ -880,25 +895,41 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
 
   if (cur->mbr_live && isMemberOp(op)) {
     folly::Optional<MOpMode> op_mode;
+    auto new_pc = pc;
     if (op == Op::QueryM) {
-      auto new_pc = pc;
       decode_op(new_pc);
       decode_iva(new_pc);
       op_mode = getQueryMOpMode(decode_oa<QueryMOp>(new_pc));
     } else if (isMemberFinalOp(op)) {
       op_mode = finalMemberOpMode(op);
     } else if (op == Op::Dim) {
-      auto new_pc = pc;
       decode_op(new_pc);
       op_mode = decode_oa<MOpMode>(new_pc);
     }
 
-    if(cur->mbr_mode && cur->mbr_mode != op_mode){
-      error("Member base register mode at %s is %s when it should be %s\n",
-            opcodeToName(op),
-            op_mode ? subopToName(op_mode.value()) : "Unknown",
-            subopToName(cur->mbr_mode.value()));
-      ok = false;
+    if (op_mode == MOpMode::InOut) {
+      if (op_mode == MOpMode::InOut && op != Op::Dim && op != Op::QueryM) {
+        error("Member instruction %s is incompatible with mode InOut\n",
+              opcodeToName(op));
+        ok = false;
+      } else {
+        auto const c = decode_member_key(new_pc, m_func->unit()).mcode;
+        if (!mcodeIsElem(c)) {
+          error("Member instruction with mode InOut and incompatible member "
+                "code %s, must be Elem\n", memberCodeString(c));
+          ok = false;
+        }
+      }
+    }
+
+    if(cur->mbr_mode && cur->mbr_mode != op_mode) {
+      if (cur->mbr_mode != MOpMode::Warn || op_mode != MOpMode::InOut) {
+        error("Member base register mode at %s is %s when it should be %s\n",
+              opcodeToName(op),
+              op_mode ? subopToName(op_mode.value()) : "Unknown",
+              subopToName(cur->mbr_mode.value()));
+        ok = false;
+      }
     }
 
     cur->mbr_mode = op_mode;
@@ -1068,6 +1099,7 @@ std::set<int> localImmediates(Op op) {
 #define BLA(n)
 #define SLA(n)
 #define ILA(n)
+#define I32LA(n)
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
@@ -1095,6 +1127,7 @@ std::set<int> localImmediates(Op op) {
 #undef BLA
 #undef SLA
 #undef ILA
+#undef I32LA
 #undef IVA
 #undef I64A
 #undef IA

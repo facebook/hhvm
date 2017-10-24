@@ -357,6 +357,13 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       }
     };
 
+    auto emit_argvec = [&] (const CompactVector<uint32_t>& argv) {
+      ue.emitInt32(argv.size());
+      for (auto i : argv) {
+        ue.emitInt32(i);
+      }
+    };
+
     auto emit_srcloc = [&] {
       auto const sl = srcLoc(func, inst.srcLoc);
       if (!sl.isValid()) return;
@@ -410,6 +417,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_BLA(n)     emit_switch(data.targets);
 #define IMM_SLA(n)     emit_sswitch(data.targets);
 #define IMM_ILA(n)     emit_itertab(data.iterTab);
+#define IMM_I32LA(n)   emit_argvec(data.argv);
 #define IMM_IVA(n)     ue.emitIVA(data.arg##n);
 #define IMM_I64A(n)    ue.emitInt64(data.arg##n);
 #define IMM_LA(n)      ue.emitIVA(map_local(data.loc##n));
@@ -479,6 +487,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_ILA
+#undef IMM_I32LA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

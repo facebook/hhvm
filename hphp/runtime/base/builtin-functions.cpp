@@ -651,6 +651,13 @@ void throw_param_is_not_container() {
   SystemLib::throwInvalidArgumentExceptionObject(msg);
 }
 
+void throw_invalid_inout_base() {
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Parameters marked inout must be contained in locals, vecs, dicts, "
+    "keysets, and arrays"
+  );
+}
+
 void throw_cannot_modify_immutable_object(const char* className) {
   auto msg = folly::format(
     "Cannot modify immutable object of type {}",

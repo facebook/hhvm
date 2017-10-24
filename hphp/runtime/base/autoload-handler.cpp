@@ -328,7 +328,7 @@ AutoloadHandler::invokeFailureCallback(const Variant& func, const String& kind,
 
 bool AutoloadHandler::autoloadFunc(StringData* name) {
   return !m_map.isNull() &&
-    loadFromMap(String{name},
+    loadFromMap(String{stripInOutSuffix(name)},
                 s_function,
                 true,
                 FuncExistsChecker(name)) != Failure;

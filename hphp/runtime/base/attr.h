@@ -183,6 +183,9 @@ enum Attr {
   // common in PHP5 builtins.           //       |          |         //
   AttrParamCoerceModeFalse = (1 << 29), //       |          |    X    //
   AttrParamCoerceModeNull  = (1 << 30), //       |          |    X    //
+  // Indicates that this function wraps either a function taking inout or ref
+  // parameters.                        //       |          |         //
+  AttrIsInOutWrapper       = (1 << 31), //       |          |    X    //
 };
 
 constexpr Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

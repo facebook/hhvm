@@ -3897,7 +3897,7 @@ void Index::refine_local_static_types(
 }
 
 void Index::init_return_type(const php::Func* func) {
-  if (func->attrs & (AttrReference | AttrBuiltin) ||
+  if (func->attrs & (AttrReference | AttrBuiltin | AttrTakesInOutParams) ||
       func->isMemoizeWrapper) {
     return;
   }

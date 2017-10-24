@@ -1049,7 +1049,9 @@ void emitFPushFuncU(IRGS& env,
   fpushFuncCommon(env, nargs, name, fallback);
 }
 
-void emitFPushFunc(IRGS& env, uint32_t numParams) {
+void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
+  if (v.size() != 0) PUNT(InOut-FPushFunc);
+
   if (topC(env)->isA(TObj)) return fpushFuncObj(env, numParams);
   if (topC(env)->isA(TArr) || topC(env)->isA(TVec)) {
     return fpushFuncArr(env, numParams);
@@ -1267,11 +1269,15 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
   }
 }
 
-void emitFPushClsMethod(IRGS& env, uint32_t numParams, uint32_t slot) {
+void emitFPushClsMethod(IRGS& env, uint32_t numParams, uint32_t slot,
+                        const ImmVector& v) {
+  if (v.size() != 0) PUNT(InOut-FPushClsMethod);
   fpushClsMethodCommon<false>(env, numParams, slot);
 }
 
-void emitFPushClsMethodF(IRGS& env, uint32_t numParams, uint32_t slot) {
+void emitFPushClsMethodF(IRGS& env, uint32_t numParams, uint32_t slot,
+                         const ImmVector& v) {
+  if (v.size() != 0) PUNT(InOut-FPushClsMethodF);
   fpushClsMethodCommon<true>(env, numParams, slot);
 }
 

@@ -326,6 +326,8 @@ enum class MemoKeyConstraint {
 };
 MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint&);
 
+const char* describe_actual_type(const TypedValue* tv, bool isHHType);
+
 }
 
 #endif

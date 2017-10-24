@@ -201,6 +201,7 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
     RuntimeOption::PHP7_IntSemantics          = s_globalData.PHP7_IntSemantics;
     RuntimeOption::PHP7_ScalarTypes           = s_globalData.PHP7_ScalarTypes;
     RuntimeOption::PHP7_Substr                = s_globalData.PHP7_Substr;
+    RuntimeOption::EvalReffinessInvariance = s_globalData.ReffinessInvariance;
     RuntimeOption::DisallowDynamicVarEnvFuncs =
       s_globalData.DisallowDynamicVarEnvFuncs;
 

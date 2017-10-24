@@ -156,8 +156,7 @@ struct hasher_impl {
 
   template<class T>
   static size_t hash(const CompactVector<T>& v) {
-    assert(!v.empty());
-    return v.size() ^ hash(v.front());
+    return v.empty() ? 0 : v.size() ^ hash(v.front());
   }
 
   static size_t hash(std::pair<LSString,BlockId> kv) {
@@ -287,6 +286,7 @@ namespace imm {
 #define IMM_ID_BLA      BLA
 #define IMM_ID_SLA      SLA
 #define IMM_ID_ILA      ILA
+#define IMM_ID_I32LA    I32LA
 #define IMM_ID_IVA      IVA
 #define IMM_ID_I64A     I64A
 #define IMM_ID_LA       LA
@@ -306,6 +306,7 @@ namespace imm {
 #define IMM_TY_BLA      SwitchTab
 #define IMM_TY_SLA      SSwitchTab
 #define IMM_TY_ILA      IterTab
+#define IMM_TY_I32LA    CompactVector<uint32_t>
 #define IMM_TY_IVA      uint32_t
 #define IMM_TY_I64A     int64_t
 #define IMM_TY_LA       LocalId
@@ -325,6 +326,7 @@ namespace imm {
 #define IMM_NAME_BLA(n)     targets
 #define IMM_NAME_SLA(n)     targets
 #define IMM_NAME_ILA(n)     iterTab
+#define IMM_NAME_I32LA(n)   argv
 #define IMM_NAME_IVA(n)     arg##n
 #define IMM_NAME_I64A(n)    arg##n
 #define IMM_NAME_LA(n)      loc##n
@@ -345,6 +347,7 @@ namespace imm {
 #define IMM_EXTRA_BLA
 #define IMM_EXTRA_SLA
 #define IMM_EXTRA_ILA
+#define IMM_EXTRA_I32LA
 #define IMM_EXTRA_IVA
 #define IMM_EXTRA_I64A
 #define IMM_EXTRA_LA
@@ -606,6 +609,7 @@ OPCODES
 #undef IMM_TY_BLA
 #undef IMM_TY_SLA
 #undef IMM_TY_ILA
+#undef IMM_TY_I32LA
 #undef IMM_TY_IVA
 #undef IMM_TY_I64A
 #undef IMM_TY_LA
@@ -627,6 +631,7 @@ OPCODES
 // #undef IMM_NAME_BLA
 // #undef IMM_NAME_SLA
 // #undef IMM_NAME_ILA
+// #undef IMM_NAME_I32LA
 // #undef IMM_NAME_IVA
 // #undef IMM_NAME_I64A
 // #undef IMM_NAME_LA
@@ -645,6 +650,7 @@ OPCODES
 #undef IMM_EXTRA_BLA
 #undef IMM_EXTRA_SLA
 #undef IMM_EXTRA_ILA
+#undef IMM_EXTRA_I32LA
 #undef IMM_EXTRA_IVA
 #undef IMM_EXTRA_I64A
 #undef IMM_EXTRA_LA

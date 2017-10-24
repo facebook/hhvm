@@ -1,0 +1,28 @@
+launder()
+launder()
+foo()
+array(1) {
+  ["alpha"]=>
+  vec(4) {
+    dict(1) {
+      ["beta"]=>
+      array(2) {
+        ["one"]=>
+        string(5) "FOO:A"
+        ["two"]=>
+        string(7) "*BLANK*"
+      }
+    }
+    string(5) "FOO:B"
+    string(5) "FOO:C"
+    NULL
+  }
+}
+foo()
+string(5) "FOO:A"
+string(5) "FOO:B"
+string(5) "FOO:C"
+foo()
+string(5) "FOO:A"
+string(5) "FOO:B"
+string(3) "yep"

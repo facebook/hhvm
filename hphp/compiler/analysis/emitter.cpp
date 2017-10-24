@@ -106,6 +106,7 @@
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/parallel.h"
 
+#include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/logger.h"
@@ -119,6 +120,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
@@ -316,6 +318,7 @@ struct Emitter {
 #define IMM_BLA std::vector<Label*>&
 #define IMM_SLA std::vector<StrOff>&
 #define IMM_ILA std::vector<IterPair>&
+#define IMM_I32LA std::vector<uint32_t>&
 #define IMM_IVA uint32_t
 #define IMM_LA int32_t
 #define IMM_IA int32_t
@@ -343,6 +346,7 @@ struct Emitter {
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_ILA
+#undef IMM_I32LA
 #undef IMM_IVA
 #undef IMM_LA
 #undef IMM_IA
@@ -790,13 +794,33 @@ private:
   typedef std::pair<Id, int> StrCase;
 
   struct PostponedMeth {
-    PostponedMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
-                  ClosureUseVarVec* useVars)
-        : m_meth(m), m_fe(fe), m_top(top), m_closureUseVars(useVars) {}
+    PostponedMeth(
+      MethodStatementPtr m,
+      FuncEmitter* fe,
+      bool top,
+      ClosureUseVarVec* useVars,
+      FuncEmitter* wrapper
+    ) : m_meth(m)
+      , m_fe(fe)
+      , m_top(top)
+      , m_closureUseVars(useVars)
+      , m_inOutWrapper(wrapper)
+    {}
+
     MethodStatementPtr m_meth;
     FuncEmitter* m_fe;
     bool m_top;
     ClosureUseVarVec* m_closureUseVars;
+
+    // If m_meth declares an inout function then m_inOutWrapper will be a
+    // wrapper function which takes parameters by ref. The name of m_fe will be
+    // mangled.
+
+    // Similarly, if m_meth declares a function which takes parameters by ref,
+    // does not return a reference, and is neither async nor generator, then
+    // m_inOutWrapper will be a wrapper which takes parameters as inout, and
+    // has a mangled form of m_meth's name.
+    FuncEmitter* m_inOutWrapper;
   };
 
   struct PostponedCtor {
@@ -930,6 +954,83 @@ public:
   bool checkIfStackEmpty(const char* forInstruction) const;
   void unexpectedStackSym(char sym, const char* where) const;
 
+  // Record the first parameter index in which a local appears as an inout
+  // parameter, and the final parameter index in which the local occurs in a
+  // write context.
+  struct LocalAliasData {
+    void write(int32_t index) { last_write = std::max(last_write, index); }
+    void inout(int32_t index) { first_inout = std::min(first_inout, index); }
+    bool aliases(int32_t off) const {
+      return last_write >= off || first_inout < off;
+    }
+    int32_t first_inout{std::numeric_limits<int32_t>::max()};
+    int32_t last_write{-1};
+  };
+
+  // Map of AliasData for locals associated with inout parameter expressions.
+  using LocalAliasMap = std::unordered_map<Id, LocalAliasData>;
+
+  // When emitting an inout parameter we need to track information about the
+  // minstr chain involved in loading the parameter so that we can emit the
+  // bytecodes necessary to write the new value back into the parameter after
+  // the call. We need more information than simply what was on the eval stack
+  // as we may create temporaries to record indicies we know may be overridden
+  // later in the parameter sequence or while writing back other inout
+  // parameters.
+  struct MInstrChain {
+    struct TempLoc {
+      Id id;
+      Offset start;
+    };
+
+    using MInstrKey = boost::variant
+      < Id
+      , TempLoc
+      , int64_t
+      , const StringData*
+      >;
+
+    struct MInstrOp {
+      char marker;
+      MInstrKey key;
+    };
+
+    // Map of Local Id -> (last write before call, first write after call)
+    LocalAliasMap* overridden_locals;
+
+    int param_index;
+    size_t base_offset;
+    std::vector<MInstrOp> ops;
+  };
+
+  std::vector<MInstrChain> m_minstrChains;
+
+  // Record a base or dim for the minstr sequence beginning at offset, if the
+  // base at that offset is associated with an inout parameter that is being
+  // read for a call to an inout function.
+  void recordMInstr(Emitter& e, int off);
+
+  // Emit the minstr sequence previosly reocrded in chain for subsequent use in
+  // a set for an inout parameter.
+  void emitMInstrChain(Emitter& e, MInstrChain& chain);
+
+  // Unset any temporaries associated with chain in reverse order of their
+  // creation.
+  void unsetMInstrChain(Emitter& e, MInstrChain chain);
+
+  // Helper for recordMInstr when the minstr is a dim
+  void recordMInstrOp(Emitter& e);
+
+  // Helper for recordMInstr when the minstr is a base
+  void recordMInstrBase(Emitter& e);
+
+  // Checks if the minstr base at offset off on the stack is associated with
+  // chain, which is being used to record the read of an inout parameter.
+  bool isInChain(const MInstrChain& chain, int off);
+
+  MInstrChain emitInOutArg(Emitter& e, ExpressionPtr exp, int paramId,
+                           LocalAliasMap* vars);
+
   int scanStackForLocation(int iLast);
 
   /*
@@ -1001,7 +1102,7 @@ public:
   void emitConvertSecondToCell(Emitter& e);
   void emitConvertToVar(Emitter& e);
   void emitFPass(Emitter& e, int paramID, PassByRefKind passByRefKind,
-                 FPassHint hint);
+                 FPassHint hint, bool isInOut = false);
   void emitVirtualLocal(int localId);
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
   void emitResolveClsBase(Emitter& e, int pos);
@@ -1029,8 +1130,8 @@ public:
   void emitNameString(Emitter& e, ExpressionPtr n, bool allowLiteral = false);
   void emitAssignment(Emitter& e, ExpressionPtr c, int op, bool bind);
   void emitListAssignment(Emitter& e, ListAssignmentPtr lst);
-  void postponeMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
-                    ClosureUseVarVec* useVars = nullptr);
+  FuncEmitter* postponeMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
+                            ClosureUseVarVec* useVars = nullptr);
   void postponeCtor(InterfaceStatementPtr m, FuncEmitter* fe);
   void postponePinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void postponeSinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
@@ -1120,6 +1221,14 @@ public:
   void emitContinue(Emitter& e, int depth, StatementPtr s);
   void emitGoto(Emitter& e, StringData* name, StatementPtr s);
 
+  // InOut functions return a tuple of the return value and inout parameters.
+  void emitInOutReturn(Emitter& e);
+
+  // Emit the post-call stub the unpack the tuple returned by a call to an
+  // inout function.
+  template<class F>
+  void emitUnpackInOutCall(Emitter& e, uint32_t nargs, F getArg);
+
   void emitYieldFrom(Emitter& e, ExpressionPtr exp);
 
   // Helper methods for emitting IterFree instructions
@@ -1160,6 +1269,16 @@ public:
                               std::vector<Label*>& cases, int depth);
   void emitGotoTrampoline(Emitter& e, Region* entry,
                           std::vector<Label*>& cases, StringData* name);
+
+  // Functions for wrapping the interop-helpers for reference and inout
+  // functions.
+  template<class F1, class F2>
+  void emitFuncWrapper(PostponedMeth& p,FuncEmitter* fe, F1 getParam,
+                       F2 getReturn, bool isInOut);
+  void emitRefToInOutWrapper(PostponedMeth& p, FuncEmitter* fe);
+  void emitInOutToRefWrapper(PostponedMeth& p, FuncEmitter* fe);
+  FuncEmitter* createInOutWrapper(MethodStatementPtr m, FuncEmitter* fe,
+                                  bool top = false);
 
   // Returns true if VerifyRetType should be emitted before Ret for
   // the current function.
@@ -1386,6 +1505,7 @@ struct OpEmitContext {
 #define DEC_BLA std::vector<Label*>&
 #define DEC_SLA std::vector<StrOff>&
 #define DEC_ILA std::vector<IterPair>&
+#define DEC_I32LA std::vector<uint32_t>&
 #define DEC_IVA uint32_t
 #define DEC_LA int32_t
 #define DEC_IA int32_t
@@ -1462,6 +1582,7 @@ struct OpEmitContext {
 #define POP_LA_BLA(i)
 #define POP_LA_SLA(i)
 #define POP_LA_ILA(i)
+#define POP_LA_I32LA(i)
 #define POP_LA_IVA(i)
 #define POP_LA_IA(i)
 #define POP_LA_CAR(i)
@@ -1501,6 +1622,7 @@ struct OpEmitContext {
 #define POP_CAR_BLA(i)
 #define POP_CAR_SLA(i)
 #define POP_CAR_ILA(i)
+#define POP_CAR_I32LA(i)
 #define POP_CAR_IVA(i)
 #define POP_CAR_LA(i)
 #define POP_CAR_IA(i)
@@ -1538,6 +1660,7 @@ struct OpEmitContext {
 #define PUSH_CAW_BLA(i)
 #define PUSH_CAW_SLA(i)
 #define PUSH_CAW_ILA(i)
+#define PUSH_CAW_I32LA(i)
 #define PUSH_CAW_IVA(i)
 #define PUSH_CAW_LA(i)
 #define PUSH_CAW_IA(i)
@@ -1621,6 +1744,18 @@ struct OpEmitContext {
 #define IMPL2_ILA IMPL_ILA(a2)
 #define IMPL3_ILA IMPL_ILA(a3)
 #define IMPL4_ILA IMPL_ILA(a4)
+
+#define IMPL_I32LA(var) do {   \
+  auto& ue = getUnitEmitter(); \
+  ue.emitInt32(var.size());    \
+  for (auto& i : var) {        \
+    ue.emitInt32(i);           \
+  }                            \
+} while(0)
+#define IMPL1_I32LA IMPL_I32LA(a1)
+#define IMPL2_I32LA IMPL_I32LA(a2)
+#define IMPL3_I32LA IMPL_I32LA(a3)
+#define IMPL4_I32LA IMPL_I32LA(a4)
 
 #define IMPL_SLA(var) do {                      \
   auto& ue = getUnitEmitter();                  \
@@ -1886,6 +2021,11 @@ struct OpEmitContext {
 #undef IMPL2_ILA
 #undef IMPL3_ILA
 #undef IMPL4_ILA
+#undef IMPL_I32LA
+#undef IMPL1_I32LA
+#undef IMPL2_I32LA
+#undef IMPL3_I32LA
+#undef IMPL4_I32LA
 #undef IMPL_IVA
 #undef IMPL1_IVA
 #undef IMPL2_IVA
@@ -2640,6 +2780,24 @@ void EmitterVisitor::emitJump(Emitter& e, IterVec& iters, Label& target) {
   }
 }
 
+void EmitterVisitor::emitInOutReturn(Emitter& e) {
+  if (!(m_curFunc->attrs & AttrTakesInOutParams)) return;
+  Id paramId = 0;
+  int elems = 1;
+  for (auto p : m_curFunc->params) {
+    if (p.inout) {
+      emitVirtualLocal(paramId);
+      emitCGet(e);
+      if (p.typeConstraint.hasConstraint()) {
+        e.VerifyOutType(paramId);
+      }
+      elems++;
+    }
+    paramId++;
+  }
+  e.NewVecArray(elems);
+}
+
 void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
   Region* region = m_regions.back().get();
   registerReturn(s, region, sym);
@@ -2655,6 +2813,7 @@ void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
         if (shouldEmitVerifyRetType()) {
           e.VerifyRetTypeC();
         }
+        emitInOutReturn(e);
         // IterFree must come after VerifyRetType, because VerifyRetType may
         // throw, in which case any Iters will be freed by the fault funclet.
         emitIterFree(e, iters);
@@ -3055,6 +3214,7 @@ void EmitterVisitor::emitReturnTrampoline(Emitter& e,
         if (shouldEmitVerifyRetType()) {
           e.VerifyRetTypeC();
         }
+        emitInOutReturn(e);
         e.RetC();
       } else {
         assert(sym == StackSym::V);
@@ -4327,6 +4487,57 @@ bool isStructInit(ExpressionPtr init_expr, std::vector<std::string>& keys) {
   );
 }
 
+template<class F>
+void EmitterVisitor::emitUnpackInOutCall(Emitter& e, uint32_t nargs, F getArg) {
+  emitConvertToCell(e);
+  auto const start = m_ue.bcPos();
+  auto const tempLocal = emitSetUnnamedL(e);
+
+  auto emitElem = [&] (int index) {
+    emitVirtualLocal(tempLocal);
+    m_evalStack.push(StackSym::I);
+    m_evalStack.setInt(index);
+    markElem(e);
+    emitCGet(e);
+  };
+
+  for (int i = 0; i < nargs; ++i) {
+    getArg(i);
+    emitClsIfSPropBase(e);
+    emitElem(i + 1);
+    emitSet(e);
+    emitPop(e);
+  }
+
+  emitElem(0);
+  emitFreeUnnamedL(e, tempLocal, start);
+}
+
+static void collect_written_variables(
+  ConstructPtr node,
+  int param_id,
+  FuncEmitter* fe,
+  EmitterVisitor::LocalAliasMap& map
+) {
+  if (!node) return;
+
+  if (auto sv = dynamic_pointer_cast<SimpleVariable>(node)) {
+    auto const is_write = sv->hasAnyContext(
+      Expression::LValue |
+      Expression::InOutParameter |
+      Expression::RefParameter
+    );
+    if (is_write && !sv->isThis()) {
+      auto const var_id = fe->lookupVarId(makeStaticString(sv->getName()));
+      map[var_id].write(param_id);
+    }
+    return;
+  }
+  for (int i = 0; i < node->getKidCount(); ++i) {
+    collect_written_variables(node->getNthKid(i), param_id, fe, map);
+  }
+}
+
 void EmitterVisitor::emitCall(Emitter& e,
                               FunctionCallPtr func,
                               ExpressionListPtr params,
@@ -4337,11 +4548,51 @@ void EmitterVisitor::emitCall(Emitter& e,
     throw IncludeTimeFatalException(
       func, "Only the last parameter in a function call is allowed to use ...");
   }
+
+  auto const anyInOut = [&] {
+    for (int i = 0; i < numParams; i++) {
+      if ((*params)[i]->hasContext(Expression::InOutParameter)) return true;
+    }
+    return false;
+  }();
+
+  std::vector<MInstrChain> chains;
+  LocalAliasMap varMap;
+
+  if (anyInOut) {
+    for (int i = 0; i < numParams; i++) {
+      auto param = (*params)[i];
+      if (auto sv = dynamic_pointer_cast<SimpleVariable>(param)) {
+        if (!sv->isThis()) {
+          auto id = m_curFunc->lookupVarId(makeStaticString(sv->getName()));
+          // Special case: If the base itself is a simple variable, then it
+          // counts as a write, but it happens after the call if the param is
+          // an inout param.
+          if (sv->hasContext(Expression::InOutParameter)) {
+            varMap[id].inout(i);
+          } else if (sv->hasContext(Expression::RefParameter)) {
+            varMap[id].write(i);
+          }
+        }
+      } else {
+        collect_written_variables(param, i, m_curFunc, varMap);
+      }
+    }
+  }
+
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     for (int i = 0; i < numParams; i++) {
       auto param = (*params)[i];
-      emitFuncCallArg(e, param, i, param->isUnpack());
+      if (!param->hasContext(Expression::InOutParameter)) {
+        emitFuncCallArg(e, param, i, param->isUnpack());
+      } else if (dynamic_pointer_cast<SimpleVariable>(param)) {
+        // If the param writes directly to a local then it doesn't need to be
+        // shadowed. If it gets shadowed that's fine, the final write will win.
+        chains.push_back(emitInOutArg(e, param, i, nullptr));
+      } else {
+        chains.push_back(emitInOutArg(e, param, i, &varMap));
+      }
     }
   }
 
@@ -4350,6 +4601,41 @@ void EmitterVisitor::emitCall(Emitter& e,
   } else {
     e.FCall(numParams);
   }
+
+  if (!chains.empty()) {
+    emitUnpackInOutCall(
+      e, chains.size(), [&] (uint32_t i) { emitMInstrChain(e, chains[i]); }
+    );
+    for (int i = chains.size() - 1; i >= 0; --i) {
+      unsetMInstrChain(e, std::move(chains[i]));
+    }
+  }
+}
+
+std::vector<uint32_t> computeInOutParamVec(ExpressionListPtr params) {
+  std::vector<uint32_t> ret;
+  if (!params) return ret;
+
+  for (int i = 0; i < params->getCount(); ++i) {
+    if ((*params)[i]->hasContext(Expression::InOutParameter)) {
+      ret.push_back(i);
+    }
+  }
+
+  return ret;
+}
+
+std::string mangleInOutFuncName(const std::string& name,
+                                std::vector<uint32_t> params) {
+  return folly::sformat("{}${}$inout", name, folly::join(";", params));
+}
+
+std::string mangleInOutFuncName(const std::string& name,
+                                ExpressionListPtr params) {
+  if (name.empty()) return name;
+  auto v = computeInOutParamVec(params);
+  if (v.empty()) return name;
+  return mangleInOutFuncName(name, std::move(v));
 }
 
 static bool isNormalLocalVariable(const ExpressionPtr& expr) {
@@ -4908,7 +5194,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     StringData* nName = makeStaticString(m->getOriginalName());
     FuncEmitter* fe = m_ue.newFuncEmitter(nName);
     e.DefFunc(fe->id());
-    postponeMeth(m, fe, false);
+    auto wrap = postponeMeth(m, fe, false);
+    if (wrap) e.DefFunc(wrap->id());
     return false;
   }
 
@@ -5446,6 +5733,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       // XHP syntax allows for expressions like "($a =& $b)[0]". We
       // handle this by unboxing the var produced by "($a =& $b)".
       emitConvertToCellIfVar(e);
+      recordMInstrBase(e);
     }
 
     ExpressionPtr offset = ae->getOffset();
@@ -5465,6 +5753,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       emitConvertToCellOrLoc(e);
       if (ae->isSuperGlobal()) {
         markGlobalName(e);
+        recordMInstrBase(e);
       } else {
         markElem(e);
       }
@@ -5944,7 +6233,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     bool useDirectForm = false;
     if (methName->is(Construct::KindOfScalarExpression)) {
       auto sval = static_pointer_cast<ScalarExpression>(methName);
-      const std::string& methStr = sval->getOriginalLiteralString();
+      auto const methStr = mangleInOutFuncName(
+        sval->getOriginalLiteralString(), params
+      );
       if (!methStr.empty()) {
         // $obj->name(...)
         //       ^^^^
@@ -5966,10 +6257,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       //       ^^^^^
       visit(methName);
       emitConvertToCell(e);
+      auto iov = computeInOutParamVec(params);
       fpiStart = m_ue.bcPos();
       e.FPushObjMethod(
         numParams,
-        om->isNullSafe() ? ObjMethodOp::NullSafe : ObjMethodOp::NullThrows
+        om->isNullSafe() ? ObjMethodOp::NullSafe : ObjMethodOp::NullThrows,
+        iov
       );
     }
     // $obj->name(...)
@@ -5998,6 +6291,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     } else {
       visit(obj);
     }
+    recordMInstrBase(e);
     StringData* clsName = getClassName(op->getObject());
     if (clsName) {
       m_evalStack.setKnownCls(clsName, false);
@@ -6116,6 +6410,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       if (sv->isSuperGlobal()) {
         e.String(nLiteral);
         markGlobalName(e);
+        recordMInstrBase(e);
         return true;
       }
       Id i = m_curFunc->lookupVarId(nLiteral);
@@ -6128,6 +6423,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         emitConvertToCell(e);
       }
     }
+    recordMInstrBase(e);
 
     return true;
   }
@@ -6137,12 +6433,14 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     visit(dv->getSubExpression());
     emitConvertToCellOrLoc(e);
     markName(e);
+    recordMInstrBase(e);
     return true;
   }
 
   case Construct::KindOfStaticMemberExpression: {
     auto sm = static_pointer_cast<StaticMemberExpression>(node);
     emitVirtualClassBase(e, sm.get());
+    recordMInstrBase(e);
     emitNameString(e, sm->getExp());
     markSProp(e);
     return true;
@@ -6863,7 +7161,9 @@ size_t EmitterVisitor::emitMOp(
     return m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
   };
 
-  auto const baseMode = opts.fpass ? MOpMode::None : opts.mode;
+  auto const baseMode =
+    opts.fpass ? MOpMode::None :
+    opts.mode == MOpMode::InOut ? MOpMode::Warn : opts.mode;
 
   // Emit the base location operation.
   auto sym = m_evalStack.get(iFirst);
@@ -7368,9 +7668,40 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
   emitFPass(e, paramId, kind, getPassByRefHint(exp));
 }
 
+EmitterVisitor::MInstrChain EmitterVisitor::emitInOutArg(
+  Emitter& e,
+  ExpressionPtr exp,
+  int paramId,
+  LocalAliasMap* vars
+) {
+  m_minstrChains.push_back(
+    MInstrChain{vars, paramId, m_evalStack.size()}
+  );
+  visit(exp);
+  if (checkIfStackEmpty("FPass*")) {
+    throw IncludeTimeFatalException(
+      exp, "unable to assign back to inout parameter"
+    );
+  }
+
+  assert(!m_minstrChains.empty());
+  auto chain = std::move(m_minstrChains.back());
+  m_minstrChains.pop_back();
+
+  if (chain.ops.empty()) {
+    throw IncludeTimeFatalException(
+      exp, "unable to assign back to inout parameter"
+    );
+  }
+
+  emitFPass(e, paramId, getPassByRefKind(exp), getPassByRefHint(exp), true);
+  return chain;
+}
+
 void EmitterVisitor::emitFPass(Emitter& e, int paramId,
                                PassByRefKind passByRefKind,
-                               FPassHint hint) {
+                               FPassHint hint,
+                               bool isInOut) {
   if (checkIfStackEmpty("FPass*")) return;
   LocationGuard locGuard(e, m_tempLoc);
   m_tempLoc.clear();
@@ -7379,9 +7710,20 @@ void EmitterVisitor::emitFPass(Emitter& e, int paramId,
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
+
   assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
+    if (isInOut) {
+      if (sym != StackSym::L) {
+        throw EmitterVisitor::IncludeTimeFatalException(e.getNode(),
+          "Parameters marked inout must be contained in locals, vecs, dicts, "
+          "keysets, and arrays");
+      }
+      e.CGetL(m_evalStack.getLoc(i));
+      e.FPassC(paramId, hint);
+      return;
+    }
     switch (sym) {
       case StackSym::L: e.FPassL(paramId, m_evalStack.getLoc(i), hint); break;
       case StackSym::C:
@@ -7407,6 +7749,12 @@ void EmitterVisitor::emitFPass(Emitter& e, int paramId,
         break;
       }
     }
+  } else if (isInOut) {
+    auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{MOpMode::InOut});
+    e.QueryM(
+      stackCount, QueryMOp::InOut, symToMemberKey(e, iLast, false /* allowW */)
+    );
+    e.FPassC(paramId, hint);
   } else {
     auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{paramId});
     e.FPassM(
@@ -7872,7 +8220,7 @@ void EmitterVisitor::emitClsIfSPropBase(Emitter& e) {
                   m_evalStack.get(m_evalStack.size() - 1) | StackSym::M);
 }
 
-void EmitterVisitor::markElem(Emitter& /*e*/) {
+void EmitterVisitor::markElem(Emitter& e) {
   if (m_evalStack.empty()) {
     InvariantViolation("Emitter encountered an empty evaluation stack inside"
                        " the markElem function (at offset %d)",
@@ -7883,6 +8231,7 @@ void EmitterVisitor::markElem(Emitter& /*e*/) {
   if (sym == StackSym::C || sym == StackSym::L || sym == StackSym::T ||
       sym == StackSym::I) {
     m_evalStack.set(m_evalStack.size()-1, (sym | StackSym::E));
+    recordMInstrOp(e);
   } else {
     InvariantViolation(
       "Emitter encountered an unsupported StackSym \"%s\" on "
@@ -7897,7 +8246,135 @@ void EmitterVisitor::markNewElem(Emitter& /*e*/) {
   m_evalStack.push(StackSym::W);
 }
 
-void EmitterVisitor::markProp(Emitter& /*e*/, PropAccessType propAccessType) {
+bool EmitterVisitor::isInChain(const MInstrChain& chain, int off) {
+  // If offset is the position after the base of the current minstr chain we may
+  // still be in the chain, as the base may be a classname and static property.
+  if (chain.base_offset != off) {
+    if (off <= 0 || off - 1 != chain.base_offset) return false;
+
+    if (StackSym::GetMarker(m_evalStack.get(off)) != StackSym::S ||
+        StackSym::GetMarker(m_evalStack.get(off - 1)) != StackSym::K) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+void EmitterVisitor::recordMInstr(Emitter& e, int off) {
+  if (m_minstrChains.empty()) return;
+  auto& chain = m_minstrChains.back();
+
+  if (!isInChain(chain, off)) return;
+
+  auto const sym = m_evalStack.top();
+  auto const flav = StackSym::GetSymFlavor(sym);
+  auto const kind = StackSym::GetMarker(sym);
+
+  auto alloc_temp = [&] {
+    return MInstrChain::TempLoc{m_curFunc->allocUnnamedLocal(), m_ue.bcPos()};
+  };
+
+  auto const stack_off = m_evalStack.size() - 1;
+
+  auto const key = [&] () -> MInstrChain::MInstrKey {
+    switch (flav) {
+    case StackSym::L: {
+      auto const id = m_evalStack.getLoc(stack_off);
+      if (!chain.overridden_locals) return id;
+
+      // If the read of this parameter occurs prior to the write then we want to
+      // observe it, e.g. foo($a[$i++], inout $a[$i++]) should pass the post-
+      // incremented value of $i. If write-back of this parameter occurs prior
+      // to it being altered (e.g. it's written by another later inout
+      // parameter), then we don't need to worry about stashing.
+      auto it = chain.overridden_locals->find(id);
+      if (it == chain.overridden_locals->end() ||
+          !it->second.aliases(chain.param_index)) {
+        return id;
+      }
+      m_ue.emitOp(OpCGetQuietL);
+      m_ue.emitIVA(id);
+      auto loc = alloc_temp();
+      m_ue.emitOp(OpPopL);
+      m_ue.emitIVA(loc.id);
+      return loc;
+    }
+    case StackSym::C: {
+      auto loc = alloc_temp();
+      m_ue.emitOp(OpSetL);
+      m_ue.emitIVA(loc.id);
+      return loc;
+    }
+    case StackSym::I: return m_evalStack.getInt(stack_off);
+    case StackSym::T: return m_evalStack.getName(stack_off);
+
+    // The "R" flavor only occurs when a return value is used as the base, H is
+    // for $this as base, and when kind == K the base is an SProp ClsRef, none
+    // of these are supported for inout parameters.
+    case StackSym::R:
+    case StackSym::H:
+    case StackSym::None: // if kind == SymStack::K this is an SProp base
+    default:
+      unexpectedStackSym(flav, "recordMInstrOp");
+      always_assert(false);
+    }
+    not_reached();
+  }();
+
+  chain.ops.push_back(MInstrChain::MInstrOp{kind, key});
+}
+
+void EmitterVisitor::recordMInstrOp(Emitter& e) {
+  if (m_evalStack.empty()) return;
+  recordMInstr(e, scanStackForLocation(m_evalStack.size() - 1));
+}
+
+void EmitterVisitor::recordMInstrBase(Emitter& e) {
+  if (m_minstrChains.empty() || !m_minstrChains.back().ops.empty()) return;
+  recordMInstr(e, m_evalStack.size() - 1);
+}
+
+void EmitterVisitor::emitMInstrChain(Emitter& e, MInstrChain& chain) {
+  assert(!chain.ops.empty());
+
+  for (auto const& op : chain.ops) {
+    prepareEvalStack();
+    match<void>(
+      op.key,
+      [&] (Id l) {
+        m_evalStack.push(StackSym::L | op.marker);
+        m_evalStack.setInt(l);
+      },
+      [&] (int64_t n) {
+        m_evalStack.push(StackSym::I | op.marker);
+        m_evalStack.setInt(n);
+      },
+      [&] (const StringData* s) {
+        m_evalStack.push(StackSym::T | op.marker);
+        m_evalStack.setString(s);
+      },
+      [&] (const MInstrChain::TempLoc& t) {
+        m_evalStack.push(StackSym::L | op.marker);
+        m_evalStack.setInt(t.id);
+      }
+    );
+  }
+}
+
+void EmitterVisitor::unsetMInstrChain(Emitter& e, MInstrChain chain) {
+  for (int i = chain.ops.size() - 1; i >= 0; --i) {
+    match<void>(
+      chain.ops[i].key,
+      [&] (Id) {},
+      [&] (int64_t) {},
+      [&] (const StringData*) {},
+      [&] (const MInstrChain::TempLoc& t) { emitFreeUnnamedL(e, t.id, t.start);}
+    );
+  }
+}
+
+void EmitterVisitor::markProp(Emitter& e, PropAccessType propAccessType) {
   if (m_evalStack.empty()) {
     InvariantViolation(
       "Emitter encountered an empty evaluation stack inside "
@@ -7914,6 +8391,14 @@ void EmitterVisitor::markProp(Emitter& /*e*/, PropAccessType propAccessType) {
         : StackSym::P
       ))
     );
+
+    // Properties aren't allowed in inout minstr chains
+    assert(
+      m_minstrChains.empty() ||
+      !isInChain(
+        m_minstrChains.back(), scanStackForLocation(m_evalStack.size() - 1)
+      )
+    );
   } else {
     InvariantViolation(
       "Emitter encountered an unsupported StackSym \"%s\" on "
@@ -7924,7 +8409,7 @@ void EmitterVisitor::markProp(Emitter& /*e*/, PropAccessType propAccessType) {
   }
 }
 
-void EmitterVisitor::markSProp(Emitter& /*e*/) {
+void EmitterVisitor::markSProp(Emitter& e) {
   if (m_evalStack.empty()) {
     InvariantViolation(
       "Emitter encountered an empty evaluation stack inside "
@@ -7935,6 +8420,13 @@ void EmitterVisitor::markSProp(Emitter& /*e*/) {
   char sym = m_evalStack.top();
   if (sym == StackSym::C || sym == StackSym::L) {
     m_evalStack.set(m_evalStack.size()-1, (sym | StackSym::S));
+    // Static properties aren't allowed in inout minstr chains
+    assert(
+      m_minstrChains.empty() ||
+      !isInChain(
+        m_minstrChains.back(), scanStackForLocation(m_evalStack.size() - 1)
+      )
+    );
   } else {
     InvariantViolation(
       "Emitter encountered an unsupported StackSym \"%s\" on "
@@ -8016,10 +8508,78 @@ void EmitterVisitor::emitNameString(Emitter& e, ExpressionPtr n,
   }
 }
 
-void EmitterVisitor::postponeMeth(MethodStatementPtr m, FuncEmitter* fe,
-                                  bool top,
-                                  ClosureUseVarVec* useVars /* = NULL */) {
-  m_postponedMeths.push_back(PostponedMeth(m, fe, top, useVars));
+FuncEmitter* EmitterVisitor::createInOutWrapper(MethodStatementPtr m,
+                                                FuncEmitter* fe,
+                                                bool isTop) {
+  auto scope = m->getFunctionScope();
+  auto makeReffy = [&] {
+    auto params = m->getParams();
+    int numParam = params ? params->getCount() : 0;
+    for (int i = 0; i < numParam; i++) {
+      auto par = static_pointer_cast<ParameterExpression>((*params)[i]);
+      if (par->mode() == ParamMode::InOut) {
+        par->setMode(ParamMode::Ref);
+        scope->clearInOutParam(i);
+        scope->setRefParam(i);
+      }
+    }
+  };
+
+  auto const nonClosureMethod = fe->pce() && !fe->isClosureBody;
+
+  // For now we cannot support inout parameters on generators, async functions,
+  // functions which return by ref, and non-closure methods when reffiness is
+  // not invariant on method overrides. Additionally, we don't emit wrappers
+  // for non <?hh files unless EnableHipHopSyntax is set.
+  auto const needIOWrapper =
+    RuntimeOption::EvalCreateInOutWrapperFunctions &&
+    (RuntimeOption::EnableHipHopSyntax || m->getFileScope()->isHHFile()) &&
+    (RuntimeOption::EvalReffinessInvariance || !nonClosureMethod) &&
+    scope->hasRefParams() &&
+    !scope->isAsync() &&
+    !scope->isGenerator() &&
+    !m->isRef();
+
+  // InOut functions must always have a wrapper created for them, however, ref
+  // functions are only sometimes wrapped.
+  if (scope->hasInOutParams() || needIOWrapper) {
+    std::vector<uint32_t> inOutParams;
+    auto const numParam = m->getParams() ? m->getParams()->getCount() : 0;
+    for (int i = 0; i < numParam; ++i) {
+      if (m->isInOut(i) || m->isRef(i)) inOutParams.push_back(i);
+    }
+    auto const name = makeStaticString(
+      mangleInOutFuncName(fe->name->data(), inOutParams)
+    );
+    FuncEmitter* wrapper = nullptr;
+    if (auto pce = fe->pce()) {
+      // This hack is to deal with closures needing to be rescoped. Since inout
+      // is currently the uncommon case, for closures we require that it always
+      // be the wrapper function so that it can be a regular function (which can
+      // dispatch to the closure). We may want to revisit this at a later time.
+      if (fe->isClosureBody && scope->hasInOutParams()) {
+        makeReffy();
+      }
+
+      wrapper = m_ue.newMethodEmitter(name, pce);
+      bool added UNUSED = pce->addMethod(wrapper);
+      assert(added);
+    } else if (isTop) {
+      wrapper = new FuncEmitter(m_ue, -1, -1, name);
+    } else {
+      wrapper = m_ue.newFuncEmitter(name);
+    }
+    return wrapper;
+  }
+  return nullptr;
+}
+
+FuncEmitter* EmitterVisitor::postponeMeth(MethodStatementPtr m, FuncEmitter* fe,
+                                          bool top,
+                                          ClosureUseVarVec* useVars) {
+  FuncEmitter* wrapper = fe ? createInOutWrapper(m, fe) : nullptr;
+  m_postponedMeths.push_back(PostponedMeth(m, fe, top, useVars, wrapper));
+  return wrapper;
 }
 
 void EmitterVisitor::postponeCtor(InterfaceStatementPtr is, FuncEmitter* fe) {
@@ -8221,6 +8781,151 @@ determine_type_constraint(const ParameterExpressionPtr& par) {
   return determine_type_constraint_from_annot(par->annotation(), false, false);
 }
 
+template<class F1, class F2>
+void EmitterVisitor::emitFuncWrapper(PostponedMeth& p, FuncEmitter* fe,
+                                     F1 getParam, F2 getReturn, bool isInOut) {
+  MethodStatementPtr meth = p.m_meth;
+  m_curFunc = fe;
+  fe->isGenerator = false;
+  fe->isAsync = false;
+
+  emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
+  if (isInOut) fe->attrs |= AttrTakesInOutParams;
+  else fe->attrs = Attr(fe->attrs & ~AttrTakesInOutParams);
+
+  auto region = createRegion(meth, Region::Kind::FuncBody);
+  enterRegion(region);
+  SCOPE_EXIT { leaveRegion(region); };
+
+  Offset fpiStart;
+  Emitter e(meth, m_ue, *this);
+  FuncFinisher ff(this, e, m_curFunc);
+  Label topOfBody(e, Label::NoEntryNopFlag{});
+
+  // If we wrap an inout function we may need to mangle its name on the fly
+  std::vector<uint32_t> iovec;
+  auto methName = [&] {
+    if (!isInOut) {
+      for (int i = 0; i < fe->params.size(); i++) {
+        if (fe->params[i].inout) iovec.push_back(i);
+      }
+      return makeStaticString(
+        mangleInOutFuncName(meth->getOriginalName(), iovec)
+      );
+    }
+    return makeStaticString(meth->getOriginalName());
+  }();
+
+  if (meth->getFunctionScope()->isClosure()) {
+    assert(isInOut);
+    // Invoke the real closure as $this(). For now the inout variant is always
+    // the wrapper... Additionally make sure we're not marked static even if
+    // the underlying closure is static.
+    fe->attrs = Attr(fe->attrs & ~AttrStatic) | AttrPublic;
+    e.This();
+    fpiStart = m_ue.bcPos();
+    e.FPushFunc(fe->params.size(), iovec);
+  } else if (meth->is(Statement::KindOfFunctionStatement)) {
+    fpiStart = m_ue.bcPos();
+    e.FPushFuncD(fe->params.size(), methName);
+  } else if (meth->getFunctionScope()->isStatic()) {
+    auto classScope = meth->getClassScope();
+    if (classScope && classScope->isTrait()) {
+      e.String(methName);
+      e.Self(kClsRefSlotPlaceholder);
+      fpiStart = m_ue.bcPos();
+      std::vector<uint32_t> iov;
+      e.FPushClsMethodF(fe->params.size(), kClsRefSlotPlaceholder, iov);
+    } else {
+      fpiStart = m_ue.bcPos();
+      e.FPushClsMethodD(fe->params.size(), methName, m_curFunc->pce()->name());
+    }
+  } else {
+    e.This();
+    fpiStart = m_ue.bcPos();
+    e.FPushObjMethodD(
+      fe->params.size(), methName, ObjMethodOp::NullSafe
+    );
+  }
+
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+    for (int i = 0; i < fe->params.size(); i++) {
+      emitVirtualLocal(i);
+      getParam(e, i);
+    }
+  }
+
+  e.FCall(fe->params.size());
+  e.UnboxRNop();
+  getReturn(e);
+  e.RetC();
+
+  emitMethodDVInitializers(e, fe, meth, topOfBody);
+}
+
+// Given method, p, which takes ref parameters, create a wrapper function, fe,
+// that takes inout parameters and calls p.
+void EmitterVisitor::emitInOutToRefWrapper(PostponedMeth& p,
+                                           FuncEmitter* fe) {
+  std::vector<uint32_t> inoutParams;
+  emitFuncWrapper(
+    p,
+    fe,
+    [&] (Emitter& e, int i) {
+      if (fe->params[i].byRef) {
+        fe->params[i].byRef = false;
+        fe->params[i].inout = true;
+        inoutParams.push_back(i);
+        emitVGet(e);
+        e.FPassVNop(i, FPassHint::Ref);
+      } else {
+        emitCGetQuiet(e);
+        e.FPassC(i, FPassHint::Cell);
+      }
+    },
+    [&] (Emitter& e) {
+      for (auto iop : inoutParams) {
+        emitVirtualLocal(iop);
+        emitCGet(e);
+      }
+      e.NewVecArray(inoutParams.size() + 1);
+    },
+    true
+  );
+}
+
+// Given method, p, which takes inout parameters, create a wrapper function, fe,
+// which takes parameters by ref and calls p.
+void EmitterVisitor::emitRefToInOutWrapper(PostponedMeth& p,
+                                           FuncEmitter* fe) {
+  std::vector<uint32_t> refParams;
+  emitFuncWrapper(
+    p,
+    fe,
+    [&] (Emitter& e, int i) {
+      if (fe->params[i].inout) {
+        fe->params[i].byRef = true;
+        fe->params[i].inout = false;
+        refParams.push_back(i);
+      }
+      emitCGetQuiet(e);
+      e.FPassC(i, FPassHint::Cell);
+    },
+    [&] (Emitter& e) {
+      emitUnpackInOutCall(
+        e,
+        refParams.size(),
+        [&] (uint32_t i) { emitVirtualLocal(refParams[i]); }
+      );
+      if (shouldEmitVerifyRetType()) {
+        e.VerifyRetTypeC();
+      }
+    },
+    false
+  );
+}
+
 void EmitterVisitor::emitPostponedMeths() {
   std::vector<FuncEmitter*> top_fes;
   while (!m_postponedMeths.empty()) {
@@ -8248,7 +8953,20 @@ void EmitterVisitor::emitPostponedMeths() {
       m_topMethodEmitted.emplace(meth->getOriginalName(), fe);
 
       p.m_fe = fe;
+      p.m_inOutWrapper = createInOutWrapper(meth, fe, true /* isTop */);
       top_fes.push_back(fe);
+      if (p.m_inOutWrapper) top_fes.push_back(p.m_inOutWrapper);
+    }
+
+    if (p.m_inOutWrapper) {
+      if (!p.m_meth->getFunctionScope()->hasInOutParams()) {
+        emitInOutToRefWrapper(p, p.m_inOutWrapper);
+        p.m_inOutWrapper->attrs |= AttrNoInjection | AttrIsInOutWrapper;
+      } else {
+        emitRefToInOutWrapper(p, p.m_fe);
+        p.m_fe->attrs |= AttrNoInjection | AttrIsInOutWrapper;
+        fe = p.m_inOutWrapper;
+      }
     }
 
     auto funcScope = meth->getFunctionScope();
@@ -8595,8 +9313,10 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
 
       if (fe->isMethod() && !(fe->attrs & AttrStatic)) {
         auto const scope = params->getClassScope();
-        if (fe->name->equal(s_construct.get()) ||
-            (scope->classNameCtor() && scope->isNamed(fe->name->data()))) {
+        auto const stripped = stripInOutSuffix(fe->name);
+        if (stripped->equal(s_construct.get()) ||
+            (scope && scope->classNameCtor() &&
+             scope->isNamed(stripped->data()))) {
           throw IncludeTimeFatalException(
             par, "Parameters may not be marked inout on constructors"
           );
@@ -8798,6 +9518,7 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
     if (shouldEmitVerifyRetType()) {
       e.VerifyRetTypeC();
     }
+    emitInOutReturn(e);
     e.RetC();
     e.setTempLocation(OptLocation());
   }
@@ -9224,7 +9945,8 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
         e.String(methName);
         e.Self(kClsRefSlotPlaceholder);
         fpiStart = m_ue.bcPos();
-        e.FPushClsMethodF(numParams, kClsRefSlotPlaceholder);
+        std::vector<uint32_t> iov;
+        e.FPushClsMethodF(numParams, kClsRefSlotPlaceholder, iov);
       } else {
         fpiStart = m_ue.bcPos();
         e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
@@ -9609,10 +10331,12 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
                                   const char* nameOverride,
                                   ExpressionListPtr paramsOverride) {
   ExpressionPtr nameExp = node->getNameExp();
-  const std::string& nameStr = nameOverride ? nameOverride :
-                                              node->getOriginalName();
   ExpressionListPtr params(paramsOverride ? paramsOverride :
                                             node->getParams());
+  auto const nameStr = mangleInOutFuncName(
+    nameOverride ? nameOverride : node->getOriginalName(), params
+  );
+
   int numParams = params ? params->getCount() : 0;
 
   ExpressionListPtr funcParams;
@@ -9630,6 +10354,10 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       e.FPushClsMethodD(numParams, nLiteral, cLiteral);
     } else {
       emitVirtualClassBase(e, node.get());
+
+      // If possible we will push the literal mangled name to the stack,
+      // otherwise we will need to perform the mangling operation at runtime.
+      std::vector<uint32_t> inoutParamVec;
       if (!nameStr.empty()) {
         // ...::foo()
         nLiteral = makeStaticString(nameStr);
@@ -9638,15 +10366,16 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
         // ...::$foo()
         visit(nameExp);
         emitConvertToCell(e);
+        inoutParamVec = computeInOutParamVec(params);
       }
       emitResolveClsBase(e, m_evalStack.size() - 2);
       fpiStart = m_ue.bcPos();
       if (isSelfOrParent) {
         // self and parent are "forwarding" calls, so we need to
         // use FPushClsMethodF instead
-        e.FPushClsMethodF(numParams, kClsRefSlotPlaceholder);
+        e.FPushClsMethodF(numParams, kClsRefSlotPlaceholder, inoutParamVec);
       } else {
-        e.FPushClsMethod(numParams, kClsRefSlotPlaceholder);
+        e.FPushClsMethod(numParams, kClsRefSlotPlaceholder, inoutParamVec);
       }
     }
   } else if (!nameStr.empty()) {
@@ -9656,7 +10385,9 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
     if (!node->hadBackslash() && !nameOverride) {
       // nameOverride is to be used only when there's an exact function
       // to be called ... supporting a fallback doesn't make sense
-      const std::string& nonNSName = node->getNonNSOriginalName();
+      auto const nonNSName = mangleInOutFuncName(
+        node->getNonNSOriginalName(), params
+      );
       if (nonNSName != nameStr) {
         nsName = nLiteral;
         nLiteral = makeStaticString(nonNSName);
@@ -9676,7 +10407,8 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
     emitConvertToCell(e);
     // FPushFunc consumes method name from stack
     fpiStart = m_ue.bcPos();
-    e.FPushFunc(numParams);
+    auto iov = computeInOutParamVec(params);
+    e.FPushFunc(numParams, iov);
   }
   emitCall(e, node, params, fpiStart);
 }
@@ -11429,6 +12161,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.ThisTypeHintLevel           = RuntimeOption::EvalThisTypeHintLevel;
   gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
+  gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
   gd.InitialNamedEntityTableSize =
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =

@@ -48,6 +48,13 @@ inline bool notClassMethodPair(const StringData* name) {
   return strstr(name->data(), "::") == nullptr;
 }
 
+const char kInOutSuffix[] = "$inout";
+inline bool needsStripInOut(const StringData* name) {
+  return
+    name->size() > sizeof(kInOutSuffix) &&
+    !strcmp(name->data() + name->size() - strlen(kInOutSuffix), kInOutSuffix);
+}
+
 /*
  * Normalizes a given class or function name removing the leading '\'.
  * Leaves the name unchanged if more than one '\' is leading.
@@ -68,6 +75,27 @@ inline String normalizeNS(const String& name) {
     return String(name.data() + 1, name.size() - 1, CopyString);
   }
   return name;
+}
+
+inline const StringData* stripInOutSuffix(const StringData* name) {
+  if (UNLIKELY(needsStripInOut(name))) {
+    assert(name->size() > sizeof(kInOutSuffix));
+    auto const s = name->data();
+    size_t len = name->size() - sizeof(kInOutSuffix);
+    for (; s[len] != '$'; --len) assert(len != 0);
+    return makeStaticString(folly::StringPiece(name->data(), len));
+  }
+  return name;
+}
+
+inline StringData* stripInOutSuffix(StringData* name) {
+  return const_cast<StringData*>(
+    stripInOutSuffix((const StringData*)name)
+  );
+}
+
+inline String stripInOutSuffix(String& s) {
+  return String(stripInOutSuffix(s.get()));
 }
 
 //////////////////////////////////////////////////////////////////////

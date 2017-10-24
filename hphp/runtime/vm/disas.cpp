@@ -299,6 +299,17 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     out.fmt(">");
   };
 
+  auto print_argv = [&] {
+    auto const vecLen = decode<uint32_t>(pc);
+    if (!vecLen) return;
+    out.fmt(" <");
+    for (auto i = uint32_t{0}; i < vecLen; ++i) {
+      auto const num = decode<uint32_t>(pc);
+      out.fmt("{}{}", i != 0 ? ", " : "", num);
+    }
+    out.fmt(">");
+  };
+
   auto print_stringvec = [&] {
     auto const vecLen = decode<int32_t>(pc);
     out.fmt(" <");
@@ -321,6 +332,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_BLA    print_switch();
 #define IMM_SLA    print_sswitch();
 #define IMM_ILA    print_itertab();
+#define IMM_I32LA  print_argv();
 #define IMM_IVA    out.fmt(" {}", decode_iva(pc));
 #define IMM_I64A   out.fmt(" {}", decode<int64_t>(pc));
 #define IMM_LA     out.fmt(" {}", loc_name(finfo, decode_iva(pc)));
@@ -366,6 +378,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_ILA
+#undef IMM_I32LA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA
@@ -559,6 +572,9 @@ std::string func_param_list(const FuncInfo& finfo) {
 
     if (func->params()[i].variadic) {
       ret += "...";
+    }
+    if (func->params()[i].inout) {
+      ret += "inout ";
     }
     ret += opt_type_info(func->params()[i].userType,
                          func->params()[i].typeConstraint);

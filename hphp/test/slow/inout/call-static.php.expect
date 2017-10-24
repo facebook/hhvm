@@ -1,0 +1,36 @@
+string(5) "apple"
+string(3) "Eat"
+string(6) "orange"
+string(4) " my "
+string(4) " my "
+string(6) "shorts"
+Hello, World!
+bar(42)
+inner finally
+string(3) "bar"
+outer finally
+bar(43)
+inner finally
+string(3) "bar"
+outer finally
+bar(44)
+inner finally
+string(3) "bar"
+outer finally
+int(42)
+int(43)
+int(44)
+int(44)
+int(45)
+baz(41, 41)
+baz(42, 41)
+array(2) {
+  [0]=>
+  string(3) "baz"
+  [1]=>
+  string(4) "main"
+}
+int(41)
+empty_ finally
+empty_ finally
+omega alpha

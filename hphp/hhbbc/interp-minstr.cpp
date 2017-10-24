@@ -1679,9 +1679,12 @@ void in(ISS& env, const bc::QueryM& op) {
         discard(env, nDiscard);
         push(env, TBool);
         break;
+      case QueryMOp::InOut:
+        always_assert(false);
     }
   } else if (mcodeIsElem(op.mkey.mcode)) {
     switch (op.subop2) {
+      case QueryMOp::InOut:
       case QueryMOp::CGet:
         miFinalCGetElem(env, nDiscard, *key, false,
                         [](Type t) { return t; });

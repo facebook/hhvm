@@ -934,6 +934,7 @@ function hhvm_cmd_impl() {
     if (isset($options['compare-hh-codegen'])) {
       $args[] = '-vEval.DisableHphpcOpts=1';
       $args[] = '-vEval.DisassemblerSourceMapping=1';
+      $args[] = '-vEval.CreateInOutWrapperFunctions=0';
 
       // TODO(paulbiss): support these
       $args[] = '-vEval.DisassemblerPropDocComments=0';

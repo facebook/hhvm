@@ -32,6 +32,7 @@
 
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/util/text-util.h"
 
@@ -119,7 +120,7 @@ void FuncCache::lookup(rds::Handle handle,
           inv,
           DecodeFlags::NoWarn);
         if (!func) {
-          raise_error("Call to undefined function %s()", sd->data());
+          raise_call_to_undefined(sd);
         }
       } catch (...) {
         *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(sd);

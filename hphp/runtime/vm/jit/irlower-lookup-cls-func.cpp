@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/system/systemlib.h"
@@ -145,7 +146,7 @@ const Func* lookupUnknownFunc(const StringData* name) {
   VMRegAnchor _;
   auto const func = Unit::loadFunc(name);
   if (UNLIKELY(!func)) {
-    raise_error("Call to undefined function %s()", name->data());
+    raise_call_to_undefined(name);
   }
   return func;
 }
@@ -160,7 +161,8 @@ const Func* lookupFallbackFunc(const StringData* name,
     // Then try to load the fallback function.
     func = Unit::loadFunc(fallback);
     if (UNLIKELY(!func)) {
-      raise_error("Call to undefined function %s()", name->data());
+      raise_error("Call to undefined function %s()",
+                  stripInOutSuffix(name)->data());
     }
   }
   return func;

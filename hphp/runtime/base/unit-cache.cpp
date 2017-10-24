@@ -659,6 +659,8 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
     + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
     + (RuntimeOption::IntsOverflowToInts ? '1' : '0')
+    + (RuntimeOption::EvalReffinessInvariance ? '1' : '0')
+    + (RuntimeOption::EvalCreateInOutWrapperFunctions ? '1' : '0')
     + RuntimeOption::EvalHackCompilerCommand + '\0'
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces()

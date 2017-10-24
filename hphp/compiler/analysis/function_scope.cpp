@@ -204,6 +204,7 @@ void FunctionScope::setParamCounts(AnalysisResultConstRawPtr, int minParam,
   if (m_numDeclParams > 0) {
     m_paramNames.resize(m_numDeclParams);
     m_refs.resize(m_numDeclParams);
+    m_inOuts.resize(m_numDeclParams);
 
     if (m_stmt) {
       auto stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
@@ -211,6 +212,7 @@ void FunctionScope::setParamCounts(AnalysisResultConstRawPtr, int minParam,
 
       for (int i = 0; i < m_numDeclParams; i++) {
         if (stmt->isRef(i)) m_refs[i] = true;
+        if (stmt->isInOut(i)) m_inOuts[i] = true;
 
         auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i]);
         m_paramNames[i] = param->getName();
@@ -369,6 +371,24 @@ void FunctionScope::setRefParam(int index) {
   m_refs[index] = true;
 }
 
+void FunctionScope::clearInOutParam(int index) {
+  assert(index >= 0 && index < (int)m_inOuts.size());
+  m_inOuts[index] = false;
+}
+
+bool FunctionScope::isInOutParam(int index) const {
+  assert(index >= 0 && index < (int)m_inOuts.size());
+  return m_inOuts[index];
+}
+
+bool FunctionScope::hasInOutParams() const {
+  return m_inOuts.any();
+}
+
+bool FunctionScope::hasRefParams() const {
+  return m_refs.any();
+}
+
 const std::string &FunctionScope::getParamName(int index) const {
   assert(index >= 0 && index < (int)m_paramNames.size());
   return m_paramNames[index];
@@ -436,13 +456,24 @@ void FunctionScope::serialize(JSON::CodeError::OutputStream &out) const {
   if (isAbstract()) mod = ClassScope::Abstract;
   else if (isFinal()) mod = ClassScope::Final;
 
+  auto toVec = [] (const boost::dynamic_bitset<>& b) {
+    std::vector<bool> r(b.size(), false);
+    for (auto i = b.find_first();
+         i != boost::dynamic_bitset<>::npos;
+         i = b.find_next(i)) {
+      r[i] = true;
+    }
+    return r;
+  };
+
   ms.add("minArgs", m_minParam)
     .add("maxArgs", m_numDeclParams)
     .add("varArgs", allowsVariableArguments())
     .add("static", isStatic())
     .add("modifier", mod)
     .add("visibility", vis)
-    .add("argIsRef", m_refs)
+    .add("argIsRef", toVec(m_refs))
+    .add("argIsInOut", toVec(m_inOuts))
     .done();
 }
 

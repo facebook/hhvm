@@ -446,7 +446,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
   not_reached();
 }
 
-static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
+const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
   tv = tvToCell(tv);
   switch (tv->m_type) {
     case KindOfUninit:        return "undefined variable";
@@ -538,7 +538,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
           "Value returned from {}{} {}() must be of type {}, {} given",
           func->isAsync() ? "async " : "",
           func->preClass() ? "method" : "function",
-          func->fullName(),
+          func->fullDisplayName(),
           name,
           givenType
         ).str();
@@ -566,7 +566,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
       folly::format(
         "Argument {} to {}() must be of type {}, {} given; argument {} was "
         "implicitly cast to array",
-        id + 1, func->fullName(), name, givenType, id + 1
+        id + 1, func->fullDisplayName(), name, givenType, id + 1
       ).str()
     );
     tvCastToArrayInPlace(tv);
@@ -581,14 +581,14 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     raise_warning_unsampled(
       folly::format(
         "Argument {} to {}() must be of type {}, {} given",
-        id + 1, func->fullName(), name, givenType
+        id + 1, func->fullDisplayName(), name, givenType
       ).str()
     );
   } else if (isExtended() && isNullable()) {
     raise_typehint_error(
       folly::format(
         "Argument {} to {}() must be of type {}, {} given",
-        id + 1, func->fullName(), name, givenType
+        id + 1, func->fullDisplayName(), name, givenType
       ).str()
     );
   } else {
@@ -597,14 +597,14 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
       raise_typehint_error(
         folly::format(
           "Argument {} passed to {}() must implement interface {}, {} given",
-          id + 1, func->fullName(), name, givenType
+          id + 1, func->fullDisplayName(), name, givenType
         ).str()
       );
     } else {
       raise_typehint_error(
         folly::format(
           "Argument {} passed to {}() must be an instance of {}, {} given",
-          id + 1, func->fullName(), name, givenType
+          id + 1, func->fullDisplayName(), name, givenType
         ).str()
       );
     }

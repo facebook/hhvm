@@ -907,7 +907,7 @@ SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
 template<class Finish>
 SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
                      MOpMode mode, SimpleOp simpleOp, Finish finish) {
-  assertx(mode == MOpMode::Warn);
+  assertx(mode == MOpMode::Warn || mode == MOpMode::InOut);
   switch (simpleOp) {
     case SimpleOp::Array:
       return emitArrayGet(env, base, key, finish);
@@ -922,12 +922,16 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
     case SimpleOp::Keyset:
       return emitDictKeysetGet(env, base, key, false, false, finish);
     case SimpleOp::String:
+      assertx(mode != MOpMode::InOut);
       return gen(env, StringGet, base, key);
     case SimpleOp::Vector:
+      assertx(mode != MOpMode::InOut);
       return emitVectorGet(env, base, key);
     case SimpleOp::Pair:
+      assertx(mode != MOpMode::InOut);
       return emitPairGet(env, base, key);
     case SimpleOp::Map:
+      assertx(mode != MOpMode::InOut);
       return gen(env, MapGet, base, key);
     case SimpleOp::None:
       return gen(env, CGetElem, MOpModeData{mode}, base, key);
@@ -1019,7 +1023,10 @@ void setWithRefImpl(IRGS& env, int32_t keyLoc, SSATmp* value) {
  * Determine which simple collection op to use for the given base and key
  * types.
  */
-SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst) {
+SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst,
+                            bool inOut) {
+  if (inOut && !(baseType <= TArrLike)) return SimpleOp::None;
+
   if (baseType <= TArr) {
     auto isPacked = false;
     if (auto arrSpec = baseType.arrSpec()) {
@@ -1740,7 +1747,7 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
   auto value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
   auto const baseType = predictedBaseType(env);
-  auto const simpleOp = simpleCollectionOp(baseType, key->type(), false);
+  auto const simpleOp = simpleCollectionOp(baseType, key->type(), false, false);
 
   if (auto tc = simpleOpConstraint(simpleOp)) {
     env.irb->constrainLocation(Location::MBase{}, *tc);
@@ -1953,7 +1960,8 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
   auto simpleOp = SimpleOp::None;
 
   if (mcodeIsElem(mk.mcode)) {
-    simpleOp = simpleCollectionOp(baseType, key->type(), true);
+    simpleOp = simpleCollectionOp(baseType, key->type(), true,
+                                  query == QueryMOp::InOut);
 
     if (simpleOp != SimpleOp::None) {
       if (auto const tc = simpleOpConstraint(simpleOp)) {
@@ -1970,8 +1978,13 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
 
   auto const result = [&]() -> SSATmp* {
     switch (query) {
+      case QueryMOp::InOut:
       case QueryMOp::CGet: {
         auto const mode = getQueryMOpMode(query);
+        always_assert_flog(
+          mode != MOpMode::InOut || mcodeIsElem(mk.mcode),
+          "QueryOp InOut can only be used with Elem codes"
+        );
         return mcodeIsProp(mk.mcode)
           ? cGetPropImpl(env, extractBaseIfObj(env), key,
                          mode, mk.mcode == MQT)

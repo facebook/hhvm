@@ -163,11 +163,25 @@ bool UnitChecker::checkClosure(PreClass* cls){
     ok = false;
   }
 
-  if (cls->allMethods().size() != 1 || !cls->hasMethod(s_invoke.get()) ||
-      !cls->lookupMethod(s_invoke.get())->isPublic()) {
+  auto invalidMethods = [&] {
     error("Closure %s must have a single public method named __invoke\n",
           cls->name()->data());
     ok = false;
+  };
+
+  if (!cls->hasMethod(s_invoke.get()) ||
+      !cls->lookupMethod(s_invoke.get())->isPublic()) {
+    invalidMethods();
+  } else if (cls->allMethods().size() == 2) {
+    auto invoke = cls->lookupMethod(s_invoke.get());
+    for (auto m : cls->allMethods()) {
+      if (m != invoke && !m->isInOutWrapper()) {
+        invalidMethods();
+        break;
+      }
+    }
+  } else if (cls->allMethods().size() != 1) {
+    invalidMethods();
   }
 
   if (cls->hasMethod(s_invoke.get()) &&

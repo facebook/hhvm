@@ -248,6 +248,13 @@ struct InstrVisitor {
       });
   }
 
+  void imm(const std::vector<uint32_t>& v) {
+    if (v.empty()) return;
+    out.append(" <");
+    out.append(folly::join(";", v));
+    out.append(">");
+  }
+
   template<class T>
   void imm(const T& /* imm */) {
     out.append(" <immediate>");

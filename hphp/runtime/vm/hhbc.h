@@ -66,7 +66,8 @@ std::string show(const LocalRange&);
   ARGTYPEVEC(BLA, Offset)        /* Bytecode offset vector immediate */        \
   ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */            \
   ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */             \
-  ARGTYPE(IVA,    uint32_t)      /* Variable size: 8 or 32-bit uint */         \
+  ARGTYPEVEC(I32LA,uint32_t)     /* Vector of variable size: 8 or 32-bit uint*/\
+  ARGTYPE(IVA,    uint32_t)      /* Vector of 32-bit uint */                   \
   ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                          \
   ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */      \
   ARGTYPE(IA,     int32_t)       /* Iterator ID: 8 or 32-bit int */            \
@@ -306,7 +307,10 @@ enum class SwitchKind : uint8_t {
   MODE(None)                                       \
   MODE(Warn)                                       \
   MODE(Define)                                     \
-  MODE(Unset)
+  MODE(Unset)                                      \
+  /* InOut mode restricts allowed bases to the
+     array like types. */                          \
+  MODE(InOut)
 
 enum class MOpMode : uint8_t {
 #define MODE(name) name,
@@ -318,7 +322,8 @@ enum class MOpMode : uint8_t {
   OP(CGet)                                        \
   OP(CGetQuiet)                                   \
   OP(Isset)                                       \
-  OP(Empty)
+  OP(Empty)                                       \
+  OP(InOut)
 
 enum class QueryMOp : uint8_t {
 #define OP(name) name,
@@ -529,15 +534,16 @@ constexpr uint32_t kMaxConcatN = 4;
   O(UnsetN,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
                                                                         \
-  O(FPushFunc,       ONE(IVA),         ONE(CV),         NOV,        PF) \
+  O(FPushFunc,       TWO(IVA,I32LA),    ONE(CV),         NOV,       PF) \
   O(FPushFuncD,      TWO(IVA,SA),      NOV,             NOV,        PF) \
   O(FPushFuncU,      THREE(IVA,SA,SA), NOV,             NOV,        PF) \
-  O(FPushObjMethod,  TWO(IVA,                                           \
-                       OA(ObjMethodOp)), TWO(CV,CV),    NOV,        PF) \
+  O(FPushObjMethod,  THREE(IVA,                                         \
+                       OA(ObjMethodOp),                                 \
+                       I32LA),          TWO(CV,CV),      NOV,       PF) \
   O(FPushObjMethodD, THREE(IVA,SA,                                      \
                        OA(ObjMethodOp)), ONE(CV),       NOV,        PF) \
-  O(FPushClsMethod,  TWO(IVA,CAR),     ONE(CV),         NOV,        PF) \
-  O(FPushClsMethodF, TWO(IVA,CAR),     ONE(CV),         NOV,        PF) \
+  O(FPushClsMethod,  THREE(IVA,CAR,I32LA),ONE(CV),       NOV,       PF) \
+  O(FPushClsMethodF, THREE(IVA,CAR,I32LA),ONE(CV),       NOV,       PF) \
   O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        PF) \
   O(FPushCtor,       TWO(IVA,CAR),     NOV,             ONE(CV),    PF) \
   O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    PF) \
@@ -616,6 +622,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(Catch,           NA,               NOV,             ONE(CV),    NF) \
   O(OODeclExists,    ONE(OA(OODeclExistsOp)),                           \
                                        TWO(CV,CV),      ONE(CV),    NF) \
+  O(VerifyOutType,   ONE(IVA),         ONE(CV),         ONE(CV),    NF) \
   O(VerifyParamType, ONE(LA),          NOV,             NOV,        NF) \
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(VerifyRetTypeV,  NA,               ONE(VV),         ONE(VV),    NF) \
@@ -740,6 +747,7 @@ inline MOpMode getQueryMOpMode(QueryMOp op) {
     case QueryMOp::CGetQuiet:
     case QueryMOp::Isset:
     case QueryMOp::Empty: return MOpMode::None;
+    case QueryMOp::InOut: return MOpMode::InOut;
   }
   always_assert(false);
 }

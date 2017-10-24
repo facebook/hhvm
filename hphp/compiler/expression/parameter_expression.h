@@ -44,6 +44,7 @@ struct ParameterExpression : Expression {
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
+  void setMode(ParamMode m) { m_mode = m;}
   ParamMode mode() const { return m_mode;}
   bool isRef() const { return m_mode == ParamMode::Ref;}
   bool isOptional() const { return m_defaultValue != nullptr;}

@@ -123,6 +123,30 @@ void raise_hackarr_compat_notice(const std::string& msg) {
   raise_notice("Hack Array Compat: %s", msg.c_str());
 }
 
+void raise_call_to_undefined(const StringData* name, const Class* cls) {
+  if (LIKELY(!needsStripInOut(name))) {
+    if (cls) {
+      raise_error("Call to undefined method %s::%s()", cls->name()->data(),
+                  name->data());
+    }
+    raise_error("Call to undefined function %s()", name->data());
+  } else {
+    auto stripped = stripInOutSuffix(name);
+    if (cls) {
+      if (cls->lookupMethod(stripped)) {
+        raise_error("Call to method %s::%s() with incorrectly annotated inout "
+                    "parameter", cls->name()->data(), stripped->data());
+      }
+      raise_error("Call to undefined method %s::%s()", cls->name()->data(),
+                  stripped->data());
+    } else if (Unit::lookupFunc(stripped)) {
+      raise_error("Call to function %s() with incorrectly annotated inout "
+                  "parameter", stripped->data());
+    }
+    raise_error("Call to undefined function %s()", stripped->data());
+  }
+}
+
 void raise_recoverable_error(const char *fmt, ...) {
   std::string msg;
   va_list ap;

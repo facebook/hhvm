@@ -22,6 +22,7 @@
 #include <set>
 #include <utility>
 #include <vector>
+#include <boost/dynamic_bitset.hpp>
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/json.h"
@@ -88,6 +89,8 @@ struct FunctionScope : BlockScope,
   void setParamCounts(AnalysisResultConstRawPtr ar,
                       int minParam, int numDeclParam);
   void setRefParam(int index);
+  void clearInOutParam(int index);
+  bool isInOutParam(int index) const;
 
   bool hasUserAttr(const char *attr) const;
 
@@ -125,6 +128,8 @@ struct FunctionScope : BlockScope,
   void setNextLSB(bool f) { m_nextLSB = f; }
 
   bool needsLocalThis() const;
+  bool hasInOutParams() const;
+  bool hasRefParams() const;
 
   bool isNamed(const char* n) const;
   bool isNamed(const std::string& n) const {
@@ -233,7 +238,8 @@ private:
   int m_numDeclParams;
   int m_attribute;
   std::vector<std::string> m_paramNames;
-  std::vector<bool> m_refs;
+  boost::dynamic_bitset<> m_refs;
+  boost::dynamic_bitset<> m_inOuts;
   ModifierExpressionPtr m_modifiers;
   UserAttributeMap m_userAttributes;
 

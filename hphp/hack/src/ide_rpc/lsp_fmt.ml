@@ -415,11 +415,10 @@ let print_showMessageRequest
 (************************************************************************)
 
 let print_progress (id: int) (label: string option) : json =
-  let open Progress in
   let r = { Progress.id; label; } in
   JSON_Object [
-    "id", r.id |> int_;
-    "label", match r.label with None -> JSON_Null | Some s -> JSON_String s;
+    "id", r.Progress.id |> int_;
+    "label", match r.Progress.label with None -> JSON_Null | Some s -> JSON_String s;
   ]
 
 
@@ -428,11 +427,10 @@ let print_progress (id: int) (label: string option) : json =
 (************************************************************************)
 
 let print_actionRequired (id: int) (label: string option) : json =
-  let open ActionRequired in
   let r = { ActionRequired.id; label; } in
   JSON_Object [
-    "id", r.id |> int_;
-    "label", match r.label with None -> JSON_Null | Some s -> JSON_String s;
+    "id", r.ActionRequired.id |> int_;
+    "label", match r.ActionRequired.label with None -> JSON_Null | Some s -> JSON_String s;
   ]
 
 

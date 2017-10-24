@@ -22,126 +22,6 @@ type env = {
 
 
 (************************************************************************)
-(** Conversions - ad-hoc ones written as needed them, not systematic   **)
-(************************************************************************)
-
-let url_scheme_regex = Str.regexp "^\\([a-zA-Z][a-zA-Z0-9+.-]+\\):"
-(* this requires schemes with 2+ characters, so "c:\path" isn't considered a scheme *)
-
-let lsp_uri_to_path (uri: string) : string =
-  if Str.string_match url_scheme_regex uri 0 then
-    let scheme = Str.matched_group 1 uri in
-    if scheme = "file" then
-      File_url.parse uri
-    else
-      raise (Error.InvalidParams (Printf.sprintf "Not a valid file url '%s'" uri))
-  else
-    uri
-
-let path_to_lsp_uri (path: string) ~(default_path: string): string =
-  if path = "" then File_url.create default_path
-  else File_url.create path
-
-let lsp_textDocumentIdentifier_to_filename
-    (identifier: Lsp.TextDocumentIdentifier.t)
-  : string =
-  let open Lsp.TextDocumentIdentifier in
-  lsp_uri_to_path identifier.uri
-
-let lsp_position_to_ide (position: Lsp.position) : Ide_api_types.position =
-  { Ide_api_types.
-    line = position.line + 1;
-    column = position.character + 1;
-  }
-
-let lsp_file_position_to_hack (params: Lsp.TextDocumentPositionParams.t)
-  : string * int * int =
-  let open Lsp.TextDocumentPositionParams in
-  let {Ide_api_types.line; column;} = lsp_position_to_ide params.position in
-  let filename = lsp_textDocumentIdentifier_to_filename params.textDocument
-  in
-  (filename, line, column)
-
-let hack_pos_to_lsp_range (pos: 'a Pos.pos) : Lsp.range =
-  let line1, col1, line2, col2 = Pos.destruct_range pos in
-  {
-    start = {line = line1 - 1; character = col1 - 1;};
-    end_ = {line = line2 - 1; character = col2 - 1;};
-  }
-
-let hack_pos_to_lsp_location (pos: string Pos.pos) ~(default_path: string): Lsp.Location.t =
-  let open Lsp.Location in
-  {
-    uri = path_to_lsp_uri (Pos.filename pos) ~default_path;
-    range = hack_pos_to_lsp_range pos;
-  }
-
-let ide_range_to_lsp (range: Ide_api_types.range) : Lsp.range =
-  { Lsp.
-    start = { Lsp.
-              line = range.Ide_api_types.st.Ide_api_types.line - 1;
-              character = range.Ide_api_types.st.Ide_api_types.column - 1;
-            };
-    end_ = { Lsp.
-             line = range.Ide_api_types.ed.Ide_api_types.line - 1;
-             character = range.Ide_api_types.ed.Ide_api_types.column - 1;
-           };
-  }
-
-let lsp_range_to_ide (range: Lsp.range) : Ide_api_types.range =
-  let open Ide_api_types in
-  {
-    st = lsp_position_to_ide range.start;
-    ed = lsp_position_to_ide range.end_;
-  }
-
-let hack_symbol_definition_to_lsp_location
-    (symbol: string SymbolDefinition.t)
-    ~(default_path: string)
-  : Lsp.Location.t =
-  let open SymbolDefinition in
-  hack_pos_to_lsp_location symbol.pos ~default_path
-
-let hack_errors_to_lsp_diagnostic
-    (filename: string)
-    (errors: Pos.absolute Errors.error_ list)
-  : PublishDiagnostics.params =
-  let open Lsp.Location in
-  let location_message (error: Pos.absolute * string) : (Lsp.Location.t * string) =
-    let (pos, message) = error in
-    let {uri; range;} = hack_pos_to_lsp_location pos ~default_path:filename in
-    ({Location.uri; range;}, message)
-  in
-  let hack_error_to_lsp_diagnostic (error: Pos.absolute Errors.error_) =
-    let all_messages = Errors.to_list error |> List.map ~f:location_message in
-    let (first_message, additional_messages) = match all_messages with
-      | hd :: tl -> (hd, tl)
-      | [] -> failwith "Expected at least one error in the error list"
-    in
-    let ({range; _}, message) = first_message in
-    let relatedLocations = additional_messages |> List.map ~f:(fun (location, message) ->
-      { PublishDiagnostics.
-        relatedLocation = location;
-        relatedMessage = message;
-      }) in
-    { Lsp.PublishDiagnostics.
-      range;
-      severity = Some PublishDiagnostics.Error;
-      code = Some (Errors.get_code error);
-      source = Some "Hack";
-      message;
-      relatedLocations;
-    }
-  in
-  (* The caller is required to give us a non-empty filename. If it is empty,  *)
-  (* the following path_to_lsp_uri will fall back to the default path - which *)
-  (* is also empty - and throw, logging appropriate telemetry.                *)
-  { Lsp.PublishDiagnostics.
-    uri = path_to_lsp_uri filename ~default_path:"";
-    diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
-  }
-
-(************************************************************************)
 (** Protocol orchestration & helpers                                   **)
 (************************************************************************)
 
@@ -157,18 +37,15 @@ type server_conn = {
   pending_messages: ServerCommandTypes.push Queue.t;
 }
 
-type progress_id = Progress_id of int | Progress_none
-type actionRequired_id = ActionRequired_id of int | ActionRequired_none
-
 module Main_env = struct
   type t = {
     conn: server_conn;
     needs_idle: bool;
     uris_with_diagnostics: SSet.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
-    dialog_cancel: (unit -> unit) option; (* "hack server is now ready" dialog *)
-    progress_id: progress_id; (* "typechecking..." *)
-    actionRequired_id: actionRequired_id; (* "save any file to trigger a global recheck" *)
+    dialog: ShowMessageRequest.t; (* "hack server is now ready" *)
+    progress: Progress.t; (* "typechecking..." *)
+    actionRequired: ActionRequired.t; (* "save any file to trigger a global recheck" *)
   }
 end
 
@@ -180,8 +57,8 @@ module In_init_env = struct
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     tail_env: Tail.env;
     has_reported_progress: bool;
-    dialog_cancel: (unit -> unit) option; (* "hack server is busy" dialog *)
-    progress_id: progress_id; (* "hh_server is initializing [naming]" *)
+    dialog: ShowMessageRequest.t; (* "hack server is busy" *)
+    progress: Progress.t; (* "hh_server is initializing [naming]" *)
   }
 end
 
@@ -191,9 +68,9 @@ module Lost_env = struct
     prev_hhconfig_version: string option;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     lock_file: string;
-    dialog_cancel: (unit -> unit) option; (* "hh_server stopped" dialog *)
-    actionRequired_id: actionRequired_id; (* "hh_server stopped" *)
-    progress_id: progress_id; (* "hh_server monitor is waiting for a rebase to settle" *)
+    dialog: ShowMessageRequest.t; (* "hh_server stopped" *)
+    actionRequired: ActionRequired.t; (* "hh_server stopped" *)
+    progress: Progress.t; (* "hh_server monitor is waiting for a rebase to settle" *)
   }
 
   and how_to_explain_loss_to_user =
@@ -227,9 +104,10 @@ type state =
   (* notifies us that we can exit.                                       *)
   | Post_shutdown
 
-module Jsonrpc = Jsonrpc.Make(struct type t = state end)
+let initialize_params: Hh_json.json option ref = ref None
 
-let initialize_params: Initialize.params option ref = ref None
+module Jsonrpc = Jsonrpc.Make (struct type t = state end)
+module Lsp_helpers = Lsp_helpers.Make (struct type t = state let get () = !initialize_params end)
 
 let can_autostart_after_mismatch: bool ref = ref true
 
@@ -294,30 +172,6 @@ let get_uris_with_unsaved_changes (state: state): SSet.t =
   | _ -> SSet.empty
 
 
-let get_root () : Path.t option =
-  let open Lsp.Initialize in
-  match !initialize_params with
-  | None -> None
-  | Some params ->
-    let path = match params.rootUri with
-      | Some uri -> Some (lsp_uri_to_path uri)
-      | None -> params.rootPath
-    in
-    Some (ClientArgsUtils.get_root path)
-
-
-let supports_progress () : bool =
-  let open Lsp.Initialize in
-  Option.value_map !initialize_params
-    ~default:false ~f:(fun params -> params.client_capabilities.window.progress)
-
-
-let supports_actionRequired () : bool =
-  let open Lsp.Initialize in
-  Option.value_map !initialize_params
-    ~default:false ~f:(fun params -> params.client_capabilities.window.actionRequired)
-
-
 let rpc
     (server_conn: server_conn)
     (command: 'a ServerCommandTypes.t)
@@ -335,74 +189,6 @@ let rpc
     let message = Printexc.to_string e in
     let stack = Printexc.get_backtrace () in
     raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
-
-
-(* notify_progress: for sending/updating/closing progress messages.           *)
-(* To start a new indicator: id=None, message=Some, and get back the new id.  *)
-(* To update an existing one: id=Some, message=Some, and get back id.         *)
-(* To close an existing one: id=Some, message=None, and get back None.        *)
-(* No-op, for convenience: id=None, message=None, and you get back None.      *)
-(* messages. To start a new progress notifier, put id=None and message=Some.  *)
-let progress_and_actionRequired_counter = ref 0
-
-let notify_progress (id: progress_id) (message: string option) : progress_id =
-  match id, message with
-  | Progress_none, Some message ->
-    if supports_progress () then
-      let () = incr progress_and_actionRequired_counter in
-      let id = !progress_and_actionRequired_counter in
-      let () = print_progress id (Some message) |> Jsonrpc.notify "window/progress" in
-      Progress_id id
-    else
-      Progress_none
-  | Progress_id id, Some message ->
-    print_progress id (Some message) |> Jsonrpc.notify "window/progress";
-    Progress_id id
-  | Progress_id id, None ->
-    print_progress id None |> Jsonrpc.notify "window/progress";
-    Progress_none
-  | Progress_none, None ->
-    Progress_none
-
-let notify_actionRequired (id: actionRequired_id) (message: string option) : actionRequired_id =
-  match id, message with
-  | ActionRequired_none, Some message ->
-    if supports_actionRequired () then
-      let () = incr progress_and_actionRequired_counter in
-      let id = !progress_and_actionRequired_counter in
-      let () = print_actionRequired id (Some message) |> Jsonrpc.notify "window/actionRequired" in
-      ActionRequired_id id
-    else
-      ActionRequired_none
-  | ActionRequired_id id, Some message ->
-    print_actionRequired id (Some message) |> Jsonrpc.notify "window/actionRequired";
-    ActionRequired_id id
-  | ActionRequired_id id, None ->
-    print_actionRequired id None |> Jsonrpc.notify "window/actionRequired";
-    ActionRequired_none
-  | ActionRequired_none, None ->
-    ActionRequired_none
-
-
-let client_log (level: Lsp.MessageType.t) (message: string) : unit =
-  print_logMessage level message |> Jsonrpc.notify "telemetry/event"
-
-let hack_log_error
-    (event: event option)
-    (message: string)
-    (stack: string)
-    (source: string)
-    (start_handle_t: float)
-  : unit =
-  let root = get_root () in
-  match event with
-  | Some Client_message c ->
-    let open Jsonrpc in
-    let json = c.json |> Hh_json.json_truncate |> Hh_json.json_to_string in
-    HackEventLogger.client_lsp_method_exception
-      root c.method_ (kind_to_string c.kind) c.timestamp start_handle_t json message stack source
-  | _ ->
-    HackEventLogger.client_lsp_exception root message stack source
 
 
 (* Determine whether to read a message from the client (the editor) or the
@@ -487,24 +273,6 @@ let get_next_event (state: state) (client: Jsonrpc.queue) : event =
     end
 
 
-
-(* cancel_if_stale: If a message is stale, throw the necessary exception to
-   cancel it. A message is considered stale if it's sufficiently old and there
-   are other messages in the queue that are newer than it. *)
-let short_timeout = 2.5
-let long_timeout = 15.0
-
-let cancel_if_stale
-    (client: Jsonrpc.queue)
-    (message: Jsonrpc.message)
-    (timeout: float)
-  : unit =
-  let message_received_time = message.Jsonrpc.timestamp in
-  let time_elapsed = (Unix.gettimeofday ()) -. message_received_time in
-  if time_elapsed >= timeout && Jsonrpc.has_message client
-  then raise (Error.RequestCancelled "request timed out")
-
-
 (* respond_to_error: if we threw an exception during the handling of a request,
    report the exception to the client as the response to their request. *)
 let respond_to_error (event: event option) (e: exn) (stack: string): unit =
@@ -514,48 +282,144 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
     print_error e stack |> Jsonrpc.respond c
   | _ ->
     let (code, message, _original_data) = get_error_info e in
-    client_log Lsp.MessageType.ErrorMessage (Printf.sprintf "%s [%i]\n%s" message code stack)
+    Lsp_helpers.telemetry_error (Printf.sprintf "%s [%i]\n%s" message code stack)
 
 
 (* dismiss_ui: dismisses all dialogs, progress- and action-required           *)
 (* indicators and diagnostics in a state.                                     *)
 let dismiss_ui (state: state) : state =
-  let dismiss_dialog (cancel: (unit->unit) option) : (unit->unit) option =
-    let () = Option.call ~f:cancel () in
-    None
-  in
-  let dismiss_diagnostic (uri: string) : unit =
-    let message = { Lsp.PublishDiagnostics.uri; diagnostics = []; } in
-    message |> print_diagnostics |> Jsonrpc.notify "textDocument/publishDiagnostics"
-  in
-  let dismiss_diagnostics (diagnostic_uris: SSet.t) : SSet.t =
-    let () = SSet.iter dismiss_diagnostic diagnostic_uris in
-    SSet.empty
-  in
   match state with
   | In_init ienv ->
     let open In_init_env in
     In_init { ienv with
-      dialog_cancel = dismiss_dialog ienv.dialog_cancel;
-      progress_id = notify_progress ienv.progress_id None;
+      dialog = Lsp_helpers.dismiss_showMessageRequest ienv.dialog;
+      progress = Lsp_helpers.notify_progress ienv.progress None;
     }
   | Main_loop menv ->
     let open Main_env in
     Main_loop { menv with
-      uris_with_diagnostics = dismiss_diagnostics menv.uris_with_diagnostics;
-      dialog_cancel = dismiss_dialog menv.dialog_cancel;
-      progress_id = notify_progress menv.progress_id None;
-      actionRequired_id = notify_actionRequired menv.actionRequired_id None;
+      uris_with_diagnostics = Lsp_helpers.dismiss_diagnostics menv.uris_with_diagnostics;
+      dialog = Lsp_helpers.dismiss_showMessageRequest menv.dialog;
+      progress = Lsp_helpers.notify_progress menv.progress None;
+      actionRequired = Lsp_helpers.notify_actionRequired menv.actionRequired None;
     }
   | Lost_server lenv ->
     let open Lost_env in
     Lost_server { lenv with
-      dialog_cancel = dismiss_dialog lenv.dialog_cancel;
-      actionRequired_id = notify_actionRequired lenv.actionRequired_id None;
-      progress_id = notify_progress lenv.progress_id None;
+      dialog = Lsp_helpers.dismiss_showMessageRequest lenv.dialog;
+      actionRequired = Lsp_helpers.notify_actionRequired lenv.actionRequired None;
+      progress = Lsp_helpers.notify_progress lenv.progress None;
     }
   | Pre_init -> Pre_init
   | Post_shutdown -> Post_shutdown
+
+
+(************************************************************************)
+(** Conversions - ad-hoc ones written as needed them, not systematic   **)
+(************************************************************************)
+
+let get_root () : Path.t option =
+  let path_opt = Lsp_helpers.get_root () in
+  if Option.is_none path_opt then
+    None (* None for us means "haven't yet received initialize so we don't know" *)
+  else
+    Some (ClientArgsUtils.get_root path_opt) (* None for ClientArgsUtils means "." *)
+
+let lsp_uri_to_path = Lsp_helpers.lsp_uri_to_path
+let path_to_lsp_uri = Lsp_helpers.path_to_lsp_uri
+
+let lsp_position_to_ide (position: Lsp.position) : Ide_api_types.position =
+  { Ide_api_types.
+    line = position.line + 1;
+    column = position.character + 1;
+  }
+
+let lsp_file_position_to_hack (params: Lsp.TextDocumentPositionParams.t)
+  : string * int * int =
+  let open Lsp.TextDocumentPositionParams in
+  let {Ide_api_types.line; column;} = lsp_position_to_ide params.position in
+  let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument
+  in
+  (filename, line, column)
+
+let hack_pos_to_lsp_range (pos: 'a Pos.pos) : Lsp.range =
+  let line1, col1, line2, col2 = Pos.destruct_range pos in
+  {
+    start = {line = line1 - 1; character = col1 - 1;};
+    end_ = {line = line2 - 1; character = col2 - 1;};
+  }
+
+let hack_pos_to_lsp_location (pos: string Pos.pos) ~(default_path: string): Lsp.Location.t =
+  let open Lsp.Location in
+  {
+    uri = path_to_lsp_uri (Pos.filename pos) ~default_path;
+    range = hack_pos_to_lsp_range pos;
+  }
+
+let ide_range_to_lsp (range: Ide_api_types.range) : Lsp.range =
+  { Lsp.
+    start = { Lsp.
+              line = range.Ide_api_types.st.Ide_api_types.line - 1;
+              character = range.Ide_api_types.st.Ide_api_types.column - 1;
+            };
+    end_ = { Lsp.
+             line = range.Ide_api_types.ed.Ide_api_types.line - 1;
+             character = range.Ide_api_types.ed.Ide_api_types.column - 1;
+           };
+  }
+
+let lsp_range_to_ide (range: Lsp.range) : Ide_api_types.range =
+  let open Ide_api_types in
+  {
+    st = lsp_position_to_ide range.start;
+    ed = lsp_position_to_ide range.end_;
+  }
+
+let hack_symbol_definition_to_lsp_location
+    (symbol: string SymbolDefinition.t)
+    ~(default_path: string)
+  : Lsp.Location.t =
+  let open SymbolDefinition in
+  hack_pos_to_lsp_location symbol.pos ~default_path
+
+let hack_errors_to_lsp_diagnostic
+    (filename: string)
+    (errors: Pos.absolute Errors.error_ list)
+  : PublishDiagnostics.params =
+  let open Lsp.Location in
+  let location_message (error: Pos.absolute * string) : (Lsp.Location.t * string) =
+    let (pos, message) = error in
+    let {uri; range;} = hack_pos_to_lsp_location pos ~default_path:filename in
+    ({Location.uri; range;}, message)
+  in
+  let hack_error_to_lsp_diagnostic (error: Pos.absolute Errors.error_) =
+    let all_messages = Errors.to_list error |> List.map ~f:location_message in
+    let (first_message, additional_messages) = match all_messages with
+      | hd :: tl -> (hd, tl)
+      | [] -> failwith "Expected at least one error in the error list"
+    in
+    let ({range; _}, message) = first_message in
+    let relatedLocations = additional_messages |> List.map ~f:(fun (location, message) ->
+      { PublishDiagnostics.
+        relatedLocation = location;
+        relatedMessage = message;
+      }) in
+    { Lsp.PublishDiagnostics.
+      range;
+      severity = Some PublishDiagnostics.Error;
+      code = Some (Errors.get_code error);
+      source = Some "Hack";
+      message;
+      relatedLocations;
+    }
+  in
+  (* The caller is required to give us a non-empty filename. If it is empty,  *)
+  (* the following path_to_lsp_uri will fall back to the default path - which *)
+  (* is also empty - and throw, logging appropriate telemetry.                *)
+  { Lsp.PublishDiagnostics.
+    uri = path_to_lsp_uri filename ~default_path:"";
+    diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
+  }
 
 
 (************************************************************************)
@@ -697,14 +561,10 @@ let do_definition (conn: server_conn) (params: Definition.params)
 let make_ide_completion_response (result:AutocompleteTypes.ide_result) =
   let open AutocompleteTypes in
   let open Completion in
-  let open Initialize in
   (* We use snippets to provide parentheses+arguments when autocompleting     *)
   (* method calls e.g. "$c->|" ==> "$c->foo($arg1)". But we'll only do this   *)
   (* there's nothing after the caret: no "$c->|(1)" -> "$c->foo($arg1)(1)"    *)
   let is_caret_followed_by_lparen = result.char_at_pos = '(' in
-  let client_supports_snippets = Option.value_map !initialize_params
-      ~default:false ~f:(fun params ->
-      params.client_capabilities.textDocument.completion.completionItem.snippetSupport) in
 
   let rec hack_completion_to_lsp (completion: complete_autocomplete_result)
     : Completion.completionItem =
@@ -762,7 +622,7 @@ let make_ide_completion_response (result:AutocompleteTypes.ide_result) =
       Printf.sprintf "(%s)" params
   and hack_to_insert (completion: complete_autocomplete_result) : (string * insertTextFormat) =
     match completion.func_details with
-    | Some details when client_supports_snippets && not is_caret_followed_by_lparen ->
+    | Some details when Lsp_helpers.supports_snippets () && not is_caret_followed_by_lparen ->
       (* "method(${1:arg1}, ...)" but for args we just use param names. *)
       let f i param = Printf.sprintf "${%i:%s}" (i + 1) param.param_name in
       let params = String.concat ", " (List.mapi details.params ~f) in
@@ -895,7 +755,7 @@ let do_findReferences
   let open FindReferences in
 
   let {Ide_api_types.line; column;} = lsp_position_to_ide params.position in
-  let filename = lsp_textDocumentIdentifier_to_filename params.textDocument in
+  let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument in
   let include_defs = params.context.includeDeclaration in
   let command = ServerCommandTypes.IDE_FIND_REFS
       (ServerUtils.FileName filename, line, column, include_defs) in
@@ -930,7 +790,7 @@ let do_typeCoverage (conn: server_conn) (params: TypeCoverage.params)
   : TypeCoverage.result =
   let open TypeCoverage in
 
-  let filename = lsp_textDocumentIdentifier_to_filename params.textDocument in
+  let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument in
   let command = ServerCommandTypes.COVERAGE_LEVELS (ServerUtils.FileName filename) in
   let results: Coverage_level.result = rpc conn command in
   let results = Coverage_level.merge_adjacent_results results in
@@ -1045,8 +905,8 @@ let do_server_busy (state: state) (status: ServerCommandTypes.busy_status) : sta
   match state with
   | Main_loop menv ->
     Main_loop { menv with
-      progress_id = notify_progress menv.progress_id progress;
-      actionRequired_id = notify_actionRequired menv.actionRequired_id action;
+      progress = Lsp_helpers.notify_progress menv.progress progress;
+      actionRequired = Lsp_helpers.notify_actionRequired menv.actionRequired action;
     }
   | _ ->
     state
@@ -1097,8 +957,8 @@ let report_connect_start
   : state =
   let open In_init_env in
   assert (not ienv.has_reported_progress);
-  assert (ienv.dialog_cancel = None);
-  assert (ienv.progress_id = Progress_none);
+  assert (ienv.dialog = ShowMessageRequest.None);
+  assert (ienv.progress = Progress.None);
   (* Our goal behind progress reporting is to let the user know when things   *)
   (* won't be instantaneous, and to show that things are working as expected. *)
   (* Upon connection, if it connects immediately (before we've had 1s idle)   *)
@@ -1108,23 +968,17 @@ let report_connect_start
   (* report_progress_end we put up a "ready" dialog.                          *)
 
   (* dialog... *)
-  let clear_cancel_flag state = match state with
-    | In_init ienv -> In_init {ienv with In_init_env.dialog_cancel = None}
+  let handle_result ~result:_ state = match state with
+    | In_init ienv -> In_init {ienv with In_init_env.dialog = ShowMessageRequest.None}
     | _ -> state in
-  let handle_result ~result:_ state = clear_cancel_flag state in
-  let handle_error ~code:_ ~message:_ ~data:_ state = clear_cancel_flag state in
-  let req = print_showMessageRequest MessageType.InfoMessage
-      "Waiting for hh_server to be ready..." [] in
-  let cancel = Jsonrpc.request handle_result handle_error "window/showMessageRequest" req in
+  let handle_error ~code:_ ~message:_ ~data:_ state = handle_result "" state in
+  let dialog = Lsp_helpers.request_showMessage handle_result handle_error
+    MessageType.InfoMessage "Waiting for hh_server to be ready..." [] in
 
   (* progress indicator... *)
-  let progress_id = notify_progress Progress_none (Some "hh_server initializing") in
+  let progress = Lsp_helpers.notify_progress Progress.None (Some "hh_server initializing") in
 
-  In_init { ienv with
-    has_reported_progress = true;
-    dialog_cancel = Some cancel;
-    progress_id;
-  }
+  In_init { ienv with has_reported_progress = true; dialog; progress; }
 
 
 let report_connect_progress
@@ -1147,7 +1001,7 @@ let report_connect_progress
       tail_msg delay_in_secs
   in
   In_init { ienv with
-    progress_id = notify_progress ienv.progress_id (Some msg);
+    progress = Lsp_helpers.notify_progress ienv.progress (Some msg);
   }
 
 
@@ -1162,9 +1016,9 @@ let report_connect_end
       needs_idle = true;
       uris_with_diagnostics = SSet.empty;
       uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
-      dialog_cancel = None;
-      progress_id = Progress_none;
-      actionRequired_id = ActionRequired_none;
+      dialog = ShowMessageRequest.None;
+      progress = Progress.None;
+      actionRequired = ActionRequired.None;
     }
   in
   (* alert the user that hack is ready, either by console log or by dialog *)
@@ -1172,15 +1026,13 @@ let report_connect_end
   let seconds = int_of_float (time -. ienv.start_time) in
   let msg = Printf.sprintf "hh_server is now ready, after %i seconds." seconds in
   if (time -. ienv.start_time > 30.0) then
-    let clear_cancel_flag state = match state with
-      | Main_loop menv -> Main_loop {menv with Main_env.dialog_cancel = None}
-      | _ -> state
-    in
-    let handle_result ~result:_ state = clear_cancel_flag state in
-    let handle_error ~code:_ ~message:_ ~data:_ state = clear_cancel_flag state in
-    let req = print_showMessageRequest MessageType.InfoMessage msg [] in
-    let cancel = Jsonrpc.request handle_result handle_error "window/showMessageRequest" req in
-    Main_loop {menv with Main_env.dialog_cancel = Some cancel;}
+    let handle_result ~result:_ state = match state with
+      | Main_loop menv -> Main_loop {menv with Main_env.dialog = ShowMessageRequest.None}
+      | _ -> state in
+    let handle_error ~code:_ ~message:_ ~data:_ state = handle_result "" state in
+    let dialog = Lsp_helpers.request_showMessage handle_result handle_error
+      MessageType.InfoMessage msg [] in
+    Main_loop {menv with Main_env.dialog;}
   else
     Main_loop menv
 
@@ -1346,8 +1198,8 @@ let rec connect (state: state) : state =
       file_edits = ImmQueue.empty;
       tail_env;
       has_reported_progress = false;
-      dialog_cancel = None;
-      progress_id = Progress_none;
+      dialog = ShowMessageRequest.None;
+      progress = Progress.None;
     }
   with e ->
     (* Exit_with Out_of_retries, Exit_with Out_of_time: raised when we        *)
@@ -1361,7 +1213,7 @@ let rec connect (state: state) : state =
     let stack = Printexc.get_backtrace () in
     let (code, message, _data) = Lsp_fmt.get_error_info e in
     let longMessage = Printf.sprintf "connect failed: %s [%i]\n%s" message code stack in
-    let () = client_log Lsp.MessageType.ErrorMessage longMessage in
+    let () = Lsp_helpers.telemetry_error longMessage in
     let open Exit_status in
     let explanation = match e with
       | Exit_with Out_of_retries
@@ -1410,7 +1262,7 @@ and reconnect_from_lost_if_necessary
         "\nVersion in hhconfig that spawned the current hh_client: " ^ prev_version_str ^
         "\nVersion in hhconfig currently: " ^ current_version_str ^
         "\n" in
-      client_log Lsp.MessageType.InfoMessage message;
+      Lsp_helpers.telemetry_log message;
       exit_fail ()
     else
       connect state
@@ -1450,7 +1302,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
   (* These helper functions are for the dialog *)
   let clear_dialog_flag (state: state) : state =
     match state with
-    | Lost_server lenv -> Lost_server { lenv with dialog_cancel = None; }
+    | Lost_server lenv -> Lost_server { lenv with dialog = ShowMessageRequest.None; }
     | _ -> state
   in
   let handle_error ~code:_ ~message:_ ~data:_ state =
@@ -1479,32 +1331,32 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
       prev_hhconfig_version;
       uris_with_unsaved_changes;
       lock_file;
-      dialog_cancel = None;
-      actionRequired_id = ActionRequired_none;
-      progress_id = Progress_none;
+      dialog = ShowMessageRequest.None;
+      actionRequired = ActionRequired.None;
+      progress = Progress.None;
     } in
-    client_log Lsp.MessageType.InfoMessage "Reconnecting immediately to hh_server";
+    Lsp_helpers.telemetry_log "Reconnecting immediately to hh_server";
     let new_state = reconnect_from_lost_if_necessary lost_state `Force_regain in
     new_state
   else
-    let progress_id, actionRequired_id, dialog_cancel = match p.explanation with
+    let progress, actionRequired, dialog = match p.explanation with
       | Wait_required msg ->
-        let progress_id = notify_progress Progress_none (Some msg) in
-        progress_id, ActionRequired_none, None
+        let progress = Lsp_helpers.notify_progress Progress.None (Some msg) in
+        progress, ActionRequired.None, ShowMessageRequest.None
       | Action_required msg ->
-        let actionRequired_id = notify_actionRequired ActionRequired_none (Some msg) in
-        let dialog_cancel = print_showMessageRequest MessageType.ErrorMessage msg ["Restart"]
-          |> Jsonrpc.request handle_result handle_error "window/showMessageRequest" in
-        Progress_none, actionRequired_id, Some dialog_cancel
+        let actionRequired = Lsp_helpers.notify_actionRequired ActionRequired.None (Some msg) in
+        let dialog = Lsp_helpers.request_showMessage handle_result handle_error
+          MessageType.ErrorMessage msg ["Restart"] in
+        Progress.None, actionRequired, dialog
     in
     Lost_server { Lost_env.
       p;
       prev_hhconfig_version;
       uris_with_unsaved_changes;
       lock_file;
-      dialog_cancel;
-      actionRequired_id;
-      progress_id;
+      dialog;
+      actionRequired;
+      progress;
     }
 
 
@@ -1515,13 +1367,14 @@ let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
   let open Jsonrpc in
   let open Main_env in
   match state with
-  | Main_loop ({dialog_cancel = Some cancel; _} as menv) -> begin
+  | Main_loop menv -> begin
       match event with
       | Client_message {kind = Jsonrpc.Response; _} ->
         state
       | Client_message _
       | Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
-        cancel (); Main_loop { menv with Main_env.dialog_cancel = None; }
+        let dialog = Lsp_helpers.dismiss_showMessageRequest menv.dialog in
+        Main_loop { menv with dialog; }
       | _ ->
         state
     end
@@ -1586,6 +1439,37 @@ let log_response_if_necessary
   | _ -> ()
 
 
+let hack_log_error
+    (event: event option)
+    (message: string)
+    (stack: string)
+    (source: string)
+    (start_handle_t: float)
+  : unit =
+  let root = get_root () in
+  match event with
+  | Some Client_message c ->
+    let open Jsonrpc in
+    let json = c.json |> Hh_json.json_truncate |> Hh_json.json_to_string in
+    HackEventLogger.client_lsp_method_exception
+      root c.method_ (kind_to_string c.kind) c.timestamp start_handle_t json message stack source
+  | _ ->
+    HackEventLogger.client_lsp_exception root message stack source
+
+
+(* cancel_if_stale: If a message is stale, throw the necessary exception to
+   cancel it. A message is considered stale if it's sufficiently old and there
+   are other messages in the queue that are newer than it. *)
+let short_timeout = 2.5
+let long_timeout = 15.0
+
+let cancel_if_stale (client: Jsonrpc.queue) (message: Jsonrpc.message) (timeout: float) : unit =
+  let message_received_time = message.Jsonrpc.timestamp in
+  let time_elapsed = (Unix.gettimeofday ()) -. message_received_time in
+  if time_elapsed >= timeout && Jsonrpc.has_message client
+  then raise (Error.RequestCancelled "request timed out")
+
+
 (************************************************************************)
 (** Message handling                                                   **)
 (************************************************************************)
@@ -1626,7 +1510,7 @@ let handle_event
 
   (* initialize request *)
   | Pre_init, Client_message c when c.method_ = "initialize" ->
-    initialize_params := Some (parse_initialize c.params);
+    initialize_params := c.params;
     state := connect !state;
     do_initialize () |> print_initialize |> Jsonrpc.respond c
 
@@ -1852,7 +1736,7 @@ let main (env: env) : 'a =
       if !state <> Post_shutdown then begin
         let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
         hack_log_error !ref_event edata.message stack "from_server" start_handle_t;
-        client_log Lsp.MessageType.ErrorMessage (edata.message ^ ", from_server\n" ^ stack);
+        Lsp_helpers.telemetry_error (edata.message ^ ", from_server\n" ^ stack);
         (* The server never tells us why it closed the connection - it simply   *)
         (* closes. We don't have privilege to inspect its exit status.          *)
         (* The monitor is responsible for detecting server closure and exit     *)
@@ -1882,12 +1766,12 @@ let main (env: env) : 'a =
     | Client_fatal_connection_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
       hack_log_error !ref_event edata.message stack "from_client" start_handle_t;
-      client_log Lsp.MessageType.ErrorMessage (edata.message ^ ", from_client\n" ^ stack);
+      Lsp_helpers.telemetry_error (edata.message ^ ", from_client\n" ^ stack);
       exit_fail ()
     | Client_recoverable_connection_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
       hack_log_error !ref_event edata.message stack "from_client" start_handle_t;
-      client_log Lsp.MessageType.ErrorMessage (edata.message ^ ", from_client\n" ^ stack);
+      Lsp_helpers.telemetry_error (edata.message ^ ", from_client\n" ^ stack);
     | e ->
       let message = Printexc.to_string e in
       let stack = Printexc.get_backtrace () in

@@ -683,7 +683,9 @@ end
 
 (* ShowMessage request, method="window/showMessageRequest" *)
 module ShowMessageRequest = struct
-  type params = showMessageRequestParams
+  type t = Some of {cancel: unit -> unit;} | None
+
+  and params = showMessageRequestParams
 
   and showMessageRequestParams = {
     type_: MessageType.t;
@@ -699,7 +701,9 @@ end
 
 (* Progress notification, method="window/progress" *)
 module Progress = struct
-  type params = progressParams
+  type t = Some of {id: int; label: string;} | None
+
+  and params = progressParams
 
   and progressParams = {
     (* LSP progress notifications have a lifetime that starts with their 1st  *)
@@ -714,7 +718,9 @@ end
 
 (* ActionRequired notification, method="window/actionRequired" *)
 module ActionRequired = struct
-  type params = actionRequiredParams
+  type t = Some of {id: int; label: string;} | None
+
+  and params = actionRequiredParams
 
   and actionRequiredParams = {
     (* See progressParams.id for an explanation of this field. *)

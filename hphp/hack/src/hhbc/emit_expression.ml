@@ -1712,10 +1712,15 @@ and emit_arg env i is_splatted (pos, expr_ as expr) =
   | _ -> expr_ in
   let default () =
     let instrs, flavor = emit_flavored_expr env expr in
-    let fpass_kind = match flavor with
-      | Flavor.Cell -> instr_fpass (get_passByRefKind is_splatted expr) i hint
-      | Flavor.Ref -> instr_fpassv i hint
-      | Flavor.ReturnVal -> instr_fpassr i hint
+    let instrs =
+      if is_splatted && flavor = Flavor.ReturnVal
+      then gather [ instrs; instr_unboxr ] else instrs
+    in
+    let fpass_kind = match is_splatted, flavor with
+      | false, Flavor.Ref -> instr_fpassv i hint
+      | false, Flavor.ReturnVal -> instr_fpassr i hint
+      | false, Flavor.Cell
+      | true, _ -> instr_fpass (get_passByRefKind is_splatted expr) i hint
     in
     gather [
       instrs;

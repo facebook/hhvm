@@ -597,7 +597,7 @@ inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
     uint32_t fragBytes = remBytes;
     assert(fragBytes >= kSmallSizeAlign);
     assert((fragBytes & kSmallSizeAlignMask) == 0);
-    unsigned fragInd = smallSize2Index(fragBytes + 1) - 1;
+    unsigned fragInd = size2Index(fragBytes + 1) - 1;
     uint32_t fragUsable = sizeIndex2Size(fragInd);
     auto frag = FreeNode::InitFrom((char*)rem + remBytes - fragUsable,
                                    fragUsable, HeaderKind::Hole);
@@ -704,7 +704,7 @@ void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
   assert(nbytes == sizeIndex2Size(index));
   unsigned nContig = kNContigTab[index];
   size_t contigMin = nContig * nbytes;
-  unsigned contigInd = smallSize2Index(contigMin);
+  unsigned contigInd = size2Index(contigMin);
   for (unsigned i = contigInd; i < kNumSmallSizes; ++i) {
     FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): contigMin={}, "
               "contigInd={}, try i={}\n", nbytes, index, contigMin,

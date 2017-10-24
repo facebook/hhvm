@@ -110,9 +110,8 @@ inline size_t StringData::heapSize() const {
 }
 
 inline size_t StringData::estimateCap(size_t size) {
-  auto requested = size + kStringOverhead;
-  return requested <= kMaxSmallSize ? MemoryManager::smallSizeClass(requested)
-                                    : requested;
+  assert(size <= MaxSize);
+  return MemoryManager::sizeClass(size + kStringOverhead);
 }
 
 inline bool StringData::isStrictlyInteger(int64_t& res) const {

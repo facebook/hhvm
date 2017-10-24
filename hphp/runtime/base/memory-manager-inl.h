@@ -211,15 +211,6 @@ inline size_t MemoryManager::lookupSmallSize2Index(size_t size) {
   return index;
 }
 
-inline size_t MemoryManager::smallSize2Index(size_t size) {
-  assert(size > 0);
-  assert(size <= kMaxSmallSize);
-  if (LIKELY(size <= kMaxSmallSizeLookup)) {
-    return lookupSmallSize2Index(size);
-  }
-  return computeSize2Index(size);
-}
-
 inline size_t MemoryManager::size2Index(size_t size) {
   assert(size > 0);
   assert(size <= kMaxSizeClass);
@@ -233,9 +224,9 @@ inline size_t MemoryManager::sizeIndex2Size(size_t index) {
   return kSizeIndex2Size[index];
 }
 
-inline size_t MemoryManager::smallSizeClass(size_t size) {
+inline size_t MemoryManager::sizeClass(size_t size) {
   assert(size > 1);
-  assert(size <= kMaxSmallSize);
+  assert(size <= kMaxSizeClass);
   // Round up to the nearest kLgSizeClassesPerDoubling + 1 significant bits,
   // or to the nearest kLgSmallSizeQuantum, whichever is greater.
   ssize_t nInsignificantBits = bsrq(--size) - kLgSizeClassesPerDoubling;
@@ -243,7 +234,7 @@ inline size_t MemoryManager::smallSizeClass(size_t size) {
     ? kLgSmallSizeQuantum : nInsignificantBits;
   size_t ret = ((size >> roundTo) + 1) << roundTo;
   assert(ret >= kSmallSizeAlign);
-  assert(ret <= kMaxSmallSize);
+  assert(ret <= kMaxSizeClass);
   return ret;
 }
 
@@ -266,7 +257,7 @@ inline void* MemoryManager::mallocSmallIndex(size_t index) {
 inline void* MemoryManager::mallocSmallSize(size_t bytes) {
   assert(bytes > 0);
   assert(bytes <= kMaxSmallSize);
-  return mallocSmallIndex(smallSize2Index(bytes));
+  return mallocSmallIndex(size2Index(bytes));
 }
 
 inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
@@ -285,7 +276,7 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
 }
 
 inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
-  freeSmallIndex(ptr, smallSize2Index(bytes));
+  freeSmallIndex(ptr, size2Index(bytes));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

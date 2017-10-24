@@ -658,14 +658,14 @@ struct MemoryManager {
   // Allocation.
 
   /*
-   * Return the size class for a given requested small-allocation size.
+   * Return the size class for a given requested allocation size.
    *
    * The return value is greater than or equal to the parameter, and
-   * less than or equal to kMaxSmallSize.
+   * less than or equal to kMaxSizeClass.
    *
-   * Pre: requested <= kMaxSmallSize
+   * Pre: requested <= kMaxSizeClass
    */
-  static size_t smallSizeClass(size_t requested);
+  static size_t sizeClass(size_t requested);
 
   /*
    * Allocate/deallocate a small memory block in a given small size class.
@@ -744,7 +744,6 @@ struct MemoryManager {
    */
   static size_t computeSize2Index(size_t size);
   static size_t lookupSmallSize2Index(size_t size);
-  static size_t smallSize2Index(size_t size);
   static size_t size2Index(size_t size);
   static size_t sizeIndex2Size(size_t index);
 

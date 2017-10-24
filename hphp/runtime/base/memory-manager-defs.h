@@ -246,7 +246,7 @@ inline const ObjectData* innerObj(const HeapObject* h) {
          nullptr;
 }
 
-// constexpr version of MemoryManager::smallSizeClass.
+// constexpr version of MemoryManager::sizeClass.
 // requires sizeof(T) <= kMaxSmallSizeLookup
 template<class T> constexpr size_t sizeClass() {
   return kSizeIndex2Size[
@@ -348,7 +348,7 @@ inline size_t allocSize(const HeapObject* h) {
 
   auto kind = h->kind();
   if (auto size = kind_sizes[(int)kind]) {
-    assert(size == MemoryManager::smallSizeClass(size));
+    assert(size == MemoryManager::sizeClass(size));
     return size;
   }
 
@@ -397,7 +397,7 @@ inline size_t allocSize(const HeapObject* h) {
       auto whKind = wait_handle<c_WaitHandle>(obj)->getKind();
       size = waithandle_sizes[(int)whKind];
       assert(size != 0); // AsyncFuncFrame or AwaitAllWH
-      assert(size == MemoryManager::smallSizeClass(size));
+      assert(size == MemoryManager::sizeClass(size));
       return size;
     }
     case HeaderKind::AwaitAllWH:
@@ -456,7 +456,7 @@ inline size_t allocSize(const HeapObject* h) {
       // these have a constant size in kind_sizes[]
       not_reached();
   }
-  return MemoryManager::smallSizeClass(size);
+  return MemoryManager::sizeClass(size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

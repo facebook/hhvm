@@ -163,3 +163,5 @@ val error2067 : string
 val error2068 : string
 val error2069 : string
 val error2070 : open_tag:string -> close_tag:string -> string
+val error2071 : string -> string
+val error2072 : string -> string

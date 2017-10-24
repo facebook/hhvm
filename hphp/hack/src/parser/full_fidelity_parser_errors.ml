@@ -999,8 +999,27 @@ let invalid_shape_field_check node =
     invalid_shape_initializer_name field_initializer_name
   | _ -> [make_error_from_node node SyntaxError.error2059]
 
-let expression_errors node parents is_hack hhvm_compat_mode =
+let expression_errors node parents is_hack is_hack_file hhvm_compat_mode =
   match syntax node with
+  | LiteralExpression {
+      literal_expression = {
+        syntax = Token {
+          PositionedToken.kind = (
+            TokenKind.DecimalLiteral |
+            TokenKind.HexadecimalLiteral
+          ) as kind
+        ; _}
+      ; _} as e
+    ; _} when is_hack_file ->
+    let text = text e in
+    begin try ignore (Int64.of_string text); []
+    with _ ->
+      let error_text =
+        if kind = TokenKind.DecimalLiteral
+        then SyntaxError.error2071 text
+        else SyntaxError.error2072 text in
+      [make_error_from_node node error_text]
+    end
   | SafeMemberSelectionExpression _ when not is_hack ->
     [ make_error_from_node node SyntaxError.error2069 ]
   | SubscriptExpression { subscript_left_bracket; _}
@@ -1224,7 +1243,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
     let property_errs =
       property_errors node is_strict is_hack hhvm_compatiblity_mode in
     let expr_errs =
-      expression_errors node parents is_hack hhvm_compatiblity_mode in
+      expression_errors node parents is_hack is_hack_file hhvm_compatiblity_mode in
     let require_errs =
       require_errors node parents hhvm_compatiblity_mode in
     let classish_errors =

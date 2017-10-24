@@ -222,3 +222,5 @@ let error2069 = "Operator '?->' is only allowed in Hack."
 let error2070 ~open_tag ~close_tag =
   Printf.sprintf "XHP: mismatched tag: '%s' not the same as '%s'"
     open_tag close_tag
+let error2071 s = "Decimal number is too big: " ^ s
+let error2072 s = "Hexadecimal number is too big: " ^ s

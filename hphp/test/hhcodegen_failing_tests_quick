@@ -1,7 +1,6 @@
 quick/ClsCases.php
 quick/backtick.php
 quick/closure_recursive_bad.php
-quick/finally_break.php
 quick/float-overflow-literals.php
 quick/hh_numbers.php
 quick/instanceofInterface.php

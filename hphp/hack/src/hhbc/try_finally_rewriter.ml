@@ -190,8 +190,16 @@ let emit_finally_epilogue ~verify_return env pos jump_instructions finally_end =
           L3 -> handler for return
        }
        *)
+    (* This function builds a list of labels and jump targets for switch.
+    It is possible that cases ids are not consequtive
+      [L1,L2,L4]. Vector of labels in switch should be dense so we need to
+      fill holes with a label that points to the end of finally block
+      [End, L1, L2, End, L4]
+    *)
     let rec aux n instructions labels bodies =
       match instructions with
+      | [] when n >= 0 ->
+        aux (n - 1) instructions (finally_end :: labels) (empty :: bodies)
       | [] -> (labels, bodies)
       | (id, instruction) :: t ->
         if id = n then
@@ -204,7 +212,7 @@ let emit_finally_epilogue ~verify_return env pos jump_instructions finally_end =
         else
           aux (n - 1) instructions (finally_end :: labels) (empty :: bodies)
     in
-    (* lst is already stored - IMap.elements took care of it *)
+    (* lst is already sorted - IMap.elements took care of it *)
     (* TODO: add is_sorted assert to make sure this behavior is preserved *)
     let (labels, bodies) = aux max_id lst [] [] in
     let labels = labels in

@@ -1,0 +1,4 @@
+File "bad_inout_decl_byref2.php", line 3, characters 25-26:
+Cannot mix inout and byRef parameters (NastCheck[3044])
+File "bad_inout_decl_byref2.php", line 3, characters 46-47:
+This parameter is passed by reference

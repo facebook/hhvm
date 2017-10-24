@@ -33,6 +33,7 @@ open Typing_subtype
 module Env = Typing_env
 module Inst = Decl_instantiate
 module Phase = Typing_phase
+module SN = Naming_special_names
 module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module TUtils = Typing_utils
@@ -311,12 +312,12 @@ end
 let is_magic =
   let h = Hashtbl.create 23 in
   let a x = Hashtbl.add h x true in
-  a Naming_special_names.Members.__set;
-  a Naming_special_names.Members.__isset;
-  a Naming_special_names.Members.__get;
-  a Naming_special_names.Members.__unset;
-  a Naming_special_names.Members.__call;
-  a Naming_special_names.Members.__callStatic;
+  a SN.Members.__set;
+  a SN.Members.__isset;
+  a SN.Members.__get;
+  a SN.Members.__unset;
+  a SN.Members.__call;
+  a SN.Members.__callStatic;
   fun (_, s) ->
     Hashtbl.mem h s
 
@@ -333,7 +334,7 @@ let rec fun_ tenv f named_body =
 
 and func env f named_body =
   let p, fname = f.f_name in
-  if String.lowercase (strip_ns fname) = Naming_special_names.Members.__construct
+  if String.lowercase (strip_ns fname) = SN.Members.__construct
   then Errors.illegal_function_name p fname;
   check_coroutines_enabled (f.f_fun_kind = Ast.FCoroutine) env p;
   (* Add type parameters to typing environment and localize the bounds *)
@@ -347,7 +348,8 @@ and func env f named_body =
   } in
   maybe hint env f.f_ret;
   List.iter f.f_tparams (tparam env);
-  List.iter f.f_params (fun_param env);
+  let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
+  List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
   block env named_body.fnb_nast;
   CheckFunctionBody.block
     f.f_fun_kind
@@ -745,7 +747,7 @@ and class_var env cv =
   ()
 
 and check__toString m is_static =
-  if snd m.m_name = Naming_special_names.Members.__toString
+  if snd m.m_name = SN.Members.__toString
   then begin
     if m.m_visibility <> Public || is_static
     then Errors.toString_visibility (fst m.m_name);
@@ -778,7 +780,8 @@ and method_ (env, is_static) m =
                ~ety_env:(Phase.env_with_self env.tenv) in
   let tenv = add_constraints (fst m.m_name) tenv constraints in
   let env = { env with tenv = tenv } in
-  List.iter m.m_params (fun_param env);
+  let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
+  List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
   List.iter m.m_tparams (tparam env);
   block env named_body.fnb_nast;
   maybe hint env m.m_ret;
@@ -800,24 +803,30 @@ and method_ (env, is_static) m =
   | None -> assert false);
   ()
 
-and fun_param env param =
-  maybe hint env param.param_hint;
-  maybe expr env param.param_expr;
-  callconv env param.param_pos param.param_callconv;
-  ()
-
 and inout_params_enabled env =
   TypecheckerOptions.experimental_feature_enabled
     (Env.get_options env.tenv)
     TypecheckerOptions.experimental_inout_params
 
-and check_inout_params_enabled ~cond env p =
-  if cond && not (inout_params_enabled env)
-  then Errors.experimental_feature p "inout parameters"
+and require_inout_params_enabled env p =
+  let enabled = inout_params_enabled env in
+  if not enabled then Errors.experimental_feature p "inout parameters";
+  enabled
 
-and callconv env pos modifier =
-  check_inout_params_enabled ~cond:(modifier <> None) env pos;
-  ()
+and fun_param env (_, name) f_type byref param =
+  maybe hint env param.param_hint;
+  maybe expr env param.param_expr;
+  match param.param_callconv with
+  | None -> ()
+  | Some _ ->
+      let pos = param.param_pos in
+      if require_inout_params_enabled env pos
+      then begin
+        if f_type <> Ast.FSync then Errors.inout_params_outside_of_sync pos;
+        if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
+        Option.iter byref ~f:(fun param ->
+          Errors.inout_params_mix_byref pos param.param_pos)
+      end
 
 and stmt env = function
   | Return (p, _) when env.t_is_finally ->

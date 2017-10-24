@@ -394,4 +394,7 @@ module type S = sig
   val duplicate_using_var : Pos.t -> unit
   val illegal_disposable : Pos.t -> string -> unit
   val escaping_disposable : Pos.t -> unit
+  val inout_params_outside_of_sync : Pos.t -> unit
+  val inout_params_special : Pos.t -> unit
+  val inout_params_mix_byref : Pos.t -> Pos.t -> unit
 end

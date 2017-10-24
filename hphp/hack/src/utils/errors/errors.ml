@@ -564,7 +564,12 @@ module NastCheck                            = struct
   let suspend_outside_of_coroutine          = 3038 (* DONT MODIFY!!!! *)
   let suspend_in_finally                    = 3039 (* DONT MODIFY!!!! *)
   let break_continue_n_not_supported        = 3040 (* DONT MODIFY!!!! *)
-  let static_memoized_function   = 3041 (* DONT MODIFY!!!! *)
+  let static_memoized_function              = 3041 (* DONT MODIFY!!!! *)
+  let inout_params_outside_of_sync          = 3042 (* DONT MODIFY!!!! *)
+  let inout_params_special                  = 3043 (* DONT MODIFY!!!! *)
+  let inout_params_mix_byref                = 3044 (* DONT MODIFY!!!! *)
+
+  (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
 module Typing                               = struct
@@ -1376,6 +1381,24 @@ let dangerous_method_name pos =
 let optional_shape_fields_not_supported pos =
   add NastCheck.optional_shape_fields_not_supported pos
     "Optional shape fields are not supported."
+
+let inout_params_outside_of_sync pos =
+  add NastCheck.inout_params_outside_of_sync pos (
+    "Inout parameters cannot be defined on async functions, "^
+    "generators or coroutines."
+  )
+
+let inout_params_special pos =
+  add NastCheck.inout_params_special pos
+  "Methods with special semantics cannot have inout parameters."
+
+let inout_params_mix_byref pos1 pos2 =
+  if pos1 <> pos2 then begin
+    let msg1 = pos1, "Cannot mix inout and byRef parameters" in
+    let msg2 = pos2, "This parameter is passed by reference" in
+    add_list NastCheck.inout_params_mix_byref [msg1; msg2]
+  end
+
 
 (*****************************************************************************)
 (* Nast terminality *)

@@ -1,0 +1,2 @@
+File "bad_inout_decl_special_destruct.php", line 4, characters 19-28:
+Destructor must not have any parameters. (Parsing[1002])

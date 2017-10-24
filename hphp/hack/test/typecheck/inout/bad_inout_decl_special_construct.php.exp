@@ -1,0 +1,2 @@
+File "bad_inout_decl_special_construct.php", line 4, characters 41-42:
+Methods with special semantics cannot have inout parameters. (NastCheck[3043])

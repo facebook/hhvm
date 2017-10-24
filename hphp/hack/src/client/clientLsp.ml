@@ -255,26 +255,6 @@ exception Client_recoverable_connection_exception of Marshal_tools.remote_except
 exception Server_fatal_connection_exception of Marshal_tools.remote_exception_data
 
 
-(* To handle requests, we use a global list of callbacks for when the *)
-(* response is received, and a global id counter for correlation...   *)
-type on_result_callback =
-  state:state -> result:Hh_json.json option -> state
-
-type on_error_callback =
-  state:state -> code:int -> message:string -> data:Hh_json.json option -> state
-
-module Callback = struct
-  type t = {
-    method_: string;
-    on_result: on_result_callback;
-    on_error: on_error_callback;
-  }
-end
-
-let requests_counter: IMap.key ref = ref 0
-let requests_outstanding: Callback.t IMap.t ref = ref IMap.empty
-
-
 let event_to_string (event: event) : string =
   let open Jsonrpc in
   match event with
@@ -357,41 +337,6 @@ let rpc
     raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
 
 
-(* respond: produces either a Response or an Error message, according
-   to whether the json has an error-code or not. Note that JsonRPC and LSP
-   mandate id to be present. *)
-let respond
-    (outchan: out_channel)
-    (c: Jsonrpc.message)
-    (json: Hh_json.json)
-  : Hh_json.json option =
-  let open Jsonrpc in
-  let open Hh_json in
-  let is_error = (Jget.val_opt (Some json) "code" <> None) in
-  let response = JSON_Object (
-    ["jsonrpc", JSON_String "2.0"]
-    @
-      ["id", match c.id with Some id -> id | None -> JSON_Null]
-    @
-      (if is_error then ["error", json] else ["result", json])
-  )
-  in
-  response |> Hh_json.json_to_string |> Http_lite.write_message outchan;
-  Some response
-
-(* notify: produces a Notify message *)
-let notify (outchan: out_channel) (method_: string) (json: Hh_json.json)
-  : unit =
-  let open Hh_json in
-  let message = JSON_Object [
-    "jsonrpc", JSON_String "2.0";
-    "method", JSON_String method_;
-    "params", json;
-  ]
-  in
-  message |> Hh_json.json_to_string |> Http_lite.write_message outchan
-
-
 (* notify_progress: for sending/updating/closing progress messages.           *)
 (* To start a new indicator: id=None, message=Some, and get back the new id.  *)
 (* To update an existing one: id=Some, message=Some, and get back id.         *)
@@ -406,15 +351,15 @@ let notify_progress (id: progress_id) (message: string option) : progress_id =
     if supports_progress () then
       let () = incr progress_and_actionRequired_counter in
       let id = !progress_and_actionRequired_counter in
-      let () = print_progress id (Some message) |> notify stdout "window/progress" in
+      let () = print_progress id (Some message) |> Jsonrpc.notify "window/progress" in
       Progress_id id
     else
       Progress_none
   | Progress_id id, Some message ->
-    print_progress id (Some message) |> notify stdout "window/progress";
+    print_progress id (Some message) |> Jsonrpc.notify "window/progress";
     Progress_id id
   | Progress_id id, None ->
-    print_progress id None |> notify stdout "window/progress";
+    print_progress id None |> Jsonrpc.notify "window/progress";
     Progress_none
   | Progress_none, None ->
     Progress_none
@@ -425,94 +370,22 @@ let notify_actionRequired (id: actionRequired_id) (message: string option) : act
     if supports_actionRequired () then
       let () = incr progress_and_actionRequired_counter in
       let id = !progress_and_actionRequired_counter in
-      let () = print_actionRequired id (Some message) |> notify stdout "window/actionRequired" in
+      let () = print_actionRequired id (Some message) |> Jsonrpc.notify "window/actionRequired" in
       ActionRequired_id id
     else
       ActionRequired_none
   | ActionRequired_id id, Some message ->
-    print_actionRequired id (Some message) |> notify stdout "window/actionRequired";
+    print_actionRequired id (Some message) |> Jsonrpc.notify "window/actionRequired";
     ActionRequired_id id
   | ActionRequired_id id, None ->
-    print_actionRequired id None |> notify stdout "window/actionRequired";
+    print_actionRequired id None |> Jsonrpc.notify "window/actionRequired";
     ActionRequired_none
   | ActionRequired_none, None ->
     ActionRequired_none
 
 
-(* request: produce a Request message; returns a method you can call to cancel it *)
-let request
-    (outchan: out_channel)
-    (on_result: on_result_callback)
-    (on_error: on_error_callback)
-    (method_: string)
-    (json: Hh_json.json)
-  : unit -> unit =
-  incr requests_counter;
-  let callback = { Callback.method_; on_result; on_error; } in
-  let request_id = !requests_counter in
-  requests_outstanding := IMap.add request_id callback !requests_outstanding;
-
-  let open Hh_json in
-  let message = JSON_Object [
-    "jsonrpc", string_ "2.0";
-    "id", int_ request_id;
-    "method", string_ method_;
-    "params", json;
-  ]
-  in
-  let cancel_message = JSON_Object [
-    "jsonrpc", string_ "2.0";
-    "method", string_ "$/cancelRequest";
-    "params", JSON_Object [
-      "id", int_ request_id;
-    ]
-  ]
-  in
-  message |> Hh_json.json_to_string |> Http_lite.write_message outchan;
-
-  let cancel () = cancel_message |> Hh_json.json_to_string |> Http_lite.write_message outchan
-  in
-  cancel
-
-let get_outstanding_request (id: Hh_json.json option) =
-  match id with
-  | Some (Hh_json.JSON_Number s) -> begin
-      try
-        let id = int_of_string s in
-        Option.map (IMap.get id !requests_outstanding) ~f:(fun v -> (id, v))
-      with Failure _ -> None
-    end
-  | _ -> None
-
-let get_outstanding_method_name (id: Hh_json.json option) : string =
-  let open Callback in
-  match (get_outstanding_request id) with
-  | Some (_, callback) -> callback.method_
-  | None -> ""
-
-let do_response
-    (state: state)
-    (id: Hh_json.json option)
-    (result: Hh_json.json option)
-    (error: Hh_json.json option)
-  : state =
-  let open Callback in
-  let id, on_result, on_error = match (get_outstanding_request id) with
-    | Some (id, callback) -> (id, callback.on_result, callback.on_error)
-    | None -> raise (Error.InvalidRequest "response to non-existent id")
-  in
-  requests_outstanding := IMap.remove id !requests_outstanding;
-  if Option.is_some error then
-    let code = Jget.int_exn error "code" in
-    let message = Jget.string_exn error "message" in
-    let data = Jget.val_opt error "data" in
-    on_error state code message data
-  else
-    on_result state result
-
-
 let client_log (level: Lsp.MessageType.t) (message: string) : unit =
-  print_logMessage level message |> notify stdout "telemetry/event"
+  print_logMessage level message |> Jsonrpc.notify "telemetry/event"
 
 let hack_log_error
     (event: event option)
@@ -638,7 +511,7 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
   match event with
   | Some (Client_message c)
     when c.Jsonrpc.kind = Jsonrpc.Request ->
-    print_error e stack |> respond stdout c |> ignore
+    print_error e stack |> Jsonrpc.respond c
   | _ ->
     let (code, message, _original_data) = get_error_info e in
     client_log Lsp.MessageType.ErrorMessage (Printf.sprintf "%s [%i]\n%s" message code stack)
@@ -653,7 +526,7 @@ let dismiss_ui (state: state) : state =
   in
   let dismiss_diagnostic (uri: string) : unit =
     let message = { Lsp.PublishDiagnostics.uri; diagnostics = []; } in
-    message |> print_diagnostics |> notify stdout "textDocument/publishDiagnostics"
+    message |> print_diagnostics |> Jsonrpc.notify "textDocument/publishDiagnostics"
   in
   let dismiss_diagnostics (diagnostic_uris: SSet.t) : SSet.t =
     let () = SSet.iter dismiss_diagnostic diagnostic_uris in
@@ -1201,7 +1074,7 @@ let do_diagnostics
   let per_file file errors =
     hack_errors_to_lsp_diagnostic file errors
     |> print_diagnostics
-    |> notify stdout "textDocument/publishDiagnostics"
+    |> Jsonrpc.notify "textDocument/publishDiagnostics"
   in
   SMap.iter per_file file_reports;
 
@@ -1238,11 +1111,11 @@ let report_connect_start
   let clear_cancel_flag state = match state with
     | In_init ienv -> In_init {ienv with In_init_env.dialog_cancel = None}
     | _ -> state in
-  let handle_result ~state ~result:_ = clear_cancel_flag state in
-  let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
+  let handle_result ~result:_ state = clear_cancel_flag state in
+  let handle_error ~code:_ ~message:_ ~data:_ state = clear_cancel_flag state in
   let req = print_showMessageRequest MessageType.InfoMessage
       "Waiting for hh_server to be ready..." [] in
-  let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
+  let cancel = Jsonrpc.request handle_result handle_error "window/showMessageRequest" req in
 
   (* progress indicator... *)
   let progress_id = notify_progress Progress_none (Some "hh_server initializing") in
@@ -1303,10 +1176,10 @@ let report_connect_end
       | Main_loop menv -> Main_loop {menv with Main_env.dialog_cancel = None}
       | _ -> state
     in
-    let handle_result ~state ~result:_ = clear_cancel_flag state in
-    let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
+    let handle_result ~result:_ state = clear_cancel_flag state in
+    let handle_error ~code:_ ~message:_ ~data:_ state = clear_cancel_flag state in
     let req = print_showMessageRequest MessageType.InfoMessage msg [] in
-    let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
+    let cancel = Jsonrpc.request handle_result handle_error "window/showMessageRequest" req in
     Main_loop {menv with Main_env.dialog_cancel = Some cancel;}
   else
     Main_loop menv
@@ -1580,10 +1453,10 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
     | Lost_server lenv -> Lost_server { lenv with dialog_cancel = None; }
     | _ -> state
   in
-  let handle_error ~state ~code:_ ~message:_ ~data:_ =
+  let handle_error ~code:_ ~message:_ ~data:_ state =
     state |> clear_dialog_flag
   in
-  let handle_result ~state ~result =
+  let handle_result ~result state =
     let state = state |> clear_dialog_flag in
     let result = Option.value_map result ~default:""
       ~f:(Hh_json_helpers.get_string_val "title" ~default:"") in
@@ -1621,7 +1494,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
       | Action_required msg ->
         let actionRequired_id = notify_actionRequired ActionRequired_none (Some msg) in
         let dialog_cancel = print_showMessageRequest MessageType.ErrorMessage msg ["Restart"]
-          |> request stdout handle_result handle_error "window/showMessageRequest" in
+          |> Jsonrpc.request handle_result handle_error "window/showMessageRequest" in
         Progress_none, actionRequired_id, Some dialog_cancel
     in
     Lost_server { Lost_env.
@@ -1697,14 +1570,14 @@ let log_response_if_necessary
   let open Jsonrpc in
   match event with
   | Client_message c ->
+    let json = c.json |> Hh_json.json_truncate |> Hh_json.json_to_string in
     let json_response = match response with
       | None -> ""
       | Some json -> json |> Hh_json.json_truncate |> Hh_json.json_to_string
     in
-    let json = c.json |> Hh_json.json_truncate |> Hh_json.json_to_string in
     HackEventLogger.client_lsp_method_handled
       ~root:(get_root ())
-      ~method_:(if c.kind = Response then get_outstanding_method_name c.id else c.method_)
+      ~method_:(if c.kind = Response then get_method_for_response c else c.method_)
       ~kind:(kind_to_string c.kind)
       ~start_queue_t:c.timestamp
       ~start_handle_t
@@ -1725,24 +1598,23 @@ let handle_event
     ~(state: state ref)
     ~(client: Jsonrpc.queue)
     ~(event: event)
-  : Hh_json.json option =
+  : unit =
   let open Jsonrpc in
   let open Main_env in
   match !state, event with
   (* response *)
   | _, Client_message c when c.kind = Jsonrpc.Response ->
-    state := do_response !state c.id c.result c.error;
-    None
+    state := Jsonrpc.dispatch_response c !state
 
   (* shutdown request *)
   | _, Client_message c when c.method_ = "shutdown" ->
     state := do_shutdown !state;
-    print_shutdown () |> respond stdout c;
+    print_shutdown () |> Jsonrpc.respond c;
 
   (* cancel notification *)
   | _, Client_message c when c.method_ = "$/cancelRequest" ->
     (* For now, we'll ignore it. *)
-    None
+    ()
 
   (* exit notification *)
   | _, Client_message c when c.method_ = "exit" ->
@@ -1750,13 +1622,13 @@ let handle_event
 
   (* rage request *)
   | _, Client_message c when c.method_ = "telemetry/rage" ->
-    do_rage !state |> print_rage |> respond stdout c
+    do_rage !state |> print_rage |> Jsonrpc.respond c
 
   (* initialize request *)
   | Pre_init, Client_message c when c.method_ = "initialize" ->
     initialize_params := Some (parse_initialize c.params);
     state := connect !state;
-    do_initialize () |> print_initialize |> respond stdout c
+    do_initialize () |> print_initialize |> Jsonrpc.respond c
 
   (* any request/notification if we haven't yet initialized *)
   | Pre_init, Client_message _c ->
@@ -1776,8 +1648,7 @@ let handle_event
         raise (Error.RequestCancelled "Server busy")
         (* We deny all other requests. Operation_cancelled is the only *)
         (* error-response that won't produce logs/warnings on most clients. *)
-    end;
-    None
+    end
 
   (* idle tick while waiting for server to complete initialization *)
   | In_init ienv, Tick ->
@@ -1785,14 +1656,12 @@ let handle_event
     if ienv.has_reported_progress then
       state := report_connect_progress ienv
     else
-      state := report_connect_start ienv;
-    None
+      state := report_connect_start ienv
 
   (* server completes initialization *)
   | In_init ienv, Server_hello ->
     connect_after_hello ienv.In_init_env.conn ienv.In_init_env.file_edits;
-    state := report_connect_end ienv;
-    None
+    state := report_connect_end ienv
 
   (* any "hello" from the server when we weren't expecting it. This is so *)
   (* egregious that we can't trust anything more from the server.         *)
@@ -1807,103 +1676,97 @@ let handle_event
     (* then we must let the server know we're idle, so it will be free to     *)
     (* handle command-line requests.                                          *)
     state := Main_loop { menv with needs_idle = false; };
-    rpc menv.conn ServerCommandTypes.IDE_IDLE;
-    None
+    rpc menv.conn ServerCommandTypes.IDE_IDLE
 
   (* textDocument/hover request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/hover" ->
     cancel_if_stale client c short_timeout;
-    parse_hover c.params |> do_hover menv.conn |> print_hover |> respond stdout c
+    parse_hover c.params |> do_hover menv.conn |> print_hover |> Jsonrpc.respond c
 
   (* textDocument/definition request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/definition" ->
     cancel_if_stale client c short_timeout;
-    parse_definition c.params |> do_definition menv.conn |> print_definition |> respond stdout c
+    parse_definition c.params |> do_definition menv.conn |> print_definition |> Jsonrpc.respond c
 
   (* textDocument/completion request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/completion" ->
     let do_completion =
       if env.use_ffp_autocomplete then do_completion_ffp else do_completion_legacy in
     cancel_if_stale client c short_timeout;
-    parse_completion c.params |> do_completion menv.conn |> print_completion |> respond stdout c
+    parse_completion c.params |> do_completion menv.conn |> print_completion |> Jsonrpc.respond c
 
   (* workspace/symbol request *)
   | Main_loop menv, Client_message c when c.method_ = "workspace/symbol" ->
     parse_workspaceSymbol c.params |> do_workspaceSymbol menv.conn
-    |> print_workspaceSymbol |> respond stdout c
+    |> print_workspaceSymbol |> Jsonrpc.respond c
 
   (* textDocument/documentSymbol request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/documentSymbol" ->
     parse_documentSymbol c.params |> do_documentSymbol menv.conn
-    |> print_documentSymbol |> respond stdout c
+    |> print_documentSymbol |> Jsonrpc.respond c
 
   (* textDocument/references request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/references" ->
     cancel_if_stale client c long_timeout;
     parse_findReferences c.params |> do_findReferences menv.conn
-    |> print_findReferences |> respond stdout c
+    |> print_findReferences |> Jsonrpc.respond c
 
   (* textDocument/documentHighlight *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/documentHighlight" ->
     cancel_if_stale client c short_timeout;
     parse_documentHighlights c.params |> do_documentHighlights menv.conn
-    |> print_documentHighlights |> respond stdout c
+    |> print_documentHighlights |> Jsonrpc.respond c
 
   (* textDocument/typeCoverage *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/typeCoverage" ->
     parse_typeCoverage c.params |> do_typeCoverage menv.conn
-    |> print_typeCoverage |> respond stdout c
+    |> print_typeCoverage |> Jsonrpc.respond c
 
   (* textDocument/formatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/formatting" ->
     parse_documentFormatting c.params |> do_documentFormatting menv.conn
-    |> print_documentFormatting |> respond stdout c
+    |> print_documentFormatting |> Jsonrpc.respond c
 
   (* textDocument/formatting *)
   | Main_loop menv, Client_message c
     when c.method_ = "textDocument/rangeFormatting" ->
     parse_documentRangeFormatting c.params |> do_documentRangeFormatting menv.conn
-    |> print_documentRangeFormatting |> respond stdout c
+    |> print_documentRangeFormatting |> Jsonrpc.respond c
 
   (* textDocument/onTypeFormatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/onTypeFormatting" ->
     cancel_if_stale client c short_timeout;
     parse_documentOnTypeFormatting c.params |> do_documentOnTypeFormatting menv.conn
-    |> print_documentOnTypeFormatting |> respond stdout c
+    |> print_documentOnTypeFormatting |> Jsonrpc.respond c
 
   (* textDocument/didOpen notification *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/didOpen" ->
-    parse_didOpen c.params |> do_didOpen menv.conn;
-    None
+    parse_didOpen c.params |> do_didOpen menv.conn
 
   (* textDocument/didClose notification *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/didClose" ->
-    parse_didClose c.params |> do_didClose menv.conn;
-    None
+    parse_didClose c.params |> do_didClose menv.conn
 
   (* textDocument/didChange notification *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/didChange" ->
-    parse_didChange c.params |> do_didChange menv.conn;
-    None
+    parse_didChange c.params |> do_didChange menv.conn
 
   (* textDocument/didSave notification *)
   | Main_loop _menv, Client_message c when c.method_ = "textDocument/didSave" ->
-    None
+    ()
 
   (* server busy status *)
   | _, Server_message ServerCommandTypes.BUSY_STATUS status ->
-    state := do_server_busy !state status;
-    None
+    state := do_server_busy !state status
 
   (* textDocument/publishDiagnostics notification *)
   | Main_loop menv, Server_message ServerCommandTypes.DIAGNOSTIC (_, errors) ->
     let uris_with_diagnostics = do_diagnostics menv.uris_with_diagnostics errors in
-    state := Main_loop { menv with uris_with_diagnostics; };
-    None
+    state := Main_loop { menv with uris_with_diagnostics; }
 
   (* any server diagnostics that come after we've shut down *)
   | _, Server_message ServerCommandTypes.DIAGNOSTIC _ ->
-    None
+    ()
 
   (* catch-all for client reqs/notifications we haven't yet implemented *)
   | Main_loop _menv, Client_message c ->
@@ -1922,8 +1785,7 @@ let handle_event
       start_on_click = false;
       trigger_on_lock_file = false;
       trigger_on_lsp = true;
-    };
-    None
+    }
 
   (* server shut-down request, unexpected *)
   | _, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
@@ -1938,8 +1800,7 @@ let handle_event
 
   (* idle tick. No-op. *)
   | _, Tick ->
-    EventLogger.flush ();
-    None
+    EventLogger.flush ()
 
   (* client message when we've lost the server *)
   | Lost_server lenv, Client_message _c ->
@@ -1981,7 +1842,9 @@ let main (env: env) : 'a =
       state := track_edits_if_necessary !state event;
 
       (* this is the main handler for each message*)
-      let response = handle_event ~env ~state ~client ~event in
+      Jsonrpc.clear_last_sent ();
+      handle_event ~env ~state ~client ~event;
+      let response = Jsonrpc.last_sent () in
       (* for LSP requests and notifications, we keep a log of what+when we responded *)
       log_response_if_necessary event response start_handle_t
     with

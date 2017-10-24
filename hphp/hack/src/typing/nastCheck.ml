@@ -384,7 +384,7 @@ and hint_ env p = function
     begin match Typing_lazy_heap.get_typedef (Env.get_options env.tenv) x with
       | Some {td_tparams; _} ->
         check_happly env.typedef_tparams env.tenv (p, h);
-        check_params env p x td_tparams hl
+        check_tparams env p x td_tparams hl
       | None -> ()
     end
   | Happly ((_, x), hl) as h ->
@@ -392,7 +392,7 @@ and hint_ env p = function
       | None -> ()
       | Some class_ ->
           check_happly env.typedef_tparams env.tenv (p, h);
-          check_params env p x class_.tc_tparams hl
+          check_tparams env p x class_.tc_tparams hl
       );
       ()
   | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
@@ -408,8 +408,8 @@ and hint_ env p = function
 
       ShapeMap.iter compute_hint_for_shape_field_info nsi_field_map
 
-and check_params env p x params hl =
-  let arity = List.length params in
+and check_tparams env p x tparams hl =
+  let arity = List.length tparams in
   check_arity env p x arity (List.length hl);
   List.iter hl (hint env);
 
@@ -803,11 +803,20 @@ and method_ (env, is_static) m =
 and fun_param env param =
   maybe hint env param.param_hint;
   maybe expr env param.param_expr;
+  callconv env param.param_pos param.param_callconv;
   ()
 
-and fun_param_opt env (h, _, e) =
-  maybe hint env h;
-  maybe expr env e;
+and inout_params_enabled env =
+  TypecheckerOptions.experimental_feature_enabled
+    (Env.get_options env.tenv)
+    TypecheckerOptions.experimental_inout_params
+
+and check_inout_params_enabled ~cond env p =
+  if cond && not (inout_params_enabled env)
+  then Errors.experimental_feature p "inout parameters"
+
+and callconv env pos modifier =
+  check_inout_params_enabled ~cond:(modifier <> None) env pos;
   ()
 
 and stmt env = function

@@ -353,6 +353,7 @@ let rec bind_param env (ty1, param) =
     T.param_pos = param.param_pos;
     T.param_name = param.param_name;
     T.param_expr = param_te;
+    T.param_callconv = param.param_callconv;
   } in
   Env.set_local env (Local_id.get param.param_name) ty1, tparam
 

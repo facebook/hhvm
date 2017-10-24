@@ -281,6 +281,7 @@ and fun_param = {
   param_pos : Pos.t;
   param_name : string;
   param_expr : expr option;
+  param_callconv : Ast.param_kind option;
 }
 
 and fun_variadicity = (* does function take varying number of args? *)

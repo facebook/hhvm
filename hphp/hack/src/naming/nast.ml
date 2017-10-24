@@ -1,5 +1,5 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/ppx_gen. *)
-(* SourceShasum<<3565fb095aed6d1c08deb422f52b1e4db0c20834>> *)
+(* SourceShasum<<4f94f1e95c7fd822fc6ed2be0c33c860f79c490c>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -630,7 +630,8 @@ module AnnotatedAST(Annotation:AnnotationType) =
       param_is_variadic: is_variadic ;
       param_pos: Pos.t ;
       param_name: string ;
-      param_expr: expr option }
+      param_expr: expr option ;
+      param_callconv: Ast.param_kind option }
     and fun_variadicity =
       | FVvariadicArg of fun_param 
       | FVellipsis 
@@ -1720,7 +1721,9 @@ module AnnotatedAST(Annotation:AnnotationType) =
     
     and pp_fun_param :
       Format.formatter -> fun_param -> Ppx_deriving_runtime.unit =
-      let __4 () = pp_expr
+      let __5 () = Ast.pp_param_kind
+      
+      and __4 () = pp_expr
       
       and __3 () = Pos.pp
       
@@ -1734,38 +1737,47 @@ module AnnotatedAST(Annotation:AnnotationType) =
           fun fmt  ->
             fun x  ->
               Format.fprintf fmt "@[<2>{ ";
-              ((((((Format.fprintf fmt "@[%s =@ " "AnnotatedAST.param_hint";
-                    ((function
-                      | None  -> Format.pp_print_string fmt "None"
-                      | Some x ->
-                          (Format.pp_print_string fmt "(Some ";
-                           ((__0 ()) fmt) x;
-                           Format.pp_print_string fmt ")"))) x.param_hint;
+              (((((((Format.fprintf fmt "@[%s =@ " "AnnotatedAST.param_hint";
+                     ((function
+                       | None  -> Format.pp_print_string fmt "None"
+                       | Some x ->
+                           (Format.pp_print_string fmt "(Some ";
+                            ((__0 ()) fmt) x;
+                            Format.pp_print_string fmt ")"))) x.param_hint;
+                     Format.fprintf fmt "@]");
+                    Format.fprintf fmt ";@ ";
+                    Format.fprintf fmt "@[%s =@ " "param_is_reference";
+                    ((__1 ()) fmt) x.param_is_reference;
                     Format.fprintf fmt "@]");
                    Format.fprintf fmt ";@ ";
-                   Format.fprintf fmt "@[%s =@ " "param_is_reference";
-                   ((__1 ()) fmt) x.param_is_reference;
+                   Format.fprintf fmt "@[%s =@ " "param_is_variadic";
+                   ((__2 ()) fmt) x.param_is_variadic;
                    Format.fprintf fmt "@]");
                   Format.fprintf fmt ";@ ";
-                  Format.fprintf fmt "@[%s =@ " "param_is_variadic";
-                  ((__2 ()) fmt) x.param_is_variadic;
+                  Format.fprintf fmt "@[%s =@ " "param_pos";
+                  ((__3 ()) fmt) x.param_pos;
                   Format.fprintf fmt "@]");
                  Format.fprintf fmt ";@ ";
-                 Format.fprintf fmt "@[%s =@ " "param_pos";
-                 ((__3 ()) fmt) x.param_pos;
+                 Format.fprintf fmt "@[%s =@ " "param_name";
+                 (Format.fprintf fmt "%S") x.param_name;
                  Format.fprintf fmt "@]");
                 Format.fprintf fmt ";@ ";
-                Format.fprintf fmt "@[%s =@ " "param_name";
-                (Format.fprintf fmt "%S") x.param_name;
+                Format.fprintf fmt "@[%s =@ " "param_expr";
+                ((function
+                  | None  -> Format.pp_print_string fmt "None"
+                  | Some x ->
+                      (Format.pp_print_string fmt "(Some ";
+                       ((__4 ()) fmt) x;
+                       Format.pp_print_string fmt ")"))) x.param_expr;
                 Format.fprintf fmt "@]");
                Format.fprintf fmt ";@ ";
-               Format.fprintf fmt "@[%s =@ " "param_expr";
+               Format.fprintf fmt "@[%s =@ " "param_callconv";
                ((function
                  | None  -> Format.pp_print_string fmt "None"
                  | Some x ->
                      (Format.pp_print_string fmt "(Some ";
-                      ((__4 ()) fmt) x;
-                      Format.pp_print_string fmt ")"))) x.param_expr;
+                      ((__5 ()) fmt) x;
+                      Format.pp_print_string fmt ")"))) x.param_callconv;
                Format.fprintf fmt "@]");
               Format.fprintf fmt "@ }@]")
         [@ocaml.warning "-A"])

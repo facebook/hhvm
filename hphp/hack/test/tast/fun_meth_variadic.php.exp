@@ -6,7 +6,8 @@
       f_params =
       [{ AnnotatedAST.param_hint = (Some (<p>, (Hprim Tstring)));
          param_is_reference = false; param_is_variadic = false;
-         param_pos = <p>; param_name = "$s"; param_expr = None }
+         param_pos = <p>; param_name = "$s"; param_expr = None;
+         param_callconv = None }
         ];
       f_body =
       (AnnotatedAST.NamedBody
@@ -22,7 +23,7 @@
           { AnnotatedAST.param_hint = (Some (<p>, (Hprim Tstring)));
             param_is_reference = false; param_is_variadic = true;
             param_pos = <p>; param_name = "$args";
-            param_expr = None });
+            param_expr = None; param_callconv = None });
        f_params = [];
        f_body =
        (AnnotatedAST.NamedBody
@@ -63,7 +64,8 @@
           (AnnotatedAST.FVvariadicArg
              { AnnotatedAST.param_hint = None; param_is_reference = false;
                param_is_variadic = true; param_pos = <p>;
-               param_name = "$args"; param_expr = None });
+               param_name = "$args"; param_expr = None; param_callconv = None
+               });
           m_params = [];
           m_body =
           (AnnotatedAST.NamedBody

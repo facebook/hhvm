@@ -1671,18 +1671,13 @@ module Make (GetLocals : GetLocals) = struct
     Env.add_lvar env param.param_id (p, ident);
     let ty = Option.map param.param_hint (hint env) in
     let eopt = Option.map param.param_expr (expr env) in
-    let inout_params_enabled =
-      TypecheckerOptions.experimental_feature_enabled
-        (fst env).tcopt
-        TypecheckerOptions.experimental_inout_params in
-    if param.param_callconv <> None && not inout_params_enabled
-    then Errors.experimental_feature p "inout parameters";
     { N.param_hint = ty;
       param_is_reference = param.param_is_reference;
       param_is_variadic = param.param_is_variadic;
       param_pos = p;
       param_name = name;
       param_expr = eopt;
+      param_callconv = param.param_callconv;
     }
 
   and make_constraints paraml =

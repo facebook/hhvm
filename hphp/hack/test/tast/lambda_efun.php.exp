@@ -29,7 +29,8 @@
                              param_is_reference = false;
                              param_is_variadic = false;
                              param_pos = <p>;
-                             param_name = "$z"; param_expr = None }
+                             param_name = "$z"; param_expr = None;
+                             param_callconv = None }
                             ];
                           f_body =
                           (AnnotatedAST.NamedBody
@@ -79,7 +80,8 @@
                              param_is_reference = false;
                              param_is_variadic = false;
                              param_pos = <p>;
-                             param_name = "$z"; param_expr = None }
+                             param_name = "$z"; param_expr = None;
+                             param_callconv = None }
                             ];
                           f_body =
                           (AnnotatedAST.NamedBody
@@ -116,12 +118,14 @@
                              param_is_reference = false;
                              param_is_variadic = false;
                              param_pos = <p>;
-                             param_name = "$a"; param_expr = None };
+                             param_name = "$a"; param_expr = None;
+                             param_callconv = None };
                             { AnnotatedAST.param_hint = None;
                               param_is_reference = false;
                               param_is_variadic = false;
                               param_pos = <p>;
-                              param_name = "$b"; param_expr = None }
+                              param_name = "$b"; param_expr = None;
+                              param_callconv = None }
                             ];
                           f_body =
                           (AnnotatedAST.NamedBody

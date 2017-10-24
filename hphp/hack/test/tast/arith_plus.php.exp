@@ -6,7 +6,8 @@
       f_params =
       [{ AnnotatedAST.param_hint = (Some (<p>, (Hprim Tint)));
          param_is_reference = false; param_is_variadic = false;
-         param_pos = <p>; param_name = "$x"; param_expr = None }
+         param_pos = <p>; param_name = "$x"; param_expr = None;
+         param_callconv = None }
         ];
       f_body =
       (AnnotatedAST.NamedBody

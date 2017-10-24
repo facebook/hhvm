@@ -1,5 +1,5 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/ppx_gen. *)
-(* SourceShasum<<4f94f1e95c7fd822fc6ed2be0c33c860f79c490c>> *)
+(* SourceShasum<<49a9463bfea33ac419bf0e866d30895be937bc63>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -597,6 +597,7 @@ module AnnotatedAST(Annotation:AnnotationType) =
       | New of class_id* expr list* expr list 
       | Efun of fun_* id list 
       | Xml of sid* (pstring* expr) list* expr list 
+      | Callconv of Ast.param_kind* expr 
       | Lplaceholder of Pos.t 
       | Fun_id of sid 
       | Method_id of expr* pstring 
@@ -990,15 +991,19 @@ module AnnotatedAST(Annotation:AnnotationType) =
       fun x  -> Format.asprintf "%a" pp_expr x
     
     and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
-      let __76 () = pp_sid
+      let __78 () = pp_sid
       
-      and __75 () = pp_assert_expr
+      and __77 () = pp_assert_expr
       
-      and __74 () = pp_expr
+      and __76 () = pp_expr
       
-      and __73 () = pp_expr
+      and __75 () = pp_expr
       
-      and __72 () = pp_special_func
+      and __74 () = pp_special_func
+      
+      and __73 () = pp_pstring
+      
+      and __72 () = pp_sid
       
       and __71 () = pp_pstring
       
@@ -1006,15 +1011,15 @@ module AnnotatedAST(Annotation:AnnotationType) =
       
       and __69 () = pp_pstring
       
-      and __68 () = pp_sid
+      and __68 () = pp_expr
       
-      and __67 () = pp_pstring
+      and __67 () = pp_sid
       
-      and __66 () = pp_expr
+      and __66 () = Pos.pp
       
-      and __65 () = pp_sid
+      and __65 () = pp_expr
       
-      and __64 () = Pos.pp
+      and __64 () = Ast.pp_param_kind
       
       and __63 () = pp_expr
       
@@ -1511,49 +1516,55 @@ module AnnotatedAST(Annotation:AnnotationType) =
                                 true) false x);
                       Format.fprintf fmt "@,]@]")) a2);
                  Format.fprintf fmt "@,))@]")
+            | Callconv (a0,a1) ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Callconv (@,";
+                 (((__64 ()) fmt) a0;
+                  Format.fprintf fmt ",@ ";
+                  ((__65 ()) fmt) a1);
+                 Format.fprintf fmt "@,))@]")
             | Lplaceholder a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Lplaceholder@ ";
-                 ((__64 ()) fmt) a0;
+                 ((__66 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Fun_id a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Fun_id@ ";
-                 ((__65 ()) fmt) a0;
+                 ((__67 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Method_id (a0,a1) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Method_id (@,";
-                 (((__66 ()) fmt) a0;
-                  Format.fprintf fmt ",@ ";
-                  ((__67 ()) fmt) a1);
-                 Format.fprintf fmt "@,))@]")
-            | Method_caller (a0,a1) ->
-                (Format.fprintf fmt "(@[<2>AnnotatedAST.Method_caller (@,";
                  (((__68 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
                   ((__69 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
-            | Smethod_id (a0,a1) ->
-                (Format.fprintf fmt "(@[<2>AnnotatedAST.Smethod_id (@,";
+            | Method_caller (a0,a1) ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Method_caller (@,";
                  (((__70 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
                   ((__71 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
+            | Smethod_id (a0,a1) ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Smethod_id (@,";
+                 (((__72 ()) fmt) a0;
+                  Format.fprintf fmt ",@ ";
+                  ((__73 ()) fmt) a1);
+                 Format.fprintf fmt "@,))@]")
             | Special_func a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Special_func@ ";
-                 ((__72 ()) fmt) a0;
+                 ((__74 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Pair (a0,a1) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Pair (@,";
-                 (((__73 ()) fmt) a0;
+                 (((__75 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
-                  ((__74 ()) fmt) a1);
+                  ((__76 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
             | Assert a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Assert@ ";
-                 ((__75 ()) fmt) a0;
+                 ((__77 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Typename a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Typename@ ";
-                 ((__76 ()) fmt) a0;
+                 ((__78 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Any  -> Format.pp_print_string fmt "AnnotatedAST.Any")
         [@ocaml.warning "-A"])
@@ -2782,6 +2793,7 @@ module AnnotatedAST(Annotation:AnnotationType) =
       | New _ -> "New"
       | Efun _ -> "Efun"
       | Xml _ -> "Xml"
+      | Callconv _ -> "Callconv"
       | Assert _ -> "Assert"
       | Clone _ -> "Clone"
       | Typename _ -> "Typename" 
@@ -2920,6 +2932,8 @@ module AnnotatedAST(Annotation:AnnotationType) =
             method  on_efun : 'a -> fun_ -> id list -> 'a
             method  on_xml :
               'a -> sid -> (pstring* expr) list -> expr list -> 'a
+            method  on_param_kind : 'a -> Ast.param_kind -> 'a
+            method  on_callconv : 'a -> Ast.param_kind -> expr -> 'a
             method  on_assert : 'a -> assert_expr -> 'a
             method  on_clone : 'a -> expr -> 'a
             method  on_field : 'a -> field -> 'a
@@ -3066,6 +3080,7 @@ module AnnotatedAST(Annotation:AnnotationType) =
               | New (cid,el,uel) -> this#on_new acc cid el uel
               | Efun (f,idl) -> this#on_efun acc f idl
               | Xml (sid,attrl,el) -> this#on_xml acc sid attrl el
+              | Callconv (kind,e) -> this#on_callconv acc kind e
               | ValCollection (s,el) -> this#on_valCollection acc s el
               | KeyValCollection (s,fl) -> this#on_keyValCollection acc s fl
             method on_array acc afl = List.fold_left this#on_afield acc afl
@@ -3164,6 +3179,10 @@ module AnnotatedAST(Annotation:AnnotationType) =
                   acc attrl
                  in
               let acc = List.fold_left this#on_expr acc el  in acc
+            method on_param_kind acc _ = acc
+            method on_callconv acc kind e =
+              let acc = this#on_param_kind acc kind  in
+              let acc = this#on_expr acc e  in acc
             method on_assert acc =
               function | AE_assert e -> this#on_expr acc e
             method on_clone acc e = this#on_expr acc e

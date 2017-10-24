@@ -1941,6 +1941,9 @@ and expr_
         end ~init:env in
         make_result env txml obj
       )
+  | Callconv (kind, e) ->
+      let env, te, ty = lvalue env e in
+      make_result env (T.Callconv (kind, te)) ty
     (* TODO TAST: change AST so that order of shape expressions is preserved.
      * At present, evaluation order is unspecified in TAST *)
   | Shape fdm ->

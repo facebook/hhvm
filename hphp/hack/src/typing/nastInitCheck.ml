@@ -386,6 +386,7 @@ and expr_ env acc p e =
       let l = List.map l snd in
       let acc = exprl acc l in
       exprl acc el
+  | Callconv (_, e) -> expr acc e
   | Shape fdm ->
       ShapeMap.fold begin fun _ v acc ->
         expr acc v

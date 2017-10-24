@@ -300,6 +300,9 @@ module CheckFunctionBody = struct
         List.iter attrl (fun (_, e) -> expr f_type env e);
         List.iter el (expr f_type env);
         ()
+    | _, Callconv (_, e) ->
+        expr f_type env e;
+        ()
     | _, Assert (AE_assert e) ->
         expr f_type env e;
         ()
@@ -634,7 +637,8 @@ and check_class_property_initialization prop =
       | Method_id _
       | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
       | Call _ | Special_func _ | Yield_break | Yield _ | Suspend _
-      | Await _ | InstanceOf _ | New _ | Efun _ | Xml _ | Assert _ | Clone _ ->
+      | Await _ | InstanceOf _ | New _ | Efun _ | Xml _ | Callconv _
+      | Assert _ | Clone _ ->
         Errors.class_property_only_static_literal (fst e)
     and assert_static_literal_for_field_list (expr1, expr2) =
       rec_assert_static_literal expr1;
@@ -1043,6 +1047,10 @@ and expr_ env p = function
   | Xml (_, attrl, el) ->
       List.iter attrl (attribute env);
       List.iter el (expr env);
+      ()
+  | Callconv (_, e) ->
+      let _ = require_inout_params_enabled env p in
+      expr env e;
       ()
   | Shape fdm ->
       ShapeMap.iter (fun _ v -> expr env v) fdm

@@ -233,6 +233,7 @@ and expr_ =
   | New of class_id * expr list * expr list
   | Efun of fun_ * id list
   | Xml of sid * (pstring * expr) list * expr list
+  | Callconv of Ast.param_kind * expr
 
   (* None of these constructors exist in the AST *)
   | Lplaceholder of Pos.t
@@ -470,6 +471,7 @@ let expr_to_string expr =
   | New _  -> "New"
   | Efun _  -> "Efun"
   | Xml _  -> "Xml"
+  | Callconv _ -> "Callconv"
   | Assert _  -> "Assert"
   | Clone _  -> "Clone"
   | Typename _  -> "Typename"
@@ -569,6 +571,8 @@ class type ['a] visitor_type = object
   method on_new : 'a -> class_id -> expr list -> expr list -> 'a
   method on_efun : 'a -> fun_ -> id list -> 'a
   method on_xml : 'a -> sid -> (pstring * expr) list -> expr list -> 'a
+  method on_param_kind : 'a -> Ast.param_kind -> 'a
+  method on_callconv : 'a -> Ast.param_kind -> expr -> 'a
   method on_assert : 'a -> assert_expr -> 'a
   method on_clone : 'a -> expr -> 'a
   method on_field: 'a -> field -> 'a
@@ -760,6 +764,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | New         (cid, el, uel)   -> this#on_new acc cid el uel
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (sid, attrl, el) -> this#on_xml acc sid attrl el
+   | Callconv    (kind, e)        -> this#on_callconv acc kind e
    | ValCollection    (s, el)     ->
        this#on_valCollection acc s el
    | KeyValCollection (s, fl)     ->
@@ -901,6 +906,13 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
       this#on_expr acc e
     end acc attrl in
     let acc = List.fold_left this#on_expr acc el in
+    acc
+
+  method on_param_kind acc _ = acc
+
+  method on_callconv acc kind e =
+    let acc = this#on_param_kind acc kind in
+    let acc = this#on_expr acc e in
     acc
 
   method on_assert acc = function

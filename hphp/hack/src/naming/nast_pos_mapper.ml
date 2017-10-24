@@ -71,6 +71,7 @@ and expr_ f = function
     Efun (fun_, idl)
   | Xml (sid, attrl, el) ->
     Xml (pstring f sid, attr_list f attrl, List.map el (expr f))
+  | Callconv (kind, e) -> Callconv (kind, expr f e)
   | ValCollection (s, el) -> ValCollection (s, List.map el (expr f))
   | KeyValCollection (s, fl) ->
     KeyValCollection (s, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))

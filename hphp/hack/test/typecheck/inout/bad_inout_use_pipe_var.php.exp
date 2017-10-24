@@ -1,0 +1,2 @@
+File "bad_inout_use_pipe_var.php", line 9, characters 17-18:
+Cannot assign a value to the special pipe variable ($$) (Typing[4176])

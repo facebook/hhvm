@@ -521,15 +521,23 @@ and emit_load_class_ref env cexpr =
   end
 
 and emit_load_class_const env cexpr id =
-  let load_const =
-    if SU.is_class id
-    then instr (IMisc (ClsRefName 0))
-    else instr (ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id, 0)))
-  in
-  gather [
-    emit_load_class_ref env cexpr;
-    load_const
-  ]
+  (* TODO(T21932293): HHVM does not match Zend here.
+   * Eventually remove this to match PHP7 *)
+  match Ast_scope.Scope.get_class (Emit_env.get_scope env) with
+  | Some cd when cd.A.c_kind = A.Ctrait
+              && cexpr = Class_self
+              && SU.is_class id ->
+    instr_string @@ SU.strip_global_ns @@ snd cd.A.c_name
+  | _ ->
+    let load_const =
+      if SU.is_class id
+      then instr (IMisc (ClsRefName 0))
+      else instr (ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id, 0)))
+    in
+    gather [
+      emit_load_class_ref env cexpr;
+      load_const
+    ]
 
 and emit_class_expr_parts env cexpr prop =
   let load_prop, load_prop_first =
@@ -1416,9 +1424,12 @@ and emit_obj_get ~need_ref env param_num_hint_opt qop expr prop null_flavor =
       ]
     end
 
-and is_special_class_constant_accessed_with_class_id (_, cName) id =
+and is_special_class_constant_accessed_with_class_id env (_, cName) id =
+  (* TODO(T21932293): HHVM does not match Zend here.
+   * Eventually remove this to match PHP7 *)
   SU.is_class id &&
-  not (SU.is_self cName || SU.is_parent cName || SU.is_static cName)
+  (not (SU.is_self cName || SU.is_parent cName || SU.is_static cName)
+  || (Ast_scope.Scope.is_in_trait (Emit_env.get_scope env)) && SU.is_self cName)
 
 and emit_elem_instrs env opt_elem_expr =
   match opt_elem_expr with
@@ -1426,7 +1437,7 @@ and emit_elem_instrs env opt_elem_expr =
   | Some (_, (A.Int _ | A.String _)) -> empty, 0
   | Some (_, (A.Lvar (_, id))) when not (is_local_this env id) -> empty, 0
   | Some (_, (A.Class_const (cid, (_, id))))
-    when is_special_class_constant_accessed_with_class_id cid id -> empty, 0
+    when is_special_class_constant_accessed_with_class_id env cid id -> empty, 0
   | Some expr -> emit_expr ~need_ref:false env expr, 1
   | None -> empty, 0
 
@@ -1452,7 +1463,18 @@ and get_elem_member_key env stack_index opt_expr =
   | Some (_, A.String (_, str)) -> MemberKey.ET str
   (* Special case for class name *)
   | Some (_, (A.Class_const ((_, cName) as cid, (_, id))))
-    when is_special_class_constant_accessed_with_class_id cid id ->
+    when is_special_class_constant_accessed_with_class_id env cid id ->
+    (* Special case for self::class in traits *)
+    (* TODO(T21932293): HHVM does not match Zend here.
+     * Eventually remove this to match PHP7 *)
+    let cName =
+      match SU.is_self cName,
+            SU.is_class id,
+            Ast_scope.Scope.get_class (Emit_env.get_scope env)
+      with
+      | true, true, Some cd -> SU.strip_global_ns @@ snd cd.A.c_name
+      | _ -> cName
+    in
     MemberKey.ET cName
   (* General case *)
   | Some _ -> MemberKey.EC stack_index

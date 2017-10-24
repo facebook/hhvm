@@ -61,4 +61,9 @@ struct
     | ScopeItem.LongLambda is_static :: scope ->
       not is_static && is_in_static_method scope
     | _ -> false
+
+  let is_in_trait scope =
+    match get_class scope with
+    | None -> false
+    | Some cd -> cd.Ast.c_kind = Ast.Ctrait
 end

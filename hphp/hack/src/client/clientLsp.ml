@@ -176,7 +176,7 @@ module In_init_env = struct
   type t = {
     conn: server_conn;
     start_time: float;
-    file_edits: Jsonrpc_queue.jsonrpc_message ImmQueue.t;
+    file_edits: Hh_json.json ImmQueue.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     tail_env: Tail.env;
     has_reported_progress: bool;
@@ -227,6 +227,8 @@ type state =
   (* notifies us that we can exit.                                       *)
   | Post_shutdown
 
+module Jsonrpc = Jsonrpc.Make(struct type t = state end)
+
 let initialize_params: Initialize.params option ref = ref None
 
 let can_autostart_after_mismatch: bool ref = ref true
@@ -234,7 +236,7 @@ let can_autostart_after_mismatch: bool ref = ref true
 type event =
   | Server_hello
   | Server_message of ServerCommandTypes.push
-  | Client_message of Jsonrpc_queue.jsonrpc_message
+  | Client_message of Jsonrpc.message
   | Tick (* once per second, on idle *)
 
 (* Here are some exit points. *)
@@ -274,7 +276,7 @@ let requests_outstanding: Callback.t IMap.t ref = ref IMap.empty
 
 
 let event_to_string (event: event) : string =
-  let open Jsonrpc_queue in
+  let open Jsonrpc in
   match event with
   | Server_hello -> "Server hello"
   | Server_message ServerCommandTypes.DIAGNOSTIC _ -> "Server DIAGNOSTIC"
@@ -360,10 +362,10 @@ let rpc
    mandate id to be present. *)
 let respond
     (outchan: out_channel)
-    (c: Jsonrpc_queue.jsonrpc_message)
+    (c: Jsonrpc.message)
     (json: Hh_json.json)
   : Hh_json.json option =
-  let open Jsonrpc_queue in
+  let open Jsonrpc in
   let open Hh_json in
   let is_error = (Jget.val_opt (Some json) "code" <> None) in
   let response = JSON_Object (
@@ -522,10 +524,10 @@ let hack_log_error
   let root = get_root () in
   match event with
   | Some Client_message c ->
-    let open Jsonrpc_queue in
+    let open Jsonrpc in
+    let json = c.json |> Hh_json.json_truncate |> Hh_json.json_to_string in
     HackEventLogger.client_lsp_method_exception
-      root c.method_ (kind_to_string c.kind) c.timestamp start_handle_t c.message_json_for_logging
-      message stack source
+      root c.method_ (kind_to_string c.kind) c.timestamp start_handle_t json message stack source
   | _ ->
     HackEventLogger.client_lsp_exception root message stack source
 
@@ -534,7 +536,7 @@ let hack_log_error
    server (hh_server), or whether neither is ready within 1s. *)
 let get_message_source
     (server: server_conn)
-    (client: Jsonrpc_queue.t)
+    (client: Jsonrpc.queue)
     : [> `From_server | `From_client | `No_source ] =
   (* Take action on server messages in preference to client messages, because
      server messages are very easy and quick to service (just send a message to
@@ -542,11 +544,11 @@ let get_message_source
      long-running RPC command. *)
   let has_server_messages = not (Queue.is_empty server.pending_messages) in
   if has_server_messages then `From_server else
-  if Jsonrpc_queue.has_message client then `From_client else
+  if Jsonrpc.has_message client then `From_client else
 
   (* If no immediate messages are available, then wait up to 1 second. *)
   let server_read_fd = Unix.descr_of_out_channel server.oc in
-  let client_read_fd = Jsonrpc_queue.get_read_fd client in
+  let client_read_fd = Jsonrpc.get_read_fd client in
   let readable, _, _ = Unix.select [server_read_fd; client_read_fd] [] [] 1.0 in
   if readable = [] then `No_source
   else if List.mem readable server_read_fd then `From_server
@@ -555,10 +557,10 @@ let get_message_source
 
 (* A simplified version of get_message_source which only looks at client *)
 let get_client_message_source
-    (client: Jsonrpc_queue.t)
+    (client: Jsonrpc.queue)
   : [> `From_client | `No_source ] =
-  if Jsonrpc_queue.has_message client then `From_client else
-  let client_read_fd = Jsonrpc_queue.get_read_fd client in
+  if Jsonrpc.has_message client then `From_client else
+  let client_read_fd = Jsonrpc.get_read_fd client in
   let readable, _, _ = Unix.select [client_read_fd] [] [] 1.0 in
   if readable = [] then `No_source
   else `From_client
@@ -584,20 +586,18 @@ let read_message_from_server (server: server_conn) : event =
    from either client or server, we block until that message is completely
    received. Note: if server is None (meaning we haven't yet established
    connection with server) then we'll just block waiting for client. *)
-let get_next_event (state: state) (client: Jsonrpc_queue.t) : event =
+let get_next_event (state: state) (client: Jsonrpc.queue) : event =
   let from_server (server: server_conn) =
     if Queue.is_empty server.pending_messages
     then read_message_from_server server
     else Server_message (Queue.take server.pending_messages)
   in
 
-  let from_client (client: Jsonrpc_queue.t) =
-    match Jsonrpc_queue.get_message client with
-    | Jsonrpc_queue.Message message -> Client_message message
-    | Jsonrpc_queue.Fatal_exception edata ->
-      raise (Client_fatal_connection_exception edata)
-    | Jsonrpc_queue.Recoverable_exception edata ->
-      raise (Client_recoverable_connection_exception edata)
+  let from_client (client: Jsonrpc.queue) =
+    match Jsonrpc.get_message client with
+    | `Message message -> Client_message message
+    | `Fatal_exception edata -> raise (Client_fatal_connection_exception edata)
+    | `Recoverable_exception edata -> raise (Client_recoverable_connection_exception edata)
   in
 
   match state with
@@ -622,13 +622,13 @@ let short_timeout = 2.5
 let long_timeout = 15.0
 
 let cancel_if_stale
-    (client: Jsonrpc_queue.t)
-    (message: Jsonrpc_queue.jsonrpc_message)
+    (client: Jsonrpc.queue)
+    (message: Jsonrpc.message)
     (timeout: float)
   : unit =
-  let message_received_time = message.Jsonrpc_queue.timestamp in
+  let message_received_time = message.Jsonrpc.timestamp in
   let time_elapsed = (Unix.gettimeofday ()) -. message_received_time in
-  if time_elapsed >= timeout && Jsonrpc_queue.has_message client
+  if time_elapsed >= timeout && Jsonrpc.has_message client
   then raise (Error.RequestCancelled "request timed out")
 
 
@@ -637,7 +637,7 @@ let cancel_if_stale
 let respond_to_error (event: event option) (e: exn) (stack: string): unit =
   match event with
   | Some (Client_message c)
-    when c.Jsonrpc_queue.kind = Jsonrpc_queue.Request ->
+    when c.Jsonrpc.kind = Jsonrpc.Request ->
     print_error e stack |> respond stdout c |> ignore
   | _ ->
     let (code, message, _original_data) = get_error_info e in
@@ -1322,7 +1322,7 @@ let read_hhconfig_version (root: Path.t) : string option =
 (* ready, so we can send our backlog of file-edits to the server.             *)
 let connect_after_hello
     (server_conn: server_conn)
-    (file_edits: Jsonrpc_queue.jsonrpc_message ImmQueue.t)
+    (file_edits: Hh_json.json ImmQueue.t)
   : unit =
   let open Marshal_tools in
   begin try
@@ -1333,8 +1333,9 @@ let connect_after_hello
       if response <> ServerCommandTypes.Connected then
         failwith "Didn't get server Connected response";
 
-      let handle_file_edit (c: Jsonrpc_queue.jsonrpc_message) =
-        let open Jsonrpc_queue in
+      let handle_file_edit (json: Hh_json.json) =
+        let open Jsonrpc in
+        let c = Jsonrpc.parse_message ~json ~timestamp:0.0 in
         match c.method_ with
         | "textDocument/didOpen" -> parse_didOpen c.params |> do_didOpen server_conn
         | "textDocument/didChange" -> parse_didChange c.params |> do_didChange server_conn
@@ -1513,7 +1514,7 @@ and reconnect_from_lost_if_necessary
   let should_reconnect = match state, reason with
     | Lost_server _, `Force_regain -> true
     | Lost_server lenv, `Event Client_message c
-      when lenv.p.trigger_on_lsp && c.Jsonrpc_queue.kind <> Jsonrpc_queue.Response -> true
+      when lenv.p.trigger_on_lsp && c.Jsonrpc.kind <> Jsonrpc.Response -> true
     | Lost_server lenv, `Event Tick when lenv.p.trigger_on_lock_file ->
       MonitorConnection.server_exists lenv.lock_file
     | _, _ -> false
@@ -1634,15 +1635,16 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
     }
 
 
+
 let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
   (* We'll auto-dismiss the ready dialog if it was up, in response to user    *)
   (* actions like typing or hover, and in response to a lost server.          *)
-  let open Jsonrpc_queue in
+  let open Jsonrpc in
   let open Main_env in
   match state with
   | Main_loop ({dialog_cancel = Some cancel; _} as menv) -> begin
       match event with
-      | Client_message {kind = Jsonrpc_queue.Response; _} ->
+      | Client_message {kind = Jsonrpc.Response; _} ->
         state
       | Client_message _
       | Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
@@ -1660,7 +1662,7 @@ let handle_idle_if_necessary (state: state) (event: event) : state =
 
 
 let track_edits_if_necessary (state: state) (event: event) : state =
-  let open Jsonrpc_queue in
+  let open Jsonrpc in
   (* We'll keep track of which files have unsaved edits. Note that not all    *)
   (* clients send didSave messages; for those we only rely on didClose.       *)
   let previous = get_uris_with_unsaved_changes state in
@@ -1692,20 +1694,21 @@ let log_response_if_necessary
     (response: Hh_json.json option)
     (start_handle_t: float)
   : unit =
-  let open Jsonrpc_queue in
+  let open Jsonrpc in
   match event with
   | Client_message c ->
     let json_response = match response with
       | None -> ""
       | Some json -> json |> Hh_json.json_truncate |> Hh_json.json_to_string
     in
+    let json = c.json |> Hh_json.json_truncate |> Hh_json.json_to_string in
     HackEventLogger.client_lsp_method_handled
       ~root:(get_root ())
       ~method_:(if c.kind = Response then get_outstanding_method_name c.id else c.method_)
       ~kind:(kind_to_string c.kind)
       ~start_queue_t:c.timestamp
       ~start_handle_t
-      ~json:c.message_json_for_logging
+      ~json
       ~json_response
   | _ -> ()
 
@@ -1720,14 +1723,14 @@ let log_response_if_necessary
 let handle_event
     ~(env: env)
     ~(state: state ref)
-    ~(client: Jsonrpc_queue.t)
+    ~(client: Jsonrpc.queue)
     ~(event: event)
   : Hh_json.json option =
-  let open Jsonrpc_queue in
+  let open Jsonrpc in
   let open Main_env in
   match !state, event with
   (* response *)
-  | _, Client_message c when c.kind = Jsonrpc_queue.Response ->
+  | _, Client_message c when c.kind = Jsonrpc.Response ->
     state := do_response !state c.id c.result c.error;
     None
 
@@ -1768,7 +1771,7 @@ let handle_event
       | "textDocument/didClose" ->
         (* These three crucial-for-correctness notifications will be buffered *)
         (* up so we'll be able to handle them when we're ready.               *)
-        state := In_init { ienv with file_edits = ImmQueue.push ienv.file_edits c }
+        state := In_init { ienv with file_edits = ImmQueue.push ienv.file_edits c.json }
       | _ ->
         raise (Error.RequestCancelled "Server busy")
         (* We deny all other requests. Operation_cancelled is the only *)
@@ -1954,7 +1957,7 @@ let main (env: env) : 'a =
   let open Marshal_tools in
   Printexc.record_backtrace true;
   HackEventLogger.client_set_from env.from;
-  let client = Jsonrpc_queue.make () in
+  let client = Jsonrpc.make_queue () in
   let deferred_action = ref None in
   let state = ref Pre_init in
   while true do

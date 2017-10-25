@@ -23,9 +23,10 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/bisector.h"
+#include "hphp/util/bitset-utils.h"
+#include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/dataflow-worklist.h"
 
 #include "hphp/runtime/vm/jit/alias-analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"

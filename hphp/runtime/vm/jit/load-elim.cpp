@@ -23,6 +23,7 @@
 #include <folly/ScopeGuard.h>
 #include <folly/Hash.h>
 
+#include "hphp/util/bitset-utils.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/either.h"
 #include "hphp/util/dataflow-worklist.h"

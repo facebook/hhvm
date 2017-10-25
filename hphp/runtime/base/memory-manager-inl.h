@@ -20,6 +20,7 @@
 #include <limits>
 #include <utility>
 
+#include "hphp/util/bitops.h"
 #include "hphp/util/compilation-flags.h"
 
 namespace HPHP {
@@ -144,34 +145,6 @@ inline void MemoryManager::FreeList::push(void* val) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline size_t MemoryManager::bsrq(size_t x) {
-#if defined(__x86_64__)
-  size_t ret;
-  __asm__ ("bsrq %1, %0"
-           : "=r"(ret) // Outputs.
-           : "r"(x)    // Inputs.
-           );
-  return ret;
-#elif defined(__powerpc64__)
-  size_t ret;
-  __asm__ ("cntlzd %0, %1"
-           : "=r"(ret) // Outputs.
-           : "r"(x)    // Inputs.
-           );
-  return 63 - ret;
-#elif defined(__aarch64__)
-  size_t ret;
-  __asm__ ("clz %x0, %x1"
-           : "=r"(ret) // Outputs.
-           : "r"(x)    // Inputs.
-           );
-  return 63 - ret;
-#else
-  // Equivalent (but incompletely strength-reduced by gcc):
-  return 63 - __builtin_clzl(x);
-#endif
-}
-
 inline size_t MemoryManager::computeSize2Index(size_t size) {
   assert(size > 1);
   assert(size <= kMaxSizeClass);
@@ -191,7 +164,7 @@ inline size_t MemoryManager::computeSize2Index(size_t size) {
   //   (1 << kLgSizeClassesPerDoubling + mantissa - 1)
   // This lets us skip taking the leading 1 off of the mantissa, and skip
   // adding 1 to the exponent.
-  size_t nBits = bsrq(--size);
+  size_t nBits = fls64(--size);
   if (UNLIKELY(nBits < kLgSizeClassesPerDoubling + kLgSmallSizeQuantum)) {
     // denormal sizes
     // UNLIKELY because these normally go through lookupSmallSize2Index
@@ -229,7 +202,7 @@ inline size_t MemoryManager::sizeClass(size_t size) {
   assert(size <= kMaxSizeClass);
   // Round up to the nearest kLgSizeClassesPerDoubling + 1 significant bits,
   // or to the nearest kLgSmallSizeQuantum, whichever is greater.
-  ssize_t nInsignificantBits = bsrq(--size) - kLgSizeClassesPerDoubling;
+  ssize_t nInsignificantBits = fls64(--size) - kLgSizeClassesPerDoubling;
   size_t roundTo = (nInsignificantBits < ssize_t(kLgSmallSizeQuantum))
     ? kLgSmallSizeQuantum : nInsignificantBits;
   size_t ret = ((size >> roundTo) + 1) << roundTo;

@@ -31,7 +31,7 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 
-#include "hphp/util/bitops.h"
+#include "hphp/util/bitset-utils.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
 

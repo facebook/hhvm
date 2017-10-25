@@ -1046,8 +1046,6 @@ private:
   void* mallocSmallSizeSlow(size_t bytes, size_t index);
   void  updateBigStats();
 
-  static size_t bsrq(size_t x);
-
   static void threadStatsInit();
   static void threadStats(uint64_t*&, uint64_t*&);
   void refreshStats();

@@ -572,9 +572,10 @@ way than to complicate the main pass further.
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "hphp/util/safe-cast.h"
+#include "hphp/util/bitset-utils.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
+#include "hphp/util/safe-cast.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/jit/ir-unit.h"

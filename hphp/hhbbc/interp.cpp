@@ -315,17 +315,17 @@ void in(ISS& env, const bc::Keyset& op) {
 
 void in(ISS& env, const bc::NewArray& op) {
   push(env, op.arg1 == 0 ?
-       effect_free(env), aempty() : counted_aempty());
+       effect_free(env), aempty() : some_aempty());
 }
 
 void in(ISS& env, const bc::NewDictArray& op) {
   push(env, op.arg1 == 0 ?
-       effect_free(env), dict_empty() : counted_dict_empty());
+       effect_free(env), dict_empty() : some_dict_empty());
 }
 
 void in(ISS& env, const bc::NewMixedArray& op) {
   push(env, op.arg1 == 0 ?
-       effect_free(env), aempty() : counted_aempty());
+       effect_free(env), aempty() : some_aempty());
 }
 
 void in(ISS& env, const bc::NewPackedArray& op) {
@@ -393,7 +393,7 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
 
 void in(ISS& env, const bc::NewLikeArrayL& op) {
   locAsCell(env, op.loc1);
-  push(env, counted_aempty());
+  push(env, some_aempty());
 }
 
 void in(ISS& env, const bc::AddElemC& /*op*/) {

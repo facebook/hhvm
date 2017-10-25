@@ -193,15 +193,6 @@ bool setCouldHaveSideEffects(const Type& t) {
     could_run_destructor(t);
 }
 
-bool couldBeCowType(const Type& t) {
-  return
-    t.couldBe(TCStr) ||
-    t.couldBe(TCArrN) ||
-    t.couldBe(TCVecN) ||
-    t.couldBe(TCDictN) ||
-    t.couldBe(TCKeysetN);
-}
-
 // Some reads could raise warnings and run arbitrary code.
 bool readCouldHaveSideEffects(const Type& t) {
   return t.couldBe(TUninit);
@@ -1249,7 +1240,7 @@ void cgetImpl(Env& env, LocalId loc, bool quiet) {
         return PushFlags::MarkUnused;
       }
       if (!isLocLive(env, loc) &&
-          couldBeCowType(locRaw(env, loc)) &&
+          could_copy_on_write(locRaw(env, loc)) &&
           !setCouldHaveSideEffects(locRaw(env, loc)) &&
           !readCouldHaveSideEffects(locRaw(env, loc))) {
         // note: PushL does not deal with Uninit, so we need the

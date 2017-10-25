@@ -544,6 +544,7 @@ private:
   friend Type dict_val(SArray);
   friend Type keyset_val(SArray);
   friend bool could_run_destructor(const Type&);
+  friend bool could_copy_on_write(const Type&);
   friend Type loosen_staticness(Type);
   friend Type loosen_unstaticness(Type);
   friend Type loosen_values(Type);
@@ -644,48 +645,35 @@ X(True)                                         \
 X(Int)                                          \
 X(Dbl)                                          \
 X(SStr)                                         \
-X(CStr)                                         \
 X(SArrE)                                        \
-X(CArrE)                                        \
 X(SArrN)                                        \
-X(CArrN)                                        \
 X(Obj)                                          \
 X(Res)                                          \
 X(Cls)                                          \
 X(Ref)                                          \
 X(SVecE)                                        \
-X(CVecE)                                        \
 X(SVecN)                                        \
-X(CVecN)                                        \
 X(SDictE)                                       \
-X(CDictE)                                       \
 X(SDictN)                                       \
-X(CDictN)                                       \
 X(SKeysetE)                                     \
-X(CKeysetE)                                     \
 X(SKeysetN)                                     \
-X(CKeysetN)                                     \
 X(Null)                                         \
 X(Bool)                                         \
 X(Num)                                          \
 X(Str)                                          \
 X(SArr)                                         \
-X(CArr)                                         \
 X(ArrE)                                         \
 X(ArrN)                                         \
 X(Arr)                                          \
 X(SVec)                                         \
-X(CVec)                                         \
 X(VecE)                                         \
 X(VecN)                                         \
 X(Vec)                                          \
 X(SDict)                                        \
-X(CDict)                                        \
 X(DictE)                                        \
 X(DictN)                                        \
 X(Dict)                                         \
 X(SKeyset)                                      \
-X(CKeyset)                                      \
 X(KeysetE)                                      \
 X(KeysetN)                                      \
 X(Keyset)                                       \
@@ -702,43 +690,30 @@ X(OptInt)                                       \
 X(OptDbl)                                       \
 X(OptNum)                                       \
 X(OptSStr)                                      \
-X(OptCStr)                                      \
 X(OptStr)                                       \
 X(OptSArrE)                                     \
-X(OptCArrE)                                     \
 X(OptSArrN)                                     \
-X(OptCArrN)                                     \
 X(OptSArr)                                      \
-X(OptCArr)                                      \
 X(OptArrE)                                      \
 X(OptArrN)                                      \
 X(OptArr)                                       \
 X(OptObj)                                       \
 X(OptRes)                                       \
 X(OptSVecE)                                     \
-X(OptCVecE)                                     \
 X(OptSVecN)                                     \
-X(OptCVecN)                                     \
 X(OptSVec)                                      \
-X(OptCVec)                                      \
 X(OptVecE)                                      \
 X(OptVecN)                                      \
 X(OptVec)                                       \
 X(OptSDictE)                                    \
-X(OptCDictE)                                    \
 X(OptSDictN)                                    \
-X(OptCDictN)                                    \
 X(OptSDict)                                     \
-X(OptCDict)                                     \
 X(OptDictE)                                     \
 X(OptDictN)                                     \
 X(OptDict)                                      \
 X(OptSKeysetE)                                  \
-X(OptCKeysetE)                                  \
 X(OptSKeysetN)                                  \
-X(OptCKeysetN)                                  \
 X(OptSKeyset)                                   \
-X(OptCKeyset)                                   \
 X(OptKeysetE)                                   \
 X(OptKeysetN)                                   \
 X(OptKeyset)                                    \
@@ -753,6 +728,37 @@ X(Top)
 #define X(y) extern const Type T##y;
 TYPES(X)
 #undef X
+
+// These are treps that have B* names, but which are not "predefined"
+// types. They are only allowed in combination with the corresponding
+// S types.
+#define NON_TYPES(X)                            \
+  X(CStr)                                       \
+  X(CArrE)                                      \
+  X(CArrN)                                      \
+  X(CVecE)                                      \
+  X(CVecN)                                      \
+  X(CDictE)                                     \
+  X(CDictN)                                     \
+  X(CKeysetE)                                   \
+  X(CKeysetN)                                   \
+  X(CArr)                                       \
+  X(CVec)                                       \
+  X(CDict)                                      \
+  X(CKeyset)                                    \
+  X(OptCStr)                                    \
+  X(OptCArrE)                                   \
+  X(OptCArrN)                                   \
+  X(OptCArr)                                    \
+  X(OptCVecE)                                   \
+  X(OptCVecN)                                   \
+  X(OptCVec)                                    \
+  X(OptCDictE)                                  \
+  X(OptCDictN)                                  \
+  X(OptCDict)                                   \
+  X(OptCKeysetE)                                \
+  X(OptCKeysetN)                                \
+  X(OptCKeyset)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -789,14 +795,6 @@ Type dict_empty();
 Type keyset_empty();
 
 /*
- * Create a reference counted empty array/vec/dict.
- */
-Type counted_aempty();
-Type counted_vec_empty();
-Type counted_dict_empty();
-Type counted_keyset_empty();
-
-/*
  * Create an any-countedness empty array/vec/dict type.
  */
 Type some_aempty();
@@ -820,7 +818,6 @@ Type clsExact(res::Class);
  */
 Type arr_packed(std::vector<Type> v);
 Type sarr_packed(std::vector<Type> v);
-Type carr_packed(std::vector<Type> v);
 
 /*
  * Packed array types of unknown size.
@@ -829,7 +826,6 @@ Type carr_packed(std::vector<Type> v);
  */
 Type arr_packedn(Type);
 Type sarr_packedn(Type);
-Type carr_packedn(Type);
 
 /*
  * Struct-like arrays.
@@ -844,7 +840,6 @@ Type sarr_map(MapElems m);
  */
 Type arr_mapn(Type k, Type v);
 Type sarr_mapn(Type k, Type v);
-Type carr_mapn(Type k, Type v);
 
 /*
  * vec types with known size.

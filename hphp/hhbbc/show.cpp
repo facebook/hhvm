@@ -422,127 +422,16 @@ std::string show(const Type& t) {
     return ret;
   }
 
+#define SHOW(n) case B##n: ret = #n; break;
   switch (t.m_bits) {
-  case BBottom:      ret = "Bottom";   break;
-
-  case BUninit:      ret = "Uninit";   break;
-  case BInitNull:    ret = "InitNull"; break;
-  case BFalse:       ret = "False";    break;
-  case BTrue:        ret = "True";     break;
-  case BInt:         ret = "Int";      break;
-  case BDbl:         ret = "Dbl";      break;
-  case BSStr:        ret = "SStr";     break;
-  case BCStr:        ret = "CStr";     break;
-  case BSArr:        ret = "SArr";     break;
-  case BCArr:        ret = "CArr";     break;
-  case BSArrE:       ret = "SArrE";    break;
-  case BCArrE:       ret = "CArrE";    break;
-  case BSArrN:       ret = "SArrN";    break;
-  case BCArrN:       ret = "CArrN";    break;
-  case BArrE:        ret = "ArrE";     break;
-  case BArrN:        ret = "ArrN";     break;
-  case BObj:         ret = "Obj";      break;
-  case BRes:         ret = "Res";      break;
-  case BCls:         ret = "Cls";      break;
-  case BRef:         ret = "Ref";      break;
-
-  case BSVec:        ret = "SVec";     break;
-  case BCVec:        ret = "CVec";     break;
-  case BSVecE:       ret = "SVecE";    break;
-  case BCVecE:       ret = "CVecE";    break;
-  case BSVecN:       ret = "SVecN";    break;
-  case BCVecN:       ret = "CVecN";    break;
-  case BVecE:        ret = "VecE";     break;
-  case BVecN:        ret = "VecN";     break;
-  case BSDict:       ret = "SDict";    break;
-  case BCDict:       ret = "CDict";    break;
-  case BSDictE:      ret = "SDictE";   break;
-  case BCDictE:      ret = "CDictE";   break;
-  case BSDictN:      ret = "SDictN";   break;
-  case BCDictN:      ret = "CDictN";   break;
-  case BDictE:       ret = "DictE";    break;
-  case BDictN:       ret = "DictN";    break;
-  case BSKeyset:     ret = "SKeyset";  break;
-  case BCKeyset:     ret = "CKeyset";  break;
-  case BSKeysetE:    ret = "SKeysetE"; break;
-  case BCKeysetE:    ret = "CKeysetE"; break;
-  case BSKeysetN:    ret = "SKeysetN"; break;
-  case BCKeysetN:    ret = "CKeysetN"; break;
-  case BKeysetE:     ret = "KeysetE";  break;
-  case BKeysetN:     ret = "KeysetN";  break;
-
-  case BNull:        ret = "Null";     break;
-  case BNum:         ret = "Num";      break;
-  case BBool:        ret = "Bool";     break;
-  case BStr:         ret = "Str";      break;
-  case BArr:         ret = "Arr";      break;
-  case BVec:         ret = "Vec";      break;
-  case BDict:        ret = "Dict";     break;
-  case BKeyset:      ret = "Keyset";   break;
-
-  case BOptTrue:     ret = "?True";    break;
-  case BOptFalse:    ret = "?False";   break;
-  case BOptInt:      ret = "?Int";     break;
-  case BOptDbl:      ret = "?Dbl";     break;
-  case BOptNum:      ret = "?Num";     break;
-  case BOptBool:     ret = "?Bool";    break;
-  case BOptSStr:     ret = "?SStr";    break;
-  case BOptCStr:     ret = "?CStr";    break;
-  case BOptStr:      ret = "?Str";     break;
-  case BOptSArrE:    ret = "?SArrE";   break;
-  case BOptCArrE:    ret = "?CArrE";   break;
-  case BOptSArrN:    ret = "?SArrN";   break;
-  case BOptCArrN:    ret = "?CArrN";   break;
-  case BOptSArr:     ret = "?SArr";    break;
-  case BOptCArr:     ret = "?CArr";    break;
-  case BOptArrE:     ret = "?ArrE";    break;
-  case BOptArrN:     ret = "?ArrN";    break;
-  case BOptArr:      ret = "?Arr";     break;
-  case BOptObj:      ret = "?Obj";     break;
-  case BOptRes:      ret = "?Res";     break;
-
-  case BOptSVecE:    ret = "?SVecE";   break;
-  case BOptCVecE:    ret = "?CVecE";   break;
-  case BOptSVecN:    ret = "?SVecN";   break;
-  case BOptCVecN:    ret = "?CVecN";   break;
-  case BOptSVec:     ret = "?SVec";    break;
-  case BOptCVec:     ret = "?CVec";    break;
-  case BOptVecE:     ret = "?VecE";    break;
-  case BOptVecN:     ret = "?VecN";    break;
-  case BOptVec:      ret = "?Vec";     break;
-  case BOptSDictE:   ret = "?SDictE";  break;
-  case BOptCDictE:   ret = "?CDictE";  break;
-  case BOptSDictN:   ret = "?SDictN";  break;
-  case BOptCDictN:   ret = "?CDictN";  break;
-  case BOptSDict:    ret = "?SDict";   break;
-  case BOptCDict:    ret = "?CDict";   break;
-  case BOptDictE:    ret = "?DictE";   break;
-  case BOptDictN:    ret = "?DictN";   break;
-  case BOptDict:     ret = "?Dict";    break;
-  case BOptSKeysetE: ret = "?SKeysetE";break;
-  case BOptCKeysetE: ret = "?CKeysetE";break;
-  case BOptSKeysetN: ret = "?SKeysetN";break;
-  case BOptCKeysetN: ret = "?CKeysetN";break;
-  case BOptSKeyset:  ret = "?SKeyset"; break;
-  case BOptCKeyset:  ret = "?CKeyset"; break;
-  case BOptKeysetE:  ret = "?KeysetE"; break;
-  case BOptKeysetN:  ret = "?KeysetN"; break;
-  case BOptKeyset:   ret = "?Keyset";  break;
-
-  case BUncArrKey:    ret = "UncArrKey";  break;
-  case BArrKey:       ret = "ArrKey";     break;
-  case BOptUncArrKey: ret = "?UncArrKey"; break;
-  case BOptArrKey:    ret = "?ArrKey";    break;
-
-  case BInitPrim:    ret = "InitPrim"; break;
-  case BPrim:        ret = "Prim";     break;
-  case BInitUnc:     ret = "InitUnc";  break;
-  case BUnc:         ret = "Unc";      break;
-  case BInitCell:    ret = "InitCell"; break;
-  case BCell:        ret = "Cell";     break;
-  case BInitGen:     ret = "InitGen";  break;
-  case BGen:         ret = "Gen";      break;
-  case BTop:         ret = "Top";      break;
+    TYPES(SHOW)
+    default:
+      always_assert(false);
+  }
+#undef SHOW
+  if (!ret.compare(0, 3, "Opt", 3)) {
+    ret = ret.substr(2);
+    ret[0] = '?';
   }
 
   switch (t.m_dataTag) {

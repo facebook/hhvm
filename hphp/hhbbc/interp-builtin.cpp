@@ -244,9 +244,20 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
     retTy |= TInt;
   }
   if (ty.couldBe(TStr)) {
-    retTy |= TInt;
-    if (ty.couldBe(TSStr)) retTy |= TSStr;
-    if (ty.couldBe(TCStr)) retTy |= TCStr;
+    retTy |= [&] {
+      if (ty.subtypeOf(TSStr)) {
+        auto const v = tv(ty);
+        if (v) {
+          int64_t i;
+          if (v->m_data.pstr->isStrictlyInteger(i)) {
+            return ival(i);
+          }
+          return ty;
+        }
+        return TUncArrKey;
+      }
+      return TArrKey;
+    }();
   }
 
   if (!ty.couldBe(TObj) && !ty.couldBe(TArr) &&

@@ -223,9 +223,7 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeSame(const Type& a, const Type& b) {
-  auto const nsa = loosen_unstaticness(a);
-  auto const nsb = loosen_unstaticness(b);
-  if (!nsa.couldBe(nsb)) return TFalse;
+  if (!a.couldBe(b)) return TFalse;
   return TBool;
 }
 

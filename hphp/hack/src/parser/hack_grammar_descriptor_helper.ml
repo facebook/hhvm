@@ -232,6 +232,7 @@ module HackGrammarTermSpec = struct
   let xhp_comment = Term XHPComment
   let slash_greater_than = Term SlashGreaterThan
   let less_than_slash = Term LessThanSlash
+  let inout = Term Inout
 
   (* For keywords, use TokenKind to_string. For names, use gen_name to generate
    * name *)

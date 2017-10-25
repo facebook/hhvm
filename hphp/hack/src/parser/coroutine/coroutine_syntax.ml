@@ -435,6 +435,7 @@ let make_parameter_declaration_syntax
   make_parameter_declaration
     (* attribute *)  (make_missing ())
     visibility_syntax
+    (* call convention *) (make_missing ())
     parameter_type_syntax
     parameter_variable_syntax
     (* default value *)  (make_missing ())

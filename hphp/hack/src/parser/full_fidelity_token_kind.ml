@@ -74,6 +74,7 @@ type t =
   | Implements
   | Include
   | Include_once
+  | Inout
   | Instanceof
   | Insteadof
   | Int
@@ -276,6 +277,7 @@ let from_string keyword =
   | "implements"   -> Some Implements
   | "include"      -> Some Include
   | "include_once" -> Some Include_once
+  | "inout"        -> Some Inout
   | "instanceof"   -> Some Instanceof
   | "insteadof"    -> Some Insteadof
   | "int"          -> Some Int
@@ -450,6 +452,7 @@ let to_string kind =
   | Implements                    -> "implements"
   | Include                       -> "include"
   | Include_once                  -> "include_once"
+  | Inout                         -> "inout"
   | Instanceof                    -> "instanceof"
   | Insteadof                     -> "insteadof"
   | Int                           -> "int"

@@ -637,6 +637,7 @@ module FromMinimal = struct
       , (  parameter_default_value
         :: parameter_name
         :: parameter_type
+        :: parameter_call_convention
         :: parameter_visibility
         :: parameter_attribute
         :: results
@@ -644,6 +645,7 @@ module FromMinimal = struct
           ParameterDeclaration
           { parameter_attribute
           ; parameter_visibility
+          ; parameter_call_convention
           ; parameter_type
           ; parameter_name
           ; parameter_default_value
@@ -2574,6 +2576,7 @@ module FromMinimal = struct
     | { M.syntax = M.ParameterDeclaration
         { M.parameter_attribute
         ; M.parameter_visibility
+        ; M.parameter_call_convention
         ; M.parameter_type
         ; M.parameter_name
         ; M.parameter_default_value
@@ -2583,6 +2586,7 @@ module FromMinimal = struct
         let todo = Convert (parameter_default_value, todo) in
         let todo = Convert (parameter_name, todo) in
         let todo = Convert (parameter_type, todo) in
+        let todo = Convert (parameter_call_convention, todo) in
         let todo = Convert (parameter_visibility, todo) in
         convert offset todo results parameter_attribute
     | { M.syntax = M.VariadicParameter

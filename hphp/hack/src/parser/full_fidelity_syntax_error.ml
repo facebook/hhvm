@@ -161,8 +161,8 @@ let error2030 = "Only traits may use 'require implements'."
 let error2031 =
   "A class, interface, or trait declaration cannot have duplicate modifiers."
 let error2032 = "The array type is not allowed in strict mode."
-let error2033 = "A variadic argument ('...') may only appear at the end of " ^
-  "an argument list."
+let error2033 = "The splat operator ('...') for unpacking variadic arguments " ^
+  "may only appear at the end of an argument list."
 let error2034 = "A type alias declaration cannot both use 'type' and have a " ^
   "constraint. Did you mean 'newtype'?"
 let error2035 = "Only classes may implement interfaces."
@@ -211,7 +211,7 @@ let error2061 = "Non-static instance variables are not allowed in abstract final
 let error2062 = "Non-static methods are not allowed in abstract final classes."
 let error2063 = "Expected integer or string literal."
 let error2064 = "Reference methods are not allowed in strict mode."
-let error2065 = "A variadic argument ('...') must not have a default value."
+let error2065 = "A variadic parameter ('...') must not have a default value."
 (* This was typing error 4077. *)
 let error2066 = "A previous parameter has a default value. Remove all the " ^
   "default values for the preceding parameters, or add a default value to " ^
@@ -224,7 +224,12 @@ let error2070 ~open_tag ~close_tag =
     open_tag close_tag
 let error2071 s = "Decimal number is too big: " ^ s
 let error2072 s = "Hexadecimal number is too big: " ^ s
-
+let error2073 = "A variadic parameter ('...') cannot have a modifier " ^
+  "that changes the calling convention, like 'inout'."
+let error2074 call_modifier = "An '" ^ call_modifier ^ "' parameter must not " ^
+  "have a default value."
+let error2075 call_modifier = "An '" ^ call_modifier ^ "' parameter cannot " ^
+  "be passed by reference ('&')."
 
 (* Start giving names rather than numbers *)
 let hsl_in_php = "Hack standard library is only allowed in Hack files"

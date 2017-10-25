@@ -887,6 +887,8 @@ abstract class EditableToken extends EditableSyntax {
        return new IncludeToken($leading, $trailing);
     case 'include_once':
        return new Include_onceToken($leading, $trailing);
+    case 'inout':
+       return new InoutToken($leading, $trailing);
     case 'instanceof':
        return new InstanceofToken($leading, $trailing);
     case 'insteadof':
@@ -2004,6 +2006,21 @@ final class Include_onceToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): Include_onceToken {
     return new Include_onceToken($this->leading(), $trailing);
+  }
+}
+final class InoutToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('inout', $leading, $trailing, 'inout');
+  }
+
+  public function with_leading(EditableSyntax $leading): InoutToken {
+    return new InoutToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): InoutToken {
+    return new InoutToken($this->leading(), $trailing);
   }
 }
 final class InstanceofToken extends EditableToken {
@@ -8351,18 +8368,21 @@ final class DecoratedExpression extends EditableSyntax {
 final class ParameterDeclaration extends EditableSyntax {
   private EditableSyntax $_attribute;
   private EditableSyntax $_visibility;
+  private EditableSyntax $_call_convention;
   private EditableSyntax $_type;
   private EditableSyntax $_name;
   private EditableSyntax $_default_value;
   public function __construct(
     EditableSyntax $attribute,
     EditableSyntax $visibility,
+    EditableSyntax $call_convention,
     EditableSyntax $type,
     EditableSyntax $name,
     EditableSyntax $default_value) {
     parent::__construct('parameter_declaration');
     $this->_attribute = $attribute;
     $this->_visibility = $visibility;
+    $this->_call_convention = $call_convention;
     $this->_type = $type;
     $this->_name = $name;
     $this->_default_value = $default_value;
@@ -8372,6 +8392,9 @@ final class ParameterDeclaration extends EditableSyntax {
   }
   public function visibility(): EditableSyntax {
     return $this->_visibility;
+  }
+  public function call_convention(): EditableSyntax {
+    return $this->_call_convention;
   }
   public function type(): EditableSyntax {
     return $this->_type;
@@ -8386,6 +8409,7 @@ final class ParameterDeclaration extends EditableSyntax {
     return new ParameterDeclaration(
       $attribute,
       $this->_visibility,
+      $this->_call_convention,
       $this->_type,
       $this->_name,
       $this->_default_value);
@@ -8394,6 +8418,16 @@ final class ParameterDeclaration extends EditableSyntax {
     return new ParameterDeclaration(
       $this->_attribute,
       $visibility,
+      $this->_call_convention,
+      $this->_type,
+      $this->_name,
+      $this->_default_value);
+  }
+  public function with_call_convention(EditableSyntax $call_convention): ParameterDeclaration {
+    return new ParameterDeclaration(
+      $this->_attribute,
+      $this->_visibility,
+      $call_convention,
       $this->_type,
       $this->_name,
       $this->_default_value);
@@ -8402,6 +8436,7 @@ final class ParameterDeclaration extends EditableSyntax {
     return new ParameterDeclaration(
       $this->_attribute,
       $this->_visibility,
+      $this->_call_convention,
       $type,
       $this->_name,
       $this->_default_value);
@@ -8410,6 +8445,7 @@ final class ParameterDeclaration extends EditableSyntax {
     return new ParameterDeclaration(
       $this->_attribute,
       $this->_visibility,
+      $this->_call_convention,
       $this->_type,
       $name,
       $this->_default_value);
@@ -8418,6 +8454,7 @@ final class ParameterDeclaration extends EditableSyntax {
     return new ParameterDeclaration(
       $this->_attribute,
       $this->_visibility,
+      $this->_call_convention,
       $this->_type,
       $this->_name,
       $default_value);
@@ -8431,12 +8468,14 @@ final class ParameterDeclaration extends EditableSyntax {
     array_push($new_parents, $this);
     $attribute = $this->attribute()->rewrite($rewriter, $new_parents);
     $visibility = $this->visibility()->rewrite($rewriter, $new_parents);
+    $call_convention = $this->call_convention()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $default_value = $this->default_value()->rewrite($rewriter, $new_parents);
     if (
       $attribute === $this->attribute() &&
       $visibility === $this->visibility() &&
+      $call_convention === $this->call_convention() &&
       $type === $this->type() &&
       $name === $this->name() &&
       $default_value === $this->default_value()) {
@@ -8445,6 +8484,7 @@ final class ParameterDeclaration extends EditableSyntax {
       return $rewriter(new ParameterDeclaration(
         $attribute,
         $visibility,
+        $call_convention,
         $type,
         $name,
         $default_value), $parents ?? []);
@@ -8458,6 +8498,9 @@ final class ParameterDeclaration extends EditableSyntax {
     $visibility = EditableSyntax::from_json(
       $json->parameter_visibility, $position, $source);
     $position += $visibility->width();
+    $call_convention = EditableSyntax::from_json(
+      $json->parameter_call_convention, $position, $source);
+    $position += $call_convention->width();
     $type = EditableSyntax::from_json(
       $json->parameter_type, $position, $source);
     $position += $type->width();
@@ -8470,6 +8513,7 @@ final class ParameterDeclaration extends EditableSyntax {
     return new ParameterDeclaration(
         $attribute,
         $visibility,
+        $call_convention,
         $type,
         $name,
         $default_value);
@@ -8477,6 +8521,7 @@ final class ParameterDeclaration extends EditableSyntax {
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_attribute;
     yield $this->_visibility;
+    yield $this->_call_convention;
     yield $this->_type;
     yield $this->_name;
     yield $this->_default_value;

@@ -62,18 +62,15 @@ let assert_last_in_list assert_fun node =
     | _ :: t -> aux t in
   aux (syntax_to_list_no_separators node)
 
-let is_variadic_expression node =
+let is_decorated_expression ~f node =
   begin match syntax node with
-    | DecoratedExpression { decorated_expression_decorator; _; } ->
-      is_ellipsis decorated_expression_decorator
+    | DecoratedExpression { decorated_expression_decorator; _ } ->
+      f decorated_expression_decorator
     | _ -> false
   end
 
-let is_parameter_with_default_value param =
-  match (syntax param) with
-    | ParameterDeclaration { parameter_default_value; _ }
-      -> not (is_missing parameter_default_value)
-    | _ -> false
+let is_variadic_expression node =
+  is_decorated_expression ~f:is_ellipsis node
 
 let is_variadic_parameter_variable node =
   (* TODO: This shouldn't be a decorated *expression* because we are not
@@ -104,16 +101,20 @@ let ends_with_variadic_comma params =
     | _ :: t -> aux t in
   aux (syntax_to_list_with_separators params)
 
-(* If a variadic parameter has a default value, return it *)
-let variadic_params_with_default_value params =
+(* Extract variadic parameter from a parameter list *)
+let variadic_param params =
   let rec aux params =
     match params with
     | [] -> None
-    | x :: t when
-      (is_parameter_with_default_value x) &&
-      (is_variadic_parameter_declaration x) -> Some x
+    | x :: _ when is_variadic_parameter_declaration x -> Some x
     | _ :: t -> aux t in
   aux (syntax_to_list_with_separators params)
+
+let is_parameter_with_default_value param =
+  match syntax param with
+  | ParameterDeclaration { parameter_default_value; _ } ->
+    not (is_missing parameter_default_value)
+  | _ -> false
 
 let param_missing_default_value params =
   (* TODO: This error is also reported in the type checker; when we switch
@@ -461,6 +462,12 @@ let produce_error acc check node error error_node =
     (make_error_from_node error_node error) :: acc
   else acc
 
+let produce_error_from_check acc check node error =
+  match check node with
+  | Some error_node ->
+    (make_error_from_node error_node error) :: acc
+  | _ -> acc
+
 let produce_error_parents acc check node parents error error_node =
   if check node parents then
     (make_error_from_node error_node error) :: acc
@@ -634,14 +641,14 @@ let is_abstract_and_async_method md_node parents =
 (* Returns the visibility modifier node from a list, or None if the
  * list doesn't contain one. *)
 let extract_visibility_node modifiers_list =
-  let is_visibility_modifier modifier =
-    match token_kind modifier with
-    | Some TokenKind.Public
-    | Some TokenKind.Private
-    | Some TokenKind.Protected -> true
-    | _ -> false in
-  Core.List.find ~f:is_visibility_modifier (syntax_to_list_no_separators
+  Core.List.find ~f:is_visibility (syntax_to_list_no_separators
     modifiers_list)
+
+let extract_callconv_node node =
+  match syntax node with
+  | ParameterDeclaration { parameter_call_convention; _ } ->
+    Some parameter_call_convention
+  | _ -> None
 
 (* Tests if visibility modifiers of the node are allowed on
  * methods inside an interface. *)
@@ -870,37 +877,89 @@ let markup_errors node is_hack_file hhvm_compat_mode =
     [ make_error_from_node node SyntaxError.error2068 ]
   | _ -> []
 
-let default_value_params_errors params is_hack hhvm_compat_mode =
-  if hhvm_compat_mode || not is_hack then []
-  else match param_missing_default_value params with
-  | None -> []
-  | Some param -> [ make_error_from_node param SyntaxError.error2066 ]
+let default_value_params is_hack hhvm_compat_mode params =
+  match param_missing_default_value params with
+  | Some param when not hhvm_compat_mode && is_hack -> Some param
+  | _ -> None
+
+(* Test if the parameter is missing a type annotation but one is required *)
+let missing_param_type_check is_strict hhvm_compat_mode p parents =
+  let is_required = parameter_type_is_required parents in
+  not hhvm_compat_mode && is_strict && is_missing p.parameter_type && is_required
+
+(* If a variadic parameter has a default value, return it *)
+let variadic_param_with_default_value params =
+  Option.filter (variadic_param params) ~f:is_parameter_with_default_value
+
+let is_parameter_with_callconv param =
+  match syntax param with
+  | ParameterDeclaration { parameter_call_convention; _ } ->
+    not (is_missing parameter_call_convention)
+  | _ -> false
+
+(* If a variadic parameter is marked inout, return it *)
+let variadic_param_with_callconv params =
+  Option.filter (variadic_param params) ~f:is_parameter_with_callconv
+
+(* If an inout parameter has a default, return the default *)
+let param_with_callconv_has_default node =
+  match syntax node with
+  | ParameterDeclaration { parameter_default_value; _ } when
+    is_parameter_with_callconv node &&
+    is_parameter_with_default_value node -> Some parameter_default_value
+  | _ -> None
+
+let is_byref_expression node =
+  is_decorated_expression ~f:is_ampersand node
+
+let is_byref_parameter_variable node =
+  (* TODO: This shouldn't be a decorated *expression* because we are not
+  expecting an expression at all. We're expecting a declaration. *)
+  is_byref_expression node
+
+(* If an inout parameter is passed by reference, return it *)
+let param_with_callconv_is_byref node =
+  match syntax node with
+  | ParameterDeclaration { parameter_name; _ } when
+    is_parameter_with_callconv node &&
+    is_byref_parameter_variable parameter_name -> Some node
+  | _ -> None
 
 let params_errors params is_hack hhvm_compat_mode =
-  let errors = default_value_params_errors params is_hack hhvm_compat_mode in
+  let errors = [] in
   let errors =
-    match ends_with_variadic_comma params with
-    | None -> errors
-    | Some comma ->
-      ( make_error_from_node comma SyntaxError.error2022 ) :: errors in
+    produce_error_from_check errors (default_value_params is_hack hhvm_compat_mode)
+    params SyntaxError.error2066 in
   let errors =
-    match misplaced_variadic_param params with
-    | None -> errors
-    | Some param ->
-      ( make_error_from_node param SyntaxError.error2021 ) :: errors in
+    produce_error_from_check errors ends_with_variadic_comma
+    params SyntaxError.error2022 in
   let errors =
-    match variadic_params_with_default_value params with
-    | None -> errors
-    | Some default_argument ->
-      (make_error_from_node default_argument SyntaxError.error2065) :: errors in
+    produce_error_from_check errors misplaced_variadic_param
+    params SyntaxError.error2021 in
+  let errors =
+    produce_error_from_check errors variadic_param_with_default_value
+    params SyntaxError.error2065 in
+  let errors =
+    produce_error_from_check errors variadic_param_with_callconv
+    params SyntaxError.error2073 in
   errors
 
 let parameter_errors node parents is_strict is_hack hhvm_compat_mode =
   match syntax node with
-  | ParameterDeclaration { parameter_type; _}
-    when not hhvm_compat_mode && is_strict && (is_missing parameter_type) &&
-    (parameter_type_is_required parents) ->
-      [ make_error_from_node node SyntaxError.error2001 ]
+  | ParameterDeclaration p ->
+    let errors = [] in
+    let errors =
+      produce_error_parents errors (missing_param_type_check is_strict hhvm_compat_mode)
+      p parents SyntaxError.error2001 node in
+    let callconv_text = Option.value (extract_callconv_node node) ~default:node
+      |> PositionedSyntax.text in
+    let errors =
+      produce_error_from_check errors param_with_callconv_has_default
+      node (SyntaxError.error2074 callconv_text) in
+    let errors =
+      produce_error_from_check errors param_with_callconv_is_byref
+      node (SyntaxError.error2075 callconv_text) in
+    errors
   | FunctionDeclarationHeader { function_parameter_list; _ }
     when not hhvm_compat_mode ->
     params_errors function_parameter_list is_hack hhvm_compat_mode
@@ -908,7 +967,6 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode =
     when not hhvm_compat_mode ->
     params_errors anonymous_parameters is_hack hhvm_compat_mode
   | _ -> []
-
 
 let missing_type_annot_check is_strict hhvm_compat_mode f =
   let label = f.function_name in

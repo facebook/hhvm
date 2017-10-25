@@ -5,7 +5,7 @@
     ((end_of_line)(function)(whitespace))
     (missing)((name))(missing)((lparen))
     (list(list_item(
-      parameter_declaration(missing)(missing)(error((function)))(missing)(missing)
+      parameter_declaration(missing)(missing)(missing)(error((function)))(missing)(missing)
     )(missing)))
     (missing)(missing)(missing)(missing))
     (compound_statement(missing)(list(expression_statement

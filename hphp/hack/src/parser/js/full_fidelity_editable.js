@@ -782,6 +782,8 @@ class EditableToken extends EditableSyntax
        return new IncludeToken(leading, trailing);
     case 'include_once':
        return new Include_onceToken(leading, trailing);
+    case 'inout':
+       return new InoutToken(leading, trailing);
     case 'instanceof':
        return new InstanceofToken(leading, trailing);
     case 'insteadof':
@@ -1485,6 +1487,13 @@ class Include_onceToken extends EditableToken
   constructor(leading, trailing)
   {
     super('include_once', leading, trailing, 'include_once');
+  }
+}
+class InoutToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('inout', leading, trailing, 'inout');
   }
 }
 class InstanceofToken extends EditableToken
@@ -6485,6 +6494,7 @@ class ParameterDeclaration extends EditableSyntax
   constructor(
     attribute,
     visibility,
+    call_convention,
     type,
     name,
     default_value)
@@ -6492,12 +6502,14 @@ class ParameterDeclaration extends EditableSyntax
     super('parameter_declaration', {
       attribute: attribute,
       visibility: visibility,
+      call_convention: call_convention,
       type: type,
       name: name,
       default_value: default_value });
   }
   get attribute() { return this.children.attribute; }
   get visibility() { return this.children.visibility; }
+  get call_convention() { return this.children.call_convention; }
   get type() { return this.children.type; }
   get name() { return this.children.name; }
   get default_value() { return this.children.default_value; }
@@ -6505,6 +6517,7 @@ class ParameterDeclaration extends EditableSyntax
     return new ParameterDeclaration(
       attribute,
       this.visibility,
+      this.call_convention,
       this.type,
       this.name,
       this.default_value);
@@ -6513,6 +6526,16 @@ class ParameterDeclaration extends EditableSyntax
     return new ParameterDeclaration(
       this.attribute,
       visibility,
+      this.call_convention,
+      this.type,
+      this.name,
+      this.default_value);
+  }
+  with_call_convention(call_convention){
+    return new ParameterDeclaration(
+      this.attribute,
+      this.visibility,
+      call_convention,
       this.type,
       this.name,
       this.default_value);
@@ -6521,6 +6544,7 @@ class ParameterDeclaration extends EditableSyntax
     return new ParameterDeclaration(
       this.attribute,
       this.visibility,
+      this.call_convention,
       type,
       this.name,
       this.default_value);
@@ -6529,6 +6553,7 @@ class ParameterDeclaration extends EditableSyntax
     return new ParameterDeclaration(
       this.attribute,
       this.visibility,
+      this.call_convention,
       this.type,
       name,
       this.default_value);
@@ -6537,6 +6562,7 @@ class ParameterDeclaration extends EditableSyntax
     return new ParameterDeclaration(
       this.attribute,
       this.visibility,
+      this.call_convention,
       this.type,
       this.name,
       default_value);
@@ -6549,12 +6575,14 @@ class ParameterDeclaration extends EditableSyntax
     new_parents.push(this);
     var attribute = this.attribute.rewrite(rewriter, new_parents);
     var visibility = this.visibility.rewrite(rewriter, new_parents);
+    var call_convention = this.call_convention.rewrite(rewriter, new_parents);
     var type = this.type.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
     var default_value = this.default_value.rewrite(rewriter, new_parents);
     if (
       attribute === this.attribute &&
       visibility === this.visibility &&
+      call_convention === this.call_convention &&
       type === this.type &&
       name === this.name &&
       default_value === this.default_value)
@@ -6566,6 +6594,7 @@ class ParameterDeclaration extends EditableSyntax
       return rewriter(new ParameterDeclaration(
         attribute,
         visibility,
+        call_convention,
         type,
         name,
         default_value), parents);
@@ -6579,6 +6608,9 @@ class ParameterDeclaration extends EditableSyntax
     let visibility = EditableSyntax.from_json(
       json.parameter_visibility, position, source);
     position += visibility.width;
+    let call_convention = EditableSyntax.from_json(
+      json.parameter_call_convention, position, source);
+    position += call_convention.width;
     let type = EditableSyntax.from_json(
       json.parameter_type, position, source);
     position += type.width;
@@ -6591,6 +6623,7 @@ class ParameterDeclaration extends EditableSyntax
     return new ParameterDeclaration(
         attribute,
         visibility,
+        call_convention,
         type,
         name,
         default_value);
@@ -6601,6 +6634,7 @@ class ParameterDeclaration extends EditableSyntax
       ParameterDeclaration._children_keys = [
         'attribute',
         'visibility',
+        'call_convention',
         'type',
         'name',
         'default_value'];
@@ -18835,6 +18869,7 @@ exports.IfToken = IfToken;
 exports.ImplementsToken = ImplementsToken;
 exports.IncludeToken = IncludeToken;
 exports.Include_onceToken = Include_onceToken;
+exports.InoutToken = InoutToken;
 exports.InstanceofToken = InstanceofToken;
 exports.InsteadofToken = InsteadofToken;
 exports.IntToken = IntToken;

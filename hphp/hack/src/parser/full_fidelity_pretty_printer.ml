@@ -571,16 +571,18 @@ let rec get_doc node =
   | ParameterDeclaration {
     parameter_attribute;
     parameter_visibility;
+    parameter_call_convention;
     parameter_type;
     parameter_name;
     parameter_default_value } ->
     let attr = get_doc parameter_attribute in
     let visibility = get_doc parameter_visibility in
+    let callconv = get_doc parameter_call_convention in
     let parameter_type = get_doc parameter_type in
     let parameter_name = get_doc parameter_name in
     let parameter_default = get_doc parameter_default_value in
     group_doc
-      ( attr ^| visibility ^| parameter_type ^| parameter_name
+      ( attr ^| visibility ^| callconv ^| parameter_type ^| parameter_name
       ^| parameter_default )
   | VariadicParameter { variadic_parameter_ellipsis } ->
       get_doc variadic_parameter_ellipsis

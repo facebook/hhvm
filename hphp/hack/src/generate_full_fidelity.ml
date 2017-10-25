@@ -608,6 +608,7 @@ TYPE_TESTS
     let is_comma      = is_specific_token Full_fidelity_token_kind.Comma
     let is_array      = is_specific_token Full_fidelity_token_kind.Array
     let is_var        = is_specific_token Full_fidelity_token_kind.Var
+    let is_ampersand  = is_specific_token Full_fidelity_token_kind.Ampersand
 
 CHILD_LIST_FROM_TYPE
 

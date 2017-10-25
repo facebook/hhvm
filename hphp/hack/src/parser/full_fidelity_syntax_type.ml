@@ -280,6 +280,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and parameter_declaration =
     { parameter_attribute                                : t
     ; parameter_visibility                               : t
+    ; parameter_call_convention                          : t
     ; parameter_type                                     : t
     ; parameter_name                                     : t
     ; parameter_default_value                            : t
@@ -1593,6 +1594,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and parameter_declaration =
     { parameter_attribute: attribute_specification option value
     ; parameter_visibility: Token.t option value
+    ; parameter_call_convention: Token.t option value
     ; parameter_type: specifier option value
     ; parameter_name: expression value
     ; parameter_default_value: simple_initializer option value

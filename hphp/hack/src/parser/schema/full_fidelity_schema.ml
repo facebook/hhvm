@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-10-23-0001"
+let full_fidelity_schema_version_number = "2017-10-24-0001"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -182,6 +182,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Implements"; "implements" ];
   [ "Include"; "include" ];
   [ "Include_once"; "include_once" ];
+  [ "Inout"; "inout" ];
   [ "Instanceof"; "instanceof" ];
   [ "Insteadof"; "insteadof" ];
   [ "Int"; "int" ];
@@ -403,7 +404,7 @@ module GenerateFFJSONSchema = struct
 
   let full_fidelity_json_schema_template =
 "{ \"description\" :
-  \"Auto-generated JSON schema of the Hack Full Fidelity Parser AST\",
+  \"@"^"generated JSON schema of the Hack Full Fidelity Parser AST\",
   \"version\" : \"" ^ full_fidelity_schema_version_number ^ "\",
   \"trivia\" : [
 TRIVIA_KINDS ],

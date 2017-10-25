@@ -1250,6 +1250,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { parameter_default_value = validate_option_with (validate_simple_initializer) x.Syntax.parameter_default_value
     ; parameter_name = validate_expression x.Syntax.parameter_name
     ; parameter_type = validate_option_with (validate_specifier) x.Syntax.parameter_type
+    ; parameter_call_convention = validate_option_with (validate_token) x.Syntax.parameter_call_convention
     ; parameter_visibility = validate_option_with (validate_token) x.Syntax.parameter_visibility
     ; parameter_attribute = validate_option_with (validate_attribute_specification) x.Syntax.parameter_attribute
     }
@@ -1259,6 +1260,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.ParameterDeclaration
       { Syntax.parameter_attribute = invalidate_option_with (invalidate_attribute_specification) x.parameter_attribute
       ; Syntax.parameter_visibility = invalidate_option_with (invalidate_token) x.parameter_visibility
+      ; Syntax.parameter_call_convention = invalidate_option_with (invalidate_token) x.parameter_call_convention
       ; Syntax.parameter_type = invalidate_option_with (invalidate_specifier) x.parameter_type
       ; Syntax.parameter_name = invalidate_expression x.parameter_name
       ; Syntax.parameter_default_value = invalidate_option_with (invalidate_simple_initializer) x.parameter_default_value

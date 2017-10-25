@@ -469,6 +469,7 @@ let schema : schema_node list =
     ; fields =
       [ "attribute", ZeroOrOne (Just "AttributeSpecification")
       ; "visibility", ZeroOrOne Token
+      ; "call_convention", ZeroOrOne Token
       ; "type", ZeroOrOne (Aggregate Specifier)
       ; "name", Aggregate Expression
       ; "default_value", ZeroOrOne (Just "SimpleInitializer")

@@ -264,6 +264,11 @@ let pKinds : kind list parser = couldMap ~f:(fun node env ->
   | _ -> missing_syntax "kind" node env
   )
 
+let pParamKind : param_kind parser = fun node env ->
+  match token_kind node with
+  | Some TK.Inout -> Pinout
+  | _ -> missing_syntax "param kind" node env
+
 let syntax_of_token : Token.t -> node = fun t ->
   let value =
     SyntaxValue.from_token t in
@@ -581,11 +586,13 @@ let rec pSimpleInitializer node env =
   | SimpleInitializer { simple_initializer_value; simple_initializer_equal } ->
     pExpr simple_initializer_value env
   | _ -> missing_syntax "simple initializer" node env
+
 and pFunParam : fun_param parser = fun node env ->
   match syntax node with
   | ParameterDeclaration
     { parameter_attribute
     ; parameter_visibility
+    ; parameter_call_convention
     ; parameter_type
     ; parameter_name
     ; parameter_default_value
@@ -619,7 +626,8 @@ and pFunParam : fun_param parser = fun node env ->
       mpOptional pSimpleInitializer parameter_default_value env
     ; param_user_attributes = List.concat @@
       couldMap ~f:pUserAttribute parameter_attribute env
-    ; param_callconv        = None
+    ; param_callconv        =
+      mpOptional pParamKind parameter_call_convention env
     (* implicit field via constructor parameter.
      * This is always None except for constructors and the modifier
      * can be only Public or Protected or Private.

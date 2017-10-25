@@ -165,6 +165,9 @@ val error2069 : string
 val error2070 : open_tag:string -> close_tag:string -> string
 val error2071 : string -> string
 val error2072 : string -> string
+val error2073 : string
+val error2074 : string -> string
+val error2075 : string -> string
 
 (* Start giving names rather than numbers *)
 val hsl_in_php : string

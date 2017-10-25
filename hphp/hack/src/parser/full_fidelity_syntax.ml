@@ -419,6 +419,7 @@ module WithToken(Token: TokenType) = struct
     let is_comma      = is_specific_token Full_fidelity_token_kind.Comma
     let is_array      = is_specific_token Full_fidelity_token_kind.Array
     let is_var        = is_specific_token Full_fidelity_token_kind.Var
+    let is_ampersand  = is_specific_token Full_fidelity_token_kind.Ampersand
 
     let get_end_of_file_children {
       end_of_file_token;
@@ -819,12 +820,14 @@ module WithToken(Token: TokenType) = struct
     let get_parameter_declaration_children {
       parameter_attribute;
       parameter_visibility;
+      parameter_call_convention;
       parameter_type;
       parameter_name;
       parameter_default_value;
     } = (
       parameter_attribute,
       parameter_visibility,
+      parameter_call_convention,
       parameter_type,
       parameter_name,
       parameter_default_value
@@ -2578,12 +2581,14 @@ module WithToken(Token: TokenType) = struct
       | ParameterDeclaration {
         parameter_attribute;
         parameter_visibility;
+        parameter_call_convention;
         parameter_type;
         parameter_name;
         parameter_default_value;
       } -> [
         parameter_attribute;
         parameter_visibility;
+        parameter_call_convention;
         parameter_type;
         parameter_name;
         parameter_default_value;
@@ -4215,12 +4220,14 @@ module WithToken(Token: TokenType) = struct
       | ParameterDeclaration {
         parameter_attribute;
         parameter_visibility;
+        parameter_call_convention;
         parameter_type;
         parameter_name;
         parameter_default_value;
       } -> [
         "parameter_attribute";
         "parameter_visibility";
+        "parameter_call_convention";
         "parameter_type";
         "parameter_name";
         "parameter_default_value";
@@ -5940,6 +5947,7 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.ParameterDeclaration, [
           parameter_attribute;
           parameter_visibility;
+          parameter_call_convention;
           parameter_type;
           parameter_name;
           parameter_default_value;
@@ -5947,6 +5955,7 @@ module WithToken(Token: TokenType) = struct
         ParameterDeclaration {
           parameter_attribute;
           parameter_visibility;
+          parameter_call_convention;
           parameter_type;
           parameter_name;
           parameter_default_value;
@@ -8000,6 +8009,7 @@ module WithToken(Token: TokenType) = struct
       let make_parameter_declaration
         parameter_attribute
         parameter_visibility
+        parameter_call_convention
         parameter_type
         parameter_name
         parameter_default_value
@@ -8007,6 +8017,7 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_children SyntaxKind.ParameterDeclaration [
           parameter_attribute;
           parameter_visibility;
+          parameter_call_convention;
           parameter_type;
           parameter_name;
           parameter_default_value;
@@ -8014,6 +8025,7 @@ module WithToken(Token: TokenType) = struct
         make (ParameterDeclaration {
           parameter_attribute;
           parameter_visibility;
+          parameter_call_convention;
           parameter_type;
           parameter_name;
           parameter_default_value;

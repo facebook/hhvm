@@ -195,6 +195,7 @@ let minimal_tests =
       "test_nested_namespace_declarations";
       "test_xhp_attributes";
       "test_spaces_preserved_in_string_containing_expression";
+      "test_inout_params";
     ] ~f:mapper
 
 let error_tests =
@@ -254,6 +255,7 @@ let error_tests =
     "test_valid_php_no_markup_errors";
     "test_question_mark_end_tag_errors";
     "test_php_blocks_errors";
+    "test_inout_params_errors";
   ] ~f:mapper
 
 let test_data = minimal_tests @ trivia_tests @ error_tests @

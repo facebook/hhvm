@@ -1046,6 +1046,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Implements
     | Include
     | Include_once
+    | Inout
     | Insteadof
     | Int
     | Interface

@@ -554,6 +554,7 @@ let make_outer_param outer_variable =
   {
     parameter_attribute = make_missing();
     parameter_visibility = public_syntax;
+    parameter_call_convention = make_missing();
     parameter_type = make_missing();
     parameter_name = make_variable_syntax outer_variable;
     parameter_default_value = make_missing();

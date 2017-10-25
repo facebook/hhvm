@@ -534,15 +534,17 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         Newline;
       ]
     | ParameterDeclaration x ->
-      let (attr, visibility, param_type, name, default) =
+      let (attr, visibility, callconv, param_type, name, default) =
         get_parameter_declaration_children x
       in
       Concat [
         t attr;
         t visibility;
         when_present visibility space;
+        t callconv;
+        when_present callconv space;
         t param_type;
-        if is_missing visibility && is_missing param_type
+        if is_missing visibility && is_missing callconv && is_missing param_type
         then t name
         else Concat [
           Space;

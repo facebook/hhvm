@@ -1255,17 +1255,25 @@ module WithExpressionAndStatementAndTypeParser
   and parse_parameter_declaration parser =
     (* SPEC
     parameter-declaration:
-      attribute-specification-opt  type-specifier  variable-name \
+      attribute-specification-opt \
+      call-convention-opt \
+      type-specifier  variable-name \
       default-argument-specifier-opt
+    *)
+    (* TODO: Update grammar for inout parameters (call-convention-opt).
+       (This work is tracked by task T22582715.)
     *)
     (* ERROR RECOVERY
       * In strict mode, we require a type specifier. This error is not caught
         at parse time but rather by a later pass.
       * Visibility modifiers are only legal in constructor parameter
         lists; we give an error in a later pass.
+      * Variadic params and inout params cannot have default values; these
+        errors are also reported in a later pass.
     *)
     let (parser, attrs) = parse_attribute_specification_opt parser in
     let (parser, visibility) = parse_visibility_modifier_opt parser in
+    let (parser, callconv) = parse_call_convention_opt parser in
     let token = peek_token parser in
     let (parser, type_specifier) =
       match Token.kind token with
@@ -1274,7 +1282,13 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, name) = parse_decorated_variable_opt parser in
     let (parser, default) = parse_simple_initializer_opt parser in
     let syntax =
-      make_parameter_declaration attrs visibility type_specifier name default in
+      make_parameter_declaration
+        attrs
+        visibility
+        callconv
+        type_specifier
+        name
+        default in
     (parser, syntax)
 
   and parse_decorated_variable_opt parser =
@@ -1288,7 +1302,9 @@ module WithExpressionAndStatementAndTypeParser
   same data structure for a decorated expression as a declaration; one
   is a *use* and the other is a *definition*. *)
   and parse_decorated_variable parser =
-    (* TODO: Error on
+    (* ERROR RECOVERY
+       Detection of (variadic, byRef) inout params happens in post-parsing.
+       TODO: Error on
           ... ... variable
           & & variable
           ... & variable
@@ -1309,6 +1325,12 @@ module WithExpressionAndStatementAndTypeParser
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Public | Protected | Private -> (parser1, make_token token)
+    | _ -> (parser, make_missing())
+
+  and parse_call_convention_opt parser =
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Inout -> (parser1, make_token token)
     | _ -> (parser, make_missing())
 
   (* SPEC

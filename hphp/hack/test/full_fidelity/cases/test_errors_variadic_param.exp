@@ -1,4 +1,4 @@
 (3,13)-(3,17) A variadic parameter ('...') may only appear at the end of a parameter list.
 (5,17)-(5,21) A variadic parameter ('...') may only appear at the end of a parameter list.
-(8,4)-(8,8) A variadic argument ('...') may only appear at the end of an argument list.
-(9,8)-(9,12) A variadic argument ('...') may only appear at the end of an argument list.
+(8,4)-(8,8) The splat operator ('...') for unpacking variadic arguments may only appear at the end of an argument list.
+(9,8)-(9,12) The splat operator ('...') for unpacking variadic arguments may only appear at the end of an argument list.

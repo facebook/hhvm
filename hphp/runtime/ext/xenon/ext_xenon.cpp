@@ -155,12 +155,19 @@ Xenon& Xenon::getInstance() noexcept {
   return instance;
 }
 
-Xenon::Xenon() noexcept : m_stopping(false) {
+Xenon::Xenon() noexcept : m_stopping(false), m_missedSampleCount(0) {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
   m_timerid = 0;
 #endif
 }
 
+void Xenon::incrementMissedSampleCount(ssize_t val) {
+  m_missedSampleCount += val;
+}
+
+int64_t Xenon::getAndClearMissedSampleCount() {
+    return std::atomic_exchange<int64_t>(&m_missedSampleCount, 0);
+}
 // XenonForceAlwaysOn is active - it doesn't need a timer, it is always on.
 // Xenon needs to be started once per process.
 // The number of milliseconds has to be greater than zero.
@@ -327,6 +334,7 @@ void XenonRequestLocalData::requestInit() {
 void XenonRequestLocalData::requestShutdown() {
   TRACE(1, "XenonRequestLocalData::requestShutdown\n");
   clearSurpriseFlag(XenonSignalFlag);
+  Xenon::getInstance().incrementMissedSampleCount(m_stackSnapshots.size());
   m_stackSnapshots.reset();
 }
 
@@ -343,11 +351,30 @@ Array HHVM_FUNCTION(xenon_get_data, void) {
   return empty_array();
 }
 
+Array HHVM_FUNCTION(xenon_get_and_clear_samples, void) {
+  if (RuntimeOption::XenonForceAlwaysOn ||
+      RuntimeOption::XenonPeriodSeconds > 0) {
+    TRACE(1, "xenon_get_and_clear_samples\n");
+    Array ret = s_xenonData->createResponse();
+    s_xenonData->m_stackSnapshots.reset();
+    return ret;
+  }
+  return empty_array();
+}
+
+int64_t HHVM_FUNCTION(xenon_get_and_clear_missed_sample_count, void) {
+    TRACE(1, "xenon_get_and_clear_missed_sample_count\n");
+    return Xenon::getInstance().getAndClearMissedSampleCount();
+}
+
 struct xenonExtension final : Extension {
   xenonExtension() : Extension("xenon", "1.0") { }
 
   void moduleInit() override {
     HHVM_FALIAS(HH\\xenon_get_data, xenon_get_data);
+    HHVM_FALIAS(HH\\xenon_get_and_clear_samples, xenon_get_and_clear_samples);
+    HHVM_FALIAS(HH\\xenon_get_and_clear_missed_sample_count,
+                xenon_get_and_clear_missed_sample_count);
     loadSystemlib();
   }
 } s_xenon_extension;

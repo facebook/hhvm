@@ -126,6 +126,8 @@ struct Xenon final {
 
     void start(uint64_t msec);
     void stop();
+    void incrementMissedSampleCount(ssize_t val);
+    int64_t getAndClearMissedSampleCount();
     // Log a sample if XenonSignalFlag is set. Also clear it, unless
     // in always-on mode.
     void log(SampleType t, c_WaitableWaitHandle* wh = nullptr) const;
@@ -139,6 +141,7 @@ struct Xenon final {
 
     bool      m_stopping;
   private:
+    std::atomic<int64_t> m_missedSampleCount;
     sem_t     m_timerTriggered;
 #if !defined(__APPLE__) && !defined(_MSC_VER)
     pthread_t m_triggerThread;

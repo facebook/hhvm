@@ -22,7 +22,7 @@ function verifyTestRun($samples, $required, $optional): void {
         $file = $frame['file'] ?? '';
         $line = $frame['line'] ?? 0;
         echo sprintf(
-          "Unknown function:  %s %s %s\n",
+          "Unexpected function in call stack:  %s %s %s\n",
           $function,
           $file,
           $line,

@@ -236,8 +236,13 @@ function test_core(string $tmpdir): void {
   }
   HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
 
-  print("Stess test subscription\n");
-  apc_delete('stress_counter');
+  print("Stress test\n");
+  apc_store('stress_counter', 0);
+  fb_call_user_func_array_async(
+    __DIR__.'/callback.php',
+    'callback_checksub',
+    varray[SUB_NAME],
+  );
   // Success for this test is just not crashing HHVM
   $subscribed = false;
   $subscribe_c = 0;
@@ -248,8 +253,8 @@ function test_core(string $tmpdir): void {
   $exception_count = array(0, 0, 0);
   $op_count = array(0, 0, 0);
   srand(1);
-  for ($i = 0; $i < 3000; $i++) {
-    if ($i % 100 === 0) {
+  for ($i = 0; $i < 30000; $i++) {
+    if ($i % 1000 === 0) {
       print(".");
       invariant(
         ($op_count[0] === 0 && $op_count[1] === 0)
@@ -291,7 +296,7 @@ function test_core(string $tmpdir): void {
     } catch (Exception $e) {
       $exception_count[$op]++;
     }
-    usleep(rand() % 10000);
+    usleep(rand() % 1000);
   }
   try {
     if ($last_subscribe) {
@@ -310,6 +315,8 @@ function test_core(string $tmpdir): void {
   } else {
     print("\nPASS ($subscribe_c, $unsubscribe_c, $touch_c, $hit_c)\n");
   }
+  apc_delete('stress_counter');  // Stops async callback_checksub()
+  sleep(1);
 
   # Sync testing is based on the fact there will immediately be an event to
   # process as Watchman will send us an "initial" update straight away. There
@@ -440,6 +447,7 @@ try {
   }
   test_core($tmpdir);
 } finally {
+  apc_delete('stress_counter');  // Stops async callback_checksub() if running
   if (is_dir($tmpdir)) {
     foreach (glob($tmpdir.'/*') as $file) {
       unlink($file);

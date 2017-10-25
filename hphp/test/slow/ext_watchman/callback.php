@@ -89,3 +89,13 @@ function callback_exception(
 ): void {
   throw new Exception("expected exception");
 }
+
+function callback_checksub(string $sub_name): void {
+  // Having these async print statements can be problematic when checking test
+  // output so don't include them by default.
+  // print("Checking sub: $sub_name\n");
+  while (apc_exists('stress_counter')) {
+    HH\watchman_check_sub($sub_name);
+  }
+  // print("Done checking sub: $sub_name\n");
+}

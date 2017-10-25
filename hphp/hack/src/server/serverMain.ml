@@ -467,6 +467,8 @@ let setup_server ~informant_managed options handle =
     incremental_init;
     search_chunk_size;
     load_script_config;
+    max_workers;
+    max_bucket_size;
     _
   } as local_config = local_config in
   let saved_state_load_type =
@@ -483,7 +485,9 @@ let setup_server ~informant_managed options handle =
     incremental_init
     saved_state_load_type
     use_sql
-    search_chunk_size;
+    search_chunk_size
+    max_workers
+    max_bucket_size;
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in
   if not check_mode && Sys_utils.is_nfs root_s && not enable_on_nfs then begin

@@ -38,6 +38,8 @@ type t = {
   cpu_priority: int;
   shm_dirs: string list;
   start_with_recorder_on : bool;
+  max_workers : int;
+  max_bucket_size : int;
   (** See HhMonitorInformant. *)
   use_dummy_informant : bool;
   informant_min_distance_restart: int;
@@ -66,6 +68,8 @@ let default = {
   io_priority = 7;
   cpu_priority = 10;
   shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir;];
+  max_workers = GlobalConfig.nbr_procs;
+  max_bucket_size = Bucket.max_size ();
   start_with_recorder_on = false;
   use_dummy_informant = true;
   informant_min_distance_restart = 100;
@@ -147,6 +151,14 @@ let load_ fn ~silent =
     ~default:default.shm_dirs
     config
   |> List.map ~f:(fun(dir) -> Path.(to_string @@ make dir)) in
+  let max_workers = int_ "max_workers"
+    ~default:default.max_workers config in
+  (* Do not allow max workers to exceed the number of processors *)
+  if max_workers > GlobalConfig.nbr_procs then
+    Hh_logger.log "Warning: max_workers is higher than the number of processors. Ignoring.";
+  let max_workers = min GlobalConfig.nbr_procs max_workers in
+  let max_bucket_size = int_ "max_bucket_size"
+    ~default:default.max_bucket_size config in
   let load_script_config = LoadScriptConfig.default in
   {
     use_watchman;
@@ -168,6 +180,8 @@ let load_ fn ~silent =
     io_priority;
     cpu_priority;
     shm_dirs;
+    max_workers;
+    max_bucket_size;
     start_with_recorder_on;
     use_dummy_informant;
     informant_min_distance_restart;

@@ -51,7 +51,20 @@ let make_genv options config local_config handle =
   Typing_deps.trace :=
     not check_mode || ServerArgs.convert options <> None ||
       ServerArgs.save_filename options <> None;
+  (* The number of workers is set both in hh.conf and as an optional server argument.
+    if the two numbers given in argument and in hh.conf are different, we always take the minimum
+    of the two.
+  *)
+
   let nbr_procs = ServerArgs.max_procs options in
+  (* If the number of processes is not equal to default, and the local config specifies differently
+     from the one given in ServerArgs, that means both an argument and a local config were passed in
+    *)
+  if nbr_procs <> local_config.SLC.max_workers && nbr_procs <> GlobalConfig.nbr_procs then
+    Hh_logger.log
+      ("Warning: both an argument --max-procs and a local config "
+        ^^"for max workers are given. Choosing minimum of the two.");
+  let nbr_procs = min nbr_procs local_config.SLC.max_workers in
   let gc_control = ServerConfig.gc_control config in
   let workers = Some (ServerWorker.make ~nbr_procs gc_control handle) in
   let watchman_env =
@@ -86,14 +99,17 @@ let make_genv options config local_config handle =
       Hh_logger.log "No debug port attached";
       None
   in
+  let max_bucket_size = local_config.SLC.max_bucket_size in
+  Bucket.set_max_bucket_size max_bucket_size;
+
   let indexer, notifier_async, notifier, wait_until_ready =
     match watchman_env with
     | Some watchman_env ->
       let indexer filter =
         let files = Watchman.get_all_files watchman_env in
         Bucket.make_list
-          ~num_workers:GlobalConfig.nbr_procs
-          ~max_size:1000
+          ~num_workers:nbr_procs
+          ~max_size:max_bucket_size
           (List.filter filter files)
       in
       (** Watchman state can change during requests (See

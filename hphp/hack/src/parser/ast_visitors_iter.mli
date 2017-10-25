@@ -183,6 +183,9 @@ class virtual ['b] iter :
         on_InstanceOf : 'c ->
                         Ast_visitors_ancestors.expr ->
                         Ast_visitors_ancestors.expr -> unit;
+        on_Is : 'c ->
+                Ast_visitors_ancestors.expr ->
+                Ast_visitors_ancestors.hint -> unit;
         on_Int : 'c -> Ast_visitors_ancestors.pstring -> unit;
         on_Invariant : 'c -> unit;
         on_Lfun : 'c -> Ast_visitors_ancestors.fun_ -> unit;
@@ -575,6 +578,9 @@ class virtual ['b] iter :
     method on_InstanceOf :
       'c ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr -> unit
+    method on_Is :
+      'c ->
+      Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.hint -> unit
     method on_Int : 'c -> Ast_visitors_ancestors.pstring -> unit
     method on_Invariant : 'c -> unit
     method on_Lfun : 'c -> Ast_visitors_ancestors.fun_ -> unit

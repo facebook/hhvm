@@ -179,6 +179,9 @@ class virtual ['b] reduce :
         on_InstanceOf : 'c ->
                         Ast_visitors_ancestors.expr ->
                         Ast_visitors_ancestors.expr -> 'd;
+        on_Is : 'c ->
+                Ast_visitors_ancestors.expr ->
+                Ast_visitors_ancestors.hint -> 'd;
         on_Int : 'c -> Ast_visitors_ancestors.pstring -> 'd;
         on_Invariant : 'c -> 'd;
         on_Lfun : 'c -> Ast_visitors_ancestors.fun_ -> 'd;
@@ -553,6 +556,8 @@ class virtual ['b] reduce :
     method on_IncludeOnce : 'c -> 'd
     method on_InstanceOf :
       'c -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr -> 'd
+    method on_Is :
+      'c -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.hint -> 'd
     method on_Int : 'c -> Ast_visitors_ancestors.pstring -> 'd
     method on_Invariant : 'c -> 'd
     method on_Lfun : 'c -> Ast_visitors_ancestors.fun_ -> 'd

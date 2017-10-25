@@ -154,6 +154,7 @@ type token =
   | Teval
   | Tprint
   | Tinstanceof
+  | Tis
   | Tnew
   | Tclone
   | Telseif
@@ -267,6 +268,7 @@ let token_to_string = function
   | Teval         -> "eval"
   | Tprint        -> "print"
   | Tinstanceof   -> "instanceof"
+  | Tis           -> "is"
   | Tnew          -> "new"
   | Tclone        -> "clone"
   | Telseif       -> "elseif"

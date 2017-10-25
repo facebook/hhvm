@@ -265,7 +265,7 @@ let rec check_lvalue env = function
   | String _ | String2 _ | Yield _ | Yield_break | Yield_from _
   | Await _ | Suspend _ | Expr_list _ | Cast _ | Unop _
   | Binop _ | Eif _ | NullCoalesce _ | InstanceOf _ | New _ | Efun _ | Lfun _
-  | Xml _ | Import _ | Pipe _ | Callconv _) ->
+  | Xml _ | Import _ | Pipe _ | Callconv _ | Is _) ->
       error_at env pos "Invalid lvalue"
 
 (* The bound variable of a foreach can be a reference (but not inside
@@ -315,6 +315,7 @@ let priorities = [
   (Right, [Tsuspend]);
   (Right, [Tem]);
   (NonAssoc, [Tinstanceof]);
+  (Left, [Tis]);
   (Right, [Ttild; Tincr; Tdecr; Tcast]);
   (Right, [Tstarstar]);
   (Right, [Tat; Tref]);
@@ -2941,6 +2942,8 @@ and expr_remain env e1 =
       expr_null_coalesce env e1
   | Tword when Lexing.lexeme env.lb = "instanceof" ->
       expr_instanceof env e1
+  | Tword when Lexing.lexeme env.lb = "is" ->
+      expr_is env e1
   | Tword when Lexing.lexeme env.lb = "and" ->
       error env ("Do not use \"and\", it has surprising precedence. "^
         "Use \"&&\" instead");
@@ -3495,6 +3498,16 @@ and expr_instanceof env e1 =
   reduce env e1 Tinstanceof begin fun e1 env ->
     let e2 = expr env in
     btw e1 e2, InstanceOf (e1, e2)
+  end
+
+(*****************************************************************************)
+(* Is *)
+(*****************************************************************************)
+
+and expr_is env e =
+  reduce env e Tis begin fun e env ->
+    let h = hint env in
+    btw e h, Is (e, h)
   end
 
 (*****************************************************************************)

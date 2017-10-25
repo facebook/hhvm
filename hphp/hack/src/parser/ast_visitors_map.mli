@@ -285,6 +285,10 @@ class virtual ['c] map :
                         Ast_visitors_ancestors.expr ->
                         Ast_visitors_ancestors.expr ->
                         Ast_visitors_ancestors.expr_;
+        on_Is : 'd ->
+                Ast_visitors_ancestors.expr ->
+                Ast_visitors_ancestors.hint ->
+                Ast_visitors_ancestors.expr_;
         on_Int : 'd ->
                  Ast_visitors_ancestors.pstring ->
                  Ast_visitors_ancestors.expr_;
@@ -939,6 +943,10 @@ class virtual ['c] map :
       'd ->
       Ast_visitors_ancestors.expr ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
+    method on_Is :
+      'd ->
+      Ast_visitors_ancestors.expr ->
+      Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.expr_
     method on_Int :
       'd -> Ast_visitors_ancestors.pstring -> Ast_visitors_ancestors.expr_
     method on_Invariant : 'd -> Ast_visitors_ancestors.variance

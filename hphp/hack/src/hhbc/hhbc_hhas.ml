@@ -1101,6 +1101,10 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
   | A.Pipe (e1, e2) -> middle_aux e1 " |> " e2
   | A.NullCoalesce (e1, e2) -> middle_aux e1 " \\?\\? " e2
   | A.InstanceOf (e1, e2) -> middle_aux e1 " instanceof " e2
+  | A.Is (e, h) ->
+    let e = string_of_param_default_value e in
+    let h = string_of_hint ~ns:true h in
+      e ^ " is " ^ h
   | A.Varray es ->
     let index i = p, A.Int (p, string_of_int i) in
     string_of_param_default_value @@

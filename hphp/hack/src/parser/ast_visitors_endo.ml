@@ -997,6 +997,12 @@ class virtual ['self] endo =
       let r1 = self#on_expr env c1 in if c0 == r0 && c1 == r1
       then this
       else InstanceOf (r0, r1)
+    method on_Is env this c0 c1 =
+      let r0 = self#on_expr env c0 in
+      let r1 = self#on_hint env c1 in
+      if c0 == r0 && c1 == r1
+      then this
+      else Is (r0, r1)
     method on_New env this c0 c1 c2 =
       let r0 = self#on_expr env c0 in
       let r1 = self#on_list self#on_expr env c1 in
@@ -1100,6 +1106,8 @@ class virtual ['self] endo =
           self#on_NullCoalesce env this c0 c1
       | InstanceOf (c0, c1) as this ->
           self#on_InstanceOf env this c0 c1
+      | Is (c0, c1) as this ->
+          self#on_Is env this c0 c1
       | BracedExpr c0 -> self#on_BracedExpr env this c0
       | New (c0, c1, c2) -> self#on_New env this c0 c1 c2
       | Efun (c0, c1) -> self#on_Efun env this c0 c1

@@ -70,6 +70,7 @@ class type ['a] ast_visitor_type = object
   method on_includeOnce: 'a -> 'a
   method on_instanceOf : 'a -> expr -> expr -> 'a
   method on_int : 'a -> pstring -> 'a
+  method on_is : 'a -> expr -> hint -> 'a
   method on_lfun: 'a -> fun_ -> 'a
   method on_list : 'a -> expr list -> 'a
   method on_lvar : 'a -> id -> 'a
@@ -368,6 +369,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Eif         (e1, e2, e3)     -> this#on_eif acc e1 e2 e3
    | NullCoalesce (e1, e2)     -> this#on_nullCoalesce acc e1 e2
    | InstanceOf  (e1, e2)         -> this#on_instanceOf acc e1 e2
+   | Is          (e, h) -> this#on_is acc e h
    | BracedExpr e -> this#on_expr acc e
    | New         (e, el, uel) -> this#on_new acc e el uel
    | Efun        (f, idl)         -> this#on_efun acc f idl
@@ -501,6 +503,11 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_instanceOf acc e1 e2 =
     let acc = this#on_expr acc e1 in
     let acc = this#on_expr acc e2 in
+    acc
+
+  method on_is acc e h =
+    let acc = this#on_expr acc e in
+    let acc = this#on_hint acc h in
     acc
 
   method on_new acc e el uel =

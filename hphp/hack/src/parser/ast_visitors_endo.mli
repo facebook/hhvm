@@ -413,6 +413,11 @@ class virtual ['b] endo :
                         Ast_visitors_ancestors.expr ->
                         Ast_visitors_ancestors.expr ->
                         Ast_visitors_ancestors.expr_;
+        on_Is : 'c ->
+                        Ast_visitors_ancestors.expr_ ->
+                        Ast_visitors_ancestors.expr ->
+                        Ast_visitors_ancestors.hint ->
+                        Ast_visitors_ancestors.expr_;
         on_Int : 'c ->
                  Ast_visitors_ancestors.expr_ ->
                  Ast_visitors_ancestors.pstring ->
@@ -1318,6 +1323,11 @@ class virtual ['b] endo :
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.expr ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
+    method on_Is :
+      'c ->
+      Ast_visitors_ancestors.expr_ ->
+      Ast_visitors_ancestors.expr ->
+      Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.expr_
     method on_Int :
       'c ->
       Ast_visitors_ancestors.expr_ ->

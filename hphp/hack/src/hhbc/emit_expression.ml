@@ -372,6 +372,9 @@ and emit_instanceof env e1 e2 =
       emit_expr ~need_ref:false env e2;
       instr_instanceof ]
 
+and emit_is _env _e _h =
+  emit_nyi "is expression"
+
 and emit_null_coalesce env e1 e2 =
   let end_label = Label.next_regular () in
   gather [
@@ -896,6 +899,8 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     emit_box_if_necessary need_ref @@ emit_pipe env e1 e2
   | A.InstanceOf (e1, e2) ->
     emit_box_if_necessary need_ref @@ emit_instanceof env e1 e2
+  | A.Is (e, h) ->
+    emit_box_if_necessary need_ref @@ emit_is env e h
   | A.NullCoalesce (e1, e2) ->
     emit_box_if_necessary need_ref @@ emit_null_coalesce env e1 e2
   | A.Cast((_, hint), e) ->

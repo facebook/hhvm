@@ -611,6 +611,10 @@ class virtual ['self] reduce =
       let r0 = self#on_expr env c0 in
       let r1 = self#on_expr env c1 in
       self#add r0 r1
+    method on_Is env c0 c1 =
+      let r0 = self#on_expr env c0 in
+      let r1 = self#on_hint env c1 in
+      self#add r0 r1
     method on_New env c0 c1 c2 =
       let r0 = self#on_expr env c0 in
       let r1 = self#on_list self#on_expr env c1 in
@@ -691,6 +695,7 @@ class virtual ['self] reduce =
       | Eif (c0, c1, c2) -> self#on_Eif env c0 c1 c2
       | NullCoalesce (c0, c1) -> self#on_NullCoalesce env c0 c1
       | InstanceOf (c0, c1) -> self#on_InstanceOf env c0 c1
+      | Is (c0, c1) -> self#on_Is env c0 c1
       | BracedExpr c0 -> self#on_BracedExpr env c0
       | New (c0, c1, c2) -> self#on_New env c0 c1 c2
       | Efun (c0, c1) -> self#on_Efun env c0 c1

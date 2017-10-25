@@ -1095,6 +1095,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       | p, Unop (o,e) -> Unop (0, (p, InstanceOf (e, ty)))
       | e -> InstanceOf (e, ty)
       *)
+    | IsExpression
+      { is_left_operand; is_right_operand; _ } ->
+      Is (pExpr is_left_operand env, pHint is_right_operand env)
     | AnonymousFunction
       { anonymous_static_keyword
       ; anonymous_async_keyword

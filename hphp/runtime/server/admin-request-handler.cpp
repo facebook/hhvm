@@ -476,11 +476,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (cmd == "free-mem") {
-      auto pid = getpid();
-      const auto before = Process::GetProcessRSS(pid);
+      const auto before = Process::GetProcessRSS();
       std::string errStr;
       if (purge_all(&errStr)) {
-        const auto after = Process::GetProcessRSS(pid);
+        const auto after = Process::GetProcessRSS();
         transport->sendString(
           folly::sformat("Purged {} -> {} MB RSS", before, after).c_str());
       } else {

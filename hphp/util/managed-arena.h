@@ -59,6 +59,11 @@ struct ManagedArena {
     return m_currCapacity - activeSize();
   }
 
+  inline static ManagedArena* GetArenaById(unsigned id) {
+    assertx(id < sizeof(s_arenas) / sizeof(s_arenas[0]));
+    return s_arenas[id];
+  }
+
   // Report usage.
   static std::string reportStats();
 

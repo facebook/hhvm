@@ -34,6 +34,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * System-wide memory infomation from /proc/meminfo
+ */
 struct MemInfo {
   int64_t freeMb{-1};
   int64_t cachedMb{-1};
@@ -75,7 +78,7 @@ struct Process {
   /**
    * Get memory usage in MB by a process.
    */
-  static int64_t GetProcessRSS(pid_t pid);
+  static int64_t GetProcessRSS();
 
   /**
    * Get system-wide memory usage information.  Returns false upon
@@ -137,11 +140,6 @@ struct Process {
    */
   static int GetCPUCount();
   static std::string GetCPUModel();
-
-  /**
-   * Get binary code footprint in bytes.
-   */
-  static size_t GetCodeFootprint(pid_t pid);
 
   /**
    * Get current working directory.

@@ -46,7 +46,7 @@ using std::string;
 
 static void readString(FILE *f, string &out) {
   size_t nread = 0;
-  const unsigned int BUFFER_SIZE = 1024;
+  constexpr unsigned int BUFFER_SIZE = 1024;
   char buf[BUFFER_SIZE];
   while ((nread = fread(buf, 1, BUFFER_SIZE, f)) != 0) {
     out.append(buf, nread);
@@ -97,11 +97,9 @@ bool Process::IsUnderGDB() {
   return binaryPath.filename() == "gdb ";
 }
 
-int64_t Process::GetProcessRSS(pid_t pid) {
-  string name = "/proc/" + folly::to<string>(pid) + "/status";
-
+int64_t Process::GetProcessRSS() {
   string status;
-  FILE * f = fopen(name.c_str(), "r");
+  FILE * f = fopen("/proc/self/status", "r");
   if (f) {
     readString(f, status);
     fclose(f);
@@ -163,48 +161,6 @@ bool Process::GetMemoryInfo(MemInfo& info) {
 int Process::GetCPUCount() {
   return sysconf(_SC_NPROCESSORS_ONLN);
 }
-
-size_t Process::GetCodeFootprint(pid_t pid) {
-  // /proc/<pid>/statm reports the following whitespace-separated values (in
-  // terms of page counts):
-  //    size       total program size
-  //    resident   resident set size
-  //    share      shared pages
-  //    text       text (code)
-  //    lib        library (unused in Linux 2.6)
-  //    data       data/stack
-  //    dt         dirty pages (unused in Linux 2.6)
-  //
-  // Return (share + text), under the assumption that share consists only of
-  // shared libraries.
-  string name = "/proc/" + folly::to<string>(pid) + "/statm";
-
-  string statm;
-  FILE * f = fopen(name.c_str(), "r");
-  if (f) {
-    readString(f, statm);
-    fclose(f);
-  }
-
-  size_t pageSize = size_t(sysconf(_SC_PAGESIZE));
-  size_t pos0, pos1 = 0;
-#define STATM_FIELD_NEXT() do {                                               \
-  pos0 = pos1;                                                                \
-  pos1 = statm.find(" ", pos0) + 1;                                           \
-} while (0)
-#define STATM_FIELD_READ(name)                                                \
-  STATM_FIELD_NEXT();                                                         \
-  size_t name = strtoull(statm.substr(pos0, pos1-pos0).c_str(),               \
-                         nullptr, 0) * pageSize;
-  STATM_FIELD_NEXT(); // size.
-  STATM_FIELD_NEXT(); // resident.
-  STATM_FIELD_READ(share);
-  STATM_FIELD_READ(text);
-#undef STATM_FIELD_NEXT
-#undef STATM_FIELD_READ
-  return share + text;
-}
-
 
 #ifdef __x86_64__
 static __inline void do_cpuid(u_int ax, u_int *p) {

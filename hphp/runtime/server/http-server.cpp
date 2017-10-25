@@ -685,7 +685,6 @@ void HttpServer::CheckMemAndWait(bool final) {
   if (!RuntimeOption::StopOldServer) return;
   if (RuntimeOption::OldServerWait <= 0) return;
 
-  auto const pid = getpid();
   auto const rssNeeded = RuntimeOption::ServerRSSNeededMb;
   auto const factor = RuntimeOption::CacheFreeFactor;
   do {
@@ -695,7 +694,7 @@ void HttpServer::CheckMemAndWait(bool final) {
       return;
     }
 
-    auto const rssMb = Process::GetProcessRSS(pid);
+    auto const rssMb = Process::GetProcessRSS();
     MemInfo memInfo;
     if (!Process::GetMemoryInfo(memInfo)) {
       Logger::Error("Failed to obtain memory information");
@@ -725,7 +724,7 @@ void HttpServer::MarkShutdownStat(ShutdownEvent event) {
   std::lock_guard<folly::MicroSpinLock> lock(StatsLock);
   MemInfo mem;
   Process::GetMemoryInfo(mem);
-  auto const rss = Process::GetProcessRSS(getpid());
+  auto const rss = Process::GetProcessRSS();
   auto const requests = requestCount();
   if (event == ShutdownEvent::SHUTDOWN_PREPARE) {
     ShutdownStats.clear();
@@ -781,7 +780,7 @@ void HttpServer::dropCache() {
 }
 
 void HttpServer::checkMemory() {
-  int64_t used = Process::GetProcessRSS(getpid()) * 1024 * 1024;
+  int64_t used = Process::GetProcessRSS() * 1024 * 1024;
   if (RuntimeOption::MaxRSS > 0 && used > RuntimeOption::MaxRSS) {
     Logger::Error(
       "ResourceLimit.MaxRSS %" PRId64 " reached %" PRId64 " used, exiting",

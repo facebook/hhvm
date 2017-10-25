@@ -31,142 +31,59 @@
 
 namespace HPHP {
 
-  MemoryStats g_memoryStats;
+void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
+  std::ostringstream out;
+  std::unique_ptr<Writer> w;
+  if (format == Writer::Format::XML) {
+    w.reset(new XMLWriter(out));
+  } else if (format == Writer::Format::HTML) {
+    w.reset(new HTMLWriter(out));
+  } else {
+    assert(format == Writer::Format::JSON);
+    w.reset(new JSONWriter(out));
+  }
 
-  void MemoryStats::ReportMemory(std::string &output, Writer::Format format) {
-    std::ostringstream out;
-    Writer *w;
-    if (format == Writer::Format::XML) {
-      w = new XMLWriter(out);
-    } else if (format == Writer::Format::HTML) {
-      w = new HTMLWriter(out);
-    } else {
-      assert(format == Writer::Format::JSON);
-      w = new JSONWriter(out);
-    }
+  w->writeFileHeader();
 
-    w->writeFileHeader();
-    // read and fill StatM structure
-    StatM procStatM;
-    if (!FillProcessStatM(&procStatM)) {
-      // failed to read statm file
-      w->writeEntry("Success", false);
-      w->writeFileFooter();
-      return;
-    }
-
-    // successfully read statm file
-    w->writeEntry("Success", true);
-
-    // Calculate unknown size
-    size_t totalBytes = GetStaticStringSize();
-    totalBytes += procStatM.m_text;
-
-    w->beginObject("Memory");
-
-    // process memory statistics
-    w->beginObject("Process Stats (bytes)");
-    w->writeEntry("VmSize", procStatM.m_vmSize);
-    w->writeEntry("VmRss", procStatM.m_vmRss);
-    w->writeEntry("Shared", procStatM.m_share);
-    w->writeEntry("Text(Code)", procStatM.m_text);
-    w->writeEntry("Data", procStatM.m_data);
-    w->endObject("Process Stats");
-
-    // Start HHVM internal memory buckets
-    w->beginObject("Breakdown");
-
-    // static string stats
-    w->beginObject("Static Strings");
-    w->writeEntry("Bytes", GetStaticStringSize());
-    w->beginObject("Details");
-    w->writeEntry("Count", makeStaticStringCount());
-    w->endObject("Details");
-    w->endObject("Static Strings");
-
-    // code segment stats
-    w->beginObject("Code");
-    w->beginObject("Details");
-    w->writeEntry("Bytes", procStatM.m_text);
-    w->endObject("Details");
-    w->endObject("Code");
-
-    // TC/Jit
-    w->beginObject("TC/Jit");
-    {
-      size_t globalTCUsed = 0;
-      size_t globalTCSize = 0;
-
-      w->beginObject("Details");
-
-      for (auto const& blockUsageInfo : jit::tc::getUsageInfo()) {
-        if (blockUsageInfo.global) {
-          globalTCSize += blockUsageInfo.capacity;
-          globalTCUsed += blockUsageInfo.used;
-          w->beginObject(blockUsageInfo.name.c_str());
-          w->writeEntry("Used", blockUsageInfo.used);
-          w->writeEntry("Capacity", blockUsageInfo.capacity);
-          w->endObject(blockUsageInfo.name.c_str());
-        }
-      };
-      w->writeEntry("Total Used", globalTCUsed);
-      w->writeEntry("Total Capacity", globalTCSize);
-      w->endObject("Details");
-
-      w->writeEntry("Bytes", globalTCSize);
-      totalBytes += globalTCSize;
-    }
-    w->endObject("TC/Jit");
-
-    // currently unknown portion of vmSize
-    w->writeEntry("Unknown", procStatM.m_vmSize - totalBytes);
-
-    w->endObject("Breakdown");
-    // End HHVM internal memory buckets
-
-    w->endObject("Memory");
+  MemStatus procStatus;                 // read /proc/self/status
+  if (!procStatus.valid()) {
     w->writeFileFooter();
-    delete w;
-
-    output = out.str();
     return;
   }
 
-  MemoryStats* MemoryStats::GetInstance() {
-    static MemoryStats s_memoryStats;
-    return &s_memoryStats;
-  }
+  w->beginObject("Memory");
 
-  void MemoryStats::ResetStaticStringSize() {
-    m_staticStringSize.store(0);
-  }
+  w->writeEntry("VmSize", procStatus.VmSize);
+  w->writeEntry("VmRSS", procStatus.VmRSS);
+  w->writeEntry("PeakUsage", procStatus.VmHWM);
+  w->writeEntry("HugetlbPages", procStatus.HugetlbPages);
+  w->writeEntry("adjustedRSS", procStatus.adjustedRSS);
 
-  void MemoryStats::LogStaticStringAlloc(size_t bytes) {
-    m_staticStringSize += bytes;
-  }
+  // static string stats
+  w->writeEntry("static_string_count", makeStaticStringCount());
+  w->writeEntry("static_string_size", GetStaticStringSize());
 
-  size_t MemoryStats::GetStaticStringSize() {
-    return m_staticStringSize.load();
-  }
+  w->endObject("Memory");
+  w->writeFileFooter();
 
-  bool MemoryStats::FillProcessStatM(MemoryStats::StatM* pStatM) {
+  output = out.str();
+  return;
+}
 
-    std::ifstream statm_stream("/proc/self/statm", std::ios_base::in);
-    if (!statm_stream.good()){
-      return false;
-    }
+MemoryStats* MemoryStats::GetInstance() {
+  static MemoryStats s_memoryStats;
+  return &s_memoryStats;
+}
 
-    uint64_t pageSizeBytes = sysconf(_SC_PAGE_SIZE);
-    size_t deprecatedField;
-    statm_stream >> pStatM->m_vmSize >> pStatM->m_vmRss
-                 >> pStatM->m_share  >> pStatM->m_text
-                 >> deprecatedField  >> pStatM->m_data;
+void MemoryStats::ResetStaticStringSize() {
+  m_staticStringSize.store(0);
+}
 
-    pStatM->m_vmSize     *= pageSizeBytes;
-    pStatM->m_vmRss      *= pageSizeBytes;
-    pStatM->m_share      *= pageSizeBytes;
-    pStatM->m_text       *= pageSizeBytes;
-    pStatM->m_data       *= pageSizeBytes;
-    return true;
-  }
+void MemoryStats::LogStaticStringAlloc(size_t bytes) {
+  m_staticStringSize += bytes;
+}
+
+size_t MemoryStats::GetStaticStringSize() {
+  return m_staticStringSize.load();
+}
 }

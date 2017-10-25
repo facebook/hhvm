@@ -17,7 +17,6 @@
 
 #include <atomic>
 #include <chrono>
-#include <condition_variable>
 #include <deque>
 #include <exception>
 #include <map>
@@ -105,31 +104,6 @@ namespace {
 // Lock covering all Watchman global data - this needs to be grabbed in
 // any direct entries from HHVM.
 std::mutex s_sharedDataMutex;
-
-// socket name (or empty string) -> Watchman client
-std::unordered_map<
-  std::string,
-  std::shared_ptr<watchman::WatchmanClient>
-> s_activeClients;
-
-// All WatchmanClients must be disposed of on a non-EventBase thread and holding
-// the data lock. To ensure this, the list below holds a shared_ptr to all
-// clients regardless of whether they are initializing, active, or in a zombie
-// state. When the shared pointer use count drops to 1 we know the client is now
-// only refrenced in this list, and we can safely dispose of it in the next
-// requestInit/Shutdown.
-std::list<std::shared_ptr<watchman::WatchmanClient>> s_allClients;
-
-// On shutdown we use these to wait for transactions to finish
-std::condition_variable s_cvNoOutstandingOneShots;
-int s_outstandingOneShots{0};
-
-// Multiple requests may end up asking for a client at once so we broadcast
-// to all of them when a connection is established.
-std::unordered_map<
-  std::string,
-  std::vector<folly::Promise<std::shared_ptr<watchman::WatchmanClient>>>
-> s_connectPromises;
 
 // Class to execute short-run Watchman related callbacks in serial order. Long-
 // running Watchman subscription callbacks are run as AsyncFunc threads
@@ -281,7 +255,7 @@ struct ActiveSubscription {
     m_unsubcribeInProgress = true;
 
     folly::Future<bool> unsubscribe_future{false};
-    // If the connection is alive we must peform an actual unsubscribe. If not,
+    // If the connection is alive we must perform an actual unsubscribe. If not,
     // we just need to sync to make sure all the outstanding threads complete.
     if (checkConnection()) {
       unsubscribe_future = m_watchmanClient->unsubscribe(m_subscriptionPtr)
@@ -540,70 +514,22 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   folly::exception_wrapper m_exception;
 };
 
-// (PHP) Gets a WatchmanClient instance while trying to re-use an existing one.
+// (PHP) Makes a new WatchmanClient.
 folly::Future<std::shared_ptr<watchman::WatchmanClient>>
 getWatchmanClientForSocket(const std::string& socket_path) {
-  // Check to see if there is already a running client
-  auto existing_client = s_activeClients.find(socket_path);
-  if (existing_client != s_activeClients.end()) {
-      return folly::Future<std::shared_ptr<watchman::WatchmanClient>>(
-        existing_client->second
-      ).via(WatchmanThreadEventBase::Get());
-  }
-
-  // Check to see if there is a currently a client still initializing
-  folly::Promise<std::shared_ptr<watchman::WatchmanClient>> new_promise;
-  auto new_future = new_promise.getFuture();
-  auto existing_promise_list = s_connectPromises.find(socket_path);
-  if (existing_promise_list == s_connectPromises.end()) {
-    std::vector<folly::Promise<std::shared_ptr<watchman::WatchmanClient>>>
-      promise_list;
-    promise_list.emplace_back(std::move(new_promise));
-    s_connectPromises.emplace(socket_path, std::move(promise_list));
-  } else {
-    existing_promise_list->second.emplace_back(std::move(new_promise));
-    return new_future;
-  }
-
-  // Make a new client
-  try {
-    auto socket =
-      socket_path.size() ? socket_path : folly::Optional<std::string>();
-    auto client = std::make_shared<watchman::WatchmanClient>(
-      &(WatchmanThreadEventBase::Get()->getEventBase()), std::move(socket),
-      WatchmanThreadEventBase::Get(),
-      [socket_path](folly::exception_wrapper& /*ex*/) { // (ASYNC) error handler
-        auto activeClient = s_activeClients.find(socket_path);
-        if (activeClient != s_activeClients.end()) {
-          s_activeClients.erase(socket_path);
-        }
-      });
-    s_allClients.push_back(client);
-    client->connect()
-      .then([client, socket_path](const folly::dynamic& /*connect_info*/) {
-        // (ASYNC)
-        auto promise_list = s_connectPromises.find(socket_path);
-        for (auto& promise : promise_list->second) {
-          promise.setValue(client);
-        }
-        s_activeClients.insert({socket_path, client});
-        s_connectPromises.erase(socket_path);
-        return client;
-      })
-      .onError([socket_path](const folly::exception_wrapper& e) {
-        // (ASYNC)
-        auto promise_list = s_connectPromises.find(socket_path);
-        for (auto& promise : promise_list->second) { promise.setException(e); }
-        s_connectPromises.erase(socket_path);
-        e.throw_exception();
-        // shouldn't actually be reached but placates the compiler
-        return std::shared_ptr<watchman::WatchmanClient>();
-      });
-    return new_future;
-  } catch(...) {
-    s_connectPromises.erase(socket_path);
-    throw;
-  }
+  auto socket =
+    socket_path.size() ? socket_path : folly::Optional<std::string>();
+  auto client = std::make_shared<watchman::WatchmanClient>(
+    &(WatchmanThreadEventBase::Get()->getEventBase()),
+    std::move(socket),
+    WatchmanThreadEventBase::Get(),
+    [](folly::exception_wrapper& /*ex*/) { /* (ASYNC) error handler */ }
+  );
+  return client->connect()
+    .then([client](const folly::dynamic& /*connect_info*/) {
+      // (ASYNC)
+      return client;
+    });
 }
 
 // (PHP / INIT)
@@ -626,35 +552,6 @@ folly::Future<std::string> watchman_unsubscribe_impl(const std::string& name) {
   return res_future;
 }
 
-// (PHP)
-void clearDeadConnections() {
-  for (auto& sub_entry : s_activeSubscriptions) {
-    sub_entry.second.checkConnection(); // releases client shared_ptr if dead
-  }
-  auto active_it = s_activeClients.begin();
-  while (active_it != s_activeClients.end()) {
-    // use = 2 => s_activeClients + s_allClients only
-    if (active_it->second.use_count() == 2) {
-      active_it = s_activeClients.erase(active_it);
-    } else {
-      ++active_it;
-    }
-  }
-  auto all_it = s_allClients.begin();
-  while (all_it != s_allClients.end()) {
-    // use = 1 => s_allClients only
-    if (all_it->use_count() == 1) {
-      // Pass shared-ptr to a closure in our executor queue. This ensures the
-      // client won't be destroyed until all potentially outstanding callbacks
-      // with references to the connection are completed.
-      WatchmanThreadEventBase::Get()->add([ptr = *all_it]{});
-      all_it = s_allClients.erase(all_it);
-    } else {
-      ++all_it;
-    }
-  }
-}
-
 // (PHP entry-point)
 Object HHVM_FUNCTION(HH_watchman_run,
   const String& _json_query,
@@ -675,15 +572,7 @@ Object HHVM_FUNCTION(HH_watchman_run,
         .then([client] (const folly::dynamic& result) {
           return std::string(toJson(result).data());
         });
-    })
-    .ensure([] {
-      // (ASYNC)
-      s_outstandingOneShots--;
-      if (!s_outstandingOneShots) {
-        s_cvNoOutstandingOneShots.notify_all();
-      }
     });
-  s_outstandingOneShots++;
   return Object{
     (new FutureEvent<std::string>(std::move(res_future)))->getWaitHandle()
   };
@@ -883,34 +772,9 @@ struct WatchmanExtension final : Extension {
     for (auto& unsub_future : unsub_futures) {
       unsub_future.wait();
     }
-    // Wait for there to be no outstanding one-shot runs.
-    {
-      std::unique_lock<std::mutex> lock(HPHP::s_sharedDataMutex);
-      if (HPHP::s_outstandingOneShots) {
-        HPHP::s_cvNoOutstandingOneShots.wait(
-          lock,
-          [] { // (INIT)
-            return HPHP::s_outstandingOneShots == 0;
-          });
-      }
-    }
     WatchmanThreadEventBase::Get()->drain();
     s_activeSubscriptions.clear();
-    s_activeClients.clear();
-    s_allClients.clear();
     WatchmanThreadEventBase::Free();
-  }
-
-  // (PHP entry-point)
-  void requestInit() override {
-    std::lock_guard<std::mutex> g(s_sharedDataMutex);
-    HPHP::clearDeadConnections();
-  }
-
-  // (PHP entry-point)
-  void requestShutdown() override {
-    std::lock_guard<std::mutex> g(s_sharedDataMutex);
-    HPHP::clearDeadConnections();
   }
 
   // (INIT entry-point) no need for lock

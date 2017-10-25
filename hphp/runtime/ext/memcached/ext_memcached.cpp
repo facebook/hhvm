@@ -177,12 +177,15 @@ struct MemcachedData {
     }
 
     if (m_impl->compression && encoded.length() >= MEMC_COMPRESS_THRESHOLD) {
+      uint32_t originalSize = encoded.length();
       unsigned long payloadCompLength = compressBound(encoded.length());
       payload.resize(payloadCompLength);
       if (compress((Bytef*)payload.data(), &payloadCompLength,
                    (const Bytef*)encoded.data(), encoded.length()) == Z_OK) {
         payload.resize(payloadCompLength);
-        flags |= MEMC_VAL_COMPRESSED;
+        payload.insert(payload.begin(), sizeof(uint32_t), 0);
+        memcpy(payload.data(), &originalSize, sizeof(uint32_t));
+        flags |= MEMC_VAL_COMPRESSED | MEMC_VAL_COMPRESSION_ZLIB;
         return;
       }
       raise_warning("could not compress value");

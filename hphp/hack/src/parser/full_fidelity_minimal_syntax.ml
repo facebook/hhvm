@@ -40,6 +40,14 @@ module MinimalValueBuilder = struct
 
   let value_from_token token =
     MinimalSyntaxValue.make (MinimalToken.full_width token)
+
+  let value_from_syntax syntax =
+    let folder sum child =
+      let v = MinimalSyntax.value child in
+      let w = MinimalSyntaxValue.full_width v in
+      sum + w in
+    let width = (MinimalSyntax.fold_over_children folder 0 syntax) in
+    MinimalSyntaxValue.make width
 end
 
 include MinimalSyntax

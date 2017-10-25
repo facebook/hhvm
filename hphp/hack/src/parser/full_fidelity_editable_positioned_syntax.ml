@@ -154,6 +154,21 @@ module ValueBuilder = struct
 
   let value_from_token token =
     from_token token
+
+  let value_from_syntax syntax =
+    let pr first last =
+      match first, last with
+      | (Value.Synthetic, Value.Synthetic) -> Synthetic
+      | (f, Value.Synthetic) -> f
+      | (Positioned f, Positioned l) -> Positioned (SourceData.spanning_between f l)
+      | (_, _) -> Synthetic in
+    let folder (sum: Value.t * Value.t) child: (Value.t * Value.t) =
+      match sum with
+      | (Value.Synthetic, Value.Synthetic) -> (value child, Value.Synthetic)
+      | (f, _) -> (f, value child) in
+    let first, last =
+      Syntax.fold_over_children folder (Value.Synthetic, Value.Synthetic) syntax in
+    pr first last
 end
 
 include Syntax.WithValueBuilder(ValueBuilder)

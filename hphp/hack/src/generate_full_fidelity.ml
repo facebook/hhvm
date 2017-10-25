@@ -480,6 +480,14 @@ module GenerateFFSyntax = struct
     sprintf "      | %s {\n%s      } -> [\n%s      ]\n"
       x.kind_name fields fields
 
+  let to_fold_from_syntax x =
+    let mapper (f,_) = sprintf "        %s_%s;\n" x.prefix f in
+    let fields = map_and_concat mapper x.fields in
+    let mapper2 (f, _) = sprintf "         let acc = f acc %s_%s in\n" x.prefix f in
+    let fields2 = map_and_concat mapper2 x.fields in
+    sprintf "      | %s {\n%s      } ->\n%s         acc\n"
+      x.kind_name fields fields2
+
   let to_children_names x =
     let mapper1 (f,_) = sprintf "        %s_%s;\n" x.prefix f in
     let mapper2 (f,_) = sprintf "        \"%s_%s\";\n" x.prefix f in
@@ -503,17 +511,15 @@ module GenerateFFSyntax = struct
     let fields1 = map_and_concat mapper1 x.fields in
     let mapper2 (f,_) = sprintf "          %s_%s;\n" x.prefix f in
     let fields2 = map_and_concat mapper2 x.fields in
-    let mapper3 (f,_) = sprintf "          %s_%s;\n" x.prefix f in
-    let fields3 = map_and_concat mapper3 x.fields in
     sprintf "      let make_%s
 %s      =
-        let value = ValueBuilder.value_from_children SyntaxKind.%s [
-%s        ] in
-        make (%s {
-%s        }) value
+        let syntax = %s {
+%s        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
 
 "
-    x.type_name fields1 x.kind_name fields2 x.kind_name fields3
+    x.type_name fields1 x.kind_name fields2
 
   let full_fidelity_syntax_template = make_header MLStyle "
  * With these factory methods, nodes can be built up from their child nodes. A
@@ -612,6 +618,13 @@ TYPE_TESTS
 
 CHILD_LIST_FROM_TYPE
 
+    let fold_over_children f acc syntax =
+      match syntax with
+      | Missing -> acc
+      | Token _ -> acc
+      | SyntaxList _ -> acc
+FOLD_FROM_SYNTAX
+
     (* The order that the children are returned in should match the order
        that they appear in the source text *)
     let children node =
@@ -708,6 +721,7 @@ SYNTAX_FROM_CHILDREN      | (SyntaxKind.Missing, []) -> Missing
       val value_from_children:
         Full_fidelity_syntax_kind.t -> t list -> SyntaxValue.t
       val value_from_token: Token.t -> SyntaxValue.t
+      val value_from_syntax: syntax -> SyntaxValue.t
     end
 
     module WithValueBuilder(ValueBuilder: ValueBuilderType) = struct
@@ -815,6 +829,7 @@ end (* WithToken *)
       { pattern = "TYPE_TESTS"; func = to_type_tests };
       { pattern = "CHILD_LIST_FROM_TYPE"; func = to_child_list_from_type };
       { pattern = "CHILDREN"; func = to_children };
+      { pattern = "FOLD_FROM_SYNTAX"; func = to_fold_from_syntax };
       { pattern = "CHILDREN_NAMES"; func = to_children_names };
       { pattern = "SYNTAX_FROM_CHILDREN"; func = to_syntax_from_children };
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };

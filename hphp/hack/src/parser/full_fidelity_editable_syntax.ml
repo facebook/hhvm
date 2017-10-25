@@ -37,6 +37,9 @@ module EditableValueBuilder = struct
 
   let value_from_token _ =
     EditableSyntaxValue.NoValue
+
+  let value_from_syntax _ =
+    EditableSyntaxValue.NoValue
 end
 
 include EditableSyntax

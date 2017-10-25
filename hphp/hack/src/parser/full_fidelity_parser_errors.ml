@@ -1048,6 +1048,13 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode =
   | ShapeExpression { shape_expression_fields; _} ->
     List.fold_right (fun fl acc -> (invalid_shape_field_check fl) @ acc)
       (syntax_to_list_no_separators shape_expression_fields) []
+  | VectorIntrinsicExpression _
+  | DictionaryIntrinsicExpression _
+  | KeysetIntrinsicExpression _ when not is_hack ->
+    [ make_error_from_node node SyntaxError.hsl_in_php ]
+  | VarrayIntrinsicExpression _
+  | DarrayIntrinsicExpression _ when not is_hack ->
+    [ make_error_from_node node SyntaxError.vdarray_in_php ]
   | _ -> [ ] (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents hhvm_compat_mode =

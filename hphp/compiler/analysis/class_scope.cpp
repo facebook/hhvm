@@ -342,6 +342,7 @@ void ClassScope::importTraitProperties(AnalysisResultPtr ar) {
       if (prop) {
         auto cloneProp = dynamic_pointer_cast<ClassVariable>(
           dynamic_pointer_cast<ClassStatement>(m_stmt)->addClone(prop));
+        cloneProp->setFromTrait();
         cloneProp->resetScope(shared_from_this());
         cloneProp->addTraitPropsToScope(ar,
                       dynamic_pointer_cast<ClassScope>(shared_from_this()));

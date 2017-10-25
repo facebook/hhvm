@@ -10671,6 +10671,7 @@ Id EmitterVisitor::emitClass(Emitter& e,
         ModifierExpressionPtr mod(cv->getModifiers());
         ExpressionListPtr el(cv->getVarList());
         Attr declAttrs = buildAttrs(mod);
+        if (cv->isFromTrait()) declAttrs |= AttrTrait;
         StringData* typeConstraint = makeStaticString(
           cv->getTypeConstraint());
         int nVars = el->getCount();

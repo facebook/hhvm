@@ -2196,10 +2196,9 @@ void Class::setProperties() {
 
   Slot traitIdx = m_preClass->numProperties();
   if (m_preClass->attrs() & AttrNoExpandTrait) {
-    for (auto const& traitName : m_preClass->usedTraits()) {
-      Class* classPtr = Unit::loadClass(traitName);
-      traitIdx -= classPtr->m_declProperties.size() +
-                  classPtr->m_staticProperties.size();
+    while (traitIdx &&
+           (m_preClass->properties()[traitIdx - 1].attrs() & AttrTrait)) {
+      traitIdx--;
     }
   }
 
@@ -2245,7 +2244,7 @@ void Class::setProperties() {
         prop.name                = preProp->name();
         prop.mangledName         = preProp->mangledName();
         prop.originalMangledName = preProp->mangledName();
-        prop.attrs               = preProp->attrs();
+        prop.attrs               = Attr(preProp->attrs() & ~AttrTrait);
         // This is the first class to declare this property
         prop.cls                 = this;
         prop.typeConstraint      = preProp->typeConstraint();

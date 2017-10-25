@@ -45,9 +45,10 @@ struct ClassVariable : Statement, IParseHandler {
   ModifierExpressionPtr getModifiers() const { return m_modifiers; }
 
   void addTraitPropsToScope(AnalysisResultPtr ar, ClassScopePtr scope);
-
+  void setFromTrait() { m_fromTrait = true; }
+  bool isFromTrait() { return m_fromTrait; }
 private:
-
+  bool m_fromTrait = false;
   ModifierExpressionPtr m_modifiers;
   std::string m_typeConstraint;
   ExpressionListPtr m_declaration;

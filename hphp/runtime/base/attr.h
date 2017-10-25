@@ -71,9 +71,9 @@ enum Attr {
   // using FCallBuiltin.                //       |          |         //
   AttrPhpLeafFn            = (1 <<  7), //       |          |    X    //
                                         //       |          |         //
-  // Is this class a trait?  On methods, this indicates that the method was
-  // imported from a trait.
-  AttrTrait                = (1 <<  8), //    X  |          |    X    //
+  // Is this class a trait?  On methods, or properties, this indicates that
+  // the method was imported from a trait.
+  AttrTrait                = (1 <<  8), //    X  |    X     |    X    //
                                         //       |          |         //
   // Indicates that this function should be ignored in backtraces.    //
   AttrNoInjection          = (1 <<  9), //       |          |    X    //

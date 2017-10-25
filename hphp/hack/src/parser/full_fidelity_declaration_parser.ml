@@ -21,10 +21,14 @@ open TokenKind
 open Full_fidelity_minimal_syntax
 
 module WithExpressionAndStatementAndTypeParser
-  (ExpressionParser : Full_fidelity_expression_parser_type.ExpressionParserType)
-  (StatementParser : Full_fidelity_statement_parser_type.StatementParserType)
-  (TypeParser : Full_fidelity_type_parser_type.TypeParserType) :
-  Full_fidelity_declaration_parser_type.DeclarationParserType = struct
+  (ExpressionParser : Full_fidelity_expression_parser_type.
+    WithLexer(Full_fidelity_minimal_lexer).ExpressionParser_S)
+  (StatementParser : Full_fidelity_statement_parser_type.
+    WithLexer(Full_fidelity_minimal_lexer).StatementParser_S)
+  (TypeParser : Full_fidelity_type_parser_type.
+    WithLexer(Full_fidelity_minimal_lexer).TypeParser_S) :
+  Full_fidelity_declaration_parser_type.
+    WithLexer(Full_fidelity_minimal_lexer).DeclarationParser_S = struct
 
   include SimpleParser
   include

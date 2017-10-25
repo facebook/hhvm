@@ -8,7 +8,8 @@
  *
  *)
 
-module Lexer = Full_fidelity_minimal_lexer
+module WithLexer(Lexer : Full_fidelity_lexer_sig.MinimalLexer_S) = struct
+
 module Context =
   Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token)
 
@@ -108,3 +109,5 @@ let next_xhp_body_token parser =
   let (lexer, token) = Lexer.next_xhp_body_token parser.lexer in
   let parser = { parser with lexer } in
   (parser, token)
+
+end

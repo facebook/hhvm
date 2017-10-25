@@ -7,8 +7,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-
-module Lexer = Full_fidelity_minimal_lexer
+module WithLexer :
+  functor (Lexer : Full_fidelity_lexer_sig.MinimalLexer_S) -> sig
 
 type t = {
   lexer : Lexer.t;
@@ -77,3 +77,4 @@ val next_xhp_element_token :
   -> t * Full_fidelity_minimal_token.t * String.t
 
 val next_xhp_body_token : t -> t * Full_fidelity_minimal_token.t
+end

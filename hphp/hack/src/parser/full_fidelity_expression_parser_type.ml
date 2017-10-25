@@ -7,15 +7,18 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-module type ExpressionParserType = sig
-  type t
-  val make : ?hhvm_compat_mode:bool
-    -> Full_fidelity_minimal_lexer.t
-    -> Full_fidelity_syntax_error.t list
-    -> Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token).t
-    -> t
-  val lexer : t -> Full_fidelity_minimal_lexer.t
-  val errors : t -> Full_fidelity_syntax_error.t list
-  val parse_expression : t -> t * Full_fidelity_minimal_syntax.t
-  val parse_simple_variable: t -> t * Full_fidelity_minimal_syntax.t
+
+module WithLexer(Lexer : Full_fidelity_lexer_sig.MinimalLexer_S) = struct
+  module type ExpressionParser_S = sig
+    type t
+    val make : ?hhvm_compat_mode:bool
+      -> Lexer.t
+      -> Full_fidelity_syntax_error.t list
+      -> Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token).t
+      -> t
+    val lexer : t -> Lexer.t
+    val errors : t -> Full_fidelity_syntax_error.t list
+    val parse_expression : t -> t * Full_fidelity_minimal_syntax.t
+    val parse_simple_variable: t -> t * Full_fidelity_minimal_syntax.t
+  end
 end

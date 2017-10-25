@@ -14,16 +14,22 @@ module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Operator = Full_fidelity_operator
-module PrecedenceParser = Full_fidelity_precedence_parser
+module Lexer = Full_fidelity_minimal_lexer
+module PrecedenceParser =
+  Full_fidelity_precedence_parser.WithLexer(Full_fidelity_minimal_lexer)
 
 open TokenKind
 open Full_fidelity_minimal_syntax
 
 module WithStatementAndDeclAndTypeParser
-  (StatementParser : Full_fidelity_statement_parser_type.StatementParserType)
-  (DeclParser : Full_fidelity_declaration_parser_type.DeclarationParserType)
-  (TypeParser : Full_fidelity_type_parser_type.TypeParserType) :
-  Full_fidelity_expression_parser_type.ExpressionParserType = struct
+  (StatementParser : Full_fidelity_statement_parser_type.
+    WithLexer(Full_fidelity_minimal_lexer).StatementParser_S)
+  (DeclParser : Full_fidelity_declaration_parser_type.
+    WithLexer(Full_fidelity_minimal_lexer).DeclarationParser_S)
+  (TypeParser : Full_fidelity_type_parser_type.
+      WithLexer(Full_fidelity_minimal_lexer).TypeParser_S) :
+  Full_fidelity_expression_parser_type.
+    WithLexer(Full_fidelity_minimal_lexer).ExpressionParser_S = struct
 
   include PrecedenceParser
   include Full_fidelity_parser_helpers.
@@ -101,17 +107,6 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_expression_with_operator_precedence parser operator =
     with_operator_precedence parser operator parse_expression
-
-  (* try to parse an expression. If parser cannot make progress, return None *)
-  (* TODO: Not currently used; can we delete this? *)
-  and _parse_expression_optional parser ~reset_prec =
-    let module Lexer = PrecedenceParser.Lexer in
-    let offset = Lexer.start_offset (lexer parser) in
-    let (parser, expr) =
-      if reset_prec then with_reset_precedence parser parse_expression
-      else parse_expression parser in
-    let offset1 = Lexer.start_offset (lexer parser) in
-    if offset1 = offset then None else Some (parser, expr)
 
   and parses_without_error parser f =
     let old_errors = List.length (errors parser) in

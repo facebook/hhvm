@@ -19,9 +19,11 @@ module SimpleParser =
 open TokenKind
 open Full_fidelity_minimal_syntax
 
-module WithExpressionParser (ExpressionParser :
-    Full_fidelity_expression_parser_type.ExpressionParserType) :
-  Full_fidelity_type_parser_type.TypeParserType = struct
+module WithExpressionParser (
+  ExpressionParser : Full_fidelity_expression_parser_type.
+    WithLexer(Full_fidelity_minimal_lexer).ExpressionParser_S) :
+  Full_fidelity_type_parser_type.
+    WithLexer(Full_fidelity_minimal_lexer).TypeParser_S = struct
 
 include SimpleParser
 include

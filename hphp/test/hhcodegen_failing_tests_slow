@@ -6,7 +6,6 @@ slow/array_offset/433.php
 slow/class_constant/abstract_const7.php
 slow/class_constant/globals-array.php
 slow/class_type_constant/type_constant.php
-slow/class_type_constant/type_constant4.php
 slow/class_type_constant/type_constant6.php
 slow/closure/lambda_implicit_this.php
 slow/closure/return_types.php
@@ -58,7 +57,6 @@ slow/goto/try_goto_in_finally1.php
 slow/goto/try_goto_in_finally2.php
 slow/goto/try_goto_out_finally.php
 slow/hack_arr_compat/scalars.php
-slow/hack_mode/2213.php
 slow/hack_mode/2214.php
 slow/hack_mode/function_hint_with_single_type_hinted_variadic_param.php
 slow/hack_mode/function_hint_with_type_hinted_variadic_param.php
@@ -96,18 +94,8 @@ slow/inout/bad-call-12.php
 slow/inout/bad-call-13.php
 slow/inout/bad-call-14.php
 slow/inout/bad-call-15.php
-slow/inout/bad-call-1.php
-slow/inout/bad-call-2.php
-slow/inout/bad-call-3.php
-slow/inout/bad-call-4.php
-slow/inout/bad-call-5.php
-slow/inout/bad-call-6.php
-slow/inout/bad-call-7.php
-slow/inout/bad-call-8.php
-slow/inout/bad-call-9.php
 slow/inout/bad-class.php
 slow/inout/bad-constructor.php
-slow/inout/bad-decl-1.php
 slow/inout/bad-decl-2.php
 slow/inout/bad-func.php
 slow/inout/bad-generator.php
@@ -208,7 +196,6 @@ slow/php7_bcbreak/5/uvs/dimmable_object_access.php
 slow/php7_bcbreak/5/uvs/dimmable_object_call.php
 slow/php7_bcbreak/5/uvs/static_dim_call.php
 slow/reflection/1342.php
-slow/reflection/2695.php
 slow/reflection/dynamic_property2.php
 slow/reflection/ns_closure.php
 slow/reflection/param_tostring_zendcompat.php

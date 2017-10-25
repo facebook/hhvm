@@ -2,9 +2,7 @@ quick/ClsCases.php
 quick/backtick.php
 quick/closure_recursive_bad.php
 quick/float-overflow-literals.php
-quick/instanceofInterface.php
 quick/ns_existing_names_class.php
 quick/prop_order.php
 quick/prop_order_parens.php
 quick/selfparent.php
-quick/serialize2.php

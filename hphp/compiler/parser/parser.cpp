@@ -1627,6 +1627,7 @@ void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt,
     intf->onParse(m_ar, m_file);
   }
   completeScope(intf->getClassScope());
+  m_clsContexts.pop();
 }
 
 void Parser::onInterfaceName(Token &out, Token *names, Token &name) {

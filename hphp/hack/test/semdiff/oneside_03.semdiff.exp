@@ -1,0 +1,33 @@
+Semdiff succeeded
+comparing key f
+Semdiff failed
+pc=20 7;21, pc'=6;7, i=Int 2 i'=Dup asn={}{}
+Assumed=
+[;0,;0-><{}{}>]
+[;1,;0-><{}{}>]
+[;2,;0-><{}{}>]
+[;2,;1-><{}{}>]
+[;3,;2-><{}{}>]
+[;4,;3-><{}{}>]
+[;5,;4-><{}{}>]
+[20 7;20,6;6-><{}{}>]
+[20 7;21,6;6-><{}{}>]
+
+Todo=[20 7;20,6;6->{}{}]
+[20 7;20,6;6->{}{}]
+[20 7;20,6;6->{}{}]
+
+Distance = 7
+Size = 45
+Similarity = 84.78
+Edits = 
+
+for f:
+- .try_fault F0 {
+- }
++ Jmp L0
+- F0:
+- Int 2
+- Print
+- PopC
+- Unwind

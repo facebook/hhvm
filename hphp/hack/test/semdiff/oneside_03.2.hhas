@@ -1,0 +1,47 @@
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/oneside_02.php starts here
+
+
+.filepath "/data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/oneside_02.php";
+
+.main {
+  FPushFuncD 0 "f"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"" N  > f() {
+  .declvars $e;
+  .try {
+    .try_fault F0 {
+      FPushCtorD 0 "Exception"
+      FCall 0
+      PopR
+      Throw
+    }
+  } .catch {
+    Dup
+    InstanceOfD "Exception"
+    JmpZ L1
+    SetL $e
+    PopC
+    Int 1
+    Print
+    PopC
+    Jmp L0
+  L1:
+    Throw
+  }
+F0:
+  # now have something non-trivial in the fault handler so unequal
+  Int 2
+  Print
+  PopC
+  Unwind
+L0:
+  Null
+  RetC
+}
+
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/oneside_02.php ends here

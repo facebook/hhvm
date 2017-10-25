@@ -19,19 +19,17 @@
   PopC
   .try {
     CGetL $pairs
-    IterInit 0 L2 _8
-    .try_fault F4 {
-      .try_fault F5 {
-      L1:
-        BaseL _8 Warn
-        QueryM 0 CGet EI:1
-        SetL $b
-        PopC
-        BaseL _8 Warn
-        QueryM 0 CGet EI:0
-        SetL $a
-        PopC
-      }
+    IterInit 0 L4 _8
+    .try_fault F1 {
+    L0:
+      BaseL _8 Warn
+      QueryM 0 CGet EI:1
+      SetL $b
+      PopC
+      BaseL _8 Warn
+      QueryM 0 CGet EI:0
+      SetL $a
+      PopC
       CGetL $f
       FPushFunc 2
       FPassL 0 $a Cell
@@ -40,37 +38,30 @@
       UnboxR
       SetL _8
       PopC
-      .try_fault F6 {
-        CGetL $a
-        CGetL _8
-        NewPackedArray 2
-      }
+      CGetL $a
+      CGetL _8
+      NewPackedArray 2
       UnsetL _8
       BaseL $result Define
       SetM 0 W
       PopC
-      IterNext 0 L1 _8
+      IterNext 0 L0 _8
     }
-    Jmp L2
+    Jmp L4
   } .catch {
     Dup
     InstanceOfD "Exception"
-    JmpNZ L3
+    JmpNZ L1
     Throw
-  L3:
+  L1:
     SetL $e
     PopC
-    Jmp L2
   }
-L2:
+L4:
   CGetL $result
   VerifyRetTypeC
   RetC
-F5:
-  Unwind
-F6:
-  Unwind
-F4:
+F1:
   IterFree 0
   Unwind
 }

@@ -1,0 +1,4 @@
+.main {
+  Int 1
+  RetC
+}

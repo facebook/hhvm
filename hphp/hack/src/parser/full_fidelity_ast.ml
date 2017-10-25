@@ -2389,15 +2389,16 @@ let from_text
   : result =
     let open Full_fidelity_syntax_tree in
     let tree   = make ?hhvm_compat_mode source_text in
+    let script = Full_fidelity_positioned_syntax.from_tree tree in
     if Option.value hhvm_compat_mode ~default:false
     then begin
     match ParserErrors.parse_errors
       ~enable_hh_syntax
+      ~positioned_syntax:script
       ~level:ParserErrors.HHVMCompatibility tree with
     | [] -> ()
     | e :: _ -> failwith (Full_fidelity_syntax_error.message e)
     end;
-    let script = Full_fidelity_positioned_syntax.from_tree tree in
     let script = from_positioned_syntax script in
     let script =
       if lower_coroutines then

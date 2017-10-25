@@ -145,13 +145,13 @@ void MemoryManager::traceStats(const char* event) {
     FTRACE(1, "mm-usage {} extUsage {} ",
            m_stats.mmUsage, m_stats.extUsage);
     FTRACE(1, "capacity {} peak usage {} peak capacity {} ",
-           m_stats.capacity, m_stats.peakUsage, m_stats.peakCap);
+           m_stats.capacity(), m_stats.peakUsage, m_stats.peakCap);
     FTRACE(1, "total {} reset alloc-dealloc {} cur alloc-dealloc {}\n",
            m_stats.totalAlloc, m_resetAllocated - m_resetDeallocated,
            *m_allocated - *m_deallocated);
   } else {
     FTRACE(1, "usage: {} capacity: {} peak usage: {} peak capacity: {}\n",
-           m_stats.usage(), m_stats.capacity,
+           m_stats.usage(), m_stats.capacity(),
            m_stats.peakUsage, m_stats.peakCap);
   }
 }
@@ -163,8 +163,9 @@ void MemoryManager::resetAllStats() {
   m_statsIntervalActive = false;
   m_stats.mmUsage = 0;
   m_stats.extUsage = 0;
-  m_stats.capacity = 0;
-  m_stats.heapAllocVolume = 0;
+  m_stats.malloc_cap = 0;
+  m_stats.mmap_cap = 0;
+  m_stats.mmap_volume = 0;
   m_stats.peakUsage = 0;
   m_stats.peakCap = 0;
   m_stats.totalAlloc = 0;
@@ -194,15 +195,9 @@ void MemoryManager::resetExternalStats() {
   m_enableStatsSync = s_statsEnabled; // false if !use_jemalloc
   if (s_statsEnabled) {
     m_resetDeallocated = *m_deallocated;
-#ifndef USE_CONTIGUOUS_HEAP
-    m_resetAllocated = *m_allocated - m_stats.capacity;
-    // By subtracting capcity here, the next call to refreshStatsImpl()
-    // will correctly include m_stats.capacity in extUsage and totalAlloc.
-#else
-    // Contiguous heap does not use jemalloc,
-    // so we don't need to subtract capacity to avoid double-counting.
-    m_resetAllocated = *m_allocated;
-#endif
+    m_resetAllocated = *m_allocated - m_stats.malloc_cap;
+    // By subtracting malloc_cap here, the next call to refreshStatsImpl()
+    // will correctly include m_stats.malloc_cap in extUsage and totalAlloc.
   }
   traceStats("resetExternalStats post");
 }
@@ -239,7 +234,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   //
   //   int64 musage = delta - delta0;
   //
-  // Note however, the slab allocator adds to m_stats.capacity
+  // Note however, the slab allocator adds to m_stats.malloc_cap
   // when it calls malloc(), so that this function can avoid
   // double-counting the malloced memory. Thus musage in the example
   // code may well substantially exceed m_stats.usage.
@@ -261,7 +256,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       resetUsage, curUsage, curAllocated - m_resetAllocated);
     FTRACE(1, "dealloc-change: {} ", curDeallocated - m_resetDeallocated);
     FTRACE(1, "mm usage {} extUsage {} totalAlloc {} capacity {}\n",
-      stats.mmUsage, stats.extUsage, stats.totalAlloc, stats.capacity);
+      stats.mmUsage, stats.extUsage, stats.totalAlloc, stats.capacity());
 
     // External usage (allocated-deallocated) since the last resetStats().
     stats.extUsage = curUsage - resetUsage;
@@ -270,9 +265,9 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     // We need to do the calculation instead of just setting it to curAllocated
     // because of the MaskAlloc capability, which updates m_resetAllocated.
 
-    // stats.heapAllocVolume is only used for contiguous heap, it would always
-    // be 0 in default SparseHeap.
-    stats.totalAlloc = curAllocated - m_resetAllocated + stats.heapAllocVolume;
+    // stats.mmap_volume is only used for mmap'd heap space; any malloc'd
+    // space is included in curAllocated.
+    stats.totalAlloc = curAllocated - m_resetAllocated + stats.mmap_volume;
     FTRACE(1, "heap-id {} after sync extUsage {} totalAlloc: {}\n",
       t_heap_id, stats.extUsage, stats.totalAlloc);
   }
@@ -281,7 +276,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   stats.peakUsage = std::max(stats.peakUsage, usage);
   if (m_statsIntervalActive) {
     stats.peakIntervalUsage = std::max(stats.peakIntervalUsage, usage);
-    stats.peakIntervalCap = std::max(stats.peakIntervalCap, stats.capacity);
+    stats.peakIntervalCap = std::max(stats.peakIntervalCap, stats.capacity());
   }
 }
 
@@ -773,7 +768,7 @@ void MemoryManager::freeBigSize(void* vp) {
   // them on allocation, we also need to adjust for them negatively on free.
   auto bytes = static_cast<MallocNode*>(vp)[-1].nbytes;
   m_stats.mmUsage -= bytes;
-  m_stats.capacity -= bytes;
+  m_stats.malloc_cap -= bytes;
   FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
   m_heap.freeBig(vp);
 }
@@ -1064,8 +1059,8 @@ MemBlock SparseHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
   auto usable = size;
 #endif
   m_slabs.push_back({slab, size});
-  stats.capacity += usable;
-  stats.peakCap = std::max(stats.peakCap, stats.capacity);
+  stats.malloc_cap += usable;
+  stats.peakCap = std::max(stats.peakCap, stats.capacity());
   return {slab, usable};
 }
 
@@ -1088,7 +1083,7 @@ MemBlock SparseHeap::allocBig(size_t bytes, HeaderKind kind,
 #endif
   enlist(n, kind, cap, tyindex);
   stats.mmUsage += cap;
-  stats.capacity += cap;
+  stats.malloc_cap += cap;
   return {n + 1, cap - sizeof(MallocNode)};
 }
 
@@ -1106,7 +1101,7 @@ MemBlock SparseHeap::callocBig(size_t nbytes, HeaderKind kind,
 #endif
   enlist(n, kind, cap, tyindex);
   stats.mmUsage += cap;
-  stats.capacity += cap;
+  stats.malloc_cap += cap;
   return {n + 1, cap - sizeof(MallocNode)};
 }
 
@@ -1156,7 +1151,7 @@ MemBlock SparseHeap::resizeBig(void* ptr, size_t newsize,
     m_bigs[newNode->index()] = newNode;
   }
   stats.mmUsage += newsize - old_size;
-  stats.capacity += newsize - old_size;
+  stats.malloc_cap += newsize - old_size;
   return {newNode + 1, newNode->nbytes - sizeof(MallocNode)};
 }
 

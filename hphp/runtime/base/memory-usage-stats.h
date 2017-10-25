@@ -35,7 +35,8 @@ struct MemoryUsageStats {
   int64_t mmUsage;    // bytes are currently in use via MM apis
   int64_t extUsage;   // cumulative allocations via jemalloc
 
-  int64_t capacity;   // sum of slabs & big objects (MM's capacity)
+  int64_t malloc_cap; // capacity of malloc'd slabs & big objects
+  int64_t mmap_cap;   // capacity of mmap'd slabs & big objects
   int64_t peakUsage;  // how many bytes have been used at maximum
   int64_t peakCap;    // peak bytes owned by MemoryManager (slabs and big)
   int64_t peakIntervalUsage; // peakUsage during userland interval
@@ -44,16 +45,12 @@ struct MemoryUsageStats {
   int64_t totalAlloc; // how many bytes have cumulatively been allocated
                       // by the underlying allocator
 
-  int64_t heapAllocVolume; // how many bytes have cumulatively been allocated
-                           // by the MemoryManager, ONLY used in contiguous heap
+  int64_t mmap_volume; // how many bytes have cumulatively been mmap'd
+                       // by the HeapImpl, not counting munmaps or madvises.
 
   int64_t usage() const { return mmUsage + auxUsage(); }
-#ifdef USE_CONTIGUOUS_HEAP
-  // If use contiguous heap, stop subtracting capacity from extusage.
-  int64_t auxUsage() const { return extUsage; }
-#else
-  int64_t auxUsage() const { return extUsage - capacity; }
-#endif
+  int64_t capacity() const { return mmap_cap + malloc_cap; }
+  int64_t auxUsage() const { return extUsage - malloc_cap; }
 };
 
 //////////////////////////////////////////////////////////////////////

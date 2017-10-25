@@ -417,7 +417,7 @@ StructuredLogEntry logCommon() {
   sample.setInt("usage", t_pre_stats.usage());
   sample.setInt("mm_usage", t_pre_stats.mmUsage);
   sample.setInt("aux_usage", t_pre_stats.auxUsage());
-  sample.setInt("mm_capacity", t_pre_stats.capacity);
+  sample.setInt("mm_capacity", t_pre_stats.capacity());
   sample.setInt("peak_usage", t_pre_stats.peakUsage);
   sample.setInt("peak_capacity", t_pre_stats.peakCap);
   sample.setInt("total_alloc", t_pre_stats.totalAlloc);

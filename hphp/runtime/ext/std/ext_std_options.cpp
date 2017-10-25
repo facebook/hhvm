@@ -898,7 +898,7 @@ static int64_t HHVM_FUNCTION(memory_get_peak_usage,
 
 static int64_t HHVM_FUNCTION(memory_get_usage, bool real_usage /*=false */) {
   auto const stats = tl_heap->getStatsCopy();
-  int64_t ret = real_usage ? stats.usage() : stats.capacity;
+  int64_t ret = real_usage ? stats.usage() : stats.capacity();
   // Since we don't always alloc and dealloc a shared structure from the same
   // thread it is possible that this can go negative when we are tracking
   // jemalloc stats.
@@ -915,7 +915,7 @@ static int64_t HHVM_FUNCTION(hphp_memory_heap_usage) {
 static int64_t HHVM_FUNCTION(hphp_memory_heap_capacity) {
   // This happens to match HHVM memory_get_usage(false), and
   // PHP memory_get_usage(true).
-  return tl_heap->getStatsCopy().capacity;
+  return tl_heap->getStatsCopy().capacity();
 }
 
 static bool HHVM_FUNCTION(hphp_memory_start_interval) {

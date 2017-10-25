@@ -190,9 +190,9 @@ void ContiguousHeap::raw_free(char* p, size_t size) {
 MemBlock ContiguousHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
   assert(size % ChunkSize == 0);
   auto p = raw_alloc(size);
-  stats.heapAllocVolume += size;
-  stats.capacity += size;
-  stats.peakCap = std::max(stats.peakCap, stats.capacity);
+  stats.mmap_volume += size;
+  stats.mmap_cap += size;
+  stats.peakCap = std::max(stats.peakCap, stats.capacity());
   return {p, size};
 }
 
@@ -221,8 +221,8 @@ MemBlock ContiguousHeap::allocBig(size_t bytes, HeaderKind kind,
   n->initHeader_32_16(kind, 0, tyindex);
   n->nbytes = cap;
   stats.mmUsage += cap;
-  stats.capacity += cap;
-  stats.heapAllocVolume += cap;
+  stats.mmap_cap += cap;
+  stats.mmap_volume += cap;
   return {n + 1, cap - sizeof(MallocNode)};
 }
 
@@ -251,7 +251,7 @@ MemBlock ContiguousHeap::resizeBig(void* ptr, size_t newsize,
   auto newcap = (newsize + sizeof(MallocNode) + ChunkSize-1) & ~(ChunkSize-1);
   auto n = static_cast<MallocNode*>(ptr) - 1;
   if (newcap == n->nbytes) {
-    // capacity and heapAllocVolume don't change
+    // capacity and mmap_volume don't change
     return {n + 1, newcap - sizeof(MallocNode)};
   }
   auto old_size = n->nbytes;
@@ -260,8 +260,8 @@ MemBlock ContiguousHeap::resizeBig(void* ptr, size_t newsize,
   raw_free((char*)n, n->nbytes);
   // Already add the stats in allocBig(), so just subtract the old stats
   stats.mmUsage -= old_size;
-  stats.capacity -= old_size;
-  stats.heapAllocVolume -= old_size;
+  stats.mmap_cap -= old_size;
+  stats.mmap_volume -= old_size;
   return b;
 }
 

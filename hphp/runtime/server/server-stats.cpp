@@ -509,7 +509,7 @@ void ServerStats::ReportStatus(std::string& output, Writer::Format format) {
       auto const stats = ts.m_mm->getStatsCopy();
       w->beginObject("memory");
       w->writeEntry("current usage", stats.usage());
-      w->writeEntry("current alloc", stats.capacity);
+      w->writeEntry("current alloc", stats.capacity());
       w->writeEntry("peak usage", stats.peakUsage);
       w->writeEntry("peak alloc", stats.peakCap);
       w->writeEntry("limit", ts.m_mm->getMemoryLimit());

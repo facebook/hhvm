@@ -1,0 +1,2 @@
+File "class_clone_function_with_one_param.php", line 5, characters 25-31:
+__clone method cannot take arguments (Naming[2038])

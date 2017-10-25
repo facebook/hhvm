@@ -1450,9 +1450,12 @@ module Make (GetLocals : GetLocals) = struct
     | XhpCategory _ -> acc
     | XhpChild _ -> acc
     | Method m when snd m.m_name = SN.Members.__construct -> acc
-    | Method m when not (List.mem m.m_kind Static) ->
-      let genv = fst env in
-      method_ genv m :: acc
+    | Method m when not (List.mem m.m_kind Static) ->(
+      match (m.m_name, m.m_params) with
+        | ( (m_pos, m_name), _::_) when m_name = SN.Members.__clone ->
+            Errors.clone_too_many_arguments m_pos; acc
+        | _ -> let genv = fst env in method_ genv m :: acc
+      )
     | Method _ -> acc
     | TypeConst _ -> acc
 

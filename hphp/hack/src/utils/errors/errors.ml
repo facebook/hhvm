@@ -1008,6 +1008,10 @@ let expected_variable pos =
   add Naming.expected_variable pos
     "Was expecting a variable name"
 
+let clone_too_many_arguments pos =
+  add Naming.naming_too_many_arguments pos
+    "__clone method cannot take arguments"
+
 let naming_too_few_arguments pos =
   add Naming.naming_too_few_arguments pos
     "Too few arguments"

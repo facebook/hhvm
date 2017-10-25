@@ -74,6 +74,7 @@ module type S = sig
   val shadowed_type_param : Pos.t -> Pos.t -> string -> unit
   val missing_typehint : Pos.t -> unit
   val expected_variable : Pos.t -> unit
+  val clone_too_many_arguments : Pos.t -> unit
   val naming_too_few_arguments : Pos.t -> unit
   val naming_too_many_arguments : Pos.t -> unit
   val expected_collection : Pos.t -> string -> unit

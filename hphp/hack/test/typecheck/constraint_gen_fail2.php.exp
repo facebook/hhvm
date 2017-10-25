@@ -1,4 +1,4 @@
-File "constraint_gen_fail2.php", line 21, characters 7-12:
+File "constraint_gen_fail2.php", line 21, characters 3-5:
 Some type constraint(s) here are violated (Typing[4110])
 File "constraint_gen_fail2.php", line 16, characters 14-14:
 'T' is a constrained type

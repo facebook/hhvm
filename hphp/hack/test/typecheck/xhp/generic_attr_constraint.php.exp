@@ -1,4 +1,4 @@
-File "generic_attr_constraint.php", line 7, characters 10-13:
+File "generic_attr_constraint.php", line 8, characters 4-9:
 Some type constraint(s) here are violated (Typing[4110])
 File "generic_attr_constraint.php", line 3, characters 15-15:
 'T' is a constrained type

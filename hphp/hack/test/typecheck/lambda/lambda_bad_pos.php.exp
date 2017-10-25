@@ -1,0 +1,14 @@
+File "lambda_bad_pos.php", line 26, characters 8-13:
+Some type constraint(s) here are violated (Typing[4110])
+File "lambda_bad_pos.php", line 6, characters 21-22:
+'Tv' is a constrained type
+File "lambda_bad_pos.php", line 6, characters 27-34:
+This is an array key (int/string)
+File "lambda_bad_pos.php", line 25, characters 22-22:
+It is incompatible with an object of type C
+File "hhi_lib__srcs/experimental/interfaces.hhi", line 14, characters 55-55:
+  via this generic T
+File "hhi_lib__srcs/interfaces.hhi", line 102, characters 57-58:
+  via this generic Tv
+File "hhi_lib__srcs/interfaces.hhi", line 83, characters 80-81:
+  via this generic Tv

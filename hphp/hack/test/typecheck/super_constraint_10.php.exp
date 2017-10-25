@@ -1,4 +1,4 @@
-File "super_constraint_10.php", line 22, characters 34-38:
+File "super_constraint_10.php", line 22, characters 21-25:
 Some type constraint(s) here are violated (Typing[4110])
 File "super_constraint_10.php", line 7, characters 42-44:
 'Tk1' is a constrained type

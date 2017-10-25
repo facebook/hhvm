@@ -1,4 +1,4 @@
-File "nullary_constructor_constraint.php", line 13, characters 10-15:
+File "nullary_constructor_constraint.php", line 14, characters 8-14:
 Some type constraint(s) here are violated (Typing[4110])
 File "nullary_constructor_constraint.php", line 10, characters 9-9:
 'T' is a constrained type

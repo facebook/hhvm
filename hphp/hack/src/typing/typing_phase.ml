@@ -157,7 +157,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
            Toption ty in
        env, (ety_env, (r, ty_))
   | r, Tfun ft ->
-      let env, ft = localize_ft ~ety_env env ft in
+      let env, ft = localize_ft ~use_pos:ft.ft_pos ~ety_env env ft in
       env, (ety_env, (r, Tfun ft))
   | r, Tapply ((_, x), argl) when Env.is_typedef x ->
       let env, argl = List.map_env env argl (localize ~ety_env) in
@@ -200,7 +200,7 @@ and localize ~ety_env env ty =
  * 2) When the type arguments are explicitly specified, in which case we instantiate
  * the type parameters to the provided types.
  *)
-and localize_ft ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env ft =
+and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env ft =
   (* If no explicit type parameters are provided, set the instantiated type parameter to
    * initially point to unresolved, so that it can grow and eventually be a subtype of
    * something like "mixed".
@@ -292,7 +292,7 @@ and localize_ft ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env 
    *)
   let env =
     if instantiate_tparams then
-      let env = check_tparams_constraints ~ety_env env ft.ft_tparams in
+      let env = check_tparams_constraints ~use_pos ~ety_env env ft.ft_tparams in
       let env = check_where_constraints ~ety_env env ft.ft_pos
                   ft.ft_where_constraints in
       env
@@ -331,14 +331,20 @@ and localize_ft ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env 
  * constraint checking is deferred until we have finished checking a
  * function's body.
  *)
-and check_tparams_constraints ~ety_env env tparams =
+and check_tparams_constraints ~use_pos ~ety_env env tparams =
   let check_tparam_constraints env (_var, (p, name), cstrl) =
     let r = Reason.Rwitness p in
     List.fold_left cstrl ~init:env ~f:begin fun env (ck, ty) ->
       let env, ty = localize ~ety_env env ty in
       match SMap.get name ety_env.substs with
       | Some x_ty ->
-      TGenConstraint.add_check_constraint_todo env r name ck ty x_ty
+        begin
+          Typing_log.log_types 1 use_pos env
+          [Typing_log.Log_sub ("check_tparams_constraints: add_check_constraint_todo",
+            [Typing_log.Log_type ("ty", ty);
+            Typing_log.Log_type ("x_ty", x_ty)])];
+          TGenConstraint.add_check_constraint_todo env ~use_pos r name ck ty x_ty
+        end
       | None ->
         env
     end in

@@ -4,7 +4,7 @@ File "new_generic.php", line 18, characters 3-32:
   ^(C<int>)
 File "new_generic.php", line 19, characters 3-38:
   ^(C<int>)
-File "new_generic.php", line 19, characters 29-36:
+File "new_generic.php", line 19, characters 11-19:
 Some type constraint(s) here are violated (Typing[4110])
 File "new_generic.php", line 8, characters 26-29:
 'Tobj' is a constrained type

@@ -1,4 +1,4 @@
-File "gen6.php", line 26, characters 11-17:
+File "gen6.php", line 25, characters 8-14:
 Some type constraint(s) here are violated (Typing[4110])
 File "gen6.php", line 12, characters 9-9:
 'T' is a constrained type

@@ -1,7 +1,9 @@
-File "gen1.php", line 23, characters 7-8:
+File "gen1.php", line 23, characters 3-5:
 Some type constraint(s) here are violated (Typing[4110])
 File "gen1.php", line 18, characters 14-14:
 'T' is a constrained type
+File "gen1.php", line 23, characters 7-8:
+Some type constraint(s) here are violated
 File "gen1.php", line 22, characters 23-23:
 'T' is a constrained type
 File "gen1.php", line 18, characters 19-19:

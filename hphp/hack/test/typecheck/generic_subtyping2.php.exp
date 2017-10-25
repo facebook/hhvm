@@ -1,4 +1,4 @@
-File "generic_subtyping2.php", line 25, characters 7-8:
+File "generic_subtyping2.php", line 25, characters 3-5:
 Some type constraint(s) here are violated (Typing[4110])
 File "generic_subtyping2.php", line 17, characters 14-14:
 'T' is a constrained type

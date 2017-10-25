@@ -1,4 +1,4 @@
-File "classmeth_constraints_bad.php", line 11, characters 6-6:
+File "classmeth_constraints_bad.php", line 10, characters 8-44:
 Some type constraint(s) here are violated (Typing[4110])
 File "classmeth_constraints_bad.php", line 6, characters 34-34:
 'T' is a constrained type

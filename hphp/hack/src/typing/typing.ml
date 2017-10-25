@@ -1377,7 +1377,7 @@ and expr_
               ety_env with substs = Subst.make class_.tc_tparams tvarl
             } in
             let env =
-              Phase.check_tparams_constraints ~ety_env env class_.tc_tparams in
+              Phase.check_tparams_constraints ~use_pos:p ~ety_env env class_.tc_tparams in
             let env, local_obj_ty = Phase.localize ~ety_env env obj_type in
             let local_obj_fp = TUtils.default_fun_param local_obj_ty in
             let fty = { fty with
@@ -1434,23 +1434,25 @@ and expr_
           this_ty = cid_ty;
           from_class = Some cid;
         } in
-        let env, smethod_type = Phase.localize ~ety_env env ty in
-        (match smethod_type with
-        | _, Tfun fty -> check_deprecated p fty
-        | _ -> ());
-        (match smethod_type, ce_visibility with
-        | (r, (Tfun _ as ty)), Vpublic ->
-          make_result env (T.Smethod_id(c, meth)) (r, ty)
-        | (r, Tfun _), Vprivate _ ->
-          Errors.private_class_meth (Reason.to_pos r) p;
-          expr_error env r
-        | (r, Tfun _), Vprotected _ ->
-          Errors.protected_class_meth (Reason.to_pos r) p;
-          expr_error env r
-        | (r, _), _ ->
+        match ty with
+        | (r, Tfun ft) ->
+          begin
+            let env, ft = Phase.localize_ft ~use_pos:p ~ety_env env ft in
+            let ty = r, Tfun ft in
+            check_deprecated p ft;
+            match ce_visibility with
+            | Vpublic ->
+              make_result env (T.Smethod_id(c, meth)) ty
+            | Vprivate _ ->
+              Errors.private_class_meth (Reason.to_pos r) p;
+              expr_error env r
+            | Vprotected _ ->
+              Errors.protected_class_meth (Reason.to_pos r) p;
+              expr_error env r
+          end
+        | (r, _) ->
           Errors.internal_error p "We have a method which isn't callable";
           expr_error env r
-        )
       )
     )
   | Lplaceholder p ->
@@ -1640,7 +1642,7 @@ and expr_
             end in
             let ety_env = { (Phase.env_with_self env) with
                             substs = Subst.make tparaml tparams } in
-            let env = Phase.check_tparams_constraints ~ety_env env tparaml in
+            let env = Phase.check_tparams_constraints ~use_pos:p ~ety_env env tparaml in
             let env, ty = Phase.localize ~ety_env env typename in
             make_result env (T.Typename sid) ty
         | None ->
@@ -1820,7 +1822,7 @@ and expr_
        *)
       let ety_env =
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
-      let env, declared_ft = Phase.localize_ft ~ety_env env declared_ft in
+      let env, declared_ft = Phase.localize_ft ~use_pos:p ~ety_env env declared_ft in
       (* Are all parameters annotated with explicit types? *)
       let all_explicit_params =
         List.for_all f.f_params (fun param -> Option.is_some param.param_hint) in
@@ -3116,7 +3118,7 @@ and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_
           | _ -> fty.ft_params, fty.ft_ret in
         let fty = { fty with ft_params = params; ft_ret = ret } in
         let ety_env = Phase.env_with_self env in
-        let env, fty = Phase.localize_ft ~ety_env env fty in
+        let env, fty = Phase.localize_ft ~use_pos:p ~ety_env env fty in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
         let env, tel, _tuel, ty = call ~expected p env tfun el [] in
         make_call_special env id tel ty
@@ -3324,7 +3326,7 @@ and fun_type_of_id env x hl =
     | None -> let env, _, ty = unbound_name env x in env, ty
     | Some fty ->
         let ety_env = Phase.env_with_self env in
-        let env, fty = Phase.localize_ft ~explicit_tparams:hl ~ety_env env fty in
+        let env, fty = Phase.localize_ft ~use_pos:(fst x) ~explicit_tparams:hl ~ety_env env fty in
         env, (Reason.Rwitness fty.ft_pos, Tfun fty)
   in
   env, fty
@@ -3728,7 +3730,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[]) ?(incl_tc=fa
                 let p_vis = Reason.to_pos r in
                 TVis.check_class_access p env (p_vis, vis) cid class_;
                 let env, ft =
-                  Phase.localize_ft ~ety_env ~explicit_tparams:explicit_tparams env ft in
+                  Phase.localize_ft ~use_pos:p ~ety_env ~explicit_tparams:explicit_tparams env ft in
                 let ft = { ft with
                   ft_arity = Fellipsis 0;
                   ft_tparams = []; ft_params = [];
@@ -3743,7 +3745,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[]) ?(incl_tc=fa
                 (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)
                 | r, Tfun ft ->
                   let env, ft =
-                    Phase.localize_ft ~ety_env ~explicit_tparams:explicit_tparams env ft
+                    Phase.localize_ft ~use_pos:p ~ety_env ~explicit_tparams:explicit_tparams env ft
                   in env, (r, Tfun ft)
                 | _ -> Phase.localize ~ety_env env method_
               end in
@@ -3878,7 +3880,7 @@ and obj_get_concrete_ty ~is_method ?(explicit_tparams=[]) env concrete_ty class_
               substs = Subst.make class_info.tc_tparams paraml;
               from_class = Some class_id;
             } in
-            let env, ft = Phase.localize_ft ~ety_env env ft in
+            let env, ft = Phase.localize_ft ~use_pos:id_pos ~ety_env env ft in
 
             (* we change the params of the underlying
              * declaration to act as a variadic function
@@ -3910,7 +3912,7 @@ and obj_get_concrete_ty ~is_method ?(explicit_tparams=[]) env concrete_ty class_
         begin match member_ty with
           | (r, Tfun ft) ->
             (* We special case function types here to be able to pass explicit type parameters. *)
-            let (env, ft) = Phase.localize_ft ~explicit_tparams ~ety_env env ft in
+            let (env, ft) = Phase.localize_ft ~use_pos:mem_pos ~explicit_tparams ~ety_env env ft in
             (env, (r, Tfun ft))
           | _ -> Phase.localize ~ety_env env member_ty
         end in
@@ -4225,7 +4227,7 @@ and call_construct p env class_ params el uel cid =
     substs = Subst.make class_.tc_tparams params;
     from_class = Some cid;
   } in
-  let env = Phase.check_tparams_constraints ~ety_env env class_.tc_tparams in
+  let env = Phase.check_tparams_constraints ~use_pos:p ~ety_env env class_.tc_tparams in
   if SSet.mem "XHP" class_.tc_extends then env, tcid, [], [] else
   let cstr = Env.get_construct env class_ in
   let mode = Env.get_mode env in

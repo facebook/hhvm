@@ -150,6 +150,7 @@ module WithToken(Token: TokenType) = struct
       | PostfixUnaryExpression                  _ -> SyntaxKind.PostfixUnaryExpression
       | BinaryExpression                        _ -> SyntaxKind.BinaryExpression
       | InstanceofExpression                    _ -> SyntaxKind.InstanceofExpression
+      | IsExpression                            _ -> SyntaxKind.IsExpression
       | ConditionalExpression                   _ -> SyntaxKind.ConditionalExpression
       | EvalExpression                          _ -> SyntaxKind.EvalExpression
       | EmptyExpression                         _ -> SyntaxKind.EmptyExpression
@@ -317,6 +318,7 @@ module WithToken(Token: TokenType) = struct
     let is_postfix_unary_expression                     = has_kind SyntaxKind.PostfixUnaryExpression
     let is_binary_expression                            = has_kind SyntaxKind.BinaryExpression
     let is_instanceof_expression                        = has_kind SyntaxKind.InstanceofExpression
+    let is_is_expression                                = has_kind SyntaxKind.IsExpression
     let is_conditional_expression                       = has_kind SyntaxKind.ConditionalExpression
     let is_eval_expression                              = has_kind SyntaxKind.EvalExpression
     let is_empty_expression                             = has_kind SyntaxKind.EmptyExpression
@@ -1484,6 +1486,16 @@ module WithToken(Token: TokenType) = struct
       instanceof_left_operand,
       instanceof_operator,
       instanceof_right_operand
+    )
+
+    let get_is_expression_children {
+      is_left_operand;
+      is_operator;
+      is_right_operand;
+    } = (
+      is_left_operand,
+      is_operator,
+      is_right_operand
     )
 
     let get_conditional_expression_children {
@@ -3178,6 +3190,15 @@ module WithToken(Token: TokenType) = struct
         instanceof_operator;
         instanceof_right_operand;
       ]
+      | IsExpression {
+        is_left_operand;
+        is_operator;
+        is_right_operand;
+      } -> [
+        is_left_operand;
+        is_operator;
+        is_right_operand;
+      ]
       | ConditionalExpression {
         conditional_test;
         conditional_question;
@@ -4805,6 +4826,15 @@ module WithToken(Token: TokenType) = struct
         "instanceof_left_operand";
         "instanceof_operator";
         "instanceof_right_operand";
+      ]
+      | IsExpression {
+        is_left_operand;
+        is_operator;
+        is_right_operand;
+      } -> [
+        "is_left_operand";
+        "is_operator";
+        "is_right_operand";
       ]
       | ConditionalExpression {
         conditional_test;
@@ -6578,6 +6608,16 @@ module WithToken(Token: TokenType) = struct
           instanceof_left_operand;
           instanceof_operator;
           instanceof_right_operand;
+        }
+      | (SyntaxKind.IsExpression, [
+          is_left_operand;
+          is_operator;
+          is_right_operand;
+        ]) ->
+        IsExpression {
+          is_left_operand;
+          is_operator;
+          is_right_operand;
         }
       | (SyntaxKind.ConditionalExpression, [
           conditional_test;
@@ -9020,6 +9060,22 @@ module WithToken(Token: TokenType) = struct
           instanceof_left_operand;
           instanceof_operator;
           instanceof_right_operand;
+        }) value
+
+      let make_is_expression
+        is_left_operand
+        is_operator
+        is_right_operand
+      =
+        let value = ValueBuilder.value_from_children SyntaxKind.IsExpression [
+          is_left_operand;
+          is_operator;
+          is_right_operand;
+        ] in
+        make (IsExpression {
+          is_left_operand;
+          is_operator;
+          is_right_operand;
         }) value
 
       let make_conditional_expression

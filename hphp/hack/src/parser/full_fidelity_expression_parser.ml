@@ -769,6 +769,8 @@ module WithStatementAndDeclAndTypeParser
       parse_remaining_binary_expression parser term assignment_prefix_kind
     | Instanceof ->
       parse_instanceof_expression parser term
+    | Is ->
+      parse_is_expression parser term
     | QuestionMinusGreaterThan
     | MinusGreaterThan ->
       let (parser, result) = parse_member_selection_expression parser term in
@@ -1128,6 +1130,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | And
     | As
     | Instanceof
+    | Is
     | Or
     | Xor -> false
     (* Symbols that imply parenthesized expression *)
@@ -1472,6 +1475,19 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let (parser, right) = parse_remaining_binary_expression_helper
       parser right_term precedence in
     let result = make_instanceof_expression left op right in
+    parse_remaining_expression parser result
+
+  and parse_is_expression parser left =
+    (* SPEC:
+    is-expression:
+      is-subject  is  type-specifier
+
+    is-subject:
+      expression
+    *)
+    let (parser, op) = assert_token parser Is in
+    let (parser, right) = parse_type_specifier parser in
+    let result = make_is_expression left op right in
     parse_remaining_expression parser result
 
   and parse_remaining_binary_expression

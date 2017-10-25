@@ -267,6 +267,8 @@ class EditableSyntax
       return BinaryExpression.from_json(json, position, source);
     case 'instanceof_expression':
       return InstanceofExpression.from_json(json, position, source);
+    case 'is_expression':
+      return IsExpression.from_json(json, position, source);
     case 'conditional_expression':
       return ConditionalExpression.from_json(json, position, source);
     case 'eval_expression':
@@ -788,6 +790,8 @@ class EditableToken extends EditableSyntax
        return new IntToken(leading, trailing);
     case 'interface':
        return new InterfaceToken(leading, trailing);
+    case 'is':
+       return new IsToken(leading, trailing);
     case 'isset':
        return new IssetToken(leading, trailing);
     case 'keyset':
@@ -1509,6 +1513,13 @@ class InterfaceToken extends EditableToken
   constructor(leading, trailing)
   {
     super('interface', leading, trailing, 'interface');
+  }
+}
+class IsToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('is', leading, trailing, 'is');
   }
 }
 class IssetToken extends EditableToken
@@ -12541,6 +12552,89 @@ class InstanceofExpression extends EditableSyntax
     return InstanceofExpression._children_keys;
   }
 }
+class IsExpression extends EditableSyntax
+{
+  constructor(
+    left_operand,
+    operator,
+    right_operand)
+  {
+    super('is_expression', {
+      left_operand: left_operand,
+      operator: operator,
+      right_operand: right_operand });
+  }
+  get left_operand() { return this.children.left_operand; }
+  get operator() { return this.children.operator; }
+  get right_operand() { return this.children.right_operand; }
+  with_left_operand(left_operand){
+    return new IsExpression(
+      left_operand,
+      this.operator,
+      this.right_operand);
+  }
+  with_operator(operator){
+    return new IsExpression(
+      this.left_operand,
+      operator,
+      this.right_operand);
+  }
+  with_right_operand(right_operand){
+    return new IsExpression(
+      this.left_operand,
+      this.operator,
+      right_operand);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_operand = this.left_operand.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var right_operand = this.right_operand.rewrite(rewriter, new_parents);
+    if (
+      left_operand === this.left_operand &&
+      operator === this.operator &&
+      right_operand === this.right_operand)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new IsExpression(
+        left_operand,
+        operator,
+        right_operand), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let left_operand = EditableSyntax.from_json(
+      json.is_left_operand, position, source);
+    position += left_operand.width;
+    let operator = EditableSyntax.from_json(
+      json.is_operator, position, source);
+    position += operator.width;
+    let right_operand = EditableSyntax.from_json(
+      json.is_right_operand, position, source);
+    position += right_operand.width;
+    return new IsExpression(
+        left_operand,
+        operator,
+        right_operand);
+  }
+  get children_keys()
+  {
+    if (IsExpression._children_keys == null)
+      IsExpression._children_keys = [
+        'left_operand',
+        'operator',
+        'right_operand'];
+    return IsExpression._children_keys;
+  }
+}
 class ConditionalExpression extends EditableSyntax
 {
   constructor(
@@ -18745,6 +18839,7 @@ exports.InstanceofToken = InstanceofToken;
 exports.InsteadofToken = InsteadofToken;
 exports.IntToken = IntToken;
 exports.InterfaceToken = InterfaceToken;
+exports.IsToken = IsToken;
 exports.IssetToken = IssetToken;
 exports.KeysetToken = KeysetToken;
 exports.ListToken = ListToken;
@@ -18990,6 +19085,7 @@ exports.PrefixUnaryExpression = PrefixUnaryExpression;
 exports.PostfixUnaryExpression = PostfixUnaryExpression;
 exports.BinaryExpression = BinaryExpression;
 exports.InstanceofExpression = InstanceofExpression;
+exports.IsExpression = IsExpression;
 exports.ConditionalExpression = ConditionalExpression;
 exports.EvalExpression = EvalExpression;
 exports.EmptyExpression = EmptyExpression;

@@ -1362,6 +1362,17 @@ module FromMinimal = struct
           ; instanceof_operator
           ; instanceof_right_operand
           }, results
+      | SyntaxKind.IsExpression
+      , (  is_right_operand
+        :: is_operator
+        :: is_left_operand
+        :: results
+        ) ->
+          IsExpression
+          { is_left_operand
+          ; is_operator
+          ; is_right_operand
+          }, results
       | SyntaxKind.ConditionalExpression
       , (  conditional_alternative
         :: conditional_colon
@@ -3232,6 +3243,16 @@ module FromMinimal = struct
         let todo = Convert (instanceof_right_operand, todo) in
         let todo = Convert (instanceof_operator, todo) in
         convert offset todo results instanceof_left_operand
+    | { M.syntax = M.IsExpression
+        { M.is_left_operand
+        ; M.is_operator
+        ; M.is_right_operand
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (is_right_operand, todo) in
+        let todo = Convert (is_operator, todo) in
+        convert offset todo results is_left_operand
     | { M.syntax = M.ConditionalExpression
         { M.conditional_test
         ; M.conditional_question

@@ -1193,6 +1193,18 @@ let schema : schema_node list =
       ; "right_operand", Aggregate Expression
       ]
     }
+  ; { kind_name   = "IsExpression"
+    ; type_name   = "is_expression"
+    ; func_name   = "is_expression"
+    ; description = "is_expression"
+    ; prefix      = "is"
+    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
+    ; fields =
+      [ "left_operand", Aggregate Expression
+      ; "operator", Token
+      ; "right_operand", Aggregate Specifier
+      ]
+    }
   ; { kind_name   = "ConditionalExpression"
     ; type_name   = "conditional_expression"
     ; func_name   = "conditional_expression"

@@ -613,6 +613,11 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; instanceof_operator                                : t
     ; instanceof_right_operand                           : t
     }
+  and is_expression =
+    { is_left_operand                                    : t
+    ; is_operator                                        : t
+    ; is_right_operand                                   : t
+    }
   and conditional_expression =
     { conditional_test                                   : t
     ; conditional_question                               : t
@@ -1061,6 +1066,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | PostfixUnaryExpression                  of postfix_unary_expression
   | BinaryExpression                        of binary_expression
   | InstanceofExpression                    of instanceof_expression
+  | IsExpression                            of is_expression
   | ConditionalExpression                   of conditional_expression
   | EvalExpression                          of eval_expression
   | EmptyExpression                         of empty_expression
@@ -1191,6 +1197,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprPostfixUnary                  of postfix_unary_expression
   | ExprBinary                        of binary_expression
   | ExprInstanceof                    of instanceof_expression
+  | ExprIs                            of is_expression
   | ExprConditional                   of conditional_expression
   | ExprEval                          of eval_expression
   | ExprEmpty                         of empty_expression
@@ -1303,6 +1310,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaPostfixUnary                  of postfix_unary_expression
   | LambdaBinary                        of binary_expression
   | LambdaInstanceof                    of instanceof_expression
+  | LambdaIs                            of is_expression
   | LambdaConditional                   of conditional_expression
   | LambdaEval                          of eval_expression
   | LambdaEmpty                         of empty_expression
@@ -1350,6 +1358,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprPostfixUnary                  of postfix_unary_expression
   | CExprBinary                        of binary_expression
   | CExprInstanceof                    of instanceof_expression
+  | CExprIs                            of is_expression
   | CExprConditional                   of conditional_expression
   | CExprEval                          of eval_expression
   | CExprEmpty                         of empty_expression
@@ -1916,6 +1925,11 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { instanceof_left_operand: expression value
     ; instanceof_operator: Token.t value
     ; instanceof_right_operand: expression value
+    }
+  and is_expression =
+    { is_left_operand: expression value
+    ; is_operator: Token.t value
+    ; is_right_operand: specifier value
     }
   and conditional_expression =
     { conditional_test: expression value

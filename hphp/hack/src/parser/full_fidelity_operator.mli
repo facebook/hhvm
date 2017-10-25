@@ -53,6 +53,7 @@ not how they look on the page. *)
 | RemainderOperator
 | LogicalNotOperator
 | InstanceofOperator
+| IsOperator
 | NotOperator
 | PrefixIncrementOperator
 | PrefixDecrementOperator

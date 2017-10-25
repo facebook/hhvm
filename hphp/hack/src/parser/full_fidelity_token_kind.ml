@@ -78,6 +78,7 @@ type t =
   | Insteadof
   | Int
   | Interface
+  | Is
   | Isset
   | Keyset
   | List
@@ -279,6 +280,7 @@ let from_string keyword =
   | "insteadof"    -> Some Insteadof
   | "int"          -> Some Int
   | "interface"    -> Some Interface
+  | "is"           -> Some Is
   | "isset"        -> Some Isset
   | "keyset"       -> Some Keyset
   | "list"         -> Some List
@@ -452,6 +454,7 @@ let to_string kind =
   | Insteadof                     -> "insteadof"
   | Int                           -> "int"
   | Interface                     -> "interface"
+  | Is                            -> "is"
   | Isset                         -> "isset"
   | Keyset                        -> "keyset"
   | List                          -> "list"

@@ -205,6 +205,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.PostfixUnaryExpression _ -> tag validate_postfix_unary_expression (fun x -> ExprPostfixUnary x) x
     | Syntax.BinaryExpression _ -> tag validate_binary_expression (fun x -> ExprBinary x) x
     | Syntax.InstanceofExpression _ -> tag validate_instanceof_expression (fun x -> ExprInstanceof x) x
+    | Syntax.IsExpression _ -> tag validate_is_expression (fun x -> ExprIs x) x
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> ExprConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> ExprEval x) x
     | Syntax.EmptyExpression _ -> tag validate_empty_expression (fun x -> ExprEmpty x) x
@@ -254,6 +255,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprPostfixUnary                  thing -> invalidate_postfix_unary_expression       (value, thing)
     | ExprBinary                        thing -> invalidate_binary_expression              (value, thing)
     | ExprInstanceof                    thing -> invalidate_instanceof_expression          (value, thing)
+    | ExprIs                            thing -> invalidate_is_expression                  (value, thing)
     | ExprConditional                   thing -> invalidate_conditional_expression         (value, thing)
     | ExprEval                          thing -> invalidate_eval_expression                (value, thing)
     | ExprEmpty                         thing -> invalidate_empty_expression               (value, thing)
@@ -446,6 +448,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.PostfixUnaryExpression _ -> tag validate_postfix_unary_expression (fun x -> LambdaPostfixUnary x) x
     | Syntax.BinaryExpression _ -> tag validate_binary_expression (fun x -> LambdaBinary x) x
     | Syntax.InstanceofExpression _ -> tag validate_instanceof_expression (fun x -> LambdaInstanceof x) x
+    | Syntax.IsExpression _ -> tag validate_is_expression (fun x -> LambdaIs x) x
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> LambdaConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> LambdaEval x) x
     | Syntax.EmptyExpression _ -> tag validate_empty_expression (fun x -> LambdaEmpty x) x
@@ -496,6 +499,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | LambdaPostfixUnary                  thing -> invalidate_postfix_unary_expression       (value, thing)
     | LambdaBinary                        thing -> invalidate_binary_expression              (value, thing)
     | LambdaInstanceof                    thing -> invalidate_instanceof_expression          (value, thing)
+    | LambdaIs                            thing -> invalidate_is_expression                  (value, thing)
     | LambdaConditional                   thing -> invalidate_conditional_expression         (value, thing)
     | LambdaEval                          thing -> invalidate_eval_expression                (value, thing)
     | LambdaEmpty                         thing -> invalidate_empty_expression               (value, thing)
@@ -544,6 +548,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.PostfixUnaryExpression _ -> tag validate_postfix_unary_expression (fun x -> CExprPostfixUnary x) x
     | Syntax.BinaryExpression _ -> tag validate_binary_expression (fun x -> CExprBinary x) x
     | Syntax.InstanceofExpression _ -> tag validate_instanceof_expression (fun x -> CExprInstanceof x) x
+    | Syntax.IsExpression _ -> tag validate_is_expression (fun x -> CExprIs x) x
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> CExprConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> CExprEval x) x
     | Syntax.EmptyExpression _ -> tag validate_empty_expression (fun x -> CExprEmpty x) x
@@ -594,6 +599,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | CExprPostfixUnary                  thing -> invalidate_postfix_unary_expression       (value, thing)
     | CExprBinary                        thing -> invalidate_binary_expression              (value, thing)
     | CExprInstanceof                    thing -> invalidate_instanceof_expression          (value, thing)
+    | CExprIs                            thing -> invalidate_is_expression                  (value, thing)
     | CExprConditional                   thing -> invalidate_conditional_expression         (value, thing)
     | CExprEval                          thing -> invalidate_eval_expression                (value, thing)
     | CExprEmpty                         thing -> invalidate_empty_expression               (value, thing)
@@ -2250,6 +2256,22 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { Syntax.instanceof_left_operand = invalidate_expression x.instanceof_left_operand
       ; Syntax.instanceof_operator = invalidate_token x.instanceof_operator
       ; Syntax.instanceof_right_operand = invalidate_expression x.instanceof_right_operand
+      }
+    ; Syntax.value = v
+    }
+  and validate_is_expression : is_expression validator = function
+  | { Syntax.syntax = Syntax.IsExpression x; value = v } -> v,
+    { is_right_operand = validate_specifier x.Syntax.is_right_operand
+    ; is_operator = validate_token x.Syntax.is_operator
+    ; is_left_operand = validate_expression x.Syntax.is_left_operand
+    }
+  | s -> validation_fail SyntaxKind.IsExpression s
+  and invalidate_is_expression : is_expression invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.IsExpression
+      { Syntax.is_left_operand = invalidate_expression x.is_left_operand
+      ; Syntax.is_operator = invalidate_token x.is_operator
+      ; Syntax.is_right_operand = invalidate_specifier x.is_right_operand
       }
     ; Syntax.value = v
     }

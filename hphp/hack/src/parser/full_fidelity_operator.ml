@@ -51,6 +51,7 @@ not how they look on the page. *)
 | RemainderOperator
 | LogicalNotOperator
 | InstanceofOperator
+| IsOperator
 | NotOperator
 | PrefixIncrementOperator
 | PrefixDecrementOperator
@@ -132,7 +133,7 @@ let precedence operator =
   | PrefixIncrementOperator | PrefixDecrementOperator
   | LogicalNotOperator| NotOperator
   | UnaryPlusOperator | UnaryMinusOperator -> 20
-  | InstanceofOperator -> 21
+  | InstanceofOperator | IsOperator -> 21
   | ExponentOperator -> 22
   | PostfixIncrementOperator | PostfixDecrementOperator -> 23
   | CloneOperator -> 24
@@ -163,7 +164,7 @@ let associativity operator =
   | ScopeResolutionOperator | FunctionCallOperator | IndexingOperator
   | IncludeOperator | IncludeOnceOperator | RequireOperator
   | RequireOnceOperator | PHPAndOperator | PHPOrOperator
-  | PHPExclusiveOrOperator
+  | PHPExclusiveOrOperator | IsOperator
   (* eval *)
   (* Comma *)
   (* elseif *)
@@ -245,6 +246,7 @@ let is_trailing_operator_token token =
   | TokenKind.Slash
   | TokenKind.Percent
   | TokenKind.Instanceof
+  | TokenKind.Is
   | TokenKind.StarStar
   | TokenKind.Equal
   | TokenKind.PlusEqual
@@ -297,6 +299,7 @@ let trailing_from_token token =
   | TokenKind.Slash -> DivisionOperator
   | TokenKind.Percent -> RemainderOperator
   | TokenKind.Instanceof -> InstanceofOperator
+  | TokenKind.Is -> IsOperator
   | TokenKind.StarStar -> ExponentOperator
   | TokenKind.Equal -> AssignmentOperator
   | TokenKind.PlusEqual -> AdditionAssignmentOperator
@@ -438,6 +441,7 @@ let to_string kind =
   | RemainderOperator -> "remainder"
   | LogicalNotOperator -> "logical_not"
   | InstanceofOperator -> "instanceof"
+  | IsOperator -> "is"
   | NotOperator -> "not"
   | PrefixIncrementOperator -> "prefix_increment"
   | PrefixDecrementOperator -> "prefix_decrement"

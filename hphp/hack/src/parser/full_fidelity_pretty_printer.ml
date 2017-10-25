@@ -1010,6 +1010,11 @@ let rec get_doc node =
     let op = get_doc x.instanceof_operator in
     let right = get_doc x.instanceof_right_operand in
     group_doc (left ^| op ^| right)
+  | IsExpression x ->
+    let left = get_doc x.is_left_operand in
+    let op = get_doc x.is_operator in
+    let right = get_doc x.is_right_operand in
+    group_doc (left ^| op ^| right)
   | ConditionalExpression x ->
     let tst = get_doc x.conditional_test in
     let qm = get_doc x.conditional_question in

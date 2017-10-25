@@ -1035,6 +1035,16 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         SplitWith Cost.Base;
         Nest [t right];
       ]
+    | IsExpression x ->
+      let (left, kw, right) = get_is_expression_children x in
+      Concat [
+        t left;
+        Space;
+        t kw;
+        Space;
+        SplitWith Cost.Base;
+        Nest [t right];
+      ]
     | ConditionalExpression x ->
       let (test_expr, q_kw, true_expr, c_kw, false_expr) =
         get_conditional_expression_children x in

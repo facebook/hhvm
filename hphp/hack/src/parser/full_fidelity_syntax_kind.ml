@@ -115,6 +115,7 @@ type t =
   | PostfixUnaryExpression
   | BinaryExpression
   | InstanceofExpression
+  | IsExpression
   | ConditionalExpression
   | EvalExpression
   | EmptyExpression
@@ -275,6 +276,7 @@ let to_string kind =
   | PostfixUnaryExpression                  -> "postfix_unary_expression"
   | BinaryExpression                        -> "binary_expression"
   | InstanceofExpression                    -> "instanceof_expression"
+  | IsExpression                            -> "is_expression"
   | ConditionalExpression                   -> "conditional_expression"
   | EvalExpression                          -> "eval_expression"
   | EmptyExpression                         -> "empty_expression"

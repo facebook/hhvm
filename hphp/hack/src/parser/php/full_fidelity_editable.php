@@ -330,6 +330,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return BinaryExpression::from_json($json, $position, $source);
     case 'instanceof_expression':
       return InstanceofExpression::from_json($json, $position, $source);
+    case 'is_expression':
+      return IsExpression::from_json($json, $position, $source);
     case 'conditional_expression':
       return ConditionalExpression::from_json($json, $position, $source);
     case 'eval_expression':
@@ -893,6 +895,8 @@ abstract class EditableToken extends EditableSyntax {
        return new IntToken($leading, $trailing);
     case 'interface':
        return new InterfaceToken($leading, $trailing);
+    case 'is':
+       return new IsToken($leading, $trailing);
     case 'isset':
        return new IssetToken($leading, $trailing);
     case 'keyset':
@@ -2060,6 +2064,21 @@ final class InterfaceToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): InterfaceToken {
     return new InterfaceToken($this->leading(), $trailing);
+  }
+}
+final class IsToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('is', $leading, $trailing, 'is');
+  }
+
+  public function with_leading(EditableSyntax $leading): IsToken {
+    return new IsToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): IsToken {
+    return new IsToken($this->leading(), $trailing);
   }
 }
 final class IssetToken extends EditableToken {
@@ -14657,6 +14676,91 @@ final class InstanceofExpression extends EditableSyntax {
       $json->instanceof_right_operand, $position, $source);
     $position += $right_operand->width();
     return new InstanceofExpression(
+        $left_operand,
+        $operator,
+        $right_operand);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_left_operand;
+    yield $this->_operator;
+    yield $this->_right_operand;
+    yield break;
+  }
+}
+final class IsExpression extends EditableSyntax {
+  private EditableSyntax $_left_operand;
+  private EditableSyntax $_operator;
+  private EditableSyntax $_right_operand;
+  public function __construct(
+    EditableSyntax $left_operand,
+    EditableSyntax $operator,
+    EditableSyntax $right_operand) {
+    parent::__construct('is_expression');
+    $this->_left_operand = $left_operand;
+    $this->_operator = $operator;
+    $this->_right_operand = $right_operand;
+  }
+  public function left_operand(): EditableSyntax {
+    return $this->_left_operand;
+  }
+  public function operator(): EditableSyntax {
+    return $this->_operator;
+  }
+  public function right_operand(): EditableSyntax {
+    return $this->_right_operand;
+  }
+  public function with_left_operand(EditableSyntax $left_operand): IsExpression {
+    return new IsExpression(
+      $left_operand,
+      $this->_operator,
+      $this->_right_operand);
+  }
+  public function with_operator(EditableSyntax $operator): IsExpression {
+    return new IsExpression(
+      $this->_left_operand,
+      $operator,
+      $this->_right_operand);
+  }
+  public function with_right_operand(EditableSyntax $right_operand): IsExpression {
+    return new IsExpression(
+      $this->_left_operand,
+      $this->_operator,
+      $right_operand);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $left_operand = $this->left_operand()->rewrite($rewriter, $new_parents);
+    $operator = $this->operator()->rewrite($rewriter, $new_parents);
+    $right_operand = $this->right_operand()->rewrite($rewriter, $new_parents);
+    if (
+      $left_operand === $this->left_operand() &&
+      $operator === $this->operator() &&
+      $right_operand === $this->right_operand()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new IsExpression(
+        $left_operand,
+        $operator,
+        $right_operand), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $left_operand = EditableSyntax::from_json(
+      $json->is_left_operand, $position, $source);
+    $position += $left_operand->width();
+    $operator = EditableSyntax::from_json(
+      $json->is_operator, $position, $source);
+    $position += $operator->width();
+    $right_operand = EditableSyntax::from_json(
+      $json->is_right_operand, $position, $source);
+    $position += $right_operand->width();
+    return new IsExpression(
         $left_operand,
         $operator,
         $right_operand);

@@ -121,7 +121,7 @@ function gmp_scan0(mixed $a,
 function gmp_scan1(mixed $a,
                    int $start): mixed;
 
-function gmp_setbit(mixed $a,
+function gmp_setbit(mixed &$a,
                     int $index,
                     bool $bit_on = true): void;
 

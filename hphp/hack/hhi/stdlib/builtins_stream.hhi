@@ -123,6 +123,6 @@ function stream_socket_client($remote_socket, &$errnum = null, &$errstr = null, 
 function stream_socket_enable_crypto($stream, $enable, $crypto_type = 0, $session_stream = null);
 function stream_socket_get_name($handle, $want_peer);
 function stream_socket_pair($domain, $type, $protocol);
-function stream_socket_recvfrom($socket, $length, $flags = 0, $address = null);
+function stream_socket_recvfrom($socket, $length, $flags = 0, &$address = null);
 function stream_socket_sendto($socket, $data, $flags = 0, $address = null);
 function stream_socket_shutdown($stream, $how);

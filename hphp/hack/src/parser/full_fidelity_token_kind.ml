@@ -14,8 +14,6 @@
  *
  *   buck run //hphp/hack/src:generate_full_fidelity
  *
- * This module contains the type describing the structure of a syntax tree.
- *
  **
  *
  *)

@@ -80,6 +80,7 @@ struct
       T.Eif(map_expr f e1, Option.map e2 (map_expr f), map_expr f e3)
     | S.NullCoalesce (e1, e2) -> T.NullCoalesce (map_expr f e1, map_expr f e2)
     | S.InstanceOf (e, ci) -> T.InstanceOf (map_expr f e, map_class_id ci)
+    | S.Is (e, h) -> T.Is (map_expr f e, h)
     | S.New (ci, el1, el2) ->
       T.New (map_class_id ci, map_exprl f el1, map_exprl f el2)
     | S.Efun (ef, ids) -> T.Efun(map_fun f ef, ids)

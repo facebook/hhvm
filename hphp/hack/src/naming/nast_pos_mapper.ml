@@ -60,6 +60,7 @@ and expr_ f = function
   | Eif (e1, e2, e3) -> Eif (expr f e1, Option.map e2 (expr f), expr f e3)
   | NullCoalesce (e1, e2) -> NullCoalesce (expr f e1, expr f e2)
   | InstanceOf (e1, e2) -> InstanceOf (expr f e1, class_id f e2)
+  | Is (e, h) -> Is (expr f e, hint f h)
   | Typename n -> Typename (pstring f n)
   | New (cid, el, uel) ->
     New (class_id f cid, List.map el (expr f), List.map uel (expr f))

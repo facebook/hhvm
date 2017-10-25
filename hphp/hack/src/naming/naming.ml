@@ -2318,9 +2318,9 @@ module Make (GetLocals : GetLocals) = struct
       Errors.invalid_instanceof p;
       N.Any
     | Is (e, h) ->
-      let _e1 = expr env e in
-      let _h1 = hint env h in
-      N.Any (* TODO(kunalm) implement naming for is expression *)
+      let e1 = expr env e in
+      let h1 = hint env h in
+      N.Is (e1, h1)
     | New ((_, Id_type_arguments (x, hl)), el, uel) ->
       N.New (make_class_id env x hl,
         exprl env el,

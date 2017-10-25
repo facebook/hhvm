@@ -1808,6 +1808,9 @@ and expr_
       TUtils.process_class_id cid;
       let env, te2, _class = instantiable_cid p env cid in
       make_result env (T.InstanceOf (te, te2)) (Reason.Rwitness p, Tprim Tbool)
+  | Is (_e, _hint) ->
+      Errors.experimental_feature p "is expression";
+      expr_error env (Reason.Rnone)
   | Efun (f, idl) ->
       (* This is the function type as declared on the lambda itself.
        * If type hints are absent then use Tany instead. *)

@@ -254,6 +254,9 @@ module CheckFunctionBody = struct
     | _, InstanceOf (e, _) ->
         expr f_type env e;
         ()
+    | _, Is (e, _) ->
+        expr f_type env e;
+        ()
     | _, Cast (_, e) ->
         expr f_type env e;
         ()
@@ -637,7 +640,7 @@ and check_class_property_initialization prop =
       | Method_id _
       | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
       | Call _ | Special_func _ | Yield_break | Yield _ | Suspend _
-      | Await _ | InstanceOf _ | New _ | Efun _ | Xml _ | Callconv _
+      | Await _ | InstanceOf _ | Is _ | New _ | Efun _ | Xml _ | Callconv _
       | Assert _ | Clone _ ->
         Errors.class_property_only_static_literal (fst e)
     and assert_static_literal_for_field_list (expr1, expr2) =
@@ -1034,6 +1037,10 @@ and expr_ env p = function
   | Assert (AE_assert e)
   | InstanceOf (e, _) ->
       expr env e;
+      ()
+  | Is (e, h) ->
+      expr env e;
+      hint env h;
       ()
   | New (_, el, uel) ->
       List.iter el (expr env);

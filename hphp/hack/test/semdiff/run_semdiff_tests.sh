@@ -75,7 +75,7 @@ for FILE in ${FDS[*]}; do
     "$SEMDIFF_PATH" "$FILE" "$basename.2.hhas" > "$new_file"
   else
     printf "\t\trunning: %s %s %s %s" "$(basename "$SEMDIFF_PATH")" "$(basename "$basename")".{{1,2}.hhas,semdiff.exp}
-    diff <("$SEMDIFF_PATH" "$basename".{1,2}.hhas) "$basename.semdiff.exp" > "$DIFF_RESULT"
+    diff <("$SEMDIFF_PATH" --laxunset "$basename".{1,2}.hhas) "$basename.semdiff.exp" > "$DIFF_RESULT"
     if [ -z "$(cat $DIFF_RESULT)" ]
     then
       echo -e "$GREEN OK $NC"

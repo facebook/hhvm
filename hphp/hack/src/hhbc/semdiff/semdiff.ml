@@ -39,6 +39,10 @@ let parse_options () =
                   1: Also displays differences on STDOUT
                   2: Also displays debugging information on STDOUT"
       );
+      ("--laxunset",
+       Arg.Unit (fun () -> Rhl.lax_unset := true),
+       " Ignore finalizer ordering effects of Unset instructions"
+      );
     ] in
   let options = Arg.align ~limit:25 options in
   let files = ref [] in

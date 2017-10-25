@@ -43,6 +43,9 @@ let adata_checked = ref StringStringSet.empty
 let typedefs_to_check = ref IntIntSet.empty
 let typedefs_checked = ref IntIntSet.empty
 
+(* If `false`, then `UnsetL` instructions cannot be reordered. *)
+let lax_unset = ref false
+
 (* An individual prop is an equation between local variables. To start with,
   this means that they are both defined and equal or that they are both
   undefined.
@@ -234,16 +237,11 @@ let labasnlisttostring l = String.concat "" (List.map ~f:labasntostring l)
 let labasnsmaptostring asnmap =
   String.concat "" (List.map ~f:labasnstostring (PcpMap.bindings asnmap))
 
-(* Mark v1 and v2 as being possibly set. *)
-let addunseteq_asn v1 v2 (props,vs,vs') =
-  let stripped = PropSet.filter (fun (x1,x2) -> x1 <> v1 && x2 <> v2) props in
-    (stripped, VarSet.add v1 vs, VarSet.add v2 vs')
-
 (* Add equality between v1 and v2 to an assertion, removing any existing
-  relation between them. Mark v1 and v2 as being possibly set. *)
-let addeq_asn v1 v2 asn =
-  let (props, vs, vs') = addunseteq_asn v1 v2 asn in
-  (PropSet.add (v1,v2) props, vs, vs')
+  relation involving them. Mark v1 and v2 as being possibly set. *)
+let addeq_asn v1 v2 (props, vs, vs') =
+  let stripped = PropSet.filter (fun (x1,x2) -> x1 <> v1 && x2 <> v2) props in
+  (PropSet.add (v1,v2) stripped, VarSet.add v1 vs, VarSet.add v2 vs')
 
 (* Simple-minded entailment between assertions.
   In general, asn2 entails asn1 iff (s,s') \in asn2 implies (s,s') \in asn1 for
@@ -337,11 +335,12 @@ let writes asn l l' =
 (* We could be a bit more refined in tracking set/unset status of named locals
    but it might not make much difference, so leaving it out for now
 *)
-let writesunset asn l l' =
+let writesunset ((props,vs,vs') as asn) l l' =
   match l, l' with
   | Named s, Named s' -> if s=s' then Some asn else None
   | Unnamed _, Unnamed _ ->
-    Some (addunseteq_asn l l' asn)
+    let stripped = PropSet.filter (fun (x,x') -> x <> l && x' <> l') props in
+      Some (stripped, VarSet.remove l vs, VarSet.remove l' vs')
   | Named _, _ | Unnamed _, _ -> None
 
 let readswrites asn l l' =
@@ -798,7 +797,8 @@ let equiv prog prog' startlabelpairs =
                 (add_assumption (pc,pc') asn assumed) todo
         | _ -> try_specials ()
       end
-    | IMutator (UnsetL l) ->
+    | IMutator (UnsetL l)
+      when (!lax_unset) || (not (VarSet.mem l vs)) ->
       let newprops = PropSet.filter (fun (x1,_x2) -> x1 <> l) props in
       let newasn = (newprops, VarSet.remove l vs, vs') in
         check (succ pc) pc' newasn (add_assumption (pc,pc') asn assumed) todo
@@ -834,7 +834,8 @@ let equiv prog prog' startlabelpairs =
                 (add_assumption (pc,pc') asn assumed) todo
         | _ -> try_specials ()
       end
-    | IMutator (UnsetL l') ->
+    | IMutator (UnsetL l')
+      when (!lax_unset) || (not (VarSet.mem l' vs')) ->
       let newprops = PropSet.filter (fun (_x1,x2) -> x2 <> l') props in
       let newasn = (newprops, vs, VarSet.remove l' vs') in
         check pc (succ pc') newasn (add_assumption (pc,pc') asn assumed) todo

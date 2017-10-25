@@ -30,6 +30,8 @@ slow/ext_phar/create_zip.php
 slow/ext_process/bad_shell_exec.php
 slow/ext_std/minmax_splat.php
 slow/ext_string/setlocale-threaded.php
+slow/finally/finally_break_004.php
+slow/finally/finally_break_005.php
 slow/finally/finally_break_006.php
 slow/finally/finally_break_007.php
 slow/finally/finally_break_008.php
@@ -49,6 +51,8 @@ slow/finally/new_try_catch_011.php
 slow/finally/new_try_catch_012.php
 slow/finally/new_try_catch_013.php
 slow/finally/new_try_catch_014.php
+slow/finally/new_try_catch_015.php
+slow/finally/try_finally_004.php
 slow/finally/try_finally_005.php
 slow/finally/try_finally_007.php
 slow/goto/label_in_finally.php
@@ -223,6 +227,10 @@ slow/using/bad-function3.php
 slow/using/bad-function4.php
 slow/using/bad-goto1.php
 slow/using/bad-goto2.php
+slow/using/bad-lambda4.php
+slow/using/bad-lambda5.php
+slow/using/bad-lambda6.php
+slow/using/functions.php
 slow/using/bad-name.php
 slow/using/goto.php
 slow/vec/bad-init2.php

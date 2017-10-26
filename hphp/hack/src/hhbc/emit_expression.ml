@@ -1858,7 +1858,7 @@ and emit_call_lhs_with_this env instrs = Local.scope @@ fun () ->
     end
   ]
 
-and emit_call_lhs env (_, expr_ as expr) nargs =
+and emit_call_lhs env (_, expr_ as expr) nargs has_splat =
   match expr_ with
   | A.Obj_get (obj, (_, A.Id ((_, str) as id)), null_flavor)
     when str.[0] = '$' ->
@@ -1926,9 +1926,9 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
       Hhbc_id.Function.elaborate_id (Emit_env.get_namespace env) id in
     let fq_id, id_opt =
       match id_opt, SU.strip_global_ns s with
-      | None, "min" when nargs = 2 ->
+      | None, "min" when nargs = 2 && not has_splat ->
         Hhbc_id.Function.from_raw_string "__SystemLib\\min2", None
-      | None, "max" when nargs = 2 ->
+      | None, "max" when nargs = 2 && not has_splat ->
         Hhbc_id.Function.from_raw_string  "__SystemLib\\max2", None
       | _ -> fq_id, id_opt in
     begin match id_opt with
@@ -2129,7 +2129,7 @@ and emit_call env (_, expr_ as expr) args uargs =
   let nargs = List.length args + List.length uargs in
   let default () =
     gather [
-      emit_call_lhs env expr nargs;
+      emit_call_lhs env expr nargs (not (List.is_empty uargs));
       emit_args_and_call env args uargs;
     ], Flavor.ReturnVal in
 

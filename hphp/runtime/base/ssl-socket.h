@@ -21,9 +21,7 @@
 #include "hphp/runtime/base/socket.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/network.h"
-#include <openssl/ssl.h>
-#include <openssl/x509.h>
-#include <openssl/err.h>
+#include <folly/portability/OpenSSL.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

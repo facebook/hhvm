@@ -20,7 +20,7 @@ let rec (pp_cst_kind :
 and show_cst_kind : cst_kind -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_cst_kind x
 
-type id = (Pos.t* string)[@@deriving show]
+type id = (Pos.t * string)[@@deriving show]
 let rec pp_id : Format.formatter -> id -> Ppx_deriving_runtime.unit =
   let __0 () = Pos.pp  in
   ((let open! Ppx_deriving_runtime in
@@ -36,7 +36,7 @@ let rec pp_id : Format.formatter -> id -> Ppx_deriving_runtime.unit =
 and show_id : id -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_id x
 
-type pstring = (Pos.t* string)[@@deriving show]
+type pstring = (Pos.t * string)[@@deriving show]
 let rec pp_pstring : Format.formatter -> pstring -> Ppx_deriving_runtime.unit
   =
   let __0 () = Pos.pp  in
@@ -242,7 +242,7 @@ and show_fun_kind : fun_kind -> Ppx_deriving_runtime.string =
 
 type shape_field_name =
   | SFlit of pstring 
-  | SFclass_const of id* pstring [@@deriving show]
+  | SFclass_const of id * pstring [@@deriving show]
 let rec pp_shape_field_name :
   Format.formatter -> shape_field_name -> Ppx_deriving_runtime.unit =
   let __2 () = pp_pstring
@@ -396,7 +396,7 @@ module ShapeField =
   end
 module ShapeMap =
   struct
-    include MyMap.Make(ShapeField)
+    include (MyMap.Make)(ShapeField)
     let map_and_rekey m f1 f2 =
       fold (fun k  -> fun v  -> fun acc  -> add (f1 k) (f2 v) acc) m empty 
     let pp _ fmt _ = Format.pp_print_string fmt "[ShapeMap]" 

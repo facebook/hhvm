@@ -71,9 +71,15 @@ module Tools = struct
       Report_asserter.assert_equals expected_report report
         assert_msg
 
-  let set_xdb ~svn_rev ~everstore_handle =
+  (** Create an entry in XDB table for a saved state.
+   *
+   * stat_svn_rev: The revision on which this saved state was created.
+   * for_svn_rev: The svn_rev lookup in "Xdb.find_nearest" that will locate
+   *              this result.
+   *)
+  let set_xdb ~state_svn_rev ~for_svn_rev ~everstore_handle =
     let hh_version = Build_id.build_revision in
-    let hg_hash = match svn_rev with
+    let hg_hash = match state_svn_rev with
       | 1 -> hg_rev_1
       | 5 -> hg_rev_2
       | 200 -> hg_rev_3
@@ -89,7 +95,7 @@ module Tools = struct
       assert false
     | Some hhconfig_hash ->
       let result = {
-        Xdb.svn_rev = svn_rev;
+        Xdb.svn_rev = state_svn_rev;
         hg_hash;
         everstore_handle;
         hh_version;
@@ -97,7 +103,8 @@ module Tools = struct
       } in
       let result = Future.of_value [result] in
       Xdb.Mocking.find_nearest_returns ~db:Xdb.hack_db_name
-        ~db_table:Xdb.mini_saved_states_table ~svn_rev ~hh_version ~hhconfig_hash result
+        ~db_table:Xdb.mini_saved_states_table
+        ~svn_rev:for_svn_rev ~hh_version ~hhconfig_hash result
 end;;
 
 
@@ -107,8 +114,10 @@ end;;
 let test_informant_restarts_significant_move temp_dir =
   Tools.set_hg_to_svn_map ();
   (** In XDB table, add an entry for svn rev 200. *)
-  Tools.set_xdb ~svn_rev:200 ~everstore_handle:"dummy_handle_for_svn_200";
-  Tools.set_xdb ~svn_rev:5 ~everstore_handle:"dummy_handle_for_svn_5";
+  Tools.set_xdb ~state_svn_rev:200
+    ~for_svn_rev:200 ~everstore_handle:"dummy_handle_for_svn_200";
+  Tools.set_xdb ~state_svn_rev:5
+    ~for_svn_rev:5 ~everstore_handle:"dummy_handle_for_svn_5";
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
   Hg.Mocking.current_working_copy_base_rev_returns
     (Future.of_value Tools.svn_1);
@@ -283,6 +292,40 @@ let test_informant_no_saved_state_no_restart temp_dir =
     "Significantly changed merge base, but no saved state for this rev";
     true
 
+(** The found saved state in the XDB table is too far, so we should
+ * just prefer letting incremental run its course.
+ *
+ * We start Informant at rev 5, transition to rev 200, but only find
+ * a saved state for rev 1. So we prefer incremental (Move_along) instead
+ * of loading a new saved state (Restart_server). *)
+let test_informant_xdb_saved_state_too_far temp_dir =
+  Tools.set_hg_to_svn_map ();
+  Watchman.Mocking.init_returns @@ Some "test_mock_basic";
+  Hg.Mocking.current_working_copy_base_rev_returns
+    (Future.of_value Tools.svn_2);
+  Watchman.Mocking.get_changes_returns
+    (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
+  let informant = HhMonitorInformant.init {
+    HhMonitorInformant.root = temp_dir;
+    state_prefetcher = State_prefetcher.dummy;
+    allow_subscriptions = true;
+    min_distance_restart = 100;
+    use_dummy = false;
+    use_xdb = true;
+  } in
+  let report = HhMonitorInformant.report
+    informant Informant_sig.Server_alive in
+  Report_asserter.assert_equals Informant_sig.Move_along report
+    "no distance moved" ;
+  (** At rev 200, we will find a saved state made for rev 1. *)
+  Tools.set_xdb ~state_svn_rev:1 ~for_svn_rev:200
+    ~everstore_handle:"Fake everstore handle for svn rev 1";
+  Tools.test_transition
+    informant Tools.Changed_merge_base Tools.hg_rev_3
+    Informant_sig.Server_alive Informant_sig.Move_along
+    "Significantly changed merge base, saved state for this rev is too distant";
+    true
+
 (** We emulate the repo being in a mid-update state when the informant
  * starts. i.e., the .hg/updatestate file is present. *)
 let test_repo_starts_midupdate temp_dir =
@@ -352,6 +395,8 @@ let tests =
       run_test test_informant_restarts_significant_move_delayed);
     "test_informant_no_saved_state_no_restart", (fun () ->
       run_test test_informant_no_saved_state_no_restart);
+    "test_informant_xdb_saved_state_too_far", (fun () ->
+      run_test test_informant_xdb_saved_state_too_far);
     "test_repo_starts_midupdate", (fun () ->
       run_test test_repo_starts_midupdate);
     "test_watcher_in_unknown_state", (fun () ->

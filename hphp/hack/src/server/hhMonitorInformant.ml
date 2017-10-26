@@ -252,7 +252,13 @@ module Revision_tracker = struct
   let cached_svn_rev revision_map hg_rev =
     Revision_map.find hg_rev revision_map
 
-  let form_decision ~use_xdb is_significant transition server_state xdb_results =
+  (** Form a decision about whether or not we'd like to start a new server.
+   * transition: The state transition for which we are forming a decision
+   * svn_rev: The corresponding SVN rev for this transition's hg rev.
+   * xdb_results: The nearest saved states for this svn_rev provided by the XDB table.
+   *)
+  let form_decision is_significant transition server_state xdb_results svn_rev env =
+    let use_xdb = env.inits.use_xdb in
     let open Informant_sig in
     match is_significant, transition, server_state, xdb_results with
     | _, State_leave _, Server_not_yet_started, _ ->
@@ -279,6 +285,13 @@ module Revision_tracker = struct
       (** No XDB results, so w don't restart. *)
       let () = Printf.eprintf "Got no XDB results on merge base change\n" in
       Move_along
+    | true, Changed_merge_base _, _, (nearest_xdb_result :: _) when use_xdb ->
+      let state_distance = abs @@ nearest_xdb_result.Xdb.svn_rev - svn_rev in
+      let incremental_distance = abs @@ svn_rev - !(env.current_base_revision) in
+      if incremental_distance > state_distance then
+        Restart_server
+      else
+        Move_along
     | true, Changed_merge_base _, _, _ ->
       Restart_server
 
@@ -303,8 +316,8 @@ module Revision_tracker = struct
       let significant = is_significant
         ~min_distance_restart:env.inits.min_distance_restart
         distance elapsed_t in
-      Some (form_decision ~use_xdb:env.inits.use_xdb significant
-        transition server_state xdb_results, svn_rev)
+      Some (form_decision significant
+        transition server_state xdb_results svn_rev env, svn_rev)
 
   (**
    * Keep popping state_changes queue until we reach a non-ready result.

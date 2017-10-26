@@ -115,6 +115,9 @@ let current_text_at lexer length relative_start =
 let at_end lexer =
   (offset lexer) >= SourceText.length (source lexer)
 
+let at_end_index lexer index =
+  index >= SourceText.length (source lexer)
+
 let remaining lexer =
   let r = (SourceText.length (source lexer)) - offset lexer in
   if r < 0 then 0 else r
@@ -124,6 +127,12 @@ let text_len (l : lexer) =
 
 let peek (l : lexer) i =
   SourceText.get (source l) i
+
+let peek_def (l: lexer) i ~def =
+  if i >= SourceText.length (source l) then
+    def
+  else
+    SourceText.get (source l) i
 
 (* Character classification *)
 
@@ -1257,21 +1266,24 @@ let scan_xhp_trivia lexer =
 let scan_xhp_colon_trivia (lexer : t) : t * Trivia.t =
   (* TODO(T21789285): Take this mess out *)
   let lexer = start_new_lexeme lexer in
-  let rec aux lexer ch0 =
-    let ch1 = peek_char lexer 1 in
+  let rec aux lexer index ch0 =
+    let ch1 = peek_def lexer (succ index) ~def:invalid in
     match ch0, ch1 with
     | '>', _
     | '/', '>'
     | '\n', _
     | '\r', '\n'
     | '}', _
-      -> lexer, Trivia.make_extra_token_error (width lexer)
-    | _ -> aux (advance lexer 1) ch1
+      -> begin
+        let lexer' = with_offset lexer index in
+        lexer', Trivia.make_extra_token_error (width lexer')
+      end
+    | _ -> aux lexer (succ index) ch1
   in
   (* The only valid case to use this scanner is when a name was interrupted by
    * a colon *)
   let () = assert (peek_char lexer 0 = ':') in
-  let lexer, trivia = aux lexer ':' in
+  let lexer, trivia = aux lexer (offset lexer) ':' in
   with_error lexer SyntaxError.error1002, trivia
 
 (*
@@ -1547,18 +1559,21 @@ let skip_to_end_of_markup lexer ~is_leading_section =
     | _ ->
       lexer, markup_text, Some (less_than_question_token, None)
   in
-  let rec aux lexer =
-    let ch0 = peek_char lexer 0 in
-    if ch0 = invalid && at_end lexer then
-      (* It's not an error to run off the end of one of these. *)
-      lexer, (make_markup_token lexer), None
-    else if ch0 = '<' && peek_char lexer 1 = '?' then
-      (* Found a beginning tag that delimits markup from the script *)
-      make_markup_and_suffix lexer
-    else
-      aux (advance lexer 1)
+  let rec aux lexer index =
+    (* It's not an error to run off the end of one of these. *)
+    if at_end_index lexer index then
+      let lexer' = with_offset lexer index in
+      lexer', (make_markup_token lexer'), None
+    else begin
+      let ch = peek lexer index in
+      if ch = '<' && peek_def lexer (succ index) ~def:'\x00' = '?' then
+        (* Found a beginning tag that delimits markup from the script *)
+        make_markup_and_suffix (with_offset lexer index)
+      else
+        aux lexer (succ index)
+    end
   in
-  aux lexer
+  aux lexer (offset lexer)
 
 let scan_markup lexer ~is_leading_section =
   let lexer = start_new_lexeme lexer in

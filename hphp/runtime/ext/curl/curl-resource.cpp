@@ -767,9 +767,9 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
         && var_val.toObject()->instanceof(SystemLib::s_CURLFileClass))) {
       Object val = var_val.toObject();
 
-      String name = val.o_get(s_name).toString();
-      String mime = val.o_get(s_mime).toString();
-      String postname = val.o_get(s_postname).toString();
+      String name = val->o_get(s_name).toString();
+      String mime = val->o_get(s_mime).toString();
+      String postname = val->o_get(s_postname).toString();
 
       m_error_no = (CURLcode)curl_formadd
         (&first, &last,

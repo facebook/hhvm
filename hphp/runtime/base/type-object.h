@@ -192,13 +192,6 @@ public:
   }
   bool moreEqual(const Object& v2) const { return more(v2) || equal(v2); }
 
-  Variant o_get(const String& propName, bool error = true,
-                const String& context = null_string) const;
-  Variant o_set(
-    const String& s, const Variant& v, const String& context = null_string);
-
-  void setToDefaultObject();
-
   // Transfer ownership of our reference to this object.
   ObjectData *detach() { return m_obj.detach(); }
 

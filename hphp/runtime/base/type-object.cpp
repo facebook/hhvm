@@ -58,41 +58,8 @@ double Object::toDoubleForCompare() const {
   return toDouble();
 }
 
-static Variant warn_non_object() {
-  raise_notice("Cannot access property on non-object");
-  return uninit_null();
-}
-
-Variant Object::o_get(const String& propName, bool error /* = true */,
-                      const String& context /* = null_string */) const {
-  if (UNLIKELY(!m_obj)) return warn_non_object();
-  return m_obj->o_get(propName, error, context);
-}
-
-Variant Object::o_set(const String& propName, const Variant& val,
-                      const String& context /* = null_string */) {
-  if (!m_obj) {
-    setToDefaultObject();
-  }
-  return m_obj->o_set(propName, val, context);
-}
-
 const char* Object::classname_cstr() const {
   return m_obj->getClassName().c_str();
-}
-
-void Object::setToDefaultObject() {
-  if (!RuntimeOption::EvalPromoteEmptyObject) {
-    if (RuntimeOption::PHP7_EngineExceptions) {
-      SystemLib::throwErrorObject(Strings::SET_PROP_NON_OBJECT);
-    } else {
-      SystemLib::throwExceptionObject(Strings::SET_PROP_NON_OBJECT);
-    }
-    not_reached();
-  }
-
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
-  operator=(SystemLib::AllocStdClassObject());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

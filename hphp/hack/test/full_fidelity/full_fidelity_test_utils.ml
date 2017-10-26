@@ -38,7 +38,8 @@ let rewrite_editable_tree_no_trivia node =
       trivia := !trivia @ leading @ trailing;
       EditableRewriter.Replace (EditableSyntax.make_token token)
     | _ -> EditableRewriter.Keep in
-  ((EditableRewriter.rewrite_post rewrite node), !trivia)
+  let no_trivia_tree = EditableRewriter.rewrite_post rewrite node in
+  (no_trivia_tree, !trivia)
 
 let rewrite_tree_no_trivia node =
   let rewrite n =

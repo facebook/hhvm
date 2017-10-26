@@ -3361,12 +3361,12 @@ and expr_colcol env e1 =
     )
   end
 
-and expr_colcol_remain ~allow_class env e1 cname =
+and expr_colcol_remain ~allow_class env e1 (p_name, _ as cname) =
   match expr_atomic env ~allow_class ~class_const:true with
   | (_, Lvar x) as p ->
-      btw e1 x, Class_get (cname, p)
+      btw e1 x, Class_get ((p_name, Id cname), p)
   | _, Id x ->
-      btw e1 x, Class_const (cname, x)
+      btw e1 x, Class_const ((p_name, Id cname), x)
   | pos, _ ->
       error_at env pos "Expected identifier";
       e1
@@ -4206,7 +4206,7 @@ and shape_field_name env =
   let pos, e = expr env in
   match e with
   | String p -> SFlit p
-  | Class_const (id, ps) -> SFclass_const (id, ps)
+  | Class_const ((_, Id id), ps) -> SFclass_const (id, ps)
   | _ -> error_expect env "string literal or class constant";
     SFlit (pos, "")
 

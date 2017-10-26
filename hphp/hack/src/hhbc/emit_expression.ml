@@ -209,7 +209,7 @@ let check_shape_key name =
 let extract_shape_field_name_pstring = function
   | A.SFlit (_, s as p) ->
     check_shape_key s; A.String p
-  | A.SFclass_const (id, p) -> A.Class_const (id, p)
+  | A.SFclass_const ((pn, _) as id, p) -> A.Class_const ((pn, A.Id id), p)
 
 let rec expr_and_new env instr_to_add_new instr_to_add = function
   | A.AFvalue e ->
@@ -509,13 +509,12 @@ and emit_load_class_ref env cexpr =
   | Class_parent -> instr (IMisc (Parent 0))
   | Class_self -> instr (IMisc (Self 0))
   | Class_id id -> emit_known_class_id env id
+  | Class_unnamed_local l -> instr (IGet (ClsRefGetL (l, 0)))
   | Class_expr expr ->
   begin match snd expr with
-  | A.Lvar (_, id) when id <> SN.SpecialIdents.this ->
-    stash_in_local ~always_stash_this:true env expr
-    begin fun temp _ ->
-    instr (IGet (ClsRefGetL (temp, 0)))
-    end
+  | A.Lvar ((_, id) as pos_id) when id <> SN.SpecialIdents.this ->
+    let local = get_local env pos_id in
+    instr (IGet (ClsRefGetL (local, 0)))
   | _ ->
     gather [
       emit_expr ~need_ref:false env expr;
@@ -561,12 +560,43 @@ and emit_class_expr_parts env cexpr prop =
   else load_cls_ref, load_prop
 
 and emit_class_expr env cexpr prop =
+  match cexpr with
+  | Class_expr ((_, (A.BracedExpr _ | A.Lvarvar _)) as e) ->
+    (* if class is stored as lvarvar or braced expression (computed dynamically)
+       it needs to be stored in unnamed local and eventually cleaned.
+       Here we don't use stash_in_local because shape of the code generated
+       for class case is different (PopC / UnsetL is the part of try block) *)
+    let cexpr_local =
+      Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
+    Local.scope @@ fun () ->
+      let temp = Local.get_unnamed_local () in
+      let instrs = emit_class_expr env (Class_unnamed_local temp) prop in
+      let fault_label = Label.next_fault () in
+      let block =
+        instr_try_fault
+          fault_label
+          (* try block *)
+          (gather [
+            instr_popc;
+            instrs;
+            instr_unsetl temp
+          ])
+          (* fault block *)
+          (gather [
+            instr_unsetl temp;
+            instr_unwind ]) in
+      gather [
+        cexpr_local;
+        instr_setl temp;
+        block
+      ]
+  | _ ->
   let cexpr_begin, cexpr_end = emit_class_expr_parts env cexpr prop in
   gather [cexpr_begin ; cexpr_end]
 
 and emit_class_get env param_num_opt qop need_ref cid prop =
   let cexpr, _ = expr_to_class_expr ~resolve_self:false
-    (Emit_env.get_scope env) (id_to_expr cid)
+    (Emit_env.get_scope env) cid
   in
   gather [
     emit_class_expr env cexpr prop;
@@ -584,7 +614,7 @@ and emit_class_get env param_num_opt qop need_ref cid prop =
  *)
 and emit_class_const env cid (_, id) =
   let cexpr, _ = expr_to_class_expr ~resolve_self:true
-    (Emit_env.get_scope env) (id_to_expr cid) in
+    (Emit_env.get_scope env) cid in
   match cexpr with
   | Class_id cid ->
     let fq_id, _id_opt =
@@ -1441,7 +1471,7 @@ and emit_elem_instrs env opt_elem_expr =
   (* These all have special inline versions of member keys *)
   | Some (_, (A.Int _ | A.String _)) -> empty, 0
   | Some (_, (A.Lvar (_, id))) when not (is_local_this env id) -> empty, 0
-  | Some (_, (A.Class_const (cid, (_, id))))
+  | Some (_, (A.Class_const ((_, A.Id cid), (_, id))))
     when is_special_class_constant_accessed_with_class_id env cid id -> empty, 0
   | Some expr -> emit_expr ~need_ref:false env expr, 1
   | None -> empty, 0
@@ -1467,7 +1497,7 @@ and get_elem_member_key env stack_index opt_expr =
   (* Special case for literal string *)
   | Some (_, A.String (_, str)) -> MemberKey.ET str
   (* Special case for class name *)
-  | Some (_, (A.Class_const ((_, cName) as cid, (_, id))))
+  | Some (_, (A.Class_const ((_, A.Id (_, cName as cid)), (_, id))))
     when is_special_class_constant_accessed_with_class_id env cid id ->
     (* Special case for self::class in traits *)
     (* TODO(T21932293): HHVM does not match Zend here.
@@ -1657,7 +1687,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
 
    | A.Class_get(cid, (_, A.Lvarvar (1, id))) ->
      let cexpr, _ = expr_to_class_expr ~resolve_self:false
-       (Emit_env.get_scope env) (id_to_expr cid) in
+       (Emit_env.get_scope env) cid in
      (* special case for $x->$$y: use BaseSL *)
      emit_load_class_ref env cexpr,
      empty,
@@ -1666,7 +1696,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
 
    | A.Class_get(cid, prop) ->
      let cexpr, _ = expr_to_class_expr ~resolve_self:false
-       (Emit_env.get_scope env) (id_to_expr cid) in
+       (Emit_env.get_scope env) cid in
      let cexpr_begin, cexpr_end = emit_class_expr_parts env cexpr prop in
      cexpr_begin,
      cexpr_end,
@@ -1853,7 +1883,7 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
 
   | A.Class_const (cid, (_, id)) ->
     let cexpr, forward = expr_to_class_expr ~resolve_self:false
-      (Emit_env.get_scope env) (id_to_expr cid) in
+      (Emit_env.get_scope env) cid in
     let method_id = Hhbc_id.Method.from_ast_name id in
     begin match cexpr with
     (* Statically known *)
@@ -1877,7 +1907,7 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
 
   | A.Class_get (cid, e) ->
     let cexpr, forward = expr_to_class_expr ~resolve_self:false
-      (Emit_env.get_scope env) (id_to_expr cid) in
+      (Emit_env.get_scope env) cid in
     let expr_instrs = emit_expr ~need_ref:false env e in
     let body_instrs =
       match cexpr with
@@ -2182,6 +2212,11 @@ and emit_final_global_op op =
   | LValOp.IncDec op -> instr (IMutator (IncDecG op))
   | LValOp.Unset -> instr (IMutator UnsetG)
 
+and text_of_expr e =
+  match e with
+  | A.Id id | A.Lvar id | A.Lvarvar (_, id) -> id
+  | _ -> Pos.none, "unknown" (* TODO: get text of expression *)
+
 and emit_final_static_op cid prop op =
   match op with
   | LValOp.Set -> instr (IMutator (SetS 0))
@@ -2189,12 +2224,10 @@ and emit_final_static_op cid prop op =
   | LValOp.SetOp op -> instr (IMutator (SetOpS (op, 0)))
   | LValOp.IncDec op -> instr (IMutator (IncDecS (op, 0)))
   | LValOp.Unset ->
-    let id =
-      match snd prop with
-      | A.Lvar id | A.Lvarvar (_, id) -> id
-      | _ -> (Pos.none, "unknown") (* TODO: get text of property name  *)
-    in Emit_fatal.emit_fatal_runtime (fst id)
-      ("Attempt to unset static property " ^ cid ^ "::" ^ snd id)
+    let cid = text_of_expr cid in
+    let id = text_of_expr (snd prop) in
+    Emit_fatal.emit_fatal_runtime (fst id)
+      ("Attempt to unset static property " ^ snd cid ^ "::" ^ snd id)
 
 (* Given a local $local and a list of integer array indices i_1, ..., i_n,
  * generate code to extract the value of $local[i_n]...[i_1]:
@@ -2489,7 +2522,7 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
 
   | A.Class_get (cid, prop) ->
     let cexpr, _ = expr_to_class_expr ~resolve_self:false
-      (Emit_env.get_scope env) (id_to_expr cid) in
+      (Emit_env.get_scope env) cid in
     begin match snd prop with
     | A.Lvarvar (_, id) | A.BracedExpr (_, A.Lvar id)  ->
       let n = match snd prop with A.Lvarvar (n, _) -> n | _ -> 1 in

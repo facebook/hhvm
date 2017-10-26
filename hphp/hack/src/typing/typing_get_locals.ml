@@ -43,8 +43,7 @@ and terminal_ tcopt nsenv ~in_try = function
   | Expr (_, Call ((_, Id fun_id), _, _, _)) ->
     let _, fun_name = NS.elaborate_id nsenv NS.ElaborateFun fun_id in
     FuncTerm.(raise_exit_if_terminal (get_fun tcopt fun_name))
-  | Expr (_, Call ((_, Class_const (cls_id, (_, meth_name))), _, _, _))
-    when (snd cls_id).[0] <> '$' ->
+  | Expr (_, Call ((_, Class_const ((_, Id cls_id), (_, meth_name))), _, _, _)) ->
     let _, cls_name = NS.elaborate_id nsenv NS.ElaborateClass cls_id in
     FuncTerm.(raise_exit_if_terminal
       (get_static_meth tcopt cls_name meth_name))

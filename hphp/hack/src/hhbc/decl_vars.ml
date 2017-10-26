@@ -58,15 +58,8 @@ let add_bare_expr this acc expr =
 let add_bare_exprs this acc exprs =
   List.fold_left exprs ~f:(add_bare_expr this) ~init:acc
 
-let is_lvar_like_id (_, id) = String_utils.string_starts_with id "$"
-
 let on_class_get this acc recv prop ~is_call_target =
-  let acc =
-    (* Only add if it is a variable *)
-    if is_lvar_like_id recv
-    then add_local ~bareparam:false acc recv
-    else acc
-  in
+  let acc = this#on_expr acc recv in
   (* Distinguish between cases
   - A::$b() - $b is a local variable
   - A::$b = 1 - $b is a static field name *)
@@ -93,8 +86,7 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
     | _ -> this#on_expr acc e in
     match snd prop with
     (* Only add if it is a variable *)
-    | Ast.Id id when is_lvar_like_id id ->
-      add_local ~bareparam:false acc id
+    | Ast.Lvar id -> add_local ~bareparam:false acc id
     | _ -> this#on_expr acc prop
 
   method! on_foreach acc e pos iterator block =
@@ -149,9 +141,7 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
     then List.fold_left use_list ~init:acc
       ~f:(fun acc (x, _isref) -> add_local ~bareparam:false acc x)
     else acc
-  method! on_class_const acc e _ =
-    if is_lvar_like_id e then add_local ~bareparam:false acc e
-    else acc
+  method! on_class_const acc e _ = this#on_expr acc e
   method! on_call acc e _ el1 el2 =
     let acc =
       match e with

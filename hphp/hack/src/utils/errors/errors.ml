@@ -519,6 +519,7 @@ module Naming                               = struct
   let goto_invoked_in_finally               = 2075 (* DONT MODIFY!!!! *)
   let dynamic_class_property_name_in_strict_mode  = 2076 (* DONT MODIFY!!!! *)
   let this_as_lexical_variable              = 2077 (* DONT MODIFY!!!! *)
+  let dynamic_class_name_in_strict_mode     = 2078  (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1181,6 +1182,12 @@ let dynamic_class_property_name_in_strict_mode pos =
   add Naming.dynamic_class_property_name_in_strict_mode
     pos
     "Cannot use dynamic class property name in strict mode"
+
+let dynamic_class_name_in_strict_mode pos =
+  add Naming.dynamic_class_name_in_strict_mode
+    pos
+    "Cannot use dynamic class name in strict mode"
+
 
 (*****************************************************************************)
 (* Init check errors *)

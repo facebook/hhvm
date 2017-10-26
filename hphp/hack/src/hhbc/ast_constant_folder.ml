@@ -158,7 +158,7 @@ and update_duplicates_in_map kvs =
 and class_const_to_typed_value ns cid id =
   if snd id = SN.Members.mClass
   then
-    let cexpr, _ = expr_to_class_expr ~resolve_self:true [] (id_to_expr cid) in
+    let cexpr, _ = expr_to_class_expr ~resolve_self:true [] cid in
     begin match cexpr with
     | Class_id cid ->
       let fq_id, _ = Hhbc_id.Class.elaborate_id ns cid in
@@ -208,7 +208,7 @@ and shape_to_typed_value ns fields =
       | A.SFlit id ->
         TV.String (snd id)
       | A.SFclass_const (class_id, id) ->
-        class_const_to_typed_value ns class_id id in
+        class_const_to_typed_value ns (Pos.none, A.Id class_id) id in
     (key, expr_to_typed_value ns expr))
   )
 

@@ -135,11 +135,11 @@ class virtual ['c] map :
                        string option ->
                        Ast_visitors_ancestors.class_elt;
         on_Class_const : 'd ->
-                         Ast_visitors_ancestors.id ->
+                         Ast_visitors_ancestors.expr ->
                          Ast_visitors_ancestors.pstring ->
                          Ast_visitors_ancestors.expr_;
         on_Class_get : 'd ->
-                       Ast_visitors_ancestors.id ->
+                       Ast_visitors_ancestors.expr ->
                        Ast_visitors_ancestors.expr ->
                        Ast_visitors_ancestors.expr_;
         on_Clone : 'd ->
@@ -796,11 +796,11 @@ class virtual ['c] map :
       Ast_visitors_ancestors.class_elt
     method on_Class_const :
       'd ->
-      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.expr ->
       Ast_visitors_ancestors.pstring -> Ast_visitors_ancestors.expr_
     method on_Class_get :
       'd ->
-      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.expr ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
     method on_Clone :
       'd -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_

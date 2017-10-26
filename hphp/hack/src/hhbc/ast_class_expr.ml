@@ -19,6 +19,7 @@ type class_expr =
 | Class_static
 | Class_id of Ast.id
 | Class_expr of Ast.expr
+| Class_unnamed_local of Local.t
 
 let get_original_class_name ~resolve_self scope =
   match Ast_scope.Scope.get_class scope with
@@ -76,8 +77,3 @@ let expr_to_class_expr ~resolve_self scope (_, expr_ as expr) =
     Class_id id, false
   | _ ->
     Class_expr expr, false
-
-let id_to_expr (pos, name as id) =
-  if name.[0] = '$'
-  then (pos, A.Lvar id)
-  else (pos, A.Id id)

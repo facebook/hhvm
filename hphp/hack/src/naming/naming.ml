@@ -1064,6 +1064,13 @@ module Make (GetLocals : GetLocals) = struct
     if Option.is_some level_opt
     then Errors.break_continue_n_not_supported p
 
+  let ensure_name_not_dynamic env e err =
+    match e with
+    | (_, (Id _ | Lvar _)) -> ()
+    | (p, _) ->
+      if (fst env).in_mode = FileInfo.Mstrict
+      then err p
+
   (* Naming of a class *)
   let rec class_ nenv c =
     let constraints = make_constraints c.c_tparams in
@@ -1480,7 +1487,8 @@ module Make (GetLocals : GetLocals) = struct
     match e with
     | Unsafeexpr _ | Id _ | Null | True | False | Int _
     | Float _ | String _ -> ()
-    | Class_const ((_, cls), _) when cls <> "static" -> ()
+    | Class_const ((_, cls), _)
+      when (match cls with Id (_, "static") -> false | _ -> true) -> ()
     | Unop ((Uplus | Uminus | Utild | Unot), e) -> check_constant_expr env e
     | Binop (op, e1, e2) ->
       (* Only assignment is invalid *)
@@ -2054,21 +2062,25 @@ module Make (GetLocals : GetLocals) = struct
         let id = p, N.Lvar (Env.lvar env x) in
         N.Array_get (id, None)
     | Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
-    | Class_get (x1, (_, Id x2)) ->
+    | Class_get ((_, (Id x1 | Lvar x1)), (_, (Id x2 | Lvar x2))) ->
       N.Class_get (make_class_id env x1 [], x2)
-    | Class_get (x1, (_, Lvar x2)) ->
-      N.Class_get (make_class_id env x1 [], x2)
-    | Class_get _ ->
-      if (fst env).in_mode = FileInfo.Mstrict
-      then Errors.dynamic_class_property_name_in_strict_mode p;
+    | Class_get (x1, x2) ->
+      ensure_name_not_dynamic env x1
+        Errors.dynamic_class_name_in_strict_mode;
+      ensure_name_not_dynamic env x2
+        Errors.dynamic_class_property_name_in_strict_mode;
       N.Any
-    | Class_const (x1, x2) ->
+    | Class_const ((_, Id x1), x2)
+    | Class_const ((_, Lvar x1), x2) ->
       let (genv, _) = env in
       let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
       if GEnv.typedef_pos (genv.tcopt) name <> None && (snd x2) = "class" then
         N.Typename (Env.type_name env x1 ~allow_typedef:true)
       else
         N.Class_const (make_class_id env x1 [], x2)
+    | Class_const _ ->
+      (* TODO: report error in strict mode *)
+      N.Any
     | Call ((_, Id (p, pseudo_func)), hl, el, uel)
         when pseudo_func = SN.SpecialFunctions.echo ->
         arg_unpack_unexpected uel ;

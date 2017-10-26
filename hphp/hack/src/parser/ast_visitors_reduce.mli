@@ -84,10 +84,10 @@ class virtual ['b] reduce :
                        Ast_visitors_ancestors.class_var list ->
                        string option -> 'd;
         on_Class_const : 'c ->
-                         Ast_visitors_ancestors.id ->
+                         Ast_visitors_ancestors.expr ->
                          Ast_visitors_ancestors.pstring -> 'd;
         on_Class_get : 'c ->
-                       Ast_visitors_ancestors.id ->
+                       Ast_visitors_ancestors.expr ->
                        Ast_visitors_ancestors.expr -> 'd;
         on_Clone : 'c -> Ast_visitors_ancestors.expr -> 'd;
         on_Cnormal : 'c -> 'd;
@@ -450,9 +450,9 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.class_var list ->
       string option -> 'd
     method on_Class_const :
-      'c -> Ast_visitors_ancestors.id -> Ast_visitors_ancestors.pstring -> 'd
+      'c -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.pstring -> 'd
     method on_Class_get :
-      'c -> Ast_visitors_ancestors.id -> Ast_visitors_ancestors.expr -> 'd
+      'c -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr -> 'd
     method on_Clone : 'c -> Ast_visitors_ancestors.expr -> 'd
     method on_Cmp : 'c -> 'd
     method on_Cnormal : 'c -> 'd

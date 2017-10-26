@@ -407,7 +407,8 @@ let rec convert_expr env st (p, expr_ as expr) =
       ~trait:false
       ~fallback_to_empty_string:false
       env p pe
-  | Call ((_, (Class_const ((_, cid), _) | Class_get ((_, cid), _))) as e, el1, el2, el3)
+  | Call ((_, (Class_const ((_, Id (_, cid)), _) | Class_get ((_, Id (_, cid)), _))) as e,
+    el1, el2, el3)
   when cid = "parent" ->
     let st = add_var env st "$this" in
     let st, e = convert_expr env st e in
@@ -492,13 +493,13 @@ let rec convert_expr env st (p, expr_ as expr) =
     st, (p, ast_id)
   | Id id ->
     st, convert_id env p id
-  | Class_get (cid, _)
-  | Class_const (cid, _) ->
-    let st = begin match (Ast_class_expr.id_to_expr cid) with
-    | _, Lvar (_, id) -> add_var env st id
-    | _ -> st
-    end in
-    st, expr
+  | Class_get (cid, n) ->
+    let st, e = convert_expr env st cid in
+    let st, n = convert_expr env st n in
+    st, (p, Class_get (e, n))
+  | Class_const (cid, n) ->
+    let st, e = convert_expr env st cid in
+    st, (p, Class_const (e, n))
   | _ ->
     st, expr
 

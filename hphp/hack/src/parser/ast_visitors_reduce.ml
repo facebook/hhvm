@@ -557,11 +557,11 @@ class virtual ['self] reduce =
       let r1 = self#on_option self#on_expr env c1 in
       self#add r0 r1
     method on_Class_get env c0 c1 =
-      let r0 = self#on_id env c0 in
+      let r0 = self#on_expr env c0 in
       let r1 = self#on_expr env c1 in
       self#add r0 r1
     method on_Class_const env c0 c1 =
-      let r0 = self#on_id env c0 in
+      let r0 = self#on_expr env c0 in
       let r1 = self#on_pstring env c1 in
       self#add r0 r1
     method on_Call env c0 c1 c2 c3 =

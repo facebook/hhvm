@@ -244,19 +244,23 @@ class dependency_visitor = object(this)
     super#on_id dep_env id
 
   method handle_class_const dep_env c0 c1 =
-    add_class_dep dep_env c0;
-    match c1 with
+    begin match c0 with
+    | _, (Id c0 | Lvar c0) -> add_class_dep dep_env c0;
+    | _ -> ();
+    end;
+    begin match c1 with
     (* Special "::class" constant. Add the dependency to \\classname *)
     | (_, "class") ->
       add_class_dep dep_env (Pos.none, Naming_special_names.Classes.cClassname)
     | _ -> ()
+    end
 
   method! on_Class_const dep_env c0 c1 =
     this#handle_class_const dep_env c0 c1;
     super#on_Class_const dep_env c0 c1
 
   method! on_SFclass_const dep_env c0 c1 =
-    this#handle_class_const dep_env c0 c1;
+    this#handle_class_const dep_env (Pos.none, Id c0) c1;
     super#on_SFclass_const dep_env c0 c1
 
 end

@@ -963,7 +963,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
 
     | ScopeResolutionExpression
       { scope_resolution_qualifier; scope_resolution_name; _ } ->
-      let qual = pos_name scope_resolution_qualifier in
+      let qual = pExpr scope_resolution_qualifier env in
       begin match syntax scope_resolution_name with
       | Token { Token.kind = TK.Variable; _ } ->
         let name =
@@ -1094,7 +1094,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       { instanceof_left_operand; instanceof_right_operand; _ } ->
       let ty =
         match pExpr instanceof_right_operand env with
-        | p, Class_const (pid, (_, "")) -> p, Id pid
+        | p, Class_const ((_, pid), (_, "")) -> p, pid
         | ty -> ty
       in
       InstanceOf (pExpr instanceof_left_operand env, ty)

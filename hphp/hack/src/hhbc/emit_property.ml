@@ -31,7 +31,7 @@ let rec expr_requires_deep_init (_, expr_) =
   | A.Id(_, ("__FILE__" | "__DIR__")) -> false
   | A.Call((_, A.Id(_, "tuple")), _, args, []) ->
     List.exists args expr_requires_deep_init
-  | A.Class_const ((_, s), (_, p)) ->
+  | A.Class_const ((_, A.Id (_, s)), (_, p)) ->
     class_const_requires_deep_init s p
   | A.Shape fields ->
     List.exists fields shape_field_requires_deep_init

@@ -37,8 +37,8 @@ class type ['a] ast_visitor_type = object
   method on_cast : 'a -> hint -> expr -> 'a
   method on_catch : 'a -> catch -> 'a
   method on_markup: 'a -> pstring -> expr option -> 'a
-  method on_class_const : 'a -> id -> pstring -> 'a
-  method on_class_get : 'a -> id -> expr -> 'a
+  method on_class_const : 'a -> expr -> pstring -> 'a
+  method on_class_get : 'a -> expr -> expr -> 'a
   method on_clone : 'a -> expr -> 'a
   method on_collection: 'a -> id -> afield list -> 'a
   method on_continue : 'a -> Pos.t -> expr option -> 'a
@@ -358,8 +358,8 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Expr_list el    -> this#on_expr_list acc el
    | Obj_get     (e1, e2, _) -> this#on_obj_get acc e1 e2
    | Array_get   (e1, e2)    -> this#on_array_get acc e1 e2
-   | Class_get   (id, p)   -> this#on_class_get acc id p
-   | Class_const (id, pstr)   -> this#on_class_const acc id pstr
+   | Class_get   (e1, p)   -> this#on_class_get acc e1 p
+   | Class_const (e1, pstr)   -> this#on_class_const acc e1 pstr
    | Call        (e, hl, el, uel) -> this#on_call acc e hl el uel
    | String2     el           -> this#on_string2 acc el
    | Cast        (hint, e)   -> this#on_cast acc hint e
@@ -419,13 +419,13 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     in
     acc
 
-  method on_class_get acc id p =
-    let acc = this#on_id acc id in
+  method on_class_get acc e p =
+    let acc = this#on_expr acc e in
     let acc = this#on_expr acc p in
     acc
 
-  method on_class_const acc id pstr =
-    let acc = this#on_id acc id in
+  method on_class_const acc e pstr =
+    let acc = this#on_expr acc e in
     let acc = this#on_pstring acc pstr in
     acc
 
@@ -549,7 +549,8 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | SFclass_const (id, pstr) -> this#on_sfclass_const acc id pstr
 
   method on_sflit acc pstr = this#on_pstring acc pstr
-  method on_sfclass_const acc id c = this#on_class_const acc id c
+  method on_sfclass_const acc (p, _ as id) c =
+    this#on_class_const acc (p, Id id) c
 
   method on_collection acc i afl =
     let acc = this#on_id acc i in

@@ -110,7 +110,7 @@ let emit_xhp_use_attributes xual =
     | _, A.Happly ((_, s), []) ->
       let s = SU.Xhp.mangle @@ Utils.strip_ns s in
       let e =
-        p, A.Class_const ((p, s), (p, "__xhpAttributeDeclaration"))
+        p, A.Class_const ((p, A.Id (p, s)), (p, "__xhpAttributeDeclaration"))
       in
       p, A.Call (e, [], [], [])
     | _ -> failwith "Xhp use attribute - unexpected attribute"
@@ -132,7 +132,7 @@ let from_attribute_declaration ~ns ast_class xal xual =
   let cond = p, A.Binop (A.EQeqeq, var_dollar_, neg_one) in
   let arg1 =
     p, A.Call (
-      (p, A.Class_const ((p, "parent"), (p, "__xhpAttributeDeclaration"))),
+      (p, A.Class_const ((p, A.Id (p, "parent")), (p, "__xhpAttributeDeclaration"))),
       [],
       [],
       [])

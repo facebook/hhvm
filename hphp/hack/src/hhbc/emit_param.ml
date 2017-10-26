@@ -21,10 +21,11 @@ let from_variadic_param_hint_opt ho =
 
 let resolve_class_id ~scope cid =
   let cexpr, _ = expr_to_class_expr ~resolve_self:true
-    scope (id_to_expr cid) in
+    scope cid in
   match cexpr with
-  | Class_id cid -> cid
-  | Class_parent | Class_self | Class_static | Class_expr _ -> cid
+  | Class_id ((p, _) as cid) -> p, A.Id cid
+  | Class_parent | Class_self | Class_static | Class_expr _
+  | Class_unnamed_local _ -> cid
 
 let resolver_visitor =
 object(_)

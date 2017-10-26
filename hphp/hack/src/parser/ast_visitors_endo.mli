@@ -183,12 +183,12 @@ class virtual ['b] endo :
                        Ast_visitors_ancestors.class_elt;
         on_Class_const : 'c ->
                          Ast_visitors_ancestors.expr_ ->
-                         Ast_visitors_ancestors.id ->
+                         Ast_visitors_ancestors.expr ->
                          Ast_visitors_ancestors.pstring ->
                          Ast_visitors_ancestors.expr_;
         on_Class_get : 'c ->
                        Ast_visitors_ancestors.expr_ ->
-                       Ast_visitors_ancestors.id ->
+                       Ast_visitors_ancestors.expr ->
                        Ast_visitors_ancestors.expr ->
                        Ast_visitors_ancestors.expr_;
         on_Clone : 'c ->
@@ -1079,12 +1079,12 @@ class virtual ['b] endo :
     method on_Class_const :
       'c ->
       Ast_visitors_ancestors.expr_ ->
-      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.expr ->
       Ast_visitors_ancestors.pstring -> Ast_visitors_ancestors.expr_
     method on_Class_get :
       'c ->
       Ast_visitors_ancestors.expr_ ->
-      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.expr ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
     method on_Clone :
       'c ->

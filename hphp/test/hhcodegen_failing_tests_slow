@@ -52,7 +52,6 @@ slow/finally/new_try_catch_012.php
 slow/finally/new_try_catch_013.php
 slow/finally/new_try_catch_014.php
 slow/finally/new_try_catch_015.php
-slow/finally/try_finally_004.php
 slow/finally/try_finally_005.php
 slow/finally/try_finally_007.php
 slow/goto/label_in_finally.php
@@ -199,8 +198,6 @@ slow/php7_bcbreak/5/uvs/array_indirect_ref.php
 slow/php7_bcbreak/5/uvs/dimmable_object_access.php
 slow/php7_bcbreak/5/uvs/dimmable_object_call.php
 slow/php7_bcbreak/5/uvs/static_dim_call.php
-slow/reflection/1342.php
-slow/reflection/dynamic_property2.php
 slow/reflection/ns_closure.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection/scalar_param_types/php-noforcehh.php
@@ -230,8 +227,8 @@ slow/using/bad-goto2.php
 slow/using/bad-lambda4.php
 slow/using/bad-lambda5.php
 slow/using/bad-lambda6.php
-slow/using/functions.php
 slow/using/bad-name.php
+slow/using/functions.php
 slow/using/goto.php
 slow/vec/bad-init2.php
 slow/vec/hh-only2.php

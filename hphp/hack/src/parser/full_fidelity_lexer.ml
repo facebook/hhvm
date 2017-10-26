@@ -1343,7 +1343,8 @@ let as_case_insensitive_keyword text =
   match lower with
   | "eval" | "isset" | "unset" | "empty" | "const" | "new"
   | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
-  | "true" | "false" | "null" | "array" | "instanceof" -> lower
+  | "true" | "false" | "null" | "array" | "instanceof"
+  | "trait" | "class" | "interface" -> lower
   | _ -> text
 
 let as_keyword kind lexer =

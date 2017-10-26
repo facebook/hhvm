@@ -15,22 +15,30 @@ module SyntaxError = Full_fidelity_syntax_error
 module Context =
   Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token)
 module rec ExpressionParser :
-  Full_fidelity_expression_parser_type.
-    WithSyntax(Minimal_syntax).ExpressionParser_S =
+  Full_fidelity_expression_parser_type
+    .WithSyntax(Full_fidelity_minimal_syntax)
+    .WithLexer(Full_fidelity_minimal_lexer)
+    .ExpressionParser_S =
   Full_fidelity_expression_parser.WithStatementAndDeclAndTypeParser
     (StatementParser) (DeclParser) (TypeParser)
 and StatementParser :
-  Full_fidelity_statement_parser_type.
-    WithSyntax(Minimal_syntax).StatementParser_S =
+  Full_fidelity_statement_parser_type
+  .WithSyntax(Full_fidelity_minimal_syntax)
+  .WithLexer(Full_fidelity_minimal_lexer)
+  .StatementParser_S =
   Full_fidelity_statement_parser.WithExpressionAndDeclAndTypeParser
     (ExpressionParser) (DeclParser) (TypeParser)
 and DeclParser :
-  Full_fidelity_declaration_parser_type.
-    WithSyntax(Minimal_syntax).DeclarationParser_S =
+  Full_fidelity_declaration_parser_type
+    .WithSyntax(Full_fidelity_minimal_syntax)
+    .WithLexer(Full_fidelity_minimal_lexer)
+    .DeclarationParser_S =
   Full_fidelity_declaration_parser.WithExpressionAndStatementAndTypeParser
     (ExpressionParser) (StatementParser) (TypeParser)
-and TypeParser : Full_fidelity_type_parser_type.
-    WithSyntax(Minimal_syntax).TypeParser_S =
+and TypeParser : Full_fidelity_type_parser_type
+  .WithSyntax(Full_fidelity_minimal_syntax)
+  .WithLexer(Full_fidelity_minimal_lexer)
+  .TypeParser_S =
   Full_fidelity_type_parser.WithExpressionParser(ExpressionParser)
 
 type t = {

@@ -21,13 +21,13 @@ open Full_fidelity_minimal_syntax
 
 module WithExpressionAndDeclAndTypeParser
   (ExpressionParser : Full_fidelity_expression_parser_type.
-    WithSyntax(Minimal_syntax).ExpressionParser_S)
+    WithSyntax(Full_fidelity_minimal_syntax).WithLexer(Full_fidelity_minimal_lexer).ExpressionParser_S)
   (DeclParser : Full_fidelity_declaration_parser_type.
-    WithSyntax(Minimal_syntax).DeclarationParser_S)
+    WithSyntax(Full_fidelity_minimal_syntax).WithLexer(Full_fidelity_minimal_lexer).DeclarationParser_S)
   (TypeParser : Full_fidelity_type_parser_type.
-    WithSyntax(Minimal_syntax).TypeParser_S) :
+    WithSyntax(Full_fidelity_minimal_syntax).WithLexer(Full_fidelity_minimal_lexer).TypeParser_S) :
   Full_fidelity_statement_parser_type.
-    WithSyntax(Minimal_syntax).StatementParser_S = struct
+    WithSyntax(Full_fidelity_minimal_syntax).WithLexer(Full_fidelity_minimal_lexer).StatementParser_S = struct
   include SimpleParser
   include
     Full_fidelity_parser_helpers.MinimalParserHelper.WithParser(SimpleParser)

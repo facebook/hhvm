@@ -46,7 +46,7 @@ let analyze_header text script =
     begin match syntax markup_suffix with
     | MarkupSuffix {
         markup_suffix_name = {
-          syntax = Missing | Token { MinimalToken.kind = TK.Equal; _ }
+          syntax = Missing | Token { Token.kind = TK.Equal; _ }
         ; _ }
       ; _ } -> "php", ""
     | MarkupSuffix {

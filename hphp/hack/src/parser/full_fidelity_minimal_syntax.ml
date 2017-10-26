@@ -15,10 +15,10 @@
   * trivia width, trailing trivia width, and width without trivia.
   *)
 
-module MinimalToken = Full_fidelity_minimal_token
+module Token = Full_fidelity_minimal_token
 
 module SyntaxWithMinimalToken =
-  Full_fidelity_syntax.WithToken(MinimalToken)
+  Full_fidelity_syntax.WithToken(Token)
 
 module MinimalSyntaxValue = struct
   type t = { full_width: int }
@@ -39,7 +39,7 @@ module MinimalValueBuilder = struct
     MinimalSyntaxValue.make width
 
   let value_from_token token =
-    MinimalSyntaxValue.make (MinimalToken.full_width token)
+    MinimalSyntaxValue.make (Token.full_width token)
 
   let value_from_syntax syntax =
     let folder sum child =
@@ -59,12 +59,12 @@ let full_width node =
 let leading_width node =
   match leading_token node with
   | None -> 0
-  | Some token -> MinimalToken.leading_width token
+  | Some token -> Token.leading_width token
 
 let trailing_width node =
   match trailing_token node with
   | None -> 0
-  | Some token -> MinimalToken.trailing_width token
+  | Some token -> Token.trailing_width token
 
 let width node =
   (full_width node) - (leading_width node) - (trailing_width node)

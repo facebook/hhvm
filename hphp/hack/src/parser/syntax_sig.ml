@@ -8,6 +8,6 @@
  *
  *)
 module type Syntax_S = sig
-  module Lexer : Full_fidelity_lexer_sig.MinimalLexer_S
+  module Token : Lexable_token_sig.LexableToken_S
   type t
 end

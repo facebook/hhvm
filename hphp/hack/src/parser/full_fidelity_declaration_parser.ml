@@ -11,9 +11,7 @@
 module Token = Full_fidelity_minimal_token
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
-module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
-module Operator = Full_fidelity_operator
 module SimpleParser =
   Full_fidelity_simple_parser.WithLexer(Full_fidelity_minimal_lexer)
 
@@ -22,13 +20,13 @@ open Full_fidelity_minimal_syntax
 
 module WithExpressionAndStatementAndTypeParser
   (ExpressionParser : Full_fidelity_expression_parser_type.
-    WithLexer(Full_fidelity_minimal_lexer).ExpressionParser_S)
+    WithSyntax(Minimal_syntax).ExpressionParser_S)
   (StatementParser : Full_fidelity_statement_parser_type.
-    WithLexer(Full_fidelity_minimal_lexer).StatementParser_S)
+    WithSyntax(Minimal_syntax).StatementParser_S)
   (TypeParser : Full_fidelity_type_parser_type.
-    WithLexer(Full_fidelity_minimal_lexer).TypeParser_S) :
+    WithSyntax(Minimal_syntax).TypeParser_S) :
   Full_fidelity_declaration_parser_type.
-    WithLexer(Full_fidelity_minimal_lexer).DeclarationParser_S = struct
+    WithSyntax(Minimal_syntax).DeclarationParser_S = struct
 
   include SimpleParser
   include

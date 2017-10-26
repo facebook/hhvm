@@ -913,6 +913,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.Minus                   -> Unop (Uminus, expr)
         | Some TK.Ampersand               -> Unop (Uref,   expr)
         | Some TK.At                      -> Unop (Usilence, expr)
+        | Some TK.Inout                   -> Callconv (Pinout, expr)
         | Some TK.Await                   -> Await expr
         | Some TK.Suspend                 -> Suspend expr
         | Some TK.Clone                   -> Clone expr

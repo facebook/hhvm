@@ -1101,6 +1101,14 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
   | ShapeExpression { shape_expression_fields; _} ->
     List.fold_right invalid_shape_field_check
       (syntax_to_list_no_separators shape_expression_fields) errors
+  | DecoratedExpression
+    { decorated_expression_decorator = decorator
+    ; decorated_expression_expression =
+      { syntax = PrefixUnaryExpression { prefix_unary_operator = operator; _ }
+      ; _ }
+    }
+    when is_inout decorator && is_ampersand operator ->
+    make_error_from_node node SyntaxError.error2076 :: errors
   | VectorIntrinsicExpression _
   | DictionaryIntrinsicExpression _
   | KeysetIntrinsicExpression _ when not is_hack ->

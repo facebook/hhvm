@@ -613,6 +613,7 @@ TYPE_TESTS
     let is_array      = is_specific_token Full_fidelity_token_kind.Array
     let is_var        = is_specific_token Full_fidelity_token_kind.Var
     let is_ampersand  = is_specific_token Full_fidelity_token_kind.Ampersand
+    let is_inout      = is_specific_token Full_fidelity_token_kind.Inout
 
 CHILD_LIST_FROM_TYPE
 

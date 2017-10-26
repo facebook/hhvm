@@ -12,7 +12,7 @@ function swap(inout $a, inout $b) {
   $b = $tmp;
 }
 
-function extend<T>(inout vec<T> $dst, vec<T> $src): bool {
+function extend<T>(inout vec<T> $dst, Traversable<T> $src): bool {
   if (!$src) {
     return false;
   }
@@ -20,4 +20,21 @@ function extend<T>(inout vec<T> $dst, vec<T> $src): bool {
     $dst[] = $e;
   }
   return true;
+}
+
+function test(): void {
+  $i = 42;
+  $s = 'foo';
+
+  noop(inout $i);
+  add1(inout $i);
+
+  swap(inout $i, inout $s);
+  swap(&$i, inout $s);
+  swap(inout $i, &$s);
+  swap(&$i, &$s);
+
+  $v = vec[];
+  extend(inout $v, vec[0, 1, 2]);
+  extend(&$v, dict['spam' => 3, 'eggs' => 4]);
 }

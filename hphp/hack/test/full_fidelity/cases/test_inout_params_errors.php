@@ -23,3 +23,11 @@ class C {
     }
   } // no error
 }
+
+function test(): void {
+  $i = 999;
+  g3(inout $i, 'ok'); // no error
+
+  $v = vec[];
+  z(inout &$v); // ERROR
+}

@@ -849,6 +849,9 @@ module WithStatementAndDeclAndTypeParser
 
       TODO: This business of allowing ... does not appear in the spec. Add it.
 
+      TODO: Update grammar for inout params (call-convention-opt).
+      (This work is tracked by task T22582715.)
+
       ERROR RECOVERY: A ... expression can only appear at the end of a
       formal parameter list. However, we parse it everywhere without error,
       and detect the error in a later pass.
@@ -863,6 +866,7 @@ module WithStatementAndDeclAndTypeParser
       argument-expressions:
         expression
         ... expression
+        call-convention-opt  expression
         argument-expressions  ,  expression
     *)
     (* This function parses the parens as well. *)
@@ -872,11 +876,12 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_decorated_expression_opt parser =
     match peek_token_kind parser with
-    | DotDotDot ->
-      let (parser, dots) = next_token parser in
+    | DotDotDot
+    | Inout ->
+      let (parser, decorator) = next_token parser in
       let (parser, expr) = parse_expression parser in
-      let dots = make_token dots in
-      parser, make_decorated_expression dots expr
+      let decorator = make_token decorator in
+      parser, make_decorated_expression decorator expr
     | _ -> parse_expression parser
 
   and parse_designator parser =

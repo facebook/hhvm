@@ -281,11 +281,6 @@ static req::ptr<T> getResource(ObjectData* obj, const char* varName) {
   return cast<T>(var);
 }
 
-ALWAYS_INLINE
-static Variant setVariable(const Object& obj, const char* varName, const Variant& varValue) {
-  return obj->o_set(varName, varValue, s_ZipArchive);
-}
-
 #define FAIL_IF_EMPTY_STRING(func, str)                     \
   if (str.empty()) {                                        \
     raise_warning(#func "(): Empty string as source");      \
@@ -616,7 +611,7 @@ static bool HHVM_METHOD(ZipArchive, close) {
 
   bool ret = zipDir->close();
 
-  setVariable(Object{this_}, "zipDir", null_resource);
+  this_->o_set("zipDir", null_resource, s_ZipArchive);
 
   return ret;
 }
@@ -1030,8 +1025,8 @@ static Variant HHVM_METHOD(ZipArchive, open, const String& filename,
 
   auto zipDir = req::make<ZipDirectory>(z);
 
-  setVariable(Object{this_}, "zipDir", Variant(zipDir));
-  setVariable(Object{this_}, "filename", filename);
+  this_->o_set("zipDir", Variant(zipDir), s_ZipArchive);
+  this_->o_set("filename", filename, s_ZipArchive);
 
   zip_error_clear(zipDir->getZip());
   return true;

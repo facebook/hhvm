@@ -361,18 +361,29 @@ const Variant* ObjectData::o_realProp(const String& propName, int flags,
                                                      false);
 }
 
-inline Variant ObjectData::o_getImpl(const String& propName,
-                                     bool error /* = true */,
-                                     const String& context /*= null_string*/) {
+Variant ObjectData::o_get(const String& propName, bool error /* = true */,
+                          const String& context /*= null_string*/) {
   assert(kindIsValid());
 
+  // This is not (just) a check for empty string; property names that start
+  // with null are intentionally being rejected here.
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);
   }
 
-  if (const Variant* t = o_realProp(propName, 0, context)) {
-    if (t->isInitialized())
-      return *t;
+  Class* ctx = nullptr;
+  if (!context.empty()) {
+    ctx = Unit::lookupClass(context.get());
+  }
+
+  // Can't use propImpl here because if the property is not accessible and
+  // there is no magic __get, propImpl will raise_error("Cannot access ...",
+  // but o_get will only (maybe) raise_notice("Undefined property ..." :-(
+
+  auto const lookup = getPropImpl(ctx, propName.get(), false);
+  auto prop = lookup.prop;
+  if (lookup.accessible && prop && prop->m_type != KindOfUninit) {
+    return tvAsVariant(prop);
   }
 
   if (getAttribute(UseGet)) {
@@ -389,43 +400,43 @@ inline Variant ObjectData::o_getImpl(const String& propName,
   return uninit_null();
 }
 
-Variant ObjectData::o_get(const String& propName, bool error /* = true */,
-                          const String& context /* = null_string */) {
-  return o_getImpl(propName, error, context);
-}
-
-ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName,
-                                            const Variant& v,
-                                            const String& context) {
+void ObjectData::o_set(const String& propName, const Variant& v,
+                       const String& context /* = null_string */) {
   assert(kindIsValid());
 
+  // This is not (just) a check for empty string; property names that start
+  // with null are intentionally being rejected here.
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);
   }
 
-  bool useSet = getAttribute(UseSet);
-  auto flags = useSet ? 0 : RealPropCreate;
+  Class* ctx = nullptr;
+  if (!context.empty()) {
+    ctx = Unit::lookupClass(context.get());
+  }
 
-  if (Variant* t = o_realProp(propName, flags, context)) {
-    if (!useSet || t->isInitialized()) {
-      *t = v;
-      return v;
+  // Can't use setProp here because if the property is not accessible and
+  // there is no magic __set, setProp will raise_error("Cannot access ...",
+  // but o_set will skip writing and return normally. Also, if we try to
+  // invoke __set and fail due to recursion, setProp will fall back to writing
+  // the property normally, but o_set will just skip writing and return :-(
+
+  bool useSet = getAttribute(UseSet);
+
+  auto const lookup = getPropImpl(ctx, propName.get(), true);
+  auto prop = lookup.prop;
+  if (prop && lookup.accessible) {
+    if (!useSet || prop->m_type != KindOfUninit) {
+      tvSet(tvToInitCell(*v.asTypedValue()), *prop);
+      return;
     }
   }
 
   if (useSet) {
     invokeSet(propName.get(), *v.asCell());
+  } else if (!prop) {
+    reserveProperties().set(propName, tvToInitCell(*v.asTypedValue()), true);
   }
-  return v;
-}
-
-Variant ObjectData::o_set(const String& propName, const Variant& v) {
-  return o_setImpl(propName, v, null_string);
-}
-
-Variant ObjectData::o_set(const String& propName, const Variant& v,
-                          const String& context) {
-  return o_setImpl(propName, v, context);
 }
 
 void ObjectData::o_setArray(const Array& properties) {

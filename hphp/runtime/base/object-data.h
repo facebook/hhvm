@@ -285,8 +285,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   Variant o_get(const String& s, bool error = true,
                 const String& context = null_string);
 
-  Variant o_set(const String& s, const Variant& v);
-  Variant o_set(const String& s, const Variant& v, const String& context);
+  void o_set(const String& s, const Variant& v,
+             const String& context = null_string);
 
   void o_setArray(const Array& properties);
   void o_getArray(Array& props, bool pubOnly = false) const;
@@ -361,10 +361,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
  private:
   Slot declPropInd(const TypedValue* prop) const;
 
-  inline Variant o_getImpl(const String& propName, bool error = true,
-                           const String& context = null_string);
-  inline Variant o_setImpl(const String& propName, const Variant& v,
-                           const String& context);
  public:
   member_lval getPropLval(const Class*, const StringData*);
   member_rval getProp(const Class*, const StringData*) const;

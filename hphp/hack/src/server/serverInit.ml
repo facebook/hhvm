@@ -28,8 +28,8 @@ exception Loader_timeout of string
 
 type load_mini_approach =
   | Load_mini_script of Path.t
-  | Precomputed of ServerArgs.mini_state_target
-  | Load_state_natively
+  | Precomputed of ServerArgs.mini_state_target_info
+  | Load_state_natively of ServerArgs.informant_induced_mini_state_target option
 
 (** Docs are in .mli *)
 type init_result =
@@ -232,9 +232,18 @@ module ServerInitCommon = struct
        None
      )) in
      Core_result.try_with (fun () -> fun () -> Ok get_dirty_files)
-   | Load_state_natively ->
-     let result = State_loader.mk_state_future
-       (ServerConfig.config_hash genv.config) root in
+   | Load_state_natively target_opt ->
+     let mini_state_handle = begin match target_opt with
+     | None -> None
+     | Some { ServerArgs.mini_state_everstore_handle; target_svn_rev; } ->
+       Some
+       {
+         State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
+         mini_state_for_svn_rev = target_svn_rev;
+       }
+     end in
+     let result = State_loader.mk_state_future ?mini_state_handle
+       ~config_hash:(ServerConfig.config_hash genv.config) root in
      lock_and_load_deptable result.State_loader.deptable_fn;
      let old_saved = open_in result.State_loader.saved_state_fn
        |> Marshal.from_channel in

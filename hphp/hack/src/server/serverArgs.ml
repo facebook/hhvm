@@ -101,12 +101,12 @@ let parse_mini_state_json (json, _keytrace) =
       let changes = List.fold_left
         (fun acc file -> (Hh_json.get_string_exn file) :: acc) [] changes in
       let changes = List.map Relative_path.from_root changes in
-      return {
+      return (Mini_state_target_info {
         saved_state_fn = state;
         corresponding_base_revision = for_base_rev;
         deptable_fn = deptable;
         changes = changes;
-      }
+      })
 
 let verify_with_mini_state v = match !v with
   | None -> None

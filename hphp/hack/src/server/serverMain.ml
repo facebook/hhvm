@@ -416,12 +416,14 @@ let resolve_init_approach genv =
       | Some _, true, None ->
         (** Use native loading only if the config specifies a load script,
          * and the local config prefers native. *)
-        Some ServerInit.Load_state_natively, "Load_state_natively"
+        Some (ServerInit.Load_state_natively None), "Load_state_natively"
+      | _, _, Some (ServerArgs.Informant_induced_mini_state_target target) ->
+        Some (ServerInit.Load_state_natively (Some target)), "Load_state_natively_with_target"
       | Some load_mini_script, false, None ->
         Some (ServerInit.Load_mini_script load_mini_script), "Load_mini_script"
-      | None, _, Some target ->
+      | None, _, Some (ServerArgs.Mini_state_target_info target) ->
         Some (ServerInit.Precomputed target), "Precomputed"
-      | Some _, _, Some target ->
+      | Some _, _, Some (ServerArgs.Mini_state_target_info target) ->
         Hh_logger.log "Warning - Both a mini script in the server config %s"
           "and a mini state target in server args are configured";
         Hh_logger.log "Ignoring the script and using precomputed target";

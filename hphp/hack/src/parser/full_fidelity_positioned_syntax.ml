@@ -650,10 +650,12 @@ module FromMinimal = struct
           }, results
       | SyntaxKind.VariadicParameter
       , (  variadic_parameter_ellipsis
+        :: variadic_parameter_type
         :: results
         ) ->
           VariadicParameter
-          { variadic_parameter_ellipsis
+          { variadic_parameter_type
+          ; variadic_parameter_ellipsis
           }, results
       | SyntaxKind.AttributeSpecification
       , (  attribute_specification_right_double_angle
@@ -2588,11 +2590,13 @@ module FromMinimal = struct
         let todo = Convert (parameter_visibility, todo) in
         convert offset todo results parameter_attribute
     | { M.syntax = M.VariadicParameter
-        { M.variadic_parameter_ellipsis
+        { M.variadic_parameter_type
+        ; M.variadic_parameter_ellipsis
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results variadic_parameter_ellipsis
+        let todo = Convert (variadic_parameter_ellipsis, todo) in
+        convert offset todo results variadic_parameter_type
     | { M.syntax = M.AttributeSpecification
         { M.attribute_specification_left_double_angle
         ; M.attribute_specification_attributes

@@ -6642,14 +6642,23 @@ class ParameterDeclaration extends EditableSyntax
 class VariadicParameter extends EditableSyntax
 {
   constructor(
+    type,
     ellipsis)
   {
     super('variadic_parameter', {
+      type: type,
       ellipsis: ellipsis });
   }
+  get type() { return this.children.type; }
   get ellipsis() { return this.children.ellipsis; }
+  with_type(type){
+    return new VariadicParameter(
+      type,
+      this.ellipsis);
+  }
   with_ellipsis(ellipsis){
     return new VariadicParameter(
+      this.type,
       ellipsis);
   }
   rewrite(rewriter, parents)
@@ -6658,8 +6667,10 @@ class VariadicParameter extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var type = this.type.rewrite(rewriter, new_parents);
     var ellipsis = this.ellipsis.rewrite(rewriter, new_parents);
     if (
+      type === this.type &&
       ellipsis === this.ellipsis)
     {
       return rewriter(this, parents);
@@ -6667,21 +6678,27 @@ class VariadicParameter extends EditableSyntax
     else
     {
       return rewriter(new VariadicParameter(
+        type,
         ellipsis), parents);
     }
   }
   static from_json(json, position, source)
   {
+    let type = EditableSyntax.from_json(
+      json.variadic_parameter_type, position, source);
+    position += type.width;
     let ellipsis = EditableSyntax.from_json(
       json.variadic_parameter_ellipsis, position, source);
     position += ellipsis.width;
     return new VariadicParameter(
+        type,
         ellipsis);
   }
   get children_keys()
   {
     if (VariadicParameter._children_keys == null)
       VariadicParameter._children_keys = [
+        'type',
         'ellipsis'];
     return VariadicParameter._children_keys;
   }

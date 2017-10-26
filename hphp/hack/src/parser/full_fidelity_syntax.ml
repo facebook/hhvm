@@ -833,8 +833,10 @@ module WithToken(Token: TokenType) = struct
     )
 
     let get_variadic_parameter_children {
+      variadic_parameter_type;
       variadic_parameter_ellipsis;
     } = (
+      variadic_parameter_type,
       variadic_parameter_ellipsis
     )
 
@@ -2591,8 +2593,10 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc parameter_default_value in
          acc
       | VariadicParameter {
+        variadic_parameter_type;
         variadic_parameter_ellipsis;
       } ->
+         let acc = f acc variadic_parameter_type in
          let acc = f acc variadic_parameter_ellipsis in
          acc
       | AttributeSpecification {
@@ -4232,8 +4236,10 @@ module WithToken(Token: TokenType) = struct
         parameter_default_value;
       ]
       | VariadicParameter {
+        variadic_parameter_type;
         variadic_parameter_ellipsis;
       } -> [
+        variadic_parameter_type;
         variadic_parameter_ellipsis;
       ]
       | AttributeSpecification {
@@ -5871,8 +5877,10 @@ module WithToken(Token: TokenType) = struct
         "parameter_default_value";
       ]
       | VariadicParameter {
+        variadic_parameter_type;
         variadic_parameter_ellipsis;
       } -> [
+        "variadic_parameter_type";
         "variadic_parameter_ellipsis";
       ]
       | AttributeSpecification {
@@ -7599,9 +7607,11 @@ module WithToken(Token: TokenType) = struct
           parameter_default_value;
         }
       | (SyntaxKind.VariadicParameter, [
+          variadic_parameter_type;
           variadic_parameter_ellipsis;
         ]) ->
         VariadicParameter {
+          variadic_parameter_type;
           variadic_parameter_ellipsis;
         }
       | (SyntaxKind.AttributeSpecification, [
@@ -9535,9 +9545,11 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_variadic_parameter
+        variadic_parameter_type
         variadic_parameter_ellipsis
       =
         let syntax = VariadicParameter {
+          variadic_parameter_type;
           variadic_parameter_ellipsis;
         } in
         let value = ValueBuilder.value_from_syntax syntax in

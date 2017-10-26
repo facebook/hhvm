@@ -481,7 +481,10 @@ let schema : schema_node list =
     ; description = "variadic_parameter"
     ; prefix      = "variadic_parameter"
     ; aggregates  = [ Specifier; Parameter ]
-    ; fields      = [ "ellipsis", Token ]
+    ; fields      =
+      [ "type", ZeroOrOne (Just "SimpleTypeSpecifier")
+      ; "ellipsis", Token
+      ]
     }
   ; { kind_name   = "AttributeSpecification"
     ; type_name   = "attribute_specification"

@@ -1253,7 +1253,8 @@ module WithExpressionAndStatementAndTypeParser
     | DotDotDot ->
       let next_kind = peek_token_kind parser1 in
       if next_kind = Variable then parse_parameter_declaration parser
-      else (parser1, make_variadic_parameter (make_token token))
+      else
+        (parser1, make_variadic_parameter (make_missing ()) (make_token token))
     | _ -> parse_parameter_declaration parser
 
   and parse_parameter_declaration parser =

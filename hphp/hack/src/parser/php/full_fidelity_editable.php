@@ -8527,17 +8527,29 @@ final class ParameterDeclaration extends EditableSyntax {
   }
 }
 final class VariadicParameter extends EditableSyntax {
+  private EditableSyntax $_type;
   private EditableSyntax $_ellipsis;
   public function __construct(
+    EditableSyntax $type,
     EditableSyntax $ellipsis) {
     parent::__construct('variadic_parameter');
+    $this->_type = $type;
     $this->_ellipsis = $ellipsis;
+  }
+  public function type(): EditableSyntax {
+    return $this->_type;
   }
   public function ellipsis(): EditableSyntax {
     return $this->_ellipsis;
   }
+  public function with_type(EditableSyntax $type): VariadicParameter {
+    return new VariadicParameter(
+      $type,
+      $this->_ellipsis);
+  }
   public function with_ellipsis(EditableSyntax $ellipsis): VariadicParameter {
     return new VariadicParameter(
+      $this->_type,
       $ellipsis);
   }
 
@@ -8547,24 +8559,32 @@ final class VariadicParameter extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
+    $type = $this->type()->rewrite($rewriter, $new_parents);
     $ellipsis = $this->ellipsis()->rewrite($rewriter, $new_parents);
     if (
+      $type === $this->type() &&
       $ellipsis === $this->ellipsis()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new VariadicParameter(
+        $type,
         $ellipsis), $parents ?? []);
     }
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
+    $type = EditableSyntax::from_json(
+      $json->variadic_parameter_type, $position, $source);
+    $position += $type->width();
     $ellipsis = EditableSyntax::from_json(
       $json->variadic_parameter_ellipsis, $position, $source);
     $position += $ellipsis->width();
     return new VariadicParameter(
+        $type,
         $ellipsis);
   }
   public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_type;
     yield $this->_ellipsis;
     yield break;
   }

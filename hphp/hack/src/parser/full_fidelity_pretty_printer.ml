@@ -584,8 +584,12 @@ let rec get_doc node =
     group_doc
       ( attr ^| visibility ^| callconv ^| parameter_type ^| parameter_name
       ^| parameter_default )
-  | VariadicParameter { variadic_parameter_ellipsis } ->
-      get_doc variadic_parameter_ellipsis
+  | VariadicParameter {
+    variadic_parameter_type;
+    variadic_parameter_ellipsis } ->
+    let t = get_doc variadic_parameter_type in
+    let ell = get_doc variadic_parameter_ellipsis in
+    t ^| ell
   | AttributeSpecification {
       attribute_specification_left_double_angle;
       attribute_specification_attributes;

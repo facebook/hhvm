@@ -1268,12 +1268,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_variadic_parameter : variadic_parameter validator = function
   | { Syntax.syntax = Syntax.VariadicParameter x; value = v } -> v,
     { variadic_parameter_ellipsis = validate_token x.Syntax.variadic_parameter_ellipsis
+    ; variadic_parameter_type = validate_option_with (validate_simple_type_specifier) x.Syntax.variadic_parameter_type
     }
   | s -> validation_fail SyntaxKind.VariadicParameter s
   and invalidate_variadic_parameter : variadic_parameter invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.VariadicParameter
-      { Syntax.variadic_parameter_ellipsis = invalidate_token x.variadic_parameter_ellipsis
+      { Syntax.variadic_parameter_type = invalidate_option_with (invalidate_simple_type_specifier) x.variadic_parameter_type
+      ; Syntax.variadic_parameter_ellipsis = invalidate_token x.variadic_parameter_ellipsis
       }
     ; Syntax.value = v
     }

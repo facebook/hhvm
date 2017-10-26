@@ -252,9 +252,16 @@ and parse_type_or_ellipsis_list parser close_kind =
 
 and parse_type_or_ellipsis parser =
   let (parser1, token) = next_token parser in
-  match Token.kind token with
-  | DotDotDot -> (parser1, make_variadic_parameter (make_token token))
-  | _ -> parse_type_specifier parser
+  if Token.kind token = DotDotDot then
+    (parser1, make_variadic_parameter (make_missing ()) (make_token token))
+  else begin
+    let (parser, ts) = parse_type_specifier parser in
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | DotDotDot ->
+      (parser1, make_variadic_parameter ts (make_token token))
+    | _ -> (parser, ts)
+  end
 
 and parse_generic_type_argument_list parser =
   (* SPEC:

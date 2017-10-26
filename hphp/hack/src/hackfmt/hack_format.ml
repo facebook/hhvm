@@ -554,8 +554,12 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         t default;
       ]
     | VariadicParameter x ->
-      let ellipsis = get_variadic_parameter_children x in
-      t ellipsis;
+      let type_var, ellipsis = get_variadic_parameter_children x in
+      Concat [
+        t type_var;
+        Space;
+        t ellipsis;
+      ]
     | AttributeSpecification x ->
       let (left_da, attrs, right_da) = get_attribute_specification_children x in
       transform_argish ~allow_trailing:false left_da attrs right_da

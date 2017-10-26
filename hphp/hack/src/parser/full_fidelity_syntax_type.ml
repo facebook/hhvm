@@ -284,7 +284,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; parameter_default_value                            : t
     }
   and variadic_parameter =
-    { variadic_parameter_ellipsis                        : t
+    { variadic_parameter_type                            : t
+    ; variadic_parameter_ellipsis                        : t
     }
   and attribute_specification =
     { attribute_specification_left_double_angle          : t
@@ -1598,7 +1599,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; parameter_default_value: simple_initializer option value
     }
   and variadic_parameter =
-    { variadic_parameter_ellipsis: Token.t value
+    { variadic_parameter_type: simple_type_specifier option value
+    ; variadic_parameter_ellipsis: Token.t value
     }
   and attribute_specification =
     { attribute_specification_left_double_angle: Token.t value

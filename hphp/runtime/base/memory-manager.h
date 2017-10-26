@@ -1038,9 +1038,6 @@ private:
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  void storeTail(void* tail, uint32_t tailBytes);
-  void splitTail(void* tail, uint32_t tailBytes, unsigned nSplit,
-                 uint32_t splitUsable, unsigned splitInd);
   void* slabAlloc(uint32_t bytes, size_t index);
   void* newSlab(uint32_t nbytes);
   void* mallocSmallSizeSlow(size_t bytes, size_t index);

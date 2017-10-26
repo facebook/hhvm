@@ -583,25 +583,30 @@ void MemoryManager::checkHeap(const char* phase) {
   }
 }
 
+namespace {
+
+using FreelistArray = MemoryManager::FreelistArray;
+
 /*
  * Store slab tail bytes (if any) in freelists.
  */
-inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
+inline
+void storeTail(FreelistArray& freelists, void* tail, uint32_t tailBytes) {
   void* rem = tail;
   for (uint32_t remBytes = tailBytes; remBytes > 0;) {
     uint32_t fragBytes = remBytes;
     assert(fragBytes >= kSmallSizeAlign);
     assert((fragBytes & kSmallSizeAlignMask) == 0);
-    unsigned fragInd = size2Index(fragBytes + 1) - 1;
-    uint32_t fragUsable = sizeIndex2Size(fragInd);
+    unsigned fragInd = MemoryManager::size2Index(fragBytes + 1) - 1;
+    uint32_t fragUsable = MemoryManager::sizeIndex2Size(fragInd);
     auto frag = FreeNode::InitFrom((char*)rem + remBytes - fragUsable,
                                    fragUsable, HeaderKind::Hole);
-    FTRACE(4, "MemoryManager::storeTail({}, {}): rem={}, remBytes={}, "
+    FTRACE(4, "storeTail({}, {}): rem={}, remBytes={}, "
               "frag={}, fragBytes={}, fragUsable={}, fragInd={}\n", tail,
               (void*)uintptr_t(tailBytes), rem, (void*)uintptr_t(remBytes),
               frag, (void*)uintptr_t(fragBytes), (void*)uintptr_t(fragUsable),
               fragInd);
-    m_freelists[fragInd].push(frag);
+    freelists[fragInd].push(frag);
     remBytes -= fragUsable;
   }
 }
@@ -609,28 +614,29 @@ inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
 /*
  * Create nSplit contiguous regions and store them in the appropriate freelist.
  */
-inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
-                                     unsigned nSplit, uint32_t splitUsable,
-                                     unsigned splitInd) {
+inline
+void splitTail(FreelistArray& freelists, void* tail, uint32_t tailBytes,
+               unsigned nSplit, uint32_t splitUsable, size_t index) {
   assert(tailBytes >= kSmallSizeAlign);
   assert((tailBytes & kSmallSizeAlignMask) == 0);
   assert((splitUsable & kSmallSizeAlignMask) == 0);
   assert(nSplit * splitUsable <= tailBytes);
-  assert(splitUsable == sizeIndex2Size(splitInd));
   for (uint32_t i = nSplit; i--;) {
     auto split = FreeNode::InitFrom((char*)tail + i * splitUsable,
                                     splitUsable, HeaderKind::Hole);
     FTRACE(4, "MemoryManager::splitTail(tail={}, tailBytes={}, tailPast={}): "
-              "split={}, splitUsable={}, splitInd={}\n", tail,
+              "split={}, splitUsable={}\n", tail,
               (void*)uintptr_t(tailBytes), (void*)(uintptr_t(tail) + tailBytes),
-              split, splitUsable, splitInd);
-    m_freelists[splitInd].push(split);
+              split, splitUsable);
+    freelists[index].push(split);
   }
   void* rem = (void*)(uintptr_t(tail) + nSplit * splitUsable);
   assert(tailBytes >= nSplit * splitUsable);
   uint32_t remBytes = tailBytes - nSplit * splitUsable;
   assert(uintptr_t(rem) + remBytes == uintptr_t(tail) + tailBytes);
-  storeTail(rem, remBytes);
+  storeTail(freelists, rem, remBytes);
+}
+
 }
 
 /*
@@ -640,7 +646,7 @@ inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
 NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   refreshStats();
   requestGC();
-  storeTail(m_front, (char*)m_limit - (char*)m_front);
+  storeTail(m_freelists, m_front, (char*)m_limit - (char*)m_front);
   auto mem = m_heap.allocSlab(kSlabSize, m_stats);
   assert((uintptr_t(mem.ptr) & kSmallSizeAlignMask) == 0);
   auto slab = static_cast<Slab*>(mem.ptr);
@@ -688,7 +694,7 @@ inline void* MemoryManager::slabAlloc(uint32_t nbytes, size_t index) {
     void* tail = m_front;
     uint32_t tailBytes = nSplit * nbytes;
     m_front = (void*)(uintptr_t(m_front) + tailBytes);
-    splitTail(tail, tailBytes, nSplit, nbytes, index);
+    splitTail(m_freelists, tail, tailBytes, nSplit, nbytes, index);
   }
   FTRACE(4, "slabAlloc({}, {}) --> ptr={}, m_front={}, m_limit={}\n", nbytes,
             index, ptr, m_front, m_limit);
@@ -715,7 +721,7 @@ void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
       size_t tailBytes = availBytes - nbytes;
       if (tailBytes > 0) {
         void* tail = (void*)(uintptr_t(p) + nbytes);
-        splitTail(tail, tailBytes, nContig - 1, nbytes, index);
+        splitTail(m_freelists, tail, tailBytes, nContig - 1, nbytes, index);
       }
       return p;
     }

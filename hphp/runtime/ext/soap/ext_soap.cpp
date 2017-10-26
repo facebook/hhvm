@@ -2929,14 +2929,11 @@ Variant HHVM_METHOD(SoapClient, __setcookie,
                     const String& name,
                     const Variant& value /* = null_string */) {
   auto* data = Native::data<SoapClient>(this_);
+  // FIXME: data->m_cookies is a write-only value
   if (!value.isNull()) {
     data->m_cookies.set(name, make_packed_array(value.toString()));
   } else {
-    const Variant* t = this_->o_realProp("_cookies",
-                                         ObjectData::RealPropUnchecked);
-    if (t && t->isInitialized()) {
-      data->m_cookies.remove(name);
-    }
+    data->m_cookies.remove(name);
   }
   return init_null();
 }

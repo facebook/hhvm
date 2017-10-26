@@ -8,7 +8,6 @@
  *)
 
 module Syntax = Full_fidelity_editable_positioned_syntax
-module Token = Syntax.Token
 module CoroutineSyntax = Coroutine_syntax
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 

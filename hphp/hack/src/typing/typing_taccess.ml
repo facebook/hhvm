@@ -13,12 +13,8 @@ open Typing_defs
 open Typing_dependent_type
 open Utils
 
-module TUtils = Typing_utils
 module Reason = Typing_reason
 module Env = Typing_env
-module Inst = Decl_instantiate
-module SN = Naming_special_names
-module TGen = Typing_generic
 module Phase = Typing_phase
 
 type env = {

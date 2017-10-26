@@ -8,8 +8,6 @@
  *
 *)
 
-module B = Buffer
-module A = Ast
 module SS = String_sequence
 module SU = Hhbc_string_utils
 module TV = Typed_value

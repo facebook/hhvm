@@ -9,13 +9,13 @@
  *)
 
 module PositionedSyntax = Full_fidelity_positioned_syntax
+open PositionedSyntax
+
 module PositionedToken = Full_fidelity_positioned_token
 module SyntaxUtilities =
   Full_fidelity_syntax_utilities.WithSyntax(PositionedSyntax)
 module SyntaxError = Full_fidelity_syntax_error
 module TokenKind = Full_fidelity_token_kind
-
-open PositionedSyntax
 
 type namespace_type =
   | Unspecified

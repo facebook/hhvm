@@ -20,7 +20,6 @@
 *)
 
 module Program = HhServerMonitorConfig.Program
-module SP = ServerProcess
 module SM = ServerMonitor.Make_monitor
   (HhServerMonitorConfig.HhServerConfig) (HhMonitorInformant);;
 

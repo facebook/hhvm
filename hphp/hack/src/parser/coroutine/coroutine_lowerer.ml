@@ -14,8 +14,6 @@ module CoroutineTypeLowerer = Coroutine_type_lowerer
 module Syntax = Full_fidelity_editable_positioned_syntax
 module List = Core_list
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
-module SourceText = Full_fidelity_source_text
-module SyntaxTree = Full_fidelity_syntax_tree
 
 open CoroutineSyntax
 open Syntax

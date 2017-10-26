@@ -8,6 +8,8 @@
  *
  *)
 
+[@@@ocaml.warning "-60"] (* https://caml.inria.fr/mantis/view.php?id=7522 *)
+
 module Lexer = Full_fidelity_minimal_lexer
 module SyntaxError = Full_fidelity_syntax_error
 module Context =

@@ -22,7 +22,6 @@ open Core_result.Monad_infix
 module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
 module SLC = ServerLocalConfig
-module LSC = LoadScriptConfig
 
 exception No_loader
 exception Loader_timeout of string
@@ -920,8 +919,6 @@ module ServerLazyInit : InitKind = struct
       fallback_init genv env err, state
 end
 
-
-module SIC = ServerInitCommon
 
 let ai_check genv files_info env t =
   match ServerArgs.ai_mode genv.options with

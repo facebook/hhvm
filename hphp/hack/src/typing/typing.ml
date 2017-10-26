@@ -32,7 +32,6 @@ module SubType      = Typing_subtype
 module Unify        = Typing_unify
 module TGen         = Typing_generic
 module SN           = Naming_special_names
-module TAccess      = Typing_taccess
 module TI           = Typing_instantiability
 module TVis         = Typing_visibility
 module TNBody       = Typing_naming_body
@@ -41,7 +40,6 @@ module T            = Tast
 module Phase        = Typing_phase
 module Subst        = Decl_subst
 module ExprDepTy    = Typing_dependent_type.ExprDepTy
-module Conts        = Typing_continuations
 module TCO          = TypecheckerOptions
 
 (*****************************************************************************)

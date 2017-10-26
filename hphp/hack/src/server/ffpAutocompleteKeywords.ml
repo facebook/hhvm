@@ -14,12 +14,6 @@
  *   wishes to do, not just what is valid
  *)
 
-module MinToken = Full_fidelity_minimal_token
-module MinimalSyntax = Full_fidelity_minimal_syntax
-module TokenKind = Full_fidelity_token_kind
-module SyntaxKind = Full_fidelity_syntax_kind
-module SyntaxTree = Full_fidelity_syntax_tree
-
 open FfpAutocompleteContextParser
 open FfpAutocompleteContextParser.Container
 open FfpAutocompleteContextParser.Predecessor

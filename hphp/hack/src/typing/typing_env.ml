@@ -14,7 +14,6 @@ open Decl_env
 open Typing_defs
 open Nast
 
-module SN = Naming_special_names
 module Dep = Typing_deps.Dep
 module TLazyHeap = Typing_lazy_heap
 module LEnvC = Typing_lenv_cont

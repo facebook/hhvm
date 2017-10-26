@@ -14,7 +14,6 @@ module A = Ast
 module SS = String_sequence
 module SU = Hhbc_string_utils
 module SN = Naming_special_names
-module TV = Typed_value
 module ULS = Unique_list_string
 open H
 

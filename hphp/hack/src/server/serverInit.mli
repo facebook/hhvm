@@ -13,7 +13,7 @@ type load_mini_approach =
   | Precomputed of ServerArgs.mini_state_target_info
   (** Load a saved state using Ocaml implementation of saved state loader.
    * Optionally, use the supplied saved state target to skip lookup in XDB. *)
-  | Load_state_natively of ServerArgs.informant_induced_mini_state_target option
+  | Load_state_natively of ServerMonitorUtils.target_mini_state option
 
 (* Saves the state that load_mini_script below reads in *)
 val save_state: ServerEnv.env -> string -> unit

@@ -268,11 +268,11 @@ module Revision_tracker = struct
       * slow init. *)
       Hh_logger.log "Hit unreachable Server_not_yet_started match in %s"
         "Revision_tracker.form_decision";
-      Restart_server
+      Restart_server None
     | _, State_leave _, Server_dead, _ ->
       (** Regardless of whether we had a significant change or not, when the
        * server is not alive, we restart it on a state leave.*)
-      Restart_server
+      Restart_server None
     | false, _, _, _ ->
       Move_along
     | true, State_enter _, _, _
@@ -289,11 +289,15 @@ module Revision_tracker = struct
       let state_distance = abs @@ nearest_xdb_result.Xdb.svn_rev - svn_rev in
       let incremental_distance = abs @@ svn_rev - !(env.current_base_revision) in
       if incremental_distance > state_distance then
-        Restart_server
+        let target_state = {
+          ServerMonitorUtils.mini_state_everstore_handle = nearest_xdb_result.Xdb.everstore_handle;
+          target_svn_rev = nearest_xdb_result.Xdb.svn_rev;
+        } in
+        Restart_server (Some target_state)
       else
         Move_along
     | true, Changed_merge_base _, _, _ ->
-      Restart_server
+      Restart_server None
 
   (**
    * If we have a cached svn_rev for this hg_rev, make a decision on
@@ -360,9 +364,10 @@ module Revision_tracker = struct
       Move_along
     else
       let decisions = churn_ready_changes ~acc:[] env server_state in
+      (** left is more recent transition, so we prefer its saved state target. *)
       let select_relevant left right = match left, right with
-        | Restart_server, _ -> Restart_server
-        | _, Restart_server -> Restart_server
+        | Restart_server target, _ -> Restart_server target
+        | _, Restart_server target -> Restart_server target
         | _, _ -> Move_along
       in
       List.fold_left select_relevant Move_along decisions
@@ -454,13 +459,13 @@ module Revision_tracker = struct
      *
      * Otherwise, we continue as per usual. *)
     let report = match early_decision with
-      | Some (Restart_server, svn_rev) ->
+      | Some (Restart_server target, svn_rev) ->
         (** Early decision to restart, so the prior state changes don't
          * matter anymore. *)
         Hh_logger.log "Informant early decision: restart server";
         let () = Queue.clear env.state_changes in
         let () = set_base_revision svn_rev env in
-        Restart_server
+        Restart_server target
       | Some (Move_along, _) | None ->
         handle_change_then_churn server_state change env
     in
@@ -484,9 +489,9 @@ module Revision_tracker = struct
     let reports = process (server_state, env, []) in
     (** We fold through the reports and take the "most active" one. *)
     let max_report a b = match a, b with
-      | Restart_server, _
-      | _, Restart_server ->
-        Restart_server
+      | Restart_server target, _
+      | _, Restart_server target->
+        Restart_server target
       | _, _ ->
         Move_along
     in
@@ -611,13 +616,13 @@ let report informant server_state = match informant, server_state with
   | Resigned, Informant_sig.Server_not_yet_started ->
     (** Actually, this case should never happen. But we force a restart
      * to avoid accidental wedged states anyway. *)
-    Informant_sig.Restart_server
+    Informant_sig.Restart_server None
   | Resigned, _ ->
     Informant_sig.Move_along
   | Active _, Informant_sig.Server_not_yet_started ->
     if should_start_first_server informant then begin
       HackEventLogger.informant_watcher_starting_server_from_settling ();
-      Informant_sig.Restart_server
+      Informant_sig.Restart_server None
     end
     else
       Informant_sig.Move_along

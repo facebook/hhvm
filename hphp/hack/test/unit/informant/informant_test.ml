@@ -5,8 +5,15 @@ module Report_comparator : Asserter.Comparator
     let to_string v = match v with
       | Move_along ->
         "Move_along"
-      | Restart_server ->
-        "Restart_server"
+      | Restart_server state ->
+        let str = begin match state with
+          | None -> "None"
+          | Some state ->
+            Printf.sprintf "(Some %s %d)"
+              state.ServerMonitorUtils.mini_state_everstore_handle
+              state.ServerMonitorUtils.target_svn_rev
+        end in
+        Printf.sprintf "Restart_server %s" str
 
     let is_equal exp actual =
       exp = actual
@@ -158,10 +165,15 @@ let test_informant_restarts_significant_move temp_dir =
     informant Tools.State_leave Tools.hg_rev_3
     Informant_sig.Server_alive Informant_sig.Move_along
     "state leave significant distance";
+  let expected_state_target = {
+    ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_200";
+    target_svn_rev = 200;
+  } in
   Tools.test_transition
     informant Tools.Changed_merge_base Tools.hg_rev_3
-    Informant_sig.Server_alive Informant_sig.Restart_server
-    "Changed merge base significant distance";
+    Informant_sig.Server_alive
+    (Informant_sig.Restart_server (Some expected_state_target))
+    "Move forward significant distance";
 
   (** Informant now sitting at revision 200. Moving to 230 no restart. *)
   Tools.test_transition
@@ -200,10 +212,15 @@ let test_informant_restarts_significant_move temp_dir =
     informant Tools.State_leave Tools.hg_rev_2
     Informant_sig.Server_alive Informant_sig.Move_along
     "state leave significant distance";
+  let expected_state_target = {
+    ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_5";
+    target_svn_rev = 5;
+  } in
   Tools.test_transition
     informant Tools.Changed_merge_base Tools.hg_rev_2
-    Informant_sig.Server_alive Informant_sig.Restart_server
-    "Changed merge base significant distance";
+    Informant_sig.Server_alive
+    (Informant_sig.Restart_server (Some expected_state_target))
+    "Move back significant distance";
   true
 
 (** This test is similar to the above (but shorter) except the
@@ -257,7 +274,7 @@ let test_informant_restarts_significant_move_delayed temp_dir =
    * Changed_merge_base above shows up now. *)
   Tools.test_transition
     informant Tools.State_enter Tools.hg_rev_3
-    Informant_sig.Server_alive Informant_sig.Restart_server
+    Informant_sig.Server_alive (Informant_sig.Restart_server None)
     "Trigger last delayed value for prior Changed_merge_base svn rev mapping";
   true
 
@@ -354,7 +371,7 @@ let test_repo_starts_midupdate temp_dir =
   let report = HhMonitorInformant.report
     informant Informant_sig.Server_not_yet_started in
   Report_asserter.assert_equals
-    Informant_sig.Restart_server report
+    (Informant_sig.Restart_server None) report
     "Should report restart server since repo is settled";
   true
 

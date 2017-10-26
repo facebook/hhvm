@@ -293,3 +293,9 @@ let debug_client options = options.debug_client
 (*****************************************************************************)
 
 let set_no_load options is_no_load = {options with no_load = is_no_load}
+let set_mini_state_target options target = match target with
+  | None -> options
+  | Some target ->
+    { options with
+      with_mini_state = Some (Informant_induced_mini_state_target target)
+    }

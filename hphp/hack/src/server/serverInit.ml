@@ -29,7 +29,7 @@ exception Loader_timeout of string
 type load_mini_approach =
   | Load_mini_script of Path.t
   | Precomputed of ServerArgs.mini_state_target_info
-  | Load_state_natively of ServerArgs.informant_induced_mini_state_target option
+  | Load_state_natively of ServerMonitorUtils.target_mini_state option
 
 (** Docs are in .mli *)
 type init_result =
@@ -235,7 +235,7 @@ module ServerInitCommon = struct
    | Load_state_natively target_opt ->
      let mini_state_handle = begin match target_opt with
      | None -> None
-     | Some { ServerArgs.mini_state_everstore_handle; target_svn_rev; } ->
+     | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; } ->
        Some
        {
          State_loader.mini_state_everstore_handle = mini_state_everstore_handle;

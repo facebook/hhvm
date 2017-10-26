@@ -8,15 +8,9 @@ module Types = struct
     changes          : Relative_path.t list;
   }
 
-  (** When Informant triggers a new server to start, use this record. *)
-  type informant_induced_mini_state_target = {
-    mini_state_everstore_handle : string;
-    target_svn_rev : int;
-  }
-
   type mini_state_target =
     | Mini_state_target_info of mini_state_target_info
-    | Informant_induced_mini_state_target of informant_induced_mini_state_target
+    | Informant_induced_mini_state_target of ServerMonitorUtils.target_mini_state
 
 end
 
@@ -60,5 +54,6 @@ module type S = sig
   (****************************************************************************)
 
   val set_no_load         : options -> bool -> options
+  val set_mini_state_target : options -> ServerMonitorUtils.target_mini_state option -> options
 
 end

@@ -1774,9 +1774,9 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         }
 
         // If we have a DebugDisplay prop saved, use it.
-        auto const debugDispVal = obj->o_realProp(s_PHP_DebugDisplay, 0);
-        if (debugDispVal) {
-          serializeVariant(*debugDispVal, false, false, true);
+        auto const debugDisp = obj->getProp(nullptr, s_PHP_DebugDisplay.get());
+        if (debugDisp.has_val()) {
+          serializeVariant(tvAsCVarRef(debugDisp.tv_ptr()), false, false, true);
           return;
         }
         // Otherwise compute it if we have a __toDebugDisplay method.
@@ -1791,9 +1791,12 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
            type == VariableSerializer::Type::APCSerialize ||
            type == VariableSerializer::Type::DebuggerSerialize ||
            type == VariableSerializer::Type::DebuggerDump)) {
-        auto const cname = obj->o_realProp(s_PHP_Incomplete_Class_Name, 0);
-        if (cname && cname->isString()) {
-          pushObjectInfo(cname->toCStrRef(), obj->getId(), 'O');
+        auto const cname = obj->getProp(
+          nullptr,
+          s_PHP_Incomplete_Class_Name.get()
+        ).unboxed();
+        if (cname.has_val() && isStringType(cname.type())) {
+          pushObjectInfo(StrNR(cname.val().pstr), obj->getId(), 'O');
           properties.remove(s_PHP_Incomplete_Class_Name, true);
           serializeArray(properties, true);
           popObjectInfo();

@@ -48,8 +48,9 @@ const StaticString
   s_current("current"),
   s_key("key"),
   s_getIterator("getIterator"),
-  s_directory_iterator("DirectoryIterator");
+  s_DirectoryIterator("DirectoryIterator");
 
+static Class* s_DirectoryIterator_class = nullptr;
 
 void throw_spl_exception(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
   ATTRIBUTE_PRINTF(1,2);
@@ -327,19 +328,29 @@ String HHVM_FUNCTION(spl_autoload_extensions,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString
+  s_dir("dir"),
+  s_dirName("dirName");
+
 template <class T>
 static req::ptr<T> getDir(const Object& dir_iter) {
   static_assert(std::is_base_of<Directory, T>::value,
                 "Only cast to directories");
-  return cast<T>(*dir_iter->o_realProp("dir", 0, s_directory_iterator));
+  auto const dir = dir_iter->getProp(
+    s_DirectoryIterator_class, s_dir.get()
+  ).unboxed();
+  assertx(dir.has_val());
+  assertx(dir.type() == KindOfResource);
+  return req::ptr<T>(static_cast<T*>(dir.val().pres->data()));
 }
 
 static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
   auto dir = getDir<Directory>(ObjNR(this_).asObject());
 
   if (auto array_dir = dyn_cast<ArrayDirectory>(dir)) {
-    auto prop = this_->o_realProp("dirName", 0, s_directory_iterator);
-    *prop = array_dir->path();
+    auto const path = array_dir->path();
+    this_->setProp(s_DirectoryIterator_class, s_dirName.get(),
+                   make_tv<KindOfString>(path.get()));
   }
 
   return HHVM_FN(readdir)(Resource(dir));
@@ -374,6 +385,9 @@ struct SPLExtension final : Extension {
     HHVM_FE(spl_autoload_unregister);
 
     loadSystemlib();
+
+    s_DirectoryIterator_class = Unit::lookupClass(s_DirectoryIterator.get());
+    assertx(s_DirectoryIterator_class);
   }
 } s_SPL_extension;
 

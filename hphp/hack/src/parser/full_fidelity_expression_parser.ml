@@ -15,7 +15,9 @@ module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Operator = Full_fidelity_operator
 module Lexer = Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token)
-module PrecedenceParser = Full_fidelity_precedence_parser
+module PrecedenceSyntax = Full_fidelity_precedence_parser
+  .WithSyntax(Full_fidelity_minimal_syntax)
+module PrecedenceParser = PrecedenceSyntax
   .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
 
 open TokenKind

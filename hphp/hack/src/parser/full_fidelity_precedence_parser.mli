@@ -7,14 +7,13 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-module WithLexer :
-  functor (Lexer : Full_fidelity_lexer_sig.MinimalLexer_S) -> sig
-
+module WithSyntax : functor (Syntax : Syntax_sig.Syntax_S) -> sig
+module WithLexer : functor (Lexer : Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S) -> sig
 type t = {
   lexer : Lexer.t;
   errors : Full_fidelity_syntax_error.t list;
   context:
-    Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token).t;
+    Full_fidelity_parser_context.WithToken(Syntax.Token).t;
   precedence : int;
   hhvm_compat_mode : bool;
 }
@@ -22,7 +21,7 @@ type t = {
 val make : ?hhvm_compat_mode:bool
   -> Lexer.t
   -> Full_fidelity_syntax_error.t list
-  -> Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token).t
+  -> Full_fidelity_parser_context.WithToken(Syntax.Token).t
   -> t
 
 val errors : t -> Full_fidelity_syntax_error.t list
@@ -36,14 +35,14 @@ val with_lexer : t -> Lexer.t -> t
 val lexer : t -> Lexer.t
 
 val context : t ->
-  Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token).t
+  Full_fidelity_parser_context.WithToken(Syntax.Token).t
 
 val with_context : t ->
-  Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token).t -> t
+  Full_fidelity_parser_context.WithToken(Syntax.Token).t -> t
 
-val skipped_tokens : t -> Full_fidelity_minimal_token.t list
+val skipped_tokens : t -> Syntax.Token.t list
 
-val with_skipped_tokens : t -> Full_fidelity_minimal_token.t list -> t
+val with_skipped_tokens : t -> Syntax.Token.t list -> t
 
 val clear_skipped_tokens : t -> t
 
@@ -74,7 +73,8 @@ val with_reset_precedence : t -> (t -> t * 'a) -> t * 'a
 
 val next_xhp_element_token :
   ?no_trailing:bool -> ?attribute:bool -> t
-  -> t * Full_fidelity_minimal_token.t * String.t
+  -> t * Syntax.Token.t * String.t
 
-val next_xhp_body_token : t -> t * Full_fidelity_minimal_token.t
+val next_xhp_body_token : t -> t * Syntax.Token.t
+end
 end

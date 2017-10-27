@@ -231,7 +231,8 @@ module type Syntax_S = sig
     ; parameter_default_value                            : t
     }
   type variadic_parameter =
-    { variadic_parameter_ellipsis                        : t
+    { variadic_parameter_type                            : t
+    ; variadic_parameter_ellipsis                        : t
     }
   type attribute_specification =
     { attribute_specification_left_double_angle          : t
@@ -1077,13 +1078,324 @@ module type Syntax_S = sig
   | ErrorSyntax                             of error
   | ListItem                                of list_item
 
-(* TODO: generate functions
+
+  val syntax : t -> syntax
+
   val make_token : Token.t -> t
   val make_missing : unit -> t
   val make_list : t list -> t
+  val make_end_of_file : t -> t
+  val make_script : t -> t
+  val make_simple_type_specifier : t -> t
+  val make_literal_expression : t -> t
+  val make_variable_expression : t -> t
+  val make_qualified_name_expression : t -> t
+  val make_pipe_variable_expression : t -> t
+  val make_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_enumerator : t -> t -> t -> t -> t
+  val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_property_declaration : t -> t -> t -> t -> t
+  val make_property_declarator : t -> t -> t
+  val make_namespace_declaration : t -> t -> t -> t
+  val make_namespace_body : t -> t -> t -> t
+  val make_namespace_empty_body : t -> t
+  val make_namespace_use_declaration : t -> t -> t -> t -> t
+  val make_namespace_group_use_declaration : t -> t -> t -> t -> t -> t -> t -> t
+  val make_namespace_use_clause : t -> t -> t -> t -> t
+  val make_function_declaration : t -> t -> t -> t
+  val make_function_declaration_header : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_where_clause : t -> t -> t
+  val make_where_constraint : t -> t -> t -> t
+  val make_methodish_declaration : t -> t -> t -> t -> t -> t
+  val make_classish_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_classish_body : t -> t -> t -> t
+  val make_trait_use_precedence_item : t -> t -> t -> t
+  val make_trait_use_alias_item : t -> t -> t -> t -> t
+  val make_trait_use_conflict_resolution : t -> t -> t -> t -> t -> t
+  val make_trait_use : t -> t -> t -> t
+  val make_require_clause : t -> t -> t -> t -> t
+  val make_const_declaration : t -> t -> t -> t -> t -> t
+  val make_constant_declarator : t -> t -> t
+  val make_type_const_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_decorated_expression : t -> t -> t
+  val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t
+  val make_variadic_parameter : t -> t -> t
+  val make_attribute_specification : t -> t -> t -> t
+  val make_attribute : t -> t -> t -> t -> t
+  val make_inclusion_expression : t -> t -> t
+  val make_inclusion_directive : t -> t -> t
+  val make_compound_statement : t -> t -> t -> t
+  val make_expression_statement : t -> t -> t
+  val make_markup_section : t -> t -> t -> t -> t
+  val make_markup_suffix : t -> t -> t
+  val make_unset_statement : t -> t -> t -> t -> t -> t
+  val make_using_statement_block_scoped : t -> t -> t -> t -> t -> t -> t
+  val make_using_statement_function_scoped : t -> t -> t -> t -> t
+  val make_while_statement : t -> t -> t -> t -> t -> t
+  val make_if_statement : t -> t -> t -> t -> t -> t -> t -> t
+  val make_elseif_clause : t -> t -> t -> t -> t -> t
+  val make_else_clause : t -> t -> t
+  val make_if_endif_statement : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_elseif_colon_clause : t -> t -> t -> t -> t -> t -> t
+  val make_else_colon_clause : t -> t -> t -> t
+  val make_try_statement : t -> t -> t -> t -> t
+  val make_catch_clause : t -> t -> t -> t -> t -> t -> t
+  val make_finally_clause : t -> t -> t
+  val make_do_statement : t -> t -> t -> t -> t -> t -> t -> t
+  val make_for_statement : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_foreach_statement : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_switch_statement : t -> t -> t -> t -> t -> t -> t -> t
+  val make_switch_section : t -> t -> t -> t
+  val make_switch_fallthrough : t -> t -> t
+  val make_case_label : t -> t -> t -> t
+  val make_default_label : t -> t -> t
+  val make_return_statement : t -> t -> t -> t
+  val make_goto_label : t -> t -> t
+  val make_goto_statement : t -> t -> t -> t
+  val make_throw_statement : t -> t -> t -> t
+  val make_break_statement : t -> t -> t -> t
+  val make_continue_statement : t -> t -> t -> t
+  val make_function_static_statement : t -> t -> t -> t
+  val make_static_declarator : t -> t -> t
+  val make_echo_statement : t -> t -> t -> t
+  val make_global_statement : t -> t -> t -> t
+  val make_simple_initializer : t -> t -> t
+  val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_anonymous_function_use_clause : t -> t -> t -> t -> t
+  val make_lambda_expression : t -> t -> t -> t -> t -> t
+  val make_lambda_signature : t -> t -> t -> t -> t -> t
+  val make_cast_expression : t -> t -> t -> t -> t
+  val make_scope_resolution_expression : t -> t -> t -> t
+  val make_member_selection_expression : t -> t -> t -> t
+  val make_safe_member_selection_expression : t -> t -> t -> t
+  val make_embedded_member_selection_expression : t -> t -> t -> t
+  val make_yield_expression : t -> t -> t
+  val make_yield_from_expression : t -> t -> t -> t
+  val make_prefix_unary_expression : t -> t -> t
+  val make_postfix_unary_expression : t -> t -> t
+  val make_binary_expression : t -> t -> t -> t
+  val make_instanceof_expression : t -> t -> t -> t
+  val make_is_expression : t -> t -> t -> t
+  val make_conditional_expression : t -> t -> t -> t -> t -> t
+  val make_eval_expression : t -> t -> t -> t -> t
+  val make_empty_expression : t -> t -> t -> t -> t
+  val make_define_expression : t -> t -> t -> t -> t
+  val make_isset_expression : t -> t -> t -> t -> t
+  val make_function_call_expression : t -> t -> t -> t -> t
+  val make_function_call_with_type_arguments_expression : t -> t -> t -> t -> t -> t
+  val make_parenthesized_expression : t -> t -> t -> t
+  val make_braced_expression : t -> t -> t -> t
+  val make_embedded_braced_expression : t -> t -> t -> t
+  val make_list_expression : t -> t -> t -> t -> t
+  val make_collection_literal_expression : t -> t -> t -> t -> t
+  val make_object_creation_expression : t -> t -> t -> t -> t -> t
+  val make_array_creation_expression : t -> t -> t -> t
+  val make_array_intrinsic_expression : t -> t -> t -> t -> t
+  val make_darray_intrinsic_expression : t -> t -> t -> t -> t
+  val make_dictionary_intrinsic_expression : t -> t -> t -> t -> t
+  val make_keyset_intrinsic_expression : t -> t -> t -> t -> t
+  val make_varray_intrinsic_expression : t -> t -> t -> t -> t
+  val make_vector_intrinsic_expression : t -> t -> t -> t -> t
+  val make_element_initializer : t -> t -> t -> t
+  val make_subscript_expression : t -> t -> t -> t -> t
+  val make_embedded_subscript_expression : t -> t -> t -> t -> t
+  val make_awaitable_creation_expression : t -> t -> t -> t
+  val make_xhp_children_declaration : t -> t -> t -> t
+  val make_xhp_children_parenthesized_list : t -> t -> t -> t
+  val make_xhp_category_declaration : t -> t -> t -> t
+  val make_xhp_enum_type : t -> t -> t -> t -> t
+  val make_xhp_required : t -> t -> t
+  val make_xhp_class_attribute_declaration : t -> t -> t -> t
+  val make_xhp_class_attribute : t -> t -> t -> t -> t
+  val make_xhp_simple_class_attribute : t -> t
+  val make_xhp_attribute : t -> t -> t -> t
+  val make_xhp_open : t -> t -> t -> t -> t
+  val make_xhp_expression : t -> t -> t -> t
+  val make_xhp_close : t -> t -> t -> t
+  val make_type_constant : t -> t -> t -> t
+  val make_vector_type_specifier : t -> t -> t -> t -> t -> t
+  val make_keyset_type_specifier : t -> t -> t -> t -> t -> t
+  val make_tuple_type_explicit_specifier : t -> t -> t -> t -> t
+  val make_varray_type_specifier : t -> t -> t -> t -> t -> t
+  val make_vector_array_type_specifier : t -> t -> t -> t -> t
+  val make_type_parameter : t -> t -> t -> t
+  val make_type_constraint : t -> t -> t
+  val make_darray_type_specifier : t -> t -> t -> t -> t -> t -> t -> t
+  val make_map_array_type_specifier : t -> t -> t -> t -> t -> t -> t
+  val make_dictionary_type_specifier : t -> t -> t -> t -> t
+  val make_closure_type_specifier : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_classname_type_specifier : t -> t -> t -> t -> t -> t
+  val make_field_specifier : t -> t -> t -> t -> t
+  val make_field_initializer : t -> t -> t -> t
+  val make_shape_type_specifier : t -> t -> t -> t -> t -> t
+  val make_shape_expression : t -> t -> t -> t -> t
+  val make_tuple_expression : t -> t -> t -> t -> t
+  val make_generic_type_specifier : t -> t -> t
+  val make_nullable_type_specifier : t -> t -> t
+  val make_soft_type_specifier : t -> t -> t
+  val make_type_arguments : t -> t -> t -> t
+  val make_type_parameters : t -> t -> t -> t
+  val make_tuple_type_specifier : t -> t -> t -> t
+  val make_error : t -> t
   val make_list_item : t -> t -> t
-  ... and so on ... *)
-(* TODO: generate functions:
+
+
   val is_missing : t -> bool
-  ... and so on ... *)
+  val is_list : t -> bool
+  val is_end_of_file : t -> bool
+  val is_script : t -> bool
+  val is_simple_type_specifier : t -> bool
+  val is_literal_expression : t -> bool
+  val is_variable_expression : t -> bool
+  val is_qualified_name_expression : t -> bool
+  val is_pipe_variable_expression : t -> bool
+  val is_enum_declaration : t -> bool
+  val is_enumerator : t -> bool
+  val is_alias_declaration : t -> bool
+  val is_property_declaration : t -> bool
+  val is_property_declarator : t -> bool
+  val is_namespace_declaration : t -> bool
+  val is_namespace_body : t -> bool
+  val is_namespace_empty_body : t -> bool
+  val is_namespace_use_declaration : t -> bool
+  val is_namespace_group_use_declaration : t -> bool
+  val is_namespace_use_clause : t -> bool
+  val is_function_declaration : t -> bool
+  val is_function_declaration_header : t -> bool
+  val is_where_clause : t -> bool
+  val is_where_constraint : t -> bool
+  val is_methodish_declaration : t -> bool
+  val is_classish_declaration : t -> bool
+  val is_classish_body : t -> bool
+  val is_trait_use_precedence_item : t -> bool
+  val is_trait_use_alias_item : t -> bool
+  val is_trait_use_conflict_resolution : t -> bool
+  val is_trait_use : t -> bool
+  val is_require_clause : t -> bool
+  val is_const_declaration : t -> bool
+  val is_constant_declarator : t -> bool
+  val is_type_const_declaration : t -> bool
+  val is_decorated_expression : t -> bool
+  val is_parameter_declaration : t -> bool
+  val is_variadic_parameter : t -> bool
+  val is_attribute_specification : t -> bool
+  val is_attribute : t -> bool
+  val is_inclusion_expression : t -> bool
+  val is_inclusion_directive : t -> bool
+  val is_compound_statement : t -> bool
+  val is_expression_statement : t -> bool
+  val is_markup_section : t -> bool
+  val is_markup_suffix : t -> bool
+  val is_unset_statement : t -> bool
+  val is_using_statement_block_scoped : t -> bool
+  val is_using_statement_function_scoped : t -> bool
+  val is_while_statement : t -> bool
+  val is_if_statement : t -> bool
+  val is_elseif_clause : t -> bool
+  val is_else_clause : t -> bool
+  val is_if_endif_statement : t -> bool
+  val is_elseif_colon_clause : t -> bool
+  val is_else_colon_clause : t -> bool
+  val is_try_statement : t -> bool
+  val is_catch_clause : t -> bool
+  val is_finally_clause : t -> bool
+  val is_do_statement : t -> bool
+  val is_for_statement : t -> bool
+  val is_foreach_statement : t -> bool
+  val is_switch_statement : t -> bool
+  val is_switch_section : t -> bool
+  val is_switch_fallthrough : t -> bool
+  val is_case_label : t -> bool
+  val is_default_label : t -> bool
+  val is_return_statement : t -> bool
+  val is_goto_label : t -> bool
+  val is_goto_statement : t -> bool
+  val is_throw_statement : t -> bool
+  val is_break_statement : t -> bool
+  val is_continue_statement : t -> bool
+  val is_function_static_statement : t -> bool
+  val is_static_declarator : t -> bool
+  val is_echo_statement : t -> bool
+  val is_global_statement : t -> bool
+  val is_simple_initializer : t -> bool
+  val is_anonymous_function : t -> bool
+  val is_anonymous_function_use_clause : t -> bool
+  val is_lambda_expression : t -> bool
+  val is_lambda_signature : t -> bool
+  val is_cast_expression : t -> bool
+  val is_scope_resolution_expression : t -> bool
+  val is_member_selection_expression : t -> bool
+  val is_safe_member_selection_expression : t -> bool
+  val is_embedded_member_selection_expression : t -> bool
+  val is_yield_expression : t -> bool
+  val is_yield_from_expression : t -> bool
+  val is_prefix_unary_expression : t -> bool
+  val is_postfix_unary_expression : t -> bool
+  val is_binary_expression : t -> bool
+  val is_instanceof_expression : t -> bool
+  val is_is_expression : t -> bool
+  val is_conditional_expression : t -> bool
+  val is_eval_expression : t -> bool
+  val is_empty_expression : t -> bool
+  val is_define_expression : t -> bool
+  val is_isset_expression : t -> bool
+  val is_function_call_expression : t -> bool
+  val is_function_call_with_type_arguments_expression : t -> bool
+  val is_parenthesized_expression : t -> bool
+  val is_braced_expression : t -> bool
+  val is_embedded_braced_expression : t -> bool
+  val is_list_expression : t -> bool
+  val is_collection_literal_expression : t -> bool
+  val is_object_creation_expression : t -> bool
+  val is_array_creation_expression : t -> bool
+  val is_array_intrinsic_expression : t -> bool
+  val is_darray_intrinsic_expression : t -> bool
+  val is_dictionary_intrinsic_expression : t -> bool
+  val is_keyset_intrinsic_expression : t -> bool
+  val is_varray_intrinsic_expression : t -> bool
+  val is_vector_intrinsic_expression : t -> bool
+  val is_element_initializer : t -> bool
+  val is_subscript_expression : t -> bool
+  val is_embedded_subscript_expression : t -> bool
+  val is_awaitable_creation_expression : t -> bool
+  val is_xhp_children_declaration : t -> bool
+  val is_xhp_children_parenthesized_list : t -> bool
+  val is_xhp_category_declaration : t -> bool
+  val is_xhp_enum_type : t -> bool
+  val is_xhp_required : t -> bool
+  val is_xhp_class_attribute_declaration : t -> bool
+  val is_xhp_class_attribute : t -> bool
+  val is_xhp_simple_class_attribute : t -> bool
+  val is_xhp_attribute : t -> bool
+  val is_xhp_open : t -> bool
+  val is_xhp_expression : t -> bool
+  val is_xhp_close : t -> bool
+  val is_type_constant : t -> bool
+  val is_vector_type_specifier : t -> bool
+  val is_keyset_type_specifier : t -> bool
+  val is_tuple_type_explicit_specifier : t -> bool
+  val is_varray_type_specifier : t -> bool
+  val is_vector_array_type_specifier : t -> bool
+  val is_type_parameter : t -> bool
+  val is_type_constraint : t -> bool
+  val is_darray_type_specifier : t -> bool
+  val is_map_array_type_specifier : t -> bool
+  val is_dictionary_type_specifier : t -> bool
+  val is_closure_type_specifier : t -> bool
+  val is_classname_type_specifier : t -> bool
+  val is_field_specifier : t -> bool
+  val is_field_initializer : t -> bool
+  val is_shape_type_specifier : t -> bool
+  val is_shape_expression : t -> bool
+  val is_tuple_expression : t -> bool
+  val is_generic_type_specifier : t -> bool
+  val is_nullable_type_specifier : t -> bool
+  val is_soft_type_specifier : t -> bool
+  val is_type_arguments : t -> bool
+  val is_type_parameters : t -> bool
+  val is_tuple_type_specifier : t -> bool
+  val is_error : t -> bool
+  val is_list_item : t -> bool
+
+
 end (* Syntax_S *)

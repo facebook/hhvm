@@ -444,6 +444,16 @@ end (* MakeValidated *)
 end (* GenerateFFSyntaxType *)
 
 module GenerateFFSyntaxSig = struct
+
+  let to_constructor_methods x =
+    let mapper1 (f,_) = " t ->" in
+    let fields1 = map_and_concat mapper1 x.fields in
+    sprintf "  val make_%s :%s t\n"
+      x.type_name fields1
+
+  let to_type_tests x =
+    sprintf ("  val is_%s : t -> bool\n") x.type_name
+
   let to_parse_tree x =
     let field_width = 50 - String.length x.prefix in
     let fmt = sprintf "%s_%%-%ds: t\n" x.prefix field_width in
@@ -455,50 +465,6 @@ module GenerateFFSyntaxSig = struct
   let to_syntax x =
     sprintf ("  | " ^^ kind_name_fmt ^^ " of %s\n")
       x.kind_name x.type_name
-
-  let to_aggregate_type x =
-    let aggregated_types = aggregation_of x in
-    let prefix, trim = aggregate_type_pfx_trim x in
-    let compact = Str.global_replace (Str.regexp trim) "" in
-    let valign = align_fmt (fun x -> compact x.kind_name) aggregated_types in
-    let type_name = aggregate_type_name x in
-    let make_constructor ty =
-      sprintf ("%s" ^^ valign ^^ " of %s")
-        prefix (compact ty.kind_name)
-        ty.type_name
-    in
-    let type_body = List.map make_constructor aggregated_types in
-    sprintf "  and %s =\n  | %s\n" type_name (String.concat "\n  | " type_body)
-
-  let to_validated_syntax x =
-    (* Not proud of this, but we have to exclude these things that don't occur
-     * in validated syntax. Their absence being the point of the validated
-     * syntax
-     *)
-    if x.kind_name = "ErrorSyntax" || x.kind_name = "ListItem" then "" else
-    begin
-      let open Printf in
-      let mapper (f,c) =
-        let rec make_type_string : child_spec -> string = function
-        | Aggregate t -> aggregate_type_name t
-        | Token -> "Token.t"
-        | Just t ->
-          (match SMap.get t schema_map with
-          | None   -> failwith @@ sprintf "Unknown type: %s" t
-          | Some t -> t.type_name
-          )
-        | ZeroOrMore ((Just _ | Aggregate _ | Token) as c) ->
-          sprintf "%s listesque" (make_type_string c)
-        | ZeroOrOne  ((Just _ | Aggregate _ | Token) as c) ->
-          sprintf "%s option" (make_type_string c)
-        | ZeroOrMore c -> sprintf "(%s) listesque" (make_type_string c)
-        | ZeroOrOne  c -> sprintf "(%s) option"    (make_type_string c)
-        in
-        sprintf "%s_%s: %s value" x.prefix f (make_type_string c)
-      in
-      let fields = map_and_concat_separated "\n    ; " mapper x.fields in
-      sprintf "  and %s =\n    { %s\n    }\n" x.type_name fields
-    end
 
   let full_fidelity_syntax_template : string = (make_header MLStyle "
 * This module contains a signature which can be used to describe the public
@@ -514,15 +480,18 @@ PARSE_TREE
   | Missing
   | SyntaxList                        of t list
 SYNTAX
-(* TODO: generate functions
+
+  val syntax : t -> syntax
+
   val make_token : Token.t -> t
   val make_missing : unit -> t
   val make_list : t list -> t
-  val make_list_item : t -> t -> t
-  ... and so on ... *)
-(* TODO: generate functions:
+CONSTRUCTOR_METHODS
+
   val is_missing : t -> bool
-  ... and so on ... *)
+  val is_list : t -> bool
+TYPE_TESTS
+
 end (* Syntax_S *)
 "
 
@@ -533,6 +502,8 @@ end (* Syntax_S *)
     transformations = [
       { pattern = "PARSE_TREE"; func = to_parse_tree };
       { pattern = "SYNTAX"; func = to_syntax };
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
+      { pattern = "TYPE_TESTS"; func = to_type_tests };
     ];
     token_no_text_transformations = [];
     token_given_text_transformations = [];

@@ -8,32 +8,36 @@
  *
  *)
 
-module Token = Full_fidelity_minimal_token
+module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
+
+module Token = Syntax.Token
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
-module SimpleParserSyntax =
-  Full_fidelity_simple_parser.WithSyntax(Full_fidelity_minimal_syntax)
+module SimpleParserSyntax = Full_fidelity_simple_parser.WithSyntax(Syntax)
 module SimpleParser = SimpleParserSyntax.WithLexer(
-  Full_fidelity_type_lexer.WithToken(Full_fidelity_minimal_token))
+  Full_fidelity_type_lexer.WithToken(Syntax.Token))
 
 open TokenKind
-open Full_fidelity_minimal_syntax
+open Syntax
 
 module WithExpressionParser (
   ExpressionParser : Full_fidelity_expression_parser_type
-    .WithSyntax(Full_fidelity_minimal_syntax)
-    .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+    .WithSyntax(Syntax)
+    .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
     .ExpressionParser_S) :
   Full_fidelity_type_parser_type
-    .WithSyntax(Full_fidelity_minimal_syntax)
-    .WithLexer(Full_fidelity_type_lexer.WithToken(Full_fidelity_minimal_token))
+    .WithSyntax(Syntax)
+    .WithLexer(Full_fidelity_type_lexer.WithToken(Syntax.Token))
     .TypeParser_S = struct
 
+module ParserHelperSyntax = Full_fidelity_parser_helpers.WithSyntax(Syntax)
+module ParserHelper =
+  ParserHelperSyntax.WithLexer(Full_fidelity_type_lexer.WithToken(Syntax.Token))
+
 include SimpleParser
-include
-  Full_fidelity_parser_helpers.MinimalTypeParserHelper.WithParser(SimpleParser)
+include ParserHelper.WithParser(SimpleParser)
 
 let parse_expression parser =
   let expr_parser = ExpressionParser.make
@@ -707,3 +711,4 @@ and parse_return_type parser =
     parse_type_specifier parser
 
 end
+end (* WithSyntax *)

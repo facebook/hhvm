@@ -729,5 +729,3 @@ end (* WithSyntax *)
 module MinimalParserSyntax = WithSyntax(Full_fidelity_minimal_syntax)
 module MinimalParserHelper = MinimalParserSyntax
   .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
-module MinimalTypeParserHelper = MinimalParserSyntax
-  .WithLexer(Full_fidelity_type_lexer.WithToken(Full_fidelity_minimal_token))

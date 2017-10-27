@@ -34,6 +34,9 @@ module type TypeParser_S = Full_fidelity_type_parser_type
   .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
   .TypeParser_S
 
+module TypeParserSyntax =
+  Full_fidelity_type_parser.WithSyntax(Full_fidelity_minimal_syntax)
+
 module rec ExpressionParser : ExpressionParser_S =
   Full_fidelity_expression_parser.WithStatementAndDeclAndTypeParser
     (StatementParser) (DeclParser) (TypeParser)
@@ -44,7 +47,7 @@ and DeclParser : DeclarationParser_S =
   Full_fidelity_declaration_parser.WithExpressionAndStatementAndTypeParser
     (ExpressionParser) (StatementParser) (TypeParser)
 and TypeParser : TypeParser_S =
-  Full_fidelity_type_parser.WithExpressionParser(ExpressionParser)
+  TypeParserSyntax.WithExpressionParser(ExpressionParser)
 
 type t = {
   lexer : Lexer.t;

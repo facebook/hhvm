@@ -677,6 +677,9 @@ function find_tests($files, array $options = null) {
   }
   if ($files == array('all')) {
     $files = array('quick', 'slow', 'spec', 'zend', 'fastcgi');
+    if (is_dir(hphp_home() . '/hphp/facebook/test')) {
+      $files[] = 'facebook';
+    }
   }
   $ft = array();
   foreach ($files as $file) {

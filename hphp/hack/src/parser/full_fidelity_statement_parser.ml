@@ -13,8 +13,10 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
-module SimpleParser = Full_fidelity_simple_parser
-  .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+module SimpleParserSyntax =
+  Full_fidelity_simple_parser.WithSyntax(Full_fidelity_minimal_syntax)
+module SimpleParser = SimpleParserSyntax.WithLexer(
+  Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
 
 open TokenKind
 open Full_fidelity_minimal_syntax

@@ -7,17 +7,21 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-module Token = Full_fidelity_minimal_token
+
+module WithSyntax(Syntax: Syntax_sig.Syntax_S) = struct
+
+module Token = Syntax.Token
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SyntaxError = Full_fidelity_syntax_error
-module Context = Full_fidelity_parser_context
-module Trivia = Full_fidelity_minimal_trivia
+module Trivia = Token.Trivia
 module SourceText = Full_fidelity_source_text
 
-open Full_fidelity_minimal_syntax
+open Syntax
 
-module WithLexer(Lexer : Full_fidelity_lexer_sig.MinimalLexer_S) = struct
+module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
+
+module WithLexer(Lexer : Lexer_S) = struct
 module type Parser_S = sig
   type t
   val errors : t -> SyntaxError.t list
@@ -718,10 +722,12 @@ module WithParser(Parser : Parser_S) = struct
     let (parser, items) = aux parser [] in
     (parser, make_list (List.rev items))
 
-end
-end
+end (* WithParser *)
+end (* WithLexer *)
+end (* WithSyntax *)
 
-module MinimalParserHelper =
-  WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
-module MinimalTypeParserHelper =
-  WithLexer(Full_fidelity_type_lexer.WithToken(Full_fidelity_minimal_token))
+module MinimalParserSyntax = WithSyntax(Full_fidelity_minimal_syntax)
+module MinimalParserHelper = MinimalParserSyntax
+  .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+module MinimalTypeParserHelper = MinimalParserSyntax
+  .WithLexer(Full_fidelity_type_lexer.WithToken(Full_fidelity_minimal_token))

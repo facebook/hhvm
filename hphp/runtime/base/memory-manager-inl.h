@@ -34,10 +34,6 @@ static_assert(
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline SparseHeap::~SparseHeap() {
-  reset();
-}
-
 inline bool SparseHeap::empty() const {
   return m_slabs.empty() && m_bigs.empty();
 }

@@ -1107,6 +1107,7 @@ private:
 };
 
 extern THREAD_LOCAL_FLAT(MemoryManager, tl_heap);
+extern __thread size_t tl_heap_id; // current heap instance id
 
 //////////////////////////////////////////////////////////////////////
 

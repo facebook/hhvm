@@ -482,7 +482,7 @@ PARSE_TREE
 SYNTAX
 
   val syntax : t -> syntax
-
+  val kind : t -> Full_fidelity_syntax_kind.t
   val make_token : Token.t -> t
   val make_missing : unit -> t
   val make_list : t list -> t

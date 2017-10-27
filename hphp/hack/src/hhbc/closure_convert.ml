@@ -645,6 +645,7 @@ and convert_stmt env st stmt =
     let st, b2 = convert_block env st b2 in
     st, Try (b1, cl, b2)
   | Using (has_await, e, b) ->
+    if has_await then check_if_in_async_context env;
     let st, e = convert_expr env st e in
     let st, b = convert_block env st b in
     st, Using (has_await, e, b)

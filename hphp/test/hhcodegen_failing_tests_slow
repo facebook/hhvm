@@ -225,11 +225,8 @@ slow/types/abstract_function_typehints.php
 slow/types/scalar_names.php
 slow/use_function/double_alias.php
 slow/use_function/override.php
-slow/using/bad-async.php
 slow/using/bad-function1.php
 slow/using/bad-function2.php
-slow/using/bad-function3.php
-slow/using/bad-function4.php
 slow/using/bad-goto1.php
 slow/using/bad-goto2.php
 slow/using/bad-lambda4.php

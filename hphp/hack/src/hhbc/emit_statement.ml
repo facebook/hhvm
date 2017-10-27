@@ -415,14 +415,20 @@ and emit_using env has_await e b =
         instr_fpushobjmethodd 0 fn_name A.OG_nullthrows;
         instr_fcall 0;
         epilogue;
+        (* TOOD: Only empty unset if this is a
+         * function scoped using statement *)
         instr_unsetl local
       ]
     in
     let fault = gather [ finally; instr_unwind ] in
+    let middle =
+      if is_empty_block b then empty
+      else instr_try_fault fault_label body fault
+    in
     gather [
       preamble;
-      instr_try_fault fault_label body fault;
-      finally
+      middle;
+      finally;
     ]
 
 and emit_do env b e =

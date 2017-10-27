@@ -26,6 +26,8 @@ module Ignore_fixmes_result = struct
   }
 end
 
+type lint_stdin_input = { filename: string; contents: string }
+
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
@@ -54,6 +56,7 @@ type _ t =
   | SEARCH : string * string -> HackSearchService.result t
   | COVERAGE_COUNTS : string -> ServerCoverageMetricTypes.result t
   | LINT : string list -> ServerLintTypes.result t
+  | LINT_STDIN : lint_stdin_input -> ServerLintTypes.result t
   | LINT_ALL : int -> ServerLintTypes.result t
   | CREATE_CHECKPOINT : string -> unit t
   | RETRIEVE_CHECKPOINT : string -> string list option t

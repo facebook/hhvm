@@ -94,6 +94,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerSearch.go env.tcopt genv.workers query type_
     | COVERAGE_COUNTS path -> env, ServerCoverageMetric.go path genv env
     | LINT fnl -> env, ServerLint.go genv env fnl
+    | LINT_STDIN { filename; contents } ->
+        env, ServerLint.go_stdin env ~filename ~contents
     | LINT_ALL code -> env, ServerLint.lint_all genv env code
     | CREATE_CHECKPOINT x -> env, ServerCheckpoint.create_checkpoint x
     | RETRIEVE_CHECKPOINT x -> env, ServerCheckpoint.retrieve_checkpoint x

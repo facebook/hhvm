@@ -32,6 +32,7 @@ type client_mode =
 (* TODO figure out why we can't reference FuzzySearchService from here *)
 | MODE_SEARCH of string * string
 | MODE_LINT of string list
+| MODE_LINT_STDIN of string
 | MODE_LINT_ALL of int
 | MODE_DUMP_SYMBOL_INFO of string
 | MODE_DUMP_AI_INFO of string
@@ -87,6 +88,7 @@ let mode_to_string = function
   | MODE_FIND_CLASS_REFS _ -> "MODE_FIND_CLASS_REFS"
   | MODE_SEARCH _ -> "MODE_SEARCH"
   | MODE_LINT _ -> "MODE_LINT"
+  | MODE_LINT_STDIN _ -> "MODE_LINT_STDIN"
   | MODE_LINT_ALL _ -> "MODE_LINT_ALL"
   | MODE_DUMP_SYMBOL_INFO _ -> "MODE_DUMP_SYMBOL_INFO"
   | MODE_DUMP_AI_INFO _ -> "MODE_DUMP_AI_INFO"

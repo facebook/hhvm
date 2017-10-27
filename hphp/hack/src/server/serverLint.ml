@@ -37,13 +37,23 @@ let output_text oc el =
   end;
   flush oc
 
-let lint tcopt _acc fnl =
-  List.fold_left fnl ~f:begin fun acc fn ->
+(* For linting from stdin, we pass the file contents in directly because there's
+no other way to get ahold of the contents of stdin from a worker process. But
+when linting from disk, we want each individual worker to read the file off disk
+by itself, so that we don't need to read all the files at the beginning and hold
+them all in memory. *)
+type lint_target = { filename: RP.t; contents: string option }
+
+let lint tcopt _acc (files_with_contents : lint_target list) =
+  List.fold_left files_with_contents ~f:begin fun acc { filename; contents } ->
     let errs, () =
       Lint.do_ begin fun () ->
         Errors.ignore_ begin fun () ->
-          Linting_service.lint tcopt fn
-            (Sys_utils.cat (Relative_path.to_absolute fn))
+          let contents = match contents with
+            | Some contents -> contents
+            | None -> Sys_utils.cat (Relative_path.to_absolute filename)
+          in
+          Linting_service.lint tcopt filename contents
         end
       end in
     errs @ acc
@@ -55,7 +65,10 @@ let lint_and_filter tcopt code acc fnl =
 
 let lint_all genv env code =
   let next = compose
-    (fun lst -> lst |> List.map ~f:(RP.create RP.Root) |> Bucket.of_list)
+    (fun lst -> lst
+      |> List.map ~f:(fun fn ->
+          { filename = RP.create RP.Root fn; contents = None })
+      |> Bucket.of_list)
     (genv.indexer FindUtils.is_php) in
   let errs = MultiWorker.call
     genv.workers
@@ -65,20 +78,32 @@ let lint_all genv env code =
     ~next in
   List.map errs Lint.to_absolute
 
+let create_rp : string -> RP.t = Relative_path.create Relative_path.Root
+
+let prepare_errors_for_output errs = errs
+  |> List.sort ~cmp:(fun x y -> Pos.compare (Lint.get_pos x) (Lint.get_pos y))
+  |> List.map ~f:Lint.to_absolute
+
 let go genv env fnl =
-  let fnl = List.map fnl (Relative_path.create Relative_path.Root) in
+  let files_with_contents = List.map fnl
+    ~f:(fun filename -> { filename = create_rp filename; contents = None })
+  in
   let errs =
-    if List.length fnl > 10
+    if List.length files_with_contents > 10
     then
       MultiWorker.call
         genv.workers
         ~job:(lint env.tcopt)
         ~merge:List.rev_append
         ~neutral:[]
-        ~next:(MultiWorker.next genv.workers fnl)
+        ~next:(MultiWorker.next genv.workers files_with_contents)
     else
-      lint env.tcopt [] fnl in
-  let errs = List.sort begin fun x y ->
-    Pos.compare (Lint.get_pos x) (Lint.get_pos y)
-  end errs in
-  List.map errs Lint.to_absolute
+      lint env.tcopt [] files_with_contents in
+  prepare_errors_for_output errs
+
+let go_stdin env ~(filename : string) ~(contents : string) =
+  let file_with_contents =
+    { filename = create_rp filename; contents = Some contents }
+  in
+  lint env.tcopt [] [file_with_contents]
+  |> prepare_errors_for_output

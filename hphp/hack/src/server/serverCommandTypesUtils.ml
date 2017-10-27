@@ -20,6 +20,7 @@ let debug_describe_t : type a. a t -> string = function
   | SEARCH                   _ -> "SEARCH"
   | COVERAGE_COUNTS          _ -> "COVERAGE_COUNTS"
   | LINT                     _ -> "LINT"
+  | LINT_STDIN               _ -> "LINT_STDIN"
   | LINT_ALL                 _ -> "LINT_ALL"
   | CREATE_CHECKPOINT        _ -> "CREATE_CHECKPOINT"
   | RETRIEVE_CHECKPOINT      _ -> "RETRIEVE_CHECKPOINT"

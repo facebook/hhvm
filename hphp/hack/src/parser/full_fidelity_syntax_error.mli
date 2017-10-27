@@ -174,3 +174,4 @@ val error2076 : string
 val hsl_in_php : string
 val vdarray_in_php : string
 val using_st_function_scoped_top_level : string
+val const_in_trait : string

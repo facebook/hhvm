@@ -609,6 +609,11 @@ let abstract_method_in_nonabstract_class hhvm_compat_mode  md_node parents =
 let is_inside_interface parents =
   Option.is_some (first_parent_classish_node TokenKind.Interface parents)
 
+(* Given a list of parents, tests if the immediate classish parent is a
+ * trait. *)
+let is_inside_trait parents =
+  Option.is_some (first_parent_classish_node TokenKind.Trait parents)
+
 (* Given a methodish_declaration node and a list of parents, tests if that
  * node declares an abstract method inside of an interface. *)
 let abstract_method_in_interface hhvm_compat_mode  md_node parents =
@@ -1193,6 +1198,12 @@ let classish_errors node parents hhvm_compat_mode errors =
     errors
   | _ -> errors
 
+let class_element_errors node parents errors =
+  match syntax node with
+  | ConstDeclaration _ when is_inside_trait parents ->
+    make_error_from_node node SyntaxError.const_in_trait :: errors
+  | _ -> errors
+
 let type_errors node parents is_strict hhvm_compat_mode errors =
   match syntax node with
   | SimpleTypeSpecifier t ->
@@ -1323,6 +1334,8 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
       require_errors node parents hhvm_compatiblity_mode errors in
     let errors =
       classish_errors node parents hhvm_compatiblity_mode errors in
+    let errors =
+      class_element_errors node parents errors in
     let errors =
       type_errors node parents is_strict hhvm_compatiblity_mode errors in
     let errors = alias_errors node errors in

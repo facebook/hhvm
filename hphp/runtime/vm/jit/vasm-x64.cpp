@@ -133,6 +133,7 @@ struct Vgen {
   void emit(const addlim& i);
   void emit(addq i) { commuteSF(i); a.addq(i.s0, i.d); }
   void emit(addqi i) { binary(i); a.addq(i.s0, i.d); }
+  void emit(const addqmr& i) { binary(i); a.addq(i.m, i.d); }
   void emit(const addqim& i);
   void emit(addsd i) { commute(i); a.addsd(i.s0, i.d); }
   void emit(const cloadq& i);

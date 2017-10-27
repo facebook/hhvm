@@ -105,7 +105,7 @@ foldable_load_helper(Env& env, Vreg reg, int size, Vlabel b, size_t i) {
 
 const Vptr* foldable_load(Env& env, Vreg reg, int size,
                           Vlabel b, size_t i) {
-  auto const info = foldable_load_helper(env, reg, size, b, i);
+   auto const info = foldable_load_helper(env, reg, size, b, i);
   if (!info.first || info.second + 1 == i) return info.first;
   std::vector<Vreg> nonSSARegs;
   visit(env.unit, *info.first, [&] (Vreg r, Width) {
@@ -459,6 +459,17 @@ SFUsage check_unsigned_uses(Env& env, Vreg sf, Vlabel b, size_t i, bool fix) {
     }
   }
   return ret;
+}
+
+bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
+  if (arch_any(Arch::ARM, Arch::PPC64)) return false;
+ if (auto const vptr = foldable_load(env, vadd.s0, b, i)) {
+   return simplify_impl(env, b, i, addqmr{*vptr, vadd.s1, vadd.d, vadd.sf});
+ }
+ if (auto const vptr = foldable_load(env, vadd.s1, b, i)) {
+   return simplify_impl(env, b, i, addqmr{*vptr, vadd.s0, vadd.d, vadd.sf});
+ }
+ return false;
 }
 
 bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {

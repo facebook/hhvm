@@ -214,7 +214,7 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
         frozen->toDestAddress(frozen->frontier()) - frozen->frontier();
     }
     printUnit(kCodeGenLevel, unit, " after code gen ",
-              ai, nullptr, annotations);
+             ai, nullptr, annotations);
   }
 }
 

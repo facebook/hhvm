@@ -9,35 +9,34 @@
  *)
 
 [@@@ocaml.warning "-60"] (* https://caml.inria.fr/mantis/view.php?id=7522 *)
-
-module Lexer = Full_fidelity_minimal_lexer
+module Lexer = Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token)
 module SyntaxError = Full_fidelity_syntax_error
 module Context =
   Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token)
 module rec ExpressionParser :
   Full_fidelity_expression_parser_type
     .WithSyntax(Full_fidelity_minimal_syntax)
-    .WithLexer(Full_fidelity_minimal_lexer)
+    .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
     .ExpressionParser_S =
   Full_fidelity_expression_parser.WithStatementAndDeclAndTypeParser
     (StatementParser) (DeclParser) (TypeParser)
 and StatementParser :
   Full_fidelity_statement_parser_type
   .WithSyntax(Full_fidelity_minimal_syntax)
-  .WithLexer(Full_fidelity_minimal_lexer)
+  .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
   .StatementParser_S =
   Full_fidelity_statement_parser.WithExpressionAndDeclAndTypeParser
     (ExpressionParser) (DeclParser) (TypeParser)
 and DeclParser :
   Full_fidelity_declaration_parser_type
     .WithSyntax(Full_fidelity_minimal_syntax)
-    .WithLexer(Full_fidelity_minimal_lexer)
+    .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
     .DeclarationParser_S =
   Full_fidelity_declaration_parser.WithExpressionAndStatementAndTypeParser
     (ExpressionParser) (StatementParser) (TypeParser)
 and TypeParser : Full_fidelity_type_parser_type
   .WithSyntax(Full_fidelity_minimal_syntax)
-  .WithLexer(Full_fidelity_minimal_lexer)
+  .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
   .TypeParser_S =
   Full_fidelity_type_parser.WithExpressionParser(ExpressionParser)
 

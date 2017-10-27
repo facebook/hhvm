@@ -13,21 +13,29 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
-module SimpleParser =
-  Full_fidelity_simple_parser.WithLexer(Full_fidelity_minimal_lexer)
+module SimpleParser = Full_fidelity_simple_parser
+  .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
 
 open TokenKind
 open Full_fidelity_minimal_syntax
 
 module WithExpressionAndDeclAndTypeParser
-  (ExpressionParser : Full_fidelity_expression_parser_type.
-    WithSyntax(Full_fidelity_minimal_syntax).WithLexer(Full_fidelity_minimal_lexer).ExpressionParser_S)
-  (DeclParser : Full_fidelity_declaration_parser_type.
-    WithSyntax(Full_fidelity_minimal_syntax).WithLexer(Full_fidelity_minimal_lexer).DeclarationParser_S)
-  (TypeParser : Full_fidelity_type_parser_type.
-    WithSyntax(Full_fidelity_minimal_syntax).WithLexer(Full_fidelity_minimal_lexer).TypeParser_S) :
-  Full_fidelity_statement_parser_type.
-    WithSyntax(Full_fidelity_minimal_syntax).WithLexer(Full_fidelity_minimal_lexer).StatementParser_S = struct
+  (ExpressionParser : Full_fidelity_expression_parser_type
+    .WithSyntax(Full_fidelity_minimal_syntax)
+    .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+    .ExpressionParser_S)
+  (DeclParser : Full_fidelity_declaration_parser_type
+    .WithSyntax(Full_fidelity_minimal_syntax)
+    .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+    .DeclarationParser_S)
+  (TypeParser : Full_fidelity_type_parser_type
+    .WithSyntax(Full_fidelity_minimal_syntax)
+    .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+    .TypeParser_S) :
+  Full_fidelity_statement_parser_type
+    .WithSyntax(Full_fidelity_minimal_syntax)
+    .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+    .StatementParser_S = struct
   include SimpleParser
   include
     Full_fidelity_parser_helpers.MinimalParserHelper.WithParser(SimpleParser)

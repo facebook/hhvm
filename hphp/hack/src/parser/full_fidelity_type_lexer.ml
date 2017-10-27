@@ -11,5 +11,8 @@
 (* This lexer is exactly the same as a regular lexer, except that it tokenizes
    C<D<E>> as C < D < E > >, and not C < D < E >> *)
 
-include Full_fidelity_minimal_lexer
-let next_token = Full_fidelity_minimal_lexer.next_token_in_type
+module WithToken(Token: Lexable_token_sig.LexableToken_S) = struct
+  module Lexer = Full_fidelity_lexer.WithToken(Token)
+  include Lexer
+  let next_token = Lexer.next_token_in_type
+end (* WithToken *)

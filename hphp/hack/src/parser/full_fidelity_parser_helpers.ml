@@ -721,5 +721,7 @@ module WithParser(Parser : Parser_S) = struct
 end
 end
 
-module MinimalParserHelper = WithLexer(Full_fidelity_minimal_lexer)
-module MinimalTypeParserHelper = WithLexer(Full_fidelity_type_lexer)
+module MinimalParserHelper =
+  WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+module MinimalTypeParserHelper =
+  WithLexer(Full_fidelity_type_lexer.WithToken(Full_fidelity_minimal_token))

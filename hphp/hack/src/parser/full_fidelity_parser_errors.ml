@@ -392,6 +392,13 @@ let rec continue_is_legal parents =
   | _ :: t -> continue_is_legal t
   | [] -> false
 
+let using_statement_function_scoped_is_legal parents =
+  match parents with
+  | _ :: c :: h :: _
+    when is_compound_statement c &&
+        (is_function_declaration h || is_methodish_declaration h) -> true
+  | _ -> false
+
 let is_bad_xhp_attribute_name name =
   (String.contains name ':') || (String.contains name '-')
 
@@ -995,6 +1002,9 @@ let statement_errors node parents hhvm_compat_mode errors =
   | TryStatement { try_catch_clauses; try_finally_clause; _ }
     when (is_missing try_catch_clauses) && (is_missing try_finally_clause) ->
     Some (node, SyntaxError.error2007)
+  | UsingStatementFunctionScoped _
+    when not (using_statement_function_scoped_is_legal parents) ->
+    Some (node, SyntaxError.using_st_function_scoped_top_level)
   | _ -> None in
   match result with
   | None -> errors

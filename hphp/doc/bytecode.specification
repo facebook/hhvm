@@ -4279,6 +4279,15 @@ Await    [C]  ->  [C]
   Once the execution is resumed, the result of the WaitHandle provided by $1
   becomes available on the stack.
 
+AwaitAll<local-range>    []  ->  [C:Null]
+
+  Fetches instances of WaitHandle from the locals in range %1, and suspends
+  until all of them have completed, at which point execution is resumed with a
+  single null on the stack.
+
+  The WaitHandles on the locals must not be userland WaitHandles, and the stack
+  must be empty. Should all of the handles in %1 already be complete a null will
+  be pushed to the stack without suspending the current function.
 
 Basic statement transformations
 -------------------------------

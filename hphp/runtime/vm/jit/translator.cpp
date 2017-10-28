@@ -440,6 +440,7 @@ static const struct {
 
   { OpWHResult,    {Stack1,           Stack1,       OutUnknown      }},
   { OpAwait,       {Stack1,           Stack1,       OutUnknown      }},
+  { OpAwaitAll,    {LocalRange,       Stack1,       OutNull         }},
 
   /*** 16. Member instructions ***/
 
@@ -894,6 +895,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::ContRaise:
   case Op::CreateCont:
   case Op::Await:
+  case Op::AwaitAll:
   case Op::BitAnd:
   case Op::BitOr:
   case Op::BitXor:
@@ -1135,6 +1137,7 @@ bool dontGuardAnyInputs(Op op) {
 bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
   if (instrIsNonCallControlFlow(inst->op()) ||
       inst->op() == OpAwait || // may branch to scheduler and suspend execution
+      inst->op() == OpAwaitAll || // similar to Await
       inst->op() == OpFCallAwait || // similar to Await
       inst->op() == OpClsCnsD) { // side exits if misses in the RDS
     return true;

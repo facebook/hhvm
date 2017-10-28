@@ -213,8 +213,8 @@ Vreg cond(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
  * should return a single SF Vreg to be tested against `cc'.
  */
 template <class Loop>
-void doWhile(Vout& v, ConditionCode cc,
-             const VregList& regs, Loop loopBlock) {
+VregList doWhile(Vout& v, ConditionCode cc,
+                 const VregList& regs, Loop loopBlock) {
   auto loop = v.makeBlock();
   auto done = v.makeBlock();
 
@@ -233,7 +233,10 @@ void doWhile(Vout& v, ConditionCode cc,
   v << phijcc{cc, sf, {done, loop}, v.makeTuple(out)};
 
   v = done;
-  v << phidef{v.makeTuple(freshRegs())};
+  auto fout = freshRegs();
+  v << phidef{v.makeTuple(fout)};
+
+  return fout;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

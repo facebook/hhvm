@@ -873,6 +873,30 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AFrameAny | AClsRefSlotAny | ACufIterAny
     );
 
+  case CreateAAWH:
+    {
+      auto const extra = inst.extra<CreateAAWH>();
+      auto const frame = AFrame {
+        inst.src(0),
+        AliasIdSet {
+          AliasIdSet::IdRange{ extra->first, extra->first + extra->count }
+        }
+      };
+      return may_load_store(frame, AHeapAny);
+    }
+
+  case CountWHNotDone:
+    {
+      auto const extra = inst.extra<CountWHNotDone>();
+      auto const frame = AFrame {
+        inst.src(0),
+        AliasIdSet {
+          AliasIdSet::IdRange{ extra->first, extra->first + extra->count }
+        }
+      };
+      return may_load_store(frame, AEmpty);
+    }
+
   // This re-enters to call extension-defined instance constructors.
   case ConstructInstance:
     return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
@@ -1716,6 +1740,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdVectorBase:
   case LdWHResult:
   case LdWHState:
+  case LdWHNotDone:
   case LookupClsRDS:
   case DbgTraceCall:
   case InitCtx:

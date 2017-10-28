@@ -1820,48 +1820,6 @@ void in(ISS& env, const bc::FPassM& op) {
   );
 }
 
-namespace {
-
-// Find a contiguous local range which is equivalent to the given range and has
-// a smaller starting id. Only returns the equivalent first local because the
-// size doesn't change.
-LocalId equivLocalRange(ISS& env, const LocalRange& range) {
-  auto bestRange = range.first;
-  auto equivFirst = findLocEquiv(env, range.first);
-  if (equivFirst == NoLocalId) return bestRange;
-  do {
-    if (equivFirst < bestRange) {
-      auto equivRange = [&] {
-        // local equivalency includes differing by Uninit, so we need
-        // to check the types.
-        if (peekLocRaw(env, equivFirst) != peekLocRaw(env, range.first)) {
-          return false;
-        }
-
-        for (uint32_t i = 1; i <= range.restCount; ++i) {
-          if (!locsAreEquiv(env, equivFirst + i, range.first + i) ||
-              peekLocRaw(env, equivFirst + i) !=
-              peekLocRaw(env, range.first + i)) {
-            return false;
-          }
-        }
-
-        return true;
-      }();
-
-      if (equivRange) {
-        bestRange = equivFirst;
-      }
-    }
-    equivFirst = findLocEquiv(env, equivFirst);
-    assert(equivFirst != NoLocalId);
-  } while (equivFirst != range.first);
-
-  return bestRange;
-}
-
-}
-
 void in(ISS& env, const bc::MemoGet& op) {
   always_assert(env.ctx.func->isMemoizeWrapper);
   always_assert(op.locrange.first + op.locrange.restCount

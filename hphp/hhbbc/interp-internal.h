@@ -30,6 +30,8 @@
 
 namespace HPHP { namespace HHBBC {
 
+struct LocalRange;
+
 //////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(hhbbc);
@@ -90,6 +92,13 @@ OPCODES
 #undef O
 
 }
+
+/*
+ * Find a contiguous local range which is equivalent to the given range and has
+ * a smaller starting id. Only returns the equivalent first local because the
+ * size doesn't change.
+ */
+LocalId equivLocalRange(ISS& env, const LocalRange& range);
 
 namespace {
 

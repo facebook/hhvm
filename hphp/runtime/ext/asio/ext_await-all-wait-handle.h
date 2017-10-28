@@ -57,6 +57,9 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
     }
   }
 
+  static ObjectData* fromFrameNoCheck(uint32_t total, uint32_t cnt,
+                                      TypedValue* stk);
+
  public:
   struct Node final {
     static constexpr ptrdiff_t blockableOff() {

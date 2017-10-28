@@ -231,6 +231,8 @@ bool canDCE(IRInstruction* inst) {
   case LdAsyncArParentChain:
   case LdWHState:
   case LdWHResult:
+  case LdWHNotDone:
+  case CountWHNotDone:
   case LdAFWHActRec:
   case LdResumableArObj:
   case LdMIStateAddr:
@@ -510,6 +512,7 @@ bool canDCE(IRInstruction* inst) {
   case StClosureArg:
   case CreateGen:
   case CreateAGen:
+  case CreateAAWH:
   case CreateAFWH:
   case CreateAFWHNoVV:
   case AFWHPrepareChild:

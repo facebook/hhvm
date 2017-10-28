@@ -153,6 +153,41 @@ void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
   }
 }
 
+LocalId equivLocalRange(ISS& env, const LocalRange& range) {
+  auto bestRange = range.first;
+  auto equivFirst = findLocEquiv(env, range.first);
+  if (equivFirst == NoLocalId) return bestRange;
+  do {
+    if (equivFirst < bestRange) {
+      auto equivRange = [&] {
+        // local equivalency includes differing by Uninit, so we need
+        // to check the types.
+        if (peekLocRaw(env, equivFirst) != peekLocRaw(env, range.first)) {
+          return false;
+        }
+
+        for (uint32_t i = 1; i <= range.restCount; ++i) {
+          if (!locsAreEquiv(env, equivFirst + i, range.first + i) ||
+              peekLocRaw(env, equivFirst + i) !=
+              peekLocRaw(env, range.first + i)) {
+            return false;
+          }
+        }
+
+        return true;
+      }();
+
+      if (equivRange) {
+        bestRange = equivFirst;
+      }
+    }
+    equivFirst = findLocEquiv(env, equivFirst);
+    assert(equivFirst != NoLocalId);
+  } while (equivFirst != range.first);
+
+  return bestRange;
+}
+
 namespace interp_step {
 
 void in(ISS& env, const bc::Nop&)  { effect_free(env); }
@@ -3517,6 +3552,22 @@ void in(ISS& env, const bc::WHResult&) {
 
 void in(ISS& env, const bc::Await&) {
   pushTypeFromWH(env, popC(env));
+}
+
+void in(ISS& env, const bc::AwaitAll& op) {
+  auto const equiv = equivLocalRange(env, op.locrange);
+  if (equiv != op.locrange.first) {
+    return reduce(
+      env,
+      bc::AwaitAll {LocalRange {equiv, op.locrange.restCount}}
+    );
+  }
+
+  for (uint32_t i = 0; i < op.locrange.restCount + 1; ++i) {
+    mayReadLocal(env, op.locrange.first + i);
+  }
+
+  push(env, TInitNull);
 }
 
 void in(ISS& /*env*/, const bc::IncStat&) {}

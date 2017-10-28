@@ -6917,23 +6917,12 @@ bool EmitterVisitor::emitInlineGenva(
   }
   assertx(waithandles.size() == num_params);
 
-  // AwaitAllWaitHandle::fromArray() always returns a WaitHandle.
-  Offset fpiStart = m_ue.bcPos();
-  e.FPushClsMethodD(1, s_fromArray.get(), s_AwaitAllWaitHandle.get());
-  {
-    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-    // create a packed array of the waithandles
-    for (const auto wh : waithandles) {
-      emitVirtualLocal(wh);
-      emitCGet(e);
-    }
-    e.NewPackedArray(num_params);
-    emitFPass(e, 0, PassByRefKind::ErrorOnCell, FPassHint::Cell);
-  }
-  e.FCall(1);
-  e.UnboxR();
+  Offset start = m_ue.bcPos();
+  e.AwaitAll(LocalRange{
+    (uint32_t)waithandles.back(),
+    (uint32_t)(waithandles.size() - 1)
+  });
 
-  e.Await();
   // result of AwaitAllWaitHandle does not matter
   emitPop(e);
 
@@ -6972,7 +6961,7 @@ bool EmitterVisitor::emitInlineGenva(
   }
 
   newFaultRegionAndFunclet(
-    fpiStart, m_ue.bcPos(),
+    start, m_ue.bcPos(),
     new UnsetUnnamedLocalsThunklet(std::move(waithandles)));
 
   return true;

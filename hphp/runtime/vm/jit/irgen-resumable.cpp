@@ -67,7 +67,8 @@ void suspendHookR(IRGS& env, SSATmp* frame, SSATmp* objOrNullptr) {
   );
 }
 
-void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
+void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
+                uint32_t ndiscard) {
   assertx(curFunc(env)->isAsync());
   assertx(!resumed(env));
   assertx(child->type() <= TObj);
@@ -93,10 +94,10 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
   // catch trace in place of our input, since we've already shuffled that value
   // into the heap to be owned by the waitHandle, so the unwinder can't decref
   // it.
-  push(env, cns(env, TInitNull));
+  for (auto i = ndiscard; i; --i) push(env, cns(env, TInitNull));
   env.irb->exceptionStackBoundary();
   suspendHookE(env, fp(env), asyncAR, waitHandle);
-  discard(env, 1);
+  discard(env, ndiscard);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     gen(env, DbgTrashRetVal, fp(env));
@@ -254,7 +255,7 @@ void emitAwait(IRGS& env) {
       if (resumed(env)) {
         implAwaitR(env, child, resumeOffset);
       } else {
-        implAwaitE(env, child, resumeOffset);
+        implAwaitE(env, child, resumeOffset, 1);
       }
     },
     [&] { // Taken: retrieve the result from the wait handle
@@ -262,6 +263,59 @@ void emitAwait(IRGS& env) {
       gen(env, IncRef, res);
       decRef(env, child);
       push(env, res);
+    }
+  );
+}
+
+void emitAwaitAll(IRGS& env, LocalRange locals) {
+  auto const resumeOffset = nextBcOff(env);
+
+  auto const cnt = [&] {
+    if (locals.restCount + 1 > RuntimeOption::EvalJitMaxAwaitAllUnroll) {
+      return gen(
+        env,
+        CountWHNotDone,
+        CountWHNotDoneData { locals.first, locals.restCount + 1 },
+        fp(env)
+      );
+    }
+    auto cnt = cns(env, 0);
+    for (int i = 0; i < locals.restCount + 1; ++i) {
+      assertTypeLocal(
+        env, locals.first + i, Type::SubObj(c_WaitHandle::classof())
+      );
+      auto const loc = ldLoc(env, locals.first + i, nullptr, DataTypeSpecific);
+      auto const not_done = gen(env, LdWHNotDone, loc);
+      cnt = gen(env, AddInt, cnt, not_done);
+    }
+    return cnt;
+  }();
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      gen(env, JmpNZero, taken, cnt);
+    },
+    [&] { // Next: all of the wait handles are finished
+      push(env, cns(env, TInitNull));
+    },
+    [&] { // Taken: some of the wait handles have not yet completed
+      hint(env, Block::Hint::Unlikely);
+      IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
+
+      auto const wh = gen(
+        env,
+        CreateAAWH,
+        CreateAAWHData { locals.first, locals.restCount + 1 },
+        fp(env),
+        cnt
+      );
+
+      if (resumed(env)) {
+        implAwaitR(env, wh, resumeOffset);
+      } else {
+        implAwaitE(env, wh, resumeOffset, 0);
+      }
     }
   );
 }
@@ -299,7 +353,7 @@ void emitFCallAwait(IRGS& env,
       } else {
         // implAwaitE pushes a null before calling the event hook,
         // so we don't want to update the marker here.
-        implAwaitE(env, child, resumeOffset);
+        implAwaitE(env, child, resumeOffset, 1);
       }
     }
   );

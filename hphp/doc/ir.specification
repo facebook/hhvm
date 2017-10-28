@@ -2215,6 +2215,13 @@ To string conversions:
   non-finished child S4.  This version of the instruction guarantees that the
   VarEnv is unused.
 
+| CreateAAWH<local,count>, DAllocObj, S(FramePtr) S(Int), PRc
+
+  Create an AwaitAllWaitHandle and add the count elements from frame contiguous
+  frame locals beginning at local and extending count locals. S1 denotes the
+  total number of non-completed waithandles. All locals must be subclasses of
+  WaitHandle.
+
 | CreateSSWH, DAllocObj, S(Cell), CRc|PRc
 
   Call c_StaticWaitHandle::CreateSucceeded.
@@ -2352,6 +2359,15 @@ To string conversions:
 
   Loads the result of the WaitHandle in S0. This instruction has undefined
   behavior if S0 is not a WaitHandle, or if S0 is not finished.
+
+| LdWHNotDone, D(Int), S(Obj), NF
+
+  Returns 1 if S0 is not finished, and 0 if S0 is finished.
+
+| CountWHNotDone<local,count>, D(Int), S(FramePtr), NF
+
+  Returns the number of unfinished waithandles contained in the contiguous
+  locals beginning at local and extending count.
 
 | LdAFWHActRec, D(FramePtr), S(Obj), NF
 

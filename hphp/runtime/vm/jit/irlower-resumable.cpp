@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -33,6 +34,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/runtime/ext/asio/asio-blockable.h"
+#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
@@ -314,6 +316,66 @@ IMPL_OPCODE_CALL(CreateAFWHNoVV)
 IMPL_OPCODE_CALL(CreateSSWH)
 IMPL_OPCODE_CALL(AFWHPrepareChild)
 
+void cgCreateAAWH(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<CreateAAWHData>();
+
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(c_AwaitAllWaitHandle::fromFrameNoCheck),
+    callDest(env, inst),
+    SyncOptions::None,
+    argGroup(env, inst)
+      .imm(extra->count)
+      .ssa(1)
+      .addr(fp, localOffset(extra->first))
+  );
+}
+
+void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<CountWHNotDone>();
+
+  auto& v = vmain(env);
+  auto const base = v.makeReg();
+  auto const loc = v.cns((extra->count - 1) * 2);
+  auto const cnt = v.cns(0);
+
+  v << lea{fp[localOffset(extra->first + extra->count - 1)], base};
+
+  auto out = doWhile(v, CC_GE, {loc, cnt},
+    [&] (const VregList& in, const VregList& out) {
+      auto const loc_in  = in[0],  cnt_in  = in[1];
+      auto const loc_out = out[0], cnt_out = out[1];
+      auto const sf1 = v.makeReg();
+      auto const sf2 = v.makeReg();
+      auto const obj = v.makeReg();
+
+      // We depend on this in the test with 0x0E below.
+      static_assert(c_WaitHandle::STATE_SUCCEEDED == 0, "");
+      static_assert(c_WaitHandle::STATE_FAILED == 1, "");
+
+      v << load{base[loc_in * 8], obj};
+      v << testbim{0x0E, obj[WH::stateOff()], sf1};
+      cond(v, CC_NZ, sf1, cnt_out,
+        [&] (Vout& v) {
+          auto ret = v.makeReg();
+          v << incq{cnt_in, ret, v.makeReg()};
+          return ret;
+        },
+        [&] (Vout& v) { return cnt_in; }
+      );
+
+      // Add 2 to the loop variable because we can only scale by at most 8.
+      v << subqi{2, loc_in, loc_out, sf2};
+      return sf2;
+    }
+  );
+
+  v << copy{out[1], dstLoc(env, inst, 0).reg()};
+}
+
 void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
   auto parentAR = srcLoc(env, inst, 0).reg();
   auto child = srcLoc(env, inst, 1).reg();
@@ -377,6 +439,22 @@ void cgLdWHState(IRLS& env, const IRInstruction* inst) {
   auto const state = v.makeReg();
   v << loadzbq{obj[WH::stateOff()], state};
   v << andqi{0x0F, state, dst, v.makeReg()};
+}
+
+void cgLdWHNotDone(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const obj = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  // We depend on this in the test with 0x0E below.
+  static_assert(c_WaitHandle::STATE_SUCCEEDED == 0, "");
+  static_assert(c_WaitHandle::STATE_FAILED == 1, "");
+
+  auto const sf = v.makeReg();
+  auto const result = v.makeReg();
+  v << testbim{0x0E, obj[WH::stateOff()], sf};
+  v << setcc{CC_NZ, sf, result};
+  v << movzbq{result, dst};
 }
 
 void cgStAsyncArSucceeded(IRLS& env, const IRInstruction* inst) {

@@ -128,6 +128,39 @@ Object c_AwaitAllWaitHandle::Create(Iter iter) {
   return Object{std::move(result)};
 }
 
+ObjectData* c_AwaitAllWaitHandle::fromFrameNoCheck(
+  uint32_t total, uint32_t cnt, TypedValue* stk
+) {
+  assert(cnt);
+
+  auto result = Alloc(cnt);
+  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
+  auto next = &result->m_children[cnt];
+  uint32_t idx = cnt;
+
+  for (int64_t i = 0; i < total; i++) {
+    auto const waitHandle = c_WaitHandle::fromCellAssert(stk[-i]);
+    if (waitHandle->isFinished()) continue;
+
+    auto const child = static_cast<c_WaitableWaitHandle*>(waitHandle);
+    ctx_idx = std::min(ctx_idx, child->getContextIdx());
+
+    child->incRefCount();
+    (--next)->m_child = child;
+    next->m_index = --idx;
+    next->m_child->getParentChain().addParent(
+      next->m_blockable,
+      AsioBlockable::Kind::AwaitAllWaitHandleNode
+    );
+
+    if (!idx) break;
+  }
+
+  assert(next == &result->m_children[0]);
+  result->initialize(ctx_idx);
+  return result.detach();
+}
+
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
                           const Array& dependencies) {
   auto ad = dependencies.get();

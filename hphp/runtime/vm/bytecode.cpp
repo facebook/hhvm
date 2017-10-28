@@ -68,6 +68,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/ext/array/ext_array.h"
+#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
@@ -6331,6 +6332,29 @@ OPTBLD_INLINE TCA iopAwait(PC& pc) {
   return suspendStack(pc);
 }
 
+OPTBLD_INLINE TCA iopAwaitAll(PC& pc, LocalRange locals) {
+  uint32_t cnt = 0;
+  for (auto i = locals.first; i < locals.first + locals.restCount + 1; ++i) {
+    if (!c_WaitHandle::fromCellAssert(*frame_local(vmfp(), i))->isFinished()) {
+      ++cnt;
+    }
+  }
+
+  if (!cnt) {
+    vmStack().pushNull();
+    return nullptr;
+  }
+
+  auto obj = Object::attach(c_AwaitAllWaitHandle::fromFrameNoCheck(
+    locals.restCount + 1, cnt, frame_local(vmfp(), locals.first)
+  ));
+  assert(obj->getAttribute(ObjectData::IsWaitHandle));
+  assert(!static_cast<c_WaitHandle*>(obj.get())->isFinished());
+
+  vmStack().pushObjectNoRc(obj.detach());
+  return suspendStack(pc);
+}
+
 TCA suspendStack(PC &pc) {
   while (true) {
     auto const jitReturn = [&] {
@@ -6581,6 +6605,12 @@ TCA iopWrapper(Op, void(*fn)(PC&), PC& pc) {
 OPTBLD_INLINE static
 TCA iopWrapper(Op, TCA(*fn)(PC& pc), PC& pc) {
   return fn(pc);
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, TCA(*fn)(PC& pc, LocalRange locals), PC& pc) {
+  auto n = decodeLocalRange(pc);
+  return fn(pc, n);
 }
 
 OPTBLD_INLINE static TCA iopWrapper(Op, void (*fn)(), PC& /*pc*/) {

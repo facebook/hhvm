@@ -651,6 +651,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ContGetReturn,   NA,               NOV,             ONE(CV),    NF) \
   O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(Await,           NA,               ONE(CV),         ONE(CV),    CF) \
+  O(AwaitAll,        ONE(LAR),         NOV,             ONE(CV),    CF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
@@ -1143,7 +1144,7 @@ inline MOpMode finalMemberOpMode(Op op) {
 // true if the opcode body can set pc=0 to halt the interpreter.
 constexpr bool instrCanHalt(Op op) {
   return op == OpRetC || op == OpRetV || op == OpNativeImpl ||
-         op == OpAwait || op == OpCreateCont ||
+         op == OpAwait || op == OpAwaitAll || op == OpCreateCont ||
          op == OpYield || op == OpYieldK ||
          op == OpYieldFromDelegate;
 }

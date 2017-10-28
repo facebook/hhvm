@@ -1060,6 +1060,7 @@ bool instrIsNonCallControlFlow(Op opcode) {
 
   switch (opcode) {
     case OpAwait:
+    case OpAwaitAll:
     case OpYield:
     case OpYieldK:
     case OpContEnter:

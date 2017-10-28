@@ -1055,6 +1055,34 @@ struct InitPackedArrayLoopData : IRExtraData {
   uint32_t size;
 };
 
+struct CreateAAWHData : IRExtraData {
+  explicit CreateAAWHData(uint32_t first, uint32_t count)
+    : first(first)
+    , count(count)
+  {}
+
+  std::string show() const {
+    return folly::format("{},{}", first, count).str();
+  }
+
+  uint32_t first;
+  uint32_t count;
+};
+
+struct CountWHNotDoneData : IRExtraData {
+  explicit CountWHNotDoneData(uint32_t first, uint32_t count)
+    : first(first)
+    , count(count)
+  {}
+
+  std::string show() const {
+    return folly::format("{},{}", first, count).str();
+  }
+
+  uint32_t first;
+  uint32_t count;
+};
+
 struct NewKeysetArrayData : IRExtraData {
   explicit NewKeysetArrayData(IRSPRelOffset offset, uint32_t size)
     : offset(offset)
@@ -1397,6 +1425,8 @@ X(AllocVecArray,                PackedArrayData);
 X(NewKeysetArray,               NewKeysetArrayData);
 X(InitPackedLayoutArrayLoop,    InitPackedArrayLoopData);
 X(InitPackedLayoutArray,        IndexData);
+X(CreateAAWH,                   CreateAAWHData);
+X(CountWHNotDone,               CountWHNotDoneData);
 X(CheckMixedArrayOffset,        IndexData);
 X(CheckDictOffset,              IndexData);
 X(CheckKeysetOffset,            IndexData);

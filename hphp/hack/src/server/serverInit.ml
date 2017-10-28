@@ -243,7 +243,7 @@ module ServerInitCommon = struct
        }
      end in
      let result = State_loader.mk_state_future ?mini_state_handle
-       ~config_hash:(ServerConfig.config_hash genv.config) root in
+       ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny:false in
      lock_and_load_deptable result.State_loader.deptable_fn;
      let old_saved = open_in result.State_loader.saved_state_fn
        |> Marshal.from_channel in

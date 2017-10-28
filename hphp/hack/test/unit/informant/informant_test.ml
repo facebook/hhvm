@@ -84,7 +84,7 @@ module Tools = struct
    * for_svn_rev: The svn_rev lookup in "Xdb.find_nearest" that will locate
    *              this result.
    *)
-  let set_xdb ~state_svn_rev ~for_svn_rev ~everstore_handle =
+  let set_xdb ~state_svn_rev ~for_svn_rev ~everstore_handle ~tiny  =
     let hh_version = Build_id.build_revision in
     let hg_hash = match state_svn_rev with
       | 1 -> hg_rev_1
@@ -111,7 +111,7 @@ module Tools = struct
       let result = Future.of_value [result] in
       Xdb.Mocking.find_nearest_returns ~db:Xdb.hack_db_name
         ~db_table:Xdb.mini_saved_states_table
-        ~svn_rev:for_svn_rev ~hh_version ~hhconfig_hash result
+        ~svn_rev:for_svn_rev ~hh_version ~hhconfig_hash ~tiny result
 end;;
 
 
@@ -122,9 +122,9 @@ let test_informant_restarts_significant_move temp_dir =
   Tools.set_hg_to_svn_map ();
   (** In XDB table, add an entry for svn rev 200. *)
   Tools.set_xdb ~state_svn_rev:200
-    ~for_svn_rev:200 ~everstore_handle:"dummy_handle_for_svn_200";
+    ~for_svn_rev:200 ~everstore_handle:"dummy_handle_for_svn_200" ~tiny:false;
   Tools.set_xdb ~state_svn_rev:5
-    ~for_svn_rev:5 ~everstore_handle:"dummy_handle_for_svn_5";
+    ~for_svn_rev:5 ~everstore_handle:"dummy_handle_for_svn_5" ~tiny:false;
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
   Hg.Mocking.current_working_copy_base_rev_returns
     (Future.of_value Tools.svn_1);
@@ -336,7 +336,7 @@ let test_informant_xdb_saved_state_too_far temp_dir =
     "no distance moved" ;
   (** At rev 200, we will find a saved state made for rev 1. *)
   Tools.set_xdb ~state_svn_rev:1 ~for_svn_rev:200
-    ~everstore_handle:"Fake everstore handle for svn rev 1";
+    ~everstore_handle:"Fake everstore handle for svn rev 1" ~tiny:false;
   Tools.test_transition
     informant Tools.Changed_merge_base Tools.hg_rev_3
     Informant_sig.Server_alive Informant_sig.Move_along

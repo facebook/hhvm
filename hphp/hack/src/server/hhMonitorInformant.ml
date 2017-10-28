@@ -93,6 +93,7 @@ module Revision_map = struct
               ~svn_rev
               ~hh_version:Build_id.build_revision
               ~hhconfig_hash
+              ~tiny:false
           end in
           let () = Hashtbl.add t.xdb_queries svn_rev future in
           None

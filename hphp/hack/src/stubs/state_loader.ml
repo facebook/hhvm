@@ -14,5 +14,5 @@ type mini_state_handle = {
 
 exception Not_supported
 
-let mk_state_future ?mini_state_handle:_ ~config_hash:_ _ =
+let mk_state_future ?mini_state_handle:_ ~config_hash:_ ~tiny:_ _ =
   raise Not_supported

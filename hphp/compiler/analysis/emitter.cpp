@@ -712,9 +712,10 @@ public:
   void listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
                               IndexChain& indexChain,
                               std::vector<IndexPair>& chainList);
+  template<class F>
   void listAssignmentAssignElements(Emitter& e,
                                     std::vector<IndexPair>& indexChains,
-                                    std::function<void()> emitSrc);
+                                    F&& emitSrc, int popAll = -1);
 
   void visitIfCondition(ExpressionPtr cond, Emitter& e, Label& tru, Label& fals,
                         bool truFallthrough);
@@ -1160,7 +1161,8 @@ public:
   void emitConstMethodCallNoParams(Emitter& e, const std::string& name);
   bool emitInlineGen(Emitter& e, const ExpressionPtr&);
   bool emitInlineGena(Emitter& e, const SimpleFunctionCallPtr& call);
-  bool emitInlineGenva(Emitter& e, const SimpleFunctionCallPtr& call);
+  bool emitInlineGenva(Emitter& e, const SimpleFunctionCallPtr& call,
+                       ListAssignmentPtr assign, bool deadResult);
   bool emitInlineHHAS(Emitter& e, SimpleFunctionCallPtr);
   bool emitHHInvariant(Emitter& e, SimpleFunctionCallPtr);
   void emitMethodDVInitializers(Emitter& e,
@@ -3999,17 +4001,41 @@ void EmitterVisitor::listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
   }
 }
 
+template<class F>
+typename std::enable_if<
+  std::is_same<typename std::decay<F>::type, std::nullptr_t>::value,
+  int
+>::type emit_list_assign_src(int i, F&& null) {
+  always_assert(false);
+}
+
+template<class F>
+auto emit_list_assign_src(int i, F&& func) -> decltype(func(0), 1) {
+  func(i);
+  return 1;
+}
+
+template<class F>
+auto emit_list_assign_src(int i, F&& func) -> decltype(func(), 0) {
+  func();
+  return 0;
+}
+
+template<class F>
 void EmitterVisitor::listAssignmentAssignElements(
   Emitter& e,
   std::vector<IndexPair>& indexPairs,
-  std::function<void()> emitSrc
+  F&& emitSrc,
+  int popAll
 ) {
+
+  auto const ltr = RuntimeOption::PHP7_LTR_assign;
+  int next = ltr ? 0 : popAll - 1;
 
   // PHP5 does list() assignments RTL, PHP7 does them LTR, so this loop can go
   // either way and looks a little ugly. The assignment order normally isn't
   // visible, but it is if you do something like:
   // list($a[], $a[]) = $foo
-  auto const ltr = RuntimeOption::PHP7_LTR_assign;
   for (int i = ltr ? 0 : (int)indexPairs.size() - 1;
        i >= 0 && i < (int)indexPairs.size();
        ltr ? i++ : i--) {
@@ -4025,11 +4051,18 @@ void EmitterVisitor::listAssignmentAssignElements(
       continue;
     }
 
-    if (emitSrc == nullptr) {
+    if (std::is_same<F, std::nullptr_t>::value) {
       e.Null();
     } else {
-      emitSrc();
-      for (int j = 0; j < (int)currIndexChain.size(); ++j) {
+      auto const cur = currIndexChain[0];
+      for (;0 <= next && next < popAll && next != cur; ltr ? next++ : next--) {
+        emit_list_assign_src(next, emitSrc);
+        emitCGet(e);
+        emitPop(e);
+      }
+      next = ltr ? cur + 1 : cur - 1;
+      auto const start = emit_list_assign_src(cur, emitSrc);
+      for (int j = start; j < (int)currIndexChain.size(); ++j) {
         m_evalStack.push(StackSym::I);
         m_evalStack.setInt(currIndexChain[j]);
         markElem(e);
@@ -4038,6 +4071,12 @@ void EmitterVisitor::listAssignmentAssignElements(
     }
 
     emitSet(e);
+    emitPop(e);
+  }
+
+  for (;0 <= next && next < popAll; ltr ? next++ : next--) {
+    emit_list_assign_src(next, emitSrc);
+    emitCGet(e);
     emitPop(e);
   }
 }
@@ -4763,6 +4802,28 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   case Construct::KindOfExpStatement: {
     auto s = static_pointer_cast<Statement>(node);
     auto es = static_pointer_cast<ExpStatement>(s);
+
+    bool canInlineGenva =
+      m_ue.m_isHHFile &&
+      RuntimeOption::EnableHipHopSyntax &&
+      !RuntimeOption::EvalJitEnableRenameFunction &&
+      !RuntimeOption::EvalDisableHphpcOpts;
+
+    if (canInlineGenva) {
+      auto la = dynamic_pointer_cast<ListAssignment>(es->getExpression());
+      auto await = dynamic_pointer_cast<AwaitExpression>(
+        la ? la->getArray() : es->getExpression()
+      );
+      if (await) {
+        auto exp = await->getExpression();
+        if (auto call = dynamic_pointer_cast<SimpleFunctionCall>(exp)) {
+          if (call->isCallToFunction("genva")) {
+            if (emitInlineGenva(e, call, la, !la)) return false;
+          }
+        }
+      }
+    }
+
     if (visit(es->getExpression())) {
       // reachability tracking isn't very sophisticated; emitting a pop
       // when we're unreachable will make the emitter think the next
@@ -6792,12 +6853,24 @@ const StaticString
 
 bool EmitterVisitor::emitInlineGenva(
   Emitter& e,
-  const SimpleFunctionCallPtr& call
+  const SimpleFunctionCallPtr& call,
+  ListAssignmentPtr assign,
+  bool deadResult
 ) {
   assert(call->isCallToFunction("genva"));
   const auto params = call->getParams();
   const auto num_params = params ? params->getCount() : 0;
+  if (assign) {
+    auto vars = assign->getVariables();
+    if (vars->containsUnpack()) return false;
+
+    auto assign_ct = vars->getCount();
+    while (assign_ct && !(*vars)[assign_ct - 1]) --assign_ct;
+    if (assign_ct > num_params) return false;
+    if (!num_params) return true;
+  }
   if (!num_params) {
+    if (deadResult) return true;
     e.Array(staticEmptyArray());
     return true;
   }
@@ -6864,12 +6937,35 @@ bool EmitterVisitor::emitInlineGenva(
   // result of AwaitAllWaitHandle does not matter
   emitPop(e);
 
-  for (const auto wh : waithandles) {
-    emitVirtualLocal(wh);
-    emitPushL(e);
-    e.WHResult();
+  if (deadResult) {
+    // Resolve waithandles, and observe any exceptions
+    for (const auto wh : waithandles) {
+      emitVirtualLocal(wh);
+      emitPushL(e);
+      e.WHResult();
+      emitPop(e);
+    }
+  } else if (!assign) {
+    for (const auto wh : waithandles) {
+      emitVirtualLocal(wh);
+      emitPushL(e);
+      e.WHResult();
+    }
+    e.NewPackedArray(num_params);
+  } else {
+    std::vector<IndexPair> indexPairs;
+    IndexChain workingChain;
+    listAssignmentVisitLHS(e, assign, workingChain, indexPairs);
+    listAssignmentAssignElements(
+      e, indexPairs,
+      [&] (uint32_t i) {
+        emitVirtualLocal(waithandles[i]);
+        emitCGet(e);
+        e.WHResult();
+      },
+      waithandles.size() /* popAll */
+    );
   }
-  e.NewPackedArray(num_params);
 
   for (auto wh : waithandles) {
     m_curFunc->freeUnnamedLocal(wh);
@@ -7042,7 +7138,7 @@ bool EmitterVisitor::emitInlineGen(
 
   const auto call = static_pointer_cast<SimpleFunctionCall>(expression);
   if (call->isCallToFunction("genva")) {
-    return emitInlineGenva(e, call);
+    return emitInlineGenva(e, call, nullptr, false);
   } else if (call->isCallToFunction("gena")) {
     return emitInlineGena(e, call);
   }

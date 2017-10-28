@@ -144,18 +144,25 @@ let collection_type = function
   | x -> failwith ("unknown collection type '" ^ x ^ "'")
 
 let istype_op id =
-  match id with
+  (* TODO: figure out why HHVM constraints some intrinsics to simple names
+     and some can appear in simple and qualified forms *)
+  let enable_hh_syntax = Emit_env.is_hh_syntax_enabled () in
+  match String.lowercase_ascii id with
   | "is_int" | "is_integer" | "is_long" -> Some OpInt
   | "is_bool" -> Some OpBool
   | "is_float" | "is_real" | "is_double" -> Some OpDbl
   | "is_string" -> Some OpStr
-  | "is_array" | "is_varray_or_darray" -> Some OpArr
+  | "is_varray_or_darray" when enable_hh_syntax -> Some OpArr
+  | "is_array"  | "hh\\is_varray_or_darray" -> Some OpArr
   | "is_object" -> Some OpObj
   | "is_null" -> Some OpNull
   | "is_scalar" -> Some OpScalar
-  | "is_keyset" -> Some OpKeyset
-  | "is_dict" -> Some OpDict
-  | "is_vec" -> Some OpVec
+  | "is_keyset" when enable_hh_syntax -> Some OpKeyset
+  | "hh\\is_keyset" -> Some OpKeyset
+  | "is_dict" when enable_hh_syntax -> Some OpDict
+  | "hh\\is_dict" -> Some OpDict
+  | "is_vec" when enable_hh_syntax -> Some OpVec
+  | "hh\\is_vec" -> Some OpVec
   | _ -> None
 
 (* See EmitterVisitor::getPassByRefKind in emitter.cpp *)
@@ -2147,7 +2154,7 @@ and emit_call env (_, expr_ as expr) args uargs =
         ], Flavor.Cell
 
       | _ ->
-        begin match args, istype_op id with
+        begin match args, istype_op (SU.strip_global_ns id) with
         | [(_, A.Lvar (_, arg_str as arg_id))], Some i
           when not (is_local_this env arg_str) ->
           instr (IIsset (IsTypeL (get_local env arg_id, i))),

@@ -145,7 +145,7 @@ type elaborate_kind =
  * works out. (Fully qualifying identifiers is of course idempotent, but there
  * used to be other schemes here.)
  *)
-let elaborate_id_impl ~autoimport nsenv kind (p, id) =
+let elaborate_id_impl ~autoimport ~is_definition nsenv kind (p, id) =
   (* Go ahead and fully-qualify the name first. *)
   let fully_qualified =
     if id <> "" && id.[0] = '\\' then id
@@ -167,7 +167,8 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
         elaborate back into the current namespace. *)
         let len = (String.length id) - bslash_loc  - 1 in
         elaborate_into_current_ns nsenv (String.sub id (bslash_loc + 1) len)
-      end else match SMap.get prefix uses with
+      end else if is_definition then elaborate_into_current_ns nsenv id
+      else match SMap.get prefix uses with
         | None -> elaborate_into_current_ns nsenv id
         | Some use -> begin
           (* Strip off the "use" from id, but *not* the backslash after that
@@ -181,11 +182,13 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
       (ParserOptions.auto_namespace_map nsenv.ns_popt) fully_qualified in
   p, translated
 
-let elaborate_id = elaborate_id_impl ~autoimport:true
+let elaborate_id = elaborate_id_impl ~autoimport:true ~is_definition:false
 (* When a name that clashes with an auto-imported name is first being
  * defined (in its own namespace), it's impressively incorrect to
  * teleport it's definition into the global namespace *)
-let elaborate_id_no_autos = elaborate_id_impl ~autoimport:false
+(* do not try to shadow definition name by alias imported before *)
+let elaborate_definition_id_no_autos =
+  elaborate_id_impl ~autoimport:false ~is_definition:true
 
 (* First pass of flattening namespaces, run super early in the pipeline, right
  * after parsing.
@@ -256,18 +259,18 @@ module ElaborateDefs = struct
         nsenv, [SetNamespaceEnv nsenv]
       end
     | Class c -> nsenv, [Class {c with
-        c_name = elaborate_id_no_autos nsenv ElaborateClass c.c_name;
+        c_name = elaborate_definition_id_no_autos nsenv ElaborateClass c.c_name;
         c_extends = List.map c.c_extends (hint nsenv);
         c_implements = List.map c.c_implements (hint nsenv);
         c_body = List.map c.c_body (class_def nsenv);
         c_namespace = nsenv;
       }]
     | Fun f -> nsenv, [Fun {f with
-        f_name = elaborate_id_no_autos nsenv ElaborateFun f.f_name;
+        f_name = elaborate_definition_id_no_autos nsenv ElaborateFun f.f_name;
         f_namespace = nsenv;
       }]
     | Typedef t -> nsenv, [Typedef {t with
-        t_id = elaborate_id_no_autos nsenv ElaborateClass t.t_id;
+        t_id = elaborate_definition_id_no_autos nsenv ElaborateClass t.t_id;
         t_namespace = nsenv;
       }]
     | Constant cst -> nsenv, [Constant {cst with
@@ -283,7 +286,7 @@ module ElaborateDefs = struct
             the same way so name will be successfully resolved.*)
             let (pos, n) = cst.cst_name in
             pos, "\\" ^ n
-          else elaborate_id_no_autos nsenv ElaborateConst cst.cst_name;
+          else elaborate_definition_id_no_autos nsenv ElaborateConst cst.cst_name;
         cst_namespace = nsenv;
       }]
     | other -> nsenv, [other]

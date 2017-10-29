@@ -239,3 +239,28 @@ let using_st_function_scoped_top_level =
   "Using statement in function scoped form may only be used at the top " ^
   "level of a function or a method"
 let const_in_trait = "Traits cannot have constants"
+let strict_namespace_hh =
+  "To use strict hack, place // strict after the open tag. " ^
+  "If it's already there, remove this line. " ^
+  "Hack is strict already."
+let strict_namespace_not_hh =
+  "You seem to be trying to use a different language. " ^
+  "May I recommend Hack? http://hacklang.org"
+
+let original_definition = "Original definition"
+
+let name_is_already_in_use ~name ~short_name =
+  "Cannot use " ^ name ^ " as " ^ short_name ^
+  " because the name is already in use"
+
+let function_name_is_already_in_use ~name ~short_name =
+  "Cannot use function " ^ name ^ " as " ^ short_name ^
+  " because the name is already in use"
+
+let const_name_is_already_in_use ~name ~short_name =
+  "Cannot use const " ^ name ^ " as " ^ short_name ^
+  " because the name is already in use"
+
+let type_name_is_already_in_use ~name ~short_name =
+  "Cannot use type " ^ name ^ " as " ^ short_name ^
+  " because the name is already in use"

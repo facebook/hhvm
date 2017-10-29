@@ -12,20 +12,64 @@ module PositionedSyntax = Full_fidelity_positioned_syntax
 open PositionedSyntax
 
 module PositionedToken = Full_fidelity_positioned_token
-module SyntaxUtilities =
-  Full_fidelity_syntax_utilities.WithSyntax(PositionedSyntax)
 module SyntaxError = Full_fidelity_syntax_error
 module TokenKind = Full_fidelity_token_kind
 
+type location = {
+  start_offset: int;
+  end_offset: int
+}
+
+let make_location s e =
+  { start_offset = start_offset s; end_offset = end_offset e }
+
+let make_location_of_node n =
+  make_location n n
+
 type namespace_type =
   | Unspecified
-  | Bracketed of { start_offset : int; end_offset : int }
-  | Unbracketed of { start_offset : int; end_offset : int }
+  | Bracketed of location
+  | Unbracketed of location
+
+type used_names = {
+  t_classes: (location * bool) SMap.t;
+  t_namespaces: (location * bool) SMap.t;
+  t_functions: (location * bool) SMap.t;
+  t_constants: (location * bool) SMap.t;
+}
+
+let empty_names = {
+  t_classes= SMap.empty;
+  t_namespaces = SMap.empty;
+  t_functions = SMap.empty;
+  t_constants = SMap.empty;
+}
+
+let get_short_name_from_qualified_name name alias =
+  if String.length alias <> 0 then alias
+  else
+  try
+    let i = String.rindex name '\\' in
+    String.sub name (i + 1) (String.length name - i - 1)
+  with Not_found -> name
 
 type accumulator = {
   errors : SyntaxError.t list;
   namespace_type : namespace_type;
+  has_namespace_prefix: bool;
+  names: used_names;
 }
+
+let make_acc acc errors namespace_type names has_namespace_prefix =
+  if acc.errors == errors &&
+     acc.namespace_type == namespace_type &&
+     acc.names == names &&
+     acc.has_namespace_prefix = has_namespace_prefix then acc
+  else { errors; namespace_type; names; has_namespace_prefix }
+
+let fold_child_nodes f node parents acc =
+  PositionedSyntax.children node
+  |> Core_list.fold_left ~init:acc ~f:(fun acc c -> f acc c (node :: parents))
 
 (* Turns a syntax node into a list of nodes; if it is a separated syntax
    list then the separators are filtered from the resulting list. *)
@@ -641,6 +685,18 @@ let extract_async_node md_node =
     end
   | _ -> None (* Only method declarations have async nodes *)
 
+let make_name_already_used_error node name short_name original_location
+  report_error =
+  let original_location_error =
+    SyntaxError.make
+      original_location.start_offset
+      original_location.end_offset
+      SyntaxError.original_definition in
+  let s = start_offset node in
+  let e = end_offset node in
+  SyntaxError.make ~child:(Some original_location_error) s e
+    (report_error ~name ~short_name)
+
 (* Given a node and its parents, tests if the node declares a method that is
  * both abstract and async. *)
 let is_abstract_and_async_method md_node parents =
@@ -984,7 +1040,7 @@ let missing_type_annot_check is_strict hhvm_compat_mode f =
 let function_reference_check is_strict hhvm_compat_mode f =
   not hhvm_compat_mode && is_strict && not (is_missing f.function_ampersand)
 
-let function_errors node _parents is_strict hhvm_compat_mode errors =
+let function_errors node parents is_strict hhvm_compat_mode names errors =
   match syntax node with
   | FunctionDeclarationHeader f ->
     let errors =
@@ -993,8 +1049,16 @@ let function_errors node _parents is_strict hhvm_compat_mode errors =
     let errors =
       produce_error errors (function_reference_check is_strict hhvm_compat_mode) f
       SyntaxError.error2064 f.function_ampersand in
-    errors
-  | _ -> errors
+    let names =
+      match parents with
+      | { syntax = FunctionDeclaration _; _ } :: _ ->
+        let function_name = text f.function_name in
+        let location = make_location_of_node f.function_name in
+        { names with
+          t_functions = SMap.add function_name (location, true) names.t_functions }
+      | _ -> names in
+    names, errors
+  | _ -> names, errors
 
 let statement_errors node parents hhvm_compat_mode errors =
   let result = match syntax node with
@@ -1148,7 +1212,7 @@ let require_errors node parents hhvm_compat_mode errors =
     end
   | _ -> errors
 
-let classish_errors node parents hhvm_compat_mode errors =
+let classish_errors node parents hhvm_compat_mode names errors =
   match syntax node with
   | ClassishDeclaration cd ->
     let errors =
@@ -1195,8 +1259,27 @@ let classish_errors node parents hhvm_compat_mode errors =
       produce_error errors
       (is_classish_kind_declared_abstract hhvm_compat_mode TokenKind.Trait)
       node SyntaxError.error2043 abstract_keyword in
-    errors
-  | _ -> errors
+    let names, errors =
+      match token_kind cd.classish_keyword with
+      | Some TokenKind.Class | Some TokenKind.Trait ->
+        let name = text cd.classish_name in
+        let location = make_location_of_node cd.classish_name in
+        begin match SMap.get name names.t_classes with
+        | Some (location, false) ->
+          let error =
+            make_name_already_used_error cd.classish_name name name location
+              SyntaxError.type_name_is_already_in_use in
+          names, error :: errors
+        | _ ->
+          let names =
+            { names with
+              t_classes = SMap.add name (location, true) names.t_classes} in
+          names, errors
+        end
+      | _ ->
+        names, errors in
+    names, errors
+  | _ -> names, errors
 
 let class_element_errors node parents errors =
   match syntax node with
@@ -1244,7 +1327,108 @@ let group_use_errors node errors =
         SyntaxError.error2048 prefix
   | _ -> errors
 
-let const_decl_errors node parents hhvm_compat_mode errors =
+let use_class_or_namespace_clause_errors
+  is_hack is_global_namespace kind (names, errors) cl =
+
+  match syntax cl with
+  | NamespaceUseClause {
+      namespace_use_name  = name;
+      namespace_use_alias = alias; _
+    } ->
+    let name_text = text name in
+    let short_name = get_short_name_from_qualified_name name_text (text alias) in
+
+    let do_check ~error_on_global_redefinition names errors
+      get_map update_map report_error =
+
+      let map = get_map names in
+      match SMap.get short_name map with
+      | Some (location, is_definition) ->
+        if not is_definition
+           || (error_on_global_redefinition && is_global_namespace)
+        then
+          let error =
+            make_name_already_used_error name name_text
+              short_name location report_error in
+          names, error :: errors
+        else
+          names, errors
+      | None ->
+        let new_entry = make_location_of_node name, false in
+        update_map names (SMap.add short_name new_entry map), errors in
+
+    begin match syntax kind with
+    | Token { PositionedToken.kind = TokenKind.Namespace; _ } ->
+      do_check ~error_on_global_redefinition:false names errors
+        (fun n -> n.t_namespaces)
+        (fun n v -> { n with t_namespaces = v })
+        SyntaxError.name_is_already_in_use
+
+    | Token { PositionedToken.kind = TokenKind.Type; _ } ->
+      do_check ~error_on_global_redefinition:false names errors
+        (fun n -> n.t_classes)
+        (fun n v -> { n with t_classes = v })
+        SyntaxError.type_name_is_already_in_use
+
+    | Token { PositionedToken.kind = TokenKind.Function; _ } ->
+      do_check ~error_on_global_redefinition:true names errors
+        (fun n -> n.t_functions)
+        (fun n v -> { n with t_functions = v })
+        SyntaxError.function_name_is_already_in_use
+
+    | Token { PositionedToken.kind = TokenKind.Const; _ } ->
+      do_check ~error_on_global_redefinition:true names errors
+        (fun n -> n.t_constants)
+        (fun n v -> { n with t_constants = v })
+        SyntaxError.const_name_is_already_in_use
+
+    | Missing ->
+      let errors =
+        if name_text = "strict"
+        then
+          let message =
+            if is_hack then SyntaxError.strict_namespace_hh
+            else SyntaxError.strict_namespace_not_hh in
+          make_error_from_node name message :: errors
+        else errors in
+
+      let names, errors =
+        let location = make_location_of_node name in
+        match SMap.get short_name names.t_classes with
+        | Some (loc, _) ->
+          let error =
+            make_name_already_used_error name name_text short_name loc
+              SyntaxError.name_is_already_in_use in
+            names, error :: errors
+        | None ->
+          let t_classes = SMap.add short_name (location, false) names.t_classes in
+          let t_namespaces =
+            if SMap.mem short_name names.t_namespaces
+            then names.t_namespaces
+            else SMap.add short_name (location, false) names.t_namespaces in
+          { names with t_classes; t_namespaces }, errors in
+
+      names, errors
+    | _ ->
+      names, errors
+    end
+  | _ ->
+    names, errors
+
+let namespace_use_declaration_errors node is_hack is_global_namespace names errors =
+  match syntax node with
+  | NamespaceUseDeclaration {
+      namespace_use_kind = kind;
+      namespace_use_clauses = clauses; _ }
+  | NamespaceGroupUseDeclaration {
+      namespace_group_use_kind = kind;
+      namespace_group_use_clauses = clauses; _ } ->
+    let f =
+      use_class_or_namespace_clause_errors is_hack is_global_namespace kind in
+    List.fold_left f (names, errors) (syntax_to_list_no_separators clauses)
+  | _ -> names, errors
+
+let const_decl_errors node parents hhvm_compat_mode names errors =
   match syntax node with
   | ConstantDeclarator cd ->
     let errors =
@@ -1254,10 +1438,15 @@ let const_decl_errors node parents hhvm_compat_mode errors =
     let errors =
       produce_error_parents errors abstract_with_initializer cd parents
       SyntaxError.error2051 cd.constant_declarator_initializer in
-    errors
-  | _ -> errors
+    let constant_name = text cd.constant_declarator_name in
+    let location = make_location_of_node cd.constant_declarator_name in
+    let names = {
+      names with t_constants =
+        SMap.add constant_name (location, true) names.t_constants } in
+    names, errors
+  | _ -> names, errors
 
-  let abstract_final_class_nonstatic_var_error node parents hhvm_compat_mode errors =
+let abstract_final_class_nonstatic_var_error node parents hhvm_compat_mode errors =
   match syntax node with
   | PropertyDeclaration cd ->
     produce_error_parents errors
@@ -1265,7 +1454,7 @@ let const_decl_errors node parents hhvm_compat_mode errors =
     SyntaxError.error2061 cd.property_modifiers
   | _ -> errors
 
-  let abstract_final_class_nonstatic_method_error node parents hhvm_compat_mode errors =
+let abstract_final_class_nonstatic_method_error node parents hhvm_compat_mode errors =
   match syntax node with
   | MethodishDeclaration cd ->
     produce_error_parents errors
@@ -1278,48 +1467,37 @@ let mixed_namespace_errors node namespace_type errors =
   | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
     let s = start_offset namespace_left_brace in
     let e = end_offset namespace_right_brace in
-    let errors =
-      match namespace_type with
-      | Unbracketed { start_offset; end_offset } ->
-        let child = Some
-          (SyntaxError.make start_offset end_offset SyntaxError.error2057) in
-        SyntaxError.make ~child s e SyntaxError.error2052 :: errors
-      | _ -> errors in
-    let namespace_type =
-      if namespace_type = Unspecified
-      then Bracketed { start_offset = s; end_offset = e }
-      else namespace_type
-    in
-    { errors; namespace_type }
+    begin match namespace_type with
+    | Unbracketed { start_offset; end_offset } ->
+      let child = Some
+        (SyntaxError.make start_offset end_offset SyntaxError.error2057) in
+      SyntaxError.make ~child s e SyntaxError.error2052 :: errors
+    | _ -> errors
+    end
   | NamespaceEmptyBody { namespace_semicolon; _ } ->
     let s = start_offset namespace_semicolon in
     let e = end_offset namespace_semicolon in
-    let errors =
-      match namespace_type with
-      | Bracketed { start_offset; end_offset } ->
-        let child = Some
-          (SyntaxError.make start_offset end_offset SyntaxError.error2056) in
-        SyntaxError.make ~child s e SyntaxError.error2052 :: errors
-      | _ -> errors in
-    let namespace_type =
-      if namespace_type = Unspecified
-      then Unbracketed { start_offset = s; end_offset = e }
-      else namespace_type
-    in
-    { errors; namespace_type }
-  | _ -> { errors; namespace_type }
+    begin match namespace_type with
+    | Bracketed { start_offset; end_offset } ->
+      let child = Some
+        (SyntaxError.make start_offset end_offset SyntaxError.error2056) in
+      SyntaxError.make ~child s e SyntaxError.error2052 :: errors
+    | _ -> errors
+    end
+  | _ -> errors
 
 let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let is_hack_file = (SyntaxTree.language syntax_tree = "hh") in
   let is_hack = is_hack_file || enable_hh_syntax in
-  let folder acc node parents =
+  let rec folder acc node parents =
+    let { errors; namespace_type; names; has_namespace_prefix } = acc in
     let errors =
-      markup_errors node is_hack_file hhvm_compatiblity_mode acc.errors in
+      markup_errors node is_hack_file hhvm_compatiblity_mode errors in
     let errors =
       parameter_errors node parents is_strict is_hack hhvm_compatiblity_mode errors in
-    let errors =
-      function_errors node parents is_strict hhvm_compatiblity_mode errors in
+    let names, errors =
+      function_errors node parents is_strict hhvm_compatiblity_mode names errors in
     let errors =
       xhp_errors node parents hhvm_compatiblity_mode errors in
     let errors =
@@ -1332,29 +1510,69 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
       expression_errors node parents is_hack is_hack_file hhvm_compatiblity_mode errors in
     let errors =
       require_errors node parents hhvm_compatiblity_mode errors in
-    let errors =
-      classish_errors node parents hhvm_compatiblity_mode errors in
+    let names, errors =
+      classish_errors node parents hhvm_compatiblity_mode names errors in
     let errors =
       class_element_errors node parents errors in
     let errors =
       type_errors node parents is_strict hhvm_compatiblity_mode errors in
     let errors = alias_errors node errors in
     let errors = group_use_errors node errors in
-    let errors =
-      const_decl_errors node parents hhvm_compatiblity_mode errors in
+    let names, errors =
+      const_decl_errors node parents hhvm_compatiblity_mode names errors in
     let errors =
       abstract_final_class_nonstatic_var_error node parents hhvm_compatiblity_mode errors in
     let errors =
       abstract_final_class_nonstatic_method_error node parents hhvm_compatiblity_mode errors in
-    let mixed_namespace_acc =
-      mixed_namespace_errors node acc.namespace_type errors in
-    mixed_namespace_acc in
+    let errors =
+      mixed_namespace_errors node namespace_type errors in
+    let names, errors =
+      namespace_use_declaration_errors node is_hack (not has_namespace_prefix)
+        names errors in
+
+    match syntax node with
+    | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
+      let namespace_type =
+        if namespace_type = Unspecified
+        then Bracketed (make_location namespace_left_brace namespace_right_brace)
+        else namespace_type in
+      (* reset names/namespace_type before diving into namespace body *)
+      let has_namespace_prefix = has_namespace_prefix ||
+        match parents with
+        | { syntax = NamespaceDeclaration { namespace_name; _ }; _ } :: _ ->
+          not (is_missing namespace_name)
+        | _ -> false in
+      let acc1 =
+        make_acc acc errors namespace_type empty_names has_namespace_prefix in
+      let acc1 = fold_child_nodes folder node parents acc1 in
+      (* resume with old set of names and pull back
+        accumulated errors/last seen namespace type *)
+        make_acc acc acc1.errors namespace_type acc.names acc.has_namespace_prefix
+    | NamespaceEmptyBody { namespace_semicolon; _ } ->
+      let namespace_type =
+        if namespace_type = Unspecified
+        then Unbracketed (make_location_of_node namespace_semicolon)
+        else namespace_type
+      in
+      (* consider the rest of file to be the part of the namespace:
+         reset names and namespace type, keep errors *)
+      let acc =
+        make_acc acc errors namespace_type empty_names has_namespace_prefix in
+      fold_child_nodes folder node parents acc
+    | _ ->
+      let acc =
+        make_acc acc errors namespace_type names has_namespace_prefix in
+      fold_child_nodes folder node parents acc in
+
   let node =
     match positioned_syntax with
     | Some n -> n
     | None -> PositionedSyntax.from_tree syntax_tree in
-  let acc = SyntaxUtilities.parented_fold_pre folder
-    { errors = []; namespace_type = Unspecified } node in
+  let acc = fold_child_nodes folder node []
+    { errors = [];
+      namespace_type = Unspecified;
+      names = empty_names;
+      has_namespace_prefix = false } in
   acc.errors
 
 type error_level = Minimum | Typical | Maximum | HHVMCompatibility

@@ -175,3 +175,10 @@ val hsl_in_php : string
 val vdarray_in_php : string
 val using_st_function_scoped_top_level : string
 val const_in_trait : string
+val strict_namespace_hh : string
+val strict_namespace_not_hh : string
+val original_definition : string
+val name_is_already_in_use : name:string -> short_name:string -> string
+val function_name_is_already_in_use : name:string -> short_name:string -> string
+val const_name_is_already_in_use : name:string -> short_name:string -> string
+val type_name_is_already_in_use : name:string -> short_name:string -> string

@@ -481,9 +481,14 @@ PARSE_TREE
   | SyntaxList                        of t list
 SYNTAX
 
+  val full_width : t -> int
+  val trailing_width : t -> int
+  val leading_width : t -> int
+  val children : t -> t list
   val syntax : t -> syntax
   val kind : t -> Full_fidelity_syntax_kind.t
   val make_token : Token.t -> t
+  val get_token : t -> Token.t option
   val make_missing : unit -> t
   val make_list : t list -> t
 CONSTRUCTOR_METHODS

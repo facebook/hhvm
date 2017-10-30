@@ -23,4 +23,5 @@ module type LexableToken_S = sig
   val trailing: t -> Trivia.t list
   val leading: t -> Trivia.t list
   val with_leading: Trivia.t list -> t -> t
+  val with_kind: t -> Full_fidelity_token_kind.t -> t
 end

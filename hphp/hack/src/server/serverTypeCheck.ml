@@ -555,11 +555,16 @@ end = functor(CheckKind:CheckKindType) -> struct
     end ~init:FileInfo.empty_names
 
   let get_oldified_defs env =
-    Relative_path.Set.fold env.needs_phase2_redecl ~f:begin fun path acc ->
+    let res = Relative_path.Set.fold env.needs_phase2_redecl ~f:begin fun path acc ->
       match Relative_path.Map.get env.files_info path with
       | None -> acc
       | Some names -> FileInfo.(merge_names (simplify names) acc)
-    end ~init:FileInfo.empty_names
+    end ~init:FileInfo.empty_names in
+    Relative_path.Set.fold env.needs_redecl ~f:begin fun path acc ->
+      match Relative_path.Map.get env.files_info path with
+      | None -> acc
+      | Some names -> FileInfo.(merge_names (simplify names) acc)
+    end ~init:res
 
   let type_check genv env =
     let start_t = Unix.gettimeofday () in

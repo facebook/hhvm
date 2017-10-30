@@ -264,3 +264,7 @@ let const_name_is_already_in_use ~name ~short_name =
 let type_name_is_already_in_use ~name ~short_name =
   "Cannot use type " ^ name ^ " as " ^ short_name ^
   " because the name is already in use"
+
+let variadic_reference = "Found '...&'. Did you mean '&...'?"
+let double_variadic = "Parameter redundantly marked as variadic ('...')."
+let double_reference = "Parameter redundantly marked as reference ('&')."

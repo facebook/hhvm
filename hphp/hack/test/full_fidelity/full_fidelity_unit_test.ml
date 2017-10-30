@@ -256,6 +256,7 @@ let error_tests =
     "test_question_mark_end_tag_errors";
     "test_php_blocks_errors";
     "test_inout_params_errors";
+    "test_variadic_ref_decorators";
   ] ~f:mapper
 
 let test_data = minimal_tests @ trivia_tests @ error_tests @

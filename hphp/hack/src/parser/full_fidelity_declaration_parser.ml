@@ -1317,12 +1317,9 @@ module WithExpressionAndStatementAndTypeParser
   and parse_decorated_variable parser =
     (* ERROR RECOVERY
        Detection of (variadic, byRef) inout params happens in post-parsing.
-       TODO: Error on
-          ... ... variable
-          & & variable
-          ... & variable
-       at a later pass
-       (This work is tracked by task T21651222.)
+       Although a parameter can have at most one variadic/reference decorator,
+       we deliberately allow multiple decorators in the initial parse and produce
+       an error in a later pass.
      *)
     let (parser, decorator) = next_token parser in
     let decorator = make_token decorator in

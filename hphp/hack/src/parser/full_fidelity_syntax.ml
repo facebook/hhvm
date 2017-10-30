@@ -414,10 +414,10 @@ module WithToken(Token: TokenType) = struct
     let is_void       = is_specific_token Full_fidelity_token_kind.Void
     let is_left_brace = is_specific_token Full_fidelity_token_kind.LeftBrace
     let is_ellipsis   = is_specific_token Full_fidelity_token_kind.DotDotDot
+    let is_ampersand  = is_specific_token Full_fidelity_token_kind.Ampersand
     let is_comma      = is_specific_token Full_fidelity_token_kind.Comma
     let is_array      = is_specific_token Full_fidelity_token_kind.Array
     let is_var        = is_specific_token Full_fidelity_token_kind.Var
-    let is_ampersand  = is_specific_token Full_fidelity_token_kind.Ampersand
     let is_inout      = is_specific_token Full_fidelity_token_kind.Inout
 
     let get_end_of_file_children {

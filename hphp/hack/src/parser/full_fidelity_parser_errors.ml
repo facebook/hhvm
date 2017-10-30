@@ -113,8 +113,30 @@ let is_decorated_expression ~f node =
     | _ -> false
   end
 
+let test_decorated_expression_child ~f node =
+  begin match syntax node with
+    | DecoratedExpression { decorated_expression_expression; _ } ->
+      f decorated_expression_expression
+    | _ -> false
+  end
+
+let is_reference_expression node =
+  is_decorated_expression ~f:is_ampersand node
+
 let is_variadic_expression node =
   is_decorated_expression ~f:is_ellipsis node
+
+let is_reference_variadic node =
+  is_variadic_expression node &&
+  test_decorated_expression_child node ~f:is_reference_expression
+
+let is_double_variadic node =
+  is_variadic_expression node &&
+  test_decorated_expression_child node ~f:is_variadic_expression
+
+let is_double_reference node =
+  is_reference_expression node &&
+  test_decorated_expression_child node ~f:is_reference_expression
 
 let is_variadic_parameter_variable node =
   (* TODO: This shouldn't be a decorated *expression* because we are not
@@ -1009,6 +1031,12 @@ let params_errors params is_hack hhvm_compat_mode errors =
     params SyntaxError.error2073 in
   errors
 
+let decoration_errors node errors =
+  let errors = produce_error errors is_reference_variadic node SyntaxError.variadic_reference node in
+  let errors = produce_error errors is_double_variadic node SyntaxError.double_variadic node in
+  let errors = produce_error errors is_double_reference node SyntaxError.double_reference node in
+  errors
+
 let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
   match syntax node with
   | ParameterDeclaration p ->
@@ -1030,6 +1058,7 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
   | AnonymousFunction { anonymous_parameters; _ }
     when not hhvm_compat_mode ->
     params_errors anonymous_parameters is_hack hhvm_compat_mode errors
+  | DecoratedExpression _ -> decoration_errors node errors
   | _ -> errors
 
 let missing_type_annot_check is_strict hhvm_compat_mode f =

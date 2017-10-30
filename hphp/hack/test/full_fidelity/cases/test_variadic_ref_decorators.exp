@@ -1,0 +1,3 @@
+(7,23)-(7,32) Parameter redundantly marked as variadic ('...').
+(9,21)-(9,26) Parameter redundantly marked as reference ('&').
+(11,21)-(11,28) Found '...&'. Did you mean '&...'?

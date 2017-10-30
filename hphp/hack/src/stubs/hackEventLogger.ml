@@ -10,10 +10,11 @@
 
 let set_use_watchman _ = ()
 let set_incremental_init _ = ()
+let set_use_tiny_state _ = ()
 let set_lazy_incremental _ = ()
 let set_search_chunk_size _ = ()
 let bad_exit _ _ _ ~is_oom:_ = ()
-let init _ _ _ _ _ _ _ _ _ _ = ()
+let init _ _ _ _ _ _ _ _ _ _ _ = ()
 let init_monitor _ _ _ = ()
 let init_end ~state_distance:_ ~approach_name:_ _ _ = ()
 let starting_first_server _ = ()

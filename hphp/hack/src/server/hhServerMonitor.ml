@@ -60,6 +60,9 @@ let monitor_daemon_main (options: ServerArgs.options) =
     ServerConfig.(load filename options) in
   if local_config.ServerLocalConfig.incremental_init then
     HackEventLogger.set_incremental_init ();
+  if local_config.ServerLocalConfig.incremental_init then
+    HackEventLogger.set_use_tiny_state ();
+
   HackEventLogger.set_search_chunk_size
     local_config.ServerLocalConfig.search_chunk_size;
 

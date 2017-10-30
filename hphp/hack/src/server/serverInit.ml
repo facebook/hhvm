@@ -215,7 +215,7 @@ module ServerInitCommon = struct
       (try Daemon.kill daemon with e -> Hh_logger.exc e);
       raise e
 
-  let invoke_approach genv root approach = match approach with
+  let invoke_approach genv root approach ~tiny = match approach with
    | Load_mini_script cmd ->
      mk_state_future root cmd
    | Precomputed { ServerArgs.saved_state_fn;
@@ -243,7 +243,7 @@ module ServerInitCommon = struct
        }
      end in
      let result = State_loader.mk_state_future ?mini_state_handle
-       ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny:false in
+       ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny in
      lock_and_load_deptable result.State_loader.deptable_fn;
      let old_saved = open_in result.State_loader.saved_state_fn
        |> Marshal.from_channel in
@@ -595,7 +595,7 @@ module ServerEagerInit : InitKind = struct
      * in the Result monad provides a convenient way to locate the error
      * handling code in one place. *)
     let state_future =
-     load_mini_approach >>= invoke_approach genv root in
+     load_mini_approach >>= invoke_approach genv root ~tiny:false in
     let get_next, t = indexing genv in
     let lazy_parse = lazy_level = Parse in
     let env, t = parsing ~lazy_parse genv env ~get_next t in
@@ -719,7 +719,7 @@ module ServerIncrementalInit : InitKind = struct
   let init ~load_mini_approach genv lazy_level env  root =
     assert (lazy_level = Incremental);
     let state_future =
-      load_mini_approach >>= invoke_approach genv root in
+      load_mini_approach >>= invoke_approach genv root ~tiny:false in
 
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
     let state_future = state_future >>= fun f ->
@@ -818,9 +818,9 @@ module ServerLazyInit : InitKind = struct
 
   let init ~load_mini_approach genv lazy_level env root =
     assert(lazy_level = Init);
+    let tiny = genv.local_config.SLC.load_tiny_state in
     let state_future =
-      load_mini_approach >>= invoke_approach genv root in
-
+      load_mini_approach >>= invoke_approach genv root ~tiny in
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
     let state_future = state_future >>= fun f ->
       with_loader_timeout timeout "wait_for_state" f

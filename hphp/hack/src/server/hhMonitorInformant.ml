@@ -87,13 +87,15 @@ module Revision_map = struct
              * Just return a fake empty list of XDB results. *)
             Future.of_value []
           | Some hhconfig_hash ->
+            let local_config = ServerLocalConfig.load ~silent:true in
+            let tiny = local_config.ServerLocalConfig.load_tiny_state in
             Xdb.find_nearest
               ~db:Xdb.hack_db_name
               ~db_table:Xdb.mini_saved_states_table
               ~svn_rev
               ~hh_version:Build_id.build_revision
               ~hhconfig_hash
-              ~tiny:false
+              ~tiny
           end in
           let () = Hashtbl.add t.xdb_queries svn_rev future in
           None

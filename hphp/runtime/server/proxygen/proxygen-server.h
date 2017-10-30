@@ -62,8 +62,13 @@ struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
 
   void onConnectionsDrained() override;
 
-  void onIngressError(const proxygen::HTTPSession&,
-                      proxygen::ProxygenError error) override;
+  void onIngressError(
+#if PROXYGEN_HTTP_SESSION_USES_BASE
+    const proxygen::HTTPSessionBase&,
+#else
+    const proxygen::HTTPSession&,
+#endif
+    proxygen::ProxygenError error) override;
 
   proxygen::HTTPSessionController* getController() override {
     return m_controllerPtr;

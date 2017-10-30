@@ -286,9 +286,10 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
             else if secs > 60 then Printf.sprintf "%n minutes" (secs / 60)
             else Printf.sprintf "%n seconds" (secs) in
           Printf.eprintf
-            "  hh_server '%s' was launched %s ago.\n%!"
+            "  hh_server '%s' was launched %s ago;\n  hh_client '%s' launched now.\n%!"
             (String.concat " " mismatch_info.existing_argv)
-            time;
+            time
+            (String.concat " " (Array.to_list Sys.argv));
           ()
       end;
       if env.autostart

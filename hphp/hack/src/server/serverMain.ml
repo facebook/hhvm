@@ -416,9 +416,9 @@ let resolve_init_approach genv =
       | Some _, true, None ->
         (** Use native loading only if the config specifies a load script,
          * and the local config prefers native. *)
-        Some (ServerInit.Load_state_natively None), "Load_state_natively"
+        Some ServerInit.Load_state_natively, "Load_state_natively"
       | _, _, Some (ServerArgs.Informant_induced_mini_state_target target) ->
-        Some (ServerInit.Load_state_natively (Some target)), "Load_state_natively_with_target"
+        Some (ServerInit.Load_state_natively_with_target target), "Load_state_natively_with_target"
       | Some load_mini_script, false, None ->
         Some (ServerInit.Load_mini_script load_mini_script), "Load_mini_script"
       | None, _, Some (ServerArgs.Mini_state_target_info target) ->

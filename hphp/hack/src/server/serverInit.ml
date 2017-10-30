@@ -29,7 +29,8 @@ exception Loader_timeout of string
 type load_mini_approach =
   | Load_mini_script of Path.t
   | Precomputed of ServerArgs.mini_state_target_info
-  | Load_state_natively of ServerMonitorUtils.target_mini_state option
+  | Load_state_natively
+  | Load_state_natively_with_target of ServerMonitorUtils.target_mini_state
 
 (** Docs are in .mli *)
 type init_result =
@@ -215,51 +216,56 @@ module ServerInitCommon = struct
       (try Daemon.kill daemon with e -> Hh_logger.exc e);
       raise e
 
+  let invoke_loading_state_natively ~tiny ?target genv root =
+    let mini_state_handle = begin match target with
+    | None -> None
+    | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; } ->
+      Some
+      {
+        State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
+        mini_state_for_svn_rev = target_svn_rev;
+      }
+    end in
+    let result = State_loader.mk_state_future ?mini_state_handle
+      ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny in
+    lock_and_load_deptable result.State_loader.deptable_fn;
+    let old_saved = open_in result.State_loader.saved_state_fn
+      |> Marshal.from_channel in
+    let get_dirty_files = (fun () ->
+      let dirty_files = Future.get result.State_loader.dirty_files in
+      let dirty_files = List.map dirty_files Relative_path.from_root in
+      let dirty_files = Relative_path.set_of_list dirty_files in
+      Ok (
+        result.State_loader.saved_state_fn,
+        result.State_loader.corresponding_base_rev,
+        dirty_files,
+        old_saved,
+        Some result.State_loader.state_distance
+      )
+    ) in
+    (fun () -> Ok get_dirty_files)
+
   let invoke_approach genv root approach ~tiny = match approach with
-   | Load_mini_script cmd ->
-     mk_state_future root cmd
-   | Precomputed { ServerArgs.saved_state_fn;
-     corresponding_base_revision; deptable_fn; changes } ->
-     lock_and_load_deptable deptable_fn;
-     let changes = Relative_path.set_of_list changes in
-     let chan = open_in saved_state_fn in
-     let old_saved = Marshal.from_channel chan in
-     let get_dirty_files = (fun () -> Ok (
-       saved_state_fn,
-       corresponding_base_revision,
-       changes,
-       old_saved,
-       None
-     )) in
-     Core_result.try_with (fun () -> fun () -> Ok get_dirty_files)
-   | Load_state_natively target_opt ->
-     let mini_state_handle = begin match target_opt with
-     | None -> None
-     | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; } ->
-       Some
-       {
-         State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
-         mini_state_for_svn_rev = target_svn_rev;
-       }
-     end in
-     let result = State_loader.mk_state_future ?mini_state_handle
-       ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny in
-     lock_and_load_deptable result.State_loader.deptable_fn;
-     let old_saved = open_in result.State_loader.saved_state_fn
-       |> Marshal.from_channel in
-     let get_dirty_files = (fun () ->
-       let dirty_files = Future.get result.State_loader.dirty_files in
-       let dirty_files = List.map dirty_files Relative_path.from_root in
-       let dirty_files = Relative_path.set_of_list dirty_files in
-       Ok (
-         result.State_loader.saved_state_fn,
-         result.State_loader.corresponding_base_rev,
-         dirty_files,
-         old_saved,
-         Some result.State_loader.state_distance
-       )
-     ) in
-     Core_result.try_with (fun () -> fun () -> Ok get_dirty_files)
+    | Load_mini_script cmd ->
+      mk_state_future root cmd
+    | Precomputed { ServerArgs.saved_state_fn;
+      corresponding_base_revision; deptable_fn; changes } ->
+      lock_and_load_deptable deptable_fn;
+      let changes = Relative_path.set_of_list changes in
+      let chan = open_in saved_state_fn in
+      let old_saved = Marshal.from_channel chan in
+      let get_dirty_files = (fun () -> Ok (
+        saved_state_fn,
+        corresponding_base_revision,
+        changes,
+        old_saved,
+        None
+      )) in
+      Core_result.try_with (fun () -> fun () -> Ok get_dirty_files)
+    | Load_state_natively ->
+      Core_result.try_with (fun () -> invoke_loading_state_natively ~tiny genv root)
+    | Load_state_natively_with_target target ->
+      Core_result.try_with (fun () -> invoke_loading_state_natively ~tiny ~target genv root)
 
   let is_check_mode options =
     ServerArgs.check_mode options &&

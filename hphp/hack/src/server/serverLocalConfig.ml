@@ -119,7 +119,7 @@ let load_ fn ~silent =
     ~default:default.search_chunk_size config in
   let load_mini_script_timeout = int_ "load_mini_script_timeout"
     ~default:default.load_mini_script_timeout config in
-  let load_state_natively = bool_ "load_state_natively_v2"
+  let load_state_natively = bool_ "load_state_natively_v3"
     ~default:default.load_state_natively config in
   let use_hackfmt = bool_ "use_hackfmt"
     ~default:default.use_hackfmt config in

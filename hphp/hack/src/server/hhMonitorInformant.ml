@@ -232,8 +232,11 @@ module Revision_tracker = struct
       Hg.current_working_copy_base_rev (Path.to_string root))
 
   let set_base_revision svn_rev env =
-    let () = Hh_logger.log "Revision_tracker setting base rev: %d" svn_rev in
-    env.current_base_revision := svn_rev
+    if svn_rev = !(env.current_base_revision) then
+      ()
+    else
+      let () = Hh_logger.log "Revision_tracker setting base rev: %d" svn_rev in
+      env.current_base_revision := svn_rev
 
   let active_env init_settings base_svn_rev =
     {

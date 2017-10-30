@@ -1057,6 +1057,11 @@ module Make (GetLocals : GetLocals) = struct
         (fun (pc,xc) -> if (x = xc) then Errors.shadowed_type_param p pc x)
     end
 
+  let check_tparams_constructor class_tparam_names constructor =
+    match constructor with
+    | None -> ()
+    | Some constr -> check_method_tparams class_tparam_names constr
+
   let check_tparams_shadow class_tparam_names methods =
     List.iter methods (check_method_tparams class_tparam_names)
 
@@ -1119,6 +1124,7 @@ module Make (GetLocals : GetLocals) = struct
       interface c constructor methods smethods in
     let class_tparam_names = List.map c.c_tparams (fun (_, x,_) -> x) in
     let enum = Option.map c.c_enum (enum_ env) in
+    check_tparams_constructor class_tparam_names constructor;
     check_name_collision methods;
     check_tparams_shadow class_tparam_names methods;
     check_name_collision smethods;

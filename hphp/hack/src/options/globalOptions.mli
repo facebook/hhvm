@@ -110,6 +110,7 @@ val tco_experimental_forbid_nullable_cast : string
 val tco_experimental_safe_pass_by_ref : string
 val tco_experimental_coroutines: string
 val tco_experimental_inout_params : string
+val tco_experimental_disallow_static_memoized : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t

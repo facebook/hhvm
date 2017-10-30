@@ -569,6 +569,7 @@ module NastCheck                            = struct
   let inout_params_outside_of_sync          = 3042 (* DONT MODIFY!!!! *)
   let inout_params_special                  = 3043 (* DONT MODIFY!!!! *)
   let inout_params_mix_byref                = 3044 (* DONT MODIFY!!!! *)
+  let inout_params_memoize                  = 3045 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1410,6 +1411,10 @@ let inout_params_mix_byref pos1 pos2 =
     add_list NastCheck.inout_params_mix_byref [msg1; msg2]
   end
 
+let inout_params_memoize fpos pos =
+  let msg1 = fpos, "Functions with inout parameters cannot be memoized" in
+  let msg2 = pos, "This is an inout parameter" in
+  add_list NastCheck.inout_params_memoize [msg1; msg2]
 
 (*****************************************************************************)
 (* Nast terminality *)

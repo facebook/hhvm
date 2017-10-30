@@ -356,6 +356,13 @@ and func env f named_body =
   List.iter f.f_tparams (tparam env);
   let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
   List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
+  if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes then begin
+    let inout = List.find f.f_params ~f:(
+      fun x -> x.param_callconv = Some Ast.Pinout) in
+    match inout with
+    | Some param -> Errors.inout_params_memoize p param.param_pos
+    | _ -> ()
+  end;
   block env named_body.fnb_nast;
   CheckFunctionBody.block
     f.f_fun_kind
@@ -519,7 +526,8 @@ and class_ tenv c =
   List.iter c.c_req_extends (check_is_class env);
   List.iter c.c_uses (check_is_trait env);
   let disallow_static_memoized = TypecheckerOptions.experimental_feature_enabled
-    (Env.get_options env.tenv) "disallow_static_memoized" in
+    (Env.get_options env.tenv)
+    TypecheckerOptions.experimental_disallow_static_memoized in
   if disallow_static_memoized && not c.c_final then
     begin
     List.iter c.c_static_methods (check_static_memoized_function);
@@ -789,6 +797,13 @@ and method_ (env, is_static) m =
   let env = { env with tenv = tenv } in
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
   List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
+  if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes then begin
+    let inout = List.find m.m_params ~f:(
+      fun x -> x.param_callconv = Some Ast.Pinout) in
+    match inout with
+    | Some param -> Errors.inout_params_memoize p param.param_pos
+    | _ -> ()
+  end;
   List.iter m.m_tparams (tparam env);
   block env named_body.fnb_nast;
   maybe hint env m.m_ret;
@@ -825,15 +840,15 @@ and fun_param env (_, name) f_type byref param =
   maybe expr env param.param_expr;
   match param.param_callconv with
   | None -> ()
-  | Some _ ->
-      let pos = param.param_pos in
-      if require_inout_params_enabled env pos
-      then begin
-        if f_type <> Ast.FSync then Errors.inout_params_outside_of_sync pos;
-        if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
-        Option.iter byref ~f:(fun param ->
-          Errors.inout_params_mix_byref pos param.param_pos)
-      end
+  | Some Ast.Pinout ->
+    let pos = param.param_pos in
+    if require_inout_params_enabled env pos
+    then begin
+      if f_type <> Ast.FSync then Errors.inout_params_outside_of_sync pos;
+      if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
+      Option.iter byref ~f:(fun param ->
+        Errors.inout_params_mix_byref pos param.param_pos)
+    end
 
 and stmt env = function
   | Return (p, _) when env.t_is_finally ->

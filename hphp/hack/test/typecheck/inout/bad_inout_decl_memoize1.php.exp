@@ -1,0 +1,4 @@
+File "bad_inout_decl_memoize1.php", line 4, characters 10-12:
+Functions with inout parameters cannot be memoized (NastCheck[3045])
+File "bad_inout_decl_memoize1.php", line 4, characters 36-37:
+This is an inout parameter

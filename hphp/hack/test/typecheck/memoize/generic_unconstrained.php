@@ -6,3 +6,8 @@ class Foo<T> {
     return "hello";
   }
 }
+
+<<__Memoize>>
+function some_function<T>(T $arg): string {
+  return 'hello';
+}

@@ -416,24 +416,26 @@ and fun_def tcopt f =
       TI.check_params_instantiable env f.f_params;
       TI.check_tparams_instantiable env f.f_tparams;
       let env, param_tys = List.map_env env f.f_params make_param_local_ty in
+      if Env.is_strict env then
+        List.iter2_exn ~f:(check_param env) f.f_params param_tys;
+      if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes then
+        List.iter2_exn ~f:(check_memoizable env) f.f_params param_tys;
       let env, typed_params = List.map_env env (List.zip_exn param_tys f.f_params)
         bind_param in
-      let env, t_variadic, v_ty = match f.f_variadic with
+      let env, t_variadic = match f.f_variadic with
         | FVvariadicArg vparam ->
           TI.check_param_instantiable env vparam;
           let env, ty = make_param_local_ty env vparam in
+          if Env.is_strict env then
+            check_param env vparam ty;
+          if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes then
+            check_memoizable env vparam ty;
           let env, t_vparam = bind_param env (ty, vparam) in
-          env, T.FVvariadicArg t_vparam, Some ty
-        | FVellipsis -> env, T.FVellipsis, None
-        | FVnonVariadic -> env, T.FVnonVariadic, None in
+          env, T.FVvariadicArg t_vparam
+        | FVellipsis -> env, T.FVellipsis
+        | FVnonVariadic -> env, T.FVnonVariadic in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = Env.check_todo env in
-      if Env.is_strict env then begin
-        List.iter2_exn f.f_params param_tys (check_param env);
-        match f.f_variadic, v_ty with
-          | FVvariadicArg vparam, Some ty -> check_param env vparam ty;
-          | _ -> ()
-      end;
       begin match f.f_ret with
         | None when Env.is_strict env -> suggest_return env pos (fst return)
         | None -> Typing_suggest.save_fun_or_method f.f_name

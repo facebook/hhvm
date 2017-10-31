@@ -12,3 +12,11 @@ class Foo {
     return "hello";
   }
 }
+
+<<__Memoize>>
+async function some_async_function(array<Bar> $arg): Awaitable<string> {
+  return 'goodbye';
+}
+
+<<__Memoize>>
+function some_function(array<Bar> $arg): void {}

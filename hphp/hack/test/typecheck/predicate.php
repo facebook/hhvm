@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function takes_int(int $x): void {}
 

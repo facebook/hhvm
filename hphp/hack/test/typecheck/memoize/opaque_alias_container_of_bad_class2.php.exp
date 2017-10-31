@@ -1,0 +1,4 @@
+File "opaque_alias_container_of_bad_class2.php--file1.php", line 8, characters 21-27:
+This is an object of type BarImpl (Typing[4149])
+File "opaque_alias_container_of_bad_class2.php--file2.php", line 6, characters 28-29:
+Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize

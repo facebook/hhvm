@@ -12,3 +12,8 @@ class Foo {
     return "hello";
   }
 }
+
+<<__Memoize>>
+function some_function(Bar &$arg): string {
+  return 'hello';
+}

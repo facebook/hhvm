@@ -1,0 +1,4 @@
+File "bad_class_by_reference2.php", line 6, characters 24-26:
+This is an object of type Bar (Typing[4149])
+File "bad_class_by_reference2.php", line 6, characters 29-32:
+Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize

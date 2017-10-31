@@ -571,6 +571,8 @@ let rewrite_class_refs instrseq =
           | _ -> false)
       | _ -> false
       end
+    | A.Call ((_, A.Id (_, "tuple")), _, es, []) ->
+      List.for_all es ~f:can_initialize_static_var
     | _ -> false
 
   let rewrite_static_instrseq static_var_map emit_expr env instrseq =

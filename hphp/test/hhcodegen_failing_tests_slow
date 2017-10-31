@@ -171,7 +171,6 @@ slow/parser/semi-reserved-keywords/enum_class_constant_bad.php
 slow/parser/static_call_access.php
 slow/parser/static_call_access_const_expr.php
 slow/parser/tuple-1.php
-slow/parser/tuple-2.php
 slow/parser/val_colon_colon_class_method.php
 slow/parser/xhp-ambiguity.php
 slow/php7_backported/ns_089.php

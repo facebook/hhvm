@@ -87,6 +87,10 @@ let make_test test =
 
     let on_server_exit : ServerMonitorUtils.monitor_config -> unit = fun _ -> ()
 
+    let kill_server _ = ()
+
+    let wait_for_server_exit _ _ = ()
+
   end : Mock_server_config_sig) in
   fun () ->
   Tempfile.with_tempdir (test mock_server_config)

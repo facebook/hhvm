@@ -556,9 +556,11 @@ let init {
   use_xdb;
 } =
   if use_dummy then
+    let () = Printf.eprintf "Informant using dummy - resigning\n" in
     Resigned
   (** Active informant requires Watchman subscriptions. *)
   else if not allow_subscriptions then
+    let () = Printf.eprintf "Not using subscriptions - Informant resigning\n" in
     Resigned
   else
     let watchman = Watchman.init {
@@ -569,7 +571,9 @@ let init {
       root;
     } in
     match watchman with
-    | None -> Resigned
+    | None ->
+      let () = Printf.eprintf "Watchman failed to init - Informant resigning\n" in
+      Resigned
     | Some watchman_env ->
       Active
       {

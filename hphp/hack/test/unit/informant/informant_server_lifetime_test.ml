@@ -42,7 +42,9 @@ module type Mock_server_config_sig = sig
 end;;
 
 
-module Test_common = struct
+module Tools = struct
+  include Informant_test_tools
+
   let monitor_config temp_dir = {
     ServerMonitorUtils.socket_file =
       Path.to_string (Path.concat temp_dir "test_server.monitor_socket");
@@ -54,6 +56,15 @@ module Test_common = struct
       Path.to_string (Path.concat temp_dir "test_server.monitor_log");
     load_script_log_file =
       Path.to_string (Path.concat temp_dir "test_load_script.log");
+  }
+
+  let simple_informant_options temp_dir = {
+    HhMonitorInformant.root = temp_dir;
+    allow_subscriptions = true;
+    state_prefetcher = State_prefetcher.dummy;
+    use_dummy = false;
+    min_distance_restart = 100;
+    use_xdb = true;
   }
 end;;
 
@@ -94,20 +105,18 @@ let make_test test =
     let wait_pid _ = 0, (Unix.WEXITED 0)
 
   end : Mock_server_config_sig) in
+  Xdb.Mocking.reset_find_nearest ();
+  Tools.set_hg_to_svn_map ();
   fun () ->
-  Tempfile.with_tempdir (test mock_server_config)
+    Tempfile.with_tempdir begin fun temp_dir ->
+      try test mock_server_config temp_dir with
+      | e ->
+        raise e
+    end
 
 let test_no_event mock_server_config temp_dir =
   let module Mock_server_config = (val mock_server_config : Mock_server_config_sig) in
   let module Test_monitor = ServerMonitor.Make_monitor (Mock_server_config) (HhMonitorInformant) in
-  let informant_options = {
-    HhMonitorInformant.root = temp_dir;
-    allow_subscriptions = true;
-    state_prefetcher = State_prefetcher.dummy;
-    use_dummy = false;
-    min_distance_restart = 100;
-    use_xdb = true;
-  } in
   let last_call = Mock_server_config.get_last_start_server_call () in
   let expected = None in
   Start_server_args_opt_asserter.assert_equals expected last_call
@@ -116,8 +125,8 @@ let test_no_event mock_server_config temp_dir =
     ~waiting_client:None
     ~max_purgatory_clients:10
     ()
-    informant_options
-    (Test_common.monitor_config temp_dir)
+    (Tools.simple_informant_options temp_dir)
+    (Tools.monitor_config temp_dir)
   in
   ignore monitor;
   let last_call = Mock_server_config.get_last_start_server_call () in
@@ -126,14 +135,57 @@ let test_no_event mock_server_config temp_dir =
     "Start server should have been called, but with None for target_saved_state";
   true
 
+let test_restart_server_with_target_saved_state mock_server_config temp_dir =
+  let module Mock_server_config = (val mock_server_config : Mock_server_config_sig) in
+  let module Test_monitor = ServerMonitor.Make_monitor (Mock_server_config) (HhMonitorInformant) in
+  Watchman.Mocking.init_returns @@ Some "Fake name for watchman instance";
+  let last_call = Mock_server_config.get_last_start_server_call () in
+  let expected = None in
+  Start_server_args_opt_asserter.assert_equals expected last_call
+    "Before starting monitor, start_server should not have been called.";
+  Hg.Mocking.current_working_copy_base_rev_returns
+    (Future.of_value Tools.svn_1);
+  let monitor = Test_monitor.start_monitor
+    ~waiting_client:None
+    ~max_purgatory_clients:10
+    ()
+    (Tools.simple_informant_options temp_dir)
+    (Tools.monitor_config temp_dir)
+  in
+  let monitor = Test_monitor.check_and_run_loop_once monitor in
+  let last_call = Mock_server_config.get_last_start_server_call () in
+  let expected = Some None in
+  Start_server_args_opt_asserter.assert_equals expected last_call
+    "First call of start server should have no target saved state";
+  Tools.set_xdb ~state_svn_rev:200
+    ~for_svn_rev:200 ~everstore_handle:"dummy_handle_for_svn_200" ~tiny:false;
+  Tools.set_next_watchman_state_transition Tools.Changed_merge_base Tools.hg_rev_200;
+  let monitor = Test_monitor.check_and_run_loop_once monitor in
+  ignore monitor;
+  let last_call = Mock_server_config.get_last_start_server_call () in
+  let state_target = {
+    ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_200";
+    target_svn_rev = 200;
+  } in
+  let expected = Some (Some state_target) in
+  Start_server_args_opt_asserter.assert_equals expected last_call
+    "Should be starting fresh server with target saved state after significant Changed_merge_base";
+  true
+
+
 let setup_global_test_state () =
   EventLogger.init EventLogger.Event_logger_fake 0.0;
-  Relative_path.(set_path_prefix Root (Path.make Sys_utils.temp_dir_name))
+  Relative_path.(set_path_prefix Root (Path.make "/tmp"));
+  Relative_path.(set_path_prefix Root (Path.make Sys_utils.temp_dir_name));
+  let hhconfig_path = Relative_path.(create Root "/tmp/.hhconfig") in
+  Disk.write_file (Relative_path.to_absolute hhconfig_path) "assume_php = false"
 
 let tests =
   [
     "test_no_event",
       make_test test_no_event;
+    "test_restart_server_with_target_saved_state",
+      make_test test_restart_server_with_target_saved_state;
   ]
 
 let () =

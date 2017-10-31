@@ -1038,8 +1038,8 @@ private:
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  void* slabAlloc(uint32_t bytes, size_t index);
-  void* newSlab(uint32_t nbytes);
+  void* slabAlloc(size_t bytes, size_t index);
+  void* newSlab(size_t nbytes);
   void* mallocSmallSizeSlow(size_t bytes, size_t index);
   void  updateBigStats();
 

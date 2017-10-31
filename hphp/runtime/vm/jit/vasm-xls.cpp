@@ -932,6 +932,10 @@ struct UseVisitor {
    */
   template<class R> void across(R r) { use(r, constraint(r), m_range.end + 1); }
   void across(RegSet regs) { regs.forEach([&](Vreg r) { across(r); }); }
+  void across(Vptr m) {
+    if (m.base.isValid()) across(m.base);
+    if (m.index.isValid()) across(m.index);
+  }
 
 private:
   void use(Vreg r, Constraint kind, unsigned end, Vreg hint = Vreg{}) {
@@ -2322,6 +2326,10 @@ struct Renamer {
   template<class R> void use(R& r) { rename(r); }
   template<class S, class H> void useHint(S& src, H) { rename(src); }
   template<class R> void across(R& r) { rename(r); }
+  void across(Vptr& m) {
+    if (m.base.isValid()) rename(m.base);
+    if (m.index.isValid()) rename(m.index);
+  }
 
   void def(RegSet) {}
   void use(RegSet /*r*/) {}

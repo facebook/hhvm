@@ -82,7 +82,7 @@ bool touchesMemory(Vinstr::Opcode op) {
 #define O(name, imms, uses, defs) \
   case Vinstr::name: { using T = name; return uses false; }
 #define U(s)    useMemory<decltype(T::s)>() ||
-#define UA(s)   (assertx(!useMemory<decltype(T::s)>()),false) ||
+#define UA(s)   useMemory<decltype(T::s)>() ||
 #define UH(s,h) (assertx(!useMemory<decltype(T::s)>()),false) ||
 #define UW(s)   (assertx(useMemory<decltype(T::s)>()),true) ||
 #define UM(s)   (assertx(useMemory<decltype(T::s)>()),true) ||

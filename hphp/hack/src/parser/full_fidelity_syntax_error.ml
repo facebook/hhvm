@@ -268,3 +268,4 @@ let type_name_is_already_in_use ~name ~short_name =
 let variadic_reference = "Found '...&'. Did you mean '&...'?"
 let double_variadic = "Parameter redundantly marked as variadic ('...')."
 let double_reference = "Parameter redundantly marked as reference ('&')."
+let global_in_const_decl = "Cannot have globals in constant declaration"

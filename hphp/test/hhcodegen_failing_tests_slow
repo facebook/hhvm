@@ -3,14 +3,12 @@ slow/anon_class/extend_local.php
 slow/arithmetic/inc-dec-dollar-this.php
 slow/array_offset/429.php
 slow/array_offset/433.php
-slow/class_constant/globals-array.php
 slow/class_type_constant/type_constant.php
 slow/class_type_constant/type_constant6.php
 slow/closure/lambda_implicit_this.php
 slow/closure/return_types.php
 slow/concat/1578.php
 slow/constant/1597.php
-slow/constant/globals-array-constant.php
 slow/constant/true_false_null.php
 slow/dict/hh-only2.php
 slow/dict/init-parse-error2.php

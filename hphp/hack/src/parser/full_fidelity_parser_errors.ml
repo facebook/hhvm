@@ -15,6 +15,8 @@ module PositionedToken = Full_fidelity_positioned_token
 module SyntaxError = Full_fidelity_syntax_error
 module TokenKind = Full_fidelity_token_kind
 
+module SN = Naming_special_names
+
 type location = {
   start_offset: int;
   end_offset: int
@@ -1444,6 +1446,16 @@ let use_class_or_namespace_clause_errors
   | _ ->
     names, errors
 
+let is_global_in_const_decl init =
+  match syntax init with
+  | SimpleInitializer { simple_initializer_value; _ } ->
+    begin match syntax simple_initializer_value with
+    | VariableExpression { variable_expression } ->
+      SN.Superglobals.is_superglobal @@ text variable_expression
+    | _ -> false
+    end
+  | _ -> false
+
 let namespace_use_declaration_errors node is_hack is_global_namespace names errors =
   match syntax node with
   | NamespaceUseDeclaration {
@@ -1467,6 +1479,9 @@ let const_decl_errors node parents hhvm_compat_mode names errors =
     let errors =
       produce_error_parents errors abstract_with_initializer cd parents
       SyntaxError.error2051 cd.constant_declarator_initializer in
+    let errors =
+      produce_error errors is_global_in_const_decl cd.constant_declarator_initializer
+      SyntaxError.global_in_const_decl cd.constant_declarator_initializer in
     let constant_name = text cd.constant_declarator_name in
     let location = make_location_of_node cd.constant_declarator_name in
     let names = {

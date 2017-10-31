@@ -19,22 +19,25 @@ module SimpleParserSyntax = Full_fidelity_simple_parser.WithSyntax(Syntax)
 module SimpleParser = SimpleParserSyntax.WithLexer(
   Full_fidelity_type_lexer.WithToken(Syntax.Token))
 
+module type ExpressionParser_S = Full_fidelity_expression_parser_type
+  .WithSyntax(Syntax)
+  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
+  .ExpressionParser_S
+
+module type TypeParser_S = Full_fidelity_type_parser_type
+  .WithSyntax(Syntax)
+  .WithLexer(Full_fidelity_type_lexer.WithToken(Syntax.Token))
+  .TypeParser_S
+
+module ParserHelperSyntax = Full_fidelity_parser_helpers.WithSyntax(Syntax)
+module ParserHelper = ParserHelperSyntax
+  .WithLexer(Full_fidelity_type_lexer.WithToken(Syntax.Token))
+
 open TokenKind
 open Syntax
 
-module WithExpressionParser (
-  ExpressionParser : Full_fidelity_expression_parser_type
-    .WithSyntax(Syntax)
-    .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
-    .ExpressionParser_S) :
-  Full_fidelity_type_parser_type
-    .WithSyntax(Syntax)
-    .WithLexer(Full_fidelity_type_lexer.WithToken(Syntax.Token))
-    .TypeParser_S = struct
-
-module ParserHelperSyntax = Full_fidelity_parser_helpers.WithSyntax(Syntax)
-module ParserHelper =
-  ParserHelperSyntax.WithLexer(Full_fidelity_type_lexer.WithToken(Syntax.Token))
+module WithExpressionParser (ExpressionParser : ExpressionParser_S) :
+  TypeParser_S = struct
 
 include SimpleParser
 include ParserHelper.WithParser(SimpleParser)

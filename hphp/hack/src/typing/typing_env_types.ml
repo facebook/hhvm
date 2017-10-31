@@ -72,6 +72,8 @@ type env = {
 and genv = {
   tcopt   : TypecheckerOptions.t;
   return  : locl ty;
+  (* For each function parameter, its type and calling convention. *)
+  params  : (locl ty * param_mode) Local_id.Map.t;
   parent_id : string;
   parent  : decl ty;
   (* Identifier of the enclosing class *)

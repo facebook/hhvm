@@ -280,6 +280,7 @@ let empty tcopt file ~droot = {
   genv    = {
     tcopt   = tcopt;
     return  = fresh_type();
+    params  = Local_id.Map.empty;
     self_id = "";
     self    = Reason.none, Tany;
     static  = false;
@@ -439,10 +440,27 @@ let set_return env x =
   let genv = { genv with return = x } in
   { env with genv = genv }
 
-let with_return env f =
+let get_params env =
+  env.genv.params
+
+let set_params env params =
+  { env with genv = { env.genv with params = params } }
+
+let set_param env x param =
+  let params = get_params env in
+  let params = Local_id.Map.add x param params in
+  set_params env params
+
+let clear_params env =
+  set_params env Local_id.Map.empty
+
+let with_env env f =
   let ret = get_return env in
+  let params = get_params env in
   let env, result = f env in
-  set_return env ret, result
+  let env = set_params env params in
+  let env = set_return env ret in
+  env, result
 
 let is_static env = env.genv.static
 let get_self env = env.genv.self
@@ -806,12 +824,14 @@ let anon anon_lenv env f =
   (* Setting up the environment. *)
   let old_lenv = env.lenv in
   let old_return = get_return env in
+  let old_params = get_params env in
   let outer_fun_kind = get_fn_kind env in
   let env = { env with lenv = anon_lenv } in
   (* Typing *)
   let env, tfun, result = f env in
   (* Cleaning up the environment. *)
   let env = { env with lenv = old_lenv } in
+  let env = set_params env old_params in
   let env = set_return env old_return in
   let env = set_fn_kind env outer_fun_kind in
   env, tfun, result

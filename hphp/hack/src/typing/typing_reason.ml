@@ -60,6 +60,7 @@ type t =
   | Rmap_append      of Pos.t
   | Rvar_param       of Pos.t
   | Runpack_param    of Pos.t
+  | Rinout_param     of Pos.t
   | Rinstantiate     of t * string * t
   | Rarray_filter    of Pos.t * t
   | Rtype_access     of t * string list * t
@@ -134,6 +135,7 @@ let rec to_string prefix r =
   | Ryield_send      _ -> [(p, prefix ^ " ($generator->send() can always send a null back to a \"yield\")")]
   | Rvar_param       _ -> [(p, prefix ^ " (variadic argument)")]
   | Runpack_param    _ -> [(p, prefix ^ " (it is unpacked with '...')")]
+  | Rinout_param     _ -> [(p, prefix ^ " (inout parameter)")]
   | Rnullsafe_op     _ -> [(p, prefix ^ " (use of ?-> operator)")]
   | Rcoerced     (_, p2, s)  ->
       [
@@ -251,6 +253,7 @@ and to_pos = function
   | Rmap_append p -> p
   | Rvar_param p -> p
   | Runpack_param p -> p
+  | Rinout_param p -> p
   | Rinstantiate (_, _, r) -> to_pos r
   | Rarray_filter (p, _) -> p
   | Rtype_access (r, _, _) -> to_pos r
@@ -297,6 +300,7 @@ type ureason =
   | URnone
   | URassign
   | URassign_branch
+  | URassign_inout
   | URhint
   | URreturn
   | URforeach
@@ -311,6 +315,7 @@ type ureason =
   | URxhp of string * string
   | URindex of string
   | URparam
+  | URparam_inout
   | URarray_value
   | URarray_key
   | URtuple_access
@@ -337,6 +342,7 @@ let string_of_ureason = function
   | URhint -> "Wrong type hint"
   | URassign -> "Invalid assignment"
   | URassign_branch -> "Invalid assignment in this branch"
+  | URassign_inout -> "Invalid assignment to an inout parameter"
   | URforeach -> "Invalid foreach"
   | URthrow -> "Invalid exception"
   | URvector -> "Some elements in this Vector are incompatible"
@@ -349,6 +355,7 @@ let string_of_ureason = function
       "Invalid xhp value for attribute " ^ attr ^ " in " ^ (strip_ns cls)
   | URindex s -> "Invalid index type for this " ^ s
   | URparam -> "Invalid argument"
+  | URparam_inout -> "Invalid argument to an inout parameter"
   | URarray_value -> "Incompatible field values"
   | URarray_key -> "Incompatible array keys"
   | URtuple_access ->

@@ -739,19 +739,24 @@ module Typing                               = struct
   let array_get_with_optional_field         = 4165 (* DONT MODIFY!!!! *)
   let unknown_field_disallowed_in_shape     = 4166 (* DONT MODIFY!!!! *)
   let nullable_cast                         = 4167 (* DONT MODIFY!!!! *)
-  let pass_by_ref_annotation_mismatch       = 4168 (* DONT MODIFY!!!! *)
+  let pass_by_ref_annotation_missing        = 4168 (* DONT MODIFY!!!! *)
   let non_call_argument_in_suspend          = 4169 (* DONT MODIFY!!!! *)
   let non_coroutine_call_in_suspend         = 4170 (* DONT MODIFY!!!! *)
   let coroutine_call_outside_of_suspend     = 4171 (* DONT MODIFY!!!! *)
   let function_is_not_coroutine             = 4172 (* DONT MODIFY!!!! *)
   let coroutinness_mismatch                 = 4173 (* DONT MODIFY!!!! *)
   let expecting_awaitable_return_type_hint  = 4174 (* DONT MODIFY!!!! *)
-  let bad_pass_by_ref_override              = 4175 (* DONT MODIFY!!!! *)
+  let reffiness_invariant                   = 4175 (* DONT MODIFY!!!! *)
   let dollardollar_lvalue                   = 4176 (* DONT MODIFY!!!! *)
   let static_method_on_interface            = 4177 (* DONT MODIFY!!!! *)
   let duplicate_using_var                   = 4178 (* DONT MODIFY!!!! *)
   let illegal_disposable                    = 4179 (* DONT MODIFY!!!! *)
   let escaping_disposable                   = 4180 (* DONT MODIFY!!!! *)
+  let pass_by_ref_annotation_unexpected     = 4181 (* DONT MODIFY!!!! *)
+  let inout_annotation_missing              = 4182 (* DONT MODIFY!!!! *)
+  let inout_annotation_unexpected           = 4183 (* DONT MODIFY!!!! *)
+  let inoutness_mismatch                    = 4184 (* DONT MODIFY!!!! *)
+
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2543,16 +2548,38 @@ let reference_expr pos =
   let msg = "Cannot take a value by reference in strict mode." in
   add Typing.reference_expr pos msg
 
-let pass_by_ref_annotation ~should_add p witness =
-  let msg = if should_add
-    then "This argument should be annotated with &"
-    else "This argument should not be annotated with &" in
-  add_list Typing.pass_by_ref_annotation_mismatch ((p, msg) :: witness)
+let pass_by_ref_annotation_missing pos1 pos2 =
+  let msg1 = pos1, "This argument should be annotated with &" in
+  let msg2 = pos2, "Because this parameter is passed by reference" in
+  add_list Typing.pass_by_ref_annotation_missing [msg1; msg2]
 
-let bad_pass_by_ref_override pos1 pos2 =
+let pass_by_ref_annotation_unexpected pos1 pos2 =
+  let msg1 = pos1, "This argument should not be annotated with &" in
+  let msg2 = pos2, "Because this parameter is passed by value" in
+  add_list Typing.pass_by_ref_annotation_unexpected [msg1; msg2]
+
+let reffiness_invariant pos1 pos2 mode2 =
   let msg1 = pos1, "This parameter is passed by reference" in
+  let mode_str = match mode2 with
+    | `normal -> "a normal parameter"
+    | `inout -> "an inout parameter" in
+  let msg2 = pos2, "It is incompatible with " ^ mode_str in
+  add_list Typing.reffiness_invariant [msg1; msg2]
+
+let inout_annotation_missing pos1 pos2 =
+  let msg1 = pos1, "This argument should be annotated with 'inout'" in
+  let msg2 = pos2, "Because this is an inout parameter" in
+  add_list Typing.inout_annotation_missing [msg1; msg2]
+
+let inout_annotation_unexpected pos1 pos2 =
+  let msg1 = pos1, "Unexpected inout annotation for argument" in
+  let msg2 = pos2, "This is a normal parameter (does not have 'inout')" in
+  add_list Typing.inout_annotation_unexpected [msg1; msg2]
+
+let inoutness_mismatch pos1 pos2 =
+  let msg1 = pos1, "This is an inout parameter" in
   let msg2 = pos2, "It is incompatible with a normal parameter" in
-  add_list Typing.bad_pass_by_ref_override [msg1; msg2]
+  add_list Typing.inoutness_mismatch [msg1; msg2]
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

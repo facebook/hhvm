@@ -295,9 +295,21 @@ let add_constraint p env ck ty_sub ty_super =
 let rec subtype_params env subl superl =
   match subl, superl with
   | [], _ | _, [] -> env
-  | { fp_type = sub; _ } :: subl, { fp_type = super; _ } :: superl ->
-    let env = { env with Env.pos = Reason.to_pos (fst sub) } in
-    let env = sub_type env sub super in
+  | sub :: subl, super :: superl ->
+    let { fp_type = ty_sub; _ } = sub in
+    let { fp_type = ty_super; _ } = super in
+    (* Check that the calling conventions of the params are compatible.
+     * We don't currently raise an error for reffiness because function
+     * hints don't support '&' annotations (safe_pass_by_ref = false). *)
+    Unify.unify_param_modes ~safe_pass_by_ref:false sub super;
+    let env = { env with Env.pos = Reason.to_pos (fst ty_sub) } in
+    let env = match sub.fp_kind, super.fp_kind with
+    | FPinout, FPinout ->
+      (* Inout parameters are invariant wrt subtyping for function types. *)
+      let env, _ = Unify.unify env ty_super ty_sub in
+      env
+    | _ ->
+      sub_type env ty_sub ty_super in
     let env = subtype_params env subl superl in
     env
 

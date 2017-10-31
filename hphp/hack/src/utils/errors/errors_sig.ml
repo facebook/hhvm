@@ -338,10 +338,9 @@ module type S = sig
   val instanceof_always_true : Pos.t -> unit
   val instanceof_generic_classname : Pos.t -> string -> unit
   val final_property : Pos.t -> unit
-  val pass_by_ref_annotation :
-    should_add:bool -> Pos.t -> (Pos.t * string) list -> unit
-  val bad_pass_by_ref_override : Pos.t -> Pos.t -> unit
-
+  val pass_by_ref_annotation_missing : Pos.t -> Pos.t -> unit
+  val reffiness_invariant : Pos.t -> Pos.t -> [< `normal | `inout ] -> unit
+  val pass_by_ref_annotation_unexpected : Pos.t -> Pos.t -> unit
 
   val to_json : Pos.absolute error_ -> Hh_json.json
   val to_string : ?indent:bool -> Pos.absolute error_ -> string
@@ -400,4 +399,7 @@ module type S = sig
   val inout_params_special : Pos.t -> unit
   val inout_params_mix_byref : Pos.t -> Pos.t -> unit
   val inout_params_memoize : Pos.t -> Pos.t -> unit
+  val inout_annotation_missing : Pos.t -> Pos.t -> unit
+  val inout_annotation_unexpected : Pos.t -> Pos.t -> unit
+  val inoutness_mismatch : Pos.t -> Pos.t -> unit
 end

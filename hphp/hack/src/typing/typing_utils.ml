@@ -557,5 +557,5 @@ let default_fun_param ty : 'a fun_param = {
   fp_pos = Pos.none;
   fp_name = None;
   fp_type = ty;
-  fp_is_ref = false;
+  fp_kind = FPnormal;
 }

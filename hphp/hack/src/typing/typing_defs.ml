@@ -365,13 +365,16 @@ and 'phase fun_arity =
   (* HH-style ... anonymous variadic arg; body presumably uses func_get_args *)
   | Fellipsis of int       (* min *)
 
+and param_mode =
+  | FPnormal
+  | FPref
+  | FPinout
 
 and 'phase fun_param = {
-  fp_pos    : Pos.t;
-  fp_name   : string option;
-  fp_type   : 'phase ty;
-  (* true if this parameter is passed by reference *)
-  fp_is_ref : bool;
+  fp_pos  : Pos.t;
+  fp_name : string option;
+  fp_type : 'phase ty;
+  fp_kind : param_mode;
 }
 
 and 'phase fun_params = 'phase fun_param list
@@ -503,6 +506,13 @@ let this = Local_id.make "$this"
 
 let arity_min ft_arity : int = match ft_arity with
   | Fstandard (min, _) | Fvariadic (min, _) | Fellipsis min -> min
+
+let get_param_mode is_ref callconv =
+  (* If a param has both & and inout, this should have errored in parsing. *)
+  match callconv with
+  | Some Ast.Pinout -> FPinout
+  | None when is_ref -> FPref
+  | None -> FPnormal
 
 module AbstractKind = struct
   let to_string = function

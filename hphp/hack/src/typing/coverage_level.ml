@@ -129,6 +129,7 @@ let incr_reason_stats r p reason_stats =
     | Rmap_append _ -> "Rmap_append"
     | Rvar_param _ -> "Rvar_param"
     | Runpack_param _ -> "Runpack_param"
+    | Rinout_param _ -> "Rinout_param"
     | Rinstantiate _ -> "Rinstantiate"
     | Rarray_filter _ -> "Rarray_filter"
     | Rtype_access _ -> "Rtype_access"

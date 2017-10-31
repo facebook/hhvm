@@ -1,0 +1,6 @@
+File "bad_inout_use_assign4.php", line 11, characters 10-19:
+Invalid assignment to an inout parameter (Typing[4110])
+File "bad_inout_use_assign4.php", line 7, characters 18-23:
+This is a string (inout parameter)
+File "bad_inout_use_assign4.php", line 15, characters 18-25:
+It is incompatible with an array key (int/string)

@@ -353,7 +353,10 @@ let rec bind_param env (ty1, param) =
     T.param_expr = param_te;
     T.param_callconv = param.param_callconv;
   } in
-  Env.set_local env (Local_id.get param.param_name) ty1, tparam
+  let mode = get_param_mode param.param_is_reference param.param_callconv in
+  let env = Env.set_local env (Local_id.get param.param_name) ty1 in
+  let env = Env.set_param env (Local_id.get param.param_name) (ty1, mode) in
+  env, tparam
 
 (* In strict mode, we force you to give a type declaration on a parameter *)
 (* But the type checker is nice: it makes a suggestion :-) *)
@@ -361,6 +364,22 @@ and check_param env param ty =
   match param.param_hint with
   | None -> suggest env param.param_pos ty
   | Some _ -> ()
+
+and check_inout_return env =
+  let params = Local_id.Map.elements (Env.get_params env) in
+  List.fold params ~init:env ~f:begin fun env (id, ((r, ty), mode)) ->
+    match mode with
+    | FPinout ->
+      (* Whenever the function exits normally, we require that each local
+       * corresponding to an inout parameter be compatible with the original
+       * type for the parameter (under subtyping rules). *)
+      let local_ty = Env.get_local env id in
+      let env, ety = Env.expand_type env local_ty in
+      let pos = Reason.to_pos (fst ety) in
+      let param_ty = Reason.Rinout_param (Reason.to_pos r), ty in
+      Type.sub_type pos Reason.URassign_inout env ety param_ty
+    | _ -> env
+  end
 
 (*****************************************************************************)
 (* Now we are actually checking stuff! *)
@@ -386,6 +405,7 @@ and fun_def tcopt f =
       let env =
         localize_where_constraints
           ~ety_env:(Phase.env_with_self env) env f.f_where_constraints in
+      let env = Env.clear_params env in
       let env, hret =
         match f.f_ret with
         | None -> env, (Reason.Rwitness pos, Tany)
@@ -444,7 +464,7 @@ and fun_def tcopt f =
 (*****************************************************************************)
 
 and fun_ ?(abstract=false) env hret pos named_body f_kind =
-  Env.with_return env begin fun env ->
+  Env.with_env env begin fun env ->
     debug_last_pos := pos;
     let env = Env.set_return env hret in
     let env = Env.set_fn_kind env f_kind in
@@ -468,6 +488,7 @@ and fun_implicit_return env pos ret _b = function
   | Ast.FSync ->
     (* A function without a terminal block has an implicit return; the
      * "void" type *)
+    let env = check_inout_return env in
     let rty = Reason.Rno_return pos, Tprim Nast.Tvoid in
     Typing_suggest.save_return env ret rty;
     Type.sub_type pos Reason.URreturn env rty ret
@@ -605,12 +626,14 @@ and stmt env = function
       (* TODO TAST: annotate with joined types *)
       env, T.If(te, tb1, tb2)
   | Return (p, None) ->
+      let env = check_inout_return env in
       let rty = make_return_type env p (Reason.Rwitness p, Tprim Tvoid) in
       let expected_return = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
       let env = Type.sub_type p Reason.URreturn env rty expected_return in
       env, T.Return (p, None)
   | Return (p, Some e) ->
+      let env = check_inout_return env in
       let pos = fst e in
       let expected_return = Env.get_return env in
       let env, te, rty =
@@ -1945,7 +1968,7 @@ and expr_
         make_result env txml obj
       )
   | Callconv (kind, e) ->
-      let env, te, ty = lvalue env e in
+      let env, te, ty = expr env e in
       make_result env (T.Callconv (kind, te)) ty
     (* TODO TAST: change AST so that order of shape expressions is preserved.
      * At present, evaluation order is unspecified in TAST *)
@@ -2073,6 +2096,7 @@ and anon_make tenv p f ft idl =
 
   is_coroutine,
   fun ?el ?ret_ty env supplied_params ->
+    let safe_pass_by_ref = TUtils.safe_pass_by_ref_enabled env in
     if !is_typing_self
     then begin
       Errors.anonymous_recursive p;
@@ -2081,11 +2105,17 @@ and anon_make tenv p f ft idl =
     else begin
       is_typing_self := true;
       Env.anon anon_lenv env begin fun env ->
+        let env = Env.clear_params env in
         let params = ref f.f_params in
         let env, t_params = List.fold_left ~f:(anon_bind_param params) ~init:(env, [])
           (List.map supplied_params (fun x -> x.fp_type)) in
         let env = List.fold_left ~f:anon_bind_opt_param ~init:env !params in
         let env = List.fold_left ~f:anon_check_param ~init:env f.f_params in
+        let env = match el with
+          | None -> env
+          | Some x ->
+            iter2_shortest (param_modes ~safe_pass_by_ref) ft.ft_params x;
+            wfold_left2 inout_write_back env ft.ft_params x in
         let env, hret =
           match f.f_ret with
           | None ->
@@ -2112,8 +2142,6 @@ and anon_make tenv p f ft idl =
           then env
           else fun_implicit_return env p hret nb.fnb_nast f.f_fun_kind
         in
-        if TUtils.safe_pass_by_ref_enabled env
-        then Option.iter el ~f:(iter2_shortest check_pass_by_ref ft.ft_params);
         is_typing_self := false;
         let tfun_ = {
           T.f_mode = f.f_mode;
@@ -2424,7 +2452,10 @@ and set_valid_rvalue p env x ty =
 
 (* Deal with assignment of a value of type ty2 to lvalue e1 *)
 and assign p env e1 ty2 : _ * T.expr * T.ty =
-let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
+  assign_ p Reason.URassign env e1 ty2
+
+and assign_ p ur env e1 ty2 =
+  let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
   match e1 with
   | (_, Lvar ((_, x) as id)) ->
     let env, ty1 = set_valid_rvalue p env x ty2 in
@@ -2500,7 +2531,7 @@ let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
         | _ ->
           let env, tyl =
             List.map_env env el (fun env _ -> Env.fresh_unresolved_type env) in
-          let env = Type.sub_type p Reason.URassign env folded_ty2
+          let env = Type.sub_type p ur env folded_ty2
               (Reason.Rwitness (fst e1), Ttuple tyl) in
           let env, reversed_tel =
             List.fold2_exn el tyl ~init:(env,[]) ~f:(fun (env,tel) lvalue ty2 ->
@@ -2510,7 +2541,7 @@ let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
         end in
     begin match resl with
       | [res] -> res
-      | _ -> assign_simple p env e1 ty2
+      | _ -> assign_simple p ur env e1 ty2
     end
   | _, Class_get _
   | _, Obj_get _ ->
@@ -2535,7 +2566,7 @@ let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
         | ty -> [ty]
       in
       let env = List.fold_left real_type_list ~f:begin fun env real_type ->
-        Type.sub_type p (Reason.URassign) env ety2 real_type
+        Type.sub_type p ur env ety2 real_type
       end ~init:env in
       (match e1 with
       | _, Obj_get ((_, This | _, Lvar _ as obj),
@@ -2575,7 +2606,7 @@ let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
     * shape_ty could be more than just a shape. It could be an unresolved
     * type where some elements are shapes and some others are not.
     *)
-    assign_simple p env e1 ty2
+    assign_simple p ur env e1 ty2
   | _, This ->
      Errors.this_lvalue p;
      make_result env T.Any (Reason.Rwitness p, Terr)
@@ -2586,13 +2617,13 @@ let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
     let env, texpr, ty = assign p env e1' ty2 in
     make_result env (T.Unop (Ast.Uref, texpr)) ty
   | _ ->
-      assign_simple p env e1 ty2
+      assign_simple p ur env e1 ty2
 
-and assign_simple pos env e1 ty2 =
+and assign_simple pos ur env e1 ty2 =
   let env, te1, ty1 = lvalue env e1 in
   let env, ty2 = check_valid_rvalue pos env ty2 in
   let env, ty2 = TUtils.unresolved env ty2 in
-  let env = Type.sub_type pos (Reason.URassign) env ty2 ty1 in
+  let env = Type.sub_type pos ur env ty2 ty1 in
   env, te1, ty2
 
 and array_field env = function
@@ -4267,6 +4298,43 @@ and variadic_param env ft =
     | Fvariadic (_, p_ty) -> env, Some p_ty
     | Fellipsis _ | Fstandard _ -> env, None
 
+and param_modes ~safe_pass_by_ref { fp_pos; fp_kind; _ } (pos, e) =
+  match fp_kind, e with
+  | FPnormal, Unop (Ast.Uref, _) ->
+    Errors.pass_by_ref_annotation_unexpected pos fp_pos
+  | FPnormal, Callconv _ ->
+    Errors.inout_annotation_unexpected pos fp_pos
+  | FPnormal, _
+  | FPref, Unop (Ast.Uref, _) -> ()
+  | FPref, Callconv (kind, _) ->
+    (match kind with
+    (* HHVM supports pass-by-ref for arguments annotated as 'inout'. *)
+    | Ast.Pinout -> ()
+    )
+  | FPref, _ ->
+    if safe_pass_by_ref
+    then Errors.pass_by_ref_annotation_missing pos fp_pos
+  (* HHVM also allows '&' on arguments to inout parameters via interop layer. *)
+  | FPinout, Unop (Ast.Uref, _)
+  | FPinout, Callconv (Ast.Pinout, _) -> ()
+  | FPinout, _ ->
+    Errors.inout_annotation_missing pos fp_pos
+
+and inout_write_back env { fp_type; _ } (_, e) =
+  match e with
+  | Callconv (Ast.Pinout, e1) ->
+    (* Translate the write-back semantics of inout parameters.
+     *
+     * This matters because we want to:
+     * (1) make sure we can write to the original argument
+     *     (modifiable lvalue check)
+     * (2) allow for growing of locals / Tunresolveds (type side effect)
+     *     but otherwise unify the argument type with the parameter hint
+     *)
+    let env, _te, _ty = assign_ (fst e1) Reason.URparam_inout env e1 fp_type in
+    env
+  | _ -> env
+
 and call ~expected pos env fty el uel =
   let env, tel, tuel, ty = call_ ~expected pos env fty el uel in
   (* We need to solve the constraints after every single function call.
@@ -4276,18 +4344,6 @@ and call ~expected pos env fty el uel =
    * in a branch. *)
   let env = Env.check_todo env in
   env, tel, tuel, ty
-
-and check_pass_by_ref { fp_pos; fp_is_ref; _ } (pos, e) =
-  let r = Reason.Rwitness fp_pos in
-  match e with
-    | Unop (Ast.Uref, _) when fp_is_ref -> ()
-    | Unop (Ast.Uref, _) ->
-      Errors.pass_by_ref_annotation ~should_add:false pos
-        (Reason.to_string "Because this parameter is passed by value" r)
-    | _ when fp_is_ref ->
-      Errors.pass_by_ref_annotation ~should_add:true pos
-        (Reason.to_string "Because this parameter is passed by reference" r)
-    | _ -> ()
 
 and call_ ~expected pos env fty el uel =
   let safe_pass_by_ref = TUtils.safe_pass_by_ref_enabled env in
@@ -4403,6 +4459,8 @@ and call_ ~expected pos env fty el uel =
      * that not enough args were passed in (so we don't do the min check).
      *)
     let () = check_arity ~check_min pos pos_def arity ft.ft_arity in
+    (* Variadic params cannot be inout so we can stop early *)
+    let env = wfold_left2 inout_write_back env ft.ft_params el in
     Typing_hooks.dispatch_fun_call_hooks
       ft.ft_params (List.map (el @ uel) fst) env;
     env, tel, tuel, ft.ft_ret
@@ -4432,7 +4490,7 @@ and call_param ~safe_pass_by_ref env param ((pos, _ as e), arg_ty) =
   | None -> ()
   | Some name -> Typing_suggest.save_param name env param.fp_type arg_ty
   );
-  if safe_pass_by_ref then check_pass_by_ref param e;
+  param_modes ~safe_pass_by_ref param e;
   let env, arg_ty = check_valid_rvalue pos env arg_ty in
 
   (* When checking params the type 'x' may be expression dependent. Since
@@ -5479,6 +5537,7 @@ and method_def env m =
   let env =
     localize_where_constraints ~ety_env env m.m_where_constraints in
   let env = Env.set_local env this (Env.get_self env) in
+  let env = Env.clear_params env in
   let env, ret = match m.m_ret with
     | None -> env, make_default_return m.m_name
     | Some ret ->

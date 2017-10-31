@@ -521,31 +521,45 @@ and unify_funs env r1 ft1 r2 ft2 =
     ft_ret = ret;
   }
 
+and unify_param_modes ~safe_pass_by_ref param1 param2 =
+  let { fp_pos = pos1; fp_kind = mode1; _ } = param1 in
+  let { fp_pos = pos2; fp_kind = mode2; _ } = param2 in
+  match mode1, mode2 with
+  | FPnormal, FPnormal | FPref, FPref | FPinout, FPinout -> ()
+  | FPnormal, FPref ->
+    if safe_pass_by_ref then Errors.reffiness_invariant pos2 pos1 `normal
+  | FPref, FPnormal ->
+    if safe_pass_by_ref then Errors.reffiness_invariant pos1 pos2 `normal
+  | FPnormal, FPinout ->
+    Errors.inoutness_mismatch pos2 pos1
+  | FPinout, FPnormal ->
+    Errors.inoutness_mismatch pos1 pos2
+  | FPref, FPinout ->
+    Errors.reffiness_invariant pos1 pos2 `inout
+  | FPinout, FPref ->
+    Errors.reffiness_invariant pos2 pos1 `inout
+
 and unify_params env l1 l2 var1_opt =
+  let safe_pass_by_ref = TUtils.safe_pass_by_ref_enabled env in
   match l1, l2, var1_opt with
   | [], l, None -> env, l
-  | [], fp2 :: rl2, Some (name1, v1) ->
-    let { fp_name = name2; fp_type = x2; _ } = fp2 in
+  | [], x2 :: rl2, Some (name1, v1) ->
+    let { fp_name = name2; fp_type = ty2; _ } = x2 in
     let name = if name1 = name2 then name1 else None in
-    let env = { env with Env.pos = Reason.to_pos (fst x2) } in
-    let env, _ = unify env x2 v1 in
+    let env = { env with Env.pos = Reason.to_pos (fst ty2) } in
+    let env, _ = unify env ty2 v1 in
     let env, rl = unify_params env [] rl2 var1_opt in
-    env, { fp2 with fp_name = name } :: rl
+    env, { x2 with fp_name = name } :: rl
   | l, [], _ -> env, l
-  | fp1 :: rl1, fp2 :: rl2, _ ->
-    let { fp_name = name1; fp_type = x1; fp_pos = p1; _ } = fp1 in
-    let { fp_name = name2; fp_type = x2; fp_pos = p2; _ } = fp2 in
+  | x1 :: rl1, x2 :: rl2, _ ->
+    let { fp_name = name1; fp_type = ty1; _ } = x1 in
+    let { fp_name = name2; fp_type = ty2; _ } = x2 in
     let name = if name1 = name2 then name1 else None in
-    let env = { env with Env.pos = Reason.to_pos (fst x1) } in
-    if TUtils.safe_pass_by_ref_enabled env then begin
-      match fp1.fp_is_ref, fp2.fp_is_ref with
-      | true, false -> Errors.bad_pass_by_ref_override p1 p2
-      | false, true -> Errors.bad_pass_by_ref_override p2 p1
-      | _ -> ()
-    end;
-    let env, _ = unify env x2 x1 in
+    unify_param_modes ~safe_pass_by_ref x1 x2;
+    let env = { env with Env.pos = Reason.to_pos (fst ty1) } in
+    let env, _ = unify env ty2 ty1 in
     let env, rl = unify_params env rl1 rl2 var1_opt in
-    env, { fp2 with fp_name = name } :: rl
+    env, { x2 with fp_name = name } :: rl
 
 (*****************************************************************************)
 (* Exporting *)

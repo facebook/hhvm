@@ -57,7 +57,11 @@ and hint_ p env = function
     Toption h
   | Hfun (is_coroutine, hl, b, h) ->
     let paraml = List.map hl begin fun (p, _ as x) ->
-      { fp_pos = p; fp_name = None; fp_type = hint env x; fp_is_ref = false }
+      { fp_pos = p;
+        fp_name = None;
+        fp_type = hint env x;
+        fp_kind = FPnormal; (* TODO(mqian) implement *)
+      }
     end in
     let ret = hint env h in
     let arity_min = List.length paraml in

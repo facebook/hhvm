@@ -153,11 +153,12 @@ and make_param_ty env param =
       Reason.Rvar_param param.param_pos, t
     | x -> x
   in
+  let mode = get_param_mode param.param_is_reference param.param_callconv in
   {
-    fp_pos    = param.param_pos;
-    fp_name   = Some param.param_name;
-    fp_type   = ty;
-    fp_is_ref = param.param_is_reference;
+    fp_pos  = param.param_pos;
+    fp_name = Some param.param_name;
+    fp_type = ty;
+    fp_kind = mode;
   }
 
 and fun_decl f decl_tcopt =

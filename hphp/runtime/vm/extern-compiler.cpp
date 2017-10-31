@@ -22,7 +22,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/atomic-vector.h"
@@ -65,7 +64,8 @@ struct ExternCompiler {
   std::unique_ptr<UnitEmitter> compile(
     const char* filename,
     const MD5& md5,
-    folly::StringPiece code
+    folly::StringPiece code,
+    AsmCallbacks* callbacks
   ) {
     if (RuntimeOption::EvalHackCompilerReset &&
         m_compilations > RuntimeOption::EvalHackCompilerReset) {
@@ -85,7 +85,8 @@ struct ExternCompiler {
         prog.length(),
         filename,
         md5,
-        false /* swallow errors */
+        false /* swallow errors */,
+        callbacks
       );
     } catch (CompilerException& ex) {
       stop();
@@ -152,7 +153,8 @@ struct CompilerPool {
   CompilerResult compile(const char* code,
                          int len,
                          const char* filename,
-                         const MD5& md5);
+                         const MD5& md5,
+                         AsmCallbacks* callbacks);
   std::string getVersionString() { return m_version; }
   bool started() const { return m_started.load(std::memory_order_relaxed); }
 
@@ -241,7 +243,9 @@ void CompilerPool::shutdown() {
 CompilerResult CompilerPool::compile(const char* code,
                                      int len,
                                      const char* filename,
-                                     const MD5& md5) {
+                                     const MD5& md5,
+                                     AsmCallbacks* callbacks
+) {
   assert(started());
 
   CompilerGuard compiler(*this);
@@ -255,7 +259,8 @@ CompilerResult CompilerPool::compile(const char* code,
     try {
       return compiler->compile(filename,
                                md5,
-                               folly::StringPiece(code, len));
+                               folly::StringPiece(code, len),
+                               callbacks);
     } catch (CompilerException& ex) {
       // Swallow and retry, we return infra errors in bulk once the retry limit
       // is exceeded.
@@ -524,20 +529,22 @@ CompilerResult hackc_compile(
   const char* code,
   int len,
   const char* filename,
-  const MD5& md5
+  const MD5& md5,
+  AsmCallbacks* callbacks
 ) {
   always_assert(s_hackc_pool);
-  return s_hackc_pool->compile(code, len, filename, md5);
+  return s_hackc_pool->compile(code, len, filename, md5, callbacks);
 }
 
 CompilerResult php7_compile(
   const char* code,
   int len,
   const char* filename,
-  const MD5& md5
+  const MD5& md5,
+  AsmCallbacks* callbacks
 ) {
   always_assert(s_php7_pool);
-  return s_php7_pool->compile(code, len, filename, md5);
+  return s_php7_pool->compile(code, len, filename, md5, callbacks);
 }
 
 std::string hackc_version() {
@@ -575,7 +582,8 @@ bool isFileHack(const char* code, size_t codeLen) {
 std::unique_ptr<UnitCompiler> UnitCompiler::create(const char* code,
                                                    int codeLen,
                                                    const char* filename,
-                                                   const MD5& md5) {
+                                                   const MD5& md5
+) {
   if (SystemLib::s_inited) {
     auto const hcMode = hackc_mode();
     if (RuntimeOption::EvalPHP7CompilerEnabled &&
@@ -596,8 +604,9 @@ std::unique_ptr<UnitCompiler> UnitCompiler::create(const char* code,
   return nullptr;
 }
 
-std::unique_ptr<UnitEmitter> Php7UnitCompiler::compile() const {
-  auto res = php7_compile(m_code, m_codeLen, m_filename, m_md5);
+std::unique_ptr<UnitEmitter> Php7UnitCompiler::compile(
+  AsmCallbacks* callbacks) const {
+  auto res = php7_compile(m_code, m_codeLen, m_filename, m_md5, callbacks);
   std::unique_ptr<UnitEmitter> unitEmitter;
   match<void>(
     res,
@@ -617,11 +626,13 @@ std::unique_ptr<UnitEmitter> Php7UnitCompiler::compile() const {
   return unitEmitter;
 }
 
-std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile() const {
+std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
+  AsmCallbacks* callbacks) const {
   auto res = hackc_compile(m_code,
                            m_codeLen,
                            m_filename,
-                           m_md5);
+                           m_md5,
+                           callbacks);
   std::unique_ptr<UnitEmitter> unitEmitter;
   match<void>(
     res,

@@ -29,6 +29,22 @@ struct MD5;
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * We allow callers of assemble_string to pass in a struct of callbacks which
+ * can be triggered on certain events that occur during assembly. We use
+ * callbacks for instance to process metadata sections like .include,
+ * .constant_refs, etc. which hold information about which symbols this
+ * compilation unit makes reference to but doesn't necessarily define itself.
+ */
+struct AsmCallbacks {
+  virtual ~AsmCallbacks() {}
+
+  virtual void onInclude(const std::string&) {}
+  virtual void onConstantRef(const std::string&) {}
+  virtual void onFunctionRef(const std::string&) {}
+  virtual void onClassRef(const std::string&) {}
+};
+
+/*
  * Assemble the contents of `filename' and return a UnitEmitter.
  *
  * If swallowErrors is true then emit a fataling unit for any assembler errors.
@@ -40,7 +56,8 @@ std::unique_ptr<UnitEmitter> assemble_string(
   int codeLen,
   const char* filename,
   const MD5&,
-  bool swallowErrors = true
+  bool swallowErrors = true,
+  AsmCallbacks* callbacks = nullptr
 );
 
 enum class AsmResult {

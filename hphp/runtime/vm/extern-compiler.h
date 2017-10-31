@@ -18,6 +18,7 @@
 
 #include <boost/variant.hpp>
 
+#include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
 namespace HPHP {
@@ -44,11 +45,13 @@ using CompilerResult = boost::variant<std::unique_ptr<UnitEmitter>,std::string>;
 CompilerResult hackc_compile(const char* code,
                              int len,
                              const char* filename,
-                             const MD5& md5);
+                             const MD5& md5,
+                             AsmCallbacks* callbacks = nullptr);
 CompilerResult php7_compile(const char* code,
                             int len,
                             const char* filename,
-                            const MD5& md5);
+                            const MD5& md5,
+                            AsmCallbacks* callbacks = nullptr);
 std::string hackc_version();
 std::string php7c_version();
 
@@ -64,11 +67,13 @@ struct UnitCompiler {
     {}
   virtual ~UnitCompiler() {}
 
-  static std::unique_ptr<UnitCompiler> create(const char* code,
-                                              int codeLen,
-                                              const char* filename,
-                                              const MD5& md5);
-  virtual std::unique_ptr<UnitEmitter> compile() const = 0;
+  static std::unique_ptr<UnitCompiler> create(
+    const char* code,
+    int codeLen,
+    const char* filename,
+    const MD5& md5);
+  virtual std::unique_ptr<UnitEmitter> compile(
+    AsmCallbacks* callbacks = nullptr) const = 0;
   virtual const char* getName() const = 0;
 
  protected:
@@ -80,7 +85,8 @@ struct UnitCompiler {
 
 struct Php7UnitCompiler : public UnitCompiler {
   using UnitCompiler::UnitCompiler;
-  virtual std::unique_ptr<UnitEmitter> compile() const override;
+  virtual std::unique_ptr<UnitEmitter> compile(
+    AsmCallbacks* callbacks = nullptr) const override;
   virtual const char* getName() const override { return "PHP7"; }
 };
 
@@ -94,7 +100,8 @@ struct HackcUnitCompiler : public UnitCompiler {
         m_hackcMode(hackcMode)
     {}
 
-  virtual std::unique_ptr<UnitEmitter> compile() const override;
+  virtual std::unique_ptr<UnitEmitter> compile(
+    AsmCallbacks* callbacks = nullptr) const override;
   virtual const char* getName() const override { return "HackC"; }
 
  private:

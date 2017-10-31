@@ -71,11 +71,12 @@
 
 #include "hphp/runtime/vm/as.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <iostream>
-#include <algorithm>
 #include <iterator>
 #include <vector>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/bind.hpp>
@@ -346,8 +347,7 @@ struct Input {
 
   // Skips whitespace (including newlines and comments).
   void skipWhitespace() {
-    for (;;) {
-      skipPred(boost::is_any_of(" \t\r\n"));
+    while (skipPred(boost::is_any_of(" \t\r\n"))) {
       if (peek() == '#') {
         skipPred(!boost::is_any_of("\n"));
         expect('\n');
@@ -364,15 +364,28 @@ struct Input {
   }
 
   template<class Predicate>
-  void skipPred(Predicate pred) {
-    int c;
-    while (pred(c = peek())) { getc(); }
+  bool skipPred(Predicate pred) {
+    while (pred(peek())) {
+      if (getc() == EOF) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   template<class Predicate, class OutputIterator>
-  void consumePred(Predicate pred, OutputIterator out) {
+  bool consumePred(Predicate pred, OutputIterator out) {
     int c;
-    while (pred(c = peek())) { *out++ = getc(); }
+    while (pred(c = peek())) {
+      if (getc() == EOF) {
+        return false;
+      }
+
+      *out++ = c;
+    }
+
+    return true;
   }
 
 private:
@@ -505,8 +518,9 @@ struct Label {
 };
 
 struct AsmState {
-  explicit AsmState(std::istream& in)
+  explicit AsmState(std::istream& in, AsmCallbacks* callbacks = nullptr)
     : in(in)
+    , callbacks(callbacks)
   {
     currentStackDepth->setBase(*this, 0);
   }
@@ -810,6 +824,7 @@ struct AsmState {
   std::set<std::string,stdltistr> hoistables;
   std::unordered_map<uint32_t,Offset> defClsOffsets;
   Location::Range srcLoc{-1,-1,-1,-1};
+  AsmCallbacks* callbacks{ nullptr };
 };
 
 void StackDepth::adjust(AsmState& as, int delta) {
@@ -2782,17 +2797,64 @@ void parse_strict(AsmState& as) {
   as.in.expectWs(';');
 }
 
+void parse_symbol_refs(
+  AsmState& as,
+  void (AsmCallbacks::*onSymbol)(const std::string&)
+) {
+  as.in.expectWs('{');
+
+  if (as.callbacks) {
+    while (true) {
+      as.in.skipWhitespace();
+      std::string symbol;
+      as.in.consumePred(!boost::is_any_of(" \t\r\n#}"),
+                        std::back_inserter(symbol));
+      if (symbol.empty()) {
+        break;
+      }
+      (as.callbacks->*onSymbol)(symbol);
+    }
+  } else {
+    while (as.in.peek() != '}') {
+      as.in.skipWhitespace();
+      if (!as.in.skipPred(!boost::is_any_of("#}"))) break;
+    }
+  }
+
+  as.in.expect('}');
+}
+
+void parse_includes(AsmState& as) {
+  parse_symbol_refs(as, &AsmCallbacks::onInclude);
+}
+
+void parse_constant_refs(AsmState& as) {
+  parse_symbol_refs(as, &AsmCallbacks::onConstantRef);
+}
+
+void parse_function_refs(AsmState& as) {
+  parse_symbol_refs(as, &AsmCallbacks::onFunctionRef);
+}
+
+void parse_class_refs(AsmState& as) {
+  parse_symbol_refs(as, &AsmCallbacks::onClassRef);
+}
+
 /*
  * asm-file : asm-tld* <EOF>
  *          ;
  *
- * asm-tld :    ".filepath"    directive-filepath
- *         |    ".main"        directive-main
- *         |    ".function"    directive-function
- *         |    ".adata"       directive-adata
- *         |    ".class"       directive-class
- *         |    ".alias"       directive-alias
- *         |    ".strict"      directive-strict
+ * asm-tld :    ".filepath"     directive-filepath
+ *         |    ".main"         directive-main
+ *         |    ".function"     directive-function
+ *         |    ".adata"        directive-adata
+ *         |    ".class"        directive-class
+ *         |    ".alias"        directive-alias
+ *         |    ".strict"       directive-strict
+ *         |    ".includes      directive-filepaths
+ *         |    ".constant_refs directive-symbols
+ *         |    ".function_refs directive-symbols
+ *         |    ".class_refs    directive-symbols
  *         ;
  */
 void parse(AsmState& as) {
@@ -2810,13 +2872,17 @@ void parse(AsmState& as) {
   }
 
   while (as.in.readword(directive)) {
-    if (directive == ".filepath")    { parse_filepath(as); continue; }
-    if (directive == ".main")        { parse_main(as);     continue; }
-    if (directive == ".function")    { parse_function(as); continue; }
-    if (directive == ".adata")       { parse_adata(as);    continue; }
-    if (directive == ".class")       { parse_class(as);    continue; }
-    if (directive == ".alias")       { parse_alias(as);    continue; }
-    if (directive == ".strict")      { parse_strict(as);   continue; }
+    if (directive == ".filepath")      { parse_filepath(as)      ; continue; }
+    if (directive == ".main")          { parse_main(as)          ; continue; }
+    if (directive == ".function")      { parse_function(as)      ; continue; }
+    if (directive == ".adata")         { parse_adata(as)         ; continue; }
+    if (directive == ".class")         { parse_class(as)         ; continue; }
+    if (directive == ".alias")         { parse_alias(as)         ; continue; }
+    if (directive == ".strict")        { parse_strict(as)        ; continue; }
+    if (directive == ".includes")      { parse_includes(as)      ; continue; }
+    if (directive == ".constant_refs") { parse_constant_refs(as) ; continue; }
+    if (directive == ".function_refs") { parse_function_refs(as) ; continue; }
+    if (directive == ".class_refs")    { parse_class_refs(as)    ; continue; }
 
     as.error("unrecognized top-level directive `" + directive + "'");
   }
@@ -2837,7 +2903,8 @@ std::unique_ptr<UnitEmitter> assemble_string(
   int codeLen,
   const char* filename,
   const MD5& md5,
-  bool swallowErrors
+  bool swallowErrors,
+  AsmCallbacks* callbacks
 ) {
   auto ue = std::make_unique<UnitEmitter>(md5);
   StringData* sd = makeStaticString(filename);
@@ -2848,7 +2915,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   try {
     auto const mode = std::istringstream::binary | std::istringstream::in;
     std::istringstream instr(std::string(code, codeLen), mode);
-    AsmState as(instr);
+    AsmState as(instr, callbacks);
     as.ue = ue.get();
     parse(as);
   } catch (const std::exception& e) {

@@ -26,6 +26,8 @@
 #include "hphp/compiler/package.h"
 #include "hphp/compiler/hphp.h"
 
+#include "hphp/runtime/vm/as.h"
+
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/string-bag.h"
 #include "hphp/util/thread-local.h"
@@ -111,6 +113,26 @@ struct AnalysisResult : BlockScope, FunctionContainer {
     Mutex &m_mutex;
   };
 
+  struct ParseOnDemandCalbacks : AsmCallbacks {
+    explicit ParseOnDemandCalbacks(AnalysisResult* ar) : m_ar(ar) {}
+
+    virtual void onInclude(const std::string& include) override {
+      m_ar->parseOnDemand(include);
+    }
+    virtual void onConstantRef(const std::string& constant) override {
+      m_ar->parseOnDemandByConstant(constant);
+    }
+    virtual void onFunctionRef(const std::string& function) override {
+      m_ar->parseOnDemandByFunction(function);
+    }
+    virtual void onClassRef(const std::string& cls) override {
+      m_ar->parseOnDemandByClass(cls);
+    }
+
+   private:
+    AnalysisResult* m_ar;
+  };
+
 public:
   AnalysisResult();
   ~AnalysisResult() override;
@@ -189,6 +211,13 @@ public:
   const std::vector<FileScopePtr> &getAllFilesVector() {
     return m_fileScopes;
   }
+  ParseOnDemandCalbacks* getParseOnDemandCallBacks() {
+    if (isParseOnDemand()) {
+      return &m_asmCallbacks;
+    }
+
+    return nullptr;
+  }
 
   void addFileScope(FileScopePtr fileScope);
 
@@ -263,6 +292,8 @@ private:
   StatementPtr m_stmt;
 
   std::string m_outputPath;
+
+  ParseOnDemandCalbacks m_asmCallbacks;
 public:
   AnalysisResultPtr shared_from_this() {
     return static_pointer_cast<AnalysisResult>

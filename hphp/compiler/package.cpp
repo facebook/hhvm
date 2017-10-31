@@ -365,8 +365,8 @@ bool Package::parseImpl(const std::string* fileName) {
     // skip the file.
     if (auto uc = UnitCompiler::create(
           content.data(), content.size(), fileName->c_str(), md5)) {
-      if (auto ue = uc->compile()) {
-        Lock lock(m_ar->getMutex());
+      Lock lock(m_ar->getMutex());
+      if (auto ue = uc->compile(m_ar->getParseOnDemandCallBacks())) {
         m_ar->addHhasFile(std::move(ue));
         return true;
       } else {

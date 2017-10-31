@@ -1404,10 +1404,8 @@ let scan_assert_progress tokenizer lexer  =
     (Token.kind token) = TokenKind.EndOfFile) then
       (lexer, token)
   else begin
-    let message = Printf.sprintf
-      "failed to make progress at %d\n" (offset lexer) in
-    print_endline message;
-    assert false
+    Printf.kprintf failwith
+      "failed to make progress at %d\n" (offset lexer)
   end
 
 let scan_next_token as_name scanner lexer =

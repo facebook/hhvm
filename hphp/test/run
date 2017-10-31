@@ -1065,6 +1065,18 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
 
 function hphp_cmd($options, $test, $timeout_prefix) {
   $extra_args = preg_replace("/-v\s*/", "-vRuntime.", extra_args($options));
+
+  $hackc_args = "";
+  if (isset($options['hackc'])) {
+    $hh_single_compile = hh_codegen_path();
+    $hackc_args = implode(" ", array(
+      "-vFlattenTraits=false",
+      "-vRuntime.Eval.HackCompilerReset=1",
+      "-vRuntime.Eval.HackCompilerDefault=true",
+      "-vRuntime.Eval.HackCompilerCommand=\"${hh_single_compile} -v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs\""
+    ));
+  }
+
   return implode(" ", array(
     "HHVM_DISABLE_HHBBC=1",
     $timeout_prefix,
@@ -1075,7 +1087,8 @@ function hphp_cmd($options, $test, $timeout_prefix) {
     read_opts_file("$test.hphp_opts"),
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     "--nofork=1 -thhbc -l1 -k1 -o \"$test.repo\" \"$test\"",
-    $extra_args
+    $extra_args,
+    $hackc_args,
   ));
 }
 

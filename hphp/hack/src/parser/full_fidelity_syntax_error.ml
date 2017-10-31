@@ -272,3 +272,6 @@ let global_in_const_decl = "Cannot have globals in constant declaration"
 
 let conflicting_trait_require_clauses ~name =
   "Conflicting requirements for '" ^ name ^ "'"
+
+let yield_in_magic_methods =
+  "'yield' is not allowed in constructor, destructor, or magic methods"

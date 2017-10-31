@@ -154,7 +154,6 @@ slow/parser/1851.php
 slow/parser/async-constructor.php
 slow/parser/async.php
 slow/parser/backquote.php
-slow/parser/bad_yield.php
 slow/parser/colon_colon_class.php
 slow/parser/colon_colon_class_var.php
 slow/parser/dynamic-class-method.php

@@ -1173,6 +1173,11 @@ let invalid_shape_field_check node errors =
     invalid_shape_initializer_name field_initializer_name errors
   | _ -> make_error_from_node node SyntaxError.error2059 :: errors
 
+let is_in_magic_method parents =
+  match first_parent_function_name parents with
+  | None -> false
+  | Some s -> SSet.mem s SN.Members.as_set
+
 let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors =
   match syntax node with
   | LiteralExpression {
@@ -1237,6 +1242,9 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
   | VarrayIntrinsicExpression _
   | DarrayIntrinsicExpression _ when not is_hack ->
     make_error_from_node node SyntaxError.vdarray_in_php :: errors
+  | YieldFromExpression _
+  | YieldExpression _ when is_in_magic_method parents ->
+    make_error_from_node node SyntaxError.yield_in_magic_methods :: errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents hhvm_compat_mode trait_use_clauses errors =

@@ -1,0 +1,6 @@
+File "subtype_shape_may_not_omit_nullable_fields_in_supertype_shape.php", line 4, characters 10-21:
+Invalid return type (Typing[4140])
+File "subtype_shape_may_not_omit_nullable_fields_in_supertype_shape.php", line 3, characters 15-19:
+The field 'a' may be set to an unknown type. Explicitly null out the field, or remove it (with Shapes::removeKey(...))
+File "subtype_shape_may_not_omit_nullable_fields_in_supertype_shape.php", line 3, characters 38-42:
+The field 'a' is defined as optional

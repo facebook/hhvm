@@ -92,25 +92,21 @@ val default : t
 val make_permissive : t -> t
 val tco_experimental_instanceof : string
 val tco_experimental_isarray : string
-val tco_experimental_optional_shape_field : string
 val tco_experimental_darray_and_varray : string
 val tco_experimental_goto : string
 val tco_experimental_tconst_on_generics : string
-val tco_experimental_shape_idx_relaxed : string
 val tco_experimental_disable_shape_and_tuple_arrays : string
-val tco_experimental_promote_nullable_to_optional_in_shapes : string
 val tco_experimental_stronger_shape_idx_ret : string
 val tco_experimental_unresolved_fix : string
 val tco_experimental_contextual_inference : string
 val tco_experimental_generics_arity : string
 val tco_experimental_annotate_function_calls : string
-val tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape
-    : string
 val tco_experimental_forbid_nullable_cast : string
 val tco_experimental_safe_pass_by_ref : string
 val tco_experimental_coroutines: string
 val tco_experimental_inout_params : string
 val tco_experimental_disallow_static_memoized : string
+val tco_experimental_disable_optional_and_unknown_shape_fields : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t

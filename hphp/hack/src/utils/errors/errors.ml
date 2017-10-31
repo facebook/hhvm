@@ -426,7 +426,7 @@ let error_code_to_string = Common.error_code_to_string
 module Temporary = struct
   let darray_not_supported = 1
   let varray_not_supported = 2
-  let unknown_fields_not_supported = 3
+  (* DEPRECATED let unknown_fields_not_supported = 3 *)
   let varray_or_darray_not_supported = 4
   (* DEPRECATED let goto_not_supported = 5 *)
 end
@@ -557,7 +557,8 @@ module NastCheck                            = struct
   let constructor_required                  = 3030 (* DONT MODIFY!!!! *)
   let interface_with_partial_typeconst      = 3031 (* DONT MODIFY!!!! *)
   let multiple_xhp_category                 = 3032 (* DONT MODIFY!!!! *)
-  let optional_shape_fields_not_supported   = 3033 (* DONT MODIFY!!!! *)
+  (* DEPRECATED
+     let optional_shape_fields_not_supported   = 3033 (* DONT MODIFY!!!! *) *)
   let await_not_allowed                     = 3034 (* DONT MODIFY!!!! *)
   let async_in_interface                    = 3035 (* DONT MODIFY!!!! *)
   let await_in_coroutine                    = 3036 (* DONT MODIFY!!!! *)
@@ -779,10 +780,6 @@ let darray_not_supported pos =
 
 let varray_not_supported pos =
   add Temporary.varray_not_supported pos "varray is not supported."
-
-let unknown_fields_not_supported pos =
-  add Temporary.unknown_fields_not_supported pos
-    "The Unknown shape fields feature (i.e., \"shape(...)\") is not supported."
 
 let varray_or_darray_not_supported pos =
   add
@@ -1395,10 +1392,6 @@ let dangerous_method_name pos =
   "if you want to define a constructor, use "^
   "__construct"
 )
-
-let optional_shape_fields_not_supported pos =
-  add NastCheck.optional_shape_fields_not_supported pos
-    "Optional shape fields are not supported."
 
 let inout_params_outside_of_sync pos =
   add NastCheck.inout_params_outside_of_sync pos (

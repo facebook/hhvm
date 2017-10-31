@@ -350,9 +350,10 @@ module Full = struct
       o "shape";
       o "(";
       let optional_shape_field_enabled =
-        TypecheckerOptions.experimental_feature_enabled
-          (Env.get_options env)
-          TypecheckerOptions.experimental_optional_shape_field in
+        not @@
+          TypecheckerOptions.experimental_feature_enabled
+            (Env.get_options env)
+            TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
       let o_field (shape_map_key, { sft_optional; sft_ty }) =
         if optional_shape_field_enabled then
           begin

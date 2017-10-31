@@ -98,9 +98,10 @@ and hint_ p env = function
     Ttuple tyl
   | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
     let optional_shape_fields_enabled =
-      TypecheckerOptions.experimental_feature_enabled
-        env.Decl_env.decl_tcopt
-        TypecheckerOptions.experimental_optional_shape_field in
+      not @@
+        TypecheckerOptions.experimental_feature_enabled
+          env.Decl_env.decl_tcopt
+          TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
     let shape_fields_known =
       match optional_shape_fields_enabled, nsi_allows_unknown_fields with
         | _, true

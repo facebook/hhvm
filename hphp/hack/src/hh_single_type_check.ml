@@ -129,6 +129,7 @@ let parse_options () =
   let forbid_nullable_cast = ref false in
   let safe_pass_by_ref = ref false in
   let deregister_attributes = ref false in
+  let disable_optional_and_unknown_shape_fields = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -154,6 +155,9 @@ let parse_options () =
     "--coverage",
       Arg.Unit (set_mode Coverage),
       " Produce coverage output";
+    "--disable_optional_and_unknown_shape_fields",
+      Arg.Set disable_optional_and_unknown_shape_fields,
+      "Disables optional and unknown shape fields syntax and typechecking.";
     "--dump-symbol-info",
       Arg.Unit (set_mode Dump_symbol_info),
       " Dump all symbol information";
@@ -262,6 +266,8 @@ let parse_options () =
         then !forbid_nullable_cast
         else if x = GlobalOptions.tco_experimental_safe_pass_by_ref
         then !safe_pass_by_ref
+        else if x = GlobalOptions.tco_experimental_disable_optional_and_unknown_shape_fields
+        then !disable_optional_and_unknown_shape_fields
         else true
       end tcopt.GlobalOptions.tco_experimental_features;
   } in

@@ -22,19 +22,13 @@ let default = GlobalOptions.default
 let make_permissive = GlobalOptions.make_permissive
 let experimental_instanceof = GlobalOptions.tco_experimental_instanceof
 let experimental_isarray = GlobalOptions.tco_experimental_isarray
-let experimental_optional_shape_field =
-  GlobalOptions.tco_experimental_optional_shape_field
 let experimental_darray_and_varray =
   GlobalOptions.tco_experimental_darray_and_varray
 let experimental_goto = GlobalOptions.tco_experimental_goto
 let experimental_tconst_on_generics =
   GlobalOptions.tco_experimental_tconst_on_generics
-let experimental_shape_idx_relaxed =
-  GlobalOptions.tco_experimental_shape_idx_relaxed
 let experimental_disable_shape_and_tuple_arrays =
   GlobalOptions.tco_experimental_disable_shape_and_tuple_arrays
-let experimental_promote_nullable_to_optional_in_shapes =
-  GlobalOptions.tco_experimental_promote_nullable_to_optional_in_shapes
 let experimental_stronger_shape_idx_ret =
   GlobalOptions.tco_experimental_stronger_shape_idx_ret
 let experimental_annotate_function_calls =
@@ -45,9 +39,6 @@ let experimental_contextual_inference =
   GlobalOptions.tco_experimental_contextual_inference
 let experimental_generics_arity =
   GlobalOptions.tco_experimental_generics_arity
-let experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape =
-  GlobalOptions.
-    tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape
 let experimental_forbid_nullable_cast =
   GlobalOptions.tco_experimental_forbid_nullable_cast
 let experimental_safe_pass_by_ref =
@@ -57,6 +48,8 @@ let experimental_coroutines =
 let experimental_inout_params = GlobalOptions.tco_experimental_inout_params
 let experimental_disallow_static_memoized =
   GlobalOptions.tco_experimental_disallow_static_memoized
+let experimental_disable_optional_and_unknown_shape_fields =
+  GlobalOptions.tco_experimental_disable_optional_and_unknown_shape_fields
 
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

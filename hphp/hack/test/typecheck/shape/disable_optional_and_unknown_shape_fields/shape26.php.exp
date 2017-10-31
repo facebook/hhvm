@@ -1,0 +1,9 @@
+File "shape26.php", line 21, characters 3-13:
+  ^(shape('x' => ^(int)) | shape('y' => ^(string)))
+File "shape26.php", line 29, characters 3-13:
+  ^(shape('x' => ^(string | int)))
+File "shape26.php", line 37, characters 3-13:
+  ^(shape('x' => int, ...) | shape('x' => int, 'y' => ?string, ...))
+File "shape26.php", line 45, characters 3-13:
+  ^(shape('x' => ^(int)) | shape('x' => int, 'y' => ?string, ...))
+No errors

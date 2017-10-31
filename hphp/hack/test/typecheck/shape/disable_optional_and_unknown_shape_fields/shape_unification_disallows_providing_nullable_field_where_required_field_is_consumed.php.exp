@@ -1,0 +1,8 @@
+File "shape_unification_disallows_providing_nullable_field_where_required_field_is_consumed.php", line 8, characters 14-15:
+Invalid argument (Typing[4110])
+File "shape_unification_disallows_providing_nullable_field_where_required_field_is_consumed.php", line 5, characters 44-46:
+This is an int
+File "shape_unification_disallows_providing_nullable_field_where_required_field_is_consumed.php", line 7, characters 38-41:
+It is incompatible with a nullable type
+File "shape_unification_disallows_providing_nullable_field_where_required_field_is_consumed.php", line 5, characters 31-35:
+Considering that this type argument is invariant with respect to MyWrapper

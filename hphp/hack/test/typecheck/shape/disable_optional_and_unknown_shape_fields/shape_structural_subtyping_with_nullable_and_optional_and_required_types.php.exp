@@ -1,0 +1,6 @@
+File "shape_structural_subtyping_with_nullable_and_optional_and_required_types.php", line 14, characters 7-11:
+Invalid argument (Typing[4057])
+File "shape_structural_subtyping_with_nullable_and_optional_and_required_types.php", line 14, characters 7-11:
+The field 'b' is missing
+File "shape_structural_subtyping_with_nullable_and_optional_and_required_types.php", line 11, characters 14-55:
+The field 'b' is defined

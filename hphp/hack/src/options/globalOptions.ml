@@ -24,10 +24,6 @@ let tco_experimental_instanceof = "instanceof"
 
 let tco_experimental_isarray = "is_array"
 
-(* Whether opetional shape fields are enabled. Please see t16016001 for more
-   background on this feature. *)
-let tco_experimental_optional_shape_field = "optional_shape_field"
-
 (* Whether darray and varray are enabled. *)
 let tco_experimental_darray_and_varray = "darray_and_varray"
 
@@ -36,28 +32,11 @@ let tco_experimental_goto = "goto"
 (* Whether allow accessing tconsts on generics *)
 let tco_experimental_tconst_on_generics = "tconst_on_generics"
 
-(* Whether Shapes::idx should allow accessing a field that does not exist in
-  a partial shape and is not explicitly unset. *)
-let tco_experimental_shape_idx_relaxed =
-  "shape_idx_relaxed"
-
 (**
  * Prevents arraus from being promoted to shape-like or tuple-like arrays.
  *)
 let tco_experimental_disable_shape_and_tuple_arrays =
   "disable_shape_and_tuple_arrays"
-
-(**
- * If enabled, the following promotions will be applied at parse time:
- *
- *   1. A shape field whose type is nullable will also have the field considered
- *      as optional. I.e., shape('x' => ?int) will be interpreted as
- *      shape(?'x' => ?int).
- *   2. All shapes will be considered to support unknown fields. I.e.,
- *      shape('x' => int) will be interpreted as shape('x' => int, ...).
- *)
-let tco_experimental_promote_nullable_to_optional_in_shapes =
-  "promote_nullable_to_optional_in_shapes"
 
 (* Whether Shapes::idx should return a non-nullable type when the input shape
     is known to contain the field. *)
@@ -84,28 +63,6 @@ let tco_experimental_annotate_function_calls =
  *)
 let tco_experimental_generics_arity =
   "generics_arity"
-
-(**
- * There was a bug in the typechecker, and this flag exists PURELY to facilitate
- * migration away from the bug. It is safe to remove thereafter. Here's the bug:
- *
- * Consider a shape A and shape B. In this example, we're trying to use shape A
- * as a supertype of shape B.
- *
- * When this is disabled, we only verify that supertype shape A's fields are
- * consistent with subtype shape B's fields. So, consider:
- *
- * type A = shape('int_field' => int);
- * type B = shape('int_field' => int, ?'optional_string_field' => string);
- *
- * Here, A has a single field. It is in fact consistent with B's definition!
- * However, since A is a FieldsFullyKnown shape, it has the additional
- * requirement that no other fields may be present in the subtype shape B. Here,
- * 'optional_string_field' may be present in B, and so A should not be a
- * supertype of B. When this flag is enabled, this relationship is enforced.
- *)
-let tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape =
-  "unknown_fields_shape_is_not_subtype_of_known_fields_shape"
 
 (**
  * Forbid casting nullable values, since they have unexpected semantics. For
@@ -136,28 +93,45 @@ let tco_experimental_coroutines =
  *)
 let tco_experimental_inout_params = "inout_params"
 
+(**
+ * Disables optional and unknown shape fields syntax and typechecking.
+ *
+ * Please see the public documentation at
+ * http://hhvm.com/blog/2017/09/26/hhvm-3-22.html#nullable-vs-optional-fields-in-shapes
+ * to learn more about optional and unknown shape fields.
+ *
+ * When enabled, this flag results in the following behavior:
+ *
+ *   1. Shape fields with a nullable type are allowed to be omitted.
+ *   2. All shapes are considered to support unknown fields, whether or not
+ *      their last declared field is '...'.
+ *
+ * This temporary flag exists for backwards-compatiblity purposes, and will be
+ * removed in a future release.
+ *)
+let tco_experimental_disable_optional_and_unknown_shape_fields =
+  "disable_optional_and_unknown_shape_fields"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
      tco_experimental_instanceof;
      tco_experimental_isarray;
-     tco_experimental_optional_shape_field;
      tco_experimental_darray_and_varray;
      tco_experimental_goto;
      tco_experimental_tconst_on_generics;
-     tco_experimental_shape_idx_relaxed;
      tco_experimental_disable_shape_and_tuple_arrays;
      tco_experimental_stronger_shape_idx_ret;
      tco_experimental_annotate_function_calls;
      tco_experimental_unresolved_fix;
      tco_experimental_contextual_inference;
      tco_experimental_generics_arity;
-     tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape;
      tco_experimental_forbid_nullable_cast;
      tco_experimental_safe_pass_by_ref;
      tco_experimental_coroutines;
      tco_experimental_disallow_static_memoized;
      tco_experimental_inout_params;
+     tco_experimental_disable_optional_and_unknown_shape_fields;
    ]
 
 let tco_migration_flags_all =

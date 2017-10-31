@@ -464,19 +464,7 @@ let rec pHint : hint parser = fun node env ->
       -> Happly (pos_name node, [])
     | ShapeTypeSpecifier { shape_type_fields; shape_type_ellipsis; _ } ->
       let si_allows_unknown_fields =
-        (**
-         * To maintain compatibility with open source, we always promote the
-         * definitions in Shapes.hhi.
-         *
-         * TODO(T21756986): Clean this up after OSS release of `...`
-         *)
-        let filename = Relative_path.to_absolute !(lowerer_state.filePath) in
-        not (is_missing shape_type_ellipsis) ||
-        String_utils.string_ends_with filename "Shapes.hhi" ||
-        (TypecheckerOptions.experimental_feature_enabled
-          !(lowerer_state.popt)
-          TypecheckerOptions.experimental_promote_nullable_to_optional_in_shapes
-        )
+        not (is_missing shape_type_ellipsis)
       in
       let si_shape_field_list =
         couldMap ~f:(mpShapeField pHint) shape_type_fields env in

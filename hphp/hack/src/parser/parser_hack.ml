@@ -4455,14 +4455,6 @@ and typedef_constraint env =
       L.back env.lb;
       None
 
-and promote_nullable_to_optional_in_shapes env =
-  (* To maintain compatibility with open source, we always promote the
-     definitions in Shapes.hhi. *)
-  String_utils.string_ends_with (Relative_path.suffix env.file) "Shapes.hhi" ||
-  TypecheckerOptions.experimental_feature_enabled
-    env.popt
-    TypecheckerOptions.experimental_promote_nullable_to_optional_in_shapes
-
 and hint_shape_info env shape_keyword_pos =
   match L.token env.file env.lb with
   | Tlp -> hint_shape_info_remain env
@@ -4471,7 +4463,7 @@ and hint_shape_info env shape_keyword_pos =
     error_at env shape_keyword_pos "\"shape\" is an invalid type; you need to \
     declare and use a specific shape type.";
     {
-      si_allows_unknown_fields = promote_nullable_to_optional_in_shapes env;
+      si_allows_unknown_fields = false;
       si_shape_field_list = [];
     }
 
@@ -4479,7 +4471,7 @@ and hint_shape_info_remain env =
   match L.token env.file env.lb with
   | Trp ->
       {
-        si_allows_unknown_fields = promote_nullable_to_optional_in_shapes env;
+        si_allows_unknown_fields = false;
         si_shape_field_list = [];
       }
   | Tellipsis ->
@@ -4495,15 +4487,13 @@ and hint_shape_info_remain env =
       match L.token env.file env.lb with
       | Trp ->
           {
-            si_allows_unknown_fields =
-              promote_nullable_to_optional_in_shapes env;
+            si_allows_unknown_fields = false;
             si_shape_field_list = [fd];
           }
       | Tcomma ->
           if !(env.errors) != error_state
           then {
-            si_allows_unknown_fields =
-              promote_nullable_to_optional_in_shapes env;
+            si_allows_unknown_fields = false;
             si_shape_field_list = [fd];
           }
           else
@@ -4514,8 +4504,7 @@ and hint_shape_info_remain env =
       | _ ->
           error_expect env ")";
           {
-            si_allows_unknown_fields =
-              promote_nullable_to_optional_in_shapes env;
+            si_allows_unknown_fields = false;
             si_shape_field_list = [fd]
           }
 

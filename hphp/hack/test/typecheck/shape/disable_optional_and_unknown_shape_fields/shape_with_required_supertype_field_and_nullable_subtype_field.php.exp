@@ -1,0 +1,6 @@
+File "shape_with_required_supertype_field_and_nullable_subtype_field.php", line 13, characters 21-37:
+Invalid argument (Typing[4110])
+File "shape_with_required_supertype_field_and_nullable_subtype_field.php", line 3, characters 31-33:
+This is an int
+File "shape_with_required_supertype_field_and_nullable_subtype_field.php", line 4, characters 29-32:
+It is incompatible with a nullable type

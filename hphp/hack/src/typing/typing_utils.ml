@@ -79,14 +79,15 @@ let rec is_option env ty =
 
 let is_shape_field_optional env { sft_optional; sft_ty } =
   let optional_shape_field_enabled =
-    TypecheckerOptions.experimental_feature_enabled
-      (Env.get_options env)
-      TypecheckerOptions.experimental_optional_shape_field in
+    not @@
+      TypecheckerOptions.experimental_feature_enabled
+        (Env.get_options env)
+        TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
 
   if optional_shape_field_enabled then
     sft_optional
   else
-    is_option env sft_ty
+    is_option env sft_ty || sft_optional
 
 let is_class ty = match snd ty with
   | Tclass _ -> true
@@ -280,11 +281,7 @@ let get_printable_shape_field_name = Env.get_shape_field_name
 let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
   (r1, fields_known1, fdm1) (r2, fields_known2, fdm2) =
   begin match fields_known1, fields_known2 with
-    | FieldsFullyKnown, FieldsFullyKnown
-        when TypecheckerOptions.experimental_feature_enabled
-          (Env.get_options env)
-          TypecheckerOptions.experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape
-            ->
+    | FieldsFullyKnown, FieldsFullyKnown ->
         (* If both shapes are FieldsFullyKnown, then we must ensure that the
            supertype shape knows about every single field that could possibly
            be present in the subtype shape. *)

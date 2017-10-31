@@ -369,13 +369,11 @@ module type S = sig
   val from_error_list : error list -> t
   val iter_error_list : (error -> unit) -> t -> unit
   val get_applied_fixmes : t -> applied_fixme list
-  val optional_shape_fields_not_supported : Pos.t -> unit
   val darray_not_supported : Pos.t -> unit
   val varray_not_supported : Pos.t -> unit
   val too_few_type_arguments : Pos.t -> unit
   val required_field_is_optional : Pos.t -> Pos.t -> string -> unit
   val array_get_with_optional_field : Pos.t -> Pos.t -> string -> unit
-  val unknown_fields_not_supported : Pos.t -> unit
   val goto_label_already_defined : string -> Pos.t -> Pos.t -> unit
   val goto_label_undefined : Pos.t -> string -> unit
   val goto_label_defined_in_finally : Pos.t -> string -> unit

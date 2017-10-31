@@ -53,42 +53,34 @@ let experiment_enabled env experiment =
   Shapes::idx (arg_ty). In most cases, the returned supertype will be
     shape(?field_name: res, ...)
 
-  If experimental_shape_idx_relaxed is enabled, then we will return shape(...)
-  for the case where field_name does not exist in the arg_ty and arg_ty is
-  partial but does not unset field_name.
+  We will return shape(...) for the case where field_name does not exist in the
+  arg_ty and arg_ty is partial but does not unset field_name.
 
   If experimental_optional_shape_field is disabled, then a nullable type will be
   used instead of an optional type in the returned supertype.
 *)
-let make_idx_fake_super_shape env p (_, arg_ty) field_name res =
-  let optional_shape_field_enabled = experiment_enabled env
-    TypecheckerOptions.experimental_optional_shape_field in
-  let shape_idx_relaxed = experiment_enabled env
-    TypecheckerOptions.experimental_shape_idx_relaxed in
+let make_idx_fake_super_shape _env p (_, arg_ty) field_name res =
   let fake_shape_field = {
-    sft_optional = optional_shape_field_enabled;
+    sft_optional = true;
     sft_ty = Reason.Rnone, Toption res;
   } in
-  if shape_idx_relaxed then
-    match arg_ty with
-    | Tshape (FieldsPartiallyKnown unset_fields, fdm)
-        when not (ShapeMap.mem field_name fdm
-                  || ShapeMap.mem field_name unset_fields) ->
-      (* Special logic for when arg_ty does not have field and does not
-        explicitly unset field. We want to relax Shapes::idx to allow accessing
-        field in this case, so we will only require that arg_ty be a shape. *)
-      (* This is dangerous because the shape may later be instantiated with a
-        field that conflicts with the return type of Shapes::idx. Programmers
-        should instead use direct accessing (i.e. shape[field]) when possible to
-        get stricter behavior. *)
-      Lint.shape_idx_access_unknown_field
-        p
-        (Env.get_shape_field_name field_name);
-      (* But we allow it anyhow *)
-      Nast.ShapeMap.empty
-    | _ -> Nast.ShapeMap.singleton field_name fake_shape_field
-  else
-    Nast.ShapeMap.singleton field_name fake_shape_field
+  match arg_ty with
+  | Tshape (FieldsPartiallyKnown unset_fields, fdm)
+      when not (ShapeMap.mem field_name fdm
+                || ShapeMap.mem field_name unset_fields) ->
+    (* Special logic for when arg_ty does not have field and does not
+      explicitly unset field. We want to relax Shapes::idx to allow accessing
+      field in this case, so we will only require that arg_ty be a shape. *)
+    (* This is dangerous because the shape may later be instantiated with a
+      field that conflicts with the return type of Shapes::idx. Programmers
+      should instead use direct accessing (i.e. shape[field]) when possible to
+      get stricter behavior. *)
+    Lint.shape_idx_access_unknown_field
+      p
+      (Env.get_shape_field_name field_name);
+    (* But we allow it anyhow *)
+    Nast.ShapeMap.empty
+  | _ -> Nast.ShapeMap.singleton field_name fake_shape_field
 
 let apply_on_field ~f ~default field_name (_, ty) =
   match ty with
@@ -117,12 +109,13 @@ let field_has_nullable_type env =
   Tunresolved[default].
 
   Ensures that $s is a shape. $s must be a subtype of:
-  shape(...) -- if experimental_shape_idx_relaxed and $s does not contain field
-                and does not unset field; i.e. it is possible for an instance of
-                $s to provide the field with an arbitrary type.
-                (This will emit a lint warning)
-  shape(?field => Tmixed, ...)  -- if experimental_optional_shape_field
-  shape(field => ?Tmixed, ...)  -- otherwise
+  shape(...) -- if $s does not contain field and does not unset field; i.e. it
+                is possible for an instance of $s to provide the field with an
+                arbitrary type. (This will emit a lint warning)
+  shape(field => ?Tmixed, ...)
+    if tco_experimental_disable_optional_and_unknown_shape_fields
+  shape(?field => Tmixed, ...)
+    otherwise
 *)
 let idx env p fty shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
@@ -132,7 +125,7 @@ let idx env p fty shape_ty field default =
   | Some field_name ->
     let fake_shape = (
       (* Rnone because we don't want the fake shape to show up in messages about
-       * field non existing. Errors.missing_optional_field filters them out *)
+       * field non existing. *)
       Reason.Rnone,
       Tshape (
         FieldsPartiallyKnown Nast.ShapeMap.empty,

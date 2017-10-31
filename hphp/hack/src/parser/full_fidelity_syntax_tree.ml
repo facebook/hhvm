@@ -19,6 +19,7 @@
 
 module SourceText = Full_fidelity_source_text
 module Parser = Full_fidelity_parser
+module Env = Full_fidelity_parser_env
 module SyntaxError = Full_fidelity_syntax_error
 module TK = Full_fidelity_token_kind
 open Full_fidelity_minimal_syntax
@@ -101,8 +102,8 @@ let remove_duplicates errors equals =
   let result = aux errors [] in
   List.rev result
 
-let make ?(hhvm_compat_mode = false) text =
-  let parser = Parser.make ~hhvm_compat_mode text in
+let make ?(env = Env.default) text =
+  let parser = Parser.make env text in
   let (parser, root) = Parser.parse_script parser in
   (* We've got the lexical errors and the parser errors together, both
   with lexically later errors earlier in the list. We want to reverse the

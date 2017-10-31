@@ -15,10 +15,10 @@ type t = {
   context:
     Full_fidelity_parser_context.WithToken(Syntax.Token).t;
   precedence : int;
-  hhvm_compat_mode : bool;
+  env : Full_fidelity_parser_env.t;
 }
 
-val make : ?hhvm_compat_mode:bool
+val make : Full_fidelity_parser_env.t
   -> Lexer.t
   -> Full_fidelity_syntax_error.t list
   -> Full_fidelity_parser_context.WithToken(Syntax.Token).t
@@ -26,7 +26,7 @@ val make : ?hhvm_compat_mode:bool
 
 val errors : t -> Full_fidelity_syntax_error.t list
 
-val hhvm_compat_mode : t -> bool
+val env : t -> Full_fidelity_parser_env.t
 
 val with_errors : t -> Full_fidelity_syntax_error.t list -> t
 

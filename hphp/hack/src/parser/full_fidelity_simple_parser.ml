@@ -19,17 +19,17 @@ module WithLexer(Lexer : Lexer_S) = struct
     lexer : Lexer.t;
     errors : Full_fidelity_syntax_error.t list;
     context : Context.t;
-    hhvm_compat_mode : bool;
+    env : Full_fidelity_parser_env.t;
   }
 
-  let make ?(hhvm_compat_mode=false) lexer errors context =
-    { lexer; errors; context; hhvm_compat_mode }
+  let make env lexer errors context =
+    { lexer; errors; context; env }
 
   let errors parser =
     parser.errors @ (Lexer.errors parser.lexer)
 
-  let hhvm_compat_mode parser =
-    parser.hhvm_compat_mode
+  let env parser =
+    parser.env
 
   let with_errors parser errors =
     { parser with errors }

@@ -16,6 +16,7 @@ module TokenKind = Full_fidelity_token_kind
 module SyntaxError = Full_fidelity_syntax_error
 module Trivia = Token.Trivia
 module SourceText = Full_fidelity_source_text
+module Env = Full_fidelity_parser_env
 
 open Syntax
 
@@ -32,7 +33,7 @@ module type Parser_S = sig
   val skipped_tokens : t -> Token.t list
   val with_skipped_tokens : t -> Token.t list -> t
   val clear_skipped_tokens : t -> t
-  val hhvm_compat_mode : t -> bool
+  val env : t -> Env.t
 end
 
 module WithParser(Parser : Parser_S) = struct

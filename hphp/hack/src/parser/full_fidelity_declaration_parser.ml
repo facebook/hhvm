@@ -14,6 +14,7 @@ module Token = Syntax.Token
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SyntaxError = Full_fidelity_syntax_error
+module Env = Full_fidelity_parser_env
 module SimpleParserSyntax =
   Full_fidelity_simple_parser.WithSyntax(Syntax)
 module SimpleParser = SimpleParserSyntax.WithLexer(
@@ -59,8 +60,7 @@ module WithExpressionAndStatementAndTypeParser
 
   let parse_in_type_parser parser type_parser_function =
     let type_parser = TypeParser.make
-      ~hhvm_compat_mode: parser.hhvm_compat_mode
-      parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context in
     let (type_parser, node) = type_parser_function type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
@@ -85,8 +85,7 @@ module WithExpressionAndStatementAndTypeParser
   (* Expressions *)
   let parse_in_expression_parser parser expression_parser_function =
     let expr_parser = ExpressionParser.make
-      ~hhvm_compat_mode: parser.hhvm_compat_mode
-      parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context in
     let (expr_parser, node) = expression_parser_function expr_parser in
     let lexer = ExpressionParser.lexer expr_parser in
     let errors = ExpressionParser.errors expr_parser in
@@ -99,8 +98,7 @@ module WithExpressionAndStatementAndTypeParser
   (* Statements *)
   let parse_in_statement_parser parser statement_parser_function =
     let statement_parser = StatementParser.make
-      ~hhvm_compat_mode: parser.hhvm_compat_mode
-      parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context in
     let (statement_parser, node) = statement_parser_function
        statement_parser in
     let lexer = StatementParser.lexer statement_parser in
@@ -1219,8 +1217,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser1, open_angle) = next_token parser in
     if (Token.kind open_angle) = LessThan then
         let type_parser = TypeParser.make
-          ~hhvm_compat_mode:parser.hhvm_compat_mode
-          parser.lexer parser.errors parser.context in
+          parser.env parser.lexer parser.errors parser.context in
         let (type_parser, node) =
           TypeParser.parse_generic_type_parameter_list type_parser in
         let lexer = TypeParser.lexer type_parser in
@@ -1662,7 +1659,7 @@ module WithExpressionAndStatementAndTypeParser
       | _ -> false
     in
     (* Do not attempt to recover in HHVM compatibility mode *)
-    if valid || hhvm_compat_mode parser then
+    if valid || Env.hhvm_compat_mode (env parser) then
       parser1, markup_section
     else
       let parser = with_error parser SyntaxError.error1001 in

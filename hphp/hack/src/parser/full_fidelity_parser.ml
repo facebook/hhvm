@@ -11,6 +11,7 @@
 [@@@ocaml.warning "-60"] (* https://caml.inria.fr/mantis/view.php?id=7522 *)
 module Lexer = Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token)
 module SyntaxError = Full_fidelity_syntax_error
+module Env = Full_fidelity_parser_env
 module Context =
   Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token)
 
@@ -62,24 +63,23 @@ type t = {
   lexer : Lexer.t;
   errors : SyntaxError.t list;
   context: Context.t;
-  hhvm_compat_mode: bool;
+  env: Env.t;
 }
 
-let make ?(hhvm_compat_mode = false) text =
+let make env text =
   { lexer = Lexer.make text
   ; errors = []
   ; context = Context.empty
-  ; hhvm_compat_mode
+  ; env
   }
 
 let errors parser =
   parser.errors @ (Lexer.errors parser.lexer)
 
-let hhvm_compat_mode parser =
-  parser.hhvm_compat_mode
+let env parser = parser.env
 
 let parse_script parser =
-  let decl_parser = DeclParser.make ~hhvm_compat_mode:parser.hhvm_compat_mode
+  let decl_parser = DeclParser.make parser.env
     parser.lexer parser.errors parser.context in
   let (decl_parser, node) = DeclParser.parse_script decl_parser in
   let lexer = DeclParser.lexer decl_parser in

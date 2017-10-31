@@ -62,9 +62,8 @@ module WithStatementAndDeclAndTypeParser
     | Prefix_byref_assignment | Prefix_assignment | Prefix_none
 
   let parse_type_specifier parser =
-    let type_parser = TypeParser.make parser.lexer
-      ~hhvm_compat_mode:parser.hhvm_compat_mode
-      parser.errors parser.context in
+    let type_parser = TypeParser.make
+      parser.env parser.lexer parser.errors parser.context in
     let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
@@ -72,9 +71,8 @@ module WithStatementAndDeclAndTypeParser
     (parser, node)
 
   let parse_generic_type_arguments_opt parser =
-    let type_parser = TypeParser.make parser.lexer
-      ~hhvm_compat_mode:parser.hhvm_compat_mode
-      parser.errors parser.context in
+    let type_parser = TypeParser.make
+      parser.env parser.lexer parser.errors parser.context in
     let (type_parser, node) =
       TypeParser.parse_generic_type_argument_list_opt type_parser
     in
@@ -89,9 +87,8 @@ module WithStatementAndDeclAndTypeParser
     && parser0.errors = parser1.errors
 
   let parse_return_type parser =
-    let type_parser = TypeParser.make parser.lexer
-      ~hhvm_compat_mode:parser.hhvm_compat_mode
-      parser.errors parser.context in
+    let type_parser = TypeParser.make
+      parser.env parser.lexer parser.errors parser.context in
     let (type_parser, node) = TypeParser.parse_return_type type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
@@ -100,8 +97,7 @@ module WithStatementAndDeclAndTypeParser
 
   let parse_parameter_list_opt parser =
     let decl_parser = DeclParser.make
-      ~hhvm_compat_mode:parser.hhvm_compat_mode
-      parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context in
     let (decl_parser, right, params, left ) =
       DeclParser.parse_parameter_list_opt decl_parser in
     let lexer = DeclParser.lexer decl_parser in
@@ -111,9 +107,7 @@ module WithStatementAndDeclAndTypeParser
 
   let parse_compound_statement parser =
     let statement_parser = StatementParser.make
-      ~hhvm_compat_mode:parser.hhvm_compat_mode
-      parser.lexer
-      parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context in
     let (statement_parser, node) =
       StatementParser.parse_compound_statement statement_parser in
     let lexer = StatementParser.lexer statement_parser in

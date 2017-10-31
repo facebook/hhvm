@@ -2377,7 +2377,10 @@ let from_text
   (source_text : Full_fidelity_source_text.t)
   : result =
     let open Full_fidelity_syntax_tree in
-    let tree   = make ?hhvm_compat_mode source_text in
+    let tree   =
+      make
+        ~env:(Full_fidelity_parser_env.make ?hhvm_compat_mode ())
+        source_text in
     let script = Full_fidelity_positioned_syntax.from_tree tree in
     if Option.value hhvm_compat_mode ~default:false
     then begin

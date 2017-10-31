@@ -13,7 +13,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module WithLexer(Lexer : Lexer_S) = struct
     module type StatementParser_S = sig
       type t
-      val make : ?hhvm_compat_mode:bool
+      val make : Full_fidelity_parser_env.t
         -> Lexer.t
         -> Full_fidelity_syntax_error.t list
         -> Full_fidelity_parser_context.WithToken(Syntax.Token).t

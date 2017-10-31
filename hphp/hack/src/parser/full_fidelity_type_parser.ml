@@ -44,8 +44,7 @@ include ParserHelper.WithParser(SimpleParser)
 
 let parse_expression parser =
   let expr_parser = ExpressionParser.make
-    ~hhvm_compat_mode: parser.hhvm_compat_mode
-    parser.lexer parser.errors parser.context in
+    parser.env parser.lexer parser.errors parser.context in
   let (expr_parser, node) = ExpressionParser.parse_expression expr_parser in
   let lexer = ExpressionParser.lexer expr_parser in
   let errors = ExpressionParser.errors expr_parser in

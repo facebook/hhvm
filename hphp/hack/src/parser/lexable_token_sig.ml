@@ -24,4 +24,5 @@ module type LexableToken_S = sig
   val leading: t -> Trivia.t list
   val with_leading: Trivia.t list -> t -> t
   val with_kind: t -> Full_fidelity_token_kind.t -> t
+  val has_leading_end_of_line: t -> bool
 end

@@ -1079,9 +1079,11 @@ module type Syntax_S = sig
   | ListItem                                of list_item
 
 
+  val syntax_node_to_list : t -> t list
   val full_width : t -> int
   val trailing_width : t -> int
   val leading_width : t -> int
+  val leading_token : t -> Token.t option
   val children : t -> t list
   val syntax : t -> syntax
   val kind : t -> Full_fidelity_syntax_kind.t
@@ -1245,6 +1247,7 @@ module type Syntax_S = sig
   val make_list_item : t -> t -> t
 
 
+  val is_abstract : t -> bool
   val is_missing : t -> bool
   val is_list : t -> bool
   val is_end_of_file : t -> bool

@@ -35,6 +35,9 @@ module type DeclarationParser_S = Full_fidelity_declaration_parser_type
   .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
   .DeclarationParser_S
 
+module DeclarationParserSyntax =
+  Full_fidelity_declaration_parser.WithSyntax(Full_fidelity_minimal_syntax)
+
 module type TypeParser_S = Full_fidelity_type_parser_type
   .WithSyntax(Full_fidelity_minimal_syntax)
   .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
@@ -50,7 +53,7 @@ and StatementParser : StatementParser_S =
   StatementParserSyntax.WithExpressionAndDeclAndTypeParser
     (ExpressionParser) (DeclParser) (TypeParser)
 and DeclParser : DeclarationParser_S =
-  Full_fidelity_declaration_parser.WithExpressionAndStatementAndTypeParser
+  DeclarationParserSyntax.WithExpressionAndStatementAndTypeParser
     (ExpressionParser) (StatementParser) (TypeParser)
 and TypeParser : TypeParser_S =
   TypeParserSyntax.WithExpressionParser(ExpressionParser)

@@ -798,9 +798,9 @@ and emit_call_empty_expr env (_, expr_ as expr) =
     emit_class_get env None QueryOp.Empty false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get ~need_ref:false env None QueryOp.Empty expr prop nullflavor
-  | A.Lvar(_, id) when id = SN.Superglobals.globals ->
+  | A.Lvar(_, id) when SN.Superglobals.is_superglobal id ->
     gather [
-      instr_string @@ SU.Locals.strip_dollar SN.Superglobals.globals;
+      instr_string @@ SU.Locals.strip_dollar id;
       instr_emptyg
     ]
   | A.Lvar id when not (is_local_this env (snd id)) ->

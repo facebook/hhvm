@@ -41,11 +41,13 @@ type used_names = {
 }
 
 let empty_names = {
-  t_classes= SMap.empty;
+  t_classes = SMap.empty;
   t_namespaces = SMap.empty;
   t_functions = SMap.empty;
   t_constants = SMap.empty;
 }
+
+let empty_trait_require_clauses = SMap.empty
 
 let get_short_name_from_qualified_name name alias =
   if String.length alias <> 0 then alias
@@ -60,14 +62,23 @@ type accumulator = {
   namespace_type : namespace_type;
   has_namespace_prefix: bool;
   names: used_names;
+  trait_require_clauses: TokenKind.t SMap.t;
 }
 
-let make_acc acc errors namespace_type names has_namespace_prefix =
+let make_acc
+  acc errors namespace_type names has_namespace_prefix trait_require_clauses =
   if acc.errors == errors &&
      acc.namespace_type == namespace_type &&
      acc.names == names &&
-     acc.has_namespace_prefix = has_namespace_prefix then acc
-  else { errors; namespace_type; names; has_namespace_prefix }
+     acc.has_namespace_prefix = has_namespace_prefix &&
+     acc.trait_require_clauses = trait_require_clauses
+  then acc
+  else { errors
+       ; namespace_type
+       ; names
+       ; has_namespace_prefix
+       ; trait_require_clauses
+       }
 
 let fold_child_nodes f node parents acc =
   PositionedSyntax.children node
@@ -1228,11 +1239,23 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     make_error_from_node node SyntaxError.vdarray_in_php :: errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
-let require_errors node parents hhvm_compat_mode errors =
+let require_errors node parents hhvm_compat_mode trait_use_clauses errors =
   match syntax node with
   | RequireClause p ->
-    begin
-      match (containing_classish_kind parents, token_kind p.require_kind) with
+    let name = text p.require_name in
+    let req_kind = token_kind p.require_kind in
+    let trait_use_clauses, errors =
+      match SMap.get name trait_use_clauses, req_kind with
+      | None, Some tk -> SMap.add name tk trait_use_clauses, errors
+      | Some tk1, Some tk2 when tk1 = tk2 -> (* duplicate, it is okay *)
+        trait_use_clauses, errors
+      | _ -> (* Conflicting entry *)
+        trait_use_clauses,
+        make_error_from_node node
+          (SyntaxError.conflicting_trait_require_clauses ~name) :: errors
+    in
+    let errors =
+      match (containing_classish_kind parents, req_kind) with
       | (Some TokenKind.Class, Some TokenKind.Extends)
         when not hhvm_compat_mode ->
         make_error_from_node node SyntaxError.error2029 :: errors
@@ -1240,8 +1263,9 @@ let require_errors node parents hhvm_compat_mode errors =
       | (Some TokenKind.Class, Some TokenKind.Implements) ->
         make_error_from_node node SyntaxError.error2030 :: errors
       | _ -> errors
-    end
-  | _ -> errors
+    in
+    trait_use_clauses, errors
+  | _ -> trait_use_clauses, errors
 
 let classish_errors node parents hhvm_compat_mode names errors =
   match syntax node with
@@ -1535,7 +1559,12 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
   let is_hack_file = (SyntaxTree.language syntax_tree = "hh") in
   let is_hack = is_hack_file || enable_hh_syntax in
   let rec folder acc node parents =
-    let { errors; namespace_type; names; has_namespace_prefix } = acc in
+    let { errors
+        ; namespace_type
+        ; names
+        ; has_namespace_prefix
+        ; trait_require_clauses
+        } = acc in
     let errors =
       markup_errors node is_hack_file hhvm_compatiblity_mode errors in
     let errors =
@@ -1552,8 +1581,8 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
       property_errors node is_strict is_hack hhvm_compatiblity_mode errors in
     let errors =
       expression_errors node parents is_hack is_hack_file hhvm_compatiblity_mode errors in
-    let errors =
-      require_errors node parents hhvm_compatiblity_mode errors in
+    let trait_require_clauses, errors =
+      require_errors node parents hhvm_compatiblity_mode trait_require_clauses errors in
     let names, errors =
       classish_errors node parents hhvm_compatiblity_mode names errors in
     let errors =
@@ -1587,11 +1616,16 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
           not (is_missing namespace_name)
         | _ -> false in
       let acc1 =
-        make_acc acc errors namespace_type empty_names has_namespace_prefix in
+        make_acc
+          acc errors namespace_type empty_names
+          has_namespace_prefix empty_trait_require_clauses
+      in
       let acc1 = fold_child_nodes folder node parents acc1 in
       (* resume with old set of names and pull back
         accumulated errors/last seen namespace type *)
-        make_acc acc acc1.errors namespace_type acc.names acc.has_namespace_prefix
+        make_acc
+          acc acc1.errors namespace_type acc.names
+          acc.has_namespace_prefix acc.trait_require_clauses
     | NamespaceEmptyBody { namespace_semicolon; _ } ->
       let namespace_type =
         if namespace_type = Unspecified
@@ -1601,11 +1635,25 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
       (* consider the rest of file to be the part of the namespace:
          reset names and namespace type, keep errors *)
       let acc =
-        make_acc acc errors namespace_type empty_names has_namespace_prefix in
+        make_acc
+          acc errors namespace_type empty_names
+          has_namespace_prefix empty_trait_require_clauses
+      in
+      fold_child_nodes folder node parents acc
+    | ClassishDeclaration _ ->
+      (* Reset the trait require clauses *)
+      let acc =
+        make_acc
+          acc errors namespace_type names
+          has_namespace_prefix empty_trait_require_clauses
+      in
       fold_child_nodes folder node parents acc
     | _ ->
       let acc =
-        make_acc acc errors namespace_type names has_namespace_prefix in
+        make_acc
+          acc errors namespace_type names
+          has_namespace_prefix trait_require_clauses
+      in
       fold_child_nodes folder node parents acc in
 
   let node =
@@ -1613,10 +1661,12 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
     | Some n -> n
     | None -> PositionedSyntax.from_tree syntax_tree in
   let acc = fold_child_nodes folder node []
-    { errors = [];
-      namespace_type = Unspecified;
-      names = empty_names;
-      has_namespace_prefix = false } in
+    { errors = []
+    ; namespace_type = Unspecified
+    ; names = empty_names
+    ; has_namespace_prefix = false
+    ; trait_require_clauses = empty_trait_require_clauses
+    } in
   acc.errors
 
 type error_level = Minimum | Typical | Maximum | HHVMCompatibility

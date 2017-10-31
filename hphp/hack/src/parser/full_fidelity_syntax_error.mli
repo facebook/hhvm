@@ -186,3 +186,4 @@ val variadic_reference : string
 val double_variadic : string
 val double_reference : string
 val global_in_const_decl : string
+val conflicting_trait_require_clauses : name:string -> string

@@ -269,3 +269,6 @@ let variadic_reference = "Found '...&'. Did you mean '&...'?"
 let double_variadic = "Parameter redundantly marked as variadic ('...')."
 let double_reference = "Parameter redundantly marked as reference ('&')."
 let global_in_const_decl = "Cannot have globals in constant declaration"
+
+let conflicting_trait_require_clauses ~name =
+  "Conflicting requirements for '" ^ name ^ "'"

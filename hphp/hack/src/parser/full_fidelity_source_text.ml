@@ -76,10 +76,12 @@ let position_to_offset source_text position =
 (* Create a Pos.t from two offsets in a source_text (given a path) *)
 let relative_pos pos_file source_text start_offset end_offset =
   let offset_to_file_pos offset =
-    let pos_lnum, pos_bol, pos_cnum =
-      OffsetMap.offset_to_file_pos_triple source_text.offset_map offset
-    in
-    File_pos.of_lnum_bol_cnum ~pos_lnum ~pos_bol ~pos_cnum
+    try
+      let pos_lnum, pos_bol, pos_cnum =
+        OffsetMap.offset_to_file_pos_triple source_text.offset_map offset
+      in
+      File_pos.of_lnum_bol_cnum ~pos_lnum ~pos_bol ~pos_cnum
+    with Invalid_argument _ -> File_pos.dummy
   in
   let pos_start = offset_to_file_pos start_offset in
   let pos_end   = offset_to_file_pos end_offset in

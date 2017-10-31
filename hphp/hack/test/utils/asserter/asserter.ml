@@ -186,6 +186,7 @@ end;;
 
 module Hh_json_json_option_comparator =
   Make_option_comparator (Hh_json_json_comparator);;
+module Int_option_comparator = Make_option_comparator (Int_comparator);;
 
 module String_asserter = Make_asserter (String_comparator);;
 module Bool_asserter = Make_asserter (Bool_comparator);;

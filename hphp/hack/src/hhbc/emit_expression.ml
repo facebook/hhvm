@@ -490,6 +490,9 @@ and emit_tuple env p es =
   emit_expr ~need_ref:false env (p, A.Array af_list)
 
 and emit_call_expr ~need_ref env expr =
+  (match expr with
+    | _, A.Call ((_, A.Id (_, s)), _, _, _) -> Emit_symbol_refs.add_function s
+    | _ -> ());
   let instrs, flavor = emit_flavored_expr env expr in
   gather [
     instrs;
@@ -626,8 +629,10 @@ and emit_class_const env cid (_, id) =
   | Class_id cid ->
     let fq_id, _id_opt =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
+    let fq_id_str = Hhbc_id.Class.to_raw_string fq_id in
+    Emit_symbol_refs.add_class fq_id_str;
     if SU.is_class id
-    then instr_string (Hhbc_id.Class.to_raw_string fq_id)
+    then instr_string fq_id_str
     else instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id, fq_id)))
   | _ ->
     emit_load_class_const env cexpr id
@@ -699,8 +704,13 @@ and emit_id env (p, s as id) =
     let fq_id, id_opt, contains_backslash =
       Hhbc_id.Const.elaborate_id (Emit_env.get_namespace env) id in
     begin match id_opt with
-    | Some id -> instr (ILitConst (CnsU (fq_id, id)))
-    | None -> instr (ILitConst
+    | Some id ->
+      Emit_symbol_refs.add_constant (Hhbc_id.Const.to_raw_string fq_id);
+      Emit_symbol_refs.add_constant id;
+      instr (ILitConst (CnsU (fq_id, id)))
+    | None ->
+      Emit_symbol_refs.add_constant (snd id);
+      instr (ILitConst
         (if contains_backslash then CnsE fq_id else Cns fq_id))
     end
 
@@ -720,9 +730,11 @@ and emit_xhp env p id attributes children =
   let children_vec = make_varray p dec_children in
   let filename = p, A.Id (p, "__FILE__") in
   let line = p, A.Id (p, "__LINE__") in
+  let renamed_id = rename_xhp id in
+  Emit_symbol_refs.add_class (snd renamed_id);
   emit_expr ~need_ref:false env @@
     (p, A.New (
-      (p, A.Id (rename_xhp id)),
+      (p, A.Id renamed_id),
       [attribute_map ; children_vec ; filename ; line],
       []))
 
@@ -733,6 +745,9 @@ and emit_import env flavor e =
     | A.IncludeOnce -> instr @@ IIncludeEvalDefine InclOnce
     | A.RequireOnce -> instr @@ IIncludeEvalDefine ReqOnce
   in
+  (match e with
+    | _, A.String (_, s) -> Emit_symbol_refs.add_include s
+    | _ -> ());
   gather [
     emit_expr ~need_ref:false env e;
     import_instr;

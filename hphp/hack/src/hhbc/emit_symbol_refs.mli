@@ -8,7 +8,10 @@
  *
 *)
 
-val to_string : ?path:Relative_path.t -> ?dump_symbol_refs:bool -> Hhas_program.t -> string
-val string_of_instruction : Hhbc_ast.instruct -> string
-val string_of_local_id : Local.t -> string
-val string_of_label : Label.t -> string
+val empty_symbol_refs : Hhas_symbol_refs.t
+val get_symbol_refs : unit -> Hhas_symbol_refs.t
+val add_include : string -> unit
+val add_constant : string -> unit
+val add_function : string -> unit
+val add_class : string -> unit
+val reset : unit -> unit

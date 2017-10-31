@@ -25,16 +25,17 @@ type mode =
   | DAEMON
 
 type options = {
-  filename        : string;
-  fallback        : bool;
-  config_list     : string list;
-  debug_time      : bool;
-  parser          : parser;
-  output_file     : string option;
-  config_file     : string option;
-  quiet_mode      : bool;
-  mode            : mode;
-  input_file_list : string option;
+  filename         : string;
+  fallback         : bool;
+  config_list      : string list;
+  debug_time       : bool;
+  parser           : parser;
+  output_file      : string option;
+  config_file      : string option;
+  quiet_mode       : bool;
+  mode             : mode;
+  input_file_list  : string option;
+  dump_symbol_refs : bool;
 }
 
 (*****************************************************************************)
@@ -84,6 +85,7 @@ let parse_options () =
   let config_file = ref None in
   let quiet_mode = ref false in
   let input_file_list = ref None in
+  let dump_symbol_refs = ref false in
   let usage = P.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
     [ ("--fallback"
@@ -129,6 +131,10 @@ let parse_options () =
       , Arg.String (fun str -> input_file_list := Some str)
       , " read a list of files (one per line) from the file `input-file-list'"
       );
+      ("--dump-symbol-refs"
+      , Arg.Set dump_symbol_refs
+      , " Dump symbol ref sections of HHAS"
+      );
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -152,6 +158,7 @@ let parse_options () =
   ; quiet_mode         = !quiet_mode
   ; mode               = !mode
   ; input_file_list    = !input_file_list
+  ; dump_symbol_refs   = !dump_symbol_refs
   }
 
 let load_file_stdin () =
@@ -249,7 +256,8 @@ let do_compile filename compiler_options fail_or_ast debug_time =
         Hhbc_ast.FatalOp.Parse Pos.none "Syntax error"
       in
   let t = add_to_time_ref debug_time.codegen_t t in
-  let hhas_text = Hhbc_hhas.to_string hhas_prog in
+  let hhas_text = Hhbc_hhas.to_string
+    ~dump_symbol_refs:compiler_options.dump_symbol_refs hhas_prog in
   ignore @@ add_to_time_ref debug_time.printing_t t;
   if compiler_options.debug_time
   then print_debug_time_info filename debug_time;

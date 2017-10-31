@@ -49,7 +49,7 @@ open Hhas_parser_actions
 %type <Hhas_program.t> program
 %%
 program:
-    nl decllist nl EOF { split_decl_list $2 [] [] None [] []}
+    nl decllist nl EOF { split_decl_list $2 [] [] None [] [] Emit_symbol_refs.empty_symbol_refs}
 ;
 decl:
     | maindecl {Main_decl $1}

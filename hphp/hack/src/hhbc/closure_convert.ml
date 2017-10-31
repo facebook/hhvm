@@ -845,5 +845,5 @@ let convert_toplevel_prog defs =
     Emit_env.(
       { global_explicit_use_set = st.explicit_use_set
       ; global_closure_namespaces = st.closure_namespaces
-      ; global_closure_enclosing_classes = st.closure_enclosing_classes })
+      ; global_closure_enclosing_classes = st.closure_enclosing_classes})
   )

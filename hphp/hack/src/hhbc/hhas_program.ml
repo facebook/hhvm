@@ -12,15 +12,16 @@ open Instruction_sequence
 open Hhbc_ast
 
 type t = {
-  hhas_adata   : Hhas_adata.t list;
-  hhas_fun     : Hhas_function.t list;
-  hhas_classes : Hhas_class.t list;
-  hhas_typedefs: Hhas_typedef.t list;
-  hhas_main    : Hhas_body.t;
+  hhas_adata       : Hhas_adata.t list;
+  hhas_fun         : Hhas_function.t list;
+  hhas_classes     : Hhas_class.t list;
+  hhas_typedefs    : Hhas_typedef.t list;
+  hhas_main        : Hhas_body.t;
+  hhas_symbol_refs : Hhas_symbol_refs.t;
 }
 
-let make hhas_adata hhas_fun hhas_classes hhas_typedefs hhas_main =
-  { hhas_adata; hhas_fun; hhas_classes; hhas_typedefs; hhas_main }
+let make hhas_adata hhas_fun hhas_classes hhas_typedefs hhas_main hhas_symbol_refs =
+  { hhas_adata; hhas_fun; hhas_classes; hhas_typedefs; hhas_main; hhas_symbol_refs; }
 
 let functions hhas_prog =
   hhas_prog.hhas_fun
@@ -36,6 +37,9 @@ let main hhas_prog =
 
 let adata hhas_prog =
   hhas_prog.hhas_adata
+
+let symbol_refs hhas_prog =
+  hhas_prog.hhas_symbol_refs
 
 let with_main hhas_prog hhas_main =
   {hhas_prog with hhas_main}
@@ -90,8 +94,7 @@ let emit_fatal_program ~ignore_message op pos message =
     [] (* static_inits static_inits  *)
     None (* doc *)
   in
-    make [] [] [] [] body
-
+    make [] [] [] [] body Emit_symbol_refs.empty_symbol_refs
 
 let pick_top_function_name_span f =
   match f with
@@ -130,11 +133,16 @@ let from_ast is_hh_file ast =
       let compiled_classes = Emit_class.emit_classes_from_program closed_ast in
       let compiled_typedefs = Emit_typedef.emit_typedefs_from_program flat_closed_ast in
       let adata = Emit_adata.get_adata () in
-      make adata compiled_funs compiled_classes compiled_typedefs compiled_defs
+      let symbol_refs = Emit_symbol_refs.get_symbol_refs () in
+      let hhas = make
+        adata compiled_funs compiled_classes
+        compiled_typedefs compiled_defs symbol_refs in
+      hhas
     with Emit_fatal.IncludeTimeFatalException (op, pos, message) ->
       emit_fatal_program ~ignore_message:false op pos message
   end
   ~finally:begin fun () ->
     Emit_adata.reset ();
+    Emit_symbol_refs.reset ();
     Emit_env.clear_global_state ();
   end

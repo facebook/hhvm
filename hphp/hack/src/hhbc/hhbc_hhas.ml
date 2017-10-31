@@ -1447,7 +1447,7 @@ let add_uses buf c =
 
 let add_class_def buf class_def =
   let class_name = Hhas_class.name class_def in
-  (* TODO: user attribuqtes *)
+  (* TODO: user attributes *)
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
   B.add_string buf (Hhbc_id.Class.to_raw_string class_name);
@@ -1501,32 +1501,48 @@ let add_typedef buf typedef =
   | None ->
     B.add_string buf ";"
 
-let add_program_content buf hhas_prog =
+let add_symbol_ref_regions buf symbol_refs =
+  let add_region name refs =
+    if not (SSet.is_empty refs) then begin
+      B.add_string buf ("\n." ^ name);
+      B.add_string buf " {";
+      SSet.iter (fun s -> B.add_string buf ("\n  " ^ s)) refs;
+      B.add_string buf "\n}\n";
+    end
+  in
+  add_region "includes" symbol_refs.Hhas_symbol_refs.includes;
+  add_region "constant_refs" symbol_refs.Hhas_symbol_refs.constants;
+  add_region "function_refs" symbol_refs.Hhas_symbol_refs.functions;
+  add_region "class_refs" symbol_refs.Hhas_symbol_refs.classes
+
+let add_program_content dump_symbol_refs buf hhas_prog =
   let functions = Hhas_program.functions hhas_prog in
   let top_level_body = Hhas_program.main hhas_prog in
   let classes = Hhas_program.classes hhas_prog in
   let adata = Hhas_program.adata hhas_prog in
+  let symbol_refs = Hhas_program.symbol_refs hhas_prog in
   add_data_region buf adata;
   add_top_level buf top_level_body;
   List.iter (add_fun_def buf) functions;
   List.iter (add_class_def buf) classes;
-  List.iter (add_typedef buf) (Hhas_program.typedefs hhas_prog)
+  List.iter (add_typedef buf) (Hhas_program.typedefs hhas_prog);
+  if dump_symbol_refs then add_symbol_ref_regions buf symbol_refs
 
-let add_program ?path buf hhas_prog =
+let add_program ?path dump_symbol_refs buf hhas_prog =
   match path with
   | Some path ->
       let path = Relative_path.to_absolute path in
       B.add_string
         buf
         (Printf.sprintf "# %s starts here\n\n .filepath \"%s\";\n" path path);
-      add_program_content buf hhas_prog;
+      add_program_content dump_symbol_refs buf hhas_prog;
       B.add_string buf (Printf.sprintf "\n# %s ends here\n" path)
   | None ->
       B.add_string buf "#starts here\n";
-      add_program_content buf hhas_prog;
+      add_program_content dump_symbol_refs buf hhas_prog;
       B.add_string buf "\n#ends here\n"
 
-let to_string ?path hhas_prog =
+let to_string ?path ?(dump_symbol_refs=false) hhas_prog =
   let buf = Buffer.create 1024 in
-  add_program ?path buf hhas_prog;
+  add_program ?path dump_symbol_refs buf hhas_prog;
   B.contents buf

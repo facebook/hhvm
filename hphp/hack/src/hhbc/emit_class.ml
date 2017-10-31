@@ -29,6 +29,30 @@ let ensure_methods_not_redeclared class_id l =
         (Hhbc_id.Class.to_raw_string class_id) name in
     Emit_fatal.raise_fatal_parse conflicting_span message
 
+let add_symbol_refs
+    class_base class_implements class_uses class_use_aliases
+    class_use_precedences class_requirements =
+  begin
+    let add_hhbc_id id =
+      Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string id) in
+    let add_class_use_alias (qualifier, _, aliased_name, _) =
+      Option.iter qualifier Emit_symbol_refs.add_class;
+      Option.iter aliased_name Emit_symbol_refs.add_class in
+    let add_class_use_precedence (c, _, removed_names) =
+      Emit_symbol_refs.add_class c;
+      List.iter removed_names Emit_symbol_refs.add_class in
+    (match class_base with
+      | Some c -> add_hhbc_id c
+      | _ -> ());
+    List.iter class_implements add_hhbc_id;
+    List.iter class_uses (fun c ->
+      let c = Hhbc_string_utils.strip_global_ns c in
+      Emit_symbol_refs.add_class c);
+    List.iter class_use_aliases add_class_use_alias;
+    List.iter class_use_precedences add_class_use_precedence;
+    List.iter class_requirements (function _, c ->
+      Emit_symbol_refs.add_class c);
+  end
 
 let make_86method
   ~name ~params ~is_static ~is_private ~is_abstract ~span instrs =
@@ -459,6 +483,9 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   let additional_methods =
     Emit_memoize_method.emit_wrapper_methods env info ast_class methods in
   let doc_comment = ast_class.A.c_doc_comment in
+  add_symbol_refs
+    class_base class_implements class_uses class_use_aliases
+    class_use_precedences class_requirements;
   Hhas_class.make
     class_attributes
     class_base

@@ -112,4 +112,7 @@ module HhServerConfig = struct
         Hh_logger.log_duration (Printf.sprintf
           "%s has exited. Time since sigterm: " process.ServerProcess.name) start_t)
 
+  let wait_pid process =
+    Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid
+
 end

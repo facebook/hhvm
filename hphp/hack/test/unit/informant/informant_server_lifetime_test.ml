@@ -91,6 +91,8 @@ let make_test test =
 
     let wait_for_server_exit _ _ = ()
 
+    let wait_pid _ = 0, (Unix.WEXITED 0)
+
   end : Mock_server_config_sig) in
   fun () ->
   Tempfile.with_tempdir (test mock_server_config)

@@ -115,6 +115,43 @@ bool emit(Venv& env, const fallbackcc& i);
 bool emit(Venv& env, const retransopt& i);
 bool emit(Venv& env, const funcguard& i);
 
+inline void record_frame(Venv& env) {
+  auto const& block = env.unit.blocks[env.current];
+  auto const frame = env.frame;
+  auto const start = env.framestart;
+  auto& frames = env.unit.frames;
+  auto const size = env.cb->frontier() - start;
+  // It's possible that (a) this block is empty, and (b) cb is full, so the
+  // frontier from the start of the block is actually the first byte after the
+  // block. This is particularly likely when RetranslateAll is in use as
+  // ephemeral code blocks are resizable.
+  always_assert(!size || env.cb->contains(start));
+  always_assert((int64_t)size >= 0);
+  auto const area = static_cast<uint8_t>(block.area_idx);
+  frames[frame].sections[area].exclusive += size;
+  for (auto f = block.frame; f != Vframe::Top; f = frames[f].parent) {
+    frames[f].sections[area].inclusive += size;
+  }
+  env.framestart = env.cb->frontier();
+}
+
+inline bool emit(Venv& env, const inlinestart& i) {
+  if (env.frame == -1) return true; // unreachable block
+
+  always_assert(0 <= i.id && i.id < env.unit.frames.size());
+  record_frame(env);
+  env.frame = i.id;
+  return true;
+}
+inline bool emit(Venv& env, const inlineend&) {
+  if (env.frame == -1) return true; // unreachable block
+
+  record_frame(env);
+  env.frame = env.unit.frames[env.frame].parent;
+  always_assert(0 <= env.frame && env.frame < env.unit.frames.size());
+  return true;
+}
+
 template<class Vemit>
 void check_nop_interval(Venv& env, const Vinstr& inst,
                         int& nop_counter, int nop_interval) {
@@ -194,6 +231,8 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
     env.cb = &text.area(block.area_idx).code;
     env.addrs[b] = env.cb->frontier();
+    env.framestart = env.cb->frontier();
+    env.frame = block.frame;
 
     { // Compute the next block we will emit into the current area.
       auto const cur_start = area_start(labels[i]);
@@ -209,8 +248,6 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
     // We'll replace exception edges to empty catch blocks with the catch
     // helper unique stub.
     if (is_empty_catch(block)) continue;
-
-    auto const start = env.cb->frontier();
 
     for (auto& inst : block.code) {
       irmu.register_inst(inst);
@@ -229,22 +266,7 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
       postprocess<Vemit>(env, inst);
     }
 
-    if (block.frame != -1) {
-      auto& frames = unit.frames;
-      auto const size = env.cb->frontier() - start;
-      // It's possible that (a) this block is empty, and (b) cb is full, so the
-      // frontier from the start of the block is actually the first byte after
-      // the block. This is particularly likely when RetranslateAll is in use as
-      // ephemeral code blocks are resizable.
-      always_assert(!size || env.cb->contains(start));
-      always_assert((int64_t)size >= 0);
-      auto const area = static_cast<uint8_t>(block.area_idx);
-      frames[block.frame].sections[area].exclusive += size;
-      for (auto f = block.frame; f != Vframe::Top; f = frames[f].parent) {
-        frames[f].sections[area].inclusive += size;
-      }
-    }
-
+    if (block.frame != -1) record_frame(env);
     irmu.register_block_end();
   }
 

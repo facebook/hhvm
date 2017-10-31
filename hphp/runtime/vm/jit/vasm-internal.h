@@ -43,13 +43,13 @@ struct Venv {
   struct LabelPatch { CodeAddress instr; Vlabel target; };
   struct SvcReqPatch { CodeAddress jmp, jcc; Vinstr svcreq; };
 
-  Venv(const Vunit& unit, Vtext& text, CGMeta& meta)
+  Venv(Vunit& unit, Vtext& text, CGMeta& meta)
     : unit(unit)
     , text(text)
     , meta(meta)
   {}
 
-  const Vunit& unit;
+  Vunit& unit;
   Vtext& text;
   CGMeta& meta;
 
@@ -57,6 +57,9 @@ struct Venv {
 
   Vlabel current{0};
   Vlabel next{0};
+
+  int frame{-1};
+  CodeAddress framestart;
 
   jit::vector<CodeAddress> addrs;
   jit::vector<LabelPatch> jmps, jccs;

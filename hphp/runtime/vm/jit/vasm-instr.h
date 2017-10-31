@@ -532,14 +532,15 @@ struct funcguard { const Func* func; TCA* watch; };
 
 /*
  * Marks the entry block of an inlined function, func, in the current unit,
- * whose Vcost was computed to be cost.
+ * whose Vcost was computed to be cost. Id is a post computed index into a table
+ * of frames stored on Vunit.
  */
-struct inlinestart { const Func* func; int cost; Vlabel target; };
+struct inlinestart { const Func* func; int cost; int id; };
 
 /*
  * Marks a return target or exit from the current inlined frame.
  */
-struct inlineend { Vlabel target; };
+struct inlineend {};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Native function ABI.

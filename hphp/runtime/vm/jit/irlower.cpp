@@ -131,34 +131,33 @@ void computeFrames(Vunit& unit) {
     if (block.code.empty()) continue;
 
     auto const next_frame = [&] () -> int {
-      auto& inst = block.code.back();
-      switch (inst.op) {
-      case Vinstr::inlinestart:
-        // Each inlined frame will have a single start but may have multiple
-        // ends, and so we need to propagate this state here so that it only
-        // happens once per frame.
-        for (auto f = block.frame;
-             f != Vframe::Top;
-             f = unit.frames[f].parent) {
-          unit.frames[f].inclusive_cost += inst.inlinestart_.cost;
-          unit.frames[f].num_inner_frames++;
-        }
+      auto frame = block.frame;
+      for (auto& inst : block.code) {
+        switch (inst.op) {
+        case Vinstr::inlinestart:
+          // Each inlined frame will have a single start but may have multiple
+          // ends, and so we need to propagate this state here so that it only
+          // happens once per frame.
+          for (auto f = frame; f != Vframe::Top; f = unit.frames[f].parent) {
+            unit.frames[f].inclusive_cost += inst.inlinestart_.cost;
+            unit.frames[f].num_inner_frames++;
+          }
 
-        unit.frames.emplace_back(
-          inst.inlinestart_.func,
-          block.frame,
-          inst.inlinestart_.cost,
-          block.weight
-        );
-        inst = jmp{inst.inlinestart_.target};
-        return unit.frames.size() - 1;
-      case Vinstr::inlineend:
-        inst = jmp{inst.inlineend_.target};
-        return unit.frames[block.frame].parent;
-      default:
-        return block.frame;
+          unit.frames.emplace_back(
+            inst.inlinestart_.func,
+            frame,
+            inst.inlinestart_.cost,
+            block.weight
+          );
+          frame = inst.inlinestart_.id = unit.frames.size() - 1;
+          break;
+        case Vinstr::inlineend:
+          frame = unit.frames[frame].parent;
+          break;
+        default: break;
+        }
       }
-      not_reached();
+      return frame;
     }();
 
     for (auto const s : succs(block)) {

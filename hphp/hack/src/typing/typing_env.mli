@@ -47,8 +47,8 @@ val get_member : bool -> env -> class_type -> string -> class_elt option
 val suggest_member : bool -> class_type -> string -> (Pos.t * string) option
 val get_construct : env -> class_type -> class_elt option * bool
 val check_todo : env -> env
-val get_return : env -> locl ty
-val set_return : env -> locl ty -> env
+val get_return : env -> locl ty * bool (* Use as contextual type *)
+val set_return : env -> locl ty * bool -> env
 val get_params : env -> (locl ty * param_mode) Local_id.Map.t
 val set_param : env -> Local_id.t -> locl ty * param_mode -> env
 val clear_params : env -> env

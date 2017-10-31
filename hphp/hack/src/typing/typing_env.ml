@@ -280,7 +280,7 @@ let empty tcopt file ~droot = {
   };
   genv    = {
     tcopt   = tcopt;
-    return  = fresh_type();
+    return  = (fresh_type(), false);
     params  = Local_id.Map.empty;
     self_id = "";
     self    = Reason.none, Tany;

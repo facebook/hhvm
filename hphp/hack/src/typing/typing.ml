@@ -405,13 +405,13 @@ and fun_def tcopt f =
       let env =
         localize_where_constraints
           ~ety_env:(Phase.env_with_self env) env f.f_where_constraints in
-      let env = Env.clear_params env in
-      let env, hret =
+      let env, return =
         match f.f_ret with
-        | None -> env, (Reason.Rwitness pos, Tany)
+        | None -> env, ((Reason.Rwitness pos, Tany), false)
         | Some ret ->
           let ty = TI.instantiable_hint env ret in
-          Phase.localize_with_self env ty
+          let env, ty = Phase.localize_with_self env ty in
+          env, (ty, true)
       in
       TI.check_params_instantiable env f.f_params;
       TI.check_tparams_instantiable env f.f_tparams;
@@ -426,7 +426,7 @@ and fun_def tcopt f =
           env, T.FVvariadicArg t_vparam, Some ty
         | FVellipsis -> env, T.FVellipsis, None
         | FVnonVariadic -> env, T.FVnonVariadic, None in
-      let env, tb = fun_ env hret pos nb f.f_fun_kind in
+      let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = Env.check_todo env in
       if Env.is_strict env then begin
         List.iter2_exn f.f_params param_tys (check_param env);
@@ -435,7 +435,7 @@ and fun_def tcopt f =
           | _ -> ()
       end;
       begin match f.f_ret with
-        | None when Env.is_strict env -> suggest_return env pos hret
+        | None when Env.is_strict env -> suggest_return env pos (fst return)
         | None -> Typing_suggest.save_fun_or_method f.f_name
         | Some hint -> async_suggest_return (f.f_fun_kind) hint pos
       end;
@@ -464,14 +464,14 @@ and fun_def tcopt f =
 (* function used to type closures, functions and methods *)
 (*****************************************************************************)
 
-and fun_ ?(abstract=false) env hret pos named_body f_kind =
+and fun_ ?(abstract=false) env return pos named_body f_kind =
   Env.with_env env begin fun env ->
     debug_last_pos := pos;
-    let env = Env.set_return env hret in
+    let env = Env.set_return env return in
     let env = Env.set_fn_kind env f_kind in
     let env, tb = block env named_body.fnb_nast in
     Typing_sequencing.sequence_check_block named_body.fnb_nast;
-    let ret = Env.get_return env in
+    let (ret, _) = Env.get_return env in
     let env =
       if Nast_terminality.Terminal.block env named_body.fnb_nast ||
         abstract ||
@@ -629,16 +629,19 @@ and stmt env = function
   | Return (p, None) ->
       let env = check_inout_return env in
       let rty = make_return_type env p (Reason.Rwitness p, Tprim Tvoid) in
-      let expected_return = Env.get_return env in
+      let (expected_return, _) = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
       let env = Type.sub_type p Reason.URreturn env rty expected_return in
       env, T.Return (p, None)
   | Return (p, Some e) ->
       let env = check_inout_return env in
       let pos = fst e in
-      let expected_return = Env.get_return env in
-      let env, te, rty =
-        expr ~expected:(pos, Reason.URreturn, expected_return) env e in
+      let (expected_return, has_expected) = Env.get_return env in
+      let expected =
+        if has_expected
+        then Some (pos, Reason.URreturn, expected_return)
+        else None in
+      let env, te, rty = expr ?expected:expected env e in
       let rty = make_return_type env p rty in
       (match snd (Env.expand_type env expected_return) with
       | r, Tprim Tvoid ->
@@ -1779,8 +1782,9 @@ and expr_
             Tclass ((p, SN.Classes.cAsyncGenerator), [key; value; send])
         | Ast.FSync | Ast.FAsync ->
             failwith "Parsing should never allow this" in
+      let expected_return, _ = Env.get_return env in
       let env =
-        Type.sub_type p (Reason.URyield) env rty (Env.get_return env) in
+        Type.sub_type p (Reason.URyield) env rty expected_return in
       let env = Env.forget_members env p in
       make_result env (T.Yield taf) (Reason.Ryield_send p, Toption send)
   | Await e ->
@@ -2135,7 +2139,7 @@ and anon_make tenv p f ft idl =
               { (Phase.env_with_self env) with
                 from_class = Some CIstatic } in
             Phase.localize ~ety_env env ret in
-        let env = Env.set_return env hret in
+        let env = Env.set_return env (hret, Option.is_some ret_ty) in
         let env = Env.set_fn_kind env f.f_fun_kind in
         let env, tb = block env nb.fnb_nast in
         let env =
@@ -5541,17 +5545,18 @@ and method_def env m =
     localize_where_constraints ~ety_env env m.m_where_constraints in
   let env = Env.set_local env this (Env.get_self env) in
   let env = Env.clear_params env in
-  let env, ret = match m.m_ret with
-    | None -> env, make_default_return m.m_name
+  let env, return = match m.m_ret with
+    | None -> env, (make_default_return m.m_name, false)
     | Some ret ->
       let ret = TI.instantiable_hint env ret in
-      (* If a 'this' type appears it needs to be compatiable with the
+      (* If a 'this' type appears it needs to be compatible with the
        * late static type
        *)
       let ety_env =
         { (Phase.env_with_self env) with
           from_class = Some CIstatic } in
-      Phase.localize ~ety_env env ret in
+      let env, ty = Phase.localize ~ety_env env ret in
+      env, (ty, true) in
   TI.check_params_instantiable env m.m_params;
   let env, param_tys = List.map_env env m.m_params make_param_local_ty in
   if Env.is_strict env then begin
@@ -5575,7 +5580,7 @@ and method_def env m =
     | FVnonVariadic -> env, T.FVnonVariadic in
   let nb = Nast.assert_named_body m.m_body in
   let env, tb =
-    fun_ ~abstract:m.m_abstract env ret pos nb m.m_fun_kind in
+    fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
   let env =
     Env.check_todo env in
   let m_ret =
@@ -5585,7 +5590,7 @@ and method_def env m =
       || snd m.m_name = SN.Members.__construct ->
       Some (pos, Happly((pos, "void"), []))
     | None when Env.is_strict env ->
-      suggest_return env pos ret; None
+      suggest_return env pos (fst return); None
     | None -> let (pos, id) = m.m_name in
               let id = (Env.get_self_id env) ^ "::" ^ id in
               Typing_suggest.save_fun_or_method (pos, id);

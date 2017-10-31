@@ -68,7 +68,7 @@ type env = {
 
 and genv = {
   tcopt   : TypecheckerOptions.t;
-  return  : locl ty;
+  return  : locl ty * bool (* use as contextual type *);
   (* For each function parameter, its type and calling convention. *)
   params  : (locl ty * param_mode) Local_id.Map.t;
   parent_id : string;

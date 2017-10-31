@@ -8,42 +8,55 @@
  *
  *)
 
-module Token = Full_fidelity_minimal_token
+module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
+
+module Token = Syntax.Token
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Operator = Full_fidelity_operator
-module Lexer = Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token)
+module Lexer = Full_fidelity_lexer.WithToken(Syntax.Token)
 module PrecedenceSyntax = Full_fidelity_precedence_parser
-  .WithSyntax(Full_fidelity_minimal_syntax)
+  .WithSyntax(Syntax)
 module PrecedenceParser = PrecedenceSyntax
-  .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
 
-open TokenKind
-open Full_fidelity_minimal_syntax
+module type StatementParser_S = Full_fidelity_statement_parser_type
+  .WithSyntax(Syntax)
+  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
+  .StatementParser_S
+
+module type DeclarationParser_S = Full_fidelity_declaration_parser_type
+  .WithSyntax(Syntax)
+  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
+  .DeclarationParser_S
+
+module type TypeParser_S = Full_fidelity_type_parser_type
+  .WithSyntax(Syntax)
+  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
+  .TypeParser_S
+
+module type ExpressionParser_S = Full_fidelity_expression_parser_type
+  .WithSyntax(Syntax)
+  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
+  .ExpressionParser_S
+
+module ParserHelperSyntax = Full_fidelity_parser_helpers.WithSyntax(Syntax)
+module ParserHelper =
+  ParserHelperSyntax.WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
 
 module WithStatementAndDeclAndTypeParser
-  (StatementParser : Full_fidelity_statement_parser_type
-    .WithSyntax(Full_fidelity_minimal_syntax)
-    .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
-    .StatementParser_S)
-  (DeclParser : Full_fidelity_declaration_parser_type
-    .WithSyntax(Full_fidelity_minimal_syntax)
-    .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
-    .DeclarationParser_S)
-  (TypeParser : Full_fidelity_type_parser_type
-    .WithSyntax(Full_fidelity_minimal_syntax)
-    .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
-    .TypeParser_S) :
-  Full_fidelity_expression_parser_type
-    .WithSyntax(Full_fidelity_minimal_syntax)
-    .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
-    .ExpressionParser_S = struct
+  (StatementParser : StatementParser_S)
+  (DeclParser : DeclarationParser_S)
+  (TypeParser : TypeParser_S) :
+  ExpressionParser_S = struct
+
+  open TokenKind
+  open Syntax
 
   include PrecedenceParser
-  include Full_fidelity_parser_helpers.
-    MinimalParserHelper.WithParser(PrecedenceParser)
+  include ParserHelper.WithParser(PrecedenceParser)
 
   type binary_expression_prefix_kind =
     | Prefix_byref_assignment | Prefix_assignment | Prefix_none
@@ -460,7 +473,7 @@ module WithStatementAndDeclAndTypeParser
       match acc with
       | h :: t ->
         begin
-        match MinimalSyntax.get_token h with
+        match Syntax.get_token h with
         | None ->
           let k = Token.kind token in
           let token = match k with
@@ -655,12 +668,15 @@ module WithStatementAndDeclAndTypeParser
   and check_prefix_unary_expression t expected_kind operand_predicate =
     match syntax t with
     | PrefixUnaryExpression {
-        prefix_unary_operator = {
-          syntax = Token t
-        ; _ };
+        prefix_unary_operator;
         prefix_unary_operand
-      } when Token.kind t = expected_kind ->
+      } ->
+      begin
+      match syntax prefix_unary_operator with
+      | Token t when Token.kind t = expected_kind ->
         operand_predicate prefix_unary_operand
+      | _ -> false
+      end
     | _ -> false
 
   (* Checks if given expression is a PHP variable.
@@ -2289,3 +2305,4 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let result = make_scope_resolution_expression qualifier op name in
     (parser, result)
 end
+end (* WithSyntax *)

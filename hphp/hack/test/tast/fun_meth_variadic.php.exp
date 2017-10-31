@@ -12,7 +12,7 @@
       f_body =
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop]; fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = [] });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
   (AnnotatedAST.Fun
      { AnnotatedAST.f_mode = <opaque>;
        f_ret = (Some (<p>, (Hprim Tvoid)));
@@ -47,7 +47,7 @@
                 ))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = [] });
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
   (AnnotatedAST.Class
      { AnnotatedAST.c_mode = <opaque>; c_final = false; c_is_xhp = false;
        c_kind = Cnormal; c_name = (<p>, "\\C1");
@@ -72,7 +72,8 @@
              { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop];
                fnb_unsafe = false });
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some (<p>, (Hprim Tvoid))) }
+          m_ret = (Some (<p>, (Hprim Tvoid)));
+          m_ret_by_ref = false }
          ];
        c_user_attributes = []; c_enum = None })
   ]

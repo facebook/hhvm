@@ -12,7 +12,7 @@
       f_body =
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop]; fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = [] });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
   (AnnotatedAST.Fun
      { AnnotatedAST.f_mode = <opaque>;
        f_ret = (Some (<p>, (Hprim Tvoid)));
@@ -33,5 +33,5 @@
                     []))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = [] })
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

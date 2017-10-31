@@ -48,7 +48,8 @@
                                    ))
                                  ];
                                fnb_unsafe = false });
-                          f_fun_kind = FSync; f_user_attributes = [] },
+                          f_fun_kind = FSync; f_user_attributes = [];
+                          f_ret_by_ref = false },
                         [(<p>, $y)])))
                     ))));
              (AnnotatedAST.Expr
@@ -99,7 +100,8 @@
                                    ))
                                  ];
                                fnb_unsafe = false });
-                          f_fun_kind = FSync; f_user_attributes = [] },
+                          f_fun_kind = FSync; f_user_attributes = [];
+                          f_ret_by_ref = false },
                         [(<p>, $y)])))
                     ))));
              (AnnotatedAST.Expr
@@ -143,7 +145,8 @@
                                    ))
                                  ];
                                fnb_unsafe = false });
-                          f_fun_kind = FSync; f_user_attributes = [] },
+                          f_fun_kind = FSync; f_user_attributes = [];
+                          f_ret_by_ref = false },
                         [])))
                     ))));
              (AnnotatedAST.Expr
@@ -164,5 +167,5 @@
                     ))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = [] })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

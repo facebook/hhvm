@@ -107,6 +107,7 @@ struct
     T.f_fun_kind = fd.S.f_fun_kind;
     T.f_user_attributes =
     List.map fd.S.f_user_attributes (map_user_attribute f);
+    T.f_ret_by_ref = fd.S.f_ret_by_ref;
   }
 
   and map_user_attribute f ua =
@@ -244,6 +245,7 @@ struct
     T.m_fun_kind = m.S.m_fun_kind;
     T.m_user_attributes = List.map m.S.m_user_attributes (map_user_attribute f);
     T.m_ret = m.S.m_ret;
+    T.m_ret_by_ref = m.S.m_ret_by_ref;
   }
 
   and map_typedef f td = {

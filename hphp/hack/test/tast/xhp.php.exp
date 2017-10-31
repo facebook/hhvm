@@ -58,7 +58,7 @@
                     ))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = [] });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
   (AnnotatedAST.Class
      { AnnotatedAST.c_mode = <opaque>; c_final = false; c_is_xhp = true;
        c_kind = Cnormal; c_name = (<p>, "\\:foo");

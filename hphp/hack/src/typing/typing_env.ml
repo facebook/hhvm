@@ -94,6 +94,7 @@ let make_ft p is_coroutine params ret_ty =
     ft_where_constraints = [];
     ft_params   = params;
     ft_ret      = ret_ty;
+    ft_ret_by_ref = false;
   }
 
 let get_shape_field_name = function

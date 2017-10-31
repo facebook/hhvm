@@ -10,5 +10,5 @@
                [AnnotatedAST.Noop], [AnnotatedAST.Noop]))
              ];
            fnb_unsafe = true });
-      f_fun_kind = FSync; f_user_attributes = [] })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

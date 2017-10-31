@@ -1653,6 +1653,7 @@ module Make (GetLocals : GetLocals) = struct
       N.m_ret             = ret         ;
       N.m_variadic        = variadicity ;
       N.m_user_attributes = attrs;
+      N.m_ret_by_ref      = m.m_ret_by_ref;
     }
 
   and kind (final, abs, vis) = function
@@ -1746,6 +1747,7 @@ module Make (GetLocals : GetLocals) = struct
       f_fun_kind = f_kind;
       f_variadic = variadicity;
       f_user_attributes = user_attributes env f.f_user_attributes;
+      f_ret_by_ref = f.f_ret_by_ref;
     } in
     Naming_hooks.dispatch_fun_named_hook named_fun;
     named_fun
@@ -2441,6 +2443,7 @@ module Make (GetLocals : GetLocals) = struct
       f_fun_kind = f_kind;
       f_variadic = variadicity;
       f_user_attributes = user_attributes env f.f_user_attributes;
+      f_ret_by_ref = f.f_ret_by_ref;
     }
 
   and make_class_id env (p, x as cid) hl =

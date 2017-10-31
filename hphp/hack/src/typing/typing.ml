@@ -452,7 +452,8 @@ and fun_def tcopt f =
         T.f_body = T.NamedBody {
           T.fnb_nast = tb;
           T.fnb_unsafe = nb.fnb_unsafe;
-        }
+        };
+        T.f_ret_by_ref = f.f_ret_by_ref;
       },
       env
   ) in
@@ -1418,6 +1419,7 @@ and expr_
               ft_where_constraints = fty.ft_where_constraints;
               ft_params = fty.ft_params;
               ft_ret = fty.ft_ret;
+              ft_ret_by_ref = fty.ft_ret_by_ref;
             } in
             make_result env (T.Method_caller(pos_cname, meth_name))
               (reason, Tfun caller)
@@ -2156,8 +2158,8 @@ and anon_make tenv p f ft idl =
             T.fnb_unsafe = nb.fnb_unsafe;
           };
           T.f_params = t_params;
-
           T.f_variadic = T.FVnonVariadic; (* TODO TAST: Variadic efuns *)
+          T.f_ret_by_ref = f.f_ret_by_ref;
         } in
         let te = T.make_typed_expr p hret (T.Efun (tfun_, idl)) in
         env, te, hret
@@ -3015,6 +3017,7 @@ and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_
                 ft_where_constraints = [];
                 ft_params = List.map vars TUtils.default_fun_param;
                 ft_ret = tr;
+                ft_ret_by_ref = fty.ft_ret_by_ref;
               }
             ) in
             let containers = List.map vars (fun var ->
@@ -5606,6 +5609,7 @@ and method_def env m =
       T.fnb_nast = tb;
       T.fnb_unsafe = nb.fnb_unsafe;
     };
+    T.m_ret_by_ref = m.m_ret_by_ref;
   }
 
 and typedef_def tcopt typedef  =

@@ -402,4 +402,5 @@ module type S = sig
   val inout_annotation_missing : Pos.t -> Pos.t -> unit
   val inout_annotation_unexpected : Pos.t -> Pos.t -> unit
   val inoutness_mismatch : Pos.t -> Pos.t -> unit
+  val inout_params_ret_by_ref : Pos.t -> Pos.t -> unit
 end

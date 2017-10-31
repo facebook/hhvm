@@ -302,6 +302,7 @@ and fun_ = {
   f_body     : func_body;
   f_fun_kind : Ast.fun_kind;
   f_user_attributes : user_attribute list;
+  f_ret_by_ref : bool;
 }
 
 and func_body =
@@ -401,6 +402,7 @@ and method_ = {
   m_fun_kind        : Ast.fun_kind        ;
   m_user_attributes : user_attribute list ;
   m_ret             : hint option         ;
+  m_ret_by_ref      : bool                ;
 }
 
 and typedef = {

@@ -79,6 +79,7 @@ and hint_ p env = function
       ft_where_constraints = [];
       ft_params = paraml;
       ft_ret = ret;
+      ft_ret_by_ref = false;
     }
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->

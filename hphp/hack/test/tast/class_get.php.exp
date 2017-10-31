@@ -42,7 +42,8 @@
                 ];
               fnb_unsafe = false });
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some (<p>, (Hprim Tint))) }
+         m_ret = (Some (<p>, (Hprim Tint)));
+         m_ret_by_ref = false }
         ];
       c_methods = []; c_user_attributes = []; c_enum = None })
   ]

@@ -216,6 +216,7 @@ and fun_decl_in_env env f =
     ft_where_constraints = where_constraints;
     ft_params      = params;
     ft_ret         = ret_ty;
+    ft_ret_by_ref  = f.f_ret_by_ref;
   } in
   ft
 
@@ -710,6 +711,7 @@ and method_decl env m =
     ft_where_constraints = where_constraints;
     ft_params   = params;
     ft_ret      = ret;
+    ft_ret_by_ref = m.m_ret_by_ref;
   }
 
 and method_check_override opt ~is_static c m acc  =

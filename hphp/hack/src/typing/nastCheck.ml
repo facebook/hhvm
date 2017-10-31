@@ -356,13 +356,16 @@ and func env f named_body =
   List.iter f.f_tparams (tparam env);
   let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
   List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
-  if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes then begin
-    let inout = List.find f.f_params ~f:(
-      fun x -> x.param_callconv = Some Ast.Pinout) in
-    match inout with
-    | Some param -> Errors.inout_params_memoize p param.param_pos
+  let inout = List.find f.f_params ~f:(
+    fun x -> x.param_callconv = Some Ast.Pinout) in
+  (match inout with
+    | Some param ->
+      if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes
+      then Errors.inout_params_memoize p param.param_pos;
+      if f.f_ret_by_ref then Errors.inout_params_ret_by_ref p param.param_pos;
+      ()
     | _ -> ()
-  end;
+  );
   block env named_body.fnb_nast;
   CheckFunctionBody.block
     f.f_fun_kind
@@ -797,13 +800,16 @@ and method_ (env, is_static) m =
   let env = { env with tenv = tenv } in
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
   List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
-  if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes then begin
-    let inout = List.find m.m_params ~f:(
-      fun x -> x.param_callconv = Some Ast.Pinout) in
-    match inout with
-    | Some param -> Errors.inout_params_memoize p param.param_pos
+  let inout = List.find m.m_params ~f:(
+    fun x -> x.param_callconv = Some Ast.Pinout) in
+  (match inout with
+    | Some param ->
+      if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes
+      then Errors.inout_params_memoize p param.param_pos;
+      if m.m_ret_by_ref then Errors.inout_params_ret_by_ref p param.param_pos;
+      ()
     | _ -> ()
-  end;
+  );
   List.iter m.m_tparams (tparam env);
   block env named_body.fnb_nast;
   maybe hint env m.m_ret;

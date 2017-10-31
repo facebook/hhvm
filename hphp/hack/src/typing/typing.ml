@@ -1857,7 +1857,7 @@ and expr_
       let is_explicit_ret = Option.is_some f.f_ret in
       (* Is contextual inference switched on? *)
       let contextual_inference =
-        Env.is_strict env && TypecheckerOptions.experimental_feature_enabled
+        TypecheckerOptions.experimental_feature_enabled
           (Env.get_options env) TypecheckerOptions.experimental_contextual_inference in
       let check_body_under_known_params ?ret_ty ft =
         let (is_coroutine, anon) = anon_make env p f ft idl in
@@ -2228,7 +2228,7 @@ and check_expected_ty message env inferred_ty expected =
     env
   | Some (p, ur, expected_ty) ->
     let contextual_inference =
-      Env.is_strict env && TypecheckerOptions.experimental_feature_enabled
+      TypecheckerOptions.experimental_feature_enabled
         (Env.get_options env) TypecheckerOptions.experimental_contextual_inference in
     if contextual_inference
     then

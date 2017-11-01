@@ -90,7 +90,8 @@ NativeDataInfo* getNativeDataInfo(const StringData* name) {
  * NativeNode is a link in the NativeData sweep list for this ND block
  */
 ObjectData* nativeDataInstanceCtor(Class* cls) {
-  auto ndi = cls->getNativeDataInfo();
+  auto const ndi = cls->getNativeDataInfo();
+  assertx(ndi);
   size_t nativeDataSize = ndsize(ndi->sz);
   size_t nProps = cls->numDeclProperties();
   size_t size = ObjectData::sizeForNProps(nProps) + nativeDataSize;
@@ -102,9 +103,8 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   assert(type_scan::isKnownType(ndi->tyindex));
   node->initHeader_32_16(HeaderKind::NativeData, 0, ndi->tyindex);
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
-             ObjectData(cls);
+             ObjectData(cls, ndi->odattrs);
   assert(obj->hasExactlyOneRef());
-  obj->setAttribute(static_cast<ObjectData::Attribute>(ndi->odattrs));
   if (ndi->init) {
     ndi->init(obj);
   }
@@ -114,15 +114,32 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   return obj;
 }
 
-void nativeDataInstanceCopy(ObjectData* dest, ObjectData *src) {
-  auto ndi = dest->getVMClass()->getNativeDataInfo();
-  if (!ndi) return;
-  assert(ndi == src->getVMClass()->getNativeDataInfo());
+ObjectData* nativeDataInstanceCopyCtor(ObjectData* src, Class* cls,
+                                       size_t nProps) {
+  auto const ndi = cls->getNativeDataInfo();
+  assertx(ndi);
   if (!ndi->copy) {
     throw_not_implemented("NativeDataInfoCopy");
   }
-  ndi->copy(dest, src);
-  // Already in the sweep list from init call, no need to add again
+  auto nativeDataSize = getNativeNode(src, ndi)->obj_offset;
+
+  auto node = reinterpret_cast<NativeNode*>(
+    tl_heap->objMalloc(ObjectData::sizeForNProps(nProps) + nativeDataSize)
+  );
+  node->obj_offset = nativeDataSize;
+  assert(type_scan::isKnownType(ndi->tyindex));
+  node->initHeader_32_16(HeaderKind::NativeData, 0, ndi->tyindex);
+  auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
+             ObjectData(cls, ndi->odattrs);
+  assert(obj->hasExactlyOneRef());
+  if (ndi->init) {
+    ndi->init(obj);
+  }
+  ndi->copy(obj, src);
+  if (ndi->sweep) {
+    tl_heap->addNativeObject(node);
+  }
+  return obj;
 }
 
 void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {

@@ -787,16 +787,12 @@ ObjectData* ObjectData::clone() {
   Object clone;
   auto const nProps = m_cls->numDeclProperties();
   if (getAttribute(HasNativeData)) {
-    if (instanceof(Generator::getClass())) {
-      clone = Object::attach(Generator::allocClone(this));
-    } else {
-      auto const ctor = m_cls->instanceCtor();
-      clone = Object::attach(ctor(m_cls));
-    }
+    assertx(m_cls->instanceCtor() == Native::nativeDataInstanceCtor);
+    clone = Object::attach(
+      Native::nativeDataInstanceCopyCtor(this, m_cls, nProps)
+    );
     assertx(clone->hasExactlyOneRef());
     assertx(clone->hasInstanceDtor());
-
-    Native::nativeDataInstanceCopy(clone.get(), this);
   } else {
     auto const size = sizeForNProps(nProps);
     auto const obj = new (tl_heap->objMalloc(size)) ObjectData(m_cls);

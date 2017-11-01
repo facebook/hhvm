@@ -265,7 +265,8 @@ inline const ObjectData* obj(const NativeNode* node) {
 }
 
 ObjectData* nativeDataInstanceCtor(Class* cls);
-void nativeDataInstanceCopy(ObjectData* dest, ObjectData *src);
+ObjectData* nativeDataInstanceCopyCtor(ObjectData *src, Class* cls,
+                                       size_t nProps);
 void nativeDataInstanceDtor(ObjectData* obj, const Class* cls);
 
 Variant nativeDataSleep(const ObjectData* obj);

@@ -186,16 +186,6 @@ struct Generator final : BaseGenerator {
   static Generator* fromObject(ObjectData *obj) {
     return Native::data<Generator>(obj);
   }
-  static ObjectData* allocClone(ObjectData *obj) {
-    auto const genDataSz = Native::getNativeNode(
-                             obj, getClass()->getNativeDataInfo())->obj_offset;
-    auto const clone = BaseGenerator::Alloc<Generator>(
-        getClass(), genDataSz + sizeof(ObjectData)
-    );
-    UNUSED auto const genData = new (Native::data<Generator>(clone))
-                                Generator();
-    return clone;
-  }
 
   void yield(Offset resumeOffset, const Cell* key, Cell value);
   void copyVars(const ActRec *fp);

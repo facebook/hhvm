@@ -24,6 +24,28 @@ let has_valid_access_modifiers kind_list =
   (* Either only one modifier or none *)
   count_of_modifiers <= 1
 
+let rec hint_uses_tparams tparam_names (_, hint)  =
+  match hint with
+  | Ast.Hsoft h  | Ast.Hoption h ->
+    hint_uses_tparams tparam_names h
+  | Ast.Hfun (_, ps, _, r) ->
+    List.exists ps ~f:(hint_uses_tparams tparam_names) ||
+    hint_uses_tparams tparam_names r
+  | Ast.Htuple ts ->
+    List.exists ts ~f:(hint_uses_tparams tparam_names)
+  | Ast.Happly ((_, h), ts) ->
+    SSet.mem h tparam_names ||
+    List.exists ts ~f:(hint_uses_tparams tparam_names)
+  | Ast.Hshape { Ast.si_shape_field_list = _l; _ } ->
+    (* HHVM currenly does not report errors if constructor type parameter
+       is captured in shape field type annotation *)
+    (*
+    List.exists l ~f:(fun { Ast.sf_hint = h; _ } ->
+      hint_uses_tparams tparam_names h)
+    *)
+    false
+  | Ast.Haccess ((_, n), _, _) -> SSet.mem n tparam_names
+
 let from_ast_wrapper : bool -> _ ->
   Ast.class_ -> Ast.method_ -> Hhas_method.t =
   fun privatize make_name ast_class ast_method ->
@@ -82,6 +104,10 @@ let from_ast_wrapper : bool -> _ ->
   if has_param_promotion then
     if original_name = Naming_special_names.Members.__construct
     then begin
+      let tparam_names =
+        List.fold_left ast_method.Ast.m_tparams
+          ~init:SSet.empty
+          ~f:(fun acc (_, (_, n), _) -> SSet.add n acc) in
       List.iter ast_method.Ast.m_params (fun p ->
         if List.length (
           List.filter ast_class.Ast.c_body
@@ -91,17 +117,24 @@ let from_ast_wrapper : bool -> _ ->
                  snd id = SU.Locals.strip_dollar (snd p.Ast.param_id))
            | _ -> false)) > 1
         then Emit_fatal.raise_fatal_parse pos
-          (Printf.sprintf "Cannot redeclare %s::%s" class_name (snd p.Ast.param_id)));
+          (Printf.sprintf "Cannot redeclare %s::%s" class_name (snd p.Ast.param_id));
+        (* Disallow method type parameters to be used as type annotations
+           on promoted parameters *)
+        (* TODO: move to parser errors *)
+        if Option.is_some p.Ast.param_modifier
+        then match p.Ast.param_hint with
+        | Some h when hint_uses_tparams tparam_names h ->
+          Emit_fatal.raise_fatal_parse pos
+            "parameter modifiers not supported with type variable annotation"
+        | _ -> ());
+
       if ast_class.Ast.c_kind = Ast.Cinterface || ast_class.Ast.c_kind = Ast.Ctrait
       then Emit_fatal.raise_fatal_parse pos
         "Constructor parameter promotion not allowed on traits or interfaces";
       if List.mem ast_method.Ast.m_kind Ast.Abstract
       then Emit_fatal.raise_fatal_parse pos
         "parameter modifiers not allowed on abstract __construct";
-      if not (List.is_empty ast_method.Ast.m_tparams)
-      then Emit_fatal.raise_fatal_parse pos
-        "parameter modifiers not supported with type variable annotation"
-        end
+      end
     else
       (* not in __construct *)
       Emit_fatal.raise_fatal_parse

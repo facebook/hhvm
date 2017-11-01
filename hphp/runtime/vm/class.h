@@ -1287,6 +1287,8 @@ private:
 
   friend struct collections::CollectionsExtension;
 
+  friend struct StandardExtension;
+
   RequirementMap m_requirements;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
   uint32_t m_numDeclInterfaces{0};

@@ -155,7 +155,6 @@ struct PreClassEmitter {
 
 
 
-  void setClosurePreClass();
   void init(int line1, int line2, Offset offset, Attr attrs,
             const StringData* parent, const StringData* docComment);
 
@@ -260,8 +259,6 @@ struct PreClassEmitter {
   TypeConstraint m_enumBaseTy;
   Id m_id;
   PreClass::Hoistable m_hoistable;
-  BuiltinCtorFunction m_instanceCtor{nullptr};
-  BuiltinDtorFunction m_instanceDtor{nullptr};
   int32_t m_numDeclMethods{-1};
   Slot m_ifaceVtableSlot{kInvalidSlot};
   int m_memoizeInstanceSerial{0};

@@ -20,7 +20,6 @@
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
@@ -352,12 +351,6 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
   tl_heap->objFree(hdr, hdr->size());
 }
 
-void PreClassEmitter::setClosurePreClass() {
-  m_instanceCtor = RuntimeOption::RepoAuthoritative ?
-    closureInstanceCtorRepoAuth : closureInstanceCtor;
-  m_instanceDtor = closureInstanceDtor;
-}
-
 void StandardExtension::loadClosure() {
   HHVM_ME(Closure, __debugInfo);
   HHVM_ME(Closure, bindto);
@@ -367,6 +360,11 @@ void StandardExtension::loadClosure() {
 void StandardExtension::initClosure() {
   c_Closure::cls_Closure = Unit::lookupClass(s_Closure.get());
   assertx(c_Closure::cls_Closure);
+  c_Closure::cls_Closure->allocExtraData();
+  c_Closure::cls_Closure->m_extra.raw()->m_instanceCtor =
+    RuntimeOption::RepoAuthoritative
+      ? closureInstanceCtorRepoAuth : closureInstanceCtor;
+  c_Closure::cls_Closure->m_extra.raw()->m_instanceDtor = closureInstanceDtor;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

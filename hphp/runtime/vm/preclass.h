@@ -323,12 +323,6 @@ public:
   const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
 
   /*
-   * Extension builtin classes have custom creation and destruction routines.
-   */
-  BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
-  BuiltinDtorFunction instanceDtor() const { return m_instanceDtor; }
-
-  /*
    * Accessors for vectory data.
    */
   const InterfaceVec& interfaces()           const { return m_interfaces; }
@@ -442,8 +436,6 @@ private:
   int32_t m_numDeclMethods;
   Slot m_ifaceVtableSlot{kInvalidSlot};
   TypeConstraint m_enumBaseTy;
-  BuiltinCtorFunction m_instanceCtor{nullptr};
-  BuiltinDtorFunction m_instanceDtor{nullptr};
   InterfaceVec m_interfaces;
   UsedTraitVec m_usedTraits;
   ClassRequirementsVec m_requirements;

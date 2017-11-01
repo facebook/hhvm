@@ -1348,11 +1348,7 @@ void Class::setParent() {
   }
 
   // Handle stuff specific to cppext classes
-  if (m_preClass->instanceCtor()) {
-    allocExtraData();
-    m_extra.raw()->m_instanceCtor = m_preClass->instanceCtor();
-    m_extra.raw()->m_instanceDtor = m_preClass->instanceDtor();
-  } else if (m_parent.get() && m_parent->m_extra->m_instanceCtor) {
+  if (m_parent.get() && m_parent->m_extra->m_instanceCtor) {
     allocExtraData();
     m_extra.raw()->m_instanceCtor = m_parent->m_extra->m_instanceCtor;
     m_extra.raw()->m_instanceDtor = m_parent->m_extra->m_instanceDtor;

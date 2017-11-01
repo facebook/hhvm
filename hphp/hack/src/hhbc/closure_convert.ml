@@ -773,6 +773,15 @@ and convert_class_elt env st ce =
     let st, iel = List.map_env st iel (convert_class_const env) in
     st, Const (ho, iel)
 
+  | XhpAttr (h, c, v, es) ->
+    let st, c = convert_class_var env st c in
+    let st, es =
+      match es with
+      | None -> st, es
+      | Some (p, es) ->
+        let st, es = convert_exprs env st es in
+        st, Some (p, es) in
+    st, XhpAttr (h, c, v, es)
   | _ ->
     st, ce
 

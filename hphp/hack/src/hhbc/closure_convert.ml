@@ -154,15 +154,19 @@ let env_with_longlambda env is_static fd =
 
 let strip_id id = SU.strip_global_ns (snd id)
 
-let rec make_scope_name scope =
+let rec make_scope_name ns scope =
   match scope with
-  | [] -> ""
+  | [] ->
+    begin match ns.Namespace_env.ns_name with
+    | None -> ""
+    | Some n -> n ^ "\\"
+    end
   | ScopeItem.Function fd :: _ -> strip_id fd.f_name
   | ScopeItem.Method md :: scope ->
-    make_scope_name scope ^ "::" ^ strip_id md.m_name
+    make_scope_name ns scope ^ "::" ^ strip_id md.m_name
   | ScopeItem.Class cd :: _ ->
     SU.Xhp.mangle_id (strip_id cd.c_name)
-  | _ :: scope -> make_scope_name scope
+  | _ :: scope -> make_scope_name ns scope
 
 let env_with_function env fd =
   env_with_function_like env (ScopeItem.Function fd) ~is_closure_body:false fd
@@ -228,7 +232,7 @@ let add_class env st cd =
 
 let make_closure_name total_count env st =
   SU.Closures.mangle_closure
-    (make_scope_name env.scope) st.per_function_count total_count
+    (make_scope_name st.namespace env.scope) st.per_function_count total_count
 
 let make_closure ~class_num
   p total_count env st lambda_vars tparams fd body =

@@ -18,8 +18,8 @@
  *)
 
 module SourceText = Full_fidelity_source_text
-module Parser = Full_fidelity_parser
 module Env = Full_fidelity_parser_env
+module Parser = Minimal_parser
 module SyntaxError = Full_fidelity_syntax_error
 module TK = Full_fidelity_token_kind
 open Full_fidelity_minimal_syntax

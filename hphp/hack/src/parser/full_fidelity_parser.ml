@@ -8,44 +8,56 @@
  *
  *)
 
-[@@@ocaml.warning "-60"] (* https://caml.inria.fr/mantis/view.php?id=7522 *)
-module Lexer = Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token)
-module SyntaxError = Full_fidelity_syntax_error
 module Env = Full_fidelity_parser_env
+
+
+[@@@ocaml.warning "-60"] (* https://caml.inria.fr/mantis/view.php?id=7522 *)
+module WithSyntax(Syntax : Syntax_sig.Syntax_S)
+: sig
+  type t
+  val make : Env.t -> Full_fidelity_source_text.t -> t
+  val errors : t -> Full_fidelity_syntax_error.t list
+  val env : t -> Env.t
+  val parse_script : t -> t * Syntax.t
+end
+ = struct
+
+module Lexer = Full_fidelity_lexer.WithToken(Syntax.Token)
+module SyntaxError = Full_fidelity_syntax_error
 module Context =
-  Full_fidelity_parser_context.WithToken(Full_fidelity_minimal_token)
+  Full_fidelity_parser_context.WithToken(Syntax.Token)
 
 module type ExpressionParser_S = Full_fidelity_expression_parser_type
-  .WithSyntax(Full_fidelity_minimal_syntax)
-  .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+  .WithSyntax(Syntax)
+  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
   .ExpressionParser_S
 
 module ExpressionParserSyntax =
-  Full_fidelity_expression_parser.WithSyntax(Full_fidelity_minimal_syntax)
+  Full_fidelity_expression_parser.WithSyntax(Syntax)
 
 module type StatementParser_S = Full_fidelity_statement_parser_type
-  .WithSyntax(Full_fidelity_minimal_syntax)
-  .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+  .WithSyntax(Syntax)
+  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
   .StatementParser_S
 
 module StatementParserSyntax =
-  Full_fidelity_statement_parser.WithSyntax(Full_fidelity_minimal_syntax)
+  Full_fidelity_statement_parser.WithSyntax(Syntax)
 
 module type DeclarationParser_S = Full_fidelity_declaration_parser_type
-  .WithSyntax(Full_fidelity_minimal_syntax)
-  .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+  .WithSyntax(Syntax)
+  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
   .DeclarationParser_S
 
 module DeclarationParserSyntax =
-  Full_fidelity_declaration_parser.WithSyntax(Full_fidelity_minimal_syntax)
+  Full_fidelity_declaration_parser.WithSyntax(Syntax)
 
 module type TypeParser_S = Full_fidelity_type_parser_type
-  .WithSyntax(Full_fidelity_minimal_syntax)
-  .WithLexer(Full_fidelity_lexer.WithToken(Full_fidelity_minimal_token))
+  .WithSyntax(Syntax)
+  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
   .TypeParser_S
 
 module TypeParserSyntax =
-  Full_fidelity_type_parser.WithSyntax(Full_fidelity_minimal_syntax)
+  Full_fidelity_type_parser.WithSyntax(Syntax)
 
 module rec ExpressionParser : ExpressionParser_S =
   ExpressionParserSyntax.WithStatementAndDeclAndTypeParser
@@ -86,3 +98,5 @@ let parse_script parser =
   let errors = DeclParser.errors decl_parser in
   let parser = { parser with lexer; errors } in
   (parser, node)
+
+end (* WithSyntax *)

@@ -212,17 +212,16 @@ void ClosureExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
     analyzeVarsForClosureExpression(ar);
   }
 
+  if (!sameScope || m_func->getModifiers()->isStatic()) return;
   auto const funcScope = getFunctionScope();
-  if (!m_func->getModifiers()->isStatic()) {
-    auto const container = funcScope->getContainingNonClosureFunction();
-    if (container && container->isStatic()) {
-      if (sameScope) m_func->getModifiers()->add(T_STATIC);
-    } else {
-      auto const closureFuncScope = m_func->getFunctionScope();
-      if (m_type != ClosureType::Short ||
-          closureFuncScope->containsThis()) {
-        funcScope->setContainsThis();
-      }
+  auto const container = funcScope->getContainingNonClosureFunction();
+  if (container && container->isStatic()) {
+    m_func->getModifiers()->add(T_STATIC);
+  } else {
+    auto const closureFuncScope = m_func->getFunctionScope();
+    if (m_type != ClosureType::Short ||
+        closureFuncScope->containsThis()) {
+      funcScope->setContainsThis();
     }
   }
 }

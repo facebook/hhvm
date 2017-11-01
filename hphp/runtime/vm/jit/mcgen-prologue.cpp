@@ -26,6 +26,8 @@
 #include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/runtime/vm/resumable.h"
+
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(mcg);
@@ -124,7 +126,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
     if (paramInfo.hasDefaultValue()) {
       bool ret = false;
       auto genPrologue = [&] (bool hasThis) {
-        SrcKey funcletSK(func, paramInfo.funcletOff, false, hasThis);
+        SrcKey funcletSK(func, paramInfo.funcletOff, ResumeMode::None, hasThis);
         if (profData()->optimized(funcletSK)) return;
         auto funcletTransId = profData()->dvFuncletTransId(funcletSK);
         if (funcletTransId == kInvalidTransID) return;
@@ -188,7 +190,7 @@ bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
     func->past() - func->base() <= RuntimeOption::EvalJitPGOMaxFuncSizeDupBody;
 
   auto funcBodySk = [&] (bool hasThis) {
-    return SrcKey{func, func->base(), false, hasThis};
+    return SrcKey{func, func->base(), ResumeMode::None, hasThis};
   };
   if (!includedBody) {
     withThis(func,

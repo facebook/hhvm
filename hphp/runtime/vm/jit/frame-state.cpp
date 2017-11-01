@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/resumable.h"
 
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
@@ -1090,7 +1091,7 @@ void FrameStateMgr::collectPostConds(Block* block) {
   if (sp() != nullptr) {
     auto const& lastInst = block->back();
     auto const bcSPOff = lastInst.marker().spOff();
-    auto const resumed = lastInst.marker().resumed();
+    auto const resumed = lastInst.marker().resumeMode() != ResumeMode::None;
     auto const skipCells = FPInvOffset{resumed ? 0 : func()->numSlotsInFrame()};
     auto const evalStkCells = bcSPOff - skipCells;
 

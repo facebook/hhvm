@@ -89,7 +89,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
       auto const start  = unit->offsetOf(b->start);
       auto const length = numInstrs(b->start, b->end);
-      SrcKey sk{context.func, start, context.resumed, context.hasThis};
+      SrcKey sk{context.func, start, context.resumeMode, context.hasThis};
       auto const rblock = ret->addBlock(sk, length, spOffset);
       blockMap[b] = rblock->id();
       // flag SP offset as unknown for all but the first block

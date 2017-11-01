@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/service-data.h"
@@ -359,8 +360,8 @@ SrcRec* findSrcRec(SrcKey sk) {
 void createSrcRec(SrcKey sk, FPInvOffset spOff) {
   if (srcDB().find(sk)) return;
 
-  auto const srcRecSPOff = sk.resumed() ? folly::none
-                                        : folly::make_optional(spOff);
+  auto const srcRecSPOff = sk.resumeMode() != ResumeMode::None
+    ? folly::none : folly::make_optional(spOff);
 
   // We put retranslate requests at the end of our slab to more frequently
   // allow conditional jump fall-throughs

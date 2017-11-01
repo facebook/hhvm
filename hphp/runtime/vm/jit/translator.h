@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/location.h"
@@ -128,7 +129,7 @@ struct TransContext {
   Offset initBcOffset;
   bool hasThis;
   bool prologue;
-  bool resumed;
+  ResumeMode resumeMode;
 };
 
 

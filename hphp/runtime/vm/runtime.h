@@ -20,10 +20,12 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-refcount.h"
 

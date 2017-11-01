@@ -169,13 +169,13 @@ std::string TransRec::print() const {
     "  src.md5 = {}\n"
     "  src.funcId = {}\n"
     "  src.funcName = {}\n"
-    "  src.resumed = {}\n"
+    "  src.resumeMode = {}\n"
     "  src.hasThis = {}\n"
     "  src.bcStart = {}\n"
     "  src.blocks = {}\n",
     id, md5, src.funcID(),
     funcName.empty() ? "Pseudo-main" : funcName,
-    (int32_t)src.resumed(),
+    (int32_t)src.resumeMode(),
     (int32_t)src.hasThis(),
     src.offset(),
     blocks.size());

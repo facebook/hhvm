@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -48,7 +49,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
   if (!realCode) return;  // No translations, nothing to do.
 
   auto const dbgGuard = vwrap(cb, data, fixups, [&] (Vout& v) {
-    if (!sk.resumed()) {
+    if (sk.resumeMode() == ResumeMode::None) {
       auto const off = sr->nonResumedSPOff();
       v << lea{rvmfp()[-cellsToBytes(off.offset)], rvmsp()};
     }
@@ -126,8 +127,8 @@ bool addDbgGuards(const Unit* unit) {
 }
 
 bool addDbgGuardHelper(const Func* func, Offset offset,
-                       bool resumed, bool hasThis) {
-  SrcKey sk{func, offset, resumed, hasThis};
+                       ResumeMode resumeMode, bool hasThis) {
+  SrcKey sk{func, offset, resumeMode, hasThis};
   if (auto const sr = srcDB().find(sk)) {
     if (sr->hasDebuggerGuard()) {
       return true;
@@ -155,10 +156,10 @@ bool addDbgGuardHelper(const Func* func, Offset offset,
   return true;
 }
 
-bool addDbgGuard(const Func* func, Offset offset, bool resumed) {
-  auto const ret = addDbgGuardHelper(func, offset, resumed, false);
+bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode) {
+  auto const ret = addDbgGuardHelper(func, offset, resumeMode, false);
   if (!ret || !func->cls() || func->isStatic()) return ret;
-  return addDbgGuardHelper(func, offset, resumed, true);
+  return addDbgGuardHelper(func, offset, resumeMode, true);
 }
 
 }}}

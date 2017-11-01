@@ -121,7 +121,7 @@ TransCFG::TransCFG(FuncId funcId,
                              postConds.refined.end());
         auto const predSK = predRec->srcKey();
         if (preCondsAreSatisfied(dstBlock, predPostConds) &&
-            predSK.resumed() == dstSK.resumed()) {
+            predSK.resumeMode() == dstSK.resumeMode()) {
           FTRACE(5, "TransCFG: adding arc {} -> {} ({} -> {})\n",
                  predId, dstId, showShort(predSK), showShort(dstSK));
           addArc(predId, dstId, TransCFG::Arc::kUnknownWeight);

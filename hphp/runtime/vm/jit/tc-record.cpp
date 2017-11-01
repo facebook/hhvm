@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -296,7 +297,8 @@ static void logFrame(const Vunit& unit, const size_t frame) {
   ent.setStr("trans_kind", show(unit.context->kind));
   ent.setStr("prologue", unit.context->prologue ? "true" : "false");
   ent.setStr("has_this", unit.context->hasThis ? "true" : "false");
-  ent.setStr("resumed", unit.context->resumed ? "true" : "false");
+  ent.setStr("resumed", unit.context->resumeMode != ResumeMode::None
+                        ? "true" : "false");
 
   logFunc(func, ent);
 

@@ -39,7 +39,7 @@ std::string show(SrcKey sk) {
                         func->isPseudoMain() ? "pseudoMain"
                                              : func->fullName()->data(),
                         (uint32_t)sk.funcID(), sk.offset(),
-                        sk.resumed()  ? "r" : "",
+                        resumeModeShortName(sk.resumeMode()),
                         sk.hasThis()  ? "t" : "",
                         sk.prologue() ? "p" : "");
 }
@@ -51,7 +51,7 @@ std::string showShort(SrcKey sk) {
     sk.func()->fullName(),
     sk.funcID(),
     sk.offset(),
-    sk.resumed()  ? "r" : "",
+    resumeModeShortName(sk.resumeMode()),
     sk.hasThis()  ? "t" : "",
     sk.prologue() ? "p" : ""
   );

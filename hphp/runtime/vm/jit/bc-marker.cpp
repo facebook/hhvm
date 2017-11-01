@@ -20,6 +20,7 @@
 #include <folly/Conv.h>
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 namespace HPHP { namespace jit {
@@ -31,7 +32,7 @@ std::string BCMarker::show() const {
   return folly::format(
     "--- bc {}{}{}{}, fp {}, spOff {} ({}){}",
     m_sk.offset(),
-    m_sk.resumed()  ? "r" : "",
+    resumeModeShortName(m_sk.resumeMode()),
     m_sk.hasThis()  ? "t" : "",
     m_sk.prologue() ? "p" : "",
     m_fp ? folly::to<std::string>(m_fp->id()) : "_",

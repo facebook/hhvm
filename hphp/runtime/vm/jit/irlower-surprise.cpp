@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/resumable.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
@@ -70,7 +71,7 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
 void cgCheckSurpriseFlags(IRLS& env, const IRInstruction* inst) {
   // This is not a correctness assertion, but we want to know if we get it
   // wrong because it'll be a subtle perf bug:
-  if (inst->marker().resumed()) {
+  if (inst->marker().resumeMode() != ResumeMode::None) {
     assertx(inst->src(0)->isA(TStkPtr));
   } else {
     assertx(inst->src(0)->isA(TFramePtr));

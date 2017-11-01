@@ -24,36 +24,34 @@ inline SrcKey::SrcKey()
   : m_funcID{InvalidFuncId}
   , m_offset{0}
   , m_hasThis{false}
-  , m_prologue{false}
-  , m_resumed{false}
+  , m_resumeModeAndPrologue{encodeResumeMode(ResumeMode::None)}
 {}
 
-inline SrcKey::SrcKey(const Func* f, Offset off, bool resumed, bool hasThis)
+inline SrcKey::SrcKey(const Func* f, Offset off, ResumeMode resumeMode,
+                      bool hasThis)
   : m_funcID{f->getFuncId()}
   , m_offset{(uint32_t)off}
   , m_hasThis{hasThis}
-  , m_prologue{false}
-  , m_resumed{resumed}
+  , m_resumeModeAndPrologue{encodeResumeMode(resumeMode)}
 {
   assert((uint32_t)off >> 31 == 0);
 }
 
-inline SrcKey::SrcKey(const Func* f, PC pc, bool resumed, bool hasThis)
+inline SrcKey::SrcKey(const Func* f, PC pc, ResumeMode resumeMode, bool hasThis)
   : m_funcID{f->getFuncId()}
   , m_offset{(uint32_t)f->unit()->offsetOf(pc)}
   , m_hasThis{hasThis}
-  , m_prologue{false}
-  , m_resumed{resumed}
+  , m_resumeModeAndPrologue{encodeResumeMode(resumeMode)}
 {
   assert((uint32_t)f->unit()->offsetOf(pc) >> 31 == 0);
 }
 
-inline SrcKey::SrcKey(FuncId funcId, Offset off, bool resumed, bool hasThis)
+inline SrcKey::SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode,
+                      bool hasThis)
   : m_funcID{funcId}
   , m_offset{(uint32_t)off}
   , m_hasThis{hasThis}
-  , m_prologue{false}
-  , m_resumed{resumed}
+  , m_resumeModeAndPrologue{encodeResumeMode(resumeMode)}
 {
   assert((uint32_t)off >> 31 == 0);
 }
@@ -62,8 +60,7 @@ inline SrcKey::SrcKey(const Func* f, Offset off, PrologueTag)
   : m_funcID{f->getFuncId()}
   , m_offset{(uint32_t)off}
   , m_hasThis{false}
-  , m_prologue{true}
-  , m_resumed{false}
+  , m_resumeModeAndPrologue{encodePrologue()}
 {
   assert((uint32_t)off >> 31 == 0);
 }
@@ -72,8 +69,7 @@ inline SrcKey::SrcKey(const Func* f, PC pc, PrologueTag)
   : m_funcID{f->getFuncId()}
   , m_offset{(uint32_t)f->unit()->offsetOf(pc)}
   , m_hasThis{false}
-  , m_prologue{true}
-  , m_resumed{false}
+  , m_resumeModeAndPrologue{encodePrologue()}
 {
   assert((uint32_t)f->unit()->offsetOf(pc) >> 31 == 0);
 }
@@ -82,8 +78,7 @@ inline SrcKey::SrcKey(FuncId funcId, Offset off, PrologueTag)
   : m_funcID{funcId}
   , m_offset{(uint32_t)off}
   , m_hasThis{false}
-  , m_prologue{true}
-  , m_resumed{false}
+  , m_resumeModeAndPrologue{encodePrologue()}
 {
   assert((uint32_t)off >> 31 == 0);
 }
@@ -92,8 +87,7 @@ inline SrcKey::SrcKey(SrcKey other, Offset off)
   : m_funcID{other.funcID()}
   , m_offset{(uint32_t)off}
   , m_hasThis{other.hasThis()}
-  , m_prologue{other.prologue()}
-  , m_resumed{other.resumed()}
+  , m_resumeModeAndPrologue{other.m_resumeModeAndPrologue}
 {
   assert((uint32_t)off >> 31 == 0);
 }
@@ -130,11 +124,20 @@ inline bool SrcKey::hasThis() const {
 }
 
 inline bool SrcKey::prologue() const {
-  return m_prologue;
+  return m_resumeModeAndPrologue == 3;
 }
 
-inline bool SrcKey::resumed() const {
-  return m_resumed;
+inline ResumeMode SrcKey::resumeMode() const {
+  return prologue() ? ResumeMode::None : (ResumeMode)m_resumeModeAndPrologue;
+}
+
+inline uint32_t SrcKey::encodePrologue() {
+  return 3;
+}
+
+inline uint32_t SrcKey::encodeResumeMode(ResumeMode resumeMode) {
+  assertx((uint8_t)resumeMode < 3);
+  return (uint8_t)resumeMode;
 }
 
 inline const Func* SrcKey::func() const {

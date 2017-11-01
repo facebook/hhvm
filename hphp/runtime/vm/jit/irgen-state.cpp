@@ -18,6 +18,7 @@
 #include <sstream>
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/resumable.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -59,7 +60,7 @@ std::string show(const IRGS& irgs) {
     out << folly::format("+{:-^102}+\n", str);
   };
 
-  const int32_t frameCells = resumed(irgs)
+  const int32_t frameCells = resumeMode(irgs) != ResumeMode::None
     ? 0
     : curFunc(irgs)->numSlotsInFrame();
   auto const stackDepth = irgs.irb->fs().bcSPOff().offset - frameCells;

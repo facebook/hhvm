@@ -29,6 +29,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/map-walker.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -158,8 +159,8 @@ RegionDesc::Block* RegionDesc::addBlock(SrcKey      sk,
                                         int         length,
                                         FPInvOffset spOffset) {
   m_blocks.push_back(
-    std::make_shared<Block>(sk.func(), sk.resumed(), sk.hasThis(), sk.offset(),
-                            length, spOffset));
+    std::make_shared<Block>(sk.func(), sk.resumeMode(), sk.hasThis(),
+                            sk.offset(), length, spOffset));
   BlockPtr block = m_blocks.back();
   m_data[block->id()] = BlockData(block);
   return block.get();
@@ -584,14 +585,14 @@ bool hasTransID(RegionDesc::BlockId blockId) {
 }
 
 RegionDesc::Block::Block(const Func* func,
-                         bool        resumed,
+                         ResumeMode  resumeMode,
                          bool        hasThis,
                          Offset      start,
                          int         length,
                          FPInvOffset initSpOff)
   : m_id(s_nextId.fetch_sub(1, std::memory_order_relaxed))
   , m_func(func)
-  , m_resumed(resumed)
+  , m_resumeMode(resumeMode)
   , m_hasThis(hasThis)
   , m_start(start)
   , m_last(kInvalidOffset)
@@ -601,7 +602,7 @@ RegionDesc::Block::Block(const Func* func,
 {
   assertx(length >= 0);
   if (length > 0) {
-    SrcKey sk(func, start, resumed, hasThis);
+    SrcKey sk(func, start, resumeMode, hasThis);
     for (unsigned i = 1; i < length; ++i) sk.advance();
     m_last = sk.offset();
   }
@@ -927,7 +928,7 @@ bool breaksRegion(SrcKey sk) {
       // We break regions at resumed Await/FCallAwait instructions, to avoid
       // duplicating the translation of the resumed SrcKey after the
       // Await.
-      return sk.resumed();
+      return sk.resumeMode() == ResumeMode::Async;
 
     default:
       return false;
@@ -1204,7 +1205,7 @@ std::string show(RegionContext::PreLiveAR ar) {
 std::string show(const RegionContext& ctx) {
   std::string ret;
   folly::toAppend(ctx.func->fullName()->data(), "@", ctx.bcOffset,
-                  ctx.resumed ? "r" : "", "\n", &ret);
+                  resumeModeShortName(ctx.resumeMode), "\n", &ret);
   for (auto& t : ctx.liveTypes) folly::toAppend(" ", show(t), "\n", &ret);
   for (auto& ar : ctx.preLiveARs) folly::toAppend(" ", show(ar), "\n", &ret);
 
@@ -1215,7 +1216,7 @@ std::string show(const RegionDesc::Block& b) {
   std::string ret{"Block "};
   folly::toAppend(b.id(), ' ',
                   b.func()->fullName()->data(), '@', b.start().offset(),
-                  b.start().resumed() ? "r" : "",
+                  resumeModeShortName(b.start().resumeMode()),
                   " length ", b.length(),
                   " initSpOff ", b.initialSpOffset().offset,
                   " profTransID ", b.profTransID(),

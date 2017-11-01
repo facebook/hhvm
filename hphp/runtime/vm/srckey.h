@@ -17,6 +17,7 @@
 #define incl_HPHP_SRCKEY_H_
 
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/resumable.h"
 
 #include <boost/operators.hpp>
 
@@ -48,7 +49,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    * Used for SrcKeys corresponding to the prologue which precedes a function
    * entry source location.
    *
-   * Used disjointly from the `resumed' flag.
+   * Used disjointly from the `resumeMode'.
    */
   enum class PrologueTag {};
 
@@ -59,9 +60,9 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    */
   SrcKey();
 
-  SrcKey(const Func* f, Offset off, bool resumed, bool hasThis);
-  SrcKey(const Func* f, PC pc, bool resumed, bool hasThis);
-  SrcKey(FuncId funcId, Offset off, bool resumed, bool hasThis);
+  SrcKey(const Func* f, Offset off, ResumeMode resumeMode, bool hasThis);
+  SrcKey(const Func* f, PC pc, ResumeMode resumeMode, bool hasThis);
+  SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode, bool hasThis);
 
   SrcKey(const Func* f, Offset off, PrologueTag);
   SrcKey(const Func* f, PC pc, PrologueTag);
@@ -93,7 +94,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   FuncId funcID() const;
   int offset() const;
   bool prologue() const;
-  bool resumed() const;
+  ResumeMode resumeMode() const;
   bool hasThis() const;
 
   /*
@@ -152,14 +153,18 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   /////////////////////////////////////////////////////////////////////////////
 
 private:
+  uint32_t encodeResumeMode(ResumeMode resumeMode);
+  uint32_t encodePrologue();
+
+  /////////////////////////////////////////////////////////////////////////////
+
   union {
     AtomicInt m_atomicInt;
     struct {
       FuncId m_funcID;
       uint32_t m_offset : 29;
       uint32_t m_hasThis : 1;
-      uint32_t m_prologue : 1;
-      uint32_t m_resumed : 1;
+      uint32_t m_resumeModeAndPrologue : 2;
     };
   };
 };

@@ -69,7 +69,7 @@ void OfflineTransData::loadTCData(string dumpDir) {
     MD5Str    md5Str;
     uint32_t  kind;
     FuncId    funcId;
-    int32_t   resumed;
+    int32_t   resumeMode;
     int32_t   hasThis;
     uint64_t  annotationsCount;
     size_t    numBCMappings = 0;
@@ -88,7 +88,7 @@ void OfflineTransData::loadTCData(string dumpDir) {
     READ(" src.funcId = %u", &funcId);
     READ(" src.funcName = %s", funcName);
     tRec.funcName = funcName;
-    READ(" src.resumed = %d", &resumed);
+    READ(" src.resumeMode = %d", &resumeMode);
     READ(" src.hasThis = %d", &hasThis);
     READ(" src.bcStart = %d", &tRec.bcStart);
 
@@ -201,7 +201,7 @@ void OfflineTransData::loadTCData(string dumpDir) {
     } else {
       tRec.src = SrcKey {
         funcId, tRec.bcStart,
-        static_cast<bool>(resumed), static_cast<bool>(hasThis)
+        static_cast<ResumeMode>(resumeMode), static_cast<bool>(hasThis)
       };
     }
     always_assert_flog(tid == tRec.id,
@@ -312,7 +312,7 @@ void OfflineTransData::printTransRec(TransID transId,
     "  src.md5 = {}\n"
     "  src.funcId = {}\n"
     "  src.funcName = {}\n"
-    "  src.resumed = {}\n"
+    "  src.resumeMode = {}\n"
     "  src.hasThis = {}\n"
     "  src.prologue = {}\n"
     "  src.bcStartOffset = {}\n"
@@ -321,7 +321,7 @@ void OfflineTransData::printTransRec(TransID transId,
     tRec->md5,
     tRec->src.funcID(),
     tRec->funcName,
-    tRec->src.resumed(),
+    static_cast<int32_t>(tRec->src.resumeMode()),
     tRec->src.hasThis(),
     tRec->src.prologue(),
     tRec->src.offset(),

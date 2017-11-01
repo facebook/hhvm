@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
@@ -53,7 +54,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 void maybe_syncsp(Vout& v, BCMarker marker, Vreg sp, IRSPRelOffset off) {
-  if (!marker.resumed()) {
+  if (marker.resumeMode() == ResumeMode::None) {
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       v << syncvmsp{v.cns(0x42)};
     }
@@ -65,7 +66,8 @@ void maybe_syncsp(Vout& v, BCMarker marker, Vreg sp, IRSPRelOffset off) {
 }
 
 RegSet cross_trace_args(BCMarker marker) {
-  return marker.resumed() ? cross_trace_regs_resumed() : cross_trace_regs();
+  return marker.resumeMode() != ResumeMode::None
+    ? cross_trace_regs_resumed() : cross_trace_regs();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -35,15 +35,15 @@ inline TransContext::TransContext(
   , initBcOffset(sk.offset())
   , hasThis(sk.hasThis())
   , prologue(sk.prologue())
-  , resumed(sk.resumed())
+  , resumeMode(sk.resumeMode())
 {}
 
 inline SrcKey TransContext::srcKey() const {
   if (prologue) {
-    assertx(!resumed);
+    assertx(resumeMode == ResumeMode::None);
     return SrcKey { func, initBcOffset, SrcKey::PrologueTag{} };
   }
-  return SrcKey { func, initBcOffset, resumed, hasThis };
+  return SrcKey { func, initBcOffset, resumeMode, hasThis };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

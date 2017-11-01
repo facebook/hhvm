@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/util/arch.h"
@@ -179,7 +180,7 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
   // support for these---it has no way to redefine stack pointers relative to
   // the frame pointer, because in a resumed function the frame pointer points
   // into the heap instead of into the eval stack.
-  if (callSK.resumed()) return false;
+  if (callSK.resumeMode() != ResumeMode::None) return false;
 
   // TODO(#4238160): Inlining into pseudomain callsites is still buggy.
   if (callSK.func()->isPseudoMain()) return false;
@@ -528,7 +529,7 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
   RegionContext ctx{
     callee, callee->getEntryForNumArgs(numArgs),
     FPInvOffset{safe_cast<int32_t>(callee->numSlotsInFrame())},
-    false,
+    ResumeMode::None,
     hasThis
   };
 

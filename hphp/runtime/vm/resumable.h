@@ -28,6 +28,42 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /**
+ * Indicates how a function got resumed.
+ */
+enum class ResumeMode : uint8_t {
+  // The function was regularly called and its frame is located on the stack.
+  // This is the only valid mode for regular (non-async, non-generator)
+  // functions. Async functions are executed in this mode (also called eager
+  // execution) until reaching the first blocking await statement. Generators
+  // and async generators run in this mode only during argument type enforcement
+  // and suspend their execution immediately afterwards using the CreateCont
+  // opcode.
+  None = 0,
+
+  // Execution of the function was resumed by the asio scheduler upon completion
+  // of the awaited WaitHandle. Frame of the function is stored on the heap
+  // colocated with the Resumable structure. Valid only for async functions and
+  // async generators. An AsyncGeneratorWaitHandle is associated with async
+  // generators.
+  Async = 1,
+
+  // Execution of the function was resumed by generator iteration (e.g. by
+  // calling next() or send()). Frame of the function is stored on the heap
+  // colocated with the Resumable structure. Valid only for generators and
+  // async generators. Async generators are considered to be eagerly executed
+  // in this mode and don't have any associated AsyncGeneratorWaitHandle.
+  GenIter = 2,
+};
+
+char* resumeModeShortName(ResumeMode resumeMode);
+
+ResumeMode resumeModeFromActRecImpl(ActRec* ar);
+ALWAYS_INLINE ResumeMode resumeModeFromActRec(ActRec* ar) {
+  if (LIKELY(!ar->resumed())) return ResumeMode::None;
+  return resumeModeFromActRecImpl(ar);
+}
+
+/**
  * Header of the resumable frame used by async functions:
  *
  *     NativeNode* -> +--------------------------------+ low address

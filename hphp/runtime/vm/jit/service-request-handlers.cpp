@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/workload-stats.h"
@@ -51,7 +52,7 @@ namespace {
 RegionContext getContext(SrcKey sk) {
   RegionContext ctx {
     sk.func(), sk.offset(), liveSpOff(),
-    sk.resumed(), sk.hasThis()
+    sk.resumeMode(), sk.hasThis()
   };
 
   auto const fp = vmfp();
@@ -192,7 +193,7 @@ TCA getFuncBody(Func* func) {
                                             : TransKind::Live;
     tca = tc::emitFuncBodyDispatch(func, dvs, kind);
   } else {
-    SrcKey sk(func, func->base(), false, func->mayHaveThis());
+    SrcKey sk(func, func->base(), ResumeMode::None, func->mayHaveThis());
     tca = getTranslation(TransArgs{sk});
     if (tca) func->setFuncBody(tca);
   }
@@ -292,7 +293,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
     case REQ_RETRANSLATE: {
       INC_TPC(retranslate);
       sk = SrcKey{
-        liveFunc(), info.args[0].offset, liveResumed(), liveHasThis()
+        liveFunc(), info.args[0].offset, liveResumeMode(), liveHasThis()
       };
       auto trflags = info.args[1].trflags;
       auto args = TransArgs{sk};

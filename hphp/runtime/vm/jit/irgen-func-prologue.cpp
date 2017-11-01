@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/extra-data.h"
@@ -335,7 +336,8 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
         env,
         ReqBindJmp,
         ReqBindJmpData {
-          SrcKey { func, func->getEntryForNumArgs(argc), false, hasThis },
+          SrcKey { func, func->getEntryForNumArgs(argc), ResumeMode::None,
+                   hasThis },
           FPInvOffset { func->numSlotsInFrame() },
           spOffBCFromIRSP(env),
           TransFlags{}
@@ -439,7 +441,7 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
               env,
               ReqBindJmp,
               ReqBindJmpData {
-                SrcKey { func, dv.second, false, hasThis },
+                SrcKey { func, dv.second, ResumeMode::None, hasThis },
                 FPInvOffset { func->numSlotsInFrame() },
                 spOffBCFromIRSP(env),
                 TransFlags{}
@@ -455,7 +457,7 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
         env,
         ReqBindJmp,
         ReqBindJmpData {
-          SrcKey { func, func->base(), false, hasThis },
+          SrcKey { func, func->base(), ResumeMode::None, hasThis },
           FPInvOffset { func->numSlotsInFrame() },
           spOffBCFromIRSP(env),
           TransFlags{}

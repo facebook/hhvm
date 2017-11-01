@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -66,7 +67,7 @@ void cgDefSP(IRLS& env, const IRInstruction* inst) {
   auto const sp = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  if (inst->marker().resumed()) {
+  if (inst->marker().resumeMode() != ResumeMode::None) {
     v << defvmsp{sp};
     return;
   }

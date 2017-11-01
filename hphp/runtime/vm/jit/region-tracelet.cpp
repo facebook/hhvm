@@ -64,7 +64,7 @@ struct Env {
     : ctx(ctx)
     , interp(interp)
     , breakAt(breakAt)
-    , sk{ctx.func, ctx.bcOffset, ctx.resumed, ctx.hasThis}
+    , sk{ctx.func, ctx.bcOffset, ctx.resumeMode, ctx.hasThis}
     , startSk(sk)
     , region(std::make_shared<RegionDesc>())
     , curBlock(region->addBlock(sk, 0, ctx.spOffset))
@@ -244,7 +244,9 @@ bool prepareInstruction(Env& env) {
     auto argNum =  env.inst.imm[0].u_IVA;
     auto entryArDelta = env.ctx.spOffset.offset -
       instrFpToArDelta(curFunc(env), env.inst.pc());
-    if (env.sk.resumed()) entryArDelta += curFunc(env)->numSlotsInFrame();
+    if (env.sk.resumeMode() != ResumeMode::None) {
+      entryArDelta += curFunc(env)->numSlotsInFrame();
+    }
 
     try {
       env.inst.preppedByRef =

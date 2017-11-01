@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/vm/jit/irgen-control.h"
 
+#include "hphp/runtime/vm/resumable.h"
+
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -26,7 +28,7 @@ namespace HPHP { namespace jit { namespace irgen {
 
 void surpriseCheck(IRGS& env, Offset relOffset) {
   if (relOffset <= 0) {
-    auto const ptr = resumed(env) ? sp(env) : fp(env);
+    auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
     auto const exit = makeExitSlow(env);
     gen(env, CheckSurpriseFlags, exit, ptr);
   }

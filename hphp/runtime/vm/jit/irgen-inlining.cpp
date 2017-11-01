@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/resumable.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -160,7 +161,7 @@ bool beginInlining(IRGS& env,
 
   assertx(startSk.func() == target &&
           startSk.offset() == target->getEntryForNumArgs(numParams) &&
-          !startSk.resumed());
+          startSk.resumeMode() == ResumeMode::None);
 
   env.bcStateStack.emplace_back(startSk);
   env.inlineReturnTarget.emplace_back(returnTarget);
@@ -194,7 +195,7 @@ bool beginInlining(IRGS& env,
     auto sideExit = [&] (bool hasThis) {
       hint(env, Block::Hint::Unlikely);
       auto const sk =
-        SrcKey { startSk.func(), startSk.offset(), false, hasThis };
+        SrcKey { startSk.func(), startSk.offset(), ResumeMode::None, hasThis };
       gen(
         env,
         ReqBindJmp,
@@ -273,7 +274,7 @@ bool conjureBeginInlining(IRGS& env,
 
 void implInlineReturn(IRGS& env) {
   assertx(!curFunc(env)->isPseudoMain());
-  assertx(!resumed(env));
+  assertx(resumeMode(env) == ResumeMode::None);
 
   auto const& fs = env.irb->fs();
 

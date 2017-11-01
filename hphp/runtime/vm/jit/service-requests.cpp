@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/resumable.h"
 
 #include "hphp/util/arch.h"
 #include "hphp/util/data-block.h"
@@ -156,7 +157,8 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     cb,
     data,
     allocTCStub(cb, &fixups),
-    target.resumed() ? folly::none : folly::make_optional(spOff),
+    target.resumeMode() != ResumeMode::None
+      ? folly::none : folly::make_optional(spOff),
     REQ_BIND_JMP,
     jmp,
     target.toAtomicInt(),
@@ -177,7 +179,8 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
       cb,
       data,
       allocTCStub(cb, &fixups),
-      target.resumed() ? folly::none : folly::make_optional(spOff),
+      target.resumeMode() != ResumeMode::None
+        ? folly::none : folly::make_optional(spOff),
       REQ_BIND_ADDR,
       (TCA)addr, // needs to be RIP relative so that we can relocate it
       target.toAtomicInt(),
@@ -189,7 +192,8 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     cb,
     data,
     allocTCStub(cb, &fixups),
-    target.resumed() ? folly::none : folly::make_optional(spOff),
+    target.resumeMode() != ResumeMode::None
+      ? folly::none : folly::make_optional(spOff),
     REQ_BIND_ADDR,
     addr,
     target.toAtomicInt(),
@@ -202,7 +206,8 @@ TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
   return emit_persistent(
     cb,
     data,
-    target.resumed() ? folly::none : folly::make_optional(spOff),
+    target.resumeMode() != ResumeMode::None
+      ? folly::none : folly::make_optional(spOff),
     REQ_RETRANSLATE,
     target.offset(),
     trflags.packed
@@ -214,7 +219,8 @@ TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
   return emit_persistent(
     cb,
     data,
-    sk.resumed() ? folly::none : folly::make_optional(spOff),
+    sk.resumeMode() != ResumeMode::None
+      ? folly::none : folly::make_optional(spOff),
     REQ_RETRANSLATE_OPT,
     sk.toAtomicInt()
   );

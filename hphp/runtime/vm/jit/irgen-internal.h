@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -51,8 +52,8 @@ inline bool hasThis(const IRGS& env) {
   return env.bcStateStack.back().hasThis();
 }
 
-inline bool resumed(const IRGS& env) {
-  return env.bcStateStack.back().resumed();
+inline ResumeMode resumeMode(const IRGS& env) {
+  return env.bcStateStack.back().resumeMode();
 }
 
 inline const Func* curFunc(const IRGS& env) {

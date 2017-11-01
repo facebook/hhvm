@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/interp-helpers.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -1468,7 +1469,7 @@ RegSet interp_one_cf_regs() {
 }
 
 void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff) {
-  if (!sk.resumed()) {
+  if (sk.resumeMode() == ResumeMode::None) {
     v << lea{rvmfp()[-cellsToBytes(spOff.offset)], rvmsp()};
   }
   v << copy{v.cns(sk.pc()), rarg(0)};

@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit {
@@ -294,7 +295,7 @@ struct RegionDesc::Block {
   using ParamByRefMap = boost::container::flat_map<SrcKey,bool>;
   using KnownFuncMap  = boost::container::flat_map<SrcKey,const Func*>;
 
-  explicit Block(const Func* func, bool resumed, bool hasThis,
+  explicit Block(const Func* func, ResumeMode resumeMode, bool hasThis,
                  Offset start, int length, FPInvOffset initSpOff);
 
   Block& operator=(const Block&) = delete;
@@ -307,10 +308,10 @@ struct RegionDesc::Block {
   const Unit* unit()              const { return m_func->unit(); }
   const Func* func()              const { return m_func; }
   SrcKey      start()             const {
-    return SrcKey { m_func, m_start, m_resumed, m_hasThis };
+    return SrcKey { m_func, m_start, m_resumeMode, m_hasThis };
   }
   SrcKey      last()              const {
-    return SrcKey { m_func, m_last, m_resumed, m_hasThis };
+    return SrcKey { m_func, m_last, m_resumeMode, m_hasThis };
   }
   int         length()            const { return m_length; }
   bool        empty()             const { return length() == 0; }
@@ -392,21 +393,21 @@ private:
   void checkMetadata() const;
 
 private:
-  BlockId         m_id;
-  const Func*     m_func;
-  const bool      m_resumed;
-  const bool      m_hasThis;
-  const Offset    m_start;
-  Offset          m_last;
-  int             m_length;
-  FPInvOffset     m_initialSpOffset;
-  TransID         m_profTransID;
-  TypedLocVec     m_typePredictions;
-  GuardedLocVec   m_typePreConditions;
-  ParamByRefMap   m_byRefs;
-  RefPredVec      m_refPreds;
-  KnownFuncMap    m_knownFuncs;
-  PostConditions  m_postConds;
+  BlockId          m_id;
+  const Func*      m_func;
+  const ResumeMode m_resumeMode;
+  const bool       m_hasThis;
+  const Offset     m_start;
+  Offset           m_last;
+  int              m_length;
+  FPInvOffset      m_initialSpOffset;
+  TransID          m_profTransID;
+  TypedLocVec      m_typePredictions;
+  GuardedLocVec    m_typePreConditions;
+  ParamByRefMap    m_byRefs;
+  RefPredVec       m_refPreds;
+  KnownFuncMap     m_knownFuncs;
+  PostConditions   m_postConds;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -429,13 +430,13 @@ struct RegionContext {
   struct PreLiveAR;
 
   RegionContext(const Func* f, Offset bcOff, FPInvOffset spOff,
-                bool r, bool ht) :
-      func(f), bcOffset(bcOff), spOffset(spOff), resumed(r), hasThis(ht) {}
+                ResumeMode rm, bool ht) :
+      func(f), bcOffset(bcOff), spOffset(spOff), resumeMode(rm), hasThis(ht) {}
 
   const Func* func;
   Offset bcOffset;
   FPInvOffset spOffset;
-  bool resumed;
+  ResumeMode resumeMode;
   bool hasThis;
   jit::vector<LiveType> liveTypes;
   jit::vector<PreLiveAR> preLiveARs;

@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/pc-filter.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/logger.h"
@@ -531,7 +532,7 @@ void phpAddBreakPointFuncEntry(const Func* f) {
   if (RuntimeOption::EvalJit) {
     if (jit::addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
-      if (!jit::tc::addDbgGuard(f, base, false)) {
+      if (!jit::tc::addDbgGuard(f, base, ResumeMode::None)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }
@@ -553,7 +554,7 @@ void phpAddBreakPointFuncExit(const Func* f) {
 
     // Blacklist the location
     if (RuntimeOption::EvalJit && jit::addDbgBLPC(pc)) {
-      if (!jit::tc::addDbgGuard(f, unit->offsetOf(pc), false)) {
+      if (!jit::tc::addDbgGuard(f, unit->offsetOf(pc), ResumeMode::None)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }

@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_TC_H_
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -321,7 +322,7 @@ void freeTCStub(TCA stub);
  * translation in `unit' or for `SrcKey{func, offset, resumed}'.
  */
 bool addDbgGuards(const Unit* unit);
-bool addDbgGuard(const Func* func, Offset offset, bool resumed);
+bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode);
 
 ////////////////////////////////////////////////////////////////////////////////
 

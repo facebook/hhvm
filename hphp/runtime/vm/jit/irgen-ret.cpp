@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 
 
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -45,7 +46,7 @@ void retSurpriseCheck(IRGS& env, SSATmp* retVal) {
   ifThen(
     env,
     [&] (Block* taken) {
-      auto const ptr = resumed(env) ? sp(env) : fp(env);
+      auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
       gen(env, CheckSurpriseFlags, taken, ptr);
     },
     [&] {
@@ -98,9 +99,10 @@ void normalReturn(IRGS& env, SSATmp* retval) {
   // If we're on the eager side of an async function, we have to zero-out the
   // TV aux of the return value, because it might be used as a flag if we were
   // called with FCallAwait.
-  auto const aux = curFunc(env)->isAsyncFunction() && !resumed(env)
-    ? folly::make_optional(AuxUnion{0})
-    : folly::none;
+  auto const aux =
+    (curFunc(env)->isAsyncFunction() && resumeMode(env) == ResumeMode::None)
+      ? folly::make_optional(AuxUnion{0})
+      : folly::none;
 
   auto const data = RetCtrlData { offsetToReturnSlot(env), false, aux };
   gen(env, RetCtrl, data, sp(env), fp(env), retval);
@@ -162,7 +164,7 @@ void asyncRetSurpriseCheck(IRGS& env, SSATmp* retVal) {
 }
 
 void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
-  if (!resumed(env)) {
+  if (resumeMode(env) == ResumeMode::None) {
     retSurpriseCheck(env, retVal);
 
     // Return from an eagerly-executed async function: wrap the return value in
@@ -251,10 +253,11 @@ void implRet(IRGS& env) {
 
   retSurpriseCheck(env, retval);
 
-  if (resumed(env)) {
+  if (resumeMode(env) == ResumeMode::GenIter) {
     assertx(curFunc(env)->isNonAsyncGenerator());
     return generatorReturn(env, retval);
   }
+  assertx(resumeMode(env) == ResumeMode::None);
   return normalReturn(env, retval);
 }
 
@@ -271,7 +274,7 @@ void emitRetC(IRGS& env) {
   if (curFunc(env)->isAsyncGenerator()) PUNT(RetC-AsyncGenerator);
 
   if (isInlining(env)) {
-    assertx(!resumed(env));
+    assertx(resumeMode(env) == ResumeMode::None);
     retFromInlined(env);
   } else {
     implRet(env);
@@ -279,7 +282,7 @@ void emitRetC(IRGS& env) {
 }
 
 void emitRetV(IRGS& env) {
-  assertx(!resumed(env));
+  assertx(resumeMode(env) == ResumeMode::None);
   assertx(!curFunc(env)->isResumable());
   if (isInlining(env)) {
     retFromInlined(env);

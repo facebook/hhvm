@@ -40,7 +40,7 @@ let is_special_function e args =
     match s with
     | "isset" -> n > 0
     | "empty" -> n = 1
-    | "tuple" -> true
+    | "tuple" when Emit_env.is_hh_syntax_enabled () -> true
     | "define" ->
       begin match args with
       | [_, A.String _; _] -> true
@@ -988,7 +988,8 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Call ((_, A.Id (_, "empty")), _, [expr], []) ->
     emit_box_if_necessary need_ref @@ emit_call_empty_expr env expr
   (* Did you know that tuples are functions? *)
-  | A.Call ((p, A.Id (_, "tuple")), _, es, _) ->
+  | A.Call ((p, A.Id (_, "tuple")), _, es, _)
+    when Emit_env.is_hh_syntax_enabled () ->
     emit_box_if_necessary need_ref @@ emit_tuple env p es
   | A.Call ((_, A.Id (_, "idx")), _, es, _) ->
     emit_box_if_necessary need_ref @@ emit_idx env es
@@ -1756,14 +1757,11 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      1
 
 and emit_arg env i is_splatted (pos, expr_ as expr) =
-  let force_hh =
-    Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
-  let is_hh = Emit_env.is_hh_file () in
   let with_ref = expr_starts_with_ref expr in
-  let hint = match (is_hh || force_hh, with_ref) with
-  | (true, true) -> Ref
-  | (true, false) -> Cell
-  | (false, _) -> Any in
+  let hint =
+    if Emit_env.is_hh_syntax_enabled ()
+    then if with_ref then Ref else Cell
+    else Any in
   let expr_ = match expr_ with
   | A.Unop (A.Uref, (_, e)) -> e
   | _ -> expr_ in
@@ -1981,19 +1979,25 @@ and is_call_user_func id num_args =
   is_fn && num_args >= min_args && num_args <= max_args
 
 and get_call_builtin_func_info fn_name =
-  match SU.strip_global_ns fn_name with
+  let name = SU.strip_global_ns fn_name in
+  match name with
   | "array_key_exists" -> Some (2, IMisc AKExists)
   | "hphp_array_idx" -> Some (3, IMisc ArrayIdx)
   | "intval" -> Some (1, IOp CastInt)
   | "boolval" -> Some (1, IOp CastBool)
   | "strval" -> Some (1, IOp CastString)
   | "floatval" | "doubleval" -> Some (1, IOp CastDouble)
-  | "vec" -> Some (1, IOp CastVec)
-  | "keyset" -> Some (1, IOp CastKeyset)
-  | "dict" -> Some (1, IOp CastDict)
-  | "varray" -> Some (1, IOp CastVArray)
-  | "darray" -> Some (1, IOp CastDArray)
-  | _ -> None
+  | _ ->
+    (* HH-specific *)
+    if not (Emit_env.is_hh_syntax_enabled ())
+    then None
+    else match name with
+    | "vec" -> Some (1, IOp CastVec)
+    | "keyset" -> Some (1, IOp CastKeyset)
+    | "dict" -> Some (1, IOp CastDict)
+    | "varray" -> Some (1, IOp CastVArray)
+    | "darray" -> Some (1, IOp CastDArray)
+    | _ -> None
 
 and emit_call_user_func_args env i expr =
   gather [

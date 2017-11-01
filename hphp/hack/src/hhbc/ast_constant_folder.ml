@@ -133,7 +133,7 @@ let rec expr_to_typed_value
     shape_to_typed_value ns fields
   | A.Class_const (cid, id) ->
     class_const_to_typed_value ns cid id
-  | A.Call ((_, A.Id (_, "tuple")), _, es, _) ->
+  | A.Call ((_, A.Id (_, "tuple")), _, es, _) when Emit_env.is_hh_syntax_enabled () ->
     array_to_typed_value ns @@ List.map es ~f:(fun e -> A.AFvalue e)
   | A.Id _ | A.Class_get _ -> raise UserDefinedConstant
   | _ ->

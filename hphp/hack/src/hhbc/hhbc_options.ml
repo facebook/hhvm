@@ -16,6 +16,8 @@ module J = Hh_json
 type t = {
   option_ints_overflow_to_ints : bool option;
   option_enable_hiphop_syntax : bool;
+  option_php7_scalar_types : bool;
+  option_enable_xhp : bool;
   option_constant_folding : bool;
   option_optimize_null_check : bool;
   option_optimize_cuf : bool;
@@ -27,6 +29,8 @@ type t = {
 let default = {
   option_ints_overflow_to_ints = None;
   option_enable_hiphop_syntax = false;
+  option_php7_scalar_types = false;
+  option_enable_xhp = false;
   option_constant_folding = false;
   option_optimize_null_check = false;
   option_optimize_cuf = false;
@@ -36,6 +40,8 @@ let default = {
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
+let php7_scalar_types o = o.option_php7_scalar_types
+let enable_xhp o = o.option_enable_xhp
 let constant_folding o = o.option_constant_folding
 let optimize_null_check o = o.option_optimize_null_check
 let optimize_cuf o = o.option_optimize_cuf
@@ -70,6 +76,10 @@ let set_option options name value =
     { options with option_optimize_cuf = as_bool value }
   | "hack.compiler.sourcemapping" ->
     { options with option_source_mapping = as_bool value }
+  | "hhvm.php7.scalar_types" ->
+    { options with option_php7_scalar_types = as_bool value }
+  | "hhvm.enable_xhp" ->
+    { options with option_enable_xhp = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -111,6 +121,10 @@ let value_setters = [
     fun opts v -> { opts with option_aliased_namespaces = v });
   (set_value "hhvm.force_hh" get_value_from_config_int @@
     fun opts v -> { opts with option_enable_hiphop_syntax = (v = 1) });
+  (set_value "hhvm.enable_xhp" get_value_from_config_int @@
+    fun opts v -> { opts with option_enable_xhp = (v = 1) });
+  (set_value "hhvm.php7.scalar_types" get_value_from_config_int @@
+    fun opts v -> { opts with option_php7_scalar_types = (v = 1) });
   (set_value "hhvm.hack.lang.ints_overflow_to_ints" get_value_from_config_int @@
     fun opts v -> { opts with option_ints_overflow_to_ints = Some (v = 1) });
   (set_value "hack.compiler.constant_folding" get_value_from_config_int @@

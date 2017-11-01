@@ -208,7 +208,9 @@ let validate_class_name ns (p, class_name) =
      - containing file is hack file and class is in global namespace
      - class is in HH namespace *)
   let check_hh_name =
-    (Emit_env.is_hh_file () && is_global_namespace ns) || is_hh_namespace ns in
+    (Emit_env.is_hh_file () && is_global_namespace ns) ||
+    is_hh_namespace ns ||
+    Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options in
   let name = SU.strip_ns class_name in
   let name_is_reserved =
     SN.Typehints.is_reserved_global_name name ||

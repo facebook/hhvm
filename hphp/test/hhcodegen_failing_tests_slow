@@ -10,7 +10,6 @@ slow/closure/return_types.php
 slow/concat/1578.php
 slow/constant/1597.php
 slow/constant/true_false_null.php
-slow/dict/hh-only2.php
 slow/dict/init-parse-error2.php
 slow/dict/init-parse-error4.php
 slow/dict/mixed-to-dict-with-refs.php
@@ -21,8 +20,6 @@ slow/ext_function/register_postsend_function-simple.php
 slow/ext_function/register_shutdown_function-simple.php
 slow/ext_misc/ext_misc.php
 slow/ext_phar/composer.php
-slow/ext_phar/create_tar.php
-slow/ext_phar/create_zip.php
 slow/ext_process/bad_shell_exec.php
 slow/finally/finally_break_004.php
 slow/finally/finally_break_005.php
@@ -73,10 +70,7 @@ slow/hh_namespace_migration/hh_set4.php
 slow/hh_namespace_migration/hh_set7.php
 slow/hh_namespace_migration/hh_vector3.php
 slow/hh_namespace_migration/hh_vector5.php
-slow/hhbbc/array_011.php
 slow/hhbbc/clsref-side-effects.php
-slow/hhbbc/magic_builtin_interfaces.php
-slow/hint/2187.php
 slow/inline-hhas/hello-world.php
 slow/inline-hhas/if.php
 slow/inline-hhas/mixed.php
@@ -136,11 +130,9 @@ slow/inout/out-type-hints.php
 slow/inout/side-effects.php
 slow/inout/trait-magic.php
 slow/interpolated_function_call.php
-slow/keyset/hh-only2.php
 slow/keyset/init-parse-error2.php
 slow/labels/72.php
 slow/lang/deprecated.php
-slow/lang/tuple_non_hh.php
 slow/namespace/dynamic_extra_slash.php
 slow/namespace/dynamic_extra_slash_cns.php
 slow/namespace/dynamic_extra_slash_cns2.php
@@ -162,13 +154,9 @@ slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-3.php
 slow/parser/hh-namespace-conflict-6.php
 slow/parser/namespace_use_trailing_comma.php
-slow/parser/php-namespace-conflict-1.php
-slow/parser/php-namespace-conflict-2.php
 slow/parser/php-namespace-conflict-3.php
-slow/parser/php-namespace-conflict-6.php
 slow/parser/semi-reserved-keywords/enum_class_constant_bad.php
 slow/parser/static_call_access_const_expr.php
-slow/parser/tuple-1.php
 slow/parser/val_colon_colon_class_method.php
 slow/parser/xhp-ambiguity.php
 slow/php7_backported/ns_089.php
@@ -176,11 +164,6 @@ slow/php7_backported/ns_090.php
 slow/php7_backported/ns_092.php
 slow/php7_backported/ns_093.php
 slow/php7_backported/scalar-types/scalar_relative_typehint_disallowed.php
-slow/php7_backported/scalar-types/scalar_reserved2.php
-slow/php7_backported/scalar-types/scalar_reserved3.php
-slow/php7_backported/scalar-types/scalar_reserved4.php
-slow/php7_backported/scalar-types/scalar_reserved6.php
-slow/php7_backported/scalar-types/scalar_reserved7.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_001.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_002.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_003.php
@@ -190,7 +173,6 @@ slow/php7_backported/varSyntax/staticMember.php
 slow/php7_bcbreak/5/uvs/array_indirect_ref.php
 slow/reflection/ns_closure.php
 slow/reflection/param_tostring_zendcompat.php
-slow/reflection/scalar_param_types/php-noforcehh.php
 slow/reflection_classes/xhp.php
 slow/sanity/3.php
 slow/sanity/4.php
@@ -199,11 +181,8 @@ slow/string/164.php
 slow/traits/1981.php
 slow/traits/__class__.php
 slow/type_assertions/1857.php
-slow/typecheck/type_coersion_5.php
 slow/typedef/typedef_parent.php
 slow/typedef/typedef_self.php
-slow/types/abstract_function_typehints.php
-slow/types/scalar_names.php
 slow/using/bad-goto1.php
 slow/using/bad-goto2.php
 slow/using/bad-lambda4.php
@@ -213,6 +192,5 @@ slow/using/bad-name.php
 slow/using/functions.php
 slow/using/goto.php
 slow/vec/bad-init2.php
-slow/vec/hh-only2.php
 slow/xhp/attr-syntax-2.php
 slow/xhp/attr-syntax-3.php

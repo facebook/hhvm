@@ -114,7 +114,7 @@ let default_type_check param_name param_type_info param_expr =
   (* If matches, return None, otherwise return default_type *)
   let default_type = Option.bind hint_type (function hint_type ->
       match_default_and_hint
-      (Emit_env.is_hh_file () || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options)
+      (Emit_env.is_hh_syntax_enabled ())
       hint_type param_expr)
   in
   let param_true_name = Hhbc_string_utils.Locals.strip_dollar param_name

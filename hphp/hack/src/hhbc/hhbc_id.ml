@@ -147,8 +147,7 @@ module Function = struct
   let add_suffix s suffix = s ^ suffix
   let elaborate_id ns (_, s as id) =
     if is_hh_builtin s
-    && (Emit_env.is_hh_file ()
-    || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options)
+    && (Emit_env.is_hh_syntax_enabled ())
     then if has_hh_prefix s
           then s, None
           else SU.prefix_namespace "HH" s, Some s

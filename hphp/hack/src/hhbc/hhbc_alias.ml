@@ -25,8 +25,7 @@ let add_alias m a =
   let add k v =
     SMap.add (String.lowercase_ascii k) v m in
   match a with
-  | HH_ONLY_TYPE s -> add s (prefix_namespace "HH" s)
-  | SCALAR_TYPE s -> add s (prefix_namespace "HH" s)
+  | HH_ONLY_TYPE s | SCALAR_TYPE s -> add s (prefix_namespace "HH" s)
   | HH_ALIAS (s, alias) -> add s alias
 
 let alias_map = List.fold_left ~f:add_alias ~init:SMap.empty
@@ -106,6 +105,9 @@ let alias_map = List.fold_left ~f:add_alias ~init:SMap.empty
 ]
 
 let rec normalize s =
+  if not (Emit_env.is_hh_syntax_enabled ())
+  then s
+  else
   match SMap.get (String.lowercase_ascii s) alias_map with
   | None -> s
   | Some a -> normalize a
@@ -114,4 +116,8 @@ let opt_normalize s =
   match String.lowercase_ascii s with
   | "callable" -> Some "callable"
   | "array" -> Some "array"
-  | s -> Option.map ~f:normalize (SMap.get s alias_map)
+  | s ->
+    if not (Emit_env.is_hh_syntax_enabled ()
+            || Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options)
+    then None
+    else Option.map ~f:normalize (SMap.get s alias_map)

@@ -29,7 +29,7 @@ let rec expr_requires_deep_init (_, expr_) =
   | A.Varray fields -> List.exists fields expr_requires_deep_init
   | A.Darray fields -> List.exists fields expr_pair_requires_deep_init
   | A.Id(_, ("__FILE__" | "__DIR__")) -> false
-  | A.Call((_, A.Id(_, "tuple")), _, args, []) ->
+  | A.Call((_, A.Id(_, "tuple")), _, args, []) when Emit_env.is_hh_syntax_enabled () ->
     List.exists args expr_requires_deep_init
   | A.Class_const ((_, A.Id (_, s)), (_, p)) ->
     class_const_requires_deep_init s p

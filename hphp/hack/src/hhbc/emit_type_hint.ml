@@ -189,10 +189,7 @@ let param_hint_to_type_info
   let tc_name = TC.name tc in
   if is_simple_hint
   then
-    let is_hh_type =
-      Emit_env.is_hh_file ()
-      || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options
-    in
+    let is_hh_type = Emit_env.is_hh_syntax_enabled () in
     let tc_flags = if is_hh_type then [TC.HHType] else [] in
     let tc_flags = try_add_nullable ~nullable h tc_flags in
     make_type_info ~tparams ~namespace h tc_name tc_flags

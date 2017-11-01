@@ -571,7 +571,7 @@ and emit_class_expr_parts env cexpr prop =
 
 and emit_class_expr env cexpr prop =
   match cexpr with
-  | Class_expr ((_, (A.BracedExpr _ | A.Lvarvar _)) as e) ->
+  | Class_expr ((_, (A.BracedExpr _ | A.Lvarvar _ | A.Call _)) as e) ->
     (* if class is stored as lvarvar or braced expression (computed dynamically)
        it needs to be stored in unnamed local and eventually cleaned.
        Here we don't use stash_in_local because shape of the code generated

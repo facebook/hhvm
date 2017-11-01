@@ -1152,18 +1152,10 @@ static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
 static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
                          const Object& closure) {
   auto const cls = get_cls(closure);
-  assert(cls);
-
-  auto size = cls->numDeclProperties();
-  ArrayInit ai(size, ArrayInit::Mixed{});
-
-  auto clsName = cls->nameStr();
-
+  assertx(cls);
+  MixedArrayInit ai(cls->numDeclProperties());
+  auto propVal = closure->propVec();
   for (auto const& prop : cls->declProperties()) {
-    auto val = closure.get()->o_realProp(StrNR(prop.name),
-                                         ObjectData::RealPropExist, clsName);
-    assert(val);
-
     // Closure static locals are represented as special instance properties
     // with a mangled name.
     if (prop.name->data()[0] == '8') {
@@ -1172,14 +1164,11 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
       String strippedName(prop.name->data() + sizeof prefix - 1,
                           prop.name->size() - sizeof prefix + 1,
                           CopyString);
-      ai.setUnknownKey(VarNR(strippedName), *val);
+      ai.setUnknownKey(VarNR(strippedName), tvAsCVarRef(propVal));
     } else {
-      if (val->isReferenced()) {
-        ai.setRef(StrNR(prop.name), *val, false /* = keyConverted */);
-      } else {
-        ai.setUnknownKey(VarNR(prop.name), *val);
-      }
+      ai.setWithRef(StrNR(prop.name), *propVal);
     }
+    propVal++;
   }
   return ai.toArray();
 }

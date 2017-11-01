@@ -31,13 +31,13 @@ function foo() {
 $foo = function() {
   static $a;
   static $b = 3;
-  // static $c = Bar::X;
+  static $c = Bar::X;
   static $d = array('4' => array(5));
   $b++;
   echo "\$foo():\n";
   echo "a = ";var_dump($a);
   echo "b = ";var_dump($b);
-  // echo "c = ";var_dump($c);
+  echo "c = ";var_dump($c);
   echo "d = ";var_dump($d);
 };
 

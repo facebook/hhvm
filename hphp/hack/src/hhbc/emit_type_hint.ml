@@ -126,12 +126,16 @@ match h with
   TC.make None []
 
 (* Need to differentiate between type params and classes *)
-| A.Happly (id, _) ->
-  if List.mem tparams (snd id) then
+| A.Happly ((pos,name) as id, _) ->
+  if List.mem tparams name then
     let tc_name = Some "" in
     let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeVar] in
     TC.make tc_name tc_flags
   else
+    if kind = TypeDef && (name = "self" || name = "parent")
+    then Emit_fatal.raise_fatal_runtime pos
+      (Printf.sprintf "Cannot access %s when no class scope is active" name)
+    else
     let tc_name =
       let fq_id, _ = Hhbc_id.Class.elaborate_id namespace id in
       Hhbc_id.Class.to_raw_string fq_id in

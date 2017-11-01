@@ -291,17 +291,15 @@ const StaticString
 
 Array HHVM_METHOD(DateTime, __sleep) {
   DateTimeData* data = Native::data<DateTimeData>(this_);
-  int zoneType = data->m_dt->zoneType();
 
-  this_->setProp(nullptr, s_date.get(),
-                 make_tv<KindOfString>(data->format(s_ISOformat).get()));
+  auto const formatted = data->format(s_ISOformat);
+  this_->setProp(nullptr, s_date.get(), make_tv<KindOfString>(formatted.get()));
+  int zoneType = data->m_dt->zoneType();
   this_->setProp(nullptr, s_timezone_type.get(),
                  make_tv<KindOfInt64>(zoneType));
-  this_->setProp(
-    nullptr,
-    s_timezone.get(),
-    make_tv<KindOfString>(zone_type_to_string(zoneType, data->m_dt).get())
-  );
+  auto const timezone = zone_type_to_string(zoneType, data->m_dt);
+  this_->setProp(nullptr, s_timezone.get(),
+                 make_tv<KindOfString>(timezone.get()));
   return make_packed_array(s_date, s_timezone_type, s_timezone);
 }
 

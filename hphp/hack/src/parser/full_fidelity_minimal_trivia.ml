@@ -22,34 +22,34 @@ type t = {
   width: int
 }
 
-let make_whitespace width =
+let make_whitespace _text _offset width =
   { kind = WhiteSpace; width }
 
-let make_eol width =
+let make_eol _text _offset width =
   { kind = EndOfLine; width }
 
-let make_single_line_comment width =
+let make_single_line_comment _text _offset width =
   { kind = SingleLineComment; width }
 
-let make_fallthrough width =
+let make_fallthrough _text _offset width =
   { kind = FallThrough; width }
 
-let make_unsafe width =
+let make_unsafe _text _offset width =
   { kind = Unsafe; width }
 
-let make_unsafe_expression width =
+let make_unsafe_expression _text _offset width =
   { kind = UnsafeExpression; width }
 
-let make_fix_me width =
+let make_fix_me _text _offset width =
   { kind = FixMe; width}
 
-let make_ignore_error width =
+let make_ignore_error _text _offset width =
   { kind = IgnoreError; width }
 
-let make_delimited_comment width =
+let make_delimited_comment _text _offset width =
   { kind = DelimitedComment; width }
 
-let make_extra_token_error width =
+let make_extra_token_error _text _offset width =
   { kind = ExtraTokenError; width }
 
 let width trivia =

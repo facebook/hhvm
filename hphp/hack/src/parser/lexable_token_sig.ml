@@ -12,6 +12,8 @@ module type LexableToken_S = sig
   type t
   val make:
     Full_fidelity_token_kind.t -> (* kind *)
+    Full_fidelity_source_text.t -> (* source *)
+    int -> (* offset *)
     int -> (* width *)
     Trivia.t list -> (* leading *)
     Trivia.t list -> (* trailing *)

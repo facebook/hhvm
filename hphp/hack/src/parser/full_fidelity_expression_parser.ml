@@ -458,10 +458,14 @@ module WithStatementAndDeclAndTypeParser
       | (_, DoubleQuotedStringLiteralTail) -> DoubleQuotedStringLiteralTail
       | (_, HeredocStringLiteralTail) -> HeredocStringLiteralTail
       | _ -> StringLiteralBody in
+      let s = SourceText.empty in
+      let o = 0 in
       let w = (Token.width head) + (Token.width token) in
       let l = Token.leading head in
       let t = Token.trailing token in
-      let result = Token.make k w l t in
+      (* TODO: Make a "position" type that is a tuple of source and offset. *)
+      (* TODO: Get the source and offset from the leading token *)
+      let result = Token.make k s o w l t in
       make_token result in
 
     let merge_head token acc =
@@ -2174,9 +2178,12 @@ TODO: This will need to be fixed to allow situations where the qualified name
       let (parser, token, _) = next_xhp_element_token parser1 in
       if (Token.kind token) != Equal then
         let value =
-          if colon_bug
-          then make_token (Token.make TokenKind.XHPStringLiteral 0 [] [])
-          else make_missing ()
+          if colon_bug then
+            let s = Lexer.source (lexer parser) in
+            let o = 0 in (* TODO: Get the offset from the leading token *)
+            make_token (Token.make TokenKind.XHPStringLiteral s o 0 [] [])
+          else
+            make_missing ()
         in
         let node = make_xhp_attribute name (make_missing()) value in
         let parser = if colon_bug then parser1 else

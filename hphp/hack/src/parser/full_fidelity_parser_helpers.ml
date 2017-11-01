@@ -54,7 +54,9 @@ module WithParser(Parser : Parser_S) = struct
            * followed by the leading trivia. *)
            let prepend_onto elt_list elt = List.cons elt elt_list in
            let acc = List.fold_left prepend_onto acc (Token.trailing t) in
-           let acc = Trivia.make_extra_token_error (Token.width t) :: acc in
+           let acc = Trivia.make_extra_token_error
+              (Lexer.source lexer) (Lexer.start_offset lexer) (Token.width t)
+              :: acc in
            List.fold_left prepend_onto acc (Token.leading t)
          in
          let leading =

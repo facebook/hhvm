@@ -8,6 +8,7 @@
  *
  *)
 
+module SourceText = Full_fidelity_source_text
 module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree = Full_fidelity_syntax_tree
 module TriviaKind = Full_fidelity_trivia_kind
@@ -47,7 +48,7 @@ let rewrite_tree_no_trivia node =
     | MinimalSyntax.Token t ->
       let kind = MinimalToken.kind t in
       let width = MinimalToken.width t in
-      let token = MinimalToken.make kind width [] [] in
+      let token = MinimalToken.make kind SourceText.empty 0 width [] [] in
       Rewriter.Replace (MinimalSyntax.make_token token)
     | _ -> Rewriter.Keep in
   Rewriter.rewrite_post rewrite node
@@ -76,6 +77,8 @@ let rewrite_tree_no_whitespace node =
     | MinimalSyntax.Token t ->
       let token = MinimalToken.(make
         (kind t)
+        SourceText.empty
+        0
         (width t)
         (filter_whitespace (leading t))
         (filter_whitespace (trailing t))

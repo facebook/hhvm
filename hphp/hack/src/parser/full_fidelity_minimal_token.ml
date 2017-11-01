@@ -26,7 +26,7 @@ type t = {
   trailing: Trivia.t list
 }
 
-let make kind width leading trailing =
+let make kind _source _offset width leading trailing =
   { kind; width; leading; trailing }
 
 let leading_width token =

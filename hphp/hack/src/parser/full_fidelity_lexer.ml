@@ -1129,18 +1129,19 @@ let scan_token_outside_type = scan_token false
 let scan_end_of_line lexer =
   match peek_char lexer 0 with
   | '\r' ->
-    if (peek_char lexer 1) = '\n' then (advance lexer 2, Trivia.make_eol 2)
-    else (advance lexer 1, Trivia.make_eol 1)
-  | '\n' -> (advance lexer 1, Trivia.make_eol 1)
+    let w = if peek_char lexer 1 = '\n' then 2 else 1 in
+    advance lexer w, Trivia.make_eol (source lexer) (start lexer) w
+  | '\n' -> (advance lexer 1, Trivia.make_eol (source lexer) (start lexer) 1)
   | _ -> failwith "scan_end_of_line called while not on end of line!"
 
 let scan_whitespace lexer =
   let lexer = skip_whitespace lexer in
-  (lexer, Trivia.make_whitespace (width lexer))
+  (lexer, Trivia.make_whitespace (source lexer) (start lexer) (width lexer))
 
 let scan_hash_comment lexer =
   let lexer = skip_to_end_of_line lexer in
-  let c = Trivia.make_single_line_comment (width lexer) in
+  let c = Trivia.make_single_line_comment
+    (source lexer) (start lexer) (width lexer) in
   (lexer, c)
 
 let scan_single_line_comment lexer =
@@ -1158,11 +1159,11 @@ let scan_single_line_comment lexer =
   let remainder = offset lexer - offset lexer_ws in
   let c =
     if remainder = 11 && peek_string lexer_ws 11 = "FALLTHROUGH" then
-      Trivia.make_fallthrough w
+      Trivia.make_fallthrough (source lexer) (start lexer) w
     else if remainder >= 6 && peek_string lexer_ws 6 = "UNSAFE" then
-      Trivia.make_unsafe w
+      Trivia.make_unsafe (source lexer) (start lexer) w
     else
-      Trivia.make_single_line_comment w in
+      Trivia.make_single_line_comment (source lexer) (start lexer) w in
   (lexer, c)
 
 let skip_to_end_of_delimited_comment lexer =
@@ -1203,13 +1204,13 @@ let scan_delimited_comment lexer =
   let w = width lexer in
   let c =
     if match_string lexer_ws "UNSAFE_EXPR" then
-      Trivia.make_unsafe_expression w
+      Trivia.make_unsafe_expression (source lexer) (start lexer) w
     else if match_string lexer_ws "HH_FIXME" then
-      Trivia.make_fix_me w
+      Trivia.make_fix_me (source lexer) (start lexer) w
     else if match_string lexer_ws "HH_IGNORE_ERROR" then
-      Trivia.make_ignore_error w
+      Trivia.make_ignore_error (source lexer) (start lexer) w
     else
-      Trivia.make_delimited_comment w in
+      Trivia.make_delimited_comment (source lexer) (start lexer) w in
   (lexer, c)
 
 let scan_php_trivia lexer =
@@ -1276,7 +1277,8 @@ let scan_xhp_colon_trivia (lexer : t) : t * Trivia.t =
     | '}', _
       -> begin
         let lexer' = with_offset lexer index in
-        lexer', Trivia.make_extra_token_error (width lexer')
+        lexer', Trivia.make_extra_token_error
+          (source lexer) (start lexer) (width lexer')
       end
     | _ -> aux lexer (succ index) ch1
   in
@@ -1391,7 +1393,7 @@ let scan_token_and_trivia scanner as_name lexer  =
   let (lexer, trailing) =
     if suppress_trailing_trivia kind then (lexer, [])
     else scan_trailing_php_trivia lexer in
-  (lexer, Token.make kind w leading trailing)
+  (lexer, Token.make kind (source lexer) (start lexer) w leading trailing)
 
 (* tokenizer takes a lexer, returns a lexer and a token *)
 let scan_assert_progress tokenizer lexer  =
@@ -1421,9 +1423,11 @@ let scan_next_token_as_keyword = scan_next_token false
 (* This function is the inner loop of the parser, is pure, and
 is frequently called twice in a row with the same lexer due to the
 design of the parser. We get a big win by memoizing it. *)
+
+
 let next_token = (* takes a lexer, returns a (lexer, token) *)
   let next_token_cache = Little_cache.make empty
-    (empty, Token.make TokenKind.EndOfFile 0 [] []) in
+    (empty, Token.make TokenKind.EndOfFile SourceText.empty 0 0 [] []) in
   Little_cache.memoize next_token_cache
     (scan_next_token_as_keyword scan_token_outside_type)
 
@@ -1431,7 +1435,7 @@ let next_token_no_trailing lexer =
   let tokenizer lexer =
     let (lexer, kind, w, leading) =
       scan_token_and_leading_trivia scan_token_outside_type false lexer in
-    (lexer, Token.make kind w leading []) in
+    (lexer, Token.make kind (source lexer) (start lexer) w leading []) in
   scan_assert_progress tokenizer lexer
 
 let next_token_in_string lexer name =
@@ -1445,7 +1449,7 @@ let next_token_in_string lexer name =
     | TokenKind.DoubleQuotedStringLiteralTail
     | TokenKind.HeredocStringLiteralTail -> scan_trailing_php_trivia lexer
     | _ -> (lexer, []) in
-  let token = Token.make kind w [] trailing in
+  let token = Token.make kind (source lexer) (start lexer) w [] trailing in
   (lexer, token)
 
 let next_docstring_header lexer =
@@ -1455,7 +1459,8 @@ let next_docstring_header lexer =
   let lexer = start_new_lexeme lexer in
   let (lexer, name, _) = scan_docstring_header lexer in
   let w = width lexer in
-  let token = Token.make TokenKind.HeredocStringLiteralHead w leading [] in
+  let token = Token.make TokenKind.HeredocStringLiteralHead
+    (source lexer) (start lexer) w leading [] in
   (lexer, token, name)
 
 let next_token_as_name lexer =
@@ -1475,16 +1480,18 @@ let next_xhp_element_token ~no_trailing ~attribute lexer =
     let (_, token1) = next_token lexer in
     match kind with
     | TokenKind.GreaterThan when no_trailing ->
-      (lexer, Token.make kind w leading [])
+      (lexer, Token.make kind (source lexer) (start lexer) w leading [])
     | TokenKind.XHPElementName
       when attribute && Token.kind token1 = TokenKind.Colon ->
       (* TODO(T21789285): Take this hack out when illtyped xhp is gone *)
       let (lexer, dropped) = scan_xhp_colon_trivia lexer in
       let (lexer, trailing) = scan_trailing_xhp_trivia lexer in
-      (lexer, Token.make kind w leading (dropped :: trailing))
+      (lexer, Token.make kind
+        (source lexer) (start lexer) w leading (dropped :: trailing))
     | _ ->
       let (lexer, trailing) = scan_trailing_php_trivia lexer in
-      (lexer, Token.make kind w leading trailing) in
+      (lexer, Token.make
+          kind (source lexer) (start lexer) w leading trailing) in
   let (lexer, token) = scan_assert_progress tokenizer lexer in
   let token_width = Token.width token in
   let trailing_width = Token.trailing_width token in
@@ -1508,7 +1515,7 @@ let next_xhp_body_token lexer =
       then scan_trailing_xhp_trivia lexer
       else (lexer, [])
     in
-    (lexer, Token.make kind w leading trailing) in
+    (lexer, Token.make kind (source lexer) (start lexer) w leading trailing) in
   scan_assert_progress scanner lexer
 
 let next_xhp_class_name lexer =
@@ -1518,13 +1525,13 @@ let next_xhp_name lexer =
   scan_token_and_trivia scan_xhp_element_name false lexer
 
 let make_markup_token lexer =
-  Token.make TokenKind.Markup (width lexer) [] []
+  Token.make TokenKind.Markup (source lexer) (start lexer) (width lexer) [] []
 
 let skip_to_end_of_markup lexer ~is_leading_section =
   let make_markup_and_suffix lexer =
     let markup_text = make_markup_token lexer in
     let less_than_question_token =
-      Token.make TokenKind.LessThanQuestion 2 [] []
+      Token.make TokenKind.LessThanQuestion (source lexer) (start lexer) 2 [] []
     in
     let make_long_tag lexer size =
       (* skip name*)
@@ -1536,7 +1543,8 @@ let skip_to_end_of_markup lexer ~is_leading_section =
         if is_leading_section then scan_trailing_php_trivia lexer
         else lexer, []
       in
-      let name = Token.make TokenKind.Name size [] trailing in
+      let name = Token.make TokenKind.Name
+        (source lexer) (start lexer) size [] trailing in
       lexer, markup_text, Some (less_than_question_token, Some name)
     in
     (* skip <? *)
@@ -1551,7 +1559,8 @@ let skip_to_end_of_markup lexer ~is_leading_section =
       begin
         (* skip = *)
         let lexer = advance lexer 1 in
-        let equal = Token.make TokenKind.Equal 1 [] [] in
+        let equal = Token.make TokenKind.Equal
+          (source lexer) (start lexer) 1 [] [] in
         lexer, markup_text, Some (less_than_question_token, Some equal)
       end
     | _ ->

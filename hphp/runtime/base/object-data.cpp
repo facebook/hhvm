@@ -770,19 +770,41 @@ Variant ObjectData::o_invoke_few_args(const String& s, int count,
 }
 
 ObjectData* ObjectData::clone() {
-  if (getAttribute(HasClone) && isCppBuiltin()) {
-    if (isCollection()) {
-      return collections::clone(this);
+  if (isCppBuiltin()) {
+    if (isCollection()) return collections::clone(this);
+    if (instanceof(c_Closure::classof())) {
+      return c_Closure::fromObject(this)->clone();
     }
-    always_assert(instanceof(c_Closure::classof()));
-    return c_Closure::fromObject(this)->clone();
+    assertx(instanceof(c_WaitHandle::classof()));
+    // cloning WaitHandles is not allowed
+    // invoke the instanceCtor to get the right sort of exception
+    auto const ctor = m_cls->instanceCtor();
+    ctor(m_cls);
+    always_assert(false);
   }
 
-  auto obj = instanceof(Generator::getClass()) ? Generator::allocClone(this) :
-             ObjectData::newInstance(m_cls);
   // clone prevents a leak if something throws before clone() returns
-  Object clone = Object::attach(obj);
+  Object clone;
   auto const nProps = m_cls->numDeclProperties();
+  if (getAttribute(HasNativeData)) {
+    if (instanceof(Generator::getClass())) {
+      clone = Object::attach(Generator::allocClone(this));
+    } else {
+      auto const ctor = m_cls->instanceCtor();
+      clone = Object::attach(ctor(m_cls));
+    }
+    assertx(clone->hasExactlyOneRef());
+    assertx(clone->hasInstanceDtor());
+
+    Native::nativeDataInstanceCopy(clone.get(), this);
+  } else {
+    auto const size = sizeForNProps(nProps);
+    auto const obj = new (tl_heap->objMalloc(size)) ObjectData(m_cls);
+    clone = Object::attach(obj);
+    assertx(clone->hasExactlyOneRef());
+    assertx(!clone->hasInstanceDtor());
+  }
+
   auto const clonePropVec = clone->propVecForWrite();
   auto const props = m_cls->declProperties();
   for (auto i = Slot{0}; i < nProps; i++) {
@@ -796,18 +818,11 @@ ObjectData* ObjectData::clone() {
     clone->setAttribute(HasDynPropArr);
     g_context->dynPropTable.emplace(clone.get(), dynPropArray().get());
   }
-  if (UNLIKELY(getAttribute(HasNativeData))) {
-    Native::nativeDataInstanceCopy(clone.get(), this);
-  }
   if (getAttribute(HasClone)) {
+    assertx(!isCppBuiltin());
     auto const method = clone->m_cls->lookupMethod(s_clone.get());
-    // PHP classes that inherit from cpp builtins that have special clone
-    // functionality *may* also define a __clone method, but it's totally
-    // fine if a __clone doesn't exist.
-    if (method || !isCppBuiltin()) {
-      assert(method);
-      g_context->invokeMethodV(clone.get(), method);
-    }
+    assertx(method);
+    g_context->invokeMethodV(clone.get(), method);
   }
   return clone.detach();
 }

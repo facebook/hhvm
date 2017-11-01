@@ -750,7 +750,7 @@ module Typing                               = struct
   let expecting_awaitable_return_type_hint  = 4174 (* DONT MODIFY!!!! *)
   let reffiness_invariant                   = 4175 (* DONT MODIFY!!!! *)
   let dollardollar_lvalue                   = 4176 (* DONT MODIFY!!!! *)
-  let static_method_on_interface            = 4177 (* DONT MODIFY!!!! *)
+  (* DEPRECATED static_method_on_interface = 4177 *)
   let duplicate_using_var                   = 4178 (* DONT MODIFY!!!! *)
   let illegal_disposable                    = 4179 (* DONT MODIFY!!!! *)
   let escaping_disposable                   = 4180 (* DONT MODIFY!!!! *)
@@ -758,6 +758,7 @@ module Typing                               = struct
   let inout_annotation_missing              = 4182 (* DONT MODIFY!!!! *)
   let inout_annotation_unexpected           = 4183 (* DONT MODIFY!!!! *)
   let inoutness_mismatch                    = 4184 (* DONT MODIFY!!!! *)
+  let static_synthetic_method               = 4185 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1881,10 +1882,10 @@ let classname_abstract_call cname meth_name call_pos decl_pos =
     decl_pos, "Declaration is here"
   ]
 
-let static_method_on_interface cname meth_name call_pos decl_pos =
+let static_synthetic_method cname meth_name call_pos decl_pos =
   let cname = Utils.strip_ns cname in
-  add_list Typing.static_method_on_interface [
-    call_pos, ("Cannot call "^cname^"::"^meth_name^"(); "^cname^" is an interface");
+  add_list Typing.static_synthetic_method [
+    call_pos, ("Cannot call "^cname^"::"^meth_name^"(); "^meth_name^" is not defined in "^cname);
     decl_pos, "Declaration is here"
   ]
 

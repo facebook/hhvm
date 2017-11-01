@@ -123,9 +123,13 @@ bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind) {
 }
 
 static std::atomic_flag s_did_log = ATOMIC_FLAG_INIT;
+static std::atomic<bool> s_TCisFull{false};
 
 bool shouldTranslate(const Func* func, TransKind kind) {
-  if (!shouldTranslateNoSizeLimit(func, kind)) return false;
+  if (s_TCisFull.load(std::memory_order_relaxed) ||
+      !shouldTranslateNoSizeLimit(func, kind)) {
+    return false;
+  }
 
   const auto serverMode = RuntimeOption::ServerExecutionMode();
   const auto maxTransTime = RuntimeOption::EvalJitMaxRequestTranslationTime;
@@ -166,6 +170,10 @@ bool shouldTranslate(const Func* func, TransKind kind) {
         break;
     }
   }
+
+  // Set a flag so we quickly bail from trying to generate new translations next
+  // time.
+  s_TCisFull.store(true, std::memory_order_relaxed);
 
   if (main_under && !s_did_log.test_and_set() &&
       RuntimeOption::EvalProfBranchSampleFreq == 0) {

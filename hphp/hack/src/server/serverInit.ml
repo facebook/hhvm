@@ -263,7 +263,15 @@ module ServerInitCommon = struct
       )) in
       Core_result.try_with (fun () -> fun () -> Ok get_dirty_files)
     | Load_state_natively ->
-      Core_result.try_with (fun () -> invoke_loading_state_natively ~tiny genv root)
+      let result =
+      Core_result.try_with (fun () -> invoke_loading_state_natively ~tiny genv root) in
+      begin match result, tiny with
+      | Error _, true ->
+        (* Turn off use tiny state *)
+        HackEventLogger.set_use_tiny_state false;
+        Core_result.try_with (fun () -> invoke_loading_state_natively ~tiny:false genv root)
+      | _ -> result
+      end
     | Load_state_natively_with_target target ->
       Core_result.try_with (fun () -> invoke_loading_state_natively ~tiny ~target genv root)
 

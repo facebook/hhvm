@@ -795,7 +795,8 @@ ObjectData* ObjectData::clone() {
     assertx(clone->hasInstanceDtor());
   } else {
     auto const size = sizeForNProps(nProps);
-    auto const obj = new (tl_heap->objMalloc(size)) ObjectData(m_cls);
+    auto const obj = new (tl_heap->objMalloc(size))
+      ObjectData(m_cls, InitRaw{}, m_cls->getODAttrs());
     clone = Object::attach(obj);
     assertx(clone->hasExactlyOneRef());
     assertx(!clone->hasInstanceDtor());
@@ -804,11 +805,21 @@ ObjectData* ObjectData::clone() {
   auto const clonePropVec = clone->propVecForWrite();
   auto const props = m_cls->declProperties();
   for (auto i = Slot{0}; i < nProps; i++) {
-    if (props[i].attrs & AttrNoSerialize) {
-      continue;
+    if (UNLIKELY(props[i].attrs & AttrNoSerialize)) {
+      // need to write default value, not value from instance we're cloning
+      if (m_cls->pinitVec().size() > 0) {
+        const Class::PropInitVec* propInitVec = m_cls->getPropData();
+        cellCopy((*propInitVec)[i], clonePropVec[i]);
+        if ((*propInitVec)[i].deepInit()) {
+          tvIncRefGen(clonePropVec[i]);
+          collections::deepCopy(&clonePropVec[i]);
+        }
+      } else {
+        cellCopy(m_cls->declPropInit()[i], clonePropVec[i]);
+      }
+    } else {
+      tvDupWithRef(propVec()[i], clonePropVec[i]);
     }
-    tvDecRefGen(&clonePropVec[i]);
-    tvDupWithRef(propVec()[i], clonePropVec[i]);
   }
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
     clone->setAttribute(HasDynPropArr);

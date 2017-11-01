@@ -60,6 +60,11 @@ struct TypedValue;
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps);
 
+namespace Native {
+  ObjectData* nativeDataInstanceCopyCtor(ObjectData *src, Class* cls,
+                                         size_t nProps);
+}
+
 struct InvokeResult {
   TypedValue val;
   InvokeResult() {}
@@ -439,6 +444,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
 private:
   friend struct MemoryProfile;
+  friend ObjectData* Native::nativeDataInstanceCopyCtor(
+    ObjectData* src, Class* cls, size_t nProps);
 
   bool toBooleanImpl() const noexcept;
   int64_t toInt64Impl() const noexcept;

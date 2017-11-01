@@ -130,7 +130,7 @@ ObjectData* nativeDataInstanceCopyCtor(ObjectData* src, Class* cls,
   assert(type_scan::isKnownType(ndi->tyindex));
   node->initHeader_32_16(HeaderKind::NativeData, 0, ndi->tyindex);
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
-             ObjectData(cls, ndi->odattrs);
+    ObjectData(cls, ObjectData::InitRaw{}, cls->getODAttrs() | ndi->odattrs);
   assert(obj->hasExactlyOneRef());
   if (ndi->init) {
     ndi->init(obj);

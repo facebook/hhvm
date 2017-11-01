@@ -221,7 +221,6 @@ let make_env config =
     ide_needs_parsing = Relative_path.Set.empty;
     disk_needs_parsing = Relative_path.Set.empty;
     needs_phase2_redecl = Relative_path.Set.empty;
-    needs_redecl = Relative_path.Set.empty;
     needs_recheck = Relative_path.Set.empty;
     needs_full_check = false;
     diag_subscribe = None;

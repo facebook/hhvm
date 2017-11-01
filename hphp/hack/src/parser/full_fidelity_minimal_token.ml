@@ -55,10 +55,6 @@ let leading token =
 let trailing token =
   token.trailing
 
-let has_leading_end_of_line token =
-  Core.List.exists token.leading
-    ~f:(fun trivia ->  Trivia.kind trivia = TriviaKind.EndOfLine)
-
 let with_leading leading token =
   { token with leading }
 

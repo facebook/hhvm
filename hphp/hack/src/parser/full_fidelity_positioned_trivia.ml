@@ -28,6 +28,24 @@ type t = {
   width : int
 }
 
+let make_ignore_error source_text offset width =
+  { kind = TriviaKind.IgnoreError; source_text; offset; width }
+
+let make_unsafe source_text offset width =
+  { kind = TriviaKind.Unsafe; source_text; offset; width }
+
+let make_unsafe_expression source_text offset width =
+  { kind = TriviaKind.UnsafeExpression; source_text; offset; width }
+
+let make_extra_token_error source_text offset width =
+  { kind = TriviaKind.ExtraTokenError; source_text; offset; width }
+
+let make_fallthrough source_text offset width =
+  { kind = TriviaKind.FallThrough; source_text; offset; width }
+
+let make_fix_me source_text offset width =
+  { kind = TriviaKind.FixMe; source_text; offset; width }
+
 let make_whitespace source_text offset width =
   { kind = TriviaKind.WhiteSpace; source_text; offset; width }
 

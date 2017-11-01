@@ -13,6 +13,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 module Token = Syntax.Token
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
+module TriviaKind = Full_fidelity_trivia_kind
 module SyntaxError = Full_fidelity_syntax_error
 module Env = Full_fidelity_parser_env
 module SimpleParserSyntax =
@@ -55,6 +56,12 @@ module WithExpressionAndStatementAndTypeParser
 
   include SimpleParser
   include ParserHelper.WithParser(SimpleParser)
+
+  (* Tokens *)
+
+  let has_leading_end_of_line token =
+    Core.List.exists (Token.leading token)
+      ~f:(fun trivia ->  Token.Trivia.kind trivia = TriviaKind.EndOfLine)
 
   (* Types *)
 
@@ -916,7 +923,7 @@ module WithExpressionAndStatementAndTypeParser
        * we should be parsing a methodish. Throw an error, process the token
        * as an extra, and keep going. *)
       | _, (Async | Coroutine | Function)
-        when not (Token.has_leading_end_of_line next_token) ->
+        when not (has_leading_end_of_line next_token) ->
         let parser = with_error parser SyntaxError.error1056
           ~on_whole_token:true in
         let parser = skip_and_log_unexpected_token parser

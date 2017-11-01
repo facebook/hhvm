@@ -20,7 +20,7 @@
  *)
 
 module MinimalToken = Full_fidelity_minimal_token
-module PositionedTrivia = Full_fidelity_positioned_trivia
+module Trivia = Full_fidelity_positioned_trivia
 module SourceText = Full_fidelity_source_text
 module TokenKind = Full_fidelity_token_kind
 
@@ -31,13 +31,13 @@ type t = {
   leading_width: int;
   width: int; (* Width of actual token, not counting trivia *)
   trailing_width: int;
-  leading: PositionedTrivia.t list;
-  trailing: PositionedTrivia.t list
+  leading: Trivia.t list;
+  trailing: Trivia.t list
 }
 
 let make kind source_text offset width leading trailing =
   let folder sum trivia =
-    sum + (PositionedTrivia.width trivia) in
+    sum + (Trivia.width trivia) in
   let leading_width = List.fold_left folder 0 leading in
   let trailing_width = List.fold_left folder 0 trailing in
   { kind; source_text; offset; leading_width; width; trailing_width;
@@ -45,6 +45,9 @@ let make kind source_text offset width leading trailing =
 
 let kind token =
   token.kind
+
+let with_kind token kind =
+  { token with kind }
 
 let source_text token =
   token.source_text
@@ -64,12 +67,15 @@ let full_width token =
 let leading token =
   token.leading
 
+let with_leading leading token =
+  { token with leading }
+
 let trailing token =
   token.trailing
 
 let has_trivia_kind token kind =
-  List.exists (fun t -> PositionedTrivia.kind t = kind) token.leading ||
-  List.exists (fun t -> PositionedTrivia.kind t = kind) token.trailing
+  List.exists (fun t -> Trivia.kind t = kind) token.leading ||
+  List.exists (fun t -> Trivia.kind t = kind) token.trailing
 
 let leading_start_offset token =
   token.offset
@@ -145,9 +151,9 @@ let from_minimal source_text minimal_token offset =
   let kind = MinimalToken.kind minimal_token in
   let leading_width = MinimalToken.leading_width minimal_token in
   let width = MinimalToken.width minimal_token in
-  let leading = PositionedTrivia.from_minimal_list source_text
+  let leading = Trivia.from_minimal_list source_text
     (MinimalToken.leading minimal_token) offset in
-  let trailing = PositionedTrivia.from_minimal_list source_text
+  let trailing = Trivia.from_minimal_list source_text
     (MinimalToken.trailing minimal_token) (offset + leading_width + width) in
   make kind source_text offset width leading trailing
 
@@ -160,6 +166,6 @@ let to_json token =
     ("leading_width", int_ token.leading_width);
     ("width", int_ token.width);
     ("trailing_width", int_ token.trailing_width);
-    ("leading", JSON_Array (List.map PositionedTrivia.to_json token.leading));
-    ("trailing", JSON_Array (List.map PositionedTrivia.to_json token.trailing))
+    ("leading", JSON_Array (List.map Trivia.to_json token.leading));
+    ("trailing", JSON_Array (List.map Trivia.to_json token.trailing))
     ]

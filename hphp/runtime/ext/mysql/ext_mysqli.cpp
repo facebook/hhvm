@@ -58,6 +58,11 @@ const StaticString
   s_def("def"),
   s_free("free");
 
+static Class* s_mysqli_class = nullptr;
+static Class* s_mysqli_stmt_class = nullptr;
+static Class* s_mysqli_result_class = nullptr;
+static Class* s_mysqli_driver_class = nullptr;
+
 // ini settings settable anywhere -- PHP_INI_ALL
 struct MysqliIniSetting {
   int m_default_port;
@@ -80,16 +85,10 @@ static bool reconnect = false;
 // helper
 
 static Resource get_connection_resource(const Object& obj) {
-  auto res = obj->o_realProp(
-    s_connection,
-    ObjectData::RealPropUnchecked,
-    s_mysqli
-  );
-  if (!res || !res->isResource()) {
-    return Resource();
-  }
-
-  return res->toResource();
+  assertx(s_mysqli_class);
+  auto const rval = obj->getProp(s_mysqli_class, s_connection.get()).unboxed();
+  if (rval.type() != KindOfResource) return Resource();
+  return Resource{rval.val().pres};
 }
 
 static std::shared_ptr<MySQL> get_connection(const Object& obj) {
@@ -99,26 +98,22 @@ static std::shared_ptr<MySQL> get_connection(const Object& obj) {
 }
 
 static req::ptr<MySQLStmt> getStmt(const Object& obj) {
-  auto res = obj->o_realProp(
-    s_stmt,
-    ObjectData::RealPropUnchecked,
-    s_mysqli_stmt
-  );
-  assert(res->isResource());
-  return cast<MySQLStmt>(*res);
+  assertx(s_mysqli_stmt_class);
+  auto const rval = obj->getProp(s_mysqli_stmt_class, s_stmt.get()).unboxed();
+  assertx(rval.type() == KindOfResource);
+  return req::ptr<MySQLStmt>(static_cast<MySQLStmt*>(rval.val().pres->data()));
 }
 
 static req::ptr<MySQLResult> getResult(const Object& obj) {
-  auto res = obj->o_realProp(
-    s_result,
-    ObjectData::RealPropUnchecked,
-    s_mysqli_result
+  assertx(s_mysqli_result_class);
+  auto const rval = obj->getProp(
+    s_mysqli_result_class,
+    s_result.get()
+  ).unboxed();
+  if (rval.type() != KindOfResource) return nullptr;
+  return req::ptr<MySQLResult>(
+    static_cast<MySQLResult*>(rval.val().pres->data())
   );
-  if (!res || !res->isResource()) {
-    return nullptr;
-  }
-
-  return cast_or_null<MySQLResult>(*res);
 }
 
 Variant mysqli_stmt_param_count_get(const Object& this_);
@@ -495,16 +490,6 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
   return true;
 }
 
-static Variant* getRawProp(const Object& obj,
-                          const String& propName,
-                          const String& className) {
-  return obj->o_realProp(
-    propName,
-    ObjectData::RealPropUnchecked,
-    className
-  );
-}
-
 static Variant getStaticProp(const Object& obj, const StaticString& prop) {
   auto cls = obj->getVMClass();
   return tvAsVariant(cls->getSPropData(cls->lookupSProp(prop.get())));
@@ -710,7 +695,9 @@ static Variant mysqli_driver_embedded_get(const Object& /*this_*/) {
 }
 
 static Variant mysqli_driver_reconnect_get(const Object& this_) {
-  return *getRawProp(this_, s_reconnect, s_mysqli_driver);
+  assertx(s_mysqli_driver_class);
+  auto const rval = this_->getProp(s_mysqli_driver_class, s_reconnect.get());
+  return Variant::wrap(rval.tv());
 }
 
 void mysqli_driver_reconnect_set(const Object& this_, const Variant& value) {
@@ -718,7 +705,9 @@ void mysqli_driver_reconnect_set(const Object& this_, const Variant& value) {
 }
 
 static Variant mysqli_driver_report_mode_get(const Object& this_) {
-  return *getRawProp(this_, s_report_mode, s_mysqli_driver);
+  assertx(s_mysqli_driver_class);
+  auto const rval = this_->getProp(s_mysqli_driver_class, s_report_mode.get());
+  return Variant::wrap(rval.tv());
 }
 
 void mysqli_driver_report_mode_set(const Object& this_, const Variant& value) {
@@ -834,17 +823,24 @@ Variant mysqli_result_lengths_get(const Object& this_) {
 }
 
 Variant mysqli_result_type_get(const Object& this_) {
-  return *getRawProp(this_, s_resulttype, s_mysqli_result);
+  assertx(s_mysqli_result_class);
+  auto const rval = this_->getProp(s_mysqli_result_class, s_resulttype.get());
+  return Variant::wrap(rval.tv());
 }
 
 Variant mysqli_result_num_rows_get(const Object& this_) {
   auto res = getResult(this_);
   VALIDATE_RESULT(res)
 
-  auto resultType = getRawProp(this_, s_resulttype, s_mysqli_result);
-  auto done = getRawProp(this_, s_done, s_mysqli_result)->toBoolean();
+  assertx(s_mysqli_result_class);
+  auto resultType = tvCastToInt64(
+    this_->getProp(s_mysqli_result_class, s_resulttype.get()).tv()
+  );
+  auto done = tvCastToBoolean(
+    this_->getProp(s_mysqli_result_class, s_done.get()).tv()
+  );
 
-  if (resultType->toInt64() == _MYSQLI_USE_RESULT && !done) {
+  if (resultType == _MYSQLI_USE_RESULT && !done) {
     raise_warning("Function can not be used with MYSQL_USE_RESULT");
     return VarNR(0);
   }
@@ -1390,6 +1386,17 @@ struct mysqliExtension final : Extension {
     HHVM_RC_INT(MYSQLI_SERVER_QUERY_WAS_SLOW, 2048);
 
     loadSystemlib();
+
+#define GET_CLASS(x) \
+    s_##x##_class = Unit::lookupClass(s_##x.get()); \
+    assertx(s_##x##_class)
+
+    GET_CLASS(mysqli);
+    GET_CLASS(mysqli_stmt);
+    GET_CLASS(mysqli_result);
+    GET_CLASS(mysqli_driver);
+
+#undef GET_CLASS
   }
 } s_mysqli_extension;
 

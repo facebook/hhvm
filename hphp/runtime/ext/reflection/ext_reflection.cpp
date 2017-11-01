@@ -111,6 +111,9 @@ const StaticString
   s_type_hint_builtin("type_hint_builtin"),
   s_type_hint_nullable("type_hint_nullable");
 
+Class* Reflection::s_ReflectionExceptionClass = nullptr;
+Class* Reflection::s_ReflectionExtensionClass = nullptr;
+
 Class* get_cls(const Variant& class_or_object) {
   if (class_or_object.is(KindOfObject)) {
     return class_or_object.toCObjRef()->getVMClass();
@@ -700,8 +703,6 @@ void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
   throw_object(inst);
 }
 
-
-HPHP::Class* Reflection::s_ReflectionExceptionClass = nullptr;
 
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionFuncHandle
@@ -1732,9 +1733,12 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
 }
 
 static Variant reflection_extension_name_get(const Object& this_) {
-  auto name = this_->o_realProp(s___name, ObjectData::RealPropUnchecked,
-                                s_reflectionextension);
-  return name->toString();
+  assertx(Reflection::s_ReflectionExtensionClass);
+  auto const name = this_->getProp(
+    Reflection::s_ReflectionExtensionClass,
+    s___name.get()
+  ).unboxed();
+  return tvCastToString(name.tv());
 }
 
 static Native::PropAccessor reflection_extension_Accessors[] = {
@@ -2100,7 +2104,11 @@ struct ReflectionExtension final : Extension {
     loadSystemlib("reflection_hni");
 
     Reflection::s_ReflectionExceptionClass =
-        Unit::lookupClass(s_reflectionexception.get());
+      Unit::lookupClass(s_reflectionexception.get());
+    assertx(Reflection::s_ReflectionExceptionClass);
+    Reflection::s_ReflectionExtensionClass =
+      Unit::lookupClass(s_reflectionextension.get());
+    assertx(Reflection::s_ReflectionExtensionClass);
   }
 } s_reflection_extension;
 

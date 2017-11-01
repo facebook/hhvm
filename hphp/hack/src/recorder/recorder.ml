@@ -24,8 +24,10 @@ module Header = struct
   let make_header ?for_revision build_id =
     let for_revision = match for_revision with
     | None -> ""
-    | Some for_revision ->
-      Printf.sprintf "\"loaded_state_for_base_revision\" : \"%s\"," for_revision
+    | Some (Hg.Svn_rev svn_rev) ->
+      Printf.sprintf "\"loaded_state_for_base_revision\" : \"%d\"," svn_rev
+    | Some (Hg.Hg_rev hash) ->
+      Printf.sprintf "\"loaded_state_for_hg_rev\" : \"%s\"," hash
     in
     let build_id = Printf.sprintf "\"build_id\" : \"%s\"" build_id in
     let blob = Printf.sprintf "{ %s %s }" for_revision build_id in
@@ -86,9 +88,9 @@ type instance =
   | Switched_off
   | Active of env
   (** Hack server loaded a saved state. *)
-  | Active_and_loaded_saved_state of string * env
+  | Active_and_loaded_saved_state of Hg.rev * env
   | Finished of event list
-  | Finished_and_loaded_saved_state of string * (event list)
+  | Finished_and_loaded_saved_state of Hg.rev * (event list)
 
 let is_finished instance = match instance with
   | Finished _ -> true
@@ -165,7 +167,7 @@ let files_with_contents_opt files =
 let convert_event debug_event = match debug_event with
   | DE.Loaded_saved_state (
     { DE.filename;
-      corresponding_base_revision;
+      corresponding_rev;
       dirty_files;
       changed_while_parsing;
       build_targets; },
@@ -177,7 +179,7 @@ let convert_event debug_event = match debug_event with
     let build_targets = files_with_contents_opt build_targets in
     Loaded_saved_state (
       { filename;
-      corresponding_base_revision;
+      corresponding_rev;
       dirty_files;
       changed_while_parsing;
       build_targets; },
@@ -207,9 +209,9 @@ let add_event event instance = match instance, event with
     Finished_and_loaded_saved_state (for_revision,
       (List.rev env.rev_buffered_recording))
   | Active env, (DE.Loaded_saved_state
-    ({ DE.corresponding_base_revision; _ }, _)) ->
+    ({ DE.corresponding_rev; _ }, _)) ->
     let env = with_event event env in
-    Active_and_loaded_saved_state (corresponding_base_revision, env)
+    Active_and_loaded_saved_state (corresponding_rev, env)
   | Active env, _ ->
     let env = with_event event env in
     Active env

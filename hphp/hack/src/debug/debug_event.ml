@@ -1,6 +1,6 @@
 type saved_state_info = {
   filename : string;
-  corresponding_base_revision: string;
+  corresponding_rev: Hg.rev;
   (** During server initialization, there are files that need to be
    * rechecked due to them being "dirtied" in various ways - already
    * dirtied VCS working directory, modified while parsing FASTs or

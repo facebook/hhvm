@@ -13,15 +13,15 @@ let test_open_header_width_constant () =
   true
 
 let test_make_header () =
-  let header = Recorder.Header.make_header ~for_revision:"hello"
+  let header = Recorder.Header.make_header ~for_revision:(Hg.Hg_rev "hello")
     "fake_build_id" in
-  Asserter.String_asserter.assert_equals "<hack-recording-header size=00076>"
+  Asserter.String_asserter.assert_equals "<hack-recording-header size=00069>"
     (String.sub header 0 Recorder.Header.open_tag_width) "";
   let blob = String.sub header Recorder.Header.open_tag_width 76 in
   let json = Hh_json.json_of_string ~strict:true blob in
   let open Hh_json.Access in
   let rev = (return json)
-    >>= get_string "loaded_state_for_base_revision"
+    >>= get_string "loaded_state_for_hg_rev"
     |> get_or_throw
   in
   Asserter.String_asserter.assert_equals "hello" rev "";

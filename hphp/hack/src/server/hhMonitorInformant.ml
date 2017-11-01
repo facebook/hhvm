@@ -46,24 +46,10 @@ module Revision_map = struct
         let future = Hg.get_closest_svn_ancestor hg_rev (Path.to_string root) in
         Hashtbl.add t.svn_queries hg_rev future
 
-    (** Wrap Future.get. If process exits abnormally, returns 0. *)
-    let svn_rev_of_future future =
-      let parse_svn_rev svn_rev =
-        try int_of_string svn_rev
-        with Failure "int_of_string" ->
-          Hh_logger.log "Revision_tracker failed to parse svn_rev: %s" svn_rev;
-          0
-      in
-      try begin
-        let result = Future.get future in
-        parse_svn_rev result
-      end with
-      | Future_sig.Process_failure _ -> 0
-
     let find_svn_rev hg_rev t =
       let future = Hashtbl.find t.svn_queries hg_rev in
       if Future.is_ready future then
-        Some (svn_rev_of_future future)
+        Some (Future.get future)
       else
         None
 
@@ -507,7 +493,7 @@ module Revision_tracker = struct
     | Initializing (init_settings, future) ->
       if Future.is_ready future
       then
-        let svn_rev = Revision_map.svn_rev_of_future future in
+        let svn_rev = Future.get future in
         let () = Hh_logger.log "Initialized Revision_tracker to SVN rev: %d"
           svn_rev in
         let env = active_env init_settings svn_rev in

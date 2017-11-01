@@ -1,6 +1,6 @@
 type native_load_result = {
   saved_state_fn : string;
-  corresponding_base_rev : string;
+  corresponding_rev : Hg.rev;
   is_cached : bool;
   state_distance : int;
   deptable_fn : string;

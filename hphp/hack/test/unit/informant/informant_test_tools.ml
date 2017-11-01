@@ -2,10 +2,10 @@ let hg_rev_1 = "abc"
 let hg_rev_5 = "def"
 let hg_rev_200 = "ghi"
 let hg_rev_230 = "jkl"
-let svn_1 = "1"
-let svn_5 = "5"
-let svn_200 = "200" (** is a significant distance from the above. *)
-let svn_230 = "230"
+let svn_1 = 1
+let svn_5 = 5
+let svn_200 = 200 (** is a significant distance from the above. *)
+let svn_230 = 230
 
 type state_transition =
   | State_leave

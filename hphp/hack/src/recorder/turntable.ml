@@ -102,7 +102,7 @@ skip_hg_update_on_load_state recording root =
     preconnection_playback skip_hg_update_on_load_state recording root
   | Loaded_saved_state ( {
       filename = _filename;
-      corresponding_base_revision;
+      corresponding_rev;
       dirty_files;
       changed_while_parsing;
       build_targets;
@@ -113,7 +113,7 @@ skip_hg_update_on_load_state recording root =
         ()
       else
         Future.get @@
-          Hg.update_to_base_rev corresponding_base_revision @@
+          Hg.update_to_rev corresponding_rev @@
           Path.to_string root;
       write_files_contents dirty_files;
       write_files_contents changed_while_parsing;

@@ -119,7 +119,7 @@ module ServerInitCommon = struct
       let kv = Hh_json.get_object_exn json in
       check_json_obj_error kv;
       let state_fn = Hh_json.get_string_exn @@ List.Assoc.find_exn kv "state" in
-      let corresponding_base_revision = Hh_json.get_string_exn @@
+      let corresponding_rev = Hh_json.get_string_exn @@
         List.Assoc.find_exn kv "corresponding_base_revision" in
       let is_cached =
         Hh_json.get_bool_exn @@ List.Assoc.find_exn kv "is_cached" in
@@ -134,7 +134,7 @@ module ServerInitCommon = struct
       Daemon.to_channel oc
         @@ Ok (`Fst (
           state_fn,
-          corresponding_base_revision,
+          Hg.Svn_rev (int_of_string corresponding_rev),
           is_cached,
           end_time,
           deptable_fn,
@@ -176,7 +176,7 @@ module ServerInitCommon = struct
       | `Snd _ -> assert false
       | `Fst (
         fn,
-        corresponding_base_revision,
+        corresponding_rev,
         is_cached,
         end_time,
         deptable_fn,
@@ -201,7 +201,7 @@ module ServerInitCommon = struct
             let _ = Hh_logger.log_duration "Finding changed files" t in
             Ok (
               fn,
-              corresponding_base_revision,
+              corresponding_rev,
               Relative_path.set_of_list dirty_files,
               old_saved,
               state_distance)
@@ -237,7 +237,7 @@ module ServerInitCommon = struct
       let dirty_files = Relative_path.set_of_list dirty_files in
       Ok (
         result.State_loader.saved_state_fn,
-        result.State_loader.corresponding_base_rev,
+        result.State_loader.corresponding_rev,
         dirty_files,
         old_saved,
         Some result.State_loader.state_distance
@@ -256,7 +256,7 @@ module ServerInitCommon = struct
       let old_saved = Marshal.from_channel chan in
       let get_dirty_files = (fun () -> Ok (
         saved_state_fn,
-        corresponding_base_revision,
+        (Hg.Svn_rev (int_of_string (corresponding_base_revision))),
         changes,
         old_saved,
         None
@@ -496,7 +496,7 @@ module ServerInitCommon = struct
     >>= with_loader_timeout timeout "wait_for_changes"
     >>= fun (
       saved_state_fn,
-      corresponding_base_revision,
+      corresponding_rev,
       dirty_files,
       old_saved,
       state_distance
@@ -526,7 +526,7 @@ module ServerInitCommon = struct
       string_starts_with p root && ServerEnv.file_filter p) in
     let changed_while_parsing = Relative_path.(relativize_set Root updates) in
     Ok (saved_state_fn,
-      corresponding_base_revision,
+      corresponding_rev,
       dirty_files,
       changed_while_parsing,
       old_saved,
@@ -553,13 +553,13 @@ module ServerInitCommon = struct
 end
 
 type saved_state_fn = string
-type corresponding_base_rev = string
+type corresponding_rev = Hg.rev
 (** Newer versions of load script also output the distance of the
  * saved state's revision to the node's merge base. *)
 type state_distance = int option
 
 type state_result =
- (saved_state_fn * corresponding_base_rev * Relative_path.Set.t
+ (saved_state_fn * corresponding_rev * Relative_path.Set.t
    * Relative_path.Set.t * FileInfo.saved_state_info * state_distance, exn)
  result
 
@@ -633,7 +633,7 @@ module ServerEagerInit : InitKind = struct
     match state with
     | Ok (
       saved_state_fn,
-      corresponding_base_revision,
+      corresponding_rev,
       dirty_files,
       changed_while_parsing,
       old_saved,
@@ -647,7 +647,7 @@ module ServerEagerInit : InitKind = struct
       let global_state = ServerGlobalState.save () in
       let loaded_event = Debug_event.Loaded_saved_state ({
         Debug_event.filename = saved_state_fn;
-        corresponding_base_revision;
+        corresponding_rev;
         dirty_files;
         changed_while_parsing;
         build_targets;
@@ -743,14 +743,14 @@ module ServerIncrementalInit : InitKind = struct
     let state = get_state_future genv root state_future timeout in
     match state with
     | Ok (
-      saved_state_fn, corresponding_base_revision,
+      saved_state_fn, corresponding_rev,
       dirty_files, changed_while_parsing, old_saved, _state_distance) ->
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
       let global_state = ServerGlobalState.save () in
       let loaded_event = Debug_event.Loaded_saved_state ({
         Debug_event.filename = saved_state_fn;
-        corresponding_base_revision;
+        corresponding_rev;
         dirty_files;
         changed_while_parsing;
         build_targets;
@@ -767,7 +767,7 @@ module ServerIncrementalInit : InitKind = struct
         List.map dirty_file_list (Relative_path.suffix) in
       (* Send the hg cat command *)
       let pid, t = send_hg_cat_command
-        root corresponding_base_revision dirty_file_paths_list t in
+        root corresponding_rev dirty_file_paths_list t in
       (* Find the temporary directories *)
       let tmp_files_list = List.map ~f:Relative_path.to_tmp dirty_file_list in
       (* Build targets are untracked by version control, so we must always
@@ -844,14 +844,14 @@ module ServerLazyInit : InitKind = struct
 
     match state with
     | Ok (
-      saved_state_fn, corresponding_base_revision,
+      saved_state_fn, corresponding_rev,
       dirty_files, changed_while_parsing, old_saved, _state_distance) ->
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
       let global_state = ServerGlobalState.save () in
       let loaded_event = Debug_event.Loaded_saved_state ({
         Debug_event.filename = saved_state_fn;
-        corresponding_base_revision;
+        corresponding_rev;
         dirty_files;
         changed_while_parsing;
         build_targets;
@@ -1046,7 +1046,7 @@ let init ?load_mini_approach genv =
   let result = match state with
     | Ok (
       _saved_state_fn,
-      _corresponding_base_revision,
+      _corresponding_rev,
       _dirty_files,
       _changed_while_parsing,
       _old_saved,

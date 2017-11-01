@@ -14,6 +14,9 @@ module Hg_actual = struct
 
   include Hg_sig.Types
 
+  let rev_string rev = match rev with
+    | Hg_rev hash -> hash
+    | Svn_rev rev -> Printf.sprintf "r%d" rev
 
 (** Given a list of files and their revisions, saves the files to the output
  * directory. For example,
@@ -30,7 +33,7 @@ let get_old_version_of_files ~rev ~files ~out ~repo =
   let process = Process.exec "hg" ([
     "cat";
     "-r";
-    "r"^rev;
+    (rev_string rev);
     ] @ files @ [
     "-o";
     out;
@@ -58,7 +61,7 @@ let get_closest_svn_ancestor hg_rev repo =
     repo;
   ]
   in
-  Future.make process String.trim
+  Future.make process (fun s -> int_of_string (String.trim s))
 
   (** Get the hg revision hash of the current working copy in the repo dir.
    *
@@ -86,27 +89,27 @@ let get_closest_svn_ancestor hg_rev repo =
       "--cwd";
       repo;
     ] in
-    Future.make process String.trim
+    Future.make process (fun s -> int_of_string (String.trim s))
 
   (** Returns the files changed since the given svn_rev
    *
    * hg status -n --rev r<svn_rev> --cwd <repo> *)
-  let files_changed_since_svn_rev svn_rev repo =
+  let files_changed_since_rev rev repo =
     let process = Process.exec "hg" [
       "status";
       "--rev";
-      Printf.sprintf "r%s" svn_rev;
+      rev_string rev;
       "--cwd";
       repo;
     ] in
     Future.make process Sys_utils.split_lines
 
   (** hg update --rev r<svn_rev> --cwd <repo> *)
-  let update_to_base_rev svn_rev repo =
+  let update_to_rev rev repo =
     let process = Process.exec "hg" [
       "update";
       "--rev";
-      Printf.sprintf "r%s" svn_rev;
+      rev_string rev;
       "--cwd";
       repo;
     ] in
@@ -124,7 +127,7 @@ let get_closest_svn_ancestor hg_rev repo =
       let closest_svn_ancestor_bind_value _ _ =
         raise Cannot_set_when_mocks_disabled
 
-      let files_changed_since_svn_rev_returns _ =
+      let files_changed_since_rev_returns _ =
         raise Cannot_set_when_mocks_disabled
     end
 
@@ -136,9 +139,9 @@ module Hg_mock = struct
 
   module Mocking = struct
     let current_working_copy_hg_rev = ref @@ Future.of_value ("", false)
-    let current_working_copy_base_rev = ref @@ Future.of_value ""
+    let current_working_copy_base_rev = ref @@ Future.of_value 0
     let closest_svn_ancestor = Hashtbl.create 10
-    let files_changed_since_svn_rev = ref @@ Future.of_value []
+    let files_changed_since_rev = ref @@ Future.of_value []
 
     let current_working_copy_hg_rev_returns v =
       current_working_copy_hg_rev := v
@@ -149,16 +152,16 @@ module Hg_mock = struct
     let closest_svn_ancestor_bind_value hg_rev svn_rev =
       Hashtbl.replace closest_svn_ancestor hg_rev svn_rev
 
-    let files_changed_since_svn_rev_returns v =
-      files_changed_since_svn_rev := v
+    let files_changed_since_rev_returns v =
+      files_changed_since_rev := v
   end
 
   let current_working_copy_hg_rev _ = !Mocking.current_working_copy_hg_rev
   let current_working_copy_base_rev _ = !Mocking.current_working_copy_base_rev
   let get_closest_svn_ancestor hg_rev _ =
     Hashtbl.find Mocking.closest_svn_ancestor hg_rev
-  let files_changed_since_svn_rev _ _ = !Mocking.files_changed_since_svn_rev
-  let update_to_base_rev _ _ = Future.of_value ()
+  let files_changed_since_rev _ _ = !Mocking.files_changed_since_rev
+  let update_to_rev _ _ = Future.of_value ()
   let get_old_version_of_files ~rev:_ ~files:_ ~out:_ ~repo:_ = Future.of_value ()
 
 

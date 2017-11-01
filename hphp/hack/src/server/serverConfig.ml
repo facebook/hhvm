@@ -116,13 +116,7 @@ let process_experimental sl =
   match List.map sl String.lowercase_ascii with
     | ["false"] -> SSet.empty
     | ["true"] -> TypecheckerOptions.experimental_all
-    | features ->
-      begin
-        List.iter features ~f:(fun s ->
-          if not (SSet.mem TypecheckerOptions.experimental_all s)
-          then failwith ("invalid experimental feature " ^ s));
-        List.fold_left features ~f:SSet.add ~init:SSet.empty
-      end
+    | features -> List.fold_left features ~f:SSet.add ~init:SSet.empty
 
 let config_experimental_tc_features config =
   match SMap.get config "enable_experimental_tc_features" with

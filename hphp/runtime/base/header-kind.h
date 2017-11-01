@@ -48,9 +48,12 @@ enum class HeaderKind : uint8_t {
   Dict, VecArray, Keyset,
   // Other ordinary refcounted heap objects
   String, Resource, Ref,
+
+  // Valid kinds for an ObjectData; all but Object are isCppBuiltin()
   Object, WaitHandle, AsyncFuncWH, AwaitAllWH, Closure,
   // Collections
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
+
   // other kinds, not used for countable objects.
   AsyncFuncFrame, // NativeNode followed by Frame, Resumable, AFWH
   NativeData, // a NativeData header preceding an HNI ObjectData
@@ -231,8 +234,8 @@ namespace detail {
 // update these if you add more kinds for ObjectData that should
 // pass the isCppBuiltin() predicate.
 constexpr auto FirstCppBuiltin = HeaderKind::WaitHandle;
-constexpr auto LastCppBuiltin = HeaderKind::AsyncFuncFrame;
-static_assert((int)LastCppBuiltin - (int)FirstCppBuiltin == 11,
+constexpr auto LastCppBuiltin = HeaderKind::ImmSet;
+static_assert((int)LastCppBuiltin - (int)FirstCppBuiltin == 10,
               "keep predicate in sync with enum");
 }
 

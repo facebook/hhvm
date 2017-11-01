@@ -11478,6 +11478,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
         tvVal = make_tv<KindOfBoolean>(ce->getBooleanValue());
       } else if (ce->isScalar()) {
         ce->getScalarValue(tvAsVariant(&tvVal));
+        tvAsVariant(&tvVal).setEvalScalar();
       } else {
         not_implemented();
       }
@@ -11534,6 +11535,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
         if (tvAsVariant(&tvVal).isArray()) {
           not_implemented();
         }
+        tvAsVariant(&tvVal).setEvalScalar();
         break;
       }
       not_reached();

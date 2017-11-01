@@ -39,6 +39,14 @@
   },
   {
     "jsonrpc": "2.0",
+    "method": "telemetry/event",
+    "params": {
+      "type": 4,
+      "message": "Version in hhconfig=[NoVersion]"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "method": "textDocument/publishDiagnostics",
     "params": {
       "uri": "${php_file_uri}",

@@ -29,9 +29,6 @@ type server_conn = {
   ic: Timeout.in_channel;
   oc: out_channel;
 
-  (* The hhconfig version indicates which binary format the server speaks... *)
-  hhconfig_version: string option;
-
   (* Pending messages sent from the server. They need to be relayed to the
      client. *)
   pending_messages: ServerCommandTypes.push Queue.t;
@@ -65,7 +62,6 @@ end
 module Lost_env = struct
   type t = {
     p: params;
-    prev_hhconfig_version: string option;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     lock_file: string;
     dialog: ShowMessageRequest.t; (* "hh_server stopped" *)
@@ -105,6 +101,7 @@ type state =
   | Post_shutdown
 
 let initialize_params: Hh_json.json option ref = ref None
+let hhconfig_version: string ref = ref "[NotYetInitialized]"
 
 module Jsonrpc = Jsonrpc.Make (struct type t = state end)
 module Lsp_helpers = Lsp_helpers.Make (struct type t = state let get () = !initialize_params end)
@@ -152,6 +149,29 @@ let state_to_string (state: state) : string =
   | Main_loop _menv -> "Main_loop"
   | Lost_server _lenv -> "Lost_server"
   | Post_shutdown -> "Post_shutdown"
+
+
+let get_root () : Path.t option =
+  let path_opt = Lsp_helpers.get_root () in
+  if Option.is_none path_opt then
+    None (* None for us means "haven't yet received initialize so we don't know" *)
+  else
+    Some (ClientArgsUtils.get_root path_opt) (* None for ClientArgsUtils means "." *)
+
+
+let read_hhconfig_version () : string =
+  match get_root () with
+  | None ->
+    "[NoRoot]"
+  | Some root ->
+    let file = Filename.concat (Path.to_string root) ".hhconfig" in
+    try
+      let contents = Sys_utils.cat file in
+      let config = Config_file.parse_contents contents in
+      let version = SMap.get "version" config in
+      Option.value version ~default:"[NoVersion]"
+    with e ->
+      Printf.sprintf "[NoHhconfig:%s]" (Printexc.to_string e)
 
 
 (* get_uris_with_unsaved_changes is the set of files for which we've          *)
@@ -317,13 +337,6 @@ let dismiss_ui (state: state) : state =
 (************************************************************************)
 (** Conversions - ad-hoc ones written as needed them, not systematic   **)
 (************************************************************************)
-
-let get_root () : Path.t option =
-  let path_opt = Lsp_helpers.get_root () in
-  if Option.is_none path_opt then
-    None (* None for us means "haven't yet received initialize so we don't know" *)
-  else
-    Some (ClientArgsUtils.get_root path_opt) (* None for ClientArgsUtils means "." *)
 
 let lsp_uri_to_path = Lsp_helpers.lsp_uri_to_path
 let path_to_lsp_uri = Lsp_helpers.path_to_lsp_uri
@@ -1037,12 +1050,6 @@ let report_connect_end
     Main_loop menv
 
 
-let read_hhconfig_version (root: Path.t) : string option =
-  let file = Filename.concat (Path.to_string root) ".hhconfig" in
-  let _, config = Config_file.parse file in
-  SMap.get "version" config
-
-
 (* After the server has sent 'hello', it means the persistent connection is   *)
 (* ready, so we can send our backlog of file-edits to the server.             *)
 let connect_after_hello
@@ -1105,8 +1112,7 @@ let rec connect_client
     let (ic, oc) = ClientConnect.connect env_connect in
     can_autostart_after_mismatch := false;
     let pending_messages = Queue.create () in
-    let hhconfig_version = read_hhconfig_version root in
-    { ic; oc; hhconfig_version; pending_messages; }
+    { ic; oc; pending_messages; }
   with
   | Exit_with Build_id_mismatch when !can_autostart_after_mismatch ->
     (* Raised when the server was running an old version. We'll retry once.   *)
@@ -1246,21 +1252,17 @@ and reconnect_from_lost_if_necessary
   in
   if should_reconnect then
     let has_unsaved_changes = not (SSet.is_empty (get_uris_with_unsaved_changes state)) in
-    let prev_version, current_version = match state, get_root () with
-      | Lost_server lenv, Some root -> lenv.prev_hhconfig_version, read_hhconfig_version root
-      | _ -> assert false in
-    let needs_to_terminate = has_unsaved_changes || prev_version <> current_version in
+    let current_version = read_hhconfig_version () in
+    let needs_to_terminate = has_unsaved_changes || !hhconfig_version <> current_version in
     if needs_to_terminate then
       (* In these cases we have to terminate our LSP server, and trust the    *)
       (* client to restart us. Note that we can't do clientStart because that *)
       (* would start our (old) version of hh_server, not the new one!         *)
       let unsaved = get_uris_with_unsaved_changes state |> SSet.elements in
       let unsaved_str = if unsaved = [] then "[None]" else String.concat "\n" unsaved in
-      let prev_version_str = Option.value prev_version ~default: "[None]" in
-      let current_version_str = Option.value current_version ~default: "[None]" in
       let message = "Unsaved files:\n" ^ unsaved_str ^
-        "\nVersion in hhconfig that spawned the current hh_client: " ^ prev_version_str ^
-        "\nVersion in hhconfig currently: " ^ current_version_str ^
+        "\nVersion in hhconfig that spawned the current hh_client: " ^ !hhconfig_version ^
+        "\nVersion in hhconfig currently: " ^ current_version ^
         "\n" in
       Lsp_helpers.telemetry_log message;
       exit_fail ()
@@ -1283,13 +1285,6 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
 
   let state = dismiss_ui state in
   let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
-
-  let prev_hhconfig_version = match state with
-    | Main_loop menv -> menv.Main_env.conn.hhconfig_version
-    | In_init ienv -> ienv.In_init_env.conn.hhconfig_version
-    | Lost_server lenv -> lenv.prev_hhconfig_version
-    | _ -> None
-  in
 
   let lock_file = match get_root () with
     | None -> assert false
@@ -1328,7 +1323,6 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
   if reconnect_immediately then
     let lost_state = Lost_server { Lost_env.
       p;
-      prev_hhconfig_version;
       uris_with_unsaved_changes;
       lock_file;
       dialog = ShowMessageRequest.None;
@@ -1351,7 +1345,6 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
     in
     Lost_server { Lost_env.
       p;
-      prev_hhconfig_version;
       uris_with_unsaved_changes;
       lock_file;
       dialog;
@@ -1511,8 +1504,10 @@ let handle_event
   (* initialize request *)
   | Pre_init, Client_message c when c.method_ = "initialize" ->
     initialize_params := c.params;
+    hhconfig_version := read_hhconfig_version ();
     state := connect !state;
-    do_initialize () |> print_initialize |> Jsonrpc.respond c
+    do_initialize () |> print_initialize |> Jsonrpc.respond c;
+    Lsp_helpers.telemetry_log ("Version in hhconfig=" ^ !hhconfig_version)
 
   (* any request/notification if we haven't yet initialized *)
   | Pre_init, Client_message _c ->

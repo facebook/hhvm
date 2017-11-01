@@ -313,54 +313,6 @@ TypedValue* ObjectData::makeDynProp(K key, AccessFlags flags) {
   return reserveProperties().lvalAt(key, flags).asTypedValue();
 }
 
-Variant* ObjectData::realPropImpl(const String& propName, int flags,
-                                  const String& context,
-                                  bool copyDynArray) {
-  assert(kindIsValid());
-
-  /*
-   * Returns a pointer to a place for a property value. This should never
-   * call the magic methods __get or __set. The flags argument describes the
-   * behavior in cases where the named property is nonexistent or
-   * inaccessible.
-   */
-  Class* ctx = nullptr;
-  if (!context.empty()) {
-    ctx = Unit::lookupClass(context.get());
-  }
-
-  auto const lookup = getPropImpl(ctx, propName.get(), copyDynArray);
-  auto prop = lookup.prop;
-
-  if (!prop) {
-    // Property is not declared, and not dynamically created yet.
-    if (!(flags & RealPropCreate)) return nullptr;
-
-    prop = makeDynProp(propName, AccessFlags::Key);
-    if (flags & RealPropBind) tvBoxIfNeeded(*prop);
-    return &tvAsVariant(prop);
-  }
-
-  // Property is non-NULL if we reach here.
-  if ((!lookup.accessible || prop->m_type == KindOfUninit) &&
-      !(flags & (RealPropUnchecked|RealPropExist))) {
-    return nullptr;
-  }
-  if (flags & RealPropBind) tvBoxIfNeeded(*prop);
-  return &tvAsVariant(prop);
-}
-
-Variant* ObjectData::o_realProp(const String& propName, int flags,
-                                const String& context /* = null_string */) {
-  return realPropImpl(propName, flags, context, true);
-}
-
-const Variant* ObjectData::o_realProp(const String& propName, int flags,
-                                      const String& context) const {
-  return const_cast<ObjectData*>(this)->realPropImpl(propName, flags, context,
-                                                     false);
-}
-
 Variant ObjectData::o_get(const String& propName, bool error /* = true */,
                           const String& context /*= null_string*/) {
   assert(kindIsValid());
@@ -556,10 +508,9 @@ size_t getPropertyIfAccessible(ObjectData* obj,
                                Array& properties,
                                size_t propLeft) {
   if (mode == ObjectData::CreateRefs) {
-    auto const prop = obj->getPropLval(ctx, key);
-    if (prop.has_ref() && prop.type() != KindOfUninit) {
+    auto const prop = obj->vGetProp(ctx, key);
+    if (prop) {
       --propLeft;
-      tvBoxIfNeeded(prop);
       properties.setRef(StrNR(key), tvAsVariant(prop.tv_ptr()), true);
     }
   } else {
@@ -1061,6 +1012,26 @@ member_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
   return member_rval {
     this, lookup.prop && lookup.accessible ? lookup.prop : nullptr
   };
+}
+
+member_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
+  auto const lookup = getPropImpl(ctx, key, true);
+  auto prop = lookup.prop;
+  if (lookup.accessible && prop && prop->m_type != KindOfUninit) {
+    tvBoxIfNeeded(*prop);
+    return member_lval { this, prop };
+  }
+  return member_lval { this, nullptr };
+}
+
+member_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
+  auto const lookup = getPropImpl(nullptr, key, true);
+  auto prop = lookup.prop;
+  if (prop && prop->m_type != KindOfUninit) {
+    tvBoxIfNeeded(*prop);
+    return member_lval { this, prop };
+  }
+  return member_lval { this, nullptr };
 }
 
 //////////////////////////////////////////////////////////////////////

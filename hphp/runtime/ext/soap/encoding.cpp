@@ -1196,14 +1196,10 @@ static bool get_zval_property(Variant &object, const char* name,
   String sname(name);
   if (object.isObject()) {
     Object obj = object.toObject();
-    auto t = obj->o_realProp(sname,
-      ObjectData::RealPropUnchecked|ObjectData::RealPropBind);
-    if (t && t->isInitialized()) {
-      assert(t->asTypedValue()->m_type == KindOfRef); // assignRef won't box
-      if (ret) ret->assignRef(*t);
-      return true;
-    }
-    return false;
+    auto const prop = obj->vGetPropIgnoreAccessibility(sname.get());
+    if (!prop) return false;
+    if (ret) ret->assignRef(tvAsVariant(prop.tv_ptr()));
+    return true;
   }
   if (object.isArray()) {
     Array arr = object.toArray();

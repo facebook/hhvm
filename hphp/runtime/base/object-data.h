@@ -101,13 +101,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                   = 0x8000
   };
 
-  enum {
-    RealPropCreate = 1,    // Property should be created if it doesn't exist
-    RealPropBind = 2,      // Property should be boxed
-    RealPropUnchecked = 8, // Don't check property accessibility
-    RealPropExist = 16,    // For property_exists
-  };
-
  private:
   static __thread uint32_t os_max_id;
 
@@ -267,8 +260,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
  private:
   void instanceInit(Class*);
   bool destructImpl();
-  Variant* realPropImpl(const String& s, int flags, const String& context,
-                        bool copyDynArray);
+
  public:
 
   enum IterMode { EraseRefs, CreateRefs, PreserveRefs };
@@ -281,11 +273,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    *                array
    */
   Array o_toIterArray(const String& context, IterMode mode);
-
-  Variant* o_realProp(const String& s, int flags,
-                      const String& context = null_string);
-  const Variant* o_realProp(const String& s, int flags,
-                            const String& context = null_string) const;
 
   Variant o_get(const String& s, bool error = true,
                 const String& context = null_string);
@@ -367,8 +354,12 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   Slot declPropInd(const TypedValue* prop) const;
 
  public:
+  // never box the lval returned from getPropLval; use propB or vGetProp instead
   member_lval getPropLval(const Class*, const StringData*);
   member_rval getProp(const Class*, const StringData*) const;
+  member_lval vGetProp(const Class*, const StringData*);
+  // don't use vGetPropIgnoreAccessibility in new code
+  member_lval vGetPropIgnoreAccessibility(const StringData*);
 
  private:
   template <class T>

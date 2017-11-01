@@ -188,3 +188,6 @@ val double_reference : string
 val global_in_const_decl : string
 val conflicting_trait_require_clauses : name:string -> string
 val yield_in_magic_methods : string
+val reference_not_allowed_on_key : string
+val reference_not_allowed_on_value : string
+val reference_not_allowed_on_element : string

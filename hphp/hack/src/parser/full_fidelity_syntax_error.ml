@@ -275,3 +275,10 @@ let conflicting_trait_require_clauses ~name =
 
 let yield_in_magic_methods =
   "'yield' is not allowed in constructor, destructor, or magic methods"
+
+let reference_not_allowed_on_key = "Key of collection element cannot " ^
+  "be marked as reference"
+let reference_not_allowed_on_value = "Value of collection element cannot " ^
+  "be marked as reference"
+let reference_not_allowed_on_element = "Collection element cannot " ^
+  "be marked as reference"

@@ -1144,6 +1144,33 @@ let string_starts_with_int s =
   if String.length s = 0 then false else
   try let _ = int_of_string (String.make 1 s.[0]) in true with _ -> false
 
+let check_collection_element m error_text errors =
+  match syntax m with
+  | PrefixUnaryExpression {
+      prefix_unary_operator = {
+        syntax = Token { PositionedToken.kind = TokenKind.Ampersand; _ }; _
+      }; _
+    } -> make_error_from_node m error_text :: errors
+  | _ -> errors
+
+let check_collection_member errors m =
+  match syntax m with
+  | ElementInitializer { element_key; element_value; _ } ->
+    let errors =
+      check_collection_element element_key
+        SyntaxError.reference_not_allowed_on_key errors in
+    let errors =
+      check_collection_element element_value
+        SyntaxError.reference_not_allowed_on_value errors in
+    errors
+  | _ ->
+    check_collection_element m
+      SyntaxError.reference_not_allowed_on_element errors
+
+let check_collection_members members errors =
+  syntax_to_list_no_separators members
+  |> Core_list.fold_left ~init:errors ~f:check_collection_member
+
 let invalid_shape_initializer_name node errors =
   match syntax node with
   | LiteralExpression { literal_expression = expr } ->
@@ -1235,16 +1262,24 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     }
     when is_inout decorator && is_ampersand operator ->
     make_error_from_node node SyntaxError.error2076 :: errors
-  | VectorIntrinsicExpression _
-  | DictionaryIntrinsicExpression _
-  | KeysetIntrinsicExpression _ when not is_hack ->
-    make_error_from_node node SyntaxError.hsl_in_php :: errors
-  | VarrayIntrinsicExpression _
-  | DarrayIntrinsicExpression _ when not is_hack ->
-    make_error_from_node node SyntaxError.vdarray_in_php :: errors
   | YieldFromExpression _
   | YieldExpression _ when is_in_magic_method parents ->
     make_error_from_node node SyntaxError.yield_in_magic_methods :: errors
+  | VectorIntrinsicExpression { vector_intrinsic_members = m; _ }
+  | DictionaryIntrinsicExpression { dictionary_intrinsic_members = m; _ }
+  | KeysetIntrinsicExpression { keyset_intrinsic_members = m; _ } ->
+    let errors =
+      if not is_hack
+      then make_error_from_node node SyntaxError.hsl_in_php :: errors
+      else errors in
+    check_collection_members m errors
+  | VarrayIntrinsicExpression { varray_intrinsic_members = m; _ }
+  | DarrayIntrinsicExpression { darray_intrinsic_members = m; _ } ->
+    let errors =
+      if not is_hack
+      then make_error_from_node node SyntaxError.vdarray_in_php :: errors
+      else errors in
+    check_collection_members m errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents hhvm_compat_mode trait_use_clauses errors =

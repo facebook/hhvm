@@ -10,11 +10,7 @@ slow/closure/return_types.php
 slow/concat/1578.php
 slow/constant/1597.php
 slow/constant/true_false_null.php
-slow/dict/init-parse-error2.php
-slow/dict/init-parse-error4.php
 slow/dict/mixed-to-dict-with-refs.php
-slow/dv_array/parse-error4.php
-slow/dv_array/parse-error5.php
 slow/dynamic_variables/1164.php
 slow/ext_misc/ext_misc.php
 slow/ext_phar/composer.php
@@ -127,7 +123,6 @@ slow/inout/out-type-hints.php
 slow/inout/side-effects.php
 slow/inout/trait-magic.php
 slow/interpolated_function_call.php
-slow/keyset/init-parse-error2.php
 slow/labels/72.php
 slow/lang/deprecated.php
 slow/namespace/dynamic_extra_slash.php
@@ -184,6 +179,5 @@ slow/using/bad-lambda6.php
 slow/using/bad-name.php
 slow/using/functions.php
 slow/using/goto.php
-slow/vec/bad-init2.php
 slow/xhp/attr-syntax-2.php
 slow/xhp/attr-syntax-3.php

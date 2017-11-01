@@ -167,7 +167,6 @@ slow/parser/php-namespace-conflict-2.php
 slow/parser/php-namespace-conflict-3.php
 slow/parser/php-namespace-conflict-6.php
 slow/parser/semi-reserved-keywords/enum_class_constant_bad.php
-slow/parser/static_call_access.php
 slow/parser/static_call_access_const_expr.php
 slow/parser/tuple-1.php
 slow/parser/val_colon_colon_class_method.php
@@ -189,9 +188,6 @@ slow/php7_backported/scalar-types/scalar_strict_declaration_placement_008.php
 slow/php7_backported/varSyntax/indirect-fcall.php
 slow/php7_backported/varSyntax/staticMember.php
 slow/php7_bcbreak/5/uvs/array_indirect_ref.php
-slow/php7_bcbreak/5/uvs/dimmable_object_access.php
-slow/php7_bcbreak/5/uvs/dimmable_object_call.php
-slow/php7_bcbreak/5/uvs/static_dim_call.php
 slow/reflection/ns_closure.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection/scalar_param_types/php-noforcehh.php

@@ -17,6 +17,7 @@ module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Operator = Full_fidelity_operator
 module Lexer = Full_fidelity_lexer.WithToken(Syntax.Token)
+module Env = Full_fidelity_parser_env
 module PrecedenceSyntax = Full_fidelity_precedence_parser
   .WithSyntax(Syntax)
 module PrecedenceParser = PrecedenceSyntax
@@ -678,11 +679,23 @@ module WithStatementAndDeclAndTypeParser
   https://github.com/php/php-langspec/blob/master/spec/10-expressions.md#grammar-variable
    A variable is an expression that can in principle be used as an lvalue *)
   and can_be_used_as_lvalue t =
-    is_variable_expression t ||
-    is_subscript_expression t ||
-    is_member_selection_expression t ||
-    is_scope_resolution_expression t ||
-    check_prefix_unary_expression t Dollar can_be_used_as_lvalue
+    match syntax t with
+    | VariableExpression _ | SubscriptExpression _
+    | MemberSelectionExpression _ | ScopeResolutionExpression _ -> true
+    | BracedExpression {
+        braced_expression_left_brace = lb;
+        braced_expression_right_brace = rb;
+        braced_expression_expression = e
+      } when is_missing lb && is_missing rb -> can_be_used_as_lvalue e
+    | PrefixUnaryExpression {
+        prefix_unary_operator = op;
+        prefix_unary_operand = e
+      } ->
+      begin match syntax op with
+      | Token t -> Token.kind t = Dollar && can_be_used_as_lvalue e
+      | _ -> false
+      end
+    | _ -> false
 
   (* checks if expression is a valid right hand side in by-ref assignment
    which is '&'PHP variable *)
@@ -826,15 +839,44 @@ module WithStatementAndDeclAndTypeParser
     let op = make_token token in
     (* TODO: We are putting the name / variable into the tree as a token
     leaf, rather than as a name or variable expression. Is that right? *)
-    let (parser, name) = if peek_token_kind parser = LeftBrace then
-      parse_braced_expression parser
-    else
-      require_xhp_class_name_or_name_or_variable parser in
+    let (parser, name) =
+      match peek_token_kind parser with
+      | LeftBrace ->
+        parse_braced_expression parser
+      | Variable when Env.php5_compat_mode (env parser) ->
+        parse_variable_in_php5_compat_mode parser
+      | _ ->
+        require_xhp_class_name_or_name_or_variable parser in
     let result = if (Token.kind token) = MinusGreaterThan then
       make_member_selection_expression term op name
     else
       make_safe_member_selection_expression term op name in
     (parser, result)
+
+  and parse_variable_in_php5_compat_mode parser =
+    (* PHP7 had a breaking change in parsing variables:
+       (https://wiki.php.net/rfc/uniform_variable_syntax).
+       Hack parser by default uses PHP7 compatible more which interprets
+       variables accesses left-to-right. It usually matches PHP5 behavior
+       except for cases with '$' operator, member accesses and scope resolution
+       operators:
+       $$a[1][2] -> ($$a)[1][2]
+       $a->$b[c] -> ($a->$b)[c]
+       X::$a[b]() -> (X::$a)[b]()
+
+       In order to preserve backward compatibility we can parse
+       variable/subscript expressions and wrap them in
+       synthetic braced expressions to enfore PHP5 semantics
+       $$a[1][2] -> ${$a[1][2]}
+       $a->$b[c] -> $a->{$b[c]}
+       X::$a[b]() -> X::{$a[b]}()
+       *)
+    let parser1, e =
+      let precedence = Operator.precedence Operator.IndexingOperator in
+      parse_expression (with_precedence parser precedence) in
+    let parser1 = with_precedence parser1 parser.precedence in
+    let brace = make_missing () in
+    parser1, make_braced_expression brace e brace
 
   and parse_subscript parser term =
     (* SPEC
@@ -1391,12 +1433,14 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_dollar_expression parser =
     let (parser, dollar) = assert_token parser Dollar in
     let (parser, operand) =
-      if peek_token_kind parser = TokenKind.LeftBrace
-      then parse_braced_expression parser
-      else
+      match peek_token_kind parser with
+      | LeftBrace ->
+        parse_braced_expression parser
+      | Variable when Env.php5_compat_mode (env parser) ->
+        parse_variable_in_php5_compat_mode parser
+      | _ ->
         parse_expression_with_operator_precedence parser
-          (Operator.prefix_unary_from_token TokenKind.Dollar)
-    in
+          (Operator.prefix_unary_from_token TokenKind.Dollar) in
     let result = make_prefix_unary_expression dollar operand in
     (parser, result)
 
@@ -2294,7 +2338,17 @@ TODO: This will need to be fixed to allow situations where the qualified name
       match Token.kind token with
       | Class -> parser1, make_token token
       | Dollar -> parse_dollar_expression parser
-      | _ -> require_name_or_variable_or_error parser SyntaxError.error1048
+      | LeftBrace -> parse_braced_expression parser
+      | Variable when Env.php5_compat_mode (env parser) ->
+        let parser1, e = parse_variable_in_php5_compat_mode parser in
+        (* for :: only do PHP5 transform for call expressions
+           in other cases fall back to the regular parsing logic *)
+        (* TODO: handle calls to generic methods *)
+        if peek_token_kind parser1 = LeftParen
+        then parser1, e
+        else require_name_or_variable_or_error parser SyntaxError.error1048
+      | _ ->
+        require_name_or_variable_or_error parser SyntaxError.error1048
     in
     let result = make_scope_resolution_expression qualifier op name in
     (parser, result)

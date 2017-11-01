@@ -2372,15 +2372,19 @@ let from_text
   ?(lower_coroutines      = true)
   ?(enable_hh_syntax       = false)
   ?hhvm_compat_mode
+  ?php5_compat_mode
   ?(parser_options        = ParserOptions.default)
   (file        : Relative_path.t)
   (source_text : Full_fidelity_source_text.t)
   : result =
     let open Full_fidelity_syntax_tree in
     let tree   =
-      make
-        ~env:(Full_fidelity_parser_env.make ?hhvm_compat_mode ())
-        source_text in
+      let env =
+        Full_fidelity_parser_env.make
+          ?hhvm_compat_mode
+          ?php5_compat_mode
+          () in
+      make ~env source_text in
     let script = Full_fidelity_positioned_syntax.from_tree tree in
     if Option.value hhvm_compat_mode ~default:false
     then begin
@@ -2436,6 +2440,7 @@ let from_file
   ?(enable_hh_syntax      = false)
   ?lower_coroutines
   ?hhvm_compat_mode
+  ?php5_compat_mode
   ?(parser_options        = ParserOptions.default)
   (path : Relative_path.t)
   : result =
@@ -2449,6 +2454,7 @@ let from_file
       ~enable_hh_syntax
       ?lower_coroutines
       ?hhvm_compat_mode
+      ?php5_compat_mode
       ~parser_options
       path
       (Full_fidelity_source_text.from_file path)
@@ -2474,6 +2480,7 @@ let from_text_with_legacy
   ?(enable_hh_syntax      = false)
   ?lower_coroutines
   ?hhvm_compat_mode
+  ?php5_compat_mode
   ?(parser_options        = ParserOptions.default)
   (file    : Relative_path.t)
   (content : string)
@@ -2488,6 +2495,7 @@ let from_text_with_legacy
       ~enable_hh_syntax
       ?lower_coroutines
       ?hhvm_compat_mode
+      ?php5_compat_mode
       ~parser_options
       file
       (Full_fidelity_source_text.make file content)
@@ -2502,6 +2510,7 @@ let from_file_with_legacy
   ?(enable_hh_syntax      = false)
   ?lower_coroutines
   ?hhvm_compat_mode
+  ?php5_compat_mode
   ?(parser_options        = ParserOptions.default)
   (file : Relative_path.t)
   : Parser_hack.parser_return =
@@ -2515,5 +2524,6 @@ let from_file_with_legacy
       ~enable_hh_syntax
       ?lower_coroutines
       ?hhvm_compat_mode
+      ?php5_compat_mode
       ~parser_options
       file

@@ -140,8 +140,8 @@ let precedence operator =
   | FunctionCallOperator -> 25
   | NewOperator -> 26
   (* value 27 is reserved for assignment that appear in expressions *)
-  | IndexingOperator -> 28
-  | MemberSelectionOperator | NullSafeMemberSelectionOperator -> 29
+  | MemberSelectionOperator | NullSafeMemberSelectionOperator -> 28
+  | IndexingOperator -> 29
   | ScopeResolutionOperator -> 30
   | DollarOperator -> 31
 

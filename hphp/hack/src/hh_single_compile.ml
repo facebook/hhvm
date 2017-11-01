@@ -186,6 +186,7 @@ let parse_text compiler_options popt fn text =
       ~ignore_pos
       ~suppress_output:true
       ~hhvm_compat_mode:true
+      ~php5_compat_mode:true
       ~enable_hh_syntax
       fn text
   | Legacy ->

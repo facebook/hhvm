@@ -1,6 +1,3 @@
 quick/backtick.php
 quick/closure_recursive_bad.php
 quick/float-overflow-literals.php
-quick/prop_order.php
-quick/prop_order_parens.php
-quick/selfparent.php

@@ -1057,8 +1057,15 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
   | A.Class_get ((_, A.Id (_, s1)), e2) ->
     let s2 = string_of_param_default_value e2 in
     "\\\\" ^ (Php_escaping.escape (SU.strip_global_ns s1)) ^ "::" ^ s2
+  | A.Class_get (e1, e2) ->
+    let s1 = string_of_param_default_value e1 in
+    let s2 = string_of_param_default_value e2 in
+    s1 ^ "::" ^ s2
   | A.Class_const ((_, A.Id (_, s1)), (_, s2)) ->
     "\\\\" ^ (Php_escaping.escape (SU.strip_global_ns s1)) ^ "::" ^ s2
+  | A.Class_const (e1, (_, s2)) ->
+    let s1 = string_of_param_default_value e1 in
+    s1 ^ "::" ^ s2
   | A.Unop (uop, e) -> begin
     let e = string_of_param_default_value e in
     match uop with
@@ -1128,8 +1135,6 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
   | A.List _
   | A.Omitted
   | A.Callconv _
-  | A.Class_get _
-  | A.Class_const _
   | A.Expr_list _ -> failwith "illegal default value"
 
 let string_of_param_default_value_option = function

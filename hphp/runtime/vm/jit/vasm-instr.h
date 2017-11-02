@@ -140,7 +140,7 @@ struct Vunit;
   O(addlm, I(fl), U(s0) UM(m), D(sf)) \
   O(addlim, I(s0) I(fl), UM(m), D(sf)) \
   O(addq, I(fl), U(s0) U(s1), D(d) D(sf)) \
-  O(addqmr, I(fl), UA(m) U(s1), D(d) D(sf)) \
+  O(addqmr, I(fl), UA(m) UH(s1,d), DH(d,s1) D(sf))  \
   O(addqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(addqim, I(s0) I(fl), UM(m), D(sf)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\

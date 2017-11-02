@@ -14,7 +14,7 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree = Full_fidelity_syntax_tree
 module TokenKind = Full_fidelity_token_kind
 
-open Core
+open Hh_core
 open AutocompleteTypes
 
 let empty_autocomplete_token = "PLACEHOLDER"

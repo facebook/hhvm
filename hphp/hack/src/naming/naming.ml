@@ -15,7 +15,7 @@
  * 2- transform all the local names into a unique identifier
  *)
 open Ast
-open Core
+open Hh_core
 open Utils
 open String_utils
 

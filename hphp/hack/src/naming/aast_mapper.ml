@@ -2,7 +2,7 @@
  * transform one annotated AST to another, applying a given function to
  * every annotation
  *)
-open Core
+open Hh_core
 open Nast
 module MapAnnotatedAST
   (Source : AnnotationType)

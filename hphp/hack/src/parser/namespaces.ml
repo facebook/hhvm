@@ -9,7 +9,7 @@
  *)
 
 open Ast
-open Core
+open Hh_core
 open Namespace_env
 
 (* When dealing with an <?hh file, HHVM automatically imports a few

@@ -14,7 +14,7 @@ module SourceText = Full_fidelity_source_text
 module TestUtils = Full_fidelity_test_utils
 module Config = Random_ast_generator_config
 
-(* open Core *)
+(* open Hh_core *)
 open OUnit
 
 type test = {source : string; parse : string; error : string}

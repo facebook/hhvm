@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 (*****************************************************************************)
 (* Table containing all the Abstract Syntax Trees (cf ast.ml) for each file.*)

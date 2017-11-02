@@ -8,7 +8,7 @@
  *
 *)
 
-open Core
+open Hh_core
 
 let kind_to_type_info ~tparams ~namespace k =
   match k with

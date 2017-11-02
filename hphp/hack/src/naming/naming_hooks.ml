@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 let (hint_hooks: (Pos.t * string -> unit) list ref) = ref []
 

@@ -8,7 +8,7 @@
  *
  *)
 open Ast
-open Core
+open Hh_core
 open Lexer_hack
 open Prim_defs
 

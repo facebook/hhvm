@@ -16,17 +16,17 @@
 
 type 'a m = 'a list
 
-let return = Core.List.return
+let return = Hh_core.List.return
 
-let join = Core.List.join
+let join = Hh_core.List.join
 
-let (>>|) = Core.List.(>>|)
+let (>>|) = Hh_core.List.(>>|)
 
 let fmap = (>>|)
 
 let lift f l = l >>| f
 
-let bind = Core.List.bind
+let bind = Hh_core.List.bind
 
 let (>>=) = bind
 

@@ -9,7 +9,7 @@
  *)
 
 include Typing_env_types
-open Core
+open Hh_core
 open Decl_env
 open Typing_defs
 open Nast

@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 type t = {
   chunks: Chunk.t list;

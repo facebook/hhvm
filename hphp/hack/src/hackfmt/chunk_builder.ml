@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 type open_span = {
   open_span_start: int;

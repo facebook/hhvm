@@ -13,7 +13,7 @@
 (* Module declaring the types in parallel *)
 (*****************************************************************************)
 
-open Core
+open Hh_core
 open Utils
 
 (* The set of files that failed *)

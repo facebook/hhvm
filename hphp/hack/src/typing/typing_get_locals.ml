@@ -9,7 +9,7 @@
  *)
 
 open Ast
-open Core
+open Hh_core
 open Utils
 
 module FuncTerm = Typing_func_terminality

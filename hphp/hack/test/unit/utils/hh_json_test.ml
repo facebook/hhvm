@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 let test_escape_unescape_data = [
   "newline\n";

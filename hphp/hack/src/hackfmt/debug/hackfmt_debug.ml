@@ -11,7 +11,7 @@
 module SyntaxTree = Full_fidelity_syntax_tree
 module SourceText = Full_fidelity_source_text
 
-open Core
+open Hh_core
 
 type debug_config = {
   print_ast: bool;

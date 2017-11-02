@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 (*****************************************************************************)
 (* Table containing all the HH_FIXMEs found in the source code.

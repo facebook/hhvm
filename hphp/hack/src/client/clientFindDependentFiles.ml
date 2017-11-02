@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 let to_json result =
   Hh_json.JSON_Object ["dependent_files",

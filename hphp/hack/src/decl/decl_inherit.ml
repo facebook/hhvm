@@ -16,7 +16,7 @@
  *)
 (*****************************************************************************)
 
-open Core
+open Hh_core
 open Decl_defs
 open Nast
 open Typing_defs

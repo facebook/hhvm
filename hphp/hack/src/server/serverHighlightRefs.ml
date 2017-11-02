@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 let get_target symbol =
   let open SymbolOccurrence in

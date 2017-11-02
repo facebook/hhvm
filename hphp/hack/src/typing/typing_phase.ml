@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Typing_defs
 open Typing_dependent_type
 open Utils

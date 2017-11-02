@@ -16,7 +16,7 @@ module Token = Full_fidelity_editable_token
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 module Env = Format_env
 
-open Core
+open Hh_core
 open Syntax
 open Doc
 

@@ -8,7 +8,7 @@
  *
 *)
 
-open Core
+open Hh_core
 
 module J = Hh_json
 

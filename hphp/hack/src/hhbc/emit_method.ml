@@ -11,7 +11,7 @@
 module SU = Hhbc_string_utils
 module SN = Naming_special_names
 
-open Core
+open Hh_core
 open Instruction_sequence
 
 let has_valid_access_modifiers kind_list =

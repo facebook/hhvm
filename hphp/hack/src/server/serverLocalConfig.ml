@@ -9,7 +9,7 @@
  *)
 
 open Config_file.Getters
-open Core
+open Hh_core
 
 type t = {
   use_watchman: bool;

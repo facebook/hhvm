@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Ide_api_types
 open String_utils
 open Sys_utils

@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
 *)
-open Core
+open Hh_core
 
 module ULS = Unique_list_string
 module SN = Naming_special_names

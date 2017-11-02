@@ -9,7 +9,7 @@
 *)
 
 open Instruction_sequence
-open Core
+open Hh_core
 
 let memoize_suffix = "$memoize_impl"
 let static_memoize_cache = "static$memoize_cache"

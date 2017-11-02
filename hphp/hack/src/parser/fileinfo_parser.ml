@@ -9,7 +9,7 @@
  *)
 
 (*  Quick FileInfo parser that parses only the basics *)
-open Core
+open Hh_core
 open FileInfo
 
 open Lexer_hack

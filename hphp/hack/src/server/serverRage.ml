@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 let go (genv: ServerEnv.genv) (env: ServerEnv.env) : ServerRageTypes.result =
   let open ServerRageTypes in

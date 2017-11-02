@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-open Core
+open Hh_core
 open Ide_message
 open Ide_parser_utils
 open Hh_json

@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Hh_json
 
 let to_json res =

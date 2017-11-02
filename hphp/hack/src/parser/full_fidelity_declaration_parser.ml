@@ -60,7 +60,7 @@ module WithExpressionAndStatementAndTypeParser
   (* Tokens *)
 
   let has_leading_end_of_line token =
-    Core.List.exists (Token.leading token)
+    Hh_core.List.exists (Token.leading token)
       ~f:(fun trivia ->  Token.Trivia.kind trivia = TriviaKind.EndOfLine)
 
   (* Types *)

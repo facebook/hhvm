@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 (*****************************************************************************)
 (* TextBlocks.make produces a list of indivisible blocks for a given file.

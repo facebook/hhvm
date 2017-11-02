@@ -12,7 +12,7 @@ module PositionedSyntax = Full_fidelity_positioned_syntax
 module FFUtils = Full_fidelity_syntax_utilities.WithSyntax(PositionedSyntax)
 open FfpAutocompleteContextParser
 open AutocompleteTypes
-open Core
+open Hh_core
 
 let should_complete_class (context:context) : bool =
   let open ContextPredicates in

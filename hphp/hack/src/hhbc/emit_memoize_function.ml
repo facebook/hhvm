@@ -10,7 +10,7 @@
 
 open Instruction_sequence
 open Hhbc_ast.MemberOpMode
-open Core
+open Hh_core
 open Emit_memoize_helpers
 
 let make_memoize_function_no_params_code ~non_null_return renamed_function_id =

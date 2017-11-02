@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Hh_json
 
 let fun_call_to_json fun_call_results =

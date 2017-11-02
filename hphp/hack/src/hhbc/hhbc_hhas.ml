@@ -1187,7 +1187,7 @@ let add_static_default_value_option buf indent label =
   add_indented_line buf indent (".static " ^ label ^ ";")
 
 let add_static_values buf indent lst =
-  Core.List.iter lst
+  Hh_core.List.iter lst
     (fun label -> add_static_default_value_option buf indent label)
 
 let add_doc buf indent doc_comment =

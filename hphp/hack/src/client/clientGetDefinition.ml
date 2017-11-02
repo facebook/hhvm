@@ -8,7 +8,7 @@
  *
 *)
 
-open Core
+open Hh_core
 
 let print_json res =
   let response = IdentifySymbolService.result_to_ide_message res in

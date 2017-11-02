@@ -10,7 +10,7 @@
 
 module Env = Format_env
 
-open Core
+open Hh_core
 
 let expand_state env state =
   let { Solve_state.chunk_group; rbm; _ } = state in

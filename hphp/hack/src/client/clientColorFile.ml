@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Ide_api_types
 
 module C = Tty

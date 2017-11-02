@@ -8,7 +8,7 @@
  *
 *)
 
-(* TODO: change this over to Core *)
+(* TODO: change this over to Hh_core *)
 
 module EA = Emit_adata
 module Log = Semdiff_logging
@@ -601,7 +601,7 @@ let permute_property_list perm ps =
   let offset = List.length ps - List.length perm in
   let sorted_perm = List.sort (fun (a,_) (b,_) -> compare a b) perm in
   let permuted_tail = List.map (fun (_,i) -> List.nth ps (offset+i)) sorted_perm in
-  Core.List.take ps offset @ permuted_tail
+  Hh_core.List.take ps offset @ permuted_tail
 
 let property_list_comparer perm =
   let lc = list_comparer property_comparer "\n" in
@@ -649,7 +649,7 @@ let permute_decl_list perm ds =
   if perm = [] then ds
   else let sorted_perm = List.sort (fun (a,_) (b,_) -> compare a b) perm in
     let sorted_section = List.map (fun (_,i) -> List.nth ds (1+i)) sorted_perm in
-    (List.hd ds) :: (sorted_section @ Core.List.drop ds (List.length perm + 1))
+    (List.hd ds) :: (sorted_section @ Hh_core.List.drop ds (List.length perm + 1))
 
 let decl_list_comparer perm =
   let lc = list_comparer string_comparer "," in
@@ -705,7 +705,7 @@ let option_is_some o = match o with Some _ -> true | None -> false
 *)
 let body_instrs_comparer = {
   comparer = (fun b b' ->
-    let todo = match Core.List.zip (Hhas_body.params b) (Hhas_body.params b') with
+    let todo = match Hh_core.List.zip (Hhas_body.params b) (Hhas_body.params b') with
       | None -> [] (* different lengths so just look at initial entry point *)
       | Some param_pairs ->
         let params_with_defaults = List.filter

@@ -18,7 +18,7 @@ open FfpAutocompleteContextParser
 open FfpAutocompleteContextParser.Container
 open FfpAutocompleteContextParser.Predecessor
 open FfpAutocompleteContextParser.ContextPredicates
-open Core
+open Hh_core
 
 (* Each keyword completion object has a list of keywords and a function that
    takes a context and returns whether or not the list of keywords is valid

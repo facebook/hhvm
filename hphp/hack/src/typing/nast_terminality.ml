@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Nast
 
 module Env = Typing_env

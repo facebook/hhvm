@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Typing_defs
 
 module SN     = Naming_special_names

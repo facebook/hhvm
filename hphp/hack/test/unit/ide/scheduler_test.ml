@@ -8,7 +8,7 @@
  *
 *)
 
-open Core
+open Hh_core
 
 type test_env = {
   (* What callbacks were called and when *)

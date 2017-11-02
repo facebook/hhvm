@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 (* An atom is a substring of the original source which will be exactly
  * represented in the formatted output and is considered indivisible by hackfmt.

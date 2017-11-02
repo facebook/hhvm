@@ -9,7 +9,7 @@
  *)
 
 
-open Core
+open Hh_core
 open ServerEnv
 
 module SearchServiceRunner  = struct

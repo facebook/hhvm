@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 module Env = Typing_env
 open Env

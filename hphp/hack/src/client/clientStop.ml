@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 module MC = MonitorConnection
 module SMUtils = ServerMonitorUtils
 

@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 module Make(S : SearchUtils.Searchable) = struct
   module Fuzzy = FuzzySearchService.Make(S)

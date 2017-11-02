@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Typing_defs
 module Reason = Typing_reason
 

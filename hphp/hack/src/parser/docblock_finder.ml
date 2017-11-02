@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 (**
  * This is a simple data structure that allows querying for the docblock

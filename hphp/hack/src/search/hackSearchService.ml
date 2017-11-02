@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Utils
 open Reordered_argument_collections
 

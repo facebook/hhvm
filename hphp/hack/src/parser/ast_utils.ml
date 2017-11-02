@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Ast
 
 (* Given a Ast.program, give me the list of entities it defines *)

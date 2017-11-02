@@ -22,7 +22,7 @@ module EditableSyntax = Full_fidelity_editable_syntax
 module EditableToken = Full_fidelity_editable_token
 module EditableRewriter = Full_fidelity_rewriter.WithSyntax(EditableSyntax)
 
-open Core
+open Hh_core
 
 let identity x = x
 

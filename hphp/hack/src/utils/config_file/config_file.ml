@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Sys_utils
 
 type t = string SMap.t

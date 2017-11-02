@@ -13,7 +13,7 @@ module EditableSyntax = Full_fidelity_editable_syntax
 module SourceText = Full_fidelity_source_text
 module Env = Format_env
 
-open Core
+open Hh_core
 open Printf
 
 let get_line_boundaries lines =

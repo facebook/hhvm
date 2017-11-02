@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Ast
 open Ast_scope
 

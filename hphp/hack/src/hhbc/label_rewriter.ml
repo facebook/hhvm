@@ -8,7 +8,7 @@
  *
 *)
 
-open Core
+open Hh_core
 open Hhbc_ast
 open Instruction_sequence
 

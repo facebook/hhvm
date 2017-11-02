@@ -9,7 +9,7 @@
 *)
 
 open Instruction_sequence
-open Core
+open Hh_core
 open Emit_memoize_helpers
 
 (* Precomputed information required for generation of memoized methods *)
@@ -372,7 +372,7 @@ let emit_memoize_wrapper_body env memoize_info index ast_method
     ~scope ~namespace params ret =
     let is_static =List.mem ast_method.Ast.m_kind Ast.Static in
     let tparams =
-      Core.List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
+      Hh_core.List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
     let return_type_info =
       Emit_body.emit_return_type_info ~scope ~skipawaitable:false ~namespace ret in
     let non_null_return = cannot_return_null ast_method.Ast.m_fun_kind ast_method.Ast.m_ret in

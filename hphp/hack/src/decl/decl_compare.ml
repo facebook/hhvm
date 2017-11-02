@@ -20,7 +20,7 @@
  *    either redeclared or checked again.
  *)
 (*****************************************************************************)
-open Core
+open Hh_core
 open Decl_defs
 open Typing_deps
 

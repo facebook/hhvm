@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-open Core
+open Hh_core
 open Reordered_argument_collections
 
 (* Throttle errors - pause pushing errors after editor is aware of errors in

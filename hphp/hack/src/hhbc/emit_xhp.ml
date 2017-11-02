@@ -8,7 +8,7 @@
  *
 *)
 
-open Core
+open Hh_core
 open Emit_expression
 
 module SU = Hhbc_string_utils

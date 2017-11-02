@@ -12,7 +12,7 @@
  * Parser::AutoAliasMap in hphp/compiler/parser/{parser.cpp,parser.h}
  *)
 
-open Core
+open Hh_core
 open Hhbc_string_utils
 
 type alias =

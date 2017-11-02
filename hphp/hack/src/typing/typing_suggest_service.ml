@@ -14,7 +14,7 @@
  *)
 (*****************************************************************************)
 
-open Core
+open Hh_core
 
 module Env = Typing_env
 module SN = Naming_special_names

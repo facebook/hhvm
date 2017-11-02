@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-open Core
+open Hh_core
 
 let dependency_files popt _acc fnl =
   List.iter fnl ~f:(fun fn ->

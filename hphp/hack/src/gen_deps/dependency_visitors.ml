@@ -14,7 +14,7 @@
  *)
 open Ast
 open Typing_deps
-open Core
+open Hh_core
 
 
 type dep_env = {

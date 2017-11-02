@@ -8,7 +8,7 @@
  *
 *)
 
-open Core
+open Hh_core
 
 type iterator = (*is mutable*) bool * Iterator.t
 

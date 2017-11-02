@@ -11,7 +11,7 @@
 module Env = Typing_env
 
 open Tty
-open Core
+open Hh_core
 
 (*****************************************************************************)
 (* Logging type inference environment                                        *)

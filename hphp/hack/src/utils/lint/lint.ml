@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Utils
 
 (* These severity levels are based on those provided by Arcanist. "Advice"

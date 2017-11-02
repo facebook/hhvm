@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 module IdentMap = Map.Make(Local_id)
 

@@ -9,7 +9,7 @@
  *)
 
 open Ast
-open Core
+open Hh_core
 
 type result = Pos.absolute list
 

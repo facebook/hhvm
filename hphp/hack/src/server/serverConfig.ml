@@ -12,7 +12,7 @@
  * Parses and gathers information from the .hhconfig in the repo.
  *)
 
-open Core
+open Hh_core
 open Config_file.Getters
 open Reordered_argument_collections
 

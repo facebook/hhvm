@@ -205,7 +205,7 @@ module WithParser(Parser : Parser_S) = struct
    * of a TokenKind from kind_list, return the TokenKind that token_str is a
    * misspelling of. Otherwise, return None. *)
   let suggested_kind_from kind_list token_str =
-    Core.List.find_map kind_list ~f:(fun kind ->
+    Hh_core.List.find_map kind_list ~f:(fun kind ->
       if is_misspelled_kind kind token_str then Some kind else None)
 
   let skip_and_log_misspelled_token parser required_kind =

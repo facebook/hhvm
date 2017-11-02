@@ -622,7 +622,7 @@ let extract_function_name header_node =
 (* Return, as a string opt, the name of the function with the earliest
  * declaration node in the list of parents. *)
 let first_parent_function_name parents =
-  Core.List.find_map parents ~f:begin fun node ->
+  Hh_core.List.find_map parents ~f:begin fun node ->
     match syntax node with
     | FunctionDeclaration {function_declaration_header = header; _ }
     | MethodishDeclaration {methodish_function_decl_header = header; _ } ->
@@ -633,7 +633,7 @@ let first_parent_function_name parents =
 (* Returns the first ClassishDeclaration node in the list of parents,
  * or None if there isn't one. *)
 let first_parent_classish_node classish_kind parents =
-  Core.List.find_map parents ~f:begin fun node ->
+  Hh_core.List.find_map parents ~f:begin fun node ->
   match syntax node with
   | ClassishDeclaration cd
     when is_token_kind cd.classish_keyword classish_kind -> Some node
@@ -656,7 +656,7 @@ let extract_keyword modifier declaration_node =
   match syntax declaration_node with
   | ClassishDeclaration { classish_modifiers = modifiers_list ; _ }
   | MethodishDeclaration { methodish_modifiers = modifiers_list ; _ } ->
-    Core.List.find ~f:modifier
+    Hh_core.List.find ~f:modifier
         (syntax_to_list_no_separators modifiers_list)
   | _ -> None
 
@@ -745,7 +745,7 @@ let is_abstract_and_async_method md_node parents =
 (* Returns the visibility modifier node from a list, or None if the
  * list doesn't contain one. *)
 let extract_visibility_node modifiers_list =
-  Core.List.find ~f:is_visibility (syntax_to_list_no_separators
+  Hh_core.List.find ~f:is_visibility (syntax_to_list_no_separators
     modifiers_list)
 
 let extract_callconv_node node =

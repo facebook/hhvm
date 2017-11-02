@@ -13,7 +13,7 @@
 (* Checks that a class implements an interface *)
 (*****************************************************************************)
 
-open Core
+open Hh_core
 open Typing_defs
 open Typing_ops
 

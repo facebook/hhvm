@@ -11,7 +11,7 @@
 
 (** Module used to suggest type annotations when they are missing
 *)
-open Core
+open Hh_core
 open Typing_defs
 open Utils
 

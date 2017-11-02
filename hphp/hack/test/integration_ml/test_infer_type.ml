@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 module Test = Integration_test_base
 

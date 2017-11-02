@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 (** Module consisting of the special names known to the typechecker *)
 

@@ -12,7 +12,7 @@
            ("Who watches the Watchmen?")
 ****************************************************)
 
-open Core
+open Hh_core
 
 (**
  * Watches a repo and logs state-leave and state-enter

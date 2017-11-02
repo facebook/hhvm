@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 let make_local_changes () =
   Fixmes.HH_FIXMES.LocalChanges.push_stack();

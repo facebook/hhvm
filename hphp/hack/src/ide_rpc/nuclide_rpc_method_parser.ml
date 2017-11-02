@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Ide_message
 open Ide_parser_utils
 open Ide_rpc_method_parser_utils

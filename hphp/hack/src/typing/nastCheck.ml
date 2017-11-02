@@ -23,7 +23,7 @@
 
 
 open Autocomplete
-open Core
+open Hh_core
 open Nast
 open String_utils
 open Typing_defs

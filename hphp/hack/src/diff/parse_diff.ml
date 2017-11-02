@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 (*****************************************************************************)
 (* Section building a list of intervals per file for a given diff.

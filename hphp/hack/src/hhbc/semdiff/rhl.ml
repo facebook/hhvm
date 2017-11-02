@@ -15,7 +15,7 @@ equalities between local variables on the two sides, and there's no proper
 fixed point iteration at all. Still, it should cope with different labels,
 different uses of locals and some simple variations in control-flow
 *)
-open Core
+open Hh_core
 open Hhbc_ast
 open Local
 open Hhbc_destruct

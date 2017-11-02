@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 let print_result (name, pos) =
   let pos_str = Pos.string pos in

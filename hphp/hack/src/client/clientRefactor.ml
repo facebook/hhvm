@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open ClientEnv
 
 let compare_pos pos1 pos2 =

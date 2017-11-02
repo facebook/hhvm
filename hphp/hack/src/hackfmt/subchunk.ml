@@ -10,7 +10,7 @@
 
 module Env = Format_env
 
-open Core
+open Hh_core
 
 (* A subchunk is one of these variants, representing a substring of the final
  * string representation of a chunk in the formatted output.

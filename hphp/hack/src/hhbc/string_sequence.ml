@@ -9,7 +9,7 @@
 *)
 
 module B = Buffer
-open Core
+open Hh_core
 
 (* Inspired by the instruction sequence, string sequence contains tree like
  * strings of logical order *)

@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
 *)
-open Core
+open Hh_core
 open Hhbc_ast
 open Instruction_sequence
 module SU = Hhbc_string_utils

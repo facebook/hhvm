@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 let check_defs_tast tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
   let open Option in

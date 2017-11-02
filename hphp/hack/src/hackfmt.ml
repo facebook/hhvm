@@ -13,7 +13,7 @@ module SourceText = Full_fidelity_source_text
 module Logger = HackfmtEventLogger
 module FEnv = Format_env
 
-open Core
+open Hh_core
 open Printf
 open Libhackfmt
 open Hackfmt_error

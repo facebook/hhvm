@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
 *)
-open Core
+open Hh_core
 
 module Make = functor (EnvType: sig type t end) -> struct
   type t = EnvType.t

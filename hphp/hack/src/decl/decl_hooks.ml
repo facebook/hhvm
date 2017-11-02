@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 let (class_id_hooks: (Pos.t * string ->
                       (Pos.t * string) option -> unit) list ref) = ref []

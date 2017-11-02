@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Coverage_level
 open Hh_json
 open Ide_api_types

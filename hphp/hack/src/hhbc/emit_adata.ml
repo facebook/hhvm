@@ -13,7 +13,7 @@ module SU = Hhbc_string_utils
 module TV = Typed_value
 module TVMap = Typed_value.TVMap
 open Hhbc_ast
-open Core
+open Hh_core
 
 let rec adata_to_string_seq argument =
   match argument with
@@ -33,7 +33,7 @@ let rec adata_to_string_seq argument =
 
 and adata_dict_collection_argument_to_string_seq col_type pairs =
   let num = List.length pairs in
-  let fields = List.concat (Core.List.map pairs (fun (v1, v2) -> [v1;v2])) in
+  let fields = List.concat (Hh_core.List.map pairs (fun (v1, v2) -> [v1;v2])) in
   let fields_str = adata_arguments_to_string_seq fields in
   SS.gather [
     SS.str @@ Printf.sprintf "%s:%d:{" col_type num;
@@ -52,7 +52,7 @@ and adata_collection_argument_to_string_seq col_type fields =
 
 and adata_arguments_to_string_seq arguments =
   arguments
-    |> Core.List.map ~f:adata_to_string_seq
+    |> Hh_core.List.map ~f:adata_to_string_seq
     |> SS.gather
 
 let attribute_to_string a =
@@ -74,11 +74,11 @@ let attributes_to_strings al =
       (Hhas_attribute.name a2)) al in
   (* Adjust for underscore coming before alphabet *)
   let with_underscores, no_underscores =
-    Core.List.partition_tf
+    Hh_core.List.partition_tf
       ~f:(fun x -> String_utils.string_starts_with (Hhas_attribute.name x) "__")
       al
   in
-  Core.List.map (with_underscores @ no_underscores) attribute_to_string
+  Hh_core.List.map (with_underscores @ no_underscores) attribute_to_string
 
 
 (* Array identifier map. Maintain list as well, in generated order *)

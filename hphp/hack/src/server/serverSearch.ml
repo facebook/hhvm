@@ -8,7 +8,7 @@
  *
 *)
 
-open Core
+open Hh_core
 module SS = HackSearchService
 module SUtils = SearchUtils
 

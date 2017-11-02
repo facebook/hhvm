@@ -17,7 +17,7 @@ module SyntaxError = Full_fidelity_syntax_error
 module TestUtils = Full_fidelity_test_utils
 module TriviaKind = Full_fidelity_trivia_kind
 
-open Core
+open Hh_core
 open Ocaml_overrides
 open OUnit
 

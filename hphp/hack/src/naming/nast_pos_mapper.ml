@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Nast
 
 let rec expr f (p, e) =

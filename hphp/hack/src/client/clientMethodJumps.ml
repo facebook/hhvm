@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 let pos_to_json pos =
   let line, start, end_ = Pos.info_pos pos in

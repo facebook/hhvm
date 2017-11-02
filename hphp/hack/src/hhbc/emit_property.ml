@@ -10,7 +10,7 @@
 
 open Instruction_sequence
 open Hhbc_ast
-open Core
+open Hh_core
 module A = Ast
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
@@ -65,12 +65,12 @@ let from_ast ast_class cv_kind_list type_hint tparams namespace doc_comment_opt
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
   let pid = Hhbc_id.Prop.from_ast_name cv_name in
-  let is_private = Core.List.mem cv_kind_list Ast.Private in
-  let is_protected = Core.List.mem cv_kind_list Ast.Protected in
+  let is_private = Hh_core.List.mem cv_kind_list Ast.Private in
+  let is_protected = Hh_core.List.mem cv_kind_list Ast.Protected in
   let is_public =
     List.mem cv_kind_list Ast.Public
     || (not is_private && not is_protected) in
-  let is_static = Core.List.mem cv_kind_list Ast.Static in
+  let is_static = Hh_core.List.mem cv_kind_list Ast.Static in
   if not is_static
     && ast_class.Ast.c_final
     && ast_class.Ast.c_kind = Ast.Cabstract

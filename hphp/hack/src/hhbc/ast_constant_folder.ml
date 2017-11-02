@@ -13,7 +13,7 @@ module SN = Naming_special_names
 module SU = Hhbc_string_utils
 module TVL = Unique_list_typed_value
 open Ast_class_expr
-open Core
+open Hh_core
 
 exception NotLiteral
 exception UserDefinedConstant

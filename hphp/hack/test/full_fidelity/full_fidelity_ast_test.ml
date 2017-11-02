@@ -11,7 +11,7 @@
 module SourceText = Full_fidelity_source_text
 module SyntaxTree = Full_fidelity_syntax_tree
 
-open Core
+open Hh_core
 open OUnit
 
 type test_case = {

@@ -10,7 +10,7 @@
 
 open Instruction_sequence
 module A = Ast
-open Core
+open Hh_core
 
 let find_first_redeclaration pick_name_span l =
   let rec aux seen l =

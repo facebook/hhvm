@@ -8,7 +8,7 @@
  *
 *)
 
-open Core
+open Hh_core
 open Instruction_sequence
 open Ast_class_expr
 module A = Ast
@@ -171,7 +171,7 @@ let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
     param_user_attributes param_type_info param_default_value)
 
 let rename_params params =
-  let names = Core.List.fold_left params
+  let names = Hh_core.List.fold_left params
     ~init:SSet.empty ~f:(fun n p -> SSet.add (Hhas_param.name p) n) in
   let rec rename param_counts param =
     let name = Hhas_param.name param in
@@ -185,7 +185,7 @@ let rename_params params =
       then rename param_counts param
       else param_counts, (Hhas_param.with_name newname param)
   in
-    List.rev (snd (Core.List.map_env SMap.empty (List.rev params) rename))
+    List.rev (snd (Hh_core.List.map_env SMap.empty (List.rev params) rename))
 
 let from_asts ~namespace ~tparams ~generate_defaults ~scope ast_params =
   let hhas_params = List.filter_map ast_params

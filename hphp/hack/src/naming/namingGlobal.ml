@@ -14,7 +14,7 @@
  * 1- get all the global names
  * 2- transform all the local names into a unique identifier
  *)
-open Core
+open Hh_core
 open Utils
 open Naming_heap
 module SN = Naming_special_names

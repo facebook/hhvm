@@ -2636,7 +2636,7 @@ module PositionedSyntaxValue = struct
     value.trailing_width
 end
 
-open Core
+open Hh_core
 include SyntaxWithPositionedToken.WithSyntaxValue(PositionedSyntaxValue)
 module Validated =
   Full_fidelity_validated_syntax.Make(PositionedToken)(PositionedSyntaxValue)

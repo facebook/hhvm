@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open SymbolOccurrence
 open Typing_defs
 

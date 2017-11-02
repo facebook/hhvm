@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open SymbolInfoServiceTypes
 
 (* This module dumps all the symbol info(like fun-calls) in input files *)

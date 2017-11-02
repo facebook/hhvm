@@ -10,7 +10,7 @@
 
 
 (* module checking that all the class members are properly initialized *)
-open Core
+open Hh_core
 open Nast
 open Utils
 

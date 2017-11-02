@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open ServerEnv
 open Reordered_argument_collections
 open String_utils

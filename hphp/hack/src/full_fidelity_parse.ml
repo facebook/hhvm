@@ -189,10 +189,10 @@ let type_file filename (funs, classes, typedefs, consts) =
   let path = Relative_path.create Relative_path.Dummy filename in
   let name_function (_, fun_) =
     Typing_check_service.type_fun TypecheckerOptions.default path fun_ in
-  let named_funs = Core.List.filter_map funs name_function in
+  let named_funs = Hh_core.List.filter_map funs name_function in
   let name_class (_, class_) =
     Typing_check_service.type_class TypecheckerOptions.default path class_ in
-  let named_classes = Core.List.filter_map classes name_class in
+  let named_classes = Hh_core.List.filter_map classes name_class in
   let named_typedefs = [] in (* TODO *)
   let named_consts = [] in (* TODO *)
   (named_funs, named_classes, named_typedefs, named_consts)

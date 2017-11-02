@@ -40,7 +40,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Nast
 
 type env = {

@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Typing_defs
 module ExprDepTy = Typing_dependent_type
 module Env = Typing_env

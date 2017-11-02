@@ -28,7 +28,7 @@ Ad-hoc rules for typing some common idioms
 
 *)
 
-open Core
+open Hh_core
 open Typing_defs
 open Utils
 

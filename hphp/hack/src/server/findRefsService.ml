@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Option.Monad_infix
 open Reordered_argument_collections
 open Typing_defs

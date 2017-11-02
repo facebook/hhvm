@@ -14,7 +14,7 @@
  * have the proper type, and restricts what types can be used for enums.
  *)
 (*****************************************************************************)
-open Core
+open Hh_core
 open Nast
 open Typing_defs
 open Utils

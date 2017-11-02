@@ -27,7 +27,7 @@ module SourceText = Full_fidelity_source_text
 module ParserErrors = Full_fidelity_parser_errors
 open Prim_defs
 
-open Core
+open Hh_core
 
 let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
   let len = String.length str in
@@ -2358,7 +2358,7 @@ let lower
     in
     if keep_errors then begin
       Fixmes.HH_FIXMES.add file fixmes;
-      Option.iter (Core.List.last !errors) Errors.parsing_error
+      Option.iter (Hh_core.List.last !errors) Errors.parsing_error
     end;
     { fi_mode; ast; content; comments; file }
 

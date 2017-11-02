@@ -14,7 +14,7 @@
  * the methods defined in the class plus everything that was inherited.
  *)
 (*****************************************************************************)
-open Core
+open Hh_core
 open Decl_defs
 open Nast
 open Typing_defs

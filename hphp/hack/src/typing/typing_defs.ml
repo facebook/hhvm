@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 
 module Reason = Typing_reason
 module SN = Naming_special_names
@@ -562,13 +562,13 @@ module ShapeFieldMap = struct
 end
 
 module ShapeFieldList = struct
-  include Core.List
+  include Hh_core.List
 
   let map_env env xs ~f =
     let f_over_shape_field_type env ({ sft_ty; _ } as shape_field_type) =
       let env, sft_ty = f env sft_ty in
       env, { shape_field_type with sft_ty } in
-    Core.List.map_env env xs ~f:f_over_shape_field_type
+    Hh_core.List.map_env env xs ~f:f_over_shape_field_type
 end
 
 (*****************************************************************************)

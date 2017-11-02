@@ -144,8 +144,8 @@ module LineConf = struct
  let line_width = 80
 end
 module Comparator = WidthConstrainedDocComparator(LineConf)
-module Core = Pretty_printing_library.Make(Comparator)
-module Printer = Utility(Core)
+module Hh_core = Pretty_printing_library.Make(Comparator)
+module Printer = Utility(Hh_core)
 module Syntax = Full_fidelity_editable_syntax
 module EditableToken = Full_fidelity_editable_token
 open Syntax

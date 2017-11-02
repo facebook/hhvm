@@ -15,7 +15,7 @@ module TestUtils = Full_fidelity_test_utils
 module Config = Random_ast_generator_config
 module Grammar = Hack_grammar_descriptor
 
-(* open Core *)
+(* open Hh_core *)
 open OUnit
 open Ocaml_overrides
 

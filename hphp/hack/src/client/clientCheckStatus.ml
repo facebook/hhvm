@@ -8,7 +8,7 @@
  *
  *)
 
-open Core
+open Hh_core
 open Ocaml_overrides
 open String_utils
 

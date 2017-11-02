@@ -9,7 +9,7 @@
  *)
 
 (* This module implements the typing for type_structure. *)
-open Core
+open Hh_core
 open Nast
 open Typing_defs
 

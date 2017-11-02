@@ -10,7 +10,7 @@
 
 module Env = Format_env
 
-open Core
+open Hh_core
 
 type t = {
   chunk_group: Chunk_group.t;

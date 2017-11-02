@@ -16,7 +16,7 @@
  * work to do. We need calculate what must be re-checked.
  *)
 (*****************************************************************************)
-open Core
+open Hh_core
 open Reordered_argument_collections
 open Typing_deps
 

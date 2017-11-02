@@ -14,7 +14,7 @@
  * variables, and checks that all the types are correct (aka
  * consistent) *)
 open Autocomplete
-open Core
+open Hh_core
 open Decl_defs
 open Nast
 open Typing_defs

@@ -8,7 +8,7 @@
  *
 *)
 
-open Core
+open Hh_core
 open Emit_expression
 
 let ast_attribute_name: A.user_attribute -> Litstr.id =

@@ -10,7 +10,7 @@
 
 open Hhbc_ast
 open Instruction_sequence
-open Core
+open Hh_core
 
 module JT = Jump_targets
 

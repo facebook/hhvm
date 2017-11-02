@@ -29,21 +29,23 @@ namespace HPHP {
 struct MInstrState {
 
   /*
-   * This space is used for the return value of builtin functions that return
-   * Variant by reference, and for storing $this as the base for the
-   * BaseH bytecode, without needing to acquire a reference to it.
-   * Since we don't ever use the two at the same time, union is safe.
+   * This space is used for the return value of builtin functions that return by
+   * reference, and for storing $this as the base for the BaseH bytecode,
+   * without needing to acquire a reference to it.  Since we don't ever use the
+   * two at the same time, it is okay to use a union.
    */
   union {
     TypedValue tvBuiltinReturn;
     TypedValue tvTempBase;
   };
 
-  /*
-   * Space for the return value of builtin functions that return String,
-   * Array, Object, or Resource by reference.
-   */
-  MaybeCountable* ptrBuiltinReturn;
+  // The JIT passes &tvBuiltinReturn::m_data to builtins returning
+  // Array/Object/String, which perform RVO in C++, thus writing valid
+  // pointers without updating m_type, preventing the GC from scanning
+  // the pointer. But conservative scanning doesn't really hurt here
+  // (given that the pointer is also passed into a C++ function), and
+  // it allows us to keep rds::Header below 128 bytes.
+  TYPE_SCAN_CONSERVATIVE_FIELD(tvBuiltinReturn);
 
   TypedValue tvRef;
   TypedValue tvRef2;

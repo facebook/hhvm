@@ -8,6 +8,7 @@
  *
  *)
 
+open Hh_core
 open File_content
 open Option.Monad_infix
 open ServerEnv
@@ -32,18 +33,57 @@ let get_file_content = function
       (* In case of errors, proceed with empty file contents *)
       |> Option.value ~default:""
 
+(* Warning: this takes O(global error list) time. Should be OK while
+ * it's only used in editor, where opening a file is a rare (compared to other
+ * kind of queries) operation, but if this ever ends up being called by
+ * other automation there is room for improvement (i.e finally changing global
+ * error list to be a error map)
+ *)
+let send_errors_for_file diag_subscribe path editor_open_files errorl =
+  Option.map diag_subscribe ~f:begin fun diag_subscribe ->
+    (* Using empty_names because update function below ignores map values, and
+     * its signature requires it only to avoid costly conversion between big
+     * maps and lists elswhere. *)
+    let fast = Relative_path.Map.singleton path FileInfo.empty_names in
+    let error_list =
+      Errors.get_error_list errorl |>
+      List.filter ~f:begin fun e ->
+        (Errors.get_pos e |> Pos.filename) = path
+      end |>
+      Errors.from_error_list
+    in
+    Diagnostic_subscription.update
+      diag_subscribe
+      editor_open_files
+      fast
+      error_list
+  end
+
 let open_file env path content =
   let prev_content = get_file_content (ServerUtils.FileName path) in
   let new_env = try_relativize_path path >>= fun path ->
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     FileHeap.remove_batch (Relative_path.Set.singleton path);
     FileHeap.add path (Ide content);
-    let ide_needs_parsing =
-      if content = prev_content then env.ide_needs_parsing
-      else Relative_path.Set.add env.ide_needs_parsing path in
+    let ide_needs_parsing, diag_subscribe =
+      if content = prev_content && (not env.needs_full_check) then begin
+        (* Try to avoid telling the user that a check is needed when the file
+         * was unchanged. But even in this case, we might need to push
+         * errors that were previously throttled. They are available only
+         * when full recheck was completed and there were no further changes. In
+         * all other cases, we will need to (lazily) recheck the file. *)
+        env.ide_needs_parsing,
+        send_errors_for_file
+          env.diag_subscribe
+          path
+          editor_open_files
+          env.errorl
+      end else
+        Relative_path.Set.add env.ide_needs_parsing path, env.diag_subscribe
+      in
     let last_command_time = Unix.gettimeofday () in
     Some { env with
-      editor_open_files; ide_needs_parsing; last_command_time;
+      editor_open_files; ide_needs_parsing; last_command_time; diag_subscribe;
     } in
   Option.value new_env ~default:env
 

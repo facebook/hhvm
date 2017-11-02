@@ -1,0 +1,4 @@
+object(HH\AsyncGenerator)#1 (0) {
+}
+
+Fatal error: NativeDataInfoCopy is not implemented yet. in %s on line 8

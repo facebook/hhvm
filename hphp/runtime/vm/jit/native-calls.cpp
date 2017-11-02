@@ -94,7 +94,6 @@ using StrIntCmpFnInt = int64_t (*)(const StringData*, int64_t);
 //////////////////////////////////////////////////////////////////////
 
 #ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
-static auto Generator_Create_false = &Generator::Create<false>;
 static auto c_AsyncFunctionWaitHandle_Create_true =
   &c_AsyncFunctionWaitHandle::Create<true>;
 static auto c_AsyncFunctionWaitHandle_Create_false =
@@ -456,13 +455,8 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* Generator support helpers */
-#ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
-    {CreateGen,          Generator_Create_false, DSSA, SNone,
+    {CreateGen,          &Generator::Create, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
-#else
-    {CreateGen,          &Generator::Create<false>, DSSA, SNone,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
-#endif
 
     /* Async generator support helpers */
     {CreateAGen,         &AsyncGenerator::Create, DSSA, SNone,

@@ -455,7 +455,8 @@ struct NativeNode : HeapObject,
   uint32_t obj_offset; // byte offset from this to ObjectData*
   uint16_t& typeIndex() { return m_aux16; }
   uint16_t typeIndex() const { return m_aux16; }
-  uint32_t arOff() const { return m_count; } // from this to ActRec, or 0
+  uint32_t& arOff() { return m_aux32; }
+  uint32_t arOff() const { return m_aux32; } // from this to ActRec, or 0
 };
 
 // POD type for tracking arbitrary memory ranges

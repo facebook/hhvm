@@ -5840,7 +5840,7 @@ OPTBLD_INLINE TCA iopCreateCont(PC& pc) {
   // variables and iterators.
   auto const obj = func->isAsync()
     ? AsyncGenerator::Create(fp, numSlots, nullptr, resumeOffset)
-    : Generator::Create<false>(fp, numSlots, nullptr, resumeOffset);
+    : Generator::Create(fp, numSlots, nullptr, resumeOffset);
 
   auto const genData = func->isAsync() ?
     static_cast<BaseGenerator*>(AsyncGenerator::fromObject(obj)) :

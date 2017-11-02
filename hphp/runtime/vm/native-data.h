@@ -280,10 +280,6 @@ inline size_t ndsize(size_t dataSize) {
   return alignTypedValue(dataSize + sizeof(NativeNode));
  }
 
-inline size_t ndextra(const ObjectData* obj, const NativeDataInfo* ndi) {
-  return ndsize(obj, ndi) - ndsize(ndi->sz);
-}
-
 inline NativeNode* getNativeNode(ObjectData* obj, const NativeDataInfo* ndi) {
   return reinterpret_cast<NativeNode*>(
     reinterpret_cast<char*>(obj) - ndsize(obj, ndi)

@@ -59,6 +59,11 @@ Generator& Generator::operator=(const Generator& other) {
   const size_t numSlots = fp->func()->numSlotsInFrame();
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(Generator), frameSz);
+  const size_t arOff = frameSz + sizeof(NativeNode);
+  auto node = reinterpret_cast<NativeNode*>(
+    reinterpret_cast<char*>(this) - arOff
+  );
+  node->arOff() = arOff;
   resumable()->initialize<true>(fp,
                                 other.resumable()->resumeAddr(),
                                 other.resumable()->resumeOffset(),
@@ -71,6 +76,24 @@ Generator& Generator::operator=(const Generator& other) {
   cellSet(other.m_value, m_value);
   cellSet(other.m_delegate, m_delegate);
   return *this;
+}
+
+ObjectData* Generator::Create(const ActRec* fp, size_t numSlots,
+                              jit::TCA resumeAddr, Offset resumeOffset) {
+  assert(fp);
+  assert(!fp->resumed());
+  assert(fp->func()->isNonAsyncGenerator());
+  const size_t frameSz = Resumable::getFrameSize(numSlots);
+  const size_t genSz = genSize(sizeof(Generator), frameSz);
+  auto const obj = BaseGenerator::Alloc<Generator>(s_class, genSz);
+  auto const genData = new (Native::data<Generator>(obj)) Generator();
+  genData->resumable()->initialize<false>(fp,
+                                          resumeAddr,
+                                          resumeOffset,
+                                          frameSz,
+                                          genSz);
+  genData->setState(State::Created);
+  return obj;
 }
 
 void Generator::copyVars(const ActRec* srcFp) {

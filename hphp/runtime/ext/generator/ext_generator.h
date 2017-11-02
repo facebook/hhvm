@@ -173,7 +173,6 @@ struct Generator final : BaseGenerator {
   ~Generator();
   Generator& operator=(const Generator& other);
 
-  template <bool clone>
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
                             jit::TCA resumeAddr, Offset resumeOffset);
   static Class* getClass() {
@@ -208,25 +207,6 @@ public:
   static Class* s_class;
   static const StaticString s_className;
 };
-
-template <bool clone>
-ObjectData* Generator::Create(const ActRec* fp, size_t numSlots,
-                              jit::TCA resumeAddr, Offset resumeOffset) {
-  assert(fp);
-  assert(fp->resumed() == clone);
-  assert(fp->func()->isNonAsyncGenerator());
-  const size_t frameSz = Resumable::getFrameSize(numSlots);
-  const size_t genSz = genSize(sizeof(Generator), frameSz);
-  auto const obj = BaseGenerator::Alloc<Generator>(s_class, genSz);
-  auto const genData = new (Native::data<Generator>(obj)) Generator();
-  genData->resumable()->initialize<clone>(fp,
-                                          resumeAddr,
-                                          resumeOffset,
-                                          frameSz,
-                                          genSz);
-  genData->setState(State::Created);
-  return obj;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

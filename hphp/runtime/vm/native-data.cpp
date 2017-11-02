@@ -121,7 +121,7 @@ ObjectData* nativeDataInstanceCopyCtor(ObjectData* src, Class* cls,
   if (!ndi->copy) {
     throw_not_implemented("NativeDataInfoCopy");
   }
-  auto nativeDataSize = getNativeNode(src, ndi)->obj_offset;
+  auto nativeDataSize = ndsize(src, ndi);
 
   auto node = reinterpret_cast<NativeNode*>(
     tl_heap->objMalloc(ObjectData::sizeForNProps(nProps) + nativeDataSize)

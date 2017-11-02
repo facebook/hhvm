@@ -1,6 +1,7 @@
 
 with allow_unsafe_import():
     import subprocess
+    import platform
 
 def get_fbcode_platform():
     return read_config('cxx', 'default_platform')
@@ -28,3 +29,6 @@ def find_systemlib_files(dir, skip):
     files = str(proc.stdout.read().decode('ascii')).split('\n')
     return sorted(map(lambda x: x[len(dir) if skip else 0:],
                       filter(lambda x: x[:len(dir)] == dir, files)))
+
+def get_platform_machine():
+    return platform.machine()

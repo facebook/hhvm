@@ -703,12 +703,15 @@ FOLD_FROM_SYNTAX
 
     (* The order that the children are returned in should match the order
        that they appear in the source text *)
-    let children node =
-      match node.syntax with
+    let children_from_syntax s =
+      match s with
       | Missing -> []
       | Token _ -> []
       | SyntaxList x -> x
 CHILDREN
+
+    let children node =
+      children_from_syntax node.syntax
 
     let children_names node =
       match node.syntax with

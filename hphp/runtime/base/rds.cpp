@@ -230,8 +230,6 @@ size_t s_persistent_frontier = 0;
 // shared between threads, but not zero'd)---downward-growing.
 size_t s_local_frontier = 0;
 
-Link<GenNumber> g_current_gen_link{kInvalidHandle};
-
 AllocDescriptorList s_normal_alloc_descs;
 AllocDescriptorList s_local_alloc_descs;
 
@@ -471,8 +469,8 @@ void requestInit() {
   assert(tl_base);
   s_constantsStorage.set(nullptr);
   assert(!s_constants().get());
-  assert(g_current_gen_link.bound());
 
+  auto gen = header()->currentGen;
   memset(tl_base, 0, sizeof(Header));
   if (debug) {
     // Trash the normal section in debug mode, so that we can catch errors with
@@ -482,9 +480,8 @@ void requestInit() {
       kRDSTrashFill,
       s_normal_frontier - sizeof(Header)
     );
-    *g_current_gen_link = 1;
-    return;
-  } else if (++*g_current_gen_link == kInvalidGenNumber) {
+    gen = 1;
+  } else if (++gen == kInvalidGenNumber) {
     // If the current gen number has wrapped around back to the "invalid"
     // number, memset the entire normal section.  Once the current gen number
     // wraps, it becomes ambiguous whether any given gen number is up to date.
@@ -493,8 +490,9 @@ void requestInit() {
       kInvalidGenNumber,
       s_normal_frontier - sizeof(Header)
     );
-    ++*g_current_gen_link;
+    ++gen;
   }
+  header()->currentGen = gen;
 }
 
 void requestExit() {
@@ -577,6 +575,14 @@ constexpr std::size_t kAllocBitNumBytes = 8;
 }
 
 /////////////////////////////////////////////////////////////////////
+
+GenNumber currentGenNumber() {
+  return header()->currentGen;
+}
+
+Handle currentGenNumberHandle() {
+  return offsetof(Header, currentGen);
+}
 
 size_t allocBit() {
   Guard g(s_allocMutex);
@@ -689,15 +695,7 @@ void threadInit(bool shouldRegister) {
       "rds");
   }
 
-  g_current_gen_link.bind(Mode::Local);
-  *g_current_gen_link = 1;
-  if (RuntimeOption::EvalPerfDataMap) {
-    Debug::DebugInfo::recordDataMap(
-      (char*)tl_base + g_current_gen_link.handle(),
-      (char*)tl_base + g_current_gen_link.handle() +
-      RuntimeOption::EvalJitTargetCacheSize,
-      "-rds-gen-number");
-  }
+  header()->currentGen = 1;
 }
 
 void threadExit(bool shouldUnregister) {

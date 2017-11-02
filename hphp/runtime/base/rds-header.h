@@ -112,7 +112,8 @@ struct Header {
   const char padding[4096];
 #endif
 
-  VMRegs vmRegs;
+  VMRegs     vmRegs;
+  GenNumber  currentGen;
 };
 
 /*

@@ -40,8 +40,6 @@ extern size_t s_persistent_base;
 extern size_t s_persistent_frontier;
 extern size_t s_local_frontier;
 
-extern Link<GenNumber> g_current_gen_link;
-
 struct AllocDescriptor {
   Handle handle;
   uint32_t size;
@@ -215,20 +213,6 @@ T& handleToRef(void* base, Handle h) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-inline GenNumber currentGenNumber() {
-  assertx(detail::g_current_gen_link.bound());
-  assertx(*detail::g_current_gen_link != kInvalidGenNumber);
-  return *detail::g_current_gen_link;
-}
-
-inline Handle currentGenNumberHandle() {
-  assertx(detail::g_current_gen_link.bound());
-  assertx(*detail::g_current_gen_link != kInvalidGenNumber);
-  return detail::g_current_gen_link.handle();
-}
-
-/////////////////////////////////////////////////////////////////////
 
 inline bool isNormalHandle(Handle handle) {
   assertx(isValidHandle(handle));

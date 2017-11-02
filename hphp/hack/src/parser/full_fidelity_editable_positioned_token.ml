@@ -28,6 +28,7 @@
 module PositionedToken = Full_fidelity_positioned_token
 module SourceData = Full_fidelity_editable_positioned_original_source_data
 module TokenKind = Full_fidelity_token_kind
+module Trivia = Full_fidelity_positioned_trivia
 
 (**
  * Data about the token with respect to the original source text.
@@ -58,6 +59,10 @@ let from_positioned_token positioned_token =
     trailing_text = PositionedToken.trailing_text positioned_token;
     token_data = Original (SourceData.from_positioned_token positioned_token);
   }
+
+let make kind source_text offset width leading trailing =
+  from_positioned_token
+    (PositionedToken.make kind source_text offset width leading trailing)
 
 (**
  * Retains the original_source_data and trivia from the existing
@@ -166,6 +171,12 @@ let with_updated_original_source_data token update_original_source_data =
     | Synthetic _ ->
         token.token_data in
   { token with token_data }
+
+let with_leading leading token =
+  with_updated_original_source_data token (SourceData.with_leading leading)
+
+let with_kind token kind =
+  { token with kind }
 
 let concatenate b e =
   let token_data =

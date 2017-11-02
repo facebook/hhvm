@@ -81,6 +81,10 @@ let leading_start_offset data =
 let leading data =
   data.leading
 
+let with_leading leading data =
+  (* TODO: Do we need to update leading_width and offset? *)
+  { data with leading }
+
 let trailing data =
   data.trailing
 

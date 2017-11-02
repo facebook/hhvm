@@ -46,7 +46,6 @@ constexpr ObjectData::Attribute objectFlags =
     ObjectData::IsCollection |
     ObjectData::CallToImpl |
     ObjectData::NoDestructor |
-    ObjectData::HasClone |
     ObjectData::UseGet |
     ObjectData::UseSet |
     ObjectData::UseIsset |

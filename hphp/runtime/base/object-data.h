@@ -89,8 +89,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     UseUnset      = 0x0020, // __unset()
     IsWaitHandle  = 0x0040, // This is a c_WaitHandle or derived
     IsWeakRefed   = 0x0080, // Is pointed to by at least one WeakRef
-    HasClone      = 0x0100, // if isCppBuiltin(), has custom clone logic
-                            // if !isCppBuiltin(), defines __clone PHP method
+    HasClone      = 0x0100, // defines __clone PHP method
+                            // only valid when !isCppBuiltin()
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasNativeData = 0x0400, // HNI Class with <<__NativeData("T")>>
     HasDynPropArr = 0x0800, // has a dynamic properties array

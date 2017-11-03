@@ -31,7 +31,6 @@ typedef _locale_t locale_t;
 inline locale_t _current_locale() { return _get_current_locale(); }
 #else
 #include <langinfo.h>
-#include <xlocale.h>
 #endif
 
 #endif

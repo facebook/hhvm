@@ -108,6 +108,8 @@ void cgInterpOne(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<InterpOne>();
   auto const sp = srcLoc(env, inst, 0).reg();
 
+  // Did you forget to specify ControlFlowInfo?
+  assertx(!instrIsControlFlow(extra->opcode));
   auto const helper = interpOneEntryPoints[size_t(extra->opcode)];
   auto const args = argGroup(env, inst)
     .ssa(1)

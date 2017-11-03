@@ -62,6 +62,8 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
     case Op::YieldK:
     case Op::YieldFromDelegate:
     case Op::Await:
+    case Op::AwaitAll:
+    case Op::FCallAwait:
     case Op::RetC:
     case Op::RetV:
     case Op::Exit:

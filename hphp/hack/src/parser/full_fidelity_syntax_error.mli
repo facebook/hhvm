@@ -200,3 +200,4 @@ val reference_not_allowed_on_key : string
 val reference_not_allowed_on_value : string
 val reference_not_allowed_on_element : string
 val yield_in_finally_block : string
+val coloncolonclass_on_dynamic : string

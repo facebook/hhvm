@@ -1296,6 +1296,25 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
         node SyntaxError.yield_in_finally_block :: errors
       else errors in
     errors
+  | ScopeResolutionExpression
+    { scope_resolution_qualifier = qualifier
+    ; scope_resolution_name = name
+    ; _ } ->
+      let is_dynamic_name =
+        match syntax qualifier, token_kind qualifier with
+        | LiteralExpression _, _
+        | QualifiedNameExpression _, _ -> false
+        | _, Some TokenKind.Self
+        | _, Some TokenKind.Parent
+        | _, Some TokenKind.Static -> false
+        | _ -> true
+      in
+      let is_name_class = String.lowercase_ascii @@ text name = "class" in
+      let errors = if is_dynamic_name && is_name_class then
+        make_error_from_node
+          node SyntaxError.coloncolonclass_on_dynamic :: errors
+        else errors in
+      errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents hhvm_compat_mode trait_use_clauses errors =

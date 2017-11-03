@@ -1,8 +1,6 @@
 """
 I don't understand Python's version incompatibilities and also Python sucks.
 """
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 # I've heard that it's "Pythonic" or something to use try/catch for everything.
 # Most likely people who think this should be hospitalized, but who am I to

@@ -1,8 +1,6 @@
 """
 GDB commands for inspecting HHVM bytecode.
 """
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 from compatibility import *
 

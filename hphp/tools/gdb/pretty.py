@@ -1,8 +1,6 @@
 """
 GDB pretty printers for HHVM types.
 """
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 from compatibility import *
 

@@ -1,8 +1,6 @@
 """
 Wow okay, let's frob repos from inside gdb.
 """
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 from compatibility import *
 

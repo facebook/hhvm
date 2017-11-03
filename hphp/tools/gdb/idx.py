@@ -1,8 +1,6 @@
 """
 Helpers for accessing C++ STL containers in GDB.
 """
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 from compatibility import *
 

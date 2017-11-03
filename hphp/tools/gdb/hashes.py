@@ -1,8 +1,6 @@
 """
 Hash functions for use with container accessors.
 """
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 from compatibility import *
 

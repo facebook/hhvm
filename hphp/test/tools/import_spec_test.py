@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
-
 #
 # Copies all the phplang-spec tests to a temporary directory, runs them in
 # interp mode, then copies the good ones to test/spec/good and the bad ones to

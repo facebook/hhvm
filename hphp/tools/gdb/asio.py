@@ -1,8 +1,6 @@
 """
 GDB commands for asio information and stacktraces.
 """
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 from compatibility import *
 

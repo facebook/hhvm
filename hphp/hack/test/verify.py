@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# @lint-avoid-pyflakes2
 
 import argparse
 import os.path

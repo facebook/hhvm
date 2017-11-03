@@ -15,3 +15,4 @@
 --regex-c++=/^\s*(static)?\s*\w+\s+HHVM_METHOD\((\w+)\s*,\s*(\w+)/c_\2_ni_\3/f,function,function definitions/
 --regex-c++=/^\s*(static)?\s*\w+\s+HHVM_STATIC_METHOD\((\w+)\s*,\s*(\w+)/\3/f,function,function definitions/
 --regex-c++=/^\s*(static)?\s*\w+\s+HHVM_STATIC_METHOD\((\w+)\s*,\s*(\w+)/c_\2_ni_\3/f,function,function definitions/
+--regex-c++=/^\s*using\s+(\w+)\s*=/\1/t,type,type definitions/

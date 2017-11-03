@@ -2,7 +2,6 @@
 
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
-# @lint-avoid-python-3-compatibility-imports
 
 #
 # Copies all the phplang-spec tests to a temporary directory, runs them in

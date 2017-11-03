@@ -4,8 +4,6 @@
 Searches for good tests in zend/bad and moves them to good
 """
 
-# @lint-avoid-python-3-compatibility-imports
-
 import argparse
 import json
 import os

@@ -1,6 +1,3 @@
-# @lint-avoid-python-3-compatibility-imports.
-
-
 # this script uses ents_*.txt and mappings/* for generating ../html-table.cpp
 # USAGE:
 #         python generate-html-table.py > ../html-table.cpp

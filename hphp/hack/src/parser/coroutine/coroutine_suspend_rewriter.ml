@@ -10,6 +10,7 @@
 module Syntax = Full_fidelity_editable_positioned_syntax
 module CoroutineSyntax = Coroutine_syntax
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
+module Utils = Full_fidelity_syntax_utilities.WithSyntax(Syntax)
 
 open Syntax
 open CoroutineSyntax
@@ -21,6 +22,40 @@ let make_return_actual_coroutine_result_syntax expr =
     "ActualCoroutineResult" [expr] in
   make_return_statement_syntax return_expression
 
+(**
+ * Checks to see whether a coroutine function could actually suspend
+ * If a coroutine doesn't contain any suspend calls or the only suspend calls
+ * are return tailcalls, then the coroutine function is considered to be
+ * a synchronous coroutine, which means that we can simply execute the function
+ * without worrying about generating the closure and state machine
+ *)
+let matches_suspend node =
+  match syntax node with
+  | PrefixUnaryExpression {
+      prefix_unary_operator = {
+        syntax = Token { Token.kind = TokenKind.Suspend; _ };
+        _
+      };
+      _
+    } -> true
+  | _ -> false
+
+(* Determines if a function contains no suspend statements *)
+let has_no_suspends body = not @@
+  Utils.fold (fun a n -> a || matches_suspend n) false body
+
+(**
+ * lambda bodies implicitly return if not a CompoundStatement
+ * (int $x) ==> $x + 4;
+ * so in order to treat lambda bodies the same as function/method bodies,
+ * we need to add the return statement
+ *)
+let fix_up_lambda_body lambda_body =
+  match syntax lambda_body with
+  | CompoundStatement _ -> lambda_body
+  | _ ->
+    let stmt = make_return_statement_syntax lambda_body in
+    make_compound_statement_syntax [stmt]
 
 (* checks if one of node's parents is a try-block of try-statement
    NOTE: this function relies on physical identity of nodes being the same *)
@@ -60,6 +95,65 @@ let rec is_in_tail_position node parents =
     } as n :: xs when node == right ->
     is_in_tail_position n xs
   | _ -> false
+
+(* TODO: Optimize the cases where the suspend is in tail position of the null
+   coalesce operator (TokenKind.QuestionQuestion), then delete this function
+   in favor of is_in_tail_position *)
+let rec is_in_tail_position_truncated node parents =
+  match parents with
+  | [] -> true
+  | { syntax = ParenthesizedExpression {
+        parenthesized_expression_expression = e; _
+      }; _
+    } as n :: xs when node == e ->
+    is_in_tail_position_truncated n xs
+  | { syntax = ConditionalExpression {
+        conditional_consequence = consequence;
+        conditional_alternative = alternative; _
+      }; _
+    } as n :: xs when node == consequence || node == alternative ->
+    is_in_tail_position_truncated n xs
+  | _ -> false
+
+(**
+ * When a coroutine function only contains tail call suspends
+ * (return suspend function();) or no suspend calls it is not necessary to
+ * generate and instantiate the closure class and the state machine
+ * but it is still necessary to transform the declaration and the return type.
+ * This function checks to see whether a coroutine can be optimized as such
+ *)
+let only_tail_call_suspends body =
+  (* Checks that all suspends in a return statement are tail calls *)
+  let return_helper body =
+    let folder acc node parents =
+      if matches_suspend node
+      then acc && is_in_tail_position_truncated node parents
+      else acc
+    in
+    Utils.parented_fold_pre folder true body
+  in
+  let rec aux acc node =
+    if matches_suspend node
+    then false
+    else
+      match syntax node with
+      (* All suspends in the try block are not tail calls *)
+      | TryStatement { try_compound_statement; _ } ->
+        acc && has_no_suspends try_compound_statement
+      | ReturnStatement {return_expression; _ } -> acc && return_helper return_expression
+      | _ -> List.fold_left aux acc (Syntax.children node)
+  in
+  let body =
+    match syntax body with
+    | LambdaExpression {
+      lambda_coroutine;
+      lambda_body;
+      _
+      } when not @@ is_missing lambda_coroutine ->
+      fix_up_lambda_body lambda_body
+    | _ -> body
+  in
+  aux true body
 
 (* Returns pair:
     - n elements from the beginning of the list in reverse order
@@ -981,7 +1075,7 @@ let rewrite_suspends_in_non_return_context
  * get executed before the statement itself is executed, and transforms its
  * expression node appropriately.
  *)
-let rewrite_suspends node =
+let rewrite_suspends ?(only_tail_call_suspends = false) node =
   let rewrite ancestors node ((next_label, temp_count) as acc) =
     if is_in_lambda_or_anonymous_function node ancestors
     then
@@ -1031,6 +1125,15 @@ let rewrite_suspends node =
 
           (next_label, temp_count), Rewriter.Result.Replace statements
 
+        else if only_tail_call_suspends
+        then
+          let return_statement =
+            make_return_actual_coroutine_result_syntax return_expression in
+          let statements =
+            let statements = prefix @ [return_statement] in
+            make_compound_statement_syntax statements in
+
+          (next_label, temp_count), Rewriter.Result.Replace statements
         else
           let assignment = set_next_label_syntax (-1) in
           let ret =

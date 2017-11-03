@@ -13,7 +13,6 @@ module CoroutineSyntax = Coroutine_syntax
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Token = Syntax.Token
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
-module Utils = Full_fidelity_syntax_utilities.WithSyntax(Syntax)
 module SuspendRewriter = Coroutine_suspend_rewriter
 
 open Syntax
@@ -520,6 +519,18 @@ let lower_body body =
       |> Core_list.map ~f:make_coroutine_result_data_variable in
   (body, coroutine_result_data_variables)
 
+let lower_synchronous_body body =
+  if is_missing body then body else
+  let body = add_missing_return body in
+  (**
+   * Although there are no suspends to rewrite, rewrite_suspends will rewrite
+   * the returns in the body
+   * from return 5; to return new ActualCoroutineResult(5);
+   *)
+  let _, body = SuspendRewriter.rewrite_suspends body ~only_tail_call_suspends:true in
+  let body = unnest_compound_statements body in
+  body
+
 let make_closure_lambda_signature_from_method
     method_node
     context
@@ -588,16 +599,19 @@ let generate_coroutine_state_machine
     original_body
     function_type
     function_parameter_list =
-  let new_body, coroutine_result_data_variables =
-    lower_body original_body in
-  let state_machine_data = compute_state_machine_data
-    context
-    coroutine_result_data_variables
-    function_parameter_list in
-  let closure_syntax =
-    CoroutineClosureGenerator.generate_coroutine_closure
-      context
-      original_body
-      function_type
-      state_machine_data in
-  new_body, closure_syntax
+  if SuspendRewriter.only_tail_call_suspends original_body
+    then lower_synchronous_body original_body, None
+    else
+      let new_body, coroutine_result_data_variables =
+        lower_body original_body in
+      let state_machine_data = compute_state_machine_data
+        context
+        coroutine_result_data_variables
+        function_parameter_list in
+      let closure_syntax =
+        CoroutineClosureGenerator.generate_coroutine_closure
+          context
+          original_body
+          function_type
+          state_machine_data in
+      new_body, closure_syntax

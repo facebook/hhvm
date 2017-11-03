@@ -9,6 +9,7 @@
 
 module CoroutineSyntax = Coroutine_syntax
 module Syntax = Full_fidelity_editable_positioned_syntax
+module CoroutineSuspendRewriter = Coroutine_suspend_rewriter
 
 open Syntax
 open CoroutineSyntax
@@ -145,20 +146,24 @@ let rewrite_coroutine_body
     function_parameter_list
     function_type
     rewritten_body =
-  match syntax rewritten_body with
-  | CompoundStatement node ->
-      let compound_statements = create_closure_invocation
-        context
-        function_parameter_list
-        function_type
-        rewritten_body in
-      let compound_statements = make_list compound_statements in
-      make_syntax (CompoundStatement { node with compound_statements })
-  | Missing ->
-      rewritten_body
-  | _ ->
-      (* Unexpected or malformed input, so we won't transform the coroutine. *)
-      failwith "rewritten_body wasn't a CompoundStatement"
+  if CoroutineSuspendRewriter.only_tail_call_suspends
+    context.Coroutine_context.original_node
+  then rewritten_body
+  else
+    match syntax rewritten_body with
+    | CompoundStatement node ->
+        let compound_statements = create_closure_invocation
+          context
+          function_parameter_list
+          function_type
+          rewritten_body in
+        let compound_statements = make_list compound_statements in
+        make_syntax (CompoundStatement { node with compound_statements })
+    | Missing ->
+        rewritten_body
+    | _ ->
+        (* Unexpected or malformed input, so we won't transform the coroutine. *)
+        failwith "rewritten_body wasn't a CompoundStatement"
 
 (**
  * If the provided methodish declaration is for a coroutine, rewrites the

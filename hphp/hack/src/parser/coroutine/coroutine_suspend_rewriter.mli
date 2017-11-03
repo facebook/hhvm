@@ -8,7 +8,12 @@
  *)
 module Syntax = Full_fidelity_editable_positioned_syntax
 
+val fix_up_lambda_body: Syntax.t -> Syntax.t
+
+val only_tail_call_suspends:
+  Syntax.t -> bool
+
 val rewrite_suspends:
-  Syntax.t ->
+  ?only_tail_call_suspends:bool -> Syntax.t ->
   (* (next_label * next_temp) * new_node *)
   (int * int) * Syntax.t

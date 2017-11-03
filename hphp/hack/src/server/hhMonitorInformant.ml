@@ -49,7 +49,7 @@ module Revision_map = struct
     let find_svn_rev hg_rev t =
       let future = Hashtbl.find t.svn_queries hg_rev in
       if Future.is_ready future then
-        Some (Future.get future)
+        Some (try Future.get future with _ -> 0)
       else
         None
 
@@ -89,7 +89,7 @@ module Revision_map = struct
       let open Option in
       query >>= fun future ->
         if Future.is_ready future then
-          let results = Future.get future in
+          let results = try Future.get future with _ -> [] in
           Some results
         else
           None
@@ -489,11 +489,12 @@ module Revision_tracker = struct
     in
     List.fold_left max_report Move_along reports
 
-  let make_report server_state t = match !t with
+  let make_report server_state t =
+    match !t with
     | Initializing (init_settings, future) ->
       if Future.is_ready future
       then
-        let svn_rev = Future.get future in
+        let svn_rev = try Future.get future with _ -> 0 in
         let () = Hh_logger.log "Initialized Revision_tracker to SVN rev: %d"
           svn_rev in
         let env = active_env init_settings svn_rev in

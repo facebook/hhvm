@@ -13,7 +13,8 @@ open Hhbc_ast.MemberOpMode
 open Hh_core
 open Emit_memoize_helpers
 
-let make_memoize_function_no_params_code ~non_null_return renamed_function_id =
+let make_memoize_function_no_params_code
+  ~non_null_return ~deprecation_info env renamed_function_id =
   let local_cache = Local.Unnamed 0 in
   let local_guard = Local.Unnamed 1 in
   let label_0 = Label.Regular 0 in
@@ -23,7 +24,11 @@ let make_memoize_function_no_params_code ~non_null_return renamed_function_id =
   let label_4 = Label.Regular 4 in
   let label_5 = Label.Regular 5 in
   let needs_guard = not non_null_return in
+  let scope = Emit_env.get_scope env in
+  let deprecation_body =
+    Emit_body.emit_deprecation_warning scope deprecation_info in
   gather [
+    deprecation_body;
     optional needs_guard [
       instr_false; instr_staticlocinit local_guard static_memoize_cache_guard;
     ];
@@ -75,7 +80,8 @@ let make_memoize_function_no_params_code ~non_null_return renamed_function_id =
       ];
     instr_retc ]
 
-let make_memoize_function_with_params_code ~pos env params renamed_method_id =
+let make_memoize_function_with_params_code
+  ~pos ~deprecation_info env params renamed_method_id =
   let param_count = List.length params in
   let static_local = Local.Unnamed param_count in
   let label = Label.Regular 0 in
@@ -84,9 +90,13 @@ let make_memoize_function_with_params_code ~pos env params renamed_method_id =
     (* Default value setters belong in the wrapper function not in the original function *)
     Emit_param.emit_param_default_value_setter env params
   in
+  let scope = Emit_env.get_scope env in
+  let deprecation_body =
+    Emit_body.emit_deprecation_warning scope deprecation_info in
   gather [
     begin_label;
     Emit_body.emit_method_prolog ~pos ~params:params ~should_emit_init_this:false;
+    deprecation_body;
     instr_typedvalue (Typed_value.Dict []);
     instr_staticlocinit static_local static_memoize_cache;
     param_code_sets params (param_count + 1);
@@ -109,10 +119,13 @@ let make_memoize_function_with_params_code ~pos env params renamed_method_id =
     default_value_setters
   ]
 
-let make_memoize_function_code ~pos ~non_null_return env params renamed_method_id =
+let make_memoize_function_code
+  ~pos ~non_null_return ~deprecation_info env params renamed_method_id =
   if List.is_empty params
-  then make_memoize_function_no_params_code ~non_null_return renamed_method_id
-  else make_memoize_function_with_params_code ~pos env params renamed_method_id
+  then make_memoize_function_no_params_code
+        ~non_null_return ~deprecation_info env renamed_method_id
+  else make_memoize_function_with_params_code
+        ~pos ~deprecation_info env params renamed_method_id
 
 (* Construct the wrapper function body *)
 let make_wrapper_body return_type params instrs =
@@ -125,7 +138,8 @@ let make_wrapper_body return_type params instrs =
     [] (* static_inits: this is intentionally empty *)
     None (* doc *)
 
-let emit_wrapper_function ~original_id ~renamed_id ~is_method ast_fun =
+let emit_wrapper_function
+  ~original_id ~renamed_id ~is_method ~deprecation_info ast_fun =
   Emit_memoize_helpers.check_memoize_possible (fst ast_fun.Ast.f_name)
     ~ret_by_ref: ast_fun.Ast.f_ret_by_ref
     ~params: ast_fun.Ast.f_params
@@ -149,7 +163,9 @@ let emit_wrapper_function ~original_id ~renamed_id ~is_method ast_fun =
   let non_null_return =
     cannot_return_null ast_fun.Ast.f_fun_kind ast_fun.Ast.f_ret in
   let body_instrs =
-    make_memoize_function_code ~pos ~non_null_return env params renamed_id in
+    make_memoize_function_code
+      ~pos ~non_null_return ~deprecation_info env params renamed_id
+  in
   let memoized_body =
     make_wrapper_body return_type_info params body_instrs in
   Hhas_function.make

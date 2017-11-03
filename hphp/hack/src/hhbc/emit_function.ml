@@ -53,7 +53,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~is_closure_body:false
       ~is_memoize
       ~is_async:function_is_async
-      ~deprecation_info
+      ~deprecation_info:(if is_memoize then None else deprecation_info)
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
       ~is_return_by_ref:ast_fun.Ast.f_ret_by_ref
       ~default_dropthrough:None
@@ -79,6 +79,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~original_id
       ~renamed_id
       ~is_method:false
+      ~deprecation_info
       ast_fun]
   else [normal_function]
 

@@ -15,6 +15,7 @@ val emit_wrapper_function :
   (* Renamed identifier, used for the wrapped function *)
   renamed_id: Hhbc_id.Function.t ->
   is_method: bool ->
+  deprecation_info: (Typed_value.t list) option ->
   (* Function definition in AST *)
   Ast.fun_ ->
   Hhas_function.t

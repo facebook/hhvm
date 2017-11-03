@@ -53,3 +53,8 @@ val emit_return_type_info :
   namespace: Namespace_env.env ->
   Ast.hint option ->
   Hhas_type_info.t
+
+val emit_deprecation_warning :
+  Ast_scope.Scope.t -> (* scope *)
+  (Typed_value.t list) option -> (* deprecation_info *)
+  Instruction_sequence.t

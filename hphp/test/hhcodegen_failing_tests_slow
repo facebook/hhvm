@@ -122,7 +122,6 @@ slow/inout/side-effects.php
 slow/inout/trait-magic.php
 slow/interpolated_function_call.php
 slow/labels/72.php
-slow/lang/deprecated.php
 slow/namespace/dynamic_extra_slash.php
 slow/namespace/dynamic_extra_slash_cns.php
 slow/namespace/dynamic_extra_slash_cns2.php

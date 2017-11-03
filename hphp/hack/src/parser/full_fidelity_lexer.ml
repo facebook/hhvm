@@ -12,6 +12,8 @@ module TriviaKind = Full_fidelity_trivia_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
+
+
 module Lexer : sig
   type t
   val make : SourceText.t -> t
@@ -25,6 +27,7 @@ module Lexer : sig
   val with_offset_errors : t -> int -> SyntaxError.t list -> t
   val start_new_lexeme : t -> t
   val advance : t -> int -> t
+  val with_start_offset : t -> int -> int -> t
 end = struct
 
   type t = {
@@ -47,6 +50,8 @@ end = struct
     { lexer with errors = error :: lexer.errors }
 
   let with_offset lexer offset = {lexer with offset = offset}
+
+  let with_start_offset lexer start offset = {lexer with start = start; offset = offset}
 
   let with_offset_errors lexer offset errors = {
     lexer with offset = offset; errors = errors
@@ -76,6 +81,7 @@ let with_offset = Lexer.with_offset
 let start_new_lexeme = Lexer.start_new_lexeme
 let advance = Lexer.advance
 let with_offset_errors = Lexer.with_offset_errors
+let with_start_offset = Lexer.with_start_offset
 
 let start_offset = start
 let end_offset = offset
@@ -83,6 +89,8 @@ let end_offset = offset
 let invalid = '\000'
 
 let empty = make SourceText.empty
+
+let source_text_string (l : lexer) = SourceText.text (source l)
 
 (* Housekeeping *)
 
@@ -135,6 +143,9 @@ let peek_def (l: lexer) i ~def =
     SourceText.get (source l) i
 
 (* Character classification *)
+let is_whitespace_no_newline : char -> bool = function
+  | ' ' | '\t' -> true
+  | _ -> false
 
 let is_newline ch =
   ch = '\r' || ch = '\n'
@@ -169,12 +180,20 @@ let is_name_letter ch =
 let skip_while (l : lexer) (p : char -> bool) =
   let n = SourceText.length (source l) in
   let rec aux i =
-  if i < n && p (peek l i) then aux (i + 1) else i in
+    if i < n && p (peek l i) then aux (i + 1) else i in
   with_offset l (aux (offset l))
 
+let str_skip_while ~str ~i ~p =
+  let n = String.length str in
+  let rec aux i =
+    if i < n && p str.[i] then aux (i + 1) else i in
+  aux i
+
 let skip_whitespace (l : lexer) =
-  let is_space ch = (ch = '\t' || ch = ' ') in
-  skip_while l is_space
+  skip_while l is_whitespace_no_newline
+
+let str_skip_whitespace ~str ~i =
+  str_skip_while ~str ~i ~p:is_whitespace_no_newline
 
 let skip_to_end_of_line (l : lexer) =
   let not_newline ch = (ch <> '\n') in
@@ -1213,6 +1232,7 @@ let scan_delimited_comment lexer =
       Trivia.make_delimited_comment (source lexer) (start lexer) w in
   (lexer, c)
 
+
 let scan_php_trivia lexer =
   (* Hack does not support PHP style embedded markup:
   <?php
@@ -1228,12 +1248,13 @@ in Hack.
 
 TODO: Give an error if this appears in a Hack program.
 *)
-  let lexer = start_new_lexeme lexer in
   match peek_char lexer 0 with
   | '#' ->
+    let lexer = start_new_lexeme lexer in
     let (lexer, c) = scan_hash_comment lexer in
     (lexer, Some c)
   | '/' -> begin
+    let lexer = start_new_lexeme lexer in
     match peek_char lexer 1 with
     | '/' ->
       let (lexer, c) = scan_single_line_comment lexer in
@@ -1244,12 +1265,17 @@ TODO: Give an error if this appears in a Hack program.
     | _ -> (lexer, None)
     end
   | ' ' | '\t' ->
-    let (lexer, w) = scan_whitespace lexer in
-    (lexer, Some w)
+    let new_end = str_skip_whitespace ~str:(source_text_string lexer) ~i:(offset lexer) in
+    let new_start = offset lexer in
+    let new_trivia = Trivia.make_whitespace (source lexer) new_start (new_end - new_start) in
+    (with_start_offset lexer new_start new_end, Some new_trivia)
   | '\r' | '\n' ->
+    let lexer = start_new_lexeme lexer in
     let (lexer, e) = scan_end_of_line lexer in
     (lexer, Some e)
-  | _ -> (* Not trivia *) (lexer, None)
+  | _ ->
+    let lexer = start_new_lexeme lexer in
+    (* Not trivia *) (lexer, None)
 
 let scan_xhp_trivia lexer =
   (* TODO: Should XHP comments <!-- --> be their own thing, or a kind of

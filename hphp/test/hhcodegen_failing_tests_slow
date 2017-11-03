@@ -25,7 +25,6 @@ slow/finally/finally_goto_002.php
 slow/finally/finally_goto_003.php
 slow/finally/finally_pseudomain_001.php
 slow/finally/finally_pseudomain_002.php
-slow/finally/finally_yield_001.php
 slow/finally/goto-bare.php
 slow/finally/new_try_catch_004.php
 slow/finally/new_try_catch_005.php

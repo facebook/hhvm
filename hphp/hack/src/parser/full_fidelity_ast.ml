@@ -2393,7 +2393,8 @@ let from_text
       ~positioned_syntax:script
       ~level:ParserErrors.HHVMCompatibility tree with
     | [] -> ()
-    | e :: _ -> failwith (Full_fidelity_syntax_error.message e)
+    | e :: _ ->
+      raise @@ Full_fidelity_syntax_error.ParserFatal e
     end;
     let script = from_positioned_syntax script in
     let script =

@@ -6,22 +6,30 @@
  * LICENSE file in the "hack" directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
- *)
+*)
+
+type error_type = ParseError | RuntimeError
 
 type t = {
-  child : t option;
+  child        : t option;
   start_offset : int;
-  end_offset : int;
-  message : string
+  end_offset   : int;
+  error_type   : error_type;
+  message      : string;
 }
 
-val make : ?child:t option -> int -> int -> string -> t
+exception ParserFatal of t
+
+val make :
+  ?child:t option -> ?error_type:error_type -> int -> int -> string -> t
 
 val to_positioned_string : t -> (int -> int * int) -> string
 
 val compare : t -> t -> int
 
 val exactly_equal : t -> t -> bool
+
+val error_type : t -> error_type
 
 val message : t -> string
 
@@ -191,3 +199,4 @@ val yield_in_magic_methods : string
 val reference_not_allowed_on_key : string
 val reference_not_allowed_on_value : string
 val reference_not_allowed_on_element : string
+val yield_in_finally_block : string

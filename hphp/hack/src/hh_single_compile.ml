@@ -12,6 +12,7 @@ open Hh_core
 open Sys_utils
 
 module P = Printf
+module SyntaxError = Full_fidelity_syntax_error
 
 (*****************************************************************************)
 (* Types, constants *)
@@ -197,7 +198,11 @@ let parse_file compiler_options popt filename text =
     `ParseResult (Errors.do_ begin fun () ->
       parse_text compiler_options popt filename text
     end)
-  with Failure s -> `ParseFailure s
+  with
+    (* FFP failed to parse *)
+    | Failure s -> `ParseFailure (SyntaxError.make 0 0 s)
+    (* FFP generated an error *)
+    | SyntaxError.ParserFatal e -> `ParseFailure e
 
 
 let hhvm_unix_call config filename =
@@ -240,9 +245,13 @@ let do_compile filename compiler_options fail_or_ast debug_time =
   let t = add_to_time_ref debug_time.parsing_t t in
   let hhas_prog =
     match fail_or_ast with
-    | `ParseFailure s ->
-      Hhas_program.emit_fatal_program ~ignore_message:true
-        Hhbc_ast.FatalOp.Parse Pos.none s
+    | `ParseFailure e ->
+      let error_t = match SyntaxError.error_type e with
+        | SyntaxError.ParseError -> Hhbc_ast.FatalOp.Parse
+        | SyntaxError.RuntimeError -> Hhbc_ast.FatalOp.Runtime
+      in
+      let s = SyntaxError.message e in
+      Hhas_program.emit_fatal_program ~ignore_message:false error_t Pos.none s
     | `ParseResult (errors, parser_return, _) ->
       let is_hh_file =
         Option.value_map parser_return.Parser_hack.file_mode

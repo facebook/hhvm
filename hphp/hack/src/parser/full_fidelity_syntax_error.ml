@@ -10,15 +10,21 @@
 
 (* TODO: Integrate these with the rest of the Hack error messages. *)
 
+type error_type = ParseError | RuntimeError
+
 type t = {
-  child : t option;
+  child        : t option;
   start_offset : int;
-  end_offset : int;
-  message : string
+  end_offset   : int;
+  error_type   : error_type;
+  message      : string;
 }
 
-let make ?(child = None) start_offset end_offset message =
-  { child; start_offset; end_offset; message }
+exception ParserFatal of t
+
+let make
+  ?(child = None) ?(error_type = ParseError) start_offset end_offset message =
+  { child; error_type; start_offset; end_offset; message }
 
 let rec to_positioned_string error offset_to_position =
   let child =
@@ -41,6 +47,8 @@ let exactly_equal err1 err2 =
   err1.start_offset = err2.start_offset &&
     err1.end_offset = err2.end_offset &&
     err1.message = err2.message
+
+let error_type err = err.error_type
 
 let message err = err.message
 
@@ -282,3 +290,5 @@ let reference_not_allowed_on_value = "Value of collection element cannot " ^
   "be marked as reference"
 let reference_not_allowed_on_element = "Collection element cannot " ^
   "be marked as reference"
+let yield_in_finally_block =
+  "Yield expression inside a finally block is not supported"

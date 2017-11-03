@@ -481,13 +481,14 @@ let using_statement_function_scoped_is_legal parents =
 let is_bad_xhp_attribute_name name =
   (String.contains name ':') || (String.contains name '-')
 
-let make_error_from_nodes start_node end_node error =
+let make_error_from_nodes
+  ?(error_type=SyntaxError.ParseError) start_node end_node error =
   let s = start_offset start_node in
   let e = end_offset end_node in
-  SyntaxError.make s e error
+  SyntaxError.make ~error_type s e error
 
-let make_error_from_node node error =
-  make_error_from_nodes node node error
+let make_error_from_node ?(error_type=SyntaxError.ParseError) node error =
+  make_error_from_nodes ~error_type node node error
 
 let is_invalid_xhp_attr_enum_item_literal literal_expression =
   match syntax literal_expression with
@@ -729,8 +730,8 @@ let make_name_already_used_error node name short_name original_location
       SyntaxError.original_definition in
   let s = start_offset node in
   let e = end_offset node in
-  SyntaxError.make ~child:(Some original_location_error) s e
-    (report_error ~name ~short_name)
+  SyntaxError.make
+    ~child:(Some original_location_error) s e (report_error ~name ~short_name)
 
 (* Given a node and its parents, tests if the node declares a method that is
  * both abstract and async. *)
@@ -1205,6 +1206,12 @@ let is_in_magic_method parents =
   | None -> false
   | Some s -> SSet.mem s SN.Members.as_set
 
+let is_in_finally_block parents =
+  Hh_core.List.exists parents ~f:(fun node ->
+    match syntax node with
+    | FinallyClause _ -> true
+    | _ -> false)
+
 let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors =
   match syntax node with
   | LiteralExpression {
@@ -1262,9 +1269,6 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     }
     when is_inout decorator && is_ampersand operator ->
     make_error_from_node node SyntaxError.error2076 :: errors
-  | YieldFromExpression _
-  | YieldExpression _ when is_in_magic_method parents ->
-    make_error_from_node node SyntaxError.yield_in_magic_methods :: errors
   | VectorIntrinsicExpression { vector_intrinsic_members = m; _ }
   | DictionaryIntrinsicExpression { dictionary_intrinsic_members = m; _ }
   | KeysetIntrinsicExpression { keyset_intrinsic_members = m; _ } ->
@@ -1280,6 +1284,18 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
       then make_error_from_node node SyntaxError.vdarray_in_php :: errors
       else errors in
     check_collection_members m errors
+  | YieldFromExpression _
+  | YieldExpression _ ->
+    let errors =
+      if is_in_magic_method parents then
+      make_error_from_node node SyntaxError.yield_in_magic_methods :: errors
+      else errors in
+    let errors =
+      if is_in_finally_block parents then
+      make_error_from_node ~error_type:SyntaxError.RuntimeError
+        node SyntaxError.yield_in_finally_block :: errors
+      else errors in
+    errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents hhvm_compat_mode trait_use_clauses errors =
@@ -1581,7 +1597,8 @@ let mixed_namespace_errors node namespace_type errors =
     begin match namespace_type with
     | Unbracketed { start_offset; end_offset } ->
       let child = Some
-        (SyntaxError.make start_offset end_offset SyntaxError.error2057) in
+        (SyntaxError.make start_offset end_offset SyntaxError.error2057)
+      in
       SyntaxError.make ~child s e SyntaxError.error2052 :: errors
     | _ -> errors
     end
@@ -1591,7 +1608,8 @@ let mixed_namespace_errors node namespace_type errors =
     begin match namespace_type with
     | Bracketed { start_offset; end_offset } ->
       let child = Some
-        (SyntaxError.make start_offset end_offset SyntaxError.error2056) in
+        (SyntaxError.make start_offset end_offset SyntaxError.error2056)
+      in
       SyntaxError.make ~child s e SyntaxError.error2052 :: errors
     | _ -> errors
     end

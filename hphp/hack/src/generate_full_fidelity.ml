@@ -698,7 +698,8 @@ CHILD_LIST_FROM_TYPE
       match syntax with
       | Missing -> acc
       | Token _ -> acc
-      | SyntaxList _ -> acc
+      | SyntaxList items ->
+        List.fold_left f acc items
 FOLD_FROM_SYNTAX
 
     (* The order that the children are returned in should match the order

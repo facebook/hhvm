@@ -2214,7 +2214,8 @@ module WithToken(Token: TokenType) = struct
       match syntax with
       | Missing -> acc
       | Token _ -> acc
-      | SyntaxList _ -> acc
+      | SyntaxList items ->
+        List.fold_left f acc items
       | EndOfFile {
         end_of_file_token;
       } ->

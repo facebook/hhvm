@@ -126,13 +126,13 @@ module WithStatementAndDeclAndTypeParser
   and parse_expression_with_operator_precedence parser operator =
     with_operator_precedence parser operator parse_expression
 
-  and parses_without_error parser f =
+  and parse_if_no_error parser f =
     let old_errors = List.length (errors parser) in
     try
       let (parser, result) = f parser in
       let new_errors = List.length(errors parser) in
-      old_errors = new_errors
-    with Failure _ -> false
+      Option.some_if (old_errors = new_errors) (parser, result)
+    with Failure _ -> None
 
   and parse_as_name_or_error parser =
     (* TODO: Are there "reserved" keywords that absolutely cannot start
@@ -1047,18 +1047,19 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_cast_or_parenthesized_or_lambda_expression parser =
   (* We need to disambiguate between casts, lambdas and ordinary
     parenthesized expressions. *)
-    if is_cast_expression parser then
-      parse_cast_expression parser
-    else if is_lambda_expression parser then
-      parse_lambda_expression parser
-    else
-      parse_parenthesized_expression parser
-
-  and is_easy_cast_type kind =
-    (* See comments below. *)
-    match kind with
-    | Array | Bool | Double | Float | Int | Object | String | Unset -> true
-    | _ -> false
+    match possible_cast_expression parser with
+    | Some (parser, left, cast_type, right) ->
+      let (parser, operand) = parse_expression_with_operator_precedence
+        parser Operator.CastOperator in
+      let result = make_cast_expression left cast_type right operand in
+      (parser, result)
+    | _ -> begin
+      match possible_lambda_expression parser with
+      | Some (parser, signature) ->
+        parse_lambda_expression_after_signature parser signature
+      | None ->
+        parse_parenthesized_expression parser
+      end
 
   and token_implies_cast kind =
     (* See comments below. *)
@@ -1269,7 +1270,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | XHPBody
     | XHPComment -> false
 
-  and is_cast_expression parser =
+  and possible_cast_expression parser =
     (* SPEC:
     cast-expression:
       (  cast-type  ) unary-expression
@@ -1288,43 +1289,33 @@ TODO: This will need to be fixed to allow situations where the qualified name
 
     * If the thing in parens is one of the keywords mentioned above, then
       it's a cast.
-    * If the token which follows (x) is as or instanceof then
+    * If the token which follows (x) is "as" or "instanceof" then
       it's a parenthesized expression.
-    * PHP-ism extension: if the token is and, or or xor, then it's a
+    * PHP-ism extension: if the token is "and", "or" or "xor", then it's a
       parenthesized expression.
     * Otherwise, if the token which follows (x) is $$, @, ~, !, (, +, -,
       any name, qualified name, variable name, literal, or keyword then
       it's a cast.
     * Otherwise, it's a parenthesized expression. *)
 
-    let (parser, _) = assert_token parser LeftParen in
+    let (parser, left_paren) = assert_token parser LeftParen in
     let (parser, type_token) = next_token parser in
-    let type_token = Token.kind type_token in
+    let type_token_kind = Token.kind type_token in
     let (parser, right_paren) = next_token parser in
-    let right_paren = Token.kind right_paren in
-    let following_token = peek_token_kind parser in
-    if right_paren != RightParen then
-      false
-    else if is_easy_cast_type type_token then
-      true
-    else if type_token != Name then
-      false
+    let is_easy_cast_type_or_at_least_name =
+      match type_token_kind with
+      | Array | Bool | Double | Float | Int | Object | String | Unset -> Some true
+      | Name -> Some false
+      | _ -> None in
+    let is_cast = Token.kind right_paren = RightParen &&
+      Option.value_map ~default:false is_easy_cast_type_or_at_least_name
+        ~f:(fun b -> b || token_implies_cast (peek_token_kind parser)) in
+    if is_cast then
+      Some (parser, left_paren, make_token type_token, make_token right_paren)
     else
-      token_implies_cast following_token
+      None
 
-  and parse_cast_expression parser =
-    (* We don't get here unless we have a legal cast, thanks to the
-       previous call to is_cast_expression. See notes above. *)
-    let (parser, left) = assert_token parser LeftParen in
-    let (parser, cast_type) = next_token parser in
-    let cast_type = make_token cast_type in
-    let (parser, right) = assert_token parser RightParen in
-    let (parser, operand) = parse_expression_with_operator_precedence
-      parser Operator.CastOperator in
-    let result = make_cast_expression left cast_type right operand in
-    (parser, result)
-
-  and is_lambda_expression parser =
+  and possible_lambda_expression parser =
     (* We have a left paren in hand and we already know we're not in a cast.
        We need to know whether this is a parenthesized expression or the
        signature of a lambda.
@@ -1348,10 +1339,11 @@ TODO: This will need to be fixed to allow situations where the qualified name
        (x)==> then odds are pretty good that a lambda was intended and the
        error should say that ($x)==> was expected.
     *)
-    let sig_and_arrow parser =
-      let (parser, signature) = parse_lambda_signature parser in
-      require_lambda_arrow parser in
-    parses_without_error parser sig_and_arrow
+    let signature_result = parse_if_no_error parser parse_lambda_signature in
+    match signature_result with
+    | Some (parser, _) when (peek_token_kind parser) = EqualEqualGreaterThan ->
+      signature_result
+    | _ -> None
 
   and parse_lambda_expression parser =
     (* SPEC
@@ -1371,6 +1363,16 @@ TODO: This will need to be fixed to allow situations where the qualified name
       failwith "syntax error, unexpected T_LAMBDA_ARROW";
     (* End of bug-port *)
 
+    let (parser, arrow) = require_lambda_arrow parser in
+    let (parser, body) = parse_lambda_body parser in
+    let result = make_lambda_expression async coroutine signature arrow body in
+    (parser, result)
+
+  and parse_lambda_expression_after_signature parser signature =
+    (* We had a signature with no async or coroutine, and we disambiguated it
+    from a cast. *)
+    let async = make_missing() in
+    let coroutine = make_missing() in
     let (parser, arrow) = require_lambda_arrow parser in
     let (parser, body) = parse_lambda_body parser in
     let result = make_lambda_expression async coroutine signature arrow body in

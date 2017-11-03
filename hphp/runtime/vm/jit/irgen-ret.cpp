@@ -115,23 +115,15 @@ void emitAsyncRetSlow(IRGS& env, SSATmp* retVal) {
   gen(env, StAsyncArResult, fp(env), retVal);
   gen(env, ABCUnblock, parentChain);
 
-  // We don't really pass a return value via the stack, but enterTCHelper is
-  // going to want to store the rret() regs to the top of the stack, so we need
-  // the stack depth to be one deeper here.  The resumeAsyncFunc() entry point
-  // in ExecutionContext doesn't care what we put here, but also won't try to
-  // decref it, so we use a null.  (This push doesn't actually get the value
-  // into memory---we're going to put it in the return value for AsyncRetCtrl
-  // and let enterTCHelper store it to memory.)
-  auto const ret = cns(env, TInitNull);
-  push(env, ret);
-
   // Must load this before FreeActRec, which adjusts fp(env).
   auto const resumableObj = gen(env, LdResumableArObj, fp(env));
   gen(env, FreeActRec, fp(env));
   decRef(env, resumableObj);
 
-  gen(env, AsyncRetCtrl, RetCtrlData { spOffBCFromIRSP(env), false },
-      sp(env), fp(env), ret);
+  // Transfer control back to the asio scheduler. Make uninitialized space
+  // on the stack for null "return value" to be written by the enterTCExit stub.
+  auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
+  gen(env, AsyncRetCtrl, IRSPRelOffsetData { spAdjust }, sp(env), fp(env));
 }
 
 void asyncRetSurpriseCheck(IRGS& env, SSATmp* retVal) {
@@ -194,10 +186,12 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
   // when debugging the fast return path.
   asyncRetSurpriseCheck(env, retVal);
 
-  // Unblock parents and possibly take fast path to resume parent.
+  // Call stub that will mark this AFWH as finished, unblock parents and
+  // possibly take fast path to resume parent. Leave SP pointing to a single
+  // uninitialized cell which will be filled by the stub.
   auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
-  gen(env, AsyncRetFast, RetCtrlData { spAdjust, false },
-      sp(env), fp(env), retVal);
+  gen(env, AsyncRetFast, IRSPRelOffsetData { spAdjust }, sp(env), fp(env),
+      retVal);
 }
 
 void generatorReturn(IRGS& env, SSATmp* retval) {

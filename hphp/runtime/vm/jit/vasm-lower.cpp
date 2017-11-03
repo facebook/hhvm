@@ -352,6 +352,24 @@ void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
       break;
   }
 }
+void lower(VLS& env, syncvmrettype& inst, Vlabel b, size_t i) {
+  switch (arch()) {
+    case Arch::X64: // fall through
+    case Arch::PPC64:
+      env.unit.blocks[b].code[i] = copy{inst.type, rret_type()};
+      break;
+    case Arch::ARM:
+      // For ARM64 we need to clear the bits 8..31 from the type value.
+      // That allows us to use the resulting register values in
+      // type comparisons without the need for truncation there.
+      // We must not touch bits 63..32 as they contain the AUX data.
+      lower_impl(env.unit, b, i, [&] (Vout& v) {
+        v << andq{v.cns(0xffffffff000000ff),
+                  inst.type, rret_type(), v.makeReg()};
+      });
+      break;
+  }
+}
 void lower(VLS& env, vregrestrict& /*inst*/, Vlabel b, size_t i) {
   env.vreg_restrict_level--;
   env.unit.blocks[b].code[i] = nop{};

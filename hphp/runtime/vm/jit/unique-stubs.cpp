@@ -635,10 +635,13 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
     v << store{rvmfp(), rvmtl()[rds::kVmFirstAROff]};
 
     // Jump to the AFWH's resume address.
-    v << jmpm{afwh[AFWH::resumeAddrOff()], php_return_regs()};
+    v << jmpm{afwh[AFWH::resumeAddrOff()], vm_regs_with_sp()};
 
+    // Return control to the asio scheduler. The enterTCExit stub will deal with
+    // populating top of the stack with the returned null.
     v = slow_path;
-    v << leavetc{php_return_regs()};
+    v << syncvmrettype{v.cns(KindOfNull)};
+    v << leavetc{vm_regs_with_sp() | rret_type()};
   });
 
   return ret;
@@ -765,7 +768,7 @@ TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
     v << storebi{runningState, parentBl[bl_rel(AFWH::stateOff())]};
 
     // Transfer control to the resume address.
-    v << jmpm{rvmfp()[ar_rel(AFWH::resumeAddrOff())], php_return_regs()};
+    v << jmpm{rvmfp()[ar_rel(AFWH::resumeAddrOff())], vm_regs_with_sp()};
 
     /*
      * Slow path: unblock all parents, and return to the scheduler.
@@ -787,7 +790,7 @@ TCA emitAsyncRetCtrl(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
     // path) since we're not also resuming a parent that we've unblocked.
     emitDecRefWorkObj(v, wh);
 
-    v << jmpi{switchCtrl, php_return_regs()};
+    v << jmpi{switchCtrl, vm_regs_with_sp()};
   });
 }
 

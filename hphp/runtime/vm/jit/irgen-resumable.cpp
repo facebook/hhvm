@@ -137,13 +137,11 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   // Set up the dependency.
   gen(env, AFWHBlockOn, fp(env), child);
 
-  // We put a fake return value on the stack for the same reason that returning
-  // from a resumed function does.  See the comments in asyncFunctionReturn.
-  auto const retVal = cns(env, TInitNull);
-  push(env, retVal);
-
-  gen(env, AsyncSwitchFast, RetCtrlData { spOffBCFromIRSP(env), true },
-      sp(env), fp(env), retVal);
+  // Call stub that will either transfer control to another ResumableWaitHandle,
+  // or return control back to the scheduler. Leave SP pointing to a single
+  // uninitialized cell which will be filled by the stub.
+  auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
+  gen(env, AsyncSwitchFast, IRSPRelOffsetData { spAdjust }, sp(env), fp(env));
 }
 
 void yieldReturnControl(IRGS& env) {

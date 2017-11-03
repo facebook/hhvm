@@ -59,9 +59,10 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template<class ExtraData>
 Vreg adjustSPForReturn(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
-  auto const adjust = inst->extra<RetCtrlData>()->spOffset.offset;
+  auto const adjust = inst->extra<ExtraData>()->offset.offset;
   auto& v = vmain(env);
 
   auto const sync_sp = v.makeReg();
@@ -118,7 +119,7 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
 
 void cgRetCtrl(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 1).reg();
-  auto const sync_sp = adjustSPForReturn(env, inst);
+  auto const sync_sp = adjustSPForReturn<RetCtrlData>(env, inst);
   auto& v = vmain(env);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -141,10 +142,9 @@ void cgRetCtrl(IRLS& env, const IRInstruction* inst) {
 
 void cgAsyncRetCtrl(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  adjustSPForReturn(env, inst);
-  prepare_return_regs(v, inst->src(2), srcLoc(env, inst, 2),
-                      inst->extra<AsyncRetCtrl>()->aux);
-  v << leavetc{php_return_regs()};
+  adjustSPForReturn<IRSPRelOffsetData>(env, inst);
+  v << syncvmrettype{v.cns(KindOfNull)};
+  v << leavetc{vm_regs_with_sp() | rret_type()};
 }
 
 void cgAsyncRetFast(IRLS& env, const IRInstruction* inst) {
@@ -152,7 +152,7 @@ void cgAsyncRetFast(IRLS& env, const IRInstruction* inst) {
   auto const retLoc = srcLoc(env, inst, 2);
   auto& v = vmain(env);
 
-  adjustSPForReturn(env, inst);
+  adjustSPForReturn<IRSPRelOffsetData>(env, inst);
 
   // The asyncRetCtrl stub takes the return TV as its arguments.
   copyTV(v, rarg(0), rarg(1), retLoc, ret);
@@ -164,10 +164,8 @@ void cgAsyncRetFast(IRLS& env, const IRInstruction* inst) {
 
 void cgAsyncSwitchFast(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  adjustSPForReturn(env, inst);
-  prepare_return_regs(v, inst->src(2), srcLoc(env, inst, 2),
-                      inst->extra<AsyncSwitchFast>()->aux);
-  v << jmpi{tc::ustubs().asyncSwitchCtrl, php_return_regs()};
+  adjustSPForReturn<IRSPRelOffsetData>(env, inst);
+  v << jmpi{tc::ustubs().asyncSwitchCtrl, vm_regs_with_sp()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

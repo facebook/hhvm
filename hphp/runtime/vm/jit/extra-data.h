@@ -688,23 +688,23 @@ struct CallData : IRExtraData {
 };
 
 struct RetCtrlData : IRExtraData {
-  explicit RetCtrlData(IRSPRelOffset spOffset, bool suspendingResumed,
+  explicit RetCtrlData(IRSPRelOffset offset, bool suspendingResumed,
                        folly::Optional<AuxUnion> aux = folly::none)
-    : spOffset(spOffset)
+    : offset(offset)
     , suspendingResumed(suspendingResumed)
     , aux(aux)
   {}
 
   std::string show() const {
     return folly::to<std::string>(
-      spOffset.offset,
+      offset.offset,
       suspendingResumed ? ",suspendingResumed" : ""
     );
   }
 
   // Adjustment we need to make to the stack pointer (for cross-tracelet ABI
   // purposes) before returning.
-  IRSPRelOffset spOffset;
+  IRSPRelOffset offset;
 
   // Indicates that the current resumable frame is being suspended without
   // decrefing locals.  Used by refcount optimizer.
@@ -1384,9 +1384,9 @@ X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);
 X(CallArray,                    CallArrayData);
 X(RetCtrl,                      RetCtrlData);
-X(AsyncRetCtrl,                 RetCtrlData);
-X(AsyncRetFast,                 RetCtrlData);
-X(AsyncSwitchFast,              RetCtrlData);
+X(AsyncRetCtrl,                 IRSPRelOffsetData);
+X(AsyncRetFast,                 IRSPRelOffsetData);
+X(AsyncSwitchFast,              IRSPRelOffsetData);
 X(LdArrFuncCtx,                 IRSPRelOffsetData);
 X(LdArrFPushCuf,                IRSPRelOffsetData);
 X(LdStrFPushCuf,                IRSPRelOffsetData);

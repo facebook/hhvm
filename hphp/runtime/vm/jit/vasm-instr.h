@@ -111,6 +111,7 @@ struct Vunit;
   O(defvmretdata, Inone, Un, D(data))\
   O(defvmrettype, Inone, Un, D(type))\
   O(syncvmret, Inone, U(data) U(type), Dn)\
+  O(syncvmrettype, Inone, U(type), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
   O(phpret, Inone, U(fp) U(args), D(d))\
   O(callphp, I(stub), U(args), Dn)\
@@ -707,11 +708,18 @@ struct defvmretdata { Vreg data; };
 struct defvmrettype { Vreg type; };
 
 /*
- * Copy a PHP return value into the return registers (rreg(0) and rreg(1)).
+ * Copy a PHP return value into the rret_data() and rret_type() registers.
  *
  * This should be used right before we execute a phpret{}.
  */
 struct syncvmret { Vreg data; Vreg type; };
+
+/*
+ * Copy a PHP return type into the rret_type() register.
+ *
+ * This should be used right before we execute a phpret{}.
+ */
+struct syncvmrettype { Vreg type; };
 
 /*
  * PHP function prologue.

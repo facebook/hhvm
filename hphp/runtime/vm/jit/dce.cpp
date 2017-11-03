@@ -444,6 +444,8 @@ bool canDCE(IRInstruction* inst) {
   case CallBuiltin:
   case RetCtrl:
   case AsyncRetCtrl:
+  case AsyncRetFast:
+  case AsyncSwitchFast:
   case ReleaseVVAndSkip:
   case GenericRetDecRefs:
   case StMem:
@@ -533,8 +535,6 @@ bool canDCE(IRInstruction* inst) {
   case StAsyncArResume:
   case StAsyncArResult:
   case AFWHBlockOn:
-  case AsyncRetFast:
-  case AsyncSwitchFast:
   case ABCUnblock:
   case IncStat:
   case IncStatGrouped:

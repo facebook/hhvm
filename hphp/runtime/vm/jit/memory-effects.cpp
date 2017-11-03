@@ -599,16 +599,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case AsyncRetCtrl:
   case AsyncRetFast:
+    return ReturnEffects { AStackAny | AMIStateAny };
+
   case AsyncSwitchFast:
-    if (inst.extra<RetCtrlData>()->suspendingResumed) {
-      return UnknownEffects {};
-    }
-    return ReturnEffects {
-      *stack_below(
-        inst.src(0),
-        inst.extra<RetCtrlData>()->spOffset - 1
-      ).precise_union(AMIStateAny)
-    };
+    // Suspending can go anywhere, and doesn't even kill locals.
+    return UnknownEffects {};
 
   case GenericRetDecRefs:
     /*

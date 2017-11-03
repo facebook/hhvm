@@ -140,11 +140,14 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     // The RetCtrl is generally ending a bytecode instruction, with the
     // exception being in an Await bytecode instruction, where we consider the
     // end of the bytecode instruction to be the non-suspending path.
-    case RetCtrl:
+    case RetCtrl: {
+      auto const op = inst.marker().sk().op();
+      return op != Op::Await && op != Op::AwaitAll && op != Op::FCallAwait;
+    }
+
     case AsyncRetCtrl:
     case AsyncRetFast:
-    case AsyncSwitchFast:
-      return inst.marker().sk().op() != Op::Await;
+      return true;
 
     // A ReqBindJmp ends a unit and it jumps to the next instruction to
     // execute.

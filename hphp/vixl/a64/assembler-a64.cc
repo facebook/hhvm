@@ -1100,10 +1100,15 @@ void Assembler::str(const CPURegister& rt, const MemOperand& src) {
 
 
 void Assembler::ldr(const Register& rt, Label* label) {
-  assert(rt.Is64Bits());
-  Emit(LDR_x_lit
-       | ImmLLiteral(UpdateAndGetInstructionOffsetTo(label))
-       | Rt(rt));
+  if (rt.Is64Bits()) {
+    Emit(LDR_x_lit
+         | ImmLLiteral(UpdateAndGetInstructionOffsetTo(label))
+         | Rt(rt));
+  } else {
+    Emit(LDR_w_lit
+         | ImmLLiteral(UpdateAndGetInstructionOffsetTo(label))
+         | Rt(rt));
+  }
 }
 
 

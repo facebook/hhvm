@@ -238,14 +238,14 @@ namespace arm {
   //   ADD imm
   static constexpr int kLeaVmSpLen = 4;
   // The largest of vasm setcc, copy, or leap is emitted in 16 bytes.
-  //   AND imm, MOV, LDR + B + dc64, or ADRP + ADD imm
-  static constexpr int kMovLen = 16;
+  //   AND imm, MOV, LDR + B + dc32, or ADRP + ADD imm
+  static constexpr int kMovLen = 12;
   // The largest of vasm copy or leap is emitted in 16 bytes.
-  //   MOV, LDR + B + dc64, or ADRP + ADD imm
-  static constexpr int kPersist = 16;
-  // vasm copy and jmpi is emitted in 20 bytes.
-  //   MOV and 16
-  static constexpr int kSvcReqExit = 20;
+  //   MOV, LDR + B + dc32, or ADRP + ADD imm
+  static constexpr int kPersist = 12;
+  // vasm copy and jmpi is emitted in 16 bytes.
+  //   MOV + LDR + B + dc32
+  static constexpr int kSvcReqExit = 16;
 }
 
 namespace ppc64 {

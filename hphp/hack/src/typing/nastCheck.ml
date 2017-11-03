@@ -50,6 +50,7 @@ type env = {
   class_kind: Ast.class_kind option;
   imm_ctrl_ctx: control_context;
   typedef_tparams : Nast.tparam list;
+  lvalue: bool; (* current expression is being used as an lvalue *)
   tenv: Env.env;
 }
 
@@ -331,6 +332,7 @@ let rec fun_ tenv f named_body =
   if !auto_complete then ()
   else begin
     let env = { t_is_finally = false;
+                lvalue = false;
                 class_name = None; class_kind = None;
                 imm_ctrl_ctx = Toplevel;
                 typedef_tparams = [];
@@ -490,6 +492,7 @@ and class_ tenv c =
   if !auto_complete then () else begin
   let cname = Some (snd c.c_name) in
   let env = { t_is_finally = false;
+              lvalue = false;
               class_name = cname;
               class_kind = Some c.c_kind;
               imm_ctrl_ctx = Toplevel;
@@ -984,6 +987,9 @@ and expr_ env p = function
       expr env e1;
       expr env e2;
       ()
+  | Array_get ((p, _), None) when not env.lvalue ->
+    Errors.reading_from_append p;
+    ()
   | Array_get (e, eopt) ->
       expr env e;
       maybe expr env eopt;
@@ -1031,8 +1037,11 @@ and expr_ env p = function
       hint env h;
       expr env e;
       ()
-  | Binop (_, e1, e2) ->
-      expr env e1;
+  | Binop (op, e1, e2) ->
+      let lvalue_env = match op with
+      | Ast.Eq None -> { env with lvalue = true }
+      | _ -> env in
+      expr lvalue_env e1;
       expr env e2;
       ()
   | Eif (e1, None, e3) ->
@@ -1095,6 +1104,7 @@ and attribute env (_, e) =
 
 let typedef tenv t =
   let env = { t_is_finally = false;
+              lvalue = false;
               class_name = None; class_kind = None;
               imm_ctrl_ctx = Toplevel;
               (* Since typedefs cannot have constraints we shouldn't check

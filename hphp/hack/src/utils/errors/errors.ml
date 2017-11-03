@@ -520,7 +520,6 @@ module Naming                               = struct
   let dynamic_class_property_name_in_strict_mode  = 2076 (* DONT MODIFY!!!! *)
   let this_as_lexical_variable              = 2077 (* DONT MODIFY!!!! *)
   let dynamic_class_name_in_strict_mode     = 2078  (* DONT MODIFY!!!! *)
-
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -572,6 +571,7 @@ module NastCheck                            = struct
   let inout_params_mix_byref                = 3044 (* DONT MODIFY!!!! *)
   let inout_params_memoize                  = 3045 (* DONT MODIFY!!!! *)
   let inout_params_ret_by_ref               = 3046 (* DONT MODIFY!!!! *)
+  let reading_from_append                   = 3047 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1193,7 +1193,6 @@ let dynamic_class_name_in_strict_mode pos =
     pos
     "Cannot use dynamic class name in strict mode"
 
-
 (*****************************************************************************)
 (* Init check errors *)
 (*****************************************************************************)
@@ -1421,6 +1420,9 @@ let inout_params_ret_by_ref fpos pos =
     "Functions with inout parameters cannot return by reference (&)" in
   let msg2 = pos, "This is an inout parameter" in
   add_list NastCheck.inout_params_ret_by_ref [msg1; msg2]
+
+let reading_from_append pos =
+  add NastCheck.reading_from_append pos "Cannot use [] for reading"
 
 (*****************************************************************************)
 (* Nast terminality *)

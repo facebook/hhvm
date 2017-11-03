@@ -123,7 +123,7 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
   InstrSet literals;
   for (auto instr = start; instr < end; instr = instr->NextInstruction()) {
     if (literals.count(instr)) continue;
-    if (instr->IsLoadLiteral() && instr->Mask(LoadLiteralMask) == LDR_x_lit) {
+    if (instr->IsLoadLiteral()) {
       /*
        * Get the address of the literal instruction words. Add both words.
        * Also check if these instruction words are themselves LDR literals
@@ -134,17 +134,20 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
           if (!literals.count(lit)) {
             literals.insert(lit);
           }
-          if (lit->IsLoadLiteral() && lit->Mask(LoadLiteralMask) == LDR_x_lit) {
+          if (lit->IsLoadLiteral()) {
             auto oops = Instruction::Cast(lit->LiteralAddress());
             literals.erase(oops);
-            literals.erase(oops->NextInstruction());
+            if (lit->Mask(LoadLiteralMask) == LDR_x_lit) {
+              literals.erase(oops->NextInstruction());
+	    }
           }
         }
       };
 
       auto la = Instruction::Cast(instr->LiteralAddress());
       addLiteral(la);
-      addLiteral(la->NextInstruction());
+      if (instr->Mask(LoadLiteralMask) == LDR_x_lit)
+        addLiteral(la->NextInstruction());
     }
   }
   return literals;
@@ -717,23 +720,31 @@ size_t relocateImpl(Env& env) {
            *   MOV/MOVK
            */
           if (src->IsLoadLiteral()) {
-            auto addr = reinterpret_cast<TCA*>(dest->LiteralAddress());
-            auto target = *addr;
-            auto adjusted = env.rel.adjustedAddressAfter(target);
-
-            if (!adjusted) {
-              // Consider the case of a non-initialized mcprep smashableMovq
-              target = reinterpret_cast<TCA>((uint64_t(target) >> 1));
-              adjusted = env.rel.adjustedAddressAfter(target);
+            if (src->Mask(LoadLiteralMask) == LDR_w_lit) {
+              auto addr = reinterpret_cast<uint32_t*>(dest->LiteralAddress());
+              auto target = *addr;
+              auto adjusted =
+		env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
               if (adjusted) {
-                adjusted = reinterpret_cast<TCA>((uint64_t(adjusted) << 1) | 1);
+		patchTarget32(reinterpret_cast<TCA>(addr), adjusted);
+	      }
+            } else {
+              auto addr = reinterpret_cast<TCA*>(dest->LiteralAddress());
+              auto target = *addr;
+              auto adjusted = env.rel.adjustedAddressAfter(target);
+              if (!adjusted) {
+                // Consider the case of a non-initialized mcprep smashableMovq
+                target = reinterpret_cast<TCA>((uint64_t(target) >> 1));
+                adjusted = env.rel.adjustedAddressAfter(target);
+                if (adjusted) {
+		  adjusted = reinterpret_cast<TCA>(
+		    (uint64_t(adjusted) << 1) | 1
+		  );
+		}
+		if (adjusted) {
+		  patchTarget64(reinterpret_cast<TCA>(addr), adjusted);
+		}
               }
-            }
-
-            if (adjusted) {
-              *addr = adjusted;
-              auto const begin = reinterpret_cast<TCA>(addr);
-              DataBlock::syncDirect(begin, begin + 8);
             }
           } else if (src->IsMovz()) {
             int length = 1;
@@ -869,13 +880,16 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
    *       assert when attempting to adjust MOV/MOVK when live.
    */
   if (instr->IsLoadLiteral()) {
-    auto addr = reinterpret_cast<TCA*>(instr->LiteralAddress());
-    auto target = *addr;
-    auto adjusted = rel.adjustedAddressAfter(target);
-    if (adjusted) {
-      *addr = adjusted;
-      auto const begin = reinterpret_cast<TCA>(addr);
-      DataBlock::syncDirect(begin, begin + 2 * kInstructionSize);
+    if (instr->Mask(LoadLiteralMask) == LDR_w_lit) {
+      auto addr = reinterpret_cast<uint32_t*>(instr->LiteralAddress());
+      auto target = *addr;
+      auto adjusted = rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
+      if (adjusted) patchTarget32(reinterpret_cast<TCA>(addr), adjusted);
+    } else {
+      auto addr = reinterpret_cast<TCA*>(instr->LiteralAddress());
+      auto target = *addr;
+      auto adjusted = rel.adjustedAddressAfter(target);
+      if (adjusted) patchTarget64(reinterpret_cast<TCA>(addr), adjusted);
     }
   } else if (instr->IsMovz()) {
     const auto rd = instr->Rd();

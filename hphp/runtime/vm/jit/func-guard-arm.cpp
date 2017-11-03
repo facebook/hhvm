@@ -69,11 +69,11 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   a.  Cmp   (vixl::x0, rAsm);
   a.  B     (&after_data, convertCC(CC_Z));
 
-  a.  Ldr   (rAsm, &target_data);
+  a.  Ldr   (rAsm_w, &target_data);
   a.  Br    (rAsm);
 
   a.  bind  (&target_data);
-  a.  dc64  (tc::ustubs().funcPrologueRedispatch);
+  a.  dc32  (makeTarget32(tc::ustubs().funcPrologueRedispatch));
   a.  bind  (&after_data);
 
   cb.sync(begin);
@@ -82,9 +82,9 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
 TCA funcGuardFromPrologue(TCA prologue, const Func* /*func*/) {
   if (!isPrologueStub(prologue)) {
     // Typically a func guard is a smashable movq followed by an ldr, cmp, b.eq,
-    // ldr, br, and a 64 bit target. However, relocation can shorten the
-    // sequence, so search backwards until the smashable movq is found.
-    for (int length = 0; length <= (5 * 4) + 8; length += 4) {
+    // ldr, br, and a 32 bit target. However, relocation can shorten the sequence,
+    // so search backwards until the smashable movq is found.
+    for (int length = 0; length <= (5 * 4) + 4; length += 4) {
       TCA inst = prologue - (smashableMovqLen() + length);
       if (isSmashableMovq(inst)) return inst;
     }

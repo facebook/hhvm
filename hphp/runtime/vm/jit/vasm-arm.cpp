@@ -440,24 +440,18 @@ static CodeAddress toReal(Venv& env, CodeAddress a) {
 
 void Vgen::patch(Venv& env) {
   for (auto& p : env.jmps) {
-    assertx(env.addrs[p.target]);
-    // 'jmp' is 2 instructions, load followed by branch
-    auto const begin = p.instr + 2 * 4;
-    auto const block = getBlock(env, begin);
-    assertx(block);
-    auto const addr = block->toDestAddress(begin);
-    *reinterpret_cast<TCA*>(addr) = env.addrs[p.target];
-    block->sync(begin, begin + sizeof(env.addrs[p.target]));
+    auto addr = toReal(env, p.instr);
+    auto target = env.addrs[p.target];
+    assertx(target);
+    // Patch the 32 bit target following the LDR and BR
+    patchTarget32(addr + 2 * 4, target);
   }
   for (auto& p : env.jccs) {
-    assertx(env.addrs[p.target]);
-    // 'jcc' is 3 instructions, b.!cc + load followed by branch
-    auto const begin = p.instr + 3 * 4;
-    auto const block = getBlock(env, begin);
-    assertx(block);
-    auto const addr = block->toDestAddress(begin);
-    *reinterpret_cast<TCA*>(addr) = env.addrs[p.target];
-    block->sync(begin, begin + sizeof(env.addrs[p.target]));
+    auto addr = toReal(env, p.instr);
+    auto target = env.addrs[p.target];
+    assertx(p.target);
+    // Patch the 32 bit target following the B.<CC>, LDR, and BR
+    patchTarget32(addr + 3 * 4, target);
   }
 }
 
@@ -765,10 +759,10 @@ void Vgen::emit(const jcc& i) {
     // Emit a sequence similar to a smashable for easy patching later.
     // Static relocation might be able to simplify the branch.
     a->B(&skip, vixl::InvertCondition(C(i.cc)));
-    a->Ldr(rAsm, &data);
+    a->Ldr(rAsm_w, &data);
     a->Br(rAsm);
     a->bind(&data);
-    a->dc64(a->code().toDestAddress(a->frontier()));
+    a->dc32(makeTarget32(a->frontier()));
     a->bind(&skip);
   }
   emit(jmp{i.targets[0]});
@@ -790,10 +784,10 @@ void Vgen::emit(const jmp& i) {
 
   // Emit a sequence similar to a smashable for easy patching later.
   // Static relocation might be able to simplify the branch.
-  a->Ldr(rAsm, &data);
+  a->Ldr(rAsm_w, &data);
   a->Br(rAsm);
   a->bind(&data);
-  a->dc64(a->code().toDestAddress(a->frontier()));
+  a->dc32(makeTarget32(a->frontier()));
 }
 
 void Vgen::emit(const jmpi& i) {
@@ -807,10 +801,10 @@ void Vgen::emit(const jmpi& i) {
   } else {
     // Cannot use simple a->Mov() since such a sequence cannot be
     // adjusted while live following a relocation.
-    a->Ldr(rAsm, &data);
+    a->Ldr(rAsm_w, &data);
     a->Br(rAsm);
     a->bind(&data);
-    a->dc64(i.target);
+    a->dc32(makeTarget32(i.target));
   }
 }
 
@@ -831,10 +825,10 @@ void Vgen::emit(const leap& i) {
 
   // Cannot use simple a->Mov() since such a sequence cannot be
   // adjusted while live following a relocation.
-  a->Ldr(X(i.d), &imm_data);
+  a->Ldr(W(i.d), &imm_data);
   a->B(&after_data);
   a->bind(&imm_data);
-  a->dc64(i.s.r.disp);
+  a->dc32(makeTarget32(i.s.r.disp));
   a->bind(&after_data);
 }
 

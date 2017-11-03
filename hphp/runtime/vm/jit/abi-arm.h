@@ -233,8 +233,10 @@ inline vixl::Register svcReqArgReg(unsigned index) {
 const vixl::Register rVixlScratch0(vixl::x16);
 const vixl::Register rVixlScratch1(vixl::x17);
 
-// x18 is used as assembler temporary
+// w18/x18 is used as assembler temporary. The 32-bit w18 is used
+// primarily to hold 32-bit branch targets.
 const vixl::Register rAsm(vixl::x18);
+const vixl::Register rAsm_w(vixl::w18);
 
 ///////////////////////////////////////////////////////////////////////////////
 

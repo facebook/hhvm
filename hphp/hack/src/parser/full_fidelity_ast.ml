@@ -344,8 +344,10 @@ let mkStr : (string -> string) -> string -> string = fun unescaper content ->
          * line as well as the blank line and preceding terminator line. *)
         let start = (String.index content '\n') + 1 in
         let end_ = (String.rindex_from content (len - 2) '\n') in
-        let len = end_ - start in
-          String.sub content start len
+        (* in case of empty heredoc expected start position will be
+           located after the end  *)
+        if start >= end_ then ""
+        else String.sub content start (end_ - start)
       else String.sub content 1 (String.length content - 2)
     with
     | Invalid_argument _ -> content

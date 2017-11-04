@@ -48,7 +48,6 @@ slow/hack_mode/function_hint_with_params_trailing_variadic_param.php
 slow/hack_mode/function_hint_with_type_hinted_variadic_param-trailing-comma.php
 slow/hash_not_bang.php
 slow/hashbang_regression.php
-slow/here_doc/1234.php
 slow/hh_namespace_migration/hh_frozenset4.php
 slow/hh_namespace_migration/hh_frozenset7.php
 slow/hh_namespace_migration/hh_frozenvector4.php

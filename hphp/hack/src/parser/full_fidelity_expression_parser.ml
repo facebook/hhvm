@@ -159,8 +159,8 @@ module WithStatementAndDeclAndTypeParser
   and parse_term parser =
     let (parser1, token) = next_xhp_class_name_or_other parser in
     match (Token.kind token) with
-    | ExecutionString -> (* TODO: Make these an error in Hack *)
-       (parser1, make_literal_expression (make_token token))
+    (* TODO: Make these an error in Hack *)
+    | ExecutionStringLiteral
     | DecimalLiteral
     | OctalLiteral
     | HexadecimalLiteral
@@ -178,7 +178,11 @@ module WithStatementAndDeclAndTypeParser
       parse_heredoc_string parser (make_token token) name
     | HeredocStringLiteralHead
     | DoubleQuotedStringLiteralHead ->
-      parse_double_quoted_string parser1 (make_token token)
+      parse_double_quoted_like_string
+        parser1 (make_token token) Lexer.Literal_double_quoted
+    | ExecutionStringLiteralHead ->
+      parse_double_quoted_like_string
+        parser1 (make_token token) Lexer.Literal_execution_string
     | Variable -> parse_variable_or_lambda parser
     | XHPClassName
     | Name
@@ -322,11 +326,11 @@ module WithStatementAndDeclAndTypeParser
     else
       parse_as_name_or_error parser
 
-  and parse_double_quoted_string parser head =
-    parse_string_literal parser head ""
+  and parse_double_quoted_like_string parser head literal_kind =
+    parse_string_literal parser head literal_kind
 
   and parse_heredoc_string parser head name =
-    parse_string_literal parser head name
+    parse_string_literal parser head (Lexer.Literal_heredoc name)
 
   and parse_braced_expression_in_string parser =
     (*
@@ -375,7 +379,7 @@ module WithStatementAndDeclAndTypeParser
     let node = make_embedded_braced_expression left_brace expr right_brace in
     (parser, node)
 
-  and parse_string_literal parser head name =
+  and parse_string_literal parser head literal_kind =
     (* SPEC
 
     Double-quoted string literals and heredoc string literals use basically
@@ -451,12 +455,16 @@ module WithStatementAndDeclAndTypeParser
       let k = match (Token.kind head, Token.kind token) with
       | (DoubleQuotedStringLiteralHead, DoubleQuotedStringLiteralTail) ->
         DoubleQuotedStringLiteral
+      | (ExecutionStringLiteralHead, ExecutionStringLiteralTail) ->
+        ExecutionStringLiteral
       | (HeredocStringLiteralHead, HeredocStringLiteralTail) ->
         HeredocStringLiteral
       | (DoubleQuotedStringLiteralHead, _) -> DoubleQuotedStringLiteralHead
+      | (ExecutionStringLiteralHead, _) -> ExecutionStringLiteralHead
       | (HeredocStringLiteralHead, _) -> HeredocStringLiteralHead
       | (_, DoubleQuotedStringLiteralTail) -> DoubleQuotedStringLiteralTail
       | (_, HeredocStringLiteralTail) -> HeredocStringLiteralTail
+      | (_, ExecutionStringLiteralTail) -> ExecutionStringLiteralTail
       | _ -> StringLiteralBody in
       let s = SourceText.empty in
       let o = 0 in
@@ -478,7 +486,8 @@ module WithStatementAndDeclAndTypeParser
           let token = match k with
             | StringLiteralBody
             | HeredocStringLiteralTail
-            | DoubleQuotedStringLiteralTail -> token
+            | DoubleQuotedStringLiteralTail
+            | ExecutionStringLiteralTail -> token
             | _ -> Token.with_kind token StringLiteralBody in
           (make_token token) :: acc
         | Some head -> (merge token head) :: t
@@ -487,9 +496,9 @@ module WithStatementAndDeclAndTypeParser
 
     let parse_embedded_expression parser token =
       let var_expr = make_variable_expression (make_token token) in
-      let (parser1, token1) = next_token_in_string parser name in
-      let (parser2, token2) = next_token_in_string parser1 name in
-      let (parser3, token3) = next_token_in_string parser2 name in
+      let (parser1, token1) = next_token_in_string parser literal_kind in
+      let (parser2, token2) = next_token_in_string parser1 literal_kind in
+      let (parser3, token3) = next_token_in_string parser2 literal_kind in
       match (Token.kind token1, Token.kind token2, Token.kind token3) with
       | (MinusGreaterThan, Name, _) ->
         let expr = make_embedded_member_selection_expression var_expr
@@ -519,8 +528,8 @@ module WithStatementAndDeclAndTypeParser
     let rec handle_left_brace parser acc =
       (* Note that here we use next_token_in_string because we need to know
       whether there is trivia between the left brace and the $x which follows.*)
-      let (parser1, left_brace) = next_token_in_string parser name in
-      let (_, token) = next_token_in_string parser1 name in
+      let (parser1, left_brace) = next_token_in_string parser literal_kind in
+      let (_, token) = next_token_in_string parser1 literal_kind in
       (* TODO: What about "{$$}" ? *)
       match Token.kind token with
       | Dollar ->
@@ -548,7 +557,7 @@ module WithStatementAndDeclAndTypeParser
       (* TODO: This should be an error in strict mode. *)
       (* We must not have trivia between the $ and the {, but we can have
       trivia after the {. That's why we use next_token_in_string here. *)
-      let (_, token) = next_token_in_string parser name in
+      let (_, token) = next_token_in_string parser literal_kind in
       match Token.kind token with
       | LeftBrace ->
         (* The thing in the braces has to be an expression that begins
@@ -572,10 +581,11 @@ module WithStatementAndDeclAndTypeParser
         aux parser (merge_head dollar acc)
 
     and aux parser acc =
-      let (parser1, token) = next_token_in_string parser name in
+      let (parser1, token) = next_token_in_string parser literal_kind in
       match Token.kind token with
       | HeredocStringLiteralTail
-      | DoubleQuotedStringLiteralTail -> (parser1, (merge_head token acc))
+      | DoubleQuotedStringLiteralTail
+      | ExecutionStringLiteralTail -> (parser1, (merge_head token acc))
       | LeftBrace -> handle_left_brace parser acc
       | Variable ->
         let (parser, expr) = parse_embedded_expression parser1 token in
@@ -1184,7 +1194,9 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | DoubleQuotedStringLiteralHead
     | StringLiteralBody
     | DoubleQuotedStringLiteralTail
-    | ExecutionString
+    | ExecutionStringLiteral
+    | ExecutionStringLiteralHead
+    | ExecutionStringLiteralTail
     | FloatingLiteral
     | HeredocStringLiteral
     | HeredocStringLiteralHead

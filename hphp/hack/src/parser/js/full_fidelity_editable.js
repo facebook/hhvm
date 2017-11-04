@@ -1037,8 +1037,12 @@ class EditableToken extends EditableSyntax
        return new BinaryLiteralToken(leading, trailing, token_text);
     case 'floating_literal':
        return new FloatingLiteralToken(leading, trailing, token_text);
-    case 'execution_string':
-       return new ExecutionStringToken(leading, trailing, token_text);
+    case 'execution_string_literal':
+       return new ExecutionStringLiteralToken(leading, trailing, token_text);
+    case 'execution_string_literal_head':
+       return new ExecutionStringLiteralHeadToken(leading, trailing, token_text);
+    case 'execution_string_literal_tail':
+       return new ExecutionStringLiteralTailToken(leading, trailing, token_text);
     case 'single_quoted_string_literal':
        return new SingleQuotedStringLiteralToken(leading, trailing, token_text);
     case 'double_quoted_string_literal':
@@ -2434,15 +2438,39 @@ class FloatingLiteralToken extends EditableToken
   }
 
 }
-class ExecutionStringToken extends EditableToken
+class ExecutionStringLiteralToken extends EditableToken
 {
   constructor(leading, trailing, text)
   {
-    super('execution_string', leading, trailing, text);
+    super('execution_string_literal', leading, trailing, text);
   }
   with_text(text)
   {
-    return new ExecutionStringToken(this.leading, this.trailing, text);
+    return new ExecutionStringLiteralToken(this.leading, this.trailing, text);
+  }
+
+}
+class ExecutionStringLiteralHeadToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('execution_string_literal_head', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new ExecutionStringLiteralHeadToken(this.leading, this.trailing, text);
+  }
+
+}
+class ExecutionStringLiteralTailToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('execution_string_literal_tail', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new ExecutionStringLiteralTailToken(this.leading, this.trailing, text);
   }
 
 }
@@ -19013,7 +19041,9 @@ exports.OctalLiteralToken = OctalLiteralToken;
 exports.HexadecimalLiteralToken = HexadecimalLiteralToken;
 exports.BinaryLiteralToken = BinaryLiteralToken;
 exports.FloatingLiteralToken = FloatingLiteralToken;
-exports.ExecutionStringToken = ExecutionStringToken;
+exports.ExecutionStringLiteralToken = ExecutionStringLiteralToken;
+exports.ExecutionStringLiteralHeadToken = ExecutionStringLiteralHeadToken;
+exports.ExecutionStringLiteralTailToken = ExecutionStringLiteralTailToken;
 exports.SingleQuotedStringLiteralToken = SingleQuotedStringLiteralToken;
 exports.DoubleQuotedStringLiteralToken = DoubleQuotedStringLiteralToken;
 exports.DoubleQuotedStringLiteralHeadToken = DoubleQuotedStringLiteralHeadToken;

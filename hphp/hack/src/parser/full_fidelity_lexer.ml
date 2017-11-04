@@ -92,6 +92,12 @@ let empty = make SourceText.empty
 
 let source_text_string (l : lexer) = SourceText.text (source l)
 
+type string_literal_kind =
+  | Literal_execution_string
+  | Literal_double_quoted
+  | Literal_heredoc of string
+
+
 (* Housekeeping *)
 
 let peek_char lexer index =
@@ -388,51 +394,6 @@ let scan_decimal_or_float lexer =
   | 'e' | 'E' -> (* 123e *) scan_exponent lexer_no_underscores
   | _ -> (* 123 *) (lexer_with_underscores, TokenKind.DecimalLiteral)
 
-
-let scan_execution_string_literal (l : lexer) =
-  (* TODO: PHP supports literals of the form `command` where the command
-  is then executed as a shell command.  Hack does not support this.
-  We should give an error if this feature is used in Hack, but we should lex
-  it anyways to give a good error message.
-
-  TODO: Can execution strings have embedded expressions like double-quoted
-  strings?
-
-  TODO: Are there any escape sequences in execution strings?
-
-  TODO: Are there any illegal characters in execution strings?
-  *)
-
-  let n = SourceText.length (source l) in
-  let peek = SourceText.get (source l) in
-
-  let has_error0012 = ref false in
-  let has_error0006 = ref false in
-
-  let rec last_pos i =
-    if i >= n then
-      (has_error0012 := true; i)
-    else begin
-      let ch = peek i in
-      match ch with
-      | '\000' -> (has_error0006  := true; last_pos (1 + i))
-      | '`'    -> (1 + i)
-      | _      -> (last_pos (1 + i))
-    end in
-
-  let new_offset = last_pos (1 + (offset l)) in
-
-  let new_errors =
-    let err msg = make_error_with_location l msg in
-    match (!has_error0006, !has_error0012) with
-    | (true, true) -> (err SyntaxError.error0006 :: err SyntaxError.error0012 :: (errors l))
-    | (true, false) -> (err SyntaxError.error0006 :: (errors l))
-    | (false, true) -> (err SyntaxError.error0012 :: (errors l))
-    | (false, false) -> (errors l) in
-
-  let res = with_offset_errors l new_offset new_errors in
-  (res, TokenKind.ExecutionString)
-
 let scan_single_quote_string_literal (l : lexer) =
   (* TODO: What about newlines embedded? *)
   (* SPEC:
@@ -526,12 +487,12 @@ let scan_unicode_escape lexer =
       (* TODO: Consider producing a warning for a malformed unicode escape. *)
       advance lexer 2
 
-let skip_uninteresting_double_quote_string_characters (l : lexer) =
+let skip_uninteresting_double_quote_like_string_characters (l : lexer) start_char =
   let is_uninteresting ch =
     match ch with
-    | '\000' | '"' | '\\' | '$' | '{' | '[' | ']' | '-'
+    | '\000' | '\\' | '$' | '{' | '[' | ']' | '-'
     | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' -> false
-    | ch -> not (is_name_nondigit ch)  in
+    | ch -> ch <> start_char && not (is_name_nondigit ch) in
   skip_while l is_uninteresting
 
 let scan_integer_literal lexer =
@@ -543,11 +504,21 @@ let scan_integer_literal lexer =
   else
     (scan_decimal_digits_with_underscores lexer, TokenKind.DecimalLiteral)
 
-let scan_double_quote_string_literal_from_start lexer =
+(* scans double quoted or execution string literals - they have similar rules
+   for content interpretation except for \"" character - it is escaped in
+   double quoted string and remain intact in execution string literals *)
+let scan_double_quote_like_string_literal_from_start lexer start_char =
+  let literal_token_kind =
+    if start_char = '`' then TokenKind.ExecutionStringLiteral
+    else TokenKind.DoubleQuotedStringLiteral in
+  let head_token_kind =
+    if start_char = '`' then TokenKind.ExecutionStringLiteralHead
+    else TokenKind.DoubleQuotedStringLiteralHead in
   let rec aux lexer =
     (* If there's nothing interesting in this double-quoted string then
        we can just hand it back as-is. *)
-    let lexer = skip_uninteresting_double_quote_string_characters lexer in
+    let lexer =
+      skip_uninteresting_double_quote_like_string_characters lexer start_char in
     match peek_char lexer 0 with
     | '\000' ->
       (* If the string is unterminated then give an error; if this is an
@@ -555,15 +526,15 @@ let scan_double_quote_string_literal_from_start lexer =
          be able to make more progress. *)
       if at_end lexer then
         let lexer = with_error lexer SyntaxError.error0012 in
-        (lexer, TokenKind.DoubleQuotedStringLiteral)
+        (lexer, literal_token_kind)
       else
         let lexer = with_error lexer SyntaxError.error0006 in
         aux (advance lexer 1)
-    | '"' ->
+    | '`' | '"' ->
       (* We made it to the end without finding a special character. *)
-      (advance lexer 1, TokenKind.DoubleQuotedStringLiteral)
+      (advance lexer 1, literal_token_kind)
     | _ -> (* We've found a backslash, dollar or brace. *)
-      (lexer, TokenKind.DoubleQuotedStringLiteralHead) in
+      (lexer, head_token_kind) in
   aux (advance lexer 1)
 
 let is_heredoc_tail lexer name =
@@ -599,8 +570,25 @@ let is_heredoc_tail lexer name =
     ((is_newline ch0) || ch0 = ';' && (is_newline ch1)) &&
       (peek_string lexer len) = name
 
-let scan_string_literal_in_progress lexer name =
-  let is_heredoc = (String.length name) != 0 in
+let get_tail_token_kind literal_kind =
+  match literal_kind with
+  | Literal_heredoc _-> TokenKind.HeredocStringLiteralTail
+  | Literal_execution_string -> TokenKind.ExecutionStringLiteralTail
+  | Literal_double_quoted -> TokenKind.DoubleQuotedStringLiteralTail
+
+let get_string_literal_body_or_double_quoted_tail literal_kind =
+  if literal_kind = Literal_double_quoted
+  then TokenKind.DoubleQuotedStringLiteralTail
+  else TokenKind.StringLiteralBody
+
+let scan_string_literal_in_progress lexer literal_kind =
+  let is_heredoc, name =
+    match literal_kind with
+    | Literal_heredoc name -> true, name
+    | _ -> false, "" in
+  let start_char =
+    if literal_kind = Literal_execution_string then '`'
+    else '"' in
   let ch0 = peek_char lexer 0 in
   if is_name_nondigit ch0 then
     if is_heredoc && (is_heredoc_tail lexer name) then
@@ -612,19 +600,20 @@ let scan_string_literal_in_progress lexer name =
     | '\000' ->
       if at_end lexer then
         let lexer = with_error lexer SyntaxError.error0012 in
-        let kind =
-          if is_heredoc then TokenKind.HeredocStringLiteralTail
-          else TokenKind.DoubleQuotedStringLiteralTail in
-        (lexer, kind)
+        (lexer, get_tail_token_kind literal_kind)
       else
         let lexer = with_error lexer SyntaxError.error0006 in
         let lexer = advance lexer 1 in
-        let lexer = skip_uninteresting_double_quote_string_characters lexer in
+        let lexer =
+          skip_uninteresting_double_quote_like_string_characters
+            lexer
+            start_char in
         (lexer, TokenKind.StringLiteralBody)
+    | '`' when literal_kind = Literal_execution_string ->
+      (* '`' terminates execution string *)
+      (advance lexer 1, TokenKind.ExecutionStringLiteralTail)
     | '"' ->
-      let kind =
-        if is_heredoc then TokenKind.StringLiteralBody
-        else TokenKind.DoubleQuotedStringLiteralTail in
+      let kind = get_string_literal_body_or_double_quoted_tail literal_kind in
       (advance lexer 1, kind)
     | '$' ->
       if is_name_nondigit (peek_char lexer 1) then scan_variable lexer
@@ -634,20 +623,26 @@ let scan_string_literal_in_progress lexer name =
       match peek_char lexer 1 with
       (* In these cases we just skip the escape sequence and
        keep on scanning for special characters. *)
-      | '\\' | '"' | '$' | 'e' | 'f' | 'n' | 'r' | 't' | 'v'
+      | '\\' | '"' | '$' | 'e' | 'f' | 'n' | 'r' | 't' | 'v' | '`'
       (* Same in these cases; there might be more octal characters following but
          if there are, we'll just eat them as normal characters. *)
       | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' ->
         let lexer = advance lexer 2 in
-        let lexer = skip_uninteresting_double_quote_string_characters lexer in
+        let lexer =
+          skip_uninteresting_double_quote_like_string_characters
+            lexer start_char in
         (lexer, TokenKind.StringLiteralBody)
       | 'x' ->
         let lexer = scan_hexadecimal_escape lexer in
-        let lexer = skip_uninteresting_double_quote_string_characters lexer in
+        let lexer =
+          skip_uninteresting_double_quote_like_string_characters
+            lexer start_char in
         (lexer, TokenKind.StringLiteralBody)
       | 'u' ->
         let lexer = scan_unicode_escape lexer in
-        let lexer = skip_uninteresting_double_quote_string_characters lexer in
+        let lexer =
+          skip_uninteresting_double_quote_like_string_characters
+            lexer start_char in
         (lexer, TokenKind.StringLiteralBody)
       | '{' ->
         (* The rules for escaping open braces in Hack are bizarre. Suppose we
@@ -676,7 +671,9 @@ let scan_string_literal_in_progress lexer name =
          in the string.
          *)
          let lexer = advance lexer 1 in
-         let lexer = skip_uninteresting_double_quote_string_characters lexer in
+         let lexer =
+          skip_uninteresting_double_quote_like_string_characters
+            lexer start_char in
          (lexer, TokenKind.StringLiteralBody)
       end
     | '[' ->
@@ -693,7 +690,9 @@ let scan_string_literal_in_progress lexer name =
         (* Nothing interesting here. Skip it and find the next
            interesting character. *)
         let lexer = advance lexer 1 in
-        let lexer = skip_uninteresting_double_quote_string_characters lexer in
+        let lexer =
+          skip_uninteresting_double_quote_like_string_characters
+            lexer start_char in
         (lexer, TokenKind.StringLiteralBody)
     | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ->
       let (lexer1, _) as literal = scan_integer_literal lexer in
@@ -704,7 +703,9 @@ let scan_string_literal_in_progress lexer name =
       (* Nothing interesting here. Skip it and find the next
          interesting character. *)
       let lexer = advance lexer 1 in
-      let lexer = skip_uninteresting_double_quote_string_characters lexer in
+      let lexer =
+        skip_uninteresting_double_quote_like_string_characters
+          lexer start_char in
       (lexer, TokenKind.StringLiteralBody)
 
 (*  A heredoc string literal has the form
@@ -1109,9 +1110,9 @@ let scan_token in_type lexer =
     end
   | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ->
     scan_decimal_or_float lexer
-  | '`' -> scan_execution_string_literal lexer
   | '\'' -> scan_single_quote_string_literal lexer
-  | '"' -> scan_double_quote_string_literal_from_start lexer
+  | '`' -> scan_double_quote_like_string_literal_from_start lexer '`'
+  | '"' -> scan_double_quote_like_string_literal_from_start lexer '"'
   | '\\' -> scan_qualified_name lexer
   (* Names *)
   | _ ->
@@ -1467,10 +1468,10 @@ let next_token_no_trailing lexer =
     (lexer, Token.make kind (source lexer) (start lexer) w leading []) in
   scan_assert_progress tokenizer lexer
 
-let next_token_in_string lexer name =
+let next_token_in_string lexer literal_kind =
   let lexer = start_new_lexeme lexer in
   (* We're inside a string. Do not scan leading trivia. *)
-  let (lexer, kind) = scan_string_literal_in_progress lexer name in
+  let (lexer, kind) = scan_string_literal_in_progress lexer literal_kind in
   let w = width lexer in
   (* Only scan trailing trivia if we've finished the string. *)
   let (lexer, trailing) =

@@ -11,6 +11,10 @@
 module WithToken(Token : Lexable_token_sig.LexableToken_S) = struct
   module type Lexer_S = sig
     type t
+    type string_literal_kind =
+      | Literal_execution_string
+      | Literal_double_quoted
+      | Literal_heredoc of string
     val source : t -> Full_fidelity_source_text.t
     val start_offset : t -> int
     val end_offset : t -> int
@@ -19,7 +23,7 @@ module WithToken(Token : Lexable_token_sig.LexableToken_S) = struct
     val next_token_no_trailing : t -> t * Token.t
     val next_token_as_name : t -> t * Token.t
     val next_docstring_header : t -> t * Token.t * string
-    val next_token_in_string : t -> string -> t * Token.t
+    val next_token_in_string : t -> string_literal_kind -> t * Token.t
     val scan_markup: t ->
       is_leading_section:bool ->
       (* lexer *)

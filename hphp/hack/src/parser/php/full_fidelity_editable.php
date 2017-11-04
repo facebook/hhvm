@@ -1142,8 +1142,12 @@ abstract class EditableToken extends EditableSyntax {
        return new BinaryLiteralToken($leading, $trailing, $token_text);
     case 'floating_literal':
        return new FloatingLiteralToken($leading, $trailing, $token_text);
-    case 'execution_string':
-       return new ExecutionStringToken($leading, $trailing, $token_text);
+    case 'execution_string_literal':
+       return new ExecutionStringLiteralToken($leading, $trailing, $token_text);
+    case 'execution_string_literal_head':
+       return new ExecutionStringLiteralHeadToken($leading, $trailing, $token_text);
+    case 'execution_string_literal_tail':
+       return new ExecutionStringLiteralTailToken($leading, $trailing, $token_text);
     case 'single_quoted_string_literal':
        return new SingleQuotedStringLiteralToken($leading, $trailing, $token_text);
     case 'double_quoted_string_literal':
@@ -3977,24 +3981,64 @@ final class FloatingLiteralToken extends EditableToken {
     return new FloatingLiteralToken($this->leading(), $trailing, $this->text());
   }
 }
-final class ExecutionStringToken extends EditableToken {
+final class ExecutionStringLiteralToken extends EditableToken {
   public function __construct(
     EditableSyntax $leading,
     EditableSyntax $trailing,
     string $text) {
-    parent::__construct('execution_string', $leading, $trailing, $text);
+    parent::__construct('execution_string_literal', $leading, $trailing, $text);
   }
 
-  public function with_text(string $text): ExecutionStringToken {
-    return new ExecutionStringToken($this->leading(), $this->trailing(), $text);
+  public function with_text(string $text): ExecutionStringLiteralToken {
+    return new ExecutionStringLiteralToken($this->leading(), $this->trailing(), $text);
   }
 
-  public function with_leading(EditableSyntax $leading): ExecutionStringToken {
-    return new ExecutionStringToken($leading, $this->trailing(), $this->text());
+  public function with_leading(EditableSyntax $leading): ExecutionStringLiteralToken {
+    return new ExecutionStringLiteralToken($leading, $this->trailing(), $this->text());
   }
 
-  public function with_trailing(EditableSyntax $trailing): ExecutionStringToken {
-    return new ExecutionStringToken($this->leading(), $trailing, $this->text());
+  public function with_trailing(EditableSyntax $trailing): ExecutionStringLiteralToken {
+    return new ExecutionStringLiteralToken($this->leading(), $trailing, $this->text());
+  }
+}
+final class ExecutionStringLiteralHeadToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $text) {
+    parent::__construct('execution_string_literal_head', $leading, $trailing, $text);
+  }
+
+  public function with_text(string $text): ExecutionStringLiteralHeadToken {
+    return new ExecutionStringLiteralHeadToken($this->leading(), $this->trailing(), $text);
+  }
+
+  public function with_leading(EditableSyntax $leading): ExecutionStringLiteralHeadToken {
+    return new ExecutionStringLiteralHeadToken($leading, $this->trailing(), $this->text());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): ExecutionStringLiteralHeadToken {
+    return new ExecutionStringLiteralHeadToken($this->leading(), $trailing, $this->text());
+  }
+}
+final class ExecutionStringLiteralTailToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $text) {
+    parent::__construct('execution_string_literal_tail', $leading, $trailing, $text);
+  }
+
+  public function with_text(string $text): ExecutionStringLiteralTailToken {
+    return new ExecutionStringLiteralTailToken($this->leading(), $this->trailing(), $text);
+  }
+
+  public function with_leading(EditableSyntax $leading): ExecutionStringLiteralTailToken {
+    return new ExecutionStringLiteralTailToken($leading, $this->trailing(), $this->text());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): ExecutionStringLiteralTailToken {
+    return new ExecutionStringLiteralTailToken($this->leading(), $trailing, $this->text());
   }
 }
 final class SingleQuotedStringLiteralToken extends EditableToken {

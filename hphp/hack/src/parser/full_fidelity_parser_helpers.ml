@@ -80,9 +80,9 @@ module WithParser(Parser : Parser_S) = struct
     let parser = Parser.with_lexer parser lexer in
     (parser, token, name)
 
-  let next_token_in_string parser name =
+  let next_token_in_string parser literal_kind =
     let lexer = Parser.lexer parser in
-    let (lexer, token) = Lexer.next_token_in_string lexer name in
+    let (lexer, token) = Lexer.next_token_in_string lexer literal_kind in
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 

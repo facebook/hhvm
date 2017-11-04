@@ -10,6 +10,10 @@
 
 module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
   type t
+  type string_literal_kind =
+    | Literal_execution_string
+    | Literal_double_quoted
+    | Literal_heredoc of string
   val make : Full_fidelity_source_text.t -> t
   val source : t -> Full_fidelity_source_text.t
   val errors : t -> Full_fidelity_syntax_error.t list
@@ -18,7 +22,7 @@ module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
   val current_text_at : t -> int -> int -> string
   val next_token : t -> t * Token.t
   val next_token_no_trailing : t -> t * Token.t
-  val next_token_in_string : t -> string -> t * Token.t
+  val next_token_in_string : t -> string_literal_kind -> t * Token.t
   val scan_markup: t ->
     is_leading_section:bool ->
     (* lexer *)

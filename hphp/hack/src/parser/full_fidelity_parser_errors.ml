@@ -1641,6 +1641,48 @@ let enum_errors node errors =
     make_error_from_node node SyntaxError.enum_elem_name_is_class :: errors
   | _ -> errors
 
+let does_op_create_write_on_left = function
+  | Some (TokenKind.( Equal
+                    | BarEqual
+                    | PlusEqual
+                    | StarEqual
+                    | StarStarEqual
+                    | SlashEqual
+                    | DotEqual
+                    | MinusEqual
+                    | PercentEqual
+                    | CaratEqual
+                    | AmpersandEqual
+                    | LessThanLessThanEqual
+                    | GreaterThanGreaterThanEqual)) -> true
+  | _ -> false
+
+let assignment_errors node errors =
+  match syntax node with
+  | BinaryExpression
+    { binary_left_operand = loperand
+    ; binary_operator = op
+    ; binary_right_operand = roperand
+    } when does_op_create_write_on_left (token_kind op) ->
+    let result = match syntax loperand with
+      | SafeMemberSelectionExpression _ ->
+        Some SyntaxError.safe_member_selection_in_write
+      | MemberSelectionExpression { member_name; _ }
+        when token_kind member_name = Some TokenKind.XHPClassName ->
+        Some SyntaxError.safe_member_selection_in_write
+      | VariableExpression { variable_expression }
+        when String.lowercase_ascii (text variable_expression)
+          = SN.SpecialIdents.this ->
+        Some SyntaxError.reassign_this
+      | _ -> None
+    in
+    begin match result with
+    | None -> errors
+    | Some error_message ->
+      make_error_from_node loperand error_message :: errors
+    end
+  | _ -> errors
+
 let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let is_hack_file = (SyntaxTree.language syntax_tree = "hh") in
@@ -1690,6 +1732,7 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
       namespace_use_declaration_errors node is_hack (not has_namespace_prefix)
         names errors in
     let errors = enum_errors node errors in
+    let errors = assignment_errors node errors in
 
     match syntax node with
     | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->

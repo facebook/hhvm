@@ -202,3 +202,6 @@ val reference_not_allowed_on_element : string
 val yield_in_finally_block : string
 val coloncolonclass_on_dynamic : string
 val enum_elem_name_is_class : string
+val safe_member_selection_in_write : string
+val xhp_member_selection_in_write : string
+val reassign_this : string

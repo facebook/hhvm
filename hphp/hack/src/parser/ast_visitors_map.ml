@@ -701,6 +701,8 @@ class virtual ['self] map =
       let r0 = self#on_pstring env c0 in String r0
     method on_String2 env c0 =
       let r0 = self#on_list self#on_expr env c0 in String2 r0
+    method on_Execution_operator env c0 =
+      let r0 = self#on_list self#on_expr env c0 in Execution_operator r0
     method on_Yield env c0 =
       let r0 = self#on_afield env c0 in Yield r0
     method on_Yield_break env = Yield_break
@@ -811,6 +813,7 @@ class virtual ['self] map =
       | Float c0 -> self#on_Float env c0
       | String c0 -> self#on_String env c0
       | String2 c0 -> self#on_String2 env c0
+      | Execution_operator c0 -> self#on_Execution_operator env c0
       | Yield c0 -> self#on_Yield env c0
       | Yield_from c0 -> self#on_Yield_from env c0
       | Yield_break -> self#on_Yield_break env

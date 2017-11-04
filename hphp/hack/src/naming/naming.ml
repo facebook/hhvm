@@ -2033,7 +2033,9 @@ module Make (GetLocals : GetLocals) = struct
     | Int s -> N.Int s
     | Float s -> N.Float s
     | String s -> N.String s
-    | String2 idl -> N.String2 (string2 env idl)
+    | String2 idl
+    (* treat execution operator similar to interpolated strings *)
+    | Execution_operator idl -> N.String2 (string2 env idl)
     | Id x -> N.Id (Env.global_const env x)
     | Id_type_arguments (_x, _hl) ->
       (* Shouldn't happen: parser only allows this in New *)

@@ -1085,6 +1085,9 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
     e ^ "[" ^ eo ^ "]"
   | A.String2 es ->
     String.concat " . " @@ List.map string_of_param_default_value es
+  | A.Execution_operator es ->
+    let s = String.concat " . " @@ List.map string_of_param_default_value es in
+    "shell_exec(" ^ s ^ ")"
   | A.Eif (cond, etrue, efalse) ->
     let cond = string_of_param_default_value cond in
     let etrue =

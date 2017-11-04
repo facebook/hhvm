@@ -50,6 +50,7 @@ class type ['a] ast_visitor_type = object
   method on_nullCoalesce : 'a -> expr -> expr -> 'a
   method on_expr : 'a -> expr -> 'a
   method on_omitted: 'a -> 'a
+  method on_execution_operator : 'a -> expr list -> 'a
   method on_expr_ : 'a -> expr_ -> 'a
   method on_expr_list : 'a -> expr list -> 'a
   method on_fallthrough : 'a -> 'a
@@ -345,6 +346,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Float n     -> this#on_float acc n
    | Null        -> this#on_null acc
    | String s    -> this#on_string acc s
+   | Execution_operator s -> this#on_execution_operator acc s
    | Id id       -> this#on_id acc id
    | Id_type_arguments (id, hl) -> this#on_id_type_arguments acc id hl
    | Lvar id     -> this#on_lvar acc id
@@ -452,8 +454,11 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = this#on_pstring acc pstr in
     acc
 
-
   method on_string2 acc el =
+    let acc = List.fold_left this#on_expr acc el in
+    acc
+
+  method on_execution_operator acc el =
     let acc = List.fold_left this#on_expr acc el in
     acc
 

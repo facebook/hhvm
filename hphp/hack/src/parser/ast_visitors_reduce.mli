@@ -245,6 +245,7 @@ class virtual ['b] reduce :
         on_Stmt : 'c -> Ast_visitors_ancestors.stmt -> 'd;
         on_String : 'c -> Ast_visitors_ancestors.pstring -> 'd;
         on_String2 : 'c -> Ast_visitors_ancestors.expr list -> 'd;
+        on_Execution_operator : 'c -> Ast_visitors_ancestors.expr list -> 'd;
         on_Switch : 'c ->
                     Ast_visitors_ancestors.expr ->
                     Ast_visitors_ancestors.case list -> 'd;
@@ -636,6 +637,7 @@ class virtual ['b] reduce :
     method on_Stmt : 'c -> Ast_visitors_ancestors.stmt -> 'd
     method on_String : 'c -> Ast_visitors_ancestors.pstring -> 'd
     method on_String2 : 'c -> Ast_visitors_ancestors.expr list -> 'd
+    method on_Execution_operator : 'c -> Ast_visitors_ancestors.expr list -> 'd
     method on_Switch :
       'c ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.case list -> 'd

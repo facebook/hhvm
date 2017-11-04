@@ -353,6 +353,7 @@ and expr_ =
   | Unsafeexpr of expr
   | Import of import_flavor * expr
   | Callconv of param_kind * expr
+  | Execution_operator of expr list
 
 and import_flavor =
   | Include

@@ -510,6 +510,7 @@ class virtual ['self] iter =
     method on_Float = self#on_pstring
     method on_String = self#on_pstring
     method on_String2 = self#on_list self#on_expr
+    method on_Execution_operator = self#on_list self#on_expr
     method on_Yield = self#on_afield
     method on_Yield_from = self#on_expr
     method on_Yield_break env = ()
@@ -604,6 +605,7 @@ class virtual ['self] iter =
       | Float c0 -> self#on_Float env c0
       | String c0 -> self#on_String env c0
       | String2 c0 -> self#on_String2 env c0
+      | Execution_operator c0 -> self#on_Execution_operator env c0
       | Yield c0 -> self#on_Yield env c0
       | Yield_from c0 -> self#on_Yield_from env c0
       | Yield_break -> self#on_Yield_break env

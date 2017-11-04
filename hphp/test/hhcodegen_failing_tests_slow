@@ -13,7 +13,6 @@ slow/dict/mixed-to-dict-with-refs.php
 slow/dynamic_variables/1164.php
 slow/ext_misc/ext_misc.php
 slow/ext_phar/composer.php
-slow/ext_process/bad_shell_exec.php
 slow/finally/finally_break_004.php
 slow/finally/finally_break_005.php
 slow/finally/finally_break_006.php
@@ -132,7 +131,6 @@ slow/object_property_expression/798.php
 slow/parser/1851.php
 slow/parser/async-constructor.php
 slow/parser/async.php
-slow/parser/backquote.php
 slow/parser/colon_colon_class.php
 slow/parser/dynamic-class-method.php
 slow/parser/hh-namespace-conflict-1.php

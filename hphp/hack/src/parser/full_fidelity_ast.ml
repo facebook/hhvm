@@ -126,8 +126,11 @@ let mpYielding : ('a, ('a * bool)) metaparser = fun p node env ->
 type expr_location =
   | TopLevel
   | MemberSelect
-  | InString
+  | InDoubleQuotedString
+  | InBacktickedString
 
+let in_string l =
+  l = InDoubleQuotedString || l = InBacktickedString
 
 let pos_name node =
   let name = text node in
@@ -276,6 +279,7 @@ let syntax_of_token : Token.t -> node = fun t ->
 
 (* TODO: Clean up string escaping *)
 let prepString2 : node list -> node list =
+  let is_double_quote_or_backtick ch = ch = '"' || ch = '`' in
   let trimLeft ~n t =
     Token.(
       with_updated_original_source_data
@@ -302,11 +306,11 @@ let prepString2 : node list -> node list =
   in
   function
   | ({ syntax = Token t; _ }::ss)
-  when (Token.width t) > 0 && (Token.text t).[0] = '"' ->
+  when (Token.width t) > 0 && is_double_quote_or_backtick (Token.text t).[0] ->
     let rec unwind = function
       | [{ syntax = Token t; _ }]
       when (Token.width t) > 0 &&
-          (Token.text t).[(Token.width t) - 1] = '"' ->
+          is_double_quote_or_backtick ((Token.text t).[(Token.width t) - 1]) ->
         let s = syntax_of_token (trimRight ~n:1 t) in
         if width s > 0 then [s] else []
       | x :: xs -> x :: unwind xs
@@ -651,8 +655,8 @@ and pAField : afield parser = fun node env ->
   | ElementInitializer { element_key; element_value; _ } ->
     AFkvalue (pExpr element_key env, pExpr element_value env)
   | _ -> AFvalue (pExpr node env)
-and pString2: node list -> env -> expr list =
-  let rec aux l env acc =
+and pString2: expr_location -> node list -> env -> expr list =
+  let rec aux loc l env acc =
     (* in PHP "${x}" in strings is treated as if it was written "$x",
        here we recognize pattern: Dollar; EmbeddedBracedExpression { QName (Token.Name) }
        produced by FFP and lower it into Lvar.
@@ -686,17 +690,17 @@ and pString2: node list -> env -> expr list =
             let pos_end = Pos.pos_end right_pos in
             Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
         in
-        aux tl env ((pos, id)::acc)
+        aux loc tl env ((pos, id)::acc)
     | ({ syntax = Token { Token.kind = TK.Dollar; _ }; _ })::
       ({ syntax = EmbeddedBracedExpression {
           embedded_braced_expression_expression
           ; _ }
         ; _ } as expr_with_braces)
       ::tl ->
-        aux tl env (pExpr ~location:InString expr_with_braces env::acc)
-    | x::xs -> aux xs env ((pExpr ~location:InString x env)::acc)
+        aux loc tl env (pExpr ~location:loc expr_with_braces env::acc)
+    | x::xs -> aux loc xs env ((pExpr ~location:loc x env)::acc)
   in
-  fun l env -> aux l env []
+  fun loc l env -> aux loc l env []
 and pExprL node env =
   (get_pos node, Expr_list (couldMap ~f:pExpr node env))
 and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
@@ -835,7 +839,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         end in
       Call (pExpr recv env, hints, couldMap ~f:pExpr args env, [])
     | QualifiedNameExpression { qualified_name_expression } ->
-      if location = InString
+      if in_string location
       then String (pos_name qualified_name_expression)
       else Id (pos_name qualified_name_expression)
     | VariableExpression { variable_expression } ->
@@ -927,7 +931,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | Token t ->
       (match location with
       | MemberSelect when Token.kind t = TK.Variable -> Lvar (pos_name node)
-      | InString -> String (pos, unesc_dbl (text node))
+      | InDoubleQuotedString -> String (pos, unesc_dbl (text node))
+      | InBacktickedString -> String (pos, Php_escaping.unescape_backtick (text node))
       | MemberSelect
       | TopLevel -> Id (pos_name node)
       )
@@ -1055,8 +1060,11 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
                                       |> String.concat "" in
         (* TODO(17796330): Get rid of linter functionality in the lowerer *)
         if s <> String.lowercase s then Lint.lowercase_constant pos s;
-        (if location = InString then String (pos, mkStr unesc_dbl s) else
-        match token_kind expr with
+        begin match location with
+        | InDoubleQuotedString -> String (pos, mkStr unesc_dbl s)
+        | InBacktickedString -> String (pos, mkStr Php_escaping.unescape_backtick s)
+        | _ ->
+        begin match token_kind expr with
         | Some TK.DecimalLiteral
         | Some TK.OctalLiteral
         | Some TK.HexadecimalLiteral
@@ -1073,11 +1081,16 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | "true"  -> True
           | _       -> missing_syntax ("boolean (not: " ^ s ^ ")") expr env
           )
-        | Some TK.ExecutionStringLiteral -> Null (* PHP Clowns *)
+        | Some TK.ExecutionStringLiteral ->
+          Execution_operator [pos, String (pos, mkStr Php_escaping.unescape_backtick s)]
         | _ -> missing_syntax "literal" expr env
-        )
-
-      | SyntaxList ts -> String2 (pString2 (prepString2 ts) env)
+        end
+        end
+      | SyntaxList (
+         { syntax = Token { Token.kind = TK.ExecutionStringLiteralHead; _ }; _ }
+         :: _ as ts) ->
+        Execution_operator (pString2 InBacktickedString (prepString2 ts) env)
+      | SyntaxList ts -> String2 (pString2 InDoubleQuotedString (prepString2 ts) env)
       | _ -> missing_syntax "literal expression" expr env
       )
 

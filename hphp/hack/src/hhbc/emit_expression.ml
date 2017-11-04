@@ -655,6 +655,19 @@ and emit_yield env = function
       instr_yieldk;
     ]
 
+and emit_execution_operator env exprs =
+  let instrs =
+    match exprs with
+    (* special handling of ``*)
+    | [_, A.String (_, "") as e] -> emit_expr ~need_ref:false env e
+    | _ ->  emit_string2 env exprs in
+  gather [
+    instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "shell_exec");
+    instrs;
+    instr_fpass PassByRefKind.AllowCell 0 Cell;
+    instr_fcall 1;
+  ]
+
 and emit_string2 env exprs =
   match exprs with
   | [e] ->
@@ -1008,7 +1021,10 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     emit_box_if_necessary need_ref @@ emit_get_class_no_args ()
   | A.Call ((_, A.Id (_, ("exit" | "die"))), _, es, _) ->
     emit_exit env (List.hd es)
-  | A.Call _ -> emit_call_expr ~need_ref env expr
+  | A.Call _
+  (* execution operator is compiled as call to `shell_exec` and should
+     be handled in the same way *)
+  | A.Execution_operator _ -> emit_call_expr ~need_ref env expr
   | A.New (typeexpr, args, uargs) ->
     emit_box_if_necessary need_ref @@ emit_new env typeexpr args uargs
   | A.Array es ->
@@ -2203,6 +2219,8 @@ and emit_flavored_expr env (pos, expr_ as expr) =
   | A.Call (e, _, args, uargs) when not (is_special_function e args) ->
     let instrs, flavor = emit_call env e args uargs in
     Emit_pos.emit_pos_then pos instrs, flavor
+  | A.Execution_operator es ->
+    emit_execution_operator env es, Flavor.ReturnVal
   | _ ->
     let flavor =
       if binary_assignment_rhs_starts_with_ref expr

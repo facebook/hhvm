@@ -265,7 +265,7 @@ let rec check_lvalue env = function
   | String _ | String2 _ | Yield _ | Yield_break | Yield_from _
   | Await _ | Suspend _ | Expr_list _ | Cast _ | Unop _
   | Binop _ | Eif _ | NullCoalesce _ | InstanceOf _ | New _ | Efun _ | Lfun _
-  | Xml _ | Import _ | Pipe _ | Callconv _ | Is _) ->
+  | Xml _ | Import _ | Pipe _ | Callconv _ | Is _ | Execution_operator _) ->
       error_at env pos "Invalid lvalue"
 
 (* The bound variable of a foreach can be a reference (but not inside

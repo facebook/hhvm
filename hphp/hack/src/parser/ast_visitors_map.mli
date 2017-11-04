@@ -395,6 +395,9 @@ class virtual ['c] map :
         on_String2 : 'd ->
                      Ast_visitors_ancestors.expr list ->
                      Ast_visitors_ancestors.expr_;
+        on_Execution_operator : 'd ->
+                    Ast_visitors_ancestors.expr list ->
+                    Ast_visitors_ancestors.expr_;
         on_Switch : 'd ->
                     Ast_visitors_ancestors.expr ->
                     Ast_visitors_ancestors.case list ->
@@ -1052,6 +1055,8 @@ class virtual ['c] map :
     method on_String :
       'd -> Ast_visitors_ancestors.pstring -> Ast_visitors_ancestors.expr_
     method on_String2 :
+      'd -> Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
+    method on_Execution_operator :
       'd -> Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
     method on_Switch :
       'd ->

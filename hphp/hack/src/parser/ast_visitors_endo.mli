@@ -594,6 +594,10 @@ class virtual ['b] endo :
                      Ast_visitors_ancestors.expr_ ->
                      Ast_visitors_ancestors.expr list ->
                      Ast_visitors_ancestors.expr_;
+        on_Execution_operator : 'c ->
+                     Ast_visitors_ancestors.expr_ ->
+                     Ast_visitors_ancestors.expr list ->
+                     Ast_visitors_ancestors.expr_;
         on_Switch : 'c ->
                     Ast_visitors_ancestors.stmt ->
                     Ast_visitors_ancestors.expr ->
@@ -1507,6 +1511,10 @@ class virtual ['b] endo :
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.pstring -> Ast_visitors_ancestors.expr_
     method on_String2 :
+      'c ->
+      Ast_visitors_ancestors.expr_ ->
+      Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
+    method on_Execution_operator :
       'c ->
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_

@@ -1634,6 +1634,13 @@ let mixed_namespace_errors node namespace_type errors =
     end
   | _ -> errors
 
+let enum_errors node errors =
+  match syntax node with
+  | Enumerator { enumerator_name = name; _}
+      when String.lowercase_ascii @@ text name = "class" ->
+    make_error_from_node node SyntaxError.enum_elem_name_is_class :: errors
+  | _ -> errors
+
 let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let is_hack_file = (SyntaxTree.language syntax_tree = "hh") in
@@ -1682,6 +1689,7 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
     let names, errors =
       namespace_use_declaration_errors node is_hack (not has_namespace_prefix)
         names errors in
+    let errors = enum_errors node errors in
 
     match syntax node with
     | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->

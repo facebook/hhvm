@@ -143,7 +143,6 @@ slow/parser/hh-namespace-conflict-3.php
 slow/parser/hh-namespace-conflict-6.php
 slow/parser/namespace_use_trailing_comma.php
 slow/parser/php-namespace-conflict-3.php
-slow/parser/semi-reserved-keywords/enum_class_constant_bad.php
 slow/parser/static_call_access_const_expr.php
 slow/parser/xhp-ambiguity.php
 slow/php7_backported/ns_089.php

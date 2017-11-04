@@ -170,3 +170,4 @@ slow/using/bad-name.php
 slow/using/functions.php
 slow/using/goto.php
 slow/xhp/attr-syntax-2.php
+slow/xhp/attr-syntax-3.php

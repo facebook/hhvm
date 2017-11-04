@@ -2475,6 +2475,10 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
     rhs_instrs,
     emit_final_global_op op
 
+    (* PHP rejects assignment to $this (even when $this isn't in scope) *)
+  | A.Lvar (pos, str) when str = SN.SpecialIdents.this && not (is_legal_lval_op_on_this op) ->
+    Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this"
+
   | A.Lvar ((_, str) as id) when is_local_this env str && is_incdec op ->
     emit_local ~notice:Notice ~need_ref:false env id,
     rhs_instrs,

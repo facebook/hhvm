@@ -46,7 +46,6 @@ slow/hack_arr_compat/scalars.php
 slow/hack_mode/2214.php
 slow/hack_mode/function_hint_with_params_trailing_variadic_param.php
 slow/hack_mode/function_hint_with_type_hinted_variadic_param-trailing-comma.php
-slow/hash_not_bang.php
 slow/hashbang_regression.php
 slow/hh_namespace_migration/hh_frozenset4.php
 slow/hh_namespace_migration/hh_frozenset7.php
@@ -160,7 +159,6 @@ slow/reflection/param_tostring_zendcompat.php
 slow/reflection_classes/xhp.php
 slow/sanity/3.php
 slow/sanity/4.php
-slow/sanity/5.php
 slow/string/164.php
 slow/traits/1981.php
 slow/traits/__class__.php

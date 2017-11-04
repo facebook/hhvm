@@ -1407,18 +1407,21 @@ let scan_token_and_leading_trivia scanner as_name lexer  =
   let w = width lexer in
   (lexer, kind, w, leading)
 
-let suppress_trailing_trivia kind =
-  match kind with
-  | TokenKind.DoubleQuotedStringLiteralHead -> true
-  | _ -> false
-
 (* scanner takes a lexer, returns a lexer and a kind *)
 let scan_token_and_trivia scanner as_name lexer  =
   let (lexer, kind, w, leading) =
     scan_token_and_leading_trivia scanner as_name lexer in
   let (lexer, trailing) =
-    if suppress_trailing_trivia kind then (lexer, [])
-    else scan_trailing_php_trivia lexer in
+    match kind with
+    | TokenKind.DoubleQuotedStringLiteralHead -> (lexer, [])
+    | TokenKind.QuestionGreaterThan ->
+      if is_newline (peek_char lexer 0) then
+        (* consume only trailing EOL token after ?> as trailing trivia *)
+        let (lexer, eol) = scan_end_of_line lexer in
+        (lexer, [eol])
+      else
+        (lexer, [])
+    | _ -> scan_trailing_php_trivia lexer in
   (lexer, Token.make kind (source lexer) (start lexer) w leading trailing)
 
 (* tokenizer takes a lexer, returns a lexer and a token *)

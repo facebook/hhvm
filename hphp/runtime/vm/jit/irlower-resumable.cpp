@@ -325,7 +325,7 @@ void cgCreateAAWH(IRLS& env, const IRInstruction* inst) {
     env,
     CallSpec::direct(c_AwaitAllWaitHandle::fromFrameNoCheck),
     callDest(env, inst),
-    SyncOptions::None,
+    SyncOptions::Sync,
     argGroup(env, inst)
       .imm(extra->count)
       .ssa(1)

@@ -877,7 +877,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           AliasIdSet::IdRange{ extra->first, extra->first + extra->count }
         }
       };
-      return may_load_store(frame, AHeapAny);
+      return may_reenter(inst, may_load_store(frame, AHeapAny));
     }
 
   case CountWHNotDone:

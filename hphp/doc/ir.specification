@@ -2209,7 +2209,7 @@ To string conversions:
   non-finished child S4.  This version of the instruction guarantees that the
   VarEnv is unused.
 
-| CreateAAWH<local,count>, DAllocObj, S(FramePtr) S(Int), PRc
+| CreateAAWH<local,count>, DAllocObj, S(FramePtr) S(Int), PRc|Er
 
   Create an AwaitAllWaitHandle and add the count elements from frame contiguous
   frame locals beginning at local and extending count locals. S1 denotes the

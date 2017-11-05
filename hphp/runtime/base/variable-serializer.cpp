@@ -60,7 +60,9 @@ static VariableSerializer::ArrayKind getKind(const ArrayData* arr) {
   if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
   if (arr->isKeyset()) return VariableSerializer::ArrayKind::Keyset;
   assert(arr->isPHPArray());
-  return VariableSerializer::ArrayKind::PHP;
+  return arr->isVArray()
+    ? VariableSerializer::ArrayKind::VArray
+    : VariableSerializer::ArrayKind::PHP;
 }
 
 [[noreturn]] NEVER_INLINE
@@ -801,6 +803,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         m_buf->append("Keyset\n");
         break;
       case ArrayKind::PHP:
+      case ArrayKind::VArray:
         m_buf->append("Array\n");
         break;
       }
@@ -840,6 +843,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         m_buf->append("keyset [\n");
         break;
       case ArrayKind::PHP:
+      case ArrayKind::VArray:
         m_buf->append("array (\n");
         break;
       }
@@ -874,6 +878,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         m_buf->append("keyset");
         break;
       case ArrayKind::PHP:
+      case ArrayKind::VArray:
         m_buf->append("array");
         break;
       }
@@ -925,6 +930,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         break;
       case ArrayKind::PHP:
         m_buf->append("a:");
+        break;
+      case ArrayKind::VArray:
+        m_buf->append("y:");
         break;
       }
       m_buf->append(size);
@@ -1051,7 +1059,7 @@ void VariableSerializer::writeArrayKey(
     break;
 
   case Type::APCSerialize:
-    if (kind == AK::Vec || kind == AK::Keyset) return;
+    if (kind == AK::Vec || kind == AK::Keyset || kind == AK::VArray) return;
     if (skey) {
       write(StrNR(keyCell->m_data.pstr).asString());
       return;
@@ -1059,7 +1067,7 @@ void VariableSerializer::writeArrayKey(
 
   case Type::Serialize:
   case Type::DebuggerSerialize:
-    if (kind == AK::Vec || kind == AK::Keyset) return;
+    if (kind == AK::Vec || kind == AK::Keyset || kind == AK::VArray) return;
     write(key);
     break;
 
@@ -1204,6 +1212,7 @@ void VariableSerializer::writeArrayFooter(
         m_buf->append("]");
         break;
       case ArrayKind::PHP:
+      case ArrayKind::VArray:
         m_buf->append(')');
         break;
       }

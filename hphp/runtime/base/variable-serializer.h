@@ -79,7 +79,7 @@ struct VariableSerializer {
 
   Type getType() const { return m_type; }
 
-  enum class ArrayKind { PHP, Dict, Vec, Keyset };
+  enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray };
 
 private:
   /**

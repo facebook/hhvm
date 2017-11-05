@@ -886,7 +886,7 @@ void VariableUnserializer::unserializeVariant(
       tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
-  case 'y': // VArray (same as packed array for now)
+  case 'y': // VArray
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
@@ -1302,8 +1302,8 @@ Array VariableUnserializer::unserializeVec() {
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
   }
-  auto const scale = MixedArray::computeScaleFromSize(size);
-  auto const allocsz = MixedArray::computeAllocBytes(scale);
+  auto const sizeClass = PackedArray::capacityToSizeIndex(size);
+  auto const allocsz = kSizeIndex2PackedArrayCapacity[sizeClass];
 
   // For large arrays, do a naive pre-check for OOM.
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
@@ -1338,7 +1338,7 @@ Array VariableUnserializer::unserializeVArray() {
   expectChar('{');
   if (size == 0) {
     expectChar('}');
-    return Array::Create();
+    return Array::CreateVArray();
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1351,7 +1351,7 @@ Array VariableUnserializer::unserializeVArray() {
     check_non_safepoint_surprise();
   }
 
-  Array arr = PackedArrayInit(size).toArray();
+  Array arr = VArrayInit(size).toArray();
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {

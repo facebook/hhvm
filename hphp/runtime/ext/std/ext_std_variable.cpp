@@ -236,6 +236,7 @@ const StaticString
   s_False("b:0;"),
   s_Res("i:0;"),
   s_EmptyArray("a:0:{}"),
+  s_EmptyVArray("y:0:{}"),
   s_EmptyVecArray("v:0:{}"),
   s_EmptyDictArray("D:0:{}"),
   s_EmptyKeysetArray("k:0:{}");
@@ -300,7 +301,10 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
     case KindOfArray: {
       ArrayData *arr = value.getArrayData();
       assert(arr->isPHPArray());
-      if (arr->empty()) return s_EmptyArray;
+      if (arr->empty()) {
+        if (arr->isVArray()) return s_EmptyVArray;
+        return s_EmptyArray;
+      }
       break;
     }
     case KindOfDouble:

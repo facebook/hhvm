@@ -59,6 +59,7 @@ struct APCArray {
     assert(handle->checkInvariants());
     assert(handle->kind() == APCKind::SharedArray ||
            handle->kind() == APCKind::SharedPackedArray ||
+           handle->kind() == APCKind::SharedVArray ||
            handle->kind() == APCKind::SharedVec ||
            handle->kind() == APCKind::SharedDict ||
            handle->kind() == APCKind::SharedKeyset);
@@ -70,6 +71,7 @@ struct APCArray {
     assert(handle->checkInvariants());
     assert(handle->kind() == APCKind::SharedArray ||
            handle->kind() == APCKind::SharedPackedArray ||
+           handle->kind() == APCKind::SharedVArray ||
            handle->kind() == APCKind::SharedVec ||
            handle->kind() == APCKind::SharedDict ||
            handle->kind() == APCKind::SharedKeyset);
@@ -81,6 +83,9 @@ struct APCArray {
   void reference() const { m_handle.referenceNonRoot(); }
   void unreference() const { m_handle.unreferenceNonRoot(); }
 
+  ArrayData* toLocalVArray() const {
+    return PackedArray::MakeVArrayFromAPC(this);
+  }
   ArrayData* toLocalVec() const { return PackedArray::MakeVecFromAPC(this); }
   ArrayData* toLocalDict() const { return MixedArray::MakeDictFromAPC(this); }
   ArrayData* toLocalKeyset() const { return SetArray::MakeSetFromAPC(this); }
@@ -126,6 +131,7 @@ struct APCArray {
     auto const k = m_handle.kind();
     return
       k == APCKind::SharedPackedArray ||
+      k == APCKind::SharedVArray ||
       k == APCKind::SharedVec ||
       k == APCKind::SharedKeyset;
   }
@@ -141,7 +147,12 @@ struct APCArray {
     auto const k = m_handle.kind();
     return
       k == APCKind::SharedArray ||
-      k == APCKind::SharedPackedArray;
+      k == APCKind::SharedPackedArray ||
+      k == APCKind::SharedVArray;
+  }
+
+  bool isVArray() const {
+    return m_handle.kind() == APCKind::SharedVArray;
   }
 
   bool isVec() const {

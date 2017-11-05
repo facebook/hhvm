@@ -575,6 +575,16 @@ ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
   return init.create();
 }
 
+ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc) {
+  assert(apc->isVArray());
+  auto const apcSize = apc->size();
+  VArrayInit init{apcSize};
+  for (uint32_t i = 0; i < apcSize; ++i) {
+    init.append(apc->getValue(i)->toLocal());
+  }
+  return init.create();
+}
+
 void PackedArray::Release(ArrayData* ad) {
   assert(checkInvariants(ad));
   assert(ad->isRefCounted());

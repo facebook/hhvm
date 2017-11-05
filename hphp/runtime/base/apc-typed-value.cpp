@@ -92,6 +92,7 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::SharedVec:
     case APCKind::SharedDict:
     case APCKind::SharedKeyset:
+    case APCKind::SharedVArray:
     case APCKind::SerializedArray:
     case APCKind::SerializedObject:
     case APCKind::SerializedVec:

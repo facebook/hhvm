@@ -135,7 +135,7 @@ function meth_caller(string $class, string $method) {
 <<__IsFoldable>>
 function class_meth(string $class, string $method)
   /* : (function(<hack figures this>): <and this>) */ {
-  return array($class, $method);
+  return varray[$class, $method];
 }
 
 /**
@@ -169,7 +169,7 @@ function class_meth(string $class, string $method)
 function inst_meth($instance, string $method)
   /* : (function(<hack figures this>): <and this>) */ {
   invariant(\is_object($instance), 'expecting an object');
-  return array($instance, $method);
+  return varray[$instance, $method];
 }
 
 }

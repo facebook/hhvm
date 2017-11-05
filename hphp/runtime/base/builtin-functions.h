@@ -234,15 +234,15 @@ Variant unserialize_ex(const char* str, int len,
                        const Array& options = null_array);
 
 inline Variant unserialize_from_buffer(const char* str, int len,
+                                       VariableUnserializer::Type type,
                                        const Array& options = null_array) {
-  return unserialize_ex(str, len,
-                        VariableUnserializer::Type::Serialize,
-                        options);
+  return unserialize_ex(str, len, type, options);
 }
 
 inline Variant unserialize_from_string(const String& str,
+                                       VariableUnserializer::Type type,
                                        const Array& options = null_array) {
-  return unserialize_from_buffer(str.data(), str.size(), options);
+  return unserialize_from_buffer(str.data(), str.size(), type, options);
 }
 
 String resolve_include(const String& file, const char* currentDir,

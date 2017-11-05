@@ -861,7 +861,8 @@ void apc_load_impl_compressed
         item.readOnly = readOnly;
         p += other_lens[i + i + 2] + 1; // skip \0
         String value(p, other_lens[i + i + 3], CopyString);
-        Variant v = unserialize_from_string(value);
+        Variant v =
+          unserialize_from_string(value, VariableUnserializer::Type::Internal);
         if (same(v, false)) {
           // we can't possibly get here if it was a boolean "false" that's
           // supposed to be serialized as a char
@@ -1064,7 +1065,7 @@ String apc_serialize(const Variant& value) {
   VariableSerializer::Type sType =
     apcExtension::EnableApcSerialize ?
       VariableSerializer::Type::APCSerialize :
-      VariableSerializer::Type::Serialize;
+      VariableSerializer::Type::Internal;
   VariableSerializer vs(sType);
   return vs.serialize(value, true);
 }
@@ -1073,7 +1074,7 @@ Variant apc_unserialize(const char* data, int len) {
   VariableUnserializer::Type sType =
     apcExtension::EnableApcSerialize ?
       VariableUnserializer::Type::APCSerialize :
-      VariableUnserializer::Type::Serialize;
+      VariableUnserializer::Type::Internal;
   return unserialize_ex(data, len, sType);
 }
 

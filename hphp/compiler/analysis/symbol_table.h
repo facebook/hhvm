@@ -264,7 +264,6 @@ public:
   FunctionScopeRawPtr getFunctionScope();
   ClassScopeRawPtr getClassScope();
   FileScopeRawPtr getFileScope();
-  static std::string getEscapedText(Variant v, int &len);
 protected:
   Symbol *genSymbol(const std::string &name, bool konst);
   Symbol *genSymbol(const std::string &name, bool konst,

@@ -1582,7 +1582,10 @@ String parse_maybe_long_string(AsmState& as) {
  * caller to make sure it is a legal literal.
  */
 Variant parse_php_serialized(AsmState& as) {
-  return unserialize_from_string(parse_long_string(as));
+  return unserialize_from_string(
+    parse_long_string(as),
+    VariableUnserializer::Type::Internal
+  );
 }
 
 /*
@@ -1591,7 +1594,9 @@ Variant parse_php_serialized(AsmState& as) {
  */
 Variant parse_maybe_php_serialized(AsmState& as) {
   auto s = parse_maybe_long_string(as);
-  if (!s.empty()) return unserialize_from_string(s);
+  if (!s.empty()) {
+    return unserialize_from_string(s, VariableUnserializer::Type::Internal);
+  }
   return Variant();
 }
 

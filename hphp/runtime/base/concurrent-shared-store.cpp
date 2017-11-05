@@ -574,7 +574,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
     auto const sType =
       apcExtension::EnableApcSerialize
         ? VariableUnserializer::Type::APCSerialize
-        : VariableUnserializer::Type::Serialize;
+        : VariableUnserializer::Type::Internal;
 
     VariableUnserializer vu(sAddr, sval->getSerializedSize(), sType);
     if (sval->readOnly) vu.setReadOnly();
@@ -1081,8 +1081,6 @@ void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
     out << " #### ";
     const StoreValue *sval = &iter->second;
     if (!sval->expired()) {
-      VariableSerializer vs(VariableSerializer::Type::Serialize);
-
       auto const value = sval->data().match(
         [&] (APCHandle* handle) {
           return handle->toLocal();
@@ -1095,7 +1093,7 @@ void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
       );
 
       try {
-        String valS(vs.serialize(value, true));
+        auto valS = internal_serialize(value);
         out << valS.toCppString();
       } catch (const Exception &e) {
         out << "Exception: " << e.what();

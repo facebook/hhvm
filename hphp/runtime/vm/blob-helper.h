@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 
@@ -152,7 +153,7 @@ struct BlobEncoder {
     if (tv.m_type == KindOfUninit) {
       return encode(staticEmptyString());
     }
-    String s = f_serialize(tvAsCVarRef(&tv));
+    auto s = internal_serialize(tvAsCVarRef(&tv));
     encode(s.get());
   }
 
@@ -292,7 +293,8 @@ struct BlobDecoder {
     assert(!!s);
     if (s.empty()) return;
 
-    tvAsVariant(&tv) = unserialize_from_string(s);
+    tvAsVariant(&tv) =
+      unserialize_from_string(s, VariableUnserializer::Type::Internal);
     tvAsVariant(&tv).setEvalScalar();
   }
 

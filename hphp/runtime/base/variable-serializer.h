@@ -45,6 +45,7 @@ struct VariableSerializer {
     DebugDump, //debug_zval_dump()
     DebuggerDump, //used by hphp debugger to obtain user visible output
     Serialize, // serialize()
+    Internal, // used internally by the compiler. No compatibility guarantees.
     JSON, //json_encode()
     APCSerialize, //used in APC serialization (controlled by switch)
     DebuggerSerialize, //used by hphp debugger for client<->proxy communication
@@ -232,6 +233,11 @@ private:
 
   Array getSerializeProps(const ObjectData* obj) const;
 };
+
+inline String internal_serialize(const Variant& v) {
+  VariableSerializer vs{VariableSerializer::Type::Internal};
+  return vs.serializeValue(v, false);
+}
 
 // TODO: Move to util/folly?
 template<typename T> struct TmpAssign {

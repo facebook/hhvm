@@ -275,7 +275,10 @@ struct MemcachedData {
       value = Variant::attach(HHVM_FN(json_decode)(decompPayload));
       break;
     case MEMC_VAL_IS_SERIALIZED:
-      value = unserialize_from_string(decompPayload);
+      value = unserialize_from_string(
+        decompPayload,
+        VariableUnserializer::Type::Serialize
+      );
       break;
     case MEMC_VAL_IS_IGBINARY:
       raise_warning("could not unserialize value, no igbinary support");

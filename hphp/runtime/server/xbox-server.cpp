@@ -240,7 +240,13 @@ bool XboxServer::SendMessage(const String& message,
     if (code > 0) {
       ret.set(s_code, code);
       if (code == 200) {
-        ret.set(s_response, unserialize_from_string(response));
+        ret.set(
+          s_response,
+          unserialize_from_string(
+            response,
+            VariableUnserializer::Type::Internal
+          )
+        );
       } else {
         ret.set(s_error, response);
       }
@@ -272,7 +278,13 @@ bool XboxServer::SendMessage(const String& message,
         String sresponse(response, len, AttachString);
         ret.set(s_code, code);
         if (code == 200) {
-          ret.set(s_response, unserialize_from_string(sresponse));
+          ret.set(
+            s_response,
+            unserialize_from_string(
+              sresponse,
+              VariableUnserializer::Type::Internal
+            )
+          );
         } else {
           ret.set(s_error, sresponse);
         }
@@ -317,7 +329,15 @@ bool XboxServer::PostMessage(const String& message,
         int len = 0;
         char *response = http->recv(len);
         String sresponse(response, len, AttachString);
-        if (code == 200 && same(unserialize_from_string(sresponse), true)) {
+        if (code == 200 &&
+            same(
+              unserialize_from_string(
+                sresponse,
+                VariableUnserializer::Type::Internal
+              ),
+              true
+            )
+           ) {
           return true;
         }
       }
@@ -435,7 +455,8 @@ int XboxServer::TaskResult(XboxTransport *job, int timeout_ms, Variant *ret) {
   String response = job->getResults(code, timeout_ms);
   if (ret) {
     if (code == 200) {
-      *ret = unserialize_from_string(response);
+      *ret =
+        unserialize_from_string(response, VariableUnserializer::Type::Internal);
     } else {
       *ret = response;
     }

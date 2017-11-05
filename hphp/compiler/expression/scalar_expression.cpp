@@ -26,10 +26,10 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/util/hash.h"
-#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-strtod.h"
-#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"
 
 #include <folly/Conv.h>
@@ -65,8 +65,7 @@ ScalarExpression::ScalarExpression
     : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
       m_quoted(quoted) {
   if (!value.isNull()) {
-    String serialized = HHVM_FN(serialize)(value);
-    m_serializedValue = std::string(serialized.data(), serialized.size());
+    m_serializedValue = internal_serialize(value).toCppString();
     if (value.isDouble()) {
       m_dval = value.toDouble();
     }
@@ -346,7 +345,11 @@ void ScalarExpression::outputPHP(CodeGenerator& cg, AnalysisResultPtr /*ar*/) {
 Variant ScalarExpression::getVariant() const {
   if (!m_serializedValue.empty()) {
     Variant ret = unserialize_from_buffer(
-      m_serializedValue.data(), m_serializedValue.size(), null_array);
+      m_serializedValue.data(),
+      m_serializedValue.size(),
+      VariableUnserializer::Type::Internal,
+      null_array
+    );
     if (ret.isDouble()) {
       return m_dval;
     }

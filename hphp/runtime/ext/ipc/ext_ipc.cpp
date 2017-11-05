@@ -769,7 +769,11 @@ Variant HHVM_FUNCTION(shm_get_var,
 
   sysvshm_chunk *shm_var =
     (sysvshm_chunk*)((char *)shm_list_ptr->ptr + shm_varpos);
-  return unserialize_from_buffer(&shm_var->mem, shm_var->length);
+  return unserialize_from_buffer(
+    &shm_var->mem,
+    shm_var->length,
+    VariableUnserializer::Type::Serialize
+  );
 }
 
 bool HHVM_FUNCTION(shm_has_var,

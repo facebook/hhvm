@@ -229,7 +229,7 @@ void RepoQuery::bindTypedValue(const char* paramName, const TypedValue& tv) {
   if (tv.m_type == KindOfUninit) {
     bindBlob(paramName, "", 0, true);
   } else {
-    String blob = f_serialize(tvAsCVarRef(&tv));
+    String blob = internal_serialize(tvAsCVarRef(&tv));
     bindBlob(paramName, blob.data(), blob.size());
   }
 }
@@ -418,7 +418,8 @@ void RepoQuery::getTypedValue(int iCol, TypedValue& tv) {
   tvWriteUninit(tv);
   if (size > 0) {
     String s = String((const char*)blob, size, CopyString);
-    Variant v = unserialize_from_string(s);
+    Variant v =
+      unserialize_from_string(s, VariableUnserializer::Type::Internal);
     if (v.isString()) {
       v = String(makeStaticString(v.asCStrRef().get()));
     } else if (v.isArray()) {

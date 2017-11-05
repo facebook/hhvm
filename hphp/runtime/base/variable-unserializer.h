@@ -45,6 +45,7 @@ struct VariableUnserializer {
    */
   enum class Type {
     Serialize,
+    Internal,
     APCSerialize,
     DebuggerSerialize
   };

@@ -176,8 +176,9 @@ String VariableSerializer::serializeValue(const Variant& v, bool limit) {
 }
 
 String VariableSerializer::serializeWithLimit(const Variant& v, int limit) {
-  if (m_type == Type::Serialize || m_type == Type::JSON ||
-      m_type == Type::APCSerialize || m_type == Type::DebuggerSerialize) {
+  if (m_type == Type::Serialize || m_type == Type::Internal ||
+      m_type == Type::JSON || m_type == Type::APCSerialize ||
+      m_type == Type::DebuggerSerialize) {
     assert(false);
     return String();
   }
@@ -218,6 +219,7 @@ void VariableSerializer::write(bool v) {
     m_buf->append('\n');
     break;
   case Type::Serialize:
+  case Type::Internal:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
     m_buf->append(v ? "b:1;" : "b:0;");
@@ -252,6 +254,7 @@ void VariableSerializer::write(int64_t v) {
     m_buf->append('\n');
     break;
   case Type::Serialize:
+  case Type::Internal:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
     m_buf->append("i:");
@@ -315,6 +318,7 @@ void VariableSerializer::write(double v) {
     }
     break;
   case Type::Serialize:
+  case Type::Internal:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
     m_buf->append("d:");
@@ -529,6 +533,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     break;
   }
   case Type::Serialize:
+  case Type::Internal:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
     m_buf->append("s:");
@@ -688,6 +693,7 @@ void VariableSerializer::writeNull() {
     m_buf->append('\n');
     break;
   case Type::Serialize:
+  case Type::Internal:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
     m_buf->append("N;");
@@ -732,6 +738,7 @@ void VariableSerializer::writeOverflow(const TypedValue& tv) {
     }
     // fall through
   case Type::Serialize:
+  case Type::Internal:
   case Type::APCSerialize:
     {
       int optId = m_refs[tv].m_id;
@@ -901,6 +908,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     m_indent += (info.indent_delta = 2);
     break;
   case Type::Serialize:
+  case Type::Internal:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
     if (!m_rsrcName.empty() && m_type == Type::DebuggerSerialize) {
@@ -1072,6 +1080,7 @@ void VariableSerializer::writeArrayKey(
     }
 
   case Type::Serialize:
+  case Type::Internal:
   case Type::DebuggerSerialize:
     if (kind == AK::Vec || kind == AK::Keyset || kind == AK::VArray) return;
     write(key);
@@ -1120,7 +1129,9 @@ void VariableSerializer::writeCollectionKey(
   const Variant& key,
   VariableSerializer::ArrayKind kind
 ) {
-  if (m_type == Type::Serialize || m_type == Type::APCSerialize ||
+  if (m_type == Type::Serialize ||
+      m_type == Type::Internal ||
+      m_type == Type::APCSerialize ||
       m_type == Type::DebuggerSerialize) {
     m_valueCount++;
   }
@@ -1133,6 +1144,7 @@ void VariableSerializer::writeArrayValue(
 ) {
   switch (m_type) {
   case Type::Serialize:
+  case Type::Internal:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
     // Do not count referenced values after the first
@@ -1233,6 +1245,7 @@ void VariableSerializer::writeArrayFooter(
     }
     break;
   case Type::Serialize:
+  case Type::Internal:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
     m_buf->append('}');
@@ -1307,6 +1320,7 @@ bool VariableSerializer::incNestedLevel(const TypedValue& tv) {
     }
     // fall through
   case Type::Serialize:
+  case Type::Internal:
   case Type::APCSerialize:
     {
       auto& ref = m_refs[tv];
@@ -1338,6 +1352,7 @@ void VariableSerializer::serializeRef(const TypedValue* tv, bool isArrayKey) {
   assert(tv->m_type == KindOfRef);
   // Ugly, but behavior is different for serialize
   if (getType() == VariableSerializer::Type::Serialize ||
+      getType() == VariableSerializer::Type::Internal ||
       getType() == VariableSerializer::Type::APCSerialize ||
       getType() == VariableSerializer::Type::DebuggerSerialize) {
     if (incNestedLevel(*tv)) {
@@ -1529,6 +1544,7 @@ void VariableSerializer::serializeCollection(ObjectData* obj) {
     writeArrayHeader(sz, true, AK::PHP);
     auto ser_type = getType();
     if (ser_type == VariableSerializer::Type::Serialize ||
+        ser_type == VariableSerializer::Type::Internal ||
         ser_type == VariableSerializer::Type::APCSerialize ||
         ser_type == VariableSerializer::Type::DebuggerSerialize ||
         ser_type == VariableSerializer::Type::VarExport ||
@@ -1643,6 +1659,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
   }
 
   if (LIKELY(type == VariableSerializer::Type::Serialize ||
+             type == VariableSerializer::Type::Internal ||
              type == VariableSerializer::Type::APCSerialize)) {
     if (obj->instanceof(SystemLib::s_SerializableClass)) {
       assert(!obj->isCollection());
@@ -1804,6 +1821,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       }
       if (className.get() == s_PHP_Incomplete_Class.get() &&
           (type == VariableSerializer::Type::Serialize ||
+           type == VariableSerializer::Type::Internal ||
            type == VariableSerializer::Type::APCSerialize ||
            type == VariableSerializer::Type::DebuggerSerialize ||
            type == VariableSerializer::Type::DebuggerDump)) {

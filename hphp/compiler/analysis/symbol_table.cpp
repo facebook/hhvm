@@ -309,10 +309,3 @@ void SymbolTable::serialize(JSON::CodeError::OutputStream &out) const {
 
   out << symbols;
 }
-
-std::string SymbolTable::getEscapedText(Variant v, int &len) {
-  VariableSerializer vs(VariableSerializer::Type::Serialize);
-  String str = vs.serialize(v, true);
-  len = str.length();
-  return escapeStringForCPP(str.data(), len);
-}

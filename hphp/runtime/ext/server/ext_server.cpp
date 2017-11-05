@@ -197,7 +197,8 @@ int64_t HHVM_FUNCTION(xbox_task_result,
 
 Variant HHVM_FUNCTION(xbox_process_call_message,
                       const String& msg) {
-  Variant v = unserialize_from_string(msg);
+  Variant v =
+    unserialize_from_string(msg, VariableUnserializer::Type::Internal);
   if (!v.isArray()) {
     raise_error("Error decoding xbox call message");
   }

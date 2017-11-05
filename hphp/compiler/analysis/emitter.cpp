@@ -10501,7 +10501,7 @@ bool EmitterVisitor::emitConstantFuncCall(Emitter& e,
   if (it == Option::ConstantFunctions.end()) return false;
 
   VariableUnserializer uns{
-    it->second.data(), it->second.size(), VariableUnserializer::Type::Serialize,
+    it->second.data(), it->second.size(), VariableUnserializer::Type::Internal,
     false, empty_array()
   };
 

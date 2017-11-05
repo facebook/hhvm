@@ -456,11 +456,11 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       urp.insertUnitLitstr[repoId].insert(txn, usn, i, m_litstrs[i]);
     }
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
-      VariableSerializer vs(VariableSerializer::Type::Serialize);
       urp.insertUnitArray[repoId].insert(
         txn, usn, i,
-        vs.serializeValue(VarNR(const_cast<ArrayData*>(m_arrays[i])),
-                          false /* limit */).toCppString()
+        internal_serialize(
+          VarNR(const_cast<ArrayData*>(m_arrays[i]))
+        ).toCppString()
       );
     }
     urp.insertUnitArrayTypeTable[repoId].insert(txn, usn, m_arrayTypeTable);
@@ -1095,7 +1095,11 @@ void UnitRepoProxy::GetUnitArraysStmt
     if (query.row()) {
       Id arrayId;        /**/ query.getId(0, arrayId);
       std::string key;   /**/ query.getStdString(1, key);
-      Variant v = unserialize_from_buffer(key.data(), key.size());
+      Variant v = unserialize_from_buffer(
+        key.data(),
+        key.size(),
+        VariableUnserializer::Type::Internal
+      );
       Id id DEBUG_ONLY = ue.mergeArray(ArrayData::GetScalarArray(std::move(v)));
       assert(id == arrayId);
     }

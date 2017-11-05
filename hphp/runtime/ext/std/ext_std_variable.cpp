@@ -340,7 +340,11 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
 
 Variant HHVM_FUNCTION(unserialize, const String& str,
                                    const Array& options /* =[] */) {
-  return unserialize_from_string(str, options);
+  return unserialize_from_string(
+    str,
+    VariableUnserializer::Type::Serialize,
+    options
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

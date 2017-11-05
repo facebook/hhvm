@@ -245,7 +245,11 @@ static Variant unserialize_if_serialized(const char *payload,
                                          uint32_t flags) {
   Variant ret = uninit_null();
   if (flags & MMC_SERIALIZED) {
-    ret = unserialize_from_buffer(payload, payload_len);
+    ret = unserialize_from_buffer(
+      payload,
+      payload_len,
+      VariableUnserializer::Type::Serialize
+    );
   } else {
     if (payload_len == 0) {
       ret = String("");

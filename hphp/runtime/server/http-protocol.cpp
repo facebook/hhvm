@@ -449,7 +449,10 @@ void HttpProtocol::PreparePostVariables(Array& post,
 
       bool ret = transport->getFiles(files_str);
       if (ret) {
-        files = unserialize_from_string(files_str);
+        files = unserialize_from_string(
+          files_str,
+          VariableUnserializer::Type::Serialize
+        );
       }
     }
 

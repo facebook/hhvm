@@ -23,9 +23,9 @@
 
 #include <folly/String.h>
 
-#include "hphp/runtime/base/builtin-functions.h" // f_serialize
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
@@ -113,13 +113,13 @@ std::string escaped_long(const StringData* sd) {
 }
 
 std::string escaped_long(const ArrayData* ad) {
-  auto const str = f_serialize(Variant{const_cast<ArrayData*>(ad)});
+  auto const str = internal_serialize(Variant{const_cast<ArrayData*>(ad)});
   return escaped_long(str.get());
 }
 
 std::string escaped_long(Cell cell) {
   assert(cellIsPlausible(cell));
-  auto const str = f_serialize(tvAsCVarRef(&cell));
+  auto const str = internal_serialize(tvAsCVarRef(&cell));
   return escaped_long(str.get());
 }
 

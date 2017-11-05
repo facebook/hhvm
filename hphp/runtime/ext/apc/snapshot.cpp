@@ -195,7 +195,10 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
           break;
         }
         case SnapshotBuilder::kSnapOther: {
-          Variant v = unserialize_from_string(value);
+          Variant v = unserialize_from_string(
+            value,
+            VariableUnserializer::Type::Internal
+          );
           if (same(v, false)) {
             throw Exception("bad apc archive, unserialize_from_string failed");
           }

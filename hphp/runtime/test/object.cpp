@@ -26,7 +26,7 @@ namespace HPHP {
 
 TEST(Object, Serialization) {
   String s = "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}";
-  Variant v = unserialize_from_string(s);
+  Variant v = unserialize_from_string(s, VariableUnserializer::Type::Serialize);
   EXPECT_TRUE(v.isObject());
   auto o = v.toObject();
   EXPECT_TRUE(

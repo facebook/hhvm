@@ -1001,9 +1001,12 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   Y("?Obj=",    T::OptExactObj);
   Y("?Obj<=",   T::OptSubObj);
   Y("Obj<=",    T::SubObj);
-
   X("Arr",      T::Arr);
   X("?Arr",     T::OptArr);
+  X("VArr",     T::VArr);
+  X("?VArr",    T::OptVArr);
+  X("DArr",     T::DArr);
+  X("?DArr",    T::OptDArr);
   X("Vec",      T::Vec);
   X("?Vec",     T::OptVec);
   X("Dict",     T::Dict);
@@ -1030,6 +1033,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("Res",      T::Res);
   X("?SArr",    T::OptSArr);
   X("SArr",     T::SArr);
+  X("?SVArr",   T::OptSVArr);
+  X("SVArr",    T::SVArr);
+  X("?SDArr",   T::OptSDArr);
+  X("SDArr",    T::SDArr);
   X("?SVec",    T::OptSVec);
   X("SVec",     T::SVec);
   X("?SDict",   T::OptSDict);
@@ -1072,6 +1079,14 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptSArr:
   case T::Arr:
   case T::OptArr:
+  case T::SVArr:
+  case T::OptSVArr:
+  case T::VArr:
+  case T::OptVArr:
+  case T::SDArr:
+  case T::OptSDArr:
+  case T::DArr:
+  case T::OptDArr:
   case T::SVec:
   case T::OptSVec:
   case T::Vec:

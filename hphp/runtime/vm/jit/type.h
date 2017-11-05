@@ -599,12 +599,14 @@ public:
    */
   static Type Array(ArrayData::ArrayKind kind);
   static Type Array(const RepoAuthType::Array* rat);
+  static Type Array(ArrayData::ArrayKind, const RepoAuthType::Array*);
 
   /*
    * Return a specialized TStaticArr.
    */
   static Type StaticArray(ArrayData::ArrayKind kind);
   static Type StaticArray(const RepoAuthType::Array* rat);
+  static Type StaticArray(ArrayData::ArrayKind, const RepoAuthType::Array*);
 
   /*
    * Return a specialized TObj.

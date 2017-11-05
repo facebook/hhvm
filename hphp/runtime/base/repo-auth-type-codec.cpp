@@ -80,6 +80,14 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::OptSArr:
   case T::Arr:
   case T::OptArr:
+  case T::SVArr:
+  case T::OptSVArr:
+  case T::VArr:
+  case T::OptVArr:
+  case T::SDArr:
+  case T::OptSDArr:
+  case T::DArr:
+  case T::OptDArr:
     if (highBitSet) {
       uint32_t id;
       std::memcpy(&id, pc, sizeof id);
@@ -173,6 +181,14 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptSArr:
   case T::Arr:
   case T::OptArr:
+  case T::SVArr:
+  case T::OptSVArr:
+  case T::VArr:
+  case T::OptVArr:
+  case T::SDArr:
+  case T::OptSDArr:
+  case T::DArr:
+  case T::OptDArr:
     {
       auto tagByte = static_cast<uint8_t>(rat.tag());
       if (rat.hasArrData()) tagByte |= kRATArrayDataBit;

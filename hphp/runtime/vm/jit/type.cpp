@@ -642,6 +642,29 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::OptArr:         return X(TArr, Array)             | TInitNull;
 #undef X
 
+#define X(A, B)                                                         \
+      [&]{                                                              \
+        if (auto const arr = ty.array()) return Type::B(A, arr);        \
+        else return Type::B(A);                                         \
+      }()
+
+    case T::SVArr:          return X(ArrayData::kPackedKind, StaticArray);
+    case T::VArr:           return X(ArrayData::kPackedKind, Array);
+
+    case T::OptSVArr:       return X(ArrayData::kPackedKind, StaticArray)
+                                   | TInitNull;
+    case T::OptVArr:        return X(ArrayData::kPackedKind, Array)
+                                   | TInitNull;
+
+    case T::SDArr:          return X(ArrayData::kMixedKind, StaticArray);
+    case T::DArr:           return X(ArrayData::kMixedKind, Array);
+
+    case T::OptSDArr:       return X(ArrayData::kMixedKind, StaticArray)
+                                   | TInitNull;
+    case T::OptDArr:        return X(ArrayData::kMixedKind, Array)
+                                   | TInitNull;
+#undef X
+
     case T::SVec:           return TStaticVec;
     case T::Vec:            return TVec;
     case T::SDict:          return TStaticDict;

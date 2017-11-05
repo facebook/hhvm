@@ -361,6 +361,14 @@ inline Type Type::Array(const RepoAuthType::Array* rat) {
   return Type(TArr, ArraySpec(rat));
 }
 
+inline Type Type::Array(ArrayData::ArrayKind kind,
+                              const RepoAuthType::Array* rat) {
+  assertx(kind != ArrayData::kVecKind &&
+          kind != ArrayData::kDictKind &&
+          kind != ArrayData::kKeysetKind);
+  return Type(TArr, ArraySpec(kind, rat));
+}
+
 inline Type Type::StaticArray(ArrayData::ArrayKind kind) {
   assertx(kind != ArrayData::kVecKind &&
           kind != ArrayData::kDictKind &&
@@ -370,6 +378,14 @@ inline Type Type::StaticArray(ArrayData::ArrayKind kind) {
 
 inline Type Type::StaticArray(const RepoAuthType::Array* rat) {
   return Type(TStaticArr, ArraySpec(rat));
+}
+
+inline Type Type::StaticArray(ArrayData::ArrayKind kind,
+                              const RepoAuthType::Array* rat) {
+  assertx(kind != ArrayData::kVecKind &&
+          kind != ArrayData::kDictKind &&
+          kind != ArrayData::kKeysetKind);
+  return Type(TStaticArr, ArraySpec(kind, rat));
 }
 
 inline Type Type::SubObj(const Class* cls) {

@@ -914,6 +914,14 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptArr:
   case T::SArr:
   case T::Arr:
+  case T::OptSVArr:
+  case T::OptVArr:
+  case T::SVArr:
+  case T::VArr:
+  case T::OptSDArr:
+  case T::OptDArr:
+  case T::SDArr:
+  case T::DArr:
   case T::OptSVec:
   case T::OptVec:
   case T::SVec:

@@ -4392,10 +4392,18 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
   }();
 
   auto const tag = [&]() -> RepoAuthType::Tag {
-    if (t.subtypeOf(TSArr))    return RepoAuthType::Tag::SArr;
-    if (t.subtypeOf(TArr))     return RepoAuthType::Tag::Arr;
-    if (t.subtypeOf(TOptSArr)) return RepoAuthType::Tag::OptSArr;
-    if (t.subtypeOf(TOptArr))  return RepoAuthType::Tag::OptArr;
+    if (t.subtypeOf(TSVArr))    return RepoAuthType::Tag::SVArr;
+    if (t.subtypeOf(TVArr))     return RepoAuthType::Tag::VArr;
+    if (t.subtypeOf(TOptSVArr)) return RepoAuthType::Tag::OptSVArr;
+    if (t.subtypeOf(TOptVArr))  return RepoAuthType::Tag::OptVArr;
+    if (t.subtypeOf(TSDArr))    return RepoAuthType::Tag::SDArr;
+    if (t.subtypeOf(TDArr))     return RepoAuthType::Tag::DArr;
+    if (t.subtypeOf(TOptSDArr)) return RepoAuthType::Tag::OptSDArr;
+    if (t.subtypeOf(TOptDArr))  return RepoAuthType::Tag::OptDArr;
+    if (t.subtypeOf(TSArr))     return RepoAuthType::Tag::SArr;
+    if (t.subtypeOf(TArr))      return RepoAuthType::Tag::Arr;
+    if (t.subtypeOf(TOptSArr))  return RepoAuthType::Tag::OptSArr;
+    if (t.subtypeOf(TOptArr))   return RepoAuthType::Tag::OptArr;
     not_reached();
   }();
 
@@ -4436,6 +4444,14 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(OptSStr)
   X(Str)
   X(OptStr)
+  X(SVArr)
+  X(OptSVArr)
+  X(VArr)
+  X(OptVArr)
+  X(SDArr)
+  X(OptSDArr)
+  X(DArr)
+  X(OptDArr)
   X(SArr)
   X(OptSArr)
   X(Arr)

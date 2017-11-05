@@ -157,11 +157,19 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
 
   case T::OptSArr:
   case T::OptArr:
+  case T::OptSVArr:
+  case T::OptVArr:
+  case T::OptSDArr:
+  case T::OptDArr:
     // Can't currently have array() info.
     return true;
 
   case T::SArr:
   case T::Arr:
+  case T::SVArr:
+  case T::VArr:
+  case T::SDArr:
+  case T::DArr:
     // array id equals to either kInvalidArrayId for null array info, or a
     // regular id. in each case, we just need to compare their id.
     return arrayId() == o.arrayId();
@@ -243,6 +251,54 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::Arr:
     if (!isArrayType(tv.m_type)) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptSVArr:
+    if (initNull) return true;
+    // fallthrough
+  case T::SVArr:
+    if (!isArrayType(tv.m_type) ||
+        !tv.m_data.parr->isStatic() ||
+        !tv.m_data.parr->isVArray()) {
+      return false;
+    }
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptVArr:
+    if (initNull) return true;
+    // fallthrough
+  case T::VArr:
+    if (!isArrayType(tv.m_type) || !tv.m_data.parr->isVArray()) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptSDArr:
+    if (initNull) return true;
+    // fallthrough
+  case T::SDArr:
+    if (!isArrayType(tv.m_type) ||
+        !tv.m_data.parr->isStatic() ||
+        !tv.m_data.parr->isDArray()) {
+      return false;
+    }
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptDArr:
+    if (initNull) return true;
+    // fallthrough
+  case T::DArr:
+    if (!isArrayType(tv.m_type) || !tv.m_data.parr->isDArray()) return false;
     if (auto const arr = ty.array()) {
       if (!tvMatchesArrayType(tv, arr)) return false;
     }
@@ -384,15 +440,35 @@ std::string show(RepoAuthType rat) {
   case T::OptArr:
   case T::SArr:
   case T::Arr:
+  case T::OptSVArr:
+  case T::OptVArr:
+  case T::SVArr:
+  case T::VArr:
+  case T::OptSDArr:
+  case T::OptDArr:
+  case T::SDArr:
+  case T::DArr:
     {
       auto ret = std::string{};
-      if (tag == T::OptArr || tag == T::OptSArr) {
+      if (tag == T::OptArr || tag == T::OptSArr ||
+          tag == T::OptVArr || tag == T::OptSVArr ||
+          tag == T::OptDArr || tag == T::OptSDArr) {
         ret += '?';
       }
-      if (tag == T::SArr || tag == T::OptSArr) {
+      if (tag == T::SArr || tag == T::OptSArr ||
+          tag == T::SVArr || tag == T::OptSVArr ||
+          tag == T::SDArr || tag == T::OptSDArr) {
         ret += 'S';
       }
-      ret += "Arr";
+      if (tag == T::OptArr || tag == T::Arr ||
+          tag == T::OptSArr || tag == T::SArr) {
+        ret += "Arr";
+      } else if (tag == T::OptVArr || tag == T::VArr ||
+                 tag == T::OptSVArr || tag == T::SVArr) {
+        ret += "VArr";
+      } else {
+        ret += "DArr";
+      }
       if (rat.hasArrData()) folly::format(&ret, "{}", show(*rat.array()));
       return ret;
     }

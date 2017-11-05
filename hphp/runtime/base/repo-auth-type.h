@@ -87,6 +87,14 @@ struct RepoAuthType {
     TAG(OptSArr)                                  \
     TAG(Arr)                                      \
     TAG(OptArr)                                   \
+    TAG(SVArr)                                    \
+    TAG(OptSVArr)                                 \
+    TAG(VArr)                                     \
+    TAG(OptVArr)                                  \
+    TAG(SDArr)                                    \
+    TAG(OptSDArr)                                 \
+    TAG(DArr)                                     \
+    TAG(OptDArr)                                  \
     TAG(SVec)                                     \
     TAG(OptSVec)                                  \
     TAG(Vec)                                      \
@@ -175,7 +183,9 @@ struct RepoAuthType {
 
   bool mayHaveArrData() const {
     switch (tag()) {
-    case Tag::OptArr: case Tag::OptSArr: case Tag::Arr: case Tag::SArr:
+    case Tag::OptArr:  case Tag::OptSArr: case Tag::Arr: case Tag::SArr:
+    case Tag::OptVArr: case Tag::OptSVArr: case Tag::VArr: case Tag::SVArr:
+    case Tag::OptDArr: case Tag::OptSDArr: case Tag::DArr: case Tag::SDArr:
       return true;
     default:
       return false;

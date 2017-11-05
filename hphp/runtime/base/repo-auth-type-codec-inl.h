@@ -81,6 +81,14 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptSArr:
   case T::Arr:
   case T::OptArr:
+  case T::SVArr:
+  case T::OptSVArr:
+  case T::VArr:
+  case T::OptVArr:
+  case T::SDArr:
+  case T::OptSDArr:
+  case T::DArr:
+  case T::OptDArr:
     return highBitSet ? 5 : 1;
   case T::ExactObj:
   case T::SubObj:

@@ -62,8 +62,14 @@ inline bool IRInstruction::mayRaiseError() const {
     // AKExistsArr, ArrayIdx, and ArrayIsset are only marked as Er because of
     // EvalHackArrCompatNotices. So, if its not enabled, treat them as if they
     // aren't.
-    return !is(AKExistsArr, ArrayIdx, ArrayIsset) ||
-      RuntimeOption::EvalHackArrCompatNotices;
+    if (is(AKExistsArr, ArrayIdx, ArrayIsset)) {
+      return RuntimeOption::EvalHackArrCompatNotices;
+    }
+    // Likewise for SameArr and NSameArr, but for EvalHackArrCompatDVCmpNotices.
+    if (is(SameArr, NSameArr)) {
+      return RuntimeOption::EvalHackArrCompatDVCmpNotices;
+    }
+    return true;
   }
   return false;
 }

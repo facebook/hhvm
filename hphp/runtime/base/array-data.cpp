@@ -945,6 +945,12 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   assert(ad2->isPHPArray());
 
   if (ad1 == ad2) return true;
+
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatDVCmpNotices &&
+               ad1->dvArray() != ad2->dvArray())) {
+    raiseHackArrCompatDVArrCmp(ad1, ad2);
+  }
+
   if (ad1->size() != ad2->size()) return false;
 
   // Prevent circular referenced objects/arrays or deep ones.
@@ -979,6 +985,11 @@ ALWAYS_INLINE
 int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
   assert(ad1->isPHPArray());
   assert(ad2->isPHPArray());
+
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatDVCmpNotices &&
+               ad1->dvArray() != ad2->dvArray())) {
+    raiseHackArrCompatDVArrCmp(ad1, ad2);
+  }
 
   auto const size1 = ad1->size();
   auto const size2 = ad2->size();
@@ -1407,6 +1418,17 @@ void raiseHackArrCompatAdd() {
 
 void raiseHackArrCompatArrMixedCmp() {
   raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_ARR_MIXEDCMP);
+}
+
+void raiseHackArrCompatDVArrCmp(const ArrayData* ad1, const ArrayData* ad2) {
+  auto const type = [](const ArrayData* a) {
+    if (a->isVArray()) return "varray";
+    if (a->isDArray()) return "darray";
+    return "array";
+  };
+  raise_hackarr_compat_notice(
+    folly::sformat("Comparing {} and {}", type(ad1), type(ad2))
+  );
 }
 
 void raiseHackArrCompatMissingIncDec() {

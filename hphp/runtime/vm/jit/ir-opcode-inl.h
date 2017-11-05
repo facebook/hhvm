@@ -36,9 +36,15 @@ inline bool hasEdges(Opcode opcode) {
     // AKExistsArr, ArrayIdx, and ArrayIsset are only marked as Er because of
     // EvalHackArrCompatNotices. So, if its not enabled, treat them as if they
     // aren't.
-    return
-      (opcode != AKExistsArr && opcode != ArrayIdx && opcode != ArrayIsset) ||
-      RuntimeOption::EvalHackArrCompatNotices;
+    if (opcode == AKExistsArr || opcode == ArrayIdx || opcode == ArrayIsset) {
+      return RuntimeOption::EvalHackArrCompatNotices;
+    }
+    // Same thing for SameArr and NSameArr, but for
+    // EvalHackArrCompatDVCmpNotices.
+    if (opcode == SameArr || opcode == NSameArr) {
+      return RuntimeOption::EvalHackArrCompatDVCmpNotices;
+    }
+    return true;
   }
   return false;
 }

@@ -122,8 +122,6 @@ bool canDCE(IRInstruction* inst) {
   case CmpBool:
   case SameObj:
   case NSameObj:
-  case SameArr:
-  case NSameArr:
   case SameVec:
   case NSameVec:
   case SameDict:
@@ -699,6 +697,10 @@ bool canDCE(IRInstruction* inst) {
   case ArrayIsset:
   case ArrayIdx:
     return !RuntimeOption::EvalHackArrCompatNotices;
+
+  case SameArr:
+  case NSameArr:
+    return !RuntimeOption::EvalHackArrCompatDVCmpNotices;
   }
   not_reached();
 }

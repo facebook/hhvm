@@ -721,9 +721,9 @@ To string conversions:
 
 | NeqArr,                      D(Bool), S(Arr) S(Arr),                    Er
 
-| SameArr,                     D(Bool), S(Arr) S(Arr),                    NF
+| SameArr,                     D(Bool), S(Arr) S(Arr),                    Er
 
-| NSameArr,                    D(Bool), S(Arr) S(Arr),                    NF
+| NSameArr,                    D(Bool), S(Arr) S(Arr),                    Er
 
 | CmpArr,                      D(Int),  S(Arr) S(Arr),                    Er
 

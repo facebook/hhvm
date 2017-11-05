@@ -710,9 +710,17 @@ std::pair<Type,bool> resolveSame(ISS& env) {
   auto const mightWarn = [&] {
     // EvalHackArrCompatNotices will notice on === and !== between PHP arrays
     // and Hack arrays.
-    if (!RuntimeOption::EvalHackArrCompatNotices) return false;
-    if (t1.couldBe(TArr) && couldBeHackArr(t2)) return true;
-    if (couldBeHackArr(t1) && t2.couldBe(TArr)) return true;
+    if (RuntimeOption::EvalHackArrCompatNotices) {
+      if (t1.couldBe(TArr) && couldBeHackArr(t2)) return true;
+      if (couldBeHackArr(t1) && t2.couldBe(TArr)) return true;
+    }
+    if (RuntimeOption::EvalHackArrCompatDVCmpNotices) {
+      if (!t1.couldBe(TArr) || !t2.couldBe(TArr)) return false;
+      if (t1.subtypeOf(TPArr) && t2.subtypeOf(TPArr)) return false;
+      if (t1.subtypeOf(TVArr) && t2.subtypeOf(TVArr)) return false;
+      if (t1.subtypeOf(TDArr) && t2.subtypeOf(TDArr)) return false;
+      return true;
+    }
     return false;
   };
 

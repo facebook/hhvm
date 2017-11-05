@@ -953,6 +953,7 @@ void raiseHackArrCompatRefIter();
 void raiseHackArrCompatAdd();
 
 void raiseHackArrCompatArrMixedCmp();
+void raiseHackArrCompatDVArrCmp(const ArrayData*, const ArrayData*);
 
 void raiseHackArrCompatMissingIncDec();
 void raiseHackArrCompatMissingSetOp();

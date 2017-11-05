@@ -404,6 +404,13 @@ GeneralEffects hack_arr_compat_may_raise(const IRInstruction& inst,
   return may_raise(inst, x);
 }
 
+GeneralEffects hack_arr_compat_dv_cmp_may_raise(const IRInstruction& inst,
+                                                GeneralEffects x) {
+  assertx(inst.is(SameArr, NSameArr));
+  if (!RuntimeOption::EvalHackArrCompatDVCmpNotices) return x;
+  return may_raise(inst, x);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 GeneralEffects may_load_store(AliasClass loads, AliasClass stores) {
@@ -1253,6 +1260,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       may_load_store(AElemAny | ARefAny, AEmpty)
     );
 
+  case SameArr:
+  case NSameArr:
+    return hack_arr_compat_dv_cmp_may_raise(
+      inst,
+      may_load_store(AEmpty, AEmpty)
+    );
+
   case DictGetQuiet:
   case DictIsset:
   case DictEmptyElem:
@@ -1684,8 +1698,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqStrInt:
   case NeqStrInt:
   case CmpStrInt:
-  case SameArr:
-  case NSameArr:
   case GtRes:
   case GteRes:
   case LtRes:

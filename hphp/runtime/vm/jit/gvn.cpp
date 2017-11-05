@@ -291,8 +291,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case CmpBool:
   case SameObj:
   case NSameObj:
-  case SameArr:
-  case NSameArr:
   case SameVec:
   case NSameVec:
   case SameDict:
@@ -367,6 +365,11 @@ bool supportsGVN(const IRInstruction* inst) {
   case Select:
   case StrictlyIntegerConv:
     return true;
+
+  case SameArr:
+  case NSameArr:
+    return !RuntimeOption::EvalHackArrCompatDVCmpNotices;
+
   default:
     return false;
   }

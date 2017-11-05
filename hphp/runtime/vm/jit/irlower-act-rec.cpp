@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/countable.h"
@@ -322,19 +323,33 @@ static void sync_regstate_to_caller(ActRec* preLive) {
   tl_regState = VMRegState::CLEAN;
 }
 
+/*
+ * Perform the action specified by 'action1' on the range of TypedValues
+ * represented by 'tv' and 'limit'. If 'pred' ever returns true, sync the
+ * register register state and then start calling 'action2' instead.
+ */
+template <typename Iter, typename Pred, typename Action1, typename Action2>
 NEVER_INLINE
-static void trimExtraArgsMayReenter(ActRec* ar,
-                                    TypedValue* tvArgs,
-                                    TypedValue* limit) {
-  sync_regstate_to_caller(ar);
+static void actionMayReenter(ActRec* ar,
+                             Iter tv,
+                             Iter limit,
+                             Pred pred,
+                             Action1 action1,
+                             Action2 action2) {
   do {
-    tvDecRefGen(tvArgs); // may reenter for __destruct
-    ++tvArgs;
-  } while (tvArgs != limit);
-  ar->setNumArgs(ar->m_func->numParams());
-
-  // Go back to dirty (see the comments of sync_regstate_to_caller()).
-  tl_regState = VMRegState::DIRTY;
+    if (pred(*tv)) {
+      sync_regstate_to_caller(ar);
+      // Go back to dirty (see the comments of sync_regstate_to_caller()).
+      SCOPE_EXIT { tl_regState = VMRegState::DIRTY; };
+      do {
+        action2(*tv);
+        ++tv;
+      } while (tv != limit);
+      break;
+    }
+    action1(*tv);
+    ++tv;
+  } while (tv != limit);
 }
 
 }
@@ -355,15 +370,14 @@ void trimExtraArgs(ActRec* ar) {
   assertx(!f->hasVariadicCaptureParam());
   assertx(!(f->attrs() & AttrMayUseVV));
 
-  auto limit = tvArgs + numExtra;
-  do {
-    if (UNLIKELY(tvDecRefWillCallHelper(*tvArgs))) {
-      trimExtraArgsMayReenter(ar, tvArgs, limit);
-      return;
-    }
-    tvDecRefGenNZ(tvArgs);
-    ++tvArgs;
-  } while (tvArgs != limit);
+  actionMayReenter(
+    ar,
+    tvArgs,
+    tvArgs + numExtra,
+    [](TypedValue v){ return tvDecRefWillCallHelper(v); },
+    [](TypedValue v){ tvDecRefGenNZ(v); },
+    [](TypedValue v){ tvDecRefGen(v); }
+  );
 
   assertx(f->numParams() == (numArgs - numExtra));
   assertx(f->numParams() == numParams);
@@ -383,11 +397,30 @@ void shuffleExtraArgsVariadic(ActRec* ar) {
   assertx(f->hasVariadicCaptureParam());
   assertx(!(f->attrs() & AttrMayUseVV));
 
-  auto varArgsArray = Array::attach(PackedArray::MakePacked(numExtra, tvArgs));
+  VArrayInit ai{numExtra};
+  actionMayReenter(
+    ar,
+    std::reverse_iterator<TypedValue*>(tvArgs + numExtra),
+    std::reverse_iterator<TypedValue*>(tvArgs),
+    [](TypedValue v)  { return v.m_type == KindOfRef; },
+    [&](TypedValue v) { ai.appendWithRef(v); },
+    [&](TypedValue v) { ai.appendWithRef(v); }
+  );
+  actionMayReenter(
+    ar,
+    tvArgs,
+    tvArgs + numExtra,
+    /* If the value wasn't a ref, we'll have definitely inc-reffed it, so we
+     * won't re-enter. */
+    [](TypedValue v){ return v.m_type == KindOfRef; },
+    [](TypedValue v){ tvDecRefGenNZ(v); },
+    [](TypedValue v){ tvDecRefGen(v); }
+  );
+
   // Write into the last (variadic) param.
   auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
   tv->m_type = KindOfArray;
-  tv->m_data.parr = varArgsArray.detach();
+  tv->m_data.parr = ai.create();
   assertx(tv->m_data.parr->hasExactlyOneRef());
 
   // No incref is needed, since extra values are being transferred from the
@@ -403,20 +436,28 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
   assertx(f->attrs() & AttrMayUseVV);
 
   ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
-
-  auto varArgsArray = Array::attach(PackedArray::MakePacked(numExtra, tvArgs));
-  auto tvIncr = tvArgs;
-  // An incref is needed to compensate for discarding from the stack.
-  for (uint32_t i = 0; i < numExtra; ++i, ++tvIncr) {
-    tvIncRefGen(*tvIncr);
+  try {
+    VArrayInit ai{numExtra};
+    actionMayReenter(
+      ar,
+      std::reverse_iterator<TypedValue*>(tvArgs + numExtra),
+      std::reverse_iterator<TypedValue*>(tvArgs),
+      [](TypedValue v)  { return v.m_type == KindOfRef; },
+      [&](TypedValue v) { ai.appendWithRef(v); },
+      [&](TypedValue v) { ai.appendWithRef(v); }
+    );
+    // Write into the last (variadic) param.
+    auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
+    tv->m_type = KindOfArray;
+    tv->m_data.parr = ai.create();
+    assertx(tv->m_data.parr->hasExactlyOneRef());
+    // Before, for each arg: refcount = n + 1 (stack).
+    // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray).
+  } catch (...) {
+    ExtraArgs::deallocateRaw(ar->getExtraArgs());
+    ar->resetExtraArgs();
+    throw;
   }
-  // Write into the last (variadic) param.
-  auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-  tv->m_type = KindOfArray;
-  tv->m_data.parr = varArgsArray.detach();
-  assertx(tv->m_data.parr->hasExactlyOneRef());
-  // Before, for each arg: refcount = n + 1 (stack).
-  // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray).
 }
 
 #undef SHUFFLE_EXTRA_ARGS_PRELUDE
@@ -455,11 +496,14 @@ void cgInitExtraArgs(IRLS& env, const IRInstruction* inst) {
       break;
   }
 
-  v << vcall{
+  cgCallHelper(
+    v,
+    env,
     CallSpec::direct(handler),
-    v.makeVcallArgs({{fp}}),
-    v.makeTuple({})
-  };
+    callDest(env, inst),
+    SyncOptions::Sync,
+    argGroup(env, inst).reg(fp)
+  );
 }
 
 void cgPackMagicArgs(IRLS& env, const IRInstruction* inst) {
@@ -485,7 +529,7 @@ void cgPackMagicArgs(IRLS& env, const IRInstruction* inst) {
     .reg(num_args)
     .reg(values);
 
-  cgCallHelper(v, env, CallSpec::direct(PackedArray::MakePacked),
+  cgCallHelper(v, env, CallSpec::direct(PackedArray::MakeVArray),
                callDest(env, inst), SyncOptions::Sync, args);
 }
 

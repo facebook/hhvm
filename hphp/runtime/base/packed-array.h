@@ -248,18 +248,19 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 
   /*
    * Allocate a PackedArray containing `size' values, in the reverse order of
-   * the `values' array.
+   * the `values' array. This can only be used to populate the array with cells,
+   * not refs.
    *
-   * This function takes ownership of the TypedValues in `values'.
+   * This function takes ownership of the Cells in `values'.
    */
-  static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
-  static ArrayData* MakeVArray(uint32_t size, const TypedValue* values);
-  static ArrayData* MakeVec(uint32_t size, const TypedValue* values);
+  static ArrayData* MakePacked(uint32_t size, const Cell* values);
+  static ArrayData* MakeVArray(uint32_t size, const Cell* values);
+  static ArrayData* MakeVec(uint32_t size, const Cell* values);
 
   /*
    * Like MakePacked, but with `values' array in natural (not reversed) order.
    */
-  static ArrayData* MakePackedNatural(uint32_t size, const TypedValue* values);
+  static ArrayData* MakePackedNatural(uint32_t size, const Cell* values);
 
   static ArrayData* MakeUninitialized(uint32_t size);
   static ArrayData* MakeUninitializedVArray(uint32_t size);
@@ -305,7 +306,7 @@ private:
   static ArrayData* MakeReserveImpl(uint32_t, HeaderKind, ArrayData::DVArray);
 
   template<bool reverse>
-  static ArrayData* MakePackedImpl(uint32_t, const TypedValue*,
+  static ArrayData* MakePackedImpl(uint32_t, const Cell*,
                                    HeaderKind, ArrayData::DVArray);
 
   template<bool convertingPackedToVec>

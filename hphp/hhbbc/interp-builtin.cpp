@@ -432,7 +432,7 @@ void finish_builtin(ISS& env,
   for (auto i = numArgs; i < func->params.size(); i++) {
     auto const& pi = func->params[i];
     if (pi.isVariadic) {
-      repl.emplace_back(bc::NewArray { 0 });
+      repl.emplace_back(bc::Array { staticEmptyVArray() });
       continue;
     }
     auto cell = pi.defaultValue.m_type == KindOfNull && !pi.builtinType ?
@@ -445,7 +445,7 @@ void finish_builtin(ISS& env,
       numArgs >= func->params.size()) {
 
     const uint32_t numToPack = numArgs - func->params.size() + 1;
-    repl.emplace_back(bc::NewPackedArray { numToPack });
+    repl.emplace_back(bc::NewVArray { numToPack });
     numArgs = func->params.size();
   }
 
@@ -525,7 +525,9 @@ folly::Optional<Type> const_fold(ISS& env,
   // to be unpacked, so do so here.
   if (func->hasVariadicCaptureParam()) {
     if (args.empty()) return folly::none;
-    if (!isArrayType(args.back().m_type)) return folly::none;
+    if (!isArrayType(args.back().m_type) && !isVecType(args.back().m_type)) {
+      return folly::none;
+    }
     auto const variadic = args.back();
     args.pop_back();
     IterateV(

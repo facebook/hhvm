@@ -105,6 +105,9 @@ struct ExtraArgs {
   static void deallocate(ActRec*);
   static void deallocate(ExtraArgs*, unsigned numArgs);
 
+  // Just free the memory, don't dec-ref anything.
+  static void deallocateRaw(ExtraArgs*);
+
   /**
    * Make a copy of ExtraArgs.
    */

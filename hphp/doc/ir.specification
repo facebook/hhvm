@@ -3143,7 +3143,7 @@ fields of that struct for holding intermediate values.
   Check if the stack depth has exceeded its limit.  If it has, jump to the
   stack overflow helper stub, which will throw.
 
-| InitExtraArgs<func,argc>, ND, S(FramePtr), NF
+| InitExtraArgs<func,argc>, ND, S(FramePtr), Er
 
   Set up the ExtraArgs struct on the live ActRec.  If extra args are present
   and need to be discarded, they will be decref'd and may re-enter to run
@@ -3190,9 +3190,9 @@ fields of that struct for holding intermediate values.
 
   Store S1 to m_invName on the ActRec pointed to by the frame pointer S0.
 
-| PackMagicArgs, D(Arr), S(FramePtr), PRc
+| PackMagicArgs, DArrPacked, S(FramePtr), PRc
 
-  Call PackedArray::MakePacked() with the value of numArgs() on the ActRec
+  Call PackedArray::MakeVArray() with the value of numArgs() on the ActRec
   pointed to by the frame pointer S0 as the first argument, and the pointer to
   the first parameter in the frame as the second argument.
 

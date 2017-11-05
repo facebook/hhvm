@@ -349,6 +349,7 @@ struct ActRec {
    */
   void setVarEnv(VarEnv* val);
   void setExtraArgs(ExtraArgs* val);
+  void resetExtraArgs();
 
   /*
    * Get the extra argument with index `ind', from either the VarEnv or the

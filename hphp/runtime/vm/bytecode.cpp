@@ -585,13 +585,17 @@ void ExtraArgs::deallocate(ExtraArgs* ea, unsigned nargs) {
   for (unsigned i = 0; i < nargs; ++i) {
     tvDecRefGen(ea->m_extraArgs + i);
   }
-  ea->~ExtraArgs();
-  req::free(ea);
+  deallocateRaw(ea);
 }
 
 void ExtraArgs::deallocate(ActRec* ar) {
   const int numExtra = ar->numArgs() - ar->m_func->numNonVariadicParams();
   deallocate(ar->getExtraArgs(), numExtra);
+}
+
+void ExtraArgs::deallocateRaw(ExtraArgs* ea) {
+  ea->~ExtraArgs();
+  req::free(ea);
 }
 
 ExtraArgs* ExtraArgs::clone(ActRec* ar) const {
@@ -1096,19 +1100,21 @@ static void shuffleExtraStackArgs(ActRec* ar) {
     auto const tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;
     ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numVarArgs));
     if (takesVariadicParam) {
-      auto varArgsArray =
-        Array::attach(PackedArray::MakePacked(numVarArgs, tvArgs));
-      // Incref the args (they're already referenced in extraArgs) but now
-      // additionally referenced in varArgsArray ...
-      auto tv = tvArgs; uint32_t i = 0;
-      for (; i < numVarArgs; ++i, ++tv) { tvIncRefGen(*tv); }
-      // ... and now remove them from the stack
-      stack.ndiscard(numVarArgs);
-      auto const ad = varArgsArray.detach();
-      assert(ad->hasExactlyOneRef());
-      stack.pushArrayNoRc(ad);
-      // Before, for each arg: refcount = n + 1 (stack)
-      // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray)
+      try {
+        VArrayInit ai{numVarArgs};
+        for (uint32_t i = 0; i < numVarArgs; ++i) {
+          ai.appendWithRef(*(tvArgs + numVarArgs - 1 - i));
+        }
+        // Remove them from the stack
+        stack.ndiscard(numVarArgs);
+        stack.pushArrayNoRc(ai.create());
+        // Before, for each arg: refcount = n + 1 (stack)
+        // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray)
+      } catch (...) {
+        ExtraArgs::deallocateRaw(ar->getExtraArgs());
+        ar->resetExtraArgs();
+        throw;
+      }
     } else {
       // Discard the arguments from the stack; they were all moved
       // into the extra args so we don't decref.
@@ -1117,15 +1123,14 @@ static void shuffleExtraStackArgs(ActRec* ar) {
     // leave ar->numArgs reflecting the actual number of args passed
   } else {
     assert(takesVariadicParam); // called only if extra args are used
-    auto const tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;
-    auto varArgsArray =
-      Array::attach(PackedArray::MakePacked(numVarArgs, tvArgs));
-    // Discard the arguments from the stack; they were all moved into the
-    // variadic args array so we don't need to decref the values.
-    stack.ndiscard(numVarArgs);
-    auto const ad = varArgsArray.detach();
-    assert(ad->hasExactlyOneRef());
-    stack.pushArrayNoRc(ad);
+    auto tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs + numVarArgs - 1;
+    VArrayInit ai{numVarArgs};
+    for (uint32_t i = 0; i < numVarArgs; ++i) {
+      ai.appendWithRef(*(tvArgs--));
+    }
+    // Discard the arguments from the stack
+    for (uint32_t i = 0; i < numVarArgs; ++i) stack.popTV();
+    stack.pushArrayNoRc(ai.create());
     assert(func->numParams() == (numArgs - numVarArgs + 1));
     ar->setNumArgs(func->numParams());
   }
@@ -1141,9 +1146,9 @@ static void shuffleMagicArgs(ActRec* ar) {
   // We need to make an array containing all the arguments passed by
   // the caller and put it where the second argument is.
   auto argArray = Array::attach(
-    nargs ? PackedArray::MakePacked(
+    nargs ? PackedArray::MakeVArray(
               nargs, reinterpret_cast<TypedValue*>(ar) - nargs)
-          : staticEmptyArray()
+          : staticEmptyVArray()
   );
 
   auto& stack = vmStack();
@@ -1207,9 +1212,9 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
     // the caller and put it where the second argument is.
     auto argArray = Array::attach(
       nregular
-      ? PackedArray::MakePacked(
+      ? PackedArray::MakeVArray(
         nregular, reinterpret_cast<TypedValue*>(ar) - nregular)
-      : staticEmptyArray()
+      : staticEmptyVArray()
     );
 
     // Remove the arguments from the stack; they were moved into the
@@ -1227,12 +1232,12 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
   } else {
     if (nregular == 0
         && isArrayType(args.m_type)
-        && args.m_data.parr->isVectorData()) {
+        && args.m_data.parr->isVArray()) {
       assert(stack.top() == (void*) ar);
       stack.pushStringNoRc(invName);
       stack.pushArray(args.m_data.parr);
     } else {
-      PackedArrayInit ai(nargs + nregular);
+      VArrayInit ai(nargs + nregular);
       // The arguments are pushed in order, so we should refer them by
       // index instead of taking the top, that would lead to reverse order.
       for (int i = nregular - 1; i >= 0; --i) {
@@ -1367,7 +1372,7 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
   auto const extra = nargs - nparams;
   if (f->attrs() & AttrMayUseVV) {
     ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
-    PackedArrayInit ai(extra);
+    VArrayInit ai(extra);
     if (UNLIKELY(nextra_regular > 0)) {
       // The arguments are pushed in order, so we should refer them by
       // index instead of taking the top, that would lead to reverse order.
@@ -1408,10 +1413,10 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
     assert(hasVarParam);
     if (nparams == nregular &&
         isArrayType(args.m_type) &&
-        args.m_data.parr->isVectorData()) {
+        args.m_data.parr->isVArray()) {
       stack.pushArray(args.m_data.parr);
     } else {
-      PackedArrayInit ai(extra);
+      VArrayInit ai(extra);
       if (UNLIKELY(nextra_regular > 0)) {
         // The arguments are pushed in order, so we should refer them by
         // index instead of taking the top, that would lead to reverse order.
@@ -1493,7 +1498,7 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
         }
       }
       if (UNLIKELY(func->hasVariadicCaptureParam())) {
-        stack.pushArrayNoRc(staticEmptyArray());
+        stack.pushArrayNoRc(staticEmptyVArray());
       }
       if (func->attrs() & AttrMayUseVV) {
         ar->setVarEnv(nullptr);
@@ -4486,7 +4491,7 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs, int32_t n,
       } else if (c1->m_data.parr->size() == 2){
         auto s = c1->m_data.parr->at(1);
         if (isStringType(s.m_type)) {
-          PackedArrayInit ai(2);
+          VArrayInit ai{2};
           ai.append(c1->m_data.parr->at(int64_t(0)));
           ai.append(Variant::attach(appendSuffix(s.m_data.pstr)));
           v = ai.toVariant();
@@ -5195,7 +5200,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
         // argument_unpacking RFC dictates "containers and Traversables"
         raise_warning_unsampled("Only containers may be unpacked");
         c1->m_type = KindOfPersistentArray;
-        c1->m_data.parr = staticEmptyArray();
+        c1->m_data.parr = staticEmptyVArray();
         tvDecRefGen(&tmp);
         break;
       }

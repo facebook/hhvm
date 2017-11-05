@@ -95,12 +95,13 @@ State entry_state(const Index& index, Context const ctx,
       if (locId < knownArgs->size()) {
         if (ctx.func->params[locId].isVariadic) {
           std::vector<Type> pack(knownArgs->begin() + locId, knownArgs->end());
-          ret.locals[locId] = arr_packed(std::move(pack));
+          ret.locals[locId] = arr_packed_varray(std::move(pack));
         } else {
           ret.locals[locId] = (*knownArgs)[locId];
         }
       } else {
-        ret.locals[locId] = ctx.func->params[locId].isVariadic ? TArr : TUninit;
+        ret.locals[locId] =
+          ctx.func->params[locId].isVariadic ? TVArr : TUninit;
       }
       continue;
     }
@@ -230,7 +231,7 @@ prepare_incompleteQ(const Index& index,
       incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
         ai.bdata[dv].stateIn.locals[locId] =
-          ctx.func->params[locId].isVariadic ? TArr : TUninit;
+          ctx.func->params[locId].isVariadic ? TVArr : TUninit;
       }
     }
   }

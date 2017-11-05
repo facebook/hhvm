@@ -476,7 +476,7 @@ ArrayData* PackedArray::MakeReserveVec(uint32_t capacity) {
 template<bool reverse>
 ALWAYS_INLINE
 ArrayData* PackedArray::MakePackedImpl(uint32_t size,
-                                       const TypedValue* values,
+                                       const Cell* values,
                                        HeaderKind hk,
                                        ArrayData::DVArray dv) {
   assert(size > 0);
@@ -487,11 +487,15 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
   if (reverse) {
     auto elm = packedData(ad) + size - 1;
     for (auto end = values + size; values < end; ++values, --elm) {
-      assert(hk != HeaderKind::VecArray || values->m_type != KindOfRef);
-      tvCopy(*values, *elm);
+      cellCopy(*values, *elm);
     }
   } else {
-    memcpy16_inline(packedData(ad), values, sizeof(TypedValue) * size);
+    if (debug) {
+      for (uint32_t i = 0; i < size; ++i) {
+        assertx(cellIsPlausible(*(values + i)));
+      }
+    }
+    memcpy16_inline(packedData(ad), values, sizeof(Cell) * size);
   }
 
   assert(ad->m_size == size);
@@ -500,7 +504,7 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
   return ad;
 }
 
-ArrayData* PackedArray::MakePacked(uint32_t size, const TypedValue* values) {
+ArrayData* PackedArray::MakePacked(uint32_t size, const Cell* values) {
   // Values are in reverse order since they come from the stack, which
   // grows down.
   auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed,
@@ -510,7 +514,7 @@ ArrayData* PackedArray::MakePacked(uint32_t size, const TypedValue* values) {
   return ad;
 }
 
-ArrayData* PackedArray::MakeVArray(uint32_t size, const TypedValue* values) {
+ArrayData* PackedArray::MakeVArray(uint32_t size, const Cell* values) {
   // Values are in reverse order since they come from the stack, which
   // grows down.
   auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed,
@@ -520,7 +524,7 @@ ArrayData* PackedArray::MakeVArray(uint32_t size, const TypedValue* values) {
   return ad;
 }
 
-ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
+ArrayData* PackedArray::MakeVec(uint32_t size, const Cell* values) {
   // Values are in reverse order since they come from the stack, which
   // grows down.
   auto ad = MakePackedImpl<true>(size, values, HeaderKind::VecArray,
@@ -529,8 +533,7 @@ ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
   return ad;
 }
 
-ArrayData* PackedArray::MakePackedNatural(uint32_t size,
-                                          const TypedValue* values) {
+ArrayData* PackedArray::MakePackedNatural(uint32_t size, const Cell* values) {
   auto ad = MakePackedImpl<false>(size, values, HeaderKind::Packed,
                                   ArrayData::kNotDVArray);
   assert(ad->isPacked());

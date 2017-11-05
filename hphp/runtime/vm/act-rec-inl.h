@@ -258,6 +258,10 @@ inline void ActRec::setExtraArgs(ExtraArgs* val) {
     reinterpret_cast<uintptr_t>(val) | kExtraArgsBit);
 }
 
+inline void ActRec::resetExtraArgs() {
+  m_extraArgs = nullptr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

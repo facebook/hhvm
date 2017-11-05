@@ -102,11 +102,12 @@ void init_params(IRGS& env, const Func* func, uint32_t argc) {
   if (argc <= nparams && func->hasVariadicCaptureParam()) {
     // Need to initialize `...$args'.
     gen(env, StLoc, LocalId{nparams}, fp(env),
-        cns(env, staticEmptyArray()));
+        cns(env, staticEmptyVArray()));
   }
 
   if (!env.inlineLevel) {
     // Null out or initialize the frame's ExtraArgs.
+    env.irb->exceptionStackBoundary();
     gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env));
   }
 }
@@ -377,7 +378,7 @@ void emitMagicFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   // Pack the passed args into an array, then store it as the second param.
   // This has to happen before we write the first param.
   auto const args_arr = (argc == 0)
-    ? cns(env, staticEmptyArray())
+    ? cns(env, staticEmptyVArray())
     : gen(env, PackMagicArgs, fp(env));
   gen(env, StLoc, LocalId{1}, fp(env), args_arr);
 

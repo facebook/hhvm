@@ -249,6 +249,8 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   // When running hhvm, these option is not loaded from GD, but read from CLI.
   RuntimeOption::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
   RuntimeOption::EvalHackArrCompatNotices    = gd.HackArrCompatNotices;
+  RuntimeOption::EvalHackArrCompatIsArrayNotices =
+    gd.HackArrCompatIsArrayNotices;
 
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
@@ -307,6 +309,8 @@ void write_global_data(
   gd.APCProfile                  = std::move(apcProfile);
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
 
+  gd.HackArrCompatIsArrayNotices =
+    RuntimeOption::EvalHackArrCompatIsArrayNotices;
   gd.InitialNamedEntityTableSize  =
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =

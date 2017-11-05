@@ -12309,6 +12309,8 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
+  gd.HackArrCompatIsArrayNotices =
+    RuntimeOption::EvalHackArrCompatIsArrayNotices;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

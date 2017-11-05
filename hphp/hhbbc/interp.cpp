@@ -1102,10 +1102,18 @@ void isTypeHelper(ISS& env,
   }
 
   if (istype.op == Op::IsTypeC) {
-    nothrow(env);
+    if (!RuntimeOption::EvalHackArrCompatIsArrayNotices ||
+        typeOp != IsTypeOp::Arr ||
+        !val.couldBeAny(TVArr, TDArr)) {
+      nothrow(env);
+    }
     popT(env);
   } else if (!locCouldBeUninit(env, location)) {
-    nothrow(env);
+    if (!RuntimeOption::EvalHackArrCompatIsArrayNotices ||
+        typeOp != IsTypeOp::Arr ||
+        !val.couldBeAny(TVArr, TDArr)) {
+      nothrow(env);
+    }
   }
 
   auto const negate = jmp.op == Op::JmpNZ;
@@ -1829,7 +1837,12 @@ void in(ISS& env, const bc::EmptyG&) { popC(env); push(env, TBool); }
 void in(ISS& env, const bc::IssetG&) { popC(env); push(env, TBool); }
 
 void isTypeImpl(ISS& env, const Type& locOrCell, const Type& test) {
-  constprop(env);
+  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices ||
+      !test.subtypeOf(TArr) ||
+      test.subtypeOfAny(TVArr, TDArr) ||
+      !locOrCell.couldBeAny(TVArr, TDArr)) {
+    constprop(env);
+  }
   if (locOrCell.subtypeOf(test))  return push(env, TTrue);
   if (!locOrCell.couldBe(test))   return push(env, TFalse);
   push(env, TBool);

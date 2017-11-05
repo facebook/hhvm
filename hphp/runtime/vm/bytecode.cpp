@@ -3915,7 +3915,19 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
   case IsTypeOp::Bool:   return is_bool(tvAsCVarRef(tv));
   case IsTypeOp::Int:    return is_int(tvAsCVarRef(tv));
   case IsTypeOp::Dbl:    return is_double(tvAsCVarRef(tv));
-  case IsTypeOp::Arr:    return is_array(tvAsCVarRef(tv));
+  case IsTypeOp::Arr:
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+      if (isArrayType(tv->m_type)) {
+        if (tv->m_data.parr->isVArray()) {
+          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_ARR);
+        } else if (tv->m_data.parr->isDArray()) {
+          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_ARR);
+        }
+        return true;
+      }
+      return false;
+    }
+    return is_array(tvAsCVarRef(tv));
   case IsTypeOp::Vec:    return is_vec(tvAsCVarRef(tv));
   case IsTypeOp::Dict:   return is_dict(tvAsCVarRef(tv));
   case IsTypeOp::Keyset: return is_keyset(tvAsCVarRef(tv));

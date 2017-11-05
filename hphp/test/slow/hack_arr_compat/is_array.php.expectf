@@ -1,0 +1,36 @@
+================= literals ===========================
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+
+Notice: Hack Array Compat: is_array() called on varray in %s/is_array.php on line 17
+bool(true)
+
+Notice: Hack Array Compat: is_array() called on darray in %s/is_array.php on line 18
+bool(true)
+================= normal =============================
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+
+Notice: Hack Array Compat: is_array() called on varray in %s/is_array.php on line 5
+bool(true)
+
+Notice: Hack Array Compat: is_array() called on darray in %s/is_array.php on line 5
+bool(true)
+================= dynamic =============================
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+
+Notice: Hack Array Compat: is_array() called on varray in %s/is_array.php on line 8
+bool(true)
+
+Notice: Hack Array Compat: is_array() called on darray in %s/is_array.php on line 8
+bool(true)

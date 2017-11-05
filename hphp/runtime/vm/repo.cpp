@@ -212,16 +212,6 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
       RuntimeOption::EvalThisTypeHintLevel = s_globalData.ThisTypeHintLevel;
     }
 
-    if (RuntimeOption::ServerExecutionMode() &&
-        RuntimeOption::EvalHackArrCompatNotices) {
-      // Temporary until we verify Makefile changes work in prod
-      Logger::Info(
-        folly::sformat(
-          "HackArrCompatNotices is {} in repo",
-          s_globalData.HackArrCompatNotices ? "enabled" : "disabled")
-      );
-    }
-
     return;
   }
 

@@ -103,6 +103,8 @@ const char* const REDECLARE_BUILTIN = "Cannot redeclare %s()";
 const char* const DISALLOWED_DYNCALL = "%s should not be called dynamically";
 const char* const HACKARR_COMPAT_ARR_MIXEDCMP =
   "Comparing array with non-array";
+const char* const HACKARR_COMPAT_VARR_IS_ARR = "is_array() called on varray";
+const char* const HACKARR_COMPAT_DARR_IS_ARR = "is_array() called on darray";
 
 } // namespace Strings
 } // namespace HPHP

@@ -379,6 +379,48 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* val, IsTypeOp op) {
   );
 }
 
+SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
+  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices) {
+    return gen(env, IsType, TArr, src);
+  }
+
+  auto const secondCheck = [&](SSATmp* arr) {
+    ifElse(
+      env,
+      [&](Block* taken) { gen(env, CheckDArray, taken, arr); },
+      [&]{
+        gen(
+          env,
+          RaiseHackArrCompatNotice,
+          cns(env, makeStaticString(Strings::HACKARR_COMPAT_DARR_IS_ARR))
+        );
+      }
+    );
+  };
+
+  auto const firstCheck = [&](SSATmp* arr) {
+    ifThenElse(
+      env,
+      [&](Block* taken) { gen(env, CheckVArray, taken, arr); },
+      [&]{
+        gen(
+          env,
+          RaiseHackArrCompatNotice,
+          cns(env, makeStaticString(Strings::HACKARR_COMPAT_VARR_IS_ARR))
+        );
+      },
+      [&]{ secondCheck(arr); }
+    );
+  };
+
+  return cond(
+    env,
+    [&](Block* taken) { firstCheck(gen(env, CheckType, TArr, taken, src)); },
+    [&]{ return cns(env, true); },
+    [&]{ return cns(env, false); }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -528,6 +570,8 @@ void emitIsTypeC(IRGS& env, IsTypeOp subop) {
 
   if (subop == IsTypeOp::VArray || subop == IsTypeOp::DArray) {
     push(env, isDVArrayImpl(env, src, subop));
+  } else if (subop == IsTypeOp::Arr) {
+    push(env, isArrayImpl(env, src));
   } else {
     auto const t = typeOpToDataType(subop);
     if (t == KindOfObject) {
@@ -549,6 +593,8 @@ void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
 
   if (subop == IsTypeOp::VArray || subop == IsTypeOp::DArray) {
     push(env, isDVArrayImpl(env, val, subop));
+  } else if (subop == IsTypeOp::Arr) {
+    push(env, isArrayImpl(env, val));
   } else {
     auto const t = typeOpToDataType(subop);
     if (t == KindOfObject) {

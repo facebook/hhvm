@@ -120,6 +120,11 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
                                        size_t neededSize) {
   assert(checkInvariants(old));
 
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatPromoteNotices) &&
+      old->isVArray()) {
+    raise_hackarr_compat_notice("varray promoting to darray");
+  }
+
   auto const oldSize = old->m_size;
   auto const scale   = MixedArray::computeScaleFromSize(neededSize);
   auto const ad      = MixedArray::reqAlloc(scale);
@@ -699,7 +704,13 @@ auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy,
     return found(ad);
   }
 
-  if (size_t(k) == adIn->getSize()) return append();
+  if (size_t(k) == adIn->getSize()) {
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatPromoteNotices) &&
+        adIn->isVArray()) {
+      raise_hackarr_compat_notice("Implicit append to varray");
+    }
+    return append();
+  }
 
   auto const mixed = copy ? PackedArray::ToMixedCopy(adIn)
                           : PackedArray::ToMixed(adIn);

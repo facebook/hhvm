@@ -251,6 +251,8 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalHackArrCompatNotices    = gd.HackArrCompatNotices;
   RuntimeOption::EvalHackArrCompatIsArrayNotices =
     gd.HackArrCompatIsArrayNotices;
+  RuntimeOption::EvalHackArrCompatPromoteNotices =
+    gd.HackArrCompatPromoteNotices;
 
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
@@ -311,6 +313,8 @@ void write_global_data(
 
   gd.HackArrCompatIsArrayNotices =
     RuntimeOption::EvalHackArrCompatIsArrayNotices;
+  gd.HackArrCompatPromoteNotices =
+    RuntimeOption::EvalHackArrCompatPromoteNotices;
   gd.InitialNamedEntityTableSize  =
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =

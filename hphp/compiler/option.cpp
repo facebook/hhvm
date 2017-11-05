@@ -254,6 +254,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalHackArrCompatIsArrayNotices,
                ini, config, "HackArrCompatIsArrayNotices",
                RuntimeOption::EvalHackArrCompatIsArrayNotices);
+  Config::Bind(RuntimeOption::EvalHackArrCompatPromoteNotices,
+               ini, config, "HackArrCompatPromoteNotices",
+               RuntimeOption::EvalHackArrCompatPromoteNotices);
 
   {
     // Hack

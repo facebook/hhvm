@@ -147,6 +147,7 @@ struct Repo::GlobalData {
    */
   bool HackArrCompatNotices = false;
   bool HackArrCompatIsArrayNotices = false;
+  bool HackArrCompatPromoteNotices = false;
 
   /*
    * Should the extension containing HHVM intrinsics be enabled?
@@ -181,6 +182,7 @@ struct Repo::GlobalData {
       (EnableRenameFunction)
       (HackArrCompatNotices)
       (HackArrCompatIsArrayNotices)
+      (HackArrCompatPromoteNotices)
       (EnableIntrinsicsExtension)
       (APCProfile)
       ;

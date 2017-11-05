@@ -107,6 +107,7 @@ public:
   static ArrayData* CreateDict();
   static ArrayData* CreateKeyset();
   static ArrayData* CreateVArray();
+  static ArrayData* CreateDArray();
 
   /*
    * Create a new kPackedKind ArrayData with a single element, `value'.
@@ -158,6 +159,7 @@ public:
   ArrayData* toVec(bool copy);
   ArrayData* toKeyset(bool copy);
   ArrayData* toVArray(bool copy);
+  ArrayData* toDArray(bool copy);
 
   /*
    * Return an array with identical contents to this array, but of an array
@@ -810,6 +812,7 @@ extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyArray;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVecArray;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
+extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDArray;
 extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 
 /*
@@ -821,6 +824,7 @@ extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
  */
 ArrayData* staticEmptyArray();
 ArrayData* staticEmptyVArray();
+ArrayData* staticEmptyDArray();
 ArrayData* staticEmptyVecArray();
 ArrayData* staticEmptyDictArray();
 ArrayData* staticEmptyKeysetArray();
@@ -911,6 +915,7 @@ struct ArrayFunctions {
   ArrayData* (*toVec[NK])(ArrayData*, bool);
   ArrayData* (*toKeyset[NK])(ArrayData*, bool);
   ArrayData* (*toVArray[NK])(ArrayData*, bool);
+  ArrayData* (*toDArray[NK])(ArrayData*, bool);
 };
 
 extern const ArrayFunctions g_array_funcs;

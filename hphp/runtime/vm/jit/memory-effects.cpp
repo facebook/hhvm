@@ -1964,6 +1964,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvVecToVArr:
   case ConvDictToVArr:
   case ConvKeysetToVArr:
+  case ConvArrToDArr:
+  case ConvVecToDArr:
+  case ConvDictToDArr:
+  case ConvKeysetToDArr:
     return may_load_store(AElemAny, AEmpty);
 
   case ReleaseVVAndSkip:  // can decref ExtraArgs or VarEnv and Locals

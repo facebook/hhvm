@@ -1911,6 +1911,14 @@ SSATmp* convToVArrImpl(State& env, const IRInstruction* inst, G get) {
   );
 }
 
+template <typename G>
+SSATmp* convToDArrImpl(State& env, const IRInstruction* inst, G get) {
+  return arrayLikeConvImpl(
+    env, inst, get,
+    [&](ArrayData* a) { return a->toDArray(true); }
+  );
+}
+
 SSATmp* convNonArrToArrImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
@@ -1950,6 +1958,11 @@ X(Arr, arrVal, VArr)
 X(Vec, vecVal, VArr)
 X(Dict, dictVal, VArr)
 X(Keyset, keysetVal, VArr)
+
+X(Arr, arrVal, DArr)
+X(Vec, vecVal, DArr)
+X(Dict, dictVal, DArr)
+X(Keyset, keysetVal, DArr)
 
 X(Arr, arrVal, NonDVArr)
 
@@ -3493,6 +3506,10 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvVecToVArr)
   X(ConvDictToVArr)
   X(ConvKeysetToVArr)
+  X(ConvArrToDArr)
+  X(ConvVecToDArr)
+  X(ConvDictToDArr)
+  X(ConvKeysetToDArr)
   X(Count)
   X(CountArray)
   X(CountArrayFast)

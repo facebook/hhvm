@@ -411,26 +411,66 @@ void cgConvObjToVArr(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToDArray
 
+static ArrayData* convArrToDArrImpl(ArrayData* adIn) {
+  assertx(adIn->isPHPArray());
+  auto a = adIn->toDArray(adIn->cowCheck());
+  assertx(a->isMixed());
+  assertx(a->isDArray());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+static ArrayData* convVecToDArrImpl(ArrayData* adIn) {
+  assertx(adIn->isVecArray());
+  auto a = PackedArray::ToDArrayVec(adIn, adIn->cowCheck());
+  assertx(a != adIn);
+  assertx(a->isMixed());
+  assertx(a->isDArray());
+  decRefArr(adIn);
+  return a;
+}
+
+static ArrayData* convDictToDArrImpl(ArrayData* adIn) {
+  assertx(adIn->isDict());
+  auto a = MixedArray::ToDArrayDict(adIn, adIn->cowCheck());
+  assertx(a->isMixed());
+  assertx(a->isDArray());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+static ArrayData* convKeysetToDArrImpl(ArrayData* adIn) {
+  assertx(adIn->isKeyset());
+  auto a = SetArray::ToDArray(adIn, adIn->cowCheck());
+  assertx(a != adIn);
+  assertx(a->isMixed());
+  assertx(a->isDArray());
+  decRefArr(adIn);
+  return a;
+}
+
 static ArrayData* convObjToDArrImpl(ObjectData* obj) {
   if (obj->isCollection()) {
     auto a = [&]{
       if (auto ad = collections::asArray(obj)) {
-        return ArrNR{ad}.asArray().toPHPArray();
+        return ArrNR{ad}.asArray().toDArray();
       }
-      return collections::toArray(obj).toPHPArray();
+      return collections::toArray(obj).toDArray();
     }();
-    assertx(a->isPHPArray());
+    assertx(a->isMixed());
+    assertx(a->isDArray());
     decRefObj(obj);
     return a.detach();
   }
 
   if (obj->instanceof(SystemLib::s_IteratorClass)) {
-    auto arr = Array::Create();
+    auto arr = Array::CreateDArray();
     for (ArrayIter iter(obj); iter; ++iter) {
       arr.set(iter.first(), iter.second());
     }
     decRefObj(obj);
-    assertx(arr->isPHPArray());
+    assertx(arr->isMixed());
+    assertx(arr->isDArray());
     return arr.detach();
   }
 
@@ -439,16 +479,41 @@ static ArrayData* convObjToDArrImpl(ObjectData* obj) {
   );
 }
 
-void cgConvObjToDArr(IRLS& env, const IRInstruction* inst) {
+namespace {
+
+void convToDArrHelper(IRLS& env, const IRInstruction* inst,
+                      CallSpec call, bool sync) {
   auto const args = argGroup(env, inst).ssa(0);
   cgCallHelper(
     vmain(env),
     env,
-    CallSpec::direct(convObjToDArrImpl),
+    call,
     callDest(env, inst),
-    SyncOptions::Sync,
+    sync ? SyncOptions::Sync : SyncOptions::None,
     args
   );
+}
+
+}
+
+void cgConvArrToDArr(IRLS& env, const IRInstruction* inst) {
+  convToDArrHelper(env, inst, CallSpec::direct(convArrToDArrImpl), false);
+}
+
+void cgConvVecToDArr(IRLS& env, const IRInstruction* inst) {
+  convToDArrHelper(env, inst, CallSpec::direct(convVecToDArrImpl), false);
+}
+
+void cgConvDictToDArr(IRLS& env, const IRInstruction* inst) {
+  convToDArrHelper(env, inst, CallSpec::direct(convDictToDArrImpl), false);
+}
+
+void cgConvKeysetToDArr(IRLS& env, const IRInstruction* inst) {
+  convToDArrHelper(env, inst, CallSpec::direct(convKeysetToDArrImpl), false);
+}
+
+void cgConvObjToDArr(IRLS& env, const IRInstruction* inst) {
+  convToDArrHelper(env, inst, CallSpec::direct(convObjToDArrImpl), true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

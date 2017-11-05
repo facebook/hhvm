@@ -1004,7 +1004,7 @@ void in(ISS& env, const bc::CastVArray&)  {
 }
 
 void in(ISS& env, const bc::CastDArray&)  {
-  castImpl(env, TArr, tvCastToDArrayInPlace);
+  castImpl(env, TArr, tvCastToDArrayInPlace, false);
 }
 
 void in(ISS& env, const bc::Print& /*op*/) {

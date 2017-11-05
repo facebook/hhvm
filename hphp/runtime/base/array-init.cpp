@@ -21,24 +21,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayInit::ArrayInit(size_t n, Map, CheckAllocation)
-  : ArrayInitBase(n, CheckAllocation{})
-{
-  if (n > std::numeric_limits<int>::max()) {
-    tl_heap->forceOOM();
-    check_non_safepoint_surprise();
-  }
-  auto const allocsz = MixedArray::computeAllocBytes(
-                         MixedArray::computeScaleFromSize(n)
-                       );
-  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
-    check_non_safepoint_surprise();
-  }
-  m_arr = MixedArray::MakeReserveMixed(n);
-  assert(m_arr->hasExactlyOneRef());
-  check_non_safepoint_surprise();
-}
-
 DictInit::DictInit(size_t n, CheckAllocation)
   : ArrayInitBase(n, CheckAllocation{})
 {

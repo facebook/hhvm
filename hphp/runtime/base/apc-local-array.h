@@ -124,6 +124,7 @@ struct APCLocalArray final : ArrayData,
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
+  static constexpr auto ToDArray = &ArrayCommon::ToDArray;
 
 public:
   using ArrayData::decRefCount;

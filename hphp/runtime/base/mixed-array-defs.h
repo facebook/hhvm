@@ -45,7 +45,7 @@ ALWAYS_INLINE
 void MixedArray::InitSmall(MixedArray* a, uint32_t size, int64_t nextIntKey) {
   InitSmallHash(a);
   a->m_sizeAndPos = size; // pos=0
-  a->initHeader(HeaderKind::Mixed, OneReference);
+  a->initHeader_16(HeaderKind::Mixed, OneReference, ArrayData::kNotDVArray);
   a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
   a->m_nextKI = nextIntKey;
 }
@@ -373,6 +373,7 @@ void ConvertTvToUncounted(TypedValue* source) {
       if (ad->isStatic()) break;
       if (ad->empty()) {
         if (ad->isVArray()) ad = staticEmptyVArray();
+        else if (ad->isDArray()) ad = staticEmptyDArray();
         else ad = staticEmptyArray();
       } else if (ad->hasPackedLayout()) {
         ad = PackedArray::MakeUncounted(ad);

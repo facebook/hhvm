@@ -138,7 +138,21 @@ ArrayData* ArrayCommon::ToVArray(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return staticEmptyVArray();
   VArrayInit init{size};
-  IterateV( a, [&](TypedValue v) { init.appendWithRef(v); });
+  IterateV(a, [&](TypedValue v) { init.appendWithRef(v); });
+  return init.create();
+}
+
+ArrayData* ArrayCommon::ToDArray(ArrayData* a, bool) {
+  if (a->isDArray()) return a;
+  auto const size = a->size();
+  if (!size) return staticEmptyDArray();
+  DArrayInit init{size};
+  IterateKV(
+    a,
+    [&](Cell k, TypedValue v) {
+      init.setUnknownKey(tvAsCVarRef(&k), tvAsCVarRef(&v));
+    }
+  );
   return init.create();
 }
 

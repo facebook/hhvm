@@ -832,13 +832,14 @@ ArrayData* SetArray::Escalate(const ArrayData* ad) {
   return const_cast<ArrayData*>(ad);
 }
 
-ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
+template <typename Init> ALWAYS_INLINE
+ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
   auto a = asSet(ad);
   auto size = a->size();
 
-  if (!size) return staticEmptyArray();
+  if (!size) return toDArray ? staticEmptyDArray() : staticEmptyArray();
 
-  ArrayInit init{size, ArrayInit::Map{}};
+  Init init{size};
 
   auto const elms = a->data();
   auto const used = a->m_used;
@@ -858,7 +859,21 @@ ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
     }
   }
 
-  return init.create();
+  auto out = init.create();
+  assertx(MixedArray::asMixed(out));
+  return out;
+}
+
+ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
+  auto out = ToArrayImpl<MixedArrayInit>(ad, false);
+  assertx(out->isNotDVArray());
+  return out;
+}
+
+ArrayData* SetArray::ToDArray(ArrayData* ad, bool) {
+  auto out = ToArrayImpl<DArrayInit>(ad, true);
+  assertx(out->isDArray());
+  return out;
 }
 
 ArrayData* SetArray::ToKeyset(ArrayData* ad, bool /*copy*/) {

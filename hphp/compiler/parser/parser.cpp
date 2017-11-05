@@ -631,6 +631,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "is_dict" ||
            stripped == "is_keyset" ||
            stripped == "is_varray" ||
+           stripped == "is_darray" ||
            stripped == "is_varray_or_darray"
           )) {
         funcName = "HH\\" + stripped;

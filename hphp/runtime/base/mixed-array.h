@@ -32,7 +32,6 @@ namespace HPHP {
 
 struct APCArray;
 struct APCHandle;
-struct ArrayInit;
 struct MemoryProfile;
 
 //////////////////////////////////////////////////////////////////////
@@ -193,6 +192,7 @@ struct MixedArray final : ArrayData,
    * The returned array is already incref'd.
    */
   static ArrayData* MakeReserveMixed(uint32_t size);
+  static ArrayData* MakeReserveDArray(uint32_t size);
   static ArrayData* MakeReserveDict(uint32_t size);
   static constexpr auto MakeReserve = &MakeReserveMixed;
 
@@ -359,6 +359,7 @@ public:
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
+  static ArrayData* ToDArray(ArrayData*, bool);
 
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
@@ -456,6 +457,7 @@ public:
   static constexpr auto ToVecDict = &ArrayCommon::ToVec;
   static constexpr auto ToKeysetDict = &ArrayCommon::ToKeyset;
   static constexpr auto ToVArrayDict = &ArrayCommon::ToVArray;
+  static ArrayData* ToDArrayDict(ArrayData*, bool);
 
   //////////////////////////////////////////////////////////////////////
 
@@ -471,7 +473,10 @@ public:
 
 private:
   MixedArray* copyMixed() const;
-  static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk);
+  static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk,
+                                    ArrayData::DVArray);
+
+  static ArrayData* FromDictImpl(ArrayData*, bool, bool);
 
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
 
@@ -501,7 +506,6 @@ public:
 
 private:
   friend struct array::HashTable<MixedArray, MixedArrayElm>;
-  friend struct ArrayInit;
   friend struct MemoryProfile;
   friend struct EmptyArray;
   friend struct PackedArray;
@@ -570,7 +574,8 @@ private:
 private:
   enum class AllocMode : bool { Request, Static };
 
-  static MixedArray* CopyMixed(const MixedArray& other, AllocMode, HeaderKind);
+  static MixedArray* CopyMixed(const MixedArray& other, AllocMode,
+                               HeaderKind, ArrayData::DVArray);
   static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
 
   MixedArray() = delete;
@@ -689,6 +694,9 @@ public:
 private:
   struct Initializer;
   static Initializer s_initializer;
+
+  struct DArrayInitializer;
+  static DArrayInitializer s_darr_initializer;
 
   int64_t  m_nextKI;        // Next integer key to use for append.
 };

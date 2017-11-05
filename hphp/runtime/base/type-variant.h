@@ -879,10 +879,10 @@ struct Variant : private TypedValue {
   }
 
   Array toDArray() const {
-    if (isArrayType(m_type)) return Array{m_data.parr};
+    if (isArrayType(m_type)) return asCArrRef().toDArray();
     auto copy = *this;
     tvCastToDArrayInPlace(copy.asTypedValue());
-    assertx(copy.isPHPArray());
+    assertx(copy.isPHPArray() && copy.asCArrRef().isDArray());
     return Array::attach(copy.detach().m_data.parr);
   }
 

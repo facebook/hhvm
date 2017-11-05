@@ -106,8 +106,8 @@ foreach ($values as $v) {
 $c1 = __hhvm_intrinsics\launder_value('HH\\varray');
 $c2 = __hhvm_intrinsics\launder_value('HH\\darray');
 foreach ($values as $v) {
-  test_indirect('HH\\varray', $v);
+  test_indirect($c1, $v);
 }
 foreach ($values as $v) {
-  test_indirect('HH\\darray', $v);
+  test_indirect($c2, $v);
 }

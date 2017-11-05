@@ -88,6 +88,10 @@ inline ArrayData* ArrayData::toVArray(bool copy) {
   return g_array_funcs.toVArray[kind()](this, copy);
 }
 
+inline ArrayData* ArrayData::toDArray(bool copy) {
+  return g_array_funcs.toDArray[kind()](this, copy);
+}
+
 inline ArrayData* ArrayData::escalate() const {
   return g_array_funcs.escalate[kind()](this);
 }

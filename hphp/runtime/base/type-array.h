@@ -93,6 +93,10 @@ public:
     return Array(ArrayData::CreateVArray(), NoIncRef{});
   }
 
+  static Array CreateDArray() {
+    return Array(ArrayData::CreateDArray(), NoIncRef{});
+  }
+
   static Array Create(const Variant& value) {
     return Array(ArrayData::Create(value), NoIncRef{});
   }
@@ -193,6 +197,7 @@ public:
   Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
   Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
   Array toVArray() const { COPY_BODY(toVArray(true), CreateVArray()) }
+  Array toDArray() const { COPY_BODY(toDArray(true), CreateDArray()) }
 
   #undef COPY_BODY
 

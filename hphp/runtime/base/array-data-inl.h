@@ -51,6 +51,11 @@ ALWAYS_INLINE ArrayData* staticEmptyVecArray() {
   return static_cast<ArrayData*>(vp);
 }
 
+ALWAYS_INLINE ArrayData* staticEmptyDArray() {
+  void* vp = &s_theEmptyDArray;
+  return static_cast<ArrayData*>(vp);
+}
+
 ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
   void* vp = &s_theEmptyDictArray;
   return static_cast<ArrayData*>(vp);
@@ -74,6 +79,10 @@ ALWAYS_INLINE ArrayData* ArrayData::CreateVArray() {
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateVec() {
   return staticEmptyVecArray();
+}
+
+ALWAYS_INLINE ArrayData* ArrayData::CreateDArray() {
+  return staticEmptyDArray();
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateDict() {
@@ -167,6 +176,7 @@ inline bool ArrayData::isNotDVArray() const { return dvArray() == kNotDVArray; }
 inline bool ArrayData::dvArraySanityCheck() const {
   auto const dv = dvArray();
   if (isPacked()) return dv == kVArray || dv == kNotDVArray;
+  if (isMixed())  return dv == kDArray || dv == kNotDVArray;
   return dv == kNotDVArray;
 }
 

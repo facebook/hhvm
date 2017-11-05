@@ -176,6 +176,7 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
     if (arr->isDict())     return replace(staticEmptyDictArray());
     if (arr->isKeyset())   return replace(staticEmptyKeysetArray());
     if (arr->isVArray())   return replace(staticEmptyVArray());
+    if (arr->isDArray())   return replace(staticEmptyDArray());
     return replace(staticEmptyArray());
   }
 
@@ -197,7 +198,7 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
 
   ArrayData* ad;
   if (arr->isVectorData() && !arr->hasPackedLayout() && !arr->isDict() &&
-      !arr->isKeyset()) {
+      !arr->isKeyset() && !arr->isDArray()) {
     ad = PackedArray::ConvertStatic(arr);
   } else {
     ad = arr->copyStatic();
@@ -847,11 +848,21 @@ const ArrayFunctions g_array_funcs = {
    * ArrayData* ToVArray(ArrayData*, bool)
    *
    * Convert to a varray (vector-like array). The array will be converted to a
-   * packed (or empty) array, discarding keys. If already a packed or empty
-   * array, it will be returned unchanged (without copying). If copy is false,
-   * it may be converted in place.
+   * packed array, discarding keys. If already a packed array, it will be
+   * returned with the elements unchanged, but with the DVArray flag updated. If
+   * copy is false, it may be converted in place.
    */
   DISPATCH(ToVArray)
+
+  /*
+   * ArrayData* ToDArray(ArrayData*, bool)
+   *
+   * Convert to a darray (dict-like array). The array will be converted to a
+   * mixed array. If already a mixed array, it will be returned with the
+   * elements unchanged, but with the DVArray flag updated. If copy is false, it
+   * may be converted in place.
+   */
+  DISPATCH(ToDArray)
 };
 
 #undef DISPATCH

@@ -224,6 +224,8 @@ private:
   static SetArray* CopyReserve(const SetArray* src, size_t expectedSize);
   SetArray* copySet() const { return CopySet(*this, AllocMode::Request); }
 
+  template <typename Init> static ArrayData* ToArrayImpl(ArrayData*, bool);
+
 private:
   SetArray() = delete;
   SetArray(const SetArray&) = delete;
@@ -382,7 +384,6 @@ private:
 
 private:
   friend struct array::HashTable<SetArray, SetArrayElm>;
-  friend struct ArrayInit;
   friend struct MemoryProfile;
   friend struct jit::ArrayOffsetProfile;
   friend struct EmptyArray;
@@ -456,6 +457,7 @@ public:
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
+  static ArrayData* ToDArray(ArrayData*, bool);
   static bool Equal(const ArrayData*, const ArrayData*);
   static bool NotEqual(const ArrayData*, const ArrayData*);
   static bool Same(const ArrayData*, const ArrayData*);

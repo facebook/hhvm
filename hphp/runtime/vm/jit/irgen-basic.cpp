@@ -332,7 +332,9 @@ void emitCastVArray(IRGS& env) {
       if (src->isA(TDbl))    return raise("Double");
       if (src->isA(TStr))    return raise("String");
       if (src->isA(TRes))    return raise("Resource");
-      always_assert_flog(false, "Unexpected {} in emitCastVArray", src->type());
+      // Unexpected types may only be seen in unreachable code.
+      gen(env, Unreachable);
+      return cns(env, TBottom);
     }()
   );
 }
@@ -355,10 +357,10 @@ void emitCastDArray(IRGS& env) {
   push(
     env,
     [&] {
-      if (src->isA(TArr))    return src;
-      if (src->isA(TVec))    return gen(env, ConvVecToArr, src);
-      if (src->isA(TDict))   return gen(env, ConvDictToArr, src);
-      if (src->isA(TKeyset)) return gen(env, ConvKeysetToArr, src);
+      if (src->isA(TArr))    return gen(env, ConvArrToDArr, src);
+      if (src->isA(TVec))    return gen(env, ConvVecToDArr, src);
+      if (src->isA(TDict))   return gen(env, ConvDictToDArr, src);
+      if (src->isA(TKeyset)) return gen(env, ConvKeysetToDArr, src);
       if (src->isA(TObj))    return gen(env, ConvObjToDArr, src);
       if (src->isA(TNull))   return raise("Null");
       if (src->isA(TBool))   return raise("Bool");
@@ -366,7 +368,9 @@ void emitCastDArray(IRGS& env) {
       if (src->isA(TDbl))    return raise("Double");
       if (src->isA(TStr))    return raise("String");
       if (src->isA(TRes))    return raise("Resource");
-      always_assert_flog(false, "Unexpected {} in emitCastDArray", src->type());
+      // Unexpected types may only be seen in unreachable code.
+      gen(env, Unreachable);
+      return cns(env, TBottom);
     }()
   );
 }

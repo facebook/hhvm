@@ -484,7 +484,15 @@ To varray conversions:
 
 To darray conversion:
 
-| ConvObjToDArr,                D(Arr), S(Obj),                   Er|PRc|CRc
+| ConvArrToDArr,                DArrMixed, S(Arr),                   PRc|CRc
+
+| ConvVecToDArr,                DArrMixed, S(Vec),                   PRc|CRc
+
+| ConvDictToDArr,               DArrMixed, S(Dict),                  PRc|CRc
+
+| ConvKeysetToDArr,             DArrMixed, S(Keyset),                PRc|CRc
+
+| ConvObjToDArr,                DArrMixed, S(Obj),                Er|PRc|CRc
 
 
 To bool conversions:

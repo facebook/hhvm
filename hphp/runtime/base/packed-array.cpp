@@ -118,20 +118,24 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
 ALWAYS_INLINE
 MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
                                        size_t neededSize) {
-  assert(PackedArray::checkInvariants(old));
+  assert(checkInvariants(old));
 
   auto const oldSize = old->m_size;
   auto const scale   = MixedArray::computeScaleFromSize(neededSize);
   auto const ad      = MixedArray::reqAlloc(scale);
   ad->m_sizeAndPos   = oldSize | int64_t{old->m_pos} << 32;
-  ad->initHeader(HeaderKind::Mixed, OneReference);
+  ad->initHeader_16(
+    HeaderKind::Mixed,
+    OneReference,
+    old->isVArray() ? ArrayData::kDArray : ArrayData::kNotDVArray
+  );
   ad->m_scale_used   = scale | uint64_t{oldSize} << 32; // used=oldSize
   ad->m_nextKI       = oldSize;
 
   assert(ad->m_size == oldSize);
   assert(ad->m_pos == old->m_pos);
   assert(ad->kind() == ArrayData::kMixedKind);
-  assert(ad->dvArray() == ArrayData::kNotDVArray);
+  assert(ad->isDArray() == old->isVArray());
   assert(ad->hasExactlyOneRef());
   assert(ad->m_used == oldSize);
   assert(ad->m_scale == scale);
@@ -184,7 +188,7 @@ MixedArray* PackedArray::ToMixed(ArrayData* old) {
  * guaranteed not to be full.
  */
 MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
-  assert(PackedArray::checkInvariants(old));
+  assert(checkInvariants(old));
 
   auto const oldSize = old->m_size;
   auto const ad      = ToMixedHeader(old, oldSize + 1);
@@ -385,6 +389,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
 
 ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   assert(arr->isVectorData());
+  assert(!arr->isDArray());
 
   auto const sizeIndex = capacityToSizeIndex(arr->m_size);
   auto ad = alloc_packed_static(arr->m_size);
@@ -1116,6 +1121,7 @@ ArrayData* PackedArray::Merge(ArrayData* adIn, const ArrayData* elems) {
   assert(checkInvariants(adIn));
   auto const neededSize = adIn->m_size + elems->size();
   auto const ret = ToMixedCopyReserve(adIn, neededSize);
+  ret->setDVArray(ArrayData::kNotDVArray);
   return MixedArray::ArrayMergeGeneric(ret, elems);
 }
 
@@ -1208,6 +1214,18 @@ ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
   ad->setDVArray(ArrayData::kVArray);
   assert(checkInvariants(ad));
   return ad;
+}
+
+ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool copy) {
+  assert(checkInvariants(adIn));
+
+  auto const size = adIn->getSize();
+  if (size == 0) return staticEmptyDArray();
+
+  DArrayInit init{size};
+  auto const elms = packedData(adIn);
+  for (int64_t i = 0; i < size; ++i) init.add(i, elms[i]);
+  return init.create();
 }
 
 ArrayData* PackedArray::ToPHPArrayVec(ArrayData* adIn, bool copy) {

@@ -59,6 +59,7 @@ struct ArrayCommon {
   static ArrayData* ToKeyset(ArrayData*, bool);
 
   static ArrayData* ToVArray(ArrayData*, bool);
+  static ArrayData* ToDArray(ArrayData*, bool);
 
   enum class RefCheckResult {
     Pass, // No refs

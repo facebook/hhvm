@@ -1089,8 +1089,9 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
       case KindOfVec: {
         auto* adIn = tv->m_data.parr;
         assert(adIn->isVecArray());
-        a = PackedArray::ToPHPArrayVec(adIn, adIn->cowCheck());
-        if (a != adIn) decRefArr(adIn);
+        a = PackedArray::ToDArrayVec(adIn, adIn->cowCheck());
+        assert(a != adIn);
+        decRefArr(adIn);
         continue;
       }
 
@@ -1098,7 +1099,7 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
       case KindOfDict: {
         auto* adIn = tv->m_data.parr;
         assert(adIn->isDict());
-        a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
+        a = MixedArray::ToDArrayDict(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
       }
@@ -1107,23 +1108,31 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
       case KindOfKeyset: {
         auto* adIn = tv->m_data.parr;
         assert(adIn->isKeyset());
-        a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
+        a = SetArray::ToDArray(adIn, adIn->cowCheck());
         assert(a != adIn);
         decRefArr(adIn);
         continue;
       }
 
       case KindOfPersistentArray:
-      case KindOfArray:
-        assert(tv->m_data.parr->isPHPArray());
-        return;
+      case KindOfArray: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isPHPArray());
+        if (adIn->isDArray()) return;
+        a = adIn->toDArray(adIn->cowCheck());
+        assert(a->isMixed());
+        assert(a->isDArray());
+        if (a == adIn) return;
+        decRefArr(adIn);
+        continue;
+      }
 
       case KindOfObject: {
         auto* obj = tv->m_data.pobj;
         if (obj->isCollection()) {
-          a = arrayFromCollection(obj).toPHPArray().detach();
+          a = arrayFromCollection(obj).toDArray().detach();
         } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
-          auto arr = Array::Create();
+          auto arr = Array::CreateDArray();
           for (ArrayIter iter(obj); iter; ++iter) {
             arr.set(iter.first(), iter.second());
           }
@@ -1142,6 +1151,9 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
     }
     not_reached();
   } while (0);
+
+  assert(a->isMixed());
+  assert(a->isDArray());
 
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;

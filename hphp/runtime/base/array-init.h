@@ -163,6 +163,11 @@ struct VArray {
   static constexpr auto Release = PackedArray::Release;
 };
 
+struct DArray {
+  static constexpr auto MakeReserve = &MixedArray::MakeReserveDArray;
+  static constexpr auto Release = MixedArray::Release;
+};
+
 struct VecArray {
   static constexpr auto MakeReserve = &PackedArray::MakeReserveVec;
   static constexpr auto Release = PackedArray::ReleaseVec;
@@ -181,18 +186,20 @@ struct DictArray {
 /*
  * Initializer for a MixedArray.
  */
-struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
+template <typename TArray>
+struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
   enum class Map {};
   // This is the same as map right now, but is here for documentation
   // so we can find them later.
   using Mixed = Map;
 
   /*
-   * When you create an ArrayInit, you must specify the "kind" of
+   * When you create an MixedPHPArrayInitBase, you must specify the "kind" of
    * array you are creating, for performance reasons.  "Kinds" that
    * are relevant to know about for extension code:
    *
-   *   Packed -- a vector-like array: don't use ArrayInit, use PackedArrayInit
+   *   Packed -- a vector-like array: don't use MixedPHPArrayInitBase,
+   *             use PackedArrayInit
    *   Map    -- you expect only string keys and any value type
    *   Mixed  -- you expect either integer keys, mixed keys
    *
@@ -203,49 +210,55 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
    * For large array allocations, consider passing CheckAllocation, which will
    * throw if the allocation would OOM the request.
    */
-  ArrayInit(size_t n, Map) : ArrayInitBase(n) {}
-  ArrayInit(size_t n, Map, CheckAllocation);
+  MixedPHPArrayInitBase(size_t n, Map)
+    : ArrayInitBase<TArray, KindOfArray>(n) {}
+  MixedPHPArrayInitBase(size_t n, Map, CheckAllocation);
 
-  ArrayInit(ArrayInit&& o) noexcept : ArrayInitBase(std::move(o)) {}
+  MixedPHPArrayInitBase(MixedPHPArrayInitBase&& o) noexcept
+    : ArrayInitBase<TArray, KindOfArray>(std::move(o)) {}
 
   /////////////////////////////////////////////////////////////////////////////
 
   /*
    * Call append() on the underlying array.
    */
-  ArrayInit& append(TypedValue tv) {
-    performOp([&]{
-      return MixedArray::Append(m_arr, tvToInitCell(tv), false);
+  MixedPHPArrayInitBase& append(TypedValue tv) {
+    this->performOp([&]{
+      return MixedArray::Append(this->m_arr, tvToInitCell(tv), false);
     });
     return *this;
   }
-  ArrayInit& append(const Variant& v) {
+  MixedPHPArrayInitBase& append(const Variant& v) {
     return append(*v.asTypedValue());
   }
 
   /*
    * Call set() on the underlying ArrayData.
    */
-  ArrayInit& set(int64_t name, TypedValue tv) {
-    performOp([&]{
-      return MixedArray::SetInt(m_arr, name, tvToInitCell(tv), false);
+  MixedPHPArrayInitBase& set(int64_t name, TypedValue tv) {
+    this->performOp([&]{
+      return MixedArray::SetInt(this->m_arr, name, tvToInitCell(tv), false);
     });
     return *this;
   }
-  ArrayInit& set(const String& name, TypedValue tv) {
-    performOp([&]{
-      return MixedArray::SetStr(m_arr, name.get(), tvToInitCell(tv), false);
+  MixedPHPArrayInitBase& set(const String& name, TypedValue tv) {
+    this->performOp([&]{
+      return MixedArray::SetStr(
+        this->m_arr, name.get(), tvToInitCell(tv), false
+      );
     });
     return *this;
   }
   template<class T>
-  ArrayInit& set(const T& name, TypedValue tv) {
-    performOp([&]{ return m_arr->set(name, tvToInitCell(tv), false); });
+  MixedPHPArrayInitBase& set(const T& name, TypedValue tv) {
+    this->performOp([&]{
+      return this->m_arr->set(name, tvToInitCell(tv), false);
+    });
     return *this;
   }
 
 #define IMPL_SET(KeyType)                           \
-  ArrayInit& set(KeyType name, const Variant& v) {  \
+  MixedPHPArrayInitBase& set(KeyType name, const Variant& v) {  \
     return set(name, *v.asTypedValue());            \
   }
 
@@ -253,35 +266,37 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
   IMPL_SET(const String&)
   template<typename T> IMPL_SET(const T&)
 
-  ArrayInit& set(const Variant& name, const Variant& v) = delete;
+  MixedPHPArrayInitBase& set(const Variant& name, const Variant& v) = delete;
 
 #undef IMPL_SET
 
   /*
    * Same as set(), but for the deleted double `const Variant&' overload.
    */
-  ArrayInit& setValidKey(TypedValue name, TypedValue v) {
-    performOp([&]{
-      return m_arr->set(tvToInitCell(name), tvToInitCell(v), false);
+  MixedPHPArrayInitBase& setValidKey(TypedValue name, TypedValue v) {
+    this->performOp([&]{
+      return this->m_arr->set(tvToInitCell(name), tvToInitCell(v), false);
     });
     return *this;
   }
-  ArrayInit& setValidKey(const Variant& name, const Variant& v) {
+  MixedPHPArrayInitBase& setValidKey(const Variant& name, const Variant& v) {
     return setValidKey(*name.asTypedValue(), *v.asTypedValue());
   }
 
   /*
    * This function is deprecated and exists for backward compatibility with the
-   * ArrayInit API.
+   * MixedPHPArrayInitBase API.
    *
    * Generally you should be able to figure out if your key is a pure string
-   * (not-integer-like) or not when using ArrayInit, and if not you should
-   * probably use toKey yourself.
+   * (not-integer-like) or not when using MixedPHPArrayInitBase, and if not you
+   * should probably use toKey yourself.
    */
-  ArrayInit& setUnknownKey(const Variant& name, const Variant& v) {
-    auto const k = name.toKey(m_arr).tv();
+  MixedPHPArrayInitBase& setUnknownKey(const Variant& name, const Variant& v) {
+    auto const k = name.toKey(this->m_arr).tv();
     if (LIKELY(!isNullType(k.m_type))) {
-      performOp([&]{ return m_arr->set(k, v.asInitCellTmp(), false); });
+      this->performOp([&]{
+        return this->m_arr->set(k, v.asInitCellTmp(), false);
+      });
     }
     return *this;
   }
@@ -289,22 +304,22 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
   /*
    * Call setWithRef() on the underlying array.
    */
-  ArrayInit& setWithRef(int64_t name, TypedValue tv) {
-    performOp([&]{
-      return MixedArray::SetWithRefInt(m_arr, name, tv, false);
+  MixedPHPArrayInitBase& setWithRef(int64_t name, TypedValue tv) {
+    this->performOp([&]{
+      return MixedArray::SetWithRefInt(this->m_arr, name, tv, false);
     });
     return *this;
   }
-  ArrayInit& setWithRef(const String& name, TypedValue tv) {
-    performOp([&]{
-      return MixedArray::SetWithRefStr(m_arr, name.get(), tv, false);
+  MixedPHPArrayInitBase& setWithRef(const String& name, TypedValue tv) {
+    this->performOp([&]{
+      return MixedArray::SetWithRefStr(this->m_arr, name.get(), tv, false);
     });
     return *this;
   }
   template<class T>
-  ArrayInit& setWithRef(const T& name, TypedValue tv) {
-    performOp([&]{
-      return m_arr->setWithRef(name, tv, false);
+  MixedPHPArrayInitBase& setWithRef(const T& name, TypedValue tv) {
+    this->performOp([&]{
+      return this->m_arr->setWithRef(name, tv, false);
     });
     return *this;
   }
@@ -312,60 +327,71 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
   /*
    * Call add() on the underlying array.
    */
-  ArrayInit& add(int64_t name, TypedValue tv, bool /*keyConverted*/ = false) {
-    performOp([&]{
-      return MixedArray::AddInt(m_arr, name, tvToInitCell(tv), false);
+  MixedPHPArrayInitBase& add(int64_t name, TypedValue tv,
+                             bool /*keyConverted*/ = false) {
+    this->performOp([&]{
+      return MixedArray::AddInt(this->m_arr, name, tvToInitCell(tv), false);
     });
     return *this;
   }
 
-  ArrayInit& add(const String& name, TypedValue tv,
-                 bool keyConverted = false) {
+  MixedPHPArrayInitBase& add(const String& name, TypedValue tv,
+                             bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{
-        return MixedArray::AddStr(m_arr, name.get(), tvToInitCell(tv), false);
+      this->performOp([&]{
+        return MixedArray::AddStr(
+          this->m_arr, name.get(), tvToInitCell(tv), false
+        );
       });
     } else if (!name.isNull()) {
-      performOp([&]{
-        return m_arr->add(VarNR::MakeKey(name).tv(), tvToInitCell(tv), false);
+      this->performOp([&]{
+        return this->m_arr->add(
+          VarNR::MakeKey(name).tv(), tvToInitCell(tv), false
+        );
       });
     }
     return *this;
   }
 
-  ArrayInit& add(const Variant& name, TypedValue tv,
-                 bool keyConverted = false) {
+  MixedPHPArrayInitBase& add(const Variant& name, TypedValue tv,
+                             bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{
-        return m_arr->add(name.asInitCellTmp(), tvToInitCell(tv), false);
+      this->performOp([&]{
+        return this->m_arr->add(name.asInitCellTmp(), tvToInitCell(tv), false);
       });
     } else {
-      auto const k = name.toKey(m_arr).tv();
+      auto const k = name.toKey(this->m_arr).tv();
       if (!isNullType(k.m_type)) {
-        performOp([&]{ return m_arr->add(k, tvToInitCell(tv), false); });
+        this->performOp([&]{
+          return this->m_arr->add(k, tvToInitCell(tv), false);
+        });
       }
     }
     return *this;
   }
 
   template<typename T>
-  ArrayInit& add(const T& name, TypedValue tv,
-                 bool keyConverted = false) {
+  MixedPHPArrayInitBase& add(const T& name, TypedValue tv,
+                             bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{ return m_arr->add(name, tvToInitCell(tv), false); });
+      this->performOp([&]{
+        return this->m_arr->add(name, tvToInitCell(tv), false);
+      });
     } else {
-      auto const k = Variant(name).toKey(m_arr).tv();
+      auto const k = Variant(name).toKey(this->m_arr).tv();
       if (!isNullType(k.m_type)) {
-        performOp([&]{ return m_arr->add(k, tvToInitCell(tv), false); });
+        this->performOp([&]{
+          return this->m_arr->add(k, tvToInitCell(tv), false);
+        });
       }
     }
     return *this;
   }
 
-#define IMPL_ADD(KeyType)                               \
-  ArrayInit& add(KeyType name, const Variant& v,        \
-                 bool keyConverted = false) {           \
-    return add(name, *v.asTypedValue(), keyConverted);  \
+#define IMPL_ADD(KeyType)                                           \
+  MixedPHPArrayInitBase& add(KeyType name, const Variant& v,        \
+                             bool keyConverted = false) {           \
+    return add(name, *v.asTypedValue(), keyConverted);              \
   }
 
   IMPL_ADD(int64_t)
@@ -378,69 +404,85 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
   /*
    * Call appendRef() on the underlying array.
    */
-  ArrayInit& appendRef(Variant& v) {
-    performOp([&]{ return MixedArray::AppendRef(m_arr, v, false); });
+  MixedPHPArrayInitBase& appendRef(Variant& v) {
+    this->performOp([&]{
+      return MixedArray::AppendRef(this->m_arr, v, false);
+    });
     return *this;
   }
 
   /*
    * Call setRef() on the underlying array.
    */
-  ArrayInit& setRef(int64_t name, Variant& v, bool /*keyConverted*/ = false) {
-    performOp([&]{ return MixedArray::SetRefInt(m_arr, name, v, false); });
+  MixedPHPArrayInitBase& setRef(int64_t name, Variant& v,
+                                bool /*keyConverted*/ = false) {
+    this->performOp([&]{
+      return MixedArray::SetRefInt(this->m_arr, name, v, false);
+    });
     return *this;
   }
 
-  ArrayInit& setRef(const String& name, Variant& v,
-                    bool keyConverted = false) {
+  MixedPHPArrayInitBase& setRef(const String& name, Variant& v,
+                             bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{
-        return MixedArray::SetRefStr(m_arr, name.get(), v, false);
+      this->performOp([&]{
+        return MixedArray::SetRefStr(this->m_arr, name.get(), v, false);
       });
     } else {
-      performOp([&]{
-        return m_arr->setRef(VarNR::MakeKey(name).tv(), v, false);
+      this->performOp([&]{
+        return this->m_arr->setRef(VarNR::MakeKey(name).tv(), v, false);
       });
     }
     return *this;
   }
 
-  ArrayInit& setRef(TypedValue name, Variant& v,
-                    bool keyConverted = false) {
+  MixedPHPArrayInitBase& setRef(TypedValue name, Variant& v,
+                                bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{ return m_arr->setRef(tvToCell(name), v, false); });
+      this->performOp([&]{
+        return this->m_arr->setRef(tvToCell(name), v, false);
+      });
     } else {
-      auto const k = tvToKey(name, m_arr);
+      auto const k = tvToKey(name, this->m_arr);
       if (!isNullType(k.m_type)) {
-        performOp([&]{ return m_arr->setRef(k, v, false); });
+        this->performOp([&]{ return this->m_arr->setRef(k, v, false); });
       }
     }
     return *this;
   }
-  ArrayInit& setRef(const Variant& name, Variant& v,
-                    bool keyConverted = false) {
+  MixedPHPArrayInitBase& setRef(const Variant& name, Variant& v,
+                                bool keyConverted = false) {
     return setRef(*name.asTypedValue(), v, keyConverted);
   }
 
   template<typename T>
-  ArrayInit& setRef(const T& name, Variant& v,
-                    bool keyConverted = false) {
+  MixedPHPArrayInitBase& setRef(const T& name, Variant& v,
+                                bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{ return m_arr->setRef(name, v, false); });
+      this->performOp([&]{ return this->m_arr->setRef(name, v, false); });
     } else {
-      auto const k = Variant(name).toKey(m_arr).tv();
+      auto const k = Variant(name).toKey(this->m_arr).tv();
       if (!isNullType(k.m_type)) {
-        performOp([&]{ return m_arr->setRef(k, v, false); });
+        this->performOp([&]{ return this->m_arr->setRef(k, v, false); });
       }
     }
     return *this;
   }
 };
 
+using ArrayInit = MixedPHPArrayInitBase<MixedArray>;
+
 struct MixedArrayInit : ArrayInit {
   explicit MixedArrayInit(size_t n) : ArrayInit(n, Map{}) {}
   MixedArrayInit(size_t n, CheckAllocation c) : ArrayInit(n, Map{}, c) {}
   MixedArrayInit(MixedArrayInit&& o) noexcept : ArrayInit(std::move(o)) {}
+};
+
+struct DArrayInit : MixedPHPArrayInitBase<detail::DArray> {
+  using Base = MixedPHPArrayInitBase<detail::DArray>;
+  explicit DArrayInit(size_t n) : Base(n, Map{}) {}
+  DArrayInit(size_t n, CheckAllocation c) : Base(n, Map{}, c) {}
+  DArrayInit(DArrayInit&& o) noexcept : Base(std::move(o)) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -674,6 +716,22 @@ namespace make_array_detail {
     map_impl(init, std::forward<KVPairs>(kvpairs)...);
   }
 
+  inline String darray_init_key(const char* s) { return String(s); }
+  inline int64_t darray_init_key(int k) { return k; }
+  inline int64_t darray_init_key(int64_t k) { return k; }
+  inline const String& darray_init_key(const String& k) { return k; }
+  inline const String darray_init_key(StringData* k) { return String{k}; }
+
+  inline void darray_impl(DArrayInit&) {}
+
+  template<class Key, class Val, class... KVPairs>
+  void darray_impl(DArrayInit& init, Key&& key,
+                   Val&& val, KVPairs&&... kvpairs) {
+    init.set(darray_init_key(std::forward<Key>(key)),
+             Variant(std::forward<Val>(val)));
+    darray_impl(init, std::forward<KVPairs>(kvpairs)...);
+  }
+
   inline String dict_init_key(const char* s) { return String(s); }
   inline int64_t dict_init_key(int k) { return k; }
   inline int64_t dict_init_key(int64_t k) { return k; }
@@ -778,11 +836,30 @@ Array make_map_array(KVPairs&&... kvpairs) {
 }
 
 /*
+ * Helper for creating darrays.  Takes pairs of arguments for the keys and
+ * values.
+ *
+ * Usage:
+ *
+ *   auto newArray = make_darray(keyOne, valueOne, otherKey, otherValue);
+ *
+ */
+template<class... KVPairs>
+Array make_darray(KVPairs&&... kvpairs) {
+  static_assert(sizeof...(kvpairs), "use Array::CreateDArray() instead");
+  static_assert(
+    sizeof...(kvpairs) % 2 == 0, "make_darray needs key value pairs");
+  DArrayInit init(sizeof...(kvpairs) / 2);
+  make_array_detail::darray_impl(init, std::forward<KVPairs>(kvpairs)...);
+  return init.toArray();
+}
+
+/*
  * Helper for creating Hack dictionaries.
  *
  * Usage:
  *
- *   auto newArray = make_keyset_array(1, 2, 3, 4);
+ *   auto newArray = make_dict_array(1, 2, 3, 4);
  */
 template<class... KVPairs>
 Array make_dict_array(KVPairs&&... kvpairs) {
@@ -807,6 +884,29 @@ Array make_keyset_array(Vals&&... vals) {
   KeysetInit init(sizeof...(vals));
   make_array_detail::keyset_impl(init, std::forward<Vals>(vals)...);
   return init.toArray();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <typename TArray>
+MixedPHPArrayInitBase<TArray>::MixedPHPArrayInitBase(size_t n,
+                                                     Map,
+                                                     CheckAllocation)
+  : ArrayInitBase<TArray, KindOfArray>(n, CheckAllocation{})
+{
+  if (n > std::numeric_limits<int>::max()) {
+    tl_heap->forceOOM();
+    check_non_safepoint_surprise();
+  }
+  auto const allocsz = MixedArray::computeAllocBytes(
+                         MixedArray::computeScaleFromSize(n)
+                       );
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
+    check_non_safepoint_surprise();
+  }
+  this->m_arr = TArray::MakeReserve(n);
+  assert(this->m_arr->hasExactlyOneRef());
+  check_non_safepoint_surprise();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -158,6 +158,9 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* ToVArray(ArrayData*, bool) {
     return staticEmptyVArray();
   }
+  static ArrayData* ToDArray(ArrayData*, bool) {
+    return staticEmptyDArray();
+  }
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);

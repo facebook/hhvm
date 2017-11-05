@@ -2351,7 +2351,7 @@ Type context_sensitive_return_type(const Index& index,
         auto const constraint = finfo->func->params[i].typeConstraint;
         if (constraint.hasConstraint() && !constraint.isTypeVar() &&
             !constraint.isTypeConstant()) {
-          auto t = index.lookup_constraint(ctx, constraint);
+          auto t = loosen_dvarrayness(index.lookup_constraint(ctx, constraint));
           if (!callCtx.args[i].subtypeOf(t)) return true;
           if (callCtx.args[i] != t) return true;
           continue;
@@ -3313,7 +3313,7 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
       case KindOfPersistentKeyset:
       case KindOfKeyset:       return TKeyset;
       case KindOfPersistentArray:
-      case KindOfArray:        return TArr;
+      case KindOfArray:        return TPArr;
       case KindOfResource:     return TRes;
       case KindOfObject:
         return resolve_class_or_type_alias(ctx, name, candidate);
@@ -3350,6 +3350,12 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
       if (candidate.subtypeOf(TInt)) return TInt;
       if (candidate.subtypeOf(TStr)) return TStr;
       return TArrKey;
+    case AnnotMetaType::VArray:
+      return TVArr;
+    case AnnotMetaType::DArray:
+      return TDArr;
+    case AnnotMetaType::VArrOrDArr:
+      return TArr;
     }
     return folly::none;
   }();
@@ -3366,7 +3372,9 @@ Type Index::lookup_constraint(Context ctx,
 
 bool Index::satisfies_constraint(Context ctx, const Type& t,
                                  const TypeConstraint& tc) const {
-  return t.subtypeOf(get_type_for_constraint<false>(ctx, tc, t));
+  return t.subtypeOf(
+    loosen_dvarrayness(get_type_for_constraint<false>(ctx, tc, t))
+  );
 }
 
 bool Index::is_async_func(res::Func rfunc) const {
@@ -3910,14 +3918,16 @@ void Index::init_return_type(const php::Func* func) {
 
   auto const finfo = create_func_info(*m_data, func);
 
-  auto tcT = lookup_constraint(
-    Context {
-      func->unit,
-      const_cast<php::Func*>(func),
-      func->cls && func->cls->closureContextCls ?
-        func->cls->closureContextCls : func->cls
-    },
-    constraint);
+  auto tcT = loosen_dvarrayness(
+    lookup_constraint(
+      Context {
+        func->unit,
+          const_cast<php::Func*>(func),
+          func->cls && func->cls->closureContextCls ?
+          func->cls->closureContextCls : func->cls
+          },
+      constraint)
+  );
 
   if (!tcT.subtypeOf(TCell)) {
     tcT = TInitCell;

@@ -47,12 +47,38 @@ TypedValue HHVM_FUNCTION(launder_value, const Variant& val) {
   return tvReturn(val);
 }
 
+Array HHVM_FUNCTION(dummy_varray_builtin, const Array& arr) {
+  if (arr.isVArray()) return arr;
+  return Array::CreateVArray();
+}
+
+Array HHVM_FUNCTION(dummy_darray_builtin, const Array& arr) {
+  if (arr.isDArray()) return arr;
+  return Array::CreateDArray();
+}
+
+Array HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Array& arr) {
+  if (arr.isVArray() || arr.isDArray()) return arr;
+  return Array::CreateVArray();
+}
+
+Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {
+  if (!arr.isVArray() && !arr.isDArray()) return arr;
+  return Array::Create();
+}
+
 void StandardExtension::initIntrinsics() {
   if (!RuntimeOption::EnableIntrinsicsExtension) return;
 
   HHVM_FALIAS(__hhvm_intrinsics\\disable_inlining, disable_inlining);
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_oom, trigger_oom);
   HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_varray_builtin, dummy_varray_builtin);
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_builtin, dummy_darray_builtin);
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_varr_or_darr_builtin,
+              dummy_varr_or_darr_builtin);
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_builtin, dummy_array_builtin);
 
   loadSystemlib("std_intrinsics");
 }

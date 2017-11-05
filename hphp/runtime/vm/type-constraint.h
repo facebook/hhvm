@@ -172,6 +172,9 @@ struct TypeConstraint {
    * Returns the underlying DataType for this TypeConstraint.
    */
   MaybeDataType underlyingDataType() const {
+    if (isVArray() || isDArray() || isVArrayOrDArray()) {
+      return KindOfArray;
+    }
     auto const dt = getAnnotDataType(m_type);
     return (dt != KindOfUninit || isPrecise())
       ? MaybeDataType(dt)
@@ -204,12 +207,19 @@ struct TypeConstraint {
   bool isNumber()   const { return m_type == Type::Number; }
   bool isArrayKey() const { return m_type == Type::ArrayKey; }
 
-  bool isArray()    const { return m_type == Type::Array; }
+  bool isArray()    const {
+    return m_type == Type::Array ||
+      isVArray() || isDArray() || isVArrayOrDArray();
+  }
   bool isDict()     const { return m_type == Type::Dict; }
   bool isVec()      const { return m_type == Type::Vec; }
   bool isKeyset()   const { return m_type == Type::Keyset; }
 
   bool isObject()   const { return m_type == Type::Object; }
+
+  bool isVArray()   const { return m_type == Type::VArray; }
+  bool isDArray()   const { return m_type == Type::DArray; }
+  bool isVArrayOrDArray() const { return m_type == Type::VArrOrDArr; }
 
   AnnotType type()  const { return m_type; }
 

@@ -86,8 +86,16 @@ Type native_function_return_type(borrowed_ptr<const php::Func> f,
   }
 
   // Infer the type from the HNI declaration
-  auto const hni = f->nativeInfo->returnType;
-  auto t = hni ? from_DataType(*hni) : TInitCell;
+  auto t = [&]{
+    auto const hni = f->nativeInfo->returnType;
+    return hni ? from_DataType(*hni) : TInitCell;
+  }();
+  if (t.subtypeOf(TArr)) {
+    if (f->retTypeConstraint.isVArray())      t = TVArr;
+    else if (f->retTypeConstraint.isDArray()) t = TDArr;
+    else if (f->retTypeConstraint.isArray())  t = TPArr;
+  }
+
   // Non-simple types (ones that are represented by pointers) can always
   // possibly be null.
   if (t.subtypeOfAny(TStr, TArr, TVec, TDict,

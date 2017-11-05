@@ -874,7 +874,9 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
     if (t.subtypeOf(TInt))      return retype(AnnotType::Int);
     if (t.subtypeOf(TDbl))      return retype(AnnotType::Float);
     if (t.subtypeOf(TStr))      return retype(AnnotType::String);
-    if (t.subtypeOf(TArr))      return retype(AnnotType::Array);
+    if (t.subtypeOf(TPArr))     return retype(AnnotType::Array);
+    if (t.subtypeOf(TVArr))     return retype(AnnotType::VArray);
+    if (t.subtypeOf(TDArr))     return retype(AnnotType::DArray);
     // if (t.subtypeOf(TObj))   return retype(AnnotType::Object);
     if (t.subtypeOf(TRes))      return retype(AnnotType::Resource);
     if (t.subtypeOf(TDict))     return retype(AnnotType::Dict);

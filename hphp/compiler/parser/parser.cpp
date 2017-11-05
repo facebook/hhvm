@@ -1471,6 +1471,9 @@ void Parser::checkClassDeclName(const std::string& name) {
         }
         // Fall though to the call to PARSE_ERROR() below
       case AnnotType::Array:
+      case AnnotType::VArray:
+      case AnnotType::DArray:
+      case AnnotType::VArrOrDArr:
       case AnnotType::Self:
       case AnnotType::This:
       case AnnotType::Parent:

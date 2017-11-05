@@ -111,7 +111,8 @@ State entry_state(const Index& index, Context const ctx,
       auto const& constraint = param.typeConstraint;
       if (constraint.hasConstraint() && !constraint.isTypeVar() &&
           !constraint.isTypeConstant()) {
-        ret.locals[locId] = index.lookup_constraint(ctx, constraint);
+        ret.locals[locId] =
+          loosen_dvarrayness(index.lookup_constraint(ctx, constraint));
         continue;
       }
     }

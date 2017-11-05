@@ -3398,7 +3398,8 @@ void in(ISS& env, const bc::VerifyParamType& op) {
   }
   if (constraint.hasConstraint() && !constraint.isTypeVar() &&
       !constraint.isTypeConstant()) {
-    auto t = env.index.lookup_constraint(env.ctx, constraint);
+    auto t =
+      loosen_dvarrayness(env.index.lookup_constraint(env.ctx, constraint));
     if (t.subtypeOf(TBottom)) unreachable(env);
     FTRACE(2, "     {} ({})\n", constraint.fullName(), show(t));
     setLoc(env, op.loc1, std::move(t));
@@ -3433,7 +3434,9 @@ void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
   // throw or it will produce a value whose type is compatible with the
   // return type constraint.
   auto tcT =
-    remove_uninit(env.index.lookup_constraint(env.ctx, constraint));
+    remove_uninit(
+      loosen_dvarrayness(env.index.lookup_constraint(env.ctx, constraint))
+    );
 
   // If tcT could be an interface or trait, we upcast it to TObj/TOptObj.
   // Why?  Because we want uphold the invariant that we only refine return

@@ -1685,8 +1685,15 @@ Type builtinReturnType(const Func* builtin) {
       assertx(builtin->hniReturnType() == KindOfObject);
       return Type::ExactObj(builtin->implCls());
     }
-    auto const hniType = builtin->hniReturnType();
-    return hniType ? Type{*hniType} : TInitCell;
+    if (auto const hniType = builtin->hniReturnType()) {
+      if (isArrayType(*hniType)) {
+        auto const& constraint = builtin->returnTypeConstraint();
+        if (constraint.isVArray()) return Type::Array(ArrayData::kPackedKind);
+        if (constraint.isDArray()) return Type::Array(ArrayData::kMixedKind);
+      }
+      return Type{*hniType};
+    }
+    return TInitCell;
   }();
 
   // "Reference" types (not boxed, types represented by a pointer) can always be

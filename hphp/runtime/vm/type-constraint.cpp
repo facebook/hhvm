@@ -134,6 +134,9 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/,
       case AnnotType::Keyset:   str = "keyset"; break;
       case AnnotType::Number:   str = "num"; break;
       case AnnotType::ArrayKey: str = "arraykey"; break;
+      case AnnotType::VArray:   str = "varray"; break;
+      case AnnotType::DArray:   str = "darray"; break;
+      case AnnotType::VArrOrDArr: str = "varray_or_darray"; break;
       case AnnotType::Self:
       case AnnotType::This:
       case AnnotType::Parent:
@@ -260,7 +263,10 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
     !hasConstraint() || isTypeVar() || isTypeConstant(),
     isMixed()));
 
-  if (!isPrecise()) return folly::none;
+  if (!isPrecise()) {
+    if (isVArray() || isDArray() || isVArrayOrDArray()) return KindOfArray;
+    return folly::none;
+  }
 
   auto t = underlyingDataType();
   assert(t);
@@ -276,8 +282,15 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
   // See if this is a type alias.
   if (td) {
     if (td->type != Type::Object) {
-      t = (getAnnotMetaType(td->type) != MetaType::Precise)
-        ? folly::none : MaybeDataType(getAnnotDataType(td->type));
+      auto const metatype = getAnnotMetaType(td->type);
+      if (metatype == MetaType::Precise) {
+        t = getAnnotDataType(td->type);
+      } else if (metatype == MetaType::VArray || metatype == MetaType::DArray ||
+                 metatype == MetaType::VArrOrDArr) {
+        t = KindOfArray;
+      } else {
+        t = folly::none;
+      }
     } else {
       c = td->klass;
     }
@@ -358,6 +371,9 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
     case AnnotMetaType::Number:
     case AnnotMetaType::ArrayKey:
     case AnnotMetaType::This:
+    case AnnotMetaType::VArray:
+    case AnnotMetaType::DArray:
+    case AnnotMetaType::VArrOrDArr:
       // Self and Parent should never happen, because type
       // aliases are not allowed to use those MetaTypes
       return false;
@@ -420,6 +436,9 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
         case MetaType::Precise:
         case MetaType::Number:
         case MetaType::ArrayKey:
+        case MetaType::VArray:
+        case MetaType::DArray:
+        case MetaType::VArrOrDArr:
           return false;
         case MetaType::Mixed:
           // We assert'd at the top of this function that the
@@ -706,6 +725,9 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::Parent:
     case AnnotMetaType::Callable:
     case AnnotMetaType::Number:
+    case AnnotMetaType::VArray:
+    case AnnotMetaType::DArray:
+    case AnnotMetaType::VArrOrDArr:
       return MK::None;
   }
   not_reached();

@@ -42,6 +42,9 @@ enum class AnnotMetaType : uint8_t {
   Number = 5,
   ArrayKey = 6,
   This = 7,
+  VArray = 8,
+  DArray = 9,
+  VArrOrDArr = 10,
 };
 
 enum class AnnotType : uint16_t {
@@ -65,6 +68,9 @@ enum class AnnotType : uint16_t {
   Number   = (uint16_t)AnnotMetaType::Number << 8   | (uint8_t)KindOfUninit,
   ArrayKey = (uint16_t)AnnotMetaType::ArrayKey << 8 | (uint8_t)KindOfUninit,
   This     = (uint16_t)AnnotMetaType::This << 8     | (uint8_t)KindOfUninit,
+  VArray   = (uint16_t)AnnotMetaType::VArray << 8   | (uint8_t)KindOfUninit,
+  DArray   = (uint16_t)AnnotMetaType::DArray << 8   | (uint8_t)KindOfUninit,
+  VArrOrDArr = (uint16_t)AnnotMetaType::VArrOrDArr << 8 | (uint8_t)KindOfUninit,
 };
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
@@ -183,6 +189,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       return (isStringType(dt) || isArrayType(dt) ||
               dt == KindOfObject)
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
+    case AnnotMetaType::VArray:
+    case AnnotMetaType::DArray:
+    case AnnotMetaType::VArrOrDArr:
+      return isArrayType(dt) ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::Precise:
       break;
   }

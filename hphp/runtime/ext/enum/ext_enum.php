@@ -14,19 +14,19 @@ abstract class BuiltinEnum<T> {
    * Get the values of the public consts defined on this class,
    * indexed by the string name of those consts.
    *
-   * @return array ('CONST_NAME' => $value, ....)
+   * @return darray['CONST_NAME' => $value, ....]
    */
   <<__Native>>
-  final public static function getValues(): array<string, T>;
+  final public static function getValues(): darray<string, T>;
 
   /**
    * Get the names of all the const values, indexed by value. Calls
    * invariant_exception if multiple constants have the same value.
    *
-   * @return array($value => 'CONST_NAME', ....)
+   * @return darray[$value => 'CONST_NAME', ....]
    */
   <<__Native>>
-  final public static function getNames(): array<T, string>;
+  final public static function getNames(): darray<T, string>;
 
   /**
    * Returns whether or not the value is defined as a constant.
@@ -63,7 +63,7 @@ abstract class BuiltinEnum<T> {
   final public static function assertAll(
     Traversable<mixed> $values,
   ): Container<T> {
-    $new_values = array();
+    $new_values = varray[];
     foreach ($values as $value) {
       $new_values[] = static::assert($value);
     }

@@ -25,6 +25,7 @@ namespace HPHP {
 // class BuiltinEnum
 static Array HHVM_STATIC_METHOD(BuiltinEnum, getValues) {
   const EnumValues* values = EnumCache::getValuesBuiltin(self_);
+  assertx(values->values.isDArray());
   return values->values;
 }
 
@@ -37,6 +38,7 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
            make_packed_array(s_overlappingErrorMessage));
   }
 
+  assertx(values->names.isDArray());
   return values->names;
 }
 

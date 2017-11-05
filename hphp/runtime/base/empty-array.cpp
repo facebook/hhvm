@@ -136,6 +136,7 @@ member_lval EmptyArray::MakePackedInl(TypedValue tv) {
   *elem = tv;
 
   assert(ad->kind() == ArrayData::kPackedKind);
+  assert(ad->dvArray() == ArrayData::kNotDVArray);
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
   assert(ad->hasExactlyOneRef());
@@ -326,17 +327,19 @@ ArrayData* EmptyArray::PlusEq(ArrayData*, const ArrayData* elems) {
 }
 
 ArrayData* EmptyArray::Merge(ArrayData*, const ArrayData* elems) {
-  // Packed arrays don't need renumbering, so don't make a copy.
-  if (elems->isPacked()) {
-    elems->incRefCount();
-    return const_cast<ArrayData*>(elems);
-  }
-  // Fast path the common case that elems is mixed.
-  if (elems->isMixed()) {
-    auto const copy = MixedArray::Copy(elems);
-    assert(copy != elems);
-    MixedArray::Renumber(copy);
-    return copy;
+  if (elems->isNotDVArray()) {
+    // Packed arrays don't need renumbering, so don't make a copy.
+    if (elems->isPacked()) {
+      elems->incRefCount();
+      return const_cast<ArrayData*>(elems);
+    }
+    // Fast path the common case that elems is mixed.
+    if (elems->isMixed()) {
+      auto const copy = MixedArray::Copy(elems);
+      assert(copy != elems);
+      MixedArray::Renumber(copy);
+      return copy;
+    }
   }
   auto copy = const_cast<ArrayData*>(elems)->toPHPArray(true);
   copy = copy == elems ? elems->copy() : copy;

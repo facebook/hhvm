@@ -89,6 +89,10 @@ public:
     return Array(ArrayData::CreateKeyset(), NoIncRef{});
   }
 
+  static Array CreateVArray() {
+    return Array(ArrayData::CreateVArray(), NoIncRef{});
+  }
+
   static Array Create(const Variant& value) {
     return Array(ArrayData::Create(value), NoIncRef{});
   }
@@ -188,7 +192,7 @@ public:
   Array toDict() const { COPY_BODY(toDict(true), CreateDict()) }
   Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
   Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
-  Array toVArray() const { COPY_BODY(toVArray(true), Array{}) }
+  Array toVArray() const { COPY_BODY(toVArray(true), CreateVArray()) }
 
   #undef COPY_BODY
 
@@ -214,7 +218,8 @@ public:
   bool isKeyset() const { return m_arr && m_arr->isKeyset(); }
   bool isHackArray() const { return m_arr && m_arr->isHackArray(); }
   bool isPHPArray() const { return !m_arr || m_arr->isPHPArray(); }
-  bool isVArray() const { return !m_arr || m_arr->isVArray(); }
+  bool isVArray() const { return m_arr && m_arr->isVArray(); }
+  bool isDArray() const { return m_arr && m_arr->isDArray(); }
 
   /////////////////////////////////////////////////////////////////////////////
 

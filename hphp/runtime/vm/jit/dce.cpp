@@ -318,6 +318,7 @@ bool canDCE(IRInstruction* inst) {
   case ConvVecToArr:
   case ConvDictToArr:
   case ConvKeysetToArr:
+  case ConvArrToNonDVArr:
   case ConvObjToDbl:
   case ConvCellToDbl:
   case ConvObjToInt:

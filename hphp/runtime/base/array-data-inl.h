@@ -31,12 +31,18 @@ inline ArrayData::ArrayData(ArrayKind kind, RefCount initial_count)
   assert(m_size == -1);
   assert(m_pos == 0);
   assert(m_kind == static_cast<HeaderKind>(kind));
+  assert(dvArraySanityCheck());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE ArrayData* staticEmptyArray() {
   void* vp = &s_theEmptyArray;
+  return static_cast<ArrayData*>(vp);
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyVArray() {
+  void* vp = &s_theEmptyVArray;
   return static_cast<ArrayData*>(vp);
 }
 
@@ -60,6 +66,10 @@ ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
 
 ALWAYS_INLINE ArrayData* ArrayData::Create() {
   return staticEmptyArray();
+}
+
+ALWAYS_INLINE ArrayData* ArrayData::CreateVArray() {
+  return staticEmptyVArray();
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateVec() {
@@ -146,8 +156,18 @@ inline ArrayData::DVArray ArrayData::dvArray() const {
   return static_cast<DVArray>(m_aux16);
 }
 
-inline bool ArrayData::isVArray() const {
-  return isPacked() || isEmptyArray();
+inline void ArrayData::setDVArray(DVArray d) {
+  m_aux16 = (m_aux16 & 0xFF00) | d;
+}
+
+inline bool ArrayData::isVArray() const { return dvArray() == kVArray; }
+inline bool ArrayData::isDArray() const { return dvArray() == kDArray; }
+inline bool ArrayData::isNotDVArray() const { return dvArray() == kNotDVArray; }
+
+inline bool ArrayData::dvArraySanityCheck() const {
+  auto const dv = dvArray();
+  if (isPacked()) return dv == kVArray || dv == kNotDVArray;
+  return dv == kNotDVArray;
 }
 
 inline bool ArrayData::useWeakKeys() const { return isPHPArray(); }

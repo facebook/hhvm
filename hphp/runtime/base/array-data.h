@@ -106,6 +106,7 @@ public:
   static ArrayData* CreateVec();
   static ArrayData* CreateDict();
   static ArrayData* CreateKeyset();
+  static ArrayData* CreateVArray();
 
   /*
    * Create a new kPackedKind ArrayData with a single element, `value'.
@@ -249,11 +250,19 @@ public:
    * The DVArray kind for the array.
    */
   DVArray dvArray() const;
+  void setDVArray(DVArray);
 
   /*
-   * Is the array a varray?
+   * Is the array a varray, darray, or neither?
    */
   bool isVArray() const;
+  bool isDArray() const;
+  bool isNotDVArray() const;
+
+  /*
+   * Check whether the array has an sane DVArray setting for its kind.
+   */
+  bool dvArraySanityCheck() const;
 
   /*
    * Whether the array contains "vector-like" data---i.e., iteration order
@@ -799,6 +808,7 @@ constexpr size_t kEmptySetArraySize = 96;
  */
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyArray;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVecArray;
+extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 
@@ -810,6 +820,7 @@ extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
  * corresponding Hack array kind.
  */
 ArrayData* staticEmptyArray();
+ArrayData* staticEmptyVArray();
 ArrayData* staticEmptyVecArray();
 ArrayData* staticEmptyDictArray();
 ArrayData* staticEmptyKeysetArray();

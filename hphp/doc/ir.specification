@@ -433,6 +433,9 @@ To array conversions:
 | ConvCellToArr,                D(Arr), S(Cell),                  Er|PRc|CRc
 
 
+| ConvArrToNonDVArr,            D(Arr), S(Arr),                      PRc|CRc
+
+
 To vec conversions:
 
 | ConvArrToVec,                 D(Vec), S(Arr),                   Er|PRc|CRc
@@ -468,15 +471,15 @@ To keyset conversions:
 
 To varray conversions:
 
-| ConvArrToVArr,                D(Arr), S(Arr),                      PRc|CRc
+| ConvArrToVArr,                DArrPacked, S(Arr),                  PRc|CRc
 
-| ConvVecToVArr,                D(Arr), S(Vec),                      PRc|CRc
+| ConvVecToVArr,                DArrPacked, S(Vec),                  PRc|CRc
 
-| ConvDictToVArr,               D(Arr), S(Dict),                     PRc|CRc
+| ConvDictToVArr,               DArrPacked, S(Dict),                 PRc|CRc
 
-| ConvKeysetToVArr,             D(Arr), S(Keyset),                   PRc|CRc
+| ConvKeysetToVArr,             DArrPacked, S(Keyset),               PRc|CRc
 
-| ConvObjToVArr,                D(Arr), S(Obj),                   Er|PRc|CRc
+| ConvObjToVArr,                DArrPacked, S(Obj),               Er|PRc|CRc
 
 
 To darray conversion:

@@ -134,9 +134,10 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
 }
 
 ArrayData* ArrayCommon::ToVArray(ArrayData* a, bool) {
+  if (a->isVArray()) return a;
   auto const size = a->size();
-  if (!size) return staticEmptyArray();
-  PackedArrayInit init{size};
+  if (!size) return staticEmptyVArray();
+  VArrayInit init{size};
   IterateV( a, [&](TypedValue v) { init.appendWithRef(v); });
   return init.create();
 }

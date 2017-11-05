@@ -942,9 +942,14 @@ void in(ISS& env, const bc::CastInt&) {
   push(env, TInt);
 }
 
-void castImpl(ISS& env, Type target, void(*fn)(TypedValue*)) {
+// Handle a casting operation, where "target" is the type being casted to. If
+// "fn" is provided, it will be called to cast any constant inputs. If "elide"
+// is set to true, if the source type is the same as the destination, the cast
+// will be optimized away.
+void castImpl(ISS& env, Type target,
+              void(*fn)(TypedValue*), bool elide = true) {
   auto const t = topC(env);
-  if (t.subtypeOf(target)) return reduce(env, bc::Nop {});
+  if (elide && t.subtypeOf(target)) return reduce(env, bc::Nop {});
   popC(env);
   if (fn) {
     if (auto val = tv(t)) {
@@ -966,7 +971,7 @@ void in(ISS& env, const bc::CastString&) {
 }
 
 void in(ISS& env, const bc::CastArray&)  {
-  castImpl(env, TArr, tvCastToArrayInPlace);
+  castImpl(env, TArr, tvCastToArrayInPlace, false);
 }
 
 void in(ISS& env, const bc::CastObject&) { castImpl(env, TObj, nullptr); }
@@ -984,20 +989,7 @@ void in(ISS& env, const bc::CastKeyset&) {
 }
 
 void in(ISS& env, const bc::CastVArray&)  {
-  auto const t = popC(env);
-  if (auto val = tv(t)) {
-    auto result = eval_cell(
-      [&] {
-        tvCastToVArrayInPlace(&*val);
-        return *val;
-      }
-    );
-    if (result) {
-      constprop(env);
-      return push(env, std::move(*result));
-    }
-  }
-  push(env, TArr);
+  castImpl(env, TArr, tvCastToVArrayInPlace, false);
 }
 
 void in(ISS& env, const bc::CastDArray&)  {

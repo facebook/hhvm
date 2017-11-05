@@ -228,6 +228,9 @@ namespace HH {
   function is_keyset(mixed $var): bool;
 
   <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
+  function is_varray(mixed $var): bool;
+
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
   function is_varray_or_darray(mixed $var): bool;
 
   /*

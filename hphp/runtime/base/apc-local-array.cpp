@@ -60,6 +60,7 @@ struct EscalateHelper {
 
 bool APCLocalArray::checkInvariants(const ArrayData* ad) {
   assert(ad->isApcArray());
+  assert(ad->isNotDVArray());
   assert(ad->checkCount());
   DEBUG_ONLY auto const local = static_cast<const APCLocalArray*>(ad);
   DEBUG_ONLY auto p = local->localCache();

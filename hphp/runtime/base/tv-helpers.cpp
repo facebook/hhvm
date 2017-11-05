@@ -60,43 +60,51 @@ bool cellIsPlausible(const Cell cell) {
         assertPtr(cell.m_data.parr);
         assert(!cell.m_data.parr->isRefCounted());
         assert(cell.m_data.parr->isVecArray());
+        assert(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfVec:
         assertPtr(cell.m_data.parr);
         assert(cell.m_data.parr->checkCount());
         assert(cell.m_data.parr->isVecArray());
+        assert(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfPersistentDict:
         assertPtr(cell.m_data.parr);
         assert(!cell.m_data.parr->isRefCounted());
         assert(cell.m_data.parr->isDict());
+        assert(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfDict:
         assertPtr(cell.m_data.parr);
         assert(cell.m_data.parr->checkCount());
         assert(cell.m_data.parr->isDict());
+        assert(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfPersistentKeyset:
         assertPtr(cell.m_data.parr);
         assert(!cell.m_data.parr->isRefCounted());
         assert(cell.m_data.parr->isKeyset());
+        assert(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfKeyset:
         assertPtr(cell.m_data.parr);
         assert(cell.m_data.parr->checkCount());
         assert(cell.m_data.parr->isKeyset());
+        assert(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfPersistentArray:
         assertPtr(cell.m_data.parr);
         assert(cell.m_data.parr->kindIsValid());
         assert(!cell.m_data.parr->isRefCounted());
         assert(cell.m_data.parr->isPHPArray());
+        assert(cell.m_data.parr->dvArraySanityCheck());
         return;
       case KindOfArray:
         assertPtr(cell.m_data.parr);
         assert(cell.m_data.parr->kindIsValid());
         assert(cell.m_data.parr->checkCount());
         assert(cell.m_data.parr->isPHPArray());
+        assert(cell.m_data.parr->dvArraySanityCheck());
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);

@@ -574,10 +574,23 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         continue;
       }
 
-      case KindOfPersistentArray:
-      case KindOfArray:
-        assert(tv->m_data.parr->isPHPArray());
-        return;
+      case KindOfPersistentArray: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isPHPArray());
+        if (adIn->isNotDVArray()) return;
+        a = adIn->toPHPArray(true);
+        assert(a != adIn);
+        continue;
+      }
+
+      case KindOfArray: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isPHPArray());
+        if (adIn->isNotDVArray()) return;
+        a = adIn->toPHPArray(adIn->cowCheck());
+        if (a != adIn) tvDecRefArr(tv);
+        continue;
+      }
 
       case KindOfObject:
         // For objects, we fall back on the Variant machinery
@@ -594,6 +607,9 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     }
     not_reached();
   } while (0);
+
+  assert(a->isPHPArray());
+  assert(a->isNotDVArray());
 
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
@@ -988,6 +1004,8 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
         assert(adIn->isPHPArray());
         if (adIn->isVArray()) return;
         a = adIn->toVArray(adIn->cowCheck());
+        assert(a->isPacked());
+        assert(a->isVArray());
         if (a == adIn) return;
         decRefArr(adIn);
         continue;
@@ -1000,7 +1018,7 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
         } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
           // This assumes that appending to an initially empty array will never
           // promote to mixed.
-          auto arr = Array::Create();
+          auto arr = Array::CreateVArray();
           for (ArrayIter iter(obj); iter; ++iter) {
             arr.append(iter.second());
           }
@@ -1020,6 +1038,7 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
+  assert(a->isPacked());
   assert(a->isVArray());
 
   tv->m_data.parr = a;

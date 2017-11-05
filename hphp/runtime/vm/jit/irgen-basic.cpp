@@ -321,15 +321,7 @@ void emitCastVArray(IRGS& env) {
   push(
     env,
     [&] {
-      if (src->isA(TArr))    {
-        // ConvArrToVArr can be simplified away if the array is packed or the
-        // empty array.
-        env.irb->constrainValue(
-          src,
-          TypeConstraint{DataTypeSpecialized}.setWantArrayKind()
-        );
-        return gen(env, ConvArrToVArr, src);
-      }
+      if (src->isA(TArr))    return gen(env, ConvArrToVArr, src);
       if (src->isA(TVec))    return gen(env, ConvVecToVArr, src);
       if (src->isA(TDict))   return gen(env, ConvDictToVArr, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToVArr, src);

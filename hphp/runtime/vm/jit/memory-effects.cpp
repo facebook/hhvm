@@ -1954,6 +1954,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvVecToArr:
   case ConvDictToArr:
   case ConvKeysetToArr:
+  case ConvArrToNonDVArr:
   case ConvDictToVec:
   case ConvKeysetToVec:
   case ConvVecToDict:

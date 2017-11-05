@@ -155,6 +155,9 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* ToPHPArray(ArrayData* ad, bool) {
     return ad;
   }
+  static ArrayData* ToVArray(ArrayData*, bool) {
+    return staticEmptyVArray();
+  }
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
@@ -163,8 +166,6 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* Escalate(const ArrayData* ad) {
     return const_cast<ArrayData*>(ad);
   }
-
-  static constexpr auto ToVArray = &ToPHPArray;
 
 private:
   static member_lval MakePacked(TypedValue);

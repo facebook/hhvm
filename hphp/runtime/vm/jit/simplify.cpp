@@ -1872,6 +1872,14 @@ SSATmp* convToDictImpl(State& env, const IRInstruction* inst, G get) {
 }
 
 template <typename G>
+SSATmp* convToNonDVArrImpl(State& env, const IRInstruction* inst, G get) {
+  return arrayLikeConvImpl(
+    env, inst, get,
+    [&](ArrayData* a) { return a->toPHPArray(true); }
+  );
+}
+
+template <typename G>
 SSATmp* convToKeysetImpl(State& env, const IRInstruction* inst, G get) {
   return arrayLikeConvImpl(
     env, inst, get,
@@ -1938,29 +1946,18 @@ X(Arr, arrVal, Keyset)
 X(Vec, vecVal, Keyset)
 X(Dict, dictVal, Keyset)
 
-//X(Arr, arrVal, VArr) // Below
+X(Arr, arrVal, VArr)
 X(Vec, vecVal, VArr)
 X(Dict, dictVal, VArr)
 X(Keyset, keysetVal, VArr)
 
+X(Arr, arrVal, NonDVArr)
+
 #undef X
-
-SSATmp* simplifyConvArrToVArr(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-
-  auto const packedArrType = Type::Array(ArrayData::kPackedKind);
-  auto const emptyArrType  = Type::Array(ArrayData::kEmptyKind);
-
-  if (src->isA(emptyArrType) || src->isA(packedArrType)) return src;
-
-  return convToVArrImpl(
-    env, inst,
-    [&](const SSATmp* s) { return s->arrVal(); });
-}
 
 SSATmp* simplifyConvCellToArr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (src->isA(TArr))    return src;
+  if (src->isA(TArr))    return gen(env, ConvArrToNonDVArr, src);
   if (src->isA(TVec))    return gen(env, ConvVecToArr, src);
   if (src->isA(TDict))   return gen(env, ConvDictToArr, src);
   if (src->isA(TKeyset)) return gen(env, ConvKeysetToArr, src);

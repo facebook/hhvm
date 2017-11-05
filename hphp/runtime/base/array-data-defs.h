@@ -311,7 +311,10 @@ inline ArrayData* ArrayData::plusEq(const ArrayData* elms) {
 }
 
 inline ArrayData* ArrayData::merge(const ArrayData* elms) {
-  return g_array_funcs.merge[kind()](this, elms);
+  auto ret = g_array_funcs.merge[kind()](this, elms);
+  assertx(ret->isPHPArray());
+  assertx(ret->isNotDVArray());
+  return ret;
 }
 
 inline ArrayData* ArrayData::pop(Variant& value) {

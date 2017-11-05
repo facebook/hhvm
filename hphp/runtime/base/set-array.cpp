@@ -50,6 +50,7 @@ struct SetArray::Initializer {
     ad->m_sizeAndPos = 0;
     ad->m_scale_used = SetArray::SmallScale;
     ad->initHeader(HeaderKind::Keyset, StaticValue);
+    assert(ad->checkInvariants());
   }
 };
 SetArray::Initializer SetArray::s_initializer;
@@ -379,7 +380,7 @@ SetArray* SetArray::grow(bool copy) {
   auto ad            = reqAlloc(newScale);
   ad->m_sizeAndPos   = m_sizeAndPos;
   ad->m_scale_used   = newScale | (uint64_t{oldUsed} << 32);
-  ad->initHeader(*this, OneReference);
+  ad->initHeader(HeaderKind::Keyset, OneReference);
 
   assert(reinterpret_cast<uintptr_t>(Data(ad)) % 16 == 0);
   assert(reinterpret_cast<uintptr_t>(data()) % 16 == 0);
@@ -496,6 +497,7 @@ bool SetArray::checkInvariants() const {
 
   // All arrays:
   assert(checkCount());
+  assert(isNotDVArray());
   assert(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assert(HashSize(m_scale) == folly::nextPowTwo<uint64_t>(capacity()));
 

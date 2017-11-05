@@ -304,6 +304,7 @@ IMPL_OPCODE_CALL(ConvCellToDbl);
 static ArrayData* convArrToVArrImpl(ArrayData* adIn) {
   assertx(adIn->isPHPArray());
   auto a = adIn->toVArray(adIn->cowCheck());
+  assertx(a->isPacked());
   assertx(a->isVArray());
   if (a != adIn) decRefArr(adIn);
   return a;
@@ -312,6 +313,7 @@ static ArrayData* convArrToVArrImpl(ArrayData* adIn) {
 static ArrayData* convVecToVArrImpl(ArrayData* adIn) {
   assertx(adIn->isVecArray());
   auto a = PackedArray::ToVArrayVec(adIn, adIn->cowCheck());
+  assertx(a->isPacked());
   assertx(a->isVArray());
   if (a != adIn) decRefArr(adIn);
   return a;
@@ -321,6 +323,7 @@ static ArrayData* convDictToVArrImpl(ArrayData* adIn) {
   assertx(adIn->isDict());
   auto a = MixedArray::ToVArrayDict(adIn, adIn->cowCheck());
   assertx(a != adIn);
+  assertx(a->isPacked());
   assertx(a->isVArray());
   decRefArr(adIn);
   return a;
@@ -330,6 +333,7 @@ static ArrayData* convKeysetToVArrImpl(ArrayData* adIn) {
   assertx(adIn->isKeyset());
   auto a = SetArray::ToVArray(adIn, adIn->cowCheck());
   assertx(a != adIn);
+  assertx(a->isPacked());
   assertx(a->isVArray());
   decRefArr(adIn);
   return a;
@@ -343,6 +347,7 @@ static ArrayData* convObjToVArrImpl(ObjectData* obj) {
       }
       return collections::toArray(obj).toVArray();
     }();
+    assertx(a->isPacked());
     assertx(a->isVArray());
     decRefObj(obj);
     return a.detach();
@@ -351,11 +356,12 @@ static ArrayData* convObjToVArrImpl(ObjectData* obj) {
   if (obj->instanceof(SystemLib::s_IteratorClass)) {
     // This assumes that appending to an initially empty array will never
     // promote to mixed.
-    auto arr = Array::Create();
+    auto arr = Array::CreateVArray();
     for (ArrayIter iter(obj); iter; ++iter) {
       arr.append(iter.second());
     }
     decRefObj(obj);
+    assertx(arr->isPacked());
     assertx(arr->isVArray());
     return arr.detach();
   }
@@ -465,6 +471,7 @@ IMPL_OPCODE_CALL(ConvDictToArr);
 IMPL_OPCODE_CALL(ConvKeysetToArr);
 IMPL_OPCODE_CALL(ConvObjToArr);
 IMPL_OPCODE_CALL(ConvCellToArr);
+IMPL_OPCODE_CALL(ConvArrToNonDVArr);
 
 IMPL_OPCODE_CALL(ConvArrToVec);
 IMPL_OPCODE_CALL(ConvDictToVec);

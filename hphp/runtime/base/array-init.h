@@ -158,6 +158,11 @@ protected:
  */
 namespace detail {
 
+struct VArray {
+  static constexpr auto MakeReserve = &PackedArray::MakeReserveVArray;
+  static constexpr auto Release = PackedArray::Release;
+};
+
 struct VecArray {
   static constexpr auto MakeReserve = &PackedArray::MakeReserveVec;
   static constexpr auto Release = PackedArray::ReleaseVec;
@@ -541,32 +546,40 @@ struct PackedArrayInitBase : ArrayInitBase<TArray, DT> {
 /*
  * Initializer for a PHP vector-shaped array.
  */
-struct PackedArrayInit : PackedArrayInitBase<PackedArray, KindOfArray> {
-  using PackedArrayInitBase<PackedArray, KindOfArray>::PackedArrayInitBase;
+template <typename TArray>
+struct PackedPHPArrayInitBase : PackedArrayInitBase<TArray, KindOfArray> {
+  using PackedArrayInitBase<TArray, KindOfArray>::PackedArrayInitBase;
 
-  PackedArrayInit& append(TypedValue tv) {
-    performOp([&]{
-      return PackedArray::Append(m_arr, tvToInitCell(tv), false);
+  PackedPHPArrayInitBase& append(TypedValue tv) {
+    this->performOp([&]{
+      return PackedArray::Append(this->m_arr, tvToInitCell(tv), false);
     });
     return *this;
   }
-  PackedArrayInit& append(const Variant& v) {
+  PackedPHPArrayInitBase& append(const Variant& v) {
     return append(*v.asTypedValue());
   }
 
-  PackedArrayInit& appendRef(Variant& v) {
-    performOp([&]{ return PackedArray::AppendRef(m_arr, v, false); });
+  PackedPHPArrayInitBase& appendRef(Variant& v) {
+    this->performOp([&]{
+      return PackedArray::AppendRef(this->m_arr, v, false);
+    });
     return *this;
   }
 
-  PackedArrayInit& appendWithRef(TypedValue v) {
-    performOp([&]{ return PackedArray::AppendWithRef(m_arr, v, false); });
+  PackedPHPArrayInitBase& appendWithRef(TypedValue v) {
+    this->performOp([&]{
+      return PackedArray::AppendWithRef(this->m_arr, v, false);
+    });
     return *this;
   }
-  PackedArrayInit& appendWithRef(const Variant& v) {
+  PackedPHPArrayInitBase& appendWithRef(const Variant& v) {
     return appendWithRef(*v.asTypedValue());
   }
 };
+
+using PackedArrayInit = PackedPHPArrayInitBase<PackedArray>;
+using VArrayInit = PackedPHPArrayInitBase<detail::VArray>;
 
 /*
  * Initializer for a Hack vector array.
@@ -629,6 +642,14 @@ namespace make_array_detail {
   void packed_impl(PackedArrayInit& init, Val&& val, Vals&&... vals) {
     init.append(Variant(std::forward<Val>(val)));
     packed_impl(init, std::forward<Vals>(vals)...);
+  }
+
+  inline void varray_impl(VArrayInit&) {}
+
+  template<class Val, class... Vals>
+  void varray_impl(VArrayInit& init, Val&& val, Vals&&... vals) {
+    init.append(Variant(std::forward<Val>(val)));
+    varray_impl(init, std::forward<Vals>(vals)...);
   }
 
   inline void vec_impl(VecArrayInit&) {}
@@ -700,6 +721,24 @@ Array make_packed_array(Vals&&... vals) {
   static_assert(sizeof...(vals), "use Array::Create() instead");
   PackedArrayInit init(sizeof...(vals));
   make_array_detail::packed_impl(init, std::forward<Vals>(vals)...);
+  return init.toArray();
+}
+
+/*
+ * Helper for creating packed varrays that don't contain references.
+ *
+ * Usage:
+ *
+ *   auto newArray = make_varray(1, 2, 3, 4);
+ *
+ * If you need to deal with references, you currently have to use
+ * VArrayInit directly.
+ */
+template<class... Vals>
+Array make_varray(Vals&&... vals) {
+  static_assert(sizeof...(vals), "use Array::CreateVArray() instead");
+  VArrayInit init(sizeof...(vals));
+  make_array_detail::varray_impl(init, std::forward<Vals>(vals)...);
   return init.toArray();
 }
 

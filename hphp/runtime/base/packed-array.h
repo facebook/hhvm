@@ -136,6 +136,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
   static ArrayData* ToPHPArray(ArrayData*, bool);
+  static ArrayData* ToVArray(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
   static void Renumber(ArrayData*) {}
@@ -145,7 +146,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   }
 
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
-  static constexpr auto ToVArray = &ToPHPArray;
 
   static member_rval::ptr_u NvTryGetIntVec(const ArrayData*, int64_t);
   static member_rval::ptr_u NvTryGetStrVec(const ArrayData*, const StringData*);
@@ -167,6 +167,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* AppendWithRefVec(ArrayData*, TypedValue, bool);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
   static ArrayData* ToPHPArrayVec(ArrayData*, bool);
+  static ArrayData* ToVArrayVec(ArrayData*, bool);
   static ArrayData* ToDictVec(ArrayData*, bool);
   static ArrayData* ToVecVec(ArrayData*, bool);
 
@@ -206,7 +207,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto OnSetEvalScalarVec = &OnSetEvalScalar;
   static constexpr auto EscalateVec = &Escalate;
   static constexpr auto ToKeysetVec = &ArrayCommon::ToKeyset;
-  static constexpr auto ToVArrayVec = &ToPHPArrayVec;
 
   static member_rval RvalIntVec(const ArrayData* ad, int64_t k) {
     return member_rval { ad, NvGetIntVec(ad, k) };
@@ -241,6 +241,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static void scan(const ArrayData*, type_scan::Scanner&);
 
   static ArrayData* MakeReserve(uint32_t capacity);
+  static ArrayData* MakeReserveVArray(uint32_t capacity);
   static ArrayData* MakeReserveVec(uint32_t capacity);
 
   /*
@@ -295,7 +296,7 @@ private:
   static ArrayData* PrepareForInsert(ArrayData*, bool);
   static SortFlavor preSort(ArrayData*);
 
-  static ArrayData* MakeReserveImpl(uint32_t, HeaderKind);
+  static ArrayData* MakeReserveImpl(uint32_t, HeaderKind, ArrayData::DVArray);
 
   template<bool reverse>
   static ArrayData* MakePackedImpl(uint32_t, const TypedValue*, HeaderKind);
@@ -307,7 +308,10 @@ private:
   static int64_t VecCmpHelper(const ArrayData*, const ArrayData*);
 
   struct VecInitializer;
-  static VecInitializer s_initializer;
+  static VecInitializer s_vec_initializer;
+
+  struct VArrayInitializer;
+  static VArrayInitializer s_varr_initializer;
 };
 
 //////////////////////////////////////////////////////////////////////

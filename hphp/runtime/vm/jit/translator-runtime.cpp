@@ -236,10 +236,21 @@ ArrayData* convCellToArrHelper(TypedValue tv) {
   return tv.m_data.parr;
 }
 
+ArrayData* convArrToNonDVArrHelper(ArrayData* adIn) {
+  assertx(adIn->isPHPArray());
+  if (adIn->isNotDVArray()) return adIn;
+  auto a = adIn->toPHPArray(adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  assertx(a->isNotDVArray());
+  return a;
+}
+
 ArrayData* convVecToArrHelper(ArrayData* adIn) {
   assertx(adIn->isVecArray());
   auto a = PackedArray::ToPHPArrayVec(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
+  assertx(a->isPHPArray());
+  assertx(a->isNotDVArray());
   return a;
 }
 
@@ -247,6 +258,8 @@ ArrayData* convDictToArrHelper(ArrayData* adIn) {
   assertx(adIn->isDict());
   auto a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
+  assertx(a->isPHPArray());
+  assertx(a->isNotDVArray());
   return a;
 }
 
@@ -254,6 +267,8 @@ ArrayData* convKeysetToArrHelper(ArrayData* adIn) {
   assertx(adIn->isKeyset());
   auto a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
+  assertx(a->isPHPArray());
+  assertx(a->isNotDVArray());
   return a;
 }
 

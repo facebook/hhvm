@@ -67,6 +67,7 @@ struct MixedArray::Initializer {
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
     ad->initHeader(HeaderKind::Dict, StaticValue);
+    assert(ad->checkInvariants());
   }
 };
 MixedArray::Initializer MixedArray::s_initializer;
@@ -492,6 +493,7 @@ bool MixedArray::checkInvariants() const {
 
   // All arrays:
   assert(hasMixedLayout());
+  assert(isNotDVArray());
   assert(checkCount());
   assert(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assert(MixedArray::HashSize(m_scale) ==
@@ -697,7 +699,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   auto ad            = reqAlloc(newScale);
   auto const oldUsed = old->m_used;
   ad->m_sizeAndPos   = old->m_sizeAndPos;
-  ad->initHeader(*old, OneReference);
+  ad->initHeader(old->m_kind, OneReference);
   ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
 
   copyElmsNextUnsafe(ad, old, oldUsed);
@@ -1212,7 +1214,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto const oldUsed = src->m_used;
 
   ad->m_sizeAndPos      = src->m_sizeAndPos;
-  ad->initHeader(*src, OneReference);
+  ad->initHeader(src->m_kind, OneReference);
   ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
@@ -1361,6 +1363,9 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
 NEVER_INLINE
 ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
                                          const ArrayData* elems) {
+  assertx(ret->isMixed());
+  assertx(ret->isNotDVArray());
+
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     auto const value = it.secondVal();

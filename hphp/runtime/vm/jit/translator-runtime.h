@@ -99,6 +99,7 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2);
  * complicated to inline
  */
 ArrayData* convCellToArrHelper(TypedValue tv);
+ArrayData* convArrToNonDVArrHelper(ArrayData* a);
 ArrayData* convVecToArrHelper(ArrayData* a);
 ArrayData* convDictToArrHelper(ArrayData* a);
 ArrayData* convKeysetToArrHelper(ArrayData* a);

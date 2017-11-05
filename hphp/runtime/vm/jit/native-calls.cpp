@@ -151,6 +151,8 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvCellToArr,      convCellToArrHelper, DSSA, SSync,
                            {{TV, 0}}},
+    {ConvArrToNonDVArr,  convArrToNonDVArrHelper, DSSA, SSync,
+                           {{SSA, 0}}},
 
     {ConvArrToVec,       convArrToVecHelper, DSSA, SSync,
                            {{SSA, 0}}},

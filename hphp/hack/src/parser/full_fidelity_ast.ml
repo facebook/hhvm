@@ -656,6 +656,25 @@ and pAField : afield parser = fun node env ->
     AFkvalue (pExpr element_key env, pExpr element_value env)
   | _ -> AFvalue (pExpr node env)
 and pString2: expr_location -> node list -> env -> expr list =
+  let rec convert_name_to_lvar location env n =
+    match syntax n with
+    | Token { Token.kind = TK.Name; _ }
+    | QualifiedNameExpression {
+        qualified_name_expression = {
+          syntax = Token { Token.kind = TK.Name; _ }; _ }
+        ; _ } ->
+      let pos, name = pos_name n in
+      let id = Lvar (pos, "$" ^ name) in
+      Some (pos, id)
+    | SubscriptExpression { subscript_receiver; subscript_index; _ } ->
+      begin match convert_name_to_lvar location env subscript_receiver with
+      | Some recv ->
+        let index = mpOptional (pExpr ~location) subscript_index env in
+        Some (get_pos n, Array_get (recv, index))
+      | _ -> None
+      end
+    | _ -> None in
+
   let rec aux loc l env acc =
     (* in PHP "${x}" in strings is treated as if it was written "$x",
        here we recognize pattern: Dollar; EmbeddedBracedExpression { QName (Token.Name) }
@@ -663,41 +682,19 @@ and pString2: expr_location -> node list -> env -> expr list =
     *)
     match l with
     | [] -> List.rev acc
-    | ({ syntax = Token { Token.kind = TK.Dollar; _ }; _ } as l)::
-      ({ syntax = EmbeddedBracedExpression {
-          embedded_braced_expression_expression =
-            ( { syntax = QualifiedNameExpression { qualified_name_expression =
-                  ({ syntax = Token { Token.kind = TK.Name; _ }; _ } as name)
-                ; _ }
-              ; _ }
-            | ({ syntax = Token { Token.kind = TK.Name; _ }; _ } as name)
-            )
-          ; _ }
-       ; _ } as r)
-      ::tl ->
-        let pos, name = pos_name name in
-        let id = Lvar (pos, "$" ^ name) in
-        let left_pos = get_pos l in
-        let right_pos = get_pos r in
-        let pos =
-          if left_pos = Pos.none || right_pos = Pos.none then Pos.none
-          else
-            (* build final position as:
-            start_pos = start position of Dollar token
-            end_pos = end position pof embedded brace expression *)
-            let pos_file = Pos.filename left_pos in
-            let pos_start = Pos.pos_start left_pos in
-            let pos_end = Pos.pos_end right_pos in
-            Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
-        in
-        aux loc tl env ((pos, id)::acc)
     | ({ syntax = Token { Token.kind = TK.Dollar; _ }; _ })::
       ({ syntax = EmbeddedBracedExpression {
-          embedded_braced_expression_expression
-          ; _ }
-        ; _ } as expr_with_braces)
-      ::tl ->
-        aux loc tl env (pExpr ~location:loc expr_with_braces env::acc)
+          embedded_braced_expression_expression = e; _ }; _
+        } as expr_with_braces)::
+      tl ->
+        let e =
+          begin match convert_name_to_lvar loc env e with
+          | Some e -> e
+          | None ->
+            let e = pExpr ~location:loc expr_with_braces env in
+            fst e, BracedExpr e
+          end in
+        aux loc tl env (e::acc)
     | x::xs -> aux loc xs env ((pExpr ~location:loc x env)::acc)
   in
   fun loc l env -> aux loc l env []

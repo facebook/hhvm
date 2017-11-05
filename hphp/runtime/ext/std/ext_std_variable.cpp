@@ -241,6 +241,7 @@ const StaticString
   s_Res("i:0;"),
   s_EmptyArray("a:0:{}"),
   s_EmptyVArray("y:0:{}"),
+  s_EmptyDArray("Y:0:{}"),
   s_EmptyVecArray("v:0:{}"),
   s_EmptyDictArray("D:0:{}"),
   s_EmptyKeysetArray("k:0:{}");
@@ -307,6 +308,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       assert(arr->isPHPArray());
       if (arr->empty()) {
         if (arr->isVArray()) return s_EmptyVArray;
+        if (arr->isDArray()) return s_EmptyDArray;
         return s_EmptyArray;
       }
       break;

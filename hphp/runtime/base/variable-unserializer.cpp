@@ -878,11 +878,11 @@ void VariableUnserializer::unserializeVariant(
       tvMove(make_array_like_tv(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
-  case 'Y': // DArray (same as array for now)
+  case 'Y': // DArray
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
-      auto a = unserializeArray();
+      auto a = unserializeDArray();
       tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
@@ -1366,6 +1366,61 @@ Array VariableUnserializer::unserializeVArray() {
       }
     }
   }
+  check_non_safepoint_surprise();
+  expectChar('}');
+  return arr;
+}
+
+Array VariableUnserializer::unserializeDArray() {
+  int64_t size = readInt();
+  expectChar(':');
+  expectChar('{');
+  if (size == 0) {
+    expectChar('}');
+    return Array::CreateDArray();
+  }
+  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+    throwArraySizeOutOfBounds();
+  }
+  auto const scale = MixedArray::computeScaleFromSize(size);
+  auto const allocsz = MixedArray::computeAllocBytes(scale);
+
+  // For large arrays, do a naive pre-check for OOM.
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
+    check_non_safepoint_surprise();
+  }
+
+  Array arr = DArrayInit(size).toArray();
+  reserveForAdd(size);
+
+  for (int64_t i = 0; i < size; i++) {
+    Variant key;
+    unserializeVariant(key, UnserializeMode::Key);
+    if (!key.isString() && !key.isInteger()) {
+      throwInvalidKey();
+    }
+
+    // for apc, we know the key can't exist, but ignore that optimization
+    assert(type() != VariableUnserializer::Type::APCSerialize ||
+           !arr.exists(key, true));
+
+    auto& value = [&]() -> decltype(auto) {
+      SuppressHackArrCompatNotices shacn;
+      return arr.lvalAt(key, AccessFlags::Key);
+    }();
+    if (UNLIKELY(isRefcountedType(value.getRawType()))) {
+      putInOverwrittenList(value);
+    }
+    unserializeVariant(value);
+
+    if (i < (size - 1)) {
+      auto lastChar = peekBack();
+      if ((lastChar != ';' && lastChar != '}')) {
+        throwUnterminatedElement();
+      }
+    }
+  }
+
   check_non_safepoint_surprise();
   expectChar('}');
   return arr;

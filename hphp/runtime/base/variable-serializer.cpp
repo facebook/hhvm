@@ -60,9 +60,9 @@ static VariableSerializer::ArrayKind getKind(const ArrayData* arr) {
   if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
   if (arr->isKeyset()) return VariableSerializer::ArrayKind::Keyset;
   assert(arr->isPHPArray());
-  return arr->isVArray()
-    ? VariableSerializer::ArrayKind::VArray
-    : VariableSerializer::ArrayKind::PHP;
+  if (arr->isVArray()) return VariableSerializer::ArrayKind::VArray;
+  if (arr->isDArray()) return VariableSerializer::ArrayKind::DArray;
+  return VariableSerializer::ArrayKind::PHP;
 }
 
 [[noreturn]] NEVER_INLINE
@@ -804,6 +804,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         break;
       case ArrayKind::PHP:
       case ArrayKind::VArray:
+      case ArrayKind::DArray:
         m_buf->append("Array\n");
         break;
       }
@@ -844,6 +845,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         break;
       case ArrayKind::PHP:
       case ArrayKind::VArray:
+      case ArrayKind::DArray:
         m_buf->append("array (\n");
         break;
       }
@@ -879,6 +881,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         break;
       case ArrayKind::PHP:
       case ArrayKind::VArray:
+      case ArrayKind::DArray:
         m_buf->append("array");
         break;
       }
@@ -933,6 +936,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         break;
       case ArrayKind::VArray:
         m_buf->append("y:");
+        break;
+      case ArrayKind::DArray:
+        m_buf->append("Y:");
         break;
       }
       m_buf->append(size);
@@ -1213,6 +1219,7 @@ void VariableSerializer::writeArrayFooter(
         break;
       case ArrayKind::PHP:
       case ArrayKind::VArray:
+      case ArrayKind::DArray:
         m_buf->append(')');
         break;
       }

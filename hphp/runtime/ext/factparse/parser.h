@@ -223,6 +223,7 @@ struct Parser : ParserBase {
   void onConstantValue(Token &out, Token &constant);
   void onScalar(Token &out, int type, Token &scalar);
   void onExprListElem(Token &out, Token *exprs, Token &expr);
+  void onOptExprListElem(Token &out, Token *exprs, Token &expr);
 
   void onObjectProperty(Token &out, Token &base,
                         PropAccessType propAccessType, Token &prop);

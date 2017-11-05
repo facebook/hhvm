@@ -745,12 +745,9 @@ and emit_xhp env p id attributes children =
    *)
   let convert_attr (name, v) = (A.SFlit name, Html_entities.decode_expr v) in
   let attributes = List.map ~f:convert_attr attributes in
-  let attribute_map =
-    p, A.Array (List.map attributes
-                         ~f:(fun (k, v) ->
-                           A.AFkvalue ((p, extract_shape_field_name_pstring k), v))) in
+  let attribute_map = p, A.Shape attributes in
   let dec_children = List.map ~f:Html_entities.decode_expr children in
-  let children_vec = make_vec_like_array p dec_children in
+  let children_vec = p, A.Varray dec_children in
   let filename = p, A.Id (p, "__FILE__") in
   let line = p, A.Id (p, "__LINE__") in
   let renamed_id = rename_xhp id in

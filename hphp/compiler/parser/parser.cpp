@@ -855,6 +855,17 @@ void Parser::onExprListElem(Token &out, Token *exprs, Token &expr) {
   out->exp = expList;
 }
 
+void Parser::onOptExprListElem(Token &out, Token *exprs, Token &expr) {
+  ExpressionPtr expList;
+  if (exprs && exprs->exp) {
+    expList = exprs->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  if (expr->exp) expList->addElement(expr->exp);
+  out->exp = expList;
+}
+
 void Parser::checkAllowedInWriteContext(ExpressionPtr e) {
   if (e == nullptr) {
     return;

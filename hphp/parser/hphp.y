@@ -269,30 +269,30 @@ static void xhp_attribute(Parser *_p, Token &out, Token &type, Token &label,
   }
 
   Token num;  scalar_num(_p, num, type.num());
-  Token arr1; _p->onArrayPair(arr1, 0, 0, num, 0);
+  Token arr1; _p->onExprListElem(arr1, nullptr, num);
 
   Token arr2;
   switch (type.num()) {
     case 5: /* class */ {
       Token cls; _p->onScalar(cls, T_CONSTANT_ENCAPSED_STRING, type);
-      _p->onArrayPair(arr2, &arr1, 0, cls, 0);
+      _p->onExprListElem(arr2, &arr1, cls);
       break;
     }
     case 7: /* enum */ {
-      Token arr;   _p->onArray(arr, type);
-      _p->onArrayPair(arr2, &arr1, 0, arr, 0);
+      Token arr;   _p->onVArray(arr, type);
+      _p->onExprListElem(arr2, &arr1, arr);
       break;
     }
     default: {
       Token tnull; scalar_null(_p, tnull);
-      _p->onArrayPair(arr2, &arr1, 0, tnull, 0);
+      _p->onExprListElem(arr2, &arr1, tnull);
       break;
     }
   }
 
-  Token arr3; _p->onArrayPair(arr3, &arr2, 0, def, 0);
-  Token arr4; _p->onArrayPair(arr4, &arr3, 0, req, 0);
-  _p->onArray(out, arr4);
+  Token arr3; _p->onExprListElem(arr3, &arr2, def);
+  Token arr4; _p->onExprListElem(arr4, &arr3, req);
+  _p->onVArray(out, arr4);
   out.setText(label);
 }
 
@@ -330,7 +330,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
 
   std::vector<std::string> classes;
   folly::split(':', attributes.text(), classes, true);
-  Token arrAttributes; _p->onArray(arrAttributes, attributes);
+  Token arrAttributes; _p->onDArray(arrAttributes, attributes);
 
   Token dummy;
 
@@ -340,19 +340,20 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
   }
   Token stmts1;
   {
-    // static $_ = -1;
-    Token one;     scalar_num(_p, one, "1");
-    Token mone;    UEXP(mone, one, '-', 1);
+    // static $_ = null;
+    Token null;    scalar_null(_p, null);
     Token var;     var.set(T_VARIABLE, "_");
-    Token decl;    _p->onStaticVariable(decl, 0, var, &mone);
+    Token decl;    _p->onStaticVariable(decl, 0, var, &null);
     Token sdecl;   _p->onStatic(sdecl, decl);
     _p->addStatement(stmts1, stmts0, sdecl);
   }
   Token stmts2;
   {
-    // if ($_ === -1) {
-    //   $_ = array_merge(parent::__xhpAttributeDeclaration(),
-    //                    attributes);
+    // if ($_ === null) {
+    //   $_ = __SystemLib\\merge_xhp_attr_declarations(
+    //          parent::__xhpAttributeDeclaration(),
+    //          attributes
+    //        );
     // }
     Token parent;  parent.set(T_STRING, "parent");
     Token cls;     _p->onName(cls, parent, Parser::StringName);
@@ -374,7 +375,8 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
     Token params2; _p->onCallParam(params2, &params1, arrAttributes,
                                    ParamMode::In, false);
 
-    Token name;    name.set(T_STRING, "array_merge");
+    Token name;    name.set(T_STRING, "__SystemLib\\merge_xhp_attr_declarations");
+                   name = name.num() | 2; // WTH???
     Token call;    _p->onCall(call, 0, name, params2, NULL);
     Token tvar;    tvar.set(T_VARIABLE, "_");
     Token var;     _p->onSimpleVariable(var, tvar);
@@ -384,9 +386,8 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
 
     Token tvar2;   tvar2.set(T_VARIABLE, "_");
     Token var2;    _p->onSimpleVariable(var2, tvar2);
-    Token one;     scalar_num(_p, one, "1");
-    Token mone;    UEXP(mone, one, '-', 1);
-    Token cond;    BEXP(cond, var2, mone, T_IS_IDENTICAL);
+    Token null;    scalar_null(_p, null);
+    Token cond;    BEXP(cond, var2, null, T_IS_IDENTICAL);
     Token dummy1, dummy2;
     Token sif;     _p->onIf(sif, cond, block, dummy1, dummy2);
     _p->addStatement(stmts2, stmts1, sif);
@@ -435,7 +436,7 @@ static void xhp_category_stmt(Parser *_p, Token &out, Token &categories) {
   Token stmts1;
   {
     // static $_ = categories;
-    Token arr;     _p->onArray(arr, categories);
+    Token arr;     _p->onDArray(arr, categories);
     Token var;     var.set(T_VARIABLE, "_");
     Token decl;    _p->onStaticVariable(decl, 0, var, &arr);
     Token sdecl;   _p->onStatic(sdecl, decl);
@@ -462,7 +463,7 @@ static void xhp_category_stmt(Parser *_p, Token &out, Token &categories) {
 
 static void xhp_children_decl_tag(Parser *_p, Token &arr, Token &tag) {
   Token num;  scalar_num(_p, num, tag.num());
-  Token arr1; _p->onArrayPair(arr1, &arr, 0, num, 0);
+  Token arr1; _p->onExprListElem(arr1, &arr, num);
 
   Token name;
   if (tag.num() == 3 || tag.num() == 4) {
@@ -472,34 +473,34 @@ static void xhp_children_decl_tag(Parser *_p, Token &arr, Token &tag) {
   } else {
     HPHP_PARSER_ERROR("XHP: unknown children declaration", _p);
   }
-  Token arr2; _p->onArrayPair(arr2, &arr1, 0, name, 0);
+  Token arr2; _p->onExprListElem(arr2, &arr1, name);
   arr = arr2;
 }
 
 static void xhp_children_decl(Parser *_p, Token &out, Token &op1, int op,
                               Token *op2) {
   Token num; scalar_num(_p, num, op);
-  Token arr; _p->onArrayPair(arr, 0, 0, num, 0);
+  Token arr; _p->onExprListElem(arr, nullptr, num);
 
   if (op2) {
-    Token arr1; _p->onArrayPair(arr1, &arr,  0, op1,  0);
-    Token arr2; _p->onArrayPair(arr2, &arr1, 0, *op2, 0);
-    _p->onArray(out, arr2);
+    Token arr1; _p->onExprListElem(arr1, &arr,  op1);
+    Token arr2; _p->onExprListElem(arr2, &arr1, *op2);
+    _p->onVArray(out, arr2);
   } else {
     xhp_children_decl_tag(_p, arr, op1);
-    _p->onArray(out, arr);
+    _p->onVArray(out, arr);
   }
 }
 
 static void xhp_children_paren(Parser *_p, Token &out, Token exp, int op) {
   Token num;  scalar_num(_p, num, op);
-  Token arr1; _p->onArrayPair(arr1, 0, 0, num, 0);
+  Token arr1; _p->onExprListElem(arr1, nullptr, num);
 
   Token num5; scalar_num(_p, num5, 5);
-  Token arr2; _p->onArrayPair(arr2, &arr1, 0, num5, 0);
+  Token arr2; _p->onExprListElem(arr2, &arr1, num5);
 
-  Token arr3; _p->onArrayPair(arr3, &arr2, 0, exp, 0);
-  _p->onArray(out, arr3);
+  Token arr3; _p->onExprListElem(arr3, &arr2, exp);
+  _p->onVArray(out, arr3);
 }
 
 static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
@@ -1909,9 +1910,9 @@ xhp_attribute_decl_type:
 ;
 
 non_empty_xhp_attribute_enum:
-    common_scalar                      { _p->onArrayPair($$,  0,0,$1,0);}
+    common_scalar                      { _p->onExprListElem($$,nullptr,$1); }
   | non_empty_xhp_attribute_enum ','
-    common_scalar                      { _p->onArrayPair($$,&$1,0,$3,0);}
+    common_scalar                      { _p->onExprListElem($$,&$1,$3); }
 ;
 
 xhp_attribute_enum:
@@ -2581,8 +2582,8 @@ xhp_tag:
     T_XHP_TAG_GT                       { xhp_tag(_p,$$,$2,$3);}
 ;
 xhp_tag_body:
-    xhp_attributes '/'                 { Token t1; _p->onArray(t1,$1);
-                                         Token t2; _p->onArray(t2,$2);
+    xhp_attributes '/'                 { Token t1; _p->onDArray(t1,$1);
+                                         Token t2; _p->onVArray(t2,$2);
                                          Token file; scalar_file(_p, file);
                                          Token line; scalar_line(_p, line);
                                          _p->onCallParam($1,NULL,t1,
@@ -2598,8 +2599,8 @@ xhp_tag_body:
     xhp_children T_XHP_TAG_LT '/'
     xhp_opt_end_label                  { Token file; scalar_file(_p, file);
                                          Token line; scalar_line(_p, line);
-                                         _p->onArray($4,$1);
-                                         _p->onArray($5,$3);
+                                         _p->onDArray($4,$1);
+                                         _p->onVArray($5,$3);
                                          _p->onCallParam($2,NULL,$4,
                                                          ParamMode::In,0);
                                          _p->onCallParam($$, &$2,$5,
@@ -2621,7 +2622,7 @@ xhp_attributes:
   |                                    { $$.reset();}
 ;
 xhp_children:
-    xhp_children xhp_child             { _p->onArrayPair($$,&$1,0,$2,0);}
+xhp_children xhp_child                 { _p->onOptExprListElem($$, &$1, $2); }
   |                                    { $$.reset();}
 ;
 xhp_attribute_name:

@@ -441,6 +441,7 @@ void Parser::onConstantValue(Token& /*out*/, Token& /*constant*/) {}
 
 void Parser::onExprListElem(Token& /*out*/, Token* /*exprs*/, Token& /*expr*/) {
 }
+void Parser::onOptExprListElem(Token&, Token*, Token&) {}
 
 void Parser::onListAssignment(Token& /*out*/, Token& /*vars*/, Token* /*expr*/,
                               bool /*rhsFirst*/ /* = false */) {}

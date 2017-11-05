@@ -19,10 +19,7 @@ let get_array3 i0 i1 i2 =
   let index0 = p, i0 in
   let index1 = p, i1 in
   let index2 = p, i2 in
-  A.Array
-  [A.AFkvalue ((p, A.Int (p, "0")), index0);
-   A.AFkvalue ((p, A.Int (p, "1")), index1);
-   A.AFkvalue ((p, A.Int (p, "2")), index2)]
+  A.Varray [index0; index1; index2]
 
 let xhp_attribute_declaration_method name kind body =
   {
@@ -74,9 +71,7 @@ let emit_xhp_attribute_array ~ns xal =
   let get_enum_attributes = function
     | None ->
       failwith "Xhp attribute that's supposed to be an enum but not really"
-    | Some (_, es) ->
-      let turn_to_kv i e = A.AFkvalue ((p, A.Int (p, string_of_int i)), e) in
-      p, A.Array (List.mapi ~f:turn_to_kv es)
+    | Some (_, es) -> p, A.Varray es
   in
   let get_attribute_array_values id enumo =
     let id, _ = Hhbc_id.Class.elaborate_id ns (p, id) in
@@ -106,10 +101,7 @@ let emit_xhp_attribute_array ~ns xal =
       | _ -> failwith "There are no other possible xhp attribute hints"
     in
     let is_required = (p, A.Int (p, if is_req then "1" else "0")) in
-    [A.AFkvalue ((p, A.Int (p, "0")), hint);
-     A.AFkvalue ((p, A.Int (p, "1")), class_name);
-     A.AFkvalue ((p, A.Int (p, "2")), e);
-     A.AFkvalue ((p, A.Int (p, "3")), is_required)]
+    [hint; class_name; e; is_required]
   in
   let aux xa =
     let ho = Hhas_xhp_attribute.type_ xa in
@@ -117,10 +109,10 @@ let emit_xhp_attribute_array ~ns xal =
     let enumo = Hhas_xhp_attribute.maybe_enum xa in
     let is_req = Hhas_xhp_attribute.is_required xa in
     let k = p, A.String (p, SU.Xhp.clean name) in
-    let v = p, A.Array (inner_array ho expo enumo is_req) in
-    A.AFkvalue (k, v)
+    let v = p, A.Varray (inner_array ho expo enumo is_req) in
+    (k, v)
   in
-  p, A.Array (List.map ~f:aux xal)
+  p, A.Darray (List.map ~f:aux xal)
 
 let emit_xhp_use_attributes xual =
   let aux = function
@@ -137,16 +129,17 @@ let emit_xhp_use_attributes xual =
 (* AST transformations taken from hphp/parser/hphp.y *)
 let from_attribute_declaration ~ns ast_class xal xual =
   let var_dollar_ = p, A.Lvar (p, "$_") in
-  let neg_one = p, A.Unop(A.Uminus, (p, A.Int (p, "1"))) in
-  (* static $_ = -1; *)
-  let token1 = A.Static_var [p, A.Binop (A.Eq None, var_dollar_, neg_one)] in
-  (* if ($_ === -1) {
-   *   $_ = array_merge(parent::__xhpAttributeDeclaration(),
-   *                    use_attributes
-   *                    attributes);
+  let null_ = p, A.Null in
+  (* static $_ = null; *)
+  let token1 = A.Static_var [p, A.Binop (A.Eq None, var_dollar_, null_)] in
+  (* if ($_ === null) {
+   *   $_ = __SystemLib\\merge_xhp_attr_declarations(
+   *          parent::__xhpAttributeDeclaration(),
+   *          attributes
+   *        );
    * }
    *)
-  let cond = p, A.Binop (A.EQeqeq, var_dollar_, neg_one) in
+  let cond = p, A.Binop (A.EQeqeq, var_dollar_, null_) in
   let arg1 =
     p, A.Call (
       (p, A.Class_const ((p, A.Id (p, "parent")), (p, "__xhpAttributeDeclaration"))),
@@ -157,7 +150,8 @@ let from_attribute_declaration ~ns ast_class xal xual =
   let args =
     arg1 :: emit_xhp_use_attributes xual @ [emit_xhp_attribute_array ~ns xal]
   in
-  let array_merge_call = p, A.Call ((p, A.Id (p, "array_merge")), [], args, []) in
+  let array_merge_call =
+    p, A.Call ((p, A.Id (p, "__SystemLib\\merge_xhp_attr_declarations")), [], args, []) in
   let true_branch =
     [A.Expr (p, A.Binop (A.Eq None, var_dollar_, array_merge_call))]
   in
@@ -269,13 +263,13 @@ let from_children_declaration ast_class children =
 let get_category_array categories =
   (* TODO: is this always 1? *)
   List.map categories
-    ~f:(fun s -> A.AFkvalue ((p, A.String s), (p, A.Int (p, "1"))))
+    ~f:(fun s -> ((p, A.String s), (p, A.Int (p, "1"))))
 
 (* AST transformations taken from hphp/parser/hphp.y *)
 let from_category_declaration ast_class categories =
   let var_dollar_ = p, A.Lvar (p, "$_") in
   (* static $_ = categories; *)
-  let category_arr = p, A.Array (get_category_array categories) in
+  let category_arr = p, A.Darray (get_category_array categories) in
   let token1 =
     A.Static_var [p, A.Binop (A.Eq None, var_dollar_, category_arr)]
   in

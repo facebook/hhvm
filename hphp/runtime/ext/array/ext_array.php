@@ -1367,6 +1367,11 @@ namespace __SystemLib {
   function array_map(mixed $callback,
                      mixed $arr1,
                      ...$argv): mixed;
+
+  <<__Native, __IsFoldable>>
+  function merge_xhp_attr_declarations(darray $arr1,
+                                       darray $arr2,
+                                       ...$rest): darray;
 }
 
 namespace HH {

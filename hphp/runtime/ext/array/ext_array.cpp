@@ -2961,6 +2961,35 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
   not_reached();
 }
 
+Array HHVM_FUNCTION(merge_xhp_attr_declarations,
+                    const Array& arr1,
+                    const Array& arr2,
+                    const Array& rest) {
+  auto ret = Array::CreateDArray();
+  IterateKV(arr1.get(), [&](Cell k, TypedValue v) { ret.set(k, v); });
+  IterateKV(arr2.get(), [&](Cell k, TypedValue v) { ret.set(k, v); });
+  int idx = 2;
+  IterateV(
+    rest.get(),
+    [&](TypedValue arr) {
+      if (!isArrayType(arr.m_type)) {
+        raise_param_type_warning(
+          "__SystemLib\\merge_xhp_attr_declarations",
+          idx+1,
+          KindOfArray,
+          arr.m_type
+        );
+        ret = Array{};
+        return true;
+      }
+      IterateKV(arr.m_data.parr, [&](Cell k, TypedValue v) { ret.set(k, v); });
+      ++idx;
+      return false;
+    }
+  );
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ArrayExtension final : Extension {
@@ -3097,6 +3126,8 @@ struct ArrayExtension final : Extension {
     HHVM_FALIAS(HH\\varray, HH_varray);
     HHVM_FALIAS(HH\\darray, HH_darray);
     HHVM_FALIAS(HH\\array_key_cast, HH_array_key_cast);
+    HHVM_FALIAS(__SystemLib\\merge_xhp_attr_declarations,
+                merge_xhp_attr_declarations);
 
     loadSystemlib();
   }

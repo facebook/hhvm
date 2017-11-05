@@ -181,7 +181,13 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     auto const failHard = strictTypes
       && RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
-      && !(tc.isThis() && RuntimeOption::EvalThisTypeHintLevel == 2);
+      && !(tc.isThis() && RuntimeOption::EvalThisTypeHintLevel == 2)
+      // If we're warning on d/varray mismatches, any array type-hint will
+      // always fail, so regardless of other settings, we can't assume its a
+      // hard failure.
+      && !(RuntimeOption::EvalHackArrCompatTypeHintNotices
+           && tc.isArray()
+           && valType <= TArr);
 
     if (isReturnType) {
       updateMarker(env);

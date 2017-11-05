@@ -269,6 +269,11 @@ struct TypeConstraint {
       verifyReturnFail(func, tv, useStrictTypes);
     }
   }
+  void verifyOutParam(TypedValue* tv, const Func* func, int paramNum) const {
+    if (UNLIKELY(!check(tv, func))) {
+      verifyOutParamFail(func, tv, paramNum);
+    }
+  }
 
   // Can not be private; used by the translator.
   void selfToClass(const Func* func, const Class **cls) const;
@@ -278,6 +283,7 @@ struct TypeConstraint {
                   bool useStrictTypes) const;
   void verifyParamFail(const Func* func, TypedValue* tv,
                        int paramNum, bool useStrictTypes = true) const;
+  void verifyOutParamFail(const Func* func, TypedValue* tv, int paramNum) const;
   void verifyReturnFail(const Func* func, TypedValue* tv,
                         bool useStrictTypes = true) const {
     verifyFail(func, tv, ReturnId, useStrictTypes);

@@ -1665,6 +1665,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InterfaceSupportsStr:
   case IsWaitHandle:
   case IsCol:
+  case IsDVArray:
   case HasToString:
   case DbgAssertRefCount:
   case GtStr:
@@ -1842,6 +1843,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case FatalMissingThis:
   case RaiseVarEnvDynCall:
   case RaiseHackArrCompatNotice:
+  case RaiseHackArrParamNotice:
   case RaiseParamRefMismatch:
   case ConvCellToStr:
   case ConvObjToStr:

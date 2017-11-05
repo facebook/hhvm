@@ -21,6 +21,7 @@
 #include <string>
 
 #include "hphp/util/portability.h"
+#include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/datatype.h"
 
 #ifdef ERROR
@@ -36,7 +37,9 @@ namespace HPHP {
 
 struct Class;
 struct Func;
+struct ArrayData;
 struct StringData;
+struct TypeConstraint;
 
 enum class HackStrictOption;
 
@@ -133,6 +136,18 @@ void raise_return_typehint_error(const std::string& msg);
 void raise_disallowed_dynamic_call(const Func* f);
 
 void raise_intish_index_cast();
+
+void raise_hackarr_type_hint_param_notice(const Func* func,
+                                          const ArrayData* ad,
+                                          AnnotType at,
+                                          int param);
+void raise_hackarr_type_hint_ret_notice(const Func* func,
+                                        const ArrayData* ad,
+                                        AnnotType at);
+void raise_hackarr_type_hint_outparam_notice(const Func* func,
+                                             const ArrayData* ad,
+                                             AnnotType at,
+                                             int param);
 
 void raise_call_to_undefined(const StringData* name, const Class* c = nullptr);
 

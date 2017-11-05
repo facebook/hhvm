@@ -315,6 +315,15 @@ void cgCheckDArray(IRLS& env, const IRInstruction* inst) {
   v << copy{src, dst};
 }
 
+void cgIsDVArray(IRLS& env, const IRInstruction* inst) {
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << cmpbim{ArrayData::kNotDVArray, src + ArrayData::offsetofDVArray(), sf};
+  v << setcc{CC_NZ, sf, dst};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgAssertType(IRLS& env, const IRInstruction* inst) {

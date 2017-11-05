@@ -310,7 +310,30 @@ bool coerceFCallArgs(TypedValue* args,
 
     // Skip tvCoerceParamTo*() call if we're already the right type, or if its a
     // Variant.
-    if (!targetType || equivDataTypes(args[-i].m_type, *targetType)) continue;
+    if (!targetType || equivDataTypes(args[-i].m_type, *targetType)) {
+      auto const c = &args[-i];
+      auto const raise = [&] {
+        if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices)) {
+          return false;
+        }
+        if (!tc.isArray()) return false;
+        if (!isArrayType(c->m_type)) return false;
+        if (tc.isVArray()) {
+          return !c->m_data.parr->isVArray();
+        } else if (tc.isDArray()) {
+          return !c->m_data.parr->isDArray();
+        } else if (tc.isVArrayOrDArray()) {
+          return c->m_data.parr->isNotDVArray();
+        } else {
+          return !c->m_data.parr->isNotDVArray();
+        }
+      }();
+      if (raise) {
+        raise_hackarr_type_hint_param_notice(func, c->m_data.parr,
+                                             tc.type(), i);
+      }
+      continue;
+    }
 
     if (RuntimeOption::PHP7_ScalarTypes && useStrictTypes) {
       tc.verifyParam(&args[-i], func, i, true);

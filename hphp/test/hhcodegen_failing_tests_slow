@@ -41,6 +41,7 @@ slow/goto/try_goto_in_finally1.php
 slow/goto/try_goto_in_finally2.php
 slow/goto/try_goto_out_finally.php
 slow/hack_arr_compat/scalars.php
+slow/hack_arr_compat/type-hints.php
 slow/hack_mode/2214.php
 slow/hack_mode/function_hint_with_params_trailing_variadic_param.php
 slow/hack_mode/function_hint_with_type_hinted_variadic_param-trailing-comma.php

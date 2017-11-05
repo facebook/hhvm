@@ -192,8 +192,18 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::VArray:
     case AnnotMetaType::DArray:
     case AnnotMetaType::VArrOrDArr:
-      return isArrayType(dt) ? AnnotAction::Pass : AnnotAction::Fail;
+      if (!isArrayType(dt)) return AnnotAction::Fail;
+      // If we're raising notices for d/varray type-hint mismatches, we have to
+      // treat everything as a fail. In the failure handling we'll do the actual
+      // check and raise the notice.
+      return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
+        ? AnnotAction::Fail
+        : AnnotAction::Pass;
     case AnnotMetaType::Precise:
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices) &&
+          at == AnnotType::Array && isArrayType(dt)) {
+        return AnnotAction::Fail;
+      }
       break;
   }
 

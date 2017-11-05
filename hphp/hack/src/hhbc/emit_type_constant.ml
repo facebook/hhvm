@@ -31,7 +31,7 @@ let get_kind_num ~tparams p =
   | "hh\\mixed" -> 9
   | "tuple" -> 10
   | "fun" -> 11
-  | "hh\\darray" | "hh\\varray" | "array" -> 12
+  | "hh\\darray" | "hh\\varray" | "hh\\varray_or_darray" | "array" -> 12
   | "typevar" -> 13 (* corresponds to user OF_GENERIC *)
   | "shape" -> 14
   | "class" -> 15
@@ -55,7 +55,7 @@ and is_prim = function
   | _ -> false
 
 and is_resolved_classname = function
-  | "HH\\darray" | "HH\\varray"
+  | "HH\\darray" | "HH\\varray" | "HH\\varray_or_darray"
   | "array" | "HH\\vec"
   | "HH\\dict" | "HH\\keyset" -> true
   | _ -> false

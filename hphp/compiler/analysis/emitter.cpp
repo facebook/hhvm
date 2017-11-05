@@ -12313,6 +12313,8 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
     RuntimeOption::EvalHackArrCompatIsArrayNotices;
   gd.HackArrCompatPromoteNotices =
     RuntimeOption::EvalHackArrCompatPromoteNotices;
+  gd.HackArrCompatTypeHintNotices =
+    RuntimeOption::EvalHackArrCompatTypeHintNotices;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

@@ -3372,9 +3372,19 @@ Type Index::lookup_constraint(Context ctx,
 
 bool Index::satisfies_constraint(Context ctx, const Type& t,
                                  const TypeConstraint& tc) const {
-  return t.subtypeOf(
-    loosen_dvarrayness(get_type_for_constraint<false>(ctx, tc, t))
-  );
+  auto const tcType = get_type_for_constraint<false>(ctx, tc, t);
+  if (t.subtypeOf(loosen_dvarrayness(tcType))) {
+    // For d/varrays, we might satisfy the constraint, but still not want to
+    // optimize away the type-check (because we'll raise a notice on a d/varray
+    // mismatch), so do some additional checking here to rule that out.
+    if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) return true;
+    if (!tcType.subtypeOf(TOptArr) || tcType.subtypeOf(TNull)) return true;
+    assertx(t.subtypeOf(TOptArr));
+    if (tcType.subtypeOf(TOptVArr)) return t.subtypeOf(TOptVArr);
+    if (tcType.subtypeOf(TOptDArr)) return t.subtypeOf(TOptDArr);
+    if (tcType.subtypeOf(TOptPArr)) return t.subtypeOf(TOptPArr);
+  }
+  return false;
 }
 
 bool Index::is_async_func(res::Func rfunc) const {

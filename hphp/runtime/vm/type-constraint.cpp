@@ -496,7 +496,66 @@ const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
 void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
                                      int paramNum, bool useStrictTypes) const {
   verifyFail(func, tv, paramNum, useStrictTypes);
-  assertx(isSoft() || !RuntimeOption::EvalHardTypeHints || check(tv, func));
+  assertx(
+    isSoft() || !RuntimeOption::EvalHardTypeHints ||
+    (RuntimeOption::EvalHackArrCompatTypeHintNotices &&
+     isArrayType(tv->m_type)) ||
+    check(tv, func)
+  );
+}
+
+void TypeConstraint::verifyOutParamFail(const Func* func,
+                                        TypedValue* tv,
+                                        int paramNum) const {
+  auto const c = tvToCell(tv);
+
+  auto const done = [&] {
+    auto const check = [&](AnnotType at) {
+      switch (at) {
+      case AnnotType::Array:
+        if (c->m_data.parr->isNotDVArray()) return;
+        break;
+      case AnnotType::VArray:
+        if (c->m_data.parr->isVArray()) return;
+        break;
+      case AnnotType::DArray:
+        if (c->m_data.parr->isDArray()) return;
+        break;
+      case AnnotType::VArrOrDArr:
+        if (!c->m_data.parr->isNotDVArray()) return;
+        break;
+      default:
+        return;
+      }
+      raise_hackarr_type_hint_outparam_notice(
+        func, c->m_data.parr, at, paramNum
+      );
+    };
+    if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices)) return false;
+    if (!isArrayType(c->m_type)) return false;
+    if (isArray()) {
+      check(m_type);
+      return true;
+    }
+    if (!isObject()) return false;
+    if (auto alias = getTypeAliasWithAutoload(m_namedEntity, m_typeName)) {
+      check(alias->type);
+      return true;
+    }
+    return false;
+  }();
+  if (done) return;
+
+  raise_return_typehint_error(
+    folly::sformat(
+      "Argument {} returned from {}() as an inout parameter must be of type "
+      "{}, {} given",
+      paramNum + 1,
+      func->fullDisplayName(),
+      displayName(func),
+      describe_actual_type(tv, isHHType())
+    )
+  );
 }
 
 void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
@@ -504,6 +563,56 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
   VMRegAnchor _;
   std::string name = displayName(func);
   auto const givenType = describe_actual_type(tv, isHHType());
+
+  auto const c = tvToCell(tv);
+
+  auto const done = [&] {
+    auto const check = [&](AnnotType at) {
+      switch (at) {
+      case AnnotType::Array:
+        if (c->m_data.parr->isNotDVArray()) return;
+        break;
+      case AnnotType::VArray:
+        if (c->m_data.parr->isVArray()) return;
+        break;
+      case AnnotType::DArray:
+        if (c->m_data.parr->isDArray()) return;
+        break;
+      case AnnotType::VArrOrDArr:
+        if (!c->m_data.parr->isNotDVArray()) return;
+        break;
+      default:
+        return;
+      }
+      if (id == ReturnId) {
+        raise_hackarr_type_hint_ret_notice(
+          func,
+          c->m_data.parr,
+          at
+        );
+      } else {
+        raise_hackarr_type_hint_param_notice(
+          func,
+          c->m_data.parr,
+          at,
+          id
+        );
+      }
+    };
+    if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices)) return false;
+    if (!isArrayType(c->m_type)) return false;
+    if (isArray()) {
+      check(m_type);
+      return true;
+    }
+    if (!isObject()) return false;
+    if (auto alias = getTypeAliasWithAutoload(m_namedEntity, m_typeName)) {
+      check(alias->type);
+      return true;
+    }
+    return false;
+  }();
+  if (done) return;
 
   if (UNLIKELY(!useStrictTypes)) {
     if (auto dt = underlyingDataType()) {
@@ -573,7 +682,6 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
 
   // Handle implicit collection->array conversion for array parameter type
   // constraints
-  auto c = tvToCell(tv);
   if (isArray() && !isSoft() && !func->mustBeRef(id) &&
       c->m_type == KindOfObject && c->m_data.pobj->isCollection()) {
     // To ease migration, the 'array' type constraint will implicitly cast

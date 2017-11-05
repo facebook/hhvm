@@ -254,4 +254,23 @@ void cgVerifyRetCls(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static void hackArrParamNoticeImpl(const Func* f, const ArrayData* a,
+                                   int64_t type, int64_t param) {
+  raise_hackarr_type_hint_param_notice(f, a, AnnotType(type), param);
+}
+
+void cgRaiseHackArrParamNotice(IRLS& env, const IRInstruction* inst) {
+  auto const at = inst->extra<RaiseHackArrParamNotice>()->type;
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(hackArrParamNoticeImpl),
+    kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst).ssa(1).ssa(0).imm(int64_t(at)).ssa(2)
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}}

@@ -1198,6 +1198,41 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
 
   assertx(!params.count || callee->attrs() & AttrNumArgs);
 
+  auto const needDVCheck = [&](uint32_t param, const Type& ty) {
+    if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) return false;
+    if (!callee->params()[param].typeConstraint.isArray()) return false;
+    return ty <= TArr;
+  };
+
+  auto const dvCheck = [&](uint32_t param, SSATmp* val) {
+    assertx(needDVCheck(param, val->type()));
+    auto const& tc = callee->params()[param].typeConstraint;
+
+    auto const check = [&](Block* taken) {
+      if (tc.isVArray()) return gen(env, CheckVArray, taken, val);
+      if (tc.isDArray()) return gen(env, CheckDArray, taken, val);
+      if (tc.isVArrayOrDArray()) {
+        return gen(env, JmpZero, taken, gen(env, IsDVArray, val));
+      }
+      return gen(env, JmpNZero, taken, gen(env, IsDVArray, val));
+    };
+
+    ifThen(
+      env,
+      check,
+      [&]{
+        gen(
+          env,
+          RaiseHackArrParamNotice,
+          RaiseHackArrParamNoticeData { tc.type() },
+          val,
+          cns(env, callee),
+          cns(env, param)
+        );
+      }
+    );
+  };
+
   DEBUG_ONLY auto seenBottom = false;
   DEBUG_ONLY auto usedStack = false;
   auto stackIdx = uint32_t{0};
@@ -1212,6 +1247,9 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         env, param, callee, targetTy,
         [&] (const Type& ty, Block* fail) -> SSATmp* {
           gen(env, CheckTypeMem, ty, fail, param.value);
+          if (needDVCheck(paramIdx, ty)) {
+            dvCheck(paramIdx, gen(env, LdMem, ty, param.value));
+          }
           return param.isOutputArg ?
             gen(env, LdMem, TBoxedCell, param.value) : nullptr;
         },
@@ -1250,6 +1288,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         [&] (const Type& ty, Block* fail) {
           auto ret = gen(env, CheckType, ty, fail, param.value);
           env.irb->constrainValue(ret, DataTypeSpecific);
+          if (needDVCheck(paramIdx, ty)) dvCheck(paramIdx, ret);
           return ret;
         },
         [&] (const Type& ty) {
@@ -1298,6 +1337,12 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         auto irSPRel = offsetFromIRSP(env, offset);
         gen(env, CheckStk, IRSPRelOffsetData { irSPRel }, ty, fail, sp(env));
         env.irb->constrainStack(irSPRel, DataTypeSpecific);
+        if (needDVCheck(paramIdx, ty)) {
+          dvCheck(
+            paramIdx,
+            gen(env, LdStk, ty, IRSPRelOffsetData { irSPRel }, sp(env))
+          );
+        }
         return nullptr;
       },
       [&] (const Type& ty) -> SSATmp* {

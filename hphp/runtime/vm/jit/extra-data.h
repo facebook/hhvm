@@ -1298,6 +1298,20 @@ struct RaiseParamRefMismatchData : IRExtraData {
   uint32_t paramId;
 };
 
+struct RaiseHackArrParamNoticeData : IRExtraData {
+  explicit RaiseHackArrParamNoticeData(AnnotType type)
+    : type{type} {}
+
+  std::string show() const {
+    if (type == AnnotType::VArray) return "varray";
+    if (type == AnnotType::DArray) return "darray";
+    if (type == AnnotType::VArrOrDArr) return "varray_or_darray";
+    return "array";
+  }
+
+  AnnotType type;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1488,6 +1502,7 @@ X(DecRef,                       DecRefData);
 X(LdTVAux,                      LdTVAuxData);
 X(CheckRefs,                    CheckRefsData);
 X(FuncGuard,                    FuncGuardData);
+X(RaiseHackArrParamNotice,      RaiseHackArrParamNoticeData);
 
 #undef X
 

@@ -5759,18 +5759,8 @@ OPTBLD_INLINE void iopVerifyOutType(intva_t paramId) {
   assert(func->numParams() == int(func->params().size()));
   auto const& tc = func->params()[paramId].typeConstraint;
   assert(tc.hasConstraint());
-  if (!tc.isTypeVar() && !tc.isTypeConstant() &&
-      !tc.check(vmStack().topTV(), func)) {
-    raise_return_typehint_error(
-      folly::sformat(
-        "Argument {} returned from {}() as an inout parameter must be of type "
-        "{}, {} given",
-        paramId.n + 1,
-        func->fullDisplayName(),
-        tc.displayName(func),
-        describe_actual_type(vmStack().topTV(), tc.isHHType())
-      )
-    );
+  if (!tc.isTypeVar() && !tc.isTypeConstant()) {
+    tc.verifyOutParam(vmStack().topTV(), func, paramId.n);
   }
 }
 

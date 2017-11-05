@@ -123,6 +123,84 @@ void raise_hackarr_compat_notice(const std::string& msg) {
   raise_notice("Hack Array Compat: %s", msg.c_str());
 }
 
+namespace {
+
+void raise_hackarr_type_hint_impl(const Func* func,
+                                  const ArrayData* ad,
+                                  AnnotType at,
+                                  folly::Optional<int> param) {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+
+  auto const name = [&]{
+    if (at == AnnotType::VArray) return "varray";
+    if (at == AnnotType::DArray) return "darray";
+    if (at == AnnotType::VArrOrDArr) return "varray_or_darray";
+    if (at == AnnotType::Array) return "array";
+    always_assert(false);
+  }();
+
+  auto const given = [&]{
+    if (ad->isVArray()) return "varray";
+    if (ad->isDArray()) return "darray";
+    return "array";
+  }();
+
+  if (param) {
+    raise_notice(
+      "Hack Array Compat: Argument %d to %s() must be of type %s, %s given",
+      *param + 1, func->fullDisplayName()->data(), name, given
+    );
+  } else {
+    raise_notice(
+      "Hack Array Compat: Value returned from %s() must be of type %s, "
+      "%s given",
+      func->fullDisplayName()->data(), name, given
+    );
+  }
+}
+
+}
+
+void raise_hackarr_type_hint_param_notice(const Func* func,
+                                          const ArrayData* ad,
+                                          AnnotType at,
+                                          int param) {
+  raise_hackarr_type_hint_impl(func, ad, at, param);
+}
+
+void raise_hackarr_type_hint_ret_notice(const Func* func,
+                                        const ArrayData* ad,
+                                        AnnotType at) {
+  raise_hackarr_type_hint_impl(func, ad, at, folly::none);
+}
+
+void raise_hackarr_type_hint_outparam_notice(const Func* func,
+                                             const ArrayData* ad,
+                                             AnnotType at,
+                                             int param) {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+
+  auto const name = [&]{
+    if (at == AnnotType::VArray) return "varray";
+    if (at == AnnotType::DArray) return "darray";
+    if (at == AnnotType::VArrOrDArr) return "varray_or_darray";
+    if (at == AnnotType::Array) return "array";
+    always_assert(false);
+  }();
+
+  auto const given = [&]{
+    if (ad->isVArray()) return "varray";
+    if (ad->isDArray()) return "darray";
+    return "array";
+  }();
+
+  raise_notice(
+    "Hack Array Compat: Argument %d returned from %s() as an inout parameter "
+    "must be of type %s, %s given",
+    param + 1, func->fullDisplayName()->data(), name, given
+  );
+}
+
 void raise_call_to_undefined(const StringData* name, const Class* cls) {
   if (LIKELY(!needsStripInOut(name))) {
     if (cls) {

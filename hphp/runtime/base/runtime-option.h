@@ -716,6 +716,7 @@ struct RuntimeOption {
   F(bool, HackArrCompatNotices, false)                                  \
   F(bool, HackArrCompatIsArrayNotices, false)                           \
   F(bool, HackArrCompatPromoteNotices, false)                           \
+  F(bool, HackArrCompatTypeHintNotices, false)                          \
   F(bool, CreateInOutWrapperFunctions, true)                            \
   F(bool, ReffinessInvariance, false)                                   \
   F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \

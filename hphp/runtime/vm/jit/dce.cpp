@@ -164,6 +164,7 @@ bool canDCE(IRInstruction* inst) {
   case IsScalarType:
   case IsWaitHandle:
   case IsCol:
+  case IsDVArray:
   case UnboxPtr:
   case LdStk:
   case LdLoc:
@@ -484,6 +485,7 @@ bool canDCE(IRInstruction* inst) {
   case VerifyRetCls:
   case VerifyRetFail:
   case VerifyRetFailHard:
+  case RaiseHackArrParamNotice:
   case RaiseUninitLoc:
   case RaiseUndefProp:
   case RaiseMissingArg:

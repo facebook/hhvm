@@ -2216,7 +2216,7 @@ FPushCufSafe <num params> [C C] ->  [C C:Bool]
 
 CufSafeArray   [C C R] -> [C]
 
-  Pops 3 elements from the stack, and pushes array($2, $1), preserving refs.
+  Pops 3 elements from the stack, and pushes varray[$2, $1], preserving refs.
 
 CufSafeReturn  [C C R] -> [R]
 

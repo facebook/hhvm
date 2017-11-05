@@ -210,7 +210,7 @@ function fb_lazy_realpath(string $filename): mixed;
  */
 <<__HipHopSpecific, __Native>>
 function fb_call_user_func_safe(mixed $function,
-                                ...$argv): array;
+                                ...$argv): varray;
 
 /* This function invokes $function with the arguments specified in its
  * parameter list. If the function is not defined, $default_rval is returned.
@@ -239,4 +239,4 @@ function fb_call_user_func_safe_return(mixed $function,
  */
 <<__HipHopSpecific, __Native>>
 function fb_call_user_func_array_safe(mixed $function,
-                                      array $params): array;
+                                      array $params): varray;

@@ -2940,8 +2940,10 @@ void in(ISS& env, const bc::FCallUnpack& op) {
 }
 
 void in(ISS& env, const bc::CufSafeArray&) {
-  popR(env); popC(env); popC(env);
-  push(env, TArr);
+  auto val1 = popR(env);
+  auto val2 = popC(env);
+  popC(env);
+  push(env, arr_packed_varray({std::move(val2), std::move(val1)}));
 }
 
 void in(ISS& env, const bc::CufSafeReturn&) {

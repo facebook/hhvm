@@ -5269,7 +5269,7 @@ OPTBLD_INLINE void iopFCallUnpack(PC& pc, intva_t numArgs) {
 }
 
 OPTBLD_INLINE void iopCufSafeArray() {
-  Array ret;
+  auto ret = Array::CreateVArray();
   ret.append(tvAsVariant(vmStack().top() + 1));
   ret.appendWithRef(tvAsVariant(vmStack().top() + 0));
   vmStack().popTV();

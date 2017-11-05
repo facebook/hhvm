@@ -65,51 +65,56 @@ function returns_traversable($v): Traversable { return $v; }
 function returns_indexish($v): Indexish { return $v; }
 
 function test1() {
-  $values = vec[
-    null,
-    false,
-    true,
-    'abc',
-    123,
-    1.234,
-    vec[],
-    vec[1, 2, 3, 4],
-    dict[],
-    dict[1 => 'a', 2 => 'b'],
-    keyset[],
-    keyset[100, 'abc', 200],
-    xml_parser_create(),
-    new stdclass(),
-    [],
-    [1, 2, 3, 4],
-    varray[],
-    varray[1, 2, 3],
-    darray[],
-    darray['a' => 1, 'b' => 2, 'c' => 3]
-  ];
+  $values =
+    __hhvm_intrinsics\launder_value(
+      vec[
+        null,
+        false,
+        true,
+        'abc',
+        123,
+        1.234,
+        vec[],
+        vec[1, 2, 3, 4],
+        dict[],
+        dict[1 => 'a', 2 => 'b'],
+        keyset[],
+        keyset[100, 'abc', 200],
+        xml_parser_create(),
+        new stdclass(),
+        [],
+        [1, 2, 3, 4],
+        varray[],
+        varray[1, 2, 3],
+        darray[],
+        darray['a' => 1, 'b' => 2, 'c' => 3]
+      ]
+    );
 
-  $funcs = vec[
-    'takes_array',
-    'takes_nullable_array',
-    'takes_varray',
-    'takes_nullable_varray',
-    'takes_darray',
-    'takes_nullable_darray',
-    'takes_varray_or_darray',
-    'takes_nullable_varray_or_darray',
+  $funcs = __hhvm_intrinsics\launder_value(
+    vec[
+      'takes_array',
+      'takes_nullable_array',
+      'takes_varray',
+      'takes_nullable_varray',
+      'takes_darray',
+      'takes_nullable_darray',
+      'takes_varray_or_darray',
+      'takes_nullable_varray_or_darray',
 
-    'takes_varray2',
-    'takes_darray2',
+      'takes_varray2',
+      'takes_darray2',
 
-    'returns_array',
-    'returns_nullable_array',
-    'returns_varray',
-    'returns_nullable_varray',
-    'returns_darray',
-    'returns_nullable_darray',
-    'returns_varray_or_darray',
-    'returns_nullable_varray_or_darray'
-  ];
+      'returns_array',
+      'returns_nullable_array',
+      'returns_varray',
+      'returns_nullable_varray',
+      'returns_darray',
+      'returns_nullable_darray',
+      'returns_varray_or_darray',
+      'returns_nullable_varray_or_darray'
+    ]
+  );
 
   foreach ($values as $v) {
     foreach ($funcs as $f) {
@@ -125,42 +130,46 @@ function test1() {
 }
 
 function test2() {
-  $values = vec[
-    varray[1, 2, 3],
-    darray[100 => 200]
-  ];
+  $values = __hhvm_intrinsics\launder_value(
+    vec[
+      varray[1, 2, 3],
+      darray[100 => 200]
+    ]
+  );
 
-  $funcs = vec[
-    'takes_bool',
-    'takes_int',
-    'takes_str',
-    'takes_vec',
-    'takes_dict',
-    'takes_keyset',
-    'takes_resource',
-    'takes_obj',
-    'takes_foo',
-    'takes_vector',
-    'takes_map',
-    'takes_mixed',
-    'takes_traversable',
-    'takes_indexish',
+  $funcs = __hhvm_intrinsics\launder_value(
+    vec[
+      'takes_bool',
+      'takes_int',
+      'takes_str',
+      'takes_vec',
+      'takes_dict',
+      'takes_keyset',
+      'takes_resource',
+      'takes_obj',
+      'takes_foo',
+      'takes_vector',
+      'takes_map',
+      'takes_mixed',
+      'takes_traversable',
+      'takes_indexish',
 
-    'returns_bool',
-    'returns_int',
-    'returns_str',
-    'returns_vec',
-    'returns_dict',
-    'returns_keyset',
-    'returns_resource',
-    'returns_obj',
-    'returns_foo',
-    'returns_vector',
-    'returns_map',
-    'returns_mixed',
-    'returns_traversable',
-    'returns_indexish'
-  ];
+      'returns_bool',
+      'returns_int',
+      'returns_str',
+      'returns_vec',
+      'returns_dict',
+      'returns_keyset',
+      'returns_resource',
+      'returns_obj',
+      'returns_foo',
+      'returns_vector',
+      'returns_map',
+      'returns_mixed',
+      'returns_traversable',
+      'returns_indexish'
+    ]
+  );
 
   foreach ($values as $v) {
     foreach ($funcs as $f) {

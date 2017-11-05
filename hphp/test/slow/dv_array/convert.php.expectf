@@ -15,6 +15,8 @@ Exception: Double to varray conversion
 ============== test_varray =========================
 array(0) {
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(4) {
   [0]=>
@@ -26,6 +28,8 @@ array(4) {
   [3]=>
   int(4)
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(3) {
   [0]=>
@@ -35,9 +39,13 @@ array(3) {
   [2]=>
   int(300)
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(0) {
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(4) {
   [0]=>
@@ -49,9 +57,13 @@ array(4) {
   [3]=>
   int(4)
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(0) {
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(2) {
   [0]=>
@@ -59,9 +71,13 @@ array(2) {
   [1]=>
   string(1) "b"
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(0) {
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(3) {
   [0]=>
@@ -71,6 +87,8 @@ array(3) {
   [2]=>
   int(200)
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 Exception: Resource to varray conversion
 ============== test_varray =========================
@@ -84,6 +102,8 @@ array(3) {
   [2]=>
   string(3) "ghi"
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 Exception: ThrowIterableObj
 ============== test_varray =========================
@@ -93,6 +113,8 @@ array(2) {
   [1]=>
   string(3) "def"
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(2) {
   [0]=>
@@ -100,6 +122,8 @@ array(2) {
   [1]=>
   string(3) "100"
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(3) {
   [0]=>
@@ -109,6 +133,8 @@ array(3) {
   [2]=>
   int(300)
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(4) {
   [0]=>
@@ -120,6 +146,8 @@ array(4) {
   [3]=>
   string(1) "d"
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(3) {
   [0]=>
@@ -129,6 +157,8 @@ array(3) {
   [2]=>
   string(1) "c"
 }
+bool(true)
+bool(false)
 ============== test_varray =========================
 array(2) {
   [0]=>
@@ -136,6 +166,49 @@ array(2) {
   [1]=>
   int(100)
 }
+bool(true)
+bool(false)
+============== test_varray =========================
+array(0) {
+}
+bool(true)
+bool(false)
+============== test_varray =========================
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+============== test_varray =========================
+array(0) {
+}
+bool(true)
+bool(false)
+============== test_varray =========================
+array(3) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+  [2]=>
+  string(1) "z"
+}
+bool(true)
+bool(false)
+============== test_varray =========================
+array(2) {
+  [0]=>
+  int(111)
+  [1]=>
+  int(222)
+}
+bool(true)
+bool(false)
 ============== test_darray =========================
 Exception: Null to darray conversion
 ============== test_darray =========================
@@ -153,6 +226,8 @@ Exception: Double to darray conversion
 ============== test_darray =========================
 array(0) {
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(4) {
   [0]=>
@@ -164,6 +239,8 @@ array(4) {
   [3]=>
   int(4)
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(3) {
   ["a"]=>
@@ -173,9 +250,13 @@ array(3) {
   ["c"]=>
   int(300)
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(0) {
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(4) {
   [0]=>
@@ -187,9 +268,13 @@ array(4) {
   [3]=>
   int(4)
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(0) {
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(2) {
   [1]=>
@@ -197,9 +282,13 @@ array(2) {
   [2]=>
   string(1) "b"
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(0) {
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(3) {
   [100]=>
@@ -209,6 +298,8 @@ array(3) {
   [200]=>
   int(200)
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 Exception: Resource to darray conversion
 ============== test_darray =========================
@@ -222,6 +313,8 @@ array(3) {
   [300]=>
   string(3) "ghi"
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 Exception: ThrowIterableObj
 ============== test_darray =========================
@@ -229,11 +322,15 @@ array(1) {
   [100]=>
   string(3) "def"
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(1) {
   [100]=>
   int(100)
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(3) {
   [0]=>
@@ -243,6 +340,8 @@ array(3) {
   [2]=>
   int(300)
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(4) {
   ["a"]=>
@@ -254,6 +353,8 @@ array(4) {
   ["d"]=>
   string(1) "d"
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(3) {
   [100]=>
@@ -263,6 +364,8 @@ array(3) {
   [300]=>
   string(1) "c"
 }
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(2) {
   [0]=>
@@ -270,6 +373,49 @@ array(2) {
   [1]=>
   int(100)
 }
+bool(false)
+bool(true)
+============== test_darray =========================
+array(0) {
+}
+bool(false)
+bool(true)
+============== test_darray =========================
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(false)
+bool(true)
+============== test_darray =========================
+array(0) {
+}
+bool(false)
+bool(true)
+============== test_darray =========================
+array(3) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+  [2]=>
+  string(1) "z"
+}
+bool(false)
+bool(true)
+============== test_darray =========================
+array(2) {
+  ["key1"]=>
+  int(111)
+  ["key2"]=>
+  int(222)
+}
+bool(false)
+bool(true)
 ============== test_indirect (HH\varray) ==================
 Exception: Null to varray conversion
 ============== test_indirect (HH\varray) ==================
@@ -287,6 +433,8 @@ Exception: Double to varray conversion
 ============== test_indirect (HH\varray) ==================
 array(0) {
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(4) {
   [0]=>
@@ -298,6 +446,8 @@ array(4) {
   [3]=>
   int(4)
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(3) {
   [0]=>
@@ -307,9 +457,13 @@ array(3) {
   [2]=>
   int(300)
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(0) {
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(4) {
   [0]=>
@@ -321,9 +475,13 @@ array(4) {
   [3]=>
   int(4)
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(0) {
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(2) {
   [0]=>
@@ -331,9 +489,13 @@ array(2) {
   [1]=>
   string(1) "b"
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(0) {
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(3) {
   [0]=>
@@ -343,6 +505,8 @@ array(3) {
   [2]=>
   int(200)
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 Exception: Resource to varray conversion
 ============== test_indirect (HH\varray) ==================
@@ -356,6 +520,8 @@ array(3) {
   [2]=>
   string(3) "ghi"
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 Exception: ThrowIterableObj
 ============== test_indirect (HH\varray) ==================
@@ -365,6 +531,8 @@ array(2) {
   [1]=>
   string(3) "def"
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(2) {
   [0]=>
@@ -372,6 +540,8 @@ array(2) {
   [1]=>
   string(3) "100"
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(3) {
   [0]=>
@@ -381,6 +551,8 @@ array(3) {
   [2]=>
   int(300)
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(4) {
   [0]=>
@@ -392,6 +564,8 @@ array(4) {
   [3]=>
   string(1) "d"
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(3) {
   [0]=>
@@ -401,6 +575,8 @@ array(3) {
   [2]=>
   string(1) "c"
 }
+bool(true)
+bool(false)
 ============== test_indirect (HH\varray) ==================
 array(2) {
   [0]=>
@@ -408,6 +584,49 @@ array(2) {
   [1]=>
   int(100)
 }
+bool(true)
+bool(false)
+============== test_indirect (HH\varray) ==================
+array(0) {
+}
+bool(true)
+bool(false)
+============== test_indirect (HH\varray) ==================
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+============== test_indirect (HH\varray) ==================
+array(0) {
+}
+bool(true)
+bool(false)
+============== test_indirect (HH\varray) ==================
+array(3) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+  [2]=>
+  string(1) "z"
+}
+bool(true)
+bool(false)
+============== test_indirect (HH\varray) ==================
+array(2) {
+  [0]=>
+  int(111)
+  [1]=>
+  int(222)
+}
+bool(true)
+bool(false)
 ============== test_indirect (HH\darray) ==================
 Exception: Null to darray conversion
 ============== test_indirect (HH\darray) ==================
@@ -425,6 +644,8 @@ Exception: Double to darray conversion
 ============== test_indirect (HH\darray) ==================
 array(0) {
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(4) {
   [0]=>
@@ -436,6 +657,8 @@ array(4) {
   [3]=>
   int(4)
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(3) {
   ["a"]=>
@@ -445,9 +668,13 @@ array(3) {
   ["c"]=>
   int(300)
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(0) {
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(4) {
   [0]=>
@@ -459,9 +686,13 @@ array(4) {
   [3]=>
   int(4)
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(0) {
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(2) {
   [1]=>
@@ -469,9 +700,13 @@ array(2) {
   [2]=>
   string(1) "b"
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(0) {
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(3) {
   [100]=>
@@ -481,6 +716,8 @@ array(3) {
   [200]=>
   int(200)
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 Exception: Resource to darray conversion
 ============== test_indirect (HH\darray) ==================
@@ -494,6 +731,8 @@ array(3) {
   [300]=>
   string(3) "ghi"
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 Exception: ThrowIterableObj
 ============== test_indirect (HH\darray) ==================
@@ -501,11 +740,15 @@ array(1) {
   [100]=>
   string(3) "def"
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(1) {
   [100]=>
   int(100)
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(3) {
   [0]=>
@@ -515,6 +758,8 @@ array(3) {
   [2]=>
   int(300)
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(4) {
   ["a"]=>
@@ -526,6 +771,8 @@ array(4) {
   ["d"]=>
   string(1) "d"
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(3) {
   [100]=>
@@ -535,6 +782,8 @@ array(3) {
   [300]=>
   string(1) "c"
 }
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(2) {
   [0]=>
@@ -542,3 +791,92 @@ array(2) {
   [1]=>
   int(100)
 }
+bool(false)
+bool(true)
+============== test_indirect (HH\darray) ==================
+array(0) {
+}
+bool(false)
+bool(true)
+============== test_indirect (HH\darray) ==================
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(false)
+bool(true)
+============== test_indirect (HH\darray) ==================
+array(0) {
+}
+bool(false)
+bool(true)
+============== test_indirect (HH\darray) ==================
+array(3) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+  [2]=>
+  string(1) "z"
+}
+bool(false)
+bool(true)
+============== test_indirect (HH\darray) ==================
+array(2) {
+  ["key1"]=>
+  int(111)
+  ["key2"]=>
+  int(222)
+}
+bool(false)
+bool(true)
+============== test_array =========================
+array(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+============== test_array =========================
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+bool(false)
+============== test_array =========================
+array(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+============== test_array =========================
+array(3) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+  [2]=>
+  string(1) "z"
+}
+bool(true)
+bool(false)
+bool(false)
+============== test_array =========================
+array(2) {
+  ["key1"]=>
+  int(111)
+  ["key2"]=>
+  int(222)
+}
+bool(true)
+bool(false)
+bool(false)

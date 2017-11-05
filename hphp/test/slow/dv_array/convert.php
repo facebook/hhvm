@@ -43,7 +43,10 @@ class ThrowIterableObj implements Iterator {
 function test_varray($v) {
   echo "============== test_varray =========================\n";
   try {
-    var_dump(varray($v));
+    $v2 = varray($v);
+    var_dump($v2);
+    var_dump(is_varray($v2));
+    var_dump(is_darray($v2));
   } catch (Exception $e) {
     echo "Exception: " . $e->getMessage() . "\n";
   }
@@ -52,15 +55,35 @@ function test_varray($v) {
 function test_darray($v) {
   echo "============== test_darray =========================\n";
   try {
-    var_dump(darray($v));
+    $v2 = darray($v);
+    var_dump($v2);
+    var_dump(is_varray($v2));
+    var_dump(is_darray($v2));
   } catch (Exception $e) {
     echo "Exception: " . $e->getMessage() . "\n";
   }
 }
+
+function test_array($v) {
+  echo "============== test_array =========================\n";
+  try {
+    $v2 = (array)$v;
+    var_dump($v2);
+    var_dump(is_array($v2));
+    var_dump(is_varray($v2));
+    var_dump(is_darray($v2));
+  } catch (Exception $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
+  }
+}
+
 function test_indirect($c, $v) {
   echo "============== test_indirect ($c) ==================\n";
   try {
-    var_dump($c($v));
+    $v2 = $c($v);
+    var_dump($v2);
+    var_dump(is_varray($v2));
+    var_dump(is_darray($v2));
   } catch (Exception $e) {
     echo "Exception: " . $e->getMessage() . "\n";
   }
@@ -92,7 +115,12 @@ $values = vec[
   Vector{100, 200, 300},
   Set{'a', 'b', 'c', 'd'},
   Map{100 => 'a', 200 => 'b', 300 => 'c'},
-  Pair{'a', 100}
+  Pair{'a', 100},
+  varray[],
+  varray['a', 'b', 'c'],
+  darray[],
+  darray[0 => 'x', 1 => 'y', 2 => 'z'],
+  darray['key1' => 111, 'key2' => 222]
 ];
 $values = __hhvm_intrinsics\launder_value($values);
 
@@ -110,4 +138,16 @@ foreach ($values as $v) {
 }
 foreach ($values as $v) {
   test_indirect($c2, $v);
+}
+
+$dvvalues = vec[
+  varray[],
+  varray['a', 'b', 'c'],
+  darray[],
+  darray[0 => 'x', 1 => 'y', 2 => 'z'],
+  darray['key1' => 111, 'key2' => 222]
+];
+$dvvalues = __hhvm_intrinsics\launder_value($dvvalues);
+foreach ($dvvalues as $v) {
+  test_array($v);
 }

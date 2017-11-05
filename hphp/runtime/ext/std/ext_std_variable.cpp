@@ -528,7 +528,6 @@ void StandardExtension::initVariable() {
   HHVM_FALIAS(HH\\is_keyset, HH_is_keyset);
   HHVM_FALIAS(HH\\is_varray, HH_is_varray);
   HHVM_FALIAS(HH\\is_darray, HH_is_darray);
-  HHVM_FALIAS(HH\\is_varray_or_darray, is_array);
   HHVM_FE(is_object);
   HHVM_FE(is_resource);
   HHVM_FE(boolval);

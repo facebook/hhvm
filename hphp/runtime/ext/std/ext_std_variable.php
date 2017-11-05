@@ -233,9 +233,6 @@ namespace HH {
   <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
   function is_darray(mixed $var): bool;
 
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
-  function is_varray_or_darray(mixed $var): bool;
-
   /*
    * This function returns an array of an object's properties in the same manner
    * as casting the object to an array.

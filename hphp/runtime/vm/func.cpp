@@ -960,7 +960,6 @@ FuncSet s_ignores_frame = {
   "HH\\is_keyset",
   "HH\\is_varray",
   "HH\\is_darray",
-  "HH\\is_varray_or_darray",
   "is_object",
   "is_resource",
   "boolval",

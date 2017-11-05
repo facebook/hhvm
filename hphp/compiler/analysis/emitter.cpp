@@ -6106,13 +6106,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       visit((*call->getParams())[0]);
       emitIsType(e, IsTypeOp::Keyset);
       return true;
-    } else if (((call->isCallToFunction("is_varray_or_darray") &&
-                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
-                call->isCallToFunction("HH\\is_varray_or_darray")) &&
-               params && params->getCount() == 1) {
-      visit((*call->getParams())[0]);
-      emitIsType(e, IsTypeOp::Arr);
-      return true;
     }
   #define TYPE_CONVERT_INSTR(what, What)                             \
     else if (call->isCallToFunction(#what"val") &&                 \

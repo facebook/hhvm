@@ -122,7 +122,8 @@ module Function = struct
     "is_vec";
     "is_dict";
     "is_keyset";
-    "is_varray_or_darray";
+    "is_varray";
+    "is_darray";
   ]
 
   let builtins_at_top = [

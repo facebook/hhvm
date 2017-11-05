@@ -22,3 +22,12 @@ var_dump(DCONST1);
 var_dump(DCONST2);
 var_dump(A::DCONST3);
 var_dump(A::DCONST4);
+
+var_dump(is_varray(VCONST1));
+var_dump(is_varray(VCONST2));
+var_dump(is_varray(A::VCONST3));
+var_dump(is_varray(A::VCONST4));
+var_dump(is_darray(DCONST1));
+var_dump(is_darray(DCONST2));
+var_dump(is_darray(A::DCONST3));
+var_dump(is_darray(A::DCONST4));

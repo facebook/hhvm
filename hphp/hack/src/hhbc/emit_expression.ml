@@ -157,8 +157,7 @@ let istype_op id =
   | "is_bool" -> Some OpBool
   | "is_float" | "is_real" | "is_double" -> Some OpDbl
   | "is_string" -> Some OpStr
-  | "is_varray_or_darray" when enable_hh_syntax -> Some OpArr
-  | "is_array"  | "hh\\is_varray_or_darray" -> Some OpArr
+  | "is_array" -> Some OpArr
   | "is_object" -> Some OpObj
   | "is_null" -> Some OpNull
   | "is_scalar" -> Some OpScalar

@@ -111,10 +111,13 @@ let string_of_lit_const instruction =
     | NewKeysetArray i  -> sep ["NewKeysetArray"; string_of_int i]
     | NewVecArray i     -> sep ["NewVecArray"; string_of_int i]
     | NewVArray i       -> sep ["NewVArray"; string_of_int i]
+    | NewDArray i       -> sep ["NewDArray"; string_of_int i]
     | NewMixedArray i   -> sep ["NewMixedArray"; string_of_int i]
     | NewPackedArray i  -> sep ["NewPackedArray"; string_of_int i]
     | NewStructArray l  ->
       sep ["NewStructArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
+    | NewStructDArray l  ->
+      sep ["NewStructDArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | NewPair -> "NewPair"
     | ClsCns (cnsid, cr) ->
       sep ["ClsCns"; string_of_const_id cnsid; string_of_classref cr]

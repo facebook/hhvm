@@ -168,6 +168,7 @@ let instr_cuf_safe_array = instr (ICall CufSafeArray)
 let instr_cuf_safe_return = instr (ICall CufSafeReturn)
 let instr_clone = instr (IOp Clone)
 let instr_newstructarray keys = instr (ILitConst (NewStructArray keys))
+let instr_newstructdarray keys = instr (ILitConst (NewStructDArray keys))
 let instr_newcol collection_type = instr (ILitConst (NewCol collection_type))
 let instr_colfromarray collection_type =
   instr (ILitConst (ColFromArray collection_type))

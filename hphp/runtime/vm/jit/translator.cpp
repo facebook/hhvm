@@ -123,9 +123,11 @@ static const struct {
   { OpNewLikeArrayL,  {Local,         Stack1,       OutArray        }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray        }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray        }},
+  { OpNewStructDArray,{StackN,        Stack1,       OutArray        }},
   { OpNewVecArray,    {StackN,        Stack1,       OutVec          }},
   { OpNewKeysetArray, {StackN,        Stack1,       OutKeyset       }},
   { OpNewVArray,   {StackN,           Stack1,       OutArray        }},
+  { OpNewDArray,   {None,             Stack1,       OutArray        }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutModifiedInput3 }},
   { OpAddElemV,    {StackTop3,        Stack1,       OutModifiedInput3 }},
   { OpAddNewElemC, {StackTop2,        Stack1,       OutModifiedInput2 }},
@@ -579,7 +581,9 @@ int64_t getStackPopped(PC pc) {
     case Op::MemoSet:
       return getImm(pc, 0).u_IVA + 1;
 
-    case Op::NewStructArray: return getImmVector(pc).size();
+    case Op::NewStructArray:
+    case Op::NewStructDArray:
+      return getImmVector(pc).size();
 
     default:             break;
   }
@@ -862,6 +866,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::FPassS:
   case Op::FCallBuiltin:
   case Op::NewStructArray:
+  case Op::NewStructDArray:
   case Op::Switch:
   case Op::SSwitch:
   case Op::Lt:
@@ -1004,6 +1009,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::NewVecArray:
   case Op::NewKeysetArray:
   case Op::NewVArray:
+  case Op::NewDArray:
   case Op::Not:
   case Op::Null:
   case Op::NullUninit:

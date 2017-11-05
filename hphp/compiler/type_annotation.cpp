@@ -300,7 +300,7 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
     return TypeStructure::Kind::T_fun;
   }
   if (!strcasecmp(m_name.c_str(), "array")) {
-    return (m_shape)
+    return m_shape
       ? TypeStructure::Kind::T_shape
       : TypeStructure::Kind::T_array;
   }
@@ -308,7 +308,9 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
     return TypeStructure::Kind::T_array;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\darray")) {
-    return TypeStructure::Kind::T_array;
+    return m_shape
+      ? TypeStructure::Kind::T_shape
+      : TypeStructure::Kind::T_array;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) {
     return TypeStructure::Kind::T_array;

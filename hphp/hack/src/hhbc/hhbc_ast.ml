@@ -176,9 +176,11 @@ type instruct_lit_const =
   | NewArray of int (* capacity hint *)
   | NewMixedArray of int (* capacity hint *)
   | NewDictArray of int (* capacity hint *)
+  | NewDArray of int (* capacity hint *)
   | NewLikeArrayL of local_id * int (* capacity hint *)
   | NewPackedArray of int
   | NewStructArray of Litstr.id list
+  | NewStructDArray of Litstr.id list
   | NewVArray of int
   | NewVecArray of int
   | NewKeysetArray of int

@@ -1161,10 +1161,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case NewStructArray:
+  case NewStructDArray:
     {
       // NewStructArray is reading elements from the stack, but writes to a
       // completely new array, so we can treat the store set as empty.
-      auto const extra = inst.extra<NewStructArray>();
+      auto const extra = inst.extra<NewStructData>();
       auto const stack_in = AStack {
         inst.src(0),
         extra->offset + static_cast<int32_t>(extra->numKeys) - 1,
@@ -1374,6 +1375,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NewPair:
   case NewInstanceRaw:
   case NewMixedArray:
+  case NewDArray:
   case NewDictArray:
   case AllocPackedArray:
   case AllocVArray:

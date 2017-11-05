@@ -99,6 +99,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
       case T_ARRAY:
       case T_ARRAY_CAST:
       case T_VARRAY:
+      case T_DARRAY:
       case T_VEC:
       case T_DICT:
       case T_KEYSET:

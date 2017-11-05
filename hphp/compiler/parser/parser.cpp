@@ -1021,7 +1021,7 @@ void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {
   if (op != T_ARRAY && !m_scanner.isHHSyntaxEnabled()) {
     PARSE_ERROR("Typed collection is not enabled");
   }
-  onUnaryOpExp(out, pairs, T_ARRAY, true);
+  onUnaryOpExp(out, pairs, op, true);
 }
 
 void Parser::onDict(Token &out, Token &pairs) {
@@ -1041,7 +1041,7 @@ void Parser::onVArray(Token& out, Token& exprs) {
 }
 
 void Parser::onDArray(Token& out, Token& exprs) {
-  onUnaryOpExp(out, exprs, T_ARRAY, true);
+  onUnaryOpExp(out, exprs, T_DARRAY, true);
 }
 
 void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
@@ -2416,7 +2416,7 @@ void Parser::onClsCnsShapeField(Token& out,
 void Parser::onShape(
     Token &out, const Token &shapeFieldsList, bool terminatedWithEllipsis) {
   out.typeAnnotation = std::make_shared<TypeAnnotation>(
-    "array", shapeFieldsList.typeAnnotation);
+    "HH\\darray", shapeFieldsList.typeAnnotation);
   out.typeAnnotation->setShape();
   if (terminatedWithEllipsis) {
     out.typeAnnotation->setAllowsUnknownFields();

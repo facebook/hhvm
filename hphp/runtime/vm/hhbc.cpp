@@ -602,6 +602,7 @@ void staticArrayStreamer(const ArrayData* ad, std::string& out) {
   else {
     assert(ad->isPHPArray());
     if (ad->isVArray()) out += "varray(";
+    else if (ad->isDArray()) out += "darray(";
     else out += "array(";
   }
 

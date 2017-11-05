@@ -250,6 +250,7 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstRawPtr ar,
     auto const token = [&]{
       if (value.isPHPArray()) {
         if (value.asCArrRef().isVArray()) return T_VARRAY;
+        if (value.asCArrRef().isDArray()) return T_DARRAY;
         return T_ARRAY;
       }
       if (value.isVecArray()) return T_VEC;

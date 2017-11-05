@@ -75,6 +75,7 @@ inline void UnaryOpExpression::ctorInit() {
     break;
   case T_ARRAY:
   case T_VARRAY:
+  case T_DARRAY:
   case T_DICT:
   case T_VEC:
   case T_KEYSET:
@@ -196,6 +197,7 @@ bool UnaryOpExpression::isScalar() const {
   case '@':
     return !RuntimeOption::EvalDisableHphpcOpts && m_exp->isScalar();
   case T_ARRAY:
+  case T_DARRAY:
     return isArrayScalar(m_exp);
   case T_VEC:
   case T_VARRAY:
@@ -237,7 +239,7 @@ bool UnaryOpExpression::isThis() const {
 
 bool UnaryOpExpression::getScalarValue(Variant &value) {
   if (m_exp) {
-    if (m_op == T_ARRAY) {
+    if (m_op == T_ARRAY || m_op == T_DARRAY) {
       return m_exp->getScalarValue(value);
     }
     if (m_op == T_VARRAY) {
@@ -309,6 +311,11 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
 
   if (m_op == T_VARRAY) {
     value = Array::CreateVArray();
+    return true;
+  }
+
+  if (m_op == T_DARRAY) {
+    value = Array::CreateDArray();
     return true;
   }
 
@@ -464,6 +471,7 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstRawPtr ar) {
     }
   } else if (m_op != T_ARRAY &&
              m_op != T_VARRAY &&
+             m_op != T_DARRAY &&
              m_op != T_VEC &&
              m_op != T_DICT &&
              m_op != T_KEYSET &&
@@ -555,6 +563,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case '@':             cg_printf("@");             break;
     case T_ARRAY:         cg_printf("array(");        break;
     case T_VARRAY:        cg_printf("varray[");       break;
+    case T_DARRAY:        cg_printf("darray[");       break;
     case T_DICT:          cg_printf("dict[");         break;
     case T_VEC:           cg_printf("vec[");          break;
     case T_KEYSET:        cg_printf("keyset[");       break;
@@ -587,6 +596,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_EMPTY:
     case T_EVAL:          cg_printf(")");  break;
     case T_VARRAY:
+    case T_DARRAY:
     case T_DICT:
     case T_VEC:
     case T_KEYSET:        cg_printf("]");  break;

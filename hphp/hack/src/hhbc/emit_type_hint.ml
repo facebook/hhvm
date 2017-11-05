@@ -144,7 +144,7 @@ match h with
 
 (* Shapes and tuples are just arrays *)
 | A.Hshape _ ->
-  let tc_name = Some "array" in
+  let tc_name = Some "HH\\darray" in
   let tc_flags = [TC.HHType; TC.ExtendedHint] in
   TC.make tc_name tc_flags
 

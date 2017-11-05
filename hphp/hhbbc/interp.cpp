@@ -385,7 +385,21 @@ void in(ISS& env, const bc::NewVArray& op) {
   constprop(env);
 }
 
+void in(ISS& env, const bc::NewDArray& op) {
+  push(env, op.arg1 == 0 ?
+       effect_free(env), aempty() : some_aempty());
+}
+
 void in(ISS& env, const bc::NewStructArray& op) {
+  auto map = MapElems{};
+  for (auto it = op.keys.end(); it != op.keys.begin(); ) {
+    map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
+  }
+  push(env, arr_map(std::move(map)));
+  constprop(env);
+}
+
+void in(ISS& env, const bc::NewStructDArray& op) {
   auto map = MapElems{};
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {
     map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));

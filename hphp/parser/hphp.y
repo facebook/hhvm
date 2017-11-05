@@ -2392,7 +2392,7 @@ static_shape_pair_list:
 ;
 
 shape_literal:
-    T_SHAPE '(' shape_pair_list ')'   { _p->onArray($$, $3, T_ARRAY);}
+    T_SHAPE '(' shape_pair_list ')'   { _p->onArray($$, $3, T_DARRAY);}
 ;
 
 array_literal:
@@ -2840,7 +2840,7 @@ static_expr:
     static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | '[' static_array_pair_list ']'     { _p->onArray($$,$2,T_ARRAY); }
   | T_SHAPE '('
-    static_shape_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
+    static_shape_pair_list ')'         { _p->onArray($$,$3,T_DARRAY);}
   | static_dict_literal                { $$ = $1;}
   | static_vec_literal                 { $$ = $1;}
   | static_keyset_literal              { $$ = $1;}
@@ -2999,7 +2999,7 @@ static_scalar_ae:
     static_array_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY);}
   | '[' static_array_pair_list_ae ']'  { _p->onArray($$,$2,T_ARRAY);}
   | T_SHAPE '('
-    static_shape_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY); }
+    static_shape_pair_list_ae ')'      { _p->onArray($$,$3,T_DARRAY);}
   | static_dict_literal_ae             { $$ = $1;}
   | static_vec_literal_ae              { $$ = $1;}
   | static_keyset_literal_ae           { $$ = $1;}
@@ -3723,7 +3723,7 @@ hh_shape_member_list:
 hh_shape_type:
     T_SHAPE
     '(' hh_shape_member_list ')'      { $$ = $3;
-                                        $$.setText("array"); }
+                                        $$.setText("HH\\darray"); }
 ;
 
 hh_access_type_start:

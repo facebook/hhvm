@@ -922,7 +922,8 @@ private:
     // This is a dict, but being created for the purpose of initializing a Set.
     DictForSetCollection,
     Keyset,
-    VArray
+    VArray,
+    DArray
   };
 
   std::deque<PostponedMeth> m_postponedMeths;
@@ -5321,6 +5322,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     if (op == T_VARRAY) {
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
       emitArrayInit(e, el, ArrayType::VArray);
+      return true;
+    }
+
+    if (op == T_DARRAY) {
+      auto el = static_pointer_cast<ExpressionList>(u->getExpression());
+      emitArrayInit(e, el, ArrayType::DArray);
       return true;
     }
 
@@ -11476,6 +11483,11 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
           Array::attach(PackedArray::MakeReserveVArray(0))
         );
         break;
+      case ArrayType::DArray:
+        m_staticArrays.push_back(
+          Array::attach(MixedArray::MakeReserveDArray(0))
+        );
+        break;
       case ArrayType::Vec:
         m_staticArrays.push_back(Array::attach(PackedArray::MakeReserveVec(0)));
         break;
@@ -11547,6 +11559,10 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
         initArray(u->getExpression(), ArrayType::VArray);
         break;
       }
+      if (u->getOp() == T_DARRAY) {
+        initArray(u->getExpression(), ArrayType::DArray);
+        break;
+      }
       if (u->getOp() == T_DICT) {
         initArray(u->getExpression(), ArrayType::Dict);
         break;
@@ -11586,6 +11602,9 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
       case ArrayType::VArray:
         e.Array(staticEmptyVArray());
         break;
+      case ArrayType::DArray:
+        e.Array(staticEmptyDArray());
+        break;
       case ArrayType::Vec:
         e.Vec(staticEmptyVecArray());
         break;
@@ -11603,6 +11622,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
   auto const scalar = [&]{
     switch (type) {
       case ArrayType::Array:
+      case ArrayType::DArray:
         return isArrayScalar(el);
       case ArrayType::VArray:
       case ArrayType::Vec:
@@ -11623,9 +11643,11 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     switch (type) {
       case ArrayType::Array:
       case ArrayType::VArray:
+      case ArrayType::DArray:
         assert(tv.m_data.parr->isPHPArray());
         assert(type != ArrayType::VArray || tv.m_data.parr->isVArray());
-        assert(type != ArrayType::Array || tv.m_data.parr->isNotDVArray());
+        assert(type != ArrayType::DArray || tv.m_data.parr->isDArray());
+        assert(type != ArrayType::Array  || tv.m_data.parr->isNotDVArray());
         e.Array(tv.m_data.parr);
         break;
       case ArrayType::Vec:
@@ -11717,6 +11739,22 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
 
   if (type == ArrayType::Dict) {
     e.NewDictArray(capacityHint);
+    visit(el);
+    return;
+  }
+
+  if (type == ArrayType::DArray) {
+    std::vector<std::string> keys;
+    if (isStructInit(el, keys)) {
+      for (int i = 0, n = keys.size(); i < n; i++) {
+        auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
+        visit(ap->getValue());
+        emitConvertToCell(e);
+      }
+      e.NewStructDArray(keys);
+      return;
+    }
+    e.NewDArray(capacityHint);
     visit(el);
     return;
   }
@@ -11864,7 +11902,9 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
       return !initExpr->isScalar();
     case Expression::KindOfUnaryOpExpression: {
       auto u = static_pointer_cast<UnaryOpExpression>(initExpr);
-      if (u->getOp() == T_ARRAY || u->getOp() == T_DICT) {
+      if (u->getOp() == T_ARRAY ||
+          u->getOp() == T_DICT ||
+          u->getOp() == T_DARRAY) {
         auto el = static_pointer_cast<ExpressionList>(u->getExpression());
         if (el) {
           int n = el->getCount();

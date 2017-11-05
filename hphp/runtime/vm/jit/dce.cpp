@@ -202,6 +202,7 @@ bool canDCE(IRInstruction* inst) {
   case NewInstanceRaw:
   case NewArray:
   case NewMixedArray:
+  case NewDArray:
   case NewDictArray:
   case NewLikeArray:
   case NewCol:
@@ -442,6 +443,7 @@ bool canDCE(IRInstruction* inst) {
   case InitPackedLayoutArrayLoop:
   case NewKeysetArray:
   case NewStructArray:
+  case NewStructDArray:
   case Clone:
   case InlineReturn:
   case CallArray:

@@ -1461,9 +1461,13 @@ To string conversions:
 
   Allocate a new array with the expected capacity S0.
 
-| NewMixedArray, D(Arr), C(Int), PRc
+| NewMixedArray, DArrMixed, C(Int), PRc
 
   Allocate a new array in mixed mode with the expected capacity S0.
+
+| NewDArray, DArrMixed, C(Int), PRc
+
+  Allocate a new dict-like array with the expected capacity S0.
 
 | NewDictArray, D(Dict), C(Int), PRc
 
@@ -1512,11 +1516,17 @@ To string conversions:
   AllocVecArray that was too big to use a series of InitPackedLayoutArray
   instructions.
 
-| NewStructArray<offset,keys...>, D(Arr), S(StkPtr), PRc|CRc
+| NewStructArray<offset,keys...>, DArrMixed, S(StkPtr), PRc|CRc
 
   Allocate a new key/value array, given N immediate keys and taking N elements
   off the stack given by S0, at `offset'. This instruction assumes it can take
   the values from the stack without increfing them.
+
+| NewStructDArray<offset,keys...>, DArrMixed, S(StkPtr), PRc|CRc
+
+  Allocate a new key/value dict-like array, given N immediate keys and taking N
+  elements off the stack given by S0, at `offset'. This instruction assumes it
+  can take the values from the stack without increfing them.
 
 | NewCol<type>, DCol, NA, PRc
 

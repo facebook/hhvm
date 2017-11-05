@@ -229,6 +229,9 @@ struct MixedArray final : ArrayData,
    */
   static MixedArray* MakeStruct(uint32_t size, const StringData* const* keys,
                                const TypedValue* values);
+  static MixedArray* MakeStructDArray(uint32_t size,
+                                      const StringData* const* keys,
+                                      const TypedValue* values);
 
   /*
    * Allocate an uncounted MixedArray and copy the values from the
@@ -475,6 +478,8 @@ private:
   MixedArray* copyMixed() const;
   static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk,
                                     ArrayData::DVArray);
+  static MixedArray* MakeStructImpl(uint32_t, const StringData* const*,
+                                    const TypedValue*, ArrayData::DVArray);
 
   static ArrayData* FromDictImpl(ArrayData*, bool, bool);
 

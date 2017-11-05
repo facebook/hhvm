@@ -289,6 +289,14 @@ void emitNewMixedArray(IRGS& env, uint32_t capacity) {
   }
 }
 
+void emitNewDArray(IRGS& env, uint32_t capacity) {
+  if (capacity == 0) {
+    push(env, cns(env, staticEmptyDArray()));
+  } else {
+    push(env, gen(env, NewDArray, cns(env, capacity)));
+  }
+}
+
 void emitNewDictArray(IRGS& env, uint32_t capacity) {
   push(env, gen(env, NewDictArray, cns(env, capacity)));
 }
@@ -374,7 +382,9 @@ void emitNewVArray(IRGS& env, uint32_t numArgs) {
   emitNewPackedLayoutArray(env, numArgs, AllocVArray);
 }
 
-void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
+namespace {
+
+void newStructImpl(IRGS& env, const ImmVector& immVec, Opcode op) {
   auto const numArgs = immVec.size();
   auto const ids = immVec.vec32();
 
@@ -387,7 +397,17 @@ void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
   }
 
   discard(env, numArgs);
-  push(env, gen(env, NewStructArray, extra, sp(env)));
+  push(env, gen(env, op, extra, sp(env)));
+}
+
+}
+
+void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
+  newStructImpl(env, immVec, NewStructArray);
+}
+
+void emitNewStructDArray(IRGS& env, const ImmVector& immVec) {
+  newStructImpl(env, immVec, NewStructDArray);
 }
 
 void emitAddElemC(IRGS& env) {

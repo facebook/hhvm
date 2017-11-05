@@ -255,6 +255,17 @@ IMPL_OPCODE_CALL(NewDictArray)
 IMPL_OPCODE_CALL(AllocPackedArray)
 IMPL_OPCODE_CALL(AllocVecArray)
 
+void cgNewDArray(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(MixedArray::MakeReserveDArray),
+    callDest(env, inst),
+    SyncOptions::None,
+    argGroup(env, inst).ssa(0)
+  );
+}
+
 void cgAllocVArray(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<PackedArrayData>();
   cgCallHelper(
@@ -267,16 +278,20 @@ void cgAllocVArray(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgNewStructArray(IRLS& env, const IRInstruction* inst) {
+namespace {
+
+void newStructImpl(IRLS& env,
+                   const IRInstruction* inst,
+                   MixedArray* (*f)(uint32_t,
+                                    const StringData* const*,
+                                    const TypedValue*)
+                  ) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<NewStructData>();
   auto& v = vmain(env);
 
   auto table = v.allocData<const StringData*>(extra->numKeys);
   memcpy(table, extra->keys, extra->numKeys * sizeof(*extra->keys));
-
-  MixedArray* (*f)(uint32_t, const StringData* const*, const TypedValue*) =
-    &MixedArray::MakeStruct;
 
   auto const args = argGroup(env, inst)
     .imm(extra->numKeys)
@@ -285,6 +300,16 @@ void cgNewStructArray(IRLS& env, const IRInstruction* inst) {
 
   cgCallHelper(v, env, CallSpec::direct(f), callDest(env, inst),
                SyncOptions::None, args);
+}
+
+}
+
+void cgNewStructArray(IRLS& env, const IRInstruction* inst) {
+  newStructImpl(env, inst, MixedArray::MakeStruct);
+}
+
+void cgNewStructDArray(IRLS& env, const IRInstruction* inst) {
+  newStructImpl(env, inst, MixedArray::MakeStructDArray);
 }
 
 void cgNewKeysetArray(IRLS& env, const IRInstruction* inst) {

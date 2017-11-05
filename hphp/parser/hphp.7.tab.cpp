@@ -1,3 +1,4 @@
+// @generated
 /* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison implementation for Yacc-like parsers in C
@@ -10771,7 +10772,7 @@ yyreduce:
 
   case 598:
 #line 2395 "hphp.y" /* yacc.c:1646  */
-    { _p->onArray((yyval), (yyvsp[-1]), T_ARRAY);}
+    { _p->onArray((yyval), (yyvsp[-1]), T_DARRAY);}
 #line 10775 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
@@ -12038,7 +12039,7 @@ yyreduce:
 
   case 802:
 #line 2843 "hphp.y" /* yacc.c:1646  */
-    { _p->onArray((yyval),(yyvsp[-1]),T_ARRAY); }
+    { _p->onArray((yyval),(yyvsp[-1]),T_DARRAY);}
 #line 12042 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
@@ -12544,7 +12545,7 @@ yyreduce:
 
   case 886:
 #line 3002 "hphp.y" /* yacc.c:1646  */
-    { _p->onArray((yyval),(yyvsp[-1]),T_ARRAY); }
+    { _p->onArray((yyval),(yyvsp[-1]),T_DARRAY);}
 #line 12548 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
@@ -13941,7 +13942,7 @@ yyreduce:
   case 1114:
 #line 3725 "hphp.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[-1]);
-                                        (yyval).setText("array"); }
+                                        (yyval).setText("HH\\darray"); }
 #line 13945 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 

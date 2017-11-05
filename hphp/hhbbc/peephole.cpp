@@ -42,6 +42,7 @@ bool poppable(Op op) {
     case Op::Dict:
     case Op::Keyset:
     case Op::NewArray:
+    case Op::NewDArray:
     case Op::NewMixedArray:
     case Op::NewDictArray:
     case Op::NewLikeArrayL:

@@ -29,6 +29,7 @@ type t =
   (* Classic PHP arrays with explicit (key,value) entries *)
   | Array of (t*t) list
   | VArray of t list
+  | DArray of (t*t) list
   (* Hack arrays: vectors, keysets, and dictionaries *)
   | Vec of t list
   | Keyset of t list
@@ -86,9 +87,9 @@ let to_bool v =
   | Int i -> i <> Int64.zero
   | Float f -> f <> 0.0
   (* Empty collections cast to false *)
-  | Dict [] | Array [] | VArray [] | Keyset [] | Vec [] -> false
+  | Dict [] | Array [] | VArray [] | DArray [] | Keyset [] | Vec [] -> false
   (* Non-empty collections cast to true *)
-  | Dict _ | Array _ | VArray _ | Keyset _ | Vec _-> true
+  | Dict _ | Array _ | VArray _ | DArray _ | Keyset _ | Vec _-> true
 
 (* try to convert numeric
  * or if allow_following passed then leading numeric string to a number *)
@@ -466,5 +467,5 @@ let cast_to_arraykey v =
   match v with
   | String s -> Some (String s)
   | Null -> Some (String "")
-  | Uninit | Array _ | VArray _ | Vec _ | Keyset _ | Dict _ -> None
+  | Uninit | Array _ | VArray _ | DArray _ | Vec _ | Keyset _ | Dict _ -> None
   | _ -> cast_to_int v

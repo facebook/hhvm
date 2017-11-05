@@ -107,9 +107,7 @@ let rec expr_to_typed_value
   | A.Id (_, id) when id = "INF" -> TV.Float infinity
   | A.Array fields -> array_to_typed_value ns fields
   | A.Varray fields -> varray_to_typed_value ns fields
-  | A.Darray es ->
-    array_to_typed_value ns @@
-      List.map es ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2))
+  | A.Darray fields -> darray_to_typed_value ns fields
   | A.Collection ((_, "vec"), fields) ->
     TV.Vec (List.map fields (value_afield_to_typed_value ns))
   | A.Collection ((_, "keyset"), fields) ->
@@ -211,8 +209,27 @@ and array_to_typed_value ns fields =
 and varray_to_typed_value ns fields =
   TV.VArray (List.map fields ~f:(expr_to_typed_value ns))
 
+and darray_to_typed_value ns fields =
+  let fields =
+    List.map
+      fields
+      ~f:(fun (v1,v2) ->
+        match v1 with
+        | (_, A.String (_, s)) ->
+           begin match Int64.of_string s with
+           | index when SU.Integer.is_decimal_int s ->
+              (TV.Int index, expr_to_typed_value ns v2)
+           | _ ->
+              (expr_to_typed_value ns v1, expr_to_typed_value ns v2)
+           | exception Failure _ ->
+              (expr_to_typed_value ns v1, expr_to_typed_value ns v2)
+           end
+        | _ -> (expr_to_typed_value ns v1, expr_to_typed_value ns v2))
+  in
+  TV.DArray (update_duplicates_in_map fields)
+
 and shape_to_typed_value ns fields =
-  TV.Array (
+  TV.DArray (
   List.map fields (fun (sf, expr) ->
     let key =
       match sf with
@@ -288,6 +305,8 @@ let rec value_to_expr_ p v =
   | TV.Keyset _ -> failwith "value_to_expr: keyset NYI"
   | TV.Array pairs -> A.Array (List.map pairs (value_pair_to_afield p))
   | TV.VArray values -> A.Varray (List.map values (value_to_expr p))
+  | TV.DArray pairs ->
+     A.Darray (List.map pairs (fun (v1,v2) -> (value_to_expr p v1, value_to_expr p v2)))
   | TV.Dict _ -> failwith "value_to_expr: dict NYI"
 and value_to_expr p v =
   (p, value_to_expr_ p v)

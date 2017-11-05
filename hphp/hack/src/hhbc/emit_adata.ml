@@ -30,6 +30,7 @@ let rec adata_to_string_seq argument =
   | TV.VArray values -> adata_collection_argument_to_string_seq "y" values
   | TV.Vec values -> adata_collection_argument_to_string_seq "v" values
   | TV.Dict pairs -> adata_dict_collection_argument_to_string_seq "D" pairs
+  | TV.DArray pairs -> adata_dict_collection_argument_to_string_seq "Y" pairs
   | TV.Keyset values -> adata_collection_argument_to_string_seq "k" values
 
 and adata_dict_collection_argument_to_string_seq col_type pairs =
@@ -117,7 +118,7 @@ let rewrite_typed_value tv =
   | TV.Int i -> Int i
   | TV.Float f -> Double (SU.Float.to_string f)
   | TV.String s -> String s
-  | TV.Array _ | TV.VArray _ -> Array (get_array_identifier tv)
+  | TV.Array _ | TV.VArray _ | TV.DArray _ -> Array (get_array_identifier tv)
   | TV.Vec _ -> Vec (get_array_identifier tv)
   | TV.Keyset _ -> Keyset (get_array_identifier tv)
   | TV.Dict _ -> Dict (get_array_identifier tv)

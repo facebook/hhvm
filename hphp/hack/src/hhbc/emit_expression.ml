@@ -74,7 +74,7 @@ let optimize_cuf () =
 let emit_nyi description =
   instr (IComment (H.nyi ^ ": " ^ description))
 
-let make_varray p es = p, A.Array (List.map es ~f:(fun e -> A.AFvalue e))
+let make_vec_like_array p es = p, A.Array (List.map es ~f:(fun e -> A.AFvalue e))
 let make_kvarray p kvs =
   p, A.Array (List.map kvs ~f:(fun (k, v) -> A.AFkvalue (k, v)))
 
@@ -485,10 +485,10 @@ and emit_shape env expr fl =
   let p = fst expr in
   let fl =
     List.map fl
-      ~f:(fun (fn, e) ->
-            A.AFkvalue ((p, extract_shape_field_name_pstring fn), e))
+             ~f:(fun (fn, e) ->
+                   ((p, extract_shape_field_name_pstring fn), e))
   in
-  emit_expr ~need_ref:false env (p, A.Array fl)
+  emit_expr ~need_ref:false env (p, A.Darray fl)
 
 and emit_tuple env p es =
   emit_expr ~need_ref:false env (p, A.Varray es)
@@ -735,16 +735,19 @@ and rename_xhp (p, s) = (p, SU.Xhp.mangle s)
 
 and emit_xhp env p id attributes children =
   (* Translate into a constructor call. The arguments are:
-   *  1) shape-like array of attributes
+   *  1) struct-like array of attributes
    *  2) vec-like array of children
    *  3) filename, for debugging
    *  4) line number, for debugging
    *)
   let convert_attr (name, v) = (A.SFlit name, Html_entities.decode_expr v) in
   let attributes = List.map ~f:convert_attr attributes in
-  let attribute_map = p, A.Shape attributes in
+  let attribute_map =
+    p, A.Array (List.map attributes
+                         ~f:(fun (k, v) ->
+                           A.AFkvalue ((p, extract_shape_field_name_pstring k), v))) in
   let dec_children = List.map ~f:Html_entities.decode_expr children in
-  let children_vec = make_varray p dec_children in
+  let children_vec = make_vec_like_array p dec_children in
   let filename = p, A.Id (p, "__FILE__") in
   let line = p, A.Id (p, "__LINE__") in
   let renamed_id = rename_xhp id in
@@ -1029,9 +1032,9 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Array es ->
     emit_box_if_necessary need_ref @@ emit_collection env expr es
   | A.Darray es ->
-    let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-    let array_e = fst expr, A.Array es in
-    emit_box_if_necessary need_ref @@ emit_collection env array_e es
+    let es2 = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
+    let darray_e = fst expr, A.Darray es in
+    emit_box_if_necessary need_ref @@ emit_collection env darray_e es2
   | A.Varray es ->
     let es2 = List.map ~f:(fun e -> A.AFvalue e) es in
     let varray_e = fst expr, A.Varray es in
@@ -1136,7 +1139,7 @@ and emit_keyvalue_collection name env es constructor =
     transform_instr;
   ]
 
-and emit_struct_array env es =
+and emit_struct_array env es ctor =
   let es =
     List.map es
       ~f:(function A.AFkvalue ((_, A.String (_, s)), v) ->
@@ -1145,7 +1148,7 @@ and emit_struct_array env es =
   in
   gather [
     gather @@ List.map es ~f:snd;
-    instr_newstructarray @@ List.map es ~f:fst;
+    ctor @@ List.map es ~f:fst;
   ]
 
 (* isPackedInit() returns true if this expression list looks like an
@@ -1218,12 +1221,17 @@ and emit_dynamic_collection env expr es =
     emit_keyvalue_collection name env es (NewDictArray count)
   | A.Varray _ ->
     emit_value_only_collection env es (fun n -> NewVArray n)
+  | A.Darray _ ->
+     if is_struct_init es then
+       emit_struct_array env es instr_newstructdarray
+     else
+       emit_keyvalue_collection "array" env es (NewDArray count)
   | _ ->
   (* From here on, we're only dealing with PHP arrays *)
   if is_packed_init es then
     emit_value_only_collection env es (fun n -> NewPackedArray n)
   else if is_struct_init es then
-    emit_struct_array env es
+    emit_struct_array env es instr_newstructarray
   else if is_packed_init es then
     emit_keyvalue_collection "array" env es (NewArray count)
   else
@@ -1265,6 +1273,7 @@ and emit_named_collection env expr pos name fields =
 and is_php_array = function
  | _, A.Array _ -> true
  | _, A.Varray _ -> true
+ | _, A.Darray _ -> true
  | _ -> false
 
 and emit_collection ?(transform_to_collection) env expr es =

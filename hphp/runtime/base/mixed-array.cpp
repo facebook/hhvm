@@ -174,15 +174,20 @@ ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
   }
 }
 
-MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
-                                   const TypedValue* values) {
+ALWAYS_INLINE
+MixedArray* MixedArray::MakeStructImpl(uint32_t size,
+                                       const StringData* const* keys,
+                                       const TypedValue* values,
+                                       ArrayData::DVArray dvArray) {
   assert(size > 0);
+  assert(dvArray == ArrayData::kNotDVArray ||
+         dvArray == ArrayData::kDArray);
 
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
 
   ad->m_sizeAndPos       = size; // pos=0
-  ad->initHeader_16(HeaderKind::Mixed, OneReference, ArrayData::kNotDVArray);
+  ad->initHeader_16(HeaderKind::Mixed, OneReference, dvArray);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -206,7 +211,7 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
   }
 
   assert(ad->m_size == size);
-  assert(ad->isNotDVArray());
+  assert(ad->dvArray() == dvArray);
   assert(ad->m_pos == 0);
   assert(ad->kind() == kMixedKind);
   assert(ad->m_scale == scale);
@@ -215,6 +220,18 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
   assert(ad->m_nextKI == 0);
   assert(ad->checkInvariants());
   return ad;
+}
+
+MixedArray* MixedArray::MakeStruct(uint32_t size,
+                                   const StringData* const* keys,
+                                   const TypedValue* values) {
+  return MakeStructImpl(size, keys, values, ArrayData::kNotDVArray);
+}
+
+MixedArray* MixedArray::MakeStructDArray(uint32_t size,
+                                         const StringData* const* keys,
+                                         const TypedValue* values) {
+  return MakeStructImpl(size, keys, values, ArrayData::kDArray);
 }
 
 MixedArray* MixedArray::MakeMixed(uint32_t size,

@@ -1108,6 +1108,17 @@ NewStructArray <litstr id vector>    [C..C]  ->  [C]
 
     NewStructArray < "a" "b" >  [ 1 2 ]  ->  [ array("a"=>1, "b"=>2) ]
 
+NewStructDArray <litstr id vector>    [C..C]  ->  [C]
+
+  New dict-like array. Creates a new dict-like array from the names given in %1
+  and values from the stack. The vector of litstr ids gives the element names,
+  one value for each name is popped from the stack. Names are in array
+  insertion order, and values were pushed onto the stack in insertion order, so
+  are added to the array in reverse order (the topmost value will become the
+  last element in the array). For example:
+
+    NewStructDArray < "a" "b" >  [ 1 2 ]  ->  [ darray("a"=>1, "b"=>2) ]
+
 NewVecArray <num elems>   [C..C]  ->  [C:Vec]
 
   New vec. Creates a new vec from the top %1 cells on the stack, pops those
@@ -1125,6 +1136,12 @@ NewVArray <num elems>   [C..]  ->  [C:Arr]
  New vec-like array. Creates a new vec-like array from the top %1 cells on the
  stack, pops those cells, then pushes the new array onto the stack. Elements
  are pushed on the stack in array insertion order.
+
+NewDArray <capacity hint>    []  ->  [C:Arr]
+
+  New dict-like array with a capacity hint. Creates a new dict-like array and
+  pushes it onto the stack. The implementation may make use of the hint in %1
+  to pre-size the array. The hint %1 must be greater than or equal to 0.
 
 AddElemC    [C C C]  ->  [C:Arr|Dict]
 

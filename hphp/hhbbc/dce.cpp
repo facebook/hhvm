@@ -1335,6 +1335,16 @@ void dce(Env& env, const bc::NewMixedArray&) {
     });
 }
 
+void dce(Env& env, const bc::NewDArray&) {
+  stack_ops(env,[] (const UseInfo& ui) {
+      if (ui.usage == Use::AddElemC || allUnused(ui)) {
+        return PushFlags::MarkUnused;
+      }
+
+      return PushFlags::MarkLive;
+    });
+}
+
 void dce(Env& env, const bc::AddElemC& /*op*/) {
   stack_ops(env, [&] (UseInfo& ui) {
       // If the set might throw it needs to be kept.

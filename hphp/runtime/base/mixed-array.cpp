@@ -428,6 +428,16 @@ ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
   return init.create();
 }
 
+ArrayData* MixedArray::MakeDArrayFromAPC(const APCArray* apc) {
+  assert(apc->isDArray());
+  auto const apcSize = apc->size();
+  DArrayInit init{apcSize};
+  for (uint32_t i = 0; i < apcSize; ++i) {
+    init.setValidKey(apc->getKey(i), apc->getValue(i)->toLocal());
+  }
+  return init.create();
+}
+
 //=============================================================================
 // Destruction
 

@@ -130,6 +130,7 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:
     case APCKind::SharedVArray:
+    case APCKind::SharedDArray:
       return EntryInfo::Type::APCArray;
     case APCKind::SerializedObject:
       return EntryInfo::Type::SerializedObject;

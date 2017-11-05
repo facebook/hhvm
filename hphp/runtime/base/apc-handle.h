@@ -46,7 +46,7 @@ enum class APCKind: uint8_t {
   SharedString, SharedArray,
   SharedPackedArray, SharedVec,
   SharedDict, SharedKeyset,
-  SharedVArray,
+  SharedVArray, SharedDArray,
   SharedObject, SharedCollection,
   SerializedArray, SerializedVec,
   SerializedDict, SerializedKeyset,

@@ -223,6 +223,10 @@ Variant APCHandle::toLocal() const {
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalVArray()
       );
+    case APCKind::SharedDArray:
+      return Variant::attach(
+        APCArray::fromHandle(this)->toLocalDArray()
+      );
     case APCKind::SharedVec:
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalVec()
@@ -276,6 +280,7 @@ void APCHandle::deleteShared() {
     case APCKind::SharedPackedArray:
     case APCKind::SharedArray:
     case APCKind::SharedVArray:
+    case APCKind::SharedDArray:
     case APCKind::SharedVec:
     case APCKind::SharedDict:
     case APCKind::SharedKeyset:
@@ -342,6 +347,7 @@ bool APCHandle::checkInvariants() const {
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:
     case APCKind::SharedVArray:
+    case APCKind::SharedDArray:
     case APCKind::SharedVec:
     case APCKind::SharedDict:
     case APCKind::SharedKeyset:

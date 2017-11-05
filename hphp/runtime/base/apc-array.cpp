@@ -66,6 +66,9 @@ APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
       if (arr->isVArray()) {
         return MakePacked(arr, APCKind::SharedVArray, unserializeObj);
       }
+      if (arr->isDArray()) {
+        return MakeHash(arr, APCKind::SharedDArray, unserializeObj);
+      }
       return arr->isVectorData()
         ? MakePacked(arr, APCKind::SharedPackedArray, unserializeObj)
         : MakeHash(arr, APCKind::SharedArray, unserializeObj);

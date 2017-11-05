@@ -6894,7 +6894,7 @@ bool EmitterVisitor::emitInlineGenva(
   }
   if (!num_params) {
     if (deadResult) return true;
-    e.Array(staticEmptyArray());
+    e.Array(staticEmptyVArray());
     return true;
   }
   if (params->containsUnpack()) {
@@ -6963,7 +6963,7 @@ bool EmitterVisitor::emitInlineGenva(
       emitPushL(e);
       e.WHResult();
     }
-    e.NewPackedArray(num_params);
+    e.NewVArray(num_params);
   } else {
     std::vector<IndexPair> indexPairs;
     IndexChain workingChain;
@@ -7003,7 +7003,7 @@ bool EmitterVisitor::emitInlineGena(
   // Convert input into an array of WH (inline this?)
   // Two elements is the most common size.
   //
-  e.NewArray(2);
+  e.NewDArray(2);
   const auto array = emitSetUnnamedL(e);
   const auto arrayStart = m_ue.bcPos();
 

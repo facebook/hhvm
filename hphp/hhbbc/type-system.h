@@ -191,37 +191,73 @@ struct Type;
 
 //////////////////////////////////////////////////////////////////////
 
-enum trep : uint32_t {
+enum trep : uint64_t {
   BBottom   = 0,
 
-  BUninit   = 1 << 0,
-  BInitNull = 1 << 1,
-  BFalse    = 1 << 2,
-  BTrue     = 1 << 3,
-  BInt      = 1 << 4,
-  BDbl      = 1 << 5,
-  BSStr     = 1 << 6,  // static string
-  BCStr     = 1 << 7,  // counted string
-  BSArrE    = 1 << 8,  // static empty array
-  BCArrE    = 1 << 9,  // counted empty array
-  BSArrN    = 1 << 10, // static non-empty array
-  BCArrN    = 1 << 11, // counted non-empty array
-  BObj      = 1 << 12,
-  BRes      = 1 << 13,
-  BCls      = 1 << 14,
-  BRef      = 1 << 15,
-  BSVecE    = 1 << 16, // static empty vec
-  BCVecE    = 1 << 17, // counted empty vec
-  BSVecN    = 1 << 18, // static non-empty vec
-  BCVecN    = 1 << 19, // counted non-empty vec
-  BSDictE   = 1 << 20, // static empty dict
-  BCDictE   = 1 << 21, // counted empty dict
-  BSDictN   = 1 << 22, // static non-empty dict
-  BCDictN   = 1 << 23, // counted non-empty dict
-  BSKeysetE = 1 << 24, // static empty keyset
-  BCKeysetE = 1 << 25, // counted empty keyset
-  BSKeysetN = 1 << 26, // static non-empty keyset
-  BCKeysetN = 1 << 27, // counted non-empty keyset
+  BUninit   = 1ULL << 0,
+  BInitNull = 1ULL << 1,
+  BFalse    = 1ULL << 2,
+  BTrue     = 1ULL << 3,
+  BInt      = 1ULL << 4,
+  BDbl      = 1ULL << 5,
+  BSStr     = 1ULL << 6,  // static string
+  BCStr     = 1ULL << 7,  // counted string
+
+  BSPArrE   = 1ULL << 8, // static empty "plain" array
+  BCPArrE   = 1ULL << 9, // counted empty "plain" array
+  BSPArrN   = 1ULL << 10, // static non-empty "plain" array
+  BCPArrN   = 1ULL << 11ULL, // counted non-empty "plain array"
+
+  BSVArrE   = 1ULL << 12, // static empty varray
+  BCVArrE   = 1ULL << 13, // counted empty varray
+  BSVArrN   = 1ULL << 14, // static non-empty varray
+  BCVArrN   = 1ULL << 15, // counted non-empty varray
+
+  BSDArrE   = 1ULL << 16, // static empty darray
+  BCDArrE   = 1ULL << 17, // counted empty darray
+  BSDArrN   = 1ULL << 18, // static non-empty darray
+  BCDArrN   = 1ULL << 19, // counted non-empty darray
+
+  BObj      = 1ULL << 20,
+  BRes      = 1ULL << 21,
+  BCls      = 1ULL << 22,
+  BRef      = 1ULL << 23,
+
+  BSVecE    = 1ULL << 24, // static empty vec
+  BCVecE    = 1ULL << 25, // counted empty vec
+  BSVecN    = 1ULL << 26, // static non-empty vec
+  BCVecN    = 1ULL << 27, // counted non-empty vec
+  BSDictE   = 1ULL << 28, // static empty dict
+  BCDictE   = 1ULL << 29, // counted empty dict
+  BSDictN   = 1ULL << 30, // static non-empty dict
+  BCDictN   = 1ULL << 31, // counted non-empty dict
+  BSKeysetE = 1ULL << 32, // static empty keyset
+  BCKeysetE = 1ULL << 33, // counted empty keyset
+  BSKeysetN = 1ULL << 34, // static non-empty keyset
+  BCKeysetN = 1ULL << 35, // counted non-empty keyset
+
+  BSPArr    = BSPArrE | BSPArrN,
+  BCPArr    = BCPArrE | BCPArrN,
+  BPArrE    = BSPArrE | BCPArrE,
+  BPArrN    = BSPArrN | BCPArrN,
+  BPArr     = BPArrE  | BPArrN,
+
+  BSVArr    = BSVArrE | BSVArrN,
+  BCVArr    = BCVArrE | BCVArrN,
+  BVArrE    = BSVArrE | BCVArrE,
+  BVArrN    = BSVArrN | BCVArrN,
+  BVArr     = BVArrE  | BVArrN,
+
+  BSDArr    = BSDArrE | BSDArrN,
+  BCDArr    = BCDArrE | BCDArrN,
+  BDArrE    = BSDArrE | BCDArrE,
+  BDArrN    = BSDArrN | BCDArrN,
+  BDArr     = BDArrE  | BDArrN,
+
+  BSArrE    = BSPArrE | BSVArrE | BSDArrE,
+  BCArrE    = BCPArrE | BCVArrE | BCDArrE,
+  BSArrN    = BSPArrN | BSVArrN | BSDArrN,
+  BCArrN    = BCPArrN | BCVArrN | BCDArrN,
 
   BNull     = BUninit | BInitNull,
   BBool     = BFalse | BTrue,
@@ -297,6 +333,36 @@ enum trep : uint32_t {
   BOptKeysetN  = BInitNull | BKeysetN,
   BOptKeyset   = BInitNull | BKeyset,
 
+  BOptSPArrE   = BInitNull | BSPArrE,
+  BOptCPArrE   = BInitNull | BCPArrE,
+  BOptSPArrN   = BInitNull | BSPArrN,
+  BOptCPArrN   = BInitNull | BCPArrN,
+  BOptSPArr    = BInitNull | BSPArr,
+  BOptCPArr    = BInitNull | BCPArr,
+  BOptPArrE    = BInitNull | BPArrE,
+  BOptPArrN    = BInitNull | BPArrN,
+  BOptPArr     = BInitNull | BPArr,
+
+  BOptSVArrE   = BInitNull | BSVArrE,
+  BOptCVArrE   = BInitNull | BCVArrE,
+  BOptSVArrN   = BInitNull | BSVArrN,
+  BOptCVArrN   = BInitNull | BCVArrN,
+  BOptSVArr    = BInitNull | BSVArr,
+  BOptCVArr    = BInitNull | BCVArr,
+  BOptVArrE    = BInitNull | BVArrE,
+  BOptVArrN    = BInitNull | BVArrN,
+  BOptVArr     = BInitNull | BVArr,
+
+  BOptSDArrE   = BInitNull | BSDArrE,
+  BOptCDArrE   = BInitNull | BCDArrE,
+  BOptSDArrN   = BInitNull | BSDArrN,
+  BOptCDArrN   = BInitNull | BCDArrN,
+  BOptSDArr    = BInitNull | BSDArr,
+  BOptCDArr    = BInitNull | BCDArr,
+  BOptDArrE    = BInitNull | BDArrE,
+  BOptDArrN    = BInitNull | BDArrN,
+  BOptDArr     = BInitNull | BDArr,
+
   BUncArrKey    = BInt | BSStr,
   BArrKey       = BUncArrKey | BCStr,
   BOptUncArrKey = BInitNull | BUncArrKey,
@@ -312,7 +378,7 @@ enum trep : uint32_t {
   BInitGen  = BInitCell | BRef,
   BGen      = BUninit | BInitGen,
 
-  BTop      = static_cast<uint32_t>(-1),
+  BTop      = static_cast<uint64_t>(-1),
 };
 
 // Useful constants. Don't put them in the enum itself, because they
@@ -547,11 +613,13 @@ private:
   friend bool could_copy_on_write(const Type&);
   friend Type loosen_staticness(Type);
   friend Type loosen_unstaticness(Type);
+  friend Type loosen_dvarrayness(Type);
   friend Type loosen_values(Type);
   friend Type loosen_emptiness(Type);
   friend Type add_nonemptiness(Type);
   friend Type assert_emptiness(Type);
   friend Type assert_nonemptiness(Type);
+  friend Type set_trep(Type&, trep);
 
 private:
   union Data {
@@ -677,6 +745,24 @@ X(SKeyset)                                      \
 X(KeysetE)                                      \
 X(KeysetN)                                      \
 X(Keyset)                                       \
+X(SPArrE)                                       \
+X(SPArrN)                                       \
+X(SPArr)                                        \
+X(PArrE)                                        \
+X(PArrN)                                        \
+X(PArr)                                         \
+X(SVArrE)                                       \
+X(SVArrN)                                       \
+X(SVArr)                                        \
+X(VArrE)                                        \
+X(VArrN)                                        \
+X(VArr)                                         \
+X(SDArrE)                                       \
+X(SDArrN)                                       \
+X(SDArr)                                        \
+X(DArrE)                                        \
+X(DArrN)                                        \
+X(DArr)                                         \
 X(UncArrKey)                                    \
 X(ArrKey)                                       \
 X(InitPrim)                                     \
@@ -717,6 +803,24 @@ X(OptSKeyset)                                   \
 X(OptKeysetE)                                   \
 X(OptKeysetN)                                   \
 X(OptKeyset)                                    \
+X(OptSPArrE)                                    \
+X(OptSPArrN)                                    \
+X(OptSPArr)                                     \
+X(OptPArrE)                                     \
+X(OptPArrN)                                     \
+X(OptPArr)                                      \
+X(OptSVArrE)                                    \
+X(OptSVArrN)                                    \
+X(OptSVArr)                                     \
+X(OptVArrE)                                     \
+X(OptVArrN)                                     \
+X(OptVArr)                                      \
+X(OptSDArrE)                                    \
+X(OptSDArrN)                                    \
+X(OptSDArr)                                     \
+X(OptDArrE)                                     \
+X(OptDArrN)                                     \
+X(OptDArr)                                      \
 X(OptUncArrKey)                                 \
 X(OptArrKey)                                    \
 X(InitCell)                                     \
@@ -734,6 +838,12 @@ TYPES(X)
 // S types.
 #define NON_TYPES(X)                            \
   X(CStr)                                       \
+  X(CPArrE)                                     \
+  X(CPArrN)                                     \
+  X(CVArrE)                                     \
+  X(CVArrN)                                     \
+  X(CDArrE)                                     \
+  X(CDArrN)                                     \
   X(CArrE)                                      \
   X(CArrN)                                      \
   X(CVecE)                                      \
@@ -742,11 +852,23 @@ TYPES(X)
   X(CDictN)                                     \
   X(CKeysetE)                                   \
   X(CKeysetN)                                   \
+  X(CPArr)                                      \
+  X(CVArr)                                      \
+  X(CDArr)                                      \
   X(CArr)                                       \
   X(CVec)                                       \
   X(CDict)                                      \
   X(CKeyset)                                    \
   X(OptCStr)                                    \
+  X(OptCPArrE)                                  \
+  X(OptCPArrN)                                  \
+  X(OptCPArr)                                   \
+  X(OptCVArrE)                                  \
+  X(OptCVArrN)                                  \
+  X(OptCVArr)                                   \
+  X(OptCDArrE)                                  \
+  X(OptCDArrN)                                  \
+  X(OptCDArr)                                   \
   X(OptCArrE)                                   \
   X(OptCArrN)                                   \
   X(OptCArr)                                    \
@@ -790,6 +912,8 @@ Type keyset_val(SArray);
  */
 Type sempty();
 Type aempty();
+Type aempty_varray();
+Type aempty_darray();
 Type vec_empty();
 Type dict_empty();
 Type keyset_empty();
@@ -798,6 +922,7 @@ Type keyset_empty();
  * Create an any-countedness empty array/vec/dict type.
  */
 Type some_aempty();
+Type some_aempty_darray();
 Type some_vec_empty();
 Type some_dict_empty();
 Type some_keyset_empty();
@@ -817,6 +942,7 @@ Type clsExact(res::Class);
  * Pre: !v.empty()
  */
 Type arr_packed(std::vector<Type> v);
+Type arr_packed_varray(std::vector<Type> v);
 Type sarr_packed(std::vector<Type> v);
 
 /*
@@ -833,6 +959,7 @@ Type sarr_packedn(Type);
  * Pre: !m.empty()
  */
 Type arr_map(MapElems m);
+Type arr_map_darray(MapElems m);
 Type sarr_map(MapElems m);
 
 /*
@@ -1091,6 +1218,13 @@ Type loosen_staticness(Type);
  * non-static type that is present.
  */
 Type loosen_unstaticness(Type);
+
+/*
+ * Discard any specific knowledge about whether the type is a d/varray. Force
+ * any type which might contain any sub-types of PArr, VArr, or DArr to contain
+ * Arr, while keeping the same staticness and emptiness information.
+ */
+Type loosen_dvarrayness(Type);
 
 /*
  * Force any type which might contain any sub-types of Arr, Vec, Dict, and

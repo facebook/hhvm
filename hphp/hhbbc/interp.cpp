@@ -381,13 +381,13 @@ void in(ISS& env, const bc::NewVArray& op) {
     elems.push_back(std::move(topC(env, op.arg1 - i - 1)));
   }
   discard(env, op.arg1);
-  push(env, arr_packed(std::move(elems)));
+  push(env, arr_packed_varray(std::move(elems)));
   constprop(env);
 }
 
 void in(ISS& env, const bc::NewDArray& op) {
   push(env, op.arg1 == 0 ?
-       effect_free(env), aempty() : some_aempty());
+       effect_free(env), aempty_darray() : some_aempty_darray());
 }
 
 void in(ISS& env, const bc::NewStructArray& op) {
@@ -404,7 +404,7 @@ void in(ISS& env, const bc::NewStructDArray& op) {
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {
     map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
   }
-  push(env, arr_map(std::move(map)));
+  push(env, arr_map_darray(std::move(map)));
   constprop(env);
 }
 
@@ -781,7 +781,12 @@ void group(ISS& env, const Same& same, const JmpOp& jmp) {
     return bail();
   }
 
-  auto isect = intersection_of(ty0, ty1);
+  // We need to loosen away the d/varray bits here because array comparison does
+  // not take into account the difference.
+  auto isect = intersection_of(
+    loosen_dvarrayness(ty0),
+    loosen_dvarrayness(ty1)
+  );
   discard(env, 2);
 
   auto handle_same = [&] {
@@ -971,10 +976,9 @@ void in(ISS& env, const bc::CastInt&) {
 // "fn" is provided, it will be called to cast any constant inputs. If "elide"
 // is set to true, if the source type is the same as the destination, the cast
 // will be optimized away.
-void castImpl(ISS& env, Type target,
-              void(*fn)(TypedValue*), bool elide = true) {
+void castImpl(ISS& env, Type target, void(*fn)(TypedValue*)) {
   auto const t = topC(env);
-  if (elide && t.subtypeOf(target)) return reduce(env, bc::Nop {});
+  if (t.subtypeOf(target)) return reduce(env, bc::Nop {});
   popC(env);
   if (fn) {
     if (auto val = tv(t)) {
@@ -996,7 +1000,7 @@ void in(ISS& env, const bc::CastString&) {
 }
 
 void in(ISS& env, const bc::CastArray&)  {
-  castImpl(env, TArr, tvCastToArrayInPlace, false);
+  castImpl(env, TPArr, tvCastToArrayInPlace);
 }
 
 void in(ISS& env, const bc::CastObject&) { castImpl(env, TObj, nullptr); }
@@ -1014,11 +1018,11 @@ void in(ISS& env, const bc::CastKeyset&) {
 }
 
 void in(ISS& env, const bc::CastVArray&)  {
-  castImpl(env, TArr, tvCastToVArrayInPlace, false);
+  castImpl(env, TVArr, tvCastToVArrayInPlace);
 }
 
 void in(ISS& env, const bc::CastDArray&)  {
-  castImpl(env, TArr, tvCastToDArrayInPlace, false);
+  castImpl(env, TDArr, tvCastToDArrayInPlace);
 }
 
 void in(ISS& env, const bc::Print& /*op*/) {

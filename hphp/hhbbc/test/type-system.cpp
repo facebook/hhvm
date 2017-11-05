@@ -261,8 +261,12 @@ auto const primitives = folly::lazy([] {
     TInt,
     TDbl,
     TSStr,
-    TSArrE,
-    TSArrN,
+    TSPArrE,
+    TSPArrN,
+    TSVArrE,
+    TSVArrN,
+    TSDArrE,
+    TSDArrN,
     TSVecE,
     TSVecN,
     TSDictE,
@@ -288,6 +292,18 @@ auto const optionals = folly::lazy([] {
     TOptArrKey,
     TOptSStr,
     TOptStr,
+    TOptSPArrE,
+    TOptSPArrN,
+    TOptSPArr,
+    TOptPArr,
+    TOptSVArrE,
+    TOptSVArrN,
+    TOptSVArr,
+    TOptVArr,
+    TOptSDArrE,
+    TOptSDArrN,
+    TOptSDArr,
+    TOptDArr,
     TOptSArrE,
     TOptSArrN,
     TOptSArr,
@@ -319,6 +335,20 @@ auto const non_opt_unions = folly::lazy([] {
     TBool,
     TNum,
     TStr,
+    TPArrE,
+    TPArrN,
+    TSPArr,
+    TPArr,
+    TVArrE,
+    TVArrN,
+    TSVArr,
+    TVArr,
+    TDArrE,
+    TDArrN,
+    TSDArr,
+    TDArr,
+    TSArrE,
+    TSArrN,
     TArrE,
     TArrN,
     TSArr,
@@ -1996,6 +2026,27 @@ TEST(Type, BasicArrays) {
   EXPECT_EQ(union_of(TArr, TInitNull), TOptArr);
   EXPECT_EQ(union_of(TArrE, TInitNull), TOptArrE);
   EXPECT_EQ(union_of(TArrN, TInitNull), TOptArrN);
+
+  EXPECT_EQ(union_of(TSVArrE, TSDArrE), TSArrE);
+  EXPECT_EQ(union_of(TSVArrN, TSDArrN), TSArrN);
+  EXPECT_EQ(union_of(TVArrN, TDArrN), TArrN);
+  EXPECT_EQ(union_of(TVArrE, TDArrE), TArrE);
+  EXPECT_EQ(union_of(TSVArr, TSDArrN), TSArr);
+  EXPECT_EQ(union_of(TVArr, TDArr), TArr);
+
+  EXPECT_EQ(union_of(TSVArrE, TSPArrE), TSArrE);
+  EXPECT_EQ(union_of(TSVArrN, TSPArrN), TSArrN);
+  EXPECT_EQ(union_of(TVArrN, TPArrN), TArrN);
+  EXPECT_EQ(union_of(TVArrE, TPArrE), TArrE);
+  EXPECT_EQ(union_of(TSVArr, TSPArrN), TSArr);
+  EXPECT_EQ(union_of(TVArr, TPArr), TArr);
+
+  EXPECT_EQ(union_of(TSDArrE, TSPArrE), TSArrE);
+  EXPECT_EQ(union_of(TSDArrN, TSPArrN), TSArrN);
+  EXPECT_EQ(union_of(TDArrN, TPArrN), TArrN);
+  EXPECT_EQ(union_of(TDArrE, TPArrE), TArrE);
+  EXPECT_EQ(union_of(TSDArr, TSPArrN), TSArr);
+  EXPECT_EQ(union_of(TDArr, TPArr), TArr);
 }
 
 /*
@@ -2088,12 +2139,25 @@ TEST(Type, LoosenStaticness) {
     { TSStr, TStr },
     { TSArrE, TArrE },
     { TSArrN, TArrN },
+    { TSArr, TArr },
+    { TSPArrE, TPArrE },
+    { TSPArrN, TPArrN },
+    { TSPArr, TPArr },
+    { TSVArrE, TVArrE },
+    { TSVArrN, TVArrN },
+    { TSVArr, TVArr },
+    { TSDArrE, TDArrE },
+    { TSDArrN, TDArrN },
+    { TSDArr, TDArr },
     { TSVecE, TVecE },
     { TSVecN, TVecN },
+    { TSVec, TVec },
     { TSDictE, TDictE },
     { TSDictN, TDictN },
+    { TSDict, TDict },
     { TSKeysetE, TKeysetE },
     { TSKeysetN, TKeysetN },
+    { TSKeyset, TKeyset },
     { TUncArrKey, TArrKey },
     { TUnc, TCell },
     { TInitUnc, TInitCell },
@@ -2128,16 +2192,36 @@ TEST(Type, LoosenEmptiness) {
   std::vector<std::pair<Type, Type>> tests = {
     { TSArrE, TSArr },
     { TSArrN, TSArr },
+    { TArrE, TArr },
+    { TArrN, TArr },
+    { TSPArrE, TSPArr },
+    { TSPArrN, TSPArr },
+    { TPArrE, TPArr },
+    { TPArrN, TPArr },
+    { TSVArrE, TSVArr },
+    { TSVArrN, TSVArr },
+    { TVArrE, TVArr },
+    { TVArrN, TVArr },
+    { TSDArrE, TSDArr },
+    { TSDArrN, TSDArr },
+    { TDArrE, TDArr },
+    { TDArrN, TDArr },
     { TSVecE, TSVec },
     { TSVecN, TSVec },
+    { TVecE, TVec },
+    { TVecN, TVec },
     { TSDictE, TSDict },
     { TSDictN, TSDict },
+    { TDictE, TDict },
+    { TDictN, TDict },
     { TSKeysetE, TSKeyset },
     { TSKeysetN, TSKeyset },
-    { arr_packedn(TInt), union_of(TArrE, arr_packedn(TInt)) },
-    { arr_packed({TInt, TBool}), union_of(TArrE, arr_packed({TInt, TBool})) },
-    { arr_mapn(TStr, TInt), union_of(TArrE, arr_mapn(TStr, TInt)) },
-    { arr_map(test_map), union_of(TArrE, arr_map(test_map)) }
+    { TKeysetE, TKeyset },
+    { TKeysetN, TKeyset },
+    { arr_packedn(TInt), union_of(TPArrE, arr_packedn(TInt)) },
+    { arr_packed({TInt, TBool}), union_of(TPArrE, arr_packed({TInt, TBool})) },
+    { arr_mapn(TStr, TInt), union_of(TPArrE, arr_mapn(TStr, TInt)) },
+    { arr_map(test_map), union_of(TPArrE, arr_map(test_map)) }
   };
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_emptiness(p.first), p.second);
@@ -2176,12 +2260,13 @@ TEST(Type, LoosenValues) {
     { ival(123), TInt },
     { dval(3.14), TDbl },
     { sval(s_test.get()), TSStr },
-    { aval(test_array_packed_value()), TSArrN },
+    { aval(test_array_packed_value()), TSPArrN },
     { ref_to(TInt), TRef },
-    { arr_packedn(TInt), TArrN },
-    { arr_packed({TInt, TBool}), TArrN },
-    { arr_mapn(TStr, TInt), TArrN },
-    { arr_map(test_map), TArrN }
+    { arr_packedn(TInt), TPArrN },
+    { arr_packed({TInt, TBool}), TPArrN },
+    { arr_packed_varray({TInt, TBool}), TVArrN },
+    { arr_mapn(TStr, TInt), TPArrN },
+    { arr_map(test_map), TPArrN }
   };
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_values(p.first), p.second);
@@ -2214,6 +2299,12 @@ TEST(Type, AddNonEmptiness) {
   std::vector<std::pair<Type, Type>> tests = {
     { TArrE, TArr },
     { TSArrE, TSArr },
+    { TPArrE, TPArr },
+    { TSPArrE, TSPArr },
+    { TVArrE, TVArr },
+    { TSVArrE, TSVArr },
+    { TDArrE, TDArr },
+    { TSDArrE, TSDArr },
     { TVecE, TVec },
     { TSVecE, TSVec },
     { TDictE, TDict },
@@ -2224,6 +2315,45 @@ TEST(Type, AddNonEmptiness) {
   for (auto const& p : tests) {
     EXPECT_EQ(add_nonemptiness(p.first), p.second);
     EXPECT_EQ(add_nonemptiness(opt(p.first)), opt(p.second));
+  }
+}
+
+TEST(Type, LoosenDVArrayness) {
+  auto const program = make_program();
+  Index index{ borrow(program) };
+
+  for (auto const& t : all_with_waithandles(index)) {
+    if (t.subtypeOfAny(TOptPArr, TOptVArr, TOptDArr) && t != TInitNull) {
+      continue;
+    }
+    EXPECT_EQ(loosen_dvarrayness(t), t);
+  }
+
+  std::vector<std::pair<Type, Type>> tests = {
+    { TSPArrE, TSArrE },
+    { TSPArrN, TSArrN },
+    { TSPArr,  TSArr },
+    { TPArrE,  TArrE },
+    { TPArrN,  TArrN },
+    { TPArr,   TArr },
+
+    { TSVArrE, TSArrE },
+    { TSVArrN, TSArrN },
+    { TSVArr,  TSArr },
+    { TVArrE,  TArrE },
+    { TVArrN,  TArrN },
+    { TVArr,   TArr },
+
+    { TSDArrE, TSArrE },
+    { TSDArrN, TSArrN },
+    { TSDArr,  TSArr },
+    { TDArrE,  TArrE },
+    { TDArrN,  TArrN },
+    { TDArr,   TArr }
+  };
+  for (auto const& p : tests) {
+    EXPECT_EQ(loosen_dvarrayness(p.first), p.second);
+    EXPECT_EQ(loosen_dvarrayness(opt(p.first)), opt(p.second));
   }
 }
 

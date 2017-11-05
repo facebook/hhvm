@@ -223,7 +223,9 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeSame(const Type& a, const Type& b) {
-  if (!a.couldBe(b)) return TFalse;
+  auto const nsa = loosen_dvarrayness(a);
+  auto const nsb = loosen_dvarrayness(b);
+  if (!nsa.couldBe(nsb)) return TFalse;
   return TBool;
 }
 

@@ -1397,12 +1397,26 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
         CompactVector<Bytecode> bcs;
         if (cat.cat == Type::ArrayCat::Struct &&
             *postSize <= ArrayData::MaxElemsOnStack) {
-          bcs.emplace_back(bc::NewStructArray { get_string_keys(arrPost) });
+          if (arrPost.subtypeOf(TPArrN)) {
+            bcs.emplace_back(bc::NewStructArray { get_string_keys(arrPost) });
+          } else if (arrPost.subtypeOf(TDArrN)) {
+            bcs.emplace_back(bc::NewStructDArray { get_string_keys(arrPost) });
+          } else {
+            return PushFlags::MarkLive;
+          }
         } else if (cat.cat == Type::ArrayCat::Packed &&
                    *postSize <= ArrayData::MaxElemsOnStack) {
-          bcs.emplace_back(
-            bc::NewPackedArray { static_cast<uint32_t>(*postSize) }
-          );
+          if (arrPost.subtypeOf(TPArrN)) {
+            bcs.emplace_back(
+              bc::NewPackedArray { static_cast<uint32_t>(*postSize) }
+            );
+          } else if (arrPost.subtypeOf(TVArrN)) {
+            bcs.emplace_back(
+              bc::NewVArray { static_cast<uint32_t>(*postSize) }
+            );
+          } else {
+            return PushFlags::MarkLive;
+          }
         } else {
           return PushFlags::MarkLive;
         }

@@ -110,6 +110,7 @@ let string_of_lit_const instruction =
     | NewDictArray i    -> sep ["NewDictArray"; string_of_int i]
     | NewKeysetArray i  -> sep ["NewKeysetArray"; string_of_int i]
     | NewVecArray i     -> sep ["NewVecArray"; string_of_int i]
+    | NewVArray i       -> sep ["NewVArray"; string_of_int i]
     | NewMixedArray i   -> sep ["NewMixedArray"; string_of_int i]
     | NewPackedArray i  -> sep ["NewPackedArray"; string_of_int i]
     | NewStructArray l  ->

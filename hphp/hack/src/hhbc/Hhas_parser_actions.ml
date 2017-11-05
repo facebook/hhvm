@@ -66,6 +66,10 @@ let rec parse_attribute c =
                                      let pkvl = pair_key_values al in
                                      Scanf.bscanf c "}"
                                          (Some (Typed_value.Array pkvl)))
+           | 'y' -> Scanf.bscanf c "y:%d:{" (fun _n ->
+                                     let al = parse_attribute_list c [] in
+                                     Scanf.bscanf c "}"
+                                         (Some (Typed_value.VArray al)))
            | 'v' -> Scanf.bscanf c "v:%d:{" (fun _n ->
                                      let al = parse_attribute_list c [] in
                                      Scanf.bscanf c "}"
@@ -723,6 +727,9 @@ let makeunaryinst s arg = match s with
        | _ -> report_error "bad array size")
    | "NewKeysetArray" -> (match arg with
        | IAInt64 n -> ILitConst (NewKeysetArray (Int64.to_int n))
+       | _ -> report_error "bad array size")
+   | "NewVArray" -> (match arg with
+       | IAInt64 n -> ILitConst (NewVArray (Int64.to_int n))
        | _ -> report_error "bad array size")
    | "NewCol" -> ILitConst (NewCol (collectiontypeofiarg arg))
    | "ColFromArray" -> ILitConst (ColFromArray (collectiontypeofiarg arg))

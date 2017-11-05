@@ -185,3 +185,5 @@ const int T_KEYSET = 444;
 const int T_WHERE = 445;
 const int T_VARRAY = 446;
 const int T_DARRAY = 447;
+const int T_USING = 448;
+const int T_TUPLE = 449;

@@ -738,6 +738,7 @@ static int yylex(YYSTYPE* token, HPHP::Location* loc, Parser* _p) {
 
 %token T_COLLECTION
 %token T_SHAPE
+%token T_TUPLE
 %token T_TYPE
 %token T_UNRESOLVED_TYPE
 %token T_NEWTYPE
@@ -880,6 +881,7 @@ ident_for_class_const:
   | T_INCLUDE_ONCE
   | T_THROW
   | T_ARRAY
+  | T_TUPLE
   | T_PRINT
   | T_ECHO
   | T_REQUIRE
@@ -2203,6 +2205,7 @@ expr_no_variable:
   | keyset_literal                     { $$ = $1; }
   | varray_literal                     { $$ = $1; }
   | darray_literal                     { $$ = $1; }
+  | tuple_literal                      { $$ = $1; }
   | shape_literal                      { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
@@ -2473,6 +2476,18 @@ static_keyset_literal_ae:
     T_KEYSET '[' static_vec_ks_expr_list_ae ']' { _p->onKeyset($$, $3); }
 ;
 
+tuple_literal:
+    T_TUPLE '(' vec_ks_expr_list ')'            { _p->onVArray($$,$3); }
+;
+
+static_tuple_literal:
+    T_TUPLE '(' static_vec_ks_expr_list ')'     { _p->onVArray($$,$3); }
+;
+
+static_tuple_literal_ae:
+    T_TUPLE '(' static_vec_ks_expr_list_ae ')'  { _p->onVArray($$,$3); }
+;
+
 varray_literal:
     T_VARRAY '[' vec_ks_expr_list ']'           { _p->onVArray($$,$3); }
 ;
@@ -2543,6 +2558,7 @@ dim_expr_base:
   | keyset_literal                     { $$ = $1;}
   | varray_literal                     { $$ = $1;}
   | darray_literal                     { $$ = $1;}
+  | tuple_literal                      { $$ = $1;}
   | class_constant                     { $$ = $1;}
   | lambda_or_closure_with_parens      { $$ = $1;}
   | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
@@ -2830,6 +2846,7 @@ static_expr:
   | static_keyset_literal              { $$ = $1;}
   | static_varray_literal              { $$ = $1;}
   | static_darray_literal              { $$ = $1;}
+  | static_tuple_literal               { $$ = $1;}
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
   | '(' static_expr ')'                { $$ = $2;}
@@ -2988,6 +3005,7 @@ static_scalar_ae:
   | static_keyset_literal_ae           { $$ = $1;}
   | static_varray_literal_ae           { $$ = $1;}
   | static_darray_literal_ae           { $$ = $1;}
+  | static_tuple_literal_ae            { $$ = $1;}
 ;
 
 static_scalar_ae_list:
@@ -3765,7 +3783,7 @@ hh_type:
     hh_non_empty_type_list
     possible_comma ')'                { only_in_hh_syntax(_p);
                                         _p->onTypeList($2, $4);
-                                        Token t; t.reset(); t.setText("array");
+                                        Token t; t.reset(); t.setText("HH\\varray");
                                         _p->onTypeAnnotation($$, t, $2);
                                         _p->onTypeSpecialization($$, 't'); }
 ;

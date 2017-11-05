@@ -106,8 +106,7 @@ let rec expr_to_typed_value
   | A.Id (_, id) when id = "NAN" -> TV.Float nan
   | A.Id (_, id) when id = "INF" -> TV.Float infinity
   | A.Array fields -> array_to_typed_value ns fields
-  | A.Varray es ->
-    array_to_typed_value ns @@ List.map es ~f:(fun e -> A.AFvalue e)
+  | A.Varray fields -> varray_to_typed_value ns fields
   | A.Darray es ->
     array_to_typed_value ns @@
       List.map es ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2))
@@ -129,12 +128,21 @@ let rec expr_to_typed_value
     in
     let d = update_duplicates_in_map values in
     TV.Dict d
+  | A.Collection ((_, kind), fields)
+    when allow_maps &&
+         (SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Set" ||
+          SU.cmp ~case_sensitive:false ~ignore_ns:true kind "ImmSet") ->
+    let values =
+      List.map fields ~f:(set_afield_to_typed_value_pair ns)
+    in
+    let d = update_duplicates_in_map values in
+    TV.Dict d
   | A.Shape fields ->
     shape_to_typed_value ns fields
   | A.Class_const (cid, id) ->
     class_const_to_typed_value ns cid id
-  | A.Call ((_, A.Id (_, "tuple")), _, es, _) when Emit_env.is_hh_syntax_enabled () ->
-    array_to_typed_value ns @@ List.map es ~f:(fun e -> A.AFvalue e)
+  | A.Call ((_, A.Id (_, "tuple")), _, es, _) when Emit_env.is_hh_syntax_enabled() ->
+    varray_to_typed_value ns es
   | A.Id _ | A.Class_get _ -> raise UserDefinedConstant
   | _ ->
     raise NotLiteral
@@ -200,6 +208,9 @@ and array_to_typed_value ns fields =
   let a = update_duplicates_in_map @@ List.rev pairs in
   TV.Array a
 
+and varray_to_typed_value ns fields =
+  TV.VArray (List.map fields ~f:(expr_to_typed_value ns))
+
 and shape_to_typed_value ns fields =
   TV.Array (
   List.map fields (fun (sf, expr) ->
@@ -250,6 +261,14 @@ and keyset_value_afield_to_typed_value ns afield =
   | _ -> raise NotLiteral end;
   tv
 
+and set_afield_to_typed_value_pair ns afield =
+  match afield with
+  | A.AFvalue (value) ->
+     let tv = key_expr_to_typed_value ~restrict_keys:true ns value
+     in (tv, tv)
+  | A.AFkvalue (_, _) ->
+     failwith "set_afield_to_typed_value_pair: unexpected key=>value"
+
 let expr_to_opt_typed_value ?(restrict_keys=false) ?(allow_maps=false) ns e =
   match expr_to_typed_value ~restrict_keys ~allow_maps ns e with
   | x -> Some x
@@ -265,12 +284,11 @@ let rec value_to_expr_ p v =
   | TV.Bool true -> A.True
   | TV.String s -> A.String (p, s)
   | TV.Float f -> A.Float (p, SU.Float.to_string f)
-  | TV.Vec values -> A.Varray (List.map values (value_to_expr p))
-  | TV.Keyset _values -> failwith "value_to_expr: keyset NYI"
+  | TV.Vec _ -> failwith "value_to_expr: vec NYI"
+  | TV.Keyset _ -> failwith "value_to_expr: keyset NYI"
   | TV.Array pairs -> A.Array (List.map pairs (value_pair_to_afield p))
-  | TV.Dict pairs ->
-    A.Darray (List.map pairs
-      (fun (v1, v2) -> (value_to_expr p v1, value_to_expr p v2)))
+  | TV.VArray values -> A.Varray (List.map values (value_to_expr p))
+  | TV.Dict _ -> failwith "value_to_expr: dict NYI"
 and value_to_expr p v =
   (p, value_to_expr_ p v)
 and value_pair_to_afield p (v1, v2) =

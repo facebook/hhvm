@@ -415,32 +415,32 @@ Triggered E_WARNING: Value returned from closure must be of type @?int, string g
 Triggered E_WARNING: Value returned from closure must be of type @?int, array given
 
 calling f18
-Triggered E_WARNING: Value returned from closure must be of type array, null given
-Triggered E_WARNING: Value returned from closure must be of type array, int given
-Triggered E_WARNING: Value returned from closure must be of type array, string given
-Triggered E_WARNING: Value returned from closure must be of type array, bool given
-Triggered E_WARNING: Value returned from closure must be of type array, float given
-Triggered E_WARNING: Value returned from closure must be of type array, gd given
-Triggered E_WARNING: Value returned from closure must be of type array, Closure given
-Triggered E_WARNING: Value returned from closure must be of type array, Figure given
-Triggered E_WARNING: Value returned from closure must be of type array, Square given
-Triggered E_WARNING: Value returned from closure must be of type array, Fractal given
-Triggered E_WARNING: Value returned from closure must be of type array, xhp_div given
-Triggered E_WARNING: Value returned from closure must be of type array, string given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, null given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, int given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, string given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, bool given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, float given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, gd given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, Closure given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, Figure given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, Square given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, Fractal given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, xhp_div given
+Triggered E_WARNING: Value returned from closure must be of type HH\varray, string given
 
 calling f18_soft
-Triggered E_WARNING: Value returned from closure must be of type @array, null given
-Triggered E_WARNING: Value returned from closure must be of type @array, int given
-Triggered E_WARNING: Value returned from closure must be of type @array, string given
-Triggered E_WARNING: Value returned from closure must be of type @array, bool given
-Triggered E_WARNING: Value returned from closure must be of type @array, float given
-Triggered E_WARNING: Value returned from closure must be of type @array, gd given
-Triggered E_WARNING: Value returned from closure must be of type @array, Closure given
-Triggered E_WARNING: Value returned from closure must be of type @array, Figure given
-Triggered E_WARNING: Value returned from closure must be of type @array, Square given
-Triggered E_WARNING: Value returned from closure must be of type @array, Fractal given
-Triggered E_WARNING: Value returned from closure must be of type @array, xhp_div given
-Triggered E_WARNING: Value returned from closure must be of type @array, string given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, null given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, int given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, string given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, bool given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, float given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, gd given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, Closure given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, Figure given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, Square given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, Fractal given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, xhp_div given
+Triggered E_WARNING: Value returned from closure must be of type @HH\varray, string given
 
 calling f19
 

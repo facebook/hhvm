@@ -371,9 +371,14 @@ void ConvertTvToUncounted(TypedValue* source) {
       auto& ad = source->m_data.parr;
       assert(ad->isPHPArray());
       if (ad->isStatic()) break;
-      else if (ad->empty()) ad = staticEmptyArray();
-      else if (ad->hasPackedLayout()) ad = PackedArray::MakeUncounted(ad);
-      else ad = MixedArray::MakeUncounted(ad);
+      if (ad->empty()) {
+        if (ad->isVArray()) ad = staticEmptyVArray();
+        else ad = staticEmptyArray();
+      } else if (ad->hasPackedLayout()) {
+        ad = PackedArray::MakeUncounted(ad);
+      } else {
+        ad = MixedArray::MakeUncounted(ad);
+      }
       break;
     }
     case KindOfUninit: {

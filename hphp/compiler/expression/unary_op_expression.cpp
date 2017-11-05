@@ -74,6 +74,7 @@ inline void UnaryOpExpression::ctorInit() {
   case T_FUNCTION:
     break;
   case T_ARRAY:
+  case T_VARRAY:
   case T_DICT:
   case T_VEC:
   case T_KEYSET:
@@ -197,6 +198,7 @@ bool UnaryOpExpression::isScalar() const {
   case T_ARRAY:
     return isArrayScalar(m_exp);
   case T_VEC:
+  case T_VARRAY:
     return (!m_exp || m_exp->isScalar());
   case T_KEYSET:
     return isKeysetScalar(m_exp);
@@ -237,6 +239,21 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
   if (m_exp) {
     if (m_op == T_ARRAY) {
       return m_exp->getScalarValue(value);
+    }
+    if (m_op == T_VARRAY) {
+      auto exp_list = dynamic_pointer_cast<ExpressionList>(m_exp);
+      if (!exp_list) return false;
+      VArrayInit init(exp_list->getCount());
+      auto const result = exp_list->getListScalars(
+        [&](const Variant& n, const Variant& v) {
+          if (n.isInitialized()) return false;
+          init.append(v);
+          return true;
+        }
+      );
+      if (!result) return false;
+      value = init.toVariant();
+      return true;
     }
     if (m_op == T_DICT) {
       auto exp_list = dynamic_pointer_cast<ExpressionList>(m_exp);
@@ -288,6 +305,11 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
     Variant t;
     return m_exp->getScalarValue(t) &&
       preCompute(t, value);
+  }
+
+  if (m_op == T_VARRAY) {
+    value = Array::CreateVArray();
+    return true;
   }
 
   if (m_op == T_DICT) {
@@ -441,6 +463,7 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstRawPtr ar) {
       return replaceValue(makeScalarExpression(ar, result));
     }
   } else if (m_op != T_ARRAY &&
+             m_op != T_VARRAY &&
              m_op != T_VEC &&
              m_op != T_DICT &&
              m_op != T_KEYSET &&
@@ -531,6 +554,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_EXIT:          cg_printf("exit(");         break;
     case '@':             cg_printf("@");             break;
     case T_ARRAY:         cg_printf("array(");        break;
+    case T_VARRAY:        cg_printf("varray[");       break;
     case T_DICT:          cg_printf("dict[");         break;
     case T_VEC:           cg_printf("vec[");          break;
     case T_KEYSET:        cg_printf("keyset[");       break;
@@ -562,8 +586,9 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_ISSET:
     case T_EMPTY:
     case T_EVAL:          cg_printf(")");  break;
-    case T_DICT:          cg_printf("]");  break;
-    case T_VEC:           cg_printf("]");  break;
+    case T_VARRAY:
+    case T_DICT:
+    case T_VEC:
     case T_KEYSET:        cg_printf("]");  break;
     default:
       break;

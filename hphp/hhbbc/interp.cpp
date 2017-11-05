@@ -374,6 +374,17 @@ void in(ISS& env, const bc::NewPackedArray& op) {
   constprop(env);
 }
 
+void in(ISS& env, const bc::NewVArray& op) {
+  auto elems = std::vector<Type>{};
+  elems.reserve(op.arg1);
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) {
+    elems.push_back(std::move(topC(env, op.arg1 - i - 1)));
+  }
+  discard(env, op.arg1);
+  push(env, arr_packed(std::move(elems)));
+  constprop(env);
+}
+
 void in(ISS& env, const bc::NewStructArray& op) {
   auto map = MapElems{};
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {

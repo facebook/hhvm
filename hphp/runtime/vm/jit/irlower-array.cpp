@@ -255,6 +255,18 @@ IMPL_OPCODE_CALL(NewDictArray)
 IMPL_OPCODE_CALL(AllocPackedArray)
 IMPL_OPCODE_CALL(AllocVecArray)
 
+void cgAllocVArray(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<PackedArrayData>();
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(PackedArray::MakeUninitializedVArray),
+    callDest(env, inst),
+    SyncOptions::None,
+    argGroup(env, inst).imm(extra->size)
+  );
+}
+
 void cgNewStructArray(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<NewStructData>();

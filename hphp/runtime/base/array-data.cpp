@@ -67,8 +67,13 @@ struct ScalarHash {
     return raw_hash(arr);
   }
   size_t raw_hash(const ArrayData* arr) const {
-    auto ret = uint64_t{arr->isHackArray() ?
-                        arr->kind() : ArrayData::ArrayKind::kMixedKind};
+    auto ret = uint64_t{
+      arr->isHackArray()
+      ? arr->kind()
+      : ArrayData::ArrayKind::kMixedKind
+    };
+    ret |= (uint64_t{arr->dvArray()} << 32);
+
     IterateKV(
       arr,
       [&](Cell k, TypedValue v) {
@@ -110,6 +115,7 @@ struct ScalarHash {
   bool equal(const ArrayData* ad1, const ArrayData* ad2) const {
     if (ad1 == ad2) return true;
     if (ad1->size() != ad2->size()) return false;
+    if (ad1->dvArray() != ad2->dvArray()) return false;
     if (ad1->isHackArray()) {
       if (!ad2->isHackArray()) return false;
       if (ad1->kind() != ad2->kind()) return false;
@@ -167,8 +173,9 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
 
   if (arr->empty()) {
     if (arr->isVecArray()) return replace(staticEmptyVecArray());
-    if (arr->isDict()) return replace(staticEmptyDictArray());
-    if (arr->isKeyset()) return replace(staticEmptyKeysetArray());
+    if (arr->isDict())     return replace(staticEmptyDictArray());
+    if (arr->isKeyset())   return replace(staticEmptyKeysetArray());
+    if (arr->isVArray())   return replace(staticEmptyVArray());
     return replace(staticEmptyArray());
   }
 

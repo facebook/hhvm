@@ -432,6 +432,7 @@ bool canDCE(IRInstruction* inst) {
   case InitThrowableFileAndLine:
   case ConstructInstance:
   case AllocPackedArray:
+  case AllocVArray:
   case AllocVecArray:
   case InitPackedLayoutArray:
   case InitPackedLayoutArrayLoop:

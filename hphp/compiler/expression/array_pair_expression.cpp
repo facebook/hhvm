@@ -55,6 +55,7 @@ bool ArrayPairExpression::isScalarArrayPair() const {
   if (!m_name->isScalar()) return false;
   if (m_name->is(KindOfUnaryOpExpression) &&
       (static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_ARRAY ||
+       static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_VARRAY ||
        static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_VEC ||
        static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_DICT ||
        static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_KEYSET)) {

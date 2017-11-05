@@ -217,6 +217,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::NewArray:
   case Op::NewDictArray:
   case Op::NewPackedArray:
+  case Op::NewVArray:
   case Op::NewStructArray:
   case Op::NewVecArray:
   case Op::NewKeysetArray:

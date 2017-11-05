@@ -376,6 +376,7 @@ void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
       case T_NS_SEPARATOR:
       case T_NAMESPACE:
       case T_SHAPE:
+      case T_TUPLE:
       case T_ARRAY:
       case T_DICT:
       case T_VEC:
@@ -478,6 +479,7 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
       case T_KEYSET:
       case T_VARRAY:
       case T_DARRAY:
+      case T_TUPLE:
       case T_CALLABLE:
       case T_UNRESOLVED_TYPE:
       case T_UNRESOLVED_NEWTYPE:

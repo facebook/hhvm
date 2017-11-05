@@ -601,7 +601,8 @@ void staticArrayStreamer(const ArrayData* ad, std::string& out) {
   else if (ad->isKeyset()) out += "keyset(";
   else {
     assert(ad->isPHPArray());
-    out += "array(";
+    if (ad->isVArray()) out += "varray(";
+    else out += "array(";
   }
 
   if (!ad->empty()) {

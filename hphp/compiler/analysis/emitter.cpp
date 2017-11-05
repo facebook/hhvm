@@ -915,6 +915,16 @@ private:
 
   folly::Optional<Op> m_prevOpcode;
 
+  enum struct ArrayType {
+    Array,
+    Vec,
+    Dict,
+    // This is a dict, but being created for the purpose of initializing a Set.
+    DictForSetCollection,
+    Keyset,
+    VArray
+  };
+
   std::deque<PostponedMeth> m_postponedMeths;
   std::deque<PostponedCtor> m_postponedCtors;
   std::deque<PostponedNonScalars> m_postponedPinits;
@@ -932,7 +942,7 @@ private:
   std::deque<FaultRegion*> m_faultRegions;
   std::deque<FPIRegion*> m_fpiRegions;
   std::vector<Array> m_staticArrays;
-  std::vector<folly::Optional<HeaderKind>> m_staticColType;
+  std::vector<ArrayType> m_staticColType;
   std::set<std::string,stdltistr> m_hoistables;
   OptLocation m_tempLoc;
   std::unordered_set<std::string> m_staticEmitted;
@@ -1112,9 +1122,7 @@ public:
   Id emitSetUnnamedL(Emitter& e);
   void emitFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
   void emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
-  void emitArrayInit(Emitter& e, ExpressionListPtr el,
-                     folly::Optional<HeaderKind> ct = folly::none,
-                     bool isDictForSetCollection = false);
+  void emitArrayInit(Emitter& e, ExpressionListPtr el, ArrayType type);
   void emitPairInit(Emitter&e, ExpressionListPtr el);
   void emitVectorInit(Emitter&e, CollectionType ct, ExpressionListPtr el);
   void emitMapInit(Emitter&e, CollectionType ct, ExpressionListPtr el);
@@ -1322,7 +1330,7 @@ public:
   void saveMaxStackCells(FuncEmitter* fe, int32_t stackPad);
   void finishFunc(Emitter& e, FuncEmitter* fe, int32_t stackPad);
   void initScalar(TypedValue& tvVal, ExpressionPtr val,
-                  folly::Optional<HeaderKind> ct = folly::none);
+                  folly::Optional<ArrayType> type = folly::none);
   bool requiresDeepInit(ExpressionPtr initExpr) const;
 
   void emitClassTraitPrecRule(PreClassEmitter* pce, TraitPrecStatementPtr rule);
@@ -5306,25 +5314,31 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     if (op == T_ARRAY) {
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
-      emitArrayInit(e, el);
+      emitArrayInit(e, el, ArrayType::Array);
+      return true;
+    }
+
+    if (op == T_VARRAY) {
+      auto el = static_pointer_cast<ExpressionList>(u->getExpression());
+      emitArrayInit(e, el, ArrayType::VArray);
       return true;
     }
 
     if (op == T_DICT) {
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
-      emitArrayInit(e, el, HeaderKind::Dict);
+      emitArrayInit(e, el, ArrayType::Dict);
       return true;
     }
 
     if (op == T_VEC) {
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
-      emitArrayInit(e, el, HeaderKind::VecArray);
+      emitArrayInit(e, el, ArrayType::Vec);
       return true;
     }
 
     if (op == T_KEYSET) {
       auto el = static_pointer_cast<ExpressionList>(u->getExpression());
-      emitArrayInit(e, el, HeaderKind::Keyset);
+      emitArrayInit(e, el, ArrayType::Keyset);
       return true;
     }
 
@@ -6529,7 +6543,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       } else {
         // If we're building a static dict for the contents of a Set/ImmSet
         // we only have a val but need to store it in both the key and the val
-        if (m_staticColType.back() == HeaderKind::Dict) {
+        if (m_staticColType.back() == ArrayType::Dict ||
+            m_staticColType.back() == ArrayType::DictForSetCollection) {
           m_staticArrays.back().set(tvAsVariant(&tvVal),
                                     tvAsVariant(&tvVal));
         } else {
@@ -6567,8 +6582,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   case Construct::KindOfExpressionList: {
     auto el = static_pointer_cast<ExpressionList>(node);
     if (!m_staticArrays.empty() &&
-        (m_staticColType.back() == HeaderKind::VecArray ||
-         m_staticColType.back() == HeaderKind::Keyset)) {
+        (m_staticColType.back() == ArrayType::Vec ||
+         m_staticColType.back() == ArrayType::VArray ||
+         m_staticColType.back() == ArrayType::Keyset)) {
       auto const nelem = el->getCount();
       for (int i = 0; i < nelem; ++i) {
         auto const expr = (*el)[i];
@@ -11446,21 +11462,32 @@ void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe, int32_t stackPad) {
 }
 
 void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
-                                folly::Optional<HeaderKind> kind) {
+                                folly::Optional<ArrayType> type) {
   assert(val->isScalar());
   tvVal.m_type = KindOfUninit;
   // static array initilization
-  auto initArray = [&](ExpressionPtr el, folly::Optional<HeaderKind> k) {
-    if (k == HeaderKind::Dict) {
-      m_staticArrays.push_back(Array::attach(MixedArray::MakeReserveDict(0)));
-    } else if (k == HeaderKind::VecArray) {
-      m_staticArrays.push_back(Array::attach(PackedArray::MakeReserveVec(0)));
-    } else if (k == HeaderKind::Keyset) {
-      m_staticArrays.push_back(Array::attach(SetArray::MakeReserveSet(0)));
-    } else {
-      m_staticArrays.push_back(Array::attach(PackedArray::MakeReserve(0)));
+  auto initArray = [&](ExpressionPtr el, ArrayType t) {
+    switch (t) {
+      case ArrayType::Array:
+        m_staticArrays.push_back(Array::attach(PackedArray::MakeReserve(0)));
+        break;
+      case ArrayType::VArray:
+        m_staticArrays.push_back(
+          Array::attach(PackedArray::MakeReserveVArray(0))
+        );
+        break;
+      case ArrayType::Vec:
+        m_staticArrays.push_back(Array::attach(PackedArray::MakeReserveVec(0)));
+        break;
+      case ArrayType::Dict:
+      case ArrayType::DictForSetCollection:
+        m_staticArrays.push_back(Array::attach(MixedArray::MakeReserveDict(0)));
+        break;
+      case ArrayType::Keyset:
+        m_staticArrays.push_back(Array::attach(SetArray::MakeReserveSet(0)));
+        break;
     }
-    m_staticColType.push_back(k);
+    m_staticColType.push_back(t);
     visit(el);
     tvVal = make_array_like_tv(
       ArrayData::GetScalarArray(std::move(m_staticArrays.back()))
@@ -11507,25 +11534,29 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
     }
     case Expression::KindOfExpressionList: {
       // Array, possibly for collection initialization.
-      initArray(val, kind);
+      initArray(val, type ? *type : ArrayType::Array);
       break;
     }
     case Expression::KindOfUnaryOpExpression: {
       auto u = static_pointer_cast<UnaryOpExpression>(val);
       if (u->getOp() == T_ARRAY) {
-        initArray(u->getExpression(), folly::none);
+        initArray(u->getExpression(), ArrayType::Array);
+        break;
+      }
+      if (u->getOp() == T_VARRAY) {
+        initArray(u->getExpression(), ArrayType::VArray);
         break;
       }
       if (u->getOp() == T_DICT) {
-        initArray(u->getExpression(), HeaderKind::Dict);
+        initArray(u->getExpression(), ArrayType::Dict);
         break;
       }
       if (u->getOp() == T_VEC) {
-        initArray(u->getExpression(), HeaderKind::VecArray);
+        initArray(u->getExpression(), ArrayType::Vec);
         break;
       }
       if (u->getOp() == T_KEYSET) {
-        initArray(u->getExpression(), HeaderKind::Keyset);
+        initArray(u->getExpression(), ArrayType::Keyset);
         break;
       }
       // Fall through
@@ -11544,64 +11575,77 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
 }
 
 void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
-                                   folly::Optional<HeaderKind> kind,
-                                   bool isDictForSetCollection) {
+                                   ArrayType type) {
   assert(m_staticArrays.empty());
-  assertx(!kind || isHackArrayKind(*kind));
-  assertx(!isDictForSetCollection || (kind && *kind == HeaderKind::Dict));
-  auto const isDict = kind == HeaderKind::Dict;
-  auto const isVec = kind == HeaderKind::VecArray;
-  auto const isKeyset = kind == HeaderKind::Keyset;
 
   if (el == nullptr) {
-    if (isDict) {
-      e.Dict(staticEmptyDictArray());
-      return;
+    switch (type) {
+      case ArrayType::Array:
+        e.Array(staticEmptyArray());
+        break;
+      case ArrayType::VArray:
+        e.Array(staticEmptyVArray());
+        break;
+      case ArrayType::Vec:
+        e.Vec(staticEmptyVecArray());
+        break;
+      case ArrayType::Dict:
+      case ArrayType::DictForSetCollection:
+        e.Dict(staticEmptyDictArray());
+        break;
+      case ArrayType::Keyset:
+        e.Keyset(staticEmptyKeysetArray());
+        break;
     }
-    if (isVec) {
-      e.Vec(staticEmptyVecArray());
-      return;
-    }
-    if (isKeyset) {
-      e.Keyset(staticEmptyKeysetArray());
-      return;
-    }
-    e.Array(staticEmptyArray());
     return;
   }
 
   auto const scalar = [&]{
-    if (isDictForSetCollection) el->isSetCollectionScalar();
-    if (isVec) return el->isScalar();
-    if (isDict) return isDictScalar(el);
-    if (isKeyset) return isKeysetScalar(el);
-    return isArrayScalar(el);
+    switch (type) {
+      case ArrayType::Array:
+        return isArrayScalar(el);
+      case ArrayType::VArray:
+      case ArrayType::Vec:
+        return el->isScalar();
+      case ArrayType::Dict:
+        return isDictScalar(el);
+      case ArrayType::DictForSetCollection:
+        return el->isSetCollectionScalar();
+      case ArrayType::Keyset:
+        return isKeysetScalar(el);
+    }
+    always_assert(false);
   }();
   if (scalar) {
     TypedValue tv;
     tvWriteUninit(tv);
-    initScalar(tv, el, kind);
-    if (isDict) {
-      assert(tv.m_data.parr->isDict());
-      e.Dict(tv.m_data.parr);
-      return;
+    initScalar(tv, el, type);
+    switch (type) {
+      case ArrayType::Array:
+      case ArrayType::VArray:
+        assert(tv.m_data.parr->isPHPArray());
+        assert(type != ArrayType::VArray || tv.m_data.parr->isVArray());
+        assert(type != ArrayType::Array || tv.m_data.parr->isNotDVArray());
+        e.Array(tv.m_data.parr);
+        break;
+      case ArrayType::Vec:
+        assert(tv.m_data.parr->isVecArray());
+        e.Vec(tv.m_data.parr);
+        break;
+      case ArrayType::Dict:
+      case ArrayType::DictForSetCollection:
+        assert(tv.m_data.parr->isDict());
+        e.Dict(tv.m_data.parr);
+        break;
+      case ArrayType::Keyset:
+        assert(tv.m_data.parr->isKeyset());
+        e.Keyset(tv.m_data.parr);
+        break;
     }
-    if (isVec) {
-      assert(tv.m_data.parr->isVecArray());
-      e.Vec(tv.m_data.parr);
-      return;
-    }
-    if (isKeyset) {
-      assert(tv.m_data.parr->isKeyset());
-      e.Keyset(tv.m_data.parr);
-      return;
-    }
-    assert(tv.m_data.parr->isPHPArray());
-    e.Array(tv.m_data.parr);
     return;
   }
 
-  if (!kind && isPackedInit(el)) {
+  if (type == ArrayType::Array && isPackedInit(el)) {
     auto const total = el->getCount();
     size_t count = 0;
     while (count < std::min<size_t>(total, ArrayData::MaxElemsOnStack)) {
@@ -11623,7 +11667,9 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  if (isVec || isKeyset) {
+  if (type == ArrayType::Vec ||
+      type == ArrayType::Keyset ||
+      type == ArrayType::VArray) {
     auto const total = el->getCount();
     size_t count = 0;
     while (count < std::min<size_t>(total, ArrayData::MaxElemsOnStack)) {
@@ -11633,10 +11679,12 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
       emitConvertToCell(e);
       ++count;
     }
-    if (isVec) {
+    if (type == ArrayType::Vec) {
       e.NewVecArray(count);
-    } else {
+    } else if (type == ArrayType::Keyset) {
       e.NewKeysetArray(count);
+    } else {
+      e.NewVArray(count);
     }
     while (count < total) {
       auto expr = static_pointer_cast<Expression>((*el)[count]);
@@ -11653,7 +11701,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
   auto const capacity = el->getCount();
   if (capacity > 0) capacityHint = capacity;
 
-  if (isDictForSetCollection) {
+  if (type == ArrayType::DictForSetCollection) {
     e.NewDictArray(capacityHint);
     auto const count = el->getCount();
     for (int i = 0; i < count; i++) {
@@ -11667,14 +11715,14 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  if (isDict) {
+  if (type == ArrayType::Dict) {
     e.NewDictArray(capacityHint);
     visit(el);
     return;
   }
 
   // from here on, we're dealing with PHP arrays only
-  assertx(!kind);
+  assertx(type == ArrayType::Array);
 
   std::vector<std::string> keys;
   if (isStructInit(el, keys)) {
@@ -11732,7 +11780,7 @@ void EmitterVisitor::emitVectorInit(Emitter&e, CollectionType ct,
     }
     unwrapped->addElement(ap->getValue());
   }
-  emitArrayInit(e, unwrapped, HeaderKind::VecArray);
+  emitArrayInit(e, unwrapped, ArrayType::Vec);
   e.ColFromArray(ct);
   return;
 }
@@ -11749,7 +11797,7 @@ void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
         "Keys may not be specified for Set initialization");
     }
   }
-  emitArrayInit(e, el, HeaderKind::Dict, true);
+  emitArrayInit(e, el, ArrayType::DictForSetCollection);
   e.ColFromArray(ct);
 }
 
@@ -11765,7 +11813,7 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
         "Keys must be specified for Map initialization");
     }
   }
-  emitArrayInit(e, el, HeaderKind::Dict);
+  emitArrayInit(e, el, ArrayType::Dict);
   e.ColFromArray(ct);
 }
 
@@ -11830,7 +11878,9 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
           }
         }
         return false;
-      } else if (u->getOp() == T_VEC || u->getOp() == T_KEYSET) {
+      } else if (u->getOp() == T_VEC ||
+                 u->getOp() == T_KEYSET ||
+                 u->getOp() == T_VARRAY) {
         auto el = static_pointer_cast<ExpressionList>(u->getExpression());
         if (el) {
           int n = el->getCount();

@@ -251,13 +251,16 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
    * This function takes ownership of the TypedValues in `values'.
    */
   static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
+  static ArrayData* MakeVArray(uint32_t size, const TypedValue* values);
   static ArrayData* MakeVec(uint32_t size, const TypedValue* values);
+
   /*
    * Like MakePacked, but with `values' array in natural (not reversed) order.
    */
   static ArrayData* MakePackedNatural(uint32_t size, const TypedValue* values);
 
   static ArrayData* MakeUninitialized(uint32_t size);
+  static ArrayData* MakeUninitializedVArray(uint32_t size);
   static ArrayData* MakeUninitializedVec(uint32_t size);
 
   static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
@@ -299,7 +302,8 @@ private:
   static ArrayData* MakeReserveImpl(uint32_t, HeaderKind, ArrayData::DVArray);
 
   template<bool reverse>
-  static ArrayData* MakePackedImpl(uint32_t, const TypedValue*, HeaderKind);
+  static ArrayData* MakePackedImpl(uint32_t, const TypedValue*,
+                                   HeaderKind, ArrayData::DVArray);
 
   template<bool convertingPackedToVec>
   static bool CopyPackedHelper(const ArrayData* adIn, ArrayData* ad);

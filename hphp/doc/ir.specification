@@ -1478,6 +1478,12 @@ To string conversions:
   The array will be initialized with values using either InitPackedLayoutArray
   or InitPackedLayoutArrayLoop.
 
+| AllocVArray<size>, DArrPacked, NA, PRc
+
+  Allocate a new uninitialized vec-like array with space for size elements in
+  it.  The array will be initialized with values using either
+  InitPackedLayoutArray or InitPackedLayoutArrayLoop.
+
 | AllocVecArray<size>, D(Vec), NA, PRc
 
   Allocate a new uninitialized vector array with space for size elements in it.

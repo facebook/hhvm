@@ -1376,6 +1376,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NewMixedArray:
   case NewDictArray:
   case AllocPackedArray:
+  case AllocVArray:
   case AllocVecArray:
   case ConvBoolToArr:
   case ConvDblToStr:

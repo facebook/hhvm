@@ -472,9 +472,10 @@ template<bool reverse>
 ALWAYS_INLINE
 ArrayData* PackedArray::MakePackedImpl(uint32_t size,
                                        const TypedValue* values,
-                                       HeaderKind hk) {
+                                       HeaderKind hk,
+                                       ArrayData::DVArray dv) {
   assert(size > 0);
-  auto ad = MakeReserveImpl(size, hk, ArrayData::kNotDVArray);
+  auto ad = MakeReserveImpl(size, hk, dv);
   ad->m_sizeAndPos = size; // pos = 0
 
   // Append values by moving; this function takes ownership of them.
@@ -497,23 +498,38 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
 ArrayData* PackedArray::MakePacked(uint32_t size, const TypedValue* values) {
   // Values are in reverse order since they come from the stack, which
   // grows down.
-  auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed);
+  auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed,
+                                 ArrayData::kNotDVArray);
   assert(ad->isPacked());
+  assert(ad->isNotDVArray());
+  return ad;
+}
+
+ArrayData* PackedArray::MakeVArray(uint32_t size, const TypedValue* values) {
+  // Values are in reverse order since they come from the stack, which
+  // grows down.
+  auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed,
+                                 ArrayData::kVArray);
+  assert(ad->isPacked());
+  assert(ad->isVArray());
   return ad;
 }
 
 ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
   // Values are in reverse order since they come from the stack, which
   // grows down.
-  auto ad = MakePackedImpl<true>(size, values, HeaderKind::VecArray);
+  auto ad = MakePackedImpl<true>(size, values, HeaderKind::VecArray,
+                                 ArrayData::kNotDVArray);
   assert(ad->isVecArray());
   return ad;
 }
 
 ArrayData* PackedArray::MakePackedNatural(uint32_t size,
                                           const TypedValue* values) {
-  auto ad = MakePackedImpl<false>(size, values, HeaderKind::Packed);
+  auto ad = MakePackedImpl<false>(size, values, HeaderKind::Packed,
+                                  ArrayData::kNotDVArray);
   assert(ad->isPacked());
+  assert(ad->isNotDVArray());
   return ad;
 }
 
@@ -521,6 +537,18 @@ ArrayData* PackedArray::MakeUninitialized(uint32_t size) {
   auto ad = MakeReserveImpl(size, HeaderKind::Packed, ArrayData::kNotDVArray);
   ad->m_sizeAndPos = size; // pos = 0
   assert(ad->isPacked());
+  assert(ad->isNotDVArray());
+  assert(ad->m_size == size);
+  assert(ad->m_pos == 0);
+  assert(checkInvariants(ad));
+  return ad;
+}
+
+ArrayData* PackedArray::MakeUninitializedVArray(uint32_t size) {
+  auto ad = MakeReserveImpl(size, HeaderKind::Packed, ArrayData::kVArray);
+  ad->m_sizeAndPos = size; // pos = 0
+  assert(ad->isPacked());
+  assert(ad->isVArray());
   assert(ad->m_size == size);
   assert(ad->m_pos == 0);
   assert(checkInvariants(ad));

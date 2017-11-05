@@ -1120,6 +1120,12 @@ NewKeysetArray <num elems>    [C..C]  ->  [C:Keyset]
   those cells, then pushes the new keyset onto the stack.  Elements are pushed
   on the stack in keyset insertion order.
 
+NewVArray <num elems>   [C..]  ->  [C:Arr]
+
+ New vec-like array. Creates a new vec-like array from the top %1 cells on the
+ stack, pops those cells, then pushes the new array onto the stack. Elements
+ are pushed on the stack in array insertion order.
+
 AddElemC    [C C C]  ->  [C:Arr|Dict]
 
   Add element. If $3 is an array or dict, this instruction executes $3[$2] = $1
@@ -1438,8 +1444,8 @@ CastKeyset    [C]  ->  [C:Keyset]
 
 CastVArray    [C]  ->  [C:Arr]
 
-  Cast to vector-like array. Performs an array cast, but drops any keys from
-  the input.
+  Cast to vec-like array. Performs an array cast, but drops any keys from the
+  input and handles object inputs like CastVec.
 
 CastDArray    [C]  ->  [C:Arr]
 

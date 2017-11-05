@@ -370,6 +370,10 @@ void emitNewVecArray(IRGS& env, uint32_t numArgs) {
   emitNewPackedLayoutArray(env, numArgs, AllocVecArray);
 }
 
+void emitNewVArray(IRGS& env, uint32_t numArgs) {
+  emitNewPackedLayoutArray(env, numArgs, AllocVArray);
+}
+
 void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
   auto const numArgs = immVec.size();
   auto const ids = immVec.vec32();

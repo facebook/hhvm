@@ -404,6 +404,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewStructArray,  ONE(VSA),         SMANY,           ONE(CV),    NF) \
   O(NewVecArray,     ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(NewKeysetArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
+  O(NewVArray,       ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(AddElemC,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(AddElemV,        NA,               THREE(VV,CV,CV), ONE(CV),    NF) \
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \

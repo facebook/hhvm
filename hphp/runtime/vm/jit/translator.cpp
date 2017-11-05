@@ -125,6 +125,7 @@ static const struct {
   { OpNewStructArray, {StackN,        Stack1,       OutArray        }},
   { OpNewVecArray,    {StackN,        Stack1,       OutVec          }},
   { OpNewKeysetArray, {StackN,        Stack1,       OutKeyset       }},
+  { OpNewVArray,   {StackN,           Stack1,       OutArray        }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutModifiedInput3 }},
   { OpAddElemV,    {StackTop3,        Stack1,       OutModifiedInput3 }},
   { OpAddNewElemC, {StackTop2,        Stack1,       OutModifiedInput2 }},
@@ -562,6 +563,7 @@ int64_t getStackPopped(PC pc) {
     case Op::NewPackedArray:
     case Op::NewVecArray:
     case Op::NewKeysetArray:
+    case Op::NewVArray:
     case Op::ConcatN:
     case Op::FCallBuiltin:
     case Op::CreateCl:
@@ -746,6 +748,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     int numArgs = (ni.op() == Op::NewPackedArray ||
                    ni.op() == Op::NewVecArray ||
                    ni.op() == Op::NewKeysetArray ||
+                   ni.op() == Op::NewVArray ||
                    ni.op() == Op::ConcatN)
       ? ni.imm[0].u_IVA
       : ni.immVec.numStackValues();
@@ -999,6 +1002,8 @@ bool dontGuardAnyInputs(Op op) {
   case Op::NewDictArray:
   case Op::NewPackedArray:
   case Op::NewVecArray:
+  case Op::NewKeysetArray:
+  case Op::NewVArray:
   case Op::Not:
   case Op::Null:
   case Op::NullUninit:
@@ -1119,7 +1124,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::ContEnterDelegate:
   case Op::YieldFromDelegate:
   case Op::ContUnsetDelegate:
-  case Op::NewKeysetArray:
   case Op::MaybeMemoType:
   case Op::IsMemoType:
     return true;

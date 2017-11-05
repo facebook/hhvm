@@ -143,8 +143,13 @@ match h with
     TC.make (Some tc_name) tc_flags
 
 (* Shapes and tuples are just arrays *)
-| A.Hshape _ |  A.Htuple _ ->
+| A.Hshape _ ->
   let tc_name = Some "array" in
+  let tc_flags = [TC.HHType; TC.ExtendedHint] in
+  TC.make tc_name tc_flags
+
+| A.Htuple _ ->
+  let tc_name = Some "HH\\varray" in
   let tc_flags = [TC.HHType; TC.ExtendedHint] in
   TC.make tc_name tc_flags
 

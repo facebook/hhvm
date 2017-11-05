@@ -228,7 +228,8 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstRawPtr ar,
     auto el = std::make_shared<ExpressionList>(
       scope, r, ExpressionList::ListKindParam);
 
-    if (value.isVecArray() || value.isKeyset()) {
+    if (value.isVecArray() || value.isKeyset() ||
+        (value.isPHPArray() && value.asCArrRef().isVArray())) {
       for (ArrayIter iter(value.toArray()); iter; ++iter) {
         ExpressionPtr v(MakeScalarExpression(ar, scope, r, iter.second()));
         if (!v) return ExpressionPtr();
@@ -247,7 +248,10 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstRawPtr ar,
     if (!el->getCount()) el.reset();
 
     auto const token = [&]{
-      if (value.isPHPArray()) return T_ARRAY;
+      if (value.isPHPArray()) {
+        if (value.asCArrRef().isVArray()) return T_VARRAY;
+        return T_ARRAY;
+      }
       if (value.isVecArray()) return T_VEC;
       if (value.isDict()) return T_DICT;
       if (value.isKeyset()) return T_KEYSET;

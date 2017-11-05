@@ -491,8 +491,7 @@ and emit_shape env expr fl =
   emit_expr ~need_ref:false env (p, A.Array fl)
 
 and emit_tuple env p es =
-  let af_list = List.map es ~f:(fun e -> A.AFvalue e) in
-  emit_expr ~need_ref:false env (p, A.Array af_list)
+  emit_expr ~need_ref:false env (p, A.Varray es)
 
 and emit_call_expr ~need_ref env expr =
   (match expr with
@@ -1034,9 +1033,9 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     let array_e = fst expr, A.Array es in
     emit_box_if_necessary need_ref @@ emit_collection env array_e es
   | A.Varray es ->
-    let es = List.map ~f:(fun e -> A.AFvalue e) es in
-    let array_e = fst expr, A.Array es in
-    emit_box_if_necessary need_ref @@ emit_collection env array_e es
+    let es2 = List.map ~f:(fun e -> A.AFvalue e) es in
+    let varray_e = fst expr, A.Varray es in
+    emit_box_if_necessary need_ref @@ emit_collection env varray_e es2
   | A.Collection ((pos, name), fields) ->
     emit_box_if_necessary need_ref
       @@ emit_named_collection env expr pos name fields
@@ -1217,6 +1216,8 @@ and emit_dynamic_collection env expr es =
       || SU.strip_ns name = "Map"
       || SU.strip_ns name = "ImmMap" ->
     emit_keyvalue_collection name env es (NewDictArray count)
+  | A.Varray _ ->
+    emit_value_only_collection env es (fun n -> NewVArray n)
   | _ ->
   (* From here on, we're only dealing with PHP arrays *)
   if is_packed_init es then
@@ -1242,16 +1243,7 @@ and emit_named_collection env expr pos name fields =
       emit_collection env (pos, A.Collection ((pos, "vec"), fields)) fields;
       instr_colfromarray collection_type;
     ]
-  | "Set" | "ImmSet" ->
-    let collection_type = collection_type name in
-    if fields = []
-    then instr_newcol collection_type
-    else
-      emit_dynamic_collection
-        env
-        expr
-        fields
-  | "Map" | "ImmMap" ->
+  | "Map" | "ImmMap" | "Set" | "ImmSet" ->
     let collection_type = collection_type name in
     if fields = []
     then instr_newcol collection_type
@@ -1272,6 +1264,7 @@ and emit_named_collection env expr pos name fields =
 
 and is_php_array = function
  | _, A.Array _ -> true
+ | _, A.Varray _ -> true
  | _ -> false
 
 and emit_collection ?(transform_to_collection) env expr es =

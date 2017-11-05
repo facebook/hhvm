@@ -1036,18 +1036,7 @@ void Parser::onKeyset(Token& out, Token& exprs) {
 }
 
 void Parser::onVArray(Token& out, Token& exprs) {
-  if (exprs->exp) {
-    // varray uses the same grammar as vec, which produces Expressions instead
-    // of ArrayPairExpressions, so wrap the Expressions in ArrayPairExpressions.
-    auto expList = NEW_EXP0(ExpressionList);
-    auto& el = *static_pointer_cast<ExpressionList>(exprs->exp);
-    auto const count = el.getCount();
-    for (int i = 0; i < count; ++i) {
-      expList->addElement(NEW_EXP(ArrayPairExpression, nullptr, el[i], false));
-    }
-    exprs->exp = expList;
-  }
-  onUnaryOpExp(out, exprs, T_ARRAY, true);
+  onUnaryOpExp(out, exprs, T_VARRAY, true);
 }
 
 void Parser::onDArray(Token& out, Token& exprs) {

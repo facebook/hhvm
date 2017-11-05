@@ -281,6 +281,8 @@ bool canDCE(IRInstruction* inst) {
   case CheckType:
   case CheckNullptr:
   case CheckTypeMem:
+  case CheckVArray:
+  case CheckDArray:
   case HintLocInner:
   case HintStkInner:
   case HintMBaseInner:

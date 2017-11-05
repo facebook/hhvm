@@ -2527,6 +2527,8 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Dict:   return TDict;
   case IsTypeOp::Keyset: return TKeyset;
   case IsTypeOp::Obj:    return TObj;
+  case IsTypeOp::VArray: return TVArr;
+  case IsTypeOp::DArray: return TDArr;
   case IsTypeOp::Scalar: always_assert(0);
   }
   not_reached();

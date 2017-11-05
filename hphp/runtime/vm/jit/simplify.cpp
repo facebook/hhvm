@@ -2428,6 +2428,34 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyCheckVArray(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (!src->type().maybe(Type::Array(ArrayData::kPackedKind))) {
+    gen(env, Jmp, inst->taken());
+    return cns(env, TBottom);
+  }
+  if (!src->hasConstVal()) return nullptr;
+  if (!src->arrVal()->isVArray()) {
+    gen(env, Jmp, inst->taken());
+    return cns(env, TBottom);
+  }
+  return src;
+}
+
+SSATmp* simplifyCheckDArray(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (!src->type().maybe(Type::Array(ArrayData::kMixedKind))) {
+    gen(env, Jmp, inst->taken());
+    return cns(env, TBottom);
+  }
+  if (!src->hasConstVal()) return nullptr;
+  if (!src->arrVal()->isDArray()) {
+    gen(env, Jmp, inst->taken());
+    return cns(env, TBottom);
+  }
+  return src;
+}
+
 SSATmp* simplifyCheckTypeMem(State& env, const IRInstruction* inst) {
   if (inst->next() == inst->taken() ||
       inst->typeParam() == TBottom) {
@@ -3455,6 +3483,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckStk)
   X(CheckType)
   X(CheckTypeMem)
+  X(CheckVArray)
+  X(CheckDArray)
   X(AssertType)
   X(CheckNonNull)
   X(CheckPackedArrayDataBounds)

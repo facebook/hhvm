@@ -342,6 +342,8 @@ DataType typeOpToDataType(IsTypeOp op) {
   case IsTypeOp::Keyset: return KindOfKeyset;
   case IsTypeOp::Arr:    return KindOfArray;
   case IsTypeOp::Obj:    return KindOfObject;
+  case IsTypeOp::VArray:
+  case IsTypeOp::DArray:
   case IsTypeOp::Scalar: not_reached();
   }
   not_reached();
@@ -358,6 +360,23 @@ void implIsScalarC(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, IsScalarType, src));
   decRef(env, src);
+}
+
+SSATmp* isDVArrayImpl(IRGS& env, SSATmp* val, IsTypeOp op) {
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const arr = gen(env, CheckType, TArr, taken, val);
+      return gen(
+        env,
+        op == IsTypeOp::VArray ? CheckVArray : CheckDArray,
+        taken,
+        arr
+      );
+    },
+    [&](SSATmp*) { return cns(env, true); },
+    [&]{ return cns(env, false); }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -504,27 +523,39 @@ void emitEmptyL(IRGS& env, int32_t id) {
 
 void emitIsTypeC(IRGS& env, IsTypeOp subop) {
   if (subop == IsTypeOp::Scalar) return implIsScalarC(env);
-  auto const t = typeOpToDataType(subop);
+
   auto const src = popC(env, DataTypeSpecific);
-  if (t == KindOfObject) {
-    push(env, optimizedCallIsObject(env, src));
+
+  if (subop == IsTypeOp::VArray || subop == IsTypeOp::DArray) {
+    push(env, isDVArrayImpl(env, src, subop));
   } else {
-    push(env, gen(env, IsType, Type(t), src));
+    auto const t = typeOpToDataType(subop);
+    if (t == KindOfObject) {
+      push(env, optimizedCallIsObject(env, src));
+    } else {
+      push(env, gen(env, IsType, Type(t), src));
+    }
   }
   decRef(env, src);
 }
 
 void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
   if (subop == IsTypeOp::Scalar) return implIsScalarL(env, id);
-  auto const t = typeOpToDataType(subop);
+
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const val =
     ldLocInnerWarn(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
-  if (t == KindOfObject) {
-    push(env, optimizedCallIsObject(env, val));
+
+  if (subop == IsTypeOp::VArray || subop == IsTypeOp::DArray) {
+    push(env, isDVArrayImpl(env, val, subop));
   } else {
-    push(env, gen(env, IsType, Type(t), val));
+    auto const t = typeOpToDataType(subop);
+    if (t == KindOfObject) {
+      push(env, optimizedCallIsObject(env, val));
+    } else {
+      push(env, gen(env, IsType, Type(t), val));
+    }
   }
 }
 

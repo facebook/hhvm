@@ -534,6 +534,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case CheckType:
   case AssertType:
+  case CheckVArray:
+  case CheckDArray:
     for (auto& frame : m_stack) {
       for (auto& state : frame.locals) {
         refineValue(state, inst->src(0), inst->dst());

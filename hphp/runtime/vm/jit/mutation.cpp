@@ -98,7 +98,7 @@ struct RefineTmpsRec {
         continue;
       }
 
-      if (inst.is(CheckType, AssertType)) {
+      if (inst.is(CheckType, AssertType, CheckVArray, CheckDArray)) {
         if (!saved_state) saved_state = state;
         auto const dst = inst.dst();
         auto const src = inst.src(0);

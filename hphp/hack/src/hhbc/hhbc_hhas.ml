@@ -274,6 +274,8 @@ let string_of_istype_op op =
   | OpVec -> "Vec"
   | OpDict -> "Dict"
   | OpKeyset -> "Keyset"
+  | OpVArray -> "VArray"
+  | OpDArray -> "DArray"
 
 let string_of_initprop_op op =
   match op with

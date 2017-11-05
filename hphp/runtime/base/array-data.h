@@ -702,6 +702,9 @@ public:
    */
   static constexpr size_t offsetofSize() { return offsetof(ArrayData, m_size); }
   static constexpr size_t sizeofSize() { return sizeof(m_size); }
+  static constexpr size_t offsetofDVArray() {
+    return offsetof(ArrayData, m_aux16);
+  }
 
   /////////////////////////////////////////////////////////////////////////////
 

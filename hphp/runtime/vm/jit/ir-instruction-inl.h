@@ -86,7 +86,8 @@ inline bool IRInstruction::producesReference() const {
 
 inline SSATmp* IRInstruction::getPassthroughValue() const {
   assertx(isPassthrough());
-  assertx(is(CheckType, AssertType, AssertNonNull, Mov));
+  assertx(is(CheckType, CheckVArray, CheckDArray,
+             AssertType, AssertNonNull, Mov));
   return src(0);
 }
 

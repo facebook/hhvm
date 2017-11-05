@@ -6045,69 +6045,41 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         makeStaticString(call->getClassScope()->getScopeName());
       e.String(name);
       return true;
-    } else if (((call->isCallToFunction("dict") &&
-                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
-                call->isCallToFunction("HH\\dict")) &&
-               params && params->getCount() == 1) {
-      visit((*params)[0]);
-      emitConvertToCell(e);
-      e.CastDict();
-      return true;
-    } else if (((call->isCallToFunction("vec") &&
-                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
-                call->isCallToFunction("HH\\vec")) &&
-               params && params->getCount() == 1) {
-      visit((*params)[0]);
-      emitConvertToCell(e);
-      e.CastVec();
-      return true;
-    } else if (((call->isCallToFunction("keyset") &&
-                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
-                call->isCallToFunction("HH\\keyset")) &&
-               params && params->getCount() == 1) {
-      visit((*params)[0]);
-      emitConvertToCell(e);
-      e.CastKeyset();
-      return true;
-    } else if (((call->isCallToFunction("varray") &&
-                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
-                call->isCallToFunction("HH\\varray")) &&
-               params && params->getCount() == 1) {
-      visit((*params)[0]);
-      emitConvertToCell(e);
-      e.CastVArray();
-      return true;
-    } else if (((call->isCallToFunction("darray") &&
-                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
-                call->isCallToFunction("HH\\darray")) &&
-               params && params->getCount() == 1) {
-      visit((*params)[0]);
-      emitConvertToCell(e);
-      e.CastDArray();
-      return true;
-    } else if (((call->isCallToFunction("is_vec") &&
-                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
-                call->isCallToFunction("HH\\is_vec")) &&
-               params && params->getCount() == 1) {
-      visit((*call->getParams())[0]);
-      emitIsType(e, IsTypeOp::Vec);
-      return true;
-    } else if (((call->isCallToFunction("is_dict") &&
-                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
-                call->isCallToFunction("HH\\is_dict")) &&
-               params && params->getCount() == 1) {
-      visit((*call->getParams())[0]);
-      emitIsType(e, IsTypeOp::Dict);
-      return true;
-    } else if (((call->isCallToFunction("is_keyset") &&
-                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
-                call->isCallToFunction("HH\\is_keyset")) &&
-               params && params->getCount() == 1) {
-      visit((*call->getParams())[0]);
-      emitIsType(e, IsTypeOp::Keyset);
-      return true;
     }
-  #define TYPE_CONVERT_INSTR(what, What)                             \
+#define TYPE_CONVERT_INSTR_HH(what, What)                               \
+    else if (((call->isCallToFunction(#what) &&                         \
+               (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) || \
+              call->isCallToFunction("HH\\"#what)) &&                   \
+             params && params->getCount() == 1) {                       \
+      visit((*params)[0]);                                              \
+      emitConvertToCell(e);                                             \
+      e.Cast##What();                                                   \
+      return true;                                                      \
+    }
+  TYPE_CONVERT_INSTR_HH(dict, Dict)
+  TYPE_CONVERT_INSTR_HH(vec, Vec)
+  TYPE_CONVERT_INSTR_HH(keyset, Keyset)
+  TYPE_CONVERT_INSTR_HH(varray, VArray)
+  TYPE_CONVERT_INSTR_HH(darray, DArray)
+#undef TYPE_CONVERT_INSTR_HH
+
+#define TYPE_CHECK_INSTR_HH(what, What)                                 \
+    else if (((call->isCallToFunction("is_"#what) &&                    \
+               (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) || \
+              call->isCallToFunction("HH\\is_"#what)) &&                \
+             params && params->getCount() == 1) {                       \
+      visit((*call->getParams())[0]);                                   \
+      emitIsType(e, IsTypeOp::What);                                    \
+      return true;                                                      \
+    }
+  TYPE_CHECK_INSTR_HH(vec, Vec)
+  TYPE_CHECK_INSTR_HH(dict, Dict)
+  TYPE_CHECK_INSTR_HH(keyset, Keyset)
+  TYPE_CHECK_INSTR_HH(varray, VArray)
+  TYPE_CHECK_INSTR_HH(darray, DArray)
+#undef TYPE_CHECK_INSTR_HH
+
+#define TYPE_CONVERT_INSTR(what, What)                             \
     else if (call->isCallToFunction(#what"val") &&                 \
              params && params->getCount() == 1) {                  \
       visit((*params)[0]);                                         \

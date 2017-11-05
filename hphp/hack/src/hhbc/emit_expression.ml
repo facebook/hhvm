@@ -167,6 +167,10 @@ let istype_op id =
   | "hh\\is_dict" -> Some OpDict
   | "is_vec" when enable_hh_syntax -> Some OpVec
   | "hh\\is_vec" -> Some OpVec
+  | "is_varray" when enable_hh_syntax -> Some OpVArray
+  | "hh\\is_varray" -> Some OpVArray
+  | "is_darray" when enable_hh_syntax -> Some OpDArray
+  | "hh\\is_darray" -> Some OpDArray
   | _ -> None
 
 (* See EmitterVisitor::getPassByRefKind in emitter.cpp *)

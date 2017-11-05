@@ -3917,6 +3917,8 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
   case IsTypeOp::Obj:    return is_object(tvAsCVarRef(tv));
   case IsTypeOp::Str:    return is_string(tvAsCVarRef(tv));
   case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(tv));
+  case IsTypeOp::VArray: return is_varray(tvAsCVarRef(tv));
+  case IsTypeOp::DArray: return is_darray(tvAsCVarRef(tv));
   }
   not_reached();
 }

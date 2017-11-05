@@ -197,6 +197,16 @@ loaded, using a separate CheckRefInner instruction.
 
   If the value pointed to by S0 is not type T, branch to the block B.
 
+| CheckVArray, DArrPacked, S(Arr), B|P
+
+  Check that S0 is a varray, and if so copy it to D, and fallthrough. If S0 is
+  not a varray, branch to block B.
+
+| CheckDArray, DArrMixed, S(Arr), B|P
+
+  Check that S0 is a darray, and if so copy it to D, and fallthrough. If S0 is
+  not a darray, branch to block B.
+
 | HintLocInner<T,localId>, ND, S(FramePtr), NF
 
   Hint that the inner type of a BoxedCell in localId is likely type T, where T
@@ -892,7 +902,6 @@ To string conversions:
 | IsCol, D(Bool), S(Obj), NF
 
   Sets D to true iff S0 is a collection.
-
 
 5. Branches
 

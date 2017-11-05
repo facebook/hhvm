@@ -1620,6 +1620,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case BeginCatch:
   case CheckSurpriseFlags:
   case CheckType:
+  case CheckVArray:
+  case CheckDArray:
   case FreeActRec:
   case RegisterLiveObj:
   case StContArResume:

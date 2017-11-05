@@ -307,6 +307,8 @@ type istype_op =
   | OpKeyset
   | OpDict
   | OpVec
+  | OpVArray
+  | OpDArray
 
 type instruct_isset =
   | IssetC

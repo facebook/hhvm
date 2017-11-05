@@ -3475,7 +3475,8 @@ void sink_incs(Env& env) {
     }
 
     auto const& succ = *iter;
-    if (succ.is(CheckType, CheckLoc, CheckStk, CheckMBase)) {
+    if (succ.is(CheckType, CheckLoc, CheckStk,
+                CheckMBase, CheckVArray, CheckDArray)) {
       // try to sink past Check* instructions
       if (!can_sink(env, inc, block)) continue;
 

@@ -484,6 +484,8 @@ match arg with
                | "Keyset" -> OpKeyset
                | "Dict" -> OpDict
                | "Vec" -> OpVec
+               | "VArray" -> OpVArray
+               | "DArray" -> OpDArray
                | _ -> report_error ("bad istype_op" ^ s))
   | _ -> report_error "bad arg to istype_op"
 

@@ -658,6 +658,8 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   switch (inst.op()) {
   case CheckType:
   case CheckNonNull:
+  case CheckVArray:
+  case CheckDArray:
     refine_value(env, inst.dst(), inst.src(0));
     break;
   case AssertLoc:

@@ -190,7 +190,9 @@ inline bool isIncDecO(IncDecOp op) {
   ISTYPE_OP(Dict)                              \
   ISTYPE_OP(Keyset)                            \
   ISTYPE_OP(Obj)                               \
-  ISTYPE_OP(Scalar)
+  ISTYPE_OP(Scalar)                            \
+  ISTYPE_OP(VArray)                            \
+  ISTYPE_OP(DArray)
 
 enum class IsTypeOp : uint8_t {
 #define ISTYPE_OP(op) op,

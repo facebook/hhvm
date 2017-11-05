@@ -243,6 +243,8 @@ bool VariableUnserializer::RefInfo::isColValue() const {
   return m_data.tag() == Type::ColValue;
 }
 
+const StaticString s_force_darrays{"force_darrays"};
+
 VariableUnserializer::VariableUnserializer(
   const char* str,
   size_t len,
@@ -256,6 +258,7 @@ VariableUnserializer::VariableUnserializer(
     , m_unknownSerializable(allowUnknownSerializableClass)
     , m_options(options)
     , m_begin(str)
+    , m_forceDArrays{m_options[s_force_darrays].toBoolean()}
 {}
 
 VariableUnserializer::Type VariableUnserializer::type() const {
@@ -1179,7 +1182,7 @@ Array VariableUnserializer::unserializeArray() {
   expectChar('{');
   if (size == 0) {
     expectChar('}');
-    return Array::Create();
+    return m_forceDArrays ? Array::CreateDArray() : Array::Create();
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1194,7 +1197,9 @@ Array VariableUnserializer::unserializeArray() {
 
   // Pre-allocate an ArrayData of the given size, to avoid escalation in the
   // middle, which breaks references.
-  Array arr = ArrayInit(size, ArrayInit::Mixed{}).toArray();
+  auto arr = m_forceDArrays
+    ? DArrayInit(size).toArray()
+    : MixedArrayInit(size).toArray();
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {
@@ -1338,27 +1343,49 @@ Array VariableUnserializer::unserializeVArray() {
   expectChar('{');
   if (size == 0) {
     expectChar('}');
-    return Array::CreateVArray();
+    if (m_type != Type::Serialize) return Array::CreateVArray();
+    return m_forceDArrays
+      ? Array::CreateDArray()
+      : Array::Create();
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
   }
-  auto const sizeClass = PackedArray::capacityToSizeIndex(size);
-  auto const allocsz = kSizeIndex2PackedArrayCapacity[sizeClass];
 
-  // For large arrays, do a naive pre-check for OOM.
-  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
-    check_non_safepoint_surprise();
-  }
+  auto const oomCheck = [&](size_t allocsz) {
+    // For large arrays, do a naive pre-check for OOM.
+    if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
+      check_non_safepoint_surprise();
+    }
+  };
 
-  Array arr = VArrayInit(size).toArray();
+  auto arr = [&]{
+    if (m_type != Type::Serialize) {
+      oomCheck(
+        kSizeIndex2PackedArrayCapacity[PackedArray::capacityToSizeIndex(size)]
+      );
+      return VArrayInit(size).toArray();
+    }
+    if (m_forceDArrays) {
+      oomCheck(
+        MixedArray::computeAllocBytes(MixedArray::computeScaleFromSize(size))
+      );
+      return DArrayInit(size).toArray();
+    }
+    oomCheck(
+      kSizeIndex2PackedArrayCapacity[PackedArray::capacityToSizeIndex(size)]
+    );
+    return PackedArrayInit(size).toArray();
+  }();
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {
-    auto const lval = PackedArray::LvalNew(arr.get(), false);
+    auto lval = [&]() -> decltype(auto) {
+      SuppressHackArrCompatNotices shacn;
+      return arr.lvalAt();
+    }();
     assertx(lval.arr_base() == arr.get());
-    auto& val = tvAsVariant(lval.tv_ptr());
-    unserializeVariant(val);
+    unserializeVariant(tvAsVariant(lval.tv_ptr()));
     if (i < (size - 1)) {
       auto lastChar = peekBack();
       if ((lastChar != ';' && lastChar != '}')) {
@@ -1366,6 +1393,7 @@ Array VariableUnserializer::unserializeVArray() {
       }
     }
   }
+
   check_non_safepoint_surprise();
   expectChar('}');
   return arr;
@@ -1377,7 +1405,9 @@ Array VariableUnserializer::unserializeDArray() {
   expectChar('{');
   if (size == 0) {
     expectChar('}');
-    return Array::CreateDArray();
+    return (m_type != Type::Serialize || m_forceDArrays)
+      ? Array::CreateDArray()
+      : Array::Create();
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1390,7 +1420,9 @@ Array VariableUnserializer::unserializeDArray() {
     check_non_safepoint_surprise();
   }
 
-  Array arr = DArrayInit(size).toArray();
+  auto arr = (m_type != Type::Serialize || m_forceDArrays)
+    ? DArrayInit(size).toArray()
+    : MixedArrayInit(size).toArray();
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {

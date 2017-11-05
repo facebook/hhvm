@@ -196,6 +196,7 @@ private:
   const Array& m_options; // e.g. classes allowed to be unserialized
   req::vector<Object> m_sleepingObjects;
   const char* const m_begin;
+  bool m_forceDArrays;
 
   void unserializeVariant(Variant& self,
                           UnserializeMode mode = UnserializeMode::Value);

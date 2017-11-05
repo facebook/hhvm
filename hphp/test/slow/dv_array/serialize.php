@@ -2,19 +2,43 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function serialize_test($a) {
+  var_dump(
+    __hhvm_intrinsics\serialize_keep_dvarrays(
+      __hhvm_intrinsics\launder_value($a)
+    )
+  );
   var_dump(serialize(__hhvm_intrinsics\launder_value($a)));
+  echo "====================================================\n";
 }
 
 function unserialize_test($s) {
+  $a = __hhvm_intrinsics\deserialize_keep_dvarrays(
+    __hhvm_intrinsics\launder_value($s)
+  );
+  var_dump($a);
+  var_dump(is_varray($a));
+  var_dump(is_darray($a));
+  echo "----------------------------------------------------\n";
   $a = unserialize(__hhvm_intrinsics\launder_value($s));
   var_dump($a);
   var_dump(is_varray($a));
   var_dump(is_darray($a));
+  echo "----------------------------------------------------\n";
+  $a = unserialize(
+    __hhvm_intrinsics\launder_value($s),
+    ['force_darrays' => true]
+  );
+  var_dump($a);
+  var_dump(is_varray($a));
+  var_dump(is_darray($a));
+  echo "====================================================\n";
 }
 
 function round_trip($a) {
   $a2 = __hhvm_intrinsics\launder_value($a);
-  $a3 = unserialize(serialize($a2));
+  $a3 = __hhvm_intrinsics\deserialize_keep_dvarrays(
+    __hhvm_intrinsics\serialize_keep_dvarrays($a2)
+  );
   if ($a2 !== $a3) {
     echo "============ Value mismatch ================\n";
     var_dump($a2);
@@ -35,6 +59,12 @@ function round_trip($a) {
 }
 
 function serialize_tests() {
+  serialize_test([]);
+  serialize_test([100 => 200, 200 => 300, 300 => 400]);
+  serialize_test([0 => 'a', 1 => 'b', 2 => 'c']);
+  serialize_test(['abc' => 100, 'def' => 200, 'ghi' => 300]);
+  serialize_test([1 => [2 => 3], 4 => [5 => 6]]);
+
   serialize_test(varray[]);
   serialize_test(varray[123, 456, 789]);
   serialize_test(varray['abc', 'def', 'ghi']);
@@ -53,6 +83,12 @@ function serialize_tests() {
 }
 
 function unserialize_tests() {
+  unserialize_test('a:0:{}');
+  unserialize_test('a:3:{i:100;i:123;i:200;i:456;i:300;i:789;}');
+  unserialize_test('a:3:{i:100;s:3:"abc";i:200;s:3:"def";i:300;s:3:"ghi";}');
+  unserialize_test('a:3:{i:0;s:3:"abc";i:1;s:3:"def";i:2;s:3:"ghi";}');
+  unserialize_test('a:3:{s:3:"abc";i:100;s:3:"def";i:200;s:3:"ghi";i:300;}');
+
   unserialize_test('y:0:{}');
   unserialize_test('y:3:{i:123;i:456;i:789;}');
   unserialize_test('y:3:{s:3:"abc";s:3:"def";s:3:"ghi";}');

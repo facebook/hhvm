@@ -246,6 +246,8 @@ void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
   vs.serialize(variable, false);
 }
 
+namespace {
+
 const StaticString
   s_Null("N;"),
   s_True("b:1;"),
@@ -258,7 +260,7 @@ const StaticString
   s_EmptyDictArray("D:0:{}"),
   s_EmptyKeysetArray("k:0:{}");
 
-String HHVM_FUNCTION(serialize, const Variant& value) {
+ALWAYS_INLINE String serialize_impl(const Variant& value, bool keepDVArrays) {
   switch (value.getType()) {
     case KindOfUninit:
     case KindOfNull:
@@ -319,8 +321,10 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       ArrayData *arr = value.getArrayData();
       assert(arr->isPHPArray());
       if (arr->empty()) {
-        if (arr->isVArray()) return s_EmptyVArray;
-        if (arr->isDArray()) return s_EmptyDArray;
+        if (keepDVArrays) {
+          if (arr->isVArray()) return s_EmptyVArray;
+          if (arr->isDArray()) return s_EmptyDArray;
+        }
         return s_EmptyArray;
       }
       break;
@@ -334,8 +338,20 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
   }
 
   VariableSerializer vs(VariableSerializer::Type::Serialize);
+  if (keepDVArrays) vs.keepDVArrays();
   // Keep the count so recursive calls to serialize() embed references properly.
   return vs.serialize(value, true, true);
+}
+
+}
+
+String HHVM_FUNCTION(serialize, const Variant& value) {
+  return serialize_impl(value, false);
+}
+
+String HHVM_FUNCTION(hhvm_intrinsics_serialize_keep_dvarrays,
+                     const Variant& value) {
+  return serialize_impl(value, true);
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,
@@ -344,6 +360,17 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
     str,
     VariableUnserializer::Type::Serialize,
     options
+  );
+}
+
+Variant HHVM_FUNCTION(hhvm_intrinsics_unserialize_keep_dvarrays,
+                      const String& str) {
+  return unserialize_from_string(
+    str,
+    // This is fine because the only difference between Serialize and Internal
+    // right now is d/varray serialization.
+    VariableUnserializer::Type::Internal,
+    null_array
   );
 }
 
@@ -564,6 +591,13 @@ void StandardExtension::initVariable() {
   HHVM_FE(extract);
   HHVM_FE(parse_str);
   HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
+
+  if (RuntimeOption::EnableIntrinsicsExtension) {
+    HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,
+                hhvm_intrinsics_serialize_keep_dvarrays);
+    HHVM_FALIAS(__hhvm_intrinsics\\deserialize_keep_dvarrays,
+                hhvm_intrinsics_unserialize_keep_dvarrays);
+  }
 
   loadSystemlib("std_variable");
 }

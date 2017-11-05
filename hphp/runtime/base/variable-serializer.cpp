@@ -55,16 +55,6 @@ const StaticString
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
   s_debugInfo("__debugInfo");
 
-static VariableSerializer::ArrayKind getKind(const ArrayData* arr) {
-  if (arr->isDict()) return VariableSerializer::ArrayKind::Dict;
-  if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
-  if (arr->isKeyset()) return VariableSerializer::ArrayKind::Keyset;
-  assert(arr->isPHPArray());
-  if (arr->isVArray()) return VariableSerializer::ArrayKind::VArray;
-  if (arr->isDArray()) return VariableSerializer::ArrayKind::DArray;
-  return VariableSerializer::ArrayKind::PHP;
-}
-
 [[noreturn]] NEVER_INLINE
 static void throwNestingException() {
   throw ExtendedException("Nesting level too deep - recursive dependency?");
@@ -89,6 +79,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   , m_indent(0)
   , m_valueCount(0)
   , m_referenced(false)
+  , m_keepDVArrays{type != Type::Serialize}
   , m_refCount(1)
   , m_objId(0)
   , m_objCode(0)
@@ -101,6 +92,19 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   if (type == Type::DebuggerSerialize) {
     m_maxLevelDebugger = g_context->debuggerSettings.printLevel;
   }
+}
+
+VariableSerializer::ArrayKind
+VariableSerializer::getKind(const ArrayData* arr) const {
+  if (arr->isDict()) return VariableSerializer::ArrayKind::Dict;
+  if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
+  if (arr->isKeyset()) return VariableSerializer::ArrayKind::Keyset;
+  assert(arr->isPHPArray());
+  if (m_keepDVArrays) {
+    if (arr->isVArray()) return VariableSerializer::ArrayKind::VArray;
+    if (arr->isDArray()) return VariableSerializer::ArrayKind::DArray;
+  }
+  return VariableSerializer::ArrayKind::PHP;
 }
 
 void VariableSerializer::pushObjectInfo(const String& objClass, int objId,

@@ -80,6 +80,10 @@ struct VariableSerializer {
 
   Type getType() const { return m_type; }
 
+  // By default, for Type::Serialize, d/varrays are serialized as normal
+  // arrays. This flag can override that behavior.
+  void keepDVArrays() { m_keepDVArrays = true; }
+
   enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray };
 
 private:
@@ -131,6 +135,8 @@ private:
   void pushResourceInfo(const String& rsrcName, int rsrcId);
   void popResourceInfo();
 
+  ArrayKind getKind(const ArrayData* arr) const;
+
   // Sentinel used to indicate that a member of SavedRefMap has a count but no ID.
   static constexpr int NO_ID = -1;
 
@@ -176,6 +182,7 @@ private:
   SavedRefMap m_refs;            // reference ids and counts for objs/arrays
   int m_valueCount;              // Current ref index
   bool m_referenced;             // mark current array element as reference
+  bool m_keepDVArrays;           // serialize d/varrays as themselves or arrays
   int m_refCount;                // current variable's reference count
   String m_objClass;             // for object serialization
   int m_objId;                   // for object serialization

@@ -388,7 +388,11 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       ret.maxFpiDepth = std::max<uint32_t>(ret.maxFpiDepth, fpiStack.size());
     };
 
-    auto fcall = [&] {
+    auto fcall = [&] (Op op) {
+      // FCallArray and FCallUnpack do their own stack overflow checking
+      if (op != Op::FCallArray && op != Op::FCallUnpack) {
+        ret.containsCalls = true;
+      }
       end_fpi(startOffset);
     };
 
@@ -401,7 +405,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
 
     auto defclsnop = [&] {
-      auto const id = inst.DefCls.arg1;
+      auto const id = inst.DefClsNop.arg1;
       always_assert(euState.defClsMap[id] == kInvalidOffset);
       euState.defClsMap[id] = startOffset;
     };
@@ -471,11 +475,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       PUSH_##outputs                                              \
       IMM_##imms                                                  \
       if (isFPush(Op::opcode))     fpush();                       \
-      if (isFCallStar(Op::opcode)) fcall();                       \
+      if (isFCallStar(Op::opcode)) fcall(Op::opcode);             \
       if (flags & TF) currentStackDepth = 0;                      \
-      if (Op::opcode == Op::FCall || Op::opcode == Op::FCallD) {  \
-        ret.containsCalls = true;                                 \
-      }                                                           \
       emit_srcloc();                                              \
     };
 

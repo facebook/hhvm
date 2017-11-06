@@ -228,12 +228,12 @@ DEBUG_ONLY bool validate(const State& env,
   };
 
   assert_last(
-    !origInst->naryDst(),
-    "Nontrivial simplification returned for instruction with NaryDest"
+    origInst->numDsts() <= 1,
+    "Nontrivial simplification returned for instruction with multiple dsts"
   );
 
   assert_last(
-    origInst->hasDst() == (newDst != nullptr),
+    origInst->naryDst() || origInst->hasDst() == (newDst != nullptr),
     "HasDest mismatch between input and output"
   );
 

@@ -255,6 +255,12 @@ struct IRInstruction {
   SSATmp* dst(uint32_t i) const;
 
   /*
+   * Find index of a dst known to exist.
+   */
+  uint32_t findDstIdx(const SSATmp* dst) const;
+
+
+  /*
    * Get the srcs/dsts as a folly::Range.
    */
   folly::Range<SSATmp**> srcs() const;

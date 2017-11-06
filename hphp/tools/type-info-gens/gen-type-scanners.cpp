@@ -54,13 +54,13 @@
  *    be conservatively scanned.
  *
  * - "Collectable". A type is collectable if MarkCollectable<> or
- *   MarkScannableCountable<> is instantiated on it. Type-scanners are never
+ *   MarkScannableCollectable<> is instantiated on it. Type-scanners are never
  *   generated for collectable types, it is assumed their scanners will be
- *   hand-written. The exception is if MarkScannableCountable<> is used, in
+ *   hand-written. The exception is if MarkScannableCollectable<> is used, in
  *   which case they'll be scanned if explicitly requested. The point of the
- *   type-scanners is to determine how to find pointers to countable types from
- *   other types. Collectable types correspond to the set of types in HHVM which
- *   are explicitly managed by the GC.
+ *   type-scanners is to determine how to find pointers to collectable types
+ *   from other types. Collectable types correspond to the set of types in HHVM
+ *   which are explicitly managed by the GC.
  *
  * - "Indexed". An indexed type is a combination of a type and an action. These
  *   occur from an instantiation of Indexer<>. Any particular type can be part
@@ -234,7 +234,7 @@ struct Generator {
                              const std::string& name);
 
   static bool isMarkCollectableName(const std::string&);
-  static bool isMarkScannableCountableName(const std::string&);
+  static bool isMarkScannableCollectableName(const std::string&);
   static bool isIndexerName(const std::string&);
   static bool isConservativeActionName(const std::string&);
   static bool isWithSuffixActionName(const std::string&);
@@ -265,7 +265,7 @@ struct Generator {
 
   const Object& getObject(const ObjectType&) const;
 
-  const Object& getMarkedCountable(const Object&) const;
+  const Object& getMarkedCollectable(const Object&) const;
 
   void genLayout(const Type&, Layout&, size_t,
                  bool conservative_everything = false) const;
@@ -288,7 +288,7 @@ struct Generator {
     std::vector<Generator::IndexedType>
   ) const;
 
-  bool hasCountableBase(const Object& object) const;
+  bool hasCollectableBase(const Object& object) const;
 
   bool forbiddenTemplateCheck(const Type& type) const;
   bool forbiddenTemplateCheck(const Object& object) const;
@@ -370,7 +370,7 @@ struct Generator {
   // are discovered (it must grow monotonically, never removing anything).
   std::unordered_set<const Object*> m_ptr_followable;
   std::unordered_set<const Object*> m_collectable;
-  std::unordered_set<const Object*> m_scannable_countable;
+  std::unordered_set<const Object*> m_scannable_collectable;
 
   // List of all layouts. Once computed, the indexed types will have an index
   // into this table for its associated layout.
@@ -381,8 +381,8 @@ struct Generator {
   // sync with the types in type-scan.h.
   static constexpr const char* const s_mark_collectable_name =
     "HPHP::type_scan::MarkCollectable";
-  static constexpr const char* const s_mark_scannable_countable_name =
-    "HPHP::type_scan::MarkScannableCountable";
+  static constexpr const char* const s_mark_scannable_collectable_name =
+    "HPHP::type_scan::MarkScannableCollectable";
   static constexpr const char* const s_indexer_name =
     "HPHP::type_scan::detail::Indexer";
   static constexpr const char* const s_auto_action_name =
@@ -616,7 +616,7 @@ Generator::Generator(const std::string& filename, bool skip) {
 
   tbb::concurrent_vector<ObjectType> indexer_types;
   tbb::concurrent_vector<ObjectType> collectable_markers;
-  tbb::concurrent_vector<ObjectType> scannable_countable_markers;
+  tbb::concurrent_vector<ObjectType> scannable_collectable_markers;
 
   // Iterate through all the objects the debug info parser found, storing the
   // MarkCollectable<> markers, and the Indexer<> instances. For everything,
@@ -640,9 +640,9 @@ Generator::Generator(const std::string& filename, bool skip) {
               indexer_types.push_back(type);
             } else if (isMarkCollectableName(type.name.name)) {
               collectable_markers.push_back(type);
-            } else if (isMarkScannableCountableName(type.name.name)) {
+            } else if (isMarkScannableCollectableName(type.name.name)) {
               collectable_markers.push_back(type);
-              scannable_countable_markers.push_back(type);
+              scannable_collectable_markers.push_back(type);
             }
 
             // Incomplete types are useless for our purposes, so just ignore
@@ -671,16 +671,17 @@ Generator::Generator(const std::string& filename, bool skip) {
                  "Is debug-info enabled?" << std::endl;
   }
 
-  // Extract all the types that Mark[Scannable]Countable<> was instantiated on
-  // to obtain all the types which are countable. Since all countable types are
-  // automatically pointer followable, mark them as such.
+  // Extract all the types that Mark[Scannable]Collectable<> was instantiated on
+  // to obtain all the types which are collectable. Since all collectable types
+  // are automatically pointer followable, mark them as such.
   m_collectable = extractFromMarkers<decltype(m_collectable)>(
     collectable_markers,
-    [&](const Object& o) { return &getMarkedCountable(o); }
+    [&](const Object& o) { return &getMarkedCollectable(o); }
   );
-  m_scannable_countable = extractFromMarkers<decltype(m_scannable_countable)>(
-    scannable_countable_markers,
-    [&](const Object& o) { return &getMarkedCountable(o); }
+  m_scannable_collectable =
+    extractFromMarkers<decltype(m_scannable_collectable)>(
+      scannable_collectable_markers,
+      [&](const Object& o) { return &getMarkedCollectable(o); }
   );
   for (const auto* obj : m_collectable) {
     makePtrFollowable(*obj);
@@ -699,12 +700,13 @@ Generator::Generator(const std::string& filename, bool skip) {
     if (indexed.scan) continue;
 
     // If the underlying type is an object type, and its associated action is
-    // always non-trivial, or if the object type has a countable type as a base
-    // class, then the object type is always pointer followable. Same logic for
-    // any suffix type.
+    // always non-trivial, or if the object type has a collectable type as a
+    // base class, then the object type is always pointer followable. Same logic
+    // for any suffix type.
     if (const auto* obj = stripModifiers(*indexed.type).asObject()) {
       const auto& object = getObject(*obj);
-      if (getAction(object).isAlwaysNonTrivial() || hasCountableBase(object)) {
+      if (getAction(object).isAlwaysNonTrivial() ||
+          hasCollectableBase(object)) {
         makePtrFollowable(object);
       }
     }
@@ -750,8 +752,8 @@ bool Generator::isTemplateName(const std::string& candidate,
 bool Generator::isMarkCollectableName(const std::string& name) {
   return isTemplateName(name, s_mark_collectable_name);
 }
-bool Generator::isMarkScannableCountableName(const std::string& name) {
-  return isTemplateName(name, s_mark_scannable_countable_name);
+bool Generator::isMarkScannableCollectableName(const std::string& name) {
+  return isTemplateName(name, s_mark_scannable_collectable_name);
 }
 bool Generator::isIndexerName(const std::string& name) {
   return isTemplateName(name, s_indexer_name);
@@ -1082,14 +1084,14 @@ void Generator::sanityCheckTemplateParams(const Object& object) {
   }
 }
 
-// Given a Mark[Scannable]Countable<> marker instantiation, extract the
-// object-type its marking. Actually very simple, but do a lot of sanity
+// Given a Mark[Scannable]CollectiblCollectable<> marker instantiation, extract
+// the object-type its marking. Actually very simple, but do a lot of sanity
 // checking on the result.
-const Object& Generator::getMarkedCountable(const Object& mark) const {
+const Object& Generator::getMarkedCollectable(const Object& mark) const {
   if (mark.incomplete) {
     throw Exception{
       folly::sformat(
-        "Countable marker '{}' at ({},{}) is an incomplete type",
+        "Collectable marker '{}' at ({},{}) is an incomplete type",
         mark.name.name,
         mark.key.object_id,
         mark.key.compile_unit_id
@@ -1100,7 +1102,7 @@ const Object& Generator::getMarkedCountable(const Object& mark) const {
   if (mark.kind != Object::Kind::k_class) {
     throw Exception{
       folly::sformat(
-        "Countable marker '{}' at ({},{}) isn't a class type",
+        "Collectable marker '{}' at ({},{}) isn't a class type",
         mark.name.name,
         mark.key.object_id,
         mark.key.compile_unit_id
@@ -1111,7 +1113,7 @@ const Object& Generator::getMarkedCountable(const Object& mark) const {
   if (!mark.bases.empty()) {
     throw Exception{
       folly::sformat(
-        "Countable marker '{}' at ({},{}) has base classes",
+        "Collectable marker '{}' at ({},{}) has base classes",
         mark.name.name,
         mark.key.object_id,
         mark.key.compile_unit_id
@@ -1122,7 +1124,7 @@ const Object& Generator::getMarkedCountable(const Object& mark) const {
   if (!mark.members.empty()) {
     throw Exception{
       folly::sformat(
-        "Countable marker '{}' at ({},{}) has members",
+        "Collectable marker '{}' at ({},{}) has members",
         mark.name.name,
         mark.key.object_id,
         mark.key.compile_unit_id
@@ -1133,7 +1135,7 @@ const Object& Generator::getMarkedCountable(const Object& mark) const {
   if (mark.name.linkage != ObjectTypeName::Linkage::external) {
     throw Exception{
       folly::sformat(
-        "Countable marker '{}' at ({},{}) does not have external linkage",
+        "Collectable marker '{}' at ({},{}) does not have external linkage",
         mark.name.name,
         mark.key.object_id,
         mark.key.compile_unit_id
@@ -1144,7 +1146,7 @@ const Object& Generator::getMarkedCountable(const Object& mark) const {
   if (mark.template_params.size() != 1) {
     throw Exception{
       folly::sformat(
-        "Countable marker '{}' at ({},{}) does not have exactly "
+        "Collectable marker '{}' at ({},{}) does not have exactly "
         "one template parameter",
         mark.name.name,
         mark.key.object_id,
@@ -1159,7 +1161,7 @@ const Object& Generator::getMarkedCountable(const Object& mark) const {
   if (!obj_type) {
     throw Exception{
       folly::sformat(
-        "Countable marker '{}' at ({},{}) is instantiated on type '{}', "
+        "Collectable marker '{}' at ({},{}) is instantiated on type '{}', "
         "which is not an object",
         mark.name.name,
         mark.key.object_id,
@@ -1172,8 +1174,8 @@ const Object& Generator::getMarkedCountable(const Object& mark) const {
   if (obj_type->name.linkage != ObjectTypeName::Linkage::external) {
     throw Exception{
       folly::sformat(
-        "Countable marker '{}' at ({},{}) is instantiated on object type '{}' "
-        "at ({}, {}), which does not have external linkage",
+        "Collectable marker '{}' at ({},{}) is instantiated on object type '{}'"
+        " at ({}, {}), which does not have external linkage",
         mark.name.name,
         mark.key.object_id,
         mark.key.compile_unit_id,
@@ -1188,8 +1190,8 @@ const Object& Generator::getMarkedCountable(const Object& mark) const {
   if (obj.incomplete) {
     throw Exception{
       folly::sformat(
-        "Countable marker '{}' at ({},{}) is instantiated on object type '{}' "
-        "at ({}, {}), which is an incomplete type",
+        "Collectable marker '{}' at ({},{}) is instantiated on object type '{}'"
+        " at ({}, {}), which is an incomplete type",
         mark.name.name,
         mark.key.object_id,
         mark.key.compile_unit_id,
@@ -1202,8 +1204,8 @@ const Object& Generator::getMarkedCountable(const Object& mark) const {
   if (obj.kind != Object::Kind::k_class) {
     throw Exception{
       folly::sformat(
-        "Countable marker '{}' at ({},{}) is instantiated on object type '{}' "
-        "at ({}, {}), which is not a class type",
+        "Collectable marker '{}' at ({},{}) is instantiated on object type '{}'"
+        " at ({}, {}), which is not a class type",
         mark.name.name,
         mark.key.object_id,
         mark.key.compile_unit_id,
@@ -2351,10 +2353,10 @@ void Generator::genLayout(const Object& object,
                           size_t offset,
                           bool do_forbidden_check,
                           bool conservative_everything) const {
-  // Never generate layout for countable types, unless it was marked as
+  // Never generate layout for collectable types, unless it was marked as
   // scannable.
   if (m_collectable.count(&object) > 0 &&
-      !m_scannable_countable.count(&object)) {
+      !m_scannable_collectable.count(&object)) {
     return;
   }
 
@@ -2609,15 +2611,15 @@ void Generator::makePtrFollowable(const Object& obj) {
   }
 }
 
-// Recursive function to check if a given object has a countable base somewhere
-// in its type hierarchy.
-bool Generator::hasCountableBase(const Object& object) const {
+// Recursive function to check if a given object has a collectable base
+// somewhere in its type hierarchy.
+bool Generator::hasCollectableBase(const Object& object) const {
   if (m_collectable.count(&object)) return true;
   return std::any_of(
     object.bases.begin(),
     object.bases.end(),
     [this](const Object::Base& b) {
-      return hasCountableBase(getObject(b.type));
+      return hasCollectableBase(getObject(b.type));
     }
   );
 }
@@ -3099,8 +3101,8 @@ void Generator::genMetrics(std::ostream& os) const {
   os << "// unique layouts: " << m_layouts.size() << std::endl;
   os << "// indexed types: " << m_indexed_types.size() << std::endl;
   os << "// pointer followable types: " << m_ptr_followable.size() << std::endl;
-  os << "// countable types: " << m_collectable.size() << std::endl;
-  os << "// scannable countable types: " << m_scannable_countable.size()
+  os << "// collectable types: " << m_collectable.size() << std::endl;
+  os << "// scannable collectable types: " << m_scannable_collectable.size()
      << std::endl;
 
   size_t conservative_fields{0};

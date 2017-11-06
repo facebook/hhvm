@@ -65,7 +65,7 @@ struct RefBits {
  * For more info on the PHP extension compatibility layer, check out
  * the documentation at "doc/php.extension.compat.layer".
  */
-struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
+struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   /*
    * Some RefData's (static locals) are allocated in RDS, and
    * live until the end of the request.  In this case, we start with a

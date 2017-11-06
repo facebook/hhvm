@@ -146,7 +146,7 @@ template <typename T> struct MarkCollectable {};
 // requested. However, you may want to scan a countable type in certain contexts
 // (for example, a countable type which can be both allocated in memory and the
 // stack). In that case, use this marker instead.
-template <typename T> struct MarkScannableCountable {};
+template <typename T> struct MarkScannableCollectable {};
 
 // Obtain a type index for the given type T and an optional action. Asserts that
 // this index will be used to scan T, and that T is being allocated here.

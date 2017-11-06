@@ -1022,7 +1022,8 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
             let open EditableToken in
             if   kind x = TokenKind.Await
               || kind x = TokenKind.Clone
-              || kind x = TokenKind.Print  then Space
+              || kind x = TokenKind.Print
+              || kind x = TokenKind.Suspend  then Space
             else Nothing
           | _ -> Nothing
         );

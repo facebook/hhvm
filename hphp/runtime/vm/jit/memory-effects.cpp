@@ -605,7 +605,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
 
   case AsyncRetCtrl:
-  case AsyncRetFast:
+  case AsyncFuncRet:
     return ReturnEffects { AStackAny | AMIStateAny };
 
   case AsyncSwitchFast:

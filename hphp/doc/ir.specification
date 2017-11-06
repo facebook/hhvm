@@ -1693,9 +1693,9 @@ To string conversions:
   uninitialized garbage must be left on the stack, which will be populated by
   the enterTCExit stub using the null returned via rret_type() register.
 
-| AsyncRetFast<spOff>, ND, S(StkPtr) S(FramePtr) S(Cell), T
+| AsyncFuncRet<spOff>, ND, S(StkPtr) S(FramePtr) S(Cell), T
 
-  Packs retVal (S2) into registers, sync stack (S0) and calls the asyncRetCtrl
+  Packs retVal (S2) into registers, sync stack (S0) and calls the asyncFuncRet
   unique stub. The stub unblocks parents of the async function (represented by
   the frame pointer S1) and determines if it's possible to resume parent
   directly (fast path).

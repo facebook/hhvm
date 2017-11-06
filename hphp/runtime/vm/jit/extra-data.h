@@ -1399,7 +1399,7 @@ X(CallBuiltin,                  CallBuiltinData);
 X(CallArray,                    CallArrayData);
 X(RetCtrl,                      RetCtrlData);
 X(AsyncRetCtrl,                 IRSPRelOffsetData);
-X(AsyncRetFast,                 IRSPRelOffsetData);
+X(AsyncFuncRet,                 IRSPRelOffsetData);
 X(AsyncSwitchFast,              IRSPRelOffsetData);
 X(LdArrFuncCtx,                 IRSPRelOffsetData);
 X(LdArrFPushCuf,                IRSPRelOffsetData);

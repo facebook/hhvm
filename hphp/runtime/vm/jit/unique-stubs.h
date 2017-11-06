@@ -221,19 +221,22 @@ struct UniqueStubs {
   TCA debuggerAsyncGenRetHelper;
 
   /*
-   * Async function return stub.
+   * Return from a resumed async function.
    *
-   * Check whether the parent of the returning WaitHandle can be resumed
-   * directly (namely, if it is the solitary parent and is in the same
-   * AsioContext), and do so if possible.  Otherwise, unblock all parents and
+   * Store result into the AsyncFunctionWaitHandle, mark it as finished and
+   * unblock its parents. Check whether the first parent is eligible to be
+   * resumed directly (it is an AsyncFunctionWaitHandle in the same context
+   * with a non-null resume address), and do so if possible. Otherwise,
    * jump to asyncSwitchCtrl.
    *
-   * rvmfp() should point to the ActRec of the WaitHandle that is returning.
+   * rvmfp() should point to the ActRec of the AsyncFunctionWaitHandle that
+   * is returning, rvmsp() should point to an uninitialized cell on the
+   * stack containing garbage.
    *
    * @reached:  jmp from TC
    * @context:  func body
    */
-  TCA asyncRetCtrl;
+  TCA asyncFuncRet;
 
   /*
    * Async function finish-suspend-and-resume stub.

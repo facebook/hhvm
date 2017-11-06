@@ -146,7 +146,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     }
 
     case AsyncRetCtrl:
-    case AsyncRetFast:
+    case AsyncFuncRet:
       return true;
 
     // A ReqBindJmp ends a unit and it jumps to the next instruction to

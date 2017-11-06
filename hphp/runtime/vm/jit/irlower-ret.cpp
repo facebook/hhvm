@@ -147,19 +147,19 @@ void cgAsyncRetCtrl(IRLS& env, const IRInstruction* inst) {
   v << leavetc{vm_regs_with_sp() | rret_type()};
 }
 
-void cgAsyncRetFast(IRLS& env, const IRInstruction* inst) {
+void cgAsyncFuncRet(IRLS& env, const IRInstruction* inst) {
   auto const ret = inst->src(2);
   auto const retLoc = srcLoc(env, inst, 2);
   auto& v = vmain(env);
 
   adjustSPForReturn<IRSPRelOffsetData>(env, inst);
 
-  // The asyncRetCtrl stub takes the return TV as its arguments.
+  // The asyncFuncRet stub takes the return TV as its arguments.
   copyTV(v, rarg(0), rarg(1), retLoc, ret);
   auto args = vm_regs_with_sp() | rarg(1);
   if (!ret->isA(TNull)) args |= rarg(0);
 
-  v << jmpi{tc::ustubs().asyncRetCtrl, args};
+  v << jmpi{tc::ustubs().asyncFuncRet, args};
 }
 
 void cgAsyncSwitchFast(IRLS& env, const IRInstruction* inst) {

@@ -190,7 +190,7 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
   // possibly take fast path to resume parent. Leave SP pointing to a single
   // uninitialized cell which will be filled by the stub.
   auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
-  gen(env, AsyncRetFast, IRSPRelOffsetData { spAdjust }, sp(env), fp(env),
+  gen(env, AsyncFuncRet, IRSPRelOffsetData { spAdjust }, sp(env), fp(env),
       retVal);
 }
 

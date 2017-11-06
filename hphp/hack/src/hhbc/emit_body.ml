@@ -115,7 +115,9 @@ let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info
   let body_instrs = rewrite_user_labels body_instrs in
   let body_instrs = rewrite_class_refs body_instrs in
   let params, body_instrs =
-    Label_rewriter.relabel_function params body_instrs in
+    if Hhbc_options.relabel !Hhbc_options.compiler_options
+    then Label_rewriter.relabel_function params body_instrs
+    else params, body_instrs in
   let num_iters = !Iterator.num_iterators in
   let num_cls_ref_slots = get_num_cls_ref_slots body_instrs in
   Hhas_body.make

@@ -24,6 +24,7 @@ type t = {
   option_max_array_elem_size_on_the_stack : int;
   option_aliased_namespaces : (string * string) list;
   option_source_mapping : bool;
+  option_relabel : bool;
 }
 
 let default = {
@@ -37,6 +38,10 @@ let default = {
   option_max_array_elem_size_on_the_stack = 64;
   option_aliased_namespaces = [];
   option_source_mapping = false;
+  (* If true, then renumber labels after generating code for a method
+   * body. Semantic diff doesn't care about labels, but for visual diff against
+   * HHVM it's helpful to renumber in order that the labels match more closely *)
+  option_relabel = true;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -49,6 +54,7 @@ let max_array_elem_size_on_the_stack o =
   o.option_max_array_elem_size_on_the_stack
 let aliased_namespaces o = o.option_aliased_namespaces
 let source_mapping o = o.option_source_mapping
+let relabel o = o.option_relabel
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
  * Eval.EnableHipHopSyntax setting *)
@@ -80,6 +86,8 @@ let set_option options name value =
     { options with option_php7_scalar_types = as_bool value }
   | "hhvm.enable_xhp" ->
     { options with option_enable_xhp = as_bool value }
+  | "hack.compiler.relabel" ->
+    { options with option_relabel = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =

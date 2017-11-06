@@ -95,6 +95,7 @@ NATIVE_C_FILES=\
   libancillary/libancillary-stubs.c\
   third-party/libancillary/fd_recv.c\
   third-party/libancillary/fd_send.c\
+  utils/compiler_id_impl.c\
   utils/files.c\
   utils/get_build_id.c\
   utils/handle_stubs.c\
@@ -121,7 +122,8 @@ TARGETS_BASE=_build/hh_server _build/hh_client \
 	_build/hh_single_type_check \
 	_build/hh_format \
 	_build/hackfmt \
-	_build/full_fidelity_parse
+	_build/full_fidelity_parse \
+	_build/hh_single_compile
 
 TARGETS=$(foreach target,$(TARGETS_BASE),$(target).$(TARGET_EXT))
 
@@ -184,8 +186,13 @@ $(TARGETS): $(ALL_SRC_FILES) copy-hhis _build/ppx/ppx_gen_hhi
 	# the new binaries are exactly the same as the old ones
 	touch $(TARGETS)
 
-build-hack-native-deps: $(NATIVE_C_FILES) _build/utils/get_build_id.gen.o
-	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(OBJECT_FILES_TO_BUILD)
+_build/hackc/build-id: $(ALL_SRC_FILES)
+	mkdir -p _build/hackc
+	(cd $(ROOT)/../../.. && \
+	INSTALL_DIR=./hphp/hack/src/_build/hackc FBCODE_DIR=./ hphp/tools/generate-build-id.sh IGNORED IGNORED hackc hphp/hack/src)
+
+build-hack-native-deps: $(NATIVE_C_FILES) _build/utils/get_build_id.gen.o _build/hackc/build-id
+	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -ccopt -DHACKC_COMPILER_ID=$(shell cat _build/hackc/build-id)" $(OBJECT_FILES_TO_BUILD)
 
 .PHONY: _build/utils/get_build_id.gen.c # run every time, depends on git commit
 _build/utils/get_build_id.gen.c:
@@ -208,6 +215,7 @@ copy-hack-files: build-hack
 	cp _build/hackfmt.$(TARGET_EXT) ../bin/hackfmt
 	cp _build/hh_format.$(TARGET_EXT) ../bin/hh_format
 	cp _build/full_fidelity_parse.$(TARGET_EXT) ../bin/hh_parse
+	cp _build/hh_single_compile.$(TARGET_EXT) ../bin/hh_single_compile
 
 $(COPIED_HHIS): _build/%.hhi: ../%.hhi
 	mkdir -p $(dir $@)
@@ -223,6 +231,7 @@ copy-hack-files-ocp: build-hack-with-ocp
 	cp ../_obuild/hh_format/hackfmt.asm ../bin/hackfmt
 	cp ../_obuild/hh_format/hh_format.asm ../bin/hh_format
 	cp ../_obuild/full_fidelity_parse.asm ../bin/hh_parse
+	cp ../_obuild/hh_single_compile.asm ../bin/hh_single_compile
 
 .PHONY: test test-ocp do-test
 test: build-hack copy-hack-files

@@ -557,7 +557,6 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
       let type_var, ellipsis = get_variadic_parameter_children x in
       Concat [
         t type_var;
-        Space;
         t ellipsis;
       ]
     | AttributeSpecification x ->

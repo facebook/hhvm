@@ -4,7 +4,12 @@ class Foooooooooooo {}
 class Baaaaaaaaaaar {}
 
 function f(
-  (function(Foooooooooooo, Baaaaaaaaaaar, Foooooooooooo, Baaaaaaaaaaar): Foooooooooooo) $x,
+  (function(
+    Foooooooooooo,
+    Baaaaaaaaaaar,
+    Foooooooooooo,
+    Baaaaaaaaaaar,
+  ): Foooooooooooo) $x,
 ): void {}
 
 function g((function(...): Foooooooooooo) $x): void {}

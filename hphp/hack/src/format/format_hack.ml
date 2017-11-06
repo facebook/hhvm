@@ -1366,6 +1366,12 @@ and hint_function_params env =
 
 and hint_function_param env = wrap env begin function
   | Tellipsis -> last_token env
+  | Tword when next_token env = Tellipsis ->
+    last_token env;
+    wrap env begin function
+      | Tellipsis -> last_token env;
+      | _ -> back env
+    end
   | _ -> back env; hint env
 end
 

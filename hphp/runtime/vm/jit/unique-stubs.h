@@ -468,6 +468,11 @@ struct UniqueStubs {
   std::string describe(TCA addr) const;
 
 private:
+  /*
+   * Emit all Resumable-related unique stubs to `code'.
+   */
+  void emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg);
+
   struct StubRange {
     std::string name;
     TCA start, end;

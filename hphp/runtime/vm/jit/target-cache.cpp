@@ -620,7 +620,6 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
   StaticMethodCache* thiz = static_cast<StaticMethodCache*>
     (handleToPtr(handle));
   Stats::inc(Stats::TgtCache_StaticMethodMiss);
-  Stats::inc(Stats::TgtCache_StaticMethodHit, -1);
   TRACE(1, "miss %s :: %s caller %p\n",
         clsName->data(), methName->data(), __builtin_return_address(0));
 

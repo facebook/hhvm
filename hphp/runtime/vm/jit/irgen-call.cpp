@@ -1173,6 +1173,7 @@ void emitFPushClsMethodD(IRGS& env,
       return gen(env, LdClsMethodCacheFunc, data, taken);
     },
     [&] (SSATmp* func) { // next
+      emitIncStat(env, Stats::TgtCache_StaticMethodHit, 1);
       return func;
     },
     [&] { // taken

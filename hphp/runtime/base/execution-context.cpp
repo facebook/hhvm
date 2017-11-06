@@ -1663,9 +1663,11 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
       auto toMerge = f->unit();
       toMerge->merge();
       if (toMerge->isMergeOnly()) {
+        Stats::inc(Stats::PseudoMain_Skipped);
         retval = *toMerge->getMainReturn();
         return true;
       }
+      Stats::inc(Stats::PseudoMain_Executed);
     }
     return false;
   };

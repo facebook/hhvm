@@ -11,7 +11,7 @@ set -e
 cd "$FBCODE_DIR" || exit 2;
 
 function digest() {
-  sha1sum "$@" | cut -f1 -d' '
+  openssl sha1 "$@" | cut -f2 -d' '
 }
 
 # if we're under source control,
@@ -35,7 +35,7 @@ else
   # hash all sources files in $treeroot
   # as a sad alternative if we aren't in source control
   buildid=$(find "$treeroot" \
-    \(-name ".c" -or -name ".cpp" -or -name ".h" \) \
+    -name ".c" -or -name ".cpp" -or -name ".h" \
     -print0 | xargs -0 cat | digest - )
 fi;
 

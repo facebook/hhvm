@@ -338,11 +338,14 @@ class virtual ['self] iter =
     method on_hint env (c0, c1) =
       self#on_Pos_t env c0;
       self#on_hint_ env c1;
+    method on_variadic_hint env = function
+      | Hvariadic c0 -> self#on_option self#on_hint env c0
+      | Hnon_variadic -> ()
     method on_Hoption = self#on_hint
     method on_Hfun env c0 c1 c2 c3 =
       self#on_bool env c0;
       self#on_list self#on_hint env c1;
-      self#on_bool env c2;
+      self#on_variadic_hint env c2;
       self#on_hint env c3;
     method on_Htuple = self#on_list self#on_hint
     method on_Happly env c0 c1 =

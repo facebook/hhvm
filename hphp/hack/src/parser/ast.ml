@@ -227,9 +227,12 @@ and fun_ = {
 
 and is_coroutine = bool
 and hint = Pos.t * hint_
+and variadic_hint =
+  | Hvariadic of hint option
+  | Hnon_variadic
 and hint_ =
   | Hoption of hint
-  | Hfun of is_coroutine * hint list * is_variadic * hint
+  | Hfun of is_coroutine * hint list * variadic_hint * hint
   | Htuple of hint list
   | Happly of id * hint list
   | Hshape of shape_info

@@ -251,7 +251,7 @@ class virtual ['c] map :
         on_Hfun : 'd ->
                   Ast_visitors_ancestors.is_coroutine ->
                   Ast_visitors_ancestors.hint list ->
-                  Ast_visitors_ancestors.is_variadic ->
+                  Ast_visitors_ancestors.variadic_hint ->
                   Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_;
         on_Hoption : 'd ->
                      Ast_visitors_ancestors.hint ->
@@ -914,7 +914,7 @@ class virtual ['c] map :
       'd ->
       Ast_visitors_ancestors.is_coroutine ->
       Ast_visitors_ancestors.hint list ->
-      Ast_visitors_ancestors.is_variadic ->
+      Ast_visitors_ancestors.variadic_hint ->
       Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_
     method on_Hoption :
       'd -> Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_
@@ -1341,6 +1341,10 @@ class virtual ['c] map :
       'd ->
       Ast_visitors_ancestors.user_attribute ->
       Ast_visitors_ancestors.user_attribute
+    method on_variadic_hint :
+      'd ->
+      Ast_visitors_ancestors.variadic_hint ->
+      Ast_visitors_ancestors.variadic_hint
     method on_variance :
       'd ->
       Ast_visitors_ancestors.variance -> Ast_visitors_ancestors.variance

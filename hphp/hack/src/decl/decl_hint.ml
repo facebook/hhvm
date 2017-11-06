@@ -55,7 +55,7 @@ and hint_ p env = function
   | Hoption h ->
     let h = hint env h in
     Toption h
-  | Hfun (is_coroutine, hl, b, h) ->
+  | Hfun (is_coroutine, hl, vh, h) ->
     let paraml = List.map hl begin fun (p, _ as x) ->
       { fp_pos = p;
         fp_name = None;
@@ -65,9 +65,9 @@ and hint_ p env = function
     end in
     let ret = hint env h in
     let arity_min = List.length paraml in
-    let arity = if b
-      then Fellipsis arity_min
-      else Fstandard (arity_min, arity_min)
+    let arity = match vh with
+      | Hvariadic _ -> Fellipsis arity_min
+      | Hnon_variadic -> Fstandard (arity_min, arity_min)
     in
     Tfun {
       ft_pos = p;

@@ -477,7 +477,6 @@ let rec pHint : hint parser = fun node env ->
       Hshape { si_allows_unknown_fields; si_shape_field_list }
     | TupleTypeSpecifier { tuple_types; _ } ->
       Htuple (couldMap ~f:pHint tuple_types env)
-
     | KeysetTypeSpecifier { keyset_type_keyword = kw; keyset_type_type = ty; _ }
     | VectorTypeSpecifier { vector_type_keyword = kw; vector_type_type = ty; _ }
     | ClassnameTypeSpecifier {classname_keyword = kw; classname_type   = ty; _ }
@@ -529,16 +528,37 @@ let rec pHint : hint parser = fun node env ->
         closure_parameter_types;
         closure_return_type;
         closure_coroutine; _} ->
-      let param_types =
-        List.map ~f:(fun x -> pHint x env)
-          (as_list closure_parameter_types)
+      let make_variadic_hint variadic_type =
+        if is_missing variadic_type
+        then Hvariadic (None)
+        else Hvariadic (Some (pHint variadic_type env))
+      in
+      let (param_type_hints, variadic_hints) =
+        List.partition_map ~f:(fun x ->
+          match syntax x with
+          | VariadicParameter { variadic_parameter_type = vtype; _ } ->
+            `Snd (make_variadic_hint vtype)
+          | _ -> `Fst (pHint x env))
+        (as_list closure_parameter_types)
+      in
+      let hd_variadic_hint hints =
+        if List.length hints > 1 then begin
+          let pos = Pos.string (Pos.to_absolute (get_pos node)) in
+          let msg = Printf.sprintf
+            "%d variadic parameters found. There should be no more than one."
+            (List.length hints)
+          in
+          invariant_failure pos msg
+        end;
+        match List.hd hints with
+        | Some h -> h
+        | None -> Hnon_variadic
       in
       let is_coroutine = not (is_missing closure_coroutine) in
-      let is_variadic_param x = snd x = Htuple [] in
       Hfun
       ( is_coroutine
-      , List.filter ~f:(fun x -> not (is_variadic_param x)) param_types
-      , List.exists ~f:is_variadic_param param_types
+      , param_type_hints
+      , hd_variadic_hint variadic_hints
       , pHint closure_return_type env
       )
     | TypeConstant { type_constant_left_type; type_constant_right_type; _ } ->
@@ -548,9 +568,6 @@ let rec pHint : hint parser = fun node env ->
       | Happly (b, []) -> Haccess (b, child, [])
       | _ -> missing_syntax "type constant base" node env
       )
-    | VariadicParameter _ ->
-      (* Clever trick warning: empty tuple types indicating variadic params *)
-      Htuple []
     | _ -> missing_syntax "type hint" node env
   in
   get_pos node, pHint_ node env

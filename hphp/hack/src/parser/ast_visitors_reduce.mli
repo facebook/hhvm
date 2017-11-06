@@ -158,7 +158,7 @@ class virtual ['b] reduce :
         on_Hfun : 'c ->
                   Ast_visitors_ancestors.is_coroutine ->
                   Ast_visitors_ancestors.hint list ->
-                  Ast_visitors_ancestors.is_variadic ->
+                  Ast_visitors_ancestors.variadic_hint ->
                   Ast_visitors_ancestors.hint -> 'd;
         on_Hoption : 'c -> Ast_visitors_ancestors.hint -> 'd;
         on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> 'd;
@@ -535,7 +535,7 @@ class virtual ['b] reduce :
       'c ->
       Ast_visitors_ancestors.is_coroutine ->
       Ast_visitors_ancestors.hint list ->
-      Ast_visitors_ancestors.is_variadic ->
+      Ast_visitors_ancestors.variadic_hint ->
       Ast_visitors_ancestors.hint -> 'd
     method on_Hoption : 'c -> Ast_visitors_ancestors.hint -> 'd
     method on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> 'd
@@ -763,5 +763,6 @@ class virtual ['b] reduce :
     method on_uop : 'c -> Ast_visitors_ancestors.uop -> 'd
     method on_user_attribute :
       'c -> Ast_visitors_ancestors.user_attribute -> 'd
+    method on_variadic_hint : 'c -> Ast_visitors_ancestors.variadic_hint -> 'd
     method on_variance : 'c -> Ast_visitors_ancestors.variance -> 'd
   end

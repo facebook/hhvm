@@ -1260,18 +1260,18 @@ and hint_list_remain env =
 (* function(_): _ *)
 and hint_function env start ~is_coroutine =
   expect env Tlp;
-  let params, has_dots = hint_function_params env in
+  let params, variadic_hint = hint_function_params env in
   let ret = hint_return env in
-  Pos.btw start (fst ret), Hfun (is_coroutine, params, has_dots, ret)
+  Pos.btw start (fst ret), Hfun (is_coroutine, params, variadic_hint, ret)
 
 (* (parameter_1, .., parameter_n) *)
 and hint_function_params env =
   match L.token env.file env.lb with
   | Trp ->
-      ([], false)
+      ([], Hnon_variadic)
   | Tellipsis ->
       hint_function_params_close env;
-      ([], true)
+      ([], Hvariadic None)
   | _ ->
       L.back env.lb;
       hint_function_params_remain env
@@ -1294,18 +1294,18 @@ and hint_function_params_remain env =
   match L.token env.file env.lb with
   | Tcomma ->
       if !(env.errors) != error_state
-      then ([h], false)
+      then ([h], Hnon_variadic)
       else
-        let hl, has_dots = hint_function_params env in
-        (h :: hl, has_dots)
+        let hl, variadic_hint = hint_function_params env in
+        (h :: hl, variadic_hint)
   | Trp ->
-      ([h], false)
+      ([h], Hnon_variadic)
   | Tellipsis ->
       hint_function_params_close env;
-      ([h], true)
+      ([], Hvariadic (Some h))
   | _ ->
       error_expect env ")";
-      ([h], false)
+      ([h], Hnon_variadic)
 
 and xhp_enum_decl_list env =
   match L.token env.file env.lb with

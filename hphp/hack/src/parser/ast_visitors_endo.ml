@@ -632,13 +632,21 @@ class virtual ['self] endo =
       let r1 = self#on_hint_ env c1 in if c0 == r0 && c1 == r1
       then this
       else (r0, r1)
+    method on_variadic_hint env this =
+      match this with
+      | Hvariadic c0 ->
+        let r0 = self#on_option self#on_hint env c0 in
+        if c0 == r0
+        then this
+        else Hvariadic r0
+      | Hnon_variadic -> this
     method on_Hoption env this c0 =
       let r0 = self#on_hint env c0 in
       if c0 == r0 then this else Hoption r0
     method on_Hfun env this c0 c1 c2 c3 =
       let r0 = self#on_bool env c0 in
       let r1 = self#on_list self#on_hint env c1 in
-      let r2 = self#on_bool env c2 in
+      let r2 = self#on_variadic_hint env c2 in
       let r3 = self#on_hint env c3 in
       if c0 == r0 && c1 == r1 && c2 == r2 && c3 == r3
       then this

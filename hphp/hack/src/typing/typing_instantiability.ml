@@ -33,7 +33,7 @@ class type ['a] hint_visitor_type = object
   method on_array  : 'a -> Nast.hint option -> Nast.hint option -> 'a
   method on_prim   : 'a -> Nast.tprim -> 'a
   method on_option : 'a -> Nast.hint -> 'a
-  method on_fun    : 'a -> bool -> Nast.hint list -> bool -> Nast.hint -> 'a
+  method on_fun    : 'a -> bool -> Nast.hint list -> Nast.variadic_hint -> Nast.hint -> 'a
   method on_apply  : 'a -> Nast.sid -> Nast.hint list -> 'a
   method on_shape  : 'a -> nast_shape_info -> 'a
   method on_access : 'a -> Nast.hint -> Nast.sid list -> 'a

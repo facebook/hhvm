@@ -366,7 +366,7 @@ class virtual ['b] endo :
                   Ast_visitors_ancestors.hint_ ->
                   Ast_visitors_ancestors.is_coroutine ->
                   Ast_visitors_ancestors.hint list ->
-                  Ast_visitors_ancestors.is_variadic ->
+                  Ast_visitors_ancestors.variadic_hint ->
                   Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_;
         on_Hoption : 'c ->
                      Ast_visitors_ancestors.hint_ ->
@@ -1276,7 +1276,7 @@ class virtual ['b] endo :
       Ast_visitors_ancestors.hint_ ->
       Ast_visitors_ancestors.is_coroutine ->
       Ast_visitors_ancestors.hint list ->
-      Ast_visitors_ancestors.is_variadic ->
+      Ast_visitors_ancestors.variadic_hint ->
       Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_
     method on_Hoption :
       'c ->
@@ -1823,6 +1823,9 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.user_attribute ->
       Ast_visitors_ancestors.user_attribute
+    method on_variadic_hint :
+      'c ->
+      Ast_visitors_ancestors.variadic_hint -> Ast_visitors_ancestors.variadic_hint
     method on_variance :
       'c ->
       Ast_visitors_ancestors.variance -> Ast_visitors_ancestors.variance

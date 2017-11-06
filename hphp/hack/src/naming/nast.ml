@@ -1,5 +1,5 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/ppx_gen. *)
-(* SourceShasum<<19f66ff5e38469b999f5de6649b9a6b09087f06f>> *)
+(* SourceShasum<<5ef4017d2ec159361a359279bf6e20b282b27a30>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -78,9 +78,12 @@ and show_is_coroutine : is_coroutine -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_is_coroutine x
 
 type hint = (Pos.t * hint_)
+and variadic_hint =
+  | Hvariadic of hint option 
+  | Hnon_variadic 
 and hint_ =
   | Hoption of hint 
-  | Hfun of is_coroutine * hint list * bool * hint 
+  | Hfun of is_coroutine * hint list * variadic_hint * hint 
   | Htuple of hint list 
   | Happly of sid * hint list 
   | Hshape of nast_shape_info 
@@ -127,8 +130,31 @@ let rec pp_hint : Format.formatter -> hint -> Ppx_deriving_runtime.unit =
 and show_hint : hint -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_hint x
 
+and pp_variadic_hint :
+  Format.formatter -> variadic_hint -> Ppx_deriving_runtime.unit =
+  let __0 () = pp_hint  in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | Hvariadic a0 ->
+            (Format.fprintf fmt "(@[<2>Hvariadic@ ";
+             ((function
+               | None  -> Format.pp_print_string fmt "None"
+               | Some x ->
+                   (Format.pp_print_string fmt "(Some ";
+                    ((__0 ()) fmt) x;
+                    Format.pp_print_string fmt ")"))) a0;
+             Format.fprintf fmt "@])")
+        | Hnon_variadic  -> Format.pp_print_string fmt "Hnon_variadic")
+    [@ocaml.warning "-A"])
+
+and show_variadic_hint : variadic_hint -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_variadic_hint x
+
 and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
-  let __16 () = pp_tprim
+  let __17 () = pp_tprim
+  
+  and __16 () = pp_hint
   
   and __15 () = pp_hint
   
@@ -140,21 +166,21 @@ and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
   
   and __11 () = pp_hint
   
-  and __10 () = pp_hint
+  and __10 () = pp_sid
   
-  and __9 () = pp_sid
+  and __9 () = pp_hint
   
-  and __8 () = pp_hint
+  and __8 () = pp_nast_shape_info
   
-  and __7 () = pp_nast_shape_info
+  and __7 () = pp_hint
   
-  and __6 () = pp_hint
+  and __6 () = pp_sid
   
-  and __5 () = pp_sid
+  and __5 () = pp_hint
   
   and __4 () = pp_hint
   
-  and __3 () = pp_hint
+  and __3 () = pp_variadic_hint
   
   and __2 () = pp_hint
   
@@ -184,9 +210,9 @@ and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
                               true) false x);
                     Format.fprintf fmt "@,]@]")) a1);
                Format.fprintf fmt ",@ ";
-               (Format.fprintf fmt "%B") a2);
+               ((__3 ()) fmt) a2);
               Format.fprintf fmt ",@ ";
-              ((__3 ()) fmt) a3);
+              ((__4 ()) fmt) a3);
              Format.fprintf fmt "@,))@]")
         | Htuple a0 ->
             (Format.fprintf fmt "(@[<2>Htuple@ ";
@@ -197,13 +223,13 @@ and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
                       (fun sep  ->
                          fun x  ->
                            if sep then Format.fprintf fmt ";@ ";
-                           ((__4 ()) fmt) x;
+                           ((__5 ()) fmt) x;
                            true) false x);
                  Format.fprintf fmt "@,]@]")) a0;
              Format.fprintf fmt "@])")
         | Happly (a0,a1) ->
             (Format.fprintf fmt "(@[<2>Happly (@,";
-             (((__5 ()) fmt) a0;
+             (((__6 ()) fmt) a0;
               Format.fprintf fmt ",@ ";
               ((fun x  ->
                   Format.fprintf fmt "@[<2>[";
@@ -212,17 +238,17 @@ and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
                        (fun sep  ->
                           fun x  ->
                             if sep then Format.fprintf fmt ";@ ";
-                            ((__6 ()) fmt) x;
+                            ((__7 ()) fmt) x;
                             true) false x);
                   Format.fprintf fmt "@,]@]")) a1);
              Format.fprintf fmt "@,))@]")
         | Hshape a0 ->
             (Format.fprintf fmt "(@[<2>Hshape@ ";
-             ((__7 ()) fmt) a0;
+             ((__8 ()) fmt) a0;
              Format.fprintf fmt "@])")
         | Haccess (a0,a1) ->
             (Format.fprintf fmt "(@[<2>Haccess (@,";
-             (((__8 ()) fmt) a0;
+             (((__9 ()) fmt) a0;
               Format.fprintf fmt ",@ ";
               ((fun x  ->
                   Format.fprintf fmt "@[<2>[";
@@ -231,7 +257,7 @@ and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
                        (fun sep  ->
                           fun x  ->
                             if sep then Format.fprintf fmt ";@ ";
-                            ((__9 ()) fmt) x;
+                            ((__10 ()) fmt) x;
                             true) false x);
                   Format.fprintf fmt "@,]@]")) a1);
              Format.fprintf fmt "@,))@]")
@@ -247,33 +273,33 @@ and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
                 | None  -> Format.pp_print_string fmt "None"
                 | Some x ->
                     (Format.pp_print_string fmt "(Some ";
-                     ((__10 ()) fmt) x;
+                     ((__11 ()) fmt) x;
                      Format.pp_print_string fmt ")"))) a0;
               Format.fprintf fmt ",@ ";
               ((function
                 | None  -> Format.pp_print_string fmt "None"
                 | Some x ->
                     (Format.pp_print_string fmt "(Some ";
-                     ((__11 ()) fmt) x;
+                     ((__12 ()) fmt) x;
                      Format.pp_print_string fmt ")"))) a1);
              Format.fprintf fmt "@,))@]")
         | Hdarray (a0,a1) ->
             (Format.fprintf fmt "(@[<2>Hdarray (@,";
-             (((__12 ()) fmt) a0;
+             (((__13 ()) fmt) a0;
               Format.fprintf fmt ",@ ";
-              ((__13 ()) fmt) a1);
+              ((__14 ()) fmt) a1);
              Format.fprintf fmt "@,))@]")
         | Hvarray a0 ->
             (Format.fprintf fmt "(@[<2>Hvarray@ ";
-             ((__14 ()) fmt) a0;
+             ((__15 ()) fmt) a0;
              Format.fprintf fmt "@])")
         | Hvarray_or_darray a0 ->
             (Format.fprintf fmt "(@[<2>Hvarray_or_darray@ ";
-             ((__15 ()) fmt) a0;
+             ((__16 ()) fmt) a0;
              Format.fprintf fmt "@])")
         | Hprim a0 ->
             (Format.fprintf fmt "(@[<2>Hprim@ ";
-             ((__16 ()) fmt) a0;
+             ((__17 ()) fmt) a0;
              Format.fprintf fmt "@])")
         | Hthis  -> Format.pp_print_string fmt "Hthis")
     [@ocaml.warning "-A"])

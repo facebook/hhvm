@@ -162,7 +162,7 @@ class virtual ['b] iter :
         on_Hfun : 'c ->
                   Ast_visitors_ancestors.is_coroutine ->
                   Ast_visitors_ancestors.hint list ->
-                  Ast_visitors_ancestors.is_variadic ->
+                  Ast_visitors_ancestors.variadic_hint ->
                   Ast_visitors_ancestors.hint -> unit;
         on_Hoption : 'c -> Ast_visitors_ancestors.hint -> unit;
         on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> unit;
@@ -555,7 +555,7 @@ class virtual ['b] iter :
       'c ->
       Ast_visitors_ancestors.is_coroutine ->
       Ast_visitors_ancestors.hint list ->
-      Ast_visitors_ancestors.is_variadic ->
+      Ast_visitors_ancestors.variadic_hint ->
       Ast_visitors_ancestors.hint -> unit
     method on_Hoption : 'c -> Ast_visitors_ancestors.hint -> unit
     method on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> unit
@@ -798,5 +798,6 @@ class virtual ['b] iter :
     method on_uop : 'c -> Ast_visitors_ancestors.uop -> unit
     method on_user_attribute :
       'c -> Ast_visitors_ancestors.user_attribute -> unit
+    method on_variadic_hint : 'c -> Ast_visitors_ancestors.variadic_hint -> unit
     method on_variance : 'c -> Ast_visitors_ancestors.variance -> unit
   end

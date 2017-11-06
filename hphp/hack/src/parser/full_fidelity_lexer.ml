@@ -1146,6 +1146,18 @@ let scan_token_outside_type = scan_token false
  *   Carriage-return character followed by line-feed character
  *)
 
+let str_scan_end_of_line ~str ~i =
+  match str.[i] with
+  | '\r' -> begin
+    match str.[succ i] with
+    | '\n' -> 2 + i
+    | _ -> succ i
+    | exception Invalid_argument _ -> succ i
+  end
+  | '\n' -> succ i
+  | _ -> failwith "str_scan_end_of_line called while not on end of line!"
+  | exception Invalid_argument _ -> succ i
+
 let scan_end_of_line lexer =
   match peek_char lexer 0 with
   | '\r' ->
@@ -1153,10 +1165,6 @@ let scan_end_of_line lexer =
     advance lexer w, Trivia.make_eol (source lexer) (start lexer) w
   | '\n' -> (advance lexer 1, Trivia.make_eol (source lexer) (start lexer) 1)
   | _ -> failwith "scan_end_of_line called while not on end of line!"
-
-let scan_whitespace lexer =
-  let lexer = skip_whitespace lexer in
-  (lexer, Trivia.make_whitespace (source lexer) (start lexer) (width lexer))
 
 let scan_hash_comment lexer =
   let lexer = skip_to_end_of_line lexer in
@@ -1281,15 +1289,21 @@ TODO: Give an error if this appears in a Hack program.
 let scan_xhp_trivia lexer =
   (* TODO: Should XHP comments <!-- --> be their own thing, or a kind of
   trivia associated with a token? Right now they are the former. *)
-  let lexer = start_new_lexeme lexer in
-  match peek_char lexer 0 with
+  let i = offset lexer in
+  let ch = peek_char lexer 0 in
+  match ch with
   | ' ' | '\t' ->
-    let (lexer, w) = scan_whitespace lexer in
-    (lexer, Some w)
+    let i' = str_skip_whitespace ~str:(source_text_string lexer) ~i in
+    let lexer = with_start_offset lexer i i' in
+    let trivium = Trivia.make_whitespace (source lexer) i (i' - i) in
+    (lexer, Some trivium)
   | '\r' | '\n' ->
-    let (lexer, e) = scan_end_of_line lexer in
-    (lexer, Some e)
-  | _ -> (* Not trivia *) (lexer, None)
+    let i' = str_scan_end_of_line ~str:(source_text_string lexer) ~i in
+    let lexer = with_start_offset lexer i i' in
+    let trivium = Trivia.make_eol (source lexer) i (i' - i) in
+    (lexer, Some trivium)
+  | _ -> (* Not trivia *)
+      let lexer = start_new_lexeme lexer in (lexer, None)
 
 let scan_xhp_colon_trivia (lexer : t) : t * Trivia.t =
   (* TODO(T21789285): Take this mess out *)

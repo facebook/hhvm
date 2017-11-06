@@ -55,8 +55,19 @@ const StaticString s_86cinit("86cinit");
 
 //////////////////////////////////////////////////////////////////////
 
+struct PceInfo {
+  PreClassEmitter* pce;
+  Id origId;
+};
+
+struct FeInfo {
+  FuncEmitter* fe;
+  Id origId;
+};
+
 struct EmitUnitState {
-  explicit EmitUnitState(const Index& index) : index(index) {}
+  explicit EmitUnitState(const Index& index, const php::Unit* unit) :
+      index(index), unit(unit) {}
 
   /*
    * Access to the Index for this program.
@@ -64,12 +75,33 @@ struct EmitUnitState {
   const Index& index;
 
   /*
-   * While emitting bytecode, we keep track of where the DefCls
-   * opcodes for each class are.  The PreClass runtime structures
-   * require knowing these offsets.
+   * Access to the unit we're emitting
    */
-  std::vector<Offset> defClsMap;
+  const php::Unit* unit;
+
+  /*
+   * While emitting bytecode, we keep track of the classes and funcs
+   * we emit.
+   */
+  std::vector<Offset>  classOffsets;
+  std::vector<PceInfo> pceInfo;
+  std::vector<FeInfo>  feInfo;
+  std::vector<Id>      typeAliasInfo;
 };
+
+Id recordClass(EmitUnitState& euState, UnitEmitter& ue, Id id) {
+  auto cls = borrow(euState.unit->classes[id]);
+  euState.pceInfo.push_back(
+    { ue.newPreClassEmitter(cls->name->toCppString(), cls->hoistability), id }
+  );
+  return euState.pceInfo.back().pce->id();
+}
+
+Id recordFunc(EmitUnitState& euState, UnitEmitter& ue, Id id) {
+  auto func = borrow(euState.unit->funcs[id - 1]);
+  euState.feInfo.push_back({ ue.newFuncEmitter(func->name), id });
+  return euState.feInfo.back().fe->id();
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -201,8 +233,7 @@ struct EmitBcInfo {
   std::vector<BlockInfo> blockInfo;
 };
 
-
-typedef borrowed_ptr<php::ExnNode> ExnNodePtr;
+using ExnNodePtr = borrowed_ptr<php::ExnNode>;
 
 bool handleEquivalent (ExnNodePtr eh1, ExnNodePtr eh2) {
   if (!eh1 && !eh2) return true;
@@ -398,16 +429,23 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto ret_assert = [&] { assert(currentStackDepth == 1); };
 
-    auto defcls = [&] {
-      auto const id = inst.DefCls.arg1;
-      always_assert(euState.defClsMap[id] == kInvalidOffset);
-      euState.defClsMap[id] = startOffset;
-    };
+    auto defcls_impl = [&] (const auto& id) {
+      always_assert(euState.classOffsets[id] == kInvalidOffset);
+      euState.classOffsets[id] = startOffset;
 
-    auto defclsnop = [&] {
-      auto const id = inst.DefClsNop.arg1;
-      always_assert(euState.defClsMap[id] == kInvalidOffset);
-      euState.defClsMap[id] = startOffset;
+      const_cast<uint32_t&>(id) = recordClass(euState, ue, id);
+    };
+    auto defcls    = [&] { defcls_impl(inst.DefCls.arg1); };
+    auto defclsnop = [&] { defcls_impl(inst.DefClsNop.arg1); };
+    auto createcl  = [&] { defcls_impl(inst.CreateCl.arg2); };
+    auto deffun    = [&] {
+      const_cast<uint32_t&>(inst.DefFunc.arg1) =
+        recordFunc(euState, ue, inst.DefFunc.arg1);
+    };
+    auto deftype   = [&] {
+      euState.typeAliasInfo.push_back(inst.DefTypeAlias.arg1);
+      const_cast<uint32_t&>(inst.DefTypeAlias.arg1) =
+        euState.typeAliasInfo.size() - 1;
     };
 
     auto emit_lar = [&](const LocalRange& range) {
@@ -465,19 +503,22 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define PUSH_THREE(x, y, z)    push(3);
 #define PUSH_INS_1(x)          push(1);
 
-#define O(opcode, imms, inputs, outputs, flags)                   \
-    auto emit_##opcode = [&] (const bc::opcode& data) {           \
-      if (Op::opcode == Op::DefCls)    defcls();                  \
-      if (Op::opcode == Op::DefClsNop) defclsnop();               \
-      if (isRet(Op::opcode))           ret_assert();              \
-      ue.emitOp(Op::opcode);                                      \
-      POP_##inputs                                                \
-      PUSH_##outputs                                              \
-      IMM_##imms                                                  \
-      if (isFPush(Op::opcode))     fpush();                       \
-      if (isFCallStar(Op::opcode)) fcall(Op::opcode);             \
-      if (flags & TF) currentStackDepth = 0;                      \
-      emit_srcloc();                                              \
+#define O(opcode, imms, inputs, outputs, flags)         \
+    auto emit_##opcode = [&] (const bc::opcode& data) { \
+      if (Op::opcode == Op::DefCls)       defcls();     \
+      if (Op::opcode == Op::DefClsNop)    defclsnop();  \
+      if (Op::opcode == Op::CreateCl)     createcl();   \
+      if (Op::opcode == Op::DefFunc)      deffun();     \
+      if (Op::opcode == Op::DefTypeAlias) deftype();    \
+      if (isRet(Op::opcode))              ret_assert(); \
+      ue.emitOp(Op::opcode);                            \
+      POP_##inputs                                      \
+      PUSH_##outputs                                    \
+      IMM_##imms                                        \
+      if (isFPush(Op::opcode))     fpush();             \
+      if (isFCallStar(Op::opcode)) fcall(Op::opcode);   \
+      if (flags & TF) currentStackDepth = 0;            \
+      emit_srcloc();                                    \
     };
 
     OPCODES
@@ -1046,9 +1087,9 @@ void emit_init_func(FuncEmitter& fe, const php::Func& func) {
   );
 }
 
-void emit_func(EmitUnitState& state, UnitEmitter& ue, const php::Func& func) {
+void emit_func(EmitUnitState& state, UnitEmitter& ue,
+               FuncEmitter* fe, const php::Func& func) {
   FTRACE(2,  "    func {}\n", func.name->data());
-  auto const fe = ue.newFuncEmitter(func.name);
   emit_init_func(*fe, func);
   auto const info = emit_bytecode(state, ue, func);
   emit_finish_func(state, func, *fe, info);
@@ -1068,16 +1109,14 @@ void emit_pseudomain(EmitUnitState& state,
 
 void emit_class(EmitUnitState& state,
                 UnitEmitter& ue,
+                PreClassEmitter* pce,
+                Offset offset,
                 const php::Class& cls) {
   FTRACE(2, "    class: {}\n", cls.name->data());
-  auto const pce = ue.newPreClassEmitter(
-    cls.name->toCppString(),
-    cls.hoistability
-  );
   pce->init(
     std::get<0>(cls.srcInfo.loc),
     std::get<1>(cls.srcInfo.loc),
-    ue.bcPos(),
+    offset == kInvalidOffset ? ue.bcPos() : offset,
     cls.attrs,
     cls.parentName ? cls.parentName : s_empty.get(),
     cls.srcInfo.docComment
@@ -1207,8 +1246,8 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   ue->m_useStrictTypes = unit.useStrictTypes;
   ue->m_useStrictTypesForBuiltins = unit.useStrictTypesForBuiltins;
 
-  EmitUnitState state { index };
-  state.defClsMap.resize(unit.classes.size(), kInvalidOffset);
+  EmitUnitState state { index, &unit };
+  state.classOffsets.resize(unit.classes.size(), kInvalidOffset);
 
   /*
    * Unfortunate special case for Systemlib units.
@@ -1236,17 +1275,65 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   }
 
   emit_pseudomain(state, *ue, unit);
-  for (auto& c : unit.classes)     emit_class(state, *ue, *c);
-  for (auto& f : unit.funcs)       emit_func(state, *ue, *f);
-  for (auto& t : unit.typeAliases) emit_typealias(*ue, *t);
 
-  for (size_t id = 0; id < unit.classes.size(); ++id) {
-    // We may not have a DefCls PC if we're a closure, or a
-    // non-top-level class declaration is DCE'd.
-    if (state.defClsMap[id] != kInvalidOffset) {
-      ue->pce(id)->setOffset(state.defClsMap[id]);
-    }
+  std::vector<FuncEmitter*> top_fes;
+  /*
+   * Top level funcs are always defined when the unit is loaded, and
+   * don't have a DefFunc bytecode. Process them up front.
+   */
+  for (size_t id = 0; id < unit.funcs.size(); ++id) {
+    auto const f = borrow(unit.funcs[id]);
+    assertx(f != borrow(unit.pseudomain));
+    if (!f->top) continue;
+    auto const fe = new FuncEmitter(*ue, -1, -1, f->name);
+    top_fes.push_back(fe);
+    emit_func(state, *ue, fe, *f);
   }
+
+  /*
+   * Find any top-level classes that need to be included due to
+   * hoistability, even though the corresponding DefCls was not
+   * reachable.
+   */
+  for (size_t id = 0; id < unit.classes.size(); ++id) {
+    if (state.classOffsets[id] != kInvalidOffset) continue;
+    auto const c = borrow(unit.classes[id]);
+    if (c->hoistability != PreClass::MaybeHoistable &&
+        c->hoistability != PreClass::AlwaysHoistable) {
+      continue;
+    }
+    // Closures are AlwaysHoistable; but there's no need to include
+    // them unless there's a reachable CreateCl.
+    if (is_closure(*c)) continue;
+    recordClass(state, *ue, id);
+  }
+
+  size_t pceId = 0, feId = 0;
+  do {
+    // Note that state.pceInfo can grow inside the loop
+    while (pceId < state.pceInfo.size()) {
+      auto const& pceInfo = state.pceInfo[pceId++];
+      auto const& c = unit.classes[pceInfo.origId];
+      emit_class(state, *ue, pceInfo.pce,
+                 state.classOffsets[pceInfo.origId], *c);
+    }
+
+    while (feId < state.feInfo.size()) {
+      auto const& feInfo = state.feInfo[feId++];
+      // DefFunc ids are off by one wrt unit.funcs because we don't
+      // store the pseudomain there.
+      auto const& f = unit.funcs[feInfo.origId - 1];
+      emit_func(state, *ue, feInfo.fe, *f);
+    }
+  } while (pceId < state.pceInfo.size());
+
+  for (auto tid : state.typeAliasInfo) {
+    emit_typealias(*ue, *unit.typeAliases[tid]);
+  }
+
+  // Top level funcs need to go after any non-top level funcs. See
+  // Unit::merge for details.
+  for (auto fe : top_fes) ue->appendTopEmitter(fe);
 
   return ue;
 }

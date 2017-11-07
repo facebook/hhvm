@@ -56,6 +56,10 @@ type env =
 type +'a parser = node -> env -> 'a
 type ('a, 'b) metaparser = 'a parser -> 'b parser
 
+let mode_annotation = function
+  | FileInfo.Mphp -> FileInfo.Mdecl
+  | m -> m
+
 let pPos : Pos.t parser = fun node env ->
   if env.ignore_pos || value node = Value.Synthetic
   then Pos.none
@@ -391,7 +395,7 @@ let mk_fun_kind suspension_kind yield =
 
 let fun_template yielding node suspension_kind env =
   let p = pPos node env in
-  { f_mode            = env.fi_mode
+  { f_mode            = mode_annotation env.fi_mode
   ; f_tparams         = []
   ; f_constrs         = []
   ; f_ret             = None
@@ -1735,7 +1739,7 @@ and pClassElt : class_elt list parser = fun node env ->
             )
           | _ -> missing_syntax "property declarator" node env
           end
-        , doc_comment_opt
+        , if env.quick_mode then None else doc_comment_opt
         )
       ]
   | MethodishDeclaration
@@ -1791,7 +1795,7 @@ and pClassElt : class_elt list parser = fun node env ->
         (* Drop it on the floor in quick mode; we still need to process the body
          * to know, e.g. whether it contains a yield.
          *)
-        if env.quick_mode || env.fi_mode = FileInfo.Mdecl then [Noop] else body
+        if env.quick_mode then [Noop] else body
       in
       let kind = pKinds methodish_modifiers env in
       member_def @ [Method
@@ -1983,7 +1987,7 @@ and pDef : def list parser = fun node env ->
       ; f_params          = hdr.fh_parameters
       ; f_ret_by_ref      = hdr.fh_ret_by_ref
       ; f_body            =
-        if env.quick_mode || env.fi_mode = FileInfo.Mdecl
+        if env.quick_mode
         then [Noop]
         else begin
           (* FIXME: Filthy hack to catch UNSAFE *)
@@ -2013,7 +2017,7 @@ and pDef : def list parser = fun node env ->
     ; classish_body            =
       { syntax = ClassishBody { classish_body_elements = elts; _ }; _ }
     ; _ } ->
-      let c_mode = env.fi_mode in
+      let c_mode = mode_annotation env.fi_mode in
       let c_user_attributes = List.concat @@ couldMap ~f:pUserAttribute attr env in
       let c_final = List.mem (pKinds mods env) Final in
       let c_is_xhp =
@@ -2067,7 +2071,7 @@ and pDef : def list parser = fun node env ->
             ; constant_declarator_initializer = init
             }
           -> Constant
-            { cst_mode      = env.fi_mode
+            { cst_mode      = mode_annotation env.fi_mode
             ; cst_kind      = Cst_const
             ; cst_name      = pos_name name env
             ; cst_type      = mpOptional pHint ty env
@@ -2093,7 +2097,7 @@ and pDef : def list parser = fun node env ->
       ; t_user_attributes = List.concat @@
           List.map ~f:(fun x -> pUserAttribute x env) (as_list attr)
       ; t_namespace       = Namespace_env.empty env.parser_options
-      ; t_mode            = env.fi_mode
+      ; t_mode            = mode_annotation env.fi_mode
       ; t_kind            =
         match token_kind kw with
         | Some TK.Newtype -> NewType (pHint hint env)
@@ -2114,7 +2118,7 @@ and pDef : def list parser = fun node env ->
         | _ -> missing_syntax "enumerator" node
       in
       [ Class
-      { c_mode            = env.fi_mode
+      { c_mode            = mode_annotation env.fi_mode
       ; c_user_attributes = List.concat @@ couldMap ~f:pUserAttribute attrs env
       ; c_final           = false
       ; c_kind            = Cenum
@@ -2140,7 +2144,7 @@ and pDef : def list parser = fun node env ->
         }
       ; _ }
     ; inclusion_semicolon  = _
-    } ->
+    } when not env.quick_mode ->
       let flavor = pImportFlavor req env in
       [ Stmt (Expr (pPos node env, Import (flavor, pExpr file env))) ]
   | NamespaceDeclaration
@@ -2171,8 +2175,8 @@ and pDef : def list parser = fun node env ->
    * but if this turns out prohibitive, just `try` this and catch-and-correct
    * the raised exception.
    *)
-  | _ when env.fi_mode <> FileInfo.Mdecl -> [ Stmt (pStmt node env) ]
-  | _ -> []
+  | _ when env.quick_mode -> []
+  | _ -> [ Stmt (pStmt node env) ]
 let pProgram : program parser = fun node env ->
   let rec post_process program =
     let span (p : 'a -> bool) =
@@ -2192,6 +2196,7 @@ let pProgram : program parser = fun node env ->
       Namespace (n, body) :: post_process remainder
     | (Namespace (n, il)::el) ->
       Namespace (n, post_process il) :: post_process el
+    | (Stmt _ :: el) when env.quick_mode -> post_process el
     | (Stmt Noop::el) -> post_process el
     | ((Stmt (Expr (_, (Call
         ( (_, (Id (_, "define")))
@@ -2202,7 +2207,7 @@ let pProgram : program parser = fun node env ->
         , []
         )
       )))) :: el) -> Constant
-        { cst_mode      = env.fi_mode
+        { cst_mode      = mode_annotation env.fi_mode
         ; cst_kind      = Cst_define
         ; cst_name      = name
         ; cst_type      = None
@@ -2228,11 +2233,11 @@ let pProgram : program parser = fun node env ->
           { define_keyword; define_argument_list = args; _ }
         ; _ }
       ; _ }
-    ; _ } :: nodel ->
+    ; _ } :: nodel when not env.quick_mode ->
       let def =
         match List.map ~f:(fun x -> pExpr x env) (as_list args) with
         | [ _, String name; e ] -> Constant
-          { cst_mode      = env.fi_mode
+          { cst_mode      = mode_annotation env.fi_mode
           ; cst_kind      = Cst_define
           ; cst_name      = name
           ; cst_type      = None
@@ -2374,13 +2379,18 @@ let make_env
     ; elaborate_namespaces
     ; include_line_comments
     ; keep_errors
-    ; quick_mode              = quick_mode && not hhvm_compat_mode
+    ; quick_mode              = not hhvm_compat_mode && (match fi_mode with
+                                                        | FileInfo.Mdecl
+                                                        | FileInfo.Mphp
+                                                          -> true
+                                                        | _ -> quick_mode
+                                                        )
     ; lower_coroutines
     ; enable_hh_syntax
     ; parser_options
     ; file
     ; fi_mode
-    ; ignore_pos              = ignore_pos
+    ; ignore_pos
     ; saw_yield               = false
     ; max_depth               = 42
     ; unsafes                 = ISet.empty
@@ -2416,7 +2426,7 @@ let from_text (env : env) (source_text : SourceText.t) : result =
     make ~env source_text in
   let script = Full_fidelity_positioned_syntax.from_tree tree in
   let () = if env.hhvm_compat_mode then
-    let errors = 
+    let errors =
       ParserErrors.parse_errors
         ~enable_hh_syntax:env.enable_hh_syntax
         ~positioned_syntax:script

@@ -117,10 +117,7 @@ slow/inout/out-type-hints.php
 slow/inout/side-effects.php
 slow/inout/trait-magic.php
 slow/labels/72.php
-slow/namespace/dynamic_extra_slash.php
-slow/namespace/dynamic_extra_slash_cns.php
 slow/namespace/dynamic_extra_slash_cns2.php
-slow/namespace/dynamic_extra_slash_func.php
 slow/namespace/hashbang_2.php
 slow/namespace/nested-ns.php
 slow/now_doc/1906.php

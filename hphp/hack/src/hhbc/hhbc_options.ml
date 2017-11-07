@@ -22,7 +22,7 @@ type t = {
   option_optimize_null_check : bool;
   option_optimize_cuf : bool;
   option_max_array_elem_size_on_the_stack : int;
-  option_aliased_namespaces : (string * string) list;
+  option_aliased_namespaces : (string * string) list option;
   option_source_mapping : bool;
   option_relabel : bool;
 }
@@ -36,7 +36,7 @@ let default = {
   option_optimize_null_check = false;
   option_optimize_cuf = false;
   option_max_array_elem_size_on_the_stack = 64;
-  option_aliased_namespaces = [];
+  option_aliased_namespaces = None;
   option_source_mapping = false;
   (* If true, then renumber labels after generating code for a method
    * body. Semantic diff doesn't care about labels, but for visual diff against
@@ -126,7 +126,7 @@ let set_value name get set config opts =
 
 let value_setters = [
   (set_value "hhvm.aliased_namespaces" get_value_from_config_kv_list @@
-    fun opts v -> { opts with option_aliased_namespaces = v });
+    fun opts v -> { opts with option_aliased_namespaces = Some v });
   (set_value "hhvm.force_hh" get_value_from_config_int @@
     fun opts v -> { opts with option_enable_hiphop_syntax = (v = 1) });
   (set_value "hhvm.enable_xhp" get_value_from_config_int @@

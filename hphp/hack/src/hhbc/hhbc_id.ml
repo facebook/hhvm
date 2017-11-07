@@ -13,8 +13,8 @@ open Hh_core
 module SU = Hhbc_string_utils
 
 (* TODO: Remove this once we start reading this off of HHVM's config.hdf *)
-let auto_namespace_map () =
-  [ "Arrays", "HH\\Lib\\Arrays"
+let default_auto_aliased_namespaces = [
+  "Arrays", "HH\\Lib\\Arrays"
   ; "C", "HH\\Lib\\C"
   ; "Dict", "HH\\Lib\\Dict"
   ; "Keyset", "HH\\Lib\\Keyset"
@@ -22,8 +22,10 @@ let auto_namespace_map () =
   ; "PHP", "HH\\Lib\\PHP"
   ; "Str", "HH\\Lib\\Str"
   ; "Vec", "HH\\Lib\\Vec"
-  ] @
-  Hhbc_options.(aliased_namespaces !compiler_options)
+  ]
+let auto_namespace_map () =
+  Option.value Hhbc_options.(aliased_namespaces !compiler_options)
+    ~default:default_auto_aliased_namespaces
 
 let elaborate_id ns kind id =
   let fully_qualified_id = snd (Namespaces.elaborate_id ns kind id) in

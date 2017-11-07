@@ -756,35 +756,8 @@ typedef StateVector<IRInstruction, DceFlags> DceState;
 typedef StateVector<SSATmp, uint32_t> UseCounts;
 typedef jit::vector<const IRInstruction*> WorkList;
 
-void removeDeadPhis(IRInstruction& label, const UseCounts& uses) {
-  assertx(label.is(DefLabel));
-
-  auto dstIdx = 0;
-  while (dstIdx < label.numDsts()) {
-    if (uses[label.dst(dstIdx)]) {
-      ++dstIdx;
-      continue;
-    }
-
-    // Found unused phi, kill it from DefLabel and all predecessor Jmps.
-    label.block()->forEachSrc(
-      dstIdx,
-      [&] (IRInstruction* jmp, SSATmp*) {
-        jmp->deleteSrc(dstIdx);
-      }
-    );
-
-    label.deleteDst(dstIdx);
-  }
-}
-
-void removeDeadInstructions(IRUnit& unit, const DceState& state,
-                            const UseCounts& uses) {
+void removeDeadInstructions(IRUnit& unit, const DceState& state) {
   postorderWalk(unit, [&](Block* block) {
-    if (block->begin()->is(DefLabel)) {
-      removeDeadPhis(*block->begin(), uses);
-    }
-
     block->remove_if([&] (const IRInstruction& inst) {
       ONTRACE(4,
               if (state[inst].isDead()) {
@@ -1192,7 +1165,10 @@ IRInstruction* resolveFpDefLabelImpl(
   // We already examined this, avoid loops.
   if (visited.count(inst)) return nullptr;
 
-  auto const destIdx = inst->findDstIdx(fp);
+  auto const dests = inst->dsts();
+  auto const destIdx =
+    std::find(dests.begin(), dests.end(), fp) - dests.begin();
+  always_assert(destIdx >= 0 && destIdx < inst->numDsts());
 
   // If any of the inputs to the Phi aren't Phis themselves, then just choose
   // that.
@@ -1300,41 +1276,6 @@ void mandatoryDCE(IRUnit& unit) {
   assertx(checkEverything(unit));
 }
 
-void markLive(const SSATmp* src, DceState& state, UseCounts& uses,
-              WorkList& wl) {
-  IRInstruction* inst = src->inst();
-  if (inst->is(DefConst)) return;
-
-  if (inst->is(DefLabel)) {
-    FTRACE(3, "adding use to {} from {}\n", *src, *inst);
-    if (uses[src]++ > 0) {
-      // Already handled, avoid loops.
-      return;
-    }
-
-    // Mark all corresponding sources in predecessor blocks as live.
-    inst->block()->forEachSrc(
-      inst->findDstIdx(src),
-      [&] (const IRInstruction*, const SSATmp* predSrc) {
-        markLive(predSrc, state, uses, wl);
-      }
-    );
-
-    assertx(!state[inst].isDead());
-    return;
-  }
-
-  if (RuntimeOption::EvalHHIRInlineFrameOpts && inst->is(DefInlineFP)) {
-    FTRACE(3, "adding use to {} from {}\n", *src, *inst);
-    ++uses[src];
-  }
-
-  if (state[inst].isDead()) {
-    state[inst].setLive();
-    wl.push_back(inst);
-  }
-}
-
 void fullDCE(IRUnit& unit) {
   if (!RuntimeOption::EvalHHIRDeadCodeElim) {
     // This portion of DCE cannot be turned off, because it restores IR
@@ -1362,12 +1303,21 @@ void fullDCE(IRUnit& unit) {
   while (!wl.empty()) {
     auto* inst = wl.back();
     wl.pop_back();
-
-    // Jmp doesn't use its sources, users of DefLabel do.
-    if (inst->is(Jmp)) continue;
-
     for (auto src : inst->srcs()) {
-      markLive(src, state, uses, wl);
+      IRInstruction* srcInst = src->inst();
+      if (srcInst->op() == DefConst) continue;
+
+      if (RuntimeOption::EvalHHIRInlineFrameOpts) {
+        if (srcInst->is(DefInlineFP)) {
+          FTRACE(3, "adding use to {} from {}\n", *src, *inst);
+          ++uses[src];
+        }
+      }
+
+      if (state[srcInst].isDead()) {
+        state[srcInst].setLive();
+        wl.push_back(srcInst);
+      }
     }
   }
 
@@ -1376,7 +1326,7 @@ void fullDCE(IRUnit& unit) {
   }
 
   // Now remove instructions whose state is DEAD.
-  removeDeadInstructions(unit, state, uses);
+  removeDeadInstructions(unit, state);
 }
 
 }}

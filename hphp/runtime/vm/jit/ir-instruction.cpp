@@ -195,25 +195,11 @@ void IRInstruction::setOpcode(Opcode newOpc) {
   m_op = newOpc;
 }
 
-SSATmp* IRInstruction::dst(uint32_t i) const {
+SSATmp* IRInstruction::dst(unsigned i) const {
   if (i == 0 && m_numDsts == 0) return nullptr;
   assertx(i < m_numDsts);
   assertx(naryDst() || i == 0);
   return hasDst() ? dst() : m_dsts[i];
-}
-
-uint32_t IRInstruction::findDstIdx(const SSATmp* dst) const {
-  assertx(m_numDsts > 0);
-  if (hasDst()) {
-    assertx(m_dest == dst);
-    return 0;
-  }
-
-  assertx(naryDst());
-  auto const idx = std::find(m_dsts, m_dsts + m_numDsts, dst) - m_dsts;
-  assertx(idx >= 0 && idx < m_numDsts);
-  assertx(m_dsts[idx] == dst);
-  return idx;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

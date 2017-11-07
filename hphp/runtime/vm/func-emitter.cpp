@@ -37,6 +37,7 @@
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/debug.h"
+#include "hphp/util/file.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
@@ -238,6 +239,14 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     f->appendParam(params[i].byRef, pi, fParams);
   }
 
+  auto const originalFullName =
+    (!originalFilename ||
+     !RuntimeOption::RepoAuthoritative ||
+     FileUtil::isAbsolutePath(originalFilename->slice())) ?
+    originalFilename :
+    makeStaticString(RuntimeOption::SourceRoot +
+                     originalFilename->toCppString());
+
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
@@ -252,7 +261,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_userAttributes = userAttributes;
   f->shared()->m_retTypeConstraint = retTypeConstraint;
   f->shared()->m_retUserType = retUserType;
-  f->shared()->m_originalFilename = originalFilename;
+  f->shared()->m_originalFilename = originalFullName;
   f->shared()->m_isGenerated = isGenerated;
   f->shared()->m_repoReturnType = repoReturnType;
   f->shared()->m_repoAwaitedReturnType = repoAwaitedReturnType;

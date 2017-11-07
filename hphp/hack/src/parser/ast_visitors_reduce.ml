@@ -447,9 +447,9 @@ class virtual ['self] reduce =
       let r0 = self#on_expr env c0 in
       let r1 = self#on_block env c1 in
       self#add r0 r1
-    method on_Using env _c0 c1 c2 =
-      let r1 = self#on_expr env c1 in
-      let r2 = self#on_block env c2 in
+    method on_Using env s =
+      let r1 = self#on_expr env s.us_expr in
+      let r2 = self#on_block env s.us_block in
       self#add r1 r2
     method on_For env c0 c1 c2 c3 =
       let r0 = self#on_expr env c0 in
@@ -498,7 +498,7 @@ class virtual ['self] reduce =
       | Def_inline c0 ->
         self#on_Def_inline env c0
       | Noop -> self#on_Noop env
-      | Using (c0, c1, c2) -> self#on_Using env c0 c1 c2
+      | Using s -> self#on_Using env s
     method on_As_v = self#on_expr
     method on_As_kv env c0 c1 =
       let r0 = self#on_expr env c0 in

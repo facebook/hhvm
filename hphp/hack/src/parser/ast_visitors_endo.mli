@@ -651,9 +651,7 @@ class virtual ['b] endo :
                   Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop;
         on_Using : 'c ->
                    Ast_visitors_ancestors.stmt ->
-                   bool ->
-                   Ast_visitors_ancestors.expr ->
-                   Ast_visitors_ancestors.block ->
+                   Ast_visitors_ancestors.using_stmt ->
                    Ast_visitors_ancestors.stmt;
         on_Usilence : 'c ->
                     Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop;
@@ -1573,9 +1571,7 @@ class virtual ['b] endo :
     method on_Using :
       'c ->
       Ast_visitors_ancestors.stmt ->
-      bool ->
-      Ast_visitors_ancestors.expr ->
-      Ast_visitors_ancestors.block ->
+      Ast_visitors_ancestors.using_stmt ->
       Ast_visitors_ancestors.stmt
     method on_Usilence :
       'c -> Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop

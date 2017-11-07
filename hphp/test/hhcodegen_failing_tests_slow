@@ -161,11 +161,7 @@ slow/traits/__class__.php
 slow/type_assertions/1857.php
 slow/using/bad-goto1.php
 slow/using/bad-goto2.php
-slow/using/bad-lambda4.php
-slow/using/bad-lambda5.php
-slow/using/bad-lambda6.php
 slow/using/bad-name.php
-slow/using/functions.php
 slow/using/goto.php
 slow/xhp/attr-syntax-2.php
 slow/xhp/attr-syntax-3.php

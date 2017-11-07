@@ -1349,42 +1349,30 @@ and pStmt : stmt parser = fun node env ->
       | Some t when Token.has_trivia_kind t TriviaKind.Unsafe -> [Unsafe]
       | _ -> []
     in
-    let compound_statements = as_list compound_statements in
-    (* Here we rewrite the function scoped using expression as block scoped
-     * using expression by determining the proper block and folding over it *)
-    let compound_statements = List.fold_right compound_statements
-      ~init:([] : node list)
-      ~f:(fun node acc ->
-          match syntax node with
-          | UsingStatementFunctionScoped
-            { using_function_await_keyword = await_kw
-            ; using_function_using_keyword = using_kw
-            ; using_function_expression = expression
-            ; _ } ->
-            (* block scoped version is expecting a list of expressions *)
-            let expressions = make_list [expression] in
-            let body = make_compound_statement acc in
-            let syntax =
-              UsingStatementBlockScoped
-              { using_block_await_keyword = await_kw
-              ; using_block_using_keyword = using_kw
-              ; using_block_expressions = expressions
-              ; using_block_left_paren = missing
-              ; using_block_right_paren = missing
-              ; using_block_body = body
-              }
-            in
-            [make_syntax syntax]
-          | _ -> node :: acc
-        )
+    let rec conv acc stmts =
+      match stmts with
+      | [] -> List.concat @@ List.rev acc
+      | { syntax = UsingStatementFunctionScoped
+          { using_function_await_keyword = await_kw
+          ; using_function_expression = expression
+          ; _ }
+        ; _ } :: rest ->
+        let body = conv [] rest in
+        let using = Using {
+          us_is_block_scoped = false;
+          us_has_await = not (is_missing await_kw);
+          us_expr = pExprL expression env;
+          us_block = [Block body]; } in
+        List.concat @@ List.rev ([using] :: acc)
+      | h :: rest ->
+        let h = pStmtUnsafe h env in
+        conv (h :: acc) rest
     in
-    let blk =
-      List.concat (List.map ~f:(fun x -> pStmtUnsafe x env) compound_statements)
-    in
-    (match List.filter ~f:(fun x -> x <> Noop) blk @ tail with
+    let blk = conv [] (as_list compound_statements) in
+    begin match List.filter ~f:(fun x -> x <> Noop) blk @ tail with
     | [] -> Block [Noop]
     | blk -> Block blk
-    )
+    end
   | ThrowStatement { throw_expression; _ } -> Throw (pExpr throw_expression env)
   | DoStatement { do_body; do_condition; _ } ->
     Do ([Block (pBlock do_body env)], pExpr do_condition env)
@@ -1395,11 +1383,12 @@ and pStmt : stmt parser = fun node env ->
     ; using_block_expressions
     ; using_block_body
     ; _ } ->
-    Using
-    ( not (is_missing using_block_await_keyword)
-    , pExprL using_block_expressions env
-    , [Block (pBlock using_block_body env)]
-    )
+    Using {
+      us_is_block_scoped = true;
+      us_has_await = not (is_missing using_block_await_keyword);
+      us_expr = pExprL using_block_expressions env;
+      us_block = [Block (pBlock using_block_body env)];
+    }
   | UsingStatementFunctionScoped
     { using_function_await_keyword
     ; using_function_expression
@@ -1408,11 +1397,12 @@ and pStmt : stmt parser = fun node env ->
      * be rewritten by this point
      * If this gets run, it means that this using statement is the only one
      * in the block, hence it is not in a compound statement *)
-    Using
-    ( not (is_missing using_function_await_keyword)
-    , pExpr using_function_expression env
-    , [Block [Noop]]
-    )
+     Using {
+       us_is_block_scoped = false;
+       us_has_await = not (is_missing using_function_await_keyword);
+       us_expr = pExpr using_function_expression env;
+       us_block = [Block [Noop]];
+     }
   | ForStatement
     { for_initializer; for_control; for_end_of_loop; for_body; _ } ->
     For

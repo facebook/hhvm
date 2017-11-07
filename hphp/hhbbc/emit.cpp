@@ -429,7 +429,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto ret_assert = [&] { assert(currentStackDepth == 1); };
 
-    auto defcls_impl = [&] (const auto& id) {
+    auto defcls_impl = [&] (const uint32_t& id) {
       always_assert(euState.classOffsets[id] == kInvalidOffset);
       euState.classOffsets[id] = startOffset;
 

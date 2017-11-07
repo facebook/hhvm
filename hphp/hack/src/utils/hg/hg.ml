@@ -97,6 +97,7 @@ let get_closest_svn_ancestor hg_rev repo =
   let files_changed_since_rev rev repo =
     let process = Process.exec "hg" [
       "status";
+      "-n";
       "--rev";
       rev_string rev;
       "--cwd";

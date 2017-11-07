@@ -168,6 +168,7 @@ constexpr auto kVersion = 1;
  */
 void record_branch_hit(const BranchID* branch,
                        const Func* func, const ActRec* fp) {
+  assertx(fp);
   reset_counter();
 
   auto const& b = *branch;
@@ -203,9 +204,8 @@ void record_branch_hit(const BranchID* branch,
   if (auto const cls = func->cls()) {
     record.setStr("cls", cls->name()->data());
 
-    if (fp == nullptr || fp->func() != func || instrCanHalt(b.from.bc_op)) {
+    if (fp->func() != func || instrCanHalt(b.from.bc_op)) {
       // We can't access the late-bound class if:
-      //  - rvmfp() was invalidated, e.g., by FreeActRec;
       //  - we're in an inlined function but are not pointing at the callee
       //    frame; or
       //  - we're in a Ret-like instruction which might have decref'd the
@@ -293,10 +293,6 @@ struct Env {
    * phi), so instead we just rename everything to RegSF{0}.
    */
   std::unordered_set<unsigned> sf_renames;
-  /*
-   * Set of Vlabels for which rvmfp() is not valid.
-   */
-  boost::dynamic_bitset<> fp_invalid;
 };
 
 /*
@@ -382,7 +378,7 @@ void sample_branch(Vout& v, Env& env, const BranchID& branch,
   v << copy{rsp(), rbranch};
 
   auto const rfunc = v.cns(func);
-  auto const rfp = env.fp_invalid[b] ? v.cns(0) : Vreg(rvmfp());
+  auto const rfp = Vreg(rvmfp());
 
   v << vcall{
     CallSpec::direct(record_branch_hit),
@@ -620,64 +616,6 @@ std::vector<Vreg> compute_sf_livein(const Vunit& unit,
 }
 
 /*
- * Determine which blocks include, or are dominated by, an operation which
- * logically invalidates rvmfp().
- *
- * For the most part, we only change rvmfp() via calls and returns, which we
- * consider "safe" for our purposes here, since they are "atomic" sequences.
- * The one exception is in the async return path, when we emit a FreeActRec
- * instruction before doing some more work and eventually returning to the
- * scheduler.
- *
- * This analysis just searches for all blocks that contain or are dominated by
- * a FreeActRec instruction.
- */
-boost::dynamic_bitset<> analyze_fp_validity(const Vunit& unit,
-                                            const jit::vector<Vlabel>& rpo,
-                                            const PredVector& preds) {
-  auto fp_invalid = boost::dynamic_bitset<>(unit.blocks.size());
-
-  auto workQ = dataflow_worklist<uint32_t>(unit.blocks.size());
-
-  auto const block_to_rpo = [&] {
-    auto order = std::vector<uint32_t>(unit.blocks.size());
-
-    for (size_t i = 0; i < rpo.size(); ++i) {
-      workQ.push(i);
-      order[rpo[i]] = i;
-    }
-    return order;
-  }();
-
-  while (!workQ.empty()) {
-    auto const b = rpo[workQ.pop()];
-    auto const& block = unit.blocks[b];
-
-    auto const invalid = !!fp_invalid[b];
-
-    // `b' is fp-invalidated if any of its predecessors are...
-    for (auto p : preds[b]) {
-      fp_invalid[b] |= fp_invalid[p];
-    }
-    // ...or if it contains Vinstrs belonging to a FreeActRec.
-    if (!fp_invalid[b]) {
-      for (auto const& inst : block.code) {
-        if (inst.origin && inst.origin->is(FreeActRec)) {
-          fp_invalid[b] = true;
-          break;
-        }
-      }
-    }
-
-    if (invalid != fp_invalid[b]) {
-      for (auto const s : succs(block)) workQ.push(block_to_rpo[s]);
-    }
-  }
-
-  return fp_invalid;
-}
-
-/*
  * VregSF-renaming visitor.
  */
 struct FlagsVisitor {
@@ -717,7 +655,6 @@ void profile_branches(Vunit& unit) {
     unit,
     compute_sf_livein(unit, rpo, preds),
     decltype(Env::sf_renames){},
-    analyze_fp_validity(unit, rpo, preds)
   };
 
   PostorderWalker{unit}.dfs([&] (Vlabel b) {

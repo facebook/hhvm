@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/fixup.h"
+#include "hphp/runtime/vm/jit/irlower-internal.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -301,6 +302,27 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
   v << jmpm{rvmfp()[afwhToAr(AFWH::resumeAddrOff())], vm_regs_with_sp()};
 }
 
+/*
+ * Store the return value into the wait handle, unblock its parents,
+ * update the frame pointer and decref.
+ */
+void asyncFuncRetOnly(Vout& v, PhysReg data, PhysReg type, Vreg parentBl) {
+  // Transfer the return value from return registers into the AFWH, mark
+  // it as finished and unblock all parents.
+  storeAFWHResult(v, data, type);
+  unblockParents(v, parentBl);
+
+  // Get the pointer to the AFWH before losing FP.
+  auto const wh = v.makeReg();
+  v << lea{rvmfp()[Resumable::dataOff() - Resumable::arOff()], wh};
+
+  // Load the saved frame pointer from the ActRec.
+  v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
+
+  // Decref the AFWH for no longer being in the running state.
+  emitDecRefWorkObj(v, wh);
+}
+
 TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
   alignJmpTarget(cb);
 
@@ -335,27 +357,38 @@ TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
                                  slowPath);
     assertx(v.closed());
 
-    /*
-     * Slow path: unblock all parents, and return to the scheduler.
-     */
+    // Slow path. Finish returning and try to use the asyncSwitchCtrl stub
+    // to resume another ResumableWaitHandle.
+    v = slowPath;
+    asyncFuncRetOnly(v, rarg(0), rarg(1), parentBl);
+    v << jmpi{switchCtrl, vm_regs_with_sp()};
+  });
+}
+
+TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, data, [&] (Vout& v) {
+    auto const slowPath = Vlabel(v.makeBlock());
+
+    // Check for surprise *after* the return event hook was called.
+    irlower::emitCheckSurpriseFlags(v, rvmsp(), slowPath);
+
+    // The return event hook cleared the surprise, continue on the fast path.
+    v << jmpi{asyncFuncRet, vm_regs_with_sp() | rarg(0) | rarg(1)};
+
+    // Slow path.
     v = slowPath;
 
-    // Transfer the return value from return registers into the AFWH, mark
-    // it as finished and unblock all parents.
-    storeAFWHResult(v, rarg(0), rarg(1));
-    unblockParents(v, parentBl);
+    // Load ptr to the first parent's blockable.
+    auto const parentBl = v.makeReg();
+    v << load{rvmfp()[afwhToAr(AFWH::parentChainOff())], parentBl};
 
-    // Get the pointer to the AFWH before losing FP.
-    auto const wh = v.makeReg();
-    v << lea{rvmfp()[Resumable::dataOff() - Resumable::arOff()], wh};
-
-    // Load the saved frame pointer from the ActRec.
-    v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
-
-    // Decref the AFWH for no longer being in the running state.
-    emitDecRefWorkObj(v, wh);
-
-    v << jmpi{switchCtrl, vm_regs_with_sp()};
+    // Finish returning and transfer control to the asio scheduler, which will
+    // properly deal with the surprise when resuming the next function.
+    asyncFuncRetOnly(v, rarg(0), rarg(1), parentBl);
+    v << syncvmrettype{v.cns(KindOfNull)};
+    v << leavetc{vm_regs_with_sp() | rret_type()};
   });
 }
 
@@ -366,6 +399,7 @@ TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
 void UniqueStubs::emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg) {
   auto view = code.view();
   auto& main = view.main();
+  auto& cold = view.cold();
   auto& hotBlock = code.view(TransKind::Optimize).main();
   auto& data = view.data();
 
@@ -377,6 +411,7 @@ void UniqueStubs::emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg) {
   TCA inner_stub;
   ADD(asyncSwitchCtrl,  emitAsyncSwitchCtrl(main, data, &inner_stub));
   ADD(asyncFuncRet,     emitAsyncFuncRet(hot(), data, inner_stub));
+  ADD(asyncFuncRetSlow, emitAsyncFuncRetSlow(cold, data, asyncFuncRet));
 #undef ADD
 }
 

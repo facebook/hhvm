@@ -1582,11 +1582,6 @@ To string conversions:
   Defines the fields for an activation record and writes them to the stack
   pointed to by S0, at `offset'.
 
-| FreeActRec, D(FramePtr), S(FramePtr), NF
-
-  Load the saved frame pointer from the activation record pointed to by S0 into
-  D.
-
 | BeginInlining<offset>, ND, S(StkPtr), NF
 
   Marks the start of an inlined function whose stack resides offset cells below
@@ -1686,24 +1681,37 @@ To string conversions:
   the caller.  The `suspendingResumed' flag indicates when this instruction is
   suspending a resumable rather than performing a normal function return.
 
-| AsyncRetCtrl<spOff>, ND, S(StkPtr) S(FramePtr), T
-
-  Return control to the asio scheduler.  Ensure that S0 + `spOff` (in cells)
-  is stored in rvmsp and that S1 is stored in rvmfp.  Only one cell containing
-  uninitialized garbage must be left on the stack, which will be populated by
-  the enterTCExit stub using the null returned via rret_type() register.
-
 | AsyncFuncRet<spOff>, ND, S(StkPtr) S(FramePtr) S(Cell), T
 
-  Packs retVal (S2) into registers, sync stack (S0) and calls the asyncFuncRet
-  unique stub. The stub unblocks parents of the async function (represented by
-  the frame pointer S1) and determines if it's possible to resume parent
-  directly (fast path).
+  Return from a resumed async function, assuming no surprise. Ensures that
+  S0 + `spOff` (in cells) is stored in rvmsp and that S1 is stored in rvmfp,
+  packs return value S2 into registers and calls the `asyncFuncRet` unique
+  stub. The stub stores the result into the wait handle associated with the
+  frame pointer, marks it as finished, unblocks its parents and if possible,
+  directly resumes the first parent (fast path), or a pending fast runnable
+  ResumableWaitHandle (slower path). Otherwise, it will exit VM and return
+  control to the asio scheduler (slow path). The stack must contain exactly one
+  cell containing uninitialized garbage, which will be populated by the stub
+  either to pass the return value to the resumed function, or to return null
+  to the scheduler.
+
+| AsyncFuncRetSlow<spOff>, ND, S(StkPtr) S(FramePtr) S(Cell), T
+
+  Return from a resumed async function, assuming unknown surprise flag state
+  after the previous surprise was handled by executing "return" event hook.
+  Calls the `asyncFuncRetSlow` stub, which re-checks the surprise flag and
+  transfers control to the AsyncFuncRet if it was clear, or performs the slow
+  path of AsyncFuncRet if it was not, without resuming another function, as
+  we are not able to call a potential "resume await" event hook from the stub.
 
 | AsyncSwitchFast<spOff>, ND, S(StkPtr) S(FramePtr), T
 
-  Pass control to any pending fast resumable wait handles, bypassing the
-  scheduler.  If no fast resumables are pending, behave like AsyncRetCtrl.
+  Switch control to another ResumableWaitHandle. Ensures that S0 + `spOff`
+  (in cells) is stored in rvmsp and that S1 is stored in rvmfp and calls the
+  `asyncSwitchCtrl` unique stub, which tries to resume a pending fast runnable
+  ResumableWaitHandle (fast path) if possible, otherwise it will exit VM and
+  return control to the asio scheduler (slow path). As with AsyncRetFast, the
+  stack must contain exactly one cell containing uninitialied garbage.
 
 | LdRetVal<T>, DParam(Gen), S(FramePtr), NF
 
@@ -2359,35 +2367,15 @@ To string conversions:
   Stores 'key' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
-| StAsyncArSucceeded, ND, S(FramePtr), NF
-
-  Mark the AsyncFunctionWaitHandle object whose ActRec is given by S0 as
-  STATE_SUCCEEDED.
-
 | StAsyncArResume<offset>, ND, S(FramePtr) S(TCA), NF
 
   Store the resume address S1 into the AsyncFunctionWaitHandle whose ActRec is
   given by S0, marking the offset to resume at as `offset'.
 
-| StAsyncArResult, ND, S(FramePtr) S(Cell), CRc
-
-  Stores result into the AsyncFunctionWaitHandle object ActRec of which is S0.
-  S1 is the value.
-
-| LdAsyncArParentChain, D(ABC), S(FramePtr), NF
-
-  Loads the first parent of the AsyncFunctionWaitHandle object ActRec of which
-  is S0.
-
 | AFWHBlockOn, ND, S(FramePtr) S(Obj), CRc
 
   Establish dependency between parent AsyncFunctionWaitHandle object, whose
   ActRec is given by S0, and child WaitableWaitHandle object referenced by S1.
-
-| ABCUnblock, ND, S(ABC), NF
-
-  Calls AsioBlockableChain::Unblock. This instruction may not occur in an
-  inlined function.
 
 | LdWHState, D(Int), S(Obj), NF
 
@@ -2413,10 +2401,6 @@ To string conversions:
 
   Loads the AsyncFunctionWaitHandle object's ActRec, given a pointer to the
   AsyncFunctionWaitHandle object in S0.
-
-| LdResumableArObj, D(Obj), S(FramePtr), NF
-
-  Loads the Resumable object, given a Resumable's frame pointer in S0.
 
 
 16. Debugging, instrumentation, and profiling

@@ -65,16 +65,6 @@ void implStARResume(IRLS& env, const IRInstruction* inst,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgLdResumableArObj(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const resumableAR = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  auto const objectOff = Resumable::dataOff() - Resumable::arOff();
-  v << lea{resumableAR[objectOff], dst};
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 namespace {
 
 ptrdiff_t genOffset(bool isAsync) {
@@ -412,8 +402,6 @@ void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
   v << store{child, parentAR[ar_rel(childOff)]};
 }
 
-IMPL_OPCODE_CALL(ABCUnblock)
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgIsWaitHandle(IRLS& env, const IRInstruction* inst) {
@@ -457,24 +445,9 @@ void cgLdWHNotDone(IRLS& env, const IRInstruction* inst) {
   v << movzbq{result, dst};
 }
 
-void cgStAsyncArSucceeded(IRLS& env, const IRInstruction* inst) {
-  auto const ar = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  v << storebi{
-    WH::toKindState(WH::Kind::AsyncFunction, WH::STATE_SUCCEEDED),
-    ar[ar_rel(WH::stateOff())]
-  };
-}
-
 void cgLdWHResult(IRLS& env, const IRInstruction* inst) {
   auto const obj = srcLoc(env, inst, 0).reg();
   loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), obj[WH::resultOff()]);
-}
-
-void cgStAsyncArResult(IRLS& env, const IRInstruction* inst) {
-  auto const ar = srcLoc(env, inst, 0).reg();
-  storeTV(vmain(env), ar[ar_rel(AFWH::resultOff())],
-          srcLoc(env, inst, 1), inst->src(1));
 }
 
 void cgLdAFWHActRec(IRLS& env, const IRInstruction* inst) {
@@ -482,13 +455,6 @@ void cgLdAFWHActRec(IRLS& env, const IRInstruction* inst) {
   auto const obj = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
   v << lea{obj[AFWH::arOff()], dst};
-}
-
-void cgLdAsyncArParentChain(IRLS& env, const IRInstruction* inst) {
-  auto dst = dstLoc(env, inst, 0).reg();
-  auto ar = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  v << load{ar[ar_rel(AFWH::parentChainOff())], dst};
 }
 
 void cgStAsyncArResume(IRLS& env, const IRInstruction* inst) {

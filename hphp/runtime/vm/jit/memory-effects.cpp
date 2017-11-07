@@ -338,7 +338,6 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
             MIterNext,
             MIterNextK,
             IterFree,
-            ABCUnblock,
             GenericRetDecRefs,
             MemoSet);
   always_assert_flog(
@@ -604,8 +603,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AStackAny | AFrameAny | AClsRefSlotAny | ACufIterAny | AMIStateAny
     };
 
-  case AsyncRetCtrl:
   case AsyncFuncRet:
+  case AsyncFuncRetSlow:
     return ReturnEffects { AStackAny | AMIStateAny };
 
   case AsyncSwitchFast:
@@ -1566,7 +1565,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefConst:
   case LdLocAddr:
   case Sqrt:
-  case LdResumableArObj:
   case Shl:
   case Shr:
   case IsNType:
@@ -1636,7 +1634,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckType:
   case CheckVArray:
   case CheckDArray:
-  case FreeActRec:
   case RegisterLiveObj:
   case StContArResume:
   case StContArState:
@@ -1663,9 +1660,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CountVec:
   case CountDict:
   case CountKeyset:
-  case StAsyncArResult:
   case StAsyncArResume:
-  case StAsyncArSucceeded:
   case InstanceOf:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
@@ -1704,7 +1699,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LteRes:
   case CmpRes:
   case LdBindAddr:
-  case LdAsyncArParentChain:
   case LdSSwitchDestFast:
   case RBTraceEntry:
   case RBTraceMsg:
@@ -1997,11 +1991,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DebugBacktraceFast:
     return may_load_store(AHeapAny|AFrameAny|AStackAny, AHeapAny);
 
-  // These two instructions don't touch memory we track, except that they may
+  // This instruction doesn't touch memory we track, except that it may
   // re-enter to construct php Exception objects.  During this re-entry anything
   // can happen (e.g. a surprise flag check could cause a php signal handler to
   // run arbitrary code).
-  case ABCUnblock:
   case AFWHPrepareChild:
     return may_reenter(inst, may_load_store(AEmpty, AEmpty));
 

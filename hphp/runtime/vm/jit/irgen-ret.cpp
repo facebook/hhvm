@@ -32,7 +32,8 @@ namespace {
 
 const StaticString s_returnHook("SurpriseReturnHook");
 
-void retSurpriseCheck(IRGS& env, SSATmp* retVal) {
+template<class AH>
+void retSurpriseCheck(IRGS& env, SSATmp* retVal, AH afterHook) {
   /*
    * This is a weird situation for throwing: we've partially torn down the
    * ActRec (decref'd all the frame's locals), and we've popped the return
@@ -43,19 +44,23 @@ void retSurpriseCheck(IRGS& env, SSATmp* retVal) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  ifThen(
+  ifThenElse(
     env,
     [&] (Block* taken) {
       auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
       gen(env, CheckSurpriseFlags, taken, ptr);
     },
     [&] {
+      ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+    },
+    [&] {
       hint(env, Block::Hint::Unlikely);
       ringbufferMsg(env, Trace::RBTypeMsg, s_returnHook.get());
       gen(env, ReturnHook, fp(env), retVal);
+      ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+      afterHook();
     }
   );
-  ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
 }
 
 void freeLocalsAndThis(IRGS& env) {
@@ -108,56 +113,9 @@ void normalReturn(IRGS& env, SSATmp* retval) {
   gen(env, RetCtrl, data, sp(env), fp(env), retval);
 }
 
-void emitAsyncRetSlow(IRGS& env, SSATmp* retVal) {
-  // Slow path: unblock all parents, then return.
-  auto parentChain = gen(env, LdAsyncArParentChain, fp(env));
-  gen(env, StAsyncArSucceeded, fp(env));
-  gen(env, StAsyncArResult, fp(env), retVal);
-  gen(env, ABCUnblock, parentChain);
-
-  // Must load this before FreeActRec, which adjusts fp(env).
-  auto const resumableObj = gen(env, LdResumableArObj, fp(env));
-  gen(env, FreeActRec, fp(env));
-  decRef(env, resumableObj);
-
-  // Transfer control back to the asio scheduler. Make uninitialized space
-  // on the stack for null "return value" to be written by the enterTCExit stub.
-  auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
-  gen(env, AsyncRetCtrl, IRSPRelOffsetData { spAdjust }, sp(env), fp(env));
-}
-
-void asyncRetSurpriseCheck(IRGS& env, SSATmp* retVal) {
-  // The AsyncRet unique stub may or may not be able to do fast return (jump to
-  // parent directly).  So we don't know for sure if return hook should be
-  // called.  When profiling is enabled, we call the return hook, and follow the
-  // slow path return (uncommon case).
-
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckSurpriseFlags, taken, sp(env));
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-
-      ringbufferMsg(env, Trace::RBTypeMsg, s_returnHook.get());
-      gen(env, ReturnHook, fp(env), retVal);
-      ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
-
-      // Uncommon case: after calling the return hook, follow the slow path.
-      // Next opcode is unreachable on this path.
-      emitAsyncRetSlow(env, retVal);
-    }
-  );
-  ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
-}
-
 void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
   if (resumeMode(env) == ResumeMode::None) {
-    retSurpriseCheck(env, retVal);
+    retSurpriseCheck(env, retVal, []{});
 
     // Return from an eagerly-executed async function: wrap the return value in
     // a StaticWaitHandle object and return that normally, unless we were called
@@ -181,15 +139,17 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
     return;
   }
 
-  // When surprise flag is set, the slow path is always used.  So fast path is
-  // never reached in that case (e.g. when debugging).  Consider disabling this
-  // when debugging the fast return path.
-  asyncRetSurpriseCheck(env, retVal);
+  auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
+
+  // When surprise flag is set, the slow path is always used.
+  retSurpriseCheck(env, retVal, [&] {
+    gen(env, AsyncFuncRetSlow, IRSPRelOffsetData { spAdjust }, sp(env), fp(env),
+        retVal);
+  });
 
   // Call stub that will mark this AFWH as finished, unblock parents and
   // possibly take fast path to resume parent. Leave SP pointing to a single
   // uninitialized cell which will be filled by the stub.
-  auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
   gen(env, AsyncFuncRet, IRSPRelOffsetData { spAdjust }, sp(env), fp(env),
       retVal);
 }
@@ -245,7 +205,7 @@ void implRet(IRGS& env) {
     return asyncFunctionReturn(env, retval);
   }
 
-  retSurpriseCheck(env, retval);
+  retSurpriseCheck(env, retval, []{});
 
   if (resumeMode(env) == ResumeMode::GenIter) {
     assertx(curFunc(env)->isNonAsyncGenerator());

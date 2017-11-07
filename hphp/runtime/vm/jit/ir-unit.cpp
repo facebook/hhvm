@@ -145,8 +145,8 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
       return op != Op::Await && op != Op::AwaitAll && op != Op::FCallAwait;
     }
 
-    case AsyncRetCtrl:
     case AsyncFuncRet:
+    case AsyncFuncRetSlow:
       return true;
 
     // A ReqBindJmp ends a unit and it jumps to the next instruction to

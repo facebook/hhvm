@@ -126,6 +126,11 @@ void emitTypeCheck(Vout& v, IRLS& env, Type type,
                    Loc typeSrc, Loc dataSrc, Block* taken);
 
 /*
+ * Check the surprise flags, and jmp to handleSurprise label if they are set.
+ */
+void emitCheckSurpriseFlags(Vout& v, Vreg fp, Vlabel handleSurprise);
+
+/*
  * Check the surprise flags, and call functionEnterHelper if they are set.
  */
 void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,

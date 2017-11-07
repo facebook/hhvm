@@ -105,6 +105,21 @@ void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
   v << syncvmret{data, tp};
 }
 
+void asyncFuncRetImpl(IRLS& env, const IRInstruction* inst, TCA target) {
+  auto const ret = inst->src(2);
+  auto const retLoc = srcLoc(env, inst, 2);
+  auto& v = vmain(env);
+
+  adjustSPForReturn<IRSPRelOffsetData>(env, inst);
+
+  // The asyncFuncRet{,Slow} stubs take the return TV as its arguments.
+  copyTV(v, rarg(0), rarg(1), retLoc, ret);
+  auto args = vm_regs_with_sp() | rarg(1);
+  if (!ret->isA(TNull)) args |= rarg(0);
+
+  v << jmpi{target, args};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -140,26 +155,12 @@ void cgRetCtrl(IRLS& env, const IRInstruction* inst) {
   v << phpret{fp, rvmfp(), php_return_regs()};
 }
 
-void cgAsyncRetCtrl(IRLS& env, const IRInstruction* inst) {
-  auto& v = vmain(env);
-  adjustSPForReturn<IRSPRelOffsetData>(env, inst);
-  v << syncvmrettype{v.cns(KindOfNull)};
-  v << leavetc{vm_regs_with_sp() | rret_type()};
+void cgAsyncFuncRet(IRLS& env, const IRInstruction* inst) {
+  asyncFuncRetImpl(env, inst, tc::ustubs().asyncFuncRet);
 }
 
-void cgAsyncFuncRet(IRLS& env, const IRInstruction* inst) {
-  auto const ret = inst->src(2);
-  auto const retLoc = srcLoc(env, inst, 2);
-  auto& v = vmain(env);
-
-  adjustSPForReturn<IRSPRelOffsetData>(env, inst);
-
-  // The asyncFuncRet stub takes the return TV as its arguments.
-  copyTV(v, rarg(0), rarg(1), retLoc, ret);
-  auto args = vm_regs_with_sp() | rarg(1);
-  if (!ret->isA(TNull)) args |= rarg(0);
-
-  v << jmpi{tc::ustubs().asyncFuncRet, args};
+void cgAsyncFuncRetSlow(IRLS& env, const IRInstruction* inst) {
+  asyncFuncRetImpl(env, inst, tc::ustubs().asyncFuncRetSlow);
 }
 
 void cgAsyncSwitchFast(IRLS& env, const IRInstruction* inst) {
@@ -179,12 +180,6 @@ void cgLdRetVal(IRLS& env, const IRInstruction* inst) {
 void cgDbgTrashRetVal(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   trashTV(v, srcLoc(env, inst, 0).reg(), kArRetOff, kTVTrashJITRetVal);
-}
-
-void cgFreeActRec(IRLS& env, const IRInstruction* inst) {
-  auto fp = srcLoc(env, inst, 0).reg();
-  auto dst = dstLoc(env, inst, 0).reg();
-  vmain(env) << load{fp[AROFF(m_sfp)], dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

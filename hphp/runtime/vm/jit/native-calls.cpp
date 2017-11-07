@@ -480,8 +480,6 @@ static CallMap s_callMap {
                            {{TV, 0}}},
     {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}}},
-    {ABCUnblock,         &AsioBlockableChain::Unblock, DSSA, SSync,
-                           {{SSA, 0}}},
 
     /* MInstrTranslator helpers */
     {SetNewElem, setNewElem, DNone, SSync, {{SSA, 0}, {TV, 1}}},

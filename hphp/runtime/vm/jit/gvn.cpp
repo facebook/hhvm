@@ -352,7 +352,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case Mov:
   case LdContActRec:
   case LdAFWHActRec:
-  case LdResumableArObj:
   case LdPackedArrayDataElemAddr:
   case LdStaticLoc:
   case OrdStr:

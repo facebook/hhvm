@@ -52,17 +52,23 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
-                                 Fixup fixup, Vlabel catchBlock) {
-  auto const cold = vcold.makeBlock();
+void emitCheckSurpriseFlags(Vout& v, Vreg fp, Vlabel handleSurprise) {
   auto const done = v.makeBlock();
-
   auto const sf = v.makeReg();
   v << cmpqm{fp, rvmtl()[rds::kSurpriseFlagsOff], sf};
-  v << jcc{CC_NBE, sf, {done, cold}};
+  v << jcc{CC_NBE, sf, {done, handleSurprise}};
+  v = done;
+}
+
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
+                                 Fixup fixup, Vlabel catchBlock) {
+  auto const handleSurprise = vcold.makeBlock();
+  auto const done = v.makeBlock();
+  emitCheckSurpriseFlags(v, fp, handleSurprise);;
+  v << jmp{done};
   v = done;
 
-  vcold = cold;
+  vcold = handleSurprise;
   auto const call = CallSpec::stub(tc::ustubs().functionEnterHelper);
   auto const args = v.makeVcallArgs({});
   vcold << vinvoke{call, args, v.makeTuple({}), {done, catchBlock}, fixup};
@@ -79,9 +85,7 @@ void cgCheckSurpriseFlags(IRLS& env, const IRInstruction* inst) {
   auto const fp_or_sp = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  auto const sf = v.makeReg();
-  v << cmpqm{fp_or_sp, rvmtl()[rds::kSurpriseFlagsOff], sf};
-  v << jcc{CC_NBE, sf, {label(env, inst->next()), label(env, inst->taken())}};
+  emitCheckSurpriseFlags(v, fp_or_sp, label(env, inst->taken()));
 }
 
 void cgCheckStackOverflow(IRLS& env, const IRInstruction* inst) {

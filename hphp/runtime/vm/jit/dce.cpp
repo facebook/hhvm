@@ -206,7 +206,6 @@ bool canDCE(IRInstruction* inst) {
   case NewLikeArray:
   case NewCol:
   case NewPair:
-  case FreeActRec:
   case DefInlineFP:
   case LdRetVal:
   case Mov:
@@ -228,13 +227,11 @@ bool canDCE(IRInstruction* inst) {
   case LdContActRec:
   case LdContArValue:
   case LdContArKey:
-  case LdAsyncArParentChain:
   case LdWHState:
   case LdWHResult:
   case LdWHNotDone:
   case CountWHNotDone:
   case LdAFWHActRec:
-  case LdResumableArObj:
   case LdMIStateAddr:
   case StringIsset:
   case ColIsEmpty:
@@ -452,8 +449,8 @@ bool canDCE(IRInstruction* inst) {
   case NativeImpl:
   case CallBuiltin:
   case RetCtrl:
-  case AsyncRetCtrl:
   case AsyncFuncRet:
+  case AsyncFuncRetSlow:
   case AsyncSwitchFast:
   case ReleaseVVAndSkip:
   case GenericRetDecRefs:
@@ -541,11 +538,8 @@ bool canDCE(IRInstruction* inst) {
   case StContArResume:
   case StContArValue:
   case StContArKey:
-  case StAsyncArSucceeded:
   case StAsyncArResume:
-  case StAsyncArResult:
   case AFWHBlockOn:
-  case ABCUnblock:
   case IncStat:
   case IncStatGrouped:
   case IncProfCounter:

@@ -226,8 +226,9 @@ struct UniqueStubs {
    * Store result into the AsyncFunctionWaitHandle, mark it as finished and
    * unblock its parents. Check whether the first parent is eligible to be
    * resumed directly (it is an AsyncFunctionWaitHandle in the same context
-   * with a non-null resume address), and do so if possible. Otherwise,
-   * jump to asyncSwitchCtrl.
+   * with a non-null resume address), and do so if possible. Otherwise, jump
+   * to asyncSwitchCtrl. Slow version doesn't try to resume and just returns
+   * to the asio scheduler.
    *
    * rvmfp() should point to the ActRec of the AsyncFunctionWaitHandle that
    * is returning, rvmsp() should point to an uninitialized cell on the
@@ -237,6 +238,7 @@ struct UniqueStubs {
    * @context:  func body
    */
   TCA asyncFuncRet;
+  TCA asyncFuncRetSlow;
 
   /*
    * Async function finish-suspend-and-resume stub.

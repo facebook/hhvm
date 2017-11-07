@@ -17,18 +17,18 @@ so is extremely performance-sensitive.
 *)
 
 type ('k, 'v) t = {
-  key : 'k ref;
-  value : 'v ref;
+  mutable key : 'k;
+  mutable value : 'v;
 }
 
 let memoize cache f =
   fun k ->
     (* Note that we are deliberately using cheap reference inequality here. *)
-    if !(cache.key) != k then begin
-      cache.key := k;
-      cache.value := f k
+    if cache.key != k then begin
+      cache.key <- k;
+      cache.value <- f k
     end;
-    !(cache.value)
+    cache.value
 
 (*
 Note that the cache needs to be "seeded" with valid initial values. This
@@ -49,6 +49,6 @@ parser! It is very strange that this match is so slow.  But initializing to
 a default value is a small price to pay.
 *)
 let make k v = {
-  key = ref k;
-  value = ref v;
+  key = k;
+  value = v;
 }

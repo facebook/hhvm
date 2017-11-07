@@ -37,36 +37,44 @@ module type Parser_S = sig
 end
 
 module WithParser(Parser : Parser_S) = struct
+  module NextToken : sig
+    val next_token : Parser.t -> Parser.t * Syntax.Token.t
+  end = struct
+    let next_token_impl parser =
+      let lexer = Parser.lexer parser in
+      let (lexer, token) = Lexer.next_token lexer in
+      let parser = Parser.with_lexer parser lexer in
+      (* ERROR RECOVERY: Check if the parser's carring ExtraTokenError trivia.
+       * If so, clear it and add it to the leading trivia of the current token. *)
+       let (parser, token) =
+         match Parser.skipped_tokens parser with
+         | [] -> (parser, token)
+         | skipped_tokens ->
+           let trivialise_token acc t =
+             (* Every bit of a skipped token must end up in `acc`, so push all the
+             * token's trailing trivia, then push the "trivialised" token itself,
+             * followed by the leading trivia. *)
+             let prepend_onto elt_list elt = List.cons elt elt_list in
+             let acc = List.fold_left prepend_onto acc (Token.trailing t) in
+             let acc = Trivia.make_extra_token_error
+                (Lexer.source lexer) (Lexer.start_offset lexer) (Token.width t)
+                :: acc in
+             List.fold_left prepend_onto acc (Token.leading t)
+           in
+           let leading =
+             List.fold_left trivialise_token (Token.leading token) skipped_tokens
+           in
+           let token = Token.with_leading leading token in
+           let parser = Parser.clear_skipped_tokens parser in
+           (parser, token)
+         in
+      (parser, token)
 
-  let next_token parser =
-    let lexer = Parser.lexer parser in
-    let (lexer, token) = Lexer.next_token lexer in
-    let parser = Parser.with_lexer parser lexer in
-    (* ERROR RECOVERY: Check if the parser's carring ExtraTokenError trivia.
-     * If so, clear it and add it to the leading trivia of the current token. *)
-     let (parser, token) =
-       match Parser.skipped_tokens parser with
-       | [] -> (parser, token)
-       | skipped_tokens ->
-         let trivialise_token acc t =
-           (* Every bit of a skipped token must end up in `acc`, so push all the
-           * token's trailing trivia, then push the "trivialised" token itself,
-           * followed by the leading trivia. *)
-           let prepend_onto elt_list elt = List.cons elt elt_list in
-           let acc = List.fold_left prepend_onto acc (Token.trailing t) in
-           let acc = Trivia.make_extra_token_error
-              (Lexer.source lexer) (Lexer.start_offset lexer) (Token.width t)
-              :: acc in
-           List.fold_left prepend_onto acc (Token.leading t)
-         in
-         let leading =
-           List.fold_left trivialise_token (Token.leading token) skipped_tokens
-         in
-         let token = Token.with_leading leading token in
-         let parser = Parser.clear_skipped_tokens parser in
-         (parser, token)
-       in
-    (parser, token)
+    let magic_cache = Little_magic_cache.make ()
+    let next_token = Little_magic_cache.memoize magic_cache next_token_impl
+  end
+
+  include NextToken
 
   let next_token_no_trailing parser =
     let lexer = Parser.lexer parser in

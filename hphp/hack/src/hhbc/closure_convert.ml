@@ -153,6 +153,7 @@ let env_with_longlambda env is_static fd =
   env_with_function_like env (ScopeItem.LongLambda is_static) ~is_closure_body:true fd
 
 let strip_id id = SU.strip_global_ns (snd id)
+let make_class_name cd = SU.Xhp.mangle_id (strip_id cd.c_name)
 
 let rec make_scope_name ns scope =
   match scope with
@@ -161,12 +162,18 @@ let rec make_scope_name ns scope =
     | None -> ""
     | Some n -> n ^ "\\"
     end
-  | ScopeItem.Function fd :: _ -> strip_id fd.f_name
+  | ScopeItem.Function fd :: scope ->
+    let fname = strip_id fd.f_name in
+    begin match Scope.get_class scope with
+    | None -> fname
+    | Some cd -> make_class_name cd ^ "::" ^ fname
+    end
   | ScopeItem.Method md :: scope ->
     make_scope_name ns scope ^ "::" ^ strip_id md.m_name
   | ScopeItem.Class cd :: _ ->
-    SU.Xhp.mangle_id (strip_id cd.c_name)
-  | _ :: scope -> make_scope_name ns scope
+    make_class_name cd
+  | _ :: scope ->
+    make_scope_name ns scope
 
 let env_with_function env fd =
   env_with_function_like env (ScopeItem.Function fd) ~is_closure_body:false fd

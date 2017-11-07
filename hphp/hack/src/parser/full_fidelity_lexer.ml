@@ -181,13 +181,16 @@ let is_name_letter ch =
 
 (* Lexing *)
 
-(* create a new lexer where the offset is advanced as
- * long as the predicate is true *)
-let skip_while (l : lexer) (p : char -> bool) =
+let skip_while_to_offset l p =
   let n = SourceText.length (source l) in
   let rec aux i =
     if i < n && p (peek l i) then aux (i + 1) else i in
-  with_offset l (aux (offset l))
+  aux (offset l)
+
+(* create a new lexer where the offset is advanced as
+ * long as the predicate is true *)
+let skip_while (l : lexer) (p : char -> bool) =
+  with_offset l (skip_while_to_offset l p)
 
 let str_skip_while ~str ~i ~p =
   let n = String.length str in
@@ -201,8 +204,9 @@ let skip_whitespace (l : lexer) =
 let str_skip_whitespace ~str ~i =
   str_skip_while ~str ~i ~p:is_whitespace_no_newline
 
+let not_newline ch = not (is_newline ch)
+
 let skip_to_end_of_line (l : lexer) =
-  let not_newline ch = (ch <> '\n') in
   skip_while l not_newline
 
 let skip_to_end_of_line_or_end_tag (l : lexer) =
@@ -1624,7 +1628,18 @@ let skip_to_end_of_markup lexer ~is_leading_section =
         aux lexer (succ index)
     end
   in
-  aux lexer (offset lexer)
+  let start_offset =
+    if is_leading_section
+    then begin
+      (* if leading section starts with #! - it should span the entire line *)
+      let index = offset lexer in
+      if peek_def ~def:'\x00' lexer index = '#' &&
+         peek_def ~def:'\x00' lexer (succ index)  = '!'
+      then skip_while_to_offset lexer not_newline
+      else index
+    end
+    else offset lexer in
+  aux lexer start_offset
 
 let scan_markup lexer ~is_leading_section =
   let lexer = start_new_lexeme lexer in

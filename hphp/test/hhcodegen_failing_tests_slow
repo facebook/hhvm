@@ -153,8 +153,6 @@ slow/php7_backported/varSyntax/staticMember.php
 slow/php7_bcbreak/5/uvs/array_indirect_ref.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection_classes/xhp.php
-slow/sanity/3.php
-slow/sanity/4.php
 slow/traits/1981.php
 slow/traits/__class__.php
 slow/type_assertions/1857.php

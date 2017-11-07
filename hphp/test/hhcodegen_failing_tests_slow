@@ -146,7 +146,6 @@ slow/php7_backported/scalar-types/scalar_strict_declaration_placement_003.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_008.php
 slow/php7_backported/varSyntax/indirect-fcall.php
 slow/php7_backported/varSyntax/staticMember.php
-slow/php7_bcbreak/5/uvs/array_indirect_ref.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection_classes/xhp.php
 slow/traits/1981.php

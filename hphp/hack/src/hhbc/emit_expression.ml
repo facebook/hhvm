@@ -1809,6 +1809,11 @@ and emit_arg env i is_splatted (pos, expr_ as expr) =
   | A.Lvar ((_, str) as id)
     when not (is_local_this env str) || Emit_env.get_needs_local_this env ->
     instr_fpassl i (get_local env id) hint
+  | A.BracedExpr e ->
+    gather [
+      emit_expr ~need_ref:false env e;
+      instr_fpassn i hint;
+    ]
   | A.Lvarvar (n, id) ->
     gather [
       instr_cgetl (get_non_pipe_local id);

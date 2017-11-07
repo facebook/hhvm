@@ -6942,6 +6942,10 @@ bool EmitterVisitor::emitInlineGenva(
       },
       waithandles.size() /* popAll */
     );
+
+    for (const auto wh : waithandles) {
+      emitUnsetL(e, wh);
+    }
   }
 
   for (auto wh : waithandles) {

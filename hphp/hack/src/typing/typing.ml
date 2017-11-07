@@ -3952,7 +3952,7 @@ and obj_get_concrete_ty ~is_method ?(explicit_tparams=[]) env concrete_ty class_
         begin match member_ty with
           | (r, Tfun ft) ->
             (* We special case function types here to be able to pass explicit type parameters. *)
-            let (env, ft) = Phase.localize_ft ~use_pos:mem_pos ~explicit_tparams ~ety_env env ft in
+            let (env, ft) = Phase.localize_ft ~use_pos:id_pos ~explicit_tparams ~ety_env env ft in
             (env, (r, Tfun ft))
           | _ -> Phase.localize ~ety_env env member_ty
         end in

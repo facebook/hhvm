@@ -7,7 +7,7 @@ File "new_generic.php", line 19, characters 3-38:
 File "new_generic.php", line 19, characters 11-19:
 Some type constraint(s) here are violated (Typing[4110])
 File "new_generic.php", line 8, characters 26-29:
-'Tobj' is a constrained type
+'Tobj' is a constrained type parameter
 File "new_generic.php", line 17, characters 35-37:
 This is an int
 File "new_generic.php", line 19, characters 29-36:

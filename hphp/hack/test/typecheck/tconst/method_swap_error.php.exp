@@ -3,9 +3,9 @@ Invalid argument (Typing[4110])
 File "method_swap_error.php", line 17, characters 14-23:
 Some type constraint(s) here are violated
 File "method_swap_error.php", line 8, characters 26-32:
-'<expr#2>::T' is a constrained type
+'<expr#2>::T' is a constrained type parameter
 File "method_swap_error.php", line 8, characters 26-32:
-'X::T' is a constrained type
+'X::T' is a constrained type parameter
 File "method_swap_error.php", line 12, characters 24-30:
 This is the expression dependent type <expr#1>::T
 File "method_swap_error.php", line 4, characters 19-26:

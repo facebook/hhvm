@@ -1,7 +1,7 @@
 File "lambda_bad_pos.php", line 26, characters 8-13:
 Some type constraint(s) here are violated (Typing[4110])
 File "lambda_bad_pos.php", line 6, characters 21-22:
-'Tv' is a constrained type
+'Tv' is a constrained type parameter
 File "lambda_bad_pos.php", line 6, characters 27-34:
 This is an array key (int/string)
 File "lambda_bad_pos.php", line 25, characters 22-22:

@@ -1629,38 +1629,36 @@ let unification_cycle pos ty =
        "is necessary for a type [rec] to be equal to type " ^ ty]
 
 
-let explain_constraint p_inst pos name (error : error) =
+let explain_constraint ~use_pos ~definition_pos ~param_name (error : error) =
   let inst_msg = "Some type constraint(s) here are violated" in
   let code, msgl = (get_code error), (to_list error) in
   (* There may be multiple constraints instantiated at one spot; avoid
    * duplicating the instantiation message *)
   let msgl = match msgl with
-    | (p, x) :: rest when x = inst_msg && p = p_inst -> rest
+    | (p, x) :: rest when x = inst_msg && p = use_pos -> rest
     | _ -> msgl in
-  let name = Utils.strip_ns name in
+  let name = Utils.strip_ns param_name in
   add_list code begin
-    [p_inst, inst_msg;
-     pos, "'"^name^"' is a constrained type"] @ msgl
+    [use_pos, inst_msg;
+     definition_pos, "'" ^ name ^ "' is a constrained type parameter"] @ msgl
   end
 
-let explain_where_constraint use_pos def_pos (error : error) =
+let explain_where_constraint ~use_pos ~definition_pos (error : error) =
   let inst_msg = "A 'where' type constraint is violated here" in
   let code, msgl = (get_code error), (to_list error) in
   add_list code begin
     [use_pos, inst_msg;
-     def_pos, "This is the method with 'where' type constraints"] @ msgl
+     definition_pos, "This is the method with 'where' type constraints"] @ msgl
   end
 
-let explain_tconst_where_constraint use_pos def_pos (error: error) =
+let explain_tconst_where_constraint ~use_pos ~definition_pos (error: error) =
   let inst_msg = "A 'where' type constraint is violated here" in
   let code, msgl = (get_code error), (to_list error) in
   add_list code begin
     [use_pos, inst_msg;
-     def_pos,
+     definition_pos,
      "This method's where constraints contain a generic type access"] @ msgl
   end
-
-
 
 let explain_type_constant reason_msgl (error: error) =
   let code, msgl = (get_code error), (to_list error) in

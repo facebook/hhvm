@@ -1,4 +1,4 @@
-File "tconst_on_generics2.php", line 50, characters 18-19:
+File "tconst_on_generics2.php", line 50, characters 9-12:
 A 'where' type constraint is violated here (Typing[4110])
 File "tconst_on_generics2.php", line 40, characters 26-29:
 This method's where constraints contain a generic type access

@@ -400,4 +400,4 @@ let none = Rnone
 
 let explain_generic_constraint p_inst reason name error =
   let pos = to_pos reason in
-  Errors.explain_constraint p_inst pos name error
+  Errors.explain_constraint ~use_pos:p_inst ~definition_pos:pos ~param_name:name error

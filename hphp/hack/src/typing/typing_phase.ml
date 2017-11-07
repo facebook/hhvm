@@ -293,7 +293,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
   let env =
     if instantiate_tparams then
       let env = check_tparams_constraints ~use_pos ~ety_env env ft.ft_tparams in
-      let env = check_where_constraints ~ety_env env ft.ft_pos
+      let env = check_where_constraints ~use_pos ~definition_pos:ft.ft_pos ~ety_env env
                   ft.ft_where_constraints in
       env
     else env in
@@ -332,25 +332,24 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
  * function's body.
  *)
 and check_tparams_constraints ~use_pos ~ety_env env tparams =
-  let check_tparam_constraints env (_var, (p, name), cstrl) =
-    let r = Reason.Rwitness p in
+  let check_tparam_constraints env (_variance, id, cstrl) =
     List.fold_left cstrl ~init:env ~f:begin fun env (ck, ty) ->
       let env, ty = localize ~ety_env env ty in
-      match SMap.get name ety_env.substs with
+      match SMap.get (snd id) ety_env.substs with
       | Some x_ty ->
         begin
           Typing_log.log_types 1 use_pos env
           [Typing_log.Log_sub ("check_tparams_constraints: add_check_constraint_todo",
             [Typing_log.Log_type ("ty", ty);
             Typing_log.Log_type ("x_ty", x_ty)])];
-          TGenConstraint.add_check_constraint_todo env ~use_pos r name ck ty x_ty
+          TGenConstraint.add_check_constraint_todo env ~use_pos id ck ty x_ty
         end
       | None ->
         env
     end in
   List.fold_left tparams ~init:env ~f:check_tparam_constraints
 
-and check_where_constraints ~ety_env env def_pos cstrl =
+and check_where_constraints ~use_pos ~ety_env ~definition_pos env cstrl =
   List.fold_left cstrl ~init:env ~f:begin fun env (ty1, ck, ty2) ->
       let contains_type_access =
         match ty1, ty2 with
@@ -361,7 +360,8 @@ and check_where_constraints ~ety_env env def_pos cstrl =
       let ty_from_env = localize ~ety_env in
       TGenConstraint.add_check_tconst_where_constraint_todo
         env
-        def_pos
+        ~use_pos
+        ~definition_pos
         ck
         ty_from_env
         ty2
@@ -371,7 +371,8 @@ and check_where_constraints ~ety_env env def_pos cstrl =
       let env, ty2 = localize ~ety_env env ty2 in
       TGenConstraint.add_check_where_constraint_todo
         env
-        def_pos
+        ~use_pos
+        ~definition_pos
         ck
         ty2
         ty1

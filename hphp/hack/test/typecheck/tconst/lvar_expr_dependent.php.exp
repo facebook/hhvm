@@ -20,9 +20,9 @@ Invalid argument (Typing[4110])
 File "lvar_expr_dependent.php", line 42, characters 13-18:
 Some type constraint(s) here are violated
 File "lvar_expr_dependent.php", line 12, characters 35-41:
-'<expr#1>::T' is a constrained type
+'<expr#1>::T' is a constrained type parameter
 File "lvar_expr_dependent.php", line 12, characters 35-41:
-'C::T' is a constrained type
+'C::T' is a constrained type parameter
 File "lvar_expr_dependent.php", line 13, characters 26-32:
 This is the expression dependent type <expr#2>::T
 File "lvar_expr_dependent.php", line 10, characters 28-30:

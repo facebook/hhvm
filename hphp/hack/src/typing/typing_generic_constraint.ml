@@ -40,24 +40,24 @@ let check_constraint env ck cstr_ty ty =
        * constraint type. *)
       TUtils.sub_type env ecstr_ty ty
 
-let add_check_constraint_todo (env_now:Env.env) ~use_pos reason generic ck cstr_ty ty =
+let add_check_constraint_todo (env_now:Env.env) ~use_pos (pos,name) ck cstr_ty ty =
   Env.add_todo env_now begin fun (env:Env.env) ->
     Errors.try_
       (fun () ->
         check_constraint env ck cstr_ty ty)
       (fun l ->
-       Reason.explain_generic_constraint use_pos reason generic l;
+       Errors.explain_constraint ~use_pos ~definition_pos:pos ~param_name:name l;
        env
       ), true
   end
 
-let add_check_where_constraint_todo (env_now:Env.env) pos ck cstr_ty ty =
+let add_check_where_constraint_todo (env_now:Env.env) ~use_pos ~definition_pos ck cstr_ty ty =
   Env.add_todo env_now begin fun (env:Env.env) ->
     Errors.try_
       (fun () ->
         check_constraint env ck cstr_ty ty)
       (fun l ->
-       Errors.explain_where_constraint env.Env.pos pos l;
+       Errors.explain_where_constraint ~use_pos ~definition_pos l;
        env
       ), true
   end
@@ -102,7 +102,7 @@ let handle_eq_tconst_constraint env ck ty cstr_ty =
   end
 
 let add_check_tconst_where_constraint_todo
-  (env_now:Env.env) pos ck ty_from_env cstr_ty ty =
+  (env_now:Env.env) ~use_pos ~definition_pos ck ty_from_env cstr_ty ty =
   Env.add_todo env_now begin fun (env: Env.env) ->
     Errors.try_
       (fun () ->
@@ -115,7 +115,7 @@ let add_check_tconst_where_constraint_todo
           check_constraint env ck ty cstr_ty
       )
       (fun l ->
-        Errors.explain_tconst_where_constraint env.Env.pos pos l;
+        Errors.explain_tconst_where_constraint ~use_pos ~definition_pos l;
        env
       ), true
   end

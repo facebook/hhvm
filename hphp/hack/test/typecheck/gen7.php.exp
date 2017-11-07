@@ -1,7 +1,7 @@
 File "gen7.php", line 23, characters 17-17:
 Some type constraint(s) here are violated (Typing[4110])
 File "gen7.php", line 21, characters 9-9:
-'T' is a constrained type
+'T' is a constrained type parameter
 File "gen7.php", line 21, characters 16-16:
 This is an object of type C
 File "gen7.php", line 23, characters 19-19:

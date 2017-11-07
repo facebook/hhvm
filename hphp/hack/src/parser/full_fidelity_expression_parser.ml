@@ -2134,22 +2134,47 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let (parser, fn) = assert_token parser Function in
     let (parser, left_paren, params, right_paren) =
       parse_parameter_list_opt parser in
-    let (parser, colon, return_type) = parse_optional_return parser in
-    let (parser, use_clause) = parse_anon_use_opt parser in
+    let (parser, colon, return_type, use_clause, is_php7) =
+      let (parser, use_clause) = parse_anon_use_opt parser in
+      if is_missing use_clause then begin
+        let (parser, colon, return_type) = parse_optional_return parser in
+        let (parser, use_clause) = parse_anon_use_opt parser in
+        (parser, colon, return_type, use_clause, false)
+        end
+      else begin
+        (* might be PHP7 style lambda where return type follows use clause *)
+        let (parser, colon, return_type) = parse_optional_return parser in
+        (parser, colon, return_type, use_clause, not (is_missing colon))
+        end in
     let (parser, body) = parse_compound_statement parser in
     let result =
-      make_anonymous_function
-        static
-        async
-        coroutine
-        fn
-        left_paren
-        params
-        right_paren
-        colon
-        return_type
-        use_clause
-        body in
+      if is_php7
+      then
+        make_php7_anonymous_function
+          static
+          async
+          coroutine
+          fn
+          left_paren
+          params
+          right_paren
+          use_clause
+          colon
+          return_type
+          body
+      else
+        make_anonymous_function
+          static
+          async
+          coroutine
+          fn
+          left_paren
+          params
+          right_paren
+          colon
+          return_type
+          use_clause
+          body in
     (parser, result)
 
   and parse_braced_expression parser =

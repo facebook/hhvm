@@ -968,6 +968,38 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
           ~allow_collapse:true
           body;
       ]
+    | Php7AnonymousFunction x ->
+      let (
+        static_kw,
+        async_kw,
+        coroutine_kw,
+        fun_kw,
+        lp,
+        params,
+        rp,
+        use,
+        colon,
+        ret_type,
+        body
+      ) = get_php7_anonymous_function_children x in
+      Concat [
+        t static_kw;
+        when_present static_kw space;
+        t async_kw;
+        when_present async_kw space;
+        t coroutine_kw;
+        when_present coroutine_kw space;
+        t fun_kw;
+        transform_argish lp params rp;
+        t use;
+        t colon;
+        when_present colon space;
+        t ret_type;
+        handle_possible_compound_statement
+          ~space:false
+          ~allow_collapse:true
+          body;
+      ]
     | AnonymousFunctionUseClause x ->
       (* TODO: Revisit *)
       let (kw, left_p, vars, right_p) =

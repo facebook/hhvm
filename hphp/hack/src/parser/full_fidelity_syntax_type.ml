@@ -541,6 +541,19 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_use                                      : t
     ; anonymous_body                                     : t
     }
+  and php7_anonymous_function =
+    { php7_anonymous_static_keyword                      : t
+    ; php7_anonymous_async_keyword                       : t
+    ; php7_anonymous_coroutine_keyword                   : t
+    ; php7_anonymous_function_keyword                    : t
+    ; php7_anonymous_left_paren                          : t
+    ; php7_anonymous_parameters                          : t
+    ; php7_anonymous_right_paren                         : t
+    ; php7_anonymous_use                                 : t
+    ; php7_anonymous_colon                               : t
+    ; php7_anonymous_type                                : t
+    ; php7_anonymous_body                                : t
+    }
   and anonymous_function_use_clause =
     { anonymous_use_keyword                              : t
     ; anonymous_use_left_paren                           : t
@@ -1053,6 +1066,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | GlobalStatement                         of global_statement
   | SimpleInitializer                       of simple_initializer
   | AnonymousFunction                       of anonymous_function
+  | Php7AnonymousFunction                   of php7_anonymous_function
   | AnonymousFunctionUseClause              of anonymous_function_use_clause
   | LambdaExpression                        of lambda_expression
   | LambdaSignature                         of lambda_signature
@@ -1186,6 +1200,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprDecorated                     of decorated_expression
   | ExprInclusion                     of inclusion_expression
   | ExprAnonymousFunction             of anonymous_function
+  | ExprPhp7AnonymousFunction         of php7_anonymous_function
   | ExprLambda                        of lambda_expression
   | ExprCast                          of cast_expression
   | ExprScopeResolution               of scope_resolution_expression
@@ -1299,6 +1314,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaInclusion                     of inclusion_expression
   | LambdaCompoundStatement             of compound_statement
   | LambdaAnonymousFunction             of anonymous_function
+  | LambdaPhp7AnonymousFunction         of php7_anonymous_function
   | LambdaLambda                        of lambda_expression
   | LambdaCast                          of cast_expression
   | LambdaScopeResolution               of scope_resolution_expression
@@ -1347,6 +1363,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprDecorated                     of decorated_expression
   | CExprInclusion                     of inclusion_expression
   | CExprAnonymousFunction             of anonymous_function
+  | CExprPhp7AnonymousFunction         of php7_anonymous_function
   | CExprLambda                        of lambda_expression
   | CExprCast                          of cast_expression
   | CExprScopeResolution               of scope_resolution_expression
@@ -1856,6 +1873,19 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_type: specifier option value
     ; anonymous_use: anonymous_function_use_clause option value
     ; anonymous_body: compound_statement value
+    }
+  and php7_anonymous_function =
+    { php7_anonymous_static_keyword: Token.t option value
+    ; php7_anonymous_async_keyword: Token.t option value
+    ; php7_anonymous_coroutine_keyword: Token.t option value
+    ; php7_anonymous_function_keyword: Token.t value
+    ; php7_anonymous_left_paren: Token.t value
+    ; php7_anonymous_parameters: parameter listesque value
+    ; php7_anonymous_right_paren: Token.t value
+    ; php7_anonymous_use: anonymous_function_use_clause option value
+    ; php7_anonymous_colon: Token.t option value
+    ; php7_anonymous_type: specifier option value
+    ; php7_anonymous_body: compound_statement value
     }
   and anonymous_function_use_clause =
     { anonymous_use_keyword: Token.t value

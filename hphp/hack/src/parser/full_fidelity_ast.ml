@@ -1132,6 +1132,15 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; anonymous_type
       ; anonymous_use
       ; anonymous_body
+      ; _ }
+    | Php7AnonymousFunction
+      { php7_anonymous_static_keyword = anonymous_static_keyword
+      ; php7_anonymous_async_keyword = anonymous_async_keyword
+      ; php7_anonymous_coroutine_keyword = anonymous_coroutine_keyword
+      ; php7_anonymous_parameters = anonymous_parameters
+      ; php7_anonymous_type = anonymous_type
+      ; php7_anonymous_use = anonymous_use
+      ; php7_anonymous_body = anonymous_body
       ; _ } ->
         let pArg node env =
           match syntax node with

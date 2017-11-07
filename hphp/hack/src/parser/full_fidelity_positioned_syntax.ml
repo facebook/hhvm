@@ -1261,6 +1261,33 @@ module FromMinimal = struct
           ; anonymous_use
           ; anonymous_body
           }, results
+      | SyntaxKind.Php7AnonymousFunction
+      , (  php7_anonymous_body
+        :: php7_anonymous_type
+        :: php7_anonymous_colon
+        :: php7_anonymous_use
+        :: php7_anonymous_right_paren
+        :: php7_anonymous_parameters
+        :: php7_anonymous_left_paren
+        :: php7_anonymous_function_keyword
+        :: php7_anonymous_coroutine_keyword
+        :: php7_anonymous_async_keyword
+        :: php7_anonymous_static_keyword
+        :: results
+        ) ->
+          Php7AnonymousFunction
+          { php7_anonymous_static_keyword
+          ; php7_anonymous_async_keyword
+          ; php7_anonymous_coroutine_keyword
+          ; php7_anonymous_function_keyword
+          ; php7_anonymous_left_paren
+          ; php7_anonymous_parameters
+          ; php7_anonymous_right_paren
+          ; php7_anonymous_use
+          ; php7_anonymous_colon
+          ; php7_anonymous_type
+          ; php7_anonymous_body
+          }, results
       | SyntaxKind.AnonymousFunctionUseClause
       , (  anonymous_use_right_paren
         :: anonymous_use_variables
@@ -3162,6 +3189,32 @@ module FromMinimal = struct
         let todo = Convert (anonymous_coroutine_keyword, todo) in
         let todo = Convert (anonymous_async_keyword, todo) in
         convert offset todo results anonymous_static_keyword
+    | { M.syntax = M.Php7AnonymousFunction
+        { M.php7_anonymous_static_keyword
+        ; M.php7_anonymous_async_keyword
+        ; M.php7_anonymous_coroutine_keyword
+        ; M.php7_anonymous_function_keyword
+        ; M.php7_anonymous_left_paren
+        ; M.php7_anonymous_parameters
+        ; M.php7_anonymous_right_paren
+        ; M.php7_anonymous_use
+        ; M.php7_anonymous_colon
+        ; M.php7_anonymous_type
+        ; M.php7_anonymous_body
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (php7_anonymous_body, todo) in
+        let todo = Convert (php7_anonymous_type, todo) in
+        let todo = Convert (php7_anonymous_colon, todo) in
+        let todo = Convert (php7_anonymous_use, todo) in
+        let todo = Convert (php7_anonymous_right_paren, todo) in
+        let todo = Convert (php7_anonymous_parameters, todo) in
+        let todo = Convert (php7_anonymous_left_paren, todo) in
+        let todo = Convert (php7_anonymous_function_keyword, todo) in
+        let todo = Convert (php7_anonymous_coroutine_keyword, todo) in
+        let todo = Convert (php7_anonymous_async_keyword, todo) in
+        convert offset todo results php7_anonymous_static_keyword
     | { M.syntax = M.AnonymousFunctionUseClause
         { M.anonymous_use_keyword
         ; M.anonymous_use_left_paren

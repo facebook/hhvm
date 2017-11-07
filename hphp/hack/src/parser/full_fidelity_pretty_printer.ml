@@ -991,6 +991,38 @@ let rec get_doc node =
         ^| type_declaration ^| uses
       ) in
       handle_compound_inline_brace before_body body missing
+    | Php7AnonymousFunction
+      { php7_anonymous_static_keyword;
+        php7_anonymous_async_keyword;
+        php7_anonymous_coroutine_keyword;
+        php7_anonymous_function_keyword;
+        php7_anonymous_left_paren;
+        php7_anonymous_parameters;
+        php7_anonymous_right_paren;
+        php7_anonymous_colon;
+        php7_anonymous_type;
+        php7_anonymous_use;
+        php7_anonymous_body } ->
+      let static = get_doc php7_anonymous_static_keyword in
+      let async = get_doc php7_anonymous_async_keyword in
+      let coroutine = get_doc php7_anonymous_coroutine_keyword in
+      let fn = get_doc php7_anonymous_function_keyword in
+      let left = get_doc php7_anonymous_left_paren in
+      let params = get_doc php7_anonymous_parameters in
+      let right = get_doc php7_anonymous_right_paren in
+      let colon = get_doc php7_anonymous_colon in
+      let return_type = get_doc php7_anonymous_type in
+      let preface = group_doc ( static ^| async ^| coroutine ^| fn ) in
+      let parameters = indent_block_no_space left params right indt in
+      let type_declaration = group_doc (colon ^| return_type) in
+      let uses = get_doc php7_anonymous_use in
+      let body = php7_anonymous_body in
+      let before_body =
+        group_doc (
+          group_doc ( group_doc preface ^^| parameters )
+          ^| uses ^| type_declaration
+        ) in
+        handle_compound_inline_brace before_body body missing
   | AnonymousFunctionUseClause x ->
     let u = get_doc x.anonymous_use_keyword in
     let l = get_doc x.anonymous_use_left_paren in

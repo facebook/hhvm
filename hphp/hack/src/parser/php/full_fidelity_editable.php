@@ -300,6 +300,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return SimpleInitializer::from_json($json, $position, $source);
     case 'anonymous_function':
       return AnonymousFunction::from_json($json, $position, $source);
+    case 'php7_anonymous_function':
+      return Php7AnonymousFunction::from_json($json, $position, $source);
     case 'anonymous_function_use_clause':
       return AnonymousFunctionUseClause::from_json($json, $position, $source);
     case 'lambda_expression':
@@ -13552,6 +13554,339 @@ final class AnonymousFunction extends EditableSyntax {
     yield $this->_colon;
     yield $this->_type;
     yield $this->_use;
+    yield $this->_body;
+    yield break;
+  }
+}
+final class Php7AnonymousFunction extends EditableSyntax {
+  private EditableSyntax $_static_keyword;
+  private EditableSyntax $_async_keyword;
+  private EditableSyntax $_coroutine_keyword;
+  private EditableSyntax $_function_keyword;
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_parameters;
+  private EditableSyntax $_right_paren;
+  private EditableSyntax $_use;
+  private EditableSyntax $_colon;
+  private EditableSyntax $_type;
+  private EditableSyntax $_body;
+  public function __construct(
+    EditableSyntax $static_keyword,
+    EditableSyntax $async_keyword,
+    EditableSyntax $coroutine_keyword,
+    EditableSyntax $function_keyword,
+    EditableSyntax $left_paren,
+    EditableSyntax $parameters,
+    EditableSyntax $right_paren,
+    EditableSyntax $use,
+    EditableSyntax $colon,
+    EditableSyntax $type,
+    EditableSyntax $body) {
+    parent::__construct('php7_anonymous_function');
+    $this->_static_keyword = $static_keyword;
+    $this->_async_keyword = $async_keyword;
+    $this->_coroutine_keyword = $coroutine_keyword;
+    $this->_function_keyword = $function_keyword;
+    $this->_left_paren = $left_paren;
+    $this->_parameters = $parameters;
+    $this->_right_paren = $right_paren;
+    $this->_use = $use;
+    $this->_colon = $colon;
+    $this->_type = $type;
+    $this->_body = $body;
+  }
+  public function static_keyword(): EditableSyntax {
+    return $this->_static_keyword;
+  }
+  public function async_keyword(): EditableSyntax {
+    return $this->_async_keyword;
+  }
+  public function coroutine_keyword(): EditableSyntax {
+    return $this->_coroutine_keyword;
+  }
+  public function function_keyword(): EditableSyntax {
+    return $this->_function_keyword;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function parameters(): EditableSyntax {
+    return $this->_parameters;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function use(): EditableSyntax {
+    return $this->_use;
+  }
+  public function colon(): EditableSyntax {
+    return $this->_colon;
+  }
+  public function type(): EditableSyntax {
+    return $this->_type;
+  }
+  public function body(): EditableSyntax {
+    return $this->_body;
+  }
+  public function with_static_keyword(EditableSyntax $static_keyword): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_use,
+      $this->_colon,
+      $this->_type,
+      $this->_body);
+  }
+  public function with_async_keyword(EditableSyntax $async_keyword): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $this->_static_keyword,
+      $async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_use,
+      $this->_colon,
+      $this->_type,
+      $this->_body);
+  }
+  public function with_coroutine_keyword(EditableSyntax $coroutine_keyword): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $this->_static_keyword,
+      $this->_async_keyword,
+      $coroutine_keyword,
+      $this->_function_keyword,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_use,
+      $this->_colon,
+      $this->_type,
+      $this->_body);
+  }
+  public function with_function_keyword(EditableSyntax $function_keyword): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $this->_static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $function_keyword,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_use,
+      $this->_colon,
+      $this->_type,
+      $this->_body);
+  }
+  public function with_left_paren(EditableSyntax $left_paren): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $this->_static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_use,
+      $this->_colon,
+      $this->_type,
+      $this->_body);
+  }
+  public function with_parameters(EditableSyntax $parameters): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $this->_static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $this->_left_paren,
+      $parameters,
+      $this->_right_paren,
+      $this->_use,
+      $this->_colon,
+      $this->_type,
+      $this->_body);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $this->_static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $this->_left_paren,
+      $this->_parameters,
+      $right_paren,
+      $this->_use,
+      $this->_colon,
+      $this->_type,
+      $this->_body);
+  }
+  public function with_use(EditableSyntax $use): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $this->_static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $use,
+      $this->_colon,
+      $this->_type,
+      $this->_body);
+  }
+  public function with_colon(EditableSyntax $colon): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $this->_static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_use,
+      $colon,
+      $this->_type,
+      $this->_body);
+  }
+  public function with_type(EditableSyntax $type): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $this->_static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_use,
+      $this->_colon,
+      $type,
+      $this->_body);
+  }
+  public function with_body(EditableSyntax $body): Php7AnonymousFunction {
+    return new Php7AnonymousFunction(
+      $this->_static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_use,
+      $this->_colon,
+      $this->_type,
+      $body);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $static_keyword = $this->static_keyword()->rewrite($rewriter, $new_parents);
+    $async_keyword = $this->async_keyword()->rewrite($rewriter, $new_parents);
+    $coroutine_keyword = $this->coroutine_keyword()->rewrite($rewriter, $new_parents);
+    $function_keyword = $this->function_keyword()->rewrite($rewriter, $new_parents);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $parameters = $this->parameters()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    $use = $this->use()->rewrite($rewriter, $new_parents);
+    $colon = $this->colon()->rewrite($rewriter, $new_parents);
+    $type = $this->type()->rewrite($rewriter, $new_parents);
+    $body = $this->body()->rewrite($rewriter, $new_parents);
+    if (
+      $static_keyword === $this->static_keyword() &&
+      $async_keyword === $this->async_keyword() &&
+      $coroutine_keyword === $this->coroutine_keyword() &&
+      $function_keyword === $this->function_keyword() &&
+      $left_paren === $this->left_paren() &&
+      $parameters === $this->parameters() &&
+      $right_paren === $this->right_paren() &&
+      $use === $this->use() &&
+      $colon === $this->colon() &&
+      $type === $this->type() &&
+      $body === $this->body()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new Php7AnonymousFunction(
+        $static_keyword,
+        $async_keyword,
+        $coroutine_keyword,
+        $function_keyword,
+        $left_paren,
+        $parameters,
+        $right_paren,
+        $use,
+        $colon,
+        $type,
+        $body), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $static_keyword = EditableSyntax::from_json(
+      $json->php7_anonymous_static_keyword, $position, $source);
+    $position += $static_keyword->width();
+    $async_keyword = EditableSyntax::from_json(
+      $json->php7_anonymous_async_keyword, $position, $source);
+    $position += $async_keyword->width();
+    $coroutine_keyword = EditableSyntax::from_json(
+      $json->php7_anonymous_coroutine_keyword, $position, $source);
+    $position += $coroutine_keyword->width();
+    $function_keyword = EditableSyntax::from_json(
+      $json->php7_anonymous_function_keyword, $position, $source);
+    $position += $function_keyword->width();
+    $left_paren = EditableSyntax::from_json(
+      $json->php7_anonymous_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $parameters = EditableSyntax::from_json(
+      $json->php7_anonymous_parameters, $position, $source);
+    $position += $parameters->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->php7_anonymous_right_paren, $position, $source);
+    $position += $right_paren->width();
+    $use = EditableSyntax::from_json(
+      $json->php7_anonymous_use, $position, $source);
+    $position += $use->width();
+    $colon = EditableSyntax::from_json(
+      $json->php7_anonymous_colon, $position, $source);
+    $position += $colon->width();
+    $type = EditableSyntax::from_json(
+      $json->php7_anonymous_type, $position, $source);
+    $position += $type->width();
+    $body = EditableSyntax::from_json(
+      $json->php7_anonymous_body, $position, $source);
+    $position += $body->width();
+    return new Php7AnonymousFunction(
+        $static_keyword,
+        $async_keyword,
+        $coroutine_keyword,
+        $function_keyword,
+        $left_paren,
+        $parameters,
+        $right_paren,
+        $use,
+        $colon,
+        $type,
+        $body);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_static_keyword;
+    yield $this->_async_keyword;
+    yield $this->_coroutine_keyword;
+    yield $this->_function_keyword;
+    yield $this->_left_paren;
+    yield $this->_parameters;
+    yield $this->_right_paren;
+    yield $this->_use;
+    yield $this->_colon;
+    yield $this->_type;
     yield $this->_body;
     yield break;
   }

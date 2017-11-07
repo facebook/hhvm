@@ -237,6 +237,8 @@ class EditableSyntax
       return SimpleInitializer.from_json(json, position, source);
     case 'anonymous_function':
       return AnonymousFunction.from_json(json, position, source);
+    case 'php7_anonymous_function':
+      return Php7AnonymousFunction.from_json(json, position, source);
     case 'anonymous_function_use_clause':
       return AnonymousFunctionUseClause.from_json(json, position, source);
     case 'lambda_expression':
@@ -11425,6 +11427,313 @@ class AnonymousFunction extends EditableSyntax
     return AnonymousFunction._children_keys;
   }
 }
+class Php7AnonymousFunction extends EditableSyntax
+{
+  constructor(
+    static_keyword,
+    async_keyword,
+    coroutine_keyword,
+    function_keyword,
+    left_paren,
+    parameters,
+    right_paren,
+    use,
+    colon,
+    type,
+    body)
+  {
+    super('php7_anonymous_function', {
+      static_keyword: static_keyword,
+      async_keyword: async_keyword,
+      coroutine_keyword: coroutine_keyword,
+      function_keyword: function_keyword,
+      left_paren: left_paren,
+      parameters: parameters,
+      right_paren: right_paren,
+      use: use,
+      colon: colon,
+      type: type,
+      body: body });
+  }
+  get static_keyword() { return this.children.static_keyword; }
+  get async_keyword() { return this.children.async_keyword; }
+  get coroutine_keyword() { return this.children.coroutine_keyword; }
+  get function_keyword() { return this.children.function_keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get parameters() { return this.children.parameters; }
+  get right_paren() { return this.children.right_paren; }
+  get use() { return this.children.use; }
+  get colon() { return this.children.colon; }
+  get type() { return this.children.type; }
+  get body() { return this.children.body; }
+  with_static_keyword(static_keyword){
+    return new Php7AnonymousFunction(
+      static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      this.use,
+      this.colon,
+      this.type,
+      this.body);
+  }
+  with_async_keyword(async_keyword){
+    return new Php7AnonymousFunction(
+      this.static_keyword,
+      async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      this.use,
+      this.colon,
+      this.type,
+      this.body);
+  }
+  with_coroutine_keyword(coroutine_keyword){
+    return new Php7AnonymousFunction(
+      this.static_keyword,
+      this.async_keyword,
+      coroutine_keyword,
+      this.function_keyword,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      this.use,
+      this.colon,
+      this.type,
+      this.body);
+  }
+  with_function_keyword(function_keyword){
+    return new Php7AnonymousFunction(
+      this.static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      function_keyword,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      this.use,
+      this.colon,
+      this.type,
+      this.body);
+  }
+  with_left_paren(left_paren){
+    return new Php7AnonymousFunction(
+      this.static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      left_paren,
+      this.parameters,
+      this.right_paren,
+      this.use,
+      this.colon,
+      this.type,
+      this.body);
+  }
+  with_parameters(parameters){
+    return new Php7AnonymousFunction(
+      this.static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.left_paren,
+      parameters,
+      this.right_paren,
+      this.use,
+      this.colon,
+      this.type,
+      this.body);
+  }
+  with_right_paren(right_paren){
+    return new Php7AnonymousFunction(
+      this.static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.left_paren,
+      this.parameters,
+      right_paren,
+      this.use,
+      this.colon,
+      this.type,
+      this.body);
+  }
+  with_use(use){
+    return new Php7AnonymousFunction(
+      this.static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      use,
+      this.colon,
+      this.type,
+      this.body);
+  }
+  with_colon(colon){
+    return new Php7AnonymousFunction(
+      this.static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      this.use,
+      colon,
+      this.type,
+      this.body);
+  }
+  with_type(type){
+    return new Php7AnonymousFunction(
+      this.static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      this.use,
+      this.colon,
+      type,
+      this.body);
+  }
+  with_body(body){
+    return new Php7AnonymousFunction(
+      this.static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      this.use,
+      this.colon,
+      this.type,
+      body);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var static_keyword = this.static_keyword.rewrite(rewriter, new_parents);
+    var async_keyword = this.async_keyword.rewrite(rewriter, new_parents);
+    var coroutine_keyword = this.coroutine_keyword.rewrite(rewriter, new_parents);
+    var function_keyword = this.function_keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var parameters = this.parameters.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var use = this.use.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
+    if (
+      static_keyword === this.static_keyword &&
+      async_keyword === this.async_keyword &&
+      coroutine_keyword === this.coroutine_keyword &&
+      function_keyword === this.function_keyword &&
+      left_paren === this.left_paren &&
+      parameters === this.parameters &&
+      right_paren === this.right_paren &&
+      use === this.use &&
+      colon === this.colon &&
+      type === this.type &&
+      body === this.body)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new Php7AnonymousFunction(
+        static_keyword,
+        async_keyword,
+        coroutine_keyword,
+        function_keyword,
+        left_paren,
+        parameters,
+        right_paren,
+        use,
+        colon,
+        type,
+        body), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let static_keyword = EditableSyntax.from_json(
+      json.php7_anonymous_static_keyword, position, source);
+    position += static_keyword.width;
+    let async_keyword = EditableSyntax.from_json(
+      json.php7_anonymous_async_keyword, position, source);
+    position += async_keyword.width;
+    let coroutine_keyword = EditableSyntax.from_json(
+      json.php7_anonymous_coroutine_keyword, position, source);
+    position += coroutine_keyword.width;
+    let function_keyword = EditableSyntax.from_json(
+      json.php7_anonymous_function_keyword, position, source);
+    position += function_keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.php7_anonymous_left_paren, position, source);
+    position += left_paren.width;
+    let parameters = EditableSyntax.from_json(
+      json.php7_anonymous_parameters, position, source);
+    position += parameters.width;
+    let right_paren = EditableSyntax.from_json(
+      json.php7_anonymous_right_paren, position, source);
+    position += right_paren.width;
+    let use = EditableSyntax.from_json(
+      json.php7_anonymous_use, position, source);
+    position += use.width;
+    let colon = EditableSyntax.from_json(
+      json.php7_anonymous_colon, position, source);
+    position += colon.width;
+    let type = EditableSyntax.from_json(
+      json.php7_anonymous_type, position, source);
+    position += type.width;
+    let body = EditableSyntax.from_json(
+      json.php7_anonymous_body, position, source);
+    position += body.width;
+    return new Php7AnonymousFunction(
+        static_keyword,
+        async_keyword,
+        coroutine_keyword,
+        function_keyword,
+        left_paren,
+        parameters,
+        right_paren,
+        use,
+        colon,
+        type,
+        body);
+  }
+  get children_keys()
+  {
+    if (Php7AnonymousFunction._children_keys == null)
+      Php7AnonymousFunction._children_keys = [
+        'static_keyword',
+        'async_keyword',
+        'coroutine_keyword',
+        'function_keyword',
+        'left_paren',
+        'parameters',
+        'right_paren',
+        'use',
+        'colon',
+        'type',
+        'body'];
+    return Php7AnonymousFunction._children_keys;
+  }
+}
 class AnonymousFunctionUseClause extends EditableSyntax
 {
   constructor(
@@ -19182,6 +19491,7 @@ exports.EchoStatement = EchoStatement;
 exports.GlobalStatement = GlobalStatement;
 exports.SimpleInitializer = SimpleInitializer;
 exports.AnonymousFunction = AnonymousFunction;
+exports.Php7AnonymousFunction = Php7AnonymousFunction;
 exports.AnonymousFunctionUseClause = AnonymousFunctionUseClause;
 exports.LambdaExpression = LambdaExpression;
 exports.LambdaSignature = LambdaSignature;

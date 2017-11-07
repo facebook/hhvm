@@ -99,6 +99,7 @@ type t =
   | GlobalStatement
   | SimpleInitializer
   | AnonymousFunction
+  | Php7AnonymousFunction
   | AnonymousFunctionUseClause
   | LambdaExpression
   | LambdaSignature
@@ -260,6 +261,7 @@ let to_string kind =
   | GlobalStatement                         -> "global_statement"
   | SimpleInitializer                       -> "simple_initializer"
   | AnonymousFunction                       -> "anonymous_function"
+  | Php7AnonymousFunction                   -> "php7_anonymous_function"
   | AnonymousFunctionUseClause              -> "anonymous_function_use_clause"
   | LambdaExpression                        -> "lambda_expression"
   | LambdaSignature                         -> "lambda_signature"

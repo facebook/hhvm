@@ -1196,6 +1196,23 @@
         { "field_name" : "use" },
         { "field_name" : "body" }
       ] },
+    { "kind_name" : "Php7AnonymousFunction",
+      "type_name" : "php7_anonymous_function",
+      "description" : "php7_anonymous_function",
+      "prefix" : "php7_anonymous",
+      "fields" : [
+        { "field_name" : "static_keyword" },
+        { "field_name" : "async_keyword" },
+        { "field_name" : "coroutine_keyword" },
+        { "field_name" : "function_keyword" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "parameters" },
+        { "field_name" : "right_paren" },
+        { "field_name" : "use" },
+        { "field_name" : "colon" },
+        { "field_name" : "type" },
+        { "field_name" : "body" }
+      ] },
     { "kind_name" : "AnonymousFunctionUseClause",
       "type_name" : "anonymous_function_use_clause",
       "description" : "anonymous_function_use_clause",

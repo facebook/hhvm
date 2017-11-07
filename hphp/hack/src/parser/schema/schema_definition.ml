@@ -1027,6 +1027,26 @@ let schema : schema_node list =
       ; "body", Just "CompoundStatement"
       ]
     }
+  ; { kind_name   = "Php7AnonymousFunction"
+    ; type_name   = "php7_anonymous_function"
+    ; func_name   = "php7_anonymous_function"
+    ; description = "php7_anonymous_function"
+    ; prefix      = "php7_anonymous"
+    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
+    ; fields =
+      [ "static_keyword", ZeroOrOne Token
+      ; "async_keyword", ZeroOrOne Token
+      ; "coroutine_keyword", ZeroOrOne Token
+      ; "function_keyword", Token
+      ; "left_paren", Token
+      ; "parameters", ZeroOrMore (Aggregate Parameter)
+      ; "right_paren", Token
+      ; "use", ZeroOrOne (Just "AnonymousFunctionUseClause")
+      ; "colon", ZeroOrOne Token
+      ; "type", ZeroOrOne (Aggregate Specifier)
+      ; "body", Just "CompoundStatement"
+      ]
+    }
   ; { kind_name   = "AnonymousFunctionUseClause"
     ; type_name   = "anonymous_function_use_clause"
     ; func_name   = "anonymous_function_use_clause"

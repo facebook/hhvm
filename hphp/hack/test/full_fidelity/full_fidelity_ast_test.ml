@@ -10,6 +10,7 @@
 
 module SourceText = Full_fidelity_source_text
 module SyntaxTree = Full_fidelity_syntax_tree
+module Lowerer = Full_fidelity_ast
 
 open Hh_core
 open OUnit
@@ -40,7 +41,7 @@ let sanity_test_classic_parser source =
 
 let full_fidelity_to_classic source =
   let path = Relative_path.create Relative_path.Dummy "<inline>" in
-  let classic_ast = Full_fidelity_ast.from_text_with_legacy path source in
+  let classic_ast = Lowerer.(from_text_with_legacy (make_env path) source) in
   let str = Debug.dump_ast (Ast.AProgram classic_ast.Parser_hack.ast) in
   str
 
@@ -64,11 +65,9 @@ let comment_compare source =
 
   let errorl, result, _ =
     let path = Relative_path.default in
-    Errors.do_ @@ fun () ->
-      Full_fidelity_ast.from_text
-        ~include_line_comments:true
-        path
-        (Full_fidelity_source_text.make path source)
+    let env = Lowerer.make_env ~include_line_comments:true path in
+    let source_text = SourceText.make path source in
+    Errors.do_ @@ fun () -> Lowerer.from_text env source_text
   in
   if not (Errors.is_empty errorl) then begin
     let errors = Errors.get_error_list errorl in
@@ -81,7 +80,7 @@ let comment_compare source =
   end;
 
   Debug.dump_ast (Ast.AProgram legacy.Parser_hack.ast) ^
-    Debug.dump_ast (Ast.AProgram result.Full_fidelity_ast.ast)
+    Debug.dump_ast (Ast.AProgram result.Lowerer.ast)
 
 
 let simple_source_1 =

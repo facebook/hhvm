@@ -35,7 +35,7 @@ let debug () fnl =
       let parsing_errors1, parser_output1, _ = Errors.do_ begin fun () ->
         let rp =
           Relative_path.create Relative_path.Dummy (filepath :> string) in
-        Full_fidelity_ast.from_file_with_legacy rp
+        Full_fidelity_ast.(from_file_with_legacy (make_env rp))
       end in
       if parser_output1.Parser_hack.file_mode = None
         || not (Errors.is_empty parsing_errors1)

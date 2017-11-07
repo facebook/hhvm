@@ -57,14 +57,14 @@ let run_ast ?(quick=false) file =
   handle_errors errorl;
   result
 
-let run_ffp : Relative_path.t -> Lowerer.result =
-  Lowerer.from_file ~include_line_comments:true ~keep_errors:true
+let run_ffp (file : Relative_path.t) : Lowerer.result =
+  let env = Lowerer.make_env ~include_line_comments:true file in
+  Lowerer.from_file env
 
 let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
   let open Full_fidelity_syntax_tree in
   let source_text = SourceText.from_file file in
   let tree        = make source_text in
-  let language    = language tree in
   let script      = Syntax.from_tree tree in
   let validated   =
     try
@@ -84,36 +84,10 @@ let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
   let invalidated =
     Full_fidelity_editable_positioned_syntax.from_positioned_syntax
       invalidated in
-  Lowerer.lower
-    ~elaborate_namespaces:true
-    ~include_line_comments:false
-    ~keep_errors:true
-    ~ignore_pos:false
-    ~quick:false
-    ~suppress_output:false
-    ~parser_options:ParserOptions.default
-    ~content:(SourceText.text source_text)
-    ~language
-    ~file
-    ~fi_mode:(if is_php tree then FileInfo.Mphp else
-        let mode_string = String.trim (mode tree) in
-        let mode_word =
-          try Some (List.hd (Str.split (Str.regexp " +") mode_string)) with
-          | _ -> None
-        in
-        Option.value_map mode_word ~default:FileInfo.Mpartial ~f:(function
-          | "decl"           -> FileInfo.Mdecl
-          | "strict"         -> FileInfo.Mstrict
-          | ("partial" | "") -> FileInfo.Mpartial
-          (* TODO: Come up with better mode detection *)
-          | _                -> FileInfo.Mpartial
-        )
-      )
-    ~source_text
-    ~script:invalidated
+  let env = Lowerer.make_env file in
+  Lowerer.lower env ~source_text ~script:invalidated
 
 let dump_sexpr ast = Debug.dump_ast (Ast.AProgram ast)
-
 
 let measure : ('a -> 'b) -> 'a -> 'b * float = fun f x ->
   let start = Unix.gettimeofday () in
@@ -306,7 +280,7 @@ let run_parsers (file : Relative_path.t) (conf : parser_config) ~hash
     let ast = (run_ast file).Parser_hack.ast in
     if hash then
     let decl_hash = Ast_utils.generate_ast_decl_hash ast in
-    Printf.printf "%s" (Digest.to_hex decl_hash)  
+    Printf.printf "%s" (Digest.to_hex decl_hash)
     else
     Printf.printf "%s" (dump_sexpr ast)
   | FFP -> Printf.printf "%s" (dump_sexpr (run_ffp file).Lowerer.ast)

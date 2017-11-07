@@ -182,14 +182,15 @@ let parse_text compiler_options popt fn text =
       not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
     let enable_hh_syntax =
       Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
-    Full_fidelity_ast.from_text_with_legacy
+    let env = Full_fidelity_ast.make_env
       ~parser_options:popt
       ~ignore_pos
-      ~suppress_output:true
       ~hhvm_compat_mode:true
       ~php5_compat_mode:true
       ~enable_hh_syntax
-      fn text
+      fn
+    in
+    Full_fidelity_ast.from_text_with_legacy env text
   | Legacy ->
     Parser_hack.program popt fn text
 

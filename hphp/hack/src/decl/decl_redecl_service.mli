@@ -42,3 +42,9 @@ val oldify_type_decl :
   FileInfo.names ->
   FileInfo.names ->
   unit
+
+val remove_defs :
+  FileInfo.names ->
+  Decl_class_elements.t SMap.t ->
+  collect_garbage:bool ->
+  unit

@@ -52,6 +52,8 @@ let revert_local_changes () =
   Decl_heap.Classes.LocalChanges.pop_stack();
   Decl_heap.Typedefs.LocalChanges.pop_stack();
   Decl_heap.GConsts.LocalChanges.pop_stack();
+
+  SharedMem.invalidate_caches ();
   ()
 
 (** Surrounds f() with make and revert, but resilient to f throwing. Reraises
@@ -129,7 +131,7 @@ let declare_and_check content ~f tcopt =
 
 let declare_and_check content ~f tcopt =
   try
-    declare_and_check content ~f tcopt
+     declare_and_check content ~f tcopt
   with Decl_class.Decl_heap_elems_bug -> begin
     Hh_logger.log "%s" content;
     Exit_status.(exit Decl_heap_elems_bug)

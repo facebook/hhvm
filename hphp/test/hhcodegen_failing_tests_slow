@@ -9,7 +9,6 @@ slow/closure/return_types.php
 slow/concat/1578.php
 slow/constant/1597.php
 slow/constant/true_false_null.php
-slow/dict/mixed-to-dict-with-refs.php
 slow/ext_misc/ext_misc.php
 slow/ext_phar/composer.php
 slow/finally/finally_break_004.php

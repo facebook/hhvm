@@ -148,11 +148,8 @@ let collection_type = function
   | "ImmSet"    -> CollectionType.ImmSet
   | x -> failwith ("unknown collection type '" ^ x ^ "'")
 
-let istype_op id =
-  (* TODO: figure out why HHVM constraints some intrinsics to simple names
-     and some can appear in simple and qualified forms *)
-  let enable_hh_syntax = Emit_env.is_hh_syntax_enabled () in
-  match String.lowercase_ascii id with
+let istype_op lower_fq_id =
+  match lower_fq_id with
   | "is_int" | "is_integer" | "is_long" -> Some OpInt
   | "is_bool" -> Some OpBool
   | "is_float" | "is_real" | "is_double" -> Some OpDbl
@@ -161,15 +158,10 @@ let istype_op id =
   | "is_object" -> Some OpObj
   | "is_null" -> Some OpNull
   | "is_scalar" -> Some OpScalar
-  | "is_keyset" when enable_hh_syntax -> Some OpKeyset
   | "hh\\is_keyset" -> Some OpKeyset
-  | "is_dict" when enable_hh_syntax -> Some OpDict
   | "hh\\is_dict" -> Some OpDict
-  | "is_vec" when enable_hh_syntax -> Some OpVec
   | "hh\\is_vec" -> Some OpVec
-  | "is_varray" when enable_hh_syntax -> Some OpVArray
   | "hh\\is_varray" -> Some OpVArray
-  | "is_darray" when enable_hh_syntax -> Some OpDArray
   | "hh\\is_darray" -> Some OpDArray
   | _ -> None
 
@@ -1966,7 +1958,7 @@ and emit_call_lhs env (_, expr_ as expr) nargs has_splat =
 
   | A.Id (_, s as id)->
     let fq_id, id_opt =
-      Hhbc_id.Function.elaborate_id (Emit_env.get_namespace env) id in
+      Hhbc_id.Function.elaborate_id_with_builtins (Emit_env.get_namespace env) id in
     let fq_id, id_opt =
       match id_opt, SU.strip_global_ns s with
       | None, "min" when nargs = 2 && not has_splat ->
@@ -2001,26 +1993,20 @@ and is_call_user_func id num_args =
   let (is_fn, min_args, max_args) = get_call_user_func_info id in
   is_fn && num_args >= min_args && num_args <= max_args
 
-and get_call_builtin_func_info fn_name =
-  let name = SU.strip_global_ns fn_name in
-  match name with
+and get_call_builtin_func_info lower_fq_id =
+  match lower_fq_id with
   | "array_key_exists" -> Some (2, IMisc AKExists)
   | "hphp_array_idx" -> Some (3, IMisc ArrayIdx)
   | "intval" -> Some (1, IOp CastInt)
   | "boolval" -> Some (1, IOp CastBool)
   | "strval" -> Some (1, IOp CastString)
   | "floatval" | "doubleval" -> Some (1, IOp CastDouble)
-  | _ ->
-    (* HH-specific *)
-    if not (Emit_env.is_hh_syntax_enabled ())
-    then None
-    else match name with
-    | "vec" -> Some (1, IOp CastVec)
-    | "keyset" -> Some (1, IOp CastKeyset)
-    | "dict" -> Some (1, IOp CastDict)
-    | "varray" -> Some (1, IOp CastVArray)
-    | "darray" -> Some (1, IOp CastDArray)
-    | _ -> None
+  | "hh\\vec" -> Some (1, IOp CastVec)
+  | "hh\\keyset" -> Some (1, IOp CastKeyset)
+  | "hh\\dict" -> Some (1, IOp CastDict)
+  | "hh\\varray" -> Some (1, IOp CastVArray)
+  | "hh\\darray" -> Some (1, IOp CastDArray)
+  | _ -> None
 
 and emit_call_user_func_args env i expr =
   gather [
@@ -2080,14 +2066,13 @@ and emit_name_string env e =
 and emit_special_function env id args uargs default =
   let nargs = List.length args + List.length uargs in
   let fq_id, _ =
-    Hhbc_id.Function.elaborate_id (Emit_env.get_namespace env) (Pos.none, id) in
+    Hhbc_id.Function.elaborate_id_with_builtins (Emit_env.get_namespace env) (Pos.none, id) in
   (* Make sure that we do not treat a special function that is aliased as not
    * aliased *)
-  (* Invariant is a special function that needs further special treatment since
-   * it doesn't get a fallback unless it has zero arguments, see emitter.cpp *)
-  if Hhbc_id.Function.to_raw_string fq_id <> id && not (id = "invariant")
-  then None else
-  match id, args with
+  let lower_fq_name =
+    String.lowercase_ascii (Hhbc_id.Function.to_raw_string fq_id) in
+  let hh_enabled = Emit_env.is_hh_syntax_enabled () in
+  match lower_fq_name, args with
   | id, _ when id = SN.SpecialFunctions.echo ->
     let instrs = gather @@ List.mapi args begin fun i arg ->
          gather [
@@ -2115,17 +2100,15 @@ and emit_special_function env id args uargs default =
         Some (emit_call_user_func env id arg args)
     end
 
-  | "invariant", _ when List.length args > 0 ->
-    let e = List.hd_exn args in
-    let rest = List.tl_exn args in
+  | "hh\\invariant", e::rest when hh_enabled ->
     let l = Label.next_regular () in
     let p = Pos.none in
-    let id = p, A.Id (p, "hh\\invariant_violation") in
+    let expr_id = p, A.Id (p, "\\hh\\invariant_violation") in
     Some (gather [
       (* Could use emit_jmpnz for better code *)
       emit_expr ~need_ref:false env e;
       instr_jmpnz l;
-      emit_ignored_expr env (p, A.Call (id, [], rest, uargs));
+      emit_ignored_expr env (p, A.Call (expr_id, [], rest, uargs));
       Emit_fatal.emit_fatal_runtime p "invariant_violation";
       instr_label l;
       instr_null;
@@ -2149,7 +2132,7 @@ and emit_special_function env id args uargs default =
       instr_label l1;
     ], Flavor.Cell)
 
-  | ("class_exists" | "interface_exists" | "trait_exists" as id), _
+  | ("class_exists" | "interface_exists" | "trait_exists" as id), arg1::_
     when nargs = 1 || nargs = 2 ->
     let class_kind =
       match id with
@@ -2158,7 +2141,7 @@ and emit_special_function env id args uargs default =
       | "trait_exists" -> KTrait
       | _ -> failwith "class_kind" in
     Some (gather [
-      emit_name_string env (List.hd_exn args);
+      emit_name_string env arg1;
       instr (IOp CastString);
       if nargs = 1 then instr_true
       else gather [
@@ -2171,8 +2154,27 @@ and emit_special_function env id args uargs default =
   | ("exit" | "die"), _ when nargs = 0 || nargs = 1 ->
     Some (emit_exit env (List.hd args), Flavor.Cell)
 
-  | _ -> None
-
+  | _ ->
+    begin match args, istype_op lower_fq_name with
+    | [(_, A.Lvar (_, arg_str as arg_id))], Some i
+      when not (is_local_this env arg_str) ->
+      Some (instr (IIsset (IsTypeL (get_local env arg_id, i))), Flavor.Cell)
+    | [arg_expr], Some i ->
+      Some (gather [
+        emit_expr ~need_ref:false env arg_expr;
+        instr (IIsset (IsTypeC i))
+      ], Flavor.Cell)
+    | _ ->
+      begin match get_call_builtin_func_info lower_fq_name with
+      | Some (nargs, i) when nargs = List.length args ->
+        Some (
+          gather [
+          emit_exprs env args;
+          instr i
+        ], Flavor.Cell)
+      | _ -> None
+      end
+    end
 
 and emit_call env (_, expr_ as expr) args uargs =
   let nargs = List.length args + List.length uargs in
@@ -2187,28 +2189,7 @@ and emit_call env (_, expr_ as expr) args uargs =
     let special_fn_opt = emit_special_function env id args uargs default in
     begin match special_fn_opt with
     | Some (instrs, flavor) -> instrs, flavor
-    | None ->
-      begin match get_call_builtin_func_info id with
-      | Some (nargs, i) when nargs = List.length args ->
-        gather [
-          emit_exprs env args;
-          instr i
-        ], Flavor.Cell
-
-      | _ ->
-        begin match args, istype_op (SU.strip_global_ns id) with
-        | [(_, A.Lvar (_, arg_str as arg_id))], Some i
-          when not (is_local_this env arg_str) ->
-          instr (IIsset (IsTypeL (get_local env arg_id, i))),
-          Flavor.Cell
-        | [arg_expr], Some i ->
-          gather [
-            emit_expr ~need_ref:false env arg_expr;
-            instr (IIsset (IsTypeC i))
-          ], Flavor.Cell
-        | _ -> default ()
-        end
-      end
+    | None -> default ()
     end
   | _ -> default ()
 

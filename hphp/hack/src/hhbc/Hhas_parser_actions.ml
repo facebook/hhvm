@@ -246,7 +246,7 @@ let rec split_classconflicts xss = match xss with
        | Precedence tup -> (aliases, tup :: precedences)
 
 (* TODO: replace stupidly big match with a hash table. Bootcampable? *)
-let makenullaryinst s =
+let make_nullary_inst s =
  match s with
  (* instruct_basic *)
  | "Nop" -> IBasic (Nop)
@@ -319,6 +319,8 @@ let makenullaryinst s =
  | "CastVec" -> IOp (CastVec)
  | "CastDict" -> IOp (CastDict)
  | "CastKeyset" -> IOp (CastKeyset)
+ | "CastVArray" -> IOp (CastVArray)
+ | "CastDArray" -> IOp (CastDArray)
  | "InstanceOf" -> IOp (InstanceOf)
  | "Print" -> IOp (Print)
  | "Clone" -> IOp (Clone)

@@ -490,7 +490,7 @@ functionbody:
 ;
 instruction:
     | ID COLON            {makelabelinst $1}
-    | ID                  {makenullaryinst $1}
+    | ID                  {make_nullary_inst $1}
     | ID iarg             {makeunaryinst $1 $2}
     | ID iarg iarg        {makebinaryinst $1 $2 $3}
     | ID iarg iarg iarg   {maketernaryinst $1 $2 $3 $4}

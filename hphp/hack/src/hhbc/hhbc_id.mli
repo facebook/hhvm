@@ -31,8 +31,6 @@ end
 
 module Function : sig
   type t
-  (* See hphp/compiler/parser.cpp *)
-  val builtins_in_hh : string list
   (* For use only in assembler. Quotes have been removed already *)
   val from_raw_string : string -> t
   (* For use only at final stage of emitting assembler *)
@@ -40,6 +38,7 @@ module Function : sig
   (* Used to add suffixes for memoized functions *)
   val add_suffix : t -> string -> t
   val elaborate_id : Namespace_env.env -> Ast.id -> t * string option
+  val elaborate_id_with_builtins : Namespace_env.env -> Ast.id -> t * string option
 end
 
 module Prop : sig

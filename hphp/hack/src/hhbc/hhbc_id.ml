@@ -146,16 +146,27 @@ module Function = struct
   let from_raw_string s = s
   let to_raw_string s = s
   let add_suffix s suffix = s ^ suffix
-  let elaborate_id ns (_, s as id) =
-    if is_hh_builtin s
-    && (Emit_env.is_hh_syntax_enabled ())
-    then if has_hh_prefix s
-          then s, None
-          else SU.prefix_namespace "HH" s, Some s
-    else if List.mem builtins_at_top s
-      then s, None
-      else elaborate_id ns Namespaces.ElaborateFun id
-
+  let elaborate_id ns id = elaborate_id ns Namespaces.ElaborateFun id
+  let elaborate_id_with_builtins ns id =
+    let fq_id, backoff_id = elaborate_id ns id in
+    match backoff_id with
+      (* OK we are in a namespace so let's look at the backoff ID and see if
+       * it's an HH\ or top-level function with implicit namespace.
+       *)
+    | Some id ->
+      if List.mem builtins_in_hh id && (Emit_env.is_hh_syntax_enabled ())
+      then SU.prefix_namespace "HH" id, Some id
+      else if List.mem builtins_at_top id
+      then id, None
+      else fq_id, backoff_id
+      (* Likewise for top-level, with no namespace *)
+    | None ->
+      if is_hh_builtin fq_id && (Emit_env.is_hh_syntax_enabled ())
+      then
+        if has_hh_prefix fq_id
+        then fq_id, None
+        else SU.prefix_namespace "HH" fq_id, Some fq_id
+      else fq_id, None
 end
 
 module Const = struct

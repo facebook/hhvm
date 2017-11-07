@@ -87,8 +87,6 @@ let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
   let env = Lowerer.make_env file in
   Lowerer.lower env ~source_text ~script:invalidated
 
-let dump_sexpr ast = Debug.dump_ast (Ast.AProgram ast)
-
 let measure : ('a -> 'b) -> 'a -> 'b * float = fun f x ->
   let start = Unix.gettimeofday () in
   let res = f x in
@@ -111,14 +109,14 @@ let diff_comments : (Pos.t * string) list -> (Pos.t * string) list -> string
     -> %s
 " (List.length exp) (List.length act) exp_comments act_comments
 
-let compare_asts filename diff_cmd ast_result ffp_result =
+let compare_asts dumper filename diff_cmd ast_result ffp_result =
   let open Unix in
   let open Printf in
-  let ast_sexpr = dump_sexpr ast_result.Parser_hack.ast in
+  let ast_sexpr = dumper ast_result.Parser_hack.ast in
   let ffp_sexpr =
     match ffp_result.Lowerer.ast with
     | Ast.Stmt (Ast.Markup ((_, ""), _)) :: defs
-    | defs -> dump_sexpr defs
+    | defs -> dumper defs
   in
   if ast_sexpr <> ffp_sexpr then begin
     let mkTemp (name : string) (content : string) = begin
@@ -274,18 +272,19 @@ let compare_comments filename ast_result ffp_result =
   " filename (String.concat "" diff);
   end
 
-let run_parsers (file : Relative_path.t) (conf : parser_config) ~hash
-  = match conf with
+let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash =
+  match conf with
   | AST ->
     let ast = (run_ast file).Parser_hack.ast in
-    if hash then
-    let decl_hash = Ast_utils.generate_ast_decl_hash ast in
-    Printf.printf "%s" (Digest.to_hex decl_hash)
-    else
-    Printf.printf "%s" (dump_sexpr ast)
-  | FFP -> Printf.printf "%s" (dump_sexpr (run_ffp file).Lowerer.ast)
+    let output =
+      if not hash then dumper (run_ast file).Parser_hack.ast else
+        let decl_hash = Ast_utils.generate_ast_decl_hash ast in
+        Digest.to_hex decl_hash
+    in
+    Printf.printf "%s" output
+  | FFP -> Printf.printf "%s" (dumper (run_ffp file).Lowerer.ast)
   | ValidatedFFP ->
-    Printf.printf "%s" (dump_sexpr (run_validated_ffp file).Lowerer.ast)
+    Printf.printf "%s" (dumper (run_validated_ffp file).Lowerer.ast)
   | Compare diff_cmd ->
     let open Printf in
     let filename = Relative_path.S.to_string file in
@@ -294,7 +293,7 @@ let run_parsers (file : Relative_path.t) (conf : parser_config) ~hash
     Fixmes.HH_FIXMES.remove_batch (Relative_path.Set.singleton file);
     let ffp_result = run_ffp file in
     let ffp_fixmes = Fixmes.HH_FIXMES.get file in
-    let sexpr = compare_asts filename diff_cmd ast_result ffp_result in
+    let sexpr = compare_asts dumper filename diff_cmd ast_result ffp_result in
     let () = compare_pos ast_result.Parser_hack.ast ffp_result.Lowerer.ast in
     let () = compare_fixmes ast_fixmes ffp_fixmes in
     let () = compare_comments filename ast_result ffp_result in
@@ -308,8 +307,8 @@ let run_parsers (file : Relative_path.t) (conf : parser_config) ~hash
         exit_with ParseError
       end
     in
-    let ast_sexpr = Debug.dump_ast (Ast.AProgram ast_result.Parser_hack.ast) in
-    let ffp_sexpr = Debug.dump_ast (Ast.AProgram ffp_result.Lowerer.ast) in
+    let ast_sexpr = dumper ast_result.Parser_hack.ast in
+    let ffp_sexpr = dumper ffp_result.Lowerer.ast in
     if ast_sexpr = ffp_sexpr
     then
       Printf.printf
@@ -326,7 +325,8 @@ let () =
   Printexc.record_backtrace true;
   let use_parser = ref "ast"  in
   let use_diff   = ref "diff" in
-  let hash = ref false in
+  let hash       = ref false in
+  let dumper     = ref Debug.dump_ast in
   let filename   = ref ""     in
   Arg.(parse
     [ ("--parser", Set_string use_parser,
@@ -338,7 +338,10 @@ let () =
     ; ("--hash", Set hash,
       "Get the decl level parsing hash of a given file "
       )
-    ;
+    ; ("--sorted", Unit (fun () -> dumper := Debug.dump_sorted_ast),
+        "When using the `compare` parser, the (lexicographically) sort the " ^
+        "S-Expressions before diffing"
+      )
     ]) (fun fn -> filename := fn) usage;
   let parse_function = match !use_parser with
     | "ast"       -> AST
@@ -351,7 +354,8 @@ let () =
   if String.length !filename = 0 then raise (Failure "No filename given");
   EventLogger.init EventLogger.Event_logger_fake 0.0;
   let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
+  let dumper ast = !dumper (Ast.AProgram ast) in
   Unix.handle_unix_error (fun fn ->
     let file = Relative_path.create Relative_path.Dummy fn in
-    run_parsers file ~hash:!hash parse_function
+    run_parsers dumper file ~hash:!hash parse_function
   ) !filename

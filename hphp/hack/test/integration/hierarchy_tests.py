@@ -100,15 +100,15 @@ class Foo {
             f.write('''<?hh
 class Foo {
   public function f() {}
-  public final function g() {}
+  public function g() {}
 }
+interface I extends Foo { }
 ''')
         # If we ever change things so this error is raised from somewhere
         # other than the decl phase, remember to update this test...
         self.check_cmd([
-            '{root}baz.php:4:19,19: You cannot override this method '
-            '(Typing[4070])',
-            '  {root}foo.php:4:25,25: It was declared as final',
+            '{root}foo.php:6:11,11: an interface cannot extend a class (Typing[4115])',
+            '  {root}foo.php:6:21,23: This is a class'
         ])
 
         debug_sub = self.subscribe_debug()
@@ -119,8 +119,8 @@ class Foo {
         msgs = debug_sub.get_incremental_logs()
         # baz.php still gets rechecked
         self.assertEqual(set(msgs['to_redecl_phase1']['files']),
-                         set(['baz.php', 'qux.php']))
+                         set(['foo.php', 'qux.php']))
         self.assertEqual(set(msgs['to_redecl_phase2']['files']),
-                         set(['baz.php', 'qux.php']))
+                         set(['foo.php', 'qux.php']))
         self.assertEqual(set(msgs['to_recheck']['files']),
-                         set(['baz.php', 'qux.php']))
+                         set(['foo.php', 'qux.php']))

@@ -15,15 +15,14 @@ module Test = Integration_test_base
 
 let foo_contents = "<?hh
 class Foo {
+  <<__Override>>
   public function f() {}
-  public final function g() {}
 }
 "
 
 let baz_contents = "<?hh
 class Baz extends Foo {
-  <<__Override>>
-  public function g() {}
+
 }
 "
 
@@ -45,10 +44,9 @@ let () =
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
   let expected_error =
-    "File \"/baz.php\", line 4, characters 19-19:\n" ^
-    "You cannot override this method (Typing[4070])\n" ^
-    "File \"/foo.php\", line 4, characters 25-25:\n" ^
-    "It was declared as final\n" in
+    "File \"/foo.php\", line 4, characters 19-19:\n" ^
+    "Foo::f() is marked as override; no non-private parent definition found " ^
+    "or overridden parent is defined in non-<?hh code (Typing[4087])\n" in
   Test.assertSingleError expected_error (Errors.get_error_list env.errorl);
 
   (* Now let's edit a wholly unrelated file *)
@@ -59,6 +57,6 @@ let () =
   }) in
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
-  let path = Relative_path.create Relative_path.Root "/baz.php" in
+  let path = Relative_path.create Relative_path.Root "/foo.php" in
   if Relative_path.Set.mem env.failed_decl path then ()
-    else Test.fail "Baz should still have failed declaration"
+    else Test.fail "Foo should still have failed declaration"

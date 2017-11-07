@@ -1,6 +1,6 @@
 <?hh // strict
 /**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -9,11 +9,20 @@
  *
  */
 
-class Foo {
-  final public static function my_foo(): void {
+abstract class P1 {
+  final public function getTargetFBID(): int {
+    return 0;
   }
 }
-class Bar extends Foo {
-  public static function my_foo(): void {
+
+abstract class P2 extends P1 {}
+
+trait T1 {
+  final public function getTargetFBID(): int {
+    return 0;
   }
+}
+
+final class C1 extends P2 {
+  use T1;
 }

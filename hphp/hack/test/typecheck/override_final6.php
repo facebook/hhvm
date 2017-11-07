@@ -1,6 +1,6 @@
 <?hh // strict
 /**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -9,11 +9,14 @@
  *
  */
 
-class Foo {
-  final public static function my_foo(): void {
-  }
+class ParentClass {
+  final public function f(): void {}
 }
-class Bar extends Foo {
-  public static function my_foo(): void {
-  }
+
+trait T {
+  require extends ParentClass;
+}
+
+class ChildClass extends ParentClass {
+  use T;
 }

@@ -714,19 +714,14 @@ and method_decl env m =
     ft_ret_by_ref = m.m_ret_by_ref;
   }
 
-and method_check_override opt ~is_static c m acc  =
+and method_check_override c m acc  =
   let pos, id = m.m_name in
   let _, class_id = c.c_name in
   let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
   if m.m_visibility = Private && override then
     Errors.private_override pos class_id id;
   match SMap.get id acc with
-  | Some { elt_final = is_final; elt_origin = cls; _ } ->
-    if is_final then begin
-      let meth_pos = method_pos opt ~is_static cls id in
-      Errors.override_final ~parent:(meth_pos) ~child:pos
-    end;
-    false
+  | Some _ -> false (* overriding final methods is handled in typing *)
   | None when override && c.c_kind = Ast.Ctrait -> true
   | None when override ->
     Errors.should_be_override pos class_id id;
@@ -734,8 +729,7 @@ and method_check_override opt ~is_static c m acc  =
   | None -> false
 
 and method_decl_acc ~is_static env c acc m  =
-  let check_override =
-    method_check_override env.Decl_env.decl_tcopt ~is_static c m acc in
+  let check_override = method_check_override c m acc in
   let ft = method_decl env m in
   let _, id = m.m_name in
   let vis =

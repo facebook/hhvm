@@ -66,7 +66,7 @@ let check_visibility parent_class_elt class_elt =
 
 (* Check that all the required members are implemented *)
 let check_members_implemented check_private parent_reason reason
-    (parent_members, members, _) =
+    (_, parent_members, members, _) =
   SMap.iter begin fun member_name class_elt ->
     match class_elt.ce_visibility with
       | Vprivate _ when not check_private -> ()
@@ -140,9 +140,25 @@ let should_check_params parent_class class_ =
   let check_params = class_known || check_partially_known_method_params in
   class_known, check_params
 
+let check_final_method member_source parent_class_elt class_elt =
+  (* we only check for final overrides on methods, not properties *)
+  let is_method = match member_source with
+    | `FromMethod | `FromSMethod -> true
+    | _ -> false in
+  let is_override = parent_class_elt.ce_final && parent_class_elt.ce_origin <> class_elt.ce_origin in
+  if is_method && is_override && not class_elt.ce_synthesized then
+    (* we have a final method being overridden by a user-declared method *)
+    let lazy (parent_pos, _) = parent_class_elt.ce_type in
+    let lazy (elt_pos, _) = class_elt.ce_type in
+    let parent_pos = Reason.to_pos parent_pos in
+    let pos = Reason.to_pos elt_pos in
+    Errors.override_final parent_pos pos
+
 (* Check that overriding is correct *)
-let check_override env member_name ?(ignore_fun_return = false)
+let check_override env member_name mem_source ?(ignore_fun_return = false)
     parent_class class_ parent_class_elt class_elt =
+  (* We first verify that we aren't overriding a final method *)
+  check_final_method mem_source parent_class_elt class_elt;
   let class_known, check_params = should_check_params parent_class class_ in
   let check_vis = class_known || check_partially_known_method_visibility in
   if check_vis then check_visibility parent_class_elt class_elt else ();
@@ -185,7 +201,7 @@ let filter_privates members =
   end members SMap.empty
 
 let check_members check_private env (parent_class, psubst) (class_, subst)
-    (parent_members, members, dep) =
+    (mem_source, parent_members, members, dep) =
   let parent_members = if check_private then parent_members
     else filter_privates parent_members in
   SMap.iter begin fun member_name parent_class_elt ->
@@ -197,7 +213,7 @@ let check_members check_private env (parent_class, psubst) (class_, subst)
         Typing_deps.add_idep
           (Dep.Class class_.tc_name)
           (dep parent_class_elt.ce_origin member_name);
-      check_override env member_name parent_class class_
+      check_override env member_name mem_source parent_class class_
                                      parent_class_elt class_elt
     | None -> ()
   end parent_members
@@ -213,13 +229,13 @@ let instantiate_consts subst consts =
   SMap.map (Inst.instantiate_cc subst) consts
 
 let make_all_members ~child_class ~parent_class = [
-  parent_class.tc_props, child_class.tc_props,
+  `FromProp, parent_class.tc_props, child_class.tc_props,
   (fun x y -> Dep.Prop (x, y));
-  parent_class.tc_sprops, child_class.tc_sprops,
+  `FromSProp, parent_class.tc_sprops, child_class.tc_sprops,
   (fun x y -> Dep.SProp (x, y));
-  parent_class.tc_methods, child_class.tc_methods,
+  `FromMethod, parent_class.tc_methods, child_class.tc_methods,
   (fun x y -> Dep.Method (x, y));
-  parent_class.tc_smethods, child_class.tc_smethods,
+  `FromSMethod, parent_class.tc_smethods, child_class.tc_smethods,
   (fun x y -> Dep.SMethod (x, y));
 ]
 
@@ -270,7 +286,7 @@ let check_constructors env parent_class class_ psubst subst =
           Typing_deps.add_idep
             (Dep.Class class_.tc_name)
             (Dep.Cstr parent_cstr.ce_origin);
-        check_override env "__construct"
+        check_override env "__construct" `FromMethod
           ~ignore_fun_return:true parent_class class_ parent_cstr cstr
       | None, Some cstr when explicit_consistency ->
         let parent_cstr = default_constructor_ce parent_class in
@@ -280,7 +296,7 @@ let check_constructors env parent_class class_ psubst subst =
           Typing_deps.add_idep
             (Dep.Class class_.tc_name)
             (Dep.Cstr parent_cstr.ce_origin);
-        check_override env "__construct"
+        check_override env "__construct" `FromMethod
           ~ignore_fun_return:true parent_class class_ parent_cstr cstr
       | None, _ -> ()
   ) else ()

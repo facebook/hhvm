@@ -3,7 +3,7 @@ comparing key 86ctor
 Semdiff succeeded
 comparing key 86pinit
 Semdiff failed
-pc=;7, pc'=;7, i=CheckProp "v" i'=CheckProp "z" asn={}{}
+pc=;7, pc'=;7, i=CheckProp "z" i'=CheckProp "v" asn={}{}
 Assumed=
 [;0,;0-><{}{}>]
 [;1,;1-><{}{}>]
@@ -19,31 +19,31 @@ Todo=[;6,;6->{}{}]
 comparing key 86sinit
 Semdiff succeeded
 Distance = 16
-Size = 168
-Similarity = 90.53
+Size = 174
+Similarity = 90.86
 Edits = 
 
-- HH\float
-+ HH\int
-- array<HH\float>
-+ array<HH\int>
-+ deep_init
-- s:5:\"hello\";
-- HH\string
-+ HH\int
-- array<HH\int, HH\int>
-+ array<HH\int, HH\string>
-- (HH\string, HH\string)
-+ (HH\int, HH\string)
+- HH\int
++ HH\float
+- array<HH\int>
++ array<HH\float>
+- deep_init
++ s:5:\"hello\";
+- HH\int
++ HH\string
+- array<HH\int, HH\string>
++ array<HH\int, HH\int>
+- (HH\int, HH\string)
++ (HH\string, HH\string)
 for 86pinit:
-- CheckProp "v"
-+ CheckProp "z"
-+ ClsCnsD "i" "B"
-+ Int 3
-+ Add
-+ InitProp "z" NonStatic
-+ L1:
+- CheckProp "z"
 + CheckProp "v"
-+ JmpNZ L2
+- ClsCnsD "i" "B"
+- Int 3
+- Add
+- InitProp "z" NonStatic
 - L1:
-+ L2:
+- CheckProp "v"
+- JmpNZ L2
+- L2:
++ L1:

@@ -1,12 +1,12 @@
 Semdiff failed
-pc=;1, pc'=;1, i=DefCls 1 i'=Int 1 asn={}{}
+pc=;1, pc'=;1, i=Int 1 i'=DefCls 1 asn={}{}
 Assumed=
 [;0,;0-><{}{}>]
 
 Todo=
 comparing key openFoo
 Semdiff failed
-pc=;0, pc'=;0, i=Null i'=DefCls 1 asn={}{}
+pc=;0, pc'=;0, i=DefCls 1 i'=Null asn={}{}
 Assumed=
 
 Todo=
@@ -17,6 +17,6 @@ Size = 50
 Similarity = 96.08
 Edits = 
 
-- DefCls 1
-for openFoo:
 + DefCls 1
+for openFoo:
+- DefCls 1

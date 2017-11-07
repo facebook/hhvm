@@ -13,8 +13,8 @@ Similarity = 99.10
 Edits = 
 
 for f:
-- A11
-+ A1
+- A1
++ A11
 for __construct:
-- Annotation42
-+ Annotation
+- Annotation
++ Annotation42

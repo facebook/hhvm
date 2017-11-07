@@ -1,20 +1,20 @@
 Semdiff succeeded
+comparing key 86ctor
+Semdiff succeeded
 comparing key get
 Semdiff failed
-pc=;0, pc'=;0, i=FPushCtorD 0 "MemoizeWrappers" i'=Null asn={}{}
+pc=;0, pc'=;0, i=Null i'=FPushCtorD 0 "MemoizeWrappers" asn={}{}
 Assumed=
 
 Todo=
-comparing key 86ctor
-Semdiff succeeded
 Distance = 104
-Size = 81
-Similarity = -26.83
+Size = 153
+Similarity = 32.47
 Edits = 
 
-+ privatestaticget$guarded_single$memoize_cache$guardb:0;no_serialize<  {}>
-+ privatestaticget$guarded_single$memoize_cacheN;no_serialize<  {}>
-+ get$memoize_impl->[__Memoize([]) ]<HH\this HH\this {hh_type extended_hint }>get$memoize_impl([]) isPrivateisStatic{
+- privatestaticget$guarded_single$memoize_cache$guardb:0;no_serialize<  {}>
+- privatestaticget$guarded_single$memoize_cacheN;no_serialize<  {}>
+- get$memoize_impl->[__Memoize([]) ]<HH\this HH\this {hh_type extended_hint }>get$memoize_impl([]) isPrivateisStatic{
 {}numiters = 0
 numclsrefslots = 0
 []
@@ -26,60 +26,60 @@ RetC
 ]}
 
 for get:
-+ __Memoize([])
-+ memoize
-- 0
-+ 1
-- FPushCtorD 0 "MemoizeWrappers"
-+ Null
-+ IsMemoType
-+ JmpNZ L0
-+ String "get$guarded_single$memoize_cache"
-+ String "MemoizeWrappers"
-+ ClsRefGetC 0
-+ CGetS 0
-+ Dup
-+ IsTypeC Null
-+ JmpNZ L1
-+ RetC
-+ L1:
-+ PopC
-+ L0:
-+ Null
-+ MaybeMemoType
-+ JmpZ L2
-+ String "get$guarded_single$memoize_cache$guard"
-+ String "MemoizeWrappers"
-+ ClsRefGetC 0
-+ CGetS 0
-+ JmpZ L2
-+ Null
-+ RetC
-+ L2:
-+ Null
-+ IsMemoType
-+ JmpNZ L3
-+ String "get$guarded_single$memoize_cache"
-+ String "MemoizeWrappers"
-+ ClsRefGetC 0
-+ FPushClsMethodD 0 "get$memoize_impl" "MemoizeWrappers"
-- PopR
-+ UnboxR
-- VerifyRetTypeC
-+ SetS 0
-+ Jmp L4
-+ L3:
-+ FPushClsMethodD 0 "get$memoize_impl" "MemoizeWrappers"
-+ FCall 0
-+ UnboxR
-+ L4:
-+ Null
-+ MaybeMemoType
-+ JmpZ L5
-+ String "get$guarded_single$memoize_cache$guard"
-+ String "MemoizeWrappers"
-+ ClsRefGetC 0
-+ True
-+ SetS 0
-+ PopC
-+ L5:
+- __Memoize([])
+- memoize
+- 1
++ 0
+- Null
++ FPushCtorD 0 "MemoizeWrappers"
+- IsMemoType
+- JmpNZ L0
+- String "get$guarded_single$memoize_cache"
+- String "MemoizeWrappers"
+- ClsRefGetC 0
+- CGetS 0
+- Dup
+- IsTypeC Null
+- JmpNZ L1
+- RetC
+- L1:
+- PopC
+- L0:
+- Null
+- MaybeMemoType
+- JmpZ L2
+- String "get$guarded_single$memoize_cache$guard"
+- String "MemoizeWrappers"
+- ClsRefGetC 0
+- CGetS 0
+- JmpZ L2
+- Null
+- RetC
+- L2:
+- Null
+- IsMemoType
+- JmpNZ L3
+- String "get$guarded_single$memoize_cache"
+- String "MemoizeWrappers"
+- ClsRefGetC 0
+- FPushClsMethodD 0 "get$memoize_impl" "MemoizeWrappers"
+- UnboxR
++ PopR
+- SetS 0
++ VerifyRetTypeC
+- Jmp L4
+- L3:
+- FPushClsMethodD 0 "get$memoize_impl" "MemoizeWrappers"
+- FCall 0
+- UnboxR
+- L4:
+- Null
+- MaybeMemoType
+- JmpZ L5
+- String "get$guarded_single$memoize_cache$guard"
+- String "MemoizeWrappers"
+- ClsRefGetC 0
+- True
+- SetS 0
+- PopC
+- L5:

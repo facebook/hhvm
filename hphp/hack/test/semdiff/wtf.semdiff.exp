@@ -5,7 +5,7 @@ comparing key h
 Semdiff succeeded
 comparing key mymain
 Semdiff failed
-pc=;16, pc'=;16, i=UnboxR i'=FPassR 0 Cell asn={}{}
+pc=;16, pc'=;16, i=FPassR 0 Cell i'=UnboxR asn={}{}
 Assumed=
 [;0,;0-><{}{}>]
 [;1,;1-><{}{}>]
@@ -30,11 +30,11 @@ Semdiff succeeded
 comparing key 86ctor
 Semdiff succeeded
 Distance = 2
-Size = 132
-Similarity = 98.50
+Size = 131
+Similarity = 98.48
 Edits = 
 
 for mymain:
-- UnboxR
-+ FPassR 0 Cell
-- FPassC 0 Cell
+- FPassR 0 Cell
++ UnboxR
++ FPassC 0 Cell

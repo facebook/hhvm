@@ -1,7 +1,7 @@
 Semdiff succeeded
 comparing key main_foo
 Semdiff failed
-pc=;0, pc'=;0, i=Double 3.5 i'=Double -3.5 asn={}{}
+pc=;0, pc'=;0, i=Double -3.5 i'=Double 3.5 asn={}{}
 Assumed=
 
 Todo=
@@ -11,5 +11,5 @@ Similarity = 96.30
 Edits = 
 
 for main_foo:
-- Double 3.5
-+ Double -3.5
+- Double -3.5
++ Double 3.5

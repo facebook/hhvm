@@ -9,8 +9,8 @@ Similarity = 94.12
 Edits = 
 
 for SOME_CONSTANT:
-- i:3;
-+ s:15:\"Constant String\";
-for ANOTHER_CONSTANT:
 - s:15:\"Constant String\";
-+ s:17:\"Constant String 2\";
++ i:3;
+for ANOTHER_CONSTANT:
+- s:17:\"Constant String 2\";
++ s:15:\"Constant String\";

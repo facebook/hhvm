@@ -8,11 +8,11 @@ Size = 64
 Similarity = 93.85
 Edits = 
 
-- HH\int
-+ HH\string
-- a:1:{s:4:\"kind\";i:1;}
-+ a:1:{s:4:\"kind\";i:4;}
-- a:3:{s:21:\"allows_unknown_fields\";b:1;s:4:\"kind\";i:14;s:6:\"fields\";a:2:{s:1:\"x\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}s:1:\"z\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}}}
-+ a:3:{s:21:\"allows_unknown_fields\";b:1;s:4:\"kind\";i:14;s:6:\"fields\";a:2:{s:1:\"x\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}s:1:\"y\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}}}
-- a:2:{s:4:\"kind\";i:10;s:10:\"elem_types\";a:2:{i:0;a:1:{s:4:\"kind\";i:4;}i:1;a:1:{s:4:\"kind\";i:1;}}}
-+ a:2:{s:4:\"kind\";i:10;s:10:\"elem_types\";a:2:{i:0;a:1:{s:4:\"kind\";i:1;}i:1;a:1:{s:4:\"kind\";i:1;}}}
+- HH\string
++ HH\int
+- a:1:{s:4:\"kind\";i:4;}
++ a:1:{s:4:\"kind\";i:1;}
+- a:3:{s:21:\"allows_unknown_fields\";b:1;s:4:\"kind\";i:14;s:6:\"fields\";a:2:{s:1:\"x\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}s:1:\"y\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}}}
++ a:3:{s:21:\"allows_unknown_fields\";b:1;s:4:\"kind\";i:14;s:6:\"fields\";a:2:{s:1:\"x\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}s:1:\"z\";a:1:{s:5:\"value\";a:1:{s:4:\"kind\";i:1;}}}}
+- a:2:{s:4:\"kind\";i:10;s:10:\"elem_types\";a:2:{i:0;a:1:{s:4:\"kind\";i:1;}i:1;a:1:{s:4:\"kind\";i:1;}}}
++ a:2:{s:4:\"kind\";i:10;s:10:\"elem_types\";a:2:{i:0;a:1:{s:4:\"kind\";i:4;}i:1;a:1:{s:4:\"kind\";i:1;}}}

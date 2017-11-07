@@ -1,7 +1,7 @@
 Semdiff succeeded
 comparing key openFoo
 Semdiff failed
-pc=;0, pc'=;0, i=String "Cannot call abstract method Foo::openFoo()" i'=Null asn={}{}
+pc=;0, pc'=;0, i=Null i'=String "Cannot call abstract method Foo::openFoo()" asn={}{}
 Assumed=
 
 Todo=
@@ -14,10 +14,10 @@ Size = 75
 Similarity = 94.74
 Edits = 
 
-- abstract
++ abstract
 for openFoo:
-- isAbstract
-- String "Cannot call abstract method Foo::openFoo()"
-+ Null
-- Fatal RuntimeOmitFrame
-+ RetC
++ isAbstract
+- Null
++ String "Cannot call abstract method Foo::openFoo()"
+- RetC
++ Fatal RuntimeOmitFrame

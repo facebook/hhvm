@@ -49,7 +49,8 @@ let parse_options () =
   Arg.parse options (fun file -> files := file::!files) usage;
   match !files with
   | [x; y] ->
-    { files = (x, y) }
+    (* !files is in reverse order, so swap the files to get the order back *)
+    { files = (y, x) }
   | _ -> die usage
 
 let parse_file program_parser filename =

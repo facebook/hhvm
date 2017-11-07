@@ -1,7 +1,7 @@
 Semdiff succeeded
 comparing key foo
 Semdiff failed
-pc=92 12;98, pc'=92 12;98, i=String "handlerstack should be empty herex" i'=String "handlerstack should be empty here" asn={}{}
+pc=92 12;98, pc'=92 12;98, i=String "handlerstack should be empty here" i'=String "handlerstack should be empty herex" asn={}{}
 Assumed=
 [;0,;0-><{}{}>]
 [;1,;0-><{}{}>]
@@ -102,5 +102,5 @@ Similarity = 99.22
 Edits = 
 
 for foo:
-- String "handlerstack should be empty herex"
-+ String "handlerstack should be empty here"
+- String "handlerstack should be empty here"
++ String "handlerstack should be empty herex"

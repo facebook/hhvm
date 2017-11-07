@@ -12,5 +12,5 @@ Size = 10
 Similarity = 90.91
 Edits = 
 
-- JmpNZ L1
-+ JmpZ L1
+- JmpZ L1
++ JmpNZ L1

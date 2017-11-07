@@ -1,7 +1,7 @@
 Semdiff succeeded
 comparing key main_foo
 Semdiff failed
-pc=;0, pc'=;0, i=Double INF i'=Double NAN asn={}{}
+pc=;0, pc'=;0, i=Double NAN i'=Double INF asn={}{}
 Assumed=
 
 Todo=
@@ -11,5 +11,5 @@ Similarity = 96.30
 Edits = 
 
 for main_foo:
-- Double INF
-+ Double NAN
+- Double NAN
++ Double INF

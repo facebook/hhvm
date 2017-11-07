@@ -1789,7 +1789,7 @@ and pClassElt : class_elt list parser = fun node env ->
         (* Drop it on the floor in quick mode; we still need to process the body
          * to know, e.g. whether it contains a yield.
          *)
-        if env.quick_mode then [Noop] else body
+        if env.quick_mode || env.fi_mode = FileInfo.Mdecl then [Noop] else body
       in
       let kind = pKinds methodish_modifiers env in
       member_def @ [Method
@@ -1981,7 +1981,7 @@ and pDef : def list parser = fun node env ->
       ; f_params          = hdr.fh_parameters
       ; f_ret_by_ref      = hdr.fh_ret_by_ref
       ; f_body            =
-        if env.quick_mode
+        if env.quick_mode || env.fi_mode = FileInfo.Mdecl
         then [Noop]
         else begin
           (* FIXME: Filthy hack to catch UNSAFE *)
@@ -2169,7 +2169,8 @@ and pDef : def list parser = fun node env ->
    * but if this turns out prohibitive, just `try` this and catch-and-correct
    * the raised exception.
    *)
-  | _ -> [ Stmt (pStmt node env) ]
+  | _ when env.fi_mode <> FileInfo.Mdecl -> [ Stmt (pStmt node env) ]
+  | _ -> []
 let pProgram : program parser = fun node env ->
   let rec post_process program =
     let span (p : 'a -> bool) =
@@ -2371,7 +2372,7 @@ let make_env
     ; elaborate_namespaces
     ; include_line_comments
     ; keep_errors
-    ; quick_mode
+    ; quick_mode              = quick_mode && not hhvm_compat_mode
     ; lower_coroutines
     ; enable_hh_syntax
     ; parser_options
@@ -2438,11 +2439,12 @@ let from_text (env : env) (source_text : SourceText.t) : result =
       | _ -> None
     in
     Option.value_map mode_word ~default:FileInfo.Mpartial ~f:(function
-      | "decl"           -> FileInfo.Mdecl
-      | "strict"         -> FileInfo.Mstrict
-      | ("partial" | "") -> FileInfo.Mpartial
+      | "decl" when env.hhvm_compat_mode -> FileInfo.Mphp
+      | "decl"                           -> FileInfo.Mdecl
+      | "strict"                         -> FileInfo.Mstrict
+      | ("partial" | "")                 -> FileInfo.Mpartial
       (* TODO: Come up with better mode detection *)
-      | _                -> FileInfo.Mpartial
+      | _                                -> FileInfo.Mpartial
     )
   in
   let env = if env.fi_mode = fi_mode then env else { env with fi_mode } in

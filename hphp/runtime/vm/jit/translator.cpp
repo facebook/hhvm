@@ -1149,7 +1149,9 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
       inst->op() == OpAwait || // may branch to scheduler and suspend execution
       inst->op() == OpAwaitAll || // similar to Await
       inst->op() == OpFCallAwait || // similar to Await
-      inst->op() == OpClsCnsD) { // side exits if misses in the RDS
+      inst->op() == OpClsCnsD || // side exits if misses in the RDS
+      inst->op() == OpVerifyParamType) { // avoids combinatorial explosion with
+                                         // nullable types
     return true;
   }
   // In profiling mode, don't trace through a control flow merge point,

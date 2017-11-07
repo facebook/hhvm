@@ -443,6 +443,7 @@ let schema : schema_node list =
       ; "keyword", Token
       ; "type_keyword", Token
       ; "name", Token
+      ; "type_parameters", ZeroOrOne (Just "TypeParameters")
       ; "type_constraint", ZeroOrOne (Just "TypeConstraint")
       ; "equal", ZeroOrOne Token
       ; "type_specifier", ZeroOrOne (Aggregate Specifier)

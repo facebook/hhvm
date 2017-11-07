@@ -697,7 +697,8 @@ and parse_type_constraint_opt parser =
     TODO: What about = ?
   *)
   let (parser1, constraint_as) = next_token parser in
-  if (Token.kind constraint_as) = As then
+  let kind = Token.kind constraint_as in
+  if kind = As then
     let constraint_as = make_token constraint_as in
     let (parser, constraint_type) = parse_type_specifier parser1 in
     let result = make_type_constraint constraint_as constraint_type in

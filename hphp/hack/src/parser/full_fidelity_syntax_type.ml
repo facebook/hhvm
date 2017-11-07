@@ -266,6 +266,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_const_keyword                                 : t
     ; type_const_type_keyword                            : t
     ; type_const_name                                    : t
+    ; type_const_type_parameters                         : t
     ; type_const_type_constraint                         : t
     ; type_const_equal                                   : t
     ; type_const_type_specifier                          : t
@@ -1581,6 +1582,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_const_keyword: Token.t value
     ; type_const_type_keyword: Token.t value
     ; type_const_name: Token.t value
+    ; type_const_type_parameters: type_parameters option value
     ; type_const_type_constraint: type_constraint option value
     ; type_const_equal: Token.t option value
     ; type_const_type_specifier: specifier option value

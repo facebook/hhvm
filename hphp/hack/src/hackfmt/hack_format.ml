@@ -511,8 +511,16 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         Newline;
       ]
     | TypeConstDeclaration x ->
-      let (abs, kw, type_kw, name, type_constraint, eq, type_spec, semi) =
-        get_type_const_declaration_children x in
+      let ( abs
+          , kw
+          , type_kw
+          , name
+          , type_params
+          , type_constraint
+          , eq
+          , type_spec
+          , semi
+          ) = get_type_const_declaration_children x in
       Concat [
         t abs;
         Space;
@@ -521,6 +529,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         t type_kw;
         Space;
         t name;
+        t type_params;
         when_present type_constraint space;
         t type_constraint;
         when_present eq space;

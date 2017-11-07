@@ -505,23 +505,26 @@ class virtual ['self] endo =
     method on_typeconst env this =
       let r0 = self#on_bool env this.tconst_abstract in
       let r1 = self#on_id env this.tconst_name in
-      let r2 =
+      let r2 = self#on_list self#on_tparam env this.tconst_tparams in
+      let r3 =
         self#on_option self#on_hint env this.tconst_constraint in
-      let r3 = self#on_option self#on_hint env this.tconst_type in
-      let r4 = self#on_Pos_t env this.tconst_span in
+      let r4 = self#on_option self#on_hint env this.tconst_type in
+      let r5 = self#on_Pos_t env this.tconst_span in
       if  this.tconst_abstract == r0
        && this.tconst_name == r1
-       && this.tconst_constraint == r2
-       && this.tconst_type == r3
-       && this.tconst_span == r4
+       && this.tconst_tparams == r2
+       && this.tconst_constraint == r3
+       && this.tconst_type == r4
+       && this.tconst_span == r5
       then this
       else
         {
           tconst_abstract = r0;
           tconst_name = r1;
-          tconst_constraint = r2;
-          tconst_type = r3;
-          tconst_span = r4
+          tconst_tparams = r2;
+          tconst_constraint = r3;
+          tconst_type = r4;
+          tconst_span = r5
         }
     method on_is_reference env = self#on_bool env
     method on_is_variadic env = self#on_bool env

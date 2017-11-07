@@ -793,6 +793,7 @@ module WithToken(Token: TokenType) = struct
       type_const_keyword;
       type_const_type_keyword;
       type_const_name;
+      type_const_type_parameters;
       type_const_type_constraint;
       type_const_equal;
       type_const_type_specifier;
@@ -802,6 +803,7 @@ module WithToken(Token: TokenType) = struct
       type_const_keyword,
       type_const_type_keyword,
       type_const_name,
+      type_const_type_parameters,
       type_const_type_constraint,
       type_const_equal,
       type_const_type_specifier,
@@ -2557,6 +2559,7 @@ module WithToken(Token: TokenType) = struct
         type_const_keyword;
         type_const_type_keyword;
         type_const_name;
+        type_const_type_parameters;
         type_const_type_constraint;
         type_const_equal;
         type_const_type_specifier;
@@ -2566,6 +2569,7 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc type_const_keyword in
          let acc = f acc type_const_type_keyword in
          let acc = f acc type_const_name in
+         let acc = f acc type_const_type_parameters in
          let acc = f acc type_const_type_constraint in
          let acc = f acc type_const_equal in
          let acc = f acc type_const_type_specifier in
@@ -4200,6 +4204,7 @@ module WithToken(Token: TokenType) = struct
         type_const_keyword;
         type_const_type_keyword;
         type_const_name;
+        type_const_type_parameters;
         type_const_type_constraint;
         type_const_equal;
         type_const_type_specifier;
@@ -4209,6 +4214,7 @@ module WithToken(Token: TokenType) = struct
         type_const_keyword;
         type_const_type_keyword;
         type_const_name;
+        type_const_type_parameters;
         type_const_type_constraint;
         type_const_equal;
         type_const_type_specifier;
@@ -5844,6 +5850,7 @@ module WithToken(Token: TokenType) = struct
         type_const_keyword;
         type_const_type_keyword;
         type_const_name;
+        type_const_type_parameters;
         type_const_type_constraint;
         type_const_equal;
         type_const_type_specifier;
@@ -5853,6 +5860,7 @@ module WithToken(Token: TokenType) = struct
         "type_const_keyword";
         "type_const_type_keyword";
         "type_const_name";
+        "type_const_type_parameters";
         "type_const_type_constraint";
         "type_const_equal";
         "type_const_type_specifier";
@@ -7571,6 +7579,7 @@ module WithToken(Token: TokenType) = struct
           type_const_keyword;
           type_const_type_keyword;
           type_const_name;
+          type_const_type_parameters;
           type_const_type_constraint;
           type_const_equal;
           type_const_type_specifier;
@@ -7581,6 +7590,7 @@ module WithToken(Token: TokenType) = struct
           type_const_keyword;
           type_const_type_keyword;
           type_const_name;
+          type_const_type_parameters;
           type_const_type_constraint;
           type_const_equal;
           type_const_type_specifier;
@@ -9500,6 +9510,7 @@ module WithToken(Token: TokenType) = struct
         type_const_keyword
         type_const_type_keyword
         type_const_name
+        type_const_type_parameters
         type_const_type_constraint
         type_const_equal
         type_const_type_specifier
@@ -9510,6 +9521,7 @@ module WithToken(Token: TokenType) = struct
           type_const_keyword;
           type_const_type_keyword;
           type_const_name;
+          type_const_type_parameters;
           type_const_type_constraint;
           type_const_equal;
           type_const_type_specifier;

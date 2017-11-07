@@ -213,6 +213,7 @@ module type Syntax_S = sig
     ; type_const_keyword                                 : t
     ; type_const_type_keyword                            : t
     ; type_const_name                                    : t
+    ; type_const_type_parameters                         : t
     ; type_const_type_constraint                         : t
     ; type_const_equal                                   : t
     ; type_const_type_specifier                          : t
@@ -1123,7 +1124,7 @@ module type Syntax_S = sig
   val make_require_clause : t -> t -> t -> t -> t
   val make_const_declaration : t -> t -> t -> t -> t -> t
   val make_constant_declarator : t -> t -> t
-  val make_type_const_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_type_const_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_decorated_expression : t -> t -> t
   val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t
   val make_variadic_parameter : t -> t -> t

@@ -8124,6 +8124,7 @@ final class TypeConstDeclaration extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_type_keyword;
   private EditableSyntax $_name;
+  private EditableSyntax $_type_parameters;
   private EditableSyntax $_type_constraint;
   private EditableSyntax $_equal;
   private EditableSyntax $_type_specifier;
@@ -8133,6 +8134,7 @@ final class TypeConstDeclaration extends EditableSyntax {
     EditableSyntax $keyword,
     EditableSyntax $type_keyword,
     EditableSyntax $name,
+    EditableSyntax $type_parameters,
     EditableSyntax $type_constraint,
     EditableSyntax $equal,
     EditableSyntax $type_specifier,
@@ -8142,6 +8144,7 @@ final class TypeConstDeclaration extends EditableSyntax {
     $this->_keyword = $keyword;
     $this->_type_keyword = $type_keyword;
     $this->_name = $name;
+    $this->_type_parameters = $type_parameters;
     $this->_type_constraint = $type_constraint;
     $this->_equal = $equal;
     $this->_type_specifier = $type_specifier;
@@ -8158,6 +8161,9 @@ final class TypeConstDeclaration extends EditableSyntax {
   }
   public function name(): EditableSyntax {
     return $this->_name;
+  }
+  public function type_parameters(): EditableSyntax {
+    return $this->_type_parameters;
   }
   public function type_constraint(): EditableSyntax {
     return $this->_type_constraint;
@@ -8177,6 +8183,7 @@ final class TypeConstDeclaration extends EditableSyntax {
       $this->_keyword,
       $this->_type_keyword,
       $this->_name,
+      $this->_type_parameters,
       $this->_type_constraint,
       $this->_equal,
       $this->_type_specifier,
@@ -8188,6 +8195,7 @@ final class TypeConstDeclaration extends EditableSyntax {
       $keyword,
       $this->_type_keyword,
       $this->_name,
+      $this->_type_parameters,
       $this->_type_constraint,
       $this->_equal,
       $this->_type_specifier,
@@ -8199,6 +8207,7 @@ final class TypeConstDeclaration extends EditableSyntax {
       $this->_keyword,
       $type_keyword,
       $this->_name,
+      $this->_type_parameters,
       $this->_type_constraint,
       $this->_equal,
       $this->_type_specifier,
@@ -8210,6 +8219,19 @@ final class TypeConstDeclaration extends EditableSyntax {
       $this->_keyword,
       $this->_type_keyword,
       $name,
+      $this->_type_parameters,
+      $this->_type_constraint,
+      $this->_equal,
+      $this->_type_specifier,
+      $this->_semicolon);
+  }
+  public function with_type_parameters(EditableSyntax $type_parameters): TypeConstDeclaration {
+    return new TypeConstDeclaration(
+      $this->_abstract,
+      $this->_keyword,
+      $this->_type_keyword,
+      $this->_name,
+      $type_parameters,
       $this->_type_constraint,
       $this->_equal,
       $this->_type_specifier,
@@ -8221,6 +8243,7 @@ final class TypeConstDeclaration extends EditableSyntax {
       $this->_keyword,
       $this->_type_keyword,
       $this->_name,
+      $this->_type_parameters,
       $type_constraint,
       $this->_equal,
       $this->_type_specifier,
@@ -8232,6 +8255,7 @@ final class TypeConstDeclaration extends EditableSyntax {
       $this->_keyword,
       $this->_type_keyword,
       $this->_name,
+      $this->_type_parameters,
       $this->_type_constraint,
       $equal,
       $this->_type_specifier,
@@ -8243,6 +8267,7 @@ final class TypeConstDeclaration extends EditableSyntax {
       $this->_keyword,
       $this->_type_keyword,
       $this->_name,
+      $this->_type_parameters,
       $this->_type_constraint,
       $this->_equal,
       $type_specifier,
@@ -8254,6 +8279,7 @@ final class TypeConstDeclaration extends EditableSyntax {
       $this->_keyword,
       $this->_type_keyword,
       $this->_name,
+      $this->_type_parameters,
       $this->_type_constraint,
       $this->_equal,
       $this->_type_specifier,
@@ -8270,6 +8296,7 @@ final class TypeConstDeclaration extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $type_keyword = $this->type_keyword()->rewrite($rewriter, $new_parents);
     $name = $this->name()->rewrite($rewriter, $new_parents);
+    $type_parameters = $this->type_parameters()->rewrite($rewriter, $new_parents);
     $type_constraint = $this->type_constraint()->rewrite($rewriter, $new_parents);
     $equal = $this->equal()->rewrite($rewriter, $new_parents);
     $type_specifier = $this->type_specifier()->rewrite($rewriter, $new_parents);
@@ -8279,6 +8306,7 @@ final class TypeConstDeclaration extends EditableSyntax {
       $keyword === $this->keyword() &&
       $type_keyword === $this->type_keyword() &&
       $name === $this->name() &&
+      $type_parameters === $this->type_parameters() &&
       $type_constraint === $this->type_constraint() &&
       $equal === $this->equal() &&
       $type_specifier === $this->type_specifier() &&
@@ -8290,6 +8318,7 @@ final class TypeConstDeclaration extends EditableSyntax {
         $keyword,
         $type_keyword,
         $name,
+        $type_parameters,
         $type_constraint,
         $equal,
         $type_specifier,
@@ -8310,6 +8339,9 @@ final class TypeConstDeclaration extends EditableSyntax {
     $name = EditableSyntax::from_json(
       $json->type_const_name, $position, $source);
     $position += $name->width();
+    $type_parameters = EditableSyntax::from_json(
+      $json->type_const_type_parameters, $position, $source);
+    $position += $type_parameters->width();
     $type_constraint = EditableSyntax::from_json(
       $json->type_const_type_constraint, $position, $source);
     $position += $type_constraint->width();
@@ -8327,6 +8359,7 @@ final class TypeConstDeclaration extends EditableSyntax {
         $keyword,
         $type_keyword,
         $name,
+        $type_parameters,
         $type_constraint,
         $equal,
         $type_specifier,
@@ -8337,6 +8370,7 @@ final class TypeConstDeclaration extends EditableSyntax {
     yield $this->_keyword;
     yield $this->_type_keyword;
     yield $this->_name;
+    yield $this->_type_parameters;
     yield $this->_type_constraint;
     yield $this->_equal;
     yield $this->_type_specifier;

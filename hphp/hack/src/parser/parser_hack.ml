@@ -1870,6 +1870,7 @@ and typeconst_def def_start env ~is_abstract =
   expect env Tsc;
   { tconst_abstract = is_abstract;
     tconst_name = pname;
+    tconst_tparams = []; (* Not implemented in the legacy parser *)
     tconst_constraint = constr;
     tconst_type = type_;
     tconst_span = span;

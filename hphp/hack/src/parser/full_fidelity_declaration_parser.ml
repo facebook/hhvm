@@ -1169,6 +1169,9 @@ module WithExpressionAndStatementAndTypeParser
   and parse_type_const_declaration parser abstr const =
     let (parser, type_token) = assert_token parser Type in
     let (parser, name) = require_name_allow_keywords parser in
+    let (parser, generic_type_parameter_list) =
+      parse_generic_type_parameter_list_opt parser
+    in
     let (parser, type_constraint) = parse_type_constraint_opt parser in
     let (parser, equal_token, type_specifier) = if is_missing abstr then
       let (parser, equal_token) = require_equal parser in
@@ -1178,9 +1181,17 @@ module WithExpressionAndStatementAndTypeParser
       (parser, make_missing (), make_missing ())
     in
     let (parser, semicolon) = require_semicolon parser in
-    let syntax = make_type_const_declaration
-      abstr const type_token name type_constraint equal_token type_specifier
-      semicolon
+    let syntax =
+      make_type_const_declaration
+        abstr
+        const
+        type_token
+        name
+        generic_type_parameter_list
+        type_constraint
+        equal_token
+        type_specifier
+        semicolon
     in
     (parser, syntax)
 
@@ -1222,7 +1233,8 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_generic_type_parameter_list_opt parser =
     let (parser1, open_angle) = next_token parser in
-    if (Token.kind open_angle) = LessThan then
+    let kind = Token.kind open_angle in
+    if kind = LessThan then
         let type_parser = TypeParser.make
           parser.env parser.lexer parser.errors parser.context in
         let (type_parser, node) =

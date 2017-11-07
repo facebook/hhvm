@@ -661,6 +661,7 @@ module FromMinimal = struct
         :: type_const_type_specifier
         :: type_const_equal
         :: type_const_type_constraint
+        :: type_const_type_parameters
         :: type_const_name
         :: type_const_type_keyword
         :: type_const_keyword
@@ -672,6 +673,7 @@ module FromMinimal = struct
           ; type_const_keyword
           ; type_const_type_keyword
           ; type_const_name
+          ; type_const_type_parameters
           ; type_const_type_constraint
           ; type_const_equal
           ; type_const_type_specifier
@@ -2605,6 +2607,7 @@ module FromMinimal = struct
         ; M.type_const_keyword
         ; M.type_const_type_keyword
         ; M.type_const_name
+        ; M.type_const_type_parameters
         ; M.type_const_type_constraint
         ; M.type_const_equal
         ; M.type_const_type_specifier
@@ -2616,6 +2619,7 @@ module FromMinimal = struct
         let todo = Convert (type_const_type_specifier, todo) in
         let todo = Convert (type_const_equal, todo) in
         let todo = Convert (type_const_type_constraint, todo) in
+        let todo = Convert (type_const_type_parameters, todo) in
         let todo = Convert (type_const_name, todo) in
         let todo = Convert (type_const_type_keyword, todo) in
         let todo = Convert (type_const_keyword, todo) in

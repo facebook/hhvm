@@ -290,6 +290,7 @@ class virtual ['self] iter =
     method on_typeconst env this =
       self#on_bool env this.tconst_abstract;
       self#on_id env this.tconst_name;
+      self#on_list self#on_tparam env this.tconst_tparams;
 
         self#on_option self#on_hint env this.tconst_constraint      ;
       self#on_option self#on_hint env this.tconst_type;

@@ -6250,6 +6250,7 @@ class TypeConstDeclaration extends EditableSyntax
     keyword,
     type_keyword,
     name,
+    type_parameters,
     type_constraint,
     equal,
     type_specifier,
@@ -6260,6 +6261,7 @@ class TypeConstDeclaration extends EditableSyntax
       keyword: keyword,
       type_keyword: type_keyword,
       name: name,
+      type_parameters: type_parameters,
       type_constraint: type_constraint,
       equal: equal,
       type_specifier: type_specifier,
@@ -6269,6 +6271,7 @@ class TypeConstDeclaration extends EditableSyntax
   get keyword() { return this.children.keyword; }
   get type_keyword() { return this.children.type_keyword; }
   get name() { return this.children.name; }
+  get type_parameters() { return this.children.type_parameters; }
   get type_constraint() { return this.children.type_constraint; }
   get equal() { return this.children.equal; }
   get type_specifier() { return this.children.type_specifier; }
@@ -6279,6 +6282,7 @@ class TypeConstDeclaration extends EditableSyntax
       this.keyword,
       this.type_keyword,
       this.name,
+      this.type_parameters,
       this.type_constraint,
       this.equal,
       this.type_specifier,
@@ -6290,6 +6294,7 @@ class TypeConstDeclaration extends EditableSyntax
       keyword,
       this.type_keyword,
       this.name,
+      this.type_parameters,
       this.type_constraint,
       this.equal,
       this.type_specifier,
@@ -6301,6 +6306,7 @@ class TypeConstDeclaration extends EditableSyntax
       this.keyword,
       type_keyword,
       this.name,
+      this.type_parameters,
       this.type_constraint,
       this.equal,
       this.type_specifier,
@@ -6312,6 +6318,19 @@ class TypeConstDeclaration extends EditableSyntax
       this.keyword,
       this.type_keyword,
       name,
+      this.type_parameters,
+      this.type_constraint,
+      this.equal,
+      this.type_specifier,
+      this.semicolon);
+  }
+  with_type_parameters(type_parameters){
+    return new TypeConstDeclaration(
+      this.abstract,
+      this.keyword,
+      this.type_keyword,
+      this.name,
+      type_parameters,
       this.type_constraint,
       this.equal,
       this.type_specifier,
@@ -6323,6 +6342,7 @@ class TypeConstDeclaration extends EditableSyntax
       this.keyword,
       this.type_keyword,
       this.name,
+      this.type_parameters,
       type_constraint,
       this.equal,
       this.type_specifier,
@@ -6334,6 +6354,7 @@ class TypeConstDeclaration extends EditableSyntax
       this.keyword,
       this.type_keyword,
       this.name,
+      this.type_parameters,
       this.type_constraint,
       equal,
       this.type_specifier,
@@ -6345,6 +6366,7 @@ class TypeConstDeclaration extends EditableSyntax
       this.keyword,
       this.type_keyword,
       this.name,
+      this.type_parameters,
       this.type_constraint,
       this.equal,
       type_specifier,
@@ -6356,6 +6378,7 @@ class TypeConstDeclaration extends EditableSyntax
       this.keyword,
       this.type_keyword,
       this.name,
+      this.type_parameters,
       this.type_constraint,
       this.equal,
       this.type_specifier,
@@ -6371,6 +6394,7 @@ class TypeConstDeclaration extends EditableSyntax
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var type_keyword = this.type_keyword.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
+    var type_parameters = this.type_parameters.rewrite(rewriter, new_parents);
     var type_constraint = this.type_constraint.rewrite(rewriter, new_parents);
     var equal = this.equal.rewrite(rewriter, new_parents);
     var type_specifier = this.type_specifier.rewrite(rewriter, new_parents);
@@ -6380,6 +6404,7 @@ class TypeConstDeclaration extends EditableSyntax
       keyword === this.keyword &&
       type_keyword === this.type_keyword &&
       name === this.name &&
+      type_parameters === this.type_parameters &&
       type_constraint === this.type_constraint &&
       equal === this.equal &&
       type_specifier === this.type_specifier &&
@@ -6394,6 +6419,7 @@ class TypeConstDeclaration extends EditableSyntax
         keyword,
         type_keyword,
         name,
+        type_parameters,
         type_constraint,
         equal,
         type_specifier,
@@ -6414,6 +6440,9 @@ class TypeConstDeclaration extends EditableSyntax
     let name = EditableSyntax.from_json(
       json.type_const_name, position, source);
     position += name.width;
+    let type_parameters = EditableSyntax.from_json(
+      json.type_const_type_parameters, position, source);
+    position += type_parameters.width;
     let type_constraint = EditableSyntax.from_json(
       json.type_const_type_constraint, position, source);
     position += type_constraint.width;
@@ -6431,6 +6460,7 @@ class TypeConstDeclaration extends EditableSyntax
         keyword,
         type_keyword,
         name,
+        type_parameters,
         type_constraint,
         equal,
         type_specifier,
@@ -6444,6 +6474,7 @@ class TypeConstDeclaration extends EditableSyntax
         'keyword',
         'type_keyword',
         'name',
+        'type_parameters',
         'type_constraint',
         'equal',
         'type_specifier',

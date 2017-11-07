@@ -235,8 +235,12 @@ let rec emit_stmt env st =
     emit_if env condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
     emit_while env e (A.Block b)
-  | A.Using (has_await, e, b) ->
-    emit_using env has_await e (A.Block b)
+  | A.Using {
+      Ast.us_has_await = has_await;
+      Ast.us_expr = e; Ast.us_block = b;
+      Ast.us_is_block_scoped = is_block_scoped
+    } ->
+    emit_using env is_block_scoped has_await e (A.Block b)
   | A.Break (pos, level_opt) ->
     emit_break env pos (get_level pos "break" level_opt)
   | A.Continue (pos, level_opt) ->
@@ -380,11 +384,17 @@ and emit_while env e b =
     instr_label break_label;
   ]
 
-and emit_using env has_await e b =
+and emit_using env is_block_scoped has_await e b =
   match snd e with
   | A.Expr_list es ->
     emit_stmt env @@ List.fold_right es
-      ~f:(fun e acc -> A.Using (has_await, e, [acc]))
+      ~f:(fun e acc ->
+        A.Using {
+          Ast.us_has_await = has_await;
+          Ast.us_is_block_scoped = is_block_scoped;
+          Ast.us_expr = e;
+          Ast.us_block = [acc];
+        })
       ~init:b
   | _ ->
     let local, preamble = match snd e with
@@ -415,9 +425,7 @@ and emit_using env has_await e b =
         instr_fpushobjmethodd 0 fn_name A.OG_nullthrows;
         instr_fcall 0;
         epilogue;
-        (* TOOD: Only empty unset if this is a
-         * function scoped using statement *)
-        instr_unsetl local
+        if is_block_scoped then instr_unsetl local else empty;
       ]
     in
     let fault = gather [ finally; instr_unwind ] in

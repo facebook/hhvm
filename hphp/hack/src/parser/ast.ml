@@ -264,6 +264,13 @@ and shape_field = {
   sf_hint : hint;
 }
 
+and using_stmt = {
+  us_is_block_scoped: bool;
+  us_has_await: bool;
+  us_expr: expr;
+  us_block: block;
+}
+
 and stmt =
   | Unsafe
   | Fallthrough
@@ -287,7 +294,7 @@ and stmt =
   | Def_inline of def
   | Noop
   | Markup of pstring * expr option
-  | Using of bool (* await? *) * expr * block
+  | Using of using_stmt
 
 and as_expr =
   | As_v of expr

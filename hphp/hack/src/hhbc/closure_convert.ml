@@ -648,11 +648,11 @@ and convert_stmt env st stmt =
     let st, cl = List.map_env st cl (convert_catch env) in
     let st, b2 = convert_block env st b2 in
     st, Try (b1, cl, b2)
-  | Using (has_await, e, b) ->
-    if has_await then check_if_in_async_context env;
-    let st, e = convert_expr env st e in
-    let st, b = convert_block env st b in
-    st, Using (has_await, e, b)
+  | Using s ->
+    if s.us_has_await then check_if_in_async_context env;
+    let st, us_expr = convert_expr env st s.us_expr in
+    let st, us_block = convert_block env st s.us_block in
+    st, Using { s with us_expr; us_block }
   | Def_inline ((Class _) as d) ->
     let cd =
       (* propagate namespace information to nested classes *)

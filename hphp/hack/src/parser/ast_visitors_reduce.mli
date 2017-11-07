@@ -266,9 +266,7 @@ class virtual ['b] reduce :
         on_Updecr : 'c -> 'd; on_Upincr : 'c -> 'd; on_Uplus : 'c -> 'd;
         on_Uref : 'c -> 'd; on_Utild : 'c -> 'd; on_Usilence : 'c -> 'd;
         on_Using : 'c ->
-                   bool ->
-                   Ast_visitors_ancestors.expr ->
-                   Ast_visitors_ancestors.block -> 'd;
+                   Ast_visitors_ancestors.using_stmt -> 'd;
         on_While : 'c ->
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.block -> 'd;
@@ -664,7 +662,7 @@ class virtual ['b] reduce :
     method on_Usilence : 'c -> 'd
     method on_Utild : 'c -> 'd
     method on_Using :
-      'c -> bool -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.block -> 'd
+      'c -> Ast_visitors_ancestors.using_stmt -> 'd
     method on_While :
       'c -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.block -> 'd
     method on_XhpAttr :

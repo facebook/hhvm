@@ -449,7 +449,7 @@ class virtual ['self] iter =
       | Def_inline c0 ->
         self#on_Def_inline env c0
       | Noop -> self#on_Noop env
-      | Using (c0, c1, c2) -> self#on_Using env c0 c1 c2
+      | Using s -> self#on_Using env s
     method on_As_v = self#on_expr
     method on_As_kv env c0 c1 =
       self#on_expr env c0;
@@ -580,9 +580,9 @@ class virtual ['self] iter =
     method on_Markup env c0 c1 =
       self#on_pstring env c0;
       self#on_option self#on_expr env c1;
-    method on_Using env _c0 c1 c2 =
-      self#on_expr env c1;
-      self#on_block env c2;
+    method on_Using env s =
+      self#on_expr env s.us_expr;
+      self#on_block env s.us_block;
     method on_Callconv env c0 c1 =
       self#on_param_kind env c0;
       self#on_expr env c1;

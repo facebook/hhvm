@@ -2440,19 +2440,31 @@ and statement_using has_await env =
     let st = using_statement_list env in
     (* Step back over closing brace *)
     L.back env.lb;
-    Using (has_await, e, st)
+    Using {
+      us_is_block_scoped = false;
+      us_has_await = has_await;
+      us_expr = e;
+      us_block = st; }
 
 
 and statement_using_block_or_rest has_await e env =
     match L.token env.file env.lb with
     | Tlcb ->
       (* Block-scoped using *)
-      Using (has_await, e, statement_list env)
+      Using {
+        us_is_block_scoped = true;
+        us_has_await = has_await;
+        us_expr = e;
+        us_block = statement_list env; }
     | Tsc ->
       let st = using_statement_list env in
       (* Step back over closing brace *)
       L.back env.lb;
-      Using (has_await, e, st)
+      Using {
+        us_is_block_scoped = false;
+        us_has_await = has_await;
+        us_expr = e;
+        us_block = st; }
     | _ ->
       error_expect env "{";
       Noop

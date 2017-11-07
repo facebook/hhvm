@@ -473,9 +473,13 @@ let rec continue_is_legal parents =
 
 let using_statement_function_scoped_is_legal parents =
   match parents with
-  | _ :: c :: h :: _
-    when is_compound_statement c &&
-        (is_function_declaration h || is_methodish_declaration h) -> true
+  | _ ::
+    { syntax = CompoundStatement _; _ } ::
+    { syntax = (
+        FunctionDeclaration  _ |
+        MethodishDeclaration _ |
+        AnonymousFunction    _ |
+        LambdaExpression     _); _ } :: _ -> true
   | _ -> false
 
 let is_bad_xhp_attribute_name name =

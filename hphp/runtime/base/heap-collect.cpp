@@ -98,6 +98,7 @@ struct Collector {
 
   HeapImpl& heap_;
   GCBits const mark_version_;
+  size_t num_small_{0}, num_big_{0}, num_slabs_{0};
   Counter marked_, pinned_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
@@ -258,6 +259,7 @@ NEVER_INLINE void Collector::init() {
 
   heap_.iterate(
     [&](HeapObject* h, size_t size) { // onBig
+      ++num_big_;
       ptrs_.insert(h, size);
       if (h->kind() == HeaderKind::BigMalloc) {
         if (!type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
@@ -268,8 +270,9 @@ NEVER_INLINE void Collector::init() {
       }
     },
     [&](HeapObject* h, size_t size) { // onSlab
+      ++num_slabs_;
       ptrs_.insert(h, size);
-      Slab::fromHeader(h)->initCrossingMap();
+      num_small_ += Slab::fromHeader(h)->initCrossingMap();
     }
   );
   ptrs_.prepare();
@@ -460,6 +463,10 @@ void logCollection(const char* phase, const Collector& collector) {
   sample.setInt("roots_micros", collector.roots_ns_/1000);
   sample.setInt("mark_micros", collector.mark_ns_/1000);
   sample.setInt("sweep_micros", collector.sweep_ns_/1000);
+  // object metrics
+  sample.setInt("slab_count", collector.num_slabs_);
+  sample.setInt("small_count", collector.num_small_);
+  sample.setInt("big_count", collector.num_big_);
   // size metrics gathered during gc
   sample.setInt("allocd_span", collector.ptrs_.span().second);
   sample.setInt("marked_bytes", collector.marked_.bytes);

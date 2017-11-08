@@ -6834,7 +6834,7 @@ const StaticString
   s_hh_invariant_violation("hh\\invariant_violation"),
   s_invariant_violation("invariant_violation"),
   s_gennull("HH\\Asio\\null"),
-  s_fromArray("fromArray"),
+  s_fromDArray("fromDArray"),
   s_AwaitAllWaitHandle("HH\\AwaitAllWaitHandle"),
   s_WaitHandle("HH\\WaitHandle")
   ;
@@ -7035,7 +7035,7 @@ bool EmitterVisitor::emitInlineGena(
   // Construct an AAWH from the array.
   //
   const auto fromArrayStart = m_ue.bcPos();
-  e.FPushClsMethodD(1, s_fromArray.get(), s_AwaitAllWaitHandle.get());
+  e.FPushClsMethodD(1, s_fromDArray.get(), s_AwaitAllWaitHandle.get());
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fromArrayStart);
     emitVirtualLocal(array);

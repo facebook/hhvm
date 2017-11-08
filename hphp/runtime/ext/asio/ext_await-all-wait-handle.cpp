@@ -347,6 +347,7 @@ void AsioExtension::initAwaitAllWaitHandle() {
   AAWH_SME(fromVector);
   AAWH_SME(setOnCreateCallback);
 #undef AAWH_SME
+  HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromDArray, AwaitAllWaitHandle, fromArray);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

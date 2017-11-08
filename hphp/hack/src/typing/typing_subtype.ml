@@ -776,11 +776,10 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
                   let env, up_obj =
                       Phase.localize ~ety_env env up_obj in
                   sub_type env up_obj ty_super
-                | None when class_.tc_members_fully_known ->
+                | None ->
                   TUtils.uerror p_super ty_super_ p_sub ty_sub_;
                   env
-                | _ -> env
-          )
+           )
       )
     end
   | _, (_, Tmixed) -> env

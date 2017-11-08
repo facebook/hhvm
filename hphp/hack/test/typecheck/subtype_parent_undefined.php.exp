@@ -1,0 +1,6 @@
+File "subtype_parent_undefined.php", line 10, characters 10-11:
+Invalid return type (Typing[4110])
+File "subtype_parent_undefined.php", line 9, characters 21-21:
+This is an object of type I
+File "subtype_parent_undefined.php", line 9, characters 14-14:
+It is incompatible with an object of type C

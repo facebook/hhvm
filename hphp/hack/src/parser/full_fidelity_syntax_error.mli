@@ -205,3 +205,4 @@ val enum_elem_name_is_class : string
 val safe_member_selection_in_write : string
 val xhp_member_selection_in_write : string
 val reassign_this : string
+val strict_types_first_statement : string

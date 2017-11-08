@@ -303,3 +303,5 @@ let xhp_member_selection_in_write =
   "Using ->: syntax in write context is not supported"
 let reassign_this =
   "Cannot re-assign $this"
+let strict_types_first_statement =
+  "strict_types declaration must be the very first statement in the script"

@@ -1687,6 +1687,49 @@ let assignment_errors node errors =
     end
   | _ -> errors
 
+let declare_errrors node parents errors =
+  match syntax node with
+  | FunctionCallExpression
+    { function_call_receiver = name
+    ; function_call_argument_list = args
+    ; _ } when String.lowercase_ascii @@ text name = "declare" ->
+    let args = syntax_to_list_no_separators args in
+    let errors =
+      match args with
+      | [{ syntax = BinaryExpression
+                    { binary_left_operand = loper
+                    ; binary_operator = op
+                    ; _
+                    }; _}]
+        when token_kind op = Some TokenKind.Equal
+          && String.lowercase_ascii @@ text loper = "strict_types" ->
+        (* Checks if there are only other declares nodes
+         * in front of the node in question *)
+        let rec is_only_declares_nodes node = function
+          | ({ syntax = ExpressionStatement
+              { expression_statement_expression =
+                { syntax = FunctionCallExpression
+                  { function_call_receiver = name; _}; _ }; _}; _ } as e) :: es
+            when String.lowercase_ascii @@ text name = "declare" ->
+              if e == node then true else
+              is_only_declares_nodes node es
+          | _ -> false
+        in
+        begin match parents with
+        | [n ; { syntax = SyntaxList (
+                  {syntax = MarkupSection {markup_text; _}; _}
+                  :: items); _} ; _]
+          when width markup_text = 0 && is_only_declares_nodes n items ->
+          errors
+        | _ ->
+          make_error_from_node
+            node SyntaxError.strict_types_first_statement :: errors
+        end
+      | _ -> errors
+    in
+    errors
+  | _ -> errors
+
 let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let is_hack_file = (SyntaxTree.language syntax_tree = "hh") in
@@ -1737,6 +1780,7 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
         names errors in
     let errors = enum_errors node errors in
     let errors = assignment_errors node errors in
+    let errors = declare_errrors node parents errors in
 
     match syntax node with
     | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->

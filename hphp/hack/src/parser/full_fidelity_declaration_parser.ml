@@ -381,7 +381,7 @@ module WithExpressionAndStatementAndTypeParser
     else
       let (parser, use_token) = assert_token parser Use in
       let (parser, use_kind) = parse_namespace_use_kind_opt parser in
-      let (parser, clauses) = parse_comma_list
+      let (parser, clauses) = parse_comma_list_allow_trailing
         parser Semicolon SyntaxError.error1004 parse_namespace_use_clause in
       let (parser, semi) = require_semicolon parser in
       let result = make_namespace_use_declaration

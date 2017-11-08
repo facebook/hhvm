@@ -69,6 +69,9 @@ let trailing_width node =
 let width node =
   (full_width node) - (leading_width node) - (trailing_width node)
 
+(* TODO: This code is duplicated in the positioned syntax; consider pulling it
+out into its own module. *)
+
 (* Takes a node and an offset; produces the descent through the parse tree
    to that position. *)
 let parentage node position =

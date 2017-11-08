@@ -481,7 +481,10 @@ PARSE_TREE
   | SyntaxList                        of t list
 SYNTAX
 
+  val to_json : t -> Hh_json.json
+  val is_in_body : t -> int -> bool
   val syntax_node_to_list : t -> t list
+  val width : t -> int
   val full_width : t -> int
   val trailing_width : t -> int
   val leading_width : t -> int
@@ -2800,6 +2803,21 @@ let parentage node position =
       else
         aux t (position - width) acc in
   aux [node] position []
+
+let is_in_body node position =
+  let rec aux parents =
+    match parents with
+    | [] -> false
+    | h1 :: t1 ->
+      if is_compound_statement h1 then
+        match t1 with
+        | [] -> false
+        | h2 :: _ ->
+          is_methodish_declaration h2 || is_function_declaration h2 || aux t1
+      else
+        aux t1 in
+  let parents = parentage node position in
+  aux parents
 
 module FromMinimal = struct
   module SyntaxKind = Full_fidelity_syntax_kind

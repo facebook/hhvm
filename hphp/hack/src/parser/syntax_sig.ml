@@ -1094,7 +1094,10 @@ module type Syntax_S = sig
   | ListItem                                of list_item
 
 
+  val to_json : t -> Hh_json.json
+  val is_in_body : t -> int -> bool
   val syntax_node_to_list : t -> t list
+  val width : t -> int
   val full_width : t -> int
   val trailing_width : t -> int
   val leading_width : t -> int

@@ -5467,27 +5467,14 @@ and class_implements_type env c1 ctype2 =
   Typing_extends.check_implements env ctype2 ctype1;
   ()
 
+(* Type-check a property declaration, with optional initializer *)
 and class_var_def env ~is_static c cv =
-  let env, typed_cv_expr, ty =
-    match cv.cv_expr with
-    | None -> env, None, Env.fresh_type()
-    | Some e -> let env, te, ty = expr env e in env, Some te, ty in
-  (match cv.cv_type with
-  | None when Env.is_strict env ->
-      Errors.add_a_typehint (fst cv.cv_id)
-  | None ->
-      let pos, name = cv.cv_id in
-      let name = if is_static then "$"^name else name in
-      let var_type = Reason.Rwitness pos, Tany in
-      (match cv.cv_expr with
-      | None ->
-          Typing_suggest.uninitialized_member (snd c.c_name) name env var_type ty;
-          ()
-      | Some _ ->
-          Typing_suggest.save_member name env var_type ty;
-          ()
-      )
-  | Some (p, _ as cty) ->
+  (* First pick up and localize the hint if it exists *)
+  let env, expected =
+    match cv.cv_type with
+    | None ->
+      env, None
+    | Some (p, _ as cty) ->
       let env =
         (* If this is an XHP attribute and we're in strict mode,
            relax to partial mode to allow the use of the "array"
@@ -5501,16 +5488,43 @@ and class_var_def env ~is_static c cv =
           else env in
       let cty = TI.instantiable_hint env cty in
       let env, cty = Phase.localize_with_self env cty in
-      let _ = Type.sub_type p Reason.URhint env ty cty in
-      ());
-  {
-    T.cv_final = cv.cv_final;
-    T.cv_is_xhp = cv.cv_is_xhp;
-    T.cv_visibility = cv.cv_visibility;
-    T.cv_type = cv.cv_type;
-    T.cv_id = cv.cv_id;
-    T.cv_expr = typed_cv_expr;
-  }
+      env, Some (p, Reason.URhint, cty) in
+  (* Next check the expression, passing in expected type if present *)
+  let env, typed_cv_expr, ty =
+    match cv.cv_expr with
+    | None -> env, None, Env.fresh_type()
+    | Some e ->
+      let env, te, ty = expr ?expected env e in
+      (* Check that the inferred type is a subtype of the expected type.
+       * Eventually this will be the responsibility of `expr`
+       *)
+      let env =
+        match expected with
+        | None -> env
+        | Some (p, ur, cty) -> Type.sub_type p ur env ty cty in
+      env, Some te, ty in
+  begin
+    if Option.is_none cv.cv_type
+    then begin
+      if Env.is_strict env
+      then Errors.add_a_typehint (fst cv.cv_id)
+      else
+        let pos, name = cv.cv_id in
+        let name = if is_static then "$" ^ name else name in
+        let var_type = Reason.Rwitness pos, Tany in
+        if Option.is_none cv.cv_expr
+        then Typing_suggest.uninitialized_member (snd c.c_name) name env var_type ty
+        else Typing_suggest.save_member name env var_type ty
+      end;
+    {
+      T.cv_final = cv.cv_final;
+      T.cv_is_xhp = cv.cv_is_xhp;
+      T.cv_visibility = cv.cv_visibility;
+      T.cv_type = cv.cv_type;
+      T.cv_id = cv.cv_id;
+      T.cv_expr = typed_cv_expr;
+    }
+  end
 
 and localize_where_constraints
     ~ety_env (env:Env.env) (where_constraints:Nast.where_constraint list) =

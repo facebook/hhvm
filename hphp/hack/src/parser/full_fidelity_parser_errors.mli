@@ -14,5 +14,5 @@ val parse_errors :
   ?enable_hh_syntax:bool ->
   ?level:error_level ->
   ?positioned_syntax:Full_fidelity_positioned_syntax.t ->
-  Full_fidelity_syntax_tree.t ->
+  Full_fidelity_syntax_tree.WithSyntax(Full_fidelity_minimal_syntax).t ->
   Full_fidelity_syntax_error.t list

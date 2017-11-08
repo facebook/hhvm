@@ -26,6 +26,7 @@
  *)
 
 module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_minimal_syntax)
 module SourceText = Full_fidelity_source_text
 module Token = Full_fidelity_positioned_token
 
@@ -4085,4 +4086,3 @@ let from_minimal = FromMinimal.from_minimal
 
 let from_tree tree =
   from_minimal (SyntaxTree.text tree) (SyntaxTree.root tree)
-

@@ -17,6 +17,7 @@
  *
  *)
 
+module WithSyntax(Syntax : Syntax_sig.Syntax_S ) = struct
 module SourceText = Full_fidelity_source_text
 module Env = Full_fidelity_parser_env
 module Parser = Minimal_parser
@@ -172,3 +173,5 @@ let to_json tree =
     "program_text", text;
     "version", Hh_json.JSON_String version
   ]
+
+end (* WithSyntax *)

@@ -8,10 +8,13 @@
  *
  *)
 
+module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_minimal_syntax)
+
 (* Entry Point *)
 let go filename =
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = Full_fidelity_source_text.from_file file in
-  let syntax_tree = Full_fidelity_syntax_tree.make source_text in
-  let json = Full_fidelity_syntax_tree.to_json syntax_tree in
+  let syntax_tree = SyntaxTree.make source_text in
+  let json = SyntaxTree.to_json syntax_tree in
   Hh_json.json_to_string json

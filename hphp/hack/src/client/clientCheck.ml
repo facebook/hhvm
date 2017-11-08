@@ -16,6 +16,8 @@ open Ocaml_overrides
 
 module Cmd = ServerCommand
 module Rpc = ServerCommandTypes
+module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_minimal_syntax)
 
 let parse_function_or_method_id ~func_action ~meth_action name =
   let pieces = Str.split (Str.regexp "::") name in
@@ -415,8 +417,8 @@ let main args =
       else
         let file = Relative_path.create Relative_path.Dummy file in
         let source_text = Full_fidelity_source_text.from_file file in
-        let syntax_tree = Full_fidelity_syntax_tree.make source_text in
-        let json = Full_fidelity_syntax_tree.to_json syntax_tree in
+        let syntax_tree = SyntaxTree.make source_text in
+        let json = SyntaxTree.to_json syntax_tree in
         Hh_json.json_to_string json in
       ClientFullFidelityParse.go results;
       Exit_status.No_error

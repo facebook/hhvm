@@ -10,6 +10,7 @@
 
 module SourceText = Full_fidelity_source_text
 module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_minimal_syntax)
 
 open OUnit
 

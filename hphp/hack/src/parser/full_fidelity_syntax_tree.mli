@@ -8,6 +8,7 @@
  *
  *)
 
+module WithSyntax : functor (Syntax : Syntax_sig.Syntax_S) -> sig
 type t
 val make : ?env:Full_fidelity_parser_env.t -> Full_fidelity_source_text.t -> t
 val root : t -> Full_fidelity_minimal_syntax.t
@@ -21,3 +22,4 @@ val is_php : t -> bool
 val is_strict : t -> bool
 val is_decl : t -> bool
 val to_json : t -> Hh_json.json
+end (* WithSyntax *)

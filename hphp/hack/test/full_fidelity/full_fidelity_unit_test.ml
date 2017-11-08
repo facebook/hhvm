@@ -11,6 +11,8 @@
 module EditableTrivia = Full_fidelity_editable_trivia
 module SourceText = Full_fidelity_source_text
 module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_minimal_syntax)
+
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module ParserErrors = Full_fidelity_parser_errors
 module SyntaxError = Full_fidelity_syntax_error

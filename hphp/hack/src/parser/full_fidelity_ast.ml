@@ -8,6 +8,8 @@
  *
  *)
 
+module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_minimal_syntax)
 module Syntax = Full_fidelity_editable_positioned_syntax
 module SyntaxValue = Syntax.Value
 module Token = Full_fidelity_editable_positioned_token
@@ -2416,7 +2418,7 @@ let lower ~source_text ~script env : result =
   }
 
 let from_text (env : env) (source_text : SourceText.t) : result =
-  let open Full_fidelity_syntax_tree in
+  let open SyntaxTree in
   let tree   =
     let env =
       Full_fidelity_parser_env.make

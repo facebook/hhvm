@@ -29,6 +29,7 @@
 module Schema = Full_fidelity_schema
 module SyntaxError = Full_fidelity_syntax_error
 module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_minimal_syntax)
 module SourceText = Full_fidelity_source_text
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module ParserErrors = Full_fidelity_parser_errors
@@ -245,7 +246,7 @@ let handle_existing_file args filename =
     Printf.printf "%s\n" str
   end;
   if args.full_fidelity_json then begin
-    let json = Full_fidelity_syntax_tree.to_json syntax_tree in
+    let json = SyntaxTree.to_json syntax_tree in
     let str = Hh_json.json_to_string json in
     Printf.printf "%s\n" str
   end

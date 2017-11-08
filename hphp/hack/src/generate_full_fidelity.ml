@@ -2606,6 +2606,7 @@ module GenerateFFPositionedSyntax = struct
  * or the text." ^ "
 
 module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_minimal_syntax)
 module SourceText = Full_fidelity_source_text
 module Token = Full_fidelity_positioned_token
 

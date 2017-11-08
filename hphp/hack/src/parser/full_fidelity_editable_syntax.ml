@@ -15,6 +15,7 @@
  *)
 
 module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_minimal_syntax)
 module EditableToken = Full_fidelity_editable_token
 module MinimalSyntax = Full_fidelity_minimal_syntax
 module SyntaxWithEditableToken = Full_fidelity_syntax.WithToken(EditableToken)

@@ -9,6 +9,7 @@
  *)
 
 module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_minimal_syntax)
 module EditableSyntax = Full_fidelity_editable_syntax
 module SourceText = Full_fidelity_source_text
 module Env = Format_env

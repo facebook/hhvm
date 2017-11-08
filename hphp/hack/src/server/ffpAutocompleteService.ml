@@ -12,6 +12,7 @@ module PositionedSyntax = Full_fidelity_positioned_syntax
 module SourceText = Full_fidelity_source_text
 module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_minimal_syntax)
 module TokenKind = Full_fidelity_token_kind
 
 open Hh_core

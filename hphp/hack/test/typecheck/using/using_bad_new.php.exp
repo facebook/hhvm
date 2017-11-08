@@ -1,0 +1,6 @@
+File "using_bad_new.php", line 16, characters 8-19:
+'new' must not be used for disposable objects except in a 'using' statement (Typing[4187])
+File "using_bad_new.php", line 21, characters 10-21:
+'new' must not be used for disposable objects except in a 'using' statement (Typing[4187])
+File "using_bad_new.php", line 24, characters 8-24:
+'new' must not be used for disposable objects except in a 'using' statement (Typing[4187])

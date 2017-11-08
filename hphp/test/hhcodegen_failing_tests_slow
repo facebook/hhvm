@@ -140,7 +140,6 @@ slow/php7_backported/varSyntax/indirect-fcall.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection_classes/xhp.php
 slow/traits/1981.php
-slow/traits/__class__.php
 slow/type_assertions/1857.php
 slow/using/bad-goto1.php
 slow/using/bad-goto2.php

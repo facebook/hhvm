@@ -101,14 +101,21 @@ and emit_defs env defs =
       let i2 = aux env defs in
       gather [i1; i2]
   in
-  match defs with
-  | Ast.Stmt (Ast.Markup ((_, s), echo_expr_opt))::defs ->
-    let i1 =
-      Emit_statement.emit_markup env s echo_expr_opt ~check_for_hashbang:true
-    in
-    let i2 = aux env defs in
-    gather [i1; i2]
-  | defs -> aux env defs
+  let rec emit_markup env defs =
+    match defs with
+    | Ast.Stmt (Ast.Markup ((_, s), echo_expr_opt))::defs ->
+      let i1 =
+        Emit_statement.emit_markup env s echo_expr_opt ~check_for_hashbang:true
+      in
+      let i2 = aux env defs in
+      gather [i1; i2]
+    | d :: defs ->
+      let i1 = emit_def env d in
+      if is_empty i1 then emit_markup env defs
+      else gather [i1; aux env defs]
+    | [] -> aux env defs
+  in
+  emit_markup env defs
 
 let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info
               static_inits doc_comment =

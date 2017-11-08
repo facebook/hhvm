@@ -4,7 +4,7 @@ namespace HH {
   abstract final class Shapes {
 
     public static function idx(
-      array $shape,
+      darray $shape,
       arraykey $index,
       $default = null,
     ) {
@@ -12,27 +12,27 @@ namespace HH {
     }
 
     public static function keyExists(
-      array $shape,
+      darray $shape,
       arraykey $index,
     ): bool {
       return \array_key_exists($index, $shape);
     }
 
     public static function removeKey(
-      array &$shape,
+      darray &$shape,
       arraykey $index,
     ): void {
       unset($shape[$index]);
     }
 
     public static function toArray(
-      array $shape,
-    ): array {
+      darray $shape,
+    ): darray {
       return $shape;
     }
 
     public static function toDict(
-      array $shape,
+      darray $shape,
     ): dict {
       return dict($shape);
     }

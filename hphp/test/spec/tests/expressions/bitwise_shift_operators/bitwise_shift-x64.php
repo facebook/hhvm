@@ -6,7 +6,7 @@
    +-------------------------------------------------------------+
 */
 
-require 'bitwise_shift_helper.php';
+require 'bitwise_shift_helper.inc';
 
 error_reporting(-1);
 

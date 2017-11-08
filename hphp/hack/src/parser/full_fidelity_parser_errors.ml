@@ -1076,6 +1076,8 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
   | AnonymousFunction { anonymous_parameters; _ }
     when not hhvm_compat_mode ->
     params_errors anonymous_parameters is_hack hhvm_compat_mode errors
+  | ClosureTypeSpecifier { closure_parameter_types; _ } ->
+    params_errors closure_parameter_types is_hack hhvm_compat_mode errors
   | DecoratedExpression _ -> decoration_errors node errors
   | _ -> errors
 

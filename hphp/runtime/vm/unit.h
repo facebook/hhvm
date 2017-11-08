@@ -695,8 +695,10 @@ public:
   /*
    * Define the type alias given by `id', binding it to the appropriate
    * NamedEntity for this request.
+   *
+   * returns true iff the bound type alias is persistent.
    */
-  void defTypeAlias(Id id);
+  bool defTypeAlias(Id id);
 
 
   /////////////////////////////////////////////////////////////////////////////

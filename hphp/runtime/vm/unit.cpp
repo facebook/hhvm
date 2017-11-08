@@ -696,14 +696,17 @@ Func* Unit::lookupDynCallFunc(const StringData* name) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FrameRestore {
-  explicit FrameRestore(const PreClass* preClass) {
+  explicit FrameRestore(const PreClass* preClass) :
+      FrameRestore(preClass->unit(), preClass->getOffset()) {}
+  explicit FrameRestore(const Unit* unit, Op op, Id id) :
+      FrameRestore(unit, (static_cast<size_t>(op) << 32) | id) {}
+  explicit NEVER_INLINE FrameRestore(const Unit* unit, size_t offsetOrOp) {
     ActRec* fp = vmfp();
-    PC pc = vmpc();
 
-    if (vmsp() && (!fp || fp->m_func->unit() != preClass->unit())) {
+    if (vmsp() && (!fp || fp->m_func->unit() != unit)) {
       m_top = vmsp();
       m_fp = fp;
-      m_pc = pc;
+      m_pc = vmpc();
 
       /*
         we can be called from Unit::merge, which hasnt yet setup
@@ -716,15 +719,31 @@ struct FrameRestore {
       ActRec &tmp = *vmStack().allocA();
       tmp.m_sfp = fp;
       tmp.m_savedRip = 0;
-      tmp.m_func = preClass->unit()->getMain(nullptr);
+      tmp.m_func = unit->getMain(nullptr);
       tmp.m_soff = !fp
         ? 0
-        : fp->m_func->unit()->offsetOf(pc) - fp->m_func->base();
+        : fp->m_func->unit()->offsetOf(m_pc) - fp->m_func->base();
       tmp.trashThis();
       tmp.m_varEnv = 0;
       tmp.initNumArgs(0);
       vmfp() = &tmp;
-      vmpc() = preClass->unit()->at(preClass->getOffset());
+      auto const offset = [&] {
+        if (offsetOrOp < kInvalidOffset) return static_cast<Offset>(offsetOrOp);
+        auto const op = Op(offsetOrOp >> 32);
+        auto const id = Id(offsetOrOp & 0xffffffff);
+        auto pc = unit->at(tmp.m_func->base());
+        auto const past = unit->at(tmp.m_func->past());
+        while (pc < past) {
+          if (peek_op(pc) == op) {
+            auto tpc = pc;
+            decode_op(tpc);
+            if (decode_iva(tpc) == id) return unit->offsetOf(pc);
+          }
+          pc += instrLen(pc);
+        }
+        return tmp.m_func->base();
+      }();
+      vmpc() = unit->at(offset);
       pushFrameSlots(tmp.m_func);
     } else {
       m_top = nullptr;
@@ -1205,7 +1224,7 @@ const TypeAliasReq* Unit::loadTypeAlias(const StringData* name) {
   return nullptr;
 }
 
-void Unit::defTypeAlias(Id id) {
+bool Unit::defTypeAlias(Id id) {
   assert(id < m_typeAliases.size());
   auto thisType = &m_typeAliases[id];
   auto nameList = NamedEntity::get(thisType->name);
@@ -1217,6 +1236,7 @@ void Unit::defTypeAlias(Id id) {
    */
   if (auto current = nameList->getCachedTypeAlias()) {
     auto raiseIncompatible = [&] {
+      FrameRestore _(this, Op::DefTypeAlias, id);
       raise_error("The type %s is already defined to an incompatible type",
                   thisType->name->data());
     };
@@ -1225,25 +1245,27 @@ void Unit::defTypeAlias(Id id) {
       if (resolveTypeAlias(thisType) != *current) {
         raiseIncompatible();
       }
-      return;
+      return true;
     }
     if (!current->compat(*thisType)) {
       raiseIncompatible();
     }
-    return;
+    return false;
   }
 
   // There might also be a class with this name already.
   if (nameList->getCachedClass()) {
+    FrameRestore _(this, Op::DefTypeAlias, id);
     raise_error("The name %s is already defined as a class",
                 thisType->name->data());
-    return;
+    not_reached();
   }
 
   auto resolved = resolveTypeAlias(thisType);
   if (resolved.invalid) {
+    FrameRestore _(this, Op::DefTypeAlias, id);
     raise_error("Unknown type or class %s", typeName->data());
-    return;
+    not_reached();
   }
 
   if (!nameList->m_cachedTypeAlias.bound()) {
@@ -1261,8 +1283,8 @@ void Unit::defTypeAlias(Id id) {
   }
 
   nameList->setCachedTypeAlias(resolved);
+  return nameList->m_cachedTypeAlias.isPersistent();
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Merge.
@@ -1271,14 +1293,6 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 SimpleMutex unitInitLock(false /* reentrant */, RankUnitInit);
-
-void mergeCns(TypedValue& tv, TypedValue *value, StringData *name) {
-  if (LIKELY(tv.m_type == KindOfUninit)) {
-    tv = *value;
-    return;
-  }
-  raise_notice(Strings::CONSTANT_ALREADY_DEFINED, name->data());
-}
 
 void setGlobal(StringData* name, TypedValue *value) {
   g_context->m_globalVarEnv->set(name, value);
@@ -1352,7 +1366,6 @@ void Unit::initialMerge() {
           case MergeKind::TypeAlias: {
             auto const aliasId = static_cast<Id>(intptr_t(obj)) >> 3;
             if (m_typeAliases[aliasId].attrs & AttrPersistent) {
-              defTypeAlias(aliasId);
               needsCompact = true;
             }
             break;
@@ -1376,8 +1389,8 @@ void Unit::initialMerge() {
           case MergeKind::PersistentDefine:
             needsCompact = true;
           case MergeKind::Define: {
-            StringData* s = (StringData*)((char*)obj - (int)k);
-            auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
+            auto const s = (StringData*)((char*)obj - (int)k);
+            auto const v = (TypedValueAux*)m_mergeInfo->mergeableData(ix + 1);
             ix += sizeof(*v) / sizeof(void*);
 
             auto const persistent = (k == MergeKind::PersistentDefine);
@@ -1385,8 +1398,17 @@ void Unit::initialMerge() {
             auto const handle = makeCnsHandle(s, persistent);
             v->rdsHandle() = handle;
 
-            auto& tv = rds::handleToRef<TypedValue>(handle);
-            if (persistent) mergeCns(tv, v, s);
+            // We need both checks; if a MergeKind::Define ends up
+            // persistent, its probably trying to define a system
+            // constant (so we can't overwrite the system constant
+            // here); and if a PersistentDefine ends up non
+            // persistent, we'll downgrade it to Define during compact.
+            if (persistent && rds::isPersistentHandle(handle)) {
+              auto& tv = rds::handleToRef<TypedValue>(handle);
+              Stats::inc(Stats::UnitMerge_mergeable);
+              Stats::inc(Stats::UnitMerge_mergeable_persistent_define);
+              tv = *v;
+            }
             break;
           }
           case MergeKind::Global:
@@ -1522,11 +1544,17 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
       case MergeKind::UniqueDefinedClass:
         not_reached();
 
-      case MergeKind::PersistentDefine:
-        delta += 1 + sizeof(TypedValueAux) / sizeof(void*);
-        ix += sizeof(TypedValueAux) / sizeof(void*);
-        break;
-
+      case MergeKind::PersistentDefine: {
+        auto const v = (TypedValueAux*)in->mergeableData(ix);
+        if (rds::isPersistentHandle(v->rdsHandle())) {
+          delta += 1 + sizeof(TypedValueAux) / sizeof(void*);
+          ix += sizeof(TypedValueAux) / sizeof(void*);
+          break;
+        }
+        obj = (char*)obj - (int)MergeKind::PersistentDefine +
+          (int)MergeKind::Define;
+        // fall through
+      }
       case MergeKind::Define:
       case MergeKind::Global:
         if (out) {
@@ -1722,13 +1750,19 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
 
       case MergeKind::PersistentDefine:
         // will be removed by compactMergeInfo
-        // but could be hit by other threads before
-        // that happens
+        // but will be hit at least once before that happens.
         do {
+          auto const v = (TypedValueAux*)mi->mergeableData(ix + 1);
+          if (!rds::isPersistentHandle(v->rdsHandle())) {
+            obj = (char*)obj - (int)MergeKind::PersistentDefine +
+              (int)MergeKind::Define;
+            k = MergeKind::Define;
+            break;
+          }
           ix += 1 + sizeof(TypedValueAux) / sizeof(void*);
           obj = mi->mergeableObj(ix);
           k = MergeKind(uintptr_t(obj) & 7);
-        } while (k == MergeKind::Define);
+        } while (k == MergeKind::PersistentDefine);
         continue;
 
       case MergeKind::Define:
@@ -1736,15 +1770,18 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_define);
 
-          StringData* name = (StringData*)((char*)obj - (int)k);
-          auto* v = (TypedValueAux*)mi->mergeableData(ix + 1);
+          auto const name = (StringData*)((char*)obj - (int)k);
+          auto const v = (TypedValueAux*)mi->mergeableData(ix + 1);
           assert(v->m_type != KindOfUninit);
 
           auto const handle = v->rdsHandle();
           assertx(rds::isNormalHandle(handle));
-          mergeCns(getDataRef<TypedValue>(tcbase, handle), v, name);
-          rds::initHandle(handle);
-
+          if (UNLIKELY(rds::isHandleInit(handle, rds::NormalTag{}))) {
+            raise_notice(Strings::CONSTANT_ALREADY_DEFINED, name->data());
+          } else {
+            getDataRef<TypedValue>(tcbase, handle) = *v;
+            rds::initHandle(handle);
+          }
           ix += 1 + sizeof(*v) / sizeof(void*);
           obj = mi->mergeableObj(ix);
           k = MergeKind(uintptr_t(obj) & 7);
@@ -1804,13 +1841,17 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_typealias);
           auto const aliasId = static_cast<Id>(intptr_t(obj)) >> 3;
-          defTypeAlias(aliasId);
+          if (!defTypeAlias(aliasId)) {
+            auto& attrs = m_typeAliases[aliasId].attrs;
+            if (attrs & AttrPersistent) {
+              attrs = static_cast<Attr>(attrs & ~AttrPersistent);
+            }
+          }
           obj = mi->mergeableObj(++ix);
           k = MergeKind(uintptr_t(obj) & 7);
         } while (k == MergeKind::TypeAlias);
         continue;
       case MergeKind::Done:
-        Stats::inc(Stats::UnitMerge_mergeable, -1);
         assert((unsigned)ix == mi->m_mergeablesSize);
         if (UNLIKELY(m_mergeState & MergeState::NeedsCompact)) {
           SimpleLock lock(unitInitLock);

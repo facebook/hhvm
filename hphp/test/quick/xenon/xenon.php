@@ -56,7 +56,6 @@ if ($success) {
 }
 $required_functions = array(
   'array_map',
-  'include',
   'HH\Asio\join',
   'HH\Asio\result',
 
@@ -70,6 +69,7 @@ $required_functions = array(
   'apc_fetch',
 );
 $optional_functions = array(
+  'include',
   AwaitAllWaitHandle::class.'::fromArray',
   RescheduleWaitHandle::class.'::create',
   WaitHandle::class.'::result',

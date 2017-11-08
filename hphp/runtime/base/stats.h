@@ -65,6 +65,7 @@ namespace Stats {
   STAT(UnitMerge_mergeable_unique_persistent) \
   STAT(UnitMerge_mergeable_unique_persistent_cache) \
   STAT(UnitMerge_mergeable_define) \
+  STAT(UnitMerge_mergeable_persistent_define) \
   STAT(UnitMerge_mergeable_global) \
   STAT(UnitMerge_mergeable_class) \
   STAT(UnitMerge_mergeable_require) \

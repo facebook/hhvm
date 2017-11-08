@@ -630,6 +630,12 @@ struct Index {
                                         SString fallbackName = nullptr) const;
 
   /*
+   * See if the named constant has a unique scalar definition, and
+   * return its value if so.
+   */
+  folly::Optional<Cell> lookup_persistent_constant(SString cnsName) const;
+
+  /*
    * If func is effect-free when called with args, and it returns a constant,
    * return that constant; otherwise return TTop.
    */

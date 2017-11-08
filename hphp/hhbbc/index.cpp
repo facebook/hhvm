@@ -3482,6 +3482,13 @@ folly::Optional<Type> Index::lookup_constant(Context ctx,
   return it->second.type;
 }
 
+folly::Optional<Cell> Index::lookup_persistent_constant(SString cnsName) const {
+  if (!options.HardConstProp) return folly::none;
+  auto it = m_data->constants.find(cnsName);
+  if (it == m_data->constants.end()) return folly::none;
+  return tv(it->second.type);
+}
+
 Type Index::lookup_foldable_return_type(Context ctx,
                                         borrowed_ptr<const php::Func> func,
                                         std::vector<Type> args) const {

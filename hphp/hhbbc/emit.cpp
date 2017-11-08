@@ -27,19 +27,23 @@
 #include <folly/Optional.h>
 #include <folly/Memory.h>
 
-#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/unit-util.h"
+
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/tv-comparisons.h"
+
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
-#include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/cfg.h"
-#include "hphp/hhbbc/unit-util.h"
-#include "hphp/hhbbc/class-util.h"
-#include "hphp/hhbbc/index.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -289,6 +293,75 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
   bool traceBc = false;
 
+  Type tos{};
+
+  auto const pseudomain = is_pseudomain(&func);
+  auto process_mergeable = [&] (const Bytecode& bc) {
+    if (!pseudomain) return;
+    switch (bc.op) {
+      case Op::DefCls:
+      case Op::DefClsNop:
+        if (!ue.m_returnSeen) {
+          auto const& cls = euState.unit->classes[
+            bc.op == Op::DefCls ? bc.DefCls.arg1 : bc.DefClsNop.arg1];
+          if (cls->hoistability == PreClass::NotHoistable) {
+            cls->hoistability = PreClass::Mergeable;
+          }
+        }
+        return;
+      case Op::AssertRATL:
+      case Op::AssertRATStk:
+      case Op::Nop:
+        return;
+
+      case Op::DefCns: {
+        if (ue.m_returnSeen || tos.subtypeOf(TBottom)) break;
+        auto top = tv(tos);
+        assertx(top);
+        auto val = euState.index.lookup_persistent_constant(bc.DefCns.str1);
+        // If there's a persistent constant with the same name, either
+        // this is the one and only definition, or the persistent
+        // definition is in systemlib (and this one will always fail).
+        auto const kind = val && cellSame(*val, *top) ?
+          Unit::MergeKind::PersistentDefine : Unit::MergeKind::Define;
+        ue.pushMergeableDef(kind, bc.DefCns.str1, *top);
+        return;
+      }
+      case Op::DefTypeAlias:
+        ue.pushMergeableTypeAlias(Unit::MergeKind::TypeAlias,
+                                  bc.DefTypeAlias.arg1);
+        return;
+
+      case Op::Null:   tos = TInitNull; return;
+      case Op::True:   tos = TTrue; return;
+      case Op::False:  tos = TFalse; return;
+      case Op::Int:    tos = ival(bc.Int.arg1); return;
+      case Op::Double: tos = dval(bc.Double.dbl1); return;
+      case Op::String: tos = sval(bc.String.str1); return;
+      case Op::Vec:    tos = vec_val(bc.Vec.arr1); return;
+      case Op::Dict:   tos = dict_val(bc.Dict.arr1); return;
+      case Op::Keyset: tos = keyset_val(bc.Keyset.arr1); return;
+      case Op::Array:  tos = aval(bc.Array.arr1); return;
+      case Op::PopC:
+        tos = TBottom;
+        return;
+      case Op::RetC: {
+        if (ue.m_returnSeen || tos.subtypeOf(TBottom)) break;
+        auto top = tv(tos);
+        assertx(top);
+        ue.m_returnSeen = true;
+        ue.m_mainReturn = *top;
+        tos = TBottom;
+        return;
+      }
+      default:
+        break;
+    }
+    ue.m_returnSeen = true;
+    ue.m_mainReturn = make_tv<KindOfUninit>();
+    tos = TBottom;
+  };
+
   auto map_local = [&] (LocalId id) {
     auto const loc = func.locals[id];
     assert(!loc.killed);
@@ -336,6 +409,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   };
 
   auto emit_inst = [&] (const Bytecode& inst) {
+    process_mergeable(inst);
     auto const startOffset = ue.bcPos();
     lastOff = startOffset;
 
@@ -1104,6 +1178,15 @@ void emit_pseudomain(EmitUnitState& state,
               std::get<1>(pm.srcInfo.loc));
   auto const fe = ue.getMain();
   auto const info = emit_bytecode(state, ue, pm);
+  if (is_systemlib_part(unit)) {
+    ue.m_mergeOnly = true;
+    auto const tv = make_tv<KindOfInt64>(1);
+    ue.m_mainReturn = tv;
+  } else {
+    ue.m_mergeOnly =
+      ue.m_returnSeen && ue.m_mainReturn.m_type != KindOfUninit;
+  }
+
   emit_finish_func(state, pm, *fe, info);
 }
 
@@ -1235,8 +1318,9 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
 
 std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
                                        const php::Unit& unit) {
-  auto const is_systemlib = is_systemlib_part(unit);
-  Trace::Bump bumper{Trace::hhbbc_emit, kSystemLibBump, is_systemlib};
+  Trace::Bump bumper{
+    Trace::hhbbc_emit, kSystemLibBump, is_systemlib_part(unit)
+  };
 
   auto ue = std::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());
@@ -1248,31 +1332,6 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
 
   EmitUnitState state { index, &unit };
   state.classOffsets.resize(unit.classes.size(), kInvalidOffset);
-
-  /*
-   * Unfortunate special case for Systemlib units.
-   *
-   * We need to ensure these units end up mergeOnly, at runtime there
-   * are things that assume this (right now no other HHBBC units end
-   * up being merge only, because of the returnSeen stuff below).
-   *
-   * (Merge-only-ness provides no measurable perf win in repo mode now
-   * that we have persistent classes, so we're not too worried about
-   * this.)
-   */
-  if (is_systemlib) {
-    ue->m_mergeOnly = true;
-    auto const tv = make_tv<KindOfInt64>(1);
-    ue->m_mainReturn = tv;
-  } else {
-    /*
-     * TODO(#3017265): UnitEmitter is very coupled to emitter.cpp, and
-     * expects classes and things to be added in an order that isn't
-     * quite clear.  If you don't set returnSeen things relating to
-     * hoistability break.
-     */
-    ue->m_returnSeen = true;
-  }
 
   emit_pseudomain(state, *ue, unit);
 

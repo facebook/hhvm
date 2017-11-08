@@ -45,7 +45,6 @@ echo main(42) . "\n";
 // and that all of the functions in this file are in the stack
 $stacks = xenon_get_data();
 $required_functions = array(
-  'include',
   'HH\Asio\join',
   'HH\Asio\v',
   'HH\Asio\result',
@@ -59,6 +58,7 @@ $required_functions = array(
   'main',
 );
 $optional_functions = array(
+  'include',
   'count',
   Vector::class.'::reserve',
   AwaitAllWaitHandle::class.'::fromVector',

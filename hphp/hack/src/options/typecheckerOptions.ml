@@ -50,6 +50,7 @@ let experimental_disallow_static_memoized =
   GlobalOptions.tco_experimental_disallow_static_memoized
 let experimental_disable_optional_and_unknown_shape_fields =
   GlobalOptions.tco_experimental_disable_optional_and_unknown_shape_fields
+let experimental_no_trait_reuse = GlobalOptions.tco_experimental_no_trait_reuse
 
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

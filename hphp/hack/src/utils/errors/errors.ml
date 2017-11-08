@@ -759,7 +759,7 @@ module Typing                               = struct
   let inout_annotation_unexpected           = 4183 (* DONT MODIFY!!!! *)
   let inoutness_mismatch                    = 4184 (* DONT MODIFY!!!! *)
   let static_synthetic_method               = 4185 (* DONT MODIFY!!!! *)
-
+  let trait_reuse                           = 4186 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2375,6 +2375,14 @@ let unsatisfied_req parent_pos req_name req_pos =
 let cyclic_class_def stack pos =
   let stack = SSet.fold (fun x y -> (Utils.strip_ns x)^" "^y) stack "" in
   add Typing.cyclic_class_def pos ("Cyclic class definition : "^stack)
+
+let trait_reuse p_pos p_name class_name trait =
+  let c_pos, c_name = class_name in
+  let c_name = Utils.strip_ns c_name in
+  let trait = Utils.strip_ns trait in
+  let err = "Class "^c_name^" reuses trait "^trait^" in its hierarchy" in
+  let err' = "It is already used through "^(Utils.strip_ns p_name) in
+  add_list Typing.trait_reuse [c_pos, err; p_pos, err']
 
 let override_final ~parent ~child =
   add_list Typing.override_final [child, "You cannot override this method";

@@ -79,54 +79,99 @@ let infer_const expr =
  *)
 (*****************************************************************************)
 
+let experimental_no_trait_reuse_enabled env =
+  (TypecheckerOptions.experimental_feature_enabled
+  env.Decl_env.decl_tcopt
+  TypecheckerOptions.experimental_no_trait_reuse)
+
+let report_reused_trait parent_type class_nast =
+  Errors.trait_reuse parent_type.dc_pos parent_type.dc_name class_nast.c_name
+
+(**
+ * Verifies that a class never reuses the same trait throughout its hierarchy.
+ *
+ * Since Hack only has single inheritance and we already put up a warning for
+ * cyclic class hierarchies, if there is any overlap between our extends and
+ * our parents' extends, that overlap must be a trait.
+ *
+ * This does not hold for interfaces because they have multiple inheritance,
+ * but interfaces cannot use traits in the first place.
+ *
+ * XHP attribute dependencies don't actually pull the trait into the class,
+ * so we need to track them totally separately.
+ *)
+let check_no_duplicate_traits parent_type class_nast c_extends full_extends =
+  let class_size = SSet.cardinal c_extends in
+  let parents_size = SSet.cardinal parent_type.dc_extends in
+  let full_size = SSet.cardinal full_extends in
+  if (class_size + parents_size > full_size) then
+    let duplicates = SSet.inter c_extends parent_type.dc_extends in
+    SSet.iter (report_reused_trait parent_type class_nast) duplicates
+
 (**
  * Adds the traits/classes which are part of a class' hierarchy.
  *
- * Traits are included in the parent list so that the class can access the trait
- * members which are declared as private/protected.
+ * Traits are tracked separately but merged into the parents list when
+ * typechecking so that the class can access the trait members which are
+ * declared as private/protected.
  *)
-let add_grand_parents_or_traits parent_pos class_nast acc parent_type =
-  let extends, is_complete, is_trait = acc in
+let add_grand_parents_or_traits no_trait_reuse parent_pos class_nast acc parent_type =
+  let extends, is_complete, pass = acc in
   let class_pos = fst class_nast.c_name in
   let class_kind = class_nast.c_kind in
-  if not is_trait
-  then check_extend_kind parent_pos parent_type.dc_kind class_pos class_kind;
-  let extends = SSet.union extends parent_type.dc_extends in
-  extends, parent_type.dc_members_fully_known && is_complete, is_trait
+  if pass = `Extends_pass then
+    check_extend_kind parent_pos parent_type.dc_kind class_pos class_kind;
+  (* If we are crawling the xhp attribute deps, we need to merge their xhp deps
+   * as well *)
+  let parent_deps = if pass = `Xhp_pass
+    then SSet.union parent_type.dc_extends parent_type.dc_xhp_attr_deps
+    else parent_type.dc_extends in
+  let extends' = SSet.union extends parent_deps in
+  (* Verify that merging the parent's extends did not introduce trait reuse *)
+  if no_trait_reuse then
+    check_no_duplicate_traits parent_type class_nast extends extends';
+  extends', parent_type.dc_members_fully_known && is_complete, pass
 
-let get_class_parent_or_trait env class_nast (parents, is_complete, is_trait)
+let get_class_parent_or_trait env class_nast (parents, is_complete, pass)
     hint =
+  (* See comment on check_no_duplicate_traits for reasoning here *)
+  let no_trait_reuse = experimental_no_trait_reuse_enabled env
+    && pass <> `Xhp_pass && class_nast.c_kind <> Ast.Cinterface
+  in
   let parent_pos, parent, _ = Decl_utils.unwrap_class_hint hint in
+  (* If we already had this exact trait, we need to flag trait reuse *)
+  let reused_trait = no_trait_reuse && SSet.mem parent parents in
   let parents = SSet.add parent parents in
   let parent_type = Decl_env.get_class_dep env parent in
   match parent_type with
   | None ->
       (* The class lives in PHP *)
-      parents, false, is_trait
+      parents, false, pass
   | Some parent_type ->
-      (* The parent class lives in Hack *)
-      let acc = parents, is_complete, is_trait in
-      add_grand_parents_or_traits parent_pos class_nast acc parent_type
+      (* The parent class lives in Hack, so we can report reused traits *)
+      if reused_trait then report_reused_trait parent_type class_nast parent;
+      let acc = parents, is_complete, pass in
+      add_grand_parents_or_traits no_trait_reuse parent_pos class_nast acc parent_type
 
 let get_class_parents_and_traits env class_nast =
   let parents = SSet.empty in
   let is_complete = true in
   (* extends parents *)
-  let acc = parents, is_complete, false in
+  let acc = parents, is_complete, `Extends_pass in
   let parents, is_complete, _ =
     List.fold_left class_nast.c_extends
       ~f:(get_class_parent_or_trait env class_nast) ~init:acc in
   (* traits *)
-  let acc = parents, is_complete, true in
+  let acc = parents, is_complete, `Traits_pass in
   let parents, is_complete, _ =
     List.fold_left class_nast.c_uses
       ~f:(get_class_parent_or_trait env class_nast) ~init:acc in
   (* XHP classes whose attributes were imported via "attribute :foo;" syntax *)
-  let acc = parents, is_complete, true in
-  let parents, is_complete, _ =
+  let acc = SSet.empty, is_complete, `Xhp_pass in
+  let xhp_parents, is_complete, _ =
     List.fold_left class_nast.c_xhp_attr_uses
       ~f:(get_class_parent_or_trait env class_nast) ~init:acc in
-  parents, is_complete
+  parents, xhp_parents, is_complete
 
 (*****************************************************************************)
 (* Section declaring the type of a function *)
@@ -379,7 +424,7 @@ and class_decl tcopt c =
   in
   let impl = List.map impl (get_implements env) in
   let impl = List.fold_right impl ~f:(SMap.fold SMap.add) ~init:SMap.empty in
-  let extends, ext_strict = get_class_parents_and_traits env c in
+  let extends, xhp_attr_deps, ext_strict = get_class_parents_and_traits env c in
   let extends = if c.c_is_xhp
     then SSet.add "XHP" extends
     else extends
@@ -426,6 +471,7 @@ and class_decl tcopt c =
     dc_construct = cstr;
     dc_ancestors = impl;
     dc_extends = extends;
+    dc_xhp_attr_deps = xhp_attr_deps;
     dc_req_ancestors = req_ancestors;
     dc_req_ancestors_extends = req_ancestors_extends;
     dc_enum_type = enum;

@@ -112,6 +112,12 @@ let tco_experimental_inout_params = "inout_params"
 let tco_experimental_disable_optional_and_unknown_shape_fields =
   "disable_optional_and_unknown_shape_fields"
 
+(**
+ * Enforce no duplication of traits in a class hierarchy. There is some clean-up
+ * involved, so it's behind a flag.
+ *)
+let tco_experimental_no_trait_reuse = "no_trait_reuse"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -132,6 +138,7 @@ let tco_experimental_all =
      tco_experimental_disallow_static_memoized;
      tco_experimental_inout_params;
      tco_experimental_disable_optional_and_unknown_shape_fields;
+     tco_experimental_no_trait_reuse;
    ]
 
 let tco_migration_flags_all =

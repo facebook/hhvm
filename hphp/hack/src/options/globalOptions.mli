@@ -107,6 +107,7 @@ val tco_experimental_coroutines: string
 val tco_experimental_inout_params : string
 val tco_experimental_disallow_static_memoized : string
 val tco_experimental_disable_optional_and_unknown_shape_fields : string
+val tco_experimental_no_trait_reuse : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t

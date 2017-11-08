@@ -268,6 +268,7 @@ let is_dependent_class_of_any classes c =
   | Some c ->
     (intersection_nonempty classes SMap.mem c.Decl_defs.dc_ancestors) ||
     (intersection_nonempty classes SSet.mem c.Decl_defs.dc_extends) ||
+    (intersection_nonempty classes SSet.mem c.Decl_defs.dc_xhp_attr_deps) ||
     (intersection_nonempty classes SSet.mem
       c.Decl_defs.dc_req_ancestors_extends)
 

@@ -213,6 +213,7 @@ let class_big_diff class1 class2 =
     class1.dc_req_ancestors class2.dc_req_ancestors <> 0 ||
   SSet.compare class1.dc_req_ancestors_extends class2.dc_req_ancestors_extends <> 0 ||
   SSet.compare class1.dc_extends class2.dc_extends <> 0 ||
+  SSet.compare class1.dc_xhp_attr_deps class2.dc_xhp_attr_deps <> 0 ||
   class1.dc_enum_type <> class2.dc_enum_type ||
   (* due to, e.g. switch exhaustiveness checks, a change in an enum's
    * constant set is a "big" difference *)

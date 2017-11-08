@@ -65,6 +65,7 @@ type decl_class_type = {
   dc_req_ancestors       : requirement list;
   dc_req_ancestors_extends : SSet.t;
   dc_extends             : SSet.t;
+  dc_xhp_attr_deps       : SSet.t;
   dc_enum_type           : enum_type option;
 }
 

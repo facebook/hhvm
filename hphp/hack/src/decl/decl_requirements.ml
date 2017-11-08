@@ -74,6 +74,7 @@ let declared_class_req env (requirements, req_extends) hint =
     requirements, req_extends
   | Some parent_type -> (* The parent class lives in Hack *)
     let req_extends = SSet.union parent_type.dc_extends req_extends in
+    let req_extends = SSet.union parent_type.dc_xhp_attr_deps req_extends in
     (* the req may be of an interface that has reqs of its own; the
      * flattened ancestry required by *those* reqs need to be added
      * in to, e.g., interpret accesses to protected functions inside

@@ -759,7 +759,8 @@ module Typing                               = struct
   let inout_annotation_unexpected           = 4183 (* DONT MODIFY!!!! *)
   let inoutness_mismatch                    = 4184 (* DONT MODIFY!!!! *)
   let static_synthetic_method               = 4185 (* DONT MODIFY!!!! *)
-
+  let trait_reuse                           = 4186 (* DONT MODIFY!!!! *)
+  let invalid_new_disposable                = 4187 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2583,6 +2584,11 @@ let inoutness_mismatch pos1 pos2 =
   let msg1 = pos1, "This is an inout parameter" in
   let msg2 = pos2, "It is incompatible with a normal parameter" in
   add_list Typing.inoutness_mismatch [msg1; msg2]
+
+let invalid_new_disposable pos =
+  let msg =
+    "'new' must not be used for disposable objects except in a 'using' statement" in
+  add Typing.invalid_new_disposable pos msg
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

@@ -529,7 +529,7 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
   match content with
     (* Simple assignment to local of form `$lvar = e` *)
   | Binop (Ast.Eq None, (lvar_pos, Lvar lvar), e) ->
-    let env, te, ty = expr env e in
+    let env, te, ty = expr ~is_using_clause:true env e in
     let env = enforce_is_disposable env has_await (fst e) ty in
     let env = set_local ~is_using_clause:true env lvar ty in
     (* We are assigning a new value to the local variable, so we need to
@@ -541,7 +541,7 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
 
     (* Arbitrary expression. This will be assigned to a temporary *)
   | _ ->
-    let env, typed_using_clause, ty = expr env using_clause in
+    let env, typed_using_clause, ty = expr ~is_using_clause:true env using_clause in
     let env = enforce_is_disposable env has_await pos ty in
     env, (typed_using_clause, [])
 
@@ -999,18 +999,19 @@ and bind_as_expr env ty aexpr =
     | _ -> (* TODO Probably impossible, should check that *)
       assert false
 
-and expr ?expected ?(is_receiver = false) ?allow_uref env e =
+and expr ?expected ?(is_receiver = false) ?(is_using_clause = false) ?allow_uref env e =
   begin match expected with
   | None -> ()
   | Some (_, r, ty) ->
     Typing_log.log_types 1 (fst e) env
     [Typing_log.Log_sub ("Typing.expr " ^ Typing_reason.string_of_ureason r,
        [Typing_log.Log_type ("expected_ty", ty)])] end;
-  raw_expr ~is_receiver ?allow_uref ?expected ~in_cond:false env e
+  raw_expr ~is_receiver ~is_using_clause ?allow_uref ?expected ~in_cond:false env e
 
 and raw_expr
   ~in_cond
   ?(is_receiver = false)
+  ?(is_using_clause = false)
   ?expected
   ?lhs_of_null_coalesce
   ?allow_uref
@@ -1018,7 +1019,8 @@ and raw_expr
   env e =
   debug_last_pos := fst e;
   let env, te, ty =
-    expr_ ~in_cond ~is_receiver ?expected ?lhs_of_null_coalesce ?allow_uref ~valkind env e in
+    expr_ ~in_cond ~is_receiver ~is_using_clause ?expected ?lhs_of_null_coalesce ?allow_uref
+      ~valkind env e in
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
     | None -> () in
@@ -1096,6 +1098,7 @@ and expr_
   ?expected
   ~in_cond
   ?(is_receiver = false)
+  ?(is_using_clause = false)
   ?lhs_of_null_coalesce
   ?allow_uref
   ~(valkind: [> `lvalue | `lvalue_subexpr | `other ])
@@ -1812,7 +1815,7 @@ and expr_
       Typing_hooks.dispatch_new_id_hook c env p;
       TUtils.process_static_find_ref c (p, SN.Members.__construct);
       let env, tc, tel, tuel, ty =
-        new_object ~expected ~check_parent:false ~check_not_abstract:true
+        new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
           p env c el uel in
       let env = Env.forget_members env p in
       make_result env (T.New(tc, tel, tuel)) ty
@@ -2248,7 +2251,7 @@ and check_expected_ty message env inferred_ty expected =
     else
       env
 
-and new_object ~expected ~check_parent ~check_not_abstract p env cid el uel =
+and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p env cid el uel =
   (* Obtain class info from the cid expression. We get multiple
    * results with a CIexpr that has a union type *)
   let env, tcid, classes = instantiable_cid p env cid in
@@ -2281,6 +2284,14 @@ and new_object ~expected ~check_parent ~check_not_abstract p env cid el uel =
             (fun env _ -> Env.fresh_unresolved_type env) in
           env, (Tclass (cname, params)), params in
       let r_witness = Reason.Rwitness p in
+      let idisposable_type =
+        (r_witness, Tclass ((p, SN.Classes.cIDisposable), [])) in
+      let iasyncdisposable_type =
+        (r_witness, Tclass ((p, SN.Classes.cIAsyncDisposable), [])) in
+      if not check_parent && not is_using_clause &&
+         (SubType.is_sub_type env c_ty idisposable_type
+      || SubType.is_sub_type env c_ty iasyncdisposable_type)
+      then Errors.invalid_new_disposable p;
       let obj_ty = (r_witness, obj_ty_) in
       let c_ty =
         match cid with
@@ -2695,6 +2706,7 @@ and check_parent_construct pos env el uel env_parent =
   let env, env_parent = Phase.localize_with_self env env_parent in
   let env, _tcid, tel, tuel, parent =
     new_object ~expected:None ~check_parent:true ~check_not_abstract
+      ~is_using_clause:false
       pos env CIparent el uel in
   let env, _ = Type.unify pos (Reason.URnone) env env_parent parent in
   env, tel, tuel, (Reason.Rwitness pos, Tprim Tvoid)

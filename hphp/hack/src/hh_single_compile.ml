@@ -182,11 +182,13 @@ let parse_text compiler_options popt fn text =
       not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
     let enable_hh_syntax =
       Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
+    let php5_compat_mode =
+      not (Hhbc_options.enable_uniform_variable_syntax !Hhbc_options.compiler_options) in
     let env = Full_fidelity_ast.make_env
       ~parser_options:popt
       ~ignore_pos
       ~hhvm_compat_mode:true
-      ~php5_compat_mode:true
+      ~php5_compat_mode
       ~enable_hh_syntax
       fn
     in

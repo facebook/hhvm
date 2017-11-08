@@ -137,7 +137,6 @@ slow/php7_backported/ns_093.php
 slow/php7_backported/scalar-types/scalar_relative_typehint_disallowed.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_008.php
 slow/php7_backported/varSyntax/indirect-fcall.php
-slow/php7_backported/varSyntax/staticMember.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection_classes/xhp.php
 slow/traits/1981.php

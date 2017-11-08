@@ -25,6 +25,7 @@ type t = {
   option_aliased_namespaces : (string * string) list option;
   option_source_mapping : bool;
   option_relabel : bool;
+  option_php7_uvs : bool;
 }
 
 let default = {
@@ -38,6 +39,7 @@ let default = {
   option_max_array_elem_size_on_the_stack = 64;
   option_aliased_namespaces = None;
   option_source_mapping = false;
+  option_php7_uvs = false;
   (* If true, then renumber labels after generating code for a method
    * body. Semantic diff doesn't care about labels, but for visual diff against
    * HHVM it's helpful to renumber in order that the labels match more closely *)
@@ -55,6 +57,7 @@ let max_array_elem_size_on_the_stack o =
 let aliased_namespaces o = o.option_aliased_namespaces
 let source_mapping o = o.option_source_mapping
 let relabel o = o.option_relabel
+let enable_uniform_variable_syntax o = o.option_php7_uvs
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
  * Eval.EnableHipHopSyntax setting *)
@@ -140,7 +143,9 @@ let value_setters = [
   (set_value "hack.compiler.optimize_null_checks" get_value_from_config_int @@
     fun opts v -> { opts with option_optimize_null_check = (v = 1) });
   (set_value "hack.compiler.optimize_cuf" get_value_from_config_int @@
-    fun opts v -> { opts with option_optimize_cuf = (v = 1) })
+    fun opts v -> { opts with option_optimize_cuf = (v = 1) });
+  (set_value "hhvm.php7.uvs" get_value_from_config_int @@
+    fun opts v -> { opts with option_php7_uvs = (v = 1) })
 ]
 
 let extract_config_options_from_json ~init config_json =

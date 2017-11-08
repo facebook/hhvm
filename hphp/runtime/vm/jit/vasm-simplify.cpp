@@ -105,7 +105,7 @@ foldable_load_helper(Env& env, Vreg reg, int size, Vlabel b, size_t i) {
 
 const Vptr* foldable_load(Env& env, Vreg reg, int size,
                           Vlabel b, size_t i) {
-   auto const info = foldable_load_helper(env, reg, size, b, i);
+  auto const info = foldable_load_helper(env, reg, size, b, i);
   if (!info.first || info.second + 1 == i) return info.first;
   std::vector<Vreg> nonSSARegs;
   visit(env.unit, *info.first, [&] (Vreg r, Width) {
@@ -393,25 +393,39 @@ int narrow_cmp(Env& env, int size, const cmpq& vcmp, Vlabel b, size_t i,
 }
 
 enum class SFUsage {
-  Unsigned,
-  FixableSigned,
+  Ok,
+  Fixable,
   Unfixable
 };
 
 /*
- * Check whether all uses of sf are either "unsigned" or could be
- * converted to unsigned. If there are any uses outside of b, we
- * assume they can't be fixed. If the fix parameter is true, we
- * actually convert any signed uses to the corresponding unsigned use.
+ * Check whether all uses of sf are suitable, or can be converted to
+ * suitable uses, as determined by fun.
+ *
+ * fun takes a CC as its argument, and returns
+ *  - CC_None to indicate the usage is unsuitable
+ *  - The input cc to indicate that its already suitable
+ *  - Some other cc to indicate that we could convert to that.
+ *
+ * If fix is true, this will convert any uses as specified.
  */
-SFUsage check_unsigned_uses(Env& env, Vreg sf, Vlabel b, size_t i, bool fix) {
-  auto ret = SFUsage::Unsigned;
+template<class F>
+SFUsage check_sf_usage_helper(Env& env, Vreg sf, Vlabel b, size_t i, bool fix,
+                              F fun) {
+  auto ret = SFUsage::Ok;
   auto uses = env.use_counts[sf];
   while (uses) {
-    auto check = [&] (Vinstr& tmp) {
+    auto const& code = env.unit.blocks[b].code;
+    if (++i == code.size()) return SFUsage::Unfixable;
+    if (getSFUseReg(code[i]) == sf) {
+      uses--;
+      auto tmp = code[i];
       auto &cc = getConditionCode(tmp);
-      auto fixup = [&] (ConditionCode newCC) {
-        assertx(cc != newCC);
+      auto const newCC = fun(cc);
+      if (newCC == CC_None) {
+        return SFUsage::Unfixable;
+      }
+      if (newCC != cc) {
         if (fix) {
           cc = newCC;
           simplify_impl(env, b, i, [&] (Vout& v) {
@@ -419,16 +433,79 @@ SFUsage check_unsigned_uses(Env& env, Vreg sf, Vlabel b, size_t i, bool fix) {
             return 1;
           });
         }
-        ret = SFUsage::FixableSigned;
-        return false;
-      };
+        ret = SFUsage::Fixable;
+      }
+    }
+  }
+  return ret;
+}
+
+template<class F>
+bool check_sf_usage(Env& env, Vreg sf, Vlabel b, size_t i, F fun) {
+  switch (check_sf_usage_helper(env, sf, b, i, false, fun)) {
+    case SFUsage::Ok:
+      return true;
+    case SFUsage::Fixable:
+      check_sf_usage_helper(env, sf, b, i, true, fun);
+      return true;
+    case SFUsage::Unfixable:
+      return false;
+  }
+  not_reached();
+}
+
+// Try to change the condition codes so they work when the inputs to
+// the compare are swapped. Return true if successful (or there was
+// nothing to do).
+bool flip_ordered_uses(Env& env, Vreg sf, Vlabel b, size_t i) {
+  return check_sf_usage(
+    env, sf, b, i,
+    [] (ConditionCode cc) {
       switch (cc) {
         case CC_None:
           always_assert(false);
         case CC_O:
         case CC_NO:
           // can't be fixed
-          return true;
+          return CC_None;
+        case CC_B:  return CC_A;
+        case CC_AE: return CC_BE;
+        case CC_BE: return CC_AE;
+        case CC_A:  return CC_B;
+
+        case CC_E:
+        case CC_NE:
+          // already unordered
+          return cc;
+        case CC_S:
+        case CC_NS:
+        case CC_P:
+        case CC_NP:
+          // can't be fixed
+          return CC_None;
+        case CC_L:  return CC_G;
+        case CC_GE: return CC_LE;
+        case CC_LE: return CC_GE;
+        case CC_G:  return CC_L;
+      }
+      not_reached();
+    }
+  );
+}
+
+// Change any signed conditions to the corresponding unsigned
+// condition. Return true if successful (or there was nothing to do).
+bool fix_signed_uses(Env& env, Vreg sf, Vlabel b, size_t i) {
+  return check_sf_usage(
+    env, sf, b, i,
+    [] (ConditionCode cc) {
+      switch (cc) {
+        case CC_None:
+          always_assert(false);
+        case CC_O:
+        case CC_NO:
+          // can't be fixed
+          return CC_None;
         case CC_B:
         case CC_AE:
         case CC_E:
@@ -436,46 +513,44 @@ SFUsage check_unsigned_uses(Env& env, Vreg sf, Vlabel b, size_t i, bool fix) {
         case CC_BE:
         case CC_A:
           // already unsigned
-          return false;
+          return cc;
         case CC_S:
         case CC_NS:
         case CC_P:
         case CC_NP:
           // can't be fixed
-          return true;
-        case CC_L:  return fixup(CC_B);
-        case CC_GE: return fixup(CC_AE);
-        case CC_LE: return fixup(CC_BE);
-        case CC_G:  return fixup(CC_A);
+          return CC_None;
+        case CC_L:  return CC_B;
+        case CC_GE: return CC_AE;
+        case CC_LE: return CC_BE;
+        case CC_G:  return CC_A;
       }
       not_reached();
-    };
-    auto const& code = env.unit.blocks[b].code;
-    if (++i == code.size()) return SFUsage::Unfixable;
-    if (getSFUseReg(code[i]) == sf) {
-      uses--;
-      auto tmp = code[i];
-      if (check(tmp)) return SFUsage::Unfixable;
     }
-  }
-  return ret;
+  );
 }
 
 bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
   if (arch_any(Arch::ARM, Arch::PPC64)) return false;
- if (auto const vptr = foldable_load(env, vadd.s0, b, i)) {
-   return simplify_impl(env, b, i, addqmr{*vptr, vadd.s1, vadd.d, vadd.sf});
- }
- if (auto const vptr = foldable_load(env, vadd.s1, b, i)) {
-   return simplify_impl(env, b, i, addqmr{*vptr, vadd.s0, vadd.d, vadd.sf});
- }
- return false;
+  if (auto const vptr = foldable_load(env, vadd.s0, b, i)) {
+    return simplify_impl(env, b, i, addqmr{*vptr, vadd.s1, vadd.d, vadd.sf});
+  }
+  if (auto const vptr = foldable_load(env, vadd.s1, b, i)) {
+    return simplify_impl(env, b, i, addqmr{*vptr, vadd.s0, vadd.d, vadd.sf});
+  }
+  return false;
 }
 
 bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
-  if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
-    if (arch() == Arch::ARM) return false;
-    return simplify_impl(env, b, i, cmpqm { vcmp.s0, *vptr, vcmp.sf });
+  if (!arch_any(Arch::ARM, Arch::PPC64)) {
+    if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
+      return simplify_impl(env, b, i, cmpqm { vcmp.s0, *vptr, vcmp.sf });
+    }
+    if (auto const vptr = foldable_load(env, vcmp.s0, b, i)) {
+      if (flip_ordered_uses(env, vcmp.sf, b, i)) {
+        return simplify_impl(env, b, i, cmpqm { vcmp.s1, *vptr, vcmp.sf });
+      }
+    }
   }
   auto const sz0 = value_width(env, vcmp.s0);
   if (sz0 == sz::qword) return false;
@@ -484,19 +559,7 @@ bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
 
   auto const sz = sz1 > sz0 ? sz1 : sz0;
 
-  switch (check_unsigned_uses(env, vcmp.sf, b, i, false)) {
-    case SFUsage::Unsigned:
-      break;
-    case SFUsage::FixableSigned:
-      // convert signed uses to corresponding unsigned.
-      check_unsigned_uses(env, vcmp.sf, b, i, true);
-      // check that it worked.
-      assertx(check_unsigned_uses(env, vcmp.sf, b, i, false) ==
-              SFUsage::Unsigned);
-      break;
-    case SFUsage::Unfixable:
-      return false;
-  }
+  if (!fix_signed_uses(env, vcmp.sf, b, i)) return false;
 
   return simplify_impl(env, b, i, [&] (Vout& v) {
     return narrow_cmp(env, sz, vcmp, b, i, v);

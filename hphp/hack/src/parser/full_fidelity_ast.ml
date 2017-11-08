@@ -929,6 +929,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           (match snd expr with
           | Lvarvar (n, id) -> Lvarvar (n + 1, id)
           | Lvar id         -> Lvarvar (1, id)
+          | String (p, s) -> Lvar (p, "$" ^ s)
           | _ -> BracedExpr expr
           )
         | _ -> missing_syntax "unary operator" node env

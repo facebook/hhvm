@@ -171,6 +171,7 @@ bool PreClassEmitter::addConstant(const StringData* n,
   }
   TypedValue tvVal;
   if (typeconst && !typeStructure.empty())  {
+    assertx(typeStructure.isDArray());
     tvVal = make_tv<KindOfPersistentArray>(typeStructure.get());
     assert(tvIsPlausible(tvVal));
   } else {

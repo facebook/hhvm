@@ -360,13 +360,11 @@ const StaticString
 /* Turns the argsList linked list of TypeAnnotation into a positioned
  * static array. */
 Array TypeAnnotation::argsListToScalarArray(TypeAnnotationPtr ta) const {
-  int i = 0;
-  auto typeargs = Array::Create();
+  auto typeargs = Array::CreateVArray();
 
   auto typeEl = ta;
   while (typeEl) {
-    typeargs.add(i, Variant(typeEl->getScalarArrayRep()));
-    ++i;
+    typeargs.append(Variant(typeEl->getScalarArrayRep()));
     typeEl = typeEl->m_typeList;
   }
   return typeargs;
@@ -374,12 +372,12 @@ Array TypeAnnotation::argsListToScalarArray(TypeAnnotationPtr ta) const {
 
 void TypeAnnotation::shapeFieldsToScalarArray(Array& rep,
                                               TypeAnnotationPtr ta) const {
-  auto fields = Array::Create();
+  auto fields = Array::CreateDArray();
   auto shapeField = ta;
   while (shapeField) {
     assert(shapeField->m_typeArgs);
 
-    auto field = Array::Create();
+    auto field = Array::CreateDArray();
     if (shapeField->isClsCnsShapeField()) {
       field.add(s_is_cls_cns, true_varNR.tv());
     }
@@ -394,7 +392,7 @@ void TypeAnnotation::shapeFieldsToScalarArray(Array& rep,
 }
 
 Array TypeAnnotation::getScalarArrayRep() const {
-  auto rep = Array::Create();
+  auto rep = Array::CreateDArray();
 
   bool nullable = (bool) m_nullable;
   if (nullable) {
@@ -439,12 +437,10 @@ Array TypeAnnotation::getScalarArrayRep() const {
     // for now, only store the vanilla names (strings) as part of the
     // access list
     rep.add(s_root_name, Variant(m_name));
-    auto accList = Array::Create();
+    auto accList = Array::CreateVArray();
     auto typeEl = m_typeArgs;
-    int i = 0;
     while (typeEl) {
-      accList.add(i, Variant(typeEl->vanillaName()));
-      ++i;
+      accList.append(Variant(typeEl->vanillaName()));
       typeEl = typeEl->m_typeList;
     }
     rep.add(s_access_list, Variant(accList));

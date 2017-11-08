@@ -10612,7 +10612,8 @@ Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   }
 
   TypeAlias record;
-  record.typeStructure = Array(td->annot->getScalarArrayRep());
+  record.typeStructure = td->annot->getScalarArrayRep();
+  assertx(record.typeStructure.isDArray());
   record.name = name;
   record.value = value;
   record.type = type;

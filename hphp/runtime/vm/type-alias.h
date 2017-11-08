@@ -52,7 +52,7 @@ struct TypeAlias {
   AnnotType type;
   bool nullable;  // null is allowed; for ?Foo aliases
   UserAttributeMap userAttrs;
-  Array typeStructure{Array::Create()};
+  Array typeStructure{Array::CreateDArray()};
 
   template<class SerDe>
   typename std::enable_if<!SerDe::deserializing>::type
@@ -125,7 +125,7 @@ struct TypeAliasReq {
   LowPtr<Class> klass{nullptr};
   // Needed for error messages; nullptr if not defined.
   LowStringPtr name{nullptr};
-  Array typeStructure{Array::Create()};
+  Array typeStructure{Array::CreateDArray()};
   UserAttributeMap userAttrs;
 };
 

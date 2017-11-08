@@ -80,11 +80,11 @@ let rec shape_field_to_pair ~tparams ~namespace sf =
     [(TV.String "value", hint_to_type_constant ~tparams ~namespace hint)]
   in
   let inner_value = class_const @ optional @ inner_value in
-  let value = TV.Array inner_value in
+  let value = TV.DArray inner_value in
   (TV.String name, value)
 
 and shape_info_to_typed_value ~tparams ~namespace si =
-  TV.Array (
+  TV.DArray (
     List.map ~f:(shape_field_to_pair ~tparams ~namespace)
     si.A.si_shape_field_list)
 
@@ -94,10 +94,8 @@ and shape_allows_unknown_fields { A.si_allows_unknown_fields; _ } =
   else []
 
 and type_constant_access_list sl =
-  let l =
-    List.mapi ~f:(fun i (_, s) -> (TV.Int (Int64.of_int i), TV.String s)) sl
-  in
-  TV.Array l
+  let l = List.map ~f:(fun (_, s) -> TV.String s) sl
+  in TV.VArray l
 
 and resolve_classname ~tparams ~namespace (p, s) =
   let s = Types.fix_casing s in
@@ -165,11 +163,9 @@ and hint_to_type_constant_list ~tparams ~namespace h =
 
 and hint_to_type_constant ?(is_typedef = false) ~tparams ~namespace h =
   let l = hint_to_type_constant_list ~tparams ~namespace h in
-  TV.Array (l @ if is_typedef then get_typevars tparams else [])
+  TV.DArray (l @ if is_typedef then get_typevars tparams else [])
 
 and hints_to_type_constant ~tparams ~namespace l =
-  TV.Array (
-    List.mapi l
-      ~f:(fun i h ->
-            (TV.Int (Int64.of_int i),
-            hint_to_type_constant ~tparams ~namespace h)))
+  TV.VArray (
+    List.map l
+      ~f:(fun h -> hint_to_type_constant ~tparams ~namespace h))

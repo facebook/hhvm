@@ -1162,6 +1162,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
       cnsCopy.val.m_data.parr = typeCns;
 
       resolvedTS = TypeStructure::resolve(cnsCopy, this, persistent);
+      assertx(resolvedTS.isDArray());
     } catch (const Exception& e) {
       raise_error(e.getMessage());
     }

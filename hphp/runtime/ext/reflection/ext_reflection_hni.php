@@ -2419,7 +2419,7 @@ class ReflectionTypeAlias implements Reflector {
    * @return    array  The type structure of the type alias.
    */
   <<__Native>>
-  public function getTypeStructure(): array;
+  public function getTypeStructure(): darray;
 
   /**
    * Gets all attributes

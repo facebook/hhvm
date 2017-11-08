@@ -44,8 +44,9 @@ inline TypeAliasReq TypeAliasReq::From(const TypeAlias& alias) {
   req.name = alias.name;
   req.type = alias.type;
   req.nullable = alias.nullable;
-  req.typeStructure = Array(alias.typeStructure);
+  req.typeStructure = alias.typeStructure;
   req.userAttrs = alias.userAttrs;
+  assertx(req.typeStructure.isDArray());
   return req;
 }
 
@@ -57,8 +58,9 @@ inline TypeAliasReq TypeAliasReq::From(TypeAliasReq req,
   }
   req.name = alias.name;
   req.nullable |= alias.nullable;
-  req.typeStructure = Array(alias.typeStructure);
+  req.typeStructure = alias.typeStructure;
   req.userAttrs = alias.userAttrs;
+  assertx(req.typeStructure.isDArray());
   return req;
 }
 

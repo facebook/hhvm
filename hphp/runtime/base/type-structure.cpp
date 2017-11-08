@@ -317,15 +317,14 @@ Array resolveList(const Array& arr,
                   bool& persistent) {
   auto const sz = arr.size();
 
-  PackedArrayInit newarr(sz);
+  VArrayInit newarr(sz);
   for (auto i = 0; i < sz; i++) {
     auto elemArr = arr[i].toArray();
     auto elem = resolveTS(elemArr, typeCns, typeCnsCls, generics, persistent);
     newarr.append(Variant(elem));
   }
 
-  auto ret = newarr.toArray();
-  return ret;
+  return newarr.toArray();
 }
 
 std::string resolveContextMsg(const Class::Const& typeCns,
@@ -345,12 +344,13 @@ std::string resolveContextMsg(const Class::Const& typeCns,
  * return nullptr. */
 Array getAlias(const String& aliasName) {
   if (aliasName.same(s_this) || Unit::lookupClass(aliasName.get())) {
-    return Array::Create();
+    return Array::CreateDArray();
   }
   auto typeAliasReq = Unit::loadTypeAlias(aliasName.get());
-  if (!typeAliasReq) return Array::Create();
+  if (!typeAliasReq) return Array::CreateDArray();
 
   // this returned type structure is unresolved.
+  assertx(typeAliasReq->typeStructure.isDArray());
   return typeAliasReq->typeStructure;
 }
 
@@ -428,7 +428,7 @@ Array resolveShape(const Array& arr,
          == TypeStructure::Kind::T_shape);
   assert(arr.exists(s_fields));
 
-  auto newfields = Array::Create();
+  auto newfields = Array::CreateDArray();
   auto const fields = arr[s_fields].toCArrRef();
   auto const sz = fields.size();
   for (auto i = 0; i < sz; i++) {
@@ -511,7 +511,7 @@ Array resolveTS(const Array& arr,
   auto const kind = static_cast<TypeStructure::Kind>(
     arr[s_kind].toInt64Val());
 
-  auto newarr = Array::Create();
+  auto newarr = Array::CreateDArray();
   if (arr.exists(s_nullable)) newarr.add(s_nullable, true_varNR.tv());
   newarr.add(s_kind, Variant(static_cast<uint8_t>(kind)));
 
@@ -574,7 +574,7 @@ Array resolveTS(const Array& arr,
 
           auto const sz = std::min(static_cast<ssize_t>(typevars.size()),
                                    generic_types.size());
-          ArrayInit newarr(sz, ArrayInit::Map{});
+          DArrayInit newarr(sz);
           for (auto i = 0; i < sz; i++) {
             newarr.add(String(typevars[i]), generic_types[i]);
           }
@@ -632,8 +632,9 @@ Array resolveTS(const Array& arr,
             cnsName.data());
         }
         auto tv = cls->clsCnsGet(cnsName.get(), /* includeTypeCns = */ true);
-        assert(isArrayLikeType(tv.m_type));
+        assertx(isArrayType(tv.m_type));
         typeCnsVal = Array(tv.m_data.parr);
+        assertx(typeCnsVal.isDArray());
         if (i == sz - 1) break;
 
         // if there are more accesses, keep resolving
@@ -663,11 +664,11 @@ Array resolveTS(const Array& arr,
     case TypeStructure::Kind::T_typevar: {
       assert(arr.exists(s_name));
       auto const name = arr[s_name].toCStrRef();
-      return generics.exists(name) ? generics[name].toArray() : Array(arr);
+      return generics.exists(name) ? generics[name].toDArray() : arr.toDArray();
     }
     case TypeStructure::Kind::T_xhp:
     default:
-      return Array(arr);
+      return arr.toDArray();
   }
 
   if(arr.exists(s_typevars)) newarr.add(s_typevars, arr[s_typevars]);

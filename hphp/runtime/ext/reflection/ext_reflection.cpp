@@ -649,7 +649,8 @@ Array HHVM_FUNCTION(type_structure,
     }
 
     auto const typeStructure = typeAlias->typeStructure;
-    assert(!typeStructure.empty());
+    assertx(!typeStructure.empty());
+    assertx(typeStructure.isDArray());
     Array resolved;
     try {
       bool persistent = true;
@@ -659,7 +660,8 @@ Array HHVM_FUNCTION(type_structure,
                   "Have you declared all classes in the type alias",
                   name.get()->data());
     }
-    assert(!resolved.empty());
+    assertx(!resolved.empty());
+    assertx(resolved.isDArray());
     return resolved;
   }
 
@@ -681,8 +683,9 @@ Array HHVM_FUNCTION(type_structure,
     }
   }
 
-  assert(isArrayLikeType(typeCns.m_type));
-  assert(typeCns.m_data.parr->isStatic());
+  assertx(isArrayType(typeCns.m_type));
+  assertx(typeCns.m_data.parr->isDArray());
+  assertx(typeCns.m_data.parr->isStatic());
   return Array::attach(typeCns.m_data.parr);
 }
 
@@ -1944,7 +1947,8 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
   assert(req);
   auto const typeStructure = req->typeStructure;
-  assert(!typeStructure.empty());
+  assertx(!typeStructure.empty());
+  assertx(typeStructure.isDArray());
   return typeStructure;
 }
 
@@ -1952,7 +1956,8 @@ static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
   assert(req);
   auto const typeStructure = req->typeStructure;
-  assert(!typeStructure.empty());
+  assertx(!typeStructure.empty());
+  assertx(typeStructure.isDArray());
   return TypeStructure::toString(typeStructure);
 }
 

@@ -1258,14 +1258,14 @@ namespace HH {
     // classname for classes, interfaces, enums, or traits
     'classname' => ?classname<T>,
     // for tuples
-    'elem_types' => ?array,
+    'elem_types' => ?varray,
     // for functions
-    'param_types' => ?array,
-    'return_type' => ?array,
+    'param_types' => ?varray,
+    'return_type' => ?darray,
     // for arrays, classes
-    'generic_types' => ?array,
+    'generic_types' => ?varray,
     // for shapes
-    'fields' => ?array,
+    'fields' => ?darray,
     // name for generics (type variables)
     'name' => ?string,
     // for type aliases
@@ -1284,9 +1284,9 @@ namespace HH {
    *                         is being retrieved. This is null when retrieving
    *                         the type constant for a type alias.
    *
-   * @return        array    The resolved type structure for either a type
+   * @return        darray   The resolved type structure for either a type
    *                         constant or a type alias.
    */
   <<__Native>>
-  function type_structure(mixed $cls_or_obj, ?string $cns_name = null): array;
+  function type_structure(mixed $cls_or_obj, ?string $cns_name = null): darray;
 }

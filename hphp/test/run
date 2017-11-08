@@ -718,16 +718,6 @@ function find_tests($files, array $options = null) {
       "find $files -name '*.php' -o -name '*.php.type-errors' " .
       "-o -name '*.hhas' | grep -v round_trip.hhas"
     ));
-    $tests = array_filter(
-      $tests,
-      function($test) {
-        return file_exists($test . '.expect') ||
-               file_exists($test . '.expectf') ||
-               file_exists($test . '.expectregex') ||
-               file_exists($test . '.hhvm.expect') ||
-               file_exists($test . '.hhvm.expectf');
-      }
-    );
   }
   if (!$tests) {
     error("Could not find any tests associated with your options.\n" .
@@ -1893,7 +1883,8 @@ function run_config_post($outputs, $test, $options) {
       "$test.diff", "No $test.expect, $test.expectf, " .
       "$test.hhvm.expect, $test.hhvm.expectf, " .
       "$test.typechecker.expect, $test.typechecker.expectf, " .
-      "nor $test.expectregex. Is $test even a test?"
+      "nor $test.expectregex. If $test is meant to be included by other ".
+      "tests, use a different file extension.\n"
     );
     return false;
   }

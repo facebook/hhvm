@@ -1,6 +1,6 @@
 <?hh
 
-require_once 'constants.php';
+require_once 'constants.inc';
 
 function callback_stress(
   string $path,

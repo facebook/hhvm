@@ -4,8 +4,8 @@
 #
 # The Watchman extension is a core part of www infrastructure on devservers.
 
-require_once 'constants.php';
-require_once 'callback.php';
+require_once 'constants.inc';
+require_once 'callback.inc';
 
 // Borrowed and stripped down from Watchman project test infrastructure.
 class WatchmanInstance {
@@ -239,7 +239,7 @@ function test_core(string $tmpdir): void {
   print("Stress test\n");
   apc_store('stress_counter', 0);
   fb_call_user_func_array_async(
-    __DIR__.'/callback.php',
+    __DIR__.'/callback.inc',
     'callback_checksub',
     varray[SUB_NAME],
   );

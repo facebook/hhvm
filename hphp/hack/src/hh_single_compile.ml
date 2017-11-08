@@ -252,7 +252,7 @@ let do_compile filename compiler_options fail_or_ast debug_time =
         | SyntaxError.RuntimeError -> Hhbc_ast.FatalOp.Runtime
       in
       let s = SyntaxError.message e in
-      Hhas_program.emit_fatal_program ~ignore_message:false error_t Pos.none s
+      Emit_program.emit_fatal_program ~ignore_message:false error_t Pos.none s
     | `ParseResult (errors, parser_return, _) ->
       let is_hh_file =
         Option.value_map parser_return.Parser_hack.file_mode
@@ -262,8 +262,8 @@ let do_compile filename compiler_options fail_or_ast debug_time =
       List.iter (Errors.get_error_list errors) (fun e ->
         Printf.printf "%s\n" (Errors.to_string (Errors.to_absolute e)));
       if Errors.is_empty errors
-      then Hhas_program.from_ast is_hh_file ast
-      else Hhas_program.emit_fatal_program ~ignore_message:true
+      then Emit_program.from_ast is_hh_file ast
+      else Emit_program.emit_fatal_program ~ignore_message:true
         Hhbc_ast.FatalOp.Parse Pos.none "Syntax error"
       in
   let t = add_to_time_ref debug_time.codegen_t t in

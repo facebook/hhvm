@@ -945,6 +945,16 @@ and emit_callconv _env _kind _e =
   (* TODO(mqian) implement *)
   emit_nyi "inout argument"
 
+and emit_inline_hhas s =
+  let lexer = Lexing.from_string s in
+  try
+    let instrs = Hhas_parser.functionbody Hhas_lexer.read lexer in
+    (* TODO: if inline hhas returned no result we should push null on stack *)
+    instrs
+  with Parsing.Parse_error ->
+    Emit_fatal.raise_fatal_parse Pos.none "error parsing inline hhas"
+
+
 and emit_expr env (pos, expr_ as expr) ~need_ref =
   Emit_pos.emit_pos_then pos @@
   match expr_ with
@@ -2094,6 +2104,9 @@ and emit_special_function env id args uargs default =
     let p = Pos.none in
     Some (emit_call env (p,
         A.Id (p, "\\__SystemLib\\func_slice_args")) [count] [])
+
+  | "hh\\asm", [_, A.String (_, s)] ->
+    Some (emit_inline_hhas s, Flavor.Cell)
 
   | id, _ when
     (optimize_cuf ()) && (is_call_user_func id (List.length args)) ->

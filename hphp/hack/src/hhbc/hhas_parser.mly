@@ -47,6 +47,8 @@ open Hhas_parser_actions
 
 %start program
 %type <Hhas_program.t> program
+%start functionbody
+%type <Instruction_sequence.t> functionbody
 %%
 program:
     nl decllist nl EOF { split_decl_list $2 [] [] None [] [] Emit_symbol_refs.empty_symbol_refs}

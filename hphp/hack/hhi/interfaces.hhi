@@ -153,7 +153,7 @@ interface Iterator<+Tv> extends Traversable<Tv> {
  *
  * async function use_countdown(): Awaitable<void> {
  *   $async_iter = countdown(100);
- *   foreach ($async_gen await as $value) { ... }
+ *   foreach ($async_iter await as $value) { ... }
  * }
  * ```
  *

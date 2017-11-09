@@ -150,6 +150,14 @@ module ErrorString = struct
      | _ ->
          "a type constant"
 
+  and class_kind c_kind final =
+    let fs = if final then " final" else "" in
+    match c_kind with
+    | Ast.Cabstract -> "an abstract" ^ fs ^ " class"
+    | Ast.Cnormal -> "a" ^ fs ^ " class"
+    | Ast.Cinterface -> "an interface"
+    | Ast.Ctrait -> "a trait"
+    | Ast.Cenum -> "an enum"
 end
 
 (*****************************************************************************)
@@ -896,3 +904,4 @@ let gconst tcopt gc = Full.to_string_decl tcopt gc
 let fun_ tcopt f = PrintFun.fun_type tcopt f
 let typedef tcopt td = PrintTypedef.typedef tcopt td
 let constraints_for_type env ty = Full.constraints_for_type env ty
+let class_kind c_kind final = ErrorString.class_kind c_kind final

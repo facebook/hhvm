@@ -386,6 +386,7 @@ module type S = sig
   val dynamic_class_property_name_in_strict_mode : Pos.t -> unit
   val dynamic_class_name_in_strict_mode : Pos.t -> unit
   val reading_from_append: Pos.t -> unit
+  val const_attribute_prohibited: Pos.t -> string -> unit
   val varray_or_darray_not_supported : Pos.t -> unit
   val unknown_field_disallowed_in_shape : Pos.t -> Pos.t -> string -> unit
   val nullable_cast : Pos.t -> string -> Pos.t -> unit

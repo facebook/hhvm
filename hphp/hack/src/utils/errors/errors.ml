@@ -572,7 +572,7 @@ module NastCheck                            = struct
   let inout_params_memoize                  = 3045 (* DONT MODIFY!!!! *)
   let inout_params_ret_by_ref               = 3046 (* DONT MODIFY!!!! *)
   let reading_from_append                   = 3047 (* DONT MODIFY!!!! *)
-
+  let const_attribute_prohibited            = 3048 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1424,6 +1424,10 @@ let inout_params_ret_by_ref fpos pos =
 
 let reading_from_append pos =
   add NastCheck.reading_from_append pos "Cannot use [] for reading"
+
+let const_attribute_prohibited pos kind =
+  add NastCheck.const_attribute_prohibited pos
+    ("Cannot apply __Const attribute to " ^ kind)
 
 (*****************************************************************************)
 (* Nast terminality *)

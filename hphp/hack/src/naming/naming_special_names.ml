@@ -122,6 +122,7 @@ module UserAttributes = struct
 
   let uaOverride            = "__Override"
   let uaConsistentConstruct = "__ConsistentConstruct"
+  let uaConst               = "__Const"
   let uaUnsafeConstruct     = "__UNSAFE_Construct"
   let uaDeprecated          = "__Deprecated"
   let uaMemoize             = "__Memoize"
@@ -131,6 +132,7 @@ module UserAttributes = struct
     let s = SSet.empty in
     let s = SSet.add uaOverride s in
     let s = SSet.add uaConsistentConstruct s in
+    let s = SSet.add uaConst s in
     let s = SSet.add uaUnsafeConstruct s in
     let s = SSet.add uaDeprecated s in
     let s = SSet.add uaMemoize s in

@@ -1,0 +1,2 @@
+File "class.php", line 13, characters 22-34:
+Cannot apply __Const attribute to an abstract final class (NastCheck[3048])

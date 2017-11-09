@@ -51,6 +51,7 @@ type env = {
   imm_ctrl_ctx: control_context;
   typedef_tparams : Nast.tparam list;
   lvalue: bool; (* current expression is being used as an lvalue *)
+  inside_constructor: bool; (* permit __Const assignment in constructor *)
   tenv: Env.env;
 }
 
@@ -333,6 +334,7 @@ let rec fun_ tenv f named_body =
   else begin
     let env = { t_is_finally = false;
                 lvalue = false;
+                inside_constructor = false;
                 class_name = None; class_kind = None;
                 imm_ctrl_ctx = Toplevel;
                 typedef_tparams = [];
@@ -493,6 +495,7 @@ and class_ tenv c =
   let cname = Some (snd c.c_name) in
   let env = { t_is_finally = false;
               lvalue = false;
+              inside_constructor = false;
               class_name = cname;
               class_kind = Some c.c_kind;
               imm_ctrl_ctx = Toplevel;
@@ -504,6 +507,22 @@ and class_ tenv c =
                ~ety_env:(Phase.env_with_self tenv) in
   let tenv = add_constraints (fst c.c_name) tenv constraints in
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
+
+  (* Const handling:
+   * prevent for abstract final classes, traits, and interfaces
+   *)
+  if Attributes.mem SN.UserAttributes.uaConst c.c_user_attributes
+  then begin match c.c_kind, c.c_final with
+  | Ast.Cabstract, true
+  | Ast.Cinterface, _
+  | Ast.Ctrait, _
+  | Ast.Cenum, _ ->
+    Errors.const_attribute_prohibited
+      (fst c.c_name) (Typing_print.class_kind c.c_kind c.c_final);
+  | Ast.Cabstract, false
+  | Ast.Cnormal, _ -> ();
+  end;
+
   if c.c_kind = Ast.Cinterface then begin
     interface c;
   end
@@ -786,7 +805,10 @@ and method_ (env, is_static) m =
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
 
-  let p, _ = m.m_name in
+  let p, mname = m.m_name in
+  let env = if mname = "__construct"
+  then { env with inside_constructor = true }
+  else env in
   check_coroutines_enabled (m.m_fun_kind = Ast.FCoroutine) env p;
   (* Add method type parameters to environment and localize the bounds *)
   let tenv, constraints =
@@ -1105,6 +1127,7 @@ and attribute env (_, e) =
 let typedef tenv t =
   let env = { t_is_finally = false;
               lvalue = false;
+              inside_constructor = false;
               class_name = None; class_kind = None;
               imm_ctrl_ctx = Toplevel;
               (* Since typedefs cannot have constraints we shouldn't check

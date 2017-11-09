@@ -1,0 +1,2 @@
+File "trait.php", line 4, characters 7-11:
+Cannot apply __Const attribute to a trait (NastCheck[3048])

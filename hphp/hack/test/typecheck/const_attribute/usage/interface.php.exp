@@ -1,0 +1,2 @@
+File "interface.php", line 4, characters 11-19:
+Cannot apply __Const attribute to an interface (NastCheck[3048])

@@ -181,21 +181,17 @@ inline void memcpy16_inline(void* dst, const void* src, uint64_t len) {
 
 //////////////////////////////////////////////////////////////////////
 
-// ASan is less precise than valgrind and believes this function overruns reads
-#ifndef FOLLY_SANITIZE_ADDRESS
-
 /*
  * Word at a time comparison for two strings of length `lenBytes'.  Returns
  * true if the regions are the same. This should be invoked only when we know
  * the two strings have the same length. It will not check for the null
  * terminator.
  *
- * Assumes it can load more words than the size to compare (this is often
- * possible in HPHP when you know you dealing with request-allocated memory).
+ * Assumes that the the buffer addresses are word aligned, and that it can
+ * read lenBytes rounded up to a whole word. This is possible in HPHP because
+ * we always allocate whole numbers of words.
  * The final word compare is adjusted to handle the slack in lenBytes so only
  * the bytes we care about are compared.
- *
- * Assumes that the the buffer addresses are 8-bytes aligned.
  */
 ALWAYS_INLINE
 bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {
@@ -205,15 +201,20 @@ bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {
   assert(reinterpret_cast<const uintptr_t>(mem1) % W == 0);
   assert(reinterpret_cast<const uintptr_t>(mem2) % W == 0);
 
-  // Inverse of lenBytes.  Do the negation here to avoid doing it later on the
-  // critical path.
-  int32_t const nBytes = -lenBytes;
-  // Check if `lenBytes' is 0, do the check right here to reuse the flags of
-  // the neg instruction.  This saves a test instruction.
+// ASan is less precise than valgrind and believes this function overruns reads
+#ifndef FOLLY_SANITIZE_ADDRESS
+
+  // For speed, we count up towards 0 from -lenBytes * 8 in units of a word of
+  // bits. When we reach a value >= 0, that is the number of bits we need to
+  // ignore in the last compare. Since we're on a little-endian architecture,
+  // we can do the ignoring by shifting left by that many bits. We also unroll
+  // the nBits increment from the first iteration, because we can fold that
+  // calculation together with the multiply by 8 into a single lea instruction.
+  const int32_t nBytes = -lenBytes;
+  // We need to bail out early if len is 0, and we can save a test instruction
+  // if we reuse the flags from the negation we just did.
   if (UNLIKELY(nBytes == 0)) return true;
-  // Do the shift here to avoid doing it later on the critical path.  But we
-  // will have to switch to 64 bit here to support very long strings.
-  int64_t nBits = static_cast<int64_t>(nBytes) * 8u;
+  int64_t nBits = int64_t(nBytes) * 8 + (W * 8);
 
   // Use the base+index addressing mode in x86, so that we only need to
   // increment the base pointer in the loop.
@@ -224,8 +225,6 @@ bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {
   do {
     data = *(reinterpret_cast<const T*>(p1));
     data ^= *(reinterpret_cast<const T*>(p1 + diff));
-    p1 += W;
-    nBits += W * 8;
     if (nBits >= 0) {
       // As a note for future consideration, we could consider precomputing a
       // 64-bit mask, so that the fraction of the last qword can be checked
@@ -233,19 +232,17 @@ bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {
       // mask.  So it depends on register pressure of the call site.
       return !(data << nBits);
     }
+    p1 += W;
+    nBits += W * 8;
   } while (data == 0);
   return false;
-}
 
 #else // FOLLY_SANITIZE_ADDRESS
 
-ALWAYS_INLINE
-bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
-  assert(reinterpret_cast<const uintptr_t>(mem1) % 4 == 0);
   return !memcmp(mem1, mem2, lenBytes);
-}
 
 #endif
+}
 
 /*
  * Like memcpy, but copies numT POD values 8 bytes at a time.

@@ -986,7 +986,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       | _ ->
         let name = pExpr scope_resolution_name env in
         begin match snd name with
-        | Id id -> Class_const (qual, id)
+        | String id | Id id -> Class_const (qual, id)
         | _ -> Class_get (qual, name)
         end
       end

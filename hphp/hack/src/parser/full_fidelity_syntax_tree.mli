@@ -11,7 +11,7 @@
 module WithSyntax : functor (Syntax : Syntax_sig.Syntax_S) -> sig
 type t
 val make : ?env:Full_fidelity_parser_env.t -> Full_fidelity_source_text.t -> t
-val root : t -> Full_fidelity_minimal_syntax.t
+val root : t -> Syntax.t
 val text : t -> Full_fidelity_source_text.t
 val all_errors : t -> Full_fidelity_syntax_error.t list
 val errors : t -> Full_fidelity_syntax_error.t list

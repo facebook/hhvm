@@ -20,14 +20,14 @@
 module WithSyntax(Syntax : Syntax_sig.Syntax_S ) = struct
 module SourceText = Full_fidelity_source_text
 module Env = Full_fidelity_parser_env
-module Parser = Minimal_parser
+module Parser = Full_fidelity_parser.WithSyntax(Syntax)
 module SyntaxError = Full_fidelity_syntax_error
 module TK = Full_fidelity_token_kind
-open Full_fidelity_minimal_syntax
+open Syntax
 
 type t = {
   text : SourceText.t;
-  root : Full_fidelity_minimal_syntax.t;
+  root : Syntax.t;
   errors : SyntaxError.t list;
   language : string;
   mode : string
@@ -40,28 +40,31 @@ let strip_comment_start s =
   else
     s
 
-let analyze_header text script =
+let first_section script =
   match syntax script.script_declarations with
-  | SyntaxList ({
-      syntax = MarkupSection { markup_prefix; markup_text; markup_suffix; _ }
-    ; _}::_) ->
-    begin match syntax markup_suffix with
-    | MarkupSuffix {
-        markup_suffix_name = {
-          syntax = Missing | Token { Token.kind = TK.Equal; _ }
-        ; _ }
-      ; _ } -> "php", ""
-    | MarkupSuffix {
-        markup_suffix_less_than_question = ltq;
-        markup_suffix_name = name;
-        _
-      } ->
+  | SyntaxList (h :: _) ->
+    begin match syntax h with
+    | MarkupSection ms -> ms
+    | _ -> failwith "unexpected: first element in a script should be markup"
+    end
+  | _ -> failwith "unexpected: script content should be list"
+
+let analyze_header text script =
+  let { markup_prefix; markup_text; markup_suffix; _ } = first_section script in
+  match syntax markup_suffix with
+  | MarkupSuffix {
+    markup_suffix_less_than_question;
+    markup_suffix_name; _ } ->
+    begin match syntax markup_suffix_name with
+    | Missing -> "php", ""
+    | Token t when Token.kind t = TK.Equal -> "php", ""
+    | _ ->
       let prefix_width = full_width markup_prefix in
       let text_width = full_width markup_text in
-      let ltq_width = full_width ltq in
-      let name_leading = leading_width name in
-      let name_width = width name in
-      let name_trailing = trailing_width name in
+      let ltq_width = full_width markup_suffix_less_than_question in
+      let name_leading = leading_width markup_suffix_name in
+      let name_width = Syntax.width markup_suffix_name in
+      let name_trailing = trailing_width markup_suffix_name in
       let language = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading) name_width
       in
@@ -73,9 +76,8 @@ let analyze_header text script =
       let mode = strip_comment_start mode in
       let mode = String.trim mode in
       language, mode
-    | _ -> "php", ""
     end
-  | _ -> failwith "unexpected: script content should be list"
+  | _ -> "php", ""
   (* The parser never produces a leading markup section; it fills one in with zero
      width tokens if it needs to. *)
 
@@ -166,7 +168,7 @@ let errors tree =
 
 let to_json tree =
   let version = Full_fidelity_schema.full_fidelity_schema_version_number in
-  let root = to_json tree.root in
+  let root = Syntax.to_json tree.root in
   let text = Hh_json.JSON_String (SourceText.text tree.text) in
   Hh_json.JSON_Object [
     "parse_tree", root;

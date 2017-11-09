@@ -84,6 +84,7 @@ MODULES=\
   utils/process\
   utils/hg\
   utils/hh_json\
+  utils/sys\
   monitor\
   watchman\
   watchman_event_watcher\
@@ -96,14 +97,14 @@ NATIVE_C_FILES=\
   third-party/libancillary/fd_recv.c\
   third-party/libancillary/fd_send.c\
   utils/compiler_id_impl.c\
-  utils/files.c\
   utils/get_build_id.c\
-  utils/handle_stubs.c\
-  utils/nproc.c\
-  utils/priorities.c\
-  utils/processor_info.c\
-  utils/realpath.c\
-  utils/sysinfo.c\
+  utils/sys/files.c\
+  utils/sys/handle_stubs.c\
+  utils/sys/nproc.c\
+  utils/sys/priorities.c\
+  utils/sys/processor_info.c\
+  utils/sys/realpath.c\
+  utils/sys/sysinfo.c\
   $(INOTIFY)/$(notdir $(INOTIFY))_stubs.c
 
 OCAML_LIBRARIES=\

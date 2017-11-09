@@ -38,6 +38,7 @@ let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
 (* Context of the file being parsed, as (hopefully some day read-only) state. *)
 type env =
   { hhvm_compat_mode         : bool
+  ; codegen                  : bool
   ; php5_compat_mode         : bool
   ; elaborate_namespaces     : bool
   ; include_line_comments    : bool
@@ -920,7 +921,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.Plus                    -> Unop (Uplus,  expr)
         | Some TK.Minus                   -> Unop (Uminus, expr)
         | Some TK.Ampersand               -> Unop (Uref,   expr)
-        | Some TK.At                      -> Unop (Usilence, expr)
+        | Some TK.At     when env.codegen -> Unop (Usilence, expr)
+        | Some TK.At                      -> snd expr
         | Some TK.Inout                   -> Callconv (Pinout, expr)
         | Some TK.Await                   -> Await expr
         | Some TK.Suspend                 -> Suspend expr
@@ -2364,6 +2366,7 @@ type result =
 
 let make_env
   ?(hhvm_compat_mode         = false                   )
+  ?(codegen                  = false                   )
   ?(php5_compat_mode         = false                   )
   ?(elaborate_namespaces     = true                    )
   ?(include_line_comments    = false                   )
@@ -2377,6 +2380,7 @@ let make_env
   (file : Relative_path.t)
   : env
   = { hhvm_compat_mode
+    ; codegen                 = codegen || hhvm_compat_mode
     ; php5_compat_mode
     ; elaborate_namespaces
     ; include_line_comments

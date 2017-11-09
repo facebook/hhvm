@@ -1166,15 +1166,14 @@ static Variant preg_match_impl(const StringData* pattern,
             /* For each subpattern, insert it into the appropriate array. */
             for (i = 0; i < count; i++) {
               if (offset_capture) {
-                auto& lval = match_sets.lvalAt(i);
-                forceToArray(lval);
-                add_offset_pair(lval.toArrRef(),
+                auto const lval = match_sets.lvalAt(i);
+                add_offset_pair(forceToArray(lval),
                                 String(stringlist[i],
                                        offsets[(i<<1)+1] - offsets[i<<1],
                                        CopyString),
                                 offsets[i<<1], nullptr);
               } else {
-                auto& lval = match_sets.lvalAt(i);
+                auto const lval = match_sets.lvalAt(i);
                 forceToArray(lval).append(
                   String(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                     CopyString)
@@ -1188,7 +1187,7 @@ static Variant preg_match_impl(const StringData* pattern,
              */
             if (count < num_subpats) {
               for (; i < num_subpats; i++) {
-                auto& lval = match_sets.lvalAt(i);
+                auto const lval = match_sets.lvalAt(i);
                 forceToArray(lval).append("");
               }
             }

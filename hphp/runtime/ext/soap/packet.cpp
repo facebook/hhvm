@@ -370,9 +370,14 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
             if (val->name) {
               String key((char*)val->name, CopyString);
               if (return_value.toCArrRef().exists(key)) {
-                auto& lval = return_value.toArrRef().lvalAt(key);
-                if (!lval.isArray()) lval = lval.toArray();
-                lval.toArrRef().append(tmp);
+                auto const lval = return_value.toArrRef().lvalAt(key).unboxed();
+                if (!isArrayLikeType(lval.type())) {
+                  auto const tv = make_tv<KindOfArray>(
+                    tvCastToArrayLikeData(lval.tv())
+                  );
+                  cellMove(tv, lval);
+                }
+                asArrRef(lval).append(tmp);
               } else if (val->next && get_node(val->next, (char*)val->name)) {
                 Array arr = Array::Create();
                 arr.append(tmp);

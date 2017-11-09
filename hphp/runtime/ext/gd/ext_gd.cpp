@@ -4694,7 +4694,7 @@ Variant HHVM_FUNCTION(iptcparse, const String& iptcblock) {
     }
 
     String skey((const char *)key, CopyString);
-    auto& lval = ret.lvalAt(skey);
+    auto const lval = ret.lvalAt(skey);
     forceToArray(lval).append(
       String((const char *)(buffer+inx), len, CopyString));
     inx += len;

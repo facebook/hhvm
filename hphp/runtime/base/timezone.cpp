@@ -222,8 +222,8 @@ Array TimeZone::GetAbbreviations() {
     } else {
       element.set(s_timezone_id, uninit_null());
     }
-    auto& val = ret.lvalAt(String(entry->name));
-    forceToArray(val).append(element.toArray());
+    auto const lval = ret.lvalAt(String(entry->name));
+    forceToArray(lval).append(element.toArray());
   }
   return ret;
 }

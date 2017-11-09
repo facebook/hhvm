@@ -310,7 +310,7 @@ Array& ObjectData::setDynPropArray(const Array& newArr) {
 template<typename K>
 TypedValue* ObjectData::makeDynProp(K key, AccessFlags flags) {
   SuppressHackArrCompatNotices shacn;
-  return reserveProperties().lvalAt(key, flags).asTypedValue();
+  return reserveProperties().lvalAt(key, flags).tv_ptr();
 }
 
 Variant ObjectData::o_get(const String& propName, bool error /* = true */,
@@ -591,7 +591,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
         assert(key.m_type == KindOfInt64);
         switch (mode) {
         case CreateRefs: {
-          auto& lval = dynProps->lvalAt(key.m_data.num);
+          auto& lval = tvAsVariant(dynProps->lvalAt(key.m_data.num).tv_ptr());
           retArray.setRef(key.m_data.num, lval);
           break;
         }
@@ -612,7 +612,9 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
       auto const strKey = key.m_data.pstr;
       switch (mode) {
       case CreateRefs: {
-        auto& lval = dynProps->lvalAt(StrNR(strKey), AccessFlags::Key);
+        auto& lval = tvAsVariant(
+          dynProps->lvalAt(StrNR(strKey), AccessFlags::Key).tv_ptr()
+        );
         retArray.setRef(StrNR(strKey), lval, true /* isKey */);
         break;
       }
@@ -987,7 +989,7 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
     if (auto const rval = dynPropArray()->rval(key)) {
       // If we may write to the property we need to allow the array to escalate.
       auto const prop = copyDynArray
-        ? dynPropArray().lvalAt(StrNR(key), AccessFlags::Key).asTypedValue()
+        ? dynPropArray().lvalAt(StrNR(key), AccessFlags::Key).tv_ptr()
         : rval.tv_ptr();
 
       // Returning a non-declared property, we know that it is accessible since

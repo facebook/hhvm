@@ -570,7 +570,9 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     // pre-allocate space in the array to ensure the elements don't move during
     // unserialization.
     SuppressHackArrCompatNotices shacn;
-    t = &obj->reserveProperties(nProp).lvalAt(realKey, AccessFlags::Key);
+    t = &tvAsVariant(obj->reserveProperties(nProp).lvalAt(
+      realKey, AccessFlags::Key
+    ).tv_ptr());
   } else if (UNLIKELY(cls->declProperties()[slot].attrs & AttrNoSerialize)) {
     // Ignore fields which are marked as NoSerialize
     Variant temp;
@@ -1070,7 +1072,7 @@ void VariableUnserializer::unserializeVariant(
                 } else {
                   auto t = [&]() -> decltype(auto) {
                     SuppressHackArrCompatNotices shacn;
-                    return &arr.lvalAt(key, AccessFlags::Key);
+                    return &tvAsVariant(arr.lvalAt(key, AccessFlags::Key).tv_ptr());
                   }();
                   if (UNLIKELY(isRefcountedType(t->getRawType()))) {
                     putInOverwrittenList(*t);
@@ -1215,7 +1217,7 @@ Array VariableUnserializer::unserializeArray() {
 
     auto& value = [&]() -> decltype(auto) {
       SuppressHackArrCompatNotices shacn;
-      return arr.lvalAt(key, AccessFlags::Key);
+      return tvAsVariant(arr.lvalAt(key, AccessFlags::Key).tv_ptr());
     }();
     if (UNLIKELY(isRefcountedType(value.getRawType()))) {
       putInOverwrittenList(value);
@@ -1438,7 +1440,7 @@ Array VariableUnserializer::unserializeDArray() {
 
     auto& value = [&]() -> decltype(auto) {
       SuppressHackArrCompatNotices shacn;
-      return arr.lvalAt(key, AccessFlags::Key);
+      return tvAsVariant(arr.lvalAt(key, AccessFlags::Key).tv_ptr());
     }();
     if (UNLIKELY(isRefcountedType(value.getRawType()))) {
       putInOverwrittenList(value);

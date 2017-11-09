@@ -926,7 +926,7 @@ static Array get_function_param_info(const Func* func) {
 
   bool isOptional = true;
   for (int i = func->numParams() - 1; i >= 0; i--) {
-    auto& param = arr.lvalAt(i).toArrRef();
+    auto& param = asArrRef(arr.lvalAt(i));
 
     isOptional = isOptional && (param.exists(s_default) ||
                  param.exists(s_is_variadic));

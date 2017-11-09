@@ -415,6 +415,12 @@ static bool couldRecur(const Variant& v, const ArrayData* arr) {
     arr->kind() == ArrayData::kProxyKind;
 }
 
+static bool couldRecur(member_lval lval, const ArrayData* arr) {
+  return tvIsReferenced(lval.tv()) ||
+    arr->kind() == ArrayData::kGlobalsKind ||
+    arr->kind() == ArrayData::kProxyKind;
+}
+
 static void php_array_merge_recursive(PointerSet &seen, bool check,
                                       Array &arr1, const Array& arr2) {
   auto const arr1_ptr = (void*)arr1.get();
@@ -433,14 +439,14 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
     } else if (arr1.exists(key, true)) {
       // There is no need to do toKey() conversion, for a key that is already
       // in the array.
-      Variant &v = arr1.lvalAt(key, AccessFlags::Key);
-      auto subarr1 = v.toArray().toPHPArray();
+      auto const lval = arr1.lvalAt(key, AccessFlags::Key);
+      auto subarr1 = tvCastToArrayLike(lval.tv()).toPHPArray();
       php_array_merge_recursive(
-        seen, couldRecur(v, subarr1.get()), subarr1,
+        seen, couldRecur(lval, subarr1.get()), subarr1,
         tvCastToArrayLike(iter.secondVal())
       );
-      v.unset(); // avoid contamination of the value that was strongly bound
-      v = subarr1;
+      tvUnset(lval); // avoid contamination of the value that was strongly bound
+      tvSet(make_tv<KindOfArray>(subarr1.get()), lval);
     } else {
       arr1.setWithRef(key, iter.secondVal(), true);
     }
@@ -628,12 +634,12 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
     Variant key = iter.first();
     auto const rval = iter.secondRval().unboxed();
     if (arr1.exists(key, true) && isArrayLikeType(rval.type())) {
-      Variant& v = arr1.lvalAt(key, AccessFlags::Key);
-      if (v.isArray()) {
-        Array subarr1 = v.toArray().toPHPArray();
-        php_array_replace_recursive(seen, couldRecur(v, subarr1.get()),
+      auto const lval = arr1.lvalAt(key, AccessFlags::Key);
+      if (isArrayLikeType(lval.unboxed().type())) {
+        Array subarr1 = tvCastToArrayLike(lval.tv()).toPHPArray();
+        php_array_replace_recursive(seen, couldRecur(lval, subarr1.get()),
                                     subarr1, ArrNR(rval.val().parr));
-        v = subarr1;
+        tvSet(make_tv<KindOfArray>(subarr1.get()), lval);
       } else {
         arr1.set(key, iter.secondVal(), true);
       }

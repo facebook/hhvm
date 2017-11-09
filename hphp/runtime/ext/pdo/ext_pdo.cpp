@@ -1924,14 +1924,14 @@ static bool do_fetch(sp_PDOStatement stmt,
       /* already have an item with this name? */
       forceToArray(ret);
       if (ret.toArrRef().exists(name)) {
-        auto& curr_val = ret.toArrRef().lvalAt(name);
-        if (!curr_val.isArray()) {
+        auto const curr_val = ret.toArrRef().lvalAt(name).unboxed();
+        if (!isArrayLikeType(curr_val.type())) {
           Array arr = Array::Create();
-          arr.append(curr_val);
+          arr.append(curr_val.tv());
           arr.append(val);
           ret.toArray().set(name, arr);
         } else {
-          curr_val.toArrRef().append(val);
+          asArrRef(curr_val).append(val);
         }
       } else {
         ret.toArrRef().set(name, val);
@@ -2003,7 +2003,7 @@ static bool do_fetch(sp_PDOStatement stmt,
     if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
       return_all->toArrRef().set(grp_val, ret);
     } else {
-      auto& lval = return_all->toArrRef().lvalAt(grp_val);
+      auto const lval = return_all->toArrRef().lvalAt(grp_val);
       forceToArray(lval).append(ret);
     }
   }

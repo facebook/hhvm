@@ -18,6 +18,8 @@
 #define incl_HPHP_ARRAY_H_
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/types.h"
@@ -416,18 +418,17 @@ public:
   Variant operator[](double key) const = delete;
   Variant operator[](const char*) const = delete;
 
-#define C(key_t, name, ret_t, var_ret_t, cns) \
+#define C(key_t, name, ret_t, cns) \
   ret_t name(key_t, Flags = Flags::None) cns;
-#define V(key_t, name, ret_t, var_ret_t, cns) \
-  var_ret_t name(key_t, Flags = Flags::None) cns;
+#define V C
 #define I V
-#define D(key_t, name, ret_t, var_ret_t, cns) \
-  var_ret_t name(key_t, Flags = Flags::None) cns = delete;
+#define D(key_t, name, ret_t, cns) \
+  ret_t name(key_t, Flags = Flags::None) cns = delete;
 
   /*
    * Get an rval to the element at `key'.
    */
-  FOR_EACH_KEY_TYPE(rvalAt, member_rval, member_rval, const)
+  FOR_EACH_KEY_TYPE(rvalAt, member_rval, const)
 
   /*
    * Get an lval to the element at `key'.
@@ -436,8 +437,8 @@ public:
    * escalation.  As with those functions, the Ref versions should be used if
    * the lval will be boxed, and the non-Ref versions should be used otherwise.
    */
-  FOR_EACH_KEY_TYPE(lvalAt, member_lval, Variant&, )
-  FOR_EACH_KEY_TYPE(lvalAtRef, member_lval, Variant&, )
+  FOR_EACH_KEY_TYPE(lvalAt, member_lval, )
+  FOR_EACH_KEY_TYPE(lvalAtRef, member_lval, )
 
 #undef D
 #undef I
@@ -641,6 +642,23 @@ ALWAYS_INLINE Array empty_array() {
 
 ALWAYS_INLINE Array empty_vec_array() {
   return Array::attach(staticEmptyVecArray());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Type-pun a referenced ArrayData* as an Array&.
+ *
+ * This lets us take advantage of Array's CoW and escalation machinery to
+ * possibly mutate `ad', without the overhead or behavioral change of
+ * refcounting.
+ *
+ * asArrRef() unconditionally removes Persistent bits from the referenced type.
+ */
+ALWAYS_INLINE Array& asArrRef(member_lval lval) {
+  assertx(isArrayLikeType(lval.type()));
+  lval.type() = lval.val().parr->toDataType();
+  return *reinterpret_cast<Array*>(&lval.val().parr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

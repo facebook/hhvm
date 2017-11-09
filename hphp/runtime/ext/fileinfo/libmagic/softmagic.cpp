@@ -2031,17 +2031,19 @@ magiccheck(struct magic_set *ms, struct magic *m)
 
     if (matches.isArray() && retval.isInteger() && retval.toInt64Val() > 0) {
       auto subpats = matches.toArray();
-      auto global = subpats.lvalAt(0);
+      auto global = subpats.lvalAt(0).unboxed();
 
-      for (HPHP::ArrayIter iter(global); iter; ++iter) {
+      for (HPHP::ArrayIter iter(global.tv()); iter; ++iter) {
         auto pair = iter.second().toArray();
-        auto pattern_match = pair.lvalAt(0);
-        auto pattern_offset = pair.lvalAt(1);
+        auto pattern_match = pair.lvalAt(0).unboxed();
+        auto pattern_offset = pair.lvalAt(1).unboxed();
 
-        if (!pattern_match.isNull() && !pattern_offset.isNull()) {
-          ms->search.s += pattern_offset.toInt64Val(); /* this is where the match starts */
-          ms->search.offset += (size_t)pattern_offset.toInt64Val(); /* this is where the match starts as size_t */
-          ms->search.rm_len = pattern_match.toString().size() /* This is the length of the matched pattern */;
+        if (!isNullType(pattern_match.type()) &&
+            !isNullType(pattern_offset.type())) {
+          auto const off = tvCastToInt64(pattern_offset.tv());
+          ms->search.s += off; /* this is where the match starts */
+          ms->search.offset += (size_t)off; /* this is where the match starts as size_t */
+          ms->search.rm_len = tvCastToString(pattern_match.tv()).size() /* This is the length of the matched pattern */;
           v = 0;
         } else {
           return -1;

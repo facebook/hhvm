@@ -491,22 +491,24 @@ IniSettingMap& IniSettingMap::operator=(const IniSettingMap& i) {
 }
 
 namespace {
-void mergeSettings(Variant& curval, TypedValue v) {
+void mergeSettings(member_lval curval, TypedValue v) {
+  auto const cur_inner = curval.unboxed();
   auto const cell = tvToCell(v);
 
-  if (isArrayLikeType(cell.m_type) && curval.isArray()) {
+  if (isArrayLikeType(cell.m_type) &&
+      isArrayLikeType(cur_inner.type())) {
     for (auto i = ArrayIter(cell.m_data.parr); !i.end(); i.next()) {
-      mergeSettings(curval.toArrRef().lvalAt(i.first()), i.secondVal());
+      mergeSettings(asArrRef(cur_inner).lvalAt(i.first()), i.secondVal());
     }
   } else {
-    curval = VarNR(v);
+    tvSet(tvToInitCell(v), curval);
   }
 }
 }
 
 void IniSettingMap::set(const String& key, const Variant& v) {
   assert(this->isArray());
-  auto& curval = m_map.toArrRef().lvalAt(key);
+  auto const curval = m_map.toArrRef().lvalAt(key);
   mergeSettings(curval, *v.asTypedValue());
 }
 
@@ -549,12 +551,12 @@ void IniSetting::ParserCallback::onPopEntry(
     makeSettingSub(key, offset, value, *arr);
   } else {                                 // Normal array value
     String skey(key);
-    auto& hash = arr->toArrRef().lvalAt(skey);
+    auto const hash = arr->toArrRef().lvalAt(skey);
     forceToArray(hash);
     if (!oEmpty) {                         // a[b]
-      makeArray(hash, offset, value);
+      makeArray(tvAsVariant(hash.tv_ptr()), offset, value);
     } else {                               // a[]
-      hash.toArrRef().append(value);
+      asArrRef(hash).append(value);
     }
   }
 }
@@ -576,7 +578,7 @@ void IniSetting::ParserCallback::makeArray(Variant& hash,
     // b will be hash and an array already, but c and d might
     // not exist and will need to be made an array
     forceToArray(*val);
-    val = &val->toArrRef().lvalAt(index);
+    val = &tvAsVariant(val->toArrRef().lvalAt(index).tv_ptr());
     if (last) {
       *val = Variant(value);
     } else {
@@ -601,11 +603,11 @@ void IniSetting::ParserCallback::makeSettingSub(const String& key,
     if (!base->isArray()) {
       *base = Array::Create();
     }
-    auto lval = &base->toArrRef().lvalAt(String(part));
-    if (lval->isNull()) {
+    auto lval = base->toArrRef().lvalAt(String(part));
+    if (isNullType(lval.unboxed().type())) {
       skip = true;
     } else {
-      base = lval;
+      base = &tvAsVariant(lval.tv_ptr());
     }
   }
   // if skip is true we have something like:
@@ -636,9 +638,9 @@ void IniSetting::ParserCallback::traverseToSet(const String &key,
   auto isSymlink = stopChar == ":";
   auto start = offset.c_str();
   auto p = start;
-  auto& first(cur_settings.toArrRef().lvalAt(key));
+  auto const first(cur_settings.toArrRef().lvalAt(key));
   forceToArray(first);
-  Variant *setting = &first;
+  Variant *setting = &tvAsVariant(first.tv_ptr());
   String index;
   bool done = false;
   while (!done) {
@@ -646,7 +648,7 @@ void IniSetting::ParserCallback::traverseToSet(const String &key,
     p += index.size() + 1;
     if (strcmp(p, stopChar.c_str()) != 0) {
       forceToArray(*setting);
-      setting = &setting->toArrRef().lvalAt(index);
+      setting = &tvAsVariant(setting->toArrRef().lvalAt(index).tv_ptr());
     } else {
       done = true;
     }

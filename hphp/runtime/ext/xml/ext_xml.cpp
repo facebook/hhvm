@@ -413,7 +413,7 @@ static void _xml_add_to_info(const req::ptr<XmlParser>& parser,
   if (!parser->info.toCArrRef().exists(nameStr)) {
     parser->info.toArrRef().set(nameStr, Array::Create());
   }
-  auto& inner = parser->info.toArrRef().lvalAt(nameStr);
+  auto const inner = parser->info.toArrRef().lvalAt(nameStr);
   forceToArray(inner).append(parser->curtag);
   parser->curtag++;
 }
@@ -590,7 +590,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         String val = xml_utf8_decode(attributes[1],
                                     strlen((const char*)attributes[1]),
                                     parser->target_encoding);
-        args.lvalAt(2).toArrRef().set(att, val);
+        auto const arr = args.lvalAt(2);
+        asArrRef(arr).set(att, val);
         attributes += 2;
       }
 

@@ -679,13 +679,13 @@ bool MimePart::processHeader() {
       m_headers.set(header_key, newstr);
     } else {
       if (m_headers.exists(header_key)) {
-        Variant &zheaderval = m_headers.lvalAt(header_key);
-        if (zheaderval.isArray()) {
-          zheaderval.toArrRef().append(String(header_val, CopyString));
+        auto const zheaderval = m_headers.lvalAt(header_key).unboxed();
+        if (isArrayLikeType(zheaderval.type())) {
+          asArrRef(zheaderval).append(String(header_val, CopyString));
         } else {
           // Create a nested array if there is more than one of the same header
           Array zarr = Array::Create();
-          zarr.append(zheaderval);
+          zarr.append(zheaderval.tv());
           zarr.append(String(header_val, CopyString));
           m_headers.set(header_key, zarr);
         }

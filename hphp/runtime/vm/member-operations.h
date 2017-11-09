@@ -521,30 +521,30 @@ inline const TypedValue* Elem(TypedValue& tvRef,
 }
 
 template<MOpMode mode, bool reffy, bool intishWarn>
-inline TypedValue* ElemDArrayPre(TypedValue* base, int64_t key, bool& defined) {
-  auto* oldArr = base->m_data.parr;
+inline member_lval ElemDArrayPre(TypedValue* base, int64_t key, bool& defined) {
+  auto oldArr = base->m_data.parr;
 
   defined = (mode != MOpMode::Warn) || oldArr->exists(key);
-  auto const r = reffy
+  auto const lval = reffy
     ? oldArr->lvalRef(key, oldArr->cowCheck())
     : oldArr->lval(key, oldArr->cowCheck());
 
-  if (r.arr_base() != oldArr) {
+  if (lval.arr_base() != oldArr) {
     base->m_type = KindOfArray;
-    base->m_data.parr = r.arr_base();
+    base->m_data.parr = lval.arr_base();
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
 
-  return r.tv_ptr();
+  return lval;
 }
 
 template<MOpMode mode, bool reffy, bool intishWarn>
-inline TypedValue* ElemDArrayPre(TypedValue* base, StringData* key,
+inline member_lval ElemDArrayPre(TypedValue* base, StringData* key,
                                  bool& defined) {
-  auto* oldArr = base->m_data.parr;
+  auto oldArr = base->m_data.parr;
 
-  auto const r = [&]{
+  auto const lval = [&]{
     auto const cow = oldArr->cowCheck();
     int64_t n;
     if (oldArr->convertKey(key, n, intishWarn)) {
@@ -556,17 +556,17 @@ inline TypedValue* ElemDArrayPre(TypedValue* base, StringData* key,
     }
   }();
 
-  if (r.arr_base() != oldArr) {
+  if (lval.arr_base() != oldArr) {
     base->m_type = KindOfArray;
-    base->m_data.parr = r.arr_base();
+    base->m_data.parr = lval.arr_base();
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return r.tv_ptr();
+  return lval;
 }
 
 template<MOpMode mode, bool reffy, bool intishWarn>
-inline TypedValue* ElemDArrayPre(TypedValue* base, TypedValue key,
+inline member_lval ElemDArrayPre(TypedValue* base, TypedValue key,
                                  bool& defined) {
   auto const dt = key.m_type;
   if (isIntType(dt)) {
@@ -579,9 +579,7 @@ inline TypedValue* ElemDArrayPre(TypedValue* base, TypedValue key,
   }
   auto& arr = tvAsVariant(base).asArrRef();
   defined = (mode != MOpMode::Warn) || arr.exists(tvAsCVarRef(&key));
-  return reffy ?
-    const_cast<TypedValue*>(arr.lvalAtRef(tvAsCVarRef(&key)).asTypedValue()) :
-    const_cast<TypedValue*>(arr.lvalAt(tvAsCVarRef(&key)).asTypedValue());
+  return reffy ? arr.lvalAtRef(key) : arr.lvalAt(key);
 }
 
 /**
@@ -593,11 +591,11 @@ inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
 
   bool defined;
-  auto* result = ElemDArrayPre<mode, reffy, intishWarn>(base, key, defined);
+  auto lval = ElemDArrayPre<mode, reffy, intishWarn>(base, key, defined);
 
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
-  assertx(result->m_type != KindOfUninit);
+  assertx(lval.type() != KindOfUninit);
 
   if (!defined) {
     auto scratchKey = initScratchKey(key);
@@ -605,7 +603,7 @@ inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
                  tvAsCVarRef(&scratchKey).toString().data());
   }
 
-  return result;
+  return lval.tv_ptr();
 }
 
 /**
@@ -763,10 +761,9 @@ inline TypedValue* ElemDEmptyish(TypedValue* base, key_type<keyType> key) {
   detail::checkPromotion(base);
   auto scratchKey = initScratchKey(key);
   tvAsVariant(base) = Array::Create();
-  auto const result = const_cast<TypedValue*>(
-    tvAsVariant(base).asArrRef().lvalAt(
-      cellAsCVarRef(scratchKey)).asTypedValue()
-  );
+  auto const result = tvAsVariant(base).asArrRef().lvalAt(
+      cellAsCVarRef(scratchKey)
+  ).tv_ptr();
   if (mode == MOpMode::Warn) {
     raise_notice(Strings::UNDEFINED_INDEX,
                  tvAsCVarRef(&scratchKey).toString().data());
@@ -949,53 +946,53 @@ void SetWithRefMLElem(TypedValue& tvRef, TypedValue* base,
 /**
  * ElemU when base is Null
  */
-inline TypedValue* ElemUEmptyish() {
-  return const_cast<TypedValue*>(&immutable_null_base);
+inline member_lval ElemUEmptyish() {
+  return member_lval { nullptr, const_cast<TypedValue*>(&immutable_null_base) };
 }
 
 template <bool intishWarn>
-inline TypedValue* ElemUArrayImpl(TypedValue* base, int64_t key) {
-  auto* oldArr = base->m_data.parr;
+inline member_lval ElemUArrayImpl(TypedValue* base, int64_t key) {
+  auto oldArr = base->m_data.parr;
   if (!oldArr->exists(key)) return ElemUEmptyish();
-  auto const r = oldArr->lval(key, oldArr->cowCheck());
-  if (r.arr_base() != oldArr) {
+  auto const lval = oldArr->lval(key, oldArr->cowCheck());
+  if (lval.arr_base() != oldArr) {
     base->m_type = KindOfArray;
-    base->m_data.parr = r.arr_base();
+    base->m_data.parr = lval.arr_base();
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return r.tv_ptr();
+  return lval;
 }
 
 template <bool intishWarn>
-inline TypedValue* ElemUArrayImpl(TypedValue* base, StringData* key) {
-  auto* oldArr = base->m_data.parr;
+inline member_lval ElemUArrayImpl(TypedValue* base, StringData* key) {
+  auto oldArr = base->m_data.parr;
   int64_t n;
   if (oldArr->convertKey(key, n, intishWarn)) {
     if (!oldArr->exists(n)) return ElemUEmptyish();
-    auto const r = oldArr->lval(n, oldArr->cowCheck());
-    if (r.arr_base() != oldArr) {
+    auto const lval = oldArr->lval(n, oldArr->cowCheck());
+    if (lval.arr_base() != oldArr) {
       base->m_type = KindOfArray;
-      base->m_data.parr = r.arr_base();
+      base->m_data.parr = lval.arr_base();
       assertx(cellIsPlausible(*base));
       decRefArr(oldArr);
     }
-    return r.tv_ptr();
+    return lval;
   } else {
     if (!oldArr->exists(key)) return ElemUEmptyish();
-    auto const r = oldArr->lval(key, oldArr->cowCheck());
-    if (r.arr_base() != oldArr) {
+    auto const lval = oldArr->lval(key, oldArr->cowCheck());
+    if (lval.arr_base() != oldArr) {
       base->m_type = KindOfArray;
-      base->m_data.parr = r.arr_base();
+      base->m_data.parr = lval.arr_base();
       assertx(cellIsPlausible(*base));
       decRefArr(oldArr);
     }
-    return r.tv_ptr();
+    return lval;
   }
 }
 
 template <bool intishWarn>
-inline TypedValue* ElemUArrayImpl(TypedValue* base, TypedValue key) {
+inline member_lval ElemUArrayImpl(TypedValue* base, TypedValue key) {
   auto const dt = key.m_type;
   if (isIntType(dt)) {
     return ElemUArrayImpl<false>(base, key.m_data.num);
@@ -1007,7 +1004,7 @@ inline TypedValue* ElemUArrayImpl(TypedValue* base, TypedValue key) {
   if (!arr.exists(keyAsValue(key))) {
     return ElemUEmptyish();
   }
-  return arr.lvalAt(tvAsCVarRef(&key)).asTypedValue();
+  return arr.lvalAt(tvAsCVarRef(&key));
 }
 
 /**
@@ -1017,11 +1014,11 @@ template <bool intishWarn, KeyType keyType>
 inline TypedValue* ElemUArray(TypedValue* base, key_type<keyType> key) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
-  auto* result = ElemUArrayImpl<intishWarn>(base, key);
+  auto lval = ElemUArrayImpl<intishWarn>(base, key);
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
-  assertx(result->m_type != KindOfUninit);
-  return result;
+  assertx(lval.type() != KindOfUninit);
+  return lval.tv_ptr();
 }
 
 /**
@@ -1033,7 +1030,7 @@ inline TypedValue* ElemUVecPre(TypedValue* base, int64_t key) {
     PackedArray::LvalSilentIntVec(oldArr, key, oldArr->cowCheck());
 
   if (UNLIKELY(!lval)) {
-    return ElemUEmptyish();
+    return ElemUEmptyish().tv_ptr();
   }
   if (lval.arr_base() != oldArr) {
     base->m_type = KindOfVec;
@@ -1045,7 +1042,7 @@ inline TypedValue* ElemUVecPre(TypedValue* base, int64_t key) {
 }
 
 inline TypedValue* ElemUVecPre(TypedValue* /*base*/, StringData* /*key*/) {
-  return ElemUEmptyish();
+  return ElemUEmptyish().tv_ptr();
 }
 
 inline TypedValue* ElemUVecPre(TypedValue* base, TypedValue key) {
@@ -1075,7 +1072,7 @@ inline TypedValue* ElemUDictPre(TypedValue* base, int64_t key) {
     MixedArray::LvalSilentIntDict(oldArr, key, oldArr->cowCheck());
 
   if (UNLIKELY(!lval)) {
-    return ElemUEmptyish();
+    return ElemUEmptyish().tv_ptr();
   }
   if (lval.arr_base() != oldArr) {
     base->m_type = KindOfDict;
@@ -1092,7 +1089,7 @@ inline TypedValue* ElemUDictPre(TypedValue* base, StringData* key) {
     MixedArray::LvalSilentStrDict(oldArr, key, oldArr->cowCheck());
 
   if (UNLIKELY(!lval)) {
-    return ElemUEmptyish();
+    return ElemUEmptyish().tv_ptr();
   }
   if (lval.arr_base() != oldArr) {
     base->m_type = KindOfDict;
@@ -1948,15 +1945,14 @@ inline TypedValue* SetOpElemEmptyish(SetOpOp op, Cell* base,
   detail::checkPromotion(base);
 
   Array a = Array::Create();
-  TypedValue* result = const_cast<TypedValue*>(a.lvalAt(tvAsCVarRef(&key))
-                                               .asTypedValue());
+  auto const lval = a.lvalAt(tvAsCVarRef(&key));
   tvAsVariant(base) = a;
   if (MoreWarnings) {
     raise_notice(Strings::UNDEFINED_INDEX,
                  tvAsCVarRef(&key).toString().data());
   }
-  setopBody(result, op, rhs);
-  return result;
+  setopBody(lval.tv_ptr(), op, rhs);
+  return lval.tv_ptr();
 }
 
 /**
@@ -2207,14 +2203,14 @@ inline Cell IncDecElemEmptyish(
   detail::checkPromotion(base);
 
   auto a = Array::Create();
-  auto result = (TypedValue*)&a.lvalAt(tvAsCVarRef(&key));
+  auto const lval = a.lvalAt(tvAsCVarRef(&key));
   tvAsVariant(base) = a;
   if (MoreWarnings) {
     raise_notice(Strings::UNDEFINED_INDEX,
                  tvAsCVarRef(&key).toString().data());
   }
-  assert(result->m_type == KindOfNull);
-  return IncDecBody(op, result);
+  assert(lval.type() == KindOfNull);
+  return IncDecBody(op, lval.tv_ptr());
 }
 
 inline Cell IncDecElemScalar() {

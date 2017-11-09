@@ -525,7 +525,7 @@ void ExecutionContext::registerShutdownFunction(const Variant& function,
                                                 Array arguments,
                                                 ShutdownType type) {
   Array callback = make_map_array(s_name, function, s_args, arguments);
-  Variant& funcs = m_shutdowns.lvalAt(type);
+  auto const funcs = m_shutdowns.lvalAt(type);
   forceToArray(funcs).append(callback);
 }
 
@@ -650,10 +650,10 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
     // of them. So hold them in tmp.
     Array tmp;
     while (true) {
-      auto& var = m_shutdowns.lvalAt(type);
-      if (!var.isArray()) break;
-      auto funcs = var.toArray();
-      var.unset();
+      auto const lval = m_shutdowns.lvalAt(type);
+      if (!isArrayLikeType(lval.unboxed().type())) break;
+      auto funcs = tvCastToArrayLike(lval.tv());
+      tvUnset(lval);
       for (int pos = 0; pos < funcs.size(); ++pos) {
         Array callback = funcs[pos].toArray();
         vm_call_user_func(callback[s_name], callback[s_args].toArray());
@@ -855,8 +855,10 @@ void ExecutionContext::handleError(const std::string& msg,
           )
         );
       } else if (!deferred.empty()) {
-        auto& last = deferred.lvalAt(int64_t{deferred.size() - 1});
-        if (last.isDict()) last.asArrRef().set(s_overflow, true);
+        auto const last = deferred.lvalAt(int64_t{deferred.size() - 1});
+        if (isDictType(last.type())) {
+          asArrRef(last).set(s_overflow, true);
+        }
       }
     }
 
@@ -1935,9 +1937,9 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
                           init_null_variant, nullptr, nullptr, nullptr, nullptr,
                           InvokePseudoMain)
   );
-  Variant &lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
-  lv = v;
-  return lv;
+  auto const lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
+  tvSet(*v.asTypedValue(), lv);
+  return Variant::wrap(lv.tv());
 }
 
 void ExecutionContext::recordLastError(const Exception &e, int errnum) {

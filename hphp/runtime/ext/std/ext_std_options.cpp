@@ -699,11 +699,11 @@ static Array HHVM_FUNCTION(getopt, const String& options,
       /* numeric string */
       int optname_int = atoi(optname);
       if (ret.exists(optname_int)) {
-        Variant &e = ret.lvalAt(optname_int);
-        if (!e.isArray()) {
-          ret.set(optname_int, make_packed_array(e, val));
+        auto const lval = ret.lvalAt(optname_int).unboxed();
+        if (!isArrayLikeType(lval.type())) {
+          ret.set(optname_int, make_packed_array(Variant::wrap(lval.tv()), val));
         } else {
-          e.toArrRef().append(val);
+          asArrRef(lval).append(val);
         }
       } else {
         ret.set(optname_int, val);
@@ -712,11 +712,11 @@ static Array HHVM_FUNCTION(getopt, const String& options,
       /* other strings */
       String key(optname, strlen(optname), CopyString);
       if (ret.exists(key)) {
-        Variant &e = ret.lvalAt(key);
-        if (!e.isArray()) {
-          ret.set(key, make_packed_array(e, val));
+        auto const lval = ret.lvalAt(key).unboxed();
+        if (!isArrayLikeType(lval.type())) {
+          ret.set(key, make_packed_array(Variant::wrap(lval.tv()), val));
         } else {
-          e.toArrRef().append(val);
+          asArrRef(lval).append(val);
         }
       } else {
         ret.set(key, val);

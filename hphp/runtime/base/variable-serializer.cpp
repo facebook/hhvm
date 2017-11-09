@@ -1796,7 +1796,8 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         try {
            auto val = const_cast<ObjectData*>(obj)->invokeToDebugDisplay();
            if (val.isInitialized()) {
-             properties.lvalAt(s_PHP_DebugDisplay).assign(val);
+             auto const lval = properties.lvalAt(s_PHP_DebugDisplay);
+             tvSet(*val.asTypedValue(), lval);
            }
         } catch (...) {
           raise_warning("%s::__toDebugDisplay() throws exception",

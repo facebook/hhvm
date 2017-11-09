@@ -813,11 +813,6 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
   return elem(arr, fn, is_key, *key.asCell(), std::forward<Args>(args)...);
 }
 
-/*
- * Conversion helpers.
- */
-Variant& as_var(member_lval lval) { return tvAsVariant(lval.tv_ptr()); }
-
 }
 
 #define WRAP(name)                                              \
@@ -834,22 +829,19 @@ Variant& as_var(member_lval lval) { return tvAsVariant(lval.tv_ptr()); }
 
 #define FK(flags) any(flags & AccessFlags::Key)
 
-#define C(key_t, name, ret_t, var_ret_t, conv, cns)         \
+#define C(key_t, name, ret_t, cns)                          \
   ret_t Array::name(key_t k, AccessFlags fl) cns {          \
     return detail::elem(*this, WRAP(name), FK(fl), k, fl);  \
   }
-#define V(key_t, name, ret_t, var_ret_t, conv, cns)               \
-  var_ret_t Array::name(key_t k, AccessFlags fl) cns {            \
-    return conv(detail::elem(*this, WRAP(name), FK(fl), k, fl));  \
-  }
-#define I(key_t, name, ret_t, var_ret_t, conv, cns)     \
-  var_ret_t Array::name(key_t k, AccessFlags fl) cns {  \
-    return conv(name##Impl(int64_t(k), fl));            \
+#define V C
+#define I(key_t, name, ret_t, cns)                  \
+  ret_t Array::name(key_t k, AccessFlags fl) cns {  \
+    return name##Impl(int64_t(k), fl);              \
   }
 
-FOR_EACH_KEY_TYPE(rvalAt, member_rval, member_rval, identity, const)
-FOR_EACH_KEY_TYPE(lvalAt, member_lval, Variant&, detail::as_var, )
-FOR_EACH_KEY_TYPE(lvalAtRef, member_lval, Variant&, detail::as_var, )
+FOR_EACH_KEY_TYPE(rvalAt, member_rval, const)
+FOR_EACH_KEY_TYPE(lvalAt, member_lval, )
+FOR_EACH_KEY_TYPE(lvalAtRef, member_lval, )
 
 #undef I
 #undef V

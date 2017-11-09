@@ -464,7 +464,7 @@ static Variant soap_find_xml_ref(xmlNodePtr node) {
   USE_SOAP_GLOBAL;
   Array& ref_map = SOAP_GLOBAL(ref_map);
   if (ref_map.exists((int64_t)node)) {
-    return ref_map.lvalAt((int64_t)node);
+    return Variant::wrap(ref_map.lvalAt((int64_t)node).tv());
   }
   return uninit_null();
 }
@@ -535,7 +535,7 @@ static bool soap_check_xml_ref(Variant &data, xmlNodePtr node) {
   USE_SOAP_GLOBAL;
   Array &ref_map = SOAP_GLOBAL(ref_map);
   if (ref_map.exists((int64_t)node)) {
-    Variant &data2 = ref_map.lvalAt((int64_t)node);
+    Variant& data2 = tvAsVariant(ref_map.lvalAt((int64_t)node).tv_ptr());
     if (!(data.isObject() && data2.isObject() &&
           data.getObjectData() == data2.getObjectData()) &&
         !(data.isReferenced() && data2.isReferenced() &&
@@ -1206,7 +1206,9 @@ static bool get_zval_property(Variant &object, const char* name,
     if (!arr.exists(sname)) {
       return false;
     }
-    if (ret) ret->assignRef(object.toArrRef().lvalAt(sname));
+    if (ret) {
+      ret->assignRef(tvAsVariant(object.toArrRef().lvalAt(sname).tv_ptr()));
+    }
     return true;
   }
   return false;
@@ -1262,14 +1264,14 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
         if (name) {
           String name_str(name);
           if (any.toArrRef().exists(name_str)) {
-            Variant &el = any.toArrRef().lvalAt(name_str);
-            if (!el.isArray()) {
+            auto const el = any.toArrRef().lvalAt(name_str).unboxed();
+            if (!isArrayLikeType(el.type())) {
               /* Convert into array */
               Array arr = Array::Create();
-              arr.append(el);
-              el = arr;
+              arr.append(el.tv());
+              cellSet(make_tv<KindOfArray>(arr.get()), el);
             }
-            el.toArrRef().append(val);
+            asArrRef(el).append(val);
           } else {
             any.toArrRef().set(name_str, val);
           }
@@ -2499,7 +2501,7 @@ static Variant to_zval_array(encodeType* type, xmlNodePtr data) {
         if (!ar->toArrRef().exists(pos[i])) {
           ar->toArrRef().set(pos[i], Array::Create());
         }
-        ar = &ar->toArrRef().lvalAt(pos[i]);
+        ar = &tvAsVariant(ar->toArrRef().lvalAt(pos[i]).tv_ptr());
         i++;
       }
       ar->toArrRef().set(pos[i], tmpVal);

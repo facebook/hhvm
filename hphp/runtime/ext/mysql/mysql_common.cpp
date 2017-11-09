@@ -1100,7 +1100,7 @@ void MySQLStmtVariables::update_result() {
       }
     }
 
-    *m_arr.lvalAt(i).getRefData() = v;
+    tvSet(*v.asTypedValue(), m_arr.lvalAt(i));
   }
 }
 
@@ -1134,27 +1134,27 @@ bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
   m_value_arr.clear();
   for (int i = 0; i < m_arr.size(); i++) {
     MYSQL_BIND *b = &m_vars[i];
-    auto const& var = m_arr.lvalAt(i);
+    auto const var = m_arr.lvalAt(i).unboxed();
     Variant v;
-    if (var.isNull()) {
+    if (isNullType(var.type())) {
       *b->is_null = 1;
     } else {
       switch (b->buffer_type) {
         case MYSQL_TYPE_LONGLONG:
           {
-            m_value_arr.push_back(var.toInt64());
+            m_value_arr.push_back(cellToInt(var.tv()));
             b->buffer = m_value_arr.back().getInt64Data();
           }
           break;
         case MYSQL_TYPE_DOUBLE:
           {
-            m_value_arr.push_back(var.toDouble());
+            m_value_arr.push_back(tvCastToDouble(var.tv()));
             b->buffer = m_value_arr.back().getDoubleData();
           }
           break;
         case MYSQL_TYPE_STRING:
           {
-            m_value_arr.push_back(var.toString());
+            m_value_arr.push_back(tvCastToString(var.tv()));
             StringData *sd = m_value_arr.back().getStringData();
             b->buffer = (void *)sd->data();
             // FIXME: setting buffer_length will cause the destructor to free

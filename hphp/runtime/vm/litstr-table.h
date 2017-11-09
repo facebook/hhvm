@@ -88,7 +88,7 @@ struct LitstrTable {
   bool contains(Id id) const;
   StringData* lookupLitstrId(Id id) const;
   const NamedEntity* lookupNamedEntityId(Id id) const;
-  const NamedEntityPair& lookupNamedEntityPairId(Id id) const;
+  NamedEntityPair lookupNamedEntityPairId(Id id) const;
 
   /*
    * Set up the named info table.  Not thread-safe.
@@ -105,8 +105,8 @@ struct LitstrTable {
   /*
    * Call onItem() for each item in the table.
    */
-  void forEachNamedEntity(
-    std::function<void (int i, const NamedEntityPair& namedEntity)> onItem);
+  void forEachLitstr(
+    std::function<void (int i, const StringData* name)> onItem);
 
 
   /////////////////////////////////////////////////////////////////////////////

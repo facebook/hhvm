@@ -554,11 +554,8 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
   u->m_useStrictTypesForBuiltins = m_useStrictTypesForBuiltins;
   u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
   u->m_md5 = m_md5;
-  for (unsigned i = 0; i < m_litstrs.size(); ++i) {
-    NamedEntityPair np;
-    np.first = m_litstrs[i];
-    np.second = nullptr;
-    u->m_namedInfo.push_back(np);
+  for (auto s : m_litstrs) {
+    u->m_namedInfo.push_back(s);
   }
   u->m_arrays = m_arrays;
   u->m_arrayTypeTable = m_arrayTypeTable;

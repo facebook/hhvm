@@ -49,17 +49,18 @@ void LitstrTable::setReading() {
     m_namedInfo.resize(m_litstr2id.size());
     m_namedInfo.shrink_to_fit();
     for (auto const& strId : m_litstr2id) {
-      m_namedInfo[strId.second].first = strId.first;
+      m_namedInfo[strId.second] = strId.first;
     }
   }
   m_safeToRead = true;
 }
 
-void LitstrTable::forEachNamedEntity(
-  std::function<void (int i, const NamedEntityPair& namedEntity)> onItem) {
+void LitstrTable::forEachLitstr(
+  std::function<void (int, const StringData*)> onItem) {
   assert(m_safeToRead);
-  for (int i = 0; i < m_namedInfo.size(); ++i) {
-    onItem(i, m_namedInfo[i]);
+  auto i = 0;
+  for (auto s : m_namedInfo) {
+    onItem(i++, s);
   }
 }
 

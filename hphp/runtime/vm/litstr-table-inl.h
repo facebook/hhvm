@@ -59,8 +59,7 @@ inline const NamedEntity* LitstrTable::lookupNamedEntityId(Id id) const {
   return m_namedInfo.lookupNamedEntity(id);
 }
 
-inline
-const NamedEntityPair& LitstrTable::lookupNamedEntityPairId(Id id) const {
+inline NamedEntityPair LitstrTable::lookupNamedEntityPairId(Id id) const {
   assert(m_safeToRead);
   return m_namedInfo.lookupNamedEntityPair(id);
 }

@@ -32,7 +32,7 @@ struct StringData;
 /*
  * Vector of NamedEntityPairs, used as a map from Id to NEP.
  */
-struct NamedEntityPairTable : CompactVector<NamedEntityPair> {
+struct NamedEntityPairTable : CompactVector<LowStringPtr> {
   /*
    * Is `id' valid in this table?
    */
@@ -60,7 +60,7 @@ struct NamedEntityPairTable : CompactVector<NamedEntityPair> {
    *
    * @requires: contains(id)
    */
-  const NamedEntityPair& lookupNamedEntityPair(Id id) const;
+  NamedEntityPair lookupNamedEntityPair(Id id) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

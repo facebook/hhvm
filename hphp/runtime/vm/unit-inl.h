@@ -206,7 +206,7 @@ inline const NamedEntity* Unit::lookupNamedEntityId(Id id) const {
   return lookupNamedEntityPairId(id).second;
 }
 
-inline const NamedEntityPair& Unit::lookupNamedEntityPairId(Id id) const {
+inline NamedEntityPair Unit::lookupNamedEntityPairId(Id id) const {
   if (isGlobalLitstrId(id)) {
     auto globalID = decodeGlobalLitstrId(id);
     return LitstrTable::get().lookupNamedEntityPairId(globalID);

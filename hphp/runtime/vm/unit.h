@@ -442,7 +442,7 @@ public:
    */
   StringData* lookupLitstrId(Id id) const;
   const NamedEntity* lookupNamedEntityId(Id id) const;
-  const NamedEntityPair& lookupNamedEntityPairId(Id id) const;
+  NamedEntityPair lookupNamedEntityPairId(Id id) const;
 
 
   /////////////////////////////////////////////////////////////////////////////

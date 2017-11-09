@@ -143,6 +143,5 @@ slow/traits/1981.php
 slow/type_assertions/1857.php
 slow/using/bad-goto1.php
 slow/using/bad-goto2.php
-slow/using/bad-name.php
 slow/using/goto.php
 slow/xhp/attr-syntax-2.php

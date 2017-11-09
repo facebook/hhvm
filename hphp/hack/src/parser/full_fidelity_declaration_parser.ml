@@ -1403,7 +1403,7 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_function_declaration parser attribute_specification =
     let (parser, header) =
-      parse_function_declaration_header parser in
+      parse_function_declaration_header parser ~is_methodish:false in
     let (parser, body) = parse_compound_statement parser in
     let syntax = make_function_declaration
       attribute_specification header body in
@@ -1471,7 +1471,7 @@ module WithExpressionAndStatementAndTypeParser
     else
       parse_where_clause parser
 
-  and parse_function_declaration_header parser =
+  and parse_function_declaration_header parser ~is_methodish =
     (* SPEC
       function-definition-header:
         attribute-specification-opt  async-opt  coroutine-opt  function  name  /
@@ -1489,7 +1489,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, function_token) = require_function parser in
     let (parser, ampersand_token) = optional_token parser Ampersand in
     let (parser, label) =
-      parse_function_label_opt parser in
+      parse_function_label_opt parser ~is_methodish in
     let (parser, generic_type_parameter_list) =
       parse_generic_type_parameter_list_opt parser in
     let (parser, left_paren_token, parameter_list, right_paren_token) =
@@ -1515,7 +1515,11 @@ module WithExpressionAndStatementAndTypeParser
 
   (* A function label is either a function name, a __construct label, or a
   __destruct label. *)
-  and parse_function_label_opt parser =
+  and parse_function_label_opt parser ~is_methodish =
+    let report_error parser token =
+      let parser = with_error parser SyntaxError.error1044 in
+      let error = make_error (make_token token) in
+      (parser, error) in
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Name
@@ -1524,19 +1528,24 @@ module WithExpressionAndStatementAndTypeParser
     | LeftParen ->
       (* It turns out, it was just a verbose lambda; YOLO PHP *)
       (parser, make_missing ())
+    | Trait | Interface | Class | Static | Using
+    | Instanceof | Array | Throw | Print | As | And
+    | Or | Xor | New | Const | Eval
+      when not is_methodish ->
+      (* these are illegal for function names *)
+      (* ERROR RECOVERY: Eat the offending token. *)
+      report_error parser1 token
     | _ ->
-      (* TODO: We might have a non-reserved keyword as the name here; "empty",
-      for example, is a keyword but a legal function name. What we do here is
-      accept any keyword; what we *should* do is figure out which keywords are
+      (* TODO: We might have a non-reserved keyword as the name here
+      What we do here is accept any keyword;
+      what we *should* do is figure out which other keywords are
       reserved and which are not, and reject the reserved keywords. *)
       let (parser, token) = next_token_as_name parser in
       if Token.kind token = Name then
         (parser, make_token token)
       else
         (* ERROR RECOVERY: Eat the offending token. *)
-        let parser = with_error parser SyntaxError.error1044 in
-        let error = make_error (make_token token) in
-        (parser, error)
+        report_error parser token
 
   (* SPEC
       method-declaration:
@@ -1560,7 +1569,8 @@ module WithExpressionAndStatementAndTypeParser
       parse_methodish parser (make_missing ()) modifiers
 
   and parse_methodish parser attribute_spec modifiers =
-    let (parser, header) = parse_function_declaration_header parser in
+    let (parser, header) =
+      parse_function_declaration_header parser ~is_methodish:true in
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | LeftBrace ->

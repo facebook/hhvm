@@ -581,13 +581,11 @@ bool SetArray::IsVectorData(const ArrayData*) {
 }
 
 bool SetArray::ExistsInt(const ArrayData* ad, int64_t k) {
-  auto a = asSet(ad);
-  return a->find(k, hash_int64(k)) != -1;
+  return asSet(ad)->findForExists(k, hash_int64(k));
 }
 
 bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
-  auto a = asSet(ad);
-  return a->find(k, k->hash()) != -1;
+  return asSet(ad)->findForExists(k, k->hash());
 }
 
 member_lval SetArray::LvalInt(ArrayData*, int64_t, bool) {

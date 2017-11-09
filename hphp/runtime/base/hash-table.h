@@ -89,7 +89,7 @@ struct HashTableCommon {
   static uint32_t computeScaleFromSize(uint32_t n);
   size_t hashSize() const;
 
-  enum FindType { Lookup, Insert, InsertUpdate, Remove };
+  enum FindType { Lookup, Exists, Insert, InsertUpdate, Remove };
 
   struct Inserter {
     explicit Inserter(int32_t *p) : ei(p) {}
@@ -343,6 +343,28 @@ public:
   }
 
   ALWAYS_INLINE
+  bool findForExists(int64_t ki, hash_t h0) const {
+    return findImpl<FindType::Exists>(
+        h0,
+        [ki](const Elm& e) {
+          return hitIntKey(e, ki);
+        },
+        [](Elm&){}
+      );
+  }
+
+  ALWAYS_INLINE
+  bool findForExists(const StringData* ks, hash_t h0) const {
+    return findImpl<FindType::Exists>(
+        h0,
+        [ks, h0](const Elm& e) {
+          return hitStrKey(e, ks, h0);
+        },
+        [](Elm&){}
+      );
+  }
+
+  ALWAYS_INLINE
   Inserter findForInsert(int64_t ki, hash_t h0) const {
     return findImpl<FindType::Insert>(
         h0,
@@ -444,10 +466,14 @@ public:
 protected:
   template <FindType type, typename Hit, typename Remove>
   typename std::conditional<
-    type != FindType::Insert &&
-    type != FindType::InsertUpdate,
+    type == HashTableCommon::FindType::Lookup ||
+    type == HashTableCommon::FindType::Remove,
     int32_t,
-    Inserter
+    typename std::conditional<
+      type == HashTableCommon::FindType::Exists,
+      bool,
+      typename HashTableCommon::Inserter
+    >::type
   >::type findImpl(hash_t h0, Hit hit, Remove remove) const;
 
   /////////////////////////////////////////////////////////////////////////////

@@ -677,13 +677,11 @@ int32_t MixedArray::findForRemove(const StringData* s, strhash_t h) {
 }
 
 bool MixedArray::ExistsInt(const ArrayData* ad, int64_t k) {
-  auto a = asMixed(ad);
-  return validPos(a->find(k, hash_int64(k)));
+  return asMixed(ad)->findForExists(k, hash_int64(k));
 }
 
 bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
-  auto a = asMixed(ad);
-  return validPos(a->find(k, k->hash()));
+  return asMixed(ad)->findForExists(k, k->hash());
 }
 
 //=============================================================================

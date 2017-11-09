@@ -340,18 +340,23 @@ template <typename HashTableCommon::FindType type,
          typename RLambda>
 ALWAYS_INLINE
 typename std::conditional<
-  type != HashTableCommon::FindType::Insert &&
-  type != HashTableCommon::FindType::InsertUpdate,
+  type == HashTableCommon::FindType::Lookup ||
+  type == HashTableCommon::FindType::Remove,
   int32_t,
-  typename HashTableCommon::Inserter
+  typename std::conditional<
+    type == HashTableCommon::FindType::Exists,
+    bool,
+    typename HashTableCommon::Inserter
+  >::type
 >::type HashTable<ArrayType, ElmType>::findImpl(hash_t h0,
                                                 Hit hit,
                                                 RLambda remove) const {
   static_assert(
     static_cast<int>(FindType::Lookup) == 0 &&
-    static_cast<int>(FindType::Insert) == 1 &&
-    static_cast<int>(FindType::InsertUpdate) == 2 &&
-    static_cast<int>(FindType::Remove) == 3,
+    static_cast<int>(FindType::Exists) == 1 &&
+    static_cast<int>(FindType::Insert) == 2 &&
+    static_cast<int>(FindType::InsertUpdate) == 3 &&
+    static_cast<int>(FindType::Remove) == 4,
     "Update the tuple accessing code below."
   );
   uint64_t mask = this->mask();
@@ -371,14 +376,14 @@ typename std::conditional<
           *ei = Tombstone;
         }
         return std::get<static_cast<int>(type)>(
-          std::make_tuple(int32_t(pos), Inserter(nullptr),
+          std::make_tuple(int32_t(pos), true, Inserter(nullptr),
                           Inserter(ei), int32_t(pos))
         );
       }
     } else if (pos & 1) {
       assert(pos == Empty);
       return std::get<static_cast<int>(type)>(
-        std::make_tuple(int32_t(pos), Inserter(ei),
+        std::make_tuple(int32_t(pos), false, Inserter(ei),
                         Inserter(ei), int32_t(pos))
       );
     }

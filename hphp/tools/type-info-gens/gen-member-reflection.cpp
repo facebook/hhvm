@@ -26,6 +26,7 @@
 #include <folly/Format.h>
 #include <folly/Singleton.h>
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -86,8 +87,9 @@ void generate_entry(const Object& object, std::ostream& o,
   );
 
   auto const gen_range_check = [&] (const Object::Member& member,
-                                    std::size_t base_off) {
-    if (!member.offset) return; // static
+                                    std::size_t base_off,
+                                    std::size_t last_end) -> size_t {
+    if (!member.offset) return 0; // static
 
     auto const off = base_off + *member.offset;
     auto const size = size_of(member.type, parser);
@@ -96,23 +98,30 @@ void generate_entry(const Object& object, std::ostream& o,
       ? folly::format("union@{}", off).str()
       : member.name;
 
+    if (last_end < off) {
+      o << folly::format("      // hole ({})\n", off - last_end);
+    }
+
     o << "      " << folly::format(
-      "if ({} <= diff && diff < {}) return \"{}\";\n",
-      off, off + size, name
+      "if ({} <= diff && diff < {}) return \"{}\"; // size {}\n",
+      off, off + size, name, size
     );
+    return off + size;
   };
 
+  size_t last_end = 0;
   for (auto const& base : object.bases) {
     if (!base.offset) continue;
     auto const base_object = parser->getObject(base.type.key);
 
     for (auto const& member : base_object.members) {
-      gen_range_check(member, *base.offset);
+      last_end = std::max(last_end,
+          gen_range_check(member, *base.offset, last_end));
     }
   }
 
   for (auto const& member : object.members) {
-    gen_range_check(member, 0);
+    last_end = std::max(last_end, gen_range_check(member, 0, last_end));
   }
 
   o << "      return nullptr;\n"

@@ -1428,6 +1428,7 @@ let scan_token_and_leading_trivia scanner as_name lexer  =
 
 (* scanner takes a lexer, returns a lexer and a kind *)
 let scan_token_and_trivia scanner as_name lexer  =
+  let token_start = offset lexer in
   let (lexer, kind, w, leading) =
     scan_token_and_leading_trivia scanner as_name lexer in
   let (lexer, trailing) =
@@ -1441,7 +1442,7 @@ let scan_token_and_trivia scanner as_name lexer  =
       else
         (lexer, [])
     | _ -> scan_trailing_php_trivia lexer in
-  (lexer, Token.make kind (source lexer) (start lexer) w leading trailing)
+  (lexer, Token.make kind (source lexer) token_start w leading trailing)
 
 (* tokenizer takes a lexer, returns a lexer and a token *)
 let scan_assert_progress tokenizer lexer  =
@@ -1481,12 +1482,14 @@ let next_token = (* takes a lexer, returns a (lexer, token) *)
 
 let next_token_no_trailing lexer =
   let tokenizer lexer =
+    let token_start = offset lexer in
     let (lexer, kind, w, leading) =
       scan_token_and_leading_trivia scan_token_outside_type false lexer in
-    (lexer, Token.make kind (source lexer) (start lexer) w leading []) in
+    (lexer, Token.make kind (source lexer) token_start w leading []) in
   scan_assert_progress tokenizer lexer
 
 let next_token_in_string lexer literal_kind =
+  let token_start = offset lexer in
   let lexer = start_new_lexeme lexer in
   (* We're inside a string. Do not scan leading trivia. *)
   let (lexer, kind) = scan_string_literal_in_progress lexer literal_kind in
@@ -1497,18 +1500,19 @@ let next_token_in_string lexer literal_kind =
     | TokenKind.DoubleQuotedStringLiteralTail
     | TokenKind.HeredocStringLiteralTail -> scan_trailing_php_trivia lexer
     | _ -> (lexer, []) in
-  let token = Token.make kind (source lexer) (start lexer) w [] trailing in
+  let token = Token.make kind (source lexer) token_start w [] trailing in
   (lexer, token)
 
 let next_docstring_header lexer =
   (* We're at the beginning of a heredoc string literal. Scan leading
      trivia but not trailing trivia. *)
+  let token_start = offset lexer in
   let (lexer, leading) = scan_leading_php_trivia lexer in
   let lexer = start_new_lexeme lexer in
   let (lexer, name, _) = scan_docstring_header lexer in
   let w = width lexer in
   let token = Token.make TokenKind.HeredocStringLiteralHead
-    (source lexer) (start lexer) w leading [] in
+    (source lexer) token_start w leading [] in
   (lexer, token, name)
 
 let next_token_as_name lexer =
@@ -1520,6 +1524,7 @@ let next_token_in_type lexer =
 let next_xhp_element_token ~no_trailing ~attribute lexer =
   (* XHP elements have whitespace, newlines and Hack comments. *)
   let tokenizer lexer =
+    let token_start = offset lexer in
     let (lexer, kind, w, leading) =
       scan_token_and_leading_trivia (scan_xhp_token ~attribute) true lexer in
     (* We do not scan trivia after an XHPOpen's >. If that is the beginning of
@@ -1528,18 +1533,18 @@ let next_xhp_element_token ~no_trailing ~attribute lexer =
     let (_, token1) = next_token lexer in
     match kind with
     | TokenKind.GreaterThan when no_trailing ->
-      (lexer, Token.make kind (source lexer) (start lexer) w leading [])
+      (lexer, Token.make kind (source lexer) token_start w leading [])
     | TokenKind.XHPElementName
       when attribute && Token.kind token1 = TokenKind.Colon ->
       (* TODO(T21789285): Take this hack out when illtyped xhp is gone *)
       let (lexer, dropped) = scan_xhp_colon_trivia lexer in
       let (lexer, trailing) = scan_trailing_xhp_trivia lexer in
       (lexer, Token.make kind
-        (source lexer) (start lexer) w leading (dropped :: trailing))
+        (source lexer) token_start w leading (dropped :: trailing))
     | _ ->
       let (lexer, trailing) = scan_trailing_php_trivia lexer in
       (lexer, Token.make
-          kind (source lexer) (start lexer) w leading trailing) in
+          kind (source lexer) token_start w leading trailing) in
   let (lexer, token) = scan_assert_progress tokenizer lexer in
   let token_width = Token.width token in
   let trailing_width = Token.trailing_width token in
@@ -1549,6 +1554,7 @@ let next_xhp_element_token ~no_trailing ~attribute lexer =
 
 let next_xhp_body_token lexer =
   let scanner lexer  =
+    let token_start = offset lexer in
     let (lexer, leading) = scan_leading_xhp_trivia lexer in
     let lexer = start_new_lexeme lexer in
     let (lexer, kind) = scan_xhp_body lexer in
@@ -1563,7 +1569,7 @@ let next_xhp_body_token lexer =
       then scan_trailing_xhp_trivia lexer
       else (lexer, [])
     in
-    (lexer, Token.make kind (source lexer) (start lexer) w leading trailing) in
+    (lexer, Token.make kind (source lexer) token_start w leading trailing) in
   scan_assert_progress scanner lexer
 
 let next_xhp_class_name lexer =
@@ -1579,8 +1585,11 @@ let skip_to_end_of_markup lexer ~is_leading_section =
   let make_markup_and_suffix lexer =
     let markup_text = make_markup_token lexer in
     let less_than_question_token =
-      Token.make TokenKind.LessThanQuestion (source lexer) (start lexer) 2 [] []
+      Token.make TokenKind.LessThanQuestion (source lexer) (offset lexer) 2 [] []
     in
+    (* skip <? *)
+    let lexer = advance lexer 2 in
+    let name_token_offset = offset lexer in
     let make_long_tag lexer size =
       (* skip name*)
       let lexer = advance lexer size in
@@ -1592,11 +1601,9 @@ let skip_to_end_of_markup lexer ~is_leading_section =
         else lexer, []
       in
       let name = Token.make TokenKind.Name
-        (source lexer) (start lexer) size [] trailing in
+        (source lexer) name_token_offset size [] trailing in
       lexer, markup_text, Some (less_than_question_token, Some name)
     in
-    (* skip <? *)
-    let lexer = advance lexer 2 in
     let ch0 = peek_char lexer 0 in
     let ch1 = peek_char lexer 1 in
     let ch2 = peek_char lexer 2 in
@@ -1608,7 +1615,7 @@ let skip_to_end_of_markup lexer ~is_leading_section =
         (* skip = *)
         let lexer = advance lexer 1 in
         let equal = Token.make TokenKind.Equal
-          (source lexer) (start lexer) 1 [] [] in
+          (source lexer) name_token_offset 1 [] [] in
         lexer, markup_text, Some (less_than_question_token, Some equal)
       end
     | _ ->

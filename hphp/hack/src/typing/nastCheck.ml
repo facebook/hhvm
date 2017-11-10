@@ -344,7 +344,8 @@ let rec fun_ tenv f named_body =
 
 and func env f named_body =
   let p, fname = f.f_name in
-  if String.lowercase (strip_ns fname) = SN.Members.__construct
+  let fname_lower = String.lowercase (strip_ns fname) in
+  if fname_lower = SN.Members.__construct || fname_lower = "using"
   then Errors.illegal_function_name p fname;
   check_coroutines_enabled (f.f_fun_kind = Ast.FCoroutine) env p;
   (* Add type parameters to typing environment and localize the bounds *)

@@ -42,7 +42,7 @@ struct ErrorLogFileData {
   {}
   std::string logFile;
   std::string symLink;
-  int periodMultiplier;
+  int periodMultiplier{};
   bool isPipeOutput() const { return !logFile.empty() && logFile[0] == '|'; }
   bool hasTemplate() const { return logFile.find('%') != std::string::npos; }
 };

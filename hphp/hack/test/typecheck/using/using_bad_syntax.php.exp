@@ -1,0 +1,2 @@
+File "using_bad_syntax.php", line 15, characters 5-9:
+Parse error: function-scoped 'using' statement not supported in a block scope (Parsing[1002])

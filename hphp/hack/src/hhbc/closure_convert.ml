@@ -413,7 +413,8 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, e1 = convert_expr env st e1 in
     let st, opt_e2 = convert_opt_expr env st opt_e2 in
     st, (p, Array_get (e1, opt_e2))
-  | Call ((_, Id (pe, "get_class")), _, [], []) ->
+  | Call ((_, Id (pe, "get_class")), _, [], [])
+    when st.namespace.Namespace_env.ns_name = None ->
     st, inline_class_name_if_possible
       ~trait:false
       ~fallback_to_empty_string:false

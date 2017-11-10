@@ -224,9 +224,13 @@ module ElaborateDefs = struct
       SetNamespaceEnv nodes that contain the namespace environment
     *)
     | Namespace ((_, nsname), prog) -> begin
+        let parent_nsname =
+          Option.value_map nsenv.ns_name
+            ~default:""
+            ~f:(fun n -> n ^ "\\") in
         let nsname = match nsname with
           | "" -> None
-          | _ -> Some nsname in
+          | _ -> Some (parent_nsname ^ nsname) in
         let new_nsenv = {nsenv with ns_name = nsname} in
         nsenv, SetNamespaceEnv new_nsenv :: program new_nsenv prog
       end

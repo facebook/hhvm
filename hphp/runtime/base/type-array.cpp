@@ -1094,6 +1094,7 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
   if (count == 0) {
     return true;
   }
+  if (count < 0) not_reached();
 
   int *indices = (int *)malloc(sizeof(int) * count);
   for (int i = 0; i < count; i++) {

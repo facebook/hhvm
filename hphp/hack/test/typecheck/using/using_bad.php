@@ -10,7 +10,7 @@ class AsyncHandle implements IAsyncDisposable {
   public function bar():void { }
 }
 
-function testit():void {
+async function testit():Awaitable<void> {
   using ($x = new Handle()) {
     // Should not be able to assign $x as it's a using variable
     $x = 3;

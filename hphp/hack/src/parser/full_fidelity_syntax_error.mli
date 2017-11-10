@@ -212,3 +212,7 @@ val inout_param_in_async_generator : string
 val inout_param_in_generator : string
 val inout_param_in_async : string
 val inout_param_in_construct : string
+val fun_arg_inout_set : string
+val fun_arg_inout_const : string
+val fun_arg_invalid_arg : string
+val fun_arg_inout_containers : string

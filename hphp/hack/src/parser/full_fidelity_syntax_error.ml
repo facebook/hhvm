@@ -319,3 +319,12 @@ let inout_param_in_async =
   "Parameters may not be marked inout on async functions"
 let inout_param_in_construct =
   "Parameters may not be marked inout on constructors"
+let fun_arg_inout_set =
+  "You cannot set an inout decorated argument while calling a function"
+let fun_arg_inout_const =
+  "You cannot decorate a constant as inout"
+let fun_arg_invalid_arg =
+  "You cannot decorate this argument as inout"
+let fun_arg_inout_containers =
+  "Parameters marked inout must be contained in locals, vecs, dicts, keysets," ^
+  " and arrays"

@@ -1278,6 +1278,47 @@ let is_in_finally_block parents =
     | FinallyClause _ -> true
     | _ -> false)
 
+let function_call_argument_errors node errors =
+  match syntax node with
+  | DecoratedExpression
+    { decorated_expression_decorator = {
+        syntax = Token {
+          PositionedToken.kind = TokenKind.Inout
+        ; _}
+      ; _}
+    ; decorated_expression_expression = expression
+    } ->
+      let result =
+        match syntax expression with
+        | BinaryExpression _ ->
+          Some (true, SyntaxError.fun_arg_inout_set)
+        | QualifiedNameExpression _ ->
+          Some (true, SyntaxError.fun_arg_inout_const)
+        (* TODO: Maybe be more descriptive in error messages *)
+        | ScopeResolutionExpression _
+        | FunctionCallExpression _
+        | MemberSelectionExpression _
+        | SafeMemberSelectionExpression _
+        | SubscriptExpression
+          { subscript_receiver = {
+            syntax =
+              (MemberSelectionExpression _ | ScopeResolutionExpression _)
+              ; _
+            }; _ } -> Some (true, SyntaxError.fun_arg_invalid_arg)
+        | SubscriptExpression { subscript_receiver; _ }
+          when SN.Superglobals.is_superglobal @@ text subscript_receiver ->
+            Some (false, SyntaxError.fun_arg_inout_containers)
+        | _ -> None
+      in
+      begin match result with
+      | None -> errors
+      | Some (is_parse_error, e) ->
+        let error_type = if is_parse_error then
+          SyntaxError.ParseError else SyntaxError.RuntimeError in
+        make_error_from_node ~error_type node e :: errors
+      end
+  | _ -> errors
+
 let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors =
   match syntax node with
   | LiteralExpression {
@@ -1304,12 +1345,18 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
   | SubscriptExpression { subscript_left_bracket; _}
     when not hhvm_compat_mode && is_left_brace subscript_left_bracket ->
     make_error_from_node node SyntaxError.error2020 :: errors
-  | FunctionCallExpression { function_call_argument_list; _} ->
-    begin match misplaced_variadic_arg function_call_argument_list with
+  | FunctionCallExpression { function_call_argument_list = arg_list; _} ->
+    let errors =
+      match misplaced_variadic_arg arg_list with
       | Some h ->
         make_error_from_node h SyntaxError.error2033 :: errors
       | None -> errors
-    end
+    in
+    let arg_list = syntax_to_list_no_separators arg_list in
+    let errors = Hh_core.List.fold_right arg_list ~init:errors
+      ~f:(fun p acc -> function_call_argument_errors p acc)
+    in
+    errors
   | ObjectCreationExpression oce when not hhvm_compat_mode && is_hack ->
     if is_missing oce.object_creation_left_paren &&
         is_missing oce.object_creation_right_paren

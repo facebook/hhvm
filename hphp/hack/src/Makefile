@@ -96,8 +96,6 @@ NATIVE_C_FILES=\
   libancillary/libancillary-stubs.c\
   third-party/libancillary/fd_recv.c\
   third-party/libancillary/fd_send.c\
-  utils/compiler_id_impl.c\
-  utils/get_build_id.c\
   utils/sys/files.c\
   utils/sys/handle_stubs.c\
   utils/sys/nproc.c\
@@ -119,7 +117,9 @@ NATIVE_LIBRARIES=\
 COPIED_HHIS=\
 	$(foreach file,$(call rwildcard,../hhi/,*.hhi),_build/$(patsubst ../hhi/%,hhi/%,$(file)))
 
-TARGETS_BASE=_build/hh_server _build/hh_client \
+TARGETS_BASE=\
+	_build/hh_server \
+	_build/hh_client \
 	_build/hh_single_type_check \
 	_build/hh_format \
 	_build/hackfmt \
@@ -136,7 +136,7 @@ ALL_SRC_FILES=$(call rwildcard,$(patsubst _build,,$(wildcard *)),*.*)
 ################################################################################
 
 OBJECT_FILES_TO_BUILD=$(patsubst %.c,%.o,$(NATIVE_C_FILES))
-NATIVE_OBJECT_FILES=$(OBJECT_FILES_TO_BUILD) utils/get_build_id.gen.o
+NATIVE_OBJECT_FILES=$(OBJECT_FILES_TO_BUILD) utils/get_build_id.gen.o utils/get_build_id.o utils/compiler_id_impl.o
 INCLUDE_OPTS=$(foreach dir,$(MODULES),-I $(dir))
 LIB_OPTS=$(foreach lib,$(OCAML_LIBRARIES),-lib $(lib))
 NATIVE_LIB_OPTS=$(foreach lib, $(NATIVE_LIBRARIES),-cclib -l$(lib))
@@ -145,6 +145,9 @@ EXTRA_INCLUDE_OPTS=$(foreach dir, $(EXTRA_INCLUDE_PATHS),-ccopt -I$(dir))
 EXTRA_CC_OPTS=$(foreach opt, $(EXTRA_CC_FLAGS),-ccopt $(opt))
 EXTRA_LINK=$(EXTRA_LINK_OPTS) $(foreach dir, $(EXTRA_LIB_PATHS),-cclib -L$(dir))
 FRAMEWORK_OPTS=$(foreach framework, $(FRAMEWORKS),-cclib -framework -cclib $(framework))
+BUILD_ID_OBJECTS=_build/utils/compiler_id_impl.o _build/utils/get_build_id.o _build/utils/get_build_id.gen.o
+
+.PHONY: $(BUILD_ID_OBJECTS)
 
 LINKER_FLAGS=$(NATIVE_OBJECT_FILES) $(NATIVE_LIB_OPTS) $(EXTRA_LINK) \
 	     $(EXTRA_NATIVE_LIB_OPTS) $(FRAMEWORK_OPTS)
@@ -161,7 +164,7 @@ clean:
 
 build-hack: $(TARGETS)
 
-build-hack-with-ocp: _build/utils/get_build_id.gen.o
+build-hack-with-ocp: $(BUILD_ID_OBJECTS)
 	[ -d ${ROOT}/../_obuild ] || ( cd ${ROOT}/.. && ocp-build init )
 	ocp-build build
 
@@ -170,21 +173,30 @@ comma := ,
 space :=
 space +=
 
-# All targets are built in one time, so no parallelization is necessary
-.NOTPARALLEL: $(TARGETS)
+# A single OCAMLBUILD command generates all of executables; if we directly list the build command for the
+# targets, we pointlessly re-run the command once for each target
+$(TARGETS): _build/hack.stamp
+
 # As there is no efficient way to calculate the dependencies of
 # the targets, we make them dependent on all files. In doing this
 # we ensure that no rebuild is necessary if nothing has changed
-$(TARGETS): $(ALL_SRC_FILES) copy-hhis _build/ppx/ppx_gen_hhi
+_build/hack.stamp: $(ALL_SRC_FILES) copy-hhis _build/ppx/ppx_gen_hhi $(BUILD_ID_OBJECTS)
 	# build-hack-native-deps is a dependency of $(TARGETS) but as it is phony
 	# we place it here to avoid unnecessary rebuilds
 	$(MAKE) build-hack-native-deps
+	# Removing the targets is necessary because the ocaml build
+	# doesn't change the modification dates of the targets if
+	# the code produced from ocaml sources is exactly the same as the old ones;
+	# this:
+	#  - leads to unneccessary rebuilds as Make things the targets are out of date
+	#  - means it will never relink just for C changes
+	#  - doesn't really help that much as it needs to do the bulk of the work anyway
+	rm -f $(TARGETS)
 	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) \
 		-lflags "-g $(LINKER_FLAGS)" -tag custom \
 		$(patsubst _build/%,%,$(TARGETS))
-	# Touching the targets is necessary because the ocaml build
-	# doesn't change the modification dates of the targets if
-	# the new binaries are exactly the same as the old ones
+	touch _build/hack.stamp
+	# As $TARGETS depends on hack.stamp, make sure they're newer
 	touch $(TARGETS)
 
 _build/hackc/build-id: $(ALL_SRC_FILES)
@@ -192,11 +204,27 @@ _build/hackc/build-id: $(ALL_SRC_FILES)
 	(cd $(ROOT)/../../.. && \
 	INSTALL_DIR=./hphp/hack/src/_build/hackc FBCODE_DIR=./ hphp/tools/generate-build-id.sh IGNORED IGNORED hackc hphp/hack/src)
 
-build-hack-native-deps: $(NATIVE_C_FILES) _build/utils/get_build_id.gen.o _build/hackc/build-id
-	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -ccopt -DHACKC_COMPILER_ID=$(shell cat _build/hackc/build-id)" $(OBJECT_FILES_TO_BUILD)
+_build/utils/compiler_id_impl.o: _build/hackc/build-id
+	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) \
+		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -ccopt -DHACKC_COMPILER_ID=$(shell cat _build/hackc/build-id)" \
+	utils/compiler_id_impl.o
 
-.PHONY: _build/utils/get_build_id.gen.c # run every time, depends on git commit
-_build/utils/get_build_id.gen.c:
+_build/hack/build-id: $(ALL_SRC_FILES)
+	mkdir -p _build/hack
+	(cd $(ROOT)/../../.. && \
+	INSTALL_DIR=./hphp/hack/src/_build/hack FBCODE_DIR=./ hphp/tools/generate-build-id.sh IGNORED IGNORED hh hphp/hack/src)
+
+_build/utils/get_build_id.o: _build/hack/build-id
+	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) \
+		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -ccopt -DHH_BUILD_ID=$(shell cat _build/hack/build-id) -ccopt -DHH_BUILD_TIMESTAMP=$(shell date +%s)ul" \
+		utils/get_build_id.o
+
+build-hack-native-deps: $(NATIVE_C_FILES) $(BUILD_ID_OBJECTS)
+	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) \
+		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" \
+		$(OBJECT_FILES_TO_BUILD)
+
+_build/utils/get_build_id.gen.c: $(ALL_SRC_FILES)
 	mkdir -p $(dir $@)
 	cd $(ROOT)/.. && \
         $(OCAML) -I scripts -w -3 unix.cma scripts/gen_build_id.ml src/_build/utils/get_build_id.gen.c

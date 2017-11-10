@@ -36,6 +36,8 @@ else
   # as a sad alternative if we aren't in source control
   buildid=$(find "$treeroot" \
     -name ".c" -or -name ".cpp" -or -name ".h" \
+    -or -name "*.ml" -or -name "*.mli" \
+    ! -path '*/_build/*' \
     -print0 | xargs -0 cat | digest - )
 fi;
 

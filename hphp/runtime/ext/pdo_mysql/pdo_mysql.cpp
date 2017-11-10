@@ -750,7 +750,7 @@ bool PDOMySqlStatement::executePrepared() {
          * we have no way of knowing the true length either, we'll bump up
          * our buffer size to a reasonable size, just in case */
         if (m_fields[i].max_length == 0 &&
-            m_bound_result[i].buffer_length < 128 && MYSQL_TYPE_VAR_STRING) {
+            m_bound_result[i].buffer_length < 128) {
           m_bound_result[i].buffer_length = 128;
         }
 

@@ -1983,7 +1983,7 @@ and function_body env =
          *)
         [Noop]
       | _ ->
-        (match statement_list env with
+        (match statement_list ~is_block_scope:false env with
           | [] -> [Noop]
           | _ when env.quick -> [Noop]
           | x -> x)
@@ -2050,31 +2050,41 @@ and with_ignored_yield env fn =
 (* Statements *)
 (*****************************************************************************)
 
-and statement_list env =
+and enforce_block_scope_using env pos stmt =
+  match stmt with
+  | Using { us_is_block_scoped = false; _ } ->
+    error_at env pos "Parse error: function-scoped 'using' statement not supported in a block scope"
+  | _ ->
+    ()
+
+(* is_block_scope=true if we have entered a { ... } block *)
+and statement_list ~is_block_scope env =
   match L.token env.file env.lb with
   | Trcb -> []
   | Tlcb ->
-      let block = statement_list env in
-      Block block :: statement_list env
+      let block = statement_list ~is_block_scope:true env in
+      Block block :: statement_list ~is_block_scope env
   | Tsc ->
-      statement_list env
+      statement_list ~is_block_scope env
   | Teof ->
       error_expect env "}";
       []
   | _ ->
+      let pos = Pos.make env.file env.lb in
       L.back env.lb;
       let error_state = !(env.errors) in
       let stmt = statement env in
       if !(env.errors) != error_state
       then L.next_newline_or_close_cb env.lb;
-      stmt :: statement_list env
+      if is_block_scope then enforce_block_scope_using env pos stmt;
+      stmt :: statement_list ~is_block_scope env
 
 and using_statement_list env =
   match L.token env.file env.lb with
   | Trcb | Teof -> []
   | Tlcb ->
-      let block = statement_list env in
-      Block block :: statement_list env
+      let block = statement_list ~is_block_scope:true env in
+      Block block :: statement_list ~is_block_scope:false env
   | Tsc ->
       using_statement_list env
   | _ ->
@@ -2092,7 +2102,7 @@ and statement env =
       let stmt = statement_word env word in
       stmt
   | Tlcb ->
-      Block (statement_list env)
+      Block (statement_list ~is_block_scope:true env)
   | Tsc ->
       Noop
   | Tunsafe ->
@@ -2135,7 +2145,7 @@ and statement_word env = function
   | "do"       -> statement_do env
   | "while"    -> statement_while env
   | "await"    -> statement_await env
-  | "using"    -> statement_using false env
+  | "using"    -> statement_using ~has_await:false env
   | "for"      -> statement_for env
   | "switch"   -> statement_switch env
   | "foreach"  -> statement_foreach env
@@ -2412,7 +2422,7 @@ and statement_await env =
   let start = Pos.make env.file env.lb in
   match L.token env.file env.lb with
   | Tword when Lexing.lexeme env.lb = "using" ->
-    statement_using true env
+    statement_using ~has_await:true env
   | _ ->
     L.back env.lb;
     let e = expr_await env start in
@@ -2422,7 +2432,7 @@ and statement_await env =
 (* Block-scoped or function-scoped using, optionally prefixed by `await`. At
  * this point we have lexed `await using` or `using`.
  *)
-and statement_using has_await env =
+and statement_using ~has_await env =
   (* If there is an opening `(` then this could be either block-scoped or
    * function-scoped. If no opening `(` then it's definitely function-scoped.
    *)
@@ -2433,10 +2443,11 @@ and statement_using has_await env =
     (* Parse the remaining comma-separated expression list enclosed in parentheses *)
     let last, el = using_expr_list_rest env in
     let e = Pos.btw start last, Expr_list (e::el) in
-    statement_using_block_or_rest has_await e env
+    statement_using_block_or_rest ~has_await e env
   | _ ->
     L.back env.lb;
     let e = expr env in
+    (* The remainder of the function-level statements *)
     let st = using_statement_list env in
     (* Step back over closing brace *)
     L.back env.lb;
@@ -2447,7 +2458,7 @@ and statement_using has_await env =
       us_block = st; }
 
 
-and statement_using_block_or_rest has_await e env =
+and statement_using_block_or_rest ~has_await e env =
     match L.token env.file env.lb with
     | Tlcb ->
       (* Block-scoped using *)
@@ -2455,7 +2466,7 @@ and statement_using_block_or_rest has_await e env =
         us_is_block_scoped = true;
         us_has_await = has_await;
         us_expr = e;
-        us_block = statement_list env; }
+        us_block = statement_list ~is_block_scope:true env; }
     | Tsc ->
       let st = using_statement_list env in
       (* Step back over closing brace *)

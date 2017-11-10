@@ -744,6 +744,13 @@ module WithStatementAndDeclAndTypeParser
       Prefix_assignment
     | _ -> Prefix_none
 
+  and can_term_take_type_args term =
+    match kind term with
+    | SyntaxKind.QualifiedNameExpression
+    | SyntaxKind.MemberSelectionExpression
+    | SyntaxKind.SafeMemberSelectionExpression -> true
+    | _ -> false
+
   and parse_remaining_expression parser term =
     match peek_next_kind_if_operator parser with
     | None -> (parser, term)
@@ -763,7 +770,7 @@ module WithStatementAndDeclAndTypeParser
     (* Binary operators *)
     (* TODO Add an error if PHP and / or / xor are used in Hack.  *)
     (* TODO Add an error if PHP style <> is used in Hack. *)
-    | LessThan when kind term = SyntaxKind.QualifiedNameExpression ->
+    | LessThan when can_term_take_type_args term ->
       parse_remaining_expression_or_specified_function_call parser term
         assignment_prefix_kind
     | And

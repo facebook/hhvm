@@ -42,6 +42,19 @@ module Value = struct
         Positioned original_source_data
     | Token.Synthetic _ ->
         Synthetic
+
+  let to_json value =
+    let open Hh_json in
+    let open SourceData in
+    match value with
+    | Positioned { offset; leading_width; width; trailing_width; _ } ->
+      JSON_Object [
+        ("offset", int_ offset );
+        ("leading_width", int_ leading_width);
+        ("width", int_ width);
+        ("trailing_width", int_ trailing_width) ]
+    | Synthetic -> JSON_String "synthetic"
+
 end
 
 module SyntaxWithToken = Full_fidelity_syntax.WithToken(Token)

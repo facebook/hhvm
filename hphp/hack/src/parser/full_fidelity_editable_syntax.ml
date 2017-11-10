@@ -27,6 +27,9 @@ module SyntaxWithEditableToken = Full_fidelity_syntax.WithToken(EditableToken)
 
 module EditableSyntaxValue = struct
   type t = NoValue
+  let to_json value =
+    let open Hh_json in
+    JSON_Object [ ]
 end
 
 module EditableSyntax =

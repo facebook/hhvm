@@ -66,6 +66,7 @@ end
 
 module type SyntaxValueType = sig
   type t
+  val to_json: t -> Hh_json.json
 end
 
 (* This functor describe the shape of a parse tree that has a particular kind of

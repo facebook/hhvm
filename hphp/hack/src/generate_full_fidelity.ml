@@ -392,6 +392,7 @@ end
 
 module type SyntaxValueType = sig
   type t
+  val to_json: t -> Hh_json.json
 end
 
 (* This functor describe the shape of a parse tree that has a particular kind of
@@ -481,7 +482,7 @@ PARSE_TREE
   | SyntaxList                        of t list
 SYNTAX
 
-  val to_json : t -> Hh_json.json
+  val to_json : ?with_value:bool -> t -> Hh_json.json
   val is_in_body : t -> int -> bool
   val syntax_node_to_list : t -> t list
   val width : t -> int
@@ -724,21 +725,25 @@ CHILDREN
       | SyntaxList _ -> []
 CHILDREN_NAMES
 
-    let rec to_json node =
+    let rec to_json ?(with_value = false) node =
       let open Hh_json in
       let ch = match node.syntax with
       | Token t -> [ \"token\", Token.to_json t ]
-      | SyntaxList x -> [ (\"elements\", JSON_Array (List.map to_json x)) ]
+      | SyntaxList x -> [ (\"elements\",
+        JSON_Array (List.map (to_json ~with_value) x)) ]
       | _ ->
         let rec aux acc c n =
           match c, n with
           | ([], []) -> acc
           | ((hc :: tc), (hn :: tn)) ->
-            aux ((hn, to_json hc) :: acc) tc tn
+            aux ((hn, (to_json ~with_value) hc) :: acc) tc tn
           | _ -> failwith \"mismatch between children and names\" in
         List.rev (aux [] (children node) (children_names node)) in
       let k = (\"kind\", JSON_String (SyntaxKind.to_string (kind node))) in
-      JSON_Object (k :: ch)
+      let v = if with_value then
+        (\"value\", SyntaxValue.to_json node.value) :: ch
+        else ch in
+      JSON_Object (k :: v)
 
     let binary_operator_kind b =
       match syntax b.binary_operator with
@@ -2642,6 +2647,15 @@ module PositionedSyntaxValue = struct
 
   let trailing_width value =
     value.trailing_width
+
+  let to_json value =
+    let open Hh_json in
+    JSON_Object
+      [ \"offset\", int_ value.offset
+      ; \"leading_width\", int_ value.leading_width
+      ; \"width\", int_ value.width
+      ; \"trailing_width\", int_ value.trailing_width
+      ]
 end
 
 

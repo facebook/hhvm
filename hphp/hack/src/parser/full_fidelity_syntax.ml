@@ -7250,21 +7250,25 @@ module WithToken(Token: TokenType) = struct
       ]
 
 
-    let rec to_json node =
+    let rec to_json ?(with_value = false) node =
       let open Hh_json in
       let ch = match node.syntax with
       | Token t -> [ "token", Token.to_json t ]
-      | SyntaxList x -> [ ("elements", JSON_Array (List.map to_json x)) ]
+      | SyntaxList x -> [ ("elements",
+        JSON_Array (List.map (to_json ~with_value) x)) ]
       | _ ->
         let rec aux acc c n =
           match c, n with
           | ([], []) -> acc
           | ((hc :: tc), (hn :: tn)) ->
-            aux ((hn, to_json hc) :: acc) tc tn
+            aux ((hn, (to_json ~with_value) hc) :: acc) tc tn
           | _ -> failwith "mismatch between children and names" in
         List.rev (aux [] (children node) (children_names node)) in
       let k = ("kind", JSON_String (SyntaxKind.to_string (kind node))) in
-      JSON_Object (k :: ch)
+      let v = if with_value then
+        ("value", SyntaxValue.to_json node.value) :: ch
+        else ch in
+      JSON_Object (k :: v)
 
     let binary_operator_kind b =
       match syntax b.binary_operator with

@@ -24,6 +24,9 @@ module MinimalSyntaxValue = struct
   type t = { full_width: int }
   let make w = { full_width = w }
   let full_width n = n.full_width
+  let to_json value =
+    let open Hh_json in
+    JSON_Object [ ("full_width", int_ value.full_width) ]
 end
 
 module MinimalSyntax =

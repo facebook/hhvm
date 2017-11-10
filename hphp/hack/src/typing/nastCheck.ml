@@ -101,7 +101,8 @@ module CheckFunctionBody = struct
         expr f_type env e;
         block f_type env b;
         ()
-    | _, Using (_has_await, e, b) ->
+    | _, Using (has_await, e, b) ->
+        if has_await then found_await f_type (fst e);
         expr_allow_await_list f_type env e;
         block f_type env b;
         ()
@@ -115,12 +116,9 @@ module CheckFunctionBody = struct
         expr f_type env e;
         List.iter cl (case f_type env);
         ()
-    | Ast.FCoroutine, Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
-        Errors.await_in_coroutine p;
+    | _, Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
+        found_await f_type p
 
-    | (Ast.FSync | Ast.FGenerator), Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
-        Errors.await_in_sync_function p;
-        ()
     | _, Foreach (v, _, b) ->
         expr f_type env v;
         block f_type env b;
@@ -130,6 +128,12 @@ module CheckFunctionBody = struct
         List.iter cl (catch f_type env);
         block f_type { env with t_is_finally = true } fb;
         ()
+
+  and found_await ftype p =
+    match ftype with
+    | Ast.FCoroutine -> Errors.await_in_coroutine p
+    | Ast.FSync | Ast.FGenerator -> Errors.await_in_sync_function p
+    | _ -> ()
 
   and block f_type env stl =
     List.iter stl (stmt f_type env)
@@ -275,14 +279,12 @@ module CheckFunctionBody = struct
     | Ast.FSync, Yield _
     | Ast.FAsync, Yield _ -> assert false
 
-    | Ast.FGenerator, Await _
-    | Ast.FSync, Await _ -> Errors.await_in_sync_function p
+    | (Ast.FGenerator | Ast.FSync | Ast.FCoroutine), Await _ ->
+      found_await f_type p
 
     | Ast.FAsync, Await _
     | Ast.FAsyncGenerator, Await _ -> Errors.await_not_allowed p
 
-    | Ast.FCoroutine, Await _ ->
-      Errors.await_in_coroutine p
     | Ast.FCoroutine, (Yield _ | Yield_break) ->
       Errors.yield_in_coroutine p
     | (Ast.FSync | Ast.FAsync | Ast.FGenerator | Ast.FAsyncGenerator), Suspend _ ->

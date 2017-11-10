@@ -966,7 +966,7 @@ std::string StringData::toCppString() const {
 }
 
 bool StringData::checkSane() const {
-  static_assert(sizeof(StringData) == use_lowptr ? 16 : 24,
+  static_assert(sizeof(StringData) == (use_lowptr ? 16 : 24),
                 "StringData size changed---update assertion if you mean it");
   static_assert(size_t(MaxSize) <= size_t(INT_MAX), "Beware int wraparound");
 #ifdef NO_M_DATA

@@ -307,3 +307,15 @@ let strict_types_first_statement =
   "strict_types declaration must be the very first statement in the script"
 let async_magic_method =
   "cannot declare constructors, destructors, and magic methods such as as async"
+
+let reserved_keyword_as_class_name =
+  "You may not use a reserved keyword for a class name"
+
+let inout_param_in_generator =
+  "Parameters may not be marked inout on generators"
+let inout_param_in_async_generator =
+  "Parameters may not be marked inout on an async generators"
+let inout_param_in_async =
+  "Parameters may not be marked inout on async functions"
+let inout_param_in_construct =
+  "Parameters may not be marked inout on constructors"

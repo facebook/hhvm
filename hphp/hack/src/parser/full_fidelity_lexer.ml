@@ -1403,7 +1403,7 @@ let as_case_insensitive_keyword text =
   | "eval" | "isset" | "unset" | "empty" | "const" | "new"
   | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
   | "true" | "false" | "null" | "array" | "instanceof"
-  | "trait" | "class" | "interface" | "using" | "static" -> lower
+  | "trait" | "class" | "interface" | "using" | "static" | "inout" -> lower
   | _ -> text
 
 let as_keyword kind lexer =

@@ -620,6 +620,17 @@ let is_classish_kind_declared_abstract hhvm_compat_mode classish_kind cd_node =
       list_contains_predicate is_abstract classish_modifiers
   | _ -> false
 
+let is_reserved_keyword is_hack classish_name =
+  let name = text classish_name in
+  (* TODO: What else goes here? *)
+  match String.lowercase_ascii name with
+  | "eval" | "isset" | "unset" | "empty" | "const" | "new"
+  | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
+  | "array" | "instanceof" | "trait" | "class" | "interface"
+  | "static" -> true
+  | "using" | "inout" when is_hack -> true
+  | _ -> false
+
 (* Given a function_declaration_header node, returns its function_name
  * as a string opt. *)
 let extract_function_name header_node =
@@ -731,6 +742,36 @@ let extract_async_node md_node =
       "function_async.")
     end
   | _ -> None (* Only method declarations have async nodes *)
+
+let first_parent_function_declaration parents =
+  Hh_core.List.find_map parents ~f:begin fun node ->
+    match syntax node with
+    | FunctionDeclaration { function_declaration_header = header; _ }
+    | MethodishDeclaration { methodish_function_decl_header = header; _ } ->
+      begin match syntax header with
+      | FunctionDeclarationHeader fdh -> Some fdh
+      | _ -> None
+      end
+    | _ -> None
+    end
+
+let is_parameter_with_callconv param =
+  match syntax param with
+  | ParameterDeclaration { parameter_call_convention; _ } ->
+    not @@ is_missing parameter_call_convention
+  | _ -> false
+
+let has_inout_params parents =
+  match first_parent_function_declaration parents with
+  | Some { function_parameter_list; _ } ->
+    let params = syntax_to_list_no_separators function_parameter_list in
+    Hh_core.List.exists params ~f:is_parameter_with_callconv
+  | _ -> false
+
+let is_inside_async_method parents =
+  match first_parent_function_declaration parents with
+  | Some { function_async; _ } -> not @@ is_missing function_async
+  | None -> false
 
 let make_name_already_used_error node name short_name original_location
   report_error =
@@ -999,6 +1040,11 @@ let default_value_params is_hack hhvm_compat_mode params =
   | Some param when not hhvm_compat_mode && is_hack -> Some param
   | _ -> None
 
+let is_in_construct_method parents =
+  match first_parent_function_name parents with
+  | None -> false
+  | Some s -> String.lowercase_ascii s = SN.Members.__construct
+
 (* Test if the parameter is missing a type annotation but one is required *)
 let missing_param_type_check is_strict hhvm_compat_mode p parents =
   let is_required = parameter_type_is_required parents in
@@ -1007,12 +1053,6 @@ let missing_param_type_check is_strict hhvm_compat_mode p parents =
 (* If a variadic parameter has a default value, return it *)
 let variadic_param_with_default_value params =
   Option.filter (variadic_param params) ~f:is_parameter_with_default_value
-
-let is_parameter_with_callconv param =
-  match syntax param with
-  | ParameterDeclaration { parameter_call_convention; _ } ->
-    not (is_missing parameter_call_convention)
-  | _ -> false
 
 (* If a variadic parameter is marked inout, return it *)
 let variadic_param_with_callconv params =
@@ -1041,6 +1081,7 @@ let param_with_callconv_is_byref node =
     is_parameter_with_callconv node &&
     is_byref_parameter_variable parameter_name -> Some node
   | _ -> None
+
 let params_errors params is_hack hhvm_compat_mode errors =
   let errors =
     produce_error_from_check errors (default_value_params is_hack hhvm_compat_mode)
@@ -1079,6 +1120,15 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
     let errors =
       produce_error_from_check errors param_with_callconv_is_byref
       node (SyntaxError.error2075 callconv_text) in
+    let errors =
+      if is_parameter_with_callconv node && is_inside_async_method parents then
+      make_error_from_node node SyntaxError.inout_param_in_async :: errors
+      else errors in
+    let errors =
+      if is_parameter_with_callconv node && is_in_construct_method parents then
+      make_error_from_node ~error_type:SyntaxError.RuntimeError
+        node SyntaxError.inout_param_in_construct :: errors
+      else errors in
     errors
   | FunctionDeclarationHeader { function_parameter_list; _ }
     when not hhvm_compat_mode ->
@@ -1311,6 +1361,14 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
       make_error_from_node ~error_type:SyntaxError.RuntimeError
         node SyntaxError.yield_in_finally_block :: errors
       else errors in
+    let errors =
+      if has_inout_params parents then
+      let e =
+        if is_inside_async_method parents
+        then SyntaxError.inout_param_in_async_generator
+        else SyntaxError.inout_param_in_generator in
+      make_error_from_node ~error_type:SyntaxError.RuntimeError node e :: errors
+      else errors in
     errors
   | ScopeResolutionExpression
     { scope_resolution_qualifier = qualifier
@@ -1361,7 +1419,7 @@ let require_errors node parents hhvm_compat_mode trait_use_clauses errors =
     trait_use_clauses, errors
   | _ -> trait_use_clauses, errors
 
-let classish_errors node parents hhvm_compat_mode names errors =
+let classish_errors node parents is_hack hhvm_compat_mode names errors =
   match syntax node with
   | ClassishDeclaration cd ->
     let errors =
@@ -1408,6 +1466,10 @@ let classish_errors node parents hhvm_compat_mode names errors =
       produce_error errors
       (is_classish_kind_declared_abstract hhvm_compat_mode TokenKind.Trait)
       node SyntaxError.error2043 abstract_keyword in
+    let errors =
+      produce_error errors
+      (is_reserved_keyword is_hack) cd.classish_name
+      SyntaxError.reserved_keyword_as_class_name cd.classish_name in
     let names, errors =
       match token_kind cd.classish_keyword with
       | Some TokenKind.Class | Some TokenKind.Trait ->
@@ -1772,7 +1834,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
     let trait_require_clauses, errors =
       require_errors node parents hhvm_compatiblity_mode trait_require_clauses errors in
     let names, errors =
-      classish_errors node parents hhvm_compatiblity_mode names errors in
+      classish_errors node parents is_hack hhvm_compatiblity_mode names errors in
     let errors =
       class_element_errors node parents errors in
     let errors =

@@ -1528,7 +1528,7 @@ module WithExpressionAndStatementAndTypeParser
     | LeftParen ->
       (* It turns out, it was just a verbose lambda; YOLO PHP *)
       (parser, make_missing ())
-    | Trait | Interface | Class | Static | Using
+    | Trait | Interface | Class | Static | Using | Inout
     | Instanceof | Array | Throw | Print | As | And
     | Or | Xor | New | Const | Eval
       when not is_methodish ->

@@ -74,11 +74,7 @@ slow/inout/bad-call-6.php
 slow/inout/bad-call-7.php
 slow/inout/bad-call-8.php
 slow/inout/bad-call-9.php
-slow/inout/bad-class.php
-slow/inout/bad-constructor.php
 slow/inout/bad-decl-2.php
-slow/inout/bad-func.php
-slow/inout/bad-generator.php
 slow/inout/bad-interface.php
 slow/inout/bad-memoize.php
 slow/inout/bad-mixed-mode-1.php
@@ -92,7 +88,6 @@ slow/inout/bad-parent-5.php
 slow/inout/bad-parent-6.php
 slow/inout/bad-trait-1.php
 slow/inout/bad-trait-2.php
-slow/inout/bad-trait-3.php
 slow/inout/builtin-interop.php
 slow/inout/call-dynamic.php
 slow/inout/call-static.php

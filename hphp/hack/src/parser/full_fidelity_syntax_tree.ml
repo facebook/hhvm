@@ -119,6 +119,10 @@ let make ?(env = Env.default) text =
   let (language, mode) = get_language_and_mode text root in
   { text; root; errors; language; mode }
 
+let from_root text root errors =
+  let (language, mode) = get_language_and_mode text root in
+  { text; root; errors; language; mode }
+
 let root tree =
   tree.root
 

@@ -12,8 +12,8 @@ module EditableTrivia = Full_fidelity_editable_trivia
 module SourceText = Full_fidelity_source_text
 module SyntaxTree = Full_fidelity_syntax_tree
   .WithSyntax(Full_fidelity_minimal_syntax)
-
-module PositionedSyntax = Full_fidelity_positioned_syntax
+module PositionedTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_positioned_syntax)
 module ParserErrors = Full_fidelity_parser_errors
 module SyntaxError = Full_fidelity_syntax_error
 module TestUtils = Full_fidelity_test_utils
@@ -136,7 +136,9 @@ let test_errors source =
   let file_path = Relative_path.(create Dummy "<test_errors>") in
   let source_text = SourceText.make file_path source in
   let offset_to_position = SourceText.offset_to_position source_text in
+  (* TODO: Switch to creating a positioned tree directly *)
   let syntax_tree = SyntaxTree.make source_text in
+  let syntax_tree = Syntax_tree_utilities.positioned_from_minimal syntax_tree in
   let errors = ParserErrors.parse_errors syntax_tree in
   let mapper err = SyntaxError.to_positioned_string err offset_to_position in
   let errors = List.map errors ~f:mapper in

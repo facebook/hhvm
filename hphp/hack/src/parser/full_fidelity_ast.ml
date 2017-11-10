@@ -10,6 +10,8 @@
 
 module SyntaxTree = Full_fidelity_syntax_tree
   .WithSyntax(Full_fidelity_minimal_syntax)
+module PositionedTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_positioned_syntax)
 module Syntax = Full_fidelity_editable_positioned_syntax
 module SyntaxValue = Syntax.Value
 module Token = Full_fidelity_editable_positioned_token
@@ -2423,27 +2425,27 @@ let lower ~source_text ~script env : result =
 
 let from_text (env : env) (source_text : SourceText.t) : result =
   let open SyntaxTree in
-  let tree   =
+  let tree =
     let env =
       Full_fidelity_parser_env.make
         ~hhvm_compat_mode:env.hhvm_compat_mode
         ~php5_compat_mode:env.php5_compat_mode
         () in
     make ~env source_text in
-  let script = Full_fidelity_positioned_syntax.from_tree tree in
+  let positioned_tree = Syntax_tree_utilities.positioned_from_minimal tree in
   let () = if env.hhvm_compat_mode then
     let errors =
       ParserErrors.parse_errors
         ~enable_hh_syntax:env.enable_hh_syntax
-        ~positioned_syntax:script
         ~level:ParserErrors.HHVMCompatibility
-        tree
+        positioned_tree
     in
     match errors with
     | [] -> ()
     | e :: _ ->
       raise @@ Full_fidelity_syntax_error.ParserFatal e
   in
+  let script = PositionedTree.root positioned_tree in
   let script = from_positioned_syntax script in
   let script =
     if env.lower_coroutines then

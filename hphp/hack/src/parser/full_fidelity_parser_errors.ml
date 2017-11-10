@@ -11,6 +11,9 @@
 module PositionedSyntax = Full_fidelity_positioned_syntax
 open PositionedSyntax
 
+module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_positioned_syntax)
+
 module PositionedToken = Full_fidelity_positioned_token
 module SyntaxError = Full_fidelity_syntax_error
 module TokenKind = Full_fidelity_token_kind
@@ -1732,7 +1735,7 @@ let declare_errrors node parents errors =
     errors
   | _ -> errors
 
-let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
+let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let is_hack_file = (SyntaxTree.language syntax_tree = "hh") in
   let is_hack = is_hack_file || enable_hh_syntax in
@@ -1836,12 +1839,7 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
           has_namespace_prefix trait_require_clauses
       in
       fold_child_nodes folder node parents acc in
-
-  let node =
-    match positioned_syntax with
-    | Some n -> n
-    | None -> PositionedSyntax.from_tree syntax_tree in
-  let acc = fold_child_nodes folder node []
+  let acc = fold_child_nodes folder (SyntaxTree.root syntax_tree) []
     { errors = []
     ; namespace_type = Unspecified
     ; names = empty_names
@@ -1852,7 +1850,7 @@ let find_syntax_errors ?positioned_syntax ~enable_hh_syntax hhvm_compatiblity_mo
 
 type error_level = Minimum | Typical | Maximum | HHVMCompatibility
 
-let parse_errors ?(enable_hh_syntax=false) ?(level=Typical) ?positioned_syntax syntax_tree =
+let parse_errors ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =
   (*
   Minimum: suppress cascading errors; no second-pass errors if there are
   any first-pass errors.
@@ -1866,5 +1864,5 @@ let parse_errors ?(enable_hh_syntax=false) ?(level=Typical) ?positioned_syntax s
     if level = Minimum && errors1 <> [] then []
     else find_syntax_errors
       ~enable_hh_syntax
-      ?positioned_syntax (level = HHVMCompatibility) syntax_tree in
+      (level = HHVMCompatibility) syntax_tree in
   List.sort SyntaxError.compare (Core_list.append errors1 errors2)

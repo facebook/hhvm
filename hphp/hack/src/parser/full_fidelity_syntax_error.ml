@@ -305,3 +305,5 @@ let reassign_this =
   "Cannot re-assign $this"
 let strict_types_first_statement =
   "strict_types declaration must be the very first statement in the script"
+let async_magic_method =
+  "cannot declare constructors, destructors, and magic methods such as as async"

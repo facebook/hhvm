@@ -364,6 +364,10 @@ let class_destructor_has_non_visibility_modifier hhvm_compat_mode node parents =
   (is_destruct label) &&
   (matches_first (methodish_contains_non_visibility hhvm_compat_mode) parents)
 
+let async_magic_method { function_async; function_name; _} parents =
+  SSet.mem (String.lowercase_ascii @@ text function_name) SN.Members.as_set &&
+  not @@ is_missing function_async
+
 (* check that a constructor or a destructor is type annotated *)
 let class_constructor_destructor_has_non_void_type hhvm_compat_node node parents =
   if hhvm_compat_node then false
@@ -903,6 +907,9 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
       (class_destructor_has_non_visibility_modifier hhvm_compat_mode)
       header_node [node]
       SyntaxError.error2012 modifiers in
+    let errors =
+      produce_error_for_header errors async_magic_method header_node [node]
+      SyntaxError.async_magic_method modifiers in
     let errors =
       produce_error errors (methodish_multiple_visibility hhvm_compat_mode) node
       SyntaxError.error2017 modifiers in

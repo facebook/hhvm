@@ -116,14 +116,12 @@ slow/now_doc/1906.php
 slow/object/672.php
 slow/object_property_expression/798.php
 slow/parser/1851.php
-slow/parser/async-constructor.php
 slow/parser/async.php
 slow/parser/colon_colon_class.php
 slow/parser/hh-namespace-conflict-1.php
 slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-3.php
 slow/parser/hh-namespace-conflict-6.php
-slow/parser/namespace_use_trailing_comma.php
 slow/parser/php-namespace-conflict-3.php
 slow/parser/static_call_access_const_expr.php
 slow/parser/xhp-ambiguity.php

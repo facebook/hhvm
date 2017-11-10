@@ -54,7 +54,6 @@ slow/hh_namespace_migration/hh_set4.php
 slow/hh_namespace_migration/hh_set7.php
 slow/hh_namespace_migration/hh_vector3.php
 slow/hh_namespace_migration/hh_vector5.php
-slow/hhbbc/clsref-side-effects.php
 slow/inline-hhas/mixed.php
 slow/inout/autoloader.php
 slow/inout/bad-abstract.php

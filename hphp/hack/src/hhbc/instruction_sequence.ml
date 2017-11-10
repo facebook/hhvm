@@ -505,6 +505,39 @@ let rewrite_class_refs_instr num = function
 | IIsset (IssetS _) -> (num - 1, IIsset (IssetS num))
 | IIsset (EmptyS _) -> (num - 1, IIsset (EmptyS num))
 | ILitConst (TypedValue tv) -> (num, Emit_adata.rewrite_typed_value tv)
+(* all class ref slots at every catch clause must be uninitialized
+   Technically we can reset the counter at ICatchMiddle however this won't work
+   in following case:
+   try {
+
+   }
+   catch (A $e) { unset(AA::$x); }
+   catch (B $e) { unset(AA::$x); }
+
+   During codegen all catch clauses are flattened to something like:
+   try {
+     ...
+   }
+   catch ($e) {
+     if (!($e instanceof A)) goto L1;
+     load_class_ref(AA);
+     raise_fatal "cannot unset static property"
+
+     goto AfterCatch:
+     if (!($e instanceof B)) throw $e; // (**)
+     load_class_ref(AA);
+     raise_fatal "cannot unset static property"
+
+     goto AfterCatch
+   }
+   AfterCatch:
+
+   Resetting counter at the beginning of catch clause will not help
+   to reset it at line (**). What we do instead - reset counter
+   at instructions that raise errors
+
+   *)
+| (IOp (Fatal _) | IContFlow Throw) as i -> (-1, i)
 | i -> (num, i)
 
 (* Cannot use InstrSeq.fold_left since we want to maintain the exact
@@ -537,72 +570,72 @@ let rewrite_class_refs instrseq =
   in
   fst @@ aux instrseq (-1)
 
-  let rec can_initialize_static_var e =
-    match snd e with
-    | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True -> true
-    | A.Array es ->
-      List.for_all es ~f:(function
-        | A.AFvalue v ->
-          can_initialize_static_var v
-        | A.AFkvalue (k, v) ->
-          can_initialize_static_var k
-          && can_initialize_static_var v)
-    | A.Darray es ->
-      List.for_all es ~f:(fun (k, v) ->
+let rec can_initialize_static_var e =
+  match snd e with
+  | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True -> true
+  | A.Array es ->
+    List.for_all es ~f:(function
+      | A.AFvalue v ->
+        can_initialize_static_var v
+      | A.AFkvalue (k, v) ->
         can_initialize_static_var k
         && can_initialize_static_var v)
-    | A.Varray es ->
-      List.for_all es ~f:can_initialize_static_var
-    | A.Collection ((_, name), fields) ->
-      let name =
-        Hhbc_string_utils.Types.fix_casing @@ Hhbc_string_utils.strip_ns name in
-      begin match name with
-      | "vec" ->
-        List.for_all fields ~f:(function
-          | A.AFvalue e -> can_initialize_static_var e
-          | _ -> false)
-      | "keyset" ->
-        List.for_all fields ~f:(function
-          | A.AFvalue (_, (A.String _ | A.Int _)) -> true
-          | _ -> false)
-      | "dict" ->
-        List.for_all fields ~f:(function
-          | A.AFkvalue ((_, (A.String _ | A.Int _)), v) ->
-            can_initialize_static_var v
-          | _ -> false)
-      | _ -> false
-      end
-    | A.Call ((_, A.Id (_, "tuple")), _, es, []) ->
-      List.for_all es ~f:can_initialize_static_var
+  | A.Darray es ->
+    List.for_all es ~f:(fun (k, v) ->
+      can_initialize_static_var k
+      && can_initialize_static_var v)
+  | A.Varray es ->
+    List.for_all es ~f:can_initialize_static_var
+  | A.Collection ((_, name), fields) ->
+    let name =
+      Hhbc_string_utils.Types.fix_casing @@ Hhbc_string_utils.strip_ns name in
+    begin match name with
+    | "vec" ->
+      List.for_all fields ~f:(function
+        | A.AFvalue e -> can_initialize_static_var e
+        | _ -> false)
+    | "keyset" ->
+      List.for_all fields ~f:(function
+        | A.AFvalue (_, (A.String _ | A.Int _)) -> true
+        | _ -> false)
+    | "dict" ->
+      List.for_all fields ~f:(function
+        | A.AFkvalue ((_, (A.String _ | A.Int _)), v) ->
+          can_initialize_static_var v
+        | _ -> false)
     | _ -> false
+    end
+  | A.Call ((_, A.Id (_, "tuple")), _, es, []) ->
+    List.for_all es ~f:can_initialize_static_var
+  | _ -> false
 
-  let rewrite_static_instrseq static_var_map emit_expr env instrseq =
-    let rewrite_static_instr instruction =
-      match instruction with
-      | IMisc (StaticLocInit (Local.Named name, _)) ->
-        begin match (SMap.get name static_var_map) with
-              | None ->
-                failwith "rewrite_static_instr: No value in static map!"
-              | Some None -> gather [instr_null; instr_static_loc_init name;]
-              | Some (Some e) ->
-                if can_initialize_static_var e then
-                  gather [
-                    emit_expr env e;
-                    instr_static_loc_init name;
-                  ]
-                else
-                  let l = Label.next_regular () in
-                  gather [
-                    instr_static_loc_check name;
-                    instr_jmpnz l;
-                    emit_expr env e;
-                    instr_static_loc_def name;
-                    instr_label l;
-                  ]
-        end
-      | _ -> instr instruction
-    in
-    InstrSeq.flat_map_seq instrseq rewrite_static_instr
+let rewrite_static_instrseq static_var_map emit_expr env instrseq =
+  let rewrite_static_instr instruction =
+    match instruction with
+    | IMisc (StaticLocInit (Local.Named name, _)) ->
+      begin match (SMap.get name static_var_map) with
+            | None ->
+              failwith "rewrite_static_instr: No value in static map!"
+            | Some None -> gather [instr_null; instr_static_loc_init name;]
+            | Some (Some e) ->
+              if can_initialize_static_var e then
+                gather [
+                  emit_expr env e;
+                  instr_static_loc_init name;
+                ]
+              else
+                let l = Label.next_regular () in
+                gather [
+                  instr_static_loc_check name;
+                  instr_jmpnz l;
+                  emit_expr env e;
+                  instr_static_loc_def name;
+                  instr_label l;
+                ]
+      end
+    | _ -> instr instruction
+  in
+  InstrSeq.flat_map_seq instrseq rewrite_static_instr
 
 let is_srcloc i =
   match i with

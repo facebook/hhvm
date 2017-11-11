@@ -73,6 +73,7 @@ const StaticString s_WaitHandle("HH\\WaitHandle");
 //////////////////////////////////////////////////////////////////////
 
 struct State {
+  explicit State(IRUnit& unit) : unit(unit) {}
   IRUnit& unit;
 
   // The current instruction being simplified is always at insts.top(). This

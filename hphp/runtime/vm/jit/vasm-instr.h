@@ -250,6 +250,11 @@ struct Vunit;
   O(movtqb, Inone, UH(s,d), DH(d,s))\
   O(movtqw, Inone, UH(s,d), DH(d,s))\
   O(movtql, Inone, UH(s,d), DH(d,s))\
+  O(movsbl, Inone, UH(s,d), DH(d,s))\
+  O(movswl, Inone, UH(s,d), DH(d,s))\
+  O(movsbq, Inone, UH(s,d), DH(d,s))\
+  O(movswq, Inone, UH(s,d), DH(d,s))\
+  O(movslq, Inone, UH(s,d), DH(d,s))\
   /* loads/stores */\
   O(loadb, Inone, U(s), D(d))\
   O(loadw, Inone, U(s), D(d))\
@@ -316,9 +321,6 @@ struct Vunit;
   O(msr, I(s), U(r), Dn)\
   O(ubfmli, I(mr) I(ms), U(s), D(d))\
   /* ppc64 instructions */\
-  O(extsb, Inone, UH(s,d), DH(d,s))\
-  O(extsw, Inone, UH(s,d), DH(d,s))\
-  O(extsl, Inone, UH(s,d), DH(d,s))\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
   O(fcmpu, Inone, U(s0) U(s1), D(sf))\
   O(fctidz, Inone, U(s), D(d) D(sf))\
@@ -1059,7 +1061,12 @@ struct movtdq { VregDbl s; Vreg64 d; };
 struct movtqb { Vreg64 s; Vreg8 d; };
 struct movtqw { Vreg64 s; Vreg16 d; };
 struct movtql { Vreg64 s; Vreg32 d; };
-
+// sign-extended s to d
+struct movsbl { Vreg8 s; Vreg32 d; };
+struct movswl { Vreg16 s; Vreg32 d; };
+struct movsbq { Vreg8 s; Vreg64 d; };
+struct movswq { Vreg16 s; Vreg64 d; };
+struct movslq { Vreg32 s; Vreg64 d; };
 
 /*
  * Loads and stores.
@@ -1161,9 +1168,6 @@ struct ubfmli { Immed mr, ms; Vreg32 s, d; };
 /*
  * ppc64 intrinsics.
  */
-struct extsb { Vreg8 s; Vreg64 d; };  // Extend byte sign
-struct extsw { Vreg16 s; Vreg64 d; }; // Extend word sign
-struct extsl { Vreg32 s; Vreg64 d; }; // Extend dword sign
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fctidz { VregDbl s; VregDbl d; VregSF sf; };

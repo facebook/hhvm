@@ -225,9 +225,9 @@ struct Vgen {
   }
   void emit(const divint& i) { a.divd(i.d,  i.s0, i.s1, false); }
   void emit(const divsd& i) { a.fdiv(i.d, i.s1, i.s0); }
-  void emit(const extsb& i) { a.extsb(i.d, Reg64(i.s)); }
-  void emit(const extsw& i) { a.extsh(i.d, Reg64(i.s)); }
-  void emit(const extsl& i) { a.extsw(i.d, Reg64(i.s)); }
+  void emit(const movsbq& i) { a.extsb(i.d, Reg64(i.s)); }
+  void emit(const movswq& i) { a.extsh(i.d, Reg64(i.s)); }
+  void emit(const movslq& i) { a.extsw(i.d, Reg64(i.s)); }
   void emit(const fallthru& /*i*/) {}
   void emit(const fcmpo& i) {
     a.fcmpo(i.sf, i.s0, i.s1);
@@ -1038,8 +1038,8 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
   else v << vasm_dst_imm{inst.s0, tmp3, inst.sf};                       \
 }
 
-X(testwim, testq, testqi, loadw, extsw)
-X(testlim, testq, testqi, loadl, extsl)
+X(testwim, testq, testqi, loadw, movswq)
+X(testlim, testq, testqi, loadl, movslq)
 #undef X
 
 // Very similar with the above case: handles MemoryRef and Immed, but also
@@ -1069,8 +1069,8 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
   v << vasm_store{tmp3, p};                                             \
 }
 
-X(orwim,  orq,  loadw, storew, extsw)
-X(addlim, addq, load,  store, extsl)
+X(orwim,  orq,  loadw, storew, movswq)
+X(addlim, addq, load,  store, movslq)
 #undef X
 
 // Handles MemoryRef arguments and load the data input from memory, but these
@@ -1098,7 +1098,7 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
   v << vasm_dst{operands tmp2, inst.sf};                                \
 }
 
-X(cmpwm,  cmpq,  loadw, ONE_R64(s0), extsw)
+X(cmpwm,  cmpq,  loadw, ONE_R64(s0), movswq)
 #undef X
 
 
@@ -1112,10 +1112,10 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
 
 X(cmpb,  cmpq,  movzbq, NONE)
 X(cmpw,  cmpq,  movzwq, NONE)
-X(testb, testq, extsb,  NONE)
-X(testw, testq, extsw,  NONE)
-X(testl, testq, extsl,  NONE)
-X(subl,  subq,  extsl,  ONE_R64(d))
+X(testb, testq, movsbq, NONE)
+X(testw, testq, movswq, NONE)
+X(testl, testq, movslq, NONE)
+X(subl,  subq,  movslq, ONE_R64(d))
 
 #undef X
 
@@ -1128,10 +1128,10 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
 
 X(cmpbi,  cmpqi,  movzbq, NONE)
 X(cmpwi,  cmpqi,  movzwq, NONE)
-X(subli,  subqi,  extsl,  ONE_R64(d))
-X(testbi, testqi, extsb,  NONE)
-X(testwi, testqi, extsw,  NONE)
-X(testli, testqi, extsl,  NONE)
+X(subli,  subqi,  movslq, ONE_R64(d))
+X(testbi, testqi, movsbq, NONE)
+X(testwi, testqi, movswq, NONE)
+X(testli, testqi, movslq, NONE)
 
 #undef X
 

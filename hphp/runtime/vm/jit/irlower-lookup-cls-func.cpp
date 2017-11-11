@@ -421,7 +421,7 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
       return fpushCufHelperStringSlowPath(sd, preLiveAR, fp);
     }
 
-    auto const func = Unit::loadDynCallFunc(sd);
+    auto const func = Unit::loadFunc(sd);
     preLiveAR->m_func = func;
     if (UNLIKELY(!func)) {
       return fpushStringFail(sd, preLiveAR);

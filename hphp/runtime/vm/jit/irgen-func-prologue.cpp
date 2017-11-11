@@ -488,9 +488,12 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
 }
 
 void emitDynamicCallCheck(IRGS& env) {
-  if (!RuntimeOption::EvalNoticeOnAllDynamicCalls) return;
-
   auto const func = curFunc(env);
+
+  if (!RuntimeOption::EvalNoticeOnAllDynamicCalls &&
+      !func->accessesCallerFrame()) {
+    return;
+  }
 
   ifThen(
     env,
@@ -504,6 +507,11 @@ void emitDynamicCallCheck(IRGS& env) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
+
+      if (func->accessesCallerFrame()) {
+        gen(env, RaiseVarEnvDynCall, cns(env, func));
+      }
+
       if (RuntimeOption::EvalNoticeOnAllDynamicCalls) {
         std::string msg;
         string_printf(

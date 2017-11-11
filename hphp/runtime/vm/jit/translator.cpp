@@ -381,8 +381,6 @@ static const struct {
   { OpThis,        {None,             Stack1,       OutThisObject   }},
   { OpBareThis,    {None,             Stack1,       OutUnknown      }},
   { OpCheckThis,   {This,             None,         OutNone         }},
-  { OpVarEnvDynCall,
-                   {None,             None,         OutNone         }},
   { OpInitThisLoc,
                    {None,             Local,        OutUnknown      }},
   { OpStaticLocCheck,
@@ -1081,7 +1079,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::UnsetM:
   case Op::SetWithRefLML:
   case Op::SetWithRefRML:
-  case Op::VarEnvDynCall:
   case Op::MemoGet:
   case Op::MemoSet:
     return false;

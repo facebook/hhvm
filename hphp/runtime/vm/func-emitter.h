@@ -316,8 +316,6 @@ public:
   RepoAuthType repoReturnType;
   RepoAuthType repoAwaitedReturnType;
 
-  Id dynCallWrapperId{kInvalidId};
-
 private:
   /*
    * FuncEmitter-managed state.

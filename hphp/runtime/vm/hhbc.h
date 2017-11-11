@@ -727,8 +727,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(MemoGet,         TWO(IVA, LAR),    MFINAL,          ONE(CUV),   NF) \
   O(MemoSet,         TWO(IVA, LAR),    C_MFINAL,        ONE(CV),    NF) \
   O(MaybeMemoType,   NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsMemoType,      NA,               ONE(CV),         ONE(CV),    NF) \
-  O(VarEnvDynCall,   NA,               NOV,             NOV,        NF)
+  O(IsMemoType,      NA,               ONE(CV),         ONE(CV),    NF)
 
 enum class Op : uint16_t {
 #define O(name, ...) name,

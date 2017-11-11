@@ -194,11 +194,6 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (originalFilename)
     ;
 
-  if (isNative) {
-    sd(dynCallWrapperId)
-      ;
-  }
-
   if (SerDe::deserializing) {
     repoReturnType.resolveArray(ue());
     repoAwaitedReturnType.resolveArray(ue());

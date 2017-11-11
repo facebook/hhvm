@@ -105,7 +105,7 @@ void FuncCache::lookup(rds::Handle handle,
   const StringData* pairSd = pair->m_key;
   if (!stringMatches(pairSd, sd)) {
     // Miss. Does it actually exist?
-    auto const* func = Unit::lookupDynCallFunc(sd);
+    auto const* func = Unit::lookupFunc(sd);
     if (UNLIKELY(!func)) {
       ObjectData *this_ = nullptr;
       Class* self_ = nullptr;

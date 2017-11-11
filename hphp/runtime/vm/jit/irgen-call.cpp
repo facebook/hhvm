@@ -63,8 +63,7 @@ findCuf(Op /*op*/, SSATmp* callable, const Func* ctxFunc, const Class*& cls,
     auto const lookup = lookupImmutableFunc(ctxFunc->unit(), str);
     if (lookup.func) {
       needsUnitLoad = lookup.needsUnitLoad;
-      auto wrapper = lookup.func->dynCallWrapper();
-      return LIKELY(!wrapper) ? lookup.func : wrapper;
+      return lookup.func;
     }
     String name(const_cast<StringData*>(str));
     int pos = name.find("::");
@@ -109,7 +108,6 @@ findCuf(Op /*op*/, SSATmp* callable, const Func* ctxFunc, const Class*& cls,
   bool magicCall = false;
   const Func* f = lookupImmutableMethod(
     cls, sname, magicCall, /* staticLookup = */ true, ctxFunc, isExact);
-  assertx(!f || !f->dynCallWrapper());
   if (!f || (!isExact && !f->isImmutableFrom(cls))) return nullptr;
   if (forward && !ctx->classof(f->cls())) {
     /*

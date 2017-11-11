@@ -343,16 +343,15 @@ struct Func final {
   StrNR fullNameStr() const;
 
   /*
-   * The function's display name, which is almost always name(), except for
-   * internal functions, like the dynamic call wrappers. In that case, return
-   * the original builtin's name.
+   * The function's display name, which is almost always name(), except for some
+   * internal functions. In that case, return the original function's name.
    */
   const StringData* displayName() const;
 
   /*
    * The function's full display name, which is almost always fullName(), except
-   * for internal functions, like the dynamic call wrappers. In that case,
-   * return the original builtin's full name.
+   * for some internal functions. In that case, return the original function's
+   * full name.
    */
   const StringData* fullDisplayName() const;
 
@@ -807,30 +806,6 @@ struct Func final {
    */
   BuiltinFunction nativeFuncPtr() const;
 
-  /*
-   * The dynCallWrapper, if present, is a function identical to this one, except
-   * it has an additional opcode which marks that the function has been
-   * dynamically called. Depending on the `DisallowDynamicVarEnvFuncs` option,
-   * this opcde may cause a fatal, a warning to be raised, or nothing. When this
-   * function is dynamically called, we dispatch to the wrapper instead of this
-   * one (the wrapper cannot be called otherwise). If the opcode doesn't fatal,
-   * the operation of the function runs as normal.
-   *
-   * This should only be present for builtins which may access the caller's
-   * frame and is used to optionally forbid dynamic calls to such builtins.
-   *
-   * @implies accessesCallerFrame() && isBuiltin()
-   */
-  Func* dynCallWrapper() const;
-
-  /*
-   * The dynCallTarget is set for dynamic call wrapper functions (see above) and
-   * indicates which builtin they are associated with.
-   *
-   * @implies accessesCallerFrame() && isBuiltin()
-   */
-  Func* dynCallTarget() const;
-
   /////////////////////////////////////////////////////////////////////////////
   // Closures.                                                          [const]
 
@@ -1144,9 +1119,6 @@ struct Func final {
   void setHasPrivateAncestor(bool b);
   void setMethodSlot(Slot s);
 
-  void setDynCallWrapper(Func*);
-  void setDynCallTarget(Func*);
-
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -1279,8 +1251,6 @@ private:
     BuiltinFunction m_nativeFuncPtr;
     Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
-    Func* m_dynCallWrapper{nullptr};
-    Func* m_dynCallTarget{nullptr};
     Id m_actualNumClsRefSlots;
   };
 

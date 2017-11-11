@@ -699,13 +699,6 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       << "numIterators: " << numIterators() << '\n'
       << "numClsRefSlots: " << numClsRefSlots() << '\n';
 
-  if (auto const f = dynCallWrapper()) {
-    out << "dynCallWrapper: " << f->fullName()->data() << '\n';
-  }
-  if (auto const f = dynCallTarget()) {
-    out << "dynCallTarget: " << f->fullName()->data() << '\n';
-  }
-
   const EHEntVec& ehtab = shared()->m_ehtab;
   size_t ehId = 0;
   for (auto it = ehtab.begin(); it != ehtab.end(); ++it, ++ehId) {

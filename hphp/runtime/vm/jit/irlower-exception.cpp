@@ -75,8 +75,6 @@ IMPL_OPCODE_CALL(DebugBacktraceFast)
 
 static void raiseVarEnvDynCall(const Func* func) {
   assertx(func->accessesCallerFrame());
-  assertx(func->dynCallWrapper());
-  assertx(!func->dynCallTarget());
   raise_disallowed_dynamic_call(func);
 }
 

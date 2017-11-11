@@ -1125,7 +1125,6 @@ void emit_finish_func(EmitUnitState& state,
 
   if (func.nativeInfo) {
     fe.hniReturnType = func.nativeInfo->returnType;
-    fe.dynCallWrapperId = func.nativeInfo->dynCallWrapperId;
   }
   fe.retTypeConstraint = func.retTypeConstraint;
 

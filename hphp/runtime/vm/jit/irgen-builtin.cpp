@@ -2204,21 +2204,4 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-void emitVarEnvDynCall(IRGS& env) {
-  auto const func = curFunc(env);
-  assertx(func->dynCallTarget());
-
-  if (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON) {
-    std::string msg;
-    std::string format = "(hhvm.hack.disallow_dynamic_var_env_funcs=error) " +
-                         std::string(Strings::DISALLOWED_DYNCALL);
-    string_printf(msg, format.c_str(), func->fullDisplayName()->data());
-    gen(env, RaiseError, cns(env, makeStaticString(msg)));
-  } else {
-    gen(env, RaiseVarEnvDynCall, cns(env, func->dynCallTarget()));
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
 }}}

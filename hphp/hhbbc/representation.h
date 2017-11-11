@@ -266,12 +266,6 @@ struct NativeInfo {
    * folly::none stands for a Variant return.
    */
   folly::Optional<DataType> returnType;
-
-  /*
-   * Associated dynamic call wrapper function. Used to catch dynamic calls to
-   * caller frame affecting functions.
-   */
-  Id dynCallWrapperId;
 };
 
 /*

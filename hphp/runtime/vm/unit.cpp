@@ -682,22 +682,6 @@ void Unit::bindFunc(Func *func) {
   func->setFuncHandle(ne->m_cachedFunc);
 }
 
-Func* Unit::loadDynCallFunc(const StringData* name) {
-  if (auto f = loadFunc(name)) {
-    auto wrapper = f->dynCallWrapper();
-    return LIKELY(!wrapper) ? f : wrapper;
-  }
-  return nullptr;
-}
-
-Func* Unit::lookupDynCallFunc(const StringData* name) {
-  if (auto f = lookupFunc(name)) {
-    auto wrapper = f->dynCallWrapper();
-    return LIKELY(!wrapper) ? f : wrapper;
-  }
-  return nullptr;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FrameRestore {

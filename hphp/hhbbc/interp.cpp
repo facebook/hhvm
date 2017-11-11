@@ -2943,15 +2943,10 @@ void in(ISS& env, const bc::FCall& op) {
     case FPIKind::ObjInvoke:
       not_reached();
     case FPIKind::Func:
-      // Don't turn dynamic calls into static calls with functions that can
-      // potentially touch the caller's frame. Such functions will fatal if
-      // called dynamically and we want to preserve that behavior.
-      if (!ar.func->mightAccessCallerFrame()) {
-        return reduce(
-          env,
-          bc::FCallD { op.arg1, s_empty.get(), ar.func->name() }
-        );
-      }
+      return reduce(
+        env,
+        bc::FCallD { op.arg1, s_empty.get(), ar.func->name() }
+      );
       break;
     case FPIKind::Builtin:
       return finish_builtin(env, ar.func->exactFunc(), op.arg1, false);
@@ -3788,8 +3783,6 @@ void in(ISS& env, const bc::Silence& op) {
       break;
   }
 }
-
-void in(ISS& /*emv*/, const bc::VarEnvDynCall&) {}
 }
 
 //////////////////////////////////////////////////////////////////////

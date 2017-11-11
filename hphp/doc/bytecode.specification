@@ -4103,15 +4103,6 @@ GetMemoKeyL  <local id>  [] ->  [C:<Int/String>]
   not implement IMemoizeParam). This op can only be used within a function
   marked as being a memoize wrapper.
 
-VarEnvDynCall   []  ->  []
-
-  Mark that the current function can potentially access the caller's frame and
-  has been called dynamically. Depending on the setting of the
-  `DisallowDynamicVarEnvFuncs` runtime option, this opcode might fatal, raise a
-  warning, or do nothing. Used inside generated wrapper functions for builtins
-  which can modify the caller's frame. These wrapper functions are called
-  instead of the builtin when the builtin is called dynamically.
-
 14. Generator creation and execution
 ---------------------------------------
 

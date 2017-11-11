@@ -141,19 +141,12 @@ inline StrNR Func::fullNameStr() const {
 }
 
 inline const StringData* Func::displayName() const {
-  auto const target = dynCallTarget();
-  return
-    LIKELY(!target && !takesInOutParams()) ? name() :
-    LIKELY(target != nullptr) ? target->name() :
-    stripInOutSuffix(name());
+  return LIKELY(!takesInOutParams()) ? name() : stripInOutSuffix(name());
 }
 
 inline const StringData* Func::fullDisplayName() const {
-  auto const target = dynCallTarget();
   return
-    LIKELY(!target && !takesInOutParams()) ? fullName() :
-    LIKELY(target != nullptr) ? target->fullName() :
-    stripInOutSuffix(fullName());
+    LIKELY(!takesInOutParams()) ? fullName() : stripInOutSuffix(fullName());
 }
 
 inline NamedEntity* Func::getNamedEntity() {
@@ -456,36 +449,12 @@ inline bool Func::accessesCallerFrame() const {
 }
 
 inline BuiltinFunction Func::builtinFuncPtr() const {
-  if (auto const ex = extShared()) {
-    if (UNLIKELY(ex->m_dynCallTarget != nullptr)) {
-      return ex->m_dynCallTarget->builtinFuncPtr();
-    }
-    return ex->m_builtinFuncPtr;
-  }
+  if (auto const ex = extShared()) return ex->m_builtinFuncPtr;
   return nullptr;
 }
 
 inline BuiltinFunction Func::nativeFuncPtr() const {
-  if (auto const ex = extShared()) {
-    if (UNLIKELY(ex->m_dynCallTarget != nullptr)) {
-      return ex->m_dynCallTarget->nativeFuncPtr();
-    }
-    return ex->m_nativeFuncPtr;
-  }
-  return nullptr;
-}
-
-inline Func* Func::dynCallWrapper() const {
-  if (auto const ex = extShared()) {
-    return ex->m_dynCallWrapper;
-  }
-  return nullptr;
-}
-
-inline Func* Func::dynCallTarget() const {
-  if (auto const ex = extShared()) {
-    return ex->m_dynCallTarget;
-  }
+  if (auto const ex = extShared()) return ex->m_nativeFuncPtr;
   return nullptr;
 }
 
@@ -722,28 +691,6 @@ inline void Func::setHasPrivateAncestor(bool b) {
 inline void Func::setMethodSlot(Slot s) {
   assert(isMethod());
   m_methodSlot = s;
-}
-
-inline void Func::setDynCallWrapper(Func* f) {
-  assert(accessesCallerFrame());
-  assert(f->accessesCallerFrame());
-  assert(!f->dynCallWrapper());
-  assert(extShared());
-  assert(!dynCallWrapper() || dynCallWrapper() == f);
-  assert(!dynCallTarget());
-  assert(!f->dynCallTarget() || f->dynCallTarget() == this);
-  extShared()->m_dynCallWrapper = f;
-}
-
-inline void Func::setDynCallTarget(Func* f) {
-  assert(accessesCallerFrame());
-  assert(f->accessesCallerFrame());
-  assert(!f->dynCallTarget());
-  assert(extShared());
-  assert(!dynCallTarget() || dynCallTarget() == f);
-  assert(!dynCallWrapper());
-  assert(!f->dynCallWrapper() || f->dynCallWrapper() == this);
-  extShared()->m_dynCallTarget = f;
 }
 
 //////////////////////////////////////////////////////////////////////

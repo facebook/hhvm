@@ -408,9 +408,6 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
   if (func->isMemoizeWrapper()) {
     out.fmtln(".ismemoizewrapper;");
   }
-  if (auto const wrapper = func->dynCallWrapper()) {
-    out.fmtln(".dyncallwrapper \"{}\";", wrapper->name());
-  }
   if (auto const niters = func->numIterators()) {
     out.fmtln(".numiters {};", niters);
   }

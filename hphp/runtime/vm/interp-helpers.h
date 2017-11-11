@@ -58,11 +58,14 @@ inline void setTypesFlag(ActRec* fp, ActRec* ar) {
 
 inline void checkForDynamicCall(const ActRec* ar) {
   if (!ar->isDynamicCall()) return;
+  auto const func = ar->func();
+
+  if (func->accessesCallerFrame()) raise_disallowed_dynamic_call(func);
 
   if (RuntimeOption::EvalNoticeOnAllDynamicCalls) {
     raise_notice(
       Strings::FUNCTION_CALLED_DYNAMICALLY,
-      ar->func()->fullDisplayName()->data()
+      func->fullDisplayName()->data()
     );
   }
 }

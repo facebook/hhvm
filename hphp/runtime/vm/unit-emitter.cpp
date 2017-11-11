@@ -687,13 +687,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
     assert(m_fMap.find(fe) != m_fMap.end());
     auto func = m_fMap.find(fe)->second;
     u->m_funcTable.push_back(FuncEntry(past, func));
-    // If this function has a dynamic call wrapper, hookup the Func* pointers so
-    // they point to each other.
-    if (fe->dynCallWrapperId != kInvalidId) {
-      auto wrapper = u->lookupFuncId(fe->dynCallWrapperId);
-      func->setDynCallWrapper(wrapper);
-      wrapper->setDynCallTarget(func);
-    }
   }
 
   // Funcs can be recorded out of order when loading them from the

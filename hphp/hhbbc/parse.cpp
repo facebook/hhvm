@@ -890,7 +890,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 
     ret->nativeInfo                   = std::make_unique<php::NativeInfo>();
     ret->nativeInfo->returnType       = fe.hniReturnType;
-    ret->nativeInfo->dynCallWrapperId = fe.dynCallWrapperId;
     if (f && ret->params.size()) {
       if (!f->cls()) {
         // There are a handful of functions whose first parameter is by

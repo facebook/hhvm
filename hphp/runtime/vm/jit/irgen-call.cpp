@@ -814,6 +814,7 @@ bool callAccessesLocals(const NormalizedInstruction& inst,
     case OpFPushCtor:
     case OpFPushCtorD:
     case OpFPushCtorI:
+    case OpFPushCtorS:
       // None of these access the caller's frame because they all call methods,
       // not top-level functions. However, they might still be marked as
       // skip-frame and therefore something they call can affect our frame. We
@@ -1037,6 +1038,37 @@ void emitFPushCtorI(IRGS& env,
                              : gen(env, AllocObj, ssaCls);
   pushIncRef(env, obj);
   fpushActRec(env, ssaFunc, obj, numParams, nullptr);
+}
+
+namespace {
+
+SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
+  switch (ref) {
+    case SpecialClsRef::Static:
+      if (!curClass(env)) PUNT(SpecialClsRef-NoCls);
+      return gen(env, LdClsCtx, ldCtx(env));
+    case SpecialClsRef::Self:
+      if (auto const clss = curClass(env)) return cns(env, clss);
+      PUNT(SpecialClsRef-NoCls);
+      break;
+    case SpecialClsRef::Parent:
+      if (auto const clss = curClass(env)) {
+        if (auto const parent = clss->parent()) return cns(env, parent);
+      }
+      PUNT(SpecialClsRef-NoCls);
+      break;
+  }
+  always_assert(false);
+}
+
+}
+
+void emitFPushCtorS(IRGS& env, uint32_t numParams, SpecialClsRef ref) {
+  auto const cls  = specialClsRefToCls(env, ref);
+  auto const func = gen(env, LdClsCtor, cls, fp(env));
+  auto const obj  = gen(env, AllocObj, cls);
+  pushIncRef(env, obj);
+  fpushActRec(env, func, obj, numParams, nullptr);
 }
 
 void emitFPushFuncD(IRGS& env, uint32_t nargs, const StringData* name) {
@@ -1273,25 +1305,6 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
         sp(env),
         clsVal);
   }
-}
-
-SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
-  switch (ref) {
-    case SpecialClsRef::Static:
-      if (!curClass(env)) PUNT(SpecialClsRef-NoCls);
-      return gen(env, LdClsCtx, ldCtx(env));
-    case SpecialClsRef::Self:
-      if (auto const clss = curClass(env)) return cns(env, clss);
-      PUNT(SpecialClsRef-NoCls);
-      break;
-    case SpecialClsRef::Parent:
-      if (auto const clss = curClass(env)) {
-        if (auto const parent = clss->parent()) return cns(env, parent);
-      }
-      PUNT(SpecialClsRef-NoCls);
-      break;
-  }
-  always_assert(false);
 }
 
 }

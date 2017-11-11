@@ -2537,6 +2537,25 @@ void in(ISS& env, const bc::FPushCtorI& op) {
   ctorHelper(env, name);
 }
 
+void in(ISS& env, const bc::FPushCtorS& op) {
+  auto const cls = specialClsRefToCls(env, op.subop2);
+  if (is_specialized_cls(cls)) {
+    auto const dcls = dcls_of(cls);
+    if (dcls.type == DCls::Exact) {
+      return reduce(
+        env,
+        bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack }
+      );
+    }
+    auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, false);
+    push(env, subObj(dcls.cls));
+    fpiPush(env, ActRec { FPIKind::Ctor, dcls.cls, rfunc });
+    return;
+  }
+  push(env, TObj);
+  fpiPush(env, ActRec { FPIKind::Ctor });
+}
+
 void in(ISS& env, const bc::FPushCtor& op) {
   auto const& t1 = peekClsRefSlot(env, op.slot);
   if (is_specialized_cls(t1)) {

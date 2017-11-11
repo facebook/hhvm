@@ -6228,9 +6228,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     Offset fpiStart;
     if (ne->isStatic()) {
       // new static()
-      e.LateBoundCls(kClsRefSlotPlaceholder);
       fpiStart = m_ue.bcPos();
-      e.FPushCtor(numParams, kClsRefSlotPlaceholder);
+      e.FPushCtorS(numParams, SpecialClsRef::Static);
     } else if (ne->getOriginalName().empty()) {
       // new $x()
       visit(ne->getNameExp());
@@ -6240,16 +6239,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     } else if ((ne->isSelf() || ne->isParent()) &&
                (!cls || cls->isTrait() ||
                 (ne->isParent() && cls->getOriginalParent().empty()))) {
+      fpiStart = m_ue.bcPos();
       if (ne->isSelf()) {
         // new self() inside a trait or code statically not inside any class
-        e.Self(kClsRefSlotPlaceholder);
+        e.FPushCtorS(numParams, SpecialClsRef::Self);
       } else {
         // new parent() inside a trait, code statically not inside any
         // class, or a class with no parent
-        e.Parent(kClsRefSlotPlaceholder);
+        e.FPushCtorS(numParams, SpecialClsRef::Parent);
       }
-      fpiStart = m_ue.bcPos();
-      e.FPushCtor(numParams, kClsRefSlotPlaceholder);
     } else {
       // new C() inside trait or pseudomain
       fpiStart = m_ue.bcPos();

@@ -2171,6 +2171,7 @@ FPushClsMethodSD <num params> <mode> <litstr id>        []   ->  []
 FPushCtor <num params> <class-ref slot>   []  ->  [C]
 FPushCtorD <num params> <litstr id>       []  ->  [C]
 FPushCtorI <num params> <class id>        []  ->  [C]
+FPushCtorS <num params> <mode>            []  ->  [C]
 
   FPI push constructor. First, these instructions load a value into x as given
   by the following table:
@@ -2180,10 +2181,13 @@ FPushCtorI <num params> <class id>        []  ->  [C]
       FPushCtor   | %2
       FPushCtorD  | %2
       FPushCtorI  | %2
+      FPushCtorS  | %2
 
   When loading %2 into x, FPushCtorD will perform the work performed by the
   ClsRefGetC instruction to convert the name given by %2 into a classref, and
-  FPushCtorI will load the class in the current unit with id %2.
+  FPushCtorI will load the class in the current unit with id %2. FPushCtorS
+  will perform the same work as LateBoundCls/Self/Parent depending on the
+  specified mode.
 
   This instruction pushes an uninitialized object onto the stack (to be
   initialized during FCall*) prior to entering the FPI region, then pushes a

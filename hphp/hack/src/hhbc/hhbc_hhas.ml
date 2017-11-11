@@ -475,6 +475,8 @@ let string_of_call instruction =
     sep ["FPushCtorD"; string_of_int n; string_of_class_id cid]
   | FPushCtorI (n, id) ->
     sep ["FPushCtorI"; string_of_int n; string_of_classref id]
+  | FPushCtorS (n, r) ->
+    sep ["FPushCtorS"; string_of_int n; SpecialClsRef.to_string r]
   | DecodeCufIter (id, l) ->
     sep ["DecodeCufIter"; string_of_iterator_id id; string_of_label l]
   | FPushCufIter (n, id) ->

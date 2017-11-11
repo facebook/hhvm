@@ -145,7 +145,9 @@ const void annotate(NormalizedInstruction* i,
   }
 
   auto const func =
-    pushOp == Op::FPushCtorD || pushOp == Op::FPushCtor ?
+    (pushOp == Op::FPushCtorD ||
+     pushOp == Op::FPushCtor ||
+     pushOp == Op::FPushCtorS) ?
     lookupDirectCtor(i->source, clsName, pushOp) :
     lookupDirectFunc(i->source, funcName, clsName, isExact, isStatic);
 

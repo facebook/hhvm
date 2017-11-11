@@ -4841,19 +4841,20 @@ OPTBLD_INLINE void iopFPushClsMethodSD(intva_t numArgs,
   );
 }
 
-OPTBLD_INLINE void iopFPushCtor(intva_t numArgs, clsref_slot slot) {
-  Class* cls = slot.take();
-  // Lookup the ctor
+namespace {
+
+void fpushCtorImpl(intva_t numArgs, Class* cls) {
   const Func* f;
-  auto res UNUSED = lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
-  assert(res == LookupResult::MethodFoundWithThis);
+  auto const res UNUSED =
+    lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
+  assertx(res == LookupResult::MethodFoundWithThis);
   // Replace input with uninitialized instance.
-  ObjectData* this_ = newInstance(cls);
+  auto this_ = newInstance(cls);
   TRACE(2, "FPushCtor: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
   vmStack().pushObject(this_);
   // Push new activation record.
-  ActRec* ar = vmStack().allocA();
+  auto ar = vmStack().allocA();
   ar->m_func = f;
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
@@ -4861,53 +4862,32 @@ OPTBLD_INLINE void iopFPushCtor(intva_t numArgs, clsref_slot slot) {
   setTypesFlag(vmfp(), ar);
 }
 
+}
+
+OPTBLD_INLINE void iopFPushCtor(intva_t numArgs, clsref_slot slot) {
+  fpushCtorImpl(numArgs, slot.take());
+}
+
 OPTBLD_INLINE void iopFPushCtorD(intva_t numArgs, Id id) {
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
-  Class* cls = Unit::loadClass(nep.second, nep.first);
+  auto cls = Unit::loadClass(nep.second, nep.first);
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS,
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
   }
-  // Lookup the ctor
-  const Func* f;
-  auto res UNUSED = lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
-  assert(res == LookupResult::MethodFoundWithThis);
-  // Push uninitialized instance.
-  ObjectData* this_ = newInstance(cls);
-  TRACE(2, "FPushCtorD: new'ed an instance of class %s: %p\n",
-        cls->name()->data(), this_);
-  vmStack().pushObject(this_);
-  // Push new activation record.
-  ActRec* ar = vmStack().allocA();
-  ar->m_func = f;
-  ar->setThis(this_);
-  ar->initNumArgs(numArgs);
-  ar->trashVarEnv();
-  setTypesFlag(vmfp(), ar);
+  fpushCtorImpl(numArgs, cls);
 }
 
 OPTBLD_INLINE void iopFPushCtorI(intva_t numArgs, intva_t clsIx) {
   auto const func = vmfp()->m_func;
   auto const preCls = func->unit()->lookupPreClassId(clsIx);
   auto const cls = Unit::defClass(preCls, true);
+  fpushCtorImpl(numArgs, cls);
+}
 
-  // Lookup the ctor
-  const Func* f;
-  auto res UNUSED = lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
-  assert(res == LookupResult::MethodFoundWithThis);
-  // Push uninitialized instance.
-  ObjectData* this_ = newInstance(cls);
-  TRACE(2, "FPushCtorI: new'ed an instance of class %s: %p\n",
-        cls->name()->data(), this_);
-  vmStack().pushObject(this_);
-  // Push new activation record.
-  ActRec* ar = vmStack().allocA();
-  ar->m_func = f;
-  ar->setThis(this_);
-  ar->initNumArgs(numArgs);
-  ar->trashVarEnv();
-  setTypesFlag(vmfp(), ar);
+OPTBLD_INLINE void iopFPushCtorS(intva_t numArgs, SpecialClsRef ref) {
+  fpushCtorImpl(numArgs, specialClsRefToCls(ref));
 }
 
 OPTBLD_INLINE

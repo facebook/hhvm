@@ -568,6 +568,8 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushCtor,       TWO(IVA,CAR),     NOV,             ONE(CV),    PF) \
   O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    PF) \
   O(FPushCtorI,      TWO(IVA,IVA),     NOV,             ONE(CV),    PF) \
+  O(FPushCtorS,      TWO(IVA,OA(SpecialClsRef)),                        \
+                                       NOV,             ONE(CV),    PF) \
   O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        PF) \
   O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        PF) \
   O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        PF) \
@@ -1028,7 +1030,8 @@ constexpr bool isFPushCtor(Op opcode) {
   return
     opcode == OpFPushCtor  ||
     opcode == OpFPushCtorD ||
-    opcode == OpFPushCtorI;
+    opcode == OpFPushCtorI ||
+    opcode == OpFPushCtorS;
 }
 
 constexpr bool isFPushFunc(Op opcode) {

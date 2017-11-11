@@ -464,7 +464,19 @@ and emit_new env expr args uargs =
       push_instr;
       emit_args_and_call env args uargs;
       instr_popr
-    ]
+      ]
+  | Class_static ->
+     gather [instr_fpushctors nargs SpecialClsRef.Static;
+             emit_args_and_call env args uargs;
+             instr_popr]
+  | Class_self ->
+     gather [instr_fpushctors nargs SpecialClsRef.Self;
+             emit_args_and_call env args uargs;
+             instr_popr]
+  | Class_parent ->
+     gather [instr_fpushctors nargs SpecialClsRef.Parent;
+             emit_args_and_call env args uargs;
+             instr_popr]
   | _ ->
     gather [
       emit_load_class_ref env cexpr;

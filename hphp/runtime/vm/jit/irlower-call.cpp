@@ -81,13 +81,11 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   v << storeli{safe_cast<int32_t>(extra->after), calleeAR + AROFF(m_soff)};
 
   if (extra->fcallAwait) {
-    // This clobbers any flags that might have already been set on the callee
-    // AR (e.g., by SpillFrame), but this is okay because there should never be
-    // any conflicts; see the documentation in act-rec.h.
-    auto const imm = static_cast<int32_t>(
-      ActRec::encodeNumArgsAndFlags(argc, ActRec::Flags::IsFCallAwait)
-    );
-    v << storeli{imm, calleeAR + AROFF(m_numArgsAndFlags)};
+    v << orlim{
+      static_cast<int32_t>(ActRec::Flags::IsFCallAwait),
+      calleeAR + AROFF(m_numArgsAndFlags),
+      v.makeReg()
+    };
   }
 
   auto const isNativeImplCall = callee &&

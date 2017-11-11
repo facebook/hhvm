@@ -128,6 +128,11 @@ struct ACufIterCtx { SSATmp* fp; uint32_t id; };
 struct ACufIterInvName { SSATmp* fp; uint32_t id; };
 
 /*
+ * A specific CufIter's dynamic value (m_dynamic).
+ */
+struct ACufIterDynamic { SSATmp* fp; uint32_t id; };
+
+/*
  * A location inside of an object property, with base `obj' and byte offset
  * `offset' from the ObjectData*.
  */
@@ -198,24 +203,25 @@ struct AliasClass {
     BEmpty    = 0,
     // The relative order of the values are used in operator| to decide
     // which specialization is more useful.
-    BFrame          = 1 << 0,
-    BIterPos        = 1 << 1,
-    BIterBase       = 1 << 2,
-    BProp           = 1 << 3,
-    BElemI          = 1 << 4,
-    BElemS          = 1 << 5,
-    BStack          = 1 << 6,
-    BRef            = 1 << 7,
-    BClsRefSlot     = 1 << 8,
-    BCufIterFunc    = 1 << 9,
-    BCufIterCtx     = 1 << 10,
-    BCufIterInvName = 1 << 11,
+    BFrame          = 1U << 0,
+    BIterPos        = 1U << 1,
+    BIterBase       = 1U << 2,
+    BProp           = 1U << 3,
+    BElemI          = 1U << 4,
+    BElemS          = 1U << 5,
+    BStack          = 1U << 6,
+    BRef            = 1U << 7,
+    BClsRefSlot     = 1U << 8,
+    BCufIterFunc    = 1U << 9,
+    BCufIterCtx     = 1U << 10,
+    BCufIterInvName = 1U << 11,
+    BCufIterDynamic = 1U << 12,
 
     // Have no specialization, put them last.
-    BMITempBase = 1 << 12,
-    BMITvRef    = 1 << 13,
-    BMITvRef2   = 1 << 14,
-    BMIBase     = 1 << 15,
+    BMITempBase = 1U << 13,
+    BMITvRef    = 1U << 14,
+    BMITvRef2   = 1U << 15,
+    BMIBase     = 1U << 16,
 
     BElem      = BElemI | BElemS,
     BHeap      = BElem | BProp | BRef,
@@ -223,7 +229,7 @@ struct AliasClass {
     BMIState   = BMIStateTV | BMIBase,
 
     BIter      = BIterPos | BIterBase,
-    BCufIter   = BCufIterFunc | BCufIterCtx | BCufIterInvName,
+    BCufIter   = BCufIterFunc | BCufIterCtx | BCufIterInvName | BCufIterDynamic,
     BIterSlot  = BIter | BCufIter,
 
     BUnknownTV = ~(BIterSlot | BMIBase),
@@ -252,6 +258,7 @@ struct AliasClass {
   /* implicit */ AliasClass(ACufIterFunc);
   /* implicit */ AliasClass(ACufIterCtx);
   /* implicit */ AliasClass(ACufIterInvName);
+  /* implicit */ AliasClass(ACufIterDynamic);
   /* implicit */ AliasClass(AProp);
   /* implicit */ AliasClass(AElemI);
   /* implicit */ AliasClass(AElemS);
@@ -315,6 +322,7 @@ struct AliasClass {
   folly::Optional<ACufIterFunc>    cufIterFunc() const;
   folly::Optional<ACufIterCtx>     cufIterCtx() const;
   folly::Optional<ACufIterInvName> cufIterInvName() const;
+  folly::Optional<ACufIterDynamic> cufIterDynamic() const;
   folly::Optional<AProp>           prop() const;
   folly::Optional<AElemI>          elemI() const;
   folly::Optional<AElemS>          elemS() const;
@@ -336,6 +344,7 @@ struct AliasClass {
   folly::Optional<ACufIterFunc>    is_cufIterFunc() const;
   folly::Optional<ACufIterCtx>     is_cufIterCtx() const;
   folly::Optional<ACufIterInvName> is_cufIterInvName() const;
+  folly::Optional<ACufIterDynamic> is_cufIterDynamic() const;
   folly::Optional<AProp>           is_prop() const;
   folly::Optional<AElemI>          is_elemI() const;
   folly::Optional<AElemS>          is_elemS() const;
@@ -359,6 +368,7 @@ private:
     CufIterFunc,
     CufIterCtx,
     CufIterInvName,
+    CufIterDynamic,
     Prop,
     ElemI,
     ElemS,
@@ -400,6 +410,7 @@ private:
     ACufIterFunc    m_cufIterFunc;
     ACufIterCtx     m_cufIterCtx;
     ACufIterInvName m_cufIterInvName;
+    ACufIterDynamic m_cufIterDynamic;
     AProp           m_prop;
     AElemI          m_elemI;
     AElemS          m_elemS;
@@ -422,6 +433,7 @@ auto const AIterBaseAny       = AliasClass{AliasClass::BIterBase};
 auto const ACufIterFuncAny    = AliasClass{AliasClass::BCufIterFunc};
 auto const ACufIterCtxAny     = AliasClass{AliasClass::BCufIterCtx};
 auto const ACufIterInvNameAny = AliasClass{AliasClass::BCufIterInvName};
+auto const ACufIterDynamicAny = AliasClass{AliasClass::BCufIterDynamic};
 auto const ACufIterAny        = AliasClass{AliasClass::BCufIter};
 auto const APropAny           = AliasClass{AliasClass::BProp};
 auto const AHeapAny           = AliasClass{AliasClass::BHeap};

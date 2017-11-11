@@ -351,7 +351,7 @@ void push(ISS& env, Type t, LocalId l) {
  *
  * returns the foldable flag as a convenience.
  */
-bool fpiPush(ISS& env, ActRec ar, int32_t nArgs) {
+bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
   auto foldable = [&] {
     if (nArgs < 0 ||
         ar.kind == FPIKind::Ctor ||
@@ -359,6 +359,7 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs) {
         !ar.func || ar.fallbackFunc) {
       return false;
     }
+    if (maybeDynamic && ar.func->mightCareAboutDynCalls()) return false;
     auto const func = ar.func->exactFunc();
     if (!func) return false;
     if (env.collect.unfoldableFuncs.count(func)) return false;
@@ -398,7 +399,7 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs) {
 }
 
 void fpiPush(ISS& env, ActRec ar) {
-  fpiPush(env, std::move(ar), -1);
+  fpiPush(env, std::move(ar), -1, true);
 }
 
 ActRec fpiPop(ISS& env) {

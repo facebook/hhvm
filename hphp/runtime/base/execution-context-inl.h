@@ -197,7 +197,8 @@ inline TypedValue ExecutionContext::invokeFunc(
   const Variant& args_,
   VarEnv* varEnv
 ) {
-  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, varEnv, ctx.invName);
+  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, varEnv,
+                    ctx.invName, InvokeNormal, false, ctx.dynamic);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(
@@ -224,7 +225,9 @@ inline TypedValue ExecutionContext::invokeFuncFew(
     thisOrCls,
     ctx.invName,
     argc,
-    argv
+    argv,
+    false,
+    ctx.dynamic
   );
 }
 

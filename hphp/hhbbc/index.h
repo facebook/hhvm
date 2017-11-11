@@ -327,6 +327,12 @@ struct Func {
    */
   bool mightBeSkipFrame() const;
 
+  /*
+   * Returns whether this resolved function might distinguish being called
+   * dynamically versus being called normally (IE, might raise a notice).
+   */
+  bool mightCareAboutDynCalls() const;
+
   struct FuncInfo;
   struct MethTabEntryPair;
   struct FuncFamily;

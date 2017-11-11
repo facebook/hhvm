@@ -1070,6 +1070,7 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
 }
 
 X(orwim,  orq,  loadw, storew, extsw)
+X(orlim,  orq,  load,  store, extsl)
 X(addlim, addq, load,  store, extsl)
 #undef X
 

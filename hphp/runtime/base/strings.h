@@ -105,6 +105,7 @@ const char* const HACKARR_COMPAT_ARR_MIXEDCMP =
   "Comparing array with non-array";
 const char* const HACKARR_COMPAT_VARR_IS_ARR = "is_array() called on varray";
 const char* const HACKARR_COMPAT_DARR_IS_ARR = "is_array() called on darray";
+const char* const FUNCTION_CALLED_DYNAMICALLY = "'%s' called dynamically";
 
 } // namespace Strings
 } // namespace HPHP

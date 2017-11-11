@@ -283,6 +283,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::subl:
     case Vinstr::subli:
     case Vinstr::xorl:
+    case Vinstr::orlim:
     case Vinstr::cmovl:
     case Vinstr::csincl:
     case Vinstr::cmpl:

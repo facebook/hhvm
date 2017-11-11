@@ -212,6 +212,7 @@ struct Vgen {
   void emit(notb i) { unary(i); a.notb(i.d); }
   void emit(const orbim& i) { a.orb(i.s0, i.m); }
   void emit(const orwim& i) { a.orw(i.s0, i.m); }
+  void emit(const orlim& i) { a.orl(i.s0, i.m); }
   void emit(orq i) { commuteSF(i); a.orq(i.s0, i.d); }
   void emit(orqi i) { binary(i); a.orq(i.s0, i.d); }
   void emit(const orqim& i) { a.orq(i.s0, i.m); }

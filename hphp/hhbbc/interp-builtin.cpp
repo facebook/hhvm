@@ -543,7 +543,8 @@ folly::Optional<Type> const_fold(ISS& env,
     [&] {
       auto retVal = g_context->invokeFuncFew(
         func, HPHP::ActRec::encodeClass(cls), nullptr,
-        args.size(), args.data(), !env.ctx.unit->useStrictTypes
+        args.size(), args.data(), !env.ctx.unit->useStrictTypes,
+        false
       );
 
       assert(cellIsPlausible(retVal));

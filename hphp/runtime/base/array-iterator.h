@@ -613,11 +613,13 @@ void reset_strong_iterators(ArrayData* ad);
 //////////////////////////////////////////////////////////////////////
 
 struct CufIter {
-  CufIter() : m_obj_or_cls(nullptr), m_func(nullptr), m_name(nullptr) {}
+  CufIter() : m_obj_or_cls(nullptr), m_func(nullptr),
+              m_name(nullptr), m_dynamic{false} {}
   ~CufIter();
   const Func* func() const { return m_func; }
   void* ctx() const { return m_obj_or_cls; }
   StringData* name() const { return m_name; }
+  bool dynamic() const { return m_dynamic; }
 
   void setFunc(const Func* f) { m_func = f; }
   void setCtx(ObjectData* obj) { m_obj_or_cls = obj; }
@@ -626,15 +628,20 @@ struct CufIter {
                    reinterpret_cast<ObjectData*>((char*)cls + 1);
   }
   void setName(StringData* name) { m_name = name; }
+  void setDynamic(bool dynamic) { m_dynamic = dynamic; }
 
   static constexpr uint32_t funcOff() { return offsetof(CufIter, m_func); }
   static constexpr uint32_t ctxOff() { return offsetof(CufIter, m_obj_or_cls); }
   static constexpr uint32_t nameOff() { return offsetof(CufIter, m_name); }
+  static constexpr uint32_t dynamicOff() {
+    return offsetof(CufIter, m_dynamic);
+  }
 
  private:
   ObjectData* m_obj_or_cls; // maybe a Class* if lsb set.
   const Func* m_func;
   StringData* m_name;
+  bool m_dynamic;
   friend struct Iter;
 };
 

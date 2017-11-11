@@ -38,7 +38,8 @@ void fpushActRec(IRGS& env,
                  SSATmp* func,
                  SSATmp* objOrClass,
                  uint32_t numArgs,
-                 const StringData* invName);
+                 const StringData* invName,
+                 SSATmp* dynamicCall);
 
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args);

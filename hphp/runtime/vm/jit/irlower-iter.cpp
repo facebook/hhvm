@@ -287,15 +287,18 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func, ActRec* ar) {
   ObjectData* obj = nullptr;
   Class* cls = nullptr;
   StringData* invName = nullptr;
+  bool dynamic = false;
 
   if (LIKELY(ar->func()->isBuiltin())) {
     ar = g_context->getOuterVMFrame(ar);
   }
   auto const f = vm_decode_function(tvAsVariant(&func), ar, false,
-                                    obj, cls, invName, DecodeFlags::NoWarn);
+                                    obj, cls, invName, dynamic,
+                                    DecodeFlags::NoWarn);
   if (UNLIKELY(!f)) return false;
 
   auto& cit = it->cuf();
+  assertx(dynamic == cit.dynamic());
   cit.setFunc(f);
   if (obj) {
     cit.setCtx(obj);
@@ -345,6 +348,14 @@ void cgStCufIterInvName(IRLS& env, const IRInstruction* inst) {
   vmain(env) << store{name, fp[iterOff + CufIter::nameOff()]};
 }
 
+void cgStCufIterDynamic(IRLS& env, const IRInstruction* inst) {
+  auto const extra   = inst->extra<StCufIterDynamic>();
+  auto const fp      = srcLoc(env, inst, 0).reg();
+  auto const dynamic = srcLoc(env, inst, 1).reg();
+  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
+  vmain(env) << storeb{dynamic, fp[iterOff + CufIter::dynamicOff()]};
+}
+
 void cgLdCufIterFunc(IRLS& env, const IRInstruction* inst) {
   auto const extra   = inst->extra<LdCufIterFunc>();
   auto const fp      = srcLoc(env, inst, 0).reg();
@@ -369,6 +380,14 @@ void cgLdCufIterInvName(IRLS& env, const IRInstruction* inst) {
   vmain(env) << load{fp[iterOff + CufIter::nameOff()], dst};
 }
 
+void cgLdCufIterDynamic(IRLS& env, const IRInstruction* inst) {
+  auto const extra   = inst->extra<LdCufIterDynamic>();
+  auto const fp      = srcLoc(env, inst, 0).reg();
+  auto const dst     = dstLoc(env, inst, 0).reg();
+  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
+  vmain(env) << loadtqb{fp[iterOff + CufIter::dynamicOff()], dst};
+}
+
 void cgKillCufIter(IRLS& env, const IRInstruction* inst) {
   if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
 
@@ -384,6 +403,7 @@ void cgKillCufIter(IRLS& env, const IRInstruction* inst) {
   v << store{trashCns, fp[iterOff + CufIter::funcOff()]};
   v << store{trashCns, fp[iterOff + CufIter::ctxOff()]};
   v << store{trashCns, fp[iterOff + CufIter::nameOff()]};
+  v << storeb{trashCns, fp[iterOff + CufIter::dynamicOff()]};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

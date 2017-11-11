@@ -100,6 +100,9 @@ struct ActRec {
   enum Flags : uint32_t {
     None          = 0,
 
+    // Set if this corresponds to a dynamic call
+    DynamicCall = (1u << 27),
+
     // In non-HH files the caller can specify whether param type-checking
     // should be strict or weak.
     UseWeakTypes = (1u << 28),
@@ -116,10 +119,11 @@ struct ActRec {
     // MayNeedStaticWaitHandle, if neither bit is set.
   };
 
-  static constexpr int kNumArgsBits = 28;
+  static constexpr int kNumArgsBits = 27;
   static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
   static constexpr int kFlagsMask = ~kNumArgsMask;
-  static constexpr int kExecutionModeMask = ~(LocalsDecRefd | UseWeakTypes);
+  static constexpr int kExecutionModeMask =
+    ~(LocalsDecRefd | UseWeakTypes | DynamicCall);
 
   /*
    * To conserve space, we use unions for pairs of mutually exclusive fields
@@ -186,6 +190,7 @@ struct ActRec {
   bool isFCallAwait() const;
   bool mayNeedStaticWaitHandle() const;
   bool magicDispatch() const;
+  bool isDynamicCall() const;
 
   /*
    * Pack `numArgs' and `flags' into the format expected by m_numArgsAndFlags.
@@ -208,6 +213,7 @@ struct ActRec {
   void setLocalsDecRefd();
   void setResumed();
   void setFCallAwait();
+  void setDynamicCall();
 
   /*
    * Set or clear both m_invName and the MagicDispatch flag.

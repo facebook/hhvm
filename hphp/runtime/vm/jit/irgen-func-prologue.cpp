@@ -36,6 +36,8 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/util/text-util.h"
+
 namespace HPHP { namespace jit { namespace irgen {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -329,6 +331,8 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
     gen(env, CheckSurpriseFlagsEnter, FuncEntryData { func, argc }, fp(env));
   }
 
+  emitDynamicCallCheck(env);
+
   prologDispatch(
     env, func,
     [&] (bool hasThis) {
@@ -388,8 +392,21 @@ void emitMagicFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   gen(env, StLoc, LocalId{0}, fp(env), inv_name);
   gen(env, StARInvName, fp(env), cns(env, nullptr));
 
-  // We set m_numArgsAndFlags even if `argc == 2' in order to reset the flags.
-  gen(env, StARNumArgsAndFlags, fp(env), cns(env, 2));
+  // Reset all the flags except for the dynamic call flag and set the argument
+  // count to 2.
+  auto const flag = gen(
+    env,
+    AndInt,
+    gen(env, LdARNumArgsAndFlags, fp(env)),
+    cns(env, static_cast<int32_t>(ActRec::Flags::DynamicCall))
+  );
+  auto combined = gen(
+    env,
+    OrInt,
+    flag,
+    cns(env, ActRec::encodeNumArgsAndFlags(2, ActRec::Flags::None))
+  );
+  gen(env, StARNumArgsAndFlags, fp(env), combined);
 
   // Jmp to the two-argument prologue, or emit it if it doesn't exist yet.
   if (two_arg_prologue) {
@@ -469,6 +486,37 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
     }
   );
 }
+
+void emitDynamicCallCheck(IRGS& env) {
+  if (!RuntimeOption::EvalNoticeOnAllDynamicCalls) return;
+
+  auto const func = curFunc(env);
+
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto flags = gen(env, LdARNumArgsAndFlags, fp(env));
+      auto test = gen(
+        env, AndInt, flags,
+        cns(env, static_cast<int32_t>(ActRec::Flags::DynamicCall))
+      );
+      gen(env, JmpNZero, taken, test);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      if (RuntimeOption::EvalNoticeOnAllDynamicCalls) {
+        std::string msg;
+        string_printf(
+          msg,
+          Strings::FUNCTION_CALLED_DYNAMICALLY,
+          func->fullDisplayName()->data()
+        );
+        gen(env, RaiseNotice, cns(env, makeStaticString(msg)));
+      }
+    }
+  );
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

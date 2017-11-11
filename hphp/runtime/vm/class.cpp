@@ -746,7 +746,8 @@ void Class::initProps() const {
     // through the inheritance chain.
     for (auto it = m_pinitVec.rbegin(); it != m_pinitVec.rend(); ++it) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
-        *it, init_null_variant, nullptr, const_cast<Class*>(this)
+        *it, init_null_variant, nullptr, const_cast<Class*>(this),
+        nullptr, nullptr, ExecutionContext::InvokeNormal, false, false
       );
       assert(retval.m_type == KindOfNull);
     }
@@ -815,7 +816,8 @@ void Class::initSProps() const {
   if (hasNonscalarInit) {
     for (unsigned i = 0, n = m_sinitVec.size(); i < n; i++) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
-        m_sinitVec[i], init_null_variant, nullptr, const_cast<Class*>(this)
+        m_sinitVec[i], init_null_variant, nullptr, const_cast<Class*>(this),
+        nullptr, nullptr, ExecutionContext::InvokeNormal, false, false
       );
       assert(retval.m_type == KindOfNull);
     }
@@ -1203,7 +1205,9 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
     ActRec::encodeClass(this),
     nullptr,
     1,
-    args
+    args,
+    false,
+    false
   );
 
   assertx(tvAsCVarRef(&ret).isAllowedAsConstantValue());

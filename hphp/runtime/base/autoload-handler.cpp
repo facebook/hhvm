@@ -84,7 +84,8 @@ Variant vm_call_user_func_cufiter(const CufIter& cufIter,
   }
   return Variant::attach(
     g_context->invokeFunc(f, params, obj, cls, nullptr, invName,
-                          ExecutionContext::InvokeCuf)
+                          ExecutionContext::InvokeCuf, false,
+                          cufIter.dynamic())
   );
 }
 
@@ -96,9 +97,10 @@ bool vm_decode_function_cufiter(const Variant& function,
   ObjectData* obj = nullptr;
   Class* cls = nullptr;
   StringData* invName = nullptr;
+  bool dynamic;
   // Don't warn here, let the caller decide what to do if the func is nullptr.
   const HPHP::Func* func = vm_decode_function(function, GetCallerFrame(), false,
-                                              obj, cls, invName,
+                                              obj, cls, invName, dynamic,
                                               DecodeFlags::NoWarn);
   if (func == nullptr) {
     return false;
@@ -113,7 +115,7 @@ bool vm_decode_function_cufiter(const Variant& function,
   } else {
     cufIter->setCtx(cls);
   }
-
+  cufIter->setDynamic(dynamic);
   return true;
 }
 

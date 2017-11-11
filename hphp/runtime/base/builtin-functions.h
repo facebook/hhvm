@@ -112,6 +112,7 @@ vm_decode_function(const Variant& function,
                    ObjectData*& this_,
                    HPHP::Class*& cls,
                    StringData*& invName,
+                   bool& dynamic,
                    DecodeFlags flags = DecodeFlags::Warn);
 
 inline void
@@ -121,7 +122,7 @@ vm_decode_function(const Variant& function,
                    CallCtx& ctx,
                    DecodeFlags flags = DecodeFlags::Warn) {
   ctx.func = vm_decode_function(function, ar, forwarding, ctx.this_, ctx.cls,
-                                ctx.invName, flags);
+                                ctx.invName, ctx.dynamic, flags);
 }
 
 Variant vm_call_user_func(const Variant& function, const Variant& params,

@@ -1576,6 +1576,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
 
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
+  checkForDynamicCall(enterFnAr);
   assert(vmfp()->func()->contains(vmpc()));
 
   if (useJit) {
@@ -4523,6 +4524,7 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs, int32_t n,
     ObjectData* thiz = nullptr;
     HPHP::Class* cls = nullptr;
     StringData* invName = nullptr;
+    bool dynamic = false;
 
     auto const func = vm_decode_function(
       v,
@@ -4531,8 +4533,10 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs, int32_t n,
       thiz,
       cls,
       invName,
+      dynamic,
       DecodeFlags::NoWarn
     );
+    assertx(dynamic);
     if (func == nullptr) {
       if (isArrayLikeType(origCell.m_type)) {
         raise_error("Invalid callable (array)");
@@ -4552,6 +4556,8 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs, int32_t n,
     } else {
       ar->trashThis();
     }
+
+    ar->setDynamicCall();
 
     if (UNLIKELY(invName != nullptr)) {
       ar->setMagicDispatch(invName);
@@ -4593,7 +4599,10 @@ OPTBLD_INLINE void iopFPushFuncU(intva_t numArgs, Id nsFunc, Id globalFunc) {
   ar->trashThis();
 }
 
-void fPushObjMethodImpl(StringData* name, ObjectData* obj, int numArgs) {
+void fPushObjMethodImpl(StringData* name,
+                        ObjectData* obj,
+                        int numArgs,
+                        bool dynamic) {
   const Func* f;
   LookupResult res;
   auto cls = obj->getVMClass();
@@ -4617,6 +4626,7 @@ void fPushObjMethodImpl(StringData* name, ObjectData* obj, int numArgs) {
     ar->setThis(obj);
   }
   ar->initNumArgs(numArgs);
+  if (dynamic) ar->setDynamicCall();
   if (res == LookupResult::MagicCallFound) {
     ar->setMagicDispatch(name);
   } else {
@@ -4633,6 +4643,7 @@ void fPushNullObjMethod(int numArgs) {
   ar->trashThis();
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
+  ar->setDynamicCall();
 }
 
 static void throw_call_non_object(const char* methodName,
@@ -4686,7 +4697,7 @@ OPTBLD_INLINE void iopFPushObjMethod(intva_t numArgs, ObjMethodOp op,
 
   // We handle decReffing obj and name in fPushObjMethodImpl
   vmStack().ndiscard(2);
-  fPushObjMethodImpl(name, obj, numArgs);
+  fPushObjMethodImpl(name, obj, numArgs, true);
 }
 
 OPTBLD_INLINE void
@@ -4704,13 +4715,16 @@ iopFPushObjMethodD(intva_t numArgs, const StringData* name, ObjMethodOp op) {
   ObjectData* obj = c1->m_data.pobj;
   // We handle decReffing obj in fPushObjMethodImpl
   vmStack().discard();
-  fPushObjMethodImpl(const_cast<StringData*>(name), obj, numArgs);
+  fPushObjMethodImpl(const_cast<StringData*>(name), obj, numArgs, false);
 }
 
 namespace {
 
-void pushClsMethodImpl(Class* cls, StringData* name,
-                       int numArgs, bool forwarding) {
+void pushClsMethodImpl(Class* cls,
+                       StringData* name,
+                       int numArgs,
+                       bool forwarding,
+                       bool dynamic) {
   auto const ctx = liveClass();
   auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* f;
@@ -4745,6 +4759,7 @@ void pushClsMethodImpl(Class* cls, StringData* name,
     ar->setClass(cls);
   }
   ar->initNumArgs(numArgs);
+  if (dynamic) ar->setDynamicCall();
   if (res == LookupResult::MagicCallFound ||
       res == LookupResult::MagicCallStaticFound) {
     ar->setMagicDispatch(name);
@@ -4792,7 +4807,7 @@ OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs, clsref_slot slot,
   // pushClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
   assert(cls && name);
-  pushClsMethodImpl(cls, name, numArgs, false);
+  pushClsMethodImpl(cls, name, numArgs, false, true);
 }
 
 OPTBLD_INLINE
@@ -4803,7 +4818,7 @@ void iopFPushClsMethodD(intva_t numArgs, const StringData* name, Id classId) {
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
-  pushClsMethodImpl(cls, const_cast<StringData*>(name), numArgs, false);
+  pushClsMethodImpl(cls, const_cast<StringData*>(name), numArgs, false, false);
 }
 
 OPTBLD_INLINE void iopFPushClsMethodS(intva_t numArgs, SpecialClsRef ref,
@@ -4826,7 +4841,8 @@ OPTBLD_INLINE void iopFPushClsMethodS(intva_t numArgs, SpecialClsRef ref,
     cls,
     name,
     numArgs,
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent
+    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
+    true
   );
 }
 
@@ -4837,13 +4853,14 @@ OPTBLD_INLINE void iopFPushClsMethodSD(intva_t numArgs,
     specialClsRefToCls(ref),
     const_cast<StringData*>(name),
     numArgs,
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent
+    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
+    false
   );
 }
 
 namespace {
 
-void fpushCtorImpl(intva_t numArgs, Class* cls) {
+void fpushCtorImpl(intva_t numArgs, Class* cls, bool dynamic) {
   const Func* f;
   auto const res UNUSED =
     lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
@@ -4858,6 +4875,7 @@ void fpushCtorImpl(intva_t numArgs, Class* cls) {
   ar->m_func = f;
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
+  if (dynamic) ar->setDynamicCall();
   ar->trashVarEnv();
   setTypesFlag(vmfp(), ar);
 }
@@ -4865,7 +4883,7 @@ void fpushCtorImpl(intva_t numArgs, Class* cls) {
 }
 
 OPTBLD_INLINE void iopFPushCtor(intva_t numArgs, clsref_slot slot) {
-  fpushCtorImpl(numArgs, slot.take());
+  fpushCtorImpl(numArgs, slot.take(), true);
 }
 
 OPTBLD_INLINE void iopFPushCtorD(intva_t numArgs, Id id) {
@@ -4876,18 +4894,18 @@ OPTBLD_INLINE void iopFPushCtorD(intva_t numArgs, Id id) {
     raise_error(Strings::UNKNOWN_CLASS,
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
   }
-  fpushCtorImpl(numArgs, cls);
+  fpushCtorImpl(numArgs, cls, false);
 }
 
 OPTBLD_INLINE void iopFPushCtorI(intva_t numArgs, intva_t clsIx) {
   auto const func = vmfp()->m_func;
   auto const preCls = func->unit()->lookupPreClassId(clsIx);
   auto const cls = Unit::defClass(preCls, true);
-  fpushCtorImpl(numArgs, cls);
+  fpushCtorImpl(numArgs, cls, false);
 }
 
 OPTBLD_INLINE void iopFPushCtorS(intva_t numArgs, SpecialClsRef ref) {
-  fpushCtorImpl(numArgs, specialClsRefToCls(ref));
+  fpushCtorImpl(numArgs, specialClsRefToCls(ref), false);
 }
 
 OPTBLD_INLINE
@@ -4897,6 +4915,7 @@ void iopDecodeCufIter(PC& pc, Iter* it, PC takenpc) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
+  bool dynamic = false;
   TypedValue *func = vmStack().topTV();
 
   ActRec* ar = vmfp();
@@ -4906,6 +4925,7 @@ void iopDecodeCufIter(PC& pc, Iter* it, PC takenpc) {
   const Func* f = vm_decode_function(tvAsVariant(func),
                                      ar, false,
                                      obj, cls, invName,
+                                     dynamic,
                                      DecodeFlags::NoWarn);
 
   if (f == nullptr) {
@@ -4919,6 +4939,7 @@ void iopDecodeCufIter(PC& pc, Iter* it, PC takenpc) {
       cit.setCtx(cls);
     }
     cit.setName(invName);
+    cit.setDynamic(dynamic);
   }
   vmStack().popC();
 }
@@ -4927,6 +4948,7 @@ OPTBLD_INLINE void iopFPushCufIter(intva_t numArgs, Iter* it) {
   auto f = it->cuf().func();
   auto o = it->cuf().ctx();
   auto n = it->cuf().name();
+  auto d = it->cuf().dynamic();
 
   ActRec* ar = vmStack().allocA();
   ar->m_func = f;
@@ -4938,6 +4960,7 @@ OPTBLD_INLINE void iopFPushCufIter(intva_t numArgs, Iter* it) {
     ar->trashThis();
   }
   ar->initNumArgs(numArgs);
+  if (d) ar->setDynamicCall();
   if (n) {
     ar->setMagicDispatch(n);
     n->incRefCount();
@@ -4953,10 +4976,11 @@ OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
+  bool dynamic = false;
 
   const Func* f = vm_decode_function(
     tvAsVariant(&func), vmfp(), forward, obj, cls, invName,
-    safe ? DecodeFlags::NoWarn : DecodeFlags::Warn);
+    dynamic, safe ? DecodeFlags::NoWarn : DecodeFlags::Warn);
 
   if (safe) vmStack().topTV()[1] = vmStack().topTV()[0];
   vmStack().ndiscard(1);
@@ -4982,6 +5006,9 @@ OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
     ar->trashThis();
   }
   ar->initNumArgs(numArgs);
+
+  if (dynamic) ar->setDynamicCall();
+
   if (invName) {
     ar->setMagicDispatch(invName);
   } else {
@@ -5111,9 +5138,12 @@ bool doFCall(ActRec* ar, PC& pc) {
         int(vmfp()->m_func->base()));
   prepareFuncEntry(ar, pc, StackArgsState::Untrimmed);
   vmpc() = pc;
-  if (EventHook::FunctionCall(ar, EventHook::NormalFunc)) return true;
-  pc = vmpc();
-  return false;
+  if (!EventHook::FunctionCall(ar, EventHook::NormalFunc)) {
+    pc = vmpc();
+    return false;
+  }
+  checkForDynamicCall(ar);
+  return true;
 }
 
 OPTBLD_INLINE void iopFCall(PC& pc, intva_t numArgs) {
@@ -5270,6 +5300,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
     pc = vmpc();
     return false;
   }
+  checkForDynamicCall(ar);
   return true;
 }
 

@@ -1513,6 +1513,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
                                             uint32_t argc, StringData* invName,
                                             bool useWeakTypes,
+                                            bool dynamic,
                                             FStackCheck doStackCheck,
                                             FInitArgs doInitArgs,
                                             FEnterVM doEnterVM) {
@@ -1546,6 +1547,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     ar->trashThis();
   }
   ar->initNumArgs(argc);
+  if (dynamic) ar->setDynamicCall();
 
   if (UNLIKELY(invName != nullptr)) {
     ar->setMagicDispatch(invName);
@@ -1633,7 +1635,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         VarEnv* varEnv /* = NULL */,
                                         StringData* invName /* = NULL */,
                                         InvokeFlags flags /* = InvokeNormal */,
-                                        bool useWeakTypes /* = false */) {
+                                        bool useWeakTypes /* = false */,
+                                        bool dynamic /* = true */) {
   const auto& args = *args_.asCell();
   assert(isContainerOrNull(args));
 
@@ -1700,6 +1703,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   };
 
   return invokeFuncImpl(f, thiz, cls, argc, invName, useWeakTypes,
+                        dynamic && !(flags & InvokePseudoMain),
                         doCheckStack, doInitArgs, doEnterVM);
 }
 
@@ -1708,7 +1712,8 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
                                            StringData* invName,
                                            int argc,
                                            const TypedValue* argv,
-                                           bool useWeakTypes /* = false */) {
+                                           bool useWeakTypes /* = false */,
+                                           bool dynamic /* = true */) {
   auto const doCheckStack = [&](TypedValue&) {
     // See comments in invokeFunc().
     if (f->attrs() & AttrPhpLeafFn ||
@@ -1740,7 +1745,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
   return invokeFuncImpl(f,
                         ActRec::decodeThis(thisOrCls),
                         ActRec::decodeClass(thisOrCls),
-                        argc, invName, useWeakTypes,
+                        argc, invName, useWeakTypes, dynamic,
                         doCheckStack, doInitArgs, doEnterVM);
 }
 

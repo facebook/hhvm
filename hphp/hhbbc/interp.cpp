@@ -2290,11 +2290,13 @@ void in(ISS& env, const bc::FPushFuncD& op) {
   auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
   if (auto const func = rfunc.exactFunc()) {
     if (can_emit_builtin(func, op.arg1, op.has_unpack)) {
-      fpiPush(env, ActRec { FPIKind::Builtin, folly::none, rfunc }, op.arg1);
+      fpiPush(env, ActRec { FPIKind::Builtin, folly::none, rfunc },
+              op.arg1, false);
       return reduce(env, bc::Nop {});
     }
   }
-  if (fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc }, op.arg1)) {
+  if (fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc },
+              op.arg1, false)) {
     return reduce(env, bc::Nop {});
   }
 }
@@ -2302,16 +2304,17 @@ void in(ISS& env, const bc::FPushFuncD& op) {
 void in(ISS& env, const bc::FPushFunc& op) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
+  folly::Optional<res::Func> rfunc;
   // FPushFuncD and FPushFuncU require that the names of inout functions be
   // mangled, so skip those for now.
   if (v1 && v1->m_type == KindOfPersistentString && op.argv.size() == 0) {
     auto const name = normalizeNS(v1->m_data.pstr);
     // FPushFuncD doesn't support class-method pair strings yet.
     if (isNSNormalized(name) && notClassMethodPair(name)) {
-      auto const rfunc = env.index.resolve_func(env.ctx, name);
-      // Don't turn dynamic calls to caller frame affecting functions into
-      // static calls, because they might fatal (whereas the static one won't).
-      if (!rfunc.mightAccessCallerFrame()) {
+      rfunc = env.index.resolve_func(env.ctx, name);
+      // If the function might distinguish being called dynamically from not,
+      // don't turn a dynamic call into a static one.
+      if (!rfunc->mightCareAboutDynCalls()) {
         return reduce(env, bc::PopC {},
                       bc::FPushFuncD { op.arg1, name, op.has_unpack });
       }
@@ -2320,7 +2323,15 @@ void in(ISS& env, const bc::FPushFunc& op) {
   popC(env);
   if (t1.subtypeOf(TObj)) return fpiPush(env, ActRec { FPIKind::ObjInvoke });
   if (t1.subtypeOf(TArr)) return fpiPush(env, ActRec { FPIKind::CallableArr });
-  if (t1.subtypeOf(TStr)) return fpiPush(env, ActRec { FPIKind::Func });
+  if (t1.subtypeOf(TStr)) {
+    fpiPush(
+      env,
+      ActRec { FPIKind::Func, folly::none, rfunc },
+      op.arg1,
+      true
+    );
+    return;
+  }
   fpiPush(env, ActRec { FPIKind::Unknown });
 }
 
@@ -2343,7 +2354,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto t1 = topC(env);
   if (op.subop3 == ObjMethodOp::NullThrows) {
     if (!t1.couldBe(TObj)) {
-      fpiPush(env, ActRec { FPIKind::ObjMeth });
+      fpiPush(env, ActRec { FPIKind::ObjMeth }, op.arg1, false);
       popC(env);
       return unreachable(env);
     }
@@ -2351,7 +2362,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
       t1 = unopt(std::move(t1));
     }
   } else if (!t1.couldBe(TOptObj)) {
-    fpiPush(env, ActRec { FPIKind::ObjMeth });
+    fpiPush(env, ActRec { FPIKind::ObjMeth }, op.arg1, false);
     popC(env);
     return unreachable(env);
   }
@@ -2368,7 +2379,8 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
             rcls,
             env.index.resolve_method(env.ctx, clsTy, op.str2)
             },
-        op.arg1
+        op.arg1,
+        false
       )) {
     return reduce(env, bc::PopC {});
   }
@@ -2396,16 +2408,34 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
 void in(ISS& env, const bc::FPushObjMethod& op) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
+  auto const clsTy = objcls(t1);
+  folly::Optional<res::Func> rfunc;
   if (v1 && v1->m_type == KindOfPersistentString && op.argv.size() == 0) {
-    return reduce(
-      env,
-      bc::PopC {},
-      bc::FPushObjMethodD { op.arg1, v1->m_data.pstr, op.subop2, op.has_unpack }
-    );
+    rfunc = env.index.resolve_method(env.ctx, clsTy, v1->m_data.pstr);
+    if (!rfunc->mightCareAboutDynCalls()) {
+      return reduce(
+        env,
+        bc::PopC {},
+        bc::FPushObjMethodD {
+          op.arg1, v1->m_data.pstr, op.subop2, op.has_unpack
+        }
+      );
+    }
   }
   popC(env);
   popC(env);
-  fpiPush(env, ActRec { FPIKind::ObjMeth });
+  fpiPush(
+    env,
+    ActRec {
+      FPIKind::ObjMeth,
+      is_specialized_cls(clsTy)
+        ? folly::Optional<res::Class>(dcls_of(clsTy).cls)
+        : folly::none,
+      rfunc
+    },
+    op.arg1,
+    true
+  );
 }
 
 void in(ISS& env, const bc::FPushClsMethodD& op) {
@@ -2415,7 +2445,7 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
     rcls ? clsExact(*rcls) : TCls,
     op.str2
   );
-  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun }, op.arg1)) {
+  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun }, op.arg1, false)) {
     return reduce(env, bc::Nop {});
   }
 }
@@ -2451,7 +2481,8 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
   }
   folly::Optional<res::Func> rfunc;
   if (v2 && v2->m_type == KindOfPersistentString && op.argv.size() == 0) {
-    if (exactCls && rcls) {
+    rfunc = env.index.resolve_method(env.ctx, t1, v2->m_data.pstr);
+    if (exactCls && rcls && !rfunc->mightCareAboutDynCalls()) {
       return reduce(
         env,
         bc::DiscardClsRef { op.slot },
@@ -2461,9 +2492,8 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
         }
       );
     }
-    rfunc = env.index.resolve_method(env.ctx, t1, v2->m_data.pstr);
   }
-  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc }, op.arg1)) {
+  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc }, op.arg1, true)) {
     return reduce(env,
                   bc::DiscardClsRef { op.slot },
                   bc::PopC {});
@@ -2475,20 +2505,25 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
 void in(ISS& env, const bc::FPushClsMethodS& op) {
   auto const name  = topC(env);
   auto const namev = tv(name);
-  if (namev && namev->m_type == KindOfPersistentString && op.argv.size() == 0) {
-    return reduce(
-      env,
-      bc::PopC {},
-      bc::FPushClsMethodSD {
-        op.arg1, op.subop2, namev->m_data.pstr, op.has_unpack
-      }
-    );
-  }
   auto const cls = specialClsRefToCls(env, op.subop2);
+  folly::Optional<res::Func> rfunc;
+  if (namev && namev->m_type == KindOfPersistentString && op.argv.size() == 0) {
+    rfunc = env.index.resolve_method(env.ctx, cls, namev->m_data.pstr);
+    if (!rfunc->mightCareAboutDynCalls()) {
+      return reduce(
+        env,
+        bc::PopC {},
+        bc::FPushClsMethodSD {
+          op.arg1, op.subop2, namev->m_data.pstr, op.has_unpack
+        }
+      );
+    }
+  }
   auto const rcls = is_specialized_cls(cls)
     ? folly::Optional<res::Class>{dcls_of(cls).cls}
     : folly::none;
-  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, folly::none }, op.arg1)) {
+  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc },
+              op.arg1, true)) {
     return reduce(env, bc::PopC {});
   }
   popC(env);
@@ -2515,26 +2550,26 @@ void in(ISS& env, const bc::FPushClsMethodSD& op) {
   }
 
   auto const rfun = env.index.resolve_method(env.ctx, cls, op.str3);
-  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun }, op.arg1)) {
+  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun }, op.arg1, false)) {
     return reduce(env, bc::Nop {});
   }
 }
 
-void ctorHelper(ISS& env, SString name) {
+void ctorHelper(ISS& env, SString name, int32_t nargs) {
   auto const rcls = env.index.resolve_class(env.ctx, name);
   auto const rfunc = rcls ?
     env.index.resolve_ctor(env.ctx, *rcls, true) : folly::none;
-  fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc });
+  fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc }, nargs, false);
   push(env, rcls ? objExact(*rcls) : TObj);
 }
 
 void in(ISS& env, const bc::FPushCtorD& op) {
-  ctorHelper(env, op.str2);
+  ctorHelper(env, op.str2, op.arg1);
 }
 
 void in(ISS& env, const bc::FPushCtorI& op) {
   auto const name = env.ctx.unit->classes[op.arg2]->name;
-  ctorHelper(env, name);
+  ctorHelper(env, name, op.arg1);
 }
 
 void in(ISS& env, const bc::FPushCtorS& op) {
@@ -2549,25 +2584,24 @@ void in(ISS& env, const bc::FPushCtorS& op) {
     }
     auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, false);
     push(env, subObj(dcls.cls));
-    fpiPush(env, ActRec { FPIKind::Ctor, dcls.cls, rfunc });
+    fpiPush(env, ActRec { FPIKind::Ctor, dcls.cls, rfunc }, op.arg1, false);
     return;
   }
   push(env, TObj);
-  fpiPush(env, ActRec { FPIKind::Ctor });
+  fpiPush(env, ActRec { FPIKind::Ctor }, op.arg1, false);
 }
 
 void in(ISS& env, const bc::FPushCtor& op) {
   auto const& t1 = peekClsRefSlot(env, op.slot);
   if (is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
-    if (dcls.type == DCls::Exact) {
+    auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, false);
+    if (dcls.type == DCls::Exact && rfunc && !rfunc->mightCareAboutDynCalls()) {
       return reduce(env, bc::DiscardClsRef { op.slot },
                     bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack });
     }
-
-    auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, false);
     takeClsRefSlot(env, op.slot);
-    push(env, subObj(dcls.cls));
+    push(env, dcls.type == DCls::Exact ? objExact(dcls.cls) : subObj(dcls.cls));
     fpiPush(env, ActRec { FPIKind::Ctor, dcls.cls, rfunc });
     return;
   }

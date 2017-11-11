@@ -72,6 +72,10 @@ inline bool ActRec::magicDispatch() const {
   return (flags() & kExecutionModeMask) == MagicDispatch;
 }
 
+inline bool ActRec::isDynamicCall() const {
+  return flags() & DynamicCall;
+}
+
 inline uint32_t ActRec::encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
   assert((numArgs & kFlagsMask) == 0);
   assert((uint32_t{flags} & kNumArgsMask) == 0);
@@ -94,18 +98,25 @@ inline void ActRec::setLocalsDecRefd() {
   m_numArgsAndFlags |= LocalsDecRefd;
 }
 
+inline void ActRec::setDynamicCall() {
+  m_numArgsAndFlags |= DynamicCall;
+}
+
 inline void ActRec::setResumed() {
-  assert((flags() & ~(IsFCallAwait | UseWeakTypes)) == Flags::None);
+  assert((flags() & ~(IsFCallAwait | UseWeakTypes | DynamicCall))
+         == Flags::None);
   m_numArgsAndFlags = encodeNumArgsAndFlags(
     numArgs(),
-    static_cast<Flags>(InResumed | (flags() & UseWeakTypes)));
+    static_cast<Flags>(InResumed | (flags() & (UseWeakTypes | DynamicCall)))
+  );
 }
 
 inline void ActRec::setFCallAwait() {
-  assert((flags() & ~UseWeakTypes) == Flags::None);
+  assert((flags() & ~(UseWeakTypes | DynamicCall)) == Flags::None);
   m_numArgsAndFlags = encodeNumArgsAndFlags(
     numArgs(),
-    static_cast<Flags>(IsFCallAwait | (flags() & UseWeakTypes)));
+    static_cast<Flags>(IsFCallAwait | (flags() & (UseWeakTypes | DynamicCall)))
+  );
 }
 
 inline void ActRec::setMagicDispatch(StringData* invName) {

@@ -118,6 +118,7 @@ struct AliasAnalysis {
   ALocBits all_cufIterFunc;
   ALocBits all_cufIterCtx;
   ALocBits all_cufIterInvName;
+  ALocBits all_cufIterDynamic;
 
   /*
    * Return the number of distinct locations we're tracking by id

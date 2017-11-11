@@ -269,6 +269,8 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
                         all_cufIterCtx);
   ret |= may_alias_part(*this, acls, acls.cufIterInvName(), ACufIterInvNameAny,
                         all_cufIterInvName);
+  ret |= may_alias_part(*this, acls, acls.cufIterDynamic(), ACufIterDynamicAny,
+                        all_cufIterDynamic);
 
   return ret;
 }
@@ -324,6 +326,8 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
                      all_cufIterCtx);
   ret |= expand_part(*this, acls, acls.cufIterInvName(), ACufIterInvNameAny,
                      all_cufIterInvName);
+  ret |= expand_part(*this, acls, acls.cufIterDynamic(), ACufIterDynamicAny,
+                     all_cufIterDynamic);
 
   return ret;
 }
@@ -376,7 +380,8 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
     if (acls.is_cufIterFunc() ||
         acls.is_cufIterCtx() ||
-        acls.is_cufIterInvName()) {
+        acls.is_cufIterInvName() ||
+        acls.is_cufIterDynamic()) {
       add_class(ret, acls);
       return;
     }
@@ -495,6 +500,11 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
+    if (acls.is_cufIterDynamic()) {
+      ret.all_cufIterDynamic.set(meta.index);
+      return;
+    }
+
     if (acls.is_ref()) {
       meta.conflicts = ret.all_ref;
       meta.conflicts.reset(meta.index);
@@ -593,6 +603,7 @@ std::string show(const AliasAnalysis& ainfo) {
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
+                      " {: <20}       : {}\n"
                       " {: <20}       : {}\n",
     "all props",          show(ainfo.all_props),
     "all elemIs",         show(ainfo.all_elemIs),
@@ -602,6 +613,7 @@ std::string show(const AliasAnalysis& ainfo) {
     "all cufIterFunc",    show(ainfo.all_cufIterFunc),
     "all cufIterCtx",     show(ainfo.all_cufIterCtx),
     "all cufIterInvName", show(ainfo.all_cufIterInvName),
+    "all cufIterDynamic", show(ainfo.all_cufIterDynamic),
     "all frame",          show(ainfo.all_frame),
     "all clsRefSlot",     show(ainfo.all_clsRefSlot)
   );

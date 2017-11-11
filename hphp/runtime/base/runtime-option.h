@@ -732,7 +732,9 @@ struct RuntimeOption {
                                             std::vector<std::string>()) \
   F(std::vector<std::string>, UnixServerAllowedGroups,                  \
                                             std::vector<std::string>()) \
+  /* Options for testing */                                             \
   F(bool, TrashFillOnRequestExit, false)                                \
+  F(bool, NoticeOnAllDynamicCalls, false)                               \
   /******************                                                   \
    | ARM   Options. |                                                   \
    *****************/                                                   \

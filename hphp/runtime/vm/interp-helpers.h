@@ -56,6 +56,17 @@ inline void setTypesFlag(ActRec* fp, ActRec* ar) {
   if (!callUsesStrictTypes(fp)) ar->setUseWeakTypes();
 }
 
+inline void checkForDynamicCall(const ActRec* ar) {
+  if (!ar->isDynamicCall()) return;
+
+  if (RuntimeOption::EvalNoticeOnAllDynamicCalls) {
+    raise_notice(
+      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      ar->func()->fullDisplayName()->data()
+    );
+  }
+}
+
 /*
  * This helper only does a stack overflow check for the native stack.
  * Both native and VM stack overflows are independently possible.

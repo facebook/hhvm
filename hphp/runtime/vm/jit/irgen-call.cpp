@@ -143,7 +143,8 @@ void fpushObjMethodUnknown(IRGS& env,
               cns(env, TNullptr),  // Will be set by LdObjMethod
               obj,
               numParams,
-              nullptr);
+              nullptr,
+              cns(env, false));
   auto const objCls = gen(env, LdObjClass, obj);
 
   // This is special.  We need to move the stackpointer in case LdObjMethod
@@ -220,7 +221,8 @@ void fpushObjMethodExactFunc(
     cns(env, func),
     objOrCls,
     numParams,
-    methodName
+    methodName,
+    cns(env, false)
   );
 }
 
@@ -251,7 +253,14 @@ void fpushObjMethodInterfaceFunc(
     decRef(env, obj);
     objOrCls = cls;
   }
-  fpushActRec(env, func, objOrCls, numParams, /* invName */nullptr);
+  fpushActRec(
+    env,
+    func,
+    objOrCls,
+    numParams,
+    /* invName */nullptr,
+    cns(env, false)
+  );
   return;
 }
 
@@ -271,11 +280,13 @@ void fpushObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
     decRef(env, obj);
     objOrCls = clsTmp;
   }
-  fpushActRec(env,
+  fpushActRec(
+    env,
     funcTmp,
     objOrCls,
     numParams,
-    /* invName */nullptr
+    /* invName */nullptr,
+    cns(env, false)
   );
 }
 
@@ -393,7 +404,8 @@ bool optimizeProfiledPushMethod(IRGS& env,
                                 SSATmp* objOrCls,
                                 Block* sideExit,
                                 const StringData* methodName,
-                                uint32_t numParams) {
+                                uint32_t numParams,
+                                bool dynamic) {
   if (!profile.optimizing()) return false;
   if (env.transFlags.noProfiledFPush && env.firstBcInst) return false;
 
@@ -430,7 +442,7 @@ bool optimizeProfiledPushMethod(IRGS& env,
       env.irb->constrainValue(refined, TypeConstraint(uniqueClass));
       auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
       fpushActRec(env, cns(env, uniqueMeth), ctx, numParams,
-                  isMagic ? methodName : nullptr);
+                  isMagic ? methodName : nullptr, cns(env, dynamic));
       return true;
     }
 
@@ -451,7 +463,14 @@ bool optimizeProfiledPushMethod(IRGS& env,
     auto const meth = gen(env, LdClsMethod, cls, negSlot);
     auto const same = gen(env, EqFunc, meth, cns(env, uniqueMeth));
     gen(env, JmpZero, sideExit, same);
-    fpushActRec(env, cns(env, uniqueMeth), ctx, numParams, nullptr);
+    fpushActRec(
+      env,
+      cns(env, uniqueMeth),
+      ctx,
+      numParams,
+      nullptr,
+      cns(env, dynamic)
+    );
     return true;
   }
 
@@ -470,7 +489,14 @@ bool optimizeProfiledPushMethod(IRGS& env,
     gen(env, JmpZero, sideExit, flag);
     auto negSlot = cns(env, -1 - baseMeth->methodSlot());
     auto meth = gen(env, LdClsMethod, cls, negSlot);
-    fpushActRec(env, meth, ctx, numParams, nullptr);
+    fpushActRec(
+      env,
+      meth,
+      ctx,
+      numParams,
+      nullptr,
+      cns(env, dynamic)
+    );
     return true;
   }
 
@@ -489,7 +515,7 @@ bool optimizeProfiledPushMethod(IRGS& env,
     auto meth = gen(env, LdIfaceMethod,
                     IfaceMethodData{vtableSlot, intfMeth->methodSlot()},
                     cls);
-    fpushActRec(env, meth, ctx, numParams, nullptr);
+    fpushActRec(env, meth, ctx, numParams, nullptr, cns(env, dynamic));
     return true;
   }
 
@@ -520,8 +546,8 @@ void fpushObjMethod(IRGS& env,
   if (RuntimeOption::RepoAuthoritative) {
     profile.emplace(env.context, env.irb->curMarker(), methProfileKey.get());
 
-    if (optimizeProfiledPushMethod(env, *profile,
-                                   obj, sideExit, methodName, numParams)) {
+    if (optimizeProfiledPushMethod(env, *profile, obj, sideExit,
+                                   methodName, numParams, false)) {
       return;
     }
   }
@@ -545,7 +571,7 @@ void fpushFuncObj(IRGS& env, uint32_t numParams) {
   auto const obj      = popC(env);
   auto const cls      = gen(env, LdObjClass, obj);
   auto const func     = gen(env, LdObjInvoke, slowExit, cls);
-  fpushActRec(env, func, obj, numParams, nullptr);
+  fpushActRec(env, func, obj, numParams, nullptr, cns(env, false));
 }
 
 void fpushFuncArr(IRGS& env, uint32_t numParams) {
@@ -557,7 +583,8 @@ void fpushFuncArr(IRGS& env, uint32_t numParams) {
     cns(env, TNullptr),
     cns(env, TNullptr),
     numParams,
-    nullptr
+    nullptr,
+    cns(env, true)
   );
 
   // This is special. We need to move the stackpointer incase LdArrFuncCtx
@@ -590,7 +617,8 @@ void fpushCufUnknown(IRGS& env, Op op, uint32_t numParams) {
     cns(env, TNullptr),
     cns(env, TNullptr),
     numParams,
-    nullptr
+    nullptr,
+    cns(env, true)
   );
 
   /*
@@ -698,7 +726,14 @@ void implFPushCufOp(IRGS& env, Op op, uint32_t numArgs) {
     push(env, safeFlag);
   }
 
-  fpushActRec(env, func, ctx, numArgs, invName);
+  fpushActRec(
+    env,
+    func,
+    ctx,
+    numArgs,
+    invName,
+    cns(env, !callable->isA(TObj))
+  );
 }
 
 void fpushFuncCommon(IRGS& env,
@@ -715,7 +750,8 @@ void fpushFuncCommon(IRGS& env,
                 cns(env, lookup.func),
                 cns(env, TNullptr),
                 numParams,
-                nullptr);
+                nullptr,
+                cns(env, false));
     return;
   }
 
@@ -726,7 +762,8 @@ void fpushFuncCommon(IRGS& env,
               ssaFunc,
               cns(env, TNullptr),
               numParams,
-              nullptr);
+              nullptr,
+              cns(env, false));
 }
 
 void implUnboxR(IRGS& env) {
@@ -895,7 +932,8 @@ void fpushActRec(IRGS& env,
                  SSATmp* func,
                  SSATmp* objOrClass,
                  uint32_t numArgs,
-                 const StringData* invName) {
+                 const StringData* invName,
+                 SSATmp* dynamicCall) {
   ActRecInfo info;
   info.spOffset = offsetFromIRSP(
     env,
@@ -910,7 +948,8 @@ void fpushActRec(IRGS& env,
     sp(env),
     func,
     objOrClass,
-    invName ? cns(env, invName) : cns(env, TNullptr)
+    invName ? cns(env, invName) : cns(env, TNullptr),
+    dynamicCall
   );
 }
 
@@ -932,6 +971,12 @@ void emitFPushCufIter(IRGS& env, uint32_t numParams, int32_t itId) {
     IterId(itId),
     fp(env)
   );
+  auto const dynamic = gen(
+    env,
+    LdCufIterDynamic,
+    IterId(itId),
+    fp(env)
+  );
 
   ActRecInfo info;
   info.spOffset = offsetFromIRSP(
@@ -942,7 +987,7 @@ void emitFPushCufIter(IRGS& env, uint32_t numParams, int32_t itId) {
 
   ifNonNull(env, ctx, [&](SSATmp* t) { gen(env, IncRef, t); });
   ifNonNull(env, invName, [&](SSATmp* t) { gen(env, IncRef, t); });
-  gen(env, SpillFrame, info, sp(env), func, ctx, invName);
+  gen(env, SpillFrame, info, sp(env), func, ctx, invName, dynamic);
 }
 
 void emitFPushCuf(IRGS& env, uint32_t numArgs) {
@@ -960,7 +1005,7 @@ void emitFPushCtor(IRGS& env, uint32_t numParams, uint32_t slot) {
   auto const func = gen(env, LdClsCtor, cls, fp(env));
   auto const obj  = gen(env, AllocObj, cls);
   pushIncRef(env, obj);
-  fpushActRec(env, func, obj, numParams, nullptr);
+  fpushActRec(env, func, obj, numParams, nullptr, cns(env, true));
 }
 
 void emitFPushCtorD(IRGS& env,
@@ -992,7 +1037,7 @@ void emitFPushCtorD(IRGS& env,
   auto const obj = fastAlloc ? allocObjFast(env, cls)
                              : gen(env, AllocObj, ssaCls);
   pushIncRef(env, obj);
-  fpushActRec(env, ssaFunc, obj, numParams, nullptr);
+  fpushActRec(env, ssaFunc, obj, numParams, nullptr, cns(env, false));
 }
 
 void emitFPushCtorI(IRGS& env,
@@ -1037,7 +1082,7 @@ void emitFPushCtorI(IRGS& env,
   auto const obj = fastAlloc ? allocObjFast(env, cls)
                              : gen(env, AllocObj, ssaCls);
   pushIncRef(env, obj);
-  fpushActRec(env, ssaFunc, obj, numParams, nullptr);
+  fpushActRec(env, ssaFunc, obj, numParams, nullptr, cns(env, false));
 }
 
 namespace {
@@ -1068,7 +1113,7 @@ void emitFPushCtorS(IRGS& env, uint32_t numParams, SpecialClsRef ref) {
   auto const func = gen(env, LdClsCtor, cls, fp(env));
   auto const obj  = gen(env, AllocObj, cls);
   pushIncRef(env, obj);
-  fpushActRec(env, func, obj, numParams, nullptr);
+  fpushActRec(env, func, obj, numParams, nullptr, cns(env, false));
 }
 
 void emitFPushFuncD(IRGS& env, uint32_t nargs, const StringData* name) {
@@ -1099,7 +1144,8 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
               cns(env, TNullptr),
               cns(env, TNullptr),
               numParams,
-              nullptr);
+              nullptr,
+              cns(env, true));
 
   updateMarker(env);
   env.irb->exceptionStackBoundary();
@@ -1133,7 +1179,8 @@ void emitFPushObjMethodD(IRGS& env,
       cns(env, SystemLib::s_nullFunc),
       cns(env, TNullptr),
       numParams,
-      nullptr);
+      nullptr,
+      cns(env, true));
     return;
   }
 
@@ -1147,7 +1194,8 @@ bool fpushClsMethodKnown(IRGS& env,
                          const Class *baseClass,
                          bool exact,
                          bool check,
-                         bool forward) {
+                         bool forward,
+                         bool dynamic) {
   bool magicCall = false;
   auto const func = lookupImmutableMethod(baseClass,
                                           methodName,
@@ -1177,7 +1225,8 @@ bool fpushClsMethodKnown(IRGS& env,
               funcTmp,
               ctx,
               numParams,
-              magicCall ? methodName : nullptr);
+              magicCall ? methodName : nullptr,
+              cns(env, dynamic));
   return true;
 }
 
@@ -1189,7 +1238,7 @@ void emitFPushClsMethodD(IRGS& env,
       Unit::lookupUniqueClassInContext(className, curClass(env))) {
     if (fpushClsMethodKnown(env, numParams,
                             methodName, cns(env, baseClass), baseClass,
-                            true, true, false)) {
+                            true, true, false, false)) {
       return;
     }
   }
@@ -1221,7 +1270,8 @@ void emitFPushClsMethodD(IRGS& env,
               func,
               clsCtx,
               numParams,
-              nullptr);
+              nullptr,
+              cns(env, false));
 }
 
 namespace {
@@ -1232,7 +1282,8 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
                                         Peek peekCls,
                                         Get getMeth,
                                         Kill killCls,
-                                        bool forward) {
+                                        bool forward,
+                                        bool dynamic) {
   TransFlags trFlags;
   trFlags.noProfiledFPush = true;
   auto sideExit = makeExit(env, trFlags);
@@ -1258,7 +1309,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
 
     if (cls) {
       if (fpushClsMethodKnown(env, numParams, methodName, clsVal, cls,
-                              exact, false, forward)) {
+                              exact, false, forward, dynamic)) {
         killCls();
         return;
       }
@@ -1269,8 +1320,8 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
         !forward) {
       profile.emplace(env.context, env.irb->curMarker(), methProfileKey.get());
 
-      if (optimizeProfiledPushMethod(env, *profile,
-                                     clsVal, sideExit, methodName, numParams)) {
+      if (optimizeProfiledPushMethod(env, *profile, clsVal, sideExit,
+                                     methodName, numParams, dynamic)) {
         killCls();
         return;
       }
@@ -1282,7 +1333,8 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
               cns(env, TNullptr),
               cns(env, TNullptr),
               numParams,
-              nullptr);
+              nullptr,
+              cns(env, dynamic));
 
   /*
    * Similar to FPushFunc/FPushObjMethod, we have an incomplete ActRec on the
@@ -1320,7 +1372,8 @@ void emitFPushClsMethod(IRGS& env,
     [&] { return peekClsRef(env, slot); },
     [&] { return popC(env); },
     [&] { killClsRef(env, slot); },
-    false
+    false,
+    true
   );
 }
 
@@ -1335,7 +1388,8 @@ void emitFPushClsMethodS(IRGS& env,
     [&] { return specialClsRefToCls(env, ref); },
     [&] { return popC(env); },
     []  {},
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent
+    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
+    true
   );
 }
 
@@ -1349,7 +1403,8 @@ void emitFPushClsMethodSD(IRGS& env,
     [&] { return specialClsRefToCls(env, ref); },
     [&] { return cns(env, name); },
     []  {},
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent
+    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
+    false
   );
 }
 
@@ -1607,7 +1662,14 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
   auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
 
   env.irb->fs().setFPushOverride(Op::FPushFuncD);
-  fpushActRec(env, cns(env, callee), cns(env, TNullptr), numParams, nullptr);
+  fpushActRec(
+    env,
+    cns(env, callee),
+    cns(env, TNullptr),
+    numParams,
+    nullptr,
+    cns(env, false)
+  );
   assertx(!env.irb->fs().hasFPushOverride());
 
   for (int32_t i = 0; i < numParams; i++) {

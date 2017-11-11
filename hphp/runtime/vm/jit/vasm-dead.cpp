@@ -231,6 +231,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::mtlr:
     case Vinstr::nothrow:
     case Vinstr::orbim:
+    case Vinstr::orlim:
     case Vinstr::orqim:
     case Vinstr::orwim:
     case Vinstr::phidef:

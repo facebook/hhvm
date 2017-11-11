@@ -110,6 +110,7 @@ void FuncCache::lookup(rds::Handle handle,
       ObjectData *this_ = nullptr;
       Class* self_ = nullptr;
       StringData* inv = nullptr;
+      bool dynamic = false;
       try {
         func = vm_decode_function(
           String(sd),
@@ -118,10 +119,12 @@ void FuncCache::lookup(rds::Handle handle,
           this_,
           self_,
           inv,
+          dynamic,
           DecodeFlags::NoWarn);
         if (!func) {
           raise_call_to_undefined(sd);
         }
+        assertx(dynamic);
       } catch (...) {
         *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(sd);
         throw;

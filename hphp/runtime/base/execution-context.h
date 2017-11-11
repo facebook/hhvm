@@ -448,7 +448,8 @@ public:
                         VarEnv* varEnv = nullptr,
                         StringData* invName = nullptr,
                         InvokeFlags flags = InvokeNormal,
-                        bool useWeakTypes = false);
+                        bool useWeakTypes = false,
+                        bool dynamic = true);
 
   TypedValue invokeFunc(const CallCtx& ctx,
                         const Variant& args_,
@@ -459,7 +460,8 @@ public:
                            StringData* invName,
                            int argc,
                            const TypedValue* argv,
-                           bool useWeakTypes = false);
+                           bool useWeakTypes = false,
+                           bool dynamic = true);
 
   TypedValue invokeFuncFew(const Func* f,
                            void* thisOrCls,
@@ -494,7 +496,9 @@ private:
   template<class FStackCheck, class FInitArgs, class FEnterVM>
   TypedValue invokeFuncImpl(const Func* f,
                             ObjectData* thiz, Class* cls, uint32_t argc,
-                            StringData* invName, bool useWeakTypes,
+                            StringData* invName,
+                            bool useWeakTypes,
+                            bool dynamic,
                             FStackCheck doStackCheck,
                             FInitArgs doInitArgs,
                             FEnterVM doEnterVM);

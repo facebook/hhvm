@@ -395,7 +395,8 @@ SSATmp* simplifySpillFrame(State& env, const IRInstruction* inst) {
     auto const src = ctx->inst();
     if (src->op() == LdClsCctx) {
       return gen(env, SpillFrame, *inst->extra<SpillFrame>(),
-                 inst->src(0), inst->src(1), src->src(0), inst->src(3));
+                 inst->src(0), inst->src(1), src->src(0),
+                 inst->src(3), inst->src(4));
     }
   }
   return nullptr;

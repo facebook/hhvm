@@ -263,6 +263,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalHackArrCompatDVCmpNotices,
                ini, config, "HackArrCompatDVCmpNotices",
                RuntimeOption::EvalHackArrCompatDVCmpNotices);
+  Config::Bind(RuntimeOption::EvalNoticeOnAllDynamicCalls,
+               ini, config, "NoticeOnAllDynamicCalls",
+               RuntimeOption::EvalNoticeOnAllDynamicCalls);
 
   {
     // Hack

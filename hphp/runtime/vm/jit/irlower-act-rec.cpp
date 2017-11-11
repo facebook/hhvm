@@ -67,6 +67,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(1);
   auto const ctxTmp = inst->src(2);
   auto const invNameTmp = inst->src(3);
+  auto const isDynamic = inst->src(4);
   auto& v = vmain(env);
 
   auto const ar = sp[cellsToBytes(extra->spOffset.offset)];
@@ -113,48 +114,21 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
     }
   }
 
-  auto const caller = inst->marker().func();
-  auto const baseFlags =
-    caller->isBuiltin() || !caller->unit()->useStrictTypes()
-      ? ActRec::Flags::UseWeakTypes
-      : ActRec::Flags::None;
-  auto const naaf = static_cast<int32_t>(
-    ActRec::encodeNumArgsAndFlags(extra->numArgs, baseFlags)
-  );
-  auto const naafMagic = static_cast<int32_t>(
-    ActRec::encodeNumArgsAndFlags(
-      extra->numArgs,
-      static_cast<ActRec::Flags>(baseFlags | ActRec::Flags::MagicDispatch)
-    )
-  );
-
   // Set m_invName.
   if (invNameTmp->isA(TNullptr)) {
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_invName));
     }
-    v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
   } else {
     assertx(invNameTmp->isA(TStr | TNullptr));
 
     // We don't have to incref here
     auto const invName = srcLoc(env, inst, 3).reg();
     v << store{invName, ar + AROFF(m_invName)};
-    if (!invNameTmp->type().maybe(TNullptr)) {
-      v << storeli{naafMagic, ar + AROFF(m_numArgsAndFlags)};
-    } else {
-      auto const sf = v.makeReg();
-      auto const naafReg = v.makeReg();
-      v << testq{invName, invName, sf};
-      v << cmovl{
-        CC_Z,
-        sf,
-        v.cns(static_cast<uint32_t>(naafMagic)),
-        v.cns(static_cast<uint32_t>(naaf)),
-        naafReg
-      };
-      v << storel{naafReg, ar + AROFF(m_numArgsAndFlags)};
+    if (invNameTmp->type().maybe(TNullptr)) {
       if (RuntimeOption::EvalHHIRGenerateAsserts) {
+        auto const sf = v.makeReg();
+        v << testq{invName, invName, sf};
         ifThen(
           v,
           CC_Z,
@@ -190,6 +164,80 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
       );
     }
   }
+
+  // Set flags
+  auto const caller = inst->marker().func();
+  auto flags = caller->isBuiltin() || !caller->unit()->useStrictTypes()
+    ? ActRec::Flags::UseWeakTypes
+    : ActRec::Flags::None;
+
+  bool dynamicCheck = false;
+  bool magicCheck = false;
+  if (!isDynamic->hasConstVal()) {
+    dynamicCheck = true;
+  } else if (isDynamic->hasConstVal(true)) {
+    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::DynamicCall);
+  }
+
+  if (!invNameTmp->type().maybe(TNullptr)) {
+    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::MagicDispatch);
+  } else if (!invNameTmp->isA(TNullptr)) {
+    magicCheck = true;
+  }
+
+  auto naaf = v.cns(
+    static_cast<int32_t>(ActRec::encodeNumArgsAndFlags(extra->numArgs, flags))
+  );
+
+  if (magicCheck) {
+    auto const invName = srcLoc(env, inst, 3).reg();
+    auto const sf = v.makeReg();
+    v << testq{invName, invName, sf};
+    naaf = unlikelyCond(
+      v,
+      vcold(env),
+      CC_NZ,
+      sf,
+      v.makeReg(),
+      [&] (Vout& v) {
+        auto const dst = v.makeReg();
+        v << orqi{
+          static_cast<int32_t>(ActRec::Flags::MagicDispatch),
+          naaf,
+          dst,
+          v.makeReg()
+        };
+        return dst;
+      },
+      [&] (Vout& v) { return naaf; }
+    );
+  }
+
+  if (dynamicCheck) {
+    auto const dynamicReg = srcLoc(env, inst, 4).reg();
+    auto const sf = v.makeReg();
+    v << testb{dynamicReg, dynamicReg, sf};
+    naaf = unlikelyCond(
+      v,
+      vcold(env),
+      CC_NZ,
+      sf,
+      v.makeReg(),
+      [&] (Vout& v) {
+        auto const dst = v.makeReg();
+        v << orqi{
+          static_cast<int32_t>(ActRec::Flags::DynamicCall),
+          naaf,
+          dst,
+          v.makeReg()
+        };
+        return dst;
+      },
+      [&] (Vout& v) { return naaf; }
+    );
+  }
+
+  v << storel{naaf, ar + AROFF(m_numArgsAndFlags)};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

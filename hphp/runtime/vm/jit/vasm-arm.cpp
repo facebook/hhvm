@@ -1299,6 +1299,7 @@ Y(andbim, andbi, loadb, storeb, s, m)
 Y(orbim, orqi, loadb, storeb, s0, m)
 Y(orqim, orqi, load, store, s0, m)
 Y(orwim, orqi, loadw, storew, s0, m)
+Y(orlim, orqi, loadl, storel, s0, m)
 
 #undef Y
 

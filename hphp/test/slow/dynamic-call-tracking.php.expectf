@@ -1,0 +1,567 @@
+=============== positive tests =====================
+
+Notice: 'func' called dynamically in %s/dynamic-call-tracking.php on line 5
+
+Notice: 'count' called dynamically in %s/dynamic-call-tracking.php on line 133
+
+Notice: 'async_func' called dynamically in %s/dynamic-call-tracking.php on line 6
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::async_func' called dynamically in %s/dynamic-call-tracking.php on line 60
+
+Notice: 'A::static_async_func' called dynamically in %s/dynamic-call-tracking.php on line 63
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 140
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::async_func' called dynamically in %s/dynamic-call-tracking.php on line 60
+
+Notice: 'A::static_async_func' called dynamically in %s/dynamic-call-tracking.php on line 63
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 146
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::async_func' called dynamically in %s/dynamic-call-tracking.php on line 60
+
+Notice: 'A::static_async_func' called dynamically in %s/dynamic-call-tracking.php on line 63
+
+Notice: 'C::__call' called dynamically in %s/dynamic-call-tracking.php on line 15
+
+Notice: 'HH\Vector::firstValue' called dynamically in %s/dynamic-call-tracking.php on line 152
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 153
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::async_func' called dynamically in %s/dynamic-call-tracking.php on line 60
+
+Notice: 'A::static_async_func' called dynamically in %s/dynamic-call-tracking.php on line 63
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 159
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::async_func' called dynamically in %s/dynamic-call-tracking.php on line 60
+
+Notice: 'A::static_async_func' called dynamically in %s/dynamic-call-tracking.php on line 63
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 165
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'B::func' called dynamically in %s/dynamic-call-tracking.php on line 52
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'B::static_func' called dynamically in %s/dynamic-call-tracking.php on line 53
+
+Notice: 'A::async_func' called dynamically in %s/dynamic-call-tracking.php on line 60
+
+Notice: 'A::async_func' called dynamically in %s/dynamic-call-tracking.php on line 60
+
+Notice: 'B::async_func' called dynamically in %s/dynamic-call-tracking.php on line 54
+
+Notice: 'A::static_async_func' called dynamically in %s/dynamic-call-tracking.php on line 63
+
+Notice: 'A::static_async_func' called dynamically in %s/dynamic-call-tracking.php on line 63
+
+Notice: 'B::static_async_func' called dynamically in %s/dynamic-call-tracking.php on line 55
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'D::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 11
+
+Notice: 'A::86ctor' called dynamically in %s/dynamic-call-tracking.php on line 129
+
+Notice: 'HH\Vector::__construct' called dynamically in %s/dynamic-call-tracking.php on line 171
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::async_func' called dynamically in %s/dynamic-call-tracking.php on line 60
+
+Notice: 'A::static_async_func' called dynamically in %s/dynamic-call-tracking.php on line 63
+
+Notice: 'C::__call' called dynamically in %s/dynamic-call-tracking.php on line 15
+
+Notice: 'HH\Vector::firstValue' called dynamically in %s/dynamic-call-tracking.php on line 177
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 178
+
+Notice: '__SystemLib\__86null' called dynamically in %s/dynamic-call-tracking.php on line 179
+
+Notice: 'func' called dynamically in %s/dynamic-call-tracking.php on line 5
+
+Notice: 'count' called dynamically in %s/dynamic-call-tracking.php on line 182
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 186
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 190
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__call' called dynamically in %s/dynamic-call-tracking.php on line 15
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 194
+
+Notice: 'func' called dynamically in %s/dynamic-call-tracking.php on line 5
+
+Notice: 'count' called dynamically in %s/dynamic-call-tracking.php on line 198
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 202
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 206
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__call' called dynamically in %s/dynamic-call-tracking.php on line 15
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 210
+
+Notice: 'func' called dynamically in %s/dynamic-call-tracking.php on line 5
+
+Notice: 'count' called dynamically in %s/dynamic-call-tracking.php on line 213
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 217
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 221
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__call' called dynamically in %s/dynamic-call-tracking.php on line 15
+
+Notice: 'HH\Vector::firstValue' called dynamically in %s/dynamic-call-tracking.php on line 225
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 226
+
+Notice: 'func' called dynamically in %s/dynamic-call-tracking.php on line 5
+
+Notice: 'count' called dynamically in %s/dynamic-call-tracking.php on line 229
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 230
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 233
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'HH\Vector::firstValue' called dynamically in %s/dynamic-call-tracking.php on line 238
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 239
+
+Notice: 'func' called dynamically in %s/dynamic-call-tracking.php on line 5
+
+Notice: 'count' called dynamically in %s/dynamic-call-tracking.php on line 90
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'func' called dynamically in %s/dynamic-call-tracking.php on line 5
+
+Notice: 'count' called dynamically in %s/dynamic-call-tracking.php on line 99
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'C::__call' called dynamically in %s/dynamic-call-tracking.php on line 15
+
+Notice: 'func' called dynamically in %s/dynamic-call-tracking.php on line 5
+
+Notice: 'count' called dynamically in %s/dynamic-call-tracking.php on line 245
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 249
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 253
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__call' called dynamically in %s/dynamic-call-tracking.php on line 15
+
+Notice: 'HH\Vector::firstValue' called dynamically in %s/dynamic-call-tracking.php on line 257
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 258
+
+Notice: '__SystemLib\__86null' called dynamically in %s/dynamic-call-tracking.php on line 259
+
+Notice: 'func' called dynamically in %s/dynamic-call-tracking.php on line 5
+
+Notice: 'count' called dynamically in %s/dynamic-call-tracking.php on line 262
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 266
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 270
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'C::__call' called dynamically in %s/dynamic-call-tracking.php on line 15
+
+Notice: 'HH\Vector::firstValue' called dynamically in %s/dynamic-call-tracking.php on line 274
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 275
+
+Notice: '__SystemLib\__86null' called dynamically in %s/dynamic-call-tracking.php on line 276
+
+Notice: 'func' called dynamically in %s/dynamic-call-tracking.php on line 5
+
+Notice: 'count' called dynamically in %s/dynamic-call-tracking.php on line 279
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 282
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 285
+
+Notice: 'A::func' called dynamically in %s/dynamic-call-tracking.php on line 59
+
+Notice: 'A::static_func' called dynamically in %s/dynamic-call-tracking.php on line 62
+
+Notice: 'HH\Vector::firstValue' called dynamically in %s/dynamic-call-tracking.php on line 288
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-tracking.php on line 289
+
+Notice: '__SystemLib\__86null' called dynamically in %s/dynamic-call-tracking.php on line 290
+
+Notice: 'cmp' called dynamically in %s/dynamic-call-tracking.php on line 7
+
+Notice: 'A::cmp' called dynamically in %s/dynamic-call-tracking.php on line 61
+
+Notice: 'A::static_cmp' called dynamically in %s/dynamic-call-tracking.php on line 64
+
+Notice: 'CCmp::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 40
+
+Notice: 'A::cmp' called dynamically in %s/dynamic-call-tracking.php on line 61
+
+Notice: 'A::static_cmp' called dynamically in %s/dynamic-call-tracking.php on line 64
+
+Notice: 'CCmp::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 40
+
+Notice: 'A::cmp' called dynamically in %s/dynamic-call-tracking.php on line 61
+
+Notice: 'A::static_cmp' called dynamically in %s/dynamic-call-tracking.php on line 64
+
+Notice: 'CCmp::__call' called dynamically in %s/dynamic-call-tracking.php on line 39
+=============== negative tests =====================
+=============== positive tests (exceptions) ========
+Exception: 'func' called dynamically
+Exception: 'count' called dynamically
+Exception: 'async_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'HH\Vector::firstValue' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'B::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'B::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'B::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'B::static_async_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'D::__callStatic' called dynamically
+Exception: 'A::86ctor' called dynamically
+Exception: 'HH\Vector::__construct' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'HH\Vector::firstValue' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: '__SystemLib\__86null' called dynamically
+Exception: 'func' called dynamically
+Exception: 'count' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'func' called dynamically
+Exception: 'count' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'func' called dynamically
+Exception: 'count' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'HH\Vector::firstValue' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'func' called dynamically
+Exception: 'count' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'HH\Vector::firstValue' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'func' called dynamically
+Exception: 'count' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'func' called dynamically
+Exception: 'count' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'func' called dynamically
+Exception: 'count' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'HH\Vector::firstValue' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: '__SystemLib\__86null' called dynamically
+Exception: 'func' called dynamically
+Exception: 'count' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'HH\Vector::firstValue' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: '__SystemLib\__86null' called dynamically
+Exception: 'func' called dynamically
+Exception: 'count' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'HH\Vector::firstValue' called dynamically
+Exception: 'HH\Vector::fromItems' called dynamically
+Exception: '__SystemLib\__86null' called dynamically
+Exception: 'cmp' called dynamically
+Exception: 'A::cmp' called dynamically
+Exception: 'A::static_cmp' called dynamically
+Exception: 'CCmp::__callStatic' called dynamically
+Exception: 'A::cmp' called dynamically
+Exception: 'A::static_cmp' called dynamically
+Exception: 'CCmp::__callStatic' called dynamically
+Exception: 'A::cmp' called dynamically
+Exception: 'A::static_cmp' called dynamically
+Exception: 'CCmp::__call' called dynamically

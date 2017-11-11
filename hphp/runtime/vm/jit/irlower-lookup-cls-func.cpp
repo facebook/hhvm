@@ -299,6 +299,7 @@ void loadFuncContextImpl(FooNR callableNR, ActRec* preLiveAR, ActRec* fp) {
   ObjectData* inst = nullptr;
   Class* cls = nullptr;
   StringData* invName = nullptr;
+  bool dynamic = false;
 
   auto func = vm_decode_function(
     VarNR(callableNR),
@@ -307,8 +308,10 @@ void loadFuncContextImpl(FooNR callableNR, ActRec* preLiveAR, ActRec* fp) {
     inst,
     cls,
     invName,
+    dynamic,
     FailBehavior == OnFail::Warn ? DecodeFlags::Warn : DecodeFlags::NoWarn
   );
+  assertx(dynamic);
   if (UNLIKELY(func == nullptr)) {
     if (FailBehavior == OnFail::Fatal) {
       raise_error("Invalid callable (array)");

@@ -642,6 +642,7 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
   ctx.this_ = obj;
   ctx.cls = obj->getVMClass();
   ctx.invName = nullptr;
+  ctx.dynamic = true;
 
   ctx.func = ctx.cls->lookupMethod(s.get());
   if (ctx.func) {

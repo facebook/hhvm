@@ -182,6 +182,10 @@ bool beginInlining(IRGS& env,
     killClsRef(env, slot);
   }
 
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+  emitDynamicCallCheck(env);
+
   if (data.ctx && data.ctx->isA(TObj)) {
     assertx(startSk.hasThis());
   } else if (data.ctx && !data.ctx->type().maybe(TObj)) {
@@ -253,7 +257,8 @@ bool conjureBeginInlining(IRGS& env,
     cns(env, func),
     thisType != TBottom ? conjure(thisType) : nullptr,
     numParams,
-    nullptr /* invName */
+    nullptr, /* invName */
+    conjure(TBool)
   );
   assertx(!env.irb->fs().hasFPushOverride());
 

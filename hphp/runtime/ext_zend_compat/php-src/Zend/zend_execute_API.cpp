@@ -188,12 +188,14 @@ int zend_call_function(zend_fcall_info* fci,
 
   HPHP::CallerFrame cf;
   HPHP::StringData* invName = nullptr;
+  bool dynamic = false;
   /*
    * WATCHOUT! obj and cls are passed by reference to vm_decode_function,
    * and may get overwritten.
    */
   const HPHP::Func* f = HPHP::vm_decode_function(
-    HPHP::tvAsCVarRef(fci->function_name->tv()), cf(), false, obj, cls, invName
+    HPHP::tvAsCVarRef(fci->function_name->tv()),
+    cf(), false, obj, cls, invName, dynamic
   );
   if (f == nullptr) {
     return FAILURE;
@@ -219,7 +221,8 @@ int zend_call_function(zend_fcall_info* fci,
   try {
     auto retval = HPHP::g_context->invokeFunc(
       f, ad_params.toArray(), obj, cls,
-      nullptr, invName, HPHP::ExecutionContext::InvokeCuf
+      nullptr, invName, HPHP::ExecutionContext::InvokeCuf,
+      false, dynamic
     );
     if (retval.m_type == HPHP::KindOfUninit) {
       return FAILURE;

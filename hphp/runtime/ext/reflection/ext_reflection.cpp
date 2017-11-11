@@ -409,6 +409,7 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
   ctx.this_ = objData;
   ctx.invName = nullptr;
   ctx.func = selectedFunc;
+  ctx.dynamic = true;
 
   return Variant::attach(
     g_context->invokeFunc(ctx, params)

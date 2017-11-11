@@ -1568,7 +1568,7 @@ To string conversions:
 
 | SpillFrame<offset,numArgs>,
 |   ND,
-|   S(StkPtr) S(Func,Nullptr) S(Ctx,Cls,Nullptr) S(Str,Nullptr),
+|   S(StkPtr) S(Func,Nullptr) S(Ctx,Cls,Nullptr) S(Str,Nullptr) S(Bool),
 |   CRc
 
   Operands:
@@ -1578,6 +1578,7 @@ To string conversions:
      S2 - object (for FPushObjMethod*), class (for FPushClsMethod*), context
           (for FPushClsMethodF), or nullptr (for FPushFunc*).
      S3 - invoke name for magic dispatch
+     S4 - whether this is a "dynamic" call
 
   Defines the fields for an activation record and writes them to the stack
   pointed to by S0, at `offset'.
@@ -2535,7 +2536,8 @@ To string conversions:
 
   Decode S0 as a callable, and write the decoded values to the iterator
   specified by IterId. Returns true iff it successfully decoded the callable.
-  Does not raise warnings, or throw exceptions.
+  Does not raise warnings, or throw exceptions. Does not write to the `dynamic'
+  field of the iterator, which must be done separately.
 
 | StCufIterFunc<iterId>, ND, S(FramePtr) S(Func), NF
 
@@ -2549,6 +2551,10 @@ To string conversions:
 
   Store S1 to the `invName' field of the iterator specified by IterId.
 
+| StCufIterDynamic<iterId>, ND, S(FramePtr) S(Bool), NF
+
+  Store S1 to the `dynamic' field of the iterator specified by IterId.
+
 | LdCufIterFunc<iterId,T>, DParam(Func), S(FramePtr), NF
 
   Load the `func' field of the iterator specified by IterId.
@@ -2560,6 +2566,10 @@ To string conversions:
 | LdCufIterInvName<iterId,T>, DParam(Str|Nullptr), S(FramePtr), NF
 
   Load the `invName' field of the iterator specified by IterId.
+
+| LdCufIterDynamic<iterId>, D(Bool), S(FramePtr), NF
+
+  Load the `dynamic' field of the iterator specified by IterId.
 
 | KillCufIter<iterId>, ND, S(FramePtr), NF
 
@@ -3169,7 +3179,7 @@ fields of that struct for holding intermediate values.
   Load the value of m_numArgsAndFlags on the ActRec pointed to by the frame
   pointer S0.
 
-| StARNumArgsAndFlags, ND, S(FramePtr) S(Int), CRc
+| StARNumArgsAndFlags, ND, S(FramePtr) S(Int), NF
 
   Store S1 to m_numArgsAndFlags on the ActRec pointed to by the frame pointer
   S0.

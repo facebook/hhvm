@@ -287,11 +287,14 @@ void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
     gen(env, StCufIterFunc, IterId(iterId), fp(env), func);
     gen(env, StCufIterCtx, IterId(iterId), fp(env), src);
     gen(env, StCufIterInvName, IterId(iterId), fp(env), cns(env, TNullptr));
+    gen(env, StCufIterDynamic, IterId(iterId), fp(env), cns(env, false));
     discard(env, 1);
     return;
   }
 
   if (type.subtypeOfAny(TArr, TVec, TStr)) {
+    // Do this first, because DecodeCufIter will do a sanity check on the flag.
+    gen(env, StCufIterDynamic, IterId(iterId), fp(env), cns(env, true));
     auto const res = gen(
       env,
       DecodeCufIter,

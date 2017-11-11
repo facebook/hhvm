@@ -157,6 +157,11 @@ struct Repo::GlobalData {
   bool EnableIntrinsicsExtension = false;
 
   /*
+   * Should the runtime emit notices whenever a function is called dynamically?
+   */
+  bool NoticeOnAllDynamicCalls = false;
+
+  /*
    * Should we enforce that reffiness annotations are invaraint in overridden
    * methods?
    */
@@ -188,6 +193,8 @@ struct Repo::GlobalData {
       (HackArrCompatTypeHintNotices)
       (HackArrCompatDVCmpNotices)
       (EnableIntrinsicsExtension)
+      (ReffinessInvariance)
+      (NoticeOnAllDynamicCalls)
       (APCProfile)
       ;
   }

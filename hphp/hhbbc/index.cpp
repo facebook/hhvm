@@ -789,6 +789,12 @@ bool Func::mightBeSkipFrame() const {
     });
 }
 
+bool Func::mightCareAboutDynCalls() const {
+  if (mightAccessCallerFrame()) return true;
+  if (RuntimeOption::EvalNoticeOnAllDynamicCalls) return true;
+  return false;
+}
+
 std::string show(const Func& f) {
   std::string ret = f.name()->data();
   match<void>(f.val,

@@ -265,7 +265,9 @@ bool canDCE(IRInstruction* inst) {
   case LdCufIterFunc:
   case LdCufIterCtx:
   case LdCufIterInvName:
+  case LdCufIterDynamic:
   case LdStaticLoc:
+  case LdARNumArgsAndFlags:
   case StrictlyIntegerConv:
     assertx(!inst->isControlFlow());
     return true;
@@ -567,6 +569,7 @@ bool canDCE(IRInstruction* inst) {
   case StCufIterFunc:
   case StCufIterCtx:
   case StCufIterInvName:
+  case StCufIterDynamic:
   case BaseG:
   case PropX:
   case PropQ:
@@ -661,7 +664,6 @@ bool canDCE(IRInstruction* inst) {
   case InitCtx:
   case CheckSurpriseFlagsEnter:
   case CheckARMagicFlag:
-  case LdARNumArgsAndFlags:
   case StARNumArgsAndFlags:
   case StARInvName:
   case ExitPlaceholder:

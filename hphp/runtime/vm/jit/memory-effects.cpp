@@ -1037,6 +1037,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       ACufIterInvName { inst.src(0), inst.extra<StCufIterInvName>()->iterId },
       inst.src(1)
     };
+  case StCufIterDynamic:
+    return PureStore {
+      ACufIterDynamic { inst.src(0), inst.extra<StCufIterDynamic>()->iterId },
+      inst.src(1)
+    };
   case LdCufIterFunc:
     return PureLoad {
       ACufIterFunc { inst.src(0), inst.extra<LdCufIterFunc>()->iterId }
@@ -1049,13 +1054,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad {
       ACufIterInvName { inst.src(0), inst.extra<LdCufIterInvName>()->iterId }
     };
+  case LdCufIterDynamic:
+    return PureLoad {
+      ACufIterDynamic { inst.src(0), inst.extra<LdCufIterDynamic>()->iterId }
+    };
 
   case KillCufIter: {
     auto const iterId = inst.extra<KillCufIter>()->iterId;
     auto const func = AliasClass { ACufIterFunc { inst.src(0), iterId } };
     auto const ctx = AliasClass { ACufIterCtx { inst.src(0), iterId } };
     auto const invName = AliasClass { ACufIterInvName { inst.src(0), iterId } };
-    return may_load_store_kill(AEmpty, AEmpty, func | ctx | invName);
+    auto const dynamic = AliasClass { ACufIterDynamic { inst.src(0), iterId } };
+    return may_load_store_kill(AEmpty, AEmpty, func | ctx | invName | dynamic);
   }
 
   //////////////////////////////////////////////////////////////////////

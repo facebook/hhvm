@@ -116,8 +116,10 @@ bool is_callable(const Variant& v) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
+  bool dynamic;
   const HPHP::Func* f = vm_decode_function(v, GetCallerFrame(), false, obj, cls,
-                                           invName, DecodeFlags::LookupOnly);
+                                           invName, dynamic,
+                                           DecodeFlags::LookupOnly);
   if (invName != nullptr) {
     decRefStr(invName);
   }
@@ -191,8 +193,10 @@ vm_decode_function(const Variant& function,
                    ObjectData*& this_,
                    HPHP::Class*& cls,
                    StringData*& invName,
+                   bool& dynamic,
                    DecodeFlags flags /* = DecodeFlags::Warn */) {
   invName = nullptr;
+  dynamic = true;
   if (function.isString() || function.isArray()) {
     HPHP::Class* ctx = nullptr;
     if (ar) ctx = arGetContextClass(ar);
@@ -419,6 +423,7 @@ vm_decode_function(const Variant& function,
   if (function.isObject()) {
     this_ = function.asCObjRef().get();
     cls = nullptr;
+    dynamic = false;
     const HPHP::Func *f = this_->getVMClass()->lookupMethod(s___invoke.get());
     if (f != nullptr && f->isStaticInPrologue()) {
       // If __invoke is static, invoke it as such
@@ -444,14 +449,16 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
   Class* cls = nullptr;
   CallerFrame cf;
   StringData* invName = nullptr;
+  bool dynamic;
   const Func* f = vm_decode_function(function, cf(), forwarding,
-                                     obj, cls, invName);
+                                     obj, cls, invName, dynamic);
   if (f == nullptr || (!isContainer(params) && !params.isNull())) {
     return uninit_null();
   }
   auto ret = Variant::attach(
     g_context->invokeFunc(f, params, obj, cls,
-                          nullptr, invName, ExecutionContext::InvokeCuf)
+                          nullptr, invName, ExecutionContext::InvokeCuf,
+                          false, dynamic)
   );
   if (UNLIKELY(ret.getRawType()) == KindOfRef) {
     tvUnbox(*ret.asTypedValue());

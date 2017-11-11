@@ -565,7 +565,8 @@ Flags handle_call_effects(Local& env,
                     env.global.ainfo.all_clsRefSlot  |
                     env.global.ainfo.all_cufIterFunc |
                     env.global.ainfo.all_cufIterCtx  |
-                    env.global.ainfo.all_cufIterInvName;
+                    env.global.ainfo.all_cufIterInvName |
+                    env.global.ainfo.all_cufIterDynamic;
   env.state.avail &= keep;
   for (auto aloc = uint32_t{0};
       aloc < env.global.ainfo.locations.size();

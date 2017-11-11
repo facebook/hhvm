@@ -1,7 +1,7 @@
 #ifndef incl_HHVM_VERSION_H
 #define incl_HHVM_VERSION_H
 
-// This file needs to be valid C, not just C++
+#include <boost/preprocessor/stringize.hpp>
 
 /* cmake -DHHVM_VERSION_OVERRIDE=3.12.0-dev .
  * Allows packaging scripts to update the reported
@@ -25,14 +25,10 @@
 /* Specific HHVM release */
 #define HHVM_VERSION_ID (HHVM_VERSION_BRANCH | HHVM_VERSION_PATCH)
 
-#define HHVM_VERSION_STRINGIFY_HELPER(x) #x
-#define HHVM_VERSION_STRINGIFY(x) HHVM_VERSION_STRINGIFY_HELPER(x)
-
 /* Human readable version string (e.g. "3.5.0-dev") */
-#define HHVM_VERSION_C_STRING_LITERALS \
-  HHVM_VERSION_STRINGIFY(HHVM_VERSION_MAJOR) "." \
-  HHVM_VERSION_STRINGIFY(HHVM_VERSION_MINOR) "." \
-  HHVM_VERSION_STRINGIFY(HHVM_VERSION_PATCH) HHVM_VERSION_SUFFIX
-#define HHVM_VERSION (HHVM_VERSION_C_STRING_LITERALS)
+#define HHVM_VERSION \
+  (BOOST_PP_STRINGIZE(HHVM_VERSION_MAJOR) "." \
+   BOOST_PP_STRINGIZE(HHVM_VERSION_MINOR) "." \
+   BOOST_PP_STRINGIZE(HHVM_VERSION_PATCH) HHVM_VERSION_SUFFIX)
 
 #endif // incl_HHVM_VERSION_H

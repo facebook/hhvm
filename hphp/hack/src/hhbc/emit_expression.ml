@@ -452,7 +452,7 @@ and emit_conditional_expression env etest etrue efalse =
 
 and emit_new env expr args uargs =
   let nargs = List.length args + List.length uargs in
-  let cexpr, _ = expr_to_class_expr ~resolve_self:true
+  let cexpr = expr_to_class_expr ~resolve_self:true
     (Emit_env.get_scope env) expr in
   match cexpr with
     (* Special case for statically-known class *)
@@ -612,7 +612,7 @@ and emit_class_expr env cexpr prop =
   gather [cexpr_begin ; cexpr_end]
 
 and emit_class_get env param_num_opt qop need_ref cid prop =
-  let cexpr, _ = expr_to_class_expr ~resolve_self:false
+  let cexpr = expr_to_class_expr ~resolve_self:false
     (Emit_env.get_scope env) cid
   in
   gather [
@@ -630,7 +630,7 @@ and emit_class_get env param_num_opt qop need_ref cid prop =
  * case in emitter.cpp
  *)
 and emit_class_const env cid (_, id) =
-  let cexpr, _ = expr_to_class_expr ~resolve_self:true
+  let cexpr = expr_to_class_expr ~resolve_self:true
     (Emit_env.get_scope env) cid in
   match cexpr with
   | Class_id cid ->
@@ -1742,7 +1742,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      end
 
    | A.Class_get(cid, (_, A.Lvarvar (1, id))) ->
-     let cexpr, _ = expr_to_class_expr ~resolve_self:false
+     let cexpr = expr_to_class_expr ~resolve_self:false
        (Emit_env.get_scope env) cid in
      (* special case for $x->$$y: use BaseSL *)
      emit_load_class_ref env cexpr,
@@ -1751,7 +1751,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      0
 
    | A.Class_get(cid, prop) ->
-     let cexpr, _ = expr_to_class_expr ~resolve_self:false
+     let cexpr = expr_to_class_expr ~resolve_self:false
        (Emit_env.get_scope env) cid in
      let cexpr_begin, cexpr_end = emit_class_expr_parts env cexpr prop in
      cexpr_begin,
@@ -1940,44 +1940,47 @@ and emit_call_lhs env (_, expr_ as expr) nargs has_splat =
     ]
 
   | A.Class_const (cid, (_, id)) ->
-    let cexpr, forward = expr_to_class_expr ~resolve_self:false
+    let cexpr = expr_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) cid in
     let method_id = Hhbc_id.Method.from_ast_name id in
     begin match cexpr with
     (* Statically known *)
-    | Class_id cid when not forward ->
+    | Class_id cid ->
       let fq_cid, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
       instr_fpushclsmethodd nargs method_id fq_cid
-    | cexpr ->
-      let method_name = Hhbc_id.Method.to_raw_string method_id in
-      let body_instrs =
-        match cexpr with
-        | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
-          emit_call_lhs_with_this env @@ instr_string method_name
-        | _ ->
-          emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_name))
-      in
-      gather [
-        body_instrs;
-        instr_fpushclsmethod ~forward nargs
-      ]
+    | Class_static -> instr_fpushclsmethodsd nargs SpecialClsRef.Static method_id
+    | Class_self -> instr_fpushclsmethodsd nargs SpecialClsRef.Self method_id
+    | Class_parent -> instr_fpushclsmethodsd nargs SpecialClsRef.Parent method_id
+    | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
+       let method_name = Hhbc_id.Method.to_raw_string method_id in
+       gather [
+         emit_call_lhs_with_this env @@ instr_string method_name;
+         instr_fpushclsmethod nargs
+       ]
+    | _ ->
+       let method_name = Hhbc_id.Method.to_raw_string method_id in
+       gather [
+         emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_name));
+         instr_fpushclsmethod nargs
+       ]
     end
 
   | A.Class_get (cid, e) ->
-    let cexpr, forward = expr_to_class_expr ~resolve_self:false
+    let cexpr = expr_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) cid in
     let expr_instrs = emit_expr ~need_ref:false env e in
-    let body_instrs =
-      match cexpr with
-      | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
-        emit_call_lhs_with_this env expr_instrs
-      | _ ->
-        gather [ expr_instrs; emit_load_class_ref env cexpr ]
-    in
-    gather [
-      body_instrs;
-      instr_fpushclsmethod ~forward nargs
-    ]
+    begin match cexpr with
+    | Class_static ->
+       gather [expr_instrs; instr_fpushclsmethods nargs SpecialClsRef.Static]
+    | Class_self ->
+       gather [expr_instrs; instr_fpushclsmethods nargs SpecialClsRef.Self]
+    | Class_parent ->
+       gather [expr_instrs; instr_fpushclsmethods nargs SpecialClsRef.Parent]
+    | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
+       gather [emit_call_lhs_with_this env expr_instrs; instr_fpushclsmethod nargs]
+    | _ ->
+       gather [expr_instrs; emit_load_class_ref env cexpr; instr_fpushclsmethod nargs]
+    end
 
   | A.Id (_, s as id)->
     let fq_id, id_opt =
@@ -2580,7 +2583,7 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
     ]
 
   | A.Class_get (cid, prop) ->
-    let cexpr, _ = expr_to_class_expr ~resolve_self:false
+    let cexpr = expr_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) cid in
     begin match snd prop with
     | A.Lvarvar (_, id) | A.BracedExpr (_, A.Lvar id)  ->

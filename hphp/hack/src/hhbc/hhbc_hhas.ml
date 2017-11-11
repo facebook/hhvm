@@ -456,12 +456,19 @@ let string_of_call instruction =
       string_of_int n; string_of_method_id id; string_of_null_flavor nf]
   | FPushClsMethod (n, id) ->
     sep ["FPushClsMethod"; string_of_int n; string_of_classref id]
-  | FPushClsMethodF (n, id) ->
-    sep ["FPushClsMethodF"; string_of_int n; string_of_classref id]
   | FPushClsMethodD (n, id, cid) ->
     sep ["FPushClsMethodD";
       string_of_int n;
       string_of_method_id id; string_of_class_id cid]
+  | FPushClsMethodS (n, r) ->
+     sep ["FPushClsMethodS";
+          string_of_int n;
+          SpecialClsRef.to_string r]
+  | FPushClsMethodSD (n, r, id) ->
+     sep ["FPushClsMethodSD";
+          string_of_int n;
+          SpecialClsRef.to_string r;
+          string_of_method_id id]
   | FPushCtor (n, id) ->
     sep ["FPushCtor"; string_of_int n; string_of_int id]
   | FPushCtorD (n, cid) ->

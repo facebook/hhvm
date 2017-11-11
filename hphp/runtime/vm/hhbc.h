@@ -364,6 +364,17 @@ enum class FPassHint : uint8_t {
 #undef OP
 };
 
+#define SPECIAL_CLS_REFS                        \
+  REF(Self)                                     \
+  REF(Static)                                   \
+  REF(Parent)
+
+enum class SpecialClsRef : uint8_t {
+#define REF(name) name,
+  SPECIAL_CLS_REFS
+#undef REF
+};
+
 constexpr uint32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags
@@ -539,7 +550,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(UnsetN,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
                                                                         \
-  O(FPushFunc,       TWO(IVA,I32LA),    ONE(CV),         NOV,       PF) \
+  O(FPushFunc,       TWO(IVA,I32LA),   ONE(CV),         NOV,        PF) \
   O(FPushFuncD,      TWO(IVA,SA),      NOV,             NOV,        PF) \
   O(FPushFuncU,      THREE(IVA,SA,SA), NOV,             NOV,        PF) \
   O(FPushObjMethod,  THREE(IVA,                                         \
@@ -547,8 +558,12 @@ constexpr uint32_t kMaxConcatN = 4;
                        I32LA),          TWO(CV,CV),      NOV,       PF) \
   O(FPushObjMethodD, THREE(IVA,SA,                                      \
                        OA(ObjMethodOp)), ONE(CV),       NOV,        PF) \
-  O(FPushClsMethod,  THREE(IVA,CAR,I32LA),ONE(CV),       NOV,       PF) \
-  O(FPushClsMethodF, THREE(IVA,CAR,I32LA),ONE(CV),       NOV,       PF) \
+  O(FPushClsMethod,  THREE(IVA,CAR,I32LA),                              \
+                                       ONE(CV),         NOV,        PF) \
+  O(FPushClsMethodS, THREE(IVA,OA(SpecialClsRef),I32LA),                \
+                                       ONE(CV),         NOV,        PF) \
+  O(FPushClsMethodSD,THREE(IVA,OA(SpecialClsRef),SA),                   \
+                                       NOV,             NOV,        PF) \
   O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        PF) \
   O(FPushCtor,       TWO(IVA,CAR),     NOV,             ONE(CV),    PF) \
   O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    PF) \
@@ -894,6 +909,7 @@ const char* subopToName(QueryMOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
 const char* subopToName(FPassHint);
+const char* subopToName(SpecialClsRef);
 
 /*
  * Returns true iff the given SubOp is in the valid range for its type.
@@ -997,7 +1013,8 @@ constexpr bool isFPushCuf(Op opcode) {
 constexpr bool isFPushClsMethod(Op opcode) {
   return
     opcode == OpFPushClsMethod  ||
-    opcode == OpFPushClsMethodF ||
+    opcode == OpFPushClsMethodS ||
+    opcode == OpFPushClsMethodSD ||
     opcode == OpFPushClsMethodD;
 }
 

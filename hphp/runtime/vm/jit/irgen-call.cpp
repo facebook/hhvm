@@ -808,7 +808,8 @@ bool callAccessesLocals(const NormalizedInstruction& inst,
     case OpFPushObjMethod:
     case OpFPushObjMethodD:
     case OpFPushClsMethod:
-    case OpFPushClsMethodF:
+    case OpFPushClsMethodS:
+    case OpFPushClsMethodSD:
     case OpFPushClsMethodD:
     case OpFPushCtor:
     case OpFPushCtorD:
@@ -1191,18 +1192,22 @@ void emitFPushClsMethodD(IRGS& env,
               nullptr);
 }
 
+namespace {
 
-template<bool forward>
+template <typename Peek, typename Get, typename Kill>
 ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
                                         uint32_t numParams,
-                                        int32_t clsRefSlot) {
+                                        Peek peekCls,
+                                        Get getMeth,
+                                        Kill killCls,
+                                        bool forward) {
   TransFlags trFlags;
   trFlags.noProfiledFPush = true;
   auto sideExit = makeExit(env, trFlags);
 
   // We can side-exit, so peek the slot rather than reading from it.
-  auto const clsVal  = peekClsRef(env, clsRefSlot);
-  auto const methVal = popC(env);
+  auto const clsVal = peekCls();
+  auto const methVal = getMeth();
 
   if (!methVal->isA(TStr)) {
     PUNT(FPushClsMethod-unknownType);
@@ -1222,7 +1227,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
     if (cls) {
       if (fpushClsMethodKnown(env, numParams, methodName, clsVal, cls,
                               exact, false, forward)) {
-        killClsRef(env, clsRefSlot);
+        killCls();
         return;
       }
     }
@@ -1234,13 +1239,13 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
 
       if (optimizeProfiledPushMethod(env, *profile,
                                      clsVal, sideExit, methodName, numParams)) {
-        killClsRef(env, clsRefSlot);
+        killCls();
         return;
       }
     }
   }
 
-  killClsRef(env, clsRefSlot);
+  killCls();
   fpushActRec(env,
               cns(env, TNullptr),
               cns(env, TNullptr),
@@ -1270,16 +1275,69 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
   }
 }
 
-void emitFPushClsMethod(IRGS& env, uint32_t numParams, uint32_t slot,
-                        const ImmVector& v) {
-  if (v.size() != 0) PUNT(InOut-FPushClsMethod);
-  fpushClsMethodCommon<false>(env, numParams, slot);
+SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
+  switch (ref) {
+    case SpecialClsRef::Static:
+      if (!curClass(env)) PUNT(SpecialClsRef-NoCls);
+      return gen(env, LdClsCtx, ldCtx(env));
+    case SpecialClsRef::Self:
+      if (auto const clss = curClass(env)) return cns(env, clss);
+      PUNT(SpecialClsRef-NoCls);
+      break;
+    case SpecialClsRef::Parent:
+      if (auto const clss = curClass(env)) {
+        if (auto const parent = clss->parent()) return cns(env, parent);
+      }
+      PUNT(SpecialClsRef-NoCls);
+      break;
+  }
+  always_assert(false);
 }
 
-void emitFPushClsMethodF(IRGS& env, uint32_t numParams, uint32_t slot,
+}
+
+void emitFPushClsMethod(IRGS& env,
+                        uint32_t numParams,
+                        uint32_t slot,
+                        const ImmVector& v) {
+  if (v.size() != 0) PUNT(InOut-FPushClsMethod);
+  fpushClsMethodCommon(
+    env,
+    numParams,
+    [&] { return peekClsRef(env, slot); },
+    [&] { return popC(env); },
+    [&] { killClsRef(env, slot); },
+    false
+  );
+}
+
+void emitFPushClsMethodS(IRGS& env,
+                         uint32_t numParams,
+                         SpecialClsRef ref,
                          const ImmVector& v) {
-  if (v.size() != 0) PUNT(InOut-FPushClsMethodF);
-  fpushClsMethodCommon<true>(env, numParams, slot);
+  if (v.size() != 0) PUNT(InOut-FPushClsMethodS);
+  fpushClsMethodCommon(
+    env,
+    numParams,
+    [&] { return specialClsRefToCls(env, ref); },
+    [&] { return popC(env); },
+    []  {},
+    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent
+  );
+}
+
+void emitFPushClsMethodSD(IRGS& env,
+                          uint32_t numParams,
+                          SpecialClsRef ref,
+                          const StringData* name) {
+  fpushClsMethodCommon(
+    env,
+    numParams,
+    [&] { return specialClsRefToCls(env, ref); },
+    [&] { return cns(env, name); },
+    []  {},
+    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

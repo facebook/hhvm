@@ -255,6 +255,15 @@ struct InstrVisitor {
     out.append(">");
   }
 
+  void imm(SpecialClsRef s) {
+    out.append(" ");
+    switch (s) {
+#define REF(name) case SpecialClsRef::name: out.append( #name ); break;
+      SPECIAL_CLS_REFS
+#undef REF
+    }
+  }
+
   template<class T>
   void imm(const T& /* imm */) {
     out.append(" <immediate>");

@@ -580,7 +580,8 @@ bool pushesActRec(Op opcode) {
     case OpFPushObjMethod:
     case OpFPushObjMethodD:
     case OpFPushClsMethod:
-    case OpFPushClsMethodF:
+    case OpFPushClsMethodS:
+    case OpFPushClsMethodSD:
     case OpFPushClsMethodD:
     case OpFPushCtor:
     case OpFPushCtorD:
@@ -984,6 +985,12 @@ static const char* FPassHint_names[] = {
 #undef OP
 };
 
+static const char* SpecialClsRef_names[] = {
+#define REF(x) #x,
+  SPECIAL_CLS_REFS
+#undef REF
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode, int off) {
   static_assert(
@@ -1052,7 +1059,7 @@ X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
 X(FPassHint,      static_cast<int>(FPassHint::Any))
-
+X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
 #undef X
 
 //////////////////////////////////////////////////////////////////////

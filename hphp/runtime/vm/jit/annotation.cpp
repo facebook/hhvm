@@ -35,15 +35,12 @@ const StaticString s_empty("");
 const Func* lookupDirectFunc(SrcKey const sk,
                              const StringData* fname,
                              const StringData* clsName,
-                             Op pushOp) {
+                             bool isExact,
+                             bool isStatic) {
   if (clsName && !clsName->empty()) {
     auto const cls = Unit::lookupUniqueClassInContext(clsName,
                                                       sk.func()->cls());
     bool magic = false;
-    auto const isExact =
-      pushOp == Op::FPushClsMethodD ||
-      pushOp == Op::FPushClsMethodF;
-    auto const isStatic = isExact || pushOp == Op::FPushClsMethod;
     auto const func = lookupImmutableMethod(cls, fname, magic,
                                             isStatic, sk.func(), isExact);
     if (func &&
@@ -106,10 +103,51 @@ const void annotate(NormalizedInstruction* i,
     }
   }
 
+  bool isStatic = false;
+  bool isExact = false;
+  switch (pushOp) {
+    case Op::FPushClsMethodD:
+      isExact = true;
+      isStatic = true;
+      if (!funcName && !clsName) {
+        decode_iva(pc);
+        funcName = decode_litstr();
+        clsName = decode_litstr();
+      }
+      break;
+    case Op::FPushClsMethod:
+      isStatic = true;
+      break;
+    case Op::FPushClsMethodS:
+    case Op::FPushClsMethodSD: {
+      decode_iva(pc);
+      auto const ref = decode_oa<SpecialClsRef>(pc);
+      isExact = (ref == SpecialClsRef::Self) || (ref == SpecialClsRef::Parent);
+      isStatic = true;
+      break;
+    }
+    case Op::FPushFuncD:
+      if (!funcName && !clsName) {
+        decode_iva(pc);
+        funcName = decode_litstr();
+        clsName = nullptr;
+      }
+      break;
+    case Op::FPushCtorD:
+      if (!clsName) {
+        decode_iva(pc);
+        clsName = decode_litstr();
+      }
+      break;
+    default:
+      if (!funcName && !clsName) return;
+      break;
+  }
+
   auto const func =
     pushOp == Op::FPushCtorD || pushOp == Op::FPushCtor ?
     lookupDirectCtor(i->source, clsName, pushOp) :
-    lookupDirectFunc(i->source, funcName, clsName, pushOp);
+    lookupDirectFunc(i->source, funcName, clsName, isExact, isStatic);
 
   if (func) {
     FTRACE(1, "found direct func ({}) for FCallD\n",

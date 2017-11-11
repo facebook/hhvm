@@ -315,10 +315,10 @@ struct Emitter {
   IMM_##typ1, IMM_##typ2, IMM_##typ3
 #define FOUR(typ1, typ2, typ3, typ4) \
   IMM_##typ1, IMM_##typ2, IMM_##typ3, IMM_##typ4
-#define IMM_BLA std::vector<Label*>&
-#define IMM_SLA std::vector<StrOff>&
-#define IMM_ILA std::vector<IterPair>&
-#define IMM_I32LA std::vector<uint32_t>&
+#define IMM_BLA const std::vector<Label*>&
+#define IMM_SLA const std::vector<StrOff>&
+#define IMM_ILA const std::vector<IterPair>&
+#define IMM_I32LA const std::vector<uint32_t>&
 #define IMM_IVA uint32_t
 #define IMM_LA int32_t
 #define IMM_IA int32_t
@@ -331,7 +331,7 @@ struct Emitter {
 #define IMM_AA ArrayData*
 #define IMM_BA Label&
 #define IMM_OA(type) type
-#define IMM_VSA std::vector<std::string>&
+#define IMM_VSA const std::vector<std::string>&
 #define IMM_KA MemberKey
 #define IMM_LAR LocalRange
 #define O(name, imm, pop, push, flags) void name(imm);
@@ -1115,6 +1115,7 @@ public:
   void emitConvertToVar(Emitter& e);
   void emitFPass(Emitter& e, int paramID, PassByRefKind passByRefKind,
                  FPassHint hint, bool isInOut = false);
+  Offset emitFPushClsMethod(Emitter& e, ExpressionListPtr params);
   void emitVirtualLocal(int localId);
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
   void emitResolveClsBase(Emitter& e, int pos);
@@ -1513,10 +1514,10 @@ struct OpEmitContext {
 #define FOUR(t1, t2, t3, t4) \
   DEC_##t1 a1, DEC_##t2 a2, DEC_##t3 a3, DEC_##t4 a4
 #define NA
-#define DEC_BLA std::vector<Label*>&
-#define DEC_SLA std::vector<StrOff>&
-#define DEC_ILA std::vector<IterPair>&
-#define DEC_I32LA std::vector<uint32_t>&
+#define DEC_BLA const std::vector<Label*>&
+#define DEC_SLA const std::vector<StrOff>&
+#define DEC_ILA const std::vector<IterPair>&
+#define DEC_I32LA const std::vector<uint32_t>&
 #define DEC_IVA uint32_t
 #define DEC_LA int32_t
 #define DEC_IA int32_t
@@ -1529,7 +1530,7 @@ struct OpEmitContext {
 #define DEC_AA ArrayData*
 #define DEC_BA Label&
 #define DEC_OA(type) type
-#define DEC_VSA std::vector<std::string>&
+#define DEC_VSA const std::vector<std::string>&
 #define DEC_KA MemberKey
 #define DEC_LAR LocalRange
 
@@ -2196,11 +2197,7 @@ void SymbolicStack::push(char sym) {
 void SymbolicStack::pop() {
   // TODO(drew): assert eval stack unknown is false?
   assert(!m_symStack.empty());
-  char sym = m_symStack.back().sym;
-  char flavor = StackSym::GetSymFlavor(sym);
-  if (StackSym::GetMarker(sym) != StackSym::W &&
-      flavor != StackSym::L && flavor != StackSym::T && flavor != StackSym::I &&
-      flavor != StackSym::H && flavor != StackSym::A) {
+  if (!StackSym::IsSymbolic(m_symStack.back().sym)) {
     assert(!m_actualStack.empty());
     m_actualStack.pop_back();
   }
@@ -6304,12 +6301,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       //       ^^^^^
       visit(methName);
       emitConvertToCell(e);
-      auto iov = computeInOutParamVec(params);
       fpiStart = m_ue.bcPos();
       e.FPushObjMethod(
         numParams,
         om->isNullSafe() ? ObjMethodOp::NullSafe : ObjMethodOp::NullThrows,
-        iov
+        computeInOutParamVec(params)
       );
     }
     // $obj->name(...)
@@ -7593,6 +7589,111 @@ bool EmitterVisitor::emitVGet(Emitter& e, bool skipCells) {
     e.VGetM(stackCount, symToMemberKey(e, iLast, true /* allowW */));
   }
   return false;
+}
+
+Offset EmitterVisitor::emitFPushClsMethod(Emitter& e,
+                                          ExpressionListPtr params) {
+  Offset fpiStart;
+
+  auto const namePos = m_evalStack.size() - 1;
+  auto const clsPos = m_evalStack.size() - 2;
+
+  auto const materializeName = [&]{
+    if (StackSym::GetSymFlavor(m_evalStack.get(namePos)) == StackSym::T) {
+      auto const name = m_evalStack.getName(namePos);
+      m_evalStack.consumeBelowTop(0);
+      e.String(name);
+      return true;
+    } else {
+      emitConvertToCell(e);
+      return false;
+    }
+  };
+
+  auto const getName = [&]() -> const StringData* {
+    if (StackSym::GetSymFlavor(m_evalStack.get(namePos)) == StackSym::T) {
+      auto const name = m_evalStack.getName(namePos);
+      m_evalStack.consumeBelowTop(0);
+      return name;
+    } else {
+      emitConvertToCell(e);
+      return nullptr;
+    }
+  };
+
+  auto const numParams = params ? params->getCount() : 0;
+
+  auto const emitSpecialClsRef = [&] (SpecialClsRef r) {
+    if (auto const name = getName()) {
+      fpiStart = m_ue.bcPos();
+      e.FPushClsMethodSD(numParams, r, name);
+    } else {
+      fpiStart = m_ue.bcPos();
+      e.FPushClsMethodS(
+        numParams, r, computeInOutParamVec(params)
+      );
+    }
+  };
+
+  switch (m_evalStack.getClsBaseType(clsPos)) {
+  case SymbolicStack::CLS_STRING_NAME: {
+    auto const cls = m_evalStack.getName(clsPos);
+    if (auto const name = getName()) {
+      fpiStart = m_ue.bcPos();
+      e.FPushClsMethodD(numParams, name, cls);
+    } else {
+      e.String(cls);
+      emitAGet(e);
+      fpiStart = m_ue.bcPos();
+      e.FPushClsMethod(
+        numParams, kClsRefSlotPlaceholder, computeInOutParamVec(params)
+      );
+    }
+    break;
+  }
+  case SymbolicStack::CLS_LATE_BOUND:
+    emitSpecialClsRef(SpecialClsRef::Static);
+    break;
+  case SymbolicStack::CLS_SELF:
+    emitSpecialClsRef(SpecialClsRef::Self);
+    break;
+  case SymbolicStack::CLS_PARENT:
+    emitSpecialClsRef(SpecialClsRef::Parent);
+    break;
+  case SymbolicStack::CLS_NAMED_LOCAL: {
+    auto const& iov = !materializeName()
+      ? computeInOutParamVec(params)
+      : std::vector<uint32_t>{};
+    int loc = m_evalStack.getLoc(clsPos);
+    emitVirtualLocal(loc);
+    emitAGet(e);
+    fpiStart = m_ue.bcPos();
+    e.FPushClsMethod(numParams, kClsRefSlotPlaceholder, iov);
+    break;
+  }
+  case SymbolicStack::CLS_UNNAMED_LOCAL: {
+    auto const& iov = !materializeName()
+      ? computeInOutParamVec(params)
+      : std::vector<uint32_t>{};
+    int loc = m_evalStack.getLoc(clsPos);
+    emitVirtualLocal(loc);
+    emitAGet(e);
+    emitUnsetL(e, loc);
+    newFaultRegionAndFunclet(m_evalStack.getUnnamedLocStart(clsPos),
+                             m_ue.bcPos(),
+                             new UnsetUnnamedLocalThunklet(loc));
+    m_curFunc->freeUnnamedLocal(loc);
+    fpiStart = m_ue.bcPos();
+    e.FPushClsMethod(numParams, kClsRefSlotPlaceholder, iov);
+    break;
+  }
+  case SymbolicStack::CLS_INVALID:
+  default:
+    always_assert(false);
+  }
+
+  m_evalStack.consumeBelowTop(0);
+  return fpiStart;
 }
 
 Id EmitterVisitor::emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp) {
@@ -8908,11 +9009,8 @@ void EmitterVisitor::emitFuncWrapper(PostponedMeth& p, FuncEmitter* fe,
   } else if (meth->getFunctionScope()->isStatic()) {
     auto classScope = meth->getClassScope();
     if (classScope && classScope->isTrait()) {
-      e.String(methName);
-      e.Self(kClsRefSlotPlaceholder);
       fpiStart = m_ue.bcPos();
-      std::vector<uint32_t> iov;
-      e.FPushClsMethodF(fe->params.size(), kClsRefSlotPlaceholder, iov);
+      e.FPushClsMethodSD(fe->params.size(), SpecialClsRef::Self, methName);
     } else {
       fpiStart = m_ue.bcPos();
       e.FPushClsMethodD(fe->params.size(), methName, m_curFunc->pce()->name());
@@ -10019,11 +10117,8 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
       emitClsIfSPropBase(e);
 
       if (classScope && classScope->isTrait()) {
-        e.String(methName);
-        e.Self(kClsRefSlotPlaceholder);
         fpiStart = m_ue.bcPos();
-        std::vector<uint32_t> iov;
-        e.FPushClsMethodF(numParams, kClsRefSlotPlaceholder, iov);
+        e.FPushClsMethodSD(numParams, SpecialClsRef::Self, methName);
       } else {
         fpiStart = m_ue.bcPos();
         e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
@@ -10417,47 +10512,19 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   int numParams = params ? params->getCount() : 0;
 
   ExpressionListPtr funcParams;
-  StringData* nLiteral = nullptr;
   Offset fpiStart = 0;
   if (node->getClass() || node->hasStaticClass()) {
-    bool isSelfOrParent = node->isSelf() || node->isParent();
-    if (!node->isStatic() && !isSelfOrParent &&
-        !node->getOriginalClassName().empty() && !nameStr.empty()) {
-      // cls::foo()
-      StringData* cLiteral =
-        makeStaticString(node->getOriginalClassName());
-      nLiteral = makeStaticString(nameStr);
-      fpiStart = m_ue.bcPos();
-      e.FPushClsMethodD(numParams, nLiteral, cLiteral);
+    emitVirtualClassBase(e, node.get());
+    if (!nameStr.empty()) {
+      m_evalStack.push(StackSym::T);
+      m_evalStack.setString(makeStaticString(nameStr));
     } else {
-      emitVirtualClassBase(e, node.get());
-
-      // If possible we will push the literal mangled name to the stack,
-      // otherwise we will need to perform the mangling operation at runtime.
-      std::vector<uint32_t> inoutParamVec;
-      if (!nameStr.empty()) {
-        // ...::foo()
-        nLiteral = makeStaticString(nameStr);
-        e.String(nLiteral);
-      } else {
-        // ...::$foo()
-        visit(nameExp);
-        emitConvertToCell(e);
-        inoutParamVec = computeInOutParamVec(params);
-      }
-      emitResolveClsBase(e, m_evalStack.size() - 2);
-      fpiStart = m_ue.bcPos();
-      if (isSelfOrParent) {
-        // self and parent are "forwarding" calls, so we need to
-        // use FPushClsMethodF instead
-        e.FPushClsMethodF(numParams, kClsRefSlotPlaceholder, inoutParamVec);
-      } else {
-        e.FPushClsMethod(numParams, kClsRefSlotPlaceholder, inoutParamVec);
-      }
+      emitNameString(e, nameExp, true);
     }
+    fpiStart = emitFPushClsMethod(e, params);
   } else if (!nameStr.empty()) {
     // foo()
-    nLiteral = makeStaticString(nameStr);
+    auto nLiteral = makeStaticString(nameStr);
     StringData* nsName = nullptr;
     if (!node->hadBackslash() && !nameOverride) {
       // nameOverride is to be used only when there's an exact function
@@ -10484,8 +10551,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
     emitConvertToCell(e);
     // FPushFunc consumes method name from stack
     fpiStart = m_ue.bcPos();
-    auto iov = computeInOutParamVec(params);
-    e.FPushFunc(numParams, iov);
+    e.FPushFunc(numParams, computeInOutParamVec(params));
   }
   emitCall(e, node, params, fpiStart);
 }

@@ -2420,8 +2420,24 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
   }
 }
 
-template<typename PushOp>
-void pushClsHelper(ISS& env, const PushOp& op) {
+namespace {
+
+Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
+  if (!env.ctx.cls) return TCls;
+  auto const op = [&]{
+    switch (ref) {
+      case SpecialClsRef::Static: return selfCls(env);
+      case SpecialClsRef::Self:   return selfClsExact(env);
+      case SpecialClsRef::Parent: return parentClsExact(env);
+    }
+    always_assert(false);
+  }();
+  return op ? *op : TCls;
+}
+
+}
+
+void in(ISS& env, const bc::FPushClsMethod& op) {
   auto const t1 = peekClsRefSlot(env, op.slot);
   auto const t2 = topC(env);
   auto const v2 = tv(t2);
@@ -2435,8 +2451,7 @@ void pushClsHelper(ISS& env, const PushOp& op) {
   }
   folly::Optional<res::Func> rfunc;
   if (v2 && v2->m_type == KindOfPersistentString && op.argv.size() == 0) {
-    if (std::is_same<PushOp, bc::FPushClsMethod>::value &&
-        exactCls && rcls) {
+    if (exactCls && rcls) {
       return reduce(
         env,
         bc::DiscardClsRef { op.slot },
@@ -2457,12 +2472,52 @@ void pushClsHelper(ISS& env, const PushOp& op) {
   popC(env);
 }
 
-void in(ISS& env, const bc::FPushClsMethod& op) {
-  pushClsHelper(env, op);
+void in(ISS& env, const bc::FPushClsMethodS& op) {
+  auto const name  = topC(env);
+  auto const namev = tv(name);
+  if (namev && namev->m_type == KindOfPersistentString && op.argv.size() == 0) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FPushClsMethodSD {
+        op.arg1, op.subop2, namev->m_data.pstr, op.has_unpack
+      }
+    );
+  }
+  auto const cls = specialClsRefToCls(env, op.subop2);
+  auto const rcls = is_specialized_cls(cls)
+    ? folly::Optional<res::Class>{dcls_of(cls).cls}
+    : folly::none;
+  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, folly::none }, op.arg1)) {
+    return reduce(env, bc::PopC {});
+  }
+  popC(env);
 }
 
-void in(ISS& env, const bc::FPushClsMethodF& op) {
-  pushClsHelper(env, op);
+void in(ISS& env, const bc::FPushClsMethodSD& op) {
+  auto const cls = specialClsRefToCls(env, op.subop2);
+
+  folly::Optional<res::Class> rcls;
+  auto exactCls = false;
+  if (is_specialized_cls(cls)) {
+    auto dcls = dcls_of(cls);
+    rcls = dcls.cls;
+    exactCls = dcls.type == DCls::Exact;
+  }
+
+  if (op.subop2 == SpecialClsRef::Static && rcls && exactCls) {
+    return reduce(
+      env,
+      bc::FPushClsMethodD {
+        op.arg1, op.str3, rcls->name(), op.has_unpack
+      }
+    );
+  }
+
+  auto const rfun = env.index.resolve_method(env.ctx, cls, op.str3);
+  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun }, op.arg1)) {
+    return reduce(env, bc::Nop {});
+  }
 }
 
 void ctorHelper(ISS& env, SString name) {

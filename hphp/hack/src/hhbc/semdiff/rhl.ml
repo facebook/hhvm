@@ -383,7 +383,8 @@ let check_instruct_call asn i i' =
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
   | FPushFunc _, _ | FPushFuncD _, _ | FPushFuncU _, _ | FPushObjMethod _, _
-  | FPushObjMethodD _, _ | FPushClsMethod _, _ | FPushClsMethodF _, _
+  | FPushObjMethodD _, _ | FPushClsMethod _, _
+  | FPushClsMethodS _, _ | FPushClsMethodSD _, _
   | FPushClsMethodD _, _ | FPushCtor _, _ | FPushCtorD _, _ | FPushCtorI _, _
   | FPushCufIter _, _ | FPushCuf _, _ | FPushCufF _, _ | FPushCufSafe _, _
   | CufSafeArray, _ | CufSafeReturn, _ | FPassC _, _ | FPassCW _, _

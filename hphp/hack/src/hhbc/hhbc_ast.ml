@@ -61,6 +61,21 @@ type fpass_hint =
   | Cell
   | Ref
 
+module SpecialClsRef = struct
+
+  type t =
+  | Static
+  | Self
+  | Parent
+
+  let to_string r =
+  match r with
+  | Static -> "Static"
+  | Self -> "Self"
+  | Parent -> "Parent"
+
+end (* of SpecialClsRef *)
+
 module MemberOpMode = struct
 
   type t =
@@ -384,8 +399,9 @@ type instruct_call =
   | FPushObjMethod of num_params * Ast.og_null_flavor
   | FPushObjMethodD of num_params * method_id * Ast.og_null_flavor
   | FPushClsMethod of num_params * classref_id
-  | FPushClsMethodF of num_params * classref_id
   | FPushClsMethodD of num_params * method_id * class_id
+  | FPushClsMethodS of num_params * SpecialClsRef.t
+  | FPushClsMethodSD of num_params * SpecialClsRef.t * method_id
   | FPushCtor of num_params * classref_id
   | FPushCtorD of num_params * class_id
   | FPushCtorI of num_params * classref_id

@@ -11,6 +11,7 @@
 open Instruction_sequence
 open Hh_core
 open Emit_memoize_helpers
+open Hhbc_ast
 
 (* Precomputed information required for generation of memoized methods *)
 type memoize_info = {
@@ -75,11 +76,8 @@ let get_cls_method info param_count method_id =
   let method_id =
     Hhbc_id.Method.add_suffix method_id memoize_suffix in
   if info.memoize_is_trait
-  then gather [
-    instr_string (Hhbc_id.Method.to_raw_string method_id);
-    instr_self;
-    instr_fpushclsmethod ~forward:true param_count;
-  ]
+  then
+    instr_fpushclsmethodsd param_count SpecialClsRef.Self method_id
   else
     instr_fpushclsmethodd param_count method_id info.memoize_class_id
 

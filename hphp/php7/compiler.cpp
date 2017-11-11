@@ -443,15 +443,15 @@ CFG compileStaticCall(const zend_ast* ast) {
   auto params = zend_ast_get_list(ast->child[2]);
 
   ClassrefSlot slot;
-  bool forward;
-  CFG cfg = compileClassref(cls, slot, &forward)
+  folly::Optional<SpecialClsRef> special;
+  CFG cfg = compileClassref(cls, slot, &special)
     .then(compileExpression(method, Flavor::Cell));
 
-  if (forward) {
+  if (special) {
     return cfg
-      .then(FPushClsMethodF{
+      .then(FPushClsMethodS{
         params->children,
-        slot
+        *special
       })
       .then(compileCall(params));
   }
@@ -572,23 +572,33 @@ CFG compileArray(const zend_ast* ast) {
 } // namespace
 
 CFG compileClassref(const zend_ast* ast, ClassrefSlot slot,
-                    bool* forward) {
+                    folly::Optional<SpecialClsRef>* special) {
   auto clsString = ast->kind == ZEND_AST_ZVAL
       ? Z_STRVAL_P(zend_ast_get_zval(ast))
       : nullptr;
 
-  if (forward) *forward = true;
   if (clsString) {
     if (0 == strcasecmp(clsString, "self")) {
+      if (special) {
+        *special = SpecialClsRef::Self;
+        return {};
+      }
       return { Self{slot} };
     } else if (0 == strcasecmp(clsString, "parent")) {
+      if (special) {
+        *special = SpecialClsRef::Parent;
+        return {};
+      }
       return { Parent{slot} };
     } else if (0 == strcasecmp(clsString, "static")) {
+      if (special) {
+        *special = SpecialClsRef::Static;
+        return {};
+      }
       return { LateBoundCls{slot} };
     }
   }
 
-  if (forward) *forward = false;
   return compileExpression(ast, Flavor::Cell).then(ClsRefGetC{slot});
 }
 

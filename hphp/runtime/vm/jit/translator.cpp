@@ -298,8 +298,10 @@ static const struct {
                    {Stack1,           FStack,       OutFDesc        }},
   { OpFPushClsMethod,
                    {Stack1,           FStack,       OutFDesc        }},
-  { OpFPushClsMethodF,
+  { OpFPushClsMethodS,
                    {Stack1,           FStack,       OutFDesc        }},
+  { OpFPushClsMethodSD,
+                   {None,             FStack,       OutFDesc        }},
   { OpFPushClsMethodD,
                    {None,             FStack,       OutFDesc        }},
   { OpFPushCtor,   {None,             Stack1|FStack,OutObject       }},
@@ -971,7 +973,8 @@ bool dontGuardAnyInputs(Op op) {
   case Op::EmptyS:
   case Op::FPushClsMethodD:
   case Op::FPushClsMethod:
-  case Op::FPushClsMethodF:
+  case Op::FPushClsMethodS:
+  case Op::FPushClsMethodSD:
   case Op::FPushCtor:
   case Op::FPushCtorD:
   case Op::FPushCtorI:

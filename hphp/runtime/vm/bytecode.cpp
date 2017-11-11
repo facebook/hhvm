@@ -4707,8 +4707,10 @@ iopFPushObjMethodD(intva_t numArgs, const StringData* name, ObjMethodOp op) {
   fPushObjMethodImpl(const_cast<StringData*>(name), obj, numArgs);
 }
 
-template<bool forwarding>
-void pushClsMethodImpl(Class* cls, StringData* name, int numArgs) {
+namespace {
+
+void pushClsMethodImpl(Class* cls, StringData* name,
+                       int numArgs, bool forwarding) {
   auto const ctx = liveClass();
   auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* f;
@@ -4753,14 +4755,34 @@ void pushClsMethodImpl(Class* cls, StringData* name, int numArgs) {
   setTypesFlag(vmfp(), ar);
 }
 
+Class* specialClsRefToCls(SpecialClsRef ref) {
+  switch (ref) {
+    case SpecialClsRef::Static:
+      if (auto const cls = frameStaticClass(vmfp())) return cls;
+      raise_error(HPHP::Strings::CANT_ACCESS_STATIC);
+    case SpecialClsRef::Self:
+      if (auto const cls = arGetContextClass(vmfp())) return cls;
+      raise_error(HPHP::Strings::CANT_ACCESS_SELF);
+    case SpecialClsRef::Parent:
+      if (auto const cls = arGetContextClass(vmfp())) {
+        if (auto const parent = cls->parent()) return parent;
+        raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_PARENT);
+      }
+      raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_CLASS);
+  }
+  always_assert(false);
+}
+
+}
+
 OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs, clsref_slot slot,
                                      int32_t n, imm_array<uint32_t> args) {
-  Cell* c1 = vmStack().topC(); // Method name.
+  auto const c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
-  Class* cls = slot.take();
-  StringData* name = c1->m_data.pstr;
+  auto const cls = slot.take();
+  auto name = c1->m_data.pstr;
 
   if (UNLIKELY(n)) {
     String s = String::attach(name);
@@ -4770,7 +4792,7 @@ OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs, clsref_slot slot,
   // pushClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
   assert(cls && name);
-  pushClsMethodImpl<false>(cls, name, numArgs);
+  pushClsMethodImpl(cls, name, numArgs, false);
 }
 
 OPTBLD_INLINE
@@ -4781,17 +4803,17 @@ void iopFPushClsMethodD(intva_t numArgs, const StringData* name, Id classId) {
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
-  pushClsMethodImpl<false>(cls, const_cast<StringData*>(name), numArgs);
+  pushClsMethodImpl(cls, const_cast<StringData*>(name), numArgs, false);
 }
 
-OPTBLD_INLINE void iopFPushClsMethodF(intva_t numArgs, clsref_slot slot,
+OPTBLD_INLINE void iopFPushClsMethodS(intva_t numArgs, SpecialClsRef ref,
                                       int32_t n, imm_array<uint32_t> args) {
-  Cell* c1 = vmStack().topC(); // Method name.
+  auto const c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
-  Class* cls = slot.take();
-  StringData* name = c1->m_data.pstr;
+  auto const cls = specialClsRefToCls(ref);
+  auto name = c1->m_data.pstr;
 
   if (UNLIKELY(n)) {
     String s = String::attach(name);
@@ -4800,7 +4822,23 @@ OPTBLD_INLINE void iopFPushClsMethodF(intva_t numArgs, clsref_slot slot,
 
   // pushClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
-  pushClsMethodImpl<true>(cls, name, numArgs);
+  pushClsMethodImpl(
+    cls,
+    name,
+    numArgs,
+    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent
+  );
+}
+
+OPTBLD_INLINE void iopFPushClsMethodSD(intva_t numArgs,
+                                       SpecialClsRef ref,
+                                       const StringData* name) {
+  pushClsMethodImpl(
+    specialClsRefToCls(ref),
+    const_cast<StringData*>(name),
+    numArgs,
+    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent
+  );
 }
 
 OPTBLD_INLINE void iopFPushCtor(intva_t numArgs, clsref_slot slot) {
@@ -6729,24 +6767,55 @@ TCA iopWrapper(Op, void(*fn)(intva_t,clsref_slot), PC& pc) {
 }
 
 OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,clsref_slot,int32_t,imm_array<uint32_t>),
-               PC& pc) {
+TCA iopWrapper(Op, void(*fn)(intva_t,SpecialClsRef), PC& pc) {
   auto n1 = decode_intva(pc);
-  auto s = decode_clsref_slot(pc);
-  auto count = decode<int32_t>(pc);
-  auto args = imm_array<uint32_t>(pc);
-  pc += count * sizeof(uint32_t);
-  fn(n1, s, count, args);
+  auto imm = decode_oa<SpecialClsRef>(pc);
+  fn(n1, imm);
   return nullptr;
 }
 
 OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,int32_t,imm_array<uint32_t>), PC& pc) {
+TCA iopWrapper(Op, void(*fn)(intva_t,int32_t,imm_array<uint32_t>), PC& pc)  {
   auto n1 = decode_intva(pc);
-  auto count = decode<int32_t>(pc);
-  auto args = imm_array<uint32_t>(pc);
-  pc += count * sizeof(uint32_t);
-  fn(n1, count, args);
+  auto n2 = decode<int32_t>(pc);
+  auto v = imm_array<uint32_t>(pc);
+  pc += n2 * sizeof(uint32_t);
+  fn(n1, n2, v);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op,
+               void(*fn)(intva_t,SpecialClsRef,int32_t,imm_array<uint32_t>),
+               PC& pc) {
+  auto n1 = decode_intva(pc);
+  auto imm = decode_oa<SpecialClsRef>(pc);
+  auto n2 = decode<int32_t>(pc);
+  auto v = imm_array<uint32_t>(pc);
+  pc += n2 * sizeof(uint32_t);
+  fn(n1, imm, n2, v);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(intva_t,clsref_slot,SpecialClsRef), PC& pc) {
+  auto n1 = decode_intva(pc);
+  auto s = decode_clsref_slot(pc);
+  auto imm = decode_oa<SpecialClsRef>(pc);
+  fn(n1, s, imm);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op,
+               void(*fn)(intva_t,clsref_slot,int32_t,imm_array<uint32_t>),
+               PC& pc) {
+  auto n1 = decode_intva(pc);
+  auto s = decode_clsref_slot(pc);
+  auto n2 = decode<int32_t>(pc);
+  auto v = imm_array<uint32_t>(pc);
+  pc += n2 * sizeof(uint32_t);
+  fn(n1, s, n2, v);
   return nullptr;
 }
 
@@ -6832,6 +6901,16 @@ iopWrapper(Op /*op*/, void (*fn)(intva_t, clsref_slot, FPassHint), PC& pc) {
   auto s = decode_clsref_slot(pc);
   auto imm = decode_oa<FPassHint>(pc);
   fn(n, s, imm);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA
+iopWrapper(Op /*op*/, void (*fn)(intva_t, SpecialClsRef, const StringData*),
+           PC& pc) {
+  auto n = decode_intva(pc);
+  auto imm = decode_oa<SpecialClsRef>(pc);
+  auto s = decode_litstr(pc);
+  fn(n, imm, s);
   return nullptr;
 }
 

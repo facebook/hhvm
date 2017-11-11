@@ -650,7 +650,14 @@ let memberopmodeofiarg arg =
   | "Unset" -> MemberOpMode.Unset
   | _ -> report_error ("bad member op mode" ^ stringofiarg arg)
 
- let listofiteratorsofiarg arg =
+let specialclsrefofiarg arg =
+  match stringofiarg arg with
+  | "Static" -> SpecialClsRef.Static
+  | "Self" -> SpecialClsRef.Self
+  | "Parent" -> SpecialClsRef.Parent
+  | _ -> report_error ("bad special cls-ref" ^ stringofiarg arg)
+
+let listofiteratorsofiarg arg =
    match arg with
    | IAArglist l -> List.map iterwithkindofiarg l
    | _ -> report_error "bad list of iterators"
@@ -885,7 +892,7 @@ match s with
  | "FPushObjMethod" ->
     ICall(FPushObjMethod (intofiarg arg1, nullflavorofiarg arg2))
  | "FPushClsMethod" -> ICall (FPushClsMethod (intofiarg arg1, intofiarg arg2))
- | "FPushClsMethodF" -> ICall (FPushClsMethodF (intofiarg arg1, intofiarg arg2))
+ | "FPushClsMethodS" -> ICall (FPushClsMethodS (intofiarg arg1, specialclsrefofiarg arg2))
  | "FPushCtor" -> ICall (FPushCtor (intofiarg arg1, intofiarg arg2))
  | "FPushCtorD" -> ICall (FPushCtorD (intofiarg arg1, class_id_of_iarg arg2))
  | "FPushCtorI" -> ICall (FPushCtorI (intofiarg arg1, intofiarg arg2))
@@ -954,7 +961,9 @@ let maketernaryinst s arg1 arg2 arg3 =
  | "FPushObjMethodD" -> ICall(FPushObjMethodD
                     (intofiarg arg1, method_id_of_iarg arg2, nullflavorofiarg arg3))
  | "FPushClsMethodD" -> ICall(FPushClsMethodD
-                    (intofiarg arg1, method_id_of_iarg arg2, class_id_of_iarg arg3))
+                                (intofiarg arg1, method_id_of_iarg arg2, class_id_of_iarg arg3))
+ | "FPushClsMethodSD" -> ICall(FPushClsMethodSD
+                                 (intofiarg arg1, specialclsrefofiarg arg2, method_id_of_iarg arg3))
  | "FCallD" ->
     ICall(FCallD (intofiarg arg1,
       class_id_of_iarg arg2, function_id_of_iarg arg3))

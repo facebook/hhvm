@@ -2127,21 +2127,26 @@ FPushObjMethodD <num params> <litstr id> <nullsafe>    [C]  ->  []
   If object x does not have an accessible method named y and it does not have a
   __call method, this instruction throws a fatal error.
 
-FPushClsMethod  <num params> <class-ref slot>           [C]  ->  []
-FPushClsMethodF <num params> <class-ref slot>           [C]  ->  []
-FPushClsMethodD <num params> <litstr id> <litstr id>    []   ->  []
+FPushClsMethod   <num params> <class-ref slot>          [C]  ->  []
+FPushClsMethodD  <num params> <litstr id> <litstr id>   []   ->  []
+FPushClsMethodS  <num params> <mode>                    [C]  ->  []
+FPushClsMethodSD <num params> <mode> <litstr id>        []   ->  []
 
   FPI push class-based method. First, these instructions load values into x and
   y as given by the following table:
 
     instruction           x    y
     -------------------+----+-----
-      FPushClsMethod   | $1 | %2
-      FPushClsMethodF  | $1 | %2
+      FPushClsMethod   | %2 | $1
       FPushClsMethodD  | %3 | %2
+      FPushClsMethodS  | %2 | $1
+      FPushClsMethodSD | %2 | %3
 
   When loading %3 into x, FPushClsMethodD will perform the work performed by
   the ClsRefGetC instruction to convert the name given by %3 into a classref.
+
+  When loading %2 into x, FPushClsMethodS and FPushClsMethodSD will perform the
+  work performed by LateBoundCls/Self/Parent depending on the specified mode.
 
   If y is not a string, this instruction throws a fatal error. Next, this
   instruction checks if class x has an accessible method named y. If it does,

@@ -164,7 +164,7 @@ and update_duplicates_in_map kvs =
 and class_const_to_typed_value ns cid id =
   if snd id = SN.Members.mClass
   then
-    let cexpr, _ = expr_to_class_expr ~resolve_self:true [] cid in
+    let cexpr = expr_to_class_expr ~resolve_self:true [] cid in
     begin match cexpr with
     | Class_id cid ->
       let fq_id, _ = Hhbc_id.Class.elaborate_id ns cid in

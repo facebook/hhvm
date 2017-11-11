@@ -211,11 +211,12 @@ let instr_fpushobjmethodd num_params method_ flavor =
   instr (ICall (FPushObjMethodD (num_params, method_, flavor)))
 let instr_fpushclsmethodd num_params class_name method_name =
   instr (ICall (FPushClsMethodD (num_params, class_name, method_name)))
-let instr_fpushclsmethod ~forward num_params =
-  instr (ICall (
-    if forward
-    then FPushClsMethodF (num_params, class_ref_rewrite_sentinel)
-    else FPushClsMethod (num_params, class_ref_rewrite_sentinel)))
+let instr_fpushclsmethod num_params =
+  instr (ICall (FPushClsMethod (num_params, class_ref_rewrite_sentinel)))
+let instr_fpushclsmethods num_params scref =
+  instr (ICall (FPushClsMethodS (num_params, scref)))
+let instr_fpushclsmethodsd num_params scref method_name =
+  instr (ICall (FPushClsMethodSD (num_params, scref, method_name)))
 let instr_fpushobjmethodd_nullthrows num_params method_ =
   instr_fpushobjmethodd num_params method_ Ast.OG_nullthrows
 let instr_querym num_params op key =
@@ -500,8 +501,6 @@ let rewrite_class_refs_instr num = function
 | ICall (FPassS (np, _, h)) -> (num - 1, ICall (FPassS (np, num, h)))
 | ICall (FPushCtor (np, _)) -> (num - 1, ICall (FPushCtor (np, num)))
 | ICall (FPushClsMethod (np, _)) -> (num - 1, ICall (FPushClsMethod (np, num)))
-| ICall (FPushClsMethodF (np, _)) ->
-  (num - 1, ICall (FPushClsMethodF (np, num)))
 | IIsset (IssetS _) -> (num - 1, IIsset (IssetS num))
 | IIsset (EmptyS _) -> (num - 1, IIsset (EmptyS num))
 | ILitConst (TypedValue tv) -> (num, Emit_adata.rewrite_typed_value tv)

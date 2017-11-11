@@ -25,16 +25,51 @@ namespace HPHP { namespace HHBBC {
 
 namespace {
 
+/*
+ * Note: Our style is generally to use lambdas, rather than helper
+ * classes. postOrderWalk was originall written as:
+ *
+ * void postorderWalk(const php::Func& func,
+ *                    std::vector<borrowed_ptr<php::Block>>& out,
+ *                    boost::dynamic_bitset<>& visited,
+ *                    php::Block& blk) {
+ *   if (visited[blk.id]) return;
+ *   visited[blk.id] = true;
+ *   forEachSuccessor(blk, [&] (BlockId next) {
+ *     postorderWalk(func, out, visited, *func.blocks[next]);
+ *   });
+ *   out.push_back(&blk);
+ * }
+ *
+ * but that ends up taking nearly 1k per recursive call, which means
+ * it only takes about 10000 blocks to overflow the stack.
+ *
+ * By putting everything in a helper class, we get that down to ~128
+ * bytes per recursive call, which is a lot less likely to hit issues.
+ *
+ */
+struct PostOrderWalker {
+  const php::Func& func;
+  std::vector<borrowed_ptr<php::Block>>& out;
+  boost::dynamic_bitset<>& visited;
+
+  void walk(BlockId blk) {
+    if (visited[blk]) return;
+    visited[blk] = true;
+    auto const blkPtr = borrow(func.blocks[blk]);
+    forEachSuccessor(*blkPtr, [this] (BlockId next) {
+        walk(next);
+      });
+    out.push_back(blkPtr);
+  }
+};
+
 void postorderWalk(const php::Func& func,
                    std::vector<borrowed_ptr<php::Block>>& out,
                    boost::dynamic_bitset<>& visited,
                    php::Block& blk) {
-  if (visited[blk.id]) return;
-  visited[blk.id] = true;
-  forEachSuccessor(blk, [&] (BlockId next) {
-      postorderWalk(func, out, visited, *func.blocks[next]);
-  });
-  out.push_back(&blk);
+  auto walker = PostOrderWalker { func, out, visited };
+  walker.walk(blk.id);
 }
 
 }

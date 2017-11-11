@@ -28,3 +28,6 @@ let empty popt = {
 
 let empty_with_default_popt =
   empty ParserOptions.default
+
+let is_global_namespace env =
+  Option.is_none env.ns_name

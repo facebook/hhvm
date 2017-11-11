@@ -41,18 +41,33 @@ let rec emit_def env def =
   | Ast.Stmt s -> Emit_statement.emit_stmt env s
   | Ast.Constant c ->
     let cns_name = snd c.Ast.cst_name in
-    let cns_id =
-      if c.Ast.cst_kind = Ast.Cst_define
-      then
-        (* names of constants declared using 'define function' are always
-          prefixed with '\\', see 'def' function in 'namespaces.ml' *)
-        Hhbc_id.Const.from_raw_string (SU.strip_global_ns cns_name)
-      else Hhbc_id.Const.from_ast_name cns_name in
-    gather [
-      Emit_expression.emit_expr ~need_ref:false env c.Ast.cst_value;
-      instr (IIncludeEvalDefine (DefCns cns_id));
-      instr_popc;
-    ]
+    if c.Ast.cst_kind = Ast.Cst_define &&
+       not (Namespace_env.is_global_namespace c.Ast.cst_namespace)
+    then
+      (* replace 'define' in namespace with call to 'define' function *)
+      let env =
+        Emit_env.with_namespace c.Ast.cst_namespace env in
+      let define_call =
+        let p0 = Pos.none in
+        let p_name = fst c.Ast.cst_name in
+        let args = [
+          p_name, Ast.String (p_name, SU.strip_global_ns cns_name);
+          c.Ast.cst_value] in
+        Ast.Expr(p0, Ast.Call ((p0, Ast.Id (p0, "define")), [], args, [])) in
+      Emit_statement.emit_stmt env define_call
+    else
+      let cns_id =
+        if c.Ast.cst_kind = Ast.Cst_define
+        then
+          (* names of constants declared using 'define function' are always
+            prefixed with '\\', see 'def' function in 'namespaces.ml' *)
+          Hhbc_id.Const.from_raw_string (SU.strip_global_ns cns_name)
+        else Hhbc_id.Const.from_ast_name cns_name in
+      gather [
+        Emit_expression.emit_expr ~need_ref:false env c.Ast.cst_value;
+        instr (IIncludeEvalDefine (DefCns cns_id));
+        instr_popc;
+      ]
     (* We assume that SetNamespaceEnv does namespace setting *)
   | Ast.Namespace(_, defs) ->
     emit_defs env defs

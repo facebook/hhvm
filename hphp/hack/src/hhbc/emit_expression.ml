@@ -37,7 +37,10 @@ let is_incdec op =
   | LValOp.IncDec _ -> true
   | _ -> false
 
-let is_special_function e args =
+let is_global_namespace env =
+  Namespace_env.is_global_namespace (Emit_env.get_namespace env)
+
+let is_special_function env e args =
   match snd e with
   | A.Id (_, s) ->
   begin
@@ -46,7 +49,7 @@ let is_special_function e args =
     | "isset" -> n > 0
     | "empty" -> n = 1
     | "tuple" when Emit_env.is_hh_syntax_enabled () -> true
-    | "define" ->
+    | "define" when is_global_namespace env ->
       begin match args with
       | [_, A.String _; _] -> true
       | _ -> false
@@ -959,7 +962,6 @@ and emit_inline_hhas s =
   with Parsing.Parse_error ->
     Emit_fatal.raise_fatal_parse Pos.none "error parsing inline hhas"
 
-
 and emit_expr env (pos, expr_ as expr) ~need_ref =
   Emit_pos.emit_pos_then pos @@
   match expr_ with
@@ -1020,7 +1022,8 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     emit_box_if_necessary need_ref @@ emit_tuple env p es
   | A.Call ((_, A.Id (_, "idx")), _, es, _) ->
     emit_box_if_necessary need_ref @@ emit_idx env es
-  | A.Call ((_, A.Id (_, "define")), _, [(_, A.String (_, s)); e], _) ->
+  | A.Call ((_, A.Id (_, "define")), _, [(_, A.String (_, s)); e], _)
+    when is_global_namespace env ->
     emit_box_if_necessary need_ref @@ emit_define env s e
   | A.Call ((_, A.Id (_, "eval")), _, [expr], _) ->
     emit_box_if_necessary need_ref @@ emit_eval env expr
@@ -2222,7 +2225,7 @@ and emit_call env (_, expr_ as expr) args uargs =
  *)
 and emit_flavored_expr env (pos, expr_ as expr) =
   match expr_ with
-  | A.Call (e, _, args, uargs) when not (is_special_function e args) ->
+  | A.Call (e, _, args, uargs) when not (is_special_function env e args) ->
     let instrs, flavor = emit_call env e args uargs in
     Emit_pos.emit_pos_then pos instrs, flavor
   | A.Execution_operator es ->

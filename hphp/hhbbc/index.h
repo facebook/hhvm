@@ -333,6 +333,11 @@ struct Func {
    */
   bool mightCareAboutDynCalls() const;
 
+  /*
+   * Returns whether this resolved function might be a builtin.
+   */
+  bool mightBeBuiltin() const;
+
   struct FuncInfo;
   struct MethTabEntryPair;
   struct FuncFamily;

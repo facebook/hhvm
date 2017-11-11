@@ -162,6 +162,11 @@ struct Repo::GlobalData {
   bool NoticeOnAllDynamicCalls = false;
 
   /*
+   * Should the runtime emit notices whenever a builtin is called dynamically?
+   */
+  bool NoticeOnBuiltinDynamicCalls = false;
+
+  /*
    * Should we enforce that reffiness annotations are invaraint in overridden
    * methods?
    */
@@ -195,6 +200,7 @@ struct Repo::GlobalData {
       (EnableIntrinsicsExtension)
       (ReffinessInvariance)
       (NoticeOnAllDynamicCalls)
+      (NoticeOnBuiltinDynamicCalls)
       (APCProfile)
       ;
   }

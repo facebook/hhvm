@@ -720,6 +720,7 @@ struct RuntimeOption {
   F(bool, HackArrCompatDVCmpNotices, false)                             \
   F(bool, CreateInOutWrapperFunctions, true)                            \
   F(bool, ReffinessInvariance, false)                                   \
+  F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
   F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
   F(std::string, UseRemoteUnixServer, "no")                             \
   F(std::string, UnixServerPath, "")                                    \

@@ -266,6 +266,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalNoticeOnAllDynamicCalls,
                ini, config, "NoticeOnAllDynamicCalls",
                RuntimeOption::EvalNoticeOnAllDynamicCalls);
+  Config::Bind(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls,
+               ini, config, "NoticeOnBuiltinDynamicCalls",
+               RuntimeOption::EvalNoticeOnBuiltinDynamicCalls);
 
   {
     // Hack

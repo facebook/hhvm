@@ -792,7 +792,29 @@ bool Func::mightBeSkipFrame() const {
 bool Func::mightCareAboutDynCalls() const {
   if (mightAccessCallerFrame()) return true;
   if (RuntimeOption::EvalNoticeOnAllDynamicCalls) return true;
+  if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && mightBeBuiltin()) {
+    return true;
+  }
   return false;
+}
+
+bool Func::mightBeBuiltin() const {
+  return match<bool>(
+    val,
+    // Builtins are always uniquely resolvable in repo mode.
+    [&](FuncName) { return !RuntimeOption::RepoAuthoritative; },
+    [&](MethodName) { return true; },
+    [&](borrowed_ptr<FuncInfo> fi) { return fi->func->attrs & AttrBuiltin; },
+    [&](borrowed_ptr<const MethTabEntryPair> mte) {
+      return mte->second.func->attrs & AttrBuiltin;
+    },
+    [&](borrowed_ptr<FuncFamily> fa) {
+      for (auto const pf : fa->possibleFuncs) {
+        if (pf->second.func->attrs & AttrBuiltin) return true;
+      }
+      return false;
+    }
+  );
 }
 
 std::string show(const Func& f) {

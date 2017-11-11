@@ -1,0 +1,168 @@
+Notice: 'count' called dynamically in %s/dynamic-call-builtins.php on line 14
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 17
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 18
+
+Notice: 'HH\Vector::toArray' called dynamically in %s/dynamic-call-builtins.php on line 19
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 20
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 21
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 22
+
+Notice: 'HH\Vector::toArray' called dynamically in %s/dynamic-call-builtins.php on line 23
+
+Notice: 'HH\Vector::__construct' called dynamically in %s/dynamic-call-builtins.php on line 24
+
+Notice: 'DateTime::createFromFormat' called dynamically in %s/dynamic-call-builtins.php on line 6
+
+Notice: 'DateTime::createFromFormat' called dynamically in %s/dynamic-call-builtins.php on line 7
+
+Notice: 'DateTime::createFromFormat' called dynamically in %s/dynamic-call-builtins.php on line 8
+
+Notice: 'DateTime::getTimezone' called dynamically in %s/dynamic-call-builtins.php on line 9
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 28
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 28
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 28
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 28
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 29
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 29
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 29
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 29
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 30
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 30
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 30
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 30
+
+Notice: 'SplFixedArray::toArray' called dynamically in %s/dynamic-call-builtins.php on line 31
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 32
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 32
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 32
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 32
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 33
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 33
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 33
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 33
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 34
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 34
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 34
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 34
+
+Notice: 'SplFixedArray::toArray' called dynamically in %s/dynamic-call-builtins.php on line 35
+
+Notice: 'SplFixedArray::__construct' called dynamically in %s/dynamic-call-builtins.php on line 36
+
+Notice: 'array_map' called dynamically in %s/dynamic-call-builtins.php on line 38
+======================================================
+
+Notice: 'count' called dynamically in %s/dynamic-call-builtins.php on line 14
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 17
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 18
+
+Notice: 'HH\Vector::toArray' called dynamically in %s/dynamic-call-builtins.php on line 19
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 20
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 21
+
+Notice: 'HH\Vector::fromItems' called dynamically in %s/dynamic-call-builtins.php on line 22
+
+Notice: 'HH\Vector::toArray' called dynamically in %s/dynamic-call-builtins.php on line 23
+
+Notice: 'HH\Vector::__construct' called dynamically in %s/dynamic-call-builtins.php on line 24
+
+Notice: 'DateTime::createFromFormat' called dynamically in %s/dynamic-call-builtins.php on line 6
+
+Notice: 'DateTime::createFromFormat' called dynamically in %s/dynamic-call-builtins.php on line 7
+
+Notice: 'DateTime::createFromFormat' called dynamically in %s/dynamic-call-builtins.php on line 8
+
+Notice: 'DateTime::getTimezone' called dynamically in %s/dynamic-call-builtins.php on line 9
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 28
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 28
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 28
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 28
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 29
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 29
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 29
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 29
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 30
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 30
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 30
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 30
+
+Notice: 'SplFixedArray::toArray' called dynamically in %s/dynamic-call-builtins.php on line 31
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 32
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 32
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 32
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 32
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 33
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 33
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 33
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 33
+
+Notice: 'SplFixedArray::fromArray' called dynamically in %s/dynamic-call-builtins.php on line 34
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 34
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 34
+
+Notice: 'SplFixedArray::offsetSet' called dynamically in %s/dynamic-call-builtins.php on line 34
+
+Notice: 'SplFixedArray::toArray' called dynamically in %s/dynamic-call-builtins.php on line 35
+
+Notice: 'SplFixedArray::__construct' called dynamically in %s/dynamic-call-builtins.php on line 36
+
+Notice: 'array_map' called dynamically in %s/dynamic-call-builtins.php on line 38

@@ -62,7 +62,9 @@ inline void checkForDynamicCall(const ActRec* ar) {
 
   if (func->accessesCallerFrame()) raise_disallowed_dynamic_call(func);
 
-  if (RuntimeOption::EvalNoticeOnAllDynamicCalls) {
+  if (RuntimeOption::EvalNoticeOnAllDynamicCalls ||
+      (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
+       func->isBuiltin())) {
     raise_notice(
       Strings::FUNCTION_CALLED_DYNAMICALLY,
       func->fullDisplayName()->data()

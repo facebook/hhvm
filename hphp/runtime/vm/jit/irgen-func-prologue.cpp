@@ -491,6 +491,7 @@ void emitDynamicCallCheck(IRGS& env) {
   auto const func = curFunc(env);
 
   if (!RuntimeOption::EvalNoticeOnAllDynamicCalls &&
+      !(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) &&
       !func->accessesCallerFrame()) {
     return;
   }
@@ -512,7 +513,9 @@ void emitDynamicCallCheck(IRGS& env) {
         gen(env, RaiseVarEnvDynCall, cns(env, func));
       }
 
-      if (RuntimeOption::EvalNoticeOnAllDynamicCalls) {
+      if (RuntimeOption::EvalNoticeOnAllDynamicCalls ||
+          (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
+           func->isBuiltin())) {
         std::string msg;
         string_printf(
           msg,

@@ -394,7 +394,7 @@ void Class::destroy() {
   // Need to recheck now we have the lock
   if (!m_cachedClass.bound()) return;
   // Only do this once.
-  m_cachedClass = rds::Link<LowPtr<Class>>(rds::kInvalidHandle);
+  m_cachedClass = rds::Link<LowPtr<Class>>(rds::kUninitHandle);
 
   /*
    * Regardless of refCount, this Class is now unusable.  Remove it
@@ -549,7 +549,7 @@ void Class::releaseRefs() {
           auto const it = scopedClones.find(CloneScope { this, attrs });
           assertx(it != scopedClones.end());
           it->second->m_cachedClass =
-            rds::Link<LowPtr<Class>>(rds::kInvalidHandle);
+            rds::Link<LowPtr<Class>>(rds::kUninitHandle);
           scopedClones.erase(it);
         }
       }
@@ -828,7 +828,7 @@ void Class::initSProps() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Property storage.
 
-static rds::Link<bool> s_persistentTrue{rds::kInvalidHandle};
+static rds::Link<bool> s_persistentTrue{rds::kUninitHandle};
 
 void Class::initSPropHandles() const {
   if (m_sPropCacheInit.bound()) return;
@@ -850,31 +850,26 @@ void Class::initSPropHandles() const {
     auto& propHandle = m_sPropCache[slot];
     auto const& sProp = m_staticProperties[slot];
 
-    if (!propHandle.bound()) {
-      if (sProp.cls == this) {
-        if (usePersistentHandles && (sProp.attrs & AttrPersistent)) {
-          propHandle.bind(rds::Mode::Persistent);
-          propHandle->val = sProp.val;
-          rds::recordRds(propHandle.handle(), sizeof(StaticPropData),
-                         rds::SPropCache{this, slot});
+    if (sProp.cls == this) {
+      if (usePersistentHandles && (sProp.attrs & AttrPersistent)) {
+          propHandle.bind(
+            [&] {
+              auto const link =
+                rds::alloc<StaticPropData>(rds::Mode::Persistent);
+              link->val = sProp.val;
+              rds::recordRds(link.handle(), sizeof(StaticPropData),
+                             rds::SPropCache{this, slot});
+              return link.handle();
+            }
+          );
         } else {
           propHandle = rds::bind<StaticPropData>(
-              rds::SPropCache{this, slot}, rds::Mode::Local
-          );
-        }
-      } else {
-        auto realSlot = sProp.cls->lookupSProp(sProp.name);
-        propHandle = sProp.cls->m_sPropCache[realSlot];
+            rds::SPropCache{this, slot}, rds::Mode::Local
+        );
       }
-    } else if (propHandle.isPersistent() && sProp.cls == this) {
-      /*
-       * Avoid a weird race: two threads come through at once, the first
-       * gets as far as binding propHandle, but then sleeps. Meanwhile the
-       * second sees that its been bound, finishes up, and then tries to
-       * read the property, but sees uninit-null for the value (and asserts
-       * in a dbg build)
-       */
-      propHandle->val = sProp.val;
+    } else {
+      auto const realSlot = sProp.cls->lookupSProp(sProp.name);
+      propHandle = sProp.cls->m_sPropCache[realSlot];
     }
     if (!propHandle.isPersistent()) {
       allPersistentHandles = false;
@@ -888,10 +883,13 @@ void Class::initSPropHandles() const {
     // the wrong time. And rather than giving each Class its own persistent
     // handle that always points to an immutable 'true', share one between all
     // of them.
-    if (!s_persistentTrue.bound()) {
-      s_persistentTrue.bind(rds::Mode::Persistent);
-      *s_persistentTrue = true;
-    }
+    s_persistentTrue.bind(
+      [&] {
+        auto const link = rds::alloc<bool>(rds::Mode::Persistent);
+        *link = true;
+        return link.handle();
+      }
+    );
     m_sPropCacheInit = s_persistentTrue;
   } else {
     m_sPropCacheInit.bind();
@@ -2401,7 +2399,7 @@ void Class::setProperties() {
   m_sPropCache = (rds::Link<StaticPropData>*)
     malloc_huge(numStaticProperties() * sizeof(*m_sPropCache));
   for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
-    new (&m_sPropCache[i]) rds::Link<StaticPropData>(rds::kInvalidHandle);
+    new (&m_sPropCache[i]) rds::Link<StaticPropData>(rds::kUninitHandle);
   }
 
   m_declPropNumAccessible = m_declProperties.size() - numInaccessible;

@@ -59,7 +59,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-rds::Link<UnwindRDS,true> g_unwind_rds(rds::kInvalidHandle);
+rds::Link<UnwindRDS,true> g_unwind_rds(rds::kUninitHandle);
 
 namespace {
 

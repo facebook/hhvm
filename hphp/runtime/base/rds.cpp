@@ -37,6 +37,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/numa.h"
+#include "hphp/util/smalllocks.h"
 #include "hphp/util/type-scan.h"
 
 #include "hphp/runtime/base/rds-header.h"
@@ -412,19 +413,48 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
 Handle attachImpl(Symbol key) {
   LinkTable::const_accessor acc;
   if (s_linkTable.find(acc, key)) return acc->second;
-  return kInvalidHandle;
+  return kUninitHandle;
 }
 
+NEVER_INLINE
+void bindOnLinkImpl(std::atomic<Handle>& handle,
+                    std::function<Handle()> fun,
+                    type_scan::Index tyIndex) {
+  Handle c = kUninitHandle;
+  if (handle.compare_exchange_strong(c, kBeingBound,
+                                     std::memory_order_relaxed,
+                                     std::memory_order_relaxed)) {
+    // we flipped it from kUninitHandle, so we get to fill in the value.
+    if (handle.exchange(fun(), std::memory_order_relaxed) ==
+        kBeingBoundWithWaiters) {
+      futex_wake(&handle, INT_MAX);
+    }
+    return;
+  }
+  // Someone else beat us to it, so wait until they've filled it in.
+  if (c == kBeingBound) {
+    handle.compare_exchange_strong(c, kBeingBoundWithWaiters,
+                                   std::memory_order_relaxed,
+                                   std::memory_order_relaxed);
+  }
+  while (handle.load(std::memory_order_relaxed) == kBeingBoundWithWaiters) {
+    futex_wait(&handle, kBeingBoundWithWaiters);
+  }
+  assertx(isHandleBound(handle.load(std::memory_order_relaxed)));
+}
+
+NEVER_INLINE
 void bindOnLinkImpl(std::atomic<Handle>& handle,
                     Mode mode,
                     size_t sizeBytes,
                     size_t align,
                     type_scan::Index tyIndex) {
-  Guard g(s_allocMutex);
-  if (handle.load(std::memory_order_relaxed) == kInvalidHandle) {
-    handle.store(alloc(mode, sizeBytes, align, tyIndex),
-                 std::memory_order_relaxed);
-  }
+  bindOnLinkImpl(handle,
+                 [&] {
+                   Guard g(s_allocMutex);
+                   return alloc(mode, sizeBytes, align, tyIndex);
+                 },
+                 tyIndex);
 }
 
 }

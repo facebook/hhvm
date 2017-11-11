@@ -212,7 +212,10 @@ enum class Mode { Normal, Local, Persistent };
  * Handles into Request Data Segment.  These are offsets from rds::tl_base.
  */
 using Handle = uint32_t;
-constexpr Handle kInvalidHandle = 0;
+constexpr Handle kUninitHandle = 0;
+constexpr Handle kInvalidHandleMask = 0x80000000;
+constexpr Handle kBeingBound = 0xffffffff;
+constexpr Handle kBeingBoundWithWaiters = 0xfffffffe;
 
 /*
  * Normal segment element generation numbers.
@@ -263,6 +266,23 @@ struct Link {
   template<size_t Align = alignof(T)> void bind(Mode mode = Mode::Normal);
 
   /*
+   * Ensure this Link is bound to an RDS allocation.
+   *  - if its already bound, do nothing;
+   *  - if another thread is already calling fun to bind it, wait until its
+   *    bound;
+   *  - otherwise call fun to obtain a handle.
+   *
+   * The intent is to ensure that only one thread allocates the
+   * handle, and that in the case of persistent handles, fun has a
+   * chance to fill in the value before the Link is published (so that
+   * other threads only ever see an unbound handle, or a bound handle
+   * with a valid value.
+   *
+   * Post: bound()
+   */
+  template<typename F> void bind(F fun);
+
+  /*
    * Dereference a Link and access its RDS memory for the current thread.
    *
    * Pre: bound()
@@ -281,6 +301,12 @@ struct Link {
    * Access to the underlying rds::Handle.
    */
   Handle handle() const;
+
+  /*
+   * Access to the underlying rds::Handle; returns kUninitHandle if
+   * its not bound.
+   */
+  Handle maybeHandle() const;
 
   /*
    * Return the generation number of this element.
@@ -347,6 +373,7 @@ struct Link {
   }
 
 private:
+  Handle raw() const { return m_handle.load(std::memory_order_relaxed); }
   std::atomic<Handle> m_handle;
 };
 
@@ -463,6 +490,11 @@ GenNumber genNumberOf(Handle handle);
  * Pre: isNormalHandle(handle)
  */
 Handle genNumberHandleFrom(Handle handle);
+
+/*
+ * Whether the handle has been bound.
+ */
+bool isHandleBound(Handle handle);
 
 /*
  * Whether the element associated with `handle' is initialized.

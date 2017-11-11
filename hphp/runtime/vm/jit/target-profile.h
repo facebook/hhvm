@@ -179,7 +179,7 @@ private:
     case TransKind::ProfPrologue:
     case TransKind::OptPrologue:
     case TransKind::Invalid:
-      return rds::Link<T>(rds::kInvalidHandle);
+      return rds::Link<T>(rds::kUninitHandle);
     }
     not_reached();
   }

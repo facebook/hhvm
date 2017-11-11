@@ -575,7 +575,7 @@ bool registerConstant(const StringData* cnsName, Cell cns,
   auto& dst = s_constant_map[cnsName];
   *static_cast<Cell*>(&dst) = cns;
   dst.dynamic() = dynamic;
-  return Unit::defCns(cnsName, &cns, true);
+  return bindPersistentCns(cnsName, cns);
 }
 
 template<DataType DType>
@@ -600,8 +600,8 @@ const ConstantMap& getConstants() {
   return s_constant_map;
 }
 
-using NativeConstantCallback = const Variant& (*)();
-bool registerConstant(const StringData*, NativeConstantCallback);
+using ConstantCallback = const Variant& (*)();
+bool registerConstant(const StringData*, ConstantCallback);
 
 //////////////////////////////////////////////////////////////////////////////
 // Class Constants

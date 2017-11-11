@@ -1293,7 +1293,7 @@ private:
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
   uint32_t m_numDeclInterfaces{0};
   mutable rds::Link<Array, true /* normal_only */>
-    m_nonScalarConstantCache{rds::kInvalidHandle};
+    m_nonScalarConstantCache{rds::kUninitHandle};
 
   LowPtr<Func> m_toString;
   LowPtr<Func> m_invoke; // __invoke, iff non-static (or closure)
@@ -1302,7 +1302,7 @@ private:
 
   ClassPtr m_parent;
   int32_t m_declPropNumAccessible;
-  mutable rds::Link<LowPtr<Class>> m_cachedClass{rds::kInvalidHandle};
+  mutable rds::Link<LowPtr<Class>> m_cachedClass{rds::kUninitHandle};
 
   /*
    * Whether this is a subclass of Closure whose m_invoke->m_cls has been set
@@ -1349,7 +1349,7 @@ private:
    *    called, and the values are actually initialized.
    */
   mutable rds::Link<StaticPropData>* m_sPropCache{nullptr};
-  mutable rds::Link<bool> m_sPropCacheInit{rds::kInvalidHandle};
+  mutable rds::Link<bool> m_sPropCacheInit{rds::kUninitHandle};
 
   veclen_t m_classVecLen;
   veclen_t m_funcVecLen;
@@ -1371,7 +1371,7 @@ private:
   MaybeDataType m_enumBaseTy;
   uint16_t m_ODAttrs;
   mutable rds::Link<PropInitVec*, true /* normal_only */>
-    m_propDataCache{rds::kInvalidHandle};
+    m_propDataCache{rds::kUninitHandle};
 
   /*
    * Whether the Class requires initialization, because it has either

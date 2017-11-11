@@ -17,6 +17,7 @@
 #define incl_HPHP_RUNTIME_BASE_RDS_INL_H_
 
 #include <tbb/concurrent_vector.h>
+#include "hphp/util/compilation-flags.h"
 
 namespace HPHP { namespace rds {
 
@@ -34,6 +35,10 @@ Handle attachImpl(Symbol key);
 void bindOnLinkImpl(std::atomic<Handle>& handle, Mode mode,
                     size_t sizeBytes, size_t align,
                     type_scan::Index tyIndex);
+void bindOnLinkImpl(std::atomic<Handle>& handle,
+                    std::function<Handle()> fun,
+                    type_scan::Index tyIndex);
+
 
 extern size_t s_normal_frontier;
 extern size_t s_persistent_base;
@@ -57,12 +62,19 @@ template<class T, bool N>
 Link<T,N>::Link(Handle handle) : m_handle(handle) {}
 
 template<class T, bool N>
-Link<T,N>::Link(const Link& l) : m_handle{l.handle()} {}
+Link<T,N>::Link(const Link& l) : m_handle{l.raw()} {
+}
 
 template<class T, bool N>
 Link<T,N>& Link<T,N>::operator=(const Link& l) {
   assertx(IMPLIES(N, l.isNormal()));
-  m_handle.store(l.handle(), std::memory_order_relaxed);
+  if (debug) {
+    auto const DEBUG_ONLY old =
+      m_handle.exchange(l.raw(), std::memory_order_relaxed);
+    assertx(!((raw() | old) & kInvalidHandleMask));
+  } else {
+    m_handle.store(l.raw(), std::memory_order_relaxed);
+  }
   return *this;
 }
 
@@ -74,42 +86,45 @@ T* Link<T,N>::operator->() const { return get(); }
 
 template<class T, bool N>
 T* Link<T,N>::get() const {
-  assert(bound());
   void* vp = static_cast<char*>(tl_base) + handle();
   return static_cast<T*>(vp);
 }
 
 template<class T, bool N>
 bool Link<T,N>::bound() const {
-  return handle() != kInvalidHandle;
+  return isHandleBound(raw());
 }
 
 template<class T, bool N>
 Handle Link<T,N>::handle() const {
-  return m_handle.load(std::memory_order_relaxed);
+  auto const handle = raw();
+  assertx(isHandleBound(handle));
+  return handle;
+}
+
+template<class T, bool N>
+Handle Link<T,N>::maybeHandle() const {
+  auto const handle = raw();
+  return isHandleBound(handle) ? handle : kUninitHandle;
 }
 
 template<class T, bool N>
 Handle Link<T,N>::genNumberHandle() const {
-  assertx(bound());
   return genNumberHandleFrom(handle());
 }
 
 template<class T, bool N>
 GenNumber Link<T,N>::genNumber() const {
-  assertx(bound());
   return genNumberOf(handle());
 }
 
 template<class T, bool N>
 bool Link<T,N>::isInit() const {
-  assertx(bound());
   return isHandleInit(handle());
 }
 
 template<class T, bool N>
 bool Link<T,N>::isInit(NormalTag) const {
-  assertx(bound());
   return N
     ? isHandleInit(handle(), NormalTag{})
     : isHandleInit(handle());
@@ -117,13 +132,11 @@ bool Link<T,N>::isInit(NormalTag) const {
 
 template<class T, bool N>
 void Link<T,N>::markInit() const {
-  assertx(bound());
   initHandle(handle());
 }
 
 template<class T, bool N>
 void Link<T,N>::markUninit() const {
-  assertx(bound());
   uninitHandle(handle());
 }
 
@@ -141,19 +154,16 @@ void Link<T,N>::initWith(T&& val) const {
 
 template <class T, bool N>
 bool Link<T,N>::isNormal() const {
-  assertx(bound());
   return N || isNormalHandle(handle());
 }
 
 template <class T, bool N>
 bool Link<T,N>::isLocal() const {
-  assertx(bound());
   return !N && isLocalHandle(handle());
 }
 
 template<class T, bool N>
 bool Link<T,N>::isPersistent() const {
-  assertx(bound());
   return !N && isPersistentHandle(handle());
 }
 
@@ -167,6 +177,16 @@ void Link<T,N>::bind(Mode mode) {
     Align, type_scan::getIndexForScan<T>()
   );
   recordRds(m_handle, sizeof(T), "Unknown", __PRETTY_FUNCTION__);
+}
+
+template<class T, bool N>
+template<typename F>
+void Link<T,N>::bind(F fun) {
+  if (LIKELY(bound())) return;
+  detail::bindOnLinkImpl(
+    m_handle, std::move(fun), type_scan::getIndexForScan<T>()
+  );
+  assertx(IMPLIES(N, isNormalHandle(handle())));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -242,6 +262,10 @@ inline Handle genNumberHandleFrom(Handle handle) {
   assertx(isNormalHandle(handle));
   // The generation number is stored immediately in front of the element.
   return handle - sizeof(GenNumber);
+}
+
+inline bool isHandleBound(Handle handle) {
+  return handle != kUninitHandle && !(handle & kInvalidHandleMask);
 }
 
 inline bool isHandleInit(Handle handle) {

@@ -541,10 +541,10 @@ public:
   static Func* loadDynCallFunc(const StringData* name);
 
   /*
-   * Load or reload `func'---i.e., bind (or rebind) it to the NamedEntity
-   * corresponding to its name.
+   * bind (or rebind) a func to the NamedEntity corresponding to its
+   * name.
    */
-  static void loadFunc(const Func* func);
+  static void bindFunc(Func* func);
 
   /*
    * Lookup the builtin in this request with name `name', or nullptr if none
@@ -670,18 +670,16 @@ public:
    * May raise notices or warnings if a constant with the given name is already
    * defined or if value is invalid.
    */
-  static bool defCns(const StringData* cnsName, const TypedValue* value,
-                     bool persistent = false);
+  static bool defCns(const StringData* cnsName, const TypedValue* value);
 
-  using SystemConstantCallback = const Variant& (*)();
   /*
-   * Define a constant with name `cnsName' which stores an arbitrary data
-   * pointer in its TypedValue (with datatype KindOfUnit).
+   * Define a constant with name `cnsName' with a magic callback. The
+   * Cell should be KindOfUninit, with a Native::ConstantCallback in
+   * its m_data.pref.
    *
    * The canonical examples are STDIN, STDOUT, and STDERR.
    */
-  static bool defSystemConstantCallback(const StringData* cnsName,
-                                        SystemConstantCallback callback);
+  static bool defNativeConstantCallback(const StringData* cnsName, Cell cell);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -721,7 +719,8 @@ public:
   bool isEmpty() const;
 
   /*
-   * Get the return value of the pseudomain, or KindOfUnit if not known.
+   * Get the return value of the pseudomain, or KindOfUninit if not
+   * known.
    *
    * @requires: isMergeOnly()
    */

@@ -205,7 +205,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   }
 
   if (f != this) {
-    f->m_cachedFunc = rds::Link<LowPtr<Func>>{rds::kInvalidHandle};
+    f->m_cachedFunc = rds::Link<LowPtr<Func>>{rds::kUninitHandle};
     f->m_maybeIntercepted = -1;
     f->m_isPreFunc = false;
   }
@@ -225,8 +225,8 @@ void Func::rescope(Class* ctx, Attr attrs) {
 void Func::rename(const StringData* name) {
   m_name = name;
   setFullName(numParams());
-  // load the renamed function
-  Unit::loadFunc(this);
+  // bind the renamed function
+  Unit::bindFunc(this);
 }
 
 

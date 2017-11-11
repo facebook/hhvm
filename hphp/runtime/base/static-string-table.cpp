@@ -161,7 +161,7 @@ StringData* insertStaticString(StringData* sd) {
   assert(sd->isStatic());
   auto pair = s_stringDataMap->insert(
     safe_cast<StrInternKey>(reinterpret_cast<uintptr_t>(sd)),
-    rds::Link<TypedValue>(rds::kInvalidHandle)
+    rds::Link<TypedValue>(rds::kUninitHandle)
   );
 
   if (!pair.second) {
@@ -276,29 +276,45 @@ StringData* makeStaticStringSafe(const char* str) {
   return makeStaticString(str);
 }
 
+bool bindPersistentCns(const StringData* cnsName, const Cell& value) {
+  assert(s_stringDataMap);
+  auto const it = s_stringDataMap->find(cnsName);
+  assertx(it != s_stringDataMap->end());
+  it->second.bind(
+    [&] {
+      auto const link =
+        rds::alloc<TypedValue, kTVSimdAlign>(rds::Mode::Persistent);
+      *link = value;
+      rds::recordRds(link.handle(), sizeof(TypedValue),
+                     "Cns", cnsName->data());
+      return link.handle();
+    }
+  );
+  return it->second.isPersistent();
+}
+
 rds::Handle lookupCnsHandle(const StringData* cnsName) {
   assert(s_stringDataMap);
   auto const it = s_stringDataMap->find(cnsName);
   if (it != s_stringDataMap->end()) {
-    return it->second.handle();
+    return it->second.maybeHandle();
   }
-  return rds::kInvalidHandle;
+  return rds::kUninitHandle;
 }
 
-rds::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
+rds::Handle makeCnsHandle(const StringData* cnsName) {
   auto const val = lookupCnsHandle(cnsName);
-  if (val) return val;
+  if (rds::isHandleBound(val)) return val;
   if (!cnsName->isStatic()) {
     // Its a dynamic constant, that doesn't correspond to
     // an already allocated handle. We'll allocate it in
     // the request local rds::s_constants instead.
-    return rds::kInvalidHandle;
+    return rds::kUninitHandle;
   }
   auto const it = s_stringDataMap->find(cnsName);
   assert(it != s_stringDataMap->end());
   if (!it->second.bound()) {
-    it->second.bind<kTVSimdAlign>(persistent ? rds::Mode::Persistent
-                                             : rds::Mode::Normal);
+    it->second.bind<kTVSimdAlign>(rds::Mode::Normal);
 
     rds::recordRds(it->second.handle(), sizeof(TypedValue),
                    "Cns", cnsName->data());
@@ -338,10 +354,11 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
       if (tv.m_type != KindOfUninit) {
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         tbl->set(key, tvAsVariant(&tv), true);
-      } else if (tv.m_data.pref) {
+      } else {
+        assertx(tv.m_data.pref);
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         auto callback =
-          reinterpret_cast<Unit::SystemConstantCallback>(tv.m_data.pref);
+          reinterpret_cast<Native::ConstantCallback>(tv.m_data.pref);
         auto cns = callback();
         if (cns.isInitialized()) {
           tbl->set(key, cns, true);

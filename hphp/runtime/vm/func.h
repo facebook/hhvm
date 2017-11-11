@@ -1378,7 +1378,7 @@ private:
   int m_magic;
 #endif
   AtomicLowPtr<uint8_t> m_funcBody;
-  mutable rds::Link<LowPtr<Func>> m_cachedFunc{rds::kInvalidHandle};
+  mutable rds::Link<LowPtr<Func>> m_cachedFunc{rds::kUninitHandle};
   FuncId m_funcId{InvalidFuncId};
   LowStringPtr m_fullName{nullptr};
   LowStringPtr m_name{nullptr};

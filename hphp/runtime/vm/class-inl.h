@@ -576,7 +576,6 @@ inline bool isAbstract(const Class* cls) {
 
 inline bool classHasPersistentRDS(const Class* cls) {
   return cls != nullptr &&
-    cls->classHandle() != rds::kInvalidHandle &&
     rds::isPersistentHandle(cls->classHandle());
 }
 

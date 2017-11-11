@@ -557,8 +557,8 @@ const StaticString
 
 void define_stdio_constants() {
   auto defcns = [] (const StringData* name, const Variant& (*func)()) {
-    auto handle = makeCnsHandle(name, false);
-    always_assert(handle != rds::kInvalidHandle);
+    auto handle = makeCnsHandle(name);
+    always_assert(rds::isHandleBound(handle));
 
     rds::initHandle(handle);
     auto cns = &rds::handleToRef<TypedValue>(handle);

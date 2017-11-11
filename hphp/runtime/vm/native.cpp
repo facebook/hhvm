@@ -747,14 +747,14 @@ std::string NativeSig::toString(const char* classname,
 /////////////////////////////////////////////////////////////////////////////
 
 bool registerConstant(const StringData* cnsName,
-                      NativeConstantCallback callback) {
-  if (!Unit::defSystemConstantCallback(cnsName, callback)) {
-    return false;
-  }
+                      ConstantCallback callback) {
   TypedValueAux tv;
   tv.m_type = KindOfUninit;
   tv.m_data.pref = reinterpret_cast<RefData*>(callback);
   tv.dynamic() = true;
+  if (!Unit::defNativeConstantCallback(cnsName, tv)) {
+    return false;
+  }
   s_constant_map[cnsName] = tv;
   return true;
 }

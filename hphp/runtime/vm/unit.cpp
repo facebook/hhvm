@@ -656,25 +656,30 @@ Func* Unit::loadFunc(const StringData* name) {
   return loadFunc(ne, name);
 }
 
-void Unit::loadFunc(const Func *func) {
+void Unit::bindFunc(Func *func) {
   assert(!func->isMethod());
   auto const ne = func->getNamedEntity();
-  auto const isPersistent =
-    (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) &&
-    (func->attrs() & AttrPersistent);
   ne->m_cachedFunc.bind(
-    isPersistent ? rds::Mode::Persistent
-                 : rds::Mode::Normal
+    [&] {
+      auto const isPersistent =
+        (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) &&
+        (func->attrs() & AttrPersistent);
+      auto const link = rds::alloc<LowPtr<const Func>>(
+        isPersistent ? rds::Mode::Persistent : rds::Mode::Normal);
+      *link = func;
+      if (func->isUnique()) ne->setUniqueFunc(func);
+      if (RuntimeOption::EvalPerfDataMap) {
+        rds::recordRds(
+          link.handle(),
+          sizeof(void*),
+          "Func",
+          func->name()->toCppString()
+        );
+      }
+      return link.handle();
+    }
   );
-  const_cast<Func*>(func)->setFuncHandle(ne->m_cachedFunc);
-  if (RuntimeOption::EvalPerfDataMap) {
-    rds::recordRds(
-      ne->m_cachedFunc.handle(),
-      sizeof(void*),
-      "Func",
-      func->name()->toCppString()
-    );
-  }
+  func->setFuncHandle(ne->m_cachedFunc);
 }
 
 Func* Unit::loadDynCallFunc(const StringData* name) {
@@ -992,7 +997,7 @@ bool Unit::classExists(const StringData* name, bool autoload, ClassKind kind) {
 const Cell* Unit::lookupCns(const StringData* cnsName) {
   auto const handle = lookupCnsHandle(cnsName);
 
-  if (LIKELY(handle != rds::kInvalidHandle &&
+  if (LIKELY(rds::isHandleBound(handle) &&
              rds::isHandleInit(handle))) {
     auto const& tv = rds::handleToRef<TypedValue>(handle);
 
@@ -1001,15 +1006,15 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
       return &tv;
     }
 
-    if (UNLIKELY(tv.m_data.pref != nullptr)) {
-      auto callback = reinterpret_cast<SystemConstantCallback>(tv.m_data.pref);
-      const Cell* tvRet = callback().asTypedValue();
-      assert(cellIsPlausible(*tvRet));
-      if (LIKELY(tvRet->m_type != KindOfUninit)) {
-        return tvRet;
-      }
+    assertx(tv.m_data.pref != nullptr);
+    auto const callback =
+      reinterpret_cast<Native::ConstantCallback>(tv.m_data.pref);
+    const Cell* tvRet = callback().asTypedValue();
+    assert(cellIsPlausible(*tvRet));
+    if (LIKELY(tvRet->m_type != KindOfUninit)) {
+      return tvRet;
     }
-    assertx(rds::isPersistentHandle(handle));
+    return nullptr;
   }
   if (UNLIKELY(rds::s_constants().get() != nullptr)) {
     return rds::s_constants()->rval(cnsName).tv_ptr();
@@ -1019,7 +1024,7 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
 
 const Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
   auto const handle = lookupCnsHandle(cnsName);
-  if (handle == rds::kInvalidHandle || !rds::isPersistentHandle(handle)) {
+  if (!rds::isHandleBound(handle) || !rds::isPersistentHandle(handle)) {
     return nullptr;
   }
   auto const ret = &rds::handleToRef<TypedValue>(handle);
@@ -1055,29 +1060,24 @@ static bool defCnsHelper(rds::Handle ch,
   if (UNLIKELY(cns->m_type != KindOfUninit ||
                cns->m_data.pref != nullptr)) {
     raise_notice(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
-  } else if (UNLIKELY(!tvAsCVarRef(value).isAllowedAsConstantValue())) {
-    raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
-  } else if (LIKELY(rds::isNormalHandle(ch))) {
-    cellDup(*value, *cns);
-    rds::initHandle(ch);
-    return true;
-  } else {
-    assertx(rds::isPersistentHandle(ch));
-    Variant v = tvAsCVarRef(value);
-    assertx(!v.isResource());
-    v.setEvalScalar();
-    cns->m_data = v.asTypedValue()->m_data;
-    cns->m_type = v.asTypedValue()->m_type;
-    return true;
+    return false;
   }
-  return false;
+
+  if (UNLIKELY(!tvAsCVarRef(value).isAllowedAsConstantValue())) {
+    raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
+    return false;
+  }
+
+  assertx(rds::isNormalHandle(ch));
+  cellDup(*value, *cns);
+  rds::initHandle(ch);
+  return true;
 }
 
-bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
-                  bool persistent /* = false */) {
-  auto const handle = makeCnsHandle(cnsName, persistent);
+bool Unit::defCns(const StringData* cnsName, const TypedValue* value) {
+  auto const handle = makeCnsHandle(cnsName);
 
-  if (UNLIKELY(handle == rds::kInvalidHandle)) {
+  if (UNLIKELY(!rds::isHandleBound(handle))) {
     if (UNLIKELY(!rds::s_constants().get())) {
       /*
        * This only happens when we call define on a non
@@ -1099,8 +1099,8 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
   return defCnsHelper(handle, value, cnsName);
 }
 
-bool Unit::defSystemConstantCallback(const StringData* cnsName,
-                                     SystemConstantCallback callback) {
+bool Unit::defNativeConstantCallback(const StringData* cnsName,
+                                     Cell value) {
   static const bool kServer = RuntimeOption::ServerExecutionMode();
   // Zend doesn't define the STD* streams in server mode so we don't either
   if (UNLIKELY(kServer &&
@@ -1109,19 +1109,9 @@ bool Unit::defSystemConstantCallback(const StringData* cnsName,
         s_stderr.equal(cnsName)))) {
     return false;
   }
-  auto const handle = makeCnsHandle(cnsName, true);
-  assert(handle != rds::kInvalidHandle);
-  TypedValue* cns = &rds::handleToRef<TypedValue>(handle);
-  if (!rds::isHandleInit(handle)) {
-    cns->m_type = KindOfUninit;
-    cns->m_data.pref = nullptr;
-    rds::initHandle(handle);
-  }
-  assert(cns->m_type == KindOfUninit);
-  cns->m_data.pref = reinterpret_cast<RefData*>(callback);
+  bindPersistentCns(cnsName, value);
   return true;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Type aliases.
@@ -1269,20 +1259,22 @@ bool Unit::defTypeAlias(Id id) {
     not_reached();
   }
 
-  if (!nameList->m_cachedTypeAlias.bound()) {
-    auto rdsMode = [&] {
-      if (!(thisType->attrs & AttrPersistent)) return rds::Mode::Normal;
-      if (resolved.klass && !classHasPersistentRDS(resolved.klass)) {
-        return rds::Mode::Normal;
-      }
-      return rds::Mode::Persistent;
-    }();
-    nameList->m_cachedTypeAlias.bind(rdsMode);
-    rds::recordRds(nameList->m_cachedTypeAlias.handle(),
-                   sizeof(TypeAliasReq),
-                   "TypeAlias", typeName->data());
-  }
-
+  nameList->m_cachedTypeAlias.bind(
+    [&] {
+      auto rdsMode = [&] {
+        if (!(thisType->attrs & AttrPersistent)) return rds::Mode::Normal;
+        if (resolved.klass && !classHasPersistentRDS(resolved.klass)) {
+          return rds::Mode::Normal;
+        }
+        return rds::Mode::Persistent;
+      }();
+      auto link = rds::alloc<TypeAliasReq>(rdsMode);
+      rds::recordRds(link.handle(),
+                     sizeof(TypeAliasReq),
+                     "TypeAlias", typeName->data());
+      return link.handle();
+    }
+  );
   nameList->setCachedTypeAlias(resolved);
   return nameList->m_cachedTypeAlias.isPersistent();
 }
@@ -1319,7 +1311,7 @@ void Unit::initialMerge() {
     if (allFuncsUnique) {
       allFuncsUnique = (func->attrs() & AttrUnique);
     }
-    loadFunc(func);
+    bindFunc(func);
     if (rds::isPersistentHandle(func->funcHandle())) {
       needsCompact = true;
     }
@@ -1392,24 +1384,12 @@ void Unit::initialMerge() {
           case MergeKind::Define: {
             auto const s = (StringData*)((char*)obj - (int)k);
             auto const v = (TypedValueAux*)m_mergeInfo->mergeableData(ix + 1);
-            ix += sizeof(*v) / sizeof(void*);
-
-            auto const persistent = (k == MergeKind::PersistentDefine);
-
-            auto const handle = makeCnsHandle(s, persistent);
-            v->rdsHandle() = handle;
-
-            // We need both checks; if a MergeKind::Define ends up
-            // persistent, its probably trying to define a system
-            // constant (so we can't overwrite the system constant
-            // here); and if a PersistentDefine ends up non
-            // persistent, we'll downgrade it to Define during compact.
-            if (persistent && rds::isPersistentHandle(handle)) {
-              auto& tv = rds::handleToRef<TypedValue>(handle);
+            if (k == MergeKind::PersistentDefine && bindPersistentCns(s, *v)) {
               Stats::inc(Stats::UnitMerge_mergeable);
               Stats::inc(Stats::UnitMerge_mergeable_persistent_define);
-              tv = *v;
             }
+            ix += sizeof(*v) / sizeof(void*);
+            v->rdsHandle() = makeCnsHandle(s);
             break;
           }
           case MergeKind::Global:
@@ -1750,8 +1730,8 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
         continue;
 
       case MergeKind::PersistentDefine:
-        // will be removed by compactMergeInfo
-        // but will be hit at least once before that happens.
+        // will be removed by compactMergeInfo but will be hit at
+        // least once before that happens.
         do {
           auto const v = (TypedValueAux*)mi->mergeableData(ix + 1);
           if (!rds::isPersistentHandle(v->rdsHandle())) {

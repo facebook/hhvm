@@ -56,7 +56,8 @@ TRACE_SET_MOD(irlower);
 
 void cgLdCns(IRLS& env, const IRInstruction* inst) {
   auto const cnsName = inst->src(0)->strVal();
-  auto const ch = makeCnsHandle(cnsName, false);
+  auto const ch = makeCnsHandle(cnsName);
+  assertx(rds::isHandleBound(ch));
   auto const dst = dstLoc(env, inst, 0);
   auto& v = vmain(env);
   assertx(inst->taken());
@@ -174,7 +175,7 @@ Cell lookupCnsHelperNormal(rds::Handle tv_handle,
   if (UNLIKELY(rds::isHandleInit(tv_handle))) {
     auto const tv = &rds::handleToRef<TypedValue>(tv_handle);
     if (tv->m_data.pref != nullptr) {
-      auto callback = (Unit::SystemConstantCallback)(tv->m_data.pref);
+      auto callback = (Native::ConstantCallback)(tv->m_data.pref);
       const Cell* cns = callback().asTypedValue();
       if (LIKELY(cns->m_type != KindOfUninit)) {
         Cell c1;
@@ -196,7 +197,7 @@ Cell lookupCnsHelperPersistent(rds::Handle tv_handle,
 
   // Deferred system constants.
   if (UNLIKELY(tv->m_data.pref != nullptr)) {
-    auto callback = (Unit::SystemConstantCallback)(tv->m_data.pref);
+    auto callback = (Native::ConstantCallback)(tv->m_data.pref);
     const Cell* cns = callback().asTypedValue();
     if (LIKELY(cns->m_type != KindOfUninit)) {
       Cell c1;
@@ -258,7 +259,8 @@ namespace {
 
 void implLookupCns(IRLS& env, const IRInstruction* inst) {
   auto const cnsName = inst->src(0)->strVal();
-  auto const ch = makeCnsHandle(cnsName, false);
+  auto const ch = makeCnsHandle(cnsName);
+  assertx(rds::isHandleBound(ch));
 
   auto const args = argGroup(env, inst)
     .imm(safe_cast<int32_t>(ch))
@@ -290,7 +292,8 @@ void cgLookupCnsU(IRLS& env, const IRInstruction* inst) {
   auto const cnsName = inst->src(0)->strVal();
   auto const fallbackName = inst->src(1)->strVal();
 
-  auto const fallbackCh = makeCnsHandle(fallbackName, false);
+  auto const fallbackCh = makeCnsHandle(fallbackName);
+  assertx(rds::isHandleBound(fallbackCh));
 
   auto const args = argGroup(env, inst)
     .imm(safe_cast<int32_t>(fallbackCh))

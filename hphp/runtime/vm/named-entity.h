@@ -86,9 +86,9 @@ struct NamedEntity {
   // Constructors.
 
   explicit NamedEntity()
-    : m_cachedClass(rds::kInvalidHandle)
-    , m_cachedFunc(rds::kInvalidHandle)
-    , m_cachedTypeAlias(rds::kInvalidHandle)
+    : m_cachedClass(rds::kUninitHandle)
+    , m_cachedFunc(rds::kUninitHandle)
+    , m_cachedTypeAlias(rds::kUninitHandle)
   {}
 
   NamedEntity(NamedEntity&& ne) noexcept;

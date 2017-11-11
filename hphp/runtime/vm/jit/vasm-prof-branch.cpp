@@ -62,7 +62,7 @@ namespace {
 /*
  * Thread-local RDS branch-sampling counter.
  */
-rds::Link<uint32_t> s_counter{rds::kInvalidHandle};
+rds::Link<uint32_t> s_counter{rds::kUninitHandle};
 
 /*
  * Reset `s_counter'.

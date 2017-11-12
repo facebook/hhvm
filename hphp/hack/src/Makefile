@@ -165,7 +165,8 @@ clean:
 
 build-hack: $(TARGETS)
 
-build-hack-with-ocp: $(BUILD_ID_OBJECTS)
+build-hack-with-ocp:
+	$(MAKE) $(BUILD_ID_OBJECTS)
 	[ -d ${ROOT}/../_obuild ] || ( cd ${ROOT}/.. && ocp-build init )
 	ocp-build build
 
@@ -181,10 +182,10 @@ $(TARGETS): _build/hack.stamp
 # As there is no efficient way to calculate the dependencies of
 # the targets, we make them dependent on all files. In doing this
 # we ensure that no rebuild is necessary if nothing has changed
-_build/hack.stamp: $(ALL_SRC_FILES) copy-hhis _build/ppx/ppx_gen_hhi $(BUILD_ID_OBJECTS)
-	# build-hack-native-deps is a dependency of $(TARGETS) but as it is phony
+_build/hack.stamp: $(ALL_SRC_FILES) copy-hhis _build/ppx/ppx_gen_hhi
+	# These are dependencies of $(TARGETS), but as they're phony,
 	# we place it here to avoid unnecessary rebuilds
-	$(MAKE) build-hack-native-deps
+	$(MAKE) build-hack-native-deps $(BUILD_ID_OBJECTS)
 	# Removing the targets is necessary because the ocaml build
 	# doesn't change the modification dates of the targets if
 	# the code produced from ocaml sources is exactly the same as the old ones;

@@ -150,6 +150,12 @@ BUILD_ID_OBJECTS=_build/utils/compiler_id_impl.o _build/utils/get_build_id.o _bu
 
 .PHONY: $(BUILD_ID_OBJECTS)
 
+# Magic! Work around various forms of ocamlbuild brokeness by ignoring -j
+# For example, parrallel ocamlbuild processes in the same directory fight
+# over _build/_log, even if the main inputs and outputs are independent.
+
+.NOTPARALLEL:
+
 LINKER_FLAGS=$(NATIVE_OBJECT_FILES) $(NATIVE_LIB_OPTS) $(EXTRA_LINK) \
 	     $(EXTRA_NATIVE_LIB_OPTS) $(FRAMEWORK_OPTS)
 # Function to recursively find files, eg: $(call rwildcard,dir/to/look/in/,*.c)

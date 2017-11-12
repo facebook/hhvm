@@ -22,6 +22,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val errors : t -> Full_fidelity_syntax_error.t list
       val parse_expression : t -> t * Syntax.t
       val parse_simple_variable: t -> t * Syntax.t
+      val parse_cast_or_parenthesized_or_lambda_expression: t -> t * Syntax.t
     end (* ExpressionParser_S *)
   end (* WithLexer *)
 end (* WithSyntax *)

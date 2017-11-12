@@ -313,7 +313,17 @@ module WithExpressionAndDeclAndTypeParser
   and parse_using_statement parser await_kw =
     let (parser, using_kw) = assert_token parser Using in
     (* Decision point - Are we at a function scope or a body scope *)
-    let (parser1, expr) = parse_expression parser in
+    let token_kind = peek_token_kind parser in
+    (* if next token is left paren it can be either
+    - parenthesized expression followed by semicolon for function scoped using
+    - comma separated list of expressions wrapped in parens for blocks.
+      To distinguish between then try parse parenthesized expression and then
+      check next token. NOTE: we should not use 'parse_expression' here
+      since it might parse (expr) { smth() } as subscript expression $expr{$index}
+    *)
+    let (parser1, expr) =
+      if token_kind = LeftParen then parse_cast_or_parenthesized_or_lambda_expression parser
+      else parse_expression parser in
     let (parser1, token) = next_token parser1 in
     match Token.kind token with
     | Semicolon ->
@@ -858,6 +868,10 @@ module WithExpressionAndDeclAndTypeParser
 
   and parse_simple_variable parser =
     with_expression_parser parser ExpressionParser.parse_simple_variable
+
+  and parse_cast_or_parenthesized_or_lambda_expression parser =
+    with_expression_parser parser
+      ExpressionParser.parse_cast_or_parenthesized_or_lambda_expression
 
   and with_expression_parser parser f =
     let expression_parser = ExpressionParser.make

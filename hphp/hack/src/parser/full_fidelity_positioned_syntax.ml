@@ -90,15 +90,20 @@ module PositionedValueBuilder = struct
 let value_from_outer_children first last =
   match (first, last) with
   | (Some first, Some last) ->
-    let source_text = PositionedSyntaxValue.source_text (value first) in
-    let offset = PositionedSyntaxValue.start_offset (value first) in
-    let leading_width = PositionedSyntaxValue.leading_width (value first) in
+    let first_value = value first in
+    let last_value = value last in
+    let source_text = PositionedSyntaxValue.source_text first_value in
+    let first_offset = PositionedSyntaxValue.start_offset first_value in
+    let first_leading_width = PositionedSyntaxValue.leading_width first_value in
     let trailing_width =
-      PositionedSyntaxValue.trailing_width (value last) in
-    let last_offset = PositionedSyntaxValue.start_offset (value last) in
-    let width = last_offset + trailing_width - offset in
+      PositionedSyntaxValue.trailing_width last_value in
+    let last_offset = PositionedSyntaxValue.start_offset last_value in
+    let last_leading_width = PositionedSyntaxValue.leading_width last_value in
+    let last_width = PositionedSyntaxValue.width last_value in
+    let width = (last_offset + last_leading_width + last_width) -
+      (first_offset + first_leading_width) in
     PositionedSyntaxValue.make
-      source_text offset leading_width width trailing_width
+      source_text first_offset first_leading_width width trailing_width
   | _ -> failwith "How did we get a syntax node with only missing children?"
 
 let value_from_children kind nodes =

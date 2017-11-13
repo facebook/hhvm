@@ -1107,8 +1107,8 @@ module type Syntax_S = sig
   val kind : t -> Full_fidelity_syntax_kind.t
   val make_token : Token.t -> t
   val get_token : t -> Token.t option
-  val make_missing : unit -> t
-  val make_list : t list -> t
+  val make_missing : Full_fidelity_source_text.t -> int -> t
+  val make_list : Full_fidelity_source_text.t -> int -> t list -> t
   val make_end_of_file : t -> t
   val make_script : t -> t
   val make_simple_type_specifier : t -> t

@@ -36,7 +36,7 @@ module EditableSyntax =
   SyntaxWithEditableToken.WithSyntaxValue(EditableSyntaxValue)
 
 module EditableValueBuilder = struct
-  let value_from_children _ _ =
+  let value_from_children _ _ _ _ =
     EditableSyntaxValue.NoValue
 
   let value_from_token _ =

@@ -19,7 +19,8 @@ is computed elsewhere.
 *)
 
 module Syntax = Full_fidelity_editable_positioned_syntax
-
+module SourceText = Full_fidelity_source_text
+let make_missing () = Syntax.make_missing SourceText.empty 0
 type t = {
   classish_name : Syntax.t;
   classish_type_parameters : Syntax.t;
@@ -39,7 +40,7 @@ type t = {
 }
 
 let empty =
-  let m = Syntax.make_missing() in
+  let m = make_missing() in
   { classish_name = m;
     classish_type_parameters = m;
     function_name = m;

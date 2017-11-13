@@ -9148,15 +9148,19 @@ module WithToken(Token: TokenType) = struct
 
     module type ValueBuilderType = sig
       val value_from_children:
-        Full_fidelity_syntax_kind.t -> t list -> SyntaxValue.t
+        Full_fidelity_source_text.t ->
+        int -> (* offset *)
+        Full_fidelity_syntax_kind.t ->
+        t list ->
+        SyntaxValue.t
       val value_from_token: Token.t -> SyntaxValue.t
       val value_from_syntax: syntax -> SyntaxValue.t
     end
 
     module WithValueBuilder(ValueBuilder: ValueBuilderType) = struct
-      let from_children kind ts =
+      let from_children text offset kind ts =
         let syntax = syntax_from_children kind ts in
-        let value = ValueBuilder.value_from_children kind ts in
+        let value = ValueBuilder.value_from_children text offset kind ts in
         make syntax value
 
       let make_token token =
@@ -9164,15 +9168,15 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_token token in
         make syntax value
 
-      let make_missing () =
-        from_children SyntaxKind.Missing []
+      let make_missing text offset =
+        from_children text offset SyntaxKind.Missing []
 
       (* An empty list is represented by Missing; everything else is a
         SyntaxList, even if the list has only one item. *)
-      let make_list items =
+      let make_list text offset items =
         match items with
-        | [] -> make_missing()
-        | _ -> from_children SyntaxKind.SyntaxList items
+        | [] -> make_missing text offset
+        | _ -> from_children text offset SyntaxKind.SyntaxList items
 
       let make_end_of_file
         end_of_file_token

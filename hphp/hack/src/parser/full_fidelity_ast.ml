@@ -176,7 +176,7 @@ let make_token_syntax token_kind =
 let make_compound_statement nl =
   make_compound_statement
     (make_token_syntax TK.LeftBrace)
-    (make_list nl)
+    (make_list SourceText.empty 0 nl)
     (make_token_syntax TK.RightBrace)
 
 let missing = make_syntax Missing

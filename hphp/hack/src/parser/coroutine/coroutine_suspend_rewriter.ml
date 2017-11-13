@@ -945,7 +945,7 @@ let rewrite_suspends_in_statement
                 @ right_extra_info.prefix in
 
               let left =
-                Syntax.from_children (Syntax.kind left) children in
+                CoroutineSyntax.from_children (Syntax.kind left) children in
 
               prefix, left, next_temp
           in
@@ -1018,7 +1018,7 @@ let rewrite_suspends_in_statement
           let nodes, prefixes = Core_list.unzip result in
 
           let new_node =
-            Syntax.from_children (Syntax.kind node) nodes in
+            CoroutineSyntax.from_children (Syntax.kind node) nodes in
 
           let extra_info =
             no_tail_call_extra_info (Core_list.concat prefixes) in

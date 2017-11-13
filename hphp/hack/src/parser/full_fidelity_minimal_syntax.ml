@@ -33,7 +33,7 @@ module MinimalSyntax =
   SyntaxWithMinimalToken.WithSyntaxValue(MinimalSyntaxValue)
 
 module MinimalValueBuilder = struct
-  let value_from_children _kind nodes =
+  let value_from_children _text _offset _kind nodes =
     let folder sum node =
       let v = MinimalSyntax.value node in
       let w = MinimalSyntaxValue.full_width v in

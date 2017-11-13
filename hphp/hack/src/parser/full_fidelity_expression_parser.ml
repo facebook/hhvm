@@ -146,7 +146,7 @@ module WithStatementAndDeclAndTypeParser
        * the previous scope of the expected stack, don't eat it--just mark the
        * name missing and continue parsing, starting from the offending token. *)
       let parser = with_error parser SyntaxError.error1015 in
-      (parser, make_missing())
+      (parser, make_missing parser)
     | _ ->
       (* ERROR RECOVERY: If we're encountering anything other than a Name
        * or the next expected kind, eat the offending token.
@@ -237,7 +237,7 @@ module WithStatementAndDeclAndTypeParser
       (* ERROR RECOVERY: if we've prematurely found a token we're expecting
        * later, mark the expression missing, throw an error, and do not advance
        * the parser. *)
-      (with_error parser SyntaxError.error1015, make_missing())
+      (with_error parser SyntaxError.error1015, make_missing parser)
     | TokenKind.EndOfFile
     | _ -> parse_as_name_or_error parser
 
@@ -372,7 +372,7 @@ module WithStatementAndDeclAndTypeParser
           if (Token.kind token) = RightBrace then
             (parser1, make_token token)
           else
-            (with_error parser SyntaxError.error1006, (make_missing()))
+            (with_error parser SyntaxError.error1006, (make_missing parser))
         in
         parser, expr, right_brace
     in
@@ -598,7 +598,7 @@ module WithStatementAndDeclAndTypeParser
     structure, do not represent that as a list with one item. *)
     let results = match results with
     | h :: [] -> h
-    | _ -> make_list (List.rev results) in
+    | _ -> make_list parser (List.rev results) in
     let result = make_literal_expression results in
     (parser, result)
 
@@ -896,7 +896,7 @@ module WithStatementAndDeclAndTypeParser
       let precedence = Operator.precedence Operator.IndexingOperator in
       parse_expression (with_precedence parser precedence) in
     let parser1 = with_precedence parser1 parser.precedence in
-    let brace = make_missing () in
+    let brace = make_missing parser in
     parser1, make_braced_expression brace e brace
 
   and parse_subscript parser term =
@@ -912,7 +912,7 @@ module WithStatementAndDeclAndTypeParser
     | (LeftBracket, RightBracket)
     | (LeftBrace, RightBrace) ->
       let left = make_token left in
-      let index = make_missing() in
+      let index = make_missing parser in
       let right = make_token right in
       let result = make_subscript_expression term left index right in
       parse_remaining_expression parser1 result
@@ -1018,7 +1018,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     if peek_token_kind parser = LeftParen then
       parse_expression_list_opt parser
     else
-      (parser, make_missing(), make_missing(), make_missing()) in
+      (parser, make_missing parser, make_missing parser, make_missing parser) in
     let result =
       make_object_creation_expression new_token designator left args right in
     (parser, result)
@@ -1056,7 +1056,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
       let parser, break_kw = assert_token parser Break in
       parser, make_yield_expression yield_kw break_kw
     | Semicolon ->
-      parser, make_yield_expression yield_kw (make_missing ())
+      parser, make_yield_expression yield_kw (make_missing parser)
     | _ ->
       let parser, operand = parse_array_element_init parser in
       parser, make_yield_expression yield_kw operand
@@ -1390,8 +1390,8 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_lambda_expression_after_signature parser signature =
     (* We had a signature with no async or coroutine, and we disambiguated it
     from a cast. *)
-    let async = make_missing() in
-    let coroutine = make_missing() in
+    let async = make_missing parser in
+    let coroutine = make_missing parser in
     let (parser, arrow) = require_lambda_arrow parser in
     let (parser, body) = parse_lambda_body parser in
     let result = make_lambda_expression async coroutine signature arrow body in
@@ -1760,7 +1760,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let missing_consequence =
       kind = Colon && not (is_next_xhp_class_name parser) in
     let (parser, consequence) = if missing_consequence then
-      (parser, make_missing())
+      (parser, make_missing parser)
     else
       with_reset_precedence parser parse_expression in
     let (parser, colon) = require_colon parser in
@@ -2102,7 +2102,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     *)
     let (parser, use_token) = optional_token parser Use in
     if is_missing use_token then
-      (parser, (make_missing()))
+      (parser, (make_missing parser))
     else
       let (parser, left, vars, right) =
         parse_parenthesized_comma_list_opt_allow_trailing
@@ -2116,7 +2116,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let (parser, colon) = optional_token parser Colon in
     let (parser, return_type) =
       if is_missing colon then
-        (parser, (make_missing()))
+        (parser, (make_missing parser))
       else
         parse_return_type parser in
     (parser, colon, return_type)
@@ -2198,7 +2198,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     else
       (* ERROR RECOVERY: Create a missing token for the expected token,
          and continue on from the current token. Don't skip it. *)
-      (with_error parser SyntaxError.error1006, (make_missing()))
+      (with_error parser SyntaxError.error1006, (make_missing parser))
 
   and parse_xhp_body_braced_expression parser =
     (* The difference between a regular braced expression and an
@@ -2229,9 +2229,9 @@ TODO: This will need to be fixed to allow situations where the qualified name
             let o = 0 in (* TODO: Get the offset from the leading token *)
             make_token (Token.make TokenKind.XHPStringLiteral s o 0 [] [])
           else
-            make_missing ()
+            make_missing parser
         in
-        let node = make_xhp_attribute name (make_missing()) value in
+        let node = make_xhp_attribute name (make_missing parser) value in
         let parser = if colon_bug then parser1 else
           with_error parser1 SyntaxError.error1016
         in
@@ -2253,7 +2253,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
         | _ ->
         (* ERROR RECOVERY: The expression is missing; assume that the "name ="
            belongs to the attribute and start looking for the next attribute. *)
-          let node = make_xhp_attribute name equal (make_missing()) in
+          let node = make_xhp_attribute name equal (make_missing parser) in
           let parser = with_error parser SyntaxError.error1017 in
           (parser, Some node)
 
@@ -2290,19 +2290,19 @@ TODO: This will need to be fixed to allow situations where the qualified name
           (* ERROR RECOVERY: *)
           let parser = with_error parser2 SyntaxError.error1039 in
           (parser, make_xhp_close
-            (make_token less_than_slash) (make_token name) (make_missing()))
+            (make_token less_than_slash) (make_token name) (make_missing parser))
       else
         (* ERROR RECOVERY: *)
         let parser = with_error parser1 SyntaxError.error1039 in
         (parser, make_xhp_close
-          (make_token less_than_slash) (make_missing()) (make_missing()))
+          (make_token less_than_slash) (make_missing parser) (make_missing parser))
     else
       (* ERROR RECOVERY: We probably got a < without a following / or name.
          TODO: For now we'll just bail out. We could use a more
          sophisticated strategy here. *)
       let parser = with_error parser1 SyntaxError.error1026 in
       (parser, make_xhp_close
-        (make_token less_than_slash) (make_missing()) (make_missing()))
+        (make_token less_than_slash) (make_missing parser) (make_missing parser))
 
   and parse_xhp_expression parser left_angle name name_text =
     let (parser, attrs) = parse_list_until_none parser parse_xhp_attribute in
@@ -2311,7 +2311,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | SlashGreaterThan ->
       let xhp_open = make_xhp_open left_angle name attrs (make_token token) in
       let xhp = make_xhp_expression
-        xhp_open (make_missing()) (make_missing()) in
+        xhp_open (make_missing parser) (make_missing parser) in
       (parser1, xhp)
     | GreaterThan ->
       let xhp_open = make_xhp_open left_angle name attrs (make_token token) in
@@ -2323,9 +2323,9 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | _ ->
       (* ERROR RECOVERY: Assume the unexpected token belongs to whatever
          comes next. *)
-      let xhp_open = make_xhp_open left_angle name attrs (make_missing()) in
+      let xhp_open = make_xhp_open left_angle name attrs (make_missing parser) in
       let xhp = make_xhp_expression
-        xhp_open (make_missing()) (make_missing()) in
+        xhp_open (make_missing parser) (make_missing parser) in
       let parser = with_error parser SyntaxError.error1013 in
       (parser, xhp)
 

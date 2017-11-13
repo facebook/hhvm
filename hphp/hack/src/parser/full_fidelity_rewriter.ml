@@ -8,10 +8,17 @@
  *
  *)
 
+module SourceText = Full_fidelity_source_text
+
 module type RewritableType = sig
   type t
   val children : t -> t list
-  val from_children : Full_fidelity_syntax_kind.t -> t list -> t
+  val from_children :
+    Full_fidelity_source_text.t ->
+    int ->
+    Full_fidelity_syntax_kind.t ->
+    t list ->
+    t
   val kind: t -> Full_fidelity_syntax_kind.t
 end
 
@@ -54,7 +61,7 @@ module WithSyntax(Syntax: RewritableType) = struct
       let node =
         if child_changed then
           let new_children = Hh_core.List.filter_opt option_new_children in
-          Syntax.from_children (Syntax.kind node) new_children
+          Syntax.from_children SourceText.empty 0 (Syntax.kind node) new_children
         else
           node
       in
@@ -117,7 +124,8 @@ module WithSyntax(Syntax: RewritableType) = struct
         let result =
           if child_changed then
             let new_children = Hh_core.List.filter_opt option_new_children in
-            let node = Syntax.from_children (Syntax.kind node) new_children in
+            let node = Syntax.from_children
+              SourceText.empty 0 (Syntax.kind node) new_children in
             Replace node
           else if node_changed then
             Replace node

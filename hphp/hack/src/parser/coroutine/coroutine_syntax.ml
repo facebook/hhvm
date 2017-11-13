@@ -14,9 +14,13 @@
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Token = Syntax.Token
 module TokenKind = Full_fidelity_token_kind
+module SourceText = Full_fidelity_source_text
 
 open Syntax
 
+let make_list = make_list SourceText.empty 0
+let make_missing () = make_missing SourceText.empty 0
+let from_children = from_children SourceText.empty 0
 
 (* Common factories *)
 

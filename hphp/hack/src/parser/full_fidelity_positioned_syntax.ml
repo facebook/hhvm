@@ -87,9 +87,7 @@ module PositionedValueBuilder = struct
     PositionedSyntaxValue.make
       source_text offset leading_width width trailing_width
 
-let value_from_outer_children first last =
-  match (first, last) with
-  | (Some first, Some last) ->
+  let value_from_outer_children first last =
     let first_value = value first in
     let last_value = value last in
     let source_text = PositionedSyntaxValue.source_text first_value in
@@ -104,30 +102,50 @@ let value_from_outer_children first last =
       (first_offset + first_leading_width) in
     PositionedSyntaxValue.make
       source_text first_offset first_leading_width width trailing_width
-  | _ -> failwith "How did we get a syntax node with only missing children?"
 
-let value_from_children kind nodes =
-  if kind == Full_fidelity_syntax_kind.Missing then
-    let source_text = SourceText.empty in
-    let offset = 0 in
-    let leading_width = 0 in
-    let width = 0 in
-    let trailing_width = 0 in
-    PositionedSyntaxValue.make
-      source_text offset leading_width width trailing_width
-  else
-    let no_missing = List.filter ~f:(fun x -> not (is_missing x)) nodes in
-    let first = List.hd no_missing in
-    let last = List.last no_missing in
-    value_from_outer_children first last
+  let width n =
+    PositionedSyntaxValue.width (value n)
+
+  let value_from_children source_text offset kind nodes =
+    (**
+     * We need to determine the offset, leading, middle and trailing widths of
+     * the node to be constructed based on its children.  If the children are
+     * all of zero width -- including the case where there are no children at
+     * all -- then we make a zero-width value at the given offset.
+     * Otherwise, we can determine the associated value from the first and last
+     * children that have width.
+     *)
+    let have_width = List.filter ~f:(fun x -> (width x) > 0) nodes in
+    match have_width with
+    | [] -> PositionedSyntaxValue.make source_text offset 0 0 0
+    | first :: _ -> value_from_outer_children first (List.last_exn have_width)
 
   let value_from_syntax syntax =
-    let f (first, last) node =
-      if is_missing node then (first, last)
-      else if first = None then (Some node, Some node)
-      else (first, Some node) in
-    let (first, last) = fold_over_children f (None, None) syntax in
-    value_from_outer_children first last
+    (* We need to find the first and last nodes that have width. If there are
+      no such nodes then we can simply use the first and last nodes, period,
+      since they will have an offset and source text we can use. *)
+    let f (first, first_not_zero, last_not_zero, last) node =
+      if first = None then
+        if (width node) > 0 then
+          (Some node, Some node, Some node, Some node)
+        else
+          (Some node, None, None, Some node)
+      else if (width node) > 0 then
+        if first_not_zero = None then
+          (first, Some node, Some node, Some node)
+        else
+          (first, first_not_zero, Some node, Some node)
+      else
+        (first, first_not_zero, last_not_zero, Some node) in
+    let (f, fnz, lnz, l) =
+      fold_over_children f (None, None, None, None) syntax in
+    match (f, fnz, lnz, l) with
+    | (_, Some first_not_zero, Some last_not_zero, _) ->
+      value_from_outer_children first_not_zero last_not_zero
+    | (Some first, None, None, Some last) ->
+      value_from_outer_children first last
+    | _ -> failwith
+      "how did we get a node with no children in value_from_syntax?"
 end
 
 include PositionedWithValue.WithValueBuilder(PositionedValueBuilder)

@@ -8,6 +8,7 @@
  *
  *)
 module List = Core_list
+module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Token = Syntax.Token
 module SyntaxKind = Full_fidelity_syntax_kind
@@ -103,7 +104,7 @@ let rec get_params_list node =
     anonymous_parameters
   | MethodishDeclaration { methodish_function_decl_header; _ } ->
     get_params_list methodish_function_decl_header
-  | _ -> make_missing()
+  | _ -> make_missing SourceText.empty 0
 
 let get_params node =
   let param_list = get_params_list node in
@@ -117,7 +118,7 @@ let get_body node =
   | LambdaExpression { lambda_body; _ } -> lambda_body
   | AnonymousFunction { anonymous_body; _ } -> anonymous_body
   | MethodishDeclaration { methodish_function_body; _ } -> methodish_function_body
-  | _ -> make_missing()
+  | _ -> make_missing SourceText.empty 0
 
 (* TODO: This does not consider situations like "${x}" as the use of a local.*)
 let add_local acc node =

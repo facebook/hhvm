@@ -15,10 +15,14 @@ module Trivia = Full_fidelity_editable_trivia
 module Token = Full_fidelity_editable_token
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 module Env = Format_env
+module SourceText = Full_fidelity_source_text
 
 open Hh_core
 open Syntax
 open Doc
+
+let make_list = Syntax.make_list SourceText.empty 0
+let make_missing () = Syntax.make_missing SourceText.empty 0
 
 let transform (env: Env.t) (node: Syntax.t) : Doc.t =
   let rec t node =

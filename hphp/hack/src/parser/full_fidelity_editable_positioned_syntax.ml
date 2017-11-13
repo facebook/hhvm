@@ -149,7 +149,7 @@ let trailing_start_offset node =
 module ValueBuilder = struct
   open Value
 
-  let value_from_children _kind = function
+  let value_from_children _source _offset _kind = function
     | [] ->
         (* Missing node case: we consider Missing to be Synthetic. *)
         Synthetic

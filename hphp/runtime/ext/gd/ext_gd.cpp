@@ -5365,7 +5365,7 @@ typedef struct {
 
 static const maker_note_type maker_note_array[] = {
   { tag_table_VND_CANON, "Canon", nullptr, nullptr,
-    0, 0, MN_ORDER_INTEL, MN_OFFSET_GUESS},
+    0, 0, MN_ORDER_INTEL, MN_OFFSET_NORMAL},
 /*  { tag_table_VND_CANON, "Canon", nullptr, nullptr,
       0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},*/
   { tag_table_VND_CASIO, "CASIO", nullptr, nullptr,

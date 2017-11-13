@@ -466,13 +466,12 @@ module WithStatementAndDeclAndTypeParser
       | (_, HeredocStringLiteralTail) -> HeredocStringLiteralTail
       | (_, ExecutionStringLiteralTail) -> ExecutionStringLiteralTail
       | _ -> StringLiteralBody in
-      let s = SourceText.empty in
-      let o = 0 in
+      let s = Token.source_text head in
+      let o = Token.leading_start_offset head in
       let w = (Token.width head) + (Token.width token) in
       let l = Token.leading head in
       let t = Token.trailing token in
       (* TODO: Make a "position" type that is a tuple of source and offset. *)
-      (* TODO: Get the source and offset from the leading token *)
       let result = Token.make k s o w l t in
       make_token result in
 

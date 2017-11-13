@@ -58,6 +58,12 @@ let trailing token =
 let with_leading leading token =
   { token with leading }
 
+let leading_start_offset _ =
+  0 (* Not available *)
+
+let source_text _ =
+  Full_fidelity_source_text.empty (* Not available *)
+
 let to_json token =
   let open Hh_json in
   JSON_Object [

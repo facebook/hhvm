@@ -127,6 +127,7 @@ module UserAttributes = struct
   let uaDeprecated          = "__Deprecated"
   let uaMemoize             = "__Memoize"
   let uaPHPStdLib           = "__PHPStdLib"
+  let uaHipHopSpecific      = "__HipHopSpecific"
 
   let as_set : SSet.t =
     let s = SSet.empty in
@@ -137,6 +138,7 @@ module UserAttributes = struct
     let s = SSet.add uaDeprecated s in
     let s = SSet.add uaMemoize s in
     let s = SSet.add uaPHPStdLib s in
+    let s = SSet.add uaHipHopSpecific s in
     s
 
 end

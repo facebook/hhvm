@@ -854,6 +854,7 @@ interface XHPChild {}
  * Stringish is a type that matches strings as well as string-convertible
  * objects: that is, objects that provide the __toString method
  */
+<<__HipHopSpecific>>
 interface Stringish {
   <<__Deprecated('Use string coercion syntax `(string) <expression>` instead.')>>
   public function __toString(): string;
@@ -866,6 +867,7 @@ interface Stringish {
  * @guide /hack/attributes/introduction
  * @guide /hack/attributes/special
   */
+<<__HipHopSpecific>>
 interface IMemoizeParam {
    /**
    * Serialize this object to a string that can be used as a
@@ -877,6 +879,7 @@ interface IMemoizeParam {
 /**
   * Objects that implement IDisposable may be used in using statements
   */
+<<__HipHopSpecific>>
 interface IDisposable {
   /**
    * This method is invoked exactly once at the end of the scope of the
@@ -888,6 +891,7 @@ interface IDisposable {
 /**
   * Objects that implement IAsyncDisposable may be used in await using statements
   */
+<<__HipHopSpecific>>
 interface IAsyncDisposable {
   /**
    * This method is invoked exactly once at the end of the scope of the

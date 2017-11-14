@@ -234,6 +234,7 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
+    --currentSmallAllocs[index];
     return freeBigSize(ptr);
   }
 
@@ -362,8 +363,8 @@ inline bool MemoryManager::contains(void* p) const {
 
 inline bool MemoryManager::checkContains(DEBUG_ONLY void* p) const {
   // Be conservative if the small-block allocator is disabled.
-  assert(RuntimeOption::DisableSmallAllocator || m_bypassSlabAlloc ||
-         contains(p));
+   assert(RuntimeOption::DisableSmallAllocator || m_bypassSlabAlloc ||
+          contains(p));
   return true;
 }
 

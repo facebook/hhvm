@@ -1105,6 +1105,11 @@ private:
   int64_t m_req_start_micros;
 
   TYPE_SCAN_IGNORE_ALL; // heap-scan handles MemoryManager fields itself.
+
+  // This are memory intensive, a counter per slab. As such, they're only
+  // allocated when we skip the small allocator.
+  std::vector<int64_t> totalSmallAllocs;
+  std::vector<int64_t> currentSmallAllocs;
 };
 
 extern THREAD_LOCAL_FLAT(MemoryManager, tl_heap);

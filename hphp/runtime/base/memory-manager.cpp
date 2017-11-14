@@ -171,6 +171,12 @@ void MemoryManager::resetAllStats() {
   m_stats.totalAlloc = 0;
   m_stats.peakIntervalUsage = 0;
   m_stats.peakIntervalCap = 0;
+  if (m_bypassSlabAlloc) {
+    totalSmallAllocs.insert(totalSmallAllocs.begin(),
+        totalSmallAllocs.size(), 0);
+    currentSmallAllocs.insert(currentSmallAllocs.begin(),
+        currentSmallAllocs.size(), 0);
+  }
   m_enableStatsSync = false;
   if (Trace::enabled) tl_heap_id = ++s_heap_id;
   if (s_statsEnabled) {
@@ -670,6 +676,11 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
   assert((uintptr_t(m_front) & kSmallSizeAlignMask) == 0);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
+    totalSmallAllocs.resize(kNumSmallSizes, 0);
+    currentSmallAllocs.resize(kNumSmallSizes, 0);
+    ++totalSmallAllocs[index];
+    ++currentSmallAllocs[index];
+
     // Stats correction; mallocBigSize() pulls stats from jemalloc.
     m_stats.mmUsage -= nbytes;
     return mallocBigSize<Unzeroed>(nbytes);

@@ -151,33 +151,42 @@ let peek_def (l: lexer) i ~def =
 (* Character classification *)
 let is_whitespace_no_newline : char -> bool = function
   | ' ' | '\t' -> true
+  | _          -> false
+
+let is_newline = function
+  | '\r' | '\n' -> true
+  | _           -> false
+
+let is_binary_digit = function
+  | '0' | '1' -> true
+  | _         -> false
+
+let is_octal_digit = function
+  | '0' .. '7' -> true
+  | _          -> false
+
+let is_decimal_digit = function
+  | '0' .. '9' -> true
+  | _          -> false
+
+let is_hexadecimal_digit = function
+  | '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' -> true
   | _ -> false
 
-let is_newline ch =
-  ch = '\r' || ch = '\n'
+let is_name_nondigit = function
+  | '_'              -> true
+  | 'a' .. 'z'       -> true
+  | 'A' .. 'Z'       -> true
+  | '\x7f' .. '\xff' -> true
+  | _                -> false
 
-let is_binary_digit ch =
-  ch == '0' || ch == '1'
-
-let is_octal_digit ch =
-  '0' <= ch && ch <= '7'
-
-let is_decimal_digit ch =
-  '0' <= ch && ch <= '9'
-
-let is_hexadecimal_digit ch =
-  ('0' <= ch && ch <= '9') ||
-  ('a' <= ch && ch <= 'f') ||
-  ('A' <= ch && ch <= 'F')
-
-let is_name_nondigit ch =
-  ('a' <= ch && ch <= 'z') ||
-  ('A' <= ch && ch <= 'Z') ||
-  ('\x7f' <= ch && ch <= '\xff') ||
-  ch = '_'
-
-let is_name_letter ch =
-  (is_name_nondigit ch) || (is_decimal_digit ch)
+let is_name_letter = function
+  | '_'              -> true
+  | '0' .. '9'       -> true
+  | 'a' .. 'z'       -> true
+  | 'A' .. 'Z'       -> true
+  | '\x7f' .. '\xff' -> true
+  | _                -> false
 
 (* Lexing *)
 
@@ -354,7 +363,7 @@ let scan_octal_or_float lexer =
   match ch with
   | '.' -> (* 0. *) scan_after_decimal_point lexer
   | 'e' | 'E' -> (* 0e *) scan_exponent lexer
-  | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ->
+  | '0' .. '9' ->
     (* 05 *)
     let lexer_oct = scan_octal_digits lexer in
     let lexer_dec = scan_decimal_digits lexer in
@@ -495,7 +504,7 @@ let skip_uninteresting_double_quote_like_string_characters (l : lexer) start_cha
   let is_uninteresting ch =
     match ch with
     | '\000' | '\\' | '$' | '{' | '[' | ']' | '-'
-    | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' -> false
+    | '0' .. '9' -> false
     | ch -> ch <> start_char && not (is_name_nondigit ch) in
   skip_while l is_uninteresting
 
@@ -630,7 +639,7 @@ let scan_string_literal_in_progress lexer literal_kind =
       | '\\' | '"' | '$' | 'e' | 'f' | 'n' | 'r' | 't' | 'v' | '`'
       (* Same in these cases; there might be more octal characters following but
          if there are, we'll just eat them as normal characters. *)
-      | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' ->
+      | '0' .. '7' ->
         let lexer = advance lexer 2 in
         let lexer =
           skip_uninteresting_double_quote_like_string_characters
@@ -698,7 +707,7 @@ let scan_string_literal_in_progress lexer literal_kind =
           skip_uninteresting_double_quote_like_string_characters
             lexer start_char in
         (lexer, TokenKind.StringLiteralBody)
-    | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ->
+    | '0' .. '9' ->
       let (lexer1, _) as literal = scan_integer_literal lexer in
       if errors lexer == errors lexer1 then literal else
         (* If we failed to scan a literal, do not interpret the literal *)
@@ -1001,7 +1010,7 @@ let scan_token in_type lexer =
   | '.' -> begin
     match peek_char lexer 1 with
     | '=' -> (advance lexer 2, TokenKind.DotEqual)
-    | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ->
+    | '0' .. '9' ->
       scan_after_decimal_point lexer
     | '.' ->
       if (peek_char lexer 2) = '.' then (advance lexer 3, TokenKind.DotDotDot)
@@ -1112,7 +1121,7 @@ let scan_token in_type lexer =
     | 'b' | 'B' -> scan_binary_literal (advance lexer 2)
     | _ -> scan_octal_or_float lexer
     end
-  | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ->
+  | '1' .. '9' ->
     scan_decimal_or_float lexer
   | '\'' -> scan_single_quote_string_literal lexer
   | '`' -> scan_double_quote_like_string_literal_from_start lexer '`'

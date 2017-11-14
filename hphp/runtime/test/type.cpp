@@ -114,7 +114,7 @@ TEST(Type, ToString) {
   EXPECT_EQ("Int", TInt.toString());
   EXPECT_EQ("Cell", TCell.toString());
   EXPECT_EQ("BoxedDbl", TBoxedDbl.toString());
-  EXPECT_EQ("Boxed{Int|Dbl}", (TBoxedInt | TBoxedDbl).toString());
+  EXPECT_EQ("Boxed{Dbl|Int}", (TBoxedInt | TBoxedDbl).toString());
 
   EXPECT_EQ("Vec", TVec.toString());
   EXPECT_EQ("Dict", TDict.toString());
@@ -144,7 +144,7 @@ TEST(Type, ToString) {
   EXPECT_EQ("Cls=Iterator",
             Type::ExactCls(SystemLib::s_IteratorClass).toString());
 
-  EXPECT_EQ("{Func|ABC}", (TABC | TFunc).toString());
+  EXPECT_EQ("{ABC|Func}", (TABC | TFunc).toString());
 
   EXPECT_EQ("InitNull", TInitNull.constValString());
 
@@ -282,7 +282,7 @@ TEST(Type, Ptr) {
 
 TEST(Type, Subtypes) {
   Type numbers = TDbl | TInt;
-  EXPECT_EQ("{Int|Dbl}", numbers.toString());
+  EXPECT_EQ("{Dbl|Int}", numbers.toString());
   EXPECT_TRUE(TDbl <= numbers);
   EXPECT_TRUE(TInt <= numbers);
   EXPECT_FALSE(TBool <= numbers);

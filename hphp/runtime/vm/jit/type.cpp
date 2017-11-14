@@ -234,12 +234,41 @@ std::string Type::toString() const {
     }
   }
 
-  // Concat all of the primitive types in the custom union type
-# define IRT(name, ...) if (T##name <= t) parts.push_back(#name);
-# define IRTP(name, ...)
-  IRT_PRIMITIVE
-# undef IRT
-# undef IRTP
+  // Sort all types by decreasing number of bits in their representation. This
+  // ensures that larger unions come first.
+  static auto const sortedTypes = []{
+    std::vector<std::pair<Type, const char*>> types{
+#define IRT(x, ...) {T##x, #x},
+#define IRTP IRT
+      IR_TYPES
+#undef IRT
+#undef IRTP
+    };
+    std::sort(
+      types.begin(), types.end(),
+      [](const std::pair<Type, const char*>& a,
+         const std::pair<Type, const char*>& b) {
+        auto const pop1 = folly::popcount(a.first.m_bits);
+        auto const pop2 = folly::popcount(b.first.m_bits);
+        if (pop1 != pop2) return pop1 > pop2;
+        return std::strcmp(a.second, b.second) < 0;
+      }
+    );
+    // Remove Bottom
+    while (!types.back().first.m_bits) types.pop_back();
+    return types;
+  }();
+
+  // Decompose the type into a union of pre-defined types. Since we've sorted
+  // the type list in decreasing size, this means the decomposition will be
+  // minimal.
+  for (auto const& t2 : sortedTypes) {
+    if (t <= TBottom) break;
+    if (t2.first <= t) {
+      parts.push_back(t2.second);
+      t -= t2.first;
+    }
+  }
 
   assertx(!parts.empty());
   if (parts.size() == 1) return parts.front();

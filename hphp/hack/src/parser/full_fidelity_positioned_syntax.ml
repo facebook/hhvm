@@ -1899,16 +1899,29 @@ module FromMinimal = struct
           XHPSimpleClassAttribute
           { xhp_simple_class_attribute_type
           }, results
-      | SyntaxKind.XHPAttribute
-      , (  xhp_attribute_expression
-        :: xhp_attribute_equal
-        :: xhp_attribute_name
+      | SyntaxKind.XHPSimpleAttribute
+      , (  xhp_simple_attribute_expression
+        :: xhp_simple_attribute_equal
+        :: xhp_simple_attribute_name
         :: results
         ) ->
-          XHPAttribute
-          { xhp_attribute_name
-          ; xhp_attribute_equal
-          ; xhp_attribute_expression
+          XHPSimpleAttribute
+          { xhp_simple_attribute_name
+          ; xhp_simple_attribute_equal
+          ; xhp_simple_attribute_expression
+          }, results
+      | SyntaxKind.XHPSpreadAttribute
+      , (  xhp_spread_attribute_right_brace
+        :: xhp_spread_attribute_expression
+        :: xhp_spread_attribute_spread_operator
+        :: xhp_spread_attribute_left_brace
+        :: results
+        ) ->
+          XHPSpreadAttribute
+          { xhp_spread_attribute_left_brace
+          ; xhp_spread_attribute_spread_operator
+          ; xhp_spread_attribute_expression
+          ; xhp_spread_attribute_right_brace
           }, results
       | SyntaxKind.XHPOpen
       , (  xhp_open_right_angle
@@ -3779,16 +3792,28 @@ module FromMinimal = struct
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         convert offset todo results xhp_simple_class_attribute_type
-    | { M.syntax = M.XHPAttribute
-        { M.xhp_attribute_name
-        ; M.xhp_attribute_equal
-        ; M.xhp_attribute_expression
+    | { M.syntax = M.XHPSimpleAttribute
+        { M.xhp_simple_attribute_name
+        ; M.xhp_simple_attribute_equal
+        ; M.xhp_simple_attribute_expression
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_attribute_expression, todo) in
-        let todo = Convert (xhp_attribute_equal, todo) in
-        convert offset todo results xhp_attribute_name
+        let todo = Convert (xhp_simple_attribute_expression, todo) in
+        let todo = Convert (xhp_simple_attribute_equal, todo) in
+        convert offset todo results xhp_simple_attribute_name
+    | { M.syntax = M.XHPSpreadAttribute
+        { M.xhp_spread_attribute_left_brace
+        ; M.xhp_spread_attribute_spread_operator
+        ; M.xhp_spread_attribute_expression
+        ; M.xhp_spread_attribute_right_brace
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (xhp_spread_attribute_right_brace, todo) in
+        let todo = Convert (xhp_spread_attribute_expression, todo) in
+        let todo = Convert (xhp_spread_attribute_spread_operator, todo) in
+        convert offset todo results xhp_spread_attribute_left_brace
     | { M.syntax = M.XHPOpen
         { M.xhp_open_left_angle
         ; M.xhp_open_name

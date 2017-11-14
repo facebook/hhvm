@@ -396,8 +396,10 @@ abstract class EditableSyntax implements ArrayAccess {
       return XHPClassAttribute::from_json($json, $position, $source);
     case 'xhp_simple_class_attribute':
       return XHPSimpleClassAttribute::from_json($json, $position, $source);
-    case 'xhp_attribute':
-      return XHPAttribute::from_json($json, $position, $source);
+    case 'xhp_simple_attribute':
+      return XHPSimpleAttribute::from_json($json, $position, $source);
+    case 'xhp_spread_attribute':
+      return XHPSpreadAttribute::from_json($json, $position, $source);
     case 'xhp_open':
       return XHPOpen::from_json($json, $position, $source);
     case 'xhp_expression':
@@ -18462,7 +18464,7 @@ final class XHPSimpleClassAttribute extends EditableSyntax {
     yield break;
   }
 }
-final class XHPAttribute extends EditableSyntax {
+final class XHPSimpleAttribute extends EditableSyntax {
   private EditableSyntax $_name;
   private EditableSyntax $_equal;
   private EditableSyntax $_expression;
@@ -18470,7 +18472,7 @@ final class XHPAttribute extends EditableSyntax {
     EditableSyntax $name,
     EditableSyntax $equal,
     EditableSyntax $expression) {
-    parent::__construct('xhp_attribute');
+    parent::__construct('xhp_simple_attribute');
     $this->_name = $name;
     $this->_equal = $equal;
     $this->_expression = $expression;
@@ -18484,20 +18486,20 @@ final class XHPAttribute extends EditableSyntax {
   public function expression(): EditableSyntax {
     return $this->_expression;
   }
-  public function with_name(EditableSyntax $name): XHPAttribute {
-    return new XHPAttribute(
+  public function with_name(EditableSyntax $name): XHPSimpleAttribute {
+    return new XHPSimpleAttribute(
       $name,
       $this->_equal,
       $this->_expression);
   }
-  public function with_equal(EditableSyntax $equal): XHPAttribute {
-    return new XHPAttribute(
+  public function with_equal(EditableSyntax $equal): XHPSimpleAttribute {
+    return new XHPSimpleAttribute(
       $this->_name,
       $equal,
       $this->_expression);
   }
-  public function with_expression(EditableSyntax $expression): XHPAttribute {
-    return new XHPAttribute(
+  public function with_expression(EditableSyntax $expression): XHPSimpleAttribute {
+    return new XHPSimpleAttribute(
       $this->_name,
       $this->_equal,
       $expression);
@@ -18518,7 +18520,7 @@ final class XHPAttribute extends EditableSyntax {
       $expression === $this->expression()) {
       return $rewriter($this, $parents ?? []);
     } else {
-      return $rewriter(new XHPAttribute(
+      return $rewriter(new XHPSimpleAttribute(
         $name,
         $equal,
         $expression), $parents ?? []);
@@ -18527,15 +18529,15 @@ final class XHPAttribute extends EditableSyntax {
 
   public static function from_json(mixed $json, int $position, string $source) {
     $name = EditableSyntax::from_json(
-      $json->xhp_attribute_name, $position, $source);
+      $json->xhp_simple_attribute_name, $position, $source);
     $position += $name->width();
     $equal = EditableSyntax::from_json(
-      $json->xhp_attribute_equal, $position, $source);
+      $json->xhp_simple_attribute_equal, $position, $source);
     $position += $equal->width();
     $expression = EditableSyntax::from_json(
-      $json->xhp_attribute_expression, $position, $source);
+      $json->xhp_simple_attribute_expression, $position, $source);
     $position += $expression->width();
-    return new XHPAttribute(
+    return new XHPSimpleAttribute(
         $name,
         $equal,
         $expression);
@@ -18544,6 +18546,115 @@ final class XHPAttribute extends EditableSyntax {
     yield $this->_name;
     yield $this->_equal;
     yield $this->_expression;
+    yield break;
+  }
+}
+final class XHPSpreadAttribute extends EditableSyntax {
+  private EditableSyntax $_left_brace;
+  private EditableSyntax $_spread_operator;
+  private EditableSyntax $_expression;
+  private EditableSyntax $_right_brace;
+  public function __construct(
+    EditableSyntax $left_brace,
+    EditableSyntax $spread_operator,
+    EditableSyntax $expression,
+    EditableSyntax $right_brace) {
+    parent::__construct('xhp_spread_attribute');
+    $this->_left_brace = $left_brace;
+    $this->_spread_operator = $spread_operator;
+    $this->_expression = $expression;
+    $this->_right_brace = $right_brace;
+  }
+  public function left_brace(): EditableSyntax {
+    return $this->_left_brace;
+  }
+  public function spread_operator(): EditableSyntax {
+    return $this->_spread_operator;
+  }
+  public function expression(): EditableSyntax {
+    return $this->_expression;
+  }
+  public function right_brace(): EditableSyntax {
+    return $this->_right_brace;
+  }
+  public function with_left_brace(EditableSyntax $left_brace): XHPSpreadAttribute {
+    return new XHPSpreadAttribute(
+      $left_brace,
+      $this->_spread_operator,
+      $this->_expression,
+      $this->_right_brace);
+  }
+  public function with_spread_operator(EditableSyntax $spread_operator): XHPSpreadAttribute {
+    return new XHPSpreadAttribute(
+      $this->_left_brace,
+      $spread_operator,
+      $this->_expression,
+      $this->_right_brace);
+  }
+  public function with_expression(EditableSyntax $expression): XHPSpreadAttribute {
+    return new XHPSpreadAttribute(
+      $this->_left_brace,
+      $this->_spread_operator,
+      $expression,
+      $this->_right_brace);
+  }
+  public function with_right_brace(EditableSyntax $right_brace): XHPSpreadAttribute {
+    return new XHPSpreadAttribute(
+      $this->_left_brace,
+      $this->_spread_operator,
+      $this->_expression,
+      $right_brace);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $left_brace = $this->left_brace()->rewrite($rewriter, $new_parents);
+    $spread_operator = $this->spread_operator()->rewrite($rewriter, $new_parents);
+    $expression = $this->expression()->rewrite($rewriter, $new_parents);
+    $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
+    if (
+      $left_brace === $this->left_brace() &&
+      $spread_operator === $this->spread_operator() &&
+      $expression === $this->expression() &&
+      $right_brace === $this->right_brace()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new XHPSpreadAttribute(
+        $left_brace,
+        $spread_operator,
+        $expression,
+        $right_brace), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $left_brace = EditableSyntax::from_json(
+      $json->xhp_spread_attribute_left_brace, $position, $source);
+    $position += $left_brace->width();
+    $spread_operator = EditableSyntax::from_json(
+      $json->xhp_spread_attribute_spread_operator, $position, $source);
+    $position += $spread_operator->width();
+    $expression = EditableSyntax::from_json(
+      $json->xhp_spread_attribute_expression, $position, $source);
+    $position += $expression->width();
+    $right_brace = EditableSyntax::from_json(
+      $json->xhp_spread_attribute_right_brace, $position, $source);
+    $position += $right_brace->width();
+    return new XHPSpreadAttribute(
+        $left_brace,
+        $spread_operator,
+        $expression,
+        $right_brace);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_left_brace;
+    yield $this->_spread_operator;
+    yield $this->_expression;
+    yield $this->_right_brace;
     yield break;
   }
 }

@@ -1325,13 +1325,22 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         when_present req space;
         t req;
       ]
-    | XHPAttribute x ->
-      let (name, eq, expr) = get_xhp_attribute_children x in
+    | XHPSimpleAttribute x ->
+      let (name, eq, expr) = get_xhp_simple_attribute_children x in
       Span [
         t name;
         t eq;
         SplitWith Cost.Base;
         Nest [t expr];
+      ]
+    | XHPSpreadAttribute x ->
+      let (l_brace, spread, expr, r_brace) = get_xhp_spread_attribute_children x in
+      Span [
+        t l_brace;
+        t spread;
+        SplitWith Cost.Base;
+        Nest [t expr];
+        t r_brace;
       ]
     | XHPOpen x ->
       let (left_a, name, attrs, right_a) = get_xhp_open_children x in

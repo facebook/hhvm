@@ -182,7 +182,8 @@ module WithToken(Token: TokenType) = struct
       | XHPClassAttributeDeclaration            _ -> SyntaxKind.XHPClassAttributeDeclaration
       | XHPClassAttribute                       _ -> SyntaxKind.XHPClassAttribute
       | XHPSimpleClassAttribute                 _ -> SyntaxKind.XHPSimpleClassAttribute
-      | XHPAttribute                            _ -> SyntaxKind.XHPAttribute
+      | XHPSimpleAttribute                      _ -> SyntaxKind.XHPSimpleAttribute
+      | XHPSpreadAttribute                      _ -> SyntaxKind.XHPSpreadAttribute
       | XHPOpen                                 _ -> SyntaxKind.XHPOpen
       | XHPExpression                           _ -> SyntaxKind.XHPExpression
       | XHPClose                                _ -> SyntaxKind.XHPClose
@@ -351,7 +352,8 @@ module WithToken(Token: TokenType) = struct
     let is_xhp_class_attribute_declaration              = has_kind SyntaxKind.XHPClassAttributeDeclaration
     let is_xhp_class_attribute                          = has_kind SyntaxKind.XHPClassAttribute
     let is_xhp_simple_class_attribute                   = has_kind SyntaxKind.XHPSimpleClassAttribute
-    let is_xhp_attribute                                = has_kind SyntaxKind.XHPAttribute
+    let is_xhp_simple_attribute                         = has_kind SyntaxKind.XHPSimpleAttribute
+    let is_xhp_spread_attribute                         = has_kind SyntaxKind.XHPSpreadAttribute
     let is_xhp_open                                     = has_kind SyntaxKind.XHPOpen
     let is_xhp_expression                               = has_kind SyntaxKind.XHPExpression
     let is_xhp_close                                    = has_kind SyntaxKind.XHPClose
@@ -1892,14 +1894,26 @@ module WithToken(Token: TokenType) = struct
       xhp_simple_class_attribute_type
     )
 
-    let get_xhp_attribute_children {
-      xhp_attribute_name;
-      xhp_attribute_equal;
-      xhp_attribute_expression;
+    let get_xhp_simple_attribute_children {
+      xhp_simple_attribute_name;
+      xhp_simple_attribute_equal;
+      xhp_simple_attribute_expression;
     } = (
-      xhp_attribute_name,
-      xhp_attribute_equal,
-      xhp_attribute_expression
+      xhp_simple_attribute_name,
+      xhp_simple_attribute_equal,
+      xhp_simple_attribute_expression
+    )
+
+    let get_xhp_spread_attribute_children {
+      xhp_spread_attribute_left_brace;
+      xhp_spread_attribute_spread_operator;
+      xhp_spread_attribute_expression;
+      xhp_spread_attribute_right_brace;
+    } = (
+      xhp_spread_attribute_left_brace,
+      xhp_spread_attribute_spread_operator,
+      xhp_spread_attribute_expression,
+      xhp_spread_attribute_right_brace
     )
 
     let get_xhp_open_children {
@@ -3591,14 +3605,25 @@ module WithToken(Token: TokenType) = struct
       } ->
          let acc = f acc xhp_simple_class_attribute_type in
          acc
-      | XHPAttribute {
-        xhp_attribute_name;
-        xhp_attribute_equal;
-        xhp_attribute_expression;
+      | XHPSimpleAttribute {
+        xhp_simple_attribute_name;
+        xhp_simple_attribute_equal;
+        xhp_simple_attribute_expression;
       } ->
-         let acc = f acc xhp_attribute_name in
-         let acc = f acc xhp_attribute_equal in
-         let acc = f acc xhp_attribute_expression in
+         let acc = f acc xhp_simple_attribute_name in
+         let acc = f acc xhp_simple_attribute_equal in
+         let acc = f acc xhp_simple_attribute_expression in
+         acc
+      | XHPSpreadAttribute {
+        xhp_spread_attribute_left_brace;
+        xhp_spread_attribute_spread_operator;
+        xhp_spread_attribute_expression;
+        xhp_spread_attribute_right_brace;
+      } ->
+         let acc = f acc xhp_spread_attribute_left_brace in
+         let acc = f acc xhp_spread_attribute_spread_operator in
+         let acc = f acc xhp_spread_attribute_expression in
+         let acc = f acc xhp_spread_attribute_right_brace in
          acc
       | XHPOpen {
         xhp_open_left_angle;
@@ -5261,14 +5286,25 @@ module WithToken(Token: TokenType) = struct
       } -> [
         xhp_simple_class_attribute_type;
       ]
-      | XHPAttribute {
-        xhp_attribute_name;
-        xhp_attribute_equal;
-        xhp_attribute_expression;
+      | XHPSimpleAttribute {
+        xhp_simple_attribute_name;
+        xhp_simple_attribute_equal;
+        xhp_simple_attribute_expression;
       } -> [
-        xhp_attribute_name;
-        xhp_attribute_equal;
-        xhp_attribute_expression;
+        xhp_simple_attribute_name;
+        xhp_simple_attribute_equal;
+        xhp_simple_attribute_expression;
+      ]
+      | XHPSpreadAttribute {
+        xhp_spread_attribute_left_brace;
+        xhp_spread_attribute_spread_operator;
+        xhp_spread_attribute_expression;
+        xhp_spread_attribute_right_brace;
+      } -> [
+        xhp_spread_attribute_left_brace;
+        xhp_spread_attribute_spread_operator;
+        xhp_spread_attribute_expression;
+        xhp_spread_attribute_right_brace;
       ]
       | XHPOpen {
         xhp_open_left_angle;
@@ -6932,14 +6968,25 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "xhp_simple_class_attribute_type";
       ]
-      | XHPAttribute {
-        xhp_attribute_name;
-        xhp_attribute_equal;
-        xhp_attribute_expression;
+      | XHPSimpleAttribute {
+        xhp_simple_attribute_name;
+        xhp_simple_attribute_equal;
+        xhp_simple_attribute_expression;
       } -> [
-        "xhp_attribute_name";
-        "xhp_attribute_equal";
-        "xhp_attribute_expression";
+        "xhp_simple_attribute_name";
+        "xhp_simple_attribute_equal";
+        "xhp_simple_attribute_expression";
+      ]
+      | XHPSpreadAttribute {
+        xhp_spread_attribute_left_brace;
+        xhp_spread_attribute_spread_operator;
+        xhp_spread_attribute_expression;
+        xhp_spread_attribute_right_brace;
+      } -> [
+        "xhp_spread_attribute_left_brace";
+        "xhp_spread_attribute_spread_operator";
+        "xhp_spread_attribute_expression";
+        "xhp_spread_attribute_right_brace";
       ]
       | XHPOpen {
         xhp_open_left_angle;
@@ -8783,15 +8830,27 @@ module WithToken(Token: TokenType) = struct
         XHPSimpleClassAttribute {
           xhp_simple_class_attribute_type;
         }
-      | (SyntaxKind.XHPAttribute, [
-          xhp_attribute_name;
-          xhp_attribute_equal;
-          xhp_attribute_expression;
+      | (SyntaxKind.XHPSimpleAttribute, [
+          xhp_simple_attribute_name;
+          xhp_simple_attribute_equal;
+          xhp_simple_attribute_expression;
         ]) ->
-        XHPAttribute {
-          xhp_attribute_name;
-          xhp_attribute_equal;
-          xhp_attribute_expression;
+        XHPSimpleAttribute {
+          xhp_simple_attribute_name;
+          xhp_simple_attribute_equal;
+          xhp_simple_attribute_expression;
+        }
+      | (SyntaxKind.XHPSpreadAttribute, [
+          xhp_spread_attribute_left_brace;
+          xhp_spread_attribute_spread_operator;
+          xhp_spread_attribute_expression;
+          xhp_spread_attribute_right_brace;
+        ]) ->
+        XHPSpreadAttribute {
+          xhp_spread_attribute_left_brace;
+          xhp_spread_attribute_spread_operator;
+          xhp_spread_attribute_expression;
+          xhp_spread_attribute_right_brace;
         }
       | (SyntaxKind.XHPOpen, [
           xhp_open_left_angle;
@@ -11023,15 +11082,30 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_xhp_attribute
-        xhp_attribute_name
-        xhp_attribute_equal
-        xhp_attribute_expression
+      let make_xhp_simple_attribute
+        xhp_simple_attribute_name
+        xhp_simple_attribute_equal
+        xhp_simple_attribute_expression
       =
-        let syntax = XHPAttribute {
-          xhp_attribute_name;
-          xhp_attribute_equal;
-          xhp_attribute_expression;
+        let syntax = XHPSimpleAttribute {
+          xhp_simple_attribute_name;
+          xhp_simple_attribute_equal;
+          xhp_simple_attribute_expression;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_xhp_spread_attribute
+        xhp_spread_attribute_left_brace
+        xhp_spread_attribute_spread_operator
+        xhp_spread_attribute_expression
+        xhp_spread_attribute_right_brace
+      =
+        let syntax = XHPSpreadAttribute {
+          xhp_spread_attribute_left_brace;
+          xhp_spread_attribute_spread_operator;
+          xhp_spread_attribute_expression;
+          xhp_spread_attribute_right_brace;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

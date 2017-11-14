@@ -19,6 +19,7 @@ type aggregate_type =
   | LambdaBody
   | ConstructorExpression
   | NamespaceInternals
+  | XHPAttribute
   | TODO
 
 type child_spec =
@@ -1632,16 +1633,29 @@ let schema : schema_node list =
     ; aggregates  = []
     ; fields      = [ "type", Just "SimpleTypeSpecifier" ]
     }
-  ; { kind_name   = "XHPAttribute"
-    ; type_name   = "xhp_attribute"
-    ; func_name   = "xhp_attribute"
-    ; description = "xhp_attribute"
-    ; prefix      = "xhp_attribute"
-    ; aggregates  = []
+  ; { kind_name   = "XHPSimpleAttribute"
+    ; type_name   = "xhp_simple_attribute"
+    ; func_name   = "xhp_simple_attribute"
+    ; description = "xhp_simple_attribute"
+    ; prefix      = "xhp_simple_attribute"
+    ; aggregates  = [ XHPAttribute ]
     ; fields =
       [ "name", Token
       ; "equal", Token
       ; "expression", Aggregate Expression
+      ]
+    }
+  ; { kind_name   = "XHPSpreadAttribute"
+    ; type_name   = "xhp_spread_attribute"
+    ; func_name   = "xhp_spread_attribute"
+    ; description = "xhp_spread_attribute"
+    ; prefix      = "xhp_spread_attribute"
+    ; aggregates  = [ XHPAttribute ]
+    ; fields =
+      [ "left_brace", Token
+      ; "spread_operator", Token
+      ; "expression", Aggregate Expression
+      ; "right_brace", Token
       ]
     }
   ; { kind_name   = "XHPOpen"
@@ -1653,7 +1667,7 @@ let schema : schema_node list =
     ; fields =
       [ "left_angle", Token
       ; "name", Token
-      ; "attributes", ZeroOrMore (Just "XHPAttribute")
+      ; "attributes", ZeroOrMore (Aggregate XHPAttribute)
       ; "right_angle", Token
       ]
     }
@@ -2033,6 +2047,7 @@ let generated_aggregate_types =
   ; LambdaBody
   ; ConstructorExpression
   ; NamespaceInternals
+  ; XHPAttribute
   ; TODO
   ]
 
@@ -2047,6 +2062,7 @@ let string_of_aggregate_type = function
   | LambdaBody             -> "LambdaBody"
   | ConstructorExpression  -> "ConstructorExpression"
   | NamespaceInternals     -> "NamespaceInternals"
+  | XHPAttribute           -> "XHPAttribute"
   | TODO                   -> "TODO"
 
 module AggregateKey = struct
@@ -2076,6 +2092,8 @@ let aggregation_of_constructor_expression =
   List.filter (fun x -> List.mem ConstructorExpression x.aggregates) schema
 let aggregation_of_namespace_internals =
   List.filter (fun x -> List.mem NamespaceInternals    x.aggregates) schema
+let aggregation_of_xhp_attribute =
+  List.filter (fun x -> List.mem XHPAttribute          x.aggregates) schema
 let aggregation_of_todo_aggregate =
   List.filter (fun x -> List.mem TODO                  x.aggregates) schema
 
@@ -2090,6 +2108,7 @@ let aggregation_of = function
   | LambdaBody             -> aggregation_of_lambda_body
   | ConstructorExpression  -> aggregation_of_constructor_expression
   | NamespaceInternals     -> aggregation_of_namespace_internals
+  | XHPAttribute           -> aggregation_of_xhp_attribute
   | TODO                   -> aggregation_of_todo_aggregate
 
 let aggregate_type_name = function
@@ -2103,6 +2122,7 @@ let aggregate_type_name = function
   | LambdaBody             -> "lambda_body"
   | ConstructorExpression  -> "constructor_expression"
   | NamespaceInternals     -> "namespace_internals"
+  | XHPAttribute           -> "xhp_attribute"
   | TODO                   -> "todo_aggregate"
 
 let aggregate_type_pfx_trim = function
@@ -2116,6 +2136,7 @@ let aggregate_type_pfx_trim = function
   | LambdaBody             -> "Lambda", "Expression$"
   | ConstructorExpression  -> "CExpr",  "Expression$"
   | NamespaceInternals     -> "NSI",    ""
+  | XHPAttribute           -> "XHPAttr",""
   | TODO                   -> "TODO",   ""
 
 

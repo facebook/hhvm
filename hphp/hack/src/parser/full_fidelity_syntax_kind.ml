@@ -147,7 +147,8 @@ type t =
   | XHPClassAttributeDeclaration
   | XHPClassAttribute
   | XHPSimpleClassAttribute
-  | XHPAttribute
+  | XHPSimpleAttribute
+  | XHPSpreadAttribute
   | XHPOpen
   | XHPExpression
   | XHPClose
@@ -309,7 +310,8 @@ let to_string kind =
   | XHPClassAttributeDeclaration            -> "xhp_class_attribute_declaration"
   | XHPClassAttribute                       -> "xhp_class_attribute"
   | XHPSimpleClassAttribute                 -> "xhp_simple_class_attribute"
-  | XHPAttribute                            -> "xhp_attribute"
+  | XHPSimpleAttribute                      -> "xhp_simple_attribute"
+  | XHPSpreadAttribute                      -> "xhp_spread_attribute"
   | XHPOpen                                 -> "xhp_open"
   | XHPExpression                           -> "xhp_expression"
   | XHPClose                                -> "xhp_close"

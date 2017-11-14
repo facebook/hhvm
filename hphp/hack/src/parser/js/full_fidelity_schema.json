@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-11-06-0001",
+  "version" : "2017-11-13-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -1659,14 +1659,24 @@
       "fields" : [
         { "field_name" : "type" }
       ] },
-    { "kind_name" : "XHPAttribute",
-      "type_name" : "xhp_attribute",
-      "description" : "xhp_attribute",
-      "prefix" : "xhp_attribute",
+    { "kind_name" : "XHPSimpleAttribute",
+      "type_name" : "xhp_simple_attribute",
+      "description" : "xhp_simple_attribute",
+      "prefix" : "xhp_simple_attribute",
       "fields" : [
         { "field_name" : "name" },
         { "field_name" : "equal" },
         { "field_name" : "expression" }
+      ] },
+    { "kind_name" : "XHPSpreadAttribute",
+      "type_name" : "xhp_spread_attribute",
+      "description" : "xhp_spread_attribute",
+      "prefix" : "xhp_spread_attribute",
+      "fields" : [
+        { "field_name" : "left_brace" },
+        { "field_name" : "spread_operator" },
+        { "field_name" : "expression" },
+        { "field_name" : "right_brace" }
       ] },
     { "kind_name" : "XHPOpen",
       "type_name" : "xhp_open",

@@ -1304,12 +1304,20 @@ let rec get_doc node =
     let attrs = get_doc xhp_open_attributes in
     let right = get_doc xhp_open_right_angle in
     group_doc (group_doc (indent_doc (left ^^^ name) attrs indt) ^| right)
-  | XHPAttribute
-    { xhp_attribute_name; xhp_attribute_equal; xhp_attribute_expression }->
-    let name = get_doc xhp_attribute_name in
-    let equals = get_doc xhp_attribute_equal in
-    let expr = get_doc xhp_attribute_expression in
+  | XHPSimpleAttribute {
+    xhp_simple_attribute_name;
+    xhp_simple_attribute_equal;
+    xhp_simple_attribute_expression }->
+    let name = get_doc xhp_simple_attribute_name in
+    let equals = get_doc xhp_simple_attribute_equal in
+    let expr = get_doc xhp_simple_attribute_expression in
     group_doc (group_doc (name ^^| equals) ^^| expr)
+  | XHPSpreadAttribute x ->
+    let left = get_doc x.xhp_spread_attribute_left_brace in
+    let spread = get_doc x.xhp_spread_attribute_spread_operator in
+    let expr = get_doc x.xhp_spread_attribute_expression in
+    let right = get_doc x.xhp_spread_attribute_right_brace in
+    left ^^^ spread ^^^ expr ^^^ right
   | XHPClose x ->
     let left = get_doc x.xhp_close_left_angle in
     let name = get_doc x.xhp_close_name in

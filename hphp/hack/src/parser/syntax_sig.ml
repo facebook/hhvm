@@ -759,10 +759,16 @@ module type Syntax_S = sig
   type xhp_simple_class_attribute =
     { xhp_simple_class_attribute_type                    : t
     }
-  type xhp_attribute =
-    { xhp_attribute_name                                 : t
-    ; xhp_attribute_equal                                : t
-    ; xhp_attribute_expression                           : t
+  type xhp_simple_attribute =
+    { xhp_simple_attribute_name                          : t
+    ; xhp_simple_attribute_equal                         : t
+    ; xhp_simple_attribute_expression                    : t
+    }
+  type xhp_spread_attribute =
+    { xhp_spread_attribute_left_brace                    : t
+    ; xhp_spread_attribute_spread_operator               : t
+    ; xhp_spread_attribute_expression                    : t
+    ; xhp_spread_attribute_right_brace                   : t
     }
   type xhp_open =
     { xhp_open_left_angle                                : t
@@ -1062,7 +1068,8 @@ module type Syntax_S = sig
   | XHPClassAttributeDeclaration            of xhp_class_attribute_declaration
   | XHPClassAttribute                       of xhp_class_attribute
   | XHPSimpleClassAttribute                 of xhp_simple_class_attribute
-  | XHPAttribute                            of xhp_attribute
+  | XHPSimpleAttribute                      of xhp_simple_attribute
+  | XHPSpreadAttribute                      of xhp_spread_attribute
   | XHPOpen                                 of xhp_open
   | XHPExpression                           of xhp_expression
   | XHPClose                                of xhp_close
@@ -1234,7 +1241,8 @@ module type Syntax_S = sig
   val make_xhp_class_attribute_declaration : t -> t -> t -> t
   val make_xhp_class_attribute : t -> t -> t -> t -> t
   val make_xhp_simple_class_attribute : t -> t
-  val make_xhp_attribute : t -> t -> t -> t
+  val make_xhp_simple_attribute : t -> t -> t -> t
+  val make_xhp_spread_attribute : t -> t -> t -> t -> t
   val make_xhp_open : t -> t -> t -> t -> t
   val make_xhp_expression : t -> t -> t -> t
   val make_xhp_close : t -> t -> t -> t
@@ -1394,7 +1402,8 @@ module type Syntax_S = sig
   val is_xhp_class_attribute_declaration : t -> bool
   val is_xhp_class_attribute : t -> bool
   val is_xhp_simple_class_attribute : t -> bool
-  val is_xhp_attribute : t -> bool
+  val is_xhp_simple_attribute : t -> bool
+  val is_xhp_spread_attribute : t -> bool
   val is_xhp_open : t -> bool
   val is_xhp_expression : t -> bool
   val is_xhp_close : t -> bool

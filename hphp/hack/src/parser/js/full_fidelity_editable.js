@@ -333,8 +333,10 @@ class EditableSyntax
       return XHPClassAttribute.from_json(json, position, source);
     case 'xhp_simple_class_attribute':
       return XHPSimpleClassAttribute.from_json(json, position, source);
-    case 'xhp_attribute':
-      return XHPAttribute.from_json(json, position, source);
+    case 'xhp_simple_attribute':
+      return XHPSimpleAttribute.from_json(json, position, source);
+    case 'xhp_spread_attribute':
+      return XHPSpreadAttribute.from_json(json, position, source);
     case 'xhp_open':
       return XHPOpen.from_json(json, position, source);
     case 'xhp_expression':
@@ -16142,14 +16144,14 @@ class XHPSimpleClassAttribute extends EditableSyntax
     return XHPSimpleClassAttribute._children_keys;
   }
 }
-class XHPAttribute extends EditableSyntax
+class XHPSimpleAttribute extends EditableSyntax
 {
   constructor(
     name,
     equal,
     expression)
   {
-    super('xhp_attribute', {
+    super('xhp_simple_attribute', {
       name: name,
       equal: equal,
       expression: expression });
@@ -16158,19 +16160,19 @@ class XHPAttribute extends EditableSyntax
   get equal() { return this.children.equal; }
   get expression() { return this.children.expression; }
   with_name(name){
-    return new XHPAttribute(
+    return new XHPSimpleAttribute(
       name,
       this.equal,
       this.expression);
   }
   with_equal(equal){
-    return new XHPAttribute(
+    return new XHPSimpleAttribute(
       this.name,
       equal,
       this.expression);
   }
   with_expression(expression){
-    return new XHPAttribute(
+    return new XHPSimpleAttribute(
       this.name,
       this.equal,
       expression);
@@ -16193,7 +16195,7 @@ class XHPAttribute extends EditableSyntax
     }
     else
     {
-      return rewriter(new XHPAttribute(
+      return rewriter(new XHPSimpleAttribute(
         name,
         equal,
         expression), parents);
@@ -16202,27 +16204,131 @@ class XHPAttribute extends EditableSyntax
   static from_json(json, position, source)
   {
     let name = EditableSyntax.from_json(
-      json.xhp_attribute_name, position, source);
+      json.xhp_simple_attribute_name, position, source);
     position += name.width;
     let equal = EditableSyntax.from_json(
-      json.xhp_attribute_equal, position, source);
+      json.xhp_simple_attribute_equal, position, source);
     position += equal.width;
     let expression = EditableSyntax.from_json(
-      json.xhp_attribute_expression, position, source);
+      json.xhp_simple_attribute_expression, position, source);
     position += expression.width;
-    return new XHPAttribute(
+    return new XHPSimpleAttribute(
         name,
         equal,
         expression);
   }
   get children_keys()
   {
-    if (XHPAttribute._children_keys == null)
-      XHPAttribute._children_keys = [
+    if (XHPSimpleAttribute._children_keys == null)
+      XHPSimpleAttribute._children_keys = [
         'name',
         'equal',
         'expression'];
-    return XHPAttribute._children_keys;
+    return XHPSimpleAttribute._children_keys;
+  }
+}
+class XHPSpreadAttribute extends EditableSyntax
+{
+  constructor(
+    left_brace,
+    spread_operator,
+    expression,
+    right_brace)
+  {
+    super('xhp_spread_attribute', {
+      left_brace: left_brace,
+      spread_operator: spread_operator,
+      expression: expression,
+      right_brace: right_brace });
+  }
+  get left_brace() { return this.children.left_brace; }
+  get spread_operator() { return this.children.spread_operator; }
+  get expression() { return this.children.expression; }
+  get right_brace() { return this.children.right_brace; }
+  with_left_brace(left_brace){
+    return new XHPSpreadAttribute(
+      left_brace,
+      this.spread_operator,
+      this.expression,
+      this.right_brace);
+  }
+  with_spread_operator(spread_operator){
+    return new XHPSpreadAttribute(
+      this.left_brace,
+      spread_operator,
+      this.expression,
+      this.right_brace);
+  }
+  with_expression(expression){
+    return new XHPSpreadAttribute(
+      this.left_brace,
+      this.spread_operator,
+      expression,
+      this.right_brace);
+  }
+  with_right_brace(right_brace){
+    return new XHPSpreadAttribute(
+      this.left_brace,
+      this.spread_operator,
+      this.expression,
+      right_brace);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var spread_operator = this.spread_operator.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
+    if (
+      left_brace === this.left_brace &&
+      spread_operator === this.spread_operator &&
+      expression === this.expression &&
+      right_brace === this.right_brace)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new XHPSpreadAttribute(
+        left_brace,
+        spread_operator,
+        expression,
+        right_brace), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let left_brace = EditableSyntax.from_json(
+      json.xhp_spread_attribute_left_brace, position, source);
+    position += left_brace.width;
+    let spread_operator = EditableSyntax.from_json(
+      json.xhp_spread_attribute_spread_operator, position, source);
+    position += spread_operator.width;
+    let expression = EditableSyntax.from_json(
+      json.xhp_spread_attribute_expression, position, source);
+    position += expression.width;
+    let right_brace = EditableSyntax.from_json(
+      json.xhp_spread_attribute_right_brace, position, source);
+    position += right_brace.width;
+    return new XHPSpreadAttribute(
+        left_brace,
+        spread_operator,
+        expression,
+        right_brace);
+  }
+  get children_keys()
+  {
+    if (XHPSpreadAttribute._children_keys == null)
+      XHPSpreadAttribute._children_keys = [
+        'left_brace',
+        'spread_operator',
+        'expression',
+        'right_brace'];
+    return XHPSpreadAttribute._children_keys;
   }
 }
 class XHPOpen extends EditableSyntax
@@ -19539,7 +19645,8 @@ exports.XHPRequired = XHPRequired;
 exports.XHPClassAttributeDeclaration = XHPClassAttributeDeclaration;
 exports.XHPClassAttribute = XHPClassAttribute;
 exports.XHPSimpleClassAttribute = XHPSimpleClassAttribute;
-exports.XHPAttribute = XHPAttribute;
+exports.XHPSimpleAttribute = XHPSimpleAttribute;
+exports.XHPSpreadAttribute = XHPSpreadAttribute;
 exports.XHPOpen = XHPOpen;
 exports.XHPExpression = XHPExpression;
 exports.XHPClose = XHPClose;

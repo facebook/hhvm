@@ -813,10 +813,16 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and xhp_simple_class_attribute =
     { xhp_simple_class_attribute_type                    : t
     }
-  and xhp_attribute =
-    { xhp_attribute_name                                 : t
-    ; xhp_attribute_equal                                : t
-    ; xhp_attribute_expression                           : t
+  and xhp_simple_attribute =
+    { xhp_simple_attribute_name                          : t
+    ; xhp_simple_attribute_equal                         : t
+    ; xhp_simple_attribute_expression                    : t
+    }
+  and xhp_spread_attribute =
+    { xhp_spread_attribute_left_brace                    : t
+    ; xhp_spread_attribute_spread_operator               : t
+    ; xhp_spread_attribute_expression                    : t
+    ; xhp_spread_attribute_right_brace                   : t
     }
   and xhp_open =
     { xhp_open_left_angle                                : t
@@ -1115,7 +1121,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | XHPClassAttributeDeclaration            of xhp_class_attribute_declaration
   | XHPClassAttribute                       of xhp_class_attribute
   | XHPSimpleClassAttribute                 of xhp_simple_class_attribute
-  | XHPAttribute                            of xhp_attribute
+  | XHPSimpleAttribute                      of xhp_simple_attribute
+  | XHPSpreadAttribute                      of xhp_spread_attribute
   | XHPOpen                                 of xhp_open
   | XHPExpression                           of xhp_expression
   | XHPClose                                of xhp_close
@@ -1409,6 +1416,9 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and namespace_internals =
   | NSINamespaceBody      of namespace_body
   | NSINamespaceEmptyBody of namespace_empty_body
+  and xhp_attribute =
+  | XHPAttrXHPSimpleAttribute of xhp_simple_attribute
+  | XHPAttrXHPSpreadAttribute of xhp_spread_attribute
   and todo_aggregate =
   | TODOEndOfFile of end_of_file
   and end_of_file =
@@ -2146,10 +2156,16 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and xhp_simple_class_attribute =
     { xhp_simple_class_attribute_type: simple_type_specifier value
     }
-  and xhp_attribute =
-    { xhp_attribute_name: Token.t value
-    ; xhp_attribute_equal: Token.t value
-    ; xhp_attribute_expression: expression value
+  and xhp_simple_attribute =
+    { xhp_simple_attribute_name: Token.t value
+    ; xhp_simple_attribute_equal: Token.t value
+    ; xhp_simple_attribute_expression: expression value
+    }
+  and xhp_spread_attribute =
+    { xhp_spread_attribute_left_brace: Token.t value
+    ; xhp_spread_attribute_spread_operator: Token.t value
+    ; xhp_spread_attribute_expression: expression value
+    ; xhp_spread_attribute_right_brace: Token.t value
     }
   and xhp_open =
     { xhp_open_left_angle: Token.t value

@@ -641,6 +641,15 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match thing with
     | NSINamespaceBody      thing -> invalidate_namespace_body                 (value, thing)
     | NSINamespaceEmptyBody thing -> invalidate_namespace_empty_body           (value, thing)
+  and validate_xhp_attribute : xhp_attribute validator = fun x ->
+    match Syntax.syntax x with
+    | Syntax.XHPSimpleAttribute _ -> tag validate_xhp_simple_attribute (fun x -> XHPAttrXHPSimpleAttribute x) x
+    | Syntax.XHPSpreadAttribute _ -> tag validate_xhp_spread_attribute (fun x -> XHPAttrXHPSpreadAttribute x) x
+    | s -> aggregation_fail Def.XHPAttribute s
+  and invalidate_xhp_attribute : xhp_attribute invalidator = fun (value, thing) ->
+    match thing with
+    | XHPAttrXHPSimpleAttribute thing -> invalidate_xhp_simple_attribute           (value, thing)
+    | XHPAttrXHPSpreadAttribute thing -> invalidate_xhp_spread_attribute           (value, thing)
   and validate_todo_aggregate : todo_aggregate validator = fun x ->
     match Syntax.syntax x with
     | Syntax.EndOfFile _ -> tag validate_end_of_file (fun x -> TODOEndOfFile x) x
@@ -2869,19 +2878,37 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
-  and validate_xhp_attribute : xhp_attribute validator = function
-  | { Syntax.syntax = Syntax.XHPAttribute x; value = v } -> v,
-    { xhp_attribute_expression = validate_expression x.Syntax.xhp_attribute_expression
-    ; xhp_attribute_equal = validate_token x.Syntax.xhp_attribute_equal
-    ; xhp_attribute_name = validate_token x.Syntax.xhp_attribute_name
+  and validate_xhp_simple_attribute : xhp_simple_attribute validator = function
+  | { Syntax.syntax = Syntax.XHPSimpleAttribute x; value = v } -> v,
+    { xhp_simple_attribute_expression = validate_expression x.Syntax.xhp_simple_attribute_expression
+    ; xhp_simple_attribute_equal = validate_token x.Syntax.xhp_simple_attribute_equal
+    ; xhp_simple_attribute_name = validate_token x.Syntax.xhp_simple_attribute_name
     }
-  | s -> validation_fail SyntaxKind.XHPAttribute s
-  and invalidate_xhp_attribute : xhp_attribute invalidator = fun (v, x) ->
+  | s -> validation_fail SyntaxKind.XHPSimpleAttribute s
+  and invalidate_xhp_simple_attribute : xhp_simple_attribute invalidator = fun (v, x) ->
     { Syntax.syntax =
-      Syntax.XHPAttribute
-      { Syntax.xhp_attribute_name = invalidate_token x.xhp_attribute_name
-      ; Syntax.xhp_attribute_equal = invalidate_token x.xhp_attribute_equal
-      ; Syntax.xhp_attribute_expression = invalidate_expression x.xhp_attribute_expression
+      Syntax.XHPSimpleAttribute
+      { Syntax.xhp_simple_attribute_name = invalidate_token x.xhp_simple_attribute_name
+      ; Syntax.xhp_simple_attribute_equal = invalidate_token x.xhp_simple_attribute_equal
+      ; Syntax.xhp_simple_attribute_expression = invalidate_expression x.xhp_simple_attribute_expression
+      }
+    ; Syntax.value = v
+    }
+  and validate_xhp_spread_attribute : xhp_spread_attribute validator = function
+  | { Syntax.syntax = Syntax.XHPSpreadAttribute x; value = v } -> v,
+    { xhp_spread_attribute_right_brace = validate_token x.Syntax.xhp_spread_attribute_right_brace
+    ; xhp_spread_attribute_expression = validate_expression x.Syntax.xhp_spread_attribute_expression
+    ; xhp_spread_attribute_spread_operator = validate_token x.Syntax.xhp_spread_attribute_spread_operator
+    ; xhp_spread_attribute_left_brace = validate_token x.Syntax.xhp_spread_attribute_left_brace
+    }
+  | s -> validation_fail SyntaxKind.XHPSpreadAttribute s
+  and invalidate_xhp_spread_attribute : xhp_spread_attribute invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.XHPSpreadAttribute
+      { Syntax.xhp_spread_attribute_left_brace = invalidate_token x.xhp_spread_attribute_left_brace
+      ; Syntax.xhp_spread_attribute_spread_operator = invalidate_token x.xhp_spread_attribute_spread_operator
+      ; Syntax.xhp_spread_attribute_expression = invalidate_expression x.xhp_spread_attribute_expression
+      ; Syntax.xhp_spread_attribute_right_brace = invalidate_token x.xhp_spread_attribute_right_brace
       }
     ; Syntax.value = v
     }

@@ -522,11 +522,11 @@ let xhp_errors node _parents hhvm_compat_mode errors =
    because it's easier to have one rule for tokenizing both attribute and
    element names. *)
   match syntax node with
-  |  XHPAttribute attr when
+  |  XHPSimpleAttribute attr when
     not hhvm_compat_mode &&
     (is_bad_xhp_attribute_name
-    (PositionedSyntax.text attr.xhp_attribute_name)) ->
-      make_error_from_node attr.xhp_attribute_name SyntaxError.error2002 :: errors
+    (PositionedSyntax.text attr.xhp_simple_attribute_name)) ->
+      make_error_from_node attr.xhp_simple_attribute_name SyntaxError.error2002 :: errors
   |  XHPEnumType enumType when
     not hhvm_compat_mode &&
     (is_missing enumType.xhp_enum_values) ->

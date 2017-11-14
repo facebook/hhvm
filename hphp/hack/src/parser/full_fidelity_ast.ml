@@ -1221,10 +1221,12 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       in
       let pAttr = fun node env ->
         match syntax node with
-        | XHPAttribute { xhp_attribute_name; xhp_attribute_expression; _ } ->
-          Xhp_simple ( pos_name xhp_attribute_name env
-          , pEmbedded unesc_xhp_attr xhp_attribute_expression env
+        | XHPSimpleAttribute { xhp_simple_attribute_name; xhp_simple_attribute_expression; _ } ->
+          Xhp_simple ( pos_name xhp_simple_attribute_name env
+          , pEmbedded unesc_xhp_attr xhp_simple_attribute_expression env
           )
+        | XHPSpreadAttribute { xhp_spread_attribute_expression; _ } ->
+          Xhp_spread ( pEmbedded unesc_xhp_attr xhp_spread_attribute_expression env )
         | _ -> missing_syntax "XHP attribute" node env
       in
       Xml

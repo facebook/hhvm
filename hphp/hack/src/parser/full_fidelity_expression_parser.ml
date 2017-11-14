@@ -2211,50 +2211,61 @@ TODO: This will need to be fixed to allow situations where the qualified name
     (parser, node)
 
   and parse_xhp_attribute parser =
-    let (parser1, token, _) = next_xhp_element_token ~attribute:true parser in
-    if (Token.kind token) != XHPElementName then
-      (parser, None)
-    else
-      (* TODO(T21789285): Remove ugly xhp bug *)
+    let (parser', token, _) = next_xhp_element_token ~attribute:true parser in
+    match (Token.kind token) with
+    | LeftBrace -> parse_xhp_spread_attribute parser
+    | XHPElementName ->
       let prev_errors = Lexer.errors (lexer parser) in
-      let curr_errors = Lexer.errors (lexer parser1) in
+      let curr_errors = Lexer.errors (lexer parser') in
       let colon_bug = prev_errors != curr_errors in
-      let name = make_token token in
-      let (parser, token, _) = next_xhp_element_token parser1 in
-      if (Token.kind token) != Equal then
-        let value =
-          if colon_bug then
-            let s = Lexer.source (lexer parser) in
-            let o = 0 in (* TODO: Get the offset from the leading token *)
-            make_token (Token.make TokenKind.XHPStringLiteral s o 0 [] [])
-          else
-            make_missing parser
-        in
-        let node = make_xhp_attribute name (make_missing parser) value in
-        let parser = if colon_bug then parser1 else
-          with_error parser1 SyntaxError.error1016
-        in
-        (* ERROR RECOVERY: The = is missing; assume that the name belongs
-           to the attribute, but that the remainder is missing, and start
-           looking for the next attribute. *)
+      parse_xhp_simple_attribute parser' (make_token token) colon_bug
+    | _ -> (parser, None)
+
+  and parse_xhp_spread_attribute parser =
+    let (parser, left_brace, _) = next_xhp_element_token parser in
+    let (parser, ellipsis) = assert_token parser DotDotDot in
+    let (parser, expression) = parse_expression_with_reset_precedence parser in
+    let (parser, right_brace) = require_right_brace parser in
+    let node = make_xhp_spread_attribute (make_token left_brace) ellipsis expression right_brace in
+    (parser, Some node)
+
+  and parse_xhp_simple_attribute parser1 name colon_bug =
+    (* TODO(T21789285): Remove ugly xhp bug *)
+    let (parser, token, _) = next_xhp_element_token parser1 in
+    if (Token.kind token) != Equal then
+      let value =
+        if colon_bug then
+          let s = Lexer.source (lexer parser) in
+          let o = 0 in (* TODO: Get the offset from the leading token *)
+          make_token (Token.make TokenKind.XHPStringLiteral s o 0 [] [])
+        else
+          make_missing parser
+      in
+      let node = make_xhp_simple_attribute name (make_missing parser) value in
+      let parser = if colon_bug then parser1 else
+        with_error parser1 SyntaxError.error1016
+      in
+      (* ERROR RECOVERY: The = is missing; assume that the name belongs
+         to the attribute, but that the remainder is missing, and start
+         looking for the next attribute. *)
+      (parser, Some node)
+    else
+      let equal = make_token token in
+      let (parser1, token, text) = next_xhp_element_token parser in
+      match (Token.kind token) with
+      | XHPStringLiteral ->
+        let node = make_xhp_simple_attribute name equal (make_token token) in
+        (parser1, Some node)
+      | LeftBrace ->
+        let (parser, expr) = parse_braced_expression parser in
+        let node = make_xhp_simple_attribute name equal expr in
         (parser, Some node)
-      else
-        let equal = make_token token in
-        let (parser1, token, text) = next_xhp_element_token parser in
-        match (Token.kind token) with
-        | XHPStringLiteral ->
-          let node = make_xhp_attribute name equal (make_token token) in
-          (parser1, Some node)
-        | LeftBrace ->
-          let (parser, expr) = parse_braced_expression parser in
-          let node = make_xhp_attribute name equal expr in
-          (parser, Some node)
-        | _ ->
-        (* ERROR RECOVERY: The expression is missing; assume that the "name ="
-           belongs to the attribute and start looking for the next attribute. *)
-          let node = make_xhp_attribute name equal (make_missing parser) in
-          let parser = with_error parser SyntaxError.error1017 in
-          (parser, Some node)
+      | _ ->
+      (* ERROR RECOVERY: The expression is missing; assume that the "name ="
+         belongs to the attribute and start looking for the next attribute. *)
+        let node = make_xhp_simple_attribute name equal (make_missing parser) in
+        let parser = with_error parser SyntaxError.error1017 in
+        (parser, Some node)
 
   and parse_xhp_body_element parser =
     let (parser1, token) = next_xhp_body_token parser in

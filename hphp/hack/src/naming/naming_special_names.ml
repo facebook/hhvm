@@ -132,7 +132,6 @@ module UserAttributes = struct
     [
       uaOverride;
       uaConsistentConstruct;
-      uaConst;
       uaUnsafeConstruct;
       uaDeprecated;
       uaMemoize;

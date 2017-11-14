@@ -1439,6 +1439,9 @@ function run($options, $tests, $bad_test_file) {
     } else if ($status === 'skip-onlyrepo') {
       Status::skip($test, 'onlyrepo', $time, $stime, $etime);
       clean_intermediate_files($test, $options);
+    } else if ($status === 'skip-nosemdiff') {
+      Status::skip($test, 'no-semdiff', $time, $stime, $etime);
+      clean_intermediate_files($test, $options);
     } else if ($status) {
       Status::pass($test, $status, $time, $stime, $etime);
       clean_intermediate_files($test, $options);
@@ -2184,6 +2187,9 @@ function run_test($options, $test) {
     }
 
     if (!isset($options['no-semdiff'])) {
+      if (file_exists($test.'.nosemdiff')) {
+        return 'skip-nosemdiff';
+      }
       // Run semantic diff on outputs first
       $semdiff = semdiff_output($options, $test);
       // If it fails completely (e.g. timeout or exception) then

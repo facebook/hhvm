@@ -218,6 +218,8 @@ CFG compileConstant(const zend_ast* ast) {
       return { False{} };
     } else if (strcasecmp(str, "null") == 0) {
       return { Null{} };
+    } else if (strcasecmp(str, "__COMPILER_FRONTEND__") == 0) {
+      return { String{"php7/hhvm"} };
     } else {
       return { Cns{str} };
     }

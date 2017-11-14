@@ -342,6 +342,7 @@ module type S = sig
   val reffiness_invariant : Pos.t -> Pos.t -> [< `normal | `inout ] -> unit
   val pass_by_ref_annotation_unexpected : Pos.t -> Pos.t -> unit
   val invalid_new_disposable : Pos.t -> unit
+  val invalid_disposable_hint : Pos.t -> string -> unit
 
   val to_json : Pos.absolute error_ -> Hh_json.json
   val to_string : ?indent:bool -> Pos.absolute error_ -> string

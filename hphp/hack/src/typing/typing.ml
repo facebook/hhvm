@@ -256,6 +256,34 @@ let rec check_memoizable env param ty =
     let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in
     Errors.invalid_memoized_param p msgl
 
+let has_accept_disposable_attribute param =
+  List.exists param.param_user_attributes
+    (fun { ua_name; _ } -> SN.UserAttributes.uaAcceptDisposable = snd ua_name)
+
+let check_not_disposable env param ty =
+  if has_accept_disposable_attribute param then ()
+  else
+  let p = param.param_pos in
+  match Env.expand_type env ty with
+  (* Only bother looking at classish types. Other types can spuriously
+   * claim to implement these interfaces. Ideally we should check
+   * constrained generics, abstract types, etc.
+   * Also, FormatString is special. Weird.
+   *)
+  | _env, (r, Tclass((_, class_name), _)) when not (SN.Classes.is_format_string class_name) ->
+    (* Make sure that it exists. Otherwise any subtype test will pass *)
+    if Option.is_none (Env.get_class env class_name)
+    then ()
+    else
+    let idisposable_type =
+      r, Tclass ((Pos.none, SN.Classes.cIDisposable), []) in
+    let iasyncdisposable_type =
+      r, Tclass ((Pos.none, SN.Classes.cIAsyncDisposable), []) in
+    if SubType.is_sub_type env ty idisposable_type
+    || SubType.is_sub_type env ty iasyncdisposable_type
+    then Errors.invalid_disposable_hint p (strip_ns class_name)
+  | _ -> ()
+
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to
  * introduce the type of the arguments of the function in the environment
@@ -358,10 +386,7 @@ let rec bind_param env (ty1, param) =
   let id = Local_id.get param.param_name in
   let env = Env.set_local env id ty1 in
   let env = Env.set_param env id (ty1, mode) in
-  let has_accept_disposable =
-    List.exists param.param_user_attributes
-      (fun { ua_name; _ } -> SN.UserAttributes.uaAcceptDisposable = snd ua_name) in
-  let env = if has_accept_disposable
+  let env = if has_accept_disposable_attribute param
             then Env.set_using_var env id else env in
   env, tparam
 
@@ -370,7 +395,9 @@ let rec bind_param env (ty1, param) =
 and check_param env param ty =
   match param.param_hint with
   | None -> suggest env param.param_pos ty
-  | Some _ -> ()
+  | Some _ ->
+    (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
+    check_not_disposable env param ty
 
 and check_inout_return env =
   let params = Local_id.Map.elements (Env.get_params env) in

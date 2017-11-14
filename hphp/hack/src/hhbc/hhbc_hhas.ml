@@ -984,8 +984,7 @@ and string_of_xml (_, id) attributes children =
   let p = Pos.none in
   let name = SU.Xhp.mangle id in
   let attributes = string_of_param_default_value @@
-   (p, A.Array (
-    List.map (fun (id, e) -> A.AFkvalue ((p, A.Id id), e)) attributes))
+   (p, A.Array (List.map (string_of_xhp_attr p) attributes))
   in
   let children = string_of_param_default_value @@
    (p, A.Array (List.map (fun e -> A.AFvalue e) children))
@@ -997,6 +996,10 @@ and string_of_xml (_, id) attributes children =
   ^ ", "
   ^ children
   ^ ", __FILE__, __LINE__)"
+
+and string_of_xhp_attr p = function
+  | A.Xhp_simple (id, e) -> A.AFkvalue ((p, A.Id id), e)
+  | A.Xhp_spread _ -> failwith "Spread operator not yet supported"
 
 and string_of_param_default_value ?(use_single_quote=false) expr =
   let p = Pos.none in

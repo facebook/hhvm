@@ -770,14 +770,18 @@ class virtual ['self] map =
       let r0 = self#on_fun_ env c0 in Lfun r0
     method on_Xml env c0 c1 c2 =
       let r0 = self#on_id env c0 in
-      let r1 =
-        self#on_list
-          (fun env (c0, c1) ->
-               let r0 = self#on_id env c0 in
-               let r1 = self#on_expr env c1 in (r0, r1)) env c1
-      in
+      let r1 = self#on_list self#on_Xhpattribute env c1 in
       let r2 = self#on_list self#on_expr env c2 in
       Xml (r0, r1, r2)
+    method on_Xhpattribute env = function
+      | Xhp_simple (c0, c1) -> self#on_Xhpsimpleattr env c0 c1
+      | Xhp_spread c0 -> self#on_Xhpspreadattr env c0
+    method on_Xhpsimpleattr env c0 c1 =
+      let r0 = self#on_id env c0 in
+      let r1 = self#on_expr env c1 in
+      Xhp_simple (r0, r1)
+    method on_Xhpspreadattr env c0 =
+      let r0 = self#on_expr env c0 in Xhp_spread r0
     method on_Unsafeexpr env c0 =
       let r0 = self#on_expr env c0 in Unsafeexpr r0
     method on_Import env c0 c1 =

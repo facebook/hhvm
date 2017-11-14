@@ -2514,7 +2514,9 @@ module Make (GetLocals : GetLocals) = struct
     | AFkvalue (e1, e2) -> expr env e1, expr env e2
 
   and attrl env l = List.map l (attr env)
-  and attr env (x, e) = x, expr env e
+  and attr env = function
+    | Xhp_simple (x, e) -> N.Xhp_simple (x, expr env e)
+    | Xhp_spread e -> N.Xhp_spread (expr env e)
 
   and string2 env idl =
     List.map idl (expr env)

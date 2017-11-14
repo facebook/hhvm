@@ -152,6 +152,7 @@ and hint_ f = function
   | Haccess (h, sids) -> Haccess (hint f h, List.map sids (pstring f))
 
 and attr_list f attrl =
-  List.map attrl begin fun (pstr, e) ->
-    pstring f pstr, expr f e
+  List.map attrl begin fun attr -> match attr with
+   | Xhp_simple (pstr, e) -> Xhp_simple (pstring f pstr, expr f e)
+   | Xhp_spread e -> Xhp_spread (expr f e)
   end

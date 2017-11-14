@@ -104,7 +104,7 @@ class type ['a] ast_visitor_type = object
   method on_using: 'a -> using_stmt -> 'a
   method on_varray : 'a -> expr list -> 'a
   method on_while : 'a -> expr -> block -> 'a
-  method on_xml : 'a -> id -> (pstring * expr) list -> expr list -> 'a
+  method on_xml : 'a -> id -> xhp_attribute list -> expr list -> 'a
   method on_yield : 'a -> afield -> 'a
   method on_yield_from : 'a -> expr -> 'a
   method on_yield_break : 'a -> 'a
@@ -525,8 +525,10 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
   method on_xml acc pstr attrl el =
     let acc = this#on_pstring acc pstr in
-    let acc = List.fold_left begin fun acc (_, e) ->
-      this#on_expr acc e
+    let acc = List.fold_left begin fun acc attr ->
+      match attr with
+      | Xhp_simple (_, e) -> this#on_expr acc e
+      | Xhp_spread e -> this#on_expr acc e
     end acc attrl in
     let acc = List.fold_left this#on_expr acc el in
     acc

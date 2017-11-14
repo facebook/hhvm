@@ -384,7 +384,7 @@ and expr_ env acc p e =
       (* We don't need to analyze the body of closures *)
       acc
   | Xml (_, l, el) ->
-      let l = List.map l snd in
+      let l = List.map l get_xhp_attr_expr in
       let acc = exprl acc l in
       exprl acc el
   | Callconv (_, e) -> expr acc e

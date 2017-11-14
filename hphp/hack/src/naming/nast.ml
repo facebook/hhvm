@@ -1,5 +1,5 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/ppx_gen. *)
-(* SourceShasum<<e94fe808c0613b11cb4eef5526590989d77b07c3>> *)
+(* SourceShasum<<af70068c2550ba0be07d477ea6d8bb0a3921ceb5>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -623,7 +623,7 @@ module AnnotatedAST(Annotation:AnnotationType) =
       | Is of expr * hint 
       | New of class_id * expr list * expr list 
       | Efun of fun_ * id list 
-      | Xml of sid * (pstring * expr) list * expr list 
+      | Xml of sid * xhp_attribute list * expr list 
       | Callconv of Ast.param_kind * expr 
       | Lplaceholder of Pos.t 
       | Fun_id of sid 
@@ -645,6 +645,9 @@ module AnnotatedAST(Annotation:AnnotationType) =
     and afield =
       | AFvalue of expr 
       | AFkvalue of expr * expr 
+    and xhp_attribute =
+      | Xhp_simple of pstring * expr 
+      | Xhp_spread of expr 
     and special_func =
       | Gena of expr 
       | Genva of expr list 
@@ -1020,41 +1023,39 @@ module AnnotatedAST(Annotation:AnnotationType) =
       fun x  -> Format.asprintf "%a" pp_expr x
     
     and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
-      let __80 () = pp_sid
+      let __79 () = pp_sid
       
-      and __79 () = pp_assert_expr
-      
-      and __78 () = pp_expr
+      and __78 () = pp_assert_expr
       
       and __77 () = pp_expr
       
-      and __76 () = pp_special_func
+      and __76 () = pp_expr
       
-      and __75 () = pp_pstring
+      and __75 () = pp_special_func
       
-      and __74 () = pp_sid
+      and __74 () = pp_pstring
       
-      and __73 () = pp_pstring
+      and __73 () = pp_sid
       
-      and __72 () = pp_sid
+      and __72 () = pp_pstring
       
-      and __71 () = pp_pstring
+      and __71 () = pp_sid
       
-      and __70 () = pp_expr
+      and __70 () = pp_pstring
       
-      and __69 () = pp_sid
+      and __69 () = pp_expr
       
-      and __68 () = Pos.pp
+      and __68 () = pp_sid
       
-      and __67 () = pp_expr
+      and __67 () = Pos.pp
       
-      and __66 () = Ast.pp_param_kind
+      and __66 () = pp_expr
       
-      and __65 () = pp_expr
+      and __65 () = Ast.pp_param_kind
       
       and __64 () = pp_expr
       
-      and __63 () = pp_pstring
+      and __63 () = pp_xhp_attribute
       
       and __62 () = pp_sid
       
@@ -1535,12 +1536,7 @@ module AnnotatedAST(Annotation:AnnotationType) =
                             (fun sep  ->
                                fun x  ->
                                  if sep then Format.fprintf fmt ";@ ";
-                                 ((fun (a0,a1)  ->
-                                     Format.fprintf fmt "(@[";
-                                     (((__63 ()) fmt) a0;
-                                      Format.fprintf fmt ",@ ";
-                                      ((__64 ()) fmt) a1);
-                                     Format.fprintf fmt "@])")) x;
+                                 ((__63 ()) fmt) x;
                                  true) false x);
                        Format.fprintf fmt "@,]@]")) a1);
                   Format.fprintf fmt ",@ ";
@@ -1551,59 +1547,59 @@ module AnnotatedAST(Annotation:AnnotationType) =
                            (fun sep  ->
                               fun x  ->
                                 if sep then Format.fprintf fmt ";@ ";
-                                ((__65 ()) fmt) x;
+                                ((__64 ()) fmt) x;
                                 true) false x);
                       Format.fprintf fmt "@,]@]")) a2);
                  Format.fprintf fmt "@,))@]")
             | Callconv (a0,a1) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Callconv (@,";
-                 (((__66 ()) fmt) a0;
+                 (((__65 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
-                  ((__67 ()) fmt) a1);
+                  ((__66 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
             | Lplaceholder a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Lplaceholder@ ";
-                 ((__68 ()) fmt) a0;
+                 ((__67 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Fun_id a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Fun_id@ ";
-                 ((__69 ()) fmt) a0;
+                 ((__68 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Method_id (a0,a1) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Method_id (@,";
-                 (((__70 ()) fmt) a0;
+                 (((__69 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
-                  ((__71 ()) fmt) a1);
+                  ((__70 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
             | Method_caller (a0,a1) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Method_caller (@,";
-                 (((__72 ()) fmt) a0;
+                 (((__71 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
-                  ((__73 ()) fmt) a1);
+                  ((__72 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
             | Smethod_id (a0,a1) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Smethod_id (@,";
-                 (((__74 ()) fmt) a0;
+                 (((__73 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
-                  ((__75 ()) fmt) a1);
+                  ((__74 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
             | Special_func a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Special_func@ ";
-                 ((__76 ()) fmt) a0;
+                 ((__75 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Pair (a0,a1) ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Pair (@,";
-                 (((__77 ()) fmt) a0;
+                 (((__76 ()) fmt) a0;
                   Format.fprintf fmt ",@ ";
-                  ((__78 ()) fmt) a1);
+                  ((__77 ()) fmt) a1);
                  Format.fprintf fmt "@,))@]")
             | Assert a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Assert@ ";
-                 ((__79 ()) fmt) a0;
+                 ((__78 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Typename a0 ->
                 (Format.fprintf fmt "(@[<2>AnnotatedAST.Typename@ ";
-                 ((__80 ()) fmt) a0;
+                 ((__79 ()) fmt) a0;
                  Format.fprintf fmt "@])")
             | Any  -> Format.pp_print_string fmt "AnnotatedAST.Any")
         [@ocaml.warning "-A"])
@@ -1713,6 +1709,32 @@ module AnnotatedAST(Annotation:AnnotationType) =
     
     and show_afield : afield -> Ppx_deriving_runtime.string =
       fun x  -> Format.asprintf "%a" pp_afield x
+    
+    and pp_xhp_attribute :
+      Format.formatter -> xhp_attribute -> Ppx_deriving_runtime.unit =
+      let __2 () = pp_expr
+      
+      and __1 () = pp_expr
+      
+      and __0 () = pp_pstring
+       in
+      ((let open! Ppx_deriving_runtime in
+          fun fmt  ->
+            function
+            | Xhp_simple (a0,a1) ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Xhp_simple (@,";
+                 (((__0 ()) fmt) a0;
+                  Format.fprintf fmt ",@ ";
+                  ((__1 ()) fmt) a1);
+                 Format.fprintf fmt "@,))@]")
+            | Xhp_spread a0 ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Xhp_spread@ ";
+                 ((__2 ()) fmt) a0;
+                 Format.fprintf fmt "@])"))
+        [@ocaml.warning "-A"])
+    
+    and show_xhp_attribute : xhp_attribute -> Ppx_deriving_runtime.string =
+      fun x  -> Format.asprintf "%a" pp_xhp_attribute x
     
     and pp_special_func :
       Format.formatter -> special_func -> Ppx_deriving_runtime.unit =
@@ -2996,7 +3018,7 @@ module AnnotatedAST(Annotation:AnnotationType) =
             method  on_new : 'a -> class_id -> expr list -> expr list -> 'a
             method  on_efun : 'a -> fun_ -> id list -> 'a
             method  on_xml :
-              'a -> sid -> (pstring * expr) list -> expr list -> 'a
+              'a -> sid -> xhp_attribute list -> expr list -> 'a
             method  on_param_kind : 'a -> Ast.param_kind -> 'a
             method  on_callconv : 'a -> Ast.param_kind -> expr -> 'a
             method  on_assert : 'a -> assert_expr -> 'a
@@ -3242,7 +3264,11 @@ module AnnotatedAST(Annotation:AnnotationType) =
               | NamedBody { fnb_nast = n;_} -> this#on_block acc n
             method on_xml acc _ attrl el =
               let acc =
-                List.fold_left (fun acc  -> fun (_,e)  -> this#on_expr acc e)
+                List.fold_left
+                  (fun acc  ->
+                     fun attr  ->
+                       match attr with
+                       | Xhp_simple (_,e)|Xhp_spread e -> this#on_expr acc e)
                   acc attrl
                  in
               let acc = List.fold_left this#on_expr acc el  in acc
@@ -3437,3 +3463,12 @@ let vc_kind_to_name kind =
   | `ImmSet -> SN.Collections.cImmSet
   | `Keyset -> SN.Collections.cKeyset
   | `Pair -> SN.Collections.cPair 
+let map_xhp_attr (f : pstring -> pstring) (g : expr -> expr) =
+  function
+  | Xhp_simple (id,e) -> Xhp_simple ((f id), (g e))
+  | Xhp_spread e -> Xhp_spread (g e) 
+let get_xhp_attr_expr = function | Xhp_simple (_,e)|Xhp_spread e -> e 
+let get_simple_xhp_attrs =
+  Hh_core.List.filter_map
+    ~f:(function | Xhp_simple (id,e) -> Some (id, e) | Xhp_spread _ -> None)
+  

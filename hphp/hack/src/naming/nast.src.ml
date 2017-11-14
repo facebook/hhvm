@@ -236,7 +236,7 @@ and expr_ =
   | Is of expr * hint
   | New of class_id * expr list * expr list
   | Efun of fun_ * id list
-  | Xml of sid * (pstring * expr) list * expr list
+  | Xml of sid * xhp_attribute list * expr list
   | Callconv of Ast.param_kind * expr
 
   (* None of these constructors exist in the AST *)
@@ -271,6 +271,10 @@ and field = expr * expr
 and afield =
   | AFvalue of expr
   | AFkvalue of expr * expr
+
+and xhp_attribute =
+  | Xhp_simple of pstring * expr
+  | Xhp_spread of expr
 
 and special_func =
   | Gena of expr
@@ -579,7 +583,7 @@ class type ['a] visitor_type = object
   method on_class_id : 'a -> class_id -> 'a
   method on_new : 'a -> class_id -> expr list -> expr list -> 'a
   method on_efun : 'a -> fun_ -> id list -> 'a
-  method on_xml : 'a -> sid -> (pstring * expr) list -> expr list -> 'a
+  method on_xml : 'a -> sid -> xhp_attribute list -> expr list -> 'a
   method on_param_kind : 'a -> Ast.param_kind -> 'a
   method on_callconv : 'a -> Ast.param_kind -> expr -> 'a
   method on_assert : 'a -> assert_expr -> 'a
@@ -914,8 +918,9 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | NamedBody { fnb_nast = n; _ } -> this#on_block acc n
 
   method on_xml acc _ attrl el =
-    let acc = List.fold_left begin fun acc (_, e) ->
-      this#on_expr acc e
+    let acc = List.fold_left begin fun acc attr -> match attr with
+      | Xhp_simple (_, e)
+      | Xhp_spread e -> this#on_expr acc e
     end acc attrl in
     let acc = List.fold_left this#on_expr acc el in
     acc
@@ -1166,3 +1171,15 @@ let vc_kind_to_name kind = match kind with
   | `ImmSet -> SN.Collections.cImmSet
   | `Keyset -> SN.Collections.cKeyset
   | `Pair -> SN.Collections.cPair
+
+(* XHP attribute helpers *)
+let map_xhp_attr (f: pstring -> pstring) (g: expr -> expr) = function
+  | Xhp_simple (id, e) -> Xhp_simple (f id, g e)
+  | Xhp_spread e -> Xhp_spread (g e)
+
+let get_xhp_attr_expr = function
+  | Xhp_simple (_, e)
+  | Xhp_spread e -> e
+
+let get_simple_xhp_attrs =
+  Hh_core.List.filter_map ~f:(function Xhp_simple (id, e) -> Some (id, e) | Xhp_spread _ -> None)

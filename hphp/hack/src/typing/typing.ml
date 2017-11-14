@@ -1985,12 +1985,18 @@ and expr_
       let env, attr_ptyl = List.map_env env attrl begin fun env attr ->
         (* Typecheck the expressions - this just checks that the expressions are
          * valid, not that they match the declared type for the attribute *)
-        let namepstr, valexpr = attr in
+        let namepstr, valexpr = match attr with
+          | Xhp_simple (id, e) -> (id, e)
+          | Xhp_spread (p, _) -> begin
+              Errors.unimplemented_feature p "XHP spread operator";
+              ( p, "__SPREAD_TODO"), (p, Any)
+          end
+        in
         let valp, _ = valexpr in
         let env, te, valty = expr env valexpr in
         env, (namepstr, (valp, valty), te)
       end in
-      let tal = List.map attr_ptyl (fun (a, _, c) -> (a, c)) in
+      let tal = List.map attr_ptyl (fun (a, _, c) -> T.Xhp_simple (a, c)) in
       let env, tel, _body = exprs env el in
       let txml = T.Xml (sid, tal, tel) in
       let env, _te, classes = class_id_for_new p env cid in

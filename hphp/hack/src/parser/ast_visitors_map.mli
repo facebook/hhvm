@@ -501,10 +501,19 @@ class virtual ['c] map :
 
         on_Xml : 'd ->
                  Ast_visitors_ancestors.id ->
-                 (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr)
-                 list ->
+                 Ast_visitors_ancestors.xhp_attribute list ->
                  Ast_visitors_ancestors.expr list ->
                  Ast_visitors_ancestors.expr_;
+        on_Xhpattribute : 'd ->
+                          Ast_visitors_ancestors.xhp_attribute ->
+                          Ast_visitors_ancestors.xhp_attribute;
+        on_Xhpsimpleattr : 'd ->
+                           Ast_visitors_ancestors.id ->
+                           Ast_visitors_ancestors.expr ->
+                           Ast_visitors_ancestors.xhp_attribute;
+        on_Xhpspreadattr : 'd ->
+                           Ast_visitors_ancestors.expr ->
+                           Ast_visitors_ancestors.xhp_attribute;
         on_LogXor : 'd -> Ast_visitors_ancestors.bop;
         on_Xor : 'd -> Ast_visitors_ancestors.bop;
         on_Yield : 'd ->
@@ -1161,11 +1170,21 @@ class virtual ['c] map :
         Ast_visitors_ancestors.xhp_child_op
 
 
-    method on_Xml :
-      'd ->
+    method on_Xml : 'd ->
       Ast_visitors_ancestors.id ->
-      (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr) list ->
-      Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
+      Ast_visitors_ancestors.xhp_attribute list ->
+      Ast_visitors_ancestors.expr list ->
+      Ast_visitors_ancestors.expr_
+    method on_Xhpattribute : 'd ->
+      Ast_visitors_ancestors.xhp_attribute ->
+      Ast_visitors_ancestors.xhp_attribute
+    method on_Xhpsimpleattr : 'd ->
+      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.expr ->
+      Ast_visitors_ancestors.xhp_attribute
+    method on_Xhpspreadattr : 'd ->
+      Ast_visitors_ancestors.expr ->
+      Ast_visitors_ancestors.xhp_attribute
     method on_LogXor : 'd -> Ast_visitors_ancestors.bop
     method on_Xor : 'd -> Ast_visitors_ancestors.bop
     method on_Yield :

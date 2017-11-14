@@ -182,3 +182,8 @@ let get_break_continue_level level_opt =
     else Level_ok (Some i)
   | _ -> Level_non_literal
   | exception _ -> Level_non_literal
+
+(* Helpers for XHP attributes *)
+let map_xhp_attr (f: id -> id) (g: expr -> expr) = function
+  | Xhp_simple (id, e) -> Xhp_simple (f id, g e)
+  | Xhp_spread e -> Xhp_spread (g e)

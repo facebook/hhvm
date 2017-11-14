@@ -726,10 +726,21 @@ class virtual ['b] endo :
         on_Xml : 'c ->
                  Ast_visitors_ancestors.expr_ ->
                  Ast_visitors_ancestors.id ->
-                 (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr)
-                 list ->
+                 Ast_visitors_ancestors.xhp_attribute list ->
                  Ast_visitors_ancestors.expr list ->
                  Ast_visitors_ancestors.expr_;
+        on_Xhpattribute : 'c ->
+                          Ast_visitors_ancestors.xhp_attribute ->
+                          Ast_visitors_ancestors.xhp_attribute;
+        on_Xhpsimpleattr : 'c ->
+                           Ast_visitors_ancestors.xhp_attribute ->
+                           Ast_visitors_ancestors.id ->
+                           Ast_visitors_ancestors.expr ->
+                           Ast_visitors_ancestors.xhp_attribute;
+        on_Xhpspreadattr : 'c ->
+                           Ast_visitors_ancestors.xhp_attribute ->
+                           Ast_visitors_ancestors.expr ->
+                           Ast_visitors_ancestors.xhp_attribute;
         on_LogXor: 'c ->
                  Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop;
         on_Xor : 'c ->
@@ -1652,12 +1663,24 @@ class virtual ['b] endo :
         Ast_visitors_ancestors.xhp_child_op ->
         Ast_visitors_ancestors.xhp_child_op
 
-    method on_Xml :
-      'c ->
+    method on_Xml : 'c ->
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.id ->
-      (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr) list ->
-      Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
+      Ast_visitors_ancestors.xhp_attribute list ->
+      Ast_visitors_ancestors.expr list ->
+      Ast_visitors_ancestors.expr_
+    method on_Xhpattribute : 'c ->
+      Ast_visitors_ancestors.xhp_attribute ->
+      Ast_visitors_ancestors.xhp_attribute
+    method on_Xhpsimpleattr : 'c ->
+      Ast_visitors_ancestors.xhp_attribute ->
+      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.expr ->
+      Ast_visitors_ancestors.xhp_attribute
+    method on_Xhpspreadattr : 'c ->
+      Ast_visitors_ancestors.xhp_attribute ->
+      Ast_visitors_ancestors.expr ->
+      Ast_visitors_ancestors.xhp_attribute
     method on_Xor :
       'c -> Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop
     method on_LogXor :

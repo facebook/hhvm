@@ -563,13 +563,15 @@ class virtual ['self] iter =
     method on_Lfun = self#on_fun_
     method on_Xml env c0 c1 c2 =
       self#on_id env c0;
-      begin
-        self#on_list
-          (fun env (c0, c1) ->
-               self#on_id env c0;
-               self#on_expr env c1; ()) env c1
-      end;
+      self#on_list self#on_Xhpattribute env c1;
       self#on_list self#on_expr env c2;
+    method on_Xhpattribute env = function
+      | Xhp_simple (c0, c1) -> self#on_Xhpsimpleattr env c0 c1
+      | Xhp_spread c0 -> self#on_Xhpspreadattr env c0
+    method on_Xhpsimpleattr env c0 c1 =
+      self#on_id env c0;
+      self#on_expr env c1;
+    method on_Xhpspreadattr = self#on_expr
     method on_Unsafeexpr = self#on_expr
     method on_Import env c0 c1 =
       self#on_import_flavor env c0;

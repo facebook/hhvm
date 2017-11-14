@@ -485,10 +485,7 @@ let rec convert_expr env st (p, expr_ as expr) =
   | Lfun fd ->
     convert_lambda env st p fd None
   | Xml(id, pairs, el) ->
-    let st, pairs = List.map_env st pairs
-      (fun st (id, e) ->
-        let st, e = convert_expr env st e in
-        st, (id, e)) in
+    let st, pairs = List.map_env st pairs (convert_xhp_attr env) in
     let st, el = convert_exprs env st el in
     st, (p, Xml(id, pairs, el))
   | Unsafeexpr e ->
@@ -729,6 +726,14 @@ and convert_afield env st afield =
     let st, e1 = convert_expr env st e1 in
     let st, e2 = convert_expr env st e2 in
     st, AFkvalue (e1, e2)
+
+and convert_xhp_attr env st = function
+  | Xhp_simple (id, e) ->
+      let st, e = convert_expr env st e in
+      st, Xhp_simple (id, e)
+  | Xhp_spread e ->
+      let st, e = convert_expr env st e in
+      st, Xhp_spread e
 
 and convert_params env st param_list =
   let convert_param env st param = match param.param_expr with

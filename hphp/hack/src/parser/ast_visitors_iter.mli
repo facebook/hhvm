@@ -299,8 +299,14 @@ class virtual ['b] iter :
 
         on_Xml : 'c ->
                  Ast_visitors_ancestors.id ->
-                 (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr)
-                 list -> Ast_visitors_ancestors.expr list -> unit;
+                 Ast_visitors_ancestors.xhp_attribute list ->
+                 Ast_visitors_ancestors.expr list -> unit;
+        on_Xhpattribute : 'c ->
+                          Ast_visitors_ancestors.xhp_attribute -> unit;
+        on_Xhpsimpleattr : 'c ->
+                           Ast_visitors_ancestors.id ->
+                           Ast_visitors_ancestors.expr -> unit;
+        on_Xhpspreadattr : 'c -> Ast_visitors_ancestors.expr -> unit;
         on_LogXor : 'c -> unit;
         on_Xor : 'c -> unit;
         on_Yield : 'c -> Ast_visitors_ancestors.afield -> unit;
@@ -714,11 +720,16 @@ class virtual ['b] iter :
     method on_ChildPlus : 'c -> unit
     method on_ChildQuestion : 'c -> unit
 
-    method on_Xml :
-      'c ->
+    method on_Xml : 'c ->
       Ast_visitors_ancestors.id ->
-      (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr) list ->
+      Ast_visitors_ancestors.xhp_attribute list ->
       Ast_visitors_ancestors.expr list -> unit
+    method on_Xhpattribute : 'c ->
+      Ast_visitors_ancestors.xhp_attribute -> unit
+    method on_Xhpsimpleattr : 'c ->
+      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.expr -> unit
+    method on_Xhpspreadattr : 'c -> Ast_visitors_ancestors.expr -> unit
     method on_LogXor : 'c -> unit
     method on_Xor : 'c -> unit
     method on_Yield : 'c -> Ast_visitors_ancestors.afield -> unit

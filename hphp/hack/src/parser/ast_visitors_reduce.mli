@@ -296,8 +296,14 @@ class virtual ['b] reduce :
 
         on_Xml : 'c ->
                  Ast_visitors_ancestors.id ->
-                 (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr)
-                 list -> Ast_visitors_ancestors.expr list -> 'd;
+                 Ast_visitors_ancestors.xhp_attribute list ->
+                 Ast_visitors_ancestors.expr list -> 'd;
+        on_Xhpattribute : 'c ->
+                          Ast_visitors_ancestors.xhp_attribute -> 'd;
+        on_Xhpsimpleattr : 'c ->
+                           Ast_visitors_ancestors.id ->
+                           Ast_visitors_ancestors.expr -> 'd;
+        on_Xhpspreadattr : 'c -> Ast_visitors_ancestors.expr -> 'd;
         on_LogXor : 'c -> 'd;
         on_Xor : 'c -> 'd;
         on_Yield : 'c -> Ast_visitors_ancestors.afield -> 'd;
@@ -686,11 +692,16 @@ class virtual ['b] reduce :
     method on_ChildStar : 'c -> 'd
     method on_ChildPlus : 'c -> 'd
     method on_ChildQuestion : 'c -> 'd
-    method on_Xml :
-      'c ->
+    method on_Xml : 'c ->
       Ast_visitors_ancestors.id ->
-      (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr) list ->
+      Ast_visitors_ancestors.xhp_attribute list ->
       Ast_visitors_ancestors.expr list -> 'd
+    method on_Xhpattribute : 'c ->
+      Ast_visitors_ancestors.xhp_attribute -> 'd
+    method on_Xhpsimpleattr : 'c ->
+      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.expr -> 'd
+    method on_Xhpspreadattr : 'c -> Ast_visitors_ancestors.expr -> 'd
     method on_LogXor : 'c -> 'd
     method on_Xor : 'c -> 'd
     method on_Yield : 'c -> Ast_visitors_ancestors.afield -> 'd

@@ -1042,19 +1042,22 @@ class virtual ['self] endo =
       if c0 == r0 then this else Lfun r0
     method on_Xml env this c0 c1 c2 =
       let r0 = self#on_id env c0 in
-      let r1 =
-        self#on_list
-          (fun env ((c0, c1) as this) ->
-               let r0 = self#on_id env c0 in
-               let r1 = self#on_expr env c1 in
-               if c0 == r0 && c1 == r1
-               then this
-               else (r0, r1)) env c1
-      in
+      let r1 = self#on_list self#on_Xhpattribute env c1 in
       let r2 = self#on_list self#on_expr env c2 in
       if c0 == r0 && c1 == r1 && c2 == r2
       then this
       else Xml (r0, r1, r2)
+    method on_Xhpattribute env this =
+      match this with
+      | Xhp_simple (c0, c1) -> self#on_Xhpsimpleattr env this c0 c1
+      | Xhp_spread c0 -> self#on_Xhpspreadattr env this c0
+    method on_Xhpsimpleattr env this c0 c1 =
+      let r0 = self#on_id env c0 in
+      let r1 = self#on_expr env c1 in
+      if c0 == r0 && c1 == r1 then this else Xhp_simple (r0, r1)
+    method on_Xhpspreadattr env this c0 =
+      let r0 = self#on_expr env c0 in
+      if c0 == r0 then this else Xhp_spread r0
     method on_Unsafeexpr env this c0 =
       let r0 = self#on_expr env c0 in
       if c0 == r0 then this else Unsafeexpr r0

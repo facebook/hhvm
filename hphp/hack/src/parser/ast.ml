@@ -300,6 +300,10 @@ and as_expr =
   | As_v of expr
   | As_kv of expr * expr
 
+and xhp_attribute =
+  | Xhp_simple of id * expr
+  | Xhp_spread of expr
+
 and block = stmt list
 
 and expr = Pos.t * expr_
@@ -360,7 +364,7 @@ and expr_ =
    * during name resolution).
    *)
   | Lfun of fun_
-  | Xml of id * (id * expr) list * expr list
+  | Xml of id * xhp_attribute list * expr list
   | Unsafeexpr of expr
   | Import of import_flavor * expr
   | Callconv of param_kind * expr

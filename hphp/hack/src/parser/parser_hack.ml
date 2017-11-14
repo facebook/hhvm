@@ -4322,12 +4322,13 @@ and xhp_attributes env =
       let attr_name = Pos.make env.file env.lb, Lexing.lexeme env.lb in
       expect env Teq;
       let attr_value = xhp_attribute_value env in
+      let attr = Xhp_simple (attr_name, attr_value) in
       if !(env.errors) != error_state
       then
-        [attr_name, attr_value], true
+        [attr], true
       else
         let rl, closed = xhp_attributes env in
-        (attr_name, attr_value) :: rl, closed
+        attr :: rl, closed
   | _ ->
       error_expect env ">";
       [], true

@@ -1222,7 +1222,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       let pAttr = fun node env ->
         match syntax node with
         | XHPAttribute { xhp_attribute_name; xhp_attribute_expression; _ } ->
-          ( pos_name xhp_attribute_name env
+          Xhp_simple ( pos_name xhp_attribute_name env
           , pEmbedded unesc_xhp_attr xhp_attribute_expression env
           )
         | _ -> missing_syntax "XHP attribute" node env

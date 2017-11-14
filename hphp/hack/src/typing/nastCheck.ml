@@ -304,7 +304,7 @@ module CheckFunctionBody = struct
           | Genva el -> List.iter el (expr f_type env));
         ()
     | _, Xml (_, attrl, el) ->
-        List.iter attrl (fun (_, e) -> expr f_type env e);
+        List.iter attrl (fun attr -> expr f_type env (get_xhp_attr_expr attr));
         List.iter el (expr f_type env);
         ()
     | _, Callconv (_, e) ->
@@ -1100,7 +1100,7 @@ and expr_ env p = function
       let body = Nast.assert_named_body f.f_body in
       func env f body; ()
   | Xml (_, attrl, el) ->
-      List.iter attrl (attribute env);
+      List.iter attrl (fun attr -> expr env (get_xhp_attr_expr attr));
       List.iter el (expr env);
       ()
   | Callconv (_, e) ->
@@ -1121,10 +1121,6 @@ and catch env (_, _, b) = block env b
 and field env (e1, e2) =
   expr env e1;
   expr env e2;
-  ()
-
-and attribute env (_, e) =
-  expr env e;
   ()
 
 let typedef tenv t =

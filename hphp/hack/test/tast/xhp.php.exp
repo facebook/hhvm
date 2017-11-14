@@ -10,9 +10,10 @@
            [(AnnotatedAST.Expr
                ((Some \:foo),
                 (AnnotatedAST.Xml ((<p>, "\\:foo"),
-                   [((<p>, "bar"),
-                     ((Some string),
-                      (AnnotatedAST.String (<p>, "herp"))))
+                   [(AnnotatedAST.Xhp_simple ((<p>, "bar"),
+                       ((Some string),
+                        (AnnotatedAST.String (<p>, "herp")))
+                       ))
                      ],
                    []))));
              (AnnotatedAST.Expr
@@ -26,30 +27,37 @@
              (AnnotatedAST.Expr
                 ((Some \:foo),
                  (AnnotatedAST.Xml ((<p>, "\\:foo"),
-                    [((<p>, "bar"),
-                      ((Some string),
-                       (AnnotatedAST.Lvar (<p>, $derp))))
+                    [(AnnotatedAST.Xhp_simple ((<p>, "bar"),
+                        ((Some string),
+                         (AnnotatedAST.Lvar (<p>, $derp)))
+                        ))
                       ],
                     []))));
              (AnnotatedAST.Expr
                 ((Some \:foo),
                  (AnnotatedAST.Xml ((<p>, "\\:foo"),
-                    [((<p>, "bar"),
-                      ((Some string),
-                       (AnnotatedAST.String (<p>, "herp"))))
+                    [(AnnotatedAST.Xhp_simple ((<p>, "bar"),
+                        ((Some string),
+                         (AnnotatedAST.String (<p>, "herp")))
+                        ))
                       ],
                     [((Some \:foo),
                       (AnnotatedAST.Xml ((<p>, "\\:foo"),
-                         [((<p>, "bar"),
-                           ((Some string),
-                            (AnnotatedAST.String (<p>, "derp"))))
+                         [(AnnotatedAST.Xhp_simple (
+                             (<p>, "bar"),
+                             ((Some string),
+                              (AnnotatedAST.String
+                                 (<p>, "derp")))
+                             ))
                            ],
                          [((Some \:foo),
                            (AnnotatedAST.Xml ((<p>, "\\:foo"),
-                              [((<p>, "bar"),
-                                ((Some string),
-                                 (AnnotatedAST.String
-                                    (<p>, "herp"))))
+                              [(AnnotatedAST.Xhp_simple (
+                                  (<p>, "bar"),
+                                  ((Some string),
+                                   (AnnotatedAST.String
+                                      (<p>, "herp")))
+                                  ))
                                 ],
                               [])))
                            ]

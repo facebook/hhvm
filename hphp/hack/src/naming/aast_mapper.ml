@@ -85,7 +85,10 @@ struct
       T.New (map_class_id ci, map_exprl f el1, map_exprl f el2)
     | S.Efun (ef, ids) -> T.Efun(map_fun f ef, ids)
     | S.Xml (id, pl, el) ->
-      T.Xml (id, List.map pl (fun (p,e) -> (p,map_expr f e)), map_exprl f el)
+      T.Xml (id, List.map pl (fun attr -> match attr with
+        | S.Xhp_simple (p, e) -> T.Xhp_simple (p,map_expr f e)
+        | S.Xhp_spread e -> T.Xhp_spread (map_expr f e)
+      ), map_exprl f el)
     | S.Callconv (k, e) -> T.Callconv (k, map_expr f e)
     | S.Assert (S.AE_assert e) -> T.Assert (T.AE_assert (map_expr f e))
     | S.Clone e -> T.Clone (map_expr f e)

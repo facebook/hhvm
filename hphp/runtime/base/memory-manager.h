@@ -490,9 +490,9 @@ struct SparseHeap {
   bool contains(void* ptr) const;
 
   /*
-   * Allocate a MemBlock of at least size bytes, track in m_slabs.
+   * Allocate a MemBlock of kSlabSize bytes, track in m_slabs.
    */
-  MemBlock allocSlab(size_t size, MemoryUsageStats& stats);
+  HeapObject* allocSlab(MemoryUsageStats& stats);
 
   /*
    * Allocation API for big blocks.
@@ -543,7 +543,7 @@ struct SparseHeap {
   void enlist(MallocNode*, HeaderKind kind, size_t size, type_scan::Index);
 
  protected:
-  std::vector<MemBlock> m_slabs;
+  std::vector<HeapObject*> m_slabs;
   std::vector<MallocNode*> m_bigs;
 };
 
@@ -569,9 +569,9 @@ struct ContiguousHeap {
   bool contains(void* ptr) const;
 
   /*
-   * Allocate a MemBlock of at least size bytes.
+   * Allocate a MemBlock of kSlabSize bytes.
    */
-  MemBlock allocSlab(size_t size, MemoryUsageStats& stats);
+  HeapObject* allocSlab(MemoryUsageStats& stats);
 
   /*
    * Allocation API for big blocks.

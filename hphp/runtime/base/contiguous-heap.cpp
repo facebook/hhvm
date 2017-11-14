@@ -187,13 +187,13 @@ void ContiguousHeap::raw_free(char* p, size_t size) {
   }
 }
 
-MemBlock ContiguousHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
-  assert(size % ChunkSize == 0);
-  auto p = raw_alloc(size);
-  stats.mmap_volume += size;
-  stats.mmap_cap += size;
+HeapObject* ContiguousHeap::allocSlab(MemoryUsageStats& stats) {
+  static_assert(kSlabSize % ChunkSize == 0, "");
+  auto p = raw_alloc(kSlabSize);
+  stats.mmap_volume += kSlabSize;
+  stats.mmap_cap += kSlabSize;
   stats.peakCap = std::max(stats.peakCap, stats.capacity());
-  return {p, size};
+  return (HeapObject*)p;
 }
 
 //

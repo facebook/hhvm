@@ -653,9 +653,9 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   refreshStats();
   requestGC();
   storeTail(m_freelists, m_front, (char*)m_limit - (char*)m_front);
-  auto mem = m_heap.allocSlab(kSlabSize, m_stats);
-  assert((uintptr_t(mem.ptr) & kSmallSizeAlignMask) == 0);
-  auto slab = static_cast<Slab*>(mem.ptr);
+  auto mem = m_heap.allocSlab(m_stats);
+  assert((uintptr_t(mem) & kSmallSizeAlignMask) == 0);
+  auto slab = static_cast<Slab*>(mem);
   auto slab_start = slab->init();
   m_front = (void*)(slab_start + nbytes); // allocate requested object
   // we can't use any space after slab->end() even if the allocator allows

@@ -39,7 +39,7 @@ void SparseHeap::reset() {
     free(ptr);
 #endif
   };
-  for (auto slab : m_slabs) do_free(slab.ptr, slab.size);
+  for (auto slab : m_slabs) do_free(slab, kSlabSize);
   m_slabs.clear();
   for (auto n : m_bigs) do_free(n, n->nbytes);
   m_bigs.clear();
@@ -47,22 +47,22 @@ void SparseHeap::reset() {
 
 void SparseHeap::flush() {
   assert(empty());
-  m_slabs = std::vector<MemBlock>{};
+  m_slabs = std::vector<HeapObject*>{};
   m_bigs = std::vector<MallocNode*>{};
 }
 
-MemBlock SparseHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
+HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
 #ifdef USE_JEMALLOC
-  void* slab = mallocx(size, 0);
+  auto slab = mallocx(kSlabSize, 0);
   auto usable = sallocx(slab, 0);
 #else
-  void* slab = safe_malloc(size);
-  auto usable = size;
+  auto slab = safe_malloc(kSlabSize);
+  auto usable = kSlabSize;
 #endif
-  m_slabs.push_back({slab, size});
+  m_slabs.push_back((HeapObject*)slab);
   stats.malloc_cap += usable;
   stats.peakCap = std::max(stats.peakCap, stats.capacity());
-  return {slab, usable};
+  return (HeapObject*)slab;
 }
 
 void SparseHeap::enlist(MallocNode* n, HeaderKind kind,
@@ -109,9 +109,9 @@ MemBlock SparseHeap::callocBig(size_t nbytes, HeaderKind kind,
 bool SparseHeap::contains(void* ptr) const {
   auto const ptrInt = reinterpret_cast<uintptr_t>(ptr);
   auto it = std::find_if(std::begin(m_slabs), std::end(m_slabs),
-    [&] (MemBlock slab) {
-      auto const baseInt = reinterpret_cast<uintptr_t>(slab.ptr);
-      return ptrInt >= baseInt && ptrInt < baseInt + slab.size;
+    [&] (HeapObject* slab) {
+      auto const baseInt = reinterpret_cast<uintptr_t>(slab);
+      return ptrInt >= baseInt && ptrInt < baseInt + kSlabSize;
     }
   );
   return it != std::end(m_slabs);
@@ -157,13 +157,7 @@ MemBlock SparseHeap::resizeBig(void* ptr, size_t newsize,
 }
 
 void SparseHeap::sort() {
-  std::sort(std::begin(m_slabs), std::end(m_slabs),
-    [] (const MemBlock& l, const MemBlock& r) {
-      assertx(static_cast<char*>(l.ptr) + l.size <= r.ptr ||
-              static_cast<char*>(r.ptr) + r.size <= l.ptr);
-      return l.ptr < r.ptr;
-    }
-  );
+  std::sort(std::begin(m_slabs), std::end(m_slabs));
   std::sort(std::begin(m_bigs), std::end(m_bigs));
   for (size_t i = 0, n = m_bigs.size(); i < n; ++i) {
     m_bigs[i]->index() = i;
@@ -181,18 +175,18 @@ HeapObject* SparseHeap::find(const void* p) {
   sort();
   auto const slab = std::lower_bound(
     std::begin(m_slabs), std::end(m_slabs), p,
-    [] (const MemBlock& slab, const void* p) {
-      return static_cast<const char*>(slab.ptr) + slab.size <= p;
+    [] (HeapObject* slab, const void* p) {
+      return reinterpret_cast<char*>(slab) + kSlabSize <= p;
     }
   );
 
-  if (slab != std::end(m_slabs) && slab->ptr <= p) {
+  if (slab != std::end(m_slabs) && (void*)*slab <= p) {
     // std::lower_bound() finds the first slab that is not less than `p'.  By
     // our comparison predicate, a slab is less than `p' iff its entire range
     // is below `p', so if the returned slab's start address is <= `p', then
     // the slab must contain `p'.  Within the slab, we just do a linear search.
-    auto const slab_end = static_cast<char*>(slab->ptr) + slab->size;
-    auto h = reinterpret_cast<char*>(slab->ptr);
+    auto const slab_end = reinterpret_cast<char*>(*slab) + kSlabSize;
+    auto h = reinterpret_cast<char*>(*slab);
     while (h < slab_end) {
       auto const hdr = reinterpret_cast<HeapObject*>(h);
       auto const size = allocSize(hdr);

@@ -488,11 +488,11 @@ void SparseHeap::iterate(OnBig onBig, OnSlab onSlab) {
   auto slabend = std::end(m_slabs);
   auto bigend = std::end(m_bigs);
   while (slab != slabend || big != bigend) {
-    HeapObject* slab_hdr = slab != slabend ? (HeapObject*)slab->ptr : SENTINEL;
+    HeapObject* slab_hdr = slab != slabend ? *slab : SENTINEL;
     HeapObject* big_hdr = big != bigend ? *big : SENTINEL;
     assert(slab_hdr < SENTINEL || big_hdr < SENTINEL);
     if (slab_hdr < big_hdr) {
-      onSlab(slab_hdr, slab->size);
+      onSlab(slab_hdr, kSlabSize);
       ++slab;
     } else {
       assert(big_hdr < slab_hdr);
@@ -510,13 +510,13 @@ template<class Fn> void SparseHeap::iterate(Fn fn) {
   auto slabend = std::end(m_slabs);
   auto bigend = std::end(m_bigs);
   while (slab != slabend || big != bigend) {
-    HeapObject* slab_hdr = slab != slabend ? (HeapObject*)slab->ptr : SENTINEL;
+    HeapObject* slab_hdr = slab != slabend ? *slab : SENTINEL;
     HeapObject* big_hdr = big != bigend ? *big : SENTINEL;
     assert(slab_hdr < SENTINEL || big_hdr < SENTINEL);
     HeapObject *h, *end;
     if (slab_hdr < big_hdr) {
       h = slab_hdr;
-      end = (HeapObject*)((char*)h + slab->size);
+      end = (HeapObject*)((char*)h + kSlabSize);
       ++slab;
       assert(end <= big_hdr); // otherwise slab overlaps next big
     } else {

@@ -41,7 +41,6 @@ slow/goto/try_goto_out_finally.php
 slow/hack_arr_compat/scalars.php
 slow/hack_arr_compat/type-hints.php
 slow/hack_mode/2214.php
-slow/hashbang_regression.php
 slow/hh_namespace_migration/hh_frozenset4.php
 slow/hh_namespace_migration/hh_frozenset7.php
 slow/hh_namespace_migration/hh_frozenvector4.php

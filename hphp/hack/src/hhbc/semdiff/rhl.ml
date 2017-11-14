@@ -1121,6 +1121,23 @@ let equiv prog prog' startlabelpairs =
          check newpc brpc' asn (add_assumption (pc, pc') asn assumed)
              (add_todo (brpc, newpc') asn todo)) in
 
+    let print_constant_strings_pattern =
+      greedy_kleene (uString $$ uPrint $$ uPopC) in
+
+    let two_print_constant_strings_action =
+      (print_constant_strings_pattern $*$ print_constant_strings_pattern)
+      $? (function
+        | [], _ | _, [] -> false
+        | l1, l2 ->
+          let s1 = List.map l1 (fun ((s, _), _) -> s) |> String.concat "" in
+          let s2 = List.map l2 (fun ((s, _), _) -> s) |> String.concat "" in
+          s1 = s2)
+      $> (fun (s,_) -> s)
+      $>> (fun _s ((_,n), (_,n')) ->
+        let newpc = (hs_of_pc pc, n) in
+        let newpc' = (hs_of_pc pc', n') in
+          check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
+
     (* recognize closure creation *)
     let named_filter foo =
       foo
@@ -1350,6 +1367,7 @@ let equiv prog prog' startlabelpairs =
       notjmp_action;
       flipped_jump_action;
       concat_string_either_action;
+      two_print_constant_strings_action;
       fpassl_action;
       two_string_fatal_action;
       two_cugetl_list_createcl_action;

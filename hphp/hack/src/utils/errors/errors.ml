@@ -763,6 +763,8 @@ module Typing                               = struct
   let invalid_new_disposable                = 4187 (* DONT MODIFY!!!! *)
   let escaping_disposable_parameter         = 4188 (* DONT MODIFY!!!! *)
   let accept_disposable_invariant           = 4189 (* DONT MODIFY!!!! *)
+  let invalid_disposable_hint               = 4190 (* DONT MODIFY!!!! *)
+
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2436,6 +2438,11 @@ let invalid_memoized_param pos ty_reason_msg =
       "Parameters to memoized function must be null, bool, int, float, string, \
       an object deriving IMemoizeParam, or a Container thereof. See also \
       http://docs.hhvm.com/hack/attributes/special#__memoize"])
+
+let invalid_disposable_hint pos class_name =
+  add Typing.invalid_disposable_hint pos ("Parameter with type '" ^ class_name ^ "' must not \
+    implement IDisposable or IAsyncDisposable. Please use <<__AcceptDisposable>> attribute or \
+    create disposable object with 'using' statement instead.")
 
 let nullsafe_not_needed p nonnull_witness =
   add_list Typing.nullsafe_not_needed (

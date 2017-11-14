@@ -376,6 +376,7 @@ and 'phase fun_param = {
   fp_name : string option;
   fp_type : 'phase ty;
   fp_kind : param_mode;
+  fp_accept_disposable : bool;
 }
 
 and 'phase fun_params = 'phase fun_param list

@@ -128,18 +128,20 @@ module UserAttributes = struct
   let uaMemoize             = "__Memoize"
   let uaPHPStdLib           = "__PHPStdLib"
   let uaHipHopSpecific      = "__HipHopSpecific"
+  let uaAcceptDisposable    = "__AcceptDisposable"
 
-  let as_set : SSet.t =
-    let s = SSet.empty in
-    let s = SSet.add uaOverride s in
-    let s = SSet.add uaConsistentConstruct s in
-    let s = SSet.add uaConst s in
-    let s = SSet.add uaUnsafeConstruct s in
-    let s = SSet.add uaDeprecated s in
-    let s = SSet.add uaMemoize s in
-    let s = SSet.add uaPHPStdLib s in
-    let s = SSet.add uaHipHopSpecific s in
-    s
+  let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
+    [
+      uaOverride;
+      uaConsistentConstruct;
+      uaConst;
+      uaUnsafeConstruct;
+      uaDeprecated;
+      uaMemoize;
+      uaPHPStdLib;
+      uaHipHopSpecific;
+      uaAcceptDisposable;
+    ]
 
 end
 

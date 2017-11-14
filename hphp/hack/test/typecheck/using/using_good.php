@@ -4,10 +4,15 @@
 class Handle implements IDisposable {
   public function __dispose():void { }
   public function foo():void { }
+  public function mescape(<<__AcceptDisposable>> IDisposable $x):void { }
 }
 class AsyncHandle implements IAsyncDisposable {
   public async function __disposeAsync():Awaitable<void> { }
   public function bar():void { }
+}
+
+function escape(<<__AcceptDisposable>> Handle $h):void {
+  var_dump($h);
 }
 
 async function testit():Awaitable<void> {
@@ -23,6 +28,8 @@ async function testit():Awaitable<void> {
     $x->foo(); $y->foo();
     // Nested
     using ($z = new Handle()) {
+      // This is legal because var_dump is marked as <<__AcceptDisposable>>
+      var_dump($x, $z);
       $z->foo();
     }
     $z = 'a';
@@ -31,6 +38,9 @@ async function testit():Awaitable<void> {
   // Now with function scope
   using $x = new Handle();
   $x->foo();
+  // Legal because of attribute
+  escape($x);
+  $x->mescape($x);
 
   await using ($a = new AsyncHandle()) {
     $a->bar();

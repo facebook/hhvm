@@ -1,0 +1,22 @@
+File "using_bad_override.php", line 13, characters 7-17:
+Class BadDerived1 does not correctly implement all required methods  (Typing[4189])
+  File "using_bad_override.php", line 13, characters 27-30:
+  Some methods are incompatible with those declared in type Base
+Read the following to see why:
+  File "using_bad_override.php", line 14, characters 19-21:
+  Member foo has the wrong type
+  File "using_bad_override.php", line 10, characters 52-53:
+  This parameter is marked <<__AcceptDisposable>>
+  File "using_bad_override.php", line 14, characters 29-30:
+  This parameter is not marked <<__AcceptDisposable>>
+File "using_bad_override.php", line 17, characters 7-17:
+Class BadDerived2 does not correctly implement all required methods  (Typing[4189])
+  File "using_bad_override.php", line 17, characters 27-30:
+  Some methods are incompatible with those declared in type Base
+Read the following to see why:
+  File "using_bad_override.php", line 19, characters 19-21:
+  Member bar has the wrong type
+  File "using_bad_override.php", line 19, characters 52-53:
+  This parameter is marked <<__AcceptDisposable>>
+  File "using_bad_override.php", line 11, characters 29-30:
+  This parameter is not marked <<__AcceptDisposable>>

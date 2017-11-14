@@ -755,6 +755,23 @@ let first_parent_function_declaration parents =
     | _ -> None
     end
 
+let first_parent_function_attributes_contains parents name =
+  Hh_core.List.exists parents ~f:begin fun node ->
+    match syntax node with
+    | FunctionDeclaration { function_attribute_spec = {
+        syntax = AttributeSpecification {
+          attribute_specification_attributes; _ }; _ }; _ }
+    | MethodishDeclaration { methodish_attribute = {
+        syntax = AttributeSpecification {
+          attribute_specification_attributes; _ }; _ }; _ } ->
+      let attrs =
+        syntax_to_list_no_separators attribute_specification_attributes in
+      Hh_core.List.exists attrs
+        ~f:(function { syntax = Attribute { attribute_name; _}; _} ->
+          text attribute_name = name | _ -> false)
+    | _ -> false
+    end
+
 let is_parameter_with_callconv param =
   match syntax param with
   | ParameterDeclaration { parameter_call_convention; _ } ->
@@ -1041,9 +1058,13 @@ let default_value_params is_hack hhvm_compat_mode params =
   | _ -> None
 
 let is_in_construct_method parents =
-  match first_parent_function_name parents with
-  | None -> false
-  | Some s -> String.lowercase_ascii s = SN.Members.__construct
+  match first_parent_function_name parents, first_parent_class_name parents with
+  | None, _ -> false
+  (* Function name is __construct *)
+  | Some s, _ when String.lowercase_ascii s = SN.Members.__construct -> true
+  (* Function name is same as class name *)
+  | Some s1, Some s2 -> String.lowercase_ascii s1 = String.lowercase_ascii s2
+  | _ -> false
 
 (* Test if the parameter is missing a type annotation but one is required *)
 let missing_param_type_check is_strict hhvm_compat_mode p parents =
@@ -1082,6 +1103,12 @@ let param_with_callconv_is_byref node =
     is_byref_parameter_variable parameter_name -> Some node
   | _ -> None
 
+let is_param_by_ref node =
+  match syntax node with
+  | ParameterDeclaration { parameter_name; _ } ->
+    is_byref_parameter_variable parameter_name
+  | _ -> false
+
 let params_errors params is_hack hhvm_compat_mode errors =
   let errors =
     produce_error_from_check errors (default_value_params is_hack hhvm_compat_mode)
@@ -1098,6 +1125,15 @@ let params_errors params is_hack hhvm_compat_mode errors =
   let errors =
     produce_error_from_check errors variadic_param_with_callconv
     params SyntaxError.error2073 in
+  let param_list = syntax_to_list_no_separators params in
+  let has_inout_param =
+    Hh_core.List.exists param_list ~f:is_parameter_with_callconv in
+  let has_reference_param = Hh_core.List.exists param_list ~f:is_param_by_ref in
+  let errors = if has_inout_param && has_reference_param then
+    make_error_from_node ~error_type:SyntaxError.RuntimeError
+      params SyntaxError.fn_with_inout_and_ref_params :: errors
+    else errors
+  in
   errors
 
 let decoration_errors node errors =
@@ -1120,21 +1156,35 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
     let errors =
       produce_error_from_check errors param_with_callconv_is_byref
       node (SyntaxError.error2075 callconv_text) in
-    let errors =
-      if is_parameter_with_callconv node && is_inside_async_method parents then
-      make_error_from_node node SyntaxError.inout_param_in_async :: errors
-      else errors in
-    let errors =
-      if is_parameter_with_callconv node && is_in_construct_method parents then
-      make_error_from_node ~error_type:SyntaxError.RuntimeError
-        node SyntaxError.inout_param_in_construct :: errors
-      else errors in
+    let errors = if is_parameter_with_callconv node then
+      begin
+        let errors = if is_inside_async_method parents then
+        make_error_from_node node SyntaxError.inout_param_in_async :: errors
+        else errors in
+        let errors =
+          if is_in_construct_method parents then
+          make_error_from_node ~error_type:SyntaxError.RuntimeError
+            node SyntaxError.inout_param_in_construct :: errors
+          else errors in
+        let errors = match syntax p.parameter_name with
+          | DecoratedExpression { decorated_expression_decorator = {
+              syntax = Token { PositionedToken.kind = TokenKind.DotDotDot;
+                _ }; _ }; _} ->
+              make_error_from_node node SyntaxError.error2073 :: errors
+          | _ -> errors
+        in
+        let errors = if first_parent_function_attributes_contains
+              parents SN.UserAttributes.uaMemoize then
+          make_error_from_node ~error_type:SyntaxError.RuntimeError
+            node SyntaxError.memoize_with_inout :: errors
+          else errors in
+        errors
+      end else errors
+    in
     errors
-  | FunctionDeclarationHeader { function_parameter_list; _ }
-    when not hhvm_compat_mode ->
+  | FunctionDeclarationHeader { function_parameter_list; _ } ->
     params_errors function_parameter_list is_hack hhvm_compat_mode errors
-  | AnonymousFunction { anonymous_parameters; _ }
-    when not hhvm_compat_mode ->
+  | AnonymousFunction { anonymous_parameters; _ } ->
     params_errors anonymous_parameters is_hack hhvm_compat_mode errors
   | ClosureTypeSpecifier { closure_parameter_types; _ } ->
     params_errors closure_parameter_types is_hack hhvm_compat_mode errors

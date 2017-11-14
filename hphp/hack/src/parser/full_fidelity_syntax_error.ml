@@ -328,3 +328,7 @@ let fun_arg_invalid_arg =
 let fun_arg_inout_containers =
   "Parameters marked inout must be contained in locals, vecs, dicts, keysets," ^
   " and arrays"
+let memoize_with_inout =
+  "<<__Memoize>> cannot be used on functions with inout parameters"
+let fn_with_inout_and_ref_params =
+  "Functions may not use both reference and inout parameters"

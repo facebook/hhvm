@@ -64,12 +64,7 @@ slow/inout/bad-call-11.php
 slow/inout/bad-call-12.php
 slow/inout/bad-call-14.php
 slow/inout/bad-call-15.php
-slow/inout/bad-decl-2.php
 slow/inout/bad-interface.php
-slow/inout/bad-memoize.php
-slow/inout/bad-mixed-mode-1.php
-slow/inout/bad-mixed-mode-2.php
-slow/inout/bad-named-constructor.php
 slow/inout/bad-parent-1.php
 slow/inout/bad-parent-2.php
 slow/inout/bad-parent-3.php

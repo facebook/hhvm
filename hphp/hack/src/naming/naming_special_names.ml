@@ -126,16 +126,19 @@ module UserAttributes = struct
   let uaDeprecated          = "__Deprecated"
   let uaMemoize             = "__Memoize"
   let uaPHPStdLib           = "__PHPStdLib"
+  let uaAcceptDisposable    = "__AcceptDisposable"
 
-  let as_set : SSet.t =
-    let s = SSet.empty in
-    let s = SSet.add uaOverride s in
-    let s = SSet.add uaConsistentConstruct s in
-    let s = SSet.add uaUnsafeConstruct s in
-    let s = SSet.add uaDeprecated s in
-    let s = SSet.add uaMemoize s in
-    let s = SSet.add uaPHPStdLib s in
-    s
+  let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
+    [
+      uaOverride;
+      uaConsistentConstruct;
+      uaConst;
+      uaUnsafeConstruct;
+      uaDeprecated;
+      uaMemoize;
+      uaPHPStdLib;
+      uaAcceptDisposable;
+    ]
 
 end
 

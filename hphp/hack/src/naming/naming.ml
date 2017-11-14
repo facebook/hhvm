@@ -1690,6 +1690,7 @@ module Make (GetLocals : GetLocals) = struct
       param_name = name;
       param_expr = eopt;
       param_callconv = param.param_callconv;
+      param_user_attributes = user_attributes env param.param_user_attributes;
     }
 
   and make_constraints paraml =

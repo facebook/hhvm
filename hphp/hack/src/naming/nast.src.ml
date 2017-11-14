@@ -287,6 +287,7 @@ and fun_param = {
   param_name : string;
   param_expr : expr option;
   param_callconv : Ast.param_kind option;
+  param_user_attributes : user_attribute list;
 }
 
 and fun_variadicity = (* does function take varying number of args? *)

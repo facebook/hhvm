@@ -352,10 +352,17 @@ let rec bind_param env (ty1, param) =
     T.param_name = param.param_name;
     T.param_expr = param_te;
     T.param_callconv = param.param_callconv;
+    T.param_user_attributes = List.map param.param_user_attributes (user_attribute env);
   } in
   let mode = get_param_mode param.param_is_reference param.param_callconv in
-  let env = Env.set_local env (Local_id.get param.param_name) ty1 in
-  let env = Env.set_param env (Local_id.get param.param_name) (ty1, mode) in
+  let id = Local_id.get param.param_name in
+  let env = Env.set_local env id ty1 in
+  let env = Env.set_param env id (ty1, mode) in
+  let has_accept_disposable =
+    List.exists param.param_user_attributes
+      (fun { ua_name; _ } -> SN.UserAttributes.uaAcceptDisposable = snd ua_name) in
+  let env = if has_accept_disposable
+            then Env.set_using_var env id else env in
   env, tparam
 
 (* In strict mode, we force you to give a type declaration on a parameter *)
@@ -999,18 +1006,18 @@ and bind_as_expr env ty aexpr =
     | _ -> (* TODO Probably impossible, should check that *)
       assert false
 
-and expr ?expected ?(is_receiver = false) ?(is_using_clause = false) ?allow_uref env e =
+and expr ?expected ?(accept_using_var = false) ?(is_using_clause = false) ?allow_uref env e =
   begin match expected with
   | None -> ()
   | Some (_, r, ty) ->
     Typing_log.log_types 1 (fst e) env
     [Typing_log.Log_sub ("Typing.expr " ^ Typing_reason.string_of_ureason r,
        [Typing_log.Log_type ("expected_ty", ty)])] end;
-  raw_expr ~is_receiver ~is_using_clause ?allow_uref ?expected ~in_cond:false env e
+  raw_expr ~accept_using_var ~is_using_clause ?allow_uref ?expected ~in_cond:false env e
 
 and raw_expr
   ~in_cond
-  ?(is_receiver = false)
+  ?(accept_using_var = false)
   ?(is_using_clause = false)
   ?expected
   ?lhs_of_null_coalesce
@@ -1019,7 +1026,7 @@ and raw_expr
   env e =
   debug_last_pos := fst e;
   let env, te, ty =
-    expr_ ~in_cond ~is_receiver ~is_using_clause ?expected ?lhs_of_null_coalesce ?allow_uref
+    expr_ ~in_cond ~accept_using_var ~is_using_clause ?expected ?lhs_of_null_coalesce ?allow_uref
       ~valkind env e in
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
@@ -1097,7 +1104,7 @@ and exprs_expected (pos, ur, expected_tyl) env el =
 and expr_
   ?expected
   ~in_cond
-  ?(is_receiver = false)
+  ?(accept_using_var = false)
   ?(is_using_clause = false)
   ?lhs_of_null_coalesce
   ?allow_uref
@@ -1498,8 +1505,11 @@ and expr_
       make_result env (T.Dollardollar id) ty
   | Lvar ((pos, x) as id) ->
       Typing_hooks.dispatch_lvar_hook id env;
-      if not is_receiver && Env.is_using_var env x
-      then Errors.escaping_disposable pos;
+      if not accept_using_var && Env.is_using_var env x
+      then
+        if Option.is_some (Local_id.Map.get x (Env.get_params env))
+        then Errors.escaping_disposable_parameter pos
+        else Errors.escaping_disposable pos;
       let ty = Env.get_local env x in
       make_result env (T.Lvar id) ty
   | Lvarvar (i, id) ->
@@ -1730,7 +1740,7 @@ and expr_
           | OG_nullthrows -> None
           | OG_nullsafe -> Some p
         ) in
-      let env, te1, ty1 = expr ~is_receiver:true env e1 in
+      let env, te1, ty1 = expr ~accept_using_var:true env e1 in
       let env, result =
         obj_get ~is_method:false ~nullsafe env ty1 (CIexpr e1) m (fun x -> x) in
       let has_lost_info = Env.FakeMembers.is_invalid env e1 (snd m) in
@@ -3336,7 +3346,7 @@ and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_
   (* Call instance method *)
   | Obj_get(e1, (pos_id, Id m), nullflavor) ->
       let is_method = call_type = Cnormal in
-      let env, te1, ty1 = expr ~is_receiver:true env e1 in
+      let env, te1, ty1 = expr ~accept_using_var:true env e1 in
       let nullsafe =
         (match nullflavor with
           | OG_nullthrows -> None
@@ -4423,7 +4433,7 @@ and call_ ~expected pos env fty el uel =
             begin match opt_param with
             | Some param ->
               let env, te, ty =
-                expr ~allow_uref:true
+                expr ~allow_uref:true ~accept_using_var:param.fp_accept_disposable
                   ~expected:(pos, Reason.URparam, param.fp_type) env e in
               let env = call_param ~safe_pass_by_ref env param (e, ty) in
               env, Some (te, ty)

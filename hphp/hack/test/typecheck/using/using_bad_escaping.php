@@ -11,6 +11,16 @@ class AsyncHandle implements IAsyncDisposable {
 }
 
 function expect_mixed(mixed $m):void { }
+function expect_handle(<<__AcceptDisposable>> Handle $h):void {
+  // Illegal because it escapes to a function not marked with the attribute
+  expect_mixed($h);
+}
+function expect_handle_good(<<__AcceptDisposable>> Handle $h):void {
+  $h->foo();
+}
+function expect_handle_bad(<<__AcceptDisposable>> Handle $h):mixed {
+  return $h;
+}
 
 function test_it():mixed {
   using ($x = new Handle()) {
@@ -27,5 +37,9 @@ function test_it():mixed {
   }
   using ($r = new Handle()) {
     using ($m = $r) { }
+  }
+  using ($s = new Handle()) {
+    // OK, but look at body of function
+    expect_handle($s);
   }
 }

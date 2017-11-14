@@ -539,6 +539,14 @@ and unify_param_modes ~safe_pass_by_ref param1 param2 =
   | FPinout, FPref ->
     Errors.reffiness_invariant pos2 pos1 `inout
 
+and unify_accept_disposable param1 param2 =
+  let { fp_pos = pos1; fp_accept_disposable = mode1; _ } = param1 in
+  let { fp_pos = pos2; fp_accept_disposable = mode2; _ } = param2 in
+  match mode1, mode2 with
+  | true, false -> Errors.accept_disposable_invariant pos1 pos2
+  | false, true -> Errors.accept_disposable_invariant pos2 pos1
+  | _, _ -> ()
+
 and unify_params env l1 l2 var1_opt =
   let safe_pass_by_ref = TUtils.safe_pass_by_ref_enabled env in
   match l1, l2, var1_opt with
@@ -556,6 +564,7 @@ and unify_params env l1 l2 var1_opt =
     let { fp_name = name2; fp_type = ty2; _ } = x2 in
     let name = if name1 = name2 then name1 else None in
     unify_param_modes ~safe_pass_by_ref x1 x2;
+    unify_accept_disposable x1 x2;
     let env = { env with Env.pos = Reason.to_pos (fst ty1) } in
     let env, _ = unify env ty2 ty1 in
     let env, rl = unify_params env rl1 rl2 var1_opt in

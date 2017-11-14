@@ -132,6 +132,9 @@ let get_class_parents_and_traits env class_nast =
 (* Section declaring the type of a function *)
 (*****************************************************************************)
 
+let has_accept_disposable_attribute attrs =
+  List.exists attrs (fun { ua_name; _ } -> SN.UserAttributes.uaAcceptDisposable = snd ua_name)
+
 let rec ifun_decl tcopt (f: Ast.fun_) =
   let f = Naming.fun_ tcopt f in
   fun_decl f tcopt;
@@ -159,6 +162,8 @@ and make_param_ty env param =
     fp_name = Some param.param_name;
     fp_type = ty;
     fp_kind = mode;
+    fp_accept_disposable =
+      has_accept_disposable_attribute param.param_user_attributes;
   }
 
 and fun_decl f decl_tcopt =

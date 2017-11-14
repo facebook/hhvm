@@ -7,7 +7,7 @@
       [{ AnnotatedAST.param_hint = (Some (<p>, (Hprim Tstring)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = <p>; param_name = "$s"; param_expr = None;
-         param_callconv = None }
+         param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
       (AnnotatedAST.NamedBody

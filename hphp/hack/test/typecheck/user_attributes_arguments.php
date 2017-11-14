@@ -24,9 +24,8 @@ function f6(<<Data>> ?string $x = null): void {}
 function f7(<<Data>> $x = null): void {}
 
 class Blah {
-  public function f5(<<Multiple(1), Attributes(2,"b$lah"), Foo>> int $x): void {
+  public function f5(<<Multiple(1), Attributes(2,"blah"), Foo>> int $x): void {
     $x = "blah";
     $y = "$x";
   }
 }
-

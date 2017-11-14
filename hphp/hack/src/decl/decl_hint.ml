@@ -61,6 +61,7 @@ and hint_ p env = function
         fp_name = None;
         fp_type = hint env x;
         fp_kind = FPnormal; (* TODO(mqian) implement *)
+        fp_accept_disposable = false;
       }
     end in
     let ret = hint env h in

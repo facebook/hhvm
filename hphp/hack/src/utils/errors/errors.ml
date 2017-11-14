@@ -761,6 +761,8 @@ module Typing                               = struct
   let static_synthetic_method               = 4185 (* DONT MODIFY!!!! *)
   let trait_reuse                           = 4186 (* DONT MODIFY!!!! *)
   let invalid_new_disposable                = 4187 (* DONT MODIFY!!!! *)
+  let escaping_disposable_parameter         = 4188 (* DONT MODIFY!!!! *)
+  let accept_disposable_invariant           = 4189 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1738,7 +1740,18 @@ let illegal_disposable pos verb =
 
 let escaping_disposable pos =
   add Typing.escaping_disposable pos
-    ("Disposable object might escape the scope of the 'using' statement")
+    "Variable from 'using' clause may only be used as receiver in method invocation or \
+    passed to function with <<__AcceptDisposable>> parameter attribute"
+
+let escaping_disposable_parameter pos =
+  add Typing.escaping_disposable_parameter pos
+    "Parameter with <<__AcceptDisposable>> attribute may only be used as receiver in method \
+    invocation or passed to another function with <<__AcceptDisposable>> parameter attribute"
+
+let accept_disposable_invariant pos1 pos2 =
+  let msg1 = pos1, "This parameter is marked <<__AcceptDisposable>>" in
+  let msg2 = pos2, "This parameter is not marked <<__AcceptDisposable>>" in
+  add_list Typing.accept_disposable_invariant [msg1; msg2]
 
 let field_kinds pos1 pos2 =
   add_list Typing.field_kinds

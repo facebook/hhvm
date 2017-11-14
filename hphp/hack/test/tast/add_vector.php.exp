@@ -12,7 +12,7 @@
                    ))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = <p>; param_name = "$v"; param_expr = None;
-         param_callconv = None }
+         param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
       (AnnotatedAST.NamedBody
@@ -127,7 +127,8 @@
              (Some (<p>, (Habstr "T")));
              param_is_reference = false; param_is_variadic = false;
              param_pos = <p>; param_name = "$x";
-             param_expr = None; param_callconv = None }
+             param_expr = None; param_callconv = None;
+             param_user_attributes = [] }
             ];
           m_body =
           (AnnotatedAST.NamedBody
@@ -160,7 +161,8 @@
               (Some (<p>, (Hprim Tint)));
               param_is_reference = false; param_is_variadic = false;
               param_pos = <p>; param_name = "$x";
-              param_expr = None; param_callconv = None }
+              param_expr = None; param_callconv = None;
+              param_user_attributes = [] }
              ];
            m_body =
            (AnnotatedAST.NamedBody

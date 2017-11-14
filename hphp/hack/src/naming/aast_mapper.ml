@@ -178,6 +178,8 @@ struct
     T.param_name = fp.S.param_name;
     T.param_expr = Option.map fp.S.param_expr (map_expr f);
     T.param_callconv = fp.S.param_callconv;
+    T.param_user_attributes =
+    List.map fp.S.param_user_attributes (map_user_attribute f);
   }
 
   and map_fun_variadicity f v =

@@ -192,11 +192,13 @@ inline ArrayData* ArrayData::setWithRef(StringData* k,
 }
 
 inline ArrayData* ArrayData::setRef(int64_t k, Variant& v, bool copy) {
-  return g_array_funcs.setRefInt[kind()](this, k, v, copy);
+  return g_array_funcs.setRefInt[kind()](
+    this, k, member_lval { nullptr, v.asTypedValue() }, copy);
 }
 
 inline ArrayData* ArrayData::setRef(StringData* k, Variant& v, bool copy) {
-  return g_array_funcs.setRefStr[kind()](this, k, v, copy);
+  return g_array_funcs.setRefStr[kind()](
+    this, k, member_lval { nullptr, v.asTypedValue() }, copy);
 }
 
 inline ArrayData* ArrayData::add(int64_t k, Cell v, bool copy) {
@@ -239,7 +241,8 @@ inline ArrayData* ArrayData::appendWithRef(const Variant& v, bool copy) {
 }
 
 inline ArrayData* ArrayData::appendRef(Variant& v, bool copy) {
-  return g_array_funcs.appendRef[kind()](this, v, copy);
+  return g_array_funcs.appendRef[kind()](
+    this, member_lval { nullptr, v.asTypedValue() }, copy);
 }
 
 inline ArrayData* ArrayData::zSet(int64_t k, RefData* v) {

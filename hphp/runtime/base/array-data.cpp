@@ -460,7 +460,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(LvalNewRef)
 
   /*
-   * ArrayData* SetRefInt(ArrayData*, int64_t key, Variant& v, bool copy)
+   * ArrayData* SetRefInt(ArrayData*, int64_t key, member_lval v, bool copy)
    *
    *   Binding set with an integer key.  Box `v' if it is not already
    *   boxed, and then insert a KindOfRef that points to v's RefData.
@@ -469,7 +469,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(SetRefInt)
 
   /*
-   * ArrayData* SetRefStr(ArrayData*, StringData* key, Variant& v, bool copy)
+   * ArrayData* SetRefStr(ArrayData*, StringData* key, member_lval v, bool copy)
    *
    *  Binding set with a string key.  The string `key' must not be an
    *  integer-like string.  Box `v' if it is not already boxed, and
@@ -667,7 +667,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Append)
 
   /*
-   * ArrayData* AppendRef(ArrayData*, Variant& v, bool copy)
+   * ArrayData* AppendRef(ArrayData*, member_lval v, bool copy)
    *
    *   Binding append.  This function appends a new KindOfRef to the
    *   array with the next available integer key, boxes v if it is not

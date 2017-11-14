@@ -189,15 +189,17 @@ ArrayData* MixedArray::updateWithRef(K k, TypedValue data) {
 }
 
 template <class K>
-ArrayData* MixedArray::updateRef(K k, Variant& data) {
+ArrayData* MixedArray::updateRef(K k, member_lval data) {
   assert(!isFull());
+
   auto p = insert(k);
+
+  tvBoxIfNeeded(data);
   if (p.found) {
-    tvBind(*data.asRef(), p.tv);
+    tvBind(data.tv(), p.tv);
     return this;
   }
-  tvBoxIfNeeded(*data.asTypedValue());
-  refDup(*data.asTypedValue(), p.tv);
+  refDup(data.tv(), p.tv);
   return this;
 }
 

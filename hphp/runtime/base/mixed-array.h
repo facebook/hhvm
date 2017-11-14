@@ -341,9 +341,10 @@ public:
   static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
   static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
   static ArrayData* ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr);
-  static ArrayData* SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy);
-  static ArrayData* SetRefStr(ArrayData* ad, StringData* k, Variant& v,
-                              bool copy);
+  static ArrayData* SetRefInt(ArrayData* ad, int64_t k,
+                              member_lval v, bool copy);
+  static ArrayData* SetRefStr(ArrayData* ad, StringData* k,
+                              member_lval v, bool copy);
   static ArrayData* AddInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
@@ -351,7 +352,7 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, member_lval v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
@@ -444,9 +445,9 @@ public:
                                       TypedValue v, bool copy);
   static ArrayData* SetWithRefStrDict(ArrayData*, StringData* k,
                                       TypedValue v, bool copy);
-  static ArrayData* SetRefIntDict(ArrayData*, int64_t, Variant&, bool);
-  static ArrayData* SetRefStrDict(ArrayData*, StringData*, Variant&, bool);
-  static ArrayData* AppendRefDict(ArrayData*, Variant&, bool);
+  static ArrayData* SetRefIntDict(ArrayData*, int64_t, member_lval, bool);
+  static ArrayData* SetRefStrDict(ArrayData*, StringData*, member_lval, bool);
+  static ArrayData* AppendRefDict(ArrayData*, member_lval, bool);
   static ArrayData* AppendWithRefDict(ArrayData*, TypedValue, bool);
   static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
@@ -626,7 +627,7 @@ private:
   int32_t findForRemove(const StringData* s, strhash_t h);
 
   bool nextInsert(Cell);
-  ArrayData* nextInsertRef(Variant& data);
+  ArrayData* nextInsertRef(member_lval data);
   ArrayData* nextInsertWithRef(TypedValue data);
   ArrayData* nextInsertWithRef(const Variant& data);
   ArrayData* addVal(int64_t ki, Cell data);
@@ -638,7 +639,7 @@ private:
   template <bool warn, class K> member_lval addLvalImpl(K k);
   template <class K> ArrayData* update(K k, Cell data);
   template <class K> ArrayData* updateWithRef(K k, TypedValue data);
-  template <class K> ArrayData* updateRef(K k, Variant& data);
+  template <class K> ArrayData* updateRef(K k, member_lval data);
 
   template <class K> ArrayData* zSetImpl(K k, RefData* data);
   ArrayData* zAppendImpl(RefData* data, int64_t* key_ptr);
@@ -655,7 +656,7 @@ private:
 
   MixedArray* copyImpl(MixedArray* target) const;
 
-  MixedArray* initRef(TypedValue& tv, Variant& v);
+  MixedArray* initRef(TypedValue& tv, member_lval v);
   MixedArray* initWithRef(TypedValue& tv, TypedValue v);
   MixedArray* initWithRef(TypedValue& tv, const Variant& v);
   MixedArray* moveVal(TypedValue& tv, TypedValue v);

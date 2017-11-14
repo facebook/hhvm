@@ -433,8 +433,8 @@ public:
   static ArrayData* SetStr(ArrayData*, StringData*, Cell, bool);
   static ArrayData* SetWithRefInt(ArrayData*, int64_t, TypedValue, bool);
   static ArrayData* SetWithRefStr(ArrayData*, StringData*, TypedValue, bool);
-  static ArrayData* SetRefInt(ArrayData*, int64_t, Variant&, bool);
-  static ArrayData* SetRefStr(ArrayData*, StringData*, Variant&, bool);
+  static ArrayData* SetRefInt(ArrayData*, int64_t, member_lval, bool);
+  static ArrayData* SetRefStr(ArrayData*, StringData*, member_lval, bool);
   static ArrayData* RemoveInt(ArrayData*, int64_t, bool);
   static ArrayData* RemoveStr(ArrayData*, const StringData*, bool);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
@@ -442,7 +442,7 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell, bool);
-  static ArrayData* AppendRef(ArrayData*, Variant&, bool);
+  static ArrayData* AppendRef(ArrayData*, member_lval, bool);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue, bool);
   static ArrayData* PlusEq(ArrayData*, const ArrayData*);
   static ArrayData* Merge(ArrayData*, const ArrayData*);

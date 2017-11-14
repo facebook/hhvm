@@ -618,11 +618,11 @@ member_lval SetArray::LvalNewRef(ArrayData* ad, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::SetRefInt(ArrayData* ad, int64_t, Variant&, bool) {
+ArrayData* SetArray::SetRefInt(ArrayData* ad, int64_t, member_lval, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::SetRefStr(ArrayData* ad, StringData*, Variant&, bool) {
+ArrayData* SetArray::SetRefStr(ArrayData* ad, StringData*, member_lval, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
@@ -718,7 +718,7 @@ ArrayData* SetArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
   return Append(ad, tvToInitCell(v), copy);
 }
 
-ArrayData* SetArray::AppendRef(ArrayData* ad, Variant&, bool) {
+ArrayData* SetArray::AppendRef(ArrayData* ad, member_lval, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 

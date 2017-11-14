@@ -177,8 +177,10 @@ public:
                                   TypedValue v, bool copy);
   static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
                                   TypedValue v, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v, bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k,
+                              member_lval v, bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k,
+                              member_lval v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
   static constexpr auto AddInt = &SetInt;
@@ -187,7 +189,7 @@ public:
   static ArrayData* Copy(const ArrayData* ad);
 
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, member_lval v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
 
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);

@@ -102,8 +102,10 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static member_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static member_lval LvalNew(ArrayData*, bool copy);
   static member_lval LvalNewRef(ArrayData*, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v, bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k,
+                              member_lval v, bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k,
+                              member_lval v, bool copy);
   static constexpr auto AddInt = &SetInt;
   static constexpr auto AddStr = &SetStr;
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
@@ -128,7 +130,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
   static ArrayData* ZAppend(ArrayData*, RefData* v, int64_t* key_ptr);
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, member_lval v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
@@ -162,9 +164,9 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static member_lval LvalIntRefVec(ArrayData*, int64_t, bool);
   static member_lval LvalStrRefVec(ArrayData*, StringData*, bool);
   static member_lval LvalNewRefVec(ArrayData*, bool);
-  static ArrayData* SetRefIntVec(ArrayData*, int64_t, Variant&, bool);
-  static ArrayData* SetRefStrVec(ArrayData*, StringData*, Variant&, bool);
-  static ArrayData* AppendRefVec(ArrayData*, Variant&, bool);
+  static ArrayData* SetRefIntVec(ArrayData*, int64_t, member_lval, bool);
+  static ArrayData* SetRefStrVec(ArrayData*, StringData*, member_lval, bool);
+  static ArrayData* AppendRefVec(ArrayData*, member_lval, bool);
   static ArrayData* AppendWithRefVec(ArrayData*, TypedValue, bool);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
   static ArrayData* ToPHPArrayVec(ArrayData*, bool);

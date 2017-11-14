@@ -275,26 +275,22 @@ member_lval EmptyArray::LvalNewRef(ArrayData* ad, bool copy) {
   return LvalNew(ad, copy);
 }
 
-ArrayData* EmptyArray::SetRefInt(ArrayData*,
-                                 int64_t k,
-                                 Variant& var,
-                                 bool) {
+ArrayData* EmptyArray::SetRefInt(ArrayData*, int64_t k,
+                                 member_lval v, bool) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
-  auto ref = *var.asRef();
-  tvIncRefCountable(ref);
-  auto const lval = k == 0 ? EmptyArray::MakePacked(ref)
-                           : EmptyArray::MakeMixed(k, ref);
+  tvBoxIfNeeded(v);
+  tvIncRefCountable(v.tv());
+  auto const lval = k == 0 ? EmptyArray::MakePacked(v.tv())
+                           : EmptyArray::MakeMixed(k, v.tv());
   return lval.arr_base();
 }
 
-ArrayData* EmptyArray::SetRefStr(ArrayData*,
-                                 StringData* k,
-                                 Variant& var,
-                                 bool) {
+ArrayData* EmptyArray::SetRefStr(ArrayData*, StringData* k,
+                                 member_lval v, bool) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
-  auto ref = *var.asRef();
-  tvIncRefCountable(ref);
-  return EmptyArray::MakeMixed(k, ref).arr_base();
+  tvBoxIfNeeded(v);
+  tvIncRefCountable(v.tv());
+  return EmptyArray::MakeMixed(k, v.tv()).arr_base();
 }
 
 ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool /*copy*/) {
@@ -302,11 +298,11 @@ ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool /*copy*/) {
   return EmptyArray::MakePackedInl(v).arr_base();
 }
 
-ArrayData* EmptyArray::AppendRef(ArrayData*, Variant& v, bool /*copy*/) {
+ArrayData* EmptyArray::AppendRef(ArrayData*, member_lval v, bool) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
-  auto ref = *v.asRef();
-  tvIncRefCountable(ref);
-  return EmptyArray::MakePacked(ref).arr_base();
+  tvBoxIfNeeded(v);
+  tvIncRefCountable(v.tv());
+  return EmptyArray::MakePacked(v.tv()).arr_base();
 }
 
 ArrayData* EmptyArray::AppendWithRef(ArrayData*, TypedValue v, bool /*copy*/) {

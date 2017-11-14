@@ -877,8 +877,10 @@ struct ArrayFunctions {
   member_lval (*lvalStrRef[NK])(ArrayData*, StringData* k, bool copy);
   member_lval (*lvalNew[NK])(ArrayData*, bool copy);
   member_lval (*lvalNewRef[NK])(ArrayData*, bool copy);
-  ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, Variant& v, bool copy);
-  ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, Variant& v, bool copy);
+  ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k,
+                              member_lval v, bool copy);
+  ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k,
+                              member_lval v, bool copy);
   ArrayData* (*addInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
   ArrayData* (*addStr[NK])(ArrayData*, StringData* k, Cell v, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k, bool copy);
@@ -900,7 +902,7 @@ struct ArrayFunctions {
   ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, Cell v, bool copy);
-  ArrayData* (*appendRef[NK])(ArrayData*, Variant& v, bool copy);
+  ArrayData* (*appendRef[NK])(ArrayData*, member_lval v, bool copy);
   ArrayData* (*appendWithRef[NK])(ArrayData*, TypedValue v, bool copy);
   ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);

@@ -107,8 +107,10 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static member_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static member_lval LvalNew(ArrayData*, bool copy);
   static member_lval LvalNewRef(ArrayData*, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v, bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k,
+                              member_lval v, bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k,
+                              member_lval v, bool copy);
   static constexpr auto AddInt = &SetInt;
   static constexpr auto AddStr = &SetStr;
   static constexpr auto IterBegin = &ArrayCommon::ReturnInvalidIndex;
@@ -147,7 +149,7 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* ZSetStr(ArrayData* ad, StringData* k, RefData* v);
   static ArrayData* ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr);
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, member_lval v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);

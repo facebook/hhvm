@@ -167,17 +167,17 @@ ArrayData* GlobalsArray::SetWithRefStr(ArrayData* ad, StringData* k,
   return a;
 }
 
-ArrayData* GlobalsArray::SetRefInt(ArrayData* ad,
-                                            int64_t k,
-                                            Variant& v,
-                                            bool copy) {
-  return asGlobals(ad)->setRef(String(k).get(), v, copy);
+ArrayData* GlobalsArray::SetRefInt(ArrayData* ad, int64_t k,
+                                   member_lval v, bool copy) {
+  return asGlobals(ad)->setRef(
+    String(k).get(), tvAsVariant(v.tv_ptr()), copy
+  );
 }
 
-ArrayData* GlobalsArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v,
-                                   bool /*copy*/) {
+ArrayData* GlobalsArray::SetRefStr(ArrayData* ad, StringData* k,
+                                   member_lval v, bool) {
   auto a = asGlobals(ad);
-  tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(v);
+  tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(tvAsVariant(v.tv_ptr()));
   return a;
 }
 
@@ -203,7 +203,7 @@ ArrayData* GlobalsArray::Append(ArrayData*, Cell /*v*/, bool /*copy*/) {
   throw_not_implemented("append on $GLOBALS");
 }
 
-ArrayData* GlobalsArray::AppendRef(ArrayData*, Variant&, bool) {
+ArrayData* GlobalsArray::AppendRef(ArrayData*, member_lval, bool) {
   throw_not_implemented("appendRef on $GLOBALS");
 }
 

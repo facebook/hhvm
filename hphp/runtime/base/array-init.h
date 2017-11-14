@@ -20,15 +20,19 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+#define LV(v) member_lval { nullptr, v.asTypedValue() }
 
 /*
  * Flag indicating whether an array allocation should be pre-checked for OOM.
@@ -406,7 +410,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
    */
   MixedPHPArrayInitBase& appendRef(Variant& v) {
     this->performOp([&]{
-      return MixedArray::AppendRef(this->m_arr, v, false);
+      return MixedArray::AppendRef(this->m_arr, LV(v), false);
     });
     return *this;
   }
@@ -417,7 +421,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
   MixedPHPArrayInitBase& setRef(int64_t name, Variant& v,
                                 bool /*keyConverted*/ = false) {
     this->performOp([&]{
-      return MixedArray::SetRefInt(this->m_arr, name, v, false);
+      return MixedArray::SetRefInt(this->m_arr, name, LV(v), false);
     });
     return *this;
   }
@@ -426,7 +430,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
                              bool keyConverted = false) {
     if (keyConverted) {
       this->performOp([&]{
-        return MixedArray::SetRefStr(this->m_arr, name.get(), v, false);
+        return MixedArray::SetRefStr(this->m_arr, name.get(), LV(v), false);
       });
     } else {
       this->performOp([&]{
@@ -604,7 +608,7 @@ struct PackedPHPArrayInitBase : PackedArrayInitBase<TArray, KindOfArray> {
 
   PackedPHPArrayInitBase& appendRef(Variant& v) {
     this->performOp([&]{
-      return PackedArray::AppendRef(this->m_arr, v, false);
+      return PackedArray::AppendRef(this->m_arr, LV(v), false);
     });
     return *this;
   }
@@ -885,6 +889,8 @@ Array make_keyset_array(Vals&&... vals) {
   make_array_detail::keyset_impl(init, std::forward<Vals>(vals)...);
   return init.toArray();
 }
+
+#undef LV
 
 ///////////////////////////////////////////////////////////////////////////////
 

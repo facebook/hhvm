@@ -695,9 +695,9 @@ ArrayData* MixedArray::zInitVal(TypedValue& tv, RefData* v) {
 }
 
 ALWAYS_INLINE
-MixedArray* MixedArray::initRef(TypedValue& tv, Variant& v) {
-  tvBoxIfNeeded(*v.asTypedValue());
-  refDup(*v.asTypedValue(), tv);
+MixedArray* MixedArray::initRef(TypedValue& tv, member_lval v) {
+  tvBoxIfNeeded(v);
+  refDup(v.tv(), tv);
   return this;
 }
 
@@ -948,7 +948,7 @@ bool MixedArray::nextInsert(Cell v) {
   return true;
 }
 
-ArrayData* MixedArray::nextInsertRef(Variant& data) {
+ArrayData* MixedArray::nextInsertRef(member_lval data) {
   assert(!isFull());
   assert(m_nextKI >= 0);
 
@@ -1110,7 +1110,7 @@ ArrayData* MixedArray::SetWithRefStr(ArrayData* ad, StringData* k,
 }
 
 ArrayData*
-MixedArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
+MixedArray::SetRefInt(ArrayData* ad, int64_t k, member_lval v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
@@ -1118,7 +1118,7 @@ MixedArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
 }
 
 ArrayData*
-MixedArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
+MixedArray::SetRefStr(ArrayData* ad, StringData* k, member_lval v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
@@ -1237,7 +1237,7 @@ ArrayData* MixedArray::Append(ArrayData* ad, Cell v, bool copy) {
   return a;
 }
 
-ArrayData* MixedArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
+ArrayData* MixedArray::AppendRef(ArrayData* ad, member_lval v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
 
@@ -1775,20 +1775,21 @@ member_lval MixedArray::LvalNewRefDict(ArrayData* adIn, bool) {
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayData* MixedArray::SetRefIntDict(ArrayData* adIn, int64_t, Variant&, bool) {
+ArrayData*
+MixedArray::SetRefIntDict(ArrayData* adIn, int64_t, member_lval, bool) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData*
-MixedArray::SetRefStrDict(ArrayData* adIn, StringData*, Variant&, bool) {
+MixedArray::SetRefStrDict(ArrayData* adIn, StringData*, member_lval, bool) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayData* MixedArray::AppendRefDict(ArrayData* adIn, Variant&, bool) {
+ArrayData* MixedArray::AppendRefDict(ArrayData* adIn, member_lval, bool) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);

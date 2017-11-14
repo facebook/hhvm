@@ -903,29 +903,31 @@ ArrayData* PackedArray::SetWithRefStrVec(ArrayData* adIn, StringData* k,
   throwInvalidArrayKeyException(k, adIn);
 }
 
-ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k, Variant& v,
-                                  bool copy) {
+ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k,
+                                  member_lval v, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
 
   return MutableOpInt(adIn, k, copy,
-    [&] (ArrayData* ad) { tvBind(*v.asRef(), packedData(ad)[k]); return ad; },
+    [&] (ArrayData* ad) {
+      tvBoxIfNeeded(v);
+      tvBind(v.tv(), packedData(ad)[k]);
+      return ad;
+    },
     [&] { return AppendRef(adIn, v, copy); },
     // TODO(#2606310): Make use of our knowledge that the key is missing.
     [&] (MixedArray* mixed) { return mixed->updateRef(k, v); }
   );
 }
 
-ArrayData* PackedArray::SetRefIntVec(ArrayData* adIn, int64_t /*k*/,
-                                     Variant& /*v*/, bool /*copy*/) {
+ArrayData* PackedArray::SetRefIntVec(ArrayData* adIn, int64_t,
+                                     member_lval, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayData* PackedArray::SetRefStr(ArrayData* adIn,
-                                  StringData* k,
-                                  Variant& v,
-                                  bool copy) {
+ArrayData* PackedArray::SetRefStr(ArrayData* adIn, StringData* k,
+                                  member_lval v, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
 
   return MutableOpStr(adIn, k, copy,
@@ -934,8 +936,8 @@ ArrayData* PackedArray::SetRefStr(ArrayData* adIn,
   );
 }
 
-ArrayData*
-PackedArray::SetRefStrVec(ArrayData* adIn, StringData* k, Variant&, bool) {
+ArrayData* PackedArray::SetRefStrVec(ArrayData* adIn, StringData* k,
+                                     member_lval, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidArrayKeyException(k, adIn);
@@ -1064,21 +1066,20 @@ ArrayData* PackedArray::Append(ArrayData* adIn, Cell v, bool copy) {
   return ad;
 }
 
-ArrayData* PackedArray::AppendRef(ArrayData* adIn,
-                                  Variant& v,
-                                  bool copy) {
+ArrayData* PackedArray::AppendRef(ArrayData* adIn, member_lval v, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
   auto const ad = PrepareForInsert(adIn, copy);
   auto& dst = packedData(ad)[ad->m_size++];
-  dst.m_data.pref = v.asRef()->m_data.pref;
+  tvBoxIfNeeded(v);
+  dst.m_data.pref = v.val().pref;
   dst.m_type = KindOfRef;
   dst.m_data.pref->incRefCount();
   return ad;
 }
 
-ArrayData* PackedArray::AppendRefVec(ArrayData* adIn, Variant&, bool) {
+ArrayData* PackedArray::AppendRefVec(ArrayData* adIn, member_lval, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);

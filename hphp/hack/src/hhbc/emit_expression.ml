@@ -718,6 +718,7 @@ and emit_id env (p, s as id) =
   | "__NAMESPACE__" ->
     let ns = Emit_env.get_namespace env in
     instr_string (Option.value ~default:"" ns.Namespace_env.ns_name)
+  | "__COMPILER_FRONTEND__" -> instr_string "hackc"
   | ("EXIT" | "DIE") ->
     emit_exit env None
   | _ ->

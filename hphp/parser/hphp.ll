@@ -779,6 +779,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"__FILE__"             { RETTOKEN(T_FILE); }
 <ST_IN_SCRIPTING>"__DIR__"              { RETTOKEN(T_DIR); }
 <ST_IN_SCRIPTING>"__NAMESPACE__"        { RETTOKEN(T_NS_C); }
+<ST_IN_SCRIPTING>"__COMPILER_FRONTEND__" {
+  _scanner->setToken(yytext, yyleng, "hhvm", 4);
+  return T_CONSTANT_ENCAPSED_STRING;
+}
 
 <INITIAL>"#!"[^\n]*"\n" {
         SETTOKEN(T_HASHBANG);

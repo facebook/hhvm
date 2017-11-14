@@ -59,3 +59,4 @@ const string __DIR__ = '';
 const string __FUNCTION__ = '';
 const string __METHOD__ = '';
 const string __NAMESPACE__ = '';
+const string __COMPILER_FRONTEND__ = '';

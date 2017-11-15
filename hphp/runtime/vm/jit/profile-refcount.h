@@ -104,6 +104,64 @@ struct DecRefProfile {
 
 using OptDecRefProfile = folly::Optional<TargetProfile<DecRefProfile>>;
 
+/*
+ * Profile the frequency of the 3 possible different behaviors for an IncRef,
+ * or DecRefNZ instruction.  Each execution must fall into exactly one of these
+ * categories:
+ *
+ *  1) Uncounted:
+ *     the type was uncounted
+ *  2) Persistent:
+ *     the type was refcounted and the value was persistent (so no inc/dec
+ *     happened)
+ *  3) IncDeced:
+ *     the count for the value was incremented or decremented.
+ *
+ */
+struct RefcountProfile {
+  uint16_t uncounted() const {
+    return total - refcounted;
+  }
+
+  uint16_t persistent() const {
+    return refcounted - incDeced;
+  }
+
+  float percent(uint16_t value) const {
+    return total ? 100.0 * value / total : 0.0;
+  }
+
+  std::string toString() const {
+    return folly::sformat(
+      "total: {:4}\n uncounted: {:4} ({:.1f}%),\n persistent: {:4} ({:.1f}%),\n"
+      " incDeced: {:4} ({:.1f}%)",
+      total,
+      uncounted(),  percent(uncounted()),
+      persistent(), percent(persistent()),
+      incDeced,     percent(incDeced)
+    );
+  }
+
+  static void reduce(RefcountProfile& a, const RefcountProfile& b) {
+    a.total       += b.total;
+    a.refcounted  += b.refcounted;
+    a.incDeced    += b.incDeced;
+  }
+
+  /*
+   * The total number of times this refcount op was executed.
+   */
+  uint16_t total;
+  /*
+   * The number of times this refcount op made it past the refcounted check.
+   */
+  uint16_t refcounted;
+  /*
+   * The number of times this refcount op inc/deced the refcount.
+   */
+  uint16_t incDeced;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } }

@@ -191,6 +191,7 @@ Unit::Unit()
   : m_mergeOnly(false)
   , m_interpretOnly(false)
   , m_isHHFile(false)
+  , m_extended(false)
   , m_mainReturn(make_tv<KindOfUninit>())
 {}
 
@@ -525,9 +526,10 @@ int Unit::getNearestLineWithCode(int line) const {
 }
 
 const Func* Unit::getFunc(Offset pc) const {
+  auto& table = getExtended()->m_funcTable;
   FuncEntry key = FuncEntry(pc, nullptr);
-  auto it = std::upper_bound(m_funcTable.begin(), m_funcTable.end(), key);
-  if (it != m_funcTable.end()) {
+  auto it = std::upper_bound(table.begin(), table.end(), key);
+  if (it != table.end()) {
     assert(pc < it->pastOffset());
     return it->val();
   }

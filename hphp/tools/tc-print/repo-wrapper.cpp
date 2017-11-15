@@ -58,6 +58,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   RuntimeOption::AlwaysUseRelativePath = false;
   RuntimeOption::SafeFileAccess = false;
   RuntimeOption::EvalAllowHhas = true;
+  RuntimeOption::SandboxMode = true; // So we get Unit::m_funcTable
   Option::WholeProgram = false;
 
   LitstrTable::init();

@@ -541,7 +541,12 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
 
 std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
   INC_TPC(unit_load);
-  auto u = std::make_unique<Unit>();
+  std::unique_ptr<Unit> u {
+    RuntimeOption::RepoAuthoritative && !RuntimeOption::SandboxMode &&
+      m_litstrs.empty() && m_arrayTypeTable.empty() ?
+    new Unit : new UnitExtended
+  };
+
   u->m_repoId = saveLineTable ? RepoIdInvalid : m_repoId;
   u->m_sn = m_sn;
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
@@ -554,11 +559,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
   u->m_useStrictTypesForBuiltins = m_useStrictTypesForBuiltins;
   u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
   u->m_md5 = m_md5;
-  for (auto s : m_litstrs) {
-    u->m_namedInfo.push_back(s);
-  }
   u->m_arrays = m_arrays;
-  u->m_arrayTypeTable = m_arrayTypeTable;
   for (auto const& pce : m_pceVec) {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
   }
@@ -680,20 +681,31 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
     stashExtendedLineTable(u.get(), createSourceLocTable());
   }
 
-  for (size_t i = 0; i < m_feTab.size(); ++i) {
-    auto const past = m_feTab[i].first;
-    auto const fe = m_feTab[i].second;
-    assert(fe->past == past);
-    assert(m_fMap.find(fe) != m_fMap.end());
-    auto func = m_fMap.find(fe)->second;
-    u->m_funcTable.push_back(FuncEntry(past, func));
+  if (u->m_extended) {
+    auto ux = u->getExtended();
+    for (auto s : m_litstrs) {
+      ux->getExtended()->m_namedInfo.push_back(s);
+    }
+    ux->m_arrayTypeTable = m_arrayTypeTable;
+
+    for (auto const& ent : m_feTab) {
+      auto const past = ent.first;
+      auto const fe = ent.second;
+      assert(fe->past == past);
+      assert(m_fMap.find(fe) != m_fMap.end());
+      auto func = m_fMap.find(fe)->second;
+      ux->m_funcTable.push_back(FuncEntry(past, func));
+    }
+
+    // Funcs can be recorded out of order when loading them from the
+    // repo currently.  So sort 'em here.
+    std::sort(ux->m_funcTable.begin(), ux->m_funcTable.end());
+
+    m_fMap.clear();
+  } else {
+    assertx(!m_litstrs.size());
+    assertx(m_arrayTypeTable.empty());
   }
-
-  // Funcs can be recorded out of order when loading them from the
-  // repo currently.  So sort 'em here.
-  std::sort(u->m_funcTable.begin(), u->m_funcTable.end());
-
-  m_fMap.clear();
 
   static const bool kVerify = debug || RuntimeOption::EvalVerify ||
     RuntimeOption::EvalVerifyOnly;

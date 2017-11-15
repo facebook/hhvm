@@ -51,6 +51,8 @@ struct ArrayTypeTable {
    */
   void repopulate(const Builder&);
 
+  bool empty() const { return m_arrTypes.empty(); }
+
   /*
    * Find an array type description by id.
    */

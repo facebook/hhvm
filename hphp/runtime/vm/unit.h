@@ -51,6 +51,7 @@ struct Func;
 struct PreClass;
 struct String;
 struct StringData;
+struct UnitExtended;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Unit enums.
@@ -199,6 +200,7 @@ extern ServiceData::ExportedTimeSeries* g_hhbc_size;
  * required.
  */
 struct Unit {
+  friend struct UnitExtended;
   friend struct UnitEmitter;
   friend struct UnitRepoProxy;
 
@@ -327,7 +329,6 @@ public:
   void* operator new(size_t sz);
   void operator delete(void* p, size_t sz);
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Basic accessors.                                                   [const]
 
@@ -347,7 +348,6 @@ public:
    */
   const StringData* filepath() const;
   const StringData* dirpath() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode.                                                          [const]
@@ -373,7 +373,6 @@ public:
    * Get the Op at `instrOffset'.
    */
   Op getOp(Offset instrOffset) const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Code locations.                                                    [const]
@@ -415,7 +414,6 @@ public:
    */
   const Func* getFunc(Offset pc) const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Litstrs and NamedEntitys.                                          [const]
 
@@ -443,7 +441,6 @@ public:
   StringData* lookupLitstrId(Id id) const;
   const NamedEntity* lookupNamedEntityId(Id id) const;
   NamedEntityPair lookupNamedEntityPairId(Id id) const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Arrays.                                                            [const]
@@ -630,7 +627,6 @@ public:
   static bool classExists(const StringData* name,
                           bool autoload, ClassKind kind);
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Constant lookup.                                                  [static]
 
@@ -674,7 +670,6 @@ public:
    */
   static bool defNativeConstantCallback(const StringData* cnsName, Cell cell);
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
@@ -690,7 +685,6 @@ public:
    * returns true iff the bound type alias is persistent.
    */
   bool defTypeAlias(Id id);
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Merge.
@@ -719,7 +713,6 @@ public:
    */
   const TypedValue* getMainReturn() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Info arrays.                                                      [static]
 
@@ -735,7 +728,6 @@ public:
    */
   static Array getUserFunctions();
   static Array getSystemFunctions();
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Pretty printer.                                                    [const]
@@ -779,7 +771,6 @@ public:
 
   void prettyPrint(std::ostream&, PrintOpts = PrintOpts()) const;
   std::string toString() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Other methods.
@@ -834,14 +825,12 @@ public:
    * files or force_hh */
   bool useStrictTypesForBuiltins() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
   static constexpr ptrdiff_t bcOff() {
     return offsetof(Unit, m_bc);
   }
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
@@ -850,7 +839,8 @@ private:
   void initialMerge();
   template<bool debugger>
   void mergeImpl(void* tcbase, MergeInfo* mi);
-
+  UnitExtended* getExtended();
+  const UnitExtended* getExtended() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -874,6 +864,7 @@ private:
   bool m_isHHFile : 1;
   bool m_useStrictTypes : 1;
   bool m_useStrictTypesForBuiltins : 1;
+  bool m_extended : 1;
   LowStringPtr m_dirpath{nullptr};
 
   TypedValue m_mainReturn;
@@ -886,11 +877,19 @@ private:
 
   int64_t m_sn{-1};             // Note: could be 32-bit
   MD5 m_md5;
-  NamedEntityPairTable m_namedInfo;
   FixedVector<const ArrayData*> m_arrays;
+  mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
+};
+
+struct UnitExtended : Unit {
+  friend struct Unit;
+  friend struct UnitEmitter;
+
+  UnitExtended() { m_extended = true; }
+
+  NamedEntityPairTable m_namedInfo;
   ArrayTypeTable m_arrayTypeTable;
   FuncTable m_funcTable;
-  mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

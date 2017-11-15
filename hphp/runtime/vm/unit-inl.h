@@ -127,6 +127,16 @@ inline void** Unit::MergeInfo::mergeableData(int idx) {
 ///////////////////////////////////////////////////////////////////////////////
 // Basic accessors.
 
+inline UnitExtended* Unit::getExtended() {
+  assertx(m_extended);
+  return static_cast<UnitExtended*>(this);
+}
+
+inline const UnitExtended* Unit::getExtended() const {
+  assertx(m_extended);
+  return static_cast<const UnitExtended*>(this);
+}
+
 inline int Unit::repoID() const {
   return m_repoId;
 }
@@ -183,7 +193,8 @@ inline Op Unit::getOp(Offset instrOffset) const {
 // Litstrs and NamedEntitys.
 
 inline size_t Unit::numLitstrs() const {
-  return m_namedInfo.size();
+  if (!m_extended) return 0;
+  return getExtended()->m_namedInfo.size();
 }
 
 inline bool Unit::isLitstrId(Id id) const {
@@ -191,7 +202,7 @@ inline bool Unit::isLitstrId(Id id) const {
     auto globalID = decodeGlobalLitstrId(id);
     return LitstrTable::get().contains(globalID);
   }
-  return m_namedInfo.contains(id);
+  return m_extended && getExtended()->m_namedInfo.contains(id);
 }
 
 inline StringData* Unit::lookupLitstrId(Id id) const {
@@ -199,7 +210,7 @@ inline StringData* Unit::lookupLitstrId(Id id) const {
     auto globalID = decodeGlobalLitstrId(id);
     return LitstrTable::get().lookupLitstrId(globalID);
   }
-  return m_namedInfo.lookupLitstr(id);
+  return getExtended()->m_namedInfo.lookupLitstr(id);
 }
 
 inline const NamedEntity* Unit::lookupNamedEntityId(Id id) const {
@@ -211,7 +222,7 @@ inline NamedEntityPair Unit::lookupNamedEntityPairId(Id id) const {
     auto globalID = decodeGlobalLitstrId(id);
     return LitstrTable::get().lookupNamedEntityPairId(globalID);
   }
-  return m_namedInfo.lookupNamedEntityPair(id);
+  return getExtended()->m_namedInfo.lookupNamedEntityPair(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -227,9 +238,9 @@ inline const ArrayData* Unit::lookupArrayId(Id id) const {
 }
 
 inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
-  return RuntimeOption::RepoAuthoritative
-           ? globalArrayTypeTable().lookup(id)
-           : m_arrayTypeTable.lookup(id);
+  return RuntimeOption::RepoAuthoritative ?
+    globalArrayTypeTable().lookup(id) :
+    getExtended()->m_arrayTypeTable.lookup(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

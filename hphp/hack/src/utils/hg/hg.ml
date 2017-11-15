@@ -67,7 +67,7 @@ let get_closest_svn_ancestor hg_rev repo =
    *
    * hg id -i --cwd <repo> *)
   let current_working_copy_hg_rev repo =
-    let process = Process.exec "hg" ["id"; "-i"; "--cwd"; repo; ] in
+    let process = Process.exec "hg" ["id"; "--debug"; "-i"; "--cwd"; repo; ] in
     Future.make process @@ fun result ->
       let result = String.trim result in
       if String.length result < 1 then

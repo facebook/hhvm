@@ -11,8 +11,10 @@
 type load_mini_approach =
   | Load_mini_script of Path.t
   | Precomputed of ServerArgs.mini_state_target_info
-  (** Load a saved state using Ocaml implementation of saved state loader. *)
-  | Load_state_natively
+  (** Load a saved state using Ocaml implementation of saved state loader.
+   * Bool is true when using canary, i.e. look up saved state by hg commit
+   * hash instead of nearest SVN rev. *)
+  | Load_state_natively of bool
   (* Use the supplied saved state target to skip lookup in XDB. *)
   | Load_state_natively_with_target of ServerMonitorUtils.target_mini_state
 

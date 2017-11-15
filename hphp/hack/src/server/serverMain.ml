@@ -416,7 +416,8 @@ let resolve_init_approach genv =
       | Some _, true, None ->
         (** Use native loading only if the config specifies a load script,
          * and the local config prefers native. *)
-        Some ServerInit.Load_state_natively, "Load_state_natively"
+        let use_canary = ServerArgs.load_state_canary genv.options in
+        Some (ServerInit.Load_state_natively use_canary), "Load_state_natively"
       | _, _, Some (ServerArgs.Informant_induced_mini_state_target target) ->
         Some (ServerInit.Load_state_natively_with_target target), "Load_state_natively_with_target"
       | Some load_mini_script, false, None ->

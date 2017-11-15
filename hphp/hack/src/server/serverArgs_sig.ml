@@ -43,6 +43,7 @@ module type S = sig
   val max_procs           : options -> int
   val no_load             : options -> bool
   val profile_log         : options -> bool
+  val load_state_canary   : options -> bool
   val with_mini_state     : options -> mini_state_target option
   val save_filename       : options -> string option
   val use_gen_deps        : options -> bool

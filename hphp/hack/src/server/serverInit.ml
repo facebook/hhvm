@@ -29,7 +29,7 @@ exception Loader_timeout of string
 type load_mini_approach =
   | Load_mini_script of Path.t
   | Precomputed of ServerArgs.mini_state_target_info
-  | Load_state_natively
+  | Load_state_natively of bool
   | Load_state_natively_with_target of ServerMonitorUtils.target_mini_state
 
 (** Docs are in .mli *)
@@ -216,17 +216,17 @@ module ServerInitCommon = struct
       (try Daemon.kill daemon with e -> Hh_logger.exc e);
       raise e
 
-  let invoke_loading_state_natively ~tiny ?target genv root =
+  let invoke_loading_state_natively ~tiny ?(use_canary=false) ?target genv root =
     let mini_state_handle = begin match target with
     | None -> None
     | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; } ->
       Some
       {
         State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
-        mini_state_for_svn_rev = target_svn_rev;
+        mini_state_for_rev = (Hg.Svn_rev target_svn_rev);
       }
     end in
-    let result = State_loader.mk_state_future ?mini_state_handle
+    let result = State_loader.mk_state_future ~use_canary ?mini_state_handle
       ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny in
     lock_and_load_deptable result.State_loader.deptable_fn;
     let old_saved = open_in result.State_loader.saved_state_fn
@@ -262,18 +262,20 @@ module ServerInitCommon = struct
         None
       )) in
       Core_result.try_with (fun () -> fun () -> Ok get_dirty_files)
-    | Load_state_natively ->
-      let result =
-      Core_result.try_with (fun () -> invoke_loading_state_natively ~tiny genv root) in
+    | Load_state_natively use_canary ->
+      let result = Core_result.try_with (fun () ->
+        invoke_loading_state_natively ~use_canary ~tiny genv root) in
       begin match result, tiny with
       | Error _, true ->
         (* Turn off use tiny state *)
         HackEventLogger.set_use_tiny_state false;
-        Core_result.try_with (fun () -> invoke_loading_state_natively ~tiny:false genv root)
+        Core_result.try_with (fun () ->
+          invoke_loading_state_natively ~use_canary ~tiny:false genv root)
       | _ -> result
       end
     | Load_state_natively_with_target target ->
-      Core_result.try_with (fun () -> invoke_loading_state_natively ~tiny ~target genv root)
+      Core_result.try_with (fun () ->
+        invoke_loading_state_natively ~tiny ~target genv root)
 
   let is_check_mode options =
     ServerArgs.check_mode options &&
@@ -550,6 +552,7 @@ module ServerInitCommon = struct
       let fast = Relative_path.Set.fold env.failed_parsing
         ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
       type_check genv env fast t
+
 end
 
 type saved_state_fn = string
@@ -693,14 +696,14 @@ module ServerIncrementalInit : InitKind = struct
   open ServerInitCommon
 
   (* Runs the hg cat process to query for the old versions of dirty files *)
-  let send_hg_cat_command root base_rev dirty_file_paths_list t =
+  let send_hg_cat_command root rev dirty_file_paths_list t =
     let tmp_dir = (Relative_path.path_of_prefix Relative_path.Tmp) in
     (* First, we need to make the paths to mimic those in our repository. *)
     List.iter dirty_file_paths_list
       ~f:(fun path -> Sys_utils.mkdir_p (tmp_dir ^ (Filename.dirname path)));
     (* Grab the old version of files from hg *)
     let pid = Hg.get_old_version_of_files
-      ~rev:base_rev
+      ~rev
       ~out: ( tmp_dir ^ "%p")
       ~files: dirty_file_paths_list
       ~repo: (Path.to_string root) in

@@ -4852,7 +4852,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     if (visit(fs->getInitExp())) {
       emitPop(e);
     }
-    Label preCond(e);
     Label& preInc = registerContinue(fs, region.get(), 1, false)->m_label;
     Label& fail = registerBreak(fs, region.get(), 1, false)->m_label;
     ExpressionPtr condExp = fs->getCondExp();

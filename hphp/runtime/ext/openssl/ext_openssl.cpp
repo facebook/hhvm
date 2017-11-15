@@ -1516,7 +1516,7 @@ bool HHVM_FUNCTION(openssl_pkcs7_encrypt, const String& infilename,
   PKCS7 *p7 = nullptr;
   const EVP_CIPHER *cipher = nullptr;
 
-  infile = BIO_new_file(infilename.data(), "r");
+  infile = BIO_new_file(infilename.data(), (flags & PKCS7_BINARY) ? "rb" : "r");
   if (infile == nullptr) {
     raise_warning("error opening the file, %s", infilename.data());
     goto clean_exit;
@@ -1602,7 +1602,7 @@ bool HHVM_FUNCTION(openssl_pkcs7_sign, const String& infilename,
   X509 *cert;
   cert = ocert->m_cert;
 
-  infile = BIO_new_file(infilename.data(), "r");
+  infile = BIO_new_file(infilename.data(), (flags & PKCS7_BINARY) ? "rb" : "r");
   if (infile == nullptr) {
     raise_warning("error opening input file %s!", infilename.data());
     goto clean_exit;

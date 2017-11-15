@@ -1,0 +1,13 @@
+# step-indexing test
+.main {
+  # real code seems to need EntryNop here
+  # which is rather inelegant
+  L0:
+  Jmp L1
+  L1:
+  Int 2
+  JmpZ L0
+  Jmp L0
+  Int 1
+  RetC
+}

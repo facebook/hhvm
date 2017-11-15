@@ -1,0 +1,254 @@
+# These variations should all pass
+
+.main {
+  FPushFuncD 1 "foo"
+  String "lop"
+  FPassCE 0 Cell
+  FCall 1
+  PopR
+  FPushFuncD 1 "foo"
+  String "goo"
+  FPassCE 0 Cell
+  FCall 1
+  PopR
+  FPushFuncD 1 "foo"
+  String "blah"
+  FPassCE 0 Cell
+  FCall 1
+  PopR
+  FPushFuncD 1 "foo"
+  String "baz"
+  FPassCE 0 Cell
+  FCall 1
+  PopR
+  FPushFuncD 1 "foo"
+  String "bar"
+  FPassCE 0 Cell
+  FCall 1
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"" N  > lop() {
+  .try_fault F2 {
+    .try_fault F3 {
+      FPushCtorD 1 "Exception"
+      String "one"
+      FPassCE 0 Cell
+      FCall 1
+      PopR
+      Throw
+    }
+  }
+F3:
+  FPushCtorD 1 "Exception"
+  String "two"
+  FPassCE 0 Cell
+  FCall 1
+  PopR
+  Throw
+F2:
+  String "outer finally\n"
+  Print
+  PopC
+  Unwind
+}
+
+.function <"" N  > goo() {
+  .declvars $e;
+    .try {
+      .try_fault F3 {
+        FPushCtorD 1 "Exception"
+        String "one"
+        FPassCE 0 Cell
+        FCall 1
+        PopR
+        Throw
+      }
+    } .catch {
+    .try_fault F2 {
+      Dup
+      InstanceOfD "Exception"
+      JmpZ L1
+      SetL $e
+      PopC
+      String "ch\n"
+      Print
+      PopC
+      Jmp L0
+    L1:
+      Throw
+    }
+    }
+L0:
+  String "fh2\n"
+  Print
+  PopC
+  Null
+  RetC
+F3:
+  String "fh1\n"
+  Print
+  PopC
+  Unwind
+F2:
+  String "fh2\n"
+  Print
+  PopC
+  Unwind
+}
+
+
+.function <"" N  > blah() {
+  .declvars $e;
+  .try_fault F1 {
+    String "begin try\n"
+    Print
+    PopC
+    FPushCtorD 1 "Exception"
+    String "one"
+    FPassCE 0 Cell
+    FCall 1
+    PopR
+    Throw
+  }
+F1:
+  .try {
+    String "end outer loop\n"
+    Print
+    PopC
+    FPushCtorD 1 "Exception"
+    String "two"
+    FPassCE 0 Cell
+    FCall 1
+    PopR
+    Throw
+  } .catch {
+    Dup
+    InstanceOfD "Exception"
+    JmpZ L3
+    SetL $e
+    PopC
+    String "catch\n"
+    Print
+    PopC
+    CGetL $e
+    FPushObjMethodD 0 "getMessage" NullThrows
+    FCall 0
+    UnboxR
+    Print
+    PopC
+    Unwind
+  L3:
+    Throw
+  }
+}
+
+.function <"" N  > baz() {
+    .try_fault F1 {
+      FPushCtorD 1 "Exception"
+      String "one"
+      FPassCE 0 Cell
+      FCall 1
+      PopR
+      Throw
+    }
+F1:
+ .try_fault F0 {
+   FPushCtorD 1 "Exception"
+   String "two"
+   FPassCE 0 Cell
+   FCall 1
+   PopR
+   Throw
+  }
+F0:
+  String "end"
+  Print
+  PopC
+  Unwind
+}
+
+# can't think of a clever test-passing transform for this
+# one at the moment
+.function <"" N  > bar() {
+  .declvars $e;
+  .try {
+    .try_fault F2 {
+      FPushCtorD 1 "Exception"
+      String "bar"
+      FPassCE 0 Cell
+      FCall 1
+      PopR
+      Throw
+    }
+  } .catch {
+    Dup
+    InstanceOfD "Exception"
+    JmpZ L1
+    SetL $e
+    PopC
+    String "in catch\n"
+    Print
+    PopC
+    Jmp L0
+  L1:
+    Throw
+  }
+L0:
+  Null
+  RetC
+F2:
+  String "in finally\n"
+  Print
+  PopC
+  Unwind
+}
+
+.function <"" N  > foo($fname) {
+  .declvars $e;
+  String "running "
+  CGetL $fname
+  Concat
+  String " \n"
+  Concat
+  Print
+  PopC
+  .try {
+    FPushFuncD 1 "call_user_func"
+    FPassL 0 $fname Cell
+    FCall 1
+    PopR
+    Jmp L0
+  } .catch {
+    Dup
+    InstanceOfD "Exception"
+    JmpZ L1
+    SetL $e
+    PopC
+    String "foo catch\n"
+    Print
+    PopC
+    CGetL $e
+    FPushObjMethodD 0 "getMessage" NullThrows
+    FCall 0
+    UnboxR
+    Print
+    PopC
+    String "\n"
+    Print
+    PopC
+    Jmp L0
+  L1:
+    Throw
+  }
+L0:
+  String "foo done\n\n"
+  Print
+  PopC
+  Null
+  RetC
+}
+
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/exntest.php ends here

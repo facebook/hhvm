@@ -14,17 +14,8 @@ slow/finally/finally_break_008.php
 slow/finally/finally_goto_001.php
 slow/finally/finally_goto_002.php
 slow/finally/finally_goto_003.php
-slow/finally/finally_pseudomain_001.php
 slow/finally/finally_pseudomain_002.php
 slow/finally/goto-bare.php
-slow/finally/new_try_catch_004.php
-slow/finally/new_try_catch_005.php
-slow/finally/new_try_catch_006.php
-slow/finally/new_try_catch_007.php
-slow/finally/new_try_catch_010.php
-slow/finally/new_try_catch_011.php
-slow/finally/new_try_catch_012.php
-slow/finally/new_try_catch_013.php
 slow/finally/new_try_catch_014.php
 slow/finally/new_try_catch_015.php
 slow/finally/try_finally_005.php

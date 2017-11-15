@@ -1,7 +1,5 @@
-# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/paperexample.php starts here
+# this is more of an example than a test, and is still under development...
 
-
-.filepath "/data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/paperexample.php";
 .adata A_0 = """v:0:{}""";
 .adata A_1 = """v:3:{a:2:{i:0;i:1;i:1;i:2;}a:2:{i:0;i:3;i:1;i:4;}a:2:{i:0;i:5;i:1;i:6;}}""";
 

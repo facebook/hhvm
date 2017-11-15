@@ -1,0 +1,5 @@
+# step-indexing test
+.main {
+  L0:
+  Jmp L0
+}

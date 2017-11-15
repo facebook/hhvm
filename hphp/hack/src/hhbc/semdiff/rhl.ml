@@ -141,7 +141,7 @@ let make_label_try_maps prog =
     end in
   loop prog 0 [] LabelMap.empty IMap.empty
 
-(* Second pass constructsan an exception table. Revised version maps instruction
+(* Second pass constructs an exception table. Revised version maps instruction
   indices to a list of handler indices. Previous parent relation is removed, as
   it doesn't track the right information.
 
@@ -194,6 +194,24 @@ let make_exntable prog labelmap trymap =
     | _ -> loop is (n+1) trycatchstack newexnmap
   end in
   loop prog 0 [] IMap.empty
+
+(* lop off the tail after the first catch handler, if there is one *)
+let rec to_first_catch hs = match hs with
+  | [] -> []
+  | Fault_handler x :: rest -> Fault_handler x :: to_first_catch rest
+  | Catch_handler x :: _rest -> [Catch_handler x]
+
+(* construct the new pc corresponding to throwing from given static
+   and dynamic handler stacks
+   This version assumes that the dynamic stacks do not include the "current" handler,
+   just those that are still pending
+   The result is an option to enable shortcircuiting throwing out of frame
+*)
+let throw_pc static dynamic =
+ match (to_first_catch static) @ dynamic with
+  | [] -> None (* really should be ([],-1) *)
+  | Fault_handler x :: rest
+  | Catch_handler x :: rest -> Some (rest, x)
 
 (* Moving string functions into rhl so that I can use them in debugging *)
 let propstostring props =
@@ -743,17 +761,17 @@ let equiv prog prog' startlabelpairs =
     let try_specials () = specials pc pc' asn assumed todo in
 
     let exceptional_pc pc exnmap =
-      match IMap.get (ip_of_pc pc) exnmap with
-      | None
-      | Some [] -> None
-      | Some (Fault_handler h :: rest) ->
-          Some (Fault_handler h :: (rest @ hs_of_pc pc), h)
-      | Some (Catch_handler h :: _rest) ->
-          Some ([Catch_handler h], h) in
+      let static =  match IMap.get (ip_of_pc pc) exnmap with
+       | None
+       | Some [] -> []
+       | Some statichandlers -> statichandlers in
+      let dynamic = hs_of_pc pc in
+    throw_pc static dynamic in
 
+    (* update todo with throwing from both sides *)
     let exceptional_todo () =
       match exceptional_pc pc exnmap, exceptional_pc pc' exnmap' with
-      | None, None -> todo
+      | None, None -> todo (* this just shortcircuits adding trivial stuff to todo *)
       | Some epc, Some epc' -> add_todo (epc,epc') asn todo
       | Some epc, None -> add_todo (epc,([],-1)) asn todo
       | None, Some epc' -> add_todo (([],-1), epc') asn todo in
@@ -779,27 +797,31 @@ let equiv prog prog' startlabelpairs =
     | IContFlow (JmpNS lab) ->
       check (hs_of_pc pc, LabelMap.find lab labelmap) pc' asn
         (add_assumption (pc,pc') asn assumed) todo
-    | ITry _
+
+    (* TryCatchMiddle moves exception info from exn stack to evaluation stack
+       so *shouldn't* be treated as a dynamic nop here *)
+    | ITry TryCatchBegin
+    | ITry TryCatchEnd
+    | ITry TryFaultBegin _
+    | ITry TryFaultEnd
     | ILabel _
     | IComment _ ->
       check (succ pc) pc' asn (add_assumption (pc,pc') asn assumed) todo
+
+    | ITry TryCatchLegacyBegin _
+    | ITry TryCatchLegacyEnd -> failwith "Legacy try instructions not implemented"
+
     | IContFlow Unwind ->
       begin match hs_of_pc pc with
-        | [] -> begin
-          (* unwind not in handler! should be hard failure? *)
-          Log.debug (Tty.Normal Tty.Red) "left unwind not in handler";
-          try_specials ()
-          end
-        | (Fault_handler _h :: Fault_handler next :: hs) ->
-          check (Fault_handler next :: hs, next) pc' asn
-                (add_assumption (pc,pc') asn assumed) todo
-        | (Fault_handler _h :: Catch_handler next :: _hs) ->
-          check ([Catch_handler next] , next) pc' asn
-                (add_assumption (pc,pc') asn assumed) todo
-        | [Fault_handler _h] ->
+        | [] -> (* empty now means we're unwinding out of frame *)
           check ([], -1) pc' asn
                 (add_assumption (pc,pc') asn assumed) todo
-        | _ -> try_specials ()
+        | Fault_handler next :: hs ->
+          check (hs, next) pc' asn
+                (add_assumption (pc,pc') asn assumed) todo
+        | Catch_handler next :: hs ->
+          check (hs, next) pc' asn
+                (add_assumption (pc,pc') asn assumed) todo
       end
     | IMutator (UnsetL l)
       when (!lax_unset) || (not (VarSet.mem l vs)) ->
@@ -817,26 +839,29 @@ let equiv prog prog' startlabelpairs =
     | IContFlow(JmpNS lab') ->
       check pc (hs_of_pc pc', LabelMap.find lab' labelmap') asn
         (add_assumption (pc,pc') asn assumed) todo
-    | ITry _
+
+    | ITry TryCatchBegin
+    | ITry TryCatchEnd
+    | ITry TryFaultBegin _
+    | ITry TryFaultEnd
     | ILabel _
     | IComment _ ->
       check pc (succ pc') asn (add_assumption (pc,pc') asn assumed) todo
+
+    | ITry TryCatchLegacyBegin _
+    | ITry TryCatchLegacyEnd -> failwith "Legacy try instructions not implemented"
+
     | IContFlow Unwind ->
       begin match hs_of_pc pc' with
-        | [] -> begin
-          Log.debug (Tty.Normal Tty.Red) "right unwind not in handler";
-          try_specials ()
-          end
-        | (Fault_handler _h' :: Fault_handler next' :: hs') ->
-          check pc (Fault_handler next' :: hs', next') asn
+        | [] ->
+        check pc ([],-1) asn
+              (add_assumption (pc,pc') asn assumed) todo
+        | Fault_handler next' :: hs' ->
+          check pc (hs', next') asn
                 (add_assumption (pc,pc') asn assumed) todo
-        | (Fault_handler _h' :: Catch_handler next' :: _hs') ->
-          check pc ([Catch_handler next'] , next') asn
+        | Catch_handler next' :: hs' ->
+          check pc (hs', next') asn
                 (add_assumption (pc,pc') asn assumed) todo
-        | [Fault_handler _h'] ->
-          check pc ([],-1) asn
-                (add_assumption (pc,pc') asn assumed) todo
-        | _ -> try_specials ()
       end
     | IMutator (UnsetL l')
       when (!lax_unset) || (not (VarSet.mem l' vs')) ->
@@ -853,6 +878,8 @@ let equiv prog prog' startlabelpairs =
     else
     if ip_of_pc pc = -1 || ip_of_pc pc' = -1
     then Some (pc, pc', asn, assumed, todo)
+    (* fail if one of them has thrown out and we haven't been able to progress
+      the other one independently *)
     else begin match prog_array.(ip_of_pc pc), prog_array'.(ip_of_pc pc') with
     | IIterator (IterBreak (lab, it_list)),
       IIterator (IterBreak (lab', it_list')) ->
@@ -864,6 +891,9 @@ let equiv prog prog' startlabelpairs =
     | IContFlow (SSwitch _), _
     | _, IContFlow (SSwitch _) ->
       failwith "SSwitch not implemented"
+
+    (* Catch instructions have to match up because they affect the stack *)
+    | ITry TryCatchMiddle, ITry TryCatchMiddle -> nextins()
 
     | IContFlow ins, IContFlow ins' ->
       begin match ins, ins' with
@@ -877,19 +907,13 @@ let equiv prog prog' startlabelpairs =
       | RetV, RetV ->
         donext assumed todo
 
-      (* One-sided treatment of throw. Note that we need the instructions to be the
-         same, but we allow the handler stacks to vary now *)
+      (* Two-sided treatment of throw. Here we need the instructions to be the
+         same, but we allow the handler stacks to vary
+         I think I should be able to make this one-sided, but need to think
+         just a little more about whether that would guarantee that the
+         same exception object gets thrown on both sides when more than one
+         might be in flight.. *)
       | Throw, Throw ->
-        let exceptional_pc pc exnmap =
-        begin match IMap.get (ip_of_pc pc) exnmap with
-          | None
-          | Some [] -> None
-          | Some (Fault_handler h as handler :: rest) ->
-             let newstack = handler :: (rest @ hs_of_pc pc) in
-             Some (newstack, h)
-          | Some (Catch_handler h as handler :: _rest) ->
-             Some ([handler], h)
-        end in
         begin match exceptional_pc pc exnmap, exceptional_pc pc' exnmap' with
         | None, None ->  donext assumed todo (* both leave *)
         | Some epc, Some epc' ->
@@ -1029,8 +1053,11 @@ let equiv prog prog' startlabelpairs =
         previous_assumptions
       (* that's a clumsy attempt at entailment asn => \bigcup prev_asses *)
       then donext assumed todo
-      else if AsnSet.cardinal previous_assumptions > 3 (* arbitrary bound *)
-           then try_specials ()
+      else if AsnSet.cardinal previous_assumptions > 7 (* arbitrary bound *)
+           then begin
+             Log.error ~level:0 (Tty.Normal Tty.Blue) ("disjunction limit exceeded");
+             try_specials ()
+           end
            else one_side_left ()
 
   and donext assumed todo =

@@ -38,7 +38,7 @@ namespace HPHP {
 static Mutex NetworkMutex;
 
 Variant HHVM_FUNCTION(gethostname) {
-  char h_name[HOST_NAME_MAX];
+  char h_name[HOST_NAME_MAX + 1];
 
   if (gethostname(h_name, sizeof(h_name)) != 0) {
     raise_warning(

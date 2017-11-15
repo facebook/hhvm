@@ -95,9 +95,7 @@ NATIVE_C_FILES=\
   libancillary/libancillary-stubs.c\
   third-party/libancillary/fd_recv.c\
   third-party/libancillary/fd_send.c\
-  utils/compiler_id_impl.c\
   utils/files.c\
-  utils/get_build_id.c\
   utils/handle_stubs.c\
   utils/nproc.c\
   utils/priorities.c\

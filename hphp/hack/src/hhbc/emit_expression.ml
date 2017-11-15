@@ -755,12 +755,22 @@ and emit_xhp env p id attributes children =
    *  2) vec-like array of children
    *  3) filename, for debugging
    *  4) line number, for debugging
+   *
+   *  Spread operators are injected into the attributes array with placeholder
+   *  keys that the runtime will interpret as a spread. These keys are not
+   *  parseable as user-specified attributes, so they will never collide.
    *)
-  let convert_attr = function
-    | A.Xhp_simple (name, v) -> (A.SFlit name, Html_entities.decode_expr v)
-    | A.Xhp_spread _ -> failwith "Spread operator not yet supported" in
-  let attributes = List.map ~f:convert_attr attributes in
-  let attribute_map = p, A.Shape attributes in
+  let create_spread p id = (p, "...$" ^ string_of_int(id)) in
+  let convert_attr (spread_id, attrs) = function
+    | A.Xhp_simple (name, v) ->
+        let attr = (A.SFlit name, Html_entities.decode_expr v) in
+        (spread_id, attr::attrs)
+    | A.Xhp_spread e ->
+        let (p, _) = e in
+        let attr = (A.SFlit (create_spread p spread_id), Html_entities.decode_expr e) in
+        (spread_id + 1, attr::attrs) in
+  let (_, attributes) = List.fold_left ~f:convert_attr ~init:(0, []) attributes in
+  let attribute_map = p, A.Shape (List.rev attributes) in
   let dec_children = List.map ~f:Html_entities.decode_expr children in
   let children_vec = p, A.Varray dec_children in
   let filename = p, A.Id (p, "__FILE__") in

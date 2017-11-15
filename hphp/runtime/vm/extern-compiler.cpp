@@ -451,7 +451,8 @@ folly::Optional<CompilerOptions> hackcConfiguration() {
 }
 
 folly::Optional<CompilerOptions> php7Configuration() {
-  if (!RuntimeOption::EvalPHP7CompilerEnabled) {
+  if (RuntimeOption::EnableHipHopSyntax ||
+      !RuntimeOption::EvalPHP7CompilerEnabled) {
     return folly::none;
   }
 
@@ -586,13 +587,14 @@ std::unique_ptr<UnitCompiler> UnitCompiler::create(const char* code,
 ) {
   if (SystemLib::s_inited) {
     auto const hcMode = hackc_mode();
-    if (RuntimeOption::EvalPHP7CompilerEnabled &&
-        !RuntimeOption::EnableHipHopSyntax &&
-        !isFileHack(code, codeLen) &&
-        s_php7_pool &&
-        s_php7_pool->started()) {
-      return std::make_unique<Php7UnitCompiler>(
-        code, codeLen, filename, md5);
+    if (!RuntimeOption::EnableHipHopSyntax && !isFileHack(code, codeLen)) {
+      if (RuntimeOption::EvalPHP7CompilerEnabled &&
+          s_php7_pool &&
+          s_php7_pool->started()) {
+        return std::make_unique<Php7UnitCompiler>
+          (code, codeLen, filename, md5);
+      }
+      return nullptr;
     } else if (hcMode != HackcMode::kNever &&
                s_hackc_pool &&
                s_hackc_pool->started()) {

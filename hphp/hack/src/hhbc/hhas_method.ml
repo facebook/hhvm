@@ -17,6 +17,7 @@ type t = {
   method_is_final      : bool;
   method_is_abstract   : bool;
   method_no_injection  : bool;
+  method_inout_wrapper : bool;
   method_name          : Hhbc_id.Method.t;
   method_body          : Hhas_body.t;
   method_span          : Hhas_pos.span;
@@ -35,6 +36,7 @@ let make
   method_is_final
   method_is_abstract
   method_no_injection
+  method_inout_wrapper
   method_name
   method_body
   method_span
@@ -50,6 +52,7 @@ let make
     method_is_final;
     method_is_abstract;
     method_no_injection;
+    method_inout_wrapper;
     method_name;
     method_body;
     method_span;
@@ -67,6 +70,7 @@ let is_static method_def = method_def.method_is_static
 let is_final method_def = method_def.method_is_final
 let is_abstract method_def = method_def.method_is_abstract
 let no_injection method_def = method_def.method_no_injection
+let inout_wrapper method_def = method_def.method_inout_wrapper
 let name method_def = method_def.method_name
 let with_name method_def method_name = { method_def with method_name }
 let make_private method_def =

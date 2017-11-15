@@ -214,6 +214,23 @@ let rec is_awaitable h =
   | _, (A.Hsoft h | A.Hoption h) -> is_awaitable h
   | _ -> false
 
+let emit_verify_out params =
+  let param_instrs = List.filter_mapi params ~f:(fun i p ->
+    if not @@ Hhas_param.is_inout p then None else
+      let b = Hhas_param.type_info p <> None in
+      Some (
+        gather [
+          instr_cgetl (Local.Named (Hhas_param.name p));
+          if b then instr_verifyOutType (Param_unnamed i) else empty
+        ]
+      )) in
+  let len = List.length param_instrs in
+  if len = 0 then empty else
+  gather [
+    gather param_instrs;
+    instr_new_vec_array (len + 1)
+  ]
+
 let emit_body
   ~pos
   ~scope
@@ -266,14 +283,16 @@ let emit_body
       else None
     end
   in
-  Emit_statement.set_verify_return verify_return;
-  Emit_statement.set_default_dropthrough default_dropthrough;
-  Emit_statement.set_default_return_value return_value;
-  Emit_statement.set_return_by_ref is_return_by_ref;
   let params =
     Emit_param.from_asts
       ~namespace ~tparams ~generate_defaults:(not is_memoize) ~scope params
   in
+  let verify_out = emit_verify_out params in
+  Emit_statement.set_verify_return verify_return;
+  Emit_statement.set_verify_out verify_out;
+  Emit_statement.set_default_dropthrough default_dropthrough;
+  Emit_statement.set_default_return_value return_value;
+  Emit_statement.set_return_by_ref is_return_by_ref;
   Jump_targets.reset ();
 
   let remove_this vars =

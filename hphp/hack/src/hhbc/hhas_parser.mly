@@ -111,6 +111,8 @@ fundecl:
             (isgenerator $7)
             (ispairgenerator $7)
             (not (List.mem "nontop" attrs))
+            (List.mem "no_injection" attrs)
+            (List.mem "inout_wrapper" attrs)
         }
 ;
 nl:
@@ -177,15 +179,19 @@ paramdefaultvalueopt:
 is_variadic:
   | /* empty */ {false}
   | DOTDOTDOT {true}
+is_inout:
+  | /* empty */ {false}
+  | ID {String.lowercase_ascii $1 = "inout"}
 param:
-    | attributes is_variadic typeinfooption possibleampersand vname paramdefaultvalueopt
+    | attributes is_inout is_variadic typeinfooption possibleampersand vname paramdefaultvalueopt
       {Hhas_param.make
-        $5 (* name *)
-        $4 (* is_reference*)
-        $2 (* variadic *)
+        $6 (* name *)
+        $5 (* is_reference*)
+        $3 (* variadic *)
+        $2 (* is_inout *)
         (fst $1) (* user_attrs *)
-        $3 (* type info option *)
-        $6 (* default_value *)}
+        $4 (* type info option *)
+        $7 (* default_value *)}
 ;
 vname:
     | DOLLAR ID {"$" ^ $2}
@@ -239,6 +245,7 @@ methoddecl:
     (List.mem "final" (snd $2))
     (List.mem "abstract" (snd $2))
     (List.mem "no_injection" (snd $2))
+    (List.mem "inout_wrapper" (snd $2))
     (Hhbc_id.Method.from_raw_string $5) (* name *)
     (Hhas_body.make
       $15 (* method instructions *)

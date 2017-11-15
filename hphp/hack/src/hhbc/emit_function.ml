@@ -41,9 +41,17 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
     Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
   let is_memoize = Hhas_attribute.is_memoized function_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info function_attributes in
+  let inout_param_locations = List.filter_mapi ast_fun.Ast.f_params
+      ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout
+                     then None else Some (string_of_int i)) in
+  let has_inout_args = List.length inout_param_locations <> 0 in
   let renamed_id =
     if is_memoize
-    then Hhbc_id.Function.add_suffix original_id Emit_memoize_helpers.memoize_suffix
+    then Hhbc_id.Function.add_suffix
+      original_id Emit_memoize_helpers.memoize_suffix
+    else if has_inout_args
+    then Hhbc_id.Function.add_suffix
+      original_id (Emit_inout_helpers.inout_suffix inout_param_locations)
     else original_id in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let function_body, function_is_generator, function_is_pair_generator =
@@ -72,7 +80,10 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       function_is_async
       function_is_generator
       function_is_pair_generator
-      is_top in
+      is_top
+      false (*no_injection*)
+      false (*inout_wrapper*)
+  in
   if is_memoize
   then [normal_function;
     Emit_memoize_function.emit_wrapper_function
@@ -81,6 +92,13 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~is_method:false
       ~deprecation_info
       ast_fun]
+  else if has_inout_args
+  then [Emit_inout_function.emit_wrapper_function
+          ~original_id
+          ~renamed_id
+          ~verify_ret:(ast_fun.Ast.f_ret <> None)
+          ast_fun;
+        normal_function]
   else [normal_function]
 
 let emit_functions_from_program ast =

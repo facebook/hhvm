@@ -58,7 +58,8 @@ let emit_save_label_id id =
     instr_popc;
   ]
 
-let emit_return ~need_ref ~verify_return ~in_finally_epilogue env =
+let emit_return
+  ~need_ref ~verify_return ~verify_out ~in_finally_epilogue env =
   let ret_instr = if need_ref then instr_retv else instr_retc in
   (* check if there are try/finally region *)
   let jump_targets = Emit_env.get_jump_targets env in
@@ -88,11 +89,13 @@ let emit_return ~need_ref ~verify_return ~in_finally_epilogue env =
         release_iterators_instr;
         load_retval_instr;
         verify_return_instr;
+        verify_out;
         ret_instr;
       ]
     else gather [
       verify_return_instr;
       release_iterators_instr;
+      verify_out;
       ret_instr;
     ]
   (* ret is in finally block and there might be iterators to release -
@@ -157,13 +160,16 @@ and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
       if is_break then instr_break adjusted_level else instr_continue adjusted_level
     ]
 
-let emit_finally_epilogue ~verify_return env pos jump_instructions finally_end =
+let emit_finally_epilogue
+  ~verify_return ~verify_out env pos jump_instructions finally_end =
   let emit_instr i =
     match i with
     | IContFlow RetC ->
-      emit_return ~need_ref:false ~verify_return ~in_finally_epilogue:true env
+      emit_return
+        ~need_ref:false ~verify_return ~verify_out ~in_finally_epilogue:true env
     | IContFlow RetV ->
-      emit_return ~need_ref:true ~verify_return ~in_finally_epilogue:true env
+      emit_return
+        ~need_ref:true ~verify_return ~verify_out ~in_finally_epilogue:true env
     | ISpecialFlow (Break l) ->
       emit_break_or_continue ~is_break:true ~in_finally_epilogue:true env pos l
     | ISpecialFlow (Continue l) ->

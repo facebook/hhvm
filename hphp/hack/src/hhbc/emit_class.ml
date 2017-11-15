@@ -71,6 +71,7 @@ let make_86method
   let method_is_closure_body = false in
   let method_is_memoize_wrapper = false in
   let method_no_injection = true in
+  let method_inout_wrapper = false in
   let method_static_inits = [] in
   let method_doc_comment = None in
   let method_body = Emit_body.make_body
@@ -90,6 +91,7 @@ let make_86method
     method_is_final
     is_abstract
     method_no_injection
+    method_inout_wrapper
     (Hhbc_id.Method.from_ast_name name)
     method_body
     span
@@ -448,7 +450,8 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
               make_cinit_instrs cs;
             ] in
       let instrs = make_cinit_instrs initialized_class_constants in
-      let params = [Hhas_param.make "$constName" false false [] None None] in
+      let params =
+        [Hhas_param.make "$constName" false false false [] None None] in
       [make_86method
         ~name:"86cinit"
         ~params

@@ -583,6 +583,7 @@ let check_instruct_misc asn i i' =
   | This, _ | BareThis _, _ | CheckThis, _ | Catch, _ | OODeclExists _, _
   | VerifyParamType _, _ | VerifyRetTypeC, _ | VerifyRetTypeV, _ | Self _, _
   | Parent _, _ | LateBoundCls _, _ | ClsRefName _, _ | NativeImpl, _
+  | VerifyOutType _, _
   | IncStat _, _ | AKExists, _ | Idx, _ | ArrayIdx, _
   | AssertRATStk _, _ | BreakTraceHint, _ | VarEnvDynCall, _ | IsUninit, _
   | CGetCUNop, _ | UGetCUNop, _ | IsMemoType, _ | MaybeMemoType, _ ->

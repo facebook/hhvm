@@ -492,6 +492,7 @@ let mut_imms (is : IS.t) : IS.t =
     | StaticLocDef  (id, str)  -> StaticLocDef   (mutate_local_id id  !mag, str)
     | OODeclExists    k       -> OODeclExists    (mutate_kind            k)
     | VerifyParamType p       -> VerifyParamType (mutate_param_id p   !mag)
+    | VerifyOutType p         -> VerifyOutType   (mutate_param_id p   !mag)
     | Self            i       -> Self            (mutate_int      i   !mag)
     | Parent          i       -> Parent          (mutate_int      i   !mag)
     | LateBoundCls    i       -> LateBoundCls    (mutate_int      i   !mag)
@@ -701,6 +702,7 @@ let mutate_metadata (input : HP.t)  =
       (param |> Hhas_param.name)
       (param |> Hhas_param.is_reference |> mutate_bool)
       (param |> Hhas_param.is_variadic  |> mutate_bool)
+      (param |> Hhas_param.is_inout  |> mutate_bool)
       (param |> Hhas_param.user_attributes |> List.map mutate_attribute)
       (param |> Hhas_param.type_info    |> option_lift mutate_type_info)
       (param |> Hhas_param.default_value) in
@@ -730,6 +732,7 @@ let mutate_metadata (input : HP.t)  =
         (m |> Hhas_method.is_final          |> mutate_bool)
         (m |> Hhas_method.is_abstract       |> mutate_bool)
         (m |> Hhas_method.no_injection      |> mutate_bool)
+        (m |> Hhas_method.inout_wrapper     |> mutate_bool)
         (m |> Hhas_method.name)
         (m |> Hhas_method.body              |> mutate_body_data)
         (m |> Hhas_method.span)
@@ -797,7 +800,9 @@ let mutate_metadata (input : HP.t)  =
       (f |> Hhas_function.is_async          |> mutate_bool)
       (f |> Hhas_function.is_generator      |> mutate_bool)
       (f |> Hhas_function.is_pair_generator |> mutate_bool)
-      (f |> Hhas_function.is_top            |> mutate_bool) in
+      (f |> Hhas_function.is_top            |> mutate_bool)
+      (f |> Hhas_function.no_injection      |> mutate_bool)
+      (f |> Hhas_function.inout_wrapper     |> mutate_bool) in
   let mutate_typedef (typedef : Hhas_typedef.t) : Hhas_typedef.t =
     Hhas_typedef.make
       (typedef |> Hhas_typedef.name)

@@ -187,6 +187,7 @@ let from_ast_wrapper : bool -> _ ->
     method_is_final
     method_is_abstract
     false (*method_no_injection*)
+    false (*method_inout_wrapper*)
     method_id
     method_body
     (Hhas_pos.pos_to_span ast_method.Ast.m_span)

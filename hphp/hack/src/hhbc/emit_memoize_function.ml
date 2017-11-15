@@ -173,4 +173,4 @@ let emit_wrapper_function
     original_id
     memoized_body
     (Hhas_pos.pos_to_span ast_fun.Ast.f_span)
-    false false false true
+    false false false true false false

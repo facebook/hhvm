@@ -517,6 +517,7 @@ type instruct_misc =
   | Catch
   | OODeclExists of class_kind
   | VerifyParamType of param_id
+  | VerifyOutType of param_id
   | VerifyRetTypeC
   | VerifyRetTypeV
   | Self of classref_id

@@ -26,15 +26,18 @@ let verify_return = ref false
 let default_return_value = ref instr_null
 let default_dropthrough = ref None
 let return_by_ref = ref false
+let verify_out = ref empty
 let set_verify_return b = verify_return := b
 let set_default_return_value i = default_return_value := i
 let set_default_dropthrough i = default_dropthrough := i
 let set_return_by_ref b = return_by_ref := b
+let set_verify_out i = verify_out := i
 
 let emit_return ~need_ref env =
   TFR.emit_return
     ~need_ref
     ~verify_return:!verify_return
+    ~verify_out:!verify_out
     ~in_finally_epilogue:false
     env
 
@@ -671,7 +674,8 @@ and emit_try_finally_ env try_block finally_block =
 
   (* TODO: position *)
   let finally_epilogue =
-    TFR.emit_finally_epilogue env Pos.none ~verify_return:!verify_return
+    TFR.emit_finally_epilogue
+      env Pos.none ~verify_return:!verify_return ~verify_out:!verify_out
       jump_instructions finally_end
   in
 

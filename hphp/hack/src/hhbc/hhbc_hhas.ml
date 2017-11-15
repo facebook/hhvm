@@ -80,7 +80,7 @@ let string_of_adata_id id = "@" ^ id
 
 let string_of_param_id x =
   match x with
-  | Param_unnamed i -> "_" ^ string_of_int i
+  | Param_unnamed i -> string_of_int i
   | Param_named s -> s
 
 let string_of_param_num i = string_of_int i
@@ -544,6 +544,7 @@ let string_of_misc instruction =
     | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
     | ClsRefName id -> sep ["ClsRefName"; string_of_classref id]
     | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
+    | VerifyOutType id -> sep ["VerifyOutType"; string_of_param_id id]
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | VerifyRetTypeV -> "VerifyRetTypeV"
     | Catch -> "Catch"
@@ -875,6 +876,7 @@ and string_of_fun f use_list =
     match snd @@ p.A.param_id with
     | "" | "..." -> None
     | name ->
+    let inout = if p.A.param_callconv = Some A.Pinout then "inout " else "" in
     let hint =
       Option.value_map p.A.param_hint ~default:"" ~f:(string_of_hint ~ns:true)
     in
@@ -883,7 +885,8 @@ and string_of_fun f use_list =
         p.A.param_expr
         ~default:""
         ~f:(fun e -> " = " ^ (string_of_param_default_value e)) in
-    let param_text = string_of_is_variadic p.A.param_is_variadic ^ hint in
+    let param_text =
+      inout ^ string_of_is_variadic p.A.param_is_variadic ^ hint in
     let param_text =
       if String.length param_text = 0
       then param_text
@@ -1174,11 +1177,14 @@ let string_of_param_user_attributes p =
     let attrs = Emit_adata.attributes_to_strings user_attrs in
     "[" ^ (String.concat " " attrs) ^ "]"
 
+let string_of_is_inout b = if b then "inout " else ""
+
 let string_of_param p =
   let param_type_info = Hhas_param.type_info p in
   let param_name = Hhas_param.name p in
   let param_default_value = Hhas_param.default_value p in
     string_of_param_user_attributes p
+  ^ string_of_is_inout (Hhas_param.is_inout p)
   ^ string_of_is_variadic (Hhas_param.is_variadic p)
   ^ string_of_type_info_option param_type_info
   ^ string_of_is_reference (Hhas_param.is_reference p)
@@ -1240,6 +1246,10 @@ let function_attributes f =
   let attrs = Emit_adata.attributes_to_strings user_attrs in
   let attrs =
     if not (Hhas_function.is_top f) then "nontop" :: attrs else attrs in
+  let attrs =
+    if Hhas_function.inout_wrapper f then "inout_wrapper" :: attrs else attrs in
+  let attrs =
+    if Hhas_function.no_injection f then "no_injection" :: attrs else attrs in
   let text = String.concat " " attrs in
   if text = "" then "" else "[" ^ text ^ "] "
 
@@ -1270,6 +1280,7 @@ let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
   let attrs = if Hhas_method.no_injection m then "no_injection" :: attrs else attrs in
+  let attrs = if Hhas_method.inout_wrapper m then "inout_wrapper" :: attrs else attrs in
   let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
   let attrs = if Hhas_method.is_final m then "final" :: attrs else attrs in
   let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in

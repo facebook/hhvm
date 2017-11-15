@@ -1353,10 +1353,18 @@ void group(ISS& env,
     return bail();
   }
 
+  // If we have an optional type, whose unopt is guaranteed to pass
+  // the instanceof check, then failing to pass implies it was null.
+  auto const fail_implies_null = is_opt(val) && unopt(val).subtypeOf(instTy);
+
   popC(env);
-  auto const negate    = jmp.op == Op::JmpNZ;
-  auto const pre  = [&] (Type t) { return negate ? instTy : t; };
-  auto const post = [&] (Type t) { return negate ? t : instTy; };
+  auto const negate = jmp.op == Op::JmpNZ;
+  auto const result = [&] (Type t, bool pass) {
+    return pass ? instTy :
+      fail_implies_null ? (t.couldBe(TUninit) ? TNull : TInitNull) : t;
+  };
+  auto const pre  = [&] (Type t) { return result(t, negate); };
+  auto const post = [&] (Type t) { return result(t, !negate); };
   refineLocation(env, locId, pre, jmp.target, post);
 }
 

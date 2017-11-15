@@ -45,6 +45,9 @@ let float_of_string_custom (s : string) : float =
     | `Hex | `Dec -> float_of_string s
     | `Oct -> float_of_string_radix (String_utils.string_after s 1) 8
 
+(* TODO: once we don't need to be PHP5 compliant, we may want to get rid of
+this octal truncation at the first non-octal digit, and instead throw an error
+either somewhere around here or in the lexer. *)
 let int64_of_octal_opt (s : string) (truncate : bool) : Int64.t option =
   (* If we have a partial result that is strictly larger than this value,
    * then we are in danger of overflowing and should return None *)

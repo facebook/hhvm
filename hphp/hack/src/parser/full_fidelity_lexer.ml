@@ -384,16 +384,19 @@ let scan_octal_or_float lexer =
       end
     else
       begin
-        (* We had decimal digits following a leading zero; this MUST
-           be a float literal. *)
+        (* We had decimal digits following a leading zero; this is either a
+          float literal or an octal to be truncated at the first non-octal
+          digit. *)
         let ch = peek_char lexer_dec 0 in
         if ch = 'e' || ch = 'E' then
           scan_exponent lexer_dec
         else if ch = '.' then
           scan_after_decimal_point lexer_dec
-        else
-          let lexer_dec = with_error lexer_dec SyntaxError.error0004 in
-          (lexer_dec, TokenKind.DecimalLiteral)
+        else (* an octal to be truncated at the first non-octal digit *)
+          (* Again we differ the lexing with underscores here *)
+          let lexer_dec_with_underscores =
+            scan_decimal_digits_with_underscores lexer in
+          (lexer_dec_with_underscores, TokenKind.OctalLiteral)
       end
   | _ -> (* 0 *) (lexer, TokenKind.OctalLiteral)
 

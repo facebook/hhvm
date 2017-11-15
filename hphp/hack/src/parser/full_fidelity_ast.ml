@@ -349,7 +349,17 @@ let mkStr : (string -> string) -> string -> string = fun unescaper content ->
            located after the end  *)
         if start >= end_ then ""
         else String.sub content start (end_ - start)
-      else String.sub content 1 (String.length content - 2)
+      else
+        let has_quotes str =
+          if len >= 2 then
+            let first_char = String.get content 0 in
+            let last_char = String.get content (len - 1) in
+            let first_and_last_are ch = (first_char == ch && last_char == ch) in
+            List.exists ['"'; '\''; '`'] ~f:first_and_last_are
+          else false in
+        if has_quotes content
+        then String.sub content 1 (len - 2)
+        else content
     with
     | Invalid_argument _ -> content
   in
@@ -751,7 +761,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | ParenthesizedExpression { parenthesized_expression_expression = expr; _ }
       -> pExpr_ expr env
 
-   | DictionaryIntrinsicExpression
+    | DictionaryIntrinsicExpression
       { dictionary_intrinsic_keyword = kw
       ; dictionary_intrinsic_members = members
       ; _ }

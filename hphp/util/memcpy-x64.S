@@ -26,7 +26,7 @@
  *
  *    %rax:  destination buffer address.
  *    %rsi:  source buffer address.
- *    %edx:  length, in the range of [0, 7]
+ *    %rdx:  length, in the range of [0, 7]
  */
               ETCH_TYPE(ETCH_NAME(_memcpy_short), @function)
 ETCH_NAME(_memcpy_short):
@@ -69,16 +69,13 @@ ETCH_LABEL(S4):
 
 
 /*
- * void* _memcpy8(void* dst, void* src, uint32_t length);
+ * void* _memcpy8(void* dst, void* src, size_t length);
  *
  * This is the same as
  *     memcpy(dst, src, (length + 7) / 8 * 8)
  * except that it returns dst + length instead of dst. It always copy 8-byte
  * groups, and could overrun the buffers. If both src and dst starts at
  * addresses aligned to 8-byte boundary, it is generally safe.
- *
- * Note: we limit the length to a 32-bit integer, because we don't
- * really copy very long things, and this helps reduce code size.
  */
               ETCH_ALIGN16
               .globl ETCH_NAME(_memcpy8)
@@ -86,9 +83,9 @@ ETCH_LABEL(S4):
 ETCH_NAME(_memcpy8):
               CFI(startproc)
               lea   (%rdi, %rdx), %rax
-              add   $7, %edx
-              mov   %edx, %ecx
-              and   $-8, %edx
+              add   $7, %rdx
+              mov   %rdx, %rcx
+              and   $-8, %rdx
               jnz   ETCH_LABEL(L8)
               ret
 
@@ -96,10 +93,7 @@ ETCH_NAME(_memcpy8):
               ETCH_SIZE(_memcpy8)
 
 /*
- * void* memcpy(void* dst, void* src, uint32_t length);
- *
- * Note: we limit the length to a 32-bit integer here to save code
- * size. It works for hhvm.
+ * void* memcpy(void* dst, void* src, size_t length);
  */
               ETCH_ALIGN16
               .globl ETCH_NAME(memcpy)
@@ -109,7 +103,7 @@ ETCH_NAME(memcpy):
 
               mov   %rdx, %rcx
               mov   %rdi, %rax
-              cmp   $8, %edx
+              cmp   $8, %rdx
               jb    ETCH_LABEL(SHORT)
 
               mov   -8(%rsi, %rdx), %r8
@@ -121,12 +115,12 @@ ETCH_LABEL(L8):
               //    this store before L8 because that will slow down the
               //    loading of (%rsi).
               mov   %r8, -8(%rdi, %rdx)
-              and   $24, %ecx
+              and   $24, %rcx
               jz    ETCH_LABEL(L32)
 
               mov   %r9, (%rdi)
-              mov   %ecx, %r8d
-              sub   $16, %ecx
+              mov   %rcx, %r8
+              sub   $16, %rcx
               jb    ETCH_LABEL(T32)
 
               movdqu (%rsi, %rcx), %xmm1
@@ -135,7 +129,7 @@ ETCH_LABEL(L8):
               // Test if there are 32-byte groups
 ETCH_LABEL(T32):
               add   %r8, %rsi
-              and   $-32, %edx
+              and   $-32, %rdx
               jnz   ETCH_LABEL(R32_adjDI)
 ETCH_LABEL(END2):
               rep
@@ -145,7 +139,7 @@ ETCH_LABEL(END2):
 ETCH_LABEL(R32_adjDI):
               add   %r8, %rdi
 /*
- * void* _bcopy32(void* dst, void* src, uint32_t length);
+ * void* _bcopy32(void* dst, void* src, size_t length);
  *
  * This is the same as
  *     assert(length >= 32);
@@ -161,8 +155,8 @@ ETCH_LABEL(L32):
 ETCH_LABEL(L32_16read):
               movdqu 16(%rsi), %xmm1
 
-              //    if ((edx & 32) == 0) goto R64Byte_32read
-              shr   $6, %edx
+              //    if ((rdx & 32) == 0) goto R64Byte_32read
+              shr   $6, %rdx
               jnc   ETCH_LABEL(R64Byte_32read)
 
               movdqu %xmm0, (%rdi)
@@ -175,14 +169,14 @@ ETCH_LABEL(R64_adjDI):
               add   $32, %rdi
 
 /*
- * void _bcopy_in_64(void* dst, void* src, uint32_t lengthIn64Bytes);
+ * void _bcopy_in_64(void* dst, void* src, size_t lengthIn64Bytes);
  *
  * This is the same as
  *     assert(lengthIn64Bytes > 0);
  *     memcpy(dst, src, 64 * lengthIn64Bytes);
  * except that the return value cannot be used.
  *
- * Note that the length being copied is 64 * %edx.
+ * Note that the length being copied is 64 * %rdx.
  */
               .globl ETCH_NAME(_bcopy_in_64)
               ETCH_TYPE(ETCH_NAME(_bcopy_in_64), @function)
@@ -200,12 +194,12 @@ ETCH_LABEL(R64Byte_32read):
               movdqu %xmm2, 32(%rdi)
               movdqu %xmm3, 48(%rdi)
               add   $64, %rdi
-              dec   %edx
+              dec   %rdx
               jnz   ETCH_LABEL(R64Byte)
               ret
 
 /*
- * void* _memcpy16(void* dst, void* src, uint32_t length);
+ * void* _memcpy16(void* dst, void* src, size_t length);
  *
  * This is the same as
  *     assert(length % 16 == 0 && length > 0);
@@ -223,7 +217,7 @@ ETCH_NAME(_memcpy16):
               jz    ETCH_LABEL(L32_16read)
 
               movdqu %xmm3, -16(%rdi, %rdx)
-              shr   $6, %edx
+              shr   $6, %rdx
               jz    ETCH_LABEL(32_OR_0)
 
               //    We have at least 64 bytes remaining.  CF indicates whether

@@ -57,7 +57,7 @@ namespace HPHP {
  *    except that it returns void.
  */
 
-inline char* memcpy8(void* dst, const void* src, uint32_t len) {
+inline char* memcpy8(void* dst, const void* src, size_t len) {
 #if defined(__x86_64__)
   return reinterpret_cast<char*>(_memcpy8(dst, src, len));
 #else
@@ -66,7 +66,7 @@ inline char* memcpy8(void* dst, const void* src, uint32_t len) {
 #endif
 }
 
-inline char* memcpy16(void* dst, const void* src, uint32_t len) {
+inline char* memcpy16(void* dst, const void* src, size_t len) {
   assertx(len > 0 && len % 16 == 0);
 #if defined(__x86_64__)
   return reinterpret_cast<char*>(_memcpy16(dst, src, len));
@@ -75,7 +75,7 @@ inline char* memcpy16(void* dst, const void* src, uint32_t len) {
 #endif
 }
 
-inline void bcopy32(void* dst, const void* src, uint32_t len) {
+inline void bcopy32(void* dst, const void* src, size_t len) {
   assertx(len >= 32);
 #if defined(__x86_64__)
   _bcopy32(dst, src, len);
@@ -84,7 +84,7 @@ inline void bcopy32(void* dst, const void* src, uint32_t len) {
 #endif
 }
 
-inline void bcopy_in_64(void* dst, const void* src, uint32_t lenIn64) {
+inline void bcopy_in_64(void* dst, const void* src, size_t lenIn64) {
   assertx(lenIn64 != 0);
 #if defined(__x86_64__)
   _bcopy_in_64(dst, src, lenIn64);
@@ -94,7 +94,7 @@ inline void bcopy_in_64(void* dst, const void* src, uint32_t lenIn64) {
 }
 
 // Inline assembly version to avoid a function call.
-inline void bcopy32_inline(void* dst, const void* src, uint32_t len) {
+inline void bcopy32_inline(void* dst, const void* src, size_t len) {
   assertx(len >= 32);
 #if defined(__x86_64__)
   __asm__ __volatile__("shr    $5, %0\n"
@@ -130,7 +130,7 @@ inline void bcopy32_inline(void* dst, const void* src, uint32_t len) {
 #endif
 }
 
-inline void memcpy16_inline(void* dst, const void* src, uint64_t len) {
+inline void memcpy16_inline(void* dst, const void* src, size_t len) {
   assertx(len >=16 && len % 16 == 0);
 #if defined(__x86_64__)
   __asm__ __volatile__("movdqu -16(%1, %0), %%xmm0\n"

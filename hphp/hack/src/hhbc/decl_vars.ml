@@ -149,13 +149,15 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
       | (_, Ast.Id(p, "\\HH\\set_frame_metadata")) ->
         add_local ~bareparam:false acc (p,"$86metadata")
       | _ -> acc in
-    let call_isset =
-      match e with (_, Ast.Id(_, "isset")) -> true | _ -> false in
+    let call_w_bareparam =
+      match e with
+      | (_, Ast.Id(_, ("isset" | "echo"))) -> false
+      | _ -> true in
     let on_arg acc e =
       match e with
       (* Only add $this to locals if it's bare *)
       | (_, Ast.Lvar(_, "$this" as id)) ->
-       add_local ~bareparam:(not call_isset) acc id
+       add_local ~bareparam:(call_w_bareparam) acc id
       | _ ->
         this#on_expr acc e
     in

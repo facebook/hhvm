@@ -511,12 +511,18 @@ let skip_uninteresting_double_quote_like_string_characters (l : lexer) start_cha
     | ch -> ch <> start_char && not (is_name_nondigit ch) in
   skip_while l is_uninteresting
 
-let scan_integer_literal lexer =
+let scan_integer_literal_in_string lexer =
   if (peek_char lexer 0) = '0' then
     match peek_char lexer 1 with
     | 'x' | 'X' -> scan_hex_literal (advance lexer 2)
     | 'b' | 'B' -> scan_binary_literal (advance lexer 2)
-    | _ -> (scan_octal_digits_with_underscores lexer, TokenKind.OctalLiteral)
+    | _ ->
+      (* An integer literal starting with 0 in a string will actually
+      always be treated as a string index in HHVM, and not as an octal.
+      In such a case, HHVM actually scans all decimal digits to create the
+      token. TODO: we may want to change this behavior to something more
+      sensible *)
+      (scan_decimal_digits_with_underscores lexer, TokenKind.DecimalLiteral)
   else
     (scan_decimal_digits_with_underscores lexer, TokenKind.DecimalLiteral)
 
@@ -711,7 +717,7 @@ let scan_string_literal_in_progress lexer literal_kind =
             lexer start_char in
         (lexer, TokenKind.StringLiteralBody)
     | '0' .. '9' ->
-      let (lexer1, _) as literal = scan_integer_literal lexer in
+      let (lexer1, _) as literal = scan_integer_literal_in_string lexer in
       if errors lexer == errors lexer1 then literal else
         (* If we failed to scan a literal, do not interpret the literal *)
         (with_offset lexer (offset lexer1), TokenKind.StringLiteralBody)

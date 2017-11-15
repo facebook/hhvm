@@ -1564,7 +1564,13 @@ and get_elem_member_key env stack_index opt_expr =
   | Some (_, A.Lvar id) when not (is_local_this env (snd id)) ->
     MemberKey.EL (get_local env id)
   (* Special case for literal integer *)
-  | Some (_, A.Int (_, str)) -> MemberKey.EI (Int64.of_string str)
+  | Some (_, A.Int (_, str) as int_expr)->
+    let open Ast_constant_folder in
+    let namespace = Emit_env.get_namespace env in
+    begin match expr_to_typed_value namespace int_expr with
+    | TV.Int i -> MemberKey.EI i
+    | _ -> failwith (str ^ " is not a valid integer index")
+    end
   (* Special case for literal string *)
   | Some (_, A.String (_, str)) -> MemberKey.ET str
   (* Special case for class name *)

@@ -2354,21 +2354,10 @@ void parse_constant(AsmState& as) {
  * directive-default-ctor : ';'
  *                        ;
  *
- * Creates an 86ctor stub for the class.
+ * No-op, for backward compat
  */
 void parse_default_ctor(AsmState& as) {
   assert(!as.fe && as.pce);
-
-  as.fe = as.ue->newMethodEmitter(
-    makeStaticString("86ctor"), as.pce);
-  as.pce->addMethod(as.fe);
-  as.fe->init(as.in.getLineNumber(), as.in.getLineNumber(),
-              as.ue->bcPos(), AttrPublic, true, 0);
-  as.ue->emitOp(OpNull);
-  as.ue->emitOp(OpRetC);
-  as.fe->maxStackCells = 1;
-  as.finishFunction();
-
   as.in.expectWs(';');
 }
 

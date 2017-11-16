@@ -14,6 +14,12 @@
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_into" transaction_id="0"><xdebug:message lineno="6" filename="file://%s/test/slow/ext_xdebug/remote/property_get.php.test"></xdebug:message></response>
 (cmd) step_into -i 0
 <?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_into" transaction_id="0"><xdebug:message lineno="%d" filename="file://%s/test/slow/ext_xdebug/remote/%s"></xdebug:message></response>
+(cmd) step_into -i 0
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_into" transaction_id="0"><xdebug:message lineno="6" filename="file://%s/test/slow/ext_xdebug/remote/property_get.php.test"></xdebug:message></response>
+(cmd) step_into -i 0
+<?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_into" transaction_id="0"><xdebug:message lineno="7" filename="file://%s/test/slow/ext_xdebug/remote/property_get.php.test"></xdebug:message></response>
 (cmd) property_get -i 0 -c 1 -n $x
 <?xml version="1.0" encoding="iso-8859-1"?>

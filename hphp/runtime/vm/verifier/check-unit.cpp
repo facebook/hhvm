@@ -197,7 +197,6 @@ bool UnitChecker::checkClosure(PreClass* cls){
 /* Check the following conditions:
    - All constructors/destructors are non-static and not closure bodies
    - Properties/Methods have exactly one access modifier
-   - Preclasses have at least one constructor
    - Preclasses do not inherit from themselves
    - Interfaces cannot be final
    - Methods cannot be both abstract and final
@@ -207,12 +206,9 @@ bool UnitChecker::checkPreClasses() {
 
   for (auto preclass : m_unit->preclasses()) {
     auto classAttrs = preclass->attrs();
-    bool hasConstructor = !preclass->parent()->empty() &&
-      preclass->parent()->toCppString() == std::string("Closure");
-      // Closures don't need constructors
 
+    // Closures don't need constructors
     if (preclass->parent()->toCppString() == std::string("Closure")) {
-      hasConstructor = true;
       ok &= checkClosure(preclass.get());
     }
 
@@ -273,33 +269,13 @@ bool UnitChecker::checkPreClasses() {
       std::transform(className.begin(), className.end(), className.begin(),
                       ::tolower);
 
-      if (name == std::string("86ctor")) {
-        hasConstructor = true;
-        ok &= checkStructor(method, preclass.get());
-        if ((attributes & ~(AttrBuiltin | AttrAbstract | AttrHot |
-                            AttrInterceptable | AttrMayUseVV)) !=
-            (AttrPublic|AttrNoInjection|AttrPhpLeafFn)) {
-              error("86ctor in class %s has illegal attribute\n",
-                    preclass->name()->data());
-              ok = false;
-           }
-      }
-
-      if(name == std::string("__construct") ||
-         name == className) {
-            hasConstructor = true;
-            ok &= checkStructor(method, preclass.get());
-      }
-
-      if(name == std::string("__destruct")) {
+      if (name == std::string("__construct") || name == className) {
         ok &= checkStructor(method, preclass.get());
       }
-    }
 
-    if (!hasConstructor &&
-          !((classAttrs & AttrFinal) && (classAttrs & AttrAbstract))) {
-      ok = false;
-      error("Base class %s has no constructor\n", preclass->name()->data());
+      if (name == std::string("__destruct")) {
+        ok &= checkStructor(method, preclass.get());
+      }
     }
   }
 

@@ -877,7 +877,7 @@ struct Func final {
   /*
    * Is this a compiler-generated function?
    *
-   * This includes special methods like 86pinit, 86sinit, and 86ctor, as well
+   * This includes special methods like 86pinit and 86sinit as well
    * as all closures.
    */
   bool isGenerated() const;

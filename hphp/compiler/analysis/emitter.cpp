@@ -10908,18 +10908,6 @@ Id EmitterVisitor::emitClass(Emitter& e,
     }
   }
 
-  if (!cNode->getAttribute(ClassScope::HasConstructor) &&
-      !cNode->getAttribute(ClassScope::ClassNameConstructor) &&
-      !cNode->isStaticUtil()) {
-    // cNode does not have a constructor; synthesize 86ctor() so that the class
-    // will always have a method that can be called during construction.
-    static const StringData* methName = makeStaticString("86ctor");
-    FuncEmitter* fe = m_ue.newMethodEmitter(methName, pce);
-    bool added UNUSED = pce->addMethod(fe);
-    assert(added);
-    postponeCtor(is, fe);
-  }
-
   if (nonScalarPinitVec != nullptr) {
     // Non-scalar property initializers require 86pinit() for run-time
     // initialization support.

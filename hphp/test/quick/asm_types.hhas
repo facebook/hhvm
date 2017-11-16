@@ -108,10 +108,6 @@
 }
 
 .class C {
-  .method [public] 86ctor() {
-    Null
-    RetC
-  }
   .method [public static] <"HH\\int" "HH\\int" hh_type extended_hint> test() {
     Int 42
     RetC

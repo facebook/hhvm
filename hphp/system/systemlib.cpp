@@ -89,6 +89,7 @@ Unit* s_hhas_unit = nullptr;
 Unit* s_nativeFuncUnit = nullptr;
 Unit* s_nativeClassUnit = nullptr;
 Func* s_nullFunc = nullptr;
+Func* s_nullCtor = nullptr;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -292,6 +293,23 @@ void mergePersistentUnits() {
   for (auto unit : s_persistent_units) {
     unit->merge();
   }
+}
+
+void setupNullCtor(Class* cls) {
+  assertx(!s_nullCtor);
+  if (!s_nullFunc) {
+    s_nullFunc =
+      Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
+    assertx(s_nullFunc);
+  }
+
+  auto clone = s_nullFunc->clone(cls, makeStaticString("86ctor"));
+  clone->setNewFuncId();
+  clone->setAttrs(static_cast<Attr>(
+                    AttrPublic | AttrNoInjection |
+                    AttrPhpLeafFn | AttrSkipFrame |
+                    AttrRequiresThis | AttrHasForeignThis));
+  s_nullCtor = clone;
 }
 
 namespace {

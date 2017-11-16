@@ -1519,7 +1519,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             FEnterVM doEnterVM) {
   assert(f);
   // If `f' is a regular function, `thiz' and `cls' must be null.
-  assert(IMPLIES(!f->preClass(), f->isPseudoMain() || (!thiz && !cls)));
+  assert(IMPLIES(!f->implCls(), (!thiz && !cls)));
   // If `f' is a method, either `thiz' or `cls' must be non-null.
   assert(IMPLIES(f->preClass(), thiz || cls));
   // If `f' is a static method, thiz must be null.

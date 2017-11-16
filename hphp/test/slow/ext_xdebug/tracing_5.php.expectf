@@ -7,7 +7,7 @@ string(%d) "<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>
 %r\x09%r<tr><td>3</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>var_dump() </td><td>%s/test/slow/ext_xdebug/tracing.inc:3</td></tr>
 %r\x09%r<tr><td>4</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>include(%s/test/slow/ext_xdebug/tracing_helper.inc) </td><td>%s/test/slow/ext_xdebug/tracing.inc:4</td></tr>
 %r\x09%r<tr><td>5</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>bee() </td><td>%s/test/slow/ext_xdebug/tracing_helper.inc:7</td></tr>
-%r\x09%r<tr><td>6</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::86ctor() </td><td>%s/test/slow/ext_xdebug/tracing.inc:21</td></tr>
+%r\x09%r<tr><td>6</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>%s::86ctor() </td><td>%s/test/slow/ext_xdebug/tracing.inc:21</td></tr>
 %r\x09%r<tr><td>7</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::bar() </td><td>%s/test/slow/ext_xdebug/tracing.inc:21</td></tr>
 %r\x09%r<tr><td>8</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::bar() </td><td>%s/test/slow/ext_xdebug/tracing.inc:9</td></tr>
 %r\x09%r<tr><td>9</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::bar() </td><td>%s/test/slow/ext_xdebug/tracing.inc:9</td></tr>

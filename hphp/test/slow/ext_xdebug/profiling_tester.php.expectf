@@ -1,5 +1,5 @@
 string(%d) "version: 1
-creator: xdebug 
+creator: xdebug%s
 cmd: %s/test/slow/ext_xdebug/profiling_testee.inc
 part: 1
 positions: line
@@ -26,9 +26,9 @@ fl=php:internal
 fn=php::var_dump
 145 %d
 
-fl=%s/test/slow/ext_xdebug/profiling_testee.inc
-fn=Baz::86ctor
-14 %d
+fl=%s
+fn=%s::86ctor
+%d %d
 
 fl=%s/test/slow/ext_xdebug/profiling_testee.inc
 fn=Baz::boo
@@ -120,8 +120,8 @@ cfl=php:internal
 cfn=php::var_dump
 calls=1 0 0
 23 %d
-cfl=%s/test/slow/ext_xdebug/profiling_testee.inc
-cfn=Baz::86ctor
+cfl=%s
+cfn=%s::86ctor
 calls=1 0 0
 24 %d
 cfl=%s/test/slow/ext_xdebug/profiling_testee.inc

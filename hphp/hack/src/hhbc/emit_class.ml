@@ -326,25 +326,6 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   let class_body = ast_class.A.c_body in
   let class_span = Hhas_pos.pos_to_span ast_class.Ast.c_span in
   (* TODO: communicate this without looking at the name *)
-  let is_closure_class =
-    String_utils.string_starts_with (snd ast_class.A.c_name) "Closure$" in
-  let has_constructor_or_invoke =
-    let cls_name =
-      String.lowercase_ascii (Hhbc_id.Class.to_raw_string class_id) in
-    List.exists class_body
-    (fun elt ->
-      match elt with
-      | A.Method m ->
-        let method_name = String.lowercase_ascii (snd m.A.m_name) in
-        (* HasConstructor in HHVM *)
-        method_name = SN.Members.__construct ||
-        (* ClassNameConstructor in HHVM *)
-        not (class_is_trait || class_is_interface)
-          && method_name = cls_name ||
-        is_closure_class
-          && method_name = "__invoke"
-      | _ -> false)
-  in
   let additional_methods = [] in
   let additional_methods =
     if not class_is_xhp || class_xhp_categories = []
@@ -460,21 +441,9 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
         ~is_abstract:class_is_interface
         ~span:class_span
         instrs] in
-  let ctor_methods =
-    if has_constructor_or_invoke ||(class_is_final && class_is_abstract) then []
-    else
-      let instrs = gather [instr_null; instr_retc] in
-      [make_86method
-        ~name:"86ctor"
-        ~params:[]
-        ~is_static:false
-        ~is_private:false
-        ~is_abstract:class_is_interface
-        ~span:class_span
-        instrs] in
   let additional_methods =
     additional_methods @
-    ctor_methods @ pinit_methods @ sinit_methods @ cinit_methods in
+    pinit_methods @ sinit_methods @ cinit_methods in
   let methods = ast_methods class_body in
 
   ensure_methods_not_redeclared class_id methods;

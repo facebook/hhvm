@@ -74,6 +74,7 @@ extern Unit* s_hhas_unit;
 extern Unit* s_nativeFuncUnit;
 extern Unit* s_nativeClassUnit;
 extern Func* s_nullFunc;
+extern Func* s_nullCtor;
 
 #define DECLARE_SYSTEMLIB_CLASS(cls)       \
 extern Class* s_ ## cls ## Class;
@@ -153,6 +154,11 @@ void addPersistentUnit(Unit* unit);
  * Re-merge all persistent units
  */
 void mergePersistentUnits();
+
+/*
+ * Setup the shared null constructor.
+ */
+void setupNullCtor(Class* cls);
 
 ///////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::SystemLib

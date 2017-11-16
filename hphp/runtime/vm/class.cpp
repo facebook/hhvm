@@ -53,7 +53,6 @@ TRACE_SET_MOD(class_load);
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_86ctor("86ctor");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 
@@ -675,7 +674,7 @@ const Class* Class::getClassDependency(const StringData* name) const {
 
 const Func* Class::getDeclaredCtor() const {
   const Func* f = getCtor();
-  return f->name() != s_86ctor.get() ? f : nullptr;
+  return f != SystemLib::s_nullCtor ? f : nullptr;
 }
 
 const Func* Class::getCachedInvoke() const {
@@ -1474,9 +1473,8 @@ void Class::setSpecial() {
     }
   }
 
-  // Look for parent constructor other than 86ctor().
-  if (m_parent.get() != nullptr && m_parent->m_ctor &&
-      m_parent->m_ctor->name() != s_86ctor.get()) {
+  // Look for parent constructor.
+  if (m_parent.get() != nullptr && m_parent->m_ctor) {
     m_ctor = m_parent->m_ctor;
     return;
   }
@@ -1487,14 +1485,11 @@ void Class::setSpecial() {
     return;
   }
 
-  // Use 86ctor(), since no program-supplied constructor exists
-  m_ctor = findSpecialMethod(this, s_86ctor.get());
-  m_ctor->setAttrs(m_ctor->attrs() | AttrRequiresThis);
-  assert(m_ctor && "class had no user-defined constructor or 86ctor");
-  assert((m_ctor->attrs() & ~(AttrBuiltin | AttrAbstract |
-                              AttrHot | AttrInterceptable |
-                              AttrMayUseVV)) ==
-         (AttrPublic|AttrNoInjection|AttrPhpLeafFn|AttrRequiresThis));
+  if (UNLIKELY(!SystemLib::s_nullCtor)) {
+    SystemLib::setupNullCtor(this);
+  }
+
+  m_ctor = SystemLib::s_nullCtor;
 }
 
 namespace {
@@ -1805,8 +1800,7 @@ void Class::setMethods() {
     Func* method = m_preClass->methods()[methI];
     ITRACE(5, "  - processing pre-class method {}\n", method->name()->data());
     if (Func::isSpecial(method->name())) {
-      if (method->name() == s_86ctor.get() ||
-          method->name() == s_86sinit.get() ||
+      if (method->name() == s_86sinit.get() ||
           method->name() == s_86pinit.get()) {
         /*
          * we could also skip the cinit function here, but

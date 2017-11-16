@@ -98,7 +98,7 @@ bool beginInlining(IRGS& env,
         if (target->attrs() & AttrRequiresThis ||
             isFPushObjMethod(info.fpushOpc) ||
             ty <= TObj) {
-          ty &= Type::SubObj(target->cls());
+          ty &= thisTypeFromFunc(target);
         }
       }
     }

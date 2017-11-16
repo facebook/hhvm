@@ -52,10 +52,6 @@
 }
 
 .class A extends A {
-  .method [public no_injection] 86ctor() {
-    Null
-    RetC
-  }
 }
 
 .class B {
@@ -63,10 +59,6 @@
 }
 
 .class C {
-  .method [public abstract no_injection] 86ctor() {
-    Null
-    RetC
-  }
 }
 
 
@@ -82,10 +74,6 @@
 }
 
 .class [abstract] F {
-  .method [public abstract final no_injection] 86ctor() {
-    Null
-    RetC
-  }
 }
 
 .class G extends F{

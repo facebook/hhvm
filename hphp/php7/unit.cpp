@@ -37,24 +37,12 @@ std::unique_ptr<Unit> makeFatalUnit(const std::string& filename,
 
 Function* Class::getConstructor(uint32_t lineno) {
   for (const auto& func : methods) {
-    if (func->name == "__construct" || func->name == "86ctor") {
+    if (func->name == "__construct") {
       return func.get();
     }
   }
 
-  // we must not have a constructor yet so make a default one
-  using namespace bc;
-  auto func = makeMethod();
-  func->name = "86ctor";
-  func->attr |= Attr::AttrPublic;
-  func->cfg = CFG({
-    Null{},
-    RetC{}
-  }).makeExitsReal()
-    .tagSrcLoc(lineno)
-    .inRegion(std::make_unique<Region>(Region::Kind::Entry));
-
-  return func;
+  return nullptr;
 }
 
 void Class::buildPropInit(uint32_t lineno) {

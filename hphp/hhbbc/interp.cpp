@@ -2965,8 +2965,7 @@ void in(ISS& env, const bc::FCall& op) {
        * ctor but D::B also exists.  (So in this case we'll skip the
        * fcallKnownImpl stuff.)
        */
-      if (!ar.func->name()->isame(s_construct.get()) &&
-          !ar.func->name()->isame(s_86ctor.get())) {
+      if (!ar.func->name()->isame(s_construct.get())) {
         break;
       }
       // fallthrough

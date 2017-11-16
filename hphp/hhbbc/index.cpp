@@ -82,7 +82,6 @@ const StaticString s_unset("__unset");
 const StaticString s_callStatic("__callStatic");
 const StaticString s_toBoolean("__toBoolean");
 const StaticString s_invoke("__invoke");
-const StaticString s_86ctor("86ctor");
 const StaticString s_86cinit("86cinit");
 const StaticString s_Closure("Closure");
 const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
@@ -1431,18 +1430,13 @@ bool find_constructor(borrowed_ptr<ClassInfo> cinfo) {
     return true;
   }
 
-  // Parent class constructor if it isn't named 86ctor.
-  if (cinfo->parent && cinfo->parent->ctor &&
-      cinfo->parent->ctor->first != s_86ctor.get()) {
+  // Parent class constructor if it exists
+  if (cinfo->parent && cinfo->parent->ctor) {
     cinfo->ctor = cinfo->parent->ctor;
     return true;
   }
 
-  // Use the generated 86ctor.  Unless the class is abstract, this
-  // must exist at this point or the bytecode is ill-formed.
-  if (cinfo->cls->attrs & AttrAbstract) return true;
-  cinfo->ctor = find_toplevel(s_86ctor.get());
-  always_assert(cinfo->ctor);
+  // We'll use SystemLib::s_nullfunc, but thats equivalent to no constructor
   return true;
 }
 

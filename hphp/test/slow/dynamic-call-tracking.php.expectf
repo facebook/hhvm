@@ -98,7 +98,7 @@ Notice: 'C::__callStatic' called dynamically in %s/dynamic-call-tracking.php on 
 
 Notice: 'D::__callStatic' called dynamically in %s/dynamic-call-tracking.php on line 11
 
-Notice: 'A::86ctor' called dynamically in %s/dynamic-call-tracking.php on line 129
+Notice: '%s::86ctor' called dynamically in %s on line %d
 
 Notice: 'HH\Vector::__construct' called dynamically in %s/dynamic-call-tracking.php on line 171
 
@@ -426,7 +426,7 @@ Exception: 'B::static_async_func' called dynamically
 Exception: 'C::__callStatic' called dynamically
 Exception: 'C::__callStatic' called dynamically
 Exception: 'D::__callStatic' called dynamically
-Exception: 'A::86ctor' called dynamically
+Exception: '%s::86ctor' called dynamically
 Exception: 'HH\Vector::__construct' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically

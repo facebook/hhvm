@@ -45,8 +45,4 @@
     Int 1
     RetC
   }
-  .method [public no_injection] 86ctor() {
-    Int 1
-    RetC
-  }
 }

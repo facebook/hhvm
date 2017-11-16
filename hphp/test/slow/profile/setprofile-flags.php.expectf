@@ -21,7 +21,7 @@ IMPLICIT CTORS
 enter fb_setprofile args,this_ptr,frame_ptr,parent_frame_ptr
 exit fb_setprofile return
 enter some_function args
-enter SomeClass::86ctor args
-exit SomeClass::86ctor return
+enter stdClass::86ctor args
+exit stdClass::86ctor return
 exit some_function return
 exit  return

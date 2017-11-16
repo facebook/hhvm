@@ -1,0 +1,4 @@
+Created Redis
+Created OptionalDestruct
+
+Fatal error: Class Destruct has a __destruct() method and cannot be instantiated when Eval.DisallowObjectDestructors is set in %s/test/slow/object/optional-destruct.php on line 17

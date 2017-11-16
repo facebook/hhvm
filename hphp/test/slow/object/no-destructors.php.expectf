@@ -1,0 +1,3 @@
+Should get here
+
+Fatal error: Class HaveDestructor has a __destruct() method and cannot be instantiated when Eval.DisallowObjectDestructors is set in %s/test/slow/object/no-destructors.php on line 8

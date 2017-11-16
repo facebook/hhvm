@@ -56,6 +56,8 @@ namespace HPHP {
 const StaticString s_86ctor("86ctor");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
+const StaticString s___destruct("__destruct");
+const StaticString s___OptionalDestruct("__OptionalDestruct");
 
 Mutex g_classesMutex;
 
@@ -216,6 +218,20 @@ template struct assert_sizeof_class<sizeof_Class>;
  * R/W lock for caching scopings of closures.
  */
 ReadWriteMutex s_scope_cache_mutex;
+
+[[noreturn]] ObjectData* destructorFatalInstanceCtor(Class* cls) {
+  auto err = folly::sformat(
+    "Class {} has a __destruct() method and cannot be instantiated when ",
+    cls->name()->data()
+  );
+
+  if (one_bit_refcount) {
+    err += "one-bit reference counting is enabled";
+  } else {
+    err += "Eval.DisallowObjectDestructors is set";
+  }
+  raise_error("%s", err.c_str());
+}
 
 }
 
@@ -2925,6 +2941,18 @@ void Class::setNativeDataInfo() {
       m_extra.raw()->m_instanceCtor = Native::nativeDataInstanceCtor;
       m_extra.raw()->m_instanceDtor = Native::nativeDataInstanceDtor;
       break;
+    }
+  }
+
+  // If destructors aren't supported by the current configuration, this class
+  // has one, and the destructor doesn't have the __OptionalDestruct attribute,
+  // prevent instantiation of the class with an instanceCtor.
+  if (!RuntimeOption::AllowObjectDestructors() && getDtor()) {
+    if (getDtor()->userAttributes().count(s___OptionalDestruct.get()) == 0) {
+      allocExtraData();
+      m_extra.raw()->m_instanceCtor = destructorFatalInstanceCtor;
+    } else {
+      m_dtor = nullptr;
     }
   }
 }

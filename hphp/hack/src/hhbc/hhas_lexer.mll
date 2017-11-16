@@ -48,6 +48,7 @@ let newline = '\r' | '\n' | "\r\n"
 let sillyend = ';' digit+
 let inoutend = '$' ['0' - '9' ';']+ '$' "inout"
 let id = (digit* ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '0'-'9' '_' '\\' '$' '#' '\x7f'-'\xff' ] | "::")* inoutend? sillyend?)
+let vname = (['\x21'-'\xff'] # [';' ')' ','])*
 let escapequote = "\\\""
 let comment = '#' [^ '\r' '\n']* newline
 let nonquote = [^ '"']
@@ -105,13 +106,17 @@ rule read =
   | ';'         {SEMI}
   | ':'         {COLON}
   | ','         {COMMA}
-  | '$'         {DOLLAR}
+  | '$'         {read_variable_name (Buffer.create 17) lexbuf}
   | '='         {EQUALS}
   | '&'         {AMPERSAND}
   | '+'         {PLUS}
   | '-'         {MINUS}
   | eof         {EOF}
   | _           {raise (SyntaxError "read")}
+and read_variable_name buf =
+  parse
+  | vname       {VNAME (Lexing.lexeme lexbuf)}
+  | _           {raise (SyntaxError "read_variable_name")}
 and read_php_escaped_string buf =
   parse
   | escapequote  {ESCAPEDSTRING (Buffer.contents buf)}

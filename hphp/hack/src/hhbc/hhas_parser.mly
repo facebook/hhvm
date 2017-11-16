@@ -36,7 +36,7 @@ open Hhas_parser_actions
 %token RBRACE RBRACK
 %token COMMA SEMI
 %token COLON EQUALS
-%token EOF DOLLAR NEWLINE AMPERSAND
+%token EOF NEWLINE AMPERSAND
 %token QUOTE AT UNDERSCORE
 %token PLUS MINUS
 %token TRYCATCHDIRECTIVE
@@ -125,8 +125,8 @@ declvars:
 ;
 statics:
     | /* empty */ { [] }
-    | STATICDIRECTIVE DOLLAR ID SEMI nl statics
-      { $3 :: $6 }
+    | STATICDIRECTIVE VNAME SEMI nl statics
+      { $2 :: $5 }
 ;
 requires:
     | /* empty */ { [] }
@@ -194,8 +194,7 @@ param:
         $7 (* default_value *)}
 ;
 vname:
-    | DOLLAR ID {"$" ^ $2}
-    | DOLLAR INT ID {"$" ^ (Int64.to_string $2) ^ $3 }
+    | VNAME {"$" ^ $1}
 ;
 classdecl:
     | CLASSDIRECTIVE attributes ID span extendsimplements LBRACE
@@ -274,8 +273,8 @@ srcloc:
    { (($2, $4), ($6, $8)) }
 ;
 staticdirective:
- | STATICDIRECTIVE DOLLAR ID EQUALS ID
-   { ($3, $5) }
+ | STATICDIRECTIVE VNAME EQUALS ID
+   { ($2, $4) }
 ;
 classproperties:
   | /* empty */ {[]}

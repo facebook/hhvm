@@ -34,6 +34,9 @@ type env = {
   dep_tys : (Reason.t * dependent_type) list;
   (* The remaining type constants we need to expand *)
   ids : Nast.sid list;
+
+  (* A list of generics we've seen while expanding. *)
+  gen_seen : locl ty list
 }
 
 let empty_env env ety_env ids = {
@@ -42,6 +45,7 @@ let empty_env env ety_env ids = {
   trail = [];
   dep_tys = [];
   ids = ids;
+  gen_seen = [];
 }
 
 let rec expand_with_env ety_env env reason root ids =
@@ -89,8 +93,16 @@ and expand_ env (root_reason, root_ty as root) =
         let dep_ty = generic_to_dep_ty s in
         let env =
           { env with
-            dep_tys = (root_reason, dep_ty)::env.dep_tys } in
+            dep_tys = (root_reason, dep_ty)::env.dep_tys;
+            gen_seen = root::env.gen_seen;
+            } in
         let upper_bounds = Env.get_upper_bounds env.tenv s in
+        (* Ignore upper bounds that are equal to ones we've seen, to avoid
+          an infinite loop
+        *)
+        let upper_bounds = List.filter ~f:(fun ty ->
+            List.exists env.gen_seen
+            ~f:(fun ty2 -> not (ty_equal ty ty2))) upper_bounds in
         let env, tyl = List.map_env env upper_bounds begin fun prev_env ty ->
           let env, ty = expand_ env ty in
           (* If ty here involves a type access, we have to use

@@ -79,10 +79,7 @@ class virtual ['b] iter :
                            Ast_visitors_ancestors.id list ->
                            unit;
         on_ClassVars : 'c ->
-                       Ast_visitors_ancestors.kind list ->
-                       Ast_visitors_ancestors.hint option ->
-                       Ast_visitors_ancestors.class_var list ->
-                       string option -> unit;
+                       Ast_visitors_ancestors.class_vars_ -> unit;
         on_Class_const : 'c ->
                          Ast_visitors_ancestors.expr ->
                          Ast_visitors_ancestors.pstring -> unit;
@@ -458,10 +455,7 @@ class virtual ['b] iter :
                               unit
     method on_ClassVars :
       'c ->
-      Ast_visitors_ancestors.kind list ->
-      Ast_visitors_ancestors.hint option ->
-      Ast_visitors_ancestors.class_var list ->
-      string option -> unit
+      Ast_visitors_ancestors.class_vars_ -> unit
     method on_Class_const :
       'c ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.pstring -> unit

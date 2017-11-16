@@ -155,12 +155,12 @@ let ast_methods ast_class_body =
 
 let from_class_elt_classvars ast_class tparams namespace elt =
   match elt with
-  | A.ClassVars (kind_list, type_hint, cvl, doc_comment_opt) ->
+  | A.ClassVars cv ->
     (* TODO: we need to emit doc comments for each property,
      * not one per all properties on the same line *)
-    List.map cvl
+    List.map cv.A.cv_names
       (Emit_property.from_ast
-          ast_class kind_list type_hint tparams namespace doc_comment_opt)
+        ast_class cv.A.cv_kinds cv.A.cv_hint tparams namespace cv.A.cv_doc_comment)
   | _ -> []
 
 let from_class_elt_constants ns elt =

@@ -129,10 +129,7 @@ class virtual ['c] map :
                             Ast_visitors_ancestors.id list ->
                             Ast_visitors_ancestors.class_elt;
         on_ClassVars : 'd ->
-                       Ast_visitors_ancestors.kind list ->
-                       Ast_visitors_ancestors.hint option ->
-                       Ast_visitors_ancestors.class_var list ->
-                       string option ->
+                       Ast_visitors_ancestors.class_vars_ ->
                        Ast_visitors_ancestors.class_elt;
         on_Class_const : 'd ->
                          Ast_visitors_ancestors.expr ->
@@ -799,10 +796,7 @@ class virtual ['c] map :
       Ast_visitors_ancestors.id list -> Ast_visitors_ancestors.class_elt
     method on_ClassVars :
       'd ->
-      Ast_visitors_ancestors.kind list ->
-      Ast_visitors_ancestors.hint option ->
-      Ast_visitors_ancestors.class_var list ->
-      string option ->
+      Ast_visitors_ancestors.class_vars_ ->
       Ast_visitors_ancestors.class_elt
     method on_Class_const :
       'd ->

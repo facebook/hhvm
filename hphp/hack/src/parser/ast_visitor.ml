@@ -123,7 +123,7 @@ class type ['a] ast_visitor_type = object
                            id option -> kind option -> 'a
   method on_classUsePrecedence: 'a -> id -> pstring -> id list -> 'a
   method on_classVars:
-    'a -> kind list -> hint option -> class_var list -> string option -> 'a
+    'a -> class_vars_ -> 'a
   method on_const: 'a -> hint option -> (id * expr) list -> 'a
   method on_constant: 'a -> gconst -> 'a
   method on_def: 'a -> def -> 'a
@@ -687,7 +687,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | XhpCategory cs -> this#on_xhpCategory acc cs
     | XhpChild c -> this#on_xhp_child acc c
     | ClassTraitRequire (t, h) -> this#on_classTraitRequire acc t h
-    | ClassVars (c,v,l,s) -> this#on_classVars acc c v l s
+    | ClassVars cv -> this#on_classVars acc cv
     | XhpAttr (t,h,i,n) -> this#on_xhpAttr acc t h i n
     | Method m -> this#on_method_ acc m
 
@@ -740,8 +740,8 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_classTraitRequire acc _ h =
     let acc = this#on_hint acc h in
     acc
-  method on_classVars acc _ h_opt vars _ =
-    let acc = match h_opt with
+  method on_classVars acc cv =
+    let acc = match cv.cv_hint with
       | Some h -> this#on_hint acc h
       | None -> acc in
     let acc = List.fold_left (fun acc (_, id, opt_expr) ->
@@ -749,7 +749,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       match opt_expr with
       | Some expr -> this#on_expr acc expr
       | None -> acc
-    ) acc vars in
+    ) acc cv.cv_names in
     acc
   method on_xhpAttr acc h_opt _ _ _ =
     let acc = match h_opt with

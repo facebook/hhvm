@@ -1678,7 +1678,12 @@ and class_member_def env =
       L.back env.lb;
       check_not_final env modifier_pos modifiers;
       let cvars = class_var_list env in
-      ClassVars (modifiers, None, cvars, None)
+      ClassVars
+      { cv_kinds = modifiers
+      ; cv_hint = None
+      ; cv_names = cvars
+      ; cv_doc_comment = None
+      }
   | Tword ->
       let word = Lexing.lexeme env.lb in
       class_member_word env member_start ~modifiers ~attrs word
@@ -1688,7 +1693,12 @@ and class_member_def env =
       check_not_final env modifier_pos modifiers;
       let h = hint env in
       let cvars = class_var_list env in
-      ClassVars (modifiers, Some h, cvars, None)
+      ClassVars
+      { cv_kinds = modifiers
+      ; cv_hint = Some h
+      ; cv_names = cvars
+      ; cv_doc_comment = None
+      }
 
 (*****************************************************************************)
 (* Class variables *)
@@ -1856,7 +1866,13 @@ and class_member_word env member_start ~attrs ~modifiers = function
               "Perhaps you meant 'function (...): return-type'?");
             []
         | _ -> L.back env.lb; class_var_list env
-      in ClassVars (modifiers, Some h, cvars, None)
+      in
+      ClassVars
+      { cv_kinds = modifiers
+      ; cv_hint = Some h
+      ; cv_names = cvars
+      ; cv_doc_comment = None
+      }
 
 and typeconst_def def_start env ~is_abstract =
   let pname = identifier env in
@@ -1953,7 +1969,12 @@ and param_implicit_field vis p =
     | Some (pos_end, _) -> Pos.btw pos pos_end
     | None -> pos
   in
-  let member = ClassVars ([vis], p.param_hint, [span, cvname, None], None) in
+  let member = ClassVars
+  { cv_kinds = [vis]
+  ; cv_hint = p.param_hint
+  ; cv_names = [span, cvname, None]
+  ; cv_doc_comment = None
+  } in
   (* Building the implicit assignment (for example: $this->x = $x;) *)
   let this = pos, "$this" in
   let stmt =

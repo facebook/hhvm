@@ -92,7 +92,7 @@ and class_elt =
   | ClassUsePrecedence of id * pstring * id list
   | XhpAttrUse of hint
   | ClassTraitRequire of trait_req_kind * hint
-  | ClassVars of kind list * hint option * class_var list * string option
+  | ClassVars of class_vars_
   | XhpAttr of hint option * class_var * bool *
                ((Pos.t * expr list) option)
   | Method of method_
@@ -166,6 +166,13 @@ and ca_type =
  * extent as span of name + initializer, if present.
  *)
 and class_var = Pos.t * id * expr option
+
+and class_vars_ = {
+  cv_kinds: kind list;
+  cv_hint: hint option;
+  cv_names: class_var list;
+  cv_doc_comment: string option;
+}
 
 and method_ = {
   m_kind: kind list ;

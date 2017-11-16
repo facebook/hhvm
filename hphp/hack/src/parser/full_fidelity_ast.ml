@@ -1739,9 +1739,9 @@ and pClassElt : class_elt list parser = fun node env ->
        * properties, right now we don't handle this *)
       let doc_comment_opt = extract_docblock node in
       [ ClassVars
-        ( pKinds property_modifiers env
-        , mpOptional pHint property_type env
-        , couldMap property_declarators env ~f:begin fun node env ->
+        { cv_kinds = pKinds property_modifiers env
+        ; cv_hint = mpOptional pHint property_type env
+        ; cv_names = couldMap property_declarators env ~f:begin fun node env ->
           match syntax node with
           | PropertyDeclarator { property_name; property_initializer } ->
             ( let _, n as name = pos_name property_name env in
@@ -1755,8 +1755,8 @@ and pClassElt : class_elt list parser = fun node env ->
             )
           | _ -> missing_syntax "property declarator" node env
           end
-        , if env.quick_mode then None else doc_comment_opt
-        )
+        ; cv_doc_comment = if env.quick_mode then None else doc_comment_opt
+        }
       ]
   | MethodishDeclaration
     { methodish_attribute
@@ -1786,11 +1786,11 @@ and pClassElt : class_elt list parser = fun node env ->
             (p, Lvar param.param_id)
           ))
         , ClassVars
-          ( Option.to_list param.param_modifier
-          , hint
-          , [span, cvname, None]
-          , None
-          )
+          { cv_kinds = Option.to_list param.param_modifier
+          ; cv_hint = hint
+          ; cv_names = [span, cvname, None]
+          ; cv_doc_comment = None
+          }
         )
       in
       let hdr = pFunHdr methodish_function_decl_header env in

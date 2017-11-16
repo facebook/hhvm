@@ -334,7 +334,7 @@ let emit_body
         ast_class.Ast.c_body
         |> List.concat_map ~f:(fun item ->
           match item with
-          | Ast.ClassVars(_, _, cvl, _) ->
+          | Ast.ClassVars { Ast.cv_names = cvl; _ } ->
             List.filter_map cvl ~f:(fun (_, (_, id), _) ->
               if not (starts_with id "86static_")
               then Some ("$" ^ id) else None)

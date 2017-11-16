@@ -112,7 +112,7 @@ let from_ast_wrapper : bool -> _ ->
         if List.length (
           List.filter ast_class.Ast.c_body
           (function
-           | Ast.ClassVars (_, _, cvl, _) ->
+           | Ast.ClassVars { Ast.cv_names = cvl; _ } ->
                List.exists cvl (fun (_,id,_) ->
                  snd id = SU.Locals.strip_dollar (snd p.Ast.param_id))
            | _ -> false)) > 1

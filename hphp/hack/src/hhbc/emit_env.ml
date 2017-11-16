@@ -20,12 +20,14 @@ type global_state =
 { global_explicit_use_set: SSet.t
 ; global_closure_namespaces: Namespace_env.env SMap.t
 ; global_closure_enclosing_classes: Ast.class_ SMap.t
+; global_functions_with_finally: SSet.t
 }
 
 let empty_global_state =
 { global_explicit_use_set = SSet.empty
 ; global_closure_namespaces = SMap.empty
 ; global_closure_enclosing_classes = SMap.empty
+; global_functions_with_finally = SSet.empty
 }
 
 let is_hh_file_ = ref false
@@ -44,6 +46,15 @@ let get_explicit_use_set () = (!global_state_).global_explicit_use_set
 let get_closure_namespaces () = (!global_state_).global_closure_namespaces
 let get_closure_enclosing_classes () =
   (!global_state_).global_closure_enclosing_classes
+let get_functions_with_finally () =
+  (!global_state_).global_functions_with_finally
+
+let get_unique_id_for_main () =
+  "|"
+let get_unique_id_for_function { Ast.f_name = (_, n); _ } =
+  "|" ^ n
+let get_unique_id_for_method { Ast.c_name = (_, cls); _ } { Ast.m_name = (_, m); _} =
+  cls ^ "|" ^ m
 
 let set_global_state s = global_state_ := s
 let clear_global_state () = set_global_state empty_global_state

@@ -61,7 +61,11 @@ type state = {
      properly qualify things when that method's body is emitted. *)
   closure_namespaces : Namespace_env.env SMap.t;
   (* original enclosing class for closure *)
-  closure_enclosing_classes: Ast.class_ SMap.t
+  closure_enclosing_classes: Ast.class_ SMap.t;
+  (* does current function has finally block *)
+  has_finally: bool;
+  (* set of functions that has try-finally block *)
+  functions_with_finally: SSet.t;
 }
 
 let initial_state =
@@ -77,6 +81,8 @@ let initial_state =
   explicit_use_set = SSet.empty;
   closure_namespaces = SMap.empty;
   closure_enclosing_classes = SMap.empty;
+  functions_with_finally = SSet.empty;
+  has_finally = false;
 }
 
 let is_in_lambda scope =
@@ -220,6 +226,11 @@ let set_namespace st ns =
 let reset_function_count st =
   { st with per_function_count = 0; }
 
+let record_has_finally_flag_for_function key has_finally st =
+  if not has_finally then st
+  else
+  { st with functions_with_finally = SSet.add key st.functions_with_finally }
+
 let add_function env st fd =
   let n = env.defined_function_count + List.length st.hoisted_functions in
   { st with hoisted_functions = fd :: st.hoisted_functions },
@@ -298,7 +309,7 @@ let make_closure ~class_num
     { fd with f_body = body;
               f_static = is_static;
               f_name = (p, string_of_int class_num) } in
-  inline_fundef, cd
+  inline_fundef, cd, md
 
 let inline_class_name_if_possible env ~trait ~fallback_to_empty_string p pe =
   let get_class_call =
@@ -525,6 +536,7 @@ and convert_lambda env st p fd use_vars_opt =
   let captured_this = st.captured_this in
   let total_count = st.total_count in
   let static_vars = st.static_vars in
+  let old_has_finally = st.has_finally in
   let st = { st with total_count = total_count + 1; } in
   let st = enter_lambda st in
   let old_env = env in
@@ -535,7 +547,8 @@ and convert_lambda env st p fd use_vars_opt =
   let env = if Option.is_some use_vars_opt
             then env_with_longlambda env false fd
             else env_with_lambda env fd in
-  let st, block = convert_block env st fd.f_body in
+  let st, has_finally, block =
+    convert_function_like_body_with_finally_tracking env st fd.f_body in
   let st = { st with per_function_count = st.per_function_count + 1 } in
   (* HHVM lists lambda vars in descending order - do the same *)
   let lambda_vars = List.sort ~cmp:(fun a b -> compare b a) @@ ULS.items st.captured_vars in
@@ -558,7 +571,7 @@ and convert_lambda env st p fd use_vars_opt =
         List.map use_vars (fun ((_, var), _ref) -> var), use_vars in
   let tparams = Scope.get_tparams env.scope in
   let class_num = List.length st.hoisted_classes + env.defined_class_count in
-  let inline_fundef, cd =
+  let inline_fundef, cd, md =
       make_closure
       ~class_num
       p total_count env st lambda_vars tparams fd block in
@@ -582,7 +595,11 @@ and convert_lambda env st p fd use_vars_opt =
                      closure_enclosing_classes;
                      closure_namespaces = SMap.add
                        closure_class_name st.namespace st.closure_namespaces;
+                     has_finally = old_has_finally;
            } in
+  let st =
+    record_has_finally_flag_for_function
+      (Emit_env.get_unique_id_for_method cd md) has_finally st in
   let env = old_env in
   (* Add lambda captured vars to current captured vars *)
   let st = List.fold_left lambda_vars ~init:st ~f:(add_var env) in
@@ -656,6 +673,7 @@ and convert_stmt env st stmt =
     let st, b1 = convert_block env st b1 in
     let st, cl = List.map_env st cl (convert_catch env) in
     let st, b2 = convert_block env st b2 in
+    let st = if List.is_empty b2 then st else { st with has_finally = true } in
     st, Try (b1, cl, b2)
   | Using s ->
     if s.us_has_await then check_if_in_async_context env;
@@ -685,6 +703,19 @@ and convert_stmt env st stmt =
 
 and convert_block env st stmts =
   List.map_env st stmts (convert_stmt env)
+
+and convert_function_like_body_with_finally_tracking env old_st block =
+  let st =
+    (* reset has_finally on the state *)
+    if old_st.has_finally then { old_st with has_finally = false } else old_st
+  in
+  let st, r = convert_block env st block in
+  let has_finally = st.has_finally in
+  (* restore old has_finally value *)
+  let st =
+    if st.has_finally = old_st.has_finally then st
+    else { st with has_finally = old_st.has_finally } in
+  st, has_finally, r
 
 and convert_catch env st (id1, id2, b) =
   let st, b = convert_block env st b in
@@ -751,7 +782,11 @@ and convert_params env st param_list =
 and convert_fun env st fd =
   let env = env_with_function env fd in
   let st = reset_function_count st in
-  let st, block = convert_block env st fd.f_body in
+  let st, has_finally, block =
+    convert_function_like_body_with_finally_tracking env st fd.f_body in
+  let st =
+    record_has_finally_flag_for_function
+      (Emit_env.get_unique_id_for_function fd) has_finally st in
   let st, params = convert_params env st fd.f_params in
   st, { fd with f_body = block; f_params = params }
 
@@ -776,9 +811,17 @@ and convert_class_const env st (id, expr) =
 and convert_class_elt env st ce =
   match ce with
   | Method md ->
+    let cls =
+      match env.scope with
+      | ScopeItem.Class c :: _-> c
+      | _ -> failwith "unexpected scope shape - method is not inside the class" in
     let env = env_with_method env md in
     let st = reset_function_count st in
-    let st, block = convert_block env st md.m_body in
+    let st, has_finally, block =
+      convert_function_like_body_with_finally_tracking env st md.m_body in
+    let st =
+      record_has_finally_flag_for_function
+        (Emit_env.get_unique_id_for_method cls md) has_finally st in
     let st, params = convert_params env st md.m_params in
     st, Method { md with m_body = block; m_params = params }
 
@@ -866,6 +909,9 @@ let convert_toplevel_prog defs =
    * function and we place hoisted functions just after that *)
   let env = env_toplevel (count_classes defs) 1 defs in
   let st, original_defs = convert_defs env 0 0 initial_state defs in
+  let st =
+    record_has_finally_flag_for_function
+      (Emit_env.get_unique_id_for_main ()) st.has_finally st in
   (* Reorder the functions so that they appear first. This matches the
    * behaviour of HHVM. *)
   let original_defs = hoist_toplevel_functions original_defs in
@@ -875,5 +921,6 @@ let convert_toplevel_prog defs =
     Emit_env.(
       { global_explicit_use_set = st.explicit_use_set
       ; global_closure_namespaces = st.closure_namespaces
-      ; global_closure_enclosing_classes = st.closure_enclosing_classes})
+      ; global_closure_enclosing_classes = st.closure_enclosing_classes
+      ; global_functions_with_finally = st.functions_with_finally})
   )

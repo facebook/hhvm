@@ -47,6 +47,13 @@ let get_label_id_local () = get_or_allocate_unnamed label_id_local
 let has_retval_local () = Option.is_some !retval_local
 let get_retval_local () = get_or_allocate_unnamed retval_local
 
+let reserve_retval_and_label_id_locals () =
+  (* values are ignored because we care only about reserving them
+     in the internal table *)
+  let _ = get_label_id_local () in
+  let _ = get_retval_local () in
+  ()
+
 let scope f =
   let current = !next_local in
   let result = f () in

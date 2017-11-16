@@ -693,13 +693,10 @@ and emit_try_finally_ env try_block finally_block =
   *)
 
   let cleanup_local =
-    if IMap.is_empty jump_instructions then empty
-    else
-      gather [
-        instr_unsetl (Local.get_label_id_local ());
-        if Local.has_retval_local () then instr_unsetl (Local.get_retval_local ())
-        else empty;
-      ]
+    gather [
+      instr_unsetl (Local.get_label_id_local ());
+      instr_unsetl (Local.get_retval_local ())
+    ]
   in
   let fault_body = gather [
       cleanup_local;

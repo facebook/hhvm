@@ -347,7 +347,26 @@ let emit_body
       | _ :: Ast_scope.ScopeItem.Class _ :: _ -> move_this decl_vars
       | _ -> decl_vars in
 
+  let should_reserve_locals =
+    let open Ast_scope in
+    let key =
+      match scope with
+      | [] -> Emit_env.get_unique_id_for_main ()
+      | ScopeItem.Method md :: ScopeItem.Class cls :: _
+      | ScopeItem.Lambda :: ScopeItem.Method md :: ScopeItem.Class cls :: _ ->
+        Emit_env.get_unique_id_for_method cls md
+      | ScopeItem.Function fd :: _ ->
+        Emit_env.get_unique_id_for_function fd
+      | _ -> failwith @@ "unexpected scope shape:" ^
+        "expected either " ^
+        "'ScopeItem.Method md :: ScopeItem.Class cls' for method or " ^
+        "'ScopeItem.Function fd' for function or " ^
+        "empty scope for top level" in
+    SSet.mem key @@ Emit_env.get_functions_with_finally () in
+
   Local.reset_local (List.length params + List.length decl_vars);
+  if should_reserve_locals then Local.reserve_retval_and_label_id_locals ();
+
   let env = Emit_env.(
     empty |>
     with_namespace namespace |>

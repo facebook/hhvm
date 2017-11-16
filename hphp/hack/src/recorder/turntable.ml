@@ -112,7 +112,7 @@ skip_hg_update_on_load_state recording root =
       if skip_hg_update_on_load_state then
         ()
       else
-        Future.get @@
+        Future.get_exn @@
           Hg.update_to_rev corresponding_rev @@
           Path.to_string root;
       write_files_contents dirty_files;

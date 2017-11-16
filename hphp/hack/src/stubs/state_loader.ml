@@ -12,6 +12,8 @@ type mini_state_handle = {
   mini_state_everstore_handle : string;
 }
 
+let error_string _ = ""
+
 exception Not_supported
 
 let mk_state_future ~use_canary:_ ?mini_state_handle:_ ~config_hash:_ ~tiny:_ _ =

@@ -8,21 +8,32 @@
  *
  *)
 
-(** Fully-defined types go outside the module type. *)
-exception Process_failure of Unix.process_status * (** Stderr *) string
-
-(** string is stderr output received so far. *)
-exception Timed_out of string
-
-exception Process_aborted
-
 (** Deserializes the byte sequence. *)
 type 'a deserializer = string -> 'a
 
+module Types = struct
+  type stdout = string
+  type stderr = string
+  type error =
+    | Process_failure of Unix.process_status * stderr
+    (** string is stderr output received so far. *)
+    | Timed_out of stdout * stderr
+    | Process_aborted
+    | Transformer_raised of exn
+
+  exception Failure of error
+
+end
+
 module type S = sig
+  include module type of Types
   type 'a t
   (** Blocking. Returns the value from the underlying process. *)
-  val get : 'a t -> 'a
+  val get : 'a t -> ('a, error) result
+
+  (** Like get, but raises Failure instead of returning when result is Error. *)
+  val get_exn : 'a t -> 'a
+
   val make : Process_types.t -> 'a deserializer -> 'a t
 
   (** Just wrap a value inside a future. *)
@@ -34,4 +45,7 @@ module type S = sig
 
   (** Returns true if "get" will not block. *)
   val is_ready : 'a t -> bool
+
+  val error_to_string : error -> string
+  val error_to_exn : error -> exn
 end

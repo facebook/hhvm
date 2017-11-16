@@ -49,7 +49,13 @@ module Revision_map = struct
     let find_svn_rev hg_rev t =
       let future = Hashtbl.find t.svn_queries hg_rev in
       if Future.is_ready future then
-        Some (try Future.get future with _ -> 0)
+        (** We return "Some 0" if the query fails to show that the query
+         * completed and we can move on. *)
+        Some (Future.get future
+          |> Core_result.map_error ~f:Future.error_to_string
+          |> Core_result.map_error ~f:HackEventLogger.find_svn_rev_failed
+          |> Core_result.ok
+          |> Option.value ~default:0)
       else
         None
 
@@ -89,8 +95,12 @@ module Revision_map = struct
       let open Option in
       query >>= fun future ->
         if Future.is_ready future then
-          let results = try Future.get future with _ -> [] in
-          Some results
+          (** If query fails, return empty list. *)
+          Some (Future.get future
+            |> Core_result.map_error ~f:Future.error_to_string
+            |> Core_result.map_error ~f:HackEventLogger.find_xdb_match_failed
+            |> Core_result.ok
+            |> Option.value ~default:[])
         else
           None
 
@@ -494,7 +504,12 @@ module Revision_tracker = struct
     | Initializing (init_settings, future) ->
       if Future.is_ready future
       then
-        let svn_rev = try Future.get future with _ -> 0 in
+        let svn_rev = Future.get future
+          |> Core_result.map_error ~f:Future.error_to_string
+          |> Core_result.map_error ~f:HackEventLogger.revision_tracker_init_svn_rev_failed
+          |> Core_result.ok
+          |> Option.value ~default:0
+        in
         let () = Hh_logger.log "Initialized Revision_tracker to SVN rev: %d"
           svn_rev in
         let env = active_env init_settings svn_rev in

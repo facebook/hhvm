@@ -23,6 +23,7 @@ module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
 module SLC = ServerLocalConfig
 
+exception Native_loader_failure of string
 exception No_loader
 exception Loader_timeout of string
 
@@ -226,13 +227,19 @@ module ServerInitCommon = struct
         mini_state_for_rev = (Hg.Svn_rev target_svn_rev);
       }
     end in
-    let result = State_loader.mk_state_future ~use_canary ?mini_state_handle
-      ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny in
+    let native_load_error e = raise (Native_loader_failure (State_loader.error_string e)) in
+    State_loader.mk_state_future ~use_canary ?mini_state_handle
+      ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny
+      |> Core_result.map_error ~f:native_load_error
+      >>= fun result ->
     lock_and_load_deptable result.State_loader.deptable_fn;
     let old_saved = open_in result.State_loader.saved_state_fn
       |> Marshal.from_channel in
     let get_dirty_files = (fun () ->
-      let dirty_files = Future.get result.State_loader.dirty_files in
+      result.State_loader.dirty_files
+        |> Future.get
+        |> Core_result.map_error ~f:Future.error_to_exn
+        >>= fun dirty_files ->
       let dirty_files = List.map dirty_files Relative_path.from_root in
       let dirty_files = Relative_path.set_of_list dirty_files in
       Ok (
@@ -243,7 +250,7 @@ module ServerInitCommon = struct
         Some result.State_loader.state_distance
       )
     ) in
-    (fun () -> Ok get_dirty_files)
+    Ok get_dirty_files
 
   let invoke_approach genv root approach ~tiny = match approach with
     | Load_mini_script cmd ->
@@ -263,18 +270,18 @@ module ServerInitCommon = struct
       )) in
       Core_result.try_with (fun () -> fun () -> Ok get_dirty_files)
     | Load_state_natively use_canary ->
-      let result = Core_result.try_with (fun () ->
-        invoke_loading_state_natively ~use_canary ~tiny genv root) in
-      begin match result, tiny with
-      | Error _, true ->
-        (* Turn off use tiny state *)
-        HackEventLogger.set_use_tiny_state false;
-        Core_result.try_with (fun () ->
-          invoke_loading_state_natively ~use_canary ~tiny:false genv root)
-      | _ -> result
+      Core_result.try_with begin fun () -> fun () ->
+        let result = invoke_loading_state_natively ~use_canary ~tiny genv root in
+        begin match result, tiny with
+        | Error _, true ->
+          (* Turn off use tiny state *)
+          HackEventLogger.set_use_tiny_state false;
+          invoke_loading_state_natively ~use_canary ~tiny:false genv root
+        | _ -> result
+        end
       end
     | Load_state_natively_with_target target ->
-      Core_result.try_with (fun () ->
+      Core_result.try_with (fun () -> fun () ->
         invoke_loading_state_natively ~tiny ~target genv root)
 
   let is_check_mode options =
@@ -714,15 +721,15 @@ module ServerIncrementalInit : InitKind = struct
   let wait_hg_cat pid t =
     (* Ensure hg command has finished *)
     begin
-      try
-        Future.get pid
-      with err ->
+      match Future.get pid with
+      | Error err ->
       (* Errors don't really matter here, at worst we are just parsing empty
         files and we'll get the real ones during incremental mode *)
-      Hh_logger.exc
-        ~prefix:"Exception with hg, continuing: "  err;
-      HackEventLogger.hg_cat_exn err
-      end;
+      Hh_logger.log "Error with hg, continuing. Error: %s" (Future.error_to_string err);
+      HackEventLogger.hg_cat_exn (Future.error_to_string err)
+      | Ok () ->
+        ()
+    end;
     HackEventLogger.wait_hg_end t;
     Hh_logger.log_duration "Extra time waiting for hg cat" t
 

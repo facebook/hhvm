@@ -1113,6 +1113,7 @@ let scan_token in_type lexer =
     end
   | '?' -> begin
     match (peek_char lexer 1, peek_char lexer 2) with
+    | (':', _) when not in_type -> (advance lexer 2, TokenKind.QuestionColon)
     | ('-', '>') -> (advance lexer 3, TokenKind.QuestionMinusGreaterThan)
     | ('?', _) -> (advance lexer 2, TokenKind.QuestionQuestion)
     | ('>', _) -> (advance lexer 2, TokenKind.QuestionGreaterThan)

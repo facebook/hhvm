@@ -23,6 +23,7 @@ not how they look on the page. *)
 | PipeOperator
 | ConditionalQuestionOperator
 | ConditionalColonOperator
+| DegenerateConditionalOperator
 | CoalesceOperator
 | PHPOrOperator
 | PHPExclusiveOrOperator

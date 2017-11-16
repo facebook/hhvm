@@ -21,6 +21,7 @@ not how they look on the page. *)
 | PipeOperator
 | ConditionalQuestionOperator
 | ConditionalColonOperator
+| DegenerateConditionalOperator
 | CoalesceOperator
 | PHPOrOperator
 | PHPExclusiveOrOperator
@@ -114,7 +115,8 @@ let precedence operator =
   | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
     -> 6
   | PipeOperator -> 7
-  | ConditionalQuestionOperator | ConditionalColonOperator -> 8
+  | ConditionalQuestionOperator | ConditionalColonOperator
+  | DegenerateConditionalOperator -> 8
   | CoalesceOperator -> 9
   | LogicalOrOperator -> 10
   | LogicalAndOperator -> 11
@@ -155,6 +157,7 @@ let associativity operator =
   | NewOperator | CloneOperator | AwaitOperator | SpaceshipOperator
     -> NotAssociative
 
+  | DegenerateConditionalOperator
   | PipeOperator | ConditionalQuestionOperator | ConditionalColonOperator
   | LogicalOrOperator | ExclusiveOrOperator | LogicalAndOperator
   | OrOperator | AndOperator | LeftShiftOperator | RightShiftOperator
@@ -225,6 +228,7 @@ let is_trailing_operator_token token =
   | TokenKind.BarGreaterThan
   | TokenKind.Question
   | TokenKind.QuestionQuestion
+  | TokenKind.QuestionColon
   | TokenKind.BarBar
   | TokenKind.Carat
   | TokenKind.AmpersandAmpersand
@@ -275,6 +279,7 @@ let trailing_from_token token =
   | TokenKind.Question -> ConditionalQuestionOperator
   | TokenKind.Colon -> ConditionalColonOperator
   | TokenKind.QuestionQuestion -> CoalesceOperator
+  | TokenKind.QuestionColon -> DegenerateConditionalOperator
   | TokenKind.BarBar -> LogicalOrOperator
   | TokenKind.Carat -> ExclusiveOrOperator
   | TokenKind.AmpersandAmpersand -> LogicalAndOperator
@@ -335,6 +340,7 @@ let is_binary_operator_token token =
   | TokenKind.Ampersand
   | TokenKind.BarGreaterThan
   | TokenKind.QuestionQuestion
+  | TokenKind.QuestionColon
   | TokenKind.BarBar
   | TokenKind.Carat
   | TokenKind.AmpersandAmpersand
@@ -477,3 +483,4 @@ let to_string kind =
   | RequireOperator -> "require"
   | RequireOnceOperator -> "require_once"
   | PrintOperator -> "print"
+  | DegenerateConditionalOperator -> "degenerate_conditional"

@@ -198,6 +198,7 @@ let minimal_tests =
       "test_xhp_attributes";
       "test_spaces_preserved_in_string_containing_expression";
       "test_inout_params";
+      "test_degenerate_ternary";
     ] ~f:mapper
 
 let error_tests =

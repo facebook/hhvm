@@ -160,6 +160,7 @@ type t =
   | AmpersandAmpersand
   | BarBar
   | Question
+  | QuestionColon
   | QuestionQuestion
   | Colon
   | Semicolon
@@ -366,6 +367,7 @@ let from_string keyword =
   | "||"           -> Some BarBar
   | "?"            -> Some Question
   | "??"           -> Some QuestionQuestion
+  | "?:"           -> Some QuestionColon
   | ":"            -> Some Colon
   | ";"            -> Some Semicolon
   | "="            -> Some Equal
@@ -541,6 +543,7 @@ let to_string kind =
   | BarBar                        -> "||"
   | Question                      -> "?"
   | QuestionQuestion              -> "??"
+  | QuestionColon                 -> "?:"
   | Colon                         -> ":"
   | Semicolon                     -> ";"
   | Equal                         -> "="

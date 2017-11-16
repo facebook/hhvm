@@ -1,0 +1,1 @@
+(script(header((<))((?))((name)(end_of_line)))(list(expression_statement(binary_expression(variable((end_of_line)(variable)))((?:))(function_call_expression(qualified_name((name)))((lparen))(missing)((rparen))))((;)))))

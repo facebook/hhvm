@@ -234,6 +234,7 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
    *)
   | Some TK.BarGreaterThan              -> Pipe         (lhs, rhs)
   | Some TK.QuestionQuestion            -> NullCoalesce (lhs, rhs)
+  | Some TK.QuestionColon               -> Eif          (lhs, None, rhs)
   (* TODO: Figure out why this fails silently when used in a pBlock; probably
      just caught somewhere *)
   | _ -> missing_syntax "binary operator" node env

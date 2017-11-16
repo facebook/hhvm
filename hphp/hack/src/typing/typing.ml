@@ -4323,7 +4323,7 @@ and call_construct p env class_ params el uel cid =
     from_class = Some cid;
   } in
   let env = Phase.check_tparams_constraints ~use_pos:p ~ety_env env class_.tc_tparams in
-  if SSet.mem "XHP" class_.tc_extends then env, tcid, [], [] else
+  if class_.tc_is_xhp then env, tcid, [], [] else
   let cstr = Env.get_construct env class_ in
   let mode = Env.get_mode env in
   Typing_hooks.dispatch_constructor_hook class_ params env p;

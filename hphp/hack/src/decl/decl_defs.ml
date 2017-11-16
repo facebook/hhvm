@@ -49,6 +49,7 @@ type decl_class_type = {
   dc_final               : bool;
   dc_deferred_init_members : SSet.t;
   dc_kind                : Ast.class_kind;
+  dc_is_xhp              : bool;
   dc_name                : string ;
   dc_pos                 : Pos.t ;
   dc_tparams             : decl tparam list ;

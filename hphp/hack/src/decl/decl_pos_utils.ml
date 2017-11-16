@@ -173,6 +173,7 @@ let rec ty (p, x) =
       dc_abstract              = dc.dc_abstract                       ;
       dc_members_fully_known   = dc.dc_members_fully_known            ;
       dc_kind                  = dc.dc_kind                           ;
+      dc_is_xhp                = dc.dc_is_xhp                         ;
       dc_name                  = dc.dc_name                           ;
       dc_pos                   = dc.dc_pos                            ;
       dc_extends               = dc.dc_extends                        ;

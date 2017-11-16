@@ -206,6 +206,7 @@ let class_big_diff class1 class2 =
   SSet.compare class1.dc_deferred_init_members class2.dc_deferred_init_members <> 0 ||
   class1.dc_members_fully_known <> class2.dc_members_fully_known ||
   class1.dc_kind <> class2.dc_kind ||
+  class1.dc_is_xhp <> class2.dc_is_xhp ||
   class1.dc_tparams <> class2.dc_tparams ||
   SMap.compare class1.dc_substs class2.dc_substs <> 0 ||
   SMap.compare class1.dc_ancestors class2.dc_ancestors <> 0 ||

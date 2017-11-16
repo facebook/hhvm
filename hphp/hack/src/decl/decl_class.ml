@@ -56,6 +56,7 @@ let to_class_type {
   dc_final;
   dc_deferred_init_members;
   dc_kind;
+  dc_is_xhp;
   dc_name;
   dc_pos;
   dc_tparams;
@@ -105,6 +106,7 @@ let to_class_type {
     tc_final = dc_final;
     tc_deferred_init_members = dc_deferred_init_members;
     tc_kind = dc_kind;
+    tc_is_xhp = dc_is_xhp;
     tc_name = dc_name;
     tc_pos = dc_pos;
     tc_tparams = dc_tparams;

@@ -430,10 +430,6 @@ and class_decl tcopt c =
   let impl = List.map impl (get_implements env) in
   let impl = List.fold_right impl ~f:(SMap.fold SMap.add) ~init:SMap.empty in
   let extends, xhp_attr_deps, ext_strict = get_class_parents_and_traits env c in
-  let extends = if c.c_is_xhp
-    then SSet.add "XHP" extends
-    else extends
-  in
   let req_ancestors, req_ancestors_extends =
     Decl_requirements.get_class_requirements env c in
   let ext_strict = List.fold_left c.c_uses
@@ -463,6 +459,7 @@ and class_decl tcopt c =
     dc_deferred_init_members = deferred_members;
     dc_members_fully_known = ext_strict;
     dc_kind = c.c_kind;
+    dc_is_xhp = c.c_is_xhp;
     dc_name = snd c.c_name;
     dc_pos = fst c.c_name;
     dc_tparams = tparams;

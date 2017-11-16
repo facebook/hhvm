@@ -160,7 +160,7 @@ struct CompilerPool {
 
  private:
   CompilerOptions m_options;
-  std::atomic<bool> m_started;
+  std::atomic<bool> m_started{false};
   std::atomic<size_t> m_freeCount{0};
   std::mutex m_compilerLock;
   std::condition_variable m_compilerCv;

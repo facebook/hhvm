@@ -231,6 +231,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
     assertx(vasm.frozen().empty() || vasm.frozen().closed());
   }
 
+  fixBlockWeights(*vunit);
   printUnit(kInitialVasmLevel, "after initial vasm generation", *vunit);
   assertx(check(*vunit));
   timer.stop();

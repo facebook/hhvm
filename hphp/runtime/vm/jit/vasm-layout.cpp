@@ -112,6 +112,8 @@ struct Scale {
   std::string toString() const;
 
  private:
+  static const int64_t kUnknownWeight = std::numeric_limits<int64_t>::max();
+
   void    computeArcWeights();
   TransID findProfTransID(Vlabel blk) const;
   int64_t findProfCount(Vlabel blk)   const;
@@ -152,22 +154,93 @@ int64_t Scale::findProfCount(Vlabel blk) const {
 }
 
 void Scale::computeArcWeights() {
+  FTRACE(3, "[vasm-layout] computeArcWeights:\n");
+
+  // First, we can easily compute the weight of the non-crititical arcs by
+  // looking at its incident blocks.
   for (auto b : m_blocks) {
     auto succSet = succs(m_unit.blocks[b]);
     for (auto s : succSet) {
-      // If the arc is non-critical, we can figure out its weight by
-      // looking at its incident blocks.  For critical arcs, we
-      // currently just approximate it as half of the smallest weight
-      // of its incident blocks.
       auto arcid = arcId(b, s);
       m_arcWgts[arcid] = succSet.size()    == 1 ? weight(b)
                        : m_preds[s].size() == 1 ? weight(s)
-                       : std::min(weight(b), weight(s)) / 2;
-      if (m_arcWgts[arcid] < 0) m_arcWgts[arcid] = 0;
-      FTRACE(3, "arc({} -> {}) => weight = {}  "
-             "[|succs(b)| = {} ; |preds(s)| = {}] "
-             "[weight(b) = {} ; weight(s) = {}]\n", b, s, m_arcWgts[arcid],
-             succSet.size(), m_preds[s].size(), weight(b), weight(s));
+                       : kUnknownWeight;
+      assertx(m_arcWgts[arcid] >= 0);
+      if (m_arcWgts[arcid] != kUnknownWeight) {
+        FTRACE(3, "  - arc({} -> {}) [non-critical] => weight = {}  "
+               "[|succs(b)| = {} ; |preds(s)| = {}] "
+               "[weight(b) = {} ; weight(s) = {}]\n", b, s, m_arcWgts[arcid],
+               succSet.size(), m_preds[s].size(), weight(b), weight(s));
+      }
+    }
+  }
+
+  // Next, do an iterative pass trying to infer the remaining arcs using the
+  // fact that some arc weights are already known and the invariant that arc
+  // weights incoming / outgoing a specific block should add up to that block's
+  // weight.
+  bool inferred = true;
+  do {
+    inferred = false;
+
+    for (auto b : m_blocks) {
+      const auto total = weight(b);
+
+      // If b has a single successor with unknown weight, infer its weight.
+      auto succSet = succs(m_unit.blocks[b]);
+      unsigned numUnknown = 0;
+      uint64_t unknownArcId = 0;
+      uint64_t knownTotal = 0;
+      for (auto s : succSet) {
+        auto arcid = arcId(b, s);
+        if (m_arcWgts[arcid] == kUnknownWeight) {
+          numUnknown++;
+          unknownArcId = arcid;
+        } else {
+          knownTotal += m_arcWgts[arcid];
+        }
+      }
+      if (numUnknown == 1) {
+        m_arcWgts[unknownArcId] = total > knownTotal ? total - knownTotal : 0;
+        inferred = true;
+        FTRACE(3, "  - arc({} -> {}) [inferred-succs] => weight = {}\n",
+               b, unknownArcId & 0xffffffff, m_arcWgts[unknownArcId]);
+      }
+
+      // If b has a single predecessor with unknown weight, infer its weight.
+      numUnknown = 0;
+      unknownArcId = 0;
+      knownTotal = 0;
+      for (auto p : m_preds[b]) {
+        auto arcid = arcId(p, b);
+        if (m_arcWgts[arcid] == kUnknownWeight) {
+          numUnknown++;
+          unknownArcId = arcid;
+        } else {
+          knownTotal += m_arcWgts[arcid];
+        }
+      }
+      if (numUnknown == 1) {
+        m_arcWgts[unknownArcId] = total > knownTotal ? total - knownTotal : 0;
+        inferred = true;
+        FTRACE(3, "  - arc({} -> {}) [inferred-preds] => weight = {}\n",
+               unknownArcId >> 32, b, m_arcWgts[unknownArcId]);
+      }
+    }
+  } while (inferred);
+
+  // Finally, for each arc whose weight is still unknown at this point, we
+  // currently just approximate it as half of the smallest weight of its
+  // incident blocks.
+  for (auto b : m_blocks) {
+    auto succSet = succs(m_unit.blocks[b]);
+    for (auto s : succSet) {
+      auto arcid = arcId(b, s);
+      if (m_arcWgts[arcid] == kUnknownWeight) {
+        m_arcWgts[arcid] = std::min(weight(b), weight(s)) / 2;
+        FTRACE(3, "  - arc({} -> {}) [guessed] => weight = {}\n",
+               b, s, m_arcWgts[arcid]);
+      }
     }
   }
 }
@@ -426,7 +499,10 @@ void Clusterizer::splitHotColdClusters() {
 ///////////////////////////////////////////////////////////////////////////////
 
 jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
-  // Compute block & arc weights.
+  // Make sure block weights are consistent.
+  fixBlockWeights(unit);
+
+  // Compute arc weights.
   Scale scale(unit);
   FTRACE(1, "profileGuidedLayout: Weighted CFG:\n{}\n", scale.toString());
 
@@ -467,6 +543,45 @@ jit::vector<Vlabel> layoutBlocks(Vunit& unit, const Vtext& text) {
   return unit.context && unit.context->kind == TransKind::Optimize
     ? pgoLayout(unit, text)
     : rpoLayout(unit, text);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void fixBlockWeights(Vunit& unit) {
+  const auto preds(computePreds(unit));
+  bool changed = false;
+  do {
+    changed = false;
+    for (size_t b = 0; b < unit.blocks.size(); b++) {
+      auto& block = unit.blocks[b];
+
+      // Rule 1: a block's weight can't exceed the sum of its predecessors,
+      // except for the entry block.
+      if (b != unit.entry) {
+        uint64_t predsTotal = 0;
+        for (auto p : preds[b]) {
+          predsTotal += unit.blocks[p].weight;
+        }
+        if (block.weight > predsTotal) {
+          block.weight = predsTotal;
+          changed = true;
+        }
+      }
+
+      // Rule 2: a block's weight can't exceed the sum of its successors, except
+      // for exit blocks.
+      if (succs(block).size() > 0) {
+        uint64_t succsTotal = 0;
+        for (auto s : succs(block)) {
+          succsTotal += unit.blocks[s].weight;
+        }
+        if (block.weight > succsTotal) {
+          block.weight = succsTotal;
+          changed = true;
+        }
+      }
+    }
+  } while (changed);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

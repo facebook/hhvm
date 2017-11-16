@@ -56,18 +56,20 @@ and hint_ p env = function
     let h = hint env h in
     Toption h
   | Hfun (is_coroutine, hl, vh, h) ->
-    let paraml = List.map hl begin fun (p, _ as x) ->
+    let make_param (p, _ as x) =
       { fp_pos = p;
         fp_name = None;
         fp_type = hint env x;
         fp_kind = FPnormal; (* TODO(mqian) implement *)
         fp_accept_disposable = false;
       }
-    end in
+    in
+    let paraml = List.map hl make_param in
     let ret = hint env h in
     let arity_min = List.length paraml in
     let arity = match vh with
-      | Hvariadic _ -> Fellipsis arity_min
+      | Hvariadic Some(t) -> Fvariadic (arity_min, make_param t)
+      | Hvariadic None -> Fvariadic (arity_min, make_param (p, Hany))
       | Hnon_variadic -> Fstandard (arity_min, arity_min)
     in
     Tfun {

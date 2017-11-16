@@ -1,0 +1,6 @@
+File "function_hint_with_variadic_parameter_and_arg_with_vararg.php", line 10, characters 17-39:
+Invalid argument (Typing[4043])
+File "function_hint_with_variadic_parameter_and_arg_with_vararg.php", line 4, characters 10-25:
+Variadic arguments: ...-style is not a subtype of ...$args
+File "function_hint_with_variadic_parameter_and_arg_with_vararg.php", line 7, characters 24-49:
+Because of this definition

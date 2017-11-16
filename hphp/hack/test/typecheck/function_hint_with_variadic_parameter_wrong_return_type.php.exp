@@ -1,0 +1,6 @@
+File "function_hint_with_variadic_parameter_wrong_return_type.php", line 8, characters 30-48:
+Invalid argument (Typing[4110])
+File "function_hint_with_variadic_parameter_wrong_return_type.php", line 5, characters 53-58:
+This is a string
+File "function_hint_with_variadic_parameter_wrong_return_type.php", line 3, characters 35-38:
+It is incompatible with void

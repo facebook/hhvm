@@ -292,9 +292,12 @@ let add_constraint p env ck ty_sub ty_super =
         Typing_log.Log_type ("ty_super", ty_super)])];
   add_constraint_with_fail env ck ty_sub ty_super (fun env -> env)
 
-let rec subtype_params env subl superl =
+let rec subtype_params env subl superl variadic_ty =
   match subl, superl with
-  | [], _ | _, [] -> env
+  | [], _ -> env
+  | _, [] -> (match variadic_ty with
+    | None -> env
+    | Some ty -> subtype_params_with_variadic env subl ty)
   | sub :: subl, super :: superl ->
     let { fp_type = ty_sub; _ } = sub in
     let { fp_type = ty_super; _ } = super in
@@ -311,8 +314,16 @@ let rec subtype_params env subl superl =
       env
     | _ ->
       sub_type env ty_sub ty_super in
-    let env = subtype_params env subl superl in
+    let env = subtype_params env subl superl variadic_ty in
     env
+
+and subtype_params_with_variadic env subl variadic_ty =
+  match subl with
+  | [] -> env
+  | { fp_type = sub; _ } :: subl ->
+    let env = { env with Env.pos = Reason.to_pos (fst sub) } in
+    let env = sub_type env sub variadic_ty in
+    subtype_params_with_variadic env subl variadic_ty
 
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super.
@@ -402,8 +413,12 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
   let env, var_opt = match ft_sub.ft_arity, ft_super.ft_arity with
     | Fvariadic (_, fp_super), Fvariadic (_, { fp_type = var_sub; _ }) ->
       let { fp_name = n_super; fp_type = var_super; _ } = fp_super in
-      let env, var = Unify.unify env var_super var_sub in
-      env, Some (n_super, var)
+      if contravariant_arguments
+      then
+        sub_type env var_sub var_super, None
+      else
+        let env, var = Unify.unify env var_super var_sub in
+        env, Some (n_super, var)
     | _ -> env, None
   in
   (* This is (1) above *)
@@ -411,7 +426,10 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
     (* Right now this is true only for function types; hence var_opt=None *)
     if contravariant_arguments
     then
-      subtype_params env ft_super.ft_params ft_sub.ft_params
+      let variadic_subtype = match ft_sub.ft_arity with
+        | Fvariadic (_, {fp_type = var_sub; _ }) -> Some var_sub
+        | _ -> None in
+      subtype_params env ft_super.ft_params ft_sub.ft_params variadic_subtype
     else
       fst (Unify.unify_params env ft_super.ft_params ft_sub.ft_params var_opt)
   in

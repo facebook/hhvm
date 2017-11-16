@@ -1,0 +1,6 @@
+File "function_hint_with_variadic_parameter_not_covariant_2.php", line 12, characters 19-35:
+Invalid argument (Typing[4110])
+File "function_hint_with_variadic_parameter_not_covariant_2.php", line 7, characters 26-27:
+This is an object of type B (variadic argument)
+File "function_hint_with_variadic_parameter_not_covariant_2.php", line 9, characters 36-36:
+It is incompatible with an object of type A

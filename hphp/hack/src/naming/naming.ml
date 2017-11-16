@@ -1836,20 +1836,18 @@ module Make (GetLocals : GetLocals) = struct
    result
 
   and do_stmt env b e =
-    let new_scope = false in
-    let b = block ~new_scope env b in
+    let b = block ~new_scope:false env b in
     N.Do (b, expr env e)
 
   and while_stmt env e b =
     let e = expr env e in
     N.While (e, block env b)
 
+  (* Scoping is essentially that of do: block is always executed *)
   and using_stmt env has_await e b =
     let e = expr env e in
-    Env.scope env (
-      fun env ->
-        N.Using (has_await, e, block env b)
-    )
+    let b = block ~new_scope:false env b in
+    N.Using (has_await, e, b)
 
   and for_stmt env e1 e2 e3 b =
     let e1 = expr env e1 in

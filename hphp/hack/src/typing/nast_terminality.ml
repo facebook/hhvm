@@ -73,13 +73,14 @@ end = struct
        *)
       (try terminal env inside_case b; () with Exit ->
         terminal_catchl env inside_case catch_list)
+    | Using(_, _, b) ->
+      terminal env inside_case b
     | While ((_, True), b)
     | Do (b, (_, True))
     | For ((_, Expr_list []), (_, Expr_list []), (_, Expr_list []), b) ->
         if not (Nast.Visitor.HasBreak.block b) then raise Exit
     | Do _
     | While _
-    | Using _
     | For _
     | Foreach _
     | Noop

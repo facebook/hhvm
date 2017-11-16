@@ -527,11 +527,14 @@ int Unit::getNearestLineWithCode(int line) const {
 
 const Func* Unit::getFunc(Offset pc) const {
   auto& table = getExtended()->m_funcTable;
-  FuncEntry key = FuncEntry(pc, nullptr);
-  auto it = std::upper_bound(table.begin(), table.end(), key);
+  auto it = std::upper_bound(table.begin(), table.end(), nullptr,
+                             [&] (const Func* a, const Func* b) {
+                               assertx(a == nullptr);
+                               return pc < b->past();
+                             });
   if (it != table.end()) {
-    assert(pc < it->pastOffset());
-    return it->val();
+    assert(pc < (*it)->past());
+    return *it;
   }
   return nullptr;
 }

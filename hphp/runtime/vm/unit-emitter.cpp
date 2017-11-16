@@ -223,7 +223,7 @@ void UnitEmitter::appendTopEmitter(FuncEmitter* fe) {
 }
 
 void UnitEmitter::recordFunction(FuncEmitter* fe) {
-  m_feTab.push_back(std::make_pair(fe->past, fe));
+  m_feTab.push_back(fe);
 }
 
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
@@ -688,18 +688,18 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
     }
     ux->m_arrayTypeTable = m_arrayTypeTable;
 
-    for (auto const& ent : m_feTab) {
-      auto const past = ent.first;
-      auto const fe = ent.second;
-      assert(fe->past == past);
+    for (auto const fe : m_feTab) {
       assert(m_fMap.find(fe) != m_fMap.end());
-      auto func = m_fMap.find(fe)->second;
-      ux->m_funcTable.push_back(FuncEntry(past, func));
+      auto const func = m_fMap.find(fe)->second;
+      ux->m_funcTable.push_back(func);
     }
 
     // Funcs can be recorded out of order when loading them from the
     // repo currently.  So sort 'em here.
-    std::sort(ux->m_funcTable.begin(), ux->m_funcTable.end());
+    std::sort(ux->m_funcTable.begin(), ux->m_funcTable.end(),
+              [] (const Func* a, const Func* b) {
+                return a->past() < b->past();
+              });
 
     m_fMap.clear();
   } else {

@@ -168,11 +168,10 @@ private:
  */
 using LineEntry      = TableEntry<int>;
 using SourceLocEntry = TableEntry<SourceLoc>;
-using FuncEntry      = TableEntry<const Func*>;
 
 using LineTable      = std::vector<LineEntry>;
 using SourceLocTable = std::vector<SourceLocEntry>;
-using FuncTable      = CompactVector<FuncEntry>;
+using FuncTable      = CompactVector<const Func*>;
 
 /*
  * Get the line number or SourceLoc for Offset `pc' in `table'.

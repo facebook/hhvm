@@ -453,11 +453,11 @@ private:
    * to allow appending new bytecode offsets that are part of the same range to
    * coalesce.
    *
-   * The m_feTab and m_lineTable are keyed by the past-the-end offset.  This is
-   * the format we'll want them in when we go to create a Unit.
+   * The m_lineTable is keyed by the past-the-end offset.  This is the
+   * format we'll want it in when we go to create a Unit.
    */
   std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
-  std::vector<std::pair<Offset,const FuncEmitter*>> m_feTab;
+  std::vector<const FuncEmitter*> m_feTab;
   LineTable m_lineTable;
 };
 

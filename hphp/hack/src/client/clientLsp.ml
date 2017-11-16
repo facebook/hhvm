@@ -104,7 +104,7 @@ let initialize_params: Hh_json.json option ref = ref None
 let hhconfig_version: string ref = ref "[NotYetInitialized]"
 
 module Jsonrpc = Jsonrpc.Make (struct type t = state end)
-module Lsp_helpers = Lsp_helpers.Make (struct type t = state let get () = !initialize_params end)
+module Lsp_helpers = Lsp_helpers.Make (Jsonrpc) (struct let get () = !initialize_params end)
 
 let can_autostart_after_mismatch: bool ref = ref true
 
@@ -1423,7 +1423,7 @@ let log_response_if_necessary
     in
     HackEventLogger.client_lsp_method_handled
       ~root:(get_root ())
-      ~method_:(if c.kind = Response then get_method_for_response c else c.method_)
+      ~method_:(if c.kind = Response then "[response]" else c.method_)
       ~kind:(kind_to_string c.kind)
       ~start_queue_t:c.timestamp
       ~start_handle_t

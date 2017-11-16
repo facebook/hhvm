@@ -38,6 +38,7 @@ class PharFileInfo extends SplFileInfo {
     return $this->name;
   }
 
+  <<__OptionalDestruct>>
   public function __destruct() {
   }
 

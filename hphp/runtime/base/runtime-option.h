@@ -28,6 +28,7 @@
 #include <memory>
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/util/compilation-flags.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/functional.h"
 
@@ -66,6 +67,12 @@ struct RuntimeOption {
 
   static bool JitSamplingEnabled() {
     return EvalJit && EvalJitSampleRate > 0;
+  }
+
+  static bool AllowObjectDestructors() {
+    // When one_bit_refcount == true, skip the runtime check since destructors
+    // are never allowed.
+    return !one_bit_refcount && EvalAllowObjectDestructors;
   }
 
   static void ReadSatelliteInfo(
@@ -534,6 +541,7 @@ struct RuntimeOption {
         instead of the GlobalData. */                                   \
   F(bool, HardTypeHints,               RepoAuthoritative)               \
   F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
+  F(bool, AllowObjectDestructors,      !one_bit_refcount)               \
   F(bool, AllowScopeBinding,           true)                            \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \

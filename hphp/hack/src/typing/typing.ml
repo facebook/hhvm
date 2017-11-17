@@ -1107,6 +1107,14 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
   let te = if coalesce then T.NullCoalesce(tc, te2) else T.Eif(tc, te1, te2) in
   env, T.make_typed_expr p ty te, ty
 
+and check_escaping_var env (pos, x) =
+  if Env.is_using_var env x
+  then
+    if Option.is_some (Local_id.Map.get x (Env.get_params env))
+    then Errors.escaping_disposable_parameter pos
+    else Errors.escaping_disposable pos
+  else ()
+
 and exprs ?allow_uref ?expected env el =
   match el with
   | [] ->
@@ -1530,13 +1538,10 @@ and expr_
   | Dollardollar ((_, x) as id) ->
       let ty = Env.get_local env x in
       make_result env (T.Dollardollar id) ty
-  | Lvar ((pos, x) as id) ->
+  | Lvar ((_, x) as id) ->
       Typing_hooks.dispatch_lvar_hook id env;
-      if not accept_using_var && Env.is_using_var env x
-      then
-        if Option.is_some (Local_id.Map.get x (Env.get_params env))
-        then Errors.escaping_disposable_parameter pos
-        else Errors.escaping_disposable pos;
+      if not accept_using_var
+      then check_escaping_var env id;
       let ty = Env.get_local env x in
       make_result env (T.Lvar id) ty
   | Lvarvar (i, id) ->
@@ -1892,6 +1897,7 @@ and expr_
       let ety_env =
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
       let env, declared_ft = Phase.localize_ft ~use_pos:p ~ety_env env declared_ft in
+      List.iter idl (check_escaping_var env);
       (* Are all parameters annotated with explicit types? *)
       let all_explicit_params =
         List.for_all f.f_params (fun param -> Option.is_some param.param_hint) in

@@ -1,4 +1,4 @@
-File "bad_inout_hint_call2.php", line 7, characters 7-8:
+File "bad_inout_hint_call2.php", line 8, characters 7-8:
 Invalid argument (Typing[4184])
 File "bad_inout_hint_call2.php", line 6, characters 15-16:
 This is an inout parameter

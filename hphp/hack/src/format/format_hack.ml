@@ -1372,6 +1372,8 @@ and hint_function_param env = wrap env begin function
       | Tellipsis -> last_token env;
       | _ -> back env
     end
+  | Tword when !(env.last_str) = "inout" ->
+    seq env [last_token; space; hint]
   | _ -> back env; hint env
 end
 
@@ -1717,7 +1719,8 @@ and modifier_list env =
 and modifier env = try_token env Tword begin fun env ->
   match !(env.last_str) with
   | "public" | "protected" | "private" | "abstract"
-  | "final"| "static" | "async" | "coroutine" ->
+  | "final" | "static" | "async" | "coroutine"
+  | "inout" ->
       last_token env
   | _ -> back env
 end
@@ -2833,6 +2836,8 @@ and expr_atomic_word env last_tok = function
       last_token env;
       space env;
       with_priority env Tclone expr
+  | "inout" ->
+      seq env [last_token; space; expr_atomic]
   | _ ->
       last_token env;
       wrap env begin function

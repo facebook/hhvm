@@ -49,5 +49,18 @@ function test(): int {
   };
 
   $f = getf();
-  return $f($h1, f1a($h2, f1b($h3, f2(($_, inout $_) ==> {}, 21))));
+  return $f(
+    $h1,
+    f1a(
+      $h2,
+      f1b(
+        $h3,
+        f2(
+          ($_, inout $_) ==> {
+          },
+          21,
+        ),
+      ),
+    ),
+  );
 }

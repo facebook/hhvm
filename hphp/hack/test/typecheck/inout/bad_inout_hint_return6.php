@@ -1,5 +1,7 @@
 <?hh // strict
 
 function foo(): (function(inout int): int) {
-  return function(inout num $x) { return 42; };
+  return function(inout num $x) {
+    return 42;
+  };
 }

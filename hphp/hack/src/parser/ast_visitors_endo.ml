@@ -647,14 +647,15 @@ class virtual ['self] endo =
     method on_Hoption env this c0 =
       let r0 = self#on_hint env c0 in
       if c0 == r0 then this else Hoption r0
-    method on_Hfun env this c0 c1 c2 c3 =
+    method on_Hfun env this c0 c1 c2 c3 c4 =
       let r0 = self#on_bool env c0 in
       let r1 = self#on_list self#on_hint env c1 in
-      let r2 = self#on_variadic_hint env c2 in
-      let r3 = self#on_hint env c3 in
-      if c0 == r0 && c1 == r1 && c2 == r2 && c3 == r3
+      let r2 = self#on_list (self#on_option self#on_param_kind) env c2 in
+      let r3 = self#on_variadic_hint env c3 in
+      let r4 = self#on_hint env c4 in
+      if c0 == r0 && c1 == r1 && c2 == r2 && c3 == r3 && c4 == r4
       then this
-      else Hfun (r0, r1, r2, r3)
+      else Hfun (r0, r1, r2, r3, r4)
     method on_Htuple env this c0 =
       let r0 = self#on_list self#on_hint env c0 in
       if c0 == r0 then this else Htuple r0
@@ -687,7 +688,7 @@ class virtual ['self] endo =
     method on_hint_ env this =
     match this with
       | Hoption c0 -> self#on_Hoption env this c0
-      | Hfun (c0, c1, c2, c3) -> self#on_Hfun env this c0 c1 c2 c3
+      | Hfun (c0, c1, c2, c3, c4) -> self#on_Hfun env this c0 c1 c2 c3 c4
       | Htuple c0 -> self#on_Htuple env this c0
       | Happly (c0, c1) -> self#on_Happly env this c0 c1
       | Hshape c0 -> self#on_Hshape env this c0

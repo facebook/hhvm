@@ -28,7 +28,7 @@ let rec hint_uses_tparams tparam_names (_, hint)  =
   match hint with
   | Ast.Hsoft h  | Ast.Hoption h ->
     hint_uses_tparams tparam_names h
-  | Ast.Hfun (_, ps, _, r) ->
+  | Ast.Hfun (_, ps, _, _, r) ->
     List.exists ps ~f:(hint_uses_tparams tparam_names) ||
     hint_uses_tparams tparam_names r
   | Ast.Htuple ts ->

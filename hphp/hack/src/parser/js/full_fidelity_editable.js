@@ -367,6 +367,8 @@ class EditableSyntax
       return DictionaryTypeSpecifier.from_json(json, position, source);
     case 'closure_type_specifier':
       return ClosureTypeSpecifier.from_json(json, position, source);
+    case 'closure_parameter_type_specifier':
+      return ClosureParameterTypeSpecifier.from_json(json, position, source);
     case 'classname_type_specifier':
       return ClassnameTypeSpecifier.from_json(json, position, source);
     case 'field_specifier':
@@ -960,6 +962,8 @@ class EditableToken extends EditableSyntax
        return new BarBarToken(leading, trailing);
     case '?':
        return new QuestionToken(leading, trailing);
+    case '?:':
+       return new QuestionColonToken(leading, trailing);
     case '??':
        return new QuestionQuestionToken(leading, trailing);
     case ':':
@@ -2109,6 +2113,13 @@ class QuestionToken extends EditableToken
   constructor(leading, trailing)
   {
     super('?', leading, trailing, '?');
+  }
+}
+class QuestionColonToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('?:', leading, trailing, '?:');
   }
 }
 class QuestionQuestionToken extends EditableToken
@@ -6705,22 +6716,33 @@ class ParameterDeclaration extends EditableSyntax
 class VariadicParameter extends EditableSyntax
 {
   constructor(
+    call_convention,
     type,
     ellipsis)
   {
     super('variadic_parameter', {
+      call_convention: call_convention,
       type: type,
       ellipsis: ellipsis });
   }
+  get call_convention() { return this.children.call_convention; }
   get type() { return this.children.type; }
   get ellipsis() { return this.children.ellipsis; }
+  with_call_convention(call_convention){
+    return new VariadicParameter(
+      call_convention,
+      this.type,
+      this.ellipsis);
+  }
   with_type(type){
     return new VariadicParameter(
+      this.call_convention,
       type,
       this.ellipsis);
   }
   with_ellipsis(ellipsis){
     return new VariadicParameter(
+      this.call_convention,
       this.type,
       ellipsis);
   }
@@ -6730,9 +6752,11 @@ class VariadicParameter extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var call_convention = this.call_convention.rewrite(rewriter, new_parents);
     var type = this.type.rewrite(rewriter, new_parents);
     var ellipsis = this.ellipsis.rewrite(rewriter, new_parents);
     if (
+      call_convention === this.call_convention &&
       type === this.type &&
       ellipsis === this.ellipsis)
     {
@@ -6741,12 +6765,16 @@ class VariadicParameter extends EditableSyntax
     else
     {
       return rewriter(new VariadicParameter(
+        call_convention,
         type,
         ellipsis), parents);
     }
   }
   static from_json(json, position, source)
   {
+    let call_convention = EditableSyntax.from_json(
+      json.variadic_parameter_call_convention, position, source);
+    position += call_convention.width;
     let type = EditableSyntax.from_json(
       json.variadic_parameter_type, position, source);
     position += type.width;
@@ -6754,6 +6782,7 @@ class VariadicParameter extends EditableSyntax
       json.variadic_parameter_ellipsis, position, source);
     position += ellipsis.width;
     return new VariadicParameter(
+        call_convention,
         type,
         ellipsis);
   }
@@ -6761,6 +6790,7 @@ class VariadicParameter extends EditableSyntax
   {
     if (VariadicParameter._children_keys == null)
       VariadicParameter._children_keys = [
+        'call_convention',
         'type',
         'ellipsis'];
     return VariadicParameter._children_keys;
@@ -17862,7 +17892,7 @@ class ClosureTypeSpecifier extends EditableSyntax
     coroutine,
     function_keyword,
     inner_left_paren,
-    parameter_types,
+    parameter_list,
     inner_right_paren,
     colon,
     return_type,
@@ -17873,7 +17903,7 @@ class ClosureTypeSpecifier extends EditableSyntax
       coroutine: coroutine,
       function_keyword: function_keyword,
       inner_left_paren: inner_left_paren,
-      parameter_types: parameter_types,
+      parameter_list: parameter_list,
       inner_right_paren: inner_right_paren,
       colon: colon,
       return_type: return_type,
@@ -17883,7 +17913,7 @@ class ClosureTypeSpecifier extends EditableSyntax
   get coroutine() { return this.children.coroutine; }
   get function_keyword() { return this.children.function_keyword; }
   get inner_left_paren() { return this.children.inner_left_paren; }
-  get parameter_types() { return this.children.parameter_types; }
+  get parameter_list() { return this.children.parameter_list; }
   get inner_right_paren() { return this.children.inner_right_paren; }
   get colon() { return this.children.colon; }
   get return_type() { return this.children.return_type; }
@@ -17894,7 +17924,7 @@ class ClosureTypeSpecifier extends EditableSyntax
       this.coroutine,
       this.function_keyword,
       this.inner_left_paren,
-      this.parameter_types,
+      this.parameter_list,
       this.inner_right_paren,
       this.colon,
       this.return_type,
@@ -17906,7 +17936,7 @@ class ClosureTypeSpecifier extends EditableSyntax
       coroutine,
       this.function_keyword,
       this.inner_left_paren,
-      this.parameter_types,
+      this.parameter_list,
       this.inner_right_paren,
       this.colon,
       this.return_type,
@@ -17918,7 +17948,7 @@ class ClosureTypeSpecifier extends EditableSyntax
       this.coroutine,
       function_keyword,
       this.inner_left_paren,
-      this.parameter_types,
+      this.parameter_list,
       this.inner_right_paren,
       this.colon,
       this.return_type,
@@ -17930,19 +17960,19 @@ class ClosureTypeSpecifier extends EditableSyntax
       this.coroutine,
       this.function_keyword,
       inner_left_paren,
-      this.parameter_types,
+      this.parameter_list,
       this.inner_right_paren,
       this.colon,
       this.return_type,
       this.outer_right_paren);
   }
-  with_parameter_types(parameter_types){
+  with_parameter_list(parameter_list){
     return new ClosureTypeSpecifier(
       this.outer_left_paren,
       this.coroutine,
       this.function_keyword,
       this.inner_left_paren,
-      parameter_types,
+      parameter_list,
       this.inner_right_paren,
       this.colon,
       this.return_type,
@@ -17954,7 +17984,7 @@ class ClosureTypeSpecifier extends EditableSyntax
       this.coroutine,
       this.function_keyword,
       this.inner_left_paren,
-      this.parameter_types,
+      this.parameter_list,
       inner_right_paren,
       this.colon,
       this.return_type,
@@ -17966,7 +17996,7 @@ class ClosureTypeSpecifier extends EditableSyntax
       this.coroutine,
       this.function_keyword,
       this.inner_left_paren,
-      this.parameter_types,
+      this.parameter_list,
       this.inner_right_paren,
       colon,
       this.return_type,
@@ -17978,7 +18008,7 @@ class ClosureTypeSpecifier extends EditableSyntax
       this.coroutine,
       this.function_keyword,
       this.inner_left_paren,
-      this.parameter_types,
+      this.parameter_list,
       this.inner_right_paren,
       this.colon,
       return_type,
@@ -17990,7 +18020,7 @@ class ClosureTypeSpecifier extends EditableSyntax
       this.coroutine,
       this.function_keyword,
       this.inner_left_paren,
-      this.parameter_types,
+      this.parameter_list,
       this.inner_right_paren,
       this.colon,
       this.return_type,
@@ -18006,7 +18036,7 @@ class ClosureTypeSpecifier extends EditableSyntax
     var coroutine = this.coroutine.rewrite(rewriter, new_parents);
     var function_keyword = this.function_keyword.rewrite(rewriter, new_parents);
     var inner_left_paren = this.inner_left_paren.rewrite(rewriter, new_parents);
-    var parameter_types = this.parameter_types.rewrite(rewriter, new_parents);
+    var parameter_list = this.parameter_list.rewrite(rewriter, new_parents);
     var inner_right_paren = this.inner_right_paren.rewrite(rewriter, new_parents);
     var colon = this.colon.rewrite(rewriter, new_parents);
     var return_type = this.return_type.rewrite(rewriter, new_parents);
@@ -18016,7 +18046,7 @@ class ClosureTypeSpecifier extends EditableSyntax
       coroutine === this.coroutine &&
       function_keyword === this.function_keyword &&
       inner_left_paren === this.inner_left_paren &&
-      parameter_types === this.parameter_types &&
+      parameter_list === this.parameter_list &&
       inner_right_paren === this.inner_right_paren &&
       colon === this.colon &&
       return_type === this.return_type &&
@@ -18031,7 +18061,7 @@ class ClosureTypeSpecifier extends EditableSyntax
         coroutine,
         function_keyword,
         inner_left_paren,
-        parameter_types,
+        parameter_list,
         inner_right_paren,
         colon,
         return_type,
@@ -18052,9 +18082,9 @@ class ClosureTypeSpecifier extends EditableSyntax
     let inner_left_paren = EditableSyntax.from_json(
       json.closure_inner_left_paren, position, source);
     position += inner_left_paren.width;
-    let parameter_types = EditableSyntax.from_json(
-      json.closure_parameter_types, position, source);
-    position += parameter_types.width;
+    let parameter_list = EditableSyntax.from_json(
+      json.closure_parameter_list, position, source);
+    position += parameter_list.width;
     let inner_right_paren = EditableSyntax.from_json(
       json.closure_inner_right_paren, position, source);
     position += inner_right_paren.width;
@@ -18072,7 +18102,7 @@ class ClosureTypeSpecifier extends EditableSyntax
         coroutine,
         function_keyword,
         inner_left_paren,
-        parameter_types,
+        parameter_list,
         inner_right_paren,
         colon,
         return_type,
@@ -18086,12 +18116,76 @@ class ClosureTypeSpecifier extends EditableSyntax
         'coroutine',
         'function_keyword',
         'inner_left_paren',
-        'parameter_types',
+        'parameter_list',
         'inner_right_paren',
         'colon',
         'return_type',
         'outer_right_paren'];
     return ClosureTypeSpecifier._children_keys;
+  }
+}
+class ClosureParameterTypeSpecifier extends EditableSyntax
+{
+  constructor(
+    call_convention,
+    type)
+  {
+    super('closure_parameter_type_specifier', {
+      call_convention: call_convention,
+      type: type });
+  }
+  get call_convention() { return this.children.call_convention; }
+  get type() { return this.children.type; }
+  with_call_convention(call_convention){
+    return new ClosureParameterTypeSpecifier(
+      call_convention,
+      this.type);
+  }
+  with_type(type){
+    return new ClosureParameterTypeSpecifier(
+      this.call_convention,
+      type);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var call_convention = this.call_convention.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    if (
+      call_convention === this.call_convention &&
+      type === this.type)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new ClosureParameterTypeSpecifier(
+        call_convention,
+        type), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let call_convention = EditableSyntax.from_json(
+      json.closure_parameter_call_convention, position, source);
+    position += call_convention.width;
+    let type = EditableSyntax.from_json(
+      json.closure_parameter_type, position, source);
+    position += type.width;
+    return new ClosureParameterTypeSpecifier(
+        call_convention,
+        type);
+  }
+  get children_keys()
+  {
+    if (ClosureParameterTypeSpecifier._children_keys == null)
+      ClosureParameterTypeSpecifier._children_keys = [
+        'call_convention',
+        'type'];
+    return ClosureParameterTypeSpecifier._children_keys;
   }
 }
 class ClassnameTypeSpecifier extends EditableSyntax
@@ -19446,6 +19540,7 @@ exports.AmpersandToken = AmpersandToken;
 exports.AmpersandAmpersandToken = AmpersandAmpersandToken;
 exports.BarBarToken = BarBarToken;
 exports.QuestionToken = QuestionToken;
+exports.QuestionColonToken = QuestionColonToken;
 exports.QuestionQuestionToken = QuestionQuestionToken;
 exports.ColonToken = ColonToken;
 exports.SemicolonToken = SemicolonToken;
@@ -19662,6 +19757,7 @@ exports.DarrayTypeSpecifier = DarrayTypeSpecifier;
 exports.MapArrayTypeSpecifier = MapArrayTypeSpecifier;
 exports.DictionaryTypeSpecifier = DictionaryTypeSpecifier;
 exports.ClosureTypeSpecifier = ClosureTypeSpecifier;
+exports.ClosureParameterTypeSpecifier = ClosureParameterTypeSpecifier;
 exports.ClassnameTypeSpecifier = ClassnameTypeSpecifier;
 exports.FieldSpecifier = FieldSpecifier;
 exports.FieldInitializer = FieldInitializer;

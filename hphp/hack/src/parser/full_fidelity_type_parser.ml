@@ -258,22 +258,64 @@ and parse_type_list parser close_kind =
   parse_comma_list_allow_trailing parser close_kind SyntaxError.error1007
     parse_type_specifier
 
-and parse_type_or_ellipsis_list parser close_kind =
-  parse_comma_list_allow_trailing parser close_kind SyntaxError.error1007
-  parse_type_or_ellipsis
+(* SPEC
 
-and parse_type_or_ellipsis parser =
+  TODO: Add this to the specification.
+  (This work is tracked by task T22582676.)
+
+  call-convention:
+    inout
+*)
+and parse_call_convention_opt parser =
   let (parser1, token) = next_token parser in
-  if Token.kind token = DotDotDot then
-    (parser1, make_variadic_parameter (make_missing parser) (make_token token))
-  else begin
+  match Token.kind token with
+  | Inout -> (parser1, make_token token)
+  | _ -> (parser, make_missing parser)
+
+(* SPEC
+
+  TODO: Add this to the specification.
+  (This work is tracked by task T22582676.)
+
+  closure-param-type-specifier-list:
+    closure-param-type-specifiers  ,opt
+
+  closure-param-type-specifiers:
+    closure-param-type-specifier
+    closure-param-type-specifiers  ,  closure-param-type-specifier
+*)
+and parse_closure_param_list parser close_kind =
+  parse_comma_list_allow_trailing parser close_kind SyntaxError.error1007
+  parse_closure_param_type_or_ellipsis
+
+(* SPEC
+
+  TODO: Add this to the specification.
+  (This work is tracked by task T22582676.)
+
+  ERROR RECOVERY: Variadic params cannot be declared inout; this error is
+  caught in a later pass.
+
+  closure-param-type-specifier:
+    call-convention-opt  type-specifier
+    type-specifier  ...
+    ...
+*)
+and parse_closure_param_type_or_ellipsis parser =
+  let (parser1, token) = next_token parser in
+  match Token.kind token with
+  | DotDotDot ->
+    parser1, make_variadic_parameter
+      (make_missing parser) (make_missing parser) (make_token token)
+  | _ ->
+    let (parser, callconv) = parse_call_convention_opt parser in
     let (parser, ts) = parse_type_specifier parser in
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | DotDotDot ->
-      (parser1, make_variadic_parameter ts (make_token token))
-    | _ -> (parser, ts)
-  end
+      parser1, make_variadic_parameter callconv ts (make_token token)
+    | _ ->
+      parser, make_closure_parameter_type_specifier callconv ts
 
 and parse_generic_type_argument_list parser =
   (* SPEC:
@@ -511,12 +553,19 @@ and parse_tuple_or_closure_type_specifier parser =
     parse_tuple_type_specifier parser
 
 and parse_closure_type_specifier parser =
-
   (* SPEC
-      closure-type-specifier:
-          ( coroutine-opt function ( type-specifier-listopt ) : type-specifier )
-  *)
 
+    TODO: Update the specification with closure-param-type-specifier-list-opt.
+    (This work is tracked by task T22582676.)
+
+    TODO: Update grammar for inout parameters.
+    (This work is tracked by task T22582715.)
+
+    closure-type-specifier:
+      ( coroutine-opt function ( \
+      closure-param-type-specifier-list-opt \
+      ) : type-specifier )
+  *)
   (* TODO: Error recovery is pretty weak here. We could be smarter. *)
   let (parser, olp) = next_token parser in
   let olp = make_token olp in
@@ -530,7 +579,7 @@ and parse_closure_type_specifier parser =
       (parser1, (make_missing parser), (make_token token))
     else
       (* TODO add second pass checking to ensure ellipsis is the last arg *)
-      let (parser, pts) = parse_type_or_ellipsis_list parser RightParen in
+      let (parser, pts) = parse_closure_param_list parser RightParen in
       let (parser, irp) = require_right_paren parser in
       (parser, pts, irp) in
   let (parser, col) = require_colon parser in

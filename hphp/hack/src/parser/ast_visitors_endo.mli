@@ -363,6 +363,7 @@ class virtual ['b] endo :
                   Ast_visitors_ancestors.hint_ ->
                   Ast_visitors_ancestors.is_coroutine ->
                   Ast_visitors_ancestors.hint list ->
+                  Ast_visitors_ancestors.param_kind option list ->
                   Ast_visitors_ancestors.variadic_hint ->
                   Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_;
         on_Hoption : 'c ->
@@ -1279,6 +1280,7 @@ class virtual ['b] endo :
       Ast_visitors_ancestors.hint_ ->
       Ast_visitors_ancestors.is_coroutine ->
       Ast_visitors_ancestors.hint list ->
+      Ast_visitors_ancestors.param_kind option list ->
       Ast_visitors_ancestors.variadic_hint ->
       Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_
     method on_Hoption :

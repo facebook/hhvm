@@ -933,7 +933,10 @@ module WithStatementAndDeclAndTypeParser
 
       TODO: This business of allowing ... does not appear in the spec. Add it.
 
-      TODO: Update grammar for inout params (call-convention-opt).
+      TODO: Add call-convention-opt to the specification.
+      (This work is tracked by task T22582676.)
+
+      TODO: Update grammar for inout parameters.
       (This work is tracked by task T22582715.)
 
       ERROR RECOVERY: A ... expression can only appear at the end of a

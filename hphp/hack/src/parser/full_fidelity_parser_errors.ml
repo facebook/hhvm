@@ -776,6 +776,10 @@ let is_parameter_with_callconv param =
   match syntax param with
   | ParameterDeclaration { parameter_call_convention; _ } ->
     not @@ is_missing parameter_call_convention
+  | ClosureParameterTypeSpecifier { closure_parameter_call_convention; _ } ->
+    not @@ is_missing closure_parameter_call_convention
+  | VariadicParameter { variadic_parameter_call_convention; _ } ->
+    not @@ is_missing variadic_parameter_call_convention
   | _ -> false
 
 let has_inout_params parents =
@@ -822,6 +826,10 @@ let extract_callconv_node node =
   match syntax node with
   | ParameterDeclaration { parameter_call_convention; _ } ->
     Some parameter_call_convention
+  | ClosureParameterTypeSpecifier { closure_parameter_call_convention; _ } ->
+    Some closure_parameter_call_convention
+  | VariadicParameter { variadic_parameter_call_convention; _ } ->
+    Some variadic_parameter_call_convention
   | _ -> None
 
 (* Tests if visibility modifiers of the node are allowed on
@@ -1186,8 +1194,8 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
     params_errors function_parameter_list is_hack hhvm_compat_mode errors
   | AnonymousFunction { anonymous_parameters; _ } ->
     params_errors anonymous_parameters is_hack hhvm_compat_mode errors
-  | ClosureTypeSpecifier { closure_parameter_types; _ } ->
-    params_errors closure_parameter_types is_hack hhvm_compat_mode errors
+  | ClosureTypeSpecifier { closure_parameter_list; _ } ->
+    params_errors closure_parameter_list is_hack hhvm_compat_mode errors
   | DecoratedExpression _ -> decoration_errors node errors
   | _ -> errors
 

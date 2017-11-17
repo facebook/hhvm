@@ -585,11 +585,13 @@ let rec get_doc node =
       ( attr ^| visibility ^| callconv ^| parameter_type ^| parameter_name
       ^| parameter_default )
   | VariadicParameter {
+    variadic_parameter_call_convention;
     variadic_parameter_type;
     variadic_parameter_ellipsis } ->
+    let cc = get_doc variadic_parameter_call_convention in
     let t = get_doc variadic_parameter_type in
     let ell = get_doc variadic_parameter_ellipsis in
-    t ^| ell
+    group_doc (cc ^| t ^| ell)
   | AttributeSpecification {
       attribute_specification_left_double_angle;
       attribute_specification_attributes;
@@ -1461,7 +1463,7 @@ let rec get_doc node =
     closure_coroutine;
     closure_function_keyword;
     closure_inner_left_paren;
-    closure_parameter_types;
+    closure_parameter_list;
     closure_inner_right_paren;
     closure_colon;
     closure_return_type;
@@ -1470,12 +1472,19 @@ let rec get_doc node =
     let cor = get_doc closure_coroutine in
     let fnc = get_doc closure_function_keyword in
     let ilp = get_doc closure_inner_left_paren in
-    let pts = get_doc closure_parameter_types in
+    let pts = get_doc closure_parameter_list in
     let irp = get_doc closure_inner_right_paren in
     let col = get_doc closure_colon in
     let ret = get_doc closure_return_type in
     let orp = get_doc closure_outer_right_paren in
     olp ^^^ cor ^| fnc ^^| ilp ^^^ pts ^^^ irp ^^^ col ^^^ ret ^^^ orp
+  | ClosureParameterTypeSpecifier {
+      closure_parameter_call_convention;
+      closure_parameter_type;
+    } ->
+    let cc = get_doc closure_parameter_call_convention in
+    let ty = get_doc closure_parameter_type in
+    cc ^| ty
   | ClassnameTypeSpecifier x ->
     let cn = get_doc x.classname_keyword in
     let la = get_doc x.classname_left_angle in

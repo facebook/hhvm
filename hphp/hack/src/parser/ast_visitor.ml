@@ -171,8 +171,13 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Hoption h ->
       let acc = this#on_hint acc h in
       acc
-    | Hfun (_, hl, _, h) ->
+    | Hfun (_, hl, kl, _, h) ->
       let acc = List.fold_left this#on_hint acc hl in
+      let acc = List.fold_left (fun acc k ->
+        match k with
+        | Some kind -> this#on_param_kind acc kind
+        | None -> acc
+      ) acc kl in
       let acc = this#on_hint acc h in
       acc
     | Htuple hl ->
@@ -584,8 +589,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = this#on_expr acc e in
     acc
 
-
-
   method on_fun_ acc f =
     let acc = List.fold_left this#on_user_attribute acc f.f_user_attributes in
     let acc = this#on_id acc f.f_name in
@@ -657,6 +660,9 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       | Some expr -> this#on_expr acc expr in
     let acc = match f.param_hint with
       | Some h -> this#on_hint acc h
+      | None -> acc in
+    let acc = match f.param_callconv with
+      | Some kind -> this#on_param_kind acc kind
       | None -> acc in
     acc
 

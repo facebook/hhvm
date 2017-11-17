@@ -567,8 +567,10 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         t default;
       ]
     | VariadicParameter x ->
-      let type_var, ellipsis = get_variadic_parameter_children x in
+      let callconv, type_var, ellipsis = get_variadic_parameter_children x in
       Concat [
+        t callconv;
+        when_present callconv space;
         t type_var;
         t ellipsis;
       ]
@@ -1548,7 +1550,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         coroutine,
         kw,
         inner_left_p,
-        param_types,
+        param_list,
         inner_right_p,
         colon,
         ret_type,
@@ -1560,8 +1562,16 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         when_present coroutine space;
         t kw;
         transform_argish_with_return_type
-          inner_left_p param_types inner_right_p colon ret_type;
+          inner_left_p param_list inner_right_p colon ret_type;
         t outer_right_p;
+      ]
+    | ClosureParameterTypeSpecifier x ->
+      let (callconv, cp_type) =
+        get_closure_parameter_type_specifier_children x in
+      Concat [
+        t callconv;
+        when_present callconv space;
+        t cp_type;
       ]
     | ClassnameTypeSpecifier x ->
       let (kw, left_a, class_type, trailing_comma, right_a) =

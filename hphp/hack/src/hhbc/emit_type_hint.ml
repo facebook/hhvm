@@ -39,10 +39,11 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
     if strip_tparams then name
     else name ^ "<" ^ fmt_hints ~tparams ~namespace args ^ ">"
 
-  | A.Hfun (true, _, _, _) ->
+  | A.Hfun (true, _, _, _, _) ->
     failwith "Codegen for coroutine functions is not supported"
 
-  | A.Hfun (false, args, _, ret) ->
+  | A.Hfun (false, args, _kinds, _, ret) ->
+    (* TODO(mqian): Implement for inout parameters *)
     "(function (" ^ fmt_hints ~tparams ~namespace args
     ^ "): " ^ fmt_hint ~tparams ~namespace ret ^ ")"
 
@@ -78,8 +79,8 @@ and fmt_hints ~tparams ~namespace hints =
 
 let can_be_nullable h =
   match snd h with
-  | A.Hfun (_, _, _, _)
-  | A.Hoption (_, A.Hfun (_, _, _, _))
+  | A.Hfun (_, _, _, _, _)
+  | A.Hoption (_, A.Hfun (_, _, _, _, _))
   | A.Happly ((_, "mixed"), _)
   | A.Hoption (_, A.Happly ((_, "mixed"), _))
   (* HHVM does not emit nullable for type consts that are set to null by default

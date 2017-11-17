@@ -373,12 +373,13 @@ class virtual ['self] reduce =
       | Hvariadic c0 -> self#on_option self#on_hint env c0
       | Hnon_variadic -> self#e
     method on_Hoption = self#on_hint
-    method on_Hfun env c0 c1 c2 c3 =
+    method on_Hfun env c0 c1 c2 c3 c4 =
       let r0 = self#on_bool env c0 in
       let r1 = self#on_list self#on_hint env c1 in
-      let r2 = self#on_variadic_hint env c2 in
-      let r3 = self#on_hint env c3 in
-      self#add (self#add (self#add r0 r1) r2) r3
+      let r2 = self#on_list (self#on_option self#on_param_kind) env c2 in
+      let r3 = self#on_variadic_hint env c3 in
+      let r4 = self#on_hint env c4 in
+      self#add (self#add (self#add (self#add r0 r1) r2) r3) r4
     method on_Htuple = self#on_list self#on_hint
     method on_Happly env c0 c1 =
       let r0 = self#on_id env c0 in
@@ -396,7 +397,7 @@ class virtual ['self] reduce =
     method on_Hsoft = self#on_hint
     method on_hint_ env = function
       | Hoption c0 -> self#on_Hoption env c0
-      | Hfun (c0, c1, c2, c3) -> self#on_Hfun env c0 c1 c2 c3
+      | Hfun (c0, c1, c2, c3, c4) -> self#on_Hfun env c0 c1 c2 c3 c4
       | Htuple c0 -> self#on_Htuple env c0
       | Happly (c0, c1) -> self#on_Happly env c0 c1
       | Hshape c0 -> self#on_Hshape env c0

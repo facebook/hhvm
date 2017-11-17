@@ -1293,25 +1293,32 @@ module WithExpressionAndStatementAndTypeParser
       let next_kind = peek_token_kind parser1 in
       if next_kind = Variable then parse_parameter_declaration parser
       else
-        (parser1, make_variadic_parameter (make_missing parser) (make_token token))
+        (parser1, make_variadic_parameter
+          (make_missing parser) (make_missing parser) (make_token token))
     | _ -> parse_parameter_declaration parser
 
   and parse_parameter_declaration parser =
     (* SPEC
-    parameter-declaration:
-      attribute-specification-opt \
-      call-convention-opt \
-      type-specifier  variable-name \
-      default-argument-specifier-opt
-    *)
-    (* TODO: Update grammar for inout parameters (call-convention-opt).
-       (This work is tracked by task T22582715.)
+
+      TODO: Add call-convention-opt to the specification.
+      (This work is tracked by task T22582676.)
+
+      TODO: Update grammar for inout parameters.
+      (This work is tracked by task T22582715.)
+
+      parameter-declaration:
+        attribute-specification-opt \
+        call-convention-opt \
+        type-specifier  variable-name \
+        default-argument-specifier-opt
     *)
     (* ERROR RECOVERY
       * In strict mode, we require a type specifier. This error is not caught
         at parse time but rather by a later pass.
       * Visibility modifiers are only legal in constructor parameter
         lists; we give an error in a later pass.
+      * Variadic params cannot be declared inout; we permit that here but
+        give an error in a later pass.
       * Variadic params and inout params cannot have default values; these
         errors are also reported in a later pass.
     *)
@@ -1368,6 +1375,14 @@ module WithExpressionAndStatementAndTypeParser
     | Public | Protected | Private -> (parser1, make_token token)
     | _ -> (parser, make_missing parser)
 
+  (* SPEC
+
+    TODO: Add this to the specification.
+    (This work is tracked by task T22582676.)
+
+    call-convention:
+      inout
+  *)
   and parse_call_convention_opt parser =
     let (parser1, token) = next_token parser in
     match Token.kind token with

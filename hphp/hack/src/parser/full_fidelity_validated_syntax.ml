@@ -298,6 +298,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.MapArrayTypeSpecifier _ -> tag validate_map_array_type_specifier (fun x -> SpecMapArray x) x
     | Syntax.DictionaryTypeSpecifier _ -> tag validate_dictionary_type_specifier (fun x -> SpecDictionary x) x
     | Syntax.ClosureTypeSpecifier _ -> tag validate_closure_type_specifier (fun x -> SpecClosure x) x
+    | Syntax.ClosureParameterTypeSpecifier _ -> tag validate_closure_parameter_type_specifier (fun x -> SpecClosureParameter x) x
     | Syntax.ClassnameTypeSpecifier _ -> tag validate_classname_type_specifier (fun x -> SpecClassname x) x
     | Syntax.FieldSpecifier _ -> tag validate_field_specifier (fun x -> SpecField x) x
     | Syntax.ShapeTypeSpecifier _ -> tag validate_shape_type_specifier (fun x -> SpecShape x) x
@@ -321,6 +322,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | SpecMapArray          thing -> invalidate_map_array_type_specifier       (value, thing)
     | SpecDictionary        thing -> invalidate_dictionary_type_specifier      (value, thing)
     | SpecClosure           thing -> invalidate_closure_type_specifier         (value, thing)
+    | SpecClosureParameter  thing -> invalidate_closure_parameter_type_specifier (value, thing)
     | SpecClassname         thing -> invalidate_classname_type_specifier       (value, thing)
     | SpecField             thing -> invalidate_field_specifier                (value, thing)
     | SpecShape             thing -> invalidate_shape_type_specifier           (value, thing)
@@ -1286,12 +1288,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.VariadicParameter x; value = v } -> v,
     { variadic_parameter_ellipsis = validate_token x.Syntax.variadic_parameter_ellipsis
     ; variadic_parameter_type = validate_option_with (validate_simple_type_specifier) x.Syntax.variadic_parameter_type
+    ; variadic_parameter_call_convention = validate_option_with (validate_token) x.Syntax.variadic_parameter_call_convention
     }
   | s -> validation_fail SyntaxKind.VariadicParameter s
   and invalidate_variadic_parameter : variadic_parameter invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.VariadicParameter
-      { Syntax.variadic_parameter_type = invalidate_option_with (invalidate_simple_type_specifier) x.variadic_parameter_type
+      { Syntax.variadic_parameter_call_convention = invalidate_option_with (invalidate_token) x.variadic_parameter_call_convention
+      ; Syntax.variadic_parameter_type = invalidate_option_with (invalidate_simple_type_specifier) x.variadic_parameter_type
       ; Syntax.variadic_parameter_ellipsis = invalidate_token x.variadic_parameter_ellipsis
       }
     ; Syntax.value = v
@@ -3174,7 +3178,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; closure_return_type = validate_specifier x.Syntax.closure_return_type
     ; closure_colon = validate_token x.Syntax.closure_colon
     ; closure_inner_right_paren = validate_token x.Syntax.closure_inner_right_paren
-    ; closure_parameter_types = validate_list_with (validate_specifier) x.Syntax.closure_parameter_types
+    ; closure_parameter_list = validate_list_with (validate_closure_parameter_type_specifier) x.Syntax.closure_parameter_list
     ; closure_inner_left_paren = validate_token x.Syntax.closure_inner_left_paren
     ; closure_function_keyword = validate_token x.Syntax.closure_function_keyword
     ; closure_coroutine = validate_option_with (validate_token) x.Syntax.closure_coroutine
@@ -3188,11 +3192,25 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; Syntax.closure_coroutine = invalidate_option_with (invalidate_token) x.closure_coroutine
       ; Syntax.closure_function_keyword = invalidate_token x.closure_function_keyword
       ; Syntax.closure_inner_left_paren = invalidate_token x.closure_inner_left_paren
-      ; Syntax.closure_parameter_types = invalidate_list_with (invalidate_specifier) x.closure_parameter_types
+      ; Syntax.closure_parameter_list = invalidate_list_with (invalidate_closure_parameter_type_specifier) x.closure_parameter_list
       ; Syntax.closure_inner_right_paren = invalidate_token x.closure_inner_right_paren
       ; Syntax.closure_colon = invalidate_token x.closure_colon
       ; Syntax.closure_return_type = invalidate_specifier x.closure_return_type
       ; Syntax.closure_outer_right_paren = invalidate_token x.closure_outer_right_paren
+      }
+    ; Syntax.value = v
+    }
+  and validate_closure_parameter_type_specifier : closure_parameter_type_specifier validator = function
+  | { Syntax.syntax = Syntax.ClosureParameterTypeSpecifier x; value = v } -> v,
+    { closure_parameter_type = validate_specifier x.Syntax.closure_parameter_type
+    ; closure_parameter_call_convention = validate_option_with (validate_token) x.Syntax.closure_parameter_call_convention
+    }
+  | s -> validation_fail SyntaxKind.ClosureParameterTypeSpecifier s
+  and invalidate_closure_parameter_type_specifier : closure_parameter_type_specifier invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.ClosureParameterTypeSpecifier
+      { Syntax.closure_parameter_call_convention = invalidate_option_with (invalidate_token) x.closure_parameter_call_convention
+      ; Syntax.closure_parameter_type = invalidate_specifier x.closure_parameter_type
       }
     ; Syntax.value = v
     }

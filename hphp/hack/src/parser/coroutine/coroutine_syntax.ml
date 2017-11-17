@@ -444,6 +444,11 @@ let make_parameter_declaration_syntax
     parameter_variable_syntax
     (* default value *)  (make_missing ())
 
+let make_closure_parameter_type_syntax parameter_type_syntax =
+  make_closure_parameter_type_specifier
+    (* call convention *) (make_missing ())
+    parameter_type_syntax
+
 let make_type_arguments_syntax = function
   | [] ->
       make_missing ()
@@ -488,13 +493,16 @@ let make_object_creation_expression_syntax classname arguments =
   make_typed_object_creation_expression_syntax type_specifier_syntax arguments
 
 let make_functional_type_syntax argument_types return_type_syntax =
-  let argument_types_syntax = make_comma_list argument_types in
+  let argument_list_syntax =
+    argument_types
+      |> Core_list.map ~f:make_closure_parameter_type_syntax
+      |> make_comma_list in
   make_closure_type_specifier
     left_paren_syntax
     (* coroutine *) (make_missing ())
     function_keyword_syntax
     left_paren_syntax
-    argument_types_syntax
+    argument_list_syntax
     right_paren_syntax
     colon_syntax
     return_type_syntax
@@ -701,6 +709,10 @@ let make_continuation_parameter_syntax
     ?visibility_syntax
     (make_continuation_type_syntax function_type)
     continuation_variable
+
+let make_continuation_closure_parameter_syntax function_type =
+  make_closure_parameter_type_syntax
+    (make_continuation_type_syntax function_type)
 
 let make_coroutine_result_type_syntax function_type =
   make_type_specifier_syntax "CoroutineResult" [ function_type; ]

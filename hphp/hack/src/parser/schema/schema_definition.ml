@@ -484,7 +484,8 @@ let schema : schema_node list =
     ; prefix      = "variadic_parameter"
     ; aggregates  = [ Specifier; Parameter ]
     ; fields      =
-      [ "type", ZeroOrOne (Just "SimpleTypeSpecifier")
+      [ "call_convention", ZeroOrOne Token
+      ; "type", ZeroOrOne (Just "SimpleTypeSpecifier")
       ; "ellipsis", Token
       ]
     }
@@ -1853,11 +1854,22 @@ let schema : schema_node list =
       ; "coroutine", ZeroOrOne Token
       ; "function_keyword", Token
       ; "inner_left_paren", Token
-      ; "parameter_types", ZeroOrMore (Aggregate Specifier)
+      ; "parameter_list", ZeroOrMore (Just "ClosureParameterTypeSpecifier")
       ; "inner_right_paren", Token
       ; "colon", Token
       ; "return_type", Aggregate Specifier
       ; "outer_right_paren", Token
+      ]
+    }
+  ; { kind_name   = "ClosureParameterTypeSpecifier"
+    ; type_name   = "closure_parameter_type_specifier"
+    ; func_name   = "closure_parameter_type_specifier"
+    ; description = "closure_parameter_type_specifier"
+    ; prefix      = "closure_parameter"
+    ; aggregates  = [ Specifier ]
+    ; fields      =
+      [ "call_convention", ZeroOrOne Token
+      ; "type", Aggregate Specifier
       ]
     }
   ; { kind_name   = "ClassnameTypeSpecifier"

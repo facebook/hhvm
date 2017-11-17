@@ -1,0 +1,6 @@
+File "bad_inout_hint_call5.php", line 6, characters 7-7:
+Invalid argument (Typing[4110])
+File "bad_inout_hint_call5.php", line 6, characters 14-19:
+This is a string
+File "bad_inout_hint_call5.php", line 3, characters 30-32:
+It is incompatible with an int

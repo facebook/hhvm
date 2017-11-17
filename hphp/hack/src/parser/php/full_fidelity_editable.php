@@ -430,6 +430,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return DictionaryTypeSpecifier::from_json($json, $position, $source);
     case 'closure_type_specifier':
       return ClosureTypeSpecifier::from_json($json, $position, $source);
+    case 'closure_parameter_type_specifier':
+      return ClosureParameterTypeSpecifier::from_json($json, $position, $source);
     case 'classname_type_specifier':
       return ClassnameTypeSpecifier::from_json($json, $position, $source);
     case 'field_specifier':
@@ -1065,6 +1067,8 @@ abstract class EditableToken extends EditableSyntax {
        return new BarBarToken($leading, $trailing);
     case '?':
        return new QuestionToken($leading, $trailing);
+    case '?:':
+       return new QuestionColonToken($leading, $trailing);
     case '??':
        return new QuestionQuestionToken($leading, $trailing);
     case ':':
@@ -3332,6 +3336,21 @@ final class QuestionToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): QuestionToken {
     return new QuestionToken($this->leading(), $trailing);
+  }
+}
+final class QuestionColonToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('?:', $leading, $trailing, '?:');
+  }
+
+  public function with_leading(EditableSyntax $leading): QuestionColonToken {
+    return new QuestionColonToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): QuestionColonToken {
+    return new QuestionColonToken($this->leading(), $trailing);
   }
 }
 final class QuestionQuestionToken extends EditableToken {
@@ -8609,14 +8628,20 @@ final class ParameterDeclaration extends EditableSyntax {
   }
 }
 final class VariadicParameter extends EditableSyntax {
+  private EditableSyntax $_call_convention;
   private EditableSyntax $_type;
   private EditableSyntax $_ellipsis;
   public function __construct(
+    EditableSyntax $call_convention,
     EditableSyntax $type,
     EditableSyntax $ellipsis) {
     parent::__construct('variadic_parameter');
+    $this->_call_convention = $call_convention;
     $this->_type = $type;
     $this->_ellipsis = $ellipsis;
+  }
+  public function call_convention(): EditableSyntax {
+    return $this->_call_convention;
   }
   public function type(): EditableSyntax {
     return $this->_type;
@@ -8624,13 +8649,21 @@ final class VariadicParameter extends EditableSyntax {
   public function ellipsis(): EditableSyntax {
     return $this->_ellipsis;
   }
+  public function with_call_convention(EditableSyntax $call_convention): VariadicParameter {
+    return new VariadicParameter(
+      $call_convention,
+      $this->_type,
+      $this->_ellipsis);
+  }
   public function with_type(EditableSyntax $type): VariadicParameter {
     return new VariadicParameter(
+      $this->_call_convention,
       $type,
       $this->_ellipsis);
   }
   public function with_ellipsis(EditableSyntax $ellipsis): VariadicParameter {
     return new VariadicParameter(
+      $this->_call_convention,
       $this->_type,
       $ellipsis);
   }
@@ -8641,20 +8674,26 @@ final class VariadicParameter extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
+    $call_convention = $this->call_convention()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     $ellipsis = $this->ellipsis()->rewrite($rewriter, $new_parents);
     if (
+      $call_convention === $this->call_convention() &&
       $type === $this->type() &&
       $ellipsis === $this->ellipsis()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new VariadicParameter(
+        $call_convention,
         $type,
         $ellipsis), $parents ?? []);
     }
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
+    $call_convention = EditableSyntax::from_json(
+      $json->variadic_parameter_call_convention, $position, $source);
+    $position += $call_convention->width();
     $type = EditableSyntax::from_json(
       $json->variadic_parameter_type, $position, $source);
     $position += $type->width();
@@ -8662,10 +8701,12 @@ final class VariadicParameter extends EditableSyntax {
       $json->variadic_parameter_ellipsis, $position, $source);
     $position += $ellipsis->width();
     return new VariadicParameter(
+        $call_convention,
         $type,
         $ellipsis);
   }
   public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_call_convention;
     yield $this->_type;
     yield $this->_ellipsis;
     yield break;
@@ -20263,7 +20304,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_coroutine;
   private EditableSyntax $_function_keyword;
   private EditableSyntax $_inner_left_paren;
-  private EditableSyntax $_parameter_types;
+  private EditableSyntax $_parameter_list;
   private EditableSyntax $_inner_right_paren;
   private EditableSyntax $_colon;
   private EditableSyntax $_return_type;
@@ -20273,7 +20314,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     EditableSyntax $coroutine,
     EditableSyntax $function_keyword,
     EditableSyntax $inner_left_paren,
-    EditableSyntax $parameter_types,
+    EditableSyntax $parameter_list,
     EditableSyntax $inner_right_paren,
     EditableSyntax $colon,
     EditableSyntax $return_type,
@@ -20283,7 +20324,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     $this->_coroutine = $coroutine;
     $this->_function_keyword = $function_keyword;
     $this->_inner_left_paren = $inner_left_paren;
-    $this->_parameter_types = $parameter_types;
+    $this->_parameter_list = $parameter_list;
     $this->_inner_right_paren = $inner_right_paren;
     $this->_colon = $colon;
     $this->_return_type = $return_type;
@@ -20301,8 +20342,8 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   public function inner_left_paren(): EditableSyntax {
     return $this->_inner_left_paren;
   }
-  public function parameter_types(): EditableSyntax {
-    return $this->_parameter_types;
+  public function parameter_list(): EditableSyntax {
+    return $this->_parameter_list;
   }
   public function inner_right_paren(): EditableSyntax {
     return $this->_inner_right_paren;
@@ -20322,7 +20363,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
       $this->_coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
-      $this->_parameter_types,
+      $this->_parameter_list,
       $this->_inner_right_paren,
       $this->_colon,
       $this->_return_type,
@@ -20334,7 +20375,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
       $coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
-      $this->_parameter_types,
+      $this->_parameter_list,
       $this->_inner_right_paren,
       $this->_colon,
       $this->_return_type,
@@ -20346,7 +20387,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
       $this->_coroutine,
       $function_keyword,
       $this->_inner_left_paren,
-      $this->_parameter_types,
+      $this->_parameter_list,
       $this->_inner_right_paren,
       $this->_colon,
       $this->_return_type,
@@ -20358,19 +20399,19 @@ final class ClosureTypeSpecifier extends EditableSyntax {
       $this->_coroutine,
       $this->_function_keyword,
       $inner_left_paren,
-      $this->_parameter_types,
+      $this->_parameter_list,
       $this->_inner_right_paren,
       $this->_colon,
       $this->_return_type,
       $this->_outer_right_paren);
   }
-  public function with_parameter_types(EditableSyntax $parameter_types): ClosureTypeSpecifier {
+  public function with_parameter_list(EditableSyntax $parameter_list): ClosureTypeSpecifier {
     return new ClosureTypeSpecifier(
       $this->_outer_left_paren,
       $this->_coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
-      $parameter_types,
+      $parameter_list,
       $this->_inner_right_paren,
       $this->_colon,
       $this->_return_type,
@@ -20382,7 +20423,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
       $this->_coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
-      $this->_parameter_types,
+      $this->_parameter_list,
       $inner_right_paren,
       $this->_colon,
       $this->_return_type,
@@ -20394,7 +20435,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
       $this->_coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
-      $this->_parameter_types,
+      $this->_parameter_list,
       $this->_inner_right_paren,
       $colon,
       $this->_return_type,
@@ -20406,7 +20447,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
       $this->_coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
-      $this->_parameter_types,
+      $this->_parameter_list,
       $this->_inner_right_paren,
       $this->_colon,
       $return_type,
@@ -20418,7 +20459,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
       $this->_coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
-      $this->_parameter_types,
+      $this->_parameter_list,
       $this->_inner_right_paren,
       $this->_colon,
       $this->_return_type,
@@ -20435,7 +20476,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     $coroutine = $this->coroutine()->rewrite($rewriter, $new_parents);
     $function_keyword = $this->function_keyword()->rewrite($rewriter, $new_parents);
     $inner_left_paren = $this->inner_left_paren()->rewrite($rewriter, $new_parents);
-    $parameter_types = $this->parameter_types()->rewrite($rewriter, $new_parents);
+    $parameter_list = $this->parameter_list()->rewrite($rewriter, $new_parents);
     $inner_right_paren = $this->inner_right_paren()->rewrite($rewriter, $new_parents);
     $colon = $this->colon()->rewrite($rewriter, $new_parents);
     $return_type = $this->return_type()->rewrite($rewriter, $new_parents);
@@ -20445,7 +20486,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
       $coroutine === $this->coroutine() &&
       $function_keyword === $this->function_keyword() &&
       $inner_left_paren === $this->inner_left_paren() &&
-      $parameter_types === $this->parameter_types() &&
+      $parameter_list === $this->parameter_list() &&
       $inner_right_paren === $this->inner_right_paren() &&
       $colon === $this->colon() &&
       $return_type === $this->return_type() &&
@@ -20457,7 +20498,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
         $coroutine,
         $function_keyword,
         $inner_left_paren,
-        $parameter_types,
+        $parameter_list,
         $inner_right_paren,
         $colon,
         $return_type,
@@ -20478,9 +20519,9 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     $inner_left_paren = EditableSyntax::from_json(
       $json->closure_inner_left_paren, $position, $source);
     $position += $inner_left_paren->width();
-    $parameter_types = EditableSyntax::from_json(
-      $json->closure_parameter_types, $position, $source);
-    $position += $parameter_types->width();
+    $parameter_list = EditableSyntax::from_json(
+      $json->closure_parameter_list, $position, $source);
+    $position += $parameter_list->width();
     $inner_right_paren = EditableSyntax::from_json(
       $json->closure_inner_right_paren, $position, $source);
     $position += $inner_right_paren->width();
@@ -20498,7 +20539,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
         $coroutine,
         $function_keyword,
         $inner_left_paren,
-        $parameter_types,
+        $parameter_list,
         $inner_right_paren,
         $colon,
         $return_type,
@@ -20509,11 +20550,74 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     yield $this->_coroutine;
     yield $this->_function_keyword;
     yield $this->_inner_left_paren;
-    yield $this->_parameter_types;
+    yield $this->_parameter_list;
     yield $this->_inner_right_paren;
     yield $this->_colon;
     yield $this->_return_type;
     yield $this->_outer_right_paren;
+    yield break;
+  }
+}
+final class ClosureParameterTypeSpecifier extends EditableSyntax {
+  private EditableSyntax $_call_convention;
+  private EditableSyntax $_type;
+  public function __construct(
+    EditableSyntax $call_convention,
+    EditableSyntax $type) {
+    parent::__construct('closure_parameter_type_specifier');
+    $this->_call_convention = $call_convention;
+    $this->_type = $type;
+  }
+  public function call_convention(): EditableSyntax {
+    return $this->_call_convention;
+  }
+  public function type(): EditableSyntax {
+    return $this->_type;
+  }
+  public function with_call_convention(EditableSyntax $call_convention): ClosureParameterTypeSpecifier {
+    return new ClosureParameterTypeSpecifier(
+      $call_convention,
+      $this->_type);
+  }
+  public function with_type(EditableSyntax $type): ClosureParameterTypeSpecifier {
+    return new ClosureParameterTypeSpecifier(
+      $this->_call_convention,
+      $type);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $call_convention = $this->call_convention()->rewrite($rewriter, $new_parents);
+    $type = $this->type()->rewrite($rewriter, $new_parents);
+    if (
+      $call_convention === $this->call_convention() &&
+      $type === $this->type()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new ClosureParameterTypeSpecifier(
+        $call_convention,
+        $type), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $call_convention = EditableSyntax::from_json(
+      $json->closure_parameter_call_convention, $position, $source);
+    $position += $call_convention->width();
+    $type = EditableSyntax::from_json(
+      $json->closure_parameter_type, $position, $source);
+    $position += $type->width();
+    return new ClosureParameterTypeSpecifier(
+        $call_convention,
+        $type);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_call_convention;
+    yield $this->_type;
     yield break;
   }
 }

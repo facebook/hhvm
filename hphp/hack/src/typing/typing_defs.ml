@@ -510,7 +510,7 @@ let this = Local_id.make "$this"
 let arity_min ft_arity : int = match ft_arity with
   | Fstandard (min, _) | Fvariadic (min, _) | Fellipsis min -> min
 
-let get_param_mode is_ref callconv =
+let get_param_mode ~is_ref callconv =
   (* If a param has both & and inout, this should have errored in parsing. *)
   match callconv with
   | Some Ast.Pinout -> FPinout

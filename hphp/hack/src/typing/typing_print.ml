@@ -431,12 +431,16 @@ module Full = struct
     ty tcopt st env o ft.ft_ret
 
   and fun_param: type a. _ -> _ -> _ -> _ -> a fun_param -> _ =
-    fun tcopt st env o { fp_name = param_name; fp_type = param_type; _ } ->
-    match param_name, param_type with
-    | None, _ -> ty tcopt st env o param_type
+    fun tcopt st env o { fp_name; fp_type; fp_kind; _ } ->
+    (match fp_kind with
+    | FPinout -> o "inout "
+    | _ -> ()
+    );
+    match fp_name, fp_type with
+    | None, _ -> ty tcopt st env o fp_type
     | Some param_name, (_, Tany) -> o param_name
-    | Some param_name, param_type ->
-        ty tcopt st env o param_type; o " "; o param_name
+    | Some param_name, _ ->
+        ty tcopt st env o fp_type; o " "; o param_name
 
   and tparam: type a. _ -> _ -> _ -> _ ->  a Typing_defs.tparam -> _ =
     fun tcopt st o env (_, (_, x), cstrl) ->

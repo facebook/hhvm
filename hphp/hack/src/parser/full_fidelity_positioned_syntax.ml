@@ -756,10 +756,12 @@ module FromMinimal = struct
       | SyntaxKind.VariadicParameter
       , (  variadic_parameter_ellipsis
         :: variadic_parameter_type
+        :: variadic_parameter_call_convention
         :: results
         ) ->
           VariadicParameter
-          { variadic_parameter_type
+          { variadic_parameter_call_convention
+          ; variadic_parameter_type
           ; variadic_parameter_ellipsis
           }, results
       | SyntaxKind.AttributeSpecification
@@ -2114,7 +2116,7 @@ module FromMinimal = struct
         :: closure_return_type
         :: closure_colon
         :: closure_inner_right_paren
-        :: closure_parameter_types
+        :: closure_parameter_list
         :: closure_inner_left_paren
         :: closure_function_keyword
         :: closure_coroutine
@@ -2126,11 +2128,20 @@ module FromMinimal = struct
           ; closure_coroutine
           ; closure_function_keyword
           ; closure_inner_left_paren
-          ; closure_parameter_types
+          ; closure_parameter_list
           ; closure_inner_right_paren
           ; closure_colon
           ; closure_return_type
           ; closure_outer_right_paren
+          }, results
+      | SyntaxKind.ClosureParameterTypeSpecifier
+      , (  closure_parameter_type
+        :: closure_parameter_call_convention
+        :: results
+        ) ->
+          ClosureParameterTypeSpecifier
+          { closure_parameter_call_convention
+          ; closure_parameter_type
           }, results
       | SyntaxKind.ClassnameTypeSpecifier
       , (  classname_right_angle
@@ -2737,13 +2748,15 @@ module FromMinimal = struct
         let todo = Convert (parameter_visibility, todo) in
         convert offset todo results parameter_attribute
     | { M.syntax = M.VariadicParameter
-        { M.variadic_parameter_type
+        { M.variadic_parameter_call_convention
+        ; M.variadic_parameter_type
         ; M.variadic_parameter_ellipsis
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (variadic_parameter_ellipsis, todo) in
-        convert offset todo results variadic_parameter_type
+        let todo = Convert (variadic_parameter_type, todo) in
+        convert offset todo results variadic_parameter_call_convention
     | { M.syntax = M.AttributeSpecification
         { M.attribute_specification_left_double_angle
         ; M.attribute_specification_attributes
@@ -3991,7 +4004,7 @@ module FromMinimal = struct
         ; M.closure_coroutine
         ; M.closure_function_keyword
         ; M.closure_inner_left_paren
-        ; M.closure_parameter_types
+        ; M.closure_parameter_list
         ; M.closure_inner_right_paren
         ; M.closure_colon
         ; M.closure_return_type
@@ -4003,11 +4016,19 @@ module FromMinimal = struct
         let todo = Convert (closure_return_type, todo) in
         let todo = Convert (closure_colon, todo) in
         let todo = Convert (closure_inner_right_paren, todo) in
-        let todo = Convert (closure_parameter_types, todo) in
+        let todo = Convert (closure_parameter_list, todo) in
         let todo = Convert (closure_inner_left_paren, todo) in
         let todo = Convert (closure_function_keyword, todo) in
         let todo = Convert (closure_coroutine, todo) in
         convert offset todo results closure_outer_left_paren
+    | { M.syntax = M.ClosureParameterTypeSpecifier
+        { M.closure_parameter_call_convention
+        ; M.closure_parameter_type
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (closure_parameter_type, todo) in
+        convert offset todo results closure_parameter_call_convention
     | { M.syntax = M.ClassnameTypeSpecifier
         { M.classname_keyword
         ; M.classname_left_angle

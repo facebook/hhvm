@@ -164,6 +164,7 @@ type t =
   | MapArrayTypeSpecifier
   | DictionaryTypeSpecifier
   | ClosureTypeSpecifier
+  | ClosureParameterTypeSpecifier
   | ClassnameTypeSpecifier
   | FieldSpecifier
   | FieldInitializer
@@ -327,6 +328,7 @@ let to_string kind =
   | MapArrayTypeSpecifier                   -> "map_array_type_specifier"
   | DictionaryTypeSpecifier                 -> "dictionary_type_specifier"
   | ClosureTypeSpecifier                    -> "closure_type_specifier"
+  | ClosureParameterTypeSpecifier           -> "closure_parameter_type_specifier"
   | ClassnameTypeSpecifier                  -> "classname_type_specifier"
   | FieldSpecifier                          -> "field_specifier"
   | FieldInitializer                        -> "field_initializer"

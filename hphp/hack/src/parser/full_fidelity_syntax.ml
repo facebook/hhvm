@@ -199,6 +199,7 @@ module WithToken(Token: TokenType) = struct
       | MapArrayTypeSpecifier                   _ -> SyntaxKind.MapArrayTypeSpecifier
       | DictionaryTypeSpecifier                 _ -> SyntaxKind.DictionaryTypeSpecifier
       | ClosureTypeSpecifier                    _ -> SyntaxKind.ClosureTypeSpecifier
+      | ClosureParameterTypeSpecifier           _ -> SyntaxKind.ClosureParameterTypeSpecifier
       | ClassnameTypeSpecifier                  _ -> SyntaxKind.ClassnameTypeSpecifier
       | FieldSpecifier                          _ -> SyntaxKind.FieldSpecifier
       | FieldInitializer                        _ -> SyntaxKind.FieldInitializer
@@ -369,6 +370,7 @@ module WithToken(Token: TokenType) = struct
     let is_map_array_type_specifier                     = has_kind SyntaxKind.MapArrayTypeSpecifier
     let is_dictionary_type_specifier                    = has_kind SyntaxKind.DictionaryTypeSpecifier
     let is_closure_type_specifier                       = has_kind SyntaxKind.ClosureTypeSpecifier
+    let is_closure_parameter_type_specifier             = has_kind SyntaxKind.ClosureParameterTypeSpecifier
     let is_classname_type_specifier                     = has_kind SyntaxKind.ClassnameTypeSpecifier
     let is_field_specifier                              = has_kind SyntaxKind.FieldSpecifier
     let is_field_initializer                            = has_kind SyntaxKind.FieldInitializer
@@ -839,9 +841,11 @@ module WithToken(Token: TokenType) = struct
     )
 
     let get_variadic_parameter_children {
+      variadic_parameter_call_convention;
       variadic_parameter_type;
       variadic_parameter_ellipsis;
     } = (
+      variadic_parameter_call_convention,
       variadic_parameter_type,
       variadic_parameter_ellipsis
     )
@@ -2093,7 +2097,7 @@ module WithToken(Token: TokenType) = struct
       closure_coroutine;
       closure_function_keyword;
       closure_inner_left_paren;
-      closure_parameter_types;
+      closure_parameter_list;
       closure_inner_right_paren;
       closure_colon;
       closure_return_type;
@@ -2103,11 +2107,19 @@ module WithToken(Token: TokenType) = struct
       closure_coroutine,
       closure_function_keyword,
       closure_inner_left_paren,
-      closure_parameter_types,
+      closure_parameter_list,
       closure_inner_right_paren,
       closure_colon,
       closure_return_type,
       closure_outer_right_paren
+    )
+
+    let get_closure_parameter_type_specifier_children {
+      closure_parameter_call_convention;
+      closure_parameter_type;
+    } = (
+      closure_parameter_call_convention,
+      closure_parameter_type
     )
 
     let get_classname_type_specifier_children {
@@ -2640,9 +2652,11 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc parameter_default_value in
          acc
       | VariadicParameter {
+        variadic_parameter_call_convention;
         variadic_parameter_type;
         variadic_parameter_ellipsis;
       } ->
+         let acc = f acc variadic_parameter_call_convention in
          let acc = f acc variadic_parameter_type in
          let acc = f acc variadic_parameter_ellipsis in
          acc
@@ -3788,7 +3802,7 @@ module WithToken(Token: TokenType) = struct
         closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
-        closure_parameter_types;
+        closure_parameter_list;
         closure_inner_right_paren;
         closure_colon;
         closure_return_type;
@@ -3798,11 +3812,18 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc closure_coroutine in
          let acc = f acc closure_function_keyword in
          let acc = f acc closure_inner_left_paren in
-         let acc = f acc closure_parameter_types in
+         let acc = f acc closure_parameter_list in
          let acc = f acc closure_inner_right_paren in
          let acc = f acc closure_colon in
          let acc = f acc closure_return_type in
          let acc = f acc closure_outer_right_paren in
+         acc
+      | ClosureParameterTypeSpecifier {
+        closure_parameter_call_convention;
+        closure_parameter_type;
+      } ->
+         let acc = f acc closure_parameter_call_convention in
+         let acc = f acc closure_parameter_type in
          acc
       | ClassnameTypeSpecifier {
         classname_keyword;
@@ -4321,9 +4342,11 @@ module WithToken(Token: TokenType) = struct
         parameter_default_value;
       ]
       | VariadicParameter {
+        variadic_parameter_call_convention;
         variadic_parameter_type;
         variadic_parameter_ellipsis;
       } -> [
+        variadic_parameter_call_convention;
         variadic_parameter_type;
         variadic_parameter_ellipsis;
       ]
@@ -5469,7 +5492,7 @@ module WithToken(Token: TokenType) = struct
         closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
-        closure_parameter_types;
+        closure_parameter_list;
         closure_inner_right_paren;
         closure_colon;
         closure_return_type;
@@ -5479,11 +5502,18 @@ module WithToken(Token: TokenType) = struct
         closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
-        closure_parameter_types;
+        closure_parameter_list;
         closure_inner_right_paren;
         closure_colon;
         closure_return_type;
         closure_outer_right_paren;
+      ]
+      | ClosureParameterTypeSpecifier {
+        closure_parameter_call_convention;
+        closure_parameter_type;
+      } -> [
+        closure_parameter_call_convention;
+        closure_parameter_type;
       ]
       | ClassnameTypeSpecifier {
         classname_keyword;
@@ -6003,9 +6033,11 @@ module WithToken(Token: TokenType) = struct
         "parameter_default_value";
       ]
       | VariadicParameter {
+        variadic_parameter_call_convention;
         variadic_parameter_type;
         variadic_parameter_ellipsis;
       } -> [
+        "variadic_parameter_call_convention";
         "variadic_parameter_type";
         "variadic_parameter_ellipsis";
       ]
@@ -7151,7 +7183,7 @@ module WithToken(Token: TokenType) = struct
         closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
-        closure_parameter_types;
+        closure_parameter_list;
         closure_inner_right_paren;
         closure_colon;
         closure_return_type;
@@ -7161,11 +7193,18 @@ module WithToken(Token: TokenType) = struct
         "closure_coroutine";
         "closure_function_keyword";
         "closure_inner_left_paren";
-        "closure_parameter_types";
+        "closure_parameter_list";
         "closure_inner_right_paren";
         "closure_colon";
         "closure_return_type";
         "closure_outer_right_paren";
+      ]
+      | ClosureParameterTypeSpecifier {
+        closure_parameter_call_convention;
+        closure_parameter_type;
+      } -> [
+        "closure_parameter_call_convention";
+        "closure_parameter_type";
       ]
       | ClassnameTypeSpecifier {
         classname_keyword;
@@ -7775,10 +7814,12 @@ module WithToken(Token: TokenType) = struct
           parameter_default_value;
         }
       | (SyntaxKind.VariadicParameter, [
+          variadic_parameter_call_convention;
           variadic_parameter_type;
           variadic_parameter_ellipsis;
         ]) ->
         VariadicParameter {
+          variadic_parameter_call_convention;
           variadic_parameter_type;
           variadic_parameter_ellipsis;
         }
@@ -9029,7 +9070,7 @@ module WithToken(Token: TokenType) = struct
           closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
-          closure_parameter_types;
+          closure_parameter_list;
           closure_inner_right_paren;
           closure_colon;
           closure_return_type;
@@ -9040,11 +9081,19 @@ module WithToken(Token: TokenType) = struct
           closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
-          closure_parameter_types;
+          closure_parameter_list;
           closure_inner_right_paren;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
+        }
+      | (SyntaxKind.ClosureParameterTypeSpecifier, [
+          closure_parameter_call_convention;
+          closure_parameter_type;
+        ]) ->
+        ClosureParameterTypeSpecifier {
+          closure_parameter_call_convention;
+          closure_parameter_type;
         }
       | (SyntaxKind.ClassnameTypeSpecifier, [
           classname_keyword;
@@ -9757,10 +9806,12 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_variadic_parameter
+        variadic_parameter_call_convention
         variadic_parameter_type
         variadic_parameter_ellipsis
       =
         let syntax = VariadicParameter {
+          variadic_parameter_call_convention;
           variadic_parameter_type;
           variadic_parameter_ellipsis;
         } in
@@ -11329,7 +11380,7 @@ module WithToken(Token: TokenType) = struct
         closure_coroutine
         closure_function_keyword
         closure_inner_left_paren
-        closure_parameter_types
+        closure_parameter_list
         closure_inner_right_paren
         closure_colon
         closure_return_type
@@ -11340,11 +11391,22 @@ module WithToken(Token: TokenType) = struct
           closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
-          closure_parameter_types;
+          closure_parameter_list;
           closure_inner_right_paren;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_closure_parameter_type_specifier
+        closure_parameter_call_convention
+        closure_parameter_type
+      =
+        let syntax = ClosureParameterTypeSpecifier {
+          closure_parameter_call_convention;
+          closure_parameter_type;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

@@ -366,8 +366,8 @@ let from_string keyword =
   | "&&"           -> Some AmpersandAmpersand
   | "||"           -> Some BarBar
   | "?"            -> Some Question
-  | "??"           -> Some QuestionQuestion
   | "?:"           -> Some QuestionColon
+  | "??"           -> Some QuestionQuestion
   | ":"            -> Some Colon
   | ";"            -> Some Semicolon
   | "="            -> Some Equal
@@ -542,8 +542,8 @@ let to_string kind =
   | AmpersandAmpersand            -> "&&"
   | BarBar                        -> "||"
   | Question                      -> "?"
-  | QuestionQuestion              -> "??"
   | QuestionColon                 -> "?:"
+  | QuestionQuestion              -> "??"
   | Colon                         -> ":"
   | Semicolon                     -> ";"
   | Equal                         -> "="

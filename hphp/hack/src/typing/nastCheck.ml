@@ -400,9 +400,13 @@ and hint_ env p = function
   | Htuple hl -> List.iter hl (hint env)
   | Hoption h ->
       hint env h; ()
-  | Hfun (is_coroutine, hl,_, h) ->
+  | Hfun (is_coroutine, hl, kl, _, h) ->
       check_coroutines_enabled is_coroutine env p;
       List.iter hl (hint env);
+      List.iter kl (function
+        | None -> ()
+        | Some Ast.Pinout -> require_inout_params_enabled env p; ()
+      );
       hint env h;
       ()
   | Happly ((_, x), hl) as h when Env.is_typedef x ->
@@ -758,7 +762,7 @@ and check_no_class_tparams class_tparams (pos, ty)  =
         check_tparams ty
     | Htuple tyl -> List.iter tyl check_tparams
     | Hoption ty_ -> check_tparams ty_
-    | Hfun (_, tyl, _, ty_) ->
+    | Hfun (_, tyl, _, _, ty_) ->
         List.iter tyl check_tparams;
         check_tparams ty_
     | Happly (_, tyl) -> List.iter tyl check_tparams
@@ -858,9 +862,8 @@ and inout_params_enabled env =
     TypecheckerOptions.experimental_inout_params
 
 and require_inout_params_enabled env p =
-  let enabled = inout_params_enabled env in
-  if not enabled then Errors.experimental_feature p "inout parameters";
-  enabled
+  if not (inout_params_enabled env)
+  then Errors.experimental_feature p "inout parameters"
 
 and fun_param env (_, name) f_type byref param =
   maybe hint env param.param_hint;
@@ -869,13 +872,12 @@ and fun_param env (_, name) f_type byref param =
   | None -> ()
   | Some Ast.Pinout ->
     let pos = param.param_pos in
-    if require_inout_params_enabled env pos
-    then begin
-      if f_type <> Ast.FSync then Errors.inout_params_outside_of_sync pos;
-      if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
-      Option.iter byref ~f:(fun param ->
-        Errors.inout_params_mix_byref pos param.param_pos)
-    end
+    require_inout_params_enabled env pos;
+    if f_type <> Ast.FSync then Errors.inout_params_outside_of_sync pos;
+    if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
+    Option.iter byref ~f:(fun param ->
+      Errors.inout_params_mix_byref pos param.param_pos);
+    ()
 
 and stmt env = function
   | Return (p, _) when env.t_is_finally ->
@@ -1104,7 +1106,7 @@ and expr_ env p = function
       List.iter el (expr env);
       ()
   | Callconv (_, e) ->
-      let _ = require_inout_params_enabled env p in
+      require_inout_params_enabled env p;
       expr env e;
       ()
   | Shape fdm ->

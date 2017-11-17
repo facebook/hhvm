@@ -232,7 +232,8 @@ module type Syntax_S = sig
     ; parameter_default_value                            : t
     }
   type variadic_parameter =
-    { variadic_parameter_type                            : t
+    { variadic_parameter_call_convention                 : t
+    ; variadic_parameter_type                            : t
     ; variadic_parameter_ellipsis                        : t
     }
   type attribute_specification =
@@ -861,11 +862,15 @@ module type Syntax_S = sig
     ; closure_coroutine                                  : t
     ; closure_function_keyword                           : t
     ; closure_inner_left_paren                           : t
-    ; closure_parameter_types                            : t
+    ; closure_parameter_list                             : t
     ; closure_inner_right_paren                          : t
     ; closure_colon                                      : t
     ; closure_return_type                                : t
     ; closure_outer_right_paren                          : t
+    }
+  type closure_parameter_type_specifier =
+    { closure_parameter_call_convention                  : t
+    ; closure_parameter_type                             : t
     }
   type classname_type_specifier =
     { classname_keyword                                  : t
@@ -1085,6 +1090,7 @@ module type Syntax_S = sig
   | MapArrayTypeSpecifier                   of map_array_type_specifier
   | DictionaryTypeSpecifier                 of dictionary_type_specifier
   | ClosureTypeSpecifier                    of closure_type_specifier
+  | ClosureParameterTypeSpecifier           of closure_parameter_type_specifier
   | ClassnameTypeSpecifier                  of classname_type_specifier
   | FieldSpecifier                          of field_specifier
   | FieldInitializer                        of field_initializer
@@ -1151,7 +1157,7 @@ module type Syntax_S = sig
   val make_type_const_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_decorated_expression : t -> t -> t
   val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t
-  val make_variadic_parameter : t -> t -> t
+  val make_variadic_parameter : t -> t -> t -> t
   val make_attribute_specification : t -> t -> t -> t
   val make_attribute : t -> t -> t -> t -> t
   val make_inclusion_expression : t -> t -> t
@@ -1258,6 +1264,7 @@ module type Syntax_S = sig
   val make_map_array_type_specifier : t -> t -> t -> t -> t -> t -> t
   val make_dictionary_type_specifier : t -> t -> t -> t -> t
   val make_closure_type_specifier : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_closure_parameter_type_specifier : t -> t -> t
   val make_classname_type_specifier : t -> t -> t -> t -> t -> t
   val make_field_specifier : t -> t -> t -> t -> t
   val make_field_initializer : t -> t -> t -> t
@@ -1419,6 +1426,7 @@ module type Syntax_S = sig
   val is_map_array_type_specifier : t -> bool
   val is_dictionary_type_specifier : t -> bool
   val is_closure_type_specifier : t -> bool
+  val is_closure_parameter_type_specifier : t -> bool
   val is_classname_type_specifier : t -> bool
   val is_field_specifier : t -> bool
   val is_field_initializer : t -> bool

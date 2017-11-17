@@ -159,6 +159,7 @@ class virtual ['b] iter :
         on_Hfun : 'c ->
                   Ast_visitors_ancestors.is_coroutine ->
                   Ast_visitors_ancestors.hint list ->
+                  Ast_visitors_ancestors.param_kind option list ->
                   Ast_visitors_ancestors.variadic_hint ->
                   Ast_visitors_ancestors.hint -> unit;
         on_Hoption : 'c -> Ast_visitors_ancestors.hint -> unit;
@@ -552,6 +553,7 @@ class virtual ['b] iter :
       'c ->
       Ast_visitors_ancestors.is_coroutine ->
       Ast_visitors_ancestors.hint list ->
+      Ast_visitors_ancestors.param_kind option list ->
       Ast_visitors_ancestors.variadic_hint ->
       Ast_visitors_ancestors.hint -> unit
     method on_Hoption : 'c -> Ast_visitors_ancestors.hint -> unit

@@ -469,6 +469,19 @@ let mpShapeField : ('a, shape_field) metaparser =
         (* Shape expressions can never have optional fields. *)
         { sf_optional = false; sf_name; sf_hint }
 
+let mpClosureParameter : ('a, hint * param_kind option) metaparser =
+  fun hintParser node env ->
+    match syntax node with
+    | ClosureParameterTypeSpecifier
+      { closure_parameter_call_convention
+      ; closure_parameter_type
+      } ->
+        let cp_kind =
+          mpOptional pParamKind closure_parameter_call_convention env in
+        let cp_hint = hintParser closure_parameter_type env in
+        cp_hint, cp_kind
+    | _ -> missing_syntax "closure parameter" node env
+
 let rec pHint : hint parser = fun node env ->
   let rec pHint_ : hint_ parser = fun node env ->
     match syntax node with
@@ -533,7 +546,7 @@ let rec pHint : hint parser = fun node env ->
     | SoftTypeSpecifier { soft_type; _ } ->
       Hsoft (pHint soft_type env)
     | ClosureTypeSpecifier {
-        closure_parameter_types;
+        closure_parameter_list;
         closure_return_type;
         closure_coroutine; _} ->
       let make_variadic_hint variadic_type =
@@ -541,13 +554,13 @@ let rec pHint : hint parser = fun node env ->
         then Hvariadic (None)
         else Hvariadic (Some (pHint variadic_type env))
       in
-      let (param_type_hints, variadic_hints) =
+      let (param_list, variadic_hints) =
         List.partition_map ~f:(fun x ->
           match syntax x with
           | VariadicParameter { variadic_parameter_type = vtype; _ } ->
             `Snd (make_variadic_hint vtype)
-          | _ -> `Fst (pHint x env))
-        (as_list closure_parameter_types)
+          | _ -> `Fst (mpClosureParameter pHint x env))
+        (as_list closure_parameter_list)
       in
       let hd_variadic_hint hints =
         if List.length hints > 1 then begin
@@ -563,9 +576,12 @@ let rec pHint : hint parser = fun node env ->
         | None -> Hnon_variadic
       in
       let is_coroutine = not (is_missing closure_coroutine) in
+      let param_type_hints = List.map param_list fst in
+      let param_callconvs = List.map param_list snd in
       Hfun
       ( is_coroutine
       , param_type_hints
+      , param_callconvs
       , hd_variadic_hint variadic_hints
       , pHint closure_return_type env
       )

@@ -1260,18 +1260,18 @@ and hint_list_remain env =
 (* function(_): _ *)
 and hint_function env start ~is_coroutine =
   expect env Tlp;
-  let params, variadic_hint = hint_function_params env in
+  let params, kinds, variadic_hint = hint_function_params env in
   let ret = hint_return env in
-  Pos.btw start (fst ret), Hfun (is_coroutine, params, variadic_hint, ret)
+  Pos.btw start (fst ret), Hfun (is_coroutine, params, kinds, variadic_hint, ret)
 
 (* (parameter_1, .., parameter_n) *)
 and hint_function_params env =
   match L.token env.file env.lb with
   | Trp ->
-      ([], Hnon_variadic)
+      ([], [], Hnon_variadic)
   | Tellipsis ->
       hint_function_params_close env;
-      ([], Hvariadic None)
+      ([], [], Hvariadic None)
   | _ ->
       L.back env.lb;
       hint_function_params_remain env
@@ -1290,22 +1290,26 @@ and hint_function_params_close env =
 (* _, parameter_list | _) | ...) | ...,) *)
 and hint_function_params_remain env =
   let error_state = !(env.errors) in
+  let k = parameter_call_modifier env in
   let h = hint env in
   match L.token env.file env.lb with
   | Tcomma ->
       if !(env.errors) != error_state
-      then ([h], Hnon_variadic)
+      then ([h], [k], Hnon_variadic)
       else
-        let hl, variadic_hint = hint_function_params env in
-        (h :: hl, variadic_hint)
+        let hl, kl, variadic_hint = hint_function_params env in
+        (h :: hl, k :: kl, variadic_hint)
   | Trp ->
-      ([h], Hnon_variadic)
+      ([h], [k], Hnon_variadic)
   | Tellipsis ->
+      Option.iter k ~f:(fun pk ->
+        error env (Printf.sprintf "A variadic parameter cannot be marked %s."
+          (string_of_param_kind pk)));
       hint_function_params_close env;
-      ([], Hvariadic (Some h))
+      ([], [], Hvariadic (Some h))
   | _ ->
       error_expect env ")";
-      ([h], Hnon_variadic)
+      ([h], [k], Hnon_variadic)
 
 and xhp_enum_decl_list env =
   match L.token env.file env.lb with

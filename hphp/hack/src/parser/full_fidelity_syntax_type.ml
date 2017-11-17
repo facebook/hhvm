@@ -286,7 +286,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; parameter_default_value                            : t
     }
   and variadic_parameter =
-    { variadic_parameter_type                            : t
+    { variadic_parameter_call_convention                 : t
+    ; variadic_parameter_type                            : t
     ; variadic_parameter_ellipsis                        : t
     }
   and attribute_specification =
@@ -915,11 +916,15 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; closure_coroutine                                  : t
     ; closure_function_keyword                           : t
     ; closure_inner_left_paren                           : t
-    ; closure_parameter_types                            : t
+    ; closure_parameter_list                             : t
     ; closure_inner_right_paren                          : t
     ; closure_colon                                      : t
     ; closure_return_type                                : t
     ; closure_outer_right_paren                          : t
+    }
+  and closure_parameter_type_specifier =
+    { closure_parameter_call_convention                  : t
+    ; closure_parameter_type                             : t
     }
   and classname_type_specifier =
     { classname_keyword                                  : t
@@ -1138,6 +1143,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | MapArrayTypeSpecifier                   of map_array_type_specifier
   | DictionaryTypeSpecifier                 of dictionary_type_specifier
   | ClosureTypeSpecifier                    of closure_type_specifier
+  | ClosureParameterTypeSpecifier           of closure_parameter_type_specifier
   | ClassnameTypeSpecifier                  of classname_type_specifier
   | FieldSpecifier                          of field_specifier
   | FieldInitializer                        of field_initializer
@@ -1263,6 +1269,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | SpecMapArray          of map_array_type_specifier
   | SpecDictionary        of dictionary_type_specifier
   | SpecClosure           of closure_type_specifier
+  | SpecClosureParameter  of closure_parameter_type_specifier
   | SpecClassname         of classname_type_specifier
   | SpecField             of field_specifier
   | SpecShape             of shape_type_specifier
@@ -1629,7 +1636,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; parameter_default_value: simple_initializer option value
     }
   and variadic_parameter =
-    { variadic_parameter_type: simple_type_specifier option value
+    { variadic_parameter_call_convention: Token.t option value
+    ; variadic_parameter_type: simple_type_specifier option value
     ; variadic_parameter_ellipsis: Token.t value
     }
   and attribute_specification =
@@ -2258,11 +2266,15 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; closure_coroutine: Token.t option value
     ; closure_function_keyword: Token.t value
     ; closure_inner_left_paren: Token.t value
-    ; closure_parameter_types: specifier listesque value
+    ; closure_parameter_list: closure_parameter_type_specifier listesque value
     ; closure_inner_right_paren: Token.t value
     ; closure_colon: Token.t value
     ; closure_return_type: specifier value
     ; closure_outer_right_paren: Token.t value
+    }
+  and closure_parameter_type_specifier =
+    { closure_parameter_call_convention: Token.t option value
+    ; closure_parameter_type: specifier value
     }
   and classname_type_specifier =
     { classname_keyword: Token.t value

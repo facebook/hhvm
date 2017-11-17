@@ -12,6 +12,8 @@ function h(mixed $m, inout bool &$res): void {} // ERROR
 
 function q(inout $x): void {} // ERROR
 
+function v((function(inout mixed ...): void) $f): void {} // ERROR
+
 function z(inout vec<int> $v): void {
   $v[] = 42;
 } // no error

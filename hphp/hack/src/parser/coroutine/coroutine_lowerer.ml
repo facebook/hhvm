@@ -50,22 +50,23 @@ open Coroutine_type_lowerer
  *)
 let rewrite_coroutine_annotation
     ({
-      closure_parameter_types;
+      closure_parameter_list;
       closure_return_type;
       _;
     } as original_type) =
   let new_return_type =
     CoroutineTypeLowerer.rewrite_return_type closure_return_type in
-  let continuation_type = make_continuation_type_syntax new_return_type in
-  let new_parameter_types = prepend_to_comma_delimited_syntax_list
-    continuation_type closure_parameter_types in
+  let continuation_parameter =
+    make_continuation_closure_parameter_syntax new_return_type in
+  let new_parameter_list = prepend_to_comma_delimited_syntax_list
+    continuation_parameter closure_parameter_list in
   let coroutine_return_type =
     make_coroutine_result_type_syntax new_return_type in
   make_syntax (
     ClosureTypeSpecifier {
       original_type with
         closure_coroutine = make_missing ();
-        closure_parameter_types = new_parameter_types;
+        closure_parameter_list = new_parameter_list;
         closure_return_type = coroutine_return_type;
     }
   )

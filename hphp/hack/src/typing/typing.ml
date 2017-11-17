@@ -1930,29 +1930,29 @@ and expr_
       let env, expected = expand_expected env expected in
       begin match expected with
       | Some (_pos, _ur, (_, Tfun expected_ft)) when contextual_inference ->
-        (* Use declared types for p[arameters in preference to those determined
+        (* Use declared types for parameters in preference to those determined
          * by the context: they might be more general. *)
         let rec replace_non_declared_types params declared_ft_params expected_ft_params =
         match params, declared_ft_params, expected_ft_params with
         | param::params, declared_ft_param::declared_ft_params,
             expected_ft_param::expected_ft_params ->
           let rest = replace_non_declared_types params declared_ft_params expected_ft_params in
-          (if Option.is_some param.param_hint
-            then declared_ft_param else expected_ft_param) :: rest
+          let resolved_ft_param = if Option.is_some param.param_hint
+            then declared_ft_param
+            else { declared_ft_param with fp_type = expected_ft_param.fp_type } in
+          resolved_ft_param :: rest
         | _, _, _ ->
           declared_ft_params
         in
         let expected_ft = { expected_ft with ft_params =
           replace_non_declared_types f.f_params declared_ft.ft_params expected_ft.ft_params } in
-        begin
-          (* Don't bother passing in `void` if there is no explicit return *)
-          let ret_ty =
-            match expected_ft.ft_ret with
-            | _, Tprim Tvoid when not is_explicit_ret -> None
-            | _ -> Some expected_ft.ft_ret in
-          Measure.sample "Lambda [contextual params]" 1.0;
-          check_body_under_known_params ?ret_ty expected_ft
-        end
+        (* Don't bother passing in `void` if there is no explicit return *)
+        let ret_ty =
+          match expected_ft.ft_ret with
+          | _, Tprim Tvoid when not is_explicit_ret -> None
+          | _ -> Some expected_ft.ft_ret in
+        Measure.sample "Lambda [contextual params]" 1.0;
+        check_body_under_known_params ?ret_ty expected_ft
       | _ ->
         (* If all parameters are annotated with explicit types, then type-check
          * the body under those assumptions and pick up the result type *)
@@ -2172,7 +2172,10 @@ and anon_make tenv p f ft idl =
         let env = List.fold_left ~f:anon_bind_opt_param ~init:env !params in
         let env = List.fold_left ~f:anon_check_param ~init:env f.f_params in
         let env = match el with
-          | None -> env
+          | None ->
+            iter2_shortest (Unify.unify_param_modes ~safe_pass_by_ref)
+              ft.ft_params supplied_params;
+            env
           | Some x ->
             iter2_shortest (param_modes ~safe_pass_by_ref) ft.ft_params x;
             wfold_left2 inout_write_back env ft.ft_params x in

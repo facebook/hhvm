@@ -756,17 +756,30 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     Printf.printf "%s\n" (filter_output (Nast.show_program nast))
   | Dump_tast ->
     let tast_tenv = get_tast_tenv opts.tcopt filename files_info in
-    let type_to_string tenv (_, ty) = match ty with
-      | None -> "None"
-      | Some ty -> "(Some " ^ Typing_print.full tenv ty ^ ")" in
-    let program = List.map tast_tenv
-      (fun (def, tenv) -> TASTStringMapper.map_def (type_to_string tenv) (fun x -> x) def) in
-    Printf.printf "%s\n" (filter_output (StringNAST.show_program program))
+    let tast = List.map tast_tenv fst in
+    let env = Typing_env.empty opts.tcopt filename ~droot:None in
+    let stringify_types =
+      TASTStringMapper.map_program
+        ~map_env_annotation:(fun _ -> ())
+        ~map_expr_annotation:begin fun saved_env (_, ty) ->
+          let env = Tast_expand.restore_saved_env env saved_env in
+          match ty with
+          | None -> "None"
+          | Some ty -> "(Some " ^ Typing_print.full env ty ^ ")"
+        end
+    in
+    let string_ast = stringify_types tast in
+    Printf.printf "%s\n" (filter_output (StringNAST.show_program string_ast))
   | Dump_stripped_tast ->
     let tast_tenv = get_tast_tenv opts.tcopt filename files_info in
-    let program = List.map tast_tenv fst in
-    let program = TASTTypeStripper.map_program fst (fun _ -> ()) program in
-    Printf.printf "%s\n" (filter_output (Nast.show_program program))
+    let tast = List.map tast_tenv fst in
+    let strip_types =
+      TASTTypeStripper.map_program
+        ~map_env_annotation:(fun _ -> ())
+        ~map_expr_annotation:(fun _ (p, _) -> p)
+    in
+    let nast = strip_types tast in
+    Printf.printf "%s\n" (filter_output (Nast.show_program nast))
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;
     let genv = ServerEnvBuild.default_genv in

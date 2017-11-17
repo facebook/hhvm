@@ -11,6 +11,14 @@
 open Typing_defs
 module T = Tast
 
+module ExpandedTypeAnnotations = struct
+  module ExprAnnotation = T.Annotations.ExprAnnotation
+  module EnvAnnotation = Nast.UnitAnnotation
+end
+
+module ExpandedTypeAnnotatedAST = Nast.AnnotatedAST(ExpandedTypeAnnotations)
+module ETast = ExpandedTypeAnnotatedAST
+
 (* Eliminate residue of type inference:
  *   1. Tvars are replaced (deep) by the expanded type
  *   2. Tanon is replaced by a Tfun function type
@@ -93,8 +101,21 @@ let expand_ty env ty =
 let expand_annotation env (pos, tyopt) =
   (pos, Option.map tyopt (expand_ty env))
 
+let restore_saved_env env saved_env =
+  let module Env = Typing_env in
+  {env with
+    Env.tenv = IMap.union saved_env.Tast.tenv env.Env.tenv;
+    Env.subst = IMap.union saved_env.Tast.subst env.Env.subst;
+  }
+
 module ExpandAST =
-  Aast_mapper.MapAnnotatedAST(Tast.Annotations)(Tast.Annotations)
+  Aast_mapper.MapAnnotatedAST(Tast.Annotations)(ExpandedTypeAnnotations)
 
 (* Replace all types in a program AST by their expansions *)
-let expand_program env = ExpandAST.map_program (expand_annotation env) (fun x -> x)
+let expand_program env =
+  ExpandAST.map_program
+    ~map_env_annotation:(fun _ -> ())
+    ~map_expr_annotation:begin fun saved_env annotation ->
+      let env = restore_saved_env env saved_env in
+      expand_annotation env annotation
+    end

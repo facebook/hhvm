@@ -99,7 +99,7 @@
                (AnnotatedAST.NamedBody
                   { AnnotatedAST.fnb_nast =
                     [(AnnotatedAST.Expr
-                        ((Some \Vector<_>),
+                        ((Some \Vector<T>),
                          (AnnotatedAST.Binop ((Eq None),
                             ((Some \Vector<T>),
                              (AnnotatedAST.Obj_get (
@@ -107,7 +107,7 @@
                                 (None,
                                  (AnnotatedAST.Id (<p>, "x"))),
                                 OG_nullthrows))),
-                            ((Some \Vector<_>),
+                            ((Some \Vector<T>),
                              (AnnotatedAST.ValCollection (<vc_kind>, [])))
                             ))))
                       ];
@@ -135,7 +135,7 @@
           (AnnotatedAST.NamedBody
              { AnnotatedAST.fnb_nast =
                [(AnnotatedAST.Expr
-                   ((Some _),
+                   ((Some T),
                     (AnnotatedAST.Binop ((Eq None),
                        ((Some T),
                         (AnnotatedAST.Array_get (

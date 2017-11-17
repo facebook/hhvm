@@ -16,6 +16,12 @@
 type ty = Typing_defs.locl Typing_defs.ty
 let pp_ty fmt _ = Format.pp_print_string fmt "<type>"
 
+type saved_env = {
+  tenv : ty IMap.t;
+  subst : int IMap.t;
+}
+let pp_saved_env fmt _ = Format.pp_print_string fmt "<env>"
+
 (* Typed AST.
  * We re-use the NAST but annotate expressions with position *and*
  * type not just position. The type is optional, the idea being that *if*
@@ -44,8 +50,11 @@ module Annotations = struct
   end
 
   module EnvAnnotation = struct
-    type t = unit
-    let pp fmt _ = Format.pp_print_string fmt "()"
+    type t = saved_env
+    let pp fmt env =
+      Format.pp_print_string fmt "(Some ";
+      pp_saved_env fmt env;
+      Format.pp_print_string fmt ")"
   end
 end
 

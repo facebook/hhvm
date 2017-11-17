@@ -148,6 +148,10 @@ let try_over_concrete_supertypes env ty f =
           (fun _ -> iter_over_types env resl tyl) in
   iter_over_types env [] tyl
 
+let save_env env =
+  T.{tenv = env.Env.tenv; subst = env.Env.subst}
+
+
 (*****************************************************************************)
 (* Handling function/method arguments *)
 (*****************************************************************************)
@@ -476,7 +480,7 @@ and fun_def tcopt f =
         | Some hint -> async_suggest_return (f.f_fun_kind) hint pos
       end;
       {
-        T.f_annotation = ();
+        T.f_annotation = save_env env;
         T.f_mode = f.f_mode;
         T.f_ret = f.f_ret;
         T.f_name = f.f_name;
@@ -2208,7 +2212,7 @@ and anon_make tenv p f ft idl =
         in
         is_typing_self := false;
         let tfun_ = {
-          T.f_annotation = ();
+          T.f_annotation = save_env env;
           T.f_mode = f.f_mode;
           T.f_ret = f.f_ret;
           T.f_name = f.f_name;
@@ -5398,7 +5402,7 @@ and class_def_ env c tc =
   let typed_static_methods = List.map c.c_static_methods (method_def env) in
   Typing_hooks.dispatch_exit_class_def_hook c tc;
   {
-    T.c_annotation = ();
+    T.c_annotation = save_env env;
     T.c_mode = c.c_mode;
     T.c_final = c.c_final;
     T.c_is_xhp = c.c_is_xhp;
@@ -5684,7 +5688,7 @@ and method_def env m =
   let m = { m with m_ret = m_ret; } in
   Typing_hooks.dispatch_exit_method_def_hook m;
   {
-    T.m_annotation = ();
+    T.m_annotation = save_env env;
     T.m_final = m.m_final;
     T.m_abstract = m.m_abstract;
     T.m_visibility = m.m_visibility;
@@ -5745,7 +5749,7 @@ and typedef_def tcopt typedef  =
     | _ -> env
   end in
   {
-    T.t_annotation = ();
+    T.t_annotation = save_env env;
     T.t_name = typedef.t_name;
     T.t_mode = typedef.t_mode;
     T.t_vis = typedef.t_vis;
@@ -5761,7 +5765,7 @@ and gconst_def cst tcopt =
   let dep = Typing_deps.Dep.GConst (snd cst.cst_name) in
   let env = Typing_env.empty tcopt filename (Some dep) in
   let env = Typing_env.set_mode env cst.cst_mode in
-  let typed_cst_value, tenv =
+  let typed_cst_value, env =
     match cst.cst_value with
     | None -> None, env
     | Some value ->
@@ -5774,13 +5778,13 @@ and gconst_def cst tcopt =
         Some te, env
       | None -> Some te, env
   in
-  { T.cst_annotation = ();
+  { T.cst_annotation = save_env env;
     T.cst_mode = cst.cst_mode;
     T.cst_name = cst.cst_name;
     T.cst_type = cst.cst_type;
     T.cst_value = typed_cst_value;
     T.cst_is_define = cst.cst_is_define;
-  }, tenv
+  }, env
 
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)

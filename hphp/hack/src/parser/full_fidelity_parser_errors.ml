@@ -1764,6 +1764,134 @@ let namespace_use_declaration_errors node is_hack is_global_namespace names erro
     List.fold_left f (names, errors) (syntax_to_list_no_separators clauses)
   | _ -> names, errors
 
+let rec check_constant_expression errors node =
+  match syntax node with
+  | Missing
+  | QualifiedNameExpression _
+  | LiteralExpression _
+  | Token { PositionedToken.kind = (TokenKind.QualifiedName | TokenKind.Name); _ } ->
+    errors
+  | PrefixUnaryExpression {
+      prefix_unary_operand;
+      prefix_unary_operator = {
+        syntax = Token {
+          PositionedToken.kind = (
+            TokenKind.Exclamation | TokenKind.Plus | TokenKind.Minus |
+            TokenKind.Tilde
+          ); _
+        }; _
+      }
+    } ->
+    let errors = check_constant_expression errors prefix_unary_operand in
+    errors
+
+  | BinaryExpression {
+      binary_left_operand;
+      binary_right_operand;
+      binary_operator = {
+        syntax = Token {
+          PositionedToken.kind = (
+            TokenKind.BarBar | TokenKind.AmpersandAmpersand | TokenKind.Carat |
+            TokenKind.And | TokenKind.Or | TokenKind.Xor | TokenKind.Bar |
+            TokenKind.Ampersand | TokenKind.Dot | TokenKind.Plus |
+            TokenKind.Minus | TokenKind.Star | TokenKind.Slash | TokenKind.Percent |
+            TokenKind.LessThanLessThan | TokenKind.GreaterThanGreaterThan |
+            TokenKind.StarStar | TokenKind.EqualEqual | TokenKind.EqualEqualEqual |
+            TokenKind.ExclamationEqual | TokenKind.ExclamationEqualEqual |
+            TokenKind.GreaterThan | TokenKind.GreaterThanEqual |
+            TokenKind.LessThan | TokenKind.LessThanEqual |
+            TokenKind.LessThanEqualGreaterThan
+          ); _
+        }; _
+      }
+    } ->
+    let errors = check_constant_expression errors binary_left_operand in
+    let errors = check_constant_expression errors binary_right_operand in
+    errors
+  | ConditionalExpression {
+      conditional_test;
+      conditional_consequence;
+      conditional_alternative; _
+    } ->
+    let errors = check_constant_expression errors conditional_test in
+    let errors = check_constant_expression errors conditional_consequence in
+    let errors = check_constant_expression errors conditional_alternative in
+    errors
+  | SimpleInitializer { simple_initializer_value = e; _ }
+  | ParenthesizedExpression { parenthesized_expression_expression = e; _} ->
+    check_constant_expression errors e
+  | CollectionLiteralExpression {
+      collection_literal_name = {
+        syntax = (
+          SimpleTypeSpecifier {
+            simple_type_specifier = {
+              syntax = Token {
+                PositionedToken.kind = (TokenKind.QualifiedName | TokenKind.Name); _
+              }; _
+            }
+          } |
+          GenericTypeSpecifier {
+            generic_class_type = {
+              syntax = Token {
+                PositionedToken.kind = (TokenKind.QualifiedName | TokenKind.Name); _
+              }; _
+            }; _
+          }); _
+      };
+      collection_literal_initializers = lst; _
+    }
+  | TupleExpression { tuple_expression_items = lst; _ }
+  | KeysetIntrinsicExpression { keyset_intrinsic_members = lst; _}
+  | VarrayIntrinsicExpression { varray_intrinsic_members = lst; _ }
+  | DarrayIntrinsicExpression { darray_intrinsic_members = lst; _ }
+  | VectorIntrinsicExpression { vector_intrinsic_members = lst; _ }
+  | DictionaryIntrinsicExpression { dictionary_intrinsic_members = lst; _}
+  | ArrayIntrinsicExpression { array_intrinsic_members = lst; _}
+  | ArrayCreationExpression { array_creation_members = lst; _ }
+  | ShapeExpression { shape_expression_fields = lst; _ } ->
+    syntax_to_list_no_separators lst
+    |> Core_list.fold_left ~init:errors ~f:check_constant_expression
+  | ElementInitializer { element_key = n; element_value = v; _ }
+  | FieldInitializer { field_initializer_name = n; field_initializer_value = v; _ } ->
+    let errors = check_constant_expression errors n in
+    let errors = check_constant_expression errors v in
+    errors
+  | ScopeResolutionExpression {
+      scope_resolution_qualifier = {
+        syntax = QualifiedNameExpression _ | Token {
+           PositionedToken.kind = (
+             TokenKind.QualifiedName | TokenKind.Name | TokenKind.Self |
+             TokenKind.Parent | TokenKind.Static); _
+        }; _
+      };
+      scope_resolution_name = {
+        syntax = QualifiedNameExpression _ | Token {
+           PositionedToken.kind = (
+             TokenKind.QualifiedName | TokenKind.Name |
+             TokenKind.Trait | TokenKind.Extends | TokenKind.Implements |
+             TokenKind.Static | TokenKind.Abstract | TokenKind.Final |
+             TokenKind.Private | TokenKind.Protected | TokenKind.Public |
+             TokenKind.Or | TokenKind.And | TokenKind.Global | TokenKind.Goto |
+             TokenKind.Instanceof | TokenKind.Insteadof | TokenKind.Interface |
+             TokenKind.Namespace | TokenKind.New | TokenKind.Try | TokenKind.Use |
+             TokenKind.Var | TokenKind.List | TokenKind.Clone |
+             TokenKind.Include | TokenKind.Include_once | TokenKind.Throw |
+             TokenKind.Array | TokenKind.Tuple | TokenKind.Print | TokenKind.Echo |
+             TokenKind.Require | TokenKind.Require_once | TokenKind.Return |
+             TokenKind.Else | TokenKind.Elseif | TokenKind.Default | TokenKind.Break |
+             TokenKind.Continue | TokenKind.Switch | TokenKind.Yield |
+             TokenKind.Function | TokenKind.If | TokenKind.Finally |
+             TokenKind.For | TokenKind.Foreach | TokenKind.Case |
+             TokenKind.Do | TokenKind.While | TokenKind.As | TokenKind.Catch |
+             TokenKind.Empty | TokenKind.Using | TokenKind.Class
+             ); _
+        }; _
+      }; _
+    } ->
+    errors
+  | _ ->
+    (make_error_from_node node SyntaxError.invalid_constant_initializer) :: errors
+
 let const_decl_errors node parents hhvm_compat_mode names errors =
   match syntax node with
   | ConstantDeclarator cd ->
@@ -1777,6 +1905,8 @@ let const_decl_errors node parents hhvm_compat_mode names errors =
     let errors =
       produce_error errors is_global_in_const_decl cd.constant_declarator_initializer
       SyntaxError.global_in_const_decl cd.constant_declarator_initializer in
+    let errors =
+      check_constant_expression errors cd.constant_declarator_initializer in
     let constant_name = text cd.constant_declarator_name in
     let location = make_location_of_node cd.constant_declarator_name in
     let names = {

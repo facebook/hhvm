@@ -334,3 +334,5 @@ let fn_with_inout_and_ref_params =
   "Functions may not use both reference and inout parameters"
 let method_calls_on_xhp_attributes =
   "Method calls are not allowed on XHP attributes"
+let invalid_constant_initializer =
+  "Invalid expression in constant initializer"

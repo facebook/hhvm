@@ -87,6 +87,8 @@ struct CompactVector {
   void pop_back();
   void erase(iterator);
   void erase(iterator, iterator);
+  iterator insert(iterator p, const T& v) { return insert_impl(p, v); }
+  iterator insert(iterator p, T&& v) { return insert_impl(p, std::move(v)); };
   void resize(size_type sz);
   void resize(size_type sz, const value_type& value);
   void shrink_to_fit();
@@ -105,7 +107,8 @@ private:
     uint32_t m_capacity;
   };
 
-
+  template <class U>
+  iterator insert_impl(iterator, U&&);
   void assign(const CompactVector& other);
   void grow();
   T* get(size_type index) const;
@@ -362,6 +365,29 @@ void CompactVector<T>::reserve_impl(size_type new_capacity) {
 template <typename T>
 void CompactVector<T>::reserve(size_type new_capacity) {
   if (new_capacity > capacity()) reserve_impl(new_capacity);
+}
+
+template <typename T>
+template <typename U>
+typename CompactVector<T>::iterator
+CompactVector<T>::insert_impl(iterator before, U&& val) {
+  auto const sz = size();
+  assert(sz <= capacity());
+  if (sz == capacity()) {
+    auto const pos = sz ? before - elems() : 0;
+    assert(pos <= sz);
+    grow();
+    before = elems() + pos;
+  }
+  ++(m_data->m_len);
+
+  auto e = end();
+  while (--e != before) {
+    new (e) T(std::move(e[-1]));
+    e[-1].~T();
+  }
+  new (e) T(std::forward<U>(val));
+  return e;
 }
 
 template <typename T>

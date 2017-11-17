@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/url-file.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
@@ -34,7 +33,6 @@ const StaticString
   s_GET("GET"),
   s_method("method"),
   s_http("http"),
-  s_header("header"),
   s_ignore_errors("ignore_errors"),
   s_max_redirects("max_redirects"),
   s_timeout("timeout"),
@@ -71,21 +69,6 @@ req::ptr<File> HttpStreamWrapper::open(const String& filename,
     Array opts = context->getOptions()[s_http].toArray();
     if (opts.exists(s_method)) {
       method = opts[s_method].toString();
-    }
-    if (opts.exists(s_header)) {
-      Array lines;
-      if (opts[s_header].isString()) {
-        lines = StringUtil::Explode(
-          opts[s_header].toString(), "\r\n").toArray();
-      } else if (opts[s_header].isArray()) {
-        lines = opts[s_header];
-      }
-
-      for (ArrayIter it(lines); it; ++it) {
-        Array parts = StringUtil::Explode(
-          it.second().toString(), ":", 2).toArray();
-        headers.set(parts.rvalAt(0).unboxed().tv(), parts.rvalAt(1).tv());
-      }
     }
     if (opts.exists(s_user_agent) && !headers.exists(s_User_Agent)) {
       headers.set(s_User_Agent, opts[s_user_agent]);

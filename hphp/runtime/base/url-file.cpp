@@ -89,10 +89,8 @@ bool UrlFile::open(const String& input_url, const String& mode) {
     http.proxy(m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
   }
 
-  HeaderMap *pHeaders = nullptr;
-  HeaderMap requestHeaders;
+  HeaderMap requestHeaders = http.streamContextHttpHeader();
   if (!m_headers.empty()) {
-    pHeaders = &requestHeaders;
     for (ArrayIter iter(m_headers); iter; ++iter) {
       requestHeaders[std::string(iter.first().toString().data())].
         push_back(iter.second().toString().data());
@@ -114,11 +112,11 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   int code;
   req::vector<String> responseHeaders;
   if (m_get) {
-    code = http.get(url.c_str(), m_response, pHeaders, &responseHeaders);
+    code = http.get(url.c_str(), m_response, &requestHeaders, &responseHeaders);
   } else {
     code = http.request(m_method,
                         url.c_str(), m_postData.data(), m_postData.size(),
-                        m_response, pHeaders, &responseHeaders);
+                        m_response, &requestHeaders, &responseHeaders);
   }
 
   m_responseHeaders.reset();

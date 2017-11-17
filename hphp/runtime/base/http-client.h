@@ -49,6 +49,12 @@ struct HttpClient {
   void setStreamContextOptions(const Array &opts) {
     m_stream_context_options = opts;
   }
+
+  /**
+   * Get StreamContext http header map.
+   */
+  HeaderMap streamContextHttpHeader();
+
   /**
    * require SLS/TLS
    * (default) CURLUSESSL_NONE, CURLUSESSL_TRY, CURLUSESSL_CONTROL,

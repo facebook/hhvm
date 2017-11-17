@@ -149,7 +149,7 @@ namespace {
  * 'usedTraits'.  Return an estimate of the method count of all used traits.
  */
 unsigned loadUsedTraits(PreClass* preClass,
-                        std::vector<ClassPtr>& usedTraits) {
+                        CompactVector<ClassPtr>& usedTraits) {
   unsigned methodCount = 0;
 
   auto const traitsFlattened = !!(preClass->attrs() & AttrNoExpandTrait);
@@ -239,7 +239,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto funcVecLen = (parent != nullptr ? parent->m_methods.size() : 0)
     + preClass->numMethods();
 
-  std::vector<ClassPtr> usedTraits;
+  CompactVector<ClassPtr> usedTraits;
   auto numTraitMethodsEstimate = loadUsedTraits(preClass, usedTraits);
   funcVecLen += numTraitMethodsEstimate;
 
@@ -636,7 +636,7 @@ Class::Avail Class::avail(Class*& parent,
     }
   } else {
     for (size_t i = 0, n = m_extra->m_usedTraits.size(); i < n; ++i) {
-      auto usedTrait = m_extra->m_usedTraits.at(i).get();
+      auto usedTrait = m_extra->m_usedTraits[i].get();
       const StringData* usedTraitName = m_preClass.get()->usedTraits()[i];
       PreClass* ptrait = usedTrait->m_preClass.get();
       Class* trait = Unit::getClass(ptrait->namedEntity(), usedTraitName,
@@ -1702,7 +1702,7 @@ void checkDeclarationCompat(const PreClass* preClass,
 } // namespace
 
 Class::Class(PreClass* preClass, Class* parent,
-             std::vector<ClassPtr>&& usedTraits,
+             CompactVector<ClassPtr>&& usedTraits,
              unsigned classVecLen, unsigned funcVecLen)
 #ifdef DEBUG
   : m_magic{kMagic}

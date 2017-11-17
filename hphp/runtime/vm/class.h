@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/trait-method-import-data.h"
 
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/default-ptr.h"
 #include "hphp/util/hash-map-typedefs.h"
 
@@ -869,7 +870,7 @@ public:
    * In RepoAuthoritative mode, we flatten all traits into their users in the
    * compile phase, which leaves m_usedTraits empty as a result.
    */
-  const std::vector<ClassPtr>& usedTraitClasses() const;
+  const CompactVector<ClassPtr>& usedTraitClasses() const;
 
   /*
    * Trait alias rules.
@@ -1050,7 +1051,7 @@ private:
      * phase to import the contents of traits.  As a result, m_usedTraits is
      * always empty.
      */
-    std::vector<ClassPtr> m_usedTraits;
+    CompactVector<ClassPtr> m_usedTraits;
 
     /*
      * Only used by reflection for method ordering.  Whenever we have no traits
@@ -1081,7 +1082,7 @@ private:
      * List of references to Closure subclasses whose scoped Class context is
      * `this'.
      */
-    std::vector<ScopedCloneBackref> m_clonesWithThisScope;
+    CompactVector<ScopedCloneBackref> m_clonesWithThisScope;
 
     /*
      * Objects with the <<__NativeData("T")>> UA are allocated with extra space
@@ -1203,7 +1204,7 @@ private:
 private:
   Class(PreClass* preClass,
         Class* parent,
-        std::vector<ClassPtr>&& usedTraits,
+        CompactVector<ClassPtr>&& usedTraits,
         unsigned classVecLen,
         unsigned funcVecLen);
   ~Class();

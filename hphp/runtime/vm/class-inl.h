@@ -356,7 +356,7 @@ inline Slot Class::traitsEndIdx() const   {
   return m_extra->m_traitsEndIdx;
 }
 
-inline const std::vector<ClassPtr>& Class::usedTraitClasses() const {
+inline const CompactVector<ClassPtr>& Class::usedTraitClasses() const {
   return m_extra->m_usedTraits;
 }
 

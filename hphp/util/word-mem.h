@@ -196,7 +196,7 @@ inline void memcpy16_inline(void* dst, const void* src, size_t len) {
 ALWAYS_INLINE
 bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {
   using T = uint64_t;
-  auto constexpr W = sizeof(T);
+  auto constexpr DEBUG_ONLY W = sizeof(T);
 
   assert(reinterpret_cast<const uintptr_t>(mem1) % W == 0);
   assert(reinterpret_cast<const uintptr_t>(mem2) % W == 0);

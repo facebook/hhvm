@@ -1369,6 +1369,19 @@ let function_call_argument_errors node errors =
       end
   | _ -> errors
 
+let function_call_on_xhp_name_errors node errors =
+  match syntax node with
+  | MemberSelectionExpression { member_name = name; _ }
+  | SafeMemberSelectionExpression { safe_member_name = name; _ } ->
+    begin match syntax name with
+    | Token { PositionedToken.kind = TokenKind.XHPClassName; _ } ->
+      let e =
+        make_error_from_node node SyntaxError.method_calls_on_xhp_attributes in
+      e :: errors
+    | _ -> errors
+    end
+  | _ -> errors
+
 let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors =
   match syntax node with
   | LiteralExpression {
@@ -1395,7 +1408,10 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
   | SubscriptExpression { subscript_left_bracket; _}
     when not hhvm_compat_mode && is_left_brace subscript_left_bracket ->
     make_error_from_node node SyntaxError.error2020 :: errors
-  | FunctionCallExpression { function_call_argument_list = arg_list; _} ->
+  | FunctionCallExpression {
+      function_call_argument_list = arg_list;
+      function_call_receiver; _
+    } ->
     let errors =
       match misplaced_variadic_arg arg_list with
       | Some h ->
@@ -1406,6 +1422,8 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     let errors = Hh_core.List.fold_right arg_list ~init:errors
       ~f:(fun p acc -> function_call_argument_errors p acc)
     in
+    let errors =
+      function_call_on_xhp_name_errors function_call_receiver errors in
     errors
   | ObjectCreationExpression oce when not hhvm_compat_mode && is_hack ->
     if is_missing oce.object_creation_left_paren &&

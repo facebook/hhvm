@@ -332,3 +332,5 @@ let memoize_with_inout =
   "<<__Memoize>> cannot be used on functions with inout parameters"
 let fn_with_inout_and_ref_params =
   "Functions may not use both reference and inout parameters"
+let method_calls_on_xhp_attributes =
+  "Method calls are not allowed on XHP attributes"

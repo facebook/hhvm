@@ -66,7 +66,6 @@ slow/inout/method-static.php
 slow/inout/out-type-hints.php
 slow/inout/side-effects.php
 slow/inout/trait-magic.php
-slow/labels/72.php
 slow/namespace/hashbang_2.php
 slow/now_doc/1906.php
 slow/object/672.php
@@ -80,7 +79,6 @@ slow/parser/hh-namespace-conflict-3.php
 slow/parser/hh-namespace-conflict-6.php
 slow/parser/php-namespace-conflict-3.php
 slow/parser/static_call_access_const_expr.php
-slow/parser/xhp-ambiguity.php
 slow/php7_backported/ns_089.php
 slow/php7_backported/ns_090.php
 slow/php7_backported/ns_092.php
@@ -94,4 +92,3 @@ slow/traits/1981.php
 slow/using/bad-goto1.php
 slow/using/bad-goto2.php
 slow/using/goto.php
-slow/xhp/attr-syntax-2.php

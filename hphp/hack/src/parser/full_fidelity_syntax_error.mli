@@ -218,3 +218,4 @@ val fun_arg_invalid_arg : string
 val fun_arg_inout_containers : string
 val memoize_with_inout : string
 val fn_with_inout_and_ref_params : string
+val method_calls_on_xhp_attributes : string

@@ -19,3 +19,16 @@ val emit_wrapper_function :
   (* Function definition in AST *)
   Ast.fun_ ->
   Hhas_function.t
+
+(* Emit wrapper function for functions with inout arguments *)
+val emit_wrapper_method :
+  (* Original identifer for function, used for the wrapper *)
+  original_id: Hhbc_id.Method.t ->
+  (* Renamed identifier, used for the wrapped function *)
+  renamed_id: Hhbc_id.Method.t ->
+  (* Whether to emit verify return instruction  *)
+  verify_ret: bool ->
+  (* Function definition in AST *)
+  Ast.class_ ->
+  Ast.method_ ->
+  Hhas_method.t

@@ -165,7 +165,7 @@ let from_attribute_declaration ~ns ast_class xal xual =
       [A.Protected; A.Static]
       body
   in
-  [Emit_method.from_ast ast_class m]
+  Emit_method.from_ast ast_class m
 
 let xhp_child_op_to_int = function
   | None -> 0
@@ -258,7 +258,7 @@ let from_children_declaration ast_class children =
       [A.Protected]
       body
   in
-  [Emit_method.from_ast ast_class m]
+  Emit_method.from_ast ast_class m
 
 let get_category_array categories =
   (* TODO: is this always 1? *)
@@ -282,4 +282,4 @@ let from_category_declaration ast_class categories =
       [A.Protected]
       body
   in
-  [Emit_method.from_ast ast_class m]
+  Emit_method.from_ast ast_class m

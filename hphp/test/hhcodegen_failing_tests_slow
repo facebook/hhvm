@@ -34,7 +34,6 @@ slow/hh_namespace_migration/hh_vector3.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/inline-hhas/mixed.php
 slow/inout/autoloader.php
-slow/inout/bad-abstract.php
 slow/inout/bad-async-generator.php
 slow/inout/bad-async.php
 slow/inout/bad-call-10.php
@@ -42,15 +41,6 @@ slow/inout/bad-call-11.php
 slow/inout/bad-call-12.php
 slow/inout/bad-call-14.php
 slow/inout/bad-call-15.php
-slow/inout/bad-interface.php
-slow/inout/bad-parent-1.php
-slow/inout/bad-parent-2.php
-slow/inout/bad-parent-3.php
-slow/inout/bad-parent-4.php
-slow/inout/bad-parent-5.php
-slow/inout/bad-parent-6.php
-slow/inout/bad-trait-1.php
-slow/inout/bad-trait-2.php
 slow/inout/builtin-interop.php
 slow/inout/call-dynamic.php
 slow/inout/call-static.php

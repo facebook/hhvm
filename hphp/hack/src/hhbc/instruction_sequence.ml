@@ -212,8 +212,8 @@ let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
 let instr_dim_define_pt key = instr_dim MemberOpMode.Define (MemberKey.PT key)
 let instr_fpushobjmethodd num_params method_ flavor =
   instr (ICall (FPushObjMethodD (num_params, method_, flavor)))
-let instr_fpushclsmethodd num_params class_name method_name =
-  instr (ICall (FPushClsMethodD (num_params, class_name, method_name)))
+let instr_fpushclsmethodd num_params method_name class_name =
+  instr (ICall (FPushClsMethodD (num_params, method_name, class_name)))
 let instr_fpushclsmethod num_params =
   instr (ICall (FPushClsMethod (num_params, class_ref_rewrite_sentinel)))
 let instr_fpushclsmethods num_params scref =

@@ -47,7 +47,7 @@ let rec hint_uses_tparams tparam_names (_, hint)  =
   | Ast.Haccess ((_, n), _, _) -> SSet.mem n tparam_names
 
 let from_ast_wrapper : bool -> _ ->
-  Ast.class_ -> Ast.method_ -> Hhas_method.t =
+  Ast.class_ -> Ast.method_ -> Hhas_method.t list =
   fun privatize make_name ast_class ast_method ->
   if not (has_valid_access_modifiers ast_method.Ast.m_kind) then
     Emit_fatal.raise_fatal_parse Pos.none
@@ -70,12 +70,21 @@ let from_ast_wrapper : bool -> _ ->
     (not method_is_private && not method_is_protected)) in
   let is_memoize =
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
+  let inout_param_locations = List.filter_mapi ast_method.Ast.m_params
+      ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout
+                     then None else Some (string_of_int i)) in
+  let has_inout_args = List.length inout_param_locations <> 0 in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   let (pos, original_name) = ast_method.Ast.m_name in
   let (_, class_name) = ast_class.Ast.c_name in
   let class_name = SU.Xhp.mangle @@ Utils.strip_ns class_name in
   let ret = ast_method.Ast.m_ret in
-  let method_id = make_name ast_method.Ast.m_name in
+  let original_method_id = make_name ast_method.Ast.m_name in
+  let renamed_method_id = if has_inout_args then
+    Hhbc_id.Method.from_ast_name @@
+      (snd ast_method.Ast.m_name)
+      ^ (Emit_inout_helpers.inout_suffix inout_param_locations)
+    else original_method_id in
   let method_is_async =
     ast_method.Ast.m_fun_kind = Ast_defs.FAsync
     || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
@@ -178,23 +187,34 @@ let from_ast_wrapper : bool -> _ ->
       ret
       [Ast.Stmt (Ast.Block ast_method.Ast.m_body)]
   in
-  Hhas_method.make
-    method_attributes
-    method_is_protected
-    method_is_public
-    method_is_private
-    method_is_static
-    method_is_final
-    method_is_abstract
-    false (*method_no_injection*)
-    false (*method_inout_wrapper*)
-    method_id
-    method_body
-    (Hhas_pos.pos_to_span ast_method.Ast.m_span)
-    method_is_async
-    method_is_generator
-    method_is_pair_generator
-    method_is_closure_body
+  let normal_function =
+    Hhas_method.make
+      method_attributes
+      method_is_protected
+      method_is_public
+      method_is_private
+      method_is_static
+      method_is_final
+      method_is_abstract
+      false (*method_no_injection*)
+      false (*method_inout_wrapper*)
+      renamed_method_id
+      method_body
+      (Hhas_pos.pos_to_span ast_method.Ast.m_span)
+      method_is_async
+      method_is_generator
+      method_is_pair_generator
+      method_is_closure_body
+  in
+  if has_inout_args
+  then [Emit_inout_function.emit_wrapper_method
+          ~original_id:original_method_id
+          ~renamed_id:renamed_method_id
+          ~verify_ret:(ast_method.Ast.m_ret <> None)
+          ast_class ast_method;
+        normal_function]
+  else [normal_function]
+
 
 let from_ast ast_class ast_method =
   let is_memoize = Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
@@ -207,4 +227,4 @@ let from_ast ast_class ast_method =
 
 
 let from_asts ast_class ast_methods =
-  List.map ast_methods (from_ast ast_class)
+  List.concat_map ast_methods ~f:(from_ast ast_class)

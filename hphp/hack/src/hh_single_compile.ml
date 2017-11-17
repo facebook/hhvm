@@ -75,6 +75,11 @@ let foreach_line_in_file str ~f =
     done
   with End_of_file -> ()
 
+let assert_regular_file filename =
+  if not (Sys.file_exists filename) ||
+    (Unix.stat filename).Unix.st_kind <> Unix.S_REG
+  then raise (Arg.Bad (filename ^ " not a valid file"))
+
 let parse_options () =
   let fn_ref = ref None in
   let fallback = ref false in
@@ -110,7 +115,9 @@ let parse_options () =
       ^ "\t\tAllows overriding config options passed on a file"
       );
       ("-c"
-      , Arg.String (fun str -> config_file := Some str)
+      , Arg.String (fun str ->
+        assert_regular_file str;
+        config_file := Some str)
       , " Config file in JSON format"
       );
       ("-o"
@@ -328,6 +335,7 @@ let compile_files_recursively compiler_options f =
     | [] -> ()
     | dir::dirs ->
       let compile_file = fun p ->
+        assert_regular_file p;
         if Filename.check_suffix p ".php" then
           let outputfile =
             let f = Filename.chop_suffix p ".php" in
@@ -359,6 +367,7 @@ let decl_and_run_mode compiler_options popt =
   if Option.is_some compiler_options.input_file_list then
     let input_file_list = Option.value compiler_options.input_file_list ~default:"" in
     foreach_line_in_file input_file_list ~f:(fun fn ->
+      assert_regular_file fn;
       let fname = Relative_path.create Relative_path.Dummy fn in
       process_single_file fname None
     )
@@ -375,6 +384,7 @@ let decl_and_run_mode compiler_options popt =
   else
     let filename =
       Relative_path.create Relative_path.Dummy compiler_options.filename in
+    assert_regular_file compiler_options.filename;
     process_single_file
       filename
       compiler_options.output_file

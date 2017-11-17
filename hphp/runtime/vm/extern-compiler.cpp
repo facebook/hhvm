@@ -18,6 +18,7 @@
 
 #include <condition_variable>
 #include <mutex>
+#include <signal.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -34,16 +35,16 @@ namespace HPHP {
 
 namespace {
 
-struct CompilerException : Exception {
-  explicit CompilerException(const std::string& what) : Exception(what) {}
+struct CompileException : Exception {
+  explicit CompileException(const std::string& what) : Exception(what) {}
   template<class... A>
-  explicit CompilerException(A&&... args)
+  explicit CompileException(A&&... args)
     : Exception(folly::sformat(std::forward<A>(args)...))
   {}
 };
 
 [[noreturn]] void throwErrno(const char* what) {
-  throw CompilerException("{}: {}", what, folly::errnoStr(errno));
+  throw CompileException("{}: {}", what, folly::errnoStr(errno));
 }
 
 struct CompilerOptions {
@@ -71,8 +72,9 @@ struct ExternCompiler {
         m_compilations > RuntimeOption::EvalHackCompilerReset) {
       stop();
     }
-
-    if (!isRunning()) start();
+    if (!isRunning()) {
+      start();
+    }
 
     std::string prog;
     std::unique_ptr<Unit> u;
@@ -88,7 +90,7 @@ struct ExternCompiler {
         false /* swallow errors */,
         callbacks
       );
-    } catch (CompilerException& ex) {
+    } catch (CompileException& ex) {
       stop();
       if (m_options.verboseErrors) {
         Logger::FError("ExternCompiler Error: {}", ex.what());
@@ -261,7 +263,7 @@ CompilerResult CompilerPool::compile(const char* code,
                                md5,
                                folly::StringPiece(code, len),
                                callbacks);
-    } catch (CompilerException& ex) {
+    } catch (CompileException& ex) {
       // Swallow and retry, we return infra errors in bulk once the retry limit
       // is exceeded.
       err << ex.what();
@@ -429,12 +431,22 @@ void ExternCompiler::start() {
     );
   }
 
-  if (m_pid == -1) throwErrno("unable to start compiler");
+  if (m_pid == -1) {
+    throw BadCompilerException(
+      folly::to<std::string>(
+        "Unable to start external compiler with command: ",
+        m_options.command));
+  }
 
   m_in = in.detach("w");
   m_out = out.detach("r");
 
-  m_version = readline(m_out);
+  try {
+    m_version = readline(m_out);
+  } catch (const CompileException& exc) {
+    throw BadCompilerException(
+      "Couldn't read version message from external compiler");
+  }
 }
 
 folly::Optional<CompilerOptions> hackcConfiguration() {

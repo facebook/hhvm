@@ -1,0 +1,4 @@
+File "using_bad_escaping_closure.php", line 11, characters 17-18:
+Variable from 'using' clause may only be used as receiver in method invocation or passed to function with <<__AcceptDisposable>> parameter attribute (Typing[4180])
+File "using_bad_escaping_closure.php", line 12, characters 30-31:
+Variable from 'using' clause may only be used as receiver in method invocation or passed to function with <<__AcceptDisposable>> parameter attribute (Typing[4180])

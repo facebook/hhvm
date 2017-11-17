@@ -860,6 +860,7 @@ let rec type_typedef_decl_if_missing tcopt typedef =
 
 and typedef_decl tdef decl_tcopt =
   let {
+    t_annotation = ();
     t_name = td_pos, tid;
     t_tparams = params;
     t_constraint = tcstr;

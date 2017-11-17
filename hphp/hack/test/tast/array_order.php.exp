@@ -1,5 +1,5 @@
 [(AnnotatedAST.Fun
-    { AnnotatedAST.f_mode = <opaque>;
+    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some (<p>, (Hprim Tvoid)));
       f_name = (<p>, "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;

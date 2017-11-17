@@ -94,7 +94,7 @@ let expand_annotation env (pos, tyopt) =
   (pos, Option.map tyopt (expand_ty env))
 
 module ExpandAST =
-  Aast_mapper.MapAnnotatedAST(Tast.AnnotationType)(Tast.AnnotationType)
+  Aast_mapper.MapAnnotatedAST(Tast.Annotations)(Tast.Annotations)
 
 (* Replace all types in a program AST by their expansions *)
-let expand_program env = ExpandAST.map_program (expand_annotation env)
+let expand_program env = ExpandAST.map_program (expand_annotation env) (fun x -> x)

@@ -144,7 +144,16 @@ module type AnnotationType = sig
   val pp : Format.formatter -> t -> unit
 end
 
-module AnnotatedAST(Annotation: AnnotationType) = struct
+module type ASTAnnotationTypes = sig
+  module ExprAnnotation : AnnotationType
+  module EnvAnnotation : AnnotationType
+end
+
+module AnnotatedAST(Annotations: ASTAnnotationTypes) =
+struct
+
+module ExprAnnotation = Annotations.ExprAnnotation
+module EnvAnnotation = Annotations.EnvAnnotation
 
 type stmt =
   | Fallthrough
@@ -187,7 +196,7 @@ and class_id =
   | CIexpr of expr
   | CI of instantiated_sid
 
-and expr = Annotation.t * expr_
+and expr = ExprAnnotation.t * expr_
 and expr_ =
   | Array of afield list
   | Darray of (expr * expr) list
@@ -300,6 +309,7 @@ and fun_variadicity = (* does function take varying number of args? *)
   | FVnonVariadic (* standard non variadic function *)
 
 and fun_ = {
+  f_annotation : EnvAnnotation.t;
   f_mode     : FileInfo.mode [@opaque];
   f_ret      : hint option;
   f_name     : sid;
@@ -343,6 +353,7 @@ and user_attribute = {
 } [@@deriving show]
 
 type class_ = {
+  c_annotation     : EnvAnnotation.t  ;
   c_mode           : FileInfo.mode [@opaque];
   c_final          : bool             ;
   c_is_xhp         : bool;
@@ -398,6 +409,7 @@ and class_var = {
 }
 
 and method_ = {
+  m_annotation      : EnvAnnotation.t     ;
   m_final           : bool                ;
   m_abstract        : bool                ;
   m_visibility      : visibility          ;
@@ -414,6 +426,7 @@ and method_ = {
 }
 
 and typedef = {
+  t_annotation : EnvAnnotation.t;
   t_name : sid;
   t_tparams : tparam list;
   t_constraint : hint option;
@@ -424,6 +437,7 @@ and typedef = {
 }
 
 and gconst = {
+  cst_annotation : EnvAnnotation.t;
   cst_mode: FileInfo.mode [@opaque];
   cst_name: sid;
   cst_type: hint option;
@@ -1102,7 +1116,14 @@ end (* of AnnotatedAST functor *)
 
 (* The NAST definitions, which we just include into this file *)
 module PosAnnotation = struct type t = Pos.t [@@deriving show] end
-module PosAnnotatedAST = AnnotatedAST(PosAnnotation)
+module UnitAnnotation = struct type t = unit [@@deriving show] end
+
+module Annotations = struct
+  module ExprAnnotation = PosAnnotation
+  module EnvAnnotation = UnitAnnotation
+end
+
+module PosAnnotatedAST = AnnotatedAST(Annotations)
 include PosAnnotatedAST
 
 (* Expecting that Naming.func_body / Naming.class_meth_bodies has been

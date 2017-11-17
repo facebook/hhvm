@@ -1,5 +1,5 @@
 [(AnnotatedAST.Fun
-    { AnnotatedAST.f_mode = <opaque>;
+    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some (<p>, (Hprim Tvoid)));
       f_name = (<p>, "\\main"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
@@ -68,8 +68,8 @@
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
   (AnnotatedAST.Class
-     { AnnotatedAST.c_mode = <opaque>; c_final = false; c_is_xhp = true;
-       c_kind = Cnormal; c_name = (<p>, "\\:foo");
+     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
+       c_is_xhp = true; c_kind = Cnormal; c_name = (<p>, "\\:foo");
        c_tparams = <opaque>; c_extends = []; c_uses = [];
        c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
        c_req_implements = []; c_implements = []; c_consts = [];

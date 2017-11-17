@@ -476,6 +476,7 @@ and fun_def tcopt f =
         | Some hint -> async_suggest_return (f.f_fun_kind) hint pos
       end;
       {
+        T.f_annotation = ();
         T.f_mode = f.f_mode;
         T.f_ret = f.f_ret;
         T.f_name = f.f_name;
@@ -2207,6 +2208,7 @@ and anon_make tenv p f ft idl =
         in
         is_typing_self := false;
         let tfun_ = {
+          T.f_annotation = ();
           T.f_mode = f.f_mode;
           T.f_ret = f.f_ret;
           T.f_name = f.f_name;
@@ -5396,6 +5398,7 @@ and class_def_ env c tc =
   let typed_static_methods = List.map c.c_static_methods (method_def env) in
   Typing_hooks.dispatch_exit_class_def_hook c tc;
   {
+    T.c_annotation = ();
     T.c_mode = c.c_mode;
     T.c_final = c.c_final;
     T.c_is_xhp = c.c_is_xhp;
@@ -5681,6 +5684,7 @@ and method_def env m =
   let m = { m with m_ret = m_ret; } in
   Typing_hooks.dispatch_exit_method_def_hook m;
   {
+    T.m_annotation = ();
     T.m_final = m.m_final;
     T.m_abstract = m.m_abstract;
     T.m_visibility = m.m_visibility;
@@ -5717,6 +5721,7 @@ and typedef_def tcopt typedef  =
   let env = add_constraints (fst typedef.t_name) env constraints in
   NastCheck.typedef env typedef;
   let {
+    t_annotation = ();
     t_name = t_pos, _;
     t_tparams = _;
     t_constraint = tcstr;
@@ -5740,6 +5745,7 @@ and typedef_def tcopt typedef  =
     | _ -> env
   end in
   {
+    T.t_annotation = ();
     T.t_name = typedef.t_name;
     T.t_mode = typedef.t_mode;
     T.t_vis = typedef.t_vis;
@@ -5768,7 +5774,8 @@ and gconst_def cst tcopt =
         Some te, env
       | None -> Some te, env
   in
-  { T.cst_mode = cst.cst_mode;
+  { T.cst_annotation = ();
+    T.cst_mode = cst.cst_mode;
     T.cst_name = cst.cst_name;
     T.cst_type = cst.cst_type;
     T.cst_value = typed_cst_value;

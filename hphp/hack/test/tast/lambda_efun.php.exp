@@ -1,5 +1,5 @@
 [(AnnotatedAST.Fun
-    { AnnotatedAST.f_mode = <opaque>;
+    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some (<p>, (Hprim Tvoid)));
       f_name = (<p>, "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
@@ -20,8 +20,8 @@
                      (AnnotatedAST.Lvar (<p>, $x))),
                     ((Some _),
                      (AnnotatedAST.Efun (
-                        { AnnotatedAST.f_mode = <opaque>; f_ret = None;
-                          f_name = ([Pos.none], ";anonymous");
+                        { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+                          f_ret = None; f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = AnnotatedAST.FVnonVariadic;
                           f_params =
@@ -73,8 +73,8 @@
                      (AnnotatedAST.Lvar (<p>, $x))),
                     ((Some _),
                      (AnnotatedAST.Efun (
-                        { AnnotatedAST.f_mode = <opaque>; f_ret = None;
-                          f_name = ([Pos.none], ";anonymous");
+                        { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+                          f_ret = None; f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = AnnotatedAST.FVnonVariadic;
                           f_params =
@@ -113,8 +113,8 @@
                      (AnnotatedAST.Lvar (<p>, $x))),
                     ((Some _),
                      (AnnotatedAST.Efun (
-                        { AnnotatedAST.f_mode = <opaque>; f_ret = None;
-                          f_name = ([Pos.none], ";anonymous");
+                        { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+                          f_ret = None; f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = AnnotatedAST.FVnonVariadic;
                           f_params =

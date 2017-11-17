@@ -1,5 +1,5 @@
 [(AnnotatedAST.Fun
-    { AnnotatedAST.f_mode = <opaque>;
+    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some (<p>, (Hprim Tvoid)));
       f_name = (<p>, "\\takes_string"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
@@ -14,7 +14,7 @@
          { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop]; fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
   (AnnotatedAST.Fun
-     { AnnotatedAST.f_mode = <opaque>;
+     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
        f_ret = (Some (<p>, (Hprim Tvoid)));
        f_name = (<p>, "\\f"); f_tparams = [];
        f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;

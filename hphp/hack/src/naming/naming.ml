@@ -1124,7 +1124,8 @@ module Make (GetLocals : GetLocals) = struct
     check_name_collision smethods;
     check_tparams_shadow class_tparam_names smethods;
     let named_class =
-      { N.c_mode           = c.c_mode;
+      { N.c_annotation     = ();
+        N.c_mode           = c.c_mode;
         N.c_final          = c.c_final;
         N.c_is_xhp         = c.c_is_xhp;
         N.c_kind           = c.c_kind;
@@ -1637,7 +1638,8 @@ module Make (GetLocals : GetLocals) = struct
         }
     ) in
     let attrs = user_attributes env m.m_user_attributes in
-    { N.m_final           = final       ;
+    { N.m_annotation      = ()          ;
+      N.m_final           = final       ;
       N.m_visibility      = vis         ;
       N.m_abstract        = abs         ;
       N.m_name            = m.Ast.m_name;
@@ -1734,7 +1736,8 @@ module Make (GetLocals : GetLocals) = struct
         }
     in
     let named_fun = {
-      N.f_mode = f.f_mode;
+      N.f_annotation = ();
+      f_mode = f.f_mode;
       f_ret = h;
       f_name = x;
       f_tparams = f_tparams;
@@ -2430,7 +2433,8 @@ module Make (GetLocals : GetLocals) = struct
       N.fnb_unsafe = unsafe;
       fnb_nast = body_nast;
     } in {
-      N.f_mode = (fst env).in_mode;
+      N.f_annotation = ();
+      f_mode = (fst env).in_mode;
       f_ret = h;
       f_name = f.f_name;
       f_params = paraml;
@@ -2610,7 +2614,8 @@ module Make (GetLocals : GetLocals) = struct
     in
     let attrs = user_attributes env tdef.t_user_attributes in
     {
-      N.t_name = tdef.t_id;
+      N.t_annotation = ();
+      t_name = tdef.t_id;
       t_tparams = tparaml;
       t_constraint = tconstraint;
       t_kind = hint env ty;
@@ -2643,7 +2648,8 @@ module Make (GetLocals : GetLocals) = struct
      * "undefined" variables that actually exist, just untracked since
      * they're toplevel. *)
     | Ast.Cst_define -> None in
-    { N.cst_mode = cst.cst_mode;
+    { N.cst_annotation = ();
+      cst_mode = cst.cst_mode;
       cst_name = cst.cst_name;
       cst_type = hint;
       cst_value = e;

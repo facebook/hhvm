@@ -1,5 +1,5 @@
 [(AnnotatedAST.Fun
-    { AnnotatedAST.f_mode = <opaque>;
+    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some (<p>, (Hprim Tint)));
       f_name = (<p>, "\\terminal_catch_can_do_whatever");
       f_tparams = []; f_where_constraints = [];

@@ -17,7 +17,7 @@ File "switch_fallthrough.php", line 33, characters 7-17:
 File "switch_fallthrough.php", line 37, characters 3-13:
   ^(int | string | float | bool)
 [(AnnotatedAST.Fun
-    { AnnotatedAST.f_mode = <opaque>;
+    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some (<p>, (Hprim Tvoid)));
       f_name = (<p>, "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;

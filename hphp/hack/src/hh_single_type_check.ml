@@ -20,13 +20,18 @@ module StringAnnotation = struct
   let pp fmt str = Format.pp_print_string fmt str
 end
 
-module TASTStringMapper = Aast_mapper.MapAnnotatedAST (Tast.AnnotationType)
-  (StringAnnotation)
+module StringNASTAnnotations = struct
+  module ExprAnnotation = StringAnnotation
+  module EnvAnnotation = Nast.UnitAnnotation
+end
 
-module StringNAST = Nast.AnnotatedAST(StringAnnotation)
+module StringNAST = Nast.AnnotatedAST(StringNASTAnnotations)
 
-module TASTTypeStripper = Aast_mapper.MapAnnotatedAST (Tast.AnnotationType)
-  (Nast.PosAnnotation)
+module TASTStringMapper =
+  Aast_mapper.MapAnnotatedAST(Tast.Annotations)(StringNASTAnnotations)
+
+module TASTTypeStripper =
+  Aast_mapper.MapAnnotatedAST(Tast.Annotations)(Nast.Annotations)
 
 
 (*****************************************************************************)
@@ -755,12 +760,12 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       | None -> "None"
       | Some ty -> "(Some " ^ Typing_print.full tenv ty ^ ")" in
     let program = List.map tast_tenv
-      (fun (def, tenv) -> TASTStringMapper.map_def (type_to_string tenv) def) in
+      (fun (def, tenv) -> TASTStringMapper.map_def (type_to_string tenv) (fun x -> x) def) in
     Printf.printf "%s\n" (filter_output (StringNAST.show_program program))
   | Dump_stripped_tast ->
     let tast_tenv = get_tast_tenv opts.tcopt filename files_info in
     let program = List.map tast_tenv fst in
-    let program = TASTTypeStripper.map_program fst program in
+    let program = TASTTypeStripper.map_program fst (fun _ -> ()) program in
     Printf.printf "%s\n" (filter_output (Nast.show_program program))
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;

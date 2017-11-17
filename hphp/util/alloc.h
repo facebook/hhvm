@@ -150,10 +150,12 @@ inline int low_dallocx_flags() {
 }
 #endif
 
-
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
 extern unsigned low_huge1g_arena;
 extern unsigned high_huge1g_arena;
+extern unsigned high_huge1g_arena_real;
+// Address range in the high1g arena is less than 16G.
+constexpr uintptr_t kHigh1GArenaMaxAddr = 16ull << 30;
 
 // Explicit per-thread tcache for the huge arenas.
 extern __thread int high_huge1g_tcache;
@@ -239,9 +241,31 @@ inline void free_huge(void* ptr) {
 #ifndef USE_JEMALLOC_EXTENT_HOOKS
   free(ptr);
 #else
-  if (ptr) dallocx(ptr, dallocx_huge1g_flags());
+  if (LIKELY(reinterpret_cast<uintptr_t>(ptr) < kHigh1GArenaMaxAddr)) {
+    if (ptr) dallocx(ptr, dallocx_huge1g_flags());
+  } else {
+    // Not from the high 1G arena
+    free(ptr);
+  }
 #endif
+}
 
+// If high1g arena was full some time ago, try to reenable it after some bytes
+// are freed.
+inline void try_reenable_huge1g_arena(size_t bytes) {
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
+  extern std::atomic_uint g_high1GRecentlyFreed;
+  if (high_huge1g_arena_real != high_huge1g_arena) {
+    auto const curr =
+      g_high1GRecentlyFreed.fetch_add((unsigned)bytes,
+                                      std::memory_order_relaxed);
+    constexpr unsigned kReenableThreashold = 4u << 20;
+    if (curr >= kReenableThreashold) {
+      g_high1GRecentlyFreed.store(0, std::memory_order_relaxed);
+      high_huge1g_arena = high_huge1g_arena_real;
+    }
+  }
+#endif
 }
 
 /**

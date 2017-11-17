@@ -233,8 +233,18 @@ void set_numa_binding(int node) {}
 unsigned low_arena = 0;
 
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
+// When an arena backed by 1G huge page is full, we set the arena index to 0, so
+// that subsequent allocations won't try the arena.  The _real index is still
+// kept, and we periodically set the index back when more space become available
+// there.
 unsigned low_huge1g_arena = 0;
+unsigned low_huge1g_arena_real = 0;
 unsigned high_huge1g_arena = 0;
+unsigned high_huge1g_arena_real = 0;
+// Keep track of the size of recently freed memory that might be in the high1g
+// arena when it is disabled, so that we know when to reenable it.
+std::atomic_uint g_high1GRecentlyFreed;
+
 // Explicit per-thread tcache for huge arenas.  -1 means no tcache.
 // In jemalloc/include/jemalloc/jemalloc_macros.h.in, we have
 // #define MALLOCX_TCACHE_NONE MALLOCX_TCACHE(-1)
@@ -428,9 +438,10 @@ void setup_low_1g_arena(int pages) {
                             size1g * pages, 0);
 #endif
     }
-    if (ma) low_huge1g_arena = ma->id();
+    if (ma) {
+      low_huge1g_arena = low_huge1g_arena_real = ma->id();
+    }
   } catch (...) {
-    low_huge1g_arena = 0;
   }
 }
 
@@ -450,7 +461,7 @@ void setup_high_1g_arena(int pages) {
     ManagedArena* ma = nullptr;
     if (max_node < 1) {
       // We either don't have libnuma, or run on a single-node system.
-      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 16),
+      ma = new ManagedArena(reinterpret_cast<void*>(kHigh1GArenaMaxAddr),
                             size1g * pages);
     } else {
 #ifdef HAVE_NUMA
@@ -461,9 +472,10 @@ void setup_high_1g_arena(int pages) {
                             size1g * pages, max_node / 2 + 1);
 #endif
     }
-    if (ma) high_huge1g_arena = ma->id();
+    if (ma) {
+      high_huge1g_arena = high_huge1g_arena_real = ma->id();
+    }
   } catch (...) {
-    high_huge1g_arena = 0;
   }
 }
 
@@ -636,9 +648,8 @@ void* low_malloc_huge1g_impl(size_t size) {
   auto ret = mallocx(size, low_mallocx_huge1g_flags());
   if (ret) return ret;
   if (size < size2m) {
-    // We are out of space in the 1G arena, I don't expect it to get more pages
-    // later, because we (should) rarely deallocate in that arena.  This is fine
-    // because the decallocation call to both arenas are the same.
+    // We are out of space in the arena, avoid trying in this arena in the near
+    // future.
     static_assert(low_dallocx_huge1g_flags() == low_dallocx_flags(), "");
     low_huge1g_arena = 0;
   }
@@ -650,6 +661,11 @@ void* malloc_huge1g_impl(size_t size) {
   if (high_huge1g_arena == 0) return malloc(size);
   auto ret = mallocx(size, mallocx_huge1g_flags());
   if (ret) return ret;
+  if (size < size2m) {
+    // We are out of space in the arena, avoid trying in this arena in the near
+    // future.
+    high_huge1g_arena = 0;
+  }
   return malloc(size);
 }
 
@@ -697,7 +713,7 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
 
 void thread_huge_tcache_create() {
-  if (high_huge1g_arena) {
+  if (high_huge1g_arena_real) {
     int tc = -1;
     if (mallctlRead("tcache.create", &tc, true)) {
       return;

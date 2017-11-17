@@ -684,7 +684,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
   if (u->m_extended) {
     auto ux = u->getExtended();
     for (auto s : m_litstrs) {
-      ux->getExtended()->m_namedInfo.push_back(s);
+      ux->m_namedInfo.push_back(s);
     }
     ux->m_arrayTypeTable = m_arrayTypeTable;
 

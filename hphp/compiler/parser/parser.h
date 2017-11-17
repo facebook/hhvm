@@ -319,6 +319,10 @@ public:
     const Token& value);
   void onShape(
     Token& out, const Token& shapeMemberList, bool terminatedWithEllipsis);
+  // for correctly tracking XHP spread operator names
+  void onXhpAttributesStart();
+  void onXhpAttributeSpread(Token& out, Token* pairs, Token& expr);
+  void onXhpAttributesEnd();
 
   // for namespace support
   void onNamespaceStart(const std::string &ns, bool file_scope = false);
@@ -613,6 +617,8 @@ private:
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
   std::vector<uint32_t> m_nsStack;
+  int m_xhpSpreadCount; // how many xhp spread operators have we labeled
+  std::vector<uint32_t> m_xhpSpreadStack;
 
   /* Namespace aliases:
    *  - RuntimeOption::AliasedNamespace

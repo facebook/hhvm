@@ -694,6 +694,13 @@ void Parser::invalidateGoto(TStatementPtr /*stmt*/, GotoError /*error*/) {}
 
 void Parser::invalidateLabel(TStatementPtr /*stmt*/) {}
 
+void Parser::onXhpAttributesStart() {}
+
+void Parser::onXhpAttributeSpread(Token& out, Token* pairs, Token& expr) {}
+
+void Parser::onXhpAttributesEnd() {}
+
+
 TStatementPtr Parser::extractStatement(ScannerToken* /*stmt*/) {
   return nullptr;
 }

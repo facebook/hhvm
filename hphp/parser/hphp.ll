@@ -157,6 +157,7 @@ static int getNextTokenType(int t) {
              NextTokenType::LambdaMaybe;
     case T_INC:
     case T_DEC:
+    case T_ELLIPSIS:
       return NextTokenType::XhpTagMaybe;
     case T_EXTENDS:
     case T_CLASS:
@@ -580,7 +581,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   RETSTEP('<');
 }
 
-<ST_LT_CHECK>"<"{XHPLABEL}(">"|"/>"|{WHITESPACE_AND_COMMENTS}(">"|"/>"|[a-zA-Z_\x7f-\xff])) {
+<ST_LT_CHECK>"<"{XHPLABEL}(">"|"/>"|{WHITESPACE_AND_COMMENTS}(">"|"/>"|"{"|[a-zA-Z_\x7f-\xff])) {
   BEGIN(ST_IN_SCRIPTING);
   yyless(1);
   STEPPOS(T_XHP_TAG_LT);

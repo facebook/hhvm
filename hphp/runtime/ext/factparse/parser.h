@@ -359,6 +359,9 @@ struct Parser : ParserBase {
     const Token& value);
   void onShape(
     Token& out, const Token& shapeMemberList, bool terminatedWithEllipsis);
+  void onXhpAttributesStart();
+  void onXhpAttributeSpread(Token& out, Token* pairs, Token& expr);
+  void onXhpAttributesEnd();
 
   void onNamespaceStart(const std::string &ns, bool file_scope = false);
   void onNamespaceEnd();

@@ -184,6 +184,7 @@ static void xhp_tag(Parser *_p, Token &out, Token &label, Token &body) {
                       _p, body.text().c_str(), label.text().c_str());
   }
 
+  _p->onXhpAttributesEnd();
   label.xhpLabel();
   Token name; _p->onName(name, label, Parser::StringName);
   _p->onNewObject(out, name, body);
@@ -2616,14 +2617,16 @@ xhp_opt_end_label:
   | T_XHP_LABEL                        { $$.reset(); $$.setText($1);}
 ;
 xhp_attributes:
-    xhp_attributes
+                                       { _p->onXhpAttributesStart(); $$.reset();}
+  | xhp_attributes
+    '{' T_ELLIPSIS expr '}'            { _p->onXhpAttributeSpread($$, &$1, $4);}
+  | xhp_attributes
     xhp_attribute_name '='
     xhp_attribute_value                { _p->onArrayPair($$,&$1,&$2,$4,0);}
-  |                                    { $$.reset();}
 ;
 xhp_children:
 xhp_children xhp_child                 { _p->onOptExprListElem($$, &$1, $2); }
-  |                                    { $$.reset();}
+  |                                    {  $$.reset();}
 ;
 xhp_attribute_name:
     T_XHP_LABEL                        { _p->onScalar($$,

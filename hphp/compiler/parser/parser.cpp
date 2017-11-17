@@ -2756,6 +2756,28 @@ void Parser::onNamespaceEnd() {
   }
 }
 
+void Parser::onXhpAttributesStart() {
+  m_xhpSpreadStack.push_back(m_xhpSpreadCount);
+  m_xhpSpreadCount = 0;
+}
+
+void Parser::onXhpAttributeSpread(Token& out, Token* pairs, Token& expr) {
+  Token tname; tname.reset();
+  // Label the spread based on how many we have seen in *this* top-level XHP
+  tname.setText("...$" + folly::to<std::string>(m_xhpSpreadCount));
+  m_xhpSpreadCount++;
+
+  // Add it to the running attribute list
+  Token attrName;
+  onScalar(attrName, T_CONSTANT_ENCAPSED_STRING, tname);
+  onArrayPair(out, pairs, &attrName, expr, 0);
+}
+
+void Parser::onXhpAttributesEnd() {
+  m_xhpSpreadCount = m_xhpSpreadStack.back();
+  m_xhpSpreadStack.pop_back();
+}
+
 void Parser::onUseDeclaration(Token& out, const std::string &ns,
                                           const std::string &as) {
   out.stmt = NEW_STMT(UseDeclarationStatementFragment, ns, as);

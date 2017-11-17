@@ -495,6 +495,9 @@ HackcMode hackc_mode() {
 }
 
 void compilers_init() {
+#ifdef __APPLE__
+  return;
+#endif
   auto php7Config = php7Configuration();
   auto hackConfig = hackcConfiguration();
 

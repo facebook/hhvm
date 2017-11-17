@@ -1,0 +1,70 @@
+# -*- mode: python -*-
+
+def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
+                    cli_server=0, hhcodegen=False, use_hackc=False,
+                    use_php7=False, hhas_roundtrip=False, target_suffix='',
+                    extra_args=[], runtime_dir_prefix=''):
+  target_name = 'verify_' + suite + '_' + mode + \
+       ('_repo' if repo else '') + \
+       ('_relocate' if relocate else '') + \
+       ('_recycle-tc' if recycle_tc else '') + \
+       ('_cli-server' if cli_server else '') + \
+       ('_hhcodegen-compare' if hhcodegen else '') + \
+       ('_hackc' if use_hackc else '') + \
+       ('_hhas_roundtrip' if hhas_roundtrip else '') + \
+       ('_phpc' if use_php7 else '') + \
+       target_suffix
+
+  target_name = target_name.replace('/', '_')
+  target_name = target_name.replace(',', '_')
+  command = [
+    'hphp/test/run',
+    suite,
+    '-m',
+    mode,
+  ] + extra_args
+  if repo:
+    command.extend(['-r'])
+  if relocate != 0:
+    command.extend(['--relocate', '%d' % relocate,
+                    '--exclude-pattern', '=/debugger/='])
+  if recycle_tc != 0:
+    command.extend(['--recycle-tc', '%d' % recycle_tc,
+                    '--exclude-pattern', '=/debugger/='])
+  if hhas_roundtrip:
+    command.extend(['--hhas-round-trip', '--exclude-pattern', '=/debugger/='])
+
+  if cli_server != 0:
+    command.append('--cli-server')
+
+  deplist=[
+    '@/hphp/hhvm:hhvm',
+    '@/hphp/hhvm:hhvm_link',
+    '@/hphp/hhvm:symlinks',
+  ]
+  runtimefiles = ['run', dir]
+
+  if hhcodegen == True or use_hackc == True:
+    command.extend(['-x', 'hphp/test/hhcodegen_failing_tests_' + suite])
+    deplist.extend(['@/hphp/hack/src:hh_single_compile'])
+    deplist.extend(['@/hphp/hack/src/hhbc/semdiff:semdiff'])
+    runtimefiles.extend(['hhcodegen_failing_tests_' + suite])
+  if use_php7 == True:
+    command.extend(['-x', 'hphp/test/zend7/failures'])
+    deplist.extend(['@/hphp/php7:php7'])
+    runtimefiles.extend(['zend7/failures'])
+
+  if hhcodegen == True:
+    command.extend(['--compare-hh-codegen'])
+  elif use_hackc == True:
+    command.extend(['--hackc', '--exclude-pattern', '=/debugger/='])
+  elif use_php7 == True:
+    command.append('--php7')
+
+  custom_unittest(
+    name=target_name,
+    command=command,
+    runtime_files=[runtime_dir_prefix + file for file in runtimefiles],
+    deps=deplist,
+    tags=['serialize', 'run_as_bundle', 'hphp-test'],
+  )

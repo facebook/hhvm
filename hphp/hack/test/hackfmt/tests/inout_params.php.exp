@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function noop<T>(inout T $_): void {}
 
@@ -6,7 +6,7 @@ function add1(inout int $x): void {
   $x += 1;
 }
 
-function swap<T>(inout T $a, inout T $b): void {
+function swap(inout $a, inout mixed $b): void {
   $tmp = $a;
   $a = $b;
   $b = $tmp;
@@ -30,9 +30,9 @@ function herp(
 }
 
 function long_function_name_with_lots_of_args(
-  int $a,
+  $a,
   string $b,
-  inout arraykey $c,
+  inout $c,
   inout dict<int, vec<string>> $d,
   inout bool $e,
   int ...$f
@@ -67,6 +67,6 @@ function test(): void {
     inout $d[$derp()],
     inout $b,
     $v[0],
-    ...$v
+    ...$v,
   );
 }

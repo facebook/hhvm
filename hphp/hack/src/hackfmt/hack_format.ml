@@ -137,7 +137,6 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
     | PipeVariableExpression _
     | PropertyDeclarator _
     | ConstantDeclarator _
-    | DecoratedExpression _
     | StaticDeclarator _
     | ScopeResolutionExpression _
     | EmbeddedMemberSelectionExpression _
@@ -1628,6 +1627,18 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
       Concat [
         t kw;
         transform_argish left_a types right_a
+      ]
+    | DecoratedExpression x ->
+      let (op, expr) = get_decorated_expression_children x in
+      Concat [
+        t op;
+        begin
+          let open EditableToken in
+          match syntax op with
+          | Token t when kind t = TokenKind.Inout -> Space
+          | _ -> Nothing
+        end;
+        t expr;
       ]
     | ErrorSyntax _ ->
       raise Hackfmt_error.InvalidSyntax

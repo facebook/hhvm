@@ -13,21 +13,21 @@ open Hh_core
 let check_defs_tast tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
   let open Option in
   let result, tast, _ = (Errors.do_ (fun () ->
-    let fs = List.map funs begin fun (_, x) ->
+    let fs = List.filter_map funs begin fun (_, x) ->
       Typing_check_service.type_fun tcopt fn x
-      >>| (fun (f, env) -> Tast.Fun f, env)
+      >>| fun f -> Tast.Fun f
     end in
-    let cs = List.map classes begin fun (_, x) ->
+    let cs = List.filter_map classes begin fun (_, x) ->
       Typing_check_service.type_class tcopt fn x
-      >>| (fun (c, env) -> Tast.Class c, env)
+      >>| fun c -> Tast.Class c
     end in
-    let ts = List.map typedefs begin fun (_, x) ->
+    let ts = List.filter_map typedefs begin fun (_, x) ->
       Typing_check_service.check_typedef tcopt fn x
-      >>| (fun (td, env) -> Tast.Typedef td, env)
+      >>| fun td -> Tast.Typedef td
     end in
-    let gcs = List.map consts begin fun (_, x) ->
+    let gcs = List.filter_map consts begin fun (_, x) ->
       Typing_check_service.check_const tcopt fn x
-      >>| (fun (c, env) -> Tast.Constant c, env)
+      >>| fun c -> Tast.Constant c
     end in
     (fs @ cs @ ts @ gcs)
   )) in

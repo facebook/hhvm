@@ -600,10 +600,10 @@ let filter_positions s = (Str.global_replace
   (Str.regexp "\\[L[0-9]+:[0-9]+-L[0-9]+:[0-9]+\\]") "<p>" s)
 
 (* Returns a list of Tast defs, along with associated type environments. *)
-let get_tast_tenv opts filename files_info =
+let get_tast opts filename files_info =
   let nasts = create_nasts opts files_info in
   let nast = Relative_path.Map.find filename nasts in
-  Typing.nast_to_tast_tenv opts nast
+  Typing.nast_to_tast opts nast
 
 let handle_mode mode filename opts popt files_contents files_info errors =
   let filter_output =
@@ -755,8 +755,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     let nast = Relative_path.Map.find filename nasts in
     Printf.printf "%s\n" (filter_output (Nast.show_program nast))
   | Dump_tast ->
-    let tast_tenv = get_tast_tenv opts.tcopt filename files_info in
-    let tast = List.map tast_tenv fst in
+    let tast = get_tast opts.tcopt filename files_info in
     let env = Typing_env.empty opts.tcopt filename ~droot:None in
     let stringify_types =
       TASTStringMapper.map_program
@@ -771,8 +770,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     let string_ast = stringify_types tast in
     Printf.printf "%s\n" (filter_output (StringNAST.show_program string_ast))
   | Dump_stripped_tast ->
-    let tast_tenv = get_tast_tenv opts.tcopt filename files_info in
-    let tast = List.map tast_tenv fst in
+    let tast = get_tast opts.tcopt filename files_info in
     let strip_types =
       TASTTypeStripper.map_program
         ~map_env_annotation:(fun _ -> ())

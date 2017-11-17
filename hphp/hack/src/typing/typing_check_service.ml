@@ -59,7 +59,7 @@ let check_const opts fn x =
   | None -> None
   | Some cst ->
     let cst = Naming.global_const opts cst in
-    Some (Typing.gconst_def cst opts)
+    Some (Typing.gconst_def opts cst)
 
 let check_file opts (errors, failed, decl_failed) (fn, file_infos) =
   let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in

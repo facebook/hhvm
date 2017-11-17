@@ -124,7 +124,7 @@ let declare_and_check content ~f tcopt =
       | Nast.Fun f -> ignore (Typing.fun_def tcopt f);
       | Nast.Class c -> ignore (Typing.class_def tcopt c);
       | Nast.Typedef t -> ignore (Typing.typedef_def tcopt t);
-      | Nast.Constant cst -> ignore (Typing.gconst_def cst tcopt);
+      | Nast.Constant cst -> ignore (Typing.gconst_def tcopt cst);
     end;
     f path file_info
   end

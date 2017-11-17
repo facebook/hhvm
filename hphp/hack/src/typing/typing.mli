@@ -14,17 +14,12 @@ val with_expr_hook:
 val debug_print_last_pos:
   'a -> unit
 
-val fun_def:
-  TypecheckerOptions.t -> Nast.fun_ -> Tast.fun_ * Typing_env.env
-val class_def:
-  TypecheckerOptions.t -> Nast.class_ -> (Tast.class_ * Typing_env.env) option
-val typedef_def:
-  TypecheckerOptions.t -> Nast.typedef -> Tast.typedef * Typing_env.env
-val gconst_def:
-  Nast.gconst -> TypecheckerOptions.t -> Tast.gconst * Typing_env.env
+val fun_def      : TypecheckerOptions.t -> Nast.fun_    -> Tast.fun_
+val class_def    : TypecheckerOptions.t -> Nast.class_  -> Tast.class_ option
+val typedef_def  : TypecheckerOptions.t -> Nast.typedef -> Tast.typedef
+val gconst_def   : TypecheckerOptions.t -> Nast.gconst  -> Tast.gconst
 
-val nast_to_tast_tenv:
-  TypecheckerOptions.t -> Nast.program -> (Tast.def * Typing_env.env) list
+val nast_to_tast : TypecheckerOptions.t -> Nast.program -> Tast.program
 
 val expr:
   ?allow_uref:bool ->

@@ -433,7 +433,7 @@ and fun_def tcopt f =
   NastCheck.fun_ env f nb;
   (* Fresh type environment is actually unnecessary, but I prefer to
    * have a guarantee that we are using a clean typing environment. *)
-  let tfun_def, tenv = Env.fresh_tenv env (
+  let tfun_def = Env.fresh_tenv env (
     fun env ->
       let env = Env.set_mode env f.f_mode in
       let env, constraints =
@@ -495,11 +495,10 @@ and fun_def tcopt f =
           T.fnb_unsafe = nb.fnb_unsafe;
         };
         T.f_ret_by_ref = f.f_ret_by_ref;
-      },
-      env
+      }
   ) in
   Typing_hooks.dispatch_exit_fun_def_hook f;
-  tfun_def, tenv
+  tfun_def
 
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
@@ -5425,7 +5424,7 @@ and class_def_ env c tc =
     T.c_methods = typed_methods;
     T.c_user_attributes = List.map c.c_user_attributes (user_attribute env);
     T.c_enum = c.c_enum;
-  }, env
+  }
 
 and check_static_method obj method_name static_method =
   if SMap.mem method_name obj
@@ -5757,9 +5756,9 @@ and typedef_def tcopt typedef  =
     T.t_constraint = typedef.t_constraint;
     T.t_kind = typedef.t_kind;
     T.t_tparams = typedef.t_tparams;
-  }, env
+  }
 
-and gconst_def cst tcopt =
+and gconst_def tcopt cst =
   Typing_hooks.dispatch_global_const_hook cst.cst_name;
   let filename = Pos.filename (fst cst.cst_name) in
   let dep = Typing_deps.Dep.GConst (snd cst.cst_name) in
@@ -5784,7 +5783,7 @@ and gconst_def cst tcopt =
     T.cst_type = cst.cst_type;
     T.cst_value = typed_cst_value;
     T.cst_is_define = cst.cst_is_define;
-  }, env
+  }
 
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)
@@ -5830,22 +5829,15 @@ and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
 (* Optional ~expected *)
 let expr ?allow_uref env e = expr ?allow_uref env e
 
-let nast_to_tast_tenv opts nast =
-  let open Core_result in
-  let def_conv = function
-    | Nast.Fun f -> Ok f
-      >>| fun_def opts
-      >>| (fun (f, tenv) -> Tast.Fun f, tenv)
-    | Nast.Class c -> Ok c
-      >>| class_def opts
-      >>= of_option
-        ~error:(Printf.sprintf "Error with class %s definition" (snd c.c_name))
-      >>| (fun (c, tenv) -> Tast.Class c, tenv)
-    | Nast.Constant gc -> Ok gc
-      >>| (fun x -> gconst_def x opts)
-      >>| (fun (gc, tenv) -> Tast.Constant gc, tenv)
-    | Nast.Typedef td -> Ok td
-      >>| typedef_def opts
-      >>| (fun (td, tenv) -> Tast.Typedef td, tenv)
+let nast_to_tast opts nast =
+  let convert_def = function
+    | Nast.Fun f       -> T.Fun (fun_def opts f)
+    | Nast.Constant gc -> T.Constant (gconst_def opts gc)
+    | Nast.Typedef td  -> T.Typedef (typedef_def opts td)
+    | Nast.Class c ->
+      match class_def opts c with
+      | Some c -> T.Class c
+      | None -> failwith @@ Printf.sprintf
+          "Error in declaration of class: %s" (snd c.c_name)
   in
-  List.map nast (Fn.compose ok_or_failwith def_conv)
+  List.map nast convert_def

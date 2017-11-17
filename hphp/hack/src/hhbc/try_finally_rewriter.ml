@@ -33,11 +33,14 @@ let collect_jump_instructions instrseq env =
       IMap.add (get_label_id ~is_break:false l) i map
     | IContFlow (RetC | RetV) ->
       IMap.add (JT.get_id_for_return ()) i map
+    | ISpecialFlow Goto l ->
+      IMap.add (JT.get_id_for_label (Label.named l)) i map
     | _ -> map
   in
   InstrSeq.fold_left instrseq ~init:IMap.empty ~f:folder
 
-(* Delete Ret*, Break/Continue instructions from the try body *)
+(* Delete Ret*, Break/Continue/Jmp(Named)/IterBreak(Named)
+   instructions from the try body *)
 let cleanup_try_body instrseq =
   let rewriter i =
     match i with
@@ -57,6 +60,45 @@ let emit_save_label_id id =
     instr_setl (Local.get_label_id_local ());
     instr_popc;
   ]
+
+let emit_goto ~in_finally_epilogue env label =
+  if not (SSet.mem label @@ JT.get_labels_in_function ())
+  then
+    Emit_fatal.raise_fatal_parse
+      Pos.none @@ "'goto' to undefined label '" ^ label ^ "'"
+  else
+  let named_label = Label.named label in
+  let jump_targets = Emit_env.get_jump_targets env in
+  begin match JT.find_goto_target jump_targets label with
+  | JT.ResolvedGoto_label iters ->
+    let preamble =
+      if not in_finally_epilogue then empty
+      else instr_unsetl @@ Local.get_label_id_local () in
+    gather [
+      preamble;
+      emit_jump_to_label named_label iters
+    ]
+  | JT.ResolvedGoto_finally {
+      JT.rgf_finally_start_label;
+      JT.rgf_iterators_to_release;
+    } ->
+    let preamble =
+      if in_finally_epilogue then empty
+      else emit_save_label_id (JT.get_id_for_label named_label) in
+    gather [
+      preamble;
+      emit_jump_to_label rgf_finally_start_label rgf_iterators_to_release;
+      (* emit goto as an indicator for try/finally rewriter to generate
+        finally epilogue, try/finally rewriter will remove it. *)
+      instr_goto label;
+    ]
+  | JT.ResolvedGoto_goto_from_finally ->
+    Emit_fatal.raise_fatal_runtime
+      Pos.none "Goto to a label outside a finally block is not supported"
+  | JT.ResolvedGoto_goto_invalid_label ->
+    Emit_fatal.raise_fatal_parse
+      Pos.none "'goto' into loop, switch or using statement is disallowed"
+  end
 
 let emit_return
   ~need_ref ~verify_return ~verify_out ~in_finally_epilogue env =
@@ -174,7 +216,11 @@ let emit_finally_epilogue
       emit_break_or_continue ~is_break:true ~in_finally_epilogue:true env pos l
     | ISpecialFlow (Continue l) ->
       emit_break_or_continue ~is_break:false ~in_finally_epilogue:true env pos l
-    | _ -> failwith "unexpected instruction: only Ret* or Break/Continue are expected"
+    | ISpecialFlow (Goto l) ->
+      emit_goto ~in_finally_epilogue:true env l
+    | _ -> failwith @@
+      "unexpected instruction: " ^
+      "only Ret* or Break/Continue/Jmp(Named)/IterBreak(Named) are expected"
   in
   match IMap.elements jump_instructions with
   | [] -> empty

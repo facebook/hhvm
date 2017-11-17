@@ -7,17 +7,8 @@ slow/constant/const_expr.php
 slow/constant/true_false_null.php
 slow/ext_misc/ext_misc.php
 slow/ext_phar/composer.php
-slow/finally/finally_goto_001.php
-slow/finally/finally_goto_002.php
-slow/finally/finally_goto_003.php
-slow/finally/goto-bare.php
-slow/finally/try_finally_005.php
-slow/finally/try_finally_007.php
 slow/goto/label_in_finally.php
-slow/goto/label_out_finally.php
 slow/goto/try_goto_in_finally1.php
-slow/goto/try_goto_in_finally2.php
-slow/goto/try_goto_out_finally.php
 slow/hack_arr_compat/scalars.php
 slow/hack_mode/2214.php
 slow/hh_namespace_migration/hh_frozenset4.php
@@ -79,6 +70,4 @@ slow/php7_backported/varSyntax/indirect-fcall.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection_classes/xhp.php
 slow/traits/1981.php
-slow/using/bad-goto1.php
-slow/using/bad-goto2.php
 slow/using/goto.php

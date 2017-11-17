@@ -10,6 +10,92 @@
 
 open Hh_core
 
+module A = Ast
+
+let labels_in_function_ = ref SSet.empty
+let function_has_goto_ = ref false
+
+let get_labels_in_function () = !labels_in_function_
+let get_function_has_goto () = !function_has_goto_
+
+let set_labels_in_function s = labels_in_function_ := s
+let set_function_has_goto f = function_has_goto_ := f
+
+let rec collect_valid_target_labels_aux is_hh_file acc s =
+  match s with
+  | A.Block block ->
+    collect_valid_target_labels_for_block_aux is_hh_file acc block
+  (* can jump into the try block but not to finally *)
+  | A.Try (block, cl, _) ->
+    let acc = collect_valid_target_labels_for_block_aux is_hh_file acc block in
+    List.fold_left cl
+      ~init:acc
+      ~f:(fun acc (_, _, block) ->
+        collect_valid_target_labels_for_block_aux is_hh_file acc block)
+  | A.GotoLabel (_, s) ->
+    SSet.add s acc
+  | A.If (_, then_block, else_block) ->
+    let acc = collect_valid_target_labels_for_block_aux is_hh_file acc then_block in
+    collect_valid_target_labels_for_block_aux is_hh_file acc else_block
+  | A.Unsafe
+  | A.Fallthrough
+  | A.Expr _
+  | A.Break _
+  | A.Continue _
+  | A.Throw _
+  | A.Return _
+  | A.Goto _
+  | A.Static_var _
+  | A.Global_var _
+  | A.Markup _
+  | A.Noop
+  | A.Foreach _
+  | A.Do _
+  | A.For _
+  | A.Def_inline _ -> acc
+  (* jump to while loops/switches/usings are disallowed in php files
+     and permitted in hh - assuming that they can only appear there
+     as a result of source to source transformation that has validated
+     correctness of the target *)
+  | A.While (_, block)
+  | A.Using { A.us_block = block; _ } ->
+    if is_hh_file
+    then collect_valid_target_labels_for_block_aux is_hh_file acc block
+    else acc
+  | A.Switch (_, cl) ->
+    if is_hh_file
+    then collect_valid_target_labels_for_switch_cases_aux is_hh_file acc cl
+    else acc
+
+and collect_valid_target_labels_for_block_aux is_hh_file acc block =
+  List.fold_left block ~init:acc ~f:(collect_valid_target_labels_aux is_hh_file)
+
+and collect_valid_target_labels_for_switch_cases_aux is_hh_file acc cl =
+  List.fold_left cl ~init:acc ~f:(fun acc s ->
+    match s with
+    | A.Default block
+    | A.Case (_, block) -> collect_valid_target_labels_for_block_aux is_hh_file acc block)
+
+let rec collect_valid_target_labels_for_def_aux is_hh_file acc def =
+  match def with
+  | A.Stmt s -> collect_valid_target_labels_aux is_hh_file acc s
+  | A.Namespace (_, defs) -> collect_valid_target_labels_for_defs_aux is_hh_file acc defs
+  | _ -> acc
+and collect_valid_target_labels_for_defs_aux is_hh_file acc defs =
+  List.fold_left defs ~init:acc ~f:(collect_valid_target_labels_for_def_aux is_hh_file)
+
+let collect_valid_target_labels_for_stmt is_hh_file s =
+  if not (!function_has_goto_) then SSet.empty
+  else collect_valid_target_labels_aux is_hh_file SSet.empty s
+
+let collect_valid_target_labels_for_defs is_hh_file defs =
+  if not (!function_has_goto_) then SSet.empty
+  else collect_valid_target_labels_for_defs_aux is_hh_file SSet.empty defs
+
+let collect_valid_target_labels_for_switch_cases is_hh_file cl =
+  if not (!function_has_goto_) then SSet.empty
+  else collect_valid_target_labels_for_switch_cases_aux is_hh_file SSet.empty cl
+
 type iterator = (*is mutable*) bool * Iterator.t
 
 type loop_labels =
@@ -18,13 +104,15 @@ type loop_labels =
 ; iterator: iterator option
 }
 
-type target =
-  | Loop of loop_labels
-  | Switch of (*end switch*) Label.t
-  | TryFinally of (*finally start*) Label.t
-  | Finally
+type region =
+  | Loop of loop_labels * SSet.t
+  | Switch of (*end switch*) Label.t * SSet.t
+  | TryFinally of (*finally start*) Label.t * SSet.t
+  | Finally of SSet.t
+  | Function of SSet.t
+  | Using of SSet.t
 
-type t = target list
+type t = region list
 
 let empty = []
 
@@ -115,34 +203,49 @@ let release_id l =
 
 (* runs a given function and then released label ids that were possibly assigned
    to labels at the head of the list *)
-let run_and_release_ids f t =
-  let r = f t in
+let run_and_release_ids labels f s t =
+  let r = f t s in
   begin match t with
-  | Loop { label_break; label_continue; _ } ::_ ->
+  | Loop ({ label_break; label_continue; _ }, _) ::_ ->
     release_id label_break;
     release_id label_continue;
-  | (Switch l | TryFinally l) :: _ ->
+  | (Switch (l, _) | TryFinally (l, _)) :: _ ->
     release_id l
-  | Finally :: _ -> ()
+  | (Function _ | Finally _ | Using _) :: _ -> ()
   | [] -> failwith "impossible"
   end;
+  SSet.iter (fun l -> release_id (Label.Named l)) labels;
   r
 
-let with_loop label_break label_continue iterator t f =
-  Loop { label_break; label_continue; iterator } :: t
-  |> run_and_release_ids f
+let with_loop is_hh_file label_break label_continue iterator t s f =
+  let labels = collect_valid_target_labels_for_stmt is_hh_file s in
+  Loop ({ label_break; label_continue; iterator }, labels) :: t
+  |> run_and_release_ids labels f s
 
-let with_switch end_label t f =
-  Switch end_label :: t
-  |> run_and_release_ids f
+let with_switch is_hh_file end_label t cl f =
+  let labels = collect_valid_target_labels_for_switch_cases is_hh_file cl in
+  Switch (end_label, labels) :: t
+  |> run_and_release_ids labels f ()
 
-let with_try finally_label t f =
-  TryFinally finally_label :: t
-  |> run_and_release_ids f
+let with_try is_hh_file finally_label t s f =
+  let labels = collect_valid_target_labels_for_stmt is_hh_file s in
+  TryFinally (finally_label, labels) :: t
+  |> run_and_release_ids labels f s
 
-let with_finally t f =
-  Finally :: t
-  |> run_and_release_ids f
+let with_finally is_hh_file t s f =
+  let labels = collect_valid_target_labels_for_stmt is_hh_file s in
+  Finally labels :: t
+  |> run_and_release_ids labels f s
+
+let with_function is_hh_file t s f =
+  let labels = collect_valid_target_labels_for_defs is_hh_file s in
+  Function labels :: t
+  |> run_and_release_ids labels f s
+
+let with_using is_hh_file t s f =
+  let labels = collect_valid_target_labels_for_stmt is_hh_file s in
+  Using labels :: t
+  |> run_and_release_ids labels f s
 
 type resolved_try_finally =
 { target_label: Label.t
@@ -176,11 +279,11 @@ let get_target_for_level ~is_break level t =
     *)
   let rec aux ~skip_try_finally n l iters =
     match l with
-    | [] ->
+    | [] | Function _ :: _ ->
       (* looked through the entires list of jump targets and still cannot find a
          target for a requested level - bad luck *)
       NotFound
-    | TryFinally finally_label :: tl ->
+    | TryFinally (finally_label, _) :: tl ->
       if skip_try_finally then aux ~skip_try_finally n tl iters
       else
       (* we need to jump out of try body in try/finally - in order to do this
@@ -197,18 +300,20 @@ let get_target_for_level ~is_break level t =
           ; iterators_to_release = iters }
       | _ -> failwith "impossible: TryFinally should be skipped"
       end
-    | Switch end_label :: _ when n = 1 -> ResolvedRegular (end_label, iters)
-    | Loop { label_break; label_continue; iterator } :: _ when n = 1 ->
+    | Switch (end_label, _) :: _ when n = 1 -> ResolvedRegular (end_label, iters)
+    | Loop ({ label_break; label_continue; iterator }, _) :: _ when n = 1 ->
         let label, iters =
           if is_break then label_break, add_iterator iterator iters
           else label_continue, iters
         in
         ResolvedRegular (label, iters)
-    | Loop { iterator; _ } :: tl ->
+    | Loop ({ iterator; _ }, _) :: tl ->
       aux ~skip_try_finally (n - 1) tl (add_iterator iterator iters)
     | Switch _ :: tl ->
       aux ~skip_try_finally (n - 1) tl iters
-    | Finally :: _ ->
+    | Using _ :: tl ->
+      aux ~skip_try_finally n tl iters
+    | Finally _ :: _ ->
       (* jumps out of finally body are disallowed *)
       NotFound
   in
@@ -218,10 +323,45 @@ let get_closest_enclosing_finally_label t =
   let rec aux l iters =
     match l with
     | [] -> None
-    | TryFinally l :: _ -> Some (l, iters)
-    | Loop { iterator; _ } :: tl -> aux tl (add_iterator iterator iters)
+    | TryFinally (l, _) :: _ -> Some (l, iters)
+    | Loop ({ iterator; _ }, _) :: tl -> aux tl (add_iterator iterator iters)
     | _ :: tl -> aux tl iters
   in aux t []
 
 let collect_iterators t =
-  List.filter_map t ~f:(function | Loop { iterator; _ } -> iterator | _ -> None)
+  List.filter_map t ~f:(function | Loop ({ iterator; _ }, _) -> iterator | _ -> None)
+
+type resolved_goto_finally = {
+  rgf_finally_start_label: Label.t;
+  rgf_iterators_to_release: iterator list
+}
+
+type resolved_goto_target =
+  | ResolvedGoto_label of iterator list
+  | ResolvedGoto_finally of resolved_goto_finally
+  | ResolvedGoto_goto_from_finally
+  | ResolvedGoto_goto_invalid_label
+
+let find_goto_target t label =
+  let rec aux t iters =
+    match t with
+    | Loop ({ iterator; _ }, labels) :: tl ->
+      if SSet.mem label labels then ResolvedGoto_label iters
+      else aux tl (add_iterator iterator iters)
+    | Using labels :: tl
+    | Switch (_, labels) :: tl ->
+      if SSet.mem label labels then ResolvedGoto_label iters
+      else aux tl iters
+    | TryFinally (finally_start, labels) :: _ ->
+      if SSet.mem label labels then ResolvedGoto_label iters
+      else ResolvedGoto_finally {
+        rgf_finally_start_label = finally_start;
+        rgf_iterators_to_release = iters }
+    | Finally labels :: _ ->
+      if SSet.mem label labels then ResolvedGoto_label iters
+      else ResolvedGoto_goto_from_finally
+    | Function labels :: _  ->
+      if SSet.mem label labels then ResolvedGoto_label iters
+      else ResolvedGoto_goto_invalid_label
+    | [] -> failwith "impossible" in
+  aux t []

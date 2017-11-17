@@ -232,7 +232,7 @@ let rec emit_stmt env st =
   | A.GotoLabel (_, label) ->
     instr_label (Label.named label)
   | A.Goto (_, label) ->
-    instr_jmp (Label.named label)
+    TFR.emit_goto ~in_finally_epilogue:false env label
   | A.Block b -> emit_stmts env b
   | A.If (condition, consequence, alternative) ->
     emit_if env condition (A.Block consequence) (A.Block alternative)
@@ -243,7 +243,8 @@ let rec emit_stmt env st =
       Ast.us_expr = e; Ast.us_block = b;
       Ast.us_is_block_scoped = is_block_scoped
     } ->
-    emit_using env is_block_scoped has_await e (A.Block b)
+    Emit_env.do_in_using_body env (A.Block b) @@
+      fun env s -> emit_using env is_block_scoped has_await e s
   | A.Break (pos, level_opt) ->
     emit_break env pos (get_level pos "break" level_opt)
   | A.Continue (pos, level_opt) ->
@@ -381,7 +382,7 @@ and emit_while env e b =
   gather [
     emit_jmpz env e break_label;
     instr_label start_label;
-    (Emit_env.do_in_loop_body break_label cont_label env @@ fun env -> emit_stmt env b);
+    (Emit_env.do_in_loop_body break_label cont_label env b emit_stmt);
     instr_label cont_label;
     emit_jmpnz env e start_label;
     instr_label break_label;
@@ -448,7 +449,7 @@ and emit_do env b e =
   let start_label = Label.next_regular () in
   gather [
     instr_label start_label;
-    (Emit_env.do_in_loop_body break_label cont_label env @@ fun env -> emit_stmt env b);
+    (Emit_env.do_in_loop_body break_label cont_label env b emit_stmt);
     instr_label cont_label;
     emit_jmpnz env e start_label;
     instr_label break_label;
@@ -488,7 +489,7 @@ and emit_for env e1 e2 e3 b =
     emit_ignored_expr env e1;
     emit_cond ~jmpz:true break_label;
     instr_label start_label;
-    (Emit_env.do_in_loop_body break_label cont_label env @@ fun env -> emit_stmt env b);
+    (Emit_env.do_in_loop_body break_label cont_label env b emit_stmt);
     instr_label cont_label;
     emit_ignored_expr env e3;
     emit_cond ~jmpz:false start_label;
@@ -515,8 +516,8 @@ and emit_switch env scrutinee_expr cl =
       Pos.none "Switch statements may only contain one 'default' clause." in
   (* "continue" in a switch in PHP has the same semantics as break! *)
   let cl =
-    Emit_env.do_in_switch_body break_label env @@
-      fun env -> List.map cl ~f:(emit_case env)
+    Emit_env.do_in_switch_body break_label env cl @@
+      fun env _ -> List.map cl ~f:(emit_case env)
   in
   let bodies = gather @@ List.map cl ~f:snd in
   let default_label_to_shift =
@@ -609,9 +610,7 @@ and emit_try_finally env try_block finally_block =
     emit_try_finally_ env try_block finally_block
 
 and emit_try_finally_ env try_block finally_block =
-  let finally_body =
-    Emit_env.do_in_finally_body env @@ fun env -> emit_stmt env finally_block
-  in
+  let finally_body = Emit_env.do_in_finally_body env finally_block emit_stmt in
   if is_empty_block try_block then finally_body
   else
   (*
@@ -639,8 +638,7 @@ and emit_try_finally_ env try_block finally_block =
   let finally_end = Label.next_regular () in
 
   let try_body =
-    Emit_env.do_in_try_body finally_start env @@ fun env -> emit_stmt env try_block
-  in
+    Emit_env.do_in_try_body finally_start env try_block emit_stmt in
   let jump_instructions =
     TFR.collect_jump_instructions try_body env
   in
@@ -959,8 +957,7 @@ and emit_foreach_await env pos collection iterator block =
       instr_jmpnz exit_label;
       with_temp_local result_temp_local begin fun _ _ -> set_key_and_value end;
       instr_unsetl result_temp_local;
-      (Emit_env.do_in_loop_body exit_label next_label env @@ fun env ->
-        emit_stmt env block);
+      (Emit_env.do_in_loop_body exit_label next_label env block emit_stmt);
       instr_jmp next_label;
       instr_label exit_label;
       instr_unsetl result_temp_local;
@@ -1022,8 +1019,7 @@ and emit_foreach_ env collection iterator block =
 
   let body =
     Emit_env.do_in_loop_body loop_break_label loop_continue_label env
-      ~iter:(mutable_iter, iterator_number) @@ fun env -> emit_stmt env block
-  in
+      ~iter:(mutable_iter, iterator_number) block emit_stmt in
   let result = gather [
     emit_expr ~need_ref:mutable_iter env collection;
     init;

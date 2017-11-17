@@ -21,6 +21,7 @@ type global_state =
 ; global_closure_namespaces: Namespace_env.env SMap.t
 ; global_closure_enclosing_classes: Ast.class_ SMap.t
 ; global_functions_with_finally: SSet.t
+; global_function_to_labels_map: SSet.t SMap.t
 }
 
 let empty_global_state =
@@ -28,6 +29,7 @@ let empty_global_state =
 ; global_closure_namespaces = SMap.empty
 ; global_closure_enclosing_classes = SMap.empty
 ; global_functions_with_finally = SSet.empty
+; global_function_to_labels_map = SMap.empty
 }
 
 let is_hh_file_ = ref false
@@ -48,6 +50,8 @@ let get_closure_enclosing_classes () =
   (!global_state_).global_closure_enclosing_classes
 let get_functions_with_finally () =
   (!global_state_).global_functions_with_finally
+let get_function_to_labels_map () =
+  (!global_state_).global_function_to_labels_map
 
 let get_unique_id_for_main () =
   "|"
@@ -89,18 +93,32 @@ let make_class_env ast_class =
     env_namespace = ast_class.Ast.c_namespace; env_needs_local_this = false;
     env_jump_targets = Jump_targets.empty; }
 
-let do_in_loop_body break_label continue_label ?iter env f =
-  Jump_targets.with_loop break_label continue_label iter env.env_jump_targets @@
-    fun env_jump_targets -> f { env with env_jump_targets }
+let do_in_loop_body break_label continue_label ?iter env s f =
+  Jump_targets.with_loop (is_hh_file ()) break_label continue_label
+    iter env.env_jump_targets s @@
+    fun env_jump_targets s -> f { env with env_jump_targets } s
 
-let do_in_switch_body end_label env f =
-  Jump_targets.with_switch end_label env.env_jump_targets @@
-    fun env_jump_targets -> f { env with env_jump_targets }
+let do_in_switch_body end_label env s f =
+  Jump_targets.with_switch (is_hh_file ()) end_label
+    env.env_jump_targets s @@
+    fun env_jump_targets s -> f { env with env_jump_targets } s
 
-let do_in_try_body finally_label env f =
-  Jump_targets.with_try finally_label env.env_jump_targets @@
-    fun env_jump_targets -> f { env with env_jump_targets }
+let do_in_try_body finally_label env s f =
+  Jump_targets.with_try (is_hh_file ()) finally_label
+    env.env_jump_targets s @@
+    fun env_jump_targets s -> f { env with env_jump_targets } s
 
-let do_in_finally_body env f =
-  Jump_targets.with_finally env.env_jump_targets @@
-    fun env_jump_targets -> f { env with env_jump_targets }
+let do_in_finally_body env s f =
+  Jump_targets.with_finally (is_hh_file ())
+    env.env_jump_targets s @@
+    fun env_jump_targets s -> f { env with env_jump_targets } s
+
+let do_in_using_body env s f =
+  Jump_targets.with_using (is_hh_file ())
+    env.env_jump_targets s @@
+    fun env_jump_targets s -> f { env with env_jump_targets } s
+
+let do_function env s f =
+  Jump_targets.with_function (is_hh_file ())
+    env.env_jump_targets s @@
+    fun env_jump_targets s -> f { env with env_jump_targets } s

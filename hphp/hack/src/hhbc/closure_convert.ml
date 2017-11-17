@@ -36,6 +36,22 @@ type env = {
   defined_function_count : int;
 }
 
+type function_goto_state = {
+  has_goto: bool;
+  labels: SSet.t
+}
+
+let empty_goto_state = {
+  has_goto = false;
+  labels = SSet.empty
+}
+
+let to_empty_state_if_no_goto s =
+  (* if function does not have any goto statements inside - it is ok
+     to ignore any labels that might appear in it *)
+  if s.has_goto then s
+  else empty_goto_state
+
 type state = {
   (* Number of closures created in the current function *)
   per_function_count : int;
@@ -66,6 +82,11 @@ type state = {
   has_finally: bool;
   (* set of functions that has try-finally block *)
   functions_with_finally: SSet.t;
+  (* accumulated information about goto statements in current function *)
+  goto_state: function_goto_state;
+  (* maps name of function that has at least one goto statement
+     to a set of labels in function *)
+  function_to_labels_map: SSet.t SMap.t;
 }
 
 let initial_state =
@@ -83,6 +104,8 @@ let initial_state =
   closure_enclosing_classes = SMap.empty;
   functions_with_finally = SSet.empty;
   has_finally = false;
+  goto_state = empty_goto_state;
+  function_to_labels_map = SMap.empty;
 }
 
 let is_in_lambda scope =
@@ -226,10 +249,15 @@ let set_namespace st ns =
 let reset_function_count st =
   { st with per_function_count = 0; }
 
-let record_has_finally_flag_for_function key has_finally st =
-  if not has_finally then st
+let record_function_state key (has_finally, goto_state) st =
+  let goto_state = to_empty_state_if_no_goto goto_state in
+  if not has_finally && goto_state == empty_goto_state then st
   else
-  { st with functions_with_finally = SSet.add key st.functions_with_finally }
+  let functions_with_finally =
+    SSet.add key st.functions_with_finally in
+  let function_to_labels_map =
+    SMap.add key goto_state.labels st.function_to_labels_map in
+  { st with functions_with_finally; function_to_labels_map }
 
 let add_function env st fd =
   let n = env.defined_function_count + List.length st.hoisted_functions in
@@ -547,8 +575,7 @@ and convert_lambda env st p fd use_vars_opt =
   let env = if Option.is_some use_vars_opt
             then env_with_longlambda env false fd
             else env_with_lambda env fd in
-  let st, has_finally, block =
-    convert_function_like_body_with_finally_tracking env st fd.f_body in
+  let st, block, function_state = convert_function_like_body env st fd.f_body in
   let st = { st with per_function_count = st.per_function_count + 1 } in
   (* HHVM lists lambda vars in descending order - do the same *)
   let lambda_vars = List.sort ~cmp:(fun a b -> compare b a) @@ ULS.items st.captured_vars in
@@ -598,8 +625,8 @@ and convert_lambda env st p fd use_vars_opt =
                      has_finally = old_has_finally;
            } in
   let st =
-    record_has_finally_flag_for_function
-      (Emit_env.get_unique_id_for_method cd md) has_finally st in
+    record_function_state
+      (Emit_env.get_unique_id_for_method cd md) function_state st in
   let env = old_env in
   (* Add lambda captured vars to current captured vars *)
   let st = List.fold_left lambda_vars ~init:st ~f:(add_var env) in
@@ -679,6 +706,7 @@ and convert_stmt env st stmt =
     if s.us_has_await then check_if_in_async_context env;
     let st, us_expr = convert_expr env st s.us_expr in
     let st, us_block = convert_block env st s.us_block in
+    let st = if st.has_finally then st else { st with has_finally = true } in
     st, Using { s with us_expr; us_block }
   | Def_inline ((Class _) as d) ->
     let cd =
@@ -698,24 +726,42 @@ and convert_stmt env st stmt =
     let st, fd = convert_fun env st fd in
     let st, stub_fd = add_function env st fd in
     st, Def_inline (Fun stub_fd)
+  | GotoLabel (_, l) ->
+    (* record known label in function *)
+    let labels = SSet.add l st.goto_state.labels in
+    let st = { st with goto_state = { st.goto_state with labels } } in
+    st, stmt
+  | Goto _ ->
+    (* record the fact that function has goto *)
+    let st =
+      if st.goto_state.has_goto then st
+      else { st with goto_state = { st.goto_state with has_goto = true } } in
+    st, stmt
   | _ ->
     st, stmt
 
 and convert_block env st stmts =
   List.map_env st stmts (convert_stmt env)
 
-and convert_function_like_body_with_finally_tracking env old_st block =
+and convert_function_like_body env old_st block =
+  (* reset has_finally/goto_state values on the state *)
   let st =
-    (* reset has_finally on the state *)
-    if old_st.has_finally then { old_st with has_finally = false } else old_st
+    (* can use old state if old values and values to be set are the same *)
+    if not old_st.has_finally && old_st.goto_state == empty_goto_state
+    then old_st
+    else { old_st with has_finally = false; goto_state = empty_goto_state }
   in
   let st, r = convert_block env st block in
+  (* capture current value of has_finally/goto_state *)
   let has_finally = st.has_finally in
-  (* restore old has_finally value *)
+  let goto_state = st.goto_state in
+  (* restore old has_finally/goto_state values *)
   let st =
-    if st.has_finally = old_st.has_finally then st
-    else { st with has_finally = old_st.has_finally } in
-  st, has_finally, r
+    (* can keep the state if values were not changed *)
+    if st.has_finally = old_st.has_finally && st.goto_state == old_st.goto_state
+    then st
+    else { st with has_finally = old_st.has_finally; goto_state = old_st.goto_state } in
+  st, r, (has_finally, goto_state)
 
 and convert_catch env st (id1, id2, b) =
   let st, b = convert_block env st b in
@@ -782,11 +828,11 @@ and convert_params env st param_list =
 and convert_fun env st fd =
   let env = env_with_function env fd in
   let st = reset_function_count st in
-  let st, has_finally, block =
-    convert_function_like_body_with_finally_tracking env st fd.f_body in
+  let st, block, function_state =
+    convert_function_like_body env st fd.f_body in
   let st =
-    record_has_finally_flag_for_function
-      (Emit_env.get_unique_id_for_function fd) has_finally st in
+    record_function_state
+      (Emit_env.get_unique_id_for_function fd) function_state st in
   let st, params = convert_params env st fd.f_params in
   st, { fd with f_body = block; f_params = params }
 
@@ -817,11 +863,11 @@ and convert_class_elt env st ce =
       | _ -> failwith "unexpected scope shape - method is not inside the class" in
     let env = env_with_method env md in
     let st = reset_function_count st in
-    let st, has_finally, block =
-      convert_function_like_body_with_finally_tracking env st md.m_body in
+    let st, block, function_state =
+      convert_function_like_body env st md.m_body in
     let st =
-      record_has_finally_flag_for_function
-        (Emit_env.get_unique_id_for_method cls md) has_finally st in
+      record_function_state
+        (Emit_env.get_unique_id_for_method cls md) function_state st in
     let st, params = convert_params env st md.m_params in
     st, Method { md with m_body = block; m_params = params }
 
@@ -909,9 +955,9 @@ let convert_toplevel_prog defs =
    * function and we place hoisted functions just after that *)
   let env = env_toplevel (count_classes defs) 1 defs in
   let st, original_defs = convert_defs env 0 0 initial_state defs in
+  let main_state = st.has_finally, to_empty_state_if_no_goto st.goto_state in
   let st =
-    record_has_finally_flag_for_function
-      (Emit_env.get_unique_id_for_main ()) st.has_finally st in
+    record_function_state (Emit_env.get_unique_id_for_main ()) main_state st in
   (* Reorder the functions so that they appear first. This matches the
    * behaviour of HHVM. *)
   let original_defs = hoist_toplevel_functions original_defs in
@@ -922,5 +968,6 @@ let convert_toplevel_prog defs =
       { global_explicit_use_set = st.explicit_use_set
       ; global_closure_namespaces = st.closure_namespaces
       ; global_closure_enclosing_classes = st.closure_enclosing_classes
-      ; global_functions_with_finally = st.functions_with_finally})
+      ; global_functions_with_finally = st.functions_with_finally
+      ; global_function_to_labels_map = st.function_to_labels_map })
   )

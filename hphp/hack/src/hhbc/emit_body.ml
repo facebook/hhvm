@@ -347,22 +347,32 @@ let emit_body
       | _ :: Ast_scope.ScopeItem.Class _ :: _ -> move_this decl_vars
       | _ -> decl_vars in
 
-  let should_reserve_locals =
+  let function_state_key =
     let open Ast_scope in
-    let key =
-      match scope with
-      | [] -> Emit_env.get_unique_id_for_main ()
-      | ScopeItem.Method md :: ScopeItem.Class cls :: _
-      | ScopeItem.Lambda :: ScopeItem.Method md :: ScopeItem.Class cls :: _ ->
-        Emit_env.get_unique_id_for_method cls md
-      | ScopeItem.Function fd :: _ ->
-        Emit_env.get_unique_id_for_function fd
-      | _ -> failwith @@ "unexpected scope shape:" ^
-        "expected either " ^
-        "'ScopeItem.Method md :: ScopeItem.Class cls' for method or " ^
-        "'ScopeItem.Function fd' for function or " ^
-        "empty scope for top level" in
-    SSet.mem key @@ Emit_env.get_functions_with_finally () in
+    match scope with
+    | [] -> Emit_env.get_unique_id_for_main ()
+    | ScopeItem.Method md :: ScopeItem.Class cls :: _
+    | ScopeItem.Lambda :: ScopeItem.Method md :: ScopeItem.Class cls :: _ ->
+      Emit_env.get_unique_id_for_method cls md
+    | ScopeItem.Function fd :: _ ->
+      Emit_env.get_unique_id_for_function fd
+    | _ -> failwith @@ "unexpected scope shape:" ^
+      "expected either " ^
+      "'ScopeItem.Method md :: ScopeItem.Class cls' for method or " ^
+      "'ScopeItem.Function fd' for function or " ^
+      "empty scope for top level" in
+
+  let should_reserve_locals =
+    SSet.mem function_state_key @@ Emit_env.get_functions_with_finally () in
+
+  begin match SMap.get function_state_key @@ Emit_env.get_function_to_labels_map () with
+  | Some s ->
+    Jump_targets.set_function_has_goto true;
+    Jump_targets.set_labels_in_function s;
+  | None ->
+    Jump_targets.set_function_has_goto false;
+    Jump_targets.set_labels_in_function SSet.empty;
+  end;
 
   Local.reset_local (List.length params + List.length decl_vars);
   if should_reserve_locals then Local.reserve_retval_and_label_id_locals ();
@@ -372,7 +382,8 @@ let emit_body
     with_namespace namespace |>
     with_needs_local_this needs_local_this |>
     with_scope scope) in
-  let stmt_instrs = emit_defs env body in
+  let stmt_instrs =
+    Emit_env.do_function env body emit_defs in
   let begin_label, default_value_setters =
     Emit_param.emit_param_default_value_setter env params in
   let generator_instr =

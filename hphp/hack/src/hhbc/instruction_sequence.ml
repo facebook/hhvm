@@ -68,6 +68,7 @@ let instr_jmpns label = instr (IContFlow (JmpNS label))
 let instr_label label = instr (ILabel label)
 let instr_continue level = instr (ISpecialFlow (Continue level))
 let instr_break level = instr (ISpecialFlow (Break level))
+let instr_goto label = instr (ISpecialFlow (Goto label))
 let instr_iter_break label itrs =
   instr (IIterator (IterBreak (label, itrs)))
 let instr_unwind = instr (IContFlow Unwind)
@@ -443,6 +444,9 @@ let rewrite_user_labels_instr name_label_map instruction =
   | IContFlow (Jmp (Label.Named name)) ->
       let label, name_label_map = get_result name in
       IContFlow (Jmp label), name_label_map
+  | IIterator (IterBreak ((Label.Named name), iters)) ->
+      let label, name_label_map = get_result name in
+      IIterator (IterBreak (label, iters)), name_label_map
   | IContFlow (JmpNS (Label.Named name)) ->
       let label, name_label_map = get_result name in
       IContFlow (JmpNS label), name_label_map

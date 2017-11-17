@@ -290,6 +290,7 @@ type iterator_list = (bool * Iterator.t) list
 type instruct_special_flow =
   | Continue of int
   | Break of int
+  | Goto of string
 
 type instruct_get =
   | CGetL of local_id

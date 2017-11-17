@@ -680,7 +680,7 @@ let check_instruct_special_flow i i' =
   match i, i' with
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | Continue _, _ | Break _, _ ->
+  | Continue _, _ | Break _, _ | Goto _, _->
     if i = i' then Some () else None
 
 let check_instruct_async_functions i i' =

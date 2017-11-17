@@ -2327,14 +2327,6 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
             (fun env _ -> Env.fresh_unresolved_type env) in
           env, (Tclass (cname, params)), params in
       let r_witness = Reason.Rwitness p in
-      let idisposable_type =
-        (r_witness, Tclass ((p, SN.Classes.cIDisposable), [])) in
-      let iasyncdisposable_type =
-        (r_witness, Tclass ((p, SN.Classes.cIAsyncDisposable), [])) in
-      if not check_parent && not is_using_clause &&
-         (SubType.is_sub_type env c_ty idisposable_type
-      || SubType.is_sub_type env c_ty iasyncdisposable_type)
-      then Errors.invalid_new_disposable p;
       let obj_ty = (r_witness, obj_ty_) in
       let c_ty =
         match cid with

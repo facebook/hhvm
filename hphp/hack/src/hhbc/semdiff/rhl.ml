@@ -1349,7 +1349,7 @@ let equiv prog prog' startlabelpairs =
         match reads asn (Local.Unnamed n) (Local.Unnamed n') with
         | None -> Some(pc,pc',asn,assumed,todo)
         | Some new_asn ->
-          let continuation ((some_props,some_vs,some_vs') as _some_asn) =
+          let continuation (some_props,some_vs,some_vs') =
             let newpc =(hs_of_pc pc, ip) in
             let newpc' = (hs_of_pc pc', ip') in
             let newprops = PropSet.filter (fun (x,x') ->
@@ -1369,6 +1369,36 @@ let equiv prog prog' startlabelpairs =
             end
           | _,_ -> failwith "vget cget can't happen"
           end) in
+
+    let vget_binds_pattern =
+      (vget_unnamed_pattern $$ uBindS $$ uPopV $$ uUnsetL)
+      $? (fun (((n1,_cn),_),n2) -> Local.Unnamed n1 = n2)
+      $> (fun (((n,cn),_),_) -> (n,cn)) in
+    let two_vget_binds_pattern =
+      vget_binds_pattern $*$ vget_binds_pattern in
+    let two_vget_binds_action =
+      two_vget_binds_pattern
+     $>> (fun ((n,cn), (n',cn')) ((_,ip),(_,ip'))->
+      begin
+       Log.debug (Tty.Normal Tty.Blue)
+         @@ Printf.sprintf "vget binds pattern %d to %d, class_refs %d and %d" n n' cn cn';
+       match reads asn (Local.Unnamed n) (Local.Unnamed n') with
+        | None -> Some(pc,pc',asn,assumed,todo)
+        | Some (new_props, new_vs, new_vs') ->
+           let newpc = (hs_of_pc pc, ip) in
+           let newpc' =(hs_of_pc pc', ip') in
+           let finalprops = PropSet.filter (fun (x,x') ->
+             x <> Local.Unnamed n && x' <> Local.Unnamed n') new_props in
+             let final_asn = (
+               finalprops,
+               VarSet.remove (Local.Unnamed n) new_vs,
+               VarSet.remove (Local.Unnamed n') new_vs') in
+         begin
+          classes_to_check := IntIntPermSet.add (cn,cn',[]) (!classes_to_check);
+          check newpc newpc' final_asn
+            (add_assumption (pc,pc') asn assumed) todo
+         end
+      end) in
 
     let vget_retv_pattern =
       vget_unnamed_pattern
@@ -1402,6 +1432,7 @@ let equiv prog prog' startlabelpairs =
       two_vget_base_action;
       two_vget_cget_bind_action;
       two_vget_retv_pattern_action;
+      two_vget_binds_action;
       failure_pattern_action;
       ] in
     bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))

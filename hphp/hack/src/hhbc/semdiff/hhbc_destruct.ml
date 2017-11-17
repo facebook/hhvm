@@ -59,6 +59,7 @@ let uCGetL = pa (function | IGet (CGetL loc) -> Some loc | _ -> None)
 let uCGetL2 = pa (function | IGet (CGetL2 loc) -> Some loc | _ -> None)
 let uRetV = pa (function | IContFlow (RetV) -> Some () | _ -> None)
 let uPrint = pa (function | IOp Print -> Some () | _ -> None)
+let uBindS = pa (function | IMutator (BindS cid) -> Some cid | _ -> None)
 
 (* trivial parser, always succeds, reads nothing *)
 let parse_any inp = Some ((),inp)

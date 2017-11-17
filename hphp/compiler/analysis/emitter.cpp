@@ -12555,7 +12555,12 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     }
 
     if (auto uc = UnitCompiler::create(code, codeLen, filename, md5)) {
-      ue = uc->compile();
+      try {
+        ue = uc->compile();
+      } catch (const BadCompilerException& exc) {
+        Logger::Error("Bad external compiler: %s", exc.what());
+        return nullptr;
+      }
     }
 
     // !ue should only happen for HackC at this point if

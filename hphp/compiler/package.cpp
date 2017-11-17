@@ -365,15 +365,20 @@ bool Package::parseImpl(const std::string* fileName) {
     // skip the file.
     if (auto uc = UnitCompiler::create(
           content.data(), content.size(), fileName->c_str(), md5)) {
-      Lock lock(m_ar->getMutex());
-      if (auto ue = uc->compile(m_ar->getParseOnDemandCallBacks())) {
-        m_ar->addHhasFile(std::move(ue));
-        return true;
-      } else {
-        Logger::Error(
-          "Unable to compile using %s compiler: %s",
-          uc->getName(),
-          fullPath.c_str());
+      try {
+        Lock lock(m_ar->getMutex());
+        if (auto ue = uc->compile(m_ar->getParseOnDemandCallBacks())) {
+          m_ar->addHhasFile(std::move(ue));
+          return true;
+        } else {
+          Logger::Error(
+            "Unable to compile using %s compiler: %s",
+            uc->getName(),
+            fullPath.c_str());
+          return false;
+        }
+      } catch (const BadCompilerException& exc) {
+        Logger::Error("Bad external compiler: %s", exc.what());
         return false;
       }
     }

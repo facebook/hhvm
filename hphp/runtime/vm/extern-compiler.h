@@ -33,6 +33,14 @@ enum class HackcMode {
 
 HackcMode hackc_mode();
 
+struct BadCompilerException : Exception {
+  explicit BadCompilerException(const std::string& what) : Exception(what) {}
+  template<class... A>
+  explicit BadCompilerException(A&&... args)
+    : Exception(folly::sformat(std::forward<A>(args)...))
+  {}
+};
+
 void compilers_init();
 void compilers_start();
 void compilers_shutdown();

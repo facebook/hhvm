@@ -66,7 +66,8 @@ let ints_overflow_to_ints options =
 let as_bool s =
   match String.lowercase_ascii s with
   | "0" | "false" -> false
-  | _ -> true
+  | "1" | "true"  -> true
+  | _             -> raise (Arg.Bad (s ^ " can't be cast to bool"))
 
 let set_option options name value =
   match String.lowercase_ascii name with
@@ -121,8 +122,12 @@ let get_value_from_config_kv_list config key =
     List.map ~f:(fun (k, v) -> k, J.get_string_exn v) keys_with_json)
 
 let set_value name get set config opts =
-  let value = get config name in
-  Option.value_map value ~default:opts ~f:(set opts)
+  try
+    let value = get config name in
+    Option.value_map value ~default:opts ~f:(set opts)
+  with
+    | Arg.Bad why      -> raise (Arg.Bad ("Option " ^ name ^ ": " ^ why))
+    | Assert_failure _ -> raise (Arg.Bad ("Option " ^ name ^ ": error parsing JSON"))
 
 let value_setters = [
   (set_value "hhvm.aliased_namespaces" get_value_from_config_kv_list @@

@@ -78,7 +78,7 @@ module Program =
       let updates = Relative_path.(relativize_set Root updates) in
       let to_recheck =
         Relative_path.Set.filter updates begin fun update ->
-          ServerEnv.file_filter (Relative_path.suffix update)
+          ServerEnv.file_filter (Relative_path.to_absolute update)
         end in
       let genv = if Relative_path.Set.is_empty to_recheck then genv else {
         genv with

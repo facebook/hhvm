@@ -53,6 +53,7 @@ and terminal_ tcopt nsenv ~in_try = function
   | Switch (_, cl) ->
     terminal_cl tcopt nsenv ~in_try cl
   | Block b -> terminal tcopt nsenv ~in_try b
+  | Using u -> terminal tcopt nsenv ~in_try u.us_block
   | Try (b, catch_l, _fb) ->
     (* return is not allowed in finally, so we can ignore fb *)
     (terminal tcopt nsenv ~in_try:true b;
@@ -60,7 +61,6 @@ and terminal_ tcopt nsenv ~in_try = function
   | Markup _
   | Do _
   | While _
-  | Using _
   | For _
   | Foreach _
   | Def_inline _
@@ -137,9 +137,10 @@ let rec stmt tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
   | Fallthrough
   | Markup _
   | Expr _ | Break _ | Continue _ | Throw _
-  | Do _ | While _ | Using _ | For _ | Foreach _
+  | Do _ | While _ | For _ | Foreach _
   | Return _ | GotoLabel _ | Goto _ | Static_var _
   | Global_var _ | Def_inline _ | Noop -> acc
+  | Using u -> block tcopt acc u.us_block
   | Block b -> block tcopt acc b
   | If (_, b1, b2) ->
     let term1 = is_terminal tcopt nsenv b1 in

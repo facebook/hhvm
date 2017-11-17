@@ -86,8 +86,57 @@ let test_pair_cases = [
   ("test_pair.php", 8, 4), "Pair";
   ("test_pair.php", 8, 17), "B";
   ("test_pair.php", 10, 14), "A";
-  ("test_pair.php", 12, 10), "Pair<A>";
+  ("test_pair.php", 12, 10), "(function(Pair<A> $v): Pair<A>)";
+  ("test_pair.php", 12, 19), "Pair<A>";
   ("test_pair.php", 12, 20), "Pair";
+]
+
+let loop_assignment = "<?hh // strict
+function use(mixed $item): void {}
+function cond(): bool { return true; }
+function loop_assignment(): void {
+  $x = 1;
+// ^5:4
+  while (true) {
+    use($x);
+//      ^8:9
+    if (cond())
+      $x = 'foo';
+//    ^11:7
+  }
+  use($x);
+//    ^14:7
+}
+"
+
+let loop_assignment_cases = [
+  ("loop_assignment.php", 5, 4), "int";
+  ("loop_assignment.php", 8, 9), "(string | int)";
+  ("loop_assignment.php", 11, 7), "string";
+  ("loop_assignment.php", 14, 7), "(string | int)";
+]
+
+let lambda1 = "<?hh // strict
+function test_lambda1(): void {
+  $s = 'foo';
+  $f = $n ==> { return $n . $s . '\\n'; };
+//^4:3                      ^4:29
+  $x = $f(4);
+//^6:3 ^6:8
+  $y = $f('bar');
+//^8:3    ^8:11
+}
+"
+
+let lambda_cases = [
+  ("lambda1.php", 4, 3), "[fun]";
+  ("lambda1.php", 4, 29), "string";
+  ("lambda1.php", 6, 3), "string";
+  ("lambda1.php", 6, 8), "[fun]";
+  ("lambda1.php", 6, 11), "int";
+  ("lambda1.php", 8, 3), "string";
+  ("lambda1.php", 8, 8), "[fun]";
+  ("lambda1.php", 8, 11), "string";
 ]
 
 let files = [
@@ -95,12 +144,16 @@ let files = [
   "A.php", class_A;
   "Pair.php", pair;
   "test_pair.php", test_pair;
+  "loop_assignment.php", loop_assignment;
+  "lambda1.php", lambda1;
 ]
 
 let cases =
     id_cases
   @ class_A_cases
   @ test_pair_cases
+  @ loop_assignment_cases
+  @ lambda_cases
 
 let () =
   let env = Test.setup_server () in

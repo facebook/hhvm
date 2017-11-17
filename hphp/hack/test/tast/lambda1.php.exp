@@ -1,0 +1,90 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some (<p>, (Hprim Tvoid)));
+      f_name = (<p>, "\\test_lambda1"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params = [];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast =
+           [(AnnotatedAST.Expr
+               ((Some string),
+                (AnnotatedAST.Binop ((Eq None),
+                   ((Some string), (AnnotatedAST.Lvar (<p>, $s))),
+                   ((Some string),
+                    (AnnotatedAST.String (<p>, "foo")))
+                   ))));
+             (AnnotatedAST.Expr
+                ((Some [fun]),
+                 (AnnotatedAST.Binop ((Eq None),
+                    ((Some [fun]), (AnnotatedAST.Lvar (<p>, $f))),
+                    ((Some _),
+                     (AnnotatedAST.Efun (
+                        { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+                          f_ret = None; f_name = ([Pos.none], ";anonymous");
+                          f_tparams = []; f_where_constraints = [];
+                          f_variadic = AnnotatedAST.FVnonVariadic;
+                          f_params =
+                          [{ AnnotatedAST.param_hint = None;
+                             param_is_reference = false;
+                             param_is_variadic = false;
+                             param_pos = <p>; param_name = "$n";
+                             param_expr = None; param_callconv = None;
+                             param_user_attributes = [] }
+                            ];
+                          f_body =
+                          (AnnotatedAST.NamedBody
+                             { AnnotatedAST.fnb_nast =
+                               [(AnnotatedAST.Return (<p>,
+                                   (Some ((Some string),
+                                          (AnnotatedAST.Binop (Dot,
+                                             ((Some string),
+                                              (AnnotatedAST.Binop (Dot,
+                                                 ((Some _),
+                                                  (AnnotatedAST.Lvar
+                                                     (<p>, $n))),
+                                                 ((Some string),
+                                                  (AnnotatedAST.Lvar
+                                                     (<p>, $s)))
+                                                 ))),
+                                             ((Some string),
+                                              (AnnotatedAST.String
+                                                 (<p>, "\\n")))
+                                             ))))
+                                   ))
+                                 ];
+                               fnb_unsafe = false });
+                          f_fun_kind = FSync; f_user_attributes = [];
+                          f_ret_by_ref = false },
+                        [(<p>, $s)])))
+                    ))));
+             (AnnotatedAST.Expr
+                ((Some string),
+                 (AnnotatedAST.Binop ((Eq None),
+                    ((Some string), (AnnotatedAST.Lvar (<p>, $x))),
+                    ((Some string),
+                     (AnnotatedAST.Call (Cnormal,
+                        ((Some [fun]),
+                         (AnnotatedAST.Lvar (<p>, $f))),
+                        [],
+                        [((Some int),
+                          (AnnotatedAST.Int (<p>, "4")))],
+                        [])))
+                    ))));
+             (AnnotatedAST.Expr
+                ((Some string),
+                 (AnnotatedAST.Binop ((Eq None),
+                    ((Some string), (AnnotatedAST.Lvar (<p>, $y))),
+                    ((Some string),
+                     (AnnotatedAST.Call (Cnormal,
+                        ((Some [fun]),
+                         (AnnotatedAST.Lvar (<p>, $f))),
+                        [],
+                        [((Some string),
+                          (AnnotatedAST.String (<p>, "bar")))],
+                        [])))
+                    ))))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+  ]

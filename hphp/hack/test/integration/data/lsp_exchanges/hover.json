@@ -31,7 +31,7 @@
       "textDocument": {
         "uri":"${php_file_uri}"
       },
-      "position": {"line": 3, "character": 10}
+      "position": {"line": 3, "character": 16}
    }
 },
 {

@@ -20,6 +20,6 @@ let get_level_list check =
 
 let go env f_in =
   get_level_list begin fun () ->
-    ServerIdeUtils.check_file_input
-      env.ServerEnv.tcopt env.ServerEnv.files_info f_in
+    fst (ServerIdeUtils.check_file_input
+      env.ServerEnv.tcopt env.ServerEnv.files_info f_in)
   end

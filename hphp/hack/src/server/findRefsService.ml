@@ -203,7 +203,7 @@ let find_refs tcopt target acc fileinfo_l =
   let results_acc = ref Pos.Map.empty in
   attach_hooks tcopt results_acc target;
   let tcopt = TypecheckerOptions.make_permissive tcopt in
-  ServerIdeUtils.recheck tcopt fileinfo_l;
+  ignore (ServerIdeUtils.recheck tcopt fileinfo_l);
   detach_hooks ();
   Pos.Map.fold begin fun p str acc ->
     (str, p) :: acc

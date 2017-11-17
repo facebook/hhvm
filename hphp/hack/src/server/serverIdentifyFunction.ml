@@ -19,7 +19,7 @@ open Hh_core
 let get_occurrence_and_map tcopt content line char ~f =
   let result = ref [] in
   IdentifySymbolService.attach_hooks result line char;
-  ServerIdeUtils.declare_and_check content ~f:begin fun path file_info ->
+  ServerIdeUtils.declare_and_check content ~f:begin fun path file_info _ ->
     IdentifySymbolService.detach_hooks ();
     f path file_info !result
   end tcopt

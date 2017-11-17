@@ -23,16 +23,17 @@ val check_file_input :
    * When given content buffer it will be parsed, named, and declared before
    * that. The declarations will be removed from shared memory afterwards. *)
   ServerUtils.file_input ->
-  Relative_path.t
+  Relative_path.t * Tast.program
 
 (* Parses, names, declares and typechecks the content buffer, then run f
  * while the declared definitions are still available in shared memory.
  * The declarations will be removed from shared memory afterwards. *)
 val declare_and_check : string ->
-  f:(Relative_path.t -> FileInfo.t -> 'a) -> TypecheckerOptions.t -> 'a
+  f:(Relative_path.t -> FileInfo.t -> Tast.program -> 'a) -> TypecheckerOptions.t -> 'a
 
 
 (* Run the typing phase on a list of files and definitions they contain. *)
 val recheck :
   TypecheckerOptions.t ->
-  (Relative_path.t * FileInfo.t) list -> unit
+  (Relative_path.t * FileInfo.t) list ->
+  (Relative_path.t * Tast.program) list

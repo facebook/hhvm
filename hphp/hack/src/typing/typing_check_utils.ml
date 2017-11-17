@@ -10,9 +10,9 @@
 
 open Hh_core
 
-let check_defs_tast tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
-  let open Option in
-  let result, tast, _ = (Errors.do_ (fun () ->
+let type_file tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
+  let open Option.Monad_infix in
+  let errors, tast, _ = Errors.do_ begin fun () ->
     let fs = List.filter_map funs begin fun (_, x) ->
       Typing_check_service.type_fun tcopt fn x
       >>| fun f -> Tast.Fun f
@@ -30,10 +30,10 @@ let check_defs_tast tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
       >>| fun c -> Tast.Constant c
     end in
     (fs @ cs @ ts @ gcs)
-  )) in
-  result, tast
+  end in
+  tast, errors
 
 (*****************************************************************************)
 (* Usually used when we want to run typing hooks *)
 (*****************************************************************************)
-let check_defs tcopt fn fi = fst (check_defs_tast tcopt fn fi)
+let check_defs tcopt fn fi = snd (type_file tcopt fn fi)

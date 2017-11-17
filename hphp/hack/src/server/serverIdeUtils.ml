@@ -119,14 +119,8 @@ let declare_and_check content ~f tcopt =
     Decl.name_and_declare_types_program tcopt ast;
 
     let nast = Naming.program tcopt ast in
-
-    List.iter nast begin function
-      | Nast.Fun f -> ignore (Typing.fun_def tcopt f);
-      | Nast.Class c -> ignore (Typing.class_def tcopt c);
-      | Nast.Typedef t -> ignore (Typing.typedef_def tcopt t);
-      | Nast.Constant cst -> ignore (Typing.gconst_def tcopt cst);
-    end;
-    f path file_info
+    let tast = Typing.nast_to_tast tcopt nast in
+    f path file_info tast
   end
 
 let declare_and_check content ~f tcopt =
@@ -139,17 +133,16 @@ let declare_and_check content ~f tcopt =
 
 let recheck tcopt filetuple_l =
   SharedMem.invalidate_caches();
-  List.iter filetuple_l begin fun (fn, defs) ->
-    ignore @@ Typing_check_utils.check_defs tcopt fn defs
+  List.map filetuple_l begin fun (fn, defs) ->
+    fn, fst @@ Typing_check_utils.type_file tcopt fn defs
   end
 
 let check_file_input tcopt files_info fi =
   match fi with
   | ServerUtils.FileContent content ->
-      declare_and_check content ~f:(fun path _ -> path) tcopt
+      declare_and_check content ~f:(fun path _ tast -> path, tast) tcopt
   | ServerUtils.FileName fn ->
       let path = Relative_path.create Relative_path.Root fn in
-      let () = match Relative_path.Map.get files_info path with
-        | Some fileinfo -> recheck tcopt [(path, fileinfo)]
-        | None -> () in
-      path
+      match Relative_path.Map.get files_info path with
+      | Some fileinfo -> List.hd_exn (recheck tcopt [(path, fileinfo)])
+      | None -> path, []

@@ -38,10 +38,10 @@ let () =
    * usage of "lazy" in Decl_class.to_class_type). We need to ensure that if
    * we remove what they refer to (which declare_and_check does at the end,
    * by popping LocalChanges) we remove Foo too ...*)
-  ServerIdeUtils.declare_and_check bar_contents ~f:(fun _ _ -> ()) tcopt;
+  ServerIdeUtils.declare_and_check bar_contents ~f:(fun _ _ _ -> ()) tcopt;
   (* ... but we used to fail to do this fully - Foo could escape through
    * Typing_heap.Classes.Cache, which was not invalidated.
    * During analysis of baz below, we would retrieve Foo and try to use its
    * members, which are missing, crashing the server *)
-  ServerIdeUtils.declare_and_check baz_contents ~f:(fun _ _ -> ()) tcopt;
+  ServerIdeUtils.declare_and_check baz_contents ~f:(fun _ _ _ -> ()) tcopt;
   ignore env

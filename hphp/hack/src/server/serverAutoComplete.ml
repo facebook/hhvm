@@ -13,7 +13,7 @@
 (* Code for auto-completion *)
 (*****************************************************************************)
 
-let get_results ~(tcopt:TypecheckerOptions.t) ~(delimit_on_namespaces:bool) _ (file_info:FileInfo.t)
+let get_results ~(tcopt:TypecheckerOptions.t) ~(delimit_on_namespaces:bool) _ (file_info:FileInfo.t) _
   : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t =
   let {
     FileInfo.n_funs = content_funs; n_classes = content_classes; _

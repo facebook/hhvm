@@ -114,7 +114,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   if (checkCachedPrologue(func, nArgs)) return false;
 
   if (retranslateAllEnabled()) {
-    info.prologues.emplace_back(rec);
+    info.translations.emplace_back(rec);
   } else {
     tc::emitFuncPrologueOpt(rec);
   }

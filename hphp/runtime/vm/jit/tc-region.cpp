@@ -45,6 +45,7 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/treadmill.h"
 
+#include "hphp/util/match.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
@@ -298,8 +299,13 @@ void invalidateFuncProfSrcKeys(const Func* func) {
 size_t infoSize(const FuncMetaInfo& info) {
   size_t sz = 0;
   for (auto& trans : info.translations) {
-    auto& range = trans.range;
-    sz += range.main.size() + range.cold.size() + range.frozen.size();
+    match<void>(
+      trans,
+      [&] (ProfTransRec* rec) { },
+      [&] (const TransMetaInfo& info) {
+        auto& range = info.range;
+        sz += range.main.size() + range.cold.size() + range.frozen.size();
+      });
   }
   return sz;
 }
@@ -326,27 +332,32 @@ void publishOptFunctionInternal(FuncMetaInfo info,
                                  TransKind::OptPrologue);
   }
 
-  for (auto const rec : info.prologues) {
-    emitFuncPrologueOptInternal(rec);
-  }
-
   invalidateFuncProfSrcKeys(func);
 
+  // Publish all prologues and translations for func in order.
   for (auto& trans : info.translations) {
-    auto const regionSk = trans.sk;
-    auto& range = trans.range;
-    auto bytes = range.main.size() + range.cold.size() + range.frozen.size();
-    auto const loc = publishTranslationInternal(
-      std::move(trans), info.tcBuf.view()
-    );
-    if (loc &&
-        regionSk.offset() == func->base() &&
-        !func->hasThisVaries() &&
-        func->getDVFunclets().size() == 0) {
-      func->setFuncBody(loc->mainStart());
-    } else if (!loc && failedBytes) {
-      *failedBytes += bytes;
-    }
+    match<void>(
+      trans,
+      [&] (ProfTransRec* rec) {
+        emitFuncPrologueOptInternal(rec);
+      },
+      [&] (TransMetaInfo& tmi) {
+        auto const regionSk = tmi.sk;
+        auto& range = tmi.range;
+        auto bytes = range.main.size() + range.cold.size() +
+                     range.frozen.size();
+        auto const loc = publishTranslationInternal(
+          std::move(tmi), info.tcBuf.view()
+        );
+        if (loc &&
+            regionSk.offset() == func->base() &&
+            !func->hasThisVaries() &&
+            func->getDVFunclets().size() == 0) {
+          func->setFuncBody(loc->mainStart());
+        } else if (!loc && failedBytes) {
+          *failedBytes += bytes;
+        }
+      });
   }
 }
 

@@ -100,8 +100,9 @@ struct FuncMetaInfo {
   FuncId fid;
   Func* func;
   LocalTCBuffer tcBuf;
-  std::vector<ProfTransRec*> prologues;
-  std::vector<TransMetaInfo> translations;
+
+  using Trans = boost::variant<ProfTransRec*,TransMetaInfo>;
+  std::vector<Trans> translations;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

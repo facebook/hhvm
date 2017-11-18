@@ -132,6 +132,7 @@ module Env : sig
   val scope : genv * lenv -> (genv * lenv -> 'a) -> 'a
   val scope_all : genv * lenv -> (genv * lenv -> 'a) -> all_locals * 'a
   val extend_all_locals : genv * lenv -> all_locals -> unit
+  val remove_locals : genv * lenv -> Ast.id list -> unit
   val pipe_scope : genv * lenv -> (genv * lenv -> N.expr) -> Local_id.t * N.expr
 
 end = struct
@@ -588,6 +589,11 @@ end = struct
     lenv.locals := lenv_copy;
     lenv.pending_locals := lenv_pending_copy;
     res
+
+  let remove_locals env vars =
+    let _genv, lenv = env in
+    lenv.locals :=
+      List.fold_left vars ~f:(fun l id -> SMap.remove (snd id) l) ~init:!(lenv.locals)
 
   let scope_all env f =
     let _genv, lenv = env in
@@ -1760,6 +1766,17 @@ module Make (GetLocals : GetLocals) = struct
           (cut_and_flatten ~replacement env rest)
     | x :: rest -> x :: (cut_and_flatten ~replacement env rest)
 
+  and get_using_vars e =
+    match snd e with
+    | Expr_list using_clauses ->
+      List.concat_map using_clauses get_using_vars
+      (* Simple assignment to local of form `$lvar = e` *)
+    | Binop (Ast.Eq None, (_, Lvar lvar), _) ->
+      [lvar]
+      (* Arbitrary expression. This will be assigned to a temporary *)
+    | _ ->
+      []
+
   and stmt env st =
     match st with
     | Block _              -> assert false
@@ -1848,8 +1865,10 @@ module Make (GetLocals : GetLocals) = struct
 
   (* Scoping is essentially that of do: block is always executed *)
   and using_stmt env has_await e b =
+    let vars = get_using_vars e in
     let e = expr env e in
     let b = block ~new_scope:false env b in
+    Env.remove_locals env vars;
     N.Using (has_await, e, b)
 
   and for_stmt env e1 e2 e3 b =

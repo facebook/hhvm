@@ -1105,7 +1105,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
                                       |> Str.split (Str.regexp "_")
                                       |> String.concat "" in
         (* TODO(17796330): Get rid of linter functionality in the lowerer *)
-        if s <> String.lowercase s then Lint.lowercase_constant pos s;
+        if s <> String.lowercase_ascii s then Lint.lowercase_constant pos s;
         begin match location with
         | InDoubleQuotedString -> String (pos, mkStr unesc_dbl s)
         | InBacktickedString -> String (pos, mkStr Php_escaping.unescape_backtick s)

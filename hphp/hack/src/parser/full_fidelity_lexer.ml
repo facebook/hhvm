@@ -1417,7 +1417,7 @@ let as_case_insensitive_keyword text =
      in strict mode. *)
   (* TODO: Consider making these illegal, period, and code-modding away all
   non-lower versions in our codebase. *)
-  let lower = String.lowercase text in
+  let lower = String.lowercase_ascii text in
   match lower with
   | "eval" | "isset" | "unset" | "empty" | "const" | "new"
   | "and"  | "or"    | "xor"  | "as" | "print" | "throw"

@@ -76,7 +76,7 @@ module Make(S : SearchUtils.Searchable) = struct
 
     let process_term_for_search key =
       (* When performing user searches, we want them to be case-insensitive *)
-      process_term (String.lowercase key)
+      process_term (String.lowercase_ascii key)
 
     let update fn trie_defs =
       SearchUpdates.add fn trie_defs;
@@ -247,7 +247,7 @@ module Make(S : SearchUtils.Searchable) = struct
         { With_complete_flag.is_complete = false; value = !results; }
 
     let search_query input type_ =
-      let input = String.lowercase input in
+      let input = String.lowercase_ascii input in
       (* We allow all None classes through the filter *)
       let compute_score str key res =
         match type_ with
@@ -255,7 +255,7 @@ module Make(S : SearchUtils.Searchable) = struct
           None
         | _ -> begin
           let score =
-            if string_starts_with (String.lowercase res.name) str
+            if string_starts_with (String.lowercase_ascii res.name) str
             then get_score res str
             else (String.length key) * 2
           in Some (res, score)

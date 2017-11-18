@@ -99,7 +99,7 @@ let internal_error pos msg =
   add 0 Lint_error pos ("Internal error: "^msg)
 
 let lowercase_constant pos cst =
-  let lower = String.lowercase cst in
+  let lower = String.lowercase_ascii cst in
   add Codes.lowercase_constant Lint_warning pos
     (spf "Please use '%s' instead of '%s'" lower cst)
 

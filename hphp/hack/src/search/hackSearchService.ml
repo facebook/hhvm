@@ -44,7 +44,7 @@ module WorkerApi = struct
   let clean_key key =
     if (String.length key) > 0
     then
-      let key = String.lowercase (Utils.strip_ns key) in
+      let key = String.lowercase_ascii (Utils.strip_ns key) in
       if (String.length key) > 0 && key.[0] = ':'
       then String.sub key 1 (String.length key - 1)
       else key

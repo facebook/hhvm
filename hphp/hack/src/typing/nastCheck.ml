@@ -346,7 +346,7 @@ let rec fun_ tenv f named_body =
 
 and func env f named_body =
   let p, fname = f.f_name in
-  let fname_lower = String.lowercase (strip_ns fname) in
+  let fname_lower = String.lowercase_ascii (strip_ns fname) in
   if fname_lower = SN.Members.__construct || fname_lower = "using"
   then Errors.illegal_function_name p fname;
   check_coroutines_enabled (f.f_fun_kind = Ast.FCoroutine) env p;
@@ -849,7 +849,7 @@ and method_ (env, is_static) m =
   (match env.class_name with
   | Some cname ->
       let p, mname = m.m_name in
-      if String.lowercase (strip_ns cname) = String.lowercase mname
+      if String.lowercase_ascii (strip_ns cname) = String.lowercase_ascii mname
           && env.class_kind <> Some Ast.Ctrait
       then Errors.dangerous_method_name p
       else ()

@@ -3303,16 +3303,16 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
           ("Parse error: "^r^" is supported only as a toplevel "^
           "declaration");
       expr_import r env pos
-  | x when not class_const && String.lowercase x = "true" ->
+  | x when not class_const && String.lowercase_ascii x = "true" ->
       Lint.lowercase_constant pos x;
       pos, True
-  | x when not class_const && String.lowercase x = "false" ->
+  | x when not class_const && String.lowercase_ascii x = "false" ->
       Lint.lowercase_constant pos x;
       pos, False
-  | x when not class_const && String.lowercase x = "null" ->
+  | x when not class_const && String.lowercase_ascii x = "null" ->
       Lint.lowercase_constant pos x;
       pos, Null
-  | x when String.lowercase x = "array" ->
+  | x when String.lowercase_ascii x = "array" ->
       expr_array env pos
   | x ->
       pos, Id (pos, x)

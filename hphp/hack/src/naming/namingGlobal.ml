@@ -23,7 +23,7 @@ module SN = Naming_special_names
 (* The types *)
 (*****************************************************************************)
 
-let canon_key = String.lowercase
+let canon_key = String.lowercase_ascii
 
 module GEnv = struct
   let get_full_pos popt (pos, name) =

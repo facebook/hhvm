@@ -544,7 +544,7 @@ end = struct
       Hashtbl.replace tbl x p
 
   let bind_class_const (genv, _env) (p, x) =
-    if String.lowercase x = "class" then Errors.illegal_member_variable_class p;
+    if String.lowercase_ascii x = "class" then Errors.illegal_member_variable_class p;
     bind_class_member genv.class_consts (p, x)
 
   let bind_prop (genv, _env) x =
@@ -672,7 +672,7 @@ let is_alok_type_name (_, x) = String.length x <= 2 && x.[0] = 'T'
 
 let check_constraint (_, (pos, name), _) =
   (* TODO refactor this in a separate module for errors *)
-  if String.lowercase name = "this"
+  if String.lowercase_ascii name = "this"
   then Errors.this_reserved pos
   else if name.[0] <> 'T' then Errors.start_with_T pos
 
@@ -911,7 +911,7 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Classes.cClassname && (List.length hl) <> 1 ->
           Errors.classname_param p;
           N.Hprim N.Tstring
-      | _ when String.lowercase x = SN.Typehints.this ->
+      | _ when String.lowercase_ascii x = SN.Typehints.this ->
           Errors.lowercase_this p x;
           N.Hany
       | _ when SMap.mem x params ->
@@ -933,7 +933,7 @@ module Make (GetLocals : GetLocals) = struct
    * have to handle the remaining cases. *)
   and try_castable_hint ?(forbid_this=false) env p x hl =
     let hint = hint ~forbid_this ~allow_retonly:false in
-    let canon = String.lowercase x in
+    let canon = String.lowercase_ascii x in
     let opt_hint = match canon with
       | nm when nm = SN.Typehints.int    -> Some (N.Hprim N.Tint)
       | nm when nm = SN.Typehints.bool   -> Some (N.Hprim N.Tbool)

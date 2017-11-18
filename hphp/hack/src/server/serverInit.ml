@@ -63,7 +63,9 @@ module ServerInitCommon = struct
       Hh_logger.log
         "Reading the dependency file took (sec): %d" read_deptable_time;
       HackEventLogger.load_deptable_end read_deptable_time;
-    with SharedMem.Sql_assertion_failure 11 as e -> (* SQL_corrupt *)
+    with
+    | SharedMem.Sql_assertion_failure 11
+    | SharedMem.Sql_assertion_failure 14 as e -> (* SQL_corrupt *)
       LoadScriptUtils.delete_corrupted_saved_state fn;
       raise e
 
@@ -272,19 +274,40 @@ module ServerInitCommon = struct
       )) in
       Core_result.try_with (fun () -> fun () -> Ok get_dirty_files)
     | Load_state_natively use_canary ->
-      Core_result.try_with begin fun () -> fun () ->
-        let result = invoke_loading_state_natively ~use_canary ~tiny genv root in
-        begin match result, tiny with
-        | Error _, true ->
-          (* Turn off use tiny state *)
-          HackEventLogger.set_use_tiny_state false;
-          invoke_loading_state_natively ~use_canary ~tiny:false genv root
-        | _ -> result
-        end
-      end
+      Ok (fun () ->
+        try
+          let result = invoke_loading_state_natively ~use_canary ~tiny genv root in
+          begin match result, tiny with
+          | Error _, true ->
+            (* If we can't find a saved state but don't throw an exception,
+              turn off tiny states and see if we have a regular one *)
+            HackEventLogger.set_use_tiny_state false;
+            invoke_loading_state_natively ~use_canary ~tiny:false genv root
+          | _ -> result
+          end
+        with
+        (** TODO: remove this after we migrate fully to tiny saved states.
+        This happens when the sql file doesn't exist because it's under a
+        different name, so Sql_assertion_failure 14 is thrown and we
+        should delete the saved state. We only need to do this for now because
+        we conflate tiny and non-tiny saved states and put them in the same
+        directory and misuse one as the other kind when the directory is filled
+         by some other process (or at an earlier time). *)
+        (* If it fails, we delete the corrupted saved state and try again *)
+        | SharedMem.Sql_assertion_failure 14 ->
+          invoke_loading_state_natively ~use_canary ~tiny genv root)
     | Load_state_natively_with_target target ->
-      Core_result.try_with (fun () -> fun () ->
-        invoke_loading_state_natively ~tiny ~target genv root)
+      Ok (fun () ->
+        let is_tiny = target.ServerMonitorUtils.is_tiny in
+        try
+          HackEventLogger.set_use_tiny_state is_tiny;
+
+          invoke_loading_state_natively ~tiny:is_tiny ~target genv root
+        with
+        | SharedMem.Sql_assertion_failure 14 ->
+          (* TODO: Remove this after we migrate fully to tiny saved states. See above docs. *)
+          (* If it fails, we delete the corrupted saved state and try again *)
+          invoke_loading_state_natively ~tiny:is_tiny ~target genv root)
 
   let is_check_mode options =
     ServerArgs.check_mode options &&

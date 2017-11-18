@@ -92,6 +92,7 @@ let test_informant_restarts_significant_move temp_dir =
     "state leave significant distance";
   let expected_state_target = {
     ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_200";
+    is_tiny = false;
     target_svn_rev = 200;
   } in
   Tools.test_transition
@@ -139,6 +140,7 @@ let test_informant_restarts_significant_move temp_dir =
     "state leave significant distance";
   let expected_state_target = {
     ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_5";
+    is_tiny = false;
     target_svn_rev = 5;
   } in
   Tools.test_transition

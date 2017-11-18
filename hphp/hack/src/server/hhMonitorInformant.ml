@@ -27,7 +27,7 @@ module Revision_map = struct
     type t =
       {
         svn_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Hashtbl.t;
-        xdb_queries : (int, Xdb.sql_result list Future.t) Hashtbl.t;
+        xdb_queries : (int, (Xdb.sql_result list Future.t * (** is tiny state *) bool)) Hashtbl.t;
         use_xdb : bool;
       }
 
@@ -71,36 +71,37 @@ module Revision_map = struct
         | Not_found ->
           let hhconfig_hash, _config = Config_file.parse
             (Relative_path.to_absolute ServerConfig.filename) in
+          let local_config = ServerLocalConfig.load ~silent:true in
+          let tiny = local_config.ServerLocalConfig.load_tiny_state in
           (** Query doesn't exist yet, so we create one and consume it when
            * it's ready. *)
           let future = begin match hhconfig_hash with
-          | None ->
-            (** Have no config file hash.
-             * Just return a fake empty list of XDB results. *)
-            Future.of_value []
-          | Some hhconfig_hash ->
-            let local_config = ServerLocalConfig.load ~silent:true in
-            let tiny = local_config.ServerLocalConfig.load_tiny_state in
-            Xdb.find_nearest
-              ~db:Xdb.hack_db_name
-              ~db_table:Xdb.mini_saved_states_table
-              ~svn_rev
-              ~hh_version:Build_id.build_revision
-              ~hhconfig_hash
-              ~tiny
+            | None ->
+              (** Have no config file hash.
+               * Just return a fake empty list of XDB results. *)
+              Future.of_value []
+            | Some hhconfig_hash ->
+              Xdb.find_nearest
+                ~db:Xdb.hack_db_name
+                ~db_table:Xdb.mini_saved_states_table
+                ~svn_rev
+                ~hh_version:Build_id.build_revision
+                ~hhconfig_hash
+                ~tiny
           end in
-          let () = Hashtbl.add t.xdb_queries svn_rev future in
+          let () = Hashtbl.add t.xdb_queries svn_rev (future, tiny) in
           None
       in
       let open Option in
-      query >>= fun future ->
+      query >>= fun (future, is_tiny) ->
         if Future.is_ready future then
           (** If query fails, return empty list. *)
-          Some (Future.get future
+          let result = Future.get future
             |> Core_result.map_error ~f:Future.error_to_string
             |> Core_result.map_error ~f:HackEventLogger.find_xdb_match_failed
             |> Core_result.ok
-            |> Option.value ~default:[])
+            |> Option.value ~default:[] in
+          Some (result, is_tiny)
         else
           None
 
@@ -110,10 +111,10 @@ module Revision_map = struct
       svn_rev >>= fun svn_rev ->
         if t.use_xdb then
           find_xdb_match svn_rev t
-          >>= fun xdb_results ->
-            Some(svn_rev, xdb_results)
+          >>= fun (xdb_results, is_tiny) ->
+            Some(svn_rev, xdb_results, is_tiny)
         else
-          Some(svn_rev, [])
+          Some(svn_rev, [], false)
 
 end
 
@@ -259,7 +260,7 @@ module Revision_tracker = struct
    * svn_rev: The corresponding SVN rev for this transition's hg rev.
    * xdb_results: The nearest saved states for this svn_rev provided by the XDB table.
    *)
-  let form_decision is_significant transition server_state xdb_results svn_rev env =
+  let form_decision ~is_tiny is_significant transition server_state xdb_results svn_rev env =
     let use_xdb = env.inits.use_xdb in
     let open Informant_sig in
     match is_significant, transition, server_state, xdb_results with
@@ -294,6 +295,7 @@ module Revision_tracker = struct
         let target_state = {
           ServerMonitorUtils.mini_state_everstore_handle = nearest_xdb_result.Xdb.everstore_handle;
           target_svn_rev = nearest_xdb_result.Xdb.svn_rev;
+          is_tiny;
         } in
         Restart_server (Some target_state)
       else
@@ -316,13 +318,13 @@ module Revision_tracker = struct
     match cached_svn_rev env.rev_map hg_rev with
     | None ->
       None
-    | Some (svn_rev, xdb_results) ->
+    | Some (svn_rev, xdb_results, is_tiny) ->
       let distance = float_of_int @@ get_distance svn_rev env in
       let elapsed_t = (Unix.time () -. timestamp) in
       let significant = is_significant
         ~min_distance_restart:env.inits.min_distance_restart
         distance elapsed_t in
-      Some (form_decision significant
+      Some (form_decision ~is_tiny significant
         transition server_state xdb_results svn_rev env, svn_rev)
 
   (**

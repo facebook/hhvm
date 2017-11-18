@@ -218,14 +218,16 @@ module ServerInitCommon = struct
       raise e
 
   let invoke_loading_state_natively ~tiny ?(use_canary=false) ?target genv root =
-    let mini_state_handle = begin match target with
-    | None -> None
-    | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; } ->
+    let mini_state_handle, tiny = begin match target with
+    | None -> None, tiny
+    | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; is_tiny; } ->
+      let handle =
       Some
       {
         State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
         mini_state_for_rev = (Hg.Svn_rev target_svn_rev);
-      }
+      } in
+      handle, is_tiny
     end in
     let native_load_error e = raise (Native_loader_failure (State_loader.error_string e)) in
     State_loader.mk_state_future ~use_canary ?mini_state_handle

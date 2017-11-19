@@ -113,8 +113,8 @@ let do_in_finally_body env s f =
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 
-let do_in_using_body env s f =
-  Jump_targets.with_using (is_hh_file ())
+let do_in_using_body finally_label env s f =
+  Jump_targets.with_using (is_hh_file ()) finally_label
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 

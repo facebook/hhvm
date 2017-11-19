@@ -110,7 +110,7 @@ type region =
   | TryFinally of (*finally start*) Label.t * SSet.t
   | Finally of SSet.t
   | Function of SSet.t
-  | Using of SSet.t
+  | Using of (*finally start*) Label.t * SSet.t
 
 type t = region list
 
@@ -209,9 +209,9 @@ let run_and_release_ids labels f s t =
   | Loop ({ label_break; label_continue; _ }, _) ::_ ->
     release_id label_break;
     release_id label_continue;
-  | (Switch (l, _) | TryFinally (l, _)) :: _ ->
+  | (Switch (l, _) | TryFinally (l, _) | Using (l, _)) :: _ ->
     release_id l
-  | (Function _ | Finally _ | Using _) :: _ -> ()
+  | (Function _ | Finally _) :: _ -> ()
   | [] -> failwith "impossible"
   end;
   SSet.iter (fun l -> release_id (Label.Named l)) labels;
@@ -242,9 +242,9 @@ let with_function is_hh_file t s f =
   Function labels :: t
   |> run_and_release_ids labels f s
 
-let with_using is_hh_file t s f =
+let with_using is_hh_file finally_label t s f =
   let labels = collect_valid_target_labels_for_stmt is_hh_file s in
-  Using labels :: t
+  Using (finally_label, labels) :: t
   |> run_and_release_ids labels f s
 
 type resolved_try_finally =
@@ -283,7 +283,7 @@ let get_target_for_level ~is_break level t =
       (* looked through the entires list of jump targets and still cannot find a
          target for a requested level - bad luck *)
       NotFound
-    | TryFinally (finally_label, _) :: tl ->
+    | (Using (finally_label, _) | TryFinally (finally_label, _)) :: tl ->
       if skip_try_finally then aux ~skip_try_finally n tl iters
       else
       (* we need to jump out of try body in try/finally - in order to do this
@@ -311,8 +311,6 @@ let get_target_for_level ~is_break level t =
       aux ~skip_try_finally (n - 1) tl (add_iterator iterator iters)
     | Switch _ :: tl ->
       aux ~skip_try_finally (n - 1) tl iters
-    | Using _ :: tl ->
-      aux ~skip_try_finally n tl iters
     | Finally _ :: _ ->
       (* jumps out of finally body are disallowed *)
       NotFound
@@ -323,7 +321,7 @@ let get_closest_enclosing_finally_label t =
   let rec aux l iters =
     match l with
     | [] -> None
-    | TryFinally (l, _) :: _ -> Some (l, iters)
+    | (Using (l, _) | TryFinally (l, _)) :: _ -> Some (l, iters)
     | Loop ({ iterator; _ }, _) :: tl -> aux tl (add_iterator iterator iters)
     | _ :: tl -> aux tl iters
   in aux t []
@@ -348,11 +346,10 @@ let find_goto_target t label =
     | Loop ({ iterator; _ }, labels) :: tl ->
       if SSet.mem label labels then ResolvedGoto_label iters
       else aux tl (add_iterator iterator iters)
-    | Using labels :: tl
     | Switch (_, labels) :: tl ->
       if SSet.mem label labels then ResolvedGoto_label iters
       else aux tl iters
-    | TryFinally (finally_start, labels) :: _ ->
+    | (Using (finally_start, labels) | TryFinally (finally_start, labels)) :: _ ->
       if SSet.mem label labels then ResolvedGoto_label iters
       else ResolvedGoto_finally {
         rgf_finally_start_label = finally_start;

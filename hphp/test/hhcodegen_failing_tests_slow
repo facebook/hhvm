@@ -71,4 +71,3 @@ slow/reflection/param_tostring_zendcompat.php
 slow/reflection_classes/xhp.php
 slow/traits/1981.php
 slow/using/goto.php
-slow/using/loops.php

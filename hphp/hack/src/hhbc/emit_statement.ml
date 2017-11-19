@@ -243,8 +243,7 @@ let rec emit_stmt env st =
       Ast.us_expr = e; Ast.us_block = b;
       Ast.us_is_block_scoped = is_block_scoped
     } ->
-    Emit_env.do_in_using_body env (A.Block b) @@
-      fun env s -> emit_using env is_block_scoped has_await e s
+    emit_using env is_block_scoped has_await e ((A.Block b))
   | A.Break (pos, level_opt) ->
     emit_break env pos (get_level pos "break" level_opt)
   | A.Continue (pos, level_opt) ->
@@ -401,6 +400,7 @@ and emit_using env is_block_scoped has_await e b =
         })
       ~init:b
   | _ ->
+    Local.scope @@ begin fun () ->
     let local, preamble = match snd e with
       | A.Binop (A.Eq None, (_, A.Lvar (_, id)), _)
       | A.Lvar (_, id) ->
@@ -409,8 +409,14 @@ and emit_using env is_block_scoped has_await e b =
         let l = Local.get_unnamed_local () in
         l, gather [emit_expr ~need_ref:false env e; instr_setl l; instr_popc]
     in
-    let fault_label = Label.next_fault () in
-    let body = emit_stmt env b in
+    let finally_start = Label.next_regular () in
+    let finally_end = Label.next_regular () in
+    let body = Emit_env.do_in_using_body finally_start env b emit_stmt in
+    let jump_instructions = TFR.collect_jump_instructions body env in
+    let body =
+      if IMap.is_empty jump_instructions then body
+      else TFR.cleanup_try_body body
+    in
     let fn_name = Hhbc_id.Method.from_raw_string @@
       if has_await then "__disposeAsync" else "__dispose"
     in
@@ -432,7 +438,20 @@ and emit_using env is_block_scoped has_await e b =
         if is_block_scoped then instr_unsetl local else empty;
       ]
     in
-    let fault = gather [ finally; instr_unwind ] in
+    let finally_epilogue =
+      TFR.emit_finally_epilogue
+        env Pos.none ~verify_return:!verify_return ~verify_out:!verify_out
+        jump_instructions finally_end
+    in
+    let cleanup_local =
+      gather [
+        instr_unsetl (Local.get_label_id_local ());
+        instr_unsetl (Local.get_retval_local ()) ] in
+    let fault = gather [
+      cleanup_local;
+      finally;
+      instr_unwind ] in
+    let fault_label = Label.next_fault () in
     let middle =
       if is_empty_block b then empty
       else instr_try_fault fault_label body fault
@@ -440,8 +459,12 @@ and emit_using env is_block_scoped has_await e b =
     gather [
       preamble;
       middle;
+      instr_label finally_start;
       finally;
+      finally_epilogue;
+      instr_label finally_end;
     ]
+    end
 
 and emit_do env b e =
   let cont_label = Label.next_regular () in

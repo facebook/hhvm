@@ -194,7 +194,7 @@ public:
   static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
 
   static void Release(ArrayData*);
-  static void ReleaseUncounted(ArrayData*, size_t);
+  static void ReleaseUncounted(ArrayData*, size_t extra = 0);
   /*
    * Recursively register {allocation, rootAPCHandle} with APCGCManager
    */

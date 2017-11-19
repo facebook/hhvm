@@ -1808,7 +1808,7 @@ let rec check_constant_expression errors node =
             TokenKind.ExclamationEqual | TokenKind.ExclamationEqualEqual |
             TokenKind.GreaterThan | TokenKind.GreaterThanEqual |
             TokenKind.LessThan | TokenKind.LessThanEqual |
-            TokenKind.LessThanEqualGreaterThan
+            TokenKind.LessThanEqualGreaterThan | TokenKind.QuestionColon
           ); _
         }; _
       }
@@ -1891,7 +1891,8 @@ let rec check_constant_expression errors node =
              TokenKind.Function | TokenKind.If | TokenKind.Finally |
              TokenKind.For | TokenKind.Foreach | TokenKind.Case |
              TokenKind.Do | TokenKind.While | TokenKind.As | TokenKind.Catch |
-             TokenKind.Empty | TokenKind.Using | TokenKind.Class
+             TokenKind.Empty | TokenKind.Using | TokenKind.Class | TokenKind.NullLiteral |
+             TokenKind.Super | TokenKind.Where
              ); _
         }; _
       }; _

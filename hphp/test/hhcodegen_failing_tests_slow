@@ -3,7 +3,6 @@ slow/anon_class/extend_local.php
 slow/class_type_constant/type_constant.php
 slow/class_type_constant/type_constant6.php
 slow/concat/1578.php
-slow/constant/const_expr.php
 slow/constant/true_false_null.php
 slow/ext_misc/ext_misc.php
 slow/ext_phar/composer.php

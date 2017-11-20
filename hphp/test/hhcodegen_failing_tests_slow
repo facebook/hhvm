@@ -48,9 +48,6 @@ slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-3.php
 slow/parser/hh-namespace-conflict-6.php
 slow/parser/php-namespace-conflict-3.php
-slow/php7_backported/ns_089.php
-slow/php7_backported/ns_090.php
-slow/php7_backported/ns_092.php
 slow/php7_backported/ns_093.php
 slow/php7_backported/scalar-types/scalar_relative_typehint_disallowed.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_008.php

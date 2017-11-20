@@ -1980,6 +1980,7 @@ and pNamespaceUseClause ~prefix env kind node =
   | NamespaceUseClause
     { namespace_use_name  = name
     ; namespace_use_alias = alias
+    ; namespace_use_clause_kind = clause_kind
     ; _ } ->
     let p, n as name =
       match prefix, pos_name name env with
@@ -1988,6 +1989,7 @@ and pNamespaceUseClause ~prefix env kind node =
     in
     let x = Str.search_forward (Str.regexp "[^\\\\]*$") n 0 in
     let key = drop_pstr x name in
+    let kind = if is_missing clause_kind then kind else clause_kind in
     let kind =
       match syntax kind with
       | Token { Token.kind = TK.Namespace; _ } -> NSNamespace

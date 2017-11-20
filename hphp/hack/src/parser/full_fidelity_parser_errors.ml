@@ -1636,10 +1636,18 @@ let alias_errors node errors =
       make_error_from_node alias_keyword SyntaxError.error2034 :: errors
   | _ -> errors
 
-let is_invalid_group_use_clause clause =
+let is_invalid_group_use_clause kind clause =
   match syntax clause with
-  | NamespaceUseClause { namespace_use_clause_kind = kind; _ } ->
-    not (is_missing kind)
+  | NamespaceUseClause { namespace_use_clause_kind = clause_kind; _ } ->
+    if is_missing kind
+    then
+      begin match syntax clause_kind with
+      | Missing
+      | Token { PositionedToken.kind = (TokenKind.Function | TokenKind.Const); _ }
+        -> false
+      | _ -> true
+      end
+    else not (is_missing clause_kind)
   | _ -> false
 
 let is_invalid_group_use_prefix prefix =
@@ -1650,14 +1658,15 @@ let group_use_errors node errors =
   | NamespaceGroupUseDeclaration
     { namespace_group_use_prefix = prefix
     ; namespace_group_use_clauses = clauses
+    ; namespace_group_use_kind = kind
     ; _} ->
-      let invalid_clauses = List.filter is_invalid_group_use_clause
-        (syntax_to_list_no_separators clauses) in
-      let mapper errors clause =
-        make_error_from_node clause SyntaxError.error2049 :: errors in
-      let invalid_clause_errors =
+      let errors =
+        let invalid_clauses = List.filter (is_invalid_group_use_clause kind)
+          (syntax_to_list_no_separators clauses) in
+        let mapper errors clause =
+          make_error_from_node clause SyntaxError.error2049 :: errors in
         List.fold_left mapper errors invalid_clauses in
-      produce_error invalid_clause_errors is_invalid_group_use_prefix prefix
+      produce_error errors is_invalid_group_use_prefix prefix
         SyntaxError.error2048 prefix
   | _ -> errors
 

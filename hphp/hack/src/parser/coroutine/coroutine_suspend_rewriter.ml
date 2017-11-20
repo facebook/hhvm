@@ -19,7 +19,7 @@ let failwithf fmt = Printf.ksprintf failwith fmt
 
 let make_return_actual_coroutine_result_syntax expr =
   let return_expression = make_object_creation_expression_syntax
-    "ActualCoroutineResult" [expr] in
+    "\\ActualCoroutineResult" [expr] in
   make_return_statement_syntax return_expression
 
 (**

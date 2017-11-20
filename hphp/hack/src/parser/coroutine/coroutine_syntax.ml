@@ -109,7 +109,7 @@ let global_syntax =
   make_name_syntax "Global"
 
 let unit_syntax =
-  make_name_syntax "CoroutineUnit"
+  make_name_syntax "\\CoroutineUnit"
 
 let unit_type_syntax =
   make_simple_type_specifier unit_syntax
@@ -211,7 +211,7 @@ let unset_syntax =
   make_name_syntax "unset"
 
 let exception_type_syntax =
-  make_name_syntax "Exception"
+  make_name_syntax "\\Exception"
     |> make_simple_type_specifier
 
 let constructor_member_name =
@@ -695,11 +695,11 @@ let continuation_variable_syntax =
   make_variable_expression_syntax continuation_variable
 
 let make_closure_base_type_syntax function_type =
-  make_type_specifier_syntax "ClosureBase" [ function_type; ]
+  make_type_specifier_syntax "\\ClosureBase" [ function_type; ]
 
 let make_continuation_type_syntax function_type =
   make_type_specifier_syntax
-    "InternalCoroutineContinuation"
+    "\\InternalCoroutineContinuation"
     [ function_type; ]
 
 let make_continuation_parameter_syntax
@@ -715,10 +715,10 @@ let make_continuation_closure_parameter_syntax function_type =
     (make_continuation_type_syntax function_type)
 
 let make_coroutine_result_type_syntax function_type =
-  make_type_specifier_syntax "CoroutineResult" [ function_type; ]
+  make_type_specifier_syntax "\\CoroutineResult" [ function_type; ]
 
 let suspended_coroutine_result_classname_syntax =
-  make_qualified_name_syntax "SuspendedCoroutineResult"
+  make_qualified_name_syntax "\\SuspendedCoroutineResult"
 
 let suspended_member_name =
   "create"
@@ -883,7 +883,7 @@ let nullable_exception_parameter_syntax =
 let throw_unimplemented_syntax reason =
   let create_exception_syntax =
     make_object_creation_expression_syntax
-      "Exception"
+      "\\Exception"
       [make_string_literal_syntax reason] in
   make_throw_statement_syntax create_exception_syntax
 
@@ -929,7 +929,7 @@ let make_member_with_unknown_type_declaration_syntax variable_name =
   make_property_declaration_syntax (make_missing ()) declaration_syntax
 
 let coroutine_unit_classname_syntax =
-  make_qualified_name_syntax "CoroutineUnit"
+  make_qualified_name_syntax "\\CoroutineUnit"
 
 (* CoroutineUnit::create() *)
 let coroutine_unit_call_syntax =

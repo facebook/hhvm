@@ -211,48 +211,118 @@ let lower_coroutine_functions_and_types
   | _ ->
     (current_acc, Rewriter.Result.Keep)
 
-(*
-We are working around a significant shortcoming of HHVM here.  We are supposed
-to have an invariant that the order in which type declarations appear in a
-Hack file is irrelevant, but this is not the case:
+(**
+ * Appends the rewritten declaration onto the list of closures that were
+ * generated when rewritting that declaration
+ *)
+let combine_declaration closures declaration =
+  if is_classish_declaration declaration
+  then declaration :: closures
+  else closures @ [ declaration; ]
 
-interface I {}
-class B implements I {}
-new D(); // Crashes here at runtime
-class D extends B {}
+(**
+ * Namespace declarations are a little harder to rewrite because we need to
+ * ensure that any closures that are generated from code within the namespace
+ * remain in the namespace. Additionally, since use statements can be used
+ * within a namespace body, it is necessary to partition the declarations in
+ * the namespace body
+ *)
+let rec rewrite_namespace_declaration node lambda_count =
+  match syntax node with
+  | NamespaceDeclaration ({
+    namespace_body = ({
+      syntax = NamespaceBody ({
+        namespace_declarations;
+        _;
+      } as namespace_body_s);
+      _ ;
+    } as namespace_body);
+    _ ;
+  } as namespace_declaration_s) ->
+    let namespace_declaration_list =
+      syntax_node_to_list namespace_declarations in
+    let (lambda_count, namespace_declarations) =
+      rewrite_declaration_acc lambda_count namespace_declaration_list in
+    let namespace_declarations = make_list namespace_declarations in
+    let namespace_body =
+      Syntax.synthesize_from
+        namespace_body
+        (NamespaceBody { namespace_body_s with namespace_declarations; }) in
+    let new_declaration =
+      Syntax.synthesize_from
+        node
+        (NamespaceDeclaration
+          { namespace_declaration_s with namespace_body; }) in
+    (([], lambda_count), new_declaration)
+  | _ -> (([], lambda_count), node)
 
-The crash is due to a peculiarity in how HHVM handles interfaces.
+(**
+ * Rewrites a top level declaration, appends the closures generated
+ * and then appends the result onto the accumulating list of rewritten
+ * declarations
+ *)
+and rewrite_declaration node (lambda_count, previous_declarations) =
+  let (closures, lambda_count), rewritten_node =
+    if is_namespace_declaration node
+    then
+      rewrite_namespace_declaration node lambda_count
+    else
+      Rewriter.parented_aggregating_rewrite_post
+        lower_coroutine_functions_and_types
+        node
+        ([], lambda_count) in
+  let closures = List.rev closures in
+  let rewritten_declaration = combine_declaration closures rewritten_node in
+  (lambda_count, rewritten_declaration @ previous_declarations)
 
-The closure classes extend the closure base, which implements an interface.
-We can therefore very easily get into this situation when generating closure
-classes at the end of a file.
+(**
+ * Rewrites a list of declarations, taking in a lambda count accumulator
+ *)
+and rewrite_declaration_acc lambda_count declaration =
+  List.fold_right
+    ~f:rewrite_declaration
+    ~init:(lambda_count, [])
+    declaration
 
-What we do then is gather up *all* the classes in a file, sort them to the
-top of the file, follow them with the closure classes, and then the rest
-of the code in the file.
+let rewrite_all_declarations declaration_list =
+  let _, rewritten_declarations =
+    rewrite_declaration_acc 0 declaration_list in
+  rewritten_declarations
 
-This unfortunate code can be removed when the bug is fixed in HHVM, and
-we can simply append the closure classes to the end of the list of
-declarations.
-*)
-let rewrite_script closures root =
-  match closures with
-  | [] -> root
-  | _ ->
-    begin match syntax root with
-    | Script { script_declarations } ->
-      let script_declarations = syntax_node_to_list script_declarations in
-      let (types, not_types) =
-        List.partition_tf script_declarations ~f:is_classish_declaration in
-      begin match not_types with
-      | h :: t -> make_script (make_list (h :: (types @ closures @ t)))
-      | [] -> failwith "How did we get a script with no header element?"
-      end
-    | _ -> failwith "How did we get a root that is not a script?"
-    end
+(**
+ Lowers all coroutines found in a script
 
+ We are working around a significant shortcoming of HHVM here.  We are supposed
+ to have an invariant that the order in which type declarations appear in a
+ Hack file is irrelevant, but this is not the case:
+
+ interface I {}
+ class B implements I {}
+ new D(); // Crashes here at runtime
+ class D extends B {}
+
+ The crash is due to a peculiarity in how HHVM handles interfaces.
+
+ The closure classes extend the closure base, which implements an interface.
+ We can therefore very easily get into this situation when generating closure
+ classes at the end of a file.
+
+ What we do then is gather up *all* the classes in a file, sort them to the
+ top of the file, follow them with the closure classes, and then the rest
+ of the code in the file.
+
+ This unfortunate code can be removed when the bug is fixed in HHVM, and
+ we can simply append the closure classes to the end of the list of
+ declarations.
+ *)
 let lower_coroutines root =
-  let ((closures, _), root) = Rewriter.parented_aggregating_rewrite_post
-    lower_coroutine_functions_and_types root ([], 0) in
-  root
-    |> rewrite_script (List.rev closures)
+  match syntax root with
+  | Script { script_declarations; } ->
+    let declarations = syntax_node_to_list script_declarations in
+    begin match declarations with
+    | hh_decl :: declarations ->
+      let rewritten_declarations = rewrite_all_declarations declarations in
+      let rewritten_declarations = hh_decl :: rewritten_declarations in
+      make_script (make_list rewritten_declarations)
+    | _ -> failwith "How did we get a script with no header element?" end
+  | _ -> failwith "How did we get a root that is not a script?"

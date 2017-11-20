@@ -891,11 +891,11 @@ module WithExpressionAndStatementAndTypeParser
     | Implements
     | Extends -> (parser1, make_token req_kind_token)
     | _ -> (with_error parser SyntaxError.error1045, make_missing parser) in
-    let (parser, name) = if is_next_xhp_class_name parser then
-      let (parser, token) = next_xhp_class_name parser in
-      (parser, make_token token)
-    else
-      parse_qualified_name_type parser in
+    let (parser, name) =
+      if is_next_xhp_class_name parser
+      then parse_possible_generic_specifier parser
+      else parse_qualified_name_type parser
+    in
     let (parser, semi) = require_semicolon parser in
     let result = make_require_clause req req_kind name semi in
     (parser, result)

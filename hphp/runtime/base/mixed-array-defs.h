@@ -413,6 +413,7 @@ void ReleaseUncountedTv(TypedValue& tv) {
     assert(!arr->isRefCounted());
     if (!arr->isStatic()) {
       if (arr->hasPackedLayout()) PackedArray::ReleaseUncounted(arr);
+      else if (arr->isKeyset()) SetArray::ReleaseUncounted(arr);
       else MixedArray::ReleaseUncounted(arr);
     }
     return;

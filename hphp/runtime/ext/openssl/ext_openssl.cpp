@@ -27,6 +27,7 @@
 #include <openssl/conf.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>
+#include <openssl/rand.h>
 #include <vector>
 
 namespace HPHP {
@@ -353,7 +354,7 @@ struct php_x509_request {
     *seeded = 0;
     if (file == nullptr) {
       file = RAND_file_name(buffer, sizeof(buffer));
-#ifndef OPENSSL_NO_RAND_EGD
+#if !defined(OPENSSL_NO_RAND_EGD) && !defined(OPENSSL_NO_EGD)
     } else if (RAND_egd(file) > 0) {
       /* if the given filename is an EGD socket, don't
        * write anything back to it */

@@ -99,11 +99,11 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, 
     if (pad && fmode) {
       siz += *decpt;
     }
-    if ((s = (char *)malloc(siz+1)) == NULL) {
+    if ((s = (char *)malloc(siz)) == NULL) {
       HPHP::zend_freedtoa(p);
       return(NULL);
     }
-    PHP_STRLCPY(s, p, siz, siz);
+    PHP_STRLCPY(s, p, siz, siz-1);
     rve = s + (rve - p);
     HPHP::zend_freedtoa(p);
   }

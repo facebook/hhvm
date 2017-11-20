@@ -183,6 +183,8 @@ let load_file file =
   content
 
 let parse_text compiler_options popt fn text =
+  let stats = Stats_container.new_container () in
+  let () = Stats_container.set_instance (Some stats) in
   match compiler_options.parser with
   | FFP ->
     let ignore_pos =
@@ -200,7 +202,9 @@ let parse_text compiler_options popt fn text =
       ~enable_hh_syntax
       fn
     in
-    Full_fidelity_ast.from_text_with_legacy env text
+    let parser_ret = Full_fidelity_ast.from_text_with_legacy env text in
+    let () = Stats_container.write_out ~out:stderr stats in
+    parser_ret
   | Legacy ->
     Parser_hack.program popt fn text
 

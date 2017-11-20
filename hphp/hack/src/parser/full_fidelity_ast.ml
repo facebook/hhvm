@@ -49,6 +49,7 @@ type env =
   ; parser_options           : ParserOptions.t
   ; fi_mode                  : FileInfo.mode
   ; file                     : Relative_path.t
+  ; stats                    : Stats_container.t option
   (* Changing parts; should disappear in future. `mutable` saves allocations. *)
   ; mutable ignore_pos       : bool
   ; mutable max_depth        : int    (* Filthy hack around OCaml bug *)
@@ -2408,6 +2409,7 @@ let make_env
   ?(enable_hh_syntax         = false                   )
   ?(parser_options           = ParserOptions.default   )
   ?(fi_mode                  = FileInfo.Mpartial       )
+  ?stats
   (file : Relative_path.t)
   : env
   = { hhvm_compat_mode
@@ -2427,6 +2429,7 @@ let make_env
     ; parser_options
     ; file
     ; fi_mode
+    ; stats
     ; ignore_pos
     ; saw_yield               = false
     ; max_depth               = 42

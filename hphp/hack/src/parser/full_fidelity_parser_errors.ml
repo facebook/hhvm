@@ -2182,7 +2182,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
 
 type error_level = Minimum | Typical | Maximum | HHVMCompatibility
 
-let parse_errors ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =
+let parse_errors_impl ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =
   (*
   Minimum: suppress cascading errors; no second-pass errors if there are
   any first-pass errors.
@@ -2198,3 +2198,9 @@ let parse_errors ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =
       ~enable_hh_syntax
       (level = HHVMCompatibility) syntax_tree in
   List.sort SyntaxError.compare (Core_list.append errors1 errors2)
+
+let parse_errors ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =
+  Stats_container.wrap_nullary_fn_timing
+    ?stats:(Stats_container.get_instance ())
+    ~key:"full_fidelity_parse_errors:parse_errors"
+    ~f:(fun () -> parse_errors_impl ~enable_hh_syntax ~level syntax_tree)

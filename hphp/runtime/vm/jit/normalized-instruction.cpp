@@ -58,6 +58,7 @@ NormalizedInstruction::NormalizedInstruction(SrcKey sk, const Unit* u)
   , preppedByRef(false)
   , ignoreInnerType(false)
   , interp(false)
+  , forceSurpriseCheck(false)
 {
   memset(imm, 0, sizeof(imm));
   populateImmediates(*this);

@@ -56,6 +56,9 @@ struct NormalizedInstruction {
    * to translate it has failed.
    */
   bool interp:1;
+  // The inst can be marked so that later on we emit a surprise check
+  // in front of it.
+  bool forceSurpriseCheck:1;
 
   Op op() const;
   PC pc() const;

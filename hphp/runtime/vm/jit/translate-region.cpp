@@ -534,6 +534,11 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
   return calleeRegion;
 }
 
+bool needsSurpriseCheck(Op op)
+{
+  return op == Op::JmpZ || op == Op::JmpNZ || op == Op::Jmp;
+}
+
 TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 const RegionDesc& region,
                                 TranslateRetryContext& retry,
@@ -605,6 +610,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     auto byRefs        = makeMapWalker(block.paramByRefs());
     auto knownFuncs    = makeMapWalker(block.knownFuncs());
     auto skipTrans     = false;
+    bool emitedSurpriseCheck = false;
 
     SCOPE_ASSERT_DETAIL("IRGS") { return show(irgs); };
 
@@ -657,6 +663,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     for (unsigned i = 0; i < block.length(); ++i, sk.advance(block.unit())) {
       ProfSrcKey psk { irgs.profTransID, sk };
       auto const lastInstr = i == block.length() - 1;
+      auto const penultimateInst = i == block.length() - 2;
 
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
@@ -805,10 +812,26 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         }
       }
 
+      if (!skipTrans && penultimateInst && isCompare(inst.op())) {
+          SrcKey nextSk = inst.nextSk();
+          Op nextOp = nextSk.op();
+          if (needsSurpriseCheck(nextOp)
+              && *instrJumpOffset(nextSk.pc()) < 0) {
+            emitedSurpriseCheck = true;
+            inst.forceSurpriseCheck = true;
+          }
+      }
+
       // Emit IR for the body of the instruction.
       try {
         if (!skipTrans) {
           const bool firstInstr = isEntry && i == 0;
+          if (lastInstr && !emitedSurpriseCheck
+              && needsSurpriseCheck(inst.op())
+              && *instrJumpOffset(inst.pc()) < 0) {
+            emitedSurpriseCheck = true;
+            inst.forceSurpriseCheck = true;
+          }
           translateInstr(irgs, inst, checkOuterTypeOnly, firstInstr);
         }
       } catch (const FailedIRGen& exn) {

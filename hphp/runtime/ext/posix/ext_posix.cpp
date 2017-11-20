@@ -27,6 +27,9 @@
 #ifdef __FreeBSD__
 #include <sys/param.h>
 #endif
+#ifdef __linux__
+#include <sys/sysmacros.h>
+#endif
 #include <folly/portability/Unistd.h>
 #include <pwd.h>
 

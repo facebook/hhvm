@@ -441,21 +441,25 @@ let string_of_final instruction =
 | SetWithRefRML of local_id
 *)
 
+let string_of_param_locations pl =
+  if List.length pl = 0 then "" else
+  "<" ^ (String.concat ", " (List.map string_of_int pl)) ^ ">"
+
 let string_of_call instruction =
   match instruction with
-  | FPushFunc n ->
-    sep ["FPushFunc"; string_of_int n]
+  | FPushFunc (n, pl) ->
+    sep ["FPushFunc"; string_of_int n; string_of_param_locations pl]
   | FPushFuncD (n, id) ->
     sep ["FPushFuncD"; string_of_int n; string_of_function_id id]
   | FPushFuncU (n, id1, id2) ->
     sep ["FPushFuncU"; string_of_int n; string_of_function_id id1; SU.quote_string id2]
-  | FPushObjMethod (n, nf) ->
-    sep ["FPushObjMethod"; string_of_int n; string_of_null_flavor nf]
+  | FPushObjMethod (n, nf, pl) ->
+    sep ["FPushObjMethod"; string_of_int n; string_of_null_flavor nf; string_of_param_locations pl]
   | FPushObjMethodD (n, id, nf) ->
     sep ["FPushObjMethodD";
       string_of_int n; string_of_method_id id; string_of_null_flavor nf]
-  | FPushClsMethod (n, id) ->
-    sep ["FPushClsMethod"; string_of_int n; string_of_classref id]
+  | FPushClsMethod (n, id, pl) ->
+    sep ["FPushClsMethod"; string_of_int n; string_of_classref id; string_of_param_locations pl]
   | FPushClsMethodD (n, id, cid) ->
     sep ["FPushClsMethodD";
       string_of_int n;

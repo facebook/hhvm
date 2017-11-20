@@ -43,7 +43,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   let deprecation_info = Hhas_attribute.deprecation_info function_attributes in
   let inout_param_locations = List.filter_mapi ast_fun.Ast.f_params
       ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout
-                     then None else Some (string_of_int i)) in
+                     then None else Some i) in
   let has_inout_args = List.length inout_param_locations <> 0 in
   let renamed_id =
     if is_memoize

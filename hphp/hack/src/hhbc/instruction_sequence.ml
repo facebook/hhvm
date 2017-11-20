@@ -136,11 +136,14 @@ let instr_fpassr i hint = instr (ICall (FPassR (i, hint)))
 let instr_fpassv i hint = instr (ICall (FPassV (i, hint)))
 let instr_fpassn i hint = instr (ICall (FPassN (i, hint)))
 let instr_fpassg i hint = instr (ICall (FPassG (i, hint)))
-and instr_fpass kind i hint =
+let instr_fpassc i hint = instr (ICall (FPassC (i, hint)))
+let instr_fpasscw i hint = instr (ICall (FPassCW (i, hint)))
+let instr_fpassce i hint = instr (ICall (FPassCE (i, hint)))
+let instr_fpass kind =
   match kind with
-  | PassByRefKind.AllowCell -> instr (ICall (FPassC (i, hint)))
-  | PassByRefKind.WarnOnCell -> instr (ICall (FPassCW (i, hint)))
-  | PassByRefKind.ErrorOnCell -> instr (ICall (FPassCE (i, hint)))
+  | PassByRefKind.AllowCell -> instr_fpassc
+  | PassByRefKind.WarnOnCell -> instr_fpasscw
+  | PassByRefKind.ErrorOnCell -> instr_fpassce
 
 let instr_popu = instr (IBasic PopU)
 let instr_popr = instr (IBasic PopR)
@@ -192,6 +195,7 @@ let instr_basesl local =
   instr (IBase(BaseSL(local, class_ref_rewrite_sentinel)))
 let instr_baseh = instr (IBase BaseH)
 let instr_baser i = instr (IBase (BaseR i))
+let instr_fpushfunc n param_locs = instr (ICall(FPushFunc(n, param_locs)))
 let instr_fpushfuncd count text = instr (ICall(FPushFuncD(count, text)))
 let instr_fcall count = instr (ICall(FCall count))
 let instr_isuninit = instr (IMisc IsUninit)
@@ -211,12 +215,14 @@ let instr_verifyOutType i = instr (IMisc (VerifyOutType i))
 let instr_dim op key = instr (IBase (Dim (op, key)))
 let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
 let instr_dim_define_pt key = instr_dim MemberOpMode.Define (MemberKey.PT key)
+let instr_fpushobjmethod n flavor pl =
+  instr (ICall (FPushObjMethod (n, flavor, pl)))
 let instr_fpushobjmethodd num_params method_ flavor =
   instr (ICall (FPushObjMethodD (num_params, method_, flavor)))
 let instr_fpushclsmethodd num_params method_name class_name =
   instr (ICall (FPushClsMethodD (num_params, method_name, class_name)))
-let instr_fpushclsmethod num_params =
-  instr (ICall (FPushClsMethod (num_params, class_ref_rewrite_sentinel)))
+let instr_fpushclsmethod num_params pl =
+  instr (ICall (FPushClsMethod (num_params, class_ref_rewrite_sentinel, pl)))
 let instr_fpushclsmethods num_params scref =
   instr (ICall (FPushClsMethodS (num_params, scref)))
 let instr_fpushclsmethodsd num_params scref method_name =
@@ -507,7 +513,8 @@ let rewrite_class_refs_instr num = function
 | IBase (BaseSL (l, _)) -> (num - 1, IBase (BaseSL (l, num)))
 | ICall (FPassS (np, _, h)) -> (num - 1, ICall (FPassS (np, num, h)))
 | ICall (FPushCtor (np, _)) -> (num - 1, ICall (FPushCtor (np, num)))
-| ICall (FPushClsMethod (np, _)) -> (num - 1, ICall (FPushClsMethod (np, num)))
+| ICall (FPushClsMethod (np, _, pl)) ->
+  (num - 1, ICall (FPushClsMethod (np, num, pl)))
 | IIsset (IssetS _) -> (num - 1, IIsset (IssetS num))
 | IIsset (EmptyS _) -> (num - 1, IIsset (EmptyS num))
 | ILitConst (TypedValue tv) -> (num, Emit_adata.rewrite_typed_value tv)

@@ -539,6 +539,7 @@ let queryopofiarg arg =
     | "CGetQuiet" -> QueryOp.CGetQuiet
     | "Isset" -> QueryOp.Isset
     | "Empty" -> QueryOp.Empty
+    | "InOut" -> QueryOp.InOut
     | _ ->
       report_error
       @@ Printf.sprintf "unknown queryop: '%s'" s
@@ -618,6 +619,11 @@ let listofshapefieldsofiarg arg =
   | IAArglist args -> List.map stringofiarg args
   | _ -> report_error "expected list of shape fields"
 
+let listofintofiarg arg =
+  match arg with
+  | IAArglist args -> List.map intofiarg args
+  | _ -> report_error "expected list of ints"
+
 let initpropopofiarg arg =
   match arg with
   | IAId "Static" -> Static
@@ -648,6 +654,7 @@ let memberopmodeofiarg arg =
   | "Warn" -> MemberOpMode.Warn
   | "Define" -> MemberOpMode.Define
   | "Unset" -> MemberOpMode.Unset
+  | "InOut" -> MemberOpMode.InOut
   | _ -> report_error ("bad member op mode" ^ stringofiarg arg)
 
 let specialclsrefofiarg arg =
@@ -817,7 +824,6 @@ let makeunaryinst s arg = match s with
    | "CheckProp" -> IMutator(CheckProp (prop_id_of_iarg arg))
 
    (* instruct_call *)
-   | "FPushFunc" -> ICall(FPushFunc (intofiarg arg))
    | "FPushCuf" -> ICall(FPushCuf (intofiarg arg))
    | "FPushCufF" -> ICall(FPushCufF (intofiarg arg))
    | "FPushCufSafe" -> ICall(FPushCufSafe (intofiarg arg))
@@ -888,10 +894,8 @@ match s with
    IMutator (InitProp (prop_id_of_iarg arg1, initpropopofiarg arg2))
 
 (* instruct_call *)
+ | "FPushFunc" -> ICall(FPushFunc (intofiarg arg1, listofintofiarg arg2))
  | "FPushFuncD" -> ICall (FPushFuncD (intofiarg arg1, function_id_of_iarg arg2))
- | "FPushObjMethod" ->
-    ICall(FPushObjMethod (intofiarg arg1, nullflavorofiarg arg2))
- | "FPushClsMethod" -> ICall (FPushClsMethod (intofiarg arg1, intofiarg arg2))
  | "FPushClsMethodS" -> ICall (FPushClsMethodS (intofiarg arg1, specialclsrefofiarg arg2))
  | "FPushCtor" -> ICall (FPushCtor (intofiarg arg1, intofiarg arg2))
  | "FPushCtorD" -> ICall (FPushCtorD (intofiarg arg1, class_id_of_iarg arg2))
@@ -959,6 +963,9 @@ let maketernaryinst s arg1 arg2 arg3 =
  (* instruct_call *)
  | "FPushFuncU" ->
     ICall(FPushFuncU (intofiarg arg1, function_id_of_iarg arg2, stringofiarg arg3))
+ | "FPushObjMethod" ->
+    ICall(FPushObjMethod (intofiarg arg1, nullflavorofiarg arg2, listofintofiarg arg3))
+ | "FPushClsMethod" -> ICall (FPushClsMethod (intofiarg arg1, intofiarg arg2, listofintofiarg arg3))
  | "FPushObjMethodD" -> ICall(FPushObjMethodD
                     (intofiarg arg1, method_id_of_iarg arg2, nullflavorofiarg arg3))
  | "FPushClsMethodD" -> ICall(FPushClsMethodD

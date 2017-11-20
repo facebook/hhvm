@@ -72,7 +72,7 @@ let from_ast_wrapper : bool -> _ ->
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
   let inout_param_locations = List.filter_mapi ast_method.Ast.m_params
       ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout
-                     then None else Some (string_of_int i)) in
+                     then None else Some i) in
   let has_inout_args = List.length inout_param_locations <> 0 in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   let (pos, original_name) = ast_method.Ast.m_name in

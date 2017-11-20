@@ -13,15 +13,6 @@ open Hh_core
 
 module H = Hhbc_ast
 
-let emit_set_instrs ?(is_last=false) base (index, local) =
-  let index = if is_last then 0 else index in
-  gather [
-    instr_setl local;
-    instr_popc;
-    instr_basel base H.MemberOpMode.Warn;
-    instr_querym 0 H.QueryOp.CGet (H.MemberKey.EI (Int64.of_int index))
-  ]
-
 let emit_body_instrs ~verify_ret _env params call_instrs =
   let param_count = List.length params in
   let param_instrs = gather @@
@@ -29,32 +20,18 @@ let emit_body_instrs ~verify_ret _env params call_instrs =
         gather [
           instr_cgetquietl (Local.Named (Hhas_param.name p));
           instr_fpass H.PassByRefKind.AllowCell i H.Cell
-        ])
-  in
-  let inout_params = List.filter_mapi params ~f:(fun i p ->
+        ]) in
+  let inout_params = List.filter_map params ~f:(fun p ->
       if not @@ Hhas_param.is_inout p then None else
-        Some (i + 2, Local.Named (Hhas_param.name p))) in
-  (* We know that this is safe since there must be at least 1 inout param *)
-  let all_but_last, last =
-    List.split_n inout_params (List.length inout_params - 1) in
-  let last = List.hd_exn last in
+        Some (instr_setl @@ Local.Named (Hhas_param.name p))) in
   let local = Local.Unnamed param_count in
-  let unset_instr = instr_unsetl local in
-  let f_label = Label.next_fault () in
-  let try_body = gather [
-    emit_set_instrs local (1, local);
-    gather @@ List.map all_but_last ~f:(emit_set_instrs local);
-    emit_set_instrs ~is_last:true local last
-  ] in
-  let fault_body = gather [ unset_instr; instr_unwind ] in
   let verify_ret_instr = if verify_ret then instr_verifyRetTypeC else empty in
   gather [
     call_instrs;
     param_instrs;
     instr_fcall param_count;
     instr_unboxr_nop;
-    instr_try_fault f_label try_body fault_body;
-    unset_instr;
+    Emit_inout_helpers.emit_list_set_for_inout_call local inout_params;
     verify_ret_instr;
     instr_retc
   ]

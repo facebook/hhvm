@@ -195,6 +195,7 @@ let get_passByRefKind is_splatted expr  =
 
 let get_queryMOpMode need_ref op =
   match op with
+  | QueryOp.InOut -> MemberOpMode.InOut
   | QueryOp.CGet -> MemberOpMode.Warn
   | QueryOp.Empty when need_ref -> MemberOpMode.Define
   | _ -> MemberOpMode.ModeNone
@@ -503,6 +504,31 @@ and emit_shape env expr fl =
 and emit_tuple env p es =
   emit_expr ~need_ref:false env (p, A.Varray es)
 
+and emit_inout_call_set env es = Local.scope @@ fun () ->
+  let inout_params =
+    List.filter_map es
+      ~f:(function
+          | _, A.Callconv (A.Pinout, e) ->
+            begin match snd e with
+            | A.Lvar (_, s) -> Some (instr_setl @@ Local.Named s)
+            | A.Array_get (base_expr, opt_e) ->
+              let base =
+                emit_array_get ~no_final:true ~need_ref:false
+                  ~mode:MemberOpMode.Define
+                  env None QueryOp.InOut base_expr opt_e in
+              let mk = get_elem_member_key env 0 opt_e in
+              Some (gather [ base; instr_setm 0 mk ]);
+            | _ -> None
+            end
+          | _ -> None)
+  in
+  if List.length inout_params = 0 then empty else
+  let local = Local.get_unnamed_local () in
+  gather [
+    instr_unboxr;
+    Emit_inout_helpers.emit_list_set_for_inout_call local inout_params
+  ]
+
 and emit_call_expr ~need_ref env expr =
   (match expr with
     | _, A.Call ((_, A.Id (_, s)), _, _, _) -> Emit_symbol_refs.add_function s
@@ -634,6 +660,7 @@ and emit_class_get env param_num_opt qop need_ref cid prop =
     | (None, QueryOp.CGetQuiet) -> failwith "emit_class_get: CGetQuiet"
     | (None, QueryOp.Isset) -> instr_issets
     | (None, QueryOp.Empty) -> instr_emptys
+    | (None, QueryOp.InOut) -> failwith "emit_class_get: InOut"
     | (Some (i, h), _) -> instr (ICall (FPassS (i, 0, h)))
   ]
 
@@ -974,9 +1001,10 @@ and emit_await env e =
     instr_label after_await;
   ]
 
-and emit_callconv _env _kind _e =
-  (* TODO(mqian) implement *)
-  emit_nyi "inout argument"
+and emit_callconv _env kind _e =
+  match kind with
+  | A.Pinout ->
+    failwith "emit_callconv: This should have been caught at emit_arg"
 
 and emit_inline_hhas s =
   let lexer = Lexing.from_string s in
@@ -1456,13 +1484,16 @@ and emit_quiet_expr env (_, expr_ as expr) =
  * If param_num_opt = Some i
  * then this is the i'th parameter to a function
  *)
-and emit_array_get ~need_ref env param_num_hint_opt qop base_expr opt_elem_expr =
+and emit_array_get ?(no_final=false) ?mode ~need_ref
+  env param_num_hint_opt qop base_expr opt_elem_expr =
   (* Disallow use of array(..)[] *)
   match base_expr, opt_elem_expr with
   | (pos, A.Array _), None ->
     Emit_fatal.raise_fatal_parse pos "Can't use array() as base in write context"
   | _ ->
-  let mode = get_queryMOpMode need_ref qop in
+  let param_num_hint_opt =
+    if qop = QueryOp.InOut then None else param_num_hint_opt in
+  let mode = Option.value mode ~default:(get_queryMOpMode need_ref qop) in
   let elem_expr_instrs, elem_stack_size = emit_elem_instrs env opt_elem_expr in
   let param_num_opt = Option.map ~f:(fun (n, _h) -> n) param_num_hint_opt in
   let base_expr_instrs_begin,
@@ -1475,7 +1506,7 @@ and emit_array_get ~need_ref env param_num_hint_opt qop base_expr opt_elem_expr 
   in
   let mk = get_elem_member_key env 0 opt_elem_expr in
   let total_stack_size = elem_stack_size + base_stack_size in
-  let final_instr =
+  let final_instr = if no_final then empty else
     instr (IFinal (
       match param_num_hint_opt with
       | None ->
@@ -1651,13 +1682,15 @@ and get_prop_member_key env null_flavor stack_index prop_expr =
  *   QueryM 1 CGet EC:0
  *)
 and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as expr) =
+   let base_mode =
+    if mode = MemberOpMode.InOut then MemberOpMode.Warn else mode in
    match expr_ with
    | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
      instr_string (SU.Locals.strip_dollar x),
      empty,
      instr (IBase (
      match param_num_opt with
-     | None -> BaseGC (base_offset, mode)
+     | None -> BaseGC (base_offset, base_mode)
      | Some i -> FPassBaseGC (i, base_offset)
      )),
      1
@@ -1675,7 +1708,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      empty,
      instr (IBase (
        match param_num_opt with
-       | None -> BaseL (v, mode)
+       | None -> BaseL (v, base_mode)
        | Some i -> FPassBaseL (i, v)
        )),
      0
@@ -1693,7 +1726,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      empty,
      instr (IBase (
        match param_num_opt with
-       | None -> BaseGL (v, mode)
+       | None -> BaseGL (v, base_mode)
        | Some i -> FPassBaseGL (i, v)
        )),
      0
@@ -1704,7 +1737,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      empty,
      instr (IBase (
      match param_num_opt with
-     | None -> BaseGC (base_offset, mode)
+     | None -> BaseGC (base_offset, base_mode)
      | Some i -> FPassBaseGC (i, base_offset)
      )),
    1
@@ -1792,7 +1825,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
    | A.Lvarvar (1, id) ->
      empty,
      empty,
-     instr_basenl (get_non_pipe_local id) mode,
+     instr_basenl (get_non_pipe_local id) base_mode,
      0
    | A.Lvarvar (n, id) ->
      let base_expr_instrs = gather [
@@ -1802,13 +1835,13 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      in
      base_expr_instrs,
      empty,
-     instr_basenc base_offset mode,
+     instr_basenc base_offset base_mode,
      1
    | A.BracedExpr e ->
      let base_expr_instrs = emit_expr ~need_ref:false env e in
      base_expr_instrs,
      empty,
-     instr_basenc base_offset mode,
+     instr_basenc base_offset base_mode,
      1
    | _ ->
      let base_expr_instrs, flavor = emit_flavored_expr env expr in
@@ -1820,7 +1853,12 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
                    then BaseR base_offset else BaseC base_offset)),
      1
 
-and emit_arg env i is_splatted (pos, expr_ as expr) =
+and emit_arg env i is_splatted expr =
+  let is_inout, (pos, expr_ as expr) =
+    match snd expr with
+    | A.Callconv (A.Pinout, e) -> true, e
+    | _ -> false, expr
+  in
   let with_ref = expr_starts_with_ref expr in
   let hint =
     if Emit_env.is_hh_syntax_enabled ()
@@ -1835,7 +1873,8 @@ and emit_arg env i is_splatted (pos, expr_ as expr) =
       if is_splatted && flavor = Flavor.ReturnVal
       then gather [ instrs; instr_unboxr ] else instrs
     in
-    let fpass_kind = match is_splatted, flavor with
+    let fpass_kind =
+      match is_splatted, flavor with
       | false, Flavor.Ref -> instr_fpassv i hint
       | false, Flavor.ReturnVal -> instr_fpassr i hint
       | false, Flavor.Cell
@@ -1854,7 +1893,11 @@ and emit_arg env i is_splatted (pos, expr_ as expr) =
       instr_string (SU.Locals.strip_dollar x);
       instr_fpassg i hint
     ]
-
+  | A.Lvar _ when is_inout ->
+    gather [
+      emit_expr ~need_ref:false env expr;
+      instr_fpassc i hint;
+    ]
   | A.Lvar ((_, str) as id)
     when not (is_local_this env str) || Emit_env.get_needs_local_this env ->
     instr_fpassl i (get_local env id) hint
@@ -1876,7 +1919,11 @@ and emit_arg env i is_splatted (pos, expr_ as expr) =
     ]
 
   | A.Array_get (base_expr, opt_elem_expr) ->
-    emit_array_get ~need_ref:false env (Some (i, hint)) QueryOp.CGet base_expr opt_elem_expr
+    let qop = if is_inout then QueryOp.InOut else QueryOp.CGet in
+    let instrs =
+      emit_array_get
+        ~need_ref:false env (Some (i, hint)) qop base_expr opt_elem_expr in
+    if is_inout then gather [ instrs; instr_fpassc i hint ] else instrs
 
   | A.Obj_get (e1, e2, nullflavor) ->
     emit_obj_get ~need_ref:false env (Some (i, hint)) QueryOp.CGet e1 e2 nullflavor
@@ -1921,7 +1968,8 @@ and emit_args_and_call env args uargs =
     gather (List.mapi all_args (fun i e -> emit_arg env i (i >= args_count) e));
     if uargs = [] && not is_splatted
     then instr (ICall (FCall nargs))
-    else instr (ICall (FCallUnpack nargs))
+    else instr (ICall (FCallUnpack nargs));
+    emit_inout_call_set env args
   ]
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
@@ -1947,33 +1995,47 @@ and emit_call_lhs_with_this env instrs = Local.scope @@ fun () ->
     end
   ]
 
-and emit_call_lhs env (_, expr_ as expr) nargs has_splat =
+and has_inout_args es =
+  List.exists es ~f:(function _, A.Callconv (A.Pinout, _) -> true | _ -> false)
+
+and emit_call_lhs env (_, expr_ as expr) nargs has_splat inout_arg_positions =
+  let has_inout_args = List.length inout_arg_positions <> 0 in
   match expr_ with
   | A.Obj_get (obj, (_, A.Id ((_, str) as id)), null_flavor)
     when str.[0] = '$' ->
     gather [
       emit_object_expr env obj;
       instr_cgetl (get_local env id);
-      instr (ICall (FPushObjMethod (nargs, null_flavor)));
+      instr_fpushobjmethod nargs null_flavor inout_arg_positions;
     ]
   | A.Obj_get (obj, (_, A.String (_, id)), null_flavor)
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
+    let name = Hhbc_id.Method.from_ast_name id in
+    let name =
+      if has_inout_args
+      then Hhbc_id.Method.add_suffix name
+        (Emit_inout_helpers.inout_suffix inout_arg_positions)
+      else name in
     gather [
       emit_object_expr env obj;
-      instr (ICall (FPushObjMethodD
-        (nargs, Hhbc_id.Method.from_ast_name id, null_flavor)));
+      instr_fpushobjmethodd nargs name null_flavor;
     ]
   | A.Obj_get(obj, method_expr, null_flavor) ->
     gather [
       emit_object_expr env obj;
       emit_expr ~need_ref:false env method_expr;
-      instr (ICall (FPushObjMethod (nargs, null_flavor)));
+      instr_fpushobjmethod nargs null_flavor inout_arg_positions;
     ]
 
   | A.Class_const (cid, (_, id)) ->
     let cexpr = expr_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) cid in
     let method_id = Hhbc_id.Method.from_ast_name id in
+    let method_id =
+      if has_inout_args
+      then Hhbc_id.Method.add_suffix method_id
+        (Emit_inout_helpers.inout_suffix inout_arg_positions)
+      else method_id in
     begin match cexpr with
     (* Statically known *)
     | Class_id cid ->
@@ -1986,13 +2048,13 @@ and emit_call_lhs env (_, expr_ as expr) nargs has_splat =
        let method_name = Hhbc_id.Method.to_raw_string method_id in
        gather [
          emit_call_lhs_with_this env @@ instr_string method_name;
-         instr_fpushclsmethod nargs
+         instr_fpushclsmethod nargs inout_arg_positions
        ]
     | _ ->
        let method_name = Hhbc_id.Method.to_raw_string method_id in
        gather [
          emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_name));
-         instr_fpushclsmethod nargs
+         instr_fpushclsmethod nargs inout_arg_positions
        ]
     end
 
@@ -2008,9 +2070,16 @@ and emit_call_lhs env (_, expr_ as expr) nargs has_splat =
     | Class_parent ->
        gather [expr_instrs; instr_fpushclsmethods nargs SpecialClsRef.Parent]
     | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
-       gather [emit_call_lhs_with_this env expr_instrs; instr_fpushclsmethod nargs]
+       gather [
+        emit_call_lhs_with_this env expr_instrs;
+        instr_fpushclsmethod nargs inout_arg_positions
+       ]
     | _ ->
-       gather [expr_instrs; emit_load_class_ref env cexpr; instr_fpushclsmethod nargs]
+       gather [
+        expr_instrs;
+        emit_load_class_ref env cexpr;
+        instr_fpushclsmethod nargs inout_arg_positions
+       ]
     end
 
   | A.Id (_, s as id)->
@@ -2023,6 +2092,10 @@ and emit_call_lhs env (_, expr_ as expr) nargs has_splat =
       | None, "max" when nargs = 2 && not has_splat ->
         Hhbc_id.Function.from_raw_string  "__SystemLib\\max2", None
       | _ -> fq_id, id_opt in
+    let fq_id = if has_inout_args
+      then Hhbc_id.Function.add_suffix
+        fq_id (Emit_inout_helpers.inout_suffix inout_arg_positions)
+      else fq_id in
     begin match id_opt with
     | Some id -> instr (ICall (FPushFuncU (nargs, fq_id, id)))
     | None -> instr (ICall (FPushFuncD (nargs, fq_id)))
@@ -2031,7 +2104,7 @@ and emit_call_lhs env (_, expr_ as expr) nargs has_splat =
   | _ ->
     gather [
       emit_expr ~need_ref:false env expr;
-      instr (ICall (FPushFunc nargs))
+      instr_fpushfunc nargs inout_arg_positions
     ]
 
 (* Retuns whether the function is a call_user_func function,
@@ -2236,13 +2309,23 @@ and emit_special_function env id args uargs default =
       end
     end
 
+and get_inout_arg_positions args =
+  List.filter_mapi args
+    ~f:(fun i -> function
+          | _, A.Callconv (A.Pinout, _) -> Some i
+          | _ -> None)
+
 and emit_call env (_, expr_ as expr) args uargs =
   let nargs = List.length args + List.length uargs in
+  let inout_arg_positions = get_inout_arg_positions args in
   let default () =
+    let flavor = if List.length inout_arg_positions = 0 then
+      Flavor.ReturnVal else Flavor.Cell in
     gather [
-      emit_call_lhs env expr nargs (not (List.is_empty uargs));
+      emit_call_lhs
+        env expr nargs (not (List.is_empty uargs)) inout_arg_positions;
       emit_args_and_call env args uargs;
-    ], Flavor.ReturnVal in
+    ], flavor in
 
   match expr_, args with
   | A.Id (_, id), _ ->
@@ -2259,7 +2342,8 @@ and emit_call env (_, expr_ as expr) args uargs =
  *)
 and emit_flavored_expr env (pos, expr_ as expr) =
   match expr_ with
-  | A.Call (e, _, args, uargs) when not (is_special_function env e args) ->
+  | A.Call (e, _, args, uargs)
+    when not (is_special_function env e args) ->
     let instrs, flavor = emit_call env e args uargs in
     Emit_pos.emit_pos_then pos instrs, flavor
   | A.Execution_operator es ->

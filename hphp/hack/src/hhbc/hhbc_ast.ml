@@ -36,6 +36,7 @@ type num_params = int
 type classref_id = int
 (* Conventionally this is "A_" followed by an integer *)
 type adata_id = string
+type param_locations = int list
 
 (* These are the three flavors of value that can live on the stack:
  *   C = cell
@@ -83,6 +84,7 @@ module MemberOpMode = struct
   | Warn
   | Define
   | Unset
+  | InOut
 
   let to_string op =
   match op with
@@ -90,6 +92,7 @@ module MemberOpMode = struct
   | Warn -> "Warn"
   | Define -> "Define"
   | Unset -> "Unset"
+  | InOut -> "InOut"
 
 end (* of MemberOpMode *)
 
@@ -99,6 +102,7 @@ module QueryOp = struct
   | CGetQuiet
   | Isset
   | Empty
+  | InOut
 
   let to_string op =
   match op with
@@ -106,6 +110,7 @@ module QueryOp = struct
   | CGetQuiet -> "CGetQuiet"
   | Isset -> "Isset"
   | Empty -> "Empty"
+  | InOut -> "InOut"
 
 end (* of QueryOp *)
 
@@ -394,12 +399,12 @@ type instruct_mutator =
   | InitProp of prop_id * initprop_op
 
 type instruct_call =
-  | FPushFunc of num_params
+  | FPushFunc of num_params * param_locations
   | FPushFuncD of num_params * function_id
   | FPushFuncU of num_params * function_id * Litstr.id
-  | FPushObjMethod of num_params * Ast.og_null_flavor
+  | FPushObjMethod of num_params * Ast.og_null_flavor * param_locations
   | FPushObjMethodD of num_params * method_id * Ast.og_null_flavor
-  | FPushClsMethod of num_params * classref_id
+  | FPushClsMethod of num_params * classref_id * param_locations
   | FPushClsMethodD of num_params * method_id * class_id
   | FPushClsMethodS of num_params * SpecialClsRef.t
   | FPushClsMethodSD of num_params * SpecialClsRef.t * method_id

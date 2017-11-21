@@ -13,6 +13,7 @@ module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 
+
 module Lexer : sig
   type t
   val make : SourceText.t -> t
@@ -1006,8 +1007,7 @@ let scan_dollar_token lexer =
     if is_name_nondigit ch1 then scan_variable lexer (* $x *)
     else (advance lexer 1, TokenKind.Dollar) (* $ *)
 
-let scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
-  fun in_type lexer ->
+let scan_token in_type lexer =
   let ch0 = peek_char lexer 0 in
   match ch0 with
   | '[' -> (advance lexer 1, TokenKind.LeftBracket)
@@ -1146,13 +1146,6 @@ let scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
     else
       let lexer = with_error lexer SyntaxError.error0006 in
       (advance lexer 1, TokenKind.ErrorToken)
-
-let scan_token : bool -> lexer -> lexer * TokenKind.t =
-  fun in_type lexer ->
-  Stats_container.wrap_nullary_fn_timing
-    ?stats:(Stats_container.get_instance ())
-    ~key:"full_fidelity_lexer:scan_token"
-    ~f:(fun () -> scan_token_impl in_type lexer)
 
 let scan_token_inside_type = scan_token true
 let scan_token_outside_type = scan_token false

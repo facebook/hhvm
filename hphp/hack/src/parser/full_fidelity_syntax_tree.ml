@@ -105,7 +105,7 @@ let remove_duplicates errors equals =
   let result = aux errors [] in
   List.rev result
 
-let make_impl ?(env = Env.default) text =
+let make ?(env = Env.default) text =
   let parser = Parser.make env text in
   let (parser, root) = Parser.parse_script parser in
   (* We've got the lexical errors and the parser errors together, both
@@ -118,12 +118,6 @@ let make_impl ?(env = Env.default) text =
   let errors = remove_duplicates errors SyntaxError.exactly_equal in
   let (language, mode) = get_language_and_mode text root in
   { text; root; errors; language; mode }
-
-let make ?(env = Env.default) text =
-  Stats_container.wrap_nullary_fn_timing
-    ?stats:(Env.stats env)
-    ~key:"Syntax_tree.make"
-    ~f:(fun () -> make_impl ~env text)
 
 let from_root text root errors =
   let (language, mode) = get_language_and_mode text root in

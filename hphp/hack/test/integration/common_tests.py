@@ -383,7 +383,7 @@ class CommonTests(object):
     def test_modify_extends_deps(self):
         """
         Introduce a change to a base class that causes an error
-        in a use case on one of its subclasses. 
+        in a use case on one of its subclasses.
         """
         with open(os.path.join(self.repo_dir, 'class_1.php'), 'w') as f:
             f.write("""
@@ -690,7 +690,7 @@ class CommonTests(object):
             '{{"type":"string",' +
             '"pos":{{"filename":"","line":0,"char_start":0,"char_end":-1}},' +
             '"full_type":{{"kind":"primitive","name":"string"}}}}'
-            ], options=['--type-at-pos', '{root}foo_3.php:11:13'])
+            ], options=['--type-at-pos', '{root}foo_3.php:11:14'])
 
     def test_ide_get_definition(self):
         """

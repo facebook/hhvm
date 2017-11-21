@@ -12,6 +12,8 @@ open Hh_core
 
 module H = Hhbc_ast
 
+type wrapper_type = InoutWrapper | RefWrapper
+
 let inout_suffix param_location =
   let param_location = List.map ~f:string_of_int param_location in
   "$"

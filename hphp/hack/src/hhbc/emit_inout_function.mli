@@ -10,6 +10,8 @@
 
 (* Emit wrapper function for functions with inout arguments *)
 val emit_wrapper_function :
+  (* Whether this is wrapper for inout or reference *)
+  wrapper_type: Emit_inout_helpers.wrapper_type ->
   (* Original identifer for function, used for the wrapper *)
   original_id: Hhbc_id.Function.t ->
   (* Renamed identifier, used for the wrapped function *)

@@ -139,6 +139,7 @@ let instr_fpassg i hint = instr (ICall (FPassG (i, hint)))
 let instr_fpassc i hint = instr (ICall (FPassC (i, hint)))
 let instr_fpasscw i hint = instr (ICall (FPassCW (i, hint)))
 let instr_fpassce i hint = instr (ICall (FPassCE (i, hint)))
+let instr_fpassvnop i hint = instr (ICall (FPassVNop (i, hint)))
 let instr_fpass kind =
   match kind with
   | PassByRefKind.AllowCell -> instr_fpassc

@@ -2048,13 +2048,13 @@ and emit_call_lhs env (_, expr_ as expr) nargs has_splat inout_arg_positions =
        let method_name = Hhbc_id.Method.to_raw_string method_id in
        gather [
          emit_call_lhs_with_this env @@ instr_string method_name;
-         instr_fpushclsmethod nargs inout_arg_positions
+         instr_fpushclsmethod nargs []
        ]
     | _ ->
        let method_name = Hhbc_id.Method.to_raw_string method_id in
        gather [
          emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_name));
-         instr_fpushclsmethod nargs inout_arg_positions
+         instr_fpushclsmethod nargs []
        ]
     end
 

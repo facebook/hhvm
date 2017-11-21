@@ -32,8 +32,6 @@ slow/inout/closure.php
 slow/inout/complex-expr.php
 slow/inout/def-func.php
 slow/inout/inout-decl.php
-slow/inout/method-dynamic.php
-slow/inout/method-interop-dynamic.php
 slow/inout/side-effects.php
 slow/inout/trait-magic.php
 slow/namespace/hashbang_2.php

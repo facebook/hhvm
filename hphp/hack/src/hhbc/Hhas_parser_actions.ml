@@ -824,6 +824,7 @@ let makeunaryinst s arg = match s with
    | "CheckProp" -> IMutator(CheckProp (prop_id_of_iarg arg))
 
    (* instruct_call *)
+   | "FPushFunc" -> ICall(FPushFunc (intofiarg arg, []))
    | "FPushCuf" -> ICall(FPushCuf (intofiarg arg))
    | "FPushCufF" -> ICall(FPushCufF (intofiarg arg))
    | "FPushCufSafe" -> ICall(FPushCufSafe (intofiarg arg))
@@ -871,7 +872,7 @@ let makeunaryinst s arg = match s with
 
 let makebinaryinst s arg1 arg2 =
 match s with
-(* instruct_lit_const *)
+ (* instruct_lit_const *)
  | "NewLikeArrayL" ->
      ILitConst(NewLikeArrayL(localidofiarg arg1, intofiarg arg2))
  | "CnsU" -> ILitConst(CnsU (const_id_of_iarg arg1, stringofiarg arg2))
@@ -879,13 +880,13 @@ match s with
  | "ClsCnsD" ->
    ILitConst(ClsCnsD (const_id_of_iarg arg1, class_id_of_iarg arg2))
 
-(* instruct_get *)
+ (* instruct_get *)
  | "ClsRefGetL" -> IGet (ClsRefGetL (localidofiarg arg1, intofiarg arg2))
 
-(* instruct_isset *)
+ (* instruct_isset *)
  | "IsTypeL" -> IIsset (IsTypeL (localidofiarg arg1, typeopofiarg arg2))
 
-(* instruct_mutator *)
+ (* instruct_mutator *)
  | "SetOpL" -> IMutator (SetOpL (localidofiarg arg1, eqopofiarg arg2))
  | "SetOpS" -> IMutator (SetOpS (eqopofiarg arg1, intofiarg arg2))
  | "IncDecL" -> IMutator (IncDecL (localidofiarg arg1, incdecopofiarg arg2))
@@ -893,7 +894,10 @@ match s with
  | "InitProp" ->
    IMutator (InitProp (prop_id_of_iarg arg1, initpropopofiarg arg2))
 
-(* instruct_call *)
+ (* instruct_call *)
+ | "FPushObjMethod" ->
+    ICall(FPushObjMethod (intofiarg arg1, nullflavorofiarg arg2, []))
+ | "FPushClsMethod" -> ICall (FPushClsMethod (intofiarg arg1, intofiarg arg2, []))
  | "FPushFunc" -> ICall(FPushFunc (intofiarg arg1, listofintofiarg arg2))
  | "FPushFuncD" -> ICall (FPushFuncD (intofiarg arg1, function_id_of_iarg arg2))
  | "FPushClsMethodS" -> ICall (FPushClsMethodS (intofiarg arg1, specialclsrefofiarg arg2))

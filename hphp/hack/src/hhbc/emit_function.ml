@@ -26,6 +26,22 @@ let find_first_redeclaration pick_name_span l =
       | None -> aux seen xs in
   aux SMap.empty l
 
+let extract_inout_or_ref_param_locations params =
+  let inout_param_locations = List.filter_mapi params
+    ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout
+                   then None else Some i) in
+  let ref_param_locations = List.filter_mapi params
+    ~f:(fun i p -> if not p.Ast.param_is_reference
+                   then None else Some i) in
+  if List.length inout_param_locations <> 0 then
+    Some (Emit_inout_helpers.InoutWrapper), inout_param_locations
+  else if List.length ref_param_locations <> 0 &&
+    Hhbc_options.create_inout_wrapper_functions !Hhbc_options.compiler_options
+  then
+    Some (Emit_inout_helpers.RefWrapper), ref_param_locations
+  else
+    None, []
+
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,
  * a wrapper function
  *)
@@ -41,10 +57,9 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
     Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
   let is_memoize = Hhas_attribute.is_memoized function_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info function_attributes in
-  let inout_param_locations = List.filter_mapi ast_fun.Ast.f_params
-      ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout
-                     then None else Some i) in
-  let has_inout_args = List.length inout_param_locations <> 0 in
+  let wrapper_type_opt, inout_param_locations =
+    extract_inout_or_ref_param_locations ast_fun.Ast.f_params in
+  let has_inout_args = Option.is_some wrapper_type_opt in
   let renamed_id =
     if is_memoize
     then Hhbc_id.Function.add_suffix
@@ -71,10 +86,13 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ast_fun.Ast.f_params
       ast_fun.Ast.f_ret
       [Ast.Stmt (Ast.Block ast_fun.Ast.f_body)] in
+  let normal_function_name =
+    if wrapper_type_opt = Some Emit_inout_helpers.RefWrapper
+    then original_id else renamed_id in
   let normal_function =
     Hhas_function.make
       function_attributes
-      renamed_id
+      normal_function_name
       function_body
       (Hhas_pos.pos_to_span ast_fun.Ast.f_span)
       function_is_async
@@ -92,14 +110,19 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~is_method:false
       ~deprecation_info
       ast_fun]
-  else if has_inout_args
-  then [Emit_inout_function.emit_wrapper_function
-          ~original_id
-          ~renamed_id
-          ~verify_ret:(ast_fun.Ast.f_ret <> None)
-          ast_fun;
-        normal_function]
-  else [normal_function]
+  else match wrapper_type_opt with
+  | Some wrapper_type ->
+    let wrapper_fn =
+      Emit_inout_function.emit_wrapper_function
+              ~wrapper_type
+              ~original_id
+              ~renamed_id
+              ~verify_ret:(ast_fun.Ast.f_ret <> None)
+              ast_fun in
+      if wrapper_type = Emit_inout_helpers.InoutWrapper
+      then [wrapper_fn; normal_function]
+      else [normal_function; wrapper_fn]
+  | None -> [normal_function]
 
 let emit_functions_from_program ast =
   List.concat_map (List.sort (fun (t1, _) (t2, _) -> compare t1 t2) ast)

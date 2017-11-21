@@ -13,7 +13,7 @@ open Hh_core
 
 module H = Hhbc_ast
 
-let emit_body_instrs ~verify_ret _env params call_instrs =
+let emit_body_instrs_inout ~verify_ret params call_instrs =
   let param_count = List.length params in
   let param_instrs = gather @@
     List.mapi params ~f:(fun i p ->
@@ -36,6 +36,47 @@ let emit_body_instrs ~verify_ret _env params call_instrs =
     instr_retc
   ]
 
+let emit_body_instrs_ref env params call_instrs =
+  let param_count = List.length params in
+  let param_instrs = gather @@
+    List.mapi params ~f:(fun i p ->
+      let local = Local.Named (Hhas_param.name p) in
+      if Hhas_param.is_reference p then
+        gather [
+          instr_vgetl local;
+          instr_fpassvnop i H.Ref
+        ]
+      else
+        gather [
+          instr_cgetquietl local;
+          instr_fpassc i H.Cell
+        ]) in
+  let param_get_instrs =
+    List.filter_map params ~f:(fun p ->
+        if Hhas_param.is_reference p
+        then Some (instr_cgetl (Local.Named (Hhas_param.name p))) else None)
+  in
+  let begin_label, default_value_setters =
+    Emit_param.emit_param_default_value_setter env params in
+  gather [
+    begin_label;
+    call_instrs;
+    param_instrs;
+    instr_fcall param_count;
+    instr_unboxr_nop;
+    gather param_get_instrs;
+    instr_new_vec_array (List.length param_get_instrs + 1);
+    instr_retc;
+    default_value_setters;
+  ]
+
+let emit_body_instrs ~wrapper_type ~verify_ret env params call_instrs =
+  match wrapper_type with
+  | Emit_inout_helpers.InoutWrapper ->
+    emit_body_instrs_inout ~verify_ret params call_instrs
+  | Emit_inout_helpers.RefWrapper ->
+    emit_body_instrs_ref env params call_instrs
+
 (* Construct the wrapper function body *)
 let make_wrapper_body return_type params instrs =
   Emit_body.make_body
@@ -47,7 +88,8 @@ let make_wrapper_body return_type params instrs =
     [] (* static_inits: this is intentionally empty *)
     None (* doc *)
 
-let emit_wrapper_function ~original_id ~renamed_id ~verify_ret ast_fun =
+let emit_wrapper_function
+  ~wrapper_type ~original_id ~renamed_id ~verify_ret ast_fun =
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let namespace = ast_fun.Ast.f_namespace in
   let env = Emit_env.(
@@ -64,16 +106,24 @@ let emit_wrapper_function ~original_id ~renamed_id ~verify_ret ast_fun =
     Emit_body.emit_return_type_info
       ~scope ~skipawaitable:false ~namespace ast_fun.Ast.f_ret in
   let param_count = List.length params in
-  let call_instrs = instr_fpushfuncd param_count renamed_id in
+  let modified_params, name, call_instrs =
+    if wrapper_type = Emit_inout_helpers.InoutWrapper then
+      List.map ~f:Hhas_param.switch_inout_to_reference params,
+      original_id,
+      instr_fpushfuncd param_count renamed_id
+    else
+      List.map ~f:Hhas_param.switch_reference_to_inout params,
+      renamed_id,
+      instr_fpushfuncd param_count original_id
+  in
   let body_instrs =
-    emit_body_instrs ~verify_ret env params call_instrs in
+    emit_body_instrs ~wrapper_type ~verify_ret env params call_instrs in
   let fault_instrs = extract_fault_instructions body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
-  let params = List.map ~f:Hhas_param.switch_inout_to_reference params in
-  let body = make_wrapper_body return_type_info params body_instrs in
+  let body = make_wrapper_body return_type_info modified_params body_instrs in
   Hhas_function.make
     function_attributes
-    original_id
+    name
     body
     (Hhas_pos.pos_to_span ast_fun.Ast.f_span)
     false false false true true true
@@ -117,8 +167,9 @@ let emit_wrapper_method
                instr_fpushobjmethodd param_count renamed_id Ast.OG_nullsafe
              ]
   in
+  let wrapper_type = Emit_inout_helpers.InoutWrapper in
   let body_instrs =
-    emit_body_instrs ~verify_ret env params call_instrs in
+    emit_body_instrs ~wrapper_type ~verify_ret env params call_instrs in
   let fault_instrs = extract_fault_instructions body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
   let params = List.map ~f:Hhas_param.switch_inout_to_reference params in

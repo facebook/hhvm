@@ -764,7 +764,7 @@ module Typing                               = struct
   let escaping_disposable_parameter         = 4188 (* DONT MODIFY!!!! *)
   let accept_disposable_invariant           = 4189 (* DONT MODIFY!!!! *)
   let invalid_disposable_hint               = 4190 (* DONT MODIFY!!!! *)
-
+  let xhp_required                          = 4191 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2443,6 +2443,10 @@ let invalid_disposable_hint pos class_name =
   add Typing.invalid_disposable_hint pos ("Parameter with type '" ^ class_name ^ "' must not \
     implement IDisposable or IAsyncDisposable. Please use <<__AcceptDisposable>> attribute or \
     create disposable object with 'using' statement instead.")
+
+let xhp_required pos why_xhp ty_reason_msg =
+  let msg = "An XHP instance was expected" in
+  add_list Typing.xhp_required ((pos, msg)::(pos, why_xhp)::ty_reason_msg)
 
 let nullsafe_not_needed p nonnull_witness =
   add_list Typing.nullsafe_not_needed (

@@ -4,7 +4,6 @@ class :foo {
 }
 
 function spread(): void {
-  <foo {...shape('a' => 1)} />;
-  <foo {...shape('a' => 1)} bar="baz" />;
-  <foo {...shape('a' => 1)} bar="baz" {...false} />;
+  // Non-XHP is not legal to spread
+  <foo bar="baz" {...shape('a' => 1)} />;
 }

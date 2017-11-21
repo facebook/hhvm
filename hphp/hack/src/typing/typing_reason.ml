@@ -313,6 +313,7 @@ type ureason =
   | URyield
   (* Name of XHP class, Name of XHP attribute *)
   | URxhp of string * string
+  | URxhp_spread
   | URindex of string
   | URparam
   | URparam_inout
@@ -353,6 +354,7 @@ let string_of_ureason = function
   | URyield -> "Invalid yield"
   | URxhp (cls, attr) ->
       "Invalid xhp value for attribute " ^ attr ^ " in " ^ (strip_ns cls)
+  | URxhp_spread -> "The attribute spread operator cannot be called on non-XHP"
   | URindex s -> "Invalid index type for this " ^ s
   | URparam -> "Invalid argument"
   | URparam_inout -> "Invalid argument to an inout parameter"

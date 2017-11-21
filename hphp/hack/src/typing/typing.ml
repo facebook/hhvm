@@ -1991,41 +1991,26 @@ and expr_
       end
   | Xml (sid, attrl, el) ->
       let cid = CI (sid, []) in
-      let env, _te, obj = expr env (fst sid, New (cid, [], [])) in
-      let env, attr_ptyl = List.map_env env attrl begin fun env attr ->
-        (* Typecheck the expressions - this just checks that the expressions are
-         * valid, not that they match the declared type for the attribute *)
-        let namepstr, valexpr = match attr with
-          | Xhp_simple (id, e) -> (id, e)
-          | Xhp_spread (p, _) -> begin
-              Errors.unimplemented_feature p "XHP spread operator";
-              ( p, "__SPREAD_TODO"), (p, Any)
-          end
-        in
-        let valp, _ = valexpr in
-        let env, te, valty = expr env valexpr in
-        env, (namepstr, (valp, valty), te)
-      end in
-      let tal = List.map attr_ptyl (fun (a, _, c) -> T.Xhp_simple (a, c)) in
-      let env, tel, _body = exprs env el in
-      let txml = T.Xml (sid, tal, tel) in
       let env, _te, classes = class_id_for_new p env cid in
-      (match classes with
-       | [] -> make_result env txml (Reason.Runknown_class p, Tobject)
+      let class_info = match classes with
+        | [] -> None
          (* OK to ignore rest of list; class_info only used for errors, and
           * cid = CI sid cannot produce a union of classes anyhow *)
-       | (_, class_info, _)::_ ->
-        let env = List.fold_left attr_ptyl ~f:begin fun env attr ->
-          let namepstr, valpty, _ = attr in
+        | (_, class_info, _)::_ -> Some class_info
+      in
+      let env, _te, obj = expr env (fst sid, New (cid, [], [])) in
+      let env, typed_attrs, attr_types = xhp_attribute_exprs env class_info attrl in
+      let env, tel, _body = exprs env el in
+      let txml = T.Xml (sid, typed_attrs, tel) in
+      (match class_info with
+       | None -> make_result env txml (Reason.Runknown_class p, Tobject)
+       | Some class_info ->
+        let env = List.fold_left attr_types ~f:begin fun env attr ->
+          let namepstr, valpty = attr in
           let valp, valty = valpty in
-          (* We pretend that XHP attributes are stored as member variables,
-           * prefixed with a colon.
-           *
-           * This converts the member name to an attribute name. *)
-          let name = ":" ^ (snd namepstr) in
           let env, declty =
             obj_get ~is_method:false ~nullsafe:None env obj cid
-              (fst namepstr, name) (fun x -> x) in
+              namepstr (fun x -> x) in
           let ureason = Reason.URxhp (class_info.tc_name, snd namepstr) in
           Type.sub_type valp ureason env valty declty
         end ~init:env in
@@ -2087,6 +2072,54 @@ and anon_sub_type pos ur env ty_sub ty_super =
   Errors.try_add_err pos (Reason.string_of_ureason ur)
     (fun () -> SubType.sub_type env ty_sub ty_super)
     (fun () -> env)
+
+(*****************************************************************************)
+(* XHP attribute helpers. *)
+(*****************************************************************************)
+(**
+ * Process a spread operator by computing the intersection of XHP attributes
+ * between the spread expression and the XHP constructor onto which we're
+ * spreading.
+ *)
+and xhp_spread_attribute env c_onto valexpr =
+  let (p, _) = valexpr in
+  let env, te, valty = expr env valexpr in
+  (* Build the typed attribute node *)
+  let typed_attr = T.Xhp_spread te in
+  let env, attr_ptys = match c_onto with
+    | None -> env, []
+    | Some class_info -> Typing_xhp.get_spread_attributes env p class_info valty
+  in env, typed_attr, attr_ptys
+
+(**
+ * Simple XHP attributes (attr={expr} form) are simply interpreted as a member
+ * variable prefixed with a colon, the types of which will be validated later
+ *)
+and xhp_simple_attribute env id valexpr =
+  let (p, _) = valexpr in
+  let env, te, valty = expr env valexpr in
+  (* This converts the attribute name to a member name. *)
+  let name = ":"^(snd id) in
+  let attr_pty = ((fst id, name), (p, valty)) in
+  let typed_attr = T.Xhp_simple (id, te) in
+  env, typed_attr, [attr_pty]
+
+
+(**
+ * Typecheck the attribute expressions - this just checks that the expressions are
+ * valid, not that they match the declared type for the attribute and,
+ * in case of spreads, makes sure they are XHP.
+ *)
+and xhp_attribute_exprs env cid attrl =
+  let handle_attr (env, typed_attrl, attr_ptyl) attr =
+    let env, typed_attr, attr_ptys = match attr with
+      | Xhp_simple (id, valexpr) -> xhp_simple_attribute env id valexpr
+      | Xhp_spread valexpr -> xhp_spread_attribute env cid valexpr
+    in
+    env, typed_attr::typed_attrl, attr_ptys @ attr_ptyl
+  in
+  let env, typed_attrl, attr_ptyl = List.fold_left ~f:handle_attr ~init:(env, [], []) attrl in
+  env, List.rev typed_attrl, List.rev attr_ptyl
 
 (*****************************************************************************)
 (* Anonymous functions. *)

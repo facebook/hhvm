@@ -5,6 +5,6 @@ class :foo {
 }
 
 function spread(): void {
-  <foo {...shape('a' => 1)}></foo>;
+  // XHP should be allowed to spread
   <foo {...<baz />} bar="bar"></foo>;
 }

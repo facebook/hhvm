@@ -1,2 +1,6 @@
-File "xhp_attr_spread_1.php", line 7, characters 12-16:
-Feature not implemented: XHP spread operator (Other[0000])
+File "xhp_attr_spread_1.php", line 8, characters 22-26:
+An XHP instance was expected (Typing[4191])
+File "xhp_attr_spread_1.php", line 8, characters 22-26:
+The attribute spread operator cannot be called on non-XHP
+File "xhp_attr_spread_1.php", line 8, characters 22-26:
+This is a shape

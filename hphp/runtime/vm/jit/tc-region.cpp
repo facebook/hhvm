@@ -45,7 +45,6 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/treadmill.h"
 
-#include "hphp/util/match.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
@@ -299,13 +298,8 @@ void invalidateFuncProfSrcKeys(const Func* func) {
 size_t infoSize(const FuncMetaInfo& info) {
   size_t sz = 0;
   for (auto& trans : info.translations) {
-    match<void>(
-      trans,
-      [&] (ProfTransRec* rec) { },
-      [&] (const TransMetaInfo& info) {
-        auto& range = info.range;
-        sz += range.main.size() + range.cold.size() + range.frozen.size();
-      });
+    auto& range = trans.range;
+    sz += range.main.size() + range.cold.size() + range.frozen.size();
   }
   return sz;
 }
@@ -335,19 +329,27 @@ void publishOptFunctionInternal(FuncMetaInfo info,
   invalidateFuncProfSrcKeys(func);
 
   // Publish all prologues and translations for func in order.
-  for (auto& trans : info.translations) {
-    match<void>(
-      trans,
-      [&] (ProfTransRec* rec) {
-        emitFuncPrologueOptInternal(rec);
-      },
-      [&] (TransMetaInfo& tmi) {
-        auto const regionSk = tmi.sk;
-        auto& range = tmi.range;
+  size_t prologueIdx = 0;
+  size_t translationIdx = 0;
+
+  for (auto kind : info.order) {
+    switch (kind) {
+      case FuncMetaInfo::Kind::Prologue: {
+        assertx(prologueIdx < info.prologues.size());
+        emitFuncPrologueOptInternal(info.prologues[prologueIdx]);
+        prologueIdx++;
+        break;
+      }
+      case FuncMetaInfo::Kind::Translation: {
+        assertx(translationIdx < info.translations.size());
+        auto& trans = info.translations[translationIdx];
+        translationIdx++;
+        auto const regionSk = trans.sk;
+        auto& range = trans.range;
         auto bytes = range.main.size() + range.cold.size() +
                      range.frozen.size();
         auto const loc = publishTranslationInternal(
-          std::move(tmi), info.tcBuf.view()
+          std::move(trans), info.tcBuf.view()
         );
         if (loc &&
             regionSk.offset() == func->base() &&
@@ -357,8 +359,12 @@ void publishOptFunctionInternal(FuncMetaInfo info,
         } else if (!loc && failedBytes) {
           *failedBytes += bytes;
         }
-      });
+        break;
+      }
+    }
   }
+  assertx(prologueIdx == info.prologues.size());
+  assertx(translationIdx == info.translations.size());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

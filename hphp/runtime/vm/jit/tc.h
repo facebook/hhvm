@@ -87,6 +87,11 @@ private:
 };
 
 struct FuncMetaInfo {
+  enum class Kind : uint8_t {
+    Prologue,
+    Translation,
+  };
+
   FuncMetaInfo() = default;
   FuncMetaInfo(Func* f, LocalTCBuffer&& buf)
     : fid(f->getFuncId())
@@ -101,8 +106,24 @@ struct FuncMetaInfo {
   Func* func;
   LocalTCBuffer tcBuf;
 
-  using Trans = boost::variant<ProfTransRec*,TransMetaInfo>;
-  std::vector<Trans> translations;
+  void add(ProfTransRec* p) {
+    prologues.emplace_back(p);
+    order.emplace_back(Kind::Prologue);
+  }
+
+  void add(TransMetaInfo&& t) {
+    translations.emplace_back(std::move(t));
+    order.emplace_back(Kind::Translation);
+  }
+
+  // We rebuild a variant type here because using boosts fails on opensource
+  // builds because it at some point requires a copy construction.
+  // This vector has one entry per prologue/translation stored in the two
+  // vectors above, and it encodes the order in which they should be published.
+  std::vector<Kind> order;
+
+  std::vector<ProfTransRec*> prologues;
+  std::vector<TransMetaInfo> translations;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

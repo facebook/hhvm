@@ -114,7 +114,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   if (checkCachedPrologue(func, nArgs)) return false;
 
   if (retranslateAllEnabled()) {
-    info.translations.emplace_back(rec);
+    info.add(rec);
   } else {
     tc::emitFuncPrologueOpt(rec);
   }
@@ -140,7 +140,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
           // it's not retranslated again along with the function body.
           profData()->setOptimized(funcletSK);
           ret = true;
-          info.translations.emplace_back(std::move(res.value()));
+          info.add(std::move(res.value()));
         }
       };
       withThis(func, genPrologue);

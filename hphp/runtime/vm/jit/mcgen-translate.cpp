@@ -88,7 +88,7 @@ void optimize(tc::FuncMetaInfo& info) {
     auto const spOff = region->entry()->initialSpOffset();
     auto data = translate(transArgs, spOff, info.tcBuf.view());
     if (data) {
-      info.translations.emplace_back(std::move(*data));
+      info.add(std::move(*data));
       transCFGAnnot = ""; // so we don't annotate it again
     }
   }

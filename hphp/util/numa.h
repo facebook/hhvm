@@ -17,12 +17,13 @@
 #define incl_HPHP_UTIL_NUMA_H
 
 #include <atomic>
+#include "stddef.h"
 
 #ifdef HAVE_NUMA
 
+#include <cstdint>
 #include <vector>
 #include <numa.h>
-#include <stdint.h>
 
 namespace HPHP {
 
@@ -52,7 +53,9 @@ void numa_interleave(void* start, size_t size);
  * Allocate the specified address range on the given node
  */
 void numa_bind_to(void* start, size_t size, int node);
-
+/*
+ * Return true if node is part of the allowed set of numa nodes
+ */
 inline bool numa_node_allowed(int node) {
   if (numa_node_set == 0) return true;
   return numa_node_set & (1u << node);
@@ -64,11 +67,11 @@ inline bool numa_node_allowed(int node) {
 namespace HPHP {
 
 inline void initNuma() {}
-inline int next_numa_node(std::atomic_int& curr_node) { return 0; }
-inline int num_numa_nodes() { return 1; }
+inline constexpr int next_numa_node(std::atomic_int& curr_node) { return 0; }
+inline constexpr int num_numa_nodes() { return 1; }
 inline void numa_interleave(void* start, size_t size) {}
 inline void numa_bind_to(void* start, size_t size, int node) {}
-inline bool numa_node_allowed(int node) { return true; }
+inline constexpr bool numa_node_allowed(int node) { return true; }
 
 }
 

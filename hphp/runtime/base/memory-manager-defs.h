@@ -51,6 +51,12 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+using HdrBlock = MemRange<HeapObject*>;
+
+// The first slab may be smaller than the normal size when it is
+// preallocated. The heap scanner needs to know about it.
+extern __thread MemBlock s_firstSlab;
+
 /*
  * Struct Slab encapsulates the header attached to each large block of memory
  * used for allocating smaller blocks. The header contains a crossing map,
@@ -148,10 +154,14 @@ struct alignas(kSmallSizeAlign) SlabHeader : FreeNode {
     return reinterpret_cast<SlabHeader<LineSize>*>(h);
   }
 
+  size_t size() const {
+    assertx(s_firstSlab.size <= kSlabSize);
+    return (this == s_firstSlab.ptr) ? s_firstSlab.size : kSlabSize;
+  }
   char* start() { return (char*)(this + 1); }
-  char* end() { return (char*)this + kSlabSize; }
+  char* end() { return (char*)this + size(); }
   const char* start() const { return (const char*)(this + 1); }
-  const char* end() const { return (const char*)this + kSlabSize; }
+  const char* end() const { return (const char*)this + size(); }
 
 private:
   // LineSize=128 would be the same overhead as 1 bit per 16 bytes
@@ -488,11 +498,11 @@ void SparseHeap::iterate(OnBig onBig, OnSlab onSlab) {
   auto slabend = std::end(m_slabs);
   auto bigend = std::end(m_bigs);
   while (slab != slabend || big != bigend) {
-    HeapObject* slab_hdr = slab != slabend ? *slab : SENTINEL;
+    HeapObject* slab_hdr = slab != slabend ? (HeapObject*)slab->ptr : SENTINEL;
     HeapObject* big_hdr = big != bigend ? *big : SENTINEL;
     assert(slab_hdr < SENTINEL || big_hdr < SENTINEL);
     if (slab_hdr < big_hdr) {
-      onSlab(slab_hdr, kSlabSize);
+      onSlab(slab_hdr, slab->size);
       ++slab;
     } else {
       assert(big_hdr < slab_hdr);
@@ -510,13 +520,13 @@ template<class Fn> void SparseHeap::iterate(Fn fn) {
   auto slabend = std::end(m_slabs);
   auto bigend = std::end(m_bigs);
   while (slab != slabend || big != bigend) {
-    HeapObject* slab_hdr = slab != slabend ? *slab : SENTINEL;
+    HeapObject* slab_hdr = slab != slabend ? (HeapObject*)slab->ptr : SENTINEL;
     HeapObject* big_hdr = big != bigend ? *big : SENTINEL;
     assert(slab_hdr < SENTINEL || big_hdr < SENTINEL);
     HeapObject *h, *end;
     if (slab_hdr < big_hdr) {
       h = slab_hdr;
-      end = (HeapObject*)((char*)h + kSlabSize);
+      end = (HeapObject*)((char*)h + slab->size);
       ++slab;
       assert(end <= big_hdr); // otherwise slab overlaps next big
     } else {

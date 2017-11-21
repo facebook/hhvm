@@ -207,7 +207,7 @@ void* ManagedArena::extent_alloc(extent_hooks_t* /*extent_hooks*/, void* addr,
 
       // This test works even if NUMA is not supported, or if there is only 1
       // NUMA node, in which cases we just return nullptr after the first try.
-      if (++failCount >= numa_num_nodes) return nullptr;
+      if (++failCount >= num_numa_nodes()) return nullptr;
 
       // We haven't tried on all NUMA nodes yet, so retry in the next iteration.
       continue;
@@ -245,10 +245,8 @@ std::string ManagedArena::reportStats() {
       assert(arena->m_arenaId == i);
       char buffer[128];
       std::snprintf(buffer, sizeof(buffer),
-                    "Arena %d on NUMA mask %d: capacity %zd, "
-                    "max_capacity %zd, used %zd\n",
+                    "Arena %d: capacity %zd, max_capacity %zd, used %zd\n",
                     i,
-                    numa_node_mask,
                     arena->m_currCapacity,
                     arena->m_maxCapacity,
                     arena->activeSize());

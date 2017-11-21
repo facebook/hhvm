@@ -19,7 +19,6 @@
 #include "hphp/util/numa.h"
 #include "hphp/util/portability.h"
 #include <folly/Bits.h>
-#include <sys/prctl.h>
 
 extern "C" {
 HHVM_ATTRIBUTE_WEAK extern void numa_init();

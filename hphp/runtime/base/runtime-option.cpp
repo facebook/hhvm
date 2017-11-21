@@ -167,6 +167,7 @@ int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
+int RuntimeOption::ServerHugeThreadCount = 0;
 int RuntimeOption::QueuedJobsReleaseRate = 3;
 int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
@@ -186,6 +187,7 @@ boost::container::flat_set<std::string>
 RuntimeOption::ServerHighPriorityEndPoints;
 bool RuntimeOption::ServerExitOnBindFail;
 int RuntimeOption::PageletServerThreadCount = 0;
+int RuntimeOption::PageletServerHugeThreadCount = 0;
 int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::PageletServerQueueLimit = 0;
 bool RuntimeOption::PageletServerThreadDropStack = false;
@@ -195,6 +197,7 @@ int RuntimeOption::PspCpuTimeoutSeconds = 0;
 int64_t RuntimeOption::MaxRequestAgeFactor = 0;
 int64_t RuntimeOption::RequestMemoryMaxBytes =
   std::numeric_limits<int64_t>::max();
+int64_t RuntimeOption::RequestHugeMaxBytes = 0;
 int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
 int RuntimeOption::ServerGracefulShutdownWait = 0;
 bool RuntimeOption::ServerHarshShutdown = true;
@@ -1396,6 +1399,10 @@ void RuntimeOption::Load(
                  "Server.ConnectionLimit", 0);
     Config::Bind(ServerThreadCount, ini, config, "Server.ThreadCount",
                  Process::GetCPUCount() * 2);
+    Config::Bind(ServerHugeThreadCount, ini, config,
+                 "Server.HugeThreadCount", 0);
+    extern unsigned s_hugeStackSizeKb;
+    Config::Bind(s_hugeStackSizeKb, ini, config, "Server.HugeStackSizeKb", 384);
     Config::Bind(ServerWarmupThrottleRequestCount, ini, config,
                  "Server.WarmupThrottleRequestCount",
                  ServerWarmupThrottleRequestCount);
@@ -1435,6 +1442,8 @@ void RuntimeOption::Load(
                  "Server.PspCpuTimeoutSeconds", 0);
     Config::Bind(RequestMemoryMaxBytes, ini, config,
                  "Server.RequestMemoryMaxBytes", (16LL << 30)); // 16GiB
+    Config::Bind(RequestHugeMaxBytes, ini, config,
+                 "Server.RequestHugeMaxBytes", (24LL << 20));
     Config::Bind(ServerGracefulShutdownWait, ini,
                  config, "Server.GracefulShutdownWait", 0);
     Config::Bind(ServerHarshShutdown, ini, config, "Server.HarshShutdown",
@@ -1695,6 +1704,8 @@ void RuntimeOption::Load(
     // Pagelet Server
     Config::Bind(PageletServerThreadCount, ini, config,
                  "PageletServer.ThreadCount", 0);
+    Config::Bind(PageletServerHugeThreadCount, ini, config,
+                 "PageletServer.HugeThreadCount", 0);
     Config::Bind(PageletServerThreadDropStack, ini, config,
                  "PageletServer.ThreadDropStack");
     Config::Bind(PageletServerThreadDropCacheTimeoutSeconds, ini, config,

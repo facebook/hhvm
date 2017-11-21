@@ -453,8 +453,7 @@ struct JobQueueWorker {
   void start() {
     assert(m_queue);
     onThreadEnter();
-    // bool highPri = (s_firstSlab.first != nullptr);
-    bool highPri = false;
+    bool highPri = (s_firstSlab.ptr != nullptr);
     while (!m_stopped) {
       try {
         bool expired = false;
@@ -758,8 +757,9 @@ private:
       return;
     }
     TWorker *worker = new TWorker();
+    bool huge = m_workers.size() < m_hugeThreadCount;
     AsyncFunc<TWorker> *func =
-      new AsyncFunc<TWorker>(worker, &TWorker::start);
+      new AsyncFunc<TWorker>(worker, &TWorker::start, huge);
     m_workers.insert(worker);
     m_funcs.insert(func);
     int id = m_id++;

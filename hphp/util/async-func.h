@@ -23,6 +23,7 @@
 
 #include <folly/Portability.h>
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/synchronizable.h"
@@ -105,7 +106,7 @@ struct AsyncFuncImpl {
   /**
    * Called by AsyncFunc<T> so we can call func(obj) back on thread running.
    */
-  AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func);
+  AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func, bool hugify);
   ~AsyncFuncImpl();
 
   /**
@@ -163,8 +164,8 @@ struct AsyncFuncImpl {
 private:
   Synchronizable m_stopMonitor;
 
-  void* m_obj;
-  PFN_THREAD_FUNC* m_func;
+  void* m_obj{nullptr};
+  PFN_THREAD_FUNC* m_func{nullptr};
   static PFN_THREAD_FUNC* s_initFunc;
   static PFN_THREAD_FUNC* s_finiFunc;
   static void* s_initFuncArg;
@@ -172,14 +173,17 @@ private:
   static std::atomic<uint32_t> s_count;
   static std::atomic_int s_curr_numa_node; // for round robin NUMA binding
 
-  void* m_threadStack;
+  char* m_threadStack;
+  size_t m_stackAllocSize;
+  MemBlock m_firstSlab{nullptr, 0};
   pthread_attr_t m_attr;
-  pthread_t m_threadId;
-  Exception* m_exception; // exception was thrown and thread was terminated
-  int m_node;
-  bool m_stopped;
-  bool m_noInitFini;
-
+  pthread_t m_threadId{0};
+  // exception was thrown and thread was terminated
+  Exception* m_exception{nullptr};
+  int m_node{0};
+  bool m_stopped{false};
+  bool m_noInitFini{false};
+  bool m_hugeStack{false};
   /**
    * Called by ThreadFunc() to delegate the work.
    */
@@ -196,8 +200,9 @@ private:
  */
 template<class T>
 struct AsyncFunc : AsyncFuncImpl {
-  AsyncFunc(T *obj, void (T::*member_func)())
-    : AsyncFuncImpl((void*)this, run_), m_obj(obj), m_memberFunc(member_func) {
+  AsyncFunc(T *obj, void (T::*member_func)(), bool hugify = false)
+    : AsyncFuncImpl((void*)this, run_, hugify),
+      m_obj(obj), m_memberFunc(member_func) {
   }
 
   static void run_(void *obj) {

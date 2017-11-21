@@ -144,6 +144,8 @@ struct RuntimeOption {
   static int ServerBacklog;
   static int ServerConnectionLimit;
   static int ServerThreadCount;
+  // Number of worker threads with stack partially on huge pages.
+  static int ServerHugeThreadCount;
   static int QueuedJobsReleaseRate;
   static int ServerWarmupThrottleRequestCount;
   static int ServerThreadDropCacheTimeoutSeconds;
@@ -162,6 +164,7 @@ struct RuntimeOption {
   static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
   static bool ServerExitOnBindFail;
   static int PageletServerThreadCount;
+  static int PageletServerHugeThreadCount;
   static int PageletServerThreadDropCacheTimeoutSeconds;
   static int PageletServerQueueLimit;
   static bool PageletServerThreadDropStack;
@@ -171,6 +174,9 @@ struct RuntimeOption {
   static int PspCpuTimeoutSeconds;
   static int64_t MaxRequestAgeFactor;
   static int64_t RequestMemoryMaxBytes;
+  // Approximate upper bound for thread heap that is backed by huge pages.  This
+  // doesn't include the first slab colocated with thread stack, if any.
+  static int64_t RequestHugeMaxBytes;
   static int64_t ImageMemoryMaxBytes;
   static int ServerGracefulShutdownWait;
   static bool ServerHarshShutdown;
@@ -669,6 +675,8 @@ struct RuntimeOption {
   F(bool, MapTgtCacheHuge,             false)                           \
   F(uint32_t, MaxHotTextHugePages,     hugePagesSoundNice() ? 8 : 0)    \
   F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
+  F(uint32_t, Num1GPagesForSlabs,      0)                               \
+  F(uint32_t, Num2MPagesForSlabs,      0)                               \
   F(bool, LowStaticArrays,             true)                            \
   F(bool, UncountedMixedArrayHuge,     true)                            \
   F(bool, UncountedStringHuge,         true)                            \

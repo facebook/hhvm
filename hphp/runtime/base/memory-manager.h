@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/req-malloc.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/slab-manager.h"
 
 namespace HPHP {
 
@@ -352,8 +353,6 @@ alignas(64) constexpr unsigned kNContigTab[] = {
 
 constexpr size_t kMaxSmallSizeLookup = 4096;
 
-constexpr unsigned kLgSlabSize = 21;
-constexpr uint32_t kSlabSize = uint32_t{1} << kLgSlabSize;
 constexpr unsigned kLgSmallSizeQuantum = 4;
 constexpr size_t kSmallSizeAlign = 1u << kLgSmallSizeQuantum;
 constexpr size_t kSmallSizeAlignMask = kSmallSizeAlign - 1;
@@ -459,22 +458,13 @@ struct NativeNode : HeapObject,
   uint32_t arOff() const { return m_aux32; } // from this to ActRec, or 0
 };
 
-// POD type for tracking arbitrary memory ranges
-template<class T> struct MemRange {
-  T ptr;
-  size_t size; // bytes
-};
-
-using MemBlock = MemRange<void*>;
-using HdrBlock = MemRange<HeapObject*>;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Allocator for slabs and big blocks.
  */
 struct SparseHeap {
-  SparseHeap() {}
+  SparseHeap();
   ~SparseHeap();
 
   /*
@@ -543,8 +533,25 @@ struct SparseHeap {
   void enlist(MallocNode*, HeaderKind kind, size_t size, type_scan::Index);
 
  protected:
-  std::vector<HeapObject*> m_slabs;
+  enum FirstSlabT { FirstSlab };
+  enum PooledSlabT { PooledSlab };
+  struct SlabInfo {
+    SlabInfo(void* p, size_t s) : ptr(p), size(s) {}
+    SlabInfo(void* p, size_t s, FirstSlabT)
+      : ptr(p), size(s), contains_stack(true) {}
+    SlabInfo(void* p, size_t s, uint16_t v, PooledSlabT)
+      : ptr(p), size(s), pooled(true), version(v) {}
+
+    void* ptr;
+    uint32_t size;
+    bool contains_stack{false};         // first slab share a page with stack
+    bool pooled{false};                 // from SlabManager
+    uint16_t version{0};                // tag used with SlabManager
+  };
+  std::vector<SlabInfo> m_slabs;
   std::vector<MallocNode*> m_bigs;
+  int64_t m_pooledBytes{0};             // compare with RequestHugeMaxBytes
+  SlabManager* m_slabManager{nullptr};
 };
 
 /*

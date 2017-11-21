@@ -1142,6 +1142,8 @@ static int start_server(const std::string &username, int xhprof) {
     start_cli_server();
   }
 
+  SlabManager::init();                // allocate hugetlb pages for pooled slabs
+
   HttpServer::Server->runOrExitProcess();
   HttpServer::Server.reset();
 

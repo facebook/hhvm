@@ -332,6 +332,14 @@ struct ScopedMem {
   void* m_ptr;
 };
 
+// POD type for tracking arbitrary memory ranges
+template<class T> struct MemRange {
+  T ptr;
+  size_t size; // bytes
+};
+
+using MemBlock = MemRange<void*>;
+
 extern __thread uintptr_t s_stackLimit;
 extern __thread size_t s_stackSize;
 void init_stack_limits(pthread_attr_t* attr);
@@ -342,6 +350,10 @@ extern const size_t s_pageSize;
  * The numa node this thread is bound to
  */
 extern __thread int32_t s_numaNode;
+/*
+ * The optional preallocated first slab
+ */
+extern __thread MemBlock s_firstSlab;
 /*
  * enable the numa support in hhvm,
  * and determine whether threads should default to using
@@ -354,6 +366,10 @@ void enable_numa(bool local);
  * Also initializes s_numaNode
  */
 void set_numa_binding(int node);
+/*
+ * Allocate on a specific NUMA node, with alignment requirement.
+ */
+void* mallocx_on_node(size_t size, int node, size_t align);
 
 /*
  * mallctl wrappers.

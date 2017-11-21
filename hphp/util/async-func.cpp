@@ -22,6 +22,7 @@
 #include <folly/portability/Unistd.h>
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/numa.h"
 
 namespace HPHP {
@@ -38,12 +39,11 @@ void* AsyncFuncImpl::s_finiFuncArg = nullptr;
 std::atomic<uint32_t> AsyncFuncImpl::s_count { 0 };
 std::atomic_int AsyncFuncImpl::s_curr_numa_node { 0 };
 
-AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
-    : m_obj(obj), m_func(func),
-      m_threadStack(nullptr), m_threadId(0),
-      m_exception(nullptr), m_node(0),
-      m_stopped(false), m_noInitFini(false) {
-}
+unsigned s_hugeStackSizeKb;             // set through "Server.HugeStackSizeKb"
+
+AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func, bool hugeStack)
+  : m_obj(obj), m_func(func), m_hugeStack(hugeStack)
+{}
 
 AsyncFuncImpl::~AsyncFuncImpl() {
   assert(m_stopped || m_threadId == 0);
@@ -53,11 +53,45 @@ AsyncFuncImpl::~AsyncFuncImpl() {
 void *AsyncFuncImpl::ThreadFunc(void *obj) {
   auto self = static_cast<AsyncFuncImpl*>(obj);
   init_stack_limits(self->getThreadAttr());
+  s_firstSlab = self->m_firstSlab;
+  assertx(!s_firstSlab.ptr || s_firstSlab.size);
   set_numa_binding(self->m_node);
-
   self->threadFuncImpl();
   return nullptr;
 }
+
+#ifdef __linux__
+// Allocate a piece of memory using mmap(), with address range [start, end), so
+// that
+// (1) start + size == end,
+// (2) end % alignment == 0 when alignment is nonzero
+// (3) the memory can be used for stack and heap.
+//
+// Both `size` and `alignment` need to be multiples of 16.
+static char* mmap_end_aligned(size_t size, size_t alignment) {
+  assertx(size % 16 == 0 && alignment % 16 == 0);
+  auto const allocSize = size + (alignment > 16) * alignment;
+  char* start = (char*)mmap(nullptr, allocSize,
+                            PROT_READ | PROT_WRITE,
+                            MAP_PRIVATE | MAP_ANON,
+                            -1, 0);
+  if (start == MAP_FAILED) return nullptr;
+  if (alignment <= 16) return start;
+  char* end = start + allocSize;
+  size_t extraAfterEnd = reinterpret_cast<uintptr_t>(end) % alignment;
+  if (extraAfterEnd > 0) {
+    end -= extraAfterEnd;
+    munmap(end, extraAfterEnd);
+  }
+  char* realStart = end - size;
+  if (realStart != start) {
+    assertx(reinterpret_cast<uintptr_t>(realStart) >
+            reinterpret_cast<uintptr_t>(start));
+    munmap(start, realStart - start);
+  }
+  return realStart;
+}
+#endif
 
 void AsyncFuncImpl::start() {
   struct rlimit rlim;
@@ -71,8 +105,67 @@ void AsyncFuncImpl::start() {
     rlim.rlim_cur = kStackSizeMinimum;
   }
 
-  // On Success use the allocated memory for the thread's stack
-  if (posix_memalign(&m_threadStack, s_pageSize, rlim.rlim_cur) == 0) {
+#if defined(__x86_64__) && defined(__linux__) && defined(MADV_HUGEPAGE)
+  if (m_hugeStack) {
+    // Allocate a heap slab of at least 2M near the stack base on huge pages.
+    // The first s_hugeStackSizeKb of the stack is also on huge pages, the
+    // residual space (if any) is merged into the first slab.
+    //
+    // m_threadStack + m_stackAllocSize ---> +------------+ ---------------
+    //                                       |            |             ^
+    //                                       | First Slab |             |
+    //                                       |            |             |
+    //     m_threadStack + rlimit_stack ---> +------------+ -----  huge pages
+    //                                       | TCB        |   ^         |
+    //                                       . TLS        . hugeStack   |
+    //                                       . Stack      .   v         v
+    //                                       .            . ---------------
+    //                                       .            .
+    //                    m_threadStack ---> +------------+
+    //
+    auto const hugeStackSize = s_hugeStackSizeKb * 1024;
+    auto const stackPartialPageSize = hugeStackSize % size2m;
+    auto const nHugePages =
+      hugeStackSize / size2m /* number of pages purely for stack */
+      + (stackPartialPageSize != 0) /* partly stack and partly heap */;
+#ifndef USE_CONTIGUOUS_HEAP
+    auto slabSize =
+      size2m * (stackPartialPageSize != 0) - stackPartialPageSize;
+    // We don't want the first slab to be too small.
+    constexpr size_t kMinSlabSize = 256ull << 10;
+    if (slabSize != 0 && slabSize < kMinSlabSize) {
+      slabSize = kMinSlabSize;
+    }
+#else
+    constexpr size_t slabSize = 0;
+#endif
+    m_stackAllocSize = rlim.rlim_cur + slabSize;
+    m_threadStack = mmap_end_aligned(m_stackAllocSize, size2m);
+    auto const end = m_threadStack + rlim.rlim_cur + slabSize;
+    assertx(reinterpret_cast<uintptr_t>(end) % size2m == 0);
+    if (m_threadStack) {
+      for (size_t i = 1; i <= nHugePages; i++) {
+        if (!mmap_2m(end - i * size2m, PROT_READ | PROT_WRITE, m_node,
+                     /* MAP_SHARED */ false, /* MAP_FIXED */ true)) {
+          // Try transparent huge pages if we are unable to get reserved ones.
+          hintHuge(end - i * size2m, size2m);
+        }
+      }
+      if (slabSize) {
+        m_firstSlab = MemBlock{end - slabSize, slabSize};
+      }
+    }
+  } else {
+    m_threadStack = mmap_end_aligned(rlim.rlim_cur, 0);
+    m_stackAllocSize = rlim.rlim_cur;
+  }
+#else
+  m_threadStack = (char*)mmap(nullptr, rlim.rlim_cur, PROT_READ | PROT_WRITE,
+                              MAP_PRIVATE | MAP_ANON, -1, 0);
+  m_stackAllocSize = rlim.rlim_cur;
+#endif
+
+  if (m_threadStack) {
     size_t guardsize;
     if (pthread_attr_getguardsize(&m_attr, &guardsize) == 0 && guardsize) {
       mprotect(m_threadStack, guardsize, PROT_NONE);
@@ -120,7 +213,7 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
     if (pthread_attr_getguardsize(&m_attr, &guardsize) == 0 && guardsize) {
       mprotect(m_threadStack, guardsize, PROT_READ | PROT_WRITE);
     }
-    free(m_threadStack);
+    munmap(m_threadStack, m_stackAllocSize);
     m_threadStack = nullptr;
   }
 

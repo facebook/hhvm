@@ -99,6 +99,22 @@ let format_tree ?config tree =
   |> Chunk_builder.build
   |> Line_splitter.solve env source_text
 
+(** Format a single node.
+ *
+ * A trailing newline will be included (and leading indentation, if
+ * requested). *)
+let format_node ?config ?(indent=0) node =
+  let source_text = EditableSyntax.text node in
+  let env = env_from_config config in
+  let rec nest times doc =
+    if times <= 0 then doc
+    else nest (times - 1) (Doc.BlockNest [doc]) in
+  node
+  |> Hack_format.transform env
+  |> nest indent
+  |> Chunk_builder.build
+  |> Line_splitter.solve env source_text
+
 (** Format a given range in a file.
  *
  * The range is a half-open interval of byte offsets into the file.

@@ -63,7 +63,7 @@ let builder = object (this)
     rules <- [];
     lazy_rules <- ISet.empty;
     chunks <- [];
-    next_split_rule <- NoRule;
+    next_split_rule <- RuleKind Rule.Always;
     next_lazy_rules <- ISet.empty;
     num_pending_spans <- 0;
     space_if_not_split <- false;

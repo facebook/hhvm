@@ -164,10 +164,7 @@ TCA getTranslation(TransArgs args) {
 
   tc::createSrcRec(sk, liveSpOff());
 
-  auto sr = tc::findSrcRec(sk);
-  always_assert(sr);
-
-  if (auto const tca = sr->getTopTranslation()) {
+  if (auto const tca = tc::findSrcRec(sk)->getTopTranslation()) {
     // Handle extremely unlikely race; someone may have just added the first
     // translation for this SrcRec while we did a non-blocking wait on the
     // write lease in createSrcRec().

@@ -51,7 +51,7 @@ let has_comma_after_chunk t ~chunk =
 
 let get_bound_ruleset rbm = ISet.of_list @@ IMap.keys rbm
 
-let get_overflow env len = max (len - (Env.line_width env)) 0
+let get_overflow env len = max (len - env.Env.line_width) 0
 
 let compute_indent_level chunk_group nesting_set chunk =
   let block_indentation = chunk_group.Chunk_group.block_indentation in
@@ -61,7 +61,7 @@ let get_indent_level t chunk =
   compute_indent_level t.chunk_group t.nesting_set chunk
 
 let get_indent_columns env chunk_group nesting_set chunk =
-  Env.indent_width env * compute_indent_level chunk_group nesting_set chunk
+  env.Env.indent_width * compute_indent_level chunk_group nesting_set chunk
 
 (**
  * Create a list of lines

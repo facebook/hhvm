@@ -1108,7 +1108,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
           t q_kw;
           when_present true_expr (fun () -> Concat [
             Space;
-            if Env.indent_width env = 2
+            if env.Env.indent_width = 2
               then Nest [t true_expr]
               else t true_expr;
             Space;
@@ -1116,7 +1116,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
           ]);
           t c_kw;
           Space;
-          if not (is_missing true_expr) && Env.indent_width env = 2
+          if not (is_missing true_expr) && env.Env.indent_width = 2
             then Nest [t false_expr]
             else t false_expr;
         ])
@@ -2075,7 +2075,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
     (* PHP does not permit trailing commas in function calls. Rather than try to
      * account for where PHP's parser permits trailing commas, we just never add
      * them in PHP files. *)
-    let allow_trailing = allow_trailing && (Env.add_trailing_commas env) in
+    let allow_trailing = allow_trailing && env.Env.add_trailing_commas in
     match syntax comma with
     | Token tok ->
       Concat [

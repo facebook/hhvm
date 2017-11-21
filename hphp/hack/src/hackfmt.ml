@@ -49,9 +49,9 @@ let parse_options () =
   let end_char = ref None in
   let at_char = ref None in
   let inplace = ref false in
-  let indent_width = ref FEnv.(indent_width default) in
-  let indent_with_tabs = ref FEnv.(indent_with_tabs default) in
-  let line_width = ref FEnv.(line_width default) in
+  let indent_width = ref FEnv.(default.indent_width) in
+  let indent_with_tabs = ref FEnv.(default.indent_with_tabs) in
+  let line_width = ref FEnv.(default.line_width) in
   let diff = ref false in
   let root = ref None in
   let diff_dry = ref false in
@@ -77,12 +77,12 @@ let parse_options () =
     "--indent-width", Arg.Set_int indent_width,
       sprintf
         " Specify the number of spaces per indentation level. Defaults to %d"
-        FEnv.(indent_width default);
+        FEnv.(default.indent_width);
 
     "--line-width", Arg.Set_int line_width,
       sprintf
         " Specify the maximum length for each line. Defaults to %d"
-        FEnv.(line_width default);
+        FEnv.(default.line_width);
 
     "--tabs", Arg.Set indent_with_tabs, " Indent with tabs rather than spaces";
 
@@ -116,10 +116,10 @@ let parse_options () =
     | Some s, Some e -> Some (s - 1, e - 1)
     | _ -> None
   in
-  let config = {FEnv.default with
-    FEnv.indent_width = !indent_width;
-    FEnv.indent_with_tabs = !indent_with_tabs;
-    FEnv.line_width = !line_width;
+  let config = FEnv.{default with
+    indent_width = !indent_width;
+    indent_with_tabs = !indent_with_tabs;
+    line_width = !line_width;
   } in
   (!files, !filename_for_logging, range, !at_char, !inplace, !diff, !root,
     !diff_dry, config),

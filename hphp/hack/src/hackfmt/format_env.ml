@@ -21,11 +21,3 @@ let default = {
   indent_with_tabs = false;
   line_width = 80;
 }
-
-let add_trailing_commas t = t.add_trailing_commas
-
-let indent_width t = t.indent_width
-
-let indent_with_tabs t = t.indent_with_tabs
-
-let line_width t = t.line_width

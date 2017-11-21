@@ -35,9 +35,9 @@ let string_of_subchunks (env: Env.t) (subchunks: t list) : string =
     | Newline -> Buffer.add_char buf '\n'
     | Indent indent ->
       Buffer.add_string buf @@
-        if Env.indent_with_tabs env
+        if env.Env.indent_with_tabs
         then String.make indent '\t'
-        else String.make (indent * Env.indent_width env) ' '
+        else String.make (indent * env.Env.indent_width) ' '
   end;
   Buffer.contents buf
 

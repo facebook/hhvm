@@ -79,8 +79,8 @@ let expand_to_atom_boundaries boundaries (r_st, r_ed) =
 
 let env_from_config config =
   let env = Option.value config ~default:Env.default in
-  if Env.indent_width env < 0 then invalid_arg "Invalid indent width";
-  if Env.line_width env < 0 then invalid_arg "Invalid line width";
+  if env.Env.indent_width < 0 then invalid_arg "Invalid indent width";
+  if env.Env.line_width < 0 then invalid_arg "Invalid line width";
   env
 
 let env_from_tree config tree =

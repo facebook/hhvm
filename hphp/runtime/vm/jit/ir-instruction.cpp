@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/func.h"
 
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
@@ -362,6 +363,10 @@ Type ctxReturn(const IRInstruction* inst) {
 }
 
 Type ctxClsReturn(const IRInstruction* inst) {
+  // If we aren't loading the cls from the ctx of the current function doing
+  // this makes no sense.
+  if (!canonical(inst->src(0))->inst()->is(LdCtx, LdCctx)) return TCls;
+
   auto const func = inst->func();
   if (!func || func->hasForeignThis()) return TCls;
   return Type::SubCls(inst->ctx());

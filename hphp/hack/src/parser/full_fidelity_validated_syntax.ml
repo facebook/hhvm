@@ -1123,7 +1123,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_trait_use_alias_item : trait_use_alias_item validator = function
   | { Syntax.syntax = Syntax.TraitUseAliasItem x; value = v } -> v,
     { trait_use_alias_item_aliased_name = validate_option_with (validate_specifier) x.Syntax.trait_use_alias_item_aliased_name
-    ; trait_use_alias_item_visibility = validate_option_with (validate_token) x.Syntax.trait_use_alias_item_visibility
+    ; trait_use_alias_item_modifiers = validate_list_with (validate_token) x.Syntax.trait_use_alias_item_modifiers
     ; trait_use_alias_item_keyword = validate_token x.Syntax.trait_use_alias_item_keyword
     ; trait_use_alias_item_aliasing_name = validate_specifier x.Syntax.trait_use_alias_item_aliasing_name
     }
@@ -1133,7 +1133,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.TraitUseAliasItem
       { Syntax.trait_use_alias_item_aliasing_name = invalidate_specifier x.trait_use_alias_item_aliasing_name
       ; Syntax.trait_use_alias_item_keyword = invalidate_token x.trait_use_alias_item_keyword
-      ; Syntax.trait_use_alias_item_visibility = invalidate_option_with (invalidate_token) x.trait_use_alias_item_visibility
+      ; Syntax.trait_use_alias_item_modifiers = invalidate_list_with (invalidate_token) x.trait_use_alias_item_modifiers
       ; Syntax.trait_use_alias_item_aliased_name = invalidate_option_with (invalidate_specifier) x.trait_use_alias_item_aliased_name
       }
     ; Syntax.value = v

@@ -7541,17 +7541,17 @@ final class TraitUsePrecedenceItem extends EditableSyntax {
 final class TraitUseAliasItem extends EditableSyntax {
   private EditableSyntax $_aliasing_name;
   private EditableSyntax $_keyword;
-  private EditableSyntax $_visibility;
+  private EditableSyntax $_modifiers;
   private EditableSyntax $_aliased_name;
   public function __construct(
     EditableSyntax $aliasing_name,
     EditableSyntax $keyword,
-    EditableSyntax $visibility,
+    EditableSyntax $modifiers,
     EditableSyntax $aliased_name) {
     parent::__construct('trait_use_alias_item');
     $this->_aliasing_name = $aliasing_name;
     $this->_keyword = $keyword;
-    $this->_visibility = $visibility;
+    $this->_modifiers = $modifiers;
     $this->_aliased_name = $aliased_name;
   }
   public function aliasing_name(): EditableSyntax {
@@ -7560,8 +7560,8 @@ final class TraitUseAliasItem extends EditableSyntax {
   public function keyword(): EditableSyntax {
     return $this->_keyword;
   }
-  public function visibility(): EditableSyntax {
-    return $this->_visibility;
+  public function modifiers(): EditableSyntax {
+    return $this->_modifiers;
   }
   public function aliased_name(): EditableSyntax {
     return $this->_aliased_name;
@@ -7570,28 +7570,28 @@ final class TraitUseAliasItem extends EditableSyntax {
     return new TraitUseAliasItem(
       $aliasing_name,
       $this->_keyword,
-      $this->_visibility,
+      $this->_modifiers,
       $this->_aliased_name);
   }
   public function with_keyword(EditableSyntax $keyword): TraitUseAliasItem {
     return new TraitUseAliasItem(
       $this->_aliasing_name,
       $keyword,
-      $this->_visibility,
+      $this->_modifiers,
       $this->_aliased_name);
   }
-  public function with_visibility(EditableSyntax $visibility): TraitUseAliasItem {
+  public function with_modifiers(EditableSyntax $modifiers): TraitUseAliasItem {
     return new TraitUseAliasItem(
       $this->_aliasing_name,
       $this->_keyword,
-      $visibility,
+      $modifiers,
       $this->_aliased_name);
   }
   public function with_aliased_name(EditableSyntax $aliased_name): TraitUseAliasItem {
     return new TraitUseAliasItem(
       $this->_aliasing_name,
       $this->_keyword,
-      $this->_visibility,
+      $this->_modifiers,
       $aliased_name);
   }
 
@@ -7603,19 +7603,19 @@ final class TraitUseAliasItem extends EditableSyntax {
     array_push($new_parents, $this);
     $aliasing_name = $this->aliasing_name()->rewrite($rewriter, $new_parents);
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
-    $visibility = $this->visibility()->rewrite($rewriter, $new_parents);
+    $modifiers = $this->modifiers()->rewrite($rewriter, $new_parents);
     $aliased_name = $this->aliased_name()->rewrite($rewriter, $new_parents);
     if (
       $aliasing_name === $this->aliasing_name() &&
       $keyword === $this->keyword() &&
-      $visibility === $this->visibility() &&
+      $modifiers === $this->modifiers() &&
       $aliased_name === $this->aliased_name()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TraitUseAliasItem(
         $aliasing_name,
         $keyword,
-        $visibility,
+        $modifiers,
         $aliased_name), $parents ?? []);
     }
   }
@@ -7627,22 +7627,22 @@ final class TraitUseAliasItem extends EditableSyntax {
     $keyword = EditableSyntax::from_json(
       $json->trait_use_alias_item_keyword, $position, $source);
     $position += $keyword->width();
-    $visibility = EditableSyntax::from_json(
-      $json->trait_use_alias_item_visibility, $position, $source);
-    $position += $visibility->width();
+    $modifiers = EditableSyntax::from_json(
+      $json->trait_use_alias_item_modifiers, $position, $source);
+    $position += $modifiers->width();
     $aliased_name = EditableSyntax::from_json(
       $json->trait_use_alias_item_aliased_name, $position, $source);
     $position += $aliased_name->width();
     return new TraitUseAliasItem(
         $aliasing_name,
         $keyword,
-        $visibility,
+        $modifiers,
         $aliased_name);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_aliasing_name;
     yield $this->_keyword;
-    yield $this->_visibility;
+    yield $this->_modifiers;
     yield $this->_aliased_name;
     yield break;
   }

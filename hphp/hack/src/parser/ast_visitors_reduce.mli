@@ -72,7 +72,7 @@ class virtual ['b] reduce :
                             Ast_visitors_ancestors.id option ->
                             Ast_visitors_ancestors.pstring ->
                             Ast_visitors_ancestors.id option ->
-                            Ast_visitors_ancestors.kind option ->
+                            Ast_visitors_ancestors.kind list ->
                            'd;
         on_ClassUsePrecedence : 'c ->
                            Ast_visitors_ancestors.id ->
@@ -440,7 +440,7 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.id option ->
       Ast_visitors_ancestors.pstring ->
       Ast_visitors_ancestors.id option ->
-      Ast_visitors_ancestors.kind option ->
+      Ast_visitors_ancestors.kind list ->
       'd
     method on_ClassUsePrecedence :
       'c ->

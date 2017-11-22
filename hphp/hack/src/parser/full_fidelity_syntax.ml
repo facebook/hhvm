@@ -729,12 +729,12 @@ module WithToken(Token: TokenType) = struct
     let get_trait_use_alias_item_children {
       trait_use_alias_item_aliasing_name;
       trait_use_alias_item_keyword;
-      trait_use_alias_item_visibility;
+      trait_use_alias_item_modifiers;
       trait_use_alias_item_aliased_name;
     } = (
       trait_use_alias_item_aliasing_name,
       trait_use_alias_item_keyword,
-      trait_use_alias_item_visibility,
+      trait_use_alias_item_modifiers,
       trait_use_alias_item_aliased_name
     )
 
@@ -2561,12 +2561,12 @@ module WithToken(Token: TokenType) = struct
       | TraitUseAliasItem {
         trait_use_alias_item_aliasing_name;
         trait_use_alias_item_keyword;
-        trait_use_alias_item_visibility;
+        trait_use_alias_item_modifiers;
         trait_use_alias_item_aliased_name;
       } ->
          let acc = f acc trait_use_alias_item_aliasing_name in
          let acc = f acc trait_use_alias_item_keyword in
-         let acc = f acc trait_use_alias_item_visibility in
+         let acc = f acc trait_use_alias_item_modifiers in
          let acc = f acc trait_use_alias_item_aliased_name in
          acc
       | TraitUseConflictResolution {
@@ -4262,12 +4262,12 @@ module WithToken(Token: TokenType) = struct
       | TraitUseAliasItem {
         trait_use_alias_item_aliasing_name;
         trait_use_alias_item_keyword;
-        trait_use_alias_item_visibility;
+        trait_use_alias_item_modifiers;
         trait_use_alias_item_aliased_name;
       } -> [
         trait_use_alias_item_aliasing_name;
         trait_use_alias_item_keyword;
-        trait_use_alias_item_visibility;
+        trait_use_alias_item_modifiers;
         trait_use_alias_item_aliased_name;
       ]
       | TraitUseConflictResolution {
@@ -5964,12 +5964,12 @@ module WithToken(Token: TokenType) = struct
       | TraitUseAliasItem {
         trait_use_alias_item_aliasing_name;
         trait_use_alias_item_keyword;
-        trait_use_alias_item_visibility;
+        trait_use_alias_item_modifiers;
         trait_use_alias_item_aliased_name;
       } -> [
         "trait_use_alias_item_aliasing_name";
         "trait_use_alias_item_keyword";
-        "trait_use_alias_item_visibility";
+        "trait_use_alias_item_modifiers";
         "trait_use_alias_item_aliased_name";
       ]
       | TraitUseConflictResolution {
@@ -7747,13 +7747,13 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.TraitUseAliasItem, [
           trait_use_alias_item_aliasing_name;
           trait_use_alias_item_keyword;
-          trait_use_alias_item_visibility;
+          trait_use_alias_item_modifiers;
           trait_use_alias_item_aliased_name;
         ]) ->
         TraitUseAliasItem {
           trait_use_alias_item_aliasing_name;
           trait_use_alias_item_keyword;
-          trait_use_alias_item_visibility;
+          trait_use_alias_item_modifiers;
           trait_use_alias_item_aliased_name;
         }
       | (SyntaxKind.TraitUseConflictResolution, [
@@ -9724,13 +9724,13 @@ module WithToken(Token: TokenType) = struct
       let make_trait_use_alias_item
         trait_use_alias_item_aliasing_name
         trait_use_alias_item_keyword
-        trait_use_alias_item_visibility
+        trait_use_alias_item_modifiers
         trait_use_alias_item_aliased_name
       =
         let syntax = TraitUseAliasItem {
           trait_use_alias_item_aliasing_name;
           trait_use_alias_item_keyword;
-          trait_use_alias_item_visibility;
+          trait_use_alias_item_modifiers;
           trait_use_alias_item_aliased_name;
         } in
         let value = ValueBuilder.value_from_syntax syntax in

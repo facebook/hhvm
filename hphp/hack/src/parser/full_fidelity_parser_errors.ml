@@ -2068,6 +2068,23 @@ let assignment_errors node errors =
     end
   | _ -> errors
 
+let trait_use_alias_item_errors node errors =
+  match syntax node with
+  | TraitUseAliasItem { trait_use_alias_item_modifiers = l; _ } ->
+    syntax_to_list_no_separators l
+    |> Core_list.fold_left ~init:errors ~f:(fun errors n ->
+      match syntax n with
+      | Token {
+        PositionedToken.kind = (
+          TokenKind.Public | TokenKind.Private | TokenKind.Protected | TokenKind.Final
+        ); _ } -> errors
+      | _ ->
+        let e =
+          make_error_from_node n
+            SyntaxError.trait_alias_rule_allows_only_final_and_visibility_modifiers in
+        e :: errors)
+  | _ -> errors
+
 let declare_errors node parents errors =
   match syntax node with
   | FunctionCallExpression
@@ -2162,6 +2179,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
     let errors = enum_errors node errors in
     let errors = assignment_errors node errors in
     let errors = declare_errors node parents errors in
+    let errors = trait_use_alias_item_errors node errors in
 
     match syntax node with
     | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->

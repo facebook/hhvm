@@ -551,8 +551,10 @@ let class_use_alias_string (a, b, c, d) =
     | None -> ""
     | Some c -> " as " ^ c in
   let d' = match d with
-    | None -> ""
-    | Some d -> Ast_defs.string_of_kind d in
+    | [] -> ""
+    | d ->
+      String.concat " " @@
+        List.map Ast_defs.string_of_kind (List.sort compare d) in
   a' ^ b ^ c' ^ d'
 
 let class_use_alias_comparer =

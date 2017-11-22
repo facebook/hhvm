@@ -953,7 +953,7 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_trait_use_alias_item parser aliasing_name =
     let (parser, keyword) = assert_token parser As in
-    let (parser, visibility) = parse_visibility_modifier_opt parser in
+    let (parser, visibility) = parse_modifiers parser in
     let (parser, aliased_name) = parse_qualified_name_type_opt parser in
     let trait_use_alias_item =
       make_trait_use_alias_item

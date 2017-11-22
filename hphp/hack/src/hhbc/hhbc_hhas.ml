@@ -1458,12 +1458,14 @@ let add_use_precedence buf (id1, id2, ids) =
   let ids = String.concat " " @@ ULS.items unique_ids in
   B.add_string buf @@ Printf.sprintf "\n    %s insteadof %s;" name ids
 
-let add_use_alias buf (ido1, id, ido2, kindo) =
+let add_use_alias buf (ido1, id, ido2, kindl) =
   let aliasing_id =
     Option.value_map ~f:(fun id1 -> id1 ^ "::" ^ id) ~default:id ido1
   in
   let kind =
-    Option.map kindo ~f:(fun kind -> "[" ^ Ast.string_of_kind kind ^ "]")
+    match kindl with
+    | [] -> None
+    | x -> Some ("[" ^ (String.concat " " @@ List.map Ast.string_of_kind x ) ^ "]")
   in
   let rest = Option.merge kind ido2 ~f:(fun x y -> x ^ " " ^ y) in
   let rest = Option.value ~default:"" rest in

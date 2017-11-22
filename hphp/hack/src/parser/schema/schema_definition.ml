@@ -365,7 +365,7 @@ let schema : schema_node list =
     ; fields =
       [ "aliasing_name", Aggregate Specifier
       ; "keyword", Token
-      ; "visibility", ZeroOrOne Token
+      ; "modifiers", ZeroOrMore Token
       ; "aliased_name", ZeroOrOne (Aggregate Specifier)
       ]
     }

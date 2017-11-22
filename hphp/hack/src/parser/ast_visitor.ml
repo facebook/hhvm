@@ -120,7 +120,7 @@ class type ['a] ast_visitor_type = object
   method on_classUse: 'a -> hint -> 'a
   method on_classUseAlias: 'a ->
                            id option -> pstring ->
-                           id option -> kind option -> 'a
+                           id option -> kind list -> 'a
   method on_classUsePrecedence: 'a -> id -> pstring -> id list -> 'a
   method on_classVars:
     'a -> class_vars_ -> 'a

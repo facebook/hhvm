@@ -1884,7 +1884,7 @@ and pClassElt : class_elt list parser = fun node env ->
         ClassUsePrecedence (qualifier, name, removed_names)
       | TraitUseAliasItem
         { trait_use_alias_item_aliasing_name = aliasing_name
-        ; trait_use_alias_item_visibility = visibility
+        ; trait_use_alias_item_modifiers = modifiers
         ; trait_use_alias_item_aliased_name = aliased_name
         ; _
         } ->
@@ -1896,17 +1896,18 @@ and pClassElt : class_elt list parser = fun node env ->
             pos_name scope_resolution_name env
           | _ -> None, pos_name aliasing_name env
         in
-        let visibility = Option.map (token_kind visibility)
-          ~f:begin function
-          | TK.Private   -> Private
-          | TK.Public    -> Public
-          | TK.Protected -> Protected
-          | _ -> missing_syntax "trait use alias item" node env end
-        in
+        let modifiers = pKinds modifiers env in
+        let is_visibility = function
+        | Public | Private | Protected -> true
+        | _ -> false in
+        let modifiers =
+          if List.is_empty modifiers || List.exists modifiers ~f:is_visibility
+          then modifiers
+          else Public :: modifiers in
         let aliased_name =
           Option.some_if (not (is_missing aliased_name)) (pos_name aliased_name env)
         in
-        ClassUseAlias (qualifier, name, aliased_name, visibility)
+        ClassUseAlias (qualifier, name, aliased_name, modifiers)
       | _ -> missing_syntax "trait use conflict resolution item" node env
     in
     (couldMap ~f:(fun n e ->

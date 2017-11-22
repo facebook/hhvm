@@ -87,7 +87,7 @@ and class_elt =
   | TypeConst of typeconst
   | ClassUse of hint
   (* as expressions *)
-  | ClassUseAlias of id option * pstring * id option * kind option
+  | ClassUseAlias of id option * pstring * id option * kind list
   (* insteadof expressions *)
   | ClassUsePrecedence of id * pstring * id list
   | XhpAttrUse of hint

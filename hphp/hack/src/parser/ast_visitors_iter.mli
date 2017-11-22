@@ -72,7 +72,7 @@ class virtual ['b] iter :
                            Ast_visitors_ancestors.id option ->
                            Ast_visitors_ancestors.pstring ->
                            Ast_visitors_ancestors.id option ->
-                           Ast_visitors_ancestors.kind option ->
+                           Ast_visitors_ancestors.kind list ->
                            unit;
         on_ClassUsePrecedence : 'c ->
                            Ast_visitors_ancestors.id ->
@@ -449,7 +449,7 @@ class virtual ['b] iter :
                               Ast_visitors_ancestors.id option ->
                               Ast_visitors_ancestors.pstring ->
                               Ast_visitors_ancestors.id option ->
-                              Ast_visitors_ancestors.kind option ->
+                              Ast_visitors_ancestors.kind list ->
                               unit
     method on_ClassUsePrecedence : 'c ->
                               Ast_visitors_ancestors.id ->

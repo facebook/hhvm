@@ -215,7 +215,7 @@ class virtual ['self] map =
       let r0 = self#on_option self#on_id env c0 in
       let r1 = self#on_pstring env c1 in
       let r2 = self#on_option self#on_id env c2 in
-      let r3 = self#on_option self#on_kind env c3 in
+      let r3 = self#on_list self#on_kind env c3 in
       ClassUseAlias (r0, r1, r2, r3)
     method on_ClassUsePrecedence env c0 c1 c2 =
       let r0 = self#on_id env c0 in

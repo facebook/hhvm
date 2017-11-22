@@ -157,7 +157,7 @@ class virtual ['self] iter =
       self#on_option self#on_id env c0;
       self#on_pstring env c1;
       self#on_option self#on_id env c2;
-      self#on_option self#on_kind env c3;
+      self#on_list self#on_kind env c3;
     method on_ClassUsePrecedence env c0 c1 c2 =
       self#on_id env c0;
       self#on_pstring env c1;

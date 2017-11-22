@@ -630,7 +630,7 @@ module FromMinimal = struct
           }, results
       | SyntaxKind.TraitUseAliasItem
       , (  trait_use_alias_item_aliased_name
-        :: trait_use_alias_item_visibility
+        :: trait_use_alias_item_modifiers
         :: trait_use_alias_item_keyword
         :: trait_use_alias_item_aliasing_name
         :: results
@@ -638,7 +638,7 @@ module FromMinimal = struct
           TraitUseAliasItem
           { trait_use_alias_item_aliasing_name
           ; trait_use_alias_item_keyword
-          ; trait_use_alias_item_visibility
+          ; trait_use_alias_item_modifiers
           ; trait_use_alias_item_aliased_name
           }, results
       | SyntaxKind.TraitUseConflictResolution
@@ -2647,13 +2647,13 @@ module FromMinimal = struct
     | { M.syntax = M.TraitUseAliasItem
         { M.trait_use_alias_item_aliasing_name
         ; M.trait_use_alias_item_keyword
-        ; M.trait_use_alias_item_visibility
+        ; M.trait_use_alias_item_modifiers
         ; M.trait_use_alias_item_aliased_name
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (trait_use_alias_item_aliased_name, todo) in
-        let todo = Convert (trait_use_alias_item_visibility, todo) in
+        let todo = Convert (trait_use_alias_item_modifiers, todo) in
         let todo = Convert (trait_use_alias_item_keyword, todo) in
         convert offset todo results trait_use_alias_item_aliasing_name
     | { M.syntax = M.TraitUseConflictResolution

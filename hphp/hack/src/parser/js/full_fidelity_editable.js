@@ -5678,45 +5678,45 @@ class TraitUseAliasItem extends EditableSyntax
   constructor(
     aliasing_name,
     keyword,
-    visibility,
+    modifiers,
     aliased_name)
   {
     super('trait_use_alias_item', {
       aliasing_name: aliasing_name,
       keyword: keyword,
-      visibility: visibility,
+      modifiers: modifiers,
       aliased_name: aliased_name });
   }
   get aliasing_name() { return this.children.aliasing_name; }
   get keyword() { return this.children.keyword; }
-  get visibility() { return this.children.visibility; }
+  get modifiers() { return this.children.modifiers; }
   get aliased_name() { return this.children.aliased_name; }
   with_aliasing_name(aliasing_name){
     return new TraitUseAliasItem(
       aliasing_name,
       this.keyword,
-      this.visibility,
+      this.modifiers,
       this.aliased_name);
   }
   with_keyword(keyword){
     return new TraitUseAliasItem(
       this.aliasing_name,
       keyword,
-      this.visibility,
+      this.modifiers,
       this.aliased_name);
   }
-  with_visibility(visibility){
+  with_modifiers(modifiers){
     return new TraitUseAliasItem(
       this.aliasing_name,
       this.keyword,
-      visibility,
+      modifiers,
       this.aliased_name);
   }
   with_aliased_name(aliased_name){
     return new TraitUseAliasItem(
       this.aliasing_name,
       this.keyword,
-      this.visibility,
+      this.modifiers,
       aliased_name);
   }
   rewrite(rewriter, parents)
@@ -5727,12 +5727,12 @@ class TraitUseAliasItem extends EditableSyntax
     new_parents.push(this);
     var aliasing_name = this.aliasing_name.rewrite(rewriter, new_parents);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
-    var visibility = this.visibility.rewrite(rewriter, new_parents);
+    var modifiers = this.modifiers.rewrite(rewriter, new_parents);
     var aliased_name = this.aliased_name.rewrite(rewriter, new_parents);
     if (
       aliasing_name === this.aliasing_name &&
       keyword === this.keyword &&
-      visibility === this.visibility &&
+      modifiers === this.modifiers &&
       aliased_name === this.aliased_name)
     {
       return rewriter(this, parents);
@@ -5742,7 +5742,7 @@ class TraitUseAliasItem extends EditableSyntax
       return rewriter(new TraitUseAliasItem(
         aliasing_name,
         keyword,
-        visibility,
+        modifiers,
         aliased_name), parents);
     }
   }
@@ -5754,16 +5754,16 @@ class TraitUseAliasItem extends EditableSyntax
     let keyword = EditableSyntax.from_json(
       json.trait_use_alias_item_keyword, position, source);
     position += keyword.width;
-    let visibility = EditableSyntax.from_json(
-      json.trait_use_alias_item_visibility, position, source);
-    position += visibility.width;
+    let modifiers = EditableSyntax.from_json(
+      json.trait_use_alias_item_modifiers, position, source);
+    position += modifiers.width;
     let aliased_name = EditableSyntax.from_json(
       json.trait_use_alias_item_aliased_name, position, source);
     position += aliased_name.width;
     return new TraitUseAliasItem(
         aliasing_name,
         keyword,
-        visibility,
+        modifiers,
         aliased_name);
   }
   get children_keys()
@@ -5772,7 +5772,7 @@ class TraitUseAliasItem extends EditableSyntax
       TraitUseAliasItem._children_keys = [
         'aliasing_name',
         'keyword',
-        'visibility',
+        'modifiers',
         'aliased_name'];
     return TraitUseAliasItem._children_keys;
   }

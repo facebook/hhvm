@@ -30,7 +30,7 @@ type t = {
   class_is_top       : bool;
   class_uses         : Litstr.id list;
   class_use_aliases  :
-    (Litstr.id option * Litstr.id * Litstr.id option * Ast.kind option) list;
+    (Litstr.id option * Litstr.id * Litstr.id option * Ast.kind list) list;
   class_use_precedences : (Litstr.id * Litstr.id * Litstr.id list) list;
   class_enum_type    : Hhas_type_info.t option;
   class_methods      : Hhas_method.t list;

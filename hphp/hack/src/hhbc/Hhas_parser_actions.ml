@@ -194,7 +194,7 @@ let makelabelinst s = ILabel (makelabel s)
 
 type precedence_or_alias =
  | Precedence of (string * string * string list)
- | Alias of (string option * string * string option * Ast.kind option)
+ | Alias of (string option * string * string option * Ast.kind list)
 
 let vis_of s = match s with
  | "public" ->  Ast.Public
@@ -213,12 +213,12 @@ let parse_precedence_or_alias xs = match xs with
    (match colon_split x with
      | Some (first_id, second_id) ->
        (match rest with
-         | ["as"; lastid] -> Alias (Some first_id, second_id, Some lastid, None)
+         | ["as"; lastid] -> Alias (Some first_id, second_id, Some lastid, [])
          | "insteadof" :: rest2 -> Precedence (first_id, second_id, rest2)
          | _ -> report_error "bad idlist after colonsplit in precedence or alias")
      | None ->
        (match rest with
-         | ["as"; lastid] -> Alias (None, x, Some lastid, None)
+         | ["as"; lastid] -> Alias (None, x, Some lastid, [])
          | _ -> report_error "bad idlist after id in precedence or alias"))
 
 let parse_alias x y vislist opt_lastid =
@@ -226,12 +226,7 @@ let parse_alias x y vislist opt_lastid =
      match colon_split x with
       | Some (first_id, second_id) -> (Some first_id, second_id)
       | None -> (None, x) in
-   let vis =
-     match vislist with
-      | [] -> None
-      | [v] -> Some (vis_of v)
-      | _ -> report_error
-              "multiple visibility attributes in alias (this should probably not be an error!)" in
+   let vis = List.map (function "final" -> Ast.Final | x -> vis_of x) vislist in
    if y = "as" then
     Alias (first, second, opt_lastid, vis)
    else report_error "missing as in alias"

@@ -176,7 +176,7 @@ module type Syntax_S = sig
   type trait_use_alias_item =
     { trait_use_alias_item_aliasing_name                 : t
     ; trait_use_alias_item_keyword                       : t
-    ; trait_use_alias_item_visibility                    : t
+    ; trait_use_alias_item_modifiers                     : t
     ; trait_use_alias_item_aliased_name                  : t
     }
   type trait_use_conflict_resolution =

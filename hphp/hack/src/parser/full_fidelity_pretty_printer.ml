@@ -335,12 +335,12 @@ let rec get_doc node =
   | TraitUseAliasItem {
     trait_use_alias_item_aliasing_name;
     trait_use_alias_item_keyword;
-    trait_use_alias_item_visibility;
+    trait_use_alias_item_modifiers;
     trait_use_alias_item_aliased_name;
     } ->
     let n = get_doc trait_use_alias_item_aliasing_name in
     let k = get_doc trait_use_alias_item_keyword in
-    let v = get_doc trait_use_alias_item_visibility in
+    let v = get_doc trait_use_alias_item_modifiers in
     let ns = get_doc trait_use_alias_item_aliased_name in
     n ^| k ^| v ^| ns
   | TraitUsePrecedenceItem {

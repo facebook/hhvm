@@ -230,7 +230,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and trait_use_alias_item =
     { trait_use_alias_item_aliasing_name                 : t
     ; trait_use_alias_item_keyword                       : t
-    ; trait_use_alias_item_visibility                    : t
+    ; trait_use_alias_item_modifiers                     : t
     ; trait_use_alias_item_aliased_name                  : t
     }
   and trait_use_conflict_resolution =
@@ -1590,7 +1590,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and trait_use_alias_item =
     { trait_use_alias_item_aliasing_name: specifier value
     ; trait_use_alias_item_keyword: Token.t value
-    ; trait_use_alias_item_visibility: Token.t option value
+    ; trait_use_alias_item_modifiers: Token.t listesque value
     ; trait_use_alias_item_aliased_name: specifier option value
     }
   and trait_use_conflict_resolution =

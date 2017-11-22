@@ -62,7 +62,7 @@ let ensure_functions_not_redeclared l =
   | Some (name, original_span, conflicting_span) ->
     let message =
       Printf.sprintf "Cannot redeclare %s() (previously declared in %s:%d)"
-        name
+        (Utils.strip_ns name)
         (Pos.filename (Pos.to_absolute original_span))
         (File_pos.line (Pos.pos_start original_span)) in
     Emit_fatal.raise_fatal_runtime

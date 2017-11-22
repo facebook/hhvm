@@ -221,7 +221,7 @@ let validate_class_name ns (p, class_name) =
   then
     let message =
       Printf.sprintf "Cannot use '%s' as class name as it is reserved"
-        class_name in
+        (Utils.strip_ns class_name) in
     Emit_fatal.raise_fatal_parse p message
 
 let emit_class : A.class_ * bool -> Hhas_class.t =

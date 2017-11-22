@@ -53,13 +53,10 @@ quick/parser_massive_concat_exp.php
 quick/post_try_error.php
 quick/reassign_this1.php
 quick/reassign_this2.php
-quick/redeclared_function.php
 quick/redeclared_method.php
 quick/reflect-default.php
 quick/reflection_static_vars.php
 quick/regpressure_bug.php
-quick/reserved_class1.php
-quick/reserved_class2.php
 quick/static_closure_gen.php
 quick/syntax-error-incl.php
 quick/syntax-error.php

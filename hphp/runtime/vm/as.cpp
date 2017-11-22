@@ -2143,17 +2143,19 @@ void parse_function_flags(AsmState& as) {
  * line-range : "(" integer "," integer ")"
  *            ;
  */
-std::pair<int,int> parse_line_range(AsmState& as) {
+bool parse_line_range(AsmState& as, int& line0, int& line1) {
   as.in.skipWhitespace();
   if (as.in.peek() != '(') {
-    return std::make_pair(as.in.getLineNumber(), as.in.getLineNumber() + 1);
+    line0 = as.in.getLineNumber();
+    line1 = as.in.getLineNumber() + 1;
+    return false;
   }
   as.in.getc();
-  int line0 = as.in.readint();
+  line0 = as.in.readint();
   as.in.expectWs(',');
-  int line1 = as.in.readint();
+  line1 = as.in.readint();
   as.in.expectWs(')');
-  return std::make_pair(line0, line1);
+  return true;
 }
 
 /*
@@ -2182,7 +2184,7 @@ void parse_function(AsmState& as) {
 
   int line0;
   int line1;
-  std::tie(line0, line1) = parse_line_range(as);
+  parse_line_range(as, line0, line1);
 
   auto typeInfo = parse_type_info(as);
   std::string name;
@@ -2217,7 +2219,7 @@ void parse_method(AsmState& as) {
 
   int line0;
   int line1;
-  std::tie(line0, line1) = parse_line_range(as);
+  parse_line_range(as, line0, line1);
 
   auto typeInfo = parse_type_info(as);
   std::string name;
@@ -2605,7 +2607,7 @@ void parse_class(AsmState& as) {
 
   int line0;
   int line1;
-  std::tie(line0, line1) = parse_line_range(as);
+  parse_line_range(as, line0, line1);
 
   std::string parentName;
   if (as.in.tryConsume("extends")) {
@@ -2674,14 +2676,18 @@ void parse_main(AsmState& as) {
 
   int line0;
   int line1;
-  std::tie(line0, line1) = parse_line_range(as);
+  bool fromSrcLoc = parse_line_range(as, line0, line1);
 
   as.in.expectWs('{');
 
   as.ue->initMain(line0, line1);
   as.fe = as.ue->getMain();
   as.emittedPseudoMain = true;
-  as.srcLoc = Location::Range{-1,-1,-1,-1};
+  if (fromSrcLoc) {
+    as.srcLoc = Location::Range{line0,0,line1,0};
+  } else {
+    as.srcLoc = Location::Range{-1,-1,-1,-1};
+  }
   parse_function_body(as);
 }
 

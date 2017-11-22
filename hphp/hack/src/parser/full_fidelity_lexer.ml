@@ -97,7 +97,6 @@ type string_literal_kind =
   | Literal_double_quoted
   | Literal_heredoc of string
 
-
 (* Housekeeping *)
 
 let peek_char lexer index =
@@ -1422,7 +1421,8 @@ let as_case_insensitive_keyword text =
   | "eval" | "isset" | "unset" | "empty" | "const" | "new"
   | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
   | "true" | "false" | "null" | "array" | "instanceof"
-  | "trait" | "class" | "interface" | "using" | "static" | "inout" -> lower
+  | "trait" | "class" | "interface" | "using" | "static" | "inout"
+  | "__halt_compiler" -> lower
   | _ -> text
 
 let as_keyword kind lexer =
@@ -1687,5 +1687,24 @@ let scan_xhp_category_name lexer =
 
 let next_xhp_category_name lexer =
   scan_token_and_trivia scan_xhp_category_name false lexer
+
+let rescan_halt_compiler lexer last_token =
+  (* __halt_compiler stops parsing of the file.
+    In order to preserve fill fidelity aspect of the parser
+    we pack everything that follows __halt_compiler as
+    separate opaque kind of trivia - it will be attached as a trailing trivia
+    to the last_token and existing trailing trivia will be merged in. *)
+  let start_offset =
+    Token.leading_start_offset last_token +
+    Token.leading_width last_token +
+    Token.width last_token in
+  let source = source lexer in
+  let length = SourceText.length source in
+  let trailing =
+    Trivia.make_after_halt_compiler
+      source
+      start_offset
+      (length - start_offset) in
+  Lexer.with_offset lexer length, Token.with_trailing [trailing] last_token
 
 end (* WithToken *)

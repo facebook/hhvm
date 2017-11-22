@@ -2258,6 +2258,11 @@ let pProgram : program parser = fun node env ->
   (* EOF happens only as the last token in the list. *)
   | [{ syntax = EndOfFile _; _ }]
     -> List.concat (List.rev acc)
+  (* HaltCompiler stops processing the list *)
+  | [{ syntax = ExpressionStatement
+      { expression_statement_expression =
+        { syntax = HaltCompilerExpression _ ; _ } ; _ } ; _ }]
+    -> List.concat (List.rev acc)
   (* There's an incompatibility between the Full-Fidelity (FF) and the AST view
    * of the world; `define` is an *expression* in FF, but a *definition* in AST.
    * Luckily, `define` only happens at the level of definitions.
@@ -2329,6 +2334,7 @@ let scour_comments
       | TriviaKind.UnsafeExpression
       | TriviaKind.FallThrough
       | TriviaKind.ExtraTokenError
+      | TriviaKind.AfterHaltCompiler
         -> acc
       | TriviaKind.DelimitedComment ->
         let start = Trivia.start_offset t + 2 (* for the '/*' *) in

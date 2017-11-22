@@ -849,6 +849,12 @@ module WithExpressionAndDeclAndTypeParser
       let parser = SimpleParser.expect_in_new_scope parser [ Semicolon ] in
       let (parser, expression) = parse_expression parser in
       let (parser, token) = require_semicolon parser in
+      let (parser, token) =
+        match syntax expression, syntax token with
+        | HaltCompilerExpression _, Token t ->
+          let parser, token = rescan_halt_compiler parser t in
+          parser, make_token token
+        | _ -> parser, token in
       let parser = SimpleParser.pop_scope parser [ Semicolon ] in
       (parser, make_expression_statement expression token)
 

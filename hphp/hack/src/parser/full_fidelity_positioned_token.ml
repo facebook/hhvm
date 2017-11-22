@@ -73,6 +73,9 @@ let with_leading leading token =
 let trailing token =
   token.trailing
 
+let with_trailing trailing token =
+  { token with trailing }
+
 let has_trivia_kind token kind =
   List.exists (fun t -> Trivia.kind t = kind) token.leading ||
   List.exists (fun t -> Trivia.kind t = kind) token.trailing

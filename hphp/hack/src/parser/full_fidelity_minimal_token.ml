@@ -58,6 +58,9 @@ let trailing token =
 let with_leading leading token =
   { token with leading }
 
+let with_trailing trailing token =
+  { token with trailing }
+
 let leading_start_offset _ =
   0 (* Not available *)
 

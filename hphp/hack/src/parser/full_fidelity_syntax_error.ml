@@ -336,3 +336,7 @@ let method_calls_on_xhp_attributes =
   "Method calls are not allowed on XHP attributes"
 let invalid_constant_initializer =
   "Invalid expression in constant initializer"
+let no_args_in_halt_compiler =
+  "__halt_compiler function does not accept any arguments"
+let halt_compiler_top_level_only =
+  "__halt_compiler function should appear only at the top level"

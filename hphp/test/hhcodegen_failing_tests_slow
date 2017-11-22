@@ -4,8 +4,6 @@ slow/class_type_constant/type_constant.php
 slow/class_type_constant/type_constant6.php
 slow/concat/1578.php
 slow/constant/true_false_null.php
-slow/ext_misc/ext_misc.php
-slow/ext_phar/composer.php
 slow/goto/label_in_finally.php
 slow/goto/try_goto_in_finally1.php
 slow/hack_arr_compat/scalars.php

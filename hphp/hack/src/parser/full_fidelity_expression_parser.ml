@@ -232,6 +232,7 @@ module WithStatementAndDeclAndTypeParser
     | Empty -> parse_empty_expression parser
     | Isset -> parse_isset_expression parser
     | Define -> parse_define_expression parser
+    | HaltCompiler -> parse_halt_compiler_expression parser
     | Eval -> parse_eval_expression parser
     | kind when PrecedenceParser.expects parser kind ->
       (* ERROR RECOVERY: if we've prematurely found a token we're expecting
@@ -324,6 +325,15 @@ module WithStatementAndDeclAndTypeParser
       let result = make_define_expression keyword left args right in
       (parser, result)
     else
+      parse_as_name_or_error parser
+
+  and parse_halt_compiler_expression parser =
+    let (parser1, keyword) = assert_token parser HaltCompiler in
+    if peek_token_kind parser1 = LeftParen then
+      let (parser, left, args, right) = parse_expression_list_opt parser1 in
+      parser, make_halt_compiler_expression keyword left args right
+    else
+      let parser = with_error parser SyntaxError.error1019 in
       parse_as_name_or_error parser
 
   and parse_double_quoted_like_string parser head literal_kind =
@@ -1109,6 +1119,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Dict
     | Default
     | Define
+    | HaltCompiler
     | Destruct
     | Do
     | Double

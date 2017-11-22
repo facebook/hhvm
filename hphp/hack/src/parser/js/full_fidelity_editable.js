@@ -80,6 +80,8 @@ class EditableSyntax
       return FallThrough.from_json(json, position, source);
     case 'extra_token_error':
       return ExtraTokenError.from_json(json, position, source);
+    case 'after_halt_compiler':
+      return AfterHaltCompiler.from_json(json, position, source);
 
     case 'missing':
       return Missing.missing;
@@ -277,6 +279,8 @@ class EditableSyntax
       return EmptyExpression.from_json(json, position, source);
     case 'define_expression':
       return DefineExpression.from_json(json, position, source);
+    case 'halt_compiler_expression':
+      return HaltCompilerExpression.from_json(json, position, source);
     case 'isset_expression':
       return IssetExpression.from_json(json, position, source);
     case 'function_call_expression':
@@ -1024,6 +1028,8 @@ class EditableToken extends EditableSyntax
        return new LessThanQuestionToken(leading, trailing);
     case '?>':
        return new QuestionGreaterThanToken(leading, trailing);
+    case '__halt_compiler':
+       return new HaltCompilerToken(leading, trailing);
 
     case 'error_token':
        return new ErrorTokenToken(leading, trailing, token_text);
@@ -2332,6 +2338,13 @@ class QuestionGreaterThanToken extends EditableToken
     super('?>', leading, trailing, '?>');
   }
 }
+class HaltCompilerToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('__halt_compiler', leading, trailing, '__halt_compiler');
+  }
+}
 
 class ErrorTokenToken extends EditableToken
 {
@@ -2732,6 +2745,8 @@ class EditableTrivia extends EditableSyntax
         return new FallThrough(trivia_text);
       case 'extra_token_error':
         return new ExtraTokenError(trivia_text);
+      case 'after_halt_compiler':
+        return new AfterHaltCompiler(trivia_text);
 
       default: throw 'unexpected json kind: ' + json.kind; // TODO: Better error
     }
@@ -2834,6 +2849,15 @@ class ExtraTokenError extends EditableTrivia
   with_text(text)
   {
     return new ExtraTokenError(text);
+  }
+}
+
+class AfterHaltCompiler extends EditableTrivia
+{
+  constructor(text) { super('after_halt_compiler', text); }
+  with_text(text)
+  {
+    return new AfterHaltCompiler(text);
   }
 }
 
@@ -13523,6 +13547,110 @@ class DefineExpression extends EditableSyntax
     return DefineExpression._children_keys;
   }
 }
+class HaltCompilerExpression extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_paren,
+    argument_list,
+    right_paren)
+  {
+    super('halt_compiler_expression', {
+      keyword: keyword,
+      left_paren: left_paren,
+      argument_list: argument_list,
+      right_paren: right_paren });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get argument_list() { return this.children.argument_list; }
+  get right_paren() { return this.children.right_paren; }
+  with_keyword(keyword){
+    return new HaltCompilerExpression(
+      keyword,
+      this.left_paren,
+      this.argument_list,
+      this.right_paren);
+  }
+  with_left_paren(left_paren){
+    return new HaltCompilerExpression(
+      this.keyword,
+      left_paren,
+      this.argument_list,
+      this.right_paren);
+  }
+  with_argument_list(argument_list){
+    return new HaltCompilerExpression(
+      this.keyword,
+      this.left_paren,
+      argument_list,
+      this.right_paren);
+  }
+  with_right_paren(right_paren){
+    return new HaltCompilerExpression(
+      this.keyword,
+      this.left_paren,
+      this.argument_list,
+      right_paren);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var argument_list = this.argument_list.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_paren === this.left_paren &&
+      argument_list === this.argument_list &&
+      right_paren === this.right_paren)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new HaltCompilerExpression(
+        keyword,
+        left_paren,
+        argument_list,
+        right_paren), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.halt_compiler_keyword, position, source);
+    position += keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.halt_compiler_left_paren, position, source);
+    position += left_paren.width;
+    let argument_list = EditableSyntax.from_json(
+      json.halt_compiler_argument_list, position, source);
+    position += argument_list.width;
+    let right_paren = EditableSyntax.from_json(
+      json.halt_compiler_right_paren, position, source);
+    position += right_paren.width;
+    return new HaltCompilerExpression(
+        keyword,
+        left_paren,
+        argument_list,
+        right_paren);
+  }
+  get children_keys()
+  {
+    if (HaltCompilerExpression._children_keys == null)
+      HaltCompilerExpression._children_keys = [
+        'keyword',
+        'left_paren',
+        'argument_list',
+        'right_paren'];
+    return HaltCompilerExpression._children_keys;
+  }
+}
 class IssetExpression extends EditableSyntax
 {
   constructor(
@@ -19571,6 +19699,7 @@ exports.SlashGreaterThanToken = SlashGreaterThanToken;
 exports.LessThanSlashToken = LessThanSlashToken;
 exports.LessThanQuestionToken = LessThanQuestionToken;
 exports.QuestionGreaterThanToken = QuestionGreaterThanToken;
+exports.HaltCompilerToken = HaltCompilerToken;
 
 exports.ErrorTokenToken = ErrorTokenToken;
 exports.NameToken = NameToken;
@@ -19614,6 +19743,7 @@ exports.FixMe = FixMe;
 exports.IgnoreError = IgnoreError;
 exports.FallThrough = FallThrough;
 exports.ExtraTokenError = ExtraTokenError;
+exports.AfterHaltCompiler = AfterHaltCompiler;
 
 exports.EndOfFile = EndOfFile;
 exports.Script = Script;
@@ -19712,6 +19842,7 @@ exports.ConditionalExpression = ConditionalExpression;
 exports.EvalExpression = EvalExpression;
 exports.EmptyExpression = EmptyExpression;
 exports.DefineExpression = DefineExpression;
+exports.HaltCompilerExpression = HaltCompilerExpression;
 exports.IssetExpression = IssetExpression;
 exports.FunctionCallExpression = FunctionCallExpression;
 exports.FunctionCallWithTypeArgumentsExpression = FunctionCallWithTypeArgumentsExpression;

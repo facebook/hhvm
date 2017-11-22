@@ -605,6 +605,12 @@ module type Syntax_S = sig
     ; define_argument_list                               : t
     ; define_right_paren                                 : t
     }
+  type halt_compiler_expression =
+    { halt_compiler_keyword                              : t
+    ; halt_compiler_left_paren                           : t
+    ; halt_compiler_argument_list                        : t
+    ; halt_compiler_right_paren                          : t
+    }
   type isset_expression =
     { isset_keyword                                      : t
     ; isset_left_paren                                   : t
@@ -1045,6 +1051,7 @@ module type Syntax_S = sig
   | EvalExpression                          of eval_expression
   | EmptyExpression                         of empty_expression
   | DefineExpression                        of define_expression
+  | HaltCompilerExpression                  of halt_compiler_expression
   | IssetExpression                         of isset_expression
   | FunctionCallExpression                  of function_call_expression
   | FunctionCallWithTypeArgumentsExpression of function_call_with_type_arguments_expression
@@ -1219,6 +1226,7 @@ module type Syntax_S = sig
   val make_eval_expression : t -> t -> t -> t -> t
   val make_empty_expression : t -> t -> t -> t -> t
   val make_define_expression : t -> t -> t -> t -> t
+  val make_halt_compiler_expression : t -> t -> t -> t -> t
   val make_isset_expression : t -> t -> t -> t -> t
   val make_function_call_expression : t -> t -> t -> t -> t
   val make_function_call_with_type_arguments_expression : t -> t -> t -> t -> t -> t
@@ -1381,6 +1389,7 @@ module type Syntax_S = sig
   val is_eval_expression : t -> bool
   val is_empty_expression : t -> bool
   val is_define_expression : t -> bool
+  val is_halt_compiler_expression : t -> bool
   val is_isset_expression : t -> bool
   val is_function_call_expression : t -> bool
   val is_function_call_with_type_arguments_expression : t -> bool

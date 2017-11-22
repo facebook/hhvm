@@ -168,7 +168,8 @@ let get_doc_from_trivia trivia_lst allow_break =
     | Kind.FixMe
     | Kind.IgnoreError
     | Kind.UnsafeExpression
-    | Kind.DelimitedComment ->
+    | Kind.DelimitedComment
+    | Kind.AfterHaltCompiler ->
       (text (Trivia.text trivia), false)
   in
   let concat = if allow_break then break_cons else space_cons in
@@ -1114,6 +1115,16 @@ let rec get_doc node =
     let lparen = get_doc isset_left_paren in
     let args = get_doc isset_argument_list in
     let rparen = get_doc isset_right_paren in
+    keyword ^^^ lparen ^^^ args ^^^ rparen
+  | HaltCompilerExpression {
+    halt_compiler_keyword;
+    halt_compiler_left_paren;
+    halt_compiler_argument_list;
+    halt_compiler_right_paren } ->
+    let keyword = get_doc halt_compiler_keyword in
+    let lparen = get_doc halt_compiler_left_paren in
+    let args = get_doc halt_compiler_argument_list in
+    let rparen = get_doc halt_compiler_right_paren in
     keyword ^^^ lparen ^^^ args ^^^ rparen
   | DefineExpression {
     define_keyword;

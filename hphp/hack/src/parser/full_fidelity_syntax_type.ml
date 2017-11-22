@@ -659,6 +659,12 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; define_argument_list                               : t
     ; define_right_paren                                 : t
     }
+  and halt_compiler_expression =
+    { halt_compiler_keyword                              : t
+    ; halt_compiler_left_paren                           : t
+    ; halt_compiler_argument_list                        : t
+    ; halt_compiler_right_paren                          : t
+    }
   and isset_expression =
     { isset_keyword                                      : t
     ; isset_left_paren                                   : t
@@ -1098,6 +1104,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | EvalExpression                          of eval_expression
   | EmptyExpression                         of empty_expression
   | DefineExpression                        of define_expression
+  | HaltCompilerExpression                  of halt_compiler_expression
   | IssetExpression                         of isset_expression
   | FunctionCallExpression                  of function_call_expression
   | FunctionCallWithTypeArgumentsExpression of function_call_with_type_arguments_expression
@@ -1232,6 +1239,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprEval                          of eval_expression
   | ExprEmpty                         of empty_expression
   | ExprDefine                        of define_expression
+  | ExprHaltCompiler                  of halt_compiler_expression
   | ExprIsset                         of isset_expression
   | ExprFunctionCall                  of function_call_expression
   | ExprFunctionCallWithTypeArguments of function_call_with_type_arguments_expression
@@ -1347,6 +1355,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaEval                          of eval_expression
   | LambdaEmpty                         of empty_expression
   | LambdaDefine                        of define_expression
+  | LambdaHaltCompiler                  of halt_compiler_expression
   | LambdaIsset                         of isset_expression
   | LambdaFunctionCall                  of function_call_expression
   | LambdaFunctionCallWithTypeArguments of function_call_with_type_arguments_expression
@@ -1396,6 +1405,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprEval                          of eval_expression
   | CExprEmpty                         of empty_expression
   | CExprDefine                        of define_expression
+  | CExprHaltCompiler                  of halt_compiler_expression
   | CExprIsset                         of isset_expression
   | CExprFunctionCall                  of function_call_expression
   | CExprFunctionCallWithTypeArguments of function_call_with_type_arguments_expression
@@ -2008,6 +2018,12 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; define_left_paren: Token.t value
     ; define_argument_list: expression listesque value
     ; define_right_paren: Token.t value
+    }
+  and halt_compiler_expression =
+    { halt_compiler_keyword: Token.t value
+    ; halt_compiler_left_paren: Token.t value
+    ; halt_compiler_argument_list: expression listesque value
+    ; halt_compiler_right_paren: Token.t value
     }
   and isset_expression =
     { isset_keyword: Token.t value

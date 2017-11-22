@@ -67,6 +67,7 @@ let rewrite_tree_no_whitespace node =
           | TriviaKind.UnsafeExpression
           | TriviaKind.FixMe
           | TriviaKind.SingleLineComment
+          | TriviaKind.AfterHaltCompiler
           | TriviaKind.DelimitedComment -> true
           | TriviaKind.EndOfLine
           | TriviaKind.WhiteSpace -> false

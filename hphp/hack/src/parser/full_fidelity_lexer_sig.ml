@@ -45,6 +45,7 @@ module WithToken(Token : Lexable_token_sig.LexableToken_S) = struct
     val next_xhp_element_token : no_trailing:bool ->  attribute:bool ->t
       -> t * Token.t * String.t
     val next_xhp_body_token : t -> t * Token.t
+    val rescan_halt_compiler : t -> Token.t -> t * Token.t
   end (* Lexer_S *)
 end (* WithToken *)
 

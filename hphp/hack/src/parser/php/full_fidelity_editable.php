@@ -143,6 +143,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return FallThrough::from_json($json, $position, $source);
     case 'extra_token_error':
       return ExtraTokenError::from_json($json, $position, $source);
+    case 'after_halt_compiler':
+      return AfterHaltCompiler::from_json($json, $position, $source);
 
     case 'missing':
       return Missing::missing();
@@ -340,6 +342,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return EmptyExpression::from_json($json, $position, $source);
     case 'define_expression':
       return DefineExpression::from_json($json, $position, $source);
+    case 'halt_compiler_expression':
+      return HaltCompilerExpression::from_json($json, $position, $source);
     case 'isset_expression':
       return IssetExpression::from_json($json, $position, $source);
     case 'function_call_expression':
@@ -1129,6 +1133,8 @@ abstract class EditableToken extends EditableSyntax {
        return new LessThanQuestionToken($leading, $trailing);
     case '?>':
        return new QuestionGreaterThanToken($leading, $trailing);
+    case '__halt_compiler':
+       return new HaltCompilerToken($leading, $trailing);
 
     case 'error_token':
        return new ErrorTokenToken($leading, $trailing, $token_text);
@@ -3803,6 +3809,21 @@ final class QuestionGreaterThanToken extends EditableToken {
     return new QuestionGreaterThanToken($this->leading(), $trailing);
   }
 }
+final class HaltCompilerToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('__halt_compiler', $leading, $trailing, '__halt_compiler');
+  }
+
+  public function with_leading(EditableSyntax $leading): HaltCompilerToken {
+    return new HaltCompilerToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): HaltCompilerToken {
+    return new HaltCompilerToken($this->leading(), $trailing);
+  }
+}
 
 final class ErrorTokenToken extends EditableToken {
   public function __construct(
@@ -4459,6 +4480,8 @@ abstract class EditableTrivia extends EditableSyntax {
         return new FallThrough($trivia_text);
       case 'extra_token_error':
         return new ExtraTokenError($trivia_text);
+      case 'after_halt_compiler':
+        return new AfterHaltCompiler($trivia_text);
 
       default:
         throw new Exception('unexpected json kind: ' . $json->kind);
@@ -4561,6 +4584,15 @@ class ExtraTokenError extends EditableTrivia {
   }
   public function with_text(string $text): ExtraTokenError {
     return new ExtraTokenError($text);
+  }
+}
+
+class AfterHaltCompiler extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('after_halt_compiler', $text);
+  }
+  public function with_text(string $text): AfterHaltCompiler {
+    return new AfterHaltCompiler($text);
   }
 }
 
@@ -15740,6 +15772,115 @@ final class DefineExpression extends EditableSyntax {
       $json->define_right_paren, $position, $source);
     $position += $right_paren->width();
     return new DefineExpression(
+        $keyword,
+        $left_paren,
+        $argument_list,
+        $right_paren);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_paren;
+    yield $this->_argument_list;
+    yield $this->_right_paren;
+    yield break;
+  }
+}
+final class HaltCompilerExpression extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_argument_list;
+  private EditableSyntax $_right_paren;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_paren,
+    EditableSyntax $argument_list,
+    EditableSyntax $right_paren) {
+    parent::__construct('halt_compiler_expression');
+    $this->_keyword = $keyword;
+    $this->_left_paren = $left_paren;
+    $this->_argument_list = $argument_list;
+    $this->_right_paren = $right_paren;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function argument_list(): EditableSyntax {
+    return $this->_argument_list;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function with_keyword(EditableSyntax $keyword): HaltCompilerExpression {
+    return new HaltCompilerExpression(
+      $keyword,
+      $this->_left_paren,
+      $this->_argument_list,
+      $this->_right_paren);
+  }
+  public function with_left_paren(EditableSyntax $left_paren): HaltCompilerExpression {
+    return new HaltCompilerExpression(
+      $this->_keyword,
+      $left_paren,
+      $this->_argument_list,
+      $this->_right_paren);
+  }
+  public function with_argument_list(EditableSyntax $argument_list): HaltCompilerExpression {
+    return new HaltCompilerExpression(
+      $this->_keyword,
+      $this->_left_paren,
+      $argument_list,
+      $this->_right_paren);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): HaltCompilerExpression {
+    return new HaltCompilerExpression(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_argument_list,
+      $right_paren);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $argument_list = $this->argument_list()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $argument_list === $this->argument_list() &&
+      $right_paren === $this->right_paren()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new HaltCompilerExpression(
+        $keyword,
+        $left_paren,
+        $argument_list,
+        $right_paren), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->halt_compiler_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_paren = EditableSyntax::from_json(
+      $json->halt_compiler_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $argument_list = EditableSyntax::from_json(
+      $json->halt_compiler_argument_list, $position, $source);
+    $position += $argument_list->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->halt_compiler_right_paren, $position, $source);
+    $position += $right_paren->width();
+    return new HaltCompilerExpression(
         $keyword,
         $left_paren,
         $argument_list,

@@ -29,6 +29,7 @@ type t =
   | IgnoreError
   | FallThrough
   | ExtraTokenError
+  | AfterHaltCompiler
 
 let to_string kind =
   match kind with
@@ -42,3 +43,4 @@ let to_string kind =
   | IgnoreError       -> "ignore_error"
   | FallThrough       -> "fall_through"
   | ExtraTokenError   -> "extra_token_error"
+  | AfterHaltCompiler -> "after_halt_compiler"

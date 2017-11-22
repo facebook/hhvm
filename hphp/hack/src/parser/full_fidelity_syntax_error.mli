@@ -220,3 +220,5 @@ val memoize_with_inout : string
 val fn_with_inout_and_ref_params : string
 val method_calls_on_xhp_attributes : string
 val invalid_constant_initializer : string
+val no_args_in_halt_compiler : string
+val halt_compiler_top_level_only: string

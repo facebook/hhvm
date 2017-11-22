@@ -119,6 +119,7 @@ type t =
   | EvalExpression
   | EmptyExpression
   | DefineExpression
+  | HaltCompilerExpression
   | IssetExpression
   | FunctionCallExpression
   | FunctionCallWithTypeArgumentsExpression
@@ -283,6 +284,7 @@ let to_string kind =
   | EvalExpression                          -> "eval_expression"
   | EmptyExpression                         -> "empty_expression"
   | DefineExpression                        -> "define_expression"
+  | HaltCompilerExpression                  -> "halt_compiler_expression"
   | IssetExpression                         -> "isset_expression"
   | FunctionCallExpression                  -> "function_call_expression"
   | FunctionCallWithTypeArgumentsExpression -> "function_call_with_type_arguments_expression"

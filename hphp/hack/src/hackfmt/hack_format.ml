@@ -1148,6 +1148,12 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         t kw;
         transform_argish left_p args right_p;
       ]
+    | HaltCompilerExpression x ->
+      let (kw, left_p, args, right_p) = get_halt_compiler_expression_children x in
+      Concat [
+        t kw;
+        transform_argish left_p args right_p;
+      ]
     | ParenthesizedExpression x ->
       let (left_p, expr, right_p) = get_parenthesized_expression_children x in
       Concat [
@@ -2369,6 +2375,9 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
     in
     List.iter trivia ~f:(fun triv ->
       match Trivia.kind triv with
+      | TriviaKind.AfterHaltCompiler ->
+        (* ignore content that appears after __halt_compiler *)
+        ()
       | TriviaKind.ExtraTokenError
       | TriviaKind.UnsafeExpression
       | TriviaKind.FixMe

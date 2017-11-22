@@ -1563,6 +1563,19 @@ module FromMinimal = struct
           ; define_argument_list
           ; define_right_paren
           }, results
+      | SyntaxKind.HaltCompilerExpression
+      , (  halt_compiler_right_paren
+        :: halt_compiler_argument_list
+        :: halt_compiler_left_paren
+        :: halt_compiler_keyword
+        :: results
+        ) ->
+          HaltCompilerExpression
+          { halt_compiler_keyword
+          ; halt_compiler_left_paren
+          ; halt_compiler_argument_list
+          ; halt_compiler_right_paren
+          }, results
       | SyntaxKind.IssetExpression
       , (  isset_right_paren
         :: isset_argument_list
@@ -3495,6 +3508,18 @@ module FromMinimal = struct
         let todo = Convert (define_argument_list, todo) in
         let todo = Convert (define_left_paren, todo) in
         convert offset todo results define_keyword
+    | { M.syntax = M.HaltCompilerExpression
+        { M.halt_compiler_keyword
+        ; M.halt_compiler_left_paren
+        ; M.halt_compiler_argument_list
+        ; M.halt_compiler_right_paren
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (halt_compiler_right_paren, todo) in
+        let todo = Convert (halt_compiler_argument_list, todo) in
+        let todo = Convert (halt_compiler_left_paren, todo) in
+        convert offset todo results halt_compiler_keyword
     | { M.syntax = M.IssetExpression
         { M.isset_keyword
         ; M.isset_left_paren

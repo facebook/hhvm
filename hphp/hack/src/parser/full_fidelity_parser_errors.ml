@@ -1450,6 +1450,16 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
   | SubscriptExpression { subscript_left_bracket; _}
     when not hhvm_compat_mode && is_left_brace subscript_left_bracket ->
     make_error_from_node node SyntaxError.error2020 :: errors
+  | HaltCompilerExpression { halt_compiler_argument_list = args; _ } ->
+    let errors =
+      if Core_list.is_empty (syntax_to_list_no_separators args) then errors
+      else make_error_from_node node SyntaxError.no_args_in_halt_compiler :: errors in
+    let errors =
+      match parents with
+      (* expression statement -> syntax list -> script *)
+      | [_; _; _] -> errors
+      | _ -> make_error_from_node node SyntaxError.halt_compiler_top_level_only :: errors in
+    errors
   | FunctionCallExpression {
       function_call_argument_list = arg_list;
       function_call_receiver; _
@@ -2058,7 +2068,7 @@ let assignment_errors node errors =
     end
   | _ -> errors
 
-let declare_errrors node parents errors =
+let declare_errors node parents errors =
   match syntax node with
   | FunctionCallExpression
     { function_call_receiver = name
@@ -2151,7 +2161,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
         names errors in
     let errors = enum_errors node errors in
     let errors = assignment_errors node errors in
-    let errors = declare_errrors node parents errors in
+    let errors = declare_errors node parents errors in
 
     match syntax node with
     | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->

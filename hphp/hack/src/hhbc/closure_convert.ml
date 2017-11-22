@@ -19,6 +19,9 @@ module SU = Hhbc_string_utils
 let constant_folding () =
   Hhbc_options.constant_folding !Hhbc_options.compiler_options
 
+let create_inout_wrapper_functions () =
+  Hhbc_options.create_inout_wrapper_functions !Hhbc_options.compiler_options
+
 type variables = {
   (* all variables declared/used in the scope*)
   all_vars: SSet.t;
@@ -64,6 +67,8 @@ type state = {
   hoisted_classes : class_ list;
   (* Hoisted inline functions *)
   hoisted_functions : fun_ list;
+  (* Functions with inout_wrappers *)
+  inout_wrappers : fun_ list;
   (* The current namespace environment *)
   namespace: Namespace_env.env;
   (* Static variables in closures have special properties with mangled names
@@ -97,6 +102,7 @@ let initial_state =
   total_count = 0;
   hoisted_classes = [];
   hoisted_functions = [];
+  inout_wrappers = [];
   namespace = Namespace_env.empty_with_default_popt;
   static_vars = ULS.empty;
   explicit_use_set = SSet.empty;
@@ -259,9 +265,14 @@ let record_function_state key (has_finally, goto_state) st =
     SMap.add key goto_state.labels st.function_to_labels_map in
   { st with functions_with_finally; function_to_labels_map }
 
-let add_function env st fd =
-  let n = env.defined_function_count + List.length st.hoisted_functions in
-  { st with hoisted_functions = fd :: st.hoisted_functions },
+let add_function ~has_inout_params env st fd =
+  let n = env.defined_function_count
+        + List.length st.hoisted_functions
+        + List.length st.inout_wrappers in
+  let inout_wrappers =
+    if has_inout_params then fd :: st.inout_wrappers else st.inout_wrappers in
+  let hoisted_functions = fd :: st.hoisted_functions in
+  { st with hoisted_functions; inout_wrappers},
   { fd with f_body = []; f_name = (fst fd.f_name, string_of_int n) }
 
 (* Make a stub class purely for the purpose of emitting the DefCls instruction
@@ -724,7 +735,12 @@ and convert_stmt env st stmt =
       | _, [Fun fd] -> fd
       | _ -> failwith "expected single function declaration" in
     let st, fd = convert_fun env st fd in
-    let st, stub_fd = add_function env st fd in
+    let has_inout_params =
+      List.exists fd.Ast.f_params
+        ~f:(fun p -> p.Ast.param_callconv = Some Ast.Pinout
+          || (create_inout_wrapper_functions () && p.Ast.param_is_reference)) in
+    let st, stub_fd =
+      add_function ~has_inout_params:has_inout_params env st fd in
     st, Def_inline (Fun stub_fd)
   | GotoLabel (_, l) ->
     (* record known label in function *)

@@ -33,6 +33,9 @@ let set_default_dropthrough i = default_dropthrough := i
 let set_return_by_ref b = return_by_ref := b
 let set_verify_out i = verify_out := i
 
+let create_inout_wrapper_functions () =
+  Hhbc_options.create_inout_wrapper_functions !Hhbc_options.compiler_options
+
 let emit_return ~need_ref env =
   TFR.emit_return
     ~need_ref
@@ -43,8 +46,16 @@ let emit_return ~need_ref env =
 
 let emit_def_inline = function
   | A.Fun fd ->
+    let has_inout_params =
+      List.exists fd.Ast.f_params
+        ~f:(fun p -> p.Ast.param_callconv = Some Ast.Pinout
+          || (create_inout_wrapper_functions () && p.Ast.param_is_reference)) in
     Emit_pos.emit_pos_then (fst fd.Ast.f_name) @@
-    instr_deffunc (int_of_string (snd fd.Ast.f_name))
+    let n = int_of_string (snd fd.Ast.f_name) in
+    gather [
+      instr_deffunc n;
+      (if not has_inout_params then empty else instr_deffunc (n + 1))
+    ]
   | A.Class cd ->
     Emit_pos.emit_pos_then (fst cd.Ast.c_name) @@
     instr_defcls (int_of_string (snd cd.Ast.c_name))

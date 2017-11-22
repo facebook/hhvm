@@ -102,6 +102,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       false (*no_injection*)
       false (*inout_wrapper*)
   in
+  let decl_vars = Hhas_body.decl_vars @@ Hhas_function.body normal_function in
   if is_memoize
   then [normal_function;
     Emit_memoize_function.emit_wrapper_function
@@ -114,10 +115,11 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   | Some wrapper_type ->
     let wrapper_fn =
       Emit_inout_function.emit_wrapper_function
+              ~decl_vars
+              ~is_top
               ~wrapper_type
               ~original_id
               ~renamed_id
-              ~verify_ret:(ast_fun.Ast.f_ret <> None)
               ast_fun in
       if wrapper_type = Emit_inout_helpers.InoutWrapper
       then [wrapper_fn; normal_function]

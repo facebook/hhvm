@@ -206,11 +206,12 @@ let from_ast_wrapper : bool -> _ ->
       method_is_pair_generator
       method_is_closure_body
   in
+  let decl_vars = Hhas_body.decl_vars @@ Hhas_method.body normal_function in
   if has_inout_args
   then [Emit_inout_function.emit_wrapper_method
+          ~decl_vars
           ~original_id:original_method_id
           ~renamed_id:renamed_method_id
-          ~verify_ret:(ast_method.Ast.m_ret <> None)
           ast_class ast_method;
         normal_function]
   else [normal_function]

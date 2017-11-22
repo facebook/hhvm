@@ -23,17 +23,9 @@ slow/hh_namespace_migration/hh_set7.php
 slow/hh_namespace_migration/hh_vector3.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/inline-hhas/mixed.php
-slow/inout/autoloader.php
-slow/inout/bad-async-generator.php
-slow/inout/bad-async.php
 slow/inout/bad-call-15.php
-slow/inout/call-static.php
 slow/inout/closure.php
-slow/inout/complex-expr.php
-slow/inout/def-func.php
-slow/inout/inout-decl.php
 slow/inout/side-effects.php
-slow/inout/trait-magic.php
 slow/namespace/hashbang_2.php
 slow/now_doc/1906.php
 slow/object/672.php

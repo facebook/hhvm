@@ -1065,13 +1065,39 @@ let default_value_params is_hack hhvm_compat_mode params =
   | Some param when not hhvm_compat_mode && is_hack -> Some param
   | _ -> None
 
+let is_in_namespace parents =
+  Hh_core.List.exists parents ~f:(fun node ->
+    match syntax node with
+    | NamespaceDeclaration {namespace_name; _}
+      when not @@ is_missing namespace_name && text namespace_name <> "" -> true
+    | _ -> false)
+
+let class_has_a_construct_method parents =
+  match first_parent_classish_node TokenKind.Class parents with
+  | Some ({ syntax = ClassishDeclaration
+            { classish_body =
+              { syntax = ClassishBody
+                { classish_body_elements = methods; _}; _}; _}; _}) ->
+    let methods = syntax_to_list_no_separators methods in
+    Hh_core.List.exists methods ~f:(function
+      { syntax = MethodishDeclaration
+          { methodish_function_decl_header =
+            { syntax = FunctionDeclarationHeader
+              { function_name; _}; _}; _}; _} ->
+        String.lowercase_ascii @@ text function_name = SN.Members.__construct
+      | _ -> false)
+  | _ -> false
+
 let is_in_construct_method parents =
   match first_parent_function_name parents, first_parent_class_name parents with
   | None, _ -> false
   (* Function name is __construct *)
   | Some s, _ when String.lowercase_ascii s = SN.Members.__construct -> true
   (* Function name is same as class name *)
-  | Some s1, Some s2 -> String.lowercase_ascii s1 = String.lowercase_ascii s2
+  | Some s1, Some s2 ->
+    not @@ is_in_namespace parents &&
+    not @@ class_has_a_construct_method parents &&
+    String.lowercase_ascii s1 = String.lowercase_ascii s2
   | _ -> false
 
 (* Test if the parameter is missing a type annotation but one is required *)
@@ -1134,11 +1160,18 @@ let params_errors params is_hack hhvm_compat_mode errors =
     produce_error_from_check errors variadic_param_with_callconv
     params SyntaxError.error2073 in
   let param_list = syntax_to_list_no_separators params in
-  let has_inout_param =
-    Hh_core.List.exists param_list ~f:is_parameter_with_callconv in
-  let has_reference_param = Hh_core.List.exists param_list ~f:is_param_by_ref in
+  let has_inout_param, has_reference_param, has_inout_and_ref_param =
+    Hh_core.List.fold_right param_list ~init:(false, false, false)
+      ~f:begin fun p (b1, b2, b3) ->
+        let is_inout = is_parameter_with_callconv p in
+        let is_ref = is_param_by_ref p in
+        b1 || is_inout, b2 || is_ref, b3 || (is_inout && is_ref)
+      end
+  in
   let errors = if has_inout_param && has_reference_param then
-    make_error_from_node ~error_type:SyntaxError.RuntimeError
+    let error_type = if has_inout_and_ref_param then
+      SyntaxError.ParseError else SyntaxError.RuntimeError in
+    make_error_from_node ~error_type
       params SyntaxError.fn_with_inout_and_ref_params :: errors
     else errors
   in
@@ -1167,7 +1200,8 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
     let errors = if is_parameter_with_callconv node then
       begin
         let errors = if is_inside_async_method parents then
-        make_error_from_node node SyntaxError.inout_param_in_async :: errors
+        make_error_from_node ~error_type:SyntaxError.RuntimeError
+          node SyntaxError.inout_param_in_async :: errors
         else errors in
         let errors =
           if is_in_construct_method parents then

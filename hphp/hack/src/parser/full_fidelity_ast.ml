@@ -2468,9 +2468,15 @@ let from_text (env : env) (source_text : SourceText.t) : result =
         ~level:ParserErrors.HHVMCompatibility
         tree
     in
-    match errors with
-    | [] -> ()
-    | e :: _ ->
+    (* Prioritize runtime errors *)
+    let runtime_errors =
+      List.filter errors
+        ~f:(fun e -> Full_fidelity_syntax_error.error_type e =
+                     Full_fidelity_syntax_error.RuntimeError) in
+    match errors, runtime_errors with
+    | [], [] -> ()
+    | _, e :: _
+    | e :: _, _ ->
       raise @@ Full_fidelity_syntax_error.ParserFatal e
   in
   let script = SyntaxTree.root tree in

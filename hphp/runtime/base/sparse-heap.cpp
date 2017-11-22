@@ -38,7 +38,7 @@ void SparseHeap::reset() {
     for (auto n : m_bigs) memset(n, kSmallFreeFill, n->nbytes);
   }
   auto const do_free = [](void* ptr, size_t size) {
-#if (JEMALLOC_VERSION_MAJOR >= 4)
+#if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 4)
     sdallocx(ptr, size, 0);
 #else
     free(ptr);

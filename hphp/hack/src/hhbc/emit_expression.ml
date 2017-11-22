@@ -212,14 +212,14 @@ let is_legal_lval_op_on_this op =
   | LValOp.IncDec _ -> true
   | _ -> false
 
-let check_shape_key name =
+let check_shape_key (pos,name) =
   if String.length name > 0 && String_utils.is_decimal_digit name.[0]
   then Emit_fatal.raise_fatal_parse
-    Pos.none "Shape key names may not start with integers"
+    pos "Shape key names may not start with integers"
 
 let extract_shape_field_name_pstring = function
-  | A.SFlit (_, s as p) ->
-    check_shape_key s; A.String p
+  | A.SFlit s ->
+    check_shape_key s; A.String s
   | A.SFclass_const ((pn, _) as id, p) -> A.Class_const ((pn, A.Id id), p)
 
 let rec expr_and_new env instr_to_add_new instr_to_add = function

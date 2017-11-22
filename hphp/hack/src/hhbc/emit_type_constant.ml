@@ -61,12 +61,13 @@ and is_resolved_classname = function
   | _ -> false
 
 let shape_field_name = function
-  | A.SFlit ((_, s)) -> s, false
+  | A.SFlit ((_, s) as id) ->
+    Emit_expression.check_shape_key id;
+    s, false
   | A.SFclass_const ((_, id), (_, s)) -> id ^ "::" ^ s, true
 
 let rec shape_field_to_pair ~tparams ~namespace sf =
   let name, is_class_const = shape_field_name sf.A.sf_name in
-  Emit_expression.check_shape_key name;
   let is_optional = sf.A.sf_optional in
   let hint = sf.A.sf_hint in
   let class_const =

@@ -38,7 +38,6 @@ quick/parse_fail_type_constraint.php
 quick/parser_massive_add_exp.php
 quick/parser_massive_concat_exp.php
 quick/post_try_error.php
-quick/reassign_this1.php
 quick/reassign_this2.php
 quick/redeclared_method.php
 quick/reflect-default.php

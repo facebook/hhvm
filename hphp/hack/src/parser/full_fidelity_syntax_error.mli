@@ -33,6 +33,9 @@ val error_type : t -> error_type
 
 val message : t -> string
 
+val start_offset : t -> int
+val end_offset : t -> int
+
 val error0001 : string
 val error0002 : string
 val error0003 : string

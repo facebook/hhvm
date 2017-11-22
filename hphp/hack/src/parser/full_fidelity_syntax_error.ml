@@ -52,6 +52,9 @@ let error_type err = err.error_type
 
 let message err = err.message
 
+let start_offset err = err.start_offset
+let end_offset err = err.end_offset
+
 (* Lexical errors *)
 let error0001 = "A hexadecimal literal needs at least one digit."
 let error0002 = "A binary literal needs at least one digit."

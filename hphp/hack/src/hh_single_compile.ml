@@ -13,6 +13,7 @@ open Sys_utils
 
 module P = Printf
 module SyntaxError = Full_fidelity_syntax_error
+module SourceText = Full_fidelity_source_text
 
 (*****************************************************************************)
 (* Types, constants *)
@@ -251,7 +252,7 @@ let print_debug_time_info filename debug_time =
   P.eprintf "MinorWords: %0.3f\n" stat.Gc.minor_words;
   P.eprintf "PromotedWords: %0.3f\n" stat.Gc.promoted_words)
 
-let do_compile filename compiler_options fail_or_ast debug_time =
+let do_compile filename compiler_options text fail_or_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
   let hhas_prog =
@@ -262,7 +263,11 @@ let do_compile filename compiler_options fail_or_ast debug_time =
         | SyntaxError.RuntimeError -> Hhbc_ast.FatalOp.Runtime
       in
       let s = SyntaxError.message e in
-      Emit_program.emit_fatal_program ~ignore_message:false error_t Pos.none s
+      let source_text = SourceText.make filename text in
+      let pos =
+        SourceText.relative_pos filename source_text
+          (SyntaxError.start_offset e) (SyntaxError.end_offset e) in
+      Emit_program.emit_fatal_program ~ignore_message:false error_t pos s
     | `ParseResult (errors, parser_return, _) ->
       let is_hh_file =
         Option.value_map parser_return.Parser_hack.file_mode
@@ -309,7 +314,7 @@ let process_single_file compiler_options popt filename outputfile =
     let fail_or_ast = parse_file compiler_options popt filename text in
     let debug_time = new_debug_time () in
     ignore @@ add_to_time_ref debug_time.parsing_t t;
-    let text = do_compile filename compiler_options fail_or_ast debug_time in
+    let text = do_compile filename compiler_options text fail_or_ast debug_time in
     if compiler_options.mode = DAEMON then
       Printf.printf "%i\n%!" (String.length text);
     match outputfile with

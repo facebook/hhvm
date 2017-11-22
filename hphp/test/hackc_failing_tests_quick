@@ -1,6 +1,5 @@
 quick/Xhp.php
 quick/bad_iter_warning.php
-quick/class_constant.php
 quick/closure.php
 quick/coverage.php
 quick/debug_backtrace.php

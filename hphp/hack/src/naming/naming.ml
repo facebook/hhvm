@@ -2025,6 +2025,7 @@ module Make (GetLocals : GetLocals) = struct
   and expr env (p, e) = p, expr_ env p e
   and expr_ env p = function
     | Array l -> N.Array (List.map l (afield env))
+    | ParenthesizedExpr (p, e) -> expr_ env p e
     | Darray l ->
       N.Darray (List.map l (fun (e1, e2) -> expr env e1, expr env e2))
     | Varray l -> N.Varray (List.map l (expr env))

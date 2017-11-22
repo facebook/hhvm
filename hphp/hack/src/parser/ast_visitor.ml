@@ -377,7 +377,8 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | NullCoalesce (e1, e2)     -> this#on_nullCoalesce acc e1 e2
    | InstanceOf  (e1, e2)         -> this#on_instanceOf acc e1 e2
    | Is          (e, h) -> this#on_is acc e h
-   | BracedExpr e -> this#on_expr acc e
+   | BracedExpr e
+   | ParenthesizedExpr e -> this#on_expr acc e
    | New         (e, el, uel) -> this#on_new acc e el uel
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (id, attrl, el) -> this#on_xml acc id attrl el

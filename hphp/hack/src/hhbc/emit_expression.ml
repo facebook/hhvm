@@ -1021,6 +1021,8 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True ->
     let v = Ast_constant_folder.expr_to_typed_value (Emit_env.get_namespace env) expr in
     emit_box_if_necessary need_ref @@ instr (ILitConst (TypedValue v))
+  | A.ParenthesizedExpr e ->
+    emit_expr ~need_ref env e
   | A.Lvar id ->
     emit_local ~notice:Notice ~need_ref env id
   | A.Class_const (cid, id) ->
@@ -2100,7 +2102,8 @@ and emit_call_lhs env (_, expr_ as expr) nargs has_splat inout_arg_positions =
     | Some id -> instr (ICall (FPushFuncU (nargs, fq_id, id)))
     | None -> instr (ICall (FPushFuncD (nargs, fq_id)))
     end
-
+  | A.String (_, s) ->
+    instr_fpushfuncd nargs (Hhbc_id.Function.from_raw_string s)
   | _ ->
     gather [
       emit_expr ~need_ref:false env expr;

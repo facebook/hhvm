@@ -657,6 +657,7 @@ class virtual ['self] reduce =
       self#add r0 r1
     method on_GotoLabel = self#on_pstring
     method on_BracedExpr = self#on_expr
+    method on_ParenthesizedExpr = self#on_expr
     method on_Goto = self#on_pstring
     method on_Markup env c0 c1 =
       let r0 = self#on_pstring env c0 in
@@ -706,6 +707,7 @@ class virtual ['self] reduce =
       | InstanceOf (c0, c1) -> self#on_InstanceOf env c0 c1
       | Is (c0, c1) -> self#on_Is env c0 c1
       | BracedExpr c0 -> self#on_BracedExpr env c0
+      | ParenthesizedExpr c0 -> self#on_ParenthesizedExpr env c0
       | New (c0, c1, c2) -> self#on_New env c0 c1 c2
       | Efun (c0, c1) -> self#on_Efun env c0 c1
       | Lfun c0 -> self#on_Lfun env c0

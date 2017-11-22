@@ -95,10 +95,14 @@ class virtual ['b] endo :
                    Ast_visitors_ancestors.stmt ->
                    Ast_visitors_ancestors.block ->
                    Ast_visitors_ancestors.stmt;
-       on_BracedExpr : 'c ->
+        on_BracedExpr : 'c ->
                        Ast_visitors_ancestors.expr_ ->
                        Ast_visitors_ancestors.expr ->
                        Ast_visitors_ancestors.expr_;
+        on_ParenthesizedExpr : 'c ->
+                      Ast_visitors_ancestors.expr_ ->
+                      Ast_visitors_ancestors.expr ->
+                      Ast_visitors_ancestors.expr_;
         on_Break : 'c ->
                    Ast_visitors_ancestors.stmt ->
                    Ast_visitors_ancestors.pos_t ->
@@ -995,6 +999,10 @@ class virtual ['b] endo :
       Ast_visitors_ancestors.stmt ->
       Ast_visitors_ancestors.block -> Ast_visitors_ancestors.stmt
     method on_BracedExpr :
+      'c ->
+      Ast_visitors_ancestors.expr_ ->
+      Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
+    method on_ParenthesizedExpr :
       'c ->
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_

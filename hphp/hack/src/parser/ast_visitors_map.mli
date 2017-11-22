@@ -71,9 +71,12 @@ class virtual ['c] map :
         on_Block : 'd ->
                    Ast_visitors_ancestors.block ->
                    Ast_visitors_ancestors.stmt;
-       on_BracedExpr : 'd ->
+        on_BracedExpr : 'd ->
                        Ast_visitors_ancestors.expr ->
                        Ast_visitors_ancestors.expr_;
+        on_ParenthesizedExpr : 'd ->
+                      Ast_visitors_ancestors.expr ->
+                      Ast_visitors_ancestors.expr_;
         on_Break : 'd ->
                    Ast_visitors_ancestors.pos_t ->
                    Ast_visitors_ancestors.expr option ->
@@ -743,6 +746,8 @@ class virtual ['c] map :
     method on_Block :
       'd -> Ast_visitors_ancestors.block -> Ast_visitors_ancestors.stmt
     method on_BracedExpr :
+      'd -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
+    method on_ParenthesizedExpr :
       'd -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
     method on_Break :
       'd -> Ast_visitors_ancestors.pos_t ->

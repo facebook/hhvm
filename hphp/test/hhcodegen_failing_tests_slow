@@ -28,7 +28,6 @@ slow/namespace/hashbang_2.php
 slow/now_doc/1906.php
 slow/object/672.php
 slow/object_property_expression/798.php
-slow/parser/1851.php
 slow/parser/async.php
 slow/parser/colon_colon_class.php
 slow/parser/hh-namespace-conflict-1.php
@@ -39,7 +38,6 @@ slow/parser/php-namespace-conflict-3.php
 slow/php7_backported/ns_093.php
 slow/php7_backported/scalar-types/scalar_relative_typehint_disallowed.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_008.php
-slow/php7_backported/varSyntax/indirect-fcall.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection_classes/xhp.php
 slow/traits/1981.php

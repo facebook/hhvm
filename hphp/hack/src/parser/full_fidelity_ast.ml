@@ -852,7 +852,19 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | _ -> []
         end
       in
+      (* preserve parens on receiver of call expression
+         to allow distinguishing between
+         ($a->b)() // invoke on callable property
+         $a->b()   // method call *)
+      let pos_if_has_parens =
+        match syntax recv with
+        | ParenthesizedExpression _ -> Some (pPos recv env)
+        | _ -> None in
       let recv = pExpr recv env in
+      let recv =
+        match snd recv, pos_if_has_parens with
+        | (Obj_get _ | Class_get _), Some p -> p, ParenthesizedExpr recv
+        | _ -> recv in
       (match List.rev (as_list args) with
       | { syntax = DecoratedExpression
           { decorated_expression_decorator =

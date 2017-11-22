@@ -578,7 +578,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     Variant temp;
     return unserializePropertyValue(temp, nProp);
   } else {
-    t = &tvAsVariant(obj->propLvalAtOffset(slot).tv_ptr());
+    t = &tvAsVariant(obj->getPropLval(ctx, key.get()).tv_ptr());
   }
 
   if (UNLIKELY(isRefcountedType(t->getRawType()))) {

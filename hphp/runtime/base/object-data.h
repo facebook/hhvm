@@ -340,7 +340,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   TypedValue* propVecForWrite();
   const TypedValue* propVec() const;
 
-  // accessors for declared properties at known offsets
+  // accessors for declared properties at statically known offsets
+  // in the lval case, the property must be statically known to be mutable
   member_lval propLvalAtOffset(Slot);
   member_rval propRvalAtOffset(Slot) const;
 

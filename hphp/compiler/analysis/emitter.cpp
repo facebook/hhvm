@@ -1377,7 +1377,9 @@ public:
                                 StringData* name, bool alloc);
 
   FPassHint getPassByRefHint(ExpressionPtr exp) {
-    if (!SystemLib::s_inited) return FPassHint::Any;
+    if (!SystemLib::s_inited || exp->getFunctionScope()->isSystem()) {
+      return FPassHint::Any;
+    }
     if (!m_ue.m_isHHFile && !RuntimeOption::EnableHipHopSyntax) {
       return FPassHint::Any;
     }

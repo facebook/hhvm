@@ -43,10 +43,4 @@ quick/redeclared_method.php
 quick/reflect-default.php
 quick/syntax-error-incl.php
 quick/syntax-error.php
-quick/trailing_comma_bad1.php
-quick/trailing_comma_bad2.php
-quick/trailing_comma_bad3.php
-quick/trailing_comma_bad4.php
-quick/trailing_comma_bad5.php
-quick/trailing_comma_bad6.php
 quick/xhp-malformed.php

@@ -96,10 +96,8 @@ slow/inout/bad-decl-2.php
 slow/inout/bad-func.php
 slow/inout/bad-generator.php
 slow/inout/closure.php
-slow/inout/def-func.php
 slow/inout/func-interop-dynamic.php
 slow/inout/func-interop-static.php
-slow/inout/inout-decl.php
 slow/inout/method-interop-dynamic.php
 slow/inout/method-interop-static.php
 slow/inout/side-effects.php

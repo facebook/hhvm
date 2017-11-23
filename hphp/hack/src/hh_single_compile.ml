@@ -38,6 +38,7 @@ type options = {
   mode             : mode;
   input_file_list  : string option;
   dump_symbol_refs : bool;
+  dump_stats       : bool;
 }
 
 (*****************************************************************************)
@@ -93,6 +94,7 @@ let parse_options () =
   let quiet_mode = ref false in
   let input_file_list = ref None in
   let dump_symbol_refs = ref false in
+  let dump_stats = ref false in
   let usage = P.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
     [ ("--fallback"
@@ -144,6 +146,10 @@ let parse_options () =
       , Arg.Set dump_symbol_refs
       , " Dump symbol ref sections of HHAS"
       );
+      ("--dump-stats"
+      , Arg.Set dump_stats
+      , " Dump timing stats for functions"
+      )
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -168,6 +174,7 @@ let parse_options () =
   ; mode               = !mode
   ; input_file_list    = !input_file_list
   ; dump_symbol_refs   = !dump_symbol_refs
+  ; dump_stats         = !dump_stats
   }
 
 let load_file_stdin () =
@@ -183,7 +190,18 @@ let load_file file =
   let content = cat abs_fn in
   content
 
+let set_stats_if_enabled ~compiler_options =
+  if compiler_options.dump_stats then
+    Stats_container.set_instance (Some (Stats_container.new_container ()))
+
+let write_stats_if_enabled ~compiler_options =
+  if compiler_options.dump_stats then
+    match (Stats_container.get_instance ()) with
+    | Some s -> Stats_container.write_out ~out:stderr s
+    | None -> ()
+
 let parse_text compiler_options popt fn text =
+  let () = set_stats_if_enabled ~compiler_options in
   match compiler_options.parser with
   | FFP ->
     let ignore_pos =
@@ -201,7 +219,9 @@ let parse_text compiler_options popt fn text =
       ~enable_hh_syntax
       fn
     in
-    Full_fidelity_ast.from_text_with_legacy env text
+    let parser_ret = Full_fidelity_ast.from_text_with_legacy env text in
+    let () = write_stats_if_enabled ~compiler_options in
+    parser_ret
   | Legacy ->
     Parser_hack.program popt fn text
 

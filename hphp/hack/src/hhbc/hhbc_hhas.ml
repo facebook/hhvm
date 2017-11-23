@@ -1528,7 +1528,10 @@ let add_data_region buf adata =
   B.add_string buf "\n"
 
 let add_top_level buf body =
-  B.add_string buf ".main {";
+  B.add_string buf ".main ";
+  if Hhbc_options.source_mapping !Hhbc_options.compiler_options
+  then B.add_string buf "(1,1) ";
+  B.add_string buf "{";
   add_body buf 2 body;
   B.add_string buf "}\n"
 

@@ -353,26 +353,30 @@ module InstrSeq = struct
       Instr_concat (List.map instrseql (filter_map ~f))
 
   let map instrseq ~f = filter_map instrseq ~f:(fun x -> Some (f x))
-
 end
 
-(* TODO: Can we eliminate this helper altogether? *)
-(* Could write this in terms of InstrSeq.fold_left *)
-let rec instr_seq_to_list_aux sl result =
-  match sl with
-  | [] -> List.rev result
-  | s::sl ->
-    match s with
-    | Instr_empty -> instr_seq_to_list_aux sl result
-    | Instr_one x -> instr_seq_to_list_aux sl (x :: result)
-    (* NOTE we discard fault blocks when linearizing an instruction sequence *)
-    | Instr_try_fault (try_body, _fault_body) ->
-      instr_seq_to_list_aux (try_body :: sl) result
-    | Instr_list instrl ->
-      instr_seq_to_list_aux sl (List.rev_append instrl result)
-    | Instr_concat sl' -> instr_seq_to_list_aux (sl' @ sl) result
-
-let instr_seq_to_list t = instr_seq_to_list_aux [t] []
+let instr_seq_to_list t =
+  (* TODO: Can we eliminate this helper altogether? *)
+  (* Could write this in terms of InstrSeq.fold_left *)
+  let rec go acc = function
+    | [] -> acc
+    | s::sl ->
+      match s with
+      | Instr_empty -> go acc sl
+      | Instr_one x -> go (x :: acc) sl
+      (* NOTE we discard fault blocks when linearizing an instruction sequence *)
+      | Instr_try_fault (try_body, _fault_body) -> go acc (try_body :: sl)
+      | Instr_list instrl -> go (List.rev_append instrl acc) sl
+      | Instr_concat sl' -> go acc (sl' @ sl) in
+  let rec compact_src_locs acc = function
+    | [] -> acc
+    | ((ISrcLoc _) as i) :: is -> begin
+      match acc with
+      | (ISrcLoc _) :: _ -> compact_src_locs acc is
+      | _ -> compact_src_locs (i :: acc) is
+    end
+    | i :: is -> compact_src_locs (i :: acc) is in
+  go [] [t] |> compact_src_locs []
 
 let instr_try_fault fault_label try_body fault_body =
   let instr_try_fault_body = gather [

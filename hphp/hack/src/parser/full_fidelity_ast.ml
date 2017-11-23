@@ -27,6 +27,7 @@ module TriviaKind = Full_fidelity_trivia_kind
 module SourceData = Full_fidelity_editable_positioned_original_source_data
 module SourceText = Full_fidelity_source_text
 module ParserErrors = Full_fidelity_parser_errors
+  .WithSyntax(Full_fidelity_positioned_syntax)
 open Prim_defs
 
 open Hh_core

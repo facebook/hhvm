@@ -8,10 +8,12 @@
  *
  *)
 
-type error_level = Minimum | Typical | Maximum | HHVMCompatibility
+module WithSyntax : functor (Syntax : Syntax_sig.Syntax_S) -> sig
+  type error_level = Minimum | Typical | Maximum | HHVMCompatibility
 
-val parse_errors :
-  ?enable_hh_syntax:bool ->
-  ?level:error_level ->
-  Full_fidelity_syntax_tree.WithSyntax(Full_fidelity_positioned_syntax).t ->
-  Full_fidelity_syntax_error.t list
+  val parse_errors :
+    ?enable_hh_syntax:bool ->
+    ?level:error_level ->
+    Full_fidelity_syntax_tree.WithSyntax(Syntax).t ->
+    Full_fidelity_syntax_error.t list
+end

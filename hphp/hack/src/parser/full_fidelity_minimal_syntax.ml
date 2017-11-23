@@ -106,3 +106,6 @@ let is_in_body node position =
         aux t1 in
   let parents = parentage node position in
   aux parents
+
+let position _file _node = None
+let extract_text _node = None

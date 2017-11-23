@@ -15,6 +15,7 @@ module SyntaxTree = Full_fidelity_syntax_tree
 module PositionedTree = Full_fidelity_syntax_tree
   .WithSyntax(Full_fidelity_positioned_syntax)
 module ParserErrors = Full_fidelity_parser_errors
+  .WithSyntax(Full_fidelity_positioned_syntax)
 module SyntaxError = Full_fidelity_syntax_error
 module TestUtils = Full_fidelity_test_utils
 module TriviaKind = Full_fidelity_trivia_kind

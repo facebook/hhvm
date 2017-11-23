@@ -33,6 +33,7 @@ module SyntaxTree = Full_fidelity_syntax_tree
 module SourceText = Full_fidelity_source_text
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module ParserErrors = Full_fidelity_parser_errors
+  .WithSyntax(Full_fidelity_positioned_syntax)
 
 module FullFidelityParseArgs = struct
 

@@ -239,6 +239,9 @@ let trailing_text node =
 let text node =
   SourceText.sub (source_text node) (start_offset node) (width node)
 
+let extract_text node =
+  Some (text node)
+
 (* Takes a node and an offset; produces the descent through the parse tree
    to that position. *)
 let parentage node position =
@@ -267,6 +270,12 @@ let is_in_body node position =
         aux t1 in
   let parents = parentage node position in
   aux parents
+
+let position file node =
+  let source_text = source_text node in
+  let start_offset = start_offset node in
+  let end_offset = end_offset node in
+  Some (SourceText.relative_pos file source_text start_offset end_offset)
 
 module FromMinimal = struct
   module SyntaxKind = Full_fidelity_syntax_kind

@@ -400,10 +400,8 @@ end
  * node.
  *)
 module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
-  type t = {
-    syntax : syntax ;
-    value : SyntaxValue.t
-  }
+  type value = SyntaxValue.t
+  type t = { syntax : syntax ; value : value }
 PARSE_TREE  and syntax =
   | Token                             of Token.t
   | Missing
@@ -460,7 +458,7 @@ module GenerateFFSyntaxSig = struct
     let fmt = sprintf "%s_%%-%ds: t\n" x.prefix field_width in
     let mapper (f,_) = sprintf (Scanf.format_from_string fmt "%-1s") f in
     let fields = map_and_concat_separated "    ; " mapper x.fields in
-    sprintf "  type %s =\n    { %s    }\n"
+    sprintf "  and %s =\n    { %s    }\n"
       x.type_name fields
 
   let to_syntax x =
@@ -474,15 +472,17 @@ module GenerateFFSyntaxSig = struct
 
 module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
-  type t
+  type value
+  type t = { syntax : syntax ; value : value }
 PARSE_TREE
-  type syntax =
+  and syntax =
   | Token                             of Token.t
   | Missing
   | SyntaxList                        of t list
 SYNTAX
 
   val to_json : ?with_value:bool -> t -> Hh_json.json
+  val extract_text : t -> string option
   val is_in_body : t -> int -> bool
   val syntax_node_to_list : t -> t list
   val width : t -> int
@@ -499,10 +499,31 @@ SYNTAX
   val make_list : Full_fidelity_source_text.t -> int -> t list -> t
 CONSTRUCTOR_METHODS
 
-  val is_abstract : t -> bool
+  val position : Relative_path.t -> t -> Pos.t option
   val is_missing : t -> bool
   val is_list : t -> bool
 TYPE_TESTS
+
+  val is_loop_statement : t -> bool
+  val is_semicolon      : t -> bool
+  val is_name           : t -> bool
+  val is_construct      : t -> bool
+  val is_destruct       : t -> bool
+  val is_static         : t -> bool
+  val is_private        : t -> bool
+  val is_public         : t -> bool
+  val is_protected      : t -> bool
+  val is_abstract       : t -> bool
+  val is_final          : t -> bool
+  val is_void           : t -> bool
+  val is_left_brace     : t -> bool
+  val is_ellipsis       : t -> bool
+  val is_comma          : t -> bool
+  val is_array          : t -> bool
+  val is_var            : t -> bool
+  val is_ampersand      : t -> bool
+  val is_inout          : t -> bool
+
 
 end (* Syntax_S *)
 "
@@ -2763,6 +2784,9 @@ let trailing_text node =
 let text node =
   SourceText.sub (source_text node) (start_offset node) (width node)
 
+let extract_text node =
+  Some (text node)
+
 (* Takes a node and an offset; produces the descent through the parse tree
    to that position. *)
 let parentage node position =
@@ -2791,6 +2815,12 @@ let is_in_body node position =
         aux t1 in
   let parents = parentage node position in
   aux parents
+
+let position file node =
+  let source_text = source_text node in
+  let start_offset = start_offset node in
+  let end_offset = end_offset node in
+  Some (SourceText.relative_pos file source_text start_offset end_offset)
 
 module FromMinimal = struct
   module SyntaxKind = Full_fidelity_syntax_kind

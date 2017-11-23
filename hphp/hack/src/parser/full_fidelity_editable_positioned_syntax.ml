@@ -25,6 +25,7 @@
 module Token = Full_fidelity_editable_positioned_token
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module SourceData = Full_fidelity_editable_positioned_original_source_data
+module SourceText = Full_fidelity_source_text
 
 module Value = struct
 
@@ -145,6 +146,18 @@ let end_offset node =
 
 let trailing_start_offset node =
   leading_start_offset node + leading_width node + width node
+
+let position file node =
+  match value node with
+  | Value.Positioned source_data ->
+    let source_text = SourceData.source_text source_data in
+    let start_offset = SourceData.start_offset source_data in
+    let end_offset = SourceData.end_offset source_data in
+    Some (SourceText.relative_pos file source_text start_offset end_offset)
+  | Value.Synthetic -> None
+
+let extract_text node =
+  Some (text node)
 
 module ValueBuilder = struct
   open Value

@@ -74,10 +74,8 @@ end
  * node.
  *)
 module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
-  type t = {
-    syntax : syntax ;
-    value : SyntaxValue.t
-  }
+  type value = SyntaxValue.t
+  type t = { syntax : syntax ; value : value }
   and end_of_file =
     { end_of_file_token                                  : t
     }

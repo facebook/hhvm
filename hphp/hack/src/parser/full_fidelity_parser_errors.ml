@@ -8,13 +8,14 @@
  *
  *)
 
-module PositionedSyntax = Full_fidelity_positioned_syntax
-open PositionedSyntax
+
+module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
+open Syntax
 
 module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_positioned_syntax)
+  .WithSyntax(Syntax)
 
-module PositionedToken = Full_fidelity_positioned_token
+module Token = Syntax.Token
 module SyntaxError = Full_fidelity_syntax_error
 module TokenKind = Full_fidelity_token_kind
 
@@ -25,11 +26,30 @@ type location = {
   end_offset: int
 }
 
+let text node =
+  Option.value ~default:"<text_extraction_failure>" (Syntax.extract_text node)
+
 let make_location s e =
-  { start_offset = start_offset s; end_offset = end_offset e }
+  match position Relative_path.default s, position Relative_path.default e with
+  | Some s, Some e ->
+    let start_offset, _ = Pos.info_raw s in
+    let _, end_offset = Pos.info_raw e in
+    { start_offset ; end_offset }
+  | _ ->
+    failwith "Could not determine positions of parse tree nodes."
 
 let make_location_of_node n =
   make_location n n
+
+let start_offset n =
+  let s = Syntax.position Relative_path.default n in
+  let s, _ = Pos.info_raw (Option.value ~default:Pos.none s) in
+  s
+
+let end_offset n =
+  let e = Syntax.position Relative_path.default n in
+  let _, e = Pos.info_raw (Option.value ~default:Pos.none e) in
+  e
 
 type namespace_type =
   | Unspecified
@@ -84,7 +104,7 @@ let make_acc
        }
 
 let fold_child_nodes f node parents acc =
-  PositionedSyntax.children node
+  Syntax.children node
   |> Core_list.fold_left ~init:acc ~f:(fun acc c -> f acc c (node :: parents))
 
 (* Turns a syntax node into a list of nodes; if it is a separated syntax
@@ -243,10 +263,10 @@ let list_contains_multiple_predicate p node =
 let list_contains_duplicate node =
   let module SyntaxMap = Map.Make (
     struct
-      type t = PositionedSyntax.t
+      type t = Syntax.t
       let compare a b = match syntax a, syntax b with
       | Token x, Token y ->
-        Full_fidelity_positioned_token.(compare (kind x) (kind y))
+        Token.(compare (kind x) (kind y))
       | _, _ -> Pervasives.compare a b
     end
   ) in
@@ -262,7 +282,7 @@ let list_contains_duplicate node =
 
 let token_kind node =
   match syntax node with
-  | Token t -> Some (PositionedToken.kind t)
+  | Token t -> Some (Token.kind t)
   | _ -> None
 
 (* Helper function for common code pattern *)
@@ -504,7 +524,7 @@ let make_error_from_node ?(error_type=SyntaxError.ParseError) node error =
 let is_invalid_xhp_attr_enum_item_literal literal_expression =
   match syntax literal_expression with
   | Token t -> begin
-      Full_fidelity_token_kind.(match PositionedToken.kind t with
+      Full_fidelity_token_kind.(match Token.kind t with
       | DecimalLiteral | SingleQuotedStringLiteral
       | DoubleQuotedStringLiteral -> false
       | _ -> true)
@@ -525,7 +545,7 @@ let xhp_errors node _parents hhvm_compat_mode errors =
   |  XHPSimpleAttribute attr when
     not hhvm_compat_mode &&
     (is_bad_xhp_attribute_name
-    (PositionedSyntax.text attr.xhp_simple_attribute_name)) ->
+    (text attr.xhp_simple_attribute_name)) ->
       make_error_from_node attr.xhp_simple_attribute_name SyntaxError.error2002 :: errors
   |  XHPEnumType enumType when
     not hhvm_compat_mode &&
@@ -639,7 +659,7 @@ let extract_function_name header_node =
    * function_declaration_header. *)
    match syntax header_node with
    | FunctionDeclarationHeader fdh ->
-     Some (PositionedSyntax.text fdh.function_name)
+     Syntax.extract_text fdh.function_name
    | _ -> None
 
 (* Return, as a string opt, the name of the function with the earliest
@@ -669,7 +689,7 @@ let first_parent_class_name parents =
   let parent_class_decl = first_parent_classish_node TokenKind.Class parents in
   Option.value_map parent_class_decl ~default:None ~f:begin fun node ->
     match syntax node with
-    | ClassishDeclaration cd -> Some (PositionedSyntax.text cd.classish_name)
+    | ClassishDeclaration cd -> Syntax.extract_text cd.classish_name
     | _ -> None (* This arm is never reached  *)
   end
 
@@ -1030,7 +1050,7 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
     let errors =
       let visibility_node = Option.value (extract_visibility_node modifiers)
         ~default:node in
-      let visibility_text = PositionedSyntax.text visibility_node in (* is this option? *)
+      let visibility_text = text visibility_node in (* is this option? *)
       produce_error errors
       (invalid_methodish_visibility_inside_interface hhvm_compat_mode node)
       parents (SyntaxError.error2047 visibility_text) visibility_node in
@@ -1038,9 +1058,11 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
   | _ -> errors
 
 let is_hashbang text =
-  let text = PositionedSyntax.text text in
-  let r = Str.regexp "^#!.*\n" in
-  Str.string_match r text 0 && Str.matched_string text = text
+  match Syntax.extract_text text with
+  | None -> false
+  | Some text ->
+    let r = Str.regexp "^#!.*\n" in
+    Str.string_match r text 0 && Str.matched_string text = text
 
 let markup_errors node is_hack_file hhvm_compat_mode errors =
   match syntax node with
@@ -1056,7 +1078,7 @@ let markup_errors node is_hack_file hhvm_compat_mode errors =
   | MarkupSuffix { markup_suffix_less_than_question; markup_suffix_name; }
     when not hhvm_compat_mode && not is_hack_file
     && ((token_kind markup_suffix_less_than_question) = Some TokenKind.LessThanQuestion)
-    && ((PositionedSyntax.text markup_suffix_name) <> "php") ->
+    && (Syntax.extract_text markup_suffix_name <> Some "php") ->
     make_error_from_node node SyntaxError.error2068 :: errors
   | _ -> errors
 
@@ -1190,7 +1212,7 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
       produce_error_parents errors (missing_param_type_check is_strict hhvm_compat_mode)
       p parents SyntaxError.error2001 node in
     let callconv_text = Option.value (extract_callconv_node node) ~default:node
-      |> PositionedSyntax.text in
+      |> text in
     let errors =
       produce_error_from_check errors param_with_callconv_has_default
       node (SyntaxError.error2074 callconv_text) in
@@ -1210,8 +1232,7 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
           else errors in
         let errors = match syntax p.parameter_name with
           | DecoratedExpression { decorated_expression_decorator = {
-              syntax = Token { PositionedToken.kind = TokenKind.DotDotDot;
-                _ }; _ }; _} ->
+              syntax = Token token; _ }; _} when Token.kind token = TokenKind.DotDotDot ->
               make_error_from_node node SyntaxError.error2073 :: errors
           | _ -> errors
         in
@@ -1305,11 +1326,10 @@ let string_starts_with_int s =
 
 let check_collection_element m error_text errors =
   match syntax m with
-  | PrefixUnaryExpression {
-      prefix_unary_operator = {
-        syntax = Token { PositionedToken.kind = TokenKind.Ampersand; _ }; _
-      }; _
-    } -> make_error_from_node m error_text :: errors
+  | PrefixUnaryExpression
+    { prefix_unary_operator = { syntax = Token token; _ }; _ }
+    when Token.kind token = TokenKind.Ampersand ->
+      make_error_from_node m error_text :: errors
   | _ -> errors
 
 let check_collection_member errors m =
@@ -1373,13 +1393,9 @@ let is_in_finally_block parents =
 let function_call_argument_errors node errors =
   match syntax node with
   | DecoratedExpression
-    { decorated_expression_decorator = {
-        syntax = Token {
-          PositionedToken.kind = TokenKind.Inout
-        ; _}
-      ; _}
+    { decorated_expression_decorator = { syntax = Token token ; _ }
     ; decorated_expression_expression = expression
-    } ->
+    } when Token.kind token = TokenKind.Inout ->
       let result =
         match syntax expression with
         | BinaryExpression _ ->
@@ -1416,7 +1432,7 @@ let function_call_on_xhp_name_errors node errors =
   | MemberSelectionExpression { member_name = name; _ }
   | SafeMemberSelectionExpression { safe_member_name = name; _ } ->
     begin match syntax name with
-    | Token { PositionedToken.kind = TokenKind.XHPClassName; _ } ->
+    | Token token when Token.kind token = TokenKind.XHPClassName ->
       let e =
         make_error_from_node node SyntaxError.method_calls_on_xhp_attributes in
       e :: errors
@@ -1425,22 +1441,19 @@ let function_call_on_xhp_name_errors node errors =
   | _ -> errors
 
 let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors =
+  let is_decimal_or_hexadecimal_literal token =
+    match Token.kind token with
+    | TokenKind.DecimalLiteral | TokenKind.HexadecimalLiteral -> true
+    | _ -> false
+  in
   match syntax node with
-  | LiteralExpression {
-      literal_expression = {
-        syntax = Token {
-          PositionedToken.kind = (
-            TokenKind.DecimalLiteral |
-            TokenKind.HexadecimalLiteral
-          ) as kind
-        ; _}
-      ; _} as e
-    ; _} when is_hack_file ->
+  | LiteralExpression { literal_expression = {syntax = Token token; _} as e ; _}
+    when is_hack_file && is_decimal_or_hexadecimal_literal token ->
     let text = text e in
     begin try ignore (Int64.of_string text); errors
     with _ ->
       let error_text =
-        if kind = TokenKind.DecimalLiteral
+        if Token.kind token = TokenKind.DecimalLiteral
         then SyntaxError.error2071 text
         else SyntaxError.error2072 text in
       make_error_from_node node error_text :: errors
@@ -1483,7 +1496,7 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     then
       let start_node = oce.object_creation_new_keyword in
       let end_node = oce.object_creation_type in
-      let constructor_name = PositionedSyntax.text oce.object_creation_type in
+      let constructor_name = text oce.object_creation_type in
       make_error_from_nodes start_node end_node
         (SyntaxError.error2038 constructor_name) :: errors
     else
@@ -1608,7 +1621,9 @@ let classish_errors node parents is_hack hhvm_compat_mode names errors =
       (* Extra setup for the the customized error message. *)
       let keyword_str = Option.value_map (token_kind cd.classish_keyword)
         ~default:"" ~f:TokenKind.to_string in
-      let declared_name_str = PositionedSyntax.text cd.classish_name in
+      let declared_name_str =
+        Option.value ~default:"" (Syntax.extract_text cd.classish_name)
+      in
       let function_str = Option.value (first_parent_function_name parents)
         ~default:"" in
       (* To avoid iterating through the whole parents list again, do a simple
@@ -1686,9 +1701,9 @@ let is_invalid_group_use_clause kind clause =
     if is_missing kind
     then
       begin match syntax clause_kind with
-      | Missing
-      | Token { PositionedToken.kind = (TokenKind.Function | TokenKind.Const); _ }
-        -> false
+      | Missing -> false
+      | Token token when let k = Token.kind token in
+                         TokenKind.(k = Function || k = Const) -> false
       | _ -> true
       end
     else not (is_missing clause_kind)
@@ -1745,30 +1760,32 @@ let use_class_or_namespace_clause_errors
         update_map names (SMap.add short_name new_entry map), errors in
 
     begin match syntax kind with
-    | Token { PositionedToken.kind = TokenKind.Namespace; _ } ->
-      do_check ~error_on_global_redefinition:false names errors
-        (fun n -> n.t_namespaces)
-        (fun n v -> { n with t_namespaces = v })
-        SyntaxError.name_is_already_in_use
-
-    | Token { PositionedToken.kind = TokenKind.Type; _ } ->
-      do_check ~error_on_global_redefinition:false names errors
-        (fun n -> n.t_classes)
-        (fun n v -> { n with t_classes = v })
-        SyntaxError.type_name_is_already_in_use
-
-    | Token { PositionedToken.kind = TokenKind.Function; _ } ->
-      do_check ~error_on_global_redefinition:true names errors
-        (fun n -> n.t_functions)
-        (fun n v -> { n with t_functions = v })
-        SyntaxError.function_name_is_already_in_use
-
-    | Token { PositionedToken.kind = TokenKind.Const; _ } ->
-      do_check ~error_on_global_redefinition:true names errors
-        (fun n -> n.t_constants)
-        (fun n v -> { n with t_constants = v })
-        SyntaxError.const_name_is_already_in_use
-
+    | Token token ->
+      let open TokenKind in
+      (match Token.kind token with
+      | Namespace ->
+        do_check ~error_on_global_redefinition:false names errors
+          (fun n -> n.t_namespaces)
+          (fun n v -> { n with t_namespaces = v })
+          SyntaxError.name_is_already_in_use
+      | Type ->
+        do_check ~error_on_global_redefinition:false names errors
+          (fun n -> n.t_classes)
+          (fun n v -> { n with t_classes = v })
+          SyntaxError.type_name_is_already_in_use
+      | Function ->
+        do_check ~error_on_global_redefinition:true names errors
+          (fun n -> n.t_functions)
+          (fun n v -> { n with t_functions = v })
+          SyntaxError.function_name_is_already_in_use
+      | Const ->
+        do_check ~error_on_global_redefinition:true names errors
+          (fun n -> n.t_constants)
+          (fun n v -> { n with t_constants = v })
+          SyntaxError.const_name_is_already_in_use
+      | _ ->
+        names, errors
+      )
     | Missing ->
       let errors =
         if name_text = "strict"
@@ -1826,46 +1843,72 @@ let namespace_use_declaration_errors node is_hack is_global_namespace names erro
   | _ -> names, errors
 
 let rec check_constant_expression errors node =
+  let is_namey token =
+    match Token.kind token with
+    | TokenKind.QualifiedName | TokenKind.Name -> true
+    | _ -> false
+  in
+  let is_good_scope_resolution_qualifier node =
+    match syntax node with
+    | QualifiedNameExpression _ -> true
+    | Token token ->
+      let open TokenKind in
+      (match Token.kind token with
+      | QualifiedName | Name | Self | Parent | Static -> true
+      | _ -> false
+      )
+    | _ -> false
+  in
+  let is_good_scope_resolution_name node =
+    match syntax node with
+    | QualifiedNameExpression _ -> true
+    | Token token ->
+      let open TokenKind in
+      (match Token.kind token with
+      | QualifiedName | Name | Trait | Extends | Implements | Static
+      | Abstract | Final | Private | Protected | Public | Or | And | Global
+      | Goto | Instanceof | Insteadof | Interface | Namespace | New | Try | Use
+      | Var | List | Clone | Include | Include_once | Throw | Array | Tuple
+      | Print | Echo | Require | Require_once | Return | Else | Elseif | Default
+      | Break | Continue | Switch | Yield | Function | If | Finally | For
+      | Foreach | Case | Do | While | As | Catch | Empty | Using | Class
+      | NullLiteral | Super | Where
+        -> true
+      | _ -> false
+      )
+    | _ -> false
+  in
   match syntax node with
   | Missing
   | QualifiedNameExpression _
   | LiteralExpression _
-  | Token { PositionedToken.kind = (TokenKind.QualifiedName | TokenKind.Name); _ } ->
-    errors
-  | PrefixUnaryExpression {
-      prefix_unary_operand;
-      prefix_unary_operator = {
-        syntax = Token {
-          PositionedToken.kind = (
-            TokenKind.Exclamation | TokenKind.Plus | TokenKind.Minus |
-            TokenKind.Tilde
-          ); _
-        }; _
-      }
-    } ->
-    let errors = check_constant_expression errors prefix_unary_operand in
-    errors
-
-  | BinaryExpression {
-      binary_left_operand;
-      binary_right_operand;
-      binary_operator = {
-        syntax = Token {
-          PositionedToken.kind = (
-            TokenKind.BarBar | TokenKind.AmpersandAmpersand | TokenKind.Carat |
-            TokenKind.And | TokenKind.Or | TokenKind.Xor | TokenKind.Bar |
-            TokenKind.Ampersand | TokenKind.Dot | TokenKind.Plus |
-            TokenKind.Minus | TokenKind.Star | TokenKind.Slash | TokenKind.Percent |
-            TokenKind.LessThanLessThan | TokenKind.GreaterThanGreaterThan |
-            TokenKind.StarStar | TokenKind.EqualEqual | TokenKind.EqualEqualEqual |
-            TokenKind.ExclamationEqual | TokenKind.ExclamationEqualEqual |
-            TokenKind.GreaterThan | TokenKind.GreaterThanEqual |
-            TokenKind.LessThan | TokenKind.LessThanEqual |
-            TokenKind.LessThanEqualGreaterThan | TokenKind.QuestionColon
-          ); _
-        }; _
-      }
-    } ->
+    -> errors
+  | Token token when is_namey token -> errors
+  | PrefixUnaryExpression
+    { prefix_unary_operand
+    ; prefix_unary_operator = { syntax = Token token ; _ }
+    } when ( let open TokenKind in
+             match Token.kind token with
+             | Exclamation | Plus | Minus | Tilde -> true
+             | _ -> false
+           ) ->
+      check_constant_expression errors prefix_unary_operand
+  | BinaryExpression
+    { binary_left_operand
+    ; binary_right_operand
+    ; binary_operator = { syntax = Token token ; _ }
+    ; _ } when ( let open TokenKind in
+                 match Token.kind token with
+                 | BarBar | AmpersandAmpersand | Carat | And | Or | Xor
+                 | Bar | Ampersand | Dot | Plus | Minus | Star | Slash | Percent
+                 | LessThanLessThan | GreaterThanGreaterThan | StarStar
+                 | EqualEqual | EqualEqualEqual | ExclamationEqual
+                 | ExclamationEqualEqual | GreaterThan | GreaterThanEqual
+                 | LessThan | LessThanEqual | LessThanEqualGreaterThan
+                 | QuestionColon
+                   -> true
+                 | _ -> false
+               ) ->
     let errors = check_constant_expression errors binary_left_operand in
     let errors = check_constant_expression errors binary_right_operand in
     errors
@@ -1881,26 +1924,21 @@ let rec check_constant_expression errors node =
   | SimpleInitializer { simple_initializer_value = e; _ }
   | ParenthesizedExpression { parenthesized_expression_expression = e; _} ->
     check_constant_expression errors e
-  | CollectionLiteralExpression {
-      collection_literal_name = {
-        syntax = (
-          SimpleTypeSpecifier {
-            simple_type_specifier = {
-              syntax = Token {
-                PositionedToken.kind = (TokenKind.QualifiedName | TokenKind.Name); _
-              }; _
-            }
-          } |
-          GenericTypeSpecifier {
-            generic_class_type = {
-              syntax = Token {
-                PositionedToken.kind = (TokenKind.QualifiedName | TokenKind.Name); _
-              }; _
-            }; _
-          }); _
-      };
-      collection_literal_initializers = lst; _
-    }
+  | CollectionLiteralExpression
+    { collection_literal_name =
+      { syntax =
+        ( SimpleTypeSpecifier
+            { simple_type_specifier = { syntax = Token token; _ } }
+        | GenericTypeSpecifier
+            { generic_class_type = { syntax = Token token; _ }; _ }
+        )
+      ; _
+      }
+    ; collection_literal_initializers = lst
+    ; _
+    } when is_namey token ->
+      syntax_to_list_no_separators lst
+      |> Core_list.fold_left ~init:errors ~f:check_constant_expression
   | TupleExpression { tuple_expression_items = lst; _ }
   | KeysetIntrinsicExpression { keyset_intrinsic_members = lst; _}
   | VarrayIntrinsicExpression { varray_intrinsic_members = lst; _ }
@@ -1917,40 +1955,12 @@ let rec check_constant_expression errors node =
     let errors = check_constant_expression errors n in
     let errors = check_constant_expression errors v in
     errors
-  | ScopeResolutionExpression {
-      scope_resolution_qualifier = {
-        syntax = QualifiedNameExpression _ | Token {
-           PositionedToken.kind = (
-             TokenKind.QualifiedName | TokenKind.Name | TokenKind.Self |
-             TokenKind.Parent | TokenKind.Static); _
-        }; _
-      };
-      scope_resolution_name = {
-        syntax = QualifiedNameExpression _ | Token {
-           PositionedToken.kind = (
-             TokenKind.QualifiedName | TokenKind.Name |
-             TokenKind.Trait | TokenKind.Extends | TokenKind.Implements |
-             TokenKind.Static | TokenKind.Abstract | TokenKind.Final |
-             TokenKind.Private | TokenKind.Protected | TokenKind.Public |
-             TokenKind.Or | TokenKind.And | TokenKind.Global | TokenKind.Goto |
-             TokenKind.Instanceof | TokenKind.Insteadof | TokenKind.Interface |
-             TokenKind.Namespace | TokenKind.New | TokenKind.Try | TokenKind.Use |
-             TokenKind.Var | TokenKind.List | TokenKind.Clone |
-             TokenKind.Include | TokenKind.Include_once | TokenKind.Throw |
-             TokenKind.Array | TokenKind.Tuple | TokenKind.Print | TokenKind.Echo |
-             TokenKind.Require | TokenKind.Require_once | TokenKind.Return |
-             TokenKind.Else | TokenKind.Elseif | TokenKind.Default | TokenKind.Break |
-             TokenKind.Continue | TokenKind.Switch | TokenKind.Yield |
-             TokenKind.Function | TokenKind.If | TokenKind.Finally |
-             TokenKind.For | TokenKind.Foreach | TokenKind.Case |
-             TokenKind.Do | TokenKind.While | TokenKind.As | TokenKind.Catch |
-             TokenKind.Empty | TokenKind.Using | TokenKind.Class | TokenKind.NullLiteral |
-             TokenKind.Super | TokenKind.Where
-             ); _
-        }; _
-      }; _
-    } ->
-    errors
+  | ScopeResolutionExpression
+    { scope_resolution_qualifier
+    ; scope_resolution_name
+    ; _ } when is_good_scope_resolution_qualifier scope_resolution_qualifier &&
+               is_good_scope_resolution_name scope_resolution_name
+      -> errors
   | _ ->
     (make_error_from_node node SyntaxError.invalid_constant_initializer) :: errors
 
@@ -2069,15 +2079,18 @@ let assignment_errors node errors =
   | _ -> errors
 
 let trait_use_alias_item_errors node errors =
+  let is_public_private_protected_or_final token =
+    let open TokenKind in
+    match Token.kind token with
+    | Public | Private | Protected | Final -> true
+    | _ -> false
+  in
   match syntax node with
   | TraitUseAliasItem { trait_use_alias_item_modifiers = l; _ } ->
     syntax_to_list_no_separators l
     |> Core_list.fold_left ~init:errors ~f:(fun errors n ->
       match syntax n with
-      | Token {
-        PositionedToken.kind = (
-          TokenKind.Public | TokenKind.Private | TokenKind.Protected | TokenKind.Final
-        ); _ } -> errors
+      | Token token when is_public_private_protected_or_final token -> errors
       | _ ->
         let e =
           make_error_from_node n
@@ -2266,3 +2279,4 @@ let parse_errors ?(enable_hh_syntax=false) ?(level=Typical) syntax_tree =
     ?stats:(Stats_container.get_instance ())
     ~key:"full_fidelity_parse_errors:parse_errors"
     ~f:(fun () -> parse_errors_impl ~enable_hh_syntax ~level syntax_tree)
+end (* WithSyntax *)

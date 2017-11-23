@@ -19,6 +19,8 @@ namespace HH\Asio {
  * Only When you `await` or `join` the resulting `Awaitable`, will all of the
  * key/values in the `Map` within the returned `Awaitable` be available.
  *
+ * @deprecated use `Dict\from_async()` instead.
+ *
  * @param $awaitables - The collection of `KeyedTraversable` awaitables.
  *
  * @return - An `Awaitable` of `Map`, where the `Map` was generated from
@@ -55,6 +57,8 @@ async function m<Tk, Tv>(
  * Only When you `await` or `join` the resulting `Awaitable`, will all of the
  * values in the `Vector` within the returned `Awaitable` be available.
  *
+ * @deprecated use `Vec\from_async()` instead.
+ *
  * @param $awaitables - The collection of `Traversable` awaitables.
  *
  * @return - An `Awaitable` of `Vector`, where the `Vector` was generated from
@@ -88,6 +92,9 @@ async function v<Tv>(
  * will return
  *
  *     Awaitable<(T1, T2, ..., Tn)>
+ *
+ * @deprecated Use `Tuple\from_async()` instead.
+ * @fbdeprecated Use `genva()` instead.
  */
 async function va(...$args): Awaitable/*<(...)>*/ {
   $wait_handles = array();

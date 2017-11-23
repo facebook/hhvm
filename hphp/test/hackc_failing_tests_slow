@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 slow/async/async-gen-and-genva.php
 slow/async/await-all-callback.php
 slow/async/await_gena.php
@@ -47,6 +54,7 @@ slow/ext_oauth/plaintext2.php
 slow/ext_oauth/rsa.php
 slow/ext_process/ext_process.php
 slow/ext_process/fork_log.php
+slow/ext_process/lwp.php
 slow/ext_socket/accept_block.php
 slow/ext_socket/persistent_socket.php
 slow/ext_watchman/ext_watchman.php

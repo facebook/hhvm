@@ -113,7 +113,7 @@ let special_function = function
   | _ -> false
 
 class dependency_visitor = object(this)
-  inherit [_] Ast_visitors_iter.iter as super
+  inherit [_] Ast.iter as super
   method! on_fun_ dep_env f =
     let new_top = if snd f.f_name <> ";anonymous"
       then Some (Dep.Fun (snd f.f_name)) else dep_env.top in

@@ -382,7 +382,7 @@ let cast_value hint v =
  * expressions. *)
 let folder_visitor =
 object (self)
-  inherit [_] Ast_visitors.endo as super
+  inherit [_] Ast.endo as super
 
   method! on_class_ _env cd =
     super#on_class_ cd.Ast.c_namespace cd

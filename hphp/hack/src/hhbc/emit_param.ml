@@ -29,7 +29,7 @@ let resolve_class_id ~scope cid =
 
 let resolver_visitor =
 object(_)
-  inherit [_] Ast_visitors.endo
+  inherit [_] Ast.endo
 
   method! on_Class_get scope _ cid id =
     let cid = resolve_class_id ~scope cid in

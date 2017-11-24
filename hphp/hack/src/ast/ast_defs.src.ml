@@ -8,109 +8,129 @@
  *
  *)
 
+include Ast_defs_visitors_ancestors
+
 (*****************************************************************************)
 (* Constants *)
 (*****************************************************************************)
+
 
 type cst_kind =
   (* The constant was introduced with: define('X', ...); *)
   | Cst_define
   (* The constant was introduced with: const X = ...; *)
   | Cst_const
-  [@@deriving show]
 
 (*****************************************************************************)
 (* The Abstract Syntax Tree *)
 (*****************************************************************************)
 
-type id = Pos.t * string [@@deriving show]
-type pstring = Pos.t * string [@@deriving show]
+and id = Pos.t * string
+and pstring = Pos.t * string
 
-type variance =
+and shape_field_name =
+  | SFlit of pstring
+  | SFclass_const of id * pstring
+
+and variance =
   | Covariant
   | Contravariant
   | Invariant
-  [@@deriving show]
 
-type ns_kind =
+and ns_kind =
   | NSNamespace
   | NSClass
   | NSClassAndNamespace
   | NSFun
   | NSConst
-  [@@deriving show]
 
-type constraint_kind =
+and constraint_kind =
   | Constraint_as
   | Constraint_eq
   | Constraint_super
-  [@@deriving show]
 
-type class_kind =
+and class_kind =
   | Cabstract
   | Cnormal
   | Cinterface
   | Ctrait
   | Cenum
-  [@@deriving show]
 
-type trait_req_kind =
+and trait_req_kind =
   | MustExtend
   | MustImplement
-  [@@deriving show]
 
-type kind =
+and kind =
   | Final
   | Static
   | Abstract
   | Private
   | Public
   | Protected
-  [@@deriving show]
 
-type param_kind =
+and param_kind =
   | Pinout
-  [@@deriving show]
 
-type og_null_flavor =
+and og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe
-  [@@deriving show]
 
-type fun_decl_kind =
-  | FDeclAsync
-  | FDeclSync
-  | FDeclCoroutine
-  [@@deriving show]
-
-type fun_kind =
+and fun_kind =
   | FSync
   | FAsync
   | FGenerator
   | FAsyncGenerator
   | FCoroutine
-  [@@deriving show]
 
-type shape_field_name =
-  | SFlit of pstring
-  | SFclass_const of id * pstring
-  [@@deriving show]
-
-type bop =
+and bop =
 | Plus
 | Minus | Star | Slash | Eqeq | EQeqeq | Starstar
 | Diff | Diff2 | AMpamp | BArbar | LogXor | Lt
 | Lte | Gt | Gte | Dot | Amp | Bar | Ltlt
 | Gtgt | Percent | Xor | Cmp
 | Eq of bop option
-[@@deriving show]
 
-type uop =
+and uop =
 | Utild
 | Unot | Uplus | Uminus | Uincr
 | Udecr | Upincr | Updecr
 | Uref | Usilence
-[@@deriving show]
+[@@deriving show,
+            visitors {
+              name="iter_defs";
+              variety = "iter";
+              nude=true;
+              visit_prefix="on_";
+              ancestors=["iter_defs_base"];
+            },
+            visitors {
+              name="endo_defs";
+              variety = "endo";
+              nude=true;
+              visit_prefix="on_";
+              ancestors=["endo_defs_base"];
+            },
+            visitors {
+              name="reduce_defs";
+              variety = "reduce";
+              nude=true;
+              visit_prefix="on_";
+              ancestors=["reduce_defs_base"];
+            },
+            visitors {
+              name="map_defs";
+              variety = "map";
+              nude=true;
+              visit_prefix="on_";
+              ancestors=["map_defs_base"];
+            }]
+
+(* This type is not used in the AST so no visitor is generated for it *)
+type fun_decl_kind =
+  | FDeclAsync
+  | FDeclSync
+  | FDeclCoroutine
+  [@@deriving show]
 
 (*****************************************************************************)
 (* Helpers *)

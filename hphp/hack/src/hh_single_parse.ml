@@ -182,9 +182,9 @@ let compare_fixmes ast_fixmes ffp_fixmes =
 let compare_pos ast_result ffp_result =
   let fetch_posses ast =
     let pos_fetcher = object(self)
-      inherit [_] Ast_visitors.iter
+      inherit [_] Ast.iter
       val mutable result = []
-      method! on_Pos_t () p = result <- p :: result
+      method! on_t () p = result <- p :: result
       method get = result
     end in
     pos_fetcher#on_program () ast;

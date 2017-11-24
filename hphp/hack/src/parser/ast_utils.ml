@@ -64,8 +64,8 @@ class ast_get_defs_visitor = object (this)
 end
 
 let ast_no_pos_mapper = object (self)
-  inherit [_] Ast_visitors.endo
-  method! private on_Pos_t () pos = Pos.none
+  inherit [_] Ast.endo
+  method! private on_t () pos = Pos.none
   (* Skip all blocks because we don't care about method bodies *)
   method! on_block env _ = self#on_list self#on_stmt env [Ast.Noop]
 end
@@ -80,7 +80,7 @@ type ignore_attribute_env = {
 }
 
 let ast_deregister_attributes_mapper = object (self)
-  inherit [_] Ast_visitors.endo as super
+  inherit [_] Ast.endo as super
 
   method ignored_attr env l =
     List.exists l

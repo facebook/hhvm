@@ -419,14 +419,19 @@ module Full = struct
       | l -> (o "<"; list_sep o ", " (tparam tcopt st o env) l; o ">")
     );
     o "("; list_sep o ", " (fun_param tcopt st env o) ft.ft_params;
-    (match ft.ft_arity with
+    begin match ft.ft_arity with
       | Fstandard _ -> ()
-      | _ -> (match ft.ft_params with
-        | [] -> ()
-        | _ -> o ", "
-        );
-        o "..."
-    );
+      | _ ->
+        if not (List.is_empty ft.ft_params) then o ", ";
+        begin match ft.ft_arity with
+        | Fvariadic(_, p) ->
+          begin match p.fp_type with
+          | _, Tany -> ()
+          | _, _ -> fun_param tcopt st env o p
+          end
+        | _ -> ()
+        end; o "..."
+    end;
     o "): ";
     ty tcopt st env o ft.ft_ret
 

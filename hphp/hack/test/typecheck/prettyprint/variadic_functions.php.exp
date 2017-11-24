@@ -2,4 +2,8 @@ File "variadic_functions.php", line 5, characters 3-13:
   (function(...): void)
 File "variadic_functions.php", line 8, characters 3-13:
   (function(int, ...): void)
+File "variadic_functions.php", line 13, characters 3-13:
+  (function(int...): void)
+File "variadic_functions.php", line 18, characters 3-13:
+  (function(int, string...): void)
 No errors

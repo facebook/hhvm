@@ -350,8 +350,8 @@ and expr_ =
   | Omitted
   | Id of id
   | Id_type_arguments of id * hint list
-  | Lvar of id
   (* Special case: the pipe variable $$ *)
+  | Lvar of id
   (**
    * PHP's Variable variable. The int is number of variable indirections
    * (i.e. number of extra $ signs.)

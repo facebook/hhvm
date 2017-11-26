@@ -502,10 +502,22 @@ end = struct
       (GEnv.gconst_pos genv.tcopt)
       x
 
+  let get_namespace_env_with_xhp_global_fallback genv x =
+    (* XHP should always exist in the global namespace (this has been the
+     * runtime behavior since it was introduced). Even an XHP class defined in
+     * a namespace should not be automatically accessible from within that
+     * namespace.
+     * So, we pretend there's no namespace if the class looks like XHP. *)
+    let (pos, name) = x in
+    match name with
+      | name when String_utils.string_starts_with name ":" -> Namespace_env.empty genv.tcopt
+      | _ -> genv.namespace
+
   let type_name (genv, _) x ~allow_typedef =
     (* Generic names are not allowed to shadow class names *)
     check_no_runtime_generic genv x;
-    let (pos, name) as x = NS.elaborate_id genv.namespace NS.ElaborateClass x in
+    let namespace_env = get_namespace_env_with_xhp_global_fallback genv x in
+    let (pos, name) as x = NS.elaborate_id namespace_env NS.ElaborateClass x in
     match GEnv.type_info genv.tcopt name with
     | Some (_def_pos, `Class) ->
       (* Don't let people use strictly internal classes

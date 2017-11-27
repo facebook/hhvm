@@ -42,7 +42,7 @@ c_AsyncGeneratorWaitHandle::~c_AsyncGeneratorWaitHandle() {
   decRefObj(m_child);
 }
 
-req::ptr<c_AsyncGeneratorWaitHandle>
+c_AsyncGeneratorWaitHandle*
 c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
                                    c_WaitableWaitHandle* child) {
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
@@ -54,7 +54,7 @@ c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
   );
   // Implied reference from child via its AsioBlockableChain.
   wh->incRefCount();
-  return wh;
+  return wh.detach();
 }
 
 c_AsyncGeneratorWaitHandle::c_AsyncGeneratorWaitHandle(AsyncGenerator* gen,
@@ -109,14 +109,14 @@ void c_AsyncGeneratorWaitHandle::onUnblocked() {
   }
 }
 
-void c_AsyncGeneratorWaitHandle::await(c_WaitableWaitHandle* child) {
+void c_AsyncGeneratorWaitHandle::await(req::ptr<c_WaitableWaitHandle>&& child) {
   // Prepare child for establishing dependency. May throw.
-  prepareChild(child);
+  prepareChild(child.get());
 
   // Set up the dependency.
   // No refcnt: incref by ref from child, decref by no longer being executed.
   setState(STATE_BLOCKED);
-  m_child = child;
+  m_child = child.detach();
   m_child->getParentChain()
     .addParent(m_blockable, AsioBlockable::Kind::AsyncGeneratorWaitHandle);
 }

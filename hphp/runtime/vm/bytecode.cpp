@@ -6285,94 +6285,95 @@ OPTBLD_INLINE void iopContGetReturn() {
 }
 
 OPTBLD_INLINE void asyncSuspendE(PC& pc) {
-  assert(!vmfp()->resumed());
-  assert(vmfp()->func()->isAsyncFunction());
-  const auto func = vmfp()->m_func;
-  const auto resumeOffset = func->unit()->offsetOf(pc);
+  auto const fp = vmfp();
+  auto const func = fp->func();
+  auto const resumeOffset = func->unit()->offsetOf(pc);
+  assertx(func->isAsync());
+  assertx(resumeModeFromActRec(fp) != ResumeMode::Async);
 
-  // Pop the blocked dependency.
-  Cell* value = vmStack().topC();
-  assert(value->m_type == KindOfObject);
-  assert(value->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
-
-  auto child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
+  // Pop the dependency we are blocked on.
+  auto child = wait_handle<c_WaitableWaitHandle>(*vmStack().topC());
   assert(!child->isFinished());
   vmStack().discard();
 
-  // Create the AsyncFunctionWaitHandle object. Create takes care of
-  // copying local variables and itertors.
-  auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(
-    c_AsyncFunctionWaitHandle::Create<true>(vmfp(),
-                                            vmfp()->func()->numSlotsInFrame(),
-                                            nullptr, resumeOffset, child));
+  if (!func->isGenerator()) {  // Async function.
+    // Create the AsyncFunctionWaitHandle object. Create takes care of
+    // copying local variables and itertors.
+    auto waitHandle = c_AsyncFunctionWaitHandle::Create<true>(
+      fp, func->numSlotsInFrame(), nullptr, resumeOffset, child);
 
-  // Call the suspend hook. It will decref the newly allocated waitHandle
-  // if it throws.
-  EventHook::FunctionSuspendAwaitEF(vmfp(), waitHandle->actRec());
+    // Call the suspend hook. It will decref the newly allocated waitHandle
+    // if it throws.
+    EventHook::FunctionSuspendAwaitEF(fp, waitHandle->actRec());
 
-  // Grab caller info from ActRec.
-  ActRec* sfp = vmfp()->sfp();
-  Offset soff = vmfp()->m_soff;
+    // Grab caller info from ActRec.
+    ActRec* sfp = fp->sfp();
+    Offset soff = fp->m_soff;
 
-  // Free ActRec and store the return value.
-  vmStack().ndiscard(vmfp()->m_func->numSlotsInFrame());
-  vmStack().ret();
-  tvCopy(make_tv<KindOfObject>(waitHandle), *vmStack().topTV());
-  assert(vmStack().topTV() == vmfp()->retSlot());
-  // In case we were called by a jitted FCallAwait, let it know
-  // that we suspended.
-  vmStack().topTV()->m_aux.u_fcallAwaitFlag = 1;
-  // Return control to the caller.
-  vmfp() = sfp;
-  pc = LIKELY(vmfp() != nullptr) ?
-    vmfp()->func()->getEntry() + soff : nullptr;
+    // Free ActRec and store the return value. In case we were called by
+    // a jitted FCallAwait, let it know that we suspended.
+    vmStack().ndiscard(func->numSlotsInFrame());
+    vmStack().ret();
+    tvCopy(make_tv<KindOfObject>(waitHandle), *vmStack().topTV());
+    vmStack().topTV()->m_aux.u_fcallAwaitFlag = 1;
+    assert(vmStack().topTV() == fp->retSlot());
+
+    // Return control to the caller.
+    pc = LIKELY(sfp != nullptr) ? sfp->func()->getEntry() + soff : nullptr;
+    vmfp() = sfp;
+  } else {  // Async generator.
+    // Create new AsyncGeneratorWaitHandle.
+    auto const gen = frame_async_generator(fp);
+    auto waitHandle = c_AsyncGeneratorWaitHandle::Create(gen, child);
+
+    // Set resume address and link the AGWH to the async generator.
+    gen->resumable()->setResumeAddr(nullptr, resumeOffset);
+    gen->attachWaitHandle(req::ptr<c_AsyncGeneratorWaitHandle>(waitHandle));
+
+    // Call the suspend hook. It will decref the newly allocated waitHandle
+    // if it throws.
+    EventHook::FunctionSuspendAwaitEG(fp);
+
+    // Store the return value.
+    vmStack().pushObjectNoRc(waitHandle);
+
+    // Return control to the caller (AG::next()).
+    assertx(fp->sfp());
+    pc = fp->sfp()->func()->getEntry() + fp->m_soff;
+    vmfp() = fp->sfp();
+  }
 }
 
 OPTBLD_INLINE void asyncSuspendR(PC& pc) {
   auto const fp = vmfp();
   auto const func = fp->func();
   auto const resumeOffset = func->unit()->offsetOf(pc);
-  assert(fp->resumed());
-  assert(func->isAsync());
+  assertx(!fp->sfp());
+  assertx(func->isAsync());
+  assertx(resumeModeFromActRec(fp) == ResumeMode::Async);
 
-  // Obtain child
-  Cell& value = *vmStack().topC();
-  assert(value.m_type == KindOfObject);
-  assert(value.m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
-  auto const child = static_cast<c_WaitableWaitHandle*>(value.m_data.pobj);
+  // Pop the dependency we are blocked on.
+  auto child = req::ptr<c_WaitableWaitHandle>::attach(
+    wait_handle<c_WaitableWaitHandle>(*vmStack().topC()));
+  assert(!child->isFinished());
+  vmStack().discard();
 
   // Before adjusting the stack or doing anything, check the suspend hook.
   // This can throw.
-  EventHook::FunctionSuspendAwaitR(fp, child);
+  EventHook::FunctionSuspendAwaitR(fp, child.get());
 
   // Await child and suspend the async function/generator. May throw.
-  if (!func->isGenerator()) {
-    // Async function.
-    assert(!fp->sfp());
-    frame_afwh(fp)->await(resumeOffset, child);
-    vmStack().discard();
-  } else {
-    // Async generator.
+  if (!func->isGenerator()) {  // Async function.
+    frame_afwh(fp)->await(resumeOffset, std::move(child));
+  } else {  // Async generator.
     auto const gen = frame_async_generator(fp);
-    auto eagerResult = gen->await(resumeOffset, child);
-    vmStack().discard();
-    if (eagerResult) {
-      // Eager execution => return AsyncGeneratorWaitHandle.
-      assert(fp->sfp());
-      vmStack().pushObjectNoRc(eagerResult.detach());
-    } else {
-      // Resumed execution => return control to the scheduler.
-      assert(!fp->sfp());
-    }
+    gen->resumable()->setResumeAddr(nullptr, resumeOffset);
+    gen->getWaitHandle()->await(std::move(child));
   }
 
-  // Grab caller info from ActRec.
-  ActRec* sfp = fp->sfp();
-  Offset soff = fp->m_soff;
-
-  // Return control to the caller or scheduler.
-  vmfp() = sfp;
-  pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
+  // Return control to the scheduler.
+  pc = nullptr;
+  vmfp() = nullptr;
 }
 
 OPTBLD_INLINE TCA iopAwait(PC& pc) {
@@ -6443,7 +6444,7 @@ TCA suspendStack(PC &pc) {
       }
     }();
 
-    if (vmfp()->resumed()) {
+    if (resumeModeFromActRec(vmfp()) == ResumeMode::Async) {
       // suspend resumed execution
       asyncSuspendR(pc);
       return jitReturnPost(jitReturn);

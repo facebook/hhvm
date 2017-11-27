@@ -52,8 +52,6 @@ struct AsyncGenerator final : BaseGenerator {
     return Native::data<AsyncGenerator>(obj);
   }
 
-  req::ptr<c_AsyncGeneratorWaitHandle> await(Offset resumeOffset,
-                                             c_WaitableWaitHandle* child);
   c_StaticWaitHandle* yield(Offset resumeOffset,
                             const Cell* key, Cell value);
   c_StaticWaitHandle* ret();
@@ -65,13 +63,22 @@ struct AsyncGenerator final : BaseGenerator {
   }
 
   bool isEagerlyExecuted() const {
-    assert(isRunning());
+    assertx(isRunning());
     return !m_waitHandle;
   }
 
   c_AsyncGeneratorWaitHandle* getWaitHandle() const {
-    assert(isRunning());
+    assertx(!isEagerlyExecuted());
     return m_waitHandle.get();
+  }
+
+  req::ptr<c_AsyncGeneratorWaitHandle> detachWaitHandle() {
+    return std::move(m_waitHandle);
+  }
+
+  void attachWaitHandle(req::ptr<c_AsyncGeneratorWaitHandle>&& waitHandle) {
+    assertx(isEagerlyExecuted());
+    m_waitHandle = std::move(waitHandle);
   }
 
 private:

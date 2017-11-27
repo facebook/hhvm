@@ -89,6 +89,12 @@ struct EventHook {
       onFunctionSuspendAwaitEF(suspending, resumableAR);
     }
   }
+  static void FunctionSuspendAwaitEG(ActRec* suspending) {
+    ringbufferExit(suspending);
+    if (UNLIKELY(checkSurpriseFlags())) {
+      onFunctionSuspendAwaitEG(suspending);
+    }
+  }
   static void FunctionSuspendAwaitR(ActRec* suspending, ObjectData* child) {
     ringbufferExit(suspending);
     if (UNLIKELY(checkSurpriseFlags())) {
@@ -122,6 +128,7 @@ struct EventHook {
    */
   static bool onFunctionCall(const ActRec* ar, int funcType);
   static void onFunctionSuspendAwaitEF(ActRec*, const ActRec*);
+  static void onFunctionSuspendAwaitEG(ActRec*);
   static void onFunctionSuspendAwaitR(ActRec*, ObjectData*);
   static void onFunctionSuspendCreateCont(ActRec*, const ActRec*);
   static void onFunctionSuspendYield(ActRec*);

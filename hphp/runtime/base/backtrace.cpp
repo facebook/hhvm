@@ -100,10 +100,11 @@ static ActRec* getPrevActRec(
   if (fp && fp->func() && fp->resumed()) {
     if (fp->func()->isAsyncFunction()) {
       currentWaitHandle = frame_afwh(fp);
-    } else if (fp->func()->isAsyncGenerator() &&
-               frame_async_generator(fp)->isRunning()) {
-      // getWaitHandle may return null, if generator is executing eagerly
-      currentWaitHandle = frame_async_generator(fp)->getWaitHandle();
+    } else if (fp->func()->isAsyncGenerator()) {
+      auto const gen = frame_async_generator(fp);
+      if (gen->isRunning() && !gen->isEagerlyExecuted()) {
+        currentWaitHandle = gen->getWaitHandle();
+      }
     }
   }
 

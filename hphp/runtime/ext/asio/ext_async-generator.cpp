@@ -67,21 +67,6 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
   return obj;
 }
 
-req::ptr<c_AsyncGeneratorWaitHandle>
-AsyncGenerator::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
-  assert(isRunning());
-  resumable()->setResumeAddr(nullptr, resumeOffset);
-
-  if (m_waitHandle) {
-    // Resumed execution.
-    m_waitHandle->await(child);
-    return nullptr;
-  }
-  // Eager executon.
-  m_waitHandle = c_AsyncGeneratorWaitHandle::Create(this, child);
-  return m_waitHandle;
-}
-
 c_StaticWaitHandle*
 AsyncGenerator::yield(Offset resumeOffset,
                       const Cell* key, const Cell value) {

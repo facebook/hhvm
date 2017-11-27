@@ -226,6 +226,11 @@ struct c_WaitHandle : ObjectData {
   }
 };
 
+template<class T>
+T* wait_handle(Cell cell) {
+  return wait_handle<T>(c_WaitHandle::fromCellAssert(cell));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

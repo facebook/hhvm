@@ -142,16 +142,16 @@ void c_AsyncFunctionWaitHandle::onUnblocked() {
 }
 
 void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
-                                      c_WaitableWaitHandle* child) {
+                                      req::ptr<c_WaitableWaitHandle>&& child) {
   // Prepare child for establishing dependency. May throw.
-  prepareChild(child);
+  prepareChild(child.get());
 
   // Suspend the async function.
   resumable()->setResumeAddr(nullptr, resumeOffset);
 
   // Set up the dependency.
   setState(STATE_BLOCKED);
-  m_children[0].setChild(child);
+  m_children[0].setChild(child.detach());
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {

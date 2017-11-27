@@ -59,12 +59,12 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
     return offsetof(c_AsyncGeneratorWaitHandle, m_blockable);
   }
 
-  static req::ptr<c_AsyncGeneratorWaitHandle>
+  static c_AsyncGeneratorWaitHandle*
   Create(AsyncGenerator* gen, c_WaitableWaitHandle* child);
 
   void resume();
   void onUnblocked();
-  void await(c_WaitableWaitHandle* child);
+  void await(req::ptr<c_WaitableWaitHandle>&& child);
   void ret(Cell& result);
   void fail(ObjectData* exception);
   void failCpp();

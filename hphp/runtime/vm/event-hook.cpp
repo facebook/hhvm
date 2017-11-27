@@ -529,7 +529,7 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
   onFunctionEnter(ar, EventHook::NormalFunc, flags, true);
 }
 
-// Async function initially suspending at Await.
+// Eagerly executed async function initially suspending at Await.
 void EventHook::onFunctionSuspendAwaitEF(ActRec* suspending,
                                          const ActRec* resumableAR) {
   assertx(suspending->func()->isAsyncFunction());
@@ -558,12 +558,29 @@ void EventHook::onFunctionSuspendAwaitEF(ActRec* suspending,
   }
 }
 
+// Eagerly executed async generator that was resumed at Yield suspending
+// at Await.
+void EventHook::onFunctionSuspendAwaitEG(ActRec* suspending) {
+  assertx(suspending->func()->isAsyncGenerator());
+  assertx(suspending->resumed());
+
+  // The generator is still being executed eagerly, make it look like that.
+  auto const gen = frame_async_generator(suspending);
+  auto wh = gen->detachWaitHandle();
+  SCOPE_EXIT { gen->attachWaitHandle(std::move(wh)); };
+
+  try {
+    auto const flags = handle_request_surprise();
+    onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+  } catch (...) {
+    decRefObj(wh.get());
+    throw;
+  }
+}
+
 // Async function or async generator that was resumed at Await suspending
 // again at Await. The suspending frame has an associated AFWH/AGWH. Child
 // is the WH we are going to block on.
-//
-// FIXME: this also handles async generators resumed at Yield, not having
-//        an AGWH yet
 void EventHook::onFunctionSuspendAwaitR(ActRec* suspending, ObjectData* child) {
   assertx(suspending->func()->isAsync());
   assertx(suspending->resumed());

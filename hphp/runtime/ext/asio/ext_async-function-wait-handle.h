@@ -90,7 +90,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   static void PrepareChild(const ActRec* fp, c_WaitableWaitHandle* child);
   void onUnblocked();
   void resume();
-  void await(Offset resumeOffset, c_WaitableWaitHandle* child);
+  void await(Offset resumeOffset, req::ptr<c_WaitableWaitHandle>&& child);
   void ret(Cell& result);
   void fail(ObjectData* exception);
   void failCpp();

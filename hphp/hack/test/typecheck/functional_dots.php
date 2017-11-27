@@ -10,7 +10,7 @@
  */
 
 function f((function(int, ...): string) $g): string {
-  return $g(5);
+  return $g(5, 23);
 }
 
 function test(): void {

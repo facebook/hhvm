@@ -1934,6 +1934,8 @@ and expr_
       let env, expected = expand_expected env expected in
       begin match expected with
       | Some (_pos, _ur, (_, Tfun expected_ft)) when contextual_inference ->
+        (* First check that arities match up *)
+        check_lambda_arity p expected_ft.ft_pos declared_ft.ft_arity expected_ft.ft_arity;
         (* Use declared types for parameters in preference to those determined
          * by the context: they might be more general. *)
         let rec replace_non_declared_types params declared_ft_params expected_ft_params =
@@ -4397,6 +4399,16 @@ and check_arity ?(check_min=true) pos pos_def (arity:int) exp_arity =
       if (arity > exp_max)
       then Errors.typing_too_many_args pos pos_def;
     | Fvariadic _ | Fellipsis _ -> ()
+
+and check_lambda_arity lambda_pos def_pos lambda_arity expected_arity =
+  let expected_min = Typing_defs.arity_min expected_arity in
+  match lambda_arity, expected_arity with
+  | Fstandard (lambda_min, _), Fstandard _ ->
+    if lambda_min < expected_min
+    then Errors.typing_too_few_args lambda_pos def_pos;
+    if lambda_min > expected_min
+    then Errors.typing_too_many_args lambda_pos def_pos
+  | _, _ -> ()
 
 and check_deprecated p { ft_pos; ft_deprecated; _ } =
   match ft_deprecated with

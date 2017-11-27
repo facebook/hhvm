@@ -40,6 +40,13 @@ struct RefBits {
   explicit operator uint16_t() const { return bits; }
 };
 
+[[noreturn]] void ref_data_unsupported_obrc_impl();
+
+inline void ref_data_unsupported_obrc() {
+  if (!one_bit_refcount) return;
+  ref_data_unsupported_obrc_impl();
+}
+
 /*
  * We heap allocate a RefData when we make a reference to something.
  * A Variant or TypedValue can be KindOfRef and point to a RefData,
@@ -171,7 +178,7 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   }
 
   bool zIsRef() const {
-    always_assert(!one_bit_refcount);
+    ref_data_unsupported_obrc();
     assert(kindIsValid());
     auto bits = aux16<RefBits>();
     assert(bits.cow == 0 || (bits.cow == 1 && m_count >= 1));
@@ -179,7 +186,7 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   }
 
   void zSetIsRef() const {
-    always_assert(!one_bit_refcount);
+    ref_data_unsupported_obrc();
     auto& bits = aux16<RefBits>();
     auto realCount = getRealCount();
     if (realCount >= 2) {
@@ -193,7 +200,7 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   }
 
   void zUnsetIsRef() const {
-    always_assert(!one_bit_refcount);
+    ref_data_unsupported_obrc();
     auto& bits = aux16<RefBits>();
     auto realCount = getRealCount();
     if (realCount >= 2) {
@@ -207,7 +214,7 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   }
 
   void zSetIsRefTo(int val) const {
-    always_assert(!one_bit_refcount);
+    ref_data_unsupported_obrc();
     if (val) {
       zSetIsRef();
     } else {
@@ -216,12 +223,12 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   }
 
   int32_t zRefcount() {
-    always_assert(!one_bit_refcount);
+    ref_data_unsupported_obrc();
     return getRealCount();
   }
 
   void zAddRef() {
-    always_assert(!one_bit_refcount);
+    ref_data_unsupported_obrc();
     if (getRealCount() != 1) {
       ++m_count;
       return;
@@ -235,7 +242,7 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   }
 
   void zDelRef() {
-    always_assert(!one_bit_refcount);
+    ref_data_unsupported_obrc();
     if (getRealCount() != 2) {
       assert(getRealCount() != 0);
       --m_count;
@@ -248,7 +255,7 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   }
 
   void zSetRefcount(int val) {
-    always_assert(!one_bit_refcount);
+    ref_data_unsupported_obrc();
     assert(kindIsValid());
     if (val < 0) {
       val = 0;
@@ -264,7 +271,7 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   }
 
   void zInit() {
-    always_assert(!one_bit_refcount);
+    ref_data_unsupported_obrc();
     auto& bits = aux16<RefBits>();
     m_count = static_cast<RefCount>(1);
     bits.cow = bits.z = 0;

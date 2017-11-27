@@ -765,6 +765,7 @@ module Typing                               = struct
   let accept_disposable_invariant           = 4189 (* DONT MODIFY!!!! *)
   let invalid_disposable_hint               = 4190 (* DONT MODIFY!!!! *)
   let xhp_required                          = 4191 (* DONT MODIFY!!!! *)
+  let escaping_this                         = 4192 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1750,6 +1751,11 @@ let escaping_disposable pos =
 let escaping_disposable_parameter pos =
   add Typing.escaping_disposable_parameter pos
     "Parameter with <<__AcceptDisposable>> attribute may only be used as receiver in method \
+    invocation or passed to another function with <<__AcceptDisposable>> parameter attribute"
+
+let escaping_this pos =
+  add Typing.escaping_this pos
+    "$this implementing IDisposable or IAsyncDisposable may only be used as receiver in method \
     invocation or passed to another function with <<__AcceptDisposable>> parameter attribute"
 
 let accept_disposable_invariant pos1 pos2 =

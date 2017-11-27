@@ -264,29 +264,41 @@ let has_accept_disposable_attribute param =
   List.exists param.param_user_attributes
     (fun { ua_name; _ } -> SN.UserAttributes.uaAcceptDisposable = snd ua_name)
 
-let check_not_disposable env param ty =
-  if has_accept_disposable_attribute param then ()
-  else
-  let p = param.param_pos in
+(* Does ty implement IDisposable or IAsyncDisposable, directly or indirectly?
+ * Return Some class_name if it does, None if it doesn't.
+ *)
+let is_disposable_type env ty =
   match Env.expand_type env ty with
   (* Only bother looking at classish types. Other types can spuriously
    * claim to implement these interfaces. Ideally we should check
    * constrained generics, abstract types, etc.
    * Also, FormatString is special. Weird.
    *)
-  | _env, (r, Tclass((_, class_name), _)) when not (SN.Classes.is_format_string class_name) ->
+  | _env, (_, Tclass((_, class_name), _)) when not (SN.Classes.is_format_string class_name) ->
     (* Make sure that it exists. Otherwise any subtype test will pass *)
     if Option.is_none (Env.get_class env class_name)
-    then ()
+    then None
     else
     let idisposable_type =
-      r, Tclass ((Pos.none, SN.Classes.cIDisposable), []) in
+      Reason.Rnone, Tclass ((Pos.none, SN.Classes.cIDisposable), []) in
     let iasyncdisposable_type =
-      r, Tclass ((Pos.none, SN.Classes.cIAsyncDisposable), []) in
+      Reason.Rnone, Tclass ((Pos.none, SN.Classes.cIAsyncDisposable), []) in
     if SubType.is_sub_type env ty idisposable_type
     || SubType.is_sub_type env ty iasyncdisposable_type
-    then Errors.invalid_disposable_hint p (strip_ns class_name)
-  | _ -> ()
+    then Some (strip_ns class_name)
+    else None
+  | _  ->
+    None
+
+let check_not_disposable env param ty =
+  if has_accept_disposable_attribute param then ()
+  else
+  let p = param.param_pos in
+  match is_disposable_type env ty with
+  | Some class_name ->
+    Errors.invalid_disposable_hint p (strip_ns class_name)
+  | None ->
+    ()
 
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to
@@ -1114,6 +1126,9 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
 and check_escaping_var env (pos, x) =
   if Env.is_using_var env x
   then
+    if x = this
+    then Errors.escaping_this pos
+    else
     if Option.is_some (Local_id.Map.get x (Env.get_params env))
     then Errors.escaping_disposable_parameter pos
     else Errors.escaping_disposable pos
@@ -1329,6 +1344,8 @@ and expr_
       let r, _ = Env.get_self env in
       if r = Reason.Rnone
       then Errors.this_var_outside_class p;
+      if not accept_using_var
+      then check_escaping_var env (p,this);
       let (_, ty) = Env.get_local env this in
       let r = Reason.Rwitness p in
       let ty = (r, ty) in
@@ -5676,7 +5693,16 @@ and method_def env m =
   let env = add_constraints pos env constraints in
   let env =
     localize_where_constraints ~ety_env env m.m_where_constraints in
-  let env = Env.set_local env this (Env.get_self env) in
+  let this_type = Env.get_self env in
+  let env = Env.set_local env this this_type in
+  let env =
+    (* Mark $this as a using variable if it has a disposable type.
+     * Don't do this in non-strict mode because we get false positives
+     * from the subtype test (e.g. if classes are undefined)
+     *)
+    if Env.is_strict env && Option.is_some (is_disposable_type env this_type)
+    then Env.set_using_var env this
+    else env in
   let env = Env.clear_params env in
   let env, return = match m.m_ret with
     | None -> env, (make_default_return m.m_name, false)

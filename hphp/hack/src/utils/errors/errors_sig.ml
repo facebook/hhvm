@@ -402,6 +402,7 @@ module type S = sig
   val illegal_disposable : Pos.t -> string -> unit
   val escaping_disposable : Pos.t -> unit
   val escaping_disposable_parameter : Pos.t -> unit
+  val escaping_this : Pos.t -> unit
   val accept_disposable_invariant : Pos.t -> Pos.t -> unit
   val inout_params_outside_of_sync : Pos.t -> unit
   val inout_params_special : Pos.t -> unit

@@ -67,7 +67,7 @@ TCA smashableJmpTarget(TCA inst);
 TCA smashableJccTarget(TCA inst);
 ConditionCode smashableJccCond(TCA inst);
 
-TCA getSmashableFromTargetAddr(TCA addr);
+hphp_hash_set<vixl::Instruction*> getSmashablesFromTargetAddr(TCA addr);
 
 constexpr size_t kSmashMovqImmOff = 8;
 constexpr size_t kSmashCmpqImmOff = 0;

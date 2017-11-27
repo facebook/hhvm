@@ -191,11 +191,16 @@ bool relocateSmashable(Env& env, TCA srcAddr, TCA destAddr,
     // Look up the smashable (jmp, jcc, etc) from the target. Note this is
     // an actual address, and so we'll use the offset with the (potentially)
     // virtual srcAddr when we search through smashableLocation.
-    auto slActual =
-      getSmashableFromTargetAddr(srcAddrActual + kSmashJmpTargetOff);
-    auto sl = srcAddr + (slActual - srcAddrActual);
-    if (sl && env.meta.smashableLocations.count(sl)) {
-      target = nullptr;
+    auto smashableLocations =
+      getSmashablesFromTargetAddr(srcAddrActual + kSmashJmpTargetOff);
+    for (auto smashableLocation : smashableLocations) {
+      auto slAddrActual = reinterpret_cast<TCA>(smashableLocation);
+      auto slAddr = srcAddr + (slAddrActual - srcAddrActual);
+      if (env.meta.smashableLocations.count(slAddr)) {
+        FTRACE(3, "Can't optimize this smashable: {}.\n", slAddr);
+        target = nullptr;
+        break;
+      }
     }
   }
 

@@ -1172,7 +1172,7 @@ class Status {
     if (substr(self::$tempdir, -1) !== "/") {
       self::$tempdir .= "/";
     }
-    self::$tempdir .= substr( md5(rand()), 0, 8);
+    self::$tempdir .= substr(md5(rand()), 0, 16);
     mkdir(self::$tempdir);
   }
 
@@ -1469,7 +1469,8 @@ function is_hack_file($options, $test) {
   while (($line = fgets($file)) !== false) {
     $line = trim($line);
     if ($line === '' || substr($line, 0, 2) === '#!') continue;
-    if (substr($line, 0, 4) === '<?hh') return true;
+    // Allow partial and strict, but don't count decl files as Hack code
+    if ($line === '<?hh' || $line === '<?hh //strict') return true;
     break;
   }
   fclose($file);

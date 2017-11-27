@@ -1652,7 +1652,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckVArray:
   case CheckDArray:
   case RegisterLiveObj:
-  case StContArResume:
+  case StArResumeAddr:
   case StContArState:
   case ZeroErrorLevel:
   case RestoreErrorLevel:
@@ -1677,7 +1677,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CountVec:
   case CountDict:
   case CountKeyset:
-  case StAsyncArResume:
   case InstanceOf:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:

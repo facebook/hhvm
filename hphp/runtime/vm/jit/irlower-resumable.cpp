@@ -50,17 +50,14 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-void implStARResume(IRLS& env, const IRInstruction* inst,
-                    ptrdiff_t addrOff, ptrdiff_t offsetOff) {
+void cgStArResumeAddr(IRLS& env, const IRInstruction* inst) {
   auto const ar = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
+  auto const addrOff = Resumable::resumeAddrOff() - Resumable::arOff();
+  auto const offsetOff = Resumable::resumeOffsetOff() - Resumable::arOff();
   v << store{srcLoc(env, inst, 1).reg(), ar[addrOff]};
   v << storeli{inst->extra<ResumeOffset>()->off, ar[offsetOff]};
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -230,14 +227,6 @@ void cgLdContResumeAddr(IRLS& env, const IRInstruction* inst) {
   auto const isAsync = inst->extra<IsAsyncData>()->isAsync;
   auto const addrOff = BaseGenerator::resumeAddrOff() - genOffset(isAsync);
   vmain(env) << load{cont[addrOff], dst};
-}
-
-void cgStContArResume(IRLS& env, const IRInstruction* inst) {
-  implStARResume(
-    env, inst,
-    BaseGenerator::resumeAddrOff() - BaseGenerator::arOff(),
-    BaseGenerator::resumeOffsetOff() - BaseGenerator::arOff()
-  );
 }
 
 void cgLdContArKey(IRLS& env, const IRInstruction* inst) {
@@ -456,14 +445,6 @@ void cgLdAFWHActRec(IRLS& env, const IRInstruction* inst) {
   auto const obj = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
   v << lea{obj[AFWH::arOff()], dst};
-}
-
-void cgStAsyncArResume(IRLS& env, const IRInstruction* inst) {
-  implStARResume(
-    env, inst,
-    ar_rel(AFWH::resumeAddrOff()),
-    ar_rel(AFWH::resumeOffsetOff())
-  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

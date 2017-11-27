@@ -138,7 +138,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset,
                                hasThis(env));
   auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, data);
-  gen(env, StAsyncArResume, ResumeOffset { resumeOffset }, fp(env),
+  gen(env, StArResumeAddr, ResumeOffset { resumeOffset }, fp(env),
       resumeAddr);
 
   // Set up the dependency.
@@ -151,34 +151,86 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset,
   gen(env, AsyncSwitchFast, IRSPRelOffsetData { spAdjust }, sp(env), fp(env));
 }
 
-void yieldReturnControl(IRGS& env) {
-  auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
-  gen(env, RetCtrl, RetCtrlData { spAdjust, true },
-      sp(env), fp(env), cns(env, TInitNull));
+SSATmp* implYieldGen(IRGS& env, SSATmp* key, SSATmp* value) {
+  if (key != nullptr) {
+    // Teleport yielded key.
+    auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
+    gen(env, StContArKey, fp(env), key);
+    decRef(env, oldKey);
+
+    if (key->type() <= TInt) {
+      gen(env, ContArUpdateIdx, fp(env), key);
+    }
+  } else {
+    // Increment key.
+    if (curFunc(env)->isPairGenerator()) {
+      auto const newIdx = gen(env, ContArIncIdx, fp(env));
+      auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
+      gen(env, StContArKey, fp(env), newIdx);
+      decRef(env, oldKey);
+    } else {
+      // Fast path: if this generator has no yield k => v, it is
+      // guaranteed that the key is an int.
+      gen(env, ContArIncKey, fp(env));
+    }
+  }
+
+  // Teleport yielded value.
+  auto const oldValue = gen(env, LdContArValue, TCell, fp(env));
+  gen(env, StContArValue, fp(env), value);
+  decRef(env, oldValue);
+
+  // Return value of iteration.
+  return cns(env, TInitNull);
 }
 
-void yieldImpl(IRGS& env, Offset resumeOffset) {
+SSATmp* implYieldAGen(IRGS& env, SSATmp* key, SSATmp* value) {
+  key = key ? key : cns(env, TInitNull);
+
+  // Wrap the key and value into a tuple.
+  auto const keyValueTuple = gen(env, AllocVArray, PackedArrayData { 2 });
+  gen(env, InitPackedLayoutArray, IndexData { 0 }, keyValueTuple, key);
+  gen(env, InitPackedLayoutArray, IndexData { 1 }, keyValueTuple, value);
+
+  // Wrap the tuple into a StaticWaitHandle.
+  return gen(env, CreateSSWH, keyValueTuple);
+}
+
+void implYield(IRGS& env, bool withKey) {
+  assertx(resumeMode(env) != ResumeMode::None);
+  assertx(curFunc(env)->isGenerator());
+
+  if (resumeMode(env) == ResumeMode::Async) PUNT(Yield-AsyncGenerator);
+
   suspendHook(env, false, [&] {
     gen(env, SuspendHookYield, fp(env));
   });
 
   // Resumable::setResumeAddr(resumeAddr, resumeOffset)
+  auto const resumeOffset = nextBcOff(env);
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, ResumeMode::GenIter,
                                hasThis(env));
   auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) };
   auto const resumeAddr = gen(env, LdBindAddr, data);
-  gen(env, StContArResume, ResumeOffset { resumeOffset }, fp(env), resumeAddr);
+  gen(env, StArResumeAddr, ResumeOffset { resumeOffset }, fp(env), resumeAddr);
 
-  // Set yielded value.
-  auto const oldValue = gen(env, LdContArValue, TCell, fp(env));
-  gen(env, StContArValue, fp(env),
-    popC(env, DataTypeGeneric)); // teleporting value
-  decRef(env, oldValue);
+  // No inc/dec-ref as keys and values are teleported.
+  auto const value = popC(env, DataTypeGeneric);
+  auto const key = withKey ? popC(env) : nullptr;
+
+  auto const retVal = !curFunc(env)->isAsync()
+    ? implYieldGen(env, key, value)
+    : implYieldAGen(env, key, value);
 
   // Set state from Running to Started.
   gen(env, StContArState,
       GeneratorState { BaseGenerator::State::Started },
       fp(env));
+
+  // Return control to the caller (Gen::next()).
+  auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
+  auto const retData = RetCtrlData { spAdjust, true };
+  gen(env, RetCtrl, retData, sp(env), fp(env), retVal);
 }
 
 Type returnTypeAwaited(SSATmp* retVal) {
@@ -453,48 +505,11 @@ void emitContRaise(IRGS& /*env*/) {
 }
 
 void emitYield(IRGS& env) {
-  auto const resumeOffset = nextBcOff(env);
-  assertx(resumeMode(env) != ResumeMode::None);
-  assertx(curFunc(env)->isGenerator());
-
-  if (curFunc(env)->isAsyncGenerator()) PUNT(Yield-AsyncGenerator);
-
-  yieldImpl(env, resumeOffset);
-
-  // take a fast path if this generator has no yield k => v;
-  if (curFunc(env)->isPairGenerator()) {
-    auto const newIdx = gen(env, ContArIncIdx, fp(env));
-    auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
-    gen(env, StContArKey, fp(env), newIdx);
-    decRef(env, oldKey);
-  } else {
-    // we're guaranteed that the key is an int
-    gen(env, ContArIncKey, fp(env));
-  }
-
-  yieldReturnControl(env);
+  implYield(env, false);
 }
 
 void emitYieldK(IRGS& env) {
-  auto const resumeOffset = nextBcOff(env);
-  assertx(resumeMode(env) != ResumeMode::None);
-  assertx(curFunc(env)->isGenerator());
-
-  if (curFunc(env)->isAsync()) PUNT(YieldK-AsyncGenerator);
-
-  yieldImpl(env, resumeOffset);
-
-  auto const newKey = popC(env);
-  auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
-  gen(env, StContArKey, fp(env), newKey);
-  decRef(env, oldKey);
-
-  auto const keyType = newKey->type();
-  if (keyType <= TInt) {
-    gen(env, ContArUpdateIdx, fp(env), newKey);
-  }
-
-  yieldReturnControl(env);
+  implYield(env, true);
 }
 
 void emitContCheck(IRGS& env, ContCheckOp subop) {

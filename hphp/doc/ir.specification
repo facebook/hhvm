@@ -2310,6 +2310,11 @@ To string conversions:
   cross-scheduler and intra-scheduler cycle detection. Throws if the
   dependency cannot be established.
 
+| StArResumeAddr<offset>, ND, S(FramePtr) S(TCA), NF
+
+  Store the resume address S1 into the Resumable whose ActRec is given by S0,
+  marking the offset to resume at as `offset'.
+
 | ContEnter<spOffset,returnBCOffset>, DGenIter,
 |                                     S(StkPtr) S(FramePtr) S(FramePtr) S(TCA),
 |                                     Er
@@ -2370,11 +2375,6 @@ To string conversions:
 
   Change the state of the Generator object which has frame pointer S0.
 
-| StContArResume<offset>, ND, S(FramePtr) S(TCA), NF
-
-  Store the resume address S1 into the Generator whose ActRec is given by S0,
-  marking the offset to resume at as `offset'.
-
 | LdContArValue, DParam(Cell), S(FramePtr), PRc
 
   Loads 'value' from the Generator object ActRec of which is S0.
@@ -2392,11 +2392,6 @@ To string conversions:
 
   Stores 'key' into the Generator object ActRec of which is S0. S1 is the
   new value.
-
-| StAsyncArResume<offset>, ND, S(FramePtr) S(TCA), NF
-
-  Store the resume address S1 into the AsyncFunctionWaitHandle whose ActRec is
-  given by S0, marking the offset to resume at as `offset'.
 
 | AFWHBlockOn, ND, S(FramePtr) S(Obj), CRc
 

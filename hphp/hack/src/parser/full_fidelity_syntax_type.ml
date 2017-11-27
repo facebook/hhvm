@@ -795,7 +795,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_category_semicolon                             : t
     }
   and xhp_enum_type =
-    { xhp_enum_keyword                                   : t
+    { xhp_enum_optional                                  : t
+    ; xhp_enum_keyword                                   : t
     ; xhp_enum_left_brace                                : t
     ; xhp_enum_values                                    : t
     ; xhp_enum_right_brace                               : t
@@ -2155,7 +2156,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_category_semicolon: Token.t value
     }
   and xhp_enum_type =
-    { xhp_enum_keyword: Token.t value
+    { xhp_enum_optional: Token.t option value
+    ; xhp_enum_keyword: Token.t value
     ; xhp_enum_left_brace: Token.t value
     ; xhp_enum_values: literal_expression listesque value
     ; xhp_enum_right_brace: Token.t value

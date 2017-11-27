@@ -1943,8 +1943,11 @@ and pClassElt : class_elt list parser = fun node env ->
           , (Pos.none, (p, ":" ^ name), mpOptional pSimpleInitializer init env)
           , not (is_missing req)
           , match syntax ty with
-            | XHPEnumType { xhp_enum_values; _ } ->
-              Some (pPos ty env, couldMap ~f:pExpr xhp_enum_values env)
+            | XHPEnumType { xhp_enum_optional; xhp_enum_values; _ } ->
+              let p = pPos ty env in
+              let opt = not (is_missing xhp_enum_optional) in
+              let vals = couldMap ~f:pExpr xhp_enum_values env in
+              Some (p, opt, vals)
             | _ -> None
           )
       | XHPSimpleClassAttribute { xhp_simple_class_attribute_type = attr } ->

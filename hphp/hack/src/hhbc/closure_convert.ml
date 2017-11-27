@@ -900,9 +900,9 @@ and convert_class_elt env st ce =
     let st, es =
       match es with
       | None -> st, es
-      | Some (p, es) ->
+      | Some (p, opt, es) ->
         let st, es = convert_exprs env st es in
-        st, Some (p, es) in
+        st, Some (p, opt, es) in
     st, XhpAttr (h, c, v, es)
   | _ ->
     st, ce

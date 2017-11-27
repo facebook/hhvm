@@ -118,7 +118,7 @@ and class_elt =
   | ClassTraitRequire of trait_req_kind * hint
   | ClassVars of class_vars_
   | XhpAttr of hint option * class_var * bool *
-               ((Pos.t * expr list) option)
+               ((Pos.t * bool * expr list) option)
   | Method of method_
   | XhpCategory of pstring list
   | XhpChild of xhp_child

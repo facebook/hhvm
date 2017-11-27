@@ -771,16 +771,24 @@ module WithExpressionAndStatementAndTypeParser
       An empty list is illegal, but we allow it here and give an error in
       a later pass.
     *)
-    if peek_token_kind parser = Enum then
-      let (parser, enum_token) = assert_token parser Enum in
+    let (parser', token) = next_token parser in
+    let (parser', token, optional) =
+      match Token.kind token with
+      | Question ->
+        let parser, enum_token = next_token parser' in
+        parser, enum_token, make_token token
+      | _ -> parser', token, make_missing parser
+    in
+    match Token.kind token with
+    | Enum ->
+      let enum_token = make_token token in
       let (parser, left_brace, values, right_brace) =
         parse_braced_comma_list_opt_allow_trailing
-        parser parse_expression in
+        parser' parse_expression in
       let result =
-        make_xhp_enum_type enum_token left_brace values right_brace in
+        make_xhp_enum_type optional enum_token left_brace values right_brace in
       (parser, result)
-    else
-      parse_type_specifier ~allow_var:true parser
+    | kind -> parse_type_specifier ~allow_var:true parser
 
   and parse_xhp_required_opt parser =
     (* SPEC (Draft)

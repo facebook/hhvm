@@ -15903,23 +15903,35 @@ class XHPCategoryDeclaration extends EditableSyntax
 class XHPEnumType extends EditableSyntax
 {
   constructor(
+    optional,
     keyword,
     left_brace,
     values,
     right_brace)
   {
     super('xhp_enum_type', {
+      optional: optional,
       keyword: keyword,
       left_brace: left_brace,
       values: values,
       right_brace: right_brace });
   }
+  get optional() { return this.children.optional; }
   get keyword() { return this.children.keyword; }
   get left_brace() { return this.children.left_brace; }
   get values() { return this.children.values; }
   get right_brace() { return this.children.right_brace; }
+  with_optional(optional){
+    return new XHPEnumType(
+      optional,
+      this.keyword,
+      this.left_brace,
+      this.values,
+      this.right_brace);
+  }
   with_keyword(keyword){
     return new XHPEnumType(
+      this.optional,
       keyword,
       this.left_brace,
       this.values,
@@ -15927,6 +15939,7 @@ class XHPEnumType extends EditableSyntax
   }
   with_left_brace(left_brace){
     return new XHPEnumType(
+      this.optional,
       this.keyword,
       left_brace,
       this.values,
@@ -15934,6 +15947,7 @@ class XHPEnumType extends EditableSyntax
   }
   with_values(values){
     return new XHPEnumType(
+      this.optional,
       this.keyword,
       this.left_brace,
       values,
@@ -15941,6 +15955,7 @@ class XHPEnumType extends EditableSyntax
   }
   with_right_brace(right_brace){
     return new XHPEnumType(
+      this.optional,
       this.keyword,
       this.left_brace,
       this.values,
@@ -15952,11 +15967,13 @@ class XHPEnumType extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var optional = this.optional.rewrite(rewriter, new_parents);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var left_brace = this.left_brace.rewrite(rewriter, new_parents);
     var values = this.values.rewrite(rewriter, new_parents);
     var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
+      optional === this.optional &&
       keyword === this.keyword &&
       left_brace === this.left_brace &&
       values === this.values &&
@@ -15967,6 +15984,7 @@ class XHPEnumType extends EditableSyntax
     else
     {
       return rewriter(new XHPEnumType(
+        optional,
         keyword,
         left_brace,
         values,
@@ -15975,6 +15993,9 @@ class XHPEnumType extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let optional = EditableSyntax.from_json(
+      json.xhp_enum_optional, position, source);
+    position += optional.width;
     let keyword = EditableSyntax.from_json(
       json.xhp_enum_keyword, position, source);
     position += keyword.width;
@@ -15988,6 +16009,7 @@ class XHPEnumType extends EditableSyntax
       json.xhp_enum_right_brace, position, source);
     position += right_brace.width;
     return new XHPEnumType(
+        optional,
         keyword,
         left_brace,
         values,
@@ -15997,6 +16019,7 @@ class XHPEnumType extends EditableSyntax
   {
     if (XHPEnumType._children_keys == null)
       XHPEnumType._children_keys = [
+        'optional',
         'keyword',
         'left_brace',
         'values',

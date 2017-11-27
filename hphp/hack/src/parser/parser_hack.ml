@@ -3169,7 +3169,7 @@ and try_xhp_enum_hint env =
         let pos = Pos.make env.file env.lb in
         expect env Tlcb;
         let items = xhp_enum_decl_list env in
-        Some (pos, items)
+        Some (pos, false, items)
       | _ -> None
   end
 

@@ -2834,12 +2834,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_enum_values = validate_list_with (validate_literal_expression) x.Syntax.xhp_enum_values
     ; xhp_enum_left_brace = validate_token x.Syntax.xhp_enum_left_brace
     ; xhp_enum_keyword = validate_token x.Syntax.xhp_enum_keyword
+    ; xhp_enum_optional = validate_option_with (validate_token) x.Syntax.xhp_enum_optional
     }
   | s -> validation_fail SyntaxKind.XHPEnumType s
   and invalidate_xhp_enum_type : xhp_enum_type invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.XHPEnumType
-      { Syntax.xhp_enum_keyword = invalidate_token x.xhp_enum_keyword
+      { Syntax.xhp_enum_optional = invalidate_option_with (invalidate_token) x.xhp_enum_optional
+      ; Syntax.xhp_enum_keyword = invalidate_token x.xhp_enum_keyword
       ; Syntax.xhp_enum_left_brace = invalidate_token x.xhp_enum_left_brace
       ; Syntax.xhp_enum_values = invalidate_list_with (invalidate_literal_expression) x.xhp_enum_values
       ; Syntax.xhp_enum_right_brace = invalidate_token x.xhp_enum_right_brace

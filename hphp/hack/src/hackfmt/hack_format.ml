@@ -1298,8 +1298,9 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         Newline;
       ]
     | XHPEnumType x ->
-      let (kw, left_b, values, right_b) = get_xhp_enum_type_children x in
+      let (opt, kw, left_b, values, right_b) = get_xhp_enum_type_children x in
       Concat [
+        t opt;
         t kw;
         Space;
         transform_argish left_b values right_b;

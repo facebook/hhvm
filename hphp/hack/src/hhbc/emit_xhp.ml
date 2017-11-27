@@ -106,7 +106,10 @@ let emit_xhp_attribute_array ~ns xal =
   let aux xa =
     let ho = Hhas_xhp_attribute.type_ xa in
     let _, (_, name), expo = Hhas_xhp_attribute.class_var xa in
-    let enumo = Hhas_xhp_attribute.maybe_enum xa in
+    let enumo =
+      (* TODO(T23734724): Properly deal with codegen for optional enums. *)
+      Option.map ~f:(fun (p, _, e) -> p, e) (Hhas_xhp_attribute.maybe_enum xa)
+    in
     let is_req = Hhas_xhp_attribute.is_required xa in
     let k = p, A.String (p, SU.Xhp.clean name) in
     let v = p, A.Varray (inner_array ho expo enumo is_req) in

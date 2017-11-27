@@ -18238,20 +18238,26 @@ final class XHPCategoryDeclaration extends EditableSyntax {
   }
 }
 final class XHPEnumType extends EditableSyntax {
+  private EditableSyntax $_optional;
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_brace;
   private EditableSyntax $_values;
   private EditableSyntax $_right_brace;
   public function __construct(
+    EditableSyntax $optional,
     EditableSyntax $keyword,
     EditableSyntax $left_brace,
     EditableSyntax $values,
     EditableSyntax $right_brace) {
     parent::__construct('xhp_enum_type');
+    $this->_optional = $optional;
     $this->_keyword = $keyword;
     $this->_left_brace = $left_brace;
     $this->_values = $values;
     $this->_right_brace = $right_brace;
+  }
+  public function optional(): EditableSyntax {
+    return $this->_optional;
   }
   public function keyword(): EditableSyntax {
     return $this->_keyword;
@@ -18265,8 +18271,17 @@ final class XHPEnumType extends EditableSyntax {
   public function right_brace(): EditableSyntax {
     return $this->_right_brace;
   }
+  public function with_optional(EditableSyntax $optional): XHPEnumType {
+    return new XHPEnumType(
+      $optional,
+      $this->_keyword,
+      $this->_left_brace,
+      $this->_values,
+      $this->_right_brace);
+  }
   public function with_keyword(EditableSyntax $keyword): XHPEnumType {
     return new XHPEnumType(
+      $this->_optional,
       $keyword,
       $this->_left_brace,
       $this->_values,
@@ -18274,6 +18289,7 @@ final class XHPEnumType extends EditableSyntax {
   }
   public function with_left_brace(EditableSyntax $left_brace): XHPEnumType {
     return new XHPEnumType(
+      $this->_optional,
       $this->_keyword,
       $left_brace,
       $this->_values,
@@ -18281,6 +18297,7 @@ final class XHPEnumType extends EditableSyntax {
   }
   public function with_values(EditableSyntax $values): XHPEnumType {
     return new XHPEnumType(
+      $this->_optional,
       $this->_keyword,
       $this->_left_brace,
       $values,
@@ -18288,6 +18305,7 @@ final class XHPEnumType extends EditableSyntax {
   }
   public function with_right_brace(EditableSyntax $right_brace): XHPEnumType {
     return new XHPEnumType(
+      $this->_optional,
       $this->_keyword,
       $this->_left_brace,
       $this->_values,
@@ -18300,11 +18318,13 @@ final class XHPEnumType extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
+    $optional = $this->optional()->rewrite($rewriter, $new_parents);
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $left_brace = $this->left_brace()->rewrite($rewriter, $new_parents);
     $values = $this->values()->rewrite($rewriter, $new_parents);
     $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
     if (
+      $optional === $this->optional() &&
       $keyword === $this->keyword() &&
       $left_brace === $this->left_brace() &&
       $values === $this->values() &&
@@ -18312,6 +18332,7 @@ final class XHPEnumType extends EditableSyntax {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPEnumType(
+        $optional,
         $keyword,
         $left_brace,
         $values,
@@ -18320,6 +18341,9 @@ final class XHPEnumType extends EditableSyntax {
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
+    $optional = EditableSyntax::from_json(
+      $json->xhp_enum_optional, $position, $source);
+    $position += $optional->width();
     $keyword = EditableSyntax::from_json(
       $json->xhp_enum_keyword, $position, $source);
     $position += $keyword->width();
@@ -18333,12 +18357,14 @@ final class XHPEnumType extends EditableSyntax {
       $json->xhp_enum_right_brace, $position, $source);
     $position += $right_brace->width();
     return new XHPEnumType(
+        $optional,
         $keyword,
         $left_brace,
         $values,
         $right_brace);
   }
   public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_optional;
     yield $this->_keyword;
     yield $this->_left_brace;
     yield $this->_values;

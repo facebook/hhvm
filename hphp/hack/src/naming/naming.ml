@@ -1390,7 +1390,7 @@ module Make (GetLocals : GetLocals) = struct
     | XhpAttr (h, cv, is_required, maybe_enum) ->
       let _, _, default = cv in
       let h = (match maybe_enum with
-        | Some (pos, items) ->
+        | Some (pos, _optional, items) ->
           let contains_int = List.exists items begin function
             | _, Int _ -> true
             | _ -> false

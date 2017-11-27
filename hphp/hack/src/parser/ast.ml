@@ -1,6 +1,6 @@
 (* @generated from ast.src.ml by hphp/hack/tools/ppx/facebook/generate_ppx.sh *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<3c79241e9d4a7883436c5bbc9788438356e8a475>> *)
+(* SourceShasum<<920ba081356ea9af753eea6046eab38a011f74ea>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -99,7 +99,8 @@ and class_elt =
   | XhpAttrUse of hint 
   | ClassTraitRequire of trait_req_kind * hint 
   | ClassVars of class_vars_ 
-  | XhpAttr of hint option * class_var * bool * (Pos.t * expr list) option 
+  | XhpAttr of hint option * class_var * bool * (Pos.t * bool * expr list)
+  option 
   | Method of method_ 
   | XhpCategory of pstring list 
   | XhpChild of xhp_child 
@@ -716,16 +717,23 @@ include
           let _visitors_r3 =
             self#on_option
               (fun env  ->
-                 fun ((_visitors_c0,_visitors_c1) as _visitors_this)  ->
+                 fun
+                   ((_visitors_c0,_visitors_c1,_visitors_c2) as
+                      _visitors_this)
+                    ->
                    let _visitors_r0 = self#on_t env _visitors_c0  in
-                   let _visitors_r1 =
-                     self#on_list self#on_expr env _visitors_c1  in
+                   let _visitors_r1 = self#on_bool env _visitors_c1  in
+                   let _visitors_r2 =
+                     self#on_list self#on_expr env _visitors_c2  in
                    if
                      Pervasives.(&&)
                        (Pervasives.(==) _visitors_c0 _visitors_r0)
-                       (Pervasives.(==) _visitors_c1 _visitors_r1)
+                       (Pervasives.(&&)
+                          (Pervasives.(==) _visitors_c1 _visitors_r1)
+                          (Pervasives.(==) _visitors_c2 _visitors_r2))
                    then _visitors_this
-                   else (_visitors_r0, _visitors_r1)) env _visitors_c3
+                   else (_visitors_r0, _visitors_r1, _visitors_r2)) env
+              _visitors_c3
              in
           if
             Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
@@ -2401,11 +2409,13 @@ include
           let _visitors_s3 =
             self#on_option
               (fun env  ->
-                 fun (_visitors_c0,_visitors_c1)  ->
+                 fun (_visitors_c0,_visitors_c1,_visitors_c2)  ->
                    let _visitors_s0 = self#on_t env _visitors_c0  in
-                   let _visitors_s1 =
-                     self#on_list self#on_expr env _visitors_c1  in
-                   self#plus _visitors_s0 _visitors_s1) env _visitors_c3
+                   let _visitors_s1 = self#on_bool env _visitors_c1  in
+                   let _visitors_s2 =
+                     self#on_list self#on_expr env _visitors_c2  in
+                   self#plus (self#plus _visitors_s0 _visitors_s1)
+                     _visitors_s2) env _visitors_c3
              in
           self#plus
             (self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2)
@@ -3423,11 +3433,13 @@ include
           let _visitors_r3 =
             self#on_option
               (fun env  ->
-                 fun (_visitors_c0,_visitors_c1)  ->
+                 fun (_visitors_c0,_visitors_c1,_visitors_c2)  ->
                    let _visitors_r0 = self#on_t env _visitors_c0  in
-                   let _visitors_r1 =
-                     self#on_list self#on_expr env _visitors_c1  in
-                   (_visitors_r0, _visitors_r1)) env _visitors_c3
+                   let _visitors_r1 = self#on_bool env _visitors_c1  in
+                   let _visitors_r2 =
+                     self#on_list self#on_expr env _visitors_c2  in
+                   (_visitors_r0, _visitors_r1, _visitors_r2)) env
+              _visitors_c3
              in
           XhpAttr (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3)
         method on_Method env _visitors_c0 =
@@ -4428,10 +4440,11 @@ include
           let _visitors_r3 =
             self#on_option
               (fun env  ->
-                 fun (_visitors_c0,_visitors_c1)  ->
+                 fun (_visitors_c0,_visitors_c1,_visitors_c2)  ->
                    let _visitors_r0 = self#on_t env _visitors_c0  in
-                   let _visitors_r1 =
-                     self#on_list self#on_expr env _visitors_c1  in
+                   let _visitors_r1 = self#on_bool env _visitors_c1  in
+                   let _visitors_r2 =
+                     self#on_list self#on_expr env _visitors_c2  in
                    ()) env _visitors_c3
              in
           ()

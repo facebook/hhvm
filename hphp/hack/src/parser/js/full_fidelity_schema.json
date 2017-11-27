@@ -1637,6 +1637,7 @@
       "description" : "xhp_enum_type",
       "prefix" : "xhp_enum",
       "fields" : [
+        { "field_name" : "optional" },
         { "field_name" : "keyword" },
         { "field_name" : "left_brace" },
         { "field_name" : "values" },

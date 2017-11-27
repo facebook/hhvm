@@ -139,7 +139,7 @@ class type ['a] ast_visitor_type = object
   method on_typedef: 'a -> typedef -> 'a
   method on_user_attribute: 'a -> user_attribute -> 'a
   method on_xhpAttr: 'a -> hint option -> class_var -> bool ->
-                     ((Pos.t * expr list) option) -> 'a
+                     ((Pos.t * bool * expr list) option) -> 'a
   method on_xhpAttrUse: 'a -> hint -> 'a
   method on_xhpCategory: 'a -> pstring list -> 'a
   method on_xhp_child: 'a -> xhp_child -> 'a

@@ -1875,10 +1875,12 @@ module FromMinimal = struct
         :: xhp_enum_values
         :: xhp_enum_left_brace
         :: xhp_enum_keyword
+        :: xhp_enum_optional
         :: results
         ) ->
           XHPEnumType
-          { xhp_enum_keyword
+          { xhp_enum_optional
+          ; xhp_enum_keyword
           ; xhp_enum_left_brace
           ; xhp_enum_values
           ; xhp_enum_right_brace
@@ -3792,7 +3794,8 @@ module FromMinimal = struct
         let todo = Convert (xhp_category_categories, todo) in
         convert offset todo results xhp_category_keyword
     | { M.syntax = M.XHPEnumType
-        { M.xhp_enum_keyword
+        { M.xhp_enum_optional
+        ; M.xhp_enum_keyword
         ; M.xhp_enum_left_brace
         ; M.xhp_enum_values
         ; M.xhp_enum_right_brace
@@ -3802,7 +3805,8 @@ module FromMinimal = struct
         let todo = Convert (xhp_enum_right_brace, todo) in
         let todo = Convert (xhp_enum_values, todo) in
         let todo = Convert (xhp_enum_left_brace, todo) in
-        convert offset todo results xhp_enum_keyword
+        let todo = Convert (xhp_enum_keyword, todo) in
+        convert offset todo results xhp_enum_optional
     | { M.syntax = M.XHPRequired
         { M.xhp_required_at
         ; M.xhp_required_keyword

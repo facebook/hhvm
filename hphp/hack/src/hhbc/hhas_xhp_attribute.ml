@@ -12,7 +12,7 @@ type t = {
   xhp_attribute_type : Ast.hint option;
   xhp_attribute_class_var : Ast.class_var;
   xhp_attribute_is_required : bool;
-  xhp_attribute_maybe_enum : ((Pos.t * Ast.expr list) option);
+  xhp_attribute_maybe_enum : ((Pos.t * bool * Ast.expr list) option);
 }
 
 let make

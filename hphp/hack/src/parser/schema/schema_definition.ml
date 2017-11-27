@@ -1597,7 +1597,8 @@ let schema : schema_node list =
     ; prefix      = "xhp_enum"
     ; aggregates  = [ Specifier ]
     ; fields =
-      [ "keyword", Token
+      [ "optional", ZeroOrOne Token
+      ; "keyword", Token
       ; "left_brace", Token
       ; "values", ZeroOrMore (Just "LiteralExpression")
       ; "right_brace", Token

@@ -308,12 +308,19 @@ let rec get_doc node =
     let l = get_doc xhp_category_categories in
     let s = get_doc xhp_category_semicolon in
     c ^| l ^^^ s
-  | XHPEnumType x ->
-    let e = get_doc x.xhp_enum_keyword in
-    let l = get_doc x.xhp_enum_left_brace in
-    let v = get_doc x.xhp_enum_values in
-    let r = get_doc x.xhp_enum_right_brace in
-    group_doc (e ^| l ^| v ^| r)
+  | XHPEnumType {
+    xhp_enum_optional;
+    xhp_enum_keyword;
+    xhp_enum_left_brace;
+    xhp_enum_values;
+    xhp_enum_right_brace;
+    } ->
+    let o = get_doc xhp_enum_optional in
+    let e = get_doc xhp_enum_keyword in
+    let l = get_doc xhp_enum_left_brace in
+    let v = get_doc xhp_enum_values in
+    let r = get_doc xhp_enum_right_brace in
+    group_doc (o ^| e ^| l ^| v ^| r)
   | XHPClassAttributeDeclaration {
     xhp_attribute_keyword;
     xhp_attribute_attributes;

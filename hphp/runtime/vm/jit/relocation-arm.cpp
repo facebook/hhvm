@@ -213,13 +213,27 @@ bool relocateSmashable(Env& env, TCA srcAddr, TCA destAddr,
   if (!adjusted) adjusted = target;
   int imm = (adjusted - destAddr) >> kInstructionSizeLog2;
 
-  if (!is_int26(imm)) return false;
-
   vixl::MacroAssembler a { env.destBlock };
   env.destBlock.setFrontier(destAddr);
-  a.b(imm);
+  destCount--;
+
+  if (is_int26(imm)) {
+    a.b(imm);
+    destCount += 1;
+  } else {
+    auto const tmp = rVixlScratch0;
+    a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
+    a.Mov(tmp, adjusted);
+    // Pad out to two instructions for adjustment later
+    if ((env.destBlock.frontier() - destAddr) == kInstructionSize) {
+      a.Nop();
+    }
+    a.Br(tmp);
+    a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
+    destCount += (env.destBlock.frontier() - destAddr) >> kInstructionSizeLog2;
+  }
+
   srcCount = smashableJmpLen() >> kInstructionSizeLog2;
-  destCount = 1;
   for (auto i = src;
        i < src + (srcCount << kInstructionSizeLog2);
        i = i->NextInstruction()) {

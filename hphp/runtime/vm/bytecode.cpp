@@ -6323,12 +6323,8 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
     vmfp() = sfp;
   } else {  // Async generator.
     // Create new AsyncGeneratorWaitHandle.
-    auto const gen = frame_async_generator(fp);
-    auto waitHandle = c_AsyncGeneratorWaitHandle::Create(gen, child);
-
-    // Set resume address and link the AGWH to the async generator.
-    gen->resumable()->setResumeAddr(nullptr, resumeOffset);
-    gen->attachWaitHandle(req::ptr<c_AsyncGeneratorWaitHandle>(waitHandle));
+    auto waitHandle = c_AsyncGeneratorWaitHandle::Create(
+      fp, nullptr, resumeOffset, child);
 
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.

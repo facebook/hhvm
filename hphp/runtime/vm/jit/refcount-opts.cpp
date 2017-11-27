@@ -2066,6 +2066,7 @@ bool consumes_reference_taken(const IRInstruction& inst, uint32_t srcID) {
   case LdArrFPushCuf:
   case LdStrFPushCuf:
   case SuspendHookAwaitEF:
+  case SuspendHookAwaitEG:
   case SuspendHookCreateCont:
   case ReturnHook:
     return srcID == 0;

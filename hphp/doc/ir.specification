@@ -946,6 +946,12 @@ To string conversions:
   Surprise flag hook for suspending eagerly executing async functions. The S0
   frame was already teleported into S1. Decrefs S2 if it throws an exception.
 
+| SuspendHookAwaitEG, ND, S(FramePtr) S(Obj), Er
+
+  Surprise flag hook for suspending eagerly executing async generators. The S0
+  frame has an associated AG, which is already linked to the newly constructed
+  AGWH in the blocked state. Decrefs S1 if it throws an exception.
+
 | SuspendHookAwaitR, ND, S(FramePtr) S(Obj), Er
 
   Surprise flag hook for suspending async functions and async generators resumed
@@ -2274,6 +2280,14 @@ To string conversions:
   the native resume address to S2, resume offset to S3, and mark it blocked on
   non-finished child S4.  This version of the instruction guarantees that the
   VarEnv is unused.
+
+| CreateAGWH, DAllocObj,
+|             S(FramePtr) S(TCA,Nullptr) C(Int) S(Obj),
+|             CRc|PRc
+
+  Create an AsyncGeneratorWaitHandle object and link it to the AsyncGenerator
+  associated with the ActRec provided by S0.  Set the native resume address
+  to S1, resume offset to S2, and mark it blocked on non-finished child S3.
 
 | CreateAAWH<local,count>, DAllocObj, S(FramePtr) S(Int), PRc|Er
 

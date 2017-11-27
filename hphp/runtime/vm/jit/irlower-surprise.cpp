@@ -147,6 +147,7 @@ void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(SuspendHookAwaitEF)
+IMPL_OPCODE_CALL(SuspendHookAwaitEG)
 IMPL_OPCODE_CALL(SuspendHookAwaitR)
 IMPL_OPCODE_CALL(SuspendHookCreateCont)
 IMPL_OPCODE_CALL(SuspendHookYield)

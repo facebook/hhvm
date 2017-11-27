@@ -476,6 +476,8 @@ static CallMap s_callMap {
     {CreateAFWHNoVV,     &c_AsyncFunctionWaitHandle::Create<false>, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
 #endif
+    {CreateAGWH,         &c_AsyncGeneratorWaitHandle::Create, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {CreateSSWH,         &c_StaticWaitHandle::CreateSucceeded, DSSA, SNone,
                            {{TV, 0}}},
     {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,
@@ -522,6 +524,8 @@ static CallMap s_callMap {
     /* surprise flag support */
     {SuspendHookAwaitEF, &EventHook::onFunctionSuspendAwaitEF, DNone,
                             SSync, {{SSA, 0}, {SSA, 1}}},
+    {SuspendHookAwaitEG, &EventHook::onFunctionSuspendAwaitEG, DNone,
+                            SSync, {{SSA, 0}}},
     {SuspendHookAwaitR, &EventHook::onFunctionSuspendAwaitR, DNone,
                             SSync, {{SSA, 0}, {SSA, 1}}},
     {SuspendHookCreateCont, &EventHook::onFunctionSuspendCreateCont, DNone,

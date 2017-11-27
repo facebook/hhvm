@@ -63,41 +63,58 @@ void suspendHook(IRGS& env, bool useNextBcOff, Hook hook) {
 void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
                 bool useNextBcOff) {
   assertx(curFunc(env)->isAsync());
-  assertx(resumeMode(env) == ResumeMode::None);
+  assertx(resumeMode(env) != ResumeMode::Async);
   assertx(child->type() <= TObj);
 
-  // Create the AsyncFunctionWaitHandle object. CreateAFWH takes care of
-  // copying local variables and iterators.
+  // Bind address at which the execution should resume after awaiting.
   auto const func = curFunc(env);
   auto const resumeSk = SrcKey(func, resumeOffset, ResumeMode::Async,
                                hasThis(env));
-  auto const bind_data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
-  auto const resumeAddr = gen(env, LdBindAddr, bind_data);
-  auto const waitHandle =
-    gen(env,
-        func->attrs() & AttrMayUseVV ? CreateAFWH : CreateAFWHNoVV,
-        fp(env),
-        cns(env, func->numSlotsInFrame()),
-        resumeAddr,
-        cns(env, resumeOffset),
-        child);
+  auto const bindData = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
+  auto const resumeAddr = gen(env, LdBindAddr, bindData);
 
-  auto const asyncAR = gen(env, LdAFWHActRec, waitHandle);
+  if (!curFunc(env)->isGenerator()) {
+    // Create the AsyncFunctionWaitHandle object. CreateAFWH takes care of
+    // copying local variables and iterators.
+    auto const waitHandle =
+      gen(env,
+          func->attrs() & AttrMayUseVV ? CreateAFWH : CreateAFWHNoVV,
+          fp(env),
+          cns(env, func->numSlotsInFrame()),
+          resumeAddr,
+          cns(env, resumeOffset),
+          child);
 
-  // Call the suspend hook.
-  suspendHook(env, useNextBcOff, [&] {
-    gen(env, SuspendHookAwaitEF, fp(env), asyncAR, waitHandle);
-  });
+    auto const asyncAR = gen(env, LdAFWHActRec, waitHandle);
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    gen(env, DbgTrashRetVal, fp(env));
+    // Call the suspend hook.
+    suspendHook(env, useNextBcOff, [&] {
+      gen(env, SuspendHookAwaitEF, fp(env), asyncAR, waitHandle);
+    });
+
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      gen(env, DbgTrashRetVal, fp(env));
+    }
+
+    // Return control to the caller.
+    auto const spAdjust = offsetToReturnSlot(env);
+    auto const retData = RetCtrlData { spAdjust, false, AuxUnion{1} };
+    gen(env, RetCtrl, retData, sp(env), fp(env), waitHandle);
+  } else {
+    // Create the AsyncGeneratorWaitHandle object.
+    auto const waitHandle =
+      gen(env, CreateAGWH, fp(env), resumeAddr, cns(env, resumeOffset), child);
+
+    // Call the suspend hook.
+    suspendHook(env, useNextBcOff, [&] {
+      gen(env, SuspendHookAwaitEG, fp(env), waitHandle);
+    });
+
+    // Return control to the caller (AG::next()).
+    auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
+    auto const retData = RetCtrlData { spAdjust, true };
+    gen(env, RetCtrl, retData, sp(env), fp(env), waitHandle);
   }
-  auto const ret_data = RetCtrlData {
-    offsetToReturnSlot(env),
-    false, // suspendingResumed
-    AuxUnion{1}
-  };
-  gen(env, RetCtrl, ret_data, sp(env), fp(env), waitHandle);
 }
 
 void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset,
@@ -203,7 +220,8 @@ void emitAwait(IRGS& env) {
   auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());
 
-  if (curFunc(env)->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
+  if (curFunc(env)->isAsyncGenerator() &&
+      resumeMode(env) == ResumeMode::Async) PUNT(Await-AsyncGenerator);
 
   auto const exitSlow = makeExitSlow(env);
 
@@ -266,7 +284,8 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
   auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());
 
-  if (curFunc(env)->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
+  if (curFunc(env)->isAsyncGenerator() &&
+      resumeMode(env) == ResumeMode::Async) PUNT(Await-AsyncGenerator);
 
   auto const cnt = [&] {
     if (locals.restCount + 1 > RuntimeOption::EvalJitMaxAwaitAllUnroll) {
@@ -326,7 +345,8 @@ void emitFCallAwait(IRGS& env,
   assertx(curFunc(env)->isAsync());
 
   // doesn't happen yet, as hhbbc doesn't create FCallAwait in async generators
-  if (curFunc(env)->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
+  if (curFunc(env)->isAsyncGenerator() &&
+      resumeMode(env) == ResumeMode::Async) PUNT(Await-AsyncGenerator);
 
   auto const ret = implFCall(env, numParams);
   assertTypeStack(env, BCSPRelOffset{0}, TInitCell);

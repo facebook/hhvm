@@ -584,6 +584,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // The suspend hooks can load anything (re-entering the VM), but can't write
   // to frame locals.
   case SuspendHookAwaitEF:
+  case SuspendHookAwaitEG:
   case SuspendHookAwaitR:
   case SuspendHookCreateCont:
   case SuspendHookYield:
@@ -875,6 +876,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AHeapAny,
       AFrameAny | AClsRefSlotAny | ACufIterAny
     );
+
+  // AGWH construction updates the AsyncGenerator object.
+  case CreateAGWH:
+    return may_load_store(AHeapAny, AHeapAny);
 
   case CreateAAWH:
     {

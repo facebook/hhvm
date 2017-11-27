@@ -303,6 +303,7 @@ constexpr ptrdiff_t ar_rel(ptrdiff_t off) {
 
 IMPL_OPCODE_CALL(CreateAFWH)
 IMPL_OPCODE_CALL(CreateAFWHNoVV)
+IMPL_OPCODE_CALL(CreateAGWH)
 IMPL_OPCODE_CALL(CreateSSWH)
 IMPL_OPCODE_CALL(AFWHPrepareChild)
 

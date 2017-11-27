@@ -383,6 +383,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckSurpriseAndStack:
   case ReturnHook:
   case SuspendHookAwaitEF:
+  case SuspendHookAwaitEG:
   case SuspendHookAwaitR:
   case SuspendHookCreateCont:
   case SuspendHookYield:
@@ -528,6 +529,7 @@ bool canDCE(IRInstruction* inst) {
   case CreateAAWH:
   case CreateAFWH:
   case CreateAFWHNoVV:
+  case CreateAGWH:
   case AFWHPrepareChild:
   case ContEnter:
   case ContPreNext:

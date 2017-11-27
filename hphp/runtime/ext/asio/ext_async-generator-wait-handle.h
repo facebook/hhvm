@@ -59,8 +59,12 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
     return offsetof(c_AsyncGeneratorWaitHandle, m_blockable);
   }
 
-  static c_AsyncGeneratorWaitHandle*
-  Create(AsyncGenerator* gen, c_WaitableWaitHandle* child);
+  static c_AsyncGeneratorWaitHandle* Create(
+    const ActRec* fp,
+    jit::TCA resumeAddr,
+    Offset resumeOffset,
+    c_WaitableWaitHandle* child
+  ); // nothrow
 
   void resume();
   void onUnblocked();

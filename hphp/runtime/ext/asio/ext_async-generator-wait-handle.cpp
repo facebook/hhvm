@@ -43,10 +43,18 @@ c_AsyncGeneratorWaitHandle::~c_AsyncGeneratorWaitHandle() {
 }
 
 c_AsyncGeneratorWaitHandle*
-c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
+c_AsyncGeneratorWaitHandle::Create(const ActRec* fp,
+                                   jit::TCA resumeAddr,
+                                   Offset resumeOffset,
                                    c_WaitableWaitHandle* child) {
-  assert(child->instanceof(c_WaitableWaitHandle::classof()));
-  assert(!child->isFinished());
+  assertx(fp);
+  assertx(fp->resumed());
+  assertx(fp->func()->isAsyncGenerator());
+  assertx(child);
+  assertx(child->instanceof(c_WaitableWaitHandle::classof()));
+  assertx(!child->isFinished());
+
+  auto const gen = frame_async_generator(fp);
   auto wh = req::make<c_AsyncGeneratorWaitHandle>(gen, child);
   child->getParentChain().addParent(
       wh->m_blockable,
@@ -54,6 +62,11 @@ c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
   );
   // Implied reference from child via its AsioBlockableChain.
   wh->incRefCount();
+
+  // Set resume address and link the AGWH to the async generator.
+  gen->resumable()->setResumeAddr(resumeAddr, resumeOffset);
+  gen->attachWaitHandle(req::ptr<c_AsyncGeneratorWaitHandle>(wh));
+
   return wh.detach();
 }
 

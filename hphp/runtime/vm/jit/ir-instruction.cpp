@@ -37,6 +37,7 @@
 
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
+#include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -175,6 +176,9 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case CreateAFWHNoVV:
       return srcNo == 4;
 
+    case CreateAGWH:
+      return srcNo == 3;
+
     case InitPackedLayoutArray:
       return srcNo == 1;
 
@@ -253,6 +257,9 @@ Type allocObjReturn(const IRInstruction* inst) {
     case CreateAFWH:
     case CreateAFWHNoVV:
       return Type::ExactObj(c_AsyncFunctionWaitHandle::classof());
+
+    case CreateAGWH:
+      return Type::ExactObj(c_AsyncGeneratorWaitHandle::classof());
 
     case CreateAAWH:
       return Type::ExactObj(c_AwaitAllWaitHandle::classof());

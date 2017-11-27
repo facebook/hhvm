@@ -5920,7 +5920,7 @@ OPTBLD_INLINE TCA iopCreateCont(PC& pc) {
     static_cast<BaseGenerator*>(AsyncGenerator::fromObject(obj)) :
     static_cast<BaseGenerator*>(Generator::fromObject(obj));
 
-  EventHook::FunctionSuspendE(fp, genData->actRec());
+  EventHook::FunctionSuspendCreateCont(fp, genData->actRec());
 
   // Grab caller info from ActRec.
   ActRec* sfp = fp->sfp();
@@ -6012,7 +6012,7 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
   assert(fp->resumed());
   assert(func->isGenerator());
 
-  EventHook::FunctionSuspendR(fp, nullptr);
+  EventHook::FunctionSuspendYield(fp);
 
   auto const sfp = fp->sfp();
   auto const soff = fp->m_soff;
@@ -6146,7 +6146,7 @@ TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
 
   auto jitReturn = jitReturnPre(fp);
 
-  EventHook::FunctionSuspendR(fp, nullptr);
+  EventHook::FunctionSuspendYield(fp);
   auto const sfp = fp->sfp();
   auto const soff = fp->m_soff;
 
@@ -6187,7 +6187,7 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
 
   auto jitReturn = jitReturnPre(fp);
 
-  EventHook::FunctionSuspendR(fp, nullptr);
+  EventHook::FunctionSuspendYield(fp);
   auto const sfp = fp->sfp();
   auto const soff = fp->m_soff;
 
@@ -6306,9 +6306,9 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
                                             vmfp()->func()->numSlotsInFrame(),
                                             nullptr, resumeOffset, child));
 
-  // Call the FunctionSuspend hook. FunctionSuspend will decref the newly
-  // allocated waitHandle if it throws.
-  EventHook::FunctionSuspendE(vmfp(), waitHandle->actRec());
+  // Call the suspend hook. It will decref the newly allocated waitHandle
+  // if it throws.
+  EventHook::FunctionSuspendAwaitEF(vmfp(), waitHandle->actRec());
 
   // Grab caller info from ActRec.
   ActRec* sfp = vmfp()->sfp();
@@ -6343,7 +6343,7 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
 
   // Before adjusting the stack or doing anything, check the suspend hook.
   // This can throw.
-  EventHook::FunctionSuspendR(fp, child);
+  EventHook::FunctionSuspendAwaitR(fp, child);
 
   // Await child and suspend the async function/generator. May throw.
   if (!func->isGenerator()) {

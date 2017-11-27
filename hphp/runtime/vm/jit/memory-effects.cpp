@@ -583,8 +583,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   // The suspend hooks can load anything (re-entering the VM), but can't write
   // to frame locals.
-  case SuspendHookE:
-  case SuspendHookR:
+  case SuspendHookAwaitEF:
+  case SuspendHookAwaitR:
+  case SuspendHookCreateCont:
+  case SuspendHookYield:
     // TODO: may-load here probably doesn't need to include AFrameAny normally.
     return may_reenter(inst,
                        may_load_store_kill(AUnknown, AHeapAny, AMIStateAny));

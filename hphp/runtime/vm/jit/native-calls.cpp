@@ -520,12 +520,16 @@ static CallMap s_callMap {
                      {{SSA, 0}, {SSA, 1}, extra(&ClassKindData::kind)}},
 
     /* surprise flag support */
-    {SuspendHookE, &EventHook::onFunctionSuspendE, DNone, SSync,
-                            {{SSA, 0}, {SSA, 1}}},
-    {SuspendHookR, &EventHook::onFunctionSuspendR, DNone, SSync,
-                            {{SSA, 0}, {SSA, 1}}},
-    {ReturnHook,  &EventHook::onFunctionReturn, DNone, SSync,
-                            {{SSA, 0}, {TV, 1}}},
+    {SuspendHookAwaitEF, &EventHook::onFunctionSuspendAwaitEF, DNone,
+                            SSync, {{SSA, 0}, {SSA, 1}}},
+    {SuspendHookAwaitR, &EventHook::onFunctionSuspendAwaitR, DNone,
+                            SSync, {{SSA, 0}, {SSA, 1}}},
+    {SuspendHookCreateCont, &EventHook::onFunctionSuspendCreateCont, DNone,
+                            SSync, {{SSA, 0}, {SSA, 1}}},
+    {SuspendHookYield, &EventHook::onFunctionSuspendYield, DNone,
+                            SSync, {{SSA, 0}}},
+    {ReturnHook, &EventHook::onFunctionReturn, DNone,
+                            SSync, {{SSA, 0}, {TV, 1}}},
 
     /* silence operator support */
     {ZeroErrorLevel, &zero_error_level, DSSA, SNone, {}},

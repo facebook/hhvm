@@ -529,34 +529,14 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
   onFunctionEnter(ar, EventHook::NormalFunc, flags, true);
 }
 
-// Child is the AFWH we're going to block on, nullptr iff this is a suspending
-// generator.
-void EventHook::onFunctionSuspendR(ActRec* suspending, ObjectData* child) {
-  auto const flags = handle_request_surprise();
-  onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+// Async function initially suspending at Await.
+void EventHook::onFunctionSuspendAwaitEF(ActRec* suspending,
+                                         const ActRec* resumableAR) {
+  assertx(suspending->func()->isAsyncFunction());
+  assertx(suspending->func() == resumableAR->func());
+  assertx(resumableAR->resumed());
 
-  if ((flags & AsyncEventHookFlag) &&
-      suspending->func()->isAsyncFunction()) {
-    assert(child != nullptr);  // This isn't a generator
-    assert(child->instanceof(c_WaitableWaitHandle::classof()));
-    assert(suspending->resumed());
-    auto const afwh = frame_afwh(suspending);
-    auto const session = AsioSession::Get();
-    if (session->hasOnResumableAwait()) {
-      session->onResumableAwait(
-        afwh,
-        static_cast<c_WaitableWaitHandle*>(child)
-      );
-    }
-  }
-}
-
-void EventHook::onFunctionSuspendE(ActRec* suspending,
-                                   const ActRec* resumableAR) {
-  // When we're suspending an eagerly executing resumable, we've already
-  // teleported the ActRec from suspending over to resumableAR, so we need to
-  // make sure the unwinder knows not to touch the locals, $this, or
-  // VarEnv/ExtraArgs.
+  // The locals were already teleported from suspending to resumableAR.
   suspending->setLocalsDecRefd();
   suspending->trashThis();
   suspending->trashVarEnv();
@@ -565,9 +545,7 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
     auto const flags = handle_request_surprise();
     onFunctionExit(resumableAR, nullptr, false, nullptr, flags, true);
 
-    if ((flags & AsyncEventHookFlag) &&
-        resumableAR->func()->isAsyncFunction()) {
-      assert(resumableAR->resumed());
+    if (flags & AsyncEventHookFlag) {
       auto const afwh = frame_afwh(resumableAR);
       auto const session = AsioSession::Get();
       if (session->hasOnResumableCreate()) {
@@ -575,11 +553,56 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
       }
     }
   } catch (...) {
-    auto const resumableObj = [&]() -> ObjectData* {
-      if (resumableAR->func()->isAsyncFunction()) {
-        return frame_afwh(resumableAR);
+    decRefObj(frame_afwh(resumableAR));
+    throw;
+  }
+}
+
+// Async function or async generator that was resumed at Await suspending
+// again at Await. The suspending frame has an associated AFWH/AGWH. Child
+// is the WH we are going to block on.
+//
+// FIXME: this also handles async generators resumed at Yield, not having
+//        an AGWH yet
+void EventHook::onFunctionSuspendAwaitR(ActRec* suspending, ObjectData* child) {
+  assertx(suspending->func()->isAsync());
+  assertx(suspending->resumed());
+  assertx(child->getAttribute(ObjectData::IsWaitHandle));
+
+  auto const flags = handle_request_surprise();
+  onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+
+  if (flags & AsyncEventHookFlag) {
+    assertx(child->instanceof(c_WaitableWaitHandle::classof()));
+    if (suspending->func()->isAsyncFunction()) {
+      auto const session = AsioSession::Get();
+      if (session->hasOnResumableAwait()) {
+        session->onResumableAwait(
+          frame_afwh(suspending),
+          static_cast<c_WaitableWaitHandle*>(child)
+        );
       }
-      assert(resumableAR->func()->isGenerator());
+    }
+  }
+}
+
+// Generator or async generator suspending initially at CreateCont.
+void EventHook::onFunctionSuspendCreateCont(ActRec* suspending,
+                                            const ActRec* resumableAR) {
+  assertx(suspending->func()->isGenerator());
+  assertx(suspending->func() == resumableAR->func());
+  assertx(resumableAR->resumed());
+
+  // The locals were already teleported from suspending to resumableAR.
+  suspending->setLocalsDecRefd();
+  suspending->trashThis();
+  suspending->trashVarEnv();
+
+  try {
+    auto const flags = handle_request_surprise();
+    onFunctionExit(resumableAR, nullptr, false, nullptr, flags, true);
+  } catch (...) {
+    auto const resumableObj = [&]() -> ObjectData* {
       return !resumableAR->func()->isAsync()
         ? frame_generator(resumableAR)->toObject()
         : frame_async_generator(resumableAR)->toObject();
@@ -587,6 +610,15 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
     decRefObj(resumableObj);
     throw;
   }
+}
+
+// Generator or async generator suspending at Yield.
+void EventHook::onFunctionSuspendYield(ActRec* suspending) {
+  assertx(suspending->func()->isGenerator());
+  assertx(suspending->resumed());
+
+  auto const flags = handle_request_surprise();
+  onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
 }
 
 void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {

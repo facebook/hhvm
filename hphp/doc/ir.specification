@@ -941,15 +941,26 @@ To string conversions:
 
   Surprise flag hook for function returns.
 
-| SuspendHookE, ND, S(FramePtr) S(FramePtr) S(Obj), Er
+| SuspendHookAwaitEF, ND, S(FramePtr) S(FramePtr) S(Obj), Er
 
-  Surprise flag hook for suspending eagerly executing async functions or
-  generators.  Decrefs S2 if it throws an exception.
+  Surprise flag hook for suspending eagerly executing async functions. The S0
+  frame was already teleported into S1. Decrefs S2 if it throws an exception.
 
-| SuspendHookR, ND, S(FramePtr) S(Obj|Nullptr), Er
+| SuspendHookAwaitR, ND, S(FramePtr) S(Obj), Er
 
-  Surprise flag hook for suspending resumed async functions or generators.  For
-  generators, the second parameter should be Nullptr.
+  Surprise flag hook for suspending async functions and async generators resumed
+  at Await. The S0 frame has an associated AFWH/AGWH still in the running state,
+  S1 points to the child WH we are going to block on.
+
+| SuspendHookCreateCont, ND, S(FramePtr) S(FramePtr) S(Obj), Er
+
+  Surprise flag hook for suspending generators and async generators during their
+  invocation. The S0 frame was already teleported into S1. Decrefs S2 if it
+  throws an exception.
+
+| SuspendHookYield, ND, S(FramePtr), Er
+
+  Surprise flag hook for suspending generators and async generators at Yield.
 
 | Unreachable, ND, NA, T
 

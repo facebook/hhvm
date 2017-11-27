@@ -382,8 +382,10 @@ bool canDCE(IRInstruction* inst) {
   case CheckSurpriseFlags:
   case CheckSurpriseAndStack:
   case ReturnHook:
-  case SuspendHookE:
-  case SuspendHookR:
+  case SuspendHookAwaitEF:
+  case SuspendHookAwaitR:
+  case SuspendHookCreateCont:
+  case SuspendHookYield:
   case EndBlock:
   case Unreachable:
   case Jmp:

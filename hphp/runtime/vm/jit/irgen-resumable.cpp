@@ -36,41 +36,32 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void suspendHookE(IRGS& env,
-                  SSATmp* frame,
-                  SSATmp* resumableAR,
-                  SSATmp* resumable) {
-  ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckSurpriseFlags, taken, fp(env));
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, SuspendHookE, frame, resumableAR, resumable);
-    }
-  );
-}
+template<class Hook>
+void suspendHook(IRGS& env, bool useNextBcOff, Hook hook) {
+  // Sync the marker to let the unwinder know that the consumed input is
+  // no longer on the eval stack. Use the next BC offset if requested by
+  // the FCallAwait opcode, otherwise the unwinder will expect to find
+  // a PreLive ActRec on the stack.
+  auto const bcOffset = useNextBcOff ? nextBcOff(env) : bcOff(env);
+  env.irb->setCurMarker(makeMarker(env, bcOffset));
+  env.irb->exceptionStackBoundary();
 
-void suspendHookR(IRGS& env, SSATmp* frame, SSATmp* objOrNullptr) {
   ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
   ifThen(
     env,
     [&] (Block* taken) {
-      // Check using sp(env) in the -R version---remember that fp(env) does not
-      // point into the eval stack.
-      gen(env, CheckSurpriseFlags, taken, sp(env));
+      auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
+      gen(env, CheckSurpriseFlags, taken, ptr);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      gen(env, SuspendHookR, frame, objOrNullptr);
+      hook();
     }
   );
 }
 
 void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
-                uint32_t ndiscard) {
+                bool useNextBcOff) {
   assertx(curFunc(env)->isAsync());
   assertx(resumeMode(env) == ResumeMode::None);
   assertx(child->type() <= TObj);
@@ -93,14 +84,10 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
 
   auto const asyncAR = gen(env, LdAFWHActRec, waitHandle);
 
-  // Call the FunctionSuspend hook.  We need put to a null on the stack in the
-  // catch trace in place of our input, since we've already shuffled that value
-  // into the heap to be owned by the waitHandle, so the unwinder can't decref
-  // it.
-  for (auto i = ndiscard; i; --i) push(env, cns(env, TInitNull));
-  env.irb->exceptionStackBoundary();
-  suspendHookE(env, fp(env), asyncAR, waitHandle);
-  discard(env, ndiscard);
+  // Call the suspend hook.
+  suspendHook(env, useNextBcOff, [&] {
+    gen(env, SuspendHookAwaitEF, fp(env), asyncAR, waitHandle);
+  });
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     gen(env, DbgTrashRetVal, fp(env));
@@ -113,7 +100,8 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
   gen(env, RetCtrl, ret_data, sp(env), fp(env), waitHandle);
 }
 
-void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
+void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset,
+                bool useNextBcOff) {
   assertx(curFunc(env)->isAsync());
   assertx(resumeMode(env) == ResumeMode::Async);
   assertx(child->isA(TObj));
@@ -121,7 +109,9 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   // We must do this before we do anything, because it can throw, and we can't
   // start tearing down the AFWH before that or the unwinder won't be able to
   // react.
-  suspendHookR(env, fp(env), child);
+  suspendHook(env, useNextBcOff, [&] {
+    gen(env, SuspendHookAwaitR, fp(env), child);
+  });
 
   // Prepare child for establishing dependency.
   gen(env, AFWHPrepareChild, fp(env), child);
@@ -151,7 +141,9 @@ void yieldReturnControl(IRGS& env) {
 }
 
 void yieldImpl(IRGS& env, Offset resumeOffset) {
-  suspendHookR(env, fp(env), cns(env, TNullptr));
+  suspendHook(env, false, [&] {
+    gen(env, SuspendHookYield, fp(env));
+  });
 
   // Resumable::setResumeAddr(resumeAddr, resumeOffset)
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, ResumeMode::GenIter,
@@ -256,9 +248,9 @@ void emitAwait(IRGS& env) {
       auto const failed = gen(env, EqInt, state, cns(env, kFailed));
       gen(env, JmpNZero, exitSlow, failed);
       if (resumeMode(env) == ResumeMode::Async) {
-        implAwaitR(env, child, resumeOffset);
+        implAwaitR(env, child, resumeOffset, false);
       } else {
-        implAwaitE(env, child, resumeOffset, 1);
+        implAwaitE(env, child, resumeOffset, false);
       }
     },
     [&] { // Taken: retrieve the result from the wait handle
@@ -318,9 +310,9 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
       );
 
       if (resumeMode(env) == ResumeMode::Async) {
-        implAwaitR(env, wh, resumeOffset);
+        implAwaitR(env, wh, resumeOffset, false);
       } else {
-        implAwaitE(env, wh, resumeOffset, 0);
+        implAwaitE(env, wh, resumeOffset, false);
       }
     }
   );
@@ -349,21 +341,11 @@ void emitFCallAwait(IRGS& env,
       IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
       assertTypeStack(env, BCSPRelOffset{0}, TObj);
 
-      // If an event hook throws we need the current bytecode to be
-      // after the FCallAwait, otherwise the unwinder will expect
-      // to find a PreLive ActRec on the stack.
-      env.irb->setCurMarker(makeMarker(env, resumeOffset));
       auto const child = popC(env);
       if (resumeMode(env) == ResumeMode::Async) {
-        // We've popped a stack element, so inform the unwinder
-        // of the current stack depth.
-        env.irb->setCurMarker(makeMarker(env, resumeOffset));
-        env.irb->exceptionStackBoundary();
-        implAwaitR(env, child, resumeOffset);
+        implAwaitR(env, child, resumeOffset, true);
       } else {
-        // implAwaitE pushes a null before calling the event hook,
-        // so we don't want to update the marker here.
-        implAwaitE(env, child, resumeOffset, 1);
+        implAwaitE(env, child, resumeOffset, true);
       }
     }
   );
@@ -398,7 +380,10 @@ void emitCreateCont(IRGS& env) {
         LdContActRec,
         IsAsyncData(curFunc(env)->isAsync()),
         cont);
-  suspendHookE(env, fp(env), contAR, cont);
+
+  suspendHook(env, false, [&] {
+    gen(env, SuspendHookCreateCont, fp(env), contAR, cont);
+  });
 
   // Grab caller info from the ActRec, free the ActRec, and return control to
   // the caller.

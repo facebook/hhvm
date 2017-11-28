@@ -39,6 +39,7 @@ type options = {
   input_file_list  : string option;
   dump_symbol_refs : bool;
   dump_stats       : bool;
+  dump_config      : bool;
 }
 
 (*****************************************************************************)
@@ -95,6 +96,7 @@ let parse_options () =
   let input_file_list = ref None in
   let dump_symbol_refs = ref false in
   let dump_stats = ref false in
+  let dump_config = ref false in
   let usage = P.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
     [ ("--fallback"
@@ -149,7 +151,11 @@ let parse_options () =
       ("--dump-stats"
       , Arg.Set dump_stats
       , " Dump timing stats for functions"
-      )
+      );
+      ("--dump-config"
+      , Arg.Set dump_config
+      , " Dump configuration settings"
+      );
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -175,6 +181,7 @@ let parse_options () =
   ; input_file_list    = !input_file_list
   ; dump_symbol_refs   = !dump_symbol_refs
   ; dump_stats         = !dump_stats
+  ; dump_config        = !dump_config
   }
 
 let load_file_stdin () =
@@ -331,6 +338,8 @@ let process_single_file compiler_options popt filename outputfile =
       Hhbc_options.get_options_from_config config compiler_options.config_list
     in
     Hhbc_options.set_compiler_options options;
+    if compiler_options.dump_config then
+      Printf.printf "===CONFIG===\n%s\n\n%!" (Hhbc_options.to_string options);
     let fail_or_ast = parse_file compiler_options popt filename text in
     let debug_time = new_debug_time () in
     ignore @@ add_to_time_ref debug_time.parsing_t t;

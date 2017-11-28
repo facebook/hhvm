@@ -65,6 +65,24 @@ let enable_uniform_variable_syntax o = o.option_php7_uvs
 let create_inout_wrapper_functions o = o.option_create_inout_wrapper_functions
 let reffiness_invariance o = o.option_reffiness_invariance
 
+let to_string o = String.concat "\n"
+  [ Printf.sprintf "enable_hiphop_syntax: %B" @@ enable_hiphop_syntax o
+  ; Printf.sprintf "php7_scalar_types: %B" @@ php7_scalar_types o
+  ; Printf.sprintf "enable_xhp: %B" @@ enable_xhp o
+  ; Printf.sprintf "constant_folding: %B" @@ constant_folding o
+  ; Printf.sprintf "optimize_null_check: %B" @@ optimize_null_check o
+  ; Printf.sprintf "optimize_cuf: %B" @@ optimize_cuf o
+  ; Printf.sprintf "max_array_elem_size_on_the_stack: %d"
+    @@ max_array_elem_size_on_the_stack o
+  ; Printf.sprintf "source_mapping: %B" @@ source_mapping o
+  ; Printf.sprintf "relabel: %B" @@ relabel o
+  ; Printf.sprintf "enable_uniform_variable_syntax: %B"
+    @@ enable_uniform_variable_syntax o
+  ; Printf.sprintf "create_inout_wrapper_functions: %B"
+    @@ create_inout_wrapper_functions o
+  ; Printf.sprintf "reffiness_invariance: %B" @@ reffiness_invariance o
+  ]
+
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
  * Eval.EnableHipHopSyntax setting *)
 let ints_overflow_to_ints options =
@@ -161,9 +179,9 @@ let value_setters = [
     fun opts v -> { opts with option_optimize_cuf = (v = 1) });
   (set_value "hhvm.php7.uvs" get_value_from_config_int @@
     fun opts v -> { opts with option_php7_uvs = (v = 1) });
-  (set_value "eval.createinoutwrapperfunctions" get_value_from_config_int @@
+  (set_value "hhvm.create_in_out_wrapper_functions" get_value_from_config_int @@
     fun opts v -> { opts with option_create_inout_wrapper_functions = (v = 1)});
-  (set_value "eval.reffinessinvariance" get_value_from_config_int @@
+  (set_value "hhvm.reffiness_invariance" get_value_from_config_int @@
     fun opts v -> { opts with option_reffiness_invariance = (v = 1) })
 ]
 

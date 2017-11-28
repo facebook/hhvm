@@ -46,6 +46,26 @@ let rec hint_uses_tparams tparam_names (_, hint)  =
     false
   | Ast.Haccess ((_, n), _, _) -> SSet.mem n tparam_names
 
+(* Extracts inout params
+ * Or ref params only if the function is a closure
+ *)
+let extract_inout_or_ref_param_locations is_closure params =
+  let inout_param_locations = List.filter_mapi params
+    ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout
+                   then None else Some i) in
+  if List.length inout_param_locations <> 0 then
+    inout_param_locations
+  else if is_closure &&
+    Hhbc_options.create_inout_wrapper_functions !Hhbc_options.compiler_options
+  then
+    let ref_param_locations = List.filter_mapi params
+      ~f:(fun i p -> if not p.Ast.param_is_reference
+                     then None else Some i) in
+    if List.length ref_param_locations <> 0 then
+      ref_param_locations else []
+  else []
+
+
 let from_ast_wrapper : bool -> _ ->
   Ast.class_ -> Ast.method_ -> Hhas_method.t list =
   fun privatize make_name ast_class ast_method ->
@@ -70,16 +90,24 @@ let from_ast_wrapper : bool -> _ ->
     (not method_is_private && not method_is_protected)) in
   let is_memoize =
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
-  let inout_param_locations = List.filter_mapi ast_method.Ast.m_params
-      ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout
-                     then None else Some i) in
-  let has_inout_args = List.length inout_param_locations <> 0 in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   let (pos, original_name) = ast_method.Ast.m_name in
   let (_, class_name) = ast_class.Ast.c_name in
   let class_name = SU.Xhp.mangle @@ Utils.strip_ns class_name in
   let ret = ast_method.Ast.m_ret in
   let original_method_id = make_name ast_method.Ast.m_name in
+  (* TODO: use something that can't be faked in user code *)
+  let method_is_closure_body =
+     original_name = "__invoke"
+     && String_utils.string_starts_with class_name "Closure$" in
+   if not (method_is_static || method_is_closure_body) then
+     List.iter ast_method.Ast.m_params (fun p ->
+       let pos, id = p.Ast.param_id in
+       if id = SN.SpecialIdents.this then
+       Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this");
+  let inout_param_locations =
+    extract_inout_or_ref_param_locations method_is_closure_body ast_method.Ast.m_params in
+  let has_inout_args = List.length inout_param_locations <> 0 in
   let renamed_method_id = if has_inout_args then
     Hhbc_id.Method.from_ast_name @@
       (snd ast_method.Ast.m_name)
@@ -97,15 +125,6 @@ let from_ast_wrapper : bool -> _ ->
   then Emit_fatal.raise_fatal_parse pos
     ("Class " ^ class_name ^ " contains non-static method " ^ original_name
      ^ " and therefore cannot be declared 'abstract final'");
- (* TODO: use something that can't be faked in user code *)
- let method_is_closure_body =
-    original_name = "__invoke"
-    && String_utils.string_starts_with class_name "Closure$" in
-  if not (method_is_static || method_is_closure_body) then
-    List.iter ast_method.Ast.m_params (fun p ->
-      let pos, id = p.Ast.param_id in
-      if id = SN.SpecialIdents.this then
-      Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this");
   (* Restrictions on __construct methods with promoted parameters *)
   let has_param_promotion = List.exists ast_method.Ast.m_params
     (fun p -> Option.is_some p.Ast.param_modifier)
@@ -188,6 +207,9 @@ let from_ast_wrapper : bool -> _ ->
       ret
       [Ast.Stmt (Ast.Block ast_method.Ast.m_body)]
   in
+  let method_id =
+    if has_inout_args && method_is_closure_body then
+    original_method_id else renamed_method_id in
   let normal_function =
     Hhas_method.make
       method_attributes
@@ -199,7 +221,7 @@ let from_ast_wrapper : bool -> _ ->
       method_is_abstract
       false (*method_no_injection*)
       false (*method_inout_wrapper*)
-      renamed_method_id
+      method_id
       method_body
       (Hhas_pos.pos_to_span ast_method.Ast.m_span)
       method_is_async
@@ -210,12 +232,16 @@ let from_ast_wrapper : bool -> _ ->
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_method.body normal_function in
   if has_inout_args
-  then [Emit_inout_function.emit_wrapper_method
-          ~decl_vars
-          ~original_id:original_method_id
-          ~renamed_id:renamed_method_id
-          ast_class ast_method;
-        normal_function]
+  then
+    let wrapper =
+      Emit_inout_function.emit_wrapper_method
+        ~is_closure:method_is_closure_body
+        ~decl_vars
+        ~original_id:original_method_id
+        ~renamed_id:renamed_method_id
+        ast_class ast_method in
+      if method_is_closure_body then [normal_function; wrapper]
+      else [wrapper; normal_function]
   else [normal_function]
 
 

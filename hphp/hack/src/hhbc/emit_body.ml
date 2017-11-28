@@ -287,7 +287,9 @@ let emit_body
     Emit_param.from_asts
       ~namespace ~tparams ~generate_defaults:(not is_memoize) ~scope params
   in
-  let verify_out = emit_verify_out params in
+  let params = if is_closure_body
+    then List.map ~f:Hhas_param.switch_inout_to_reference params else params in
+  let verify_out = if is_closure_body then empty else emit_verify_out params in
   Emit_statement.set_verify_return verify_return;
   Emit_statement.set_verify_out verify_out;
   Emit_statement.set_default_dropthrough default_dropthrough;

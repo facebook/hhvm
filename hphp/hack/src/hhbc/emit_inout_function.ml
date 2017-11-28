@@ -148,7 +148,8 @@ let emit_wrapper_function
     return_by_ref
 
 let emit_wrapper_method
-  ~decl_vars ~original_id ~renamed_id ast_class ast_method =
+  ~is_closure ~decl_vars ~original_id ~renamed_id ast_class ast_method =
+  let decl_vars = if is_closure then [] else decl_vars in
   let scope =
     [Ast_scope.ScopeItem.Method ast_method;
      Ast_scope.ScopeItem.Class ast_class] in
@@ -164,7 +165,8 @@ let emit_wrapper_method
     List.mem ast_method.Ast.m_kind Ast.Abstract ||
     ast_class.Ast.c_kind = Ast.Cinterface in
   let method_is_final = List.mem ast_method.Ast.m_kind Ast.Final in
-  let method_is_static = List.mem ast_method.Ast.m_kind Ast.Static in
+  let method_is_static = not is_closure &&
+    List.mem ast_method.Ast.m_kind Ast.Static in
   let method_attributes = Emit_attribute.from_asts
       (Emit_env.get_namespace env) ast_method.Ast.m_user_attributes in
   let method_is_private =
@@ -184,26 +186,43 @@ let emit_wrapper_method
   let method_is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let param_count = List.length params in
   let class_name = Hhbc_id.Class.from_ast_name @@ snd ast_class.A.c_name in
+  let wrapper_type, original_id, renamed_id, params =
+    if is_closure then
+      Emit_inout_helpers.RefWrapper, renamed_id, original_id,
+      List.map ~f:Hhas_param.switch_inout_to_reference params
+    else
+      Emit_inout_helpers.InoutWrapper, original_id, renamed_id, params
+  in
   let call_instrs =
-    if method_is_static then
+    if is_closure then
+      gather [
+        instr_this;
+        instr_fpushfunc param_count []
+      ]
+    else if method_is_static then
       if is_in_trait then
         instr_fpushclsmethodsd param_count H.SpecialClsRef.Self renamed_id
       else
         instr_fpushclsmethodd param_count renamed_id class_name
     else
-      gather [ instr_this;
-               instr_fpushobjmethodd param_count renamed_id Ast.OG_nullsafe
-             ]
+      gather [
+        instr_this;
+        instr_fpushobjmethodd param_count renamed_id Ast.OG_nullsafe
+      ]
   in
   let special_params = List.filter params
     ~f:(fun p -> Hhas_param.is_reference p || Hhas_param.is_inout p) in
   Local.reset_local @@ List.length decl_vars + List.length special_params + 1;
-  let wrapper_type = Emit_inout_helpers.InoutWrapper in
   let body_instrs =
     emit_body_instrs ~wrapper_type ~verify_ret env params call_instrs in
   let fault_instrs = extract_fault_instructions body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
-  let params = List.map ~f:Hhas_param.switch_inout_to_reference params in
+  let params =
+    if wrapper_type = Emit_inout_helpers.InoutWrapper then
+      List.map ~f:Hhas_param.switch_inout_to_reference params
+    else
+      List.map ~f:Hhas_param.switch_reference_to_inout params
+  in
   let body = make_wrapper_body decl_vars return_type_info params body_instrs in
   Hhas_method.make
     method_attributes

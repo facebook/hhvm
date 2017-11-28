@@ -24,6 +24,7 @@ val emit_wrapper_function :
 
 (* Emit wrapper function for functions with inout arguments *)
 val emit_wrapper_method :
+  is_closure: bool ->
   decl_vars: string list ->
   (* Original identifer for function, used for the wrapper *)
   original_id: Hhbc_id.Method.t ->

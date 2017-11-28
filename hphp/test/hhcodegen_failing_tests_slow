@@ -22,7 +22,6 @@ slow/hh_namespace_migration/hh_vector3.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/inline-hhas/mixed.php
 slow/inout/bad-call-15.php
-slow/inout/closure.php
 slow/inout/side-effects.php
 slow/namespace/hashbang_2.php
 slow/now_doc/1906.php

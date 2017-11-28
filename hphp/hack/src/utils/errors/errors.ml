@@ -766,6 +766,7 @@ module Typing                               = struct
   let invalid_disposable_hint               = 4190 (* DONT MODIFY!!!! *)
   let xhp_required                          = 4191 (* DONT MODIFY!!!! *)
   let escaping_this                         = 4192 (* DONT MODIFY!!!! *)
+  let illegal_xhp_child                     = 4193 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2453,6 +2454,10 @@ let invalid_disposable_hint pos class_name =
 let xhp_required pos why_xhp ty_reason_msg =
   let msg = "An XHP instance was expected" in
   add_list Typing.xhp_required ((pos, msg)::(pos, why_xhp)::ty_reason_msg)
+
+let illegal_xhp_child pos ty_reason_msg =
+  let msg = "XHP children must be compatible with XHPChild" in
+  add_list Typing.illegal_xhp_child ((pos, msg)::ty_reason_msg)
 
 let nullsafe_not_needed p nonnull_witness =
   add_list Typing.nullsafe_not_needed (

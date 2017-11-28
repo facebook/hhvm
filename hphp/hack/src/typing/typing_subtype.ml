@@ -861,7 +861,7 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   | (_, Tprim Nast.Tstring), (_, Tclass ((_, stringish), _))
     when stringish = SN.Classes.cStringish -> env
   | (_, Tarraykind _), (_, Tclass ((_, xhp_child), _))
-  | (_, Tprim (Nast.Tint | Nast.Tfloat | Nast.Tstring | Nast.Tnum)), (_, Tclass ((_, xhp_child), _))
+  | (_, Tprim (Nast.Tarraykey | Nast.Tint | Nast.Tfloat | Nast.Tstring | Nast.Tnum)), (_, Tclass ((_, xhp_child), _))
     when xhp_child = SN.Classes.cXHPChild -> env
   | (_, Tarraykind (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub))),
     (r, Tarraykind (AKvarray_or_darray tv_super)) ->

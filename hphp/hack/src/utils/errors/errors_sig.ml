@@ -413,4 +413,5 @@ module type S = sig
   val inoutness_mismatch : Pos.t -> Pos.t -> unit
   val inout_params_ret_by_ref : Pos.t -> Pos.t -> unit
   val xhp_required : Pos.t -> string -> (Pos.t * string) list -> unit
+  val illegal_xhp_child : Pos.t -> (Pos.t * string) list -> unit
 end

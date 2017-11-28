@@ -9,11 +9,11 @@
  *
  */
 
-class A {}
+class A implements XHPChild {}
 
 class :x:dumb {}
 
 function foo(mixed $x): void {
-  // Anything goes in XHP
+  // Almost anything goes in XHP
   $x = <x:dumb>{0} {'hello'} {$x} {new A()}</x:dumb>;
 }

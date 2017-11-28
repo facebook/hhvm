@@ -15,6 +15,7 @@ module Env          = Typing_env
 module Phase        = Typing_phase
 module Reason       = Typing_reason
 module Subst        = Decl_subst
+module SubType      = Typing_subtype
 module TUtils       = Typing_utils
 
 let raise_xhp_required pos ureason ty =
@@ -96,3 +97,22 @@ and get_spread_attributes env pos onto_xhp cty =
   in
   let env, attrs = List.map_env ~f:xhp_to_attrs env possible_xhp in
   env, List.concat attrs
+
+(**
+ * Typing rules for the body expressions of an XHP literal.
+ * Until XHPChild type inference is improved, there is a cascading set of
+ * checks here to allow for parity with what the runtime accepts.
+ *)
+and xhp_child env pos ty =
+  let reason = Reason.Rwitness pos in
+  (* ?XHPChild *)
+  let ty_child = reason, Tclass ((Pos.none, SN.Classes.cXHPChild), []) in
+  let ty_child = reason, Toption ty_child in
+  (* ?Stringish *)
+  let ty_stringish = reason, Tclass ((Pos.none, SN.Classes.cStringish), []) in
+  let ty_stringish = reason, Toption ty_stringish in
+  (* Any ?Traversable *)
+  let ty_traversable = reason, Tclass ((Pos.none, SN.Collections.cTraversable), [Reason.none, Tany]) in
+  let ty_traversable = reason, Toption ty_traversable in
+  let tys = [ty_child; ty_stringish; ty_traversable] in
+  List.exists ~f:(fun super -> SubType.is_sub_type env ty super) tys

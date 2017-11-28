@@ -113,6 +113,7 @@ fundecl:
             (not (List.mem "nontop" attrs))
             (List.mem "no_injection" attrs)
             (List.mem "inout_wrapper" attrs)
+            (List.mem "reference" attrs)
         }
 ;
 nl:
@@ -262,6 +263,7 @@ methoddecl:
     (List.mem "isGenerator" $7)
     (List.mem "isPairGenerator" $7)
     (List.mem "isClosureBody" $7)
+    (List.mem "reference" $7)
   }
 ;
 numclsrefslots:

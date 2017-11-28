@@ -1258,6 +1258,8 @@ let function_attributes f =
     if Hhas_function.inout_wrapper f then "inout_wrapper" :: attrs else attrs in
   let attrs =
     if Hhas_function.no_injection f then "no_injection" :: attrs else attrs in
+  let attrs =
+    if Hhas_function.is_return_by_ref f then "reference" :: attrs else attrs in
   let text = String.concat " " attrs in
   if text = "" then "" else "[" ^ text ^ "] "
 
@@ -1295,6 +1297,7 @@ let method_attributes m =
   let attrs = if Hhas_method.is_public m then "public" :: attrs else attrs in
   let attrs = if Hhas_method.is_protected m then "protected" :: attrs else attrs in
   let attrs = if Hhas_method.is_private m then "private" :: attrs else attrs in
+  let attrs = if Hhas_method.is_return_by_ref m then "reference" :: attrs else attrs in
   let text = String.concat " " attrs in
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text

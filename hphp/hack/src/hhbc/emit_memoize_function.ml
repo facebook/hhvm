@@ -140,8 +140,9 @@ let make_wrapper_body return_type params instrs =
 
 let emit_wrapper_function
   ~original_id ~renamed_id ~is_method ~deprecation_info ast_fun =
+  let ret_by_ref = ast_fun.Ast.f_ret_by_ref in
   Emit_memoize_helpers.check_memoize_possible (fst ast_fun.Ast.f_name)
-    ~ret_by_ref: ast_fun.Ast.f_ret_by_ref
+    ~ret_by_ref
     ~params: ast_fun.Ast.f_params
     ~is_method;
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
@@ -173,4 +174,10 @@ let emit_wrapper_function
     original_id
     memoized_body
     (Hhas_pos.pos_to_span ast_fun.Ast.f_span)
-    false false false true false false
+    false (* is_async *)
+    false (* is_generator *)
+    false (* is_pair_generator *)
+    true  (* is_top *)
+    false (* no_injection *)
+    false (* inout_wrapper *)
+    ret_by_ref

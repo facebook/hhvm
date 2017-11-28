@@ -169,6 +169,7 @@ let from_ast_wrapper : bool -> _ ->
     then Ast_scope.ScopeItem.Lambda :: scope else scope in
   let closure_namespace = SMap.get class_name (Emit_env.get_closure_namespaces ()) in
   let namespace = Option.value closure_namespace ~default:namespace in
+  let is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let method_body, method_is_generator, method_is_pair_generator =
     Emit_body.emit_body
       ~pos:ast_method.Ast.m_span
@@ -178,7 +179,7 @@ let from_ast_wrapper : bool -> _ ->
       ~is_async:method_is_async
       ~deprecation_info
       ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
-      ~is_return_by_ref:ast_method.Ast.m_ret_by_ref
+      ~is_return_by_ref
       ~default_dropthrough
       ~return_value:instr_null
       ~namespace
@@ -205,6 +206,7 @@ let from_ast_wrapper : bool -> _ ->
       method_is_generator
       method_is_pair_generator
       method_is_closure_body
+      is_return_by_ref
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_method.body normal_function in
   if has_inout_args

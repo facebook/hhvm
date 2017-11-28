@@ -405,6 +405,7 @@ let make_memoize_wrapper_method env info index ast_class ast_method =
     || original_name = Naming_special_names.Members.__destruct
     then None
     else ast_method.Ast.m_ret in
+  let method_is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let method_id = Hhbc_id.Method.from_ast_name original_name in
   let scope =
     [Ast_scope.ScopeItem.Method ast_method;
@@ -430,6 +431,7 @@ let make_memoize_wrapper_method env info index ast_class ast_method =
     false (*method_is_generator*)
     false (*method_is_pair_generator*)
     false (*method_is_closure_body*)
+    method_is_return_by_ref
 
 let emit_wrapper_methods env info ast_class ast_methods =
   (* Wrapper methods may not have iterators *)

@@ -133,12 +133,19 @@ let emit_wrapper_function
   let body_instrs = gather [body_instrs; fault_instrs] in
   let body =
     make_wrapper_body decl_vars return_type_info modified_params body_instrs in
+  let return_by_ref = ast_fun.Ast.f_ret_by_ref in
   Hhas_function.make
     function_attributes
     name
     body
     (Hhas_pos.pos_to_span ast_fun.Ast.f_span)
-    false false false is_top true true
+    false (* is_async *)
+    false (* is_generator *)
+    false (* is_pair_generator *)
+    is_top
+    true (* no_injection *)
+    true (* inout_wrapper *)
+    return_by_ref
 
 let emit_wrapper_method
   ~decl_vars ~original_id ~renamed_id ast_class ast_method =
@@ -174,6 +181,7 @@ let emit_wrapper_method
   let verify_ret =
     return_type_info.Hhas_type_info.type_info_user_type <> Some "" &&
     Hhas_type_info.has_type_constraint return_type_info in
+  let method_is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let param_count = List.length params in
   let class_name = Hhbc_id.Class.from_ast_name @@ snd ast_class.A.c_name in
   let call_instrs =
@@ -214,3 +222,4 @@ let emit_wrapper_method
     false (*method_is_generator*)
     false (*method_is_pair_generator*)
     false (*method_is_closure_body*)
+    method_is_return_by_ref

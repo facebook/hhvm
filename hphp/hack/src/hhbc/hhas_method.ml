@@ -9,22 +9,23 @@
 *)
 
 type t = {
-  method_attributes    : Hhas_attribute.t list;
-  method_is_protected  : bool;
-  method_is_public     : bool;
-  method_is_private    : bool;
-  method_is_static     : bool;
-  method_is_final      : bool;
-  method_is_abstract   : bool;
-  method_no_injection  : bool;
-  method_inout_wrapper : bool;
-  method_name          : Hhbc_id.Method.t;
-  method_body          : Hhas_body.t;
-  method_span          : Hhas_pos.span;
-  method_is_async      : bool;
+  method_attributes        : Hhas_attribute.t list;
+  method_is_protected      : bool;
+  method_is_public         : bool;
+  method_is_private        : bool;
+  method_is_static         : bool;
+  method_is_final          : bool;
+  method_is_abstract       : bool;
+  method_no_injection      : bool;
+  method_inout_wrapper     : bool;
+  method_name              : Hhbc_id.Method.t;
+  method_body              : Hhas_body.t;
+  method_span              : Hhas_pos.span;
+  method_is_async          : bool;
   method_is_generator      : bool;
   method_is_pair_generator : bool;
-  method_is_closure_body : bool;
+  method_is_closure_body   : bool;
+  method_is_return_by_ref  : bool;
 }
 
 let make
@@ -43,7 +44,8 @@ let make
   method_is_async
   method_is_generator
   method_is_pair_generator
-  method_is_closure_body = {
+  method_is_closure_body
+  method_is_return_by_ref = {
     method_attributes;
     method_is_protected;
     method_is_public;
@@ -60,6 +62,7 @@ let make
     method_is_generator;
     method_is_pair_generator;
     method_is_closure_body;
+    method_is_return_by_ref;
   }
 
 let attributes method_def = method_def.method_attributes
@@ -84,6 +87,7 @@ let is_async method_def = method_def.method_is_async
 let is_generator method_def = method_def.method_is_generator
 let is_pair_generator method_def = method_def.method_is_pair_generator
 let is_closure_body method_def = method_def.method_is_closure_body
+let is_return_by_ref method_def = method_def.method_is_return_by_ref
 let with_body method_def method_body = { method_def with method_body }
 let params m = m.method_body.Hhas_body.body_params
 let return_type m = m.method_body.Hhas_body.body_return_type

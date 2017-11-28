@@ -69,6 +69,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       original_id (Emit_inout_helpers.inout_suffix inout_param_locations)
     else original_id in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
+  let is_return_by_ref = ast_fun.Ast.f_ret_by_ref in
   let function_body, function_is_generator, function_is_pair_generator =
     Emit_body.emit_body
       ~pos: ast_fun.A.f_span
@@ -78,7 +79,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~is_async:function_is_async
       ~deprecation_info:(if is_memoize then None else deprecation_info)
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
-      ~is_return_by_ref:ast_fun.Ast.f_ret_by_ref
+      ~is_return_by_ref
       ~default_dropthrough:None
       ~return_value:instr_null
       ~namespace
@@ -101,6 +102,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       is_top
       false (*no_injection*)
       false (*inout_wrapper*)
+      is_return_by_ref
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_function.body normal_function in
   if is_memoize

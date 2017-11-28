@@ -332,10 +332,9 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
   // there is no magic __get, propImpl will raise_error("Cannot access ...",
   // but o_get will only (maybe) raise_notice("Undefined property ..." :-(
 
-  auto const lookup = getPropImpl(ctx, propName.get(), false);
-  auto prop = lookup.prop;
-  if (lookup.accessible && prop && prop->m_type != KindOfUninit) {
-    return tvAsVariant(prop);
+  auto const prop = getProp(ctx, propName.get());
+  if (prop && prop.type() != KindOfUninit) {
+    return Variant::wrap(prop.tv());
   }
 
   if (getAttribute(UseGet)) {
@@ -375,7 +374,7 @@ void ObjectData::o_set(const String& propName, const Variant& v,
 
   bool useSet = getAttribute(UseSet);
 
-  auto const lookup = getPropImpl(ctx, propName.get(), true);
+  auto const lookup = getPropImpl<true>(ctx, propName.get());
   auto prop = lookup.prop;
   if (prop && lookup.accessible) {
     if (!useSet || prop->m_type != KindOfUninit) {
@@ -958,10 +957,11 @@ Slot ObjectData::declPropInd(const TypedValue* prop) const {
   }
 }
 
+template <bool forWrite>
+ALWAYS_INLINE
 ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
   const Class* ctx,
-  const StringData* key,
-  bool copyDynArray
+  const StringData* key
 ) {
   auto const lookup = m_cls->getDeclPropIndex(ctx, key);
   auto const propIdx = lookup.prop;
@@ -988,14 +988,18 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
   // dynamic property with this name.
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
     if (auto const rval = dynPropArray()->rval(key)) {
-      // If we may write to the property we need to allow the array to escalate.
-      auto const prop = copyDynArray
-        ? dynPropArray().lvalAt(StrNR(key), AccessFlags::Key).tv_ptr()
-        : rval.tv_ptr();
-
       // Returning a non-declared property, we know that it is accessible since
-      // all dynamic properties are.
-      return PropLookup<TypedValue*> { const_cast<TypedValue*>(prop), true };
+      // all dynamic properties are. If we may write to the property we
+      // need to allow the array to escalate.
+      if (forWrite) {
+        auto const lval = dynPropArray().lvalAt(StrNR(key), AccessFlags::Key);
+        return PropLookup<TypedValue*> { lval.tv_ptr(), true };
+      } else {
+        return PropLookup<TypedValue*> {
+          const_cast<TypedValue*>(rval.tv_ptr()),
+          true
+        };
+      }
     }
   }
 
@@ -1003,7 +1007,7 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
 }
 
 member_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
-  auto const lookup = getPropImpl(ctx, key, true);
+  auto const lookup = getPropImpl<true>(ctx, key);
   return member_lval {
     this, lookup.prop && lookup.accessible ? lookup.prop : nullptr
   };
@@ -1011,14 +1015,14 @@ member_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
 
 member_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
   auto const lookup = const_cast<ObjectData*>(this)
-    ->getPropImpl(ctx, key, false);
+    ->getPropImpl<false>(ctx, key);
   return member_rval {
     this, lookup.prop && lookup.accessible ? lookup.prop : nullptr
   };
 }
 
 member_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
-  auto const lookup = getPropImpl(ctx, key, true);
+  auto const lookup = getPropImpl<true>(ctx, key);
   auto prop = lookup.prop;
   if (lookup.accessible && prop && prop->m_type != KindOfUninit) {
     tvBoxIfNeeded(*prop);
@@ -1028,7 +1032,7 @@ member_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
 }
 
 member_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
-  auto const lookup = getPropImpl(nullptr, key, true);
+  auto const lookup = getPropImpl<true>(nullptr, key);
   auto prop = lookup.prop;
   if (prop && prop->m_type != KindOfUninit) {
     tvBoxIfNeeded(*prop);
@@ -1228,7 +1232,7 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
                                  const StringData* key) {
   auto constexpr write = (mode == PropMode::DimForWrite) ||
                          (mode == PropMode::Bind);
-  auto const lookup = getPropImpl(ctx, key, write);
+  auto const lookup = getPropImpl<write>(ctx, key);
   auto const prop = lookup.prop;
 
   if (prop) {
@@ -1329,11 +1333,9 @@ TypedValue* ObjectData::propB(
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
-  auto const lookup = getPropImpl(ctx, key, false);
-  auto const prop = lookup.prop;
-
-  if (prop && lookup.accessible && prop->m_type != KindOfUninit) {
-    return !cellIsNull(tvToCell(prop));
+  auto const prop = getProp(ctx, key);
+  if (prop && prop.type() != KindOfUninit) {
+    return prop.unboxed().type() != KindOfNull;
   }
 
   if (getAttribute(HasNativePropHandler)) {
@@ -1351,11 +1353,9 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
 }
 
 bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
-  auto const lookup = getPropImpl(ctx, key, false);
-  auto const prop = lookup.prop;
-
-  if (prop && lookup.accessible && prop->m_type != KindOfUninit) {
-    return !cellToBool(*tvToCell(prop));
+  auto const prop = getProp(ctx, key);
+  if (prop && prop.type() != KindOfUninit) {
+    return !cellToBool(prop.unboxed().tv());
   }
 
   if (getAttribute(HasNativePropHandler)) {
@@ -1398,7 +1398,7 @@ bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
 }
 
 void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
-  auto const lookup = getPropImpl(ctx, key, true);
+  auto const lookup = getPropImpl<true>(ctx, key);
   auto const prop = lookup.prop;
 
   if (prop && lookup.accessible) {
@@ -1438,7 +1438,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
                                   SetOpOp op,
                                   const StringData* key,
                                   Cell* val) {
-  auto const lookup = getPropImpl(ctx, key, true);
+  auto const lookup = getPropImpl<true>(ctx, key);
   auto prop = lookup.prop;
 
   if (prop && lookup.accessible) {
@@ -1528,7 +1528,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
 }
 
 Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
-  auto const lookup = getPropImpl(ctx, key, true);
+  auto const lookup = getPropImpl<true>(ctx, key);
   auto prop = lookup.prop;
 
   if (prop && lookup.accessible) {
@@ -1609,7 +1609,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
 }
 
 void ObjectData::unsetProp(Class* ctx, const StringData* key) {
-  auto const lookup = getPropImpl(ctx, key, true);
+  auto const lookup = getPropImpl<true>(ctx, key);
   auto const prop = lookup.prop;
   auto const propInd = declPropInd(prop);
 

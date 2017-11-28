@@ -369,8 +369,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     bool accessible;
   };
 
-  PropLookup<TypedValue*> getPropImpl(const Class*, const StringData*,
-                                      bool copyDynArray);
+  template <bool forWrite>
+  ALWAYS_INLINE
+  PropLookup<TypedValue*> getPropImpl(const Class*, const StringData*);
 
   enum class PropMode : int {
     ReadNoWarn,

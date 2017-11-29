@@ -21,6 +21,20 @@ let type_at_pos tast line char =
             | None -> acc
         in
         super#on_expr acc e
+      (* When the expression being applied has a Tfun type, replace that type
+       * with its return type. This matches with legacy behavior and is
+       * better-suited for IDE hover (at present, since full function types are
+       * presented in a way which makes them difficult to read). *)
+      method! on_call acc ct e el uel =
+        let open Option.Monad_infix in
+        let return_type ty =
+          let open Typing_defs in
+          match snd ty with Tfun ft -> ft.ft_ret | _ -> ty
+        in
+        let (receiver_pos, _) = fst e in
+        if Pos.inside receiver_pos line char
+        then super#on_expr acc e >>| fun (env, ty) -> env, return_type ty
+        else super#on_call acc ct e el uel
     end
   in
   visitor#on_program None tast

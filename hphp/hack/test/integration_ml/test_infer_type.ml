@@ -86,7 +86,7 @@ let test_pair_cases = [
   ("test_pair.php", 8, 4), "Pair";
   ("test_pair.php", 8, 17), "B";
   ("test_pair.php", 10, 14), "A";
-  ("test_pair.php", 12, 10), "(function(Pair<A> $v): Pair<A>)";
+  ("test_pair.php", 12, 10), "Pair<A>";
   ("test_pair.php", 12, 19), "Pair<A>";
   ("test_pair.php", 12, 20), "Pair";
 ]
@@ -132,11 +132,26 @@ let lambda_cases = [
   ("lambda1.php", 4, 3), "[fun]";
   ("lambda1.php", 4, 29), "string";
   ("lambda1.php", 6, 3), "string";
-  ("lambda1.php", 6, 8), "[fun]";
+  ("lambda1.php", 6, 8), "string";
   ("lambda1.php", 6, 11), "int";
   ("lambda1.php", 8, 3), "string";
-  ("lambda1.php", 8, 8), "[fun]";
+  ("lambda1.php", 8, 8), "string";
   ("lambda1.php", 8, 11), "string";
+]
+
+let callback = "<?hh // strict
+function test_callback((function(int): string) $cb): void {
+  $cb;
+//^3:3
+  $cb(5);
+//^5:3 ^5:8
+}
+"
+
+let callback_cases = [
+  ("callback.php", 3, 3), "(function(int): string)";
+  ("callback.php", 5, 3), "string";
+  ("callback.php", 5, 8), "string";
 ]
 
 let files = [
@@ -146,6 +161,7 @@ let files = [
   "test_pair.php", test_pair;
   "loop_assignment.php", loop_assignment;
   "lambda1.php", lambda1;
+  "callback.php", callback;
 ]
 
 let cases =
@@ -154,6 +170,7 @@ let cases =
   @ test_pair_cases
   @ loop_assignment_cases
   @ lambda_cases
+  @ callback_cases
 
 let () =
   let env = Test.setup_server () in

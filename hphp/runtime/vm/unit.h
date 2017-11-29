@@ -169,6 +169,7 @@ private:
  */
 using LineEntry      = TableEntry<int>;
 using SourceLocEntry = TableEntry<SourceLoc>;
+using LineInfo       = std::pair<OffsetRange, int>;
 
 using LineTable      = std::vector<LineEntry>;
 using SourceLocTable = std::vector<SourceLocEntry>;
@@ -879,7 +880,7 @@ private:
   MD5 m_md5;
   FixedVector<const ArrayData*> m_arrays;
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
-  mutable LockFreePtrWrapper<CompactVector<LineEntry>> m_lineMap;
+  mutable LockFreePtrWrapper<CompactVector<LineInfo>> m_lineMap;
 };
 
 struct UnitExtended : Unit {

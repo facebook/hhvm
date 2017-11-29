@@ -114,7 +114,7 @@ T& getDataRef(void* base, unsigned offset) {
  * We store 'detailed' line number information on a table on the side, because
  * in production modes for HHVM it's generally not useful (which keeps Unit
  * smaller in that case)---this stuff is only used for the debugger, where we
- * can afford the lookup here.  The normal Unit m_lineTable is capable of
+ * can afford the lookup here.  The normal Unit m_lineMap is capable of
  * producing enough line number information for things needed in production
  * modes (backtraces, warnings, etc).
  */
@@ -395,20 +395,59 @@ static LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit) {
   return acc->second.lineToOffsetRange;
 }
 
-static LineTable loadLineTable(const Unit* unit) {
-  auto ret = LineTable{};
+static const LineTable& loadLineTable(const Unit* unit) {
   if (unit->repoID() == RepoIdInvalid) {
     LineTableStash::accessor acc;
     if (s_lineTables.find(acc, unit)) {
       return acc->second;
     }
-    return ret;
+    static LineTable empty;
+    return empty;
   }
 
-  auto& urp = Repo::get().urp();
-  urp.getUnitLineTable(unit->repoID(), unit->sn(), ret);
+  struct LineCacheEntry {
+    LineCacheEntry(const Unit* unit, LineTable&& table) :
+        unit{unit}, table{std::move(table)} {}
+    const Unit* unit;
+    LineTable table;
+  };
+  static std::array<std::atomic<LineCacheEntry*>, 512> s_lineCache;
 
-  return ret;
+  auto hash = pointer_hash<Unit>{}(unit) % s_lineCache.size();
+  auto& entry = s_lineCache[hash];
+  if (auto const p = entry.load(std::memory_order_acquire)) {
+    if (p->unit == unit) return p->table;
+  }
+
+  // We already hold a lock on the unit in Unit::getLineNumber below,
+  // so nobody else is going to be reading the line table while we are
+  // (this is only an efficiency concern).
+  auto& urp = Repo::get().urp();
+  auto table = LineTable{};
+  urp.getUnitLineTable(unit->repoID(), unit->sn(), table);
+  auto const p = new LineCacheEntry(unit, std::move(table));
+  if (auto const old = entry.exchange(p, std::memory_order_release)) {
+    Treadmill::enqueue([old] { delete old; });
+  }
+  return p->table;
+}
+
+static LineInfo getLineInfo(const LineTable& table, Offset pc) {
+  auto const it =
+    std::upper_bound(begin(table), end(table), LineEntry{ pc, -1 });
+
+  auto const e = end(table);
+  if (it != e) {
+    auto const line = it->val();
+    if (line > 0) {
+      auto const pastOff = it->pastOffset();
+      auto const baseOff = it == begin(table) ?
+        pc : std::prev(it)->pastOffset();
+      assertx(baseOff <= pc && pc < pastOff);
+      return { { baseOff, pastOff }, line };
+    }
+  }
+  return LineInfo{ { pc, pc + 1 }, -1 };
 }
 
 int getLineNumber(const LineTable& table, Offset pc) {
@@ -437,9 +476,15 @@ int Unit::getLineNumber(Offset pc) const {
     // lineMap is an atomically acquired bitwise copy of m_lineMap,
     // with no destructor
     auto lineMap(m_lineMap.get());
-    auto it = std::lower_bound(lineMap->begin(), lineMap->end(),
-                               LineEntry { pc, 0 });
-    if (it != lineMap->end() && it->pastOffset() == pc) return it->val();
+    if (lineMap->empty()) return INT_MIN;
+    auto const it = std::upper_bound(
+      lineMap->begin(), lineMap->end(),
+      *lineMap->begin(), // Will be the first (ignored) param to our predicate
+      [&] (const LineInfo&, const LineInfo& elm) {
+        return pc < elm.first.past;
+      }
+    );
+    if (it != lineMap->end() && it->first.base <= pc) return it->second;
     return INT_MIN;
   };
 
@@ -454,20 +499,24 @@ int Unit::getLineNumber(Offset pc) const {
       return line;
     }
 
-    line = HPHP::getLineNumber(loadLineTable(this), pc);
-    if (line < -1) line = -1;
-    auto const le = LineEntry { pc, line };
+    auto const info = HPHP::getLineInfo(loadLineTable(this), pc);
     auto copy = m_lineMap.copy();
-    auto it = std::lower_bound(copy.begin(), copy.end(), le);
-    assertx(it == copy.end() || it->pastOffset() != pc);
-    copy.insert(it, le);
+    auto const it = std::upper_bound(
+      copy.begin(), copy.end(),
+      info,
+      [&] (const LineInfo& a, const LineInfo& b) {
+        return a.first.base < b.first.past;
+      }
+    );
+    assertx(it == copy.end() || (it->first.past > pc && it->first.base >= pc));
+    copy.insert(it, info);
     auto old = m_lineMap.update_and_unlock(std::move(copy));
     Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });
+    return info.second;
   } catch (...) {
     m_lineMap.unlock();
     throw;
   }
-  return line;
 }
 
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {

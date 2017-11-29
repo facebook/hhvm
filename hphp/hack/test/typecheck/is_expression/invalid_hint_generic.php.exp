@@ -1,0 +1,2 @@
+File "invalid_hint_generic.php", line 4, characters 16-16:
+The `is` operator is incompatible with a value of generic type T (Typing[4195])

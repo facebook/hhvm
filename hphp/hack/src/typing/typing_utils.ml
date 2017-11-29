@@ -542,6 +542,55 @@ end = struct
 end
 
 (*****************************************************************************)
+(* Check if a type may be used in an `is` expression *)
+(*****************************************************************************)
+
+module InvalidIsExpressionHint : sig
+  val check: locl ty -> locl ty option
+  val print: locl ty_ -> string
+end = struct
+
+  let visitor =
+    object(_this)
+      inherit [locl ty option] Type_visitor.type_visitor
+      method! on_tany _ r = Some (r, Tany)
+      method! on_terr _ r = Some (r, Terr)
+      method! on_tprim acc r prim =
+        match prim with
+        | N.Tvoid
+        | N.Tnoreturn -> Some (r, Tprim prim)
+        | _ -> acc
+      (* method! on_tfun _ r fun_type = Some (r, Tfun fun_type) *)
+      method! on_tvar _ r id = Some (r, Tvar id)
+      method! on_tabstract acc r ak ty_opt =
+        match ak with
+        | AKenum _ -> acc
+        (* TODO(kunalm) support `this`, `self`, `static`, type consts *)
+        | _ -> Some (r, Tabstract (ak, ty_opt))
+      method! on_tanon _ r arity id = Some (r, Tanon (arity, id))
+      method! on_tunresolved _ r tyl = Some (r, Tunresolved tyl)
+      method! on_tobject _ r = Some (r, Tobject)
+      method! on_tclass acc r cls tyl =
+        match tyl with
+        | [] -> acc
+        | _ -> Some (r, Tclass (cls, tyl))
+      method! on_tarraykind acc r array_kind =
+        match array_kind with
+        | AKempty
+        | AKshape _
+        | AKtuple _ -> Some (r, Tarraykind array_kind)
+        | _ -> acc (* TODO(kunalm): actually handle arrays with generics *)
+    end
+
+  let check ty = visitor#on_type None ty
+
+  let print ty_ = match ty_ with
+    | Tclass (_, tyl) when tyl <> [] ->
+        "a type with generics, because generics are erased at runtime"
+    | _ -> Typing_print.error ty_
+end
+
+(*****************************************************************************)
 (* Function parameters *)
 (*****************************************************************************)
 

@@ -1899,9 +1899,24 @@ and expr_
       TUtils.process_class_id cid;
       let env, te2, _class = instantiable_cid p env cid in
       make_result env (T.InstanceOf (te, te2)) (Reason.Rwitness p, Tprim Tbool)
-  | Is (_e, _hint) ->
-      Errors.experimental_feature p "is expression";
-      expr_error env (Reason.Rnone)
+  | Is (e, hint) ->
+      if not (TypecheckerOptions.experimental_feature_enabled
+        (Env.get_options env)
+        TypecheckerOptions.experimental_is_expression)
+      then begin
+        Errors.experimental_feature p "is expression";
+        expr_error env (Reason.Rnone)
+      end else begin
+        let env, te, _ = expr env e in
+        let env, hint_ty = Phase.hint_locl env hint in
+        match (TUtils.InvalidIsExpressionHint.check hint_ty) with
+          | None ->
+              make_result env (T.Is (te, hint)) (Reason.Rwitness p, Tprim Tbool)
+          | Some (r, ty_) ->
+              Errors.invalid_is_expression_hint (Reason.to_pos r)
+                (TUtils.InvalidIsExpressionHint.print ty_);
+              expr_error env (Reason.Rnone)
+      end
   | Efun (f, idl) ->
       (* This is the function type as declared on the lambda itself.
        * If type hints are absent then use Tany instead. *)

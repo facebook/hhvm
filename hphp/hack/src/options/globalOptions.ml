@@ -118,6 +118,12 @@ let tco_experimental_disable_optional_and_unknown_shape_fields =
  *)
 let tco_experimental_no_trait_reuse = "no_trait_reuse"
 
+(**
+ * Typechecker support for `is` expressions. This feature is incomplete and
+ * under development, see T22779957 for details and progress.
+ *)
+let tco_experimental_is_expression = "is_expression"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -139,6 +145,7 @@ let tco_experimental_all =
      tco_experimental_inout_params;
      tco_experimental_disable_optional_and_unknown_shape_fields;
      tco_experimental_no_trait_reuse;
+     tco_experimental_is_expression;
    ]
 
 let tco_migration_flags_all =

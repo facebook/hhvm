@@ -1,0 +1,2 @@
+File "invalid_hint_class_with_generics.php", line 6, characters 16-16:
+The `is` operator is incompatible with a type with generics, because generics are erased at runtime (Typing[4195])

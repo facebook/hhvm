@@ -768,6 +768,7 @@ module Typing                               = struct
   let escaping_this                         = 4192 (* DONT MODIFY!!!! *)
   let illegal_xhp_child                     = 4193 (* DONT MODIFY!!!! *)
   let must_extend_disposable                = 4194 (* DONT MODIFY!!!! *)
+  let invalid_is_expression_hint            = 4195 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2415,6 +2416,10 @@ let trait_reuse p_pos p_name class_name trait =
   let err = "Class "^c_name^" reuses trait "^trait^" in its hierarchy" in
   let err' = "It is already used through "^(Utils.strip_ns p_name) in
   add_list Typing.trait_reuse [c_pos, err; p_pos, err']
+
+let invalid_is_expression_hint pos ty_str =
+  add Typing.invalid_is_expression_hint pos
+    ("The `is` operator is incompatible with "^ty_str)
 
 let override_final ~parent ~child =
   add_list Typing.override_final [child, "You cannot override this method";

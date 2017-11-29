@@ -272,21 +272,15 @@ let is_disposable_type env ty =
   (* Only bother looking at classish types. Other types can spuriously
    * claim to implement these interfaces. Ideally we should check
    * constrained generics, abstract types, etc.
-   * Also, FormatString is special. Weird.
    *)
-  | _env, (_, Tclass((_, class_name), _)) when not (SN.Classes.is_format_string class_name) ->
-    (* Make sure that it exists. Otherwise any subtype test will pass *)
-    if Option.is_none (Env.get_class env class_name)
-    then None
-    else
-    let idisposable_type =
-      Reason.Rnone, Tclass ((Pos.none, SN.Classes.cIDisposable), []) in
-    let iasyncdisposable_type =
-      Reason.Rnone, Tclass ((Pos.none, SN.Classes.cIAsyncDisposable), []) in
-    if SubType.is_sub_type env ty idisposable_type
-    || SubType.is_sub_type env ty iasyncdisposable_type
-    then Some (strip_ns class_name)
-    else None
+  | _env, (_, Tclass((_, class_name), _)) ->
+    begin match Env.get_class env class_name with
+    | None -> None
+    | Some c ->
+      if c.tc_is_disposable
+      then Some (strip_ns class_name)
+      else None
+    end
   | _  ->
     None
 
@@ -580,7 +574,7 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
     (* Simple assignment to local of form `$lvar = e` *)
   | Binop (Ast.Eq None, (lvar_pos, Lvar lvar), e) ->
     let env, te, ty = expr ~is_using_clause:true env e in
-    let env = enforce_is_disposable env has_await (fst e) ty in
+    let env = enforce_is_disposable_type env has_await (fst e) ty in
     let env = set_local ~is_using_clause:true env lvar ty in
     (* We are assigning a new value to the local variable, so we need to
      * generate a new expression id
@@ -592,7 +586,7 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
     (* Arbitrary expression. This will be assigned to a temporary *)
   | _ ->
     let env, typed_using_clause, ty = expr ~is_using_clause:true env using_clause in
-    let env = enforce_is_disposable env has_await pos ty in
+    let env = enforce_is_disposable_type env has_await pos ty in
     env, (typed_using_clause, [])
 
 (* Check the using clause e in
@@ -617,7 +611,7 @@ and check_using_clause env has_await ((pos, content) as using_clause) =
 (* Ensure that `ty` is a subtype of IDisposable (for `using`) or
  * IAsyncDisposable (for `await using`)
  *)
-and enforce_is_disposable env has_await pos ty =
+and enforce_is_disposable_type env has_await pos ty =
   let class_name =
     if has_await
     then SN.Classes.cIAsyncDisposable
@@ -2411,15 +2405,9 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
           let env, params = List.map_env env class_info.tc_tparams
             (fun env _ -> Env.fresh_unresolved_type env) in
           env, (Tclass (cname, params)), params in
-      let r_witness = Reason.Rwitness p in
-      let idisposable_type =
-        (r_witness, Tclass ((p, SN.Classes.cIDisposable), [])) in
-      let iasyncdisposable_type =
-        (r_witness, Tclass ((p, SN.Classes.cIAsyncDisposable), [])) in
-      if not check_parent && not is_using_clause &&
-         (SubType.is_sub_type env c_ty idisposable_type
-      || SubType.is_sub_type env c_ty iasyncdisposable_type)
+      if not check_parent && not is_using_clause && class_info.tc_is_disposable
       then Errors.invalid_new_disposable p;
+      let r_witness = Reason.Rwitness p in
       let obj_ty = (r_witness, obj_ty_) in
       let c_ty =
         match cid with
@@ -5431,6 +5419,17 @@ and get_self_from_c c =
   end in
   Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams)
 
+and enforce_is_disposable env hint =
+  match hint with
+    | (_, Happly ((p, c), _)) ->
+      begin match Decl_env.get_class_dep env.Env.decl_env c with
+      | None -> ()
+      | Some c ->
+        if not c.dc_is_disposable
+        then Errors.must_extend_disposable p
+      end
+    | _ -> ()
+
 and class_def_ env c tc =
   Typing_hooks.dispatch_enter_class_def_hook c tc;
   let env = Env.set_mode env c.c_mode in
@@ -5470,6 +5469,8 @@ and class_def_ env c tc =
   end;
   SMap.iter (check_static_method tc.tc_methods) tc.tc_smethods;
   List.iter impl (class_implements_type env c);
+  if tc.tc_is_disposable
+    then List.iter (c.c_extends @ c.c_uses) (enforce_is_disposable env);
   let typed_vars = List.map c.c_vars (class_var_def env ~is_static:false c) in
   let typed_methods = List.map c.c_methods (method_def env) in
   let typed_typeconsts = List.map c.c_typeconsts (typeconst_def env) in
@@ -5716,11 +5717,8 @@ and method_def env m =
   let this_type = Env.get_self env in
   let env = Env.set_local env this this_type in
   let env =
-    (* Mark $this as a using variable if it has a disposable type.
-     * Don't do this in non-strict mode because we get false positives
-     * from the subtype test (e.g. if classes are undefined)
-     *)
-    if Env.is_strict env && Option.is_some (is_disposable_type env this_type)
+    (* Mark $this as a using variable if it has a disposable type *)
+    if Option.is_some (is_disposable_type env this_type)
     then Env.set_using_var env this
     else env in
   let env = Env.clear_params env in

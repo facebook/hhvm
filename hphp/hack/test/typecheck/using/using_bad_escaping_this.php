@@ -20,8 +20,8 @@ class AsyncHandle implements IAsyncDisposable {
     expect_mixed($this);
   }
 }
-trait Tr {
-  require implements IDisposable;
+trait MyTrait {
+  require extends Handle;
   public function foo(): void {
     expect_mixed($this);
   }

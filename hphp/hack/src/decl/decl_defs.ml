@@ -47,6 +47,7 @@ type decl_class_type = {
   dc_members_fully_known : bool;
   dc_abstract            : bool;
   dc_final               : bool;
+  dc_is_disposable       : bool;
   dc_deferred_init_members : SSet.t;
   dc_kind                : Ast.class_kind;
   dc_is_xhp              : bool;

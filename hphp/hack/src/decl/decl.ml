@@ -359,6 +359,15 @@ and class_parents_decl class_env c =
   List.iter c.c_req_implements class_hint;
   ()
 
+and is_disposable_type env hint =
+  match hint with
+  | (_, Happly ((_, c), _)) ->
+    begin match Decl_env.get_class_dep env c with
+    | None -> false
+    | Some c -> c.dc_is_disposable
+    end
+  | _ -> false
+
 and class_hint_decl class_env hint =
   match hint with
   | _, Happly ((_, cid), _) ->
@@ -432,6 +441,22 @@ and class_decl tcopt c =
   let extends, xhp_attr_deps, ext_strict = get_class_parents_and_traits env c in
   let req_ancestors, req_ancestors_extends =
     Decl_requirements.get_class_requirements env c in
+  (* Interfaces IDisposable and IAsyncDisposable are *disposable types*, as
+   * are any classes that implement either of these interfaces, directly or
+   * indirectly. Also treat any trait that *requires* extension or
+   * implementation of a disposable class as disposable itself.
+   *)
+  let is_disposable_class_name cls_name =
+    cls_name = SN.Classes.cIDisposable ||
+    cls_name = SN.Classes.cIAsyncDisposable in
+  let is_disposable =
+    is_disposable_class_name cls_name ||
+    SMap.exists (fun n _ -> is_disposable_class_name n) impl ||
+    List.exists (c.c_req_extends @ c.c_req_implements) (is_disposable_type env) in
+  (* If this class is disposable then we require that any extended class or
+   * trait that is used, is also disposable, in order that escape analysis
+   * has been applied on the $this parameter.
+   *)
   let ext_strict = List.fold_left c.c_uses
     ~f:(trait_exists env) ~init:ext_strict in
   if not ext_strict &&
@@ -460,6 +485,7 @@ and class_decl tcopt c =
     dc_members_fully_known = ext_strict;
     dc_kind = c.c_kind;
     dc_is_xhp = c.c_is_xhp;
+    dc_is_disposable = is_disposable;
     dc_name = snd c.c_name;
     dc_pos = fst c.c_name;
     dc_tparams = tparams;

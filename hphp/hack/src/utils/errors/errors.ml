@@ -767,6 +767,7 @@ module Typing                               = struct
   let xhp_required                          = 4191 (* DONT MODIFY!!!! *)
   let escaping_this                         = 4192 (* DONT MODIFY!!!! *)
   let illegal_xhp_child                     = 4193 (* DONT MODIFY!!!! *)
+  let must_extend_disposable                = 4194 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1758,6 +1759,10 @@ let escaping_this pos =
   add Typing.escaping_this pos
     "$this implementing IDisposable or IAsyncDisposable may only be used as receiver in method \
     invocation or passed to another function with <<__AcceptDisposable>> parameter attribute"
+
+let must_extend_disposable pos =
+  add Typing.must_extend_disposable pos
+    "A disposable type may not extend a class or use a trait that is not disposable"
 
 let accept_disposable_invariant pos1 pos2 =
   let msg1 = pos1, "This parameter is marked <<__AcceptDisposable>>" in

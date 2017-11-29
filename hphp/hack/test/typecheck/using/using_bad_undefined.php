@@ -4,9 +4,10 @@
 class C {
   public function foo():void { }
 }
-class Handle extends C implements IDisposable {
+class Handle implements IDisposable {
   public function __dispose():void { }
   public function mescape(<<__AcceptDisposable>> IDisposable $x):void { }
+  public function foo():void { }
 }
 class AsyncHandle implements IAsyncDisposable {
   public async function __disposeAsync():Awaitable<void> { }

@@ -174,6 +174,7 @@ let rec ty (p, x) =
       dc_members_fully_known   = dc.dc_members_fully_known            ;
       dc_kind                  = dc.dc_kind                           ;
       dc_is_xhp                = dc.dc_is_xhp                         ;
+      dc_is_disposable         = dc.dc_is_disposable                  ;
       dc_name                  = dc.dc_name                           ;
       dc_pos                   = dc.dc_pos                            ;
       dc_extends               = dc.dc_extends                        ;

@@ -433,6 +433,7 @@ and class_type = {
   tc_deferred_init_members : SSet.t;
   tc_kind                : Ast.class_kind;
   tc_is_xhp              : bool;
+  tc_is_disposable       : bool;
   tc_name                : string ;
   tc_pos                 : Pos.t ;
   tc_tparams             : decl tparam list ;

@@ -1005,7 +1005,7 @@ let scan_dollar_token lexer =
     if is_name_nondigit ch1 then scan_variable lexer (* $x *)
     else (advance lexer 1, TokenKind.Dollar) (* $ *)
 
-let scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
+let rec scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
   fun in_type lexer ->
   let ch0 = peek_char lexer 0 in
   match ch0 with
@@ -1136,6 +1136,8 @@ let scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
   | '`' -> scan_double_quote_like_string_literal_from_start lexer '`'
   | '"' -> scan_double_quote_like_string_literal_from_start lexer '"'
   | '\\' -> scan_qualified_name lexer
+  | 'b' when let c = peek_char lexer 1 in c = '"' || c = '\'' ->
+    let lexer = advance lexer 1 in scan_token_impl in_type lexer
   (* Names *)
   | _ ->
     if ch0 = invalid && at_end lexer then

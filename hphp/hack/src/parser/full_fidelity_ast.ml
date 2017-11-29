@@ -353,7 +353,13 @@ let mkStr : (string -> string) -> string -> string = fun unescaper content ->
         if start >= end_ then ""
         else String.sub content start (end_ - start)
       else
+        let transform_binary_string_to_string_if_needed str =
+          if String.get str 0 = 'b'
+            then String.sub str 1 (String.length str - 1)
+            else str in
+        let content = transform_binary_string_to_string_if_needed content in
         let has_quotes str =
+          let len = String.length str in
           if len >= 2 then
             let first_char = String.get content 0 in
             let last_char = String.get content (len - 1) in
@@ -361,7 +367,7 @@ let mkStr : (string -> string) -> string -> string = fun unescaper content ->
             List.exists ['"'; '\''; '`'] ~f:first_and_last_are
           else false in
         if has_quotes content
-        then String.sub content 1 (len - 2)
+        then String.sub content 1 (String.length content - 2)
         else content
     with
     | Invalid_argument _ -> content

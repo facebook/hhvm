@@ -387,8 +387,25 @@ let check_instruct_mutator asn i i' =
 
 let check_instruct_call asn i i' =
   match i, i' with
+  (* TODO: I don't think the hints actually have semantic imnport. If so, could
+     drop requirement that they match *)
   | FPassL (param_id,Local.Named s, h), FPassL (param_id', Local.Named s', h')
     when param_id=param_id' && s=s' && h=h' -> Some asn
+  (* Experiment: when we see FPassL on unnamed locals, we register a read
+     effect, and then brutally forget any equalities involving them. So if
+     we have created an alias, we won't do anything unsound because of it.
+     If, as I suspect, these FPassL's are just used as short-lived temporaries
+     then this will probably work...
+     Note that we *add* the locals to vs, vs' because we don't know their values *)
+  | FPassL (param_id, (Local.Unnamed _n as l), h),
+    FPassL (param_id', (Local.Unnamed _n' as l'), h')
+    when param_id=param_id' && h=h' ->
+     begin match reads asn l l' with
+      | None -> None
+      | Some (props,vs,vs') ->
+         let stripped = PropSet.filter (fun (x,x') -> x <> l && x' <> l') props in
+           Some (stripped, VarSet.add l vs, VarSet.add l' vs')
+     end
   | FPassL (_,_,_), _
   | _, FPassL (_,_,_) ->
     (* COMPLETENESS: If this is pass by reference, might get aliasing so just

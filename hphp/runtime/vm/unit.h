@@ -32,6 +32,7 @@
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/lock-free-ptr-wrapper.h"
 #include "hphp/util/md5.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/service-data.h"
@@ -878,6 +879,7 @@ private:
   MD5 m_md5;
   FixedVector<const ArrayData*> m_arrays;
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
+  mutable LockFreePtrWrapper<CompactVector<LineEntry>> m_lineMap;
 };
 
 struct UnitExtended : Unit {

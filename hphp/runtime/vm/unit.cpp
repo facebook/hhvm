@@ -35,9 +35,10 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/functional.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/functional.h"
+#include "hphp/util/smalllocks.h"
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -151,21 +152,6 @@ using LineTableStash = tbb::concurrent_hash_map<
 >;
 LineTableStash s_lineTables;
 
-/*
- * Since line numbers are only used for generating warnings and backtraces, the
- * set of Offset-to-Line# mappings needed is sparse.  To save memory we load
- * these mappings lazily from the repo and cache only the ones we actually use.
-*/
-
-using LineMap = boost::container::flat_map<Offset,int>;
-
-using LineInfoCache = tbb::concurrent_hash_map<
-  const Unit*,
-  LineMap,
-  pointer_hash<Unit>
->;
-LineInfoCache s_lineInfo;
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -204,7 +190,6 @@ Unit::~Unit() {
 
   s_extendedLineInfo.erase(this);
   s_lineTables.erase(this);
-  s_lineInfo.erase(this);
 
   if (!RuntimeOption::RepoAuthoritative) {
     if (debug) {
@@ -420,7 +405,6 @@ static LineTable loadLineTable(const Unit* unit) {
     return ret;
   }
 
-  Lock lock(g_classesMutex);
   auto& urp = Repo::get().urp();
   urp.getUnitLineTable(unit->repoID(), unit->sn(), ret);
 
@@ -449,33 +433,39 @@ int Unit::getLineNumber(Offset pc) const {
     if (lineTable) return HPHP::getLineNumber(*lineTable, pc);
   }
 
-  {
-    LineInfoCache::const_accessor acc;
-    if (s_lineInfo.find(acc, this)) {
-      auto& lineMap = acc->second;
-      auto const it = lineMap.find(pc);
-      if (it != lineMap.end()) {
-        return it->second;
-      }
-    }
-  }
+  auto findLine = [&] {
+    // lineMap is an atomically acquired bitwise copy of m_lineMap,
+    // with no destructor
+    auto lineMap(m_lineMap.get());
+    auto it = std::lower_bound(lineMap->begin(), lineMap->end(),
+                               LineEntry { pc, 0 });
+    if (it != lineMap->end() && it->pastOffset() == pc) return it->val();
+    return INT_MIN;
+  };
 
-  auto line = HPHP::getLineNumber(loadLineTable(this), pc);
+  auto line = findLine();
+  if (line != INT_MIN) return line;
 
-  {
-    LineInfoCache::accessor acc;
-    if (s_lineInfo.find(acc, this)) {
-      auto& lineMap = acc->second;
-      lineMap.insert(std::pair<Offset,int>(pc, line));
+  m_lineMap.lock_for_update();
+  try {
+    line = findLine();
+    if (line != INT_MIN) {
+      m_lineMap.unlock();
       return line;
     }
-  }
 
-  LineMap newLineMap{};
-  newLineMap.insert(std::pair<Offset,int>(pc, line));
-  LineInfoCache::accessor acc;
-  if (s_lineInfo.insert(acc, this)) {
-    acc->second = std::move(newLineMap);
+    line = HPHP::getLineNumber(loadLineTable(this), pc);
+    if (line < -1) line = -1;
+    auto const le = LineEntry { pc, line };
+    auto copy = m_lineMap.copy();
+    auto it = std::lower_bound(copy.begin(), copy.end(), le);
+    assertx(it == copy.end() || it->pastOffset() != pc);
+    copy.insert(it, le);
+    auto old = m_lineMap.update_and_unlock(std::move(copy));
+    Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });
+  } catch (...) {
+    m_lineMap.unlock();
+    throw;
   }
   return line;
 }

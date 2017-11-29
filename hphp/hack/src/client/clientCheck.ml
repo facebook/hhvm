@@ -244,6 +244,20 @@ let main args =
       let ty = rpc args @@ Rpc.INFER_TYPE (fn, line, char) in
       ClientTypeAtPos.go ty args.output_json;
       Exit_status.No_error
+    | MODE_TYPE_AT_POS_BATCH positions ->
+      let positions = List.map positions begin fun pos ->
+        try
+          match Str.split (Str.regexp ":") pos with
+          | [filename; line; char] ->
+              expand_path filename, int_of_string line, int_of_string char
+          | _ -> raise Exit
+        with _ ->
+          Printf.eprintf "Invalid position\n";
+          raise Exit_status.(Exit_with Input_error)
+      end in
+      let responses = rpc args @@ Rpc.INFER_TYPE_BATCH positions in
+      List.iter responses print_endline;
+      Exit_status.No_error
     | MODE_AUTO_COMPLETE ->
       let content = Sys_utils.read_stdin_to_string () in
       let results = rpc args @@ Rpc.AUTOCOMPLETE content in

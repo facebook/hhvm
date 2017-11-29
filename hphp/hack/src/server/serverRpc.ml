@@ -25,6 +25,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | COVERAGE_LEVELS fn -> env, ServerColorFile.go env fn
     | INFER_TYPE (fn, line, char) ->
         env, ServerInferType.go env (fn, line, char)
+    | INFER_TYPE_BATCH positions ->
+        env, ServerInferTypeBatch.go genv.workers positions env
     | AUTOCOMPLETE content ->
         let result = try
           ServerAutoComplete.auto_complete ~tcopt:env.tcopt ~delimit_on_namespaces:false content

@@ -8,13 +8,7 @@
  *
  *)
 
-let go:
-  ServerEnv.env ->
-  (ServerUtils.file_input * int * int) ->
-  (string * string) option =
-fun env (file, line, char) ->
-  let {ServerEnv.tcopt; files_info; _} = env in
-  let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
+let type_at_pos tast line char =
   let visitor =
     object (self)
       inherit [(Tast.saved_env * Tast.ty) option] Tast_visitor.visitor as super
@@ -29,10 +23,22 @@ fun env (file, line, char) ->
         super#on_expr acc e
     end
   in
-  visitor#on_program None tast |> Option.map ~f:begin fun (saved_env, ty) ->
-    let file = Relative_path.create Relative_path.Dummy "<file>" in
-    let tenv = Typing_env.empty tcopt file ~droot:None in
-    let tenv = Tast_expand.restore_saved_env tenv saved_env in
-    Typing_print.full_strip_ns tenv ty,
-    Typing_print.to_json tenv ty |> Hh_json.json_to_string
-  end
+  visitor#on_program None tast
+
+let make_result tcopt (saved_env, ty) =
+  let file = Relative_path.create Relative_path.Dummy "<file>" in
+  let env = Typing_env.empty tcopt file ~droot:None in
+  let env = Tast_expand.restore_saved_env env saved_env in
+  Typing_print.full_strip_ns env ty,
+  Typing_print.to_json env ty |> Hh_json.json_to_string
+
+let go:
+  ServerEnv.env ->
+  (ServerUtils.file_input * int * int) ->
+  (string * string) option =
+fun env pos ->
+  let file, line, char = pos in
+  let {ServerEnv.tcopt; files_info; _} = env in
+  let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
+  type_at_pos tast line char
+  |> Option.map ~f:(make_result tcopt)

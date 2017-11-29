@@ -129,6 +129,15 @@ let parse_check_args cmd =
     "--type-at-pos",
       Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),
       " (mode) show type at a given position in file [line:character]";
+    "--type-at-pos-batch",
+      Arg.Rest begin fun position ->
+        mode := match !mode with
+          | None -> Some (MODE_TYPE_AT_POS_BATCH [position])
+          | Some (MODE_TYPE_AT_POS_BATCH positions) ->
+            Some (MODE_TYPE_AT_POS_BATCH (position::positions))
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+        end,
+      " (mode) show types at multiple positions [file:line:character list]";
     "--list-files",
       Arg.Unit (set_mode MODE_LIST_FILES),
       " (mode) list files with errors";

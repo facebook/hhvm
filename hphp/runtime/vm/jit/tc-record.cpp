@@ -76,7 +76,7 @@ void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec, const TransLoc& loc,
 void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
                           const TCA start, const TCA end, bool exit,
                           bool inPrologue) {
-  assertx(cb.contains(start) && cb.contains(end));
+  assertx(cb.contains(start, end));
   if (start != end) {
     assertOwnsCodeLock();
     if (!RuntimeOption::EvalJitNoGdb) {

@@ -248,6 +248,11 @@ struct DataBlock {
     return addr >= m_base && addr < (m_base + m_size);
   }
 
+  bool contains(ConstCodeAddress start, ConstCodeAddress end) const {
+    return start <= end &&
+           start >= m_base && end <= (m_base + m_size);
+  }
+
   bool empty() const {
     return m_base == m_frontier;
   }

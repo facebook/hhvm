@@ -129,7 +129,7 @@ static void bt_handler(int sig) {
   if (fd >= 0) {
     // Don't attempt to determine function arguments in the PHP backtrace, as
     // that might involve re-entering the VM.
-    if (!g_context.isNull()) {
+    if (!g_context.isNull() && !tl_sweeping) {
       dprintf(fd, "\nPHP Stacktrace:\n\n%s",
               debug_string_backtrace(
                 /*skip*/false,

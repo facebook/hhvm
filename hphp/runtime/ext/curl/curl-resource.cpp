@@ -15,7 +15,7 @@
 
 #include <curl/easy.h>
 #include <curl/multi.h>
-#include <openssl/ssl.h>
+#include <folly/portability/OpenSSL.h>
 
 #define PHP_CURL_STDOUT 0
 #define PHP_CURL_FILE   1
@@ -123,6 +123,12 @@ void CurlResource::sweep() {
   m_write.buf.release();
   m_write_header.buf.release();
   closeForSweep();
+}
+
+void CurlResource::close() {
+  closeForSweep();
+  m_opts.clear();
+  m_to_free.reset();
 }
 
 void CurlResource::closeForSweep() {

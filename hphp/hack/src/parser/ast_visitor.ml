@@ -77,6 +77,7 @@ class type ['a] ast_visitor_type = object
   method on_lvar : 'a -> id -> 'a
   method on_lvarvar : 'a -> int -> id -> 'a
   method on_new : 'a -> expr -> expr list -> expr list -> 'a
+  method on_newanoncls : 'a -> expr list -> expr list -> class_ -> 'a
   method on_noop : 'a -> 'a
   method on_null : 'a -> 'a
   method on_obj_get : 'a -> expr -> expr -> 'a
@@ -380,6 +381,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | BracedExpr e
    | ParenthesizedExpr e -> this#on_expr acc e
    | New         (e, el, uel) -> this#on_new acc e el uel
+   | NewAnonClass (el, uel, cl) -> this#on_newanoncls acc el uel cl
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (id, attrl, el) -> this#on_xml acc id attrl el
    | Omitted                     -> this#on_omitted  acc
@@ -525,6 +527,12 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = this#on_expr acc e in
     let acc = List.fold_left this#on_expr acc el in
     let acc = List.fold_left this#on_expr acc uel in
+    acc
+
+  method on_newanoncls acc el uel cl =
+    let acc = List.fold_left this#on_expr acc el in
+    let acc = List.fold_left this#on_expr acc uel in
+    let acc = this#on_class_ acc cl in
     acc
 
   method on_efun acc f _ = this#on_fun_ acc f

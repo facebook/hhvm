@@ -2053,7 +2053,7 @@ module Make (GetLocals : GetLocals) = struct
         | _ ->
             Errors.expected_collection p cn;
             N.Any
-    end
+      end
     | Clone e -> N.Clone (expr env e)
     | Null -> N.Null
     | True -> N.True
@@ -2379,6 +2379,8 @@ module Make (GetLocals : GetLocals) = struct
       N.New (make_class_id env (p, SN.Classes.cUnknown) [],
         exprl env el,
         exprl env uel)
+    | NewAnonClass _ ->
+      N.Null
     | Efun (f, idl) ->
         let idl = List.map idl fst in
         let idl =

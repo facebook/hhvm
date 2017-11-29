@@ -1019,14 +1019,50 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_object_creation_expression parser =
     (* SPEC
       object-creation-expression:
-        new  class-type-designator  (  argument-expression-list-opt  )
+        new object-creation-what
+    *)
+    let (parser, new_token) = assert_token parser New in
+    let (parser, new_what) =
+      let (parser1, token) = next_token parser in
+      begin match Token.kind token with
+      | Class -> parse_anonymous_class token parser1
+      | _ -> parse_constructor_call parser
+      end in
+    let result = make_object_creation_expression new_token new_what in
+    (parser, result)
+
+  and parse_anonymous_class class_token parser =
+    let class_token = make_token class_token in
+    let (parser, left, args, right) =
+      if peek_token_kind parser = LeftParen
+      then parse_expression_list_opt parser
+      else let miss = make_missing parser in (parser, miss, miss, miss)
+    in
+    let decl_parser = DeclParser.make
+      parser.env parser.lexer parser.errors parser.context in
+    let (decl_parser, classish_extends, classish_extends_list) =
+      DeclParser.parse_classish_extends_opt decl_parser in
+    let (decl_parser, classish_implements, classish_implements_list) =
+      DeclParser.parse_classish_implements_opt decl_parser in
+    let (decl_parser, body) = DeclParser.parse_classish_body decl_parser in
+    let result = make_anonymous_class class_token left args right
+      classish_extends classish_extends_list classish_implements
+      classish_implements_list body in
+    let lexer = DeclParser.lexer decl_parser in
+    let errors = DeclParser.errors decl_parser in
+    let parser = { parser with lexer; errors } in
+    (parser, result)
+
+  and parse_constructor_call parser =
+    (* SPEC
+      constructor-call:
+        class-type-designator  (  argument-expression-list-opt  )
     *)
     (* PHP allows the entire expression list to be omitted. *)
     (* TODO: SPEC ERROR: PHP allows the entire expression list to be omitted,
      * but Hack disallows this behavior. (See SyntaxError.error2038.) However,
      * the Hack spec still states that the argument expression list is optional.
      * Update the spec to say that the argument expression list is required. *)
-    let (parser, new_token) = assert_token parser New in
     let (parser, designator) = parse_designator parser in
     let (parser, left, args, right) =
     if peek_token_kind parser = LeftParen then
@@ -1034,8 +1070,9 @@ TODO: This will need to be fixed to allow situations where the qualified name
     else
       (parser, make_missing parser, make_missing parser, make_missing parser) in
     let result =
-      make_object_creation_expression new_token designator left args right in
+      make_constructor_call designator left args right in
     (parser, result)
+
   and parse_function_call parser receiver =
     (* SPEC
       function-call-expression:

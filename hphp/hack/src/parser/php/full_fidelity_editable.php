@@ -300,6 +300,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return GlobalStatement::from_json($json, $position, $source);
     case 'simple_initializer':
       return SimpleInitializer::from_json($json, $position, $source);
+    case 'anonymous_class':
+      return AnonymousClass::from_json($json, $position, $source);
     case 'anonymous_function':
       return AnonymousFunction::from_json($json, $position, $source);
     case 'php7_anonymous_function':
@@ -362,6 +364,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return CollectionLiteralExpression::from_json($json, $position, $source);
     case 'object_creation_expression':
       return ObjectCreationExpression::from_json($json, $position, $source);
+    case 'constructor_call':
+      return ConstructorCall::from_json($json, $position, $source);
     case 'array_creation_expression':
       return ArrayCreationExpression::from_json($json, $position, $source);
     case 'array_intrinsic_expression':
@@ -13300,6 +13304,265 @@ final class SimpleInitializer extends EditableSyntax {
     yield break;
   }
 }
+final class AnonymousClass extends EditableSyntax {
+  private EditableSyntax $_class_keyword;
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_argument_list;
+  private EditableSyntax $_right_paren;
+  private EditableSyntax $_extends_keyword;
+  private EditableSyntax $_extends_list;
+  private EditableSyntax $_implements_keyword;
+  private EditableSyntax $_implements_list;
+  private EditableSyntax $_body;
+  public function __construct(
+    EditableSyntax $class_keyword,
+    EditableSyntax $left_paren,
+    EditableSyntax $argument_list,
+    EditableSyntax $right_paren,
+    EditableSyntax $extends_keyword,
+    EditableSyntax $extends_list,
+    EditableSyntax $implements_keyword,
+    EditableSyntax $implements_list,
+    EditableSyntax $body) {
+    parent::__construct('anonymous_class');
+    $this->_class_keyword = $class_keyword;
+    $this->_left_paren = $left_paren;
+    $this->_argument_list = $argument_list;
+    $this->_right_paren = $right_paren;
+    $this->_extends_keyword = $extends_keyword;
+    $this->_extends_list = $extends_list;
+    $this->_implements_keyword = $implements_keyword;
+    $this->_implements_list = $implements_list;
+    $this->_body = $body;
+  }
+  public function class_keyword(): EditableSyntax {
+    return $this->_class_keyword;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function argument_list(): EditableSyntax {
+    return $this->_argument_list;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function extends_keyword(): EditableSyntax {
+    return $this->_extends_keyword;
+  }
+  public function extends_list(): EditableSyntax {
+    return $this->_extends_list;
+  }
+  public function implements_keyword(): EditableSyntax {
+    return $this->_implements_keyword;
+  }
+  public function implements_list(): EditableSyntax {
+    return $this->_implements_list;
+  }
+  public function body(): EditableSyntax {
+    return $this->_body;
+  }
+  public function with_class_keyword(EditableSyntax $class_keyword): AnonymousClass {
+    return new AnonymousClass(
+      $class_keyword,
+      $this->_left_paren,
+      $this->_argument_list,
+      $this->_right_paren,
+      $this->_extends_keyword,
+      $this->_extends_list,
+      $this->_implements_keyword,
+      $this->_implements_list,
+      $this->_body);
+  }
+  public function with_left_paren(EditableSyntax $left_paren): AnonymousClass {
+    return new AnonymousClass(
+      $this->_class_keyword,
+      $left_paren,
+      $this->_argument_list,
+      $this->_right_paren,
+      $this->_extends_keyword,
+      $this->_extends_list,
+      $this->_implements_keyword,
+      $this->_implements_list,
+      $this->_body);
+  }
+  public function with_argument_list(EditableSyntax $argument_list): AnonymousClass {
+    return new AnonymousClass(
+      $this->_class_keyword,
+      $this->_left_paren,
+      $argument_list,
+      $this->_right_paren,
+      $this->_extends_keyword,
+      $this->_extends_list,
+      $this->_implements_keyword,
+      $this->_implements_list,
+      $this->_body);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): AnonymousClass {
+    return new AnonymousClass(
+      $this->_class_keyword,
+      $this->_left_paren,
+      $this->_argument_list,
+      $right_paren,
+      $this->_extends_keyword,
+      $this->_extends_list,
+      $this->_implements_keyword,
+      $this->_implements_list,
+      $this->_body);
+  }
+  public function with_extends_keyword(EditableSyntax $extends_keyword): AnonymousClass {
+    return new AnonymousClass(
+      $this->_class_keyword,
+      $this->_left_paren,
+      $this->_argument_list,
+      $this->_right_paren,
+      $extends_keyword,
+      $this->_extends_list,
+      $this->_implements_keyword,
+      $this->_implements_list,
+      $this->_body);
+  }
+  public function with_extends_list(EditableSyntax $extends_list): AnonymousClass {
+    return new AnonymousClass(
+      $this->_class_keyword,
+      $this->_left_paren,
+      $this->_argument_list,
+      $this->_right_paren,
+      $this->_extends_keyword,
+      $extends_list,
+      $this->_implements_keyword,
+      $this->_implements_list,
+      $this->_body);
+  }
+  public function with_implements_keyword(EditableSyntax $implements_keyword): AnonymousClass {
+    return new AnonymousClass(
+      $this->_class_keyword,
+      $this->_left_paren,
+      $this->_argument_list,
+      $this->_right_paren,
+      $this->_extends_keyword,
+      $this->_extends_list,
+      $implements_keyword,
+      $this->_implements_list,
+      $this->_body);
+  }
+  public function with_implements_list(EditableSyntax $implements_list): AnonymousClass {
+    return new AnonymousClass(
+      $this->_class_keyword,
+      $this->_left_paren,
+      $this->_argument_list,
+      $this->_right_paren,
+      $this->_extends_keyword,
+      $this->_extends_list,
+      $this->_implements_keyword,
+      $implements_list,
+      $this->_body);
+  }
+  public function with_body(EditableSyntax $body): AnonymousClass {
+    return new AnonymousClass(
+      $this->_class_keyword,
+      $this->_left_paren,
+      $this->_argument_list,
+      $this->_right_paren,
+      $this->_extends_keyword,
+      $this->_extends_list,
+      $this->_implements_keyword,
+      $this->_implements_list,
+      $body);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $class_keyword = $this->class_keyword()->rewrite($rewriter, $new_parents);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $argument_list = $this->argument_list()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    $extends_keyword = $this->extends_keyword()->rewrite($rewriter, $new_parents);
+    $extends_list = $this->extends_list()->rewrite($rewriter, $new_parents);
+    $implements_keyword = $this->implements_keyword()->rewrite($rewriter, $new_parents);
+    $implements_list = $this->implements_list()->rewrite($rewriter, $new_parents);
+    $body = $this->body()->rewrite($rewriter, $new_parents);
+    if (
+      $class_keyword === $this->class_keyword() &&
+      $left_paren === $this->left_paren() &&
+      $argument_list === $this->argument_list() &&
+      $right_paren === $this->right_paren() &&
+      $extends_keyword === $this->extends_keyword() &&
+      $extends_list === $this->extends_list() &&
+      $implements_keyword === $this->implements_keyword() &&
+      $implements_list === $this->implements_list() &&
+      $body === $this->body()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new AnonymousClass(
+        $class_keyword,
+        $left_paren,
+        $argument_list,
+        $right_paren,
+        $extends_keyword,
+        $extends_list,
+        $implements_keyword,
+        $implements_list,
+        $body), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $class_keyword = EditableSyntax::from_json(
+      $json->anonymous_class_class_keyword, $position, $source);
+    $position += $class_keyword->width();
+    $left_paren = EditableSyntax::from_json(
+      $json->anonymous_class_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $argument_list = EditableSyntax::from_json(
+      $json->anonymous_class_argument_list, $position, $source);
+    $position += $argument_list->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->anonymous_class_right_paren, $position, $source);
+    $position += $right_paren->width();
+    $extends_keyword = EditableSyntax::from_json(
+      $json->anonymous_class_extends_keyword, $position, $source);
+    $position += $extends_keyword->width();
+    $extends_list = EditableSyntax::from_json(
+      $json->anonymous_class_extends_list, $position, $source);
+    $position += $extends_list->width();
+    $implements_keyword = EditableSyntax::from_json(
+      $json->anonymous_class_implements_keyword, $position, $source);
+    $position += $implements_keyword->width();
+    $implements_list = EditableSyntax::from_json(
+      $json->anonymous_class_implements_list, $position, $source);
+    $position += $implements_list->width();
+    $body = EditableSyntax::from_json(
+      $json->anonymous_class_body, $position, $source);
+    $position += $body->width();
+    return new AnonymousClass(
+        $class_keyword,
+        $left_paren,
+        $argument_list,
+        $right_paren,
+        $extends_keyword,
+        $extends_list,
+        $implements_keyword,
+        $implements_list,
+        $body);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_class_keyword;
+    yield $this->_left_paren;
+    yield $this->_argument_list;
+    yield $this->_right_paren;
+    yield $this->_extends_keyword;
+    yield $this->_extends_list;
+    yield $this->_implements_keyword;
+    yield $this->_implements_list;
+    yield $this->_body;
+    yield break;
+  }
+}
 final class AnonymousFunction extends EditableSyntax {
   private EditableSyntax $_static_keyword;
   private EditableSyntax $_async_keyword;
@@ -16722,25 +16985,82 @@ final class CollectionLiteralExpression extends EditableSyntax {
 }
 final class ObjectCreationExpression extends EditableSyntax {
   private EditableSyntax $_new_keyword;
+  private EditableSyntax $_object;
+  public function __construct(
+    EditableSyntax $new_keyword,
+    EditableSyntax $object) {
+    parent::__construct('object_creation_expression');
+    $this->_new_keyword = $new_keyword;
+    $this->_object = $object;
+  }
+  public function new_keyword(): EditableSyntax {
+    return $this->_new_keyword;
+  }
+  public function object(): EditableSyntax {
+    return $this->_object;
+  }
+  public function with_new_keyword(EditableSyntax $new_keyword): ObjectCreationExpression {
+    return new ObjectCreationExpression(
+      $new_keyword,
+      $this->_object);
+  }
+  public function with_object(EditableSyntax $object): ObjectCreationExpression {
+    return new ObjectCreationExpression(
+      $this->_new_keyword,
+      $object);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $new_keyword = $this->new_keyword()->rewrite($rewriter, $new_parents);
+    $object = $this->object()->rewrite($rewriter, $new_parents);
+    if (
+      $new_keyword === $this->new_keyword() &&
+      $object === $this->object()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new ObjectCreationExpression(
+        $new_keyword,
+        $object), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $new_keyword = EditableSyntax::from_json(
+      $json->object_creation_new_keyword, $position, $source);
+    $position += $new_keyword->width();
+    $object = EditableSyntax::from_json(
+      $json->object_creation_object, $position, $source);
+    $position += $object->width();
+    return new ObjectCreationExpression(
+        $new_keyword,
+        $object);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_new_keyword;
+    yield $this->_object;
+    yield break;
+  }
+}
+final class ConstructorCall extends EditableSyntax {
   private EditableSyntax $_type;
   private EditableSyntax $_left_paren;
   private EditableSyntax $_argument_list;
   private EditableSyntax $_right_paren;
   public function __construct(
-    EditableSyntax $new_keyword,
     EditableSyntax $type,
     EditableSyntax $left_paren,
     EditableSyntax $argument_list,
     EditableSyntax $right_paren) {
-    parent::__construct('object_creation_expression');
-    $this->_new_keyword = $new_keyword;
+    parent::__construct('constructor_call');
     $this->_type = $type;
     $this->_left_paren = $left_paren;
     $this->_argument_list = $argument_list;
     $this->_right_paren = $right_paren;
-  }
-  public function new_keyword(): EditableSyntax {
-    return $this->_new_keyword;
   }
   public function type(): EditableSyntax {
     return $this->_type;
@@ -16754,41 +17074,29 @@ final class ObjectCreationExpression extends EditableSyntax {
   public function right_paren(): EditableSyntax {
     return $this->_right_paren;
   }
-  public function with_new_keyword(EditableSyntax $new_keyword): ObjectCreationExpression {
-    return new ObjectCreationExpression(
-      $new_keyword,
-      $this->_type,
-      $this->_left_paren,
-      $this->_argument_list,
-      $this->_right_paren);
-  }
-  public function with_type(EditableSyntax $type): ObjectCreationExpression {
-    return new ObjectCreationExpression(
-      $this->_new_keyword,
+  public function with_type(EditableSyntax $type): ConstructorCall {
+    return new ConstructorCall(
       $type,
       $this->_left_paren,
       $this->_argument_list,
       $this->_right_paren);
   }
-  public function with_left_paren(EditableSyntax $left_paren): ObjectCreationExpression {
-    return new ObjectCreationExpression(
-      $this->_new_keyword,
+  public function with_left_paren(EditableSyntax $left_paren): ConstructorCall {
+    return new ConstructorCall(
       $this->_type,
       $left_paren,
       $this->_argument_list,
       $this->_right_paren);
   }
-  public function with_argument_list(EditableSyntax $argument_list): ObjectCreationExpression {
-    return new ObjectCreationExpression(
-      $this->_new_keyword,
+  public function with_argument_list(EditableSyntax $argument_list): ConstructorCall {
+    return new ConstructorCall(
       $this->_type,
       $this->_left_paren,
       $argument_list,
       $this->_right_paren);
   }
-  public function with_right_paren(EditableSyntax $right_paren): ObjectCreationExpression {
-    return new ObjectCreationExpression(
-      $this->_new_keyword,
+  public function with_right_paren(EditableSyntax $right_paren): ConstructorCall {
+    return new ConstructorCall(
       $this->_type,
       $this->_left_paren,
       $this->_argument_list,
@@ -16801,21 +17109,18 @@ final class ObjectCreationExpression extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
-    $new_keyword = $this->new_keyword()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
     $argument_list = $this->argument_list()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $new_keyword === $this->new_keyword() &&
       $type === $this->type() &&
       $left_paren === $this->left_paren() &&
       $argument_list === $this->argument_list() &&
       $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
-      return $rewriter(new ObjectCreationExpression(
-        $new_keyword,
+      return $rewriter(new ConstructorCall(
         $type,
         $left_paren,
         $argument_list,
@@ -16824,30 +17129,25 @@ final class ObjectCreationExpression extends EditableSyntax {
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
-    $new_keyword = EditableSyntax::from_json(
-      $json->object_creation_new_keyword, $position, $source);
-    $position += $new_keyword->width();
     $type = EditableSyntax::from_json(
-      $json->object_creation_type, $position, $source);
+      $json->constructor_call_type, $position, $source);
     $position += $type->width();
     $left_paren = EditableSyntax::from_json(
-      $json->object_creation_left_paren, $position, $source);
+      $json->constructor_call_left_paren, $position, $source);
     $position += $left_paren->width();
     $argument_list = EditableSyntax::from_json(
-      $json->object_creation_argument_list, $position, $source);
+      $json->constructor_call_argument_list, $position, $source);
     $position += $argument_list->width();
     $right_paren = EditableSyntax::from_json(
-      $json->object_creation_right_paren, $position, $source);
+      $json->constructor_call_right_paren, $position, $source);
     $position += $right_paren->width();
-    return new ObjectCreationExpression(
-        $new_keyword,
+    return new ConstructorCall(
         $type,
         $left_paren,
         $argument_list,
         $right_paren);
   }
   public function children(): Generator<string, EditableSyntax, void> {
-    yield $this->_new_keyword;
     yield $this->_type;
     yield $this->_left_paren;
     yield $this->_argument_list;

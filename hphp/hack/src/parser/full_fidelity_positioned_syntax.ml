@@ -1293,6 +1293,29 @@ module FromMinimal = struct
           { simple_initializer_equal
           ; simple_initializer_value
           }, results
+      | SyntaxKind.AnonymousClass
+      , (  anonymous_class_body
+        :: anonymous_class_implements_list
+        :: anonymous_class_implements_keyword
+        :: anonymous_class_extends_list
+        :: anonymous_class_extends_keyword
+        :: anonymous_class_right_paren
+        :: anonymous_class_argument_list
+        :: anonymous_class_left_paren
+        :: anonymous_class_class_keyword
+        :: results
+        ) ->
+          AnonymousClass
+          { anonymous_class_class_keyword
+          ; anonymous_class_left_paren
+          ; anonymous_class_argument_list
+          ; anonymous_class_right_paren
+          ; anonymous_class_extends_keyword
+          ; anonymous_class_extends_list
+          ; anonymous_class_implements_keyword
+          ; anonymous_class_implements_list
+          ; anonymous_class_body
+          }, results
       | SyntaxKind.AnonymousFunction
       , (  anonymous_body
         :: anonymous_use
@@ -1686,19 +1709,26 @@ module FromMinimal = struct
           ; collection_literal_right_brace
           }, results
       | SyntaxKind.ObjectCreationExpression
-      , (  object_creation_right_paren
-        :: object_creation_argument_list
-        :: object_creation_left_paren
-        :: object_creation_type
+      , (  object_creation_object
         :: object_creation_new_keyword
         :: results
         ) ->
           ObjectCreationExpression
           { object_creation_new_keyword
-          ; object_creation_type
-          ; object_creation_left_paren
-          ; object_creation_argument_list
-          ; object_creation_right_paren
+          ; object_creation_object
+          }, results
+      | SyntaxKind.ConstructorCall
+      , (  constructor_call_right_paren
+        :: constructor_call_argument_list
+        :: constructor_call_left_paren
+        :: constructor_call_type
+        :: results
+        ) ->
+          ConstructorCall
+          { constructor_call_type
+          ; constructor_call_left_paren
+          ; constructor_call_argument_list
+          ; constructor_call_right_paren
           }, results
       | SyntaxKind.ArrayCreationExpression
       , (  array_creation_right_bracket
@@ -3261,6 +3291,28 @@ module FromMinimal = struct
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (simple_initializer_value, todo) in
         convert offset todo results simple_initializer_equal
+    | { M.syntax = M.AnonymousClass
+        { M.anonymous_class_class_keyword
+        ; M.anonymous_class_left_paren
+        ; M.anonymous_class_argument_list
+        ; M.anonymous_class_right_paren
+        ; M.anonymous_class_extends_keyword
+        ; M.anonymous_class_extends_list
+        ; M.anonymous_class_implements_keyword
+        ; M.anonymous_class_implements_list
+        ; M.anonymous_class_body
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (anonymous_class_body, todo) in
+        let todo = Convert (anonymous_class_implements_list, todo) in
+        let todo = Convert (anonymous_class_implements_keyword, todo) in
+        let todo = Convert (anonymous_class_extends_list, todo) in
+        let todo = Convert (anonymous_class_extends_keyword, todo) in
+        let todo = Convert (anonymous_class_right_paren, todo) in
+        let todo = Convert (anonymous_class_argument_list, todo) in
+        let todo = Convert (anonymous_class_left_paren, todo) in
+        convert offset todo results anonymous_class_class_keyword
     | { M.syntax = M.AnonymousFunction
         { M.anonymous_static_keyword
         ; M.anonymous_async_keyword
@@ -3625,18 +3677,24 @@ module FromMinimal = struct
         convert offset todo results collection_literal_name
     | { M.syntax = M.ObjectCreationExpression
         { M.object_creation_new_keyword
-        ; M.object_creation_type
-        ; M.object_creation_left_paren
-        ; M.object_creation_argument_list
-        ; M.object_creation_right_paren
+        ; M.object_creation_object
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (object_creation_right_paren, todo) in
-        let todo = Convert (object_creation_argument_list, todo) in
-        let todo = Convert (object_creation_left_paren, todo) in
-        let todo = Convert (object_creation_type, todo) in
+        let todo = Convert (object_creation_object, todo) in
         convert offset todo results object_creation_new_keyword
+    | { M.syntax = M.ConstructorCall
+        { M.constructor_call_type
+        ; M.constructor_call_left_paren
+        ; M.constructor_call_argument_list
+        ; M.constructor_call_right_paren
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (constructor_call_right_paren, todo) in
+        let todo = Convert (constructor_call_argument_list, todo) in
+        let todo = Convert (constructor_call_left_paren, todo) in
+        convert offset todo results constructor_call_type
     | { M.syntax = M.ArrayCreationExpression
         { M.array_creation_left_bracket
         ; M.array_creation_members

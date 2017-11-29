@@ -98,6 +98,7 @@ type t =
   | EchoStatement
   | GlobalStatement
   | SimpleInitializer
+  | AnonymousClass
   | AnonymousFunction
   | Php7AnonymousFunction
   | AnonymousFunctionUseClause
@@ -129,6 +130,7 @@ type t =
   | ListExpression
   | CollectionLiteralExpression
   | ObjectCreationExpression
+  | ConstructorCall
   | ArrayCreationExpression
   | ArrayIntrinsicExpression
   | DarrayIntrinsicExpression
@@ -263,6 +265,7 @@ let to_string kind =
   | EchoStatement                           -> "echo_statement"
   | GlobalStatement                         -> "global_statement"
   | SimpleInitializer                       -> "simple_initializer"
+  | AnonymousClass                          -> "anonymous_class"
   | AnonymousFunction                       -> "anonymous_function"
   | Php7AnonymousFunction                   -> "php7_anonymous_function"
   | AnonymousFunctionUseClause              -> "anonymous_function_use_clause"
@@ -294,6 +297,7 @@ let to_string kind =
   | ListExpression                          -> "list_expression"
   | CollectionLiteralExpression             -> "collection_literal_expression"
   | ObjectCreationExpression                -> "object_creation_expression"
+  | ConstructorCall                         -> "constructor_call"
   | ArrayCreationExpression                 -> "array_creation_expression"
   | ArrayIntrinsicExpression                -> "array_intrinsic_expression"
   | DarrayIntrinsicExpression               -> "darray_intrinsic_expression"

@@ -528,6 +528,17 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { simple_initializer_equal                           : t
     ; simple_initializer_value                           : t
     }
+  and anonymous_class =
+    { anonymous_class_class_keyword                      : t
+    ; anonymous_class_left_paren                         : t
+    ; anonymous_class_argument_list                      : t
+    ; anonymous_class_right_paren                        : t
+    ; anonymous_class_extends_keyword                    : t
+    ; anonymous_class_extends_list                       : t
+    ; anonymous_class_implements_keyword                 : t
+    ; anonymous_class_implements_list                    : t
+    ; anonymous_class_body                               : t
+    }
   and anonymous_function =
     { anonymous_static_keyword                           : t
     ; anonymous_async_keyword                            : t
@@ -711,10 +722,13 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and object_creation_expression =
     { object_creation_new_keyword                        : t
-    ; object_creation_type                               : t
-    ; object_creation_left_paren                         : t
-    ; object_creation_argument_list                      : t
-    ; object_creation_right_paren                        : t
+    ; object_creation_object                             : t
+    }
+  and constructor_call =
+    { constructor_call_type                              : t
+    ; constructor_call_left_paren                        : t
+    ; constructor_call_argument_list                     : t
+    ; constructor_call_right_paren                       : t
     }
   and array_creation_expression =
     { array_creation_left_bracket                        : t
@@ -1082,6 +1096,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | EchoStatement                           of echo_statement
   | GlobalStatement                         of global_statement
   | SimpleInitializer                       of simple_initializer
+  | AnonymousClass                          of anonymous_class
   | AnonymousFunction                       of anonymous_function
   | Php7AnonymousFunction                   of php7_anonymous_function
   | AnonymousFunctionUseClause              of anonymous_function_use_clause
@@ -1113,6 +1128,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ListExpression                          of list_expression
   | CollectionLiteralExpression             of collection_literal_expression
   | ObjectCreationExpression                of object_creation_expression
+  | ConstructorCall                         of constructor_call
   | ArrayCreationExpression                 of array_creation_expression
   | ArrayIntrinsicExpression                of array_intrinsic_expression
   | DarrayIntrinsicExpression               of darray_intrinsic_expression
@@ -1435,6 +1451,9 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and xhp_attribute =
   | XHPAttrXHPSimpleAttribute of xhp_simple_attribute
   | XHPAttrXHPSpreadAttribute of xhp_spread_attribute
+  and object_creation_what =
+  | NewAnonymousClass  of anonymous_class
+  | NewConstructorCall of constructor_call
   and todo_aggregate =
   | TODOEndOfFile of end_of_file
   and end_of_file =
@@ -1889,6 +1908,17 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { simple_initializer_equal: Token.t value
     ; simple_initializer_value: expression value
     }
+  and anonymous_class =
+    { anonymous_class_class_keyword: Token.t value
+    ; anonymous_class_left_paren: Token.t option value
+    ; anonymous_class_argument_list: expression listesque value
+    ; anonymous_class_right_paren: Token.t option value
+    ; anonymous_class_extends_keyword: Token.t option value
+    ; anonymous_class_extends_list: specifier listesque value
+    ; anonymous_class_implements_keyword: Token.t option value
+    ; anonymous_class_implements_list: specifier listesque value
+    ; anonymous_class_body: classish_body value
+    }
   and anonymous_function =
     { anonymous_static_keyword: Token.t option value
     ; anonymous_async_keyword: Token.t option value
@@ -2072,10 +2102,13 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and object_creation_expression =
     { object_creation_new_keyword: Token.t value
-    ; object_creation_type: todo_aggregate value
-    ; object_creation_left_paren: Token.t option value
-    ; object_creation_argument_list: expression listesque value
-    ; object_creation_right_paren: Token.t option value
+    ; object_creation_object: object_creation_what value
+    }
+  and constructor_call =
+    { constructor_call_type: todo_aggregate value
+    ; constructor_call_left_paren: Token.t option value
+    ; constructor_call_argument_list: expression listesque value
+    ; constructor_call_right_paren: Token.t option value
     }
   and array_creation_expression =
     { array_creation_left_bracket: Token.t value

@@ -750,6 +750,21 @@ and pString2: expr_location -> node list -> env -> expr list =
 and pExprL node env =
   (pPos node env, Expr_list (couldMap ~f:pExpr node env))
 and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
+  let split_args_varargs arg_list =
+    match List.rev (as_list arg_list) with
+    | { syntax = DecoratedExpression
+        { decorated_expression_decorator =
+          { syntax = Token { Token.kind = Token.TokenKind.DotDotDot; _ }; _ }
+        ; decorated_expression_expression = e
+        }
+      ; _
+      } :: xs ->
+      let args = List.rev_map xs (fun x -> pExpr x env) in
+      let vararg = pExpr e env in
+      args, [vararg]
+    | _ ->
+      let args = couldMap ~f:pExpr arg_list env in
+      args, [] in
   let rec pExpr_ : expr_ parser = fun node env ->
     let pos = pPos node env in
     match syntax node with
@@ -873,20 +888,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         match snd recv, pos_if_has_parens with
         | (Obj_get _ | Class_get _), Some p -> p, ParenthesizedExpr recv
         | _ -> recv in
-      (match List.rev (as_list args) with
-      | { syntax = DecoratedExpression
-          { decorated_expression_decorator =
-            { syntax = Token { Token.kind = Token.TokenKind.DotDotDot; _ }; _ }
-          ; decorated_expression_expression = e
-          }
-        ; _
-        } :: xs
-        -> let args = List.rev_map xs (fun x -> pExpr x env) in
-           let vararg = pExpr e env in
-           Call (recv, hints, args, [vararg])
-      | _ -> let args = couldMap ~f:pExpr args env in
-             Call (recv, hints, args, [])
-      )
+      let args, varargs = split_args_varargs args in
+      Call (recv, hints, args, varargs)
     | FunctionCallWithTypeArgumentsExpression
       { function_call_with_type_arguments_receiver = recv
       ; function_call_with_type_arguments_type_args = type_args
@@ -1063,26 +1066,13 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       Shape (
         couldMap ~f:(mpShapeExpressionField pExpr) shape_expression_fields env
       )
-    | ObjectCreationExpression
-      { object_creation_type; object_creation_argument_list; _ } ->
-      let args, varargs =
-        match List.rev (as_list object_creation_argument_list) with
-        | { syntax = DecoratedExpression
-            { decorated_expression_decorator =
-              { syntax = Token { Token.kind = Token.TokenKind.DotDotDot; _ }
-              ; _ }
-            ; decorated_expression_expression = e
-            }
-          ; _
-          } :: xs
-          -> let args = List.rev_map xs (fun x -> pExpr x env) in
-             let vararg = pExpr e env in
-             args, [vararg]
-        | _ -> let args = couldMap ~f:pExpr object_creation_argument_list env in
-               args, []
-      in
+    | ObjectCreationExpression { object_creation_object = obj; _ } ->
+      pExpr_ obj env
+    | ConstructorCall
+      { constructor_call_argument_list; constructor_call_type; _ } ->
+      let args, varargs = split_args_varargs constructor_call_argument_list in
       New
-      ( (match syntax object_creation_type with
+      ( (match syntax constructor_call_type with
         | GenericTypeSpecifier { generic_class_type; generic_argument_list } ->
           let name = pos_name generic_class_type env in
           let hints =
@@ -1096,12 +1086,51 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | QualifiedNameExpression _
         | SimpleTypeSpecifier _
         | Token _
-          -> let name = pos_name object_creation_type env in fst name, Id name
-        | _ -> pExpr object_creation_type env
+          -> let name = pos_name constructor_call_type env in fst name, Id name
+        | _ -> pExpr constructor_call_type env
         )
       , args
       , varargs
       )
+    | AnonymousClass
+      { anonymous_class_argument_list = args
+      ; anonymous_class_extends_list = extends
+      ; anonymous_class_implements_list = implements
+      ; anonymous_class_body =
+        { syntax = ClassishBody { classish_body_elements = elts; _ }; _ }
+      ; _ } ->
+      let args, varargs = split_args_varargs args in
+      let c_mode = mode_annotation env.fi_mode in
+      let c_user_attributes = [] in
+      let c_final = false in
+      let c_is_xhp = false in
+      let c_name = pos, "anonymous" in
+      let c_tparams = [] in
+      let c_extends = couldMap ~f:pHint extends env in
+      let c_implements = couldMap ~f:pHint implements env in
+      let c_body = List.concat (couldMap ~f:pClassElt elts env) in
+      let c_namespace = Namespace_env.empty env.parser_options in
+      let c_enum = None in
+      let c_span = pPos node env in
+      let c_kind = Cnormal in
+      let c_doc_comment = None in
+      let cls =
+        { c_mode
+        ; c_user_attributes
+        ; c_final
+        ; c_is_xhp
+        ; c_name
+        ; c_tparams
+        ; c_extends
+        ; c_implements
+        ; c_body
+        ; c_namespace
+        ; c_enum
+        ; c_span
+        ; c_kind
+        ; c_doc_comment
+        } in
+      NewAnonClass (args, varargs, cls)
     | GenericTypeSpecifier
       { generic_class_type
       ; generic_argument_list

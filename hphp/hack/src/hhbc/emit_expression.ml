@@ -190,6 +190,7 @@ let get_passByRefKind is_splatted expr  =
       AllowCell
     | A.Xml _ ->
       AllowCell
+    | A.NewAnonClass _ -> ErrorOnCell
     | _ -> if is_splatted then AllowCell else ErrorOnCell in
   from_non_list_assignment AllowCell expr
 
@@ -460,30 +461,44 @@ and emit_new env expr args uargs =
   | Class_id id ->
     let fq_id, _id_opt =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
-    let push_instr = instr (ICall (FPushCtorD (nargs, fq_id))) in
     gather [
-      push_instr;
+      instr_fpushctord nargs fq_id;
       emit_args_and_call env args uargs;
       instr_popr
       ]
   | Class_static ->
-     gather [instr_fpushctors nargs SpecialClsRef.Static;
-             emit_args_and_call env args uargs;
-             instr_popr]
+    gather [
+      instr_fpushctors nargs SpecialClsRef.Static;
+      emit_args_and_call env args uargs;
+      instr_popr
+      ]
   | Class_self ->
-     gather [instr_fpushctors nargs SpecialClsRef.Self;
-             emit_args_and_call env args uargs;
-             instr_popr]
+    gather [
+      instr_fpushctors nargs SpecialClsRef.Self;
+      emit_args_and_call env args uargs;
+      instr_popr
+      ]
   | Class_parent ->
-     gather [instr_fpushctors nargs SpecialClsRef.Parent;
-             emit_args_and_call env args uargs;
-             instr_popr]
+    gather [
+      instr_fpushctors nargs SpecialClsRef.Parent;
+      emit_args_and_call env args uargs;
+      instr_popr
+      ]
   | _ ->
     gather [
       emit_load_class_ref env cexpr;
       instr_fpushctor nargs 0;
       emit_args_and_call env args uargs;
       instr_popr
+    ]
+
+and emit_new_anon env cls_idx args uargs =
+  let nargs = List.length args + List.length uargs in
+  gather [
+    instr_defcls cls_idx;
+    instr_fpushctori nargs cls_idx;
+    emit_args_and_call env args uargs;
+    instr_popr
     ]
 
 and emit_clone env expr =
@@ -561,16 +576,16 @@ and emit_load_class_ref env cexpr =
   | Class_id id -> emit_known_class_id env id
   | Class_unnamed_local l -> instr (IGet (ClsRefGetL (l, 0)))
   | Class_expr expr ->
-  begin match snd expr with
-  | A.Lvar ((_, id) as pos_id) when id <> SN.SpecialIdents.this ->
-    let local = get_local env pos_id in
-    instr (IGet (ClsRefGetL (local, 0)))
-  | _ ->
-    gather [
-      emit_expr ~need_ref:false env expr;
-      instr_clsrefgetc
-    ]
-  end
+    begin match snd expr with
+    | A.Lvar ((_, id) as pos_id) when id <> SN.SpecialIdents.this ->
+      let local = get_local env pos_id in
+      instr (IGet (ClsRefGetL (local, 0)))
+    | _ ->
+      gather [
+        emit_expr ~need_ref:false env expr;
+        instr_clsrefgetc
+      ]
+    end
 
 and emit_load_class_const env cexpr id =
   (* TODO(T21932293): HHVM does not match Zend here.
@@ -1094,6 +1109,9 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Execution_operator _ -> emit_call_expr ~need_ref env expr
   | A.New (typeexpr, args, uargs) ->
     emit_box_if_necessary need_ref @@ emit_new env typeexpr args uargs
+  | A.NewAnonClass (args, uargs, { A.c_name = (_, cls_name); _ }) ->
+    let cls_idx = int_of_string cls_name in
+    emit_box_if_necessary need_ref @@ emit_new_anon env cls_idx args uargs
   | A.Array es ->
     emit_box_if_necessary need_ref @@ emit_collection env expr es
   | A.Darray es ->

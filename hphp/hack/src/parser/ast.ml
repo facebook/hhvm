@@ -1,6 +1,6 @@
 (* @generated from ast.src.ml by hphp/hack/tools/ppx/facebook/generate_ppx.sh *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<920ba081356ea9af753eea6046eab38a011f74ea>> *)
+(* SourceShasum<<5e057c91196e7b4efc2012fb3df494ebead2b46b>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -287,6 +287,7 @@ and expr_ =
   | BracedExpr of expr 
   | ParenthesizedExpr of expr 
   | New of expr * expr list * expr list 
+  | NewAnonClass of expr list * expr list * class_ 
   | Efun of fun_ * (id * bool) list 
   | Lfun of fun_ 
   | Xml of id * xhp_attribute list * expr list 
@@ -1940,6 +1941,17 @@ include
                  (Pervasives.(==) _visitors_c2 _visitors_r2))
           then _visitors_this
           else New (_visitors_r0, _visitors_r1, _visitors_r2)
+        method on_NewAnonClass env _visitors_this _visitors_c0 _visitors_c1
+          _visitors_c2 =
+          let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
+          let _visitors_r1 = self#on_list self#on_expr env _visitors_c1  in
+          let _visitors_r2 = self#on_class_ env _visitors_c2  in
+          if
+            Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+              (Pervasives.(&&) (Pervasives.(==) _visitors_c1 _visitors_r1)
+                 (Pervasives.(==) _visitors_c2 _visitors_r2))
+          then _visitors_this
+          else NewAnonClass (_visitors_r0, _visitors_r1, _visitors_r2)
         method on_Efun env _visitors_this _visitors_c0 _visitors_c1 =
           let _visitors_r0 = self#on_fun_ env _visitors_c0  in
           let _visitors_r1 =
@@ -2095,6 +2107,10 @@ include
           | New (_visitors_c0,_visitors_c1,_visitors_c2) as _visitors_this ->
               self#on_New env _visitors_this _visitors_c0 _visitors_c1
                 _visitors_c2
+          | NewAnonClass (_visitors_c0,_visitors_c1,_visitors_c2) as
+              _visitors_this ->
+              self#on_NewAnonClass env _visitors_this _visitors_c0
+                _visitors_c1 _visitors_c2
           | Efun (_visitors_c0,_visitors_c1) as _visitors_this ->
               self#on_Efun env _visitors_this _visitors_c0 _visitors_c1
           | Lfun _visitors_c0 as _visitors_this ->
@@ -3053,6 +3069,11 @@ include
           let _visitors_s1 = self#on_list self#on_expr env _visitors_c1  in
           let _visitors_s2 = self#on_list self#on_expr env _visitors_c2  in
           self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+        method on_NewAnonClass env _visitors_c0 _visitors_c1 _visitors_c2 =
+          let _visitors_s0 = self#on_list self#on_expr env _visitors_c0  in
+          let _visitors_s1 = self#on_list self#on_expr env _visitors_c1  in
+          let _visitors_s2 = self#on_class_ env _visitors_c2  in
+          self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
         method on_Efun env _visitors_c0 _visitors_c1 =
           let _visitors_s0 = self#on_fun_ env _visitors_c0  in
           let _visitors_s1 =
@@ -3147,6 +3168,8 @@ include
               self#on_ParenthesizedExpr env _visitors_c0
           | New (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_New env _visitors_c0 _visitors_c1 _visitors_c2
+          | NewAnonClass (_visitors_c0,_visitors_c1,_visitors_c2) ->
+              self#on_NewAnonClass env _visitors_c0 _visitors_c1 _visitors_c2
           | Efun (_visitors_c0,_visitors_c1) ->
               self#on_Efun env _visitors_c0 _visitors_c1
           | Lfun _visitors_c0 -> self#on_Lfun env _visitors_c0
@@ -4105,6 +4128,11 @@ include
           let _visitors_r1 = self#on_list self#on_expr env _visitors_c1  in
           let _visitors_r2 = self#on_list self#on_expr env _visitors_c2  in
           New (_visitors_r0, _visitors_r1, _visitors_r2)
+        method on_NewAnonClass env _visitors_c0 _visitors_c1 _visitors_c2 =
+          let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
+          let _visitors_r1 = self#on_list self#on_expr env _visitors_c1  in
+          let _visitors_r2 = self#on_class_ env _visitors_c2  in
+          NewAnonClass (_visitors_r0, _visitors_r1, _visitors_r2)
         method on_Efun env _visitors_c0 _visitors_c1 =
           let _visitors_r0 = self#on_fun_ env _visitors_c0  in
           let _visitors_r1 =
@@ -4201,6 +4229,8 @@ include
               self#on_ParenthesizedExpr env _visitors_c0
           | New (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_New env _visitors_c0 _visitors_c1 _visitors_c2
+          | NewAnonClass (_visitors_c0,_visitors_c1,_visitors_c2) ->
+              self#on_NewAnonClass env _visitors_c0 _visitors_c1 _visitors_c2
           | Efun (_visitors_c0,_visitors_c1) ->
               self#on_Efun env _visitors_c0 _visitors_c1
           | Lfun _visitors_c0 -> self#on_Lfun env _visitors_c0
@@ -4982,6 +5012,10 @@ include
           let _visitors_r1 = self#on_list self#on_expr env _visitors_c1  in
           let _visitors_r2 = self#on_list self#on_expr env _visitors_c2  in
           ()
+        method on_NewAnonClass env _visitors_c0 _visitors_c1 _visitors_c2 =
+          let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
+          let _visitors_r1 = self#on_list self#on_expr env _visitors_c1  in
+          let _visitors_r2 = self#on_class_ env _visitors_c2  in ()
         method on_Efun env _visitors_c0 _visitors_c1 =
           let _visitors_r0 = self#on_fun_ env _visitors_c0  in
           let _visitors_r1 =
@@ -5074,6 +5108,8 @@ include
               self#on_ParenthesizedExpr env _visitors_c0
           | New (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_New env _visitors_c0 _visitors_c1 _visitors_c2
+          | NewAnonClass (_visitors_c0,_visitors_c1,_visitors_c2) ->
+              self#on_NewAnonClass env _visitors_c0 _visitors_c1 _visitors_c2
           | Efun (_visitors_c0,_visitors_c1) ->
               self#on_Efun env _visitors_c0 _visitors_c1
           | Lfun _visitors_c0 -> self#on_Lfun env _visitors_c0

@@ -20,6 +20,7 @@ type aggregate_type =
   | ConstructorExpression
   | NamespaceInternals
   | XHPAttribute
+  | ObjectCreationWhat
   | TODO
 
 type child_spec =
@@ -1009,6 +1010,24 @@ let schema : schema_node list =
       ; "value", Aggregate Expression
       ]
     }
+  ; { kind_name   = "AnonymousClass"
+    ; type_name   = "anonymous_class"
+    ; func_name   = "anonymous_class"
+    ; description = "anonymous_class"
+    ; prefix      = "anonymous_class"
+    ; aggregates  = [ ObjectCreationWhat ]
+    ; fields =
+      [ "class_keyword", Token
+      ; "left_paren", ZeroOrOne Token
+      ; "argument_list", ZeroOrMore (Aggregate Expression)
+      ; "right_paren", ZeroOrOne Token
+      ; "extends_keyword", ZeroOrOne Token
+      ; "extends_list", ZeroOrMore (Aggregate Specifier)
+      ; "implements_keyword", ZeroOrOne Token
+      ; "implements_list", ZeroOrMore (Aggregate Specifier)
+      ; "body", Just "ClassishBody"
+      ]
+    }
   ; { kind_name   = "AnonymousFunction"
     ; type_name   = "anonymous_function"
     ; func_name   = "anonymous_function"
@@ -1408,7 +1427,17 @@ let schema : schema_node list =
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
       [ "new_keyword", Token
-      ; "type", Aggregate TODO
+      ; "object", Aggregate ObjectCreationWhat
+      ]
+    }
+  ; { kind_name   = "ConstructorCall"
+    ; type_name   = "constructor_call"
+    ; func_name   = "constructor_call"
+    ; description = "constructor_call"
+    ; prefix      = "constructor_call"
+    ; aggregates  = [ ObjectCreationWhat ]
+    ; fields =
+      [ "type", Aggregate TODO
       ; "left_paren", ZeroOrOne Token
       ; "argument_list", ZeroOrMore (Aggregate Expression)
       ; "right_paren", ZeroOrOne Token
@@ -2074,6 +2103,7 @@ let generated_aggregate_types =
   ; ConstructorExpression
   ; NamespaceInternals
   ; XHPAttribute
+  ; ObjectCreationWhat
   ; TODO
   ]
 
@@ -2089,6 +2119,7 @@ let string_of_aggregate_type = function
   | ConstructorExpression  -> "ConstructorExpression"
   | NamespaceInternals     -> "NamespaceInternals"
   | XHPAttribute           -> "XHPAttribute"
+  | ObjectCreationWhat     -> "ObjectCreationWhat"
   | TODO                   -> "TODO"
 
 module AggregateKey = struct
@@ -2120,6 +2151,8 @@ let aggregation_of_namespace_internals =
   List.filter (fun x -> List.mem NamespaceInternals    x.aggregates) schema
 let aggregation_of_xhp_attribute =
   List.filter (fun x -> List.mem XHPAttribute          x.aggregates) schema
+let aggregation_of_object_creation_what =
+  List.filter (fun x -> List.mem ObjectCreationWhat    x.aggregates) schema
 let aggregation_of_todo_aggregate =
   List.filter (fun x -> List.mem TODO                  x.aggregates) schema
 
@@ -2135,6 +2168,7 @@ let aggregation_of = function
   | ConstructorExpression  -> aggregation_of_constructor_expression
   | NamespaceInternals     -> aggregation_of_namespace_internals
   | XHPAttribute           -> aggregation_of_xhp_attribute
+  | ObjectCreationWhat     -> aggregation_of_object_creation_what
   | TODO                   -> aggregation_of_todo_aggregate
 
 let aggregate_type_name = function
@@ -2149,6 +2183,7 @@ let aggregate_type_name = function
   | ConstructorExpression  -> "constructor_expression"
   | NamespaceInternals     -> "namespace_internals"
   | XHPAttribute           -> "xhp_attribute"
+  | ObjectCreationWhat     -> "object_creation_what"
   | TODO                   -> "todo_aggregate"
 
 let aggregate_type_pfx_trim = function
@@ -2163,6 +2198,7 @@ let aggregate_type_pfx_trim = function
   | ConstructorExpression  -> "CExpr",  "Expression$"
   | NamespaceInternals     -> "NSI",    ""
   | XHPAttribute           -> "XHPAttr",""
+  | ObjectCreationWhat     -> "New",    ""
   | TODO                   -> "TODO",   ""
 
 

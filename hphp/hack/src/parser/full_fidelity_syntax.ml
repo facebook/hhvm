@@ -133,6 +133,7 @@ module WithToken(Token: TokenType) = struct
       | EchoStatement                           _ -> SyntaxKind.EchoStatement
       | GlobalStatement                         _ -> SyntaxKind.GlobalStatement
       | SimpleInitializer                       _ -> SyntaxKind.SimpleInitializer
+      | AnonymousClass                          _ -> SyntaxKind.AnonymousClass
       | AnonymousFunction                       _ -> SyntaxKind.AnonymousFunction
       | Php7AnonymousFunction                   _ -> SyntaxKind.Php7AnonymousFunction
       | AnonymousFunctionUseClause              _ -> SyntaxKind.AnonymousFunctionUseClause
@@ -164,6 +165,7 @@ module WithToken(Token: TokenType) = struct
       | ListExpression                          _ -> SyntaxKind.ListExpression
       | CollectionLiteralExpression             _ -> SyntaxKind.CollectionLiteralExpression
       | ObjectCreationExpression                _ -> SyntaxKind.ObjectCreationExpression
+      | ConstructorCall                         _ -> SyntaxKind.ConstructorCall
       | ArrayCreationExpression                 _ -> SyntaxKind.ArrayCreationExpression
       | ArrayIntrinsicExpression                _ -> SyntaxKind.ArrayIntrinsicExpression
       | DarrayIntrinsicExpression               _ -> SyntaxKind.DarrayIntrinsicExpression
@@ -305,6 +307,7 @@ module WithToken(Token: TokenType) = struct
     let is_echo_statement                               = has_kind SyntaxKind.EchoStatement
     let is_global_statement                             = has_kind SyntaxKind.GlobalStatement
     let is_simple_initializer                           = has_kind SyntaxKind.SimpleInitializer
+    let is_anonymous_class                              = has_kind SyntaxKind.AnonymousClass
     let is_anonymous_function                           = has_kind SyntaxKind.AnonymousFunction
     let is_php7_anonymous_function                      = has_kind SyntaxKind.Php7AnonymousFunction
     let is_anonymous_function_use_clause                = has_kind SyntaxKind.AnonymousFunctionUseClause
@@ -336,6 +339,7 @@ module WithToken(Token: TokenType) = struct
     let is_list_expression                              = has_kind SyntaxKind.ListExpression
     let is_collection_literal_expression                = has_kind SyntaxKind.CollectionLiteralExpression
     let is_object_creation_expression                   = has_kind SyntaxKind.ObjectCreationExpression
+    let is_constructor_call                             = has_kind SyntaxKind.ConstructorCall
     let is_array_creation_expression                    = has_kind SyntaxKind.ArrayCreationExpression
     let is_array_intrinsic_expression                   = has_kind SyntaxKind.ArrayIntrinsicExpression
     let is_darray_intrinsic_expression                  = has_kind SyntaxKind.DarrayIntrinsicExpression
@@ -1332,6 +1336,28 @@ module WithToken(Token: TokenType) = struct
       simple_initializer_value
     )
 
+    let get_anonymous_class_children {
+      anonymous_class_class_keyword;
+      anonymous_class_left_paren;
+      anonymous_class_argument_list;
+      anonymous_class_right_paren;
+      anonymous_class_extends_keyword;
+      anonymous_class_extends_list;
+      anonymous_class_implements_keyword;
+      anonymous_class_implements_list;
+      anonymous_class_body;
+    } = (
+      anonymous_class_class_keyword,
+      anonymous_class_left_paren,
+      anonymous_class_argument_list,
+      anonymous_class_right_paren,
+      anonymous_class_extends_keyword,
+      anonymous_class_extends_list,
+      anonymous_class_implements_keyword,
+      anonymous_class_implements_list,
+      anonymous_class_body
+    )
+
     let get_anonymous_function_children {
       anonymous_static_keyword;
       anonymous_async_keyword;
@@ -1696,16 +1722,22 @@ module WithToken(Token: TokenType) = struct
 
     let get_object_creation_expression_children {
       object_creation_new_keyword;
-      object_creation_type;
-      object_creation_left_paren;
-      object_creation_argument_list;
-      object_creation_right_paren;
+      object_creation_object;
     } = (
       object_creation_new_keyword,
-      object_creation_type,
-      object_creation_left_paren,
-      object_creation_argument_list,
-      object_creation_right_paren
+      object_creation_object
+    )
+
+    let get_constructor_call_children {
+      constructor_call_type;
+      constructor_call_left_paren;
+      constructor_call_argument_list;
+      constructor_call_right_paren;
+    } = (
+      constructor_call_type,
+      constructor_call_left_paren,
+      constructor_call_argument_list,
+      constructor_call_right_paren
     )
 
     let get_array_creation_expression_children {
@@ -3116,6 +3148,27 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc simple_initializer_equal in
          let acc = f acc simple_initializer_value in
          acc
+      | AnonymousClass {
+        anonymous_class_class_keyword;
+        anonymous_class_left_paren;
+        anonymous_class_argument_list;
+        anonymous_class_right_paren;
+        anonymous_class_extends_keyword;
+        anonymous_class_extends_list;
+        anonymous_class_implements_keyword;
+        anonymous_class_implements_list;
+        anonymous_class_body;
+      } ->
+         let acc = f acc anonymous_class_class_keyword in
+         let acc = f acc anonymous_class_left_paren in
+         let acc = f acc anonymous_class_argument_list in
+         let acc = f acc anonymous_class_right_paren in
+         let acc = f acc anonymous_class_extends_keyword in
+         let acc = f acc anonymous_class_extends_list in
+         let acc = f acc anonymous_class_implements_keyword in
+         let acc = f acc anonymous_class_implements_list in
+         let acc = f acc anonymous_class_body in
+         acc
       | AnonymousFunction {
         anonymous_static_keyword;
         anonymous_async_keyword;
@@ -3450,16 +3503,21 @@ module WithToken(Token: TokenType) = struct
          acc
       | ObjectCreationExpression {
         object_creation_new_keyword;
-        object_creation_type;
-        object_creation_left_paren;
-        object_creation_argument_list;
-        object_creation_right_paren;
+        object_creation_object;
       } ->
          let acc = f acc object_creation_new_keyword in
-         let acc = f acc object_creation_type in
-         let acc = f acc object_creation_left_paren in
-         let acc = f acc object_creation_argument_list in
-         let acc = f acc object_creation_right_paren in
+         let acc = f acc object_creation_object in
+         acc
+      | ConstructorCall {
+        constructor_call_type;
+        constructor_call_left_paren;
+        constructor_call_argument_list;
+        constructor_call_right_paren;
+      } ->
+         let acc = f acc constructor_call_type in
+         let acc = f acc constructor_call_left_paren in
+         let acc = f acc constructor_call_argument_list in
+         let acc = f acc constructor_call_right_paren in
          acc
       | ArrayCreationExpression {
         array_creation_left_bracket;
@@ -4819,6 +4877,27 @@ module WithToken(Token: TokenType) = struct
         simple_initializer_equal;
         simple_initializer_value;
       ]
+      | AnonymousClass {
+        anonymous_class_class_keyword;
+        anonymous_class_left_paren;
+        anonymous_class_argument_list;
+        anonymous_class_right_paren;
+        anonymous_class_extends_keyword;
+        anonymous_class_extends_list;
+        anonymous_class_implements_keyword;
+        anonymous_class_implements_list;
+        anonymous_class_body;
+      } -> [
+        anonymous_class_class_keyword;
+        anonymous_class_left_paren;
+        anonymous_class_argument_list;
+        anonymous_class_right_paren;
+        anonymous_class_extends_keyword;
+        anonymous_class_extends_list;
+        anonymous_class_implements_keyword;
+        anonymous_class_implements_list;
+        anonymous_class_body;
+      ]
       | AnonymousFunction {
         anonymous_static_keyword;
         anonymous_async_keyword;
@@ -5153,16 +5232,21 @@ module WithToken(Token: TokenType) = struct
       ]
       | ObjectCreationExpression {
         object_creation_new_keyword;
-        object_creation_type;
-        object_creation_left_paren;
-        object_creation_argument_list;
-        object_creation_right_paren;
+        object_creation_object;
       } -> [
         object_creation_new_keyword;
-        object_creation_type;
-        object_creation_left_paren;
-        object_creation_argument_list;
-        object_creation_right_paren;
+        object_creation_object;
+      ]
+      | ConstructorCall {
+        constructor_call_type;
+        constructor_call_left_paren;
+        constructor_call_argument_list;
+        constructor_call_right_paren;
+      } -> [
+        constructor_call_type;
+        constructor_call_left_paren;
+        constructor_call_argument_list;
+        constructor_call_right_paren;
       ]
       | ArrayCreationExpression {
         array_creation_left_bracket;
@@ -6523,6 +6607,27 @@ module WithToken(Token: TokenType) = struct
         "simple_initializer_equal";
         "simple_initializer_value";
       ]
+      | AnonymousClass {
+        anonymous_class_class_keyword;
+        anonymous_class_left_paren;
+        anonymous_class_argument_list;
+        anonymous_class_right_paren;
+        anonymous_class_extends_keyword;
+        anonymous_class_extends_list;
+        anonymous_class_implements_keyword;
+        anonymous_class_implements_list;
+        anonymous_class_body;
+      } -> [
+        "anonymous_class_class_keyword";
+        "anonymous_class_left_paren";
+        "anonymous_class_argument_list";
+        "anonymous_class_right_paren";
+        "anonymous_class_extends_keyword";
+        "anonymous_class_extends_list";
+        "anonymous_class_implements_keyword";
+        "anonymous_class_implements_list";
+        "anonymous_class_body";
+      ]
       | AnonymousFunction {
         anonymous_static_keyword;
         anonymous_async_keyword;
@@ -6857,16 +6962,21 @@ module WithToken(Token: TokenType) = struct
       ]
       | ObjectCreationExpression {
         object_creation_new_keyword;
-        object_creation_type;
-        object_creation_left_paren;
-        object_creation_argument_list;
-        object_creation_right_paren;
+        object_creation_object;
       } -> [
         "object_creation_new_keyword";
-        "object_creation_type";
-        "object_creation_left_paren";
-        "object_creation_argument_list";
-        "object_creation_right_paren";
+        "object_creation_object";
+      ]
+      | ConstructorCall {
+        constructor_call_type;
+        constructor_call_left_paren;
+        constructor_call_argument_list;
+        constructor_call_right_paren;
+      } -> [
+        "constructor_call_type";
+        "constructor_call_left_paren";
+        "constructor_call_argument_list";
+        "constructor_call_right_paren";
       ]
       | ArrayCreationExpression {
         array_creation_left_bracket;
@@ -8358,6 +8468,28 @@ module WithToken(Token: TokenType) = struct
           simple_initializer_equal;
           simple_initializer_value;
         }
+      | (SyntaxKind.AnonymousClass, [
+          anonymous_class_class_keyword;
+          anonymous_class_left_paren;
+          anonymous_class_argument_list;
+          anonymous_class_right_paren;
+          anonymous_class_extends_keyword;
+          anonymous_class_extends_list;
+          anonymous_class_implements_keyword;
+          anonymous_class_implements_list;
+          anonymous_class_body;
+        ]) ->
+        AnonymousClass {
+          anonymous_class_class_keyword;
+          anonymous_class_left_paren;
+          anonymous_class_argument_list;
+          anonymous_class_right_paren;
+          anonymous_class_extends_keyword;
+          anonymous_class_extends_list;
+          anonymous_class_implements_keyword;
+          anonymous_class_implements_list;
+          anonymous_class_body;
+        }
       | (SyntaxKind.AnonymousFunction, [
           anonymous_static_keyword;
           anonymous_async_keyword;
@@ -8722,17 +8854,23 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.ObjectCreationExpression, [
           object_creation_new_keyword;
-          object_creation_type;
-          object_creation_left_paren;
-          object_creation_argument_list;
-          object_creation_right_paren;
+          object_creation_object;
         ]) ->
         ObjectCreationExpression {
           object_creation_new_keyword;
-          object_creation_type;
-          object_creation_left_paren;
-          object_creation_argument_list;
-          object_creation_right_paren;
+          object_creation_object;
+        }
+      | (SyntaxKind.ConstructorCall, [
+          constructor_call_type;
+          constructor_call_left_paren;
+          constructor_call_argument_list;
+          constructor_call_right_paren;
+        ]) ->
+        ConstructorCall {
+          constructor_call_type;
+          constructor_call_left_paren;
+          constructor_call_argument_list;
+          constructor_call_right_paren;
         }
       | (SyntaxKind.ArrayCreationExpression, [
           array_creation_left_bracket;
@@ -10487,6 +10625,31 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
+      let make_anonymous_class
+        anonymous_class_class_keyword
+        anonymous_class_left_paren
+        anonymous_class_argument_list
+        anonymous_class_right_paren
+        anonymous_class_extends_keyword
+        anonymous_class_extends_list
+        anonymous_class_implements_keyword
+        anonymous_class_implements_list
+        anonymous_class_body
+      =
+        let syntax = AnonymousClass {
+          anonymous_class_class_keyword;
+          anonymous_class_left_paren;
+          anonymous_class_argument_list;
+          anonymous_class_right_paren;
+          anonymous_class_extends_keyword;
+          anonymous_class_extends_list;
+          anonymous_class_implements_keyword;
+          anonymous_class_implements_list;
+          anonymous_class_body;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
       let make_anonymous_function
         anonymous_static_keyword
         anonymous_async_keyword
@@ -10941,17 +11104,26 @@ module WithToken(Token: TokenType) = struct
 
       let make_object_creation_expression
         object_creation_new_keyword
-        object_creation_type
-        object_creation_left_paren
-        object_creation_argument_list
-        object_creation_right_paren
+        object_creation_object
       =
         let syntax = ObjectCreationExpression {
           object_creation_new_keyword;
-          object_creation_type;
-          object_creation_left_paren;
-          object_creation_argument_list;
-          object_creation_right_paren;
+          object_creation_object;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_constructor_call
+        constructor_call_type
+        constructor_call_left_paren
+        constructor_call_argument_list
+        constructor_call_right_paren
+      =
+        let syntax = ConstructorCall {
+          constructor_call_type;
+          constructor_call_left_paren;
+          constructor_call_argument_list;
+          constructor_call_right_paren;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

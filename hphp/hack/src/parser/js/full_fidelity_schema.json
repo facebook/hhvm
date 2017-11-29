@@ -1186,6 +1186,21 @@
         { "field_name" : "equal" },
         { "field_name" : "value" }
       ] },
+    { "kind_name" : "AnonymousClass",
+      "type_name" : "anonymous_class",
+      "description" : "anonymous_class",
+      "prefix" : "anonymous_class",
+      "fields" : [
+        { "field_name" : "class_keyword" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "argument_list" },
+        { "field_name" : "right_paren" },
+        { "field_name" : "extends_keyword" },
+        { "field_name" : "extends_list" },
+        { "field_name" : "implements_keyword" },
+        { "field_name" : "implements_list" },
+        { "field_name" : "body" }
+      ] },
     { "kind_name" : "AnonymousFunction",
       "type_name" : "anonymous_function",
       "description" : "anonymous_function",
@@ -1493,6 +1508,13 @@
       "prefix" : "object_creation",
       "fields" : [
         { "field_name" : "new_keyword" },
+        { "field_name" : "object" }
+      ] },
+    { "kind_name" : "ConstructorCall",
+      "type_name" : "constructor_call",
+      "description" : "constructor_call",
+      "prefix" : "constructor_call",
+      "fields" : [
         { "field_name" : "type" },
         { "field_name" : "left_paren" },
         { "field_name" : "argument_list" },

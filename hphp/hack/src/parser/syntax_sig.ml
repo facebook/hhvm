@@ -477,6 +477,17 @@ module type Syntax_S = sig
     { simple_initializer_equal                           : t
     ; simple_initializer_value                           : t
     }
+  and anonymous_class =
+    { anonymous_class_class_keyword                      : t
+    ; anonymous_class_left_paren                         : t
+    ; anonymous_class_argument_list                      : t
+    ; anonymous_class_right_paren                        : t
+    ; anonymous_class_extends_keyword                    : t
+    ; anonymous_class_extends_list                       : t
+    ; anonymous_class_implements_keyword                 : t
+    ; anonymous_class_implements_list                    : t
+    ; anonymous_class_body                               : t
+    }
   and anonymous_function =
     { anonymous_static_keyword                           : t
     ; anonymous_async_keyword                            : t
@@ -660,10 +671,13 @@ module type Syntax_S = sig
     }
   and object_creation_expression =
     { object_creation_new_keyword                        : t
-    ; object_creation_type                               : t
-    ; object_creation_left_paren                         : t
-    ; object_creation_argument_list                      : t
-    ; object_creation_right_paren                        : t
+    ; object_creation_object                             : t
+    }
+  and constructor_call =
+    { constructor_call_type                              : t
+    ; constructor_call_left_paren                        : t
+    ; constructor_call_argument_list                     : t
+    ; constructor_call_right_paren                       : t
     }
   and array_creation_expression =
     { array_creation_left_bracket                        : t
@@ -1032,6 +1046,7 @@ module type Syntax_S = sig
   | EchoStatement                           of echo_statement
   | GlobalStatement                         of global_statement
   | SimpleInitializer                       of simple_initializer
+  | AnonymousClass                          of anonymous_class
   | AnonymousFunction                       of anonymous_function
   | Php7AnonymousFunction                   of php7_anonymous_function
   | AnonymousFunctionUseClause              of anonymous_function_use_clause
@@ -1063,6 +1078,7 @@ module type Syntax_S = sig
   | ListExpression                          of list_expression
   | CollectionLiteralExpression             of collection_literal_expression
   | ObjectCreationExpression                of object_creation_expression
+  | ConstructorCall                         of constructor_call
   | ArrayCreationExpression                 of array_creation_expression
   | ArrayIntrinsicExpression                of array_intrinsic_expression
   | DarrayIntrinsicExpression               of darray_intrinsic_expression
@@ -1208,6 +1224,7 @@ module type Syntax_S = sig
   val make_echo_statement : t -> t -> t -> t
   val make_global_statement : t -> t -> t -> t
   val make_simple_initializer : t -> t -> t
+  val make_anonymous_class : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_php7_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_anonymous_function_use_clause : t -> t -> t -> t -> t
@@ -1238,7 +1255,8 @@ module type Syntax_S = sig
   val make_embedded_braced_expression : t -> t -> t -> t
   val make_list_expression : t -> t -> t -> t -> t
   val make_collection_literal_expression : t -> t -> t -> t -> t
-  val make_object_creation_expression : t -> t -> t -> t -> t -> t
+  val make_object_creation_expression : t -> t -> t
+  val make_constructor_call : t -> t -> t -> t -> t
   val make_array_creation_expression : t -> t -> t -> t
   val make_array_intrinsic_expression : t -> t -> t -> t -> t
   val make_darray_intrinsic_expression : t -> t -> t -> t -> t
@@ -1371,6 +1389,7 @@ module type Syntax_S = sig
   val is_echo_statement : t -> bool
   val is_global_statement : t -> bool
   val is_simple_initializer : t -> bool
+  val is_anonymous_class : t -> bool
   val is_anonymous_function : t -> bool
   val is_php7_anonymous_function : t -> bool
   val is_anonymous_function_use_clause : t -> bool
@@ -1402,6 +1421,7 @@ module type Syntax_S = sig
   val is_list_expression : t -> bool
   val is_collection_literal_expression : t -> bool
   val is_object_creation_expression : t -> bool
+  val is_constructor_call : t -> bool
   val is_array_creation_expression : t -> bool
   val is_array_intrinsic_expression : t -> bool
   val is_darray_intrinsic_expression : t -> bool

@@ -237,6 +237,8 @@ class EditableSyntax
       return GlobalStatement.from_json(json, position, source);
     case 'simple_initializer':
       return SimpleInitializer.from_json(json, position, source);
+    case 'anonymous_class':
+      return AnonymousClass.from_json(json, position, source);
     case 'anonymous_function':
       return AnonymousFunction.from_json(json, position, source);
     case 'php7_anonymous_function':
@@ -299,6 +301,8 @@ class EditableSyntax
       return CollectionLiteralExpression.from_json(json, position, source);
     case 'object_creation_expression':
       return ObjectCreationExpression.from_json(json, position, source);
+    case 'constructor_call':
+      return ConstructorCall.from_json(json, position, source);
     case 'array_creation_expression':
       return ArrayCreationExpression.from_json(json, position, source);
     case 'array_intrinsic_expression':
@@ -11176,6 +11180,245 @@ class SimpleInitializer extends EditableSyntax
     return SimpleInitializer._children_keys;
   }
 }
+class AnonymousClass extends EditableSyntax
+{
+  constructor(
+    class_keyword,
+    left_paren,
+    argument_list,
+    right_paren,
+    extends_keyword,
+    extends_list,
+    implements_keyword,
+    implements_list,
+    body)
+  {
+    super('anonymous_class', {
+      class_keyword: class_keyword,
+      left_paren: left_paren,
+      argument_list: argument_list,
+      right_paren: right_paren,
+      extends_keyword: extends_keyword,
+      extends_list: extends_list,
+      implements_keyword: implements_keyword,
+      implements_list: implements_list,
+      body: body });
+  }
+  get class_keyword() { return this.children.class_keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get argument_list() { return this.children.argument_list; }
+  get right_paren() { return this.children.right_paren; }
+  get extends_keyword() { return this.children.extends_keyword; }
+  get extends_list() { return this.children.extends_list; }
+  get implements_keyword() { return this.children.implements_keyword; }
+  get implements_list() { return this.children.implements_list; }
+  get body() { return this.children.body; }
+  with_class_keyword(class_keyword){
+    return new AnonymousClass(
+      class_keyword,
+      this.left_paren,
+      this.argument_list,
+      this.right_paren,
+      this.extends_keyword,
+      this.extends_list,
+      this.implements_keyword,
+      this.implements_list,
+      this.body);
+  }
+  with_left_paren(left_paren){
+    return new AnonymousClass(
+      this.class_keyword,
+      left_paren,
+      this.argument_list,
+      this.right_paren,
+      this.extends_keyword,
+      this.extends_list,
+      this.implements_keyword,
+      this.implements_list,
+      this.body);
+  }
+  with_argument_list(argument_list){
+    return new AnonymousClass(
+      this.class_keyword,
+      this.left_paren,
+      argument_list,
+      this.right_paren,
+      this.extends_keyword,
+      this.extends_list,
+      this.implements_keyword,
+      this.implements_list,
+      this.body);
+  }
+  with_right_paren(right_paren){
+    return new AnonymousClass(
+      this.class_keyword,
+      this.left_paren,
+      this.argument_list,
+      right_paren,
+      this.extends_keyword,
+      this.extends_list,
+      this.implements_keyword,
+      this.implements_list,
+      this.body);
+  }
+  with_extends_keyword(extends_keyword){
+    return new AnonymousClass(
+      this.class_keyword,
+      this.left_paren,
+      this.argument_list,
+      this.right_paren,
+      extends_keyword,
+      this.extends_list,
+      this.implements_keyword,
+      this.implements_list,
+      this.body);
+  }
+  with_extends_list(extends_list){
+    return new AnonymousClass(
+      this.class_keyword,
+      this.left_paren,
+      this.argument_list,
+      this.right_paren,
+      this.extends_keyword,
+      extends_list,
+      this.implements_keyword,
+      this.implements_list,
+      this.body);
+  }
+  with_implements_keyword(implements_keyword){
+    return new AnonymousClass(
+      this.class_keyword,
+      this.left_paren,
+      this.argument_list,
+      this.right_paren,
+      this.extends_keyword,
+      this.extends_list,
+      implements_keyword,
+      this.implements_list,
+      this.body);
+  }
+  with_implements_list(implements_list){
+    return new AnonymousClass(
+      this.class_keyword,
+      this.left_paren,
+      this.argument_list,
+      this.right_paren,
+      this.extends_keyword,
+      this.extends_list,
+      this.implements_keyword,
+      implements_list,
+      this.body);
+  }
+  with_body(body){
+    return new AnonymousClass(
+      this.class_keyword,
+      this.left_paren,
+      this.argument_list,
+      this.right_paren,
+      this.extends_keyword,
+      this.extends_list,
+      this.implements_keyword,
+      this.implements_list,
+      body);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var class_keyword = this.class_keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var argument_list = this.argument_list.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var extends_keyword = this.extends_keyword.rewrite(rewriter, new_parents);
+    var extends_list = this.extends_list.rewrite(rewriter, new_parents);
+    var implements_keyword = this.implements_keyword.rewrite(rewriter, new_parents);
+    var implements_list = this.implements_list.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
+    if (
+      class_keyword === this.class_keyword &&
+      left_paren === this.left_paren &&
+      argument_list === this.argument_list &&
+      right_paren === this.right_paren &&
+      extends_keyword === this.extends_keyword &&
+      extends_list === this.extends_list &&
+      implements_keyword === this.implements_keyword &&
+      implements_list === this.implements_list &&
+      body === this.body)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new AnonymousClass(
+        class_keyword,
+        left_paren,
+        argument_list,
+        right_paren,
+        extends_keyword,
+        extends_list,
+        implements_keyword,
+        implements_list,
+        body), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let class_keyword = EditableSyntax.from_json(
+      json.anonymous_class_class_keyword, position, source);
+    position += class_keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.anonymous_class_left_paren, position, source);
+    position += left_paren.width;
+    let argument_list = EditableSyntax.from_json(
+      json.anonymous_class_argument_list, position, source);
+    position += argument_list.width;
+    let right_paren = EditableSyntax.from_json(
+      json.anonymous_class_right_paren, position, source);
+    position += right_paren.width;
+    let extends_keyword = EditableSyntax.from_json(
+      json.anonymous_class_extends_keyword, position, source);
+    position += extends_keyword.width;
+    let extends_list = EditableSyntax.from_json(
+      json.anonymous_class_extends_list, position, source);
+    position += extends_list.width;
+    let implements_keyword = EditableSyntax.from_json(
+      json.anonymous_class_implements_keyword, position, source);
+    position += implements_keyword.width;
+    let implements_list = EditableSyntax.from_json(
+      json.anonymous_class_implements_list, position, source);
+    position += implements_list.width;
+    let body = EditableSyntax.from_json(
+      json.anonymous_class_body, position, source);
+    position += body.width;
+    return new AnonymousClass(
+        class_keyword,
+        left_paren,
+        argument_list,
+        right_paren,
+        extends_keyword,
+        extends_list,
+        implements_keyword,
+        implements_list,
+        body);
+  }
+  get children_keys()
+  {
+    if (AnonymousClass._children_keys == null)
+      AnonymousClass._children_keys = [
+        'class_keyword',
+        'left_paren',
+        'argument_list',
+        'right_paren',
+        'extends_keyword',
+        'extends_list',
+        'implements_keyword',
+        'implements_list',
+        'body'];
+    return AnonymousClass._children_keys;
+  }
+}
 class AnonymousFunction extends EditableSyntax
 {
   constructor(
@@ -14447,58 +14690,107 @@ class ObjectCreationExpression extends EditableSyntax
 {
   constructor(
     new_keyword,
+    object)
+  {
+    super('object_creation_expression', {
+      new_keyword: new_keyword,
+      object: object });
+  }
+  get new_keyword() { return this.children.new_keyword; }
+  get object() { return this.children.object; }
+  with_new_keyword(new_keyword){
+    return new ObjectCreationExpression(
+      new_keyword,
+      this.object);
+  }
+  with_object(object){
+    return new ObjectCreationExpression(
+      this.new_keyword,
+      object);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var new_keyword = this.new_keyword.rewrite(rewriter, new_parents);
+    var object = this.object.rewrite(rewriter, new_parents);
+    if (
+      new_keyword === this.new_keyword &&
+      object === this.object)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new ObjectCreationExpression(
+        new_keyword,
+        object), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let new_keyword = EditableSyntax.from_json(
+      json.object_creation_new_keyword, position, source);
+    position += new_keyword.width;
+    let object = EditableSyntax.from_json(
+      json.object_creation_object, position, source);
+    position += object.width;
+    return new ObjectCreationExpression(
+        new_keyword,
+        object);
+  }
+  get children_keys()
+  {
+    if (ObjectCreationExpression._children_keys == null)
+      ObjectCreationExpression._children_keys = [
+        'new_keyword',
+        'object'];
+    return ObjectCreationExpression._children_keys;
+  }
+}
+class ConstructorCall extends EditableSyntax
+{
+  constructor(
     type,
     left_paren,
     argument_list,
     right_paren)
   {
-    super('object_creation_expression', {
-      new_keyword: new_keyword,
+    super('constructor_call', {
       type: type,
       left_paren: left_paren,
       argument_list: argument_list,
       right_paren: right_paren });
   }
-  get new_keyword() { return this.children.new_keyword; }
   get type() { return this.children.type; }
   get left_paren() { return this.children.left_paren; }
   get argument_list() { return this.children.argument_list; }
   get right_paren() { return this.children.right_paren; }
-  with_new_keyword(new_keyword){
-    return new ObjectCreationExpression(
-      new_keyword,
-      this.type,
-      this.left_paren,
-      this.argument_list,
-      this.right_paren);
-  }
   with_type(type){
-    return new ObjectCreationExpression(
-      this.new_keyword,
+    return new ConstructorCall(
       type,
       this.left_paren,
       this.argument_list,
       this.right_paren);
   }
   with_left_paren(left_paren){
-    return new ObjectCreationExpression(
-      this.new_keyword,
+    return new ConstructorCall(
       this.type,
       left_paren,
       this.argument_list,
       this.right_paren);
   }
   with_argument_list(argument_list){
-    return new ObjectCreationExpression(
-      this.new_keyword,
+    return new ConstructorCall(
       this.type,
       this.left_paren,
       argument_list,
       this.right_paren);
   }
   with_right_paren(right_paren){
-    return new ObjectCreationExpression(
-      this.new_keyword,
+    return new ConstructorCall(
       this.type,
       this.left_paren,
       this.argument_list,
@@ -14510,13 +14802,11 @@ class ObjectCreationExpression extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
-    var new_keyword = this.new_keyword.rewrite(rewriter, new_parents);
     var type = this.type.rewrite(rewriter, new_parents);
     var left_paren = this.left_paren.rewrite(rewriter, new_parents);
     var argument_list = this.argument_list.rewrite(rewriter, new_parents);
     var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
-      new_keyword === this.new_keyword &&
       type === this.type &&
       left_paren === this.left_paren &&
       argument_list === this.argument_list &&
@@ -14526,8 +14816,7 @@ class ObjectCreationExpression extends EditableSyntax
     }
     else
     {
-      return rewriter(new ObjectCreationExpression(
-        new_keyword,
+      return rewriter(new ConstructorCall(
         type,
         left_paren,
         argument_list,
@@ -14536,23 +14825,19 @@ class ObjectCreationExpression extends EditableSyntax
   }
   static from_json(json, position, source)
   {
-    let new_keyword = EditableSyntax.from_json(
-      json.object_creation_new_keyword, position, source);
-    position += new_keyword.width;
     let type = EditableSyntax.from_json(
-      json.object_creation_type, position, source);
+      json.constructor_call_type, position, source);
     position += type.width;
     let left_paren = EditableSyntax.from_json(
-      json.object_creation_left_paren, position, source);
+      json.constructor_call_left_paren, position, source);
     position += left_paren.width;
     let argument_list = EditableSyntax.from_json(
-      json.object_creation_argument_list, position, source);
+      json.constructor_call_argument_list, position, source);
     position += argument_list.width;
     let right_paren = EditableSyntax.from_json(
-      json.object_creation_right_paren, position, source);
+      json.constructor_call_right_paren, position, source);
     position += right_paren.width;
-    return new ObjectCreationExpression(
-        new_keyword,
+    return new ConstructorCall(
         type,
         left_paren,
         argument_list,
@@ -14560,14 +14845,13 @@ class ObjectCreationExpression extends EditableSyntax
   }
   get children_keys()
   {
-    if (ObjectCreationExpression._children_keys == null)
-      ObjectCreationExpression._children_keys = [
-        'new_keyword',
+    if (ConstructorCall._children_keys == null)
+      ConstructorCall._children_keys = [
         'type',
         'left_paren',
         'argument_list',
         'right_paren'];
-    return ObjectCreationExpression._children_keys;
+    return ConstructorCall._children_keys;
   }
 }
 class ArrayCreationExpression extends EditableSyntax
@@ -19844,6 +20128,7 @@ exports.StaticDeclarator = StaticDeclarator;
 exports.EchoStatement = EchoStatement;
 exports.GlobalStatement = GlobalStatement;
 exports.SimpleInitializer = SimpleInitializer;
+exports.AnonymousClass = AnonymousClass;
 exports.AnonymousFunction = AnonymousFunction;
 exports.Php7AnonymousFunction = Php7AnonymousFunction;
 exports.AnonymousFunctionUseClause = AnonymousFunctionUseClause;
@@ -19875,6 +20160,7 @@ exports.EmbeddedBracedExpression = EmbeddedBracedExpression;
 exports.ListExpression = ListExpression;
 exports.CollectionLiteralExpression = CollectionLiteralExpression;
 exports.ObjectCreationExpression = ObjectCreationExpression;
+exports.ConstructorCall = ConstructorCall;
 exports.ArrayCreationExpression = ArrayCreationExpression;
 exports.ArrayIntrinsicExpression = ArrayIntrinsicExpression;
 exports.DarrayIntrinsicExpression = DarrayIntrinsicExpression;

@@ -903,7 +903,7 @@ let rec get_doc node =
   | SwitchFallthrough {
     fallthrough_keyword;
     fallthrough_semicolon
-  } ->
+    } ->
     let f = get_doc fallthrough_keyword in
     let s = get_doc fallthrough_semicolon in
     f ^^^ s
@@ -1183,16 +1183,53 @@ let rec get_doc node =
     token ^| left_brace ^| expression_list ^| right_brace
   | ObjectCreationExpression
     { object_creation_new_keyword;
-      object_creation_type;
-      object_creation_left_paren;
-      object_creation_argument_list;
-      object_creation_right_paren } ->
+      object_creation_object } ->
     let n = get_doc object_creation_new_keyword in
-    let c = get_doc object_creation_type in
-    let l = get_doc object_creation_left_paren in
-    let a = get_doc object_creation_argument_list in
-    let r = get_doc object_creation_right_paren in
-    n ^| c ^^^ l ^^^ a ^^^ r
+    let o = get_doc object_creation_object in
+    n ^| o
+  | ConstructorCall
+    { constructor_call_type;
+      constructor_call_left_paren;
+      constructor_call_argument_list;
+      constructor_call_right_paren } ->
+    let c = get_doc constructor_call_type in
+    let l = get_doc constructor_call_left_paren in
+    let a = get_doc constructor_call_argument_list in
+    let r = get_doc constructor_call_right_paren in
+    c ^^^ l ^^^ a ^^^ r
+  | AnonymousClass
+    { anonymous_class_class_keyword;
+      anonymous_class_left_paren;
+      anonymous_class_argument_list;
+      anonymous_class_right_paren;
+      anonymous_class_extends_keyword;
+      anonymous_class_extends_list;
+      anonymous_class_implements_keyword;
+      anonymous_class_implements_list;
+      anonymous_class_body } ->
+    let c = get_doc anonymous_class_class_keyword in
+    let l = get_doc anonymous_class_left_paren in
+    let a = get_doc anonymous_class_argument_list in
+    let r = get_doc anonymous_class_right_paren in
+    let extends =
+      let extends_token = get_doc anonymous_class_extends_keyword in
+      let extends_list = get_doc anonymous_class_extends_list in
+      group_doc (indent_doc extends_token extends_list indt)
+    in
+    let implements =
+      let implements_token = get_doc anonymous_class_implements_keyword in
+      let implements_list = get_doc anonymous_class_implements_list in
+      group_doc (indent_doc implements_token implements_list indt)
+    in
+    let body = get_doc anonymous_class_body in
+    group_doc (
+      c ^^^ l ^^^ a ^^^ r ^|
+      group_doc (
+        extends ^|
+        implements
+      ) ^|
+      body
+    )
   | FieldInitializer
     { field_initializer_name; field_initializer_arrow;
       field_initializer_value }->
@@ -1477,15 +1514,15 @@ let rec get_doc node =
     let ra = get_doc map_array_right_angle in
     ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ ra
   | ClosureTypeSpecifier
-  { closure_outer_left_paren;
-    closure_coroutine;
-    closure_function_keyword;
-    closure_inner_left_paren;
-    closure_parameter_list;
-    closure_inner_right_paren;
-    closure_colon;
-    closure_return_type;
-    closure_outer_right_paren } ->
+    { closure_outer_left_paren;
+      closure_coroutine;
+      closure_function_keyword;
+      closure_inner_left_paren;
+      closure_parameter_list;
+      closure_inner_right_paren;
+      closure_colon;
+      closure_return_type;
+      closure_outer_right_paren } ->
     let olp = get_doc closure_outer_left_paren in
     let cor = get_doc closure_coroutine in
     let fnc = get_doc closure_function_keyword in

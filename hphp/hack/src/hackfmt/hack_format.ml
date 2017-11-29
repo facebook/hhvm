@@ -1208,14 +1208,56 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
       in
       transform_container_literal ~spaces:true name left_b initializers right_b
     | ObjectCreationExpression x ->
-      let (kw, obj_type, left_p, arg_list, right_p) =
-        get_object_creation_expression_children x
+      let newkw, what = get_object_creation_expression_children x in
+      Concat [
+        t newkw;
+        Space;
+        t what;
+      ]
+    | ConstructorCall x ->
+      let (obj_type, left_p, arg_list, right_p) =
+        get_constructor_call_children x
       in
       Concat [
-        t kw;
-        Space;
         t obj_type;
         transform_argish left_p arg_list right_p;
+      ]
+    | AnonymousClass x ->
+      let (classkw, left_p, arg_list, right_p, extends_kw, extends, impl_kw,
+        impls, body) =
+        get_anonymous_class_children x
+      in
+      let after_each_ancestor is_last =
+        if is_last then Nothing else space_split () in
+      Concat [
+        t classkw;
+        transform_argish left_p arg_list right_p;
+        when_present extends_kw (fun () -> Concat [
+          Space;
+          Split;
+          WithRule (Rule.Parental, Nest [ Span [
+            t extends_kw;
+            Space;
+            Split;
+            WithRule (Rule.Parental, Nest [
+              handle_possible_list ~after_each:after_each_ancestor extends
+            ])
+          ]])
+        ]);
+
+        when_present impl_kw (fun () -> Concat [
+          Space;
+          Split;
+          WithRule (Rule.Parental, Nest [ Span [
+            t impl_kw;
+            Space;
+            Split;
+            WithRule (Rule.Parental, Nest [
+              handle_possible_list ~after_each:after_each_ancestor impls
+            ])
+          ]])
+        ]);
+        t body;
       ]
     | ArrayCreationExpression x ->
       let (left_b, members, right_b) =

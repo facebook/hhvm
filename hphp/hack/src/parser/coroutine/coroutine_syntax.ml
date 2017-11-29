@@ -481,12 +481,14 @@ let make_typed_object_creation_expression_syntax
     type_specifier_syntax
     arguments =
   let arguments_syntax = make_comma_list arguments in
-  make_object_creation_expression
-    new_keyword_syntax
+  let constructor_call_syntax = make_constructor_call
     type_specifier_syntax
     left_paren_syntax
     arguments_syntax
-    right_paren_syntax
+    right_paren_syntax in
+  make_object_creation_expression
+    new_keyword_syntax
+    constructor_call_syntax
 
 let make_object_creation_expression_syntax classname arguments =
   let type_specifier_syntax = make_type_specifier_syntax classname [] in

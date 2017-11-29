@@ -487,4 +487,6 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
 
 let emit_classes_from_program ast =
   List.filter_map ast
-      (fun (is_top, d) -> match d with Ast.Class cd -> Some (emit_class (cd, is_top)) | _ -> None)
+      (fun (is_top, d) -> match d with
+        | Ast.Class cd -> Some (emit_class (cd, is_top))
+        | _ -> None)

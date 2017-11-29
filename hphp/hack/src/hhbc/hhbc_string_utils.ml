@@ -111,6 +111,29 @@ module Locals = struct
 
 end
 
+module Classes = struct
+
+  let mangle_class prefix scope ix count =
+    prefix ^ "$"
+    ^ scope
+    ^ (if ix = 1 then "" else "#" ^ string_of_int ix)
+    ^ ";" ^ string_of_int count
+
+  (* Anonymous classes have names of the form
+   *   class@anonymous$ scope ix ; num
+   * where
+   *   scope  ::=
+   *     <function-name>
+   *   | <class-name> :: <method-name>
+   *   |
+   *   ix ::=
+   *     # <digits>
+   *)
+  let mangle_anonymous_class scope ix count =
+    mangle_class "class@anonymous" scope ix count
+
+end
+
 module Closures = struct
   (* Closure classes have names of the form
    *   Closure$ scope ix ; num
@@ -136,10 +159,7 @@ module Closures = struct
     else None
 
   let mangle_closure scope ix count =
-    "Closure$"
-    ^ scope
-    ^ (if ix = 1 then "" else "#" ^ string_of_int ix)
-    ^ ";" ^ string_of_int count
+    Classes.mangle_class "Closure" scope ix count
 
   let split_scope_name s = Str.split (Str.regexp "::") s
   let join_method class_name method_name = class_name ^ "::" ^ method_name

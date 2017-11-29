@@ -57,11 +57,13 @@ let to_empty_state_if_no_goto s =
 
 type state = {
   (* Number of closures created in the current function *)
-  per_function_count : int;
+  closure_cnt_per_fun : int;
+  (* Number of anonymous classes created in the current function *)
+  anon_cls_cnt_per_fun : int;
   (* Free variables computed so far *)
   captured_vars : ULS.t;
   captured_this : bool;
-  (* Total number of closures created *)
+  (* Total number of closures or anonymous classes created *)
   total_count : int;
   (* Closure classes and hoisted inline classes *)
   hoisted_classes : class_ list;
@@ -96,7 +98,8 @@ type state = {
 
 let initial_state =
 {
-  per_function_count = 0;
+  closure_cnt_per_fun = 0;
+  anon_cls_cnt_per_fun = 0;
   captured_vars = ULS.empty;
   captured_this = false;
   total_count = 0;
@@ -113,6 +116,9 @@ let initial_state =
   goto_state = empty_goto_state;
   function_to_labels_map = SMap.empty;
 }
+
+let total_class_count env st =
+  List.length st.hoisted_classes + env.defined_class_count
 
 let is_in_lambda scope =
   match scope with
@@ -252,8 +258,10 @@ let add_static_var st var =
 let set_namespace st ns =
   { st with namespace = ns }
 
-let reset_function_count st =
-  { st with per_function_count = 0; }
+let reset_function_counts st =
+  { st with
+    closure_cnt_per_fun = 0;
+    anon_cls_cnt_per_fun = 0 }
 
 let record_function_state key (has_finally, goto_state) st =
   let goto_state = to_empty_state_if_no_goto goto_state in
@@ -288,8 +296,15 @@ let add_class env st cd =
   make_defcls cd n
 
 let make_closure_name total_count env st =
+  let per_fun_idx = st.closure_cnt_per_fun in
   SU.Closures.mangle_closure
-    (make_scope_name st.namespace env.scope) st.per_function_count total_count
+    (make_scope_name st.namespace env.scope) per_fun_idx total_count
+
+let make_anonymous_class_name env st =
+  let per_fun_idx = st.anon_cls_cnt_per_fun + 1 in
+  let per_scope_idx = st.total_count in
+  SU.Classes.mangle_anonymous_class
+    (make_scope_name st.namespace env.scope) per_fun_idx per_scope_idx
 
 let make_closure ~class_num
   p total_count env st lambda_vars tparams fd body =
@@ -534,6 +549,18 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, el1 = convert_exprs env st el1 in
     let st, el2 = convert_exprs env st el2 in
     st, (p, New(e, el1, el2))
+  | NewAnonClass (args, varargs, cls) ->
+    let cls = { cls with
+      c_name = (fst cls.c_name, make_anonymous_class_name env st) } in
+    let class_idx = total_class_count env st in
+    let cls_condensed = { cls with
+      c_name = (fst cls.c_name, string_of_int class_idx);
+      c_body = [] } in
+    let st = { st with
+      anon_cls_cnt_per_fun = st.anon_cls_cnt_per_fun + 1;
+      total_count = st.total_count + 1;
+      hoisted_classes = cls :: st.hoisted_classes } in
+    st, (p, NewAnonClass (args, varargs, cls_condensed))
   | Efun (fd, use_vars) ->
     convert_lambda env st p fd (Some use_vars)
   | Lfun fd ->
@@ -543,7 +570,9 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, el = convert_exprs env st el in
     st, (p, Xml(id, pairs, el))
   | Unsafeexpr e ->
-    (* remove unsafe expressions from the AST, they are not used during codegen *)
+    (* remove unsafe expressions from the AST, they are not used during
+     * codegen
+     *)
     convert_expr env st e
   | BracedExpr e ->
     let st, e = convert_expr env st e in
@@ -587,7 +616,7 @@ and convert_lambda env st p fd use_vars_opt =
             then env_with_longlambda env false fd
             else env_with_lambda env fd in
   let st, block, function_state = convert_function_like_body env st fd.f_body in
-  let st = { st with per_function_count = st.per_function_count + 1 } in
+  let st = { st with closure_cnt_per_fun = st.closure_cnt_per_fun + 1 } in
   (* HHVM lists lambda vars in descending order - do the same *)
   let lambda_vars = List.sort ~cmp:(fun a b -> compare b a) @@ ULS.items st.captured_vars in
   (* For lambdas without explicit `use` variables, we ignore the computed
@@ -608,7 +637,7 @@ and convert_lambda env st p fd use_vars_opt =
       in
         List.map use_vars (fun ((_, var), _ref) -> var), use_vars in
   let tparams = Scope.get_tparams env.scope in
-  let class_num = List.length st.hoisted_classes + env.defined_class_count in
+  let class_num = total_class_count env st in
   let inline_fundef, cd, md =
       make_closure
       ~class_num
@@ -843,7 +872,7 @@ and convert_params env st param_list =
 
 and convert_fun env st fd =
   let env = env_with_function env fd in
-  let st = reset_function_count st in
+  let st = reset_function_counts st in
   let st, block, function_state =
     convert_function_like_body env st fd.f_body in
   let st =
@@ -854,7 +883,7 @@ and convert_fun env st fd =
 
 and convert_class env st cd =
   let env = env_with_class env cd in
-  let st = reset_function_count st in
+  let st = reset_function_counts st in
   let st, c_body = List.map_env st cd.c_body (convert_class_elt env) in
   st, { cd with c_body = c_body }
 
@@ -878,7 +907,7 @@ and convert_class_elt env st ce =
       | ScopeItem.Class c :: _-> c
       | _ -> failwith "unexpected scope shape - method is not inside the class" in
     let env = env_with_method env md in
-    let st = reset_function_count st in
+    let st = reset_function_counts st in
     let st, block, function_state =
       convert_function_like_body env st md.m_body in
     let st =

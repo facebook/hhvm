@@ -1071,6 +1071,12 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
     ^ "("
     ^ String.concat ", " es
     ^ ")"
+  | A.NewAnonClass (es, ues, _) ->
+    let es = List.map string_of_param_default_value (es @ ues) in
+    "new class"
+    ^ "("
+    ^ String.concat ", " es
+    ^ ")"
   | A.Class_get ((_, A.Id (_, s1)), e2)
     when s1 = SN.Classes.cSelf ||
          s1 = SN.Classes.cParent ||
@@ -1100,7 +1106,7 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
     | A.Upincr -> e ^ "++"
     | A.Updecr -> e ^ "--"
     | _ -> string_of_uop uop ^ e
-  end
+    end
   | A.Obj_get (e1, e2, f) ->
     let e1 = string_of_param_default_value e1 in
     let e2 = string_of_param_default_value e2 in

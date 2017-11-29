@@ -1490,13 +1490,13 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     let errors =
       function_call_on_xhp_name_errors function_call_receiver errors in
     errors
-  | ObjectCreationExpression oce when not hhvm_compat_mode && is_hack ->
-    if is_missing oce.object_creation_left_paren &&
-        is_missing oce.object_creation_right_paren
+  | ConstructorCall ctr_call when not hhvm_compat_mode && is_hack ->
+    if is_missing ctr_call.constructor_call_left_paren &&
+        is_missing ctr_call.constructor_call_right_paren
     then
-      let start_node = oce.object_creation_new_keyword in
-      let end_node = oce.object_creation_type in
-      let constructor_name = text oce.object_creation_type in
+      let start_node = ctr_call.constructor_call_type in
+      let end_node = ctr_call.constructor_call_type in
+      let constructor_name = text ctr_call.constructor_call_type in
       make_error_from_nodes start_node end_node
         (SyntaxError.error2038 constructor_name) :: errors
     else

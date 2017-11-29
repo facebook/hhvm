@@ -658,6 +658,15 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match thing with
     | XHPAttrXHPSimpleAttribute thing -> invalidate_xhp_simple_attribute           (value, thing)
     | XHPAttrXHPSpreadAttribute thing -> invalidate_xhp_spread_attribute           (value, thing)
+  and validate_object_creation_what : object_creation_what validator = fun x ->
+    match Syntax.syntax x with
+    | Syntax.AnonymousClass _ -> tag validate_anonymous_class (fun x -> NewAnonymousClass x) x
+    | Syntax.ConstructorCall _ -> tag validate_constructor_call (fun x -> NewConstructorCall x) x
+    | s -> aggregation_fail Def.ObjectCreationWhat s
+  and invalidate_object_creation_what : object_creation_what invalidator = fun (value, thing) ->
+    match thing with
+    | NewAnonymousClass  thing -> invalidate_anonymous_class                (value, thing)
+    | NewConstructorCall thing -> invalidate_constructor_call               (value, thing)
   and validate_todo_aggregate : todo_aggregate validator = fun x ->
     match Syntax.syntax x with
     | Syntax.EndOfFile _ -> tag validate_end_of_file (fun x -> TODOEndOfFile x) x
@@ -2026,6 +2035,34 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
+  and validate_anonymous_class : anonymous_class validator = function
+  | { Syntax.syntax = Syntax.AnonymousClass x; value = v } -> v,
+    { anonymous_class_body = validate_classish_body x.Syntax.anonymous_class_body
+    ; anonymous_class_implements_list = validate_list_with (validate_specifier) x.Syntax.anonymous_class_implements_list
+    ; anonymous_class_implements_keyword = validate_option_with (validate_token) x.Syntax.anonymous_class_implements_keyword
+    ; anonymous_class_extends_list = validate_list_with (validate_specifier) x.Syntax.anonymous_class_extends_list
+    ; anonymous_class_extends_keyword = validate_option_with (validate_token) x.Syntax.anonymous_class_extends_keyword
+    ; anonymous_class_right_paren = validate_option_with (validate_token) x.Syntax.anonymous_class_right_paren
+    ; anonymous_class_argument_list = validate_list_with (validate_expression) x.Syntax.anonymous_class_argument_list
+    ; anonymous_class_left_paren = validate_option_with (validate_token) x.Syntax.anonymous_class_left_paren
+    ; anonymous_class_class_keyword = validate_token x.Syntax.anonymous_class_class_keyword
+    }
+  | s -> validation_fail SyntaxKind.AnonymousClass s
+  and invalidate_anonymous_class : anonymous_class invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.AnonymousClass
+      { Syntax.anonymous_class_class_keyword = invalidate_token x.anonymous_class_class_keyword
+      ; Syntax.anonymous_class_left_paren = invalidate_option_with (invalidate_token) x.anonymous_class_left_paren
+      ; Syntax.anonymous_class_argument_list = invalidate_list_with (invalidate_expression) x.anonymous_class_argument_list
+      ; Syntax.anonymous_class_right_paren = invalidate_option_with (invalidate_token) x.anonymous_class_right_paren
+      ; Syntax.anonymous_class_extends_keyword = invalidate_option_with (invalidate_token) x.anonymous_class_extends_keyword
+      ; Syntax.anonymous_class_extends_list = invalidate_list_with (invalidate_specifier) x.anonymous_class_extends_list
+      ; Syntax.anonymous_class_implements_keyword = invalidate_option_with (invalidate_token) x.anonymous_class_implements_keyword
+      ; Syntax.anonymous_class_implements_list = invalidate_list_with (invalidate_specifier) x.anonymous_class_implements_list
+      ; Syntax.anonymous_class_body = invalidate_classish_body x.anonymous_class_body
+      }
+    ; Syntax.value = v
+    }
   and validate_anonymous_function : anonymous_function validator = function
   | { Syntax.syntax = Syntax.AnonymousFunction x; value = v } -> v,
     { anonymous_body = validate_compound_statement x.Syntax.anonymous_body
@@ -2570,10 +2607,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and validate_object_creation_expression : object_creation_expression validator = function
   | { Syntax.syntax = Syntax.ObjectCreationExpression x; value = v } -> v,
-    { object_creation_right_paren = validate_option_with (validate_token) x.Syntax.object_creation_right_paren
-    ; object_creation_argument_list = validate_list_with (validate_expression) x.Syntax.object_creation_argument_list
-    ; object_creation_left_paren = validate_option_with (validate_token) x.Syntax.object_creation_left_paren
-    ; object_creation_type = validate_todo_aggregate x.Syntax.object_creation_type
+    { object_creation_object = validate_object_creation_what x.Syntax.object_creation_object
     ; object_creation_new_keyword = validate_token x.Syntax.object_creation_new_keyword
     }
   | s -> validation_fail SyntaxKind.ObjectCreationExpression s
@@ -2581,10 +2615,25 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.ObjectCreationExpression
       { Syntax.object_creation_new_keyword = invalidate_token x.object_creation_new_keyword
-      ; Syntax.object_creation_type = invalidate_todo_aggregate x.object_creation_type
-      ; Syntax.object_creation_left_paren = invalidate_option_with (invalidate_token) x.object_creation_left_paren
-      ; Syntax.object_creation_argument_list = invalidate_list_with (invalidate_expression) x.object_creation_argument_list
-      ; Syntax.object_creation_right_paren = invalidate_option_with (invalidate_token) x.object_creation_right_paren
+      ; Syntax.object_creation_object = invalidate_object_creation_what x.object_creation_object
+      }
+    ; Syntax.value = v
+    }
+  and validate_constructor_call : constructor_call validator = function
+  | { Syntax.syntax = Syntax.ConstructorCall x; value = v } -> v,
+    { constructor_call_right_paren = validate_option_with (validate_token) x.Syntax.constructor_call_right_paren
+    ; constructor_call_argument_list = validate_list_with (validate_expression) x.Syntax.constructor_call_argument_list
+    ; constructor_call_left_paren = validate_option_with (validate_token) x.Syntax.constructor_call_left_paren
+    ; constructor_call_type = validate_todo_aggregate x.Syntax.constructor_call_type
+    }
+  | s -> validation_fail SyntaxKind.ConstructorCall s
+  and invalidate_constructor_call : constructor_call invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.ConstructorCall
+      { Syntax.constructor_call_type = invalidate_todo_aggregate x.constructor_call_type
+      ; Syntax.constructor_call_left_paren = invalidate_option_with (invalidate_token) x.constructor_call_left_paren
+      ; Syntax.constructor_call_argument_list = invalidate_list_with (invalidate_expression) x.constructor_call_argument_list
+      ; Syntax.constructor_call_right_paren = invalidate_option_with (invalidate_token) x.constructor_call_right_paren
       }
     ; Syntax.value = v
     }

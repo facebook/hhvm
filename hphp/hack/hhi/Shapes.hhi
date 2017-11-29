@@ -34,19 +34,19 @@ abstract final class Shapes {
     shape(...) $shape,
     arraykey $index,
     $default = null,
-  ) {}
+  );
 
   /**
    * Check if a field in shape exists.
    * Similar to array_key_exists, but for shapes.
    */
-  public static function keyExists(shape(...) $shape, arraykey $index): bool {}
+  public static function keyExists(shape(...) $shape, arraykey $index): bool;
 
   /**
    * Returns a $shape with $index field removed. Currently allowed only for
    * local variables.
    */
-  public static function removeKey(shape(...) $shape, arraykey $index): void {}
+  public static function removeKey(shape(...) &$shape, arraykey $index): void;
 
   public static function toArray(shape(...) $shape): array<arraykey, mixed>;
 

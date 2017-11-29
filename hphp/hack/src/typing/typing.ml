@@ -3340,8 +3340,9 @@ and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_
       overload_function p env class_id method_id el uel
       begin fun env _ res el -> match el with
         | [shape; field] -> begin match shape with
-            | (_, Lvar (_, lvar)) ->
-              let env, _te, shape_ty = expr env shape in
+            | (_, Lvar (_, lvar))
+            | (_, Unop (Ast.Uref, (_, Lvar (_, lvar)))) ->
+              let env, _te, shape_ty = expr ~allow_uref:true env shape in
               let env, shape_ty =
                 Typing_shapes.remove_key p env shape_ty field in
               let env, _ = set_valid_rvalue p env lvar shape_ty in
@@ -5879,7 +5880,7 @@ and gconst_def tcopt cst =
  * return value type *)
 and overload_function p env class_id method_id el uel f =
   let env, _ce, ty = static_class_id p env class_id in
-  let env, _tel, _ = exprs env el in
+  let env, _tel, _ = exprs ~allow_uref:true env el in
   let env, fty, _ =
     class_get ~is_method:true ~is_const:false env ty method_id class_id in
   (* call the function as declared to validate arity and input types,

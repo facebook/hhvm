@@ -261,11 +261,11 @@ struct ActiveSubscription {
       unsubscribe_future = m_watchmanClient->unsubscribe(m_subscriptionPtr)
         .then([this] (const folly::dynamic& result) { // (ASYNC)
           m_unsubscribeData = toJson(result).data();
-          return sync(0);
+          return sync(std::chrono::milliseconds::zero());
         });
     } else {
       m_unsubscribeData = "Watchman connection dead.";
-      unsubscribe_future = sync(0);
+      unsubscribe_future = sync(std::chrono::milliseconds::zero());
     }
     return unsubscribe_future
       // All ASYNC calls run with the lock held and in some cases the lock held
@@ -415,14 +415,23 @@ struct ActiveSubscription {
   }
 
   // (PHP)
-  folly::Future<bool> sync(int timeout_ms) {
+  folly::Future<folly::Optional<folly::dynamic>> watchmanFlush(
+    std::chrono::milliseconds timeout
+  ) {
+    return !checkConnection() || m_unsubcribeInProgress || !m_subscriptionPtr
+      ? folly::makeFuture(folly::Optional<folly::dynamic>())
+      : m_watchmanClient->flushSubscription(m_subscriptionPtr, timeout);
+  }
+
+  // (PHP / ASYNC)
+  folly::Future<bool> sync(std::chrono::milliseconds timeout) {
     if (m_unprocessedCallbackData.size() == 0 && !m_callbackInProgress) {
       return folly::makeFuture(true);
     }
     folly::Promise<bool> promise;
     auto res_future = promise.getFuture();
-    if (timeout_ms > 0) {
-      res_future = res_future.within(std::chrono::milliseconds(timeout_ms))
+    if (timeout != std::chrono::milliseconds::zero()) {
+      res_future = res_future.within(timeout)
         .onError([](folly::TimedOut) {
           return false;
         });
@@ -694,9 +703,56 @@ Object HHVM_FUNCTION(HH_watchman_sync_sub,
     SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
       "Unknown subscription '{}'", name));
   }
-
+  std::chrono::milliseconds timeout(timeout_ms);
+  auto start_time = std::chrono::steady_clock::now();
   try {
-    auto res_future = sub_entry->second.sync(timeout_ms);
+    auto res_future = sub_entry->second.watchmanFlush(timeout)
+      .then([timeout, start_time, name](folly::Optional<folly::dynamic> flush) {
+        // (ASYNC)
+        if (!flush.hasValue()) {
+          // Subscription is broken - no updates to process.
+          return folly::makeFuture(true);
+        }
+        if (flush.value().find("error") != flush.value().items().end()) {
+          // Timeout
+          return folly::makeFuture(false);
+        }
+        // At this stage a flush may have caused an update which is still
+        // waiting to execute in the executor queue. So explicitly schedule
+        // our sync into the same queue causing it to execute after the updates
+        // have been processed.
+        folly::Promise<bool> sync_promise;
+        auto sync_future = sync_promise.getFuture();
+        WatchmanThreadEventBase::Get()->add(
+          [name, start_time, timeout, sync_promise = std::move(sync_promise)]
+          () mutable { // (ASYNC)
+            auto sub_entry = s_activeSubscriptions.find(name);
+            if (sub_entry == s_activeSubscriptions.end()) {
+              // Subscription went away - no updates to process.
+              sync_promise.setValue(true);
+              return;
+            }
+            auto elapsed_time = std::chrono::steady_clock::now() - start_time;
+            auto remaining_timeout = timeout -
+              std::chrono::duration_cast<std::chrono::milliseconds>(
+                elapsed_time);
+            if (timeout == timeout.zero()) {
+              remaining_timeout = timeout.zero();
+            } else {
+              if (remaining_timeout <= remaining_timeout.zero()) {
+                sync_promise.setValue(false);
+                return;
+              }
+            }
+            sub_entry->second.sync(remaining_timeout)
+              .then(
+                [sync_promise= std::move(sync_promise)]
+                (folly::Try<bool> res) mutable { // (ASYNC)
+                  sync_promise.setValue(res);
+                });
+          });
+        return sync_future;
+      });
     return Object{
       (new FutureEvent<bool>(std::move(res_future)))->getWaitHandle()
     };

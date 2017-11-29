@@ -1,6 +1,8 @@
-array(2) {
+array(3) {
   ["Reflector"]=>
   string(9) "Reflector"
   ["Stringish"]=>
   string(9) "Stringish"
+  ["XHPChild"]=>
+  string(8) "XHPChild"
 }

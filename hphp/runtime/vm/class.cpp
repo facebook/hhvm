@@ -2706,6 +2706,7 @@ void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
 }
 
 const StaticString s_Stringish("Stringish");
+const StaticString s_XHPChild("XHPChild");
 
 void Class::setInterfaces() {
   InterfaceMap::Builder interfacesBuilder;
@@ -2757,10 +2758,19 @@ void Class::setInterfaces() {
     if (present == interfacesBuilder.end()
         && (!(attrs() & AttrInterface) ||
             !m_preClass->name()->isame(s_Stringish.get()))) {
+      // Add Stringish
       Class* stringish = Unit::lookupClass(s_Stringish.get());
       assert(stringish != nullptr);
       assert((stringish->attrs() & AttrInterface));
       interfacesBuilder.add(stringish->name(), LowPtr<Class>(stringish));
+
+      if (!m_preClass->name()->isame(s_XHPChild.get())) {
+        // All Stringish are also XHPChild
+        Class* xhpChild = Unit::lookupClass(s_XHPChild.get());
+        assert(xhpChild != nullptr);
+        assert((xhpChild->attrs() & AttrInterface));
+        interfacesBuilder.add(xhpChild->name(), LowPtr<Class>(xhpChild));
+      }
     }
   }
 

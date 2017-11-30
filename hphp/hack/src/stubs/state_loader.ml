@@ -16,5 +16,5 @@ let error_string _ = ""
 
 exception Not_supported
 
-let mk_state_future ~use_canary:_ ?mini_state_handle:_ ~config_hash:_ ~tiny:_ _ =
+let mk_state_future ~config:_ ~use_canary:_ ?mini_state_handle:_ ~config_hash:_ ~tiny:_ _ =
   raise Not_supported

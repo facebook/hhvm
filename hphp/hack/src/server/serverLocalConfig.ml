@@ -39,6 +39,7 @@ type t = {
   cpu_priority: int;
   shm_dirs: string list;
   start_with_recorder_on : bool;
+  state_loader_timeouts : State_loader_config.timeouts;
   max_workers : int;
   max_bucket_size : int;
   (** See HhMonitorInformant. *)
@@ -73,6 +74,7 @@ let default = {
   max_workers = GlobalConfig.nbr_procs;
   max_bucket_size = Bucket.max_size ();
   start_with_recorder_on = false;
+  state_loader_timeouts = State_loader_config.default_timeouts;
   use_dummy_informant = true;
   informant_min_distance_restart = 100;
   informant_use_xdb = false;
@@ -90,6 +92,28 @@ let warn_dir_not_exist dir = match dir with
     default.watchman_sync_directory
   | Some dir ->
     dir
+
+let state_loader_timeouts_ ~default config =
+  let open State_loader_config in
+  let package_fetch_timeout = int_ "state_loader_timeout_package_fetch"
+    ~default:default.package_fetch_timeout config in
+  let find_exact_state_timeout = int_ "state_loader_timeout_find_exact_state"
+    ~default:default.find_exact_state_timeout config in
+  let find_nearest_state_timeout = int_ "state_loader_timeout_find_nearest_state"
+    ~default:default.find_nearest_state_timeout config in
+  let current_hg_rev_timeout =
+    int_ "state_loader_timeout_current_hg_rev"
+    ~default:default.current_hg_rev_timeout config in
+  let current_base_rev_timeout =
+    int_ "state_loader_timeout_current_base_rev_timeout"
+    ~default:default.current_base_rev_timeout config in
+  {
+    State_loader_config.package_fetch_timeout;
+    find_exact_state_timeout;
+    find_nearest_state_timeout;
+    current_hg_rev_timeout;
+    current_base_rev_timeout;
+  }
 
 let load_ fn ~silent =
   (* Print out the contents in our logs so we know what settings this server
@@ -125,6 +149,8 @@ let load_ fn ~silent =
     ~default:default.use_hackfmt config in
   let start_with_recorder_on = bool_ "start_with_recorder_on"
     ~default:default.start_with_recorder_on config in
+  let state_loader_timeouts = state_loader_timeouts_
+    ~default:State_loader_config.default_timeouts config in
   let use_dummy_informant = bool_ "use_dummy_informant"
     ~default:default.use_dummy_informant config in
   let informant_min_distance_restart = int_ "informant_min_distance_restart"
@@ -188,6 +214,7 @@ let load_ fn ~silent =
     max_workers;
     max_bucket_size;
     start_with_recorder_on;
+    state_loader_timeouts;
     use_dummy_informant;
     informant_min_distance_restart;
     informant_use_xdb;

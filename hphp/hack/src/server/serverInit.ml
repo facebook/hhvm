@@ -232,7 +232,8 @@ module ServerInitCommon = struct
       handle, is_tiny
     end in
     let native_load_error e = raise (Native_loader_failure (State_loader.error_string e)) in
-    State_loader.mk_state_future ~use_canary ?mini_state_handle
+    State_loader.mk_state_future ~config:genv.local_config.SLC.state_loader_timeouts
+      ~use_canary ?mini_state_handle
       ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny
       |> Core_result.map_error ~f:native_load_error
       >>= fun result ->

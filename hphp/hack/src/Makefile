@@ -41,6 +41,7 @@ endif
 MODULES=\
   ast\
   client\
+  config\
   decl\
   deps\
   dfind\

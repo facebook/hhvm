@@ -14,7 +14,18 @@ type mini_state_handle = {
 
 let error_string _ = ""
 
+let cached_state
+  ?mini_state_handle:_
+  ~config_hash:_
+  ~rev:_
+  ~tiny:_ = None
+
 exception Not_supported
+
+let fetch_mini_state
+  ~config:_
+  ~config_hash:_
+  _ = raise Not_supported
 
 let mk_state_future ~config:_ ~use_canary:_ ?mini_state_handle:_ ~config_hash:_ ~tiny:_ _ =
   raise Not_supported

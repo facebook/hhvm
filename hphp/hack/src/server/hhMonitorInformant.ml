@@ -13,6 +13,37 @@ include HhMonitorInformant_sig.Types
 module WEWClient = WatchmanEventWatcherClient
 module WEWConfig = WatchmanEventWatcherConfig
 
+module State_loader_prefetcher = struct
+
+  (** Main entry point for a new package fetcher process. Exits with 0 on success. *)
+  let main (hhconfig_hash, handle, is_tiny) =
+    EventLogger.init EventLogger.Event_logger_fake 0.0;
+    let cached = State_loader.cached_state
+      ~mini_state_handle:handle
+      ~config_hash:hhconfig_hash
+      ~rev:handle.State_loader.mini_state_for_rev
+      ~tiny:is_tiny
+    in
+    if cached <> None then
+      (** No need to fetch if catched. *)
+      ()
+    else
+      let result = State_loader.fetch_mini_state
+        ~config:(State_loader_config.default_timeouts)
+        ~config_hash:hhconfig_hash
+        handle in
+      result
+      |> Core_result.map_error ~f:State_loader.error_string
+      |> Core_result.ok_or_failwith
+      |> ignore
+
+  let prefetch_package_entry = Process.register_entry_point "State_loader_prefetcher_entry" main
+
+  let fetch ~hhconfig_hash ~is_tiny handle =
+    Future.make (Process.run_entry prefetch_package_entry (hhconfig_hash, handle, is_tiny)) ignore
+
+end;;
+
 
 (** We need to query mercurial to convert an hg revision into a numerical
  * SVN revision. These queries need to be non-blocking, so we keep a cache
@@ -27,7 +58,10 @@ module Revision_map = struct
     type t =
       {
         svn_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Hashtbl.t;
-        xdb_queries : (int, (Xdb.sql_result list Future.t * (** is tiny state *) bool)) Hashtbl.t;
+        xdb_queries : (int,
+          (Xdb.sql_result list Future.t *
+          (** is tiny state *) bool *
+          (** Prefetcher *) (unit Future.t) option ref)) Hashtbl.t;
         use_xdb : bool;
       }
 
@@ -89,20 +123,49 @@ module Revision_map = struct
                 ~hhconfig_hash
                 ~tiny
           end in
-          let () = Hashtbl.add t.xdb_queries svn_rev (future, tiny) in
+          let () = Hashtbl.add t.xdb_queries svn_rev (future, tiny, ref None) in
           None
       in
+      let query_to_result_list future =
+        Future.get future
+        |> Core_result.map_error ~f:Future.error_to_string
+        |> Core_result.map_error ~f:HackEventLogger.find_xdb_match_failed
+        |> Core_result.ok
+        |> Option.value ~default:[] in
+      let prefetch_package ~is_tiny xdb_result =
+        let handle = {
+          State_loader.mini_state_for_rev = Hg.Svn_rev (xdb_result.Xdb.svn_rev);
+          mini_state_everstore_handle = xdb_result.Xdb.everstore_handle;
+        } in
+        State_loader_prefetcher.fetch ~hhconfig_hash:xdb_result.Xdb.hhconfig_hash ~is_tiny handle
+      in
       let open Option in
-      query >>= fun (future, is_tiny) ->
-        if Future.is_ready future then
-          (** If query fails, return empty list. *)
-          let result = Future.get future
-            |> Core_result.map_error ~f:Future.error_to_string
-            |> Core_result.map_error ~f:HackEventLogger.find_xdb_match_failed
-            |> Core_result.ok
-            |> Option.value ~default:[] in
-          Some (result, is_tiny)
-        else
+      (** We run the prefetcher after the XDB lookup (because we need the XDB
+       * result to run the prefetcher). *)
+      query >>= fun (query, is_tiny, prefetcher) ->
+        match query, !prefetcher with
+        | query, Some prefetcher when Future.is_ready prefetcher -> begin
+          match Future.get prefetcher with
+          | Ok _ ->
+            (** This is the only case where we produce a positive result
+             * (where the prefetcher succeeded). Prefetchr is only run after
+             * XDB lookup finishes and produces a non-empty result list,
+             * so we know the XDB list is non-empty here. *)
+            Some ([List.hd (query_to_result_list query)], is_tiny)
+          | _ ->
+            (** *)
+            Some ([], is_tiny)
+          end
+        | query, None when Future.is_ready query ->
+          let result = query_to_result_list query in
+          if result = [] then
+            Some ([], is_tiny)
+          else
+            let () = prefetcher := Some (prefetch_package ~is_tiny (List.hd result)) in
+            (** None represents "not yet ready, check later". *)
+            None
+        | _, _ ->
+          (** None represents "not yet ready, check later". *)
           None
 
     let find hg_rev t =

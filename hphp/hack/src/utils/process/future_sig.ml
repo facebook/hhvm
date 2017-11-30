@@ -14,12 +14,14 @@ type 'a deserializer = string -> 'a
 module Types = struct
   type stdout = string
   type stderr = string
-  type error =
+  type error_mode =
     | Process_failure of Unix.process_status * stderr
     (** string is stderr output received so far. *)
     | Timed_out of stdout * stderr
     | Process_aborted
     | Transformer_raised of exn
+
+  type error = Process_types.info * error_mode
 
   exception Failure of error
 

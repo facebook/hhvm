@@ -80,7 +80,7 @@ let read_and_wait_pid_nonblocking process =
   stderr_fd;
   process_status;
   acc;
-  acc_err; } = process in
+  acc_err; _ } = process in
   match !process_status with
   | Process_aborted _
   | Process_exited _ ->
@@ -134,7 +134,7 @@ let rec read_and_wait_pid ~retries process =
   stderr_fd;
   process_status;
   acc;
-  acc_err; } = process in
+  acc_err; _} = process in
   read_and_wait_pid_nonblocking process;
   match !process_status with
   | Process_exited status ->
@@ -189,7 +189,7 @@ let failure_msg failure =
       "Process_aborted_input_too_large"
 
 let send_input_and_form_result
-?input ~pid ~stdin_parent ~stdout_parent ~stderr_parent =
+?input ~info ~pid ~stdin_parent ~stdout_parent ~stderr_parent =
   let open Process_types in
   let input_failed = match input with
     | None -> false
@@ -207,6 +207,7 @@ let send_input_and_form_result
   in
   Unix.close stdin_parent;
   {
+    info;
     stdin_fd = ref @@ None;
     stdout_fd = ref @@ Some stdout_parent;
     stderr_fd = ref @@ Some stderr_parent;
@@ -217,6 +218,10 @@ let send_input_and_form_result
 
 
 let exec_no_chdir prog ?input ?env args =
+  let info = {
+    Process_types.name = prog;
+    args = args;
+  } in
   let args = Array.of_list (prog :: args) in
   let stdin_child, stdin_parent = Unix.pipe () in
   let stdout_parent, stdout_child = Unix.pipe () in
@@ -234,7 +239,7 @@ let exec_no_chdir prog ?input ?env args =
   Unix.close stdin_child;
   Unix.close stdout_child;
   Unix.close stderr_child;
-  send_input_and_form_result ?input ~pid ~stdin_parent
+  send_input_and_form_result ?input ~info ~pid ~stdin_parent
     ~stdout_parent ~stderr_parent
 
 let register_entry_point = Entry.register
@@ -243,9 +248,13 @@ let run_entry ?input entry params =
   let stdin_child, stdin_parent = Unix.pipe () in
   let stdout_parent, stdout_child = Unix.pipe () in
   let stderr_parent, stderr_child = Unix.pipe () in
+  let info = {
+    Process_types.name = Daemon.name_of_entry entry;
+    args = [];
+  } in
   let { Daemon.pid; _ } = Daemon.spawn
     (stdin_child, stdout_child, stderr_child) entry params in
-  send_input_and_form_result ?input ~pid ~stdin_parent
+  send_input_and_form_result ?input ~info ~pid ~stdin_parent
     ~stdout_parent ~stderr_parent
 
 let chdir_main (cwd, prog, env_opt, args) =

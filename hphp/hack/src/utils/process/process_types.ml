@@ -8,6 +8,12 @@
  *
  *)
 
+type info =
+  {
+    name : string;
+    args : string list;
+  }
+
 type failure =
   (**
    * read_and_wait_pid is a blocking call. We never want to block forever,
@@ -21,7 +27,6 @@ type failure =
    *)
   | Process_exited_abnormally of (Unix.process_status * string * string)
   | Process_aborted_input_too_large
-
 
 type abort_reason =
   (*
@@ -42,6 +47,7 @@ type process_status =
   | Process_aborted of abort_reason
 
 type t = {
+  info : info;
   stdin_fd : Unix.file_descr option ref;
   stdout_fd : Unix.file_descr option ref;
   stderr_fd : Unix.file_descr option ref;
@@ -51,6 +57,10 @@ type t = {
 }
 
 let dummy = {
+  info = {
+    name = "dummy";
+    args = [];
+  };
   stdin_fd = ref None;
   stdout_fd = ref None;
   stderr_fd = ref None;

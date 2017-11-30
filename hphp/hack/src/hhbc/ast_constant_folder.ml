@@ -18,6 +18,9 @@ open Hh_core
 exception NotLiteral
 exception UserDefinedConstant
 
+let hack_arr_compat_notices () =
+  Hhbc_options.hack_arr_compat_notices !Hhbc_options.compiler_options
+
 let radix (s : string) : [`Oct | `Hex | `Dec | `Bin ] =
   if String.length s > 1 && s.[0] = '0' then
     match s.[1] with
@@ -245,10 +248,12 @@ and shape_to_typed_value ns fields =
 
 and key_expr_to_typed_value ?(restrict_keys=false) ns expr =
   let tv = expr_to_typed_value ns expr in
-  if restrict_keys then
-    begin match tv with
-    | TV.Int _ | TV.String _ -> ()
-    | _ -> raise NotLiteral end;
+  begin match tv with
+  | TV.Int _ | TV.String _ when restrict_keys || hack_arr_compat_notices () -> ()
+  | _ when restrict_keys -> raise NotLiteral
+  | TV.Bool _ when hack_arr_compat_notices () -> raise NotLiteral
+  | _ when hack_arr_compat_notices () -> raise NotLiteral
+  | _ -> () end;
   match TV.cast_to_arraykey tv with
   | Some tv -> tv
   | None -> raise NotLiteral

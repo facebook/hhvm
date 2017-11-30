@@ -73,6 +73,9 @@ let optimize_null_check () =
 let optimize_cuf () =
   Hhbc_options.optimize_cuf !Hhbc_options.compiler_options
 
+let hack_arr_compat_notices () =
+  Hhbc_options.hack_arr_compat_notices !Hhbc_options.compiler_options
+
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
   instr (IComment (H.nyi ^ ": " ^ description))
@@ -1236,7 +1239,7 @@ and emit_struct_array env es ctor =
 
 (* isPackedInit() returns true if this expression list looks like an
  * array with no keys and no ref values *)
-and is_packed_init es =
+and is_packed_init ?(hack_arr_compat=true) es =
   let is_only_values =
     List.for_all es ~f:(function A.AFkvalue _ -> false | _ -> true)
   in
@@ -1252,7 +1255,13 @@ and is_packed_init es =
       ~f:(function A.AFkvalue (_, e)
                  | A.AFvalue e -> expr_starts_with_ref e)
   in
+  let has_bool_keys =
+    List.exists es
+      ~f:(function A.AFkvalue ((_, (A.True | A.False)), _) -> true
+                 | _ -> false)
+  in
   (is_only_values || keys_are_zero_indexed_properly_formed)
+  && (not has_bool_keys || (not (hack_arr_compat && hack_arr_compat_notices())))
   && not has_references
   && (List.length es) > 0
 
@@ -1315,7 +1324,7 @@ and emit_dynamic_collection env expr es =
     emit_value_only_collection env es (fun n -> NewPackedArray n)
   else if is_struct_init es then
     emit_struct_array env es instr_newstructarray
-  else if is_packed_init es then
+  else if is_packed_init ~hack_arr_compat:false es then
     emit_keyvalue_collection "array" env es (NewArray count)
   else
     emit_keyvalue_collection "array" env es (NewMixedArray count)

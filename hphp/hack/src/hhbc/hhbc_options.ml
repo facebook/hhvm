@@ -28,6 +28,7 @@ type t = {
   option_php7_uvs : bool;
   option_create_inout_wrapper_functions : bool;
   option_reffiness_invariance : bool;
+  option_hack_arr_compat_notices : bool;
 }
 
 let default = {
@@ -48,6 +49,7 @@ let default = {
   option_relabel = true;
   option_create_inout_wrapper_functions = true;
   option_reffiness_invariance = false;
+  option_hack_arr_compat_notices = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -64,6 +66,7 @@ let relabel o = o.option_relabel
 let enable_uniform_variable_syntax o = o.option_php7_uvs
 let create_inout_wrapper_functions o = o.option_create_inout_wrapper_functions
 let reffiness_invariance o = o.option_reffiness_invariance
+let hack_arr_compat_notices o = o.option_hack_arr_compat_notices
 
 let to_string o = String.concat "\n"
   [ Printf.sprintf "enable_hiphop_syntax: %B" @@ enable_hiphop_syntax o
@@ -81,6 +84,7 @@ let to_string o = String.concat "\n"
   ; Printf.sprintf "create_inout_wrapper_functions: %B"
     @@ create_inout_wrapper_functions o
   ; Printf.sprintf "reffiness_invariance: %B" @@ reffiness_invariance o
+  ; Printf.sprintf "hack_arr_compat_notices: %B" @@ hack_arr_compat_notices o
   ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -120,6 +124,8 @@ let set_option options name value =
     { options with option_create_inout_wrapper_functions = as_bool value }
   | "eval.reffinessinvariance" ->
     { options with option_reffiness_invariance = as_bool value }
+  | "eval.hackarrcompatnotices" ->
+    { options with option_hack_arr_compat_notices = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -182,7 +188,9 @@ let value_setters = [
   (set_value "hhvm.create_in_out_wrapper_functions" get_value_from_config_int @@
     fun opts v -> { opts with option_create_inout_wrapper_functions = (v = 1)});
   (set_value "hhvm.reffiness_invariance" get_value_from_config_int @@
-    fun opts v -> { opts with option_reffiness_invariance = (v = 1) })
+    fun opts v -> { opts with option_reffiness_invariance = (v = 1) });
+  (set_value "hhvm.hack_arr_compat_notices" get_value_from_config_int @@
+    fun opts v -> { opts with option_hack_arr_compat_notices = (v = 1) })
 ]
 
 let extract_config_options_from_json ~init config_json =

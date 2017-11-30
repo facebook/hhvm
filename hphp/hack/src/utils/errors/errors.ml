@@ -573,6 +573,7 @@ module NastCheck                            = struct
   let inout_params_ret_by_ref               = 3046 (* DONT MODIFY!!!! *)
   let reading_from_append                   = 3047 (* DONT MODIFY!!!! *)
   let const_attribute_prohibited            = 3048 (* DONT MODIFY!!!! *)
+  let global_in_reactive_context            = 3049 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1436,6 +1437,10 @@ let reading_from_append pos =
 let const_attribute_prohibited pos kind =
   add NastCheck.const_attribute_prohibited pos
     ("Cannot apply __Const attribute to " ^ kind)
+
+let global_in_reactive_context pos =
+  add NastCheck.global_in_reactive_context pos
+    "This is global; you cannot access or write to globals in a reactive context"
 
 (*****************************************************************************)
 (* Nast terminality *)

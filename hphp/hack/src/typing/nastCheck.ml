@@ -52,6 +52,7 @@ type env = {
   typedef_tparams : Nast.tparam list;
   lvalue: bool; (* current expression is being used as an lvalue *)
   inside_constructor: bool; (* permit __Const assignment in constructor *)
+  is_reactive: bool; (* The enclosing function is reactive *)
   tenv: Env.env;
 }
 
@@ -331,6 +332,9 @@ let is_magic =
   fun (_, s) ->
     Hashtbl.mem h s
 
+let fun_is_reactive user_attributes =
+  Attributes.mem SN.UserAttributes.uaReactive user_attributes
+
 let rec fun_ tenv f named_body =
   if !auto_complete then ()
   else begin
@@ -340,7 +344,9 @@ let rec fun_ tenv f named_body =
                 class_name = None; class_kind = None;
                 imm_ctrl_ctx = Toplevel;
                 typedef_tparams = [];
-                tenv = tenv } in
+                tenv = tenv;
+                is_reactive = fun_is_reactive f.f_user_attributes
+                } in
     func env f named_body
   end
 
@@ -358,6 +364,7 @@ and func env f named_body =
   let env = { env with
     tenv = Env.set_mode tenv f.f_mode;
     t_is_finally = false;
+    is_reactive = fun_is_reactive f.f_user_attributes;
   } in
   maybe hint env f.f_ret;
   List.iter f.f_tparams (tparam env);
@@ -507,6 +514,7 @@ and class_ tenv c =
               class_kind = Some c.c_kind;
               imm_ctrl_ctx = Toplevel;
               typedef_tparams = [];
+              is_reactive = false;
               tenv = tenv } in
   (* Add type parameters to typing environment and localize the bounds *)
   let tenv, constraints = Phase.localize_generic_parameters_with_bounds
@@ -809,6 +817,7 @@ and check_static_memoized_function m =
   ()
 
 and method_ (env, is_static) m =
+  let env = { env with is_reactive = fun_is_reactive m.m_user_attributes } in
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
 
@@ -853,8 +862,8 @@ and method_ (env, is_static) m =
           && env.class_kind <> Some Ast.Ctrait
       then Errors.dangerous_method_name p
       else ()
-  | None -> assert false);
-  ()
+  | None -> assert false)
+
 
 and inout_params_enabled env =
   TypecheckerOptions.experimental_feature_enabled
@@ -902,8 +911,15 @@ and stmt env = function
   | Expr e | Throw (_, e) ->
     expr env e
   | Static_var el
-  | Global_var el
-    -> List.iter el (expr env)
+  | Global_var el ->
+    begin match el with
+    | x::_ ->
+      if env.is_reactive then
+      let p = fst x in
+      Errors.global_in_reactive_context p;
+      List.iter el (expr env)
+    | [] -> () (* This should never happen*)
+    end
   | If (e, b1, b2) ->
     expr env e;
     block env b1;
@@ -968,7 +984,6 @@ and expr_ env p = function
   | Smethod_id _
   | Method_caller _
   | This
-  | Class_get _
   | Class_const _
   | Typename _
   | Lvar _
@@ -977,6 +992,10 @@ and expr_ env p = function
   | Pipe (_, e1, e2) ->
       expr env e1;
       expr env e2
+  | Class_get _  ->
+    if env.is_reactive then
+    Errors.global_in_reactive_context p;
+    ()
   (* Check that __CLASS__ and __TRAIT__ are used appropriately *)
   | Id (pos, const) ->
       if SN.PseudoConsts.is_pseudo_const const then
@@ -1066,7 +1085,7 @@ and expr_ env p = function
       ()
   | Binop (op, e1, e2) ->
       let lvalue_env = match op with
-      | Ast.Eq None -> { env with lvalue = true }
+      | Ast.Eq _ -> { env with lvalue = true }
       | _ -> env in
       expr lvalue_env e1;
       expr env e2;
@@ -1136,6 +1155,8 @@ let typedef tenv t =
                * references.
                *)
               typedef_tparams = t.t_tparams;
-              tenv = tenv } in
+              tenv = tenv;
+              is_reactive = false
+              } in
   maybe hint env t.t_constraint;
   hint env t.t_kind

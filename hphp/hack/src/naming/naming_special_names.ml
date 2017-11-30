@@ -129,6 +129,7 @@ module UserAttributes = struct
   let uaPHPStdLib           = "__PHPStdLib"
   let uaHipHopSpecific      = "__HipHopSpecific"
   let uaAcceptDisposable    = "__AcceptDisposable"
+  let uaReactive            = "__Rx"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -141,8 +142,8 @@ module UserAttributes = struct
       uaPHPStdLib;
       uaHipHopSpecific;
       uaAcceptDisposable;
+      uaReactive;
     ]
-
 end
 
 (* Tested before \\-prepending name-canonicalization *)

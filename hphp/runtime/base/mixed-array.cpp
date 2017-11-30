@@ -308,7 +308,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   auto const scale = other.m_scale;
   auto const ad = mode == AllocMode::Request ? reqAlloc(scale)
                                              : staticAlloc(scale);
-
+#ifdef USE_JEMALLOC
   // Copy everything including tombstones.  We want to copy the elements and
   // the hash separately, because the array may not be very full.
   assertx(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
@@ -318,6 +318,9 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   // `malloc' returns multiple of 16 bytes.
   bcopy32_inline(ad, &other,
                  sizeof(MixedArray) + sizeof(Elm) * other.m_used + 24);
+#else
+  memcpy8(&other, ad, sizeof(MixedArray) + sizeof(Elm) * other.m_used);
+#endif
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
   ad->initHeader_16(dest_hk, count, dvArray);
   CopyHash(ad->hashTab(), other.hashTab(), scale);

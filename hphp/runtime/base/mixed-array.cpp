@@ -319,7 +319,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   bcopy32_inline(ad, &other,
                  sizeof(MixedArray) + sizeof(Elm) * other.m_used + 24);
 #else
-  memcpy8(&other, ad, sizeof(MixedArray) + sizeof(Elm) * other.m_used);
+  memcpy(ad, &other, sizeof(MixedArray) + sizeof(Elm) * other.m_used);
 #endif
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
   ad->initHeader_16(dest_hk, count, dvArray);

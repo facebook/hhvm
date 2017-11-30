@@ -60,8 +60,12 @@ trait BaseException {
 
   final public function setPreviousChain(\__SystemLib\Throwable $previous) {
     $cur = $this;
+    $cycle = array();
+    $cycle[\spl_object_hash($cur)] = true;
     $next = $cur->getPrevious();
-    while ($next instanceof \__SystemLib\Throwable) {
+    while ($next instanceof \__SystemLib\Throwable &&
+      !\array_key_exists(\spl_object_hash($next), $cycle)) {
+      $cycle[\spl_object_hash($next)] = true;
       $cur = $next;
       $next = $cur->getPrevious();
     }
@@ -169,13 +173,14 @@ trait BaseException {
     $res = "";
     $lst = array();
     $ex = $this;
-    while ($ex != null) {
-      $lst[] = $ex;
+    while ($ex != null && !\array_key_exists(\spl_object_hash($ex), $lst)) {
+      $lst[\spl_object_hash($ex)] = $ex;
       $ex = $ex->getPrevious();
     }
     $lst = \array_reverse($lst);
-    foreach ($lst as $i => $ex) {
-      if ($i > 0) {
+    $first = true;
+    foreach ($lst as $ex) {
+      if (!$first) {
         $res .= "\n\nNext ";
       }
       $cls = \get_class($ex);
@@ -184,9 +189,10 @@ trait BaseException {
       }
       $res .= $ex instanceof Error
         ? $cls . ": " . $ex->getMessage()
-        : "exception '" . $cls . "' with message '" . $ex->getMessage() . "'";
+        : "exception '" . $cls . "' with message '" . $ex->getMessage() .  "'";
       $res .=  " in " . $ex->getFile() . ":" .
         $ex->getLine() . "\nStack trace:\n" . $ex->getTraceAsString();
+      $first = false;
     }
     return $res;
   }

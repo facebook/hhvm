@@ -240,10 +240,12 @@ module ServerInitCommon = struct
     let old_saved = open_in result.State_loader.saved_state_fn
       |> Marshal.from_channel in
     let get_dirty_files = (fun () ->
+      let t = Unix.time () in
       result.State_loader.dirty_files
         |> Future.get ~timeout:180
         |> Core_result.map_error ~f:Future.error_to_exn
         >>= fun dirty_files ->
+      let () = HackEventLogger.state_loader_dirty_files t in
       let dirty_files = List.map dirty_files Relative_path.from_root in
       let dirty_files = Relative_path.set_of_list dirty_files in
       Ok (

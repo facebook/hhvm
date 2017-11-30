@@ -88,6 +88,7 @@ let with_id ~stage:_ _ f = f ()
 let with_rechecked_stats _ _ _ f = f ()
 let with_init_type _ f = f ()
 let with_check_kind _ f = f ()
+let state_loader_dirty_files _ = ()
 
 (** Informant events *)
 let init_informant_prefetcher_runner _ = ()

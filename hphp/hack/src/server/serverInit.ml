@@ -241,7 +241,7 @@ module ServerInitCommon = struct
       |> Marshal.from_channel in
     let get_dirty_files = (fun () ->
       result.State_loader.dirty_files
-        |> Future.get
+        |> Future.get ~timeout:180
         |> Core_result.map_error ~f:Future.error_to_exn
         >>= fun dirty_files ->
       let dirty_files = List.map dirty_files Relative_path.from_root in

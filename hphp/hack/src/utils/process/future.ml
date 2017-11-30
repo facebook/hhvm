@@ -55,8 +55,8 @@ let error_to_string (info, e) =
 
 let error_to_exn e = raise (Failure e)
 
-let get : 'a t -> ('a, error) result =
-  fun promise -> match !promise with
+let get : ?timeout:int -> 'a t -> ('a, error) result =
+  fun ?(timeout=30) promise -> match !promise with
   | Complete v -> Ok v
   | Complete_but_transformer_raised (info, e) ->
     Error (info, Transformer_raised e)
@@ -66,7 +66,7 @@ let get : 'a t -> ('a, error) result =
     Error (Process_types.dummy.Process_types.info, Timed_out ("", "Delayed value not ready yet"))
   | Incomplete (process, transformer) ->
     let info = process.Process_types.info in
-    match Process.read_and_wait_pid ~timeout:30 process with
+    match Process.read_and_wait_pid ~timeout process with
     | Ok (stdout, _stderr) -> begin
       try
         let result = transformer stdout in
@@ -85,7 +85,7 @@ let get : 'a t -> ('a, error) result =
     | Error Process_types.Process_aborted_input_too_large ->
       Error (info, Process_aborted)
 
-let get_exn x = get x
+let get_exn ?timeout x = get ?timeout x
   |> Core_result.map_error ~f:error_to_exn
   |> Core_result.ok_exn
 

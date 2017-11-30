@@ -112,7 +112,7 @@ skip_hg_update_on_load_state recording root =
       if skip_hg_update_on_load_state then
         ()
       else
-        Future.get_exn @@
+        Future.get_exn ~timeout:30 @@
           Hg.update_to_rev corresponding_rev @@
           Path.to_string root;
       write_files_contents dirty_files;

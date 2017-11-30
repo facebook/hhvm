@@ -31,10 +31,10 @@ module type S = sig
   include module type of Types
   type 'a t
   (** Blocking. Returns the value from the underlying process. *)
-  val get : 'a t -> ('a, error) result
+  val get : ?timeout:int -> 'a t -> ('a, error) result
 
   (** Like get, but raises Failure instead of returning when result is Error. *)
-  val get_exn : 'a t -> 'a
+  val get_exn : ?timeout:int -> 'a t -> 'a
 
   val make : Process_types.t -> 'a deserializer -> 'a t
 

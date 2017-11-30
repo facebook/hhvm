@@ -1,0 +1,17 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret =
+      (Some (<p>,
+             (Hfun (true, false, [(<p>, (Hprim Tint))], [None],
+                Hnon_variadic, (<p>, (Hprim Tvoid))))));
+      f_name = (<p>, "\\foo"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params = [];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop]; fnb_unsafe = true });
+      f_fun_kind = FSync;
+      f_user_attributes =
+      [{ AnnotatedAST.ua_name = (<p>, "__Rx"); ua_params = [] }];
+      f_ret_by_ref = false })
+  ]

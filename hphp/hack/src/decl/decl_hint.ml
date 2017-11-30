@@ -55,7 +55,7 @@ and hint_ p env = function
   | Hoption h ->
     let h = hint env h in
     Toption h
-  | Hfun (is_coroutine, hl, kl, vh, h) ->
+  | Hfun (is_reactive, is_coroutine, hl, kl, vh, h) ->
     let make_param ((p, _ as x), k) =
       { fp_pos = p;
         fp_name = None;
@@ -83,6 +83,7 @@ and hint_ p env = function
       ft_params = paraml;
       ft_ret = ret;
       ft_ret_by_ref = false;
+      ft_reactive = is_reactive;
     }
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->

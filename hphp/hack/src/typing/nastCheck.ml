@@ -407,7 +407,7 @@ and hint_ env p = function
   | Htuple hl -> List.iter hl (hint env)
   | Hoption h ->
       hint env h; ()
-  | Hfun (is_coroutine, hl, kl, _, h) ->
+  | Hfun (_, is_coroutine, hl, kl, _, h) ->
       check_coroutines_enabled is_coroutine env p;
       List.iter hl (hint env);
       List.iter kl (function
@@ -770,7 +770,7 @@ and check_no_class_tparams class_tparams (pos, ty)  =
         check_tparams ty
     | Htuple tyl -> List.iter tyl check_tparams
     | Hoption ty_ -> check_tparams ty_
-    | Hfun (_, tyl, _, _, ty_) ->
+    | Hfun (_, _, tyl, _, _, ty_) ->
         List.iter tyl check_tparams;
         check_tparams ty_
     | Happly (_, tyl) -> List.iter tyl check_tparams

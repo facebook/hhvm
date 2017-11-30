@@ -54,8 +54,9 @@ let expand_ty env ty =
 
   and exp_fun_type { ft_pos; ft_deprecated; ft_arity; ft_abstract; ft_tparams;
                      ft_where_constraints; ft_ret; ft_params;
+                     ft_reactive;
                      ft_is_coroutine; ft_ret_by_ref } =
-  { ft_pos; ft_deprecated; ft_arity; ft_abstract; ft_is_coroutine;
+  { ft_pos; ft_deprecated; ft_arity; ft_abstract; ft_reactive; ft_is_coroutine;
     ft_ret_by_ref;
     ft_tparams = List.map exp_tparam ft_tparams;
     ft_where_constraints = List.map exp_where_constraint ft_where_constraints;

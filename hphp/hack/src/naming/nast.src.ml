@@ -26,6 +26,7 @@ type shape_field_name = Ast.shape_field_name
 module ShapeMap = Ast.ShapeMap
 
 type is_coroutine = bool [@@deriving show]
+type is_reactive = bool [@@deriving show]
 
 type hint = Pos.t * hint_
 and variadic_hint =
@@ -33,7 +34,7 @@ and variadic_hint =
   | Hnon_variadic
 and hint_ =
   | Hoption of hint
-  | Hfun of is_coroutine * hint list * Ast.param_kind option list * variadic_hint * hint
+  | Hfun of is_reactive * is_coroutine * hint list * Ast.param_kind option list * variadic_hint * hint
   | Htuple of hint list
   | Happly of sid * hint list
   | Hshape of nast_shape_info

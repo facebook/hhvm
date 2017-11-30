@@ -82,7 +82,7 @@ let expand_type env x =
   | r, Tvar x -> get_type env r x
   | x -> env, x
 
-let make_ft p is_coroutine params ret_ty =
+let make_ft p reactive is_coroutine params ret_ty =
   let arity = List.length params in
   {
     ft_pos      = p;
@@ -95,6 +95,7 @@ let make_ft p is_coroutine params ret_ty =
     ft_params   = params;
     ft_ret      = ret_ty;
     ft_ret_by_ref = false;
+    ft_reactive = reactive;
   }
 
 let get_shape_field_name = function

@@ -180,6 +180,9 @@ let get_class_parents_and_traits env class_nast =
 let has_accept_disposable_attribute attrs =
   List.exists attrs (fun { ua_name; _ } -> SN.UserAttributes.uaAcceptDisposable = snd ua_name)
 
+let fun_is_reactive user_attributes =
+  Attributes.mem SN.UserAttributes.uaReactive user_attributes
+
 let rec ifun_decl tcopt (f: Ast.fun_) =
   let f = Naming.fun_ tcopt f in
   fun_decl f tcopt;
@@ -239,6 +242,7 @@ and ret_from_fun_kind pos kind =
 
 and fun_decl_in_env env f =
   check_params env f.f_params;
+  let reactivity = fun_is_reactive f.f_user_attributes in
   let arity_min = minimum_arity f.f_params in
   let params = make_params env f.f_params in
   let ret_ty = match f.f_ret with
@@ -267,6 +271,7 @@ and fun_decl_in_env env f =
     ft_params      = params;
     ft_ret         = ret_ty;
     ft_ret_by_ref  = f.f_ret_by_ref;
+    ft_reactive    = reactivity;
   } in
   ft
 
@@ -758,6 +763,7 @@ and typeconst_decl env c (acc, acc2) {
 
 and method_decl env m =
   check_params env m.m_params;
+  let reactivity = fun_is_reactive m.m_user_attributes in
   let arity_min = minimum_arity m.m_params in
   let params = make_params env m.m_params in
   let ret = match m.m_ret with
@@ -786,6 +792,7 @@ and method_decl env m =
     ft_params   = params;
     ft_ret      = ret;
     ft_ret_by_ref = m.m_ret_by_ref;
+    ft_reactive = reactivity;
   }
 
 and method_check_override c m acc  =

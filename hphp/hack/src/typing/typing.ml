@@ -1485,6 +1485,7 @@ and expr_
               ft_params = fty.ft_params;
               ft_ret = fty.ft_ret;
               ft_ret_by_ref = fty.ft_ret_by_ref;
+              ft_reactive = fty.ft_reactive;
             } in
             make_result env (T.Method_caller(pos_cname, meth_name))
               (reason, Tfun caller)
@@ -3167,6 +3168,7 @@ and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_
                 ft_params = List.map vars TUtils.default_fun_param;
                 ft_ret = tr;
                 ft_ret_by_ref = fty.ft_ret_by_ref;
+                ft_reactive = fty.ft_reactive;
               }
             ) in
             let containers = List.map vars (fun var ->

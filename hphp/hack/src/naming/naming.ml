@@ -789,12 +789,22 @@ module Make (GetLocals : GetLocals) = struct
       let h = hint ~allow_retonly env h
       in snd h
     | Hfun (is_coroutine, hl, kl, variadic_hint, h) ->
+      let is_reactive = false in
       let variadic_hint = match variadic_hint with
         | Hvariadic Some (h) -> N.Hvariadic (Some (hint env h))
         | Hvariadic None -> N.Hvariadic (None)
         | Hnon_variadic -> N.Hnon_variadic in
-      N.Hfun (is_coroutine, List.map hl (hint env), kl, variadic_hint,
+      N.Hfun (is_reactive, is_coroutine, List.map hl (hint env), kl, variadic_hint,
               hint ~allow_retonly:true env h)
+    (* Special case for Rx<function> *)
+    | Happly ((_, "Rx"), [(_, Hfun (is_coroutine, hl, kl, variadic_hint, h))]) ->
+        let is_reactive = true in
+        let variadic_hint = match variadic_hint with
+          | Hvariadic Some (h) -> N.Hvariadic (Some (hint env h))
+          | Hvariadic None -> N.Hvariadic (None)
+          | Hnon_variadic -> N.Hnon_variadic in
+        N.Hfun (is_reactive, is_coroutine, List.map hl (hint env), kl, variadic_hint,
+                hint ~allow_retonly:true env h)
     | Happly ((p, _x) as id, hl) ->
       let hint_id =
         hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard

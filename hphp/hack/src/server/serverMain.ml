@@ -450,7 +450,8 @@ let program_init genv =
   Hh_logger.log "Waiting for daemon(s) to be ready...";
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
-  HackEventLogger.init_really_end ~state_distance ~approach_name init_type;
+  let informant_use_xdb = genv.local_config.ServerLocalConfig.informant_use_xdb in
+  HackEventLogger.init_really_end ~informant_use_xdb ~state_distance ~approach_name init_type;
   env
 
 let setup_server ~informant_managed options handle =

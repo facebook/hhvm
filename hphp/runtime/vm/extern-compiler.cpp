@@ -368,9 +368,11 @@ void ExternCompiler::stop() {
 
   {
     UseLightDelegate useDelegate;
-
-    if (LightProcess::waitpid(m_pid, &status, 0, 2) != m_pid) {
-      Logger::Warning("ExternCompiler: unable to wait for compiler process");
+    auto ret = LightProcess::waitpid(m_pid, &status, 0, 2);
+    if (ret != m_pid) {
+      Logger::FWarning(
+        "ExternCompiler: unable to wait for compiler process, return code {}",
+        ret);
       return;
     }
   }

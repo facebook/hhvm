@@ -13,7 +13,15 @@ include HhMonitorInformant_sig.Types
 module WEWClient = WatchmanEventWatcherClient
 module WEWConfig = WatchmanEventWatcherConfig
 
-module State_loader_prefetcher = struct
+module type State_loader_prefetcher_sig = sig
+  val fetch :
+    hhconfig_hash:string ->
+    is_tiny:bool ->
+    State_loader.mini_state_handle ->
+      unit Future.t
+end
+
+module State_loader_prefetcher_real = struct
 
   (** Main entry point for a new package fetcher process. Exits with 0 on success. *)
   let main (hhconfig_hash, handle, is_tiny) =
@@ -43,6 +51,18 @@ module State_loader_prefetcher = struct
     Future.make (Process.run_entry prefetch_package_entry (hhconfig_hash, handle, is_tiny)) ignore
 
 end;;
+
+
+module State_loader_prefetcher_fake = struct
+  let fetch ~hhconfig_hash:_ ~is_tiny:_ _ = Future.of_value ()
+end
+
+
+module State_loader_prefetcher =
+  (val (if Injector_config.use_test_stubbing
+  then (module State_loader_prefetcher_fake : State_loader_prefetcher_sig)
+  else (module State_loader_prefetcher_real : State_loader_prefetcher_sig)
+))
 
 
 (** We need to query mercurial to convert an hg revision into a numerical

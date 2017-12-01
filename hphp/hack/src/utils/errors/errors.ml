@@ -771,6 +771,8 @@ module Typing                               = struct
   let must_extend_disposable                = 4194 (* DONT MODIFY!!!! *)
   let invalid_is_expression_hint            = 4195 (* DONT MODIFY!!!! *)
   let assigning_to_const                    = 4196 (* DONT MODIFY!!!! *)
+  let self_const_parent_not                 = 4197 (* DONT MODIFY!!!! *)
+  let parent_const_self_not                 = 4198 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2395,9 +2397,17 @@ let dollardollar_lvalue pos =
   add Typing.dollardollar_lvalue pos
     "Cannot assign a value to the special pipe variable ($$)"
 
-  let assigning_to_const pos =
-    add Typing.assigning_to_const pos
-      "Cannot assign to a __Const property"
+let assigning_to_const pos =
+  add Typing.assigning_to_const pos
+    "Cannot assign to a __Const property"
+
+let self_const_parent_not pos =
+  add Typing.self_const_parent_not pos
+    "A __Const class may only extend other __Const classes"
+
+let parent_const_self_not pos =
+  add Typing.parent_const_self_not pos
+    "Only __Const classes may extend a __Const class"
 
 (*****************************************************************************)
 (* Typing decl errors *)

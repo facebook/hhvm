@@ -5384,6 +5384,10 @@ and class_def_parent env class_def class_type =
 
 and check_parent class_def class_type parent_type =
   let position = fst class_def.c_name in
+  if class_type.tc_const && not parent_type.dc_const
+  then Errors.self_const_parent_not position;
+  if parent_type.dc_const && not class_type.tc_const
+  then Errors.parent_const_self_not position;
   (* Are all the parents in Hack? Do we know all their methods?
    * If so, let's check that the abstract methods have been implemented.
    *)

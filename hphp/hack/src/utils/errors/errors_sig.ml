@@ -52,6 +52,8 @@ module type S = sig
   val name_is_reserved : string -> Pos.t -> unit
   val dollardollar_unused : Pos.t -> unit
   val assigning_to_const : Pos.t -> unit
+  val self_const_parent_not : Pos.t -> unit
+  val parent_const_self_not : Pos.t -> unit
   val method_name_already_bound : Pos.t -> string -> unit
   val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
   val unbound_name : Pos.t -> string -> [< `cls | `func | `const ] -> unit

@@ -395,6 +395,7 @@ and class_is_abstract c =
 
 and class_decl tcopt c =
   let is_abstract = class_is_abstract c in
+  let const = Attrs.mem SN.UserAttributes.uaConst c.c_user_attributes in
   let _p, cls_name = c.c_name in
   let class_dep = Dep.Class cls_name in
   let env = {
@@ -484,6 +485,7 @@ and class_decl tcopt c =
   let deferred_members = Decl_init_check.class_ ~has_own_cstr env c in
   let tc = {
     dc_final = c.c_final;
+    dc_const = const;
     dc_abstract = is_abstract;
     dc_need_init = has_concrete_cstr;
     dc_deferred_init_members = deferred_members;

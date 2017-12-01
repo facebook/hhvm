@@ -572,6 +572,13 @@ void EventHook::onFunctionSuspendAwaitEG(ActRec* suspending) {
   try {
     auto const flags = handle_request_surprise();
     onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+
+    if (flags & AsyncEventHookFlag) {
+      auto const session = AsioSession::Get();
+      if (session->hasOnResumableCreate()) {
+        session->onResumableCreate(wh.get(), wh->getChild());
+      }
+    }
   } catch (...) {
     decRefObj(wh.get());
     throw;
@@ -591,11 +598,16 @@ void EventHook::onFunctionSuspendAwaitR(ActRec* suspending, ObjectData* child) {
 
   if (flags & AsyncEventHookFlag) {
     assertx(child->instanceof(c_WaitableWaitHandle::classof()));
-    if (suspending->func()->isAsyncFunction()) {
-      auto const session = AsioSession::Get();
-      if (session->hasOnResumableAwait()) {
+    auto const session = AsioSession::Get();
+    if (session->hasOnResumableAwait()) {
+      if (!suspending->func()->isGenerator()) {
         session->onResumableAwait(
           frame_afwh(suspending),
+          static_cast<c_WaitableWaitHandle*>(child)
+        );
+      } else {
+        session->onResumableAwait(
+          frame_async_generator(suspending)->getWaitHandle(),
           static_cast<c_WaitableWaitHandle*>(child)
         );
       }
@@ -636,6 +648,17 @@ void EventHook::onFunctionSuspendYield(ActRec* suspending) {
 
   auto const flags = handle_request_surprise();
   onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+
+  if ((flags & AsyncEventHookFlag) && suspending->func()->isAsync()) {
+    auto const ag = frame_async_generator(suspending);
+    if (!ag->isEagerlyExecuted()) {
+      auto const wh = ag->getWaitHandle();
+      auto const session = AsioSession::Get();
+      if (session->hasOnResumableSuccess()) {
+        session->onResumableSuccess(wh, init_null());
+      }
+    }
+  }
 }
 
 void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
@@ -649,13 +672,18 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
     onFunctionExit(ar, &retval, false, nullptr, flags, false);
 
     // Async profiler
-    if ((flags & AsyncEventHookFlag) &&
-        ar->func()->isAsyncFunction() && ar->resumed()) {
+    if ((flags & AsyncEventHookFlag) && ar->resumed() &&
+        ar->func()->isAsync()) {
       auto session = AsioSession::Get();
-      // Return @ resumed execution => AsyncFunctionWaitHandle succeeded.
       if (session->hasOnResumableSuccess()) {
-        auto afwh = frame_afwh(ar);
-        session->onResumableSuccess(afwh, cellAsCVarRef(retval));
+        if (!ar->func()->isGenerator()) {
+          session->onResumableSuccess(frame_afwh(ar), cellAsCVarRef(retval));
+        } else {
+          auto ag = frame_async_generator(ar);
+          if (!ag->isEagerlyExecuted()) {
+            session->onResumableSuccess(ag->getWaitHandle(), init_null());
+          }
+        }
       }
     }
   } catch (...) {

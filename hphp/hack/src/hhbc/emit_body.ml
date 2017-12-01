@@ -124,11 +124,11 @@ and emit_defs env defs =
       in
       let i2 = aux env defs in
       gather [i1; i2]
+    | [_] | [] -> aux env defs
     | d :: defs ->
       let i1 = emit_def env d in
       if is_empty i1 then emit_markup env defs
       else gather [i1; aux env defs]
-    | [] -> aux env defs
   in
   emit_markup env defs
 

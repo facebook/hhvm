@@ -32,7 +32,8 @@
           cv_type = (Some (<p>, (Hprim Tint)));
           cv_id = (<p>, "x");
           cv_expr =
-          (Some ((Some int), (AnnotatedAST.Int (<p>, "42")))) }
+          (Some ((Some int), (AnnotatedAST.Int (<p>, "42"))));
+          cv_user_attributes = [] }
          ];
        c_constructor = None; c_static_methods = [];
        c_methods =

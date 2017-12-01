@@ -81,6 +81,7 @@ and element = {
 
   (* Only relevant for properties *)
   elt_is_xhp_attr : bool;
+  elt_const: bool;
 
   elt_origin : string;
   elt_visibility : visibility;

@@ -770,6 +770,7 @@ module Typing                               = struct
   let illegal_xhp_child                     = 4193 (* DONT MODIFY!!!! *)
   let must_extend_disposable                = 4194 (* DONT MODIFY!!!! *)
   let invalid_is_expression_hint            = 4195 (* DONT MODIFY!!!! *)
+  let assigning_to_const                    = 4196 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2393,6 +2394,10 @@ let this_as_lexical_variable pos =
 let dollardollar_lvalue pos =
   add Typing.dollardollar_lvalue pos
     "Cannot assign a value to the special pipe variable ($$)"
+
+  let assigning_to_const pos =
+    add Typing.assigning_to_const pos
+      "Cannot assign to a __Const property"
 
 (*****************************************************************************)
 (* Typing decl errors *)

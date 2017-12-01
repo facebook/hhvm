@@ -1390,11 +1390,13 @@ module Make (GetLocals : GetLocals) = struct
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
     | AbsConst _ -> acc
-    | ClassVars { cv_kinds = kl; cv_hint = h; cv_names = cvl; _ }
-      when not (List.mem kl Static) ->
-      let h = Option.map h (hint env) in
-      let cvl = List.map cvl (class_prop_ env) in
-      let cvl = List.map cvl (fill_prop kl h) in
+    | ClassVars { cv_kinds; cv_hint; cv_names; cv_user_attributes; _ }
+      when not (List.mem cv_kinds Static) ->
+      let h = Option.map cv_hint (hint env) in
+      let cvl = List.map cv_names (class_prop_ env) in
+      let cvl = List.map cvl (fill_prop cv_kinds h) in
+      let attrs = user_attributes env cv_user_attributes in
+      let cvl = List.map cvl (fun cv -> { cv with N.cv_user_attributes = attrs}) in
       cvl @ acc
     | ClassVars _ -> acc
     | XhpAttr (h, cv, is_required, maybe_enum) ->
@@ -1581,13 +1583,14 @@ module Make (GetLocals : GetLocals) = struct
       then Some (fst x, N.Any)
       else e
     in
-    N.({ cv_final = false;
-         cv_is_xhp = ((String.sub (snd x) 0 1) = ":");
-         cv_visibility = N.Public;
-         cv_type = None;
-         cv_id = x;
-         cv_expr = e;
-       })
+    { N.cv_final = false;
+      N.cv_is_xhp = ((String.sub (snd x) 0 1) = ":");
+      N.cv_visibility = N.Public;
+      N.cv_type = None;
+      N.cv_id = x;
+      N.cv_expr = e;
+      N.cv_user_attributes = [];
+    }
 
   and fill_prop kl ty x =
     let x = { x with N.cv_type = ty } in

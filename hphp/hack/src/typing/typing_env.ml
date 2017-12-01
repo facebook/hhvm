@@ -274,6 +274,7 @@ let empty tcopt file ~droot = {
   lenv    = empty_local SMap.empty;
   todo    = [];
   in_loop = false;
+  inside_constructor = false;
   decl_env = {
     mode = FileInfo.Mstrict;
     droot;

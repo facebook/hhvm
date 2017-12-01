@@ -248,6 +248,7 @@ struct
     T.cv_type = cv.S.cv_type;
     T.cv_id = cv.S.cv_id;
     T.cv_expr = Option.map cv.S.cv_expr (map_expr menv);
+    T.cv_user_attributes = List.map cv.S.cv_user_attributes (map_user_attribute menv);
   }
 
   and map_method menv m =

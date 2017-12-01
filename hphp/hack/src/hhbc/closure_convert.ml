@@ -350,8 +350,12 @@ let make_closure ~class_num
     c_extends = [(p, Happly((p, "Closure"), []))];
     c_implements = [];
     c_body = [
-      ClassVars { cv_kinds = [Private]; cv_hint = None;
-        cv_names = cvl; cv_doc_comment = None };
+      ClassVars
+      { cv_kinds = [Private]
+      ; cv_hint = None
+      ; cv_names = cvl
+      ; cv_doc_comment = None
+      ; cv_user_attributes = []};
       Method md
     ];
     c_namespace = Namespace_env.empty_with_default_popt;

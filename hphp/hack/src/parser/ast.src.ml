@@ -196,6 +196,7 @@ and class_vars_ = {
   cv_hint: hint option;
   cv_names: class_var list;
   cv_doc_comment: string option;
+  cv_user_attributes: user_attribute list;
 }
 
 and method_ = {

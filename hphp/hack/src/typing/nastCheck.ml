@@ -51,7 +51,6 @@ type env = {
   imm_ctrl_ctx: control_context;
   typedef_tparams : Nast.tparam list;
   lvalue: bool; (* current expression is being used as an lvalue *)
-  inside_constructor: bool; (* permit __Const assignment in constructor *)
   is_reactive: bool; (* The enclosing function is reactive *)
   tenv: Env.env;
 }
@@ -340,7 +339,6 @@ let rec fun_ tenv f named_body =
   else begin
     let env = { t_is_finally = false;
                 lvalue = false;
-                inside_constructor = false;
                 class_name = None; class_kind = None;
                 imm_ctrl_ctx = Toplevel;
                 typedef_tparams = [];
@@ -509,7 +507,6 @@ and class_ tenv c =
   let cname = Some (snd c.c_name) in
   let env = { t_is_finally = false;
               lvalue = false;
-              inside_constructor = false;
               class_name = cname;
               class_kind = Some c.c_kind;
               imm_ctrl_ctx = Toplevel;
@@ -821,10 +818,7 @@ and method_ (env, is_static) m =
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
 
-  let p, mname = m.m_name in
-  let env = if mname = "__construct"
-  then { env with inside_constructor = true }
-  else env in
+  let p, _ = m.m_name in
   check_coroutines_enabled (m.m_fun_kind = Ast.FCoroutine) env p;
   (* Add method type parameters to environment and localize the bounds *)
   let tenv, constraints =
@@ -1147,7 +1141,6 @@ and field env (e1, e2) =
 let typedef tenv t =
   let env = { t_is_finally = false;
               lvalue = false;
-              inside_constructor = false;
               class_name = None; class_kind = None;
               imm_ctrl_ctx = Toplevel;
               (* Since typedefs cannot have constraints we shouldn't check

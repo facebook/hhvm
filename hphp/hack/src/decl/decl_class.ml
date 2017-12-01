@@ -36,12 +36,14 @@ let element_to_class_elt ce_type {
   elt_override = ce_override;
   elt_abstract = _;
   elt_is_xhp_attr = ce_is_xhp_attr;
+  elt_const = ce_const;
   elt_origin = ce_origin;
   elt_visibility = ce_visibility;
 } =
   {
     ce_final;
     ce_is_xhp_attr;
+    ce_const;
     ce_override;
     ce_synthesized;
     ce_visibility;

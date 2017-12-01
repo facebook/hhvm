@@ -261,6 +261,7 @@ let default_constructor_ce class_ =
            }
   in { ce_final       = false;
        ce_is_xhp_attr = false;
+       ce_const       = false;
        ce_override    = false;
        ce_synthesized = true;
        ce_visibility  = Vpublic;

@@ -1689,6 +1689,7 @@ and class_member_def env =
       ; cv_hint = None
       ; cv_names = cvars
       ; cv_doc_comment = None
+      ; cv_user_attributes = attrs
       }
   | Tword ->
       let word = Lexing.lexeme env.lb in
@@ -1704,6 +1705,7 @@ and class_member_def env =
       ; cv_hint = Some h
       ; cv_names = cvars
       ; cv_doc_comment = None
+      ; cv_user_attributes = attrs
       }
 
 (*****************************************************************************)
@@ -1878,6 +1880,7 @@ and class_member_word env member_start ~attrs ~modifiers = function
       ; cv_hint = Some h
       ; cv_names = cvars
       ; cv_doc_comment = None
+      ; cv_user_attributes = attrs
       }
 
 and typeconst_def def_start env ~is_abstract =
@@ -1980,6 +1983,7 @@ and param_implicit_field vis p =
   ; cv_hint = p.param_hint
   ; cv_names = [span, cvname, None]
   ; cv_doc_comment = None
+  ; cv_user_attributes = []
   } in
   (* Building the implicit assignment (for example: $this->x = $x;) *)
   let this = pos, "$this" in

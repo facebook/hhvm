@@ -1,6 +1,6 @@
 (* @generated from ast.src.ml by hphp/hack/tools/ppx/facebook/generate_ppx.sh *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<5e057c91196e7b4efc2012fb3df494ebead2b46b>> *)
+(* SourceShasum<<d9aa1800bb91a68ab686226e3cb6d4e928d4d678>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -131,7 +131,8 @@ and class_vars_ =
   cv_kinds: kind list ;
   cv_hint: hint option ;
   cv_names: class_var list ;
-  cv_doc_comment: string option }
+  cv_doc_comment: string option ;
+  cv_user_attributes: user_attribute list }
 and method_ =
   {
   m_kind: kind list ;
@@ -926,6 +927,10 @@ include
           let _visitors_r3 =
             self#on_option self#on_string env _visitors_this.cv_doc_comment
              in
+          let _visitors_r4 =
+            self#on_list self#on_user_attribute env
+              _visitors_this.cv_user_attributes
+             in
           if
             Pervasives.(&&)
               (Pervasives.(==) _visitors_this.cv_kinds _visitors_r0)
@@ -933,15 +938,19 @@ include
                  (Pervasives.(==) _visitors_this.cv_hint _visitors_r1)
                  (Pervasives.(&&)
                     (Pervasives.(==) _visitors_this.cv_names _visitors_r2)
-                    (Pervasives.(==) _visitors_this.cv_doc_comment
-                       _visitors_r3)))
+                    (Pervasives.(&&)
+                       (Pervasives.(==) _visitors_this.cv_doc_comment
+                          _visitors_r3)
+                       (Pervasives.(==) _visitors_this.cv_user_attributes
+                          _visitors_r4))))
           then _visitors_this
           else
             {
               cv_kinds = _visitors_r0;
               cv_hint = _visitors_r1;
               cv_names = _visitors_r2;
-              cv_doc_comment = _visitors_r3
+              cv_doc_comment = _visitors_r3;
+              cv_user_attributes = _visitors_r4
             }
         method on_method_ env _visitors_this =
           let _visitors_r0 =
@@ -2544,9 +2553,14 @@ include
           let _visitors_s3 =
             self#on_option self#on_string env _visitors_this.cv_doc_comment
              in
+          let _visitors_s4 =
+            self#on_list self#on_user_attribute env
+              _visitors_this.cv_user_attributes
+             in
           self#plus
-            (self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2)
-            _visitors_s3
+            (self#plus
+               (self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2)
+               _visitors_s3) _visitors_s4
         method on_method_ env _visitors_this =
           let _visitors_s0 =
             self#on_list self#on_kind env _visitors_this.m_kind  in
@@ -3579,11 +3593,16 @@ include
           let _visitors_r3 =
             self#on_option self#on_string env _visitors_this.cv_doc_comment
              in
+          let _visitors_r4 =
+            self#on_list self#on_user_attribute env
+              _visitors_this.cv_user_attributes
+             in
           {
             cv_kinds = _visitors_r0;
             cv_hint = _visitors_r1;
             cv_names = _visitors_r2;
-            cv_doc_comment = _visitors_r3
+            cv_doc_comment = _visitors_r3;
+            cv_user_attributes = _visitors_r4
           }
         method on_method_ env _visitors_this =
           let _visitors_r0 =
@@ -4578,6 +4597,10 @@ include
             self#on_list self#on_class_var env _visitors_this.cv_names  in
           let _visitors_r3 =
             self#on_option self#on_string env _visitors_this.cv_doc_comment
+             in
+          let _visitors_r4 =
+            self#on_list self#on_user_attribute env
+              _visitors_this.cv_user_attributes
              in
           ()
         method on_method_ env _visitors_this =

@@ -65,6 +65,7 @@ type env = {
   decl_env: Decl_env.env;
   todo    : tfun list  ;
   in_loop : bool       ;
+  inside_constructor: bool;
   (* A set of constraints that are global to a given method *)
   global_tpenv : tpenv ;
 }

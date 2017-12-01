@@ -81,7 +81,8 @@
           cv_visibility = Public;
           cv_type =
           (Some (<p>, (Hoption (<p>, (Hprim Tstring)))));
-          cv_id = (<p>, ":bar"); cv_expr = None }
+          cv_id = (<p>, ":bar"); cv_expr = None;
+          cv_user_attributes = [] }
          ];
        c_constructor = None; c_static_methods = []; c_methods = [];
        c_user_attributes = []; c_enum = None })

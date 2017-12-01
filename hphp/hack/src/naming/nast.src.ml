@@ -401,12 +401,13 @@ and class_typeconst = {
 }
 
 and class_var = {
-  cv_final      : bool        ;
-  cv_is_xhp     : bool        ;
-  cv_visibility : visibility  ;
-  cv_type       : hint option ;
-  cv_id         : sid         ;
-  cv_expr       : expr option ;
+  cv_final           : bool               ;
+  cv_is_xhp          : bool               ;
+  cv_visibility      : visibility         ;
+  cv_type            : hint option        ;
+  cv_id              : sid                ;
+  cv_expr            : expr option        ;
+  cv_user_attributes : user_attribute list;
 }
 
 and method_ = {

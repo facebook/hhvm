@@ -1,6 +1,6 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/facebook/generate_ppx.sh *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<df00730c8f94977ad22f19c91ed5a383d3bdc43b>> *)
+(* SourceShasum<<d036ac7bbc9170b002d24038eaef9b2aa99467b6>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -2194,7 +2194,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       cv_visibility: visibility ;
       cv_type: hint option ;
       cv_id: sid ;
-      cv_expr: expr option }
+      cv_expr: expr option ;
+      cv_user_attributes: user_attribute list }
     and method_ =
       {
       m_annotation: EnvAnnotation.t ;
@@ -2590,7 +2591,9 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     
     and pp_class_var :
       Format.formatter -> class_var -> Ppx_deriving_runtime.unit =
-      let __3 () = pp_expr
+      let __4 () = pp_user_attribute
+      
+      and __3 () = pp_expr
       
       and __2 () = pp_sid
       
@@ -2602,38 +2605,51 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
           fun fmt  ->
             fun x  ->
               Format.fprintf fmt "@[<2>{ ";
-              ((((((Format.fprintf fmt "@[%s =@ " "AnnotatedAST.cv_final";
-                    (Format.fprintf fmt "%B") x.cv_final;
+              (((((((Format.fprintf fmt "@[%s =@ " "AnnotatedAST.cv_final";
+                     (Format.fprintf fmt "%B") x.cv_final;
+                     Format.fprintf fmt "@]");
+                    Format.fprintf fmt ";@ ";
+                    Format.fprintf fmt "@[%s =@ " "cv_is_xhp";
+                    (Format.fprintf fmt "%B") x.cv_is_xhp;
                     Format.fprintf fmt "@]");
                    Format.fprintf fmt ";@ ";
-                   Format.fprintf fmt "@[%s =@ " "cv_is_xhp";
-                   (Format.fprintf fmt "%B") x.cv_is_xhp;
+                   Format.fprintf fmt "@[%s =@ " "cv_visibility";
+                   ((__0 ()) fmt) x.cv_visibility;
                    Format.fprintf fmt "@]");
                   Format.fprintf fmt ";@ ";
-                  Format.fprintf fmt "@[%s =@ " "cv_visibility";
-                  ((__0 ()) fmt) x.cv_visibility;
+                  Format.fprintf fmt "@[%s =@ " "cv_type";
+                  ((function
+                    | None  -> Format.pp_print_string fmt "None"
+                    | Some x ->
+                        (Format.pp_print_string fmt "(Some ";
+                         ((__1 ()) fmt) x;
+                         Format.pp_print_string fmt ")"))) x.cv_type;
                   Format.fprintf fmt "@]");
                  Format.fprintf fmt ";@ ";
-                 Format.fprintf fmt "@[%s =@ " "cv_type";
-                 ((function
-                   | None  -> Format.pp_print_string fmt "None"
-                   | Some x ->
-                       (Format.pp_print_string fmt "(Some ";
-                        ((__1 ()) fmt) x;
-                        Format.pp_print_string fmt ")"))) x.cv_type;
+                 Format.fprintf fmt "@[%s =@ " "cv_id";
+                 ((__2 ()) fmt) x.cv_id;
                  Format.fprintf fmt "@]");
                 Format.fprintf fmt ";@ ";
-                Format.fprintf fmt "@[%s =@ " "cv_id";
-                ((__2 ()) fmt) x.cv_id;
+                Format.fprintf fmt "@[%s =@ " "cv_expr";
+                ((function
+                  | None  -> Format.pp_print_string fmt "None"
+                  | Some x ->
+                      (Format.pp_print_string fmt "(Some ";
+                       ((__3 ()) fmt) x;
+                       Format.pp_print_string fmt ")"))) x.cv_expr;
                 Format.fprintf fmt "@]");
                Format.fprintf fmt ";@ ";
-               Format.fprintf fmt "@[%s =@ " "cv_expr";
-               ((function
-                 | None  -> Format.pp_print_string fmt "None"
-                 | Some x ->
-                     (Format.pp_print_string fmt "(Some ";
-                      ((__3 ()) fmt) x;
-                      Format.pp_print_string fmt ")"))) x.cv_expr;
+               Format.fprintf fmt "@[%s =@ " "cv_user_attributes";
+               ((fun x  ->
+                   Format.fprintf fmt "@[<2>[";
+                   ignore
+                     (List.fold_left
+                        (fun sep  ->
+                           fun x  ->
+                             if sep then Format.fprintf fmt ";@ ";
+                             ((__4 ()) fmt) x;
+                             true) false x);
+                   Format.fprintf fmt "@,]@]")) x.cv_user_attributes;
                Format.fprintf fmt "@]");
               Format.fprintf fmt "@ }@]")
         [@ocaml.warning "-A"])

@@ -12,7 +12,8 @@
          (Some (<p>,
                 (Hoption (<p>, (Hprim Tint)))));
          cv_id = (<p>, "x");
-         cv_expr = (Some ((Some ?_), AnnotatedAST.Null)) }
+         cv_expr = (Some ((Some ?_), AnnotatedAST.Null));
+         cv_user_attributes = [] }
         ];
       c_vars = []; c_constructor = None;
       c_static_methods =

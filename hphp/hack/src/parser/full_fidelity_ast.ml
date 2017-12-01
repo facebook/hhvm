@@ -1822,6 +1822,7 @@ and pClassElt : class_elt list parser = fun node env ->
           | _ -> missing_syntax "property declarator" node env
           end
         ; cv_doc_comment = if env.quick_mode then None else doc_comment_opt
+        ; cv_user_attributes = [] (* TODO figure out how to inject attributes *)
         }
       ]
   | MethodishDeclaration
@@ -1856,6 +1857,7 @@ and pClassElt : class_elt list parser = fun node env ->
           ; cv_hint = hint
           ; cv_names = [span, cvname, None]
           ; cv_doc_comment = None
+          ; cv_user_attributes = []
           }
         )
       in

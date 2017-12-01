@@ -17,22 +17,31 @@
 
 include Future_sig.Types
 
+type 'a delayed = {
+  (** Number of times it has been tapped by "is_ready" or "check_status". *)
+  tapped : int;
+  (** Number of times remaining to be tapped before it is ready. *)
+  remaining : int;
+  value : 'a;
+}
+
 type 'a promise =
   | Complete : 'a -> 'a promise
   | Complete_but_transformer_raised of (Process_types.info * exn)
-    (** Delayed is useful for testing. Must be tapped by "is ready"
-     * the given number of times before it is ready. *)
-  | Delayed : (int * 'a) -> 'a promise
-  | Incomplete of Process_types.t * (string -> 'a)
+    (** Delayed is useful for deterministic testing. Must be tapped by "is ready" or
+     * "check_status" the remaining number of times before it is ready. *)
+  | Delayed : 'a delayed -> 'a promise
+    (** float is the time the Future was constructed. *)
+  | Incomplete of float * Process_types.t * (string -> 'a)
 type 'a t = 'a promise ref
 
 let make process transformer =
-  ref (Incomplete (process, transformer))
+  ref (Incomplete (Unix.time (), process, transformer))
 
 let of_value v = ref @@ Complete v
 
 let delayed_value ~delays v =
-  ref (Delayed (delays, v))
+  ref (Delayed {tapped = 0; remaining = delays; value = v;})
 
 let error_to_string (info, e) =
   let info = Printf.sprintf "(%s [%s])"
@@ -60,11 +69,11 @@ let get : ?timeout:int -> 'a t -> ('a, error) result =
   | Complete v -> Ok v
   | Complete_but_transformer_raised (info, e) ->
     Error (info, Transformer_raised e)
-  | Delayed (i, v) when i <= 0 ->
-    Ok v
+  | Delayed { value; remaining; _ } when remaining <= 0 ->
+    Ok value
   | Delayed _ ->
     Error (Process_types.dummy.Process_types.info, Timed_out ("", "Delayed value not ready yet"))
-  | Incomplete (process, transformer) ->
+  | Incomplete (_, process, transformer) ->
     let info = process.Process_types.info in
     match Process.read_and_wait_pid ~timeout process with
     | Ok (stdout, _stderr) -> begin
@@ -91,9 +100,27 @@ let get_exn ?timeout x = get ?timeout x
 
 let is_ready promise = match !promise with
   | Complete _ | Complete_but_transformer_raised _ -> true
-  | Delayed (i, _) when i <= 0 -> true
-  | Delayed (i, v) ->
-    promise := Delayed(i - 1, v);
+  | Delayed {remaining; _} when remaining <= 0 ->
+    true
+  | Delayed { tapped; remaining; value; } ->
+    promise := Delayed { tapped = tapped + 1; remaining = remaining - 1; value; };
     false
-  | Incomplete (process, _) ->
+  | Incomplete (_, process, _) ->
     Process.is_ready process
+
+let check_status promise = match !promise with
+  | Complete v ->
+    Complete_with_result (Ok v)
+  | Complete_but_transformer_raised (info, e) ->
+    Complete_with_result (Error (info, Transformer_raised e))
+  | Delayed { value; remaining; _ } when remaining <= 0 ->
+    Complete_with_result (Ok value)
+  | Delayed { tapped; remaining; value; } ->
+    promise := Delayed { tapped = tapped + 1; remaining = remaining - 1; value; };
+    In_progress (float_of_int tapped)
+  | Incomplete (start_t, process, _) ->
+    if Process.is_ready process then
+      Complete_with_result (get promise)
+    else
+      let age = Unix.time () -. start_t in
+      In_progress age

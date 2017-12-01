@@ -102,16 +102,21 @@ module Revision_map = struct
 
     let find_svn_rev hg_rev t =
       let future = Hashtbl.find t.svn_queries hg_rev in
-      if Future.is_ready future then
-        (** We return "Some 0" if the query fails to show that the query
-         * completed and we can move on. *)
-        Some (Future.get future
+      match Future.check_status future with
+      | Future.In_progress age when age > 60.0 ->
+        (** Fail if lookup up SVN rev number takes more than 60 s.
+         * Delete the query so we can retry again if we encounter this hg_rev
+         * again. Return fake "0" SVN rev number. *)
+        let () = Hashtbl.remove t.svn_queries hg_rev in
+        Some 0
+      | Future.In_progress _ ->
+        None
+      | Future.Complete_with_result result ->
+        Some (result
           |> Core_result.map_error ~f:Future.error_to_string
           |> Core_result.map_error ~f:HackEventLogger.find_svn_rev_failed
           |> Core_result.ok
           |> Option.value ~default:0)
-      else
-        None
 
     (**
      * Does an async query to XDB to find nearest saved state match.
@@ -164,9 +169,16 @@ module Revision_map = struct
        * result to run the prefetcher). *)
       query >>= fun (query, is_tiny, prefetcher) ->
         match query, !prefetcher with
-        | query, Some prefetcher when Future.is_ready prefetcher -> begin
-          match Future.get prefetcher with
-          | Ok _ ->
+        | query, Some prefetcher -> begin
+          match Future.check_status prefetcher with
+          | Future.In_progress age when age > 30.0 ->
+            (** If prefetcher has taken longer than 30 seconds, we consider
+             * this as having no saved states. *)
+            Some ([], is_tiny)
+          | Future.In_progress _ ->
+            (** Prefetcher is still running. "Not yet ready, check later." *)
+            None
+          | Future.Complete_with_result (Ok _) ->
             (** This is the only case where we produce a positive result
              * (where the prefetcher succeeded). Prefetchr is only run after
              * XDB lookup finishes and produces a non-empty result list,
@@ -176,17 +188,26 @@ module Revision_map = struct
             (** *)
             Some ([], is_tiny)
           end
-        | query, None when Future.is_ready query ->
-          let result = query_to_result_list query in
-          if result = [] then
+        | query, None ->
+          begin match Future.check_status query with
+          | Future.In_progress age when age > 15.0 ->
+            (** If lookup in XDB table has taken more than 15 seconds, we
+             * we consider this as having no saved state. *)
             Some ([], is_tiny)
-          else
-            let () = prefetcher := Some (prefetch_package ~is_tiny (List.hd result)) in
-            (** None represents "not yet ready, check later". *)
+          | Future.In_progress _ ->
+            (** XDB lookup still in progress. "Not yet ready, check later." *)
             None
-        | _, _ ->
-          (** None represents "not yet ready, check later". *)
-          None
+          | Future.Complete_with_result _ ->
+            let result = query_to_result_list query in
+            if result = [] then
+              Some ([], is_tiny)
+            else
+              (** XDB looup is done, so we need to fire up the prefetcher.
+               * The prefetcher's status will be checked on the next loop. *)
+              let () = prefetcher := Some (prefetch_package ~is_tiny (List.hd result)) in
+              (** None represents "not yet ready, check later". *)
+              None
+          end
 
     let find hg_rev t =
       let svn_rev = find_svn_rev hg_rev t in

@@ -23,6 +23,12 @@ module Types = struct
 
   type error = Process_types.info * error_mode
 
+  type age = (** milliseconds *) float
+
+  type 'a status =
+    | Complete_with_result of ('a, error) result
+    | In_progress of age
+
   exception Failure of error
 
 end
@@ -47,6 +53,8 @@ module type S = sig
 
   (** Returns true if "get" will not block. *)
   val is_ready : 'a t -> bool
+
+  val check_status : 'a t -> 'a status
 
   val error_to_string : error -> string
   val error_to_exn : error -> exn

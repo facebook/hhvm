@@ -56,11 +56,32 @@ type namespace_type =
   | Bracketed of location
   | Unbracketed of location
 
+type first_use_or_def = {
+  f_location: location;
+  f_is_def: bool;
+  f_name: string;
+}
+
+let global_namespace_name = "\\"
+
+let combine_names n1 n2 =
+  assert (String.length n1 > 0 && String.length n2 > 0);
+  let has_leading_slash = String.get n2 0 = '\\' in
+  let len = String.length n1 in
+  let has_trailing_slash = String.get n1 (len - 1) = '\\' in
+  match has_leading_slash, has_trailing_slash with
+  | true, true -> n1 ^ (String.sub n2 1 (len - 1))
+  | false, false -> n1 ^ "\\" ^ n2
+  | _ -> n1 ^ n2
+
+let make_first_use_or_def ~is_def location namespace_name name =
+  { f_location = location; f_is_def = is_def; f_name = combine_names namespace_name name }
+
 type used_names = {
-  t_classes: (location * bool) SMap.t;
-  t_namespaces: (location * bool) SMap.t;
-  t_functions: (location * bool) SMap.t;
-  t_constants: (location * bool) SMap.t;
+  t_classes: first_use_or_def SMap.t;
+  t_namespaces: first_use_or_def SMap.t;
+  t_functions: first_use_or_def SMap.t;
+  t_constants: first_use_or_def SMap.t;
 }
 
 let empty_names = {
@@ -83,23 +104,23 @@ let get_short_name_from_qualified_name name alias =
 type accumulator = {
   errors : SyntaxError.t list;
   namespace_type : namespace_type;
-  has_namespace_prefix: bool;
+  namespace_name: string;
   names: used_names;
   trait_require_clauses: TokenKind.t SMap.t;
 }
 
 let make_acc
-  acc errors namespace_type names has_namespace_prefix trait_require_clauses =
+  acc errors namespace_type names namespace_name trait_require_clauses =
   if acc.errors == errors &&
      acc.namespace_type == namespace_type &&
      acc.names == names &&
-     acc.has_namespace_prefix = has_namespace_prefix &&
+     acc.namespace_name = namespace_name &&
      acc.trait_require_clauses = trait_require_clauses
   then acc
   else { errors
        ; namespace_type
        ; names
-       ; has_namespace_prefix
+       ; namespace_name
        ; trait_require_clauses
        }
 
@@ -1262,7 +1283,7 @@ let missing_type_annot_check is_strict hhvm_compat_mode f =
 let function_reference_check is_strict hhvm_compat_mode f =
   not hhvm_compat_mode && is_strict && not (is_missing f.function_ampersand)
 
-let function_errors node parents is_strict hhvm_compat_mode names errors =
+let function_errors node parents is_strict hhvm_compat_mode namespace_name names errors =
   match syntax node with
   | FunctionDeclarationHeader f ->
     let errors =
@@ -1276,8 +1297,10 @@ let function_errors node parents is_strict hhvm_compat_mode names errors =
       | { syntax = FunctionDeclaration _; _ } :: _ ->
         let function_name = text f.function_name in
         let location = make_location_of_node f.function_name in
+        let def =
+          make_first_use_or_def ~is_def:true location namespace_name function_name in
         { names with
-          t_functions = SMap.add function_name (location, true) names.t_functions }
+          t_functions = SMap.add function_name def names.t_functions }
       | _ -> names in
     names, errors
   | _ -> names, errors
@@ -1599,7 +1622,7 @@ let require_errors node parents hhvm_compat_mode trait_use_clauses errors =
     trait_use_clauses, errors
   | _ -> trait_use_clauses, errors
 
-let classish_errors node parents is_hack hhvm_compat_mode names errors =
+let classish_errors node parents is_hack hhvm_compat_mode namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
     let errors =
@@ -1658,15 +1681,17 @@ let classish_errors node parents is_hack hhvm_compat_mode names errors =
         let name = text cd.classish_name in
         let location = make_location_of_node cd.classish_name in
         begin match SMap.get name names.t_classes with
-        | Some (location, false) ->
+        | Some { f_location = location; f_is_def = false; _ } ->
           let error =
             make_name_already_used_error cd.classish_name name name location
               SyntaxError.type_name_is_already_in_use in
           names, error :: errors
         | _ ->
+          let def =
+            make_first_use_or_def ~is_def:true location namespace_name name in
           let names =
             { names with
-              t_classes = SMap.add name (location, true) names.t_classes} in
+              t_classes = SMap.add name def names.t_classes} in
           names, errors
         end
       | _ ->
@@ -1730,7 +1755,7 @@ let group_use_errors node errors =
   | _ -> errors
 
 let use_class_or_namespace_clause_errors
-  is_hack is_global_namespace kind (names, errors) cl =
+  is_hack is_global_namespace namespace_prefix kind (names, errors) cl =
 
   match syntax cl with
   | NamespaceUseClause {
@@ -1738,6 +1763,10 @@ let use_class_or_namespace_clause_errors
       namespace_use_alias = alias; _
     } ->
     let name_text = text name in
+    let qualified_name =
+      match namespace_prefix with
+      | None -> combine_names global_namespace_name name_text
+      | Some p -> combine_names p name_text in
     let short_name = get_short_name_from_qualified_name name_text (text alias) in
 
     let do_check ~error_on_global_redefinition names errors
@@ -1745,9 +1774,10 @@ let use_class_or_namespace_clause_errors
 
       let map = get_map names in
       match SMap.get short_name map with
-      | Some (location, is_definition) ->
-        if not is_definition
-           || (error_on_global_redefinition && is_global_namespace)
+      | Some { f_location = location; f_is_def = is_definition; f_name } ->
+        if qualified_name <> f_name &&
+          (not is_definition
+           || (error_on_global_redefinition && is_global_namespace))
         then
           let error =
             make_name_already_used_error name name_text
@@ -1756,8 +1786,12 @@ let use_class_or_namespace_clause_errors
         else
           names, errors
       | None ->
-        let new_entry = make_location_of_node name, false in
-        update_map names (SMap.add short_name new_entry map), errors in
+        let new_use =
+          make_first_use_or_def
+            ~is_def:false
+            (make_location_of_node name)
+            global_namespace_name qualified_name in
+        update_map names (SMap.add short_name new_use map), errors in
 
     begin match syntax kind with
     | Token token ->
@@ -1799,17 +1833,21 @@ let use_class_or_namespace_clause_errors
       let names, errors =
         let location = make_location_of_node name in
         match SMap.get short_name names.t_classes with
-        | Some (loc, _) ->
+        | Some { f_location = loc; f_name; _ } ->
+          if qualified_name = f_name then names, errors
+          else
           let error =
             make_name_already_used_error name name_text short_name loc
               SyntaxError.name_is_already_in_use in
             names, error :: errors
         | None ->
-          let t_classes = SMap.add short_name (location, false) names.t_classes in
+          let new_use =
+            make_first_use_or_def ~is_def:false location global_namespace_name qualified_name in
+          let t_classes = SMap.add short_name new_use names.t_classes in
           let t_namespaces =
             if SMap.mem short_name names.t_namespaces
             then names.t_namespaces
-            else SMap.add short_name (location, false) names.t_namespaces in
+            else SMap.add short_name new_use names.t_namespaces in
           { names with t_classes; t_namespaces }, errors in
 
       names, errors
@@ -1833,12 +1871,16 @@ let namespace_use_declaration_errors node is_hack is_global_namespace names erro
   match syntax node with
   | NamespaceUseDeclaration {
       namespace_use_kind = kind;
-      namespace_use_clauses = clauses; _ }
+      namespace_use_clauses = clauses; _ } ->
+    let f =
+      use_class_or_namespace_clause_errors is_hack is_global_namespace None kind in
+    List.fold_left f (names, errors) (syntax_to_list_no_separators clauses)
   | NamespaceGroupUseDeclaration {
       namespace_group_use_kind = kind;
-      namespace_group_use_clauses = clauses; _ } ->
+      namespace_group_use_clauses = clauses;
+      namespace_group_use_prefix = prefix; _ } ->
     let f =
-      use_class_or_namespace_clause_errors is_hack is_global_namespace kind in
+      use_class_or_namespace_clause_errors is_hack is_global_namespace (Some (text prefix)) kind in
     List.fold_left f (names, errors) (syntax_to_list_no_separators clauses)
   | _ -> names, errors
 
@@ -1964,7 +2006,7 @@ let rec check_constant_expression errors node =
   | _ ->
     (make_error_from_node node SyntaxError.invalid_constant_initializer) :: errors
 
-let const_decl_errors node parents hhvm_compat_mode names errors =
+let const_decl_errors node parents hhvm_compat_mode namespace_name names errors =
   match syntax node with
   | ConstantDeclarator cd ->
     let errors =
@@ -1981,9 +2023,11 @@ let const_decl_errors node parents hhvm_compat_mode names errors =
       check_constant_expression errors cd.constant_declarator_initializer in
     let constant_name = text cd.constant_declarator_name in
     let location = make_location_of_node cd.constant_declarator_name in
+    let def =
+      make_first_use_or_def ~is_def:true location namespace_name constant_name in
     let names = {
       names with t_constants =
-        SMap.add constant_name (location, true) names.t_constants } in
+        SMap.add constant_name def names.t_constants } in
     names, errors
   | _ -> names, errors
 
@@ -2141,6 +2185,13 @@ let declare_errors node parents errors =
     errors
   | _ -> errors
 
+let get_namespace_name parents current_namespace_name =
+  match parents with
+  | { syntax = NamespaceDeclaration { namespace_name = ns; _ }; _ } :: _ ->
+    if is_missing ns then current_namespace_name
+    else combine_names current_namespace_name (text ns)
+  | _ -> current_namespace_name
+
 let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let is_hack_file = (SyntaxTree.language syntax_tree = "hh") in
@@ -2149,7 +2200,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
     let { errors
         ; namespace_type
         ; names
-        ; has_namespace_prefix
+        ; namespace_name
         ; trait_require_clauses
         } = acc in
     let errors =
@@ -2157,7 +2208,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
     let errors =
       parameter_errors node parents is_strict is_hack hhvm_compatiblity_mode errors in
     let names, errors =
-      function_errors node parents is_strict hhvm_compatiblity_mode names errors in
+      function_errors node parents is_strict hhvm_compatiblity_mode namespace_name names errors in
     let errors =
       xhp_errors node parents hhvm_compatiblity_mode errors in
     let errors =
@@ -2171,7 +2222,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
     let trait_require_clauses, errors =
       require_errors node parents hhvm_compatiblity_mode trait_require_clauses errors in
     let names, errors =
-      classish_errors node parents is_hack hhvm_compatiblity_mode names errors in
+      classish_errors node parents is_hack hhvm_compatiblity_mode namespace_name names errors in
     let errors =
       class_element_errors node parents errors in
     let errors =
@@ -2179,7 +2230,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
     let errors = alias_errors node errors in
     let errors = group_use_errors node errors in
     let names, errors =
-      const_decl_errors node parents hhvm_compatiblity_mode names errors in
+      const_decl_errors node parents hhvm_compatiblity_mode namespace_name names errors in
     let errors =
       abstract_final_class_nonstatic_var_error node parents hhvm_compatiblity_mode errors in
     let errors =
@@ -2187,8 +2238,8 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
     let errors =
       mixed_namespace_errors node namespace_type errors in
     let names, errors =
-      namespace_use_declaration_errors node is_hack (not has_namespace_prefix)
-        names errors in
+      namespace_use_declaration_errors node is_hack
+        (namespace_name = global_namespace_name) names errors in
     let errors = enum_errors node errors in
     let errors = assignment_errors node errors in
     let errors = declare_errors node parents errors in
@@ -2201,34 +2252,31 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
         then Bracketed (make_location namespace_left_brace namespace_right_brace)
         else namespace_type in
       (* reset names/namespace_type before diving into namespace body *)
-      let has_namespace_prefix = has_namespace_prefix ||
-        match parents with
-        | { syntax = NamespaceDeclaration { namespace_name; _ }; _ } :: _ ->
-          not (is_missing namespace_name)
-        | _ -> false in
+      let namespace_name = get_namespace_name parents namespace_name in
       let acc1 =
         make_acc
           acc errors namespace_type empty_names
-          has_namespace_prefix empty_trait_require_clauses
+          namespace_name empty_trait_require_clauses
       in
       let acc1 = fold_child_nodes folder node parents acc1 in
       (* resume with old set of names and pull back
         accumulated errors/last seen namespace type *)
         make_acc
           acc acc1.errors namespace_type acc.names
-          acc.has_namespace_prefix acc.trait_require_clauses
+          acc.namespace_name acc.trait_require_clauses
     | NamespaceEmptyBody { namespace_semicolon; _ } ->
       let namespace_type =
         if namespace_type = Unspecified
         then Unbracketed (make_location_of_node namespace_semicolon)
         else namespace_type
       in
+      let namespace_name = get_namespace_name parents namespace_name in
       (* consider the rest of file to be the part of the namespace:
          reset names and namespace type, keep errors *)
       let acc =
         make_acc
           acc errors namespace_type empty_names
-          has_namespace_prefix empty_trait_require_clauses
+          namespace_name empty_trait_require_clauses
       in
       fold_child_nodes folder node parents acc
     | ClassishDeclaration _ ->
@@ -2236,21 +2284,21 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
       let acc =
         make_acc
           acc errors namespace_type names
-          has_namespace_prefix empty_trait_require_clauses
+          namespace_name empty_trait_require_clauses
       in
       fold_child_nodes folder node parents acc
     | _ ->
       let acc =
         make_acc
           acc errors namespace_type names
-          has_namespace_prefix trait_require_clauses
+          namespace_name trait_require_clauses
       in
       fold_child_nodes folder node parents acc in
   let acc = fold_child_nodes folder (SyntaxTree.root syntax_tree) []
     { errors = []
     ; namespace_type = Unspecified
     ; names = empty_names
-    ; has_namespace_prefix = false
+    ; namespace_name = global_namespace_name
     ; trait_require_clauses = empty_trait_require_clauses
     } in
   acc.errors

@@ -11,6 +11,6 @@
 
 namespace NS1;
 
-use \HH\Awaitable;
+//use \HH\Awaitable;
 
 async function f(): Awaitable<void> {}

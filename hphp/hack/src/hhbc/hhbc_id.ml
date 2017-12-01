@@ -28,7 +28,8 @@ let auto_namespace_map () =
     ~default:default_auto_aliased_namespaces
 
 let elaborate_id ns kind id =
-  let fully_qualified_id = snd (Namespaces.elaborate_id ns kind id) in
+  let was_renamed, (_, fully_qualified_id) =
+    Namespaces.elaborate_id_impl ~autoimport:(Emit_env.is_hh_syntax_enabled ()) ns kind id in
   let fully_qualified_id =
     Namespaces.renamespace_if_aliased
       ~reverse:true (auto_namespace_map ()) fully_qualified_id
@@ -40,7 +41,7 @@ let elaborate_id ns kind id =
     (String.contains stripped_fully_qualified_id '\\') &&
     not (String.contains (snd id) '\\')
   in
-  stripped_fully_qualified_id, if need_fallback then Some clean_id else None
+  was_renamed, stripped_fully_qualified_id, if need_fallback then Some clean_id else None
 
 (* Class identifier, with namespace qualification if not global, but without
  * initial backslash.
@@ -54,8 +55,13 @@ module Class = struct
   let to_raw_string s = s
   let elaborate_id ns id =
     let mangled_name = SU.Xhp.mangle (snd id) in
-    match Hhbc_alias.opt_normalize (SU.strip_global_ns mangled_name) with
-    | None -> elaborate_id ns Namespaces.ElaborateClass (fst id, mangled_name)
+    let stripped_mangled_name = SU.strip_global_ns mangled_name in
+    let was_renamed, id, fallback_id =
+      elaborate_id ns Namespaces.ElaborateClass (fst id, mangled_name) in
+    if was_renamed
+    then id, fallback_id
+    else match Hhbc_alias.opt_normalize stripped_mangled_name with
+    | None -> id, fallback_id
     | Some s -> s, None
 
   let to_unmangled_string s =
@@ -148,7 +154,9 @@ module Function = struct
   let from_raw_string s = s
   let to_raw_string s = s
   let add_suffix s suffix = s ^ suffix
-  let elaborate_id ns id = elaborate_id ns Namespaces.ElaborateFun id
+  let elaborate_id ns id =
+    let _, x, y = elaborate_id ns Namespaces.ElaborateFun id in
+    x, y
   let elaborate_id_with_builtins ns id =
     let fq_id, backoff_id = elaborate_id ns id in
     match backoff_id with
@@ -178,6 +186,6 @@ module Const = struct
   let from_raw_string s = s
   let to_raw_string s = s
   let elaborate_id ns id =
-    let fq_id, backoff_id = elaborate_id ns Namespaces.ElaborateConst id in
+    let _was_renamed, fq_id, backoff_id = elaborate_id ns Namespaces.ElaborateConst id in
     fq_id, backoff_id, String.contains (snd id) '\\'
 end

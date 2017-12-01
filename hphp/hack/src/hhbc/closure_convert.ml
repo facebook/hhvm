@@ -752,29 +752,30 @@ and convert_stmt env st stmt =
     let st, us_block = convert_block env st s.us_block in
     let st = if st.has_finally then st else { st with has_finally = true } in
     st, Using { s with us_expr; us_block }
-  | Def_inline ((Class _) as d) ->
-    let cd =
-      (* propagate namespace information to nested classes *)
-      match Namespaces.elaborate_def st.namespace d with
-      | _, [Class cd] -> cd
-      | _ -> failwith "expected single class declaration" in
-    let st, cd = convert_class env st cd in
-    let st, stub_cd = add_class env st cd in
-    st, Def_inline (Class stub_cd)
-  | Def_inline ((Fun _) as d) ->
-    let fd =
-      (* propagate namespace information to nested functions *)
-      match Namespaces.elaborate_def st.namespace d with
-      | _, [Fun fd] -> fd
-      | _ -> failwith "expected single function declaration" in
-    let st, fd = convert_fun env st fd in
-    let has_inout_params =
-      List.exists fd.Ast.f_params
-        ~f:(fun p -> p.Ast.param_callconv = Some Ast.Pinout
-          || (create_inout_wrapper_functions () && p.Ast.param_is_reference)) in
-    let st, stub_fd =
-      add_function ~has_inout_params:has_inout_params env st fd in
-    st, Def_inline (Fun stub_fd)
+  | Def_inline d ->
+    (* propagate namespace information to nested classes or functions *)
+    let _, defs = Namespaces.elaborate_def st.namespace d in
+    let rec process_inline_defs st defs =
+      match defs with
+      | SetNamespaceEnv ns :: defs ->
+        let st = set_namespace st ns in
+        process_inline_defs st defs
+      | Class cd :: _defs ->
+        let st, cd = convert_class env st cd in
+        let st, stub_cd = add_class env st cd in
+        st, Def_inline (Class stub_cd)
+      | Fun fd :: _defs ->
+        let st, fd = convert_fun env st fd in
+        let has_inout_params =
+          List.exists fd.Ast.f_params
+            ~f:(fun p -> p.Ast.param_callconv = Some Ast.Pinout
+              || (create_inout_wrapper_functions () && p.Ast.param_is_reference)) in
+        let st, stub_fd =
+          add_function ~has_inout_params:has_inout_params env st fd in
+        st, Def_inline (Fun stub_fd)
+      | _ ->
+        failwith "expected single class or function declaration" in
+    process_inline_defs st defs
   | GotoLabel (_, l) ->
     (* record known label in function *)
     let labels = SSet.add l st.goto_state.labels in

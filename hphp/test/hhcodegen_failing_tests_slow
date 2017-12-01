@@ -7,17 +7,7 @@ slow/goto/label_in_finally.php
 slow/goto/try_goto_in_finally1.php
 slow/hack_arr_compat/scalars.php
 slow/hack_mode/2214.php
-slow/hh_namespace_migration/hh_frozenset4.php
-slow/hh_namespace_migration/hh_frozenset7.php
-slow/hh_namespace_migration/hh_frozenvector4.php
-slow/hh_namespace_migration/hh_frozenvector7.php
-slow/hh_namespace_migration/hh_map4.php
-slow/hh_namespace_migration/hh_map7.php
 slow/hh_namespace_migration/hh_pair4.php
-slow/hh_namespace_migration/hh_pair7.php
-slow/hh_namespace_migration/hh_set4.php
-slow/hh_namespace_migration/hh_set7.php
-slow/hh_namespace_migration/hh_vector3.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/inline-hhas/mixed.php
 slow/inout/bad-call-15.php
@@ -27,8 +17,6 @@ slow/now_doc/1906.php
 slow/object/672.php
 slow/object_property_expression/798.php
 slow/parser/async.php
-slow/parser/colon_colon_class.php
-slow/parser/hh-namespace-conflict-1.php
 slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-3.php
 slow/parser/hh-namespace-conflict-6.php

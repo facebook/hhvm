@@ -1172,7 +1172,7 @@ class Status {
     if (substr(self::$tempdir, -1) !== "/") {
       self::$tempdir .= "/";
     }
-    self::$tempdir .= substr(md5(rand()), 0, 16);
+    self::$tempdir .= getmypid().'-'.rand();
     mkdir(self::$tempdir);
   }
 

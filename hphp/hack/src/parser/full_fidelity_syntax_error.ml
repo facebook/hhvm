@@ -351,3 +351,5 @@ let code_outside_namespace =
   "No code may exist outside of namespace {}"
 let strict_types_in_declare_block_mode =
   "strict_types declaration must not use block mode"
+let invalid_number_of_args name n =
+  "Method " ^ name ^ " must take exactly " ^ (string_of_int n) ^ " arguments"

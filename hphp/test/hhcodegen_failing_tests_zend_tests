@@ -1,6 +1,3 @@
-zend/good/tests/classes/__call_002.php
-zend/good/tests/classes/__set__get_002.php
-zend/good/tests/classes/__set__get_003.php
 zend/good/tests/classes/abstract_derived.php
 zend/good/tests/classes/abstract_final.php
 zend/good/tests/classes/abstract_not_declared.php

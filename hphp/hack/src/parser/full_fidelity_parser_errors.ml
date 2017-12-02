@@ -981,6 +981,36 @@ let abstract_final_with_method hhvm_compat_mode cd parents =
   not hhvm_compat_mode &&
   (abstract_final_parent_class parents) && not (methodish_contains_static cd)
 
+let special_method_param_errors node parents errors =
+  match syntax node with
+  | FunctionDeclarationHeader {function_name; function_parameter_list; _}
+    when SSet.mem (String.lowercase_ascii @@ text function_name)
+                  SN.Members.as_set ->
+    let params = syntax_to_list_no_separators function_parameter_list in
+    let len = Hh_core.List.length params in
+    let name = text function_name in
+    let full_name = match first_parent_class_name parents with
+      | None -> name
+      | Some c_name -> c_name ^ "::" ^ name ^ "()"
+    in
+    let num_args_opt =
+      match String.lowercase_ascii name with
+      | s when s = SN.Members.__call && len <> 2 -> Some 2
+      | s when s = SN.Members.__callStatic && len <> 2 -> Some 2
+      | s when s = SN.Members.__get && len <> 1 -> Some 1
+      | s when s = SN.Members.__set && len <> 2 -> Some 2
+      | s when s = SN.Members.__isset && len <> 1 -> Some 1
+      | s when s = SN.Members.__unset && len <> 1 -> Some 1
+      | _ -> None
+    in
+    begin match num_args_opt with
+      | None -> errors
+      | Some n ->
+        make_error_from_node
+          node (SyntaxError.invalid_number_of_args full_name n) :: errors
+    end
+  | _ -> errors
+
 let methodish_errors node parents is_hack hhvm_compat_mode errors =
   match syntax node with
   (* TODO how to narrow the range of error *)
@@ -1075,6 +1105,9 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
       produce_error errors
       (invalid_methodish_visibility_inside_interface hhvm_compat_mode node)
       parents (SyntaxError.error2047 visibility_text) visibility_node in
+    let errors =
+      special_method_param_errors
+        md.methodish_function_decl_header parents errors in
     errors
   | _ -> errors
 

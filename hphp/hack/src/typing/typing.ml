@@ -156,110 +156,6 @@ let save_env env =
 (* Handling function/method arguments *)
 (*****************************************************************************)
 
-let rec check_memoizable env param ty =
-  let env, ty = Env.expand_type env ty in
-  let p = param.param_pos in
-  match ty with
-  | _, (Tprim (Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum)
-       | Tmixed | Tany | Terr) ->
-    ()
-  | _, Tprim (Tvoid | Tresource | Tnoreturn) ->
-    let ty_str = Typing_print.error (snd ty) in
-    let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in
-    Errors.invalid_memoized_param p msgl
-  | _, Toption ty ->
-    check_memoizable env param ty
-  | _, Tshape (_, fdm) ->
-    ShapeMap.iter begin fun name _ ->
-      match ShapeMap.get name fdm with
-        | Some { sft_ty; _ } -> check_memoizable env param sft_ty
-        | None ->
-            let ty_str = Typing_print.error (snd ty) in
-            let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in
-            Errors.invalid_memoized_param p msgl;
-    end fdm
-  | _, Ttuple tyl ->
-    List.iter tyl begin fun ty ->
-      check_memoizable env param ty
-    end
-  | _, Tabstract (AKenum _, _) ->
-    ()
-  | _, Tabstract (AKnewtype (_, _), _) ->
-    let env, t', _ =
-      let ety_env = Phase.env_with_self env in
-      Typing_tdef.force_expand_typedef ~ety_env env ty in
-    check_memoizable env param t'
-  (* Just accept all generic types for now. Stricter checks to come later. *)
-  | _, Tabstract (AKgeneric _, _) ->
-    ()
-  (* For parameter type 'this::TID' defined by 'type const TID as Bar' checks
-   * Bar recursively.
-   *)
-  | _, Tabstract (AKdependent _, Some ty) ->
-    check_memoizable env param ty
-  (* Allow unconstrined dependent type `abstract type const TID` just as we
-   * allow unconstrained generics. *)
-  | _, Tabstract (AKdependent _, None) ->
-    ()
-  (* Handling Tunresolved case here for completeness, even though it
-   * shouldn't be possible to have an unresolved type when checking
-   * the method declaration. No corresponding test case for this.
-   *)
-  | _, Tunresolved tyl ->
-    List.iter tyl begin fun ty ->
-      check_memoizable env param ty
-    end
-  (* Allow untyped arrays. *)
-  | _, Tarraykind AKany
-  | _, Tarraykind AKempty ->
-      ()
-  | _,
-    Tarraykind (
-      AKvarray ty
-      | AKvec ty
-      | AKdarray(_, ty)
-      | AKvarray_or_darray ty
-      | AKmap(_, ty)
-    ) ->
-      check_memoizable env param ty
-  | _, Tarraykind (AKshape fdm) ->
-      ShapeMap.iter begin fun _ (_, tv) ->
-        check_memoizable env param tv
-      end fdm
-  | _, Tarraykind (AKtuple fields) ->
-      IMap.iter begin fun _ tv ->
-        check_memoizable env param tv
-      end fields
-  | _, Tclass (_, _) ->
-    let type_param = Env.fresh_type() in
-    let container_type =
-      Reason.none,
-      Tclass ((Pos.none, SN.Collections.cContainer), [type_param]) in
-    let env, is_container =
-      Errors.try_
-        (fun () ->
-          SubType.sub_type env ty container_type, true)
-        (fun _ -> env, false) in
-    if is_container then
-      check_memoizable env param type_param
-    else
-      let r, _ = ty in
-      let memoizable_type =
-        r, Tclass ((Pos.none, SN.Classes.cIMemoizeParam), []) in
-      if SubType.is_sub_type env ty memoizable_type
-      then ()
-      else
-        let ty_str = Typing_print.error (snd ty) in
-        let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in
-        Errors.invalid_memoized_param p msgl;
-  | _, Tfun _
-  | _, Tvar _
-  | _, Tanon (_, _)
-  | _, Tobject ->
-    let ty_str = Typing_print.error (snd ty) in
-    let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in
-    Errors.invalid_memoized_param p msgl
-
 let has_accept_disposable_attribute param =
   List.exists param.param_user_attributes
     (fun { ua_name; _ } -> SN.UserAttributes.uaAcceptDisposable = snd ua_name)
@@ -462,8 +358,7 @@ and fun_def tcopt f =
       let env, param_tys = List.map_env env f.f_params make_param_local_ty in
       if Env.is_strict env then
         List.iter2_exn ~f:(check_param env) f.f_params param_tys;
-      if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes then
-        List.iter2_exn ~f:(check_memoizable env) f.f_params param_tys;
+      Typing_memoize.check_function env f;
       let env, typed_params = List.map_env env (List.zip_exn param_tys f.f_params)
         bind_param in
       let env, t_variadic = match f.f_variadic with
@@ -472,8 +367,6 @@ and fun_def tcopt f =
           let env, ty = make_param_local_ty env vparam in
           if Env.is_strict env then
             check_param env vparam ty;
-          if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes then
-            check_memoizable env vparam ty;
           let env, t_vparam = bind_param env (ty, vparam) in
           env, T.FVvariadicArg t_vparam
         | FVellipsis -> env, T.FVellipsis
@@ -5769,8 +5662,7 @@ and method_def env m =
   if Env.is_strict env then begin
     List.iter2_exn ~f:(check_param env) m.m_params param_tys;
   end;
-  if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes then
-    List.iter2_exn ~f:(check_memoizable env) m.m_params param_tys;
+  Typing_memoize.check_method env m;
   let env, typed_params =
     List.map_env env (List.zip_exn param_tys m.m_params) bind_param in
   let env, t_variadic = match m.m_variadic with
@@ -5779,8 +5671,6 @@ and method_def env m =
       let env, ty = make_param_local_ty env vparam in
       if Env.is_strict env then
         check_param env vparam ty;
-      if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes then
-        check_memoizable env vparam ty;
       let env, t_variadic = bind_param env (ty, vparam) in
       env, (T.FVvariadicArg t_variadic)
     | FVellipsis -> env, T.FVellipsis

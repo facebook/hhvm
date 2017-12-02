@@ -423,6 +423,13 @@ public:
   /*
    * Like set(), except `v' is first boxed if it's not already a ref.
    */
+  ArrayData* setRef(int64_t k, member_lval v, bool copy);
+  ArrayData* setRef(StringData* k, member_lval v, bool copy);
+  ArrayData* setRef(const StringData*, member_lval, bool) = delete;
+  ArrayData* setRef(Cell k, member_lval v, bool copy);
+  ArrayData* setRef(const String& k, member_lval v, bool copy);
+  ArrayData* setRef(const Variant& k, member_lval v, bool copy);
+
   ArrayData* setRef(int64_t k, Variant& v, bool copy);
   ArrayData* setRef(StringData* k, Variant& v, bool copy);
   ArrayData* setRef(const StringData*, Variant&, bool) = delete;
@@ -476,6 +483,7 @@ public:
   /*
    * Like append(), except `v' is first boxed if it's not already a ref.
    */
+  ArrayData* appendRef(member_lval v, bool copy);
   ArrayData* appendRef(Variant& v, bool copy);
 
   /*

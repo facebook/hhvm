@@ -223,17 +223,13 @@ APCLocalArray::SetWithRefStr(ArrayData* ad, StringData* k, TypedValue v, bool) {
 ArrayData*
 APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, member_lval v, bool) {
   EscalateHelper helper{ad};
-  return helper.release(
-    helper.escalated->setRef(k, tvAsVariant(v.tv_ptr()), false)
-  );
+  return helper.release(helper.escalated->setRef(k, v, false));
 }
 
 ArrayData*
 APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, member_lval v, bool) {
   EscalateHelper helper{ad};
-  return helper.release(
-    helper.escalated->setRef(k, tvAsVariant(v.tv_ptr()), false)
-  );
+  return helper.release(helper.escalated->setRef(k, v, false));
 }
 
 ArrayData* APCLocalArray::RemoveInt(ArrayData* ad, int64_t k, bool /*copy*/) {
@@ -258,9 +254,7 @@ ArrayData* APCLocalArray::Append(ArrayData* ad, Cell v, bool /*copy*/) {
 
 ArrayData* APCLocalArray::AppendRef(ArrayData* ad, member_lval v, bool) {
   EscalateHelper helper{ad};
-  return helper.release(
-    helper.escalated->appendRef(tvAsVariant(v.tv_ptr()), false)
-  );
+  return helper.release(helper.escalated->appendRef(v, false));
 }
 
 ArrayData*

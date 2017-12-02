@@ -235,10 +235,9 @@ ArrayData* ProxyArray::SetWithRefStr(ArrayData* ad, StringData* k,
 ArrayData* ProxyArray::SetRefInt(ArrayData* ad, int64_t k,
                                  member_lval v, bool copy) {
   if (copy) {
-    return innerArr(ad)->setRef(k, tvAsVariant(v.tv_ptr()), true);
+    return innerArr(ad)->setRef(k, v, true);
   }
-  auto const r = innerArr(ad)->setRef(k, tvAsVariant(v.tv_ptr()),
-                                      innerArr(ad)->cowCheck());
+  auto const r = innerArr(ad)->setRef(k, v, innerArr(ad)->cowCheck());
   reseatable(ad, r);
   return ad;
 }
@@ -246,10 +245,9 @@ ArrayData* ProxyArray::SetRefInt(ArrayData* ad, int64_t k,
 ArrayData* ProxyArray::SetRefStr(ArrayData* ad, StringData* k,
                                  member_lval v, bool copy) {
   if (copy) {
-    return innerArr(ad)->setRef(k, tvAsVariant(v.tv_ptr()), true);
+    return innerArr(ad)->setRef(k, v, true);
   }
-  auto const r = innerArr(ad)->setRef(k, tvAsVariant(v.tv_ptr()),
-                                      innerArr(ad)->cowCheck());
+  auto const r = innerArr(ad)->setRef(k, v, innerArr(ad)->cowCheck());
   reseatable(ad, r);
   return ad;
 }
@@ -293,10 +291,9 @@ ProxyArray::Append(ArrayData* ad, Cell v, bool copy) {
 ArrayData*
 ProxyArray::AppendRef(ArrayData* ad, member_lval v, bool copy) {
   if (copy) {
-    return innerArr(ad)->appendRef(tvAsVariant(v.tv_ptr()), true);
+    return innerArr(ad)->appendRef(v, true);
   }
-  auto const r = innerArr(ad)->appendRef(tvAsVariant(v.tv_ptr()),
-                                         innerArr(ad)->cowCheck());
+  auto const r = innerArr(ad)->appendRef(v, innerArr(ad)->cowCheck());
   reseatable(ad, r);
   return ad;
 }

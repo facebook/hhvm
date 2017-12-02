@@ -36,6 +36,10 @@ inline member_lval::member_lval(HeapObject* base, TypedValue* elem)
   , m_ptr(elem)
 {}
 
+inline member_lval member_lval::raw(TypedValue* tv) {
+  return member_lval { nullptr, tv };
+}
+
 inline HeapObject* member_lval::base() const {
   return m_base;
 }

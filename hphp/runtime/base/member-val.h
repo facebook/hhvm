@@ -68,6 +68,11 @@ struct member_lval {
   member_lval(HeapObject* base, TypedValue* elem);
 
   /*
+   * Make a baseless member_lval for a raw TypedValue*.
+   */
+  static member_lval raw(TypedValue*);
+
+  /*
    * The base value which logically contains the referenced value and type.
    */
   HeapObject* base() const;

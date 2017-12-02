@@ -32,7 +32,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define LV(v) member_lval { nullptr, v.asTypedValue() }
+#define LV(v) member_lval::raw(v.asTypedValue())
 
 /*
  * Flag indicating whether an array allocation should be pre-checked for OOM.

@@ -169,9 +169,7 @@ ArrayData* GlobalsArray::SetWithRefStr(ArrayData* ad, StringData* k,
 
 ArrayData* GlobalsArray::SetRefInt(ArrayData* ad, int64_t k,
                                    member_lval v, bool copy) {
-  return asGlobals(ad)->setRef(
-    String(k).get(), tvAsVariant(v.tv_ptr()), copy
-  );
+  return asGlobals(ad)->setRef(String(k).get(), v, copy);
 }
 
 ArrayData* GlobalsArray::SetRefStr(ArrayData* ad, StringData* k,

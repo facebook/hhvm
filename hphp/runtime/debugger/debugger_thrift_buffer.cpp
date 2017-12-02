@@ -85,12 +85,12 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
     assert(o->instanceof(SystemLib::s_ExceptionClass));
 
     auto const info = o->getProp(SystemLib::s_ExceptionClass, s_message.get());
-    if (info.has_val()) {
-      auto& val = tvAsCVarRef(info.tv_ptr());
-      if (val.isString()) {
+    if (info) {
+      auto const inner = info.unboxed();
+      if (isStringType(inner.type())) {
         data = folly::sformat(
           "unserialize() threw '{}' with message '{}'",
-          o->getVMClass()->name(), val.toCStrRef()
+          o->getVMClass()->name(), inner.val().pstr
         );
         return DebuggerWireHelpers::ErrorMsg;
       }

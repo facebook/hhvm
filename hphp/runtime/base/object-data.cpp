@@ -70,7 +70,7 @@ static Array convert_to_array(const ObjectData* obj, Class* cls) {
   // reflectionClass. Until, either ArrayObject moves to HNI or a special
   // case is added to reflection unset should be turned off.
   assert(prop.has_val() /* && prop.type() != KindOfUninit */);
-  return tvAsCVarRef(prop.tv_ptr()).toArray();
+  return tvCastToArrayLike(prop.tv());
 }
 
 #ifdef _MSC_VER
@@ -514,7 +514,7 @@ size_t getPropertyIfAccessible(ObjectData* obj,
     }
   } else {
     auto const prop = obj->getProp(ctx, key);
-    if (prop.has_val() && prop.type() != KindOfUninit) {
+    if (prop && prop.type() != KindOfUninit) {
       --propLeft;
       if (mode == ObjectData::EraseRefs) {
         properties.set(StrNR(key), prop.tv(), true);

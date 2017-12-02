@@ -21,14 +21,14 @@
 #include <cassert>
 #include <atomic>
 
+#include <folly/CPortability.h>
 #include <folly/Portability.h>
 #include <folly/portability/PThread.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
 
-#if defined(FOLLY_SANITIZE_ADDRESS) || defined(FOLLY_SANITIZE_THREAD) ||       \
-  defined(UNDEFINED_SANITIZER)
+#if FOLLY_SANITIZE
 // ASan is less precise than valgrind so we'll need a superset of those tweaks
 # define VALGRIND
 // TODO: (t2869817) ASan doesn't play well with jemalloc
@@ -109,7 +109,7 @@ constexpr bool use_jemalloc =
 // ASAN modifies the generated code in ways that cause abnormally high C++
 // stack usage.
 constexpr size_t kStackSizeMinimum =
-#ifdef FOLLY_SANITIZE_ADDRESS
+#if FOLLY_SANITIZE
   16 << 20;
 #else
   8 << 20;

@@ -23,6 +23,7 @@
 #include <type_traits>
 #include <utility>
 
+#include <folly/CPortability.h>
 #include <folly/gen/String.h>
 
 #include "hphp/util/compilation-flags.h"
@@ -126,7 +127,7 @@ struct sparse_id_set {
   {
     // Note: the sparse part of m_mem is deliberately uninitialized, but we do
     // it for valgrind or asan builds.
-#if defined(FOLLY_SANITIZE_ADDRESS) || defined(VALGRIND)
+#if FOLLY_SANITIZE || defined(VALGRIND)
     std::memset(m_mem, 0, sizeof(T) * universe_size);
 #endif
   }
@@ -426,7 +427,7 @@ struct sparse_id_map {
   {
     // Note: the sparse part of m_mem is deliberately uninitialized, but we do
     // it for valgrind or asan builds.
-#if defined(FOLLY_SANITIZE_ADDRESS) || defined(VALGRIND)
+#if FOLLY_SANITIZE || defined(VALGRIND)
     std::memset(m_mem, 0, sizeof(K) * universe_size);
 #endif
   }

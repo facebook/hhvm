@@ -20,7 +20,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/portability.h"
 
-#include <folly/CPortability.h> // FOLLY_SANITIZE_ADDRESS
+#include <folly/CPortability.h> // FOLLY_SANITIZE
 #include <folly/Format.h>
 
 #include <algorithm>
@@ -197,7 +197,7 @@ struct AtomicStorage {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef FOLLY_SANITIZE_ADDRESS
+#if FOLLY_SANITIZE
 #undef USE_LOWPTR
 #endif
 

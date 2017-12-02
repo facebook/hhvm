@@ -99,9 +99,10 @@
 
 #include "hphp/zend/zend-string.h"
 
+#include <folly/CPortability.h>
+#include <folly/Portability.h>
 #include <folly/Random.h>
 #include <folly/Range.h>
-#include <folly/Portability.h>
 #include <folly/Singleton.h>
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Libgen.h>
@@ -767,7 +768,7 @@ const void* __hot_end = nullptr;
 static void
 NEVER_INLINE AT_END_OF_TEXT ALIGN_HUGE_PAGE __attribute__((__optimize__("2")))
 hugifyText(char* from, char* to) {
-#if !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE
+#if !FOLLY_SANITIZE && defined MADV_HUGEPAGE
   if (from > to || (to - from) < sizeof(uint64_t)) {
     // This shouldn't happen if HHVM is behaving correctly (I think),
     // but if it does then there is nothing to do and we should bail

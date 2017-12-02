@@ -202,7 +202,7 @@ bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {
   assert(reinterpret_cast<const uintptr_t>(mem2) % W == 0);
 
 // ASan is less precise than valgrind and believes this function overruns reads
-#ifndef FOLLY_SANITIZE_ADDRESS
+#if !FOLLY_SANITIZE
 
   // For speed, we count up towards 0 from -lenBytes * 8 in units of a word of
   // bits. When we reach a value >= 0, that is the number of bits we need to
@@ -237,7 +237,7 @@ bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {
   } while (data == 0);
   return false;
 
-#else // FOLLY_SANITIZE_ADDRESS
+#else // FOLLY_SANITIZE
 
   return !memcmp(mem1, mem2, lenBytes);
 

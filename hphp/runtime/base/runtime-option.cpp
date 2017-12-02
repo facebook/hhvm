@@ -24,6 +24,7 @@
 #include <set>
 #include <vector>
 
+#include <folly/CPortability.h>
 #include <folly/FileUtil.h>
 #include <folly/String.h>
 #include <folly/portability/SysResource.h>
@@ -387,7 +388,7 @@ int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
 
-#ifdef FOLLY_SANITIZE_ADDRESS
+#if FOLLY_SANITIZE
 bool RuntimeOption::DisableSmallAllocator = true;
 #else
 bool RuntimeOption::DisableSmallAllocator = false;
@@ -555,7 +556,7 @@ std::string RuntimeOption::getTraceOutputFile() {
 }
 
 const uint64_t kEvalVMStackElmsDefault =
-#if defined(VALGRIND) && !defined(FOLLY_SANITIZE_ADDRESS)
+#if defined(VALGRIND) && !FOLLY_SANITIZE
  0x800
 #else
  0x4000

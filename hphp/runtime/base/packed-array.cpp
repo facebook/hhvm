@@ -867,7 +867,7 @@ ArrayData* PackedArray::SetWithRefInt(ArrayData* adIn, int64_t k,
     [&] (MixedArray* mixed) {
       checkHackArrRef();
       auto const lval = mixed->addLvalImpl<false>(k);
-      tvSetWithRef(v, *lval.tv_ptr());
+      tvSetWithRef(v, lval);
       return lval.arr_base();
     }
   );
@@ -890,7 +890,7 @@ ArrayData* PackedArray::SetWithRefStr(ArrayData* adIn, StringData* k,
         raiseHackArrCompatRefBind(k);
       }
       auto const lval = mixed->addLvalImpl<false>(k);
-      tvSetWithRef(v, *lval.tv_ptr());
+      tvSetWithRef(v, lval);
       return lval.arr_base();
     }
   );

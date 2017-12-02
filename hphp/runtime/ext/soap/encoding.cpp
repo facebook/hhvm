@@ -531,16 +531,18 @@ static bool soap_check_zval_ref(const Variant& data, xmlNodePtr node) {
   return false;
 }
 
-static bool soap_check_xml_ref(Variant &data, xmlNodePtr node) {
+static bool soap_check_xml_ref(Variant& data, xmlNodePtr node) {
   USE_SOAP_GLOBAL;
-  Array &ref_map = SOAP_GLOBAL(ref_map);
+  Array& ref_map = SOAP_GLOBAL(ref_map);
   if (ref_map.exists((int64_t)node)) {
-    Variant& data2 = tvAsVariant(ref_map.lvalAt((int64_t)node).tv_ptr());
-    if (!(data.isObject() && data2.isObject() &&
-          data.getObjectData() == data2.getObjectData()) &&
-        !(data.isReferenced() && data2.isReferenced() &&
-          data.getRefData() == data2.getRefData())) {
-      data.assignRef(data2);
+    auto const data2 = ref_map.lvalAt((int64_t)node);
+    auto const inner2 = data2.unboxed();
+    if (!(data.isObject() && isObjectType(inner2.type()) &&
+          data.getObjectData() == inner2.val().pobj) &&
+        !(data.isReferenced() && tvIsReferenced(data2.tv()) &&
+          data.getRefData() == data2.val().pref->var())) {
+      tvBoxIfNeeded(data2);
+      tvBind(data2.tv(), *data.asTypedValue());
       return true;
     }
   } else {
@@ -1198,7 +1200,10 @@ static bool get_zval_property(Variant &object, const char* name,
     Object obj = object.toObject();
     auto const prop = obj->vGetPropIgnoreAccessibility(sname.get());
     if (!prop) return false;
-    if (ret) ret->assignRef(tvAsVariant(prop.tv_ptr()));
+    if (ret) {
+      tvBoxIfNeeded(prop);
+      tvBind(prop.tv(), *ret->asTypedValue());
+    }
     return true;
   }
   if (object.isArray()) {
@@ -1207,7 +1212,9 @@ static bool get_zval_property(Variant &object, const char* name,
       return false;
     }
     if (ret) {
-      ret->assignRef(tvAsVariant(object.toArrRef().lvalAt(sname).tv_ptr()));
+      auto const lval = object.toArrRef().lvalAt(sname);
+      tvBoxIfNeeded(lval);
+      tvBind(lval.tv(), *ret->asTypedValue());
     }
     return true;
   }

@@ -1440,7 +1440,8 @@ ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
     } else {
       StringData* sd = key.getStringData();
       auto const lval = ret->addLvalImpl<false>(sd);
-      tvAsVariant(lval.tv_ptr()).setWithRef(value);
+      assertx(value.m_type != KindOfUninit);
+      tvSetWithRef(value, lval);
     }
   }
   return ret;
@@ -1465,7 +1466,8 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
         ret->nextInsertWithRef(tvAsCVarRef(&srcElem->data));
       } else {
         auto const lval = ret->addLvalImpl<false>(srcElem->skey);
-        tvAsVariant(lval.tv_ptr()).setWithRef(tvAsCVarRef(&srcElem->data));
+        assertx(srcElem->data.m_type != KindOfUninit);
+        tvSetWithRef(srcElem->data, lval);
       }
     }
     return ret;

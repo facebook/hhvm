@@ -114,11 +114,11 @@ private:
   }
 
   /**
-   * Convert a Variant retrieved from the array to the void* expected by the
+   * Convert an lval retrieved from the array to the void* expected by the
    * Zend compat caller. This will retrieve the underlying data pointer from
    * the ZendCustomElement resource, if applicable.
    */
-  void* elementToData(Variant* v) const;
+  void* elementToData(member_lval v) const;
 
   /**
    * Make a ZendCustomElement resource wrapping the given data block. If pDest

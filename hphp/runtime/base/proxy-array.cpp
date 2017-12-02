@@ -528,7 +528,7 @@ void* ProxyArray::proxyGet(StringData * str) const {
   }
   auto lval = innerArr(this)->lval(str, false);
   reseatable(this, lval.arr_base());
-  return elementToData(&tvAsVariant(lval.tv_ptr()));
+  return elementToData(lval);
 }
 
 void* ProxyArray::proxyGet(int64_t k) const {
@@ -537,43 +537,43 @@ void* ProxyArray::proxyGet(int64_t k) const {
   }
   auto lval = innerArr(this)->lval(k, false);
   reseatable(this, lval.arr_base());
-  return elementToData(&tvAsVariant(lval.tv_ptr()));
+  return elementToData(lval);
 }
 
-void* ProxyArray::proxyGet(const Variant & k) const {
+void* ProxyArray::proxyGet(const Variant& k) const {
   if (!innerArr(this)->exists(k)) {
     return nullptr;
   }
   auto lval = innerArr(this)->lval(k, false);
   reseatable(this, lval.arr_base());
-  return elementToData(&tvAsVariant(lval.tv_ptr()));
+  return elementToData(lval);
 }
 
-void * ProxyArray::proxyGet(MArrayIter & pos) const {
+void* ProxyArray::proxyGet(MArrayIter& pos) const {
   if (!pos.prepare()) {
     return nullptr;
   }
-  Variant & v = pos.val();
-  return elementToData(&v);
+  auto const ad = pos.hasAd() ? pos.getAd() : pos.getContainer();
+  auto const tv = pos.val().asTypedValue();
+  return elementToData(member_lval { ad, tv });
 }
 
-void * ProxyArray::elementToData(Variant * v) const {
+void* ProxyArray::elementToData(member_lval v) const {
   if (!v) {
     return nullptr;
   }
-  TypedValue * tv = v->asTypedValue();
   if (hasZvalValues()) {
-    zBoxAndProxy(tv);
-    return (void*)(&tv->m_data.pref);
+    zBoxAndProxy(v.tv_ptr());
+    return (void*)(&v.val().pref);
   } else {
-    always_assert(tv->m_type == KindOfResource);
-    auto elt = dynamic_cast<ZendCustomElement*>(tv->m_data.pres->data());
+    always_assert(v.type() == KindOfResource);
+    auto elt = dynamic_cast<ZendCustomElement*>(v.val().pres->data());
     always_assert(elt);
     return elt->data();
   }
 }
 
-RefData * ProxyArray::innerRef() const {
+RefData* ProxyArray::innerRef() const {
   return m_ref;
 }
 

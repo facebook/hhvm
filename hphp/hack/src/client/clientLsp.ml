@@ -1532,10 +1532,26 @@ let handle_event
   (* idle tick while waiting for server to complete initialization *)
   | In_init ienv, Tick ->
     let open In_init_env in
-    if ienv.has_reported_progress then
-      state := report_connect_progress ienv
-    else
+    let time = Unix.time () in
+    let delay_in_secs = int_of_float (time -. ienv.start_time) in
+    if not ienv.has_reported_progress then
       state := report_connect_start ienv
+    else if delay_in_secs < 200 then
+      state := report_connect_progress ienv
+    else begin
+      begin try
+        Timeout.shutdown_connection ienv.In_init_env.conn.ic;
+        Timeout.close_in_noerr ienv.In_init_env.conn.ic
+      with _ ->
+        ()
+      end;
+      state := do_lost_server !state { Lost_env.
+        explanation = Lost_env.Action_required "hh_server isn't responding promptly";
+        start_on_click = true;
+        trigger_on_lock_file = true;
+        trigger_on_lsp = false;
+      }
+    end
 
   (* server completes initialization *)
   | In_init ienv, Server_hello ->

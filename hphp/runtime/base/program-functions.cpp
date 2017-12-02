@@ -1928,7 +1928,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     if (po.mode == "debug") {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
-      RuntimeOption::EnableDebugger = true;
+      RuntimeOption::EnableHphpdDebugger = true;
       po.debugger_options.fileName = file;
       po.debugger_options.user = po.user;
       Eval::DebuggerProxyPtr localProxy =

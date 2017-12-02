@@ -110,7 +110,7 @@ static void bt_handler(int sig) {
   StackTraceNoHeap st;
 
   auto const debuggerCount = [&] {
-    if (RuntimeOption::EnableDebugger) {
+    if (RuntimeOption::EnableHphpdDebugger) {
       return Eval::Debugger::CountConnectedProxy();
     }
     // We don't have a count of xdebug clients across all requests, so just

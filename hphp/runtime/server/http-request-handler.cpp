@@ -444,7 +444,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
     InitFiniNode::GlobalsInit();
 
-    if (RuntimeOption::EnableDebugger) {
+    if (RuntimeOption::EnableHphpdDebugger) {
       Eval::DSandboxInfo sInfo = sourceRootInfo.getSandboxInfo();
       Eval::Debugger::RegisterSandbox(sInfo);
       context->setSandboxId(sInfo.id());
@@ -459,7 +459,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   // Let the debugger initialize.
   // FIXME: hphpd can be initialized this way as well
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
-  if (RuntimeOption::EnableDebugger) {
+  if (RuntimeOption::EnableHphpdDebugger) {
     Eval::Debugger::InterruptRequestStarted(transport->getUrl());
   }
 
@@ -518,7 +518,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     transport->sendString("RequestInitDocument Not Found", 404);
   }
 
-  if (RuntimeOption::EnableDebugger) {
+  if (RuntimeOption::EnableHphpdDebugger) {
     Eval::Debugger::InterruptRequestEnded(transport->getUrl());
   }
 

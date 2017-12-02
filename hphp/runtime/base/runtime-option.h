@@ -839,7 +839,7 @@ public:
   static std::string SandboxLogsRoot;
 
   // Debugger options
-  static bool EnableDebugger;
+  static bool EnableHphpdDebugger;
   static bool EnableDebuggerColor;
   static bool EnableDebuggerPrompt;
   static bool EnableDebuggerServer;

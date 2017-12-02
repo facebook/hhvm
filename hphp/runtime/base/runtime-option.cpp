@@ -616,7 +616,7 @@ bool RuntimeOption::SandboxFromCommonRoot = false;
 std::string RuntimeOption::SandboxDirectoriesRoot;
 std::string RuntimeOption::SandboxLogsRoot;
 
-bool RuntimeOption::EnableDebugger = false;
+bool RuntimeOption::EnableHphpdDebugger = false;
 bool RuntimeOption::EnableDebuggerColor = true;
 bool RuntimeOption::EnableDebuggerPrompt = true;
 bool RuntimeOption::EnableDebuggerServer = false;
@@ -1226,7 +1226,8 @@ void RuntimeOption::Load(
     }
     {
       // Debugger (part of Eval)
-      Config::Bind(EnableDebugger, ini, config, "Eval.Debugger.EnableDebugger");
+      Config::Bind(EnableHphpdDebugger, ini, config,
+                   "Eval.Debugger.EnableDebugger");
       Config::Bind(EnableDebuggerColor, ini, config,
                    "Eval.Debugger.EnableDebuggerColor", true);
       Config::Bind(EnableDebuggerPrompt, ini, config,

@@ -224,7 +224,7 @@ void Debugger::InterruptRequestEnded(const char *url) {
 }
 
 void Debugger::InterruptPSPEnded(const char *url) {
-  if (!RuntimeOption::EnableDebugger) return;
+  if (!RuntimeOption::EnableHphpdDebugger) return;
   try {
     TRACE(2, "Debugger::InterruptPSPEnded\n");
     if (isDebuggerAttached()) {
@@ -242,7 +242,7 @@ void Debugger::InterruptPSPEnded(const char *url) {
 void Debugger::Interrupt(int type, const char *program,
                          InterruptSite *site /* = NULL */,
                          const char *error /* = NULL */) {
-  assert(RuntimeOption::EnableDebugger);
+  assert(RuntimeOption::EnableHphpdDebugger);
   TRACE_RB(2, "Debugger::Interrupt type %d\n", type);
 
   DebuggerProxyPtr proxy = GetProxy();

@@ -52,9 +52,9 @@ String HHVM_FUNCTION(hphpd_auth_token) {
 
 void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
   TRACE(5, "in f_hphpd_break()\n");
-  if (!RuntimeOption::EnableDebugger || !condition ||
+  if (!RuntimeOption::EnableHphpdDebugger || !condition ||
       g_context->m_dbgNoBreak) {
-    TRACE(5, "bail !%d || !%d || %d\n", RuntimeOption::EnableDebugger,
+    TRACE(5, "bail !%d || !%d || %d\n", RuntimeOption::EnableHphpdDebugger,
           condition, g_context->m_dbgNoBreak);
     return;
   }
@@ -69,7 +69,8 @@ void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
 
 // Quickly determine if a debugger is attached to the current thread.
 bool HHVM_FUNCTION(hphp_debugger_attached) {
-  return (RuntimeOption::EnableDebugger && (Debugger::GetProxy() != nullptr));
+  return (RuntimeOption::EnableHphpdDebugger &&
+          (Debugger::GetProxy() != nullptr));
 }
 
 const StaticString
@@ -78,7 +79,7 @@ const StaticString
 
 Array HHVM_FUNCTION(debugger_get_info) {
   Array ret(Array::Create());
-  if (!RuntimeOption::EnableDebugger) return ret;
+  if (!RuntimeOption::EnableHphpdDebugger) return ret;
   DebuggerProxyPtr proxy = Debugger::GetProxy();
   if (!proxy) return ret;
   Variant address;

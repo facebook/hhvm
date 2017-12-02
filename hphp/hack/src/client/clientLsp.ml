@@ -462,22 +462,42 @@ let do_shutdown (state: state) : state =
 
 let do_rage (state: state) : Rage.result =
   let open Rage in
-  let stateItem: rageItem = {
-    title = None;
-    data = "LSP adapter state: " ^ (state_to_string state);
-  } in
-  let hack_to_lsp (item: ServerRageTypes.rageItem) : Lsp.Rage.rageItem =
+  let logItems = match get_root () with
+    | None -> []
+    | Some root ->
+      let monitor_log_link = ServerFiles.monitor_log_link root in
+      let log_link = ServerFiles.log_link root in
+      [
+        {
+          title = Some log_link;
+          data = Sys_utils.cat log_link;
+        };
+        {
+          title = Some monitor_log_link;
+          data = Sys_utils.cat monitor_log_link;
+        }
+      ]
+  in
+  let clientItems = [
     {
-      title = item.ServerRageTypes.title;
-      data = item.ServerRageTypes.data;
-    } in
-  match state with
-  | Main_loop menv ->
-    let open Main_env in
-    let items = rpc menv.conn ServerCommandTypes.RAGE in
-    stateItem :: (List.map items ~f:hack_to_lsp)
-  | _ ->
-    [stateItem]
+      title = None;
+      data = "LSP adapter state: " ^ (state_to_string state);
+    };
+  ]
+  in
+  let serverItems = match state with
+    | Main_loop menv ->
+      let open Main_env in
+      let items = rpc menv.conn ServerCommandTypes.RAGE in
+      let hack_to_lsp item = {
+        title = item.ServerRageTypes.title;
+        data = item.ServerRageTypes.data;
+        } in
+      List.map items ~f:hack_to_lsp
+    | _ ->
+      []
+  in
+  clientItems @ logItems @ serverItems
 
 
 let do_didOpen (conn: server_conn) (params: DidOpen.params) : unit =

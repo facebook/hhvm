@@ -345,3 +345,7 @@ let halt_compiler_top_level_only =
   "__halt_compiler function should appear only at the top level"
 let trait_alias_rule_allows_only_final_and_visibility_modifiers =
   "Only 'final' and visibility modifiers are allowed in trait alias rule"
+let namespace_decl_first_statement =
+  "Namespace declaration statement has to be the very first statement in the script"
+let code_outside_namespace =
+  "No code may exist outside of namespace {}"

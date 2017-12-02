@@ -226,3 +226,5 @@ val invalid_constant_initializer : string
 val no_args_in_halt_compiler : string
 val halt_compiler_top_level_only : string
 val trait_alias_rule_allows_only_final_and_visibility_modifiers : string
+val namespace_decl_first_statement : string
+val code_outside_namespace : string

@@ -1083,7 +1083,8 @@ let is_hashbang text =
   | None -> false
   | Some text ->
     let r = Str.regexp "^#!.*\n" in
-    Str.string_match r text 0 && Str.matched_string text = text
+    let count = List.length @@ String_utils.split_on_newlines text in
+    count = 1 && Str.string_match r text 0 && Str.matched_string text = text
 
 let markup_errors node is_hack_file hhvm_compat_mode errors =
   match syntax node with
@@ -2047,7 +2048,7 @@ let abstract_final_class_nonstatic_method_error node parents hhvm_compat_mode er
     SyntaxError.error2062 cd.methodish_function_decl_header
   | _ -> errors
 
-let mixed_namespace_errors node namespace_type errors =
+let mixed_namespace_errors node parents namespace_type errors =
   match syntax node with
   | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
     let s = start_offset namespace_left_brace in
@@ -2071,6 +2072,51 @@ let mixed_namespace_errors node namespace_type errors =
       SyntaxError.make ~child s e SyntaxError.error2052 :: errors
     | _ -> errors
     end
+  | NamespaceDeclaration { namespace_body; _ } ->
+    let is_syntax_declare = function
+      | { syntax = ExpressionStatement {
+           expression_statement_expression =
+             { syntax = FunctionCallExpression {
+               function_call_receiver = name; _}; _}; _}; _}
+        when String.lowercase_ascii @@ text name = "declare" -> true
+      | _ -> false
+    in
+    let is_first_decl, has_code_outside_namespace =
+      match parents with
+      | [{ syntax = SyntaxList _; _} as decls; { syntax = Script _; _}] ->
+        let decls = syntax_to_list_no_separators decls in
+        let rec is_first l =
+          match l with
+          | { syntax = MarkupSection {markup_text; _}; _} :: rest
+            when width markup_text = 0 || is_hashbang markup_text ->
+            is_first rest
+          | s :: rest when is_syntax_declare s -> is_first rest
+          | { syntax = NamespaceDeclaration _; _} :: _ -> true
+          | _ -> false
+        in
+        let has_code_outside_namespace =
+          not (is_namespace_empty_body namespace_body) &&
+          Hh_core.List.exists decls
+            ~f:(function | { syntax = NamespaceDeclaration _; _} -> false
+                         | { syntax = MarkupSection { markup_text; _}; _}
+                           when width markup_text = 0
+                             || is_hashbang markup_text -> false
+                         | { syntax = EndOfFile _; _} -> false
+                         | s when is_syntax_declare s -> false
+                         | _ -> true)
+        in
+        is_first decls, has_code_outside_namespace
+      | _ -> true, false
+    in
+    let errors = if not is_first_decl then
+      make_error_from_node node
+        SyntaxError.namespace_decl_first_statement :: errors else errors
+    in
+    let errors = if has_code_outside_namespace then
+      make_error_from_node node
+        SyntaxError.code_outside_namespace :: errors else errors
+    in
+    errors
   | _ -> errors
 
 let enum_errors node errors =
@@ -2236,7 +2282,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
     let errors =
       abstract_final_class_nonstatic_method_error node parents hhvm_compatiblity_mode errors in
     let errors =
-      mixed_namespace_errors node namespace_type errors in
+      mixed_namespace_errors node parents namespace_type errors in
     let names, errors =
       namespace_use_declaration_errors node is_hack
         (namespace_name = global_namespace_name) names errors in

@@ -228,3 +228,4 @@ val halt_compiler_top_level_only : string
 val trait_alias_rule_allows_only_final_and_visibility_modifiers : string
 val namespace_decl_first_statement : string
 val code_outside_namespace : string
+val strict_types_in_declare_block_mode : string

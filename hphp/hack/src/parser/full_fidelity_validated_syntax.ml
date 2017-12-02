@@ -128,6 +128,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.UnsetStatement _ -> tag validate_unset_statement (fun x -> TLDUnset x) x
     | Syntax.UsingStatementBlockScoped _ -> tag validate_using_statement_block_scoped (fun x -> TLDUsingStatementBlockScoped x) x
     | Syntax.UsingStatementFunctionScoped _ -> tag validate_using_statement_function_scoped (fun x -> TLDUsingStatementFunctionScoped x) x
+    | Syntax.DeclareDirectiveStatement _ -> tag validate_declare_directive_statement (fun x -> TLDDeclareDirective x) x
+    | Syntax.DeclareBlockStatement _ -> tag validate_declare_block_statement (fun x -> TLDDeclareBlock x) x
     | Syntax.WhileStatement _ -> tag validate_while_statement (fun x -> TLDWhile x) x
     | Syntax.IfStatement _ -> tag validate_if_statement (fun x -> TLDIf x) x
     | Syntax.IfEndIfStatement _ -> tag validate_if_endif_statement (fun x -> TLDIfEndIf x) x
@@ -165,6 +167,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | TLDUnset                        thing -> invalidate_unset_statement                (value, thing)
     | TLDUsingStatementBlockScoped    thing -> invalidate_using_statement_block_scoped   (value, thing)
     | TLDUsingStatementFunctionScoped thing -> invalidate_using_statement_function_scoped (value, thing)
+    | TLDDeclareDirective             thing -> invalidate_declare_directive_statement    (value, thing)
+    | TLDDeclareBlock                 thing -> invalidate_declare_block_statement        (value, thing)
     | TLDWhile                        thing -> invalidate_while_statement                (value, thing)
     | TLDIf                           thing -> invalidate_if_statement                   (value, thing)
     | TLDIfEndIf                      thing -> invalidate_if_endif_statement             (value, thing)
@@ -372,6 +376,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.UnsetStatement _ -> tag validate_unset_statement (fun x -> StmtUnset x) x
     | Syntax.UsingStatementBlockScoped _ -> tag validate_using_statement_block_scoped (fun x -> StmtUsingStatementBlockScoped x) x
     | Syntax.UsingStatementFunctionScoped _ -> tag validate_using_statement_function_scoped (fun x -> StmtUsingStatementFunctionScoped x) x
+    | Syntax.DeclareDirectiveStatement _ -> tag validate_declare_directive_statement (fun x -> StmtDeclareDirective x) x
+    | Syntax.DeclareBlockStatement _ -> tag validate_declare_block_statement (fun x -> StmtDeclareBlock x) x
     | Syntax.WhileStatement _ -> tag validate_while_statement (fun x -> StmtWhile x) x
     | Syntax.IfStatement _ -> tag validate_if_statement (fun x -> StmtIf x) x
     | Syntax.IfEndIfStatement _ -> tag validate_if_endif_statement (fun x -> StmtIfEndIf x) x
@@ -402,6 +408,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtUnset                        thing -> invalidate_unset_statement                (value, thing)
     | StmtUsingStatementBlockScoped    thing -> invalidate_using_statement_block_scoped   (value, thing)
     | StmtUsingStatementFunctionScoped thing -> invalidate_using_statement_function_scoped (value, thing)
+    | StmtDeclareDirective             thing -> invalidate_declare_directive_statement    (value, thing)
+    | StmtDeclareBlock                 thing -> invalidate_declare_block_statement        (value, thing)
     | StmtWhile                        thing -> invalidate_while_statement                (value, thing)
     | StmtIf                           thing -> invalidate_if_statement                   (value, thing)
     | StmtIfEndIf                      thing -> invalidate_if_endif_statement             (value, thing)
@@ -1496,6 +1504,46 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; Syntax.using_function_using_keyword = invalidate_token x.using_function_using_keyword
       ; Syntax.using_function_expression = invalidate_expression x.using_function_expression
       ; Syntax.using_function_semicolon = invalidate_token x.using_function_semicolon
+      }
+    ; Syntax.value = v
+    }
+  and validate_declare_directive_statement : declare_directive_statement validator = function
+  | { Syntax.syntax = Syntax.DeclareDirectiveStatement x; value = v } -> v,
+    { declare_directive_semicolon = validate_token x.Syntax.declare_directive_semicolon
+    ; declare_directive_right_paren = validate_token x.Syntax.declare_directive_right_paren
+    ; declare_directive_expression = validate_expression x.Syntax.declare_directive_expression
+    ; declare_directive_left_paren = validate_token x.Syntax.declare_directive_left_paren
+    ; declare_directive_keyword = validate_token x.Syntax.declare_directive_keyword
+    }
+  | s -> validation_fail SyntaxKind.DeclareDirectiveStatement s
+  and invalidate_declare_directive_statement : declare_directive_statement invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.DeclareDirectiveStatement
+      { Syntax.declare_directive_keyword = invalidate_token x.declare_directive_keyword
+      ; Syntax.declare_directive_left_paren = invalidate_token x.declare_directive_left_paren
+      ; Syntax.declare_directive_expression = invalidate_expression x.declare_directive_expression
+      ; Syntax.declare_directive_right_paren = invalidate_token x.declare_directive_right_paren
+      ; Syntax.declare_directive_semicolon = invalidate_token x.declare_directive_semicolon
+      }
+    ; Syntax.value = v
+    }
+  and validate_declare_block_statement : declare_block_statement validator = function
+  | { Syntax.syntax = Syntax.DeclareBlockStatement x; value = v } -> v,
+    { declare_block_body = validate_statement x.Syntax.declare_block_body
+    ; declare_block_right_paren = validate_token x.Syntax.declare_block_right_paren
+    ; declare_block_expression = validate_expression x.Syntax.declare_block_expression
+    ; declare_block_left_paren = validate_token x.Syntax.declare_block_left_paren
+    ; declare_block_keyword = validate_token x.Syntax.declare_block_keyword
+    }
+  | s -> validation_fail SyntaxKind.DeclareBlockStatement s
+  and invalidate_declare_block_statement : declare_block_statement invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.DeclareBlockStatement
+      { Syntax.declare_block_keyword = invalidate_token x.declare_block_keyword
+      ; Syntax.declare_block_left_paren = invalidate_token x.declare_block_left_paren
+      ; Syntax.declare_block_expression = invalidate_expression x.declare_block_expression
+      ; Syntax.declare_block_right_paren = invalidate_token x.declare_block_right_paren
+      ; Syntax.declare_block_body = invalidate_statement x.declare_block_body
       }
     ; Syntax.value = v
     }

@@ -105,6 +105,7 @@ class type ['a] ast_visitor_type = object
   method on_using: 'a -> using_stmt -> 'a
   method on_varray : 'a -> expr list -> 'a
   method on_while : 'a -> expr -> block -> 'a
+  method on_declare : 'a -> bool -> expr -> block -> 'a
   method on_xml : 'a -> id -> xhp_attribute list -> expr list -> 'a
   method on_yield : 'a -> afield -> 'a
   method on_yield_from : 'a -> expr -> 'a
@@ -231,6 +232,11 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = this#on_block acc b in
     acc
 
+  method on_declare acc _ e b =
+    let acc = this#on_expr acc e in
+    let acc = this#on_block acc b in
+    acc
+
   method on_for acc e1 e2 e3 b =
     let acc = this#on_expr acc e1 in
     let acc = this#on_expr acc e2 in
@@ -318,6 +324,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Global_var el           -> this#on_global_var acc el
     | Markup (s, e)           -> this#on_markup acc s e
     | Using s                 -> this#on_using acc s
+    | Declare (is_block, e, b) -> this#on_declare acc is_block e b
 
   method on_def_inline acc d =
     this#on_def acc d

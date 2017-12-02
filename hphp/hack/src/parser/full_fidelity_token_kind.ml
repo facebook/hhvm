@@ -44,6 +44,7 @@ type t =
   | Continue
   | Coroutine
   | Darray
+  | Declare
   | Default
   | Define
   | Destruct
@@ -251,6 +252,7 @@ let from_string keyword =
   | "continue"        -> Some Continue
   | "coroutine"       -> Some Coroutine
   | "darray"          -> Some Darray
+  | "declare"         -> Some Declare
   | "default"         -> Some Default
   | "define"          -> Some Define
   | "__destruct"      -> Some Destruct
@@ -428,6 +430,7 @@ let to_string kind =
   | Continue                      -> "continue"
   | Coroutine                     -> "coroutine"
   | Darray                        -> "darray"
+  | Declare                       -> "declare"
   | Default                       -> "default"
   | Define                        -> "define"
   | Destruct                      -> "__destruct"

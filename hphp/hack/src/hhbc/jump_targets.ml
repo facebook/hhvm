@@ -58,6 +58,7 @@ let rec collect_valid_target_labels_aux is_hh_file acc s =
      as a result of source to source transformation that has validated
      correctness of the target *)
   | A.While (_, block)
+  | A.Declare (_, _, block)
   | A.Using { A.us_block = block; _ } ->
     if is_hh_file
     then collect_valid_target_labels_for_block_aux is_hh_file acc block

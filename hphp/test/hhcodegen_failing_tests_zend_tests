@@ -12,7 +12,6 @@ zend/good/tests/classes/constants_error_007.php
 zend/good/tests/classes/final_abstract.php
 zend/good/tests/classes/interface_method_final.php
 zend/good/tests/classes/interface_method_private.php
-zend/good/tests/classes/tostring_002.php
 zend/good/tests/lang/008.php
 zend/good/tests/lang/028.php
 zend/good/tests/lang/033.php

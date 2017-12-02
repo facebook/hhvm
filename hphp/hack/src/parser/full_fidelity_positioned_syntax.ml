@@ -902,6 +902,36 @@ module FromMinimal = struct
           ; using_function_expression
           ; using_function_semicolon
           }, results
+      | SyntaxKind.DeclareDirectiveStatement
+      , (  declare_directive_semicolon
+        :: declare_directive_right_paren
+        :: declare_directive_expression
+        :: declare_directive_left_paren
+        :: declare_directive_keyword
+        :: results
+        ) ->
+          DeclareDirectiveStatement
+          { declare_directive_keyword
+          ; declare_directive_left_paren
+          ; declare_directive_expression
+          ; declare_directive_right_paren
+          ; declare_directive_semicolon
+          }, results
+      | SyntaxKind.DeclareBlockStatement
+      , (  declare_block_body
+        :: declare_block_right_paren
+        :: declare_block_expression
+        :: declare_block_left_paren
+        :: declare_block_keyword
+        :: results
+        ) ->
+          DeclareBlockStatement
+          { declare_block_keyword
+          ; declare_block_left_paren
+          ; declare_block_expression
+          ; declare_block_right_paren
+          ; declare_block_body
+          }, results
       | SyntaxKind.WhileStatement
       , (  while_body
         :: while_right_paren
@@ -2929,6 +2959,34 @@ module FromMinimal = struct
         let todo = Convert (using_function_expression, todo) in
         let todo = Convert (using_function_using_keyword, todo) in
         convert offset todo results using_function_await_keyword
+    | { M.syntax = M.DeclareDirectiveStatement
+        { M.declare_directive_keyword
+        ; M.declare_directive_left_paren
+        ; M.declare_directive_expression
+        ; M.declare_directive_right_paren
+        ; M.declare_directive_semicolon
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (declare_directive_semicolon, todo) in
+        let todo = Convert (declare_directive_right_paren, todo) in
+        let todo = Convert (declare_directive_expression, todo) in
+        let todo = Convert (declare_directive_left_paren, todo) in
+        convert offset todo results declare_directive_keyword
+    | { M.syntax = M.DeclareBlockStatement
+        { M.declare_block_keyword
+        ; M.declare_block_left_paren
+        ; M.declare_block_expression
+        ; M.declare_block_right_paren
+        ; M.declare_block_body
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (declare_block_body, todo) in
+        let todo = Convert (declare_block_right_paren, todo) in
+        let todo = Convert (declare_block_expression, todo) in
+        let todo = Convert (declare_block_left_paren, todo) in
+        convert offset todo results declare_block_keyword
     | { M.syntax = M.WhileStatement
         { M.while_keyword
         ; M.while_left_paren

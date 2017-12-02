@@ -1814,6 +1814,7 @@ module Make (GetLocals : GetLocals) = struct
     | If (e, b1, b2)       -> if_stmt env st e b1 b2
     | Do (b, e)            -> do_stmt env b e
     | While (e, b)         -> while_stmt env e b
+    | Declare (is_block, e, b)  -> declare_stmt env is_block e b
     | Using s -> using_stmt env s.us_has_await s.us_expr s.us_block
     | For (st1, e, st2, b) -> for_stmt env st1 e st2 b
     | Switch (e, cl)       -> switch_stmt env st e cl
@@ -1875,6 +1876,9 @@ module Make (GetLocals : GetLocals) = struct
   and while_stmt env e b =
     let e = expr env e in
     N.While (e, block env b)
+
+  and declare_stmt _env _e _b =
+    failwith "Naming of declare statement is not yet supported"
 
   (* Scoping is essentially that of do: block is always executed *)
   and using_stmt env has_await e b =

@@ -2073,14 +2073,6 @@ let mixed_namespace_errors node parents namespace_type errors =
     | _ -> errors
     end
   | NamespaceDeclaration { namespace_body; _ } ->
-    let is_syntax_declare = function
-      | { syntax = ExpressionStatement {
-           expression_statement_expression =
-             { syntax = FunctionCallExpression {
-               function_call_receiver = name; _}; _}; _}; _}
-        when String.lowercase_ascii @@ text name = "declare" -> true
-      | _ -> false
-    in
     let is_first_decl, has_code_outside_namespace =
       match parents with
       | [{ syntax = SyntaxList _; _} as decls; { syntax = Script _; _}] ->
@@ -2090,19 +2082,21 @@ let mixed_namespace_errors node parents namespace_type errors =
           | { syntax = MarkupSection {markup_text; _}; _} :: rest
             when width markup_text = 0 || is_hashbang markup_text ->
             is_first rest
-          | s :: rest when is_syntax_declare s -> is_first rest
+          | { syntax = DeclareDirectiveStatement _; _} :: rest
+          | { syntax = DeclareBlockStatement _; _} :: rest -> is_first rest
           | { syntax = NamespaceDeclaration _; _} :: _ -> true
           | _ -> false
         in
         let has_code_outside_namespace =
           not (is_namespace_empty_body namespace_body) &&
           Hh_core.List.exists decls
-            ~f:(function | { syntax = NamespaceDeclaration _; _} -> false
-                         | { syntax = MarkupSection { markup_text; _}; _}
+            ~f:(function | { syntax = MarkupSection { markup_text; _}; _}
                            when width markup_text = 0
                              || is_hashbang markup_text -> false
+                         | { syntax = NamespaceDeclaration _; _}
+                         | { syntax = DeclareDirectiveStatement _; _}
+                         | { syntax = DeclareBlockStatement _; _}
                          | { syntax = EndOfFile _; _} -> false
-                         | s when is_syntax_declare s -> false
                          | _ -> true)
         in
         is_first decls, has_code_outside_namespace
@@ -2188,44 +2182,43 @@ let trait_use_alias_item_errors node errors =
         e :: errors)
   | _ -> errors
 
-let declare_errors node parents errors =
+let declare_errors node parents hhvm_compat_mode errors =
   match syntax node with
-  | FunctionCallExpression
-    { function_call_receiver = name
-    ; function_call_argument_list = args
-    ; _ } when String.lowercase_ascii @@ text name = "declare" ->
-    let args = syntax_to_list_no_separators args in
+  | DeclareDirectiveStatement { declare_directive_expression = expr; _}
+  | DeclareBlockStatement { declare_block_expression = expr; _} ->
     let errors =
-      match args with
-      | [{ syntax = BinaryExpression
-                    { binary_left_operand = loper
-                    ; binary_operator = op
-                    ; _
-                    }; _}]
-        when token_kind op = Some TokenKind.Equal
-          && String.lowercase_ascii @@ text loper = "strict_types" ->
+      match syntax expr with
+      | BinaryExpression
+        { binary_left_operand = loper
+        ; binary_operator = op
+        ; _} when token_kind op = Some TokenKind.Equal
+             && String.lowercase_ascii @@ text loper = "strict_types" ->
         (* Checks if there are only other declares nodes
          * in front of the node in question *)
-        let rec is_only_declares_nodes node = function
-          | ({ syntax = ExpressionStatement
-              { expression_statement_expression =
-                { syntax = FunctionCallExpression
-                  { function_call_receiver = name; _}; _ }; _}; _ } as e) :: es
-            when String.lowercase_ascii @@ text name = "declare" ->
-              if e == node then true else
-              is_only_declares_nodes node es
+        let rec is_only_declares_nodes = function
+          | ({ syntax = DeclareDirectiveStatement _; _} as e) :: es
+          | ({ syntax = DeclareBlockStatement _; _} as e) :: es ->
+            e == node || is_only_declares_nodes es
           | _ -> false
         in
-        begin match parents with
-        | [n ; { syntax = SyntaxList (
-                  {syntax = MarkupSection {markup_text; _}; _}
-                  :: items); _} ; _]
-          when width markup_text = 0 && is_only_declares_nodes n items ->
-          errors
-        | _ ->
-          make_error_from_node
-            node SyntaxError.strict_types_first_statement :: errors
-        end
+        let errors =
+          match parents with
+          | [{ syntax = SyntaxList (
+               { syntax = MarkupSection {markup_text; _}; _} :: items); _} ; _]
+            when width markup_text = 0 && is_only_declares_nodes items ->
+            errors
+          | _ ->
+            make_error_from_node
+              node SyntaxError.strict_types_first_statement :: errors
+        in
+        let errors =
+          match syntax node with
+          | DeclareBlockStatement _ when not hhvm_compat_mode ->
+            make_error_from_node ~error_type:SyntaxError.RuntimeError
+              node SyntaxError.strict_types_in_declare_block_mode :: errors
+          | _ -> errors
+        in
+        errors
       | _ -> errors
     in
     errors
@@ -2238,7 +2231,7 @@ let get_namespace_name parents current_namespace_name =
     else combine_names current_namespace_name (text ns)
   | _ -> current_namespace_name
 
-let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
+let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let is_hack_file = (SyntaxTree.language syntax_tree = "hh") in
   let is_hack = is_hack_file || enable_hh_syntax in
@@ -2250,37 +2243,37 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
         ; trait_require_clauses
         } = acc in
     let errors =
-      markup_errors node is_hack_file hhvm_compatiblity_mode errors in
+      markup_errors node is_hack_file hhvm_compatibility_mode errors in
     let errors =
-      parameter_errors node parents is_strict is_hack hhvm_compatiblity_mode errors in
+      parameter_errors node parents is_strict is_hack hhvm_compatibility_mode errors in
     let names, errors =
-      function_errors node parents is_strict hhvm_compatiblity_mode namespace_name names errors in
+      function_errors node parents is_strict hhvm_compatibility_mode namespace_name names errors in
     let errors =
-      xhp_errors node parents hhvm_compatiblity_mode errors in
+      xhp_errors node parents hhvm_compatibility_mode errors in
     let errors =
-      statement_errors node parents hhvm_compatiblity_mode errors in
+      statement_errors node parents hhvm_compatibility_mode errors in
     let errors =
-      methodish_errors node parents is_hack hhvm_compatiblity_mode errors in
+      methodish_errors node parents is_hack hhvm_compatibility_mode errors in
     let errors =
-      property_errors node is_strict is_hack hhvm_compatiblity_mode errors in
+      property_errors node is_strict is_hack hhvm_compatibility_mode errors in
     let errors =
-      expression_errors node parents is_hack is_hack_file hhvm_compatiblity_mode errors in
+      expression_errors node parents is_hack is_hack_file hhvm_compatibility_mode errors in
     let trait_require_clauses, errors =
-      require_errors node parents hhvm_compatiblity_mode trait_require_clauses errors in
+      require_errors node parents hhvm_compatibility_mode trait_require_clauses errors in
     let names, errors =
-      classish_errors node parents is_hack hhvm_compatiblity_mode namespace_name names errors in
+      classish_errors node parents is_hack hhvm_compatibility_mode namespace_name names errors in
     let errors =
       class_element_errors node parents errors in
     let errors =
-      type_errors node parents is_strict hhvm_compatiblity_mode errors in
+      type_errors node parents is_strict hhvm_compatibility_mode errors in
     let errors = alias_errors node errors in
     let errors = group_use_errors node errors in
     let names, errors =
-      const_decl_errors node parents hhvm_compatiblity_mode namespace_name names errors in
+      const_decl_errors node parents hhvm_compatibility_mode namespace_name names errors in
     let errors =
-      abstract_final_class_nonstatic_var_error node parents hhvm_compatiblity_mode errors in
+      abstract_final_class_nonstatic_var_error node parents hhvm_compatibility_mode errors in
     let errors =
-      abstract_final_class_nonstatic_method_error node parents hhvm_compatiblity_mode errors in
+      abstract_final_class_nonstatic_method_error node parents hhvm_compatibility_mode errors in
     let errors =
       mixed_namespace_errors node parents namespace_type errors in
     let names, errors =
@@ -2288,7 +2281,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatiblity_mode syntax_tree =
         (namespace_name = global_namespace_name) names errors in
     let errors = enum_errors node errors in
     let errors = assignment_errors node errors in
-    let errors = declare_errors node parents errors in
+    let errors = declare_errors node parents hhvm_compatibility_mode errors in
     let errors = trait_use_alias_item_errors node errors in
 
     match syntax node with

@@ -658,6 +658,27 @@ let rec get_doc node =
     let start_block = indent_block_no_space left_part condition right indt in
     handle_compound_brace_prefix_indent start_block while_body indt
     |> add_break
+  | DeclareDirectiveStatement
+    { declare_directive_keyword; declare_directive_left_paren;
+      declare_directive_expression; declare_directive_right_paren;
+      declare_directive_semicolon } ->
+    let k = get_doc declare_directive_keyword in
+    let l = get_doc declare_directive_left_paren in
+    let e = get_doc declare_directive_expression in
+    let r = get_doc declare_directive_right_paren in
+    let s = get_doc declare_directive_semicolon in
+    group_doc (k ^^^ l ^^^ e ^^^ r ^^^ s) |> add_break
+  | DeclareBlockStatement
+    { declare_block_keyword; declare_block_left_paren; declare_block_expression;
+      declare_block_right_paren; declare_block_body } ->
+    let keyword = get_doc declare_block_keyword in
+    let left = get_doc declare_block_left_paren in
+    let expression = get_doc declare_block_expression in
+    let right = get_doc declare_block_right_paren in
+    let left_part = group_doc (keyword ^^| left) in
+    let start_block = indent_block_no_space left_part expression right indt in
+    handle_compound_brace_prefix_indent start_block declare_block_body indt
+    |> add_break
   | UsingStatementBlockScoped
     { using_block_await_keyword
     ; using_block_using_keyword

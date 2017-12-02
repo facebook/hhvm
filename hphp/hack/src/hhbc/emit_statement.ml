@@ -132,16 +132,6 @@ let rec emit_stmt env st =
   | A.Expr (pos, A.Call ((_, A.Id (_, "unset")), _, exprl, [])) ->
     Emit_pos.emit_pos_then pos @@
     gather (List.map exprl (emit_unset_expr env))
-  | A.Expr (_, A.Call ((_, A.Id (_, "declare")), _,
-      [
-        _, (
-        A.Binop (A.Eq None, (_, A.Id(_, "ticks")), (_, A.Int(_))) |
-        A.Binop (A.Eq None, (_, A.Id(_, "encoding")), (_, A.String(_))) |
-        A.Binop (A.Eq None, (_, A.Id(_, "strict_types")), (_, A.Int(_)))
-        )
-      ], []))
-      ->
-    empty
   | A.Return (_, Some (_, A.Await e)) ->
     gather [
       emit_await env e;
@@ -249,6 +239,8 @@ let rec emit_stmt env st =
     emit_if env condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
     emit_while env e (A.Block b)
+  | A.Declare (is_block, e, b) ->
+    emit_declare env is_block e b
   | A.Using {
       Ast.us_has_await = has_await;
       Ast.us_expr = e; Ast.us_block = b;
@@ -397,6 +389,17 @@ and emit_while env e b =
     emit_jmpnz env e start_label;
     instr_label break_label;
   ]
+
+and emit_declare env is_block (p, e) b =
+  (* TODO: We are ignoring the directive (e) here?? *)
+  let errors =
+    match e with
+    | A.Binop (A.Eq None, (_, A.Id (_, "strict_types")), _) when is_block ->
+      Emit_fatal.emit_fatal_runtime
+        p "strict_types declaration must not use block mode"
+    | _ -> empty
+  in
+  gather [ errors; emit_stmts env b ]
 
 and emit_using env is_block_scoped has_await e b =
   match snd e with

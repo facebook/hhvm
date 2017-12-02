@@ -624,6 +624,34 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         handle_possible_compound_statement x.while_body;
         Newline;
       ]
+    | DeclareDirectiveStatement x ->
+      Concat [
+        t x.declare_directive_keyword;
+        Space;
+        t x.declare_directive_left_paren;
+        Split;
+        WithRule (Rule.Parental, Concat [
+          Nest [t x.declare_directive_expression];
+          Split;
+          t x.declare_directive_right_paren;
+        ]);
+        t x.declare_directive_semicolon;
+        Newline;
+      ]
+    | DeclareBlockStatement x ->
+      Concat [
+        t x.declare_block_keyword;
+        Space;
+        t x.declare_block_left_paren;
+        Split;
+        WithRule (Rule.Parental, Concat [
+          Nest [t x.declare_block_expression];
+          Split;
+          t x.declare_block_right_paren;
+        ]);
+        handle_possible_compound_statement x.declare_block_body;
+        Newline;
+      ]
     | UsingStatementBlockScoped x ->
       Concat [
         t x.using_block_await_keyword;

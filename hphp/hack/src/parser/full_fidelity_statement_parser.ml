@@ -69,6 +69,7 @@ module WithExpressionAndDeclAndTypeParser
     | Foreach -> parse_foreach_statement parser
     | Do -> parse_do_statement parser
     | While -> parse_while_statement parser
+    | Declare -> parse_declare_statement parser
     | Using -> parse_using_statement parser (make_missing parser)
     | Await when peek_token_kind ~lookahead:1 parser = Using ->
       let parser, await_kw = assert_token parser Await in
@@ -303,6 +304,31 @@ module WithExpressionAndDeclAndTypeParser
     let syntax = make_while_statement while_keyword_token left_paren_token
       expr_node right_paren_token statement_node in
     (parser, syntax)
+
+  (* SPEC:
+    declare-statement:
+      declare   (   expression   )   ;
+      declare   (   expression   )   compound-statement
+
+    TODO: Update the specification of the grammar
+   *)
+  and parse_declare_statement parser =
+    let (parser, declare_keyword_token) =
+      assert_token parser Declare in
+    let (parser, left_paren_token, expr_node, right_paren_token) =
+      parse_paren_expr parser in
+    if peek_token_kind parser = Semicolon then
+      let (parser, semi) = assert_token parser Semicolon in
+      parser, make_declare_directive_statement
+        declare_keyword_token left_paren_token expr_node right_paren_token semi
+    else
+      let (parser, statement_node) = parse_statement parser in
+      parser, make_declare_block_statement
+        declare_keyword_token
+        left_paren_token
+        expr_node
+        right_paren_token
+        statement_node
 
   (* SPEC:
     using-statement:

@@ -327,6 +327,7 @@ and stmt =
   | Noop
   | Markup of pstring * expr option
   | Using of using_stmt
+  | Declare of (* is_block *) bool * expr * block
 
 and as_expr =
   | As_v of expr

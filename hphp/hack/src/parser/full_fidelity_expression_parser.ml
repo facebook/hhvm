@@ -1157,6 +1157,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Default
     | Define
     | HaltCompiler
+    | Declare
     | Destruct
     | Do
     | Double

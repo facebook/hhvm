@@ -242,6 +242,10 @@ abstract class EditableSyntax implements ArrayAccess {
       return UsingStatementBlockScoped::from_json($json, $position, $source);
     case 'using_statement_function_scoped':
       return UsingStatementFunctionScoped::from_json($json, $position, $source);
+    case 'declare_directive_statement':
+      return DeclareDirectiveStatement::from_json($json, $position, $source);
+    case 'declare_block_statement':
+      return DeclareBlockStatement::from_json($json, $position, $source);
     case 'while_statement':
       return WhileStatement::from_json($json, $position, $source);
     case 'if_statement':
@@ -843,6 +847,8 @@ abstract class EditableToken extends EditableSyntax {
        return new CoroutineToken($leading, $trailing);
     case 'darray':
        return new DarrayToken($leading, $trailing);
+    case 'declare':
+       return new DeclareToken($leading, $trailing);
     case 'default':
        return new DefaultToken($leading, $trailing);
     case 'define':
@@ -1606,6 +1612,21 @@ final class DarrayToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): DarrayToken {
     return new DarrayToken($this->leading(), $trailing);
+  }
+}
+final class DeclareToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('declare', $leading, $trailing, 'declare');
+  }
+
+  public function with_leading(EditableSyntax $leading): DeclareToken {
+    return new DeclareToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): DeclareToken {
+    return new DeclareToken($this->leading(), $trailing);
   }
 }
 final class DefaultToken extends EditableToken {
@@ -9792,6 +9813,276 @@ final class UsingStatementFunctionScoped extends EditableSyntax {
     yield $this->_using_keyword;
     yield $this->_expression;
     yield $this->_semicolon;
+    yield break;
+  }
+}
+final class DeclareDirectiveStatement extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_expression;
+  private EditableSyntax $_right_paren;
+  private EditableSyntax $_semicolon;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_paren,
+    EditableSyntax $expression,
+    EditableSyntax $right_paren,
+    EditableSyntax $semicolon) {
+    parent::__construct('declare_directive_statement');
+    $this->_keyword = $keyword;
+    $this->_left_paren = $left_paren;
+    $this->_expression = $expression;
+    $this->_right_paren = $right_paren;
+    $this->_semicolon = $semicolon;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function expression(): EditableSyntax {
+    return $this->_expression;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function semicolon(): EditableSyntax {
+    return $this->_semicolon;
+  }
+  public function with_keyword(EditableSyntax $keyword): DeclareDirectiveStatement {
+    return new DeclareDirectiveStatement(
+      $keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $this->_semicolon);
+  }
+  public function with_left_paren(EditableSyntax $left_paren): DeclareDirectiveStatement {
+    return new DeclareDirectiveStatement(
+      $this->_keyword,
+      $left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $this->_semicolon);
+  }
+  public function with_expression(EditableSyntax $expression): DeclareDirectiveStatement {
+    return new DeclareDirectiveStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $expression,
+      $this->_right_paren,
+      $this->_semicolon);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): DeclareDirectiveStatement {
+    return new DeclareDirectiveStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $right_paren,
+      $this->_semicolon);
+  }
+  public function with_semicolon(EditableSyntax $semicolon): DeclareDirectiveStatement {
+    return new DeclareDirectiveStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $semicolon);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $expression = $this->expression()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $expression === $this->expression() &&
+      $right_paren === $this->right_paren() &&
+      $semicolon === $this->semicolon()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new DeclareDirectiveStatement(
+        $keyword,
+        $left_paren,
+        $expression,
+        $right_paren,
+        $semicolon), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->declare_directive_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_paren = EditableSyntax::from_json(
+      $json->declare_directive_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $expression = EditableSyntax::from_json(
+      $json->declare_directive_expression, $position, $source);
+    $position += $expression->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->declare_directive_right_paren, $position, $source);
+    $position += $right_paren->width();
+    $semicolon = EditableSyntax::from_json(
+      $json->declare_directive_semicolon, $position, $source);
+    $position += $semicolon->width();
+    return new DeclareDirectiveStatement(
+        $keyword,
+        $left_paren,
+        $expression,
+        $right_paren,
+        $semicolon);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_paren;
+    yield $this->_expression;
+    yield $this->_right_paren;
+    yield $this->_semicolon;
+    yield break;
+  }
+}
+final class DeclareBlockStatement extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_expression;
+  private EditableSyntax $_right_paren;
+  private EditableSyntax $_body;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_paren,
+    EditableSyntax $expression,
+    EditableSyntax $right_paren,
+    EditableSyntax $body) {
+    parent::__construct('declare_block_statement');
+    $this->_keyword = $keyword;
+    $this->_left_paren = $left_paren;
+    $this->_expression = $expression;
+    $this->_right_paren = $right_paren;
+    $this->_body = $body;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function expression(): EditableSyntax {
+    return $this->_expression;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function body(): EditableSyntax {
+    return $this->_body;
+  }
+  public function with_keyword(EditableSyntax $keyword): DeclareBlockStatement {
+    return new DeclareBlockStatement(
+      $keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $this->_body);
+  }
+  public function with_left_paren(EditableSyntax $left_paren): DeclareBlockStatement {
+    return new DeclareBlockStatement(
+      $this->_keyword,
+      $left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $this->_body);
+  }
+  public function with_expression(EditableSyntax $expression): DeclareBlockStatement {
+    return new DeclareBlockStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $expression,
+      $this->_right_paren,
+      $this->_body);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): DeclareBlockStatement {
+    return new DeclareBlockStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $right_paren,
+      $this->_body);
+  }
+  public function with_body(EditableSyntax $body): DeclareBlockStatement {
+    return new DeclareBlockStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $body);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $expression = $this->expression()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    $body = $this->body()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $expression === $this->expression() &&
+      $right_paren === $this->right_paren() &&
+      $body === $this->body()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new DeclareBlockStatement(
+        $keyword,
+        $left_paren,
+        $expression,
+        $right_paren,
+        $body), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->declare_block_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_paren = EditableSyntax::from_json(
+      $json->declare_block_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $expression = EditableSyntax::from_json(
+      $json->declare_block_expression, $position, $source);
+    $position += $expression->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->declare_block_right_paren, $position, $source);
+    $position += $right_paren->width();
+    $body = EditableSyntax::from_json(
+      $json->declare_block_body, $position, $source);
+    $position += $body->width();
+    return new DeclareBlockStatement(
+        $keyword,
+        $left_paren,
+        $expression,
+        $right_paren,
+        $body);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_paren;
+    yield $this->_expression;
+    yield $this->_right_paren;
+    yield $this->_body;
     yield break;
   }
 }

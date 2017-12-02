@@ -1473,6 +1473,11 @@ and pStmt : stmt parser = fun node env ->
     Do ([Block (pBlock do_body env)], pExpr do_condition env)
   | WhileStatement { while_condition; while_body; _ } ->
     While (pExpr while_condition env, pStmtUnsafe while_body env)
+  | DeclareDirectiveStatement { declare_directive_expression; _ } ->
+    Declare (false, pExpr declare_directive_expression env, [])
+  | DeclareBlockStatement { declare_block_expression; declare_block_body; _ } ->
+    Declare (true, pExpr declare_block_expression env,
+             pStmtUnsafe declare_block_body env)
   | UsingStatementBlockScoped
     { using_block_await_keyword
     ; using_block_expressions

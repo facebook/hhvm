@@ -3452,8 +3452,7 @@ Variant HHVM_FUNCTION(imagerotate, const Resource& source_image,
     int64_t ignore_transparent /* = 0 */) {
   gdImagePtr im_src = get_valid_image_resource(source_image);
   if (!im_src) return false;
-  gdImagePtr im_dst = gdImageRotate(im_src, angle, bgd_color,
-                                    ignore_transparent);
+  gdImagePtr im_dst = gdImageRotateInterpolated(im_src, angle, bgd_color);
   if (!im_dst) return false;
   return Variant(req::make<Image>(im_dst));
 }
@@ -4397,6 +4396,7 @@ Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImagePtr imscaled = nullptr;
+  gdInterpolationMethod old_method;
   if (method == -1) method = GD_BILINEAR_FIXED;
 
   if (newheight < 0) {
@@ -4411,9 +4411,13 @@ Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
   if (newheight <= 0 || newwidth <= 0) {
     return false;
   }
+
+  old_method = im->interpolation_id;
   if (gdImageSetInterpolationMethod(im, (gdInterpolationMethod) method)) {
     imscaled = gdImageScale(im, newwidth, newheight);
   }
+  gdImageSetInterpolationMethod(im, old_method);
+
   if (imscaled == nullptr) {
     return false;
   }

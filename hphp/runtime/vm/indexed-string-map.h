@@ -176,6 +176,8 @@ public:
   const_iterator begin() const { return m_map.begin(); }
   const_iterator end()   const { return m_map.end(); }
 
+  bool contains(const StringData* key) const { return m_map.count(key); }
+
   T& operator[](Index idx) {
     assert(idx >= 0);
     assert(size_t(idx) < m_list.size());

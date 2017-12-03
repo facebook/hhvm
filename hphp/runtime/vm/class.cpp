@@ -2698,7 +2698,7 @@ void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
 
     for (int i = 0; i < numIfcs; i++) {
       auto interface = trait->m_interfaces[i];
-      if (builder.find(interface->name()) == builder.end()) {
+      if (!builder.contains(interface->name())) {
         builder.add(interface->name(), interface);
       }
     }
@@ -2731,15 +2731,13 @@ void Class::setInterfaces() {
                   m_preClass->name()->data(), cp->name()->data());
     }
     declInterfaces.push_back(ClassPtr(cp));
-    if (interfacesBuilder.find(cp->name()) == interfacesBuilder.end()) {
+    if (!interfacesBuilder.contains(cp->name())) {
       interfacesBuilder.add(cp->name(), LowPtr<Class>(cp));
     }
     int size = cp->m_interfaces.size();
     for (int i = 0; i < size; i++) {
       auto interface = cp->m_interfaces[i];
-      interfacesBuilder.find(interface->name());
-      if (interfacesBuilder.find(interface->name()) ==
-          interfacesBuilder.end()) {
+      if (!interfacesBuilder.contains(interface->name())) {
         interfacesBuilder.add(interface->name(), interface);
       }
     }
@@ -2754,17 +2752,17 @@ void Class::setInterfaces() {
   addInterfacesFromUsedTraits(interfacesBuilder);
 
   if (m_toString) {
-    auto const present = interfacesBuilder.find(s_Stringish.get());
-    if (present == interfacesBuilder.end()
-        && (!(attrs() & AttrInterface) ||
-            !m_preClass->name()->isame(s_Stringish.get()))) {
+    if (!interfacesBuilder.contains(s_Stringish.get()) &&
+        (!(attrs() & AttrInterface) ||
+         !m_preClass->name()->isame(s_Stringish.get()))) {
       // Add Stringish
       Class* stringish = Unit::lookupClass(s_Stringish.get());
       assert(stringish != nullptr);
       assert((stringish->attrs() & AttrInterface));
       interfacesBuilder.add(stringish->name(), LowPtr<Class>(stringish));
 
-      if (!m_preClass->name()->isame(s_XHPChild.get())) {
+      if (!m_preClass->name()->isame(s_XHPChild.get()) &&
+          !interfacesBuilder.contains(s_XHPChild.get())) {
         // All Stringish are also XHPChild
         Class* xhpChild = Unit::lookupClass(s_XHPChild.get());
         assert(xhpChild != nullptr);

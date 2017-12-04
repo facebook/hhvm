@@ -1057,28 +1057,23 @@ DEBUG_ONLY std::string show(const boost::dynamic_bitset<>& bs) {
  * This includes any use of an SSATmp that implies the pointer isn't already
  * freed.
  *
- * For now, it's limited to the reference counting operations on these values,
- * because other types of uses need will to be evaluated on a per-instruction
- * basis: we can't just check instruction srcs blindly to find these types of
- * uses, because in general a use of an SSATmp with a reference-counted pointer
- * type (like Obj, Arr, etc), implies only a use of the SSA-defined pointer
- * value (i.e. the pointer bits sitting in a virtual SSA register), not
- * necessarily of the value pointed to, which is what we care about here and
- * isn't represented in SSA.
+ * PureStores are allowed to store the address of an object which has
+ * been destroyed (this allowes store-elim to sink stores without
+ * worrying about moving them past DecRefs); otherwise a use of an
+ * SSATmp indicates that its refcount has not yet hit zero.
  */
 template<class Gen>
 void weaken_decref_step(const Env& env, const IRInstruction& inst, Gen gen) {
-  switch (inst.op()) {
-  case DecRef:
-  case DecRefNZ:
-  case IncRef:
-    {
-      auto const asetID = env.asetMap[inst.src(0)];
-      if (asetID != -1) gen(asetID);
+  bool checked = false;
+  for (auto i = 0; i < inst.numSrcs(); i++) {
+    auto const asetID = env.asetMap[inst.src(i)];
+    if (asetID == -1) continue;
+    if (!checked) {
+      auto const effects = memory_effects(inst);
+      if (boost::get<PureStore>(&effects)) return;
+      checked = true;
     }
-    break;
-  default:
-    break;
+    gen(asetID);
   }
 }
 
@@ -1265,14 +1260,23 @@ bool irrelevant_inst(const IRInstruction& inst) {
 
     // Inlining related instructions can manipulate the frame but don't
     // observe reference counts.
-    [&] (GeneralEffects) {
-      return inst.is(
-        BeginInlining,
-        DefInlineFP,
-        InlineReturn,
-        InlineReturnNoFrame,
-        SyncReturnBC
-      );
+    [&] (GeneralEffects g) {
+      if (inst.is(BeginInlining,
+                  DefInlineFP,
+                  InlineReturn,
+                  InlineReturnNoFrame,
+                  SyncReturnBC
+                 )) {
+        return true;
+      }
+      if (inst.consumesReferences()) return false;
+      if (g.loads <= AEmpty &&
+          g.stores <= AEmpty &&
+          g.moves <= AEmpty &&
+          g.kills <= AEmpty) {
+        return true;
+      }
+      return false;
     },
 
     // Everything else may.

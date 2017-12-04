@@ -23,6 +23,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <folly/json.h>
+
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/atomic-vector.h"
@@ -30,6 +34,8 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
 #include "hphp/util/md5.h"
+
+#include <iostream>
 
 namespace HPHP {
 
@@ -52,6 +58,7 @@ struct CompilerOptions {
   uint64_t maxRetries;
   uint64_t workers;
   std::string command;
+  bool inheritConfig;
 };
 
 struct ExternCompiler {
@@ -127,7 +134,11 @@ private:
   void stop();
   bool isRunning() const { return m_pid != -1; }
 
+  void writeMessage(folly::dynamic& header, folly::StringPiece body);
+  void writeConfig();
   void writeProgram(const char* filename, MD5 md5, folly::StringPiece code);
+
+  std::string readVersion() const;
   std::string readProgram() const;
 
   pid_t m_pid{-1};
@@ -302,21 +313,66 @@ std::string readline(FILE* f) {
   return len ? std::string(line, len - 1) : std::string();
 }
 
+std::string ExternCompiler::readVersion() const {
+  // Note the utter lack of error handling. We're really expecting the version
+  // JSON to be the first thing we get from the compiler daemon, and that it has
+  // a "version" field, and that the value at the field is indeed a string...
+  const auto line = readline(m_out);
+  return folly::parseJson(line).at("version").asString();
+}
+
 std::string ExternCompiler::readProgram() const {
-  auto const start = readline(m_out);
-  if (start.compare(0, 7, "ERROR: ", 7) == 0) {
+  const auto line = readline(m_out);
+  const auto header = folly::parseJson(line);
+  const std::string type = header.getDefault("type", "").asString();
+  const std::size_t bytes = header.getDefault("bytes", 0).asInt();
+
+  if (type == "hhas") {
+    std::string program(bytes, '\0');
+    if (fread(&program[0], bytes, 1, m_out) != 1) {
+      throwErrno("reading input program");
+    }
+    return program;
+  } else if (type == "error") {
     // We don't need to restart the pipe-- the compiler just wasn't able to
     // build this file...
-    throw std::runtime_error(start.substr(7));
-  }
-  auto const len = folly::to<size_t>(start);
-
-  std::string program(len, '\0');
-  if (fread(&program[0], len, 1, m_out) != 1) {
-    throwErrno("reading input program");
+    throw std::runtime_error(
+      header.getDefault("error", "[no 'error' field]").asString());
+  } else {
+    throw std::runtime_error("unknown message type, " + type);
   }
 
-  return program;
+  not_reached();
+}
+
+void ExternCompiler::writeMessage(
+  folly::dynamic& header,
+  folly::StringPiece body
+) {
+  header["bytes"] = body.size();
+  const auto jsonHeader = folly::toJson(header);
+  if (
+    fprintf(m_in, "%s\n", jsonHeader.data()) == -1 ||
+    (body.size() > 0 && fwrite(body.begin(), body.size(), 1, m_in) != 1)
+  ) {
+    throwErrno("error writing message");
+  }
+  fflush(m_in);
+}
+
+void ExternCompiler::writeConfig() {
+  static const std::string config = [this] () -> std::string {
+    if (m_options.inheritConfig) {
+      // necessary to initialize zend-strtod, which is used to serialize config
+      // to JSON (!)
+      zend_get_bigint_data();
+      return IniSetting::GetAllAsJSON();
+    }
+    return "";
+  }();
+
+  folly::dynamic header = folly::dynamic::object("type", "config");
+  writeMessage(header, config);
 }
 
 void ExternCompiler::writeProgram(
@@ -324,14 +380,11 @@ void ExternCompiler::writeProgram(
   MD5 md5,
   folly::StringPiece code
 ) {
-  auto const md5s = md5.toString();
-  if (
-    fprintf(m_in, "%s\n%s\n%lu\n", filename, md5s.c_str(), code.size()) == -1 ||
-    fwrite(code.begin(), code.size(), 1, m_in) != 1
-  ) {
-    throwErrno("error writing input");
-  }
-  fflush(m_in);
+  folly::dynamic header = folly::dynamic::object
+    ("type", "code")
+    ("md5", md5.toString())
+    ("file", filename);
+  writeMessage(header, code);
 }
 
 struct UseLightDelegate final {
@@ -443,12 +496,23 @@ void ExternCompiler::start() {
   m_in = in.detach("w");
   m_out = out.detach("r");
 
+  // Here we expect the very first communication from the external compiler
+  // process to be a single line of JSON representing the compiler version.
   try {
-    m_version = readline(m_out);
+    m_version = readVersion();
   } catch (const CompileException& exc) {
     throw BadCompilerException(
       "Couldn't read version message from external compiler");
   }
+
+  // For...reasons...the external compiler process misses the first line of
+  // output on the pipe, so we open communications with a single newline.
+  if (fprintf(m_in, "\n") == -1) {
+    throw BadCompilerException("Couldn't write initial newline");
+  }
+  fflush(m_in);
+
+  writeConfig();
 }
 
 folly::Optional<CompilerOptions> hackcConfiguration() {
@@ -460,7 +524,8 @@ folly::Optional<CompilerOptions> hackcConfiguration() {
     RuntimeOption::EvalHackCompilerVerboseErrors,
     RuntimeOption::EvalHackCompilerMaxRetries,
     RuntimeOption::EvalHackCompilerWorkers,
-    RuntimeOption::EvalHackCompilerCommand
+    RuntimeOption::EvalHackCompilerCommand,
+    RuntimeOption::EvalHackCompilerInheritConfig,
   };
 }
 
@@ -475,6 +540,7 @@ folly::Optional<CompilerOptions> php7Configuration() {
     0, // maxRetries
     1, // workers
     RuntimeOption::EvalPHP7CompilerCommand, // command
+    false, // inheritConfig
   };
 }
 

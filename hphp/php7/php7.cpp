@@ -24,9 +24,11 @@
 
 #include "hphp/util/embedded-data.h"
 
+#include <folly/dynamic.h>
 #include <folly/Format.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
+#include <folly/json.h>
 
 #include <string>
 #include <iostream>
@@ -118,43 +120,94 @@ std::string runCompiler(const std::string& filename, const folly::IOBuf& buf) {
   }
 }
 
-int runDaemon() {
-  std::cout << getBuildId() << std::endl;
-  while (true) {
+void writeMessage(
+  folly::dynamic& header,
+  folly::StringPiece body
+) {
+  header["bytes"] = body.size();
+  std::cout
+    << folly::toJson(header) << std::endl
+    << body << std::flush;
+}
+
+void writeVersion() {
+  folly::dynamic header = folly::dynamic::object
+    ("type", "compiler_version")
+    ("version", getBuildId());
+  writeMessage(header, "");
+}
+
+void writeProgram(
+  folly::StringPiece filename,
+  folly::StringPiece code
+) {
+  folly::dynamic header = folly::dynamic::object
+    ("type", "hhas")
+    ("file", filename);
+  writeMessage(header, code);
+}
+
+void writeError(
+  folly::StringPiece filename,
+  folly::StringPiece error
+) {
+  folly::dynamic header = folly::dynamic::object
+    ("type", "error")
+    ("file", filename)
+    ("error", error);
+  writeMessage(header, "");
+}
+
+int processMessage() {
+  std::string headerStr;
+  std::getline(std::cin, headerStr);
+  if (!std::cin.good()) {
+    return 2;
+  }
+  if (headerStr.empty()) {
+    return 0;
+  }
+
+  const auto header = folly::parseJson(headerStr);
+  const std::string type = header.at("type").asString();
+  const std::size_t bytes = header.getDefault("bytes", "0").asInt();
+  const std::string filename =
+    header.getDefault("file", "[unknown]").asString();
+
+  if (type == "code") {
+    auto buf = folly::IOBuf::create(bytes + ZEND_MMAP_AHEAD);
+    if (!std::cin.read(reinterpret_cast<char*>(buf->writableData()), bytes)) {
+      throw std::runtime_error("Could not read code from stdin");
+    }
+    // PHP allows the cursor to be advanced to yy_limit + ZEND_MMAP_AHEAD, so
+    // don't tell it about our extra allocated space.
+    memset(buf->writableData() + bytes, '\0', ZEND_MMAP_AHEAD);
+    buf->append(bytes);
     try {
-      std::string filename;
-      std::string md5;
-      std::string length;
-
-      std::getline(std::cin, filename);
-      std::getline(std::cin, md5);
-      std::getline(std::cin, length);
-
-      size_t code_length;
-      try {
-        code_length = std::stoul(length);
-      } catch (...) {
-        throw std::runtime_error("Could not read code length from stdin");
-      }
-
-      auto buf = folly::IOBuf::create(code_length + ZEND_MMAP_AHEAD);
-      if (!std::cin.read(
-            reinterpret_cast<char*>(buf->writableData()),
-            code_length)) {
-        throw std::runtime_error("Could not read code from stdin");
-      }
-      // PHP allows the cursor to be advanced to yy_limit + ZEND_MMAP_AHEAD, so
-      // don't tell it about our extra allocated space.
-      memset(buf->writableData() + code_length, '\0', ZEND_MMAP_AHEAD);
-      buf->append(code_length);
-
-      auto hhas = runCompiler(filename, *buf);
-      std::cout << hhas.length() << std::endl
-                << hhas;
+      const auto hhas = runCompiler(filename, *buf);
+      writeProgram(filename, hhas);
     } catch (const CompilerException& e) {
-      std::cout << "ERROR: " << e.what() << std::endl;
+      writeError(filename, e.what());
+    }
+  } else if (type == "error") {
+    throw std::runtime_error(header.at("error").asString());
+  } else {
+    // Else we don't know how to process this type (yet?). So just read through
+    // it and continue.
+    auto buf = folly::IOBuf::create(bytes);
+    if (!std::cin.read(reinterpret_cast<char*>(buf->writableData()), bytes)) {
+      throw std::runtime_error("Could not message body from stdin.");
     }
   }
+
+  return 0;
+}
+
+int runDaemon() {
+  int ret;
+  writeVersion();
+  while (!(ret = processMessage()));
+  return ret;
 }
 
 void parseFlags(int argc, char** argv) {

@@ -42,6 +42,14 @@ type options = {
   dump_config      : bool;
 }
 
+type message_handler = Hh_json.json -> string -> unit
+
+type message_handlers = {
+  set_config : message_handler;
+  compile    : message_handler;
+  error      : message_handler;
+}
+
 (*****************************************************************************)
 (* Debug info refs *)
 (*****************************************************************************)
@@ -69,14 +77,13 @@ let die str =
   close_out oc;
   exit 2
 
-let foreach_line_in_file str ~f =
-  let inch = open_in str in
-  try
-    while true; do
-      let line = input_line inch |> String.trim in
-      f line; ()
-    done
-  with End_of_file -> ()
+let print_compiler_version () =
+  let open Hh_json in
+  let compiler_version_msg = json_to_string @@ JSON_Object
+    [ ("type", JSON_String "compiler_version")
+    ; ("version", JSON_String (Compiler_id.get_compiler_id ()))
+    ] in
+  P.printf "%s\n%!" compiler_version_msg
 
 let assert_regular_file filename =
   if not (Sys.file_exists filename) ||
@@ -100,24 +107,24 @@ let parse_options () =
   let usage = P.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
     [ ("--fallback"
-      , Arg.Set fallback
-      , " Enables fallback compilation"
+          , Arg.Set fallback
+            , " Enables fallback compilation"
       );
       ("--debug-time"
-      , Arg.Set debug_time
-      , " Enables debugging logging for elapsed time"
+          , Arg.Set debug_time
+            , " Enables debugging logging for elapsed time"
       );
       ("--quiet-mode"
-      , Arg.Set quiet_mode
-      , " Runs very quietly, and ignore any result if invoked without -o "
-      ^ "(lower priority than the debug-time option)"
+          , Arg.Set quiet_mode
+            , " Runs very quietly, and ignore any result if invoked without -o "
+              ^ "(lower priority than the debug-time option)"
       );
       ("-v"
-      , Arg.String (fun str -> config_list := str :: !config_list)
-      , " Configuration: Eval.EnableHipHopSyntax=<value> "
-      ^ "or Hack.Lang.IntsOverflowToInts=<value>"
-      ^ "\n"
-      ^ "\t\tAllows overriding config options passed on a file"
+          , Arg.String (fun str -> config_list := str :: !config_list)
+            , " Configuration: Eval.EnableHipHopSyntax=<value> "
+              ^ "or Hack.Lang.IntsOverflowToInts=<value>"
+              ^ "\n"
+              ^ "\t\tAllows overriding config options passed on a file"
       );
       ("-c"
       , Arg.String (fun str ->
@@ -126,27 +133,27 @@ let parse_options () =
       , " Config file in JSON format"
       );
       ("-o"
-      , Arg.String (fun str -> output_file := Some str)
-      , " Output file. Creates it if necessary"
+          , Arg.String (fun str -> output_file := Some str)
+            , " Output file. Creates it if necessary"
       );
       ("--parser"
-      , Arg.String
-        (function "ffp" -> parser := FFP
-                | "legacy" -> parser := Legacy
-                | p -> failwith @@ p ^ " is an invalid parser")
-      , " Parser: ffp or legacy [def: ffp]"
+          , Arg.String
+            (function "ffp" -> parser := FFP
+              | "legacy" -> parser := Legacy
+              | p -> failwith @@ p ^ " is an invalid parser")
+            , " Parser: ffp or legacy [def: ffp]"
       );
       ("--daemon"
-      , Arg.Unit (fun () -> mode := DAEMON)
-      , " Run a daemon which processes Hack source from standard input"
+          , Arg.Unit (fun () -> mode := DAEMON)
+            , " Run a daemon which processes Hack source from standard input"
       );
       ("--input-file-list"
-      , Arg.String (fun str -> input_file_list := Some str)
-      , " read a list of files (one per line) from the file `input-file-list'"
+          , Arg.String (fun str -> input_file_list := Some str)
+            , " read a list of files (one per line) from the file `input-file-list'"
       );
       ("--dump-symbol-refs"
-      , Arg.Set dump_symbol_refs
-      , " Dump symbol ref sections of HHAS"
+          , Arg.Set dump_symbol_refs
+            , " Dump symbol ref sections of HHAS"
       );
       ("--dump-stats"
       , Arg.Set dump_stats
@@ -159,13 +166,13 @@ let parse_options () =
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
-  if !mode = DAEMON then P.printf "%s\n%!" (Compiler_id.get_compiler_id ());
+  if !mode = DAEMON then print_compiler_version ();
   let needs_file = Option.is_none !input_file_list in
   let fn =
     if needs_file then
       match !fn_ref with
-      | Some fn -> if !mode = CLI then fn else die usage
-      | None    -> if !mode = CLI then die usage else read_line ()
+        | Some fn -> if !mode = CLI then fn else die usage
+        | None    -> if !mode = CLI then die usage else read_line ()
     else
       ""
   in
@@ -184,18 +191,43 @@ let parse_options () =
   ; dump_config        = !dump_config
   }
 
-let load_file_stdin () =
-  let _ = read_line () in (* md5 *)
-  let len = read_int () in
-  let code = Bytes.create len in
-  let _ = really_input stdin code 0 len in
-  (* TODO: Read config file from stdin and call Hh_json.json_of_string *)
-  Hh_json.JSON_Null, code
+let fail_daemon file error =
+  let open Hh_json in
+  let file = Option.value ~default:"[unknown]" file in
+  let msg = json_to_string @@ JSON_Object
+    [ ("type", JSON_String "error")
+    ; ("file", JSON_String file)
+    ; ("error", JSON_String error)
+    ] in
+  P.printf "%s\n%!" msg;
+  failwith error
 
-let load_file file =
-  let abs_fn = Relative_path.to_absolute file in
-  let content = cat abs_fn in
-  content
+let rec dispatch_loop handlers =
+  let open Hh_json in
+  let open Access in
+  let read_message () =
+    let line = read_line () in
+    let header = json_of_string line in
+    let file = get_field_opt (get_string "file") header in
+    let bytes = get_field (get_number_int "bytes") (fun _af -> 0) header in
+    let body = Bytes.create bytes in begin
+    try
+      really_input stdin body 0 bytes;
+      header, body
+    with exc ->
+      fail_daemon file ("Exception reading message body: " ^ (Printexc.to_string exc))
+    end in
+  let header, body = read_message () in
+  let msg_type = get_field
+    (get_string "type")
+    (fun af -> fail_daemon None ("Cannot determine type of message: " ^ af))
+    header in
+  (match msg_type with
+    | "code"   -> handlers.compile header body
+    | "error"  -> handlers.error header body
+    | "config" -> handlers.set_config header body
+    | _        -> fail_daemon None ("Unhandled message type '" ^ msg_type ^ "'"));
+  dispatch_loop handlers
 
 let set_stats_if_enabled ~compiler_options =
   if compiler_options.dump_stats then
@@ -243,28 +275,6 @@ let parse_file compiler_options popt filename text =
     (* FFP generated an error *)
     | SyntaxError.ParserFatal e -> `ParseFailure e
 
-
-let hhvm_unix_call config filename =
-  P.printf "compiling: %s\n" filename;
-  let readme, writeme = Unix.pipe () in
-  let prog_name = "/usr/local/hphpi/bin/hhvm" in
-  let options =
-    List.concat_map ("Eval.DumpHhas=1" :: config) (fun s -> ["-v"; s]) in
-  let params = Array.of_list ([prog_name] @ options @ [filename]) in
-  let _ =
-    Unix.create_process prog_name params Unix.stdin writeme Unix.stderr in
-  Unix.close writeme;
-  let in_channel = Unix.in_channel_of_descr readme in
-  let rec aux acc : string list =
-    try
-      aux @@ input_line in_channel :: acc
-    with End_of_file -> List.rev acc
-  in
-  let result =
-    List.fold_left (aux []) ~f:(fun acc line -> acc ^ line ^ "\n") ~init:"" in
-  Unix.close readme;
-  result
-
 let add_to_time_ref r t0 =
   let t = Unix.gettimeofday () in
   r := !r +. (t -. t0);
@@ -298,7 +308,7 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
     | `ParseResult (errors, parser_return, _) ->
       let ast = parser_return.Parser_hack.ast in
       List.iter (Errors.get_error_list errors) (fun e ->
-        Printf.printf "%s\n" (Errors.to_string (Errors.to_absolute e)));
+        P.printf "%s\n" (Errors.to_string (Errors.to_absolute e)));
       if Errors.is_empty errors
       then Emit_program.from_ast parser_return.Parser_hack.is_hh_file ast
       else Emit_program.emit_fatal_program ~ignore_message:true
@@ -306,118 +316,166 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
       in
   let t = add_to_time_ref debug_time.codegen_t t in
   let hhas_text = Hhbc_hhas.to_string
-    ~dump_symbol_refs:compiler_options.dump_symbol_refs hhas_prog in
+    ~path:filename
+    ~dump_symbol_refs:compiler_options.dump_symbol_refs
+    hhas_prog in
   ignore @@ add_to_time_ref debug_time.printing_t t;
   if compiler_options.debug_time
   then print_debug_time_info filename debug_time;
   hhas_text
 
-let load_config_and_file compiler_options filename =
-  match compiler_options.mode with
-  | CLI ->
-    Option.map ~f:Hh_json.json_of_file compiler_options.config_file,
-    load_file filename
-  | DAEMON ->
-    (* TODO: Read config file from stdin *)
-    let _config, file = load_file_stdin () in
-    None, file
 
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
 
-let process_single_file compiler_options popt filename outputfile =
+let process_single_source_unit compiler_options popt handle_output handle_exception filename source_text =
   try
     let t = Unix.gettimeofday () in
-    let config, text = load_config_and_file compiler_options filename in
-    let options =
-      Hhbc_options.get_options_from_config config compiler_options.config_list
-    in
-    Hhbc_options.set_compiler_options options;
-    if compiler_options.dump_config then
-      Printf.printf "===CONFIG===\n%s\n\n%!" (Hhbc_options.to_string options);
-    let fail_or_ast = parse_file compiler_options popt filename text in
+    let fail_or_ast = parse_file compiler_options popt filename source_text in
     let debug_time = new_debug_time () in
     ignore @@ add_to_time_ref debug_time.parsing_t t;
-    let text = do_compile filename compiler_options text fail_or_ast debug_time in
-    if compiler_options.mode = DAEMON then
-      Printf.printf "%i\n%!" (String.length text);
-    match outputfile with
-    | None ->
-      if not compiler_options.quiet_mode
-      then P.printf "%s%!" text
-      else ()
-    | Some outputfile -> Sys_utils.write_file ~file:outputfile text
-  with e ->
-    if not compiler_options.quiet_mode
-    then begin
-      if compiler_options.mode = DAEMON then
-        Printf.printf "ERROR: %s\n%!" (Printexc.to_string e)
-      else
-        let f = Relative_path.to_absolute filename in
-        Printf.eprintf "Error in file %s: %s\n" f (Printexc.to_string e)
-    end
-    else ()
-
-let compile_files_recursively compiler_options f =
-  let rec loop dirs = begin
-    match dirs with
-    | [] -> ()
-    | dir::dirs ->
-      let compile_file = fun p ->
-        assert_regular_file p;
-        if Filename.check_suffix p ".php" then
-          let outputfile =
-            let f = Filename.chop_suffix p ".php" in
-            f ^ ".hhas"
-          in
-          if Sys.file_exists outputfile then
-            if not compiler_options.quiet_mode
-            then P.fprintf stderr "Output file %s already exists\n" outputfile
-            else ()
-          else begin
-            f (Relative_path.create Relative_path.Dummy p) (Some outputfile)
-          end
-      in
-      let ds, fs =
-        Sys.readdir dir
-        |> Array.map (Filename.concat dir)
-        |> Array.to_list
-        |> List.partition_tf ~f: Sys.is_directory
-      in
-      List.iter fs compile_file;
-      loop (ds @ dirs)
-  end
-  in loop [compiler_options.filename]
+    let output = do_compile filename compiler_options source_text fail_or_ast debug_time in
+    handle_output filename output
+  with exc ->
+    handle_exception filename exc
 
 let decl_and_run_mode compiler_options popt =
+  let open Hh_json in
+  let open Access in
+
+  let set_compiler_options config_json =
+    let options =
+      Hhbc_options.get_options_from_config config_json compiler_options.config_list in
+    Hhbc_options.set_compiler_options options in
+  let ini_config_json =
+    Option.map ~f:json_of_file compiler_options.config_file in
+
+  set_compiler_options ini_config_json;
+  let dumped_options = lazy (Hhbc_options.to_string !Hhbc_options.compiler_options) in
   Local_id.track_names := true;
   Ident.track_names := true;
-  let process_single_file = process_single_file compiler_options popt in
-  if Option.is_some compiler_options.input_file_list then
-    let input_file_list = Option.value compiler_options.input_file_list ~default:"" in
-    foreach_line_in_file input_file_list ~f:(fun fn ->
-      assert_regular_file fn;
-      let fname = Relative_path.create Relative_path.Dummy fn in
-      process_single_file fname None
-    )
-  else if compiler_options.mode = DAEMON then
-    let rec process_next fn = begin
-      let fname = Relative_path.create Relative_path.Dummy fn in
-      process_single_file fname None;
-      let filename = read_line () in
-      process_next filename
-    end in
-      process_next compiler_options.filename
-  else if Sys.is_directory compiler_options.filename then
-    compile_files_recursively compiler_options process_single_file
-  else
-    let filename =
-      Relative_path.create Relative_path.Dummy compiler_options.filename in
-    assert_regular_file compiler_options.filename;
-    process_single_file
-      filename
-      compiler_options.output_file
+
+  match compiler_options.mode with
+    | DAEMON ->
+      let handle_output filename output =
+        let abs_path = Relative_path.to_absolute filename in
+        let msg = json_to_string @@ JSON_Object
+          [ ("type", JSON_String "hhas")
+          ; ("file", JSON_String abs_path)
+          ; ("bytes", int_ (String.length output))
+          ] in
+        P.printf "%s\n%s%!" msg output in
+      let handle_exception filename exc =
+        let abs_path = Relative_path.to_absolute filename in
+        let msg = json_to_string @@ JSON_Object
+          [ ("type", JSON_String "error")
+          ; ("file", JSON_String abs_path)
+          ; ("error", JSON_String (Printexc.to_string exc))
+          ] in
+        P.printf "%s\n%!" msg in
+      let handlers =
+        { set_config = (fun _header body ->
+          let config_json =
+            if body = "" then None else Some (json_of_string body) in
+          set_compiler_options config_json)
+        ; error = (fun header _body ->
+          let filename = get_field
+            (get_string "file")
+            (fun af -> fail_daemon None ("Cannot determine file name of source unit: " ^ af))
+            header in
+          let error = get_field
+            (get_string "error")
+            (fun _af -> fail_daemon (Some filename) ("No 'error' field in error message"))
+            header in
+          fail_daemon (Some filename) ("Error processing " ^ filename ^ ": " ^ error))
+        ; compile = (fun header body ->
+          let filename = get_field
+            (get_string "file")
+            (fun af -> fail_daemon None ("Cannot determine file name of source unit: " ^ af))
+            header in
+          process_single_source_unit
+            compiler_options
+            popt
+            handle_output
+            handle_exception
+            (Relative_path.create Relative_path.Dummy filename)
+            body)
+        } in
+      dispatch_loop handlers
+
+    | CLI ->
+      let handle_exception filename exc =
+        if not compiler_options.quiet_mode
+        then
+          P.eprintf "Error in file %s: %s\n"
+            (Relative_path.to_absolute filename)
+            (Printexc.to_string exc) in
+
+      let process_single_file handle_output filename =
+        let filename = Relative_path.create Relative_path.Dummy filename in
+        let abs_path = Relative_path.to_absolute filename in
+        process_single_source_unit
+          compiler_options popt handle_output handle_exception filename (cat abs_path) in
+
+      let filenames, handle_output = match compiler_options.input_file_list with
+        (* List of source files explicitly given *)
+        | Some input_file_list ->
+          let get_lines_in_file filename =
+            let inch = open_in filename in
+            let rec go lines =
+              try
+                let line = input_line inch |> String.trim in
+                go (line :: lines)
+              with End_of_file -> lines in
+            go [] in
+          let handle_output _filename output =
+            if compiler_options.dump_config then
+              Printf.printf "===CONFIG===\n%s\n\n%!" (Lazy.force dumped_options);
+            if not compiler_options.quiet_mode then P.printf "%s%!" output
+          in get_lines_in_file input_file_list, handle_output
+
+        | None ->
+          if Sys.is_directory compiler_options.filename
+
+          (* Compile every file under directory *)
+          then
+            let files_in_dir =
+              let rec go dirs = match dirs with
+                | [] -> []
+                | dir :: dirs ->
+                  let ds, fs = Sys.readdir dir
+                |> Array.map (Filename.concat dir)
+                |> Array.to_list
+                |> List.partition_tf ~f: Sys.is_directory in
+                  fs @ go (ds @ dirs) in
+              go [compiler_options.filename] in
+            let handle_output filename output =
+              let abs_path = Relative_path.to_absolute filename in
+              if Filename.check_suffix abs_path ".php" then
+                let output_file = Filename.chop_suffix abs_path ".php" ^ ".hhas" in
+                if Sys.file_exists output_file
+                then (
+                  if not compiler_options.quiet_mode
+                  then P.fprintf stderr "Output file %s already exists\n" output_file)
+                else
+                  Sys_utils.write_file ~file:output_file output
+            in files_in_dir, handle_output
+
+          (* Compile a single file *)
+          else
+            let handle_output _filename output =
+              match compiler_options.output_file with
+                | Some output_file ->
+                  Sys_utils.write_file ~file:output_file output
+                | None ->
+                  if compiler_options.dump_config then
+                    Printf.printf "===CONFIG===\n%s\n\n%!" (Lazy.force dumped_options);
+                  if not compiler_options.quiet_mode then P.printf "%s%!" output
+            in [compiler_options.filename], handle_output
+
+      (* Actually execute the compilation(s) *)
+      in List.iter filenames (process_single_file handle_output)
 
 let main_hack opts =
   let popt = ParserOptions.default in

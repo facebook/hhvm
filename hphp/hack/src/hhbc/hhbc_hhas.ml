@@ -1593,7 +1593,7 @@ let add_program ?path dump_symbol_refs buf hhas_prog =
       let path = Relative_path.to_absolute path in
       B.add_string
         buf
-        (Printf.sprintf "# %s starts here\n\n .filepath \"%s\";\n" path path);
+        (Printf.sprintf "# %s starts here\n\n.filepath \"%s\";\n" path path);
       add_program_content dump_symbol_refs buf hhas_prog;
       B.add_string buf (Printf.sprintf "\n# %s ends here\n" path)
   | None ->

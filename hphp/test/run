@@ -182,7 +182,7 @@ function hh_codegen_binary_routes() {
 
 function php7_codegen_binary_routes() {
   return array(
-    "buck"    => "/buck-out/gen/hphp/php7/php7/php7",
+    "buck"    => "/buck-out/gen/hphp/php7",
   # "cmake"   => "/hphp/php7/bin"
   );
 }
@@ -291,7 +291,7 @@ function hh_semdiff_cmd($options) {
 
 function php7_compile_cmd() {
   $routes = php7_codegen_binary_routes();
-  $cmd = hphp_home() . $routes["buck"];
+  $cmd = hphp_home() . $routes["buck"] . "/php7-binary";
   if (!is_file($cmd)) {
     error("Could not find php7 compiler");
   }
@@ -1064,6 +1064,7 @@ function hphp_cmd($options, $test, $timeout_prefix) {
       "-vFlattenTraits=false",
       "-vRuntime.Eval.HackCompilerReset=1",
       "-vRuntime.Eval.HackCompilerDefault=true",
+      "-vRuntime.Eval.HackCompilerInheritConfig=true",
       "-vRuntime.Eval.HackCompilerCommand=\"${hh_single_compile} -v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs\""
     ));
   }

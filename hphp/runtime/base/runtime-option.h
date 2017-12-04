@@ -508,6 +508,9 @@ struct RuntimeOption {
      the hhas from failing units in the fatal error messages produced by
      bad hh_single_compile units. */                                    \
   F(bool, HackCompilerVerboseErrors,   true)                            \
+  /* Whether the HackC compiler should inherit the compiler config of the
+     HHVM process that launches it. */                                  \
+  F(bool, HackCompilerInheritConfig,   true)                            \
   F(bool, PHP7CompilerEnabled,         false)                           \
   F(string, PHP7CompilerCommand,       "")                              \
   F(bool, EmitSwitch,                  true)                            \

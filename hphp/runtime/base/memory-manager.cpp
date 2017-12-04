@@ -722,6 +722,7 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
 
 void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
   assert(nbytes == sizeIndex2Size(index));
+  assert(!m_freelists[index].head); // freelist[index] is empty
   auto nContig = kNContigTab[index];
   auto contigMin = nContig * nbytes;
   auto contigInd = size2Index(contigMin);
@@ -730,6 +731,7 @@ void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
               "contigInd={}, try i={}\n", nbytes, index, contigMin,
               contigInd, i);
     if (auto p = m_freelists[i].maybePop()) {
+      assert(i > index); // because freelist[index] was empty
       FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): "
                 "contigMin={}, contigInd={}, use i={}, size={}, p={}\n",
                 nbytes, index, contigMin, contigInd, i, sizeIndex2Size(i),
@@ -737,10 +739,9 @@ void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
       // Split tail into preallocations and store them back into freelists.
       auto availBytes = sizeIndex2Size(i);
       auto tailBytes = availBytes - nbytes;
-      if (tailBytes > 0) {
-        auto tail = (void*)(uintptr_t(p) + nbytes);
-        splitTail(m_freelists, tail, tailBytes, nContig - 1, nbytes, index);
-      }
+      assert(tailBytes > 0); // because i > index
+      auto tail = (void*)(uintptr_t(p) + nbytes);
+      splitTail(m_freelists, tail, tailBytes, nContig - 1, nbytes, index);
       return p;
     }
   }

@@ -1096,7 +1096,9 @@ module Make (GetLocals : GetLocals) = struct
     let smethods =
       List.fold_right c.c_body ~init:[] ~f:(class_static_method env) in
     let sprops = List.fold_right c.c_body ~init:[] ~f:(class_prop_static env) in
-    let props = List.fold_right c.c_body ~init:[] ~f:(class_prop env) in
+    let attrs = user_attributes env c.c_user_attributes in
+    let const = (Attributes.find SN.UserAttributes.uaConst attrs) in
+    let props = List.fold_right c.c_body ~init:[] ~f:(class_prop ~const env) in
     let parents =
       List.map c.c_extends
         (hint ~allow_retonly:false ~allow_typedef:false env) in
@@ -1161,7 +1163,7 @@ module Make (GetLocals : GetLocals) = struct
         N.c_constructor    = constructor;
         N.c_static_methods = smethods;
         N.c_methods        = methods;
-        N.c_user_attributes = user_attributes env c.c_user_attributes;
+        N.c_user_attributes = attrs;
         N.c_enum           = enum
       }
     in
@@ -1380,7 +1382,7 @@ module Make (GetLocals : GetLocals) = struct
     | Method _ -> acc
     | TypeConst _ -> acc
 
-  and class_prop env x acc =
+  and class_prop env ?(const = None) x acc =
     match x with
     | Attributes _ -> acc
     | ClassUse _ -> acc
@@ -1396,6 +1398,11 @@ module Make (GetLocals : GetLocals) = struct
       let cvl = List.map cv_names (class_prop_ env) in
       let cvl = List.map cvl (fill_prop cv_kinds h) in
       let attrs = user_attributes env cv_user_attributes in
+      (* if class is __Const, make all member fields __Const *)
+      let attrs = match const with
+      | Some c -> if not (Attributes.mem SN.UserAttributes.uaConst attrs)
+        then c :: attrs else attrs
+      | None -> attrs in
       let cvl = List.map cvl (fun cv -> { cv with N.cv_user_attributes = attrs}) in
       cvl @ acc
     | ClassVars _ -> acc

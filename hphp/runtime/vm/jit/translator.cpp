@@ -1148,6 +1148,8 @@ bool dontGuardAnyInputs(Op op) {
 }
 
 bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
+  if (isFCallStar(inst->op())) return true;
+
   if (instrIsNonCallControlFlow(inst->op()) ||
       inst->op() == OpAwait || // may branch to scheduler and suspend execution
       inst->op() == OpAwaitAll || // similar to Await

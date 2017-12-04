@@ -536,7 +536,8 @@ bool retranslateOpt(FuncId funcId) {
 bool retranslateAllEnabled() {
   return
     RuntimeOption::EvalJitPGO &&
-    RuntimeOption::EvalJitRetranslateAllRequest != 0;
+    RuntimeOption::EvalJitRetranslateAllRequest != 0 &&
+    RuntimeOption::EvalJitRetranslateAllSeconds != 0;
 }
 
 void checkRetranslateAll() {

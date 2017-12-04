@@ -23,6 +23,8 @@
 
 #include "hphp/util/logger.h"
 
+#include "hphp/runtime/ext/server/ext_server.h"
+
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -271,7 +273,8 @@ std::vector<ProfData::TargetProfileInfo> ProfData::getTargetProfiles(
 ////////////////////////////////////////////////////////////////////////////////
 
 bool hasEnoughProfDataToRetranslateAll() {
-  return requestCount() >= RuntimeOption::EvalJitRetranslateAllRequest;
+  return requestCount()    >= RuntimeOption::EvalJitRetranslateAllRequest ||
+         f_server_uptime() >= RuntimeOption::EvalJitRetranslateAllSeconds;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

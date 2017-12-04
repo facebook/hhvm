@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -305,7 +306,7 @@ void checkFreeProfData() {
       (!code().hotEnabled() ||
        profData()->profilingFuncs() == profData()->optimizedFuncs()) &&
       !transdb::enabled() &&
-      !RuntimeOption::EvalJitRetranslateAllRequest) {
+      !mcgen::retranslateAllEnabled()) {
     discardProfData();
   }
 }
@@ -339,8 +340,7 @@ bool profileFunc(const Func* func) {
   // be scheduled to execute (via the treadmill), then we can't emit more
   // Profile translations.  This is to ensure that, when retranslateAll() runs,
   // no more Profile translations are being added to ProfData.
-  if (RuntimeOption::EvalJitRetranslateAllRequest != 0 &&
-      hasEnoughProfDataToRetranslateAll()) {
+  if (mcgen::retranslateAllEnabled() && hasEnoughProfDataToRetranslateAll()) {
     return false;
   }
 

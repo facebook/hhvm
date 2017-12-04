@@ -78,6 +78,7 @@
 #include "hphp/runtime/ext/extension-registry.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -546,7 +547,11 @@ static inline uint32_t resetProfCountersDefault() {
 }
 
 static inline int retranslateAllRequestDefault() {
-  return RuntimeOption::ServerExecutionMode() ? 3000 : 0;
+  return RuntimeOption::ServerExecutionMode() ? 1000000 : 0;
+}
+
+static inline int retranslateAllSecondsDefault() {
+  return RuntimeOption::ServerExecutionMode() ? 180 : 0;
 }
 
 uint64_t ahotDefault() {
@@ -1189,7 +1194,7 @@ void RuntimeOption::Load(
     if (EvalPerfRelocate > 0) {
       setRelocateRequests(EvalPerfRelocate);
     }
-    if (RuntimeOption::EvalJitRetranslateAllRequest == 0) {
+    if (!jit::mcgen::retranslateAllEnabled()) {
       EvalJitWorkerThreads = 0;
     }
     low_malloc_huge_pages(EvalMaxLowMemHugePages);

@@ -324,7 +324,7 @@ let emit_body
       ~is_in_static_method
       ~explicit_use_set
       body in
-  let decl_vars=
+  let decl_vars =
     if is_closure_body
     then
       let ast_class =
@@ -347,6 +347,7 @@ let emit_body
     else
       match scope with
       | _ :: Ast_scope.ScopeItem.Class _ :: _ -> move_this decl_vars
+      | _ when Ast_scope.Scope.is_toplevel scope -> move_this decl_vars
       | _ -> decl_vars in
 
   let function_state_key =

@@ -44,20 +44,22 @@ void SparseHeap::reset() {
     free(ptr);
 #endif
   };
-  std::vector<std::pair<void*, uint16_t>> pooledSlabs;
+  TaggedSlabList pooledSlabs;
+  void* pooledSlabTail = nullptr;
   for (auto slab : m_slabs) {
     // The first slab contains the php stack, so only unmap it when the worker
     // thread dies.
     if (slab.contains_stack) continue;
     if (slab.pooled) {
-      pooledSlabs.emplace_back(slab.ptr, slab.version);
+      if (!pooledSlabTail) pooledSlabTail = slab.ptr;
+      pooledSlabs.push_front<true>(slab.ptr, slab.version);
     } else {
       // The only slab with irregular size is the first slab.
       do_free(slab.ptr, kSlabSize);
     }
   }
-  if (!pooledSlabs.empty()) {
-    m_slabManager->pushMulti(pooledSlabs);
+  if (pooledSlabTail) {
+    m_slabManager->merge(pooledSlabs.head(), pooledSlabTail);
   }
   m_slabs.clear();
   m_pooledBytes = 0;

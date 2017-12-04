@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_SLAB_MANAGER_H_
 #define incl_HPHP_SLAB_MANAGER_H_
 
+#include "hphp/util/portability.h"
+
 #include <atomic>
 #include <cassert>
 #include <vector>
@@ -27,32 +29,76 @@ namespace HPHP {
 constexpr unsigned kLgSlabSize = 21;
 constexpr uint32_t kSlabSize = uint32_t{1} << kLgSlabSize;
 
-// Simple lock-free allocator that allocates and deallocates slabs.
-struct SlabManager {
-  // To mitigate the ABA problem (i.e., a slab is allocated and returned to the
-  // list without another thread noticing), we tag the pointers on the lower 16
-  // bits.  This should be sufficient for our purpose of slab management, so we
-  // don't consider also using other bits for now.
-  struct TaggedPtr {
-    static constexpr uintptr_t TagMask = (1ul << 16) - 1;
-    TaggedPtr() noexcept : rep(0) {}
-    TaggedPtr(void* p, uint16_t tag = 0) noexcept
-      : rep(reinterpret_cast<uintptr_t>(p) | tag) {
-      assert((reinterpret_cast<uintptr_t>(p) & TagMask) == 0);
-    }
-    void* ptr() const {
-      return reinterpret_cast<void*>(rep & ~TagMask);
-    }
-    uint16_t tag() const {
-      return static_cast<uint16_t>(rep);
-    }
-    explicit operator bool() const {
-      return !!rep;
-    }
-   private:
-    uintptr_t rep;
-  };
+// To mitigate the ABA problem (i.e., a slab is allocated and returned to the
+// list without another thread noticing), we tag the pointers on the lower 16
+// bits.  This should be sufficient for our purpose of slab management, so we
+// don't consider also using other bits for now.
+struct TaggedSlabPtr {
+  static constexpr uintptr_t TagMask = (1ul << 16) - 1;
+  TaggedSlabPtr() noexcept : rep(0) {}
+  /* implicit */ TaggedSlabPtr(std::nullptr_t) noexcept : rep(0) {}
+  TaggedSlabPtr(void* p, uint32_t tag = 0) noexcept
+    : rep(reinterpret_cast<uintptr_t>(p) | tag) {
+    assert((reinterpret_cast<uintptr_t>(p) & TagMask) == 0);
+  }
+  void* ptr() const {
+    return reinterpret_cast<void*>(rep & ~TagMask);
+  }
+  uint16_t tag() const {
+    return static_cast<uint16_t>(rep);
+  }
+  explicit operator bool() const {
+    return !!rep;
+  }
+ private:
+  uintptr_t rep;
+};
 
+using AtomicTaggedSlabPtr = std::atomic<TaggedSlabPtr>;
+
+/*
+ * Instrusive singly linked list of slabs using TaggedSlabPtr at the beginning
+ * of each slab.
+ */
+struct TaggedSlabList {
+  bool empty() const {
+    return !m_head.load(std::memory_order_relaxed);
+  }
+  TaggedSlabPtr head() {
+    return m_head.load(std::memory_order_relaxed);
+  }
+  /*
+   * Add a slab to the list.  If `local`, assume the list is only accessed in a
+   * single thread.
+   */
+  template<bool local = false> void push_front(void* p, uint32_t tag) {
+    ++tag;
+    TaggedSlabPtr tagged{p, tag};
+    auto ptr = reinterpret_cast<AtomicTaggedSlabPtr*>(p);
+    if (local) {
+      auto currHead = m_head.load(std::memory_order_relaxed);
+      ptr->store(currHead, std::memory_order_relaxed);
+      m_head.store(tagged, std::memory_order_relaxed);
+      return;
+    }
+    while (true) {
+      auto currHead = m_head.load(std::memory_order_acquire);
+      ptr->store(currHead, std::memory_order_release);
+      if (m_head.compare_exchange_weak(currHead, tagged,
+                                       std::memory_order_release)) {
+        return;
+      }
+    }
+  }
+
+  // Divide a preallocated piece of memory into slabs and add to the list.
+  NEVER_INLINE void addRange(void* ptr, std::size_t size);
+
+ protected:
+  AtomicTaggedSlabPtr m_head;
+};
+
+struct SlabManager : TaggedSlabList {
   // Create one SlabManager for each NUMA node, and add some slabs there.
   // Currently they are backed by huge pages, see EvalNum1GPagesForSlabs and
   // EvalNum2MPagesForSlabs.
@@ -64,35 +110,28 @@ struct SlabManager {
     return s_slabManagers[node];
   }
 
-  // Add a chunk of memory to be managed, thread-safe.
-  void addRange(void* ptr, std::size_t size);
-
-  void push(void* p, uint16_t tag) {
-    ++tag;
-    auto ptr = reinterpret_cast<AtomicTaggedPtr*>(p);
-    TaggedPtr tagged{p, tag};
-    while (true) {
-      auto currHead = m_head.load(std::memory_order_acquire);
-      ptr->store(currHead, std::memory_order_release);
-      if (m_head.compare_exchange_weak(currHead, tagged,
+  TaggedSlabPtr tryAlloc() {
+    while (auto currHead = m_head.load(std::memory_order_acquire)) {
+      auto const ptr =reinterpret_cast<AtomicTaggedSlabPtr*>(currHead.ptr());
+      auto next = ptr->load(std::memory_order_acquire);
+      if (m_head.compare_exchange_weak(currHead, next,
                                        std::memory_order_release)) {
-        return;
+        return currHead;
       }
     }
+    return nullptr;
   }
 
-  // To reduce contention on m_head, push multiple slabs at once.
-  void pushMulti(std::vector<std::pair<void*, uint16_t>>& slabs) {
-    if (slabs.empty()) return;
-    // form a local list first, without using atomics.
-    auto const size = slabs.size();
-    for (auto i = 0u; i < size - 1; ++i) {
-      auto ptr = reinterpret_cast<TaggedPtr*>(slabs[i].first);
-      uint16_t newTag = slabs[i + 1].second + 1;
-      *ptr = TaggedPtr{slabs[i + 1].first, newTag};
-    }
-    TaggedPtr newHead{slabs[0].first, uint16_t(slabs[0].second + 1)};
-    auto last = reinterpret_cast<AtomicTaggedPtr*>(slabs[size - 1].first);
+  // Push everything in a local TaggedSlabList starting with `newHead` and
+  // ending with `localTail` to this global list.  The linking on the local list
+  // should be performed before this call. This is intended for returning
+  // multiple local slabs to the global list in one batch at the end of each
+  // request.
+  void merge(TaggedSlabPtr newHead, void* localTail) {
+    assert(newHead);
+    // No need to bump the tag here, as it is already bumped when forming the
+    // local list.
+    auto last = reinterpret_cast<AtomicTaggedSlabPtr*>(localTail);
     while (true) {
       auto currHead = m_head.load(std::memory_order_acquire);
       last->store(currHead, std::memory_order_release);
@@ -102,22 +141,6 @@ struct SlabManager {
       }
     }
   }
-
-  TaggedPtr tryAlloc() {
-    while (auto currHead = m_head.load(std::memory_order_acquire)) {
-      auto const ptr = reinterpret_cast<AtomicTaggedPtr*>(currHead.ptr());
-      auto next = ptr->load(std::memory_order_acquire);
-      if (m_head.compare_exchange_weak(currHead, next,
-                                       std::memory_order_release)) {
-        return currHead;
-      }
-    }
-    return {nullptr, 0};
-  }
-
- private:
-  using AtomicTaggedPtr = std::atomic<TaggedPtr>;
-  AtomicTaggedPtr m_head;
 
   static std::vector<SlabManager*> s_slabManagers; // one for each NUMA node
 };

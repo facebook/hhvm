@@ -11,7 +11,7 @@
 open Hhas_symbol_refs
 
 let empty_symbol_refs =
-{ includes = SSet.empty
+{ includes = IncludePathSet.empty
 ; constants = SSet.empty
 ; functions = SSet.empty
 ; classes = SSet.empty
@@ -25,18 +25,18 @@ let set_symbol_refs s = symbol_refs := s
 
 let reset () = set_symbol_refs empty_symbol_refs
 
-let add_include s =
+let add_include inc =
   let srs = !symbol_refs in
-  set_symbol_refs { srs with includes = SSet.add s srs.includes }
+  set_symbol_refs { srs with includes = IncludePathSet.add inc srs.includes }
 
-let add_constant s =
+let add_constant s = if s <> "" then
   let srs = !symbol_refs in
   set_symbol_refs { srs with constants = SSet.add s srs.constants }
 
-let add_function s =
+let add_function s = if s <> "" then
   let srs = !symbol_refs in
   set_symbol_refs { srs with functions = SSet.add s srs.functions }
 
-let add_class s =
+let add_class s = if s <> "" then
   let srs = !symbol_refs in
   set_symbol_refs { srs with classes = SSet.add s srs.classes }

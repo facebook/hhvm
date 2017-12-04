@@ -10,7 +10,7 @@
 
 val empty_symbol_refs : Hhas_symbol_refs.t
 val get_symbol_refs : unit -> Hhas_symbol_refs.t
-val add_include : string -> unit
+val add_include : Hhas_symbol_refs.include_path -> unit
 val add_constant : string -> unit
 val add_function : string -> unit
 val add_class : string -> unit

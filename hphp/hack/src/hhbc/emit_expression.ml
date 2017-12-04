@@ -226,6 +226,40 @@ let extract_shape_field_name_pstring = function
     check_shape_key s; A.String s
   | A.SFclass_const ((pn, _) as id, p) -> A.Class_const ((pn, A.Id id), p)
 
+let rec text_of_expr e_ = match e_ with
+  | A.Id id | A.Lvar id | A.Lvarvar (_, id) | A.String id -> id
+  | A.Array_get ((p, A.Lvar (_, id)), Some (_, e_)) ->
+    (p, id ^ "[" ^ snd (text_of_expr e_) ^ "]")
+  | _ -> Pos.none, "unknown" (* TODO: get text of expression *)
+
+let add_include ?(doc_root=false) e =
+  let strip_backslash p =
+    let len = String.length p in
+    if len > 0 && p.[0] = '/' then String.sub p 1 (len-1) else p in
+  let rec split_var_lit = function
+    | _, A.Binop (A.Dot, e1, e2) -> begin
+      let v, l = split_var_lit e2 in
+      if v = ""
+      then let var, lit = split_var_lit e1 in var, lit ^ l
+      else v, ""
+    end
+    | _, A.String (_, lit) -> "", lit
+    | _, e_ -> snd (text_of_expr e_), "" in
+  let var, lit = split_var_lit e in
+  let var, lit =
+    if var = "__DIR__" then ("", strip_backslash lit) else (var, lit) in
+  let inc =
+    if var = ""
+    then
+      if not (Filename.is_relative lit)
+      then Hhas_symbol_refs.Absolute lit
+      else
+        if doc_root
+        then Hhas_symbol_refs.DocRootRelative lit
+        else Hhas_symbol_refs.SearchPathRelative lit
+    else Hhas_symbol_refs.IncludeRootRelative (var, strip_backslash lit) in
+  Emit_symbol_refs.add_include inc
+
 let rec expr_and_new env instr_to_add_new instr_to_add = function
   | A.AFvalue e ->
     let add_instr =
@@ -835,9 +869,7 @@ and emit_import env flavor e =
     | A.IncludeOnce -> instr @@ IIncludeEvalDefine InclOnce
     | A.RequireOnce -> instr @@ IIncludeEvalDefine ReqOnce
   in
-  (match e with
-    | _, A.String (_, s) -> Emit_symbol_refs.add_include s
-    | _ -> ());
+  add_include e;
   gather [
     emit_expr ~need_ref:false env e;
     import_instr;
@@ -2417,11 +2449,6 @@ and emit_final_global_op op =
   | LValOp.SetOp op -> instr (IMutator (SetOpG op))
   | LValOp.IncDec op -> instr (IMutator (IncDecG op))
   | LValOp.Unset -> instr (IMutator UnsetG)
-
-and text_of_expr e =
-  match e with
-  | A.Id id | A.Lvar id | A.Lvarvar (_, id) -> id
-  | _ -> Pos.none, "unknown" (* TODO: get text of expression *)
 
 and emit_final_static_op cid prop op =
   match op with

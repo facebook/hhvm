@@ -1556,9 +1556,40 @@ let add_typedef buf typedef =
     B.add_string buf " \"\"\"";
     B.add_string buf @@ SS.seq_to_string @@
       Emit_adata.adata_to_string_seq ts;
-    B.add_string buf "\"\"\";"
+    B.add_string buf "\"\"\";\n"
   | None ->
-    B.add_string buf ";"
+    B.add_string buf ";\n"
+
+let add_include_region ?path ?doc_root ?search_paths ?include_roots buf includes =
+  let write_if_exists p =
+    if Sys.file_exists p
+    then (B.add_string buf ("\n  " ^ p); true)
+    else false in
+  let write_include = function
+    | Hhas_symbol_refs.Absolute p -> ignore @@ write_if_exists p
+    | Hhas_symbol_refs.SearchPathRelative p ->
+      let rec try_paths = function
+        | [] -> ()
+        | prefix :: rest ->
+          if write_if_exists (Filename.concat prefix p)
+          then ()
+          else try_paths rest in
+      let dirname =
+        Option.value_map path ~default:[] ~f:(fun p -> [Filename.dirname p]) in
+      try_paths (dirname @ Option.value search_paths ~default:[])
+    | Hhas_symbol_refs.DocRootRelative p -> ignore @@
+      let resolved = Filename.concat (Option.value doc_root ~default:"") p in
+      write_if_exists resolved
+    | Hhas_symbol_refs.IncludeRootRelative (v, p) -> if p <> "" then
+      Option.iter include_roots (fun irs ->
+        Option.iter (SMap.find_opt v irs) (fun ir ->
+          let resolved = Filename.concat ir p in
+          ignore @@ write_if_exists resolved)) in
+  if not (Hhas_symbol_refs.IncludePathSet.is_empty includes) then begin
+    B.add_string buf "\n.includes {";
+    Hhas_symbol_refs.IncludePathSet.iter write_include includes;
+    B.add_string buf "\n}\n"
+  end
 
 let add_symbol_ref_regions buf symbol_refs =
   let add_region name refs =
@@ -1567,14 +1598,12 @@ let add_symbol_ref_regions buf symbol_refs =
       B.add_string buf " {";
       SSet.iter (fun s -> B.add_string buf ("\n  " ^ s)) refs;
       B.add_string buf "\n}\n";
-    end
-  in
-  add_region "includes" symbol_refs.Hhas_symbol_refs.includes;
+    end in
   add_region "constant_refs" symbol_refs.Hhas_symbol_refs.constants;
   add_region "function_refs" symbol_refs.Hhas_symbol_refs.functions;
   add_region "class_refs" symbol_refs.Hhas_symbol_refs.classes
 
-let add_program_content dump_symbol_refs buf hhas_prog =
+let add_program_content ?path dump_symbol_refs buf hhas_prog =
   let functions = Hhas_program.functions hhas_prog in
   let top_level_body = Hhas_program.main hhas_prog in
   let classes = Hhas_program.classes hhas_prog in
@@ -1585,17 +1614,19 @@ let add_program_content dump_symbol_refs buf hhas_prog =
   List.iter (add_fun_def buf) functions;
   List.iter (add_class_def buf) classes;
   List.iter (add_typedef buf) (Hhas_program.typedefs hhas_prog);
-  if dump_symbol_refs then add_symbol_ref_regions buf symbol_refs
+  if dump_symbol_refs then begin
+    add_include_region ?path buf symbol_refs.Hhas_symbol_refs.includes;
+    add_symbol_ref_regions buf symbol_refs
+  end
 
 let add_program ?path dump_symbol_refs buf hhas_prog =
   match path with
-  | Some path ->
-      let path = Relative_path.to_absolute path in
-      B.add_string
-        buf
-        (Printf.sprintf "# %s starts here\n\n.filepath \"%s\";\n" path path);
-      add_program_content dump_symbol_refs buf hhas_prog;
-      B.add_string buf (Printf.sprintf "\n# %s ends here\n" path)
+  | Some p ->
+    let p = Relative_path.to_absolute p in
+    B.add_string buf
+      (Printf.sprintf "# %s starts here\n\n.filepath \"%s\";\n" p p);
+    add_program_content ~path:p dump_symbol_refs buf hhas_prog;
+    B.add_string buf (Printf.sprintf "\n# %s ends here\n" p)
   | None ->
       B.add_string buf "#starts here\n";
       add_program_content dump_symbol_refs buf hhas_prog;

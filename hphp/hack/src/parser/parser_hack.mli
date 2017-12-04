@@ -10,6 +10,7 @@
 
 type parser_return = {
     file_mode  : FileInfo.mode option; (* None if PHP *)
+    is_hh_file : bool;
     comments   : (Pos.t * Prim_defs.comment) list;
     ast        : Ast.program;
     content   : string;

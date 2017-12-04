@@ -296,15 +296,11 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
           (SyntaxError.start_offset e) (SyntaxError.end_offset e) in
       Emit_program.emit_fatal_program ~ignore_message:false error_t pos s
     | `ParseResult (errors, parser_return, _) ->
-      let is_hh_file =
-        Option.value_map parser_return.Parser_hack.file_mode
-          ~default:false ~f:(fun v -> v <> FileInfo.Mphp)
-      in
       let ast = parser_return.Parser_hack.ast in
       List.iter (Errors.get_error_list errors) (fun e ->
         Printf.printf "%s\n" (Errors.to_string (Errors.to_absolute e)));
       if Errors.is_empty errors
-      then Emit_program.from_ast is_hh_file ast
+      then Emit_program.from_ast parser_return.Parser_hack.is_hh_file ast
       else Emit_program.emit_fatal_program ~ignore_message:true
         Hhbc_ast.FatalOp.Parse Pos.none "Syntax error"
       in

@@ -83,7 +83,7 @@ let declare_and_check content ~f tcopt =
   Autocomplete.auto_complete_for_global := "";
   Errors.ignore_ @@ make_then_revert_local_changes begin fun () ->
     Fixmes.HH_FIXMES.(remove_batch @@ KeySet.singleton path);
-    let {Parser_hack.file_mode = _; comments = _; content = _; ast} =
+    let {Parser_hack.file_mode = _; comments = _; content = _; ast; is_hh_file = _ } =
       Parser_hack.program tcopt path content
     in
     let funs, classes, typedefs, consts =

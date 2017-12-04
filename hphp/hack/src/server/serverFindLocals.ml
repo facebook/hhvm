@@ -514,7 +514,7 @@ end
 
 let parse tcopt content =
   Errors.ignore_ begin fun () ->
-    let {Parser_hack.ast; comments = _; file_mode = _; content = _;} =
+    let {Parser_hack.ast; comments = _; file_mode = _; content = _; is_hh_file = _ } =
       Parser_hack.program
         tcopt
         Relative_path.default

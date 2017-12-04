@@ -86,7 +86,8 @@ let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
   let invalidated =
     Full_fidelity_editable_positioned_syntax.from_positioned_syntax
       invalidated in
-  let env = Lowerer.make_env file in
+  let is_hh_file = is_hack tree in
+  let env = Lowerer.make_env ~is_hh_file file in
   Lowerer.lower env ~source_text ~script:invalidated
 
 let measure : ('a -> 'b) -> 'a -> 'b * float = fun f x ->

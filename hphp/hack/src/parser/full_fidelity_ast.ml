@@ -39,6 +39,7 @@ let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
 (* Context of the file being parsed, as (hopefully some day read-only) state. *)
 type env =
   { hhvm_compat_mode         : bool
+  ; is_hh_file               : bool
   ; codegen                  : bool
   ; php5_compat_mode         : bool
   ; elaborate_namespaces     : bool
@@ -2455,6 +2456,7 @@ let scour_comments
 
 type result =
   { fi_mode  : FileInfo.mode
+  ; is_hh_file : bool
   ; ast      : Ast.program
   ; content  : string
   ; file     : Relative_path.t
@@ -2474,10 +2476,12 @@ let make_env
   ?(enable_hh_syntax         = false                   )
   ?(parser_options           = ParserOptions.default   )
   ?(fi_mode                  = FileInfo.Mpartial       )
+  ?(is_hh_file               = false                   )
   ?stats
   (file : Relative_path.t)
   : env
   = { hhvm_compat_mode
+    ; is_hh_file
     ; codegen                 = codegen || hhvm_compat_mode
     ; php5_compat_mode
     ; elaborate_namespaces
@@ -2514,6 +2518,7 @@ let lower ~source_text ~script env : result =
   in
   let () = if env.keep_errors then Fixmes.HH_FIXMES.add env.file fixmes in
   { fi_mode = env.fi_mode
+  ; is_hh_file = env.is_hh_file
   ; ast
   ; content = SourceText.text source_text
   ; comments
@@ -2570,6 +2575,7 @@ let from_text (env : env) (source_text : SourceText.t) : result =
     )
   in
   let env = if env.fi_mode = fi_mode then env else { env with fi_mode } in
+  let env = { env with is_hh_file = is_hack tree } in
   lower
     env
     ~source_text
@@ -2585,6 +2591,7 @@ let from_file (env : env) : result =
 
 let legacy (x : result) : Parser_hack.parser_return =
   { Parser_hack.file_mode = Some x.fi_mode
+  ; Parser_hack.is_hh_file = x.is_hh_file
   ; Parser_hack.comments  = x.comments
   ; Parser_hack.ast       = x.ast
   ; Parser_hack.content   = x.content
@@ -2594,4 +2601,5 @@ let from_text_with_legacy (env : env) (content : string)
   : Parser_hack.parser_return =
     let source_text = SourceText.make env.file content in
     legacy @@ from_text env source_text
+
 let from_file_with_legacy env = legacy (from_file env)

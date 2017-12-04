@@ -42,6 +42,7 @@ let init_env file lb popt quick = {
 
 type parser_return = {
   file_mode  : FileInfo.mode option; (* None if PHP *)
+  is_hh_file : bool;
   comments   : (Pos.t * comment) list;
   ast        : Ast.program;
   content    : string;
@@ -463,7 +464,8 @@ let rec program
   L.fixmes := IMap.empty;
   let lb = Lexing.from_string content in
   let env = init_env file lb popt quick in
-  let ast, file_mode = header env in
+  let file_type, ast, file_mode = header env in
+  let is_hh_file = file_type = FileInfo.HhFile in
   let comments = !L.comment_list in
   let fixmes = !L.fixmes in
   L.comment_list := [];
@@ -475,7 +477,7 @@ let rec program
   let ast = if elaborate_namespaces
     then Namespaces.elaborate_toplevel_defs env.popt ast
     else ast in
-  {file_mode; comments; ast; content}
+  {file_mode; is_hh_file; comments; ast; content}
 
 and program_with_default_popt
     ?(elaborate_namespaces = true)
@@ -503,13 +505,13 @@ and header env =
       let attr = [] in
       let result = ignore_toplevel None ~attr [] env (fun x -> x = Teof) in
       expect env Teof;
-      result, head
+      file_type, result, head
   | _, Some mode ->
       let result = toplevel [] { env with mode = mode } (fun x -> x = Teof) in
       expect env Teof;
-      result, head
+      file_type, result, head
   | _ ->
-      [], head
+      file_type, [], head
 
 and get_header env =
   match L.header env.file env.lb with

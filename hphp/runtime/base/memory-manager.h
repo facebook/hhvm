@@ -1043,6 +1043,12 @@ private:
     std::string filename{};
   };
 
+  /*
+   * Pushes some allocation stats to scuba.
+   */
+  void publishStats(const char* name, const std::vector<int64_t> &stats,
+      uint32_t sampleRate);
+
   /////////////////////////////////////////////////////////////////////////////
 
 private:

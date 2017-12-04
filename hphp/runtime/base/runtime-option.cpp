@@ -394,6 +394,9 @@ bool RuntimeOption::DisableSmallAllocator = true;
 bool RuntimeOption::DisableSmallAllocator = false;
 #endif
 
+int RuntimeOption::PerAllocSampleF = 100 * 1000 * 1000;
+int RuntimeOption::TotalAllocSampleF = 1 * 1000 * 1000;
+
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
 
@@ -1210,6 +1213,11 @@ void RuntimeOption::Load(
     Config::Bind(DisableSmallAllocator, ini, config,
                  "Eval.DisableSmallAllocator", DisableSmallAllocator);
     SetArenaSlabAllocBypass(DisableSmallAllocator);
+
+    Config::Bind(PerAllocSampleF, ini, config, "Eval.PerAllocSampleF",
+                 PerAllocSampleF);
+    Config::Bind(TotalAllocSampleF, ini, config, "Eval.TotalAllocSampleF",
+                 TotalAllocSampleF);
 
     if (RecordCodeCoverage) CheckSymLink = true;
     Config::Bind(CodeCoverageOutputFile, ini, config,

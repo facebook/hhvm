@@ -35,6 +35,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ptr-map.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
@@ -363,6 +364,9 @@ void MemoryManager::resetAllocator() {
   m_front = m_limit = 0;
   tl_sweeping = false;
   m_exiting = false;
+  if (StructuredLog::coinflip(RuntimeOption::TotalAllocSampleF)) {
+    publishStats("total", totalSmallAllocs, RuntimeOption::TotalAllocSampleF);
+  }
   resetAllStats();
   setGCEnabled(RuntimeOption::EvalEnableGC);
   resetGC();
@@ -680,6 +684,10 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
     currentSmallAllocs.resize(kNumSmallSizes, 0);
     ++totalSmallAllocs[index];
     ++currentSmallAllocs[index];
+    if (StructuredLog::coinflip(RuntimeOption::PerAllocSampleF)) {
+      publishStats("current", currentSmallAllocs,
+          RuntimeOption::PerAllocSampleF);
+    }
 
     // Stats correction; mallocBigSize() pulls stats from jemalloc.
     m_stats.mmUsage -= nbytes;
@@ -1037,6 +1045,20 @@ bool MemoryManager::isGCEnabled() {
 
 void MemoryManager::setGCEnabled(bool isGCEnabled) {
   m_gc_enabled = isGCEnabled;
+}
+
+void MemoryManager::publishStats(const char* name,
+    const std::vector<int64_t> &stats, uint32_t sampleRate) {
+  if (stats.size() == 0) return;
+  StructuredLogEntry log;
+  for (size_t i = 0; i < stats.size(); ++i) {
+    std::array<char, 32> log_name;
+    snprintf(&log_name[0], log_name.size(), "%s[%lu]", name,
+        kSizeIndex2Size[i]);
+    log.setInt(&log_name[0], stats[i]);
+  }
+  log.setInt("sample_rate", sampleRate);
+  StructuredLog::log("hhvm_allocs", log);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

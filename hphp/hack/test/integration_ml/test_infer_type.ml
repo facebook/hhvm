@@ -154,6 +154,27 @@ let callback_cases = [
   ("callback.php", 5, 8), "string";
 ]
 
+let invariant_violation = "<?hh // strict
+class Exception {}
+function invariant_violation(string $msg): noreturn {
+  throw new Exception();
+}
+"
+
+let nullthrows = "<?hh // strict
+function nullthrows<T>(?T $x): T {
+  invariant($x !== null, 'got null');
+//          ^3:13
+  return $x;
+//       ^5:10
+}
+"
+
+let nullthrows_cases = [
+  ("nullthrows.php", 3, 13), "?T";
+  ("nullthrows.php", 5, 10), "T";
+]
+
 let files = [
   "id.php", id;
   "A.php", class_A;
@@ -162,6 +183,8 @@ let files = [
   "loop_assignment.php", loop_assignment;
   "lambda1.php", lambda1;
   "callback.php", callback;
+  "invariant_violation.php", invariant_violation;
+  "nullthrows.php", nullthrows;
 ]
 
 let cases =
@@ -171,6 +194,7 @@ let cases =
   @ loop_assignment_cases
   @ lambda_cases
   @ callback_cases
+  @ nullthrows_cases
 
 let () =
   let env = Test.setup_server () in

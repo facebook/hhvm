@@ -1632,6 +1632,7 @@ void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt,
   }
   completeScope(intf->getClassScope());
   m_clsContexts.pop();
+  registerClassAlias(name->text());
 }
 
 void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
@@ -2352,7 +2353,7 @@ void Parser::setTypeVars(Token &out, const Token &name) {
   out.typeAnnotation->setGenerics(tvars);
 }
 
-void Parser::onTypedef(Token& out, const Token& name, const Token& type,
+void Parser::onTypedef(Token& out, Token& name, const Token& type,
                        const Token* attr) {
   // Note: we don't always get TypeAnnotations (e.g. for shape types
   // currently).
@@ -2369,6 +2370,7 @@ void Parser::onTypedef(Token& out, const Token& name, const Token& type,
     annot->setGenerics(name.typeAnnotation->getGenerics());
   }
 
+  registerClassAlias(name->text());
   auto td_stmt = NEW_STMT(TypedefStatement, name.text(), attrList, annot);
   td_stmt->onParse(m_ar, m_file);
   out->stmt = td_stmt;

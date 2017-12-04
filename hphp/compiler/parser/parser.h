@@ -308,7 +308,7 @@ public:
   void onLabel(Token &out, Token &label);
   void onGoto(Token &out, Token &label, bool limited);
   void setTypeVars(Token &out, const Token &name);
-  void onTypedef(Token& out, const Token& name, const Token& type,
+  void onTypedef(Token& out, Token& name, const Token& type,
                  const Token* attr = nullptr);
 
   void onTypeAnnotation(Token& out, const Token& name, const Token& typeArgs);

@@ -1656,6 +1656,22 @@ let require_errors node parents hhvm_compat_mode trait_use_clauses errors =
     trait_use_clauses, errors
   | _ -> trait_use_clauses, errors
 
+let check_type_name name namespace_name name_text location names errors =
+  begin match SMap.get name_text names.t_classes with
+  | Some { f_location = location; f_is_def = false; _ } ->
+    let error =
+      make_name_already_used_error name name_text name_text location
+        SyntaxError.type_name_is_already_in_use in
+    names, error :: errors
+  | _ ->
+    let def =
+      make_first_use_or_def ~is_def:true location namespace_name name_text in
+    let names =
+      { names with
+        t_classes = SMap.add name_text def names.t_classes} in
+    names, errors
+  end
+
 let classish_errors node parents is_hack hhvm_compat_mode namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
@@ -1714,20 +1730,7 @@ let classish_errors node parents is_hack hhvm_compat_mode namespace_name names e
       | Some TokenKind.Class | Some TokenKind.Trait ->
         let name = text cd.classish_name in
         let location = make_location_of_node cd.classish_name in
-        begin match SMap.get name names.t_classes with
-        | Some { f_location = location; f_is_def = false; _ } ->
-          let error =
-            make_name_already_used_error cd.classish_name name name location
-              SyntaxError.type_name_is_already_in_use in
-          names, error :: errors
-        | _ ->
-          let def =
-            make_first_use_or_def ~is_def:true location namespace_name name in
-          let names =
-            { names with
-              t_classes = SMap.add name def names.t_classes} in
-          names, errors
-        end
+        check_type_name cd.classish_name namespace_name name location names errors
       | _ ->
         names, errors in
     names, errors
@@ -1746,13 +1749,18 @@ let type_errors node parents is_strict hhvm_compat_mode errors =
     t.simple_type_specifier SyntaxError.error2032 t.simple_type_specifier
   | _ -> errors
 
-let alias_errors node errors =
+let alias_errors node namespace_name names errors =
   match syntax node with
-  | AliasDeclaration {alias_keyword; alias_constraint; _} when
-    token_kind alias_keyword = Some TokenKind.Type &&
-    not (is_missing alias_constraint) ->
-      make_error_from_node alias_keyword SyntaxError.error2034 :: errors
-  | _ -> errors
+  | AliasDeclaration ad ->
+    let errors =
+      if token_kind ad.alias_keyword = Some TokenKind.Type &&
+        not (is_missing ad.alias_constraint)
+      then make_error_from_node ad.alias_keyword SyntaxError.error2034 :: errors
+      else errors in
+    let name = text ad.alias_name in
+    let location = make_location_of_node ad.alias_name in
+    check_type_name ad.alias_name namespace_name name location names errors
+  | _ -> names, errors
 
 let is_invalid_group_use_clause kind clause =
   match syntax clause with
@@ -2299,7 +2307,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
       class_element_errors node parents errors in
     let errors =
       type_errors node parents is_strict hhvm_compatibility_mode errors in
-    let errors = alias_errors node errors in
+    let names, errors = alias_errors node namespace_name names errors in
     let errors = group_use_errors node errors in
     let names, errors =
       const_decl_errors node parents hhvm_compatibility_mode namespace_name names errors in

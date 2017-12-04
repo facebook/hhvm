@@ -79,8 +79,24 @@ function main($foo_str, $cuf, $cufa) {
   $cufa($foo_str, &$y);
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
+  echo "fb_intercept:\n";
+  if (!ini_get('hhvm.repo.authoritative')) intercept();
+
   echo "Fatal call:\n";
   foo('x', 'y', array());
 }
 
 main('foo', 'call_user_func', 'call_user_func_array');
+
+function foo2($x, $y, $z, $t, $q) {
+  var_dump("foo", $x);
+}
+
+function bar($name, $obj, $params, $data, &$done) {
+  var_dump("bar", func_get_args());
+}
+
+function intercept() {
+  fb_intercept('foo2', 'bar', null);
+  foo2(1, 2, 3, 4, 5);
+}

@@ -927,7 +927,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv);
 void enterVMAtCurPC();
 bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
                       int nregular, bool doCufRefParamChecks,
-                      TypedValue* retval);
+                      TypedValue* retval, bool checkRefAnnot);
 
 ///////////////////////////////////////////////////////////////////////////////
 

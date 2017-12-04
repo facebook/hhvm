@@ -449,7 +449,8 @@ public:
                         StringData* invName = nullptr,
                         InvokeFlags flags = InvokeNormal,
                         bool useWeakTypes = false,
-                        bool dynamic = true);
+                        bool dynamic = true,
+                        bool checkRefAnnot = false);
 
   TypedValue invokeFunc(const CallCtx& ctx,
                         const Variant& args_,

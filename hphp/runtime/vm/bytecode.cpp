@@ -1277,7 +1277,7 @@ static void raiseFPassHintWarning(const StringData* fname, uint32_t id,
 // params precede the unpack.
 bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
                       int nregular, bool doCufRefParamChecks,
-                      TypedValue* retval) {
+                      TypedValue* retval, bool checkRefAnnot) {
   assert(!cellIsNull(&args));
   assert(nregular >= 0);
   assert((stack.top() + nregular) == (void*) ar);
@@ -1314,10 +1314,16 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
         cellDup(tvToCell(from), *to);
       } else if (LIKELY(from.m_type == KindOfRef &&
                         from.m_data.pref->hasMultipleRefs())) {
-        WRAP(raiseFPassHintWarning(f->fullDisplayName(), i, FPassHint::Cell));
+          if (checkRefAnnot) {
+            WRAP(
+              raiseFPassHintWarning(f->fullDisplayName(), i, FPassHint::Cell)
+            );
+          }
         refDup(from, *to);
       } else {
-        WRAP(raiseFPassHintWarning(f->fullDisplayName(), i, FPassHint::Cell));
+        if (checkRefAnnot) {
+          WRAP(raiseFPassHintWarning(f->fullDisplayName(), i, FPassHint::Cell));
+        }
         if (doCufRefParamChecks && f->mustBeRef(i)) {
           WRAP(raise_warning("Parameter %d to %s() expected to be a reference, "
                              "value given", i + 1, f->fullName()->data()));
@@ -5279,7 +5285,8 @@ static bool doFCallArray(PC& pc, int numStackValues,
     }
 
     auto prepResult = prepareArrayArgs(ar, args, vmStack(), numStackValues,
-                                       /* ref param checks */ true, nullptr);
+                                       /* ref param checks */ true, nullptr,
+                                       /* check ref annot */ true);
     if (UNLIKELY(!prepResult)) {
       vmStack().pushNull(); // return value is null if args are invalid
       return false;

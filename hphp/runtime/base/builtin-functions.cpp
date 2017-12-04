@@ -443,7 +443,8 @@ vm_decode_function(const Variant& function,
 }
 
 Variant vm_call_user_func(const Variant& function, const Variant& params,
-                          bool forwarding /* = false */) {
+                          bool forwarding /* = false */,
+                          bool checkRef /* = false */) {
   ObjectData* obj = nullptr;
   Class* cls = nullptr;
   CallerFrame cf;
@@ -457,7 +458,7 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
   auto ret = Variant::attach(
     g_context->invokeFunc(f, params, obj, cls,
                           nullptr, invName, ExecutionContext::InvokeCuf,
-                          false, dynamic)
+                          false, dynamic, checkRef)
   );
   if (UNLIKELY(ret.getRawType()) == KindOfRef) {
     tvUnbox(*ret.asTypedValue());

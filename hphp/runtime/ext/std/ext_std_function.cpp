@@ -59,12 +59,14 @@ bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
 
 Variant HHVM_FUNCTION(call_user_func, const Variant& function,
                       const Array& params /* = null_array */) {
-  return vm_call_user_func(function, params);
+  return vm_call_user_func(function, params, /* forward */ false,
+                           /* check ref */ true);
 }
 
 Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
                       const Array& params) {
-  return vm_call_user_func(function, params);
+  return vm_call_user_func(function, params, /* forward */ false,
+                           /* check ref */ true);
 }
 
 Variant HHVM_FUNCTION(check_user_func_async, const Variant& /*handles*/,
@@ -89,7 +91,7 @@ Variant HHVM_FUNCTION(forward_static_call, const Variant& function,
                               const Array& params /* = null_array */) {
   // Setting the bound parameter to true tells vm_call_user_func()
   // propogate the current late bound class
-  return vm_call_user_func(function, params, true);
+  return vm_call_user_func(function, params, true, /* check ref */ true);
 }
 
 String HHVM_FUNCTION(create_function, const String& args, const String& code) {

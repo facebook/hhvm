@@ -1636,7 +1636,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         StringData* invName /* = NULL */,
                                         InvokeFlags flags /* = InvokeNormal */,
                                         bool useWeakTypes /* = false */,
-                                        bool dynamic /* = true */) {
+                                        bool dynamic /* = true */,
+                                        bool checkRefAnnot /* = false */) {
   const auto& args = *args_.asCell();
   assert(isContainerOrNull(args));
 
@@ -1683,7 +1684,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
         ? make_tv<KindOfArray>(staticEmptyArray())
         : args;
       auto prepResult = prepareArrayArgs(ar, prepArgs, vmStack(), 0,
-                                         flags & InvokeCuf, &retval);
+                                         flags & InvokeCuf, &retval,
+                                         checkRefAnnot);
       if (UNLIKELY(!prepResult)) {
         assert(KindOfNull == retval.m_type);
         return true;

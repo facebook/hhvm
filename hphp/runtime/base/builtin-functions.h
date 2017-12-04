@@ -126,7 +126,7 @@ vm_decode_function(const Variant& function,
 }
 
 Variant vm_call_user_func(const Variant& function, const Variant& params,
-                          bool forwarding = false);
+                          bool forwarding = false, bool checkRef = false);
 
 Variant invoke_static_method(const String& s, const String& method,
                              const Variant& params, bool fatal = true);

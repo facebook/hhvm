@@ -544,6 +544,17 @@ RegionDescPtr form_region(Env& env) {
       break;
     }
 
+    // Break translation if there's already a translation starting at the
+    // current SrcKey.
+    if (!firstInst) {
+      auto const sr = tc::findSrcRec(env.sk);
+      if (sr != nullptr && sr->getTopTranslation() != nullptr) {
+        FTRACE(1, "selectTracelet: breaking region at TC entry: {}\n",
+               show(env.sk));
+        break;
+      }
+    }
+
     if (!prepareInstruction(env)) break;
 
     env.curBlock->setKnownFunc(env.sk, env.inst.funcd);

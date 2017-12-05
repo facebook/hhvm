@@ -1,5 +1,7 @@
 <?hh // strict
 
-function foo(mixed $x): bool {
-  return $x is noreturn;
+function foo(mixed $x): void {
+  if ($x is noreturn) {
+    hh_show($x);
+  }
 }

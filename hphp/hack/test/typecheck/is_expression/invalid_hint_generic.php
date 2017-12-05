@@ -1,5 +1,7 @@
 <?hh // strict
 
-function foo<T>(mixed $x): bool {
-  return $x is T;
+function foo<T>(mixed $x): void {
+  if ($x is T) {
+    hh_show($x);
+  }
 }

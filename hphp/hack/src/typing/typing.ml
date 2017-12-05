@@ -5113,6 +5113,16 @@ and condition ?lhs_of_null_coalesce env tparamet =
       in
       let env, x_ty = resolve_obj env obj_ty in
       set_local env ivar x_ty
+  | _p, Is (ivar, h) ->
+    (* What is the local variable bound to the expression? *)
+    let env, ivar = get_instance_var env ivar in
+    (* Resolve the typehint to a type *)
+    let env, hint_ty = Phase.hint_locl env h in
+    begin match (TUtils.InvalidIsExpressionHint.check hint_ty) with
+      | Some (_, Tclass _) (* We still want to refine in this special case. *)
+      | None -> set_local env ivar hint_ty
+      | _ -> env
+    end
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null))
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e) ->
       let env, _ = expr env e in

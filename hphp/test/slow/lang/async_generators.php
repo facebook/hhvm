@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class Logger {
   public static function attach($obj) {

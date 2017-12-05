@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class Foo {
   public function __destruct() {

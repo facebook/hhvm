@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class Marker {
   public function __destruct() {

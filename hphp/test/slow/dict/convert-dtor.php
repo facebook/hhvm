@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Dtor {

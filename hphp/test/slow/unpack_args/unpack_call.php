@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 function regular($a, $b, $c) {
   echo '* ', __FUNCTION__, "\n";

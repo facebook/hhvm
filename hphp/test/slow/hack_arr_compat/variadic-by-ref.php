@@ -1,4 +1,4 @@
-<?hh
+<?php /* binding assignment */
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function error($errno, $errstr) {

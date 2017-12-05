@@ -1,4 +1,4 @@
-<?hh
+<?php /* destructor */
 
 class HaveDestructor {
   function __destruct() {}

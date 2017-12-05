@@ -1,4 +1,4 @@
-<?hh
+<?php /* destructor */
 
 class Foo {
   public function __construct(private $options) {

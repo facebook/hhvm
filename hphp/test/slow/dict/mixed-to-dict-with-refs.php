@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 function array_unset<Tk, Tv>(array<Tk, Tv> $arr, Tk $k): array<Tk, Tv> {
   unset($arr[$k]);

@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class Destruct {
   function __destruct() {}

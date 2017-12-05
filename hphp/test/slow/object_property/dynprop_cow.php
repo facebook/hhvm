@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 function test_read() {
   echo "---- read ----\n";

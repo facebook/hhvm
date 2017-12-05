@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class C {
   function __construct(private $v) {}

@@ -1,4 +1,4 @@
-<?hh
+<?php /* ref in array */
 
 
 function main() {

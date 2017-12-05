@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class X {
   public function __construct(private int $i) {}

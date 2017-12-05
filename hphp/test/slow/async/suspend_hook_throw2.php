@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 function thrower($why, $what) {
   if ($why == 'exit' && $what == 'foo') {

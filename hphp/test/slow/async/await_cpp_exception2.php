@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class ExitOnDestruct {
   private function __destruct() {

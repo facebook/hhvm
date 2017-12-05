@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class E1 extends Exception {
   private static $e;

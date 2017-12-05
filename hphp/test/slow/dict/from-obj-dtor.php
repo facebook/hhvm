@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Cls implements Iterator {
@@ -29,5 +29,5 @@ function test() {
   }
 }
 
-error_reporting(0);
+error_reporting(E_ERROR);
 test();

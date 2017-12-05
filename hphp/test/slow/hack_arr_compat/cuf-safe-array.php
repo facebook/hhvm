@@ -1,4 +1,4 @@
-<?hh
+<?php /* ref in array */
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 $global_var = 123;

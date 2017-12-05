@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 # !!! Please contact devx_www oncall if this breaks. !!!
 #

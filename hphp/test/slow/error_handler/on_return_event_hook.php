@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class MyClass {
   public function __construct() {

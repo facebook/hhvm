@@ -461,7 +461,7 @@ static void handle_exception_helper(bool& ret,
         !context->getExitCallback().isNull() &&
         is_callable(context->getExitCallback())) {
       Array stack = e.getBacktrace();
-      Array argv = make_packed_array(ExitException::ExitCode.load(), stack);
+      Array argv = make_packed_array(tl_exit_code, stack);
       vm_call_user_func(context->getExitCallback(), argv);
     }
   } catch (const XDebugExitExn&) {
@@ -1982,7 +1982,7 @@ static int execute_program_impl(int argc, char** argv) {
         execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
         ret = 255;
         if (hphp_invoke_simple(file, false /* warmup only */)) {
-          ret = ExitException::ExitCode;
+          ret = tl_exit_code;
         }
         execute_command_line_end(po.xhprofFlags, true, file.c_str());
       }

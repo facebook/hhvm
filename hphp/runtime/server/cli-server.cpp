@@ -980,7 +980,7 @@ void CLIWorker::doJob(int client) {
       MonitorThread monitor(client);
       FTRACE(1, "CLIWorker::doJob({}): invoking {}...\n", client, args[0]);
       if (hphp_invoke_simple(args[0], false /* warmup only */)) {
-        ret = ExitException::ExitCode;
+        ret = tl_exit_code;
       }
       FTRACE(2, "CLIWorker::doJob({}): waiting for monitor...\n", client);
     }

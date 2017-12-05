@@ -136,11 +136,11 @@ struct RequestMemoryExceededException : ResourceExceededException {
 
 //////////////////////////////////////////////////////////////////////
 
-struct ExitException : ExtendedException {
-  static std::atomic<int> ExitCode; // XXX should not be static
+extern __thread int tl_exit_code;
 
+struct ExitException : ExtendedException {
   explicit ExitException(int exitCode) {
-    ExitCode = exitCode;
+    tl_exit_code = exitCode;
   }
   EXCEPTION_COMMON_IMPL(ExitException);
 };

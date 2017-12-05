@@ -2226,7 +2226,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   } catch (ExitException &e) {
     errorString << s_exit.data();
     errorString << " : ";
-    errorString << ExitException::ExitCode;
+    errorString << tl_exit_code;
   } catch (Eval::DebuggerException &e) {
   } catch (Exception &e) {
     errorString << s_cppException.data();

@@ -36,7 +36,7 @@ const Slot s_lineIdx{4};
 const Slot s_traceIdx{5};
 const Slot s_traceOptsIdx{0};
 
-std::atomic<int> ExitException::ExitCode{0};  // XXX: this should not be static
+__thread int tl_exit_code{0};
 
 ExtendedException::ExtendedException() : Exception() {
   computeBacktrace();

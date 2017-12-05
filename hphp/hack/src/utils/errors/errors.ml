@@ -773,6 +773,7 @@ module Typing                               = struct
   let assigning_to_const                    = 4196 (* DONT MODIFY!!!! *)
   let self_const_parent_not                 = 4197 (* DONT MODIFY!!!! *)
   let parent_const_self_not                 = 4198 (* DONT MODIFY!!!! *)
+  let partially_valid_is_expression_hint    = 4199 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2437,9 +2438,21 @@ let trait_reuse p_pos p_name class_name trait =
   let err' = "It is already used through "^(Utils.strip_ns p_name) in
   add_list Typing.trait_reuse [c_pos, err; p_pos, err']
 
+(**
+ * This error should be unfixmeable, because the `is` expression does not
+ * support it at all.
+ *)
 let invalid_is_expression_hint pos ty_str =
   add Typing.invalid_is_expression_hint pos
-    ("The `is` operator is incompatible with "^ty_str)
+    ("The `is` operator cannot be used with "^ty_str)
+
+(**
+ * This error is fixmeable, because the typechecker will still refine the type
+ * despite the hint not being completely valid.
+ *)
+let partially_valid_is_expression_hint pos ty_str=
+  add Typing.partially_valid_is_expression_hint pos
+    ("The `is` operator should not be used with "^ty_str)
 
 let override_final ~parent ~child =
   add_list Typing.override_final [child, "You cannot override this method";

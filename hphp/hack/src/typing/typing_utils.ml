@@ -545,44 +545,59 @@ end
 (* Check if a type may be used in an `is` expression *)
 (*****************************************************************************)
 
-module InvalidIsExpressionHint : sig
-  val check: locl ty -> locl ty option
+module IsExprHint : sig
+  type t =
+    | Valid
+    | Partial of locl ty
+    | Invalid of locl ty
+
+  val validate: locl ty -> t
   val print: locl ty_ -> string
 end = struct
 
+  type t =
+    | Valid
+    | Partial of locl ty
+    | Invalid of locl ty
+
   let visitor =
     object(_this)
-      inherit [locl ty option] Type_visitor.type_visitor
-      method! on_tany _ r = Some (r, Tany)
-      method! on_terr _ r = Some (r, Terr)
+      inherit [t] Type_visitor.type_visitor as super
+      method! on_tany _ r = Invalid (r, Tany)
+      method! on_terr _ r = Invalid (r, Terr)
       method! on_tprim acc r prim =
         match prim with
         | N.Tvoid
-        | N.Tnoreturn -> Some (r, Tprim prim)
+        | N.Tnoreturn -> Invalid (r, Tprim prim)
         | _ -> acc
-      (* method! on_tfun _ r fun_type = Some (r, Tfun fun_type) *)
-      method! on_tvar _ r id = Some (r, Tvar id)
+      (* method! on_tfun _ r fun_type = Invalid (r, Tfun fun_type) *)
+      method! on_tvar _ r id = Invalid (r, Tvar id)
       method! on_tabstract acc r ak ty_opt =
         match ak with
         | AKenum _ -> acc
         (* TODO(kunalm) support `this`, `self`, `static`, type consts *)
-        | _ -> Some (r, Tabstract (ak, ty_opt))
-      method! on_tanon _ r arity id = Some (r, Tanon (arity, id))
-      method! on_tunresolved _ r tyl = Some (r, Tunresolved tyl)
-      method! on_tobject _ r = Some (r, Tobject)
+        | _ -> Invalid (r, Tabstract (ak, ty_opt))
+      method! on_tanon _ r arity id = Invalid (r, Tanon (arity, id))
+      method! on_tunresolved _ r tyl = Invalid (r, Tunresolved tyl)
+      method! on_tobject _ r = Invalid (r, Tobject)
       method! on_tclass acc r cls tyl =
         match tyl with
-        | [] -> acc
-        | _ -> Some (r, Tclass (cls, tyl))
+          | [] -> acc
+          | _ ->
+            let acc = super#on_tclass acc r cls tyl in
+            begin match acc with
+              | Valid -> Partial (r, Tclass (cls, tyl))
+              | _ -> acc
+            end
       method! on_tarraykind acc r array_kind =
         match array_kind with
         | AKempty
         | AKshape _
-        | AKtuple _ -> Some (r, Tarraykind array_kind)
+        | AKtuple _ -> Invalid (r, Tarraykind array_kind)
         | _ -> acc (* TODO(kunalm): actually handle arrays with generics *)
     end
 
-  let check ty = visitor#on_type None ty
+  let validate ty = visitor#on_type Valid ty
 
   let print ty_ = match ty_ with
     | Tclass (_, tyl) when tyl <> [] ->

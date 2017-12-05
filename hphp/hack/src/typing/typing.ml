@@ -1806,13 +1806,17 @@ and expr_
       end else begin
         let env, te, _ = expr env e in
         let env, hint_ty = Phase.hint_locl env hint in
-        match (TUtils.InvalidIsExpressionHint.check hint_ty) with
-          | None ->
-              make_result env (T.Is (te, hint)) (Reason.Rwitness p, Tprim Tbool)
-          | Some (r, ty_) ->
-              Errors.invalid_is_expression_hint (Reason.to_pos r)
-                (TUtils.InvalidIsExpressionHint.print ty_);
-              expr_error env (Reason.Rnone)
+        match (TUtils.IsExprHint.validate hint_ty) with
+          | TUtils.IsExprHint.Valid ->
+            make_result env (T.Is (te, hint)) (Reason.Rwitness p, Tprim Tbool)
+          | TUtils.IsExprHint.Partial (r, ty_) ->
+            Errors.partially_valid_is_expression_hint (Reason.to_pos r)
+              (TUtils.IsExprHint.print ty_);
+            make_result env (T.Is (te, hint)) (Reason.Rwitness p, Tprim Tbool)
+          | TUtils.IsExprHint.Invalid (r, ty_) ->
+            Errors.invalid_is_expression_hint (Reason.to_pos r)
+              (TUtils.IsExprHint.print ty_);
+            expr_error env (Reason.Rnone)
       end
   | Efun (f, idl) ->
       (* This is the function type as declared on the lambda itself.
@@ -5118,10 +5122,11 @@ and condition ?lhs_of_null_coalesce env tparamet =
     let env, ivar = get_instance_var env ivar in
     (* Resolve the typehint to a type *)
     let env, hint_ty = Phase.hint_locl env h in
-    begin match (TUtils.InvalidIsExpressionHint.check hint_ty) with
-      | Some (_, Tclass _) (* We still want to refine in this special case. *)
-      | None -> set_local env ivar hint_ty
-      | _ -> env
+    begin match (TUtils.IsExprHint.validate hint_ty) with
+      | TUtils.IsExprHint.Valid
+      | TUtils.IsExprHint.Partial _ ->
+        set_local env ivar hint_ty
+      | TUtils.IsExprHint.Invalid _ -> env
     end
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null))
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e) ->

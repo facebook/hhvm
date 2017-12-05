@@ -756,6 +756,9 @@ and check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
         check_exhaustiveness_ env pos ty caselist new_enum
       end
     | Tabstract (AKenum id, _) ->
+      let dep = Dep.AllMembers id in
+      Option.iter env.Env.decl_env.Decl_env.droot
+        (fun root -> Typing_deps.add_idep root dep);
       let tc = unsafe_opt @@ Env.get_enum env id in
       Typing_enum.check_enum_exhaustiveness pos tc
         caselist enum_coming_from_unresolved;

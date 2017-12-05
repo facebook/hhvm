@@ -26,7 +26,8 @@ module Dep = struct
 
     (* Const is used to represent class constants. *)
     | Const of string * string
-
+    (* There is a dependency on all members of a class *)
+    | AllMembers of string
     | Class of string
     | Fun of string
     | FunName of string
@@ -74,6 +75,7 @@ module Dep = struct
     | Method (cls, s) -> spf "Method %s::%s" cls s
     | SMethod (cls, s) -> spf "SMethod %s::%s" cls s
     | Cstr s -> "Cstr "^s
+    | AllMembers s -> "AllMembers "^s
     | Extends s -> "Extends "^s
 
 end
@@ -112,6 +114,7 @@ let get_ideps x =
 
 let to_bazooka x =
   match x with
+  | Dep.AllMembers cid
   | Dep.Const (cid, _)
   | Dep.Prop (cid, _)
   | Dep.SProp (cid, _)

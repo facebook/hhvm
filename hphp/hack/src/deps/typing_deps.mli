@@ -14,6 +14,7 @@ module Dep :
       | GConst of string
       | GConstName of string
       | Const of string * string
+      | AllMembers of string
       | Class of string
       | Fun of string
       | FunName of string

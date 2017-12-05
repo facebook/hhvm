@@ -217,11 +217,7 @@ let class_big_diff class1 class2 =
   SSet.compare class1.dc_req_ancestors_extends class2.dc_req_ancestors_extends <> 0 ||
   SSet.compare class1.dc_extends class2.dc_extends <> 0 ||
   SSet.compare class1.dc_xhp_attr_deps class2.dc_xhp_attr_deps <> 0 ||
-  class1.dc_enum_type <> class2.dc_enum_type ||
-  (* due to, e.g. switch exhaustiveness checks, a change in an enum's
-   * constant set is a "big" difference *)
-    (class1.dc_enum_type <> None &&
-       not (SSet.is_empty (ClassDiff.smap class1.dc_consts class2.dc_consts)))
+  class1.dc_enum_type <> class2.dc_enum_type
 
 (*****************************************************************************)
 (* Given a class name adds all the subclasses, we need a "trace" to follow
@@ -378,6 +374,9 @@ let get_class_deps old_classes new_classes trace cid (to_redecl, to_recheck) =
         else
           let to_redecl = get_extend_deps_ trace cid_hash to_redecl in
           let to_recheck = DepSet.union to_redecl to_recheck in
+          let to_recheck =
+            DepSet.union (Typing_deps.get_ideps (Dep.AllMembers cid)) to_recheck
+          in
           DepSet.union deps to_redecl, DepSet.union deps to_recheck
       in
 

@@ -16,7 +16,6 @@ slow/class_type_constant/type_constant2.php
 slow/class_type_constant/type_constant3.php
 slow/class_type_constant/type_constant6.php
 slow/closure/ctor.php
-slow/compilation/aliased-namespaces.php
 slow/constant/bad-arrays.php
 slow/constant/globals-array-constant.php
 slow/debug_backtrace/compact_crash.php
@@ -58,14 +57,12 @@ slow/hack_arr_compat/gena.php
 slow/hack_arr_compat/scalars.php
 slow/hack_mode/2203.php
 slow/hack_mode/2204.php
-slow/hack_mode/2214.php
 slow/hack_mode/closing-tag-asp.php
 slow/hack_mode/closing-tag-php.php
 slow/hack_mode/closing-tag-script.php
 slow/hack_mode/function_hint_with_params_trailing_variadic_param.php
 slow/hack_mode/function_hint_with_type_hinted_variadic_param-trailing-comma.php
 slow/hh/hhconfig/no-config/test.php
-slow/hh_namespace_migration/hh_pair4.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/hhbbc/iteration.php
 slow/inout/autoloader.php

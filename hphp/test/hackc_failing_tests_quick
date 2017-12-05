@@ -19,7 +19,6 @@ quick/debugger/list.php
 quick/dv_i0.php
 quick/eval_noreturn.php
 quick/exceptions.php
-quick/float-overflow-literals.php
 quick/foreach-bad.php
 quick/hh_bad_end.php
 quick/hh_bad_start.php

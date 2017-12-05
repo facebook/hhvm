@@ -673,10 +673,18 @@ module WithStatementAndDeclAndTypeParser
     let parser1, type_arguments = parse_generic_type_arguments_opt parser in
     if is_valid_type_argument_list type_arguments parser parser1
     then
-      let (parser, left, args, right) = parse_expression_list_opt parser1 in
-      let result = make_function_call_with_type_arguments_expression
-        term type_arguments left args right
-      in
+      let parser, result =
+        begin match peek_token_kind parser1 with
+        | ColonColon ->
+          (* handle a<type-args>::... case *)
+          let type_specifier =
+            make_generic_type_specifier term type_arguments in
+          parse_scope_resolution_expression parser1 type_specifier
+        | _ ->
+          let (parser, left, args, right) = parse_expression_list_opt parser1 in
+          parser, make_function_call_with_type_arguments_expression
+            term type_arguments left args right
+        end in
       parse_remaining_expression parser result
     else
       parse_remaining_binary_expression parser term prefix_kind
@@ -757,7 +765,8 @@ module WithStatementAndDeclAndTypeParser
     match kind term with
     | SyntaxKind.QualifiedNameExpression
     | SyntaxKind.MemberSelectionExpression
-    | SyntaxKind.SafeMemberSelectionExpression -> true
+    | SyntaxKind.SafeMemberSelectionExpression
+    | SyntaxKind.ScopeResolutionExpression -> true
     | _ -> false
 
   and parse_remaining_expression parser term =
@@ -2461,7 +2470,6 @@ TODO: This will need to be fixed to allow situations where the qualified name
         let parser1, e = parse_variable_in_php5_compat_mode parser in
         (* for :: only do PHP5 transform for call expressions
            in other cases fall back to the regular parsing logic *)
-        (* TODO: handle calls to generic methods *)
         if peek_token_kind parser1 = LeftParen
         then parser1, e
         else require_name_or_variable_or_error parser SyntaxError.error1048

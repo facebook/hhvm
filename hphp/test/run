@@ -279,6 +279,7 @@ function hh_codegen_cmd($options, $config_file = null) {
   if (isset($options['hackc'])) {
     $cmd .= ' --daemon';
   }
+
   return $cmd;
 }
 
@@ -1003,7 +1004,8 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   }
 
   if (isset($options['repo'])) {
-    $hhbbc_repo = "\"$test.repo/hhvm.hhbbc\"";
+    $program = isset($options['hackc']) ? "hackc" : "hhvm";
+    $hhbbc_repo = "\"$test.repo/$program.hhbbc\"";
     $cmd .= ' -vRepo.Authoritative=true -vRepo.Commit=0';
     $cmd .= " -vRepo.Central.Path=$hhbbc_repo";
   }
@@ -1054,11 +1056,13 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   return array($cmd, $env);
 }
 
-function hphp_cmd($options, $test, $timeout_prefix) {
+function hphp_cmd($options, $test, $timeout_prefix, $hackc) {
   $extra_args = preg_replace("/-v\s*/", "-vRuntime.", extra_args($options));
 
+  $program = "hhvm";
   $hackc_args = "";
-  if (isset($options['hackc'])) {
+  if ($hackc) {
+    $program = "hackc";
     $hh_single_compile = hh_codegen_path();
     $hackc_args = implode(" ", array(
       "-vFlattenTraits=false",
@@ -1078,13 +1082,14 @@ function hphp_cmd($options, $test, $timeout_prefix) {
     find_test_ext($test, 'ini', 'hphp_config'),
     read_opts_file("$test.hphp_opts"),
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
-    "--nofork=1 -thhbc -l1 -k1 -o \"$test.repo\" \"$test\"",
+    '--nofork=1 -thhbc -l1 -k1',
+    "-o \"$test.repo\" --program $program.hhbc \"$test\"",
     $extra_args,
     $hackc_args,
   ));
 }
 
-function hhbbc_cmd($options, $test, $timeout_prefix) {
+function hhbbc_cmd($options, $test, $timeout_prefix, $program) {
   return implode(" ", array(
     $timeout_prefix,
     hhvm_path(),
@@ -1092,7 +1097,7 @@ function hhbbc_cmd($options, $test, $timeout_prefix) {
     '--no-logging',
     '--parallel-num-threads=1',
     read_opts_file("$test.hhbbc_opts"),
-    "-o \"$test.repo/hhvm.hhbbc\" \"$test.repo/hhvm.hhbc\"",
+    "-o \"$test.repo/$program.hhbbc\" \"$test.repo/$program.hhbc\"",
   ));
 }
 
@@ -1677,6 +1682,19 @@ function generate_diff($wanted, $wanted_re, $output)
   return implode("\r\n", $diff);
 }
 
+function dump_repo_to_hhas_files($test, $program, $hhas_target) {
+  $repo = "$test.repo/$program.hhbc";
+  $dump_cmd = implode(" ", array(
+    hhvm_path(),
+    '-vRepo.Authoritative=true',
+    '-vRepo.Commit=false',
+    "-vRepo.Central.Path=$repo",
+    "-vRepo.Local.Path=$repo",
+    '-vEval.DumpHhas=true'));
+  system("$dump_cmd $test 2> /dev/null > $hhas_target", $ret);
+  return $ret === 0 ? $hhas_target : false;
+}
+
 function dump_hhas_cmd($hhvm_cmd, $test) {
   $cmd = str_replace(
     ' -- ', ' -m dumphhas -vEval.AllowHhas=1 -- ', $hhvm_cmd
@@ -1686,15 +1704,22 @@ function dump_hhas_cmd($hhvm_cmd, $test) {
 }
 
 function dump_hhas_to_temp($hhvm_cmd, $test) {
-  $tmp_file = $test . '.round_trip.hhas';
+  $temp_file = $test . '.round_trip.hhas';
+  if (isset($options['repo'])) {
+    return dump_repo_to_hhas_files($test, "hhvm", $temp_file);
+  }
+
   $cmd = dump_hhas_cmd($hhvm_cmd, $test);
-  system("$cmd  > $tmp_file 2> /dev/null", $ret);
-  if ($ret) return false;
-  return $tmp_file;
+  system("$cmd > $temp_file 2> /dev/null", $ret);
+  return $ret === 0 ? $temp_file : false;
 }
 
 function dump_hh_codegen($options, $test, $test_config) {
   $temp_file = $test.'.hhcodegen_output.hhas';
+  if (isset($options['repo'])) {
+    return dump_repo_to_hhas_files($test, "hackc", $temp_file);
+  }
+
   $msgs_file = $test.'.hhcodegen_messages';
   if ($test_config) {
     $test_config_file = $test.'.hhcodegen_config.json';
@@ -1704,7 +1729,6 @@ function dump_hh_codegen($options, $test, $test_config) {
   else {
     $cmd = hh_codegen_cmd($options);
   }
-  $ret = false;
   system("/usr/bin/timeout 300 $cmd $test > $temp_file 2> $msgs_file", $ret);
   return $ret === 0 ? $temp_file : false;
 }
@@ -2107,33 +2131,59 @@ function run_test($options, $test) {
       return 'skip-norepo';
     }
 
-    $hphp_repo = "$test.repo/hhvm.hhbc";
-    $hhbbc_repo = "$test.repo/hhvm.hhbbc";
-    shell_exec("rm -f \"$hphp_repo\" \"$hhbbc_repo\" ");
-    $hphp = hphp_cmd($options, $test, timeout_prefix());
-    $hhbbc = hhbbc_cmd($options, $test, timeout_prefix());
-    shell_exec("$hphp 2>&1");
-    shell_exec("$hhbbc 2>&1");
-    if (isset($options['hhbbc2'])) {
-      $hhas_temp1 = dump_hhas_to_temp($hhvm, "$test.before");
-      shell_exec("mv $hhbbc_repo $hphp_repo");
-      shell_exec("$hhbbc 2>&1");
-      $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");
-      if ($hhas_temp1 === false || $hhas_temp2 === false) {
-        if ($hhas_temp1 != $hhas_temp2)  {
-          shell_exec("cat $hhas_temp1$hhas_temp2 > $test.diff");
-          return false;
-        }
-      } else {
-        $diff = shell_exec("diff $hhas_temp1 $hhas_temp2 | wc -l");
-        if (trim($diff) != '0') {
-          shell_exec("diff $hhas_temp1 $hhas_temp2 > $test.diff");
-          return false;
-        }
+    $hphp_hhvm_repo = "$test.repo/hhvm.hhbc";
+    $hhbbc_hhvm_repo = "$test.repo/hhvm.hhbbc";
+    $hphp_hackc_repo = "$test.repo/hackc.hhbc";
+    $hhbbc_hackc_repo = "$test.repo/hackc.hhbbc";
+    shell_exec("rm -f \"$hphp_hhvm_repo\" \"$hhbbc_hhvm_repo\" \"$hphp_hackc_repo\" \"$hhbbc_hackc_repo\" ");
+
+    $hhbbc = null;
+
+    if (isset($options['hackc']) ||
+        isset($options['compare-hh-codegen']) ||
+        isset($options['run-hh-codegen'])) {
+      $hphp = hphp_cmd($options, $test, timeout_prefix(), true);
+      shell_exec("$hphp 2>&1");
+      if (!isset($options['compare-hh-codegen'])) {
+        $hhbbc = hhbbc_cmd($options, $test, timeout_prefix(), "hackc");
+        shell_exec("$hhbbc 2>&1");
+        $hhbbc = null;
       }
     }
 
-    return run_one_config($options, $test, $hhvm, $hhvm_env);
+    if ((!isset($options['hackc']) &&
+         !isset($options['run-hh-codegen'])) ||
+        isset($options['compare-hh-codegen'])) {
+      $hphp = hphp_cmd($options, $test, timeout_prefix(), false);
+      shell_exec("$hphp 2>&1");
+      if (!isset($options['compare-hh-codegen'])) {
+        $hhbbc = hhbbc_cmd($options, $test, timeout_prefix(), "hhvm");
+        shell_exec("$hhbbc 2>&1");
+      }
+    }
+
+    if (isset($hhbbc)) {
+      if (isset($options['hhbbc2'])) {
+        $hhas_temp1 = dump_hhas_to_temp($hhvm, "$test.before");
+        shell_exec("mv $hhbbc_hhvm_repo $hphp_hhvm_repo");
+        shell_exec("$hhbbc 2>&1");
+        $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");
+        if ($hhas_temp1 === false || $hhas_temp2 === false) {
+          if ($hhas_temp1 != $hhas_temp2)  {
+            shell_exec("cat $hhas_temp1$hhas_temp2 > $test.diff");
+            return false;
+          }
+        } else {
+          $diff = shell_exec("diff $hhas_temp1 $hhas_temp2 | wc -l");
+          if (trim($diff) != '0') {
+            shell_exec("diff $hhas_temp1 $hhas_temp2 > $test.diff");
+            return false;
+          }
+        }
+      }
+
+      return run_one_config($options, $test, $hhvm, $hhvm_env);
+    }
   }
 
   if (file_exists($test.'.onlyrepo')) {
@@ -2151,8 +2201,15 @@ function run_test($options, $test) {
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $test, $hhas_temp);
   }
 
-  // for tests that should run HackC pull ini values from HHVM
-  if (isset($options['run-hh-codegen']) || isset($options['compare-hh-codegen'])) {
+  // For tests that should run HackC pull ini values from HHVM
+  //
+  // In repo mode, HackC will inherit configs from the hhvm process that invokes
+  // it.
+  $test_config = null;
+  if ((isset($options['run-hh-codegen']) ||
+       isset($options['compare-hh-codegen'])) &&
+      !isset($options['repo'])
+     ) {
     $test_config = get_hhvm_ini_values($test, $options);
   }
 
@@ -2297,14 +2354,15 @@ function print_commands($tests, $options) {
     }
 
     // How to run it with hhbbc:
-    $hhbbc_cmds = hphp_cmd($options, $test, '')."\n";
-    $hhbbc_cmd  = hhbbc_cmd($options, $test, '')."\n";
+    $hhbbc_cmds = hphp_cmd($options, $test, '', isset($options['hackc']))."\n";
+    $program = isset($options['hackc']) ? "hackc" : "hhvm";
+    $hhbbc_cmd  = hhbbc_cmd($options, $test, '', $program)."\n";
     $hhbbc_cmds .= $hhbbc_cmd;
     if (isset($options['hhbbc2'])) {
       foreach ((array)$command as $c) {
         $hhbbc_cmds .= $c." -m dumphhas > $test.before.round_trip.hhas\n";
       }
-      $hhbbc_cmds .= "mv $test.repo/hhvm.hhbbc $test.repo/hhvm.hhbc\n";
+      $hhbbc_cmds .= "mv $test.repo/$program.hhbbc $test.repo/$program.hhbc\n";
       $hhbbc_cmds .= $hhbbc_cmd;
       foreach ((array)$command as $c) {
         $hhbbc_cmds .= $c." -m dumphhas > $test.after.round_trip.hhas\n";

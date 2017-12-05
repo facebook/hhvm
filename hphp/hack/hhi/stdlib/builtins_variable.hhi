@@ -36,4 +36,4 @@ function serialize($value);
 function unserialize($str, $class_whitelist = array());
 function get_defined_vars();
 function import_request_variables($types, $prefix = "");
-function extract($var_array, $extract_type = EXTR_OVERWRITE, $prefix = "");
+function extract(&$var_array, $extract_type = EXTR_OVERWRITE, $prefix = "");

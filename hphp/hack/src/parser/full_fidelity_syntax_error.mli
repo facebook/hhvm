@@ -230,3 +230,5 @@ val namespace_decl_first_statement : string
 val code_outside_namespace : string
 val strict_types_in_declare_block_mode : string
 val invalid_number_of_args : string -> int -> string
+val redeclation_of_const : string -> string
+val reference_to_static_scope_resolution : string

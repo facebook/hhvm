@@ -124,9 +124,10 @@ let make_acc
        ; trait_require_clauses
        }
 
-let fold_child_nodes f node parents acc =
+let fold_child_nodes ?(cleanup = (fun x -> x)) f node parents acc =
   Syntax.children node
   |> Core_list.fold_left ~init:acc ~f:(fun acc c -> f acc c (node :: parents))
+  |> cleanup
 
 (* Turns a syntax node into a list of nodes; if it is a separated syntax
    list then the separators are filtered from the resulting list. *)
@@ -1626,6 +1627,15 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
           node SyntaxError.coloncolonclass_on_dynamic :: errors
         else errors in
       errors
+  | PrefixUnaryExpression { prefix_unary_operator; prefix_unary_operand }
+    when token_kind prefix_unary_operator = Some TokenKind.Ampersand ->
+    begin match syntax prefix_unary_operand with
+      | ScopeResolutionExpression { scope_resolution_name; _}
+        when token_kind scope_resolution_name = Some TokenKind.Name ->
+        make_error_from_node node
+          SyntaxError.reference_to_static_scope_resolution :: errors
+      | _ -> errors
+    end
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents hhvm_compat_mode trait_use_clauses errors =
@@ -2063,10 +2073,31 @@ let const_decl_errors node parents hhvm_compat_mode namespace_name names errors 
       SyntaxError.global_in_const_decl cd.constant_declarator_initializer in
     let errors =
       check_constant_expression errors cd.constant_declarator_initializer in
+    let errors =
+      match syntax cd.constant_declarator_initializer with
+      | SimpleInitializer { simple_initializer_value = { syntax =
+          LiteralExpression { literal_expression = { syntax =
+            SyntaxList _; _}}; _}; _} ->
+            make_error_from_node
+              node SyntaxError.invalid_constant_initializer :: errors
+      | _ -> errors in
     let constant_name = text cd.constant_declarator_name in
     let location = make_location_of_node cd.constant_declarator_name in
     let def =
       make_first_use_or_def ~is_def:true location namespace_name constant_name in
+    let errors =
+      match SMap.get constant_name names.t_constants with
+      | None -> errors
+      | Some _ ->
+        (* Only error if this is inside a class *)
+        begin match first_parent_class_name parents with
+          | None -> errors
+          | Some class_name ->
+            let full_name = class_name ^ "::" ^ constant_name in
+            make_error_from_node
+              node (SyntaxError.redeclation_of_const full_name) :: errors
+        end
+    in
     let names = {
       names with t_constants =
         SMap.add constant_name def names.t_constants } in
@@ -2361,12 +2392,18 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
       fold_child_nodes folder node parents acc
     | ClassishDeclaration _ ->
       (* Reset the trait require clauses *)
+      (* Reset the const declerations *)
+      let cleanup =
+        fun new_acc ->
+          { new_acc with names =
+            { new_acc.names with t_constants = acc.names.t_constants }} in
+      let names = { names with t_constants = SMap.empty } in
       let acc =
         make_acc
           acc errors namespace_type names
           namespace_name empty_trait_require_clauses
       in
-      fold_child_nodes folder node parents acc
+      fold_child_nodes ~cleanup folder node parents acc
     | _ ->
       let acc =
         make_acc

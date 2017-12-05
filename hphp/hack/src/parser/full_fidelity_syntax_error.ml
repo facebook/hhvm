@@ -353,3 +353,7 @@ let strict_types_in_declare_block_mode =
   "strict_types declaration must not use block mode"
 let invalid_number_of_args name n =
   "Method " ^ name ^ " must take exactly " ^ (string_of_int n) ^ " arguments"
+let redeclation_of_const name =
+  "Cannot redeclare " ^ name
+let reference_to_static_scope_resolution =
+  "Cannot take a reference to a static scope resolution expression"

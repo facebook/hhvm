@@ -65,7 +65,8 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrWritesCallerFrame,    F,       "writes_frame");     \
   X(AttrNoInjection,          F,       "no_injection");     \
   X(AttrIsInOutWrapper,       F,       "inout_wrapper");    \
-  X(AttrReference,            F,       "reference");
+  X(AttrReference,            F,       "reference");        \
+  X(AttrInterceptable,        F,       "interceptable");
 
   /* */
 

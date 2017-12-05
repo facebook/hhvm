@@ -210,6 +210,8 @@ let from_ast_wrapper : bool -> _ ->
   let method_id =
     if has_inout_args && method_is_closure_body then
     original_method_id else renamed_method_id in
+  let method_is_interceptable =
+    Interceptable.is_method_interceptable namespace ast_class original_method_id in
   let normal_function =
     Hhas_method.make
       method_attributes
@@ -229,6 +231,7 @@ let from_ast_wrapper : bool -> _ ->
       method_is_pair_generator
       method_is_closure_body
       is_return_by_ref
+      method_is_interceptable
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_method.body normal_function in
   if has_inout_args

@@ -90,6 +90,8 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   let normal_function_name =
     if wrapper_type_opt = Some Emit_inout_helpers.RefWrapper
     then original_id else renamed_id in
+  let is_interceptable =
+    Interceptable.is_function_interceptable namespace ast_fun in
   let normal_function =
     Hhas_function.make
       function_attributes
@@ -103,6 +105,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       false (*no_injection*)
       false (*inout_wrapper*)
       is_return_by_ref
+      is_interceptable
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_function.body normal_function in
   if is_memoize

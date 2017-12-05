@@ -20,6 +20,7 @@ type t = {
   function_no_injection      : bool;
   function_inout_wrapper     : bool;
   function_is_return_by_ref  : bool;
+  function_is_interceptable  : bool;
 }
 
 let make
@@ -33,7 +34,8 @@ let make
   function_is_top
   function_no_injection
   function_inout_wrapper
-  function_is_return_by_ref =
+  function_is_return_by_ref
+  function_is_interceptable =
   {
     function_attributes;
     function_name;
@@ -45,7 +47,8 @@ let make
     function_is_top;
     function_no_injection;
     function_inout_wrapper;
-    function_is_return_by_ref
+    function_is_return_by_ref;
+    function_is_interceptable
   }
 
 let attributes f = f.function_attributes
@@ -59,6 +62,7 @@ let is_top f = f.function_is_top
 let no_injection f = f.function_no_injection
 let inout_wrapper f = f.function_inout_wrapper
 let is_return_by_ref f = f.function_is_return_by_ref
+let is_interceptable f = f.function_is_interceptable
 
 let with_name f function_name = { f with function_name }
 let with_body f function_body = { f with function_body }

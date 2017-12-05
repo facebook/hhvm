@@ -134,6 +134,8 @@ let emit_wrapper_function
   let body =
     make_wrapper_body decl_vars return_type_info modified_params body_instrs in
   let return_by_ref = ast_fun.Ast.f_ret_by_ref in
+  let is_interceptable =
+    Interceptable.is_function_interceptable namespace ast_fun in
   Hhas_function.make
     function_attributes
     name
@@ -146,6 +148,7 @@ let emit_wrapper_function
     true (* no_injection *)
     true (* inout_wrapper *)
     return_by_ref
+    is_interceptable
 
 let emit_wrapper_method
   ~is_closure ~decl_vars ~original_id ~renamed_id ast_class ast_method =
@@ -224,6 +227,8 @@ let emit_wrapper_method
       List.map ~f:Hhas_param.switch_reference_to_inout params
   in
   let body = make_wrapper_body decl_vars return_type_info params body_instrs in
+  let method_is_interceptable =
+    Interceptable.is_method_interceptable namespace ast_class original_id in
   Hhas_method.make
     method_attributes
     method_is_protected
@@ -242,3 +247,4 @@ let emit_wrapper_method
     false (*method_is_pair_generator*)
     false (*method_is_closure_body*)
     method_is_return_by_ref
+    method_is_interceptable

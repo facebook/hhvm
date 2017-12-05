@@ -14,21 +14,22 @@ module J = Hh_json
 
 (* Compiler configuration options, as set by -v key=value on the command line *)
 type t = {
-  option_ints_overflow_to_ints : bool option;
-  option_enable_hiphop_syntax : bool;
-  option_php7_scalar_types : bool;
-  option_enable_xhp : bool;
-  option_constant_folding : bool;
-  option_optimize_null_check : bool;
-  option_optimize_cuf : bool;
+  option_ints_overflow_to_ints            : bool option;
+  option_enable_hiphop_syntax             : bool;
+  option_php7_scalar_types                : bool;
+  option_enable_xhp                       : bool;
+  option_constant_folding                 : bool;
+  option_optimize_null_check              : bool;
+  option_optimize_cuf                     : bool;
   option_max_array_elem_size_on_the_stack : int;
-  option_aliased_namespaces : (string * string) list option;
-  option_source_mapping : bool;
-  option_relabel : bool;
-  option_php7_uvs : bool;
-  option_create_inout_wrapper_functions : bool;
-  option_reffiness_invariance : bool;
-  option_hack_arr_compat_notices : bool;
+  option_aliased_namespaces               : (string * string) list option;
+  option_source_mapping                   : bool;
+  option_relabel                          : bool;
+  option_php7_uvs                         : bool;
+  option_create_inout_wrapper_functions   : bool;
+  option_reffiness_invariance             : bool;
+  option_hack_arr_compat_notices          : bool;
+  option_dynamic_invoke_functions         : SSet.t;
 }
 
 let default = {
@@ -50,6 +51,7 @@ let default = {
   option_create_inout_wrapper_functions = true;
   option_reffiness_invariance = false;
   option_hack_arr_compat_notices = false;
+  option_dynamic_invoke_functions = SSet.empty;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -67,25 +69,30 @@ let enable_uniform_variable_syntax o = o.option_php7_uvs
 let create_inout_wrapper_functions o = o.option_create_inout_wrapper_functions
 let reffiness_invariance o = o.option_reffiness_invariance
 let hack_arr_compat_notices o = o.option_hack_arr_compat_notices
+let dynamic_invoke_functions o = o.option_dynamic_invoke_functions
 
-let to_string o = String.concat "\n"
-  [ Printf.sprintf "enable_hiphop_syntax: %B" @@ enable_hiphop_syntax o
-  ; Printf.sprintf "php7_scalar_types: %B" @@ php7_scalar_types o
-  ; Printf.sprintf "enable_xhp: %B" @@ enable_xhp o
-  ; Printf.sprintf "constant_folding: %B" @@ constant_folding o
-  ; Printf.sprintf "optimize_null_check: %B" @@ optimize_null_check o
-  ; Printf.sprintf "optimize_cuf: %B" @@ optimize_cuf o
-  ; Printf.sprintf "max_array_elem_size_on_the_stack: %d"
-    @@ max_array_elem_size_on_the_stack o
-  ; Printf.sprintf "source_mapping: %B" @@ source_mapping o
-  ; Printf.sprintf "relabel: %B" @@ relabel o
-  ; Printf.sprintf "enable_uniform_variable_syntax: %B"
-    @@ enable_uniform_variable_syntax o
-  ; Printf.sprintf "create_inout_wrapper_functions: %B"
-    @@ create_inout_wrapper_functions o
-  ; Printf.sprintf "reffiness_invariance: %B" @@ reffiness_invariance o
-  ; Printf.sprintf "hack_arr_compat_notices: %B" @@ hack_arr_compat_notices o
-  ]
+let to_string o =
+  let dynamic_invokes =
+    String.concat ", " (SSet.elements (dynamic_invoke_functions o)) in
+  String.concat "\n"
+    [ Printf.sprintf "enable_hiphop_syntax: %B" @@ enable_hiphop_syntax o
+    ; Printf.sprintf "php7_scalar_types: %B" @@ php7_scalar_types o
+    ; Printf.sprintf "enable_xhp: %B" @@ enable_xhp o
+    ; Printf.sprintf "constant_folding: %B" @@ constant_folding o
+    ; Printf.sprintf "optimize_null_check: %B" @@ optimize_null_check o
+    ; Printf.sprintf "optimize_cuf: %B" @@ optimize_cuf o
+    ; Printf.sprintf "max_array_elem_size_on_the_stack: %d"
+      @@ max_array_elem_size_on_the_stack o
+    ; Printf.sprintf "source_mapping: %B" @@ source_mapping o
+    ; Printf.sprintf "relabel: %B" @@ relabel o
+    ; Printf.sprintf "enable_uniform_variable_syntax: %B"
+      @@ enable_uniform_variable_syntax o
+    ; Printf.sprintf "create_inout_wrapper_functions: %B"
+      @@ create_inout_wrapper_functions o
+    ; Printf.sprintf "reffiness_invariance: %B" @@ reffiness_invariance o
+    ; Printf.sprintf "hack_arr_compat_notices: %B" @@ hack_arr_compat_notices o
+    ; Printf.sprintf "dynamic_invoke_functions: [%s]" dynamic_invokes
+    ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
  * Eval.EnableHipHopSyntax setting *)
@@ -158,6 +165,13 @@ let get_value_from_config_kv_list config key =
     let keys_with_json = J.get_object_exn json in
     List.map ~f:(fun (k, v) -> k, J.get_string_exn v) keys_with_json)
 
+let get_value_from_config_string_array config key =
+  let json_opt = get_value_from_config_ config key in
+  match json_opt with
+    | None                   -> Some []
+    | Some (J.JSON_Array fs) -> Some (List.map fs J.get_string_exn)
+    | _                      -> raise (Arg.Bad ("Expected list of strings at " ^ key))
+
 let set_value name get set config opts =
   try
     let value = get config name in
@@ -190,7 +204,10 @@ let value_setters = [
   (set_value "hhvm.reffiness_invariance" get_value_from_config_int @@
     fun opts v -> { opts with option_reffiness_invariance = (v = 1) });
   (set_value "hhvm.hack_arr_compat_notices" get_value_from_config_int @@
-    fun opts v -> { opts with option_hack_arr_compat_notices = (v = 1) })
+    fun opts v -> { opts with option_hack_arr_compat_notices = (v = 1) });
+  (set_value "hhvm.dynamic_invoke_functions" get_value_from_config_string_array @@
+    fun opts v -> {opts with option_dynamic_invoke_functions =
+        SSet.of_list (List.map v String.lowercase_ascii)});
 ]
 
 let extract_config_options_from_json ~init config_json =

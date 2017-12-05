@@ -26,6 +26,7 @@ type t = {
   method_is_pair_generator : bool;
   method_is_closure_body   : bool;
   method_is_return_by_ref  : bool;
+  method_is_interceptable  : bool;
 }
 
 let make
@@ -45,7 +46,8 @@ let make
   method_is_generator
   method_is_pair_generator
   method_is_closure_body
-  method_is_return_by_ref = {
+  method_is_return_by_ref
+  method_is_interceptable = {
     method_attributes;
     method_is_protected;
     method_is_public;
@@ -63,6 +65,7 @@ let make
     method_is_pair_generator;
     method_is_closure_body;
     method_is_return_by_ref;
+    method_is_interceptable;
   }
 
 let attributes method_def = method_def.method_attributes
@@ -88,6 +91,7 @@ let is_generator method_def = method_def.method_is_generator
 let is_pair_generator method_def = method_def.method_is_pair_generator
 let is_closure_body method_def = method_def.method_is_closure_body
 let is_return_by_ref method_def = method_def.method_is_return_by_ref
+let is_interceptable method_def = method_def.method_is_interceptable
 let with_body method_def method_body = { method_def with method_body }
 let params m = m.method_body.Hhas_body.body_params
 let return_type m = m.method_body.Hhas_body.body_return_type

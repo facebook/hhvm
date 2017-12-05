@@ -75,6 +75,7 @@ let make_86method
   let method_static_inits = [] in
   let method_doc_comment = None in
   let method_is_return_by_ref = false in
+  let method_is_interceptable = false in
   let method_body = Emit_body.make_body
     instrs
     method_decl_vars
@@ -101,6 +102,7 @@ let make_86method
     method_is_pair_generator
     method_is_closure_body
     method_is_return_by_ref
+    method_is_interceptable
 
 let from_extends ~namespace ~is_enum _tparams extends =
   if is_enum

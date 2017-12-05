@@ -114,6 +114,7 @@ fundecl:
             (List.mem "no_injection" attrs)
             (List.mem "inout_wrapper" attrs)
             (List.mem "reference" attrs)
+            (List.mem "interceptable" attrs)
         }
 ;
 nl:
@@ -264,6 +265,7 @@ methoddecl:
     (List.mem "isPairGenerator" $7)
     (List.mem "isClosureBody" $7)
     (List.mem "reference" $7)
+    (List.mem "interceptable" $7)
   }
 ;
 numclsrefslots:

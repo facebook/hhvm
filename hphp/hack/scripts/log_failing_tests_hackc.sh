@@ -13,14 +13,20 @@ TABLE_NAME="perfpipe_hackc_hhvm_tests"
 FAIL_COMPARE_QUICK=$(grep -c '^' hphp/test/hhcodegen_failing_tests_quick)
 FAIL_COMPARE_SLOW=$(grep -c '^' hphp/test/hhcodegen_failing_tests_slow)
 FAIL_RUN_QUICK=$(grep -c '^' hphp/test/hackc_failing_tests_quick)
+FAIL_RUN_REPO_QUICK=$(grep -c '^' hphp/test/hackc_repo_failing_tests_quick)
 FAIL_RUN_SLOW=$(grep -c '^' hphp/test/hackc_failing_tests_slow)
+FAIL_RUN_REPO_SLOW=$(grep -c '^' hphp/test/hackc_repo_failing_tests_slow)
 
 SAMPLE_COMPARE_QUICK="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_COMPARE_QUICK }, \"normal\": {\"type\": \"compare_quick\"}}"
 SAMPLE_COMPARE_SLOW="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_COMPARE_SLOW }, \"normal\": {\"type\": \"compare_slow\"}}"
 SAMPLE_RUN_QUICK="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_RUN_QUICK }, \"normal\": {\"type\": \"run_quick\"}}"
 SAMPLE_RUN_SLOW="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_RUN_SLOW }, \"normal\": {\"type\": \"run_slow\"}}"
+SAMPLE_RUN_REPO_QUICK="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_RUN_REPO_QUICK }, \"normal\": {\"type\": \"run_repo_quick\"}}"
+SAMPLE_RUN_REPO_SLOW="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_RUN_REPO_SLOW }, \"normal\": {\"type\": \"run_repo_slow\"}}"
 
 scribe_cat "$TABLE_NAME" "$SAMPLE_COMPARE_QUICK"
 scribe_cat "$TABLE_NAME" "$SAMPLE_COMPARE_SLOW"
 scribe_cat "$TABLE_NAME" "$SAMPLE_RUN_QUICK"
 scribe_cat "$TABLE_NAME" "$SAMPLE_RUN_SLOW"
+scribe_cat "$TABLE_NAME" "$SAMPLE_RUN_REPO_QUICK"
+scribe_cat "$TABLE_NAME" "$SAMPLE_RUN_REPO_SLOW"

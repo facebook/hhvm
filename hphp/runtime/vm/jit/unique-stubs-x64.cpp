@@ -233,7 +233,13 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
     // We need to spill the return registers around the assert call.
     a.push(rret(0));
     a.push(rret(1));
-    a.call(TCA(assert_tc_saved_rip));
+    auto target = TCA(assert_tc_saved_rip);
+    if (a.jmpDeltaFits(target)) {
+      a.call(target);
+    } else {
+      a.emitImmReg(target, reg::rax);
+      a.call(reg::rax);
+    }
     a.pop(rret(1));
     a.pop(rret(0));
   }

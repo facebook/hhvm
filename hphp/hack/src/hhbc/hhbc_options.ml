@@ -30,6 +30,8 @@ type t = {
   option_reffiness_invariance             : bool;
   option_hack_arr_compat_notices          : bool;
   option_dynamic_invoke_functions         : SSet.t;
+  option_repo_authoritative               : bool;
+  option_jit_enable_rename_function       : bool;
 }
 
 let default = {
@@ -52,6 +54,8 @@ let default = {
   option_reffiness_invariance = false;
   option_hack_arr_compat_notices = false;
   option_dynamic_invoke_functions = SSet.empty;
+  option_repo_authoritative = false;
+  option_jit_enable_rename_function = true;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -70,6 +74,8 @@ let create_inout_wrapper_functions o = o.option_create_inout_wrapper_functions
 let reffiness_invariance o = o.option_reffiness_invariance
 let hack_arr_compat_notices o = o.option_hack_arr_compat_notices
 let dynamic_invoke_functions o = o.option_dynamic_invoke_functions
+let repo_authoritative o = o.option_repo_authoritative
+let jit_enable_rename_function o = o.option_jit_enable_rename_function
 
 let to_string o =
   let dynamic_invokes =
@@ -92,6 +98,9 @@ let to_string o =
     ; Printf.sprintf "reffiness_invariance: %B" @@ reffiness_invariance o
     ; Printf.sprintf "hack_arr_compat_notices: %B" @@ hack_arr_compat_notices o
     ; Printf.sprintf "dynamic_invoke_functions: [%s]" dynamic_invokes
+    ; Printf.sprintf "repo_authoritative: %B" @@ repo_authoritative o
+    ; Printf.sprintf "jit_enable_rename_function: %B"
+      @@ jit_enable_rename_function o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -133,6 +142,10 @@ let set_option options name value =
     { options with option_reffiness_invariance = as_bool value }
   | "eval.hackarrcompatnotices" ->
     { options with option_hack_arr_compat_notices = as_bool value }
+  | "hhvm.repo_authoritative" ->
+    { options with option_repo_authoritative = as_bool value }
+  | "hhvm.jit_enable_rename_function" ->
+    { options with option_jit_enable_rename_function = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -208,6 +221,10 @@ let value_setters = [
   (set_value "hhvm.dynamic_invoke_functions" get_value_from_config_string_array @@
     fun opts v -> {opts with option_dynamic_invoke_functions =
         SSet.of_list (List.map v String.lowercase_ascii)});
+  (set_value "hhvm.repo.authoritative" get_value_from_config_int @@
+    fun opts v -> { opts with option_repo_authoritative = (v = 1) });
+  (set_value "hhvm.jit_enable_rename_function" get_value_from_config_int @@
+    fun opts v -> { opts with option_jit_enable_rename_function = (v = 1) });
 ]
 
 let extract_config_options_from_json ~init config_json =

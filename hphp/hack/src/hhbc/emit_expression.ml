@@ -2277,7 +2277,7 @@ and emit_special_function env id args uargs default =
   | "array_slice", [
     _, A.Call ((_, A.Id (_, "func_get_args")), _, [], []);
     (_, A.Int _ as count)
-    ] ->
+    ] when not (Hhbc_options.jit_enable_rename_function !Hhbc_options.compiler_options) ->
     let p = Pos.none in
     Some (emit_call env (p,
         A.Id (p, "\\__SystemLib\\func_slice_args")) [count] [])

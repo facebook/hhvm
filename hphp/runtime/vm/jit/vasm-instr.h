@@ -142,6 +142,7 @@ struct Vunit;
   O(addlim, I(s0) I(fl), UM(m), D(sf)) \
   O(addq, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(addqmr, I(fl), UA(m) UH(s1,d), DH(d,s1) D(sf))  \
+  O(addqrm, I(fl), U(s1) UM(m), D(sf)) \
   O(addqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(addqim, I(s0) I(fl), UM(m), D(sf)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\
@@ -923,6 +924,7 @@ struct addlim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
 struct addq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct addqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct addqmr { Vptr m; Vreg64 s1; Vreg64 d; VregSF sf; Vflags fl; };
+struct addqrm { Vreg64 s1; Vptr m; VregSF sf; Vflags fl; };
 struct addqim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
 struct addsd  { VregDbl s0, s1, d; };
 // and: s0 & {s1|m} => {d|m}, sf

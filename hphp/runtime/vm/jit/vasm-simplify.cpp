@@ -39,6 +39,92 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+enum class resValid : uint8_t {
+  empty,
+  valid,
+  invalid
+};
+
+struct getMemOp {
+  getMemOp() {
+    mr.disp = 0;
+    rv = resValid::empty;
+  }
+  template<class T> void imm (T) {}
+  template<class T> void def (T) {}
+  template<class T> void use (T) {}
+  void def (Vptr mem) {
+    if (rv != resValid::empty) {
+      rv = resValid::invalid;
+    } else {
+      mr = mem;
+      rv = resValid::valid;
+    }
+  }
+  void use (Vptr mem) {
+    def(mem);
+  }
+  template<class T> void across (T) {}
+  template<class T, class H> void useHint(T,H) {}
+  template<class T, class H> void defHint(T,H) {}
+  bool isValid() { return rv == resValid::valid;}
+  Vptr mr;
+  resValid rv;
+};
+
+// return the Vptr and size for simple insts that read/ write memory.
+// return a size zero to indicate a non simple insts, e.g. a call
+std::pair<Vptr, uint8_t> getMemOpAndSize(const Vinstr inst) {
+  getMemOp g;
+  visitOperands(inst, g);
+  Vptr vop = g.mr;
+  if (!g.isValid()) return {vop, 0};
+  auto sz = width(inst.op);
+  // workaround: load and store opcodes report a width of Octa,
+  // while in reality they are quad.
+  if (inst.op == Vinstr::load || inst.op == Vinstr::store) {
+    sz = Width::Quad;
+  }
+  int size;
+  sz &= Width::AnyNF;
+  switch (sz) {
+    case Width::Byte:
+      size = 1; break;
+    case Width::Word: case Width::WordN:
+      size = 2; break;
+    case Width::Long: case Width::LongN:
+      size = 4; break;
+    case Width::Quad: case Width::QuadN:
+      size = 8; break;
+    case Width::Octa: case Width::AnyNF:
+      size = 16; break;
+    default: size = 0;
+  }
+  return {vop, size};
+}
+
+bool triviallyDifferent(const Vinstr inst1, const Vinstr inst2) {
+  if (!writesMemory(inst1.op) && !writesMemory(inst2.op)) return true;
+  auto const p1 = getMemOpAndSize(inst1);
+  auto const p2 = getMemOpAndSize(inst2);
+  if (p1.second == 0 || p2.second == 0) return false;
+  auto const v1 = p1.first;
+  auto const v2 = p2.first;
+  const int size1 = p1.second;
+  const int size2 = p2.second;
+  if (v1.base != v2.base || v1.seg != v2.seg) return false;
+  if ((v1.index != v2.index) ||
+      (v1.index.isValid() && (v1.scale != v2.scale))) {
+    return false;
+  }
+  if (v1.disp == v2.disp) return false;
+  if (v1.disp < v2.disp) {
+    return v2.disp >= v1.disp + size1;
+  } else {
+    return v1.disp >= v2.disp + size2;
+  }
+}
+
 /*
  * If reg is defined by a load in b with index j < i, and there are no
  * interfering stores between j and i, return a pointer to its Vptr
@@ -51,9 +137,10 @@ namespace {
  * Vreg doesn't carry a register-width around, we pass it in via the
  * size param, so that we can verify the zero-extend variants.
  */
-std::pair<const Vptr*, size_t>
-foldable_load_helper(Env& env, Vreg reg, int size, Vlabel b, size_t i) {
-  if (!i || env.use_counts[reg] != 1) return { nullptr, 0 };
+using namespace std;
+std::tuple<const Vptr*, size_t, bool>
+foldable_load_helper(Env& env, Vreg reg, int size, Vlabel b, size_t i, bool mw) {
+  if (!i || env.use_counts[reg] != 1) return make_tuple(nullptr, 0, false);
   auto const def_inst = env.def_insts[reg];
   switch (def_inst) {
     case Vinstr::loadb:
@@ -63,21 +150,23 @@ foldable_load_helper(Env& env, Vreg reg, int size, Vlabel b, size_t i) {
       break;
     case Vinstr::loadzbq:
     case Vinstr::loadzbl:
-      if (size != sz::byte) return { nullptr, 0 };
+      if (size != sz::byte) return make_tuple(nullptr, 0, false);
       break;
     case Vinstr::loadzlq:
-      if (size != sz::dword) return { nullptr, 0 };
+      if (size != sz::dword) return make_tuple(nullptr, 0, false);
       break;
     case Vinstr::copy:
       break;
     default:
-      return { nullptr, 0 };
+      return make_tuple(nullptr, 0, false);
   }
+
+  bool memWrite = mw;
 
 #define CHECK_LOAD(load)                        \
   case Vinstr::load:                            \
     if (inst.load##_.d != reg) break;           \
-    return { &inst.load##_.s, i };
+    return make_tuple(&inst.load##_.s, i, memWrite);
 
   while (i--) {
     auto const& inst = env.unit.blocks[b].code[i];
@@ -92,40 +181,51 @@ foldable_load_helper(Env& env, Vreg reg, int size, Vlabel b, size_t i) {
         CHECK_LOAD(loadzlq);
         case Vinstr::copy:
           if (inst.copy_.d != reg) break;
-          return foldable_load_helper(env, inst.copy_.s, size, b, i);
+          return foldable_load_helper(env, inst.copy_.s, size, b, i, memWrite);
         default:
           not_reached();
       }
     }
-    if (writesMemory(inst.op)) break;
+    auto inst2 = env.unit.blocks[b].code[i];
+    if (writesMemory(inst2.op)) memWrite = true;
   }
 
-  return { nullptr, 0 };
+  return make_tuple(nullptr, 0 , false);
 }
 
 const Vptr* foldable_load(Env& env, Vreg reg, int size,
                           Vlabel b, size_t i) {
-  auto const info = foldable_load_helper(env, reg, size, b, i);
-  if (!info.first || info.second + 1 == i) return info.first;
+  auto const info = foldable_load_helper(env, reg, size, b, i, false);
+  auto const loadOper = std::get<0>(info);
+  auto const loadIdx = std::get<1>(info);
+  auto const needsMemCheck = std::get<2>(info);
+  if (!loadOper || loadIdx + 1 == i) return loadOper;
   std::vector<Vreg> nonSSARegs;
-  visit(env.unit, *info.first, [&] (Vreg r, Width) {
+  visit(env.unit, *loadOper, [&] (Vreg r, Width) {
     if (r.isPhys()) nonSSARegs.push_back(r);
   });
-  if (nonSSARegs.empty()) return info.first;
+  if (nonSSARegs.empty() && !needsMemCheck) return loadOper;
   // The Vptr contains non-ssa regs, so we need to check that they're
   // not modified between the load and the use.
-  for (auto ix = info.second; ++ix < i; ) {
+  auto const loadInst = env.unit.blocks[b].code[loadIdx];
+  for (auto ix = loadIdx; ++ix < i; ) {
     auto const& inst = env.unit.blocks[b].code[ix];
     if (isCall(inst)) return nullptr;
     bool ok = true;
-    visitDefs(env.unit, inst, [&] (Vreg r, Width) {
-      for (auto const t : nonSSARegs) {
-        if (t == r) ok = false;
-      }
-    });
-    if (!ok) return nullptr;
+    if (!nonSSARegs.empty()) {
+      visitDefs(env.unit, inst, [&] (Vreg r, Width) {
+        for (auto const t : nonSSARegs) {
+          if (t == r) ok = false;
+        }
+      });
+      if (!ok) return nullptr;
+    }
+    if (needsMemCheck && writesMemory(inst.op) &&
+        !triviallyDifferent(loadInst, inst)) {
+      return nullptr;
+    }
   }
-  return info.first;
+  return loadOper;
 }
 
 const Vptr* foldable_load(Env& env, Vreg8 reg, Vlabel b, size_t i) {
@@ -530,8 +630,43 @@ bool fix_signed_uses(Env& env, Vreg sf, Vlabel b, size_t i) {
   );
 }
 
+// reg is a dest of an arithmetic inst. Look if it is used as a source
+// of a store within b. The width of the store has to match that of the
+// inst. The store has to be the only use of reg.
+static std::pair<const Vptr *, size_t> storeq(Env& env, Vreg64 reg,
+    Vlabel b, size_t i) {
+  if (env.use_counts[reg] != 1) {
+    return std::make_pair(nullptr,0);
+  }
+  while (++i < env.unit.blocks[b].code.size()) {
+    auto const& inst = env.unit.blocks[b].code[i];
+    if (inst.op == Vinstr::store && inst.store_.s == reg) {
+      return std::make_pair(&(inst.store_.d), i);
+    }
+  }
+  return std::make_pair(nullptr,0);
+}
+
 bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
   if (arch_any(Arch::ARM, Arch::PPC64)) return false;
+  auto stPair = storeq(env, vadd.d, b, i);
+  auto const vptrs = stPair.first;
+  size_t stIdx = stPair.second;
+  if (vptrs) {
+    auto const vptrl = foldable_load(env, vadd.s0, b, stIdx);
+    if (vptrl && (*vptrl == *vptrs)) {
+      bool ret = simplify_impl(env, b, i, addqrm { vadd.s1, *vptrs, vadd.sf });
+      // need to do it here because a store will not be removed as dead code
+      if (ret) env.unit.blocks[b].code[stIdx] = nop{};
+      return ret;
+    }
+    auto const vptrl2 = foldable_load(env, vadd.s1, b, stIdx);
+    if (vptrl2 && (*vptrl2 == *vptrs)) {
+      bool ret = simplify_impl(env, b, i, addqrm { vadd.s0, *vptrs, vadd.sf });
+      if (ret) env.unit.blocks[b].code[stIdx] = nop{};
+      return ret;
+    }
+  }
   if (auto const vptr = foldable_load(env, vadd.s0, b, i)) {
     return simplify_impl(env, b, i, addqmr{*vptr, vadd.s1, vadd.d, vadd.sf});
   }

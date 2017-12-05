@@ -1325,8 +1325,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
   in
   let handle_result ~result state =
     let state = state |> clear_dialog_flag in
-    let result = Option.value_map result ~default:""
-      ~f:(Hh_json_helpers.get_string_val "title" ~default:"") in
+    let result = Lsp_fmt.Jget.string_d result "title" ~default:"" in
     match result, state with
     | "Restart", Lost_server _ ->
       if p.start_on_click then begin

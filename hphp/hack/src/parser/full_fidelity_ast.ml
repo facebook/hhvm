@@ -1507,7 +1507,8 @@ and pStmt : stmt parser = fun node env ->
   | ForStatement
     { for_initializer; for_control; for_end_of_loop; for_body; _ } ->
     For
-    ( pExprL for_initializer env
+    ( pPos node env
+    , pExprL for_initializer env
     , pExprL for_control env
     , pExprL for_end_of_loop env
     , [Block (pBlock for_body env)]
@@ -1599,7 +1600,7 @@ and pStmt : stmt parser = fun node env ->
   | ContinueStatement { continue_level=level; _ } ->
     Continue (pPos node env, pBreak_or_continue_level env level)
   | GlobalStatement { global_variables; _ } ->
-    Global_var (couldMap ~f:pExpr global_variables env)
+    Global_var (pPos node env,couldMap ~f:pExpr global_variables env)
   | MarkupSection _ -> pMarkup node env
   | _ when env.max_depth > 0 ->
     (* OCaml optimisers; Forgive them, for they know not what they do!

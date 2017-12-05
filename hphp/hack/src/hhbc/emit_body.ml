@@ -295,6 +295,7 @@ let emit_body
   Emit_statement.set_default_dropthrough default_dropthrough;
   Emit_statement.set_default_return_value return_value;
   Emit_statement.set_return_by_ref is_return_by_ref;
+  Emit_statement.set_function_pos pos;
   Jump_targets.reset ();
 
   let remove_this vars =

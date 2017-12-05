@@ -269,6 +269,7 @@ and hint_ =
   | Htuple of hint list
   | Happly of id * hint list
   | Hshape of shape_info
+
  (* This represents the use of a type const. Type consts are accessed like
   * regular consts in Hack, i.e.
   *
@@ -315,11 +316,11 @@ and stmt =
   | GotoLabel of pstring
   | Goto of pstring
   | Static_var of expr list
-  | Global_var of expr list
+  | Global_var of Pos.t * expr list
   | If of expr * block * block
   | Do of block * expr
   | While of expr * block
-  | For of expr * expr * expr * block
+  | For of Pos.t * expr * expr * expr * block
   | Switch of expr * case list
   | Foreach of expr * Pos.t option (* await as *) * as_expr * block
   | Try of block * catch list * block

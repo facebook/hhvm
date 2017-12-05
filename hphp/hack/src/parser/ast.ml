@@ -1,6 +1,6 @@
 (* @generated from ast.src.ml by hphp/hack/tools/ppx/facebook/generate_ppx.sh *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<9a14d15e8671a58375647b4fcc714b61d59e982d>> *)
+(* SourceShasum<<45f04c02eae2d9c16e1f7b5c62bc56625a5f959a>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -36,14 +36,14 @@ type program = def list[@@deriving
                                 ancestors = ["iter_base"]
                               }))]
 and def =
-  | Fun of fun_
-  | Class of class_
-  | Stmt of stmt
-  | Typedef of typedef
-  | Constant of gconst
-  | Namespace of id * program
-  | NamespaceUse of (ns_kind * id * id) list
-  | SetNamespaceEnv of Namespace_env.env
+  | Fun of fun_ 
+  | Class of class_ 
+  | Stmt of stmt 
+  | Typedef of typedef 
+  | Constant of gconst 
+  | Namespace of id * program 
+  | NamespaceUse of (ns_kind * id * id) list 
+  | SetNamespaceEnv of Namespace_env.env 
 and typedef =
   {
   t_id: id ;
@@ -64,8 +64,8 @@ and gconst =
 and tparam = (variance * id * (constraint_kind * hint) list)
 and tconstraint = hint option
 and typedef_kind =
-  | Alias of hint
-  | NewType of hint
+  | Alias of hint 
+  | NewType of hint 
 and class_ =
   {
   c_mode: FileInfo.mode ;
@@ -89,33 +89,33 @@ and user_attribute = {
   ua_name: id ;
   ua_params: expr list }
 and class_elt =
-  | Const of hint option * (id * expr) list
-  | AbsConst of hint option * id
-  | Attributes of class_attr list
-  | TypeConst of typeconst
-  | ClassUse of hint
-  | ClassUseAlias of id option * pstring * id option * kind list
-  | ClassUsePrecedence of id * pstring * id list
-  | XhpAttrUse of hint
-  | ClassTraitRequire of trait_req_kind * hint
-  | ClassVars of class_vars_
+  | Const of hint option * (id * expr) list 
+  | AbsConst of hint option * id 
+  | Attributes of class_attr list 
+  | TypeConst of typeconst 
+  | ClassUse of hint 
+  | ClassUseAlias of id option * pstring * id option * kind list 
+  | ClassUsePrecedence of id * pstring * id list 
+  | XhpAttrUse of hint 
+  | ClassTraitRequire of trait_req_kind * hint 
+  | ClassVars of class_vars_ 
   | XhpAttr of hint option * class_var * bool * (Pos.t * bool * expr list)
-  option
-  | Method of method_
-  | XhpCategory of pstring list
-  | XhpChild of xhp_child
+  option 
+  | Method of method_ 
+  | XhpCategory of pstring list 
+  | XhpChild of xhp_child 
 and xhp_child =
-  | ChildName of id
-  | ChildList of xhp_child list
-  | ChildUnary of xhp_child * xhp_child_op
-  | ChildBinary of xhp_child * xhp_child
+  | ChildName of id 
+  | ChildList of xhp_child list 
+  | ChildUnary of xhp_child * xhp_child_op 
+  | ChildBinary of xhp_child * xhp_child 
 and xhp_child_op =
-  | ChildStar
-  | ChildPlus
-  | ChildQuestion
+  | ChildStar 
+  | ChildPlus 
+  | ChildQuestion 
 and class_attr =
-  | CA_name of id
-  | CA_field of ca_field
+  | CA_name of id 
+  | CA_field of ca_field 
 and ca_field =
   {
   ca_type: ca_type ;
@@ -123,8 +123,8 @@ and ca_field =
   ca_value: expr option ;
   ca_required: bool }
 and ca_type =
-  | CA_hint of hint
-  | CA_enum of string list
+  | CA_hint of hint 
+  | CA_enum of string list 
 and class_var = (Pos.t * id * expr option)
 and class_vars_ =
   {
@@ -186,17 +186,17 @@ and fun_ =
 and is_coroutine = bool
 and hint = (Pos.t * hint_)
 and variadic_hint =
-  | Hvariadic of hint option
-  | Hnon_variadic
+  | Hvariadic of hint option 
+  | Hnon_variadic 
 and hint_ =
-  | Hoption of hint
+  | Hoption of hint 
   | Hfun of is_coroutine * hint list * param_kind option list * variadic_hint
-  * hint
-  | Htuple of hint list
-  | Happly of id * hint list
-  | Hshape of shape_info
-  | Haccess of id * id * id list
-  | Hsoft of hint
+  * hint 
+  | Htuple of hint list 
+  | Happly of id * hint list 
+  | Hshape of shape_info 
+  | Haccess of id * id * id list 
+  | Hsoft of hint 
 and shape_info =
   {
   si_allows_unknown_fields: bool ;
@@ -213,102 +213,102 @@ and using_stmt =
   us_expr: expr ;
   us_block: block }
 and stmt =
-  | Unsafe
-  | Fallthrough
-  | Expr of expr
-  | Block of block
-  | Break of Pos.t * expr option
-  | Continue of Pos.t * expr option
-  | Throw of expr
-  | Return of Pos.t * expr option
-  | GotoLabel of pstring
-  | Goto of pstring
-  | Static_var of expr list
-  | Global_var of expr list
-  | If of expr * block * block
-  | Do of block * expr
-  | While of expr * block
-  | For of expr * expr * expr * block
-  | Switch of expr * case list
-  | Foreach of expr * Pos.t option * as_expr * block
-  | Try of block * catch list * block
-  | Def_inline of def
-  | Noop
-  | Markup of pstring * expr option
-  | Using of using_stmt
-  | Declare of bool * expr * block
+  | Unsafe 
+  | Fallthrough 
+  | Expr of expr 
+  | Block of block 
+  | Break of Pos.t * expr option 
+  | Continue of Pos.t * expr option 
+  | Throw of expr 
+  | Return of Pos.t * expr option 
+  | GotoLabel of pstring 
+  | Goto of pstring 
+  | Static_var of expr list 
+  | Global_var of Pos.t * expr list 
+  | If of expr * block * block 
+  | Do of block * expr 
+  | While of expr * block 
+  | For of Pos.t * expr * expr * expr * block 
+  | Switch of expr * case list 
+  | Foreach of expr * Pos.t option * as_expr * block 
+  | Try of block * catch list * block 
+  | Def_inline of def 
+  | Noop 
+  | Markup of pstring * expr option 
+  | Using of using_stmt 
+  | Declare of bool * expr * block 
 and as_expr =
-  | As_v of expr
-  | As_kv of expr * expr
+  | As_v of expr 
+  | As_kv of expr * expr 
 and xhp_attribute =
-  | Xhp_simple of id * expr
-  | Xhp_spread of expr
+  | Xhp_simple of id * expr 
+  | Xhp_spread of expr 
 and block = stmt list
 and expr = (Pos.t * expr_)
 and expr_ =
-  | Array of afield list
-  | Varray of expr list
-  | Darray of (expr * expr) list
-  | Shape of (shape_field_name * expr) list
-  | Collection of id * afield list
-  | Null
-  | True
-  | False
-  | Omitted
-  | Id of id
-  | Id_type_arguments of id * hint list
+  | Array of afield list 
+  | Varray of expr list 
+  | Darray of (expr * expr) list 
+  | Shape of (shape_field_name * expr) list 
+  | Collection of id * afield list 
+  | Null 
+  | True 
+  | False 
+  | Omitted 
+  | Id of id 
+  | Id_type_arguments of id * hint list 
   | Lvar of id
   [@ocaml.doc
     "\n   * PHP's Variable variable. The int is number of variable indirections\n   * (i.e. number of extra $ signs.)\n   *\n   * Example:\n     * $$$sample has int = 2.\n   * "]
-  | Lvarvar of int * id
-  | Clone of expr
-  | Obj_get of expr * expr * og_null_flavor
-  | Array_get of expr * expr option
-  | Class_get of expr * expr
-  | Class_const of expr * pstring
-  | Call of expr * hint list * expr list * expr list
-  | Int of pstring
-  | Float of pstring
-  | String of pstring
-  | String2 of expr list
-  | Yield of afield
-  | Yield_break
-  | Yield_from of expr
-  | Await of expr
-  | Suspend of expr
-  | List of expr list
-  | Expr_list of expr list
-  | Cast of hint * expr
-  | Unop of uop * expr
-  | Binop of bop * expr * expr
-  | Pipe of expr * expr
-  | Eif of expr * expr option * expr
-  | NullCoalesce of expr * expr
-  | InstanceOf of expr * expr
-  | Is of expr * hint
-  | BracedExpr of expr
-  | ParenthesizedExpr of expr
-  | New of expr * expr list * expr list
-  | NewAnonClass of expr list * expr list * class_
-  | Efun of fun_ * (id * bool) list
-  | Lfun of fun_
-  | Xml of id * xhp_attribute list * expr list
-  | Unsafeexpr of expr
-  | Import of import_flavor * expr
-  | Callconv of param_kind * expr
-  | Execution_operator of expr list
+  | Lvarvar of int * id 
+  | Clone of expr 
+  | Obj_get of expr * expr * og_null_flavor 
+  | Array_get of expr * expr option 
+  | Class_get of expr * expr 
+  | Class_const of expr * pstring 
+  | Call of expr * hint list * expr list * expr list 
+  | Int of pstring 
+  | Float of pstring 
+  | String of pstring 
+  | String2 of expr list 
+  | Yield of afield 
+  | Yield_break 
+  | Yield_from of expr 
+  | Await of expr 
+  | Suspend of expr 
+  | List of expr list 
+  | Expr_list of expr list 
+  | Cast of hint * expr 
+  | Unop of uop * expr 
+  | Binop of bop * expr * expr 
+  | Pipe of expr * expr 
+  | Eif of expr * expr option * expr 
+  | NullCoalesce of expr * expr 
+  | InstanceOf of expr * expr 
+  | Is of expr * hint 
+  | BracedExpr of expr 
+  | ParenthesizedExpr of expr 
+  | New of expr * expr list * expr list 
+  | NewAnonClass of expr list * expr list * class_ 
+  | Efun of fun_ * (id * bool) list 
+  | Lfun of fun_ 
+  | Xml of id * xhp_attribute list * expr list 
+  | Unsafeexpr of expr 
+  | Import of import_flavor * expr 
+  | Callconv of param_kind * expr 
+  | Execution_operator of expr list 
 and import_flavor =
-  | Include
-  | Require
-  | IncludeOnce
-  | RequireOnce
+  | Include 
+  | Require 
+  | IncludeOnce 
+  | RequireOnce 
 and afield =
-  | AFvalue of expr
+  | AFvalue of expr 
   | AFkvalue of expr * expr [@@ocaml.doc
                               " \"array\" field. Fields of array, map, dict, and shape literals. "]
 and case =
-  | Default of block
-  | Case of expr * block
+  | Default of block 
+  | Case of expr * block 
 and catch = (id * id * block)
 and field = (expr * expr)
 and attr = (id * expr)
@@ -1470,11 +1470,14 @@ include
           if Pervasives.(==) _visitors_c0 _visitors_r0
           then _visitors_this
           else Static_var _visitors_r0
-        method on_Global_var env _visitors_this _visitors_c0 =
-          let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
-          if Pervasives.(==) _visitors_c0 _visitors_r0
+        method on_Global_var env _visitors_this _visitors_c0 _visitors_c1 =
+          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r1 = self#on_list self#on_expr env _visitors_c1  in
+          if
+            Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+              (Pervasives.(==) _visitors_c1 _visitors_r1)
           then _visitors_this
-          else Global_var _visitors_r0
+          else Global_var (_visitors_r0, _visitors_r1)
         method on_If env _visitors_this _visitors_c0 _visitors_c1
           _visitors_c2 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
@@ -1503,18 +1506,24 @@ include
           then _visitors_this
           else While (_visitors_r0, _visitors_r1)
         method on_For env _visitors_this _visitors_c0 _visitors_c1
-          _visitors_c2 _visitors_c3 =
-          let _visitors_r0 = self#on_expr env _visitors_c0  in
+          _visitors_c2 _visitors_c3 _visitors_c4 =
+          let _visitors_r0 = self#on_t env _visitors_c0  in
           let _visitors_r1 = self#on_expr env _visitors_c1  in
           let _visitors_r2 = self#on_expr env _visitors_c2  in
-          let _visitors_r3 = self#on_block env _visitors_c3  in
+          let _visitors_r3 = self#on_expr env _visitors_c3  in
+          let _visitors_r4 = self#on_block env _visitors_c4  in
           if
             Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
               (Pervasives.(&&) (Pervasives.(==) _visitors_c1 _visitors_r1)
                  (Pervasives.(&&) (Pervasives.(==) _visitors_c2 _visitors_r2)
-                    (Pervasives.(==) _visitors_c3 _visitors_r3)))
+                    (Pervasives.(&&)
+                       (Pervasives.(==) _visitors_c3 _visitors_r3)
+                       (Pervasives.(==) _visitors_c4 _visitors_r4))))
           then _visitors_this
-          else For (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3)
+          else
+            For
+              (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3,
+                _visitors_r4)
         method on_Switch env _visitors_this _visitors_c0 _visitors_c1 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_list self#on_case env _visitors_c1  in
@@ -1602,8 +1611,8 @@ include
               self#on_Goto env _visitors_this _visitors_c0
           | Static_var _visitors_c0 as _visitors_this ->
               self#on_Static_var env _visitors_this _visitors_c0
-          | Global_var _visitors_c0 as _visitors_this ->
-              self#on_Global_var env _visitors_this _visitors_c0
+          | Global_var (_visitors_c0,_visitors_c1) as _visitors_this ->
+              self#on_Global_var env _visitors_this _visitors_c0 _visitors_c1
           | If (_visitors_c0,_visitors_c1,_visitors_c2) as _visitors_this ->
               self#on_If env _visitors_this _visitors_c0 _visitors_c1
                 _visitors_c2
@@ -1611,10 +1620,11 @@ include
               self#on_Do env _visitors_this _visitors_c0 _visitors_c1
           | While (_visitors_c0,_visitors_c1) as _visitors_this ->
               self#on_While env _visitors_this _visitors_c0 _visitors_c1
-          | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) as
-              _visitors_this ->
+          | For
+              (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
+              as _visitors_this ->
               self#on_For env _visitors_this _visitors_c0 _visitors_c1
-                _visitors_c2 _visitors_c3
+                _visitors_c2 _visitors_c3 _visitors_c4
           | Switch (_visitors_c0,_visitors_c1) as _visitors_this ->
               self#on_Switch env _visitors_this _visitors_c0 _visitors_c1
           | Foreach (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) as
@@ -2836,9 +2846,10 @@ include
         method on_Static_var env _visitors_c0 =
           let _visitors_s0 = self#on_list self#on_expr env _visitors_c0  in
           _visitors_s0
-        method on_Global_var env _visitors_c0 =
-          let _visitors_s0 = self#on_list self#on_expr env _visitors_c0  in
-          _visitors_s0
+        method on_Global_var env _visitors_c0 _visitors_c1 =
+          let _visitors_s0 = self#on_t env _visitors_c0  in
+          let _visitors_s1 = self#on_list self#on_expr env _visitors_c1  in
+          self#plus _visitors_s0 _visitors_s1
         method on_If env _visitors_c0 _visitors_c1 _visitors_c2 =
           let _visitors_s0 = self#on_expr env _visitors_c0  in
           let _visitors_s1 = self#on_block env _visitors_c1  in
@@ -2853,14 +2864,16 @@ include
           let _visitors_s1 = self#on_block env _visitors_c1  in
           self#plus _visitors_s0 _visitors_s1
         method on_For env _visitors_c0 _visitors_c1 _visitors_c2 _visitors_c3
-          =
-          let _visitors_s0 = self#on_expr env _visitors_c0  in
+          _visitors_c4 =
+          let _visitors_s0 = self#on_t env _visitors_c0  in
           let _visitors_s1 = self#on_expr env _visitors_c1  in
           let _visitors_s2 = self#on_expr env _visitors_c2  in
-          let _visitors_s3 = self#on_block env _visitors_c3  in
+          let _visitors_s3 = self#on_expr env _visitors_c3  in
+          let _visitors_s4 = self#on_block env _visitors_c4  in
           self#plus
-            (self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2)
-            _visitors_s3
+            (self#plus
+               (self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2)
+               _visitors_s3) _visitors_s4
         method on_Switch env _visitors_c0 _visitors_c1 =
           let _visitors_s0 = self#on_expr env _visitors_c0  in
           let _visitors_s1 = self#on_list self#on_case env _visitors_c1  in
@@ -2910,16 +2923,19 @@ include
           | GotoLabel _visitors_c0 -> self#on_GotoLabel env _visitors_c0
           | Goto _visitors_c0 -> self#on_Goto env _visitors_c0
           | Static_var _visitors_c0 -> self#on_Static_var env _visitors_c0
-          | Global_var _visitors_c0 -> self#on_Global_var env _visitors_c0
+          | Global_var (_visitors_c0,_visitors_c1) ->
+              self#on_Global_var env _visitors_c0 _visitors_c1
           | If (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_If env _visitors_c0 _visitors_c1 _visitors_c2
           | Do (_visitors_c0,_visitors_c1) ->
               self#on_Do env _visitors_c0 _visitors_c1
           | While (_visitors_c0,_visitors_c1) ->
               self#on_While env _visitors_c0 _visitors_c1
-          | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
+          | For
+              (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
+              ->
               self#on_For env _visitors_c0 _visitors_c1 _visitors_c2
-                _visitors_c3
+                _visitors_c3 _visitors_c4
           | Switch (_visitors_c0,_visitors_c1) ->
               self#on_Switch env _visitors_c0 _visitors_c1
           | Foreach (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
@@ -3902,9 +3918,10 @@ include
         method on_Static_var env _visitors_c0 =
           let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
           Static_var _visitors_r0
-        method on_Global_var env _visitors_c0 =
-          let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
-          Global_var _visitors_r0
+        method on_Global_var env _visitors_c0 _visitors_c1 =
+          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r1 = self#on_list self#on_expr env _visitors_c1  in
+          Global_var (_visitors_r0, _visitors_r1)
         method on_If env _visitors_c0 _visitors_c1 _visitors_c2 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_block env _visitors_c1  in
@@ -3919,12 +3936,15 @@ include
           let _visitors_r1 = self#on_block env _visitors_c1  in
           While (_visitors_r0, _visitors_r1)
         method on_For env _visitors_c0 _visitors_c1 _visitors_c2 _visitors_c3
-          =
-          let _visitors_r0 = self#on_expr env _visitors_c0  in
+          _visitors_c4 =
+          let _visitors_r0 = self#on_t env _visitors_c0  in
           let _visitors_r1 = self#on_expr env _visitors_c1  in
           let _visitors_r2 = self#on_expr env _visitors_c2  in
-          let _visitors_r3 = self#on_block env _visitors_c3  in
-          For (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3)
+          let _visitors_r3 = self#on_expr env _visitors_c3  in
+          let _visitors_r4 = self#on_block env _visitors_c4  in
+          For
+            (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3,
+              _visitors_r4)
         method on_Switch env _visitors_c0 _visitors_c1 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_list self#on_case env _visitors_c1  in
@@ -3973,16 +3993,19 @@ include
           | GotoLabel _visitors_c0 -> self#on_GotoLabel env _visitors_c0
           | Goto _visitors_c0 -> self#on_Goto env _visitors_c0
           | Static_var _visitors_c0 -> self#on_Static_var env _visitors_c0
-          | Global_var _visitors_c0 -> self#on_Global_var env _visitors_c0
+          | Global_var (_visitors_c0,_visitors_c1) ->
+              self#on_Global_var env _visitors_c0 _visitors_c1
           | If (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_If env _visitors_c0 _visitors_c1 _visitors_c2
           | Do (_visitors_c0,_visitors_c1) ->
               self#on_Do env _visitors_c0 _visitors_c1
           | While (_visitors_c0,_visitors_c1) ->
               self#on_While env _visitors_c0 _visitors_c1
-          | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
+          | For
+              (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
+              ->
               self#on_For env _visitors_c0 _visitors_c1 _visitors_c2
-                _visitors_c3
+                _visitors_c3 _visitors_c4
           | Switch (_visitors_c0,_visitors_c1) ->
               self#on_Switch env _visitors_c0 _visitors_c1
           | Foreach (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
@@ -4833,8 +4856,9 @@ include
         method on_Static_var env _visitors_c0 =
           let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
           ()
-        method on_Global_var env _visitors_c0 =
-          let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
+        method on_Global_var env _visitors_c0 _visitors_c1 =
+          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r1 = self#on_list self#on_expr env _visitors_c1  in
           ()
         method on_If env _visitors_c0 _visitors_c1 _visitors_c2 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
@@ -4847,11 +4871,12 @@ include
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_block env _visitors_c1  in ()
         method on_For env _visitors_c0 _visitors_c1 _visitors_c2 _visitors_c3
-          =
-          let _visitors_r0 = self#on_expr env _visitors_c0  in
+          _visitors_c4 =
+          let _visitors_r0 = self#on_t env _visitors_c0  in
           let _visitors_r1 = self#on_expr env _visitors_c1  in
           let _visitors_r2 = self#on_expr env _visitors_c2  in
-          let _visitors_r3 = self#on_block env _visitors_c3  in ()
+          let _visitors_r3 = self#on_expr env _visitors_c3  in
+          let _visitors_r4 = self#on_block env _visitors_c4  in ()
         method on_Switch env _visitors_c0 _visitors_c1 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_list self#on_case env _visitors_c1  in
@@ -4895,16 +4920,19 @@ include
           | GotoLabel _visitors_c0 -> self#on_GotoLabel env _visitors_c0
           | Goto _visitors_c0 -> self#on_Goto env _visitors_c0
           | Static_var _visitors_c0 -> self#on_Static_var env _visitors_c0
-          | Global_var _visitors_c0 -> self#on_Global_var env _visitors_c0
+          | Global_var (_visitors_c0,_visitors_c1) ->
+              self#on_Global_var env _visitors_c0 _visitors_c1
           | If (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_If env _visitors_c0 _visitors_c1 _visitors_c2
           | Do (_visitors_c0,_visitors_c1) ->
               self#on_Do env _visitors_c0 _visitors_c1
           | While (_visitors_c0,_visitors_c1) ->
               self#on_While env _visitors_c0 _visitors_c1
-          | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
+          | For
+              (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
+              ->
               self#on_For env _visitors_c0 _visitors_c1 _visitors_c2
-                _visitors_c3
+                _visitors_c3 _visitors_c4
           | Switch (_visitors_c0,_visitors_c1) ->
               self#on_Switch env _visitors_c0 _visitors_c1
           | Foreach (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
@@ -5225,8 +5253,8 @@ include
     [@@@VISITORS.END ]
   end
 type any =
-  | AHint of hint
-  | AExpr of expr
-  | AStmt of stmt
-  | ADef of def
-  | AProgram of program
+  | AHint of hint 
+  | AExpr of expr 
+  | AStmt of stmt 
+  | ADef of def 
+  | AProgram of program 

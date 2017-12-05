@@ -724,12 +724,12 @@ and convert_stmt env st stmt =
     let st, e = convert_expr env st e in
     let st, b = convert_block env st b in
     st, While (e, b)
-  | For (e1, e2, e3, b) ->
+  | For (p, e1, e2, e3, b) ->
     let st, e1 = convert_expr env st e1 in
     let st, e2 = convert_expr env st e2 in
     let st, e3 = convert_expr env st e3 in
     let st, b = convert_block env st b in
-    st, For(e1, e2, e3, b)
+    st, For(p, e1, e2, e3, b)
   | Switch (e, cl) ->
     let st, e = convert_expr env st e in
     let st, cl = List.map_env st cl (convert_case env) in

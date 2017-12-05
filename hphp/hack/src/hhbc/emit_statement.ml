@@ -27,11 +27,13 @@ let default_return_value = ref instr_null
 let default_dropthrough = ref None
 let return_by_ref = ref false
 let verify_out = ref empty
+let function_pos = ref Pos.none
 let set_verify_return b = verify_return := b
 let set_default_return_value i = default_return_value := i
 let set_default_dropthrough i = default_dropthrough := i
 let set_return_by_ref b = return_by_ref := b
 let set_verify_out i = verify_out := i
+let set_function_pos p = function_pos := p
 
 let create_inout_wrapper_functions () =
   Hhbc_options.create_inout_wrapper_functions !Hhbc_options.compiler_options
@@ -253,8 +255,8 @@ let rec emit_stmt env st =
     emit_continue env pos (get_level pos "continue" level_opt)
   | A.Do (b, e) ->
     emit_do env (A.Block b) e
-  | A.For (e1, e2, e3, b) ->
-    emit_for env e1 e2 e3 (A.Block b)
+  | A.For (p, e1, e2, e3, b) ->
+    emit_for env p e1 e2 e3 (A.Block b)
   | A.Throw e ->
     gather [
       emit_expr ~need_ref:false env e;
@@ -276,8 +278,8 @@ let rec emit_stmt env st =
     emit_def_inline def
   | A.Static_var es ->
     emit_static_var es
-  | A.Global_var es ->
-    emit_global_vars env es
+  | A.Global_var (p, es) ->
+    emit_global_vars env p es
   | A.Markup ((_, s), echo_expr_opt) ->
     emit_markup env s echo_expr_opt ~check_for_hashbang:false
     (* TODO: What do we do with unsafe? *)
@@ -315,7 +317,7 @@ and emit_if env condition consequence alternative =
       instr_label done_label;
     ]
 
-and emit_global_vars env es =
+and emit_global_vars env p es =
   let emit_global_var (_, e) =
     match e with
     | A.Id (_, name) when name.[0] = '$' ->
@@ -356,7 +358,8 @@ and emit_global_vars env es =
       ]
     | _ ->
       emit_nyi "global expression"
-  in gather (List.map es emit_global_var)
+  in
+  Emit_pos.emit_pos_then p @@ gather (List.map es emit_global_var)
 
 and emit_static_var es =
   let emit_static_var_single e =
@@ -492,7 +495,7 @@ and emit_do env b e =
     instr_label break_label;
   ]
 
-and emit_for env e1 e2 e3 b =
+and emit_for env p e1 e2 e3 b =
   let break_label = Label.next_regular () in
   let cont_label = Label.next_regular () in
   let start_label = Label.next_regular () in
@@ -515,7 +518,7 @@ and emit_for env e1 e2 e3 b =
     let rec expr_list h tl =
       match tl with
       | [] -> [final @@ (Pos.none, A.Expr_list [h])]
-      | h1 :: t1 -> emit_ignored_expr env h :: expr_list h1 t1
+      | h1 :: t1 -> emit_ignored_expr env ~pop_pos:p h :: expr_list h1 t1
     in
     match e2 with
     | _, A.Expr_list [] -> if jmpz then empty else instr_jmp label
@@ -523,12 +526,12 @@ and emit_for env e1 e2 e3 b =
     | cond -> final cond
   in
   gather [
-    emit_ignored_expr env e1;
+    emit_ignored_expr env ~pop_pos:p e1;
     emit_cond ~jmpz:true break_label;
     instr_label start_label;
     (Emit_env.do_in_loop_body break_label cont_label env b emit_stmt);
     instr_label cont_label;
-    emit_ignored_expr env e3;
+    emit_ignored_expr env ~pop_pos:p e3;
     emit_cond ~jmpz:false start_label;
     instr_label break_label;
   ]
@@ -1126,6 +1129,17 @@ let emit_dropthrough_return env =
   match !default_dropthrough with
   | Some instrs -> instrs
   | _ ->
+    let last_pos =
+      if !function_pos = Pos.none then Pos.none
+      else begin
+        let pos_file = Pos.filename !function_pos in
+        let pos_end = Pos.pos_end !function_pos in
+        Pos.make_from_file_pos
+          ~pos_file
+          ~pos_start:pos_end
+          ~pos_end
+      end in
+    Emit_pos.emit_pos_then last_pos @@
     gather [!default_return_value; emit_return ~need_ref:false env]
 
 let rec emit_final_statement env s =

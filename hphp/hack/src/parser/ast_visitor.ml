@@ -312,7 +312,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | If      (e, b1, b2)     -> this#on_if acc e b1 b2
     | Do      (b, e)          -> this#on_do acc b e
     | While   (e, b)          -> this#on_while acc e b
-    | For     (e1, e2, e3, b) -> this#on_for acc e1 e2 e3 b
+    | For     (_, e1, e2, e3, b) -> this#on_for acc e1 e2 e3 b
     | Switch  (e, cl)         -> this#on_switch acc e cl
     | Foreach (e, popt, ae, b)-> this#on_foreach acc e popt ae b
     | Try     (b, cl, fb)     -> this#on_try acc b cl fb
@@ -321,7 +321,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Noop                    -> this#on_noop acc
     | Fallthrough             -> this#on_fallthrough acc
     | Static_var el           -> this#on_static_var acc el
-    | Global_var el           -> this#on_global_var acc el
+    | Global_var (_, el)      -> this#on_global_var acc el
     | Markup (s, e)           -> this#on_markup acc s e
     | Using s                 -> this#on_using acc s
     | Declare (is_block, e, b) -> this#on_declare acc is_block e b

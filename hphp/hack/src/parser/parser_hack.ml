@@ -2519,11 +2519,11 @@ and statement_using_block_or_rest ~has_await e env =
 
 and statement_for env =
   expect env Tlp;
-  let start = Pos.make env.file env.lb in
+  let pos_start = Pos.make env.file env.lb in
   let _ = L.token env.file env.lb in
   let _ = L.back env.lb in
   let last, el = for_expr env in
-  let e1 = Pos.btw start last, Expr_list el in
+  let e1 = Pos.btw pos_start last, Expr_list el in
   let start = last in
   let last, el = for_expr env in
   let e2 = Pos.btw start last, Expr_list el in
@@ -2531,7 +2531,8 @@ and statement_for env =
   let last, el = for_last_expr env in
   let e3 = Pos.btw start last, Expr_list el in
   let st = statement env in
-  For (e1, e2, e3, [st])
+  let pos_end = Pos.make env.file env.lb in
+  For (Pos.btw pos_start pos_end, e1, e2, e3, [st])
 
 and for_expr env =
   match L.token env.file env.lb with

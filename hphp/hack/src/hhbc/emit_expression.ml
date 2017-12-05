@@ -2009,14 +2009,14 @@ and emit_arg env i is_splatted expr =
     ]
   | _ -> default ()
 
-and emit_ignored_expr env e =
+and emit_ignored_expr env ?(pop_pos = Pos.none) e =
   match snd e with
-  | A.Expr_list es -> gather @@ List.map ~f:(emit_ignored_expr env) es
+  | A.Expr_list es -> gather @@ List.map ~f:(emit_ignored_expr env ~pop_pos) es
   | _ ->
     let instrs, flavor = emit_flavored_expr env e in
     gather [
       instrs;
-      instr_pop flavor;
+      Emit_pos.emit_pos_then pop_pos @@ instr_pop flavor;
     ]
 
 (* Emit code to construct the argument frame and then make the call *)

@@ -357,3 +357,8 @@ let redeclation_of_const name =
   "Cannot redeclare " ^ name
 let reference_to_static_scope_resolution =
   "Cannot take a reference to a static scope resolution expression"
+let class_with_abstract_method name =
+  "Class " ^ name ^ " contains an abstract method and must " ^
+  "therefore be declared abstract"
+let interface_has_non_public_method =
+  "Access type for interface method must be omitted"

@@ -356,6 +356,9 @@ let methodish_contains_private node =
 let is_visibility x =
   is_public x || is_private x || is_protected x
 
+let is_not_public_visibility x =
+  is_private x || is_protected x
+
 (* test the methodish node contains any non-visibility modifiers *)
 let methodish_contains_non_visibility hhvm_compat_mode node =
   if hhvm_compat_mode then false
@@ -1735,10 +1738,34 @@ let classish_errors node parents is_hack hhvm_compat_mode namespace_name names e
       produce_error errors
       (is_reserved_keyword is_hack) cd.classish_name
       SyntaxError.reserved_keyword_as_class_name cd.classish_name in
+    let name = text cd.classish_name in
+    let errors =
+      match syntax cd.classish_body with
+      | ClassishBody {classish_body_elements = methods; _} ->
+        let methods = syntax_to_list_no_separators methods in
+        let has_abstract_fn =
+          Hh_core.List.exists methods ~f:methodish_contains_abstract in
+        let has_non_public_method =
+          Hh_core.List.exists methods
+            ~f:(methodish_modifier_contains_helper is_not_public_visibility) in
+        let errors =
+          if has_abstract_fn &&
+             is_token_kind cd.classish_keyword TokenKind.Class &&
+             not (list_contains_predicate is_abstract cd.classish_modifiers)
+          then make_error_from_node node
+                (SyntaxError.class_with_abstract_method name) :: errors
+          else errors in
+        let errors =
+          if has_non_public_method &&
+             is_token_kind cd.classish_keyword TokenKind.Interface
+          then make_error_from_node node
+            SyntaxError.interface_has_non_public_method :: errors
+          else errors in
+        errors
+      | _ -> errors in
     let names, errors =
       match token_kind cd.classish_keyword with
       | Some TokenKind.Class | Some TokenKind.Trait ->
-        let name = text cd.classish_name in
         let location = make_location_of_node cd.classish_name in
         check_type_name cd.classish_name namespace_name name location names errors
       | _ ->

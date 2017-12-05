@@ -1,3 +1,4 @@
+(3,1)-(25,1) Class E contains an abstract method and must therefore be declared abstract
 (4,3)-(4,16) A method declaration cannot have multiple visibility modifiers.
 (5,3)-(5,13) A method declaration cannot have duplicate modifiers.
 (6,3)-(6,23) A method cannot be both abstract and final.

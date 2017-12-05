@@ -12,17 +12,13 @@ open Hhas_parser
 
 let program_parser = program Hhas_lexer.read
 
-let optchannel = if Array.length Sys.argv > 1
-                 then Some (open_in Sys.argv.(1))
-                 else None
+let optchannel =
+  if Array.length Sys.argv > 1
+  then Some (open_in Sys.argv.(1))
+  else None
 
-let testlexer =
-match optchannel with
- | Some c ->
-  Lexing.from_channel c
- | None ->
- Lexing.from_string
-"# starts here\n\
+let sample_hhas =
+  "# starts here\n\
 .adata A_3 = \"\"\"a:1:{i:0;i:2;}\"\"\";\n\n\
 .main {\n\
   .declvars $x $y;\n\
@@ -57,17 +53,27 @@ f(<\"HH\\\\int\" \"HH\\\\int\" hh_type > $x, <\"HH\\\\int\" \"HH\\\\int\" hh_typ
   QueryM 1 CGet EC:0\n\
   RetC\n
   }\n\n\
-  .alias Point = <\"array\"  > \"\"\"a:2:{s:4:\"kind\";i:10;s:10:\"elem_types\";a:2:{i:0;a:1:{s:4:\"kind\";i:1;}i:1;a:1:{s:4:\"kind\";i:4;}}}\"\"\";"
+  .alias Point = <\"array\"  > \"\"\"a:2:{s:4:\"kind\";i:10;s:10:\"elem_types\";a:2:{i:0;a:1:{s:4:\"kind\";i:1;}i:1;a:1:{s:4:\"kind\";i:4;}}}\"\"\";\n\n\
+  .function_refs {\nf1\n}\n\n\
+  .includes {\n\n/home/akr/fbcode/hphp/BUILD_MODE    \n      parsetest.ml\n\n}\n\n\
+  .class_refs {   \n  \n\n     }\n\n\
+  .constant_refs {k1}\n\n"
 
-let parsed =  try program_parser testlexer
-              with Parsing.Parse_error -> (
-                print_string "oops!\n"; raise Parsing.Parse_error
-                )
-                (* TODO: put proper error messages and location tracking in *)
+let testlexer = match optchannel with
+ | Some c -> Lexing.from_channel c
+ | None -> Lexing.from_string sample_hhas
 
-let pp = (match optchannel with
-          | Some c -> close_in c
-          | None -> ())
-          ; Hhbc_hhas.to_string parsed
+let parsed =
+  try
+    program_parser testlexer
+  with exc ->
+    Printf.eprintf "%s\n" (Printexc.to_string exc);
+    raise exc
+
+let pp =
+  (match optchannel with
+    | Some c -> close_in c
+    | None -> ());
+  Hhbc_hhas.to_string parsed
 
 let _ = print_string pp

@@ -149,29 +149,62 @@ type decl =
   | Class_decl of Hhas_class.t
   | Data_decl of Hhas_adata.t
   | Alias_decl of Hhas_typedef.t
+  | Includes_decl of Hhas_symbol_refs.IncludePathSet.t
+  | ConstantRefs_decl of SSet.t
+  | ClassRefs_decl of SSet.t
+  | FunctionRefs_decl of SSet.t
 
-let rec split_decl_list ds funs classes optmain datadecls aliasdecls =
- match ds with
-  | [] ->
-    begin match optmain with
-    | None -> report_error "missing main"
-    | Some m -> Hhas_program.make (List.rev datadecls)
-          (List.rev funs) (List.rev classes) (List.rev aliasdecls) m
-    end
-  | Main_decl md :: rest ->
-    begin match optmain with
-    | None ->
-      split_decl_list rest funs classes (Some md) datadecls aliasdecls
-    | Some _ -> report_error "duplicate main"
-    end
-  | Fun_decl fd :: rest ->
-    split_decl_list rest (fd :: funs) classes optmain datadecls aliasdecls
-  | Class_decl cd :: rest ->
-    split_decl_list rest funs (cd :: classes) optmain datadecls aliasdecls
-  | Data_decl dd :: rest ->
-    split_decl_list rest funs classes optmain (dd :: datadecls) aliasdecls
-  | Alias_decl ad :: rest ->
-    split_decl_list rest funs classes optmain datadecls (ad :: aliasdecls)
+let rec split_decl_list ds funs classes optmain datadecls aliasdecls
+    includesdecls constantrefsdecls classrefsdecls functionrefsdecls =
+  match ds with
+    | [] ->
+      begin match optmain with
+        | None -> report_error "missing main"
+        | Some m ->
+          let symbol_refs =
+            { Hhas_symbol_refs.includes  = includesdecls
+            ; Hhas_symbol_refs.constants = constantrefsdecls
+            ; Hhas_symbol_refs.classes   = classrefsdecls
+            ; Hhas_symbol_refs.functions = functionrefsdecls
+            } in
+          Hhas_program.make (List.rev datadecls) (List.rev funs)
+            (List.rev classes) (List.rev aliasdecls) m symbol_refs
+      end
+    | Main_decl md :: rest ->
+      begin match optmain with
+        | None ->
+          split_decl_list rest funs classes (Some md) datadecls aliasdecls
+            includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+        | Some _ -> report_error "duplicate main"
+      end
+    | Fun_decl fd :: rest ->
+      split_decl_list rest (fd :: funs) classes optmain datadecls aliasdecls
+        includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+    | Class_decl cd :: rest ->
+      split_decl_list rest funs (cd :: classes) optmain datadecls aliasdecls
+        includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+    | Data_decl dd :: rest ->
+      split_decl_list rest funs classes optmain (dd :: datadecls) aliasdecls
+        includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+    | Alias_decl ad :: rest ->
+      split_decl_list rest funs classes optmain datadecls (ad :: aliasdecls)
+        includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+    | Includes_decl ids :: rest ->
+      let includes = Hhas_symbol_refs.IncludePathSet.union ids includesdecls in
+      split_decl_list rest funs classes optmain datadecls aliasdecls
+         includes constantrefsdecls classrefsdecls functionrefsdecls
+    | ConstantRefs_decl crs :: rest ->
+      let constant_refs = SSet.union crs constantrefsdecls in
+      split_decl_list rest funs classes optmain datadecls aliasdecls
+        includesdecls constant_refs classrefsdecls functionrefsdecls
+    | ClassRefs_decl crs :: rest ->
+      let class_refs = SSet.union crs classrefsdecls in
+      split_decl_list rest funs classes optmain datadecls aliasdecls
+        includesdecls constantrefsdecls class_refs functionrefsdecls
+    | FunctionRefs_decl frs :: rest ->
+      let function_refs = SSet.union frs functionrefsdecls in
+      split_decl_list rest funs classes optmain datadecls aliasdecls
+        includesdecls constantrefsdecls classrefsdecls function_refs
 
 (* This is a pretty poor way to deal with these flags on functions, and
    doesn't Throw if there's an illegal one in the list, but it'll do for now.

@@ -59,60 +59,64 @@ let doccomment = ".doc" white triplequoted ';'
 
 rule read =
   parse
-  | white       { read lexbuf }
-  | comment     {read lexbuf}
-  | doccomment   {read lexbuf}
-  | ".function" {FUNCTIONDIRECTIVE}
-  | ".main"     {MAINDIRECTIVE}
-  | ".class"    {CLASSDIRECTIVE}
-  | ".declvars" {DECLVARSDIRECTIVE}
+  | white               {read lexbuf}
+  | comment             {read lexbuf}
+  | doccomment          {read lexbuf}
+  | ".function"         {FUNCTIONDIRECTIVE}
+  | ".main"             {MAINDIRECTIVE}
+  | ".class"            {CLASSDIRECTIVE}
+  | ".includes"         {read_paths (Buffer.create 300) lexbuf}
+  | ".constant_refs"    {CONSTANTREFSDIRECTIVE}
+  | ".function_refs"    {FUNCTIONREFSDIRECTIVE}
+  | ".class_refs"       {CLASSREFSDIRECTIVE}
+  | ".declvars"         {DECLVARSDIRECTIVE}
   | ".ismemoizewrapper" {ISMEMOIZEWRAPPERDIRECTIVE}
-  | ".adata"    {DATADECLDIRECTIVE}
-  | ".numiters" {NUMITERSDIRECTIVE}
-  | ".method"   {METHODDIRECTIVE}
-  | ".const"    {CONSTDIRECTIVE}
-  | ".enum_ty"  {ENUMTYDIRECTIVE}
-  | ".use"      {USESDIRECTIVE}
-  | ".numclsrefslots" {NUMCLSREFSLOTSDIRECTIVE}
-  | ".try"      {TRYDIRECTIVE}
-  | ".catch"    {CATCHDIRECTIVE}
-  | ".try_fault" {TRYFAULTDIRECTIVE}
-  | ".try_catch" {TRYCATCHDIRECTIVE}
-  | ".property" {PROPERTYDIRECTIVE}
-  | ".filepath" {FILEPATHDIRECTIVE}
-  | ".alias"    {ALIASDIRECTIVE}
-  | ".strict"   {STRICTDIRECTIVE}
-  | ".static"   {STATICDIRECTIVE}
-  | ".require"  {REQUIREDIRECTIVE}
-  | ".srcloc"   {SRCLOCDIRECTIVE}
-  | id          {ID (Lexing.lexeme lexbuf)}
+  | ".adata"            {DATADECLDIRECTIVE}
+  | ".numiters"         {NUMITERSDIRECTIVE}
+  | ".method"           {METHODDIRECTIVE}
+  | ".const"            {CONSTDIRECTIVE}
+  | ".enum_ty"          {ENUMTYDIRECTIVE}
+  | ".use"              {USESDIRECTIVE}
+  | ".numclsrefslots"   {NUMCLSREFSLOTSDIRECTIVE}
+  | ".try"              {TRYDIRECTIVE}
+  | ".catch"            {CATCHDIRECTIVE}
+  | ".try_fault"        {TRYFAULTDIRECTIVE}
+  | ".try_catch"        {TRYCATCHDIRECTIVE}
+  | ".property"         {PROPERTYDIRECTIVE}
+  | ".filepath"         {FILEPATHDIRECTIVE}
+  | ".alias"            {ALIASDIRECTIVE}
+  | ".strict"           {STRICTDIRECTIVE}
+  | ".static"           {STATICDIRECTIVE}
+  | ".require"          {REQUIREDIRECTIVE}
+  | ".srcloc"           {SRCLOCDIRECTIVE}
+  | id                  {ID (Lexing.lexeme lexbuf)}
   | triplequoted as lxm {TRIPLEQUOTEDSTRING (String.sub lxm 3 (String.length lxm - 6))}
-  | escapequote {read_php_escaped_string (Buffer.create 17) lexbuf}
-  | '"'         { read_string (Buffer.create 17) lexbuf}
-  | newline     {NEWLINE}
-  | '<'         {LANGLE}
-  | '>'         {RANGLE}
-  | int as lxm  {INT (Int64.of_string lxm)}
-  | float as lxm {DOUBLE lxm}
-  | "..."       {DOTDOTDOT}
-  | '@'         {AT}
-  | '_'         {UNDERSCORE}
-  | '{'         {LBRACE}
-  | '}'         {RBRACE}
-  | '('         {LPAR}
-  | ')'         {RPAR}
-  | '['         {LBRACK}
-  | ']'         {RBRACK}
-  | ';'         {SEMI}
-  | ':'         {COLON}
-  | ','         {COMMA}
-  | '$'         {read_variable_name (Buffer.create 17) lexbuf}
-  | '='         {EQUALS}
-  | '&'         {AMPERSAND}
-  | '+'         {PLUS}
-  | '-'         {MINUS}
-  | eof         {EOF}
-  | _           {raise (SyntaxError "read")}
+  | escapequote         {read_php_escaped_string (Buffer.create 17) lexbuf}
+  | '"'                 { read_string (Buffer.create 17) lexbuf}
+  | newline             {NEWLINE}
+  | '<'                 {LANGLE}
+  | '>'                 {RANGLE}
+  | int as lxm          {INT (Int64.of_string lxm)}
+  | float as lxm        {DOUBLE lxm}
+  | "..."               {DOTDOTDOT}
+  | '@'                 {AT}
+  | '_'                 {UNDERSCORE}
+  | '{'                 {LBRACE}
+  | '}'                 {RBRACE}
+  | '('                 {LPAR}
+  | ')'                 {RPAR}
+  | '['                 {LBRACK}
+  | ']'                 {RBRACK}
+  | ';'                 {SEMI}
+  | ':'                 {COLON}
+  | ','                 {COMMA}
+  | '$'                 {read_variable_name (Buffer.create 17) lexbuf}
+  | '='                 {EQUALS}
+  | '&'                 {AMPERSAND}
+  | '+'                 {PLUS}
+  | '-'                 {MINUS}
+  | eof                 {EOF}
+  | _                   {raise (SyntaxError "read")}
 and read_variable_name buf =
   parse
   | vname       {VNAME (Lexing.lexeme lexbuf)}
@@ -140,3 +144,8 @@ and read_string buf =
               read_string buf lexbuf}
   | [^ '"' '\\']+
      {Buffer.add_string buf (Lexing.lexeme lexbuf); read_string buf lexbuf}
+and read_paths buf =
+  parse
+  | '{'  {read_paths buf lexbuf}
+  | '}'  {INCLUDESDIRECTIVE (Buffer.contents buf)}
+  | [^ '}'] as lxm {Buffer.add_char buf lxm; read_paths buf lexbuf}

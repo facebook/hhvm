@@ -1563,23 +1563,28 @@ let add_typedef buf typedef =
   | None ->
     B.add_string buf ";\n"
 
-let add_include_region ?path ?doc_root ?search_paths ?include_roots buf includes =
+let add_include_region
+    ?path ?doc_root ?search_paths ?include_roots ?(check_paths_exist=true)
+    buf includes =
   let write_if_exists p =
-    if Sys.file_exists p
+    if not check_paths_exist || Sys.file_exists p
     then (B.add_string buf ("\n  " ^ p); true)
     else false in
   let write_include = function
     | Hhas_symbol_refs.Absolute p -> ignore @@ write_if_exists p
     | Hhas_symbol_refs.SearchPathRelative p ->
-      let rec try_paths = function
-        | [] -> ()
-        | prefix :: rest ->
-          if write_if_exists (Filename.concat prefix p)
-          then ()
-          else try_paths rest in
-      let dirname =
-        Option.value_map path ~default:[] ~f:(fun p -> [Filename.dirname p]) in
-      try_paths (dirname @ Option.value search_paths ~default:[])
+      if not check_paths_exist
+      then B.add_string buf ("\n  " ^ p)
+      else
+        let rec try_paths = function
+          | [] -> ()
+          | prefix :: rest ->
+            if write_if_exists (Filename.concat prefix p)
+            then ()
+            else try_paths rest in
+        let dirname =
+          Option.value_map path ~default:[] ~f:(fun p -> [Filename.dirname p]) in
+        try_paths (dirname @ Option.value search_paths ~default:[])
     | Hhas_symbol_refs.DocRootRelative p -> ignore @@
       let resolved = Filename.concat (Option.value doc_root ~default:"") p in
       write_if_exists resolved

@@ -20,7 +20,9 @@ open Hhas_parser_actions
 %token <string> LVNAME
 %token <string> DOUBLE
 %token <string> TRIPLEQUOTEDSTRING
+%token <string> INCLUDESDIRECTIVE
 %token FUNCTIONDIRECTIVE MAINDIRECTIVE CLASSDIRECTIVE DECLVARSDIRECTIVE
+%token CONSTANTREFSDIRECTIVE FUNCTIONREFSDIRECTIVE CLASSREFSDIRECTIVE
 %token DATADECLDIRECTIVE NUMITERSDIRECTIVE NUMCLSREFSLOTSDIRECTIVE
 %token METHODDIRECTIVE CONSTDIRECTIVE ENUMTYDIRECTIVE USESDIRECTIVE
 %token TRYFAULTDIRECTIVE PROPERTYDIRECTIVE FILEPATHDIRECTIVE
@@ -51,7 +53,7 @@ open Hhas_parser_actions
 %type <Instruction_sequence.t> functionbody
 %%
 program:
-    nl decllist nl EOF { split_decl_list $2 [] [] None [] [] Emit_symbol_refs.empty_symbol_refs}
+    nl decllist nl EOF { split_decl_list $2 [] [] None [] [] Hhas_symbol_refs.IncludePathSet.empty SSet.empty SSet.empty SSet.empty}
 ;
 decl:
     | maindecl {Main_decl $1}
@@ -59,6 +61,10 @@ decl:
     | classdecl {Class_decl $1}
     | datadecl {Data_decl $1}
     | aliasdecl {Alias_decl $1}
+    | includesdecl {Includes_decl $1}
+    | constantrefsdecl {ConstantRefs_decl $1}
+    | classrefsdecl {ClassRefs_decl $1}
+    | functionrefsdecl {FunctionRefs_decl $1}
 ;
 aliasdecl:
     | ALIASDIRECTIVE ID EQUALS aliastypeinfo TRIPLEQUOTEDSTRING SEMI nl
@@ -540,4 +546,27 @@ decllist:
     | decl nl decllist {$1 :: $3}
     | FILEPATHDIRECTIVE STRING SEMI nl decllist {$5}
     | STRICTDIRECTIVE INT SEMI nl decllist {$5}
+;
+includesdecl:
+    | INCLUDESDIRECTIVE {
+        let path_list = Str.split (Str.regexp "[ \n\r\x0c\t]+") $1 in
+        let make_ip s =
+          if Filename.is_relative s
+          then Hhas_symbol_refs.SearchPathRelative s
+          else Hhas_symbol_refs.Absolute s in
+        Hhas_symbol_refs.IncludePathSet.of_list (List.map make_ip path_list)
+    }
+;
+nlidlist:
+    | {[]}
+    | ID nl nlidlist {$1 :: $3}
+;
+constantrefsdecl:
+    | CONSTANTREFSDIRECTIVE LBRACE nl nlidlist nl RBRACE nl {SSet.of_list $4}
+;
+classrefsdecl:
+    | CLASSREFSDIRECTIVE LBRACE nl nlidlist nl RBRACE nl {SSet.of_list $4}
+;
+functionrefsdecl:
+    | FUNCTIONREFSDIRECTIVE LBRACE nl nlidlist nl RBRACE nl {SSet.of_list $4}
 ;

@@ -22,6 +22,8 @@ function foo(mixed $x): void {
     expect_shape($x);
   } else if ($x is (int, ?string)) {
     expect_tuple($x);
+  } else if ($x is classname<C>) {
+    expect_classname($x);
   }
 }
 
@@ -32,3 +34,4 @@ function expect_nstring(?string $x): void {}
 function expect_int(int $x): void {}
 function expect_shape(shape('foo' => int, ...) $x): void {}
 function expect_tuple((int, ?string) $x): void {}
+function expect_classname(classname<C> $x): void {}

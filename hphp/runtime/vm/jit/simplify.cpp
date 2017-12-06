@@ -63,7 +63,6 @@ const StaticString s_Keyset("Keyset");
 const StaticString s_isEmpty("isEmpty");
 const StaticString s_count("count");
 const StaticString s_1("1");
-const StaticString s_empty("");
 const StaticString s_invoke("__invoke");
 const StaticString s_isFinished("isFinished");
 const StaticString s_isSucceeded("isSucceeded");
@@ -2154,6 +2153,11 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+const StaticString s_msgArrToStr("Array to string conversion");
+const StaticString s_msgVecToStr("Vec to string conversion");
+const StaticString s_msgDictToStr("Dict to string conversion");
+const StaticString s_msgKeysetToStr("Keyset to string conversion");
+
 SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
   auto const src        = inst->src(0);
   auto const srcType    = src->type();
@@ -2165,28 +2169,24 @@ SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
       Select,
       src,
       cns(env, s_1.get()),
-      cns(env, s_empty.get())
+      cns(env, staticEmptyString())
     );
   }
-  if (srcType <= TNull)   return cns(env, s_empty.get());
-  if (srcType <= TArr)  {
-    gen(env, RaiseNotice, catchTrace,
-        cns(env, makeStaticString("Array to string conversion")));
+  if (srcType <= TNull)   return cns(env, staticEmptyString());
+  if (srcType <= TArr) {
+    gen(env, RaiseNotice, catchTrace, cns(env, s_msgArrToStr.get()));
     return cns(env, s_Array.get());
   }
   if (srcType <= TVec) {
-    gen(env, RaiseNotice, catchTrace,
-        cns(env, makeStaticString("Vec to string conversion")));
+    gen(env, RaiseNotice, catchTrace, cns(env, s_msgVecToStr.get()));
     return cns(env, s_Vec.get());
   }
   if (srcType <= TDict) {
-    gen(env, RaiseNotice, catchTrace,
-        cns(env, makeStaticString("Dict to string conversion")));
+    gen(env, RaiseNotice, catchTrace, cns(env, s_msgDictToStr.get()));
     return cns(env, s_Dict.get());
   }
   if (srcType <= TKeyset) {
-    gen(env, RaiseNotice, catchTrace,
-        cns(env, makeStaticString("Keyset to string conversion")));
+    gen(env, RaiseNotice, catchTrace, cns(env, s_msgKeysetToStr.get()));
     return cns(env, s_Keyset.get());
   }
   if (srcType <= TDbl)    return gen(env, ConvDblToStr, src);

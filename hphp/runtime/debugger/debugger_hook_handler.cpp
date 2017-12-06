@@ -96,7 +96,7 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
       auto expClsName = makeStaticString(exceptionClassName);
       auto cls = Unit::lookupClass(expClsName);
       if (cls != nullptr) {
-        auto baseClsName = makeStaticString("Exception");
+        static auto baseClsName = makeStaticString("Exception");
         auto baseCls = Unit::lookupClass(baseClsName);
         if (baseCls != nullptr) {
           if (cls->classof(baseCls)) {

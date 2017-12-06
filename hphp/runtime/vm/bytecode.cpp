@@ -7587,7 +7587,7 @@ TCA dispatchBB() {
   };
 
   if (Trace::moduleEnabled(Trace::dispatchBB)) {
-    auto cat = makeStaticString("dispatchBB");
+    static auto cat = makeStaticString("dispatchBB");
     auto name = makeStaticString(show(sk()));
     Stats::incStatGrouped(cat, name, 1);
   }

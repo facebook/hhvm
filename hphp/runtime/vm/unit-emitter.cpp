@@ -180,7 +180,7 @@ Id UnitEmitter::mergeArray(const ArrayData* a) {
 
 void UnitEmitter::initMain(int line1, int line2) {
   assert(m_fes.size() == 0);
-  StringData* name = makeStaticString("");
+  StringData* name = staticEmptyString();
   FuncEmitter* pseudomain = newFuncEmitter(name);
   Attr attrs = AttrMayUseVV;
   pseudomain->init(line1, line2, 0, attrs, false, name);

@@ -26,8 +26,6 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-static const StaticString s_emptyString("");
-
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
     return ty.subtypeOfAny(TInt, TBool, TDbl);
@@ -503,7 +501,7 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env,
          gen(env,
              toStrCmpOpcode(op),
-             cns(env, s_emptyString.get()),
+             cns(env, staticEmptyString()),
              right));
   } else if (rightTy <= TObj) {
     // When compared to an object, null is treated as false, and the object as
@@ -783,7 +781,7 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
          gen(env,
              toStrCmpOpcode(op),
              left,
-             cns(env, s_emptyString.get())));
+             cns(env, staticEmptyString())));
   } else if (rightTy <= TBool) {
     // If compared against a bool, convert the string to a bool.
     push(env,

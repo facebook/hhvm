@@ -53,6 +53,7 @@ TRACE_SET_MOD(class_load);
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_86cinit("86cinit");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s___destruct("__destruct");
@@ -1209,8 +1210,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
   clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&marker), true /* isKey */);
 
   // The class constant has not been initialized yet; do so.
-  static auto const sd86cinit = makeStaticString("86cinit");
-  auto const meth86cinit = cns.cls->lookupMethod(sd86cinit);
+  auto const meth86cinit = cns.cls->lookupMethod(s_86cinit.get());
   TypedValue args[1] = {
     make_tv<KindOfPersistentString>(const_cast<StringData*>(cns.name.get()))
   };
@@ -2623,9 +2623,11 @@ void Class::setInitializers() {
   }
 }
 
+const StaticString s_Iterator("Iterator");
+const StaticString s_IteratorAggregate("IteratorAggregate");
 void Class::checkInterfaceConstraints() {
-  if (UNLIKELY(m_interfaces.contains(String("Iterator").get()) &&
-      m_interfaces.contains(String("IteratorAggregate").get()))) {
+  if (UNLIKELY(m_interfaces.contains(s_Iterator.get()) &&
+      m_interfaces.contains(s_IteratorAggregate.get()))) {
     raise_error("Class %s cannot implement both IteratorAggregate and Iterator"
                 " at the same time", name()->data());
   }

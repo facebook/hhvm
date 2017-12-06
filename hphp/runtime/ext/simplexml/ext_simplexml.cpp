@@ -777,6 +777,8 @@ static void sxe_properties_add(Array& rv, char* name, const Variant& value) {
   }
 }
 
+const static StaticString s_atAttributes{"@attributes"};
+
 static void sxe_get_prop_hash(SimpleXMLElement* sxe, bool is_debug,
                               Array& rv, bool isBoolCast = false) {
   rv.clear();
@@ -808,7 +810,7 @@ static void sxe_get_prop_hash(SimpleXMLElement* sxe, bool is_debug,
         attr = attr->next;
       }
       if (zattr.size()) {
-        rv.set(String("@attributes"), zattr);
+        rv.set(s_atAttributes, zattr);
       }
     }
   }

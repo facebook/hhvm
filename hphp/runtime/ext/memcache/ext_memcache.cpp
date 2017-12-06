@@ -252,7 +252,7 @@ static Variant unserialize_if_serialized(const char *payload,
     );
   } else {
     if (payload_len == 0) {
-      ret = String("");
+      ret = empty_string();
     } else {
       ret = String(payload, payload_len, CopyString);
     }

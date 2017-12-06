@@ -2748,7 +2748,7 @@ void parse_alias(AsmState& as) {
   }
 
   const StringData* typeName = ty.typeName();
-  if (!typeName) typeName = makeStaticString("");
+  if (!typeName) typeName = staticEmptyString();
   const StringData* sname = makeStaticString(name);
   // Merge to ensure namedentity creation, according to
   // emitTypedef in emitter.cpp

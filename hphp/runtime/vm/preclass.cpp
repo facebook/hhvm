@@ -83,7 +83,7 @@ const StringData* PreClass::manglePropName(const StringData* className,
       //Failing here will cause the VM to crash before the Verifier runs, so we
       //defer the failure to runtime so the Verifier can report this problem to
       //the user.
-      return makeStaticString("");
+      return staticEmptyString();
   }
 }
 

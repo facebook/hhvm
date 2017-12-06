@@ -1,4 +1,4 @@
-(* @generated from ast_defs.src.ml by hphp/hack/tools/ppx/facebook/generate_ppx.sh *)
+(* @generated from ast_defs.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
 (* SourceShasum<<161fd6a50ab9259eab373bc054fe51de8f7dd4cb>> *)
 

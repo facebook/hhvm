@@ -3093,7 +3093,9 @@ void EmitterVisitor::emitPendingFinally(Emitter& e) {
 
   auto const endCatches = m_ue.bcPos();
   leaveRegion(info.tryRegion);
-  info.tryRegion->m_finallyLabel.set(e);
+  if (info.tryRegion->m_finallyLabel.isUsed()) {
+    info.tryRegion->m_finallyLabel.set(e);
+  }
 
   {
     auto finallyRegion = createRegion(info.labelScope, Region::Kind::Finally);
@@ -3142,7 +3144,7 @@ void EmitterVisitor::emitUsingFinally(Emitter& e, Id localId,
 void EmitterVisitor::emitFinallyEpilogue(Emitter& e, Region* region) {
   assert(region != nullptr);
   assert(region->isTryFinally());
-  assert(region->m_finallyLabel.isSet());
+  assert(!region->m_finallyLabel.isUsed() || region->m_finallyLabel.isSet());
   int count = region->getCaseCount();
   assert(count >= 1);
   Label after;

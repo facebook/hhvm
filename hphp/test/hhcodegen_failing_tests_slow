@@ -4,8 +4,6 @@ slow/anon_class/extend_local.php
 slow/class_type_constant/type_constant.php
 slow/class_type_constant/type_constant6.php
 slow/constant/true_false_null.php
-slow/goto/label_in_finally.php
-slow/goto/try_goto_in_finally1.php
 slow/hack_arr_compat/scalars.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/inline-hhas/mixed.php

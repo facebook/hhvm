@@ -1090,6 +1090,8 @@ let init ?load_mini_approach genv =
       _old_saved,
       state_distance) ->
         Mini_load state_distance
+    | Error (Future.Failure e) ->
+      Mini_load_failed (Future.error_to_string e)
     | Error e ->
       Mini_load_failed (Printexc.to_string e)
   in

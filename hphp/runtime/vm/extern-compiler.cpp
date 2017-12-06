@@ -416,16 +416,25 @@ void ExternCompiler::stop() {
 
   m_compilations = 0;
 
-  int status, code;
-  kill(m_pid, SIGTERM);
+  auto ret = kill(m_pid, SIGTERM);
+  if (ret == -1) {
+    Logger::FWarning(
+      "ExternCompiler: kill failed: {}, {}",
+      errno,
+      folly::errnoStr(errno).c_str());
+  }
 
+  int status, code;
   {
     UseLightDelegate useDelegate;
-    auto ret = LightProcess::waitpid(m_pid, &status, 0, 2);
+    ret = LightProcess::waitpid(m_pid, &status, 0, 2);
     if (ret != m_pid) {
       Logger::FWarning(
-        "ExternCompiler: unable to wait for compiler process, return code {}",
-        ret);
+        "ExternCompiler: unable to wait for compiler process, return code {},"
+        "errno: {}, {}",
+        ret,
+        errno,
+        folly::errnoStr(errno).c_str());
       return;
     }
   }

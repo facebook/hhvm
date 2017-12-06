@@ -151,7 +151,7 @@ static ServiceData::CounterCallback s_warmedUpCounter(
  */
 void reportJitMaturity(const CodeCache& code) {
   auto static jitMaturityCounter = ServiceData::createCounter("jit.maturity");
-
+  if (!jitMaturityCounter) return;
   // Optimized translations are faster than profiling translations, which are
   // faster than the interpreter.  But when optimized translations are
   // generated, some profiling translations will become dead.  We assume the
@@ -159,37 +159,39 @@ void reportJitMaturity(const CodeCache& code) {
   // profiling translations is comparable to the incremental value of a
   // profiling translation of similar size; thus we don't have to apply
   // different weights to code in different regions.
-  auto const codeSize =
-    code.hot().used() + code.main().used() + code.prof().used();
-  if (jitMaturityCounter) {
-    // EvalJitMatureSize is supposed to to be set to approximately 20% of the
-    // code that will give us full performance, so recover the "fully mature"
-    // size with some math.
-    auto const fullSize = RuntimeOption::EvalJitMatureSize * 5;
-    auto after = codeSize >= fullSize
-        ? 100
-        : (static_cast<int64_t>(
-              std::pow(
-                  static_cast<double>(codeSize) / static_cast<double>(fullSize),
-                  RuntimeOption::EvalJitMaturityExponent) *
-              100));
+  auto codeSize = code.prof().used() + code.main().used();
+  // When retranslateAll is used, we only add code.hot() after retranslateAll
+  // finishes.
+  if (!mcgen::retranslateAllPending()) codeSize += code.hot().used();
+  // EvalJitMatureSize is supposed to to be set to approximately 20% of the
+  // code that will give us full performance, so recover the "fully mature"
+  // size with some math.
+  auto const fullSize = RuntimeOption::EvalJitMatureSize * 5;
+  int64_t after;
+  if (codeSize >= fullSize) {
+    after = 100;
+  } else {
+    after = std::pow(codeSize / static_cast<double>(fullSize),
+                     RuntimeOption::EvalJitMaturityExponent) * 100;
     if (after < 1) {
       after = 1;
-    } else if (after > 99 && code.main().used() < CodeCache::AMaxUsage) {
-      // Make jit maturity is less than 100 before the JIT stops.
-      after = 99;
     }
-    auto const before = jitMaturityCounter->getValue();
-    if (after > before) jitMaturityCounter->setValue(after);
   }
+  // Make sure jit maturity is less than 100 before the JIT stops.
+  if (after > 99 && code.main().used() < CodeCache::AMaxUsage) after = 99;
 
-  if (!s_loggedJitMature.load(std::memory_order_relaxed) &&
-      StructuredLog::enabled() &&
-      codeSize >= RuntimeOption::EvalJitMatureSize &&
-      !s_loggedJitMature.exchange(true, std::memory_order_relaxed)) {
-    StructuredLogEntry cols;
-    cols.setInt("jit_mature_sec", time(nullptr) - HttpServer::StartTime);
-    StructuredLog::log("hhvm_warmup", cols);
+  auto const before = jitMaturityCounter->getValue();
+  if (after > before) {
+    jitMaturityCounter->setValue(after);
+
+    if (!s_loggedJitMature.load(std::memory_order_relaxed) &&
+        StructuredLog::enabled() &&
+        codeSize >= RuntimeOption::EvalJitMatureSize &&
+        !s_loggedJitMature.exchange(true, std::memory_order_relaxed)) {
+      StructuredLogEntry cols;
+      cols.setInt("jit_mature_sec", time(nullptr) - HttpServer::StartTime);
+      StructuredLog::log("hhvm_warmup", cols);
+    }
   }
 
   code.forEachBlock([&] (const char* name, const CodeBlock& a) {

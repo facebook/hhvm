@@ -130,6 +130,8 @@ module UserAttributes = struct
   let uaHipHopSpecific      = "__HipHopSpecific"
   let uaAcceptDisposable    = "__AcceptDisposable"
   let uaReactive            = "__Rx"
+  let uaLocalReactive       = "__RxLocal"
+
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -143,6 +145,7 @@ module UserAttributes = struct
       uaHipHopSpecific;
       uaAcceptDisposable;
       uaReactive;
+      uaLocalReactive;
     ]
 end
 

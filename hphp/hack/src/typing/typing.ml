@@ -332,7 +332,7 @@ and fun_def tcopt f =
   let nb = TNBody.func_body tcopt f in
   let dep = Typing_deps.Dep.Fun (snd f.f_name) in
   let env = Env.empty tcopt (Pos.filename pos) (Some dep) in
-  let reactive = Attributes.mem SN.UserAttributes.uaReactive f.f_user_attributes in
+  let reactive = TUtils.fun_reactivity f.f_user_attributes in
   let env = Env.set_env_reactive env reactive in
   NastCheck.fun_ env f nb;
   (* Fresh type environment is actually unnecessary, but I prefer to
@@ -2533,7 +2533,7 @@ and assign_ p ur env e1 ty2 =
             (* Vector assignment is illegal in a reactive context
                 but vec assignment is okay
             *)
-            if x <> SN.Collections.cVec && Env.env_reactive env then
+            if x <> SN.Collections.cVec && Env.env_local_reactive env then
               Errors.nonreactive_append p;
             let env, tel = List.map_env env el begin fun env e ->
               let env, te, _ = assign (fst e) env e elt_type in
@@ -2606,7 +2606,7 @@ and assign_ p ur env e1 ty2 =
 
   | _, Class_get _
   | _, Obj_get _ ->
-      if Env.env_reactive env then
+      if Env.env_local_reactive env then
         Errors.obj_set_reactive p;
       let lenv = env.Env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in
@@ -3685,7 +3685,7 @@ and array_append p env ty1 =
         | Tclass ((_, n), [ty])
             when (n = SN.Collections.cVector
             || n = SN.Collections.cSet) &&
-            Env.env_reactive env ->
+            Env.env_local_reactive env ->
             Errors.nonreactive_append p;
             env, ty
 
@@ -3701,13 +3701,13 @@ and array_append p env ty1 =
                without type parameters *)
             env, (Reason.Rnone, Tany)
         | Tclass ((_, n), [tkey; tvalue]) when n = SN.Collections.cMap ->
-            if Env.env_reactive env then
+            if Env.env_local_reactive env then
               Errors.nonreactive_append p;
               (* You can append a pair to a map *)
             env, (Reason.Rmap_append p, Tclass ((p, SN.Collections.cPair),
                 [tkey; tvalue]))
         | Tclass ((_, n), []) when n = SN.Collections.cMap ->
-            if Env.env_reactive env then
+            if Env.env_local_reactive env then
               Errors.nonreactive_append p;
             (* Handle the case where "Map" was used as a typehint without
                type parameters *)
@@ -5675,7 +5675,7 @@ and method_def env m =
   let env =
     Env.env_with_locals env Typing_continuations.Map.empty Local_id.Map.empty
   in
-  let reactive = Attributes.mem SN.UserAttributes.uaReactive m.m_user_attributes in
+  let reactive = TUtils.fun_reactivity m.m_user_attributes in
   let env = Env.set_env_reactive env reactive in
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in

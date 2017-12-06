@@ -115,8 +115,9 @@ val is_generic_parameter : env -> string -> bool
 val get_generic_parameters : env -> string list
 val add_fresh_generic_parameter : env -> string -> env * string
 val get_tpenv_size : env -> int
-val set_env_reactive : env -> bool -> env
+val set_env_reactive : env -> reactivity -> env
 val env_reactive  : env -> bool
+val env_local_reactive : env -> bool
 val freeze_local_env : env -> env
 val env_with_locals :
   env -> local_types -> local_history Local_id.Map.t -> env

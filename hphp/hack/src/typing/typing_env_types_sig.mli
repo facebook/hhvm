@@ -67,6 +67,7 @@ type env = {
   global_tpenv : tpenv ;
 }
 
+and reactivity = Normal | Local | Reactive
 and genv = {
   tcopt   : TypecheckerOptions.t;
   return  : locl ty * bool (* use as contextual type *);
@@ -80,7 +81,7 @@ and genv = {
   self    : locl ty;
   static  : bool;
   fun_kind : Ast.fun_kind;
-  fun_reactive : bool;
+  fun_reactive : reactivity;
   anons   : anon IMap.t;
   file    : Relative_path.t;
 }

@@ -290,7 +290,7 @@ let empty tcopt file ~droot = {
     parent_id = "";
     parent  = Reason.none, Tany;
     fun_kind = Ast.FSync;
-    fun_reactive = false;
+    fun_reactive = Normal;
     anons   = IMap.empty;
     file    = file;
   };
@@ -299,8 +299,15 @@ let empty tcopt file ~droot = {
 
 let set_env_reactive env reactive =
   { env with genv = {env.genv with fun_reactive = reactive }}
+
+(* Full reactivity *)
 let env_reactive env =
-  env.genv.fun_reactive
+  env.genv.fun_reactive = Reactive
+
+(* Local reactivity *)
+let env_local_reactive env =
+  env.genv.fun_reactive <> Normal
+
 let add_wclass env x =
   let dep = Dep.Class x in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);

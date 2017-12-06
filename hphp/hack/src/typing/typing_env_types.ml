@@ -69,7 +69,7 @@ type env = {
   (* A set of constraints that are global to a given method *)
   global_tpenv : tpenv ;
 }
-
+and reactivity = Normal | Local | Reactive
 and genv = {
   tcopt   : TypecheckerOptions.t;
   return  : locl ty * bool (* use as contextual type *);
@@ -84,7 +84,7 @@ and genv = {
   static  : bool;
   fun_kind : Ast.fun_kind;
   (* Whether current function is reactive *)
-  fun_reactive : bool;
+  fun_reactive : reactivity;
   anons   : anon IMap.t;
   file    : Relative_path.t;
 }

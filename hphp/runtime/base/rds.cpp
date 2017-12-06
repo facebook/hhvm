@@ -654,14 +654,23 @@ bool isValidHandle(Handle handle) {
 static void initPersistentCache() {
   Guard g(s_allocMutex);
   if (s_tc_fd) return;
-  char tmpName[] = "/tmp/tcXXXXXX";
-  s_tc_fd = mkstemp(tmpName);
+  std::string tmpName = folly::sformat("/HHVM_tc{}", getpid());
+  always_assert(tmpName.size() <= NAME_MAX);
+  // Get a file descriptor to a shared memory object.  This is normally located
+  // in /dev/shm, which is a tmpfs filesystem that shouldn't run out of space
+  // unlike /tmp
+  s_tc_fd = shm_open(tmpName.c_str(),
+                     O_RDWR | O_CREAT | O_EXCL,
+                     S_IWUSR | S_IRUSR);
   always_assert(s_tc_fd != -1);
-  unlink(tmpName);
+  shm_unlink(tmpName.c_str());
   s_persistent_base = RuntimeOption::EvalJitTargetCacheSize * 3 / 4;
   s_persistent_base -= s_persistent_base & (4 * 1024 - 1);
-  ftruncate(s_tc_fd,
-            RuntimeOption::EvalJitTargetCacheSize - s_persistent_base);
+  auto const fail =
+    ftruncate(s_tc_fd,
+              RuntimeOption::EvalJitTargetCacheSize - s_persistent_base);
+
+  always_assert(fail == 0);
   s_local_frontier = s_persistent_frontier = s_persistent_base;
 }
 

@@ -22,11 +22,13 @@ type type_hint_kind =
 
 let fmt_name_or_prim ~tparams ~namespace x =
   let name = snd x in
-  if List.mem tparams name || name = "self"
+  if List.mem tparams name || is_self name
   then name
   else
+    let needs_unmangling = Xhp.is_xhp (strip_ns name) in
     let fq_id, _ = Hhbc_id.Class.elaborate_id namespace x in
-    Hhbc_id.Class.to_unmangled_string fq_id
+    if needs_unmangling then Hhbc_id.Class.to_unmangled_string fq_id
+    else Hhbc_id.Class.to_raw_string fq_id
 
 (* Produce the "userType" bit of the annotation *)
 let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =

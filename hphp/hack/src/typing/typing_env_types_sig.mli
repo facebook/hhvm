@@ -80,6 +80,7 @@ and genv = {
   self    : locl ty;
   static  : bool;
   fun_kind : Ast.fun_kind;
+  fun_reactive : bool;
   anons   : anon IMap.t;
   file    : Relative_path.t;
 }

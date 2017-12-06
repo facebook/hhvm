@@ -1,6 +1,6 @@
 File "test_lambda_reactive.php", line 15, characters 10-11:
-Invalid return type (Typing[4195])
-File "test_lambda_reactive.php", line 11, characters 20-21:
+Invalid return type (Typing[4203])
+File "test_lambda_reactive.php", line 11, characters 19-20:
 This function is reactive
 File "test_lambda_reactive.php", line 12, characters 8-15:
 This function is not.

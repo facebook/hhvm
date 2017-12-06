@@ -386,6 +386,9 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
     r_sub ft_sub r_super ft_super =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
+  (* Reactive functions are a subtype of non reactive ones, but not vice versa *)
+  if not ft_sub.ft_reactive && ft_super.ft_reactive then
+    Errors.fun_reactivity_mismatch p_super p_sub;
   if ft_sub.ft_is_coroutine <> ft_super.ft_is_coroutine
   then Errors.coroutinness_mismatch ft_super.ft_is_coroutine p_super p_sub;
   if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)

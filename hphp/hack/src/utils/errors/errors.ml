@@ -774,6 +774,10 @@ module Typing                               = struct
   let self_const_parent_not                 = 4197 (* DONT MODIFY!!!! *)
   let parent_const_self_not                 = 4198 (* DONT MODIFY!!!! *)
   let partially_valid_is_expression_hint    = 4199 (* DONT MODIFY!!!! *)
+  let nonreactive_function_call             = 4200 (* DONT MODIFY!!!! *)
+  let nonreactive_append                    = 4201 (* DONT MODIFY!!!! *)
+  let obj_set_reactive                      = 4202 (* DONT MODIFY!!!! *)
+  let fun_reactivity_mismatch               = 4203 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2210,6 +2214,12 @@ let fun_arity_mismatch pos1 pos2 =
   pos2, "Because of this definition";
 ]
 
+let fun_reactivity_mismatch pos1 pos2 =
+  add_list Typing.fun_reactivity_mismatch [
+  pos1, "This function is reactive";
+  pos2, "This function is not.";
+]
+
 let discarded_awaitable pos1 pos2 =
   add_list Typing.discarded_awaitable [
   pos1, "This expression is of type Awaitable, but it's "^
@@ -2677,6 +2687,21 @@ let invalid_new_disposable pos =
   let msg =
     "'new' must not be used for disposable objects except in a 'using' statement" in
   add Typing.invalid_new_disposable pos msg
+
+let nonreactive_function_call pos =
+  let msg =
+    "Reactive functions can only call other reactive functions" in
+  add Typing.nonreactive_function_call pos msg
+
+let nonreactive_append pos =
+  let msg = "Cannot append to a Hack Collection types in a reactive context" in
+  add Typing.nonreactive_append pos msg
+
+let obj_set_reactive pos =
+  let msg = ("This property is being mutated(used as an lvalue)" ^
+  "\nYou cannot set non-mutable object properties in reactive functions") in
+  add Typing.obj_set_reactive pos msg
+
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

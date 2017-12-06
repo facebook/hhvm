@@ -401,6 +401,7 @@ module type S = sig
   val coroutine_call_outside_of_suspend : Pos.t -> unit
   val function_is_not_coroutine : Pos.t -> string -> unit
   val coroutinness_mismatch : bool -> Pos.t -> Pos.t -> unit
+  val fun_reactivity_mismatch : Pos.t -> Pos.t -> unit
   val this_as_lexical_variable : Pos.t -> unit
   val dollardollar_lvalue : Pos.t -> unit
   val duplicate_using_var : Pos.t -> unit
@@ -414,6 +415,7 @@ module type S = sig
   val inout_params_special : Pos.t -> unit
   val inout_params_mix_byref : Pos.t -> Pos.t -> unit
   val inout_params_memoize : Pos.t -> Pos.t -> unit
+  val obj_set_reactive : Pos.t -> unit
   val global_in_reactive_context : Pos.t -> unit
   val inout_annotation_missing : Pos.t -> Pos.t -> unit
   val inout_annotation_unexpected : Pos.t -> Pos.t -> unit
@@ -421,4 +423,6 @@ module type S = sig
   val inout_params_ret_by_ref : Pos.t -> Pos.t -> unit
   val xhp_required : Pos.t -> string -> (Pos.t * string) list -> unit
   val illegal_xhp_child : Pos.t -> (Pos.t * string) list -> unit
+  val nonreactive_function_call : Pos.t -> unit
+  val nonreactive_append : Pos.t -> unit
 end

@@ -332,6 +332,8 @@ and fun_def tcopt f =
   let nb = TNBody.func_body tcopt f in
   let dep = Typing_deps.Dep.Fun (snd f.f_name) in
   let env = Env.empty tcopt (Pos.filename pos) (Some dep) in
+  let reactive = Attributes.mem SN.UserAttributes.uaReactive f.f_user_attributes in
+  let env = Env.set_env_reactive env reactive in
   NastCheck.fun_ env f nb;
   (* Fresh type environment is actually unnecessary, but I prefer to
    * have a guarantee that we are using a clean typing environment. *)
@@ -1845,6 +1847,8 @@ and expr_
         (* Improve hover type experience for parameters with known types *)
         List.iter2_exn f.f_params ft.ft_params (fun param ft_param ->
           Typing_hooks.dispatch_infer_ty_hook ft_param.fp_type param.param_pos env);
+        (* The lambda inherits its reactivity from the enclosing function *)
+        let ft = { ft with ft_reactive = Env.env_reactive env } in
         let inferred_ty =
           if is_explicit_ret
           then (Reason.Rwitness p, Tfun { ft with ft_ret = declared_ft.ft_ret })
@@ -2526,6 +2530,11 @@ and assign_ p ur env e1 ty2 =
             || x = SN.Collections.cImmVector
             || x = SN.Collections.cVec
             || x = SN.Collections.cConstVector ->
+            (* Vector assignment is illegal in a reactive context
+                but vec assignment is okay
+            *)
+            if x <> SN.Collections.cVec && Env.env_reactive env then
+              Errors.nonreactive_append p;
             let env, tel = List.map_env env el begin fun env e ->
               let env, te, _ = assign (fst e) env e elt_type in
               env, te
@@ -2594,8 +2603,11 @@ and assign_ p ur env e1 ty2 =
       | [res] -> res
       | _ -> assign_simple p ur env e1 ty2
     end
+
   | _, Class_get _
   | _, Obj_get _ ->
+      if Env.env_reactive env then
+        Errors.obj_set_reactive p;
       let lenv = env.Env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in
       (* In this section, we check that the assignment is compatible with
@@ -3669,6 +3681,13 @@ and array_append p env ty1 =
 
         | Terr ->
           env, (Reason.Rnone, Terr)
+        (* No reactive append on vector and set *)
+        | Tclass ((_, n), [ty])
+            when (n = SN.Collections.cVector
+            || n = SN.Collections.cSet) &&
+            Env.env_reactive env ->
+            Errors.nonreactive_append p;
+            env, ty
 
         | Tclass ((_, n), [ty])
             when n = SN.Collections.cVector
@@ -3682,10 +3701,14 @@ and array_append p env ty1 =
                without type parameters *)
             env, (Reason.Rnone, Tany)
         | Tclass ((_, n), [tkey; tvalue]) when n = SN.Collections.cMap ->
-            (* You can append a pair to a map *)
-          env, (Reason.Rmap_append p, Tclass ((p, SN.Collections.cPair),
-              [tkey; tvalue]))
+            if Env.env_reactive env then
+              Errors.nonreactive_append p;
+              (* You can append a pair to a map *)
+            env, (Reason.Rmap_append p, Tclass ((p, SN.Collections.cPair),
+                [tkey; tvalue]))
         | Tclass ((_, n), []) when n = SN.Collections.cMap ->
+            if Env.env_reactive env then
+              Errors.nonreactive_append p;
             (* Handle the case where "Map" was used as a typehint without
                type parameters *)
             env, (Reason.Rmap_append p,
@@ -4446,6 +4469,12 @@ and call_ ~expected pos env fty el uel =
     check_deprecated pos ft;
     let pos_def = Reason.to_pos r2 in
     let env, var_param = variadic_param env ft in
+
+    (* Reactive functions can only call reactive functions *)
+    (match Env.env_reactive env, ft.ft_reactive with
+    | true, false ->
+      Errors.nonreactive_function_call pos
+    | _ -> ());
 
     (* Force subtype with expected result *)
     let env = check_expected_ty "Call result" env ft.ft_ret expected in
@@ -5646,6 +5675,8 @@ and method_def env m =
   let env =
     Env.env_with_locals env Typing_continuations.Map.empty Local_id.Map.empty
   in
+  let reactive = Attributes.mem SN.UserAttributes.uaReactive m.m_user_attributes in
+  let env = Env.set_env_reactive env reactive in
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
   let env, constraints =

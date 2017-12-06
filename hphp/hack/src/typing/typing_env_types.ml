@@ -83,6 +83,8 @@ and genv = {
   self    : locl ty;
   static  : bool;
   fun_kind : Ast.fun_kind;
+  (* Whether current function is reactive *)
+  fun_reactive : bool;
   anons   : anon IMap.t;
   file    : Relative_path.t;
 }

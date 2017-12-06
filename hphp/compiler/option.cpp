@@ -58,7 +58,6 @@ std::vector<std::string> Option::ParseOnDemandDirs;
 std::map<std::string, std::string> Option::IncludeRoots;
 std::map<std::string, std::string> Option::AutoloadRoots;
 std::vector<std::string> Option::IncludeSearchPaths;
-std::string Option::DefaultIncludeRoot;
 hphp_string_imap<std::string> Option::ConstantFunctions;
 
 bool Option::GeneratePickledPHP = false;

@@ -90,11 +90,6 @@ struct Option {
   static std::vector<std::string> IncludeSearchPaths;
 
   /**
-   * PHP include root expression to use when generating PHP trimmed code.
-   */
-  static std::string DefaultIncludeRoot;
-
-  /**
    * PHP functions that can be assumed to always return a certain constant
    * value.
    */

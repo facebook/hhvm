@@ -12,6 +12,8 @@ open Hh_core
 open Hhbc_string_utils
 
 module A = Ast
+module HOpt = Hhbc_options
+module SN = Naming_special_names
 module TC = Hhas_type_constraint
 
 type type_hint_kind =
@@ -93,75 +95,75 @@ let can_be_nullable h =
 
 let rec hint_to_type_constraint
   ~kind ~tparams ~skipawaitable ~namespace (_, h) =
-match h with
-| A.Happly ((_, "mixed"), []) ->
-  TC.make None []
+  match h with
+  | A.Happly ((_, "mixed"), []) ->
+    TC.make None []
 
-| A.Happly ((_, "void"), []) when kind <> TypeDef ->
-  TC.make None []
+  | A.Happly ((_, "void"), []) when kind <> TypeDef ->
+    TC.make None []
 
-| A.Hfun _ ->
-  TC.make None []
+  | A.Hfun _ ->
+    TC.make None []
 
-| A.Haccess _ ->
-  let tc_name = Some "" in
-  let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeConstant] in
-  TC.make tc_name tc_flags
-
-  (* Elide the Awaitable class for async return types only *)
-| A.Happly ((_, ("WaitHandle" | "Awaitable")), [(_, A.Happly((_, "void"), []))])
-  when skipawaitable ->
-  TC.make None []
-
-| A.Happly ((_, ("WaitHandle" | "Awaitable")), [h])
-| A.Hoption (_, A.Happly ((_, ("WaitHandle" | "Awaitable")), [h]))
-  when skipawaitable ->
-  hint_to_type_constraint ~kind ~tparams ~skipawaitable:false ~namespace h
-
-| A.Hoption (_, A.Hsoft (_, A.Happly ((_, ("WaitHandle" | "Awaitable")), [h])))
-  when skipawaitable ->
-  make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
-    h [TC.Soft; TC.HHType; TC.ExtendedHint]
-
-| A.Happly ((_, ("WaitHandle" | "Awaitable")), [])
-| A.Hoption (_, A.Happly ((_, ("WaitHandle" | "Awaitable")), []))
-  when skipawaitable ->
-  TC.make None []
-
-(* Need to differentiate between type params and classes *)
-| A.Happly ((pos,name) as id, _) ->
-  if List.mem tparams name then
+  | A.Haccess _ ->
     let tc_name = Some "" in
-    let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeVar] in
+    let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeConstant] in
     TC.make tc_name tc_flags
-  else
-    if kind = TypeDef && (name = "self" || name = "parent")
-    then Emit_fatal.raise_fatal_runtime pos
-      (Printf.sprintf "Cannot access %s when no class scope is active" name)
+
+    (* Elide the Awaitable class for async return types only *)
+  | A.Happly ((_, ("WaitHandle" | "Awaitable")), [(_, A.Happly((_, "void"), []))])
+    when skipawaitable ->
+    TC.make None []
+
+  | A.Happly ((_, ("WaitHandle" | "Awaitable")), [h])
+  | A.Hoption (_, A.Happly ((_, ("WaitHandle" | "Awaitable")), [h]))
+    when skipawaitable ->
+    hint_to_type_constraint ~kind ~tparams ~skipawaitable:false ~namespace h
+
+  | A.Hoption (_, A.Hsoft (_, A.Happly ((_, ("WaitHandle" | "Awaitable")), [h])))
+    when skipawaitable ->
+    make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
+      h [TC.Soft; TC.HHType; TC.ExtendedHint]
+
+  | A.Happly ((_, ("WaitHandle" | "Awaitable")), [])
+  | A.Hoption (_, A.Happly ((_, ("WaitHandle" | "Awaitable")), []))
+    when skipawaitable ->
+    TC.make None []
+
+  (* Need to differentiate between type params and classes *)
+  | A.Happly ((pos,name) as id, _) ->
+    if List.mem tparams name then
+      let tc_name = Some "" in
+      let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeVar] in
+      TC.make tc_name tc_flags
     else
-    let tc_name =
-      let fq_id, _ = Hhbc_id.Class.elaborate_id namespace id in
-      Hhbc_id.Class.to_raw_string fq_id in
-    let tc_flags = [TC.HHType] in
-    TC.make (Some tc_name) tc_flags
+      if kind = TypeDef && (name = "self" || name = "parent")
+      then Emit_fatal.raise_fatal_runtime pos
+        (Printf.sprintf "Cannot access %s when no class scope is active" name)
+      else
+      let tc_name =
+        let fq_id, _ = Hhbc_id.Class.elaborate_id namespace id in
+        Hhbc_id.Class.to_raw_string fq_id in
+      let tc_flags = [TC.HHType] in
+      TC.make (Some tc_name) tc_flags
 
-(* Shapes and tuples are just arrays *)
-| A.Hshape _ ->
-  let tc_name = Some "HH\\darray" in
-  let tc_flags = [TC.HHType; TC.ExtendedHint] in
-  TC.make tc_name tc_flags
+  (* Shapes and tuples are just arrays *)
+  | A.Hshape _ ->
+    let tc_name = Some "HH\\darray" in
+    let tc_flags = [TC.HHType; TC.ExtendedHint] in
+    TC.make tc_name tc_flags
 
-| A.Htuple _ ->
-  let tc_name = Some "HH\\varray" in
-  let tc_flags = [TC.HHType; TC.ExtendedHint] in
-  TC.make tc_name tc_flags
+  | A.Htuple _ ->
+    let tc_name = Some "HH\\varray" in
+    let tc_flags = [TC.HHType; TC.ExtendedHint] in
+    TC.make tc_name tc_flags
 
-| A.Hoption t ->
-  make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
-    t [TC.Nullable; TC.HHType; TC.ExtendedHint]
+  | A.Hoption t ->
+    make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
+      t [TC.Nullable; TC.HHType; TC.ExtendedHint]
 
-| A.Hsoft t ->
-  make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
+  | A.Hsoft t ->
+    make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
     t [TC.Soft; TC.HHType; TC.ExtendedHint]
 
 and make_tc_with_flags_if_non_empty_flags
@@ -210,27 +212,58 @@ let param_hint_to_type_info
     let tc_flags = try_add_nullable ~nullable h tc_flags in
     make_type_info ~tparams ~namespace h tc_name tc_flags
 
+let fail_if_contains_reserved_id hint namespace =
+  (* Based on Parser::onTypeAnnotation,
+  for type hints like foo\bar, check that bar isn't a reserved scalar type
+  like int or string *)
+  let must_check = HOpt.php7_scalar_types !HOpt.compiler_options in
+  if must_check then
+    let is_reserved id =
+      let fully_qualified_id =
+        Hhbc_id.Class.elaborate_id namespace id
+        |> fst |> Hhbc_id.Class.to_unmangled_string in
+      SN.Typehints.is_namespace_with_reserved_hh_name fully_qualified_id in
+    let fail_if_reserved pos_id =
+      let pos, id = pos_id in
+      if is_reserved pos_id then Emit_fatal.raise_fatal_parse pos
+        (Printf.sprintf "Cannot use '%s' as class name as it is reserved" id) in
+    let checking_visitor = object(self) inherit [_] Ast.iter as super
+      method! on_hint () hint =
+        match snd hint with
+        | A.Happly (id, hints) ->
+          fail_if_reserved id;
+          List.iter hints ~f:(self#on_hint ())
+        | A.Haccess (id1, id2, ids) ->
+          fail_if_reserved id1;
+          fail_if_reserved id2;
+          List.iter ids ~f:fail_if_reserved
+        | _ -> super#on_hint () hint
+    end in
+    checking_visitor#on_hint () hint
+
 let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
+  fail_if_contains_reserved_id h namespace;
   match kind with
   | Param ->
     param_hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h
   | _ ->
-  let tc =
-    if kind = Property then TC.make None []
-    else hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace h
-  in
-  let tc_name = TC.name tc in
-  let tc_flags = TC.flags tc in
-  let tc_flags =
-    if kind = Return && tc_name <> None
-    then List.dedup (TC.ExtendedHint :: tc_flags)
-    else tc_flags in
-  let tc_flags =
-    if kind = TypeDef then add_nullable ~nullable tc_flags
-    else try_add_nullable ~nullable h tc_flags in
-  make_type_info ~tparams ~namespace h tc_name tc_flags
+    let tc =
+      if kind = Property then TC.make None []
+      else hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace h
+    in
+    let tc_name = TC.name tc in
+    let tc_flags = TC.flags tc in
+    let tc_flags =
+      if kind = Return && tc_name <> None
+      then List.dedup (TC.ExtendedHint :: tc_flags)
+      else tc_flags in
+    let tc_flags =
+      if kind = TypeDef then add_nullable ~nullable tc_flags
+      else try_add_nullable ~nullable h tc_flags in
+    make_type_info ~tparams ~namespace h tc_name tc_flags
 
 let hint_to_class ~namespace h =
+  fail_if_contains_reserved_id h namespace;
   match h with
   | (_, A.Happly (id, _)) ->
     let fq_id, _ = Hhbc_id.Class.elaborate_id namespace id in

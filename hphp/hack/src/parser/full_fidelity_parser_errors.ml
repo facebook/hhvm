@@ -563,7 +563,7 @@ let is_invalid_xhp_attr_enum_item node =
   | _ -> true
 
 let xhp_errors node _parents hhvm_compat_mode errors =
-(* An attribute name cannot contain - or :, but we allow this in the lexer
+  (* An attribute name cannot contain - or :, but we allow this in the lexer
    because it's easier to have one rule for tokenizing both attribute and
    element names. *)
   match syntax node with

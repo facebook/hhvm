@@ -247,6 +247,22 @@ module Typehints = struct
     x = num      || x = string   || x = resource || x = mixed    || x = array ||
     x = arraykey || x = integer  || x = boolean  || x = double   || x = real
 
+  let is_namespace_with_reserved_hh_name x =
+    let unqualify qualified_name =
+      let as_list = Str.split (Str.regexp "\\") qualified_name in
+      let as_list = List.filter as_list ~f:(fun s -> s != "") in
+      match List.rev as_list with
+      | name :: qualifiers -> List.rev qualifiers, name
+      | [] -> [], qualified_name in
+    let is_HH qualifier =
+      match qualifier with
+      | [qual] -> qual = "HH"
+      | _ -> false in
+    let qualifier, name = unqualify x in
+    name |> is_reserved_hh_name
+    && not (List.is_empty qualifier)
+    && not (qualifier |> is_HH)
+
 end
 
 module PseudoConsts = struct

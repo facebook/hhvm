@@ -18,6 +18,5 @@ slow/parser/hh-namespace-conflict-3.php
 slow/parser/hh-namespace-conflict-6.php
 slow/parser/php-namespace-conflict-3.php
 slow/php7_backported/ns_093.php
-slow/php7_backported/scalar-types/scalar_relative_typehint_disallowed.php
 slow/reflection/param_tostring_zendcompat.php
 slow/using/goto.php

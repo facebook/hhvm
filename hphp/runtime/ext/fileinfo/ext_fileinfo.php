@@ -26,8 +26,8 @@ class finfo {
     $this->magic_file = $magic_file;
   }
 
+  <<__OptionalDestruct>>
   public function __destruct() {
-    finfo_close($this->resource);
   }
 
   public function __sleep() {

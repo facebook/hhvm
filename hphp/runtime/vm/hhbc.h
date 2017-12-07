@@ -995,10 +995,6 @@ constexpr bool isConditionalJmp(Op opcode) {
   return opcode == Op::JmpZ || opcode == Op::JmpNZ;
 }
 
-constexpr bool isCompare(Op opcode) {
-  return opcode >= Op::Eq && opcode <= Op::Gte;
-}
-
 constexpr bool isJmp(Op opcode) {
   return opcode >= Op::Jmp && opcode <= Op::JmpNZ;
 }

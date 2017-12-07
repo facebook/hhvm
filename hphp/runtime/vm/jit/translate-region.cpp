@@ -534,9 +534,22 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
   return calleeRegion;
 }
 
-bool needsSurpriseCheck(Op op)
-{
+static bool needsSurpriseCheck(Op op) {
   return op == Op::JmpZ || op == Op::JmpNZ || op == Op::Jmp;
+}
+
+// Unlike isCompare, this also allows Not, Same, NSame and Cmp.
+static bool isCmp(Op op) {
+  return op == Op::Not ||
+      op == Op::Same ||
+      op == Op::NSame ||
+      op == Op::Eq ||
+      op == Op::Neq ||
+      op == Op::Lt ||
+      op == Op::Lte ||
+      op == Op::Gt ||
+      op == Op::Gte ||
+      op == Op::Cmp;
 }
 
 TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
@@ -812,11 +825,11 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         }
       }
 
-      if (!skipTrans && penultimateInst && isCompare(inst.op())) {
+      if (!skipTrans && penultimateInst && isCmp(inst.op())) {
           SrcKey nextSk = inst.nextSk();
           Op nextOp = nextSk.op();
-          if (needsSurpriseCheck(nextOp)
-              && *instrJumpOffset(nextSk.pc()) < 0) {
+          if (needsSurpriseCheck(nextOp) &&
+              *instrJumpOffset(nextSk.pc()) < 0) {
             emitedSurpriseCheck = true;
             inst.forceSurpriseCheck = true;
           }
@@ -826,9 +839,9 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       try {
         if (!skipTrans) {
           const bool firstInstr = isEntry && i == 0;
-          if (lastInstr && !emitedSurpriseCheck
-              && needsSurpriseCheck(inst.op())
-              && *instrJumpOffset(inst.pc()) < 0) {
+          if (lastInstr && !emitedSurpriseCheck &&
+              needsSurpriseCheck(inst.op()) &&
+              *instrJumpOffset(inst.pc()) < 0) {
             emitedSurpriseCheck = true;
             inst.forceSurpriseCheck = true;
           }

@@ -12,20 +12,6 @@ open Instruction_sequence
 module A = Ast
 open Hh_core
 
-let find_first_redeclaration pick_name_span l =
-  let rec aux seen l =
-    match l with
-    | [] -> None
-    | x :: xs ->
-      match pick_name_span x with
-      | Some (name, span) ->
-        begin match SMap.get name seen with
-        | None -> aux (SMap.add name span seen) xs
-        | Some original -> Some (name, original, span)
-        end
-      | None -> aux seen xs in
-  aux SMap.empty l
-
 let extract_inout_or_ref_param_locations params =
   let inout_param_locations = List.filter_mapi params
     ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout

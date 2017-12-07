@@ -1321,7 +1321,7 @@ let missing_type_annot_check is_strict hhvm_compat_mode f =
 let function_reference_check is_strict hhvm_compat_mode f =
   not hhvm_compat_mode && is_strict && not (is_missing f.function_ampersand)
 
-let function_errors node parents is_strict hhvm_compat_mode namespace_name names errors =
+let function_errors node parents is_strict hhvm_compat_mode errors =
   match syntax node with
   | FunctionDeclarationHeader f ->
     let errors =
@@ -1330,17 +1330,49 @@ let function_errors node parents is_strict hhvm_compat_mode namespace_name names
     let errors =
       produce_error errors (function_reference_check is_strict hhvm_compat_mode) f
       SyntaxError.error2064 f.function_ampersand in
-    let names =
-      match parents with
-      | { syntax = FunctionDeclaration _; _ } :: _ ->
+    errors
+  | _ -> errors
+
+let redeclaration_errors node parents syntax_tree namespace_name names errors =
+  match syntax node with
+  | FunctionDeclarationHeader f ->
+    begin match parents with
+      | { syntax = FunctionDeclaration _; _}
+        :: _ :: {syntax = NamespaceBody _; _} :: _
+      | [{ syntax = FunctionDeclaration _; _ }; _; _]
+      | { syntax = MethodishDeclaration _; _ } :: _ ->
         let function_name = text f.function_name in
         let location = make_location_of_node f.function_name in
-        let def =
-          make_first_use_or_def ~is_def:true location namespace_name function_name in
+        let def = make_first_use_or_def
+          ~is_def:true location namespace_name function_name in
+        let errors =
+          match SMap.get function_name names.t_functions with
+          | Some { f_location = { start_offset; _}; f_is_def; _}
+            when f_is_def ->
+            let text = SyntaxTree.text syntax_tree in
+            let line, _ =
+              Full_fidelity_source_text.offset_to_position text start_offset in
+            let path =
+              Relative_path.to_absolute @@
+                Full_fidelity_source_text.file_path text in
+            let loc = path ^ ":" ^ string_of_int line in
+            let err, error_type =
+              match first_parent_class_name parents with
+              | None ->
+                SyntaxError.redeclaration_of_function ~name:function_name ~loc,
+                SyntaxError.RuntimeError
+              | Some class_name ->
+                let full_name = class_name ^ "::" ^ function_name in
+                SyntaxError.redeclaration_of_method ~name:full_name,
+                SyntaxError.ParseError
+            in
+            make_error_from_node ~error_type node err :: errors
+          | _ -> errors
+        in
         { names with
-          t_functions = SMap.add function_name def names.t_functions }
-      | _ -> names in
-    names, errors
+          t_functions = SMap.add function_name def names.t_functions }, errors
+      | _ -> names, errors
+    end
   | _ -> names, errors
 
 let statement_errors node parents hhvm_compat_mode errors =
@@ -2332,7 +2364,7 @@ let get_namespace_name parents current_namespace_name =
 
 let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
   let is_strict = SyntaxTree.is_strict syntax_tree in
-  let is_hack_file = (SyntaxTree.language syntax_tree = "hh") in
+  let is_hack_file = SyntaxTree.is_hack syntax_tree in
   let is_hack = is_hack_file || enable_hh_syntax in
   let rec folder acc node parents =
     let { errors
@@ -2345,8 +2377,10 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
       markup_errors node is_hack_file hhvm_compatibility_mode errors in
     let errors =
       parameter_errors node parents is_strict is_hack hhvm_compatibility_mode errors in
+    let errors =
+      function_errors node parents is_strict hhvm_compatibility_mode errors in
     let names, errors =
-      function_errors node parents is_strict hhvm_compatibility_mode namespace_name names errors in
+      redeclaration_errors node parents syntax_tree namespace_name names errors in
     let errors =
       xhp_errors node parents hhvm_compatibility_mode errors in
     let errors =
@@ -2419,12 +2453,15 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
       fold_child_nodes folder node parents acc
     | ClassishDeclaration _ ->
       (* Reset the trait require clauses *)
-      (* Reset the const declerations *)
+      (* Reset the const declarations *)
+      (* Reset the function declarations *)
       let cleanup =
         fun new_acc ->
           { new_acc with names =
-            { new_acc.names with t_constants = acc.names.t_constants }} in
-      let names = { names with t_constants = SMap.empty } in
+            { new_acc.names with t_constants = acc.names.t_constants;
+                                 t_functions = acc.names.t_functions }} in
+      let names = { names with t_constants = SMap.empty;
+                               t_functions = SMap.empty } in
       let acc =
         make_acc
           acc errors namespace_type names

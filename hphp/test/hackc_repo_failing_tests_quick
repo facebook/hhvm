@@ -1,6 +1,5 @@
 quick/bad_iter_warning.php
 quick/closure.php
-quick/coverage.php
 quick/debug_backtrace.php
 quick/exceptions.php
 quick/foreach-bad.php

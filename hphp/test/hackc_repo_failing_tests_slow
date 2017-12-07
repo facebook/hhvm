@@ -1,3 +1,6 @@
+
+
+
 slow/async/async-gen-and-genva.php
 slow/async/await-all-callback.php
 slow/async/await_gena.php
@@ -16,8 +19,6 @@ slow/class_type_constant/type_constant2.php
 slow/class_type_constant/type_constant3.php
 slow/class_type_constant/type_constant6.php
 slow/constant/globals-array-constant.php
-slow/debug_backtrace/compact_crash.php
-slow/debug_backtrace/metadata_decref_on_return.php
 slow/dict/init-parse-error1.php
 slow/dict/init-parse-error2.php
 slow/dict/init-parse-error3.php
@@ -45,10 +46,8 @@ slow/ext_socket/accept_block.php
 slow/ext_socket/persistent_socket.php
 slow/function/closure-default.php
 slow/function/cuf_by_ref.php
-slow/hack_arr_compat/cuf-safe-array.php
 slow/hack_arr_compat/gena.php
 slow/hack_arr_compat/scalars.php
-slow/hack_arr_compat/variadic-by-ref.php
 slow/hack_mode/2203.php
 slow/hack_mode/2204.php
 slow/hack_mode/closing-tag-asp.php
@@ -78,10 +77,8 @@ slow/inout/method-interop-dynamic.php
 slow/inout/method-interop-static.php
 slow/inout/side-effects.php
 slow/inout/trait-magic.php
-slow/intercept/extra_args.php
 slow/keyset/init-parse-error1.php
 slow/keyset/init-parse-error2.php
-slow/lang/deprecated.php
 slow/lang/hh_return_type_1.php
 slow/lang/hh_return_type_2.php
 slow/lang/hh_return_type_3.php
@@ -115,7 +112,6 @@ slow/parser/semi-reserved-keywords/type_const_bad.php
 slow/ref-annotate.php
 slow/reflection/ReflectionTypeAliasAttrs.php
 slow/reflection/ReflectionTypeAliasObjAttrs.php
-slow/reflection_classes/xhp.php
 slow/return_statement/finally-typecheck.php
 slow/traits/2080.php
 slow/traits/require_constraint_basic_error.php
@@ -142,7 +138,6 @@ slow/using/bad-lambda5.php
 slow/using/bad-lambda6.php
 slow/using/bad-name.php
 slow/using/empty-exprs.php
-slow/variadic_args/destructors.php
 slow/vec/bad-init1.php
 slow/vec/bad-init2.php
 slow/xhp/attr-syntax-2.php

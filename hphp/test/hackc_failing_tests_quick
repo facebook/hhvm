@@ -1,17 +1,13 @@
 quick/bad_iter_warning.php
 quick/closure.php
-quick/coverage.php
 quick/debug_backtrace.php
 quick/debugger/async_stack_traversal.php
 quick/debugger/eval2.php
 quick/debugger/flow.php
 quick/debugger/flow2.php
 quick/debugger/flow_excep.php
-quick/debugger/flow_gen.php
-quick/debugger/flow_gen_async.php
 quick/debugger/flow_gen_async_excep.php
 quick/debugger/flow_gen_excep.php
-quick/debugger/flow_multistep.php
 quick/debugger/flow_small.php
 quick/debugger/info1.php
 quick/debugger/list.php

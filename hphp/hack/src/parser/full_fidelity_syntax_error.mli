@@ -234,3 +234,5 @@ val redeclation_of_const : string -> string
 val reference_to_static_scope_resolution : string
 val class_with_abstract_method : string -> string
 val interface_has_non_public_method : string
+val redeclaration_of_function : name:string -> loc:string -> string
+val redeclaration_of_method : name:string -> string

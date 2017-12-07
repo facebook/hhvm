@@ -362,3 +362,7 @@ let class_with_abstract_method name =
   "therefore be declared abstract"
 let interface_has_non_public_method =
   "Access type for interface method must be omitted"
+let redeclaration_of_function ~name ~loc =
+  "Cannot redeclare " ^ name ^ "() (previously declared in " ^ loc ^ ")"
+let redeclaration_of_method ~name =
+  "Redeclared method " ^ name

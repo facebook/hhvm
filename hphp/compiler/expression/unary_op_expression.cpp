@@ -195,6 +195,14 @@ bool UnaryOpExpression::isScalar() const {
   case '-':
   case '~':
   case '@':
+  case T_INT_CAST:
+  case T_DOUBLE_CAST:
+  case T_STRING_CAST:
+  case T_BOOL_CAST:
+  case T_EMPTY:
+  case T_ISSET:
+  case T_INC:
+  case T_DEC:
     return !RuntimeOption::EvalDisableHphpcOpts && m_exp->isScalar();
   case T_ARRAY:
   case T_DARRAY:

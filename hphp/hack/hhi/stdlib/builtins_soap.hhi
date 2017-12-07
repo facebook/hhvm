@@ -88,8 +88,11 @@ const int WSDL_CACHE_MEMORY = 2;
 const int WSDL_CACHE_DISK = 1;
 const int WSDL_CACHE_BOTH = 3;
 
+<<__PHPStdLib>>
 function use_soap_error_handler($handler = true);
+<<__PHPStdLib>>
 function is_soap_fault($fault);
+<<__PHPStdLib>>
 function _soap_active_version();
 
 class SoapServer {

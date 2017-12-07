@@ -38,7 +38,9 @@ function stripslashes($str);
 function bin2hex($str);
 function hex2bin($str);
 function nl2br($str);
+<<__PHPStdLib>>
 function quotemeta($str);
+<<__PHPStdLib>>
 function str_shuffle($str);
 function strrev($str);
 function strtolower($str);
@@ -77,24 +79,37 @@ function str_repeat($input, $multiplier);
 function wordwrap($str, $width = 75, $wordbreak = "\n", $cut = false);
 function html_entity_decode($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1");
 function htmlentities($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1", $double_encode = true);
+<<__PHPStdLib>>
 function htmlspecialchars_decode($str, $quote_style = ENT_COMPAT);
 function htmlspecialchars($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1", $double_encode = true);
 function quoted_printable_encode($str);
+<<__PHPStdLib>>
 function quoted_printable_decode($str);
+<<__PHPStdLib>>
 function convert_uudecode($data);
+<<__PHPStdLib>>
 function convert_uuencode($data);
+<<__PHPStdLib>>
 function str_rot13($str);
 function crc32($str);
+<<__PHPStdLib>>
 function crypt($str, $salt = "");
 function md5($str, $raw_output = false);
 function sha1($str, $raw_output = false);
 function strtr($str, $from, $to = null);
+<<__PHPStdLib>>
 function convert_cyr_string($str, $from, $to);
+<<__PHPStdLib>>
 function get_html_translation_table($table = 0, $quote_style = ENT_COMPAT);
+<<__PHPStdLib>>
 function hebrev($hebrew_text, $max_chars_per_line = 0);
+<<__PHPStdLib>>
 function hebrevc($hebrew_text, $max_chars_per_line = 0);
+<<__PHPStdLib>>
 function setlocale($category, $locale, ...);
+<<__PHPStdLib>>
 function localeconv();
+<<__PHPStdLib>>
 function nl_langinfo($item);
 function vprintf($format, $args);
 function vsprintf($format, $args);
@@ -109,6 +124,7 @@ function strncasecmp($str1, $str2, $len);
 function strnatcasecmp($str1, $str2);
 function strcoll($str1, $str2);
 function substr_compare($main_str, $str, $offset, $length = PHP_INT_MAX, $case_insensitivity = false);
+<<__PHPStdLib>>
 function strchr($haystack, $needle);
 function strrchr($haystack, $needle);
 function strstr($haystack, $needle, bool $before_needle = false);
@@ -122,10 +138,14 @@ function substr_count($haystack, $needle, $offset = 0, $length = 0x7FFFFFFF);
 function strspn($str1, $str2, $start = 0, $length = 0x7FFFFFFF);
 function strcspn($str1, $str2, $start = 0, $length = 0x7FFFFFFF);
 function strlen($vstr): int;
+<<__PHPStdLib>>
 function count_chars($str, $mode = 0);
 function str_word_count($str, $format = 0, $charlist = "");
 function levenshtein($str1, $str2, $cost_ins = 1, $cost_rep = 1, $cost_del = 1);
+<<__PHPStdLib>>
 function similar_text($first, $second, &$percent = null);
+<<__PHPStdLib>>
 function soundex($str);
+<<__PHPStdLib>>
 function metaphone($str, $phones = 0);
 function parse_str($str, &$arr = null);

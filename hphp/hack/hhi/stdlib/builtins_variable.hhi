@@ -26,14 +26,17 @@ function is_object($var): bool;
 function is_resource($var): bool;
 function is_null($var): bool;
 function gettype($v);
+<<__PHPStdLib>>
 function get_resource_type($handle);
 function settype(&$var, $type);
 function print_r($expression, $ret = false);
 function var_export($expression, $ret = false);
 function var_dump(<<__AcceptDisposable>> $expression, <<__AcceptDisposable>> ...$rest);
+<<__PHPStdLib>>
 function debug_zval_dump(<<__AcceptDisposable>> $variable);
 function serialize($value);
 function unserialize($str, $class_whitelist = array());
 function get_defined_vars();
+<<__PHPStdLib>>
 function import_request_variables($types, $prefix = "");
 function extract(&$var_array, $extract_type = EXTR_OVERWRITE, $prefix = "");

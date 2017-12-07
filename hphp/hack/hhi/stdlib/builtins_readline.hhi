@@ -10,21 +10,27 @@
  */
 
 // Adds a line to the history
+<<__PHPStdLib>>
 function readline_add_history(string $line): bool;
 
 // Clears the history
+<<__PHPStdLib>>
 function readline_clear_history(): bool;
 
 // Registers a completion function
+<<__PHPStdLib>>
 function readline_completion_function(mixed $function): bool;
 
 // Gets/sets various internal readline variables
+<<__PHPStdLib>>
 function readline_info(string $varname, ?string $newvalue = null): mixed;
 
 // Reads the history
+<<__PHPStdLib>>
 function readline_read_history(?string $filename = null): bool;
 
 // Writes the history
+<<__PHPStdLib>>
 function readline_write_history(?string $filename = null): bool;
 
 // Reads a line

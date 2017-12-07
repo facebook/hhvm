@@ -10,11 +10,16 @@
  */
 function ctype_alnum($text) { }
 function ctype_alpha($text) { }
+<<__PHPStdLib>>
 function ctype_cntrl($text) { }
 function ctype_digit($text) { }
+<<__PHPStdLib>>
 function ctype_graph($text) { }
+<<__PHPStdLib>>
 function ctype_lower($text) { }
+<<__PHPStdLib>>
 function ctype_print($text) { }
+<<__PHPStdLib>>
 function ctype_punct($text) { }
 function ctype_space($text) { }
 function ctype_upper($text) { }

@@ -52,13 +52,21 @@ const int ASYNC_OP_UNSET = 0;
 const int ASYNC_OP_CONNECT = 0;
 const int ASYNC_OP_QUERY = 0;
 
+<<__PHPStdLib>>
 function mysql_async_connect_start($server = null, $username = null, $password = null, $database = null);
+<<__PHPStdLib>>
 function mysql_async_connect_completed($link_identifier);
+<<__PHPStdLib>>
 function mysql_async_query_start($query, $link_identifier);
+<<__PHPStdLib>>
 function mysql_async_query_result($link_identifier);
+<<__PHPStdLib>>
 function mysql_async_query_completed($result);
+<<__PHPStdLib>>
 function mysql_async_fetch_array($result, $result_type = 1);
+<<__PHPStdLib>>
 function mysql_async_wait_actionable($items, $timeout);
+<<__PHPStdLib>>
 function mysql_async_status($link_identifier);
 
 class AsyncMysqlClient {

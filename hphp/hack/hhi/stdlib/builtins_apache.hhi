@@ -9,8 +9,11 @@
  *
  */
 function apache_note($note_name, $note_value = "") { }
+<<__PHPStdLib>>
 function apache_request_headers(): array<string, string> { }
+<<__PHPStdLib>>
 function apache_response_headers(): array<string, string> { }
+<<__PHPStdLib>>
 function apache_setenv($variable, $value, $walk_to_top = false) { }
 function getallheaders() { }
 function virtual($filename) { }

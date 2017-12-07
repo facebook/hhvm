@@ -8,14 +8,18 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+<<__PHPStdLib>>
 function get_declared_classes();
+<<__PHPStdLib>>
 function get_declared_interfaces();
+<<__PHPStdLib>>
 function get_declared_traits();
 function enum_exists(string $class_name, bool $autoload = true): bool;
 function class_exists(string $class_name, bool $autoload = true): bool;
 function interface_exists(string $interface_name, bool $autoload = true): bool;
 function trait_exists(string $trait_name, bool $autoload = true): bool;
 function get_class_methods($class_or_object): ?array<string>;
+<<__PHPStdLib>>
 function get_class_vars(string $class_name);
 function get_class($object = null);
 function get_parent_class($object = null);

@@ -22,6 +22,7 @@ function sodium_crypto_scalarmult(string $n, string $p): string;
 
 ///// Hashing (not for passwords or keys)
 
+<<__PHPStdLib>>
 function sodium_crypto_generichash_keygen(): string;
 
 function sodium_crypto_generichash(
@@ -45,6 +46,7 @@ function sodium_crypto_generichash_final(
   ?int $length = null,
 ): string;
 
+<<__PHPStdLib>>
 function sodium_crypto_shorthash_keygen(): string;
 
 function sodium_crypto_shorthash(string $message, string $key): string;
@@ -67,6 +69,7 @@ function sodium_crypto_pwhash_scryptsalsa208sha256(
   int $memlimit,
 ): string;
 
+<<__PHPStdLib>>
 function sodium_crypto_kdf_derive_from_key(
   int $subkey_length,
   int $subkey_id,
@@ -100,6 +103,7 @@ function sodium_crypto_pwhash_scryptsalsa208sha256_str_verify(
 
 ///// MACs
 
+<<__PHPStdLib>>
 function sodium_crypto_auth_keygen(): string;
 
 function sodium_crypto_auth(string $message, string $key): string;
@@ -112,6 +116,7 @@ function sodium_crypto_auth_verify(
 
 ///// Symmetric (PSK) encryption
 
+<<__PHPStdLib>>
 function sodium_crypto_secretbox_keygen(): string;
 
 function sodium_crypto_secretbox(
@@ -145,14 +150,20 @@ function sodium_crypto_box_publickey_from_secretkey(string $key): string;
 
 function sodium_crypto_scalarmult_base(string $key): string;
 
+<<__PHPStdLib>>
 function sodium_crypto_kx_keypair(): string;
+<<__PHPStdLib>>
 function sodium_crypto_kx_seed_keypair(string $seed): string;
+<<__PHPStdLib>>
 function sodium_crypto_kx_secretkey(string $keypair): string;
+<<__PHPStdLib>>
 function sodium_crypto_kx_publickey(string $keypair): string;
+<<__PHPStdLib>>
 function sodium_crypto_kx_client_session_keys(
   string $client_keypair,
   string $server_pubkey,
 ): (string, string);
+<<__PHPStdLib>>
 function sodium_crypto_kx_server_session_keys(
   string $server_keypair,
   string $client_pubkey,

@@ -26,18 +26,24 @@ function preg_replace($pattern, $replacement, $subject, $limit = -1,
                       &$count = null) { }
 function preg_replace_callback($pattern, $callback, $subject, $limit = -1,
                                &$count = null) { }
+<<__PHPStdLib>>
 function preg_replace_callback_array($patterns_and_callbacks, $subject,
                                      $limit = -1, &$count = null) { }
 function preg_split($pattern, $subject, $limit = -1, $flags = 0) { }
 function preg_quote($str, $delimiter = null) { }
 function preg_last_error() { }
+<<__PHPStdLib>>
 function ereg_replace($pattern, $replacement, $str) { }
+<<__PHPStdLib>>
 function eregi_replace($pattern, $replacement, $str) { }
 function ereg($pattern, $str, &$regs = null) { }
+<<__PHPStdLib>>
 function eregi($pattern, $str, &$regs = null) { }
 <<__Deprecated('Use explode() or preg_split().')>>
 function split($pattern, $str, $limit = -1) { }
+<<__PHPStdLib>>
 function spliti($pattern, $str, $limit = -1) { }
+<<__PHPStdLib>>
 function sql_regcase($str) { }
 
 const int PREG_PATTERN_ORDER = 0;

@@ -9,7 +9,10 @@
  *
  */
 
+<<__PHPStdLib>>
 function sncompress($data);
+<<__PHPStdLib>>
 function snuncompress($data);
+<<__PHPStdLib>>
 function snappy_compress(string $data): mixed;
 function snappy_uncompress(string $data): mixed;

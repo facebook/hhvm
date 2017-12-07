@@ -51,50 +51,82 @@ const int OPENSSL_CIPHER_RC2_64 = 0;
 const int OPENSSL_CIPHER_DES = 0;
 const int OPENSSL_CIPHER_3DES = 0;
 
+<<__PHPStdLib>>
 function openssl_csr_export_to_file($csr, $outfilename, $notext = true);
+<<__PHPStdLib>>
 function openssl_csr_export($csr, &$out, $notext = true);
+<<__PHPStdLib>>
 function openssl_csr_get_public_key($csr);
+<<__PHPStdLib>>
 function openssl_csr_get_subject($csr, $use_shortnames = true);
 function openssl_csr_new($dn, &$privkey, $configargs = null, $extraattribs = null);
 function openssl_csr_sign($csr, $cacert, $priv_key, $days, $configargs = null, $serial = 0);
+<<__PHPStdLib>>
 function openssl_error_string();
+<<__PHPStdLib>>
 function openssl_open($sealed_data, &$open_data, $env_key, $priv_key_id);
+<<__PHPStdLib>>
 function openssl_pkcs12_export_to_file($x509, $filename, $priv_key, $pass, $args = null);
 function openssl_pkcs12_export($x509, &$out, $priv_key, $pass, $args = null);
+<<__PHPStdLib>>
 function openssl_pkcs12_read($pkcs12, &$certs, $pass);
+<<__PHPStdLib>>
 function openssl_pkcs7_decrypt($infilename, $outfilename, $recipcert, $recipkey = null);
+<<__PHPStdLib>>
 function openssl_pkcs7_encrypt($infilename, $outfilename, $recipcerts, $headers, $flags = 0, $cipherid = OPENSSL_CIPHER_RC2_40);
+<<__PHPStdLib>>
 function openssl_pkcs7_sign($infilename, $outfilename, $signcert, $privkey, $headers, $flags = PKCS7_DETACHED, $extracerts = null);
+<<__PHPStdLib>>
 function openssl_pkcs7_verify($filename, $flags, $outfilename = null, $cainfo = null, $extracerts = null, $content = null);
+<<__PHPStdLib>>
 function openssl_pkey_export_to_file($key, $outfilename, $passphrase = null, $configargs = null);
+<<__PHPStdLib>>
 function openssl_pkey_export($key, &$out, $passphrase = null, $configargs = null);
+<<__PHPStdLib>>
 function openssl_pkey_free($key);
+<<__PHPStdLib>>
 function openssl_free_key($key);
 function openssl_pkey_get_details($key);
 function openssl_pkey_get_private($key, $passphrase = null);
+<<__PHPStdLib>>
 function openssl_get_privatekey($key, $passphrase = null);
 function openssl_pkey_get_public($certificate);
+<<__PHPStdLib>>
 function openssl_get_publickey($certificate);
 function openssl_pkey_new($configargs = null);
 function openssl_private_decrypt($data, &$decrypted, $key, $padding = OPENSSL_PKCS1_PADDING);
+<<__PHPStdLib>>
 function openssl_private_encrypt($data, &$crypted, $key, $padding = OPENSSL_PKCS1_PADDING);
+<<__PHPStdLib>>
 function openssl_public_decrypt($data, &$decrypted, $key, $padding = OPENSSL_PKCS1_PADDING);
 function openssl_public_encrypt($data, &$crypted, $key, $padding = OPENSSL_PKCS1_PADDING);
+<<__PHPStdLib>>
 function openssl_seal($data, &$sealed_data, &$env_keys, $pub_key_ids);
 function openssl_sign($data, &$signature, $priv_key_id, $signature_alg = OPENSSL_ALGO_SHA1);
 function openssl_verify($data, $signature, $pub_key_id, $signature_alg = OPENSSL_ALGO_SHA1);
+<<__PHPStdLib>>
 function openssl_x509_check_private_key($cert, $key);
+<<__PHPStdLib>>
 function openssl_x509_checkpurpose($x509cert, $purpose, $cainfo = null, $untrustedfile = null);
+<<__PHPStdLib>>
 function openssl_x509_export_to_file($x509, $outfilename, $notext = true);
+<<__PHPStdLib>>
 function openssl_x509_export($x509, &$output, $notext = true);
+<<__PHPStdLib>>
 function openssl_x509_free($x509cert);
 function openssl_x509_parse($x509cert, $shortnames = true);
 function openssl_x509_read($x509certdata);
 function openssl_random_pseudo_bytes($length, &$crypto_strong = false);
+<<__PHPStdLib>>
 function openssl_cipher_iv_length($method);
 function openssl_encrypt($data, $method, $password, $options = 0, $iv = null, &$tag_out = null, $aad = null, $tag_length = 16);
+<<__PHPStdLib>>
 function openssl_decrypt($data, $method, $password, $options = 0, $iv = null, $tag = null, $aad = null);
+<<__PHPStdLib>>
 function openssl_digest($data, $method, $raw_output = false);
+<<__PHPStdLib>>
 function openssl_get_cipher_methods($aliases = false);
+<<__PHPStdLib>>
 function openssl_get_curve_names();
+<<__PHPStdLib>>
 function openssl_get_md_methods($aliases = false);

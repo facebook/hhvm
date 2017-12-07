@@ -9,33 +9,53 @@
  *
  */
 function ob_start($output_callback = null, $chunk_size = 0, $erase = true) { }
+<<__PHPStdLib>>
 function ob_clean() { }
 function ob_flush() { }
 function ob_end_clean() { }
+<<__PHPStdLib>>
 function ob_end_flush() { }
 function flush() { }
 function ob_get_clean() { }
 function ob_get_contents() { }
+<<__PHPStdLib>>
 function ob_get_flush() { }
+<<__PHPStdLib>>
 function ob_get_length() { }
 function ob_get_level() { }
+<<__PHPStdLib>>
 function ob_get_status($full_status = false) { }
 function ob_gzhandler($buffer, $mode) { }
+<<__PHPStdLib>>
 function ob_implicit_flush($flag = true) { }
+<<__PHPStdLib>>
 function ob_list_handlers() { }
+<<__PHPStdLib>>
 function output_add_rewrite_var($name, $value) { }
+<<__PHPStdLib>>
 function output_reset_rewrite_vars() { }
+<<__PHPStdLib>>
 function hphp_crash_log($name, $value) { }
+<<__PHPStdLib>>
 function hphp_stats($name, $value) { }
+<<__PHPStdLib>>
 function hphp_get_stats($name) { }
+<<__PHPStdLib>>
 function hphp_get_status() { }
+<<__PHPStdLib>>
 function hphp_get_iostatus() { }
+<<__PHPStdLib>>
 function hphp_set_iostatus_address($name) { }
+<<__PHPStdLib>>
 function hphp_get_timers($get_as_float = true) { }
+<<__PHPStdLib>>
 function hphp_output_global_state($serialize = true) { }
 function hphp_instruction_counter() { }
+<<__PHPStdLib>>
 function hphp_get_hardware_counters() { }
+<<__PHPStdLib>>
 function hphp_set_hardware_events($events = null) { }
+<<__PHPStdLib>>
 function hphp_clear_hardware_events() { }
 
 const int PHP_OUTPUT_HANDLER_START = 0;

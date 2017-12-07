@@ -144,6 +144,7 @@ function each(&$array);
 function current(&$array);
 function hphp_current_ref(&$array);
 function next(&$array);
+<<__PHPStdLib>>
 function pos(&$array);
 function prev(&$array);
 function reset(&$array);
@@ -156,23 +157,37 @@ function range($low, $high, $step = 1);
 function array_diff($array1, $array2, ...);
 function array_udiff($array1, $array2, $data_compare_func, ...);
 function array_diff_assoc($array1, $array2, ...);
+<<__PHPStdLib>>
 function array_diff_uassoc($array1, $array2, $key_compare_func, ...);
+<<__PHPStdLib>>
 function array_udiff_assoc($array1, $array2, $data_compare_func, ...);
+<<__PHPStdLib>>
 function array_udiff_uassoc($array1, $array2, $data_compare_func, $key_compare_func, ...);
 function array_diff_key($array1, $array2, ...);
+<<__PHPStdLib>>
 function array_diff_ukey($array1, $array2, $key_compare_func, ...);
 function array_intersect($array1, $array2, ...);
 function array_uintersect($array1, $array2, $data_compare_func, ...);
+<<__PHPStdLib>>
 function array_intersect_assoc($array1, $array2, ...);
+<<__PHPStdLib>>
 function array_intersect_uassoc($array1, $array2, $key_compare_func, ...);
+<<__PHPStdLib>>
 function array_uintersect_assoc($array1, $array2, $data_compare_func, ...);
+<<__PHPStdLib>>
 function array_uintersect_uassoc($array1, $array2, $data_compare_func, $key_compare_func, ...);
 function array_intersect_key($array1, $array2, ...);
+<<__PHPStdLib>>
 function array_intersect_ukey($array1, $array2, $key_compare_func, ...);
 function natsort(&$array);
 function natcasesort(&$array);
+<<__PHPStdLib>>
 function i18n_loc_get_default();
+<<__PHPStdLib>>
 function i18n_loc_set_default($locale);
+<<__PHPStdLib>>
 function i18n_loc_set_attribute($attr, $val);
+<<__PHPStdLib>>
 function i18n_loc_set_strength($strength);
+<<__PHPStdLib>>
 function i18n_loc_get_error_code();

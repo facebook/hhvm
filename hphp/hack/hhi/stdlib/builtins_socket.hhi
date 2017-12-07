@@ -161,29 +161,47 @@ define('SOCKET_EDQUOT', 0);
 define('SOCKET_ENOMEDIUM', 0);
 define('SOCKET_EMEDIUMTYPE', 0);
 function socket_create($domain, $type, $protocol) { }
+<<__PHPStdLib>>
 function socket_create_listen($port, $backlog = 128) { }
+<<__PHPStdLib>>
 function socket_create_pair($domain, $type, $protocol, &$fd) { }
 function socket_get_option($socket, $level, $optname) { }
+<<__PHPStdLib>>
 function socket_getpeername($socket, &$address, &$port = null) { }
+<<__PHPStdLib>>
 function socket_getsockname($socket, &$address, &$port = null) { }
+<<__PHPStdLib>>
 function socket_set_block($socket) { }
 function socket_set_nonblock($socket) { }
+<<__PHPStdLib>>
 function socket_set_option($socket, $level, $optname, $optval) { }
 function socket_connect($socket, $address, $port = 0) { }
+<<__PHPStdLib>>
 function socket_bind($socket, $address, $port = 0) { }
+<<__PHPStdLib>>
 function socket_listen($socket, $backlog = 0) { }
+<<__PHPStdLib>>
 function socket_select(&$read, &$write, &$except, $vtv_sec, $tv_usec = 0) { }
+<<__PHPStdLib>>
 function socket_server($hostname, $port = -1, &$errnum = null, &$errstr = null) { }
+<<__PHPStdLib>>
 function socket_accept($socket) { }
 function socket_read($socket, $length, $type = 0) { }
 function socket_write($socket, $buffer, $length = 0) { }
+<<__PHPStdLib>>
 function socket_send($socket, $buf, $len, $flags) { }
+<<__PHPStdLib>>
 function socket_sendto($socket, $buf, $len, $flags, $addr, $port = 0) { }
+<<__PHPStdLib>>
 function socket_recv($socket, &$buf, $len, $flags) { }
+<<__PHPStdLib>>
 function socket_recvfrom($socket, &$buf, $len, $flags, &$name, &$port = 0) { }
+<<__PHPStdLib>>
 function socket_shutdown($socket, $how = 0) { }
 function socket_close($socket) { }
 function socket_strerror($errnum) { }
 function socket_last_error($socket = null) { }
+<<__PHPStdLib>>
 function socket_clear_error($socket = null) { }
+<<__PHPStdLib>>
 function getaddrinfo($host, $port, $family = 0, $socktype = 0, $protocol = 0, $flags = 0) { }

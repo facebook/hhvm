@@ -14,64 +14,99 @@ const int CLOCK_PROCESS_CPUTIME_ID = 2;
 const int CLOCK_REALTIME = 0;
 const int CLOCK_THREAD_CPUTIME_ID = 3;
 
+<<__PHPStdLib>>
 function assert_options($what, $value = null);
 function assert($assertion);
+<<__PHPStdLib>>
 function dl($library);
+<<__PHPStdLib>>
 function extension_loaded($name);
+<<__PHPStdLib>>
 function get_loaded_extensions($zend_extensions = false);
+<<__PHPStdLib>>
 function get_extension_funcs($module_name);
+<<__PHPStdLib>>
 function get_cfg_var($option);
 function get_current_user();
 function get_defined_constants($categorize = null);
+<<__PHPStdLib>>
 function get_include_path();
+<<__PHPStdLib>>
 function restore_include_path();
+<<__PHPStdLib>>
 function set_include_path($new_include_path);
+<<__PHPStdLib>>
 function get_included_files();
+<<__PHPStdLib>>
 function get_magic_quotes_gpc();
+<<__PHPStdLib>>
 function get_magic_quotes_runtime();
+<<__PHPStdLib>>
 function get_required_files();
 function getenv($varname);
+<<__PHPStdLib>>
 function getlastmod();
+<<__PHPStdLib>>
 function getmygid();
+<<__PHPStdLib>>
 function getmyinode();
 function getmypid();
 function getmyuid();
 function getopt($options, $longopts = null);
 function getrusage($who = 0);
+<<__PHPStdLib>>
 function clock_getres($clk_id, &$sec, &$nsec);
 function clock_gettime($clk_id, &$sec, &$nsec);
 function clock_gettime_ns(int $clk_id): int;
+<<__PHPStdLib>>
 function cpu_get_count();
+<<__PHPStdLib>>
 function cpu_get_model();
+<<__PHPStdLib>>
 function hphp_memory_get_interval_peak_usage(bool $real_usage = false): int;
+<<__PHPStdLib>>
 function hphp_memory_start_interval(): bool;
+<<__PHPStdLib>>
 function hphp_memory_stop_interval(): bool;
+<<__PHPStdLib>>
 function ini_alter($varname, $newvalue);
+<<__PHPStdLib>>
 function ini_get_all($extension = null);
 function ini_get($varname);
+<<__PHPStdLib>>
 function ini_restore($varname);
 function ini_set($varname, $newvalue);
 function memory_get_allocation();
 function memory_get_peak_usage($real_usage = false);
 function memory_get_usage($real_usage = false);
+<<__PHPStdLib>>
 function php_ini_scanned_files();
 function php_logo_guid();
 function php_sapi_name();
 function php_uname($mode = null);
 function phpcredits($flag = 0);
+<<__PHPStdLib>>
 function phpinfo($what = 0);
+<<__PHPStdLib>>
 function phpversion($extension = null);
 function putenv($setting);
+<<__PHPStdLib>>
 function set_magic_quotes_runtime($new_setting);
 function set_time_limit($seconds);
 function sys_get_temp_dir();
 function version_compare($version1, $version2, $sop = null);
+<<__PHPStdLib>>
 function gc_enabled();
+<<__PHPStdLib>>
 function gc_enable();
+<<__PHPStdLib>>
 function gc_disable();
 function gc_collect_cycles();
+<<__PHPStdLib>>
 function gc_mem_caches();
+<<__PHPStdLib>>
 function gc_check_heap();
 function zend_logo_guid();
 function zend_thread_id();
+<<__PHPStdLib>>
 function zend_version();

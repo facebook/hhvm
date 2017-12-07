@@ -8,21 +8,33 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+<<__PHPStdLib>>
 function spl_classes();
 function spl_object_hash($obj);
+<<__PHPStdLib>>
 function hphp_object_pointer($obj);
+<<__PHPStdLib>>
 function hphp_get_this();
 function class_implements($obj, $autoload = true);
+<<__PHPStdLib>>
 function class_parents($obj, $autoload = true);
 function class_uses($obj, $autoload = true);
+<<__PHPStdLib>>
 function iterator_apply($obj, $func, $params = null);
+<<__PHPStdLib>>
 function iterator_count($obj);
 function iterator_to_array($obj, $use_keys = true);
+<<__PHPStdLib>>
 function spl_autoload_call($class_name);
+<<__PHPStdLib>>
 function spl_autoload_extensions($file_extensions = null);
+<<__PHPStdLib>>
 function spl_autoload_functions();
+<<__PHPStdLib>>
 function spl_autoload_register($autoload_function = null, $throws = true, $prepend = false);
+<<__PHPStdLib>>
 function spl_autoload_unregister($autoload_function);
+<<__PHPStdLib>>
 function spl_autoload($class_name, $file_extensions = null);
 
 class SplDoublyLinkedList<T> implements Iterator<T>, ArrayAccess<int, T>, Countable {

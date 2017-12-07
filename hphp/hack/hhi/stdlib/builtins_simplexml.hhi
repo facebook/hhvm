@@ -38,7 +38,9 @@ function libxml_get_errors();
 function libxml_get_last_error();
 function libxml_clear_errors();
 function libxml_use_internal_errors($use_errors = null);
+<<__PHPStdLib>>
 function libxml_suppress_errors($suppress_errors);
+<<__PHPStdLib>>
 function libxml_set_streams_context($streams_context);
 function libxml_disable_entity_loader($disable = true);
 

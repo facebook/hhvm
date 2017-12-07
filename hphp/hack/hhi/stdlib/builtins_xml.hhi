@@ -39,27 +39,45 @@ const XML_OPTION_TARGET_ENCODING = 2;
 
 const XML_SAX_IMPL = "expat";
 
+<<__PHPStdLib>>
 function xml_parser_create($encoding = null) { }
 function xml_parser_free($parser) { }
+<<__PHPStdLib>>
 function xml_parse($parser, $data, $is_final = true) { }
 function xml_parse_into_struct($parser, $data, &$values, &$index = null) { }
 function xml_parser_create_ns($encoding = null, $separator = null) { }
+<<__PHPStdLib>>
 function xml_parser_get_option($parser, $option) { }
 function xml_parser_set_option($parser, $option, $value) { }
+<<__PHPStdLib>>
 function xml_set_character_data_handler($parser, $handler) { }
+<<__PHPStdLib>>
 function xml_set_default_handler($parser, $handler) { }
+<<__PHPStdLib>>
 function xml_set_element_handler($parser, $start_element_handler, $end_element_handler) { }
+<<__PHPStdLib>>
 function xml_set_processing_instruction_handler($parser, $handler) { }
+<<__PHPStdLib>>
 function xml_set_start_namespace_decl_handler($parser, $handler) { }
+<<__PHPStdLib>>
 function xml_set_end_namespace_decl_handler($parser, $handler) { }
+<<__PHPStdLib>>
 function xml_set_unparsed_entity_decl_handler($parser, $handler) { }
+<<__PHPStdLib>>
 function xml_set_external_entity_ref_handler($parser, $handler) { }
+<<__PHPStdLib>>
 function xml_set_notation_decl_handler($parser, $handler) { }
+<<__PHPStdLib>>
 function xml_set_object($parser, &$object) { }
+<<__PHPStdLib>>
 function xml_get_current_byte_index($parser) { }
+<<__PHPStdLib>>
 function xml_get_current_column_number($parser) { }
+<<__PHPStdLib>>
 function xml_get_current_line_number($parser) { }
+<<__PHPStdLib>>
 function xml_get_error_code($parser) { }
+<<__PHPStdLib>>
 function xml_error_string($code) { }
 function utf8_decode($data) { }
 function utf8_encode($data) { }

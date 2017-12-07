@@ -503,8 +503,11 @@ const int CURLSHOPT_UNSHARE = 0;
 
 
 function curl_init($url = null);
+<<__PHPStdLib>>
 function curl_init_pooled($pool_name, $url = null);
+<<__PHPStdLib>>
 function curl_copy_handle($ch);
+<<__PHPStdLib>>
 function curl_version($uversion = CURLVERSION_NOW);
 function curl_setopt($ch, $option, $value);
 function curl_setopt_array($ch, $options);
@@ -512,20 +515,26 @@ function curl_exec($ch);
 function curl_getinfo($ch, $opt = 0);
 function curl_errno($ch);
 function curl_error($ch);
+<<__PHPStdLib>>
 function curl_strerror($code);
 function curl_close($ch);
 function curl_multi_init();
+<<__PHPStdLib>>
 function curl_multi_strerror($errornum);
 function curl_multi_add_handle($mh, $ch);
 function curl_multi_remove_handle($mh, $ch);
 function curl_multi_exec($mh, &$still_running);
 function curl_multi_select($mh, $timeout = 1.0);
+<<__PHPStdLib>>
 function curl_multi_await($mh, float $timeout = 1.0): Awaitable<int>;
 function curl_multi_getcontent($ch);
 function curl_multi_info_read($mh, &$msgs_in_queue = null);
 function curl_multi_close($mh);
+<<__PHPStdLib>>
 function curl_share_init();
+<<__PHPStdLib>>
 function curl_share_close($sh);
+<<__PHPStdLib>>
 function curl_share_setopt($sh, $option, $value);
 
 namespace HH\Asio {
@@ -550,6 +559,7 @@ class CURLFile {
   public function setPostFilename(string $postname): void;
 }
 
+<<__PHPStdLib>>
 function curl_file_create(
   string $name,
   string $mime = '',

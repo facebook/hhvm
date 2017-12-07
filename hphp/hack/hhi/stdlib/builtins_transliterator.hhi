@@ -33,21 +33,28 @@ class Transliterator {
   );
 }
 
+<<__PHPStdLib>>
 function transliterator_create(
   string $id,
   int $direction = Transliterator::FORWARD,
 ): ?Transliterator;
 
+<<__PHPStdLib>>
 function transliterator_create_from_rules(
   string $id,
   int $direction = Transliterator::FORWARD,
 ): ?Transliterator;
 
+<<__PHPStdLib>>
 function transliterator_create_inverse(Transliterator $t): ?Transliterator;
+<<__PHPStdLib>>
 function transliterator_get_error_code(Transliterator $t): int;
+<<__PHPStdLib>>
 function transliterator_get_error_message(Transliterator $t): string;
+<<__PHPStdLib>>
 function transliterator_list_ids(): array;
 
+<<__PHPStdLib>>
 function transliterator_transliterate(
   $tOrId,
   string $subject,

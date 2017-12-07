@@ -61,34 +61,52 @@ const int LOG_WARNING = 4;
 function gethostname();
 function gethostbyaddr($ip_address);
 function gethostbyname($hostname);
+<<__PHPStdLib>>
 function gethostbynamel($hostname);
+<<__PHPStdLib>>
 function getprotobyname($name);
+<<__PHPStdLib>>
 function getprotobynumber($number);
+<<__PHPStdLib>>
 function getservbyname($service, $protocol);
+<<__PHPStdLib>>
 function getservbyport($port, $protocol);
 function inet_ntop($in_addr);
 function inet_pton($address);
 function ip2long($ip_address);
 function long2ip($proper_address);
+<<__PHPStdLib>>
 function dns_check_record($host, $type = null);
+<<__PHPStdLib>>
 function checkdnsrr($host, $type = null);
 function dns_get_record($hostname, $type = -1, &$authns = null, &$addtl = null);
+<<__PHPStdLib>>
 function dns_get_mx($hostname, &$mxhosts, &$weights = null);
+<<__PHPStdLib>>
 function getmxrr($hostname, &$mxhosts, &$weight = null);
 function fsockopen($hostname, $port = -1, &$errnum = null, &$errstr = null, $timeout = 0.0);
 function pfsockopen($hostname, $port = -1, &$errnum = null, &$errstr = null, $timeout = 0.0);
+<<__PHPStdLib>>
 function socket_get_status($stream);
+<<__PHPStdLib>>
 function socket_set_blocking($stream, $mode);
+<<__PHPStdLib>>
 function socket_set_timeout($stream, $seconds, $microseconds = 0);
 function header($str, $replace = true, $http_response_code = 0);
 function http_response_code($response_code = 0);
+<<__PHPStdLib>>
 function headers_list();
+<<__PHPStdLib>>
 function get_http_request_size();
 function headers_sent(&$file = null, &$line = null);
+<<__PHPStdLib>>
 function header_register_callback($callback);
+<<__PHPStdLib>>
 function header_remove($name = null);
 function setcookie($name, $value = null, $expire = 0, $path = null, $domain = null, $secure = false, $httponly = false);
+<<__PHPStdLib>>
 function setrawcookie($name, $value = null, $expire = 0, $path = null, $domain = null, $secure = false, $httponly = false);
+<<__PHPStdLib>>
 function define_syslog_variables();
 function openlog($ident, $option, $facility);
 function closelog();

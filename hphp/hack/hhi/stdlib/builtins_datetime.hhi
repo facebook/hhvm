@@ -33,26 +33,37 @@ function checkdate($month, $day, $year) { }
 function date_add($datetime, $interval) { }
 function date_create_from_format($format, $time, $timezone = null) { }
 function date_create($time = null, $timezone = null) { }
+<<__PHPStdLib>>
 function date_date_set($object, $year, $month, $day) { }
 function date_default_timezone_get() { }
 function date_default_timezone_set($name) { }
 function date_diff($datetime, $datetime2, $absolute = false) { }
 function date_format($object, $format) { }
+<<__PHPStdLib>>
 function date_get_last_errors() { }
 function date_interval_create_from_date_string($time) { }
+<<__PHPStdLib>>
 function date_interval_format($interval, $format_spec) { }
+<<__PHPStdLib>>
 function date_isodate_set($object, $year, $week, $day = 1) { }
+<<__PHPStdLib>>
 function date_modify($object, $modify) { }
+<<__PHPStdLib>>
 function date_offset_get($object) { }
 function date_parse($date) { }
 function date_sub($datetime, $interval) { }
+<<__PHPStdLib>>
 function date_sun_info($ts, $latitude, $longitude) { }
 function date_sunrise($timestamp, $format = 0, $latitude = 0.0, $longitude = 0.0, $zenith = 0.0, $gmt_offset = 99999.0) { }
 function date_sunset($timestamp, $format = 0, $latitude = 0.0, $longitude = 0.0, $zenith = 0.0, $gmt_offset = 99999.0) { }
+<<__PHPStdLib>>
 function date_time_set($object, $hour, $minute, $second = 0) { }
 function date_timestamp_get($datetime) { }
+<<__PHPStdLib>>
 function date_timestamp_set($datetime, $timestamp) { }
+<<__PHPStdLib>>
 function date_timezone_get($object) { }
+<<__PHPStdLib>>
 function date_timezone_set($object, $timezone) { }
 function date($format, $timestamp = null)/*: string*/ { }
 function getdate($timestamp = null) { }
@@ -68,16 +79,23 @@ function strftime($format, $timestamp = null) { }
 function strptime($date, $format) { }
 function strtotime($input, $timestamp = null) { }
 function time(): int { }
+<<__PHPStdLib>>
 function timezone_abbreviations_list() { }
 function timezone_identifiers_list(int $what = 2047, string $country = '') { }
+<<__PHPStdLib>>
 function timezone_location_get($timezone) { }
+<<__PHPStdLib>>
 function timezone_name_from_abbr($abbr, $gmtoffset = -1, $isdst = true) { }
+<<__PHPStdLib>>
 function timezone_name_get($object) { }
+<<__PHPStdLib>>
 function timezone_offset_get($object, $dt) { }
 function timezone_open($timezone) { }
+<<__PHPStdLib>>
 function timezone_transitions_get(DateTimeZone $object,
                                   int $timestamp_begin = PHP_INT_MIN,
                                   int $timestamp_end = PHP_INT_MAX) { }
+<<__PHPStdLib>>
 function timezone_version_get() { }
 
 interface DateTimeInterface {

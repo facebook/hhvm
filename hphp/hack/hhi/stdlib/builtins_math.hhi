@@ -43,39 +43,53 @@ function floor($value): float;
 function round($val, $precision = 0, $mode = 1);
 function deg2rad($number);
 function rad2deg($number);
+<<__PHPStdLib>>
 function decbin($number);
+<<__PHPStdLib>>
 function decoct($number);
 function bindec($binary_string);
 function hexdec($hex_string);
+<<__PHPStdLib>>
 function octdec($octal_string);
 function base_convert($number, $frombase, $tobase);
 function pow($base, $exp);
 function exp($arg);
+<<__PHPStdLib>>
 function expm1($arg);
 function log10($arg);
+<<__PHPStdLib>>
 function log1p($number);
 function log($arg, $base = 0);
 function cos($arg);
+<<__PHPStdLib>>
 function cosh($arg);
 function sin($arg);
+<<__PHPStdLib>>
 function sinh($arg);
 function tan($arg);
+<<__PHPStdLib>>
 function tanh($arg);
 function acos($arg);
+<<__PHPStdLib>>
 function acosh($arg);
 function asin($arg);
+<<__PHPStdLib>>
 function asinh($arg);
 function atan($arg);
+<<__PHPStdLib>>
 function atanh($arg);
 function atan2($y, $x);
+<<__PHPStdLib>>
 function hypot($x, $y);
 function fmod($x, $y);
 function sqrt($arg);
 function getrandmax();
+<<__PHPStdLib>>
 function srand($seed = null);
 function rand($min = 0, $max = -1 /* getrandmax */ );
 function mt_getrandmax();
 function mt_srand($seed = null);
 function mt_rand($min = 0, $max = -1 /* mt_getrandmax */ );
+<<__PHPStdLib>>
 function lcg_value();
 function intdiv(int $numerator, int $denominator): int;

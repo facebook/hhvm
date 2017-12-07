@@ -8,25 +8,44 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+<<__PHPStdLib>>
 function memcache_connect($host, $port = 0, $timeout = 0, $timeoutms = 0) { }
+<<__PHPStdLib>>
 function memcache_pconnect($host, $port = 0, $timeout = 0, $timeoutms = 0) { }
+<<__PHPStdLib>>
 function memcache_add($memcache, $key, $var, $flag = 0, $expire = 0) { }
+<<__PHPStdLib>>
 function memcache_set($memcache, $key, $var, $flag = 0, $expire = 0) { }
+<<__PHPStdLib>>
 function memcache_replace($memcache, $key, $var, $flag = 0, $expire = 0) { }
+<<__PHPStdLib>>
 function memcache_get($memcache, $key, &$flags = null) { }
+<<__PHPStdLib>>
 function memcache_delete($memcache, $key, $expire = 0) { }
+<<__PHPStdLib>>
 function memcache_increment($memcache, $key, $offset = 1) { }
+<<__PHPStdLib>>
 function memcache_decrement($memcache, $key, $offset = 1) { }
+<<__PHPStdLib>>
 function memcache_close($memcache) { }
 function memcache_debug($onoff) { }
+<<__PHPStdLib>>
 function memcache_get_version($memcache) { }
+<<__PHPStdLib>>
 function memcache_flush($memcache, $timestamp = 0) { }
+<<__PHPStdLib>>
 function memcache_setoptimeout($memcache, $timeoutms) { }
+<<__PHPStdLib>>
 function memcache_get_server_status($memcache, $host, $port = 0) { }
+<<__PHPStdLib>>
 function memcache_set_compress_threshold($memcache, $threshold, $min_savings = 0.2) { }
+<<__PHPStdLib>>
 function memcache_get_stats($memcache, $type = null, $slabid = 0, $limit = 100) { }
+<<__PHPStdLib>>
 function memcache_get_extended_stats($memcache, $type = null, $slabid = 0, $limit = 100) { }
+<<__PHPStdLib>>
 function memcache_set_server_params($memcache, $host, $port = 11211, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null) { }
+<<__PHPStdLib>>
 function memcache_add_server($memcache, $host, $port = 11211, $persistent = false, $weight = 0, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null, $timeoutms = 0) { }
 class Memcache {
   public function __construct() { }

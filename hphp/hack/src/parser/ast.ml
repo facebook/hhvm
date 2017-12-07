@@ -1,6 +1,6 @@
 (* @generated from ast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<45f04c02eae2d9c16e1f7b5c62bc56625a5f959a>> *)
+(* SourceShasum<<b942b337d4fddd79f0a2b517911bec4cd3aff476>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -261,6 +261,7 @@ and expr_ =
   [@ocaml.doc
     "\n   * PHP's Variable variable. The int is number of variable indirections\n   * (i.e. number of extra $ signs.)\n   *\n   * Example:\n     * $$$sample has int = 2.\n   * "]
   | Lvarvar of int * id 
+  | Dollar of expr 
   | Clone of expr 
   | Obj_get of expr * expr * og_null_flavor 
   | Array_get of expr * expr option 
@@ -1780,6 +1781,11 @@ include
               (Pervasives.(==) _visitors_c1 _visitors_r1)
           then _visitors_this
           else Lvarvar (_visitors_r0, _visitors_r1)
+        method on_Dollar env _visitors_this _visitors_c0 =
+          let _visitors_r0 = self#on_expr env _visitors_c0  in
+          if Pervasives.(==) _visitors_c0 _visitors_r0
+          then _visitors_this
+          else Dollar _visitors_r0
         method on_Clone env _visitors_this _visitors_c0 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           if Pervasives.(==) _visitors_c0 _visitors_r0
@@ -2076,6 +2082,8 @@ include
               self#on_Lvar env _visitors_this _visitors_c0
           | Lvarvar (_visitors_c0,_visitors_c1) as _visitors_this ->
               self#on_Lvarvar env _visitors_this _visitors_c0 _visitors_c1
+          | Dollar _visitors_c0 as _visitors_this ->
+              self#on_Dollar env _visitors_this _visitors_c0
           | Clone _visitors_c0 as _visitors_this ->
               self#on_Clone env _visitors_this _visitors_c0
           | Obj_get (_visitors_c0,_visitors_c1,_visitors_c2) as
@@ -3024,6 +3032,8 @@ include
           let _visitors_s0 = self#on_int env _visitors_c0  in
           let _visitors_s1 = self#on_id env _visitors_c1  in
           self#plus _visitors_s0 _visitors_s1
+        method on_Dollar env _visitors_c0 =
+          let _visitors_s0 = self#on_expr env _visitors_c0  in _visitors_s0
         method on_Clone env _visitors_c0 =
           let _visitors_s0 = self#on_expr env _visitors_c0  in _visitors_s0
         method on_Obj_get env _visitors_c0 _visitors_c1 _visitors_c2 =
@@ -3177,6 +3187,7 @@ include
           | Lvar _visitors_c0 -> self#on_Lvar env _visitors_c0
           | Lvarvar (_visitors_c0,_visitors_c1) ->
               self#on_Lvarvar env _visitors_c0 _visitors_c1
+          | Dollar _visitors_c0 -> self#on_Dollar env _visitors_c0
           | Clone _visitors_c0 -> self#on_Clone env _visitors_c0
           | Obj_get (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_Obj_get env _visitors_c0 _visitors_c1 _visitors_c2
@@ -4097,6 +4108,9 @@ include
           let _visitors_r0 = self#on_int env _visitors_c0  in
           let _visitors_r1 = self#on_id env _visitors_c1  in
           Lvarvar (_visitors_r0, _visitors_r1)
+        method on_Dollar env _visitors_c0 =
+          let _visitors_r0 = self#on_expr env _visitors_c0  in
+          Dollar _visitors_r0
         method on_Clone env _visitors_c0 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           Clone _visitors_r0
@@ -4257,6 +4271,7 @@ include
           | Lvar _visitors_c0 -> self#on_Lvar env _visitors_c0
           | Lvarvar (_visitors_c0,_visitors_c1) ->
               self#on_Lvarvar env _visitors_c0 _visitors_c1
+          | Dollar _visitors_c0 -> self#on_Dollar env _visitors_c0
           | Clone _visitors_c0 -> self#on_Clone env _visitors_c0
           | Obj_get (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_Obj_get env _visitors_c0 _visitors_c1 _visitors_c2
@@ -5017,6 +5032,8 @@ include
         method on_Lvarvar env _visitors_c0 _visitors_c1 =
           let _visitors_r0 = self#on_int env _visitors_c0  in
           let _visitors_r1 = self#on_id env _visitors_c1  in ()
+        method on_Dollar env _visitors_c0 =
+          let _visitors_r0 = self#on_expr env _visitors_c0  in ()
         method on_Clone env _visitors_c0 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in ()
         method on_Obj_get env _visitors_c0 _visitors_c1 _visitors_c2 =
@@ -5151,6 +5168,7 @@ include
           | Lvar _visitors_c0 -> self#on_Lvar env _visitors_c0
           | Lvarvar (_visitors_c0,_visitors_c1) ->
               self#on_Lvarvar env _visitors_c0 _visitors_c1
+          | Dollar _visitors_c0 -> self#on_Dollar env _visitors_c0
           | Clone _visitors_c0 -> self#on_Clone env _visitors_c0
           | Obj_get (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_Obj_get env _visitors_c0 _visitors_c1 _visitors_c2

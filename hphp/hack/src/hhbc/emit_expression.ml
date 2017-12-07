@@ -654,8 +654,10 @@ and emit_class_expr_parts env cexpr prop =
       emit_expr ~need_ref:false env (Pos.none, A.Lvar id), false
     | _, A.Lvarvar (n, id) ->
       emit_expr ~need_ref:false env (Pos.none, A.Lvarvar (n - 1, id)), true
-    | _, A.BracedExpr e | e ->
+      (* The outer dollar just says "class property" *)
+    | _, A.Dollar e | e ->
       emit_expr ~need_ref:false env e, true
+
   in
   let load_cls_ref = emit_load_class_ref env cexpr in
   if load_prop_first then load_prop, load_cls_ref
@@ -664,6 +666,7 @@ and emit_class_expr_parts env cexpr prop =
 and emit_class_expr env cexpr prop =
   match cexpr with
   | Class_expr ((_, (A.BracedExpr _ |
+                     A.Dollar _ |
                      A.Lvarvar _ |
                      A.Call _ |
                      A.Lvar (_, "$this") |
@@ -1175,7 +1178,8 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Class_get (cid, id)  ->
     emit_class_get env None QueryOp.CGet need_ref cid id
   | A.String2 es -> emit_string2 env es
-  | A.BracedExpr e ->
+  | A.BracedExpr e -> emit_expr ~need_ref:false env e
+  | A.Dollar e ->
     let instr = emit_expr ~need_ref:false env e in
     if need_ref then
       gather [
@@ -1898,7 +1902,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      empty,
      instr_basenc base_offset base_mode,
      1
-   | A.BracedExpr e ->
+   | A.Dollar e ->
      let base_expr_instrs = emit_expr ~need_ref:false env e in
      base_expr_instrs,
      empty,
@@ -1963,6 +1967,8 @@ and emit_arg env i is_splatted expr =
     when not (is_local_this env str) || Emit_env.get_needs_local_this env ->
     instr_fpassl i (get_local env id) hint
   | A.BracedExpr e ->
+    emit_expr ~need_ref:false env e;
+  | A.Dollar e ->
     gather [
       emit_expr ~need_ref:false env e;
       instr_fpassn i hint;
@@ -2758,7 +2764,7 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
     let cexpr = expr_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) cid in
     begin match snd prop with
-    | A.Lvarvar (_, id) | A.BracedExpr (_, A.Lvar id)  ->
+    | A.Lvarvar (_, id) | A.BracedExpr (_, A.Lvar id) ->
       let n = match snd prop with A.Lvarvar (n, _) -> n | _ -> 1 in
       let lhs, rhs, final =
         handle_lvarvar n id (emit_final_static_op (snd cid) prop)
@@ -2784,7 +2790,7 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
       from_unop uop;
     ]
 
-  | A.BracedExpr e ->
+  | A.Dollar e ->
     emit_expr ~need_ref:false env e,
     rhs_instrs,
     emit_final_named_local_op op

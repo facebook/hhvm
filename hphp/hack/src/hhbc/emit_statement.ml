@@ -348,7 +348,7 @@ and emit_global_vars env p es =
         instr_bindn;
         instr_popv;
       ]
-    | A.BracedExpr e ->
+    | A.Dollar e ->
       gather [
         emit_expr ~need_ref:false env e;
         instr_dup;

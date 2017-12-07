@@ -1136,7 +1136,8 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
     let suffix = String.make n '}' in
     prefix ^ s ^ suffix
   | A.Unsafeexpr e -> string_of_param_default_value e
-  | A.BracedExpr e -> "${" ^ string_of_param_default_value e ^ "}"
+  | A.BracedExpr e -> "{" ^ string_of_param_default_value e ^ "}"
+  | A.Dollar e -> "$" ^ string_of_param_default_value e
   | A.ParenthesizedExpr e -> "(" ^ string_of_param_default_value e ^ ")"
   | A.Cast (h, e) ->
     let h = string_of_hint ~ns: false h in

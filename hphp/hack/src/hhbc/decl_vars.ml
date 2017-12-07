@@ -78,6 +78,7 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
         match e with
         | (Ast.Id id | Ast.Lvarvar(_, id)) -> add_local ~bareparam:false acc id
         | Ast.BracedExpr e -> this#on_expr acc e
+        | Ast.Dollar e -> this#on_expr acc e
         | _ -> acc)
 
   method! on_obj_get acc e prop =

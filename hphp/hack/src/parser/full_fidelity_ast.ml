@@ -742,7 +742,7 @@ and pString2: expr_location -> node list -> env -> expr list =
           | Some e -> e
           | None ->
             let e = pExpr ~location:loc expr_with_braces env in
-            fst e, BracedExpr e
+            fst e, Dollar (fst e, BracedExpr e)
           end in
         aux loc tl env (e::acc)
     | x::xs -> aux loc xs env ((pExpr ~location:loc x env)::acc)
@@ -985,7 +985,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | Lvarvar (n, id) -> Lvarvar (n + 1, id)
           | Lvar id         -> Lvarvar (1, id)
           | String (p, s) -> Lvar (p, "$" ^ s)
-          | _ -> BracedExpr expr
+          | _ -> Dollar expr
           )
         | _ -> missing_syntax "unary operator" node env
         )

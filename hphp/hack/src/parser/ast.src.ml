@@ -363,6 +363,11 @@ and expr_ =
      * $$$sample has int = 2.
    * *)
   | Lvarvar of int * id
+  (* General dollar expression e.g. ${"a" . $y}. Braced expression
+   * is a separate node, so we can distinguish $f->${x} from $f->{x}
+   * and $f->$x, each of which has different semantics
+   *)
+  | Dollar of expr
   | Clone of expr
   | Obj_get of expr * expr * og_null_flavor
   | Array_get of expr * expr option

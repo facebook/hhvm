@@ -52,7 +52,7 @@ module In_init_env = struct
     start_time: float;
     file_edits: Hh_json.json ImmQueue.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
-    tail_env: Tail.env;
+    tail_env: Tail.env option;
     has_reported_progress: bool;
     dialog: ShowMessageRequest.t; (* "hack server is busy" *)
     progress: Progress.t; (* "hh_server is initializing [naming]" *)
@@ -314,7 +314,9 @@ let dismiss_ui (state: state) : state =
   match state with
   | In_init ienv ->
     let open In_init_env in
+    Option.iter ~f:Tail.close_env ienv.tail_env;
     In_init { ienv with
+      tail_env = None;
       dialog = Lsp_helpers.dismiss_showMessageRequest ienv.dialog;
       progress = Lsp_helpers.notify_progress to_stdout ienv.progress None;
     }
@@ -1044,11 +1046,12 @@ let report_connect_progress
   : state =
   let open In_init_env in
   assert ienv.has_reported_progress;
+  let tail_env = Option.value_exn ienv.tail_env in
   let time = Unix.time () in
   let delay_in_secs = int_of_float (time -. ienv.start_time) in
   (* TODO: better to report time that hh_server has spent initializing *)
   let load_state_not_found, tail_msg =
-    ClientConnect.open_and_get_tail_msg ienv.start_time ienv.tail_env in
+    ClientConnect.open_and_get_tail_msg ienv.start_time tail_env in
   let msg = if load_state_not_found then
     Printf.sprintf
       "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
@@ -1240,14 +1243,14 @@ let rec connect (state: state) : state =
   in
   try
     let conn = connect_client root ~autostart:false in
-    let tail_env = Tail.create_env (Sys_utils.readlink_no_fail (ServerFiles.log_link root)) in
+    (* Only dismiss state if connection attempt succeeded without exception: *)
     let _state = dismiss_ui state in
     In_init { In_init_env.
       conn;
       start_time;
       uris_with_unsaved_changes = SSet.empty;
       file_edits = ImmQueue.empty;
-      tail_env;
+      tail_env = Some (Tail.create_env (Sys_utils.readlink_no_fail (ServerFiles.log_link root)));
       has_reported_progress = false;
       dialog = ShowMessageRequest.None;
       progress = Progress.None;

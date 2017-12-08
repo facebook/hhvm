@@ -49,7 +49,8 @@ end
 module In_init_env = struct
   type t = {
     conn: server_conn;
-    start_time: float;
+    first_start_time: float; (* our first attempt to connect *)
+    most_recent_start_time: float; (* for subsequent retries *)
     file_edits: Hh_json.json ImmQueue.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     tail_env: Tail.env option;
@@ -1048,10 +1049,10 @@ let report_connect_progress
   assert ienv.has_reported_progress;
   let tail_env = Option.value_exn ienv.tail_env in
   let time = Unix.time () in
-  let delay_in_secs = int_of_float (time -. ienv.start_time) in
+  let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
   (* TODO: better to report time that hh_server has spent initializing *)
   let load_state_not_found, tail_msg =
-    ClientConnect.open_and_get_tail_msg ienv.start_time tail_env in
+    ClientConnect.open_and_get_tail_msg ienv.first_start_time tail_env in
   let msg = if load_state_not_found then
     Printf.sprintf
       "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
@@ -1084,9 +1085,9 @@ let report_connect_end
   in
   (* alert the user that hack is ready, either by console log or by dialog *)
   let time = Unix.time () in
-  let seconds = int_of_float (time -. ienv.start_time) in
+  let seconds = int_of_float (time -. ienv.first_start_time) in
   let msg = Printf.sprintf "hh_server is now ready, after %i seconds." seconds in
-  if (time -. ienv.start_time > 30.0) then
+  if (time -. ienv.first_start_time > 30.0) then
     let handle_result ~result:_ state = match state with
       | Main_loop menv -> Main_loop {menv with Main_env.dialog = ShowMessageRequest.None}
       | _ -> state in
@@ -1234,27 +1235,44 @@ let start_server (root: Path.t) : unit =
 
 (* connect: this method either connects to the monitor and leaves in an       *)
 (* In_init state waiting for the server hello, or it fails to connect and     *)
-(* leaves in a Lost_server state.                                             *)
+(* leaves in a Lost_server state. You might call this from Pre_init or        *)
+(* Lost_server states, obviously. But you can also call it from In_init state *)
+(* if you want to give up on the prior attempt at connection and try again.   *)
 let rec connect (state: state) : state =
-  let start_time = Unix.time () in
   let root = match get_root () with
-    | None -> failwith "we should have root after an initialize request"
     | Some root -> root
-  in
+    | None -> assert false in
+  begin match state with
+    | In_init { In_init_env.conn; _ } -> begin try
+        Timeout.shutdown_connection conn.ic;
+        Timeout.close_in_noerr conn.ic
+        with _ -> ()
+      end
+    | Pre_init | Lost_server _ -> ()
+    | _ -> failwith "connect only in Pre_init, In_init or Lost_server state"
+  end;
   try
     let conn = connect_client root ~autostart:false in
-    (* Only dismiss state if connection attempt succeeded without exception: *)
-    let _state = dismiss_ui state in
-    In_init { In_init_env.
-      conn;
-      start_time;
-      uris_with_unsaved_changes = SSet.empty;
-      file_edits = ImmQueue.empty;
-      tail_env = Some (Tail.create_env (Sys_utils.readlink_no_fail (ServerFiles.log_link root)));
-      has_reported_progress = false;
-      dialog = ShowMessageRequest.None;
-      progress = Progress.None;
-    }
+    match state with
+    | In_init ienv ->
+      In_init { ienv with In_init_env.conn; most_recent_start_time = Unix.time(); }
+    | _ ->
+      let state = dismiss_ui state in
+      In_init { In_init_env.
+        conn;
+        first_start_time = Unix.time();
+        most_recent_start_time = Unix.time();
+        (* uris_with_unsaved_changes should always be empty here: *)
+        (* Pre_init will of course be empty; *)
+        (* Lost_server will exit rather than reconnect with unsaved changes. *)
+        uris_with_unsaved_changes = get_uris_with_unsaved_changes state;
+        (* Similarly, file_edits will be empty: *)
+        file_edits = ImmQueue.empty;
+        tail_env = Some (Tail.create_env (Sys_utils.readlink_no_fail (ServerFiles.log_link root)));
+        has_reported_progress = false;
+        dialog = ShowMessageRequest.None;
+        progress = Progress.None;
+      }
   with e ->
     (* Exit_with Out_of_retries, Exit_with Out_of_time: raised when we        *)
     (*   couldn't complete the handshake up to handoff within 3 attempts over *)
@@ -1581,24 +1599,13 @@ let handle_event
   | In_init ienv, Tick ->
     let open In_init_env in
     let time = Unix.time () in
-    let delay_in_secs = int_of_float (time -. ienv.start_time) in
+    let delay_in_secs = int_of_float (time -. ienv.most_recent_start_time) in
     if not ienv.has_reported_progress then
       state := report_connect_start ienv
-    else if delay_in_secs < 200 then
+    else if delay_in_secs <= 10 then
       state := report_connect_progress ienv
     else begin
-      begin try
-        Timeout.shutdown_connection ienv.In_init_env.conn.ic;
-        Timeout.close_in_noerr ienv.In_init_env.conn.ic
-      with _ ->
-        ()
-      end;
-      state := do_lost_server !state { Lost_env.
-        explanation = Lost_env.Action_required "hh_server isn't responding promptly";
-        start_on_click = true;
-        trigger_on_lock_file = true;
-        trigger_on_lsp = false;
-      }
+      state := connect !state (* terminate + retry the connection *)
     end
 
   (* server completes initialization *)

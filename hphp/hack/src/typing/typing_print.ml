@@ -271,12 +271,12 @@ module Full = struct
     List.iter l (fun f -> o ", "; o_field f;))
 
 
-  let rec ty: type a. _ -> _ -> _ -> _ -> a ty -> _ =
-    fun tcopt st env o (_, x) -> ty_ tcopt st env o x
+  let rec ty: type a. _ -> _ -> _ -> a ty -> _ =
+    fun st env o (_, x) -> ty_ st env o x
 
-  and ty_: type a. _ -> _ -> _ -> _ -> a ty_ -> _ =
-    fun tcopt st env o x ->
-    let k: type b. b ty -> _ = fun x -> ty tcopt st env o x in
+  and ty_: type a. _ -> _ -> _ -> a ty_ -> _ =
+    fun st env o x ->
+    let k: type b. b ty -> _ = fun x -> ty st env o x in
     let list: type c. (c ty -> unit) -> c ty list -> _ =
       fun x y -> list_sep o ", " x y in
     match x with
@@ -327,11 +327,11 @@ module Full = struct
       else if !debug_mode then o "^";
       let _, ety = Env.expand_type env (Reason.Rnone, x) in
       let st = ISet.add n' st in
-      ty tcopt st env o ety
+      ty st env o ety
     | Tfun ft ->
       if ft.ft_abstract then o "abs " else ();
       o "("; if ft.ft_is_coroutine then o "coroutine ";
-      o "function"; fun_type tcopt st env o ft; o ")";
+      o "function"; fun_type st env o ft; o ")";
       (match ft.ft_ret with
         | (Reason.Rdynamic_yield _, _) -> o " [DynamicYield]"
         | _ -> ())
@@ -412,13 +412,13 @@ module Full = struct
     | Nast.Tnoreturn -> "noreturn"
     )
 
-  and fun_type: type a. _ -> _ -> _ -> _ -> a fun_type -> _ =
-    fun tcopt st env o ft ->
+  and fun_type: type a. _ -> _ -> _ -> a fun_type -> _ =
+    fun st env o ft ->
     (match ft.ft_tparams with
       | [] -> ()
-      | l -> (o "<"; list_sep o ", " (tparam tcopt st o env) l; o ">")
+      | l -> (o "<"; list_sep o ", " (tparam st o env) l; o ">")
     );
-    o "("; list_sep o ", " (fun_param tcopt st env o) ft.ft_params;
+    o "("; list_sep o ", " (fun_param st env o) ft.ft_params;
     begin match ft.ft_arity with
       | Fstandard _ -> ()
       | _ ->
@@ -427,38 +427,38 @@ module Full = struct
         | Fvariadic(_, p) ->
           begin match p.fp_type with
           | _, Tany -> ()
-          | _, _ -> fun_param tcopt st env o p
+          | _, _ -> fun_param st env o p
           end
         | _ -> ()
         end; o "..."
     end;
     o "): ";
-    ty tcopt st env o ft.ft_ret
+    ty st env o ft.ft_ret
 
-  and fun_param: type a. _ -> _ -> _ -> _ -> a fun_param -> _ =
-    fun tcopt st env o { fp_name; fp_type; fp_kind; _ } ->
+  and fun_param: type a. _ -> _ -> _ -> a fun_param -> _ =
+    fun st env o { fp_name; fp_type; fp_kind; _ } ->
     (match fp_kind with
     | FPinout -> o "inout "
     | _ -> ()
     );
     match fp_name, fp_type with
-    | None, _ -> ty tcopt st env o fp_type
+    | None, _ -> ty st env o fp_type
     | Some param_name, (_, Tany) -> o param_name
     | Some param_name, _ ->
-        ty tcopt st env o fp_type; o " "; o param_name
+        ty st env o fp_type; o " "; o param_name
 
-  and tparam: type a. _ -> _ -> _ -> _ ->  a Typing_defs.tparam -> _ =
-    fun tcopt st o env (_, (_, x), cstrl) ->
-      (o x; list_sep o " " (tparam_constraint tcopt st env o) cstrl)
+  and tparam: type a. _ -> _ -> _ ->  a Typing_defs.tparam -> _ =
+    fun st o env (_, (_, x), cstrl) ->
+      (o x; list_sep o " " (tparam_constraint st env o) cstrl)
 
   and tparam_constraint:
-    type a. _ -> _ -> _ -> _ -> (Ast.constraint_kind * a ty) -> _ =
-    fun tcopt st env o (ck, cty) ->
+    type a. _ -> _ -> _ -> (Ast.constraint_kind * a ty) -> _ =
+    fun st env o (ck, cty) ->
       begin (match ck with
       | Ast.Constraint_as -> o " as "
       | Ast.Constraint_super -> o " super "
       | Ast.Constraint_eq -> o " = ");
-        ty tcopt st env o cty
+        ty st env o cty
       end
 
   let visitor env =
@@ -489,9 +489,8 @@ module Full = struct
       List.map (TySet.elements upper) (fun ty -> (tparam, Ast.Constraint_as, ty))
 
   let to_string env x =
-    let tcopt = Typing_env.get_options env in
     let buf = Buffer.create 50 in
-    ty tcopt ISet.empty env (Buffer.add_string buf) x;
+    ty ISet.empty env (Buffer.add_string buf) x;
     Buffer.contents buf
 
   let constraints_for_type env ty =
@@ -500,29 +499,26 @@ module Full = struct
     if List.is_empty constraints
     then None
     else
-      let tcopt = Typing_env.get_options env in
       let buf = Buffer.create 50 in
       let o = Buffer.add_string buf in
       o "where "; list_sep o ", "
       (fun (tparam, ck, ty) ->
-        (o tparam; tparam_constraint tcopt ISet.empty env o (ck, ty)))
+        (o tparam; tparam_constraint ISet.empty env o (ck, ty)))
       constraints;
       Some (Buffer.contents buf)
 
   let to_string_rec env n x =
-    let tcopt = Typing_env.get_options env in
     let buf = Buffer.create 50 in
-    ty tcopt (ISet.add n ISet.empty) env (Buffer.add_string buf) x;
+    ty (ISet.add n ISet.empty) env (Buffer.add_string buf) x;
     Buffer.contents buf
 
   let to_string_strip_ns env x =
-    let tcopt = Typing_env.get_options env in
     let buf = Buffer.create 50 in
     let add_string str =
       let str = Utils.strip_ns str in
       Buffer.add_string buf str
       in
-    ty tcopt ISet.empty env add_string x;
+    ty ISet.empty env add_string x;
     Buffer.contents buf
 
   let to_string_decl tcopt (x: decl ty) =

@@ -108,11 +108,8 @@ and xhp_child env pos ty =
   (* ?XHPChild *)
   let ty_child = reason, Tclass ((Pos.none, SN.Classes.cXHPChild), []) in
   let ty_child = reason, Toption ty_child in
-  (* ?Stringish *)
-  let ty_stringish = reason, Tclass ((Pos.none, SN.Classes.cStringish), []) in
-  let ty_stringish = reason, Toption ty_stringish in
   (* Any ?Traversable *)
   let ty_traversable = reason, Tclass ((Pos.none, SN.Collections.cTraversable), [Reason.none, Tany]) in
   let ty_traversable = reason, Toption ty_traversable in
-  let tys = [ty_child; ty_stringish; ty_traversable] in
+  let tys = [ty_child; ty_traversable] in
   List.exists ~f:(fun super -> SubType.is_sub_type env ty super) tys

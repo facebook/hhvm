@@ -438,6 +438,10 @@ and class_decl tcopt c =
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       let pos = method_pos tcopt ~is_static:false cls SN.Members.__toString  in
+      let hint = pos, Happly ((pos, SN.Classes.cStringish), []) in
+      (* Declare Stringish and parents if not already declared *)
+      let class_env = { tcopt; stack = SSet.empty } in
+      class_hint_decl class_env hint;
       let ty = (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), [])) in
       ty :: impl
     | _ -> impl

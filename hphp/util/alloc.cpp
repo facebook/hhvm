@@ -228,6 +228,11 @@ __thread MemBlock s_firstSlab;
 #if !defined USE_JEMALLOC || !defined HAVE_NUMA
 void enable_numa(bool local) {}
 void set_numa_binding(int node) {}
+void* mallocx_on_node(size_t size, int node, size_t align) {
+  void* ret = nullptr;
+  posix_memalign(&ret, align, size);
+  return ret;
+}
 #endif
 
 #ifdef USE_JEMALLOC
@@ -409,7 +414,6 @@ void set_numa_binding(int node) {
 
 void* mallocx_on_node(size_t size, int node, size_t align) {
   assertx((align & (align - 1)) == 0);
-#ifdef USE_JEMALLOC
   int flags = MALLOCX_ALIGN(align);
   if (node < 0 || !use_numa) return mallocx(size, flags);
   int arena = base_arena + node;
@@ -419,21 +423,10 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
   flags |= MALLOCX_ARENA(arena);
 #endif
   return mallocx(size, flags);
-#else
-  void* ret = nullptr;
-  posix_memalign(&ret, align, size);
-  return ret;
-#endif
 }
 
 #else
 static void numa_purge_arena() {}
-
-void* mallocx_on_node(size_t size, int node, size_t align) {
-  void* ret = nullptr;
-  posix_memalign(&ret, align, size);
-  return ret;
-}
 #endif
 
 #ifdef USE_JEMALLOC_EXTENT_HOOKS

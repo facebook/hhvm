@@ -169,8 +169,8 @@ let emit_wrapper_function
   in
   let memoized_body =
     make_wrapper_body return_type_info params body_instrs in
-  let is_interceptable =
-    Interceptable.is_function_interceptable namespace ast_fun in
+  let is_interceptable = Interceptable.is_function_interceptable
+    ~is_generated:true namespace ast_fun in
   Hhas_function.make
     function_attributes
     original_id

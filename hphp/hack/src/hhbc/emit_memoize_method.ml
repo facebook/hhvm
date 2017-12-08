@@ -411,8 +411,8 @@ let make_memoize_wrapper_method env info index ast_class ast_method =
     [Ast_scope.ScopeItem.Method ast_method;
      Ast_scope.ScopeItem.Class ast_class] in
   let namespace = ast_class.Ast.c_namespace in
-  let method_is_interceptable =
-    Interceptable.is_method_interceptable namespace ast_class method_id in
+  let method_is_interceptable = Interceptable.is_method_interceptable
+    ~is_generated:true namespace ast_class method_id in
   let method_body =
     emit_memoize_wrapper_body env info index ast_method
       ~scope ~namespace ast_method.Ast.m_params ret in

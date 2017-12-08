@@ -76,8 +76,8 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   let normal_function_name =
     if wrapper_type_opt = Some Emit_inout_helpers.RefWrapper
     then original_id else renamed_id in
-  let is_interceptable =
-    Interceptable.is_function_interceptable namespace ast_fun in
+  let is_interceptable = Interceptable.is_function_interceptable
+    ~is_generated:(original_id <> renamed_id) namespace ast_fun in
   let normal_function =
     Hhas_function.make
       function_attributes

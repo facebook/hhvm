@@ -273,7 +273,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::syncvmsp:
     case Vinstr::tailcallphp:
     case Vinstr::tailcallstub:
-    case Vinstr::ud2:
+    case Vinstr::trap:
     case Vinstr::unwind:
     case Vinstr::vcall:
     case Vinstr::vcallarray:

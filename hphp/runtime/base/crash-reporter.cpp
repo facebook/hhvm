@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/ext/xdebug/server.h"
 #include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
@@ -52,7 +53,9 @@ static const char* s_newBlacklist[] = {
   "killpg"
 };
 
-static void bt_handler(int sig) {
+static void bt_simple_handler(int sig);
+
+static void bt_handler(int sig, siginfo_t* info, void*) {
   if (IsCrashing) {
     // If we re-enter bt_handler while already crashing, just abort. This
     // includes if we hit the timeout set below.
@@ -75,14 +78,14 @@ static void bt_handler(int sig) {
   signal(sig, SIG_DFL);
 
   if (RuntimeOption::StackTraceTimeout > 0) {
-    signal(SIGALRM, bt_handler);
+    signal(SIGALRM, bt_simple_handler);
     alarm(RuntimeOption::StackTraceTimeout);
   }
 
   // Make a stacktrace file to prove we were crashing. Do this before anything
   // else has a chance to deadlock us.
-  int fd = ::open(RuntimeOption::StackTraceFilename.c_str(),
-                  O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
+  const int fd = ::open(RuntimeOption::StackTraceFilename.c_str(),
+                        O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 
   if (RuntimeOption::EvalDumpRingBufferOnCrash) {
     Trace::dumpRingBuffer(RuntimeOption::EvalDumpRingBufferOnCrash, 0);
@@ -120,24 +123,34 @@ static void bt_handler(int sig) {
     }
     return 0;
   }();
-
   st.log(strsignal(sig), fd, compilerId().begin(), debuggerCount);
 
-  // flush so if php crashes us we still have this output so far
+  if (sig == SIGILL && info) {
+    auto reason = jit::getTrapReason((jit::CTCA)info->si_addr);
+    if (reason) {
+      dprintf(fd, "Detected jit::trap at %p: from %s:%d\n\n", info->si_addr,
+              reason->file, reason->line);
+    }
+  }
+
+  // flush so if C++ stack walking crashes, we still have this output so far
   ::fsync(fd);
 
-  if (fd >= 0) {
-    // Don't attempt to determine function arguments in the PHP backtrace, as
-    // that might involve re-entering the VM.
-    if (!g_context.isNull() && !tl_sweeping) {
-      dprintf(fd, "\nPHP Stacktrace:\n\n%s",
-              debug_string_backtrace(
-                /*skip*/false,
-                /*ignore_args*/true
-              ).data());
-    }
-    ::close(fd);
+  st.printStackTrace(fd);
+
+  // flush so if php stack-walking crashes, we still have this output so far
+  ::fsync(fd);
+
+  // Don't attempt to determine function arguments in the PHP backtrace, as
+  // that might involve re-entering the VM.
+  if (!g_context.isNull() && !tl_sweeping) {
+    dprintf(fd, "\nPHP Stacktrace:\n\n%s",
+            debug_string_backtrace(
+              /*skip*/false,
+              /*ignore_args*/true
+            ).data());
   }
+  ::close(fd);
 
   if (jit::transdb::enabled()) {
     jit::tc::dump(true);
@@ -183,6 +196,10 @@ static void bt_handler(int sig) {
   raise(sig);
 }
 
+static void bt_simple_handler(int sig) {
+  bt_handler(sig, nullptr, nullptr);
+}
+
 void install_crash_reporter() {
 #ifdef _MSC_VER
   signal(SIGILL,  bt_handler);
@@ -198,8 +215,8 @@ void install_crash_reporter() {
   // the same stack leads to another SIGSEGV and crashes the program.
   // Use SA_ONSTACK, so alternate stack is used (only if configured via
   // sigaltstack).
-  sa.sa_flags |= SA_ONSTACK;
-  sa.sa_handler = &bt_handler;
+  sa.sa_flags |= SA_ONSTACK | SA_SIGINFO;
+  sa.sa_sigaction = &bt_handler;
 
   CHECK_ERR(sigaction(SIGQUIT, &sa, &osa));
   CHECK_ERR(sigaction(SIGBUS,  &sa, &osa));

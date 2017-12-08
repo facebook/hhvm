@@ -186,11 +186,11 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
     v << store {data, rvmsp()[TVOFF(m_data)]};
     v << storeb{type, rvmsp()[TVOFF(m_type)]};
 
-    emitIncRefWork(v, data, type);
+    emitIncRefWork(v, data, type, TRAP_REASON);
 
     // Now decref `child', which may free it---but note that the WaitHandle's
     // destructor has no risk of reentry.
-    emitDecRefWorkObj(v, child);
+    emitDecRefWorkObj(v, child, TRAP_REASON);
 
     // Load the address of the ActRec for our AFWH into rvmfp(), and sync it to
     // vmFirstAR().  We don't need to sync any of the vmRegs(), since we're
@@ -263,7 +263,7 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
   // state and result and just free the memory directly.
   auto const wh = v.makeReg();
   v << lea{rvmfp()[Resumable::dataOff() - Resumable::arOff()], wh};
-  emitDecRef(v, wh);
+  emitDecRef(v, wh, TRAP_REASON);
   auto const shouldRelease = emitCmpRefCount(v, OneReference, wh);
   ifThenElse(
     v, CC_E, shouldRelease,
@@ -276,11 +276,11 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
     },
     [&] (Vout& v) {  // Someone else still has a ref, do the work.
       // Store the return value into the AFWH and mark it as finished.
-      emitIncRefWork(v, rdata, rtype);
+      emitIncRefWork(v, rdata, rtype, TRAP_REASON);
       storeAFWHResult(v, rdata, rtype);
 
       // Drop the second ref, but we have more.
-      emitDecRef(v, wh);
+      emitDecRef(v, wh, TRAP_REASON);
 
       // Unblock all remaining parents. This may free the wh.
       unblockParents(v, nextBl);
@@ -320,7 +320,7 @@ void asyncFuncRetOnly(Vout& v, PhysReg data, PhysReg type, Vreg parentBl) {
   v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
 
   // Decref the AFWH for no longer being in the running state.
-  emitDecRefWorkObj(v, wh);
+  emitDecRefWorkObj(v, wh, TRAP_REASON);
 }
 
 TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {

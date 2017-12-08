@@ -185,6 +185,12 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     }
   }
 
+  for (auto& r : meta.trapReasons) {
+    if (auto const adjusted = rel.adjustedAddressAfter(r.first)) {
+      r.first = adjusted;
+    }
+  }
+
   if (!meta.bcMap.empty()) {
     /*
      * Most of the time we want to adjust to a corresponding "before" address

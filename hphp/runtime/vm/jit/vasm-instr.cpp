@@ -60,7 +60,7 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::vcallarray:
     case Vinstr::contenter:
     // terminal
-    case Vinstr::ud2:
+    case Vinstr::trap:
     case Vinstr::ret:
     case Vinstr::stubret:
     case Vinstr::phpret:
@@ -167,7 +167,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::unwind:
     // nop and trap
     case Vinstr::nop:
-    case Vinstr::ud2:
+    case Vinstr::trap:
     // restrict/unrestrict new virtuals
     case Vinstr::vregrestrict:
     case Vinstr::vregunrestrict:

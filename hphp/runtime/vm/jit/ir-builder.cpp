@@ -267,7 +267,7 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
   //    the new type.
   if (!shouldConstrainGuards()) {
     if (newType == TBottom) {
-      gen(Unreachable);
+      gen(Unreachable, ASSERT_REASON);
       return inst->is(AssertType) ? m_unit.cns(TBottom) : nullptr;
     }
 

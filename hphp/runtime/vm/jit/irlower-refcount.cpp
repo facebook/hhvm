@@ -180,7 +180,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
     ifThen(v, vcold(env), CC_Z, sf, [&] (Vout& v) {
       incrementProfile(offsetof(RefcountProfile, incDeced));
-      emitIncRef(v, loc.reg());
+      emitIncRef(v, loc.reg(), TRAP_REASON);
     }, unlikelyIncrement);
     return;
   }
@@ -192,7 +192,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     if (one_bit_refcount) {
       if (unconditional_one_bit_incref && !ty.maybe(TPersistent)) {
         incrementProfile(offsetof(RefcountProfile, incDeced));
-        emitIncRef(v, loc.reg());
+        emitIncRef(v, loc.reg(), TRAP_REASON);
       } else {
         // if (m_count == OneReference) m_count = MultiReference; This combines
         // the persistence check and an attempt to reduce memory traffic,
@@ -200,7 +200,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
         auto const sf = emitCmpRefCount(v, OneReference, loc.reg());
         ifThen(v, vcold(env), CC_E, sf, [&](Vout& v) {
           incrementProfile(offsetof(RefcountProfile, incDeced));
-          emitIncRef(v, loc.reg());
+          emitIncRef(v, loc.reg(), TRAP_REASON);
         }, unlikelyIncrement);
       }
       return;
@@ -209,7 +209,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     auto& vtaken = unlikelyIncrement ? vcold(env) : v;
     ifNonPersistent(v, vtaken, ty, loc, [&] (Vout& v) {
       incrementProfile(offsetof(RefcountProfile, incDeced));
-      emitIncRef(v, loc.reg());
+      emitIncRef(v, loc.reg(), TRAP_REASON);
     });
   });
 }
@@ -325,7 +325,7 @@ void implDecRefProf(Vout& v, IRLS& env,
              v.makeReg()};
 
   if (!ty.maybe(TPersistent)) {
-    auto const sf = emitDecRef(v, base);
+    auto const sf = emitDecRef(v, base, TRAP_REASON);
     ifThenElse(v, vcold(env), CC_E, sf,
                destroy,
                [&] (Vout& v) {
@@ -349,7 +349,7 @@ void implDecRefProf(Vout& v, IRLS& env,
             rvmtl()[profile.handle() + offsetof(DecRefProfile, decremented)],
             v.makeReg()
           };
-          emitDecRef(v, base);
+          emitDecRef(v, base, TRAP_REASON);
         },
         tag_from_string("decref-is-static"));
     },
@@ -378,8 +378,10 @@ void emitDecRefOptDestroy(Vout& v, Vout& vcold, Vreg data,
     [&] (Vout& v) {
       // If it's not static, actually reduce the reference count.  This does
       // another branch using the same status flags from the cmplim above.
-      ifThen(v, vcold, CC_NL, sf, [&] (Vout& v) { emitDecRef(v, data); },
-             unlikelySurvive, tag_from_string("decref-is-static"));
+      ifThen(v, vcold, CC_NL, sf,
+             [&] (Vout& v) { emitDecRef(v, data, TRAP_REASON); },
+             unlikelySurvive, tag_from_string("decref-is-static")
+      );
     },
     destroy,
     unlikelyPersist && unlikelySurvive,
@@ -414,7 +416,7 @@ void emitDecRefOptSurvive(Vout& v, Vout& vcold, Vreg data,
              tag_from_string("decref-is-static"));
     },
     [&] (Vout& v) {
-      emitDecRef(v, data);
+      emitDecRef(v, data, TRAP_REASON);
     },
     unlikelyDestroy && unlikelyPersist,
     tag_from_string("decref-is-one")
@@ -448,7 +450,7 @@ void emitDecRefOptPersist(Vout& v, Vout& vcold, Vreg data,
       ifThenElse(v, vcold, CC_E, sf,
                  destroy,
                  [&] (Vout& v) {
-                   emitDecRef(v, data);
+                   emitDecRef(v, data, TRAP_REASON);
                  },
                  unlikelyDestroy,
                  tag_from_string("decref-is-one"));
@@ -519,7 +521,7 @@ void implDecRef(Vout& v, IRLS& env,
       RuntimeOption::EvalJitPGOUnlikelyDecRefReleasePercent;
     auto const unlikelyDestroy = destroyedPct < unlikelyReleasePct;
 
-    auto const sf = emitDecRef(v, base);
+    auto const sf = emitDecRef(v, base, TRAP_REASON);
     ifThen(v, vcold(env), CC_E, sf, destroy, unlikelyDestroy);
     return;
   }
@@ -527,7 +529,8 @@ void implDecRef(Vout& v, IRLS& env,
   if (profile.optimizing()) {
     emitDecRefOpt(v, vcold(env), base, profile, destroy);
   } else {
-    emitDecRefWork(v, vcold(env), base, destroy, true /* unlikelyDestroy */);
+    emitDecRefWork(v, vcold(env), base, destroy, true /* unlikelyDestroy */,
+                   TRAP_REASON);
   }
 }
 
@@ -737,7 +740,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
       v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
       ifThen(v, vcold(env), CC_Z, sf, [&] (Vout& v) {
         incrementProfile(offsetof(RefcountProfile, incDeced));
-        emitDecRef(v, loc.reg());
+        emitDecRef(v, loc.reg(), TRAP_REASON);
       }, unlikelyDecrement);
     }
     return;
@@ -752,7 +755,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
     auto& vtaken = unlikelyDecrement ? vcold(env) : v;
     ifNonPersistent(v, vtaken, ty, loc, [&](Vout& v) {
       incrementProfile(offsetof(RefcountProfile, incDeced));
-      emitDecRef(v, loc.reg());
+      emitDecRef(v, loc.reg(), TRAP_REASON);
     });
     });
 }
@@ -760,11 +763,12 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgDbgAssertRefCount(IRLS& env, const IRInstruction* inst) {
+  auto const reason = inst->extra<AssertReason>()->reason;
   auto const src = srcLoc(env, inst, 0);
   auto& v = vmain(env);
 
   ifRefCountedType(v, v, inst->src(0)->type(), src, [&] (Vout& v) {
-    emitAssertRefCount(v, src.reg());
+    emitAssertRefCount(v, src.reg(), reason);
   });
 }
 

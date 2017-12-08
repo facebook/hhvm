@@ -36,6 +36,9 @@ LiteralMap s_literals{128};
 using CatchTraceMap = TreadHashMap<uint32_t, uint32_t, std::hash<uint32_t>>;
 CatchTraceMap s_catchTraceMap{128};
 
+using AbortReasonMap = TreadHashMap<uint32_t, Reason, std::hash<uint32_t>>;
+AbortReasonMap s_trapReasonMap{128};
+
 constexpr uint32_t kInvalidCatchTrace = 0x0;
 }
 
@@ -61,6 +64,10 @@ folly::Optional<TCA> getCatchTrace(CTCA ip) {
   auto const found = s_catchTraceMap.find(tc::addrToOffset(ip));
   if (found && *found != kInvalidCatchTrace) return tc::offsetToAddr(*found);
   return folly::none;
+}
+
+Reason* getTrapReason(CTCA addr) {
+  return s_trapReasonMap.find(tc::addrToOffset(addr));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,6 +122,16 @@ void CGMeta::process_only(
     }
   }
   jmpTransIDs.clear();
+
+  for (auto const& pair : trapReasons) {
+    auto addr = tc::addrToOffset(pair.first);
+    if (auto r = s_trapReasonMap.find(addr)) {
+      *r = pair.second;
+    } else {
+      s_trapReasonMap.insert(addr, pair.second);
+    }
+  }
+  trapReasons.clear();
 
   process_literals();
 

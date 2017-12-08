@@ -2472,7 +2472,7 @@ SSATmp* simplifyAssertType(State& env, const IRInstruction* inst) {
 
   auto const newType = src->type() & inst->typeParam();
   if (newType == TBottom) {
-    gen(env, Unreachable);
+    gen(env, Unreachable, ASSERT_REASON);
     return cns(env, TBottom);
   }
 
@@ -2775,7 +2775,7 @@ SSATmp* simplifyReservePackedArrayDataNewElem(State& env,
   auto const base = inst->src(0);
 
   if (base->type() <= (TPersistentArr|TPersistentVec)) {
-    gen(env, Unreachable);
+    gen(env, Unreachable, ASSERT_REASON);
     return cns(env, TBottom);
   }
   return nullptr;
@@ -2909,7 +2909,7 @@ SSATmp* arrGetKImpl(State& env, const IRInstruction* inst, G get) {
   // The array doesn't contain a valid element at that offset. Since this
   // instruction should be guarded by a check, this (should be) unreachable.
   if (!tv) {
-    gen(env, Unreachable);
+    gen(env, Unreachable, ASSERT_REASON);
     return cns(env, TBottom);
   }
 
@@ -3100,7 +3100,7 @@ SSATmp* simplifyKeysetGetK(State& env, const IRInstruction* inst) {
   // The array doesn't contain a valid element at that offset. Since this
   // instruction should be guarded by a check, this (should be) unreachable.
   if (!tv) {
-    gen(env, Unreachable);
+    gen(env, Unreachable, ASSERT_REASON);
     return cns(env, TBottom);
   }
 
@@ -3384,7 +3384,7 @@ SSATmp* simplifyJmpSwitchDest(State& env, const IRInstruction* inst) {
 
   if (indexVal < 0 || indexVal >= extra.cases) {
     // Instruction is unreachable.
-    return gen(env, Unreachable);
+    return gen(env, Unreachable, ASSERT_REASON);
   }
 
   auto const newExtra = ReqBindJmpData {

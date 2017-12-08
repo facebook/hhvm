@@ -968,13 +968,13 @@ To string conversions:
 
   Surprise flag hook for suspending generators and async generators at Yield.
 
-| Unreachable, ND, NA, T
+| Unreachable<AssertReason>, ND, NA, T
 
   Indicates an unreachable code path. Any instructions that are post-dominated
   by an Unreachable may be treated as unreachable by the optimizer, and the
   behavior of a program that attempts to execute an Unreachable is undefined.
 
-| EndBlock, ND, NA, T
+| EndBlock<AssertReason>, ND, NA, T
 
   Halt execution, without implying anything about the reachability of
   instructions preceding this. Intended for use in internal tests or other code
@@ -2441,7 +2441,7 @@ To string conversions:
 
   Increment the profiling counter associated with translation TransID.
 
-| DbgAssertRefCount, ND, S(Gen,TCtx), NF
+| DbgAssertRefCount<AssertReason>, ND, S(Gen,TCtx), NF
 
   Assert that S0 has a valid refcount. If S0 has a reference counted type and
   its count is implausible then execute a hardware trap instruction.

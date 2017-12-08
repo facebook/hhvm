@@ -94,7 +94,8 @@ inline Vreg emitDecRefCount(Vout& v, Vreg s0) {
 
 template<class Destroy>
 void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
-                    Destroy destroy, bool unlikelyDestroy) {
+                    Destroy destroy, bool unlikelyDestroy,
+                    Reason reason) {
   auto const sf = emitCmpRefCount(v, OneReference, data);
 
   if (one_bit_refcount) {
@@ -109,8 +110,10 @@ void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
       [&] (Vout& v) {
         // If it's not static, actually reduce the reference count.  This does
         // another branch using the same status flags from the cmplim above.
-        ifThen(v, CC_NL, sf, [&] (Vout& v) { emitDecRef(v, data); },
-               tag_from_string("decref-is-static"));
+        ifThen(v, CC_NL, sf,
+               [&] (Vout& v) { emitDecRef(v, data, reason); },
+               tag_from_string("decref-is-static")
+        );
       },
       unlikelyDestroy,
       tag_from_string("decref-is-one")

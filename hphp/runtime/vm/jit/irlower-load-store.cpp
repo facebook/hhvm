@@ -346,7 +346,7 @@ void cgLdTVAux(IRLS& env, const IRInstruction* inst) {
       auto const sf = v.makeReg();
       v << testqi{mask, dst, sf};
       ifThen(v, CC_NZ, sf, [](Vout& v) {
-        v << ud2{};
+        v << trap{TRAP_REASON};
       });
     }
   }

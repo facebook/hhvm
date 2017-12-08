@@ -386,8 +386,8 @@ struct Vgen {
   void emit(const testli& i) { a->Tst(W(i.s1), i.s0.l()); }
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }
   void emit(const testqi& i) { a->Tst(X(i.s1), i.s0.q()); }
+  void emit(const trap& /*i*/);
   void emit(const ucomisd& i) { a->Fcmp(D(i.s0), D(i.s1)); }
-  void emit(const ud2& /*i*/) { a->Brk(1); }
   void emit(const unpcklpd&);
   void emit(const xorb& i);
   void emit(const xorbi& i);
@@ -920,6 +920,11 @@ void Vgen::emit(const roundsd& i) {
 void Vgen::emit(const srem& i) {
   a->Sdiv(rAsm, X(i.s0), X(i.s1));
   a->Msub(X(i.d), rAsm, X(i.s1), X(i.s0));
+}
+
+void Vgen::emit(const trap& i) {
+  env.meta.trapReasons.emplace_back(a->frontier(), i.reason);
+  a->Brk(1);
 }
 
 void Vgen::emit(const unpcklpd& i) {

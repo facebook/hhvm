@@ -53,9 +53,9 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void assertSFNonNegative(Vout& v, Vreg sf) {
+void assertSFNonNegative(Vout& v, Vreg sf, Reason reason) {
   if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
-  ifThen(v, CC_NGE, sf, [&] (Vout& v) { v << ud2{}; });
+  ifThen(v, CC_NGE, sf, [&] (Vout& v) { v << trap{reason}; });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -249,18 +249,18 @@ void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte) {
   v << storeli{trash32, ptr[offset + 0xc]};
 }
 
-void emitAssertRefCount(Vout& v, Vreg data) {
+void emitAssertRefCount(Vout& v, Vreg data, Reason reason) {
   auto const sf = emitCmpRefCount(v, StaticValue, data);
 
   ifThen(v, CC_NLE, sf, [&] (Vout& v) {
     auto const sf = emitCmpRefCount(v, RefCountMaxRealistic, data);
-    ifThen(v, CC_NBE, sf, [&] (Vout& v) { v << ud2{}; });
+    ifThen(v, CC_NBE, sf, [&] (Vout& v) { v << trap{reason}; });
   });
 }
 
-void emitIncRef(Vout& v, Vreg base) {
+void emitIncRef(Vout& v, Vreg base, Reason reason) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitAssertRefCount(v, base);
+    emitAssertRefCount(v, base, reason);
   }
 
   if (one_bit_refcount) {
@@ -268,20 +268,20 @@ void emitIncRef(Vout& v, Vreg base) {
   } else {
     auto const sf = v.makeReg();
     v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
-    assertSFNonNegative(v, sf);
+    assertSFNonNegative(v, sf, reason);
   }
 }
 
-Vreg emitDecRef(Vout& v, Vreg base) {
+Vreg emitDecRef(Vout& v, Vreg base, Reason reason) {
   auto const sf = one_bit_refcount ?
     emitCmpRefCount(v, OneReference, base) :
     emitDecRefCount(v, base);
 
-  assertSFNonNegative(v, sf);
+  assertSFNonNegative(v, sf, reason);
   return sf;
 }
 
-void emitIncRefWork(Vout& v, Vreg data, Vreg type) {
+void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason) {
   auto const sf = v.makeReg();
   emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
   // ifRefCountedType
@@ -290,11 +290,11 @@ void emitIncRefWork(Vout& v, Vreg data, Vreg type) {
     // do the IncRef if m_count >= 0.
     auto const sf2 = emitCmpRefCount(v, 0, data);
     auto const cc = one_bit_refcount ? CC_E : CC_GE;
-    ifThen(v, cc, sf2, [&] (Vout& v) { emitIncRef(v, data); });
+    ifThen(v, cc, sf2, [&] (Vout& v) { emitIncRef(v, data, reason); });
   });
 }
 
-void emitDecRefWorkObj(Vout& v, Vreg obj) {
+void emitDecRefWorkObj(Vout& v, Vreg obj, Reason reason) {
   auto const shouldRelease = emitCmpRefCount(v, OneReference, obj);
   ifThenElse(
     v, CC_E, shouldRelease,
@@ -304,7 +304,7 @@ void emitDecRefWorkObj(Vout& v, Vreg obj) {
       v << vcall{fn, v.makeVcallArgs({{obj}}), v.makeTuple({})};
     },
     [&] (Vout& v) {
-      emitDecRef(v, obj);
+      emitDecRef(v, obj, reason);
     }
   );
 }

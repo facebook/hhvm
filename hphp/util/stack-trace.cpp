@@ -440,8 +440,6 @@ void StackTraceNoHeap::log(const char* errorType, int fd, const char* buildId,
     printPair(fd, pair.first.c_str(), pair.second.c_str());
   }
   write(fd, "\n", 1);
-
-  printStackTrace(fd);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

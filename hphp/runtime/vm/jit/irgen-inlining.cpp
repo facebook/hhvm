@@ -330,7 +330,7 @@ void conjureEndInlining(IRGS& env, bool builtin) {
     endInlining(env);
   }
   gen(env, ConjureUse, pop(env));
-  gen(env, EndBlock);
+  gen(env, EndBlock, ASSERT_REASON);
 }
 
 void retFromInlined(IRGS& env) {

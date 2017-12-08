@@ -131,7 +131,7 @@ struct Vunit;
   O(unwind, Inone, Un, Dn)\
   /* nop and trap */\
   O(nop, Inone, Un, Dn)\
-  O(ud2, Inone, Un, Dn)\
+  O(trap, I(reason), Un, Dn)\
   /* restrict/unrestrict new virtuals */\
   O(vregrestrict, Inone, Un, Dn)\
   O(vregunrestrict, Inone, Un, Dn)\
@@ -905,7 +905,8 @@ struct unwind { Vlabel targets[2]; };
  * Nop and trap.
  */
 struct nop {};
-struct ud2 {};
+struct trap { Reason reason; };
+#define TRAP_REASON Reason{__FILE__, __LINE__}
 
 /*
  * Restrict/unrestrict new virtuals.
@@ -1194,7 +1195,7 @@ struct Vinstr {
 
   /////////////////////////////////////////////////////////////////////////////
 
-  Vinstr() : op(ud2) {}
+  Vinstr() : op(trap) {}
 
 #define O(name, imms, uses, defs) \
   /* implicit */ Vinstr(jit::name i, ir_context ctx = ir_context{}) \

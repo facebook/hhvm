@@ -345,7 +345,6 @@ struct Vgen {
     copyCR0toCR1(a, rAsm);
   }
   void emit(const subsd& i) { a.fsub(i.d, i.s1, i.s0, false); }
-  void emit(const ud2& /*i*/) { a.trap(); }
   void emit(const xorb& i) {
     a.xor(Reg64(i.d), Reg64(i.s0), Reg64(i.s1), true);
     copyCR0toCR1(a, rAsm);
@@ -478,6 +477,7 @@ struct Vgen {
     a.addi(rAsm, rAsm, 16);
     a.addi(rAsm, rAsm, -16);
   }
+  void emit(const trap& /*i*/);
 
 private:
   CodeBlock& frozen() { return text.frozen().code; }
@@ -785,6 +785,20 @@ void Vgen::emit(const lea& i) {
   }
 }
 
+void Vgen::emit(const testqi& i) {
+  if (i.s0.fits(sz::word)) {
+    a.li(rAsm, i.s0);
+  } else {
+    a.limmediate(rAsm, i.s0.l());
+  }
+  emit(testq{rAsm, i.s1, i.sf});
+}
+
+void Vgen::emit(const trap& i) {
+  env.meta.trapReasons.emplace_back(a.frontier(), i.reason);
+  a.trap();
+}
+
 void Vgen::emit(const call& i) {
   emitCallPrologue();
   // TOC save/restore is required by ABI for external functions.
@@ -870,15 +884,6 @@ void Vgen::emit(const tailcallstub& i) {
   a.mtlr(rfuncln());
   a.mr(rsfp(), rsp());
   emit(jmpi{i.target, i.args});
-}
-
-void Vgen::emit(const testqi& i) {
-  if (i.s0.fits(sz::word)) {
-    a.li(rAsm, i.s0);
-  } else {
-    a.limmediate(rAsm, i.s0.l());
-  }
-  emit(testq{rAsm, i.s1, i.sf});
 }
 
 void Vgen::emit(const loadstubret& i) {

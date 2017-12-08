@@ -64,6 +64,7 @@ struct CGMeta {
   std::vector<std::pair<TCA,Fixup>> fixups;
   std::vector<std::pair<CTCA,TCA>> catches;
   std::vector<std::pair<TCA,TransID>> jmpTransIDs;
+  std::vector<std::pair<TCA,Reason>> trapReasons;
   std::unordered_map<uint64_t, const uint64_t*> literals;
 
   /*
@@ -137,6 +138,13 @@ size_t numCatchTraces();
  * performed.
  */
 void eraseCatchTrace(CTCA addr);
+
+/*
+ * Get the reason for the jit::trap instruction (UD2 on x64) at given address.
+ * The returned pointer refers to memory subject to the treadmill, so should
+ * only be used in the current request.
+ */
+Reason* getTrapReason(CTCA addr);
 
 }}
 

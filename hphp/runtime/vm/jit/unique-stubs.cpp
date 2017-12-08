@@ -795,7 +795,7 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
       v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
     };
 
-    emitDecRefWork(v, v, rdata, destroy, false);
+    emitDecRefWork(v, v, rdata, destroy, false, TRAP_REASON);
 
     v << stubret{};
   });
@@ -969,7 +969,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
     v << load{rvmtl()[unwinderExnOff()], rarg(0)};
     v << call{TCA(_Unwind_Resume), arg_regs(1), &us.endCatchHelperPast};
-    v << ud2{};
+    v << trap{TRAP_REASON};
   });
   meta.process(nullptr);
 
@@ -1022,7 +1022,7 @@ TCA emitThrowSwitchMode(CodeBlock& cb, DataBlock& data) {
 
   return vwrap(cb, data, [] (Vout& v) {
     v << call{TCA(throwSwitchMode)};
-    v << ud2{};
+    v << trap{TRAP_REASON};
   });
 }
 

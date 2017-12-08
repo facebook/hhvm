@@ -141,13 +141,13 @@ Vreg emitDecRefCount(Vout& v, Vreg s0);
  * decrement, since callers may want to check the result and invoke data
  * destructors.
  */
-void emitIncRef(Vout& v, Vreg data);
-Vreg emitDecRef(Vout& v, Vreg data);
+void emitIncRef(Vout& v, Vreg data, Reason reason);
+Vreg emitDecRef(Vout& v, Vreg data, Reason reason);
 
 /*
  * emitIncRefWork performs type check and calls incRef if appropriate.
  */
-void emitIncRefWork(Vout& v, Vreg data, Vreg type);
+void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason);
 
 /*
  * Check the refcount of `data'.  If it's negative (and hence, a sentinel
@@ -158,18 +158,19 @@ void emitIncRefWork(Vout& v, Vreg data, Vreg type);
  */
 template<class Destroy>
 void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
-                    Destroy destroy, bool unlikelyDestroy);
+                    Destroy destroy, bool unlikelyDestroy,
+                    Reason reason);
 
 /*
  * Like emitDecRefWork(), but for a known-KindOfObject value.
  */
-void emitDecRefWorkObj(Vout& v, Vreg obj);
+void emitDecRefWorkObj(Vout& v, Vreg obj, Reason reason);
 
 /*
  * Trap or otherwise fail if `data' does not have a realistic refcount (either
  * a positive value or the sentinel static/uncounted values).
  */
-void emitAssertRefCount(Vout& v, Vreg data);
+void emitAssertRefCount(Vout& v, Vreg data, Reason reason);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calls.

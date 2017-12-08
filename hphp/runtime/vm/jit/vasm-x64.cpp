@@ -260,8 +260,8 @@ struct Vgen {
   void emit(const testqi& i);
   void emit(const testqm& i) { a.testq(i.s0, i.s1); }
   void emit(const testqim& i);
+  void emit(const trap& i);
   void emit(const ucomisd& i) { a.ucomisd(i.s0, i.s1); }
-  void emit(const ud2& /*i*/) { a.ud2(); }
   void emit(unpcklpd i) { noncommute(i); a.unpcklpd(i.s0, i.d); }
   void emit(xorb i) { commuteSF(i); a.xorb(i.s0, i.d); }
   void emit(xorbi i) { binary(i); a.xorb(i.s0, i.d); }
@@ -893,6 +893,11 @@ void Vgen::emit(const testqim& i) {
   } else {
     a.testq(i.s0, i.s1);
   }
+}
+
+void Vgen::emit(const trap& i) {
+  env.meta.trapReasons.emplace_back(a.frontier(), i.reason);
+  a.ud2();
 }
 
 void Vgen::emit(xorq i) {

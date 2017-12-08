@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -40,8 +40,8 @@ TEST(PredictionOpts, basic) {
   ckt->setNext(end);
   entry->push_back({ptr, ldm, inc, ckt});
 
-  taken->push_back(unit.gen(EndBlock, bcctx));
-  end->push_back(unit.gen(EndBlock, bcctx));
+  taken->push_back(unit.gen(EndBlock, bcctx, ASSERT_REASON));
+  end->push_back(unit.gen(EndBlock, bcctx, ASSERT_REASON));
 
   optimizePredictions(unit);
 

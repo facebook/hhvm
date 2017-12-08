@@ -595,7 +595,7 @@ Vlabel blockFor(const VxlsContext& ctx, unsigned pos) {
 void insertCodeAt(jit::vector<Vinstr>& dst, unsigned& j,
                   const jit::vector<Vinstr>& src, unsigned pos) {
   auto const irctx = dst[j].irctx();
-  dst.insert(dst.begin() + j, src.size(), ud2{});
+  dst.insert(dst.begin() + j, src.size(), trap{TRAP_REASON});
   for (auto const& inst : src) {
     dst[j] = inst;
     dst[j].set_irctx(irctx);
@@ -3000,10 +3000,10 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     }
 
     // Any block with a NeedSpill out-state and no successors must free spill
-    // space right before the block-end instruction. We ignore ud2 so spill
+    // space right before the block-end instruction. We ignore trap so spill
     // space is still allocated in core files.
     if (state.out == NeedSpill && successors.empty() &&
-        block.code.back().op != Vinstr::ud2) {
+        block.code.back().op != Vinstr::trap) {
       auto it = std::prev(block.code.end());
       FTRACE(3, "free spill before {}: {}\n", label, show(unit, (*it)));
       free.set_irctx(it->irctx());

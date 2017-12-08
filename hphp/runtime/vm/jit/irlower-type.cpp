@@ -330,7 +330,7 @@ void cgAssertType(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const& dtype = inst->dst()->type();
   if (dtype == TBottom) {
-    v << ud2();
+    v << trap{TRAP_REASON};
     v = v.makeBlock();
     return;
   }

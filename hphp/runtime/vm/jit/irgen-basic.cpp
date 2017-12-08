@@ -340,7 +340,7 @@ void emitCastVArray(IRGS& env) {
       if (src->isA(TStr))    return raise("String");
       if (src->isA(TRes))    return raise("Resource");
       // Unexpected types may only be seen in unreachable code.
-      gen(env, Unreachable);
+      gen(env, Unreachable, ASSERT_REASON);
       return cns(env, TBottom);
     }()
   );
@@ -383,7 +383,7 @@ void emitCastDArray(IRGS& env) {
       if (src->isA(TStr))    return raise("String");
       if (src->isA(TRes))    return raise("Resource");
       // Unexpected types may only be seen in unreachable code.
-      gen(env, Unreachable);
+      gen(env, Unreachable, ASSERT_REASON);
       return cns(env, TBottom);
     }()
   );
@@ -419,7 +419,7 @@ void emitCastVec(IRGS& env) {
       if (src->isA(TStr))    return raise("String");
       if (src->isA(TRes))    return raise("Resource");
       // Unexpected types may only be seen in unreachable code.
-      gen(env, Unreachable);
+      gen(env, Unreachable, ASSERT_REASON);
       return cns(env, TBottom);
     }()
   );
@@ -455,7 +455,7 @@ void emitCastDict(IRGS& env) {
       if (src->isA(TStr))     return raise("String");
       if (src->isA(TRes))     return raise("Resource");
       // Unexpected types may only be seen in unreachable code.
-      gen(env, Unreachable);
+      gen(env, Unreachable, ASSERT_REASON);
       return cns(env, TBottom);
     }()
   );
@@ -491,7 +491,7 @@ void emitCastKeyset(IRGS& env) {
       if (src->isA(TStr))     return raise("String");
       if (src->isA(TRes))     return raise("Resource");
       // Unexpected types may only be seen in unreachable code.
-      gen(env, Unreachable);
+      gen(env, Unreachable, ASSERT_REASON);
       return cns(env, TBottom);
     }()
   );

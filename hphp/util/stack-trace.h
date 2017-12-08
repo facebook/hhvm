@@ -165,10 +165,15 @@ struct StackTraceNoHeap : StackTraceBase {
   explicit StackTraceNoHeap(bool trace = true);
 
   /*
-   * Log stacktrace into the given file.
+   * Log process/thread information, plus any extra logging that was queued.
    */
   void log(const char* errorType, int fd, const char* buildId,
            int debuggerCount) const;
+
+  /*
+   * Log the C++ stack trace
+   */
+  void printStackTrace(int fd) const;
 
   /*
    * Add extra information to log together with a crash stacktrace log.
@@ -182,9 +187,6 @@ struct StackTraceNoHeap : StackTraceBase {
       StackTraceNoHeap::ClearAllExtraLogging();
     }
   };
-
-private:
-  void printStackTrace(int fd) const;
 
 private:
   void* m_frames[kMaxFrame];

@@ -1312,6 +1312,17 @@ struct RaiseHackArrParamNoticeData : IRExtraData {
   AnnotType type;
 };
 
+struct AssertReason : IRExtraData {
+  explicit AssertReason(Reason r) : reason{r.file, r.line} {}
+
+  std::string show() const {
+    return jit::show(reason);
+  }
+
+  Reason reason;
+};
+#define ASSERT_REASON AssertReason{Reason{__FILE__, __LINE__}}
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1504,6 +1515,9 @@ X(LdTVAux,                      LdTVAuxData);
 X(CheckRefs,                    CheckRefsData);
 X(FuncGuard,                    FuncGuardData);
 X(RaiseHackArrParamNotice,      RaiseHackArrParamNoticeData);
+X(DbgAssertRefCount,            AssertReason);
+X(Unreachable,                  AssertReason);
+X(EndBlock,                     AssertReason);
 
 #undef X
 

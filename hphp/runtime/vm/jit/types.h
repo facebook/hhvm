@@ -247,6 +247,18 @@ using Vflags = uint8_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Information attached to an assertion in emitted code.
+ */
+struct Reason {
+  const char* file;
+  unsigned line;
+};
+
+inline std::string show(const Reason &r) {
+  return folly::sformat("{}:{}", r.file, r.line);
+}
+
 }}
 
 #endif

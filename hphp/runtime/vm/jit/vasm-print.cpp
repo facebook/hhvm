@@ -145,6 +145,10 @@ struct FormatVisitor {
   }
   void imm(Vflags /*fl*/) {}
 
+  void imm(Reason r) {
+    str << sep() << show(r);
+  }
+
   void imm(RegSet x) { print(x); }
   void imm(ComparisonPred x) {
     str << sep();

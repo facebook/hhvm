@@ -94,12 +94,14 @@ void cgMov(IRLS& env, const IRInstruction* inst) {
   copyTV(vmain(env), src, dst, inst->dst()->type());
 }
 
-void cgUnreachable(IRLS& env, const IRInstruction* /*inst*/) {
-  vmain(env) << ud2{};
+void cgUnreachable(IRLS& env, const IRInstruction* inst) {
+  auto reason = inst->extra<AssertReason>()->reason;
+  vmain(env) << trap{reason};
 }
 
-void cgEndBlock(IRLS& env, const IRInstruction* /*inst*/) {
-  vmain(env) << ud2{};
+void cgEndBlock(IRLS& env, const IRInstruction* inst) {
+  auto reason = inst->extra<AssertReason>()->reason;
+  vmain(env) << trap{reason};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

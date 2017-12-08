@@ -401,7 +401,7 @@ module type S = sig
   val coroutine_call_outside_of_suspend : Pos.t -> unit
   val function_is_not_coroutine : Pos.t -> string -> unit
   val coroutinness_mismatch : bool -> Pos.t -> Pos.t -> unit
-  val fun_reactivity_mismatch : Pos.t -> Pos.t -> unit
+  val fun_reactivity_mismatch : bool -> Pos.t -> Pos.t -> unit
   val this_as_lexical_variable : Pos.t -> unit
   val dollardollar_lvalue : Pos.t -> unit
   val duplicate_using_var : Pos.t -> unit

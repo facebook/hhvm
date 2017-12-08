@@ -709,6 +709,7 @@ and stmt env = function
     let env, tfb = block env fb in
     env, T.Try (ttb, tcl, tfb)
   | Static_var el ->
+    Env.not_lambda_reactive ();
     let env = List.fold_left el ~f:begin fun env e ->
       match e with
         | _, Binop (Ast.Eq _, (_, Lvar (p, x)), _) ->
@@ -718,6 +719,7 @@ and stmt env = function
     let env, tel, _ = exprs env el in
     env, T.Static_var tel
   | Global_var el ->
+    Env.not_lambda_reactive ();
     let env = List.fold_left el ~f:begin fun env e ->
       match e with
         | _, Binop (Ast.Eq _, (_, Lvar (p, x)), _) ->
@@ -1641,6 +1643,7 @@ and expr_
   | Class_const (cid, mid) -> class_const env p (cid, mid)
   | Class_get (x, (py, y))
       when Env.FakeMembers.get_static env x y <> None ->
+        Env.not_lambda_reactive ();
         let env, local = Env.FakeMembers.make_static p env x y in
         let local = p, Lvar (p, local) in
         let env, _, ty = expr env local in
@@ -1657,6 +1660,7 @@ and expr_
         end in
         make_result env (T.Class_get (cid, (py, y))) ty
   | Class_get (cid, mid) ->
+      Env.not_lambda_reactive ();
       TUtils.process_static_find_ref cid mid;
       let env, te, cty = static_class_id p env cid in
       let env, ty, _ =
@@ -1841,14 +1845,13 @@ and expr_
         TypecheckerOptions.experimental_feature_enabled
           (Env.get_options env) TypecheckerOptions.experimental_contextual_inference in
       let check_body_under_known_params ?ret_ty ft =
-        let (is_coroutine, anon) = anon_make env p f ft idl in
+        let (is_reactive, is_coroutine, anon) = anon_make env p f ft idl in
         let ft = { ft with ft_is_coroutine = is_coroutine } in
+        let ft = { ft with ft_reactive = is_reactive } in
         let env, tefun, ty = anon ?ret_ty env ft.ft_params in
         (* Improve hover type experience for parameters with known types *)
         List.iter2_exn f.f_params ft.ft_params (fun param ft_param ->
           Typing_hooks.dispatch_infer_ty_hook ft_param.fp_type param.param_pos env);
-        (* The lambda inherits its reactivity from the enclosing function *)
-        let ft = { ft with ft_reactive = Env.env_reactive env } in
         let inferred_ty =
           if is_explicit_ret
           then (Reason.Rwitness p, Tfun { ft with ft_ret = declared_ft.ft_ret })
@@ -1905,7 +1908,7 @@ and expr_
           ("Typing.expr Efun unknown params",
           [Typing_log.Log_type ("declared_ft", (Reason.Rwitness p, Tfun declared_ft))])];
         (* check for recursive function calls *)
-        let (is_coroutine, anon) as anon_fun = anon_make env p f declared_ft idl in
+        let (is_reactive, is_coroutine, anon) as anon_fun = anon_make env p f declared_ft idl in
         let env, anon_id = Env.add_anonymous env anon_fun in
         let env, tefun, _ = Errors.try_with_error
           (fun () ->
@@ -1917,7 +1920,7 @@ and expr_
             let anon_ign ?el:_ ?ret_ty:_ env fun_params =
               Errors.ignore_ (fun () -> (anon env fun_params)) in
             let _, tefun, ty = anon_ign env declared_ft.ft_params in
-            let env = Env.set_anonymous env anon_id (is_coroutine, anon_ign) in
+            let env = Env.set_anonymous env anon_id (is_reactive, is_coroutine, anon_ign) in
             env, tefun, ty) in
           env, tefun, (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id))
         end
@@ -2142,7 +2145,12 @@ and anon_make tenv p f ft idl =
   let is_typing_self = ref false in
   let nb = Nast.assert_named_body f.f_body in
   let is_coroutine = f.f_fun_kind = Ast.FCoroutine in
-
+  let block_fun = fun () ->
+    (* We don't care about anything except whether reactivity gets turned off *)
+    let tenv = Env.set_fn_kind tenv f.f_fun_kind in
+    ignore(block tenv nb.fnb_nast) in
+  let is_reactive = Env.check_lambda_reactive block_fun in
+  is_reactive,
   is_coroutine,
   fun ?el ?ret_ty env supplied_params ->
     let safe_pass_by_ref = TUtils.safe_pass_by_ref_enabled env in
@@ -2531,10 +2539,13 @@ and assign_ p ur env e1 ty2 =
             || x = SN.Collections.cVec
             || x = SN.Collections.cConstVector ->
             (* Vector assignment is illegal in a reactive context
-                but vec assignment is okay
-            *)
-            if x <> SN.Collections.cVec && Env.env_local_reactive env then
-              Errors.nonreactive_append p;
+                but vec assignment is okay *)
+            (match x <> SN.Collections.cVec, Env.env_local_reactive env with
+            | true, true ->
+              Errors.nonreactive_append p
+            | true, _ ->
+              Env.not_lambda_reactive ()
+            | _ -> ());
             let env, tel = List.map_env env el begin fun env e ->
               let env, te, _ = assign (fst e) env e elt_type in
               env, te
@@ -2608,6 +2619,7 @@ and assign_ p ur env e1 ty2 =
   | _, Obj_get _ ->
       if Env.env_local_reactive env then
         Errors.obj_set_reactive p;
+      Env.not_lambda_reactive ();
       let lenv = env.Env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in
       (* In this section, we check that the assignment is compatible with
@@ -2837,7 +2849,7 @@ and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_
       | Tfun { ft_is_coroutine = true; _ } ->
         Some true
       | Tanon (_, id) ->
-        Some (Option.value_map (Env.get_anonymous env id) ~default:false ~f:fst)
+        Some (Option.value_map (Env.get_anonymous env id) ~default:false ~f:(fun (_,b,_) -> b) )
       | Tunresolved ts ->
         begin match List.map ts ~f:is_coroutine with
         | None :: _ -> None
@@ -3686,6 +3698,7 @@ and array_append p env ty1 =
             when (n = SN.Collections.cVector
             || n = SN.Collections.cSet) &&
             Env.env_local_reactive env ->
+            Env.not_lambda_reactive ();
             Errors.nonreactive_append p;
             env, ty
 
@@ -3703,12 +3716,14 @@ and array_append p env ty1 =
         | Tclass ((_, n), [tkey; tvalue]) when n = SN.Collections.cMap ->
             if Env.env_local_reactive env then
               Errors.nonreactive_append p;
+            Env.not_lambda_reactive ();
               (* You can append a pair to a map *)
             env, (Reason.Rmap_append p, Tclass ((p, SN.Collections.cPair),
                 [tkey; tvalue]))
         | Tclass ((_, n), []) when n = SN.Collections.cMap ->
             if Env.env_local_reactive env then
               Errors.nonreactive_append p;
+            Env.not_lambda_reactive ();
             (* Handle the case where "Map" was used as a typehint without
                type parameters *)
             env, (Reason.Rmap_append p,
@@ -4473,7 +4488,10 @@ and call_ ~expected pos env fty el uel =
     (* Reactive functions can only call reactive functions *)
     (match Env.env_reactive env, ft.ft_reactive with
     | true, false ->
+      Env.not_lambda_reactive ();
       Errors.nonreactive_function_call pos
+    | _, false ->
+      Env.not_lambda_reactive ()
     | _ -> ());
 
     (* Force subtype with expected result *)
@@ -4575,7 +4593,7 @@ and call_ ~expected pos env fty el uel =
       | None ->
         Errors.anonymous_recursive_call pos;
         env, tel, [], err_none
-      | Some (_, anon) ->
+      | Some (_, _, anon) ->
         let () = check_arity pos fpos (List.length tyl) arity in
         let tyl = List.map tyl TUtils.default_fun_param in
         let env, _, ty = anon ~el env tyl in

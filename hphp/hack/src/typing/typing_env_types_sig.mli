@@ -93,6 +93,7 @@ and genv = {
  * - the expected return type of the body (optional)
  *)
 and anon =
+  Nast.is_reactive *
   Nast.is_coroutine *
   (?el:Nast.expr list ->
   ?ret_ty: locl ty ->

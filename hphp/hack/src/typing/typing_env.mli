@@ -113,6 +113,8 @@ val env_with_global_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val is_generic_parameter : env -> string -> bool
 val get_generic_parameters : env -> string list
+val check_lambda_reactive : (unit -> unit) -> bool
+val not_lambda_reactive : unit -> unit
 val add_fresh_generic_parameter : env -> string -> env * string
 val get_tpenv_size : env -> int
 val set_env_reactive : env -> reactivity -> env

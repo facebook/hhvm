@@ -347,7 +347,9 @@ module Full = struct
     | Ttuple tyl -> o "("; list k tyl; o ")"
     | Tanon (_, id) ->
       begin match Env.get_anonymous env id with
-      | Some (true, _) -> o "[coroutine fun]"
+      | Some (true, true, _) -> o "[coroutine rx fun]"
+      | Some (false, true, _) -> o "[coroutine fun]"
+      | Some (true, false, _) -> o "[rx fun]"
       | _ -> o "[fun]"
       end
     | Tunresolved [] -> o "[unresolved]"

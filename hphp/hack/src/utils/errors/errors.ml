@@ -2214,11 +2214,15 @@ let fun_arity_mismatch pos1 pos2 =
   pos2, "Because of this definition";
 ]
 
-let fun_reactivity_mismatch pos1 pos2 =
-  add_list Typing.fun_reactivity_mismatch [
-  pos1, "This function is reactive";
-  pos2, "This function is not.";
-]
+let fun_reactivity_mismatch pos1_is_coroutine pos1 pos2 =
+  let m1 = "This function is reactive." in
+  let m2 = "This function is not." in
+  add_list
+    Typing.fun_reactivity_mismatch
+    [
+      pos1, if pos1_is_coroutine then m1 else m2;
+      pos2, if pos1_is_coroutine then m2 else m1;
+    ]
 
 let discarded_awaitable pos1 pos2 =
   add_list Typing.discarded_awaitable [

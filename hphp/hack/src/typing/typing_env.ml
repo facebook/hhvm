@@ -308,6 +308,24 @@ let env_reactive env =
 let env_local_reactive env =
   env.genv.fun_reactive <> Normal
 
+let lambda_reactive = ref None
+(* Takes in the typechecking function of a lambda
+  block and checks if it breaks reactivity rules *)
+let check_lambda_reactive f =
+  let old_lambda_reactive = !lambda_reactive in
+  lambda_reactive := Some true;
+  Errors.ignore_ f;
+  let result = !lambda_reactive in
+  lambda_reactive := old_lambda_reactive;
+  match result with
+  | Some c -> c
+  | None -> assert false
+
+let not_lambda_reactive () =
+  lambda_reactive := (match !lambda_reactive with
+  | Some _ -> Some false
+  | None -> None)
+
 let add_wclass env x =
   let dep = Dep.Class x in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);

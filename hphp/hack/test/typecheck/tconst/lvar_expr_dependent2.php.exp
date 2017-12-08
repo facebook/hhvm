@@ -26,6 +26,8 @@ File "lvar_expr_dependent2.php", line 49, characters 5-22:
   ^(<expr#5>::T)
   where <expr#5>::T as \C::T
 File "lvar_expr_dependent2.php", line 53, characters 7-24:
+  _
+File "lvar_expr_dependent2.php", line 53, characters 7-24:[2]
   <expr#6>::T
   where <expr#6>::T as \C::T
 File "lvar_expr_dependent2.php", line 57, characters 5-22:

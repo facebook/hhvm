@@ -388,7 +388,7 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
   let p_super = Reason.to_pos r_super in
   (* Reactive functions are a subtype of non reactive ones, but not vice versa *)
   if not ft_sub.ft_reactive && ft_super.ft_reactive then
-    Errors.fun_reactivity_mismatch p_super p_sub;
+    Errors.fun_reactivity_mismatch ft_super.ft_reactive p_super p_sub;
   if ft_sub.ft_is_coroutine <> ft_super.ft_is_coroutine
   then Errors.coroutinness_mismatch ft_super.ft_is_coroutine p_super p_sub;
   if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)
@@ -943,9 +943,11 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       | None ->
           Errors.anonymous_recursive_call (Reason.to_pos r_sub);
           env
-      | Some (is_coroutine, anon) ->
+      | Some (is_reactive, is_coroutine, anon) ->
           let p_super = Reason.to_pos r_super in
           let p_sub = Reason.to_pos r_sub in
+          if not is_reactive && ft.ft_reactive
+          then Errors.fun_reactivity_mismatch ft.ft_reactive p_super p_sub;
           if is_coroutine <> ft.ft_is_coroutine
           then Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub;
           if not (Unify.unify_arities

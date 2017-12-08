@@ -320,9 +320,11 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
       | None ->
         Errors.anonymous_recursive_call (Reason.to_pos r1);
         env, Terr
-      | Some (is_coroutine, anon) ->
+      | Some (is_reactive, is_coroutine, anon) ->
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
+        if is_reactive <> ft.ft_reactive
+        then Errors.fun_reactivity_mismatch is_reactive p1 p2;
         if is_coroutine <> ft.ft_is_coroutine
         then Errors.coroutinness_mismatch is_coroutine p1 p2;
         if not (unify_arities ~ellipsis_is_variadic:true anon_arity ft.ft_arity)

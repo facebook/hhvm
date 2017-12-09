@@ -1460,6 +1460,10 @@ and expr_
       then check_escaping_var env id;
       let ty = Env.get_local env x in
       make_result env (T.Lvar id) ty
+  | Dollar e ->
+    let env, te, _ty = expr env e in
+    (** Can't easily track any typing information for variable variable. *)
+    make_result env (T.Dollar te) (Reason.Rnone, Tany)
   | Lvarvar (i, id) ->
       Typing_hooks.dispatch_lvar_hook id env;
       (** Can't easily track any typing information for variable variable. *)

@@ -214,6 +214,7 @@ and expr_ =
   | Id of sid
   | Lvar of id
   | Lvarvar of int * id
+  | Dollar of expr
   | Dollardollar of id
   | Clone of expr
   | Obj_get of expr * expr * og_null_flavor
@@ -462,6 +463,7 @@ let expr_to_string expr =
   | Id _ -> "Id"
   | Lvar _ -> "Lvar"
   | Lvarvar _ -> "Lvarvar"
+  | Dollar _ -> "Dollar"
   | Lplaceholder _ -> "Lplaceholder"
   | Dollardollar _ -> "Dollardollar"
   | Fun_id _ -> "Fun_id"
@@ -562,6 +564,7 @@ class type ['a] visitor_type = object
   method on_id : 'a -> sid -> 'a
   method on_lvar : 'a -> id -> 'a
   method on_lvarvar : 'a -> int -> id -> 'a
+  method on_dollar : 'a -> expr -> 'a
   method on_dollardollar : 'a -> id -> 'a
   method on_fun_id : 'a -> sid -> 'a
   method on_method_id : 'a -> expr -> pstring -> 'a
@@ -762,6 +765,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Dollardollar id -> this#on_dollardollar acc id
    | Lvar id     -> this#on_lvar acc id
    | Lvarvar (n, id) -> this#on_lvarvar acc n id
+   | Dollar e    -> this#on_dollar acc e
    | Fun_id sid  -> this#on_fun_id acc sid
    | Method_id (expr, pstr) -> this#on_method_id acc expr pstr
    | Method_caller (sid, pstr) -> this#on_method_caller acc sid pstr
@@ -871,6 +875,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
   method on_yield_break acc = acc
   method on_yield acc e = this#on_afield acc e
   method on_await acc e = this#on_expr acc e
+  method on_dollar acc e = this#on_expr acc e
   method on_suspend acc e = this#on_expr acc e
   method on_list acc el = List.fold_left this#on_expr acc el
 

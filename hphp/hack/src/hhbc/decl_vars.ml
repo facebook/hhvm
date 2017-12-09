@@ -73,13 +73,12 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
   inherit [decl_vars_state] Ast_visitor.ast_visitor as super
 
   method! on_global_var acc exprs =
-    List.fold_left exprs ~init:acc
-      ~f:(fun acc (_, e) ->
-        match e with
-        | (Ast.Id id | Ast.Lvarvar(_, id)) -> add_local ~bareparam:false acc id
-        | Ast.BracedExpr e -> this#on_expr acc e
-        | Ast.Dollar e -> this#on_expr acc e
-        | _ -> acc)
+    let rec add_local_from_expr acc e =
+      match snd e with
+      | (Ast.Id id | Ast.Lvar id) -> add_local ~bareparam:false acc id
+      | Ast.Dollar e -> add_local_from_expr acc e
+      | _ -> this#on_expr acc e in
+    List.fold_left exprs ~init:acc ~f:add_local_from_expr
 
   method! on_obj_get acc e prop =
     let acc = match snd e with
@@ -115,8 +114,11 @@ class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
 
   method! on_lvar acc id =
     add_local ~bareparam:false acc id
-  method! on_lvarvar acc _ id =
-    with_dynamic_var (add_local ~bareparam:false acc id)
+  method! on_dollar acc e =
+    match e with
+    | _, Ast.Lvar id -> with_dynamic_var (add_local ~bareparam:false acc id)
+    | _ -> this#on_expr acc e
+
   method! on_class_get acc id prop =
     on_class_get this acc id prop ~is_call_target:false
   method! on_efun acc fn use_list =

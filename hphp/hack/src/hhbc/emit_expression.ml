@@ -227,7 +227,7 @@ let extract_shape_field_name_pstring = function
   | A.SFclass_const ((pn, _) as id, p) -> A.Class_const ((pn, A.Id id), p)
 
 let rec text_of_expr e_ = match e_ with
-  | A.Id id | A.Lvar id | A.Lvarvar (_, id) | A.String id -> id
+  | A.Id id | A.Lvar id | A.String id -> id
   | A.Array_get ((p, A.Lvar (_, id)), Some (_, e_)) ->
     (p, id ^ "[" ^ snd (text_of_expr e_) ^ "]")
   | _ -> Pos.none, "unknown" (* TODO: get text of expression *)
@@ -284,11 +284,20 @@ and get_local env (pos, str) =
     | Some v -> v
   else Local.Named str
 
+and check_non_pipe_local e =
+  match e with
+  | _, A.Lvar (pos, str) when str = SN.SpecialIdents.dollardollar ->
+    Emit_fatal.raise_fatal_parse pos
+      "Cannot take indirect reference to a pipe variable"
+  | _ -> ()
+
+(*
 and get_non_pipe_local (pos, str) =
   if str = SN.SpecialIdents.dollardollar
   then Emit_fatal.raise_fatal_parse pos
     "Cannot take indirect reference to a pipe variable"
   else Local.Named str
+*)
 
 and emit_local ~notice ~need_ref env ((_, str) as id) =
   if SN.Superglobals.is_superglobal str
@@ -650,10 +659,8 @@ and emit_class_expr_parts env cexpr prop =
       instr_string id, true
     | _, A.Lvar (_, id) ->
       instr_string (SU.Locals.strip_dollar id), true
-    | _, A.Lvarvar (1, id) ->
+    | _, A.Dollar (_, A.Lvar id) ->
       emit_expr ~need_ref:false env (Pos.none, A.Lvar id), false
-    | _, A.Lvarvar (n, id) ->
-      emit_expr ~need_ref:false env (Pos.none, A.Lvarvar (n - 1, id)), true
       (* The outer dollar just says "class property" *)
     | _, A.Dollar e | e ->
       emit_expr ~need_ref:false env e, true
@@ -667,12 +674,11 @@ and emit_class_expr env cexpr prop =
   match cexpr with
   | Class_expr ((_, (A.BracedExpr _ |
                      A.Dollar _ |
-                     A.Lvarvar _ |
                      A.Call _ |
                      A.Lvar (_, "$this") |
                      A.Binop _ |
                      A.Class_get _)) as e) ->
-    (* if class is stored as lvarvar or braced expression (computed dynamically)
+    (* if class is stored as dollar or braced expression (computed dynamically)
        it needs to be stored in unnamed local and eventually cleaned.
        Here we don't use stash_in_local because shape of the code generated
        for class case is different (PopC / UnsetL is the part of try block) *)
@@ -878,18 +884,6 @@ and emit_import env flavor e =
     import_instr;
   ]
 
-and emit_lvarvar ~need_ref n id =
-  gather [
-    instr_cgetl (get_non_pipe_local id);
-    if need_ref then
-      gather [
-        instr_cgetn_seq (n - 1);
-        instr_vgetn
-      ]
-    else
-      instr_cgetn_seq n
-  ]
-
 and emit_call_isset_expr env (_, expr_ as expr) =
   match expr_ with
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
@@ -912,11 +906,10 @@ and emit_call_isset_expr env (_, expr_ as expr) =
     ]
   | A.Lvar id ->
     instr (IIsset (IssetL (get_local env id)))
-  | A.Lvarvar (n, id) ->
+  | A.Dollar e ->
     gather [
-      (* Remove one cgetn since issetn takes care of it *)
-      emit_lvarvar ~need_ref:false (n-1) id;
-      instr_issetn;
+      emit_expr ~need_ref:false env e;
+      instr_issetn
     ]
   | _ ->
     gather [
@@ -945,12 +938,10 @@ and emit_call_empty_expr env (_, expr_ as expr) =
     ]
   | A.Lvar id when not (is_local_this env (snd id)) ->
     instr_emptyl (get_local env id)
-  | A.Lvarvar(n, id) ->
-    let local = get_non_pipe_local id in
+  | A.Dollar e ->
     gather [
-      instr_cgetl local;
-      instr_cgetn_seq (n - 1);
-      instr_emptyn;
+      emit_expr ~need_ref:false env e;
+      instr_emptyn
     ]
   | _ ->
     gather [
@@ -1103,17 +1094,6 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
       emit_expr ~need_ref:false env e;
       instr (IGet (if need_ref then VGetG else CGetG))
     ]
-  | A.Array_get((_, A.Lvarvar (n, (_, x))), Some e)
-    when x = SN.Superglobals.globals ->
-    gather [
-      emit_expr ~need_ref:false env e;
-      instr (IGet CGetG);
-      instr_cgetn_seq (n - 1);
-      if need_ref then
-        instr_vgetn
-      else
-        instr_cgetn
-    ]
   | A.Array_get(base_expr, opt_elem_expr) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     emit_array_get ~need_ref env None query_op base_expr opt_elem_expr
@@ -1180,6 +1160,7 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.String2 es -> emit_string2 env es
   | A.BracedExpr e -> emit_expr ~need_ref:false env e
   | A.Dollar e ->
+    check_non_pipe_local e;
     let instr = emit_expr ~need_ref:false env e in
     if need_ref then
       gather [
@@ -1197,7 +1178,6 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Callconv (kind, e) ->
     emit_box_if_necessary need_ref @@ emit_callconv env kind e
   | A.Import (flavor, e) -> emit_import env flavor e
-  | A.Lvarvar (n, id) -> emit_lvarvar ~need_ref n id
   | A.Id_type_arguments (id, _) -> emit_id env id
   | A.Omitted -> empty
   | A.Unsafeexpr _ ->
@@ -1206,6 +1186,8 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     failwith "Codegen for 'suspend' operator is not supported"
   | A.List _ ->
     failwith "List destructor can only be used as an lvar"
+  | A.Lvarvar _ ->
+    failwith "Lvarvar no longer supported"
 
 and emit_static_collection ~transform_to_collection tv =
   let transform_instr =
@@ -1528,10 +1510,10 @@ and emit_quiet_expr env (_, expr_ as expr) =
   match expr_ with
   | A.Lvar ((_, name) as id) when not (is_local_this env name) ->
     instr_cgetquietl (get_local env id)
-  | A.Lvarvar (n, id) ->
+  | A.Dollar e ->
     gather [
-      emit_lvarvar ~need_ref:false (n-1) id;
-      instr_cgetquietn;
+      emit_expr ~need_ref:false env e;
+      instr_cgetquietn
     ]
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
@@ -1870,7 +1852,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
        total_stack_size
      end
 
-   | A.Class_get(cid, (_, A.Lvarvar (1, id))) ->
+   | A.Class_get(cid, (_, A.Dollar (_, A.Lvar id))) ->
      let cexpr = expr_to_class_expr ~resolve_self:false
        (Emit_env.get_scope env) cid in
      (* special case for $x->$$y: use BaseSL *)
@@ -1878,7 +1860,6 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      empty,
      instr_basesl (get_local env id),
      0
-
    | A.Class_get(cid, prop) ->
      let cexpr = expr_to_class_expr ~resolve_self:false
        (Emit_env.get_scope env) cid in
@@ -1887,21 +1868,12 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      cexpr_end,
      instr_basesc base_offset,
      1
-   | A.Lvarvar (1, id) ->
+   | A.Dollar (_, A.Lvar id as e) ->
+     check_non_pipe_local e;
      empty,
      empty,
-     instr_basenl (get_non_pipe_local id) base_mode,
+     instr_basenl (get_local env id) base_mode,
      0
-   | A.Lvarvar (n, id) ->
-     let base_expr_instrs = gather [
-       instr_cgetl (get_non_pipe_local id);
-       instr_cgetn_seq (n - 1)
-     ]
-     in
-     base_expr_instrs,
-     empty,
-     instr_basenc base_offset base_mode,
-     1
    | A.Dollar e ->
      let base_expr_instrs = emit_expr ~need_ref:false env e in
      base_expr_instrs,
@@ -1969,15 +1941,10 @@ and emit_arg env i is_splatted expr =
   | A.BracedExpr e ->
     emit_expr ~need_ref:false env e;
   | A.Dollar e ->
+    check_non_pipe_local e;
     gather [
       emit_expr ~need_ref:false env e;
       instr_fpassn i hint;
-    ]
-  | A.Lvarvar (n, id) ->
-    gather [
-      instr_cgetl (get_non_pipe_local id);
-      instr_cgetn_seq (n - 1);
-      instr_fpassn i hint
     ]
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
@@ -2488,7 +2455,7 @@ and emit_array_get_fixed local indices =
 and can_use_as_rhs_in_list_assignment expr =
   match expr with
   | A.Lvar _
-  | A.Lvarvar _
+  | A.Dollar _
   | A.Array_get _
   | A.Obj_get _
   | A.Class_get _
@@ -2637,8 +2604,9 @@ and emit_lval_op_nonlist env op e rhs_instrs rhs_stack_size =
   ]
 
 and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
-  let handle_lvarvar n id final_op =
-    if n = 1 then
+  let handle_dollar e final_op =
+    match e with
+      _, A.Lvar id ->
       let instruction =
         let local = (get_local env id) in
         match op with
@@ -2651,11 +2619,9 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
         instruction;
         final_op op
       ]
-    else
-      gather [
-        instr_cgetl (get_local env id);
-        instr_cgetn_seq (n - 1);
-      ],
+    | _ ->
+      let instrs = emit_expr ~need_ref:false env e in
+      instrs,
       rhs_instrs,
       final_op op
   in
@@ -2675,8 +2641,8 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
     rhs_instrs,
     emit_final_local_op op (get_local env id)
 
-  | A.Lvarvar (n, id) ->
-    handle_lvarvar n id emit_final_named_local_op
+  | A.Dollar e ->
+    handle_dollar e emit_final_named_local_op
 
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     let final_global_op_instrs = emit_final_global_op op in
@@ -2764,17 +2730,18 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
     let cexpr = expr_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) cid in
     begin match snd prop with
-    | A.Lvarvar (_, id) | A.BracedExpr (_, A.Lvar id) ->
-      let n = match snd prop with A.Lvarvar (n, _) -> n | _ -> 1 in
-      let lhs, rhs, final =
-        handle_lvarvar n id (emit_final_static_op (snd cid) prop)
-      in
-      gather [
-        lhs;
-        emit_load_class_ref env cexpr;
-      ],
-      rhs,
-      final
+    | A.Dollar (_, A.Lvar _ as e) ->
+      let final_instr = emit_final_static_op (snd cid) prop op in
+      let instrs, under_top = emit_first_expr env e in
+      if under_top
+      then
+        emit_load_class_ref env cexpr,
+        rhs_instrs,
+        gather [instrs; final_instr]
+      else
+        gather [instrs; emit_load_class_ref env cexpr],
+        rhs_instrs,
+        final_instr
     | _ ->
       let final_instr = emit_final_static_op (snd cid) prop op in
       emit_class_expr env cexpr prop,
@@ -2789,11 +2756,6 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
       emit_lval_op_nonlist env op e empty rhs_stack_size;
       from_unop uop;
     ]
-
-  | A.Dollar e ->
-    emit_expr ~need_ref:false env e,
-    rhs_instrs,
-    emit_final_named_local_op op
 
   | _ ->
     Emit_fatal.raise_fatal_parse pos "Can't use return value in write context"

@@ -330,27 +330,23 @@ and emit_global_vars env p es =
           instr_bindl @@ Local.Named name;
           instr_popv;
         ]
-    | A.Lvarvar (n, (_, id)) ->
-      let load_name =
-        if SN.Superglobals.is_superglobal id then
-          gather [
-            instr_string (SU.Locals.strip_dollar id);
-            instr_cgetg;
-          ]
-        else
-          instr_cgetl (Local.Named id)
-      in
-      gather [
-        load_name;
-        gather @@ List.replicate (n - 1) instr_cgetn;
-        instr_dup;
-        instr_vgetg;
-        instr_bindn;
-        instr_popv;
-      ]
     | A.Dollar e ->
+      let rec emit_inner e =
+        match snd e with
+        | A.Lvar (_, id) ->
+          if SN.Superglobals.is_superglobal id then
+            gather [
+              instr_string (SU.Locals.strip_dollar id);
+              instr_cgetg;
+            ]
+          else
+            instr_cgetl (Local.Named id)
+        | A.Dollar e ->
+          gather [emit_inner e; instr_cgetn]
+        | _ ->
+          emit_expr ~need_ref:false env e in
       gather [
-        emit_expr ~need_ref:false env e;
+        emit_inner e;
         instr_dup;
         instr_vgetg;
         instr_bindn;
@@ -757,10 +753,6 @@ and is_mutable_iterator iterator =
   | A.As_v (_, A.Unop(A.Uref, _)) -> true
   | _ -> false
 
-and load_lvarvar n id =
-  instr_cgetl (Local.Named id) ::
-  List.replicate (n - 1) instr_cgetn
-
 and get_id_of_simple_lvar_opt ~is_key v =
   match v with
   | A.Lvar (pos, str) when str = SN.SpecialIdents.this ->
@@ -793,26 +785,17 @@ and emit_load_list_element env path i v =
     ]
     in
     [], [load_value]
-  | _, A.Lvarvar (n, (_, id)) ->
+  | _, A.Dollar (_, A.Lvar (_, id)) ->
     let local = Local.Named id in
-    let preamble =
-      if n = 1 then []
-      else load_lvarvar n id
-    in
-    let load_value =
-      if n = 1 then [
-        query_value;
-        instr_cgetl2 local;
-        instr_setn;
-        instr_popc
-      ]
-      else [
-        query_value;
-        instr_setn;
-        instr_popc
-      ]
-    in
-    [gather preamble], [gather load_value]
+    [empty], [gather [
+      query_value;
+      instr_cgetl2 local;
+      instr_setn;
+      instr_popc
+    ]]
+  | _, A.Dollar e ->
+    [emit_expr ~need_ref:false env e],
+    [gather [query_value; instr_setn; instr_popc]]
   | _, A.List exprs ->
     let dim_instr =
       instr_dim MemberOpMode.Warn (MemberKey.EI (Int64.of_int i))

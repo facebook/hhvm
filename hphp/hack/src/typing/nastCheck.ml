@@ -192,6 +192,8 @@ module CheckFunctionBody = struct
     | _, Lvarvar _
     | _, Lplaceholder _
     | _, Dollardollar _ -> ()
+    | _, Dollar e ->
+        expr f_type env e
     | _, Pipe (_, l, r) ->
         expr f_type env l;
         expr f_type env r;
@@ -678,7 +680,7 @@ and check_class_property_initialization prop =
         rec_assert_static_literal expr1;
         rec_assert_static_literal expr2;
       | This | Lvar _ | Lvarvar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
-      | Method_id _
+      | Method_id _ | Dollar _
       | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
       | Call _ | Special_func _ | Yield_break | Yield _ | Suspend _
       | Await _ | InstanceOf _ | Is _ | New _ | Efun _ | Xml _ | Callconv _
@@ -986,6 +988,8 @@ and expr_ env p = function
   | Lvar _
   | Lvarvar _
   | Lplaceholder _ | Dollardollar _ -> ()
+  | Dollar e ->
+    expr env e
   | Pipe (_, e1, e2) ->
       expr env e1;
       expr env e2

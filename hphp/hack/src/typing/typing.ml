@@ -1464,10 +1464,6 @@ and expr_
     let env, te, _ty = expr env e in
     (** Can't easily track any typing information for variable variable. *)
     make_result env (T.Dollar te) (Reason.Rnone, Tany)
-  | Lvarvar (i, id) ->
-      Typing_hooks.dispatch_lvar_hook id env;
-      (** Can't easily track any typing information for variable variable. *)
-      make_result env (T.Lvarvar (i, id)) (Reason.Rnone, Tany)
   | List el ->
       let env, expected = expand_expected env expected in
       let env, tel, tyl =

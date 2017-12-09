@@ -1129,12 +1129,6 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
     in
     let efalse = string_of_param_default_value efalse in
     cond ^ " \\? " ^ etrue ^ " : " ^ efalse
-  | A.Lvarvar (n, (_, s)) ->
-    let prefix =
-      String.init (2 * n) (fun x -> if x mod 2 = 0 then '$' else '{')
-    in
-    let suffix = String.make n '}' in
-    prefix ^ s ^ suffix
   | A.Unsafeexpr e -> string_of_param_default_value e
   | A.BracedExpr e -> "{" ^ string_of_param_default_value e ^ "}"
   | A.Dollar e -> "$" ^ string_of_param_default_value e

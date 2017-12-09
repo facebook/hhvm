@@ -982,8 +982,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           Call ((pos, Id (pos, "echo")), [], [expr], [])
         | Some TK.Dollar                  ->
           (match snd expr with
-          (* | Lvarvar (n, id) -> Lvarvar (n + 1, id)
-          | Lvar id         -> Lvarvar (1, id) *)
           | String (p, s) -> Lvar (p, "$" ^ s)
           | _ -> Dollar expr
           )

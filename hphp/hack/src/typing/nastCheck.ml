@@ -189,7 +189,6 @@ module CheckFunctionBody = struct
     | _, Class_const _
     | _, Typename _
     | _, Lvar _
-    | _, Lvarvar _
     | _, Lplaceholder _
     | _, Dollardollar _ -> ()
     | _, Dollar e ->
@@ -679,7 +678,7 @@ and check_class_property_initialization prop =
       | NullCoalesce (expr1, expr2) ->
         rec_assert_static_literal expr1;
         rec_assert_static_literal expr2;
-      | This | Lvar _ | Lvarvar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
+      | This | Lvar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
       | Method_id _ | Dollar _
       | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
       | Call _ | Special_func _ | Yield_break | Yield _ | Suspend _
@@ -986,7 +985,6 @@ and expr_ env p = function
   | Class_const _
   | Typename _
   | Lvar _
-  | Lvarvar _
   | Lplaceholder _ | Dollardollar _ -> ()
   | Dollar e ->
     expr env e

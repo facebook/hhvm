@@ -281,7 +281,6 @@ and expr_ env acc p e =
   | Typename _
   | Id _ -> acc
   | Lvar _
-  | Lvarvar _
   | Lplaceholder _ | Dollardollar _ -> acc
   | Obj_get ((_, This), (_, Id (_, vx as v)), _) ->
       if SSet.mem vx env.props && not (SSet.mem vx acc)

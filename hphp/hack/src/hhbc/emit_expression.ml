@@ -1186,8 +1186,6 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     failwith "Codegen for 'suspend' operator is not supported"
   | A.List _ ->
     failwith "List destructor can only be used as an lvar"
-  | A.Lvarvar _ ->
-    failwith "Lvarvar no longer supported"
 
 and emit_static_collection ~transform_to_collection tv =
   let transform_instr =

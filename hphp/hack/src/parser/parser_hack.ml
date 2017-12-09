@@ -254,7 +254,7 @@ let rec check_lvalue env = function
       error_at env pos "->: syntax is not supported for lvalues"
   | pos, Array_get ((_, Class_const _), _) ->
       error_at env pos "Array-like class consts are not valid lvalues"
-  | _, (Lvar _ | Lvarvar _ | Obj_get _ | Array_get _ | Class_get _ |
+  | _, (Lvar _ | Obj_get _ | Array_get _ | Class_get _ |
     Unsafeexpr _ | Omitted | BracedExpr _ | Dollar _) -> ()
   | pos, Call ((_, Id (_, "tuple")), _, _, _) ->
       error_at env pos
@@ -3205,16 +3205,18 @@ and expr_atomic ~allow_class ~class_const env =
       let dollars, var_id = strip_variablevariable 0 tok_value in
       pos, if peek env = Tlambda
         then lambda_single_arg ~sync:FDeclSync env (pos, var_id)
-        else if dollars < 1 then
-          Lvar (pos, var_id)
-        else if env.mode = FileInfo.Mdecl then
-          Lvarvar (dollars, (pos, var_id))
-        else begin
-          error_at env pos ("A valid variable name starts with a " ^
-          "letter or underscore, followed by any number of letters, " ^
-          "numbers, or underscores");
-          Lvarvar (dollars, (pos, var_id))
-        end
+        else
+          let rec make n =
+            if n = 0 then Lvar (pos, var_id) else Dollar (pos, make (n-1)) in
+          let e = make dollars in
+          if dollars < 1 || env.mode = FileInfo.Mdecl then
+            e
+          else begin
+            error_at env pos ("A valid variable name starts with a " ^
+            "letter or underscore, followed by any number of letters, " ^
+            "numbers, or underscores");
+            e
+          end
   | Tcolon ->
       L.back env.lb;
       let name = identifier env in

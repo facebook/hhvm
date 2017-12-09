@@ -355,17 +355,10 @@ and expr_ =
   | Id_type_arguments of id * hint list
   (* Special case: the pipe variable $$ *)
   | Lvar of id
-  (**
-   * PHP's Variable variable. The int is number of variable indirections
-   * (i.e. number of extra $ signs.)
-   *
-   * Example:
-     * $$$sample has int = 2.
-   * *)
-  | Lvarvar of int * id
   (* General dollar expression e.g. ${"a" . $y}. Braced expression
    * is a separate node, so we can distinguish $f->${x} from $f->{x}
-   * and $f->$x, each of which has different semantics
+   * and $f->$x, each of which has different semantics. $$x is represented
+   * by Dollar (Lvar "$x")
    *)
   | Dollar of expr
   | Clone of expr

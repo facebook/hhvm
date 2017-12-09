@@ -52,7 +52,6 @@ struct
     | S.Any -> T.Any
     | S.Id id -> T.Id id
     | S.Lvar id -> T.Lvar id
-    | S.Lvarvar (x,y) -> T.Lvarvar (x,y)
     | S.Lplaceholder x -> T.Lplaceholder x
     | S.Fun_id x -> T.Fun_id x
     | S.True -> T.True

@@ -1028,14 +1028,14 @@ and check_escaping_var env (pos, x) =
     else Errors.escaping_disposable pos
   else ()
 
-and exprs ?allow_uref ?expected env el =
+and exprs ?(accept_using_var = false) ?allow_uref ?expected env el =
   match el with
   | [] ->
     env, [], []
 
   | e::el ->
-    let env, te, ty = expr ?allow_uref ?expected env e in
-    let env, tel, tyl = exprs ?allow_uref ?expected env el in
+    let env, te, ty = expr ~accept_using_var ?allow_uref ?expected env e in
+    let env, tel, tyl = exprs ~accept_using_var ?allow_uref ?expected env el in
     env, te::tel, ty::tyl
 
 and exprs_expected (pos, ur, expected_tyl) env el =
@@ -1511,7 +1511,7 @@ and expr_
       make_result env (T.Array_get(te1, Some te2)) ty
   | Call (Cnormal, (pos_id, Id ((_, s) as id)), hl, el, [])
       when is_pseudo_function s ->
-      let env, tel, tys = exprs env el in
+      let env, tel, tys = exprs ~accept_using_var:true env el in
       if s = SN.PseudoFunctions.hh_show
       then List.iter tys (Typing_log.hh_show p env)
       else
@@ -1680,7 +1680,7 @@ and expr_
         let env, local = Env.FakeMembers.make p env e y in
         let local = p, Lvar (p, local) in
         let env, _, ty = expr env local in
-        let env, t_lhs, _ = expr env e in
+        let env, t_lhs, _ = expr ~accept_using_var:true env e in
         let t_rhs = T.make_typed_expr pid ty (T.Id (py, y)) in
         make_result env (T.Obj_get (t_lhs, t_rhs, nf)) ty
     (* Statically-known instance property access e.g. $x->f *)
@@ -1706,7 +1706,7 @@ and expr_
         T.make_implicitly_typed_expr pm (T.Id m), nullflavor)) result
     (* Dynamic instance property access e.g. $x->$f *)
   | Obj_get (e1, e2, nullflavor) ->
-    let env, te1, _ = expr env e1 in
+    let env, te1, _ = expr ~accept_using_var:true env e1 in
     let env, te2, _ = expr env e2 in
     let ty = (Reason.Rwitness p, Tany) in
     make_result env (T.Obj_get(te1, te2, nullflavor)) ty
@@ -2886,12 +2886,12 @@ and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_
   (* Special function `echo` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.SpecialFunctions.echo ->
       check_function_in_suspend SN.SpecialFunctions.echo;
-      let env, tel, _ = exprs env el in
+      let env, tel, _ = exprs ~accept_using_var:true env el in
       make_call_special env id tel (Reason.Rwitness p, Tprim Tvoid)
   (* Special function `empty` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.empty ->
     check_function_in_suspend SN.PseudoFunctions.empty;
-    let env, tel, _ = exprs env el in
+    let env, tel, _ = exprs ~accept_using_var:true env el in
     if uel <> [] then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
     if Env.is_strict env then
@@ -2900,7 +2900,7 @@ and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_
   (* Special function `isset` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.isset ->
     check_function_in_suspend SN.PseudoFunctions.isset;
-    let env, tel, _ = exprs env el in
+    let env, tel, _ = exprs ~accept_using_var:true env el in
     if uel <> [] then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
     if Env.is_strict env then
@@ -5707,10 +5707,13 @@ and method_def env m =
   let this_type = Env.get_self env in
   let env = Env.set_local env this this_type in
   let env =
-    (* Mark $this as a using variable if it has a disposable type *)
-    if Option.is_some (is_disposable_type env this_type)
-    then Env.set_using_var env this
-    else env in
+    match Env.get_class env (Env.get_self_id env) with
+    | None -> env
+    | Some c ->
+      (* Mark $this as a using variable if it has a disposable type *)
+      if c.tc_is_disposable
+      then Env.set_using_var env this
+      else env in
   let env = Env.clear_params env in
   let env, return = match m.m_ret with
     | None -> env, (make_default_return m.m_name, false)

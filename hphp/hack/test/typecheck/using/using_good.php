@@ -10,7 +10,23 @@ class AsyncHandle implements IAsyncDisposable {
   public async function __disposeAsync():Awaitable<void> { }
   public function bar():void { }
 }
-
+function expect_string(string $s):void { }
+class Another implements IDisposable {
+  public function __construct(private ?string $str) {
+    $s = $this->str;
+    $this_str = $s;
+    printf("I got a string: %s\n", $this->str);
+  }
+  public function copyStr(<<__AcceptDisposable>> Another $x):void {
+    $this->str = $x->str;
+    if ($this->str !== null) {
+      // fake member
+      expect_string($this->str);
+    }
+    echo($x);
+  }
+  public function __dispose(): void { }
+}
 function escape(<<__AcceptDisposable>> Handle $h):void {
   var_dump($h);
 }

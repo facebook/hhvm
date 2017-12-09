@@ -631,6 +631,7 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
   assert((tailBytes & kSmallSizeAlignMask) == 0);
   assert((splitUsable & kSmallSizeAlignMask) == 0);
   assert(nSplit * splitUsable <= tailBytes);
+  auto head = freelists[index].head;
   for (uint32_t i = nSplit; i--;) {
     auto split = FreeNode::InitFrom((char*)tail + i * splitUsable,
                                     splitUsable, HeaderKind::Hole);
@@ -638,8 +639,9 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
               "split={}, splitUsable={}\n", tail,
               (void*)uintptr_t(tailBytes), (void*)(uintptr_t(tail) + tailBytes),
               split, splitUsable);
-    freelists[index].push(split);
+    head = FreeNode::UninitFrom(split, head);
   }
+  freelists[index].head = head;
   void* rem = (void*)(uintptr_t(tail) + nSplit * splitUsable);
   assert(tailBytes >= nSplit * splitUsable);
   auto remBytes = tailBytes - nSplit * splitUsable;

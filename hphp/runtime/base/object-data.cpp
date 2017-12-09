@@ -334,7 +334,7 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
 
   auto const prop = getProp(ctx, propName.get());
   if (prop && prop.type() != KindOfUninit) {
-    return Variant::wrap(prop.tv());
+    return Variant::wrap(tvToCell(prop.tv()));
   }
 
   if (getAttribute(UseGet)) {

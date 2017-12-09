@@ -659,8 +659,8 @@ and emit_class_expr_parts env cexpr prop =
       instr_string id, true
     | _, A.Lvar (_, id) ->
       instr_string (SU.Locals.strip_dollar id), true
-    | _, A.Dollar (_, A.Lvar id) ->
-      emit_expr ~need_ref:false env (Pos.none, A.Lvar id), false
+    | _, A.Dollar (_, A.Lvar _ as e) ->
+      emit_expr ~need_ref:false env e, false
       (* The outer dollar just says "class property" *)
     | _, A.Dollar e | e ->
       emit_expr ~need_ref:false env e, true
@@ -1586,7 +1586,8 @@ and emit_obj_get ~need_ref env param_num_hint_opt qop expr prop null_flavor =
     | _ ->
       let param_num_opt = Option.map ~f:(fun (n, _h) -> n) param_num_hint_opt in
       let mode = get_queryMOpMode need_ref qop in
-      let prop_expr_instrs, prop_stack_size = emit_prop_instrs env prop in
+      let mk, prop_expr_instrs, prop_stack_size =
+        emit_prop_expr env null_flavor 0 prop in
       let base_expr_instrs_begin,
           base_expr_instrs_end,
           base_setup_instrs,
@@ -1595,7 +1596,6 @@ and emit_obj_get ~need_ref env param_num_hint_opt qop expr prop null_flavor =
           ~is_object:true ~notice:Notice
           env mode prop_stack_size param_num_opt expr
       in
-      let mk = get_prop_member_key env null_flavor 0 prop in
       let total_stack_size = prop_stack_size + base_stack_size in
       let final_instr =
         instr (IFinal (
@@ -1632,13 +1632,6 @@ and emit_elem_instrs env opt_elem_expr =
     when is_special_class_constant_accessed_with_class_id env cid id -> empty, 0
   | Some expr -> emit_expr ~need_ref:false env expr, 1
   | None -> empty, 0
-
-and emit_prop_instrs env (_, expr_ as expr) =
-  match expr_ with
-  (* These all have special inline versions of member keys *)
-  | A.Lvar (_, id) when not (is_local_this env id) -> empty, 0
-  | A.String _ | A.Id _ -> empty, 0
-  | _ -> emit_expr ~need_ref:false env expr, 1
 
 (* Get the member key for an array element expression: the `elem` in
  * expressions of the form `base[elem]`.
@@ -1679,23 +1672,41 @@ and get_elem_member_key env stack_index opt_expr =
   (* ELement missing (so it's array append) *)
   | None -> MemberKey.W
 
-(* Get the member key for a property *)
-and get_prop_member_key env null_flavor stack_index prop_expr =
-  match snd prop_expr with
-  | A.Id ((_, name) as id) when String_utils.string_starts_with name "$" ->
-    MemberKey.PL (get_local env id)
-  (* Special case for known property name *)
-  | A.Id (_, id)
-  | A.String (_, id) ->
-    let pid = Hhbc_id.Prop.from_ast_name id in
-    begin match null_flavor with
-    | Ast.OG_nullthrows -> MemberKey.PT pid
-    | Ast.OG_nullsafe -> MemberKey.QT pid
-    end
-  | A.Lvar ((_, name) as id) when not (is_local_this env name) ->
-    MemberKey.PL (get_local env id)
-  (* General case *)
-  | _ -> MemberKey.PC stack_index
+(* Get the member key for a property, and return any instructions and
+ * the size of the stack in the case that the property cannot be
+ * placed inline in the instruction. *)
+and emit_prop_expr env null_flavor stack_index prop_expr =
+  let mk =
+    match snd prop_expr with
+    | A.Id ((_, name) as id) when String_utils.string_starts_with name "$" ->
+      MemberKey.PL (get_local env id)
+    (* Special case for known property name *)
+    | A.Id (_, id)
+    | A.String (_, id) ->
+      let pid = Hhbc_id.Prop.from_ast_name id in
+      begin match null_flavor with
+      | Ast.OG_nullthrows -> MemberKey.PT pid
+      | Ast.OG_nullsafe -> MemberKey.QT pid
+      end
+    | A.Lvar ((_, name) as id) when not (is_local_this env name) ->
+      MemberKey.PL (get_local env id)
+    (* General case *)
+    | _ ->
+      MemberKey.PC stack_index
+  in
+  (* For nullsafe access, insist that property is known *)
+  begin match mk with
+  | MemberKey.PL _ | MemberKey.PC _ ->
+    if null_flavor = A.OG_nullsafe then
+      Emit_fatal.raise_fatal_parse (fst prop_expr)
+        "?-> can only be used with scalar property names"
+  | _ -> ()
+  end;
+  match mk with
+  | MemberKey.PC _ ->
+    mk, emit_expr ~need_ref:false env prop_expr, 1
+  | _ ->
+    mk, empty, 0
 
 (* Emit code for a base expression `expr` that forms part of
  * an element access `expr[elem]` or field access `expr->fld`.
@@ -1822,7 +1833,8 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
        gather [ instr_baser base_offset ],
        1
      | _ ->
-       let prop_expr_instrs, prop_stack_size = emit_prop_instrs env prop_expr in
+       let mk, prop_expr_instrs, prop_stack_size =
+         emit_prop_expr env null_flavor base_offset prop_expr in
        let base_expr_instrs_begin,
            base_expr_instrs_end,
            base_setup_instrs,
@@ -1830,7 +1842,6 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
          emit_base ~notice:Notice ~is_object:true
            env mode (base_offset + prop_stack_size) param_num_opt base_expr
        in
-       let mk = get_prop_member_key env null_flavor base_offset prop_expr in
        let total_stack_size = prop_stack_size + base_stack_size in
        let final_instr =
          instr (IBase (
@@ -2700,7 +2711,8 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
       match op with
       | LValOp.Unset -> MemberOpMode.Unset
       | _ -> MemberOpMode.Define in
-    let prop_expr_instrs, prop_stack_size = emit_prop_instrs env e2 in
+    let mk, prop_expr_instrs, prop_stack_size =
+      emit_prop_expr env null_flavor rhs_stack_size e2 in
     let base_offset = prop_stack_size + rhs_stack_size in
     let base_expr_instrs_begin,
         base_expr_instrs_end,
@@ -2710,7 +2722,6 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
         ~notice:Notice ~is_object:true
         env mode base_offset None e1
     in
-    let mk = get_prop_member_key env null_flavor rhs_stack_size e2 in
     let total_stack_size = prop_stack_size + base_stack_size in
     let final_instr = emit_final_member_op total_stack_size op mk in
     gather [

@@ -1,5 +1,4 @@
 slow/anon_class/anon_1.php
-slow/ext_oauth/rsa.php
 slow/anon_class/extend_local.php
 slow/class_type_constant/type_constant.php
 slow/class_type_constant/type_constant6.php
@@ -10,8 +9,6 @@ slow/inline-hhas/mixed.php
 slow/inout/bad-call-15.php
 slow/inout/side-effects.php
 slow/now_doc/1906.php
-slow/object/672.php
-slow/object_property_expression/798.php
 slow/parser/async.php
 slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-3.php

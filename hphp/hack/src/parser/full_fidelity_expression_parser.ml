@@ -886,6 +886,8 @@ module WithStatementAndDeclAndTypeParser
         parse_braced_expression parser
       | Variable when Env.php5_compat_mode (env parser) ->
         parse_variable_in_php5_compat_mode parser
+      | Dollar ->
+        parse_dollar_expression parser
       | _ ->
         require_xhp_class_name_or_name_or_variable parser in
     let result = if (Token.kind token) = MinusGreaterThan then
@@ -906,8 +908,8 @@ module WithStatementAndDeclAndTypeParser
        X::$a[b]() -> (X::$a)[b]()
 
        In order to preserve backward compatibility we can parse
-       variable/subscript expressions and wrap them in
-       synthetic braced expressions to enfore PHP5 semantics
+       variable/subscript expressions and treat them as if
+       braced expressions to enfore PHP5 semantics
        $$a[1][2] -> ${$a[1][2]}
        $a->$b[c] -> $a->{$b[c]}
        X::$a[b]() -> X::{$a[b]}()
@@ -916,8 +918,7 @@ module WithStatementAndDeclAndTypeParser
       let precedence = Operator.precedence Operator.IndexingOperator in
       parse_expression (with_precedence parser precedence) in
     let parser1 = with_precedence parser1 parser.precedence in
-    let brace = make_missing parser in
-    parser1, make_braced_expression brace e brace
+    parser1, e
 
   and parse_subscript parser term =
     (* SPEC

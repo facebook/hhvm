@@ -147,6 +147,8 @@ let rec expr_to_typed_value
     class_const_to_typed_value ns cid id
   | A.Call ((_, A.Id (_, "tuple")), _, es, _) when Emit_env.is_hh_syntax_enabled() ->
     varray_to_typed_value ns es
+  | A.BracedExpr e ->
+    expr_to_typed_value ~allow_maps ~restrict_keys ns e
   | A.Id _ | A.Class_get _ -> raise UserDefinedConstant
   | _ ->
     raise NotLiteral

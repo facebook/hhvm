@@ -1335,10 +1335,18 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | ParenthesizedExpression { parenthesized_expression_expression = expr; _ }
       -> (**
           * Peeling off braced or parenthesised expresions. When there is XHP
-          * inside, we want the XHP node to have tis own positions, rather than
+          * inside, we want the XHP node to have this own positions, rather than
           * those of enclosing parenthesised/braced expressions.
           *)
-         pExpr ~location expr env
+         let inner = pExpr ~location expr env in
+         if Syntax.is_braced_expression node
+         then
+           (* We elide the braces in {$x}, as it makes compilation easier *)
+           begin match inner with
+           | _, (Lvar _ | String _) -> inner
+           | p, _ -> p, BracedExpr inner
+           end
+         else inner
     | _ ->
       (**
        * Since we need positions in XHP, regardless of the ignore_pos flag, we

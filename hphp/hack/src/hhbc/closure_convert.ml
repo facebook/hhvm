@@ -480,7 +480,7 @@ let rec convert_expr env st (p, expr_ as expr) =
     st, (p, Clone e)
   | Obj_get (e1, e2, flavor) ->
     let st, e1 = convert_expr env st e1 in
-    let st, e2 = convert_expr env st e2 in
+    let st, e2 = convert_prop_expr env st e2 in
     st, (p, Obj_get (e1, e2, flavor))
   | Array_get(e1, opt_e2) ->
     let st, e1 = convert_expr env st e1 in
@@ -580,7 +580,11 @@ let rec convert_expr env st (p, expr_ as expr) =
     convert_expr env st e
   | BracedExpr e ->
     let st, e = convert_expr env st e in
-    st, (p, BracedExpr e)
+    (* For strings and lvars we should elide the braces *)
+    begin match e with
+    | _, Lvar _ | _, String _ -> st, e
+    | _ -> st, (p, BracedExpr e)
+    end
   | Dollar e ->
     let st, e = convert_expr env st e in
     st, (p, Dollar e)
@@ -601,6 +605,13 @@ let rec convert_expr env st (p, expr_ as expr) =
     st, (p, Class_const (e, n))
   | _ ->
     st, expr
+
+and convert_prop_expr env st (_, expr_ as expr) =
+  match expr_ with
+  | Id (_, id) when not (String_utils.string_starts_with id "$") ->
+    st, expr
+  | _ ->
+    convert_expr env st expr
 
 (* Closure-convert a lambda expression, with use_vars_opt = Some vars
  * if there is an explicit `use` clause.

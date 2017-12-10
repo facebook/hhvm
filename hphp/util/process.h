@@ -46,6 +46,34 @@ struct MemInfo {
   }
 };
 
+/*
+ * Infomation from /proc/self/status, along with other HHVM-specific memory
+ * usage data.
+ *
+ * Kernel documentation: http://man7.org/linux/man-pages/man5/proc.5.html
+ */
+struct MemStatus {
+  int64_t VmSize{-1};                   // virtual memory size
+  int64_t VmRSS{-1};                    // RSS, not including hugetlb pages
+  int64_t VmHWM{-1};                    // peak RSS
+  int64_t HugetlbPages{0};              // Hugetlb mappings (2M + 1G)
+
+  // 'Real' memory usage that includes VMRSS and HugetlbPages, but excludes
+  // unused space held by jemalloc.  This is mostly used to track regressions.
+  int64_t adjustedRSS{-1};
+
+  // Constructor reads /proc/self/status and fill in the fields.
+  MemStatus();
+  // Subtrace memory that is mapped in but unused.
+  void registerUnused(int64_t unused) {
+    auto const r = adjustedRSS - unused;
+    if (r >= 0) adjustedRSS = r;
+  }
+  bool valid() const {
+    return VmSize > 0 && VmRSS > 0 && VmHWM > 0 && HugetlbPages >= 0;
+  }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Process {

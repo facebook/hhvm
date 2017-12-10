@@ -345,5 +345,42 @@ void Process::SetCoreDumpHugePages() {
 #endif
 }
 
+MemStatus::MemStatus() {
+#ifdef __linux__
+  if (FILE* f = fopen("/proc/self/status", "r")) {
+    auto const readSize = [](const char* line) -> int64_t {
+      // We expect the line to have the following format
+      // fieldName: <number> kB
+      int64_t resultKb = 0;
+      char b = 0;                       // should be 'B'
+      // Skip the field name, put <number> in `resultKb`, and the character
+      // following 'k' to `b`.
+      sscanf(line, "%*s %" SCNd64 " k%c", &resultKb, &b);
+      if (b != 'B') {
+        // Something is wrong, maybe the kernel changed the line format?
+        return -1;
+      }
+      return resultKb;
+    };
+    char line[128];
+    while (fgets(line, sizeof(line), f)) {
+      if (!strncmp(line, "VmSize:", 7)) {
+        VmSize = readSize(line);
+      } else if (!strncmp(line, "VmRSS:", 6)) {
+        VmRSS = readSize(line);
+      } else if (!strncmp(line, "VmHWM:", 6)) {
+        VmHWM = readSize(line);
+      } else if (!strncmp(line, "HugetlbPages:", 13)) {
+        HugetlbPages = readSize(line);
+      }
+    }
+    fclose(f);
+    if (!valid()) return;
+    adjustedRSS = VmRSS + HugetlbPages;
+    VmHWM += HugetlbPages;
+  }
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

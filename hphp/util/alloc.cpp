@@ -36,7 +36,6 @@
 
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/kernel-version.h"
-#include "hphp/util/logger.h"
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/numa.h"
 
@@ -306,12 +305,8 @@ static void set_lg_dirty_mult(unsigned arena, ssize_t lg_dirty_mult) {
   size_t mib[max_miblen];
   if (mallctlnametomib("arena.0.lg_dirty_mult", mib, &miblen) == 0) {
     mib[1] = arena;
-    int err = mallctlbymib(mib, miblen, nullptr, nullptr, &lg_dirty_mult,
-                           sizeof(lg_dirty_mult));
-    if (err != 0) {
-      Logger::Warning("mallctl arena.%u.lg_dirty_mult failed with error %d",
-                      arena, err);
-    }
+    mallctlbymib(mib, miblen, nullptr, nullptr, &lg_dirty_mult,
+                 sizeof(lg_dirty_mult));
   }
 }
 
@@ -757,56 +752,6 @@ void thread_huge_tcache_destroy() {
 }
 
 #endif
-
-MemStatus::MemStatus() {
-#ifdef __linux__
-  if (FILE* f = fopen("/proc/self/status", "r")) {
-    auto const readSize = [](const char* line) -> int64_t {
-      // We expect the line to have the following format
-      // fieldName: <number> kB
-      int64_t resultKb = 0;
-      char b = 0;                       // should be 'B'
-      // Skip the field name, put <number> in `resultKb`, and the character
-      // following 'k' to `b`.
-      sscanf(line, "%*s %" SCNd64 " k%c", &resultKb, &b);
-      if (b != 'B') {
-        // Something is wrong, maybe the kernel changed the line format?
-        return -1;
-      }
-      return resultKb;
-    };
-    char line[128];
-    while (fgets(line, sizeof(line), f)) {
-      if (!strncmp(line, "VmSize:", 7)) {
-        VmSize = readSize(line);
-      } else if (!strncmp(line, "VmRSS:", 6)) {
-        VmRSS = readSize(line);
-      } else if (!strncmp(line, "VmHWM:", 6)) {
-        VmHWM = readSize(line);
-      } else if (!strncmp(line, "HugetlbPages:", 13)) {
-        HugetlbPages = readSize(line);
-      }
-    }
-    fclose(f);
-    if (!valid()) return;
-    adjustedRSS = VmRSS + HugetlbPages;
-    VmHWM += (num_1g_pages()) << 20;    // convert to gB to kB
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
-    // Subtract unused space in huge1g arenas.
-    if (low_huge1g_arena) {
-      auto const unused =
-        ManagedArena::GetArenaById(low_huge1g_arena)->unusedSize();
-      adjustedRSS -= (unused >> 10);    // convert to kB
-    }
-    if (high_huge1g_arena) {
-      auto const unused =
-        ManagedArena::GetArenaById(low_huge1g_arena)->unusedSize();
-      adjustedRSS -= (unused >> 10);    // convert to kB
-    }
-#endif
-  }
-#endif
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

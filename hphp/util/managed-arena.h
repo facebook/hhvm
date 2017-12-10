@@ -52,13 +52,6 @@ struct ManagedArena {
   // Number of bytes actively used in the arena, excluding retained
   size_t activeSize() const;
 
-  // Number of bytes in the mapped 1G pages but not actively used.  This helps
-  // to adjust the hugetlb mapping sizes to get the "real" usage by the
-  // application.
-  size_t unusedSize() const {
-    return m_currCapacity - activeSize();
-  }
-
   inline static ManagedArena* GetArenaById(unsigned id) {
     assertx(id < sizeof(s_arenas) / sizeof(s_arenas[0]));
     return s_arenas[id];
@@ -66,6 +59,9 @@ struct ManagedArena {
 
   // Report usage.
   static std::string reportStats();
+
+  // Total unused size that is mapped.
+  static size_t totalUnusedSize();
 
   // jemalloc 5 allocation hooks.
   static void* extent_alloc(extent_hooks_t* extent_hooks, void *new_addr,

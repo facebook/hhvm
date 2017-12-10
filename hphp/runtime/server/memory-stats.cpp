@@ -18,6 +18,8 @@
 
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/util/managed-arena.h"
+#include "hphp/util/process.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -50,7 +52,11 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
     w->writeFileFooter();
     return;
   }
-
+  // Subtract unused size in hugetlb arenas
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
+  auto const unused = ManagedArena::totalUnusedSize();
+  procStatus.registerUnused(unused >> 10); // convert to kB
+#endif
   w->beginObject("Memory");
 
   w->writeEntry("VmSize", procStatus.VmSize);

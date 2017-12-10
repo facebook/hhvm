@@ -256,5 +256,31 @@ std::string ManagedArena::reportStats() {
   return result;
 }
 
+size_t ManagedArena::totalUnusedSize() {
+  uint64_t epoch = 1;
+  mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
+  size_t totalActive = 0;
+  size_t totalCap = 0;
+  for (unsigned i = 1; i < MAX_HUGE_ARENA_COUNT; ++i) {
+    if (auto arena = s_arenas[i]) {
+      size_t pactive = 0;
+      size_t sz = sizeof(pactive);
+      char buffer[32];
+      std::snprintf(buffer, sizeof(buffer),
+                    "stats.arenas.%u.pactive", i);
+      totalCap += arena->m_currCapacity;
+      if (mallctl(buffer, &pactive, &sz, nullptr, 0) != 0) {
+        totalActive += arena->size();
+      } else {
+        totalActive += pactive * s_pageSize;
+      }
+    }
+  }
+  if (totalActive <= totalCap) {
+    return totalCap - totalActive;
+  }
+  return 0;                             // should not happen
 }
-#endif // USE_JEMALLOC_EXTENT_HOOKS
+
+}
+#endif

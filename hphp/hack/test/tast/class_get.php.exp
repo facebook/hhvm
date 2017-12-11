@@ -1,7 +1,7 @@
 [(AnnotatedAST.Class
     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
       c_is_xhp = false; c_kind = Cnormal;
-      c_name = (<p>, "\\TestClass"); c_tparams = <opaque>;
+      c_name = ([12:7-12:16], "\\TestClass"); c_tparams = <opaque>;
       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
       c_req_extends = []; c_req_implements = []; c_implements = [];
       c_consts = []; c_typeconsts = [];
@@ -9,40 +9,40 @@
       [{ AnnotatedAST.cv_final = false; cv_is_xhp = false;
          cv_visibility = Private;
          cv_type =
-         (Some (<p>, (Hoption (<p>, (Hprim Tint)))));
-         cv_id = (<p>, "x");
-         cv_expr = (Some ((Some ?_), AnnotatedAST.Null));
+         (Some ([13:18-13:22], (Hoption ([13:19-13:22], (Hprim Tint)))));
+         cv_id = ([13:23-13:25], "x");
+         cv_expr = (Some (([13:28-13:32], Some ?_), AnnotatedAST.Null));
          cv_user_attributes = [] }
         ];
       c_vars = []; c_constructor = None;
       c_static_methods =
       [{ AnnotatedAST.m_annotation = (); m_final = false; m_abstract = false;
-         m_visibility = Public; m_name = (<p>, "get");
+         m_visibility = Public; m_name = ([15:26-15:29], "get");
          m_tparams = []; m_where_constraints = [];
          m_variadic = AnnotatedAST.FVnonVariadic; m_params = [];
          m_body =
          (AnnotatedAST.NamedBody
             { AnnotatedAST.fnb_nast =
               [(AnnotatedAST.If (
-                  ((Some ?int),
+                  (([16:9-16:17], Some ?int),
                    (AnnotatedAST.Class_get (AnnotatedAST.CIself,
-                      (<p>, "$x")))),
-                  [(AnnotatedAST.Return (<p>,
-                      (Some ((Some int),
+                      ([16:15-16:17], "$x")))),
+                  [(AnnotatedAST.Return ([17:7-17:13],
+                      (Some (([17:14-17:22], Some int),
                              (AnnotatedAST.Class_get (AnnotatedAST.CIself,
-                                (<p>, "$x")))))
+                                ([17:20-17:22], "$x")))))
                       ))
                     ],
-                  [(AnnotatedAST.Return (<p>,
-                      (Some ((Some int),
-                             (AnnotatedAST.Int (<p>, "0"))))
+                  [(AnnotatedAST.Return ([19:7-19:13],
+                      (Some (([19:14-19:15], Some int),
+                             (AnnotatedAST.Int ([19:14-19:15], "0"))))
                       ))
                     ]
                   ))
                 ];
               fnb_unsafe = false });
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some (<p>, (Hprim Tint))); m_ret_by_ref = false }
+         m_ret = (Some ([15:33-15:36], (Hprim Tint))); m_ret_by_ref = false }
         ];
       c_methods = []; c_user_attributes = []; c_enum = None })
   ]

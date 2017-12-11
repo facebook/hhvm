@@ -1,63 +1,73 @@
 [(AnnotatedAST.Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some (<p>, (Hprim Tint)));
-      f_name = (<p>, "\\foo"); f_tparams = [];
+      f_ret = (Some ([2:17-2:20], (Hprim Tint)));
+      f_name = ([2:10-2:13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params = [];
       f_body =
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Expr
-               ((Some array<int>),
+               (([3:3-3:15], Some array<int>),
                 (AnnotatedAST.Binop ((Eq None),
-                   ((Some array<int>), (AnnotatedAST.Lvar (<p>, $arr))),
-                   ((Some array<int>),
+                   (([3:3-3:15], Some array<int>),
+                    (AnnotatedAST.Lvar ([3:3-3:7], $arr))),
+                   (([3:10-3:15], Some array<int>),
                     (AnnotatedAST.Array
                        [(AnnotatedAST.AFvalue
-                           ((Some int), (AnnotatedAST.Int (<p>, "1"))));
+                           (([3:16-3:17], Some int),
+                            (AnnotatedAST.Int ([3:16-3:17], "1"))));
                          (AnnotatedAST.AFvalue
-                            ((Some int),
-                             (AnnotatedAST.Int (<p>, "2"))));
+                            (([3:19-3:20], Some int),
+                             (AnnotatedAST.Int ([3:19-3:20], "2"))));
                          (AnnotatedAST.AFvalue
-                            ((Some int),
-                             (AnnotatedAST.Int (<p>, "3"))))
+                            (([3:22-3:23], Some int),
+                             (AnnotatedAST.Int ([3:22-3:23], "3"))))
                          ]))
                    ))));
              (AnnotatedAST.Expr
-                ((Some int),
+                (([4:3-4:9], Some int),
                  (AnnotatedAST.Binop ((Eq None),
-                    ((Some int), (AnnotatedAST.Lvar (<p>, $y))),
-                    ((Some int), (AnnotatedAST.Int (<p>, "0")))))));
+                    (([4:3-4:9], Some int),
+                     (AnnotatedAST.Lvar ([4:3-4:5], $y))),
+                    (([4:8-4:9], Some int),
+                     (AnnotatedAST.Int ([4:8-4:9], "0")))
+                    ))));
              (AnnotatedAST.Foreach (
-                ((Some array<int>), (AnnotatedAST.Lvar (<p>, $arr))),
+                (([5:12-5:16], Some array<int>),
+                 (AnnotatedAST.Lvar ([5:12-5:16], $arr))),
                 (AnnotatedAST.As_v
-                   ((Some int),
+                   (([5:12-5:16], Some int),
                     (AnnotatedAST.Unop (Uref,
-                       ((Some int), (AnnotatedAST.Lvar (<p>, $val)))
+                       (([5:12-5:16], Some int),
+                        (AnnotatedAST.Lvar ([5:21-5:25], $val)))
                        )))),
                 [(AnnotatedAST.Expr
-                    ((Some int),
+                    (([6:5-6:17], Some int),
                      (AnnotatedAST.Binop ((Eq (Some Plus)),
-                        ((Some int), (AnnotatedAST.Lvar (<p>, $y))),
-                        ((Some int),
+                        (([6:5-6:17], Some int),
+                         (AnnotatedAST.Lvar ([6:5-6:7], $y))),
+                        (([6:11-6:17], Some int),
                          (AnnotatedAST.Unop (Upincr,
-                            ((Some int),
-                             (AnnotatedAST.Lvar (<p>, $val)))
+                            (([6:11-6:15], Some int),
+                             (AnnotatedAST.Lvar ([6:11-6:15], $val)))
                             )))
                         ))))
                   ]
                 ));
              (AnnotatedAST.Expr
-                ((Some _),
+                (([8:3-8:17], Some _),
                  (AnnotatedAST.Call (Cnormal,
-                    ((Some (function($expression, ...): _)),
-                     (AnnotatedAST.Id (<p>, "\\var_dump"))),
+                    (([8:3-8:11], Some (function($expression, ...): _)),
+                     (AnnotatedAST.Id ([8:3-8:11], "\\var_dump"))),
                     [],
-                    [((Some array<int>),
-                      (AnnotatedAST.Lvar (<p>, $arr)))],
+                    [(([8:12-8:16], Some array<int>),
+                      (AnnotatedAST.Lvar ([8:12-8:16], $arr)))],
                     []))));
-             (AnnotatedAST.Return (<p>,
-                (Some ((Some int), (AnnotatedAST.Lvar (<p>, $y))))))
+             (AnnotatedAST.Return ([9:3-9:9],
+                (Some (([9:10-9:12], Some int),
+                       (AnnotatedAST.Lvar ([9:10-9:12], $y))))
+                ))
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })

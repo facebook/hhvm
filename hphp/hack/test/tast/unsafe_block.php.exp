@@ -1,12 +1,12 @@
 [(AnnotatedAST.Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>; f_ret = None;
-      f_name = (<p>, "\\foo"); f_tparams = [];
+      f_name = ([12:10-12:13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params = [];
       f_body =
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.If (((Some bool), AnnotatedAST.True),
+           [(AnnotatedAST.If ((([13:8-13:12], Some bool), AnnotatedAST.True),
                [AnnotatedAST.Noop], [AnnotatedAST.Noop]))
              ];
            fnb_unsafe = true });

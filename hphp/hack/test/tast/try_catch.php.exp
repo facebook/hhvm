@@ -1,63 +1,70 @@
 [(AnnotatedAST.Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some (<p>, (Hprim Tint)));
-      f_name = (<p>, "\\terminal_catch_can_do_whatever");
+      f_ret = (Some ([12:44-12:47], (Hprim Tint)));
+      f_name = ([12:10-12:40], "\\terminal_catch_can_do_whatever");
       f_tparams = []; f_where_constraints = [];
       f_variadic = AnnotatedAST.FVnonVariadic; f_params = [];
       f_body =
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Expr
-               ((Some int),
+               (([13:3-13:10], Some int),
                 (AnnotatedAST.Binop ((Eq None),
-                   ((Some int), (AnnotatedAST.Lvar (<p>, $a))),
-                   ((Some int), (AnnotatedAST.Int (<p>, "23")))))));
+                   (([13:3-13:10], Some int),
+                    (AnnotatedAST.Lvar ([13:3-13:5], $a))),
+                   (([13:8-13:10], Some int),
+                    (AnnotatedAST.Int ([13:8-13:10], "23")))
+                   ))));
              (AnnotatedAST.Try (
                 [(AnnotatedAST.Expr
-                    ((Some int),
+                    (([15:5-15:13], Some int),
                      (AnnotatedAST.Binop ((Eq None),
-                        ((Some int), (AnnotatedAST.Lvar (<p>, $a))),
-                        ((Some int),
-                         (AnnotatedAST.Int (<p>, "456")))
+                        (([15:5-15:13], Some int),
+                         (AnnotatedAST.Lvar ([15:5-15:7], $a))),
+                        (([15:10-15:13], Some int),
+                         (AnnotatedAST.Int ([15:10-15:13], "456")))
                         ))))
                   ],
-                [((<p>, "\\YourException"), (<p>, $e),
-                  [(AnnotatedAST.Return (<p>,
-                      (Some ((Some int),
-                             (AnnotatedAST.Lvar (<p>, $a))))
+                [(([16:12-16:25], "\\YourException"), ([16:26-16:28], $e),
+                  [(AnnotatedAST.Return ([17:5-17:11],
+                      (Some (([17:12-17:14], Some int),
+                             (AnnotatedAST.Lvar ([17:12-17:14], $a))))
                       ))
                     ]);
-                  ((<p>, "\\MyException"), (<p>, $e),
+                  (([18:12-18:23], "\\MyException"), ([18:24-18:26], $e),
                    [(AnnotatedAST.Expr
-                       ((Some string),
+                       (([20:5-20:16], Some string),
                         (AnnotatedAST.Binop ((Eq None),
-                           ((Some string),
-                            (AnnotatedAST.Lvar (<p>, $a))),
-                           ((Some string),
-                            (AnnotatedAST.String (<p>, "duck")))
+                           (([20:5-20:16], Some string),
+                            (AnnotatedAST.Lvar ([20:5-20:7], $a))),
+                           (([20:10-20:16], Some string),
+                            (AnnotatedAST.String ([20:10-20:16], "duck")))
                            ))));
-                     (AnnotatedAST.Return (<p>,
-                        (Some ((Some int),
-                               (AnnotatedAST.Int (<p>, "23904"))))
+                     (AnnotatedAST.Return ([21:5-21:11],
+                        (Some (([21:12-21:17], Some int),
+                               (AnnotatedAST.Int ([21:12-21:17], "23904"))))
                         ))
                      ]);
-                  ((<p>, "\\Exception"), (<p>, $e),
-                   [(AnnotatedAST.Return (<p>,
-                       (Some ((Some int),
-                              (AnnotatedAST.Lvar (<p>, $a))))
+                  (([22:12-22:21], "\\Exception"), ([22:22-22:24], $e),
+                   [(AnnotatedAST.Return ([23:5-23:11],
+                       (Some (([23:12-23:14], Some int),
+                              (AnnotatedAST.Lvar ([23:12-23:14], $a))))
                        ))
                      ])
                   ],
                 [(AnnotatedAST.Expr
-                    ((Some int),
+                    (([25:5-25:11], Some int),
                      (AnnotatedAST.Binop ((Eq None),
-                        ((Some int), (AnnotatedAST.Lvar (<p>, $a))),
-                        ((Some int), (AnnotatedAST.Int (<p>, "4")))
+                        (([25:5-25:11], Some int),
+                         (AnnotatedAST.Lvar ([25:5-25:7], $a))),
+                        (([25:10-25:11], Some int),
+                         (AnnotatedAST.Int ([25:10-25:11], "4")))
                         ))))
                   ]
                 ));
-             (AnnotatedAST.Return (<p>,
-                (Some ((Some int), (AnnotatedAST.Lvar (<p>, $a))))
+             (AnnotatedAST.Return ([28:3-28:9],
+                (Some (([28:10-28:12], Some int),
+                       (AnnotatedAST.Lvar ([28:10-28:12], $a))))
                 ))
              ];
            fnb_unsafe = false });

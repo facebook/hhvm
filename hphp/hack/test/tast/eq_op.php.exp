@@ -1,75 +1,91 @@
 [(AnnotatedAST.Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some (<p>, (Hprim Tint)));
-      f_name = (<p>, "\\f"); f_tparams = [];
+      f_ret = (Some ([3:21-3:24], (Hprim Tint)));
+      f_name = ([3:10-3:11], "\\f"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_hint = (Some (<p>, (Hprim Tint)));
+      [{ AnnotatedAST.param_hint = (Some ([3:12-3:15], (Hprim Tint)));
          param_is_reference = false; param_is_variadic = false;
-         param_pos = <p>; param_name = "$x"; param_expr = None;
+         param_pos = [3:16-3:18]; param_name = "$x"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
            [(AnnotatedAST.Expr
-               ((Some int),
+               (([4:3-4:10], Some int),
                 (AnnotatedAST.Binop ((Eq (Some Minus)),
-                   ((Some int), (AnnotatedAST.Lvar (<p>, $x))),
-                   ((Some int), (AnnotatedAST.Int (<p>, "4")))))));
+                   (([4:3-4:10], Some int),
+                    (AnnotatedAST.Lvar ([4:3-4:5], $x))),
+                   (([4:9-4:10], Some int),
+                    (AnnotatedAST.Int ([4:9-4:10], "4")))
+                   ))));
              (AnnotatedAST.Expr
-                ((Some int),
+                (([5:3-5:10], Some int),
                  (AnnotatedAST.Binop ((Eq (Some Plus)),
-                    ((Some int), (AnnotatedAST.Lvar (<p>, $x))),
-                    ((Some int), (AnnotatedAST.Int (<p>, "4")))))));
+                    (([5:3-5:10], Some int),
+                     (AnnotatedAST.Lvar ([5:3-5:5], $x))),
+                    (([5:9-5:10], Some int),
+                     (AnnotatedAST.Int ([5:9-5:10], "4")))
+                    ))));
              (AnnotatedAST.Expr
-                ((Some int),
+                (([6:3-6:10], Some int),
                  (AnnotatedAST.Binop ((Eq (Some Star)),
-                    ((Some int), (AnnotatedAST.Lvar (<p>, $x))),
-                    ((Some int), (AnnotatedAST.Int (<p>, "4")))))));
+                    (([6:3-6:10], Some int),
+                     (AnnotatedAST.Lvar ([6:3-6:5], $x))),
+                    (([6:9-6:10], Some int),
+                     (AnnotatedAST.Int ([6:9-6:10], "4")))
+                    ))));
              (AnnotatedAST.Expr
-                ((Some array<int>),
+                (([8:3-8:11], Some array<int>),
                  (AnnotatedAST.Binop ((Eq None),
-                    ((Some array<int>), (AnnotatedAST.Lvar (<p>, $arr))),
-                    ((Some array<int>),
+                    (([8:3-8:11], Some array<int>),
+                     (AnnotatedAST.Lvar ([8:3-8:7], $arr))),
+                    (([8:10-8:11], Some array<int>),
                      (AnnotatedAST.Array
                         [(AnnotatedAST.AFvalue
-                            ((Some int),
-                             (AnnotatedAST.Int (<p>, "1"))));
+                            (([8:11-8:12], Some int),
+                             (AnnotatedAST.Int ([8:11-8:12], "1"))));
                           (AnnotatedAST.AFvalue
-                             ((Some int),
-                              (AnnotatedAST.Int (<p>, "2"))));
+                             (([8:14-8:15], Some int),
+                              (AnnotatedAST.Int ([8:14-8:15], "2"))));
                           (AnnotatedAST.AFvalue
-                             ((Some int),
-                              (AnnotatedAST.Int (<p>, "3"))));
+                             (([8:17-8:18], Some int),
+                              (AnnotatedAST.Int ([8:17-8:18], "3"))));
                           (AnnotatedAST.AFvalue
-                             ((Some int),
-                              (AnnotatedAST.Int (<p>, "4"))))
+                             (([8:20-8:21], Some int),
+                              (AnnotatedAST.Int ([8:20-8:21], "4"))))
                           ]))
                     ))));
              (AnnotatedAST.Expr
-                ((Some int),
+                (([8:24-8:30], Some int),
                  (AnnotatedAST.Binop ((Eq None),
-                    ((Some int), (AnnotatedAST.Lvar (<p>, $i))),
-                    ((Some int), (AnnotatedAST.Int (<p>, "2")))))));
+                    (([8:24-8:30], Some int),
+                     (AnnotatedAST.Lvar ([8:24-8:26], $i))),
+                    (([8:29-8:30], Some int),
+                     (AnnotatedAST.Int ([8:29-8:30], "2")))
+                    ))));
              (AnnotatedAST.Expr
-                ((Some int),
+                (([9:3-9:20], Some int),
                  (AnnotatedAST.Binop ((Eq (Some Plus)),
-                    ((Some int),
+                    (([9:3-9:15], Some int),
                      (AnnotatedAST.Array_get (
-                        ((Some array<int>),
-                         (AnnotatedAST.Lvar (<p>, $arr))),
-                        (Some ((Some int),
+                        (([9:3-9:7], Some array<int>),
+                         (AnnotatedAST.Lvar ([9:3-9:7], $arr))),
+                        (Some (([9:8-9:14], Some int),
                                (AnnotatedAST.Binop (Minus,
-                                  ((Some int),
-                                   (AnnotatedAST.Lvar (<p>, $i))),
-                                  ((Some int),
-                                   (AnnotatedAST.Int (<p>, "1")))
+                                  (([9:8-9:10], Some int),
+                                   (AnnotatedAST.Lvar ([9:8-9:10], $i))),
+                                  (([9:13-9:14], Some int),
+                                   (AnnotatedAST.Int ([9:13-9:14], "1")))
                                   ))))
                         ))),
-                    ((Some int), (AnnotatedAST.Int (<p>, "4")))))));
-             (AnnotatedAST.Return (<p>,
-                (Some ((Some int), (AnnotatedAST.Lvar (<p>, $x))))
+                    (([9:19-9:20], Some int),
+                     (AnnotatedAST.Int ([9:19-9:20], "4")))
+                    ))));
+             (AnnotatedAST.Return ([11:3-11:9],
+                (Some (([11:10-11:12], Some int),
+                       (AnnotatedAST.Lvar ([11:10-11:12], $x))))
                 ))
              ];
            fnb_unsafe = false });

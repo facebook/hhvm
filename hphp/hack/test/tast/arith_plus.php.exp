@@ -1,22 +1,24 @@
 [(AnnotatedAST.Fun
     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some (<p>, (Hprim Tint)));
-      f_name = (<p>, "\\f"); f_tparams = [];
+      f_ret = (Some ([3:21-3:24], (Hprim Tint)));
+      f_name = ([3:10-3:11], "\\f"); f_tparams = [];
       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_hint = (Some (<p>, (Hprim Tint)));
+      [{ AnnotatedAST.param_hint = (Some ([3:12-3:15], (Hprim Tint)));
          param_is_reference = false; param_is_variadic = false;
-         param_pos = <p>; param_name = "$x"; param_expr = None;
+         param_pos = [3:16-3:18]; param_name = "$x"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Return (<p>,
-               (Some ((Some int),
+           [(AnnotatedAST.Return ([4:3-4:9],
+               (Some (([4:10-4:16], Some int),
                       (AnnotatedAST.Binop (Plus,
-                         ((Some int), (AnnotatedAST.Lvar (<p>, $x))),
-                         ((Some int), (AnnotatedAST.Int (<p>, "3")))
+                         (([4:10-4:12], Some int),
+                          (AnnotatedAST.Lvar ([4:10-4:12], $x))),
+                         (([4:15-4:16], Some int),
+                          (AnnotatedAST.Int ([4:15-4:16], "3")))
                          ))))
                ))
              ];

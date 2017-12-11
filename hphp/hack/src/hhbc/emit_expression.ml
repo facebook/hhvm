@@ -1054,8 +1054,15 @@ and emit_inline_hhas s =
   let lexer = Lexing.from_string s in
   try
     let instrs = Hhas_parser.functionbody Hhas_lexer.read lexer in
-    (* TODO: if inline hhas returned no result we should push null on stack *)
-    instrs
+    (* TODO: handle case when code after inline hhas is unreachable
+      i.e. fallthrough return should not be emitted *)
+    match get_estimated_stack_depth instrs with
+    | 0 -> gather [ instrs; instr_null ]
+    | 1 -> instrs
+    | _ ->
+      Emit_fatal.raise_fatal_runtime Pos.none
+        "Inline assembly expressions should leave the stack unchanged, \
+        or push exactly one cell onto the stack."
   with Parsing.Parse_error ->
     Emit_fatal.raise_fatal_parse Pos.none "error parsing inline hhas"
 

@@ -290,7 +290,6 @@ let mut_imms (is : IS.t) : IS.t =
     | CGetL       id     -> CGetL      (mutate_local_id id !mag)
     | CGetQuietL  id     -> CGetQuietL (mutate_local_id id !mag)
     | CGetL2      id     -> CGetL2     (mutate_local_id id !mag)
-    | CGetL3      id     -> CGetL3     (mutate_local_id id !mag)
     | PushL       id     -> PushL      (mutate_local_id id !mag)
     | CGetS       i      -> CGetS      (mutate_int      i  !mag)
     | VGetL       id     -> VGetL      (mutate_local_id id !mag)

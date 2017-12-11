@@ -211,7 +211,6 @@ type instruct_lit_const =
   | AddNewElemV
   | NewCol of CollectionType.t
   | ColFromArray of CollectionType.t
-  | MapAddElemC
   | Cns of const_id
   | CnsE of const_id
   | CnsU of const_id * Litstr.id
@@ -220,7 +219,6 @@ type instruct_lit_const =
   | File
   | Dir
   | Method
-  | NameA
 
 type instruct_operator =
   | Concat
@@ -301,7 +299,6 @@ type instruct_get =
   | CGetL of local_id
   | CGetQuietL of local_id
   | CGetL2 of local_id
-  | CGetL3 of local_id
   | CUGetL of local_id
   | PushL of local_id
   | CGetN
@@ -541,7 +538,6 @@ type instruct_misc =
   | BreakTraceHint
   | Silence of local_id * op_silence
   | GetMemoKeyL of local_id
-  | VarEnvDynCall
   | IsUninit
   | CGetCUNop
   | UGetCUNop

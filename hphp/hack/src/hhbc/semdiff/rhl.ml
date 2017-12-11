@@ -307,7 +307,6 @@ let check_instruct_get asn i i' =
   | CGetL l, CGetL l'
   | CGetQuietL l, CGetQuietL l'
   | CGetL2 l, CGetL2 l'
-  | CGetL3 l, CGetL3 l'
   | CUGetL l, CUGetL l'
   | PushL l, PushL l' (* TODO: this also unsets but don't track that yet *)
     -> reads asn l l' (* these instructions read locals *)
@@ -319,7 +318,7 @@ let check_instruct_get asn i i' =
   | _, VGetL _ ->
     (* can't handle the possible  aliasing here, so bail *)
     None
-  | CGetL _, _ | CGetQuietL _, _ | CGetL2 _, _ | CGetL3 _, _ | CUGetL _, _
+  | CGetL _, _ | CGetQuietL _, _ | CGetL2 _, _ | CUGetL _, _
   | PushL _, _ | ClsRefGetL _, _ -> None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
@@ -620,7 +619,7 @@ let check_instruct_misc asn i i' =
   | Parent _, _ | LateBoundCls _, _ | ClsRefName _, _ | NativeImpl, _
   | VerifyOutType _, _
   | IncStat _, _ | AKExists, _ | Idx, _ | ArrayIdx, _
-  | AssertRATStk _, _ | BreakTraceHint, _ | VarEnvDynCall, _ | IsUninit, _
+  | AssertRATStk _, _ | BreakTraceHint, _ | IsUninit, _
   | CGetCUNop, _ | UGetCUNop, _ | IsMemoType, _ | MaybeMemoType, _ ->
     if i=i' then Some asn else None
 
@@ -667,8 +666,8 @@ let check_instruct_lit_const asn i i' =
   | NewStructArray _, _ | NewVecArray _, _ | NewKeysetArray _, _
   | NewVArray _, _ | NewDArray _, _ | NewStructDArray _, _ | NewPair, _
   | AddElemC, _ | AddElemV, _ | AddNewElemC, _ | AddNewElemV, _ | NewCol _, _
-  | ColFromArray _, _ | MapAddElemC, _ | Cns _, _ | CnsE _, _ | CnsU _, _
-  | ClsCns _, _ | ClsCnsD _, _ | File, _ | Dir, _ | Method, _ | NameA, _ ->
+  | ColFromArray _, _ | Cns _, _ | CnsE _, _ | CnsU _, _
+  | ClsCns _, _ | ClsCnsD _, _ | File, _ | Dir, _ | Method, _ ->
     if i=i' then Some asn else None
 
 (* Returns true if the instruction terminates the program. *)

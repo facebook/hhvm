@@ -129,9 +129,7 @@ let string_of_lit_const instruction =
     | NullUninit -> "NullUninit"
     | AddElemV -> "AddElemV"
     | AddNewElemV -> "AddNewElemV"
-    | MapAddElemC -> "MapAddElemC"
     | Method -> "Method"
-    | NameA -> "NameA"
     | NewArray n -> sep ["NewArray"; string_of_int n]
     | NewLikeArrayL (id, n) ->
       sep ["NewLikeArrayL"; string_of_local_id id; string_of_int n]
@@ -196,7 +194,6 @@ let string_of_get x =
   | CGetL id -> sep ["CGetL"; string_of_local_id id]
   | CGetQuietL id -> sep ["CGetQuietL"; string_of_local_id id]
   | CGetL2 id -> sep ["CGetL2"; string_of_local_id id]
-  | CGetL3 id -> sep ["CGetL3"; string_of_local_id id]
   | CUGetL id -> sep ["CUGetL"; string_of_local_id id]
   | PushL id -> sep ["PushL"; string_of_local_id id]
   | CGetN -> "CGetN"

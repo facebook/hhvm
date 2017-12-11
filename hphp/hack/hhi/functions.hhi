@@ -38,9 +38,12 @@ function ord(string $string): int;
 function strip_tags(string $str, string $allowable_tags = ''): string;
 
 function intval($v, $base = 10): int;
+<<__PHPStdLib>>
 function doubleval($v): float;
+<<__PHPStdLib>>
 function floatval($v): float;
 function strval($v): string;
+<<__PHPStdLib>>
 function boolval($v): bool;
 
 function get_class_constants($class_name): array;

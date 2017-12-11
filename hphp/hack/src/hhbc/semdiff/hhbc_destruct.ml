@@ -29,6 +29,7 @@ let uNot = pa (function | IOp Not -> Some () | _ -> None)
 let uJmpNZ = pa (function | IContFlow (JmpNZ lab) -> Some lab | _ -> None)
 let uString = pa (function | ILitConst (String s) -> Some s | _ -> None)
 let uConcat = pa (function | IOp Concat -> Some () | _ -> None)
+let uCastString = pa (function | IOp CastString -> Some () | _ -> None)
 let uFPassL = pa (function | ICall (FPassL (param, local, hint)) -> Some (param,local,hint) | _ -> None)
 let uFPassC = pa (function | ICall (FPassC (param, hint)) -> Some (param,hint) | _ -> None)
 let uFPassCW = pa (function | ICall (FPassCW (param, hint)) -> Some (param,hint) | _ -> None)
@@ -115,6 +116,9 @@ let ($*$) p p' (inp,inp') =
        | Some (v', newinp') -> Some ((v,v'), (newinp,newinp'))
        | None -> None)
   | None -> None
+
+let ($*$|) p p' =
+  (p $*$ p') $| (p' $*$ p)
 
 (* this isn't tail recursive, but that should be OK *)
 let rec greedy_kleene p inp =

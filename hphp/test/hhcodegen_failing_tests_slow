@@ -7,7 +7,6 @@ slow/hack_arr_compat/scalars.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/inout/bad-call-15.php
 slow/inout/side-effects.php
-slow/now_doc/1906.php
 slow/parser/async.php
 slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-3.php

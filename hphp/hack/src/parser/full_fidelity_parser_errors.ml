@@ -321,21 +321,26 @@ let rec containing_classish_kind parents =
       | _ -> containing_classish_kind t
     end
 
+let modifiers_of_function_decl_header_exn node =
+  match syntax node with
+  | FunctionDeclarationHeader { function_modifiers = m; _ } -> m
+  | _ -> failwith "expected to get FunctionDeclarationHeader"
+
+let get_modifiers_of_methodish_declaration node =
+  match syntax node with
+  | MethodishDeclaration { methodish_function_decl_header = header; _ } ->
+    Some (modifiers_of_function_decl_header_exn header)
+  | _ -> None
+
 (* tests whether the methodish contains a modifier that satisfies [p] *)
 let methodish_modifier_contains_helper p node =
-  match syntax node with
-  | MethodishDeclaration syntax ->
-    let node = syntax.methodish_modifiers in
-    list_contains_predicate p node
-  | _ -> false
+  get_modifiers_of_methodish_declaration node
+    |> Option.exists ~f:(list_contains_predicate p)
 
 (* tests whether the methodish contains > 1 modifier that satisfies [p] *)
 let methodish_modifier_multiple_helper p node =
-  match syntax node with
-  | MethodishDeclaration syntax ->
-    let node = syntax.methodish_modifiers in
-    list_contains_multiple_predicate p node
-  | _ -> false
+  get_modifiers_of_methodish_declaration node
+    |> Option.value_map ~default:false ~f:(list_contains_multiple_predicate p)
 
 (* test the methodish node contains the Final keyword *)
 let methodish_contains_final node =
@@ -409,9 +414,9 @@ let class_destructor_has_non_visibility_modifier hhvm_compat_mode node parents =
   (is_destruct label) &&
   (matches_first (methodish_contains_non_visibility hhvm_compat_mode) parents)
 
-let async_magic_method { function_async; function_name; _} parents =
+let async_magic_method { function_modifiers; function_name; _} parents =
   SSet.mem (String.lowercase_ascii @@ text function_name) SN.Members.as_set &&
-  not @@ is_missing function_async
+  list_contains_predicate is_async function_modifiers
 
 (* check that a constructor or a destructor is type annotated *)
 let class_constructor_destructor_has_non_void_type hhvm_compat_node node parents =
@@ -433,11 +438,8 @@ let class_constructor_destructor_has_non_void_type hhvm_compat_node node parents
 let methodish_duplicate_modifier hhvm_compat_mode node =
   if hhvm_compat_mode then false
   else
-  match syntax node with
-  | MethodishDeclaration syntax ->
-    let modifiers = syntax.methodish_modifiers in
-    list_contains_duplicate modifiers
-  | _ -> false
+  get_modifiers_of_methodish_declaration node
+    |> Option.value_map ~default:false ~f:list_contains_duplicate
 
 (* whether a methodish decl has body *)
 let methodish_has_body node =
@@ -721,12 +723,15 @@ let first_parent_class_name parents =
 (* Given a classish_ or methodish_ declaration node, returns the modifier node
    from its list of modifiers, or None if there isn't one. *)
 let extract_keyword modifier declaration_node =
+  let aux modifiers_list =
+    Hh_core.List.find ~f:modifier (syntax_to_list_no_separators modifiers_list)
+  in
+
   match syntax declaration_node with
-  | ClassishDeclaration { classish_modifiers = modifiers_list ; _ }
-  | MethodishDeclaration { methodish_modifiers = modifiers_list ; _ } ->
-    Hh_core.List.find ~f:modifier
-        (syntax_to_list_no_separators modifiers_list)
-  | _ -> None
+  | ClassishDeclaration { classish_modifiers = modifiers_list ; _ } ->
+    aux modifiers_list
+  | _ ->
+    Option.bind (get_modifiers_of_methodish_declaration declaration_node) aux
 
 (* Wrapper function that uses above extract_keyword function to test if node
    contains is_abstract keyword *)
@@ -777,16 +782,9 @@ let is_generalized_abstract_method md_node parents =
  * None if something other than a methodish_declaration node was provided as
  * input. *)
 let extract_async_node md_node =
-  match syntax md_node with
-  | MethodishDeclaration { methodish_function_decl_header; _ } -> begin
-    match syntax methodish_function_decl_header with
-    | FunctionDeclarationHeader { function_async ; _ } -> Some function_async
-    | _ ->
-      failwith("Encountered an improperly defined methodish_function_decl_" ^
-      "header: expected it to match FunctionDeclarationHeader with field " ^
-      "function_async.")
-    end
-  | _ -> None (* Only method declarations have async nodes *)
+  get_modifiers_of_methodish_declaration md_node
+  |> Option.value_map ~default:[] ~f:syntax_to_list_no_separators
+  |> Hh_core.List.find ~f:is_async
 
 let first_parent_function_declaration parents =
   Hh_core.List.find_map parents ~f:begin fun node ->
@@ -836,7 +834,9 @@ let has_inout_params parents =
 
 let is_inside_async_method parents =
   match first_parent_function_declaration parents with
-  | Some { function_async; _ } -> not @@ is_missing function_async
+  | Some { function_modifiers = m; _ } ->
+    syntax_to_list_no_separators m
+    |> Hh_core.List.exists ~f:is_async
   | None -> false
 
 let make_name_already_used_error node name short_name original_location
@@ -880,15 +880,15 @@ let extract_callconv_node node =
 (* Tests if visibility modifiers of the node are allowed on
  * methods inside an interface. *)
 let has_valid_interface_visibility node =
-  match syntax node with
-  | MethodishDeclaration { methodish_modifiers; _ } ->
+  (* If not a methodish declaration, is vacuously valid *)
+  get_modifiers_of_methodish_declaration node
+  |> Option.value_map ~default:true ~f:(fun methodish_modifiers ->
     let visibility_kind = extract_visibility_node methodish_modifiers in
     let is_valid_methodish_visibility kind =
       (is_token_kind kind TokenKind.Public) in
     (* Defaulting to 'true' allows omitting visibility in method_declarations *)
     Option.value_map visibility_kind
-      ~f:is_valid_methodish_visibility ~default:true
-  | _ -> true (* If not a methodish declaration, is vacuously valid *)
+      ~f:is_valid_methodish_visibility ~default:true)
 
 (* Tests if a given node is a method definition (inside an interface) with
  * either private or protected visibility. *)
@@ -1033,7 +1033,7 @@ let methodish_errors node parents is_hack hhvm_compat_mode errors =
     errors
   | MethodishDeclaration md ->
     let header_node = md.methodish_function_decl_header in
-    let modifiers = md.methodish_modifiers in
+    let modifiers = modifiers_of_function_decl_header_exn header_node in
     let errors =
       produce_error_for_header errors
       (class_constructor_has_static hhvm_compat_mode) header_node

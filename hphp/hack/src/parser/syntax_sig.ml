@@ -123,8 +123,7 @@ module type Syntax_S = sig
     ; function_body                                      : t
     }
   and function_declaration_header =
-    { function_async                                     : t
-    ; function_coroutine                                 : t
+    { function_modifiers                                 : t
     ; function_keyword                                   : t
     ; function_ampersand                                 : t
     ; function_name                                      : t
@@ -147,7 +146,6 @@ module type Syntax_S = sig
     }
   and methodish_declaration =
     { methodish_attribute                                : t
-    ; methodish_modifiers                                : t
     ; methodish_function_decl_header                     : t
     ; methodish_function_body                            : t
     ; methodish_semicolon                                : t
@@ -1183,10 +1181,10 @@ module type Syntax_S = sig
   val make_namespace_group_use_declaration : t -> t -> t -> t -> t -> t -> t -> t
   val make_namespace_use_clause : t -> t -> t -> t -> t
   val make_function_declaration : t -> t -> t -> t
-  val make_function_declaration_header : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_function_declaration_header : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_where_clause : t -> t -> t
   val make_where_constraint : t -> t -> t -> t
-  val make_methodish_declaration : t -> t -> t -> t -> t -> t
+  val make_methodish_declaration : t -> t -> t -> t -> t
   val make_classish_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_classish_body : t -> t -> t -> t
   val make_trait_use_precedence_item : t -> t -> t -> t
@@ -1506,6 +1504,8 @@ module type Syntax_S = sig
   val is_protected      : t -> bool
   val is_abstract       : t -> bool
   val is_final          : t -> bool
+  val is_async          : t -> bool
+  val is_coroutine      : t -> bool
   val is_void           : t -> bool
   val is_left_brace     : t -> bool
   val is_ellipsis       : t -> bool

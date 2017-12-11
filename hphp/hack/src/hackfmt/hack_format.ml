@@ -290,8 +290,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
       ]
     | FunctionDeclarationHeader x ->
       let (
-        async,
-        coroutine,
+        modifiers,
         kw,
         amp,
         name,
@@ -306,7 +305,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
       in
       Concat [
         Span (
-          transform_fn_decl_name async coroutine kw amp name type_params leftp);
+          transform_fn_decl_name modifiers kw amp name type_params leftp);
         transform_fn_decl_args params rightp colon ret_type where;
       ]
     | WhereClause x ->
@@ -326,21 +325,17 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         t right;
       ]
     | MethodishDeclaration x ->
-      let (attr, modifiers, func_decl, body, semi) =
+      let (attr, func_decl, body, semi) =
         get_methodish_declaration_children x
       in
       Concat [
         t attr;
         when_present attr newline;
         (
-          let mods =
-            handle_possible_list ~after_each:(fun _ -> Space) modifiers
-          in
           let fn_name, args_and_where = match syntax func_decl with
             | FunctionDeclarationHeader x ->
               let (
-                async,
-                coroutine,
+                modifiers,
                 kw,
                 amp,
                 name,
@@ -355,8 +350,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
               in
               Concat (
                 transform_fn_decl_name
-                  async
-                  coroutine
+                  modifiers
                   kw
                   amp
                   name
@@ -367,7 +361,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
             | _ -> failwith "Expected FunctionDeclarationHeader"
           in
           Concat [
-            Span [mods; fn_name];
+            Span [fn_name];
             args_and_where;
           ]
         );
@@ -2030,12 +2024,10 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
       ]
     | _ -> failwith "Expected a chain of at least length 1"
 
-  and transform_fn_decl_name async coroutine kw amp name type_params leftp =
+  and transform_fn_decl_name modifiers kw amp name type_params leftp =
+    let mods = handle_possible_list ~after_each:(fun _ -> Space) modifiers in
     [
-      t async;
-      when_present async space;
-      t coroutine;
-      when_present coroutine space;
+      mods;
       t kw;
       Space;
       t amp;

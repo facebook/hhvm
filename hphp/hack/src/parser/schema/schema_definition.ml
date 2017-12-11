@@ -263,8 +263,7 @@ let schema : schema_node list =
     ; prefix      = "function"
     ; aggregates  = []
     ; fields =
-      [ "async", ZeroOrOne Token
-      ; "coroutine", ZeroOrOne Token
+      [ "modifiers", ZeroOrMore Token
       ; "keyword", Token
       ; "ampersand", ZeroOrOne Token
       ; "name", Token
@@ -308,7 +307,6 @@ let schema : schema_node list =
     ; aggregates  = [ ClassBodyDeclaration ]
     ; fields =
       [ "attribute", ZeroOrOne (Just "AttributeSpecification")
-      ; "modifiers", ZeroOrMore Token
       ; "function_decl_header", Just "FunctionDeclarationHeader"
       ; "function_body", ZeroOrOne (Just "CompoundStatement")
       ; "semicolon", ZeroOrOne Token

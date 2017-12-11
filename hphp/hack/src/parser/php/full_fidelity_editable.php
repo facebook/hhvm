@@ -6443,8 +6443,7 @@ final class FunctionDeclaration extends EditableSyntax {
   }
 }
 final class FunctionDeclarationHeader extends EditableSyntax {
-  private EditableSyntax $_async;
-  private EditableSyntax $_coroutine;
+  private EditableSyntax $_modifiers;
   private EditableSyntax $_keyword;
   private EditableSyntax $_ampersand;
   private EditableSyntax $_name;
@@ -6456,8 +6455,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   private EditableSyntax $_type;
   private EditableSyntax $_where_clause;
   public function __construct(
-    EditableSyntax $async,
-    EditableSyntax $coroutine,
+    EditableSyntax $modifiers,
     EditableSyntax $keyword,
     EditableSyntax $ampersand,
     EditableSyntax $name,
@@ -6469,8 +6467,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     EditableSyntax $type,
     EditableSyntax $where_clause) {
     parent::__construct('function_declaration_header');
-    $this->_async = $async;
-    $this->_coroutine = $coroutine;
+    $this->_modifiers = $modifiers;
     $this->_keyword = $keyword;
     $this->_ampersand = $ampersand;
     $this->_name = $name;
@@ -6482,11 +6479,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $this->_type = $type;
     $this->_where_clause = $where_clause;
   }
-  public function async(): EditableSyntax {
-    return $this->_async;
-  }
-  public function coroutine(): EditableSyntax {
-    return $this->_coroutine;
+  public function modifiers(): EditableSyntax {
+    return $this->_modifiers;
   }
   public function keyword(): EditableSyntax {
     return $this->_keyword;
@@ -6518,25 +6512,9 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function where_clause(): EditableSyntax {
     return $this->_where_clause;
   }
-  public function with_async(EditableSyntax $async): FunctionDeclarationHeader {
+  public function with_modifiers(EditableSyntax $modifiers): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
-      $async,
-      $this->_coroutine,
-      $this->_keyword,
-      $this->_ampersand,
-      $this->_name,
-      $this->_type_parameter_list,
-      $this->_left_paren,
-      $this->_parameter_list,
-      $this->_right_paren,
-      $this->_colon,
-      $this->_type,
-      $this->_where_clause);
-  }
-  public function with_coroutine(EditableSyntax $coroutine): FunctionDeclarationHeader {
-    return new FunctionDeclarationHeader(
-      $this->_async,
-      $coroutine,
+      $modifiers,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6550,8 +6528,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function with_keyword(EditableSyntax $keyword): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
-      $this->_async,
-      $this->_coroutine,
+      $this->_modifiers,
       $keyword,
       $this->_ampersand,
       $this->_name,
@@ -6565,8 +6542,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function with_ampersand(EditableSyntax $ampersand): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
-      $this->_async,
-      $this->_coroutine,
+      $this->_modifiers,
       $this->_keyword,
       $ampersand,
       $this->_name,
@@ -6580,8 +6556,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function with_name(EditableSyntax $name): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
-      $this->_async,
-      $this->_coroutine,
+      $this->_modifiers,
       $this->_keyword,
       $this->_ampersand,
       $name,
@@ -6595,8 +6570,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function with_type_parameter_list(EditableSyntax $type_parameter_list): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
-      $this->_async,
-      $this->_coroutine,
+      $this->_modifiers,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6610,8 +6584,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function with_left_paren(EditableSyntax $left_paren): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
-      $this->_async,
-      $this->_coroutine,
+      $this->_modifiers,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6625,8 +6598,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function with_parameter_list(EditableSyntax $parameter_list): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
-      $this->_async,
-      $this->_coroutine,
+      $this->_modifiers,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6640,8 +6612,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function with_right_paren(EditableSyntax $right_paren): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
-      $this->_async,
-      $this->_coroutine,
+      $this->_modifiers,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6655,8 +6626,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function with_colon(EditableSyntax $colon): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
-      $this->_async,
-      $this->_coroutine,
+      $this->_modifiers,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6670,8 +6640,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function with_type(EditableSyntax $type): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
-      $this->_async,
-      $this->_coroutine,
+      $this->_modifiers,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6685,8 +6654,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function with_where_clause(EditableSyntax $where_clause): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
-      $this->_async,
-      $this->_coroutine,
+      $this->_modifiers,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6705,8 +6673,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
-    $async = $this->async()->rewrite($rewriter, $new_parents);
-    $coroutine = $this->coroutine()->rewrite($rewriter, $new_parents);
+    $modifiers = $this->modifiers()->rewrite($rewriter, $new_parents);
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $ampersand = $this->ampersand()->rewrite($rewriter, $new_parents);
     $name = $this->name()->rewrite($rewriter, $new_parents);
@@ -6718,8 +6685,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $type = $this->type()->rewrite($rewriter, $new_parents);
     $where_clause = $this->where_clause()->rewrite($rewriter, $new_parents);
     if (
-      $async === $this->async() &&
-      $coroutine === $this->coroutine() &&
+      $modifiers === $this->modifiers() &&
       $keyword === $this->keyword() &&
       $ampersand === $this->ampersand() &&
       $name === $this->name() &&
@@ -6733,8 +6699,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new FunctionDeclarationHeader(
-        $async,
-        $coroutine,
+        $modifiers,
         $keyword,
         $ampersand,
         $name,
@@ -6749,12 +6714,9 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
-    $async = EditableSyntax::from_json(
-      $json->function_async, $position, $source);
-    $position += $async->width();
-    $coroutine = EditableSyntax::from_json(
-      $json->function_coroutine, $position, $source);
-    $position += $coroutine->width();
+    $modifiers = EditableSyntax::from_json(
+      $json->function_modifiers, $position, $source);
+    $position += $modifiers->width();
     $keyword = EditableSyntax::from_json(
       $json->function_keyword, $position, $source);
     $position += $keyword->width();
@@ -6786,8 +6748,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $json->function_where_clause, $position, $source);
     $position += $where_clause->width();
     return new FunctionDeclarationHeader(
-        $async,
-        $coroutine,
+        $modifiers,
         $keyword,
         $ampersand,
         $name,
@@ -6800,8 +6761,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
         $where_clause);
   }
   public function children(): Generator<string, EditableSyntax, void> {
-    yield $this->_async;
-    yield $this->_coroutine;
+    yield $this->_modifiers;
     yield $this->_keyword;
     yield $this->_ampersand;
     yield $this->_name;
@@ -6965,28 +6925,22 @@ final class WhereConstraint extends EditableSyntax {
 }
 final class MethodishDeclaration extends EditableSyntax {
   private EditableSyntax $_attribute;
-  private EditableSyntax $_modifiers;
   private EditableSyntax $_function_decl_header;
   private EditableSyntax $_function_body;
   private EditableSyntax $_semicolon;
   public function __construct(
     EditableSyntax $attribute,
-    EditableSyntax $modifiers,
     EditableSyntax $function_decl_header,
     EditableSyntax $function_body,
     EditableSyntax $semicolon) {
     parent::__construct('methodish_declaration');
     $this->_attribute = $attribute;
-    $this->_modifiers = $modifiers;
     $this->_function_decl_header = $function_decl_header;
     $this->_function_body = $function_body;
     $this->_semicolon = $semicolon;
   }
   public function attribute(): EditableSyntax {
     return $this->_attribute;
-  }
-  public function modifiers(): EditableSyntax {
-    return $this->_modifiers;
   }
   public function function_decl_header(): EditableSyntax {
     return $this->_function_decl_header;
@@ -7000,15 +6954,6 @@ final class MethodishDeclaration extends EditableSyntax {
   public function with_attribute(EditableSyntax $attribute): MethodishDeclaration {
     return new MethodishDeclaration(
       $attribute,
-      $this->_modifiers,
-      $this->_function_decl_header,
-      $this->_function_body,
-      $this->_semicolon);
-  }
-  public function with_modifiers(EditableSyntax $modifiers): MethodishDeclaration {
-    return new MethodishDeclaration(
-      $this->_attribute,
-      $modifiers,
       $this->_function_decl_header,
       $this->_function_body,
       $this->_semicolon);
@@ -7016,7 +6961,6 @@ final class MethodishDeclaration extends EditableSyntax {
   public function with_function_decl_header(EditableSyntax $function_decl_header): MethodishDeclaration {
     return new MethodishDeclaration(
       $this->_attribute,
-      $this->_modifiers,
       $function_decl_header,
       $this->_function_body,
       $this->_semicolon);
@@ -7024,7 +6968,6 @@ final class MethodishDeclaration extends EditableSyntax {
   public function with_function_body(EditableSyntax $function_body): MethodishDeclaration {
     return new MethodishDeclaration(
       $this->_attribute,
-      $this->_modifiers,
       $this->_function_decl_header,
       $function_body,
       $this->_semicolon);
@@ -7032,7 +6975,6 @@ final class MethodishDeclaration extends EditableSyntax {
   public function with_semicolon(EditableSyntax $semicolon): MethodishDeclaration {
     return new MethodishDeclaration(
       $this->_attribute,
-      $this->_modifiers,
       $this->_function_decl_header,
       $this->_function_body,
       $semicolon);
@@ -7045,13 +6987,11 @@ final class MethodishDeclaration extends EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
     $attribute = $this->attribute()->rewrite($rewriter, $new_parents);
-    $modifiers = $this->modifiers()->rewrite($rewriter, $new_parents);
     $function_decl_header = $this->function_decl_header()->rewrite($rewriter, $new_parents);
     $function_body = $this->function_body()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
       $attribute === $this->attribute() &&
-      $modifiers === $this->modifiers() &&
       $function_decl_header === $this->function_decl_header() &&
       $function_body === $this->function_body() &&
       $semicolon === $this->semicolon()) {
@@ -7059,7 +6999,6 @@ final class MethodishDeclaration extends EditableSyntax {
     } else {
       return $rewriter(new MethodishDeclaration(
         $attribute,
-        $modifiers,
         $function_decl_header,
         $function_body,
         $semicolon), $parents ?? []);
@@ -7070,9 +7009,6 @@ final class MethodishDeclaration extends EditableSyntax {
     $attribute = EditableSyntax::from_json(
       $json->methodish_attribute, $position, $source);
     $position += $attribute->width();
-    $modifiers = EditableSyntax::from_json(
-      $json->methodish_modifiers, $position, $source);
-    $position += $modifiers->width();
     $function_decl_header = EditableSyntax::from_json(
       $json->methodish_function_decl_header, $position, $source);
     $position += $function_decl_header->width();
@@ -7084,14 +7020,12 @@ final class MethodishDeclaration extends EditableSyntax {
     $position += $semicolon->width();
     return new MethodishDeclaration(
         $attribute,
-        $modifiers,
         $function_decl_header,
         $function_body,
         $semicolon);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_attribute;
-    yield $this->_modifiers;
     yield $this->_function_decl_header;
     yield $this->_function_body;
     yield $this->_semicolon;

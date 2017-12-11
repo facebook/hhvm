@@ -281,10 +281,13 @@ let get_type_arguments node =
     |> Core_list.map
       ~f:(fun { type_name; _; } -> make_simple_type_specifier type_name)
 
-let is_static_method { methodish_modifiers; _; } =
-  methodish_modifiers
-    |> syntax_node_to_list
-    |> Core_list.exists ~f:is_static
+let is_static_method { methodish_function_decl_header = header; _; } =
+  match syntax header with
+  | FunctionDeclarationHeader { function_modifiers; _ } ->
+    function_modifiers
+      |> syntax_node_to_list
+      |> Core_list.exists ~f:is_static
+  | _ -> false
 
 let string_of_name_token node =
   match syntax node with
@@ -539,17 +542,6 @@ let make_classish_declaration_syntax
     (* classish_implements_list *) (make_missing ())
     classish_body
 
-let make_methodish_declaration_with_body_syntax
-    ?(modifiers = [ public_syntax; ])
-    function_decl_header_syntax
-    function_body =
-  make_methodish_declaration
-    (* methodish_attribute *) (make_missing ())
-    (make_list modifiers)
-    function_decl_header_syntax
-    function_body
-    (* methodish_semicolon *) (make_missing ())
-
 let make_lambda_signature_from_method_syntax
     existing_node
     lambda_parameters
@@ -576,24 +568,16 @@ let make_lambda_from_method_syntax existing_node lambda_signature lambda_body =
       lambda_body = lambda_body;
     })
 
-let make_methodish_declaration_syntax
-    ?modifiers
-    function_decl_header_syntax
-    function_body =
-  make_methodish_declaration_with_body_syntax
-    ?modifiers
-    function_decl_header_syntax
-    (make_compound_statement_syntax function_body)
-
 let make_function_decl_header_syntax
+    ~modifiers
     name
     parameter_list
     return_type_syntax =
+  let modifiers_syntax = make_list modifiers in
   let name_syntax = make_name_syntax name in
   let parameter_list_syntax = make_comma_list parameter_list in
   make_function_declaration_header
-    (* function_async *) (make_missing ())
-    (* function_coroutine *) (make_missing ())
+    modifiers_syntax
     function_keyword_syntax
     (* function_ampersand *) (make_missing ())
     name_syntax
@@ -605,8 +589,41 @@ let make_function_decl_header_syntax
     return_type_syntax
     (* function_where_clause *) (make_missing ())
 
-let make_constructor_decl_header_syntax name parameter_list =
-  make_function_decl_header_syntax name parameter_list (make_missing ())
+let make_methodish_declaration_with_body_syntax
+    ?(modifiers = [ public_syntax; ])
+    name
+    parameter_list
+    return_type_syntax
+    function_body =
+  let function_decl_header_syntax =
+    make_function_decl_header_syntax
+      modifiers name parameter_list return_type_syntax in
+  make_methodish_declaration
+    (* methodish_attribute *) (make_missing ())
+    function_decl_header_syntax
+    function_body
+    (* methodish_semicolon *) (make_missing ())
+
+let make_methodish_declaration_syntax
+    ?modifiers
+    name
+    parameter_list
+    return_type_syntax
+    function_body =
+  make_methodish_declaration_with_body_syntax
+    ?modifiers
+    name
+    parameter_list
+    return_type_syntax
+    (make_compound_statement_syntax function_body)
+
+let make_constructor_syntax parameter_list call_parent_syntax =
+  make_methodish_declaration_syntax
+    ~modifiers:[ public_syntax; final_syntax; ]
+    constructor_member_name
+    parameter_list
+    (make_missing ())
+    [ call_parent_syntax; ]
 
 let make_property_declaration_syntax type_syntax declaration_syntax =
   make_property_declaration

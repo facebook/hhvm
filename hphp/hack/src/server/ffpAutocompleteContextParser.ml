@@ -293,8 +293,12 @@ let is_method_static (method_object:PositionedSyntax.syntax) : bool =
   let open PositionedToken in
   let open TokenKind in
   match method_object with
-  | MethodishDeclaration { methodish_modifiers; _ } ->
-    List.exists (syntax_node_to_list methodish_modifiers) ~f:(is_specific_token Static)
+  | MethodishDeclaration {
+      methodish_function_decl_header = {
+        syntax = FunctionDeclarationHeader h; _
+      }; _
+    } ->
+    List.exists (syntax_node_to_list h.function_modifiers) ~f:(is_specific_token Static)
   | AnonymousFunction { anonymous_static_keyword = static; _ } ->
     is_specific_token Static static
   | _ -> false
@@ -306,12 +310,13 @@ let is_function_async (function_object:PositionedSyntax.syntax) : bool =
   match function_object with
   | FunctionDeclaration {
       function_declaration_header = { syntax = FunctionDeclarationHeader {
-        function_async = async; _
+        function_modifiers = m; _
       }; _ }; _
     }
   | MethodishDeclaration { methodish_function_decl_header = { syntax =
-      FunctionDeclarationHeader { function_async = async; _ }; _
-    }; _ }
+      FunctionDeclarationHeader { function_modifiers = m; _ }; _
+    }; _ } ->
+    List.exists (syntax_node_to_list m) ~f:is_async
   | AnonymousFunction { anonymous_async_keyword = async; _ }
   | LambdaExpression { lambda_async = async; _ } ->
     is_specific_token Async async

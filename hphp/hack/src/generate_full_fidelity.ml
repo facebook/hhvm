@@ -515,6 +515,8 @@ TYPE_TESTS
   val is_protected      : t -> bool
   val is_abstract       : t -> bool
   val is_final          : t -> bool
+  val is_async          : t -> bool
+  val is_coroutine      : t -> bool
   val is_void           : t -> bool
   val is_left_brace     : t -> bool
   val is_ellipsis       : t -> bool
@@ -708,6 +710,8 @@ TYPE_TESTS
     let is_protected  = is_specific_token Full_fidelity_token_kind.Protected
     let is_abstract   = is_specific_token Full_fidelity_token_kind.Abstract
     let is_final      = is_specific_token Full_fidelity_token_kind.Final
+    let is_async      = is_specific_token Full_fidelity_token_kind.Async
+    let is_coroutine  = is_specific_token Full_fidelity_token_kind.Coroutine
     let is_void       = is_specific_token Full_fidelity_token_kind.Void
     let is_left_brace = is_specific_token Full_fidelity_token_kind.LeftBrace
     let is_ellipsis   = is_specific_token Full_fidelity_token_kind.DotDotDot

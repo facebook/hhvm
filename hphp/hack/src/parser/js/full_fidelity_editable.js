@@ -4637,8 +4637,7 @@ class FunctionDeclaration extends EditableSyntax
 class FunctionDeclarationHeader extends EditableSyntax
 {
   constructor(
-    async,
-    coroutine,
+    modifiers,
     keyword,
     ampersand,
     name,
@@ -4651,8 +4650,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     where_clause)
   {
     super('function_declaration_header', {
-      async: async,
-      coroutine: coroutine,
+      modifiers: modifiers,
       keyword: keyword,
       ampersand: ampersand,
       name: name,
@@ -4664,8 +4662,7 @@ class FunctionDeclarationHeader extends EditableSyntax
       type: type,
       where_clause: where_clause });
   }
-  get async() { return this.children.async; }
-  get coroutine() { return this.children.coroutine; }
+  get modifiers() { return this.children.modifiers; }
   get keyword() { return this.children.keyword; }
   get ampersand() { return this.children.ampersand; }
   get name() { return this.children.name; }
@@ -4676,25 +4673,9 @@ class FunctionDeclarationHeader extends EditableSyntax
   get colon() { return this.children.colon; }
   get type() { return this.children.type; }
   get where_clause() { return this.children.where_clause; }
-  with_async(async){
+  with_modifiers(modifiers){
     return new FunctionDeclarationHeader(
-      async,
-      this.coroutine,
-      this.keyword,
-      this.ampersand,
-      this.name,
-      this.type_parameter_list,
-      this.left_paren,
-      this.parameter_list,
-      this.right_paren,
-      this.colon,
-      this.type,
-      this.where_clause);
-  }
-  with_coroutine(coroutine){
-    return new FunctionDeclarationHeader(
-      this.async,
-      coroutine,
+      modifiers,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4708,8 +4689,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   with_keyword(keyword){
     return new FunctionDeclarationHeader(
-      this.async,
-      this.coroutine,
+      this.modifiers,
       keyword,
       this.ampersand,
       this.name,
@@ -4723,8 +4703,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   with_ampersand(ampersand){
     return new FunctionDeclarationHeader(
-      this.async,
-      this.coroutine,
+      this.modifiers,
       this.keyword,
       ampersand,
       this.name,
@@ -4738,8 +4717,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   with_name(name){
     return new FunctionDeclarationHeader(
-      this.async,
-      this.coroutine,
+      this.modifiers,
       this.keyword,
       this.ampersand,
       name,
@@ -4753,8 +4731,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   with_type_parameter_list(type_parameter_list){
     return new FunctionDeclarationHeader(
-      this.async,
-      this.coroutine,
+      this.modifiers,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4768,8 +4745,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   with_left_paren(left_paren){
     return new FunctionDeclarationHeader(
-      this.async,
-      this.coroutine,
+      this.modifiers,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4783,8 +4759,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   with_parameter_list(parameter_list){
     return new FunctionDeclarationHeader(
-      this.async,
-      this.coroutine,
+      this.modifiers,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4798,8 +4773,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   with_right_paren(right_paren){
     return new FunctionDeclarationHeader(
-      this.async,
-      this.coroutine,
+      this.modifiers,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4813,8 +4787,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   with_colon(colon){
     return new FunctionDeclarationHeader(
-      this.async,
-      this.coroutine,
+      this.modifiers,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4828,8 +4801,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   with_type(type){
     return new FunctionDeclarationHeader(
-      this.async,
-      this.coroutine,
+      this.modifiers,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4843,8 +4815,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   with_where_clause(where_clause){
     return new FunctionDeclarationHeader(
-      this.async,
-      this.coroutine,
+      this.modifiers,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4862,8 +4833,7 @@ class FunctionDeclarationHeader extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
-    var async = this.async.rewrite(rewriter, new_parents);
-    var coroutine = this.coroutine.rewrite(rewriter, new_parents);
+    var modifiers = this.modifiers.rewrite(rewriter, new_parents);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var ampersand = this.ampersand.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
@@ -4875,8 +4845,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     var type = this.type.rewrite(rewriter, new_parents);
     var where_clause = this.where_clause.rewrite(rewriter, new_parents);
     if (
-      async === this.async &&
-      coroutine === this.coroutine &&
+      modifiers === this.modifiers &&
       keyword === this.keyword &&
       ampersand === this.ampersand &&
       name === this.name &&
@@ -4893,8 +4862,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     else
     {
       return rewriter(new FunctionDeclarationHeader(
-        async,
-        coroutine,
+        modifiers,
         keyword,
         ampersand,
         name,
@@ -4909,12 +4877,9 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   static from_json(json, position, source)
   {
-    let async = EditableSyntax.from_json(
-      json.function_async, position, source);
-    position += async.width;
-    let coroutine = EditableSyntax.from_json(
-      json.function_coroutine, position, source);
-    position += coroutine.width;
+    let modifiers = EditableSyntax.from_json(
+      json.function_modifiers, position, source);
+    position += modifiers.width;
     let keyword = EditableSyntax.from_json(
       json.function_keyword, position, source);
     position += keyword.width;
@@ -4946,8 +4911,7 @@ class FunctionDeclarationHeader extends EditableSyntax
       json.function_where_clause, position, source);
     position += where_clause.width;
     return new FunctionDeclarationHeader(
-        async,
-        coroutine,
+        modifiers,
         keyword,
         ampersand,
         name,
@@ -4963,8 +4927,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   {
     if (FunctionDeclarationHeader._children_keys == null)
       FunctionDeclarationHeader._children_keys = [
-        'async',
-        'coroutine',
+        'modifiers',
         'keyword',
         'ampersand',
         'name',
@@ -5129,35 +5092,23 @@ class MethodishDeclaration extends EditableSyntax
 {
   constructor(
     attribute,
-    modifiers,
     function_decl_header,
     function_body,
     semicolon)
   {
     super('methodish_declaration', {
       attribute: attribute,
-      modifiers: modifiers,
       function_decl_header: function_decl_header,
       function_body: function_body,
       semicolon: semicolon });
   }
   get attribute() { return this.children.attribute; }
-  get modifiers() { return this.children.modifiers; }
   get function_decl_header() { return this.children.function_decl_header; }
   get function_body() { return this.children.function_body; }
   get semicolon() { return this.children.semicolon; }
   with_attribute(attribute){
     return new MethodishDeclaration(
       attribute,
-      this.modifiers,
-      this.function_decl_header,
-      this.function_body,
-      this.semicolon);
-  }
-  with_modifiers(modifiers){
-    return new MethodishDeclaration(
-      this.attribute,
-      modifiers,
       this.function_decl_header,
       this.function_body,
       this.semicolon);
@@ -5165,7 +5116,6 @@ class MethodishDeclaration extends EditableSyntax
   with_function_decl_header(function_decl_header){
     return new MethodishDeclaration(
       this.attribute,
-      this.modifiers,
       function_decl_header,
       this.function_body,
       this.semicolon);
@@ -5173,7 +5123,6 @@ class MethodishDeclaration extends EditableSyntax
   with_function_body(function_body){
     return new MethodishDeclaration(
       this.attribute,
-      this.modifiers,
       this.function_decl_header,
       function_body,
       this.semicolon);
@@ -5181,7 +5130,6 @@ class MethodishDeclaration extends EditableSyntax
   with_semicolon(semicolon){
     return new MethodishDeclaration(
       this.attribute,
-      this.modifiers,
       this.function_decl_header,
       this.function_body,
       semicolon);
@@ -5193,13 +5141,11 @@ class MethodishDeclaration extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var attribute = this.attribute.rewrite(rewriter, new_parents);
-    var modifiers = this.modifiers.rewrite(rewriter, new_parents);
     var function_decl_header = this.function_decl_header.rewrite(rewriter, new_parents);
     var function_body = this.function_body.rewrite(rewriter, new_parents);
     var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       attribute === this.attribute &&
-      modifiers === this.modifiers &&
       function_decl_header === this.function_decl_header &&
       function_body === this.function_body &&
       semicolon === this.semicolon)
@@ -5210,7 +5156,6 @@ class MethodishDeclaration extends EditableSyntax
     {
       return rewriter(new MethodishDeclaration(
         attribute,
-        modifiers,
         function_decl_header,
         function_body,
         semicolon), parents);
@@ -5221,9 +5166,6 @@ class MethodishDeclaration extends EditableSyntax
     let attribute = EditableSyntax.from_json(
       json.methodish_attribute, position, source);
     position += attribute.width;
-    let modifiers = EditableSyntax.from_json(
-      json.methodish_modifiers, position, source);
-    position += modifiers.width;
     let function_decl_header = EditableSyntax.from_json(
       json.methodish_function_decl_header, position, source);
     position += function_decl_header.width;
@@ -5235,7 +5177,6 @@ class MethodishDeclaration extends EditableSyntax
     position += semicolon.width;
     return new MethodishDeclaration(
         attribute,
-        modifiers,
         function_decl_header,
         function_body,
         semicolon);
@@ -5245,7 +5186,6 @@ class MethodishDeclaration extends EditableSyntax
     if (MethodishDeclaration._children_keys == null)
       MethodishDeclaration._children_keys = [
         'attribute',
-        'modifiers',
         'function_decl_header',
         'function_body',
         'semicolon'];

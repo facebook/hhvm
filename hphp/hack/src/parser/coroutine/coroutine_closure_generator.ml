@@ -43,14 +43,9 @@ let generate_constructor_method
   let sm_param = make_state_machine_parameter_syntax context function_type in
   let function_parameter_list =
     cont_param :: sm_param :: function_parameter_list in
-  let ctor = make_constructor_decl_header_syntax
-    constructor_member_name function_parameter_list in
   let call_parent_syntax =
     make_construct_parent_syntax [ continuation_variable_syntax ] in
-  make_methodish_declaration_syntax
-    ~modifiers:[ public_syntax; final_syntax; ]
-    ctor
-    [ call_parent_syntax; ]
+  make_constructor_syntax function_parameter_list call_parent_syntax
 
 let select_state_machine_syntax =
   make_member_selection_expression_syntax
@@ -77,10 +72,9 @@ let do_resume_body =
 
 let generate_do_resume_method function_type =
   make_methodish_declaration_syntax
-    (make_function_decl_header_syntax
-      do_resume_member_name
-      [ coroutine_data_parameter_syntax; nullable_exception_parameter_syntax; ]
-      (make_coroutine_result_type_syntax function_type))
+    do_resume_member_name
+    [ coroutine_data_parameter_syntax; nullable_exception_parameter_syntax; ]
+    (make_coroutine_result_type_syntax function_type)
     do_resume_body
 
 let generate_clone_body { CoroutineStateMachineData.parameters; properties; } =
@@ -151,7 +145,9 @@ let generate_clone_body { CoroutineStateMachineData.parameters; properties; } =
 
 let generate_clone_method state_machine_data =
   make_methodish_declaration_syntax
-    (make_function_decl_header_syntax clone_member_name [] this_type_syntax)
+    clone_member_name
+    []
+    this_type_syntax
     (generate_clone_body state_machine_data)
 
 let generate_closure_body

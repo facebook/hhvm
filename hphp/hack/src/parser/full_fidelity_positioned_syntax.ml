@@ -537,13 +537,11 @@ module FromMinimal = struct
         :: function_name
         :: function_ampersand
         :: function_keyword
-        :: function_coroutine
-        :: function_async
+        :: function_modifiers
         :: results
         ) ->
           FunctionDeclarationHeader
-          { function_async
-          ; function_coroutine
+          { function_modifiers
           ; function_keyword
           ; function_ampersand
           ; function_name
@@ -579,13 +577,11 @@ module FromMinimal = struct
       , (  methodish_semicolon
         :: methodish_function_body
         :: methodish_function_decl_header
-        :: methodish_modifiers
         :: methodish_attribute
         :: results
         ) ->
           MethodishDeclaration
           { methodish_attribute
-          ; methodish_modifiers
           ; methodish_function_decl_header
           ; methodish_function_body
           ; methodish_semicolon
@@ -2612,8 +2608,7 @@ module FromMinimal = struct
         let todo = Convert (function_declaration_header, todo) in
         convert offset todo results function_attribute_spec
     | { M.syntax = M.FunctionDeclarationHeader
-        { M.function_async
-        ; M.function_coroutine
+        { M.function_modifiers
         ; M.function_keyword
         ; M.function_ampersand
         ; M.function_name
@@ -2637,8 +2632,7 @@ module FromMinimal = struct
         let todo = Convert (function_name, todo) in
         let todo = Convert (function_ampersand, todo) in
         let todo = Convert (function_keyword, todo) in
-        let todo = Convert (function_coroutine, todo) in
-        convert offset todo results function_async
+        convert offset todo results function_modifiers
     | { M.syntax = M.WhereClause
         { M.where_clause_keyword
         ; M.where_clause_constraints
@@ -2659,7 +2653,6 @@ module FromMinimal = struct
         convert offset todo results where_constraint_left_type
     | { M.syntax = M.MethodishDeclaration
         { M.methodish_attribute
-        ; M.methodish_modifiers
         ; M.methodish_function_decl_header
         ; M.methodish_function_body
         ; M.methodish_semicolon
@@ -2669,7 +2662,6 @@ module FromMinimal = struct
         let todo = Convert (methodish_semicolon, todo) in
         let todo = Convert (methodish_function_body, todo) in
         let todo = Convert (methodish_function_decl_header, todo) in
-        let todo = Convert (methodish_modifiers, todo) in
         convert offset todo results methodish_attribute
     | { M.syntax = M.ClassishDeclaration
         { M.classish_attribute

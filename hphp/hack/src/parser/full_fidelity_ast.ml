@@ -182,8 +182,6 @@ let make_compound_statement nl =
 
 let missing = make_syntax Missing
 
-
-
 let token_kind : node -> TK.t option = function
   | { syntax = Token t; _ } -> Some (Token.kind t)
   | _ -> None
@@ -256,17 +254,30 @@ let pNullFlavor : og_null_flavor parser = fun node env ->
   | Some TK.MinusGreaterThan         -> OG_nullthrows
   | _ -> missing_syntax "null flavor" node env
 
-let pKinds : kind list parser = couldMap ~f:(fun node env ->
-  match token_kind node with
-  | Some TK.Final     -> Final
-  | Some TK.Static    -> Static
-  | Some TK.Abstract  -> Abstract
-  | Some TK.Private   -> Private
-  | Some TK.Public    -> Public
-  | Some TK.Protected -> Protected
-  | Some TK.Var       -> Public
-  | _ -> missing_syntax "kind" node env
-  )
+type modifiers = {
+  has_async: bool;
+  has_coroutine: bool;
+  kinds: kind list
+}
+
+let pModifiers node env =
+  let f (has_async, has_coroutine, kinds) node =
+    match token_kind node with
+    | Some TK.Final     -> has_async, has_coroutine, (Final :: kinds)
+    | Some TK.Static    -> has_async, has_coroutine, (Static :: kinds)
+    | Some TK.Abstract  -> has_async, has_coroutine, (Abstract :: kinds)
+    | Some TK.Private   -> has_async, has_coroutine, (Private :: kinds)
+    | Some TK.Public    -> has_async, has_coroutine, (Public :: kinds)
+    | Some TK.Protected -> has_async, has_coroutine, (Protected :: kinds)
+    | Some TK.Var       -> has_async, has_coroutine, (Public :: kinds)
+    | Some TK.Async     -> true, has_coroutine, kinds
+    | Some TK.Coroutine -> has_async, true, kinds
+    | _ -> missing_syntax "kind" node env in
+  let (has_async, has_coroutine, kinds) =
+    Core_list.fold_left ~init:(false, false, []) ~f (as_list node) in
+  { has_async; has_coroutine; kinds = List.rev kinds }
+
+let pKinds node env = (pModifiers node env).kinds
 
 let pParamKind : param_kind parser = fun node env ->
   match token_kind node with
@@ -399,12 +410,17 @@ type suspension_kind =
   | SKAsync
   | SKCoroutine
 
-let mk_suspension_kind async_node coroutine_node =
-  match is_missing async_node, is_missing coroutine_node with
-  | true, true -> SKSync
-  | false, true -> SKAsync
-  | true, false -> SKCoroutine
-  | false, false -> raise (Failure "Couroutine functions may not be async")
+let mk_suspension_kind_ has_async has_coroutine =
+  match has_async, has_coroutine with
+  | false, false -> SKSync
+  | true, false -> SKAsync
+  | false, true-> SKCoroutine
+  | true, true -> raise (Failure "Couroutine functions may not be async")
+
+let mk_suspension_kind is_async is_coroutine =
+  mk_suspension_kind_
+    (not (is_missing is_async))
+    (not (is_missing is_coroutine))
 
 let mk_fun_kind suspension_kind yield =
   match suspension_kind, yield with
@@ -1684,18 +1700,18 @@ and pTParaml : tparam list parser = fun node env ->
 and pFunHdr : fun_hdr parser = fun node env ->
   match syntax node with
   | FunctionDeclarationHeader
-    { function_async
-    ; function_coroutine
+    { function_modifiers
     ; function_ampersand
     ; function_name
     ; function_type_parameter_list
     ; function_parameter_list
     ; function_type
     ; _ } ->
+      let modifiers = pModifiers function_modifiers env in
       let fh_parameters = couldMap ~f:pFunParam function_parameter_list env in
       let fh_return_type = mpOptional pHint function_type env in
       let fh_suspension_kind =
-        mk_suspension_kind function_async function_coroutine in
+        mk_suspension_kind_ modifiers.has_async modifiers.has_coroutine in
       let fh_name = pos_name function_name env in
       let fh_type_parameters = pTParaml function_type_parameter_list env in
       let fh_param_modifiers =
@@ -1840,8 +1856,9 @@ and pClassElt : class_elt list parser = fun node env ->
       ]
   | MethodishDeclaration
     { methodish_attribute
-    ; methodish_modifiers
-    ; methodish_function_decl_header
+    ; methodish_function_decl_header = {
+        syntax = FunctionDeclarationHeader h; _
+      } as header
     ; methodish_function_body
     ; _ } ->
       let classvar_init : fun_param -> stmt * class_elt = fun param ->
@@ -1874,7 +1891,7 @@ and pClassElt : class_elt list parser = fun node env ->
           }
         )
       in
-      let hdr = pFunHdr methodish_function_decl_header env in
+      let hdr = pFunHdr header env in
       let member_init, member_def =
         List.unzip @@
           List.filter_map hdr.fh_parameters ~f:(fun p ->
@@ -1894,7 +1911,7 @@ and pClassElt : class_elt list parser = fun node env ->
          *)
         if env.quick_mode then [Noop] else body
       in
-      let kind = pKinds methodish_modifiers env in
+      let kind = pKinds h.function_modifiers env in
       member_def @ [Method
       { m_kind            = kind
       ; m_tparams         = hdr.fh_type_parameters

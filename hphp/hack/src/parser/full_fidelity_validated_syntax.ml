@@ -1003,15 +1003,13 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_name = validate_token x.Syntax.function_name
     ; function_ampersand = validate_option_with (validate_token) x.Syntax.function_ampersand
     ; function_keyword = validate_token x.Syntax.function_keyword
-    ; function_coroutine = validate_option_with (validate_token) x.Syntax.function_coroutine
-    ; function_async = validate_option_with (validate_token) x.Syntax.function_async
+    ; function_modifiers = validate_list_with (validate_token) x.Syntax.function_modifiers
     }
   | s -> validation_fail SyntaxKind.FunctionDeclarationHeader s
   and invalidate_function_declaration_header : function_declaration_header invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.FunctionDeclarationHeader
-      { Syntax.function_async = invalidate_option_with (invalidate_token) x.function_async
-      ; Syntax.function_coroutine = invalidate_option_with (invalidate_token) x.function_coroutine
+      { Syntax.function_modifiers = invalidate_list_with (invalidate_token) x.function_modifiers
       ; Syntax.function_keyword = invalidate_token x.function_keyword
       ; Syntax.function_ampersand = invalidate_option_with (invalidate_token) x.function_ampersand
       ; Syntax.function_name = invalidate_token x.function_name
@@ -1060,7 +1058,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { methodish_semicolon = validate_option_with (validate_token) x.Syntax.methodish_semicolon
     ; methodish_function_body = validate_option_with (validate_compound_statement) x.Syntax.methodish_function_body
     ; methodish_function_decl_header = validate_function_declaration_header x.Syntax.methodish_function_decl_header
-    ; methodish_modifiers = validate_list_with (validate_token) x.Syntax.methodish_modifiers
     ; methodish_attribute = validate_option_with (validate_attribute_specification) x.Syntax.methodish_attribute
     }
   | s -> validation_fail SyntaxKind.MethodishDeclaration s
@@ -1068,7 +1065,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.MethodishDeclaration
       { Syntax.methodish_attribute = invalidate_option_with (invalidate_attribute_specification) x.methodish_attribute
-      ; Syntax.methodish_modifiers = invalidate_list_with (invalidate_token) x.methodish_modifiers
       ; Syntax.methodish_function_decl_header = invalidate_function_declaration_header x.methodish_function_decl_header
       ; Syntax.methodish_function_body = invalidate_option_with (invalidate_compound_statement) x.methodish_function_body
       ; Syntax.methodish_semicolon = invalidate_option_with (invalidate_token) x.methodish_semicolon

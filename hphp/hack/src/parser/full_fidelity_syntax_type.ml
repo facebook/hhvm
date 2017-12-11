@@ -174,8 +174,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_body                                      : t
     }
   and function_declaration_header =
-    { function_async                                     : t
-    ; function_coroutine                                 : t
+    { function_modifiers                                 : t
     ; function_keyword                                   : t
     ; function_ampersand                                 : t
     ; function_name                                      : t
@@ -198,7 +197,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and methodish_declaration =
     { methodish_attribute                                : t
-    ; methodish_modifiers                                : t
     ; methodish_function_decl_header                     : t
     ; methodish_function_body                            : t
     ; methodish_semicolon                                : t
@@ -1574,8 +1572,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_body: compound_statement value
     }
   and function_declaration_header =
-    { function_async: Token.t option value
-    ; function_coroutine: Token.t option value
+    { function_modifiers: Token.t listesque value
     ; function_keyword: Token.t value
     ; function_ampersand: Token.t option value
     ; function_name: Token.t value
@@ -1598,7 +1595,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and methodish_declaration =
     { methodish_attribute: attribute_specification option value
-    ; methodish_modifiers: Token.t listesque value
     ; methodish_function_decl_header: function_declaration_header value
     ; methodish_function_body: compound_statement option value
     ; methodish_semicolon: Token.t option value

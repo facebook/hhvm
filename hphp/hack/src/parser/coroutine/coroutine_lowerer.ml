@@ -137,6 +137,9 @@ let lower_coroutine_function
       new_body in
   (closure_syntax, new_function_syntax)
 
+let has_coroutine_modifier n =
+  Core_list.exists (syntax_node_to_list n) ~f:is_coroutine
+
 let lower_coroutine_functions_and_types
     parents
     current_node
@@ -145,11 +148,11 @@ let lower_coroutine_functions_and_types
   | FunctionDeclaration {
       function_declaration_header = {
         syntax = FunctionDeclarationHeader ({
-          function_coroutine; _;
+          function_modifiers = m; _;
         } as header_node); _;
       };
       function_body; _;
-    } when not @@ is_missing function_coroutine ->
+    } when has_coroutine_modifier m ->
       let context = Coroutine_context.make_from_context
         current_node parents None in
       let (closure_syntax, new_function_syntax) = lower_coroutine_function
@@ -185,11 +188,11 @@ let lower_coroutine_functions_and_types
   | MethodishDeclaration {
       methodish_function_decl_header = {
         syntax = FunctionDeclarationHeader ({
-          function_coroutine; _;
+          function_modifiers = m; _;
         } as header_node); _;
       };
       methodish_function_body; _;
-    } when not @@ is_missing function_coroutine ->
+    } when has_coroutine_modifier m ->
     let context = Coroutine_context.make_from_context
       current_node parents None in
     let (new_header_node, new_body, closure_syntax) =

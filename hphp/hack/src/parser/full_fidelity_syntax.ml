@@ -427,6 +427,8 @@ module WithToken(Token: TokenType) = struct
     let is_protected  = is_specific_token Full_fidelity_token_kind.Protected
     let is_abstract   = is_specific_token Full_fidelity_token_kind.Abstract
     let is_final      = is_specific_token Full_fidelity_token_kind.Final
+    let is_async      = is_specific_token Full_fidelity_token_kind.Async
+    let is_coroutine  = is_specific_token Full_fidelity_token_kind.Coroutine
     let is_void       = is_specific_token Full_fidelity_token_kind.Void
     let is_left_brace = is_specific_token Full_fidelity_token_kind.LeftBrace
     let is_ellipsis   = is_specific_token Full_fidelity_token_kind.DotDotDot
@@ -631,8 +633,7 @@ module WithToken(Token: TokenType) = struct
     )
 
     let get_function_declaration_header_children {
-      function_async;
-      function_coroutine;
+      function_modifiers;
       function_keyword;
       function_ampersand;
       function_name;
@@ -644,8 +645,7 @@ module WithToken(Token: TokenType) = struct
       function_type;
       function_where_clause;
     } = (
-      function_async,
-      function_coroutine,
+      function_modifiers,
       function_keyword,
       function_ampersand,
       function_name,
@@ -678,13 +678,11 @@ module WithToken(Token: TokenType) = struct
 
     let get_methodish_declaration_children {
       methodish_attribute;
-      methodish_modifiers;
       methodish_function_decl_header;
       methodish_function_body;
       methodish_semicolon;
     } = (
       methodish_attribute,
-      methodish_modifiers,
       methodish_function_decl_header,
       methodish_function_body,
       methodish_semicolon
@@ -2528,8 +2526,7 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc function_body in
          acc
       | FunctionDeclarationHeader {
-        function_async;
-        function_coroutine;
+        function_modifiers;
         function_keyword;
         function_ampersand;
         function_name;
@@ -2541,8 +2538,7 @@ module WithToken(Token: TokenType) = struct
         function_type;
         function_where_clause;
       } ->
-         let acc = f acc function_async in
-         let acc = f acc function_coroutine in
+         let acc = f acc function_modifiers in
          let acc = f acc function_keyword in
          let acc = f acc function_ampersand in
          let acc = f acc function_name in
@@ -2572,13 +2568,11 @@ module WithToken(Token: TokenType) = struct
          acc
       | MethodishDeclaration {
         methodish_attribute;
-        methodish_modifiers;
         methodish_function_decl_header;
         methodish_function_body;
         methodish_semicolon;
       } ->
          let acc = f acc methodish_attribute in
-         let acc = f acc methodish_modifiers in
          let acc = f acc methodish_function_decl_header in
          let acc = f acc methodish_function_body in
          let acc = f acc methodish_semicolon in
@@ -4283,8 +4277,7 @@ module WithToken(Token: TokenType) = struct
         function_body;
       ]
       | FunctionDeclarationHeader {
-        function_async;
-        function_coroutine;
+        function_modifiers;
         function_keyword;
         function_ampersand;
         function_name;
@@ -4296,8 +4289,7 @@ module WithToken(Token: TokenType) = struct
         function_type;
         function_where_clause;
       } -> [
-        function_async;
-        function_coroutine;
+        function_modifiers;
         function_keyword;
         function_ampersand;
         function_name;
@@ -4327,13 +4319,11 @@ module WithToken(Token: TokenType) = struct
       ]
       | MethodishDeclaration {
         methodish_attribute;
-        methodish_modifiers;
         methodish_function_decl_header;
         methodish_function_body;
         methodish_semicolon;
       } -> [
         methodish_attribute;
-        methodish_modifiers;
         methodish_function_decl_header;
         methodish_function_body;
         methodish_semicolon;
@@ -6039,8 +6029,7 @@ module WithToken(Token: TokenType) = struct
         "function_body";
       ]
       | FunctionDeclarationHeader {
-        function_async;
-        function_coroutine;
+        function_modifiers;
         function_keyword;
         function_ampersand;
         function_name;
@@ -6052,8 +6041,7 @@ module WithToken(Token: TokenType) = struct
         function_type;
         function_where_clause;
       } -> [
-        "function_async";
-        "function_coroutine";
+        "function_modifiers";
         "function_keyword";
         "function_ampersand";
         "function_name";
@@ -6083,13 +6071,11 @@ module WithToken(Token: TokenType) = struct
       ]
       | MethodishDeclaration {
         methodish_attribute;
-        methodish_modifiers;
         methodish_function_decl_header;
         methodish_function_body;
         methodish_semicolon;
       } -> [
         "methodish_attribute";
-        "methodish_modifiers";
         "methodish_function_decl_header";
         "methodish_function_body";
         "methodish_semicolon";
@@ -7869,8 +7855,7 @@ module WithToken(Token: TokenType) = struct
           function_body;
         }
       | (SyntaxKind.FunctionDeclarationHeader, [
-          function_async;
-          function_coroutine;
+          function_modifiers;
           function_keyword;
           function_ampersand;
           function_name;
@@ -7883,8 +7868,7 @@ module WithToken(Token: TokenType) = struct
           function_where_clause;
         ]) ->
         FunctionDeclarationHeader {
-          function_async;
-          function_coroutine;
+          function_modifiers;
           function_keyword;
           function_ampersand;
           function_name;
@@ -7916,14 +7900,12 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.MethodishDeclaration, [
           methodish_attribute;
-          methodish_modifiers;
           methodish_function_decl_header;
           methodish_function_body;
           methodish_semicolon;
         ]) ->
         MethodishDeclaration {
           methodish_attribute;
-          methodish_modifiers;
           methodish_function_decl_header;
           methodish_function_body;
           methodish_semicolon;
@@ -9883,8 +9865,7 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_function_declaration_header
-        function_async
-        function_coroutine
+        function_modifiers
         function_keyword
         function_ampersand
         function_name
@@ -9897,8 +9878,7 @@ module WithToken(Token: TokenType) = struct
         function_where_clause
       =
         let syntax = FunctionDeclarationHeader {
-          function_async;
-          function_coroutine;
+          function_modifiers;
           function_keyword;
           function_ampersand;
           function_name;
@@ -9939,14 +9919,12 @@ module WithToken(Token: TokenType) = struct
 
       let make_methodish_declaration
         methodish_attribute
-        methodish_modifiers
         methodish_function_decl_header
         methodish_function_body
         methodish_semicolon
       =
         let syntax = MethodishDeclaration {
           methodish_attribute;
-          methodish_modifiers;
           methodish_function_decl_header;
           methodish_function_body;
           methodish_semicolon;

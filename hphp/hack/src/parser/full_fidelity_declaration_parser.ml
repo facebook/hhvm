@@ -1427,8 +1427,9 @@ module WithExpressionAndStatementAndTypeParser
     parse_function_declaration parser (make_missing parser)
 
   and parse_function_declaration parser attribute_specification =
+    let (parser, modifiers) = parse_modifiers parser in
     let (parser, header) =
-      parse_function_declaration_header parser ~is_methodish:false in
+      parse_function_declaration_header parser ~is_methodish:false modifiers in
     let (parser, body) = parse_compound_statement parser in
     let syntax = make_function_declaration
       attribute_specification header body in
@@ -1496,7 +1497,7 @@ module WithExpressionAndStatementAndTypeParser
     else
       parse_where_clause parser
 
-  and parse_function_declaration_header parser ~is_methodish =
+  and parse_function_declaration_header parser modifiers ~is_methodish =
     (* SPEC
       function-definition-header:
         attribute-specification-opt  async-opt  coroutine-opt  function  name  /
@@ -1509,8 +1510,6 @@ module WithExpressionAndStatementAndTypeParser
        at parse time but rather by a later pass. *)
     (* In non-strict mode we allow an & to appear before the name.
        In strict mode this produces an error during post-parsing. *)
-    let (parser, async_token) = optional_token parser Async in
-    let (parser, coroutine_token) = optional_token parser Coroutine in
     let (parser, function_token) = require_function parser in
     let (parser, ampersand_token) = optional_token parser Ampersand in
     let (parser, label) =
@@ -1524,8 +1523,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, where_clause) = parse_where_clause_opt parser in
     let syntax =
       make_function_declaration_header
-        async_token
-        coroutine_token
+        modifiers
         function_token
         ampersand_token
         label
@@ -1595,20 +1593,20 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_methodish parser attribute_spec modifiers =
     let (parser, header) =
-      parse_function_declaration_header parser ~is_methodish:true in
+      parse_function_declaration_header parser modifiers ~is_methodish:true in
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | LeftBrace ->
       let (parser, body) = parse_compound_statement parser in
       let syntax =
         make_methodish_declaration
-          attribute_spec modifiers header body (make_missing parser)in
+          attribute_spec header body (make_missing parser)in
       (parser, syntax)
     | Semicolon ->
       let semicolon = make_token token in
       let syntax =
         make_methodish_declaration
-          attribute_spec modifiers header (make_missing parser)
+          attribute_spec header (make_missing parser)
         semicolon in
       (parser1, syntax)
     | _ ->
@@ -1617,7 +1615,7 @@ module WithExpressionAndStatementAndTypeParser
       TODO: Is this the right error recovery? *)
       let error = make_error (make_token token) in
       let syntax = make_methodish_declaration
-        attribute_spec modifiers header error (make_missing parser) in
+        attribute_spec header error (make_missing parser) in
       let parser = with_error parser1 SyntaxError.error1041 in
       (parser, syntax)
 
@@ -1629,6 +1627,8 @@ module WithExpressionAndStatementAndTypeParser
     | Public
     | Protected
     | Private
+    | Async
+    | Coroutine
     | Final -> (parser1, Some (make_token token))
     | _ -> (parser, None)
 

@@ -509,8 +509,7 @@ let rec get_doc node =
       let after_attr = handle_compound_inline_brace header body missing in
       group_doc (attr ^| after_attr)
   | FunctionDeclarationHeader
-    { function_async;
-      function_coroutine;
+    { function_modifiers;
       function_keyword;
       function_ampersand;
       function_name;
@@ -522,11 +521,8 @@ let rec get_doc node =
       function_type;
       function_where_clause }
    ->
-    let preface = group_doc (
-      get_doc function_async
-        ^| get_doc function_coroutine
-        ^| get_doc function_keyword
-    ) in
+    let preface =
+      group_doc (get_doc function_modifiers ^| get_doc function_keyword) in
     let name_and_generics =
       let type_params = get_doc function_type_parameter_list in
       let ampersand = get_doc function_ampersand in
@@ -560,16 +556,14 @@ let rec get_doc node =
     let r = get_doc where_constraint_right_type in
     l ^| o ^| r
   | MethodishDeclaration
-    { methodish_attribute; methodish_modifiers; methodish_function_decl_header;
+    { methodish_attribute; methodish_function_decl_header;
       methodish_function_body; methodish_semicolon } ->
     let methodish_attr = get_doc methodish_attribute in
-    let methodish_modifiers = get_doc methodish_modifiers in
     let function_header = get_doc methodish_function_decl_header in
     let body_node = methodish_function_body in
     let semicolon = get_doc methodish_semicolon in
-    let before_body = group_doc (methodish_modifiers ^| function_header) in
     let after_attr =
-      handle_compound_inline_brace before_body body_node missing in
+      handle_compound_inline_brace function_header body_node missing in
     let after_attr = after_attr ^^^ semicolon in
     group_doc (methodish_attr ^| after_attr)
   | DecoratedExpression x ->

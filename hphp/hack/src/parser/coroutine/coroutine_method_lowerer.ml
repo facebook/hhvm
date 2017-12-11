@@ -31,6 +31,11 @@ let compute_parameter_list function_parameter_list function_type =
     coroutine_parameter_syntax
     function_parameter_list
 
+let remove_coroutine_modifier_from_modifiers_list modifiers =
+  syntax_node_to_list modifiers
+  |> Core_list.filter ~f:(fun c -> not (is_coroutine c))
+  |> make_list
+
 (**
  * If the provided function declaration header is for a coroutine, rewrites the
  * parameter list and return type as necessary to implement the coroutine.
@@ -41,9 +46,11 @@ let rewrite_function_decl_header header_node =
     make_coroutine_result_type_syntax header_node.function_type in
   let function_parameter_list = compute_parameter_list
     header_node.function_parameter_list header_node.function_type in
+  let function_modifiers = remove_coroutine_modifier_from_modifiers_list
+    header_node.function_modifiers in
   make_syntax
     { header_node with
-      function_coroutine = make_missing ();
+      function_modifiers;
       function_type;
       function_parameter_list;
     }

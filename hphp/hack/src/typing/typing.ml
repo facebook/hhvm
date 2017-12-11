@@ -2518,7 +2518,7 @@ and assign p env e1 ty2 : _ * T.expr * T.ty =
   assign_ p Reason.URassign env e1 ty2
 
 and assign_ p ur env e1 ty2 =
-  let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
+  let make_result env te1 ty1 = (env, T.make_typed_expr (fst e1) ty1 te1, ty1) in
   match e1 with
   | (_, Lvar ((_, x) as id)) ->
     let env, ty1 = set_valid_rvalue p env x ty2 in

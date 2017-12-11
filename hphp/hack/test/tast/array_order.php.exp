@@ -10,7 +10,7 @@
            [(AnnotatedAST.Expr
                (([13:3-13:13], Some array<string, _>),
                 (AnnotatedAST.Binop ((Eq None),
-                   (([13:3-13:13], Some array<string, _>),
+                   (([13:3-13:5], Some array<string, _>),
                     (AnnotatedAST.Lvar ([13:3-13:5], $x))),
                    (([13:8-13:13], Some array<string, _>),
                     (AnnotatedAST.Array
@@ -35,7 +35,7 @@
              (AnnotatedAST.Expr
                 (([14:3-14:13], Some array<_>),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([14:3-14:13], Some array<_>),
+                    (([14:3-14:5], Some array<_>),
                      (AnnotatedAST.Lvar ([14:3-14:5], $y))),
                     (([14:8-14:13], Some array<_>),
                      (AnnotatedAST.Array

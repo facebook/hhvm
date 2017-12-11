@@ -10,7 +10,7 @@
            [(AnnotatedAST.Expr
                (([3:3-3:15], Some array<int>),
                 (AnnotatedAST.Binop ((Eq None),
-                   (([3:3-3:15], Some array<int>),
+                   (([3:3-3:7], Some array<int>),
                     (AnnotatedAST.Lvar ([3:3-3:7], $arr))),
                    (([3:10-3:15], Some array<int>),
                     (AnnotatedAST.Array
@@ -28,7 +28,7 @@
              (AnnotatedAST.Expr
                 (([4:3-4:9], Some int),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([4:3-4:9], Some int),
+                    (([4:3-4:5], Some int),
                      (AnnotatedAST.Lvar ([4:3-4:5], $y))),
                     (([4:8-4:9], Some int),
                      (AnnotatedAST.Int ([4:8-4:9], "0")))
@@ -37,15 +37,15 @@
                 (([5:12-5:16], Some array<int>),
                  (AnnotatedAST.Lvar ([5:12-5:16], $arr))),
                 (AnnotatedAST.As_v
-                   (([5:12-5:16], Some int),
+                   (([5:20-5:25], Some int),
                     (AnnotatedAST.Unop (Uref,
-                       (([5:12-5:16], Some int),
+                       (([5:21-5:25], Some int),
                         (AnnotatedAST.Lvar ([5:21-5:25], $val)))
                        )))),
                 [(AnnotatedAST.Expr
                     (([6:5-6:17], Some int),
                      (AnnotatedAST.Binop ((Eq (Some Plus)),
-                        (([6:5-6:17], Some int),
+                        (([6:5-6:7], Some int),
                          (AnnotatedAST.Lvar ([6:5-6:7], $y))),
                         (([6:11-6:17], Some int),
                          (AnnotatedAST.Unop (Upincr,

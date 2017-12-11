@@ -28,7 +28,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
            [(AnnotatedAST.Expr
                (([5:3-5:9], Some int),
                 (AnnotatedAST.Binop ((Eq None),
-                   (([5:3-5:9], Some int),
+                   (([5:3-5:5], Some int),
                     (AnnotatedAST.Lvar ([5:3-5:5], $x))),
                    (([5:8-5:9], Some int),
                     (AnnotatedAST.Int ([5:8-5:9], "0")))
@@ -64,7 +64,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                        (AnnotatedAST.Expr
                           (([14:7-14:14], Some string),
                            (AnnotatedAST.Binop ((Eq None),
-                              (([14:7-14:14], Some string),
+                              (([14:7-14:9], Some string),
                                (AnnotatedAST.Lvar ([14:7-14:9], $x))),
                               (([14:12-14:14], Some string),
                                (AnnotatedAST.String ([14:12-14:14], "")))
@@ -95,7 +95,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                        (AnnotatedAST.Expr
                           (([20:7-20:16], Some bool),
                            (AnnotatedAST.Binop ((Eq None),
-                              (([20:7-20:16], Some bool),
+                              (([20:7-20:9], Some bool),
                                (AnnotatedAST.Lvar ([20:7-20:9], $x))),
                               (([20:12-20:16], Some bool), AnnotatedAST.True)
                               ))));
@@ -139,7 +139,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                        (AnnotatedAST.Expr
                           (([32:7-32:15], Some float),
                            (AnnotatedAST.Binop ((Eq None),
-                              (([32:7-32:15], Some float),
+                              (([32:7-32:9], Some float),
                                (AnnotatedAST.Lvar ([32:7-32:9], $x))),
                               (([32:12-32:15], Some float),
                                (AnnotatedAST.Float ([32:12-32:15], "1.0")))

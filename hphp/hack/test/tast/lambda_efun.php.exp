@@ -10,7 +10,7 @@
            [(AnnotatedAST.Expr
                (([13:3-13:9], Some int),
                 (AnnotatedAST.Binop ((Eq None),
-                   (([13:3-13:9], Some int),
+                   (([13:3-13:5], Some int),
                     (AnnotatedAST.Lvar ([13:3-13:5], $y))),
                    (([13:8-13:9], Some int),
                     (AnnotatedAST.Int ([13:8-13:9], "2")))
@@ -18,7 +18,7 @@
              (AnnotatedAST.Expr
                 (([15:3-15:10], Some [fun]),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([15:3-15:10], Some [fun]),
+                    (([15:3-15:5], Some [fun]),
                      (AnnotatedAST.Lvar ([15:3-15:5], $x))),
                     (([15:8-15:10], Some _),
                      (AnnotatedAST.Efun (
@@ -57,7 +57,7 @@
              (AnnotatedAST.Expr
                 (([16:3-16:13], Some int),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([16:3-16:13], Some int),
+                    (([16:3-16:5], Some int),
                      (AnnotatedAST.Lvar ([16:3-16:5], $l))),
                     (([16:8-16:13], Some int),
                      (AnnotatedAST.Call (Cnormal,
@@ -71,7 +71,7 @@
              (AnnotatedAST.Expr
                 (([18:3-18:16], Some [fun]),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([18:3-18:16], Some [fun]),
+                    (([18:3-18:5], Some [fun]),
                      (AnnotatedAST.Lvar ([18:3-18:5], $x))),
                     (([18:8-18:16], Some _),
                      (AnnotatedAST.Efun (
@@ -110,7 +110,7 @@
              (AnnotatedAST.Expr
                 (([23:3-23:9], Some [fun]),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([23:3-23:9], Some [fun]),
+                    (([23:3-23:5], Some [fun]),
                      (AnnotatedAST.Lvar ([23:3-23:5], $x))),
                     (([23:8-23:9], Some _),
                      (AnnotatedAST.Efun (
@@ -155,7 +155,7 @@
              (AnnotatedAST.Expr
                 (([24:3-24:17], Some int),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([24:3-24:17], Some int),
+                    (([24:3-24:5], Some int),
                      (AnnotatedAST.Lvar ([24:3-24:5], $l))),
                     (([24:8-24:17], Some int),
                      (AnnotatedAST.Call (Cnormal,

@@ -10,7 +10,7 @@
            [(AnnotatedAST.Static_var
                [(([4:10-4:17], Some int),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([4:10-4:17], Some int),
+                    (([4:10-4:12], Some int),
                      (AnnotatedAST.Lvar ([4:10-4:12], $x))),
                     (([4:15-4:17], Some int),
                      (AnnotatedAST.Int ([4:15-4:17], "42")))

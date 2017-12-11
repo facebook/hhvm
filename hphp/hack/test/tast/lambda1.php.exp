@@ -10,7 +10,7 @@
            [(AnnotatedAST.Expr
                (([3:3-3:13], Some string),
                 (AnnotatedAST.Binop ((Eq None),
-                   (([3:3-3:13], Some string),
+                   (([3:3-3:5], Some string),
                     (AnnotatedAST.Lvar ([3:3-3:5], $s))),
                    (([3:8-3:13], Some string),
                     (AnnotatedAST.String ([3:8-3:13], "foo")))
@@ -18,7 +18,7 @@
              (AnnotatedAST.Expr
                 (([4:3-4:10], Some [fun]),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([4:3-4:10], Some [fun]),
+                    (([4:3-4:5], Some [fun]),
                      (AnnotatedAST.Lvar ([4:3-4:5], $f))),
                     (([4:8-4:10], Some _),
                      (AnnotatedAST.Efun (
@@ -63,7 +63,7 @@
              (AnnotatedAST.Expr
                 (([5:3-5:13], Some string),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([5:3-5:13], Some string),
+                    (([5:3-5:5], Some string),
                      (AnnotatedAST.Lvar ([5:3-5:5], $x))),
                     (([5:8-5:13], Some string),
                      (AnnotatedAST.Call (Cnormal,
@@ -77,7 +77,7 @@
              (AnnotatedAST.Expr
                 (([6:3-6:17], Some string),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([6:3-6:17], Some string),
+                    (([6:3-6:5], Some string),
                      (AnnotatedAST.Lvar ([6:3-6:5], $y))),
                     (([6:8-6:17], Some string),
                      (AnnotatedAST.Call (Cnormal,

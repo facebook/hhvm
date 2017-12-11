@@ -19,7 +19,7 @@
              (AnnotatedAST.Expr
                 (([10:3-10:17], Some string),
                  (AnnotatedAST.Binop ((Eq None),
-                    (([10:3-10:17], Some string),
+                    (([10:3-10:8], Some string),
                      (AnnotatedAST.Lvar ([10:3-10:8], $derp))),
                     (([10:11-10:17], Some string),
                      (AnnotatedAST.String ([10:11-10:17], "derp")))

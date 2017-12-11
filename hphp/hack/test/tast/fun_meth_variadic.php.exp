@@ -32,7 +32,7 @@
                 (([6:12-6:17], Some varray<string>),
                  (AnnotatedAST.Lvar ([6:12-6:17], $args))),
                 (AnnotatedAST.As_v
-                   (([6:12-6:17], Some string),
+                   (([6:21-6:25], Some string),
                     (AnnotatedAST.Lvar ([6:21-6:25], $arg)))),
                 [(AnnotatedAST.Expr
                     (([7:5-7:23], Some void),

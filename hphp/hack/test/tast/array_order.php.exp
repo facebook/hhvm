@@ -35,8 +35,7 @@
              (AnnotatedAST.Expr
                 ((Some array<_>),
                  (AnnotatedAST.Binop ((Eq None),
-                    ((Some array<_>),
-                     (AnnotatedAST.Lvar (<p>, $y))),
+                    ((Some array<_>), (AnnotatedAST.Lvar (<p>, $y))),
                     ((Some array<_>),
                      (AnnotatedAST.Array
                         [(AnnotatedAST.AFvalue

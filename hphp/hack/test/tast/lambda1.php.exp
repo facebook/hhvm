@@ -11,8 +11,7 @@
                ((Some string),
                 (AnnotatedAST.Binop ((Eq None),
                    ((Some string), (AnnotatedAST.Lvar (<p>, $s))),
-                   ((Some string),
-                    (AnnotatedAST.String (<p>, "foo")))
+                   ((Some string), (AnnotatedAST.String (<p>, "foo")))
                    ))));
              (AnnotatedAST.Expr
                 ((Some [fun]),
@@ -64,11 +63,9 @@
                     ((Some string), (AnnotatedAST.Lvar (<p>, $x))),
                     ((Some string),
                      (AnnotatedAST.Call (Cnormal,
-                        ((Some [fun]),
-                         (AnnotatedAST.Lvar (<p>, $f))),
+                        ((Some [fun]), (AnnotatedAST.Lvar (<p>, $f))),
                         [],
-                        [((Some int),
-                          (AnnotatedAST.Int (<p>, "4")))],
+                        [((Some int), (AnnotatedAST.Int (<p>, "4")))],
                         [])))
                     ))));
              (AnnotatedAST.Expr
@@ -77,8 +74,7 @@
                     ((Some string), (AnnotatedAST.Lvar (<p>, $y))),
                     ((Some string),
                      (AnnotatedAST.Call (Cnormal,
-                        ((Some [fun]),
-                         (AnnotatedAST.Lvar (<p>, $f))),
+                        ((Some [fun]), (AnnotatedAST.Lvar (<p>, $f))),
                         [],
                         [((Some string),
                           (AnnotatedAST.String (<p>, "bar")))],

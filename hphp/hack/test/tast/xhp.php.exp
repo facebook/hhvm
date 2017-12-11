@@ -19,8 +19,7 @@
              (AnnotatedAST.Expr
                 ((Some string),
                  (AnnotatedAST.Binop ((Eq None),
-                    ((Some string),
-                     (AnnotatedAST.Lvar (<p>, $derp))),
+                    ((Some string), (AnnotatedAST.Lvar (<p>, $derp))),
                     ((Some string),
                      (AnnotatedAST.String (<p>, "derp")))
                     ))));
@@ -43,11 +42,9 @@
                       ],
                     [((Some \:foo),
                       (AnnotatedAST.Xml ((<p>, "\\:foo"),
-                         [(AnnotatedAST.Xhp_simple (
-                             (<p>, "bar"),
+                         [(AnnotatedAST.Xhp_simple ((<p>, "bar"),
                              ((Some string),
-                              (AnnotatedAST.String
-                                 (<p>, "derp")))
+                              (AnnotatedAST.String (<p>, "derp")))
                              ))
                            ],
                          [((Some \:foo),

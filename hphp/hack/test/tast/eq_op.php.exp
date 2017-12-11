@@ -30,8 +30,7 @@
              (AnnotatedAST.Expr
                 ((Some array<int>),
                  (AnnotatedAST.Binop ((Eq None),
-                    ((Some array<int>),
-                     (AnnotatedAST.Lvar (<p>, $arr))),
+                    ((Some array<int>), (AnnotatedAST.Lvar (<p>, $arr))),
                     ((Some array<int>),
                      (AnnotatedAST.Array
                         [(AnnotatedAST.AFvalue
@@ -70,8 +69,7 @@
                         ))),
                     ((Some int), (AnnotatedAST.Int (<p>, "4")))))));
              (AnnotatedAST.Return (<p>,
-                (Some ((Some int),
-                       (AnnotatedAST.Lvar (<p>, $x))))
+                (Some ((Some int), (AnnotatedAST.Lvar (<p>, $x))))
                 ))
              ];
            fnb_unsafe = false });

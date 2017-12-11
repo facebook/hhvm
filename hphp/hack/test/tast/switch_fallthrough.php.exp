@@ -33,14 +33,14 @@ File "switch_fallthrough.php", line 37, characters 3-13:
              (AnnotatedAST.Expr
                 ((Some _),
                  (AnnotatedAST.Call (Cnormal,
-                    (None, (AnnotatedAST.Id (<p>, "\\hh_show"))),
+                    (None, (AnnotatedAST.Id (<p>, "\\hh_show"))), 
                     [],
-                    [((Some int), (AnnotatedAST.Lvar (<p>, $x)))],
+                    [((Some int), (AnnotatedAST.Lvar (<p>, $x)))], 
                     []))));
              (AnnotatedAST.Switch (
                 ((Some int), (AnnotatedAST.Lvar (<p>, $x))),
                 [(AnnotatedAST.Case (
-                    ((Some int), (AnnotatedAST.Int (<p>, "0"))),
+                    ((Some int), (AnnotatedAST.Int (<p>, "0"))), 
                     []));
                   (AnnotatedAST.Case (
                      ((Some int), (AnnotatedAST.Int (<p>, "1"))),
@@ -48,8 +48,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                          ((Some _),
                           (AnnotatedAST.Call (Cnormal,
                              (None,
-                              (AnnotatedAST.Id
-                                 (<p>, "\\hh_show"))),
+                              (AnnotatedAST.Id (<p>, "\\hh_show"))),
                              [],
                              [((Some int),
                                (AnnotatedAST.Lvar (<p>, $x)))],
@@ -66,8 +65,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                           ((Some _),
                            (AnnotatedAST.Call (Cnormal,
                               (None,
-                               (AnnotatedAST.Id
-                                  (<p>, "\\hh_show"))),
+                               (AnnotatedAST.Id (<p>, "\\hh_show"))),
                               [],
                               [((Some string),
                                 (AnnotatedAST.Lvar (<p>, $x)))],
@@ -80,8 +78,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                          ((Some _),
                           (AnnotatedAST.Call (Cnormal,
                              (None,
-                              (AnnotatedAST.Id
-                                 (<p>, "\\hh_show"))),
+                              (AnnotatedAST.Id (<p>, "\\hh_show"))),
                              [],
                              [((Some (int | string)),
                                (AnnotatedAST.Lvar (<p>, $x)))],
@@ -96,8 +93,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                           ((Some _),
                            (AnnotatedAST.Call (Cnormal,
                               (None,
-                               (AnnotatedAST.Id
-                                  (<p>, "\\hh_show"))),
+                               (AnnotatedAST.Id (<p>, "\\hh_show"))),
                               [],
                               [((Some bool),
                                 (AnnotatedAST.Lvar (<p>, $x)))],
@@ -110,8 +106,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                          ((Some _),
                           (AnnotatedAST.Call (Cnormal,
                              (None,
-                              (AnnotatedAST.Id
-                                 (<p>, "\\hh_show"))),
+                              (AnnotatedAST.Id (<p>, "\\hh_show"))),
                              [],
                              [((Some (string | bool | int)),
                                (AnnotatedAST.Lvar (<p>, $x)))],
@@ -124,8 +119,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                          ((Some _),
                           (AnnotatedAST.Call (Cnormal,
                              (None,
-                              (AnnotatedAST.Id
-                                 (<p>, "\\hh_show"))),
+                              (AnnotatedAST.Id (<p>, "\\hh_show"))),
                              [],
                              [((Some int),
                                (AnnotatedAST.Lvar (<p>, $x)))],
@@ -142,8 +136,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                           ((Some _),
                            (AnnotatedAST.Call (Cnormal,
                               (None,
-                               (AnnotatedAST.Id
-                                  (<p>, "\\hh_show"))),
+                               (AnnotatedAST.Id (<p>, "\\hh_show"))),
                               [],
                               [((Some float),
                                 (AnnotatedAST.Lvar (<p>, $x)))],

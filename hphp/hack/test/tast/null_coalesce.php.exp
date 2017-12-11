@@ -16,8 +16,7 @@
            [(AnnotatedAST.Return (<p>,
                (Some ((Some int),
                       (AnnotatedAST.NullCoalesce (
-                         ((Some ?int),
-                          (AnnotatedAST.Lvar (<p>, $x))),
+                         ((Some ?int), (AnnotatedAST.Lvar (<p>, $x))),
                          ((Some int), (AnnotatedAST.Int (<p>, "0")))
                          ))))
                ))

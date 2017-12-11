@@ -597,7 +597,7 @@ let test_decl_compare filename popt files_contents tcopt files_info =
 
 (* Strip output of position information *)
 let filter_positions s = (Str.global_replace
-  (Str.regexp "\\[L[0-9]+:[0-9]+-L[0-9]+:[0-9]+\\]") "<p>" s)
+  (Str.regexp "\\[[0-9]+:[0-9]+-[0-9]+:[0-9]+\\]") "<p>" s)
 
 (* Returns a list of Tast defs, along with associated type environments. *)
 let get_tast opts filename files_info =

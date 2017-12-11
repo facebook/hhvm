@@ -33,16 +33,14 @@
                       ((Some int),
                        (AnnotatedAST.Obj_get (
                           ((Some <static>), AnnotatedAST.This),
-                          ((Some int),
-                           (AnnotatedAST.Id (<p>, "foo"))),
+                          ((Some int), (AnnotatedAST.Id (<p>, "foo"))),
                           OG_nullthrows))))
                     ],
                   [AnnotatedAST.Noop]))
                 ];
               fnb_unsafe = false });
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some (<p>, (Hprim Tvoid))); m_ret_by_ref = false
-         }
+         m_ret = (Some (<p>, (Hprim Tvoid))); m_ret_by_ref = false }
         ];
       c_user_attributes = []; c_enum = None })
   ]

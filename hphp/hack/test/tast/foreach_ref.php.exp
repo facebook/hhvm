@@ -10,13 +10,11 @@
            [(AnnotatedAST.Expr
                ((Some array<int>),
                 (AnnotatedAST.Binop ((Eq None),
-                   ((Some array<int>),
-                    (AnnotatedAST.Lvar (<p>, $arr))),
+                   ((Some array<int>), (AnnotatedAST.Lvar (<p>, $arr))),
                    ((Some array<int>),
                     (AnnotatedAST.Array
                        [(AnnotatedAST.AFvalue
-                           ((Some int),
-                            (AnnotatedAST.Int (<p>, "1"))));
+                           ((Some int), (AnnotatedAST.Int (<p>, "1"))));
                          (AnnotatedAST.AFvalue
                             ((Some int),
                              (AnnotatedAST.Int (<p>, "2"))));
@@ -59,8 +57,7 @@
                       (AnnotatedAST.Lvar (<p>, $arr)))],
                     []))));
              (AnnotatedAST.Return (<p>,
-                (Some ((Some int), (AnnotatedAST.Lvar (<p>, $y))))
-                ))
+                (Some ((Some int), (AnnotatedAST.Lvar (<p>, $y))))))
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })

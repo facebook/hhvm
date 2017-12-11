@@ -9,8 +9,7 @@
       [{ AnnotatedAST.cv_final = false; cv_is_xhp = false;
          cv_visibility = Private;
          cv_type =
-         (Some (<p>,
-                (Hoption (<p>, (Hprim Tint)))));
+         (Some (<p>, (Hoption (<p>, (Hprim Tint)))));
          cv_id = (<p>, "x");
          cv_expr = (Some ((Some ?_), AnnotatedAST.Null));
          cv_user_attributes = [] }
@@ -43,8 +42,7 @@
                 ];
               fnb_unsafe = false });
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some (<p>, (Hprim Tint)));
-         m_ret_by_ref = false }
+         m_ret = (Some (<p>, (Hprim Tint))); m_ret_by_ref = false }
         ];
       c_methods = []; c_user_attributes = []; c_enum = None })
   ]

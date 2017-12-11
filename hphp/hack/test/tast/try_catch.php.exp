@@ -11,27 +11,23 @@
                ((Some int),
                 (AnnotatedAST.Binop ((Eq None),
                    ((Some int), (AnnotatedAST.Lvar (<p>, $a))),
-                   ((Some int), (AnnotatedAST.Int (<p>, "23")))
-                   ))));
+                   ((Some int), (AnnotatedAST.Int (<p>, "23")))))));
              (AnnotatedAST.Try (
                 [(AnnotatedAST.Expr
                     ((Some int),
                      (AnnotatedAST.Binop ((Eq None),
-                        ((Some int),
-                         (AnnotatedAST.Lvar (<p>, $a))),
+                        ((Some int), (AnnotatedAST.Lvar (<p>, $a))),
                         ((Some int),
                          (AnnotatedAST.Int (<p>, "456")))
                         ))))
                   ],
-                [((<p>, "\\YourException"),
-                  (<p>, $e),
+                [((<p>, "\\YourException"), (<p>, $e),
                   [(AnnotatedAST.Return (<p>,
                       (Some ((Some int),
                              (AnnotatedAST.Lvar (<p>, $a))))
                       ))
                     ]);
-                  ((<p>, "\\MyException"),
-                   (<p>, $e),
+                  ((<p>, "\\MyException"), (<p>, $e),
                    [(AnnotatedAST.Expr
                        ((Some string),
                         (AnnotatedAST.Binop ((Eq None),
@@ -45,8 +41,7 @@
                                (AnnotatedAST.Int (<p>, "23904"))))
                         ))
                      ]);
-                  ((<p>, "\\Exception"),
-                   (<p>, $e),
+                  ((<p>, "\\Exception"), (<p>, $e),
                    [(AnnotatedAST.Return (<p>,
                        (Some ((Some int),
                               (AnnotatedAST.Lvar (<p>, $a))))
@@ -56,16 +51,13 @@
                 [(AnnotatedAST.Expr
                     ((Some int),
                      (AnnotatedAST.Binop ((Eq None),
-                        ((Some int),
-                         (AnnotatedAST.Lvar (<p>, $a))),
-                        ((Some int),
-                         (AnnotatedAST.Int (<p>, "4")))
+                        ((Some int), (AnnotatedAST.Lvar (<p>, $a))),
+                        ((Some int), (AnnotatedAST.Int (<p>, "4")))
                         ))))
                   ]
                 ));
              (AnnotatedAST.Return (<p>,
-                (Some ((Some int),
-                       (AnnotatedAST.Lvar (<p>, $a))))
+                (Some ((Some int), (AnnotatedAST.Lvar (<p>, $a))))
                 ))
              ];
            fnb_unsafe = false });

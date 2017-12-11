@@ -22,9 +22,8 @@
        (AnnotatedAST.FVvariadicArg
           { AnnotatedAST.param_hint = (Some (<p>, (Hprim Tstring)));
             param_is_reference = false; param_is_variadic = true;
-            param_pos = <p>; param_name = "$args";
-            param_expr = None; param_callconv = None;
-            param_user_attributes = [] });
+            param_pos = <p>; param_name = "$args"; param_expr = None;
+            param_callconv = None; param_user_attributes = [] });
        f_params = [];
        f_body =
        (AnnotatedAST.NamedBody
@@ -33,8 +32,7 @@
                 ((Some varray<string>),
                  (AnnotatedAST.Lvar (<p>, $args))),
                 (AnnotatedAST.As_v
-                   ((Some string),
-                    (AnnotatedAST.Lvar (<p>, $arg)))),
+                   ((Some string), (AnnotatedAST.Lvar (<p>, $arg)))),
                 [(AnnotatedAST.Expr
                     ((Some void),
                      (AnnotatedAST.Call (Cnormal,
@@ -51,13 +49,12 @@
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
   (AnnotatedAST.Class
      { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
-       c_is_xhp = false; c_kind = Cnormal;
-       c_name = (<p>, "\\C1"); c_tparams = <opaque>;
-       c_extends = []; c_uses = []; c_xhp_attr_uses = [];
-       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
-       c_implements = []; c_consts = []; c_typeconsts = [];
-       c_static_vars = []; c_vars = []; c_constructor = None;
-       c_static_methods = [];
+       c_is_xhp = false; c_kind = Cnormal; c_name = (<p>, "\\C1");
+       c_tparams = <opaque>; c_extends = []; c_uses = [];
+       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
+       c_req_implements = []; c_implements = []; c_consts = [];
+       c_typeconsts = []; c_static_vars = []; c_vars = [];
+       c_constructor = None; c_static_methods = [];
        c_methods =
        [{ AnnotatedAST.m_annotation = (); m_final = false;
           m_abstract = false; m_visibility = Public;
@@ -75,8 +72,8 @@
              { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop];
                fnb_unsafe = false });
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some (<p>, (Hprim Tvoid)));
-          m_ret_by_ref = false }
+          m_ret = (Some (<p>, (Hprim Tvoid))); m_ret_by_ref = false
+          }
          ];
        c_user_attributes = []; c_enum = None })
   ]

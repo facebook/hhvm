@@ -29,14 +29,12 @@
                     ((Some int), AnnotatedAST.Null),
                     ((Some int), (AnnotatedAST.Lvar (<p>, $x)))))),
                 [(AnnotatedAST.Return (<p>,
-                    (Some ((Some int),
-                           (AnnotatedAST.Int (<p>, "2"))))
+                    (Some ((Some int), (AnnotatedAST.Int (<p>, "2"))))
                     ))
                   ],
                 [AnnotatedAST.Noop]));
              (AnnotatedAST.Return (<p>,
-                (Some ((Some int), (AnnotatedAST.Int (<p>, "0"))))
-                ))
+                (Some ((Some int), (AnnotatedAST.Int (<p>, "0"))))))
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })

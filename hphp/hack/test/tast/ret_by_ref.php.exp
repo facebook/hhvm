@@ -14,8 +14,7 @@
                     ((Some int), (AnnotatedAST.Int (<p>, "42"))))))
                  ]);
              (AnnotatedAST.Return (<p>,
-                (Some ((Some int), (AnnotatedAST.Lvar (<p>, $x))))
-                ))
+                (Some ((Some int), (AnnotatedAST.Lvar (<p>, $x))))))
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = true });
@@ -49,15 +48,13 @@
                    (Some ((Some int),
                           (AnnotatedAST.Obj_get (
                              ((Some <static>), AnnotatedAST.This),
-                             (None,
-                              (AnnotatedAST.Id (<p>, "x"))),
+                             (None, (AnnotatedAST.Id (<p>, "x"))),
                              OG_nullthrows))))
                    ))
                  ];
                fnb_unsafe = false });
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some (<p>, (Hprim Tint)));
-          m_ret_by_ref = true }
+          m_ret = (Some (<p>, (Hprim Tint))); m_ret_by_ref = true }
          ];
        c_user_attributes = []; c_enum = None })
   ]

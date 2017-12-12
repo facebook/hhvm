@@ -496,7 +496,7 @@ module LazyCheckKind : CheckKindType = struct
   let get_new_env
       ~old_env
       ~files_info
-      ~errorl:_
+      ~errorl
       ~failed_parsing:_
       ~failed_naming
       ~failed_decl:_
@@ -508,6 +508,7 @@ module LazyCheckKind : CheckKindType = struct
       Relative_path.Set.union old_env.needs_recheck lazy_check_later in
     { old_env with
        files_info;
+       errorl;
        failed_naming;
        ide_needs_parsing = Relative_path.Set.empty;
        needs_phase2_redecl;
@@ -561,6 +562,10 @@ end = functor(CheckKind:CheckKindType) -> struct
     debug_print_path_set genv "files_to_parse" files_to_parse;
     let fast_parsed, errorl, failed_parsing =
       parsing genv env files_to_parse ~stop_at_errors in
+
+    let incremental_errors = env.errorl in
+    let incremental_errors = Errors.(incremental_update_set incremental_errors
+      errorl files_to_parse Parsing) in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.parsing_end t hs ~parsed_count:reparse_count;
@@ -581,6 +586,8 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     (* NAMING *)
     let errorl', failed_naming, fast = declare_names env fast_parsed in
+    let incremental_errors = Errors.(incremental_update_map incremental_errors
+      errorl' fast Naming) in
     (* failed_naming can be a superset of keys in fast - see comment in
      * NamingGlobal.ndecl_file *)
     let fast = extend_fast fast files_info failed_naming in
@@ -633,6 +640,9 @@ end = functor(CheckKind:CheckKindType) -> struct
       Decl_redecl_service.redo_type_decl ~bucket_size genv.workers
         env.tcopt oldified_defs fast_redecl_phase2_now defs_to_redecl_phase2 in
 
+    let incremental_errors = Errors.(incremental_update_map incremental_errors
+      errorl' fast_redecl_phase2_now Decl) in
+
     let needs_phase2_redecl = diff_set_and_map_keys
       (* Redaclaration delayed before and now. *)
       (union_set_and_map_keys env.needs_phase2_redecl lazy_decl_later)
@@ -678,8 +688,14 @@ end = functor(CheckKind:CheckKindType) -> struct
         (Errors.merge errorl' ae),
         (Relative_path.Set.union af failed_check)
     in
+
+    let incremental_errors = Errors.(incremental_update_map incremental_errors
+      errorl' fast Typing) in
     let errorl = Errors.merge errorl' errorl in
 
+    (* errorl is a subset of incremental_errors that was computed in this
+     * recheck. TODO: remove errorl after making Diagnostic_subscription.update
+     * work with incremental_errors *)
     let diag_subscribe = Option.map old_env.diag_subscribe
       ~f:(fun x -> Diagnostic_subscription.update
         x env.editor_open_files fast errorl) in
@@ -694,7 +710,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let new_env = CheckKind.get_new_env
       old_env
       files_info
-      errorl
+      incremental_errors
       failed_parsing
       failed_naming
       failed_decl

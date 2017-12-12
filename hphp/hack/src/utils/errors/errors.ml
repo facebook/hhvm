@@ -74,8 +74,8 @@ let files_t_to_list x =
 let list_to_files_t = function
   | [] -> Relative_path.Map.empty
   | x ->
-    (* TODO: assert in incremental mode code that default paths don't
-     * leak there. *)
+    (* Values constructed here should not be used with incremental mode.
+     * See assert in incremental_update. *)
     Relative_path.Map.singleton Relative_path.default
       (PhaseMap.singleton Typing x)
 
@@ -514,6 +514,65 @@ and merge (err',fixmes') (err,fixmes) =
   let append = fun _ x y -> List.rev_append x y in
   files_t_merge ~f:append err' err,
   files_t_merge ~f:append fixmes' fixmes
+
+and incremental_update :
+  (* Need to write out the entire ugly type to convince OCaml it's polymorphic
+   * and can update both error_map as well as applied_fixmes map *)
+  type a .
+    a files_t ->
+    a files_t ->
+    (* function folding over paths of rechecked files *)
+    (a files_t -> (Relative_path.t -> a files_t -> a files_t) -> a files_t) ->
+    phase ->
+    a files_t
+  = fun old new_ fold phase ->
+  (* Helper to remove acc[path][phase]. If acc[path] becomes empty afterwards,
+   * remove it too (i.e do not store empty maps or lists ever). *)
+  let remove path phase acc =
+    let new_phase_map = match Relative_path.Map.get acc path with
+      | None -> None
+      | Some phase_map ->
+        let new_phase_map = PhaseMap.remove phase_map phase in
+        if PhaseMap.is_empty new_phase_map then None else Some new_phase_map
+    in
+    match new_phase_map with
+    | None -> Relative_path.Map.remove acc path
+    | Some x -> Relative_path.Map.add acc path x
+  in
+  (* Replace old errors with new *)
+  let res = files_t_merge old new_ ~f:begin fun path _old new_ ->
+    if path = Relative_path.default then
+      Utils.assert_false_log_backtrace (Some(
+        "Default (untracked) error sources should not get into incremental " ^
+        "mode. There might be a missing call to Errors.do_with_context/" ^
+        "run_in_context somwhere or incorrectly used Errors.from_error_list"
+      ));
+    new_
+  end in
+  (* For files that were rechecked, but had no errors - remove them from maps *)
+  fold res begin fun path acc ->
+    let has_errors =
+      match Relative_path.Map.get new_ path with
+      | None -> false
+      | Some phase_map -> PhaseMap.mem phase_map phase
+    in
+    if has_errors then acc
+    else remove path phase acc
+  end
+
+and incremental_update_set ~old ~new_ ~rechecked phase =
+  let fold = fun init g -> Relative_path.Set.fold  ~f:begin fun path acc ->
+    g path acc
+  end ~init rechecked in
+  (incremental_update (fst old) (fst new_) fold phase),
+  (incremental_update (snd old) (snd new_) fold phase)
+
+and incremental_update_map ~old ~new_ ~rechecked phase =
+  let fold = fun init g -> Relative_path.Map.fold ~f:begin fun path _ acc ->
+    g path acc
+  end ~init rechecked in
+  (incremental_update (fst old) (fst new_) fold phase),
+  (incremental_update (snd old) (snd new_) fold phase)
 
 and empty = (Relative_path.Map.empty, Relative_path.Map.empty)
 and is_empty (err, _fixmes) = Relative_path.Map.is_empty err

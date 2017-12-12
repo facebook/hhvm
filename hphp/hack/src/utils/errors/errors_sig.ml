@@ -380,6 +380,12 @@ module type S = sig
   val to_absolute : error -> Pos.absolute error_
 
   val merge : t -> t -> t
+
+  val incremental_update_set:
+    old:t -> new_:t -> rechecked:Relative_path.Set.t -> phase -> t
+  val incremental_update_map:
+    old:t -> new_:t -> rechecked:'a Relative_path.Map.t -> phase -> t
+
   val empty : t
   val is_empty : t -> bool
   val get_error_list : t -> error list

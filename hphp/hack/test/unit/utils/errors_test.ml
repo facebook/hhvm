@@ -137,6 +137,63 @@ let test_phases () =
     "Errors from earlier phase should come first";
   true
 
+let test_incremental_update () =
+  let a_path = create_path "A" in
+  let b_path = create_path "B" in
+
+  let foo_error_a, (), _ =
+  Errors.do_with_context a_path Errors.Parsing begin fun () ->
+    error_in "foo";
+    ()
+  end in
+  let bar_error_a, (), _ =
+    Errors.do_with_context a_path Errors.Parsing begin fun () ->
+    error_in "bar";
+    ()
+  end in
+  let baz_error_b, (), _ =
+    Errors.do_with_context b_path Errors.Parsing begin fun () ->
+    error_in "baz";
+    ()
+  end in
+
+  let errors = Errors.incremental_update_set
+    ~old:foo_error_a
+    ~new_:bar_error_a
+    ~rechecked:(Relative_path.Set.singleton a_path)
+    Errors.Parsing
+  in
+  let expected =
+    "File \"/bar\", line 0, characters 0--1:\n (Parsing[1002])\n\n" in
+  Asserter.String_asserter.assert_equals expected
+    (Errors.get_error_list errors |> error_list_to_string )
+    "Incremental update should overwrite foo error with bar.";
+
+  let errors = Errors.incremental_update_set
+    ~old:foo_error_a
+    ~new_:baz_error_b
+    ~rechecked:(Relative_path.Set.singleton b_path)
+    Errors.Parsing
+  in
+  let expected =
+    "File \"/foo\", line 0, characters 0--1:\n (Parsing[1002])\n\n" ^
+    "File \"/baz\", line 0, characters 0--1:\n (Parsing[1002])\n\n"
+  in
+  Asserter.String_asserter.assert_equals expected
+    (Errors.get_error_list errors |> error_list_to_string )
+    "Incremental update should add baz error and leave foo error unchanged";
+
+  let errors = Errors.incremental_update_set
+    ~old:foo_error_a
+    ~new_:Errors.empty
+    ~rechecked:(Relative_path.Set.singleton a_path)
+    Errors.Parsing
+  in
+  Asserter.Bool_asserter.assert_equals true
+    (Errors.is_empty errors)
+    "Incremental update should clear errors if a rechecked file has no errors";
+  true
+
 let tests = [
   "test", test_do;
   "test_get_sorted_error_list", test_get_sorted_error_list;
@@ -144,6 +201,7 @@ let tests = [
   "test_merge", test_merge;
   "test_from_error_list", test_from_error_list;
   "test_phases", test_phases;
+  "test_incremental_update", test_incremental_update;
 ]
 
 let () =

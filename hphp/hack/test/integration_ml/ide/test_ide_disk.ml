@@ -88,8 +88,6 @@ let () =
   let env = Test.wait env in
   (* Next iteration executes the recheck and generates the errors *)
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
-  (* IDE edits only create diagnostics, they don't update global error list *)
-  check_has_no_errors env;
   Test.assert_has_diagnostics loop_output;
 
   (* Edit file back to have no errors *)

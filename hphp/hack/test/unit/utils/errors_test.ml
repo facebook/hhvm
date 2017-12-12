@@ -117,12 +117,33 @@ let test_from_error_list () =
     "is_empty(from_error_list([])) == true";
   true
 
+let test_phases () =
+  let a_path = create_path "A" in
+  let errors, (), _ = Errors.do_ begin fun () ->
+    Errors.run_in_context a_path Errors.Parsing begin fun () ->
+      Errors.parsing_error (Pos.make_from a_path, "");
+    end;
+    Errors.run_in_context a_path Errors.Typing begin fun () ->
+      Errors.typing_error (Pos.make_from a_path) "";
+    end;
+    ()
+  end in
+  let expected =
+    "File \"/A\", line 0, characters 0--1:\n (Parsing[1002])\n\n" ^
+    "File \"/A\", line 0, characters 0--1:\n (Typing[4116])\n\n"
+  in
+  Asserter.String_asserter.assert_equals expected
+    (Errors.get_error_list errors |> error_list_to_string )
+    "Errors from earlier phase should come first";
+  true
+
 let tests = [
   "test", test_do;
   "test_get_sorted_error_list", test_get_sorted_error_list;
   "test_try", test_try;
   "test_merge", test_merge;
   "test_from_error_list", test_from_error_list;
+  "test_phases", test_phases;
 ]
 
 let () =

@@ -27,41 +27,111 @@ let default_context = (Relative_path.default, Typing)
 (* The file and phase of analysis being currently performed *)
 let current_context: (Relative_path.t * error_phase) ref = ref default_context
 
+module PhaseMap = Reordered_argument_map(MyMap.Make(struct
+  type t = error_phase
+
+  let rank = function
+    | Parsing -> 0
+    | Naming -> 1
+    | Decl -> 2
+    | Typing -> 3
+
+  let compare x y = (rank x) - (rank y)
+end))
+
+(* Results of single file analysis. *)
+type 'a file_t = 'a list PhaseMap.t
+(* Results of multi-file analysis. *)
+type 'a files_t = ('a file_t) Relative_path.Map.t
+
+let files_t_fold v ~f ~init =
+  Relative_path.Map.fold v ~init ~f:begin fun path v acc ->
+    PhaseMap.fold v ~init:acc ~f:begin fun phase v acc ->
+      f path phase v acc
+    end
+  end
+
+let files_t_map v ~f =
+  Relative_path.Map.map v ~f:begin fun v ->
+    PhaseMap.map v ~f
+  end
+
+let files_t_merge ~f x y =
+  Relative_path.Map.merge x y ~f:begin fun k x y ->
+    Option.merge x y ~f:begin fun x y ->
+      PhaseMap.merge x y ~f:begin fun _k x y ->
+        Option.merge x y ~f:begin fun x y ->
+          f k x y
+        end
+      end
+    end
+  end
+
+let files_t_to_list x =
+  files_t_fold x ~f:(fun _ _ x acc -> List.rev_append x acc) ~init:[] |>
+  List.rev
+
+let list_to_files_t = function
+  | [] -> Relative_path.Map.empty
+  | x ->
+    (* TODO: assert in incremental mode code that default paths don't
+     * leak there. *)
+    Relative_path.Map.singleton Relative_path.default
+      (PhaseMap.singleton Typing x)
+
 module Common = struct
   type error_flags = {
     lazy_decl_err: Relative_path.t option;
   }
-  let try_with_result f1 f2 error_list accumulate_errors =
-    let error_list_copy = !error_list in
+
+  (* Get most recently-ish added error. *)
+  let get_last error_map =
+    (* If this map has more than one element, we pick an arbitrary file. Because
+     * of that, we might not end up with the most recent error and generate a
+     * less-specific error message. This should be rare. *)
+    match Relative_path.Map.max_binding error_map with
+    | None -> None
+    | Some (_, phase_map) -> begin
+      let error_list = PhaseMap.max_binding phase_map
+        |> Option.value_map ~f:snd ~default:[]
+      in
+      match List.rev error_list with
+        | [] -> None
+        | e::_ -> Some e
+      end
+
+  let try_with_result f1 f2 error_map accumulate_errors =
+    let error_map_copy = !error_map in
     let accumulate_errors_copy = !accumulate_errors in
-    error_list := [];
+    error_map := Relative_path.Map.empty;
     accumulate_errors := true;
     let result = f1 () in
-    let errors = !error_list in
-    error_list := error_list_copy;
+    let errors = !error_map in
+    error_map := error_map_copy;
     accumulate_errors := accumulate_errors_copy;
-    match List.rev errors with
-    | [] -> result
-    | l :: _ -> f2 result l
+    match get_last errors with
+    | None -> result
+    | Some l -> f2 result l
 
-  let do_ f error_list accumulate_errors applied_fixmes has_lazy_decl_error  =
-    let error_list_copy = !error_list in
+  let do_ f error_map accumulate_errors applied_fixmes has_lazy_decl_error  =
+    let error_map_copy = !error_map in
     let accumulate_errors_copy = !accumulate_errors in
     let applied_fixmes_copy = !applied_fixmes in
     let has_lazy_decl_error_copy = !has_lazy_decl_error in
-    error_list := [];
-    applied_fixmes := [];
+    error_map := Relative_path.Map.empty;
+    applied_fixmes := Relative_path.Map.empty;
     accumulate_errors := true;
     has_lazy_decl_error := None;
     let result = f () in
-    let out_errors = !error_list in
+    let out_errors = !error_map in
     let out_applied_fixmes = !applied_fixmes in
     let lazy_decl_err = !has_lazy_decl_error in
-    error_list := error_list_copy;
+    error_map := error_map_copy;
     applied_fixmes := applied_fixmes_copy;
     accumulate_errors := accumulate_errors_copy;
     has_lazy_decl_error := has_lazy_decl_error_copy;
-    (List.rev out_errors, out_applied_fixmes), result, {lazy_decl_err;}
+    let out_errors = files_t_map ~f:(List.rev) out_errors in
+    (out_errors, out_applied_fixmes), result, {lazy_decl_err;}
 
   let run_in_context path phase f =
     let context_copy = !current_context in
@@ -74,10 +144,11 @@ module Common = struct
     err_flags.lazy_decl_err
 
   (* Log important data if lazy_decl triggers a crash *)
-  let lazy_decl_error_logging error error_list to_absolute to_string =
+  let lazy_decl_error_logging error error_map to_absolute to_string =
+    let error_list = files_t_to_list !error_map in
     (* Print the current error list, which should be empty *)
     Printf.eprintf "%s" "Error list(should be empty):\n";
-    List.iter !error_list ~f:(fun err ->
+    List.iter error_list ~f:(fun err ->
         let msg = err |> to_absolute |> to_string in Printf.eprintf "%s\n" msg);
     Printf.eprintf "%s" "Offending error:\n";
     Printf.eprintf "%s" error;
@@ -107,12 +178,37 @@ module Common = struct
     let error_number = Printf.sprintf "%04d" error_code in
     error_kind^"["^error_number^"]"
 
-  let get_sorted_error_list get_pos (err,_) =
+  let sort get_pos err =
     List.sort ~cmp:begin fun x y ->
       Pos.compare (get_pos x) (get_pos y)
     end err
     |> List.remove_consecutive_duplicates ~equal:(=)
 
+  let get_sorted_error_list get_pos (err,_) =
+    sort get_pos (files_t_to_list err)
+
+  (* Getters and setter for passed-in map, based on current context *)
+  let get_current_file_t file_t_map =
+     let current_file = fst !current_context in
+     Relative_path.Map.get file_t_map current_file |>
+     Option.value ~default:PhaseMap.empty
+
+  let get_current_list file_t_map =
+    let current_phase = snd !current_context in
+    get_current_file_t file_t_map |> fun x ->
+    PhaseMap.get x current_phase |>
+    Option.value ~default:[]
+
+  let set_current_list file_t_map new_list =
+    let current_file, current_phase = !current_context in
+    file_t_map := Relative_path.Map.add
+      !file_t_map
+      current_file
+      (PhaseMap.add
+        (get_current_file_t !file_t_map)
+        current_phase
+        new_list
+      )
 end
 
 (** The mode abstracts away the underlying errors type so errors can be
@@ -125,12 +221,12 @@ module type Errors_modes = sig
   type applied_fixme = Pos.t * int
   type error_flags = Common.error_flags
 
-  val applied_fixmes: applied_fixme list ref
+  val applied_fixmes: applied_fixme files_t ref
 
   val try_with_result: (unit -> 'a) -> ('a -> error -> 'a) -> 'a
-  val do_: (unit -> 'a) -> (error list * applied_fixme list) * 'a * error_flags
+  val do_: (unit -> 'a) -> (error files_t * applied_fixme files_t) * 'a * error_flags
   val do_with_context: Relative_path.t -> error_phase ->
-    (unit -> 'a) -> (error list * applied_fixme list) * 'a * error_flags
+    (unit -> 'a) -> (error files_t * applied_fixme files_t) * 'a * error_flags
   val run_in_context: Relative_path.t -> error_phase -> (unit -> 'a) -> 'a
   val run_in_decl_mode: Relative_path.t -> (unit -> 'a) -> 'a
   val add_error: error -> unit
@@ -143,7 +239,7 @@ module type Errors_modes = sig
 
   val to_string : ?indent:bool -> Pos.absolute error_ -> string
 
-  val get_sorted_error_list: error list * applied_fixme list -> error list
+  val get_sorted_error_list: error files_t * applied_fixme files_t -> error list
 
 end
 
@@ -154,8 +250,8 @@ module NonTracingErrors: Errors_modes = struct
   type applied_fixme = Pos.t * int
   type error_flags = Common.error_flags
 
-  let applied_fixmes: applied_fixme list ref = ref []
-  let (error_list: error list ref) = ref []
+  let applied_fixmes: applied_fixme files_t ref = ref Relative_path.Map.empty
+  let (error_map: error files_t ref) = ref Relative_path.Map.empty
   let accumulate_errors = ref false
   (* Some filename when declaring *)
   let in_lazy_decl = ref None
@@ -163,10 +259,10 @@ module NonTracingErrors: Errors_modes = struct
   let has_lazy_decl_error = ref None
 
   let try_with_result f1 f2 =
-    Common.try_with_result f1 f2 error_list accumulate_errors
+    Common.try_with_result f1 f2 error_map accumulate_errors
 
   let do_ f =
-    Common.do_ f error_list accumulate_errors applied_fixmes has_lazy_decl_error
+    Common.do_ f error_map accumulate_errors applied_fixmes has_lazy_decl_error
 
   let do_with_context path phase f =
     Common.run_in_context path phase (fun () -> do_ f)
@@ -223,11 +319,12 @@ module NonTracingErrors: Errors_modes = struct
   let add_error error =
     if !accumulate_errors then
       (* Cheap test to avoid duplicating most recent error *)
-      match !error_list with
+      let error_list = Common.get_current_list !error_map in
+      match error_list with
       | old_error :: _ when error = old_error -> ()
       | _ ->
         begin
-          error_list := error :: !error_list;
+          Common.set_current_list error_map (error :: error_list);
           has_lazy_decl_error := match !in_lazy_decl with
           | Some fn -> Some fn
           | None -> !has_lazy_decl_error
@@ -237,7 +334,7 @@ module NonTracingErrors: Errors_modes = struct
       let msg = error |> to_absolute |> to_string in
       match !in_lazy_decl with
       | Some _ ->
-        Common.lazy_decl_error_logging msg error_list to_absolute to_string
+        Common.lazy_decl_error_logging msg error_map to_absolute to_string
       | None -> assert_false_log_backtrace (Some msg)
 
 end
@@ -249,18 +346,18 @@ module TracingErrors: Errors_modes = struct
   type applied_fixme = Pos.t * int
   type error_flags = Common.error_flags
 
-  let applied_fixmes: applied_fixme list ref = ref []
-  let (error_list: error list ref) = ref []
+  let applied_fixmes: applied_fixme files_t ref = ref Relative_path.Map.empty
+  let (error_map: error files_t ref) = ref Relative_path.Map.empty
 
   let accumulate_errors = ref false
   let in_lazy_decl = ref None
   let has_lazy_decl_error = ref None
 
   let try_with_result f1 f2 =
-    Common.try_with_result f1 f2 error_list accumulate_errors
+    Common.try_with_result f1 f2 error_map accumulate_errors
 
   let do_ f =
-    Common.do_ f error_list accumulate_errors applied_fixmes has_lazy_decl_error
+    Common.do_ f error_map accumulate_errors applied_fixmes has_lazy_decl_error
 
   let run_in_context = Common.run_in_context
 
@@ -322,7 +419,8 @@ module TracingErrors: Errors_modes = struct
   let add_error error =
     if !accumulate_errors then
       begin
-        error_list := error :: !error_list;
+        let error_list = Common.get_current_list !error_map in
+        Common.set_current_list error_map (error :: error_list);
         has_lazy_decl_error := match !in_lazy_decl with
         | Some fn -> Some fn
         | None -> !has_lazy_decl_error
@@ -332,7 +430,7 @@ module TracingErrors: Errors_modes = struct
       let msg = error |> to_absolute |> to_string in
       match !in_lazy_decl with
       | Some _ ->
-        Common.lazy_decl_error_logging msg error_list to_absolute to_string
+        Common.lazy_decl_error_logging msg error_map to_absolute to_string
       | None -> assert_false_log_backtrace (Some msg)
 
   let get_sorted_error_list = Common.get_sorted_error_list get_pos
@@ -351,7 +449,7 @@ module Errors_with_mode(M: Errors_modes) = struct
 type 'a error_ = 'a M.error_
 type error = Pos.t error_
 type applied_fixme = M.applied_fixme
-type t = error list * applied_fixme list
+type t = error files_t * applied_fixme files_t
 type error_flags = Common.error_flags
 
 type phase = error_phase = Parsing | Naming | Decl | Typing
@@ -394,7 +492,8 @@ let add_ignored_fixme_code_error pos code =
 (*****************************************************************************)
 
 let add_applied_fixme code pos =
-  applied_fixmes := (pos, code) :: !applied_fixmes
+  let applied_fixmes_list = Common.get_current_list !applied_fixmes in
+  Common.set_current_list applied_fixmes ((pos, code) :: applied_fixmes_list)
 
 let rec add_error = M.add_error
 
@@ -412,14 +511,16 @@ and add_list code pos_msg_l =
   add_ignored_fixme_code_error pos code
 
 and merge (err',fixmes') (err,fixmes) =
-  (List.rev_append err' err, List.rev_append fixmes' fixmes)
+  let append = fun _ x y -> List.rev_append x y in
+  files_t_merge ~f:append err' err,
+  files_t_merge ~f:append fixmes' fixmes
 
-and empty = ([], [])
-and is_empty (err, _fixmes) = err = []
+and empty = (Relative_path.Map.empty, Relative_path.Map.empty)
+and is_empty (err, _fixmes) = Relative_path.Map.is_empty err
 
-and get_error_list (err, _fixmes) = err
-and get_applied_fixmes (_err, fixmes) = fixmes
-and from_error_list err = (err, [])
+and get_error_list (err, _fixmes) = files_t_to_list err
+and get_applied_fixmes (_err, fixmes) = files_t_to_list fixmes
+and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
 
 (*****************************************************************************)
 (* Accessors. (All methods delegated to the parameterized module.) *)

@@ -63,6 +63,6 @@ let () =
 
   (* We should get exactly these two errors *)
   match (Errors.get_error_list env.errorl)  with
-  | [x; y;] -> Test.assertSingleError bar_error [x];
-    Test.assertSingleError qux_error [y];
+  | [x; y;] -> Test.assertSingleError qux_error [y];
+    Test.assertSingleError bar_error [x];
   | _ -> Test.fail "Expected exactly two errors"

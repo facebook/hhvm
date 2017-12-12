@@ -33,17 +33,17 @@ let () =
   (* TODO: get rid of repeating errors in error list *)
   let expected_error =
   "File \"/foo2.php\", line 2, characters 9-11:\n" ^
-  "Could not find FOO (Naming[2006])\n" ^
-  "File \"/foo1.php\", line 2, characters 9-11:\n" ^
-  "Did you mean foo?\n\n" ^
-  "File \"/foo2.php\", line 2, characters 9-11:\n" ^
-  "Could not find FOO (Naming[2006])\n" ^
-  "File \"/foo1.php\", line 2, characters 9-11:\n" ^
-  "Did you mean foo?\n\n" ^
-  "File \"/foo2.php\", line 2, characters 9-11:\n" ^
   "Name already bound: FOO (Naming[2012])\n" ^
   "File \"/foo1.php\", line 2, characters 9-11:\n" ^
-  "Previous definition foo differs only in capitalization\n"
+  "Previous definition foo differs only in capitalization \n\n" ^
+  "File \"/foo2.php\", line 2, characters 9-11:\n" ^
+  "Could not find FOO (Naming[2006])\n" ^
+  "File \"/foo1.php\", line 2, characters 9-11:\n" ^
+  "Did you mean foo?\n\n" ^
+  "File \"/foo2.php\", line 2, characters 9-11:\n" ^
+  "Could not find FOO (Naming[2006])\n" ^
+  "File \"/foo1.php\", line 2, characters 9-11:\n" ^
+  "Did you mean foo?\n\n"
   in
   Test.assert_errors env expected_error;
   (* Change a wholly unrelated file. *)

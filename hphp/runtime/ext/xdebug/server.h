@@ -82,17 +82,36 @@ struct XDebugServer {
   }
 
   /*
+   * Returns true if Dbgp has been initialized for this server.
+   */
+  bool isInitialized() {
+    return m_dbgpInitialized;
+  }
+
+  /*
    * Attempts to attach the xdebug server to the current thread.  Assumes it is
    * not already attached.  Raises a warning on failure.  The actual error will
    * be written to the remote debugging log.
    */
-  static void attach(Mode mode);
+  static bool attach(Mode mode);
+
+  /*
+   * Attempts to create an XDebugServer for the current request and connect to
+   * a client.
+   */
+  static bool createServer(Mode mode);
 
   /*
    * Assumes an xdebug server is attached to the thread and attempts to detach
    * it.
    */
   static void detach();
+
+  /*
+   * Attempts to send a message to a debug client informing the user that attach
+   * failed for a request.
+   */
+  static void notifyClientAttachFailed(const char* msg);
 
   //////////////////////////////////////////////////////////////////////////////
 
@@ -279,6 +298,8 @@ struct XDebugServer {
   char* m_bufferCur{nullptr};
   size_t m_bufferAvail{0};
   size_t m_bufferSize{0};
+
+  bool m_dbgpInitialized{false};
 
   AsyncFunc<XDebugServer> m_pollingThread;
 

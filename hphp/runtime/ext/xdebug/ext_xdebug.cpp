@@ -1020,12 +1020,12 @@ void XDebugExtension::requestInit() {
   XDEBUG_CUSTOM_GLOBALS
   #undef XDEBUG_OPT
 
-  // Let the server do initialization
-  XDebugServer::onRequestInit();
-
   // Initialize our breakpoint maps.
   assert(s_xdebug_breakpoints.isNull());
   s_xdebug_breakpoints.getCheck();
+
+  // Let the server do initialization
+  XDebugServer::onRequestInit();
 
   // Potentially attach the xdebug profiler
   if (XDebugProfiler::isAttachNeeded()) {
@@ -1039,6 +1039,10 @@ void XDebugExtension::requestShutdown() {
   }
 
   s_xdebug_breakpoints.destroy();
+
+  if (XDebugServer::isAttached()) {
+    XDebugServer::detach();
+  }
 
   // Potentially kill the profiler
   if (XDEBUG_GLOBAL(ProfilerAttached)) {

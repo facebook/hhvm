@@ -412,16 +412,52 @@ void XDebugServer::closeLog() {
 ////////////////////////////////////////////////////////////////////////////////
 const StaticString s_memory_limit("memory_limit");
 
+void XDebugServer::notifyClientAttachFailed(const char* msg) {
+  if (XDEBUG_GLOBAL(Server) == nullptr) {
+    // If the server was not allocated successfully, there's no client
+    // to talk to.
+    return;
+  }
+
+  // Attempt to initialize the XDebug server for this request so we can tell
+  // the client that we're not going to attach. Otherwise the user won't
+  // be able to tell what happened.
+  if (!XDebugServer::attach(XDebugServer::Mode::Req)) {
+    return;
+  }
+
+  auto const server = XDEBUG_GLOBAL(Server);
+  if (server == nullptr) {
+    return;
+  }
+
+  server->sendStream("stderr", msg, strlen(msg));
+
+  // Forcibly stop the polling thread and close the socket, the client isn't
+  // going to return the expected dbgp messages if this is being called due
+  // to an initialization failure.
+  server->m_pollingState.store(PollingState::Stop);
+  server->destroySocket();
+  server->detach();
+}
+
 void XDebugServer::onRequestInit() {
   if (!XDEBUG_GLOBAL(RemoteEnable)) {
     return;
   }
 
-  // Need to turn on debugging regardless of the remote mode in order to capture
-  // exceptions/errors.
+  if (!XDebugServer::createServer(Mode::Req)) {
+    // No debugger client attached, do not hook this request.
+    return;
+  }
+
+  const char* attachFailMsg = "Could not attach xdebug remote debugger to the "
+                              "current request. Another debugger is already "
+                              "attached.";
+
+  // Attempt to attach the debugger hook to this request.
   if (!DebuggerHook::attach<XDebugHook>()) {
-    raise_warning("Could not attach xdebug remote debugger to the current "
-                  "thread. A debugger is already attached.");
+    notifyClientAttachFailed(attachFailMsg);
     return;
   }
 
@@ -475,13 +511,28 @@ bool XDebugServer::isNeeded() {
   return !cookie[s_SESSION].isNull();
 }
 
-void XDebugServer::attach(Mode mode) {
+bool XDebugServer::createServer(Mode mode) {
   assert(XDEBUG_GLOBAL(Server) == nullptr);
   try {
     XDEBUG_GLOBAL(Server) = new XDebugServer(mode);
-    if (!XDEBUG_GLOBAL(Server)->initDbgp()) {
-      detach();
+    if (XDEBUG_GLOBAL(Server) != nullptr) {
+      return true;
     }
+  } catch (...) {
+  }
+
+  return false;
+}
+
+bool XDebugServer::attach(Mode mode) {
+  assert(XDEBUG_GLOBAL(Server) != nullptr);
+  try {
+    if (XDEBUG_GLOBAL(Server)->initDbgp()) {
+      XDEBUG_GLOBAL(Server)->m_dbgpInitialized = true;
+      return true;
+    }
+
+    detach();
   } catch (...) {
     // If we fail to attach to a debugger, then we can choose to wait for an
     // exception to be thrown so we try again, or we can just detach the
@@ -492,6 +543,8 @@ void XDebugServer::attach(Mode mode) {
     }
     // Fail silently, continue running the request.
   }
+
+  return false;
 }
 
 void XDebugServer::detach() {
@@ -598,8 +651,10 @@ bool XDebugServer::initDbgp() {
   // Grab the absolute path of the script filename.
   auto server = get_global_array(s_SERVER);
   auto scriptname_var = server[s_SCRIPT_FILENAME];
-  assertx(scriptname_var.isString());
-  auto scriptname = scriptname_var.toString().get()->mutableData();
+  auto scriptname = scriptname_var.isString() &&
+                      !scriptname_var.toString().get()->isImmutable()
+                        ? scriptname_var.toString().get()->mutableData()
+                        : "xdebug";
   auto fileuri = xdebug_path_to_url(scriptname);
 
   // Add attributes to the root init node.

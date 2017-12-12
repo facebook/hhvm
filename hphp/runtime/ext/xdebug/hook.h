@@ -188,6 +188,8 @@ struct XDebugHook final : DebuggerHook {
     if (XDebugServer::isAttached()) {
       XDebugServer::detach();
     }
+
+    DebuggerHook::detach();
   }
 
   void onOpcode(PC pc) override;
@@ -212,10 +214,22 @@ struct XDebugHook final : DebuggerHook {
   // if needed
   void onExceptionBreak(const StringData* name, const StringData* msg) {
     // Potentially start the debug server if it hasn't been started.
-    if (XDEBUG_GLOBAL(RemoteEnable) &&
-        !XDebugServer::isAttached() &&
-        XDEBUG_GLOBAL(RemoteMode) == "jit") {
-      XDebugServer::attach(XDebugServer::Mode::Jit);
+    if (XDEBUG_GLOBAL(RemoteEnable) && XDEBUG_GLOBAL(RemoteMode) == "jit") {
+
+      // When starting in JIT mode, it is possible that we decided not to attach
+      // at request init time like we normally would have. In that case, we
+      // need to create the XDebug server for this thread and connect to the
+      // client here.
+      if (!XDebugServer::isAttached()) {
+        XDebugServer::createServer(XDebugServer::Mode::Jit);
+      }
+
+      // If the server is created but not fully initialized, perform Dbgp
+      // initialization now.
+      if (XDEBUG_GLOBAL(Server) != nullptr &&
+          !XDEBUG_GLOBAL(Server)->isInitialized()) {
+        XDebugServer::attach(XDebugServer::Mode::Jit);
+      }
     }
 
     // Handle the exception.

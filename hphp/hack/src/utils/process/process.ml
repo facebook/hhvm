@@ -31,7 +31,7 @@ let chunk_size = 65536
  * non-blocking consuming of output and a nonblocking waitpid.
  * To avoid pegging the CPU at 100%, sleep for a short time between
  * those. *)
-let sleep_seconds_per_retry = 0.1
+let sleep_seconds_per_retry = 0.04
 
 (** Reuse the buffer for reading. Just an allocation optimization. *)
 let buffer = String.create chunk_size
@@ -48,20 +48,26 @@ let make_result status stdout stderr =
 
 (** Read from the FD if there is something to be read. FD is a reference
  * so when EOF is read from it, it is set to None. *)
-let rec maybe_consume fd_ref acc =
-  Option.iter !fd_ref ~f:begin fun fd ->
-    match Unix.select [fd] [] [] 0.0 with
-    | [], _, _ -> ()
-    | _ ->
-      let bytes_read = Unix.read fd buffer 0 chunk_size in
-      if bytes_read = 0 then
-        (** EOF reached. *)
-        fd_ref := None
-      else
-        let chunk = String.sub buffer 0 bytes_read in
-        Stack.push chunk acc;
-        maybe_consume fd_ref acc
-  end
+let rec maybe_consume ?(max_time=0.0) fd_ref acc =
+  if max_time < 0.0 then
+    ()
+  else
+    let start_t = Unix.time () in
+    Option.iter !fd_ref ~f:begin fun fd ->
+      match Unix.select [fd] [] [] max_time with
+      | [], _, _ -> ()
+      | _ ->
+        let bytes_read = Unix.read fd buffer 0 chunk_size in
+        if bytes_read = 0 then
+          (** EOF reached. *)
+          fd_ref := None
+        else
+          let chunk = String.sub buffer 0 bytes_read in
+          Stack.push chunk acc;
+          let consumed_t = Unix.time () -. start_t in
+          let max_time = max_time -. consumed_t in
+          maybe_consume ~max_time fd_ref acc
+    end
 
 let filter_none refs =
   List.fold_left refs ~init:[] ~f:(fun acc ref ->
@@ -150,14 +156,14 @@ let rec read_and_wait_pid ~retries process =
     let () = process_status := Process_exited status in
     make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)
   else
+    (** Consume output to clear the buffers which might
+     * be blocking the process from continuing. *)
+    let () = maybe_consume ~max_time:(sleep_seconds_per_retry /. 2.0) stdout_fd acc in
+    let () = maybe_consume ~max_time:(sleep_seconds_per_retry /. 2.0) stderr_fd acc_err in
     (** EOF hasn't been reached for all FDs. Here's where we switch from
      * reading the pipes to attempting a non-blocking waitpid. *)
     match Unix.waitpid [Unix.WNOHANG] pid with
     | 0, _ ->
-      (** Process hasn't exited. We want to avoid a spin-loop
-       * alternating between non-blocking read from pipes and
-       * non-blocking waitpid, so we insert a select here. *)
-      let _, _, _ = Unix.select fds [] [] sleep_seconds_per_retry in
       if retries <= 0 then
         Error (Timed_out
           ((Stack.merge_bytes acc), (Stack.merge_bytes acc_err)))

@@ -248,7 +248,8 @@ module ServerInitCommon = struct
     let get_dirty_files = (fun () ->
       let t = Unix.time () in
       result.State_loader.dirty_files
-        |> Future.get ~timeout:180
+        (** Mercurial can respond with 90 thousand file changes in about 3 minutes. *)
+        |> Future.get ~timeout:200
         |> Core_result.map_error ~f:Future.error_to_exn
         >>= fun dirty_files ->
       let () = HackEventLogger.state_loader_dirty_files t in

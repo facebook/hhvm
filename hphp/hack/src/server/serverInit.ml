@@ -50,6 +50,11 @@ let delete_and_log : (string) Process.Entry.t =
 let rm_dir_tree_async path =
   Process.run_entry delete_and_log path
 
+let load_mini_exn_to_string err = match err with
+  | Future.Failure e ->
+    Printf.sprintf "%s\n%s" (Future.error_to_string e) (Printexc.get_backtrace ())
+  | e -> Printexc.to_string e
+
 module ServerInitCommon = struct
 
   let lock_and_load_deptable fn =
@@ -575,8 +580,9 @@ module ServerInitCommon = struct
     let fallback_init genv env err =
       SharedMem.cleanup_sqlite ();
       if err <> No_loader then begin
-        HackEventLogger.load_mini_exn err;
-        Hh_logger.exc ~prefix:"Could not load mini state: " err;
+        let err_str = load_mini_exn_to_string err in
+        HackEventLogger.load_mini_exn err_str;
+        Hh_logger.log "Could not load mini state: %s" err_str;
       end;
       let get_next, t = indexing genv in
       let env, t = parsing ~lazy_parse:true genv env ~get_next t in
@@ -713,8 +719,9 @@ module ServerEagerInit : InitKind = struct
       (* Fall back to type-checking everything *)
       SharedMem.cleanup_sqlite ();
       if err <> No_loader then begin
-        HackEventLogger.load_mini_exn err;
-        Hh_logger.exc ~prefix:"Could not load mini state: " err;
+        let err_str = load_mini_exn_to_string err in
+        HackEventLogger.load_mini_exn err_str;
+        Hh_logger.log "Could not load mini state: %s" err_str;
       end;
       type_check genv env fast t, state
 end

@@ -444,7 +444,7 @@ let create_nasts opts files_info =
         >>| fun g -> Nast.Constant g
       end
     )
-  in Relative_path.Map.mapi (build_nast) files_info
+  in Relative_path.Map.mapi ~f:(build_nast) files_info
 
 let with_named_body opts n_fun =
   (** In the naming heap, the function bodies aren't actually named yet, so
@@ -476,10 +476,10 @@ let parse_name_and_decl popt files_contents tcopt =
   Errors.do_ begin fun () ->
     let parsed_files =
       Relative_path.Map.mapi
-       (Parser_hack.program popt) files_contents in
+       ~f:(Parser_hack.program popt) files_contents in
 
     let files_info =
-      Relative_path.Map.mapi begin fun fn parsed_file ->
+      Relative_path.Map.mapi ~f:begin fun fn parsed_file ->
         let {Parser_hack.file_mode; comments; ast; _} = parsed_file in
         let ast = if ParserOptions.deregister_php_stdlib popt then
           Ast_utils.deregister_ignored_attributes ast else ast in

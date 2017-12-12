@@ -124,6 +124,27 @@ struct DebuggerHook {
     return true;
   }
 
+  // Attempts to set or remove the specified debugger hook as the "active" hook.
+  // The active hook is the only hook that is permitted to attach to any request
+  static bool setActiveDebuggerInstance(DebuggerHook* hook, bool attach) {
+    Lock lock(s_lock);
+    if (attach) {
+      if (s_activeHook != nullptr) {
+        return s_activeHook == hook;
+      }
+
+      s_activeHook = hook;
+      return true;
+    } else {
+      if (s_activeHook != hook) {
+        return false;
+      }
+
+      s_activeHook = nullptr;
+      return true;
+    }
+  }
+
   // If a hook is attached to the thread, detaches it.
   static void detach(ThreadInfo* ti = nullptr);
 

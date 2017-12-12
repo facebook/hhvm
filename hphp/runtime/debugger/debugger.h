@@ -116,6 +116,7 @@ struct Debugger {
                                 CmdInterrupt &cmd);
 
 private:
+
   static bool s_clientStarted;
 
   static Debugger& get();

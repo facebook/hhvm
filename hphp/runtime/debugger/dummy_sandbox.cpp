@@ -125,7 +125,13 @@ void DummySandbox::run() {
         g_context->setSandboxId(m_proxy->getDummyInfo().id());
       }
 
-      DebuggerHook::attach<HphpdHook>(ti);
+      if (!DebuggerHook::attach<HphpdHook>(ti)) {
+        const char* fail = "Could not attach hphpd to request: another debugger"
+                           " is already attached.";
+        Logger::Error("%s", fail);
+        Debugger::InterruptSessionStarted(nullptr, fail);
+        throw DebuggerClientAttachFailureException();
+      }
       {
         DebuggerDummyEnv dde;
         // This is really the entire point of having the dummy sandbox. This

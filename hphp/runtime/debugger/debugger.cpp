@@ -147,7 +147,11 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
   } else {
     hphp_invoke_simple(options.extension, false /* warmup only */);
   }
-  DebuggerHook::attach<HphpdHook>();
+
+  if (!DebuggerHook::attach<HphpdHook>()) {
+    Logger::Error("Failed to attach to thread: another debugger is "
+                  "unexpectedly hooked");
+  }
   if (!restart) {
     DebuggerDummyEnv dde;
     Debugger::InterruptSessionStarted(options.fileName.c_str());
@@ -188,7 +192,6 @@ void Debugger::LogShutdown(ShutdownKind shutdownKind) {
 void Debugger::InterruptSessionStarted(const char *file,
                                        const char *error /* = NULL */) {
   TRACE(2, "Debugger::InterruptSessionStarted\n");
-  DebuggerHook::attach<HphpdHook>();
   get().registerThread(); // Register this thread as being debugged
   Interrupt(SessionStarted, file, nullptr, error);
 }
@@ -402,7 +405,10 @@ void Debugger::registerSandbox(const DSandboxInfo &sandbox) {
   // Find out whether this sandbox is being debugged.
   auto proxy = findProxy(sid);
   if (proxy) {
-    DebuggerHook::attach<HphpdHook>(ti);
+    if (!DebuggerHook::attach<HphpdHook>(ti)) {
+      Logger::Error("Failed to attach to thread: another debugger is "
+                    "unexpectedly hooked");
+    }
   }
 }
 
@@ -447,9 +453,13 @@ void Debugger::requestInterrupt(DebuggerProxyPtr proxy) {
 
 void Debugger::setDebuggerFlag(const StringData* sandboxId, bool flag) {
   TRACE(2, "Debugger::setDebuggerFlag\n");
+
   FOREACH_SANDBOX_THREAD_BEGIN(sandboxId, ti)
     if (flag) {
-      DebuggerHook::attach<HphpdHook>(ti);
+      if (!DebuggerHook::attach<HphpdHook>(ti)) {
+        Logger::Error("Failed to attach to thread: another debugger is "
+                      "unexpectedly hooked");
+      }
     } else {
       DebuggerHook::detach(ti);
     }
@@ -533,6 +543,11 @@ void Debugger::removeProxy(DebuggerProxyPtr proxy) {
   if (RuntimeOption::EvalJit && countConnectedProxy() == 0) {
     jit::clearDbgBL();
   }
+
+  if (countConnectedProxy() == 0) {
+    auto instance = HphpdHook::GetInstance();
+    DebuggerHook::setActiveDebuggerInstance(instance, false);
+  }
 }
 
 DebuggerProxyPtr Debugger::findProxy(const StringData* sandboxId) {
@@ -568,6 +583,15 @@ bool Debugger::switchSandboxImpl(DebuggerProxyPtr proxy,
                                  const StringData* newSid,
                                  bool force) {
   TRACE(2, "Debugger::switchSandboxImpl\n");
+
+  // When attaching to the sandbox, ensure that hphpd is the active debugger.
+  // If this fails, we'll end up returning failure to the CmdMachine on the
+  // hphpd client that attempted the attach, and it will inform the user.
+  auto instance = HphpdHook::GetInstance();
+  if (!DebuggerHook::setActiveDebuggerInstance(instance, true)) {
+    return false;
+  }
+
   // Take the new sandbox
   DebuggerProxyPtr otherProxy;
   {

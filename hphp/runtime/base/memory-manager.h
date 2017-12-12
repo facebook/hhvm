@@ -344,13 +344,6 @@ constexpr size_t kSizeIndex2Size[] = {
 #undef SIZE_CLASS
 };
 
-alignas(64) constexpr unsigned kNContigTab[] = {
-#define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
-  ncontig,
-  SIZE_CLASSES
-#undef SIZE_CLASS
-};
-
 constexpr size_t kMaxSmallSizeLookup = 4096;
 
 constexpr unsigned kLgSmallSizeQuantum = 4;

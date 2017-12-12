@@ -597,6 +597,13 @@ namespace {
 
 using FreelistArray = MemoryManager::FreelistArray;
 
+alignas(64) constexpr size_t kContigTab[] = {
+#define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+  ncontig * kSizeIndex2Size[index],
+  SIZE_CLASSES
+#undef SIZE_CLASS
+};
+
 /*
  * Store slab tail bytes (if any) in freelists.
  */
@@ -622,19 +629,20 @@ void storeTail(FreelistArray& freelists, void* tail, size_t tailBytes) {
 }
 
 /*
- * Create nSplit contiguous regions and store them in the appropriate freelist.
+ * Create split_bytes worth of contiguous regions, each of size splitUsable,
+ * and store them in the appropriate freelist.
  */
 inline
 void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
-               unsigned nSplit, size_t splitUsable, size_t index) {
+               size_t split_bytes, size_t splitUsable, size_t index) {
   assert(tailBytes >= kSmallSizeAlign);
   assert((tailBytes & kSmallSizeAlignMask) == 0);
   assert((splitUsable & kSmallSizeAlignMask) == 0);
-  assert(nSplit * splitUsable <= tailBytes);
+  assert(split_bytes <= tailBytes);
   auto head = freelists[index].head;
-  for (uint32_t i = nSplit; i--;) {
-    auto split = FreeNode::InitFrom((char*)tail + i * splitUsable,
-                                    splitUsable, HeaderKind::Hole);
+  auto rem = (char*)tail + split_bytes;
+  for (auto next = rem - splitUsable; next >= tail; next -= splitUsable) {
+    auto split = FreeNode::InitFrom(next, splitUsable, HeaderKind::Hole);
     FTRACE(4, "MemoryManager::splitTail(tail={}, tailBytes={}, tailPast={}): "
               "split={}, splitUsable={}\n", tail,
               (void*)uintptr_t(tailBytes), (void*)(uintptr_t(tail) + tailBytes),
@@ -642,13 +650,10 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
     head = FreeNode::UninitFrom(split, head);
   }
   freelists[index].head = head;
-  void* rem = (void*)(uintptr_t(tail) + nSplit * splitUsable);
-  assert(tailBytes >= nSplit * splitUsable);
-  auto remBytes = tailBytes - nSplit * splitUsable;
+  auto remBytes = tailBytes - split_bytes;
   assert(uintptr_t(rem) + remBytes == uintptr_t(tail) + tailBytes);
   storeTail(freelists, rem, remBytes);
 }
-
 }
 
 /*
@@ -706,16 +711,15 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
     }
   }
   // Preallocate more of the same in order to amortize entry into this method.
-  auto nSplit = kNContigTab[index] - 1;
+  auto split_bytes = kContigTab[index] - nbytes;
   auto avail = uintptr_t(m_limit) - uintptr_t(m_front);
-  if (UNLIKELY(nSplit * nbytes > avail)) {
-    nSplit = avail / nbytes; // Expensive division.
+  if (UNLIKELY(split_bytes > avail)) {
+    split_bytes = avail - avail % nbytes; // Expensive division.
   }
-  if (nSplit > 0) {
+  if (split_bytes > 0) {
     auto tail = m_front;
-    auto tailBytes = nSplit * nbytes;
-    m_front = (void*)(uintptr_t(tail) + tailBytes);
-    splitTail(m_freelists, tail, tailBytes, nSplit, nbytes, index);
+    m_front = (void*)(uintptr_t(tail) + split_bytes);
+    splitTail(m_freelists, tail, split_bytes, split_bytes, nbytes, index);
   }
   FTRACE(4, "slabAlloc({}, {}) --> ptr={}, m_front={}, m_limit={}\n", nbytes,
             index, ptr, m_front, m_limit);
@@ -725,8 +729,7 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
 void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
   assert(nbytes == sizeIndex2Size(index));
   assert(!m_freelists[index].head); // freelist[index] is empty
-  auto nContig = kNContigTab[index];
-  auto contigMin = nContig * nbytes;
+  auto contigMin = kContigTab[index];
   auto contigInd = size2Index(contigMin);
   for (auto i = contigInd; i < kNumSmallSizes; ++i) {
     FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): contigMin={}, "
@@ -743,7 +746,8 @@ void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
       auto tailBytes = availBytes - nbytes;
       assert(tailBytes > 0); // because i > index
       auto tail = (void*)(uintptr_t(p) + nbytes);
-      splitTail(m_freelists, tail, tailBytes, nContig - 1, nbytes, index);
+      splitTail(m_freelists, tail, tailBytes, contigMin - nbytes, nbytes,
+                index);
       return p;
     }
   }

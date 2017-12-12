@@ -80,6 +80,11 @@ val assert_has_diagnostics : ('a, 'b) loop_outputs -> unit
 
 val assert_diagnostics : ('a, 'b) loop_outputs -> string -> unit
 
+val assert_diagnostics_in : ('a, 'b) loop_outputs -> string -> string -> unit
+
+val get_diagnostics :
+  ('a, 'b) loop_outputs -> (Pos.absolute Errors.error_ list) SMap.t
+
 val assert_autocomplete :
   ('a, AutocompleteService.result) loop_outputs -> string list -> unit
 

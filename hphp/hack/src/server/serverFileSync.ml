@@ -66,9 +66,14 @@ let open_file env path content =
       end else
         Relative_path.Set.add env.ide_needs_parsing path, env.diag_subscribe
       in
+    (* Need to re-parse this file during next full check to update
+     * global error list positions that refer to it *)
+    let disk_needs_parsing =
+      Relative_path.Set.add env.disk_needs_parsing path in
     let last_command_time = Unix.gettimeofday () in
     Some { env with
       editor_open_files; ide_needs_parsing; last_command_time; diag_subscribe;
+      disk_needs_parsing;
     } in
   Option.value new_env ~default:env
 
@@ -82,9 +87,11 @@ let close_relative_path env path =
   let ide_needs_parsing =
     if new_contents = Some contents then env.ide_needs_parsing
     else Relative_path.Set.add env.ide_needs_parsing path in
+  let disk_needs_parsing =
+    Relative_path.Set.add env.disk_needs_parsing path in
   let last_command_time = Unix.gettimeofday () in
   { env with
-    editor_open_files; ide_needs_parsing; last_command_time
+    editor_open_files; ide_needs_parsing; last_command_time; disk_needs_parsing
   }
 
 let close_file env path =
@@ -112,9 +119,12 @@ let edit_file env path edits =
     FileHeap.add path (Ide edited_fc);
     let ide_needs_parsing =
       Relative_path.Set.add env.ide_needs_parsing path in
+    let disk_needs_parsing =
+      Relative_path.Set.add env.disk_needs_parsing path in
     let last_command_time = Unix.gettimeofday () in
     Some { env with
-      editor_open_files; ide_needs_parsing; last_command_time
+      editor_open_files; ide_needs_parsing; last_command_time;
+      disk_needs_parsing
     } in
   Option.value new_env ~default:env
 

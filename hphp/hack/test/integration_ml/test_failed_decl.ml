@@ -58,5 +58,6 @@ let () =
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
   let path = Relative_path.create Relative_path.Root "/foo.php" in
-  if Relative_path.Set.mem env.failed_decl path then ()
+  let failed_decl = Errors.(get_failed_files env.errorl Decl) in
+  if Relative_path.Set.mem failed_decl path then ()
     else Test.fail "Foo should still have failed declaration"

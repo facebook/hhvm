@@ -315,12 +315,20 @@ let errors_to_string x =
   errors_to_string buf x;
   Buffer.contents buf
 
-let assert_diagnostics loop_output expected =
-  let diagnostics = match loop_output.push_message with
-    | Some (DIAGNOSTIC (_, m)) -> m
-    | _ -> fail "Expected push diagnostics"
-  in
+let get_diagnostics loop_output =
+  match loop_output.push_message with
+  | Some (DIAGNOSTIC (_, m)) -> m
+  | _ -> fail "Expected push diagnostics"
 
+let assert_diagnostics loop_output expected =
+  let diagnostics = get_diagnostics loop_output in
+  let diagnostics_as_string = diagnostics_to_string diagnostics in
+  assertEqual expected diagnostics_as_string
+
+let assert_diagnostics_in loop_output filename expected =
+  let diagnostics = get_diagnostics loop_output in
+  let diagnostics = SMap.filter diagnostics
+    ~f:(fun path _ -> path = prepend_root filename) in
   let diagnostics_as_string = diagnostics_to_string diagnostics in
   assertEqual expected diagnostics_as_string
 

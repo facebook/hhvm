@@ -598,18 +598,34 @@ let sort = M.sort
 let get_sorted_error_list = M.get_sorted_error_list
 let iter_error_list f err = List.iter ~f:f (get_sorted_error_list err)
 
-let fold_errors err ~init ~f =
-  files_t_fold (fst err)
-    ~init
-    ~f:begin fun source _ errors acc ->
-      List.fold_right errors ~init:acc ~f:(f source)
+let fold_errors ?phase err ~init ~f =
+  match phase with
+  | None ->
+    files_t_fold (fst err)
+      ~init
+      ~f:begin fun source _ errors acc ->
+        List.fold_right errors ~init:acc ~f:(f source)
+      end
+  | Some phase ->
+    Relative_path.Map.fold (fst err) ~init ~f:begin fun source phases acc ->
+      match PhaseMap.get phases phase with
+      | None -> acc
+      | Some errors -> List.fold_right errors ~init:acc ~f:(f source)
     end
 
-let fold_errors_in err ~source ~init ~f =
+let fold_errors_in ?phase err ~source ~init ~f =
   Relative_path.Map.get (fst err) source |>
   Option.value ~default:PhaseMap.empty |>
-  PhaseMap.fold ~init ~f:begin fun _ errors acc ->
-    List.fold_right errors ~init:acc ~f
+  PhaseMap.fold ~init ~f:begin fun p errors acc ->
+    if phase <> None && phase <> Some p then acc
+    else List.fold_right errors ~init:acc ~f
+  end
+
+let get_failed_files err phase =
+  files_t_fold (fst err)
+  ~init:Relative_path.Set.empty
+  ~f:begin fun source p _ acc ->
+    if phase <> p then acc else Relative_path.Set.add acc source
   end
 
 (*****************************************************************************)

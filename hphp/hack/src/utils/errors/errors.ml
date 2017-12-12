@@ -10,6 +10,7 @@
 
 open Hh_core
 open Utils
+open Reordered_argument_collections
 open String_utils
 
 
@@ -369,7 +370,7 @@ let add_applied_fixme code pos =
 
 let rec add_error = M.add_error
 
-and add code ?mode pos msg =
+and add code pos msg =
   if not (is_ignored_fixme pos code) && !is_hh_fixme pos code
   then add_applied_fixme code pos
   else add_error (M.make_error code [pos, msg]);
@@ -386,10 +387,10 @@ and merge (err',fixmes') (err,fixmes) =
   (List.rev_append err' err, List.rev_append fixmes' fixmes)
 
 and empty = ([], [])
-and is_empty (err, fixmes) = err = []
+and is_empty (err, _fixmes) = err = []
 
-and get_error_list (err, fixmes) = err
-and get_applied_fixmes (err, fixmes) = fixmes
+and get_error_list (err, _fixmes) = err
+and get_applied_fixmes (_err, fixmes) = fixmes
 and from_error_list err = (err, [])
 
 (*****************************************************************************)
@@ -1191,12 +1192,12 @@ let goto_label_already_defined
 let goto_label_undefined pos label_name =
   add Naming.goto_label_undefined pos ("Undefined goto label: " ^ label_name)
 
-let goto_label_defined_in_finally pos label_name =
+let goto_label_defined_in_finally pos =
   add Naming.goto_label_defined_in_finally
     pos
     "It is illegal to define a goto label within a finally block."
 
-let goto_invoked_in_finally pos label_name =
+let goto_invoked_in_finally pos =
   add Naming.goto_invoked_in_finally
     pos
     "It is illegal to invoke goto within a finally block."
@@ -1224,16 +1225,17 @@ let no_construct_parent pos =
 
 let constructor_required (pos, name) prop_names =
   let name = Utils.strip_ns name in
-  let props_str = SSet.fold (fun x acc -> x^" "^acc) prop_names "" in
+  let props_str = SSet.fold ~f:(fun x acc -> x^" "^acc) prop_names ~init:"" in
   add NastCheck.constructor_required pos
     ("Lacking __construct, class "^name^" does not initialize its private member(s): "^props_str)
 
 let not_initialized (pos, cname) prop_names =
   let cname = Utils.strip_ns cname in
-  let props_str = SSet.fold (fun x acc -> x^" "^acc) prop_names "" in
+  let props_str = SSet.fold ~f:(fun x acc -> x^" "^acc) prop_names ~init:"" in
   let members, verb = if 1 == SSet.cardinal prop_names then "member", "is"
     else "members", "are" in
-  let setters_str = SSet.fold (fun x acc -> "$this->"^x^" "^acc) prop_names "" in
+  let setters_str =
+    SSet.fold ~f:(fun x acc -> "$this->"^x^" "^acc) prop_names ~init:"" in
   add NastCheck.not_initialized pos (
     sl[
       "Class "; cname ; " does not initialize all of its members; ";
@@ -2441,7 +2443,8 @@ let unsatisfied_req parent_pos req_name req_pos =
   else add_list Typing.unsatisfied_req [parent_pos, s1; req_pos, s2]
 
 let cyclic_class_def stack pos =
-  let stack = SSet.fold (fun x y -> (Utils.strip_ns x)^" "^y) stack "" in
+  let stack =
+    SSet.fold ~f:(fun x y -> (Utils.strip_ns x)^" "^y) stack ~init:"" in
   add Typing.cyclic_class_def pos ("Cyclic class definition : "^stack)
 
 let trait_reuse p_pos p_name class_name trait =

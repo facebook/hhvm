@@ -2007,7 +2007,7 @@ module Make (GetLocals : GetLocals) = struct
           original_declaration_pos
       | None -> Env.new_goto_label env label);
     if in_finally then
-      Errors.goto_label_defined_in_finally label_pos label_name;
+      Errors.goto_label_defined_in_finally label_pos;
     N.GotoLabel label
 
   (**
@@ -2018,9 +2018,9 @@ module Make (GetLocals : GetLocals) = struct
    * An error is produced if this is called within a finally block.
    *)
   and name_goto
-      ({ in_finally; _ }, _ as env) (label_pos, label_name as label) =
+      ({ in_finally; _ }, _ as env) (label_pos, _ as label) =
     Env.new_goto_target env label;
-    if in_finally then Errors.goto_invoked_in_finally label_pos label_name;
+    if in_finally then Errors.goto_invoked_in_finally label_pos;
     N.Goto label
 
   and static_varl env l = List.map l (static_var env)

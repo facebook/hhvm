@@ -71,7 +71,8 @@ let check_file opts (errors, failed, decl_failed) (fn, file_infos) =
     ignore(check_typedef opts fn name) in
   let ignore_check_const opts fn name =
     ignore(check_const opts fn name) in
-  let errors', (), err_flags = Errors.do_ begin fun () ->
+  let errors', (), err_flags = Errors.do_with_context fn Errors.Typing
+      begin fun () ->
     SSet.iter (ignore_type_fun opts fn) n_funs;
     SSet.iter (ignore_type_class opts fn) n_classes;
     SSet.iter (ignore_check_typedef opts fn) n_types;

@@ -14,6 +14,9 @@ module type S = sig
   type applied_fixme = Pos.t * int
   type error_flags
 
+  (* The analysis phase that the error is coming from. *)
+  type phase = Parsing | Naming | Decl | Typing
+
   val ignored_fixme_codes : ISet.t ref
 
   val set_ignored_fixmes : Relative_path.t list option -> unit
@@ -363,6 +366,10 @@ module type S = sig
   type t
 
   val do_ : (unit -> 'a) -> t * 'a * error_flags
+  val do_with_context :
+    Relative_path.t -> phase ->  (unit -> 'a) -> t * 'a * error_flags
+
+  val run_in_context : Relative_path.t -> phase ->  (unit -> 'a) -> 'a
   val run_in_decl_mode : Relative_path.t -> (unit -> 'a) -> 'a
   val get_lazy_decl_flag : error_flags -> Relative_path.t option
   val ignore_ : (unit -> 'a) -> 'a

@@ -46,7 +46,7 @@ end)
 (*****************************************************************************)
 
 let decl_file tcopt (errorl, failed) fn =
-  let errorl', (), _ = Errors.do_ begin fun () ->
+  let errorl', (), _ = Errors.do_with_context fn Errors.Decl begin fun () ->
     d ("Typing decl: "^Relative_path.to_absolute fn);
     Decl.make_env tcopt fn;
     dn "OK";

@@ -84,7 +84,7 @@ let process_parse_result
 
 let really_parse ~quick popt acc fn =
   let res =
-    Errors.do_ begin fun () ->
+    Errors.do_with_context fn Errors.Parsing begin fun () ->
       Parser_hack.from_file ~quick popt fn
     end
   in
@@ -134,7 +134,7 @@ let parse_parallel ?(quick = false) workers get_next popt =
 
 let parse_sequential ~quick fn content acc popt =
   let res =
-    Errors.do_ begin fun () ->
+    Errors.do_with_context fn Errors.Parsing begin fun () ->
       (* DISGUSTING: so far, parser was used only for text files from disk, and
       * those files are (or our reading primitives make them?) terminated with
       * newline. Files that come from memory don't have this guarantee, and it

@@ -19,6 +19,13 @@ type error_code = int
  * before sending it to the client *)
 type 'a message = 'a * string
 
+type error_phase = Parsing | Naming | Decl | Typing
+
+(* For callers that don't care about tracking error origins *)
+let default_context = (Relative_path.default, Typing)
+
+(* The file and phase of analysis being currently performed *)
+let current_context: (Relative_path.t * error_phase) ref = ref default_context
 
 module Common = struct
   type error_flags = {
@@ -55,6 +62,13 @@ module Common = struct
     accumulate_errors := accumulate_errors_copy;
     has_lazy_decl_error := has_lazy_decl_error_copy;
     (List.rev out_errors, out_applied_fixmes), result, {lazy_decl_err;}
+
+  let run_in_context path phase f =
+    let context_copy = !current_context in
+    current_context := (path, phase);
+    let res = f () in
+    current_context := context_copy;
+    res
 
   let get_lazy_decl_flag err_flags =
     err_flags.lazy_decl_err
@@ -115,6 +129,9 @@ module type Errors_modes = sig
 
   val try_with_result: (unit -> 'a) -> ('a -> error -> 'a) -> 'a
   val do_: (unit -> 'a) -> (error list * applied_fixme list) * 'a * error_flags
+  val do_with_context: Relative_path.t -> error_phase ->
+    (unit -> 'a) -> (error list * applied_fixme list) * 'a * error_flags
+  val run_in_context: Relative_path.t -> error_phase -> (unit -> 'a) -> 'a
   val run_in_decl_mode: Relative_path.t -> (unit -> 'a) -> 'a
   val add_error: error -> unit
   val make_error: error_code -> (Pos.t message) list -> error
@@ -151,6 +168,10 @@ module NonTracingErrors: Errors_modes = struct
   let do_ f =
     Common.do_ f error_list accumulate_errors applied_fixmes has_lazy_decl_error
 
+  let do_with_context path phase f =
+    Common.run_in_context path phase (fun () -> do_ f)
+
+  let run_in_context = Common.run_in_context
 
   (* Turn on lazy decl mode for the duration of the closure.
      This runs without returning the original state,
@@ -241,6 +262,11 @@ module TracingErrors: Errors_modes = struct
   let do_ f =
     Common.do_ f error_list accumulate_errors applied_fixmes has_lazy_decl_error
 
+  let run_in_context = Common.run_in_context
+
+  let do_with_context path phase f =
+    run_in_context path phase (fun () -> do_ f)
+
   (* Turn on lazy decl mode for the duration of the closure.
      This runs without returning the original state,
      since we collect it later in do_with_lazy_decls_
@@ -327,6 +353,8 @@ type error = Pos.t error_
 type applied_fixme = M.applied_fixme
 type t = error list * applied_fixme list
 type error_flags = Common.error_flags
+
+type phase = error_phase = Parsing | Naming | Decl | Typing
 
 (*****************************************************************************)
 (* HH_FIXMEs hook *)
@@ -2762,7 +2790,9 @@ let has_no_errors f =
 (*****************************************************************************)
 
 let do_ = M.do_
+let do_with_context = M.do_with_context
 
+let run_in_context = M.run_in_context
 let run_in_decl_mode = M.run_in_decl_mode
 
 let ignore_ f =

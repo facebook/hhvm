@@ -43,12 +43,8 @@ using StepOutState = RequestInjectionData::StepOutState;
 //////////////////////////////////////////////////////////////////////////
 // DebuggerHook implementation
 
-bool isHphpd(const DebuggerHook* hook) {
-  return dynamic_cast<const Eval::HphpdHook*>(hook) != nullptr;
-}
-
 void DebuggerHook::detach(ThreadInfo* ti /* = nullptr */) {
-  // Kegacy hphpd code expects no failure if no hook is attached.
+  // Legacy hphpd code expects no failure if no hook is attached.
   ti = (ti != nullptr) ? ti : &TI();
   if (!isDebuggerAttached(ti)) {
     return;
@@ -74,12 +70,14 @@ void DebuggerHook::detach(ThreadInfo* ti /* = nullptr */) {
   // If there are no more hooks attached, clear the blacklist.
   Lock lock(s_lock);
   if (--s_numAttached == 0) {
+    s_activeHook = nullptr;
     jit::clearDbgBL();
   }
 }
 
 Mutex DebuggerHook::s_lock;
-int DebuggerHook::s_numAttached = 0;
+int DebuggerHook::s_numAttached {0};
+DebuggerHook* DebuggerHook::s_activeHook {nullptr};
 
 //////////////////////////////////////////////////////////////////////////
 // Helpers

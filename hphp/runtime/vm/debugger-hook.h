@@ -46,9 +46,6 @@ inline bool isDebuggerAttached(ThreadInfo* ti = nullptr) {
   return ti->m_reqInjectionData.getDebuggerAttached();
 }
 
-/* Hacky way of checking if a DebuggerHook is an HphpdHook. */
-bool isHphpd(const DebuggerHook*);
-
 // Executes the passed code only if there is a debugger attached to the current
 // thread.
 #define DEBUGGER_ATTACHED_ONLY(code) do {                             \
@@ -85,24 +82,32 @@ struct DebuggerHook {
   static bool attach(ThreadInfo* ti = nullptr) {
     ti = (ti != nullptr) ? ti : &TI();
 
-    // The only time one hook can override another is when hphpd tries to
-    // override xdebug.
     if (isDebuggerAttached(ti)) {
-      if (!std::is_same<HookClass, HPHP::Eval::HphpdHook>::value) {
-        return false;
-      }
-      if (isHphpd(ti->m_debuggerHook)) {
-        return false;
-      }
-      detach();
+      // Check if this debugger hook is already attached.
+      // TODO: Ideally this wouldn't be necessary here, debuggers should
+      // be well behaved and only attach once per thread. There is at least
+      // one instance where hphpd still needs this. Remove once that's
+      // cleaned up.
+      return dynamic_cast<HookClass*>(ti->m_debuggerHook) != nullptr;
     }
-
-    // Attach to the thread
-    ti->m_debuggerHook = HookClass::GetInstance();
 
     // Increment the number of attached hooks.
     {
       Lock lock(s_lock);
+      auto instance = HookClass::GetInstance();
+
+      // Once a debugger has attached to any request, it is the only debugger
+      // allowed to attach to subsequent requests until it has detached from
+      // all requests.
+      if (s_activeHook == nullptr) {
+        s_activeHook = instance;
+      } else if (s_activeHook != instance) {
+        return false;
+      }
+
+      // Attach to the thread
+      ti->m_debuggerHook = instance;
+
       s_numAttached++;
       ti->m_reqInjectionData.setDebuggerAttached(true);
     }
@@ -165,6 +170,7 @@ struct DebuggerHook {
   // are no hooks attached.
   static Mutex s_lock;
   static int s_numAttached;
+  static DebuggerHook* s_activeHook;
 };
 
 // Returns the current hook.

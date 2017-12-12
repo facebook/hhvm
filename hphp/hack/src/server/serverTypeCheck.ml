@@ -368,6 +368,8 @@ module type CheckKindType = sig
     lazy_check_later:Relative_path.Set.t ->
     diag_subscribe:Diagnostic_subscription.t option ->
     ServerEnv.env
+
+  val is_full : bool
 end
 
 module FullCheckKind : CheckKindType = struct
@@ -438,6 +440,8 @@ module FullCheckKind : CheckKindType = struct
       diag_subscribe;
       recent_recheck_loop_stats = old_env.recent_recheck_loop_stats;
     }
+
+    let is_full = true
 end
 
 module LazyCheckKind : CheckKindType = struct
@@ -445,7 +449,7 @@ module LazyCheckKind : CheckKindType = struct
     (* Approximate failed_* sets for IDE files by taking all files with IDE
      * errors and treating them as if they were in failed_parsing *)
     let failed_in_ide = match env.diag_subscribe with
-      | Some ds ->  Diagnostic_subscription.files_with_errors_in_ide ds
+      | Some ds -> Diagnostic_subscription.error_sources ds
       | None -> Relative_path.Set.empty
     in
 
@@ -470,7 +474,7 @@ module LazyCheckKind : CheckKindType = struct
     Typing_deps.get_ideps_from_hash dep |> Typing_deps.get_files
 
   let has_errors_in_ide env = match env.diag_subscribe with
-    | Some ds ->  Diagnostic_subscription.file_has_errors_in_ide ds
+    | Some ds ->  Diagnostic_subscription.is_error_source ds
     | None -> (fun _ -> false)
 
   let is_ide_file env x =
@@ -516,6 +520,8 @@ module LazyCheckKind : CheckKindType = struct
        needs_full_check = true;
        diag_subscribe;
      }
+
+     let is_full = false
 end
 
 module Make: functor(CheckKind:CheckKindType) -> sig
@@ -536,6 +542,22 @@ end = functor(CheckKind:CheckKindType) -> struct
       | None -> acc
       | Some names -> FileInfo.(merge_names (simplify names) acc)
     end ~init:FileInfo.empty_names
+
+  let clear_failed_parsing errors failed_parsing =
+    (* In most cases, set of files processed in a phase is a superset
+     * of files from previous phase - i.e if we run decl on file A, we'll also
+     * run its typing.
+     * In few cases we might choose not to run further stages for files that
+     * failed parsing (see ~stop_at_errors). We need to manually clear out
+     * error lists for those files. *)
+    Relative_path.Set.fold failed_parsing ~init:errors ~f:begin fun path acc ->
+      let path = Relative_path.Set.singleton path in
+      List.fold_left Errors.([Naming; Decl; Typing])
+        ~init:acc
+        ~f:begin fun acc phase  ->
+          Errors.(incremental_update_set acc empty path phase)
+        end
+    end
 
   let type_check genv env =
     let start_t = Unix.gettimeofday () in
@@ -563,9 +585,10 @@ end = functor(CheckKind:CheckKindType) -> struct
     let fast_parsed, errorl, failed_parsing =
       parsing genv env files_to_parse ~stop_at_errors in
 
-    let incremental_errors = env.errorl in
-    let incremental_errors = Errors.(incremental_update_set incremental_errors
-      errorl files_to_parse Parsing) in
+    let errors = env.errorl in
+    let errors =
+      Errors.(incremental_update_set errors errorl files_to_parse Parsing) in
+    let errors = clear_failed_parsing errors failed_parsing in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.parsing_end t hs ~parsed_count:reparse_count;
@@ -586,8 +609,7 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     (* NAMING *)
     let errorl', failed_naming, fast = declare_names env fast_parsed in
-    let incremental_errors = Errors.(incremental_update_map incremental_errors
-      errorl' fast Naming) in
+    let errors = Errors.(incremental_update_map errors errorl' fast Naming) in
     (* failed_naming can be a superset of keys in fast - see comment in
      * NamingGlobal.ndecl_file *)
     let fast = extend_fast fast files_info failed_naming in
@@ -596,7 +618,6 @@ end = functor(CheckKind:CheckKindType) -> struct
     let fast = CheckKind.get_defs_to_redecl fast files_info env in
     let fast = add_old_decls env.files_info fast in
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
-    let errorl = Errors.merge errorl' errorl in
 
     HackEventLogger.naming_end t;
     let t = Hh_logger.log_duration "Naming" t in
@@ -640,7 +661,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       Decl_redecl_service.redo_type_decl ~bucket_size genv.workers
         env.tcopt oldified_defs fast_redecl_phase2_now defs_to_redecl_phase2 in
 
-    let incremental_errors = Errors.(incremental_update_map incremental_errors
+    let errors = Errors.(incremental_update_map errors
       errorl' fast_redecl_phase2_now Decl) in
 
     let needs_phase2_redecl = diff_set_and_map_keys
@@ -653,7 +674,6 @@ end = functor(CheckKind:CheckKindType) -> struct
     let to_recheck2 = Typing_deps.get_files to_recheck2 in
     let to_recheck2 = Relative_path.Set.union to_recheck2
       (CheckKind.get_to_recheck2_approximation to_redecl_phase2_deps env) in
-    let errorl = Errors.merge errorl' errorl in
 
     (* DECLARING TYPES: merging results of the 2 phases *)
     let fast = Relative_path.Map.union fast fast_redecl_phase2_now in
@@ -689,16 +709,16 @@ end = functor(CheckKind:CheckKindType) -> struct
         (Relative_path.Set.union af failed_check)
     in
 
-    let incremental_errors = Errors.(incremental_update_map incremental_errors
-      errorl' fast Typing) in
-    let errorl = Errors.merge errorl' errorl in
+    let errors = Errors.(incremental_update_map errors errorl' fast Typing) in
 
-    (* errorl is a subset of incremental_errors that was computed in this
-     * recheck. TODO: remove errorl after making Diagnostic_subscription.update
-     * work with incremental_errors *)
-    let diag_subscribe = Option.map old_env.diag_subscribe
-      ~f:(fun x -> Diagnostic_subscription.update
-        x env.editor_open_files fast errorl) in
+    let diag_subscribe = Option.map old_env.diag_subscribe ~f:begin fun x ->
+      Diagnostic_subscription.update x
+        ~priority_files:env.editor_open_files
+        ~reparsed:files_to_parse
+        ~rechecked:fast
+        ~global_errors:errors
+        ~full_check_done:CheckKind.is_full
+    end in
 
     let total_rechecked_count = Relative_path.Map.cardinal fast in
     HackEventLogger.type_check_end total_rechecked_count t;
@@ -710,7 +730,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let new_env = CheckKind.get_new_env
       old_env
       files_info
-      incremental_errors
+      errors
       failed_parsing
       failed_naming
       failed_decl

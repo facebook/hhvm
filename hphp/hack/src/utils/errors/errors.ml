@@ -240,6 +240,7 @@ module type Errors_modes = sig
   val to_string : ?indent:bool -> Pos.absolute error_ -> string
 
   val get_sorted_error_list: error files_t * applied_fixme files_t -> error list
+  val sort: error list -> error list
 
 end
 
@@ -314,6 +315,7 @@ module NonTracingErrors: Errors_modes = struct
     );
     Buffer.contents buf
 
+  let sort = Common.sort get_pos
   let get_sorted_error_list = Common.get_sorted_error_list get_pos
 
   let add_error error =
@@ -433,6 +435,7 @@ module TracingErrors: Errors_modes = struct
         Common.lazy_decl_error_logging msg error_map to_absolute to_string
       | None -> assert_false_log_backtrace (Some msg)
 
+  let sort = Common.sort get_pos
   let get_sorted_error_list = Common.get_sorted_error_list get_pos
 
 end
@@ -591,8 +594,23 @@ and to_list = M.to_list
 
 and make_error = M.make_error
 
+let sort = M.sort
 let get_sorted_error_list = M.get_sorted_error_list
 let iter_error_list f err = List.iter ~f:f (get_sorted_error_list err)
+
+let fold_errors err ~init ~f =
+  files_t_fold (fst err)
+    ~init
+    ~f:begin fun source _ errors acc ->
+      List.fold_right errors ~init:acc ~f:(f source)
+    end
+
+let fold_errors_in err ~source ~init ~f =
+  Relative_path.Map.get (fst err) source |>
+  Option.value ~default:PhaseMap.empty |>
+  PhaseMap.fold ~init ~f:begin fun _ errors acc ->
+    List.fold_right errors ~init:acc ~f
+  end
 
 (*****************************************************************************)
 (* Error code printing. *)

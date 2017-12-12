@@ -8,7 +8,6 @@
  *
  *)
 
-open Hh_core
 open File_content
 open Option.Monad_infix
 open ServerEnv
@@ -39,24 +38,14 @@ let get_file_content = function
  * other automation there is room for improvement (i.e finally changing global
  * error list to be a error map)
  *)
-let send_errors_for_file diag_subscribe path editor_open_files errorl =
+let update_diagnostics diag_subscribe editor_open_files errorl  =
   Option.map diag_subscribe ~f:begin fun diag_subscribe ->
-    (* Using empty_names because update function below ignores map values, and
-     * its signature requires it only to avoid costly conversion between big
-     * maps and lists elswhere. *)
-    let fast = Relative_path.Map.singleton path FileInfo.empty_names in
-    let error_list =
-      Errors.get_error_list errorl |>
-      List.filter ~f:begin fun e ->
-        (Errors.get_pos e |> Pos.filename) = path
-      end |>
-      Errors.from_error_list
-    in
-    Diagnostic_subscription.update
-      diag_subscribe
-      editor_open_files
-      fast
-      error_list
+    Diagnostic_subscription.update diag_subscribe
+      ~priority_files:editor_open_files
+      ~reparsed:Relative_path.Set.empty
+      ~rechecked:Relative_path.Map.empty
+      ~global_errors:errorl
+      ~full_check_done:true
   end
 
 let open_file env path content =
@@ -73,11 +62,7 @@ let open_file env path content =
          * when full recheck was completed and there were no further changes. In
          * all other cases, we will need to (lazily) recheck the file. *)
         env.ide_needs_parsing,
-        send_errors_for_file
-          env.diag_subscribe
-          path
-          editor_open_files
-          env.errorl
+        update_diagnostics env.diag_subscribe editor_open_files env.errorl
       end else
         Relative_path.Set.add env.ide_needs_parsing path, env.diag_subscribe
       in

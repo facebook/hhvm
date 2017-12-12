@@ -44,50 +44,98 @@ let test_update () =
     error_in a_path "bar";
     ()
   end in
+  let bar_error_a = Errors.incremental_update_set
+    ~old:foo_error_a
+    ~new_:bar_error_a
+    ~rechecked:(Relative_path.Set.singleton a_path)
+    Errors.Parsing
+  in
+
   let baz_error_b, (), _ =
     Errors.do_with_context b_path Errors.Parsing begin fun () ->
     error_in b_path "baz";
     ()
   end in
+  let baz_error_b = Errors.incremental_update_set
+    ~old:bar_error_a
+    ~new_:baz_error_b
+    ~rechecked:(Relative_path.Set.singleton b_path)
+    Errors.Parsing
+  in
 
+  let bar_error_cleared_a = Errors.incremental_update_set
+    ~old:baz_error_b
+    ~new_:Errors.empty
+    ~rechecked:(Relative_path.Set.singleton a_path)
+    Errors.Parsing
+  in
   let ds = DS.of_id ~id:1 ~init:Errors.empty in
 
   let priority_files = Relative_path.Set.empty in
+  let reparsed = Relative_path.Set.empty in
   let rechecked_a = Relative_path.Map.singleton a_path FileInfo.empty_names in
   let rechecked_b = Relative_path.Map.singleton b_path FileInfo.empty_names in
 
-  let ds, diagnostics =
-    DS.update ds priority_files rechecked_a foo_error_a |> DS.pop_errors in
+  let ds, diagnostics = DS.update ds
+    ~priority_files
+    ~reparsed
+    ~rechecked:rechecked_a
+    ~global_errors:foo_error_a
+    ~full_check_done:true
+    |> DS.pop_errors ~global_errors:foo_error_a in
   let expected =
     "/A:\nFile \"/A\", line 0, characters 0--1:\nfoo (Parsing[1002])\n\n" in
   Asserter.String_asserter.assert_equals expected
     (diagnostics_to_string diagnostics)
     "foo error in A should be pushed";
 
-  let ds, diagnostics =
-    DS.update ds priority_files rechecked_a foo_error_a |> DS.pop_errors in
+  let ds, diagnostics = DS.update ds
+    ~priority_files
+    ~reparsed
+    ~rechecked:rechecked_a
+    ~global_errors:foo_error_a
+    ~full_check_done:false
+    |> DS.pop_errors ~global_errors:foo_error_a in
+
   Asserter.Bool_asserter.assert_equals true
     (SMap.is_empty diagnostics)
     "Unchanged diagnostics in A should be not pushed again";
 
   let expected =
     "/A:\nFile \"/A\", line 0, characters 0--1:\nbar (Parsing[1002])\n\n" in
-  let ds, diagnostics =
-    DS.update ds priority_files rechecked_a bar_error_a |> DS.pop_errors in
+  let ds, diagnostics = DS.update ds
+    ~priority_files
+    ~reparsed
+    ~rechecked:rechecked_a
+    ~global_errors:bar_error_a
+    ~full_check_done:false
+    |> DS.pop_errors ~global_errors:bar_error_a in
   Asserter.String_asserter.assert_equals expected
     (diagnostics_to_string diagnostics)
     "foo error in A should be replaced with bar";
 
+  let priority_files = Relative_path.Set.singleton b_path  in
+
   let expected =
     "/B:\nFile \"/B\", line 0, characters 0--1:\nbaz (Parsing[1002])\n\n" in
-  let ds, diagnostics =
-    DS.update ds priority_files rechecked_b baz_error_b |> DS.pop_errors in
+  let ds, diagnostics = DS.update ds
+    ~priority_files
+    ~reparsed
+    ~rechecked:rechecked_b
+    ~global_errors:baz_error_b
+    ~full_check_done:false
+    |> DS.pop_errors ~global_errors:baz_error_b in
   Asserter.String_asserter.assert_equals expected
     (diagnostics_to_string diagnostics)
     "baz error in B should be added";
 
-  let ds, diagnostics =
-    DS.update ds priority_files rechecked_a Errors.empty |> DS.pop_errors in
+  let ds, diagnostics = DS.update ds
+    ~priority_files
+    ~reparsed
+    ~rechecked:rechecked_a
+    ~global_errors:bar_error_cleared_a
+    ~full_check_done:false
+    |> DS.pop_errors ~global_errors:bar_error_cleared_a in
   let expected = "/A:\n" in
   Asserter.String_asserter.assert_equals expected
     (diagnostics_to_string diagnostics)
@@ -119,16 +167,21 @@ let test_error_sources () =
     (singleton b_path FileInfo.empty_names)
   ) in
 
-  let ds = DS.update ds priority_files rechecked errors  in
+  let ds = DS.update ds
+    ~priority_files
+    ~reparsed:Relative_path.Set.empty
+    ~rechecked:rechecked
+    ~global_errors:errors
+    ~full_check_done:true
+   in
 
   Asserter.Bool_asserter.assert_equals true
-    (Relative_path.Set.mem (DS.files_with_errors_in_ide ds) a_path)
-    "files_with_errors_in_ide should contain A";
+    (Relative_path.Set.mem (DS.error_sources ds) a_path)
+    "error_sources should contain A";
 
-  Asserter.Bool_asserter.assert_equals false (* TODO: this should be
-    true and can lead to errors missing in ide *)
-    (Relative_path.Set.mem (DS.files_with_errors_in_ide ds) b_path)
-    "files_with_errors_in_ide should contain B";
+  Asserter.Bool_asserter.assert_equals true
+    (Relative_path.Set.mem (DS.error_sources ds) b_path)
+    "error_sources should contain B";
   true
 
 let tests = [

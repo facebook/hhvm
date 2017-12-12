@@ -342,7 +342,7 @@ let serve_one_iteration ~iteration_flag genv env client_provider =
     (* We processed some edits but didn't recheck them yet. *)
     if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then env else
 
-    let sub, errors = Diagnostic_subscription.pop_errors sub in
+    let sub, errors = Diagnostic_subscription.pop_errors sub env.errorl in
 
     if not @@ SMap.is_empty errors then begin
       let id = Diagnostic_subscription.get_id sub in

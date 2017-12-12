@@ -392,6 +392,16 @@ module type S = sig
   val get_sorted_error_list : t -> error list
   val from_error_list : error list -> t
   val iter_error_list : (error -> unit) -> t -> unit
+  val fold_errors : t ->
+    init:'a ->
+    f:(Relative_path.t -> error -> 'a -> 'a) ->
+    'a
+  val fold_errors_in : t ->
+    source:Relative_path.t ->
+    init:'a ->
+    f:(error -> 'a -> 'a) ->
+    'a
+  val sort : error list -> error list
   val get_applied_fixmes : t -> applied_fixme list
   val darray_not_supported : Pos.t -> unit
   val varray_not_supported : Pos.t -> unit

@@ -52,9 +52,9 @@ function test_basic(): void {
   $make = fun('make_int_args');
   f(...$make());
 
-  f(...make_mixed_args());
+  f(1, ...make_mixed_args());
   $make = fun('make_mixed_args');
-  f(...$make());
+  f(1, ...$make());
 
   g(
     'this is a long string to satisfy hh_format. it allows us to test that ',

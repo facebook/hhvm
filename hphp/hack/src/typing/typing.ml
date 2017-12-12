@@ -4551,9 +4551,9 @@ and call_ ~expected pos env fty el uel =
       match uel with
       | [] -> env, [], List.length el, true
       | e :: _ ->
-      (* Enforces that e is unpackable. If e is a tuple, check types against
-       * parameter types *)
-      let env, te, ety = expr env e in
+        (* Enforces that e is unpackable. If e is a tuple, check types against
+         * parameter types *)
+        let env, te, ety = expr env e in
         match ety with
         | _, Ttuple tyl ->
           let rec check_elements env tyl paraml =
@@ -4571,9 +4571,19 @@ and call_ ~expected pos env fty el uel =
         | _ ->
           let pos = fst e in
           let unpack_r = Reason.Runpack_param pos in
-          let container_ty = (unpack_r, Tclass ((pos, SN.Collections.cContainer),
-                                                [unpack_r, Tany])) in
-          let env = Type.sub_type pos Reason.URparam env ety container_ty in
+          let param_tyl = List.map paraml (fun param -> param.fp_type) in
+          let add_variadic_param_ty param_tyl =
+            match var_param with
+            | Some param -> param.fp_type :: param_tyl
+            | None -> param_tyl in
+          let param_tyl = add_variadic_param_ty param_tyl in
+          let make_subtype_of_container ty container_param_ty env =
+            let container_ty = (unpack_r, Tclass (
+              (pos, SN.Collections.cTraversable),
+              [container_param_ty])) in
+            Type.sub_type pos Reason.URparam env ty container_ty in
+          let env = List.fold_right param_tyl
+            ~f:(make_subtype_of_container ety) ~init:env in
           env, [te], List.length el + 1, false in
     (* If we unpacked an array, we don't check arity exactly. Since each
      * unpacked array consumes 1 or many parameters, it is nonsensical to say

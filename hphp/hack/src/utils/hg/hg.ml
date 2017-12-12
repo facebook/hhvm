@@ -43,18 +43,15 @@ let get_old_version_of_files ~rev ~files ~out ~repo =
   in
   Future.make process ignore
 
-(** Returns the closest SVN ancestor in master to the given hg rev.
+(** Returns the closest SVN ancestor in master to the given rev.
  *
- * hg log -r 'ancestor(master,hg_rev)' -T '{svnrev}\n'
- *
- * Note: hg_rev only works in short form from `hg id -i` (see below)
- * and not the full hash form from `hg --debug id -i`
+ * hg log -r 'ancestor(master,rev)' -T '{svnrev}\n'
  *)
-let get_closest_svn_ancestor hg_rev repo =
+let get_closest_svn_ancestor rev repo =
   let process = Process.exec "hg" [
     "log";
     "-r";
-    Printf.sprintf "ancestor(master,%s)" hg_rev;
+    Printf.sprintf "ancestor(master,%s)" rev;
     "-T";
     "{svnrev}\n";
     "--cwd";
@@ -78,18 +75,42 @@ let get_closest_svn_ancestor hg_rev repo =
         else
           result, false
 
-  (** hg log -r 'ancestor(master,.)' -T '{svnrev}\n' *)
-  let current_working_copy_base_rev repo =
+  (** hg log -r 'p2()' -T '{node}' *)
+  let get_p2_node repo =
     let process = Process.exec "hg" [
       "log";
       "-r";
-      "ancestor(master,.)";
+      "p2()";
       "-T";
-      "{svnrev}\n";
+      "{node}";
       "--cwd";
       repo;
-    ] in
-    Future.make process (fun s -> int_of_string (String.trim s))
+    ]
+    in
+    let future = Future.make process String.trim in
+    match Future.get future with
+    | Ok "" -> None
+    | Ok s -> Some s
+    | Error _ -> None
+
+  (**
+   * Returns the SVN base revision. If the current node is a normal
+   * commit, this is simply the closest_svn_ancestor.
+   *
+   * If the current node is a merge commit (for example during a merge-conflict
+   * state), then it computes the two merge bases with master (one for each
+   * parent) and uses the greater of the two.
+   * *)
+  let current_working_copy_base_rev repo =
+    let primary_mergebase = get_closest_svn_ancestor "." repo in
+    (** Ok, since (get_closest_svn_ancestor p2) depends on getting p2, we
+     * actually block on getting p2 first. *)
+    match get_p2_node repo with
+    | None -> primary_mergebase
+    | Some p2 ->
+      let p2_mergebase = get_closest_svn_ancestor p2 repo in
+      let max_svn primary p2 = max primary p2 in
+      Future.merge primary_mergebase p2_mergebase max_svn
 
   (** Returns the files changed since the given svn_rev
    *

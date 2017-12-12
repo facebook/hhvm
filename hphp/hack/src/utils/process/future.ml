@@ -31,12 +31,18 @@ type 'a promise =
     (** Delayed is useful for deterministic testing. Must be tapped by "is ready" or
      * "check_status" the remaining number of times before it is ready. *)
   | Delayed : 'a delayed -> 'a promise
+    (** A future formed from two underlying futures. Calling "get" blocks until
+     * both underlying are ready. *)
+  | Merged : ('a t * 'b t * ('a -> 'b -> 'c)) -> 'c promise
     (** float is the time the Future was constructed. *)
   | Incomplete of float * Process_types.t * (string -> 'a)
-type 'a t = 'a promise ref
+and 'a t = 'a promise ref
 
 let make process transformer =
   ref (Incomplete (Unix.time (), process, transformer))
+
+let merge a b handler =
+  ref (Merged (a, b, handler))
 
 let of_value v = ref @@ Complete v
 
@@ -64,7 +70,7 @@ let error_to_string (info, e) =
 
 let error_to_exn e = raise (Failure e)
 
-let get : ?timeout:int -> 'a t -> ('a, error) result =
+let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
   fun ?(timeout=30) promise -> match !promise with
   | Complete v -> Ok v
   | Complete_but_transformer_raised (info, e) ->
@@ -73,6 +79,16 @@ let get : ?timeout:int -> 'a t -> ('a, error) result =
     Ok value
   | Delayed _ ->
     Error (Process_types.dummy.Process_types.info, Timed_out ("", "Delayed value not ready yet"))
+  | Merged (a, b, handler) ->
+    let open Core_result.Monad_infix in
+    let start_t = Unix.time () in
+    get ~timeout a >>= fun a ->
+    let consumed_t = int_of_float @@ Unix.time () -. start_t in
+    let timeout = timeout - consumed_t in
+    get ~timeout b >>= fun b ->
+    let result = handler a b in
+    let () = promise := Complete result in
+    Ok result
   | Incomplete (_, process, transformer) ->
     let info = process.Process_types.info in
     match Process.read_and_wait_pid ~timeout process with
@@ -98,17 +114,36 @@ let get_exn ?timeout x = get ?timeout x
   |> Core_result.map_error ~f:error_to_exn
   |> Core_result.ok_exn
 
-let is_ready promise = match !promise with
+(** Must explicitly make recursive functions polymorphic. *)
+let rec is_ready : 'a. 'a t -> bool = fun promise ->
+  match !promise with
   | Complete _ | Complete_but_transformer_raised _ -> true
   | Delayed {remaining; _} when remaining <= 0 ->
     true
   | Delayed { tapped; remaining; value; } ->
     promise := Delayed { tapped = tapped + 1; remaining = remaining - 1; value; };
     false
+  | Merged (a, b, _) ->
+    is_ready a && is_ready b
   | Incomplete (_, process, _) ->
     Process.is_ready process
 
-let check_status promise = match !promise with
+let merge_status stat_a stat_b handler =
+  match stat_a, stat_b with
+  | Complete_with_result (Ok va), Complete_with_result (Ok vb) ->
+    Complete_with_result (Ok (handler va vb))
+  | Complete_with_result (Error e), _
+  | _, Complete_with_result (Error e) ->
+    Complete_with_result (Error e)
+  | In_progress age_a, In_progress age_b when age_a > age_b ->
+    In_progress age_a
+  | In_progress age, _
+  | _, In_progress age ->
+    In_progress age
+
+(** Must explicitly make recursive function polymorphic. *)
+let rec check_status : 'a. 'a t -> 'a status = fun promise ->
+  match !promise with
   | Complete v ->
     Complete_with_result (Ok v)
   | Complete_but_transformer_raised (info, e) ->
@@ -118,6 +153,8 @@ let check_status promise = match !promise with
   | Delayed { tapped; remaining; value; } ->
     promise := Delayed { tapped = tapped + 1; remaining = remaining - 1; value; };
     In_progress (float_of_int tapped)
+  | Merged (a, b, handler) ->
+    merge_status (check_status a) (check_status b) handler
   | Incomplete (start_t, process, _) ->
     if Process.is_ready process then
       Complete_with_result (get promise)

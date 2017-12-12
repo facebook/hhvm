@@ -44,6 +44,12 @@ module type S = sig
 
   val make : Process_types.t -> 'a deserializer -> 'a t
 
+  (** Analogous to "make" above, but takes in two futures and a function that
+   * consumes their results, producing a third future that "is_ready" when both
+   * of the underlying are ready (and will block on "get" until both of the
+   * underlying are completed). *)
+  val merge : 'a t -> 'b t -> ('a -> 'b -> 'c) -> 'c t
+
   (** Just wrap a value inside a future. *)
   val of_value : 'a -> 'a t
 

@@ -459,15 +459,23 @@ let rec program
     ?(include_line_comments = false)
     ?(keep_errors = true)
     popt file content =
+
+  let with_lexer_errors f =
+    if keep_errors then f () else Errors.ignore_ f in
+
   L.include_line_comments := include_line_comments;
   L.comment_list := [];
   L.fixmes := IMap.empty;
-  let lb = Lexing.from_string content in
-  let env = init_env file lb popt quick in
-  let file_type, ast, file_mode = header env in
-  let is_hh_file = file_type = FileInfo.HhFile in
-  let comments = !L.comment_list in
-  let fixmes = !L.fixmes in
+  let env, fixmes, ast, file_mode, comments, is_hh_file =
+      with_lexer_errors begin fun () ->
+    let lb = Lexing.from_string content in
+    let env = init_env file lb popt quick in
+    let file_type, ast, file_mode = header env in
+    let is_hh_file = file_type = FileInfo.HhFile in
+    let comments = !L.comment_list in
+    let fixmes = !L.fixmes in
+    env, fixmes, ast, file_mode, comments, is_hh_file
+  end in
   L.comment_list := [];
   L.fixmes := IMap.empty;
   if keep_errors then  begin

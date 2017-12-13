@@ -137,11 +137,8 @@ inline RequestInjectionData& RID() {
 void raise_infinite_recursion_error();
 
 inline void* stack_top_ptr() {
-  char marker;
-
-  // gcc warns about directly returning pointers to local variables.
-  auto to_trick_gcc = static_cast<void*>(&marker);
-  return to_trick_gcc;
+  DECLARE_FRAME_POINTER(fp);
+  return fp;
 }
 
 inline bool stack_in_bounds() {

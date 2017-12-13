@@ -538,7 +538,8 @@ static inline uint32_t profileBCSizeDefault() {
 }
 
 static inline uint32_t resetProfCountersDefault() {
-  return RuntimeOption::EvalJitConcurrently ? 250 : 1000;
+  return RuntimeOption::EvalJitPGORacyProfiling ? UINT32_MAX
+    : RuntimeOption::EvalJitConcurrently ? 250 : 1000;
 }
 
 static inline int retranslateAllRequestDefault() {

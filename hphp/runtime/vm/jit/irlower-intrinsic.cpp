@@ -191,7 +191,7 @@ void cgIncProfCounter(IRLS& env, const IRInstruction* inst) {
   auto const counterAddr = profData()->transCounterAddr(transID);
   auto& v = vmain(env);
 
-  if (RuntimeOption::EvalJitPGOFastProfiling) {
+  if (RuntimeOption::EvalJitPGORacyProfiling) {
     v << decqm{v.cns(counterAddr)[0], v.makeReg()};
   } else {
     v << decqmlock{v.cns(counterAddr)[0], v.makeReg()};

@@ -294,6 +294,23 @@ void ProxygenServer::start() {
       failedToListen(ex, m_httpsConfig.bindAddress);
     }
   }
+
+  if (!RuntimeOption::SSLTicketSeedFile.empty() &&
+      (m_httpsAcceptor || m_httpConfig.isSSL())) {
+    // setup ticket seed watcher
+    const auto& ticketPath = RuntimeOption::SSLTicketSeedFile;
+    auto seeds = wangle::TLSCredProcessor::processTLSTickets(ticketPath);
+    if (seeds) {
+      updateTLSTicketSeeds(std::move(*seeds));
+    }
+    m_credProcessor =
+        std::make_unique<wangle::TLSCredProcessor>();
+    m_credProcessor->setTicketPathToWatch(ticketPath);
+    m_credProcessor->addTicketCallback([&](wangle::TLSTicketKeySeeds seeds) {
+        updateTLSTicketSeeds(std::move(seeds));
+    });
+  }
+
   if (needListen) {
     try {
       m_httpServerSocket->listen(m_httpConfig.acceptBacklog);
@@ -360,6 +377,10 @@ void ProxygenServer::stop() {
   Logger::Info("%p: Stopping ProxygenServer port=%d", this, m_port);
 
   setStatus(RunStatus::STOPPING);
+
+  if (m_credProcessor) {
+    m_credProcessor->stop();
+  }
 
   if (m_takeover_agent) {
     m_worker.getEventBase()->runInEventBaseThread([this] {
@@ -621,6 +642,20 @@ bool ProxygenServer::initialCertHandler(const std::string& /*server_name*/,
       "Invalid certificate file or key file: ", ex.what()));
     return false;
   }
+}
+
+void ProxygenServer::updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds) {
+  auto evb = m_worker.getEventBase();
+  evb->runInEventBaseThread([seeds = std::move(seeds), this] {
+      if (m_httpsAcceptor) {
+        m_httpsAcceptor->setTLSTicketSecrets(
+            seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
+      }
+      if (m_httpAcceptor && m_httpConfig.isSSL()) {
+        m_httpAcceptor->setTLSTicketSecrets(
+            seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
+      }
+  });
 }
 
 bool ProxygenServer::dynamicCertHandler(const std::string& /*server_name*/,

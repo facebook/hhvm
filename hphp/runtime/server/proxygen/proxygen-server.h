@@ -24,6 +24,7 @@
 #include <proxygen/lib/http/session/HTTPSessionAcceptor.h>
 #include <proxygen/lib/services/WorkerThread.h>
 #include <wangle/ssl/SSLContextConfig.h>
+#include <wangle/ssl/TLSCredProcessor.h>
 #include <folly/io/async/NotificationQueue.h>
 
 #include <algorithm>
@@ -215,6 +216,8 @@ struct ProxygenServer : Server,
 
   wangle::SSLContextConfig createContextConfig();
 
+  void updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds);
+
   // Forbidden copy constructor and assignment operator
   ProxygenServer(ProxygenServer const &) = delete;
   ProxygenServer& operator=(ProxygenServer const &) = delete;
@@ -238,6 +241,7 @@ struct ProxygenServer : Server,
   ResponseMessageQueue m_responseQueue;
   std::unique_ptr<TakeoverAgent> m_takeover_agent;
   ProxygenTransportList m_pendingTransports;
+  std::unique_ptr<wangle::TLSCredProcessor> m_credProcessor;
 };
 
 struct ProxygenTransportTraits {

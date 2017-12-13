@@ -264,6 +264,7 @@ int RuntimeOption::SSLPortFd = -1;
 std::string RuntimeOption::SSLCertificateFile;
 std::string RuntimeOption::SSLCertificateKeyFile;
 std::string RuntimeOption::SSLCertificateDir;
+std::string RuntimeOption::SSLTicketSeedFile;
 bool RuntimeOption::TLSDisableTLS1_2 = false;
 std::string RuntimeOption::TLSClientCipherSpec;
 bool RuntimeOption::EnableSSLWithPlainText = false;
@@ -1542,6 +1543,7 @@ void RuntimeOption::Load(
     Config::Bind(SSLCertificateKeyFile, ini, config,
                  "Server.SSLCertificateKeyFile");
     Config::Bind(SSLCertificateDir, ini, config, "Server.SSLCertificateDir");
+    Config::Bind(SSLTicketSeedFile, ini, config, "Server.SSLTicketSeedFile");
     Config::Bind(TLSDisableTLS1_2, ini, config, "Server.TLSDisableTLS1_2",
                  false);
     Config::Bind(TLSClientCipherSpec, ini, config,

@@ -258,6 +258,7 @@ struct RuntimeOption {
   static std::string SSLCertificateFile;
   static std::string SSLCertificateKeyFile;
   static std::string SSLCertificateDir;
+  static std::string SSLTicketSeedFile;
   static bool TLSDisableTLS1_2;
   static std::string TLSClientCipherSpec;
   static bool EnableSSLWithPlainText;

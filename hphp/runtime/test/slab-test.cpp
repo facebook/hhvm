@@ -22,11 +22,7 @@
 namespace HPHP {
 
 TEST(SlabXmapTest, very_small_xmap) {
-  // 2m slab / 2k line => 1k header
-  const auto LineSize = 2048;
-  using Slab = SlabHeader<LineSize>;
-  static_assert(sizeof(Slab) < LineSize, "");
-  auto slab = static_cast<Slab*>(malloc(kSlabSize));
+  auto slab = static_cast<Slab*>(aligned_alloc(kSlabSize, kSlabSize));
   SCOPE_EXIT { free(slab); };
   auto start = slab->init();
 
@@ -42,19 +38,14 @@ TEST(SlabXmapTest, very_small_xmap) {
 
   auto hole = reinterpret_cast<FreeNode*>((char*)small + small->nbytes);
   hole->initHeader_32(HeaderKind::Hole, slab->end() - (char*)hole);
-  slab->initCrossingMap();
+  slab->initStartBits();
 
-  // ensure find doesn't walk off beginning of crossing map
+  // ensure find doesn't walk off beginning or otherwise blow up if we
+  // test addresses in the header area.
   EXPECT_EQ(slab->find(slab).ptr, nullptr);
   EXPECT_EQ(slab->find(start - 1).ptr, nullptr);
   EXPECT_EQ(slab->find(start).ptr, large);
   EXPECT_EQ(slab->find(start + 1).ptr, large);
-
-  // make sure reverse-search works
-  static_assert(kMaxSmallSize / LineSize > 128, "");
-  EXPECT_EQ(slab->find(start + 1 * LineSize).ptr, large);
-  EXPECT_EQ(slab->find(start + 2 * LineSize).ptr, large);
-  EXPECT_EQ(slab->find(start + 129 * LineSize).ptr, large);
 
   // probe edge between large and small
   EXPECT_EQ(slab->find((char*)small - 1).ptr, large);

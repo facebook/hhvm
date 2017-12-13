@@ -311,7 +311,8 @@ NEVER_INLINE void Collector::init() {
     [&](HeapObject* h, size_t size) { // onSlab
       ++num_slabs_;
       ptrs_.insert(h, size);
-      num_small_ += Slab::fromHeader(h)->initCrossingMap();
+      auto slab = Slab::fromHeader(h);
+      num_small_ += slab->initStartBits();
     }
   );
   ptrs_.prepare();

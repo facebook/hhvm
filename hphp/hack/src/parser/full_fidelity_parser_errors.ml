@@ -1335,7 +1335,7 @@ let function_errors node parents is_strict hhvm_compat_mode errors =
 
 let redeclaration_errors node parents syntax_tree namespace_name names errors =
   match syntax node with
-  | FunctionDeclarationHeader f ->
+  | FunctionDeclarationHeader f when not (is_missing f.function_name)->
     begin match parents with
       | { syntax = FunctionDeclaration _; _}
         :: _ :: {syntax = NamespaceBody _; _} :: _
@@ -1797,7 +1797,8 @@ let classish_errors node parents is_hack hhvm_compat_mode namespace_name names e
       | _ -> errors in
     let names, errors =
       match token_kind cd.classish_keyword with
-      | Some TokenKind.Class | Some TokenKind.Trait ->
+      | Some TokenKind.Class | Some TokenKind.Trait
+        when not (is_missing cd.classish_name)->
         let location = make_location_of_node cd.classish_name in
         check_type_name cd.classish_name namespace_name name location names errors
       | _ ->
@@ -1826,6 +1827,8 @@ let alias_errors node namespace_name names errors =
         not (is_missing ad.alias_constraint)
       then make_error_from_node ad.alias_keyword SyntaxError.error2034 :: errors
       else errors in
+    if is_missing ad.alias_name then names,errors
+    else
     let name = text ad.alias_name in
     let location = make_location_of_node ad.alias_name in
     check_type_name ad.alias_name namespace_name name location names errors
@@ -1872,7 +1875,7 @@ let use_class_or_namespace_clause_errors
   | NamespaceUseClause {
       namespace_use_name  = name;
       namespace_use_alias = alias; _
-    } ->
+    } when not (is_missing name) ->
     let name_text = text name in
     let qualified_name =
       match namespace_prefix with
@@ -2140,6 +2143,9 @@ let const_decl_errors node parents hhvm_compat_mode namespace_name names errors 
             make_error_from_node
               node SyntaxError.invalid_constant_initializer :: errors
       | _ -> errors in
+    if is_missing cd.constant_declarator_name
+    then names, errors
+    else
     let constant_name = text cd.constant_declarator_name in
     let location = make_location_of_node cd.constant_declarator_name in
     let def =

@@ -358,7 +358,7 @@ const InstrInfo& getInstrInfo(Op op);
  *
  * This is used to avoid generating guards for interpreted instructions.
  */
-bool dontGuardAnyInputs(Op op);
+bool dontGuardAnyInputs(const NormalizedInstruction& ni);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Other instruction information.
@@ -367,7 +367,7 @@ bool dontGuardAnyInputs(Op op);
 * Some bytecodes are always no-ops but kept around for various reasons (mostly
 * stack flavor safety).
  */
-bool isAlwaysNop(Op op);
+bool isAlwaysNop(const NormalizedInstruction& ni);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Completely unrelated functionality.

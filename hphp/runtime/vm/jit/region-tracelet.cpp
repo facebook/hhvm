@@ -216,7 +216,7 @@ bool prepareInstruction(Env& env) {
     (env.profiling && instrBreaksProfileBB(&env.inst)) ||
     opcodeBreaksBB(env.inst.op());
   env.inst.endsRegion = breaksBB ||
-    (dontGuardAnyInputs(env.inst.op()) && opcodeChangesPC(env.inst.op()));
+    (dontGuardAnyInputs(env.inst) && opcodeChangesPC(env.inst.op()));
   env.inst.funcd = env.arStates.back().knownFunc();
   irgen::prepareForNextHHBC(env.irgs, &env.inst, env.sk, false);
 

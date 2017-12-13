@@ -604,8 +604,8 @@ int64_t getStackPushed(PC pc) {
   return countOperands(getInstrInfo(op).out);
 }
 
-bool isAlwaysNop(Op op) {
-  switch (op) {
+bool isAlwaysNop(const NormalizedInstruction& ni) {
+  switch (ni.op()) {
   case Op::BoxRNop:
   case Op::DefClsNop:
   case Op::Nop:
@@ -617,7 +617,8 @@ bool isAlwaysNop(Op op) {
     return true;
   case Op::FPassC:
   case Op::FPassVNop:
-    return !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch;
+    return !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch ||
+      static_cast<FPassHint>(ni.imm[1].u_OA) == FPassHint::Any;
   case Op::VerifyRetTypeC:
   case Op::VerifyRetTypeV:
     return !RuntimeOption::EvalCheckReturnTypeHints;
@@ -708,7 +709,7 @@ size_t memberKeyImmIdx(Op op) {
  */
 InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   InputInfoVec inputs;
-  if (isAlwaysNop(ni.op())) return inputs;
+  if (isAlwaysNop(ni)) return inputs;
 
   always_assert_flog(
     instrInfo.count(ni.op()),
@@ -828,14 +829,14 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   SKTRACE(1, sk, "stack args: virtual sfo now %d\n", stackOff.offset);
   TRACE(1, "%s\n", Trace::prettyNode("Inputs", inputs).c_str());
 
-  if ((flags & DontGuardAny) || dontGuardAnyInputs(ni.op())) {
+  if ((flags & DontGuardAny) || dontGuardAnyInputs(ni)) {
     for (auto& info : inputs) info.dontGuard = true;
   }
   return inputs;
 }
 
-bool dontGuardAnyInputs(Op op) {
-  switch (op) {
+bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
+  switch (ni.op()) {
   case Op::IterBreak:
   case Op::DecodeCufIter:
   case Op::IterNext:
@@ -1141,10 +1142,11 @@ bool dontGuardAnyInputs(Op op) {
   case Op::FPassVNop:
   case Op::FPassN:
   case Op::FPassC:
-    return !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch;
+    return !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch ||
+      static_cast<FPassHint>(ni.imm[1].u_OA) == FPassHint::Any;
   }
 
-  always_assert_flog(0, "invalid opcode {}\n", static_cast<uint32_t>(op));
+  always_assert_flog(0, "invalid opcode {}\n", static_cast<uint32_t>(ni.op()));
 }
 
 bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
@@ -1283,7 +1285,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
     irgen::emitIncStat(irgs, Stats::opToTranslStat(ni.op()), 1);
   }
 
-  if (isAlwaysNop(ni.op())) return;
+  if (isAlwaysNop(ni)) return;
   if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
     irgen::interpOne(irgs, ni);
     return;

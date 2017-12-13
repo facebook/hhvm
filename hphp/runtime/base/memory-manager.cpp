@@ -604,6 +604,14 @@ alignas(64) constexpr size_t kContigTab[] = {
 #undef SIZE_CLASS
 };
 
+alignas(64) const uint8_t kContigIndexTab[] = {
+#define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+  (uint8_t)std::max(size_t(index+1),\
+                    MemoryManager::size2Index(kContigTab[index])),
+  SIZE_CLASSES
+#undef SIZE_CLASS
+};
+
 /*
  * Store slab tail bytes (if any) in freelists.
  */
@@ -729,25 +737,20 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
 void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
   assert(nbytes == sizeIndex2Size(index));
   assert(!m_freelists[index].head); // freelist[index] is empty
-  auto contigMin = kContigTab[index];
-  auto contigInd = size2Index(contigMin);
+  size_t contigInd = kContigIndexTab[index];
   for (auto i = contigInd; i < kNumSmallSizes; ++i) {
     FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): contigMin={}, "
-              "contigInd={}, try i={}\n", nbytes, index, contigMin,
+              "contigInd={}, try i={}\n", nbytes, index, kContigTab[index],
               contigInd, i);
     if (auto p = m_freelists[i].maybePop()) {
       assert(i > index); // because freelist[index] was empty
       FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): "
                 "contigMin={}, contigInd={}, use i={}, size={}, p={}\n",
-                nbytes, index, contigMin, contigInd, i, sizeIndex2Size(i),
-                p);
+                nbytes, index, kContigTab[index], contigInd, i,
+                sizeIndex2Size(i), p);
       // Split tail into preallocations and store them back into freelists.
-      auto availBytes = sizeIndex2Size(i);
-      auto tailBytes = availBytes - nbytes;
-      assert(tailBytes > 0); // because i > index
-      auto tail = (void*)(uintptr_t(p) + nbytes);
-      splitTail(m_freelists, tail, tailBytes, contigMin - nbytes, nbytes,
-                index);
+      splitTail(m_freelists, (char*)p + nbytes, sizeIndex2Size(i) - nbytes,
+                kContigTab[index] - nbytes, nbytes, index);
       return p;
     }
   }

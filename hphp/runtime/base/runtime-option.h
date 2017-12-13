@@ -689,19 +689,19 @@ struct RuntimeOption {
   F(bool, UncountedMixedArrayHuge,     true)                            \
   F(bool, UncountedStringHuge,         true)                            \
   F(bool, RandomHotFuncs,              false)                           \
-  F(bool, GCForAPC,                    false)                           \
-  F(int64_t, GCForAPCTrigger,          1024*1024*1024)                  \
   F(int64_t, ContiguousHeapWindowSize, 5 * 1000000)                     \
   F(uint64_t,ContiguousHeapThreshold,  128 * 1024 * 1024)               \
+  /* GC Options: See heap-collect.cpp for more details */               \
   F(bool, EnableGC,                    eagerGcDefault())                \
-  /* Run GC eagerly at each surprise point. */                          \
   F(bool, EagerGC,                     eagerGcDefault())                \
-  /* only run eager-gc once at each surprise point (much faster) */     \
   F(bool, FilterGCPoints,              true)                            \
   F(bool, Quarantine,                  eagerGcDefault())                \
   F(uint32_t, GCSampleRate,            0)                               \
   F(int64_t, GCMinTrigger,             64L<<20)                         \
   F(double, GCTriggerPct,              0.5)                             \
+  F(bool, GCForAPC,                    false)                           \
+  F(int64_t, GCForAPCTrigger,          1024*1024*1024)                  \
+  /* End of GC Options */                                               \
   F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
   F(bool, Verify,                      (getenv("HHVM_VERIFY") ||        \

@@ -990,6 +990,11 @@ struct MemoryManager {
    */
   void collect(const char* phase);
   void resetGC();
+
+  /*
+   * Compute the usage threshold to trigger the next gc, as a function
+   * of RuntimeOption::EvalGCMinTrigger and EvalGCTriggerPct.
+   */
   void updateNextGc();
 
   bool isGCEnabled();

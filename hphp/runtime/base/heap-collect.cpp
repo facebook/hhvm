@@ -63,6 +63,45 @@ bool hasNativeData(const HeapObject* h) {
 constexpr auto MinMark = GCBits(1);
 constexpr auto MaxMark = GCBits(3);
 
+/*
+ * GC Runtime Options
+ *
+ * Eval.EnableGC - Default value of the per-request MemoryManager::m_gc_enabled
+ * flag. This flag can be dynamically set/cleared by PHP via
+ * ini_set("zend.enable_gc"). In turn, m_gc_enabled enables automatic background
+ * garbage collection. Regardless of its value, PHP can call gc_collect_cycles()
+ * for manual gc.
+ *
+ * Eval.EagerGC - If set, trigger collection after every allocation, in debug
+ * builds. Has no effect in opt builds or when m_gc_enabled == false.
+ *
+ * Eval.FilterGCPoints - If true, use a bloom filter to only do an eager
+ * collection once per unique VMPC. This makes eager mode fast enough to be
+ * usable for unit tests, and almost tolerable for large integration tests.
+ *
+ * Eval.GCSampleRate - per *request* sample rate to enable GC logging.
+ * If coinflip is true, every GC for the current request will be logged.
+ * Note this is not the per-collection sample rate: we do one coinflip per
+ * request.
+ *
+ * Eval.GCMinTrigger - Minimum heap growth, in bytes since the last collection,
+ * before triggering the next collection. See MemoryManager::updateNextGc().
+ *
+ * Eval.GCTriggerPct - Minimum heap growth, as a percent of remaining heap
+ * space, before triggering the next collection. see updateNextGC().
+ *
+ * Eval.Quarantine - If true, objects swept by GC will be trash filled and
+ * leaked, never reallocated.
+ *
+ * Experimental options
+ *
+ * Eval.GCForAPC - enable whole-process APC collection. See APCGCManager.
+ * Eval.GCForAPCTrigger - trigger threshold; see APCGCManager.
+ */
+
+/*
+ * Collector state needed during a single whole-heap mark-sweep collection.
+ */
 struct Collector {
   explicit Collector(HeapImpl& heap, APCGCManager* apcgc, GCBits mark_version)
     : heap_(heap), mark_version_{mark_version}, apcgc_(apcgc)
@@ -565,6 +604,15 @@ void MemoryManager::requestGC() {
   }
 }
 
+/*
+ * Compute the next threshold to trigger GC. We wish to ignore auxUsage
+ * for the purpose of this calculation, even though auxUsage is counted
+ * against the request for the sake of OOM. To accomplish this, subtract
+ * auxUsage from the heap limit, before our calculations.
+ *
+ * GC will then be triggered the next time we notice mmUsage > m_nextGc
+ * (see requestGC(), above).
+ */
 void MemoryManager::updateNextGc() {
   auto stats = getStatsCopy();
   auto mm_limit = m_usageLimit - stats.auxUsage();

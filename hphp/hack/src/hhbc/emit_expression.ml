@@ -1582,10 +1582,10 @@ and emit_array_get ?(no_final=false) ?mode ~need_ref
  *)
 and emit_obj_get ~need_ref env param_num_hint_opt qop expr prop null_flavor =
   match snd expr with
-  | A.Lvar (_, id)
+  | A.Lvar (pos, id)
     when id = SN.SpecialIdents.this && null_flavor = A.OG_nullsafe ->
     Emit_fatal.raise_fatal_parse
-      Pos.none "?-> is not allowed with $this"
+      pos "?-> is not allowed with $this"
   | _ ->
     begin match snd prop with
     | A.Id (_, s) when SU.Xhp.is_xhp s ->
@@ -2600,11 +2600,11 @@ and emit_lval_op env op expr1 opt_expr2 =
               instr_popc;
               instr_pushl temp;
             ], 1
-          | Some (_, A.Unop (A.Uref, (_, A.Obj_get (_, _, A.OG_nullsafe)
+          | Some (pos, A.Unop (A.Uref, (_, A.Obj_get (_, _, A.OG_nullsafe)
                                     | _, A.Array_get ((_,
                                       A.Obj_get (_, _, A.OG_nullsafe)), _)))) ->
             Emit_fatal.raise_fatal_runtime
-              Pos.none "?-> is not allowed in write context"
+              pos "?-> is not allowed in write context"
           | Some e -> emit_expr_and_unbox_if_necessary ~need_ref:false env e, 1
         in
         emit_lval_op_nonlist env op expr1 rhs_instrs rhs_stack_size

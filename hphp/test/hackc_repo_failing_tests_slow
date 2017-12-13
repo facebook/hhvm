@@ -86,13 +86,6 @@ slow/lang/hh_return_type_this_0.php
 slow/lang/hh_return_type_this_1.php
 slow/lang/hh_return_type_this_2.php
 slow/lang/hh_return_type_this_3.php
-slow/nullsafe/nullsafe-prop-11.php
-slow/nullsafe/nullsafe-prop-14.php
-slow/nullsafe/nullsafe-prop-15.php
-slow/nullsafe/nullsafe-prop-6.php
-slow/nullsafe/nullsafe-prop-7.php
-slow/nullsafe/nullsafe-prop-8.php
-slow/nullsafe/nullsafe-prop-9.php
 slow/object/672.php
 slow/parser/async.php
 slow/parser/closure_return_types_both_places.php

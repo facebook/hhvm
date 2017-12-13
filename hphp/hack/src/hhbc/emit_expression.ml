@@ -591,9 +591,6 @@ and emit_inout_call_set env es = Local.scope @@ fun () ->
   ]
 
 and emit_call_expr ~need_ref env expr =
-  (match expr with
-    | _, A.Call ((_, A.Id (_, s)), _, _, _) -> Emit_symbol_refs.add_function s
-    | _ -> ());
   let instrs, flavor = emit_flavored_expr env expr in
   gather [
     instrs;
@@ -2367,6 +2364,9 @@ and get_inout_arg_positions args =
           | _ -> None)
 
 and emit_call env (_, expr_ as expr) args uargs =
+  (match expr_ with
+    | A.Id (_, s) -> Emit_symbol_refs.add_function s
+    | _ -> ());
   let nargs = List.length args + List.length uargs in
   let inout_arg_positions = get_inout_arg_positions args in
   let default () =

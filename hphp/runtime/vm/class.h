@@ -652,6 +652,16 @@ public:
    */
   bool hasDeepInitProps() const;
 
+  /*
+   * Whether this class forbids the use of dynamic (non-declared) properties.
+   */
+  bool forbidsDynamicProps() const;
+
+  /*
+   * Whether this class has any immutable properties.
+   */
+  bool hasImmutableProps() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Property initialization.                                           [const]

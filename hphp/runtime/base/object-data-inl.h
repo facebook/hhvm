@@ -117,14 +117,14 @@ inline void ObjectData::instanceInit(Class* cls) {
       assert(propInitVec != nullptr);
       assert(nProps == propInitVec->size());
       if (!cls->hasDeepInitProps()) {
-        memcpy16_inline(propVecForWrite(),
+        memcpy16_inline(propVecForConstruct(),
                         &(*propInitVec)[0], nProps * sizeof(TypedValue));
       } else {
-        deepInitHelper(propVecForWrite(), &(*propInitVec)[0], nProps);
+        deepInitHelper(propVecForConstruct(), &(*propInitVec)[0], nProps);
       }
     } else {
       assert(nProps == cls->declPropInit().size());
-      memcpy16_inline(propVecForWrite(),
+      memcpy16_inline(propVecForConstruct(),
                       &cls->declPropInit()[0], nProps * sizeof(TypedValue));
     }
   }
@@ -141,6 +141,10 @@ inline void ObjectData::setVMClass(Class* cls) {
 
 inline bool ObjectData::instanceof(const Class* c) const {
   return m_cls->classof(c);
+}
+
+inline bool ObjectData::isBeingConstructed() const {
+  return getAttribute(Attribute::IsBeingConstructed);
 }
 
 inline bool ObjectData::isCollection() const {
@@ -227,8 +231,16 @@ inline const Func* ObjectData::methodNamed(const StringData* sd) const {
   return getVMClass()->lookupMethod(sd);
 }
 
+[[noreturn]] void throw_cannot_modify_immutable_object(const char* className);
+
 inline TypedValue* ObjectData::propVecForWrite() {
-  // TODO(alexeyt): assert no immutable properties or we're constructing
+  if (UNLIKELY(m_cls->hasImmutableProps()) && !isBeingConstructed()) {
+    throw_cannot_modify_immutable_object(getClassName().data());
+  }
+  return const_cast<TypedValue*>(propVec());
+}
+
+inline TypedValue* ObjectData::propVecForConstruct() {
   return const_cast<TypedValue*>(propVec());
 }
 
@@ -238,7 +250,8 @@ inline const TypedValue* ObjectData::propVec() const {
 
 inline member_lval ObjectData::propLvalAtOffset(Slot idx) {
   assertx(idx < m_cls->numDeclProperties());
-  return member_lval { this, &propVecForWrite()[idx] };
+  assertx(!(m_cls->declProperties()[idx].attrs & AttrIsImmutable));
+  return member_lval { this, const_cast<TypedValue*>(&propVec()[idx]) };
 }
 
 inline member_rval ObjectData::propRvalAtOffset(Slot idx) const {

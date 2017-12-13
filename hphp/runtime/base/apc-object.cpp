@@ -235,7 +235,7 @@ Object APCObject::createObject() const {
   );
 
   auto const numProps = cls->numDeclProperties();
-  auto const objProp = obj->propVecForWrite();
+  auto const objProp = obj->propVecForConstruct();
   auto const apcProp = persistentProps();
 
   if (m_fast_init) {

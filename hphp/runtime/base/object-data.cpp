@@ -300,6 +300,10 @@ Array& ObjectData::setDynPropArray(const Array& newArr) {
   assert(!getAttribute(HasDynPropArr));
   assert(newArr.isPHPArray());
 
+  if (m_cls->forbidsDynamicProps()) {
+    throw_object_forbids_dynamic_props(getClassName().data());
+  }
+
   auto& arr = g_context->dynPropTable[this].arr();
   assert(arr.isPHPArray());
   arr = newArr;
@@ -378,6 +382,9 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   auto prop = lookup.prop;
   if (prop && lookup.accessible) {
     if (!useSet || prop->m_type != KindOfUninit) {
+      if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
+        throwMutateImmutable(prop);
+      }
       tvSet(tvToInitCell(*v.asTypedValue()), *prop);
       return;
     }
@@ -755,7 +762,7 @@ ObjectData* ObjectData::clone() {
     assertx(!clone->hasInstanceDtor());
   }
 
-  auto const clonePropVec = clone->propVecForWrite();
+  auto const clonePropVec = clone->propVecForConstruct();
   auto const props = m_cls->declProperties();
   for (auto i = Slot{0}; i < nProps; i++) {
     if (UNLIKELY(props[i].attrs & AttrNoSerialize)) {
@@ -957,6 +964,24 @@ Slot ObjectData::declPropInd(const TypedValue* prop) const {
   }
 }
 
+NEVER_INLINE
+void ObjectData::throwMutateImmutable(const TypedValue* prop) const {
+  auto const propIdx = declPropInd(prop);
+  throw_cannot_modify_immutable_prop(
+    getClassName().data(),
+    m_cls->declProperties()[propIdx].name->data()
+  );
+}
+
+NEVER_INLINE
+void ObjectData::throwBindImmutable(const TypedValue* prop) const {
+  auto const propIdx = declPropInd(prop);
+  throw_cannot_bind_immutable_prop(
+    getClassName().data(),
+    m_cls->declProperties()[propIdx].name->data()
+  );
+}
+
 template <bool forWrite>
 ALWAYS_INLINE
 ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
@@ -980,7 +1005,13 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
 
     return PropLookup<TypedValue*> {
      const_cast<TypedValue*>(prop),
-     lookup.accessible
+     lookup.accessible,
+     // we always return true in the !forWrite case; this way the compiler
+     // may optimize away this value, and if a caller intends to write but
+     // instantiates with false by mistake it will always see immutable
+     forWrite
+       ? bool(m_cls->declProperties()[propIdx].attrs & AttrIsImmutable)
+       : true,
    };
   }
 
@@ -988,26 +1019,30 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
   // dynamic property with this name.
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
     if (auto const rval = dynPropArray()->rval(key)) {
-      // Returning a non-declared property, we know that it is accessible since
-      // all dynamic properties are. If we may write to the property we
-      // need to allow the array to escalate.
+      // Returning a non-declared property. We know that it is accessible and
+      // not immutable since all dynamic properties are. If we may write to
+      // the property we need to allow the array to escalate.
       if (forWrite) {
         auto const lval = dynPropArray().lvalAt(StrNR(key), AccessFlags::Key);
-        return PropLookup<TypedValue*> { lval.tv_ptr(), true };
+        return PropLookup<TypedValue*> { lval.tv_ptr(), true, false };
       } else {
         return PropLookup<TypedValue*> {
           const_cast<TypedValue*>(rval.tv_ptr()),
-          true
+          true,
+          true,
         };
       }
     }
   }
 
-  return PropLookup<TypedValue*> { nullptr, false };
+  return PropLookup<TypedValue*> { nullptr, false, forWrite ? false : true };
 }
 
 member_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
   auto const lookup = getPropImpl<true>(ctx, key);
+  if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
+    throwMutateImmutable(lookup.prop);
+  }
   return member_lval {
     this, lookup.prop && lookup.accessible ? lookup.prop : nullptr
   };
@@ -1024,6 +1059,7 @@ member_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
 member_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
   auto const lookup = getPropImpl<true>(ctx, key);
   auto prop = lookup.prop;
+  if (UNLIKELY(lookup.immutable)) throwBindImmutable(prop);
   if (lookup.accessible && prop && prop->m_type != KindOfUninit) {
     tvBoxIfNeeded(*prop);
     return member_lval { this, prop };
@@ -1034,6 +1070,7 @@ member_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
 member_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
   auto const lookup = getPropImpl<true>(nullptr, key);
   auto prop = lookup.prop;
+  if (UNLIKELY(lookup.immutable)) throwBindImmutable(prop);
   if (prop && prop->m_type != KindOfUninit) {
     tvBoxIfNeeded(*prop);
     return member_lval { this, prop };
@@ -1237,8 +1274,27 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
 
   if (prop) {
     if (lookup.accessible) {
+      auto const checkImmutable = [&]() {
+        if (mode == PropMode::Bind) {
+          if (UNLIKELY(lookup.immutable)) throwBindImmutable(prop);
+        }
+        if (mode == PropMode::DimForWrite) {
+          if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
+            // After an object is done being constructed, dimming through an
+            // immutable property for a write is only OK if the property value
+            // is of reference type
+            auto const type = prop->m_type;
+            assertx(type != KindOfRef);
+            if (type != KindOfObject && type != KindOfResource) {
+              throwMutateImmutable(prop);
+            }
+          }
+        }
+        return prop;
+      };
+
       // Property exists, is accessible, and is not unset.
-      if (prop->m_type != KindOfUninit) return prop;
+      if (prop->m_type != KindOfUninit) return checkImmutable();
 
       // Property is unset, try __get.
       if (getAttribute(UseGet)) {
@@ -1249,7 +1305,7 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
       }
 
       if (mode == PropMode::ReadWarn) raiseUndefProp(key);
-      if (write) return prop;
+      if (write) return checkImmutable();
       return const_cast<TypedValue*>(&immutable_null_base);
     }
 
@@ -1405,6 +1461,9 @@ void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
     if (prop->m_type != KindOfUninit ||
         !getAttribute(UseSet) ||
         !invokeSet(key, val)) {
+      if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
+        throwMutateImmutable(prop);
+      }
       tvSet(val, *prop);
     }
     return;
@@ -1455,9 +1514,15 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
           }
           tvRef.m_type = KindOfUninit;
         }
+        if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
+          throwMutateImmutable(prop);
+        }
         cellDup(tvAssertCell(r.val), *prop);
         return prop;
       }
+    }
+    if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
+      throwMutateImmutable(prop);
     }
     prop = tvToCell(prop);
     setopBody(prop, op, val);
@@ -1541,10 +1606,16 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
           invokeSet(key, tvAssertCell(r.val));
           return dest;
         }
+        if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
+          throwMutateImmutable(prop);
+        }
         cellCopy(tvAssertCell(r.val), *prop);
         tvWriteNull(r.val); // suppress decref
         return dest;
       }
+    }
+    if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
+      throwMutateImmutable(prop);
     }
     if (prop->m_type == KindOfUninit) {
       tvWriteNull(*prop);
@@ -1611,11 +1682,13 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
 void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   auto const lookup = getPropImpl<true>(ctx, key);
   auto const prop = lookup.prop;
-  auto const propInd = declPropInd(prop);
 
   if (prop && lookup.accessible && prop->m_type != KindOfUninit) {
-    if (propInd != kInvalidSlot) {
+    if (declPropInd(prop) != kInvalidSlot) {
       // Declared property.
+      if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
+        throwMutateImmutable(prop);
+      }
       tvSetIgnoreRef(*uninit_variant.asTypedValue(), *prop);
     } else {
       // Dynamic property.
@@ -1631,7 +1704,7 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
 
   auto const tryUnset = getAttribute(UseUnset);
 
-  if (propInd != kInvalidSlot && !lookup.accessible && !tryUnset) {
+  if (prop && !lookup.accessible && !tryUnset) {
     // Defined property that is not accessible.
     raise_error("Cannot unset inaccessible property");
   }

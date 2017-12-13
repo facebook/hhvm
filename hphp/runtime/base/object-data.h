@@ -94,6 +94,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasNativeData = 0x0400, // HNI Class with <<__NativeData("T")>>
     HasDynPropArr = 0x0800, // has a dynamic properties array
+    IsBeingConstructed
+                  = 0x1000, // Constructor for most derived class has not
+                            // finished. Only set during construction when the
+                            // class has immutable properties (to temporarily
+                            // allow writing to them).
     IsCollection  = 0x2000, // it's a collection (and the specific type is
                             // one of the CollectionType HeaderKind values
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
@@ -214,6 +219,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // Has a custom instanceCtor and instanceDtor. If you subclass ObjectData
   // in C++, you need this.
   bool isCppBuiltin() const;
+
+  // Is this an object with (some) immutable properties for which construction
+  // has not finished yet?
+  bool isBeingConstructed() const;
 
   // Whether the object is a collection, [and [not] mutable].
   bool isCollection() const;
@@ -338,6 +347,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   // accessors for the declared properties area
   TypedValue* propVecForWrite();
+  TypedValue* propVecForConstruct();
   const TypedValue* propVec() const;
 
   // accessors for declared properties at statically known offsets
@@ -353,6 +363,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // Properties.
  private:
   Slot declPropInd(const TypedValue* prop) const;
+  [[noreturn]] NEVER_INLINE
+  void throwMutateImmutable(const TypedValue* prop) const;
+  [[noreturn]] NEVER_INLINE
+  void throwBindImmutable(const TypedValue* prop) const;
 
  public:
   // never box the lval returned from getPropLval; use propB or vGetProp instead
@@ -367,6 +381,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   struct PropLookup {
     T prop;
     bool accessible;
+    bool immutable;
   };
 
   template <bool forWrite>

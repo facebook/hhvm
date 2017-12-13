@@ -85,16 +85,19 @@ enum class SimpleOp {
 struct PropInfo {
   PropInfo() = default;
   explicit PropInfo(int offset,
+                    bool immutable,
                     RepoAuthType repoAuthType,
                     const Class* objClass,
                     const Class* propClass)
     : offset{offset}
+    , immutable{immutable}
     , repoAuthType{repoAuthType}
     , objClass{objClass}
     , propClass{propClass}
   {}
 
   int offset{-1};
+  bool immutable{false};
   RepoAuthType repoAuthType{};
   const Class* objClass{nullptr};
   const Class* propClass{nullptr};
@@ -145,6 +148,7 @@ PropInfo getPropertyOffset(IRGS& /*env*/, const Class* ctx,
   // offset.
   return PropInfo(
     baseClass->declPropOffset(idx),
+    bool(baseClass->declProperties()[idx].attrs & AttrIsImmutable),
     baseClass->declPropRepoAuthType(idx),
     baseClass,
     baseClass->declProperties()[idx].cls
@@ -885,6 +889,7 @@ SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
 
   if (RuntimeOption::RepoAuthoritative &&
       propInfo.offset != -1 &&
+      !propInfo.immutable &&
       !mightCallMagicPropMethod(MOpMode::None, propInfo) &&
       !mightCallMagicPropMethod(MOpMode::Define, propInfo)) {
 
@@ -1265,6 +1270,7 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
 
   auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), true);
   if (propInfo.offset == -1 ||
+      propInfo.immutable ||
       mode == MOpMode::Unset ||
       mightCallMagicPropMethod(mode, propInfo)) {
     return propGenericImpl(env, mode, base, key, nullsafe);
@@ -1535,7 +1541,9 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
   auto const mode = MOpMode::Define;
   auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), true);
 
-  if (propInfo.offset != -1 && !mightCallMagicPropMethod(mode, propInfo)) {
+  if (propInfo.offset != -1 &&
+      !propInfo.immutable &&
+      !mightCallMagicPropMethod(mode, propInfo)) {
     auto propPtr = emitPropSpecialized(env, base, key, false, mode, propInfo);
     auto propTy = propPtr->type().deref();
 
@@ -2125,6 +2133,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
   auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), false);
 
   if (propInfo.offset != -1 &&
+      !propInfo.immutable &&
       !mightCallMagicPropMethod(MOpMode::Define, propInfo)) {
     auto propPtr =
       emitPropSpecialized(env, base, key, false, MOpMode::Define, propInfo);

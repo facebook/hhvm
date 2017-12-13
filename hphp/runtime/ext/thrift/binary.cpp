@@ -480,7 +480,7 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
     int16_t fieldNum = transport.readI16();
     return binary_deserialize_slow(dest, spec, fieldNum, fieldType, transport);
   }
-  auto objProp = dest->propVecForWrite();
+  auto objProp = dest->propVecForConstruct();
   auto prop = cls->declProperties().begin();
   int i = -1;
   TType fieldType = static_cast<TType>(transport.readI8());

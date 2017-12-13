@@ -1030,7 +1030,7 @@ void VariableUnserializer::unserializeVariant(
           // Try fast case.
           if (size >= objCls->numDeclProperties()) {
             bool mismatch = false;
-            auto objProps = obj->propVecForWrite();
+            auto objProps = obj->propVecForConstruct();
 
             for (auto prop : objCls->declProperties()) {
               if (!matchString(prop.mangledName->slice())) {

@@ -666,10 +666,38 @@ void throw_invalid_inout_base() {
 }
 
 void throw_cannot_modify_immutable_object(const char* className) {
-  auto msg = folly::format(
+  auto msg = folly::sformat(
     "Cannot modify immutable object of type {}",
     className
-  ).str();
+  );
+  SystemLib::throwInvalidOperationExceptionObject(msg);
+}
+
+void throw_object_forbids_dynamic_props(const char* className) {
+  auto msg = folly::sformat(
+    "Class {} does not allow use of dynamic (non-declared) properties",
+    className
+  );
+  SystemLib::throwInvalidOperationExceptionObject(msg);
+}
+
+void throw_cannot_modify_immutable_prop(const char* className,
+                                        const char* propName)
+{
+  auto msg = folly::sformat(
+    "Cannot modify immutable property {} of class {} after construction",
+    propName, className
+  );
+  SystemLib::throwInvalidOperationExceptionObject(msg);
+}
+
+void throw_cannot_bind_immutable_prop(const char* className,
+                                      const char* propName)
+{
+  auto msg = folly::sformat(
+    "Cannot bind immutable property {} of class {}",
+    propName, className
+  );
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 

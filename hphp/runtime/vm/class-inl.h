@@ -263,6 +263,14 @@ inline bool Class::hasDeepInitProps() const {
   return m_hasDeepInitProps;
 }
 
+inline bool Class::forbidsDynamicProps() const {
+  return attrs() & AttrForbidDynamicProps;
+}
+
+inline bool Class::hasImmutableProps() const {
+  return attrs() & AttrHasImmutable;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Property initialization.
 

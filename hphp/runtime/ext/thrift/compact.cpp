@@ -625,7 +625,7 @@ struct CompactReader {
       if (cls->numDeclProperties() < numFields) {
         return readStructSlow(dest, spec, fieldNum, fieldType);
       }
-      auto objProp = dest->propVecForWrite();
+      auto objProp = dest->propVecForConstruct();
       auto prop = cls->declProperties().begin();
       int i = -1;
       while (fieldType != T_STOP) {

@@ -111,10 +111,17 @@ inline int operator<<(HeaderKind k, int bits) {
   return int(k) << bits;
 }
 
-inline void* MemoryManager::FreeList::maybePop() {
+inline void* MemoryManager::FreeList::likelyPop() {
   auto ret = head;
   if (LIKELY(ret != nullptr)) head = ret->next;
-  FTRACE(4, "FreeList::maybePop(): returning {}\n", ret);
+  FTRACE(4, "FreeList::likelyPop(): returning {}\n", ret);
+  return ret;
+}
+
+inline void* MemoryManager::FreeList::unlikelyPop() {
+  auto ret = head;
+  if (UNLIKELY(ret != nullptr)) head = ret->next;
+  FTRACE(4, "FreeList::unlikelyPop(): returning {}\n", ret);
   return ret;
 }
 
@@ -214,8 +221,8 @@ inline void* MemoryManager::mallocSmallIndex(size_t index) {
   auto bytes = sizeIndex2Size(index);
   m_stats.mmUsage += bytes;
 
-  void *p = m_freelists[index].maybePop();
-  if (UNLIKELY(p == nullptr)) {
+  auto p = m_freelists[index].likelyPop();
+  if (!p) {
     p = mallocSmallSizeSlow(bytes, index);
   }
   assert((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);

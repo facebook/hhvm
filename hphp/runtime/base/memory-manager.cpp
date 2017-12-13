@@ -481,7 +481,7 @@ MemoryManager::FreelistArray MemoryManager::beginQuarantine() {
 void MemoryManager::endQuarantine(FreelistArray&& list) {
   for (auto i = 0; i < kNumSmallSizes; i++) {
     auto size = sizeIndex2Size(i);
-    while (auto n = m_freelists[i].maybePop()) {
+    while (auto n = m_freelists[i].likelyPop()) {
       memset(n, 0x8a, size);
       initHole(n, size);
     }
@@ -742,7 +742,7 @@ void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
     FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): contigMin={}, "
               "contigInd={}, try i={}\n", nbytes, index, kContigTab[index],
               contigInd, i);
-    if (auto p = m_freelists[i].maybePop()) {
+    if (auto p = m_freelists[i].unlikelyPop()) {
       assert(i > index); // because freelist[index] was empty
       FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): "
                 "contigMin={}, contigInd={}, use i={}, size={}, p={}\n",

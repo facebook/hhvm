@@ -996,7 +996,8 @@ struct MemoryManager {
   void setGCEnabled(bool isGCEnabled);
 
   struct FreeList {
-    void* maybePop();
+    void* likelyPop();
+    void* unlikelyPop();
     void push(void*);
     FreeNode* head{nullptr};
   };

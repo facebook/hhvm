@@ -132,7 +132,7 @@ let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
   let param_name = snd p.A.param_id in
   let param_is_variadic = p.Ast.param_is_variadic in
   let param_is_inout = p.Ast.param_callconv = Some A.Pinout in
-  if param_is_variadic && p.Ast.param_hint <> None && not (Emit_env.is_hh_file ())
+  if param_is_variadic && p.Ast.param_hint <> None && not (Emit_env.is_hh_syntax_enabled ())
   then Emit_fatal.raise_fatal_parse Pos.none @@
     Printf.sprintf
       "Parameter %s is variadic and has a type constraint; variadic params with type constraints are not supported in non-Hack files"

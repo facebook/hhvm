@@ -36,13 +36,12 @@ let is_hh_file_ = ref false
 let global_state_ = ref empty_global_state
 
 let set_is_hh_file v = is_hh_file_ := v
-let is_hh_file () = !is_hh_file_
 
 let is_hh_syntax_enabled () =
-  is_hh_file () || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options
+  !is_hh_file_ || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options
 
 let is_xhp_syntax_enabled () =
-  is_hh_file () || Hhbc_options.enable_xhp !Hhbc_options.compiler_options
+  !is_hh_file_ || Hhbc_options.enable_xhp !Hhbc_options.compiler_options
 
 let get_explicit_use_set () = (!global_state_).global_explicit_use_set
 let get_closure_namespaces () = (!global_state_).global_closure_namespaces
@@ -94,31 +93,31 @@ let make_class_env ast_class =
     env_jump_targets = Jump_targets.empty; }
 
 let do_in_loop_body break_label continue_label ?iter env s f =
-  Jump_targets.with_loop (is_hh_file ()) break_label continue_label
+  Jump_targets.with_loop (!is_hh_file_) break_label continue_label
     iter env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 
 let do_in_switch_body end_label env s f =
-  Jump_targets.with_switch (is_hh_file ()) end_label
+  Jump_targets.with_switch (!is_hh_file_) end_label
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 
 let do_in_try_body finally_label env s f =
-  Jump_targets.with_try (is_hh_file ()) finally_label
+  Jump_targets.with_try (!is_hh_file_) finally_label
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 
 let do_in_finally_body env s f =
-  Jump_targets.with_finally (is_hh_file ())
+  Jump_targets.with_finally (!is_hh_file_)
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 
 let do_in_using_body finally_label env s f =
-  Jump_targets.with_using (is_hh_file ()) finally_label
+  Jump_targets.with_using (!is_hh_file_) finally_label
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 
 let do_function env s f =
-  Jump_targets.with_function (is_hh_file ())
+  Jump_targets.with_function (!is_hh_file_)
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s

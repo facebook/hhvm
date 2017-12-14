@@ -422,15 +422,13 @@ NEVER_INLINE void Collector::sweep() {
     },
     [&](HeapObject* big, size_t /*big_size*/) { // onSlab
       auto slab = Slab::fromHeader(big);
-      slab->find_if((HeapObject*)slab->start(),
-        [&](HeapObject* h, size_t h_size) {
-          if (!marked(h) && !isFreeKind(h->kind()) &&
-              h->kind() != HeaderKind::SmallMalloc) {
-            mm.freeSmallSize(h, h_size);
-          }
-          return false;
+      slab->iter_starts([&](HeapObject* h) {
+        auto kind = h->kind();
+        if (!isFreeKind(kind) && kind != HeaderKind::SmallMalloc &&
+            !marked(h)) {
+          mm.freeSmallSize(h, allocSize(h));
         }
-      );
+      });
     });
   if (apcgc_) {
     // This should be removed after global GC API is provided

@@ -78,6 +78,12 @@ struct alignas(kSmallSizeAlign) Slab : FreeNode {
    */
   template<class Fn> HdrBlock find_if(HeapObject* h, Fn fn) const;
 
+  /*
+   * call fn(h) on each object in the slab, without calling allocSize(),
+   * by scanning through the start-bits alone.
+   */
+  template<class Fn> void iter_starts(Fn fn) const;
+
   void setStart(const void* p) {
     auto i = start_index(p);
     starts_[i/B] |= uint64_t(1) << (i % B);
@@ -419,6 +425,20 @@ HdrBlock Slab::find_if(HeapObject* h, Fn fn) const {
   } while (h < end);
   assert(h == end); // otherwise, last object was truncated
   return {nullptr, 0};
+}
+
+// call fn(h) on each object in the slab, without calling allocSize()
+template<class Fn>
+void Slab::iter_starts(Fn fn) const {
+  auto ptr = (char*)this;
+  for (auto it = starts_, end = starts_ + NumStarts; it < end; ++it) {
+    for (auto bits = *it; bits != 0; bits &= (bits - 1)) {
+      auto k = ffs64(bits);
+      auto h = (HeapObject*)(ptr + k * Q);
+      fn(h);
+    }
+    ptr += B * Q;
+  }
 }
 
 /*

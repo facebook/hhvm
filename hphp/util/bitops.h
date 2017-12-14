@@ -148,6 +148,24 @@ inline size_t fls64(size_t x) {
 #endif
 }
 
+/*
+ * Return the index (0..63) of the least significant bit in x.
+ * x must be nonzero.
+ */
+inline size_t ffs64(size_t x) {
+  assertx(x);
+#if defined(__x86_64__)
+  size_t ret;
+  __asm__ ("bsfq %1, %0"
+           : "=r"(ret) // Outputs.
+           : "r"(x)    // Inputs.
+           );
+  return ret;
+#else
+  return __builtin_ffsll(x) - 1;
+#endif
+}
+
 } // HPHP
 
 #endif

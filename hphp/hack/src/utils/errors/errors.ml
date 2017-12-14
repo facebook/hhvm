@@ -1001,6 +1001,7 @@ module Typing                               = struct
   let nonreactive_append                    = 4201 (* DONT MODIFY!!!! *)
   let obj_set_reactive                      = 4202 (* DONT MODIFY!!!! *)
   let fun_reactivity_mismatch               = 4203 (* DONT MODIFY!!!! *)
+  let overriding_prop_const_mismatch        = 4204 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1706,6 +1707,8 @@ let member_not_implemented member_name parent_pos pos defn_pos =
   add_list Typing.member_not_implemented [msg1; msg2; msg3]
 
 let bad_decl_override parent_pos parent_name pos name (error: error) =
+  (* TODO: T24193254 reword this error message, says methods when error can
+   * occur on member field *)
   let msg1 = pos, ("Class " ^ (strip_ns name)
       ^ " does not correctly implement all required methods ") in
   let msg2 = parent_pos,
@@ -2647,6 +2650,15 @@ let self_const_parent_not pos =
 let parent_const_self_not pos =
   add Typing.parent_const_self_not pos
     "Only __Const classes may extend a __Const class"
+
+let overriding_prop_const_mismatch parent_pos parent_const child_pos child_const =
+  let m1 = "This property is __Const" in
+  let m2 = "This property is not __Const" in
+  add_list Typing.overriding_prop_const_mismatch
+  [
+    parent_pos, if parent_const then m1 else m2;
+    child_pos, if child_const then m1 else m2;
+  ]
 
 (*****************************************************************************)
 (* Typing decl errors *)

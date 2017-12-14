@@ -162,9 +162,14 @@ let check_override env member_name mem_source ?(ignore_fun_return = false)
   let class_known, check_params = should_check_params parent_class class_ in
   let check_vis = class_known || check_partially_known_method_visibility in
   if check_vis then check_visibility parent_class_elt class_elt else ();
+  let lazy fty_child = class_elt.ce_type in
+  let pos = Reason.to_pos (fst fty_child) in
+  if class_elt.ce_const <> parent_class_elt.ce_const then (
+    let lazy fty_parent = parent_class_elt.ce_type in
+    let parent_pos = Reason.to_pos (fst fty_parent) in
+    Errors.overriding_prop_const_mismatch parent_pos parent_class_elt.ce_const
+      pos class_elt.ce_const);
   if check_params then
-    let lazy fty_child = class_elt.ce_type in
-    let pos = Reason.to_pos (fst fty_child) in
     Errors.try_ (fun () ->
     match parent_class_elt.ce_type, fty_child with
     | lazy (r_parent, Tfun ft_parent), (r_child, Tfun ft_child) ->

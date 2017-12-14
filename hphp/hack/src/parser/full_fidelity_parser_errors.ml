@@ -841,6 +841,7 @@ let is_inside_async_method parents =
 
 let make_name_already_used_error node name short_name original_location
   report_error =
+  let name = Utils.strip_ns name in
   let original_location_error =
     SyntaxError.make
       original_location.start_offset
@@ -1915,17 +1916,20 @@ let use_class_or_namespace_clause_errors
         do_check ~error_on_global_redefinition:false names errors
           (fun n -> n.t_namespaces)
           (fun n v -> { n with t_namespaces = v })
-          SyntaxError.name_is_already_in_use
+          SyntaxError.namespace_name_is_already_in_use
+
       | Type ->
         do_check ~error_on_global_redefinition:false names errors
           (fun n -> n.t_classes)
           (fun n v -> { n with t_classes = v })
           SyntaxError.type_name_is_already_in_use
+
       | Function ->
         do_check ~error_on_global_redefinition:true names errors
           (fun n -> n.t_functions)
           (fun n v -> { n with t_functions = v })
           SyntaxError.function_name_is_already_in_use
+
       | Const ->
         do_check ~error_on_global_redefinition:true names errors
           (fun n -> n.t_constants)
@@ -1952,7 +1956,7 @@ let use_class_or_namespace_clause_errors
           else
           let error =
             make_name_already_used_error name name_text short_name loc
-              SyntaxError.name_is_already_in_use in
+              SyntaxError.namespace_name_is_already_in_use in
             names, error :: errors
         | None ->
           let new_use =

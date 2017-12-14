@@ -5,8 +5,6 @@ slow/async/genva-list.php
 slow/async/genva-refcnt.php
 slow/async/genva-variadic.php
 slow/async/genva.php
-slow/async/return-annotation-2.php
-slow/async/return-annotation-3.php
 slow/autoload/autoload-enum-hint-deprecated.php
 slow/autoload/autoload-fail.php
 slow/class_constant/abstract_const2.php

@@ -85,8 +85,7 @@ and check_namespace_update env ns =
                 | Some v ->
                   if v = value then () (* same element, it is fine *)
                   else Emit_fatal.raise_fatal_parse p @@ Printf.sprintf
-                    ("Cannot use %s as %s because the name was explicitly used "
-                    ^^ "earlier via a `use' statement")
+                    "Cannot use namespace %s as %s because the name is already in use"
                     (SU.strip_global_ns value) key
                 ) curr
   in
@@ -257,9 +256,9 @@ let emit_body
           let kind, name =
             match scope with
             | Ast_scope.ScopeItem.Function fd :: _ ->
-              "function", snd fd.A.f_name
+              "function", Utils.strip_ns (snd fd.A.f_name)
             | Ast_scope.ScopeItem.Method md :: Ast_scope.ScopeItem.Class cd :: _ ->
-              "method", (snd cd.A.c_name) ^ "::" ^ (snd md.A.m_name)
+              "method", Utils.strip_ns (snd cd.A.c_name) ^ "::" ^ (snd md.A.m_name)
             | _ -> assert false in
           Printf.sprintf "Return type hint for async %s %s() must be awaitable"
             kind name in

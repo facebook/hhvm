@@ -10,12 +10,48 @@ set -e
 #$ scribe_cat perfpipe_hackc_hhvm_tests "{\"int\": {\"time\": $(date +'%s')}}"
 
 TABLE_NAME="perfpipe_hackc_hhvm_tests"
-FAIL_COMPARE_QUICK=$(grep -c '^' hphp/test/hhcodegen_failing_tests_quick)
-FAIL_COMPARE_SLOW=$(grep -c '^' hphp/test/hhcodegen_failing_tests_slow)
-FAIL_RUN_QUICK=$(grep -c '^' hphp/test/hackc_failing_tests_quick)
-FAIL_RUN_REPO_QUICK=$(grep -c '^' hphp/test/hackc_repo_failing_tests_quick)
-FAIL_RUN_SLOW=$(grep -c '^' hphp/test/hackc_failing_tests_slow)
-FAIL_RUN_REPO_SLOW=$(grep -c '^' hphp/test/hackc_repo_failing_tests_slow)
+
+if [ -e hphp/test/hhcodegen_failing_tests_quick ]
+then
+  FAIL_COMPARE_QUICK=$(grep -c '^' hphp/test/hhcodegen_failing_tests_quick)
+else
+  FAIL_COMPARE_QUICK=0
+fi
+
+if [ -e hphp/test/hhcodegen_failing_tests_slow ]
+then
+  FAIL_COMPARE_SLOW=$(grep -c '^' hphp/test/hhcodegen_failing_tests_slow)
+else
+  FAIL_COMPARE_SLOW=0
+fi
+
+if [ -e hphp/test/hackc_failing_tests_quick ]
+then
+  FAIL_RUN_QUICK=$(grep -c '^' hphp/test/hackc_failing_tests_quick)
+else
+  FAIL_RUN_QUICK=0
+fi
+
+if [ -e hphp/test/hackc_repo_failing_tests_quick ]
+then
+  FAIL_RUN_REPO_QUICK=$(grep -c '^' hphp/test/hackc_repo_failing_tests_quick)
+else
+  FAIL_RUN_REPO_QUICK=0
+fi
+
+if [ -e hphp/test/hackc_failing_tests_slow ]
+then
+  FAIL_RUN_SLOW=$(grep -c '^' hphp/test/hackc_failing_tests_slow)
+else
+  FAIL_RUN_SLOW=0
+fi
+
+if [ -e hphp/test/hackc_repo_failing_tests_slow ]
+then
+  FAIL_RUN_REPO_SLOW=$(grep -c '^' hphp/test/hackc_repo_failing_tests_slow)
+else
+  FAIL_RUN_REPO_SLOW=0
+fi
 
 SAMPLE_COMPARE_QUICK="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_COMPARE_QUICK }, \"normal\": {\"type\": \"compare_quick\"}}"
 SAMPLE_COMPARE_SLOW="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_COMPARE_SLOW }, \"normal\": {\"type\": \"compare_slow\"}}"

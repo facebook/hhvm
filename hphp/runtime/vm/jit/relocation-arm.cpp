@@ -593,13 +593,14 @@ bool relocatePadding(Env& env, TCA srcAddr, TCA destAddr,
   if (src->Mask(ExceptionMask) != BRK) return false;
 
   // Check to see if this is a stub and determine its start.
-  auto srcAddrBegin = (TCA)nullptr;
-  for (auto addr : env.meta.reusedStubs) {
-    if ((srcAddr >= addr) && (srcAddr < (addr + svcreq::stub_size()))) {
-      srcAddrBegin = addr;
-      break;
+  auto const srcAddrBegin = [&] {
+    for (auto addr : env.meta.reusedStubs) {
+      if ((srcAddr >= addr) && (srcAddr < (addr + svcreq::stub_size()))) {
+        return addr;
+      }
     }
-  }
+    return (TCA)nullptr;
+  }();
   if (!srcAddrBegin) return false;
 
   // Add the src padding to the rewrites.
@@ -612,7 +613,7 @@ bool relocatePadding(Env& env, TCA srcAddr, TCA destAddr,
   }
 
   // Pad out the remainder of the dest service request stub
-  auto const destAddrBegin = (srcAddrBegin == env.start) ?
+  auto const destAddrBegin = srcAddrBegin == env.start ?
     destStart : env.rel.adjustedAddressAfter(srcAddrBegin);
   assertx(destAddrBegin);
 

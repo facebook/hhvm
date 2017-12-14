@@ -1395,7 +1395,6 @@ static void destroy_freelist(void)
 		freelist[i] = NULL;
 	}
 	_THREAD_PRIVATE_MUTEX_UNLOCK(dtoa_mutex);
-	
 }
 
 
@@ -2644,7 +2643,9 @@ ZEND_API double zend_oct_strtod(const char *str, const char **endptr)
 			 */
 			break;
 		}
-		value = value * 8 + c - '0';
+		// Note parentheses: convert digit into integer before adding as a double
+		// in order to avoid accumulating floating point inaccuracies
+		value = value * 8 + (c - '0');
 		any = 1;
 	}
 
@@ -2678,7 +2679,9 @@ ZEND_API double zend_bin_strtod(const char *str, const char **endptr)
 		 * return the portion which has been converted thus far.
 		 */
 		if ('0' == c || '1' == c)
-			value = value * 2 + c - '0';
+		  // Note parentheses: convert digit into integer before adding as a double
+			// in order to avoid accumulating floating point inaccuracies
+			value = value * 2 + (c - '0');
 		else
 			break;
 

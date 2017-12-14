@@ -1,6 +1,4 @@
 quick/bad_iter_warning.php
-quick/closure.php
-quick/debug_backtrace.php
 quick/debugger/async_stack_traversal.php
 quick/debugger/eval2.php
 quick/debugger/flow.php
@@ -12,7 +10,6 @@ quick/debugger/flow_small.php
 quick/debugger/info1.php
 quick/debugger/list.php
 quick/eval_noreturn.php
-quick/exceptions.php
 quick/foreach-bad.php
 quick/hh_bad_end.php
 quick/hh_bad_start.php

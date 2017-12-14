@@ -1,7 +1,4 @@
 quick/bad_iter_warning.php
-quick/closure.php
-quick/debug_backtrace.php
-quick/exceptions.php
 quick/foreach-bad.php
 quick/hh_bad_end.php
 quick/hh_bad_start.php

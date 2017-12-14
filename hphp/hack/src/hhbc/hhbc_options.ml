@@ -41,7 +41,7 @@ let default = {
   option_enable_xhp = false;
   option_constant_folding = false;
   option_optimize_null_check = false;
-  option_optimize_cuf = false;
+  option_optimize_cuf = true;
   option_max_array_elem_size_on_the_stack = 64;
   option_aliased_namespaces = None;
   option_source_mapping = false;
@@ -146,6 +146,8 @@ let set_option options name value =
     { options with option_repo_authoritative = as_bool value }
   | "hhvm.jit_enable_rename_function" ->
     { options with option_jit_enable_rename_function = as_bool value }
+  | "eval.disablehphpcopts" ->
+    { options with option_optimize_cuf = not (as_bool value) }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -208,6 +210,8 @@ let value_setters = [
     fun opts v -> { opts with option_constant_folding = (v = 1) });
   (set_value "hack.compiler.optimize_null_checks" get_value_from_config_int @@
     fun opts v -> { opts with option_optimize_null_check = (v = 1) });
+  (set_value "hhvm.disable_hphpc_opts" get_value_from_config_int @@
+    fun opts v -> { opts with option_optimize_cuf = (v = 0) });
   (set_value "hack.compiler.optimize_cuf" get_value_from_config_int @@
     fun opts v -> { opts with option_optimize_cuf = (v = 1) });
   (set_value "hhvm.php7.uvs" get_value_from_config_int @@

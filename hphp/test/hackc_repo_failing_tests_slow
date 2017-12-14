@@ -1,6 +1,3 @@
-
-
-
 slow/async/async-gen-and-genva.php
 slow/async/await-all-callback.php
 slow/async/await_gena.php
@@ -24,15 +21,12 @@ slow/dict/init-parse-error2.php
 slow/dict/init-parse-error3.php
 slow/dict/init-parse-error4.php
 slow/dict/mixed-to-dict-with-refs.php
-slow/dv_array/cuf-safe-array.php
 slow/dv_array/genva.php
 slow/dv_array/parse-error1.php
 slow/dv_array/parse-error2.php
 slow/dv_array/parse-error3.php
 slow/dv_array/parse-error4.php
 slow/dv_array/parse-error5.php
-slow/dv_array/variadics.php
-slow/dynamic-call-tracking.php
 slow/ext_ipc/message_queue.php
 slow/ext_ipc/semaphore.php
 slow/ext_ipc/shared_memory.php
@@ -45,7 +39,6 @@ slow/ext_process/fork_log.php
 slow/ext_socket/accept_block.php
 slow/ext_socket/persistent_socket.php
 slow/function/closure-default.php
-slow/function/cuf_by_ref.php
 slow/hack_arr_compat/gena.php
 slow/hack_arr_compat/scalars.php
 slow/hack_mode/2203.php
@@ -86,8 +79,6 @@ slow/lang/hh_return_type_this_0.php
 slow/lang/hh_return_type_this_1.php
 slow/lang/hh_return_type_this_2.php
 slow/lang/hh_return_type_this_3.php
-slow/object/672.php
-slow/parser/async.php
 slow/parser/closure_return_types_both_places.php
 slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-3.php
@@ -115,7 +106,6 @@ slow/type_annotation/shape_typedef_with_question_mark.php
 slow/type_annotation/shape_typedef_with_unknown_fields_not_at_end.php
 slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_constraint/parse_super_constraint_bad.php
-slow/unpack_args/magic.php
 slow/use_namespace_class/double_use_ns.php
 slow/user_attributes/abstract_final_mock.php
 slow/using/bad-async.php

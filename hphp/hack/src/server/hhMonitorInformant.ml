@@ -118,6 +118,12 @@ module Revision_map = struct
           |> Core_result.ok
           |> Option.value ~default:0)
 
+    (** XDB table changes over time. Prior queries should be cleared out after
+     * we'v finished using the result completely (i.e. also allowed the
+     * Prefetcher to finish) so that we don't reuse old results. *)
+    let clear_xdb_query ~svn_rev t =
+      Hashtbl.remove t.xdb_queries svn_rev
+
     (**
      * Does an async query to XDB to find nearest saved state match.
      * If no match is found, returns an empty list.
@@ -164,6 +170,18 @@ module Revision_map = struct
         } in
         State_loader_prefetcher.fetch ~hhconfig_hash:xdb_result.Xdb.hhconfig_hash ~is_tiny handle
       in
+      let not_yet_ready =
+        (** We use None to represent a not yet ready result. Check again later *)
+        None
+      in
+      let no_good_xdb_result ~is_tiny =
+        let () = clear_xdb_query ~svn_rev t in
+        Some ([], is_tiny)
+      in
+      let good_xdb_result ~is_tiny result =
+        let () = clear_xdb_query ~svn_rev t in
+        Some ([result], is_tiny)
+      in
       let open Option in
       (** We run the prefetcher after the XDB lookup (because we need the XDB
        * result to run the prefetcher). *)
@@ -174,39 +192,37 @@ module Revision_map = struct
           | Future.In_progress age when age > 30.0 ->
             (** If prefetcher has taken longer than 30 seconds, we consider
              * this as having no saved states. *)
-            Some ([], is_tiny)
+            no_good_xdb_result ~is_tiny
           | Future.In_progress _ ->
             (** Prefetcher is still running. "Not yet ready, check later." *)
-            None
+            not_yet_ready
           | Future.Complete_with_result (Ok _) ->
             (** This is the only case where we produce a positive result
              * (where the prefetcher succeeded). Prefetchr is only run after
              * XDB lookup finishes and produces a non-empty result list,
              * so we know the XDB list is non-empty here. *)
-            Some ([List.hd (query_to_result_list query)], is_tiny)
+            good_xdb_result ~is_tiny (List.hd (query_to_result_list query))
           | _ ->
-            (** *)
-            Some ([], is_tiny)
+            no_good_xdb_result ~is_tiny
           end
         | query, None ->
           begin match Future.check_status query with
           | Future.In_progress age when age > 15.0 ->
             (** If lookup in XDB table has taken more than 15 seconds, we
              * we consider this as having no saved state. *)
-            Some ([], is_tiny)
+            no_good_xdb_result ~is_tiny
           | Future.In_progress _ ->
             (** XDB lookup still in progress. "Not yet ready, check later." *)
-            None
+            not_yet_ready
           | Future.Complete_with_result _ ->
             let result = query_to_result_list query in
             if result = [] then
-              Some ([], is_tiny)
+              no_good_xdb_result ~is_tiny
             else
               (** XDB looup is done, so we need to fire up the prefetcher.
                * The prefetcher's status will be checked on the next loop. *)
               let () = prefetcher := Some (prefetch_package ~is_tiny (List.hd result)) in
-              (** None represents "not yet ready, check later". *)
-              None
+              not_yet_ready
           end
 
     let find hg_rev t =

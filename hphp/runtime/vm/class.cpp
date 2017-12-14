@@ -1495,12 +1495,6 @@ void Class::setSpecial() {
     return;
   }
 
-  // No need to generate an 86ctor for an abstract final class
-  if ((attrs() & AttrAbstract) && (attrs() & AttrFinal)) {
-    m_ctor = nullptr;
-    return;
-  }
-
   if (UNLIKELY(!SystemLib::s_nullCtor)) {
     SystemLib::setupNullCtor(this);
   }

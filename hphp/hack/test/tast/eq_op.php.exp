@@ -83,7 +83,7 @@
                     (([9:19-9:20], Some int),
                      (AnnotatedAST.Int ([9:19-9:20], "4")))
                     ))));
-             (AnnotatedAST.Return ([11:3-11:9],
+             (AnnotatedAST.Return ([11:3-11:13],
                 (Some (([11:10-11:12], Some int),
                        (AnnotatedAST.Lvar ([11:10-11:12], $x))))
                 ))

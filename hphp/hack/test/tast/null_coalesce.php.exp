@@ -13,7 +13,7 @@
       f_body =
       (AnnotatedAST.NamedBody
          { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Return ([4:3-4:9],
+           [(AnnotatedAST.Return ([4:3-4:18],
                (Some (([4:10-4:17], Some int),
                       (AnnotatedAST.NullCoalesce (
                          (([4:10-4:12], Some ?int),

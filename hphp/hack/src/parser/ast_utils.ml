@@ -67,7 +67,7 @@ let ast_no_pos_mapper = object (self)
   inherit [_] Ast.endo
   method! private on_t () pos = Pos.none
   (* Skip all blocks because we don't care about method bodies *)
-  method! on_block env _ = self#on_list self#on_stmt env [Ast.Noop]
+  method! on_block env _ = self#on_list self#on_stmt env [(Pos.none,Ast.Noop)]
 end
 
 (* Given an AST, return an AST with no position info *)

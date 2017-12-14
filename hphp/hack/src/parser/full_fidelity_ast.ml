@@ -106,11 +106,11 @@ let runP : 'a parser -> node -> env -> 'a = fun pThing thing env ->
 
 
 (* TODO: Cleanup this hopeless Noop mess *)
-let mk_noop : stmt list -> stmt list = function
-  | [] -> [Noop]
+let mk_noop pos : stmt list -> stmt list = function
+  | [] -> [pos, Noop]
   | s -> s
 let mpStripNoop pThing node env = match pThing node env with
-  | [Noop] -> []
+  | [_, Noop] -> []
   | stmtl -> stmtl
 
 let mpOptional : ('a, 'a option) metaparser = fun p -> fun node env ->
@@ -799,10 +799,10 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | _ -> missing_syntax "lambda signature" lambda_signature env
       in
       let pBody node env =
-        try mk_noop (pBlock node env) with
+        try mk_noop (pPos node env) (pBlock node env) with
         | _ ->
           let (p,r) = pExpr node env in
-          [ Return (p, Some (p, r)) ]
+          [ p, Return (Some (p, r)) ]
       in
       let f_body, yield = mpYielding pBody lambda_body env in
       Lfun
@@ -1261,7 +1261,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         ( { (fun_template yield node suspension_kind env) with
             f_ret    = mpOptional pHint anonymous_type env
           ; f_params = couldMap ~f:pFunParam anonymous_parameters env
-          ; f_body   = mk_noop body
+          ; f_body   = mk_noop (pPos anonymous_body env) body
           ; f_static = not (is_missing anonymous_static_keyword)
           }
         , try pUse anonymous_use env with _ -> []
@@ -1273,7 +1273,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         mk_suspension_kind awaitable_async awaitable_coroutine in
       let blk, yld = mpYielding pBlock awaitable_compound_statement env in
       let body =
-        { (fun_template yld node suspension_kind env) with f_body = mk_noop blk }
+        { (fun_template yld node suspension_kind env) with
+           f_body = mk_noop (pPos awaitable_compound_statement env) blk }
       in
       Call ((pPos node env, Lfun body), [], [], [])
     | XHPExpression
@@ -1380,7 +1381,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
 and pBlock : block parser = fun node env ->
    let rec fix_last acc = function
    | x :: (_ :: _ as xs) -> fix_last (x::acc) xs
-   | [Block block] -> List.rev acc @ block
+   | [_, Block block] -> List.rev acc @ block
    | stmt -> List.rev acc @ stmt
    in
    let stmt = pStmtUnsafe node env in
@@ -1388,9 +1389,10 @@ and pBlock : block parser = fun node env ->
 and pStmtUnsafe : stmt list parser = fun node env ->
   let stmt = pStmt node env in
   match leading_token node with
-  | Some t when Token.has_trivia_kind t TriviaKind.Unsafe -> [Unsafe; stmt]
+  | Some t when Token.has_trivia_kind t TriviaKind.Unsafe -> [Pos.none, Unsafe; stmt]
   | _ -> [stmt]
 and pStmt : stmt parser = fun node env ->
+  let pos = pPos node env in
   match syntax node with
   | SwitchStatement { switch_expression; switch_sections; _ } ->
     let pSwitchLabel : (block -> case) parser = fun node env cont ->
@@ -1417,11 +1419,12 @@ and pStmt : stmt parser = fun node env ->
         let blk =
           if is_missing switch_section_fallthrough
           then blk
-          else blk @ [Fallthrough]
+          else blk @ [Pos.none, Fallthrough]
         in
         null_out blk (couldMap ~f:pSwitchLabel switch_section_labels env)
       | _ -> missing_syntax "switch section" node env
     in
+    pos,
     Switch
     ( pExpr switch_expression env
     , List.concat @@ couldMap ~f:pSwitchSection switch_sections env
@@ -1432,7 +1435,7 @@ and pStmt : stmt parser = fun node env ->
      * produce `Noop`s for compound statements **in if statements**
      *)
     let de_noop = function
-    | [Block [Noop]] -> [Block []]
+    | [p, Block [_, Noop]] -> [p, Block []]
     | stmts -> stmts
     in
     let if_condition = pExpr if_condition env in
@@ -1444,7 +1447,7 @@ and pStmt : stmt parser = fun node env ->
           fun next_clause ->
             let elseif_condition = pExpr elseif_condition env in
             let elseif_statement = de_noop (pStmtUnsafe elseif_statement env) in
-            [ If (elseif_condition, elseif_statement, next_clause) ]
+            [ pos, If (elseif_condition, elseif_statement, next_clause) ]
         | _ -> missing_syntax "elseif clause" node env
       in
       List.fold_right ~f:(@@)
@@ -1452,19 +1455,19 @@ and pStmt : stmt parser = fun node env ->
           ~init:( match syntax if_else_clause with
             | ElseClause { else_statement; _ } ->
               de_noop (pStmtUnsafe else_statement env)
-            | Missing -> [Noop]
+            | Missing -> [Pos.none, Noop]
             | _ -> missing_syntax "else clause" if_else_clause env
           )
     in
-    If (if_condition, if_statement, if_elseif_statement)
+    pos, If (if_condition, if_statement, if_elseif_statement)
   | ExpressionStatement { expression_statement_expression; _ } ->
     if is_missing expression_statement_expression
-    then Noop
-    else Expr (pExpr expression_statement_expression env)
+    then pos, Noop
+    else pos, Expr (pExpr expression_statement_expression env)
   | CompoundStatement { compound_statements; compound_right_brace; _ } ->
     let tail =
       match leading_token compound_right_brace with
-      | Some t when Token.has_trivia_kind t TriviaKind.Unsafe -> [Unsafe]
+      | Some t when Token.has_trivia_kind t TriviaKind.Unsafe -> [pos, Unsafe]
       | _ -> []
     in
     let rec conv acc stmts =
@@ -1480,37 +1483,38 @@ and pStmt : stmt parser = fun node env ->
           us_is_block_scoped = false;
           us_has_await = not (is_missing await_kw);
           us_expr = pExprL expression env;
-          us_block = [Block body]; } in
-        List.concat @@ List.rev ([using] :: acc)
+          us_block = [pos, Block body]; } in
+        List.concat @@ List.rev ([pos, using] :: acc)
       | h :: rest ->
         let h = pStmtUnsafe h env in
         conv (h :: acc) rest
     in
     let blk = conv [] (as_list compound_statements) in
-    begin match List.filter ~f:(fun x -> x <> Noop) blk @ tail with
-    | [] -> Block [Noop]
-    | blk -> Block blk
+    begin match List.filter ~f:(fun (_, x) -> x <> Noop) blk @ tail with
+    | [] -> pos, Block [Pos.none, Noop]
+    | blk -> pos, Block blk
     end
-  | ThrowStatement { throw_expression; _ } -> Throw (pExpr throw_expression env)
+  | ThrowStatement { throw_expression; _ } ->
+    pos, Throw (pExpr throw_expression env)
   | DoStatement { do_body; do_condition; _ } ->
-    Do ([Block (pBlock do_body env)], pExpr do_condition env)
+    pos, Do ([pos, Block (pBlock do_body env)], pExpr do_condition env)
   | WhileStatement { while_condition; while_body; _ } ->
-    While (pExpr while_condition env, pStmtUnsafe while_body env)
+    pos, While (pExpr while_condition env, pStmtUnsafe while_body env)
   | DeclareDirectiveStatement { declare_directive_expression; _ } ->
-    Declare (false, pExpr declare_directive_expression env, [])
+    pos, Declare (false, pExpr declare_directive_expression env, [])
   | DeclareBlockStatement { declare_block_expression; declare_block_body; _ } ->
-    Declare (true, pExpr declare_block_expression env,
+    pos, Declare (true, pExpr declare_block_expression env,
              pStmtUnsafe declare_block_body env)
   | UsingStatementBlockScoped
     { using_block_await_keyword
     ; using_block_expressions
     ; using_block_body
     ; _ } ->
-    Using {
+    pos, Using {
       us_is_block_scoped = true;
       us_has_await = not (is_missing using_block_await_keyword);
       us_expr = pExprL using_block_expressions env;
-      us_block = [Block (pBlock using_block_body env)];
+      us_block = [pos, Block (pBlock using_block_body env)];
     }
   | UsingStatementFunctionScoped
     { using_function_await_keyword
@@ -1520,20 +1524,19 @@ and pStmt : stmt parser = fun node env ->
      * be rewritten by this point
      * If this gets run, it means that this using statement is the only one
      * in the block, hence it is not in a compound statement *)
-     Using {
+     pos, Using {
        us_is_block_scoped = false;
        us_has_await = not (is_missing using_function_await_keyword);
        us_expr = pExpr using_function_expression env;
-       us_block = [Block [Noop]];
+       us_block = [Pos.none, Block [Pos.none, Noop]];
      }
   | ForStatement
     { for_initializer; for_control; for_end_of_loop; for_body; _ } ->
-    For
-    ( pPos node env
-    , pExprL for_initializer env
+    pos, For
+    ( pExprL for_initializer env
     , pExprL for_control env
     , pExprL for_end_of_loop env
-    , [Block (pBlock for_body env)]
+    , [pPos for_body env, Block (pBlock for_body env)]
     )
   | ForeachStatement
     { foreach_collection
@@ -1542,7 +1545,7 @@ and pStmt : stmt parser = fun node env ->
     ; foreach_value
     ; foreach_body
     ; _ } ->
-      Foreach
+    pos, Foreach
       ( pExpr foreach_collection env
       , ( if token_kind foreach_await_keyword = Some TK.Await
           then Some (pPos foreach_await_keyword env)
@@ -1557,19 +1560,20 @@ and pStmt : stmt parser = fun node env ->
       )
   | TryStatement
     { try_compound_statement; try_catch_clauses; try_finally_clause; _ } ->
-    Try
-    ( [ Block (pBlock try_compound_statement env) ]
+    pos, Try
+    ( [ pPos try_compound_statement env, Block (pBlock try_compound_statement env) ]
     , couldMap try_catch_clauses env ~f:begin fun node env ->
       match syntax node with
       | CatchClause { catch_type; catch_variable; catch_body; _ } ->
         ( pos_name catch_type env
         , pos_name catch_variable env
-        , [ Block (mpStripNoop pBlock catch_body env) ]
+        , [ pPos catch_body env, Block (mpStripNoop pBlock catch_body env) ]
         )
       | _ -> missing_syntax "catch clause" node env
       end
     , match syntax try_finally_clause with
-      | FinallyClause { finally_body; _ } -> [ Block (pBlock finally_body env) ]
+      | FinallyClause { finally_body; _ } ->
+        [ pPos finally_body env, Block (pBlock finally_body env) ]
       | _ -> []
     )
   | FunctionStaticStatement { static_declarations; _ } ->
@@ -1590,20 +1594,19 @@ and pStmt : stmt parser = fun node env ->
         )
       | _ -> missing_syntax "static declarator" node env
     in
-    Static_var (couldMap ~f:pStaticDeclarator static_declarations env)
+    pos, Static_var (couldMap ~f:pStaticDeclarator static_declarations env)
   | ReturnStatement { return_expression; return_keyword; _} ->
-      let pos = pPos return_expression env in
-      let expr = mpOptional pExpr return_expression env in
-      Return (pos, expr)
+    let expr = mpOptional pExpr return_expression env in
+    pos, Return (expr)
   | Syntax.GotoLabel { goto_label_name; _ } ->
-    let pos = pPos goto_label_name env in
+    let pos_label = pPos goto_label_name env in
     let label_name = text goto_label_name in
-    Ast.GotoLabel (pos, label_name)
+    pos, Ast.GotoLabel (pos_label, label_name)
   | GotoStatement { goto_statement_label_name; _ } ->
-    Goto  (pos_name goto_statement_label_name env)
+    pos, Goto  (pos_name goto_statement_label_name env)
   | EchoStatement  { echo_keyword  = kw; echo_expressions = exprs; _ }
   | UnsetStatement { unset_keyword = kw; unset_variables  = exprs; _ }
-    -> Expr
+    -> pos, Expr
       ( pPos node env
       , Call
         ( (match syntax kw with
@@ -1618,11 +1621,11 @@ and pStmt : stmt parser = fun node env ->
         , []
       ))
   | BreakStatement { break_level=level; _ } ->
-    Break (pPos node env, pBreak_or_continue_level env level)
+    pos, Break (pBreak_or_continue_level env level)
   | ContinueStatement { continue_level=level; _ } ->
-    Continue (pPos node env, pBreak_or_continue_level env level)
+    pos, Continue (pBreak_or_continue_level env level)
   | GlobalStatement { global_variables; _ } ->
-    Global_var (pPos node env,couldMap ~f:pExpr global_variables env)
+    pos, Global_var (couldMap ~f:pExpr global_variables env)
   | MarkupSection _ -> pMarkup node env
   | _ when env.max_depth > 0 ->
     (* OCaml optimisers; Forgive them, for they know not what they do!
@@ -1634,7 +1637,7 @@ and pStmt : stmt parser = fun node env ->
     let () = env.max_depth <- outer_max_depth - 1 in
     let result =
       match pDef node env with
-      | [def] -> Def_inline def
+      | [def] -> pos, Def_inline def
       | _ -> failwith "This should be impossible; inline definition was list."
     in
     let () = env.max_depth <- outer_max_depth in
@@ -1652,7 +1655,7 @@ and pMarkup node env =
         ; _} -> Some (pExpr e env)
       | _ -> failwith "expression expected"
     in
-    Markup ((pPos node env, text markup_text), expr)
+    pPos node env, Markup ((pPos node env, text markup_text), expr)
   | _ -> failwith "invalid node"
 
 and pBreak_or_continue_level env level =
@@ -1878,9 +1881,9 @@ and pClassElt : class_elt list parser = fun node env ->
             Some (Pos.none, Happly ((Pos.none, "array"), hint_list))
           end
         in
-        ( Expr (p, Binop (Eq None,
+        ( (p, Expr (p, Binop (Eq None,
             (p, Obj_get((p, Lvar (p, "$this")), (p, Id cvname), OG_nullthrows)),
-            (p, Lvar param.param_id)
+            (p, Lvar param.param_id))
           ))
         , ClassVars
           { cv_kinds = Option.to_list param.param_modifier
@@ -1909,7 +1912,7 @@ and pClassElt : class_elt list parser = fun node env ->
         (* Drop it on the floor in quick mode; we still need to process the body
          * to know, e.g. whether it contains a yield.
          *)
-        if env.quick_mode then [Noop] else body
+        if env.quick_mode then [Pos.none, Noop] else body
       in
       let kind = pKinds h.function_modifiers env in
       member_def @ [Method
@@ -2108,7 +2111,7 @@ and pDef : def list parser = fun node env ->
       ; f_ret_by_ref      = hdr.fh_ret_by_ref
       ; f_body            =
         if env.quick_mode
-        then [Noop]
+        then [Pos.none, Noop]
         else begin
           (* FIXME: Filthy hack to catch UNSAFE *)
           let containsUNSAFE =
@@ -2117,8 +2120,8 @@ and pDef : def list parser = fun node env ->
             | Not_found -> false
           in
           match block with
-          | Some [Noop] when containsUNSAFE -> [Unsafe]
-          | Some [] -> [Noop]
+          | Some [p, Noop] when containsUNSAFE -> [p, Unsafe]
+          | Some [] -> [Pos.none, Noop]
           | None -> []
           | Some b -> b
         end
@@ -2266,7 +2269,7 @@ and pDef : def list parser = fun node env ->
     ; inclusion_semicolon  = _
     } when not env.quick_mode ->
       let flavor = pImportFlavor req env in
-      [ Stmt (Expr (pPos node env, Import (flavor, pExpr file env))) ]
+      [ Stmt (pPos node env, Expr (pPos node env, Import (flavor, pExpr file env))) ]
   | NamespaceDeclaration
     { namespace_name = name
     ; namespace_body =
@@ -2317,8 +2320,8 @@ let pProgram : program parser = fun node env ->
     | (Namespace (n, il)::el) ->
       Namespace (n, post_process il) :: post_process el
     | (Stmt _ :: el) when env.quick_mode -> post_process el
-    | (Stmt Noop::el) -> post_process el
-    | ((Stmt (Expr (_, (Call
+    | (Stmt (_, Noop) :: el) -> post_process el
+    | ((Stmt (_, Expr (_, (Call
         ( (_, (Id (_, "define")))
         , []
         , [ (_, (String name))
@@ -2371,7 +2374,7 @@ let pProgram : program parser = fun node env ->
           }
         | args ->
           let name = pos_name define_keyword env in
-          Stmt (Expr (fst name, Call ((fst name, Id name), [], args, [])))
+          Stmt (pPos node env, Expr (fst name, Call ((fst name, Id name), [], args, [])))
       in
       aux env ([def] :: acc) nodel
   | node :: nodel ->

@@ -1,6 +1,6 @@
 (* @generated from ast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<90b98ff52767039789c3bbad3ff8abfc1b224df0>> *)
+(* SourceShasum<<cb21367006876f582d4b512cd95b61a2253530b5>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -212,23 +212,24 @@ and using_stmt =
   us_has_await: bool ;
   us_expr: expr ;
   us_block: block }
-and stmt =
+and stmt = (Pos.t * stmt_)
+and stmt_ =
   | Unsafe 
   | Fallthrough 
   | Expr of expr 
   | Block of block 
-  | Break of Pos.t * expr option 
-  | Continue of Pos.t * expr option 
+  | Break of expr option 
+  | Continue of expr option 
   | Throw of expr 
-  | Return of Pos.t * expr option 
+  | Return of expr option 
   | GotoLabel of pstring 
   | Goto of pstring 
   | Static_var of expr list 
-  | Global_var of Pos.t * expr list 
+  | Global_var of expr list 
   | If of expr * block * block 
   | Do of block * expr 
   | While of expr * block 
-  | For of Pos.t * expr * expr * expr * block 
+  | For of expr * expr * expr * block 
   | Switch of expr * case list 
   | Foreach of expr * Pos.t option * as_expr * block 
   | Try of block * catch list * block 
@@ -1410,6 +1411,14 @@ include
               us_expr = _visitors_r2;
               us_block = _visitors_r3
             }
+        method on_stmt env ((_visitors_c0,_visitors_c1) as _visitors_this) =
+          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r1 = self#on_stmt_ env _visitors_c1  in
+          if
+            Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+              (Pervasives.(==) _visitors_c1 _visitors_r1)
+          then _visitors_this
+          else (_visitors_r0, _visitors_r1)
         method on_Unsafe env _visitors_this =
           if true then _visitors_this else Unsafe
         method on_Fallthrough env _visitors_this =
@@ -1424,35 +1433,26 @@ include
           if Pervasives.(==) _visitors_c0 _visitors_r0
           then _visitors_this
           else Block _visitors_r0
-        method on_Break env _visitors_this _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_expr env _visitors_c1  in
-          if
-            Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
-              (Pervasives.(==) _visitors_c1 _visitors_r1)
+        method on_Break env _visitors_this _visitors_c0 =
+          let _visitors_r0 = self#on_option self#on_expr env _visitors_c0  in
+          if Pervasives.(==) _visitors_c0 _visitors_r0
           then _visitors_this
-          else Break (_visitors_r0, _visitors_r1)
-        method on_Continue env _visitors_this _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_expr env _visitors_c1  in
-          if
-            Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
-              (Pervasives.(==) _visitors_c1 _visitors_r1)
+          else Break _visitors_r0
+        method on_Continue env _visitors_this _visitors_c0 =
+          let _visitors_r0 = self#on_option self#on_expr env _visitors_c0  in
+          if Pervasives.(==) _visitors_c0 _visitors_r0
           then _visitors_this
-          else Continue (_visitors_r0, _visitors_r1)
+          else Continue _visitors_r0
         method on_Throw env _visitors_this _visitors_c0 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           if Pervasives.(==) _visitors_c0 _visitors_r0
           then _visitors_this
           else Throw _visitors_r0
-        method on_Return env _visitors_this _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_expr env _visitors_c1  in
-          if
-            Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
-              (Pervasives.(==) _visitors_c1 _visitors_r1)
+        method on_Return env _visitors_this _visitors_c0 =
+          let _visitors_r0 = self#on_option self#on_expr env _visitors_c0  in
+          if Pervasives.(==) _visitors_c0 _visitors_r0
           then _visitors_this
-          else Return (_visitors_r0, _visitors_r1)
+          else Return _visitors_r0
         method on_GotoLabel env _visitors_this _visitors_c0 =
           let _visitors_r0 = self#on_pstring env _visitors_c0  in
           if Pervasives.(==) _visitors_c0 _visitors_r0
@@ -1468,14 +1468,11 @@ include
           if Pervasives.(==) _visitors_c0 _visitors_r0
           then _visitors_this
           else Static_var _visitors_r0
-        method on_Global_var env _visitors_this _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_list self#on_expr env _visitors_c1  in
-          if
-            Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
-              (Pervasives.(==) _visitors_c1 _visitors_r1)
+        method on_Global_var env _visitors_this _visitors_c0 =
+          let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
+          if Pervasives.(==) _visitors_c0 _visitors_r0
           then _visitors_this
-          else Global_var (_visitors_r0, _visitors_r1)
+          else Global_var _visitors_r0
         method on_If env _visitors_this _visitors_c0 _visitors_c1
           _visitors_c2 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
@@ -1504,24 +1501,18 @@ include
           then _visitors_this
           else While (_visitors_r0, _visitors_r1)
         method on_For env _visitors_this _visitors_c0 _visitors_c1
-          _visitors_c2 _visitors_c3 _visitors_c4 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          _visitors_c2 _visitors_c3 =
+          let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_expr env _visitors_c1  in
           let _visitors_r2 = self#on_expr env _visitors_c2  in
-          let _visitors_r3 = self#on_expr env _visitors_c3  in
-          let _visitors_r4 = self#on_block env _visitors_c4  in
+          let _visitors_r3 = self#on_block env _visitors_c3  in
           if
             Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
               (Pervasives.(&&) (Pervasives.(==) _visitors_c1 _visitors_r1)
                  (Pervasives.(&&) (Pervasives.(==) _visitors_c2 _visitors_r2)
-                    (Pervasives.(&&)
-                       (Pervasives.(==) _visitors_c3 _visitors_r3)
-                       (Pervasives.(==) _visitors_c4 _visitors_r4))))
+                    (Pervasives.(==) _visitors_c3 _visitors_r3)))
           then _visitors_this
-          else
-            For
-              (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3,
-                _visitors_r4)
+          else For (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3)
         method on_Switch env _visitors_this _visitors_c0 _visitors_c1 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_list self#on_case env _visitors_c1  in
@@ -1586,7 +1577,7 @@ include
                  (Pervasives.(==) _visitors_c2 _visitors_r2))
           then _visitors_this
           else Declare (_visitors_r0, _visitors_r1, _visitors_r2)
-        method on_stmt env _visitors_this =
+        method on_stmt_ env _visitors_this =
           match _visitors_this with
           | Unsafe  as _visitors_this -> self#on_Unsafe env _visitors_this
           | Fallthrough  as _visitors_this ->
@@ -1595,22 +1586,22 @@ include
               self#on_Expr env _visitors_this _visitors_c0
           | Block _visitors_c0 as _visitors_this ->
               self#on_Block env _visitors_this _visitors_c0
-          | Break (_visitors_c0,_visitors_c1) as _visitors_this ->
-              self#on_Break env _visitors_this _visitors_c0 _visitors_c1
-          | Continue (_visitors_c0,_visitors_c1) as _visitors_this ->
-              self#on_Continue env _visitors_this _visitors_c0 _visitors_c1
+          | Break _visitors_c0 as _visitors_this ->
+              self#on_Break env _visitors_this _visitors_c0
+          | Continue _visitors_c0 as _visitors_this ->
+              self#on_Continue env _visitors_this _visitors_c0
           | Throw _visitors_c0 as _visitors_this ->
               self#on_Throw env _visitors_this _visitors_c0
-          | Return (_visitors_c0,_visitors_c1) as _visitors_this ->
-              self#on_Return env _visitors_this _visitors_c0 _visitors_c1
+          | Return _visitors_c0 as _visitors_this ->
+              self#on_Return env _visitors_this _visitors_c0
           | GotoLabel _visitors_c0 as _visitors_this ->
               self#on_GotoLabel env _visitors_this _visitors_c0
           | Goto _visitors_c0 as _visitors_this ->
               self#on_Goto env _visitors_this _visitors_c0
           | Static_var _visitors_c0 as _visitors_this ->
               self#on_Static_var env _visitors_this _visitors_c0
-          | Global_var (_visitors_c0,_visitors_c1) as _visitors_this ->
-              self#on_Global_var env _visitors_this _visitors_c0 _visitors_c1
+          | Global_var _visitors_c0 as _visitors_this ->
+              self#on_Global_var env _visitors_this _visitors_c0
           | If (_visitors_c0,_visitors_c1,_visitors_c2) as _visitors_this ->
               self#on_If env _visitors_this _visitors_c0 _visitors_c1
                 _visitors_c2
@@ -1618,11 +1609,10 @@ include
               self#on_Do env _visitors_this _visitors_c0 _visitors_c1
           | While (_visitors_c0,_visitors_c1) as _visitors_this ->
               self#on_While env _visitors_this _visitors_c0 _visitors_c1
-          | For
-              (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
-              as _visitors_this ->
+          | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) as
+              _visitors_this ->
               self#on_For env _visitors_this _visitors_c0 _visitors_c1
-                _visitors_c2 _visitors_c3 _visitors_c4
+                _visitors_c2 _visitors_c3
           | Switch (_visitors_c0,_visitors_c1) as _visitors_this ->
               self#on_Switch env _visitors_this _visitors_c0 _visitors_c1
           | Foreach (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) as
@@ -2812,26 +2802,27 @@ include
           self#plus
             (self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2)
             _visitors_s3
+        method on_stmt env (_visitors_c0,_visitors_c1) =
+          let _visitors_s0 = self#on_t env _visitors_c0  in
+          let _visitors_s1 = self#on_stmt_ env _visitors_c1  in
+          self#plus _visitors_s0 _visitors_s1
         method on_Unsafe env = self#zero
         method on_Fallthrough env = self#zero
         method on_Expr env _visitors_c0 =
           let _visitors_s0 = self#on_expr env _visitors_c0  in _visitors_s0
         method on_Block env _visitors_c0 =
           let _visitors_s0 = self#on_block env _visitors_c0  in _visitors_s0
-        method on_Break env _visitors_c0 _visitors_c1 =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
-          let _visitors_s1 = self#on_option self#on_expr env _visitors_c1  in
-          self#plus _visitors_s0 _visitors_s1
-        method on_Continue env _visitors_c0 _visitors_c1 =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
-          let _visitors_s1 = self#on_option self#on_expr env _visitors_c1  in
-          self#plus _visitors_s0 _visitors_s1
+        method on_Break env _visitors_c0 =
+          let _visitors_s0 = self#on_option self#on_expr env _visitors_c0  in
+          _visitors_s0
+        method on_Continue env _visitors_c0 =
+          let _visitors_s0 = self#on_option self#on_expr env _visitors_c0  in
+          _visitors_s0
         method on_Throw env _visitors_c0 =
           let _visitors_s0 = self#on_expr env _visitors_c0  in _visitors_s0
-        method on_Return env _visitors_c0 _visitors_c1 =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
-          let _visitors_s1 = self#on_option self#on_expr env _visitors_c1  in
-          self#plus _visitors_s0 _visitors_s1
+        method on_Return env _visitors_c0 =
+          let _visitors_s0 = self#on_option self#on_expr env _visitors_c0  in
+          _visitors_s0
         method on_GotoLabel env _visitors_c0 =
           let _visitors_s0 = self#on_pstring env _visitors_c0  in
           _visitors_s0
@@ -2841,10 +2832,9 @@ include
         method on_Static_var env _visitors_c0 =
           let _visitors_s0 = self#on_list self#on_expr env _visitors_c0  in
           _visitors_s0
-        method on_Global_var env _visitors_c0 _visitors_c1 =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
-          let _visitors_s1 = self#on_list self#on_expr env _visitors_c1  in
-          self#plus _visitors_s0 _visitors_s1
+        method on_Global_var env _visitors_c0 =
+          let _visitors_s0 = self#on_list self#on_expr env _visitors_c0  in
+          _visitors_s0
         method on_If env _visitors_c0 _visitors_c1 _visitors_c2 =
           let _visitors_s0 = self#on_expr env _visitors_c0  in
           let _visitors_s1 = self#on_block env _visitors_c1  in
@@ -2859,16 +2849,14 @@ include
           let _visitors_s1 = self#on_block env _visitors_c1  in
           self#plus _visitors_s0 _visitors_s1
         method on_For env _visitors_c0 _visitors_c1 _visitors_c2 _visitors_c3
-          _visitors_c4 =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
+          =
+          let _visitors_s0 = self#on_expr env _visitors_c0  in
           let _visitors_s1 = self#on_expr env _visitors_c1  in
           let _visitors_s2 = self#on_expr env _visitors_c2  in
-          let _visitors_s3 = self#on_expr env _visitors_c3  in
-          let _visitors_s4 = self#on_block env _visitors_c4  in
+          let _visitors_s3 = self#on_block env _visitors_c3  in
           self#plus
-            (self#plus
-               (self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2)
-               _visitors_s3) _visitors_s4
+            (self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2)
+            _visitors_s3
         method on_Switch env _visitors_c0 _visitors_c1 =
           let _visitors_s0 = self#on_expr env _visitors_c0  in
           let _visitors_s1 = self#on_list self#on_case env _visitors_c1  in
@@ -2902,35 +2890,29 @@ include
           let _visitors_s1 = self#on_expr env _visitors_c1  in
           let _visitors_s2 = self#on_block env _visitors_c2  in
           self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
-        method on_stmt env _visitors_this =
+        method on_stmt_ env _visitors_this =
           match _visitors_this with
           | Unsafe  -> self#on_Unsafe env
           | Fallthrough  -> self#on_Fallthrough env
           | Expr _visitors_c0 -> self#on_Expr env _visitors_c0
           | Block _visitors_c0 -> self#on_Block env _visitors_c0
-          | Break (_visitors_c0,_visitors_c1) ->
-              self#on_Break env _visitors_c0 _visitors_c1
-          | Continue (_visitors_c0,_visitors_c1) ->
-              self#on_Continue env _visitors_c0 _visitors_c1
+          | Break _visitors_c0 -> self#on_Break env _visitors_c0
+          | Continue _visitors_c0 -> self#on_Continue env _visitors_c0
           | Throw _visitors_c0 -> self#on_Throw env _visitors_c0
-          | Return (_visitors_c0,_visitors_c1) ->
-              self#on_Return env _visitors_c0 _visitors_c1
+          | Return _visitors_c0 -> self#on_Return env _visitors_c0
           | GotoLabel _visitors_c0 -> self#on_GotoLabel env _visitors_c0
           | Goto _visitors_c0 -> self#on_Goto env _visitors_c0
           | Static_var _visitors_c0 -> self#on_Static_var env _visitors_c0
-          | Global_var (_visitors_c0,_visitors_c1) ->
-              self#on_Global_var env _visitors_c0 _visitors_c1
+          | Global_var _visitors_c0 -> self#on_Global_var env _visitors_c0
           | If (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_If env _visitors_c0 _visitors_c1 _visitors_c2
           | Do (_visitors_c0,_visitors_c1) ->
               self#on_Do env _visitors_c0 _visitors_c1
           | While (_visitors_c0,_visitors_c1) ->
               self#on_While env _visitors_c0 _visitors_c1
-          | For
-              (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
-              ->
+          | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
               self#on_For env _visitors_c0 _visitors_c1 _visitors_c2
-                _visitors_c3 _visitors_c4
+                _visitors_c3
           | Switch (_visitors_c0,_visitors_c1) ->
               self#on_Switch env _visitors_c0 _visitors_c1
           | Foreach (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
@@ -3878,6 +3860,10 @@ include
             us_expr = _visitors_r2;
             us_block = _visitors_r3
           }
+        method on_stmt env (_visitors_c0,_visitors_c1) =
+          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r1 = self#on_stmt_ env _visitors_c1  in
+          (_visitors_r0, _visitors_r1)
         method on_Unsafe env = Unsafe
         method on_Fallthrough env = Fallthrough
         method on_Expr env _visitors_c0 =
@@ -3886,21 +3872,18 @@ include
         method on_Block env _visitors_c0 =
           let _visitors_r0 = self#on_block env _visitors_c0  in
           Block _visitors_r0
-        method on_Break env _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_expr env _visitors_c1  in
-          Break (_visitors_r0, _visitors_r1)
-        method on_Continue env _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_expr env _visitors_c1  in
-          Continue (_visitors_r0, _visitors_r1)
+        method on_Break env _visitors_c0 =
+          let _visitors_r0 = self#on_option self#on_expr env _visitors_c0  in
+          Break _visitors_r0
+        method on_Continue env _visitors_c0 =
+          let _visitors_r0 = self#on_option self#on_expr env _visitors_c0  in
+          Continue _visitors_r0
         method on_Throw env _visitors_c0 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           Throw _visitors_r0
-        method on_Return env _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_expr env _visitors_c1  in
-          Return (_visitors_r0, _visitors_r1)
+        method on_Return env _visitors_c0 =
+          let _visitors_r0 = self#on_option self#on_expr env _visitors_c0  in
+          Return _visitors_r0
         method on_GotoLabel env _visitors_c0 =
           let _visitors_r0 = self#on_pstring env _visitors_c0  in
           GotoLabel _visitors_r0
@@ -3910,10 +3893,9 @@ include
         method on_Static_var env _visitors_c0 =
           let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
           Static_var _visitors_r0
-        method on_Global_var env _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_list self#on_expr env _visitors_c1  in
-          Global_var (_visitors_r0, _visitors_r1)
+        method on_Global_var env _visitors_c0 =
+          let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
+          Global_var _visitors_r0
         method on_If env _visitors_c0 _visitors_c1 _visitors_c2 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_block env _visitors_c1  in
@@ -3928,15 +3910,12 @@ include
           let _visitors_r1 = self#on_block env _visitors_c1  in
           While (_visitors_r0, _visitors_r1)
         method on_For env _visitors_c0 _visitors_c1 _visitors_c2 _visitors_c3
-          _visitors_c4 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          =
+          let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_expr env _visitors_c1  in
           let _visitors_r2 = self#on_expr env _visitors_c2  in
-          let _visitors_r3 = self#on_expr env _visitors_c3  in
-          let _visitors_r4 = self#on_block env _visitors_c4  in
-          For
-            (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3,
-              _visitors_r4)
+          let _visitors_r3 = self#on_block env _visitors_c3  in
+          For (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3)
         method on_Switch env _visitors_c0 _visitors_c1 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_list self#on_case env _visitors_c1  in
@@ -3969,35 +3948,29 @@ include
           let _visitors_r1 = self#on_expr env _visitors_c1  in
           let _visitors_r2 = self#on_block env _visitors_c2  in
           Declare (_visitors_r0, _visitors_r1, _visitors_r2)
-        method on_stmt env _visitors_this =
+        method on_stmt_ env _visitors_this =
           match _visitors_this with
           | Unsafe  -> self#on_Unsafe env
           | Fallthrough  -> self#on_Fallthrough env
           | Expr _visitors_c0 -> self#on_Expr env _visitors_c0
           | Block _visitors_c0 -> self#on_Block env _visitors_c0
-          | Break (_visitors_c0,_visitors_c1) ->
-              self#on_Break env _visitors_c0 _visitors_c1
-          | Continue (_visitors_c0,_visitors_c1) ->
-              self#on_Continue env _visitors_c0 _visitors_c1
+          | Break _visitors_c0 -> self#on_Break env _visitors_c0
+          | Continue _visitors_c0 -> self#on_Continue env _visitors_c0
           | Throw _visitors_c0 -> self#on_Throw env _visitors_c0
-          | Return (_visitors_c0,_visitors_c1) ->
-              self#on_Return env _visitors_c0 _visitors_c1
+          | Return _visitors_c0 -> self#on_Return env _visitors_c0
           | GotoLabel _visitors_c0 -> self#on_GotoLabel env _visitors_c0
           | Goto _visitors_c0 -> self#on_Goto env _visitors_c0
           | Static_var _visitors_c0 -> self#on_Static_var env _visitors_c0
-          | Global_var (_visitors_c0,_visitors_c1) ->
-              self#on_Global_var env _visitors_c0 _visitors_c1
+          | Global_var _visitors_c0 -> self#on_Global_var env _visitors_c0
           | If (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_If env _visitors_c0 _visitors_c1 _visitors_c2
           | Do (_visitors_c0,_visitors_c1) ->
               self#on_Do env _visitors_c0 _visitors_c1
           | While (_visitors_c0,_visitors_c1) ->
               self#on_While env _visitors_c0 _visitors_c1
-          | For
-              (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
-              ->
+          | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
               self#on_For env _visitors_c0 _visitors_c1 _visitors_c2
-                _visitors_c3 _visitors_c4
+                _visitors_c3
           | Switch (_visitors_c0,_visitors_c1) ->
               self#on_Switch env _visitors_c0 _visitors_c1
           | Foreach (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
@@ -4819,25 +4792,25 @@ include
           let _visitors_r1 = self#on_bool env _visitors_this.us_has_await  in
           let _visitors_r2 = self#on_expr env _visitors_this.us_expr  in
           let _visitors_r3 = self#on_block env _visitors_this.us_block  in ()
+        method on_stmt env (_visitors_c0,_visitors_c1) =
+          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r1 = self#on_stmt_ env _visitors_c1  in ()
         method on_Unsafe env = ()
         method on_Fallthrough env = ()
         method on_Expr env _visitors_c0 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in ()
         method on_Block env _visitors_c0 =
           let _visitors_r0 = self#on_block env _visitors_c0  in ()
-        method on_Break env _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_expr env _visitors_c1  in
+        method on_Break env _visitors_c0 =
+          let _visitors_r0 = self#on_option self#on_expr env _visitors_c0  in
           ()
-        method on_Continue env _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_expr env _visitors_c1  in
+        method on_Continue env _visitors_c0 =
+          let _visitors_r0 = self#on_option self#on_expr env _visitors_c0  in
           ()
         method on_Throw env _visitors_c0 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in ()
-        method on_Return env _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_expr env _visitors_c1  in
+        method on_Return env _visitors_c0 =
+          let _visitors_r0 = self#on_option self#on_expr env _visitors_c0  in
           ()
         method on_GotoLabel env _visitors_c0 =
           let _visitors_r0 = self#on_pstring env _visitors_c0  in ()
@@ -4846,9 +4819,8 @@ include
         method on_Static_var env _visitors_c0 =
           let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
           ()
-        method on_Global_var env _visitors_c0 _visitors_c1 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
-          let _visitors_r1 = self#on_list self#on_expr env _visitors_c1  in
+        method on_Global_var env _visitors_c0 =
+          let _visitors_r0 = self#on_list self#on_expr env _visitors_c0  in
           ()
         method on_If env _visitors_c0 _visitors_c1 _visitors_c2 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
@@ -4861,12 +4833,11 @@ include
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_block env _visitors_c1  in ()
         method on_For env _visitors_c0 _visitors_c1 _visitors_c2 _visitors_c3
-          _visitors_c4 =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          =
+          let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_expr env _visitors_c1  in
           let _visitors_r2 = self#on_expr env _visitors_c2  in
-          let _visitors_r3 = self#on_expr env _visitors_c3  in
-          let _visitors_r4 = self#on_block env _visitors_c4  in ()
+          let _visitors_r3 = self#on_block env _visitors_c3  in ()
         method on_Switch env _visitors_c0 _visitors_c1 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
           let _visitors_r1 = self#on_list self#on_case env _visitors_c1  in
@@ -4894,35 +4865,29 @@ include
           let _visitors_r0 = self#on_bool env _visitors_c0  in
           let _visitors_r1 = self#on_expr env _visitors_c1  in
           let _visitors_r2 = self#on_block env _visitors_c2  in ()
-        method on_stmt env _visitors_this =
+        method on_stmt_ env _visitors_this =
           match _visitors_this with
           | Unsafe  -> self#on_Unsafe env
           | Fallthrough  -> self#on_Fallthrough env
           | Expr _visitors_c0 -> self#on_Expr env _visitors_c0
           | Block _visitors_c0 -> self#on_Block env _visitors_c0
-          | Break (_visitors_c0,_visitors_c1) ->
-              self#on_Break env _visitors_c0 _visitors_c1
-          | Continue (_visitors_c0,_visitors_c1) ->
-              self#on_Continue env _visitors_c0 _visitors_c1
+          | Break _visitors_c0 -> self#on_Break env _visitors_c0
+          | Continue _visitors_c0 -> self#on_Continue env _visitors_c0
           | Throw _visitors_c0 -> self#on_Throw env _visitors_c0
-          | Return (_visitors_c0,_visitors_c1) ->
-              self#on_Return env _visitors_c0 _visitors_c1
+          | Return _visitors_c0 -> self#on_Return env _visitors_c0
           | GotoLabel _visitors_c0 -> self#on_GotoLabel env _visitors_c0
           | Goto _visitors_c0 -> self#on_Goto env _visitors_c0
           | Static_var _visitors_c0 -> self#on_Static_var env _visitors_c0
-          | Global_var (_visitors_c0,_visitors_c1) ->
-              self#on_Global_var env _visitors_c0 _visitors_c1
+          | Global_var _visitors_c0 -> self#on_Global_var env _visitors_c0
           | If (_visitors_c0,_visitors_c1,_visitors_c2) ->
               self#on_If env _visitors_c0 _visitors_c1 _visitors_c2
           | Do (_visitors_c0,_visitors_c1) ->
               self#on_Do env _visitors_c0 _visitors_c1
           | While (_visitors_c0,_visitors_c1) ->
               self#on_While env _visitors_c0 _visitors_c1
-          | For
-              (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
-              ->
+          | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
               self#on_For env _visitors_c0 _visitors_c1 _visitors_c2
-                _visitors_c3 _visitors_c4
+                _visitors_c3
           | Switch (_visitors_c0,_visitors_c1) ->
               self#on_Switch env _visitors_c0 _visitors_c1
           | Foreach (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->

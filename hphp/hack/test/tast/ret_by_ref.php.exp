@@ -16,7 +16,7 @@
                      (AnnotatedAST.Int ([4:15-4:17], "42")))
                     )))
                  ]);
-             (AnnotatedAST.Return ([5:3-5:9],
+             (AnnotatedAST.Return ([5:3-5:13],
                 (Some (([5:10-5:12], Some int),
                        (AnnotatedAST.Lvar ([5:10-5:12], $x))))
                 ))
@@ -50,7 +50,7 @@
           m_body =
           (AnnotatedAST.NamedBody
              { AnnotatedAST.fnb_nast =
-               [(AnnotatedAST.Return ([11:5-11:11],
+               [(AnnotatedAST.Return ([11:5-11:21],
                    (Some (([11:12-11:20], Some int),
                           (AnnotatedAST.Obj_get (
                              (([11:12-11:17], Some <static>),

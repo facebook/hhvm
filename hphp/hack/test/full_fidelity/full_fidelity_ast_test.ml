@@ -93,24 +93,8 @@ function foo(int $a, int $b): int {
 "
 
 (** Output from hh_single_parse. *)
-let simple_expected_1 = "(AProgram
- ((Fun
-   ((f_mode: Mpartial) (f_tparams: ()) (f_ret_by_ref: false)
-    (f_ret: ((p (Happly (p int) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
-    (f_params:
-     (((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
-       (param_is_variadic: false) (param_id: (p $a)) (param_expr: ())
-       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))
-      ((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
-       (param_is_variadic: false) (param_id: (p $b)) (param_expr: ())
-       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))))
-    (f_body:
-     ((Return p ((p (Binop Plus (p (Lvar (p $a))) (p (Lvar (p $b)))))))))
-    (f_user_attributes: ()) (f_fun_kind: FSync)
-    (f_namespace:
-     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
-      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
-    (f_span: p)))))"
+let simple_expected_1 =
+"(AProgram\n ((Fun\n   ((f_mode: Mpartial) (f_tparams: ()) (f_ret_by_ref: false)\n    (f_ret: ((p (Happly (p int) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())\n    (f_params:\n     (((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)\n       (param_is_variadic: false) (param_id: (p $a)) (param_expr: ())\n       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))\n      ((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)\n       (param_is_variadic: false) (param_id: (p $b)) (param_expr: ())\n       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))))\n    (f_body:\n     ((p (Return ((p (Binop Plus (p (Lvar (p $a))) (p (Lvar (p $b))))))))))\n    (f_user_attributes: ()) (f_fun_kind: FSync)\n    (f_namespace:\n     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))\n      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))\n    (f_span: p)))))"
 
 let simple_source_2 =
 "<?hh
@@ -118,23 +102,8 @@ function foo(int $a, int $b): void {
 }"
 
 (** Output from hh_single_parse. *)
-let simple_expected_2 = "(AProgram
- ((Stmt (Markup (p \"\") ()))
-  (Fun
-   ((f_mode: Mpartial) (f_tparams: ()) (f_ret_by_ref: false)
-    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
-    (f_params:
-     (((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
-       (param_is_variadic: false) (param_id: (p $a)) (param_expr: ())
-       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))
-      ((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
-       (param_is_variadic: false) (param_id: (p $b)) (param_expr: ())
-       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))))
-    (f_body: (\"\")) (f_user_attributes: ()) (f_fun_kind: FSync)
-    (f_namespace:
-     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
-      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
-    (f_span: p)))))"
+let simple_expected_2 =
+"(AProgram\n ((Stmt (p (Markup (p \"\") ())))\n  (Fun\n   ((f_mode: Mpartial) (f_tparams: ()) (f_ret_by_ref: false)\n    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())\n    (f_params:\n     (((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)\n       (param_is_variadic: false) (param_id: (p $a)) (param_expr: ())\n       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))\n      ((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)\n       (param_is_variadic: false) (param_id: (p $b)) (param_expr: ())\n       (param_modifier: ()) (param_callconv: ()) (param_user_attributes: ()))))\n    (f_body: ((p \"\"))) (f_user_attributes: ()) (f_fun_kind: FSync)\n    (f_namespace:\n     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))\n      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))\n    (f_span: p)))))"
 
 let comment_scraper_1 =
 "<?hh // strict
@@ -145,28 +114,7 @@ function foo(): void {
 }"
 
 let comment_scraper_expected =
-"(AProgram
- ((Fun
-   ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
-    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
-    (f_params: ())
-    (f_body: (Unsafe (Expr (p (Call (p (Id (p bar))) () () ())))))
-    (f_user_attributes: ()) (f_fun_kind: FSync)
-    (f_namespace:
-     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
-      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
-    (f_span: p)))))(AProgram
- ((Stmt (Markup (p \"\") ()))
-  (Fun
-   ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
-    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
-    (f_params: ())
-    (f_body: (Unsafe (Expr (p (Call (p (Id (p bar))) () () ())))))
-    (f_user_attributes: ()) (f_fun_kind: FSync)
-    (f_namespace:
-     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
-      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
-    (f_span: p)))))"
+"(AProgram\n ((Fun\n   ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)\n    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())\n    (f_params: ())\n    (f_body: ((p Unsafe) (p (Expr (p (Call (p (Id (p bar))) () () ()))))))\n    (f_user_attributes: ()) (f_fun_kind: FSync)\n    (f_namespace:\n     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))\n      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))\n    (f_span: p)))))(AProgram\n ((Stmt (p (Markup (p \"\") ())))\n  (Fun\n   ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)\n    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())\n    (f_params: ())\n    (f_body: ((p Unsafe) (p (Expr (p (Call (p (Id (p bar))) () () ()))))))\n    (f_user_attributes: ()) (f_fun_kind: FSync)\n    (f_namespace:\n     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))\n      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))\n    (f_span: p)))))"
 
 let type_annotated_function_call =
 "<?hh // strict
@@ -177,9 +125,9 @@ baz(quz<ButThisShouldBe,Two($expressions));
 
 let type_annotated_function_call_expected =
 "(AProgram
- ((Stmt (Markup (p \"\") ()))
+ ((Stmt (p (Markup (p \"\") ())))
   (Stmt
-   (Expr
+   (p (Expr
     (p
      (Call (p (Id (p foo)))
       ((p
@@ -189,13 +137,13 @@ let type_annotated_function_call_expected =
            ((p (Happly (p TypesMakeThis) ()))
             (p (Happly (p AnAnnotated) ())))))
          ((p (Lvar (p $function_call)))) ())))
-      ()))))
+      ())))))
   (Stmt
-   (Expr
+   (p (Expr
     (p
      (Call (p (Id (p baz)))
       ((p (Binop Lt (p (Id (p quz))) (p (Id (p ButThisShouldBe)))))
-       (p (Call (p (Id (p Two))) ((p (Lvar (p $expressions)))) ())))"
+       (p (Call (p (Id (p Two))) ((p (Lvar (p $expressions)))) ()))))"
 
 let global_keyword =
 "<?hh // strict
@@ -204,8 +152,9 @@ function foo(): void {
 }"
 
 let global_keyword_expected =
-"(AProgram
- ((Stmt (Markup (p \"\") ()))
+"(AProgram\n ((Stmt (p (Markup (p \"\") ())))\n  (Fun\n   ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)\n    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())\n    (f_params: ()) (f_body: ((p (Global_var ((p (Id (p $x))))))))\n    (f_user_attributes: ()) (f_fun_kind: FSync)\n    (f_namespace:\n     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))\n      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))\n    (f_span: p)))))"
+(*"(AProgram
+ ((Stmt (p (Markup (p \"\") ())))
   (Fun
    ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
     (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
@@ -215,7 +164,7 @@ let global_keyword_expected =
      ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
       (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
     (f_span: p)))))"
-
+*)
 let string_literals =
 "<?hh // strict
 final class StringsThatArentNumericLiterals {
@@ -229,29 +178,7 @@ final class StringsThatArentNumericLiterals {
 "
 
 let string_literals_expected =
-"(AProgram
- ((Stmt (Markup (p \"\") ()))
-  (Class
-   ((c_mode: Mstrict) (c_user_attributes: ()) (c_final: true)
-    (c_kind: Cnormal) (c_is_xhp: false)
-    (c_name: (p \"\\\\StringsThatArentNumericLiterals\")) (c_tparams: ())
-    (c_extends: ()) (c_implements: ())
-    (c_body:
-     ((Const ((p (Happly (p string) ())))
-       (((p BINARY) (p (String (p 0b101010))))))
-      (Const ((p (Happly (p string) ())))
-       (((p FEINT_BINARY) (p (String (p 0b101012))))))
-      (Const ((p (Happly (p string) ())))
-       (((p HEXADECIMAL) (p (String (p 0x2A))))))
-      (Const ((p (Happly (p string) ())))
-       (((p FEINT_HEXADECIMAL) (p (String (p 0x2G))))))
-      (Const ((p (Happly (p string) ()))) (((p OCTAL) (p (String (p 052))))))
-      (Const ((p (Happly (p string) ())))
-       (((p FEINT_OCTAL) (p (String (p 058))))))))
-    (c_namespace:
-     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
-      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
-    (c_enum: ()) (c_span: p)))))"
+"(AProgram\n ((Stmt (p (Markup (p \"\") ())))\n  (Class\n   ((c_mode: Mstrict) (c_user_attributes: ()) (c_final: true)\n    (c_kind: Cnormal) (c_is_xhp: false)\n    (c_name: (p \"\\\\StringsThatArentNumericLiterals\")) (c_tparams: ())\n    (c_extends: ()) (c_implements: ())\n    (c_body:\n     ((Const ((p (Happly (p string) ())))\n       (((p BINARY) (p (String (p 0b101010))))))\n      (Const ((p (Happly (p string) ())))\n       (((p FEINT_BINARY) (p (String (p 0b101012))))))\n      (Const ((p (Happly (p string) ())))\n       (((p HEXADECIMAL) (p (String (p 0x2A))))))\n      (Const ((p (Happly (p string) ())))\n       (((p FEINT_HEXADECIMAL) (p (String (p 0x2G))))))\n      (Const ((p (Happly (p string) ()))) (((p OCTAL) (p (String (p 052))))))\n      (Const ((p (Happly (p string) ())))\n       (((p FEINT_OCTAL) (p (String (p 058))))))))\n    (c_namespace:\n     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))\n      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))\n    (c_enum: ()) (c_span: p)))))"
 
 let test_data =
   [ { name = "sanity_test_classic_parser"

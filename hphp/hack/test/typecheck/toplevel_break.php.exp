@@ -1,2 +1,2 @@
-File "toplevel_break.php", line 14, characters 5-9:
+File "toplevel_break.php", line 14, characters 5-10:
 break can only be used inside loops or switch statements (NastCheck[3022])

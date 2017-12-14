@@ -739,7 +739,7 @@ and toplevel_word def_start ~attr env = function
       let pos = Pos.make env.file env.lb in
       let e = expr_import r env pos in
       expect env Tsc;
-      [Stmt (Expr e)]
+      [Stmt (pos, Expr e)]
   | _ ->
       let pos = Pos.make env.file env.lb in
       L.back env.lb;
@@ -748,7 +748,7 @@ and toplevel_word def_start ~attr env = function
       [define_or_stmt env stmt]
 
 and define_or_stmt env = function
-  | Expr (_, Call ((_, Id (_, "define")), _, [(_, String name); value], [])) ->
+  | _, Expr (_, Call ((_, Id (_, "define")), _, [(_, String name); value], [])) ->
     Constant {
       cst_mode = env.mode;
       cst_kind = Cst_define;
@@ -1998,7 +1998,7 @@ and param_implicit_field vis p =
   (* Building the implicit assignment (for example: $this->x = $x;) *)
   let this = pos, "$this" in
   let stmt =
-    Expr (pos, Binop (Eq None, (pos, Obj_get((pos, Lvar this),
+    pos, Expr (pos, Binop (Eq None, (pos, Obj_get((pos, Lvar this),
                                              (pos, Id cvname),
                                              OG_nullthrows)),
                       (pos, Lvar p.param_id)))
@@ -2022,11 +2022,11 @@ and function_body env =
         (* This is a hack for the type-checker to make a distinction
          * Between function foo(); and function foo() {}
          *)
-        [Noop]
+        [Pos.none, Noop]
       | _ ->
         (match statement_list ~is_block_scope:false env with
-          | [] -> [Noop]
-          | _ when env.quick -> [Noop]
+          | [] -> [Pos.none, Noop]
+          | _ when env.quick -> [Pos.none, Noop]
           | x -> x)
     ) in
     let in_generator = !(env.in_generator) in
@@ -2091,8 +2091,8 @@ and with_ignored_yield env fn =
 (* Statements *)
 (*****************************************************************************)
 
-and enforce_block_scope_using env pos stmt =
-  match stmt with
+and enforce_block_scope_using env (pos, stmt_) =
+  match stmt_ with
   | Using { us_is_block_scoped = false; _ } ->
     error_at env pos "Parse error: function-scoped 'using' statement not supported in a block scope"
   | _ ->
@@ -2103,29 +2103,30 @@ and statement_list ~is_block_scope env =
   match L.token env.file env.lb with
   | Trcb -> []
   | Tlcb ->
-      let block = statement_list ~is_block_scope:true env in
-      Block block :: statement_list ~is_block_scope env
+    let pos = Pos.make env.file env.lb in
+    let block = statement_list ~is_block_scope:true env in
+      (pos, Block block) :: statement_list ~is_block_scope env
   | Tsc ->
       statement_list ~is_block_scope env
   | Teof ->
       error_expect env "}";
       []
   | _ ->
-      let pos = Pos.make env.file env.lb in
       L.back env.lb;
       let error_state = !(env.errors) in
       let stmt = statement env in
       if !(env.errors) != error_state
       then L.next_newline_or_close_cb env.lb;
-      if is_block_scope then enforce_block_scope_using env pos stmt;
+      if is_block_scope then enforce_block_scope_using env stmt;
       stmt :: statement_list ~is_block_scope env
 
 and using_statement_list env =
   match L.token env.file env.lb with
   | Trcb | Teof -> []
   | Tlcb ->
+      let pos = Pos.make env.file env.lb in
       let block = statement_list ~is_block_scope:true env in
-      Block block :: statement_list ~is_block_scope:false env
+      (pos, Block block) :: statement_list ~is_block_scope:false env
   | Tsc ->
       using_statement_list env
   | _ ->
@@ -2136,12 +2137,13 @@ and using_statement_list env =
       then L.next_newline_or_close_cb env.lb;
       stmt :: using_statement_list env
 
-and statement env =
+and statement env : stmt =
+  let pos_start = Pos.make env.file env.lb in
+  let stmt_ =
   match L.token env.file env.lb with
   | Tword ->
       let word = Lexing.lexeme env.lb in
-      let stmt = statement_word env word in
-      stmt
+      statement_word env word
   | Tlcb ->
       Block (statement_list ~is_block_scope:true env)
   | Tsc ->
@@ -2154,7 +2156,10 @@ and statement env =
       L.back env.lb;
       let e = expr env in
       expect env Tsc;
-      Expr e
+      Expr e in
+  let pos_end = Pos.make env.file env.lb in
+  Pos.btw pos_start pos_end, stmt_
+
 and ignore_statement env =
   (* Parse and ignore statements *)
   let error_state = !(env.errors) in
@@ -2226,18 +2231,16 @@ and statement_word env = function
 (*****************************************************************************)
 
 and statement_break env =
-  let stmt = Break (Pos.make env.file env.lb, None) in
   check_continue env;
-  stmt
+  Break None
 
 (*****************************************************************************)
 (* Continue statement *)
 (*****************************************************************************)
 
 and statement_continue env =
-  let stmt = Continue (Pos.make env.file env.lb, None) in
   check_continue env;
-  stmt
+  Continue None
 
 and check_continue env =
   match L.token env.file env.lb with
@@ -2259,9 +2262,8 @@ and statement_throw env =
 (*****************************************************************************)
 
 and statement_return env =
-  let pos = Pos.make env.file env.lb in
   let value = return_value env in
-  Return (pos, value)
+  Return (value)
 
 and return_value env =
   match L.token env.file env.lb with
@@ -2420,14 +2422,15 @@ and statement_if env =
   If (e, [st1], [st2])
 
 and statement_else env =
+  let pos = Pos.make env.file env.lb in
   match L.token env.file env.lb with
   | Tword ->
       (match Lexing.lexeme env.lb with
       | "else" -> statement env
-      | "elseif" -> statement_if env
-      | _ -> L.back env.lb; Noop
+      | "elseif" -> pos, statement_if env
+      | _ -> L.back env.lb; pos, Noop
       )
-  | _ -> L.back env.lb; Noop
+  | _ -> L.back env.lb; pos, Noop
 
 (*****************************************************************************)
 (* Do/While do statement *)
@@ -2539,8 +2542,7 @@ and statement_for env =
   let last, el = for_last_expr env in
   let e3 = Pos.btw start last, Expr_list el in
   let st = statement env in
-  let pos_end = Pos.make env.file env.lb in
-  For (Pos.btw pos_start pos_end, e1, e2, e3, [st])
+  For (e1, e2, e3, [st])
 
 and for_expr env =
   match L.token env.file env.lb with
@@ -3081,7 +3083,7 @@ and lambda_expr_body : env -> block = fun env ->
   in
 
   let (p, e1) = expr env in
-  [Return (p, (Some (p, e1)))]
+  [p, Return (Some (p, e1))]
 
 and lambda_body ~sync env params ret =
   let is_generator, body_stmts =

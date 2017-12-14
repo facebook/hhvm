@@ -205,7 +205,7 @@ let from_ast_wrapper : bool -> _ ->
       ~doc_comment:ast_method.Ast.m_doc_comment
       ast_method.Ast.m_params
       ret
-      [Ast.Stmt (Ast.Block ast_method.Ast.m_body)]
+      [Ast.Stmt (Pos.none, Ast.Block ast_method.Ast.m_body)]
   in
   let method_id =
     if has_inout_args && method_is_closure_body then

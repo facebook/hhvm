@@ -910,7 +910,7 @@ and string_of_fun f use_list =
   ^ args
   ^ ") "
   ^ use_statement
-  ^ (string_of_statement ~indent:"" (A.Block f.A.f_body))
+  ^ (string_of_statement ~indent:"" (Pos.none, A.Block f.A.f_body))
 
 and string_of_optional_expr e =
   string_of_optional_value string_of_expression e
@@ -920,10 +920,10 @@ and string_of_block_ ~start_indent ~block_indent ~end_indent block =
     (String.concat "" @@ List.map (string_of_statement ~indent:block_indent) block) in
   start_indent ^ "{\\n" ^ lines ^ end_indent ^ "}\\n"
 
-and string_of_block ~indent block =
+and string_of_block ~indent (block:A.stmt list) =
   match block with
-  | [] | [A.Noop] -> ""
-  | [A.Block ([_] as block)]
+  | [] | [_, A.Noop] -> ""
+  | [(_, A.Block ([_] as block))]
   | (_::_::_ as block)->
     string_of_block_
       ~start_indent:""
@@ -933,16 +933,16 @@ and string_of_block ~indent block =
   | [stmt] ->
     string_of_statement ~indent:"" stmt
 
-and string_of_statement ~indent stmt =
+and string_of_statement ~indent ((_, stmt_) : A.stmt) =
   let text, is_single_line =
-    match stmt with
-    | A.Return (_, e) ->
+    match stmt_ with
+    | A.Return e ->
       "return" ^ (string_of_optional_expr e), true
     | A.Expr e ->
       string_of_expression e, true
-    | A.Break (_, level_opt) ->
+    | A.Break level_opt ->
       "break" ^ (string_of_optional_expr level_opt), true
-    | A.Continue (_, level_opt) ->
+    | A.Continue level_opt ->
       "continue" ^ (string_of_optional_expr level_opt), true
     | A.Throw e ->
       "throw " ^ (string_of_expression e), true

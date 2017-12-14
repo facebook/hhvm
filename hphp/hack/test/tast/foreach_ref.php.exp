@@ -64,7 +64,7 @@
                     [(([8:12-8:16], Some array<int>),
                       (AnnotatedAST.Lvar ([8:12-8:16], $arr)))],
                     []))));
-             (AnnotatedAST.Return ([9:3-9:9],
+             (AnnotatedAST.Return ([9:3-9:13],
                 (Some (([9:10-9:12], Some int),
                        (AnnotatedAST.Lvar ([9:10-9:12], $y))))
                 ))

@@ -122,7 +122,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                              [(([26:15-26:17], Some (string | bool | int)),
                                (AnnotatedAST.Lvar ([26:15-26:17], $x)))],
                              []))));
-                       (AnnotatedAST.Break [27:7-27:12])]
+                       (AnnotatedAST.Break [27:7-27:13])]
                      ));
                   (AnnotatedAST.Case (
                      (([28:10-28:11], Some int),
@@ -153,7 +153,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                               [(([33:15-33:17], Some float),
                                 (AnnotatedAST.Lvar ([33:15-33:17], $x)))],
                               []))));
-                       (AnnotatedAST.Break [34:7-34:12])]
+                       (AnnotatedAST.Break [34:7-34:13])]
                      ))
                   ]
                 ));

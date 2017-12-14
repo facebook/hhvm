@@ -134,7 +134,7 @@ let from_attribute_declaration ~ns ast_class xal xual =
   let var_dollar_ = p, A.Lvar (p, "$_") in
   let null_ = p, A.Null in
   (* static $_ = null; *)
-  let token1 = A.Static_var [p, A.Binop (A.Eq None, var_dollar_, null_)] in
+  let token1 = p, A.Static_var [p, A.Binop (A.Eq None, var_dollar_, null_)] in
   (* if ($_ === null) {
    *   $_ = __SystemLib\\merge_xhp_attr_declarations(
    *          parent::__xhpAttributeDeclaration(),
@@ -156,11 +156,11 @@ let from_attribute_declaration ~ns ast_class xal xual =
   let array_merge_call =
     p, A.Call ((p, A.Id (p, "__SystemLib\\merge_xhp_attr_declarations")), [], args, []) in
   let true_branch =
-    [A.Expr (p, A.Binop (A.Eq None, var_dollar_, array_merge_call))]
+    [p, A.Expr (p, A.Binop (A.Eq None, var_dollar_, array_merge_call))]
   in
-  let token2 = A.If (cond, true_branch, []) in
+  let token2 = p, A.If (cond, true_branch, []) in
   (* return $_; *)
-  let token3 = A.Return (p, Some var_dollar_) in
+  let token3 = p, A.Return (Some var_dollar_) in
   let body = [token1; token2; token3] in
   let m =
     xhp_attribute_declaration_method
@@ -250,10 +250,10 @@ let from_children_declaration ast_class children =
   (* static $_ = children; *)
   let children_arr = p, emit_xhp_children_array children in
   let token1 =
-    A.Static_var [p, A.Binop (A.Eq None, var_dollar_, children_arr)]
+    p, A.Static_var [p, A.Binop (A.Eq None, var_dollar_, children_arr)]
   in
   (* return $_; *)
-  let token2 = A.Return (p, Some var_dollar_) in
+  let token2 = p, A.Return (Some var_dollar_) in
   let body = [token1; token2] in
   let m =
     xhp_attribute_declaration_method
@@ -274,10 +274,10 @@ let from_category_declaration ast_class categories =
   (* static $_ = categories; *)
   let category_arr = p, A.Darray (get_category_array categories) in
   let token1 =
-    A.Static_var [p, A.Binop (A.Eq None, var_dollar_, category_arr)]
+    p, A.Static_var [p, A.Binop (A.Eq None, var_dollar_, category_arr)]
   in
   (* return $_; *)
-  let token2 = A.Return (p, Some var_dollar_) in
+  let token2 = p, A.Return (Some var_dollar_) in
   let body = [token1; token2] in
   let m =
     xhp_attribute_declaration_method

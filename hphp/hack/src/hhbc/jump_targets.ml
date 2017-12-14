@@ -22,7 +22,7 @@ let set_labels_in_function s = labels_in_function_ := s
 let set_function_has_goto f = function_has_goto_ := f
 
 let rec collect_valid_target_labels_aux is_hh_file acc s =
-  match s with
+  match snd s with
   | A.Block block ->
     collect_valid_target_labels_for_block_aux is_hh_file acc block
   (* can jump into the try block but not to finally *)

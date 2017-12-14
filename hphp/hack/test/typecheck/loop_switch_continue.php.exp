@@ -1,2 +1,2 @@
-File "loop_switch_continue.php", line 16, characters 9-16:
+File "loop_switch_continue.php", line 16, characters 9-17:
 In PHP, 'continue;' inside a switch statement is equivalent to 'break;'. Hack does not support this; use 'break' if that is what you meant. (NastCheck[3006])

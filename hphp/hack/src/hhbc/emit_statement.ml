@@ -124,22 +124,22 @@ let get_level p op e =
     Emit_fatal.raise_fatal_parse
       p ("'" ^ op ^ "' with non-constant operand is not supported")
 
-let rec emit_stmt env st =
-  match st with
+let rec emit_stmt env (pos, st_) =
+  Emit_pos.emit_pos_then pos @@
+  match st_ with
   | A.Expr (_, A.Yield_break) ->
     gather [
       instr_null;
       emit_return ~need_ref:false env;
     ]
-  | A.Expr (pos, A.Call ((_, A.Id (_, "unset")), _, exprl, [])) ->
-    Emit_pos.emit_pos_then pos @@
+  | A.Expr (_, A.Call ((_, A.Id (_, "unset")), _, exprl, [])) ->
     gather (List.map exprl (emit_unset_expr env))
-  | A.Return (_, Some (_, A.Await e)) ->
+  | A.Return (Some (_, A.Await e)) ->
     gather [
       emit_await env e;
       emit_return ~need_ref:false env;
     ]
-  | A.Return (_, Some (_, A.Yield_from e)) ->
+  | A.Return (Some (_, A.Yield_from e)) ->
     gather [
       emit_yield_from_delegates env e;
       emit_return ~need_ref:false env;
@@ -219,13 +219,13 @@ let rec emit_stmt env st =
       ]
   | A.Expr expr ->
     emit_ignored_expr env expr
-  | A.Return (pos, None) ->
+  | A.Return None ->
     gather [
       instr_null;
       Emit_pos.emit_pos pos;
       emit_return ~need_ref:false env;
     ]
-  | A.Return (pos,  Some expr) ->
+  | A.Return (Some expr) ->
     let need_ref = !return_by_ref in
     gather [
       emit_expr ~need_ref env expr;
@@ -238,9 +238,9 @@ let rec emit_stmt env st =
     TFR.emit_goto ~in_finally_epilogue:false env label
   | A.Block b -> emit_stmts env b
   | A.If (condition, consequence, alternative) ->
-    emit_if env condition (A.Block consequence) (A.Block alternative)
+    emit_if env condition consequence alternative
   | A.While (e, b) ->
-    emit_while env e (A.Block b)
+    emit_while env e (pos, A.Block b)
   | A.Declare (is_block, e, b) ->
     emit_declare env is_block e b
   | A.Using {
@@ -248,15 +248,15 @@ let rec emit_stmt env st =
       Ast.us_expr = e; Ast.us_block = b;
       Ast.us_is_block_scoped = is_block_scoped
     } ->
-    emit_using env is_block_scoped has_await e ((A.Block b))
-  | A.Break (pos, level_opt) ->
+    emit_using env is_block_scoped has_await e (pos, A.Block b)
+  | A.Break level_opt ->
     emit_break env pos (get_level pos "break" level_opt)
-  | A.Continue (pos, level_opt) ->
+  | A.Continue level_opt ->
     emit_continue env pos (get_level pos "continue" level_opt)
   | A.Do (b, e) ->
-    emit_do env (A.Block b) e
-  | A.For (p, e1, e2, e3, b) ->
-    emit_for env p e1 e2 e3 (A.Block b)
+    emit_do env (pos, A.Block b) e
+  | A.For (e1, e2, e3, b) ->
+    emit_for env pos e1 e2 e3 (pos, A.Block b)
   | A.Throw e ->
     gather [
       emit_expr ~need_ref:false env e;
@@ -264,22 +264,22 @@ let rec emit_stmt env st =
     ]
   | A.Try (try_block, catch_list, finally_block) ->
     if catch_list <> [] && finally_block <> [] then
-      emit_stmt env (A.Try([A.Try (try_block, catch_list, [])], [], finally_block))
+      emit_stmt env (pos, A.Try([pos, A.Try (try_block, catch_list, [])], [], finally_block))
     else if catch_list <> [] then
-      emit_try_catch env (A.Block try_block) catch_list
+      emit_try_catch env (pos, A.Block try_block) catch_list
     else
-      emit_try_finally env (A.Block try_block) (A.Block finally_block)
+      emit_try_finally env (pos, A.Block try_block) (pos, A.Block finally_block)
 
   | A.Switch (e, cl) ->
     emit_switch env e cl
   | A.Foreach (collection, await_pos, iterator, block) ->
-    emit_foreach env collection await_pos iterator (A.Block block)
+    emit_foreach env collection await_pos iterator (pos, A.Block block)
   | A.Def_inline def ->
     emit_def_inline def
   | A.Static_var es ->
     emit_static_var es
-  | A.Global_var (p, es) ->
-    emit_global_vars env p es
+  | A.Global_var es ->
+    emit_global_vars env pos es
   | A.Markup ((_, s), echo_expr_opt) ->
     emit_markup env s echo_expr_opt ~check_for_hashbang:false
     (* TODO: What do we do with unsafe? *)
@@ -295,19 +295,19 @@ and emit_continue env pos level =
 
 and emit_if env condition consequence alternative =
   match alternative with
-  | A.Block []
-  | A.Block [A.Noop] ->
+  | []
+  | [_, A.Noop] ->
     let done_label = Label.next_regular () in
     gather [
       emit_jmpz env condition done_label;
-      emit_stmt env consequence;
+      emit_stmts env consequence;
       instr_label done_label;
     ]
   | _ ->
     let alternative_label = Label.next_regular () in
     let done_label = Label.next_regular () in
-    let consequence_instr = emit_stmt env consequence in
-    let alternative_instr = emit_stmt env alternative in
+    let consequence_instr = emit_stmts env consequence in
+    let alternative_instr = emit_stmts env alternative in
     gather [
       emit_jmpz env condition alternative_label;
       consequence_instr;
@@ -405,7 +405,7 @@ and emit_using env is_block_scoped has_await e b =
   | A.Expr_list es ->
     emit_stmt env @@ List.fold_right es
       ~f:(fun e acc ->
-        A.Using {
+        fst e, A.Using {
           Ast.us_has_await = has_await;
           Ast.us_is_block_scoped = is_block_scoped;
           Ast.us_expr = e;
@@ -608,7 +608,7 @@ and emit_catch env end_label (catch_type, (_, catch_local), b) =
       instr_jmpz next_catch;
       instr_setl (Local.Named catch_local);
       instr_popc;
-      emit_stmt env (A.Block b);
+      emit_stmt env (Pos.none, A.Block b);
       instr_jmp end_label;
       instr_label next_catch;
     ]
@@ -618,8 +618,8 @@ and emit_catches env catch_list end_label =
 
 and is_empty_block b =
   match b with
-  | A.Block l -> List.for_all ~f:is_empty_block l
-  | A.Noop -> true
+  | _, A.Block l -> List.for_all ~f:is_empty_block l
+  | _, A.Noop -> true
   | _ -> false
 
 and emit_try_catch env try_block catch_list =
@@ -1100,7 +1100,7 @@ and emit_case env c =
   let b = match c with
     | A.Default b
     | A.Case (_, b) ->
-        emit_stmt env (A.Block b)
+        emit_stmt env (Pos.none, A.Block b)
   in
   let e = match c with
     | A.Case (e, _) -> Some e
@@ -1126,7 +1126,7 @@ let emit_dropthrough_return env =
     gather [!default_return_value; emit_return ~need_ref:false env]
 
 let rec emit_final_statement env s =
-  match s with
+  match snd s with
   | A.Throw _ | A.Return _ | A.Goto _
   | A.Expr (_, A.Yield_break) ->
     emit_stmt env s

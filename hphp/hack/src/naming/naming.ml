@@ -1780,8 +1780,8 @@ module Make (GetLocals : GetLocals) = struct
 
   and cut_and_flatten ?(replacement=Noop) env = function
     | [] -> []
-    | Unsafe :: _ -> Env.set_unsafe env true; [replacement]
-    | Block b :: rest ->
+    | (p, Unsafe) :: _ -> Env.set_unsafe env true; [p, replacement]
+    | (_, Block b) :: rest ->
         (cut_and_flatten ~replacement env b) @
           (cut_and_flatten ~replacement env rest)
     | x :: rest -> x :: (cut_and_flatten ~replacement env rest)
@@ -1797,33 +1797,33 @@ module Make (GetLocals : GetLocals) = struct
     | _ ->
       []
 
-  and stmt env st =
-    match st with
+  and stmt env (p, st_ as st) =
+    match st_ with
     | Block _              -> assert false
     | Unsafe               -> assert false
     | Fallthrough          -> N.Fallthrough
     | Noop                 -> N.Noop
     | Markup (_, None)     -> N.Noop (* ignore markup *)
     | Markup (_, Some e)   -> N.Expr (expr env e)
-    | Break (p, level_opt) ->
+    | Break level_opt ->
       check_break_continue_level p level_opt;
       N.Break p
-    | Continue (p, level_opt) ->
+    | Continue level_opt ->
       check_break_continue_level p level_opt;
       N.Continue p
     | Throw e              -> let terminal = not (fst env).in_try in
                               N.Throw (terminal, expr env e)
-    | Return (p, e)        -> N.Return (p, oexpr env e)
+    | Return e        -> N.Return (p, oexpr env e)
     | GotoLabel label      -> name_goto_label env label
     | Goto label           -> name_goto env label
     | Static_var el        -> N.Static_var (static_varl env el)
-    | Global_var (_, el)   -> N.Global_var (global_varl env el)
+    | Global_var el        -> N.Global_var (global_varl env el)
     | If (e, b1, b2)       -> if_stmt env st e b1 b2
     | Do (b, e)            -> do_stmt env b e
     | While (e, b)         -> while_stmt env e b
     | Declare (is_block, e, b)  -> declare_stmt env is_block e b
     | Using s -> using_stmt env s.us_has_await s.us_expr s.us_block
-    | For (_, st1, e, st2, b) -> for_stmt env st1 e st2 b
+    | For (st1, e, st2, b) -> for_stmt env st1 e st2 b
     | Switch (e, cl)       -> switch_stmt env st e cl
     | Foreach (e, aw, ae, b)-> foreach_stmt env e aw ae b
     | Try (b, cl, fb)      -> try_stmt env st b cl fb
@@ -1852,7 +1852,7 @@ module Make (GetLocals : GetLocals) = struct
             ((p, Id (fp, "\\"^SN.SpecialFunctions.invariant_violation)), hl, el,
              uel)) in
           if cond <> False then
-            let b1, b2 = [Expr violation], [Noop] in
+            let b1, b2 = [p, Expr violation], [p, Noop] in
             let cond = cond_p, Unop (Unot, (cond_p, cond)) in
             if_stmt env st cond b1 b2
           else (* a false <condition> means unconditional invariant_violation *)

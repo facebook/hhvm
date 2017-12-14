@@ -53,7 +53,7 @@ let rec emit_def env def =
         let args = [
           p_name, Ast.String (p_name, SU.strip_global_ns cns_name);
           c.Ast.cst_value] in
-        Ast.Expr(p0, Ast.Call ((p0, Ast.Id (p0, "define")), [], args, [])) in
+        p0, Ast.Expr(p0, Ast.Call ((p0, Ast.Id (p0, "define")), [], args, [])) in
       Emit_statement.emit_stmt env define_call
     else
       let cns_id =
@@ -106,7 +106,7 @@ and emit_defs env defs =
     | [Ast.Stmt s]
     (* emit statement as final if it is one before the last and last statement is
        empty markup (which will be no-op) *)
-    | [Ast.Stmt s; Ast.Stmt (Ast.Markup ((_, ""), None))] ->
+    | [Ast.Stmt s; Ast.Stmt (_, Ast.Markup ((_, ""), None))] ->
       Emit_statement.emit_final_statement env s
     | [d] ->
       gather [emit_def env d; Emit_statement.emit_dropthrough_return env]
@@ -117,7 +117,7 @@ and emit_defs env defs =
   in
   let rec emit_markup env defs =
     match defs with
-    | Ast.Stmt (Ast.Markup ((_, s), echo_expr_opt))::defs ->
+    | Ast.Stmt (_, Ast.Markup ((_, s), echo_expr_opt))::defs ->
       let i1 =
         Emit_statement.emit_markup env s echo_expr_opt ~check_for_hashbang:true
       in

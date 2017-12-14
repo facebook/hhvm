@@ -27,13 +27,13 @@
                   (([16:9-16:17], Some ?int),
                    (AnnotatedAST.Class_get (AnnotatedAST.CIself,
                       ([16:15-16:17], "$x")))),
-                  [(AnnotatedAST.Return ([17:7-17:13],
+                  [(AnnotatedAST.Return ([17:7-17:23],
                       (Some (([17:14-17:22], Some int),
                              (AnnotatedAST.Class_get (AnnotatedAST.CIself,
                                 ([17:20-17:22], "$x")))))
                       ))
                     ],
-                  [(AnnotatedAST.Return ([19:7-19:13],
+                  [(AnnotatedAST.Return ([19:7-19:16],
                       (Some (([19:14-19:15], Some int),
                              (AnnotatedAST.Int ([19:14-19:15], "0"))))
                       ))

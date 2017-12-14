@@ -33,7 +33,8 @@ module NS = Namespaces
 let rec terminal tcopt nsenv ~in_try stl =
   List.iter stl (terminal_ tcopt nsenv ~in_try)
 
-and terminal_ tcopt nsenv ~in_try = function
+and terminal_ tcopt nsenv ~in_try (_, st_) =
+  match st_ with
   | Throw _ when not in_try -> raise Exit
   | Throw _ -> ()
   | Continue _
@@ -96,13 +97,13 @@ and terminal_cl tcopt nsenv ~in_try = function
 
 and blockHasBreak = function
   | [] -> false
-  | Break _ :: _ -> true
+  | (_, Break _) :: _ -> true
   | x :: xs ->
     let x' =
       match x with
-      | If (_, [], []) -> false
-      | If (_, b, []) | If (_, [], b) -> blockHasBreak b
-      | If (_, b1, b2) -> blockHasBreak b1 && blockHasBreak b2
+      | _, If (_, [], []) -> false
+      | _, If (_, b, []) | _, If (_, [], b) -> blockHasBreak b
+      | _, If (_, b1, b2) -> blockHasBreak b1 && blockHasBreak b2
       | _ -> false
     in
     x' || blockHasBreak xs
@@ -127,12 +128,12 @@ let rec lvalue tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) = function
     nsenv, SMap.add x p m
   | _ -> acc
 
-let rec stmt tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
+let rec stmt tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) (_, st_) =
   let nsenv = fst acc in
-  match st with
+  match st_ with
   | Expr (_, Binop (Eq None, lv, rv))
   | Expr (_, Eif ((_, Binop (Eq None, lv, rv)), _, _)) ->
-    let acc = stmt tcopt acc (Expr rv) in
+    let acc = stmt tcopt acc (Pos.none, Expr rv) in
     lvalue tcopt acc lv
   | Unsafe
   | Fallthrough

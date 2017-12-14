@@ -168,7 +168,7 @@
            m_body =
            (AnnotatedAST.NamedBody
               { AnnotatedAST.fnb_nast =
-                [(AnnotatedAST.Return ([24:5-24:11],
+                [(AnnotatedAST.Return ([24:5-24:24],
                     (Some (([24:12-24:23], Some T),
                            (AnnotatedAST.Array_get (
                               (([24:12-24:20], Some \Vector<T>),

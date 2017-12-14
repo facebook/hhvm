@@ -118,7 +118,7 @@ let compare_asts dumper filename diff_cmd ast_result ffp_result =
   let ast_sexpr = dumper ast_result.Parser_hack.ast in
   let ffp_sexpr =
     match ffp_result.Lowerer.ast with
-    | Ast.Stmt (Ast.Markup ((_, ""), _)) :: defs
+    | Ast.Stmt (_, Ast.Markup ((_, ""), _)) :: defs
     | defs -> dumper defs
   in
   if ast_sexpr <> ffp_sexpr then begin

@@ -37,7 +37,7 @@
                           f_body =
                           (AnnotatedAST.NamedBody
                              { AnnotatedAST.fnb_nast =
-                               [(AnnotatedAST.Return ([4:17-4:23],
+                               [(AnnotatedAST.Return ([4:17-4:39],
                                    (Some (([4:24-4:38], Some string),
                                           (AnnotatedAST.Binop (Dot,
                                              (([4:24-4:31], Some string),

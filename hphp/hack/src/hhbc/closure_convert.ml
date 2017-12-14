@@ -164,7 +164,7 @@ let get_vars scope ~is_closure_body params body =
   Decl_vars.vars_from_ast
     ~is_closure_body ~has_this ~params ~is_toplevel ~is_in_static_method body
 
-let wrap_block b = [Ast.Stmt (Ast.Block b)]
+let wrap_block b = [Ast.Stmt (Pos.none, Ast.Block b)]
 
 let get_parameter_names params =
   List.fold_left
@@ -701,20 +701,20 @@ and convert_opt_expr env st oe =
     let st, e = convert_expr env st e in
     st, Some e
 
-and convert_stmt env st stmt =
-  match stmt with
+and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
+  match stmt_ with
   | Expr e ->
     let st, e = convert_expr env st e in
-    st, Expr e
+    st, (p, Expr e)
   | Block b ->
     let st, b = convert_block env st b in
-    st, Block b
+    st, (p, Block b)
   | Throw e ->
     let st, e = convert_expr env st e in
-    st, Throw e
-  | Return (p, opt_e) ->
+    st, (p, Throw e)
+  | Return opt_e ->
     let st, opt_e = convert_opt_expr env st opt_e in
-    st, Return (p, opt_e)
+    st, (p, Return opt_e)
   | Static_var el ->
     let visit_static_var st e =
       begin match snd e with
@@ -724,48 +724,48 @@ and convert_stmt env st stmt =
       end in
     let st = List.fold_left el ~init:st ~f:visit_static_var in
     let st, el = convert_exprs env st el in
-    st, Static_var el
+    st, (p, Static_var el)
   | If (e, b1, b2) ->
     let st, e = convert_expr env st e in
     let st, b1 = convert_block env st b1 in
     let st, b2 = convert_block env st b2 in
-    st, If(e, b1, b2)
+    st, (p, If(e, b1, b2))
   | Do (b, e) ->
     let st, b = convert_block env st b in
     let st, e = convert_expr env st e in
-    st, Do (b, e)
+    st, (p, Do (b, e))
   | While (e, b) ->
     let st, e = convert_expr env st e in
     let st, b = convert_block env st b in
-    st, While (e, b)
-  | For (p, e1, e2, e3, b) ->
+    st, (p, While (e, b))
+  | For (e1, e2, e3, b) ->
     let st, e1 = convert_expr env st e1 in
     let st, e2 = convert_expr env st e2 in
     let st, e3 = convert_expr env st e3 in
     let st, b = convert_block env st b in
-    st, For(p, e1, e2, e3, b)
+    st, (p, For(e1, e2, e3, b))
   | Switch (e, cl) ->
     let st, e = convert_expr env st e in
     let st, cl = List.map_env st cl (convert_case env) in
-    st, Switch (e, cl)
-  | Foreach (e, p, ae, b) ->
-    if p <> None then check_if_in_async_context env;
+    st, (p, Switch (e, cl))
+  | Foreach (e, p_opt, ae, b) ->
+    if p_opt <> None then check_if_in_async_context env;
     let st, e = convert_expr env st e in
     let st, ae = convert_as_expr env st ae in
     let st, b = convert_block env st b in
-    st, Foreach (e, p, ae, b)
+    st, (p, Foreach (e, p_opt, ae, b))
   | Try (b1, cl, b2) ->
     let st, b1 = convert_block env st b1 in
     let st, cl = List.map_env st cl (convert_catch env) in
     let st, b2 = convert_block env st b2 in
     let st = if List.is_empty b2 then st else { st with has_finally = true } in
-    st, Try (b1, cl, b2)
+    st, (p, Try (b1, cl, b2))
   | Using s ->
     if s.us_has_await then check_if_in_async_context env;
     let st, us_expr = convert_expr env st s.us_expr in
     let st, us_block = convert_block env st s.us_block in
     let st = if st.has_finally then st else { st with has_finally = true } in
-    st, Using { s with us_expr; us_block }
+    st, (p, Using { s with us_expr; us_block })
   | Def_inline d ->
     (* propagate namespace information to nested classes or functions *)
     let _, defs = Namespaces.elaborate_def st.namespace d in
@@ -777,7 +777,7 @@ and convert_stmt env st stmt =
       | Class cd :: _defs ->
         let st, cd = convert_class env st cd in
         let st, stub_cd = add_class env st cd in
-        st, Def_inline (Class stub_cd)
+        st, (p, Def_inline (Class stub_cd))
       | Fun fd :: _defs ->
         let st, fd = convert_fun env st fd in
         let has_inout_params =
@@ -786,7 +786,7 @@ and convert_stmt env st stmt =
               || (create_inout_wrapper_functions () && p.Ast.param_is_reference)) in
         let st, stub_fd =
           add_function ~has_inout_params:has_inout_params env st fd in
-        st, Def_inline (Fun stub_fd)
+        st, (p, Def_inline (Fun stub_fd))
       | _ ->
         failwith "expected single class or function declaration" in
     process_inline_defs st defs
@@ -972,7 +972,7 @@ and convert_defs env class_count typedef_count st dl =
     let st, cd = convert_class env st cd in
     let stub_class = make_defcls cd class_count in
     let st, dl = convert_defs env (class_count + 1) typedef_count st dl in
-    st, (true, Class cd) :: (true, Stmt (Def_inline (Class stub_class))) :: dl
+    st, (true, Class cd) :: (true, Stmt (Pos.none, Def_inline (Class stub_class))) :: dl
   | Stmt stmt :: dl ->
     let st, stmt = convert_stmt env st stmt in
     let st, dl = convert_defs env class_count typedef_count st dl in
@@ -981,7 +981,7 @@ and convert_defs env class_count typedef_count st dl =
     let st, dl = convert_defs env class_count (typedef_count + 1) st dl in
     let stub_td = { td with t_id =
       (fst td.t_id, string_of_int (typedef_count)) } in
-    st, (true, Typedef td) :: (true, Stmt (Def_inline (Typedef stub_td))) :: dl
+    st, (true, Typedef td) :: (true, Stmt (Pos.none, Def_inline (Typedef stub_td))) :: dl
   | Constant c :: dl ->
     let st, c = convert_gconst env st c in
     let st, dl = convert_defs env class_count typedef_count st dl in

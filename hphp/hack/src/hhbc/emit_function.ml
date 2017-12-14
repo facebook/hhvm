@@ -72,7 +72,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~doc_comment:ast_fun.Ast.f_doc_comment
       ast_fun.Ast.f_params
       ast_fun.Ast.f_ret
-      [Ast.Stmt (Ast.Block ast_fun.Ast.f_body)] in
+      [Ast.Stmt (Pos.none, Ast.Block ast_fun.Ast.f_body)] in
   let normal_function_name =
     if wrapper_type_opt = Some Emit_inout_helpers.RefWrapper
     then original_id else renamed_id in

@@ -26,7 +26,7 @@
                         ))))
                   ],
                 [(([16:12-16:25], "\\YourException"), ([16:26-16:28], $e),
-                  [(AnnotatedAST.Return ([17:5-17:11],
+                  [(AnnotatedAST.Return ([17:5-17:15],
                       (Some (([17:12-17:14], Some int),
                              (AnnotatedAST.Lvar ([17:12-17:14], $a))))
                       ))
@@ -40,13 +40,13 @@
                            (([20:10-20:16], Some string),
                             (AnnotatedAST.String ([20:10-20:16], "duck")))
                            ))));
-                     (AnnotatedAST.Return ([21:5-21:11],
+                     (AnnotatedAST.Return ([21:5-21:18],
                         (Some (([21:12-21:17], Some int),
                                (AnnotatedAST.Int ([21:12-21:17], "23904"))))
                         ))
                      ]);
                   (([22:12-22:21], "\\Exception"), ([22:22-22:24], $e),
-                   [(AnnotatedAST.Return ([23:5-23:11],
+                   [(AnnotatedAST.Return ([23:5-23:15],
                        (Some (([23:12-23:14], Some int),
                               (AnnotatedAST.Lvar ([23:12-23:14], $a))))
                        ))
@@ -62,7 +62,7 @@
                         ))))
                   ]
                 ));
-             (AnnotatedAST.Return ([28:3-28:9],
+             (AnnotatedAST.Return ([28:3-28:13],
                 (Some (([28:10-28:12], Some int),
                        (AnnotatedAST.Lvar ([28:10-28:12], $a))))
                 ))

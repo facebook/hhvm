@@ -304,23 +304,24 @@ and using_stmt = {
   us_block: block;
 }
 
-and stmt =
+and stmt = Pos.t * stmt_
+and stmt_ =
   | Unsafe
   | Fallthrough
   | Expr of expr
   | Block of block
-  | Break of Pos.t * expr option
-  | Continue of Pos.t * expr option
+  | Break of expr option
+  | Continue of expr option
   | Throw of expr
-  | Return of Pos.t * expr option
+  | Return of expr option
   | GotoLabel of pstring
   | Goto of pstring
   | Static_var of expr list
-  | Global_var of Pos.t * expr list
+  | Global_var of expr list
   | If of expr * block * block
   | Do of block * expr
   | While of expr * block
-  | For of Pos.t * expr * expr * expr * block
+  | For of expr * expr * expr * block
   | Switch of expr * case list
   | Foreach of expr * Pos.t option (* await as *) * as_expr * block
   | Try of block * catch list * block

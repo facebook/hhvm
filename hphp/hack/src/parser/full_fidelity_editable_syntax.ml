@@ -102,3 +102,6 @@ let trailing_trivia node =
   match token with
   | None -> []
   | Some t -> EditableToken.trailing t
+
+let to_json node =
+  EditableSyntax.to_json node

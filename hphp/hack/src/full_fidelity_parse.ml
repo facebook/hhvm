@@ -40,6 +40,7 @@ module FullFidelityParseArgs = struct
   type t =
   {
     full_fidelity_json : bool;
+    full_fidelity_text_json : bool;
     full_fidelity_errors : bool;
     full_fidelity_errors_all : bool;
     full_fidelity_s_expr : bool;
@@ -55,6 +56,7 @@ module FullFidelityParseArgs = struct
 
   let make
     full_fidelity_json
+    full_fidelity_text_json
     full_fidelity_errors
     full_fidelity_errors_all
     full_fidelity_s_expr
@@ -67,6 +69,7 @@ module FullFidelityParseArgs = struct
     show_file_name
     files = {
     full_fidelity_json;
+    full_fidelity_text_json;
     full_fidelity_errors;
     full_fidelity_errors_all;
     full_fidelity_s_expr;
@@ -83,6 +86,8 @@ module FullFidelityParseArgs = struct
     let usage = Printf.sprintf "Usage: %s [OPTIONS] filename\n" Sys.argv.(0) in
     let full_fidelity_json = ref false in
     let set_full_fidelity_json () = full_fidelity_json := true in
+    let full_fidelity_text_json = ref false in
+    let set_full_fidelity_text_json () = full_fidelity_text_json := true in
     let full_fidelity_errors = ref false in
     let set_full_fidelity_errors () = full_fidelity_errors := true in
     let full_fidelity_errors_all = ref false in
@@ -111,6 +116,9 @@ module FullFidelityParseArgs = struct
       "--full-fidelity-json",
         Arg.Unit set_full_fidelity_json,
         "Displays the full-fidelity parse tree in JSON format.";
+      "--full-fidelity-text-json",
+        Arg.Unit set_full_fidelity_text_json,
+        "Displays the full-fidelity parse tree in JSON format with token text.";
       "--full-fidelity-errors",
         Arg.Unit set_full_fidelity_errors,
         "Displays the full-fidelity parser errors, if any.
@@ -147,6 +155,7 @@ No errors are filtered out.";
     Arg.parse options push_file usage;
     make
       !full_fidelity_json
+      !full_fidelity_text_json
       !full_fidelity_errors
       !full_fidelity_errors_all
       !full_fidelity_s_expr
@@ -250,6 +259,11 @@ let handle_existing_file args filename =
   end;
   if args.full_fidelity_json then begin
     let json = SyntaxTree.to_json minimal_tree in
+    let str = Hh_json.json_to_string json in
+    Printf.printf "%s\n" str
+  end;
+  if args.full_fidelity_text_json then begin
+    let json = Full_fidelity_editable_syntax.to_json editable in
     let str = Hh_json.json_to_string json in
     Printf.printf "%s\n" str
   end

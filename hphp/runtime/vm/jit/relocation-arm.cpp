@@ -67,7 +67,7 @@ TRACE_SET_MOD(mcg);
 
 //////////////////////////////////////////////////////////////////////
 
-using InstrSet = hphp_hash_set<Instruction*>;
+using InstrSet = std::unordered_set<Instruction*>;
 struct JmpOutOfRange : std::exception {};
 
 /*

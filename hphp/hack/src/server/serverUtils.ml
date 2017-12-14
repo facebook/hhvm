@@ -46,22 +46,27 @@ let die_nicely () =
   exit 0
 
 let print_hash_stats () =
-  let { SharedMem.
+  Core_result.try_with SharedMem.dep_stats
+  |> Core_result.map_error ~f:Hh_logger.exc
+  |> Core_result.iter ~f:begin fun { SharedMem.
     used_slots;
     slots;
-    nonempty_slots = _ } = SharedMem.dep_stats () in
-  let load_factor = float_of_int used_slots /. float_of_int slots in
-  Hh_logger.log "Dependency table load factor: %d / %d (%.02f)"
-    used_slots slots load_factor;
-  let { SharedMem.
+    nonempty_slots = _ } ->
+    let load_factor = float_of_int used_slots /. float_of_int slots in
+    Hh_logger.log "Dependency table load factor: %d / %d (%.02f)"
+      used_slots slots load_factor
+  end;
+  Core_result.try_with SharedMem.hash_stats
+  |> Core_result.map_error ~f:Hh_logger.exc
+  |> Core_result.iter ~f:begin fun { SharedMem.
     used_slots;
     slots;
-    nonempty_slots } = SharedMem.hash_stats () in
-  let load_factor = float_of_int used_slots /. float_of_int slots in
-  Hh_logger.log
-    "Hashtable load factor: %d / %d (%.02f) with %d nonempty slots"
-    used_slots slots load_factor nonempty_slots;
-  ()
+    nonempty_slots } ->
+    let load_factor = float_of_int used_slots /. float_of_int slots in
+    Hh_logger.log
+      "Hashtable load factor: %d / %d (%.02f) with %d nonempty slots"
+      used_slots slots load_factor nonempty_slots
+  end
 
 let with_exit_on_exception f =
   try f () with

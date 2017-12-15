@@ -139,7 +139,6 @@ let error1058 received required = Printf.sprintf ("Encountered unexpected " ^^
   "token '%s'. Did you mean '%s'?") received required
 
 let error2001 = "A type annotation is required in strict mode."
-let error2002 = "An XHP attribute name may not contain '-' or ':'."
 let error2003 = "A case statement may only appear directly inside a switch."
 let error2004 = "A default statement may only appear directly inside a switch."
 let error2005 = "A break statement may only appear inside a switch or loop."

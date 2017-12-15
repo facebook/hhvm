@@ -37,7 +37,7 @@ module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
   val next_token_as_name : t -> t * Token.t
   val next_token_in_type : t -> t * Token.t
   val next_docstring_header : t -> t * Token.t * String.t
-  val next_xhp_element_token : no_trailing:bool ->  attribute:bool ->t
+  val next_xhp_element_token : no_trailing:bool -> t
     -> t * Token.t * String.t
   val next_xhp_body_token : t -> t * Token.t
   val next_xhp_class_name : t -> t * Token.t

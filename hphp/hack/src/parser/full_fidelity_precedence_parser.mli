@@ -72,7 +72,7 @@ val with_operator_precedence : t ->
 val with_reset_precedence : t -> (t -> t * 'a) -> t * 'a
 
 val next_xhp_element_token :
-  ?no_trailing:bool -> ?attribute:bool -> t
+  ?no_trailing:bool -> t
   -> t * Syntax.Token.t * String.t
 
 val next_xhp_body_token : t -> t * Syntax.Token.t

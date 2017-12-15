@@ -536,9 +536,6 @@ let using_statement_function_scoped_is_legal parents =
         LambdaExpression     _); _ } :: _ -> true
   | _ -> false
 
-let is_bad_xhp_attribute_name name =
-  (String.contains name ':') || (String.contains name '-')
-
 let make_error_from_nodes
   ?(error_type=SyntaxError.ParseError) start_node end_node error =
   let s = start_offset start_node in
@@ -565,15 +562,7 @@ let is_invalid_xhp_attr_enum_item node =
   | _ -> true
 
 let xhp_errors node _parents hhvm_compat_mode errors =
-  (* An attribute name cannot contain - or :, but we allow this in the lexer
-   because it's easier to have one rule for tokenizing both attribute and
-   element names. *)
   match syntax node with
-  |  XHPSimpleAttribute attr when
-    not hhvm_compat_mode &&
-    (is_bad_xhp_attribute_name
-    (text attr.xhp_simple_attribute_name)) ->
-      make_error_from_node attr.xhp_simple_attribute_name SyntaxError.error2002 :: errors
   |  XHPEnumType enumType when
     not hhvm_compat_mode &&
     (is_missing enumType.xhp_enum_values) ->

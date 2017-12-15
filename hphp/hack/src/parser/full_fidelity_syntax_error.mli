@@ -110,7 +110,6 @@ val error1057 : string -> string
 val error1058 : string -> string -> string
 
 val error2001 : string
-val error2002 : string
 val error2003 : string
 val error2004 : string
 val error2005 : string

@@ -483,7 +483,8 @@ and xhpattr file = parse
   | '}'                { Trcb        }
   | '/'                { Tslash      }
   | '\"'               { Tdquote     }
-  | word               { Tword       }
+  | word               { Txhpname    }
+  | xhpname            { Txhpname    }
   | _                  { Terror      }
 
 and heredoc_token = parse

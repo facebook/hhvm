@@ -4331,7 +4331,7 @@ and is_xhp env =
     Lexing.lexeme env.lb <> "new" &&
     Lexing.lexeme env.lb <> "yield" &&
     let tok2 = L.xhpattr env.file env.lb in
-    tok2 = Tgt || tok2 = Tword || tok2 = Tlcb ||
+    tok2 = Tgt || tok2 = Txhpname || tok2 = Tlcb ||
     (tok2 = Tslash && L.xhpattr env.file env.lb = Tgt)
   end
 
@@ -4370,7 +4370,7 @@ and xhp_attributes env =
       expect env Trcb;
       let rl, closed = xhp_attributes env in
       Xhp_spread spread_value :: rl, closed
-  | Tword ->
+  | Txhpname ->
       (* this is a simple attribute *)
       let error_state = !(env.errors) in
       let attr_name = Pos.make env.file env.lb, Lexing.lexeme env.lb in

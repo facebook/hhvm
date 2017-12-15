@@ -1,5 +1,7 @@
 # -*- mode: python -*-
 
+include_defs("//hphp/DEFS")
+
 def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
                     cli_server=0, hhcodegen=False, use_hackc=False,
                     use_php7=False, hhas_roundtrip=False, target_suffix='',
@@ -17,12 +19,19 @@ def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
 
   target_name = target_name.replace('/', '_')
   target_name = target_name.replace(',', '_')
+
+  generate_hhir_asserts = not is_opt_hhvm_build() and \
+    get_compiler_type(get_fbcode_platform()) == 'clang'
+
   command = [
     'hphp/test/run',
     suite,
     '-m',
     mode,
-  ] + extra_args
+  ] + extra_args + (
+    [ '-a', '-vEval.HHIRGenerateAsserts=true' ] if generate_hhir_asserts else
+    []
+  )
   if repo:
     command.extend(['-r'])
   if relocate != 0:

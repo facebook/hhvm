@@ -13,42 +13,42 @@ TABLE_NAME="perfpipe_hackc_hhvm_tests"
 
 if [ -e hphp/test/hhcodegen_failing_tests_quick ]
 then
-  FAIL_COMPARE_QUICK=$(grep -c '^' hphp/test/hhcodegen_failing_tests_quick)
+  FAIL_COMPARE_QUICK=$(grep -c '^' hphp/test/hhcodegen_failing_tests_quick || true)
 else
   FAIL_COMPARE_QUICK=0
 fi
 
 if [ -e hphp/test/hhcodegen_failing_tests_slow ]
 then
-  FAIL_COMPARE_SLOW=$(grep -c '^' hphp/test/hhcodegen_failing_tests_slow)
+  FAIL_COMPARE_SLOW=$(grep -c '^' hphp/test/hhcodegen_failing_tests_slow || true)
 else
   FAIL_COMPARE_SLOW=0
 fi
 
 if [ -e hphp/test/hackc_failing_tests_quick ]
 then
-  FAIL_RUN_QUICK=$(grep -c '^' hphp/test/hackc_failing_tests_quick)
+  FAIL_RUN_QUICK=$(grep -c '^' hphp/test/hackc_failing_tests_quick || true)
 else
   FAIL_RUN_QUICK=0
 fi
 
 if [ -e hphp/test/hackc_repo_failing_tests_quick ]
 then
-  FAIL_RUN_REPO_QUICK=$(grep -c '^' hphp/test/hackc_repo_failing_tests_quick)
+  FAIL_RUN_REPO_QUICK=$(grep -c '^' hphp/test/hackc_repo_failing_tests_quick || true)
 else
   FAIL_RUN_REPO_QUICK=0
 fi
 
 if [ -e hphp/test/hackc_failing_tests_slow ]
 then
-  FAIL_RUN_SLOW=$(grep -c '^' hphp/test/hackc_failing_tests_slow)
+  FAIL_RUN_SLOW=$(grep -c '^' hphp/test/hackc_failing_tests_slow || true)
 else
   FAIL_RUN_SLOW=0
 fi
 
 if [ -e hphp/test/hackc_repo_failing_tests_slow ]
 then
-  FAIL_RUN_REPO_SLOW=$(grep -c '^' hphp/test/hackc_repo_failing_tests_slow)
+  FAIL_RUN_REPO_SLOW=$(grep -c '^' hphp/test/hackc_repo_failing_tests_slow || true)
 else
   FAIL_RUN_REPO_SLOW=0
 fi

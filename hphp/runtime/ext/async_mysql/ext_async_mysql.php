@@ -1204,6 +1204,16 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    */
   <<__HipHopSpecific, __Native>>
   function rowBlocks(): Vector<AsyncMysqlRowBlock>;
+
+  /**
+   * Returns whether or not any of the queries executed did not use an index
+   * during execution
+   *
+   * @return - 'true' if no index was used for any of the queries executed,
+   *              'false' otherwise
+   */
+  <<__HipHopSpecific, __Native>>
+  function noIndexUsed(): bool;
 }
 
 /**

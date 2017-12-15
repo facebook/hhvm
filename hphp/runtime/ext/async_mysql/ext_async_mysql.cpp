@@ -1089,18 +1089,21 @@ void AsyncMysqlQueryResult::sweep() {
 
 Object AsyncMysqlQueryResult::newInstance(std::shared_ptr<am::Operation> op,
                                           db::ClientPerfStats stats,
-                                          am::QueryResult query_result) {
-  Object ret{getClass()};
-  Native::data<AsyncMysqlQueryResult>(ret)
-      ->create(std::move(op), std::move(stats), std::move(query_result));
+                                          am::QueryResult query_result,
+                                          bool noIndexUsed) {
+  Object ret{ getClass() };
+  Native::data<AsyncMysqlQueryResult>(ret)->create(
+    std::move(op), std::move(stats), std::move(query_result), noIndexUsed);
   return ret;
 }
 
 void AsyncMysqlQueryResult::create(std::shared_ptr<am::Operation> op,
                                    db::ClientPerfStats stats,
-                                   am::QueryResult query_result) {
+                                   am::QueryResult query_result,
+                                   bool noIndexUsed) {
   AsyncMysqlResult::create(std::move(op), std::move(stats));
   m_query_result = std::make_unique<am::QueryResult>(std::move(query_result));
+  m_no_index_used = noIndexUsed;
   m_field_index = req::make_shared<FieldIndex>(m_query_result->getRowFields());
 }
 
@@ -1151,6 +1154,11 @@ static Object HHVM_METHOD(AsyncMysqlQueryResult, rowBlocks) {
                                              data->m_field_index));
   }
   return Object{std::move(ret)};
+}
+
+static bool HHVM_METHOD(AsyncMysqlQueryResult, noIndexUsed) {
+  auto* data = Native::data<AsyncMysqlQueryResult>(this_);
+  return data->m_no_index_used;
 }
 
 namespace {
@@ -1284,7 +1292,8 @@ void AsyncMysqlQueryEvent::unserialize(Cell& result) {
   if (m_query_op->ok()) {
     auto query_result = m_query_op->stealQueryResult();
     auto ret = AsyncMysqlQueryResult::newInstance(
-        m_query_op, std::move(m_clientStats), std::move(query_result));
+      m_query_op, std::move(m_clientStats), std::move(query_result),
+      m_query_op->noIndexUsed());
     cellCopy(make_tv<KindOfObject>(ret.detach()), result);
   } else {
     throwAsyncMysqlQueryException("AsyncMysqlQueryException",
@@ -1308,8 +1317,9 @@ void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
   std::vector<am::QueryResult> query_results = m_multi_op->stealQueryResults();
   results->reserve(query_results.size());
   for (int i = 0; i < query_results.size(); ++i) {
-    auto ret = AsyncMysqlQueryResult::newInstance(
-        m_multi_op, m_clientStats, std::move(query_results[i]));
+    auto ret = AsyncMysqlQueryResult::newInstance(m_multi_op, m_clientStats,
+                                                  std::move(query_results[i]),
+                                                  m_multi_op->noIndexUsed());
     results->add(std::move(ret));
   }
   query_results.clear();

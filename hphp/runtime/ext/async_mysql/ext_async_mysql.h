@@ -244,16 +244,17 @@ struct AsyncMysqlQueryResult : AsyncMysqlResult {
   AsyncMysqlQueryResult() = default;
   ~AsyncMysqlQueryResult() override {}
   void sweep();
-  void create(std::shared_ptr<am::Operation> op,
-              db::ClientPerfStats values,
-              am::QueryResult query_result);
+  void
+  create(std::shared_ptr<am::Operation> op, db::ClientPerfStats values,
+         am::QueryResult query_result, bool noIndexUsed);
   Object buildRows(bool as_maps, bool typed_values);
   static Class* getClass();
-  static Object newInstance(std::shared_ptr<am::Operation> op,
-                            db::ClientPerfStats values,
-                            am::QueryResult query_result);
+  static Object
+  newInstance(std::shared_ptr<am::Operation> op, db::ClientPerfStats values,
+              am::QueryResult query_result, bool noIndexUsed);
 
   std::unique_ptr<am::QueryResult> m_query_result;
+  bool m_no_index_used;
 
   // Created here for buildRows and passed to RowBlocks
   req::shared_ptr<FieldIndex> m_field_index;

@@ -808,6 +808,7 @@ and emit_id env (p, s as id) =
   match s with
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
+  | "__METHOD__" -> instr (ILitConst Method)
   | "__LINE__" ->
     (* If the expression goes on multi lines, we return the last line *)
     let _, line, _, _ = Pos.info_pos_extended p in

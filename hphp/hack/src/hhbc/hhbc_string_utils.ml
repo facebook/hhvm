@@ -132,6 +132,8 @@ module Classes = struct
   let mangle_anonymous_class scope ix count =
     mangle_class "class@anonymous" scope ix count
 
+  let is_anonymous_class_name n =
+    String_utils.string_starts_with n "class@anonymous"
 end
 
 module Closures = struct

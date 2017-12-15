@@ -2461,7 +2461,8 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
           namespace_name empty_trait_require_clauses
       in
       fold_child_nodes folder node parents acc
-    | ClassishDeclaration _ ->
+    | ClassishDeclaration _
+    | AnonymousClass _ ->
       (* Reset the trait require clauses *)
       (* Reset the const declarations *)
       (* Reset the function declarations *)

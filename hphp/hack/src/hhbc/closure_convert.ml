@@ -397,6 +397,12 @@ let convert_id (env:env) p (pid, str as id) =
       ~fallback_to_empty_string:true
       env p pid
   | "__METHOD__" ->
+    begin match env.scope with
+    | ScopeItem.Method _ :: ScopeItem.Class { c_name = (_, n); _ } :: _
+      when SU.Classes.is_anonymous_class_name n ->
+      (* HHVM does not inline method name in anonymous classes *)
+      p, Id (pid, (snd id))
+    | _ ->
     let prefix =
       match Scope.get_class env.scope with
       | None -> ""
@@ -410,6 +416,7 @@ let convert_id (env:env) p (pid, str as id) =
        * returns class name *)
       | ScopeItem.Class cd :: _ -> return @@ strip_id cd.c_name
       | _ -> return ""
+    end
     end
   | "__FUNCTION__" ->
     begin match env.scope with
@@ -560,6 +567,7 @@ let rec convert_expr env st (p, expr_ as expr) =
     let cls_condensed = { cls with
       c_name = (fst cls.c_name, string_of_int class_idx);
       c_body = [] } in
+    let st, cls = convert_class env st cls in
     let st = { st with
       anon_cls_cnt_per_fun = st.anon_cls_cnt_per_fun + 1;
       total_count = st.total_count + 1;

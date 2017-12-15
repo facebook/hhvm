@@ -391,6 +391,8 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
     Errors.fun_reactivity_mismatch ft_super.ft_reactive p_super p_sub;
   if ft_sub.ft_is_coroutine <> ft_super.ft_is_coroutine
   then Errors.coroutinness_mismatch ft_super.ft_is_coroutine p_super p_sub;
+  if ft_sub.ft_return_disposable <> ft_super.ft_return_disposable
+  then Errors.return_disposable_mismatch ft_super.ft_return_disposable p_super p_sub;
   if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)
   then Errors.fun_too_many_args p_sub p_super;
   (match ft_sub.ft_arity, ft_super.ft_arity with

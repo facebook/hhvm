@@ -68,9 +68,14 @@ type env = {
 }
 
 and reactivity = Normal | Local | Reactive
+and return_info = {
+  return_type : locl ty;
+  return_disposable : bool;
+  return_explicit : bool;
+}
 and genv = {
   tcopt   : TypecheckerOptions.t;
-  return  : locl ty * bool (* use as contextual type *);
+  return  : return_info;
   (* For each function parameter, its type and calling convention. *)
   params  : (locl ty * param_mode) Local_id.Map.t;
   parent_id : string;

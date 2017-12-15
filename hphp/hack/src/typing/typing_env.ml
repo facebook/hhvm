@@ -96,6 +96,7 @@ let make_ft p reactive is_coroutine params ret_ty =
     ft_ret      = ret_ty;
     ft_ret_by_ref = false;
     ft_reactive = reactive;
+    ft_return_disposable = false;
   }
 
 let get_shape_field_name = function
@@ -282,7 +283,10 @@ let empty tcopt file ~droot = {
   };
   genv    = {
     tcopt   = tcopt;
-    return  = (fresh_type(), false);
+    return  = {
+      return_type = fresh_type ();
+      return_explicit = false;
+      return_disposable = false };
     params  = Local_id.Map.empty;
     self_id = "";
     self    = Reason.none, Tany;

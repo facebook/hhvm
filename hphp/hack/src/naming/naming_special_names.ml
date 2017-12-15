@@ -129,6 +129,7 @@ module UserAttributes = struct
   let uaPHPStdLib           = "__PHPStdLib"
   let uaHipHopSpecific      = "__HipHopSpecific"
   let uaAcceptDisposable    = "__AcceptDisposable"
+  let uaReturnDisposable    = "__ReturnDisposable"
   let uaReactive            = "__Rx"
   let uaLocalReactive       = "__RxLocal"
 
@@ -144,6 +145,7 @@ module UserAttributes = struct
       uaPHPStdLib;
       uaHipHopSpecific;
       uaAcceptDisposable;
+      uaReturnDisposable;
       uaReactive;
       uaLocalReactive;
     ]

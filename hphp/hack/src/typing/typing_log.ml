@@ -166,10 +166,11 @@ let log_using_vars env =
 
 let log_return_type env =
   indentEnv "return_type" (fun () ->
-    let (ty, contextual) = Env.get_return env in
-    lprintf (Normal Green) "%s (%s)"
-      (Typing_print.debug_with_tvars env ty)
-      (if contextual then "contextual" else "non-contextual")
+    let Env.{return_type; return_explicit; return_disposable} = Env.get_return env in
+    lprintf (Normal Green) "%s%s%s"
+      (Typing_print.debug_with_tvars env return_type)
+      (if return_explicit then " (explicit)" else "")
+      (if return_disposable then " (disposable)" else "")
   )
 
 let log_tpenv env =

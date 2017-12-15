@@ -160,6 +160,10 @@ let has_accept_disposable_attribute param =
   List.exists param.param_user_attributes
     (fun { ua_name; _ } -> SN.UserAttributes.uaAcceptDisposable = snd ua_name)
 
+let has_return_disposable_attribute attrs =
+  List.exists attrs
+    (fun { ua_name; _ } -> SN.UserAttributes.uaReturnDisposable = snd ua_name)
+
 (* Does ty implement IDisposable or IAsyncDisposable, directly or indirectly?
  * Return Some class_name if it does, None if it doesn't.
  *)
@@ -180,13 +184,29 @@ let is_disposable_type env ty =
   | _  ->
     None
 
-let check_not_disposable env param ty =
+(* Check whether this is a function type that (a) either returns a disposable
+ * or (b) has the <<__ReturnDisposable>> attribute
+ *)
+let is_return_disposable_fun_type env ty =
+  match Env.expand_type env ty with
+  | _env, (_, Tfun ft) ->
+    ft.ft_return_disposable || Option.is_some (is_disposable_type env ft.ft_ret)
+  | _ -> false
+
+let enforce_param_not_disposable env param ty =
   if has_accept_disposable_attribute param then ()
   else
   let p = param.param_pos in
   match is_disposable_type env ty with
   | Some class_name ->
     Errors.invalid_disposable_hint p (strip_ns class_name)
+  | None ->
+    ()
+
+let enforce_return_not_disposable env ty =
+  match is_disposable_type env ty with
+  | Some class_name ->
+    Errors.invalid_disposable_return_hint (Reason.to_pos (fst ty)) (strip_ns class_name)
   | None ->
     ()
 
@@ -303,7 +323,7 @@ and check_param env param ty =
   | None -> suggest env param.param_pos ty
   | Some _ ->
     (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
-    check_not_disposable env param ty
+    enforce_param_not_disposable env param ty
 
 and check_inout_return env =
   let params = Local_id.Map.elements (Env.get_params env) in
@@ -333,6 +353,7 @@ and fun_def tcopt f =
   let dep = Typing_deps.Dep.Fun (snd f.f_name) in
   let env = Env.empty tcopt (Pos.filename pos) (Some dep) in
   let reactive = TUtils.fun_reactivity f.f_user_attributes in
+  let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let env = Env.set_env_reactive env reactive in
   NastCheck.fun_ env f nb;
   (* Fresh type environment is actually unnecessary, but I prefer to
@@ -349,11 +370,19 @@ and fun_def tcopt f =
           ~ety_env:(Phase.env_with_self env) env f.f_where_constraints in
       let env, return =
         match f.f_ret with
-        | None -> env, ((Reason.Rwitness pos, Tany), false)
+        | None ->
+          env,
+          Env.{ return_type = (Reason.Rwitness pos, Tany);
+                return_explicit = false;
+                return_disposable = return_disposable }
         | Some ret ->
           let ty = TI.instantiable_hint env ret in
           let env, ty = Phase.localize_with_self env ty in
-          env, (ty, true)
+          if not return_disposable then enforce_return_not_disposable env ty;
+          env,
+          Env.{ return_type = ty;
+                return_explicit = true;
+                return_disposable = return_disposable }
       in
       TI.check_params_instantiable env f.f_params;
       TI.check_tparams_instantiable env f.f_tparams;
@@ -376,7 +405,7 @@ and fun_def tcopt f =
       let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = Env.check_todo env in
       begin match f.f_ret with
-        | None when Env.is_strict env -> suggest_return env pos (fst return)
+        | None when Env.is_strict env -> suggest_return env pos return.Env.return_type
         | None -> Typing_suggest.save_fun_or_method f.f_name
         | Some hint -> async_suggest_return (f.f_fun_kind) hint pos
       end;
@@ -412,7 +441,7 @@ and fun_ ?(abstract=false) env return pos named_body f_kind =
     let env = Env.set_fn_kind env f_kind in
     let env, tb = block env named_body.fnb_nast in
     Typing_sequencing.sequence_check_block named_body.fnb_nast;
-    let (ret, _) = Env.get_return env in
+    let { Env.return_type = ret; _} = Env.get_return env in
     let env =
       if Nast_terminality.Terminal.block env named_body.fnb_nast ||
         abstract ||
@@ -514,6 +543,14 @@ and enforce_is_disposable_type env has_await pos ty =
   let disposable_ty = (Reason.Rusing pos, Tclass ((pos, class_name), [])) in
   Type.sub_type pos Reason.URusing env ty disposable_ty
 
+(* Require a new construct with disposable *)
+and enforce_return_disposable _env e =
+  match e with
+  | _, New _ -> ()
+  | _, Call _ -> ()
+  | p, _ ->
+    Errors.invalid_return_disposable p
+
 and stmt env = function
   | Fallthrough ->
       env, T.Fallthrough
@@ -570,21 +607,22 @@ and stmt env = function
   | Return (p, None) ->
       let env = check_inout_return env in
       let rty = make_return_type env p (Reason.Rwitness p, Tprim Tvoid) in
-      let (expected_return, _) = Env.get_return env in
+      let { Env.return_type = expected_return; _ } = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
       let env = Type.sub_type p Reason.URreturn env rty expected_return in
       env, T.Return (p, None)
   | Return (p, Some e) ->
       let env = check_inout_return env in
       let pos = fst e in
-      let (expected_return, has_expected) = Env.get_return env in
+      let Env.{ return_type; return_explicit; return_disposable } = Env.get_return env in
       let expected =
-        if has_expected
-        then Some (pos, Reason.URreturn, expected_return)
+        if return_explicit
+        then Some (pos, Reason.URreturn, return_type)
         else None in
-      let env, te, rty = expr ?expected:expected env e in
+      if return_disposable then enforce_return_disposable env e;
+      let env, te, rty = expr ~is_using_clause:return_disposable ?expected:expected env e in
       let rty = make_return_type env p rty in
-      (match snd (Env.expand_type env expected_return) with
+      (match snd (Env.expand_type env return_type) with
       | r, Tprim Tvoid ->
           (* Yell about returning a value from a void function. This catches
            * more issues than just unifying with void would do -- in particular
@@ -597,13 +635,13 @@ and stmt env = function
       | _, Tunresolved _ ->
           (* we allow return types to grow for anonymous functions *)
           let env, rty = TUtils.unresolved env rty in
-          let env = Type.sub_type pos Reason.URreturn env rty expected_return in
+          let env = Type.sub_type pos Reason.URreturn env rty return_type in
           env, T.Return(p, Some te)
       | _, (Terr | Tany | Tmixed | Tarraykind _ | Toption _ | Tprim _
         | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
         | Tanon (_, _) | Tobject | Tshape _) ->
-          Typing_suggest.save_return env expected_return rty;
-          let env = Type.sub_type pos Reason.URreturn env rty expected_return in
+          Typing_suggest.save_return env return_type rty;
+          let env = Type.sub_type pos Reason.URreturn env rty return_type in
           env, T.Return(p, Some te)
       )
   | Do (b, e) as st ->
@@ -688,7 +726,8 @@ and stmt env = function
       let env = LEnv.intersect_list env parent_lenv cl in
       env, T.Switch(te, tcl)
   | Foreach (e1, e2, b) as st ->
-      let env, te1, ty1 = expr env e1 in
+      (* It's safe to do foreach over a disposable, as no leaking is possible *)
+      let env, te1, ty1 = expr ~accept_using_var:true env e1 in
       let parent_lenv = env.Env.lenv in
       let env = Env.freeze_local_env env in
       let env, ty2 = as_expr env (fst e1) e2 in
@@ -1096,9 +1135,9 @@ and expr_
         (Env.get_options env)
         TypecheckerOptions.experimental_disable_shape_and_tuple_arrays in
 
-  let check_call ~expected env p call_type e hl el uel ~in_suspend=
+  let check_call ~is_using_clause ~expected env p call_type e hl el uel ~in_suspend=
     let env, te, result =
-      dispatch_call ~expected p env call_type e hl el uel ~in_suspend in
+      dispatch_call ~is_using_clause ~expected p env call_type e hl el uel ~in_suspend in
     let env = Env.forget_members env p in
     env, te, result in
 
@@ -1386,6 +1425,7 @@ and expr_
               ft_ret = fty.ft_ret;
               ft_ret_by_ref = fty.ft_ret_by_ref;
               ft_reactive = fty.ft_reactive;
+              ft_return_disposable = fty.ft_return_disposable;
             } in
             make_result env (T.Method_caller(pos_cname, meth_name))
               (reason, Tfun caller)
@@ -1532,7 +1572,7 @@ and expr_
           tel,
           [])) (Env.fresh_type())
   | Call (call_type, e, hl, el, uel) ->
-      check_call ~expected env p call_type e hl el uel ~in_suspend:false
+      check_call ~is_using_clause ~expected env p call_type e hl el uel ~in_suspend:false
     (* For example, e1 += e2. This is typed and translated as if
      * written e1 = e1 + e2.
      * TODO TAST: is this right? e1 will get evaluated more than once
@@ -1747,7 +1787,7 @@ and expr_
             Tclass ((p, SN.Classes.cAsyncGenerator), [key; value; send])
         | Ast.FSync | Ast.FAsync ->
             failwith "Parsing should never allow this" in
-      let expected_return, _ = Env.get_return env in
+      let Env.{ return_type = expected_return; _ } = Env.get_return env in
       let env =
         Type.sub_type p (Reason.URyield) env rty expected_return in
       let env = Env.forget_members env p in
@@ -1760,7 +1800,7 @@ and expr_
       let env, te, ty =
         match e with
         | _, Call (call_type, e, hl, el, uel) ->
-          check_call ~expected env p call_type e hl el uel ~in_suspend:true
+          check_call ~is_using_clause ~expected env p call_type e hl el uel ~in_suspend:true
         | (epos, _)  ->
           let env, te, (r, ty) = expr env e in
           (* not a call - report an error *)
@@ -2193,7 +2233,10 @@ and anon_make tenv p f ft idl =
               { (Phase.env_with_self env) with
                 from_class = Some CIstatic } in
             Phase.localize ~ety_env env ret in
-        let env = Env.set_return env (hret, Option.is_some ret_ty) in
+        let env = Env.set_return env
+          Env.{ return_type = hret;
+                return_disposable = false;
+                return_explicit = Option.is_some ret_ty } in
         let env = Env.set_fn_kind env f.f_fun_kind in
         let env, tb = block env nb.fnb_nast in
         let env =
@@ -2832,13 +2875,16 @@ and is_abstract_ft fty = match fty with
 (* Depending on the kind of expression we are dealing with
  * The typing of call is different.
  *)
-and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_suspend =
+
+ and dispatch_call ~expected ~is_using_clause p env call_type (fpos, fun_expr as e) hl el uel ~in_suspend =
   let make_call env te thl tel tuel ty =
     env, T.make_typed_expr p ty (T.Call (call_type, te, thl, tel, tuel)), ty in
   let make_call_special env id tel ty =
     make_call env (T.make_implicitly_typed_expr fpos (T.Id id)) [] tel [] ty in
 
   let check_coroutine_call env fty =
+    let () = if is_return_disposable_fun_type env fty && not is_using_clause
+             then Errors.invalid_new_disposable p else () in
     (* returns
        - Some true if type is definitely a coroutine
        - Some false if type is definitely not a coroutine
@@ -3093,6 +3139,7 @@ and dispatch_call ~expected p env call_type (fpos, fun_expr as e) hl el uel ~in_
                 ft_ret = tr;
                 ft_ret_by_ref = fty.ft_ret_by_ref;
                 ft_reactive = fty.ft_reactive;
+                ft_return_disposable = fty.ft_return_disposable;
               }
             ) in
             let containers = List.map vars (fun var ->
@@ -5704,6 +5751,7 @@ and method_def env m =
     Env.env_with_locals env Typing_continuations.Map.empty Local_id.Map.empty
   in
   let reactive = TUtils.fun_reactivity m.m_user_attributes in
+  let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let env = Env.set_env_reactive env reactive in
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
@@ -5726,7 +5774,11 @@ and method_def env m =
       else env in
   let env = Env.clear_params env in
   let env, return = match m.m_ret with
-    | None -> env, (make_default_return m.m_name, false)
+    | None ->
+      env,
+      Env.{ return_type = make_default_return m.m_name;
+            return_explicit = false;
+            return_disposable = return_disposable }
     | Some ret ->
       let ret = TI.instantiable_hint env ret in
       (* If a 'this' type appears it needs to be compatible with the
@@ -5736,7 +5788,11 @@ and method_def env m =
         { (Phase.env_with_self env) with
           from_class = Some CIstatic } in
       let env, ty = Phase.localize ~ety_env env ret in
-      env, (ty, true) in
+      if not return_disposable then enforce_return_not_disposable env ty;
+      env,
+      Env.{ return_type = ty;
+            return_explicit = true;
+            return_disposable = return_disposable } in
   TI.check_params_instantiable env m.m_params;
   let env, param_tys = List.map_env env m.m_params make_param_local_ty in
   if Env.is_strict env then begin
@@ -5767,7 +5823,7 @@ and method_def env m =
       || snd m.m_name = SN.Members.__construct ->
       Some (pos, Happly((pos, "void"), []))
     | None when Env.is_strict env ->
-      suggest_return env pos (fst return); None
+      suggest_return env pos return.Env.return_type; None
     | None -> let (pos, id) = m.m_name in
               let id = (Env.get_self_id env) ^ "::" ^ id in
               Typing_suggest.save_fun_or_method (pos, id);

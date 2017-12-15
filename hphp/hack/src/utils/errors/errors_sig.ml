@@ -356,6 +356,8 @@ module type S = sig
   val pass_by_ref_annotation_unexpected : Pos.t -> Pos.t -> unit
   val invalid_new_disposable : Pos.t -> unit
   val invalid_disposable_hint : Pos.t -> string -> unit
+  val invalid_disposable_return_hint : Pos.t -> string -> unit
+  val invalid_return_disposable : Pos.t -> unit
 
   val to_json : Pos.absolute error_ -> Hh_json.json
   val to_string : ?indent:bool -> Pos.absolute error_ -> string
@@ -430,6 +432,7 @@ module type S = sig
   val coroutine_call_outside_of_suspend : Pos.t -> unit
   val function_is_not_coroutine : Pos.t -> string -> unit
   val coroutinness_mismatch : bool -> Pos.t -> Pos.t -> unit
+  val return_disposable_mismatch : bool -> Pos.t -> Pos.t -> unit
   val fun_reactivity_mismatch : bool -> Pos.t -> Pos.t -> unit
   val this_as_lexical_variable : Pos.t -> unit
   val dollardollar_lvalue : Pos.t -> unit

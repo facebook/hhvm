@@ -70,9 +70,14 @@ type env = {
   global_tpenv : tpenv ;
 }
 and reactivity = Normal | Local | Reactive
+and return_info = {
+  return_type : locl ty;
+  return_disposable : bool;
+  return_explicit : bool;
+}
 and genv = {
   tcopt   : TypecheckerOptions.t;
-  return  : locl ty * bool (* use as contextual type *);
+  return  : return_info;
   (* For each function parameter, its type and calling convention. *)
   params  : (locl ty * param_mode) Local_id.Map.t;
   parent_id : string;
@@ -85,6 +90,7 @@ and genv = {
   fun_kind : Ast.fun_kind;
   (* Whether current function is reactive *)
   fun_reactive : reactivity;
+  (* Whether current function is marked <<__ReturnDisposable>> *)
   anons   : anon IMap.t;
   file    : Relative_path.t;
 }

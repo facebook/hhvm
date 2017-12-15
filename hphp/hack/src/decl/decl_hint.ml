@@ -84,6 +84,7 @@ and hint_ p env = function
       ft_ret = ret;
       ft_ret_by_ref = false;
       ft_reactive = is_reactive;
+      ft_return_disposable = false;
     }
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->

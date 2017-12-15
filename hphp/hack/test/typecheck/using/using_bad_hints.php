@@ -15,3 +15,7 @@ function bad2(IAsyncDisposable $x): void {}
 class C {
   public function bad3(AsyncHandle $h): void {}
 }
+interface I {
+  public function boo(Handle $h):void;
+  public function goo(): Handle;
+}

@@ -1002,6 +1002,9 @@ module Typing                               = struct
   let obj_set_reactive                      = 4202 (* DONT MODIFY!!!! *)
   let fun_reactivity_mismatch               = 4203 (* DONT MODIFY!!!! *)
   let overriding_prop_const_mismatch        = 4204 (* DONT MODIFY!!!! *)
+  let invalid_return_disposable             = 4205 (* DONT MODIFY!!!! *)
+  let invalid_disposable_return_hint        = 4206 (* DONT MODIFY!!!! *)
+  let return_disposable_mismatch            = 4207 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2632,6 +2635,16 @@ let coroutinness_mismatch pos1_is_coroutine pos1 pos2 =
       pos2, if pos1_is_coroutine then m2 else m1;
     ]
 
+let return_disposable_mismatch pos1_return_disposable pos1 pos2 =
+  let m1 = "This is marked <<__ReturnDisposable>>." in
+  let m2 = "This is not marked <<__ReturnDisposable>>." in
+  add_list
+    Typing.return_disposable_mismatch
+    [
+      pos1, if pos1_return_disposable then m1 else m2;
+      pos2, if pos1_return_disposable then m2 else m1;
+    ]
+
 let this_as_lexical_variable pos =
   add Naming.this_as_lexical_variable pos "Cannot use $this as lexical variable"
 
@@ -2744,6 +2757,10 @@ let invalid_disposable_hint pos class_name =
   add Typing.invalid_disposable_hint pos ("Parameter with type '" ^ class_name ^ "' must not \
     implement IDisposable or IAsyncDisposable. Please use <<__AcceptDisposable>> attribute or \
     create disposable object with 'using' statement instead.")
+
+let invalid_disposable_return_hint pos class_name =
+  add Typing.invalid_disposable_return_hint pos ("Return type '" ^ class_name ^ "' must not \
+    implement IDisposable or IAsyncDisposable. Please add <<__ReturnDisposable>> attribute.")
 
 let xhp_required pos why_xhp ty_reason_msg =
   let msg = "An XHP instance was expected" in
@@ -2926,8 +2943,13 @@ let inoutness_mismatch pos1 pos2 =
 
 let invalid_new_disposable pos =
   let msg =
-    "'new' must not be used for disposable objects except in a 'using' statement" in
+    "Disposable objects may only be created in a 'using' statement or 'return' from function marked <<__ReturnDisposable>>" in
   add Typing.invalid_new_disposable pos msg
+
+let invalid_return_disposable pos =
+  let msg =
+    "Return expression must be new disposable in function marked <<__ReturnDisposable>>" in
+  add Typing.invalid_return_disposable pos msg
 
 let nonreactive_function_call pos =
   let msg =

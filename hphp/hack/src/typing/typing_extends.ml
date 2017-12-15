@@ -263,6 +263,7 @@ let default_constructor_ce class_ =
              ft_ret      = r, Tprim Nast.Tvoid;
              ft_ret_by_ref = false;
              ft_reactive = false;
+             ft_return_disposable = false;
            }
   in { ce_final       = false;
        ce_is_xhp_attr = false;

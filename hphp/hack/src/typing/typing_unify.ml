@@ -506,6 +506,8 @@ and unify_funs env r1 ft1 r2 ft2 =
   let p1 = Reason.to_pos r1 in
   if ft1.ft_is_coroutine <> ft2.ft_is_coroutine
   then Errors.coroutinness_mismatch ft1.ft_is_coroutine p1 p;
+  if ft1.ft_return_disposable <> ft2.ft_return_disposable
+  then Errors.return_disposable_mismatch ft1.ft_return_disposable p1 p;
   if not (unify_arities ~ellipsis_is_variadic:false ft1.ft_arity ft2.ft_arity)
   then Errors.fun_arity_mismatch p p1;
   let env, var_opt, arity = match ft1.ft_arity, ft2.ft_arity with

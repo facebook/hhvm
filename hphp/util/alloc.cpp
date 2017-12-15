@@ -425,6 +425,19 @@ static void numa_purge_arena() {}
 #endif
 
 #ifdef USE_JEMALLOC_EXTENT_HOOKS
+static void set_arena_retain_grow_limit(unsigned id) {
+  size_t mib[3];
+  size_t miblen = sizeof(mib)/sizeof(size_t);
+
+  if (mallctlnametomib("arena.0.retain_grow_limit", mib, &miblen) == 0) {
+    // Limit grow_retained to reduce fragmentation on 1g pages.
+    size_t grow_retained_limit = size2m;
+    mib[1] = id;
+    mallctlbymib(mib, miblen, nullptr, nullptr, &grow_retained_limit,
+                 sizeof(grow_retained_limit));
+  }
+}
+
 /*
  * Get `pages` (at most 2) 1G huge pages and map to the low memory that grows
  * down from 4G.  We can do either one (3G-4G) or two pages (2G-4G).
@@ -453,6 +466,7 @@ void setup_low_1g_arena(int pages) {
 #endif
     }
     if (ma) {
+      set_arena_retain_grow_limit(ma->id());
       low_huge1g_arena = low_huge1g_arena_real = ma->id();
     }
   } catch (...) {
@@ -487,6 +501,7 @@ void setup_high_1g_arena(int pages) {
 #endif
     }
     if (ma) {
+      set_arena_retain_grow_limit(ma->id());
       high_huge1g_arena = high_huge1g_arena_real = ma->id();
     }
   } catch (...) {

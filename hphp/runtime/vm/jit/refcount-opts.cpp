@@ -1223,7 +1223,7 @@ void weaken_decrefs(Env& env) {
 // Helper for removing instructions in the rest of this file---if a debugging
 // mode is enabled, it will replace it with a debugging instruction if
 // appropriate instead of removing it.
-void remove_helper(IRInstruction* inst) {
+void remove_helper(Env& env, IRInstruction* inst) {
   if (!RuntimeOption::EvalHHIRGenerateAsserts) {
     inst->convertToNop();
     return;
@@ -1232,10 +1232,13 @@ void remove_helper(IRInstruction* inst) {
   switch (inst->op()) {
   case IncRef:
   case DecRef:
-  case DecRefNZ:
+  case DecRefNZ: {
     inst->setOpcode(DbgAssertRefCount);
     inst->clearExtra();
+    auto extra = ASSERT_REASON;
+    inst->setExtra(cloneExtra(DbgAssertRefCount, &extra, env.unit.arena()));
     break;
+  }
   default:
     always_assert_flog(
       false,
@@ -1326,8 +1329,8 @@ void remove_trivial_incdecs(Env& env) {
         if (to_rm == nullptr) return;
 
         FTRACE(3, "    ** trivial pair: {}, {}\n", *to_rm, inst);
-        remove_helper(to_rm);
-        remove_helper(&inst);
+        remove_helper(env, to_rm);
+        remove_helper(env, &inst);
         return;
       }
 
@@ -3110,8 +3113,8 @@ Node* rule_inc_dec_fold(Env& env, Node* node) {
   auto const nsucc = ndec->next;
   FTRACE(2, "    ** inc_dec_fold: {}, {}\n", *to_inc(ninc)->inst,
     *to_dec(ndec)->inst);
-  remove_helper(to_inc(ninc)->inst);
-  remove_helper(to_dec(ndec)->inst);
+  remove_helper(env, to_inc(ninc)->inst);
+  remove_helper(env, to_dec(ndec)->inst);
   node_skip_over(env, ninc, ndec, ndec->next);
   node_skip_over(env, nprev, ninc, ninc->next);
   return reprocess_helper(nprev, nsucc);
@@ -3216,7 +3219,7 @@ Node* rule_inc_pass_sig(Env& env, Node* node) {
   ntaken->lower_bound = std::max(nsig->lower_bound - 1, 0);
   nsig->lower_bound   = std::max(nsig->lower_bound - 1, 0);
 
-  remove_helper(nold_inc->inst);
+  remove_helper(env, nold_inc->inst);
   nsig->block->taken()->prepend(new_taken);
   nsig->block->next()->prepend(new_next);
 
@@ -3308,7 +3311,7 @@ Node* rule_inc_pass_phi(Env& env, Node* node) {
     rechain_forward(inc_pred, inc, nphi);
     inc->prev = nullptr;
     inc->next = nullptr;
-    remove_helper(inc->inst);
+    remove_helper(env, inc->inst);
     pred_ptr = inc_pred;
   }
 
@@ -3494,14 +3497,14 @@ void sink_incs(Env& env) {
       incs.push_back(new_next);
       FTRACE(2, "    ** sink_incs: {} -> {}, {}\n",
              *inc, *new_taken, *new_next);
-      remove_helper(inc);
+      remove_helper(env, inc);
 
     } else if (iter != iterOrigSucc) {
       // insert the inc right before succ if we advanced any instruction
       auto const new_inc = env.unit.gen(IncRef, bcctx, tmp);
       block->insert(iter, new_inc);
       FTRACE(2, "    ** sink_incs: {} -> {}\n", *inc, *new_inc);
-      remove_helper(inc);
+      remove_helper(env, inc);
     }
   }
 }

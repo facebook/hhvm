@@ -43,7 +43,6 @@ slow/ext_watchman/ext_watchman.php
 slow/function/closure-default.php
 slow/hack-arrays-eval.php
 slow/hack_arr_compat/gena.php
-slow/hack_arr_compat/scalars.php
 slow/hack_mode/2203.php
 slow/hack_mode/2204.php
 slow/hack_mode/closing-tag-asp.php

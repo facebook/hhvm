@@ -191,6 +191,13 @@ and array_to_typed_value ns fields =
         | A.AFkvalue (((_, (A.Int (_, s) | A.String (_, s))) as key), value) ->
           begin match Int64.of_string s with
           | newindex when SU.Integer.is_decimal_int s ->
+            begin match key with
+            (* do not fold int-like strings when hack_arr_compat_notices is set.
+               Arrays with such indices should not be placed in scalar table map
+               since it will not trigger runtime notices on key type mismatch *)
+            | _, A.String _ when hack_arr_compat_notices () -> raise NotLiteral
+            | _ -> ()
+            end;
             (TV.Int newindex, expr_to_typed_value ns value) :: pairs,
               Int64.add (if Int64.compare newindex maxindex > 0
               then newindex else maxindex) Int64.one

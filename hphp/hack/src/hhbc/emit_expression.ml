@@ -1266,8 +1266,14 @@ and is_packed_init ?(hack_arr_compat=true) es =
   in
   let keys_are_zero_indexed_properly_formed =
     List.foldi es ~init:true ~f:(fun i b f -> b && match f with
-      | A.AFkvalue ((_, A.Int (_, k)), _) -> int_of_string k = i
-      | A.AFvalue _ -> true
+      | A.AFkvalue ((_, A.Int (_, k)), _) ->
+        int_of_string k = i
+      (* arrays with int-like string keys are still considered packed
+         and should be emitted via NewArray *)
+      | A.AFkvalue ((_, A.String (_, k)), _) when not hack_arr_compat ->
+        (try int_of_string k = i with Failure _ -> false)
+      | A.AFvalue _ ->
+        true
       | _ -> false)
   in
   let has_references =
@@ -1278,11 +1284,10 @@ and is_packed_init ?(hack_arr_compat=true) es =
   in
   let has_bool_keys =
     List.exists es
-      ~f:(function A.AFkvalue ((_, (A.True | A.False)), _) -> true
-                 | _ -> false)
+      ~f:(function A.AFkvalue ((_, (A.True | A.False)), _) -> true | _ -> false)
   in
   (is_only_values || keys_are_zero_indexed_properly_formed)
-  && (not has_bool_keys || (not (hack_arr_compat && hack_arr_compat_notices())))
+  && not (has_bool_keys && (hack_arr_compat && hack_arr_compat_notices()))
   && not has_references
   && (List.length es) > 0
 

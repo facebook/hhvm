@@ -46,7 +46,9 @@ let get_from_local_cache ~full popt file_name =
           contents else "" in
         let { Parser_hack.ast;
           _ } = Parser_hack.program ~quick:(not full) popt file_name contents in
-        let ast = Ast_utils.deregister_ignored_attributes ast in
+        let ast = if (Relative_path.prefix file_name = Relative_path.Hhi)
+        && ParserOptions.deregister_php_stdlib popt
+        then Ast_utils.deregister_ignored_attributes ast else ast in
         if full then LocalParserCache.add file_name ast;
         ast
 

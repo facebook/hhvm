@@ -811,6 +811,7 @@ let mutate_metadata (input : HP.t)  =
   let mutate_typedef (typedef : Hhas_typedef.t) : Hhas_typedef.t =
     Hhas_typedef.make
       (typedef |> Hhas_typedef.name)
+      (typedef |> Hhas_typedef.attributes     |> delete_map mutate_attribute)
       (typedef |> Hhas_typedef.type_info      |> mutate_type_info)
       (typedef |> Hhas_typedef.type_structure |>
                                             option_lift mutate_typed_value) in

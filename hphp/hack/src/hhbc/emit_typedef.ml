@@ -28,6 +28,8 @@ let emit_typedef : Ast.typedef -> Hhas_typedef.t =
   let namespace = ast_typedef.Ast.t_namespace in
   let typedef_name, _ =
     Hhbc_id.Class.elaborate_id namespace ast_typedef.Ast.t_id in
+  let typedef_attributes =
+    Emit_attribute.from_asts namespace ast_typedef.Ast.t_user_attributes in
   let tparams = Emit_body.tparams_to_strings ast_typedef.Ast.t_tparams in
   let typedef_type_info =
     kind_to_type_info ~tparams ~namespace ast_typedef.Ast.t_kind in
@@ -36,6 +38,7 @@ let emit_typedef : Ast.typedef -> Hhas_typedef.t =
   in
   Hhas_typedef.make
     typedef_name
+    typedef_attributes
     typedef_type_info
     (Some typedef_type_structure)
 

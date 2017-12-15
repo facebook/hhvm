@@ -454,18 +454,20 @@ let method_return_type_comparer =
   wrap Hhas_method.return_type (fun _f s -> s)
     (option_comparer type_info_comparer)
 
+let make_attributes_comparer f =
+  wrap f (fun _ s -> s) (list_comparer attribute_comparer " ")
 
 let function_attributes_comparer =
-  wrap Hhas_function.attributes (fun _ s -> s)
-    (list_comparer attribute_comparer " ")
+  make_attributes_comparer Hhas_function.attributes
 
 let method_attributes_comparer =
-  wrap Hhas_method.attributes (fun _ s -> s)
-    (list_comparer attribute_comparer " ")
+  make_attributes_comparer Hhas_method.attributes
 
 let class_attributes_comparer =
-  wrap Hhas_class.attributes (fun _ s -> s)
-    (list_comparer attribute_comparer " ")
+  make_attributes_comparer Hhas_class.attributes
+
+let typedef_attributes_comparer =
+  make_attributes_comparer Hhas_typedef.attributes
 
 let type_constants_alist c = List.map
     (fun f -> (Hhas_type_constant.name f, Hhas_type_constant.initializer_t f))
@@ -812,6 +814,11 @@ let typedef_name_comparer =
   wrap (fun def -> Hhbc_id.Class.to_raw_string @@ Hhas_typedef.name def)
     (fun _ s ->  s) string_comparer
 
+let typedef_name_attributes_comparer =
+  join (fun s1 s2 -> s1 ^ s2)
+      typedef_attributes_comparer
+      typedef_name_comparer
+
 let typedef_type_info_comparer =
   wrap Hhas_typedef.type_info (fun _ s -> s) type_info_comparer
 
@@ -826,7 +833,7 @@ let typedef_type_info_and_structure_comparer =
 
 let typedef_comparer =
   join (fun s1 s2 -> s1 ^ " = " ^ s2)
-    typedef_name_comparer
+    typedef_name_attributes_comparer
     typedef_type_info_and_structure_comparer
 
 let program_top_functions_comparer = wrap top_functions_alist_of_program

@@ -1288,6 +1288,11 @@ let add_fun_def buf fun_def =
   add_body buf 2 function_body;
   B.add_string buf "}\n"
 
+let attributes_to_string attrs =
+  let text = String.concat " " attrs in
+  let text = if text = "" then "" else "[" ^ text ^ "] " in
+  text
+
 let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
@@ -1301,9 +1306,12 @@ let method_attributes m =
   let attrs = if Hhas_method.is_private m then "private" :: attrs else attrs in
   let attrs = if Hhas_method.is_return_by_ref m then "reference" :: attrs else attrs in
   let attrs = if Hhas_method.is_interceptable m then "interceptable" :: attrs else attrs in
-  let text = String.concat " " attrs in
-  let text = if text = "" then "" else "[" ^ text ^ "] " in
-  text
+  attributes_to_string attrs
+
+let typedef_attributes t =
+  let user_attrs = Hhas_typedef.attributes t in
+  let attrs = Emit_adata.attributes_to_strings user_attrs in
+  attributes_to_string attrs
 
 let add_method_def buf method_def =
   let method_name = Hhas_method.name method_def in
@@ -1546,6 +1554,7 @@ let add_typedef buf typedef =
   let type_info = Hhas_typedef.type_info typedef in
   let opt_ts = Hhas_typedef.type_structure typedef in
   B.add_string buf "\n.alias ";
+  B.add_string buf (typedef_attributes typedef);
   B.add_string buf (Hhbc_id.Class.to_raw_string name);
   B.add_string buf (" = " ^ string_of_typedef_info type_info);
   match opt_ts with

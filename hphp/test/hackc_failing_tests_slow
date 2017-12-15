@@ -100,8 +100,6 @@ slow/parser/hh-reserved-name-parent-2.php
 slow/parser/hh-reserved-name-self-2.php
 slow/parser/semi-reserved-keywords/enum_class_constant_bad.php
 slow/parser/semi-reserved-keywords/type_const_bad.php
-slow/reflection/ReflectionTypeAliasAttrs.php
-slow/reflection/ReflectionTypeAliasObjAttrs.php
 slow/reflection/isHack.002.php
 slow/return_statement/finally-typecheck.php
 slow/traits/2080.php

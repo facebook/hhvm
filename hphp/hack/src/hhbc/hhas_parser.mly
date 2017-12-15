@@ -67,11 +67,12 @@ decl:
     | functionrefsdecl {FunctionRefs_decl $1}
 ;
 aliasdecl:
-    | ALIASDIRECTIVE ID EQUALS aliastypeinfo TRIPLEQUOTEDSTRING SEMI nl
+    | ALIASDIRECTIVE attributes ID EQUALS aliastypeinfo TRIPLEQUOTEDSTRING SEMI nl
       {Hhas_typedef.make
-        (Hhbc_id.Class.from_raw_string $2)
-        $4
-        (Some (attribute_from_string $5))}
+        (Hhbc_id.Class.from_raw_string $3)
+        (fst $2)
+        $5
+        (Some (attribute_from_string $6))}
 ;
 maindecl:
     | MAINDIRECTIVE span LBRACE nl numiters ismemoizewrapper numclsrefslots declvars statics nl

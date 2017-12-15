@@ -2733,7 +2733,8 @@ void parse_adata(AsmState& as) {
 void parse_alias(AsmState& as) {
   as.in.skipWhitespace();
 
-  Attr attrs = parse_attribute_list(as, AttrContext::Alias);
+  TypeAlias record;
+  Attr attrs = parse_attribute_list(as, AttrContext::Alias, &record.userAttrs);
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".alias must have a name");
@@ -2755,7 +2756,6 @@ void parse_alias(AsmState& as) {
   as.ue->mergeLitstr(sname);
   as.ue->mergeLitstr(typeName);
 
-  TypeAlias record;
   record.name = sname;
   record.value = typeName;
   record.type = typeName->empty() ? AnnotType::Mixed : ty.type();

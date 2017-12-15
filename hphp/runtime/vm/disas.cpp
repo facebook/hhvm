@@ -784,7 +784,7 @@ void print_alias(Output& out, const TypeAlias& alias) {
   TypeConstraint constraint(alias.value, flags);
 
   out.fmtln(".alias{} {} = <{}> {};",
-            opt_attrs(AttrContext::Alias, alias.attrs),
+            opt_attrs(AttrContext::Alias, alias.attrs, &alias.userAttrs),
             (const StringData*)alias.name,
             type_constraint(constraint),
             escaped_long(alias.typeStructure.get()));

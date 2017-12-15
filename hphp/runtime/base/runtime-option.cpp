@@ -538,7 +538,8 @@ static inline uint32_t profileBCSizeDefault() {
 }
 
 static inline uint32_t resetProfCountersDefault() {
-  return RuntimeOption::EvalJitPGORacyProfiling ? UINT32_MAX
+  return RuntimeOption::EvalJitPGORacyProfiling
+    ? std::numeric_limits<uint32_t>::max()
     : RuntimeOption::EvalJitConcurrently ? 250 : 1000;
 }
 

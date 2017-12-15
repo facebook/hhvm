@@ -140,6 +140,8 @@ let instr_fpassc i hint = instr (ICall (FPassC (i, hint)))
 let instr_fpasscw i hint = instr (ICall (FPassCW (i, hint)))
 let instr_fpassce i hint = instr (ICall (FPassCE (i, hint)))
 let instr_fpassvnop i hint = instr (ICall (FPassVNop (i, hint)))
+let instr_raise_fpass_warning hint name i =
+  instr (ICall (RaiseFPassWarning (hint, name, i)))
 let instr_fpass kind =
   match kind with
   | PassByRefKind.AllowCell -> instr_fpassc
@@ -752,7 +754,7 @@ let get_input_output_count i =
     | FPushObjMethodD _ | FPushClsMethod _ | FPushClsMethodS _ | DecodeCufIter _
     | FPushCuf _ | FPushCufF _ | FPushFunc _ -> (1, 0)
     | FPushFuncU _ | FPushClsMethodD _ | FPushClsMethodSD _ | FPushCufIter _
-    | FPushFuncD _ -> (0, 0)
+    | FPushFuncD _ | RaiseFPassWarning _ -> (0, 0)
     | FPushObjMethod _ -> (2, 0)
     | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPassL _
     | FPushCtorS _ -> (0, 1)

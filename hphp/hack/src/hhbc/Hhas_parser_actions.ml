@@ -1010,6 +1010,8 @@ let maketernaryinst s arg1 arg2 arg3 =
     ICall(FCallBuiltin (intofiarg arg1, intofiarg arg2, stringofiarg arg3))
  | "FPassL" -> ICall (FPassL (intofiarg arg1, localidofiarg arg2, fpasshintof arg3))
  | "FPassS" -> ICall(FPassS (intofiarg arg1, intofiarg arg2, fpasshintof arg3))
+ | "RaiseFPassWarning" ->
+    ICall (RaiseFPassWarning (fpasshintof arg1, stringofiarg arg2, paramidofiarg arg3))
 
 (* instruct_final *)
  | "QueryM" ->

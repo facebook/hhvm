@@ -1903,20 +1903,25 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
                    then BaseR base_offset else BaseC base_offset)),
      1
 
+and get_pass_by_ref_hint expr =
+  let with_ref = expr_starts_with_ref expr in
+  if Emit_env.is_hh_syntax_enabled ()
+  then if with_ref then Ref else Cell
+  else Any
+
+and strip_ref e =
+  match snd e with
+  | A.Unop (A.Uref, e) -> e
+  | _ -> e
+
 and emit_arg env i is_splatted expr =
-  let is_inout, (pos, expr_ as expr) =
+  let is_inout, (pos, _ as expr) =
     match snd expr with
     | A.Callconv (A.Pinout, e) -> true, e
     | _ -> false, expr
   in
-  let with_ref = expr_starts_with_ref expr in
-  let hint =
-    if Emit_env.is_hh_syntax_enabled ()
-    then if with_ref then Ref else Cell
-    else Any in
-  let expr_ = match expr_ with
-  | A.Unop (A.Uref, (_, e)) -> e
-  | _ -> expr_ in
+  let hint = get_pass_by_ref_hint expr in
+  let _, expr_ = strip_ref expr in
   let default () =
     let instrs, flavor = emit_flavored_expr env expr in
     let instrs =
@@ -1987,7 +1992,7 @@ and emit_arg env i is_splatted expr =
       set_instrs;
       instr_fpassl i local hint;
     ]
-  | A.Call _ when with_ref ->
+  | A.Call _ when expr_starts_with_ref expr ->
     let instrs, _ = emit_flavored_expr env (pos, expr_) in
     gather [
       instrs;
@@ -2186,10 +2191,22 @@ and get_call_builtin_func_info lower_fq_id =
   | "hh\\darray" -> Some (1, IOp CastDArray)
   | _ -> None
 
-and emit_call_user_func_args env i expr =
+and emit_call_user_func_arg env f i expr =
+  let hint = get_pass_by_ref_hint expr in
+  let hint, warning, expr =
+    if hint = Ref
+    then
+      (* for warning - adjust the argument id *)
+      let param_id = Param_unnamed (i + 1) in
+      (* emitter.cpp:
+         The passthrough type of call_user_func is always cell or any, so
+         any call to a function taking a ref will result in a warning *)
+      Cell, instr_raise_fpass_warning hint f param_id, strip_ref expr
+    else hint, empty, expr in
   gather [
     emit_expr ~need_ref:false env expr;
-    instr_fpass PassByRefKind.AllowCell i Any;
+    warning;
+    instr_fpass PassByRefKind.AllowCell i hint;
   ]
 
 and emit_call_user_func env id arg args =
@@ -2230,9 +2247,10 @@ and emit_call_user_func env id arg args =
     | _ -> Flavor.ReturnVal
   in
   gather [
-    emit_expr ~need_ref:false env arg;
+    (* first arg is always emitted as cell *)
+    emit_expr ~need_ref:false env (strip_ref arg);
     begin_instr;
-    gather (List.mapi args (emit_call_user_func_args env));
+    gather (List.mapi args (emit_call_user_func_arg env id));
     call_instr;
     end_instr;
   ], flavor

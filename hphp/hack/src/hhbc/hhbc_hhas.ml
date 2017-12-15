@@ -525,6 +525,8 @@ let string_of_call instruction =
     sep ["FCallUnpack"; string_of_int n]
   | FCallBuiltin (n1, n2, id) ->
     sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; SU.quote_string id]
+  | RaiseFPassWarning (h, f, n) ->
+    sep ["RaiseFPassWarning"; string_of_fpasshint h; "\"" ^ f ^ "\""; string_of_param_id n]
 
 let string_of_barethis_op i =
   match i with

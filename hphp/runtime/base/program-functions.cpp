@@ -1804,7 +1804,17 @@ static int execute_program_impl(int argc, char** argv) {
     compilers_init();
   }
 #endif
-
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
+  // Set up extent hook so that we can place jemalloc metadata on 1G pages.
+  // This needs to be done after initializing LightProcess (which forks),
+  // because the child process does malloc which won't work with jemalloc
+  // metadata on 1G huge pages.
+  setup_jemalloc_metadata_extent_hook(
+    RuntimeOption::EvalEnableArenaMetadata1GPage,
+    RuntimeOption::EvalEnableNumaArenaMetadata1GPage,
+    RuntimeOption::EvalArenaMetadataReservedSize
+  );
+#endif
   // We want to do this as early as possible because any allocations before-hand
   // will get a generic unknown type type-index.
   try {

@@ -50,8 +50,12 @@
 # endif
 #else
 # include <jemalloc/jemalloc.h>
-#if (JEMALLOC_VERSION_MAJOR == 5) && defined(__linux__)
+# if (JEMALLOC_VERSION_MAJOR == 5) && defined(__linux__)
 #  define USE_JEMALLOC_EXTENT_HOOKS 1
+#  ifdef FACEBOOK
+// Requires customizable extent hooks on arena 0 (will ship in jemalloc 5.1)
+#   define USE_JEMALLOC_METADATA_1G_PAGES 1
+#  endif
 # endif
 # if (JEMALLOC_VERSION_MAJOR > 4)
 #  define JEMALLOC_NEW_ARENA_CMD "arenas.create"
@@ -176,6 +180,10 @@ inline int mallocx_huge1g_flags() {
 inline int dallocx_huge1g_flags() {
   return MALLOCX_TCACHE(high_huge1g_tcache);
 }
+
+/* Set up extent hooks to use 1g pages for jemalloc metadata. */
+void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
+                                         size_t reserved);
 
 // Functions to manipulate tcaches for huge arenas
 void thread_huge_tcache_create();       // tcache.create

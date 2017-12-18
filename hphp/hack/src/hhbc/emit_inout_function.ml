@@ -26,10 +26,14 @@ let emit_body_instrs_inout ~verify_ret params call_instrs =
         Some (instr_setl @@ Local.Named (Hhas_param.name p))) in
   let local = Local.get_unnamed_local () in
   let verify_ret_instr = if verify_ret then instr_verifyRetTypeC else empty in
+  let last_p = List.nth_exn params (param_count - 1) in
+  let has_variadic = Hhas_param.is_variadic last_p in
   gather [
     call_instrs;
     param_instrs;
-    instr_fcall param_count;
+    if has_variadic
+      then instr_fcallunpack param_count
+      else instr_fcall param_count;
     instr_unboxr_nop;
     Emit_inout_helpers.emit_list_set_for_inout_call local inout_params;
     verify_ret_instr;
@@ -95,6 +99,8 @@ let make_wrapper_body decl_vars return_type params instrs =
 
 let emit_wrapper_function
   ~decl_vars ~is_top ~wrapper_type ~original_id ~renamed_id ast_fun =
+  (* Wrapper methods may not have iterators *)
+  Iterator.reset_iterator ();
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let namespace = ast_fun.Ast.f_namespace in
   let env = Emit_env.(
@@ -152,6 +158,8 @@ let emit_wrapper_function
 
 let emit_wrapper_method
   ~is_closure ~decl_vars ~original_id ~renamed_id ast_class ast_method =
+  (* Wrapper methods may not have iterators *)
+  Iterator.reset_iterator ();
   let decl_vars = if is_closure then [] else decl_vars in
   let scope =
     [Ast_scope.ScopeItem.Method ast_method;

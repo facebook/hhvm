@@ -1,0 +1,44 @@
+array(11) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(24)
+  [4]=>
+  int(42)
+  [5]=>
+  string(5) "apple"
+  [6]=>
+  int(200)
+  [7]=>
+  int(8)
+  [8]=>
+  int(99)
+  [9]=>
+  string(5) "green"
+  [10]=>
+  int(16)
+}
+int(16)
+string(5) "green"
+int(99)
+int(8)
+array(7) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(24)
+  [4]=>
+  int(42)
+  [5]=>
+  string(5) "apple"
+  [6]=>
+  int(200)
+}

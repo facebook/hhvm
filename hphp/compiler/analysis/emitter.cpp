@@ -9030,7 +9030,11 @@ void EmitterVisitor::emitFuncWrapper(PostponedMeth& p, FuncEmitter* fe,
     }
   }
 
-  e.FCall(fe->params.size());
+  if (!fe->params.empty() && fe->params.back().variadic) {
+    e.FCallUnpack(fe->params.size());
+  } else {
+    e.FCall(fe->params.size());
+  }
   e.UnboxRNop();
   getReturn(e);
   e.RetC();
@@ -9047,7 +9051,7 @@ void EmitterVisitor::emitInOutToRefWrapper(PostponedMeth& p,
     p,
     fe,
     [&] (Emitter& e, int i) {
-      if (fe->params[i].byRef) {
+      if (fe->params[i].byRef && !fe->params[i].variadic) {
         fe->params[i].byRef = false;
         fe->params[i].inout = true;
         inoutParams.push_back(i);

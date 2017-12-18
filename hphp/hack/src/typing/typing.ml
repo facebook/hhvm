@@ -3711,12 +3711,12 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
         when ts = SN.FB.cTypeStructure ->
       let env, fields = TS.transform_shapemap env ty fields in
       let ty = r, Tshape (fk, fields) in
-      array_get is_lvalue p env ty e2 ty2
+      array_get ~lhs_of_null_coalesce is_lvalue p env ty e2 ty2
   | Tabstract _ ->
     let resl =
     try_over_concrete_supertypes env ety1
       begin fun env ty ->
-        array_get is_lvalue p env ty e2 ty2
+        array_get ~lhs_of_null_coalesce is_lvalue p env ty e2 ty2
       end in
     begin match resl with
     | [res] -> res

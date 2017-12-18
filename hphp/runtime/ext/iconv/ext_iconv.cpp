@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
-#include <folly/Assume.h>
+#include <folly/lang/Assume.h>
 #include <boost/algorithm/string/predicate.hpp>
 
 #define ICONV_SUPPORTS_ERRNO 1

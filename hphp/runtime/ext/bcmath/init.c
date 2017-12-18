@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <limits.h>
 #include "bcmath.h"
 #include "private.h"
 
@@ -50,7 +51,15 @@ _bc_new_num_ex (length, scale, persistent)
 {
   bc_num temp;
 
-  temp = (bc_num)malloc(sizeof(bc_struct)+length + scale);
+  assert(length >= 0);
+  assert(scale >= 0);
+  size_t malloc_size = sizeof(bc_struct) + (size_t)length + (size_t)scale;
+  if (malloc_size > INT_MAX) {
+    bc_out_of_memory();
+  }
+
+  temp = (bc_num)malloc(malloc_size);
+  if (temp == NULL) bc_out_of_memory();
 #if 0
   if (_bc_Free_list != NULL) {
     temp = _bc_Free_list;
@@ -67,7 +76,7 @@ _bc_new_num_ex (length, scale, persistent)
   temp->n_ptr = (char *)malloc(length + scale);
   if (temp->n_ptr == NULL) bc_out_of_memory();
   temp->n_value = temp->n_ptr;
-  memset(temp->n_ptr, 0, length+scale);
+  memset(temp->n_ptr, 0, length + scale);
   return temp;
 }
 
@@ -126,4 +135,3 @@ bc_init_num (bc_num *num TSRMLS_DC)
 {
   *num = bc_copy_num (BCG(_zero_));
 }
-

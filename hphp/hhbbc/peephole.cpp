@@ -64,6 +64,7 @@ void BasicPeephole::push_back(const Bytecode& next) {
       cur.srcLoc = srcLoc;
     };
 
+    // Kill <side-effect-free-expr>; PopX
     if ((cur.op == Op::RGetCNop && next.op == Op::UnboxRNop) ||
         (next.op == Op::PopC && poppable(cur.op)) ||
         (next.op == Op::PopU && cur.op == Op::NullUninit)) {
@@ -71,6 +72,7 @@ void BasicPeephole::push_back(const Bytecode& next) {
       return;
     }
 
+    // transform <expr> === null or <expr> !== null to IsTypeC Null [Not]
     if (cur.op == Op::Null &&
         (next.op == Op::Same || next.op == Op::NSame)) {
       update_cur(bc::IsTypeC { IsTypeOp::Null });
@@ -80,6 +82,7 @@ void BasicPeephole::push_back(const Bytecode& next) {
       return;
     }
 
+    // transform $x === null or $x !== null to IsTypeL Null [Not]
     if (m_next.size() > 1 &&
         (cur.op == Op::CGetL || cur.op == Op::CGetL2) &&
         (next.op == Op::Same || next.op == Op::NSame)) {
@@ -97,6 +100,7 @@ void BasicPeephole::push_back(const Bytecode& next) {
       }
     }
 
+    // transform $x = $x . <expr> into $x .= <expr>
     if (m_next.size() > 1 &&
         cur.op == Op::Concat &&
         (next.op == Op::SetL || next.op == Op::PopL)) {
@@ -117,6 +121,7 @@ void BasicPeephole::push_back(const Bytecode& next) {
       }
     }
 
+    // transform Not; JmpZ/JmpNZ to JmpNZ/JmpZ
     if (cur.op == Op::Not &&
         (next.op == Op::JmpZ || next.op == Op::JmpNZ)) {
       if (next.op == Op::JmpZ) {
@@ -127,12 +132,14 @@ void BasicPeephole::push_back(const Bytecode& next) {
       return;
     }
 
+    // transform PopL; PushL to UnsetL
     if (cur.op == Op::PopL && next.op == Op::PushL &&
         cur.PopL.loc1 == next.PushL.loc1) {
       update_cur(bc::UnsetL { cur.PopL.loc1 });
       return;
     }
 
+    // transform suitable FCallD; UnboxRNop; Await to FCallAwait
     if (!m_ctx.func->isGenerator &&
         m_next.size() > 1 &&
         cur.op == Op::UnboxRNop &&
@@ -161,6 +168,7 @@ void BasicPeephole::push_back(const Bytecode& next) {
       }
     }
 
+    // transform SetL; PopC to PopL
     if (cur.op == Op::SetL && next.op == Op::PopC) {
       cur = bc_with_loc(next.srcLoc, bc::PopL { cur.SetL.loc1 });
       return;

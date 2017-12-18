@@ -8,7 +8,7 @@
  *
 *)
 
-(* TODO: change this over to Hh_core *)
+(* TODO: change this over to Hh_core (and replace silly option functions)*)
 
 module EA = Emit_adata
 module Log = Semdiff_logging
@@ -689,17 +689,9 @@ let body_iters_cls_ref_slots_decl_vars_comparer perm =
     body_iters_cls_ref_slots_comparer
     (body_decl_vars_comparer perm)
 
-(* string_of_instruction already appends a newline, so remove it *)
-let droplast s = String.sub s 0 (String.length s - 1)
-let my_string_of_instruction i = droplast (Hhbc_hhas.string_of_instruction i)
-let instruct_comparer = primitive_comparer my_string_of_instruction
+let instruct_comparer = primitive_comparer Rhl.my_string_of_instruction
 
 let instruct_list_comparer = list_comparer instruct_comparer "\n"
-
-let string_of_nth_instruction l pc =
-  let i = Rhl.ip_of_pc pc in
-  if i= -1 then "THROWN"
-  else my_string_of_instruction @@ List.nth l i
 
 let option_get o = match o with | Some v -> v | None -> failwith "option"
 let option_is_some o = match o with Some _ -> true | None -> false
@@ -729,8 +721,8 @@ let body_instrs_comparer = {
        Log.debug (Tty.Normal Tty.White) @@ Printf.sprintf
          "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nAssumed=\n%s\nTodo=%s"
          (Rhl.string_of_pc pc) (Rhl.string_of_pc pc')
-         (string_of_nth_instruction inss pc)
-         (string_of_nth_instruction inss' pc')
+         (Rhl.string_of_nth_instruction inss pc)
+         (Rhl.string_of_nth_instruction inss' pc')
          (Rhl.asntostring asn) (Rhl.labasnsmaptostring assumed)
          (Rhl.labasnlisttostring todo);
        instruct_list_comparer.comparer inss inss'));

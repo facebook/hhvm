@@ -22,6 +22,9 @@ let error ~level ?(newline = true) c s =
 let debug ?(newline = true) c s =
   print ~level:2 ~newline ~channel:stdout c s
 
+let trace ?(newline = true) c s =
+    print ~level:3 ~newline ~channel:stdout c s
+
 type tagged_string =
  | Add of string
  | Del of string

@@ -1,4 +1,3 @@
-# step-indexing test
 .main {
   # real code seems to need EntryNop here
   # which is rather inelegant

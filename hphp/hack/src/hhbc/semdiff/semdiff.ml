@@ -30,14 +30,15 @@ let parse_options () =
   let options =
     [ ("--verbose"
       , Arg.Int (fun i ->
-                  if i < 0 || 2 < i
-                  then raise (Arg.Bad "Verbosity level has to be 0, 1 or 2")
+                  if i < 0 || 3 < i
+                  then raise (Arg.Bad "Verbosity level has to be 0, 1, 2, or 3")
                   else Log.verbosity_level := i)
         (* Change the default logging level in Semdiff_logging.ml *)
       , " Set verbosity level 0, 1 or 2 [default: 2]
                   0: Only displays the similarity percentage on STDOUT
                   1: Also displays differences on STDOUT
-                  2: Also displays debugging information on STDOUT"
+                  2: Also displays debugging information on STDOUT
+                  3: Also displays full trace on STDOUT"
       );
       ("--laxunset",
        Arg.Unit (fun () -> Rhl.lax_unset := true),

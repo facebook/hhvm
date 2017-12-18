@@ -113,7 +113,12 @@ inline int operator<<(HeaderKind k, int bits) {
 
 inline void* MemoryManager::FreeList::likelyPop() {
   auto ret = head;
-  if (LIKELY(ret != nullptr)) head = ret->next;
+  if (LIKELY(ret != nullptr)) {
+    // head already prefetched, this load should be fast
+    auto next = ret->next;
+    __builtin_prefetch(next, 0, 2); // HINT_T1 on x64
+    head = next;
+  }
   FTRACE(4, "FreeList::likelyPop(): returning {}\n", ret);
   return ret;
 }

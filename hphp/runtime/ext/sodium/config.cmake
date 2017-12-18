@@ -4,5 +4,5 @@ HHVM_DEFINE_EXTENSION("sodium" IMPLICIT
   SYSTEMLIB
     ext_sodium.php
   DEPENDS
-    "libsodium 1.0.7"
+    "libsodium 1.0.9"
 )

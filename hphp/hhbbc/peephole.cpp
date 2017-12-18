@@ -97,6 +97,26 @@ void BasicPeephole::push_back(const Bytecode& next) {
       }
     }
 
+    if (m_next.size() > 1 &&
+        cur.op == Op::Concat &&
+        (next.op == Op::SetL || next.op == Op::PopL)) {
+      auto& prev = (&cur)[-1];
+      auto const setLoc = next.op == Op::SetL ? next.SetL.loc1 : next.PopL.loc1;
+      if (prev.op == Op::CGetL2 && prev.CGetL2.loc1 == setLoc) {
+        prev = bc::SetOpL {
+          setLoc,
+          SetOpOp::ConcatEqual
+        };
+        prev.srcLoc = next.srcLoc;
+        if (next.op == Op::PopL) {
+          update_cur(bc::PopC {});
+        } else {
+          m_next.pop_back();
+        }
+        return;
+      }
+    }
+
     if (cur.op == Op::Not &&
         (next.op == Op::JmpZ || next.op == Op::JmpNZ)) {
       if (next.op == Op::JmpZ) {

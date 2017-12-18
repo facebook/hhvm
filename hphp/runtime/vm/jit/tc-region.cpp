@@ -438,6 +438,7 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
     if (RuntimeOption::EvalJitUseVtuneAPI) {
       reportTraceletToVtune(sk.unit(), sk.func(), tr);
     }
+    reportJitMaturity(code());
 
     assertx(!transdb::enabled() ||
             transdb::getTransRec(coldStart)->kind == TransKind::Anchor);

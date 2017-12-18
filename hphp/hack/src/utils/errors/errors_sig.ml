@@ -457,4 +457,6 @@ module type S = sig
   val illegal_xhp_child : Pos.t -> (Pos.t * string) list -> unit
   val nonreactive_function_call : Pos.t -> unit
   val nonreactive_append : Pos.t -> unit
+  val inout_argument_bad_expr : Pos.t -> unit
+  val inout_argument_bad_type : Pos.t -> (Pos.t * string) list -> unit
 end

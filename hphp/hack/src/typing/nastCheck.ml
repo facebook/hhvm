@@ -1126,6 +1126,12 @@ and expr_ env p = function
   | Callconv (_, e) ->
       require_inout_params_enabled env p;
       expr env e;
+      let rec aux = function
+        | _, Lvar _ -> true
+        | _, Array_get (e1, Some _) -> aux e1
+        | _ -> false
+      in
+      if not (aux e) then Errors.inout_argument_bad_expr (fst e);
       ()
   | Shape fdm ->
       ShapeMap.iter (fun _ v -> expr env v) fdm

@@ -1994,6 +1994,31 @@ and expr_
       )
   | Callconv (kind, e) ->
       let env, te, ty = expr env e in
+      let rec check_types env = function
+        | _, T.Lvar _ -> ()
+        | _, T.Array_get (((_, Some ty1), _) as te1, Some _) ->
+          let rec iter = function
+            | _, Tany -> true
+            | _, Tprim Tstring -> true
+            | _, (Tarraykind _ | Ttuple _ | Tshape _) -> true
+            | _, Tclass ((_, cn), _)
+              when cn = SN.Collections.cDict
+                || cn = SN.Collections.cKeyset
+                || cn = SN.Collections.cVec -> true
+            | _, Tunresolved tyl -> List.for_all ~f:iter tyl
+            | _ -> false in
+          let env, ety1 = Env.expand_type env ty1 in
+          if iter ety1 then check_types env te1 else begin
+            let ty_str = Typing_print.error (snd ety1) in
+            let msgl = Reason.to_string ("This is " ^ ty_str) (fst ety1) in
+            Errors.inout_argument_bad_type (fst e) msgl
+          end
+        | _, T.Array_get (te2, Some _) ->
+          check_types env te2
+        (* Other invalid expressions are caught in NastCheck. *)
+        | _ -> ()
+      in
+      check_types env te;
       make_result env (T.Callconv (kind, te)) ty
     (* TODO TAST: change AST so that order of shape expressions is preserved.
      * At present, evaluation order is unspecified in TAST *)

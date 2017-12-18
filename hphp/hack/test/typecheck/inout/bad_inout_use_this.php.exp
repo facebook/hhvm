@@ -1,2 +1,2 @@
 File "bad_inout_use_this.php", line 9, characters 13-17:
-Cannot assign a value to $this (Typing[4134])
+Arguments for inout parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])

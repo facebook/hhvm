@@ -1,2 +1,2 @@
-File "bad_inout_use_lvalue6.php", line 11, characters 11-13:
+File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
 Invalid argument for an inout parameter (must be lvalue) (Parsing[1002])

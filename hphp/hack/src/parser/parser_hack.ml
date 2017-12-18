@@ -4304,17 +4304,24 @@ and expr_array_get env e1 =
 (*****************************************************************************)
 
 and expr_callconv env start ~(flavor:param_kind) =
+  let pdesc = Printf.sprintf "an %s parameter" (string_of_param_kind flavor) in
   with_base_priority env begin fun env ->
     let pos, _ as e = match expr env with
       | p, Unop (Uref, e1) -> error_at env p "Unexpected reference"; e1
       | x -> x in
     begin match snd e with
       | Call _ | Omitted ->
-        error_at env pos "Invalid lvalue"
+        error_at env pos begin
+          Printf.sprintf "Invalid argument for %s (must be lvalue)" pdesc
+        end
+      | Obj_get (_, (_, Id _), OG_nullsafe) ->
+        error_at env pos "?-> syntax is not supported for inout"
+      | Obj_get (_, (_, Id (_, name)), _) when name.[0] = ':' ->
+        error_at env pos "->: syntax is not supported for inout"
       | List _ ->
-        error_at env pos (Printf.sprintf
-          "Cannot pass list intrinsic for an %s parameter"
-          (string_of_param_kind flavor))
+        error_at env pos begin
+          Printf.sprintf "Cannot pass list intrinsic for %s" pdesc
+        end
       | _ -> check_lvalue env e
     end;
     Pos.btw start pos, Callconv (flavor, e)

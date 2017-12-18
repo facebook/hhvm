@@ -797,6 +797,7 @@ module NastCheck                            = struct
   let reading_from_append                   = 3047 (* DONT MODIFY!!!! *)
   let const_attribute_prohibited            = 3048 (* DONT MODIFY!!!! *)
   let global_in_reactive_context            = 3049 (* DONT MODIFY!!!! *)
+  let inout_argument_bad_expr               = 3050 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1005,6 +1006,7 @@ module Typing                               = struct
   let invalid_return_disposable             = 4205 (* DONT MODIFY!!!! *)
   let invalid_disposable_return_hint        = 4206 (* DONT MODIFY!!!! *)
   let return_disposable_mismatch            = 4207 (* DONT MODIFY!!!! *)
+  let inout_argument_bad_type               = 4208 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1677,6 +1679,12 @@ let const_attribute_prohibited pos kind =
 let global_in_reactive_context pos =
   add NastCheck.global_in_reactive_context pos
     "This is global; you cannot access or write to globals in a reactive context"
+
+let inout_argument_bad_expr pos =
+  add NastCheck.inout_argument_bad_expr pos (
+    "Arguments for inout parameters must be local variables or simple " ^
+    "subscript expressions on vecs, dicts, keysets, or arrays"
+  )
 
 (*****************************************************************************)
 (* Nast terminality *)
@@ -2964,6 +2972,13 @@ let obj_set_reactive pos =
   let msg = ("This property is being mutated(used as an lvalue)" ^
   "\nYou cannot set non-mutable object properties in reactive functions") in
   add Typing.obj_set_reactive pos msg
+
+let inout_argument_bad_type pos msgl =
+  let msg =
+    "Expected argument marked inout to be contained in a local or " ^
+    "a value-typed container (e.g. vec, dict, keyset, array). " ^
+    "To use inout here, assign to/from a temporary local variable." in
+  add_list Typing.inout_argument_bad_type ((pos, msg) :: msgl)
 
 
 (*****************************************************************************)

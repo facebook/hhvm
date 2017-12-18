@@ -254,8 +254,7 @@ class Instruction {
   }
 
   inline bool IsNop() const {
-    return (Mask(SystemHintMask) == HINT) &&
-          (ImmHint() == NOP);
+    return (Mask(SystemHintMask) == HINT) && (ImmHint() == NOP);
   }
 
   // Indicate whether Rd can be the stack pointer or the zero register. This

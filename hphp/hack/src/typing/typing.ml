@@ -292,7 +292,7 @@ let rec bind_param env (ty1, param) =
     | None ->
         env, None, (Reason.none, Tany)
     | Some e ->
-        let env, te, ty = expr env e in
+        let env, te, ty = expr ~expected:(param.param_pos, Reason.URparam, ty1) env e in
         Typing_sequencing.sequence_check_expr e;
         env, Some te, ty
   in
@@ -5624,15 +5624,16 @@ and typeconst_def env {
   }
 
 and class_const_def env (h, id, e) =
-  let env, ty =
+  let env, ty, opt_expected =
     match h with
-    | None -> env, Env.fresh_type()
+    | None -> env, Env.fresh_type(), None
     | Some h ->
-       Phase.hint_locl env h
+      let env, ty = Phase.hint_locl env h in
+      env, ty, Some (fst id, Reason.URhint, ty)
   in
   match e with
     | Some e ->
-      let env, te, ty' = expr env e in
+      let env, te, ty' = expr ?expected:opt_expected env e in
       ignore (Type.sub_type (fst id) Reason.URhint env ty' ty);
       (h, id, Some te), ty'
     | None ->
@@ -5913,14 +5914,17 @@ and gconst_def tcopt cst =
     match cst.cst_value with
     | None -> None, env
     | Some value ->
-      let env, te, value_type = expr env value in
       match cst.cst_type with
       | Some hint ->
         let ty = TI.instantiable_hint env hint in
         let env, dty = Phase.localize_with_self env ty in
+        let env, te, value_type =
+          expr ~expected:(fst hint, Reason.URhint, dty) env value in
         let env = Typing_utils.sub_type env value_type dty in
         Some te, env
-      | None -> Some te, env
+      | None ->
+        let env, te, _value_type = expr env value in
+        Some te, env
   in
   { T.cst_annotation = save_env env;
     T.cst_mode = cst.cst_mode;

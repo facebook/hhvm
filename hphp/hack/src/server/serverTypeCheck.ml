@@ -182,7 +182,7 @@ let remove_decls env fast_parsed =
  * we're not going to recheck it, and positions in its error list might
  * become stale. Look if any of those positions refer to files that have
  * actually changed and add them to files to recheck. *)
-let get_files_with_stale_errors
+let get_files_with_stale_errors genv
     (* Set of files that were reparsed (so their ASTs and positions
      * in them could have changed. *)
     ~reparsed
@@ -209,9 +209,15 @@ let get_files_with_stale_errors
   in
   List.fold phases ~init:Relative_path.Set.empty ~f:begin fun acc phase ->
     fold phase acc begin fun source error acc ->
-      if List.exists (Errors.to_list error) ~f:begin fun e ->
-        Relative_path.Set.mem reparsed (fst e |> Pos.filename)
-      end then Relative_path.Set.add acc source else acc
+      if
+      (* Without this setting, assume that our dependnecy tracking is unreliable
+       * and all errors can be stale. That fixes some instances of false
+       * positivies. *)
+        not genv.local_config.ServerLocalConfig.incremental_errors ||
+        List.exists (Errors.to_list error) ~f:begin fun e ->
+          Relative_path.Set.mem reparsed (fst e |> Pos.filename)
+        end
+      then Relative_path.Set.add acc source else acc
     end
   end
 
@@ -366,6 +372,7 @@ module type CheckKindType = sig
     (* files to parse, should we stop if there are parsing errors *)
 
   val get_defs_to_redecl :
+     ServerEnv.genv ->
      reparsed:Relative_path.Set.t ->
      env:ServerEnv.env ->
      Relative_path.Set.t
@@ -385,6 +392,7 @@ module type CheckKindType = sig
 
   (* Which files to typecheck, based on results of declaration phase *)
   val get_defs_to_recheck :
+    ServerEnv.genv ->
     reparsed:Relative_path.Set.t ->
     phase_2_decl_defs:FileInfo.fast ->
     files_info:FileInfo.t Relative_path.Map.t ->
@@ -414,11 +422,11 @@ module FullCheckKind : CheckKindType = struct
     ) in
     files_to_parse, false
 
-  let get_defs_to_redecl ~reparsed ~env =
+  let get_defs_to_redecl genv ~reparsed ~env =
     (* Besides the files that actually changed, we want to also redeclare
      * those that have decl errors referring to files that were
      * reparsed, since positions in those errors can be now stale *)
-    get_files_with_stale_errors
+    get_files_with_stale_errors genv
       ~reparsed
       ~filter:None
       ~phases:[Errors.Decl]
@@ -435,13 +443,13 @@ module FullCheckKind : CheckKindType = struct
      * to approximate anything *)
     Relative_path.Set.empty
 
-  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~files_info ~to_recheck ~env =
+  let get_defs_to_recheck genv ~reparsed ~phase_2_decl_defs ~files_info ~to_recheck ~env =
     (* Besides the files that actually changed, we want to also recheck
      * those that have typing errors referring to files that were
      * reparsed, since positions in those errors can be now stale. TODO: do we
      * really also need to add decl errors? We always did, but I don't know why.
      *)
-    let stale_errors = get_files_with_stale_errors
+    let stale_errors = get_files_with_stale_errors genv
       ~reparsed
       ~filter:None
       ~phases:[Errors.Decl; Errors.Typing]
@@ -498,10 +506,10 @@ module LazyCheckKind : CheckKindType = struct
     Relative_path.Set.mem (ide_error_sources env) x ||
     Relative_path.Set.mem (env.editor_open_files) x
 
-  let get_defs_to_redecl ~reparsed ~env =
+  let get_defs_to_redecl genv ~reparsed ~env =
     (* Same as FullCheckKind.get_defs_to_redecl, but we limit returned set only
      * to files that are relevant to IDE *)
-    get_files_with_stale_errors
+    get_files_with_stale_errors genv
        ~reparsed
        ~filter:(Some (ide_error_sources env))
        ~phases:[Errors.Decl]
@@ -532,10 +540,10 @@ module LazyCheckKind : CheckKindType = struct
       ~f:(fun x acc -> Relative_path.Set.union acc @@ get_related_files x)
     |> Relative_path.Set.filter ~f:(is_ide_file env)
 
-  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~files_info ~to_recheck ~env =
+  let get_defs_to_recheck genv ~reparsed ~phase_2_decl_defs ~files_info ~to_recheck ~env =
     (* Same as FullCheckKind.get_defs_to_recheck, but we limit returned set only
      * to files that are relevant to IDE *)
-    let stale_errors = get_files_with_stale_errors
+    let stale_errors = get_files_with_stale_errors genv
       ~reparsed
       ~filter:(Some (ide_error_sources env))
       ~phases:[Errors.Decl; Errors.Typing]
@@ -661,7 +669,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let fast = extend_fast fast files_info failed_naming in
 
     (* COMPUTES WHAT MUST BE REDECLARED  *)
-    let failed_decl = CheckKind.get_defs_to_redecl files_to_parse env in
+    let failed_decl = CheckKind.get_defs_to_redecl genv files_to_parse env in
     let fast = extend_fast fast files_info failed_decl in
     let fast = add_old_decls env.files_info fast in
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
@@ -732,7 +740,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let t = Hh_logger.log_duration "Type-decl" t in
 
     (* TYPE CHECKING *)
-    let fast, lazy_check_later = CheckKind.get_defs_to_recheck
+    let fast, lazy_check_later = CheckKind.get_defs_to_recheck genv
       files_to_parse fast files_info to_recheck env in
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
     ServerCheckpoint.process_updates fast;

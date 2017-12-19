@@ -73,7 +73,11 @@ def lookup_litstr(litstr_id, u):
         litstr_id -= gloff
         u = V('HPHP::LitstrTable::s_litstrTable')
 
-    return idx.vector_at(u['m_namedInfo'], litstr_id)['first']
+    val = u['m_namedInfo']
+    # get the base type
+    ty = val.type.fields()[0].type;
+    val = val.address.cast(ty.pointer()).dereference()
+    return idx.compact_vector_at(val, litstr_id)
 
 
 class LookupLitstrCommand(gdb.Command):

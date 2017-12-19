@@ -72,6 +72,8 @@ def parse_argv(args, limit=None):
 def gdbprint(val, ty=None):
     if ty is None:
         ty = val.type
+    # quote names with :: in case we're in a non-c++ frame
+    ty = re.sub(r'\b(\w*(::\w+)+)\b', r"'\1'", str(ty))
     gdb.execute('print (%s)%s' % (str(ty), str(val)))
 
 

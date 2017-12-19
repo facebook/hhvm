@@ -99,16 +99,19 @@ def php_line_number_from_repo(func, pc):
 def php_line_number(func, pc):
     unit = func['m_unit']
 
-    line_info = V('HPHP::(anonymous namespace)::s_lineInfo')
-    line_map = idxs.tbb_chm_at(line_info, unit)
+    line_map = unit['m_lineMap']['val']
 
     if line_map is not None:
-        line = idxs.boost_flat_map_at(line_map, pc)
-        if line is not None:
-            return line
+        i = 0;
+        while True:
+            r = idxs.compact_vector_at(line_map, i)
+            if r is None:
+                break
+            if r['first']['base'] <= pc and r['first']['past'] > pc:
+                return r['second']
+            i += 1
 
     return php_line_number_from_repo(func, pc)
-
 
 #------------------------------------------------------------------------------
 # Frame builders.

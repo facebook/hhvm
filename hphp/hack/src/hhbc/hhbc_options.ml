@@ -36,7 +36,7 @@ type t = {
 
 let default = {
   option_ints_overflow_to_ints = None;
-  option_enable_hiphop_syntax = true;
+  option_enable_hiphop_syntax = false;
   option_php7_scalar_types = false;
   option_enable_xhp = false;
   option_constant_folding = false;

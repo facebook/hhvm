@@ -2769,6 +2769,21 @@ void parse_alias(AsmState& as) {
   as.in.expectWs(';');
 }
 
+void parse_hh_file(AsmState& as) {
+  as.in.skipWhitespace();
+  std::string word;
+  if (!as.in.readword(word)) {
+    as.error(".hh_file must have a value");
+  }
+  as.ue->m_isHHFile = word == "1";
+
+  if (!as.ue->m_isHHFile && word != "0") {
+    as.error(".hh_file must be either 1 or 0");
+  }
+
+  as.in.expectWs(';');
+}
+
 void parse_strict(AsmState& as) {
   as.in.skipWhitespace();
   std::string word;
@@ -2870,6 +2885,7 @@ void parse(AsmState& as) {
     if (directive == ".class")         { parse_class(as)         ; continue; }
     if (directive == ".alias")         { parse_alias(as)         ; continue; }
     if (directive == ".strict")        { parse_strict(as)        ; continue; }
+    if (directive == ".hh_file")       { parse_hh_file(as)       ; continue; }
     if (directive == ".includes")      { parse_includes(as)      ; continue; }
     if (directive == ".constant_refs") { parse_constant_refs(as) ; continue; }
     if (directive == ".function_refs") { parse_function_refs(as) ; continue; }

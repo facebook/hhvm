@@ -69,13 +69,6 @@ slow/inout/bad-generator.php
 slow/inout/side-effects.php
 slow/keyset/init-parse-error1.php
 slow/keyset/init-parse-error2.php
-slow/lang/hh_return_type_1.php
-slow/lang/hh_return_type_2.php
-slow/lang/hh_return_type_3.php
-slow/lang/hh_return_type_this_0.php
-slow/lang/hh_return_type_this_1.php
-slow/lang/hh_return_type_this_2.php
-slow/lang/hh_return_type_this_3.php
 slow/parser/closure_return_types_both_places.php
 slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-3.php

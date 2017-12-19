@@ -9,6 +9,7 @@
 *)
 
 type t = {
+  hhas_is_hh       : bool;
   hhas_adata       : Hhas_adata.t list;
   hhas_fun         : Hhas_function.t list;
   hhas_classes     : Hhas_class.t list;
@@ -17,8 +18,11 @@ type t = {
   hhas_symbol_refs : Hhas_symbol_refs.t;
 }
 
-let make hhas_adata hhas_fun hhas_classes hhas_typedefs hhas_main hhas_symbol_refs =
-  { hhas_adata; hhas_fun; hhas_classes; hhas_typedefs; hhas_main; hhas_symbol_refs; }
+let make hhas_is_hh hhas_adata hhas_fun hhas_classes hhas_typedefs hhas_main hhas_symbol_refs =
+  { hhas_is_hh; hhas_adata; hhas_fun; hhas_classes; hhas_typedefs; hhas_main; hhas_symbol_refs; }
+
+let is_hh hhas_prog =
+  hhas_prog.hhas_is_hh
 
 let functions hhas_prog =
   hhas_prog.hhas_fun

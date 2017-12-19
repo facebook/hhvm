@@ -46,6 +46,7 @@ open Hhas_parser_actions
 %token CATCHDIRECTIVE
 %token ALIASDIRECTIVE
 %token STRICTDIRECTIVE
+%token HHFILE
 
 %start program
 %type <Hhas_program.t> program
@@ -53,7 +54,7 @@ open Hhas_parser_actions
 %type <Instruction_sequence.t> functionbody
 %%
 program:
-    nl decllist nl EOF { split_decl_list $2 [] [] None [] [] Hhas_symbol_refs.IncludePathSet.empty SSet.empty SSet.empty SSet.empty}
+    nl decllist nl EOF { split_decl_list $2 false [] [] None [] [] Hhas_symbol_refs.IncludePathSet.empty SSet.empty SSet.empty SSet.empty}
 ;
 decl:
     | maindecl {Main_decl $1}
@@ -547,6 +548,7 @@ decllist:
     | decl nl decllist {$1 :: $3}
     | FILEPATHDIRECTIVE STRING SEMI nl decllist {$5}
     | STRICTDIRECTIVE INT SEMI nl decllist {$5}
+    | HHFILE INT SEMI nl decllist { HHFile_decl ($2 = 1L) :: $5 }
 ;
 includesdecl:
     | INCLUDESDIRECTIVE {

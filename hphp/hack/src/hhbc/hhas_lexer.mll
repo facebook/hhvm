@@ -86,6 +86,7 @@ rule read =
   | ".filepath"         {FILEPATHDIRECTIVE}
   | ".alias"            {ALIASDIRECTIVE}
   | ".strict"           {STRICTDIRECTIVE}
+  | ".hh_file"          {HHFILE}
   | ".static"           {STATICDIRECTIVE}
   | ".require"          {REQUIREDIRECTIVE}
   | ".srcloc"           {SRCLOCDIRECTIVE}

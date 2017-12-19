@@ -1615,6 +1615,8 @@ let add_symbol_ref_regions buf symbol_refs =
   add_region "class_refs" symbol_refs.Hhas_symbol_refs.classes
 
 let add_program_content ?path dump_symbol_refs buf hhas_prog =
+  let is_hh = if Hhas_program.is_hh hhas_prog then "1" else "0" in
+  B.add_string buf @@ "\n.hh_file " ^ is_hh ^ ";\n";
   let functions = Hhas_program.functions hhas_prog in
   let top_level_body = Hhas_program.main hhas_prog in
   let classes = Hhas_program.classes hhas_prog in

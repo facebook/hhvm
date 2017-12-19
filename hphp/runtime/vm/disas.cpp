@@ -796,9 +796,16 @@ void print_unit_strict_types(Output& out, const Unit* unit) {
   else out.fmtln(".strict 0;");
 }
 
+void print_hh_file(Output& out, const Unit* unit) {
+  out.nl();
+  if (unit->isHHFile()) out.fmtln(".hh_file 1;");
+  else out.fmtln(".hh_file 0;");
+}
+
 void print_unit_metadata(Output& out, const Unit* unit) {
   out.nl();
   out.fmtln(".filepath {};", escaped(unit->filepath()));
+  print_hh_file(out, unit);
   for (auto i = size_t{0}; i < unit->numArrays(); ++i) {
     auto const ad = unit->lookupArrayId(i);
     out.fmtln(".adata A_{} = {};", i, escaped_long(ad));

@@ -49,7 +49,7 @@ let emit_fatal_program ~ignore_message op pos message =
     [] (* static_inits static_inits  *)
     None (* doc *)
   in
-    Hhas_program.make [] [] [] [] body Emit_symbol_refs.empty_symbol_refs
+    Hhas_program.make false [] [] [] [] body Emit_symbol_refs.empty_symbol_refs
 
 let from_ast is_hh_file ast =
   Utils.try_finally
@@ -69,6 +69,7 @@ let from_ast is_hh_file ast =
       let adata = Emit_adata.get_adata () in
       let symbol_refs = Emit_symbol_refs.get_symbol_refs () in
       let hhas = Hhas_program.make
+        is_hh_file
         adata compiled_funs compiled_classes
         compiled_typedefs compiled_defs symbol_refs in
       hhas

@@ -488,6 +488,7 @@ function rel_path($to) {
 
 function get_options($argv) {
   $parameters = array(
+    'env:' => '',
     'exclude:' => 'e:',
     'exclude-pattern:' => 'E:',
     'exclude-recorded-failures:' => 'x:',
@@ -1020,11 +1021,23 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   }
 
   $env = $_ENV;
+  $extra_env = array();
+
+  // Apply the --env option
+  if (isset($options['env'])) {
+    $extra_env = array_merge($extra_env,
+      explode(",", $options['env']));
+  }
+
   // If there's an <test name>.env file then inject the contents of that into
   // the test environment.
   $env_file = find_test_ext($test, 'env');
   if ($env_file !== null) {
-    $extra_env = explode("\n", trim(file_get_contents($env_file)));
+    $extra_env = array_merge($extra_env,
+      explode("\n", trim(file_get_contents($env_file))));
+  }
+
+  if ($extra_env) {
     foreach ($extra_env as $arg) {
       $i = strpos($arg, '=');
       if ($i) {

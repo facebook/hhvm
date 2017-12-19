@@ -26,10 +26,6 @@
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/ext/collections/ext_collections-map.h"
-#include "hphp/runtime/ext/collections/ext_collections-pair.h"
-#include "hphp/runtime/ext/collections/ext_collections-set.h"
-#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
@@ -83,7 +79,6 @@ ArrayIter::ArrayIter(const Variant& v) {
 ArrayIter::ArrayIter(const ArrayIter& iter) {
   m_data = iter.m_data;
   m_pos = iter.m_pos;
-  m_version = iter.m_version;
   m_itype = iter.m_itype;
   m_nextHelperIdx = iter.m_nextHelperIdx;
   if (hasArrayData()) {
@@ -104,60 +99,29 @@ void ArrayIter::arrInit(const ArrayData* arr) {
   }
 }
 
-void ArrayIter::VectorInit(ArrayIter* iter, ObjectData* obj) {
-  auto vec = static_cast<c_Vector*>(obj);
-  iter->m_version = vec->getVersion();
-  iter->m_pos = 0;
-}
+template <bool incRef>
+void ArrayIter::objInit(ObjectData* obj) {
+  assert(obj);
 
-void ArrayIter::MapInit(ArrayIter* iter, ObjectData* obj) {
-  auto mp = static_cast<c_Map*>(obj);
-  iter->m_version = mp->getVersion();
-  iter->m_pos = mp->iter_begin();
-}
-
-void ArrayIter::ImmMapInit(ArrayIter* iter, ObjectData* obj) {
-  auto smp = static_cast<c_ImmMap*>(obj);
-  iter->m_version = smp->getVersion();
-  iter->m_pos = smp->iter_begin();
-}
-
-void ArrayIter::SetInit(ArrayIter* iter, ObjectData* obj) {
-  auto st = static_cast<c_Set*>(obj);
-  iter->m_version = st->getVersion();
-  iter->m_pos = st->iter_begin();
-}
-
-void ArrayIter::PairInit(ArrayIter* iter, ObjectData* /*obj*/) {
-  iter->m_pos = 0;
-}
-
-void ArrayIter::ImmVectorInit(ArrayIter* iter, ObjectData* obj) {
-  auto vec = static_cast<c_ImmVector*>(obj);
-  iter->m_version = vec->getVersion();
-  iter->m_pos = 0;
-}
-void ArrayIter::ImmSetInit(ArrayIter* iter, ObjectData* obj) {
-  auto st = static_cast<c_ImmSet*>(obj);
-  iter->m_version = st->getVersion();
-  iter->m_pos = st->iter_begin();
-}
-
-IterNextIndex ArrayIter::getNextHelperIdx(ObjectData* obj) {
-  if (obj->isCollection()) {
-    switch (obj->collectionType()) {
-#define X(type) case CollectionType::type: return IterNextIndex::type;
-COLLECTIONS_ALL_TYPES(X)
-#undef X
+  if (LIKELY(obj->isCollection())) {
+    if (auto ad = collections::asArray(obj)) {
+      ad->incRefCount();
+      if (!incRef) decRefObj(obj);
+      m_pos = ad->iter_begin();
+      setArrayData(ad);
+    } else {
+      assertx(obj->collectionType() == CollectionType::Pair);
+      auto arr = collections::toArray(obj);
+      if (!incRef) decRefObj(obj);
+      m_pos = arr->iter_begin();
+      setArrayData(arr.detach());
     }
-    not_reached();
-  } else {
-    return IterNextIndex::Object;
+    return;
   }
-}
 
-void ArrayIter::IteratorObjInit(ArrayIter* iter, ObjectData* obj) {
-  assert(obj->instanceof(SystemLib::s_IteratorClass));
+  assertx(obj->instanceof(SystemLib::s_IteratorClass));
+  setObject(obj);
+  if (incRef) obj->incRefCount();
   try {
     obj->o_invoke_few_args(s_rewind, 0);
   } catch (...) {
@@ -168,46 +132,11 @@ void ArrayIter::IteratorObjInit(ArrayIter* iter, ObjectData* obj) {
     // care of this, but the destructor will not get invoked if an
     // exception is thrown before the constructor finishes so we have
     // to manually handle decreffing the object here.
-    iter->m_data = nullptr;
-    if (debug) iter->m_itype = TypeUndefined;
+    this->m_data = nullptr;
+    if (debug) this->m_itype = TypeUndefined;
     decRefObj(obj);
     throw;
   }
-}
-
-constexpr unsigned ctype_index(CollectionType t) {
-  return unsigned(t) - unsigned(CollectionType::Vector);
-}
-
-static_assert(ctype_index(CollectionType::Vector) == 0, "");
-static_assert(ctype_index(CollectionType::Map) == 1, "");
-static_assert(ctype_index(CollectionType::Set) == 2, "");
-static_assert(ctype_index(CollectionType::Pair) == 3, "");
-static_assert(ctype_index(CollectionType::ImmVector) == 4, "");
-static_assert(ctype_index(CollectionType::ImmMap) == 5, "");
-static_assert(ctype_index(CollectionType::ImmSet) == 6, "");
-const unsigned MaxCollectionTypes = 7;
-
-const ArrayIter::InitFuncPtr
-ArrayIter::initFuncTable[MaxCollectionTypes + 1] = {
-  &ArrayIter::VectorInit,
-  &ArrayIter::MapInit,
-  &ArrayIter::SetInit,
-  &ArrayIter::PairInit,
-  &ArrayIter::ImmVectorInit,
-  &ArrayIter::ImmMapInit,
-  &ArrayIter::ImmSetInit,
-  &ArrayIter::IteratorObjInit,
-};
-
-template <bool incRef>
-void ArrayIter::objInit(ObjectData* obj) {
-  assert(obj);
-  setObject(obj);
-  if (incRef) obj->incRefCount();
-  auto i = obj->isCollection() ? ctype_index(obj->collectionType()) :
-           MaxCollectionTypes;
-  initFuncTable[i](this, obj);
 }
 
 void ArrayIter::cellInit(const Cell c) {
@@ -222,15 +151,9 @@ void ArrayIter::cellInit(const Cell c) {
 }
 
 void ArrayIter::rewind() {
-  if (LIKELY(hasArrayData())) {
-    if (auto* data = getArrayData())
-      m_pos = data->iter_begin();
-  } else {
-    assert(hasCollection());
-    auto* obj = getObject();
-    auto i = obj->isCollection() ? ctype_index(obj->collectionType()) :
-      MaxCollectionTypes;
-    initFuncTable[i](this, obj);
+  assertx(hasArrayData());
+  if (auto* data = getArrayData()) {
+    m_pos = data->iter_begin();
   }
 }
 
@@ -251,7 +174,6 @@ ArrayIter& ArrayIter::operator=(const ArrayIter& iter) {
   reset();
   m_data = iter.m_data;
   m_pos = iter.m_pos;
-  m_version = iter.m_version;
   m_itype = iter.m_itype;
   m_nextHelperIdx = iter.m_nextHelperIdx;
   if (hasArrayData()) {
@@ -269,7 +191,6 @@ ArrayIter& ArrayIter::operator=(ArrayIter&& iter) {
   reset();
   m_data = iter.m_data;
   m_pos = iter.m_pos;
-  m_version = iter.m_version;
   m_itype = iter.m_itype;
   m_nextHelperIdx = iter.m_nextHelperIdx;
   iter.m_data = nullptr;
@@ -278,96 +199,16 @@ ArrayIter& ArrayIter::operator=(ArrayIter&& iter) {
 
 bool ArrayIter::endHelper() const  {
   auto obj = getObject();
-  if (obj->isCollection()) {
-    switch (obj->collectionType()) {
-      case CollectionType::Vector:
-      case CollectionType::ImmVector:
-        return m_pos >= static_cast<BaseVector*>(obj)->size();
-      case CollectionType::Map:
-      case CollectionType::ImmMap:
-        return !static_cast<BaseMap*>(obj)->iter_valid(m_pos);
-      case CollectionType::Set:
-      case CollectionType::ImmSet:
-        return !static_cast<BaseSet*>(obj)->iter_valid(m_pos);
-      case CollectionType::Pair:
-        return m_pos >= static_cast<c_Pair*>(obj)->size();
-    }
-  } else {
-    return !obj->o_invoke_few_args(s_valid, 0).toBoolean();
-  }
-  not_reached();
+  return !obj->o_invoke_few_args(s_valid, 0).toBoolean();
 }
 
 void ArrayIter::nextHelper() {
   auto obj = getObject();
-  if (obj->isCollection()) {
-    switch (obj->collectionType()) {
-      case CollectionType::Pair:
-      case CollectionType::ImmVector:
-      case CollectionType::Vector:
-        m_pos++;
-        return;
-      case CollectionType::Map:
-      case CollectionType::ImmMap: {
-        auto map = static_cast<BaseMap*>(obj);
-        if (UNLIKELY(m_version != map->getVersion())) {
-          throw_collection_modified();
-        }
-        m_pos = map->iter_next(m_pos);
-        return;
-      }
-      case CollectionType::Set: {
-        auto set = static_cast<BaseSet*>(obj);
-        if (UNLIKELY(m_version != set->getVersion())) {
-          throw_collection_modified();
-        }
-        m_pos = set->iter_next(m_pos);
-        return;
-      }
-      case CollectionType::ImmSet: {
-        auto set = static_cast<c_ImmSet*>(obj);
-        assert(m_version == set->getVersion());
-        m_pos = set->iter_next(m_pos);
-        return;
-      }
-    }
-  } else {
-    obj->o_invoke_few_args(s_next, 0);
-  }
+  obj->o_invoke_few_args(s_next, 0);
 }
 
 Variant ArrayIter::firstHelper() {
   auto obj = getObject();
-  if (obj->isCollection()) {
-    switch (obj->collectionType()) {
-      case CollectionType::Vector:
-      case CollectionType::Pair:
-      case CollectionType::ImmVector:
-        return m_pos;
-      case CollectionType::Map:
-      case CollectionType::ImmMap: {
-        auto map = static_cast<BaseMap*>(obj);
-        if (UNLIKELY(m_version != map->getVersion())) {
-          throw_collection_modified();
-        }
-        return map->iter_key(m_pos);
-      }
-      case CollectionType::Set: {
-        auto set = static_cast<BaseSet*>(obj);
-        if (UNLIKELY(m_version != set->getVersion())) {
-          throw_collection_modified();
-        }
-        return set->iter_key(m_pos);
-      }
-      case CollectionType::ImmSet: {
-        auto set = static_cast<c_ImmSet*>(obj);
-        if (UNLIKELY(m_version != set->getVersion())) {
-          throw_collection_modified();
-        }
-        return set->iter_key(m_pos);
-      }
-    }
-  }
   return obj->o_invoke_few_args(s_key, 0);
 }
 
@@ -379,48 +220,6 @@ Variant ArrayIter::second() {
     return ad->getValue(m_pos);
   }
   auto obj = getObject();
-  if (obj->isCollection()) {
-    switch (obj->collectionType()) {
-      case CollectionType::Vector: {
-        auto vec = static_cast<BaseVector*>(obj);
-        if (UNLIKELY(m_version != vec->getVersion())) {
-          throw_collection_modified();
-        }
-        return tvAsCVarRef(vec->at(m_pos));
-      }
-      case CollectionType::Map:
-      case CollectionType::ImmMap: {
-        auto map = static_cast<BaseMap*>(obj);
-        if (UNLIKELY(m_version != map->getVersion())) {
-          throw_collection_modified();
-        }
-        return tvAsCVarRef(map->iter_value(m_pos));
-      }
-      case CollectionType::Set: {
-        auto set = static_cast<BaseSet*>(obj);
-        if (UNLIKELY(m_version != set->getVersion())) {
-          throw_collection_modified();
-        }
-        return tvAsCVarRef(set->iter_value(m_pos));
-      }
-      case CollectionType::Pair: {
-        auto pair = static_cast<c_Pair*>(obj);
-        return tvAsCVarRef(pair->at(m_pos));
-      }
-      case CollectionType::ImmVector: {
-        auto fvec = static_cast<c_ImmVector*>(obj);
-        if (UNLIKELY(m_version != fvec->getVersion())) {
-          throw_collection_modified();
-        }
-        return tvAsCVarRef(fvec->at(m_pos));
-      }
-      case CollectionType::ImmSet: {
-        auto set = static_cast<c_ImmSet*>(obj);
-        assert(m_version == set->getVersion());
-        return tvAsCVarRef(set->iter_value(m_pos));
-      }
-    }
-  }
   return obj->o_invoke_few_args(s_current, 0);
 }
 
@@ -442,146 +241,7 @@ member_rval ArrayIter::secondRvalPlus() {
     assert(m_pos != ad->iter_end());
     return ad->rvalPos(m_pos);
   }
-  auto obj = getObject();
-  if (obj->isCollection()) {
-    switch (obj->collectionType()) {
-      case CollectionType::Vector: {
-        auto vec = static_cast<BaseVector*>(obj);
-        if (UNLIKELY(m_version != vec->getVersion())) {
-          throw_collection_modified();
-        }
-        return member_rval { obj, vec->at(m_pos) };
-      }
-      case CollectionType::Map:
-      case CollectionType::ImmMap: {
-        auto map = static_cast<BaseMap*>(obj);
-        if (UNLIKELY(m_version != map->getVersion())) {
-          throw_collection_modified();
-        }
-        return member_rval { obj, map->iter_value(m_pos) };
-      }
-      case CollectionType::Set: {
-        auto set = static_cast<BaseSet*>(obj);
-        if (UNLIKELY(m_version != set->getVersion())) {
-          throw_collection_modified();
-        }
-        return member_rval { obj, set->iter_value(m_pos) };
-      }
-      case CollectionType::Pair: {
-        auto pair = static_cast<c_Pair*>(obj);
-        return member_rval { obj, pair->at(m_pos) };
-      }
-      case CollectionType::ImmVector: {
-        auto fvec = static_cast<c_ImmVector*>(obj);
-        if (UNLIKELY(m_version != fvec->getVersion())) {
-          throw_collection_modified();
-        }
-        return member_rval { obj, fvec->at(m_pos) };
-      }
-      case CollectionType::ImmSet: {
-        auto set = static_cast<c_ImmSet*>(obj);
-        assert(m_version == set->getVersion());
-        return member_rval { obj, set->iter_value(m_pos) };
-      }
-    }
-  }
   throw_param_is_not_container();
-  not_reached();
-}
-
-//
-// Collection iterator specialized functions.
-//
-
-template<class Tuplish>
-ArrayIter::ArrayIter(Tuplish* coll, Fixed)
-    : m_pos(0), m_itype(ArrayIter::TypeIterator) {
-  assert(coll);
-  setObject(coll);
-  // TODO Task #4204598: In theory, we might be able to squeeze out a win
-  // here by not checking the version for immutable collections, but we'd
-  // to make sure all iteration implementations are consistent about this.
-  m_version = coll->getVersion();
-}
-
-template<class Vectorish>
-ArrayIter::ArrayIter(Vectorish* coll, Versionable)
-    : m_pos(0), m_itype(ArrayIter::TypeIterator) {
-  assert(coll && coll->size() > 0);
-  setObject(coll);
-  m_version = coll->getVersion();
-}
-
-template<class Mappish>
-ArrayIter::ArrayIter(Mappish* coll, VersionableSparse)
-    : m_itype(ArrayIter::TypeIterator) {
-  assert(coll && coll->size() > 0);
-  setObject(coll);
-  m_version = coll->getVersion();
-  m_pos = coll->iter_begin();
-}
-
-template<class Tuplish>
-ALWAYS_INLINE
-bool ArrayIter::iterNext(Fixed) {
-  return ++m_pos < static_cast<Tuplish*>(getObject())->size();
-}
-
-template<class Vectorish>
-ALWAYS_INLINE
-bool ArrayIter::iterNext(Versionable) {
-  Vectorish* vec = static_cast<Vectorish*>(getObject());
-  if (UNLIKELY(m_version != vec->getVersion())) {
-    throw_collection_modified();
-  }
-  return ++m_pos < vec->size();
-}
-
-template<class Mappish>
-ALWAYS_INLINE
-bool ArrayIter::iterNext(VersionableSparse) {
-  Mappish* coll = static_cast<Mappish*>(getObject());
-  if (UNLIKELY(m_version != coll->getVersion())) {
-    throw_collection_modified();
-  }
-  m_pos = coll->iter_next(m_pos);
-  return coll->iter_valid(m_pos);
-}
-
-template<class Tuplish>
-ALWAYS_INLINE
-Variant ArrayIter::iterKey(Fixed) {
-  return m_pos;
-}
-
-template<class Vectorish>
-ALWAYS_INLINE
-Variant ArrayIter::iterKey(Versionable) {
-  return m_pos;
-}
-
-template<class Mappish>
-ALWAYS_INLINE
-Variant ArrayIter::iterKey(VersionableSparse) {
-  return static_cast<Mappish*>(getObject())->iter_key(m_pos);
-}
-
-template<class Tuplish>
-ALWAYS_INLINE
-Variant ArrayIter::iterValue(Fixed) {
-  return tvAsCVarRef(static_cast<Tuplish*>(getObject())->get(m_pos));
-}
-
-template<class Vectorish>
-ALWAYS_INLINE
-Variant ArrayIter::iterValue(Versionable) {
-  return tvAsCVarRef(static_cast<Vectorish*>(getObject())->get(m_pos));
-}
-
-template<class Mappish>
-ALWAYS_INLINE
-Variant ArrayIter::iterValue(VersionableSparse) {
-  return tvAsCVarRef(static_cast<Mappish*>(getObject())->iter_value(m_pos));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -898,7 +558,7 @@ bool Iter::init(TypedValue* c1) {
   } else if (c1->m_type == KindOfObject) {
     bool isIterator;
     if (c1->m_data.pobj->isCollection()) {
-      isIterator = true;
+      isIterator = false;
       (void) new (&arr()) ArrayIter(c1->m_data.pobj);
     } else {
       Object obj = c1->m_data.pobj->iterableObject(isIterator);
@@ -965,73 +625,6 @@ void Iter::mfree() {
 
 void Iter::cfree() {
   cuf().~CufIter();
-}
-
-/**
- * Helper functions for collection style iterators.
- * Iterators over collections are never by-ref so there is no reason to
- * unbox any value.
- * Templates are instantiated over the collection class and the iterator
- * style. See the definition of Fixed, Versionable and VersionableSparse
- * in the header for details.
- * IterInit and IterNext can be called directly from the JIT for specialized
- * iterators.
- */
-template<class Coll, class Style>
-static void iterValue(ArrayIter* iter, TypedValue* out) {
-  Variant val = iter->iterValue<Coll>(Style());
-  assert(val.getRawType() != KindOfRef);
-  cellDup(*val.asTypedValue(), *out);
-}
-
-template<class Coll, class Style>
-static void iterKey(ArrayIter* iter, TypedValue* out) {
-  Variant key = iter->iterKey<Coll>(Style());
-  cellDup(*key.asTypedValue(), *out);
-}
-
-template<class Coll, class Style>
-static int64_t iterInit(Iter* dest, Coll* coll,
-                        TypedValue* valOut, TypedValue* keyOut) {
-  int64_t size = coll->size();
-  if (UNLIKELY(size == 0)) {
-    decRefObj(coll);
-    return 0LL;
-  }
-  (void) new (&dest->arr()) ArrayIter(coll, Style());
-
-  auto const oldVal = *valOut;
-  assert(oldVal.m_type != KindOfRef);
-  iterValue<Coll, Style>(&dest->arr(), valOut);
-  tvDecRefGen(oldVal);
-
-  if (keyOut) {
-    auto const oldKey = *keyOut;
-    iterKey<Coll, Style>(&dest->arr(), keyOut);
-    tvDecRefGen(oldKey);
-  }
-  return 1LL;
-}
-
-template<class Coll, class Style>
-static
-int64_t iterNext(ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut) {
-  if (!iter->iterNext<Coll>(Style())) {
-    iter->~ArrayIter();
-    return 0LL;
-  }
-
-  auto const oldVal = *valOut;
-  assert(oldVal.m_type != KindOfRef);
-  iterValue<Coll, Style>(iter, valOut);
-  tvDecRefGen(oldVal);
-
-  if (keyOut) {
-    auto const oldKey = *keyOut;
-    iterKey<Coll, Style>(iter, keyOut);
-    tvDecRefGen(oldKey);
-  }
-  return 1LL;
 }
 
 /*
@@ -1333,14 +926,14 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
 
   dest->arr().setIterType(itType);
   if (itType == ArrayIter::TypeIterator) {
-    iter_value_cell_local_impl<false, false>(dest, valOut);
+    iter_value_cell_local_impl<false, false>(dest, tvToCell(valOut));
     if (keyOut) {
-      iter_key_cell_local_impl<false, false>(dest, keyOut);
+      iter_key_cell_local_impl<false, false>(dest, tvToCell(keyOut));
     }
   } else {
-    iter_value_cell_local_impl<true, false>(dest, valOut);
+    iter_value_cell_local_impl<true, false>(dest, tvToCell(valOut));
     if (keyOut) {
-      iter_key_cell_local_impl<true, false>(dest, keyOut);
+      iter_key_cell_local_impl<true, false>(dest, tvToCell(keyOut));
     }
   }
   return 1LL;
@@ -1350,78 +943,24 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator or Object\n",
         __func__, dest, obj, ctx);
-  valOut = tvToCell(valOut);
-  if (keyOut) {
-    keyOut = tvToCell(keyOut);
+  if (UNLIKELY(!obj->isCollection())) {
+    return new_iter_object_any(dest, obj, ctx, valOut, keyOut);
   }
-  if (obj->isCollection()) {
-    auto type = obj->collectionType();
-    switch (type) {
-      case CollectionType::Vector:
-        return iterInit<c_Vector, ArrayIter::Versionable>(
-                                  dest, static_cast<c_Vector*>(obj),
-                                  valOut, keyOut);
-      case CollectionType::Map:
-      case CollectionType::ImmMap:
-        return iterInit<BaseMap, ArrayIter::VersionableSparse>(
-                                  dest,
-                                  static_cast<BaseMap*>(obj),
-                                  valOut, keyOut);
-      case CollectionType::Set:
-        return iterInit<c_Set, ArrayIter::VersionableSparse>(
-                                  dest,
-                                  static_cast<c_Set*>(obj),
-                                  valOut, keyOut);
-      case CollectionType::Pair:
-        return iterInit<c_Pair, ArrayIter::Fixed>(
-                                  dest,
-                                  static_cast<c_Pair*>(obj),
-                                  valOut, keyOut);
-      case CollectionType::ImmVector:
-        return iterInit<c_ImmVector, ArrayIter::Fixed>(
-                                  dest, static_cast<c_ImmVector*>(obj),
-                                  valOut, keyOut);
-      case CollectionType::ImmSet:
-        return iterInit<c_ImmSet, ArrayIter::VersionableSparse>(
-                                     dest,
-                                     static_cast<c_ImmSet*>(obj),
-                                     valOut, keyOut);
-    }
-  }
-  return new_iter_object_any(dest, obj, ctx, valOut, keyOut);
-  not_reached();
-}
 
-template <bool withRef>
-NEVER_INLINE
-static int64_t iter_next_collection(ArrayIter* ai,
-                                    TypedValue* valOut,
-                                    TypedValue* keyOut,
-                                    CollectionType type) {
-  assert(!ai->hasArrayData());
-  assert(isValidCollection(type));
-  switch (type) {
-    case CollectionType::Vector:
-      return iterNext<c_Vector, ArrayIter::Versionable>(
-        ai, valOut, keyOut);
-    case CollectionType::Map:
-    case CollectionType::ImmMap:
-      return iterNext<BaseMap, ArrayIter::VersionableSparse>(
-        ai, valOut, keyOut);
-    case CollectionType::Set:
-      return iterNext<c_Set, ArrayIter::VersionableSparse>(
-        ai, valOut, keyOut);
-    case CollectionType::Pair:
-      return iterNext<c_Pair, ArrayIter::Fixed>(
-        ai, valOut, keyOut);
-    case CollectionType::ImmVector:
-      return iterNext<c_ImmVector, ArrayIter::Fixed>(
-        ai, valOut, keyOut);
-    case CollectionType::ImmSet:
-      return iterNext<c_ImmSet, ArrayIter::VersionableSparse>(
-        ai, valOut, keyOut);
+  if (auto ad = collections::asArray(obj)) {
+    ad->incRefCount();
+    decRefObj(obj);
+    return keyOut
+      ? new_iter_array_key<false>(dest, ad, valOut, keyOut)
+      : new_iter_array(dest, ad, valOut);
   }
-  not_reached();
+
+  assertx(obj->collectionType() == CollectionType::Pair);
+  auto arr = collections::toArray(obj);
+  decRefObj(obj);
+  return keyOut
+    ? new_iter_array_key<false>(dest, arr.detach(), valOut, keyOut)
+    : new_iter_array(dest, arr.detach(), valOut);
 }
 
 template <bool withRef>
@@ -1430,13 +969,7 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   auto const ai = &iter->arr();
   assert(ai->getIterType() == ArrayIter::TypeArray ||
          ai->getIterType() == ArrayIter::TypeIterator);
-  if (UNLIKELY(!ai->hasArrayData())) {
-    auto obj = ai->getObject();
-    if (UNLIKELY(obj->isCollection())) {
-      auto const coll = obj->collectionType();
-      return iter_next_collection<withRef>(ai, valOut, keyOut, coll);
-    }
-  }
+  assertx(ai->hasArrayData() || !ai->getObject()->isCollection());
   ai->next();
   if (ai->end()) {
     // The ArrayIter destructor will decRef the array
@@ -1845,148 +1378,6 @@ int64_t iterNextKArray(Iter* it,
   return iter_next_cold<false>(it, valOut, keyOut);
 }
 
-int64_t iterNextVector(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterNextVector: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_Vector, ArrayIter::Versionable>(iter, valOut, nullptr);
-}
-
-int64_t iterNextKVector(Iter* it,
-                        TypedValue* valOut,
-                        TypedValue* keyOut) {
-  TRACE(2, "iterNextKVector: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_Vector, ArrayIter::Versionable>(iter, valOut, keyOut);
-}
-
-int64_t iterNextImmVector(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterFrozenNextVector: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_ImmVector, ArrayIter::Fixed>(iter, valOut, nullptr);
-}
-
-int64_t iterNextKImmVector(Iter* it,
-                              TypedValue* valOut,
-                              TypedValue* keyOut) {
-  TRACE(2, "iterFrozenNextKVector: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_ImmVector, ArrayIter::Fixed>(iter, valOut, keyOut);
-}
-
-int64_t iterNextMap(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterNextMap: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_Map, ArrayIter::VersionableSparse>(iter, valOut, nullptr);
-}
-
-int64_t iterNextImmMap(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterNextImmMap: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return
-    iterNext<c_ImmMap, ArrayIter::VersionableSparse>(iter, valOut, nullptr);
-}
-
-int64_t iterNextKMap(Iter* it,
-                     TypedValue* valOut,
-                     TypedValue* keyOut) {
-  TRACE(2, "iterNextKMap: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_Map, ArrayIter::VersionableSparse>(iter, valOut, keyOut);
-}
-
-int64_t iterNextKImmMap(Iter* it,
-                        TypedValue* valOut,
-                        TypedValue* keyOut) {
-  TRACE(2, "iterNextKImmMap: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_ImmMap, ArrayIter::VersionableSparse>(iter, valOut, keyOut);
-}
-
-int64_t iterNextSet(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterNextSet: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_Set, ArrayIter::VersionableSparse>(iter, valOut, nullptr);
-}
-
-int64_t iterNextImmSet(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterNextImmSet: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return
-    iterNext<c_ImmSet, ArrayIter::VersionableSparse>(iter, valOut, nullptr);
-}
-
-int64_t iterNextKSet(Iter* it,
-                     TypedValue* valOut,
-                     TypedValue* keyOut) {
-  TRACE(2, "iterNextKSet: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_Set, ArrayIter::VersionableSparse>(iter, valOut, keyOut);
-}
-
-int64_t iterNextKImmSet(Iter* it,
-                        TypedValue* valOut,
-                        TypedValue* keyOut) {
-  TRACE(2, "iterNextKImmSet: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_ImmSet, ArrayIter::VersionableSparse>(iter, valOut, keyOut);
-}
-
-int64_t iterNextPair(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterNextPair: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_Pair, ArrayIter::Fixed>(iter, valOut, nullptr);
-}
-
-int64_t iterNextKPair(Iter* it,
-                      TypedValue* valOut,
-                      TypedValue* keyOut) {
-  TRACE(2, "iterNextKPair: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
-         it->arr().hasCollection());
-
-  auto const iter = &it->arr();
-  return iterNext<c_Pair, ArrayIter::Fixed>(iter, valOut, keyOut);
-}
-
 int64_t iterNextObject(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextObject: I %p\n", it);
   // We can't just put the address of iter_next_cold in the table
@@ -2002,13 +1393,6 @@ const IterNextHelper g_iterNextHelpers[] = {
   &iterNextArrayPacked,
   &iterNextArrayMixed,
   &iterNextArray,
-  &iterNextVector,
-  &iterNextImmVector,
-  &iterNextMap,
-  &iterNextImmMap,
-  &iterNextSet,
-  &iterNextImmSet,
-  &iterNextPair,
   &iterNextObject,
 };
 
@@ -2016,13 +1400,6 @@ const IterNextKHelper g_iterNextKHelpers[] = {
   &iterNextKArrayPacked,
   &iterNextKArrayMixed,
   &iterNextKArray,
-  &iterNextKVector,
-  &iterNextKImmVector,
-  &iterNextKMap,
-  &iterNextKImmMap,
-  &iterNextKSet,
-  &iterNextKImmSet,
-  &iterNextKPair,
   &iter_next_cold<false>, // iterNextKObject
 };
 

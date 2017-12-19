@@ -12,6 +12,8 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 // BaseSet
 
+struct BaseVector;
+
 namespace collections {
 struct SetIterator;
 }

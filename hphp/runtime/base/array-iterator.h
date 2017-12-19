@@ -37,9 +37,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TypedValue;
-struct BaseVector;
-struct BaseMap;
-struct BaseSet;
 struct Iter;
 struct MixedArray;
 
@@ -47,13 +44,6 @@ enum class IterNextIndex : uint16_t {
   ArrayPacked = 0,
   ArrayMixed,
   Array,
-  Vector,
-  ImmVector,
-  Map,
-  ImmMap,
-  Set,
-  ImmSet,
-  Pair,
   Object,
 };
 
@@ -77,7 +67,6 @@ struct ArrayIter {
   };
 
   enum NoInc { noInc = 0 };
-  enum NoIncNonNull { noIncNonNull = 0 };
 
   /*
    * Constructors.  Note that sometimes ArrayIter objects are created
@@ -108,7 +97,6 @@ struct ArrayIter {
   ArrayIter(ArrayIter&& iter) noexcept {
     m_data = iter.m_data;
     m_pos = iter.m_pos;
-    m_version = iter.m_version;
     m_itype = iter.m_itype;
     m_nextHelperIdx = iter.m_nextHelperIdx;
     iter.m_data = nullptr;
@@ -178,10 +166,10 @@ struct ArrayIter {
   /*
    * Get a member_rval for the current iterator position.
    *
-   * Note that secondRval() has slightly different behavior than second() with
-   * regard to collection types.  Use secondRvalPlus() when you need support
-   * for these cases.  Also note that unlike second(), secondRvalPlus() will
-   * throw for non-collection types.
+   * The difference between secondRval and secondRvalPlus is that, if called
+   * when iterating an Iterable object the former will fatal and the latter
+   * will throw (whereas second will invoke the current() method on the
+   * Iterable object). Why this is has been lost in the mists of time.
    */
   member_rval secondRval() const;
   member_rval secondRvalPlus();
@@ -203,68 +191,6 @@ struct ArrayIter {
   bool hasArrayData() const {
     return !((intptr_t)m_data & 1);
   }
-  bool hasCollection() const {
-    return (!hasArrayData() && getObject()->isCollection());
-  }
-
-  //
-  // Specialized iterator for collections. Used via JIT
-  //
-
-  /**
-   * Fixed is used for collections that are immutable in size.
-   * Templatized Fixed functions expect the collection to implement
-   * size() and get().
-   * The key is the current position of the iterator.
-   */
-  enum class Fixed {};
-  /**
-   * Versionable is used for collections that are mutable and throw if
-   * an insertion or deletion is made to the collection while iterating.
-   * Templatized Versionable functions expect the collection to implement
-   * size(), getVersion() and get().
-   * The key is the current position of the iterator.
-   */
-  enum class Versionable {};
-  /**
-   * VersionableSparse is used for collections that are mutable and throw if
-   * an insertion or deletion is made to the collection while iterating.
-   * Moreover the collection elements are accessed via an iterator.
-   * Templatized VersionableSparse functions expect the collection to implement
-   * getVersion(), iter_begin(), iter_next(), iter_value(), iter_key(), and
-   * iter_valid().
-   */
-  enum class VersionableSparse {};
-
-  // Constructors
-  template<class Tuplish>
-  ArrayIter(Tuplish* coll, Fixed);
-  template<class Vectorish>
-  ArrayIter(Vectorish* coll, Versionable);
-  template<class Mappish>
-  ArrayIter(Mappish* coll, VersionableSparse);
-
-  // iterator "next", "value", "key" functions
-  template<class Tuplish>
-  bool iterNext(Fixed);
-  template<class Vectorish>
-  bool iterNext(Versionable);
-  template<class Mappish>
-  bool iterNext(VersionableSparse);
-
-  template<class Tuplish>
-  Variant iterValue(Fixed);
-  template<class Vectorish>
-  Variant iterValue(Versionable);
-  template<class Mappish>
-  Variant iterValue(VersionableSparse);
-
-  template<class Tuplish>
-  Variant iterKey(Fixed);
-  template<class Vectorish>
-  Variant iterKey(Versionable);
-  template<class Mappish>
-  Variant iterKey(VersionableSparse);
 
   const ArrayData* getArrayData() const {
     assert(hasArrayData());
@@ -311,18 +237,6 @@ private:
 
   void cellInit(Cell);
 
-  static void VectorInit(ArrayIter* iter, ObjectData* obj);
-  static void MapInit(ArrayIter* iter, ObjectData* obj);
-  static void ImmMapInit(ArrayIter* iter, ObjectData* obj);
-  static void SetInit(ArrayIter* iter, ObjectData* obj);
-  static void PairInit(ArrayIter* iter, ObjectData* obj);
-  static void ImmVectorInit(ArrayIter* iter, ObjectData* obj);
-  static void ImmSetInit(ArrayIter* iter, ObjectData* obj);
-  static void IteratorObjInit(ArrayIter* iter, ObjectData* obj);
-
-  typedef void(*InitFuncPtr)(ArrayIter*,ObjectData*);
-  static const InitFuncPtr initFuncTable[];
-
   void destruct();
 
   void setArrayData(const ArrayData* ad) {
@@ -341,9 +255,8 @@ private:
   void setObject(ObjectData* obj) {
     assert((intptr_t(obj) & 1) == 0);
     m_obj = (ObjectData*)((intptr_t)obj | 1);
-    m_nextHelperIdx = getNextHelperIdx(obj);
+    m_nextHelperIdx = IterNextIndex::Object;
   }
-  IterNextIndex getNextHelperIdx(ObjectData* obj);
 
   union {
     const ArrayData* m_data;
@@ -358,7 +271,7 @@ private:
   // as MArrayIter and CufIter, allowing Iter to be scanned without a union
   // descriminator.
   MaybeCountable* m_unused;
-  int m_version;
+  UNUSED int m_alsoUnused;
   // This is unioned so new_iter_array can initialize it more
   // efficiently.
   union {

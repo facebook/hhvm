@@ -9,6 +9,8 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
+struct BaseVector;
+
 namespace collections {
 struct MapIterator;
 void deepCopy(TypedValue*);

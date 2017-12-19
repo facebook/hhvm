@@ -46,6 +46,7 @@ let process_parse_result
   && ParserOptions.deregister_php_stdlib popt
   then Ast_utils.deregister_ignored_attributes ast
   else ast in
+  let content = if ide then File_heap.Ide content else File_heap.Disk content in
   if file_mode <> None then begin
     let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
     (* If this file was parsed from a tmp directory,
@@ -56,7 +57,7 @@ let process_parse_result
     (* if quick mode is on: otherwise Full Asts means the ParserHeap will *)
     (* never use the DiskHeap, and the Ide services update DiskHeap directly *)
     if quick then
-    File_heap.FileHeap.write_through fn (File_heap.Disk content);
+    File_heap.FileHeap.write_through fn content;
     let mode = if quick then Parser_heap.Decl else Parser_heap.Full in
     Parser_heap.ParserHeap.write_through fn (ast, mode);
     let comments = Some comments in
@@ -74,6 +75,7 @@ let process_parse_result
     acc, errorl, error_files
   end
   else begin
+    File_heap.FileHeap.write_through fn content;
     let info = try !legacy_php_file_info fn with _ -> empty_file_info in
     (* we also now keep in the file_info regular php files
      * as we need at least their names in hack build

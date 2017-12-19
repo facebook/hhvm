@@ -130,9 +130,7 @@ let emit_wrapper_function
       renamed_id,
       instr_fpushfuncd param_count original_id
   in
-  let special_params = List.filter params
-    ~f:(fun p -> Hhas_param.is_reference p || Hhas_param.is_inout p) in
-  Local.reset_local @@ List.length decl_vars + List.length special_params + 1;
+  Local.reset_local @@ List.length decl_vars + List.length params;
   let body_instrs =
     emit_body_instrs ~wrapper_type ~verify_ret env params call_instrs in
   let fault_instrs = extract_fault_instructions body_instrs in
@@ -172,6 +170,7 @@ let emit_wrapper_method
     List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
   let params = Emit_param.from_asts ~namespace ~tparams ~generate_defaults:true
     ~scope ast_method.Ast.m_params in
+  let has_ref_params = List.exists params ~f:Hhas_param.is_reference in
   let method_is_abstract =
     List.mem ast_method.Ast.m_kind Ast.Abstract ||
     ast_class.Ast.c_kind = Ast.Cinterface in
@@ -198,7 +197,7 @@ let emit_wrapper_method
   let param_count = List.length params in
   let class_name = Hhbc_id.Class.from_ast_name @@ snd ast_class.A.c_name in
   let wrapper_type, original_id, renamed_id, params =
-    if is_closure then
+    if is_closure || has_ref_params then
       Emit_inout_helpers.RefWrapper, renamed_id, original_id,
       List.map ~f:Hhas_param.switch_inout_to_reference params
     else
@@ -221,9 +220,7 @@ let emit_wrapper_method
         instr_fpushobjmethodd param_count renamed_id Ast.OG_nullsafe
       ]
   in
-  let special_params = List.filter params
-    ~f:(fun p -> Hhas_param.is_reference p || Hhas_param.is_inout p) in
-  Local.reset_local @@ List.length decl_vars + List.length special_params + 1;
+  Local.reset_local @@ List.length decl_vars + List.length params;
   let body_instrs =
     emit_body_instrs ~wrapper_type ~verify_ret env params call_instrs in
   let fault_instrs = extract_fault_instructions body_instrs in

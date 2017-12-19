@@ -66,10 +66,7 @@ slow/inout/bad-decl-1.php
 slow/inout/bad-decl-2.php
 slow/inout/bad-func.php
 slow/inout/bad-generator.php
-slow/inout/method-interop-dynamic.php
-slow/inout/method-interop-static.php
 slow/inout/side-effects.php
-slow/inout/trait-magic.php
 slow/keyset/init-parse-error1.php
 slow/keyset/init-parse-error2.php
 slow/lang/hh_return_type_1.php

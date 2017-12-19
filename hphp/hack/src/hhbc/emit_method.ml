@@ -55,16 +55,17 @@ let extract_inout_or_ref_param_locations is_closure params =
                    then None else Some i) in
   if List.length inout_param_locations <> 0 then
     inout_param_locations
-  else if is_closure &&
-    Hhbc_options.create_inout_wrapper_functions !Hhbc_options.compiler_options
-  then
-    let ref_param_locations = List.filter_mapi params
-      ~f:(fun i p -> if not p.Ast.param_is_reference
-                     then None else Some i) in
-    if List.length ref_param_locations <> 0 then
-      ref_param_locations else []
-  else []
+  else
+    let module O = Hhbc_options in
+    let need_wrapper =
+      O.create_inout_wrapper_functions !O.compiler_options
+      && (Emit_env.is_hh_syntax_enabled ())
+      && (O.reffiness_invariance !O.compiler_options || is_closure) in
+    if need_wrapper
+    then List.filter_mapi params ~f:(fun i p -> Option.some_if p.Ast.param_is_reference i)
+    else []
 
+let has_kind m k = List.mem m.Ast.m_kind k
 
 let from_ast_wrapper : bool -> _ ->
   Ast.class_ -> Ast.method_ -> Hhas_method.t list =
@@ -73,20 +74,20 @@ let from_ast_wrapper : bool -> _ ->
     Emit_fatal.raise_fatal_parse Pos.none
       "Multiple access type modifiers are not allowed";
   let method_is_abstract =
-    List.mem ast_method.Ast.m_kind Ast.Abstract ||
-    ast_class.Ast.c_kind = Ast.Cinterface in
-  let method_is_final = List.mem ast_method.Ast.m_kind Ast.Final in
-  let method_is_static = List.mem ast_method.Ast.m_kind Ast.Static in
+    ast_class.Ast.c_kind = Ast.Cinterface ||
+    has_kind ast_method Ast.Abstract in
+  let method_is_final = has_kind ast_method Ast.Final in
+  let method_is_static = has_kind ast_method Ast.Static in
   let namespace = ast_class.Ast.c_namespace in
   let method_attributes =
     Emit_attribute.from_asts namespace ast_method.Ast.m_user_attributes in
   let method_is_private =
-    privatize || List.mem ast_method.Ast.m_kind Ast.Private in
+    privatize || has_kind ast_method Ast.Private in
   let method_is_protected =
-    not privatize && List.mem ast_method.Ast.m_kind Ast.Protected in
+    not privatize && has_kind ast_method Ast.Protected in
   let method_is_public =
     not privatize && (
-    List.mem ast_method.Ast.m_kind Ast.Public ||
+    has_kind ast_method Ast.Public ||
     (not method_is_private && not method_is_protected)) in
   let is_memoize =
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
@@ -189,6 +190,8 @@ let from_ast_wrapper : bool -> _ ->
   let closure_namespace = SMap.get class_name (Emit_env.get_closure_namespaces ()) in
   let namespace = Option.value closure_namespace ~default:namespace in
   let is_return_by_ref = ast_method.Ast.m_ret_by_ref in
+  let has_ref_params =
+    List.exists ast_method.Ast.m_params ~f:(fun p -> p.Ast.param_is_reference) in
   let method_body, method_is_generator, method_is_pair_generator =
     Emit_body.emit_body
       ~pos:ast_method.Ast.m_span
@@ -208,7 +211,7 @@ let from_ast_wrapper : bool -> _ ->
       [Ast.Stmt (Pos.none, Ast.Block ast_method.Ast.m_body)]
   in
   let method_id =
-    if has_inout_args && method_is_closure_body then
+    if has_inout_args && (method_is_closure_body || has_ref_params) then
     original_method_id else renamed_method_id in
   let method_is_interceptable = Interceptable.is_method_interceptable
     ~is_generated:(method_id <> renamed_method_id) namespace ast_class original_method_id in
@@ -243,7 +246,8 @@ let from_ast_wrapper : bool -> _ ->
         ~original_id:original_method_id
         ~renamed_id:renamed_method_id
         ast_class ast_method in
-      if method_is_closure_body then [normal_function; wrapper]
+      if method_is_closure_body || has_ref_params
+      then [normal_function; wrapper]
       else [wrapper; normal_function]
   else [normal_function]
 

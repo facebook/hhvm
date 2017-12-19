@@ -1,5 +1,7 @@
 <?hh // decl
 
+require "gen-stubs.inc";
+
 class Marker {
   public function __destruct() {
     echo "destructing\n";

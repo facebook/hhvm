@@ -1,5 +1,7 @@
 <?hh
 
+require "gen-stubs.inc";
+
 async function block() {
   await RescheduleWaitHandle::create(0, 0);
 }

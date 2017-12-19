@@ -1,5 +1,7 @@
 <?hh
 
+require "gen-stubs.inc";
+
 function onCreateCallback() { echo "onCreateCallback()...\n"; }
 AwaitAllWaitHandle::setOnCreateCallback(
   ($a, $b) ==> onCreateCallback()

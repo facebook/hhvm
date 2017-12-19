@@ -1,5 +1,7 @@
 <?hh
 
+require "gen-stubs.inc";
+
 async function foo() {
   return await gena(array(
                       async { return 1; },

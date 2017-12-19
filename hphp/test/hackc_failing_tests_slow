@@ -1,10 +1,4 @@
-slow/async/async-gen-and-genva.php
-slow/async/await-all-callback.php
-slow/async/await_gena.php
-slow/async/genva-list.php
-slow/async/genva-refcnt.php
 slow/async/genva-variadic.php
-slow/async/genva.php
 slow/autoload/autoload-enum-hint-deprecated.php
 slow/autoload/autoload-fail.php
 slow/class_constant/abstract_const2.php
@@ -12,7 +6,6 @@ slow/class_constant/bad-arrays.php
 slow/class_constant/globals-array.php
 slow/class_type_constant/type_constant2.php
 slow/class_type_constant/type_constant3.php
-slow/class_type_constant/type_constant6.php
 slow/closure/ctor.php
 slow/constant/bad-arrays.php
 slow/constant/globals-array-constant.php
@@ -21,7 +14,6 @@ slow/dict/init-parse-error2.php
 slow/dict/init-parse-error3.php
 slow/dict/init-parse-error4.php
 slow/dict/mixed-to-dict-with-refs.php
-slow/dv_array/genva.php
 slow/dv_array/parse-error1.php
 slow/dv_array/parse-error2.php
 slow/dv_array/parse-error3.php
@@ -41,7 +33,6 @@ slow/ext_socket/accept_block.php
 slow/ext_socket/persistent_socket.php
 slow/ext_watchman/ext_watchman.php
 slow/function/closure-default.php
-slow/hack_arr_compat/gena.php
 slow/hack_mode/2203.php
 slow/hack_mode/2204.php
 slow/hack_mode/closing-tag-asp.php

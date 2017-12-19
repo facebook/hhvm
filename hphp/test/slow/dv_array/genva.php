@@ -1,6 +1,8 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+include  __DIR__ .  "/../async/gen-stubs.inc";
+
 async function val() {
   return __hhvm_intrinsics\launder_value(42);
 }

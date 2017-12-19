@@ -744,6 +744,7 @@ module Naming                               = struct
   let this_as_lexical_variable              = 2077 (* DONT MODIFY!!!! *)
   let dynamic_class_name_in_strict_mode     = 2078 (* DONT MODIFY!!!! *)
   let xhp_optional_required_attr            = 2079 (* DONT MODIFY!!!! *)
+  let xhp_required_with_default             = 2080 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1445,6 +1446,11 @@ let xhp_optional_required_attr pos id =
   add Naming.xhp_optional_required_attr
     pos
     ("XHP attribute " ^ id ^ " cannot be marked as nullable and required")
+
+let xhp_required_with_default pos id =
+  add Naming.xhp_required_with_default
+    pos
+    ("XHP attribute " ^ id ^ " cannot be marked as required and provide a default")
 
 (*****************************************************************************)
 (* Init check errors *)

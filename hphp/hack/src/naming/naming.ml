@@ -1203,7 +1203,9 @@ module Make (GetLocals : GetLocals) = struct
     end
 
   and xhp_attribute_decl env h cv is_required maybe_enum =
-    let _, (_, id), default = cv in
+    let p, (_, id), default = cv in
+    if is_required && Option.is_some default then
+      Errors.xhp_required_with_default p id;
     let h = (match maybe_enum with
       | Some (pos, _optional, items) ->
         let contains_int = List.exists items begin function

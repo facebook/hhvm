@@ -41,7 +41,7 @@ void BaseSet::addAllKeysOf(const Cell container) {
                   oldCap = cap(); // assume minimal collisions
                 }
                 reserve(m_size + sz);
-                mutateAndBump();
+                mutate();
                 return false;
               },
               [this](Cell k, TypedValue /*v*/) { addRaw(k); },
@@ -52,7 +52,7 @@ void BaseSet::addAllKeysOf(const Cell container) {
                   return true;
                 }
                 if (coll->collectionType() == CollectionType::Pair) {
-                  mutateAndBump();
+                  mutate();
                 }
                 return false;
               });
@@ -77,7 +77,7 @@ void BaseSet::addAll(const Variant& t) {
         oldCap = cap(); // assume minimal collisions
       }
       reserve(m_size + sz);
-      mutateAndBump();
+      mutate();
       return false;
     },
     [this](TypedValue v) {
@@ -90,7 +90,7 @@ void BaseSet::addAll(const Variant& t) {
         return true;
       }
       if (coll->collectionType() == CollectionType::Pair) {
-        mutateAndBump();
+        mutate();
       }
       return false;
     },
@@ -131,9 +131,6 @@ void BaseSet::addImpl(int64_t k) {
   e.data.m_type = KindOfInt64;
   e.data.m_data.num = k;
   updateNextKI(k);
-  if (!raw) {
-    ++m_version;
-  }
 }
 
 template<bool raw>
@@ -157,9 +154,6 @@ void BaseSet::addImpl(StringData *key) {
   // the key and once for the value
   e.setStrKey(key, h);
   cellDup(make_tv<KindOfString>(key), e.data);
-  if (!raw) {
-    ++m_version;
-  }
 }
 
 void BaseSet::addRaw(int64_t k) {
@@ -200,7 +194,6 @@ void BaseSet::addFront(int64_t k) {
   e.data.m_type = KindOfInt64;
   e.data.m_data.num = k;
   updateNextKI(k);
-  ++m_version;
 }
 
 void BaseSet::addFront(StringData *key) {
@@ -220,14 +213,13 @@ void BaseSet::addFront(StringData *key) {
   // the key and once for the value
   e.setStrKey(key, h);
   cellDup(make_tv<KindOfString>(key), e.data);
-  ++m_version;
 }
 
 Variant BaseSet::pop() {
   if (UNLIKELY(m_size == 0)) {
     SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Set");
   }
-  mutateAndBump();
+  mutate();
   auto e = elmLimit() - 1;
   for (;; --e) {
     assert(e >= data());
@@ -245,7 +237,7 @@ Variant BaseSet::popFront() {
   if (UNLIKELY(m_size == 0)) {
     SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Set");
   }
-  mutateAndBump();
+  mutate();
   auto e = data();
   for (;; ++e) {
     assert(e != elmLimit());
@@ -300,7 +292,6 @@ Object c_Set::getImmutableCopy() {
   if (m_immCopy.isNull()) {
     auto set = req::make<c_ImmSet>();
     set->m_size = m_size;
-    set->m_version = m_version;
     set->m_arr = m_arr;
     m_immCopy = std::move(set);
     arrayData()->incRefCount();
@@ -418,7 +409,6 @@ BaseSet::php_map(const Variant& callback) {
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
     auto e = iter_elm(pos);
-    int32_t pVer = m_version;
     if (useKey) {
       argv[0] = e->data;
     }
@@ -426,7 +416,6 @@ BaseSet::php_map(const Variant& callback) {
     auto cbRet = Variant::attach(
       g_context->invokeFuncFew(ctx, argc, argv)
     );
-    if (UNLIKELY(m_version != pVer)) throw_collection_modified();
     set->addRaw(*cbRet.asTypedValue());
   }
   // ... and shrink back if that was incorrect
@@ -449,7 +438,6 @@ BaseSet::php_filter(const Variant& callback) {
   if (!m_size) return Object(std::move(set));
   // we don't reserve(), because we don't know how selective callback will be
   set->mutate();
-  int32_t version = m_version;
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
@@ -459,9 +447,6 @@ BaseSet::php_filter(const Variant& callback) {
     }
     argv[argc-1] = e->data;
     bool b = invokeAndCastToBool(ctx, argc, argv);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
     if (!b) continue;
     e = iter_elm(pos);
     if (e->hasIntKey()) {
@@ -502,27 +487,19 @@ Object BaseSet::php_retain(const Variant& callback) {
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    int32_t version = m_version;
     auto e = iter_elm(pos);
     if (useKey) {
       argv[0] = e->data;
     }
     argv[argc-1] = e->data;
     bool b = invokeAndCastToBool(ctx, argc, argv);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
     if (b) { continue; }
-    mutateAndBump();
-    version = m_version;
+    mutate();
     e = iter_elm(pos);
     auto h = e->hash();
     auto pp = e->hasIntKey() ? findForRemove(e->ikey, h) :
               findForRemove(e->skey, h);
     eraseNoCompact(pp);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
   }
   assert(m_size <= size);
   compactOrShrinkIfDensityTooLow();
@@ -582,20 +559,11 @@ BaseSet::php_takeWhile(const Variant& fn) {
   auto set = req::make<TSet>();
   if (!m_size) return Object(std::move(set));
   set->mutate();
-  int32_t version UNUSED;
-  if (std::is_same<c_Set, TSet>::value) {
-    version = m_version;
-  }
   uint32_t used = posLimit();
   for (uint32_t i = 0; i < used; ++i) {
     if (isTombstone(i)) continue;
     Elm* e = &data()[i];
     bool b = invokeAndCastToBool(ctx, 1, &e->data);
-    if (std::is_same<c_Set, TSet>::value) {
-      if (UNLIKELY(version != m_version)) {
-        throw_collection_modified();
-      }
-    }
     if (!b) break;
     e = &data()[i];
     if (e->hasIntKey()) {
@@ -667,21 +635,12 @@ BaseSet::php_skipWhile(const Variant& fn) {
   if (!m_size) return Object(std::move(set));
   // we don't reserve(), because we don't know how selective fn will be
   set->mutate();
-  int32_t version UNUSED;
-  if (std::is_same<c_Set, TSet>::value) {
-    version = m_version;
-  }
   uint32_t used = posLimit();
   uint32_t i = 0;
   for (; i < used; ++i) {
     if (isTombstone(i)) continue;
     Elm& e = data()[i];
     bool b = invokeAndCastToBool(ctx, 1, &e.data);
-    if (std::is_same<c_Set, TSet>::value) {
-      if (UNLIKELY(version != m_version)) {
-        throw_collection_modified();
-      }
-    }
     if (!b) break;
   }
   for (; i < used; ++i) {
@@ -770,7 +729,6 @@ Object BaseSet::getIterator() {
 // Set
 
 void c_Set::clear() {
-  ++m_version;
   dropImmCopy();
   decRefArr(arrayData());
   m_arr = staticEmptyDictArrayAsMixed();

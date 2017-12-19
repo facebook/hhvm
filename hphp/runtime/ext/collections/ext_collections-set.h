@@ -256,7 +256,6 @@ private:
   friend struct c_Vector;
   friend struct c_Set;
   friend struct c_Map;
-  friend struct ArrayIter;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field
@@ -371,7 +370,6 @@ struct SetIterator {
   SetIterator& operator=(const SetIterator& src) {
     m_obj = src.m_obj;
     m_pos = src.m_pos;
-    m_version = src.m_version;
     return *this;
   }
   ~SetIterator() {}
@@ -385,14 +383,10 @@ struct SetIterator {
   void setSet(BaseSet* mp) {
     m_obj = mp;
     m_pos = mp->iter_begin();
-    m_version = mp->getVersion();
   }
 
   Variant current() const {
     auto st = m_obj.get();
-    if (UNLIKELY(m_version != st->getVersion())) {
-      throw_collection_modified();
-    }
     if (!st->iter_valid(m_pos)) {
       throw_iterator_not_valid();
     }
@@ -407,24 +401,17 @@ struct SetIterator {
 
   void next() {
     auto st = m_obj.get();
-    if (UNLIKELY(m_version != st->getVersion())) {
-      throw_collection_modified();
-    }
     m_pos = st->iter_next(m_pos);
   }
 
   void rewind() {
     auto st = m_obj.get();
-    if (UNLIKELY(m_version != st->getVersion())) {
-      throw_collection_modified();
-    }
     m_pos = st->iter_begin();
   }
 
  private:
   req::ptr<BaseSet> m_obj;
   uint32_t m_pos{0};
-  int32_t  m_version{0};
 };
 
 /////////////////////////////////////////////////////////////////////////////

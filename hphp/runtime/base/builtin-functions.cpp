@@ -610,11 +610,6 @@ void throw_iterator_not_valid() {
     "Iterator is not valid");
 }
 
-void throw_collection_modified() {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Collection was modified during iteration");
-}
-
 void throw_collection_property_exception() {
   SystemLib::throwInvalidOperationExceptionObject(
     "Cannot access a property on a collection");

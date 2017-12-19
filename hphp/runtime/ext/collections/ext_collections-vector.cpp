@@ -84,7 +84,6 @@ BaseVector::php_map(const Variant& callback) {
   }
 
   auto nv = req::make<TVector>(m_size);
-  int32_t version = m_version;
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   if (useKey) {
@@ -97,9 +96,6 @@ BaseVector::php_map(const Variant& callback) {
     argv[argc-1] = *from;
     *to = g_context->invokeFuncFew(ctx, argc, argv);
     nv->incSize();
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
     if (useKey) {
       argv[0].m_data.num++;
     }
@@ -123,7 +119,6 @@ BaseVector::php_filter(const Variant& callback) {
     return Object{req::make<TVector>()};
   }
   auto nv = req::make<TVector>(0);
-  int32_t version = m_version;
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   if (useKey) {
@@ -134,9 +129,6 @@ BaseVector::php_filter(const Variant& callback) {
   do {
     argv[argc-1] = *elm;
     bool b = invokeAndCastToBool(ctx, argc, argv);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
     if (b) {
       nv->addRaw(*elm);
     }
@@ -185,19 +177,10 @@ BaseVector::php_takeWhile(const Variant& fn) {
     return Object{req::make<TVector>()};
   }
   auto vec = req::make<TVector>(0);
-  int32_t version UNUSED;
-  if (std::is_same<c_Vector, TVector>::value) {
-    version = m_version;
-  }
   auto elm = data();
   auto end = elm + m_size;
   do {
     bool b = invokeAndCastToBool(ctx, 1, elm);
-    if (std::is_same<c_Vector, TVector>::value) {
-      if (UNLIKELY(version != m_version)) {
-        throw_collection_modified();
-      }
-    }
     if (!b) break;
     vec->addRaw(*elm);
   } while (++elm < end);
@@ -242,19 +225,10 @@ BaseVector::php_skipWhile(const Variant& fn) {
   if (m_size == 0) {
     return Object{req::make<TVector>()};
   }
-  int32_t version UNUSED;
-  if (std::is_same<c_Vector, TVector>::value) {
-    version = m_version;
-  }
   auto from = data();
   auto end = from + m_size;
   do {
     bool b = invokeAndCastToBool(ctx, 1, from);
-    if (std::is_same<c_Vector, TVector>::value) {
-      if (UNLIKELY(version != m_version)) {
-        throw_collection_modified();
-      }
-    }
     if (!b) break;
   } while (++from < end);
   auto sz = end - from;
@@ -355,7 +329,6 @@ void BaseVector::addAllImpl(const Variant& t) {
     [&, this](ArrayData* adata) {
       if (adata->empty()) return true;
       if (!m_size && adata->isVecArray()) {
-        ++m_version;
         dropImmCopy();
         auto oldAd = arrayData();
         m_arr = adata;
@@ -455,7 +428,6 @@ bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
 
 void BaseVector::addFront(TypedValue tv) {
   assert(tv.m_type != KindOfRef);
-  ++m_version;
   dropImmCopy();
   auto oldAd = arrayData();
   m_arr = PackedArray::PrependVec(oldAd, tv, oldAd->cowCheck());
@@ -467,7 +439,7 @@ void BaseVector::addFront(TypedValue tv) {
 
 Variant BaseVector::popFront() {
   if (m_size) {
-    mutateAndBump();
+    mutate();
     Variant ret(tvAsCVarRef(&data()[0]), Variant::CellCopy());
     decSize();
     memmove(data(), data()+1, m_size * sizeof(TypedValue));
@@ -507,7 +479,6 @@ void BaseVector::reserveImpl(uint32_t newCap) {
 }
 
 void BaseVector::reserve(uint32_t sz) {
-  ++m_version;
   dropImmCopy();
   if (sz > PackedArray::capacity(arrayData())) {
     reserveImpl(sz);
@@ -568,7 +539,6 @@ Object BaseVector::getImmutableCopy() {
   if (m_immCopy.isNull()) {
     auto vec = req::make<c_ImmVector>(arrayData());
     arrayData()->incRefCount();
-    vec->m_version = m_version;
     m_immCopy = std::move(vec);
   }
   assert(!m_immCopy.isNull());
@@ -590,7 +560,6 @@ Object BaseVector::getIterator() {
 Class* c_Vector::s_cls;
 
 void c_Vector::clear() {
-  ++m_version;
   dropImmCopy();
   decRefArr(arrayData());
   m_arr = staticEmptyVecArray();
@@ -599,7 +568,7 @@ void c_Vector::clear() {
 
 void c_Vector::removeKey(int64_t k) {
   if (!contains(k)) return;
-  mutateAndBump();
+  mutate();
   auto const old = data()[k];
   if (k+1 < m_size) {
     memmove(&data()[k], &data()[k+1],
@@ -625,7 +594,7 @@ void c_Vector::addAllKeysOf(const Variant& container) {
 
 Variant c_Vector::pop() {
   if (m_size) {
-    mutateAndBump();
+    mutate();
     decSize();
     return Variant(tvAsCVarRef(&data()[m_size]), Variant::CellCopy());
   } else {
@@ -639,7 +608,6 @@ void c_Vector::resize(uint32_t sz, const Cell* val) {
     return;
   }
   if (sz == 0) {
-    ++m_version;
     dropImmCopy();
     decRefArr(arrayData());
     m_arr = staticEmptyVecArray();
@@ -649,7 +617,6 @@ void c_Vector::resize(uint32_t sz, const Cell* val) {
     // desctuctors may mutate this Vector (and need to see it in the fully
     // resized state). The easiest way to do this is to copy the part we're
     // keeping into a new vec, swap them, and decref the old one.
-    ++m_version;
     dropImmCopy();
     auto oldAd = arrayData();
     auto from = data();
@@ -674,7 +641,7 @@ void c_Vector::resize(uint32_t sz, const Cell* val) {
 
 void c_Vector::reverse() {
   if (m_size < 2) return;
-  mutateAndBump();
+  mutate();
   auto start = data();
   auto end = start + m_size - 1;
   do {
@@ -690,7 +657,6 @@ void c_Vector::splice(int64_t startPos, int64_t endPos) {
   // keeping into a new vec, swap them, and decref the old one.
   assert(0 <= startPos && startPos < endPos && endPos <= m_size);
   uint32_t sz = m_size - (endPos - startPos);
-  ++m_version;
   dropImmCopy();
   auto oldBuf = data();
   auto oldAd = arrayData();
@@ -751,7 +717,7 @@ void c_Vector::shuffle() {
   if (m_size < 2) {
     return;
   }
-  mutateAndBump();
+  mutate();
   uint32_t i = 1;
   do {
     uint32_t j = math_mt_rand(0, i);
@@ -864,7 +830,7 @@ void c_Vector::sort(int sort_flags, bool ascending) {
   if (m_size <= 1) {
     return;
   }
-  mutateAndBump();
+  mutate();
   SortFlavor flav = preSort<VectorValAccessor>(VectorValAccessor());
   CALL_SORT(VectorValAccessor);
 }
@@ -877,7 +843,7 @@ bool c_Vector::usort(const Variant& cmp_function) {
   if (m_size <= 1) {
     return true;
   }
-  mutateAndBump();
+  mutate();
   ElmUCompare<VectorValAccessor> comp;
   CallCtx ctx;
   CallerFrame cf;

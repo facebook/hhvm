@@ -183,8 +183,8 @@ protected:
   template<bool raw> void setImpl(StringData* k, TypedValue v);
 
   // setRaw() assigns a value to the specified key in this Map, but doesn't
-  // check for an immutable buffer and doesn't increment m_version, so it's
-  // only safe to use in some cases. If you're not sure, use set() instead.
+  // check for an immutable buffer, so it's only safe to use in some cases.
+  // If you're not sure, use set() instead.
   void setRaw(int64_t k, TypedValue v);
   void setRaw(StringData* key, TypedValue v);
   void setRaw(int64_t k, const Variant& v)     { setRaw(k, *v.asCell()); }
@@ -295,7 +295,6 @@ private:
   friend struct c_Vector;
   friend struct c_Map;
   friend struct c_ImmMap;
-  friend struct ArrayIter;
   friend struct c_AwaitAllWaitHandle;
   friend struct c_GenMapWaitHandle;
 
@@ -402,7 +401,6 @@ struct MapIterator {
   MapIterator& operator=(const MapIterator& src) {
     m_obj = src.m_obj;
     m_pos = src.m_pos;
-    m_version = src.m_version;
     return *this;
   }
   ~MapIterator() {}
@@ -416,14 +414,10 @@ struct MapIterator {
   void setMap(BaseMap* mp) {
     m_obj = mp;
     m_pos = mp->iter_begin();
-    m_version = mp->getVersion();
   }
 
   Variant current() const {
     auto const mp = m_obj.get();
-    if (UNLIKELY(m_version != mp->getVersion())) {
-      throw_collection_modified();
-    }
     if (!mp->iter_valid(m_pos)) {
       throw_iterator_not_valid();
     }
@@ -432,9 +426,6 @@ struct MapIterator {
 
   Variant key() const {
     auto const mp = m_obj.get();
-    if (UNLIKELY(m_version != mp->getVersion())) {
-      throw_collection_modified();
-    }
     if (!mp->iter_valid(m_pos)) {
       throw_iterator_not_valid();
     }
@@ -445,26 +436,19 @@ struct MapIterator {
     return m_obj->iter_valid(m_pos);
   }
 
-  void next()   {
+  void next() {
     auto const mp = m_obj.get();
-    if (UNLIKELY(m_version != mp->getVersion())) {
-      throw_collection_modified();
-    }
     m_pos = mp->iter_next(m_pos);
   }
 
   void rewind() {
     auto const mp = m_obj.get();
-    if (UNLIKELY(m_version != mp->getVersion())) {
-      throw_collection_modified();
-    }
     m_pos = mp->iter_begin();
   }
 
  private:
   req::ptr<BaseMap> m_obj;
   uint32_t m_pos{0};
-  int32_t  m_version{0};
 };
 
 /////////////////////////////////////////////////////////////////////////////

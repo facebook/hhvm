@@ -30,19 +30,19 @@ protected:
   // Make sure this one is inlined all the way
   explicit BaseVector(Class* cls, HeaderKind kind)
     : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
-    , m_versionAndSize(0)
+    , m_unusedAndSize(0)
     , m_arr(staticEmptyVecArray())
   {}
   explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
     : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
-    , m_versionAndSize(arr->m_size)
+    , m_unusedAndSize(arr->m_size)
     , m_arr(arr)
   {
     assertx(arr->isVecArray());
   }
   explicit BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
     : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
-    , m_versionAndSize(0)
+    , m_unusedAndSize(0)
     , m_arr(PackedArray::MakeReserveVec(cap))
   {}
   ~BaseVector();
@@ -204,7 +204,6 @@ public:
   void addFront(TypedValue v);
   Variant popFront();
 
-  int getVersion() const { return m_version; }
   int64_t size() const { return m_size; }
   bool toBoolImpl() const { return (m_size != 0); }
   /**
@@ -281,8 +280,6 @@ public:
     assert(canMutateBuffer());
   }
 
-  void mutateAndBump() { mutate(); ++m_version; }
-
   Object getImmutableCopy();
   void dropImmCopy() {
     assert(m_immCopy.isNull() ||
@@ -321,7 +318,6 @@ protected:
       assert(canMutateBuffer());
       m_arr = PackedArray::AppendVec(oldAd, tv, false);
     } else {
-      ++m_version;
       dropImmCopy();
       m_arr = PackedArray::AppendVec(oldAd, tv, oldAd->cowCheck());
     }
@@ -332,13 +328,13 @@ protected:
   }
 
   // addRaw() adds a new element to this Vector but doesn't check for an
-  // immutable buffer and doesn't increment m_version, so it's only safe
-  // to use in some cases. If you're not sure, use add() instead.
+  // immutable buffer, so it's only safe to use in some cases. If you're not
+  // sure, use add() instead.
   void addRaw(TypedValue v) { addImpl<true>(v); }
   void addRaw(const Variant& v) { addRaw(*v.asCell()); }
 
-  // setRaw() assigns a value to the specified key in this Vector but
-  // doesn't increment m_version, so it's only safe to use in some cases.
+  // setRaw() assigns a value to the specified key in this Vector but doesn't
+  // check for an immutable buffer, so it's only safe to use in some cases.
   // If you're not sure, use set() instead.
   void setRaw(int64_t key, const TypedValue* val) {
     assert(val->m_type != KindOfRef);
@@ -396,9 +392,9 @@ protected:
   union {
     struct {
       uint32_t m_size;
-      int32_t m_version;
+      int32_t m_unused;
     };
-    int64_t m_versionAndSize;
+    int64_t m_unusedAndSize;
   };
 
 
@@ -549,7 +545,6 @@ private:
   friend void collections::append(ObjectData* obj, TypedValue* val);
   friend void triggerCow(c_Vector* vec);
 
-  friend struct ArrayIter;
   friend struct BaseMap;
   friend struct c_Pair;
 };
@@ -583,7 +578,6 @@ struct VectorIterator {
   VectorIterator& operator=(const VectorIterator& src) {
     m_obj = src.m_obj;
     m_pos = src.m_pos;
-    m_version = src.m_version;
     return *this;
   }
   ~VectorIterator() {}
@@ -597,14 +591,10 @@ struct VectorIterator {
   void setVector(BaseVector* vec) {
     m_obj = vec;
     m_pos = 0;
-    m_version = vec->getVersion();
   }
 
   Variant current() const {
     auto vec = m_obj.get();
-    if (UNLIKELY(m_version != vec->getVersion())) {
-      throw_collection_modified();
-    }
     if (m_pos >= vec->m_size) {
       throw_iterator_not_valid();
     }
@@ -630,7 +620,6 @@ struct VectorIterator {
  private:
   req::ptr<BaseVector> m_obj;
   uint32_t m_pos{0};
-  int32_t  m_version{0};
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -13,7 +13,7 @@ namespace HPHP {
 
 HashCollection::HashCollection(Class* cls, HeaderKind kind, uint32_t cap)
   : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
-  , m_versionAndSize(0)
+  , m_unusedAndSize(0)
   , m_arr(cap == 0 ? staticEmptyDictArrayAsMixed() :
           MixedArray::asMixed(MixedArray::MakeReserveDict(cap)))
 {}
@@ -133,7 +133,7 @@ Array HashCollection::toValuesArray() {
 }
 
 void HashCollection::remove(int64_t key) {
-  mutateAndBump();
+  mutate();
   auto p = findForRemove(key, hash_int64(key));
   if (validPos(p)) {
     erase(p);
@@ -141,7 +141,7 @@ void HashCollection::remove(int64_t key) {
 }
 
 void HashCollection::remove(StringData* key) {
-  mutateAndBump();
+  mutate();
   auto p = findForRemove(key, key->hash());
   if (validPos(p)) {
     erase(p);
@@ -466,13 +466,13 @@ void HashCollection::postSort() {  // Must provide the nothrow guarantee
 
 void HashCollection::asort(int sort_flags, bool ascending) {
   if (m_size <= 1) return;
-  mutateAndBump();
+  mutate();
   SORT_BODY(AssocValAccessor<HashCollection::Elm>);
 }
 
 void HashCollection::ksort(int sort_flags, bool ascending) {
   if (m_size <= 1) return;
-  mutateAndBump();
+  mutate();
   SORT_BODY(AssocKeyAccessor<HashCollection::Elm>);
 }
 
@@ -502,13 +502,13 @@ void HashCollection::ksort(int sort_flags, bool ascending) {
 
 bool HashCollection::uasort(const Variant& cmp_function) {
   if (m_size <= 1) return true;
-  mutateAndBump();
+  mutate();
   USER_SORT_BODY(AssocValAccessor<HashCollection::Elm>);
 }
 
 bool HashCollection::uksort(const Variant& cmp_function) {
   if (m_size <= 1) return true;
-  mutateAndBump();
+  mutate();
   USER_SORT_BODY(AssocKeyAccessor<HashCollection::Elm>);
 }
 

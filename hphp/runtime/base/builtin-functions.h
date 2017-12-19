@@ -142,7 +142,6 @@ void throw_instance_method_fatal(const char *name);
 [[noreturn]] void throw_arithmetic_error(StringData*);
 [[noreturn]] void throw_division_by_zero_error(StringData*);
 [[noreturn]] void throw_iterator_not_valid();
-[[noreturn]] void throw_collection_modified();
 [[noreturn]] void throw_collection_property_exception();
 [[noreturn]] void throw_collection_compare_exception();
 [[noreturn]] void throw_vec_compare_exception();

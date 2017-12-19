@@ -123,7 +123,6 @@ struct c_Pair : ObjectData {
 
   Array toArrayImpl() const;
   Object getIterator();
-  int getVersion() const { return 0; }
 
   [[noreturn]] static void throwBadKeyType();
 
@@ -146,7 +145,6 @@ struct c_Pair : ObjectData {
   friend struct c_Vector;
   friend struct BaseVector;
   friend struct BaseMap;
-  friend struct ArrayIter;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field

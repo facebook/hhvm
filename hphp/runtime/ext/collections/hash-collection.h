@@ -18,12 +18,12 @@ ALWAYS_INLINE MixedArray* staticEmptyDictArrayAsMixed() {
 struct HashCollection : ObjectData {
   explicit HashCollection(Class* cls, HeaderKind kind)
     : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
-    , m_versionAndSize(0)
+    , m_unusedAndSize(0)
     , m_arr(staticEmptyDictArrayAsMixed())
   {}
   explicit HashCollection(Class* cls, HeaderKind kind, ArrayData* arr)
     : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
-    , m_versionAndSize(arr->m_size)
+    , m_unusedAndSize(arr->m_size)
     , m_arr(MixedArray::asMixed(arr))
   {}
   explicit HashCollection(Class* cls, HeaderKind kind, uint32_t cap);
@@ -42,9 +42,6 @@ struct HashCollection : ObjectData {
   // reserve() to make room for up to MaxSize / 2 elements.
   static const uint32_t MaxReserveSize = MaxSize / 2;
 
-  int getVersion() const {
-    return m_version;
-  }
   int64_t size() const {
     return m_size;
   }
@@ -264,8 +261,6 @@ struct HashCollection : ObjectData {
     assert(canMutateBuffer());
     assert(m_immCopy.isNull());
   }
-
-  void mutateAndBump() { mutate(); ++m_version; }
 
   void dropImmCopy() {
     assert(m_immCopy.isNull() ||
@@ -613,15 +608,14 @@ struct HashCollection : ObjectData {
     adata->incRefCount();
     m_size = adata->size();
     decRefArr(oldAd);
-    ++m_version;
   }
 
   union {
     struct {
-      uint32_t m_size;    // Number of values
-      int32_t m_version;  // Version number
+      uint32_t m_size;
+      int32_t m_unused;
     };
-    int64_t m_versionAndSize;
+    int64_t m_unusedAndSize;
   };
 
   MixedArray* m_arr;      // Elm store.

@@ -76,7 +76,7 @@ void BaseMap::addAllImpl(const Variant& iterable) {
       if (m_size) {
         oldCap = cap(); // assume minimal collisions
         reserve(m_size + sz);
-        mutateAndBump();
+        mutate();
         return false;
       } else if (adata->isDict()) {
         replaceArray(adata);
@@ -89,7 +89,7 @@ void BaseMap::addAllImpl(const Variant& iterable) {
           // the array contained references, can't be turned into a dict as is
           // we'll have to proceed one element at a time, unboxing as we go
           reserve(sz);
-          mutateAndBump();
+          mutate();
           return false;
         }
         replaceArray(dict);
@@ -111,7 +111,7 @@ void BaseMap::addAllImpl(const Variant& iterable) {
           return true;
         }
         case CollectionType::Pair:
-          mutateAndBump();
+          mutate();
           break;
         default:
           break;
@@ -213,7 +213,7 @@ Variant BaseMap::pop() {
   if (UNLIKELY(m_size == 0)) {
     SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Map");
   }
-  mutateAndBump();
+  mutate();
   auto e = elmLimit() - 1;
   for (;; --e) {
     assert(e >= data());
@@ -231,7 +231,7 @@ Variant BaseMap::popFront() {
   if (UNLIKELY(m_size == 0)) {
     SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Map");
   }
-  mutateAndBump();
+  mutate();
   auto e = data();
   for (;; ++e) {
     assert(e != elmLimit());
@@ -268,9 +268,6 @@ retry:
     makeRoom();
     goto retry;
   }
-  if (!raw) {
-    ++m_version;
-  }
   auto& e = allocElm(p);
   cellDup(tv, e.data);
   e.setIntKey(k, h);
@@ -299,9 +296,6 @@ retry:
   if (UNLIKELY(isFull())) {
     makeRoom();
     goto retry;
-  }
-  if (!raw) {
-    ++m_version;
   }
   auto& e = allocElm(p);
   cellDup(tv, e.data);
@@ -452,24 +446,16 @@ Object BaseMap::php_retain(const Variant& callback) {
       }
     }
     argv[argc-1] = e->data;
-    int32_t version = m_version;
     bool b = invokeAndCastToBool(ctx, argc, argv);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
     if (b) {
       continue;
     }
-    mutateAndBump();
-    version = m_version;
+    mutate();
     e = iter_elm(pos);
     auto h = e->hash();
     auto pp = e->hasIntKey() ? findForRemove(e->ikey, h) :
               findForRemove(e->skey, h);
     eraseNoCompact(pp);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
   }
 
   assert(m_size <= size);
@@ -604,19 +590,10 @@ BaseMap::php_skipWhile(const Variant& fn) {
   }
   auto map = req::make<TMap>();
   if (!m_size) return Object{std::move(map)};
-  int32_t version;
-  if (std::is_same<c_Map, TMap>::value) {
-    version = m_version;
-  }
   ssize_t pos;
   for (pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
     auto e = iter_elm(pos);
     bool b = invokeAndCastToBool(ctx, 1, &e->data);
-    if (std::is_same<c_Map, TMap>::value) {
-      if (UNLIKELY(version != m_version)) {
-        throw_collection_modified();
-      }
-    }
     if (!b) break;
   }
   if (iter_valid(pos)) {
@@ -755,7 +732,6 @@ BaseMap::FromArray(const Class*, const Variant& arr) {
 // c_Map
 
 void c_Map::clear() {
-  ++m_version;
   dropImmCopy();
   decRefArr(arrayData());
   m_arr = staticEmptyDictArrayAsMixed();
@@ -768,7 +744,6 @@ Object c_Map::getImmutableCopy() {
   if (m_immCopy.isNull()) {
     auto map = req::make<c_ImmMap>();
     map->m_size = m_size;
-    map->m_version = m_version;
     map->m_arr = m_arr;
     m_immCopy = std::move(map);
     arrayData()->incRefCount();

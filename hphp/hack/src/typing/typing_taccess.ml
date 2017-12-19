@@ -99,9 +99,11 @@ and expand_ env (root_reason, root_ty as root) =
         let upper_bounds = Env.get_upper_bounds env.tenv s in
         (* Ignore upper bounds that are equal to ones we've seen, to avoid
           an infinite loop
+
+          let upper_bounds = upper_bounds - env.gen_seen
         *)
         let upper_bounds = List.filter ~f:(fun ty ->
-            List.exists env.gen_seen
+            List.for_all env.gen_seen
             ~f:(fun ty2 -> not (ty_equal ty ty2))) upper_bounds in
         let env, tyl = List.map_env env upper_bounds begin fun prev_env ty ->
           let env, ty = expand_ env ty in

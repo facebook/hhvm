@@ -142,11 +142,9 @@ __thread size_t s_stackSize;
 const size_t s_pageSize =  sysconf(_SC_PAGESIZE);
 
 static NEVER_INLINE uintptr_t get_stack_top() {
-  char marker;
-  uintptr_t rsp;
-
-  rsp = uintptr_t(&marker);
-  return rsp;
+  using ActRec = char;
+  DECLARE_FRAME_POINTER(fp);
+  return uintptr_t(fp) - s_pageSize;
 }
 
 void init_stack_limits(pthread_attr_t* attr) {

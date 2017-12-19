@@ -2,7 +2,7 @@
 
 async function test(
   X::T $x,
-  ?Vector<Z::Y::X<int, string>> $v,
+  ?Vector<Z::Y::X> $v,
 ): Awaitable<A::B::C> {}
 
 $reflect = new ReflectionFunction('test');

@@ -28,6 +28,11 @@ val elaborate_id_impl : autoimport:bool -> Namespace_env.env ->
   namespaces are propagated to inline declarations
   during closure conversion process *)
 val elaborate_toplevel_defs : ParserOptions.t -> Ast.program -> Ast.program
+val elaborate_map_toplevel_defs :
+  ParserOptions.t ->
+  Ast.program ->
+  (Namespace_env.env -> Ast.def -> Ast.def) ->
+  Ast.program
 
 val elaborate_def:
   Namespace_env.env ->

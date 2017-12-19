@@ -1,5 +1,4 @@
 slow/class_type_constant/type_constant.php
-slow/constant/true_false_null.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/inout/bad-call-15.php
 slow/inout/side-effects.php

@@ -13,6 +13,7 @@ module SyntaxTree = Full_fidelity_syntax_tree
 module Syntax = Full_fidelity_editable_positioned_syntax
 module SyntaxValue = Syntax.Value
 module Token = Full_fidelity_editable_positioned_token
+module NS = Namespaces
 
  (* What we're lowering from *)
  open Syntax
@@ -57,6 +58,7 @@ type env =
   ; mutable max_depth        : int    (* Filthy hack around OCaml bug *)
   ; mutable saw_yield        : bool   (* Information flowing back up *)
   ; mutable unsafes          : ISet.t (* Offsets of UNSAFE_EXPR in trivia *)
+  ; mutable saw_std_constant_redefinition: bool
   }
 
 type +'a parser = node -> env -> 'a
@@ -2078,6 +2080,11 @@ and pNamespaceUseClause ~prefix env kind node =
     let x = Str.search_forward (Str.regexp "[^\\\\]*$") n 0 in
     let key = drop_pstr x name in
     let kind = if is_missing clause_kind then kind else clause_kind in
+    let alias = if is_missing alias then key else pos_name alias env in
+    begin match String.lowercase_ascii (snd alias) with
+    | "null" | "true" | "false" -> env.saw_std_constant_redefinition <- true
+    | _ -> ()
+    end;
     let kind =
       match syntax kind with
       | Token { Token.kind = TK.Namespace; _ } -> NSNamespace
@@ -2089,9 +2096,7 @@ and pNamespaceUseClause ~prefix env kind node =
     in
     ( kind
     , (p, if n.[0] = '\\' then n else "\\" ^ n)
-    , if is_missing alias
-      then key
-      else pos_name alias env
+    , alias
     )
   | _ -> missing_syntax "namespace use clause" node env
 
@@ -2530,15 +2535,41 @@ let make_env
     ; saw_yield               = false
     ; max_depth               = 42
     ; unsafes                 = ISet.empty
+    ; saw_std_constant_redefinition = false
     }
+
+let elaborate_toplevel_and_std_constants ast env source_text =
+  match env.elaborate_namespaces, env.saw_std_constant_redefinition with
+  | true, true ->
+    let elaborate_std_constants nsenv def =
+      let visitor = object(self)
+        inherit [_] endo as super
+        method! on_expr env expr =
+          match expr with
+          | p, True | p, False | p, Null when p <> Pos.none ->
+            let s = File_pos.offset @@ Pos.pos_start p in
+            let e = File_pos.offset @@ Pos.pos_end p in
+            let text = SourceText.sub source_text s (e - s) in
+            let was_renamed, _ =
+              NS.elaborate_id_impl
+                ~autoimport:true
+                nsenv
+                NS.ElaborateConst
+                (p, text) in
+            if was_renamed then p, Ast.Id (p, text)
+            else expr
+          | _ -> super#on_expr env expr
+      end in
+      visitor#on_def nsenv def in
+    let parser_options = env.parser_options in
+    NS.elaborate_map_toplevel_defs parser_options ast elaborate_std_constants
+  | true, false ->
+    NS.elaborate_toplevel_defs env.parser_options ast
+  | _ -> ast
 
 let lower ~source_text ~script env : result =
   let ast = runP pScript script env in
-  let ast =
-    if env.elaborate_namespaces
-    then Namespaces.elaborate_toplevel_defs env.parser_options ast
-    else ast
-  in
+  let ast = elaborate_toplevel_and_std_constants ast env source_text in
   let comments, fixmes = scour_comments env.file source_text script env in
   let comments = if env.include_line_comments then comments else
     List.filter ~f:(fun (_,c) -> not (Prim_defs.is_line_comment c)) comments

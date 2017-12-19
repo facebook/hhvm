@@ -122,7 +122,7 @@ module WithExpressionAndStatementAndTypeParser
   (* Declarations *)
 
   let rec parse_inclusion_directive parser =
-  (* SPEC:
+    (* SPEC:
     inclusion-directive:
       require-multiple-directive
       require-once-directive
@@ -307,7 +307,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, as_token, alias) =
       if Token.kind as_token = As then
         let as_token = make_token as_token in
-        let (parser, alias) = require_name parser1 in
+        let (parser, alias) = require_name_allow_std_constants parser1 in
         (parser, as_token, alias)
       else
         (parser, make_missing parser, make_missing parser) in
@@ -515,7 +515,7 @@ module WithExpressionAndStatementAndTypeParser
     (parser, syntax)
 
   and parse_classish_element parser =
-  (*We need to identify an element of a class, trait, etc. Possibilities
+    (*We need to identify an element of a class, trait, etc. Possibilities
     are:
 
      // constant-declaration:

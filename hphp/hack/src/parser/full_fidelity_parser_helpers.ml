@@ -283,6 +283,21 @@ module WithParser(Parser : Parser_S) = struct
          and continue on from the current token. Don't skip it. *)
       (with_error parser SyntaxError.error1004, make_missing parser)
 
+  let require_name_allow_std_constants parser =
+    let (parser1, token) = require_name_allow_keywords parser in
+    let is_std_constant token =
+      match Syntax.extract_text token with
+      | Some text ->
+          let str = String.lowercase_ascii text in
+          begin match str with
+          | "true" | "false" | "null" -> true
+          | _ -> false
+          end
+      | None -> false in
+    if not @@ is_std_constant token
+    then require_name parser
+    else (parser1, token)
+
   let next_xhp_category_name parser =
     let lexer = Parser.lexer parser in
     let (lexer, token) = Lexer.next_xhp_category_name lexer in
@@ -505,7 +520,7 @@ module WithParser(Parser : Parser_S) = struct
     * If the list of items is empty then a Missing node is returned.
     * If the list of items is a singleton then the item is returned.
     * Otherwise, a list of the form (item, separator) ... item is returned.
-*)
+  *)
 
   let parse_separated_list_predicate parser separator_kind list_kind
       close_predicate error parse_item =

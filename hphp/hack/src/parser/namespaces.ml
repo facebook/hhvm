@@ -240,7 +240,7 @@ module ElaborateDefs = struct
     then nsenv, [stmt; SetNamespaceEnv nsenv]
     else nsenv, [stmt]
 
-  let rec def nsenv = function
+  let rec def map_def nsenv = function
     (*
       The default namespace in php is the global namespace specified by
       the empty string. In the case of an empty string, we model it as
@@ -258,7 +258,7 @@ module ElaborateDefs = struct
           | "" -> None
           | _ -> Some (parent_nsname ^ nsname) in
         let new_nsenv = {nsenv with ns_name = nsname} in
-        nsenv, SetNamespaceEnv new_nsenv :: program new_nsenv prog
+        nsenv, SetNamespaceEnv new_nsenv :: program map_def new_nsenv prog
       end
     | NamespaceUse l -> begin
         let nsenv =
@@ -291,7 +291,7 @@ module ElaborateDefs = struct
     | Class c ->
       let name, nsenv, updated_nsenv =
         elaborate_defined_id nsenv ElaborateClass c.c_name in
-      finish nsenv updated_nsenv (Class {c with
+      finish nsenv updated_nsenv @@ map_def nsenv (Class {c with
         c_name = name;
         c_extends = List.map c.c_extends (hint nsenv);
         c_implements = List.map c.c_implements (hint nsenv);
@@ -301,18 +301,18 @@ module ElaborateDefs = struct
     | Fun f ->
       let name, nsenv, updated_nsenv =
         elaborate_defined_id nsenv ElaborateFun f.f_name in
-      finish nsenv updated_nsenv (Fun {f with
+      finish nsenv updated_nsenv @@ map_def nsenv (Fun {f with
         f_name = name;
         f_namespace = nsenv;
       })
     | Typedef t ->
       let name, nsenv, updated_nsenv =
         elaborate_defined_id nsenv ElaborateClass t.t_id in
-      finish nsenv updated_nsenv (Typedef {t with
+      finish nsenv updated_nsenv @@ map_def nsenv (Typedef {t with
         t_id = name;
         t_namespace = nsenv;
       })
-    | Constant cst -> nsenv, [Constant {cst with
+    | Constant cst -> nsenv, [map_def nsenv @@ Constant {cst with
         cst_name =
           if cst.cst_kind = Ast.Cst_define
           then
@@ -331,19 +331,28 @@ module ElaborateDefs = struct
             in name);
         cst_namespace = nsenv;
       }]
-    | other -> nsenv, [other]
+    | other -> nsenv, [map_def nsenv other]
 
-  and program nsenv p =
+  and program f nsenv p =
     let _, acc =
       List.fold_left p ~init:(nsenv, []) ~f:begin fun (nsenv, acc) item ->
-        let nsenv, item = def nsenv item in
+        let nsenv, item = def f nsenv item in
         nsenv, item :: acc
       end in
     List.concat (List.rev acc)
 end
 
+let noop _ x = x
+
+let elaborate_toplevel_defs_ ?(map_def = noop) popt ast  =
+  ElaborateDefs.program map_def (Namespace_env.empty popt) ast
+
 let elaborate_toplevel_defs popt ast =
-  ElaborateDefs.program (Namespace_env.empty popt) ast
+  elaborate_toplevel_defs_ popt ast
+
+let elaborate_map_toplevel_defs popt ast map_def =
+  elaborate_toplevel_defs_ ~map_def popt ast
+
 
 let elaborate_def nsenv def =
-  ElaborateDefs.def nsenv def
+  ElaborateDefs.def noop nsenv def

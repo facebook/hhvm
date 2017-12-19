@@ -662,15 +662,28 @@ static void initPersistentCache() {
   s_tc_fd = shm_open(tmpName.c_str(),
                      O_RDWR | O_CREAT | O_EXCL,
                      S_IWUSR | S_IRUSR);
-  always_assert(s_tc_fd != -1);
-  shm_unlink(tmpName.c_str());
   s_persistent_base = RuntimeOption::EvalJitTargetCacheSize * 3 / 4;
   s_persistent_base -= s_persistent_base & (4 * 1024 - 1);
-  auto const fail =
-    ftruncate(s_tc_fd,
-              RuntimeOption::EvalJitTargetCacheSize - s_persistent_base);
-
-  always_assert(fail == 0);
+  if (s_tc_fd != -1) {
+    shm_unlink(tmpName.c_str());
+    if (ftruncate(s_tc_fd,
+                  RuntimeOption::EvalJitTargetCacheSize - s_persistent_base)) {
+      close(s_tc_fd);
+      s_tc_fd = -1;
+    }
+  }
+  if (s_tc_fd == -1) {
+    // Fall back to a file in /tmp.  If things don't work out now kill the
+    // process.
+    char tmpName[] = "/tmp/tcXXXXXX";
+    s_tc_fd = mkstemp(tmpName);
+    always_assert(s_tc_fd != -1);
+    unlink(tmpName);
+    auto const fail = ftruncate(s_tc_fd,
+                                RuntimeOption::EvalJitTargetCacheSize
+                                - s_persistent_base);
+    always_assert(fail == 0);
+  }
   s_local_frontier = s_persistent_frontier = s_persistent_base;
 }
 

@@ -1589,7 +1589,6 @@ and expr_
   | Binop (Ast.Eq None, e1, e2) ->
       let env, te2, ty2 = raw_expr in_cond env e2 in
       let env, te1, ty = assign p env e1 ty2 in
-      Typing_hooks.dispatch_assign_hook p ty2 env;
       (* If we are assigning a local variable to another local variable then
        * the expression ID associated with e2 is transferred to e1
        *)

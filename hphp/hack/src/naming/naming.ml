@@ -1202,6 +1202,51 @@ module Make (GetLocals : GetLocals) = struct
            attr :: acc
     end
 
+  and xhp_attribute_decl env h cv is_required maybe_enum =
+    let _, (_, id), default = cv in
+    let h = (match maybe_enum with
+      | Some (pos, _optional, items) ->
+        let contains_int = List.exists items begin function
+          | _, Int _ -> true
+          | _ -> false
+        end in
+        let contains_str = List.exists items begin function
+          | _, String _ | _, String2 _ -> true
+          | _ -> false
+        end in
+        if contains_int && not contains_str then
+          Some (pos, Happly ((pos, "int"), []))
+        else if not contains_int && contains_str then
+          Some (pos, Happly ((pos, "string"), []))
+        else
+          (* If the list was empty, or if there was a mix of
+             ints and strings, then fallback to mixed *)
+          Some (pos, Happly ((pos, "mixed"), []))
+      | _ -> h) in
+    let h = (match h with
+      | Some (p, ((Hoption _) as x)) -> begin
+          (* `null` has special meaning in XHP and a required attribute cannot
+           * actually be nullable *)
+          if is_required then Errors.xhp_optional_required_attr p id;
+          Some (p, x)
+      end
+      | Some (p, ((Happly ((_, "mixed"), [])) as x)) -> Some (p, x)
+      | Some (p, h) ->
+        (* If a non-nullable attribute is not marked as "@required"
+           AND it does not have a non-null default value, make the
+           typehint nullable for now *)
+        if (is_required ||
+            (match default with
+              | None ->            false
+              | Some (_, Null) ->  false
+              | Some _ ->          true))
+          then Some (p, h)
+          else Some (p, Hoption (p, h))
+      | None -> None) in
+    let h = Option.map h (hint env) in
+    let cv = class_prop_ env cv in
+    fill_prop [] h cv
+
   and enum_ env e =
     { N.e_base       = hint env e.e_base;
       N.e_constraint = Option.map e.e_constraint (hint env);
@@ -1407,45 +1452,7 @@ module Make (GetLocals : GetLocals) = struct
       cvl @ acc
     | ClassVars _ -> acc
     | XhpAttr (h, cv, is_required, maybe_enum) ->
-      let _, _, default = cv in
-      let h = (match maybe_enum with
-        | Some (pos, _optional, items) ->
-          let contains_int = List.exists items begin function
-            | _, Int _ -> true
-            | _ -> false
-          end in
-          let contains_str = List.exists items begin function
-            | _, String _ | _, String2 _ -> true
-            | _ -> false
-          end in
-          if contains_int && not contains_str then
-            Some (pos, Happly ((pos, "int"), []))
-          else if not contains_int && contains_str then
-            Some (pos, Happly ((pos, "string"), []))
-          else
-            (* If the list was empty, or if there was a mix of
-               ints and strings, then fallback to mixed *)
-            Some (pos, Happly ((pos, "mixed"), []))
-        | _ -> h) in
-      let h = (match h with
-        | Some (p, ((Hoption _) as x)) -> Some (p, x)
-        | Some (p, ((Happly ((_, "mixed"), [])) as x)) -> Some (p, x)
-        | Some (p, h) ->
-          (* If a non-nullable attribute is not marked as "@required"
-             AND it does not have a non-null default value, make the
-             typehint nullable for now *)
-          if (is_required ||
-              (match default with
-                | None ->            false
-                | Some (_, Null) ->  false
-                | Some _ ->          true))
-            then Some (p, h)
-            else Some (p, Hoption (p, h))
-        | None -> None) in
-      let h = Option.map h (hint env) in
-      let cv = class_prop_ env cv in
-      let cv = fill_prop [] h cv in
-      cv :: acc
+      (xhp_attribute_decl env h cv is_required maybe_enum) :: acc
     | XhpCategory _ -> acc
     | XhpChild _ -> acc
     | Method _ -> acc

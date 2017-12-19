@@ -71,6 +71,7 @@ module type S = sig
   val primitive_toplevel : Pos.t -> unit
   val primitive_invalid_alias : Pos.t -> string -> string -> unit
   val dynamic_new_in_strict_mode : Pos.t -> unit
+  val xhp_optional_required_attr : Pos.t -> string -> unit
   val void_cast: Pos.t -> unit
   val object_cast: Pos.t -> string -> unit
   val unset_cast: Pos.t -> unit

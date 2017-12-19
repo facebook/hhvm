@@ -1,0 +1,2 @@
+File "xhp_nullable_required.php", line 4, characters 32-35:
+XHP attribute :bar cannot be marked as nullable and required (Naming[2079])

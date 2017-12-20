@@ -39,8 +39,6 @@ void* AsyncFuncImpl::s_finiFuncArg = nullptr;
 std::atomic<uint32_t> AsyncFuncImpl::s_count { 0 };
 std::atomic_int AsyncFuncImpl::s_curr_numa_node { 0 };
 
-unsigned s_hugeStackSizeKb;             // set through "Server.HugeStackSizeKb"
-
 AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func, bool hugeStack)
   : m_obj(obj), m_func(func), m_hugeStack(hugeStack)
 {}
@@ -105,6 +103,7 @@ void AsyncFuncImpl::start() {
     rlim.rlim_cur = kStackSizeMinimum;
   }
 
+  size_t normalSize = 0;               // size of stack backed by non-huge pages
 #if defined(__x86_64__) && defined(__linux__) && defined(MADV_HUGEPAGE)
   if (m_hugeStack) {
     // Allocate a heap slab of at least 2M near the stack base on huge pages.
@@ -154,16 +153,16 @@ void AsyncFuncImpl::start() {
       if (slabSize) {
         m_firstSlab = MemBlock{end - slabSize, slabSize};
       }
+      normalSize = m_stackAllocSize - size2m * nHugePages;
     }
-  } else {
-    m_threadStack = mmap_end_aligned(rlim.rlim_cur, 0);
-    m_stackAllocSize = rlim.rlim_cur;
   }
-#else
-  m_threadStack = (char*)mmap(nullptr, rlim.rlim_cur, PROT_READ | PROT_WRITE,
-                              MAP_PRIVATE | MAP_ANON, -1, 0);
-  m_stackAllocSize = rlim.rlim_cur;
 #endif
+  if (!m_threadStack) {
+    m_threadStack = (char*)mmap(nullptr, rlim.rlim_cur, PROT_READ | PROT_WRITE,
+                                MAP_PRIVATE | MAP_ANON, -1, 0);
+    m_stackAllocSize = rlim.rlim_cur;
+    normalSize = m_stackAllocSize;
+  }
 
   if (m_threadStack) {
     size_t guardsize;
@@ -171,8 +170,8 @@ void AsyncFuncImpl::start() {
       mprotect(m_threadStack, guardsize, PROT_NONE);
     }
 
-    madvise(m_threadStack, rlim.rlim_cur, MADV_DONTNEED);
-    numa_bind_to(m_threadStack, rlim.rlim_cur, m_node);
+    madvise(m_threadStack, normalSize, MADV_DONTNEED);
+    numa_bind_to(m_threadStack, normalSize, m_node);
 
     pthread_attr_setstack(&m_attr, m_threadStack, rlim.rlim_cur);
   }

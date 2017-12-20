@@ -353,6 +353,7 @@ extern __thread size_t s_stackSize;
 void init_stack_limits(pthread_attr_t* attr);
 
 extern const size_t s_pageSize;
+extern unsigned s_hugeStackSizeKb;     // RuntimeOption "Server.HugeStackSizeKb"
 
 /*
  * The numa node this thread is bound to

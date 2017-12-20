@@ -238,18 +238,18 @@ public:
       if (m_stopped) {
         throw StopSignal();
       }
-      if (highPri) {
-        wait(id, q, Priority::High);
-      } else {
-        if (m_dropCacheTimeout <= 0 || flushed) {
-          wait(id, q, Priority::Low);
-        } else if (!wait(id, q, Priority::Middle, m_dropCacheTimeout)) {
+
+      if (flushed) {
+        // Flushed worker threads gets lower priority.  But a flushed worker
+        // with huge stack is still more preferable than a non-flushed worker
+        // without huge stack.
+        wait(id, q, highPri ? Priority::High : Priority::Low);
+      } else if (m_dropCacheTimeout > 0) {
+        if (!wait(id, q, (highPri ? Priority::Highest : Priority::Normal),
+                  m_dropCacheTimeout)) {
           // since we timed out, maybe we can turn idle without holding memory
           if (m_jobCount == 0) {
             ScopedUnlock unlock(this);
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
-            thread_huge_tcache_flush();
-#endif
             flush_thread_caches();
             if (m_dropStack && s_stackLimit) {
               flush_thread_stack();
@@ -258,7 +258,12 @@ public:
             flushed = true;
           }
         }
+      } else {
+        // m_dropCacheTimeout <= 0, a thread that starts waiting more recently
+        // should be given a task first (LIFO), same as unflushed threads.
+        wait(id, q, highPri ? Priority::Highest : Priority::Normal);
       }
+
       if (!ableToDeque) {
         ableToDeque = m_healthStatus->getHealthLevel() != HealthLevel::BackOff;
       }

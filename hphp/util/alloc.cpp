@@ -68,6 +68,9 @@ void flush_thread_caches() {
     mallctlCall("thread.tcache.flush", true);
     numa_purge_arena();
   }
+#ifdef USE_JEMALLOC_EXTENT_HOOKS
+  thread_huge_tcache_flush();
+#endif
 #endif
 #ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {
@@ -140,6 +143,7 @@ bool purge_all(std::string* errStr) {
 __thread uintptr_t s_stackLimit;
 __thread size_t s_stackSize;
 const size_t s_pageSize =  sysconf(_SC_PAGESIZE);
+unsigned s_hugeStackSizeKb;
 
 static NEVER_INLINE uintptr_t get_stack_top() {
   using ActRec = char;
@@ -208,6 +212,12 @@ void init_stack_limits(pthread_attr_t* attr) {
 
 void flush_thread_stack() {
   uintptr_t top = get_stack_top() & ~(s_pageSize - 1);
+  if (s_firstSlab.ptr) {
+    uintptr_t boundary =               // between hugetlb pages and normal pages
+       reinterpret_cast<uintptr_t>(s_firstSlab.ptr) - s_hugeStackSizeKb * 1024;
+    assert(boundary % size2m == 0);
+    if (boundary < top) top = boundary;
+  }
   // s_stackLimit is already aligned
   assert(top >= s_stackLimit);
   size_t len = top - s_stackLimit;

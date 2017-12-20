@@ -173,8 +173,8 @@ private:
   static std::atomic<uint32_t> s_count;
   static std::atomic_int s_curr_numa_node; // for round robin NUMA binding
 
-  char* m_threadStack;
-  size_t m_stackAllocSize;
+  char* m_threadStack{nullptr};
+  size_t m_stackAllocSize{0};
   MemBlock m_firstSlab{nullptr, 0};
   pthread_attr_t m_attr;
   pthread_t m_threadId{0};

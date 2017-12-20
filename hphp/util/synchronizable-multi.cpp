@@ -44,14 +44,7 @@ bool SynchronizableMulti::waitImpl(int id, int q, Priority pri, timespec *ts) {
   else if (num_lists > 2) list_index = q % num_lists;
   auto& cond_list = m_cond_list_vec[list_index];
 
-  if (pri == Priority::High) {
-    cond_list.push_front(cond);
-  } else if (pri == Priority::Middle) {
-    cond_list.push_middle(cond);
-  } else {
-    assert(pri == Priority::Low);
-    cond_list.push_back(cond);
-  }
+  cond_list.push(cond, pri);
 
   int ret;
   if (ts) {

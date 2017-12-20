@@ -143,12 +143,16 @@ class virtual ['self] reduce_defs_base = object (self : 'self)
   method private on_list
     : 'env 'a . ('env -> 'a -> 'acc) -> 'env -> 'a list -> 'acc
     = fun f env xs ->
+      self#list_fold_left f env self#zero xs
+
+  method private list_fold_left
+    : 'env 'a . ('env -> 'a -> 'acc) -> 'env -> 'acc -> 'a list -> 'acc
+    = fun f env acc xs ->
       match xs with
-      | []    -> self#e
+      | []    -> acc
       | y::ys ->
-        let z  = f env y in
-        let zs = self#on_list f env ys in
-        self#add z zs
+        let acc = self#plus acc (f env y) in
+        self#list_fold_left f env acc ys
 
   method private on_option
     : 'env 'a . ('env -> 'a -> 'acc) -> 'env -> 'a option -> 'acc

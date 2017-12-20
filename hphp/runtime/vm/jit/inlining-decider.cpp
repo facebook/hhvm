@@ -61,6 +61,8 @@ bool traceRefusal(const Func* caller, const Func* callee, const char* why) {
   return false;
 }
 
+std::atomic<uint64_t> s_baseProfCount{0};
+
 std::atomic<bool> hasCalledDisableInliningIntrinsic;
 hphp_hash_set<const StringData*,
               string_data_hash,
@@ -346,7 +348,7 @@ Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
 folly::Synchronized<InlineCostCache, folly::RWSpinLock> s_inlCostCache;
 
 int computeTranslationCost(SrcKey at, Op callerFPushOp,
-                           const RegionDesc& region) {
+                           const RegionDesc& region, uint64_t adjustedMaxCost) {
   InlineRegionKey irk{region};
   SYNCHRONIZED_CONST(s_inlCostCache) {
     auto f = s_inlCostCache.find(irk);
@@ -358,19 +360,37 @@ int computeTranslationCost(SrcKey at, Op callerFPushOp,
 
   // If the region wasn't complete, don't cache the result, unless we already
   // know it will be too expensive, or we've stopped profiling it
-  auto const maxCost = RuntimeOption::EvalHHIRInliningMaxVasmCost;
   if (info.incomplete) {
     auto const fid = region.entry()->func()->getFuncId();
     auto const profData = jit::profData();
     auto const profiling = profData && profData->profiling(fid);
     cost = std::numeric_limits<int>::max();
-    if (profiling && info.cost <= maxCost) return cost;
+    if (profiling && info.cost <= adjustedMaxCost) return cost;
   }
 
   if (!s_inlCostCache.asConst()->count(irk)) {
     s_inlCostCache->emplace(irk, cost);
   }
+  FTRACE(3, "computeTranslationCost(at {}) = {}\n", showShort(at), cost);
   return cost;
+}
+
+uint64_t adjustedMaxVasmCost(uint64_t curProfCount) {
+  const auto baseVasmCost = RuntimeOption::EvalHHIRInliningVasmCostLimit;
+  if (s_baseProfCount.load() == 0) return baseVasmCost;
+  const auto baseProfCount = s_baseProfCount.load();
+  const auto costFactor = RuntimeOption::EvalHHIRInliningVasmCostFactor;
+  auto adjustedCost = costFactor * baseVasmCost * curProfCount / baseProfCount;
+  if (adjustedCost < RuntimeOption::EvalHHIRInliningMinVasmCostLimit) {
+    adjustedCost = RuntimeOption::EvalHHIRInliningMinVasmCostLimit;
+  }
+  if (adjustedCost > RuntimeOption::EvalHHIRInliningMaxVasmCostLimit) {
+    adjustedCost = RuntimeOption::EvalHHIRInliningMaxVasmCostLimit;
+  }
+  FTRACE(3, "adjustedMaxVasmCost: adjustedCost ({}) = baseVasmCost ({}) * "
+         "curProfCount ({}) / baseProfCount ({})\n",
+         adjustedCost, baseVasmCost, curProfCount, baseProfCount);
+  return adjustedCost;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -382,8 +402,10 @@ int computeTranslationCost(SrcKey at, Op callerFPushOp,
 int InliningDecider::accountForInlining(SrcKey callerSk,
                                         Op callerFPushOp,
                                         const Func* callee,
-                                        const RegionDesc& region) {
-  int cost = computeTranslationCost(callerSk, callerFPushOp, region);
+                                        const RegionDesc& region,
+                                        const irgen::IRGS& irgs) {
+  const auto maxCost = adjustedMaxVasmCost(curProfCount(irgs));
+  int cost = computeTranslationCost(callerSk, callerFPushOp, region, maxCost);
   m_costStack.push_back(cost);
   m_cost       += cost;
   m_callDepth  += 1;
@@ -489,7 +511,8 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
   // certain threshold.  (Note that we do not measure the total cost of all the
   // inlined calls for a given caller---just the cost of each nested stack.)
   const int maxCost = maxTotalCost - m_cost;
-  const int cost = computeTranslationCost(callerSk, callerFPushOp, region);
+  const int cost = computeTranslationCost(callerSk, callerFPushOp, region,
+                                          maxCost);
   if (cost > maxCost) {
     return refuse("too expensive");
   }
@@ -671,13 +694,13 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
 
   const auto mode = RuntimeOption::EvalInlineRegionMode;
 
+  const auto adjustedMaxCost = adjustedMaxVasmCost(curProfCount(irgs));
   if (mode == "cfg" || mode == "both") {
     if (profData()) {
       auto region = selectCalleeCFG(callee, numArgs, ctx, argTypes,
                                     maxBCInstrs);
-      auto const maxCost = RuntimeOption::EvalHHIRInliningMaxVasmCost;
       if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
-                                     callee, *region, maxCost)) {
+                                     callee, *region, adjustedMaxCost)) {
         return region;
       }
     }
@@ -693,13 +716,17 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     maxBCInstrs
   );
 
-  auto const maxCost = RuntimeOption::EvalHHIRInliningMaxVasmCost;
   if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
-                                 callee, *region, maxCost)) {
+                                 callee, *region, adjustedMaxCost)) {
     return region;
   }
 
   return nullptr;
+}
+
+void setBaseInliningProfCount(uint64_t value) {
+  s_baseProfCount.store(value);
+  FTRACE(1, "setBaseInliningProfCount: {}\n", value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

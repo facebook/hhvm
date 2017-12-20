@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/mcgen.h"
 
 #include "hphp/runtime/vm/jit/debugger.h"
+#include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -281,6 +282,16 @@ void retranslateAll() {
     if (serverMode) {
       Logger::Info("retranslateAll: saved call graph at /tmp/cg-pgo.dot");
     }
+  }
+
+  // Set the base profile count used to adjust the aggressiveness of inlining
+  // based on hotness.
+  uint64_t total = 0;
+  for (auto& target : cg.targets) {
+    total += target.samples;
+  }
+  if (cg.targets.size() > 0) {
+    setBaseInliningProfCount(total / cg.targets.size());
   }
 
   // 2) Generate machine code for all the profiled functions.

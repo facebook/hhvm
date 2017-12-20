@@ -134,7 +134,8 @@ struct InliningDecider {
   int accountForInlining(SrcKey callerSk,
                          Op callerFPushOp,
                          const Func* callee,
-                         const RegionDesc& region);
+                         const RegionDesc& region,
+                         const irgen::IRGS& irgs);
 
   /*
    * Update context to begin inlining of callee with cost zero.
@@ -180,6 +181,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const irgen::IRGS& irgs,
                                  InliningDecider& inl,
                                  int32_t maxBCInstrs);
+
+void setBaseInliningProfCount(uint64_t value);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

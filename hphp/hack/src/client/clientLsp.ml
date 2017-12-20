@@ -570,42 +570,21 @@ let do_definition (conn: server_conn) (params: Definition.params)
   (* That indeed is what Typescript does -- it only gives the constructor.        *)
   (* (VSCode displays multiple definitions with a peek view of them all;          *)
   (*  Atom displays them with a small popup showing just file+line of each).      *)
-  (* If the class does not define a constructor, we jump to the class definition  *)
-  (* instead. We do not directly jump to a base class under any circumstance.     *)
-
-  (* is_self_defined is similar to hasOwnProperty in JavaScript.                  *)
-  (* We compare the class specified by the SymbolOccurrence with the class        *)
-  (* specified by the SymbolDefinition. If they are equal, then the symbol is     *)
-  (* defined in the class in question. If they are not equal, then the symbol is  *)
-  (* defined in a base class. We limit the results to only those defined in the   *)
-  (* current class so that we do not jump directly to a base class.               *)
-  (* Note: We extract the class names by a regex match, but this is potentially   *)
-  (* brittle. We should prefer to convert the pos back to a class identifier.     *)
-  let is_self_defined result = match result with
-    | { SymbolOccurrence.name = oname; _ },
-      Some { SymbolDefinition.full_name = dname; _ } ->
-      (* oname format: \MyClass::foo *)
-      let oname_regex = Str.regexp "\\\\\\([^:]+\\)" in
-      (* dname format: MyClass::bar *)
-      let dname_regex = Str.regexp "\\([^:]+\\)" in
-      let oclass = if Str.string_match oname_regex oname 0
-        then Some (Str.matched_group 1 oname)
-        else None in
-      let dclass = if Str.string_match dname_regex dname 0
-        then Some (Str.matched_group 1 dname)
-        else None in
-      begin match oclass, dclass with
-      | Some oclass, Some dclass -> oclass = dclass
-      | _ -> false
-      end
-    | _ -> false in
-  let results = List.filter results ~f:is_self_defined in
+  (* There's one subtlety. If you declare a base class "B" with a constructor,    *)
+  (* and a derived class "C" without a constructor, and click on "new C()", then  *)
+  (* both Hack and Typescript will take you to the constructor of B. As desired!  *)
+  (* Conclusion: given a class+method, we'll return only the method.              *)
   let result_is_method (result: IdentifySymbolService.single_result): bool =
     match result with
     | { SymbolOccurrence.type_ = SymbolOccurrence.Method _; _ }, _ -> true
     | _ -> false in
+  let result_is_class (result: IdentifySymbolService.single_result): bool =
+    match result with
+    | { SymbolOccurrence.type_ = SymbolOccurrence.Class; _ }, _ -> true
+    | _ -> false in
+  let has_class = List.exists results ~f:result_is_class in
   let has_method = List.exists results ~f:result_is_method in
-  let filtered_results = if has_method then
+  let filtered_results = if has_class && has_method then
     List.filter results ~f:result_is_method
   else
     results

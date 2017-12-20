@@ -28,8 +28,8 @@ class FF {}
 
 function test(): void {
   $bb = new BB(1); // should go to B::__construct
-  $cc = new CC(1); // should go to C
-  $dd = new DD(1); // should go to D
+  $cc = new CC(1); // should offer choice B::__construct or C
+  $dd = new DD(1); // should offer choice B::__construct or D
   $ee = new EE(); // should go to E::__construct
   $ff = new FF(); // should go to F
 }

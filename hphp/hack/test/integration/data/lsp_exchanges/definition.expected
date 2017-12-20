@@ -91,12 +91,12 @@
         "uri": "${php_file_uri}",
         "range": {
           "start": {
-            "line": 14,
-            "character": 6
+            "line": 11,
+            "character": 18
           },
           "end": {
-            "line": 14,
-            "character": 8
+            "line": 11,
+            "character": 29
           }
         }
       }
@@ -110,12 +110,12 @@
         "uri": "${php_file_uri}",
         "range": {
           "start": {
-            "line": 17,
-            "character": 6
+            "line": 11,
+            "character": 18
           },
           "end": {
-            "line": 17,
-            "character": 8
+            "line": 11,
+            "character": 29
           }
         }
       }

@@ -27,7 +27,6 @@ class ['e] monoid_product = object
 end
 
 class ['self] map_defs_base = object (self : 'self)
-  method private on_t            : 'env -> Pos.t  -> Pos.t  = fun _ x -> x
   method private on_string       : 'env -> string -> string = fun _ x -> x
   method private on_int          : 'env -> int    -> int    = fun _ x -> x
   method private on_bool         : 'env -> bool   -> bool   = fun _ x -> x
@@ -41,7 +40,6 @@ class ['self] map_defs_base = object (self : 'self)
 end
 
 class ['self] iter_defs_base = object (self : 'self)
-  method private on_t            : 'env -> Pos.t  -> unit = fun _ _ -> ()
   method private on_string       : 'env -> string -> unit = fun _ _ -> ()
   method private on_int          : 'env -> int    -> unit = fun _ _ -> ()
   method private on_bool         : 'env -> bool   -> unit = fun _ _ -> ()
@@ -55,7 +53,6 @@ class ['self] iter_defs_base = object (self : 'self)
 end
 
 class ['self] endo_defs_base = object (self : 'self)
-  method private on_t            : 'env -> Pos.t  -> Pos.t  = fun _ x -> x
   method private on_string       : 'env -> string -> string = fun _ x -> x
   method private on_int          : 'env -> int    -> int    = fun _ x -> x
   method private on_bool         : 'env -> bool   -> bool   = fun _ x -> x
@@ -132,8 +129,6 @@ end
 
 class virtual ['self] reduce_defs_base = object (self : 'self)
   inherit ['acc] monoid
-  method private on_t
-    : 'env -> Pos.t  -> 'acc = fun _ _ -> self#e
   method private on_string
     : 'env -> string -> 'acc = fun _ _ -> self#e
   method private on_int

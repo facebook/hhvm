@@ -25,8 +25,9 @@ type cst_kind =
 (* The Abstract Syntax Tree *)
 (*****************************************************************************)
 
-and id = Pos.t * string
-and pstring = Pos.t * string
+and pos = Pos.t [@visitors.opaque]
+and id = pos * string
+and pstring = pos * string
 
 and shape_field_name =
   | SFlit of pstring

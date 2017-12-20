@@ -1,6 +1,6 @@
 (* @generated from aast_defs.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<527a7e337363b0f8a10b6102a8421b8484820b7a>> *)
+(* SourceShasum<<1b972644f5c9a617b8717e040600b04f0e610f7b>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -24,8 +24,17 @@ and show_shape_map :
       'a shape_map -> Ppx_deriving_runtime.string
   = fun poly_a  -> fun x  -> Format.asprintf "%a" (pp_shape_map poly_a) x
 
+type pos = Ast.pos[@@deriving show]
+let rec pp_pos : Format.formatter -> pos -> Ppx_deriving_runtime.unit =
+  let __0 () = Ast.pp_pos  in
+  ((let open! Ppx_deriving_runtime in fun fmt  -> (__0 ()) fmt)
+    [@ocaml.warning "-A"])
+
+and show_pos : pos -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_pos x
+
 type local_id = ((Local_id.t)[@visitors.opaque ])
-and lid = (Pos.t * local_id)
+and lid = (pos * local_id)
 and sid = Ast.id
 and is_terminal = bool
 and call_type =
@@ -33,7 +42,7 @@ and call_type =
   | Cuser_func [@visitors.name "call_type_Cuser_func"]
 and is_coroutine = bool
 and is_reactive = bool
-and hint = (Pos.t * hint_)
+and hint = (pos * hint_)
 and variadic_hint =
   | Hvariadic of hint option 
   | Hnon_variadic 
@@ -157,7 +166,7 @@ and show_local_id : local_id -> Ppx_deriving_runtime.string =
 and pp_lid : Format.formatter -> lid -> Ppx_deriving_runtime.unit =
   let __1 () = pp_local_id
   
-  and __0 () = Pos.pp
+  and __0 () = pp_pos
    in
   ((let open! Ppx_deriving_runtime in
       fun fmt  ->
@@ -218,7 +227,7 @@ and show_is_reactive : is_reactive -> Ppx_deriving_runtime.string =
 and pp_hint : Format.formatter -> hint -> Ppx_deriving_runtime.unit =
   let __1 () = pp_hint_
   
-  and __0 () = Pos.pp
+  and __0 () = pp_pos
    in
   ((let open! Ppx_deriving_runtime in
       fun fmt  ->
@@ -669,7 +678,7 @@ include
         inherit  [_] iter_defs_base
         method on_local_id env _visitors_this = ()
         method on_lid env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_local_id env _visitors_c1  in ()
         method on_sid env = self#on_id env
         method on_is_terminal env = self#on_bool env
@@ -682,7 +691,7 @@ include
         method on_is_coroutine env = self#on_bool env
         method on_is_reactive env = self#on_bool env
         method on_hint env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_hint_ env _visitors_c1  in ()
         method on_Hvariadic env _visitors_c0 =
           let _visitors_r0 = self#on_option self#on_hint env _visitors_c0  in
@@ -846,7 +855,7 @@ include
         inherit  [_] reduce_defs_base
         method on_local_id env _visitors_this = self#zero
         method on_lid env (_visitors_c0,_visitors_c1) =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
+          let _visitors_s0 = self#on_pos env _visitors_c0  in
           let _visitors_s1 = self#on_local_id env _visitors_c1  in
           self#plus _visitors_s0 _visitors_s1
         method on_sid env = self#on_id env
@@ -860,7 +869,7 @@ include
         method on_is_coroutine env = self#on_bool env
         method on_is_reactive env = self#on_bool env
         method on_hint env (_visitors_c0,_visitors_c1) =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
+          let _visitors_s0 = self#on_pos env _visitors_c0  in
           let _visitors_s1 = self#on_hint_ env _visitors_c1  in
           self#plus _visitors_s0 _visitors_s1
         method on_Hvariadic env _visitors_c0 =
@@ -1035,7 +1044,7 @@ include
         inherit  [_] map_defs_base
         method on_local_id env _visitors_this = _visitors_this
         method on_lid env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_local_id env _visitors_c1  in
           (_visitors_r0, _visitors_r1)
         method on_sid env = self#on_id env
@@ -1049,7 +1058,7 @@ include
         method on_is_coroutine env = self#on_bool env
         method on_is_reactive env = self#on_bool env
         method on_hint env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_hint_ env _visitors_c1  in
           (_visitors_r0, _visitors_r1)
         method on_Hvariadic env _visitors_c0 =
@@ -1230,7 +1239,7 @@ include
         inherit  [_] endo_defs_base
         method on_local_id env _visitors_this = _visitors_this
         method on_lid env ((_visitors_c0,_visitors_c1) as _visitors_this) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_local_id env _visitors_c1  in
           if
             Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
@@ -1252,7 +1261,7 @@ include
         method on_is_coroutine env = self#on_bool env
         method on_is_reactive env = self#on_bool env
         method on_hint env ((_visitors_c0,_visitors_c1) as _visitors_this) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_hint_ env _visitors_c1  in
           if
             Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)

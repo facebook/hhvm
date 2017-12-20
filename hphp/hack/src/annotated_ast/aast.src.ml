@@ -61,11 +61,11 @@ and stmt =
   | Fallthrough
   | Expr of expr
   (* AST has Block of block *)
-  | Break of Pos.t
-  | Continue of Pos.t
+  | Break of pos
+  | Continue of pos
   (* is_terminal is new *)
   | Throw of is_terminal * expr
-  | Return of Pos.t * expr option
+  | Return of pos * expr option
   | GotoLabel of pstring
   | Goto of pstring
   | Static_var of expr list
@@ -85,8 +85,8 @@ and as_expr =
   | As_v of expr
   | As_kv of expr * expr
   (* This is not in AST *)
-  | Await_as_v of Pos.t * expr
-  | Await_as_kv of Pos.t * expr * expr
+  | Await_as_v of pos * expr
+  | Await_as_kv of pos * expr * expr
 
 and block = stmt list
 
@@ -151,7 +151,7 @@ and expr_ =
   | Callconv of Ast.param_kind * expr
 
   (* None of these constructors exist in the AST *)
-  | Lplaceholder of Pos.t
+  | Lplaceholder of pos
   | Fun_id of sid
   | Method_id of expr * pstring
   (* meth_caller('Class name', 'method name') *)
@@ -198,7 +198,7 @@ and fun_param = {
   param_hint : hint option;
   param_is_reference : is_reference;
   param_is_variadic : is_variadic;
-  param_pos : Pos.t;
+  param_pos : pos;
   param_name : string;
   param_expr : expr option;
   param_callconv : Ast.param_kind option;

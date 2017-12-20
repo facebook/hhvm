@@ -8,37 +8,41 @@
  *
  *)
 
-include Ast_visitors_ancestors
+include Ast_defs
 
 (*****************************************************************************)
 (* The Abstract Syntax Tree *)
 (*****************************************************************************)
 
 type program = def list
-[@@deriving visitors {
+[@@deriving show,
+            visitors {
               variety = "endo";
               nude=true;
               visit_prefix="on_";
-              ancestors=["endo_base"];
+              ancestors=["endo_defs"];
             },
             visitors {
               variety = "reduce";
               nude=true;
               visit_prefix="on_";
-              ancestors=["reduce_base"];
+              ancestors=["reduce_defs"];
             },
             visitors {
               variety = "map";
               nude=true;
               visit_prefix="on_";
-              ancestors=["map_base"];
+              ancestors=["map_defs"];
             },
             visitors {
               variety = "iter";
               nude=true;
               visit_prefix="on_";
-              ancestors=["iter_base"];
+              ancestors=["iter_defs"];
             }]
+
+and nsenv = Namespace_env.env [@opaque]
+and fimode = FileInfo.mode [@visitors.opaque]
 
 and def =
   | Fun of fun_
@@ -48,7 +52,7 @@ and def =
   | Constant of gconst
   | Namespace of id * program
   | NamespaceUse of (ns_kind * id * id) list
-  | SetNamespaceEnv of Namespace_env.env
+  | SetNamespaceEnv of nsenv
 
 and typedef = {
   t_id: id;
@@ -56,17 +60,17 @@ and typedef = {
   t_constraint: tconstraint;
   t_kind: typedef_kind;
   t_user_attributes: user_attribute list;
-  t_namespace: Namespace_env.env;
-  t_mode: FileInfo.mode;
+  t_namespace: nsenv;
+  t_mode: fimode;
 }
 
 and gconst = {
-  cst_mode: FileInfo.mode;
+  cst_mode: fimode;
   cst_kind: cst_kind;
   cst_name: id;
   cst_type: hint option;
   cst_value: expr;
-  cst_namespace: Namespace_env.env;
+  cst_namespace: nsenv;
 }
 
 and tparam = variance * id * (constraint_kind * hint) list
@@ -78,7 +82,7 @@ and typedef_kind =
   | NewType of hint
 
 and class_ = {
-  c_mode: FileInfo.mode;
+  c_mode: fimode;
   c_user_attributes: user_attribute list;
   c_final: bool;
   c_kind: class_kind;
@@ -88,9 +92,9 @@ and class_ = {
   c_extends: hint list;
   c_implements: hint list;
   c_body: class_elt list;
-  c_namespace: Namespace_env.env;
+  c_namespace: nsenv;
   c_enum: enum_ option;
-  c_span: Pos.t;
+  c_span: pos;
   c_doc_comment : string option;
 }
 
@@ -118,7 +122,7 @@ and class_elt =
   | ClassTraitRequire of trait_req_kind * hint
   | ClassVars of class_vars_
   | XhpAttr of hint option * class_var * bool *
-               ((Pos.t * bool * expr list) option)
+               ((pos * bool * expr list) option)
   | Method of method_
   | XhpCategory of pstring list
   | XhpChild of xhp_child
@@ -189,7 +193,7 @@ and ca_type =
  * The "lowest common denominator" of all those cases is to treat the property
  * extent as span of name + initializer, if present.
  *)
-and class_var = Pos.t * id * expr option
+and class_var = pos * id * expr option
 
 and class_vars_ = {
   cv_kinds: kind list;
@@ -210,7 +214,7 @@ and method_ = {
   m_ret: hint option;
   m_ret_by_ref: bool;
   m_fun_kind: fun_kind;
-  m_span: Pos.t;
+  m_span: pos;
   m_doc_comment: string option;
 }
 
@@ -220,7 +224,7 @@ and typeconst = {
   tconst_tparams: tparam list;
   tconst_constraint: hint option;
   tconst_type: hint option;
-  tconst_span: Pos.t;
+  tconst_span: pos;
 }
 
 and is_reference = bool
@@ -242,7 +246,7 @@ and fun_param = {
 }
 
 and fun_ = {
-  f_mode            : FileInfo.mode;
+  f_mode            : fimode;
   f_tparams         : tparam list;
   f_constrs         : (hint * constraint_kind * hint) list;
   f_ret             : hint option;
@@ -252,14 +256,14 @@ and fun_ = {
   f_body            : block;
   f_user_attributes : user_attribute list;
   f_fun_kind        : fun_kind;
-  f_namespace       : Namespace_env.env;
-  f_span            : Pos.t;
+  f_namespace       : nsenv;
+  f_span            : pos;
   f_doc_comment     : string option;
   f_static          : bool;
 }
 
 and is_coroutine = bool
-and hint = Pos.t * hint_
+and hint = pos * hint_
 and variadic_hint =
   | Hvariadic of hint option
   | Hnon_variadic
@@ -304,7 +308,7 @@ and using_stmt = {
   us_block: block;
 }
 
-and stmt = Pos.t * stmt_
+and stmt = pos * stmt_
 and stmt_ =
   | Unsafe
   | Fallthrough
@@ -323,7 +327,7 @@ and stmt_ =
   | While of expr * block
   | For of expr * expr * expr * block
   | Switch of expr * case list
-  | Foreach of expr * Pos.t option (* await as *) * as_expr * block
+  | Foreach of expr * pos option (* await as *) * as_expr * block
   | Try of block * catch list * block
   | Def_inline of def
   | Noop
@@ -341,7 +345,7 @@ and xhp_attribute =
 
 and block = stmt list
 
-and expr = Pos.t * expr_
+and expr = pos * expr_
 and expr_ =
   | Array of afield list
   | Varray of expr list

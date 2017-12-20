@@ -1,6 +1,6 @@
 (* @generated from ast_defs.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<161fd6a50ab9259eab373bc054fe51de8f7dd4cb>> *)
+(* SourceShasum<<d1c8b7bb10a148220cf9d9d912dba33a41672dfe>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -9,8 +9,9 @@ include Ast_defs_visitors_ancestors
 type cst_kind =
   | Cst_define 
   | Cst_const 
-and id = (Pos.t * string)
-and pstring = (Pos.t * string)
+and pos = ((Pos.t)[@visitors.opaque ])
+and id = (pos * string)
+and pstring = (pos * string)
 and shape_field_name =
   | SFlit of pstring 
   | SFclass_const of id * pstring 
@@ -138,8 +139,16 @@ let rec (pp_cst_kind :
 and show_cst_kind : cst_kind -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_cst_kind x
 
-and pp_id : Format.formatter -> id -> Ppx_deriving_runtime.unit =
+and pp_pos : Format.formatter -> pos -> Ppx_deriving_runtime.unit =
   let __0 () = Pos.pp  in
+  ((let open! Ppx_deriving_runtime in fun fmt  -> (__0 ()) fmt)
+    [@ocaml.warning "-A"])
+
+and show_pos : pos -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_pos x
+
+and pp_id : Format.formatter -> id -> Ppx_deriving_runtime.unit =
+  let __0 () = pp_pos  in
   ((let open! Ppx_deriving_runtime in
       fun fmt  ->
         fun (a0,a1)  ->
@@ -154,7 +163,7 @@ and show_id : id -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_id x
 
 and pp_pstring : Format.formatter -> pstring -> Ppx_deriving_runtime.unit =
-  let __0 () = Pos.pp  in
+  let __0 () = pp_pos  in
   ((let open! Ppx_deriving_runtime in
       fun fmt  ->
         fun (a0,a1)  ->
@@ -391,11 +400,12 @@ include
           match _visitors_this with
           | Cst_define  -> self#on_Cst_define env
           | Cst_const  -> self#on_Cst_const env
+        method on_pos env _visitors_this = ()
         method on_id env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_string env _visitors_c1  in ()
         method on_pstring env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_string env _visitors_c1  in ()
         method on_SFlit env _visitors_c0 =
           let _visitors_r0 = self#on_pstring env _visitors_c0  in ()
@@ -584,8 +594,9 @@ include
               self#on_Cst_define env _visitors_this
           | Cst_const  as _visitors_this ->
               self#on_Cst_const env _visitors_this
+        method on_pos env _visitors_this = _visitors_this
         method on_id env ((_visitors_c0,_visitors_c1) as _visitors_this) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_string env _visitors_c1  in
           if
             Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
@@ -594,7 +605,7 @@ include
           else (_visitors_r0, _visitors_r1)
         method on_pstring env ((_visitors_c0,_visitors_c1) as _visitors_this)
           =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_string env _visitors_c1  in
           if
             Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
@@ -884,12 +895,13 @@ include
           match _visitors_this with
           | Cst_define  -> self#on_Cst_define env
           | Cst_const  -> self#on_Cst_const env
+        method on_pos env _visitors_this = self#zero
         method on_id env (_visitors_c0,_visitors_c1) =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
+          let _visitors_s0 = self#on_pos env _visitors_c0  in
           let _visitors_s1 = self#on_string env _visitors_c1  in
           self#plus _visitors_s0 _visitors_s1
         method on_pstring env (_visitors_c0,_visitors_c1) =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
+          let _visitors_s0 = self#on_pos env _visitors_c0  in
           let _visitors_s1 = self#on_string env _visitors_c1  in
           self#plus _visitors_s0 _visitors_s1
         method on_SFlit env _visitors_c0 =
@@ -1077,12 +1089,13 @@ include
           match _visitors_this with
           | Cst_define  -> self#on_Cst_define env
           | Cst_const  -> self#on_Cst_const env
+        method on_pos env _visitors_this = _visitors_this
         method on_id env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_string env _visitors_c1  in
           (_visitors_r0, _visitors_r1)
         method on_pstring env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_string env _visitors_c1  in
           (_visitors_r0, _visitors_r1)
         method on_SFlit env _visitors_c0 =

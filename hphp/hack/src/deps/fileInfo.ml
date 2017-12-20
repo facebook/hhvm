@@ -35,6 +35,13 @@ type mode =
   | Mstrict  (* check everything! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
 
+let pp_mode fmt mode =
+  Format.pp_print_string fmt @@
+    match mode with
+    | Mphp     -> "Mphp"
+    | Mdecl    -> "Mdecl"
+    | Mstrict  -> "Mstrict"
+    | Mpartial -> "Mpartial"
 
 (*****************************************************************************)
 (* We define two types of positions establishing the location of a given name:

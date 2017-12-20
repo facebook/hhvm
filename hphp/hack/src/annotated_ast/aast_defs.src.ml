@@ -14,8 +14,10 @@ module ShapeMap = Ast.ShapeMap
 
 type 'a shape_map = 'a ShapeMap.t [@@deriving show]
 
+type pos = Ast.pos [@@deriving show]
+
 type local_id = Local_id.t [@visitors.opaque]
-and lid = Pos.t * local_id
+and lid = pos * local_id
 and sid = Ast.id
 
 and is_terminal = bool
@@ -27,7 +29,7 @@ and call_type =
 and is_coroutine = bool
 and is_reactive = bool
 
-and hint = Pos.t * hint_
+and hint = pos * hint_
 and variadic_hint =
   | Hvariadic of hint option
   | Hnon_variadic

@@ -35,6 +35,8 @@ type mode =
   | Mstrict  (* check everything! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
 
+val pp_mode : Format.formatter -> mode -> unit
+
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)

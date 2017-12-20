@@ -1,40 +1,43 @@
 (* @generated from ast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<cb21367006876f582d4b512cd95b61a2253530b5>> *)
+(* SourceShasum<<0b820dac859a98e6511a3c62380e4186046f2028>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
   "\n * Copyright (c) 2015, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the BSD-style license found in the\n * LICENSE file in the \"hack\" directory of this source tree. An additional grant\n * of patent rights can be found in the PATENTS file in the same directory.\n *\n "]
-include Ast_visitors_ancestors
+include Ast_defs
 type program = def list[@@deriving
-                         ((visitors
-                             {
-                               variety = "endo";
-                               nude = true;
-                               visit_prefix = "on_";
-                               ancestors = ["endo_base"]
-                             }),
+                         (show,
+                           (visitors
+                              {
+                                variety = "endo";
+                                nude = true;
+                                visit_prefix = "on_";
+                                ancestors = ["endo_defs"]
+                              }),
                            (visitors
                               {
                                 variety = "reduce";
                                 nude = true;
                                 visit_prefix = "on_";
-                                ancestors = ["reduce_base"]
+                                ancestors = ["reduce_defs"]
                               }),
                            (visitors
                               {
                                 variety = "map";
                                 nude = true;
                                 visit_prefix = "on_";
-                                ancestors = ["map_base"]
+                                ancestors = ["map_defs"]
                               }),
                            (visitors
                               {
                                 variety = "iter";
                                 nude = true;
                                 visit_prefix = "on_";
-                                ancestors = ["iter_base"]
+                                ancestors = ["iter_defs"]
                               }))]
+and nsenv = ((Namespace_env.env)[@opaque ])
+and fimode = ((FileInfo.mode)[@visitors.opaque ])
 and def =
   | Fun of fun_ 
   | Class of class_ 
@@ -43,7 +46,7 @@ and def =
   | Constant of gconst 
   | Namespace of id * program 
   | NamespaceUse of (ns_kind * id * id) list 
-  | SetNamespaceEnv of Namespace_env.env 
+  | SetNamespaceEnv of nsenv 
 and typedef =
   {
   t_id: id ;
@@ -51,16 +54,16 @@ and typedef =
   t_constraint: tconstraint ;
   t_kind: typedef_kind ;
   t_user_attributes: user_attribute list ;
-  t_namespace: Namespace_env.env ;
-  t_mode: FileInfo.mode }
+  t_namespace: nsenv ;
+  t_mode: fimode }
 and gconst =
   {
-  cst_mode: FileInfo.mode ;
+  cst_mode: fimode ;
   cst_kind: cst_kind ;
   cst_name: id ;
   cst_type: hint option ;
   cst_value: expr ;
-  cst_namespace: Namespace_env.env }
+  cst_namespace: nsenv }
 and tparam = (variance * id * (constraint_kind * hint) list)
 and tconstraint = hint option
 and typedef_kind =
@@ -68,7 +71,7 @@ and typedef_kind =
   | NewType of hint 
 and class_ =
   {
-  c_mode: FileInfo.mode ;
+  c_mode: fimode ;
   c_user_attributes: user_attribute list ;
   c_final: bool ;
   c_kind: class_kind ;
@@ -78,9 +81,9 @@ and class_ =
   c_extends: hint list ;
   c_implements: hint list ;
   c_body: class_elt list ;
-  c_namespace: Namespace_env.env ;
+  c_namespace: nsenv ;
   c_enum: enum_ option ;
-  c_span: Pos.t ;
+  c_span: pos ;
   c_doc_comment: string option }
 and enum_ = {
   e_base: hint ;
@@ -99,7 +102,7 @@ and class_elt =
   | XhpAttrUse of hint 
   | ClassTraitRequire of trait_req_kind * hint 
   | ClassVars of class_vars_ 
-  | XhpAttr of hint option * class_var * bool * (Pos.t * bool * expr list)
+  | XhpAttr of hint option * class_var * bool * (pos * bool * expr list)
   option 
   | Method of method_ 
   | XhpCategory of pstring list 
@@ -125,7 +128,7 @@ and ca_field =
 and ca_type =
   | CA_hint of hint 
   | CA_enum of string list 
-and class_var = (Pos.t * id * expr option)
+and class_var = (pos * id * expr option)
 and class_vars_ =
   {
   cv_kinds: kind list ;
@@ -145,7 +148,7 @@ and method_ =
   m_ret: hint option ;
   m_ret_by_ref: bool ;
   m_fun_kind: fun_kind ;
-  m_span: Pos.t ;
+  m_span: pos ;
   m_doc_comment: string option }
 and typeconst =
   {
@@ -154,7 +157,7 @@ and typeconst =
   tconst_tparams: tparam list ;
   tconst_constraint: hint option ;
   tconst_type: hint option ;
-  tconst_span: Pos.t }
+  tconst_span: pos }
 and is_reference = bool
 and is_variadic = bool
 and fun_param =
@@ -169,7 +172,7 @@ and fun_param =
   param_user_attributes: user_attribute list }
 and fun_ =
   {
-  f_mode: FileInfo.mode ;
+  f_mode: fimode ;
   f_tparams: tparam list ;
   f_constrs: (hint * constraint_kind * hint) list ;
   f_ret: hint option ;
@@ -179,12 +182,12 @@ and fun_ =
   f_body: block ;
   f_user_attributes: user_attribute list ;
   f_fun_kind: fun_kind ;
-  f_namespace: Namespace_env.env ;
-  f_span: Pos.t ;
+  f_namespace: nsenv ;
+  f_span: pos ;
   f_doc_comment: string option ;
   f_static: bool }
 and is_coroutine = bool
-and hint = (Pos.t * hint_)
+and hint = (pos * hint_)
 and variadic_hint =
   | Hvariadic of hint option 
   | Hnon_variadic 
@@ -212,7 +215,7 @@ and using_stmt =
   us_has_await: bool ;
   us_expr: expr ;
   us_block: block }
-and stmt = (Pos.t * stmt_)
+and stmt = (pos * stmt_)
 and stmt_ =
   | Unsafe 
   | Fallthrough 
@@ -231,7 +234,7 @@ and stmt_ =
   | While of expr * block 
   | For of expr * expr * expr * block 
   | Switch of expr * case list 
-  | Foreach of expr * Pos.t option * as_expr * block 
+  | Foreach of expr * pos option * as_expr * block 
   | Try of block * catch list * block 
   | Def_inline of def 
   | Noop 
@@ -245,7 +248,7 @@ and xhp_attribute =
   | Xhp_simple of id * expr 
   | Xhp_spread of expr 
 and block = stmt list
-and expr = (Pos.t * expr_)
+and expr = (pos * expr_)
 and expr_ =
   | Array of afield list 
   | Varray of expr list 
@@ -311,14 +314,2806 @@ and case =
 and catch = (id * id * block)
 and field = (expr * expr)
 and attr = (id * expr)
+let rec pp_program : Format.formatter -> program -> Ppx_deriving_runtime.unit
+  =
+  let __0 () = pp_def  in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>[";
+          ignore
+            (List.fold_left
+               (fun sep  ->
+                  fun x  ->
+                    if sep then Format.fprintf fmt ";@ ";
+                    ((__0 ()) fmt) x;
+                    true) false x);
+          Format.fprintf fmt "@,]@]")
+    [@ocaml.warning "-A"])
+
+and show_program : program -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_program x
+
+and (pp_nsenv : Format.formatter -> nsenv -> Ppx_deriving_runtime.unit) =
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  -> fun _  -> Format.pp_print_string fmt "<opaque>")
+  [@ocaml.warning "-A"])
+
+and show_nsenv : nsenv -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_nsenv x
+
+and pp_fimode : Format.formatter -> fimode -> Ppx_deriving_runtime.unit =
+  let __0 () = FileInfo.pp_mode  in
+  ((let open! Ppx_deriving_runtime in fun fmt  -> (__0 ()) fmt)
+    [@ocaml.warning "-A"])
+
+and show_fimode : fimode -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_fimode x
+
+and pp_def : Format.formatter -> def -> Ppx_deriving_runtime.unit =
+  let __10 () = pp_nsenv
+  
+  and __9 () = pp_id
+  
+  and __8 () = pp_id
+  
+  and __7 () = pp_ns_kind
+  
+  and __6 () = pp_program
+  
+  and __5 () = pp_id
+  
+  and __4 () = pp_gconst
+  
+  and __3 () = pp_typedef
+  
+  and __2 () = pp_stmt
+  
+  and __1 () = pp_class_
+  
+  and __0 () = pp_fun_
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | Fun a0 ->
+            (Format.fprintf fmt "(@[<2>Fun@ ";
+             ((__0 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Class a0 ->
+            (Format.fprintf fmt "(@[<2>Class@ ";
+             ((__1 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Stmt a0 ->
+            (Format.fprintf fmt "(@[<2>Stmt@ ";
+             ((__2 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Typedef a0 ->
+            (Format.fprintf fmt "(@[<2>Typedef@ ";
+             ((__3 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Constant a0 ->
+            (Format.fprintf fmt "(@[<2>Constant@ ";
+             ((__4 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Namespace (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Namespace (@,";
+             (((__5 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__6 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | NamespaceUse a0 ->
+            (Format.fprintf fmt "(@[<2>NamespaceUse@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((fun (a0,a1,a2)  ->
+                               Format.fprintf fmt "(@[";
+                               ((((__7 ()) fmt) a0;
+                                 Format.fprintf fmt ",@ ";
+                                 ((__8 ()) fmt) a1);
+                                Format.fprintf fmt ",@ ";
+                                ((__9 ()) fmt) a2);
+                               Format.fprintf fmt "@])")) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | SetNamespaceEnv a0 ->
+            (Format.fprintf fmt "(@[<2>SetNamespaceEnv@ ";
+             ((__10 ()) fmt) a0;
+             Format.fprintf fmt "@])"))
+    [@ocaml.warning "-A"])
+
+and show_def : def -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_def x
+
+and pp_typedef : Format.formatter -> typedef -> Ppx_deriving_runtime.unit =
+  let __6 () = pp_fimode
+  
+  and __5 () = pp_nsenv
+  
+  and __4 () = pp_user_attribute
+  
+  and __3 () = pp_typedef_kind
+  
+  and __2 () = pp_tconstraint
+  
+  and __1 () = pp_tparam
+  
+  and __0 () = pp_id
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          (((((((Format.fprintf fmt "@[%s =@ " "t_id";
+                 ((__0 ()) fmt) x.t_id;
+                 Format.fprintf fmt "@]");
+                Format.fprintf fmt ";@ ";
+                Format.fprintf fmt "@[%s =@ " "t_tparams";
+                ((fun x  ->
+                    Format.fprintf fmt "@[<2>[";
+                    ignore
+                      (List.fold_left
+                         (fun sep  ->
+                            fun x  ->
+                              if sep then Format.fprintf fmt ";@ ";
+                              ((__1 ()) fmt) x;
+                              true) false x);
+                    Format.fprintf fmt "@,]@]")) x.t_tparams;
+                Format.fprintf fmt "@]");
+               Format.fprintf fmt ";@ ";
+               Format.fprintf fmt "@[%s =@ " "t_constraint";
+               ((__2 ()) fmt) x.t_constraint;
+               Format.fprintf fmt "@]");
+              Format.fprintf fmt ";@ ";
+              Format.fprintf fmt "@[%s =@ " "t_kind";
+              ((__3 ()) fmt) x.t_kind;
+              Format.fprintf fmt "@]");
+             Format.fprintf fmt ";@ ";
+             Format.fprintf fmt "@[%s =@ " "t_user_attributes";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__4 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) x.t_user_attributes;
+             Format.fprintf fmt "@]");
+            Format.fprintf fmt ";@ ";
+            Format.fprintf fmt "@[%s =@ " "t_namespace";
+            ((__5 ()) fmt) x.t_namespace;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "t_mode";
+           ((__6 ()) fmt) x.t_mode;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_typedef : typedef -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_typedef x
+
+and pp_gconst : Format.formatter -> gconst -> Ppx_deriving_runtime.unit =
+  let __5 () = pp_nsenv
+  
+  and __4 () = pp_expr
+  
+  and __3 () = pp_hint
+  
+  and __2 () = pp_id
+  
+  and __1 () = pp_cst_kind
+  
+  and __0 () = pp_fimode
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          ((((((Format.fprintf fmt "@[%s =@ " "cst_mode";
+                ((__0 ()) fmt) x.cst_mode;
+                Format.fprintf fmt "@]");
+               Format.fprintf fmt ";@ ";
+               Format.fprintf fmt "@[%s =@ " "cst_kind";
+               ((__1 ()) fmt) x.cst_kind;
+               Format.fprintf fmt "@]");
+              Format.fprintf fmt ";@ ";
+              Format.fprintf fmt "@[%s =@ " "cst_name";
+              ((__2 ()) fmt) x.cst_name;
+              Format.fprintf fmt "@]");
+             Format.fprintf fmt ";@ ";
+             Format.fprintf fmt "@[%s =@ " "cst_type";
+             ((function
+               | None  -> Format.pp_print_string fmt "None"
+               | Some x ->
+                   (Format.pp_print_string fmt "(Some ";
+                    ((__3 ()) fmt) x;
+                    Format.pp_print_string fmt ")"))) x.cst_type;
+             Format.fprintf fmt "@]");
+            Format.fprintf fmt ";@ ";
+            Format.fprintf fmt "@[%s =@ " "cst_value";
+            ((__4 ()) fmt) x.cst_value;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "cst_namespace";
+           ((__5 ()) fmt) x.cst_namespace;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_gconst : gconst -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_gconst x
+
+and pp_tparam : Format.formatter -> tparam -> Ppx_deriving_runtime.unit =
+  let __3 () = pp_hint
+  
+  and __2 () = pp_constraint_kind
+  
+  and __1 () = pp_id
+  
+  and __0 () = pp_variance
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun (a0,a1,a2)  ->
+          Format.fprintf fmt "(@[";
+          ((((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
+           Format.fprintf fmt ",@ ";
+           ((fun x  ->
+               Format.fprintf fmt "@[<2>[";
+               ignore
+                 (List.fold_left
+                    (fun sep  ->
+                       fun x  ->
+                         if sep then Format.fprintf fmt ";@ ";
+                         ((fun (a0,a1)  ->
+                             Format.fprintf fmt "(@[";
+                             (((__2 ()) fmt) a0;
+                              Format.fprintf fmt ",@ ";
+                              ((__3 ()) fmt) a1);
+                             Format.fprintf fmt "@])")) x;
+                         true) false x);
+               Format.fprintf fmt "@,]@]")) a2);
+          Format.fprintf fmt "@])")
+    [@ocaml.warning "-A"])
+
+and show_tparam : tparam -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_tparam x
+
+and pp_tconstraint :
+  Format.formatter -> tconstraint -> Ppx_deriving_runtime.unit =
+  let __0 () = pp_hint  in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | None  -> Format.pp_print_string fmt "None"
+        | Some x ->
+            (Format.pp_print_string fmt "(Some ";
+             ((__0 ()) fmt) x;
+             Format.pp_print_string fmt ")"))
+    [@ocaml.warning "-A"])
+
+and show_tconstraint : tconstraint -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_tconstraint x
+
+and pp_typedef_kind :
+  Format.formatter -> typedef_kind -> Ppx_deriving_runtime.unit =
+  let __1 () = pp_hint
+  
+  and __0 () = pp_hint
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | Alias a0 ->
+            (Format.fprintf fmt "(@[<2>Alias@ ";
+             ((__0 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | NewType a0 ->
+            (Format.fprintf fmt "(@[<2>NewType@ ";
+             ((__1 ()) fmt) a0;
+             Format.fprintf fmt "@])"))
+    [@ocaml.warning "-A"])
+
+and show_typedef_kind : typedef_kind -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_typedef_kind x
+
+and pp_class_ : Format.formatter -> class_ -> Ppx_deriving_runtime.unit =
+  let __10 () = pp_pos
+  
+  and __9 () = pp_enum_
+  
+  and __8 () = pp_nsenv
+  
+  and __7 () = pp_class_elt
+  
+  and __6 () = pp_hint
+  
+  and __5 () = pp_hint
+  
+  and __4 () = pp_tparam
+  
+  and __3 () = pp_id
+  
+  and __2 () = pp_class_kind
+  
+  and __1 () = pp_user_attribute
+  
+  and __0 () = pp_fimode
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          ((((((((((((((Format.fprintf fmt "@[%s =@ " "c_mode";
+                        ((__0 ()) fmt) x.c_mode;
+                        Format.fprintf fmt "@]");
+                       Format.fprintf fmt ";@ ";
+                       Format.fprintf fmt "@[%s =@ " "c_user_attributes";
+                       ((fun x  ->
+                           Format.fprintf fmt "@[<2>[";
+                           ignore
+                             (List.fold_left
+                                (fun sep  ->
+                                   fun x  ->
+                                     if sep then Format.fprintf fmt ";@ ";
+                                     ((__1 ()) fmt) x;
+                                     true) false x);
+                           Format.fprintf fmt "@,]@]")) x.c_user_attributes;
+                       Format.fprintf fmt "@]");
+                      Format.fprintf fmt ";@ ";
+                      Format.fprintf fmt "@[%s =@ " "c_final";
+                      (Format.fprintf fmt "%B") x.c_final;
+                      Format.fprintf fmt "@]");
+                     Format.fprintf fmt ";@ ";
+                     Format.fprintf fmt "@[%s =@ " "c_kind";
+                     ((__2 ()) fmt) x.c_kind;
+                     Format.fprintf fmt "@]");
+                    Format.fprintf fmt ";@ ";
+                    Format.fprintf fmt "@[%s =@ " "c_is_xhp";
+                    (Format.fprintf fmt "%B") x.c_is_xhp;
+                    Format.fprintf fmt "@]");
+                   Format.fprintf fmt ";@ ";
+                   Format.fprintf fmt "@[%s =@ " "c_name";
+                   ((__3 ()) fmt) x.c_name;
+                   Format.fprintf fmt "@]");
+                  Format.fprintf fmt ";@ ";
+                  Format.fprintf fmt "@[%s =@ " "c_tparams";
+                  ((fun x  ->
+                      Format.fprintf fmt "@[<2>[";
+                      ignore
+                        (List.fold_left
+                           (fun sep  ->
+                              fun x  ->
+                                if sep then Format.fprintf fmt ";@ ";
+                                ((__4 ()) fmt) x;
+                                true) false x);
+                      Format.fprintf fmt "@,]@]")) x.c_tparams;
+                  Format.fprintf fmt "@]");
+                 Format.fprintf fmt ";@ ";
+                 Format.fprintf fmt "@[%s =@ " "c_extends";
+                 ((fun x  ->
+                     Format.fprintf fmt "@[<2>[";
+                     ignore
+                       (List.fold_left
+                          (fun sep  ->
+                             fun x  ->
+                               if sep then Format.fprintf fmt ";@ ";
+                               ((__5 ()) fmt) x;
+                               true) false x);
+                     Format.fprintf fmt "@,]@]")) x.c_extends;
+                 Format.fprintf fmt "@]");
+                Format.fprintf fmt ";@ ";
+                Format.fprintf fmt "@[%s =@ " "c_implements";
+                ((fun x  ->
+                    Format.fprintf fmt "@[<2>[";
+                    ignore
+                      (List.fold_left
+                         (fun sep  ->
+                            fun x  ->
+                              if sep then Format.fprintf fmt ";@ ";
+                              ((__6 ()) fmt) x;
+                              true) false x);
+                    Format.fprintf fmt "@,]@]")) x.c_implements;
+                Format.fprintf fmt "@]");
+               Format.fprintf fmt ";@ ";
+               Format.fprintf fmt "@[%s =@ " "c_body";
+               ((fun x  ->
+                   Format.fprintf fmt "@[<2>[";
+                   ignore
+                     (List.fold_left
+                        (fun sep  ->
+                           fun x  ->
+                             if sep then Format.fprintf fmt ";@ ";
+                             ((__7 ()) fmt) x;
+                             true) false x);
+                   Format.fprintf fmt "@,]@]")) x.c_body;
+               Format.fprintf fmt "@]");
+              Format.fprintf fmt ";@ ";
+              Format.fprintf fmt "@[%s =@ " "c_namespace";
+              ((__8 ()) fmt) x.c_namespace;
+              Format.fprintf fmt "@]");
+             Format.fprintf fmt ";@ ";
+             Format.fprintf fmt "@[%s =@ " "c_enum";
+             ((function
+               | None  -> Format.pp_print_string fmt "None"
+               | Some x ->
+                   (Format.pp_print_string fmt "(Some ";
+                    ((__9 ()) fmt) x;
+                    Format.pp_print_string fmt ")"))) x.c_enum;
+             Format.fprintf fmt "@]");
+            Format.fprintf fmt ";@ ";
+            Format.fprintf fmt "@[%s =@ " "c_span";
+            ((__10 ()) fmt) x.c_span;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "c_doc_comment";
+           ((function
+             | None  -> Format.pp_print_string fmt "None"
+             | Some x ->
+                 (Format.pp_print_string fmt "(Some ";
+                  (Format.fprintf fmt "%S") x;
+                  Format.pp_print_string fmt ")"))) x.c_doc_comment;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_class_ : class_ -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_class_ x
+
+and pp_enum_ : Format.formatter -> enum_ -> Ppx_deriving_runtime.unit =
+  let __1 () = pp_hint
+  
+  and __0 () = pp_hint
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          ((Format.fprintf fmt "@[%s =@ " "e_base";
+            ((__0 ()) fmt) x.e_base;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "e_constraint";
+           ((function
+             | None  -> Format.pp_print_string fmt "None"
+             | Some x ->
+                 (Format.pp_print_string fmt "(Some ";
+                  ((__1 ()) fmt) x;
+                  Format.pp_print_string fmt ")"))) x.e_constraint;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_enum_ : enum_ -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_enum_ x
+
+and pp_user_attribute :
+  Format.formatter -> user_attribute -> Ppx_deriving_runtime.unit =
+  let __1 () = pp_expr
+  
+  and __0 () = pp_id
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          ((Format.fprintf fmt "@[%s =@ " "ua_name";
+            ((__0 ()) fmt) x.ua_name;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "ua_params";
+           ((fun x  ->
+               Format.fprintf fmt "@[<2>[";
+               ignore
+                 (List.fold_left
+                    (fun sep  ->
+                       fun x  ->
+                         if sep then Format.fprintf fmt ";@ ";
+                         ((__1 ()) fmt) x;
+                         true) false x);
+               Format.fprintf fmt "@,]@]")) x.ua_params;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_user_attribute : user_attribute -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_user_attribute x
+
+and pp_class_elt : Format.formatter -> class_elt -> Ppx_deriving_runtime.unit
+  =
+  let __25 () = pp_xhp_child
+  
+  and __24 () = pp_pstring
+  
+  and __23 () = pp_method_
+  
+  and __22 () = pp_expr
+  
+  and __21 () = pp_pos
+  
+  and __20 () = pp_class_var
+  
+  and __19 () = pp_hint
+  
+  and __18 () = pp_class_vars_
+  
+  and __17 () = pp_hint
+  
+  and __16 () = pp_trait_req_kind
+  
+  and __15 () = pp_hint
+  
+  and __14 () = pp_id
+  
+  and __13 () = pp_pstring
+  
+  and __12 () = pp_id
+  
+  and __11 () = pp_kind
+  
+  and __10 () = pp_id
+  
+  and __9 () = pp_pstring
+  
+  and __8 () = pp_id
+  
+  and __7 () = pp_hint
+  
+  and __6 () = pp_typeconst
+  
+  and __5 () = pp_class_attr
+  
+  and __4 () = pp_id
+  
+  and __3 () = pp_hint
+  
+  and __2 () = pp_expr
+  
+  and __1 () = pp_id
+  
+  and __0 () = pp_hint
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | Const (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Const (@,";
+             (((function
+                | None  -> Format.pp_print_string fmt "None"
+                | Some x ->
+                    (Format.pp_print_string fmt "(Some ";
+                     ((__0 ()) fmt) x;
+                     Format.pp_print_string fmt ")"))) a0;
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((fun (a0,a1)  ->
+                                Format.fprintf fmt "(@[";
+                                (((__1 ()) fmt) a0;
+                                 Format.fprintf fmt ",@ ";
+                                 ((__2 ()) fmt) a1);
+                                Format.fprintf fmt "@])")) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a1);
+             Format.fprintf fmt "@,))@]")
+        | AbsConst (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>AbsConst (@,";
+             (((function
+                | None  -> Format.pp_print_string fmt "None"
+                | Some x ->
+                    (Format.pp_print_string fmt "(Some ";
+                     ((__3 ()) fmt) x;
+                     Format.pp_print_string fmt ")"))) a0;
+              Format.fprintf fmt ",@ ";
+              ((__4 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | Attributes a0 ->
+            (Format.fprintf fmt "(@[<2>Attributes@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__5 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | TypeConst a0 ->
+            (Format.fprintf fmt "(@[<2>TypeConst@ ";
+             ((__6 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | ClassUse a0 ->
+            (Format.fprintf fmt "(@[<2>ClassUse@ ";
+             ((__7 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | ClassUseAlias (a0,a1,a2,a3) ->
+            (Format.fprintf fmt "(@[<2>ClassUseAlias (@,";
+             (((((function
+                  | None  -> Format.pp_print_string fmt "None"
+                  | Some x ->
+                      (Format.pp_print_string fmt "(Some ";
+                       ((__8 ()) fmt) x;
+                       Format.pp_print_string fmt ")"))) a0;
+                Format.fprintf fmt ",@ ";
+                ((__9 ()) fmt) a1);
+               Format.fprintf fmt ",@ ";
+               ((function
+                 | None  -> Format.pp_print_string fmt "None"
+                 | Some x ->
+                     (Format.pp_print_string fmt "(Some ";
+                      ((__10 ()) fmt) x;
+                      Format.pp_print_string fmt ")"))) a2);
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__11 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a3);
+             Format.fprintf fmt "@,))@]")
+        | ClassUsePrecedence (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>ClassUsePrecedence (@,";
+             ((((__12 ()) fmt) a0;
+               Format.fprintf fmt ",@ ";
+               ((__13 ()) fmt) a1);
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__14 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a2);
+             Format.fprintf fmt "@,))@]")
+        | XhpAttrUse a0 ->
+            (Format.fprintf fmt "(@[<2>XhpAttrUse@ ";
+             ((__15 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | ClassTraitRequire (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>ClassTraitRequire (@,";
+             (((__16 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__17 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | ClassVars a0 ->
+            (Format.fprintf fmt "(@[<2>ClassVars@ ";
+             ((__18 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | XhpAttr (a0,a1,a2,a3) ->
+            (Format.fprintf fmt "(@[<2>XhpAttr (@,";
+             (((((function
+                  | None  -> Format.pp_print_string fmt "None"
+                  | Some x ->
+                      (Format.pp_print_string fmt "(Some ";
+                       ((__19 ()) fmt) x;
+                       Format.pp_print_string fmt ")"))) a0;
+                Format.fprintf fmt ",@ ";
+                ((__20 ()) fmt) a1);
+               Format.fprintf fmt ",@ ";
+               (Format.fprintf fmt "%B") a2);
+              Format.fprintf fmt ",@ ";
+              ((function
+                | None  -> Format.pp_print_string fmt "None"
+                | Some x ->
+                    (Format.pp_print_string fmt "(Some ";
+                     ((fun (a0,a1,a2)  ->
+                         Format.fprintf fmt "(@[";
+                         ((((__21 ()) fmt) a0;
+                           Format.fprintf fmt ",@ ";
+                           (Format.fprintf fmt "%B") a1);
+                          Format.fprintf fmt ",@ ";
+                          ((fun x  ->
+                              Format.fprintf fmt "@[<2>[";
+                              ignore
+                                (List.fold_left
+                                   (fun sep  ->
+                                      fun x  ->
+                                        if sep then Format.fprintf fmt ";@ ";
+                                        ((__22 ()) fmt) x;
+                                        true) false x);
+                              Format.fprintf fmt "@,]@]")) a2);
+                         Format.fprintf fmt "@])")) x;
+                     Format.pp_print_string fmt ")"))) a3);
+             Format.fprintf fmt "@,))@]")
+        | Method a0 ->
+            (Format.fprintf fmt "(@[<2>Method@ ";
+             ((__23 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | XhpCategory a0 ->
+            (Format.fprintf fmt "(@[<2>XhpCategory@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__24 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | XhpChild a0 ->
+            (Format.fprintf fmt "(@[<2>XhpChild@ ";
+             ((__25 ()) fmt) a0;
+             Format.fprintf fmt "@])"))
+    [@ocaml.warning "-A"])
+
+and show_class_elt : class_elt -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_class_elt x
+
+and pp_xhp_child : Format.formatter -> xhp_child -> Ppx_deriving_runtime.unit
+  =
+  let __5 () = pp_xhp_child
+  
+  and __4 () = pp_xhp_child
+  
+  and __3 () = pp_xhp_child_op
+  
+  and __2 () = pp_xhp_child
+  
+  and __1 () = pp_xhp_child
+  
+  and __0 () = pp_id
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | ChildName a0 ->
+            (Format.fprintf fmt "(@[<2>ChildName@ ";
+             ((__0 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | ChildList a0 ->
+            (Format.fprintf fmt "(@[<2>ChildList@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__1 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | ChildUnary (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>ChildUnary (@,";
+             (((__2 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__3 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | ChildBinary (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>ChildBinary (@,";
+             (((__4 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__5 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]"))
+    [@ocaml.warning "-A"])
+
+and show_xhp_child : xhp_child -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_xhp_child x
+
+and (pp_xhp_child_op :
+      Format.formatter -> xhp_child_op -> Ppx_deriving_runtime.unit)
+  =
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | ChildStar  -> Format.pp_print_string fmt "ChildStar"
+        | ChildPlus  -> Format.pp_print_string fmt "ChildPlus"
+        | ChildQuestion  -> Format.pp_print_string fmt "ChildQuestion")
+  [@ocaml.warning "-A"])
+
+and show_xhp_child_op : xhp_child_op -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_xhp_child_op x
+
+and pp_class_attr :
+  Format.formatter -> class_attr -> Ppx_deriving_runtime.unit =
+  let __1 () = pp_ca_field
+  
+  and __0 () = pp_id
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | CA_name a0 ->
+            (Format.fprintf fmt "(@[<2>CA_name@ ";
+             ((__0 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | CA_field a0 ->
+            (Format.fprintf fmt "(@[<2>CA_field@ ";
+             ((__1 ()) fmt) a0;
+             Format.fprintf fmt "@])"))
+    [@ocaml.warning "-A"])
+
+and show_class_attr : class_attr -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_class_attr x
+
+and pp_ca_field : Format.formatter -> ca_field -> Ppx_deriving_runtime.unit =
+  let __2 () = pp_expr
+  
+  and __1 () = pp_id
+  
+  and __0 () = pp_ca_type
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          ((((Format.fprintf fmt "@[%s =@ " "ca_type";
+              ((__0 ()) fmt) x.ca_type;
+              Format.fprintf fmt "@]");
+             Format.fprintf fmt ";@ ";
+             Format.fprintf fmt "@[%s =@ " "ca_id";
+             ((__1 ()) fmt) x.ca_id;
+             Format.fprintf fmt "@]");
+            Format.fprintf fmt ";@ ";
+            Format.fprintf fmt "@[%s =@ " "ca_value";
+            ((function
+              | None  -> Format.pp_print_string fmt "None"
+              | Some x ->
+                  (Format.pp_print_string fmt "(Some ";
+                   ((__2 ()) fmt) x;
+                   Format.pp_print_string fmt ")"))) x.ca_value;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "ca_required";
+           (Format.fprintf fmt "%B") x.ca_required;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_ca_field : ca_field -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_ca_field x
+
+and pp_ca_type : Format.formatter -> ca_type -> Ppx_deriving_runtime.unit =
+  let __0 () = pp_hint  in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | CA_hint a0 ->
+            (Format.fprintf fmt "(@[<2>CA_hint@ ";
+             ((__0 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | CA_enum a0 ->
+            (Format.fprintf fmt "(@[<2>CA_enum@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           (Format.fprintf fmt "%S") x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])"))
+    [@ocaml.warning "-A"])
+
+and show_ca_type : ca_type -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_ca_type x
+
+and pp_class_var : Format.formatter -> class_var -> Ppx_deriving_runtime.unit
+  =
+  let __2 () = pp_expr
+  
+  and __1 () = pp_id
+  
+  and __0 () = pp_pos
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun (a0,a1,a2)  ->
+          Format.fprintf fmt "(@[";
+          ((((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
+           Format.fprintf fmt ",@ ";
+           ((function
+             | None  -> Format.pp_print_string fmt "None"
+             | Some x ->
+                 (Format.pp_print_string fmt "(Some ";
+                  ((__2 ()) fmt) x;
+                  Format.pp_print_string fmt ")"))) a2);
+          Format.fprintf fmt "@])")
+    [@ocaml.warning "-A"])
+
+and show_class_var : class_var -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_class_var x
+
+and pp_class_vars_ :
+  Format.formatter -> class_vars_ -> Ppx_deriving_runtime.unit =
+  let __3 () = pp_user_attribute
+  
+  and __2 () = pp_class_var
+  
+  and __1 () = pp_hint
+  
+  and __0 () = pp_kind
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          (((((Format.fprintf fmt "@[%s =@ " "cv_kinds";
+               ((fun x  ->
+                   Format.fprintf fmt "@[<2>[";
+                   ignore
+                     (List.fold_left
+                        (fun sep  ->
+                           fun x  ->
+                             if sep then Format.fprintf fmt ";@ ";
+                             ((__0 ()) fmt) x;
+                             true) false x);
+                   Format.fprintf fmt "@,]@]")) x.cv_kinds;
+               Format.fprintf fmt "@]");
+              Format.fprintf fmt ";@ ";
+              Format.fprintf fmt "@[%s =@ " "cv_hint";
+              ((function
+                | None  -> Format.pp_print_string fmt "None"
+                | Some x ->
+                    (Format.pp_print_string fmt "(Some ";
+                     ((__1 ()) fmt) x;
+                     Format.pp_print_string fmt ")"))) x.cv_hint;
+              Format.fprintf fmt "@]");
+             Format.fprintf fmt ";@ ";
+             Format.fprintf fmt "@[%s =@ " "cv_names";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__2 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) x.cv_names;
+             Format.fprintf fmt "@]");
+            Format.fprintf fmt ";@ ";
+            Format.fprintf fmt "@[%s =@ " "cv_doc_comment";
+            ((function
+              | None  -> Format.pp_print_string fmt "None"
+              | Some x ->
+                  (Format.pp_print_string fmt "(Some ";
+                   (Format.fprintf fmt "%S") x;
+                   Format.pp_print_string fmt ")"))) x.cv_doc_comment;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "cv_user_attributes";
+           ((fun x  ->
+               Format.fprintf fmt "@[<2>[";
+               ignore
+                 (List.fold_left
+                    (fun sep  ->
+                       fun x  ->
+                         if sep then Format.fprintf fmt ";@ ";
+                         ((__3 ()) fmt) x;
+                         true) false x);
+               Format.fprintf fmt "@,]@]")) x.cv_user_attributes;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_class_vars_ : class_vars_ -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_class_vars_ x
+
+and pp_method_ : Format.formatter -> method_ -> Ppx_deriving_runtime.unit =
+  let __11 () = pp_pos
+  
+  and __10 () = pp_fun_kind
+  
+  and __9 () = pp_hint
+  
+  and __8 () = pp_user_attribute
+  
+  and __7 () = pp_block
+  
+  and __6 () = pp_fun_param
+  
+  and __5 () = pp_id
+  
+  and __4 () = pp_hint
+  
+  and __3 () = pp_constraint_kind
+  
+  and __2 () = pp_hint
+  
+  and __1 () = pp_tparam
+  
+  and __0 () = pp_kind
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          ((((((((((((Format.fprintf fmt "@[%s =@ " "m_kind";
+                      ((fun x  ->
+                          Format.fprintf fmt "@[<2>[";
+                          ignore
+                            (List.fold_left
+                               (fun sep  ->
+                                  fun x  ->
+                                    if sep then Format.fprintf fmt ";@ ";
+                                    ((__0 ()) fmt) x;
+                                    true) false x);
+                          Format.fprintf fmt "@,]@]")) x.m_kind;
+                      Format.fprintf fmt "@]");
+                     Format.fprintf fmt ";@ ";
+                     Format.fprintf fmt "@[%s =@ " "m_tparams";
+                     ((fun x  ->
+                         Format.fprintf fmt "@[<2>[";
+                         ignore
+                           (List.fold_left
+                              (fun sep  ->
+                                 fun x  ->
+                                   if sep then Format.fprintf fmt ";@ ";
+                                   ((__1 ()) fmt) x;
+                                   true) false x);
+                         Format.fprintf fmt "@,]@]")) x.m_tparams;
+                     Format.fprintf fmt "@]");
+                    Format.fprintf fmt ";@ ";
+                    Format.fprintf fmt "@[%s =@ " "m_constrs";
+                    ((fun x  ->
+                        Format.fprintf fmt "@[<2>[";
+                        ignore
+                          (List.fold_left
+                             (fun sep  ->
+                                fun x  ->
+                                  if sep then Format.fprintf fmt ";@ ";
+                                  ((fun (a0,a1,a2)  ->
+                                      Format.fprintf fmt "(@[";
+                                      ((((__2 ()) fmt) a0;
+                                        Format.fprintf fmt ",@ ";
+                                        ((__3 ()) fmt) a1);
+                                       Format.fprintf fmt ",@ ";
+                                       ((__4 ()) fmt) a2);
+                                      Format.fprintf fmt "@])")) x;
+                                  true) false x);
+                        Format.fprintf fmt "@,]@]")) x.m_constrs;
+                    Format.fprintf fmt "@]");
+                   Format.fprintf fmt ";@ ";
+                   Format.fprintf fmt "@[%s =@ " "m_name";
+                   ((__5 ()) fmt) x.m_name;
+                   Format.fprintf fmt "@]");
+                  Format.fprintf fmt ";@ ";
+                  Format.fprintf fmt "@[%s =@ " "m_params";
+                  ((fun x  ->
+                      Format.fprintf fmt "@[<2>[";
+                      ignore
+                        (List.fold_left
+                           (fun sep  ->
+                              fun x  ->
+                                if sep then Format.fprintf fmt ";@ ";
+                                ((__6 ()) fmt) x;
+                                true) false x);
+                      Format.fprintf fmt "@,]@]")) x.m_params;
+                  Format.fprintf fmt "@]");
+                 Format.fprintf fmt ";@ ";
+                 Format.fprintf fmt "@[%s =@ " "m_body";
+                 ((__7 ()) fmt) x.m_body;
+                 Format.fprintf fmt "@]");
+                Format.fprintf fmt ";@ ";
+                Format.fprintf fmt "@[%s =@ " "m_user_attributes";
+                ((fun x  ->
+                    Format.fprintf fmt "@[<2>[";
+                    ignore
+                      (List.fold_left
+                         (fun sep  ->
+                            fun x  ->
+                              if sep then Format.fprintf fmt ";@ ";
+                              ((__8 ()) fmt) x;
+                              true) false x);
+                    Format.fprintf fmt "@,]@]")) x.m_user_attributes;
+                Format.fprintf fmt "@]");
+               Format.fprintf fmt ";@ ";
+               Format.fprintf fmt "@[%s =@ " "m_ret";
+               ((function
+                 | None  -> Format.pp_print_string fmt "None"
+                 | Some x ->
+                     (Format.pp_print_string fmt "(Some ";
+                      ((__9 ()) fmt) x;
+                      Format.pp_print_string fmt ")"))) x.m_ret;
+               Format.fprintf fmt "@]");
+              Format.fprintf fmt ";@ ";
+              Format.fprintf fmt "@[%s =@ " "m_ret_by_ref";
+              (Format.fprintf fmt "%B") x.m_ret_by_ref;
+              Format.fprintf fmt "@]");
+             Format.fprintf fmt ";@ ";
+             Format.fprintf fmt "@[%s =@ " "m_fun_kind";
+             ((__10 ()) fmt) x.m_fun_kind;
+             Format.fprintf fmt "@]");
+            Format.fprintf fmt ";@ ";
+            Format.fprintf fmt "@[%s =@ " "m_span";
+            ((__11 ()) fmt) x.m_span;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "m_doc_comment";
+           ((function
+             | None  -> Format.pp_print_string fmt "None"
+             | Some x ->
+                 (Format.pp_print_string fmt "(Some ";
+                  (Format.fprintf fmt "%S") x;
+                  Format.pp_print_string fmt ")"))) x.m_doc_comment;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_method_ : method_ -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_method_ x
+
+and pp_typeconst : Format.formatter -> typeconst -> Ppx_deriving_runtime.unit
+  =
+  let __4 () = pp_pos
+  
+  and __3 () = pp_hint
+  
+  and __2 () = pp_hint
+  
+  and __1 () = pp_tparam
+  
+  and __0 () = pp_id
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          ((((((Format.fprintf fmt "@[%s =@ " "tconst_abstract";
+                (Format.fprintf fmt "%B") x.tconst_abstract;
+                Format.fprintf fmt "@]");
+               Format.fprintf fmt ";@ ";
+               Format.fprintf fmt "@[%s =@ " "tconst_name";
+               ((__0 ()) fmt) x.tconst_name;
+               Format.fprintf fmt "@]");
+              Format.fprintf fmt ";@ ";
+              Format.fprintf fmt "@[%s =@ " "tconst_tparams";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__1 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) x.tconst_tparams;
+              Format.fprintf fmt "@]");
+             Format.fprintf fmt ";@ ";
+             Format.fprintf fmt "@[%s =@ " "tconst_constraint";
+             ((function
+               | None  -> Format.pp_print_string fmt "None"
+               | Some x ->
+                   (Format.pp_print_string fmt "(Some ";
+                    ((__2 ()) fmt) x;
+                    Format.pp_print_string fmt ")"))) x.tconst_constraint;
+             Format.fprintf fmt "@]");
+            Format.fprintf fmt ";@ ";
+            Format.fprintf fmt "@[%s =@ " "tconst_type";
+            ((function
+              | None  -> Format.pp_print_string fmt "None"
+              | Some x ->
+                  (Format.pp_print_string fmt "(Some ";
+                   ((__3 ()) fmt) x;
+                   Format.pp_print_string fmt ")"))) x.tconst_type;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "tconst_span";
+           ((__4 ()) fmt) x.tconst_span;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_typeconst : typeconst -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_typeconst x
+
+and (pp_is_reference :
+      Format.formatter -> is_reference -> Ppx_deriving_runtime.unit)
+  = ((let open! Ppx_deriving_runtime in fun fmt  -> Format.fprintf fmt "%B")
+  [@ocaml.warning "-A"])
+
+and show_is_reference : is_reference -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_is_reference x
+
+and (pp_is_variadic :
+      Format.formatter -> is_variadic -> Ppx_deriving_runtime.unit)
+  = ((let open! Ppx_deriving_runtime in fun fmt  -> Format.fprintf fmt "%B")
+  [@ocaml.warning "-A"])
+
+and show_is_variadic : is_variadic -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_is_variadic x
+
+and pp_fun_param : Format.formatter -> fun_param -> Ppx_deriving_runtime.unit
+  =
+  let __7 () = pp_user_attribute
+  
+  and __6 () = pp_param_kind
+  
+  and __5 () = pp_kind
+  
+  and __4 () = pp_expr
+  
+  and __3 () = pp_id
+  
+  and __2 () = pp_is_variadic
+  
+  and __1 () = pp_is_reference
+  
+  and __0 () = pp_hint
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          ((((((((Format.fprintf fmt "@[%s =@ " "param_hint";
+                  ((function
+                    | None  -> Format.pp_print_string fmt "None"
+                    | Some x ->
+                        (Format.pp_print_string fmt "(Some ";
+                         ((__0 ()) fmt) x;
+                         Format.pp_print_string fmt ")"))) x.param_hint;
+                  Format.fprintf fmt "@]");
+                 Format.fprintf fmt ";@ ";
+                 Format.fprintf fmt "@[%s =@ " "param_is_reference";
+                 ((__1 ()) fmt) x.param_is_reference;
+                 Format.fprintf fmt "@]");
+                Format.fprintf fmt ";@ ";
+                Format.fprintf fmt "@[%s =@ " "param_is_variadic";
+                ((__2 ()) fmt) x.param_is_variadic;
+                Format.fprintf fmt "@]");
+               Format.fprintf fmt ";@ ";
+               Format.fprintf fmt "@[%s =@ " "param_id";
+               ((__3 ()) fmt) x.param_id;
+               Format.fprintf fmt "@]");
+              Format.fprintf fmt ";@ ";
+              Format.fprintf fmt "@[%s =@ " "param_expr";
+              ((function
+                | None  -> Format.pp_print_string fmt "None"
+                | Some x ->
+                    (Format.pp_print_string fmt "(Some ";
+                     ((__4 ()) fmt) x;
+                     Format.pp_print_string fmt ")"))) x.param_expr;
+              Format.fprintf fmt "@]");
+             Format.fprintf fmt ";@ ";
+             Format.fprintf fmt "@[%s =@ " "param_modifier";
+             ((function
+               | None  -> Format.pp_print_string fmt "None"
+               | Some x ->
+                   (Format.pp_print_string fmt "(Some ";
+                    ((__5 ()) fmt) x;
+                    Format.pp_print_string fmt ")"))) x.param_modifier;
+             Format.fprintf fmt "@]");
+            Format.fprintf fmt ";@ ";
+            Format.fprintf fmt "@[%s =@ " "param_callconv";
+            ((function
+              | None  -> Format.pp_print_string fmt "None"
+              | Some x ->
+                  (Format.pp_print_string fmt "(Some ";
+                   ((__6 ()) fmt) x;
+                   Format.pp_print_string fmt ")"))) x.param_callconv;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "param_user_attributes";
+           ((fun x  ->
+               Format.fprintf fmt "@[<2>[";
+               ignore
+                 (List.fold_left
+                    (fun sep  ->
+                       fun x  ->
+                         if sep then Format.fprintf fmt ";@ ";
+                         ((__7 ()) fmt) x;
+                         true) false x);
+               Format.fprintf fmt "@,]@]")) x.param_user_attributes;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_fun_param : fun_param -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_fun_param x
+
+and pp_fun_ : Format.formatter -> fun_ -> Ppx_deriving_runtime.unit =
+  let __12 () = pp_pos
+  
+  and __11 () = pp_nsenv
+  
+  and __10 () = pp_fun_kind
+  
+  and __9 () = pp_user_attribute
+  
+  and __8 () = pp_block
+  
+  and __7 () = pp_fun_param
+  
+  and __6 () = pp_id
+  
+  and __5 () = pp_hint
+  
+  and __4 () = pp_hint
+  
+  and __3 () = pp_constraint_kind
+  
+  and __2 () = pp_hint
+  
+  and __1 () = pp_tparam
+  
+  and __0 () = pp_fimode
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          ((((((((((((((Format.fprintf fmt "@[%s =@ " "f_mode";
+                        ((__0 ()) fmt) x.f_mode;
+                        Format.fprintf fmt "@]");
+                       Format.fprintf fmt ";@ ";
+                       Format.fprintf fmt "@[%s =@ " "f_tparams";
+                       ((fun x  ->
+                           Format.fprintf fmt "@[<2>[";
+                           ignore
+                             (List.fold_left
+                                (fun sep  ->
+                                   fun x  ->
+                                     if sep then Format.fprintf fmt ";@ ";
+                                     ((__1 ()) fmt) x;
+                                     true) false x);
+                           Format.fprintf fmt "@,]@]")) x.f_tparams;
+                       Format.fprintf fmt "@]");
+                      Format.fprintf fmt ";@ ";
+                      Format.fprintf fmt "@[%s =@ " "f_constrs";
+                      ((fun x  ->
+                          Format.fprintf fmt "@[<2>[";
+                          ignore
+                            (List.fold_left
+                               (fun sep  ->
+                                  fun x  ->
+                                    if sep then Format.fprintf fmt ";@ ";
+                                    ((fun (a0,a1,a2)  ->
+                                        Format.fprintf fmt "(@[";
+                                        ((((__2 ()) fmt) a0;
+                                          Format.fprintf fmt ",@ ";
+                                          ((__3 ()) fmt) a1);
+                                         Format.fprintf fmt ",@ ";
+                                         ((__4 ()) fmt) a2);
+                                        Format.fprintf fmt "@])")) x;
+                                    true) false x);
+                          Format.fprintf fmt "@,]@]")) x.f_constrs;
+                      Format.fprintf fmt "@]");
+                     Format.fprintf fmt ";@ ";
+                     Format.fprintf fmt "@[%s =@ " "f_ret";
+                     ((function
+                       | None  -> Format.pp_print_string fmt "None"
+                       | Some x ->
+                           (Format.pp_print_string fmt "(Some ";
+                            ((__5 ()) fmt) x;
+                            Format.pp_print_string fmt ")"))) x.f_ret;
+                     Format.fprintf fmt "@]");
+                    Format.fprintf fmt ";@ ";
+                    Format.fprintf fmt "@[%s =@ " "f_ret_by_ref";
+                    (Format.fprintf fmt "%B") x.f_ret_by_ref;
+                    Format.fprintf fmt "@]");
+                   Format.fprintf fmt ";@ ";
+                   Format.fprintf fmt "@[%s =@ " "f_name";
+                   ((__6 ()) fmt) x.f_name;
+                   Format.fprintf fmt "@]");
+                  Format.fprintf fmt ";@ ";
+                  Format.fprintf fmt "@[%s =@ " "f_params";
+                  ((fun x  ->
+                      Format.fprintf fmt "@[<2>[";
+                      ignore
+                        (List.fold_left
+                           (fun sep  ->
+                              fun x  ->
+                                if sep then Format.fprintf fmt ";@ ";
+                                ((__7 ()) fmt) x;
+                                true) false x);
+                      Format.fprintf fmt "@,]@]")) x.f_params;
+                  Format.fprintf fmt "@]");
+                 Format.fprintf fmt ";@ ";
+                 Format.fprintf fmt "@[%s =@ " "f_body";
+                 ((__8 ()) fmt) x.f_body;
+                 Format.fprintf fmt "@]");
+                Format.fprintf fmt ";@ ";
+                Format.fprintf fmt "@[%s =@ " "f_user_attributes";
+                ((fun x  ->
+                    Format.fprintf fmt "@[<2>[";
+                    ignore
+                      (List.fold_left
+                         (fun sep  ->
+                            fun x  ->
+                              if sep then Format.fprintf fmt ";@ ";
+                              ((__9 ()) fmt) x;
+                              true) false x);
+                    Format.fprintf fmt "@,]@]")) x.f_user_attributes;
+                Format.fprintf fmt "@]");
+               Format.fprintf fmt ";@ ";
+               Format.fprintf fmt "@[%s =@ " "f_fun_kind";
+               ((__10 ()) fmt) x.f_fun_kind;
+               Format.fprintf fmt "@]");
+              Format.fprintf fmt ";@ ";
+              Format.fprintf fmt "@[%s =@ " "f_namespace";
+              ((__11 ()) fmt) x.f_namespace;
+              Format.fprintf fmt "@]");
+             Format.fprintf fmt ";@ ";
+             Format.fprintf fmt "@[%s =@ " "f_span";
+             ((__12 ()) fmt) x.f_span;
+             Format.fprintf fmt "@]");
+            Format.fprintf fmt ";@ ";
+            Format.fprintf fmt "@[%s =@ " "f_doc_comment";
+            ((function
+              | None  -> Format.pp_print_string fmt "None"
+              | Some x ->
+                  (Format.pp_print_string fmt "(Some ";
+                   (Format.fprintf fmt "%S") x;
+                   Format.pp_print_string fmt ")"))) x.f_doc_comment;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "f_static";
+           (Format.fprintf fmt "%B") x.f_static;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_fun_ : fun_ -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_fun_ x
+
+and (pp_is_coroutine :
+      Format.formatter -> is_coroutine -> Ppx_deriving_runtime.unit)
+  = ((let open! Ppx_deriving_runtime in fun fmt  -> Format.fprintf fmt "%B")
+  [@ocaml.warning "-A"])
+
+and show_is_coroutine : is_coroutine -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_is_coroutine x
+
+and pp_hint : Format.formatter -> hint -> Ppx_deriving_runtime.unit =
+  let __1 () = pp_hint_
+  
+  and __0 () = pp_pos
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun (a0,a1)  ->
+          Format.fprintf fmt "(@[";
+          (((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
+          Format.fprintf fmt "@])")
+    [@ocaml.warning "-A"])
+
+and show_hint : hint -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_hint x
+
+and pp_variadic_hint :
+  Format.formatter -> variadic_hint -> Ppx_deriving_runtime.unit =
+  let __0 () = pp_hint  in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | Hvariadic a0 ->
+            (Format.fprintf fmt "(@[<2>Hvariadic@ ";
+             ((function
+               | None  -> Format.pp_print_string fmt "None"
+               | Some x ->
+                   (Format.pp_print_string fmt "(Some ";
+                    ((__0 ()) fmt) x;
+                    Format.pp_print_string fmt ")"))) a0;
+             Format.fprintf fmt "@])")
+        | Hnon_variadic  -> Format.pp_print_string fmt "Hnon_variadic")
+    [@ocaml.warning "-A"])
+
+and show_variadic_hint : variadic_hint -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_variadic_hint x
+
+and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
+  let __13 () = pp_hint
+  
+  and __12 () = pp_id
+  
+  and __11 () = pp_id
+  
+  and __10 () = pp_id
+  
+  and __9 () = pp_shape_info
+  
+  and __8 () = pp_hint
+  
+  and __7 () = pp_id
+  
+  and __6 () = pp_hint
+  
+  and __5 () = pp_hint
+  
+  and __4 () = pp_variadic_hint
+  
+  and __3 () = pp_param_kind
+  
+  and __2 () = pp_hint
+  
+  and __1 () = pp_is_coroutine
+  
+  and __0 () = pp_hint
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | Hoption a0 ->
+            (Format.fprintf fmt "(@[<2>Hoption@ ";
+             ((__0 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Hfun (a0,a1,a2,a3,a4) ->
+            (Format.fprintf fmt "(@[<2>Hfun (@,";
+             ((((((__1 ()) fmt) a0;
+                 Format.fprintf fmt ",@ ";
+                 ((fun x  ->
+                     Format.fprintf fmt "@[<2>[";
+                     ignore
+                       (List.fold_left
+                          (fun sep  ->
+                             fun x  ->
+                               if sep then Format.fprintf fmt ";@ ";
+                               ((__2 ()) fmt) x;
+                               true) false x);
+                     Format.fprintf fmt "@,]@]")) a1);
+                Format.fprintf fmt ",@ ";
+                ((fun x  ->
+                    Format.fprintf fmt "@[<2>[";
+                    ignore
+                      (List.fold_left
+                         (fun sep  ->
+                            fun x  ->
+                              if sep then Format.fprintf fmt ";@ ";
+                              ((function
+                                | None  -> Format.pp_print_string fmt "None"
+                                | Some x ->
+                                    (Format.pp_print_string fmt "(Some ";
+                                     ((__3 ()) fmt) x;
+                                     Format.pp_print_string fmt ")"))) x;
+                              true) false x);
+                    Format.fprintf fmt "@,]@]")) a2);
+               Format.fprintf fmt ",@ ";
+               ((__4 ()) fmt) a3);
+              Format.fprintf fmt ",@ ";
+              ((__5 ()) fmt) a4);
+             Format.fprintf fmt "@,))@]")
+        | Htuple a0 ->
+            (Format.fprintf fmt "(@[<2>Htuple@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__6 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | Happly (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Happly (@,";
+             (((__7 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__8 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a1);
+             Format.fprintf fmt "@,))@]")
+        | Hshape a0 ->
+            (Format.fprintf fmt "(@[<2>Hshape@ ";
+             ((__9 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Haccess (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>Haccess (@,";
+             ((((__10 ()) fmt) a0;
+               Format.fprintf fmt ",@ ";
+               ((__11 ()) fmt) a1);
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__12 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a2);
+             Format.fprintf fmt "@,))@]")
+        | Hsoft a0 ->
+            (Format.fprintf fmt "(@[<2>Hsoft@ ";
+             ((__13 ()) fmt) a0;
+             Format.fprintf fmt "@])"))
+    [@ocaml.warning "-A"])
+
+and show_hint_ : hint_ -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_hint_ x
+
+and pp_shape_info :
+  Format.formatter -> shape_info -> Ppx_deriving_runtime.unit =
+  let __0 () = pp_shape_field  in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          ((Format.fprintf fmt "@[%s =@ " "si_allows_unknown_fields";
+            (Format.fprintf fmt "%B") x.si_allows_unknown_fields;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "si_shape_field_list";
+           ((fun x  ->
+               Format.fprintf fmt "@[<2>[";
+               ignore
+                 (List.fold_left
+                    (fun sep  ->
+                       fun x  ->
+                         if sep then Format.fprintf fmt ";@ ";
+                         ((__0 ()) fmt) x;
+                         true) false x);
+               Format.fprintf fmt "@,]@]")) x.si_shape_field_list;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_shape_info : shape_info -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_shape_info x
+
+and pp_shape_field :
+  Format.formatter -> shape_field -> Ppx_deriving_runtime.unit =
+  let __1 () = pp_hint
+  
+  and __0 () = pp_shape_field_name
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          (((Format.fprintf fmt "@[%s =@ " "sf_optional";
+             (Format.fprintf fmt "%B") x.sf_optional;
+             Format.fprintf fmt "@]");
+            Format.fprintf fmt ";@ ";
+            Format.fprintf fmt "@[%s =@ " "sf_name";
+            ((__0 ()) fmt) x.sf_name;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "sf_hint";
+           ((__1 ()) fmt) x.sf_hint;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_shape_field : shape_field -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_shape_field x
+
+and pp_using_stmt :
+  Format.formatter -> using_stmt -> Ppx_deriving_runtime.unit =
+  let __1 () = pp_block
+  
+  and __0 () = pp_expr
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>{ ";
+          ((((Format.fprintf fmt "@[%s =@ " "us_is_block_scoped";
+              (Format.fprintf fmt "%B") x.us_is_block_scoped;
+              Format.fprintf fmt "@]");
+             Format.fprintf fmt ";@ ";
+             Format.fprintf fmt "@[%s =@ " "us_has_await";
+             (Format.fprintf fmt "%B") x.us_has_await;
+             Format.fprintf fmt "@]");
+            Format.fprintf fmt ";@ ";
+            Format.fprintf fmt "@[%s =@ " "us_expr";
+            ((__0 ()) fmt) x.us_expr;
+            Format.fprintf fmt "@]");
+           Format.fprintf fmt ";@ ";
+           Format.fprintf fmt "@[%s =@ " "us_block";
+           ((__1 ()) fmt) x.us_block;
+           Format.fprintf fmt "@]");
+          Format.fprintf fmt "@ }@]")
+    [@ocaml.warning "-A"])
+
+and show_using_stmt : using_stmt -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_using_stmt x
+
+and pp_stmt : Format.formatter -> stmt -> Ppx_deriving_runtime.unit =
+  let __1 () = pp_stmt_
+  
+  and __0 () = pp_pos
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun (a0,a1)  ->
+          Format.fprintf fmt "(@[";
+          (((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
+          Format.fprintf fmt "@])")
+    [@ocaml.warning "-A"])
+
+and show_stmt : stmt -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_stmt x
+
+and pp_stmt_ : Format.formatter -> stmt_ -> Ppx_deriving_runtime.unit =
+  let __35 () = pp_block
+  
+  and __34 () = pp_expr
+  
+  and __33 () = pp_using_stmt
+  
+  and __32 () = pp_expr
+  
+  and __31 () = pp_pstring
+  
+  and __30 () = pp_def
+  
+  and __29 () = pp_block
+  
+  and __28 () = pp_catch
+  
+  and __27 () = pp_block
+  
+  and __26 () = pp_block
+  
+  and __25 () = pp_as_expr
+  
+  and __24 () = pp_pos
+  
+  and __23 () = pp_expr
+  
+  and __22 () = pp_case
+  
+  and __21 () = pp_expr
+  
+  and __20 () = pp_block
+  
+  and __19 () = pp_expr
+  
+  and __18 () = pp_expr
+  
+  and __17 () = pp_expr
+  
+  and __16 () = pp_block
+  
+  and __15 () = pp_expr
+  
+  and __14 () = pp_expr
+  
+  and __13 () = pp_block
+  
+  and __12 () = pp_block
+  
+  and __11 () = pp_block
+  
+  and __10 () = pp_expr
+  
+  and __9 () = pp_expr
+  
+  and __8 () = pp_expr
+  
+  and __7 () = pp_pstring
+  
+  and __6 () = pp_pstring
+  
+  and __5 () = pp_expr
+  
+  and __4 () = pp_expr
+  
+  and __3 () = pp_expr
+  
+  and __2 () = pp_expr
+  
+  and __1 () = pp_block
+  
+  and __0 () = pp_expr
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | Unsafe  -> Format.pp_print_string fmt "Unsafe"
+        | Fallthrough  -> Format.pp_print_string fmt "Fallthrough"
+        | Expr a0 ->
+            (Format.fprintf fmt "(@[<2>Expr@ ";
+             ((__0 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Block a0 ->
+            (Format.fprintf fmt "(@[<2>Block@ ";
+             ((__1 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Break a0 ->
+            (Format.fprintf fmt "(@[<2>Break@ ";
+             ((function
+               | None  -> Format.pp_print_string fmt "None"
+               | Some x ->
+                   (Format.pp_print_string fmt "(Some ";
+                    ((__2 ()) fmt) x;
+                    Format.pp_print_string fmt ")"))) a0;
+             Format.fprintf fmt "@])")
+        | Continue a0 ->
+            (Format.fprintf fmt "(@[<2>Continue@ ";
+             ((function
+               | None  -> Format.pp_print_string fmt "None"
+               | Some x ->
+                   (Format.pp_print_string fmt "(Some ";
+                    ((__3 ()) fmt) x;
+                    Format.pp_print_string fmt ")"))) a0;
+             Format.fprintf fmt "@])")
+        | Throw a0 ->
+            (Format.fprintf fmt "(@[<2>Throw@ ";
+             ((__4 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Return a0 ->
+            (Format.fprintf fmt "(@[<2>Return@ ";
+             ((function
+               | None  -> Format.pp_print_string fmt "None"
+               | Some x ->
+                   (Format.pp_print_string fmt "(Some ";
+                    ((__5 ()) fmt) x;
+                    Format.pp_print_string fmt ")"))) a0;
+             Format.fprintf fmt "@])")
+        | GotoLabel a0 ->
+            (Format.fprintf fmt "(@[<2>GotoLabel@ ";
+             ((__6 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Goto a0 ->
+            (Format.fprintf fmt "(@[<2>Goto@ ";
+             ((__7 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Static_var a0 ->
+            (Format.fprintf fmt "(@[<2>Static_var@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__8 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | Global_var a0 ->
+            (Format.fprintf fmt "(@[<2>Global_var@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__9 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | If (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>If (@,";
+             ((((__10 ()) fmt) a0;
+               Format.fprintf fmt ",@ ";
+               ((__11 ()) fmt) a1);
+              Format.fprintf fmt ",@ ";
+              ((__12 ()) fmt) a2);
+             Format.fprintf fmt "@,))@]")
+        | Do (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Do (@,";
+             (((__13 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__14 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | While (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>While (@,";
+             (((__15 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__16 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | For (a0,a1,a2,a3) ->
+            (Format.fprintf fmt "(@[<2>For (@,";
+             (((((__17 ()) fmt) a0;
+                Format.fprintf fmt ",@ ";
+                ((__18 ()) fmt) a1);
+               Format.fprintf fmt ",@ ";
+               ((__19 ()) fmt) a2);
+              Format.fprintf fmt ",@ ";
+              ((__20 ()) fmt) a3);
+             Format.fprintf fmt "@,))@]")
+        | Switch (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Switch (@,";
+             (((__21 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__22 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a1);
+             Format.fprintf fmt "@,))@]")
+        | Foreach (a0,a1,a2,a3) ->
+            (Format.fprintf fmt "(@[<2>Foreach (@,";
+             (((((__23 ()) fmt) a0;
+                Format.fprintf fmt ",@ ";
+                ((function
+                  | None  -> Format.pp_print_string fmt "None"
+                  | Some x ->
+                      (Format.pp_print_string fmt "(Some ";
+                       ((__24 ()) fmt) x;
+                       Format.pp_print_string fmt ")"))) a1);
+               Format.fprintf fmt ",@ ";
+               ((__25 ()) fmt) a2);
+              Format.fprintf fmt ",@ ";
+              ((__26 ()) fmt) a3);
+             Format.fprintf fmt "@,))@]")
+        | Try (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>Try (@,";
+             ((((__27 ()) fmt) a0;
+               Format.fprintf fmt ",@ ";
+               ((fun x  ->
+                   Format.fprintf fmt "@[<2>[";
+                   ignore
+                     (List.fold_left
+                        (fun sep  ->
+                           fun x  ->
+                             if sep then Format.fprintf fmt ";@ ";
+                             ((__28 ()) fmt) x;
+                             true) false x);
+                   Format.fprintf fmt "@,]@]")) a1);
+              Format.fprintf fmt ",@ ";
+              ((__29 ()) fmt) a2);
+             Format.fprintf fmt "@,))@]")
+        | Def_inline a0 ->
+            (Format.fprintf fmt "(@[<2>Def_inline@ ";
+             ((__30 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Noop  -> Format.pp_print_string fmt "Noop"
+        | Markup (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Markup (@,";
+             (((__31 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((function
+                | None  -> Format.pp_print_string fmt "None"
+                | Some x ->
+                    (Format.pp_print_string fmt "(Some ";
+                     ((__32 ()) fmt) x;
+                     Format.pp_print_string fmt ")"))) a1);
+             Format.fprintf fmt "@,))@]")
+        | Using a0 ->
+            (Format.fprintf fmt "(@[<2>Using@ ";
+             ((__33 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Declare (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>Declare (@,";
+             (((Format.fprintf fmt "%B") a0;
+               Format.fprintf fmt ",@ ";
+               ((__34 ()) fmt) a1);
+              Format.fprintf fmt ",@ ";
+              ((__35 ()) fmt) a2);
+             Format.fprintf fmt "@,))@]"))
+    [@ocaml.warning "-A"])
+
+and show_stmt_ : stmt_ -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_stmt_ x
+
+and pp_as_expr : Format.formatter -> as_expr -> Ppx_deriving_runtime.unit =
+  let __2 () = pp_expr
+  
+  and __1 () = pp_expr
+  
+  and __0 () = pp_expr
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | As_v a0 ->
+            (Format.fprintf fmt "(@[<2>As_v@ ";
+             ((__0 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | As_kv (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>As_kv (@,";
+             (((__1 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__2 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]"))
+    [@ocaml.warning "-A"])
+
+and show_as_expr : as_expr -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_as_expr x
+
+and pp_xhp_attribute :
+  Format.formatter -> xhp_attribute -> Ppx_deriving_runtime.unit =
+  let __2 () = pp_expr
+  
+  and __1 () = pp_expr
+  
+  and __0 () = pp_id
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | Xhp_simple (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Xhp_simple (@,";
+             (((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | Xhp_spread a0 ->
+            (Format.fprintf fmt "(@[<2>Xhp_spread@ ";
+             ((__2 ()) fmt) a0;
+             Format.fprintf fmt "@])"))
+    [@ocaml.warning "-A"])
+
+and show_xhp_attribute : xhp_attribute -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_xhp_attribute x
+
+and pp_block : Format.formatter -> block -> Ppx_deriving_runtime.unit =
+  let __0 () = pp_stmt  in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun x  ->
+          Format.fprintf fmt "@[<2>[";
+          ignore
+            (List.fold_left
+               (fun sep  ->
+                  fun x  ->
+                    if sep then Format.fprintf fmt ";@ ";
+                    ((__0 ()) fmt) x;
+                    true) false x);
+          Format.fprintf fmt "@,]@]")
+    [@ocaml.warning "-A"])
+
+and show_block : block -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_block x
+
+and pp_expr : Format.formatter -> expr -> Ppx_deriving_runtime.unit =
+  let __1 () = pp_expr_
+  
+  and __0 () = pp_pos
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun (a0,a1)  ->
+          Format.fprintf fmt "(@[";
+          (((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
+          Format.fprintf fmt "@])")
+    [@ocaml.warning "-A"])
+
+and show_expr : expr -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_expr x
+
+and pp_expr_ : Format.formatter -> expr_ -> Ppx_deriving_runtime.unit =
+  let __74 () = pp_expr
+  
+  and __73 () = pp_expr
+  
+  and __72 () = pp_param_kind
+  
+  and __71 () = pp_expr
+  
+  and __70 () = pp_import_flavor
+  
+  and __69 () = pp_expr
+  
+  and __68 () = pp_expr
+  
+  and __67 () = pp_xhp_attribute
+  
+  and __66 () = pp_id
+  
+  and __65 () = pp_fun_
+  
+  and __64 () = pp_id
+  
+  and __63 () = pp_fun_
+  
+  and __62 () = pp_class_
+  
+  and __61 () = pp_expr
+  
+  and __60 () = pp_expr
+  
+  and __59 () = pp_expr
+  
+  and __58 () = pp_expr
+  
+  and __57 () = pp_expr
+  
+  and __56 () = pp_expr
+  
+  and __55 () = pp_expr
+  
+  and __54 () = pp_hint
+  
+  and __53 () = pp_expr
+  
+  and __52 () = pp_expr
+  
+  and __51 () = pp_expr
+  
+  and __50 () = pp_expr
+  
+  and __49 () = pp_expr
+  
+  and __48 () = pp_expr
+  
+  and __47 () = pp_expr
+  
+  and __46 () = pp_expr
+  
+  and __45 () = pp_expr
+  
+  and __44 () = pp_expr
+  
+  and __43 () = pp_expr
+  
+  and __42 () = pp_expr
+  
+  and __41 () = pp_bop
+  
+  and __40 () = pp_expr
+  
+  and __39 () = pp_uop
+  
+  and __38 () = pp_expr
+  
+  and __37 () = pp_hint
+  
+  and __36 () = pp_expr
+  
+  and __35 () = pp_expr
+  
+  and __34 () = pp_expr
+  
+  and __33 () = pp_expr
+  
+  and __32 () = pp_expr
+  
+  and __31 () = pp_afield
+  
+  and __30 () = pp_expr
+  
+  and __29 () = pp_pstring
+  
+  and __28 () = pp_pstring
+  
+  and __27 () = pp_pstring
+  
+  and __26 () = pp_expr
+  
+  and __25 () = pp_expr
+  
+  and __24 () = pp_hint
+  
+  and __23 () = pp_expr
+  
+  and __22 () = pp_pstring
+  
+  and __21 () = pp_expr
+  
+  and __20 () = pp_expr
+  
+  and __19 () = pp_expr
+  
+  and __18 () = pp_expr
+  
+  and __17 () = pp_expr
+  
+  and __16 () = pp_og_null_flavor
+  
+  and __15 () = pp_expr
+  
+  and __14 () = pp_expr
+  
+  and __13 () = pp_expr
+  
+  and __12 () = pp_expr
+  
+  and __11 () = pp_id
+  
+  and __10 () = pp_hint
+  
+  and __9 () = pp_id
+  
+  and __8 () = pp_id
+  
+  and __7 () = pp_afield
+  
+  and __6 () = pp_id
+  
+  and __5 () = pp_expr
+  
+  and __4 () = pp_shape_field_name
+  
+  and __3 () = pp_expr
+  
+  and __2 () = pp_expr
+  
+  and __1 () = pp_expr
+  
+  and __0 () = pp_afield
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | Array a0 ->
+            (Format.fprintf fmt "(@[<2>Array@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__0 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | Varray a0 ->
+            (Format.fprintf fmt "(@[<2>Varray@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__1 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | Darray a0 ->
+            (Format.fprintf fmt "(@[<2>Darray@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((fun (a0,a1)  ->
+                               Format.fprintf fmt "(@[";
+                               (((__2 ()) fmt) a0;
+                                Format.fprintf fmt ",@ ";
+                                ((__3 ()) fmt) a1);
+                               Format.fprintf fmt "@])")) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | Shape a0 ->
+            (Format.fprintf fmt "(@[<2>Shape@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((fun (a0,a1)  ->
+                               Format.fprintf fmt "(@[";
+                               (((__4 ()) fmt) a0;
+                                Format.fprintf fmt ",@ ";
+                                ((__5 ()) fmt) a1);
+                               Format.fprintf fmt "@])")) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | Collection (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Collection (@,";
+             (((__6 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__7 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a1);
+             Format.fprintf fmt "@,))@]")
+        | Null  -> Format.pp_print_string fmt "Null"
+        | True  -> Format.pp_print_string fmt "True"
+        | False  -> Format.pp_print_string fmt "False"
+        | Omitted  -> Format.pp_print_string fmt "Omitted"
+        | Id a0 ->
+            (Format.fprintf fmt "(@[<2>Id@ ";
+             ((__8 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Id_type_arguments (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Id_type_arguments (@,";
+             (((__9 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__10 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a1);
+             Format.fprintf fmt "@,))@]")
+        | Lvar a0 ->
+            (Format.fprintf fmt "(@[<2>Lvar@ ";
+             ((__11 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Dollar a0 ->
+            (Format.fprintf fmt "(@[<2>Dollar@ ";
+             ((__12 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Clone a0 ->
+            (Format.fprintf fmt "(@[<2>Clone@ ";
+             ((__13 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Obj_get (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>Obj_get (@,";
+             ((((__14 ()) fmt) a0;
+               Format.fprintf fmt ",@ ";
+               ((__15 ()) fmt) a1);
+              Format.fprintf fmt ",@ ";
+              ((__16 ()) fmt) a2);
+             Format.fprintf fmt "@,))@]")
+        | Array_get (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Array_get (@,";
+             (((__17 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((function
+                | None  -> Format.pp_print_string fmt "None"
+                | Some x ->
+                    (Format.pp_print_string fmt "(Some ";
+                     ((__18 ()) fmt) x;
+                     Format.pp_print_string fmt ")"))) a1);
+             Format.fprintf fmt "@,))@]")
+        | Class_get (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Class_get (@,";
+             (((__19 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__20 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | Class_const (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Class_const (@,";
+             (((__21 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__22 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | Call (a0,a1,a2,a3) ->
+            (Format.fprintf fmt "(@[<2>Call (@,";
+             (((((__23 ()) fmt) a0;
+                Format.fprintf fmt ",@ ";
+                ((fun x  ->
+                    Format.fprintf fmt "@[<2>[";
+                    ignore
+                      (List.fold_left
+                         (fun sep  ->
+                            fun x  ->
+                              if sep then Format.fprintf fmt ";@ ";
+                              ((__24 ()) fmt) x;
+                              true) false x);
+                    Format.fprintf fmt "@,]@]")) a1);
+               Format.fprintf fmt ",@ ";
+               ((fun x  ->
+                   Format.fprintf fmt "@[<2>[";
+                   ignore
+                     (List.fold_left
+                        (fun sep  ->
+                           fun x  ->
+                             if sep then Format.fprintf fmt ";@ ";
+                             ((__25 ()) fmt) x;
+                             true) false x);
+                   Format.fprintf fmt "@,]@]")) a2);
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__26 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a3);
+             Format.fprintf fmt "@,))@]")
+        | Int a0 ->
+            (Format.fprintf fmt "(@[<2>Int@ ";
+             ((__27 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Float a0 ->
+            (Format.fprintf fmt "(@[<2>Float@ ";
+             ((__28 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | String a0 ->
+            (Format.fprintf fmt "(@[<2>String@ ";
+             ((__29 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | String2 a0 ->
+            (Format.fprintf fmt "(@[<2>String2@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__30 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | Yield a0 ->
+            (Format.fprintf fmt "(@[<2>Yield@ ";
+             ((__31 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Yield_break  -> Format.pp_print_string fmt "Yield_break"
+        | Yield_from a0 ->
+            (Format.fprintf fmt "(@[<2>Yield_from@ ";
+             ((__32 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Await a0 ->
+            (Format.fprintf fmt "(@[<2>Await@ ";
+             ((__33 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Suspend a0 ->
+            (Format.fprintf fmt "(@[<2>Suspend@ ";
+             ((__34 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | List a0 ->
+            (Format.fprintf fmt "(@[<2>List@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__35 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | Expr_list a0 ->
+            (Format.fprintf fmt "(@[<2>Expr_list@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__36 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])")
+        | Cast (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Cast (@,";
+             (((__37 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__38 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | Unop (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Unop (@,";
+             (((__39 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__40 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | Binop (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>Binop (@,";
+             ((((__41 ()) fmt) a0;
+               Format.fprintf fmt ",@ ";
+               ((__42 ()) fmt) a1);
+              Format.fprintf fmt ",@ ";
+              ((__43 ()) fmt) a2);
+             Format.fprintf fmt "@,))@]")
+        | Pipe (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Pipe (@,";
+             (((__44 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__45 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | Eif (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>Eif (@,";
+             ((((__46 ()) fmt) a0;
+               Format.fprintf fmt ",@ ";
+               ((function
+                 | None  -> Format.pp_print_string fmt "None"
+                 | Some x ->
+                     (Format.pp_print_string fmt "(Some ";
+                      ((__47 ()) fmt) x;
+                      Format.pp_print_string fmt ")"))) a1);
+              Format.fprintf fmt ",@ ";
+              ((__48 ()) fmt) a2);
+             Format.fprintf fmt "@,))@]")
+        | NullCoalesce (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>NullCoalesce (@,";
+             (((__49 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__50 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | InstanceOf (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>InstanceOf (@,";
+             (((__51 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__52 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | Is (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Is (@,";
+             (((__53 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__54 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | BracedExpr a0 ->
+            (Format.fprintf fmt "(@[<2>BracedExpr@ ";
+             ((__55 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | ParenthesizedExpr a0 ->
+            (Format.fprintf fmt "(@[<2>ParenthesizedExpr@ ";
+             ((__56 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | New (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>New (@,";
+             ((((__57 ()) fmt) a0;
+               Format.fprintf fmt ",@ ";
+               ((fun x  ->
+                   Format.fprintf fmt "@[<2>[";
+                   ignore
+                     (List.fold_left
+                        (fun sep  ->
+                           fun x  ->
+                             if sep then Format.fprintf fmt ";@ ";
+                             ((__58 ()) fmt) x;
+                             true) false x);
+                   Format.fprintf fmt "@,]@]")) a1);
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__59 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a2);
+             Format.fprintf fmt "@,))@]")
+        | NewAnonClass (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>NewAnonClass (@,";
+             ((((fun x  ->
+                   Format.fprintf fmt "@[<2>[";
+                   ignore
+                     (List.fold_left
+                        (fun sep  ->
+                           fun x  ->
+                             if sep then Format.fprintf fmt ";@ ";
+                             ((__60 ()) fmt) x;
+                             true) false x);
+                   Format.fprintf fmt "@,]@]")) a0;
+               Format.fprintf fmt ",@ ";
+               ((fun x  ->
+                   Format.fprintf fmt "@[<2>[";
+                   ignore
+                     (List.fold_left
+                        (fun sep  ->
+                           fun x  ->
+                             if sep then Format.fprintf fmt ";@ ";
+                             ((__61 ()) fmt) x;
+                             true) false x);
+                   Format.fprintf fmt "@,]@]")) a1);
+              Format.fprintf fmt ",@ ";
+              ((__62 ()) fmt) a2);
+             Format.fprintf fmt "@,))@]")
+        | Efun (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Efun (@,";
+             (((__63 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((fun (a0,a1)  ->
+                                Format.fprintf fmt "(@[";
+                                (((__64 ()) fmt) a0;
+                                 Format.fprintf fmt ",@ ";
+                                 (Format.fprintf fmt "%B") a1);
+                                Format.fprintf fmt "@])")) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a1);
+             Format.fprintf fmt "@,))@]")
+        | Lfun a0 ->
+            (Format.fprintf fmt "(@[<2>Lfun@ ";
+             ((__65 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Xml (a0,a1,a2) ->
+            (Format.fprintf fmt "(@[<2>Xml (@,";
+             ((((__66 ()) fmt) a0;
+               Format.fprintf fmt ",@ ";
+               ((fun x  ->
+                   Format.fprintf fmt "@[<2>[";
+                   ignore
+                     (List.fold_left
+                        (fun sep  ->
+                           fun x  ->
+                             if sep then Format.fprintf fmt ";@ ";
+                             ((__67 ()) fmt) x;
+                             true) false x);
+                   Format.fprintf fmt "@,]@]")) a1);
+              Format.fprintf fmt ",@ ";
+              ((fun x  ->
+                  Format.fprintf fmt "@[<2>[";
+                  ignore
+                    (List.fold_left
+                       (fun sep  ->
+                          fun x  ->
+                            if sep then Format.fprintf fmt ";@ ";
+                            ((__68 ()) fmt) x;
+                            true) false x);
+                  Format.fprintf fmt "@,]@]")) a2);
+             Format.fprintf fmt "@,))@]")
+        | Unsafeexpr a0 ->
+            (Format.fprintf fmt "(@[<2>Unsafeexpr@ ";
+             ((__69 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Import (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Import (@,";
+             (((__70 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__71 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | Callconv (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Callconv (@,";
+             (((__72 ()) fmt) a0;
+              Format.fprintf fmt ",@ ";
+              ((__73 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]")
+        | Execution_operator a0 ->
+            (Format.fprintf fmt "(@[<2>Execution_operator@ ";
+             ((fun x  ->
+                 Format.fprintf fmt "@[<2>[";
+                 ignore
+                   (List.fold_left
+                      (fun sep  ->
+                         fun x  ->
+                           if sep then Format.fprintf fmt ";@ ";
+                           ((__74 ()) fmt) x;
+                           true) false x);
+                 Format.fprintf fmt "@,]@]")) a0;
+             Format.fprintf fmt "@])"))
+    [@ocaml.warning "-A"])
+
+and show_expr_ : expr_ -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_expr_ x
+
+and (pp_import_flavor :
+      Format.formatter -> import_flavor -> Ppx_deriving_runtime.unit)
+  =
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | Include  -> Format.pp_print_string fmt "Include"
+        | Require  -> Format.pp_print_string fmt "Require"
+        | IncludeOnce  -> Format.pp_print_string fmt "IncludeOnce"
+        | RequireOnce  -> Format.pp_print_string fmt "RequireOnce")
+  [@ocaml.warning "-A"])
+
+and show_import_flavor : import_flavor -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_import_flavor x
+
+and pp_afield : Format.formatter -> afield -> Ppx_deriving_runtime.unit =
+  let __2 () = pp_expr
+  
+  and __1 () = pp_expr
+  
+  and __0 () = pp_expr
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | AFvalue a0 ->
+            (Format.fprintf fmt "(@[<2>AFvalue@ ";
+             ((__0 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | AFkvalue (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>AFkvalue (@,";
+             (((__1 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__2 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]"))
+    [@ocaml.warning "-A"])
+
+and show_afield : afield -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_afield x
+
+and pp_case : Format.formatter -> case -> Ppx_deriving_runtime.unit =
+  let __2 () = pp_block
+  
+  and __1 () = pp_expr
+  
+  and __0 () = pp_block
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        function
+        | Default a0 ->
+            (Format.fprintf fmt "(@[<2>Default@ ";
+             ((__0 ()) fmt) a0;
+             Format.fprintf fmt "@])")
+        | Case (a0,a1) ->
+            (Format.fprintf fmt "(@[<2>Case (@,";
+             (((__1 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__2 ()) fmt) a1);
+             Format.fprintf fmt "@,))@]"))
+    [@ocaml.warning "-A"])
+
+and show_case : case -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_case x
+
+and pp_catch : Format.formatter -> catch -> Ppx_deriving_runtime.unit =
+  let __2 () = pp_block
+  
+  and __1 () = pp_id
+  
+  and __0 () = pp_id
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun (a0,a1,a2)  ->
+          Format.fprintf fmt "(@[";
+          ((((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
+           Format.fprintf fmt ",@ ";
+           ((__2 ()) fmt) a2);
+          Format.fprintf fmt "@])")
+    [@ocaml.warning "-A"])
+
+and show_catch : catch -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_catch x
+
+and pp_field : Format.formatter -> field -> Ppx_deriving_runtime.unit =
+  let __1 () = pp_expr
+  
+  and __0 () = pp_expr
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun (a0,a1)  ->
+          Format.fprintf fmt "(@[";
+          (((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
+          Format.fprintf fmt "@])")
+    [@ocaml.warning "-A"])
+
+and show_field : field -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_field x
+
+and pp_attr : Format.formatter -> attr -> Ppx_deriving_runtime.unit =
+  let __1 () = pp_expr
+  
+  and __0 () = pp_id
+   in
+  ((let open! Ppx_deriving_runtime in
+      fun fmt  ->
+        fun (a0,a1)  ->
+          Format.fprintf fmt "(@[";
+          (((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
+          Format.fprintf fmt "@])")
+    [@ocaml.warning "-A"])
+
+and show_attr : attr -> Ppx_deriving_runtime.string =
+  fun x  -> Format.asprintf "%a" pp_attr x
+
 include
   struct
     [@@@ocaml.warning "-4-26-27"]
     [@@@VISITORS.BEGIN ]
     class virtual ['self] endo =
       object (self : 'self)
-        inherit  [_] endo_base
+        inherit  [_] endo_defs
         method on_program env = self#on_list self#on_def env
+        method on_nsenv env _visitors_this = _visitors_this
+        method on_fimode env _visitors_this = _visitors_this
         method on_Fun env _visitors_this _visitors_c0 =
           let _visitors_r0 = self#on_fun_ env _visitors_c0  in
           if Pervasives.(==) _visitors_c0 _visitors_r0
@@ -377,7 +3172,7 @@ include
           then _visitors_this
           else NamespaceUse _visitors_r0
         method on_SetNamespaceEnv env _visitors_this _visitors_c0 =
-          let _visitors_r0 = self#on_env env _visitors_c0  in
+          let _visitors_r0 = self#on_nsenv env _visitors_c0  in
           if Pervasives.(==) _visitors_c0 _visitors_r0
           then _visitors_this
           else SetNamespaceEnv _visitors_r0
@@ -411,8 +3206,8 @@ include
             self#on_list self#on_user_attribute env
               _visitors_this.t_user_attributes
              in
-          let _visitors_r5 = self#on_env env _visitors_this.t_namespace  in
-          let _visitors_r6 = self#on_mode env _visitors_this.t_mode  in
+          let _visitors_r5 = self#on_nsenv env _visitors_this.t_namespace  in
+          let _visitors_r6 = self#on_fimode env _visitors_this.t_mode  in
           if
             Pervasives.(&&)
               (Pervasives.(==) _visitors_this.t_id _visitors_r0)
@@ -442,13 +3237,14 @@ include
               t_mode = _visitors_r6
             }
         method on_gconst env _visitors_this =
-          let _visitors_r0 = self#on_mode env _visitors_this.cst_mode  in
+          let _visitors_r0 = self#on_fimode env _visitors_this.cst_mode  in
           let _visitors_r1 = self#on_cst_kind env _visitors_this.cst_kind  in
           let _visitors_r2 = self#on_id env _visitors_this.cst_name  in
           let _visitors_r3 =
             self#on_option self#on_hint env _visitors_this.cst_type  in
           let _visitors_r4 = self#on_expr env _visitors_this.cst_value  in
-          let _visitors_r5 = self#on_env env _visitors_this.cst_namespace  in
+          let _visitors_r5 = self#on_nsenv env _visitors_this.cst_namespace
+             in
           if
             Pervasives.(&&)
               (Pervasives.(==) _visitors_this.cst_mode _visitors_r0)
@@ -515,7 +3311,7 @@ include
           | NewType _visitors_c0 as _visitors_this ->
               self#on_NewType env _visitors_this _visitors_c0
         method on_class_ env _visitors_this =
-          let _visitors_r0 = self#on_mode env _visitors_this.c_mode  in
+          let _visitors_r0 = self#on_fimode env _visitors_this.c_mode  in
           let _visitors_r1 =
             self#on_list self#on_user_attribute env
               _visitors_this.c_user_attributes
@@ -532,10 +3328,11 @@ include
             self#on_list self#on_hint env _visitors_this.c_implements  in
           let _visitors_r9 =
             self#on_list self#on_class_elt env _visitors_this.c_body  in
-          let _visitors_r10 = self#on_env env _visitors_this.c_namespace  in
+          let _visitors_r10 = self#on_nsenv env _visitors_this.c_namespace
+             in
           let _visitors_r11 =
             self#on_option self#on_enum_ env _visitors_this.c_enum  in
-          let _visitors_r12 = self#on_t env _visitors_this.c_span  in
+          let _visitors_r12 = self#on_pos env _visitors_this.c_span  in
           let _visitors_r13 =
             self#on_option self#on_string env _visitors_this.c_doc_comment
              in
@@ -723,7 +3520,7 @@ include
                    ((_visitors_c0,_visitors_c1,_visitors_c2) as
                       _visitors_this)
                     ->
-                   let _visitors_r0 = self#on_t env _visitors_c0  in
+                   let _visitors_r0 = self#on_pos env _visitors_c0  in
                    let _visitors_r1 = self#on_bool env _visitors_c1  in
                    let _visitors_r2 =
                      self#on_list self#on_expr env _visitors_c2  in
@@ -908,7 +3705,7 @@ include
               self#on_CA_enum env _visitors_this _visitors_c0
         method on_class_var env
           ((_visitors_c0,_visitors_c1,_visitors_c2) as _visitors_this) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_id env _visitors_c1  in
           let _visitors_r2 = self#on_option self#on_expr env _visitors_c2  in
           if
@@ -991,7 +3788,7 @@ include
           let _visitors_r8 = self#on_bool env _visitors_this.m_ret_by_ref  in
           let _visitors_r9 = self#on_fun_kind env _visitors_this.m_fun_kind
              in
-          let _visitors_r10 = self#on_t env _visitors_this.m_span  in
+          let _visitors_r10 = self#on_pos env _visitors_this.m_span  in
           let _visitors_r11 =
             self#on_option self#on_string env _visitors_this.m_doc_comment
              in
@@ -1059,7 +3856,7 @@ include
              in
           let _visitors_r4 =
             self#on_option self#on_hint env _visitors_this.tconst_type  in
-          let _visitors_r5 = self#on_t env _visitors_this.tconst_span  in
+          let _visitors_r5 = self#on_pos env _visitors_this.tconst_span  in
           if
             Pervasives.(&&)
               (Pervasives.(==) _visitors_this.tconst_abstract _visitors_r0)
@@ -1144,7 +3941,7 @@ include
               param_user_attributes = _visitors_r7
             }
         method on_fun_ env _visitors_this =
-          let _visitors_r0 = self#on_mode env _visitors_this.f_mode  in
+          let _visitors_r0 = self#on_fimode env _visitors_this.f_mode  in
           let _visitors_r1 =
             self#on_list self#on_tparam env _visitors_this.f_tparams  in
           let _visitors_r2 =
@@ -1181,8 +3978,9 @@ include
              in
           let _visitors_r9 = self#on_fun_kind env _visitors_this.f_fun_kind
              in
-          let _visitors_r10 = self#on_env env _visitors_this.f_namespace  in
-          let _visitors_r11 = self#on_t env _visitors_this.f_span  in
+          let _visitors_r10 = self#on_nsenv env _visitors_this.f_namespace
+             in
+          let _visitors_r11 = self#on_pos env _visitors_this.f_span  in
           let _visitors_r12 =
             self#on_option self#on_string env _visitors_this.f_doc_comment
              in
@@ -1251,7 +4049,7 @@ include
             }
         method on_is_coroutine env = self#on_bool env
         method on_hint env ((_visitors_c0,_visitors_c1) as _visitors_this) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_hint_ env _visitors_c1  in
           if
             Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
@@ -1412,7 +4210,7 @@ include
               us_block = _visitors_r3
             }
         method on_stmt env ((_visitors_c0,_visitors_c1) as _visitors_this) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_stmt_ env _visitors_c1  in
           if
             Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
@@ -1524,7 +4322,7 @@ include
         method on_Foreach env _visitors_this _visitors_c0 _visitors_c1
           _visitors_c2 _visitors_c3 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_t env _visitors_c1  in
+          let _visitors_r1 = self#on_option self#on_pos env _visitors_c1  in
           let _visitors_r2 = self#on_as_expr env _visitors_c2  in
           let _visitors_r3 = self#on_block env _visitors_c3  in
           if
@@ -1673,7 +4471,7 @@ include
               self#on_Xhp_spread env _visitors_this _visitors_c0
         method on_block env = self#on_list self#on_stmt env
         method on_expr env ((_visitors_c0,_visitors_c1) as _visitors_this) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_expr_ env _visitors_c1  in
           if
             Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
@@ -2236,8 +5034,10 @@ include
     [@@@VISITORS.BEGIN ]
     class virtual ['self] reduce =
       object (self : 'self)
-        inherit  [_] reduce_base
+        inherit  [_] reduce_defs
         method on_program env = self#on_list self#on_def env
+        method on_nsenv env _visitors_this = self#zero
+        method on_fimode env _visitors_this = self#zero
         method on_Fun env _visitors_c0 =
           let _visitors_s0 = self#on_fun_ env _visitors_c0  in _visitors_s0
         method on_Class env _visitors_c0 =
@@ -2266,7 +5066,7 @@ include
              in
           _visitors_s0
         method on_SetNamespaceEnv env _visitors_c0 =
-          let _visitors_s0 = self#on_env env _visitors_c0  in _visitors_s0
+          let _visitors_s0 = self#on_nsenv env _visitors_c0  in _visitors_s0
         method on_def env _visitors_this =
           match _visitors_this with
           | Fun _visitors_c0 -> self#on_Fun env _visitors_c0
@@ -2292,8 +5092,8 @@ include
             self#on_list self#on_user_attribute env
               _visitors_this.t_user_attributes
              in
-          let _visitors_s5 = self#on_env env _visitors_this.t_namespace  in
-          let _visitors_s6 = self#on_mode env _visitors_this.t_mode  in
+          let _visitors_s5 = self#on_nsenv env _visitors_this.t_namespace  in
+          let _visitors_s6 = self#on_fimode env _visitors_this.t_mode  in
           self#plus
             (self#plus
                (self#plus
@@ -2302,13 +5102,14 @@ include
                         _visitors_s2) _visitors_s3) _visitors_s4)
                _visitors_s5) _visitors_s6
         method on_gconst env _visitors_this =
-          let _visitors_s0 = self#on_mode env _visitors_this.cst_mode  in
+          let _visitors_s0 = self#on_fimode env _visitors_this.cst_mode  in
           let _visitors_s1 = self#on_cst_kind env _visitors_this.cst_kind  in
           let _visitors_s2 = self#on_id env _visitors_this.cst_name  in
           let _visitors_s3 =
             self#on_option self#on_hint env _visitors_this.cst_type  in
           let _visitors_s4 = self#on_expr env _visitors_this.cst_value  in
-          let _visitors_s5 = self#on_env env _visitors_this.cst_namespace  in
+          let _visitors_s5 = self#on_nsenv env _visitors_this.cst_namespace
+             in
           self#plus
             (self#plus
                (self#plus
@@ -2337,7 +5138,7 @@ include
           | Alias _visitors_c0 -> self#on_Alias env _visitors_c0
           | NewType _visitors_c0 -> self#on_NewType env _visitors_c0
         method on_class_ env _visitors_this =
-          let _visitors_s0 = self#on_mode env _visitors_this.c_mode  in
+          let _visitors_s0 = self#on_fimode env _visitors_this.c_mode  in
           let _visitors_s1 =
             self#on_list self#on_user_attribute env
               _visitors_this.c_user_attributes
@@ -2354,10 +5155,11 @@ include
             self#on_list self#on_hint env _visitors_this.c_implements  in
           let _visitors_s9 =
             self#on_list self#on_class_elt env _visitors_this.c_body  in
-          let _visitors_s10 = self#on_env env _visitors_this.c_namespace  in
+          let _visitors_s10 = self#on_nsenv env _visitors_this.c_namespace
+             in
           let _visitors_s11 =
             self#on_option self#on_enum_ env _visitors_this.c_enum  in
-          let _visitors_s12 = self#on_t env _visitors_this.c_span  in
+          let _visitors_s12 = self#on_pos env _visitors_this.c_span  in
           let _visitors_s13 =
             self#on_option self#on_string env _visitors_this.c_doc_comment
              in
@@ -2446,7 +5248,7 @@ include
             self#on_option
               (fun env  ->
                  fun (_visitors_c0,_visitors_c1,_visitors_c2)  ->
-                   let _visitors_s0 = self#on_t env _visitors_c0  in
+                   let _visitors_s0 = self#on_pos env _visitors_c0  in
                    let _visitors_s1 = self#on_bool env _visitors_c1  in
                    let _visitors_s2 =
                      self#on_list self#on_expr env _visitors_c2  in
@@ -2550,7 +5352,7 @@ include
           | CA_hint _visitors_c0 -> self#on_CA_hint env _visitors_c0
           | CA_enum _visitors_c0 -> self#on_CA_enum env _visitors_c0
         method on_class_var env (_visitors_c0,_visitors_c1,_visitors_c2) =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
+          let _visitors_s0 = self#on_pos env _visitors_c0  in
           let _visitors_s1 = self#on_id env _visitors_c1  in
           let _visitors_s2 = self#on_option self#on_expr env _visitors_c2  in
           self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
@@ -2601,7 +5403,7 @@ include
           let _visitors_s8 = self#on_bool env _visitors_this.m_ret_by_ref  in
           let _visitors_s9 = self#on_fun_kind env _visitors_this.m_fun_kind
              in
-          let _visitors_s10 = self#on_t env _visitors_this.m_span  in
+          let _visitors_s10 = self#on_pos env _visitors_this.m_span  in
           let _visitors_s11 =
             self#on_option self#on_string env _visitors_this.m_doc_comment
              in
@@ -2631,7 +5433,7 @@ include
              in
           let _visitors_s4 =
             self#on_option self#on_hint env _visitors_this.tconst_type  in
-          let _visitors_s5 = self#on_t env _visitors_this.tconst_span  in
+          let _visitors_s5 = self#on_pos env _visitors_this.tconst_span  in
           self#plus
             (self#plus
                (self#plus
@@ -2668,7 +5470,7 @@ include
                            _visitors_s2) _visitors_s3) _visitors_s4)
                   _visitors_s5) _visitors_s6) _visitors_s7
         method on_fun_ env _visitors_this =
-          let _visitors_s0 = self#on_mode env _visitors_this.f_mode  in
+          let _visitors_s0 = self#on_fimode env _visitors_this.f_mode  in
           let _visitors_s1 =
             self#on_list self#on_tparam env _visitors_this.f_tparams  in
           let _visitors_s2 =
@@ -2695,8 +5497,9 @@ include
              in
           let _visitors_s9 = self#on_fun_kind env _visitors_this.f_fun_kind
              in
-          let _visitors_s10 = self#on_env env _visitors_this.f_namespace  in
-          let _visitors_s11 = self#on_t env _visitors_this.f_span  in
+          let _visitors_s10 = self#on_nsenv env _visitors_this.f_namespace
+             in
+          let _visitors_s11 = self#on_pos env _visitors_this.f_span  in
           let _visitors_s12 =
             self#on_option self#on_string env _visitors_this.f_doc_comment
              in
@@ -2721,7 +5524,7 @@ include
                   _visitors_s11) _visitors_s12) _visitors_s13
         method on_is_coroutine env = self#on_bool env
         method on_hint env (_visitors_c0,_visitors_c1) =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
+          let _visitors_s0 = self#on_pos env _visitors_c0  in
           let _visitors_s1 = self#on_hint_ env _visitors_c1  in
           self#plus _visitors_s0 _visitors_s1
         method on_Hvariadic env _visitors_c0 =
@@ -2803,7 +5606,7 @@ include
             (self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2)
             _visitors_s3
         method on_stmt env (_visitors_c0,_visitors_c1) =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
+          let _visitors_s0 = self#on_pos env _visitors_c0  in
           let _visitors_s1 = self#on_stmt_ env _visitors_c1  in
           self#plus _visitors_s0 _visitors_s1
         method on_Unsafe env = self#zero
@@ -2864,7 +5667,7 @@ include
         method on_Foreach env _visitors_c0 _visitors_c1 _visitors_c2
           _visitors_c3 =
           let _visitors_s0 = self#on_expr env _visitors_c0  in
-          let _visitors_s1 = self#on_option self#on_t env _visitors_c1  in
+          let _visitors_s1 = self#on_option self#on_pos env _visitors_c1  in
           let _visitors_s2 = self#on_as_expr env _visitors_c2  in
           let _visitors_s3 = self#on_block env _visitors_c3  in
           self#plus
@@ -2951,7 +5754,7 @@ include
           | Xhp_spread _visitors_c0 -> self#on_Xhp_spread env _visitors_c0
         method on_block env = self#on_list self#on_stmt env
         method on_expr env (_visitors_c0,_visitors_c1) =
-          let _visitors_s0 = self#on_t env _visitors_c0  in
+          let _visitors_s0 = self#on_pos env _visitors_c0  in
           let _visitors_s1 = self#on_expr_ env _visitors_c1  in
           self#plus _visitors_s0 _visitors_s1
         method on_Array env _visitors_c0 =
@@ -3263,8 +6066,10 @@ include
     [@@@VISITORS.BEGIN ]
     class virtual ['self] map =
       object (self : 'self)
-        inherit  [_] map_base
+        inherit  [_] map_defs
         method on_program env = self#on_list self#on_def env
+        method on_nsenv env _visitors_this = _visitors_this
+        method on_fimode env _visitors_this = _visitors_this
         method on_Fun env _visitors_c0 =
           let _visitors_r0 = self#on_fun_ env _visitors_c0  in
           Fun _visitors_r0
@@ -3297,7 +6102,7 @@ include
              in
           NamespaceUse _visitors_r0
         method on_SetNamespaceEnv env _visitors_c0 =
-          let _visitors_r0 = self#on_env env _visitors_c0  in
+          let _visitors_r0 = self#on_nsenv env _visitors_c0  in
           SetNamespaceEnv _visitors_r0
         method on_def env _visitors_this =
           match _visitors_this with
@@ -3324,8 +6129,8 @@ include
             self#on_list self#on_user_attribute env
               _visitors_this.t_user_attributes
              in
-          let _visitors_r5 = self#on_env env _visitors_this.t_namespace  in
-          let _visitors_r6 = self#on_mode env _visitors_this.t_mode  in
+          let _visitors_r5 = self#on_nsenv env _visitors_this.t_namespace  in
+          let _visitors_r6 = self#on_fimode env _visitors_this.t_mode  in
           {
             t_id = _visitors_r0;
             t_tparams = _visitors_r1;
@@ -3336,13 +6141,14 @@ include
             t_mode = _visitors_r6
           }
         method on_gconst env _visitors_this =
-          let _visitors_r0 = self#on_mode env _visitors_this.cst_mode  in
+          let _visitors_r0 = self#on_fimode env _visitors_this.cst_mode  in
           let _visitors_r1 = self#on_cst_kind env _visitors_this.cst_kind  in
           let _visitors_r2 = self#on_id env _visitors_this.cst_name  in
           let _visitors_r3 =
             self#on_option self#on_hint env _visitors_this.cst_type  in
           let _visitors_r4 = self#on_expr env _visitors_this.cst_value  in
-          let _visitors_r5 = self#on_env env _visitors_this.cst_namespace  in
+          let _visitors_r5 = self#on_nsenv env _visitors_this.cst_namespace
+             in
           {
             cst_mode = _visitors_r0;
             cst_kind = _visitors_r1;
@@ -3376,7 +6182,7 @@ include
           | Alias _visitors_c0 -> self#on_Alias env _visitors_c0
           | NewType _visitors_c0 -> self#on_NewType env _visitors_c0
         method on_class_ env _visitors_this =
-          let _visitors_r0 = self#on_mode env _visitors_this.c_mode  in
+          let _visitors_r0 = self#on_fimode env _visitors_this.c_mode  in
           let _visitors_r1 =
             self#on_list self#on_user_attribute env
               _visitors_this.c_user_attributes
@@ -3393,10 +6199,11 @@ include
             self#on_list self#on_hint env _visitors_this.c_implements  in
           let _visitors_r9 =
             self#on_list self#on_class_elt env _visitors_this.c_body  in
-          let _visitors_r10 = self#on_env env _visitors_this.c_namespace  in
+          let _visitors_r10 = self#on_nsenv env _visitors_this.c_namespace
+             in
           let _visitors_r11 =
             self#on_option self#on_enum_ env _visitors_this.c_enum  in
-          let _visitors_r12 = self#on_t env _visitors_this.c_span  in
+          let _visitors_r12 = self#on_pos env _visitors_this.c_span  in
           let _visitors_r13 =
             self#on_option self#on_string env _visitors_this.c_doc_comment
              in
@@ -3484,7 +6291,7 @@ include
             self#on_option
               (fun env  ->
                  fun (_visitors_c0,_visitors_c1,_visitors_c2)  ->
-                   let _visitors_r0 = self#on_t env _visitors_c0  in
+                   let _visitors_r0 = self#on_pos env _visitors_c0  in
                    let _visitors_r1 = self#on_bool env _visitors_c1  in
                    let _visitors_r2 =
                      self#on_list self#on_expr env _visitors_c2  in
@@ -3592,7 +6399,7 @@ include
           | CA_hint _visitors_c0 -> self#on_CA_hint env _visitors_c0
           | CA_enum _visitors_c0 -> self#on_CA_enum env _visitors_c0
         method on_class_var env (_visitors_c0,_visitors_c1,_visitors_c2) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_id env _visitors_c1  in
           let _visitors_r2 = self#on_option self#on_expr env _visitors_c2  in
           (_visitors_r0, _visitors_r1, _visitors_r2)
@@ -3646,7 +6453,7 @@ include
           let _visitors_r8 = self#on_bool env _visitors_this.m_ret_by_ref  in
           let _visitors_r9 = self#on_fun_kind env _visitors_this.m_fun_kind
              in
-          let _visitors_r10 = self#on_t env _visitors_this.m_span  in
+          let _visitors_r10 = self#on_pos env _visitors_this.m_span  in
           let _visitors_r11 =
             self#on_option self#on_string env _visitors_this.m_doc_comment
              in
@@ -3675,7 +6482,7 @@ include
              in
           let _visitors_r4 =
             self#on_option self#on_hint env _visitors_this.tconst_type  in
-          let _visitors_r5 = self#on_t env _visitors_this.tconst_span  in
+          let _visitors_r5 = self#on_pos env _visitors_this.tconst_span  in
           {
             tconst_abstract = _visitors_r0;
             tconst_name = _visitors_r1;
@@ -3717,7 +6524,7 @@ include
             param_user_attributes = _visitors_r7
           }
         method on_fun_ env _visitors_this =
-          let _visitors_r0 = self#on_mode env _visitors_this.f_mode  in
+          let _visitors_r0 = self#on_fimode env _visitors_this.f_mode  in
           let _visitors_r1 =
             self#on_list self#on_tparam env _visitors_this.f_tparams  in
           let _visitors_r2 =
@@ -3744,8 +6551,9 @@ include
              in
           let _visitors_r9 = self#on_fun_kind env _visitors_this.f_fun_kind
              in
-          let _visitors_r10 = self#on_env env _visitors_this.f_namespace  in
-          let _visitors_r11 = self#on_t env _visitors_this.f_span  in
+          let _visitors_r10 = self#on_nsenv env _visitors_this.f_namespace
+             in
+          let _visitors_r11 = self#on_pos env _visitors_this.f_span  in
           let _visitors_r12 =
             self#on_option self#on_string env _visitors_this.f_doc_comment
              in
@@ -3768,7 +6576,7 @@ include
           }
         method on_is_coroutine env = self#on_bool env
         method on_hint env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_hint_ env _visitors_c1  in
           (_visitors_r0, _visitors_r1)
         method on_Hvariadic env _visitors_c0 =
@@ -3861,7 +6669,7 @@ include
             us_block = _visitors_r3
           }
         method on_stmt env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_stmt_ env _visitors_c1  in
           (_visitors_r0, _visitors_r1)
         method on_Unsafe env = Unsafe
@@ -3923,7 +6731,7 @@ include
         method on_Foreach env _visitors_c0 _visitors_c1 _visitors_c2
           _visitors_c3 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_t env _visitors_c1  in
+          let _visitors_r1 = self#on_option self#on_pos env _visitors_c1  in
           let _visitors_r2 = self#on_as_expr env _visitors_c2  in
           let _visitors_r3 = self#on_block env _visitors_c3  in
           Foreach (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3)
@@ -4011,7 +6819,7 @@ include
           | Xhp_spread _visitors_c0 -> self#on_Xhp_spread env _visitors_c0
         method on_block env = self#on_list self#on_stmt env
         method on_expr env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_expr_ env _visitors_c1  in
           (_visitors_r0, _visitors_r1)
         method on_Array env _visitors_c0 =
@@ -4334,8 +7142,10 @@ include
     [@@@VISITORS.BEGIN ]
     class virtual ['self] iter =
       object (self : 'self)
-        inherit  [_] iter_base
+        inherit  [_] iter_defs
         method on_program env = self#on_list self#on_def env
+        method on_nsenv env _visitors_this = ()
+        method on_fimode env _visitors_this = ()
         method on_Fun env _visitors_c0 =
           let _visitors_r0 = self#on_fun_ env _visitors_c0  in ()
         method on_Class env _visitors_c0 =
@@ -4361,7 +7171,7 @@ include
              in
           ()
         method on_SetNamespaceEnv env _visitors_c0 =
-          let _visitors_r0 = self#on_env env _visitors_c0  in ()
+          let _visitors_r0 = self#on_nsenv env _visitors_c0  in ()
         method on_def env _visitors_this =
           match _visitors_this with
           | Fun _visitors_c0 -> self#on_Fun env _visitors_c0
@@ -4387,16 +7197,17 @@ include
             self#on_list self#on_user_attribute env
               _visitors_this.t_user_attributes
              in
-          let _visitors_r5 = self#on_env env _visitors_this.t_namespace  in
-          let _visitors_r6 = self#on_mode env _visitors_this.t_mode  in ()
+          let _visitors_r5 = self#on_nsenv env _visitors_this.t_namespace  in
+          let _visitors_r6 = self#on_fimode env _visitors_this.t_mode  in ()
         method on_gconst env _visitors_this =
-          let _visitors_r0 = self#on_mode env _visitors_this.cst_mode  in
+          let _visitors_r0 = self#on_fimode env _visitors_this.cst_mode  in
           let _visitors_r1 = self#on_cst_kind env _visitors_this.cst_kind  in
           let _visitors_r2 = self#on_id env _visitors_this.cst_name  in
           let _visitors_r3 =
             self#on_option self#on_hint env _visitors_this.cst_type  in
           let _visitors_r4 = self#on_expr env _visitors_this.cst_value  in
-          let _visitors_r5 = self#on_env env _visitors_this.cst_namespace  in
+          let _visitors_r5 = self#on_nsenv env _visitors_this.cst_namespace
+             in
           ()
         method on_tparam env (_visitors_c0,_visitors_c1,_visitors_c2) =
           let _visitors_r0 = self#on_variance env _visitors_c0  in
@@ -4421,7 +7232,7 @@ include
           | Alias _visitors_c0 -> self#on_Alias env _visitors_c0
           | NewType _visitors_c0 -> self#on_NewType env _visitors_c0
         method on_class_ env _visitors_this =
-          let _visitors_r0 = self#on_mode env _visitors_this.c_mode  in
+          let _visitors_r0 = self#on_fimode env _visitors_this.c_mode  in
           let _visitors_r1 =
             self#on_list self#on_user_attribute env
               _visitors_this.c_user_attributes
@@ -4438,10 +7249,11 @@ include
             self#on_list self#on_hint env _visitors_this.c_implements  in
           let _visitors_r9 =
             self#on_list self#on_class_elt env _visitors_this.c_body  in
-          let _visitors_r10 = self#on_env env _visitors_this.c_namespace  in
+          let _visitors_r10 = self#on_nsenv env _visitors_this.c_namespace
+             in
           let _visitors_r11 =
             self#on_option self#on_enum_ env _visitors_this.c_enum  in
-          let _visitors_r12 = self#on_t env _visitors_this.c_span  in
+          let _visitors_r12 = self#on_pos env _visitors_this.c_span  in
           let _visitors_r13 =
             self#on_option self#on_string env _visitors_this.c_doc_comment
              in
@@ -4506,7 +7318,7 @@ include
             self#on_option
               (fun env  ->
                  fun (_visitors_c0,_visitors_c1,_visitors_c2)  ->
-                   let _visitors_r0 = self#on_t env _visitors_c0  in
+                   let _visitors_r0 = self#on_pos env _visitors_c0  in
                    let _visitors_r1 = self#on_bool env _visitors_c1  in
                    let _visitors_r2 =
                      self#on_list self#on_expr env _visitors_c2  in
@@ -4600,7 +7412,7 @@ include
           | CA_hint _visitors_c0 -> self#on_CA_hint env _visitors_c0
           | CA_enum _visitors_c0 -> self#on_CA_enum env _visitors_c0
         method on_class_var env (_visitors_c0,_visitors_c1,_visitors_c2) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_id env _visitors_c1  in
           let _visitors_r2 = self#on_option self#on_expr env _visitors_c2  in
           ()
@@ -4647,7 +7459,7 @@ include
           let _visitors_r8 = self#on_bool env _visitors_this.m_ret_by_ref  in
           let _visitors_r9 = self#on_fun_kind env _visitors_this.m_fun_kind
              in
-          let _visitors_r10 = self#on_t env _visitors_this.m_span  in
+          let _visitors_r10 = self#on_pos env _visitors_this.m_span  in
           let _visitors_r11 =
             self#on_option self#on_string env _visitors_this.m_doc_comment
              in
@@ -4663,7 +7475,8 @@ include
              in
           let _visitors_r4 =
             self#on_option self#on_hint env _visitors_this.tconst_type  in
-          let _visitors_r5 = self#on_t env _visitors_this.tconst_span  in ()
+          let _visitors_r5 = self#on_pos env _visitors_this.tconst_span  in
+          ()
         method on_is_reference env = self#on_bool env
         method on_is_variadic env = self#on_bool env
         method on_fun_param env _visitors_this =
@@ -4688,7 +7501,7 @@ include
              in
           ()
         method on_fun_ env _visitors_this =
-          let _visitors_r0 = self#on_mode env _visitors_this.f_mode  in
+          let _visitors_r0 = self#on_fimode env _visitors_this.f_mode  in
           let _visitors_r1 =
             self#on_list self#on_tparam env _visitors_this.f_tparams  in
           let _visitors_r2 =
@@ -4714,15 +7527,16 @@ include
              in
           let _visitors_r9 = self#on_fun_kind env _visitors_this.f_fun_kind
              in
-          let _visitors_r10 = self#on_env env _visitors_this.f_namespace  in
-          let _visitors_r11 = self#on_t env _visitors_this.f_span  in
+          let _visitors_r10 = self#on_nsenv env _visitors_this.f_namespace
+             in
+          let _visitors_r11 = self#on_pos env _visitors_this.f_span  in
           let _visitors_r12 =
             self#on_option self#on_string env _visitors_this.f_doc_comment
              in
           let _visitors_r13 = self#on_bool env _visitors_this.f_static  in ()
         method on_is_coroutine env = self#on_bool env
         method on_hint env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_hint_ env _visitors_c1  in ()
         method on_Hvariadic env _visitors_c0 =
           let _visitors_r0 = self#on_option self#on_hint env _visitors_c0  in
@@ -4793,7 +7607,7 @@ include
           let _visitors_r2 = self#on_expr env _visitors_this.us_expr  in
           let _visitors_r3 = self#on_block env _visitors_this.us_block  in ()
         method on_stmt env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_stmt_ env _visitors_c1  in ()
         method on_Unsafe env = ()
         method on_Fallthrough env = ()
@@ -4845,7 +7659,7 @@ include
         method on_Foreach env _visitors_c0 _visitors_c1 _visitors_c2
           _visitors_c3 =
           let _visitors_r0 = self#on_expr env _visitors_c0  in
-          let _visitors_r1 = self#on_option self#on_t env _visitors_c1  in
+          let _visitors_r1 = self#on_option self#on_pos env _visitors_c1  in
           let _visitors_r2 = self#on_as_expr env _visitors_c2  in
           let _visitors_r3 = self#on_block env _visitors_c3  in ()
         method on_Try env _visitors_c0 _visitors_c1 _visitors_c2 =
@@ -4924,7 +7738,7 @@ include
           | Xhp_spread _visitors_c0 -> self#on_Xhp_spread env _visitors_c0
         method on_block env = self#on_list self#on_stmt env
         method on_expr env (_visitors_c0,_visitors_c1) =
-          let _visitors_r0 = self#on_t env _visitors_c0  in
+          let _visitors_r0 = self#on_pos env _visitors_c0  in
           let _visitors_r1 = self#on_expr_ env _visitors_c1  in ()
         method on_Array env _visitors_c0 =
           let _visitors_r0 = self#on_list self#on_afield env _visitors_c0  in

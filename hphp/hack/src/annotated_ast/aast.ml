@@ -1,6 +1,6 @@
 (* @generated from aast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<5ef7fba928340af01685ffb59eaa5d7f7c851bdd>> *)
+(* SourceShasum<<8170dd46e27ca70e49a8774fd295aa4756bb454e>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -52,10 +52,10 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     and stmt =
       | Fallthrough 
       | Expr of expr 
-      | Break of Pos.t 
-      | Continue of Pos.t 
+      | Break of pos 
+      | Continue of pos 
       | Throw of is_terminal * expr 
-      | Return of Pos.t * expr option 
+      | Return of pos * expr option 
       | GotoLabel of pstring 
       | Goto of pstring 
       | Static_var of expr list 
@@ -72,8 +72,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     and as_expr =
       | As_v of expr 
       | As_kv of expr * expr 
-      | Await_as_v of Pos.t * expr 
-      | Await_as_kv of Pos.t * expr * expr 
+      | Await_as_v of pos * expr 
+      | Await_as_kv of pos * expr * expr 
     and block = stmt list
     and class_id =
       | CIparent 
@@ -127,7 +127,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       | Efun of fun_ * lid list 
       | Xml of sid * xhp_attribute list * expr list 
       | Callconv of Ast.param_kind * expr 
-      | Lplaceholder of Pos.t 
+      | Lplaceholder of pos 
       | Fun_id of sid 
       | Method_id of expr * pstring 
       | Method_caller of sid * pstring 
@@ -161,7 +161,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       param_hint: hint option ;
       param_is_reference: is_reference ;
       param_is_variadic: is_variadic ;
-      param_pos: Pos.t ;
+      param_pos: pos ;
       param_name: string ;
       param_expr: expr option ;
       param_callconv: Ast.param_kind option ;
@@ -369,15 +369,15 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __6 () = pp_expr
       
-      and __5 () = Pos.pp
+      and __5 () = pp_pos
       
       and __4 () = pp_expr
       
       and __3 () = pp_is_terminal
       
-      and __2 () = Pos.pp
+      and __2 () = pp_pos
       
-      and __1 () = Pos.pp
+      and __1 () = pp_pos
       
       and __0 () = pp_expr
        in
@@ -539,11 +539,11 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __6 () = pp_expr
       
-      and __5 () = Pos.pp
+      and __5 () = pp_pos
       
       and __4 () = pp_expr
       
-      and __3 () = Pos.pp
+      and __3 () = pp_pos
       
       and __2 () = pp_expr
       
@@ -668,7 +668,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __68 () = pp_sid
       
-      and __67 () = Pos.pp
+      and __67 () = pp_pos
       
       and __66 () = pp_expr
       
@@ -1418,7 +1418,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __4 () = pp_expr
       
-      and __3 () = Pos.pp
+      and __3 () = pp_pos
       
       and __2 () = pp_is_variadic
       
@@ -2472,14 +2472,14 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method on_Expr env _visitors_c0 =
               let _visitors_r0 = self#on_expr env _visitors_c0  in ()
             method on_Break env _visitors_c0 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in ()
+              let _visitors_r0 = self#on_pos env _visitors_c0  in ()
             method on_Continue env _visitors_c0 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in ()
+              let _visitors_r0 = self#on_pos env _visitors_c0  in ()
             method on_Throw env _visitors_c0 _visitors_c1 =
               let _visitors_r0 = self#on_is_terminal env _visitors_c0  in
               let _visitors_r1 = self#on_expr env _visitors_c1  in ()
             method on_Return env _visitors_c0 _visitors_c1 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
                  in
               ()
@@ -2570,11 +2570,11 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_r0 = self#on_expr env _visitors_c0  in
               let _visitors_r1 = self#on_expr env _visitors_c1  in ()
             method on_Await_as_v env _visitors_c0 _visitors_c1 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               let _visitors_r1 = self#on_expr env _visitors_c1  in ()
             method on_Await_as_kv env _visitors_c0 _visitors_c1 _visitors_c2
               =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               let _visitors_r1 = self#on_expr env _visitors_c1  in
               let _visitors_r2 = self#on_expr env _visitors_c2  in ()
             method on_as_expr env _visitors_this =
@@ -2756,7 +2756,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_r0 = self#on_param_kind env _visitors_c0  in
               let _visitors_r1 = self#on_expr env _visitors_c1  in ()
             method on_Lplaceholder env _visitors_c0 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in ()
+              let _visitors_r0 = self#on_pos env _visitors_c0  in ()
             method on_Fun_id env _visitors_c0 =
               let _visitors_r0 = self#on_sid env _visitors_c0  in ()
             method on_Method_id env _visitors_c0 _visitors_c1 =
@@ -2928,7 +2928,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                  in
               let _visitors_r2 =
                 self#on_is_variadic env _visitors_this.param_is_variadic  in
-              let _visitors_r3 = self#on_t env _visitors_this.param_pos  in
+              let _visitors_r3 = self#on_pos env _visitors_this.param_pos  in
               let _visitors_r4 = self#on_string env _visitors_this.param_name
                  in
               let _visitors_r5 =
@@ -3206,15 +3206,17 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_s0 = self#on_expr env _visitors_c0  in
               _visitors_s0
             method on_Break env _visitors_c0 =
-              let _visitors_s0 = self#on_t env _visitors_c0  in _visitors_s0
+              let _visitors_s0 = self#on_pos env _visitors_c0  in
+              _visitors_s0
             method on_Continue env _visitors_c0 =
-              let _visitors_s0 = self#on_t env _visitors_c0  in _visitors_s0
+              let _visitors_s0 = self#on_pos env _visitors_c0  in
+              _visitors_s0
             method on_Throw env _visitors_c0 _visitors_c1 =
               let _visitors_s0 = self#on_is_terminal env _visitors_c0  in
               let _visitors_s1 = self#on_expr env _visitors_c1  in
               self#plus _visitors_s0 _visitors_s1
             method on_Return env _visitors_c0 _visitors_c1 =
-              let _visitors_s0 = self#on_t env _visitors_c0  in
+              let _visitors_s0 = self#on_pos env _visitors_c0  in
               let _visitors_s1 = self#on_option self#on_expr env _visitors_c1
                  in
               self#plus _visitors_s0 _visitors_s1
@@ -3318,12 +3320,12 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_s1 = self#on_expr env _visitors_c1  in
               self#plus _visitors_s0 _visitors_s1
             method on_Await_as_v env _visitors_c0 _visitors_c1 =
-              let _visitors_s0 = self#on_t env _visitors_c0  in
+              let _visitors_s0 = self#on_pos env _visitors_c0  in
               let _visitors_s1 = self#on_expr env _visitors_c1  in
               self#plus _visitors_s0 _visitors_s1
             method on_Await_as_kv env _visitors_c0 _visitors_c1 _visitors_c2
               =
-              let _visitors_s0 = self#on_t env _visitors_c0  in
+              let _visitors_s0 = self#on_pos env _visitors_c0  in
               let _visitors_s1 = self#on_expr env _visitors_c1  in
               let _visitors_s2 = self#on_expr env _visitors_c2  in
               self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
@@ -3533,7 +3535,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_s1 = self#on_expr env _visitors_c1  in
               self#plus _visitors_s0 _visitors_s1
             method on_Lplaceholder env _visitors_c0 =
-              let _visitors_s0 = self#on_t env _visitors_c0  in _visitors_s0
+              let _visitors_s0 = self#on_pos env _visitors_c0  in
+              _visitors_s0
             method on_Fun_id env _visitors_c0 =
               let _visitors_s0 = self#on_sid env _visitors_c0  in
               _visitors_s0
@@ -3724,7 +3727,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                  in
               let _visitors_s2 =
                 self#on_is_variadic env _visitors_this.param_is_variadic  in
-              let _visitors_s3 = self#on_t env _visitors_this.param_pos  in
+              let _visitors_s3 = self#on_pos env _visitors_this.param_pos  in
               let _visitors_s4 = self#on_string env _visitors_this.param_name
                  in
               let _visitors_s5 =
@@ -4107,17 +4110,17 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_r0 = self#on_expr env _visitors_c0  in
               Expr _visitors_r0
             method on_Break env _visitors_c0 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               Break _visitors_r0
             method on_Continue env _visitors_c0 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               Continue _visitors_r0
             method on_Throw env _visitors_c0 _visitors_c1 =
               let _visitors_r0 = self#on_is_terminal env _visitors_c0  in
               let _visitors_r1 = self#on_expr env _visitors_c1  in
               Throw (_visitors_r0, _visitors_r1)
             method on_Return env _visitors_c0 _visitors_c1 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
                  in
               Return (_visitors_r0, _visitors_r1)
@@ -4219,12 +4222,12 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_r1 = self#on_expr env _visitors_c1  in
               As_kv (_visitors_r0, _visitors_r1)
             method on_Await_as_v env _visitors_c0 _visitors_c1 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               let _visitors_r1 = self#on_expr env _visitors_c1  in
               Await_as_v (_visitors_r0, _visitors_r1)
             method on_Await_as_kv env _visitors_c0 _visitors_c1 _visitors_c2
               =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               let _visitors_r1 = self#on_expr env _visitors_c1  in
               let _visitors_r2 = self#on_expr env _visitors_c2  in
               Await_as_kv (_visitors_r0, _visitors_r1, _visitors_r2)
@@ -4433,7 +4436,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_r1 = self#on_expr env _visitors_c1  in
               Callconv (_visitors_r0, _visitors_r1)
             method on_Lplaceholder env _visitors_c0 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               Lplaceholder _visitors_r0
             method on_Fun_id env _visitors_c0 =
               let _visitors_r0 = self#on_sid env _visitors_c0  in
@@ -4625,7 +4628,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                  in
               let _visitors_r2 =
                 self#on_is_variadic env _visitors_this.param_is_variadic  in
-              let _visitors_r3 = self#on_t env _visitors_this.param_pos  in
+              let _visitors_r3 = self#on_pos env _visitors_this.param_pos  in
               let _visitors_r4 = self#on_string env _visitors_this.param_name
                  in
               let _visitors_r5 =
@@ -5017,12 +5020,12 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               then _visitors_this
               else Expr _visitors_r0
             method on_Break env _visitors_this _visitors_c0 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               if Pervasives.(==) _visitors_c0 _visitors_r0
               then _visitors_this
               else Break _visitors_r0
             method on_Continue env _visitors_this _visitors_c0 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               if Pervasives.(==) _visitors_c0 _visitors_r0
               then _visitors_this
               else Continue _visitors_r0
@@ -5035,7 +5038,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               then _visitors_this
               else Throw (_visitors_r0, _visitors_r1)
             method on_Return env _visitors_this _visitors_c0 _visitors_c1 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
                  in
               if
@@ -5221,7 +5224,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               else As_kv (_visitors_r0, _visitors_r1)
             method on_Await_as_v env _visitors_this _visitors_c0 _visitors_c1
               =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               let _visitors_r1 = self#on_expr env _visitors_c1  in
               if
                 Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
@@ -5230,7 +5233,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               else Await_as_v (_visitors_r0, _visitors_r1)
             method on_Await_as_kv env _visitors_this _visitors_c0
               _visitors_c1 _visitors_c2 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               let _visitors_r1 = self#on_expr env _visitors_c1  in
               let _visitors_r2 = self#on_expr env _visitors_c2  in
               if
@@ -5619,7 +5622,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               then _visitors_this
               else Callconv (_visitors_r0, _visitors_r1)
             method on_Lplaceholder env _visitors_this _visitors_c0 =
-              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r0 = self#on_pos env _visitors_c0  in
               if Pervasives.(==) _visitors_c0 _visitors_r0
               then _visitors_this
               else Lplaceholder _visitors_r0
@@ -5934,7 +5937,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                  in
               let _visitors_r2 =
                 self#on_is_variadic env _visitors_this.param_is_variadic  in
-              let _visitors_r3 = self#on_t env _visitors_this.param_pos  in
+              let _visitors_r3 = self#on_pos env _visitors_this.param_pos  in
               let _visitors_r4 = self#on_string env _visitors_this.param_name
                  in
               let _visitors_r5 =

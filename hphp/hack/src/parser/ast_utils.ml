@@ -65,7 +65,7 @@ end
 
 let ast_no_pos_mapper = object (self)
   inherit [_] Ast.endo
-  method! private on_t () pos = Pos.none
+  method! private on_pos () pos = Pos.none
   (* Skip all blocks because we don't care about method bodies *)
   method! on_block env _ = self#on_list self#on_stmt env [(Pos.none,Ast.Noop)]
 end

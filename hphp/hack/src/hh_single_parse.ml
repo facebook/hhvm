@@ -185,7 +185,7 @@ let compare_pos ast_result ffp_result =
     let pos_fetcher = object(self)
       inherit [_] Ast.iter
       val mutable result = []
-      method! on_t () p = result <- p :: result
+      method! on_pos () p = result <- p :: result
       method get = result
     end in
     pos_fetcher#on_program () ast;

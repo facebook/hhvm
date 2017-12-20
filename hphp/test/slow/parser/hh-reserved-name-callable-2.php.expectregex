@@ -1,0 +1,1 @@
+((Fatal error\: syntax error, unexpected T_CALLABLE in [^\r\n]+ on line 4)|(Fatal error\: Cannot use 'HH\\Callable' as class name as it is reserved in [^\r\n]+\/parser\/hh\-reserved\-name\-callable\-2\.php on line 4))

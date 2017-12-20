@@ -25,8 +25,8 @@ class virtual ['self] reduce_defs_base = object (self : 'self)
   method private on_shape_map
     : 'env 'a . ('env -> 'a -> 'acc) -> 'env -> 'a SM.t -> 'acc
     = fun f env x ->
-      SM.fold (fun k d acc -> self#add acc (self#on_shape_map_entry f env k d))
-        x self#e
+      SM.fold (fun k d acc -> self#plus acc (self#on_shape_map_entry f env k d))
+        x self#zero
   method private on_shape_map_entry
     : 'env 'a . ('env -> 'a -> 'acc) -> 'env -> SM.key -> 'a -> 'acc
     = fun f env _key data -> f env data

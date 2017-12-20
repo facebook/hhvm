@@ -9,21 +9,20 @@
  *)
 
 class virtual ['e] monoid = object (self)
-  method private virtual e: 'e
-  method private virtual add: 'e -> 'e -> 'e
-  method private sum: 'e list -> 'e = List.fold_left self#add self#e
+  method private virtual zero: 'e
+  method private virtual plus: 'e -> 'e -> 'e
 end
 
 class ['e] monoid_sum = object
   inherit ['e] monoid
-  method private e = 0
-  method private add = (+)
+  method private zero = 0
+  method private plus = (+)
 end
 
 class ['e] monoid_product = object
   inherit ['e] monoid
-  method private e = 1
-  method private add = ( * )
+  method private zero = 1
+  method private plus = ( * )
 end
 
 class ['self] map_defs_base = object (self : 'self)
@@ -130,15 +129,11 @@ end
 class virtual ['self] reduce_defs_base = object (self : 'self)
   inherit ['acc] monoid
   method private on_string
-    : 'env -> string -> 'acc = fun _ _ -> self#e
+    : 'env -> string -> 'acc = fun _ _ -> self#zero
   method private on_int
-    : 'env -> int    -> 'acc = fun _ _ -> self#e
+    : 'env -> int    -> 'acc = fun _ _ -> self#zero
   method private on_bool
-    : 'env -> bool   -> 'acc = fun _ _ -> self#e
-
-  method private zero : 'acc = self#e
-
-  method private plus : 'a -> 'a -> 'acc = self#add
+    : 'env -> bool   -> 'acc = fun _ _ -> self#zero
 
   method private on_list
     : 'env 'a . ('env -> 'a -> 'acc) -> 'env -> 'a list -> 'acc
@@ -156,5 +151,5 @@ class virtual ['self] reduce_defs_base = object (self : 'self)
 
   method private on_option
     : 'env 'a . ('env -> 'a -> 'acc) -> 'env -> 'a option -> 'acc
-    = fun f env -> Option.value_map ~default:self#e ~f:(f env)
+    = fun f env -> Option.value_map ~default:self#zero ~f:(f env)
 end

@@ -8,25 +8,26 @@
  *
  *)
 
-type id = Pos.t * Local_id.t [@@deriving show]
-type sid = Ast.id [@@deriving show]
-type pstring = Ast.pstring [@@deriving show]
-
-type is_terminal = bool [@@deriving show]
-
-type call_type =
-  | Cnormal    (* when the call looks like f() *)
-  | Cuser_func (* when the call looks like call_user_func(...) *)
-  [@@deriving show]
-
-type shape_field_name = Ast.shape_field_name
+include Aast_defs_visitors_ancestors
 
 module ShapeMap = Ast.ShapeMap
 
-type is_coroutine = bool [@@deriving show]
-type is_reactive = bool [@@deriving show]
+type 'a shape_map = 'a ShapeMap.t [@@deriving show]
 
-type hint = Pos.t * hint_
+type local_id = Local_id.t [@visitors.opaque]
+and lid = Pos.t * local_id
+and sid = Ast.id
+
+and is_terminal = bool
+
+and call_type =
+  | Cnormal    [@visitors.name "call_type_Cnormal"] (* when the call looks like f() *)
+  | Cuser_func [@visitors.name "call_type_Cuser_func"] (* when the call looks like call_user_func(...) *)
+
+and is_coroutine = bool
+and is_reactive = bool
+
+and hint = Pos.t * hint_
 and variadic_hint =
   | Hvariadic of hint option
   | Hnon_variadic
@@ -88,23 +89,17 @@ and shape_field_info = {
 
 and nast_shape_info = {
   nsi_allows_unknown_fields : bool;
-  nsi_field_map : shape_field_info ShapeMap.t;
+  nsi_field_map : shape_field_info shape_map;
 }
-[@@deriving show]
 
-type og_null_flavor =
-  | OG_nullthrows
-  | OG_nullsafe
-  [@@deriving show]
-
-type kvc_kind = [
+and kvc_kind = [
   | `Map
   | `ImmMap
   | `Dict ]
+  [@visitors.opaque]
 
-  let pp_kvc_kind fmt _ = Format.pp_print_string fmt "<kvc_kind>"
 
-type vc_kind = [
+and vc_kind = [
   | `Vector
   | `ImmVector
   | `Vec
@@ -112,28 +107,72 @@ type vc_kind = [
   | `ImmSet
   | `Pair
   | `Keyset ]
+  [@visitors.opaque]
 
-let pp_vc_kind fmt _ = Format.pp_print_string fmt "<vc_kind>"
+and tparam = Ast.variance * sid * (Ast.constraint_kind * hint) list
 
-type tparam = Ast.variance * sid * (Ast.constraint_kind * hint) list [@@deriving show]
+and visibility =
+  | Private [@visitors.name "visibility_Private"]
+  | Public [@visitors.name "visibility_Public"]
+  | Protected [@visitors.name "visibility_Protected"]
 
-type visibility =
-  | Private
-  | Public
-  | Protected
-  [@@deriving show]
-
-type typedef_visibility =
+and typedef_visibility =
   | Transparent
   | Opaque
-  [@@deriving show]
 
-type enum_ = {
+and enum_ = {
   e_base       : hint;
   e_constraint : hint option;
-} [@@deriving show]
+}
 
 
-type instantiated_sid = sid * hint list [@@deriving show]
+and instantiated_sid = sid * hint list
 
-type where_constraint = hint * Ast.constraint_kind * hint [@@deriving show]
+and where_constraint = hint * Ast.constraint_kind * hint
+[@@deriving
+  show,
+  visitors {
+    name="iter_defs";
+    variety = "iter";
+    nude=true;
+    visit_prefix="on_";
+    ancestors=["iter_defs_base"];
+  },
+  visitors {
+    name="reduce_defs";
+    variety = "reduce";
+    nude=true;
+    visit_prefix="on_";
+    ancestors=["reduce_defs_base"];
+  },
+  visitors {
+    name="map_defs";
+    variety = "map";
+    nude=true;
+    visit_prefix="on_";
+    ancestors=["map_defs_base"];
+  },
+  visitors {
+    name="endo_defs";
+    variety = "endo";
+    nude=true;
+    visit_prefix="on_";
+    ancestors=["endo_defs_base"];
+  }]
+
+type id = lid [@@deriving show]
+type pstring = Ast.pstring [@@deriving show]
+type shape_field_name = Ast.shape_field_name [@@deriving show]
+
+type og_null_flavor = Ast.og_null_flavor =
+  | OG_nullthrows
+  | OG_nullsafe
+
+let pp_og_null_flavor fmt flavor =
+  Format.pp_print_string fmt @@
+    match flavor with
+    | OG_nullthrows -> "OG_nullthrows"
+    | OG_nullsafe -> "OG_nullsafe"
+
+let pp_kvc_kind fmt _ = Format.pp_print_string fmt "<kvc_kind>"
+let pp_vc_kind fmt _ = Format.pp_print_string fmt "<vc_kind>"

@@ -1,0 +1,1 @@
+Fatal error: Cannot instantiate abstract class Foo in %s/abstract_final_instantiation.php on line 6

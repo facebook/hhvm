@@ -5,7 +5,7 @@ replace in using
 string(62) "Call to a member function __dispose() on a non-object (double)"
 unset in using
 
-Notice: Undefined variable: x in %s/test/slow/using/bad-disposable.php on line 27
+Notice: Undefined variable: x in %s/test/slow/using/bad-disposable.php on line %d
 string(60) "Call to a member function __dispose() on a non-object (null)"
 Leaving main
 

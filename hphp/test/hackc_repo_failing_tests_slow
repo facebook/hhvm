@@ -39,7 +39,6 @@ slow/hack_mode/function_hint_with_params_trailing_variadic_param.php
 slow/hack_mode/function_hint_with_type_hinted_variadic_param-trailing-comma.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/hhbbc/iteration.php
-slow/inout/bad-async-generator.php
 slow/inout/bad-call-1.php
 slow/inout/bad-call-15.php
 slow/inout/bad-call-2.php
@@ -54,7 +53,8 @@ slow/inout/bad-class.php
 slow/inout/bad-decl-1.php
 slow/inout/bad-decl-2.php
 slow/inout/bad-func.php
-slow/inout/bad-generator.php
+slow/inout/method-interop-dynamic.php
+slow/inout/method-interop-static.php
 slow/inout/side-effects.php
 slow/keyset/init-parse-error1.php
 slow/keyset/init-parse-error2.php
@@ -73,7 +73,6 @@ slow/parser/hh-reserved-name-self-2.php
 slow/parser/semi-reserved-keywords/enum_class_constant_bad.php
 slow/parser/semi-reserved-keywords/type_const_bad.php
 slow/return_statement/finally-typecheck.php
-slow/traits/2080.php
 slow/traits/require_constraint_basic_error.php
 slow/traits/require_constraint_iface_implements_error.php
 slow/traits/require_constraint_recurse.php
@@ -83,18 +82,13 @@ slow/type_annotation/shape_typedef_with_unknown_fields_not_at_end.php
 slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_constraint/parse_super_constraint_bad.php
 slow/use_namespace_class/double_use_ns.php
-slow/user_attributes/abstract_final_mock.php
 slow/using/bad-async.php
-slow/using/bad-disposable.php
 slow/using/bad-function1.php
 slow/using/bad-function2.php
 slow/using/bad-function3.php
 slow/using/bad-function4.php
 slow/using/bad-goto1.php
 slow/using/bad-goto2.php
-slow/using/bad-lambda4.php
-slow/using/bad-lambda5.php
-slow/using/bad-lambda6.php
 slow/using/bad-name.php
 slow/using/empty-exprs.php
 slow/vec/bad-init1.php

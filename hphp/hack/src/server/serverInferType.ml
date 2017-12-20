@@ -55,45 +55,43 @@
 let type_at_pos tast line char =
   let open Option.Monad_infix in
   let visitor = object (self)
-    inherit [(Pos.t * Tast.saved_env * Tast.ty) option] Tast_visitor.visitor
-      as super
-    method! on_expr acc e =
+    inherit [_] Tast_visitor.reduce as super
+    inherit [Pos.t * _ * _] Ast.option_monoid
+
+    method private merge lhs rhs =
+      (* A node with position P is not always a parent of every other node with
+       * a position contained by P. Some desugaring can cause nodes to be
+       * rearranged so that this is no longer the case (e.g., `invariant`).
+       *
+       * To deal with this, we simply take the smaller node. *)
+      let lpos, _, _ = lhs in
+      let rpos, _, _ = rhs in
+      if Pos.length lpos <= Pos.length rpos then lhs else rhs
+
+    method! on_expr env e =
       let (pos, ty) = fst e in
       let acc =
-        if not (Pos.inside pos line char) then acc else
-          match ty with
-          | None -> acc
-          | Some ty ->
-            let new_acc = Some (pos, self#saved_env, ty) in
-            (* A node with position P is not always a parent of every other node
-             * with a position contained by P. Some desugaring can cause nodes
-             * to be rearranged so that this is no longer the case
-             * (e.g., `invariant`).
-             *
-             * To deal with this, we simply take the smaller node. *)
-            match acc with
-            | None -> new_acc
-            | Some (prev_pos, _, _) as prev_acc ->
-              if Pos.length pos < Pos.length prev_pos
-              then new_acc
-              else prev_acc
+        if Pos.inside pos line char
+        then ty >>| fun ty -> pos, self#saved_env, ty
+        else None
       in
-      super#on_expr acc e
+      self#plus acc (super#on_expr env e)
+
     (* When the expression being applied has a Tfun type, replace that type with
      * its return type. This matches with legacy behavior and is better-suited
      * for IDE hover (at present, since full function types are presented in a
      * way which makes them difficult to read). *)
-    method! on_call acc ct e el uel =
+    method! on_Call env ct e hl el uel =
       let return_type ty =
         let open Typing_defs in
         match snd ty with Tfun ft -> ft.ft_ret | _ -> ty
       in
       let (receiver_pos, _) = fst e in
       if Pos.inside receiver_pos line char
-      then super#on_expr acc e >>| fun (p, env, ty) -> p, env, return_type ty
-      else super#on_call acc ct e el uel
+      then super#on_expr env e >>| fun (p, env, ty) -> p, env, return_type ty
+      else super#on_Call env ct e hl el uel
   end in
-  visitor#on_program None tast >>| fun (_, env, ty) -> env, ty
+  visitor#on_program () tast >>| fun (_, env, ty) -> env, ty
 
 let make_result tcopt (saved_env, ty) =
   let file = Relative_path.create Relative_path.Dummy "<file>" in

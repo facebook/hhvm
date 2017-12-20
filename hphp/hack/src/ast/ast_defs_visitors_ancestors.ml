@@ -25,6 +25,13 @@ class ['e] monoid_product = object
   method private plus = ( * )
 end
 
+class virtual ['a] option_monoid = object (self)
+  inherit ['a option] monoid
+  method private virtual merge: 'a -> 'a -> 'a
+  method private zero = None
+  method private plus = Option.merge ~f:self#merge
+end
+
 class ['self] map_defs_base = object (self : 'self)
   method private on_string       : 'env -> string -> string = fun _ x -> x
   method private on_int          : 'env -> int    -> int    = fun _ x -> x

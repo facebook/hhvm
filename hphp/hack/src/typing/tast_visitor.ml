@@ -8,8 +8,8 @@
  *
  *)
 
-class virtual ['a] visitor = object (self)
-  inherit ['a] Tast.Visitor.visitor as super
+class virtual ['self] reduce = object (self : 'self)
+  inherit [_] Tast.reduce as super
 
   val mutable saved_env = None;
 

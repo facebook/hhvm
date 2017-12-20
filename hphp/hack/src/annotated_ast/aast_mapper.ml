@@ -3,7 +3,7 @@
  * every annotation
  *)
 open Hh_core
-open Nast
+open Aast
 module MapAnnotatedAST
   (Source : ASTAnnotationTypes)
   (Target : ASTAnnotationTypes) =

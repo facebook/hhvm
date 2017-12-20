@@ -180,6 +180,38 @@ final class StringsThatArentNumericLiterals {
 let string_literals_expected =
 "(AProgram\n ((Stmt (p (Markup (p \"\") ())))\n  (Class\n   ((c_mode: Mstrict) (c_user_attributes: ()) (c_final: true)\n    (c_kind: Cnormal) (c_is_xhp: false)\n    (c_name: (p \"\\\\StringsThatArentNumericLiterals\")) (c_tparams: ())\n    (c_extends: ()) (c_implements: ())\n    (c_body:\n     ((Const ((p (Happly (p string) ())))\n       (((p BINARY) (p (String (p 0b101010))))))\n      (Const ((p (Happly (p string) ())))\n       (((p FEINT_BINARY) (p (String (p 0b101012))))))\n      (Const ((p (Happly (p string) ())))\n       (((p HEXADECIMAL) (p (String (p 0x2A))))))\n      (Const ((p (Happly (p string) ())))\n       (((p FEINT_HEXADECIMAL) (p (String (p 0x2G))))))\n      (Const ((p (Happly (p string) ()))) (((p OCTAL) (p (String (p 052))))))\n      (Const ((p (Happly (p string) ())))\n       (((p FEINT_OCTAL) (p (String (p 058))))))))\n    (c_namespace:\n     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))\n      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))\n    (c_enum: ()) (c_span: p)))))"
 
+let int_indices_as_int_indices =
+"<?hh // strict
+function foo(varray<string> $args): string {
+  return \"Unlike in codgen, the 0 in $args[0] should be int not string.\";
+}
+"
+
+let int_indices_as_int_indices_expected =
+"(AProgram
+ ((Fun
+   ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
+    (f_ret: ((p (Happly (p string) ())))) (f_name: (p \"\\\\foo\"))
+    (f_constrs: ())
+    (f_params:
+     (((param_hint: ((p (Happly (p varray) ((p (Happly (p string) ())))))))
+       (param_is_reference: false) (param_is_variadic: false)
+       (param_id: (p $args)) (param_expr: ()) (param_modifier: ())
+       (param_callconv: ()) (param_user_attributes: ()))))
+    (f_body:
+     ((Return p
+       ((p
+         (String2
+          ((p (String (p \"Unlike in codgen, the 0 in \")))
+           (p (Array_get (p (Lvar (p $args))) ((p (Int (p 0))))))
+           (p (String (p \" should be int not string.\"))))))))))
+    (f_user_attributes: ()) (f_fun_kind: FSync)
+    (f_namespace:
+     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
+      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
+    (f_span: p)))))
+ )"
+
 let test_data =
   [ { name = "sanity_test_classic_parser"
     ; source = simple_source_1

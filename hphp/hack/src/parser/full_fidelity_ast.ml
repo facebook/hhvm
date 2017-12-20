@@ -1172,32 +1172,30 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
                                       |> String.concat "" in
         (* TODO(17796330): Get rid of linter functionality in the lowerer *)
         if s <> String.lowercase_ascii s then Lint.lowercase_constant pos s;
-        begin match location with
-        | InDoubleQuotedString -> String (pos, mkStr unesc_dbl s)
-        | InBacktickedString -> String (pos, mkStr Php_escaping.unescape_backtick s)
-        | _ ->
-        begin match token_kind expr with
-        | Some TK.DecimalLiteral
-        | Some TK.OctalLiteral
-        | Some TK.HexadecimalLiteral
-        | Some TK.BinaryLiteral             -> Int    (pos, eliminate_underscores s)
-        | Some TK.FloatingLiteral           -> Float  (pos, s)
-        | Some TK.SingleQuotedStringLiteral -> String (pos, mkStr Php_escaping.unescape_single s)
-        | Some TK.DoubleQuotedStringLiteral -> String (pos, mkStr Php_escaping.unescape_double s)
-        | Some TK.HeredocStringLiteral      -> String (pos, mkStr Php_escaping.unescape_heredoc s)
-        | Some TK.NowdocStringLiteral       -> String (pos, mkStr Php_escaping.unescape_nowdoc s)
-        | Some TK.NullLiteral               -> Null
-        | Some TK.BooleanLiteral            ->
+        (match location, token_kind expr with
+        (* TODO(T21285960): Inside strings, int indices "should" be string indices *)
+        | InDoubleQuotedString, _ when env.hhvm_compat_mode -> String (pos, mkStr unesc_dbl s)
+        | InBacktickedString, _ when env.hhvm_compat_mode -> String (pos, mkStr Php_escaping.unescape_backtick s)
+        | _, Some TK.DecimalLiteral
+        | _, Some TK.OctalLiteral
+        | _, Some TK.HexadecimalLiteral
+        | _, Some TK.BinaryLiteral             -> Int    (pos, eliminate_underscores s)
+        | _, Some TK.FloatingLiteral           -> Float  (pos, s)
+        | _, Some TK.SingleQuotedStringLiteral -> String (pos, mkStr Php_escaping.unescape_single s)
+        | _, Some TK.DoubleQuotedStringLiteral -> String (pos, mkStr Php_escaping.unescape_double s)
+        | _, Some TK.HeredocStringLiteral      -> String (pos, mkStr Php_escaping.unescape_heredoc s)
+        | _, Some TK.NowdocStringLiteral       -> String (pos, mkStr Php_escaping.unescape_nowdoc s)
+        | _, Some TK.NullLiteral               -> Null
+        | _, Some TK.BooleanLiteral            ->
           (match String.lowercase_ascii s with
           | "false" -> False
           | "true"  -> True
           | _       -> missing_syntax ("boolean (not: " ^ s ^ ")") expr env
           )
-        | Some TK.ExecutionStringLiteral ->
+        | _, Some TK.ExecutionStringLiteral ->
           Execution_operator [pos, String (pos, mkStr Php_escaping.unescape_backtick s)]
         | _ -> missing_syntax "literal" expr env
-        end
-        end
+        )
       | SyntaxList (
          { syntax = Token { Token.kind = TK.ExecutionStringLiteralHead; _ }; _ }
          :: _ as ts) ->

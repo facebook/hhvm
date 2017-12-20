@@ -1,6 +1,6 @@
 (* @generated from aast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2017, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<7551d86549b19daa5f717bd2775b8fb2261937e9>> *)
+(* SourceShasum<<5ef7fba928340af01685ffb59eaa5d7f7c851bdd>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -17,7 +17,39 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
   struct
     module ExprAnnotation = Annotations.ExprAnnotation
     module EnvAnnotation = Annotations.EnvAnnotation
-    type stmt =
+    type program = def list[@@deriving
+                             (show,
+                               (visitors
+                                  {
+                                    variety = "iter";
+                                    nude = true;
+                                    visit_prefix = "on_";
+                                    ancestors = ["iter_defs"]
+                                  }),
+                               (visitors
+                                  {
+                                    variety = "reduce";
+                                    nude = true;
+                                    visit_prefix = "on_";
+                                    ancestors = ["reduce_defs"]
+                                  }),
+                               (visitors
+                                  {
+                                    variety = "map";
+                                    nude = true;
+                                    visit_prefix = "on_";
+                                    ancestors = ["map_defs"]
+                                  }),
+                               (visitors
+                                  {
+                                    variety = "endo";
+                                    nude = true;
+                                    visit_prefix = "on_";
+                                    ancestors = ["endo_defs"]
+                                  }))]
+    and expr_annotation = ((ExprAnnotation.t)[@visitors.opaque ])
+    and env_annotation = ((EnvAnnotation.t)[@visitors.opaque ])
+    and stmt =
       | Fallthrough 
       | Expr of expr 
       | Break of Pos.t 
@@ -49,12 +81,12 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       | CIstatic 
       | CIexpr of expr 
       | CI of instantiated_sid 
-    and expr = (ExprAnnotation.t * expr_)
+    and expr = (expr_annotation * expr_)
     and expr_ =
       | Array of afield list 
       | Darray of (expr * expr) list 
       | Varray of expr list 
-      | Shape of expr ShapeMap.t 
+      | Shape of expr shape_map 
       | ValCollection of vc_kind * expr list 
       | KeyValCollection of kvc_kind * field list 
       | Null 
@@ -62,9 +94,9 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       | True 
       | False 
       | Id of sid 
-      | Lvar of id 
+      | Lvar of lid 
       | Dollar of expr 
-      | Dollardollar of id 
+      | Dollardollar of lid 
       | Clone of expr 
       | Obj_get of expr * expr * og_null_flavor 
       | Array_get of expr * expr option 
@@ -86,13 +118,13 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       | Binop of Ast.bop * expr * expr
       [@ocaml.doc
         " The ID of the $$ that is implicitly declared by this pipe. "]
-      | Pipe of id * expr * expr 
+      | Pipe of lid * expr * expr 
       | Eif of expr * expr option * expr 
       | NullCoalesce of expr * expr 
       | InstanceOf of expr * class_id 
       | Is of expr * hint 
       | New of class_id * expr list * expr list 
-      | Efun of fun_ * id list 
+      | Efun of fun_ * lid list 
       | Xml of sid * xhp_attribute list * expr list 
       | Callconv of Ast.param_kind * expr 
       | Lplaceholder of Pos.t 
@@ -110,7 +142,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     and case =
       | Default of block 
       | Case of expr * block 
-    and catch = (sid * id * block)
+    and catch = (sid * lid * block)
     and field = (expr * expr)
     and afield =
       | AFvalue of expr 
@@ -140,7 +172,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       | FVnonVariadic 
     and fun_ =
       {
-      f_annotation: EnvAnnotation.t ;
+      f_annotation: env_annotation ;
       f_mode: FileInfo.mode [@opaque ];
       f_ret: hint option ;
       f_name: sid ;
@@ -165,8 +197,126 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       fnb_unsafe: bool }
     and user_attribute = {
       ua_name: sid ;
-      ua_params: expr list }[@@deriving show]
-    let rec pp_stmt : Format.formatter -> stmt -> Ppx_deriving_runtime.unit =
+      ua_params: expr list }
+    and class_ =
+      {
+      c_annotation: env_annotation ;
+      c_mode: FileInfo.mode [@opaque ];
+      c_final: bool ;
+      c_is_xhp: bool ;
+      c_kind: Ast.class_kind ;
+      c_name: sid ;
+      c_tparams: (tparam list * (Ast.constraint_kind * Ast.hint) list SMap.t)
+        [@opaque ];
+      c_extends: hint list ;
+      c_uses: hint list ;
+      c_xhp_attr_uses: hint list ;
+      c_xhp_category: pstring list ;
+      c_req_extends: hint list ;
+      c_req_implements: hint list ;
+      c_implements: hint list ;
+      c_consts: class_const list ;
+      c_typeconsts: class_typeconst list ;
+      c_static_vars: class_var list ;
+      c_vars: class_var list ;
+      c_constructor: method_ option ;
+      c_static_methods: method_ list ;
+      c_methods: method_ list ;
+      c_user_attributes: user_attribute list ;
+      c_enum: enum_ option }
+    and class_const = (hint option * sid * expr option)
+    and class_typeconst =
+      {
+      c_tconst_name: sid ;
+      c_tconst_constraint: hint option ;
+      c_tconst_type: hint option }
+    and class_var =
+      {
+      cv_final: bool ;
+      cv_is_xhp: bool ;
+      cv_visibility: visibility ;
+      cv_type: hint option ;
+      cv_id: sid ;
+      cv_expr: expr option ;
+      cv_user_attributes: user_attribute list }
+    and method_ =
+      {
+      m_annotation: env_annotation ;
+      m_final: bool ;
+      m_abstract: bool ;
+      m_visibility: visibility ;
+      m_name: sid ;
+      m_tparams: tparam list ;
+      m_where_constraints: where_constraint list ;
+      m_variadic: fun_variadicity ;
+      m_params: fun_param list ;
+      m_body: func_body ;
+      m_fun_kind: Ast.fun_kind ;
+      m_user_attributes: user_attribute list ;
+      m_ret: hint option ;
+      m_ret_by_ref: bool }
+    and typedef =
+      {
+      t_annotation: env_annotation ;
+      t_name: sid ;
+      t_tparams: tparam list ;
+      t_constraint: hint option ;
+      t_kind: hint ;
+      t_user_attributes: user_attribute list ;
+      t_mode: FileInfo.mode [@opaque ];
+      t_vis: typedef_visibility }
+    and gconst =
+      {
+      cst_annotation: env_annotation ;
+      cst_mode: FileInfo.mode [@opaque ];
+      cst_name: sid ;
+      cst_type: hint option ;
+      cst_value: expr option ;
+      cst_is_define: bool }
+    and def =
+      | Fun of fun_ 
+      | Class of class_ 
+      | Typedef of typedef 
+      | Constant of gconst 
+    let rec pp_program :
+      Format.formatter -> program -> Ppx_deriving_runtime.unit =
+      let __0 () = pp_def  in
+      ((let open! Ppx_deriving_runtime in
+          fun fmt  ->
+            fun x  ->
+              Format.fprintf fmt "@[<2>[";
+              ignore
+                (List.fold_left
+                   (fun sep  ->
+                      fun x  ->
+                        if sep then Format.fprintf fmt ";@ ";
+                        ((__0 ()) fmt) x;
+                        true) false x);
+              Format.fprintf fmt "@,]@]")
+        [@ocaml.warning "-A"])
+    
+    and show_program : program -> Ppx_deriving_runtime.string =
+      fun x  -> Format.asprintf "%a" pp_program x
+    
+    and pp_expr_annotation :
+      Format.formatter -> expr_annotation -> Ppx_deriving_runtime.unit =
+      let __0 () = ExprAnnotation.pp  in
+      ((let open! Ppx_deriving_runtime in fun fmt  -> (__0 ()) fmt)
+        [@ocaml.warning "-A"])
+    
+    and show_expr_annotation : expr_annotation -> Ppx_deriving_runtime.string
+      = fun x  -> Format.asprintf "%a" pp_expr_annotation x
+    
+    and pp_env_annotation :
+      Format.formatter -> env_annotation -> Ppx_deriving_runtime.unit =
+      let __0 () = EnvAnnotation.pp  in
+      ((let open! Ppx_deriving_runtime in fun fmt  -> (__0 ()) fmt)
+        [@ocaml.warning "-A"])
+    
+    and show_env_annotation : env_annotation -> Ppx_deriving_runtime.string =
+      fun x  -> Format.asprintf "%a" pp_env_annotation x
+    
+    and pp_stmt : Format.formatter -> stmt -> Ppx_deriving_runtime.unit =
       let __31 () = pp_block
       
       and __30 () = pp_catch
@@ -480,7 +630,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     and pp_expr : Format.formatter -> expr -> Ppx_deriving_runtime.unit =
       let __1 () = pp_expr_
       
-      and __0 () = ExprAnnotation.pp
+      and __0 () = pp_expr_annotation
        in
       ((let open! Ppx_deriving_runtime in
           fun fmt  ->
@@ -530,7 +680,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __62 () = pp_sid
       
-      and __61 () = pp_id
+      and __61 () = pp_lid
       
       and __60 () = pp_fun_
       
@@ -562,7 +712,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __46 () = pp_expr
       
-      and __45 () = pp_id
+      and __45 () = pp_lid
       
       and __44 () = pp_expr
       
@@ -626,11 +776,11 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __14 () = pp_expr
       
-      and __13 () = pp_id
+      and __13 () = pp_lid
       
       and __12 () = pp_expr
       
-      and __11 () = pp_id
+      and __11 () = pp_lid
       
       and __10 () = pp_sid
       
@@ -642,7 +792,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __6 () = pp_vc_kind
       
-      and __5 () = ShapeMap.pp
+      and __5 () = pp_shape_map
       
       and __4 () = pp_expr
       
@@ -1119,7 +1269,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     and pp_catch : Format.formatter -> catch -> Ppx_deriving_runtime.unit =
       let __2 () = pp_block
       
-      and __1 () = pp_id
+      and __1 () = pp_lid
       
       and __0 () = pp_sid
        in
@@ -1379,7 +1529,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __1 () = pp_hint
       
-      and __0 () = EnvAnnotation.pp
+      and __0 () = pp_env_annotation
        in
       ((let open! Ppx_deriving_runtime in
           fun fmt  ->
@@ -1583,83 +1733,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     and show_user_attribute : user_attribute -> Ppx_deriving_runtime.string =
       fun x  -> Format.asprintf "%a" pp_user_attribute x
     
-    type class_ =
-      {
-      c_annotation: EnvAnnotation.t ;
-      c_mode: FileInfo.mode [@opaque ];
-      c_final: bool ;
-      c_is_xhp: bool ;
-      c_kind: Ast.class_kind ;
-      c_name: sid ;
-      c_tparams: (tparam list * (Ast.constraint_kind * Ast.hint) list SMap.t)
-        [@opaque ];
-      c_extends: hint list ;
-      c_uses: hint list ;
-      c_xhp_attr_uses: hint list ;
-      c_xhp_category: pstring list ;
-      c_req_extends: hint list ;
-      c_req_implements: hint list ;
-      c_implements: hint list ;
-      c_consts: class_const list ;
-      c_typeconsts: class_typeconst list ;
-      c_static_vars: class_var list ;
-      c_vars: class_var list ;
-      c_constructor: method_ option ;
-      c_static_methods: method_ list ;
-      c_methods: method_ list ;
-      c_user_attributes: user_attribute list ;
-      c_enum: enum_ option }
-    and class_const = (hint option * sid * expr option)
-    and class_typeconst =
-      {
-      c_tconst_name: sid ;
-      c_tconst_constraint: hint option ;
-      c_tconst_type: hint option }
-    and class_var =
-      {
-      cv_final: bool ;
-      cv_is_xhp: bool ;
-      cv_visibility: visibility ;
-      cv_type: hint option ;
-      cv_id: sid ;
-      cv_expr: expr option ;
-      cv_user_attributes: user_attribute list }
-    and method_ =
-      {
-      m_annotation: EnvAnnotation.t ;
-      m_final: bool ;
-      m_abstract: bool ;
-      m_visibility: visibility ;
-      m_name: sid ;
-      m_tparams: tparam list ;
-      m_where_constraints: where_constraint list ;
-      m_variadic: fun_variadicity ;
-      m_params: fun_param list ;
-      m_body: func_body ;
-      m_fun_kind: Ast.fun_kind ;
-      m_user_attributes: user_attribute list ;
-      m_ret: hint option ;
-      m_ret_by_ref: bool }
-    and typedef =
-      {
-      t_annotation: EnvAnnotation.t ;
-      t_name: sid ;
-      t_tparams: tparam list ;
-      t_constraint: hint option ;
-      t_kind: hint ;
-      t_user_attributes: user_attribute list ;
-      t_mode: FileInfo.mode [@opaque ];
-      t_vis: typedef_visibility }
-    and gconst =
-      {
-      cst_annotation: EnvAnnotation.t ;
-      cst_mode: FileInfo.mode [@opaque ];
-      cst_name: sid ;
-      cst_type: hint option ;
-      cst_value: expr option ;
-      cst_is_define: bool }[@@deriving show]
-    let rec pp_class_ :
-      Format.formatter -> class_ -> Ppx_deriving_runtime.unit =
+    and pp_class_ : Format.formatter -> class_ -> Ppx_deriving_runtime.unit =
       let __18 () = pp_enum_
       
       and __17 () = pp_user_attribute
@@ -1696,7 +1770,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __1 () = Ast.pp_class_kind
       
-      and __0 () = EnvAnnotation.pp
+      and __0 () = pp_env_annotation
        in
       ((let open! Ppx_deriving_runtime in
           fun fmt  ->
@@ -2107,7 +2181,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __1 () = pp_visibility
       
-      and __0 () = EnvAnnotation.pp
+      and __0 () = pp_env_annotation
        in
       ((let open! Ppx_deriving_runtime in
           fun fmt  ->
@@ -2230,7 +2304,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __1 () = pp_sid
       
-      and __0 () = EnvAnnotation.pp
+      and __0 () = pp_env_annotation
        in
       ((let open! Ppx_deriving_runtime in
           fun fmt  ->
@@ -2304,7 +2378,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       
       and __1 () = pp_sid
       
-      and __0 () = EnvAnnotation.pp
+      and __0 () = pp_env_annotation
        in
       ((let open! Ppx_deriving_runtime in
           fun fmt  ->
@@ -2351,6 +2425,4213 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     and show_gconst : gconst -> Ppx_deriving_runtime.string =
       fun x  -> Format.asprintf "%a" pp_gconst x
     
+    and pp_def : Format.formatter -> def -> Ppx_deriving_runtime.unit =
+      let __3 () = pp_gconst
+      
+      and __2 () = pp_typedef
+      
+      and __1 () = pp_class_
+      
+      and __0 () = pp_fun_
+       in
+      ((let open! Ppx_deriving_runtime in
+          fun fmt  ->
+            function
+            | Fun a0 ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Fun@ ";
+                 ((__0 ()) fmt) a0;
+                 Format.fprintf fmt "@])")
+            | Class a0 ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Class@ ";
+                 ((__1 ()) fmt) a0;
+                 Format.fprintf fmt "@])")
+            | Typedef a0 ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Typedef@ ";
+                 ((__2 ()) fmt) a0;
+                 Format.fprintf fmt "@])")
+            | Constant a0 ->
+                (Format.fprintf fmt "(@[<2>AnnotatedAST.Constant@ ";
+                 ((__3 ()) fmt) a0;
+                 Format.fprintf fmt "@])"))
+        [@ocaml.warning "-A"])
+    
+    and show_def : def -> Ppx_deriving_runtime.string =
+      fun x  -> Format.asprintf "%a" pp_def x
+    
+    include
+      struct
+        [@@@ocaml.warning "-4-26-27"]
+        [@@@VISITORS.BEGIN ]
+        class virtual ['self] iter =
+          object (self : 'self)
+            inherit  [_] iter_defs
+            method on_program env = self#on_list self#on_def env
+            method on_expr_annotation env _visitors_this = ()
+            method on_env_annotation env _visitors_this = ()
+            method on_Fallthrough env = ()
+            method on_Expr env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_Break env _visitors_c0 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in ()
+            method on_Continue env _visitors_c0 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in ()
+            method on_Throw env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_is_terminal env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_Return env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              ()
+            method on_GotoLabel env _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in ()
+            method on_Goto env _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in ()
+            method on_Static_var env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              ()
+            method on_Global_var env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              ()
+            method on_If env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_block env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in ()
+            method on_Do env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_block env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_While env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_block env _visitors_c1  in ()
+            method on_Using env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_bool env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in ()
+            method on_For env _visitors_c0 _visitors_c1 _visitors_c2
+              _visitors_c3 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in
+              let _visitors_r3 = self#on_block env _visitors_c3  in ()
+            method on_Switch env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_case env _visitors_c1
+                 in
+              ()
+            method on_Foreach env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_as_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in ()
+            method on_Try env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_block env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_catch env _visitors_c1
+                 in
+              let _visitors_r2 = self#on_block env _visitors_c2  in ()
+            method on_Noop env = ()
+            method on_stmt env _visitors_this =
+              match _visitors_this with
+              | Fallthrough  -> self#on_Fallthrough env
+              | Expr _visitors_c0 -> self#on_Expr env _visitors_c0
+              | Break _visitors_c0 -> self#on_Break env _visitors_c0
+              | Continue _visitors_c0 -> self#on_Continue env _visitors_c0
+              | Throw (_visitors_c0,_visitors_c1) ->
+                  self#on_Throw env _visitors_c0 _visitors_c1
+              | Return (_visitors_c0,_visitors_c1) ->
+                  self#on_Return env _visitors_c0 _visitors_c1
+              | GotoLabel _visitors_c0 -> self#on_GotoLabel env _visitors_c0
+              | Goto _visitors_c0 -> self#on_Goto env _visitors_c0
+              | Static_var _visitors_c0 ->
+                  self#on_Static_var env _visitors_c0
+              | Global_var _visitors_c0 ->
+                  self#on_Global_var env _visitors_c0
+              | If (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_If env _visitors_c0 _visitors_c1 _visitors_c2
+              | Do (_visitors_c0,_visitors_c1) ->
+                  self#on_Do env _visitors_c0 _visitors_c1
+              | While (_visitors_c0,_visitors_c1) ->
+                  self#on_While env _visitors_c0 _visitors_c1
+              | Using (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Using env _visitors_c0 _visitors_c1 _visitors_c2
+              | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
+                  self#on_For env _visitors_c0 _visitors_c1 _visitors_c2
+                    _visitors_c3
+              | Switch (_visitors_c0,_visitors_c1) ->
+                  self#on_Switch env _visitors_c0 _visitors_c1
+              | Foreach (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Foreach env _visitors_c0 _visitors_c1 _visitors_c2
+              | Try (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Try env _visitors_c0 _visitors_c1 _visitors_c2
+              | Noop  -> self#on_Noop env
+            method on_As_v env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_As_kv env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_Await_as_v env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_Await_as_kv env _visitors_c0 _visitors_c1 _visitors_c2
+              =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in ()
+            method on_as_expr env _visitors_this =
+              match _visitors_this with
+              | As_v _visitors_c0 -> self#on_As_v env _visitors_c0
+              | As_kv (_visitors_c0,_visitors_c1) ->
+                  self#on_As_kv env _visitors_c0 _visitors_c1
+              | Await_as_v (_visitors_c0,_visitors_c1) ->
+                  self#on_Await_as_v env _visitors_c0 _visitors_c1
+              | Await_as_kv (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Await_as_kv env _visitors_c0 _visitors_c1
+                    _visitors_c2
+            method on_block env = self#on_list self#on_stmt env
+            method on_CIparent env = ()
+            method on_CIself env = ()
+            method on_CIstatic env = ()
+            method on_CIexpr env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_CI env _visitors_c0 =
+              let _visitors_r0 = self#on_instantiated_sid env _visitors_c0
+                 in
+              ()
+            method on_class_id env _visitors_this =
+              match _visitors_this with
+              | CIparent  -> self#on_CIparent env
+              | CIself  -> self#on_CIself env
+              | CIstatic  -> self#on_CIstatic env
+              | CIexpr _visitors_c0 -> self#on_CIexpr env _visitors_c0
+              | CI _visitors_c0 -> self#on_CI env _visitors_c0
+            method on_expr env (_visitors_c0,_visitors_c1) =
+              let _visitors_r0 = self#on_expr_annotation env _visitors_c0  in
+              let _visitors_r1 = self#on_expr_ env _visitors_c1  in ()
+            method on_Array env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_afield env _visitors_c0
+                 in
+              ()
+            method on_Darray env _visitors_c0 =
+              let _visitors_r0 =
+                self#on_list
+                  (fun env  ->
+                     fun (_visitors_c0,_visitors_c1)  ->
+                       let _visitors_r0 = self#on_expr env _visitors_c0  in
+                       let _visitors_r1 = self#on_expr env _visitors_c1  in
+                       ()) env _visitors_c0
+                 in
+              ()
+            method on_Varray env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              ()
+            method on_Shape env _visitors_c0 =
+              let _visitors_r0 =
+                self#on_shape_map self#on_expr env _visitors_c0  in
+              ()
+            method on_ValCollection env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_vc_kind env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_expr env _visitors_c1
+                 in
+              ()
+            method on_KeyValCollection env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_kvc_kind env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_field env _visitors_c1
+                 in
+              ()
+            method on_Null env = ()
+            method on_This env = ()
+            method on_True env = ()
+            method on_False env = ()
+            method on_Id env _visitors_c0 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in ()
+            method on_Lvar env _visitors_c0 =
+              let _visitors_r0 = self#on_lid env _visitors_c0  in ()
+            method on_Dollar env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_Dollardollar env _visitors_c0 =
+              let _visitors_r0 = self#on_lid env _visitors_c0  in ()
+            method on_Clone env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_Obj_get env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_og_null_flavor env _visitors_c2  in
+              ()
+            method on_Array_get env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              ()
+            method on_Class_get env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_class_id env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in ()
+            method on_Class_const env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_class_id env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in ()
+            method on_Call env _visitors_c0 _visitors_c1 _visitors_c2
+              _visitors_c3 _visitors_c4 =
+              let _visitors_r0 = self#on_call_type env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_list self#on_hint env _visitors_c2
+                 in
+              let _visitors_r3 = self#on_list self#on_expr env _visitors_c3
+                 in
+              let _visitors_r4 = self#on_list self#on_expr env _visitors_c4
+                 in
+              ()
+            method on_Int env _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in ()
+            method on_Float env _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in ()
+            method on_String env _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in ()
+            method on_String2 env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              ()
+            method on_Yield env _visitors_c0 =
+              let _visitors_r0 = self#on_afield env _visitors_c0  in ()
+            method on_Yield_break env = ()
+            method on_Await env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_Suspend env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_List env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              ()
+            method on_Expr_list env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              ()
+            method on_Cast env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_hint env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_Unop env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_uop env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_Binop env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_bop env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in ()
+            method on_Pipe env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_lid env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in ()
+            method on_Eif env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in ()
+            method on_NullCoalesce env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_InstanceOf env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_class_id env _visitors_c1  in ()
+            method on_Is env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_hint env _visitors_c1  in ()
+            method on_New env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_class_id env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_expr env _visitors_c1
+                 in
+              let _visitors_r2 = self#on_list self#on_expr env _visitors_c2
+                 in
+              ()
+            method on_Efun env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_fun_ env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_lid env _visitors_c1
+                 in
+              ()
+            method on_Xml env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 =
+                self#on_list self#on_xhp_attribute env _visitors_c1  in
+              let _visitors_r2 = self#on_list self#on_expr env _visitors_c2
+                 in
+              ()
+            method on_Callconv env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_param_kind env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_Lplaceholder env _visitors_c0 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in ()
+            method on_Fun_id env _visitors_c0 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in ()
+            method on_Method_id env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in ()
+            method on_Method_caller env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in ()
+            method on_Smethod_id env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in ()
+            method on_Special_func env _visitors_c0 =
+              let _visitors_r0 = self#on_special_func env _visitors_c0  in ()
+            method on_Pair env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_Assert env _visitors_c0 =
+              let _visitors_r0 = self#on_assert_expr env _visitors_c0  in ()
+            method on_Typename env _visitors_c0 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in ()
+            method on_Any env = ()
+            method on_expr_ env _visitors_this =
+              match _visitors_this with
+              | Array _visitors_c0 -> self#on_Array env _visitors_c0
+              | Darray _visitors_c0 -> self#on_Darray env _visitors_c0
+              | Varray _visitors_c0 -> self#on_Varray env _visitors_c0
+              | Shape _visitors_c0 -> self#on_Shape env _visitors_c0
+              | ValCollection (_visitors_c0,_visitors_c1) ->
+                  self#on_ValCollection env _visitors_c0 _visitors_c1
+              | KeyValCollection (_visitors_c0,_visitors_c1) ->
+                  self#on_KeyValCollection env _visitors_c0 _visitors_c1
+              | Null  -> self#on_Null env
+              | This  -> self#on_This env
+              | True  -> self#on_True env
+              | False  -> self#on_False env
+              | Id _visitors_c0 -> self#on_Id env _visitors_c0
+              | Lvar _visitors_c0 -> self#on_Lvar env _visitors_c0
+              | Dollar _visitors_c0 -> self#on_Dollar env _visitors_c0
+              | Dollardollar _visitors_c0 ->
+                  self#on_Dollardollar env _visitors_c0
+              | Clone _visitors_c0 -> self#on_Clone env _visitors_c0
+              | Obj_get (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Obj_get env _visitors_c0 _visitors_c1 _visitors_c2
+              | Array_get (_visitors_c0,_visitors_c1) ->
+                  self#on_Array_get env _visitors_c0 _visitors_c1
+              | Class_get (_visitors_c0,_visitors_c1) ->
+                  self#on_Class_get env _visitors_c0 _visitors_c1
+              | Class_const (_visitors_c0,_visitors_c1) ->
+                  self#on_Class_const env _visitors_c0 _visitors_c1
+              | Call
+                  (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
+                  ->
+                  self#on_Call env _visitors_c0 _visitors_c1 _visitors_c2
+                    _visitors_c3 _visitors_c4
+              | Int _visitors_c0 -> self#on_Int env _visitors_c0
+              | Float _visitors_c0 -> self#on_Float env _visitors_c0
+              | String _visitors_c0 -> self#on_String env _visitors_c0
+              | String2 _visitors_c0 -> self#on_String2 env _visitors_c0
+              | Yield _visitors_c0 -> self#on_Yield env _visitors_c0
+              | Yield_break  -> self#on_Yield_break env
+              | Await _visitors_c0 -> self#on_Await env _visitors_c0
+              | Suspend _visitors_c0 -> self#on_Suspend env _visitors_c0
+              | List _visitors_c0 -> self#on_List env _visitors_c0
+              | Expr_list _visitors_c0 -> self#on_Expr_list env _visitors_c0
+              | Cast (_visitors_c0,_visitors_c1) ->
+                  self#on_Cast env _visitors_c0 _visitors_c1
+              | Unop (_visitors_c0,_visitors_c1) ->
+                  self#on_Unop env _visitors_c0 _visitors_c1
+              | Binop (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Binop env _visitors_c0 _visitors_c1 _visitors_c2
+              | Pipe (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Pipe env _visitors_c0 _visitors_c1 _visitors_c2
+              | Eif (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Eif env _visitors_c0 _visitors_c1 _visitors_c2
+              | NullCoalesce (_visitors_c0,_visitors_c1) ->
+                  self#on_NullCoalesce env _visitors_c0 _visitors_c1
+              | InstanceOf (_visitors_c0,_visitors_c1) ->
+                  self#on_InstanceOf env _visitors_c0 _visitors_c1
+              | Is (_visitors_c0,_visitors_c1) ->
+                  self#on_Is env _visitors_c0 _visitors_c1
+              | New (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_New env _visitors_c0 _visitors_c1 _visitors_c2
+              | Efun (_visitors_c0,_visitors_c1) ->
+                  self#on_Efun env _visitors_c0 _visitors_c1
+              | Xml (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Xml env _visitors_c0 _visitors_c1 _visitors_c2
+              | Callconv (_visitors_c0,_visitors_c1) ->
+                  self#on_Callconv env _visitors_c0 _visitors_c1
+              | Lplaceholder _visitors_c0 ->
+                  self#on_Lplaceholder env _visitors_c0
+              | Fun_id _visitors_c0 -> self#on_Fun_id env _visitors_c0
+              | Method_id (_visitors_c0,_visitors_c1) ->
+                  self#on_Method_id env _visitors_c0 _visitors_c1
+              | Method_caller (_visitors_c0,_visitors_c1) ->
+                  self#on_Method_caller env _visitors_c0 _visitors_c1
+              | Smethod_id (_visitors_c0,_visitors_c1) ->
+                  self#on_Smethod_id env _visitors_c0 _visitors_c1
+              | Special_func _visitors_c0 ->
+                  self#on_Special_func env _visitors_c0
+              | Pair (_visitors_c0,_visitors_c1) ->
+                  self#on_Pair env _visitors_c0 _visitors_c1
+              | Assert _visitors_c0 -> self#on_Assert env _visitors_c0
+              | Typename _visitors_c0 -> self#on_Typename env _visitors_c0
+              | Any  -> self#on_Any env
+            method on_AE_assert env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_assert_expr env _visitors_this =
+              match _visitors_this with
+              | AE_assert _visitors_c0 -> self#on_AE_assert env _visitors_c0
+            method on_Default env _visitors_c0 =
+              let _visitors_r0 = self#on_block env _visitors_c0  in ()
+            method on_Case env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_block env _visitors_c1  in ()
+            method on_case env _visitors_this =
+              match _visitors_this with
+              | Default _visitors_c0 -> self#on_Default env _visitors_c0
+              | Case (_visitors_c0,_visitors_c1) ->
+                  self#on_Case env _visitors_c0 _visitors_c1
+            method on_catch env (_visitors_c0,_visitors_c1,_visitors_c2) =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 = self#on_lid env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in ()
+            method on_field env (_visitors_c0,_visitors_c1) =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_AFvalue env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_AFkvalue env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_afield env _visitors_this =
+              match _visitors_this with
+              | AFvalue _visitors_c0 -> self#on_AFvalue env _visitors_c0
+              | AFkvalue (_visitors_c0,_visitors_c1) ->
+                  self#on_AFkvalue env _visitors_c0 _visitors_c1
+            method on_Xhp_simple env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in ()
+            method on_Xhp_spread env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_xhp_attribute env _visitors_this =
+              match _visitors_this with
+              | Xhp_simple (_visitors_c0,_visitors_c1) ->
+                  self#on_Xhp_simple env _visitors_c0 _visitors_c1
+              | Xhp_spread _visitors_c0 ->
+                  self#on_Xhp_spread env _visitors_c0
+            method on_Gena env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_Genva env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              ()
+            method on_Gen_array_rec env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in ()
+            method on_special_func env _visitors_this =
+              match _visitors_this with
+              | Gena _visitors_c0 -> self#on_Gena env _visitors_c0
+              | Genva _visitors_c0 -> self#on_Genva env _visitors_c0
+              | Gen_array_rec _visitors_c0 ->
+                  self#on_Gen_array_rec env _visitors_c0
+            method on_is_reference env = self#on_bool env
+            method on_is_variadic env = self#on_bool env
+            method on_fun_param env _visitors_this =
+              let _visitors_r0 =
+                self#on_option self#on_hint env _visitors_this.param_hint  in
+              let _visitors_r1 =
+                self#on_is_reference env _visitors_this.param_is_reference
+                 in
+              let _visitors_r2 =
+                self#on_is_variadic env _visitors_this.param_is_variadic  in
+              let _visitors_r3 = self#on_t env _visitors_this.param_pos  in
+              let _visitors_r4 = self#on_string env _visitors_this.param_name
+                 in
+              let _visitors_r5 =
+                self#on_option self#on_expr env _visitors_this.param_expr  in
+              let _visitors_r6 =
+                self#on_option self#on_param_kind env
+                  _visitors_this.param_callconv
+                 in
+              let _visitors_r7 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.param_user_attributes
+                 in
+              ()
+            method on_FVvariadicArg env _visitors_c0 =
+              let _visitors_r0 = self#on_fun_param env _visitors_c0  in ()
+            method on_FVellipsis env = ()
+            method on_FVnonVariadic env = ()
+            method on_fun_variadicity env _visitors_this =
+              match _visitors_this with
+              | FVvariadicArg _visitors_c0 ->
+                  self#on_FVvariadicArg env _visitors_c0
+              | FVellipsis  -> self#on_FVellipsis env
+              | FVnonVariadic  -> self#on_FVnonVariadic env
+            method on_fun_ env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.f_annotation  in
+              let _visitors_r1 =
+                (fun _visitors_this  -> ()) _visitors_this.f_mode  in
+              let _visitors_r2 =
+                self#on_option self#on_hint env _visitors_this.f_ret  in
+              let _visitors_r3 = self#on_sid env _visitors_this.f_name  in
+              let _visitors_r4 =
+                self#on_list self#on_tparam env _visitors_this.f_tparams  in
+              let _visitors_r5 =
+                self#on_list self#on_where_constraint env
+                  _visitors_this.f_where_constraints
+                 in
+              let _visitors_r6 =
+                self#on_fun_variadicity env _visitors_this.f_variadic  in
+              let _visitors_r7 =
+                self#on_list self#on_fun_param env _visitors_this.f_params
+                 in
+              let _visitors_r8 = self#on_func_body env _visitors_this.f_body
+                 in
+              let _visitors_r9 =
+                self#on_fun_kind env _visitors_this.f_fun_kind  in
+              let _visitors_r10 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.f_user_attributes
+                 in
+              let _visitors_r11 =
+                self#on_bool env _visitors_this.f_ret_by_ref  in
+              ()
+            method on_UnnamedBody env _visitors_c0 =
+              let _visitors_r0 = self#on_func_unnamed_body env _visitors_c0
+                 in
+              ()
+            method on_NamedBody env _visitors_c0 =
+              let _visitors_r0 = self#on_func_named_body env _visitors_c0  in
+              ()
+            method on_func_body env _visitors_this =
+              match _visitors_this with
+              | UnnamedBody _visitors_c0 ->
+                  self#on_UnnamedBody env _visitors_c0
+              | NamedBody _visitors_c0 -> self#on_NamedBody env _visitors_c0
+            method on_func_unnamed_body env _visitors_this =
+              let _visitors_r0 =
+                (fun _visitors_this  -> ()) _visitors_this.fub_ast  in
+              let _visitors_r1 =
+                (fun _visitors_this  -> ()) _visitors_this.fub_tparams  in
+              let _visitors_r2 =
+                (fun _visitors_this  -> ()) _visitors_this.fub_namespace  in
+              ()
+            method on_func_named_body env _visitors_this =
+              let _visitors_r0 = self#on_block env _visitors_this.fnb_nast
+                 in
+              let _visitors_r1 = self#on_bool env _visitors_this.fnb_unsafe
+                 in
+              ()
+            method on_user_attribute env _visitors_this =
+              let _visitors_r0 = self#on_sid env _visitors_this.ua_name  in
+              let _visitors_r1 =
+                self#on_list self#on_expr env _visitors_this.ua_params  in
+              ()
+            method on_class_ env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.c_annotation  in
+              let _visitors_r1 =
+                (fun _visitors_this  -> ()) _visitors_this.c_mode  in
+              let _visitors_r2 = self#on_bool env _visitors_this.c_final  in
+              let _visitors_r3 = self#on_bool env _visitors_this.c_is_xhp  in
+              let _visitors_r4 = self#on_class_kind env _visitors_this.c_kind
+                 in
+              let _visitors_r5 = self#on_sid env _visitors_this.c_name  in
+              let _visitors_r6 =
+                (fun _visitors_this  -> ()) _visitors_this.c_tparams  in
+              let _visitors_r7 =
+                self#on_list self#on_hint env _visitors_this.c_extends  in
+              let _visitors_r8 =
+                self#on_list self#on_hint env _visitors_this.c_uses  in
+              let _visitors_r9 =
+                self#on_list self#on_hint env _visitors_this.c_xhp_attr_uses
+                 in
+              let _visitors_r10 =
+                self#on_list self#on_pstring env
+                  _visitors_this.c_xhp_category
+                 in
+              let _visitors_r11 =
+                self#on_list self#on_hint env _visitors_this.c_req_extends
+                 in
+              let _visitors_r12 =
+                self#on_list self#on_hint env _visitors_this.c_req_implements
+                 in
+              let _visitors_r13 =
+                self#on_list self#on_hint env _visitors_this.c_implements  in
+              let _visitors_r14 =
+                self#on_list self#on_class_const env _visitors_this.c_consts
+                 in
+              let _visitors_r15 =
+                self#on_list self#on_class_typeconst env
+                  _visitors_this.c_typeconsts
+                 in
+              let _visitors_r16 =
+                self#on_list self#on_class_var env
+                  _visitors_this.c_static_vars
+                 in
+              let _visitors_r17 =
+                self#on_list self#on_class_var env _visitors_this.c_vars  in
+              let _visitors_r18 =
+                self#on_option self#on_method_ env
+                  _visitors_this.c_constructor
+                 in
+              let _visitors_r19 =
+                self#on_list self#on_method_ env
+                  _visitors_this.c_static_methods
+                 in
+              let _visitors_r20 =
+                self#on_list self#on_method_ env _visitors_this.c_methods  in
+              let _visitors_r21 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.c_user_attributes
+                 in
+              let _visitors_r22 =
+                self#on_option self#on_enum_ env _visitors_this.c_enum  in
+              ()
+            method on_class_const env
+              (_visitors_c0,_visitors_c1,_visitors_c2) =
+              let _visitors_r0 = self#on_option self#on_hint env _visitors_c0
+                 in
+              let _visitors_r1 = self#on_sid env _visitors_c1  in
+              let _visitors_r2 = self#on_option self#on_expr env _visitors_c2
+                 in
+              ()
+            method on_class_typeconst env _visitors_this =
+              let _visitors_r0 = self#on_sid env _visitors_this.c_tconst_name
+                 in
+              let _visitors_r1 =
+                self#on_option self#on_hint env
+                  _visitors_this.c_tconst_constraint
+                 in
+              let _visitors_r2 =
+                self#on_option self#on_hint env _visitors_this.c_tconst_type
+                 in
+              ()
+            method on_class_var env _visitors_this =
+              let _visitors_r0 = self#on_bool env _visitors_this.cv_final  in
+              let _visitors_r1 = self#on_bool env _visitors_this.cv_is_xhp
+                 in
+              let _visitors_r2 =
+                self#on_visibility env _visitors_this.cv_visibility  in
+              let _visitors_r3 =
+                self#on_option self#on_hint env _visitors_this.cv_type  in
+              let _visitors_r4 = self#on_sid env _visitors_this.cv_id  in
+              let _visitors_r5 =
+                self#on_option self#on_expr env _visitors_this.cv_expr  in
+              let _visitors_r6 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.cv_user_attributes
+                 in
+              ()
+            method on_method_ env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.m_annotation  in
+              let _visitors_r1 = self#on_bool env _visitors_this.m_final  in
+              let _visitors_r2 = self#on_bool env _visitors_this.m_abstract
+                 in
+              let _visitors_r3 =
+                self#on_visibility env _visitors_this.m_visibility  in
+              let _visitors_r4 = self#on_sid env _visitors_this.m_name  in
+              let _visitors_r5 =
+                self#on_list self#on_tparam env _visitors_this.m_tparams  in
+              let _visitors_r6 =
+                self#on_list self#on_where_constraint env
+                  _visitors_this.m_where_constraints
+                 in
+              let _visitors_r7 =
+                self#on_fun_variadicity env _visitors_this.m_variadic  in
+              let _visitors_r8 =
+                self#on_list self#on_fun_param env _visitors_this.m_params
+                 in
+              let _visitors_r9 = self#on_func_body env _visitors_this.m_body
+                 in
+              let _visitors_r10 =
+                self#on_fun_kind env _visitors_this.m_fun_kind  in
+              let _visitors_r11 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.m_user_attributes
+                 in
+              let _visitors_r12 =
+                self#on_option self#on_hint env _visitors_this.m_ret  in
+              let _visitors_r13 =
+                self#on_bool env _visitors_this.m_ret_by_ref  in
+              ()
+            method on_typedef env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.t_annotation  in
+              let _visitors_r1 = self#on_sid env _visitors_this.t_name  in
+              let _visitors_r2 =
+                self#on_list self#on_tparam env _visitors_this.t_tparams  in
+              let _visitors_r3 =
+                self#on_option self#on_hint env _visitors_this.t_constraint
+                 in
+              let _visitors_r4 = self#on_hint env _visitors_this.t_kind  in
+              let _visitors_r5 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.t_user_attributes
+                 in
+              let _visitors_r6 =
+                (fun _visitors_this  -> ()) _visitors_this.t_mode  in
+              let _visitors_r7 =
+                self#on_typedef_visibility env _visitors_this.t_vis  in
+              ()
+            method on_gconst env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.cst_annotation  in
+              let _visitors_r1 =
+                (fun _visitors_this  -> ()) _visitors_this.cst_mode  in
+              let _visitors_r2 = self#on_sid env _visitors_this.cst_name  in
+              let _visitors_r3 =
+                self#on_option self#on_hint env _visitors_this.cst_type  in
+              let _visitors_r4 =
+                self#on_option self#on_expr env _visitors_this.cst_value  in
+              let _visitors_r5 =
+                self#on_bool env _visitors_this.cst_is_define  in
+              ()
+            method on_Fun env _visitors_c0 =
+              let _visitors_r0 = self#on_fun_ env _visitors_c0  in ()
+            method on_Class env _visitors_c0 =
+              let _visitors_r0 = self#on_class_ env _visitors_c0  in ()
+            method on_Typedef env _visitors_c0 =
+              let _visitors_r0 = self#on_typedef env _visitors_c0  in ()
+            method on_Constant env _visitors_c0 =
+              let _visitors_r0 = self#on_gconst env _visitors_c0  in ()
+            method on_def env _visitors_this =
+              match _visitors_this with
+              | Fun _visitors_c0 -> self#on_Fun env _visitors_c0
+              | Class _visitors_c0 -> self#on_Class env _visitors_c0
+              | Typedef _visitors_c0 -> self#on_Typedef env _visitors_c0
+              | Constant _visitors_c0 -> self#on_Constant env _visitors_c0
+          end
+        [@@@VISITORS.END ]
+      end
+    include
+      struct
+        [@@@ocaml.warning "-4-26-27"]
+        [@@@VISITORS.BEGIN ]
+        class virtual ['self] reduce =
+          object (self : 'self)
+            inherit  [_] reduce_defs
+            method on_program env = self#on_list self#on_def env
+            method on_expr_annotation env _visitors_this = self#zero
+            method on_env_annotation env _visitors_this = self#zero
+            method on_Fallthrough env = self#zero
+            method on_Expr env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_Break env _visitors_c0 =
+              let _visitors_s0 = self#on_t env _visitors_c0  in _visitors_s0
+            method on_Continue env _visitors_c0 =
+              let _visitors_s0 = self#on_t env _visitors_c0  in _visitors_s0
+            method on_Throw env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_is_terminal env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Return env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_t env _visitors_c0  in
+              let _visitors_s1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              self#plus _visitors_s0 _visitors_s1
+            method on_GotoLabel env _visitors_c0 =
+              let _visitors_s0 = self#on_pstring env _visitors_c0  in
+              _visitors_s0
+            method on_Goto env _visitors_c0 =
+              let _visitors_s0 = self#on_pstring env _visitors_c0  in
+              _visitors_s0
+            method on_Static_var env _visitors_c0 =
+              let _visitors_s0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              _visitors_s0
+            method on_Global_var env _visitors_c0 =
+              let _visitors_s0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              _visitors_s0
+            method on_If env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_block env _visitors_c1  in
+              let _visitors_s2 = self#on_block env _visitors_c2  in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_Do env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_block env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_While env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_block env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Using env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_s0 = self#on_bool env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              let _visitors_s2 = self#on_block env _visitors_c2  in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_For env _visitors_c0 _visitors_c1 _visitors_c2
+              _visitors_c3 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              let _visitors_s2 = self#on_expr env _visitors_c2  in
+              let _visitors_s3 = self#on_block env _visitors_c3  in
+              self#plus
+                (self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2)
+                _visitors_s3
+            method on_Switch env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_list self#on_case env _visitors_c1
+                 in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Foreach env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_as_expr env _visitors_c1  in
+              let _visitors_s2 = self#on_block env _visitors_c2  in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_Try env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_s0 = self#on_block env _visitors_c0  in
+              let _visitors_s1 = self#on_list self#on_catch env _visitors_c1
+                 in
+              let _visitors_s2 = self#on_block env _visitors_c2  in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_Noop env = self#zero
+            method on_stmt env _visitors_this =
+              match _visitors_this with
+              | Fallthrough  -> self#on_Fallthrough env
+              | Expr _visitors_c0 -> self#on_Expr env _visitors_c0
+              | Break _visitors_c0 -> self#on_Break env _visitors_c0
+              | Continue _visitors_c0 -> self#on_Continue env _visitors_c0
+              | Throw (_visitors_c0,_visitors_c1) ->
+                  self#on_Throw env _visitors_c0 _visitors_c1
+              | Return (_visitors_c0,_visitors_c1) ->
+                  self#on_Return env _visitors_c0 _visitors_c1
+              | GotoLabel _visitors_c0 -> self#on_GotoLabel env _visitors_c0
+              | Goto _visitors_c0 -> self#on_Goto env _visitors_c0
+              | Static_var _visitors_c0 ->
+                  self#on_Static_var env _visitors_c0
+              | Global_var _visitors_c0 ->
+                  self#on_Global_var env _visitors_c0
+              | If (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_If env _visitors_c0 _visitors_c1 _visitors_c2
+              | Do (_visitors_c0,_visitors_c1) ->
+                  self#on_Do env _visitors_c0 _visitors_c1
+              | While (_visitors_c0,_visitors_c1) ->
+                  self#on_While env _visitors_c0 _visitors_c1
+              | Using (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Using env _visitors_c0 _visitors_c1 _visitors_c2
+              | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
+                  self#on_For env _visitors_c0 _visitors_c1 _visitors_c2
+                    _visitors_c3
+              | Switch (_visitors_c0,_visitors_c1) ->
+                  self#on_Switch env _visitors_c0 _visitors_c1
+              | Foreach (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Foreach env _visitors_c0 _visitors_c1 _visitors_c2
+              | Try (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Try env _visitors_c0 _visitors_c1 _visitors_c2
+              | Noop  -> self#on_Noop env
+            method on_As_v env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_As_kv env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Await_as_v env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_t env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Await_as_kv env _visitors_c0 _visitors_c1 _visitors_c2
+              =
+              let _visitors_s0 = self#on_t env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              let _visitors_s2 = self#on_expr env _visitors_c2  in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_as_expr env _visitors_this =
+              match _visitors_this with
+              | As_v _visitors_c0 -> self#on_As_v env _visitors_c0
+              | As_kv (_visitors_c0,_visitors_c1) ->
+                  self#on_As_kv env _visitors_c0 _visitors_c1
+              | Await_as_v (_visitors_c0,_visitors_c1) ->
+                  self#on_Await_as_v env _visitors_c0 _visitors_c1
+              | Await_as_kv (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Await_as_kv env _visitors_c0 _visitors_c1
+                    _visitors_c2
+            method on_block env = self#on_list self#on_stmt env
+            method on_CIparent env = self#zero
+            method on_CIself env = self#zero
+            method on_CIstatic env = self#zero
+            method on_CIexpr env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_CI env _visitors_c0 =
+              let _visitors_s0 = self#on_instantiated_sid env _visitors_c0
+                 in
+              _visitors_s0
+            method on_class_id env _visitors_this =
+              match _visitors_this with
+              | CIparent  -> self#on_CIparent env
+              | CIself  -> self#on_CIself env
+              | CIstatic  -> self#on_CIstatic env
+              | CIexpr _visitors_c0 -> self#on_CIexpr env _visitors_c0
+              | CI _visitors_c0 -> self#on_CI env _visitors_c0
+            method on_expr env (_visitors_c0,_visitors_c1) =
+              let _visitors_s0 = self#on_expr_annotation env _visitors_c0  in
+              let _visitors_s1 = self#on_expr_ env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Array env _visitors_c0 =
+              let _visitors_s0 = self#on_list self#on_afield env _visitors_c0
+                 in
+              _visitors_s0
+            method on_Darray env _visitors_c0 =
+              let _visitors_s0 =
+                self#on_list
+                  (fun env  ->
+                     fun (_visitors_c0,_visitors_c1)  ->
+                       let _visitors_s0 = self#on_expr env _visitors_c0  in
+                       let _visitors_s1 = self#on_expr env _visitors_c1  in
+                       self#plus _visitors_s0 _visitors_s1) env _visitors_c0
+                 in
+              _visitors_s0
+            method on_Varray env _visitors_c0 =
+              let _visitors_s0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              _visitors_s0
+            method on_Shape env _visitors_c0 =
+              let _visitors_s0 =
+                self#on_shape_map self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_ValCollection env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_vc_kind env _visitors_c0  in
+              let _visitors_s1 = self#on_list self#on_expr env _visitors_c1
+                 in
+              self#plus _visitors_s0 _visitors_s1
+            method on_KeyValCollection env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_kvc_kind env _visitors_c0  in
+              let _visitors_s1 = self#on_list self#on_field env _visitors_c1
+                 in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Null env = self#zero
+            method on_This env = self#zero
+            method on_True env = self#zero
+            method on_False env = self#zero
+            method on_Id env _visitors_c0 =
+              let _visitors_s0 = self#on_sid env _visitors_c0  in
+              _visitors_s0
+            method on_Lvar env _visitors_c0 =
+              let _visitors_s0 = self#on_lid env _visitors_c0  in
+              _visitors_s0
+            method on_Dollar env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_Dollardollar env _visitors_c0 =
+              let _visitors_s0 = self#on_lid env _visitors_c0  in
+              _visitors_s0
+            method on_Clone env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_Obj_get env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              let _visitors_s2 = self#on_og_null_flavor env _visitors_c2  in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_Array_get env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Class_get env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_class_id env _visitors_c0  in
+              let _visitors_s1 = self#on_pstring env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Class_const env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_class_id env _visitors_c0  in
+              let _visitors_s1 = self#on_pstring env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Call env _visitors_c0 _visitors_c1 _visitors_c2
+              _visitors_c3 _visitors_c4 =
+              let _visitors_s0 = self#on_call_type env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              let _visitors_s2 = self#on_list self#on_hint env _visitors_c2
+                 in
+              let _visitors_s3 = self#on_list self#on_expr env _visitors_c3
+                 in
+              let _visitors_s4 = self#on_list self#on_expr env _visitors_c4
+                 in
+              self#plus
+                (self#plus
+                   (self#plus (self#plus _visitors_s0 _visitors_s1)
+                      _visitors_s2) _visitors_s3) _visitors_s4
+            method on_Int env _visitors_c0 =
+              let _visitors_s0 = self#on_pstring env _visitors_c0  in
+              _visitors_s0
+            method on_Float env _visitors_c0 =
+              let _visitors_s0 = self#on_pstring env _visitors_c0  in
+              _visitors_s0
+            method on_String env _visitors_c0 =
+              let _visitors_s0 = self#on_pstring env _visitors_c0  in
+              _visitors_s0
+            method on_String2 env _visitors_c0 =
+              let _visitors_s0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              _visitors_s0
+            method on_Yield env _visitors_c0 =
+              let _visitors_s0 = self#on_afield env _visitors_c0  in
+              _visitors_s0
+            method on_Yield_break env = self#zero
+            method on_Await env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_Suspend env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_List env _visitors_c0 =
+              let _visitors_s0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              _visitors_s0
+            method on_Expr_list env _visitors_c0 =
+              let _visitors_s0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              _visitors_s0
+            method on_Cast env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_hint env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Unop env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_uop env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Binop env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_s0 = self#on_bop env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              let _visitors_s2 = self#on_expr env _visitors_c2  in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_Pipe env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_s0 = self#on_lid env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              let _visitors_s2 = self#on_expr env _visitors_c2  in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_Eif env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              let _visitors_s2 = self#on_expr env _visitors_c2  in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_NullCoalesce env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_InstanceOf env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_class_id env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Is env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_hint env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_New env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_s0 = self#on_class_id env _visitors_c0  in
+              let _visitors_s1 = self#on_list self#on_expr env _visitors_c1
+                 in
+              let _visitors_s2 = self#on_list self#on_expr env _visitors_c2
+                 in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_Efun env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_fun_ env _visitors_c0  in
+              let _visitors_s1 = self#on_list self#on_lid env _visitors_c1
+                 in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Xml env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_s0 = self#on_sid env _visitors_c0  in
+              let _visitors_s1 =
+                self#on_list self#on_xhp_attribute env _visitors_c1  in
+              let _visitors_s2 = self#on_list self#on_expr env _visitors_c2
+                 in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_Callconv env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_param_kind env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Lplaceholder env _visitors_c0 =
+              let _visitors_s0 = self#on_t env _visitors_c0  in _visitors_s0
+            method on_Fun_id env _visitors_c0 =
+              let _visitors_s0 = self#on_sid env _visitors_c0  in
+              _visitors_s0
+            method on_Method_id env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_pstring env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Method_caller env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_sid env _visitors_c0  in
+              let _visitors_s1 = self#on_pstring env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Smethod_id env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_sid env _visitors_c0  in
+              let _visitors_s1 = self#on_pstring env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Special_func env _visitors_c0 =
+              let _visitors_s0 = self#on_special_func env _visitors_c0  in
+              _visitors_s0
+            method on_Pair env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Assert env _visitors_c0 =
+              let _visitors_s0 = self#on_assert_expr env _visitors_c0  in
+              _visitors_s0
+            method on_Typename env _visitors_c0 =
+              let _visitors_s0 = self#on_sid env _visitors_c0  in
+              _visitors_s0
+            method on_Any env = self#zero
+            method on_expr_ env _visitors_this =
+              match _visitors_this with
+              | Array _visitors_c0 -> self#on_Array env _visitors_c0
+              | Darray _visitors_c0 -> self#on_Darray env _visitors_c0
+              | Varray _visitors_c0 -> self#on_Varray env _visitors_c0
+              | Shape _visitors_c0 -> self#on_Shape env _visitors_c0
+              | ValCollection (_visitors_c0,_visitors_c1) ->
+                  self#on_ValCollection env _visitors_c0 _visitors_c1
+              | KeyValCollection (_visitors_c0,_visitors_c1) ->
+                  self#on_KeyValCollection env _visitors_c0 _visitors_c1
+              | Null  -> self#on_Null env
+              | This  -> self#on_This env
+              | True  -> self#on_True env
+              | False  -> self#on_False env
+              | Id _visitors_c0 -> self#on_Id env _visitors_c0
+              | Lvar _visitors_c0 -> self#on_Lvar env _visitors_c0
+              | Dollar _visitors_c0 -> self#on_Dollar env _visitors_c0
+              | Dollardollar _visitors_c0 ->
+                  self#on_Dollardollar env _visitors_c0
+              | Clone _visitors_c0 -> self#on_Clone env _visitors_c0
+              | Obj_get (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Obj_get env _visitors_c0 _visitors_c1 _visitors_c2
+              | Array_get (_visitors_c0,_visitors_c1) ->
+                  self#on_Array_get env _visitors_c0 _visitors_c1
+              | Class_get (_visitors_c0,_visitors_c1) ->
+                  self#on_Class_get env _visitors_c0 _visitors_c1
+              | Class_const (_visitors_c0,_visitors_c1) ->
+                  self#on_Class_const env _visitors_c0 _visitors_c1
+              | Call
+                  (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
+                  ->
+                  self#on_Call env _visitors_c0 _visitors_c1 _visitors_c2
+                    _visitors_c3 _visitors_c4
+              | Int _visitors_c0 -> self#on_Int env _visitors_c0
+              | Float _visitors_c0 -> self#on_Float env _visitors_c0
+              | String _visitors_c0 -> self#on_String env _visitors_c0
+              | String2 _visitors_c0 -> self#on_String2 env _visitors_c0
+              | Yield _visitors_c0 -> self#on_Yield env _visitors_c0
+              | Yield_break  -> self#on_Yield_break env
+              | Await _visitors_c0 -> self#on_Await env _visitors_c0
+              | Suspend _visitors_c0 -> self#on_Suspend env _visitors_c0
+              | List _visitors_c0 -> self#on_List env _visitors_c0
+              | Expr_list _visitors_c0 -> self#on_Expr_list env _visitors_c0
+              | Cast (_visitors_c0,_visitors_c1) ->
+                  self#on_Cast env _visitors_c0 _visitors_c1
+              | Unop (_visitors_c0,_visitors_c1) ->
+                  self#on_Unop env _visitors_c0 _visitors_c1
+              | Binop (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Binop env _visitors_c0 _visitors_c1 _visitors_c2
+              | Pipe (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Pipe env _visitors_c0 _visitors_c1 _visitors_c2
+              | Eif (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Eif env _visitors_c0 _visitors_c1 _visitors_c2
+              | NullCoalesce (_visitors_c0,_visitors_c1) ->
+                  self#on_NullCoalesce env _visitors_c0 _visitors_c1
+              | InstanceOf (_visitors_c0,_visitors_c1) ->
+                  self#on_InstanceOf env _visitors_c0 _visitors_c1
+              | Is (_visitors_c0,_visitors_c1) ->
+                  self#on_Is env _visitors_c0 _visitors_c1
+              | New (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_New env _visitors_c0 _visitors_c1 _visitors_c2
+              | Efun (_visitors_c0,_visitors_c1) ->
+                  self#on_Efun env _visitors_c0 _visitors_c1
+              | Xml (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Xml env _visitors_c0 _visitors_c1 _visitors_c2
+              | Callconv (_visitors_c0,_visitors_c1) ->
+                  self#on_Callconv env _visitors_c0 _visitors_c1
+              | Lplaceholder _visitors_c0 ->
+                  self#on_Lplaceholder env _visitors_c0
+              | Fun_id _visitors_c0 -> self#on_Fun_id env _visitors_c0
+              | Method_id (_visitors_c0,_visitors_c1) ->
+                  self#on_Method_id env _visitors_c0 _visitors_c1
+              | Method_caller (_visitors_c0,_visitors_c1) ->
+                  self#on_Method_caller env _visitors_c0 _visitors_c1
+              | Smethod_id (_visitors_c0,_visitors_c1) ->
+                  self#on_Smethod_id env _visitors_c0 _visitors_c1
+              | Special_func _visitors_c0 ->
+                  self#on_Special_func env _visitors_c0
+              | Pair (_visitors_c0,_visitors_c1) ->
+                  self#on_Pair env _visitors_c0 _visitors_c1
+              | Assert _visitors_c0 -> self#on_Assert env _visitors_c0
+              | Typename _visitors_c0 -> self#on_Typename env _visitors_c0
+              | Any  -> self#on_Any env
+            method on_AE_assert env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_assert_expr env _visitors_this =
+              match _visitors_this with
+              | AE_assert _visitors_c0 -> self#on_AE_assert env _visitors_c0
+            method on_Default env _visitors_c0 =
+              let _visitors_s0 = self#on_block env _visitors_c0  in
+              _visitors_s0
+            method on_Case env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_block env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_case env _visitors_this =
+              match _visitors_this with
+              | Default _visitors_c0 -> self#on_Default env _visitors_c0
+              | Case (_visitors_c0,_visitors_c1) ->
+                  self#on_Case env _visitors_c0 _visitors_c1
+            method on_catch env (_visitors_c0,_visitors_c1,_visitors_c2) =
+              let _visitors_s0 = self#on_sid env _visitors_c0  in
+              let _visitors_s1 = self#on_lid env _visitors_c1  in
+              let _visitors_s2 = self#on_block env _visitors_c2  in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_field env (_visitors_c0,_visitors_c1) =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_AFvalue env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_AFkvalue env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_afield env _visitors_this =
+              match _visitors_this with
+              | AFvalue _visitors_c0 -> self#on_AFvalue env _visitors_c0
+              | AFkvalue (_visitors_c0,_visitors_c1) ->
+                  self#on_AFkvalue env _visitors_c0 _visitors_c1
+            method on_Xhp_simple env _visitors_c0 _visitors_c1 =
+              let _visitors_s0 = self#on_pstring env _visitors_c0  in
+              let _visitors_s1 = self#on_expr env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_Xhp_spread env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_xhp_attribute env _visitors_this =
+              match _visitors_this with
+              | Xhp_simple (_visitors_c0,_visitors_c1) ->
+                  self#on_Xhp_simple env _visitors_c0 _visitors_c1
+              | Xhp_spread _visitors_c0 ->
+                  self#on_Xhp_spread env _visitors_c0
+            method on_Gena env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_Genva env _visitors_c0 =
+              let _visitors_s0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              _visitors_s0
+            method on_Gen_array_rec env _visitors_c0 =
+              let _visitors_s0 = self#on_expr env _visitors_c0  in
+              _visitors_s0
+            method on_special_func env _visitors_this =
+              match _visitors_this with
+              | Gena _visitors_c0 -> self#on_Gena env _visitors_c0
+              | Genva _visitors_c0 -> self#on_Genva env _visitors_c0
+              | Gen_array_rec _visitors_c0 ->
+                  self#on_Gen_array_rec env _visitors_c0
+            method on_is_reference env = self#on_bool env
+            method on_is_variadic env = self#on_bool env
+            method on_fun_param env _visitors_this =
+              let _visitors_s0 =
+                self#on_option self#on_hint env _visitors_this.param_hint  in
+              let _visitors_s1 =
+                self#on_is_reference env _visitors_this.param_is_reference
+                 in
+              let _visitors_s2 =
+                self#on_is_variadic env _visitors_this.param_is_variadic  in
+              let _visitors_s3 = self#on_t env _visitors_this.param_pos  in
+              let _visitors_s4 = self#on_string env _visitors_this.param_name
+                 in
+              let _visitors_s5 =
+                self#on_option self#on_expr env _visitors_this.param_expr  in
+              let _visitors_s6 =
+                self#on_option self#on_param_kind env
+                  _visitors_this.param_callconv
+                 in
+              let _visitors_s7 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.param_user_attributes
+                 in
+              self#plus
+                (self#plus
+                   (self#plus
+                      (self#plus
+                         (self#plus
+                            (self#plus (self#plus _visitors_s0 _visitors_s1)
+                               _visitors_s2) _visitors_s3) _visitors_s4)
+                      _visitors_s5) _visitors_s6) _visitors_s7
+            method on_FVvariadicArg env _visitors_c0 =
+              let _visitors_s0 = self#on_fun_param env _visitors_c0  in
+              _visitors_s0
+            method on_FVellipsis env = self#zero
+            method on_FVnonVariadic env = self#zero
+            method on_fun_variadicity env _visitors_this =
+              match _visitors_this with
+              | FVvariadicArg _visitors_c0 ->
+                  self#on_FVvariadicArg env _visitors_c0
+              | FVellipsis  -> self#on_FVellipsis env
+              | FVnonVariadic  -> self#on_FVnonVariadic env
+            method on_fun_ env _visitors_this =
+              let _visitors_s0 =
+                self#on_env_annotation env _visitors_this.f_annotation  in
+              let _visitors_s1 =
+                (fun _visitors_this  -> self#zero) _visitors_this.f_mode  in
+              let _visitors_s2 =
+                self#on_option self#on_hint env _visitors_this.f_ret  in
+              let _visitors_s3 = self#on_sid env _visitors_this.f_name  in
+              let _visitors_s4 =
+                self#on_list self#on_tparam env _visitors_this.f_tparams  in
+              let _visitors_s5 =
+                self#on_list self#on_where_constraint env
+                  _visitors_this.f_where_constraints
+                 in
+              let _visitors_s6 =
+                self#on_fun_variadicity env _visitors_this.f_variadic  in
+              let _visitors_s7 =
+                self#on_list self#on_fun_param env _visitors_this.f_params
+                 in
+              let _visitors_s8 = self#on_func_body env _visitors_this.f_body
+                 in
+              let _visitors_s9 =
+                self#on_fun_kind env _visitors_this.f_fun_kind  in
+              let _visitors_s10 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.f_user_attributes
+                 in
+              let _visitors_s11 =
+                self#on_bool env _visitors_this.f_ret_by_ref  in
+              self#plus
+                (self#plus
+                   (self#plus
+                      (self#plus
+                         (self#plus
+                            (self#plus
+                               (self#plus
+                                  (self#plus
+                                     (self#plus
+                                        (self#plus
+                                           (self#plus _visitors_s0
+                                              _visitors_s1) _visitors_s2)
+                                        _visitors_s3) _visitors_s4)
+                                  _visitors_s5) _visitors_s6) _visitors_s7)
+                         _visitors_s8) _visitors_s9) _visitors_s10)
+                _visitors_s11
+            method on_UnnamedBody env _visitors_c0 =
+              let _visitors_s0 = self#on_func_unnamed_body env _visitors_c0
+                 in
+              _visitors_s0
+            method on_NamedBody env _visitors_c0 =
+              let _visitors_s0 = self#on_func_named_body env _visitors_c0  in
+              _visitors_s0
+            method on_func_body env _visitors_this =
+              match _visitors_this with
+              | UnnamedBody _visitors_c0 ->
+                  self#on_UnnamedBody env _visitors_c0
+              | NamedBody _visitors_c0 -> self#on_NamedBody env _visitors_c0
+            method on_func_unnamed_body env _visitors_this =
+              let _visitors_s0 =
+                (fun _visitors_this  -> self#zero) _visitors_this.fub_ast  in
+              let _visitors_s1 =
+                (fun _visitors_this  -> self#zero) _visitors_this.fub_tparams
+                 in
+              let _visitors_s2 =
+                (fun _visitors_this  -> self#zero)
+                  _visitors_this.fub_namespace
+                 in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_func_named_body env _visitors_this =
+              let _visitors_s0 = self#on_block env _visitors_this.fnb_nast
+                 in
+              let _visitors_s1 = self#on_bool env _visitors_this.fnb_unsafe
+                 in
+              self#plus _visitors_s0 _visitors_s1
+            method on_user_attribute env _visitors_this =
+              let _visitors_s0 = self#on_sid env _visitors_this.ua_name  in
+              let _visitors_s1 =
+                self#on_list self#on_expr env _visitors_this.ua_params  in
+              self#plus _visitors_s0 _visitors_s1
+            method on_class_ env _visitors_this =
+              let _visitors_s0 =
+                self#on_env_annotation env _visitors_this.c_annotation  in
+              let _visitors_s1 =
+                (fun _visitors_this  -> self#zero) _visitors_this.c_mode  in
+              let _visitors_s2 = self#on_bool env _visitors_this.c_final  in
+              let _visitors_s3 = self#on_bool env _visitors_this.c_is_xhp  in
+              let _visitors_s4 = self#on_class_kind env _visitors_this.c_kind
+                 in
+              let _visitors_s5 = self#on_sid env _visitors_this.c_name  in
+              let _visitors_s6 =
+                (fun _visitors_this  -> self#zero) _visitors_this.c_tparams
+                 in
+              let _visitors_s7 =
+                self#on_list self#on_hint env _visitors_this.c_extends  in
+              let _visitors_s8 =
+                self#on_list self#on_hint env _visitors_this.c_uses  in
+              let _visitors_s9 =
+                self#on_list self#on_hint env _visitors_this.c_xhp_attr_uses
+                 in
+              let _visitors_s10 =
+                self#on_list self#on_pstring env
+                  _visitors_this.c_xhp_category
+                 in
+              let _visitors_s11 =
+                self#on_list self#on_hint env _visitors_this.c_req_extends
+                 in
+              let _visitors_s12 =
+                self#on_list self#on_hint env _visitors_this.c_req_implements
+                 in
+              let _visitors_s13 =
+                self#on_list self#on_hint env _visitors_this.c_implements  in
+              let _visitors_s14 =
+                self#on_list self#on_class_const env _visitors_this.c_consts
+                 in
+              let _visitors_s15 =
+                self#on_list self#on_class_typeconst env
+                  _visitors_this.c_typeconsts
+                 in
+              let _visitors_s16 =
+                self#on_list self#on_class_var env
+                  _visitors_this.c_static_vars
+                 in
+              let _visitors_s17 =
+                self#on_list self#on_class_var env _visitors_this.c_vars  in
+              let _visitors_s18 =
+                self#on_option self#on_method_ env
+                  _visitors_this.c_constructor
+                 in
+              let _visitors_s19 =
+                self#on_list self#on_method_ env
+                  _visitors_this.c_static_methods
+                 in
+              let _visitors_s20 =
+                self#on_list self#on_method_ env _visitors_this.c_methods  in
+              let _visitors_s21 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.c_user_attributes
+                 in
+              let _visitors_s22 =
+                self#on_option self#on_enum_ env _visitors_this.c_enum  in
+              self#plus
+                (self#plus
+                   (self#plus
+                      (self#plus
+                         (self#plus
+                            (self#plus
+                               (self#plus
+                                  (self#plus
+                                     (self#plus
+                                        (self#plus
+                                           (self#plus
+                                              (self#plus
+                                                 (self#plus
+                                                    (self#plus
+                                                       (self#plus
+                                                          (self#plus
+                                                             (self#plus
+                                                                (self#plus
+                                                                   (self#plus
+                                                                    (self#plus
+                                                                    (self#plus
+                                                                    (self#plus
+                                                                    _visitors_s0
+                                                                    _visitors_s1)
+                                                                    _visitors_s2)
+                                                                    _visitors_s3)
+                                                                    _visitors_s4)
+                                                                   _visitors_s5)
+                                                                _visitors_s6)
+                                                             _visitors_s7)
+                                                          _visitors_s8)
+                                                       _visitors_s9)
+                                                    _visitors_s10)
+                                                 _visitors_s11) _visitors_s12)
+                                           _visitors_s13) _visitors_s14)
+                                     _visitors_s15) _visitors_s16)
+                               _visitors_s17) _visitors_s18) _visitors_s19)
+                      _visitors_s20) _visitors_s21) _visitors_s22
+            method on_class_const env
+              (_visitors_c0,_visitors_c1,_visitors_c2) =
+              let _visitors_s0 = self#on_option self#on_hint env _visitors_c0
+                 in
+              let _visitors_s1 = self#on_sid env _visitors_c1  in
+              let _visitors_s2 = self#on_option self#on_expr env _visitors_c2
+                 in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_class_typeconst env _visitors_this =
+              let _visitors_s0 = self#on_sid env _visitors_this.c_tconst_name
+                 in
+              let _visitors_s1 =
+                self#on_option self#on_hint env
+                  _visitors_this.c_tconst_constraint
+                 in
+              let _visitors_s2 =
+                self#on_option self#on_hint env _visitors_this.c_tconst_type
+                 in
+              self#plus (self#plus _visitors_s0 _visitors_s1) _visitors_s2
+            method on_class_var env _visitors_this =
+              let _visitors_s0 = self#on_bool env _visitors_this.cv_final  in
+              let _visitors_s1 = self#on_bool env _visitors_this.cv_is_xhp
+                 in
+              let _visitors_s2 =
+                self#on_visibility env _visitors_this.cv_visibility  in
+              let _visitors_s3 =
+                self#on_option self#on_hint env _visitors_this.cv_type  in
+              let _visitors_s4 = self#on_sid env _visitors_this.cv_id  in
+              let _visitors_s5 =
+                self#on_option self#on_expr env _visitors_this.cv_expr  in
+              let _visitors_s6 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.cv_user_attributes
+                 in
+              self#plus
+                (self#plus
+                   (self#plus
+                      (self#plus
+                         (self#plus (self#plus _visitors_s0 _visitors_s1)
+                            _visitors_s2) _visitors_s3) _visitors_s4)
+                   _visitors_s5) _visitors_s6
+            method on_method_ env _visitors_this =
+              let _visitors_s0 =
+                self#on_env_annotation env _visitors_this.m_annotation  in
+              let _visitors_s1 = self#on_bool env _visitors_this.m_final  in
+              let _visitors_s2 = self#on_bool env _visitors_this.m_abstract
+                 in
+              let _visitors_s3 =
+                self#on_visibility env _visitors_this.m_visibility  in
+              let _visitors_s4 = self#on_sid env _visitors_this.m_name  in
+              let _visitors_s5 =
+                self#on_list self#on_tparam env _visitors_this.m_tparams  in
+              let _visitors_s6 =
+                self#on_list self#on_where_constraint env
+                  _visitors_this.m_where_constraints
+                 in
+              let _visitors_s7 =
+                self#on_fun_variadicity env _visitors_this.m_variadic  in
+              let _visitors_s8 =
+                self#on_list self#on_fun_param env _visitors_this.m_params
+                 in
+              let _visitors_s9 = self#on_func_body env _visitors_this.m_body
+                 in
+              let _visitors_s10 =
+                self#on_fun_kind env _visitors_this.m_fun_kind  in
+              let _visitors_s11 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.m_user_attributes
+                 in
+              let _visitors_s12 =
+                self#on_option self#on_hint env _visitors_this.m_ret  in
+              let _visitors_s13 =
+                self#on_bool env _visitors_this.m_ret_by_ref  in
+              self#plus
+                (self#plus
+                   (self#plus
+                      (self#plus
+                         (self#plus
+                            (self#plus
+                               (self#plus
+                                  (self#plus
+                                     (self#plus
+                                        (self#plus
+                                           (self#plus
+                                              (self#plus
+                                                 (self#plus _visitors_s0
+                                                    _visitors_s1)
+                                                 _visitors_s2) _visitors_s3)
+                                           _visitors_s4) _visitors_s5)
+                                     _visitors_s6) _visitors_s7) _visitors_s8)
+                            _visitors_s9) _visitors_s10) _visitors_s11)
+                   _visitors_s12) _visitors_s13
+            method on_typedef env _visitors_this =
+              let _visitors_s0 =
+                self#on_env_annotation env _visitors_this.t_annotation  in
+              let _visitors_s1 = self#on_sid env _visitors_this.t_name  in
+              let _visitors_s2 =
+                self#on_list self#on_tparam env _visitors_this.t_tparams  in
+              let _visitors_s3 =
+                self#on_option self#on_hint env _visitors_this.t_constraint
+                 in
+              let _visitors_s4 = self#on_hint env _visitors_this.t_kind  in
+              let _visitors_s5 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.t_user_attributes
+                 in
+              let _visitors_s6 =
+                (fun _visitors_this  -> self#zero) _visitors_this.t_mode  in
+              let _visitors_s7 =
+                self#on_typedef_visibility env _visitors_this.t_vis  in
+              self#plus
+                (self#plus
+                   (self#plus
+                      (self#plus
+                         (self#plus
+                            (self#plus (self#plus _visitors_s0 _visitors_s1)
+                               _visitors_s2) _visitors_s3) _visitors_s4)
+                      _visitors_s5) _visitors_s6) _visitors_s7
+            method on_gconst env _visitors_this =
+              let _visitors_s0 =
+                self#on_env_annotation env _visitors_this.cst_annotation  in
+              let _visitors_s1 =
+                (fun _visitors_this  -> self#zero) _visitors_this.cst_mode
+                 in
+              let _visitors_s2 = self#on_sid env _visitors_this.cst_name  in
+              let _visitors_s3 =
+                self#on_option self#on_hint env _visitors_this.cst_type  in
+              let _visitors_s4 =
+                self#on_option self#on_expr env _visitors_this.cst_value  in
+              let _visitors_s5 =
+                self#on_bool env _visitors_this.cst_is_define  in
+              self#plus
+                (self#plus
+                   (self#plus
+                      (self#plus (self#plus _visitors_s0 _visitors_s1)
+                         _visitors_s2) _visitors_s3) _visitors_s4)
+                _visitors_s5
+            method on_Fun env _visitors_c0 =
+              let _visitors_s0 = self#on_fun_ env _visitors_c0  in
+              _visitors_s0
+            method on_Class env _visitors_c0 =
+              let _visitors_s0 = self#on_class_ env _visitors_c0  in
+              _visitors_s0
+            method on_Typedef env _visitors_c0 =
+              let _visitors_s0 = self#on_typedef env _visitors_c0  in
+              _visitors_s0
+            method on_Constant env _visitors_c0 =
+              let _visitors_s0 = self#on_gconst env _visitors_c0  in
+              _visitors_s0
+            method on_def env _visitors_this =
+              match _visitors_this with
+              | Fun _visitors_c0 -> self#on_Fun env _visitors_c0
+              | Class _visitors_c0 -> self#on_Class env _visitors_c0
+              | Typedef _visitors_c0 -> self#on_Typedef env _visitors_c0
+              | Constant _visitors_c0 -> self#on_Constant env _visitors_c0
+          end
+        [@@@VISITORS.END ]
+      end
+    include
+      struct
+        [@@@ocaml.warning "-4-26-27"]
+        [@@@VISITORS.BEGIN ]
+        class virtual ['self] map =
+          object (self : 'self)
+            inherit  [_] map_defs
+            method on_program env = self#on_list self#on_def env
+            method on_expr_annotation env _visitors_this = _visitors_this
+            method on_env_annotation env _visitors_this = _visitors_this
+            method on_Fallthrough env = Fallthrough
+            method on_Expr env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              Expr _visitors_r0
+            method on_Break env _visitors_c0 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              Break _visitors_r0
+            method on_Continue env _visitors_c0 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              Continue _visitors_r0
+            method on_Throw env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_is_terminal env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              Throw (_visitors_r0, _visitors_r1)
+            method on_Return env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              Return (_visitors_r0, _visitors_r1)
+            method on_GotoLabel env _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              GotoLabel _visitors_r0
+            method on_Goto env _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              Goto _visitors_r0
+            method on_Static_var env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              Static_var _visitors_r0
+            method on_Global_var env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              Global_var _visitors_r0
+            method on_If env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_block env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in
+              If (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Do env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_block env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              Do (_visitors_r0, _visitors_r1)
+            method on_While env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_block env _visitors_c1  in
+              While (_visitors_r0, _visitors_r1)
+            method on_Using env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_bool env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in
+              Using (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_For env _visitors_c0 _visitors_c1 _visitors_c2
+              _visitors_c3 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in
+              let _visitors_r3 = self#on_block env _visitors_c3  in
+              For (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3)
+            method on_Switch env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_case env _visitors_c1
+                 in
+              Switch (_visitors_r0, _visitors_r1)
+            method on_Foreach env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_as_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in
+              Foreach (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Try env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_block env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_catch env _visitors_c1
+                 in
+              let _visitors_r2 = self#on_block env _visitors_c2  in
+              Try (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Noop env = Noop
+            method on_stmt env _visitors_this =
+              match _visitors_this with
+              | Fallthrough  -> self#on_Fallthrough env
+              | Expr _visitors_c0 -> self#on_Expr env _visitors_c0
+              | Break _visitors_c0 -> self#on_Break env _visitors_c0
+              | Continue _visitors_c0 -> self#on_Continue env _visitors_c0
+              | Throw (_visitors_c0,_visitors_c1) ->
+                  self#on_Throw env _visitors_c0 _visitors_c1
+              | Return (_visitors_c0,_visitors_c1) ->
+                  self#on_Return env _visitors_c0 _visitors_c1
+              | GotoLabel _visitors_c0 -> self#on_GotoLabel env _visitors_c0
+              | Goto _visitors_c0 -> self#on_Goto env _visitors_c0
+              | Static_var _visitors_c0 ->
+                  self#on_Static_var env _visitors_c0
+              | Global_var _visitors_c0 ->
+                  self#on_Global_var env _visitors_c0
+              | If (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_If env _visitors_c0 _visitors_c1 _visitors_c2
+              | Do (_visitors_c0,_visitors_c1) ->
+                  self#on_Do env _visitors_c0 _visitors_c1
+              | While (_visitors_c0,_visitors_c1) ->
+                  self#on_While env _visitors_c0 _visitors_c1
+              | Using (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Using env _visitors_c0 _visitors_c1 _visitors_c2
+              | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) ->
+                  self#on_For env _visitors_c0 _visitors_c1 _visitors_c2
+                    _visitors_c3
+              | Switch (_visitors_c0,_visitors_c1) ->
+                  self#on_Switch env _visitors_c0 _visitors_c1
+              | Foreach (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Foreach env _visitors_c0 _visitors_c1 _visitors_c2
+              | Try (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Try env _visitors_c0 _visitors_c1 _visitors_c2
+              | Noop  -> self#on_Noop env
+            method on_As_v env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              As_v _visitors_r0
+            method on_As_kv env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              As_kv (_visitors_r0, _visitors_r1)
+            method on_Await_as_v env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              Await_as_v (_visitors_r0, _visitors_r1)
+            method on_Await_as_kv env _visitors_c0 _visitors_c1 _visitors_c2
+              =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in
+              Await_as_kv (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_as_expr env _visitors_this =
+              match _visitors_this with
+              | As_v _visitors_c0 -> self#on_As_v env _visitors_c0
+              | As_kv (_visitors_c0,_visitors_c1) ->
+                  self#on_As_kv env _visitors_c0 _visitors_c1
+              | Await_as_v (_visitors_c0,_visitors_c1) ->
+                  self#on_Await_as_v env _visitors_c0 _visitors_c1
+              | Await_as_kv (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Await_as_kv env _visitors_c0 _visitors_c1
+                    _visitors_c2
+            method on_block env = self#on_list self#on_stmt env
+            method on_CIparent env = CIparent
+            method on_CIself env = CIself
+            method on_CIstatic env = CIstatic
+            method on_CIexpr env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              CIexpr _visitors_r0
+            method on_CI env _visitors_c0 =
+              let _visitors_r0 = self#on_instantiated_sid env _visitors_c0
+                 in
+              CI _visitors_r0
+            method on_class_id env _visitors_this =
+              match _visitors_this with
+              | CIparent  -> self#on_CIparent env
+              | CIself  -> self#on_CIself env
+              | CIstatic  -> self#on_CIstatic env
+              | CIexpr _visitors_c0 -> self#on_CIexpr env _visitors_c0
+              | CI _visitors_c0 -> self#on_CI env _visitors_c0
+            method on_expr env (_visitors_c0,_visitors_c1) =
+              let _visitors_r0 = self#on_expr_annotation env _visitors_c0  in
+              let _visitors_r1 = self#on_expr_ env _visitors_c1  in
+              (_visitors_r0, _visitors_r1)
+            method on_Array env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_afield env _visitors_c0
+                 in
+              Array _visitors_r0
+            method on_Darray env _visitors_c0 =
+              let _visitors_r0 =
+                self#on_list
+                  (fun env  ->
+                     fun (_visitors_c0,_visitors_c1)  ->
+                       let _visitors_r0 = self#on_expr env _visitors_c0  in
+                       let _visitors_r1 = self#on_expr env _visitors_c1  in
+                       (_visitors_r0, _visitors_r1)) env _visitors_c0
+                 in
+              Darray _visitors_r0
+            method on_Varray env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              Varray _visitors_r0
+            method on_Shape env _visitors_c0 =
+              let _visitors_r0 =
+                self#on_shape_map self#on_expr env _visitors_c0  in
+              Shape _visitors_r0
+            method on_ValCollection env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_vc_kind env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_expr env _visitors_c1
+                 in
+              ValCollection (_visitors_r0, _visitors_r1)
+            method on_KeyValCollection env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_kvc_kind env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_field env _visitors_c1
+                 in
+              KeyValCollection (_visitors_r0, _visitors_r1)
+            method on_Null env = Null
+            method on_This env = This
+            method on_True env = True
+            method on_False env = False
+            method on_Id env _visitors_c0 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              Id _visitors_r0
+            method on_Lvar env _visitors_c0 =
+              let _visitors_r0 = self#on_lid env _visitors_c0  in
+              Lvar _visitors_r0
+            method on_Dollar env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              Dollar _visitors_r0
+            method on_Dollardollar env _visitors_c0 =
+              let _visitors_r0 = self#on_lid env _visitors_c0  in
+              Dollardollar _visitors_r0
+            method on_Clone env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              Clone _visitors_r0
+            method on_Obj_get env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_og_null_flavor env _visitors_c2  in
+              Obj_get (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Array_get env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              Array_get (_visitors_r0, _visitors_r1)
+            method on_Class_get env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_class_id env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in
+              Class_get (_visitors_r0, _visitors_r1)
+            method on_Class_const env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_class_id env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in
+              Class_const (_visitors_r0, _visitors_r1)
+            method on_Call env _visitors_c0 _visitors_c1 _visitors_c2
+              _visitors_c3 _visitors_c4 =
+              let _visitors_r0 = self#on_call_type env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_list self#on_hint env _visitors_c2
+                 in
+              let _visitors_r3 = self#on_list self#on_expr env _visitors_c3
+                 in
+              let _visitors_r4 = self#on_list self#on_expr env _visitors_c4
+                 in
+              Call
+                (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3,
+                  _visitors_r4)
+            method on_Int env _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              Int _visitors_r0
+            method on_Float env _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              Float _visitors_r0
+            method on_String env _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              String _visitors_r0
+            method on_String2 env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              String2 _visitors_r0
+            method on_Yield env _visitors_c0 =
+              let _visitors_r0 = self#on_afield env _visitors_c0  in
+              Yield _visitors_r0
+            method on_Yield_break env = Yield_break
+            method on_Await env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              Await _visitors_r0
+            method on_Suspend env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              Suspend _visitors_r0
+            method on_List env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              List _visitors_r0
+            method on_Expr_list env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              Expr_list _visitors_r0
+            method on_Cast env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_hint env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              Cast (_visitors_r0, _visitors_r1)
+            method on_Unop env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_uop env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              Unop (_visitors_r0, _visitors_r1)
+            method on_Binop env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_bop env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in
+              Binop (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Pipe env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_lid env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in
+              Pipe (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Eif env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in
+              Eif (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_NullCoalesce env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              NullCoalesce (_visitors_r0, _visitors_r1)
+            method on_InstanceOf env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_class_id env _visitors_c1  in
+              InstanceOf (_visitors_r0, _visitors_r1)
+            method on_Is env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_hint env _visitors_c1  in
+              Is (_visitors_r0, _visitors_r1)
+            method on_New env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_class_id env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_expr env _visitors_c1
+                 in
+              let _visitors_r2 = self#on_list self#on_expr env _visitors_c2
+                 in
+              New (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Efun env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_fun_ env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_lid env _visitors_c1
+                 in
+              Efun (_visitors_r0, _visitors_r1)
+            method on_Xml env _visitors_c0 _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 =
+                self#on_list self#on_xhp_attribute env _visitors_c1  in
+              let _visitors_r2 = self#on_list self#on_expr env _visitors_c2
+                 in
+              Xml (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Callconv env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_param_kind env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              Callconv (_visitors_r0, _visitors_r1)
+            method on_Lplaceholder env _visitors_c0 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              Lplaceholder _visitors_r0
+            method on_Fun_id env _visitors_c0 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              Fun_id _visitors_r0
+            method on_Method_id env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in
+              Method_id (_visitors_r0, _visitors_r1)
+            method on_Method_caller env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in
+              Method_caller (_visitors_r0, _visitors_r1)
+            method on_Smethod_id env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in
+              Smethod_id (_visitors_r0, _visitors_r1)
+            method on_Special_func env _visitors_c0 =
+              let _visitors_r0 = self#on_special_func env _visitors_c0  in
+              Special_func _visitors_r0
+            method on_Pair env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              Pair (_visitors_r0, _visitors_r1)
+            method on_Assert env _visitors_c0 =
+              let _visitors_r0 = self#on_assert_expr env _visitors_c0  in
+              Assert _visitors_r0
+            method on_Typename env _visitors_c0 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              Typename _visitors_r0
+            method on_Any env = Any
+            method on_expr_ env _visitors_this =
+              match _visitors_this with
+              | Array _visitors_c0 -> self#on_Array env _visitors_c0
+              | Darray _visitors_c0 -> self#on_Darray env _visitors_c0
+              | Varray _visitors_c0 -> self#on_Varray env _visitors_c0
+              | Shape _visitors_c0 -> self#on_Shape env _visitors_c0
+              | ValCollection (_visitors_c0,_visitors_c1) ->
+                  self#on_ValCollection env _visitors_c0 _visitors_c1
+              | KeyValCollection (_visitors_c0,_visitors_c1) ->
+                  self#on_KeyValCollection env _visitors_c0 _visitors_c1
+              | Null  -> self#on_Null env
+              | This  -> self#on_This env
+              | True  -> self#on_True env
+              | False  -> self#on_False env
+              | Id _visitors_c0 -> self#on_Id env _visitors_c0
+              | Lvar _visitors_c0 -> self#on_Lvar env _visitors_c0
+              | Dollar _visitors_c0 -> self#on_Dollar env _visitors_c0
+              | Dollardollar _visitors_c0 ->
+                  self#on_Dollardollar env _visitors_c0
+              | Clone _visitors_c0 -> self#on_Clone env _visitors_c0
+              | Obj_get (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Obj_get env _visitors_c0 _visitors_c1 _visitors_c2
+              | Array_get (_visitors_c0,_visitors_c1) ->
+                  self#on_Array_get env _visitors_c0 _visitors_c1
+              | Class_get (_visitors_c0,_visitors_c1) ->
+                  self#on_Class_get env _visitors_c0 _visitors_c1
+              | Class_const (_visitors_c0,_visitors_c1) ->
+                  self#on_Class_const env _visitors_c0 _visitors_c1
+              | Call
+                  (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
+                  ->
+                  self#on_Call env _visitors_c0 _visitors_c1 _visitors_c2
+                    _visitors_c3 _visitors_c4
+              | Int _visitors_c0 -> self#on_Int env _visitors_c0
+              | Float _visitors_c0 -> self#on_Float env _visitors_c0
+              | String _visitors_c0 -> self#on_String env _visitors_c0
+              | String2 _visitors_c0 -> self#on_String2 env _visitors_c0
+              | Yield _visitors_c0 -> self#on_Yield env _visitors_c0
+              | Yield_break  -> self#on_Yield_break env
+              | Await _visitors_c0 -> self#on_Await env _visitors_c0
+              | Suspend _visitors_c0 -> self#on_Suspend env _visitors_c0
+              | List _visitors_c0 -> self#on_List env _visitors_c0
+              | Expr_list _visitors_c0 -> self#on_Expr_list env _visitors_c0
+              | Cast (_visitors_c0,_visitors_c1) ->
+                  self#on_Cast env _visitors_c0 _visitors_c1
+              | Unop (_visitors_c0,_visitors_c1) ->
+                  self#on_Unop env _visitors_c0 _visitors_c1
+              | Binop (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Binop env _visitors_c0 _visitors_c1 _visitors_c2
+              | Pipe (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Pipe env _visitors_c0 _visitors_c1 _visitors_c2
+              | Eif (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Eif env _visitors_c0 _visitors_c1 _visitors_c2
+              | NullCoalesce (_visitors_c0,_visitors_c1) ->
+                  self#on_NullCoalesce env _visitors_c0 _visitors_c1
+              | InstanceOf (_visitors_c0,_visitors_c1) ->
+                  self#on_InstanceOf env _visitors_c0 _visitors_c1
+              | Is (_visitors_c0,_visitors_c1) ->
+                  self#on_Is env _visitors_c0 _visitors_c1
+              | New (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_New env _visitors_c0 _visitors_c1 _visitors_c2
+              | Efun (_visitors_c0,_visitors_c1) ->
+                  self#on_Efun env _visitors_c0 _visitors_c1
+              | Xml (_visitors_c0,_visitors_c1,_visitors_c2) ->
+                  self#on_Xml env _visitors_c0 _visitors_c1 _visitors_c2
+              | Callconv (_visitors_c0,_visitors_c1) ->
+                  self#on_Callconv env _visitors_c0 _visitors_c1
+              | Lplaceholder _visitors_c0 ->
+                  self#on_Lplaceholder env _visitors_c0
+              | Fun_id _visitors_c0 -> self#on_Fun_id env _visitors_c0
+              | Method_id (_visitors_c0,_visitors_c1) ->
+                  self#on_Method_id env _visitors_c0 _visitors_c1
+              | Method_caller (_visitors_c0,_visitors_c1) ->
+                  self#on_Method_caller env _visitors_c0 _visitors_c1
+              | Smethod_id (_visitors_c0,_visitors_c1) ->
+                  self#on_Smethod_id env _visitors_c0 _visitors_c1
+              | Special_func _visitors_c0 ->
+                  self#on_Special_func env _visitors_c0
+              | Pair (_visitors_c0,_visitors_c1) ->
+                  self#on_Pair env _visitors_c0 _visitors_c1
+              | Assert _visitors_c0 -> self#on_Assert env _visitors_c0
+              | Typename _visitors_c0 -> self#on_Typename env _visitors_c0
+              | Any  -> self#on_Any env
+            method on_AE_assert env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              AE_assert _visitors_r0
+            method on_assert_expr env _visitors_this =
+              match _visitors_this with
+              | AE_assert _visitors_c0 -> self#on_AE_assert env _visitors_c0
+            method on_Default env _visitors_c0 =
+              let _visitors_r0 = self#on_block env _visitors_c0  in
+              Default _visitors_r0
+            method on_Case env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_block env _visitors_c1  in
+              Case (_visitors_r0, _visitors_r1)
+            method on_case env _visitors_this =
+              match _visitors_this with
+              | Default _visitors_c0 -> self#on_Default env _visitors_c0
+              | Case (_visitors_c0,_visitors_c1) ->
+                  self#on_Case env _visitors_c0 _visitors_c1
+            method on_catch env (_visitors_c0,_visitors_c1,_visitors_c2) =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 = self#on_lid env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in
+              (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_field env (_visitors_c0,_visitors_c1) =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              (_visitors_r0, _visitors_r1)
+            method on_AFvalue env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              AFvalue _visitors_r0
+            method on_AFkvalue env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              AFkvalue (_visitors_r0, _visitors_r1)
+            method on_afield env _visitors_this =
+              match _visitors_this with
+              | AFvalue _visitors_c0 -> self#on_AFvalue env _visitors_c0
+              | AFkvalue (_visitors_c0,_visitors_c1) ->
+                  self#on_AFkvalue env _visitors_c0 _visitors_c1
+            method on_Xhp_simple env _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              Xhp_simple (_visitors_r0, _visitors_r1)
+            method on_Xhp_spread env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              Xhp_spread _visitors_r0
+            method on_xhp_attribute env _visitors_this =
+              match _visitors_this with
+              | Xhp_simple (_visitors_c0,_visitors_c1) ->
+                  self#on_Xhp_simple env _visitors_c0 _visitors_c1
+              | Xhp_spread _visitors_c0 ->
+                  self#on_Xhp_spread env _visitors_c0
+            method on_Gena env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              Gena _visitors_r0
+            method on_Genva env _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              Genva _visitors_r0
+            method on_Gen_array_rec env _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              Gen_array_rec _visitors_r0
+            method on_special_func env _visitors_this =
+              match _visitors_this with
+              | Gena _visitors_c0 -> self#on_Gena env _visitors_c0
+              | Genva _visitors_c0 -> self#on_Genva env _visitors_c0
+              | Gen_array_rec _visitors_c0 ->
+                  self#on_Gen_array_rec env _visitors_c0
+            method on_is_reference env = self#on_bool env
+            method on_is_variadic env = self#on_bool env
+            method on_fun_param env _visitors_this =
+              let _visitors_r0 =
+                self#on_option self#on_hint env _visitors_this.param_hint  in
+              let _visitors_r1 =
+                self#on_is_reference env _visitors_this.param_is_reference
+                 in
+              let _visitors_r2 =
+                self#on_is_variadic env _visitors_this.param_is_variadic  in
+              let _visitors_r3 = self#on_t env _visitors_this.param_pos  in
+              let _visitors_r4 = self#on_string env _visitors_this.param_name
+                 in
+              let _visitors_r5 =
+                self#on_option self#on_expr env _visitors_this.param_expr  in
+              let _visitors_r6 =
+                self#on_option self#on_param_kind env
+                  _visitors_this.param_callconv
+                 in
+              let _visitors_r7 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.param_user_attributes
+                 in
+              {
+                param_hint = _visitors_r0;
+                param_is_reference = _visitors_r1;
+                param_is_variadic = _visitors_r2;
+                param_pos = _visitors_r3;
+                param_name = _visitors_r4;
+                param_expr = _visitors_r5;
+                param_callconv = _visitors_r6;
+                param_user_attributes = _visitors_r7
+              }
+            method on_FVvariadicArg env _visitors_c0 =
+              let _visitors_r0 = self#on_fun_param env _visitors_c0  in
+              FVvariadicArg _visitors_r0
+            method on_FVellipsis env = FVellipsis
+            method on_FVnonVariadic env = FVnonVariadic
+            method on_fun_variadicity env _visitors_this =
+              match _visitors_this with
+              | FVvariadicArg _visitors_c0 ->
+                  self#on_FVvariadicArg env _visitors_c0
+              | FVellipsis  -> self#on_FVellipsis env
+              | FVnonVariadic  -> self#on_FVnonVariadic env
+            method on_fun_ env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.f_annotation  in
+              let _visitors_r1 =
+                (fun _visitors_this  -> _visitors_this) _visitors_this.f_mode
+                 in
+              let _visitors_r2 =
+                self#on_option self#on_hint env _visitors_this.f_ret  in
+              let _visitors_r3 = self#on_sid env _visitors_this.f_name  in
+              let _visitors_r4 =
+                self#on_list self#on_tparam env _visitors_this.f_tparams  in
+              let _visitors_r5 =
+                self#on_list self#on_where_constraint env
+                  _visitors_this.f_where_constraints
+                 in
+              let _visitors_r6 =
+                self#on_fun_variadicity env _visitors_this.f_variadic  in
+              let _visitors_r7 =
+                self#on_list self#on_fun_param env _visitors_this.f_params
+                 in
+              let _visitors_r8 = self#on_func_body env _visitors_this.f_body
+                 in
+              let _visitors_r9 =
+                self#on_fun_kind env _visitors_this.f_fun_kind  in
+              let _visitors_r10 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.f_user_attributes
+                 in
+              let _visitors_r11 =
+                self#on_bool env _visitors_this.f_ret_by_ref  in
+              {
+                f_annotation = _visitors_r0;
+                f_mode = _visitors_r1;
+                f_ret = _visitors_r2;
+                f_name = _visitors_r3;
+                f_tparams = _visitors_r4;
+                f_where_constraints = _visitors_r5;
+                f_variadic = _visitors_r6;
+                f_params = _visitors_r7;
+                f_body = _visitors_r8;
+                f_fun_kind = _visitors_r9;
+                f_user_attributes = _visitors_r10;
+                f_ret_by_ref = _visitors_r11
+              }
+            method on_UnnamedBody env _visitors_c0 =
+              let _visitors_r0 = self#on_func_unnamed_body env _visitors_c0
+                 in
+              UnnamedBody _visitors_r0
+            method on_NamedBody env _visitors_c0 =
+              let _visitors_r0 = self#on_func_named_body env _visitors_c0  in
+              NamedBody _visitors_r0
+            method on_func_body env _visitors_this =
+              match _visitors_this with
+              | UnnamedBody _visitors_c0 ->
+                  self#on_UnnamedBody env _visitors_c0
+              | NamedBody _visitors_c0 -> self#on_NamedBody env _visitors_c0
+            method on_func_unnamed_body env _visitors_this =
+              let _visitors_r0 =
+                (fun _visitors_this  -> _visitors_this)
+                  _visitors_this.fub_ast
+                 in
+              let _visitors_r1 =
+                (fun _visitors_this  -> _visitors_this)
+                  _visitors_this.fub_tparams
+                 in
+              let _visitors_r2 =
+                (fun _visitors_this  -> _visitors_this)
+                  _visitors_this.fub_namespace
+                 in
+              {
+                fub_ast = _visitors_r0;
+                fub_tparams = _visitors_r1;
+                fub_namespace = _visitors_r2
+              }
+            method on_func_named_body env _visitors_this =
+              let _visitors_r0 = self#on_block env _visitors_this.fnb_nast
+                 in
+              let _visitors_r1 = self#on_bool env _visitors_this.fnb_unsafe
+                 in
+              { fnb_nast = _visitors_r0; fnb_unsafe = _visitors_r1 }
+            method on_user_attribute env _visitors_this =
+              let _visitors_r0 = self#on_sid env _visitors_this.ua_name  in
+              let _visitors_r1 =
+                self#on_list self#on_expr env _visitors_this.ua_params  in
+              { ua_name = _visitors_r0; ua_params = _visitors_r1 }
+            method on_class_ env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.c_annotation  in
+              let _visitors_r1 =
+                (fun _visitors_this  -> _visitors_this) _visitors_this.c_mode
+                 in
+              let _visitors_r2 = self#on_bool env _visitors_this.c_final  in
+              let _visitors_r3 = self#on_bool env _visitors_this.c_is_xhp  in
+              let _visitors_r4 = self#on_class_kind env _visitors_this.c_kind
+                 in
+              let _visitors_r5 = self#on_sid env _visitors_this.c_name  in
+              let _visitors_r6 =
+                (fun _visitors_this  -> _visitors_this)
+                  _visitors_this.c_tparams
+                 in
+              let _visitors_r7 =
+                self#on_list self#on_hint env _visitors_this.c_extends  in
+              let _visitors_r8 =
+                self#on_list self#on_hint env _visitors_this.c_uses  in
+              let _visitors_r9 =
+                self#on_list self#on_hint env _visitors_this.c_xhp_attr_uses
+                 in
+              let _visitors_r10 =
+                self#on_list self#on_pstring env
+                  _visitors_this.c_xhp_category
+                 in
+              let _visitors_r11 =
+                self#on_list self#on_hint env _visitors_this.c_req_extends
+                 in
+              let _visitors_r12 =
+                self#on_list self#on_hint env _visitors_this.c_req_implements
+                 in
+              let _visitors_r13 =
+                self#on_list self#on_hint env _visitors_this.c_implements  in
+              let _visitors_r14 =
+                self#on_list self#on_class_const env _visitors_this.c_consts
+                 in
+              let _visitors_r15 =
+                self#on_list self#on_class_typeconst env
+                  _visitors_this.c_typeconsts
+                 in
+              let _visitors_r16 =
+                self#on_list self#on_class_var env
+                  _visitors_this.c_static_vars
+                 in
+              let _visitors_r17 =
+                self#on_list self#on_class_var env _visitors_this.c_vars  in
+              let _visitors_r18 =
+                self#on_option self#on_method_ env
+                  _visitors_this.c_constructor
+                 in
+              let _visitors_r19 =
+                self#on_list self#on_method_ env
+                  _visitors_this.c_static_methods
+                 in
+              let _visitors_r20 =
+                self#on_list self#on_method_ env _visitors_this.c_methods  in
+              let _visitors_r21 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.c_user_attributes
+                 in
+              let _visitors_r22 =
+                self#on_option self#on_enum_ env _visitors_this.c_enum  in
+              {
+                c_annotation = _visitors_r0;
+                c_mode = _visitors_r1;
+                c_final = _visitors_r2;
+                c_is_xhp = _visitors_r3;
+                c_kind = _visitors_r4;
+                c_name = _visitors_r5;
+                c_tparams = _visitors_r6;
+                c_extends = _visitors_r7;
+                c_uses = _visitors_r8;
+                c_xhp_attr_uses = _visitors_r9;
+                c_xhp_category = _visitors_r10;
+                c_req_extends = _visitors_r11;
+                c_req_implements = _visitors_r12;
+                c_implements = _visitors_r13;
+                c_consts = _visitors_r14;
+                c_typeconsts = _visitors_r15;
+                c_static_vars = _visitors_r16;
+                c_vars = _visitors_r17;
+                c_constructor = _visitors_r18;
+                c_static_methods = _visitors_r19;
+                c_methods = _visitors_r20;
+                c_user_attributes = _visitors_r21;
+                c_enum = _visitors_r22
+              }
+            method on_class_const env
+              (_visitors_c0,_visitors_c1,_visitors_c2) =
+              let _visitors_r0 = self#on_option self#on_hint env _visitors_c0
+                 in
+              let _visitors_r1 = self#on_sid env _visitors_c1  in
+              let _visitors_r2 = self#on_option self#on_expr env _visitors_c2
+                 in
+              (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_class_typeconst env _visitors_this =
+              let _visitors_r0 = self#on_sid env _visitors_this.c_tconst_name
+                 in
+              let _visitors_r1 =
+                self#on_option self#on_hint env
+                  _visitors_this.c_tconst_constraint
+                 in
+              let _visitors_r2 =
+                self#on_option self#on_hint env _visitors_this.c_tconst_type
+                 in
+              {
+                c_tconst_name = _visitors_r0;
+                c_tconst_constraint = _visitors_r1;
+                c_tconst_type = _visitors_r2
+              }
+            method on_class_var env _visitors_this =
+              let _visitors_r0 = self#on_bool env _visitors_this.cv_final  in
+              let _visitors_r1 = self#on_bool env _visitors_this.cv_is_xhp
+                 in
+              let _visitors_r2 =
+                self#on_visibility env _visitors_this.cv_visibility  in
+              let _visitors_r3 =
+                self#on_option self#on_hint env _visitors_this.cv_type  in
+              let _visitors_r4 = self#on_sid env _visitors_this.cv_id  in
+              let _visitors_r5 =
+                self#on_option self#on_expr env _visitors_this.cv_expr  in
+              let _visitors_r6 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.cv_user_attributes
+                 in
+              {
+                cv_final = _visitors_r0;
+                cv_is_xhp = _visitors_r1;
+                cv_visibility = _visitors_r2;
+                cv_type = _visitors_r3;
+                cv_id = _visitors_r4;
+                cv_expr = _visitors_r5;
+                cv_user_attributes = _visitors_r6
+              }
+            method on_method_ env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.m_annotation  in
+              let _visitors_r1 = self#on_bool env _visitors_this.m_final  in
+              let _visitors_r2 = self#on_bool env _visitors_this.m_abstract
+                 in
+              let _visitors_r3 =
+                self#on_visibility env _visitors_this.m_visibility  in
+              let _visitors_r4 = self#on_sid env _visitors_this.m_name  in
+              let _visitors_r5 =
+                self#on_list self#on_tparam env _visitors_this.m_tparams  in
+              let _visitors_r6 =
+                self#on_list self#on_where_constraint env
+                  _visitors_this.m_where_constraints
+                 in
+              let _visitors_r7 =
+                self#on_fun_variadicity env _visitors_this.m_variadic  in
+              let _visitors_r8 =
+                self#on_list self#on_fun_param env _visitors_this.m_params
+                 in
+              let _visitors_r9 = self#on_func_body env _visitors_this.m_body
+                 in
+              let _visitors_r10 =
+                self#on_fun_kind env _visitors_this.m_fun_kind  in
+              let _visitors_r11 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.m_user_attributes
+                 in
+              let _visitors_r12 =
+                self#on_option self#on_hint env _visitors_this.m_ret  in
+              let _visitors_r13 =
+                self#on_bool env _visitors_this.m_ret_by_ref  in
+              {
+                m_annotation = _visitors_r0;
+                m_final = _visitors_r1;
+                m_abstract = _visitors_r2;
+                m_visibility = _visitors_r3;
+                m_name = _visitors_r4;
+                m_tparams = _visitors_r5;
+                m_where_constraints = _visitors_r6;
+                m_variadic = _visitors_r7;
+                m_params = _visitors_r8;
+                m_body = _visitors_r9;
+                m_fun_kind = _visitors_r10;
+                m_user_attributes = _visitors_r11;
+                m_ret = _visitors_r12;
+                m_ret_by_ref = _visitors_r13
+              }
+            method on_typedef env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.t_annotation  in
+              let _visitors_r1 = self#on_sid env _visitors_this.t_name  in
+              let _visitors_r2 =
+                self#on_list self#on_tparam env _visitors_this.t_tparams  in
+              let _visitors_r3 =
+                self#on_option self#on_hint env _visitors_this.t_constraint
+                 in
+              let _visitors_r4 = self#on_hint env _visitors_this.t_kind  in
+              let _visitors_r5 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.t_user_attributes
+                 in
+              let _visitors_r6 =
+                (fun _visitors_this  -> _visitors_this) _visitors_this.t_mode
+                 in
+              let _visitors_r7 =
+                self#on_typedef_visibility env _visitors_this.t_vis  in
+              {
+                t_annotation = _visitors_r0;
+                t_name = _visitors_r1;
+                t_tparams = _visitors_r2;
+                t_constraint = _visitors_r3;
+                t_kind = _visitors_r4;
+                t_user_attributes = _visitors_r5;
+                t_mode = _visitors_r6;
+                t_vis = _visitors_r7
+              }
+            method on_gconst env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.cst_annotation  in
+              let _visitors_r1 =
+                (fun _visitors_this  -> _visitors_this)
+                  _visitors_this.cst_mode
+                 in
+              let _visitors_r2 = self#on_sid env _visitors_this.cst_name  in
+              let _visitors_r3 =
+                self#on_option self#on_hint env _visitors_this.cst_type  in
+              let _visitors_r4 =
+                self#on_option self#on_expr env _visitors_this.cst_value  in
+              let _visitors_r5 =
+                self#on_bool env _visitors_this.cst_is_define  in
+              {
+                cst_annotation = _visitors_r0;
+                cst_mode = _visitors_r1;
+                cst_name = _visitors_r2;
+                cst_type = _visitors_r3;
+                cst_value = _visitors_r4;
+                cst_is_define = _visitors_r5
+              }
+            method on_Fun env _visitors_c0 =
+              let _visitors_r0 = self#on_fun_ env _visitors_c0  in
+              Fun _visitors_r0
+            method on_Class env _visitors_c0 =
+              let _visitors_r0 = self#on_class_ env _visitors_c0  in
+              Class _visitors_r0
+            method on_Typedef env _visitors_c0 =
+              let _visitors_r0 = self#on_typedef env _visitors_c0  in
+              Typedef _visitors_r0
+            method on_Constant env _visitors_c0 =
+              let _visitors_r0 = self#on_gconst env _visitors_c0  in
+              Constant _visitors_r0
+            method on_def env _visitors_this =
+              match _visitors_this with
+              | Fun _visitors_c0 -> self#on_Fun env _visitors_c0
+              | Class _visitors_c0 -> self#on_Class env _visitors_c0
+              | Typedef _visitors_c0 -> self#on_Typedef env _visitors_c0
+              | Constant _visitors_c0 -> self#on_Constant env _visitors_c0
+          end
+        [@@@VISITORS.END ]
+      end
+    include
+      struct
+        [@@@ocaml.warning "-4-26-27"]
+        [@@@VISITORS.BEGIN ]
+        class virtual ['self] endo =
+          object (self : 'self)
+            inherit  [_] endo_defs
+            method on_program env = self#on_list self#on_def env
+            method on_expr_annotation env _visitors_this = _visitors_this
+            method on_env_annotation env _visitors_this = _visitors_this
+            method on_Fallthrough env _visitors_this =
+              if true then _visitors_this else Fallthrough
+            method on_Expr env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Expr _visitors_r0
+            method on_Break env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Break _visitors_r0
+            method on_Continue env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Continue _visitors_r0
+            method on_Throw env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_is_terminal env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Throw (_visitors_r0, _visitors_r1)
+            method on_Return env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Return (_visitors_r0, _visitors_r1)
+            method on_GotoLabel env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else GotoLabel _visitors_r0
+            method on_Goto env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Goto _visitors_r0
+            method on_Static_var env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Static_var _visitors_r0
+            method on_Global_var env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Global_var _visitors_r0
+            method on_If env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_block env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else If (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Do env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_block env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Do (_visitors_r0, _visitors_r1)
+            method on_While env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_block env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else While (_visitors_r0, _visitors_r1)
+            method on_Using env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 =
+              let _visitors_r0 = self#on_bool env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else Using (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_For env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 _visitors_c3 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in
+              let _visitors_r3 = self#on_block env _visitors_c3  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(&&)
+                        (Pervasives.(==) _visitors_c2 _visitors_r2)
+                        (Pervasives.(==) _visitors_c3 _visitors_r3)))
+              then _visitors_this
+              else
+                For (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3)
+            method on_Switch env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_case env _visitors_c1
+                 in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Switch (_visitors_r0, _visitors_r1)
+            method on_Foreach env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_as_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else Foreach (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Try env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 =
+              let _visitors_r0 = self#on_block env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_catch env _visitors_c1
+                 in
+              let _visitors_r2 = self#on_block env _visitors_c2  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else Try (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Noop env _visitors_this =
+              if true then _visitors_this else Noop
+            method on_stmt env _visitors_this =
+              match _visitors_this with
+              | Fallthrough  as _visitors_this ->
+                  self#on_Fallthrough env _visitors_this
+              | Expr _visitors_c0 as _visitors_this ->
+                  self#on_Expr env _visitors_this _visitors_c0
+              | Break _visitors_c0 as _visitors_this ->
+                  self#on_Break env _visitors_this _visitors_c0
+              | Continue _visitors_c0 as _visitors_this ->
+                  self#on_Continue env _visitors_this _visitors_c0
+              | Throw (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Throw env _visitors_this _visitors_c0 _visitors_c1
+              | Return (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Return env _visitors_this _visitors_c0 _visitors_c1
+              | GotoLabel _visitors_c0 as _visitors_this ->
+                  self#on_GotoLabel env _visitors_this _visitors_c0
+              | Goto _visitors_c0 as _visitors_this ->
+                  self#on_Goto env _visitors_this _visitors_c0
+              | Static_var _visitors_c0 as _visitors_this ->
+                  self#on_Static_var env _visitors_this _visitors_c0
+              | Global_var _visitors_c0 as _visitors_this ->
+                  self#on_Global_var env _visitors_this _visitors_c0
+              | If (_visitors_c0,_visitors_c1,_visitors_c2) as _visitors_this
+                  ->
+                  self#on_If env _visitors_this _visitors_c0 _visitors_c1
+                    _visitors_c2
+              | Do (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Do env _visitors_this _visitors_c0 _visitors_c1
+              | While (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_While env _visitors_this _visitors_c0 _visitors_c1
+              | Using (_visitors_c0,_visitors_c1,_visitors_c2) as
+                  _visitors_this ->
+                  self#on_Using env _visitors_this _visitors_c0 _visitors_c1
+                    _visitors_c2
+              | For (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3) as
+                  _visitors_this ->
+                  self#on_For env _visitors_this _visitors_c0 _visitors_c1
+                    _visitors_c2 _visitors_c3
+              | Switch (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Switch env _visitors_this _visitors_c0 _visitors_c1
+              | Foreach (_visitors_c0,_visitors_c1,_visitors_c2) as
+                  _visitors_this ->
+                  self#on_Foreach env _visitors_this _visitors_c0
+                    _visitors_c1 _visitors_c2
+              | Try (_visitors_c0,_visitors_c1,_visitors_c2) as
+                  _visitors_this ->
+                  self#on_Try env _visitors_this _visitors_c0 _visitors_c1
+                    _visitors_c2
+              | Noop  as _visitors_this -> self#on_Noop env _visitors_this
+            method on_As_v env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else As_v _visitors_r0
+            method on_As_kv env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else As_kv (_visitors_r0, _visitors_r1)
+            method on_Await_as_v env _visitors_this _visitors_c0 _visitors_c1
+              =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Await_as_v (_visitors_r0, _visitors_r1)
+            method on_Await_as_kv env _visitors_this _visitors_c0
+              _visitors_c1 _visitors_c2 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else Await_as_kv (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_as_expr env _visitors_this =
+              match _visitors_this with
+              | As_v _visitors_c0 as _visitors_this ->
+                  self#on_As_v env _visitors_this _visitors_c0
+              | As_kv (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_As_kv env _visitors_this _visitors_c0 _visitors_c1
+              | Await_as_v (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Await_as_v env _visitors_this _visitors_c0
+                    _visitors_c1
+              | Await_as_kv (_visitors_c0,_visitors_c1,_visitors_c2) as
+                  _visitors_this ->
+                  self#on_Await_as_kv env _visitors_this _visitors_c0
+                    _visitors_c1 _visitors_c2
+            method on_block env = self#on_list self#on_stmt env
+            method on_CIparent env _visitors_this =
+              if true then _visitors_this else CIparent
+            method on_CIself env _visitors_this =
+              if true then _visitors_this else CIself
+            method on_CIstatic env _visitors_this =
+              if true then _visitors_this else CIstatic
+            method on_CIexpr env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else CIexpr _visitors_r0
+            method on_CI env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_instantiated_sid env _visitors_c0
+                 in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else CI _visitors_r0
+            method on_class_id env _visitors_this =
+              match _visitors_this with
+              | CIparent  as _visitors_this ->
+                  self#on_CIparent env _visitors_this
+              | CIself  as _visitors_this ->
+                  self#on_CIself env _visitors_this
+              | CIstatic  as _visitors_this ->
+                  self#on_CIstatic env _visitors_this
+              | CIexpr _visitors_c0 as _visitors_this ->
+                  self#on_CIexpr env _visitors_this _visitors_c0
+              | CI _visitors_c0 as _visitors_this ->
+                  self#on_CI env _visitors_this _visitors_c0
+            method on_expr env
+              ((_visitors_c0,_visitors_c1) as _visitors_this) =
+              let _visitors_r0 = self#on_expr_annotation env _visitors_c0  in
+              let _visitors_r1 = self#on_expr_ env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else (_visitors_r0, _visitors_r1)
+            method on_Array env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_afield env _visitors_c0
+                 in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Array _visitors_r0
+            method on_Darray env _visitors_this _visitors_c0 =
+              let _visitors_r0 =
+                self#on_list
+                  (fun env  ->
+                     fun ((_visitors_c0,_visitors_c1) as _visitors_this)  ->
+                       let _visitors_r0 = self#on_expr env _visitors_c0  in
+                       let _visitors_r1 = self#on_expr env _visitors_c1  in
+                       if
+                         Pervasives.(&&)
+                           (Pervasives.(==) _visitors_c0 _visitors_r0)
+                           (Pervasives.(==) _visitors_c1 _visitors_r1)
+                       then _visitors_this
+                       else (_visitors_r0, _visitors_r1)) env _visitors_c0
+                 in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Darray _visitors_r0
+            method on_Varray env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Varray _visitors_r0
+            method on_Shape env _visitors_this _visitors_c0 =
+              let _visitors_r0 =
+                self#on_shape_map self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Shape _visitors_r0
+            method on_ValCollection env _visitors_this _visitors_c0
+              _visitors_c1 =
+              let _visitors_r0 = self#on_vc_kind env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_expr env _visitors_c1
+                 in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else ValCollection (_visitors_r0, _visitors_r1)
+            method on_KeyValCollection env _visitors_this _visitors_c0
+              _visitors_c1 =
+              let _visitors_r0 = self#on_kvc_kind env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_field env _visitors_c1
+                 in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else KeyValCollection (_visitors_r0, _visitors_r1)
+            method on_Null env _visitors_this =
+              if true then _visitors_this else Null
+            method on_This env _visitors_this =
+              if true then _visitors_this else This
+            method on_True env _visitors_this =
+              if true then _visitors_this else True
+            method on_False env _visitors_this =
+              if true then _visitors_this else False
+            method on_Id env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Id _visitors_r0
+            method on_Lvar env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_lid env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Lvar _visitors_r0
+            method on_Dollar env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Dollar _visitors_r0
+            method on_Dollardollar env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_lid env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Dollardollar _visitors_r0
+            method on_Clone env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Clone _visitors_r0
+            method on_Obj_get env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_og_null_flavor env _visitors_c2  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else Obj_get (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Array_get env _visitors_this _visitors_c0 _visitors_c1
+              =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Array_get (_visitors_r0, _visitors_r1)
+            method on_Class_get env _visitors_this _visitors_c0 _visitors_c1
+              =
+              let _visitors_r0 = self#on_class_id env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Class_get (_visitors_r0, _visitors_r1)
+            method on_Class_const env _visitors_this _visitors_c0
+              _visitors_c1 =
+              let _visitors_r0 = self#on_class_id env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Class_const (_visitors_r0, _visitors_r1)
+            method on_Call env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 _visitors_c3 _visitors_c4 =
+              let _visitors_r0 = self#on_call_type env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_list self#on_hint env _visitors_c2
+                 in
+              let _visitors_r3 = self#on_list self#on_expr env _visitors_c3
+                 in
+              let _visitors_r4 = self#on_list self#on_expr env _visitors_c4
+                 in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(&&)
+                        (Pervasives.(==) _visitors_c2 _visitors_r2)
+                        (Pervasives.(&&)
+                           (Pervasives.(==) _visitors_c3 _visitors_r3)
+                           (Pervasives.(==) _visitors_c4 _visitors_r4))))
+              then _visitors_this
+              else
+                Call
+                  (_visitors_r0, _visitors_r1, _visitors_r2, _visitors_r3,
+                    _visitors_r4)
+            method on_Int env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Int _visitors_r0
+            method on_Float env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Float _visitors_r0
+            method on_String env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else String _visitors_r0
+            method on_String2 env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else String2 _visitors_r0
+            method on_Yield env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_afield env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Yield _visitors_r0
+            method on_Yield_break env _visitors_this =
+              if true then _visitors_this else Yield_break
+            method on_Await env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Await _visitors_r0
+            method on_Suspend env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Suspend _visitors_r0
+            method on_List env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else List _visitors_r0
+            method on_Expr_list env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Expr_list _visitors_r0
+            method on_Cast env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_hint env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Cast (_visitors_r0, _visitors_r1)
+            method on_Unop env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_uop env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Unop (_visitors_r0, _visitors_r1)
+            method on_Binop env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 =
+              let _visitors_r0 = self#on_bop env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else Binop (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Pipe env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 =
+              let _visitors_r0 = self#on_lid env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else Pipe (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Eif env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_option self#on_expr env _visitors_c1
+                 in
+              let _visitors_r2 = self#on_expr env _visitors_c2  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else Eif (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_NullCoalesce env _visitors_this _visitors_c0
+              _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else NullCoalesce (_visitors_r0, _visitors_r1)
+            method on_InstanceOf env _visitors_this _visitors_c0 _visitors_c1
+              =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_class_id env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else InstanceOf (_visitors_r0, _visitors_r1)
+            method on_Is env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_hint env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Is (_visitors_r0, _visitors_r1)
+            method on_New env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 =
+              let _visitors_r0 = self#on_class_id env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_expr env _visitors_c1
+                 in
+              let _visitors_r2 = self#on_list self#on_expr env _visitors_c2
+                 in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else New (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Efun env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_fun_ env _visitors_c0  in
+              let _visitors_r1 = self#on_list self#on_lid env _visitors_c1
+                 in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Efun (_visitors_r0, _visitors_r1)
+            method on_Xml env _visitors_this _visitors_c0 _visitors_c1
+              _visitors_c2 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 =
+                self#on_list self#on_xhp_attribute env _visitors_c1  in
+              let _visitors_r2 = self#on_list self#on_expr env _visitors_c2
+                 in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else Xml (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_Callconv env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_param_kind env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Callconv (_visitors_r0, _visitors_r1)
+            method on_Lplaceholder env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_t env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Lplaceholder _visitors_r0
+            method on_Fun_id env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Fun_id _visitors_r0
+            method on_Method_id env _visitors_this _visitors_c0 _visitors_c1
+              =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Method_id (_visitors_r0, _visitors_r1)
+            method on_Method_caller env _visitors_this _visitors_c0
+              _visitors_c1 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Method_caller (_visitors_r0, _visitors_r1)
+            method on_Smethod_id env _visitors_this _visitors_c0 _visitors_c1
+              =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 = self#on_pstring env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Smethod_id (_visitors_r0, _visitors_r1)
+            method on_Special_func env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_special_func env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Special_func _visitors_r0
+            method on_Pair env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Pair (_visitors_r0, _visitors_r1)
+            method on_Assert env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_assert_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Assert _visitors_r0
+            method on_Typename env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Typename _visitors_r0
+            method on_Any env _visitors_this =
+              if true then _visitors_this else Any
+            method on_expr_ env _visitors_this =
+              match _visitors_this with
+              | Array _visitors_c0 as _visitors_this ->
+                  self#on_Array env _visitors_this _visitors_c0
+              | Darray _visitors_c0 as _visitors_this ->
+                  self#on_Darray env _visitors_this _visitors_c0
+              | Varray _visitors_c0 as _visitors_this ->
+                  self#on_Varray env _visitors_this _visitors_c0
+              | Shape _visitors_c0 as _visitors_this ->
+                  self#on_Shape env _visitors_this _visitors_c0
+              | ValCollection (_visitors_c0,_visitors_c1) as _visitors_this
+                  ->
+                  self#on_ValCollection env _visitors_this _visitors_c0
+                    _visitors_c1
+              | KeyValCollection (_visitors_c0,_visitors_c1) as
+                  _visitors_this ->
+                  self#on_KeyValCollection env _visitors_this _visitors_c0
+                    _visitors_c1
+              | Null  as _visitors_this -> self#on_Null env _visitors_this
+              | This  as _visitors_this -> self#on_This env _visitors_this
+              | True  as _visitors_this -> self#on_True env _visitors_this
+              | False  as _visitors_this -> self#on_False env _visitors_this
+              | Id _visitors_c0 as _visitors_this ->
+                  self#on_Id env _visitors_this _visitors_c0
+              | Lvar _visitors_c0 as _visitors_this ->
+                  self#on_Lvar env _visitors_this _visitors_c0
+              | Dollar _visitors_c0 as _visitors_this ->
+                  self#on_Dollar env _visitors_this _visitors_c0
+              | Dollardollar _visitors_c0 as _visitors_this ->
+                  self#on_Dollardollar env _visitors_this _visitors_c0
+              | Clone _visitors_c0 as _visitors_this ->
+                  self#on_Clone env _visitors_this _visitors_c0
+              | Obj_get (_visitors_c0,_visitors_c1,_visitors_c2) as
+                  _visitors_this ->
+                  self#on_Obj_get env _visitors_this _visitors_c0
+                    _visitors_c1 _visitors_c2
+              | Array_get (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Array_get env _visitors_this _visitors_c0
+                    _visitors_c1
+              | Class_get (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Class_get env _visitors_this _visitors_c0
+                    _visitors_c1
+              | Class_const (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Class_const env _visitors_this _visitors_c0
+                    _visitors_c1
+              | Call
+                  (_visitors_c0,_visitors_c1,_visitors_c2,_visitors_c3,_visitors_c4)
+                  as _visitors_this ->
+                  self#on_Call env _visitors_this _visitors_c0 _visitors_c1
+                    _visitors_c2 _visitors_c3 _visitors_c4
+              | Int _visitors_c0 as _visitors_this ->
+                  self#on_Int env _visitors_this _visitors_c0
+              | Float _visitors_c0 as _visitors_this ->
+                  self#on_Float env _visitors_this _visitors_c0
+              | String _visitors_c0 as _visitors_this ->
+                  self#on_String env _visitors_this _visitors_c0
+              | String2 _visitors_c0 as _visitors_this ->
+                  self#on_String2 env _visitors_this _visitors_c0
+              | Yield _visitors_c0 as _visitors_this ->
+                  self#on_Yield env _visitors_this _visitors_c0
+              | Yield_break  as _visitors_this ->
+                  self#on_Yield_break env _visitors_this
+              | Await _visitors_c0 as _visitors_this ->
+                  self#on_Await env _visitors_this _visitors_c0
+              | Suspend _visitors_c0 as _visitors_this ->
+                  self#on_Suspend env _visitors_this _visitors_c0
+              | List _visitors_c0 as _visitors_this ->
+                  self#on_List env _visitors_this _visitors_c0
+              | Expr_list _visitors_c0 as _visitors_this ->
+                  self#on_Expr_list env _visitors_this _visitors_c0
+              | Cast (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Cast env _visitors_this _visitors_c0 _visitors_c1
+              | Unop (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Unop env _visitors_this _visitors_c0 _visitors_c1
+              | Binop (_visitors_c0,_visitors_c1,_visitors_c2) as
+                  _visitors_this ->
+                  self#on_Binop env _visitors_this _visitors_c0 _visitors_c1
+                    _visitors_c2
+              | Pipe (_visitors_c0,_visitors_c1,_visitors_c2) as
+                  _visitors_this ->
+                  self#on_Pipe env _visitors_this _visitors_c0 _visitors_c1
+                    _visitors_c2
+              | Eif (_visitors_c0,_visitors_c1,_visitors_c2) as
+                  _visitors_this ->
+                  self#on_Eif env _visitors_this _visitors_c0 _visitors_c1
+                    _visitors_c2
+              | NullCoalesce (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_NullCoalesce env _visitors_this _visitors_c0
+                    _visitors_c1
+              | InstanceOf (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_InstanceOf env _visitors_this _visitors_c0
+                    _visitors_c1
+              | Is (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Is env _visitors_this _visitors_c0 _visitors_c1
+              | New (_visitors_c0,_visitors_c1,_visitors_c2) as
+                  _visitors_this ->
+                  self#on_New env _visitors_this _visitors_c0 _visitors_c1
+                    _visitors_c2
+              | Efun (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Efun env _visitors_this _visitors_c0 _visitors_c1
+              | Xml (_visitors_c0,_visitors_c1,_visitors_c2) as
+                  _visitors_this ->
+                  self#on_Xml env _visitors_this _visitors_c0 _visitors_c1
+                    _visitors_c2
+              | Callconv (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Callconv env _visitors_this _visitors_c0
+                    _visitors_c1
+              | Lplaceholder _visitors_c0 as _visitors_this ->
+                  self#on_Lplaceholder env _visitors_this _visitors_c0
+              | Fun_id _visitors_c0 as _visitors_this ->
+                  self#on_Fun_id env _visitors_this _visitors_c0
+              | Method_id (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Method_id env _visitors_this _visitors_c0
+                    _visitors_c1
+              | Method_caller (_visitors_c0,_visitors_c1) as _visitors_this
+                  ->
+                  self#on_Method_caller env _visitors_this _visitors_c0
+                    _visitors_c1
+              | Smethod_id (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Smethod_id env _visitors_this _visitors_c0
+                    _visitors_c1
+              | Special_func _visitors_c0 as _visitors_this ->
+                  self#on_Special_func env _visitors_this _visitors_c0
+              | Pair (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Pair env _visitors_this _visitors_c0 _visitors_c1
+              | Assert _visitors_c0 as _visitors_this ->
+                  self#on_Assert env _visitors_this _visitors_c0
+              | Typename _visitors_c0 as _visitors_this ->
+                  self#on_Typename env _visitors_this _visitors_c0
+              | Any  as _visitors_this -> self#on_Any env _visitors_this
+            method on_AE_assert env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else AE_assert _visitors_r0
+            method on_assert_expr env _visitors_this =
+              match _visitors_this with
+              | AE_assert _visitors_c0 as _visitors_this ->
+                  self#on_AE_assert env _visitors_this _visitors_c0
+            method on_Default env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_block env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Default _visitors_r0
+            method on_Case env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_block env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Case (_visitors_r0, _visitors_r1)
+            method on_case env _visitors_this =
+              match _visitors_this with
+              | Default _visitors_c0 as _visitors_this ->
+                  self#on_Default env _visitors_this _visitors_c0
+              | Case (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Case env _visitors_this _visitors_c0 _visitors_c1
+            method on_catch env
+              ((_visitors_c0,_visitors_c1,_visitors_c2) as _visitors_this) =
+              let _visitors_r0 = self#on_sid env _visitors_c0  in
+              let _visitors_r1 = self#on_lid env _visitors_c1  in
+              let _visitors_r2 = self#on_block env _visitors_c2  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_field env
+              ((_visitors_c0,_visitors_c1) as _visitors_this) =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else (_visitors_r0, _visitors_r1)
+            method on_AFvalue env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else AFvalue _visitors_r0
+            method on_AFkvalue env _visitors_this _visitors_c0 _visitors_c1 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else AFkvalue (_visitors_r0, _visitors_r1)
+            method on_afield env _visitors_this =
+              match _visitors_this with
+              | AFvalue _visitors_c0 as _visitors_this ->
+                  self#on_AFvalue env _visitors_this _visitors_c0
+              | AFkvalue (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_AFkvalue env _visitors_this _visitors_c0
+                    _visitors_c1
+            method on_Xhp_simple env _visitors_this _visitors_c0 _visitors_c1
+              =
+              let _visitors_r0 = self#on_pstring env _visitors_c0  in
+              let _visitors_r1 = self#on_expr env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else Xhp_simple (_visitors_r0, _visitors_r1)
+            method on_Xhp_spread env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Xhp_spread _visitors_r0
+            method on_xhp_attribute env _visitors_this =
+              match _visitors_this with
+              | Xhp_simple (_visitors_c0,_visitors_c1) as _visitors_this ->
+                  self#on_Xhp_simple env _visitors_this _visitors_c0
+                    _visitors_c1
+              | Xhp_spread _visitors_c0 as _visitors_this ->
+                  self#on_Xhp_spread env _visitors_this _visitors_c0
+            method on_Gena env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Gena _visitors_r0
+            method on_Genva env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_list self#on_expr env _visitors_c0
+                 in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Genva _visitors_r0
+            method on_Gen_array_rec env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_expr env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Gen_array_rec _visitors_r0
+            method on_special_func env _visitors_this =
+              match _visitors_this with
+              | Gena _visitors_c0 as _visitors_this ->
+                  self#on_Gena env _visitors_this _visitors_c0
+              | Genva _visitors_c0 as _visitors_this ->
+                  self#on_Genva env _visitors_this _visitors_c0
+              | Gen_array_rec _visitors_c0 as _visitors_this ->
+                  self#on_Gen_array_rec env _visitors_this _visitors_c0
+            method on_is_reference env = self#on_bool env
+            method on_is_variadic env = self#on_bool env
+            method on_fun_param env _visitors_this =
+              let _visitors_r0 =
+                self#on_option self#on_hint env _visitors_this.param_hint  in
+              let _visitors_r1 =
+                self#on_is_reference env _visitors_this.param_is_reference
+                 in
+              let _visitors_r2 =
+                self#on_is_variadic env _visitors_this.param_is_variadic  in
+              let _visitors_r3 = self#on_t env _visitors_this.param_pos  in
+              let _visitors_r4 = self#on_string env _visitors_this.param_name
+                 in
+              let _visitors_r5 =
+                self#on_option self#on_expr env _visitors_this.param_expr  in
+              let _visitors_r6 =
+                self#on_option self#on_param_kind env
+                  _visitors_this.param_callconv
+                 in
+              let _visitors_r7 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.param_user_attributes
+                 in
+              if
+                Pervasives.(&&)
+                  (Pervasives.(==) _visitors_this.param_hint _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_this.param_is_reference
+                        _visitors_r1)
+                     (Pervasives.(&&)
+                        (Pervasives.(==) _visitors_this.param_is_variadic
+                           _visitors_r2)
+                        (Pervasives.(&&)
+                           (Pervasives.(==) _visitors_this.param_pos
+                              _visitors_r3)
+                           (Pervasives.(&&)
+                              (Pervasives.(==) _visitors_this.param_name
+                                 _visitors_r4)
+                              (Pervasives.(&&)
+                                 (Pervasives.(==) _visitors_this.param_expr
+                                    _visitors_r5)
+                                 (Pervasives.(&&)
+                                    (Pervasives.(==)
+                                       _visitors_this.param_callconv
+                                       _visitors_r6)
+                                    (Pervasives.(==)
+                                       _visitors_this.param_user_attributes
+                                       _visitors_r7)))))))
+              then _visitors_this
+              else
+                {
+                  param_hint = _visitors_r0;
+                  param_is_reference = _visitors_r1;
+                  param_is_variadic = _visitors_r2;
+                  param_pos = _visitors_r3;
+                  param_name = _visitors_r4;
+                  param_expr = _visitors_r5;
+                  param_callconv = _visitors_r6;
+                  param_user_attributes = _visitors_r7
+                }
+            method on_FVvariadicArg env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_fun_param env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else FVvariadicArg _visitors_r0
+            method on_FVellipsis env _visitors_this =
+              if true then _visitors_this else FVellipsis
+            method on_FVnonVariadic env _visitors_this =
+              if true then _visitors_this else FVnonVariadic
+            method on_fun_variadicity env _visitors_this =
+              match _visitors_this with
+              | FVvariadicArg _visitors_c0 as _visitors_this ->
+                  self#on_FVvariadicArg env _visitors_this _visitors_c0
+              | FVellipsis  as _visitors_this ->
+                  self#on_FVellipsis env _visitors_this
+              | FVnonVariadic  as _visitors_this ->
+                  self#on_FVnonVariadic env _visitors_this
+            method on_fun_ env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.f_annotation  in
+              let _visitors_r1 =
+                (fun _visitors_this  -> _visitors_this) _visitors_this.f_mode
+                 in
+              let _visitors_r2 =
+                self#on_option self#on_hint env _visitors_this.f_ret  in
+              let _visitors_r3 = self#on_sid env _visitors_this.f_name  in
+              let _visitors_r4 =
+                self#on_list self#on_tparam env _visitors_this.f_tparams  in
+              let _visitors_r5 =
+                self#on_list self#on_where_constraint env
+                  _visitors_this.f_where_constraints
+                 in
+              let _visitors_r6 =
+                self#on_fun_variadicity env _visitors_this.f_variadic  in
+              let _visitors_r7 =
+                self#on_list self#on_fun_param env _visitors_this.f_params
+                 in
+              let _visitors_r8 = self#on_func_body env _visitors_this.f_body
+                 in
+              let _visitors_r9 =
+                self#on_fun_kind env _visitors_this.f_fun_kind  in
+              let _visitors_r10 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.f_user_attributes
+                 in
+              let _visitors_r11 =
+                self#on_bool env _visitors_this.f_ret_by_ref  in
+              if
+                Pervasives.(&&)
+                  (Pervasives.(==) _visitors_this.f_annotation _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_this.f_mode _visitors_r1)
+                     (Pervasives.(&&)
+                        (Pervasives.(==) _visitors_this.f_ret _visitors_r2)
+                        (Pervasives.(&&)
+                           (Pervasives.(==) _visitors_this.f_name
+                              _visitors_r3)
+                           (Pervasives.(&&)
+                              (Pervasives.(==) _visitors_this.f_tparams
+                                 _visitors_r4)
+                              (Pervasives.(&&)
+                                 (Pervasives.(==)
+                                    _visitors_this.f_where_constraints
+                                    _visitors_r5)
+                                 (Pervasives.(&&)
+                                    (Pervasives.(==)
+                                       _visitors_this.f_variadic _visitors_r6)
+                                    (Pervasives.(&&)
+                                       (Pervasives.(==)
+                                          _visitors_this.f_params
+                                          _visitors_r7)
+                                       (Pervasives.(&&)
+                                          (Pervasives.(==)
+                                             _visitors_this.f_body
+                                             _visitors_r8)
+                                          (Pervasives.(&&)
+                                             (Pervasives.(==)
+                                                _visitors_this.f_fun_kind
+                                                _visitors_r9)
+                                             (Pervasives.(&&)
+                                                (Pervasives.(==)
+                                                   _visitors_this.f_user_attributes
+                                                   _visitors_r10)
+                                                (Pervasives.(==)
+                                                   _visitors_this.f_ret_by_ref
+                                                   _visitors_r11)))))))))))
+              then _visitors_this
+              else
+                {
+                  f_annotation = _visitors_r0;
+                  f_mode = _visitors_r1;
+                  f_ret = _visitors_r2;
+                  f_name = _visitors_r3;
+                  f_tparams = _visitors_r4;
+                  f_where_constraints = _visitors_r5;
+                  f_variadic = _visitors_r6;
+                  f_params = _visitors_r7;
+                  f_body = _visitors_r8;
+                  f_fun_kind = _visitors_r9;
+                  f_user_attributes = _visitors_r10;
+                  f_ret_by_ref = _visitors_r11
+                }
+            method on_UnnamedBody env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_func_unnamed_body env _visitors_c0
+                 in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else UnnamedBody _visitors_r0
+            method on_NamedBody env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_func_named_body env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else NamedBody _visitors_r0
+            method on_func_body env _visitors_this =
+              match _visitors_this with
+              | UnnamedBody _visitors_c0 as _visitors_this ->
+                  self#on_UnnamedBody env _visitors_this _visitors_c0
+              | NamedBody _visitors_c0 as _visitors_this ->
+                  self#on_NamedBody env _visitors_this _visitors_c0
+            method on_func_unnamed_body env _visitors_this =
+              let _visitors_r0 =
+                (fun _visitors_this  -> _visitors_this)
+                  _visitors_this.fub_ast
+                 in
+              let _visitors_r1 =
+                (fun _visitors_this  -> _visitors_this)
+                  _visitors_this.fub_tparams
+                 in
+              let _visitors_r2 =
+                (fun _visitors_this  -> _visitors_this)
+                  _visitors_this.fub_namespace
+                 in
+              if
+                Pervasives.(&&)
+                  (Pervasives.(==) _visitors_this.fub_ast _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_this.fub_tparams _visitors_r1)
+                     (Pervasives.(==) _visitors_this.fub_namespace
+                        _visitors_r2))
+              then _visitors_this
+              else
+                {
+                  fub_ast = _visitors_r0;
+                  fub_tparams = _visitors_r1;
+                  fub_namespace = _visitors_r2
+                }
+            method on_func_named_body env _visitors_this =
+              let _visitors_r0 = self#on_block env _visitors_this.fnb_nast
+                 in
+              let _visitors_r1 = self#on_bool env _visitors_this.fnb_unsafe
+                 in
+              if
+                Pervasives.(&&)
+                  (Pervasives.(==) _visitors_this.fnb_nast _visitors_r0)
+                  (Pervasives.(==) _visitors_this.fnb_unsafe _visitors_r1)
+              then _visitors_this
+              else { fnb_nast = _visitors_r0; fnb_unsafe = _visitors_r1 }
+            method on_user_attribute env _visitors_this =
+              let _visitors_r0 = self#on_sid env _visitors_this.ua_name  in
+              let _visitors_r1 =
+                self#on_list self#on_expr env _visitors_this.ua_params  in
+              if
+                Pervasives.(&&)
+                  (Pervasives.(==) _visitors_this.ua_name _visitors_r0)
+                  (Pervasives.(==) _visitors_this.ua_params _visitors_r1)
+              then _visitors_this
+              else { ua_name = _visitors_r0; ua_params = _visitors_r1 }
+            method on_class_ env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.c_annotation  in
+              let _visitors_r1 =
+                (fun _visitors_this  -> _visitors_this) _visitors_this.c_mode
+                 in
+              let _visitors_r2 = self#on_bool env _visitors_this.c_final  in
+              let _visitors_r3 = self#on_bool env _visitors_this.c_is_xhp  in
+              let _visitors_r4 = self#on_class_kind env _visitors_this.c_kind
+                 in
+              let _visitors_r5 = self#on_sid env _visitors_this.c_name  in
+              let _visitors_r6 =
+                (fun _visitors_this  -> _visitors_this)
+                  _visitors_this.c_tparams
+                 in
+              let _visitors_r7 =
+                self#on_list self#on_hint env _visitors_this.c_extends  in
+              let _visitors_r8 =
+                self#on_list self#on_hint env _visitors_this.c_uses  in
+              let _visitors_r9 =
+                self#on_list self#on_hint env _visitors_this.c_xhp_attr_uses
+                 in
+              let _visitors_r10 =
+                self#on_list self#on_pstring env
+                  _visitors_this.c_xhp_category
+                 in
+              let _visitors_r11 =
+                self#on_list self#on_hint env _visitors_this.c_req_extends
+                 in
+              let _visitors_r12 =
+                self#on_list self#on_hint env _visitors_this.c_req_implements
+                 in
+              let _visitors_r13 =
+                self#on_list self#on_hint env _visitors_this.c_implements  in
+              let _visitors_r14 =
+                self#on_list self#on_class_const env _visitors_this.c_consts
+                 in
+              let _visitors_r15 =
+                self#on_list self#on_class_typeconst env
+                  _visitors_this.c_typeconsts
+                 in
+              let _visitors_r16 =
+                self#on_list self#on_class_var env
+                  _visitors_this.c_static_vars
+                 in
+              let _visitors_r17 =
+                self#on_list self#on_class_var env _visitors_this.c_vars  in
+              let _visitors_r18 =
+                self#on_option self#on_method_ env
+                  _visitors_this.c_constructor
+                 in
+              let _visitors_r19 =
+                self#on_list self#on_method_ env
+                  _visitors_this.c_static_methods
+                 in
+              let _visitors_r20 =
+                self#on_list self#on_method_ env _visitors_this.c_methods  in
+              let _visitors_r21 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.c_user_attributes
+                 in
+              let _visitors_r22 =
+                self#on_option self#on_enum_ env _visitors_this.c_enum  in
+              if
+                Pervasives.(&&)
+                  (Pervasives.(==) _visitors_this.c_annotation _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_this.c_mode _visitors_r1)
+                     (Pervasives.(&&)
+                        (Pervasives.(==) _visitors_this.c_final _visitors_r2)
+                        (Pervasives.(&&)
+                           (Pervasives.(==) _visitors_this.c_is_xhp
+                              _visitors_r3)
+                           (Pervasives.(&&)
+                              (Pervasives.(==) _visitors_this.c_kind
+                                 _visitors_r4)
+                              (Pervasives.(&&)
+                                 (Pervasives.(==) _visitors_this.c_name
+                                    _visitors_r5)
+                                 (Pervasives.(&&)
+                                    (Pervasives.(==) _visitors_this.c_tparams
+                                       _visitors_r6)
+                                    (Pervasives.(&&)
+                                       (Pervasives.(==)
+                                          _visitors_this.c_extends
+                                          _visitors_r7)
+                                       (Pervasives.(&&)
+                                          (Pervasives.(==)
+                                             _visitors_this.c_uses
+                                             _visitors_r8)
+                                          (Pervasives.(&&)
+                                             (Pervasives.(==)
+                                                _visitors_this.c_xhp_attr_uses
+                                                _visitors_r9)
+                                             (Pervasives.(&&)
+                                                (Pervasives.(==)
+                                                   _visitors_this.c_xhp_category
+                                                   _visitors_r10)
+                                                (Pervasives.(&&)
+                                                   (Pervasives.(==)
+                                                      _visitors_this.c_req_extends
+                                                      _visitors_r11)
+                                                   (Pervasives.(&&)
+                                                      (Pervasives.(==)
+                                                         _visitors_this.c_req_implements
+                                                         _visitors_r12)
+                                                      (Pervasives.(&&)
+                                                         (Pervasives.(==)
+                                                            _visitors_this.c_implements
+                                                            _visitors_r13)
+                                                         (Pervasives.(&&)
+                                                            (Pervasives.(==)
+                                                               _visitors_this.c_consts
+                                                               _visitors_r14)
+                                                            (Pervasives.(&&)
+                                                               (Pervasives.(==)
+                                                                  _visitors_this.c_typeconsts
+                                                                  _visitors_r15)
+                                                               (Pervasives.(&&)
+                                                                  (Pervasives.(==)
+                                                                    _visitors_this.c_static_vars
+                                                                    _visitors_r16)
+                                                                  (Pervasives.(&&)
+                                                                    (Pervasives.(==)
+                                                                    _visitors_this.c_vars
+                                                                    _visitors_r17)
+                                                                    (Pervasives.(&&)
+                                                                    (Pervasives.(==)
+                                                                    _visitors_this.c_constructor
+                                                                    _visitors_r18)
+                                                                    (Pervasives.(&&)
+                                                                    (Pervasives.(==)
+                                                                    _visitors_this.c_static_methods
+                                                                    _visitors_r19)
+                                                                    (Pervasives.(&&)
+                                                                    (Pervasives.(==)
+                                                                    _visitors_this.c_methods
+                                                                    _visitors_r20)
+                                                                    (Pervasives.(&&)
+                                                                    (Pervasives.(==)
+                                                                    _visitors_this.c_user_attributes
+                                                                    _visitors_r21)
+                                                                    (Pervasives.(==)
+                                                                    _visitors_this.c_enum
+                                                                    _visitors_r22))))))))))))))))))))))
+              then _visitors_this
+              else
+                {
+                  c_annotation = _visitors_r0;
+                  c_mode = _visitors_r1;
+                  c_final = _visitors_r2;
+                  c_is_xhp = _visitors_r3;
+                  c_kind = _visitors_r4;
+                  c_name = _visitors_r5;
+                  c_tparams = _visitors_r6;
+                  c_extends = _visitors_r7;
+                  c_uses = _visitors_r8;
+                  c_xhp_attr_uses = _visitors_r9;
+                  c_xhp_category = _visitors_r10;
+                  c_req_extends = _visitors_r11;
+                  c_req_implements = _visitors_r12;
+                  c_implements = _visitors_r13;
+                  c_consts = _visitors_r14;
+                  c_typeconsts = _visitors_r15;
+                  c_static_vars = _visitors_r16;
+                  c_vars = _visitors_r17;
+                  c_constructor = _visitors_r18;
+                  c_static_methods = _visitors_r19;
+                  c_methods = _visitors_r20;
+                  c_user_attributes = _visitors_r21;
+                  c_enum = _visitors_r22
+                }
+            method on_class_const env
+              ((_visitors_c0,_visitors_c1,_visitors_c2) as _visitors_this) =
+              let _visitors_r0 = self#on_option self#on_hint env _visitors_c0
+                 in
+              let _visitors_r1 = self#on_sid env _visitors_c1  in
+              let _visitors_r2 = self#on_option self#on_expr env _visitors_c2
+                 in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_c1 _visitors_r1)
+                     (Pervasives.(==) _visitors_c2 _visitors_r2))
+              then _visitors_this
+              else (_visitors_r0, _visitors_r1, _visitors_r2)
+            method on_class_typeconst env _visitors_this =
+              let _visitors_r0 = self#on_sid env _visitors_this.c_tconst_name
+                 in
+              let _visitors_r1 =
+                self#on_option self#on_hint env
+                  _visitors_this.c_tconst_constraint
+                 in
+              let _visitors_r2 =
+                self#on_option self#on_hint env _visitors_this.c_tconst_type
+                 in
+              if
+                Pervasives.(&&)
+                  (Pervasives.(==) _visitors_this.c_tconst_name _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_this.c_tconst_constraint
+                        _visitors_r1)
+                     (Pervasives.(==) _visitors_this.c_tconst_type
+                        _visitors_r2))
+              then _visitors_this
+              else
+                {
+                  c_tconst_name = _visitors_r0;
+                  c_tconst_constraint = _visitors_r1;
+                  c_tconst_type = _visitors_r2
+                }
+            method on_class_var env _visitors_this =
+              let _visitors_r0 = self#on_bool env _visitors_this.cv_final  in
+              let _visitors_r1 = self#on_bool env _visitors_this.cv_is_xhp
+                 in
+              let _visitors_r2 =
+                self#on_visibility env _visitors_this.cv_visibility  in
+              let _visitors_r3 =
+                self#on_option self#on_hint env _visitors_this.cv_type  in
+              let _visitors_r4 = self#on_sid env _visitors_this.cv_id  in
+              let _visitors_r5 =
+                self#on_option self#on_expr env _visitors_this.cv_expr  in
+              let _visitors_r6 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.cv_user_attributes
+                 in
+              if
+                Pervasives.(&&)
+                  (Pervasives.(==) _visitors_this.cv_final _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_this.cv_is_xhp _visitors_r1)
+                     (Pervasives.(&&)
+                        (Pervasives.(==) _visitors_this.cv_visibility
+                           _visitors_r2)
+                        (Pervasives.(&&)
+                           (Pervasives.(==) _visitors_this.cv_type
+                              _visitors_r3)
+                           (Pervasives.(&&)
+                              (Pervasives.(==) _visitors_this.cv_id
+                                 _visitors_r4)
+                              (Pervasives.(&&)
+                                 (Pervasives.(==) _visitors_this.cv_expr
+                                    _visitors_r5)
+                                 (Pervasives.(==)
+                                    _visitors_this.cv_user_attributes
+                                    _visitors_r6))))))
+              then _visitors_this
+              else
+                {
+                  cv_final = _visitors_r0;
+                  cv_is_xhp = _visitors_r1;
+                  cv_visibility = _visitors_r2;
+                  cv_type = _visitors_r3;
+                  cv_id = _visitors_r4;
+                  cv_expr = _visitors_r5;
+                  cv_user_attributes = _visitors_r6
+                }
+            method on_method_ env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.m_annotation  in
+              let _visitors_r1 = self#on_bool env _visitors_this.m_final  in
+              let _visitors_r2 = self#on_bool env _visitors_this.m_abstract
+                 in
+              let _visitors_r3 =
+                self#on_visibility env _visitors_this.m_visibility  in
+              let _visitors_r4 = self#on_sid env _visitors_this.m_name  in
+              let _visitors_r5 =
+                self#on_list self#on_tparam env _visitors_this.m_tparams  in
+              let _visitors_r6 =
+                self#on_list self#on_where_constraint env
+                  _visitors_this.m_where_constraints
+                 in
+              let _visitors_r7 =
+                self#on_fun_variadicity env _visitors_this.m_variadic  in
+              let _visitors_r8 =
+                self#on_list self#on_fun_param env _visitors_this.m_params
+                 in
+              let _visitors_r9 = self#on_func_body env _visitors_this.m_body
+                 in
+              let _visitors_r10 =
+                self#on_fun_kind env _visitors_this.m_fun_kind  in
+              let _visitors_r11 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.m_user_attributes
+                 in
+              let _visitors_r12 =
+                self#on_option self#on_hint env _visitors_this.m_ret  in
+              let _visitors_r13 =
+                self#on_bool env _visitors_this.m_ret_by_ref  in
+              if
+                Pervasives.(&&)
+                  (Pervasives.(==) _visitors_this.m_annotation _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_this.m_final _visitors_r1)
+                     (Pervasives.(&&)
+                        (Pervasives.(==) _visitors_this.m_abstract
+                           _visitors_r2)
+                        (Pervasives.(&&)
+                           (Pervasives.(==) _visitors_this.m_visibility
+                              _visitors_r3)
+                           (Pervasives.(&&)
+                              (Pervasives.(==) _visitors_this.m_name
+                                 _visitors_r4)
+                              (Pervasives.(&&)
+                                 (Pervasives.(==) _visitors_this.m_tparams
+                                    _visitors_r5)
+                                 (Pervasives.(&&)
+                                    (Pervasives.(==)
+                                       _visitors_this.m_where_constraints
+                                       _visitors_r6)
+                                    (Pervasives.(&&)
+                                       (Pervasives.(==)
+                                          _visitors_this.m_variadic
+                                          _visitors_r7)
+                                       (Pervasives.(&&)
+                                          (Pervasives.(==)
+                                             _visitors_this.m_params
+                                             _visitors_r8)
+                                          (Pervasives.(&&)
+                                             (Pervasives.(==)
+                                                _visitors_this.m_body
+                                                _visitors_r9)
+                                             (Pervasives.(&&)
+                                                (Pervasives.(==)
+                                                   _visitors_this.m_fun_kind
+                                                   _visitors_r10)
+                                                (Pervasives.(&&)
+                                                   (Pervasives.(==)
+                                                      _visitors_this.m_user_attributes
+                                                      _visitors_r11)
+                                                   (Pervasives.(&&)
+                                                      (Pervasives.(==)
+                                                         _visitors_this.m_ret
+                                                         _visitors_r12)
+                                                      (Pervasives.(==)
+                                                         _visitors_this.m_ret_by_ref
+                                                         _visitors_r13)))))))))))))
+              then _visitors_this
+              else
+                {
+                  m_annotation = _visitors_r0;
+                  m_final = _visitors_r1;
+                  m_abstract = _visitors_r2;
+                  m_visibility = _visitors_r3;
+                  m_name = _visitors_r4;
+                  m_tparams = _visitors_r5;
+                  m_where_constraints = _visitors_r6;
+                  m_variadic = _visitors_r7;
+                  m_params = _visitors_r8;
+                  m_body = _visitors_r9;
+                  m_fun_kind = _visitors_r10;
+                  m_user_attributes = _visitors_r11;
+                  m_ret = _visitors_r12;
+                  m_ret_by_ref = _visitors_r13
+                }
+            method on_typedef env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.t_annotation  in
+              let _visitors_r1 = self#on_sid env _visitors_this.t_name  in
+              let _visitors_r2 =
+                self#on_list self#on_tparam env _visitors_this.t_tparams  in
+              let _visitors_r3 =
+                self#on_option self#on_hint env _visitors_this.t_constraint
+                 in
+              let _visitors_r4 = self#on_hint env _visitors_this.t_kind  in
+              let _visitors_r5 =
+                self#on_list self#on_user_attribute env
+                  _visitors_this.t_user_attributes
+                 in
+              let _visitors_r6 =
+                (fun _visitors_this  -> _visitors_this) _visitors_this.t_mode
+                 in
+              let _visitors_r7 =
+                self#on_typedef_visibility env _visitors_this.t_vis  in
+              if
+                Pervasives.(&&)
+                  (Pervasives.(==) _visitors_this.t_annotation _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_this.t_name _visitors_r1)
+                     (Pervasives.(&&)
+                        (Pervasives.(==) _visitors_this.t_tparams
+                           _visitors_r2)
+                        (Pervasives.(&&)
+                           (Pervasives.(==) _visitors_this.t_constraint
+                              _visitors_r3)
+                           (Pervasives.(&&)
+                              (Pervasives.(==) _visitors_this.t_kind
+                                 _visitors_r4)
+                              (Pervasives.(&&)
+                                 (Pervasives.(==)
+                                    _visitors_this.t_user_attributes
+                                    _visitors_r5)
+                                 (Pervasives.(&&)
+                                    (Pervasives.(==) _visitors_this.t_mode
+                                       _visitors_r6)
+                                    (Pervasives.(==) _visitors_this.t_vis
+                                       _visitors_r7)))))))
+              then _visitors_this
+              else
+                {
+                  t_annotation = _visitors_r0;
+                  t_name = _visitors_r1;
+                  t_tparams = _visitors_r2;
+                  t_constraint = _visitors_r3;
+                  t_kind = _visitors_r4;
+                  t_user_attributes = _visitors_r5;
+                  t_mode = _visitors_r6;
+                  t_vis = _visitors_r7
+                }
+            method on_gconst env _visitors_this =
+              let _visitors_r0 =
+                self#on_env_annotation env _visitors_this.cst_annotation  in
+              let _visitors_r1 =
+                (fun _visitors_this  -> _visitors_this)
+                  _visitors_this.cst_mode
+                 in
+              let _visitors_r2 = self#on_sid env _visitors_this.cst_name  in
+              let _visitors_r3 =
+                self#on_option self#on_hint env _visitors_this.cst_type  in
+              let _visitors_r4 =
+                self#on_option self#on_expr env _visitors_this.cst_value  in
+              let _visitors_r5 =
+                self#on_bool env _visitors_this.cst_is_define  in
+              if
+                Pervasives.(&&)
+                  (Pervasives.(==) _visitors_this.cst_annotation _visitors_r0)
+                  (Pervasives.(&&)
+                     (Pervasives.(==) _visitors_this.cst_mode _visitors_r1)
+                     (Pervasives.(&&)
+                        (Pervasives.(==) _visitors_this.cst_name _visitors_r2)
+                        (Pervasives.(&&)
+                           (Pervasives.(==) _visitors_this.cst_type
+                              _visitors_r3)
+                           (Pervasives.(&&)
+                              (Pervasives.(==) _visitors_this.cst_value
+                                 _visitors_r4)
+                              (Pervasives.(==) _visitors_this.cst_is_define
+                                 _visitors_r5)))))
+              then _visitors_this
+              else
+                {
+                  cst_annotation = _visitors_r0;
+                  cst_mode = _visitors_r1;
+                  cst_name = _visitors_r2;
+                  cst_type = _visitors_r3;
+                  cst_value = _visitors_r4;
+                  cst_is_define = _visitors_r5
+                }
+            method on_Fun env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_fun_ env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Fun _visitors_r0
+            method on_Class env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_class_ env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Class _visitors_r0
+            method on_Typedef env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_typedef env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Typedef _visitors_r0
+            method on_Constant env _visitors_this _visitors_c0 =
+              let _visitors_r0 = self#on_gconst env _visitors_c0  in
+              if Pervasives.(==) _visitors_c0 _visitors_r0
+              then _visitors_this
+              else Constant _visitors_r0
+            method on_def env _visitors_this =
+              match _visitors_this with
+              | Fun _visitors_c0 as _visitors_this ->
+                  self#on_Fun env _visitors_this _visitors_c0
+              | Class _visitors_c0 as _visitors_this ->
+                  self#on_Class env _visitors_this _visitors_c0
+              | Typedef _visitors_c0 as _visitors_this ->
+                  self#on_Typedef env _visitors_this _visitors_c0
+              | Constant _visitors_c0 as _visitors_this ->
+                  self#on_Constant env _visitors_this _visitors_c0
+          end
+        [@@@VISITORS.END ]
+      end
     let expr_to_string expr =
       match expr with
       | Any  -> "Any"
@@ -2405,65 +6686,6 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       | Assert _ -> "Assert"
       | Clone _ -> "Clone"
       | Typename _ -> "Typename" 
-    type def =
-      | Fun of fun_ 
-      | Class of class_ 
-      | Typedef of typedef 
-      | Constant of gconst [@@deriving show]
-    let rec pp_def : Format.formatter -> def -> Ppx_deriving_runtime.unit =
-      let __3 () = pp_gconst
-      
-      and __2 () = pp_typedef
-      
-      and __1 () = pp_class_
-      
-      and __0 () = pp_fun_
-       in
-      ((let open! Ppx_deriving_runtime in
-          fun fmt  ->
-            function
-            | Fun a0 ->
-                (Format.fprintf fmt "(@[<2>AnnotatedAST.Fun@ ";
-                 ((__0 ()) fmt) a0;
-                 Format.fprintf fmt "@])")
-            | Class a0 ->
-                (Format.fprintf fmt "(@[<2>AnnotatedAST.Class@ ";
-                 ((__1 ()) fmt) a0;
-                 Format.fprintf fmt "@])")
-            | Typedef a0 ->
-                (Format.fprintf fmt "(@[<2>AnnotatedAST.Typedef@ ";
-                 ((__2 ()) fmt) a0;
-                 Format.fprintf fmt "@])")
-            | Constant a0 ->
-                (Format.fprintf fmt "(@[<2>AnnotatedAST.Constant@ ";
-                 ((__3 ()) fmt) a0;
-                 Format.fprintf fmt "@])"))
-        [@ocaml.warning "-A"])
-    
-    and show_def : def -> Ppx_deriving_runtime.string =
-      fun x  -> Format.asprintf "%a" pp_def x
-    
-    type program = def list[@@deriving show]
-    let rec pp_program :
-      Format.formatter -> program -> Ppx_deriving_runtime.unit =
-      let __0 () = pp_def  in
-      ((let open! Ppx_deriving_runtime in
-          fun fmt  ->
-            fun x  ->
-              Format.fprintf fmt "@[<2>[";
-              ignore
-                (List.fold_left
-                   (fun sep  ->
-                      fun x  ->
-                        if sep then Format.fprintf fmt ";@ ";
-                        ((__0 ()) fmt) x;
-                        true) false x);
-              Format.fprintf fmt "@,]@]")
-        [@ocaml.warning "-A"])
-    
-    and show_program : program -> Ppx_deriving_runtime.string =
-      fun x  -> Format.asprintf "%a" pp_program x
-    
     module Visitor =
       struct
         class type ['a] visitor_type =

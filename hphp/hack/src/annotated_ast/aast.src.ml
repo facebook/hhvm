@@ -26,7 +26,38 @@ struct
 module ExprAnnotation = Annotations.ExprAnnotation
 module EnvAnnotation = Annotations.EnvAnnotation
 
-type stmt =
+type program = def list
+[@@deriving
+  show,
+  visitors {
+    variety = "iter";
+    nude = true;
+    visit_prefix = "on_";
+    ancestors = ["iter_defs"];
+  },
+  visitors {
+    variety = "reduce";
+    nude = true;
+    visit_prefix = "on_";
+    ancestors = ["reduce_defs"];
+  },
+  visitors {
+    variety = "map";
+    nude = true;
+    visit_prefix = "on_";
+    ancestors = ["map_defs"];
+  },
+  visitors {
+    variety = "endo";
+    nude = true;
+    visit_prefix = "on_";
+    ancestors = ["endo_defs"];
+  }]
+
+and expr_annotation = ExprAnnotation.t [@visitors.opaque]
+and env_annotation = EnvAnnotation.t [@visitors.opaque]
+
+and stmt =
   | Fallthrough
   | Expr of expr
   (* AST has Block of block *)
@@ -67,13 +98,13 @@ and class_id =
   | CIexpr of expr
   | CI of instantiated_sid
 
-and expr = ExprAnnotation.t * expr_
+and expr = expr_annotation * expr_
 and expr_ =
   | Array of afield list
   | Darray of (expr * expr) list
   | Varray of expr list
   (* This is more abstract than the AST but forgets evaluation order *)
-  | Shape of expr ShapeMap.t
+  | Shape of expr shape_map
   | ValCollection of vc_kind * expr list
   | KeyValCollection of kvc_kind * field list
   | Null
@@ -82,9 +113,9 @@ and expr_ =
   | False
   (* TODO: to match AST we need Id_type_arguments as well *)
   | Id of sid
-  | Lvar of id
+  | Lvar of lid
   | Dollar of expr
-  | Dollardollar of id
+  | Dollardollar of lid
   | Clone of expr
   | Obj_get of expr * expr * og_null_flavor
   | Array_get of expr * expr option
@@ -109,13 +140,13 @@ and expr_ =
   | Unop of Ast.uop * expr
   | Binop of Ast.bop * expr * expr
   (** The ID of the $$ that is implicitly declared by this pipe. *)
-  | Pipe of id * expr * expr
+  | Pipe of lid * expr * expr
   | Eif of expr * expr option * expr
   | NullCoalesce of expr * expr
   | InstanceOf of expr * class_id
   | Is of expr * hint
   | New of class_id * expr list * expr list
-  | Efun of fun_ * id list
+  | Efun of fun_ * lid list
   | Xml of sid * xhp_attribute list * expr list
   | Callconv of Ast.param_kind * expr
 
@@ -145,7 +176,7 @@ and case =
   | Default of block
   | Case of expr * block
 
-and catch = sid * id * block
+and catch = sid * lid * block
 
 and field = expr * expr
 and afield =
@@ -180,7 +211,7 @@ and fun_variadicity = (* does function take varying number of args? *)
   | FVnonVariadic (* standard non variadic function *)
 
 and fun_ = {
-  f_annotation : EnvAnnotation.t;
+  f_annotation : env_annotation;
   f_mode     : FileInfo.mode [@opaque];
   f_ret      : hint option;
   f_name     : sid;
@@ -221,10 +252,10 @@ and func_named_body = {
 and user_attribute = {
   ua_name: sid;
   ua_params: expr list (* user attributes are restricted to scalar values *)
-} [@@deriving show]
+}
 
-type class_ = {
-  c_annotation     : EnvAnnotation.t  ;
+and class_ = {
+  c_annotation     : env_annotation   ;
   c_mode           : FileInfo.mode [@opaque];
   c_final          : bool             ;
   c_is_xhp         : bool;
@@ -281,7 +312,7 @@ and class_var = {
 }
 
 and method_ = {
-  m_annotation      : EnvAnnotation.t     ;
+  m_annotation      : env_annotation      ;
   m_final           : bool                ;
   m_abstract        : bool                ;
   m_visibility      : visibility          ;
@@ -298,7 +329,7 @@ and method_ = {
 }
 
 and typedef = {
-  t_annotation : EnvAnnotation.t;
+  t_annotation : env_annotation;
   t_name : sid;
   t_tparams : tparam list;
   t_constraint : hint option;
@@ -309,7 +340,7 @@ and typedef = {
 }
 
 and gconst = {
-  cst_annotation : EnvAnnotation.t;
+  cst_annotation : env_annotation;
   cst_mode: FileInfo.mode [@opaque];
   cst_name: sid;
   cst_type: hint option;
@@ -317,7 +348,11 @@ and gconst = {
   cst_is_define: bool;
 }
 
-[@@deriving show]
+and def =
+  | Fun of fun_
+  | Class of class_
+  | Typedef of typedef
+  | Constant of gconst
 
 let expr_to_string expr =
   match expr with
@@ -373,15 +408,6 @@ let expr_to_string expr =
   | Assert _  -> "Assert"
   | Clone _  -> "Clone"
   | Typename _  -> "Typename"
-
-type def =
-  | Fun of fun_
-  | Class of class_
-  | Typedef of typedef
-  | Constant of gconst
-  [@@deriving show]
-
-type program = def list [@@deriving show]
 
 (*****************************************************************************)
 (* This module defines a visitor class on the Nast data structure.

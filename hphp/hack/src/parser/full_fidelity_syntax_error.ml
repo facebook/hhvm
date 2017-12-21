@@ -259,6 +259,10 @@ let strict_namespace_not_hh =
 
 let original_definition = "Original definition"
 
+let name_is_already_in_use ~name ~short_name =
+  "Cannot use " ^ name ^ " as " ^ short_name ^
+  " because the name is already in use"
+
 let namespace_name_is_already_in_use ~name ~short_name =
   "Cannot use namespace " ^ name ^ " as " ^ short_name ^
   " because the name is already in use"

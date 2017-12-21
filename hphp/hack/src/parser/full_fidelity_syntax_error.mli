@@ -188,6 +188,7 @@ val const_in_trait : string
 val strict_namespace_hh : string
 val strict_namespace_not_hh : string
 val original_definition : string
+val name_is_already_in_use : name:string -> short_name:string -> string
 val namespace_name_is_already_in_use : name:string -> short_name:string -> string
 val function_name_is_already_in_use : name:string -> short_name:string -> string
 val const_name_is_already_in_use : name:string -> short_name:string -> string

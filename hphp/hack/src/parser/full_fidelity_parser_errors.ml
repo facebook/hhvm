@@ -1945,7 +1945,7 @@ let use_class_or_namespace_clause_errors
           else
           let error =
             make_name_already_used_error name name_text short_name loc
-              SyntaxError.namespace_name_is_already_in_use in
+              SyntaxError.name_is_already_in_use in
             names, error :: errors
         | None ->
           let new_use =

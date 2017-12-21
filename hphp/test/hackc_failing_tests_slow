@@ -1,8 +1,6 @@
 slow/async/genva-variadic.php
 slow/autoload/autoload-enum-hint-deprecated.php
 slow/autoload/autoload-fail.php
-slow/class_constant/bad-arrays.php
-slow/constant/bad-arrays.php
 slow/dict/mixed-to-dict-with-refs.php
 slow/ext_ipc/message_queue.php
 slow/ext_ipc/semaphore.php

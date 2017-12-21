@@ -5,7 +5,7 @@ cpp_library(
         "FBSerialize-inl.h",
     ],
     deps = [
-        "@/folly:bits",
-        "@/folly:conv",
+        "//folly:bits",
+        "//folly:conv",
     ],
 )

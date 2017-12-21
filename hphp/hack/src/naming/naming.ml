@@ -1893,8 +1893,8 @@ module Make (GetLocals : GetLocals) = struct
     let e = expr env e in
     N.While (e, block env b)
 
-  and declare_stmt _env _e _b =
-    failwith "Naming of declare statement is not yet supported"
+  and declare_stmt _env _is_block e _b =
+    N.Expr (fst e, N.Any)
 
   (* Scoping is essentially that of do: block is always executed *)
   and using_stmt env has_await e b =

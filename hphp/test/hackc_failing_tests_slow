@@ -1,7 +1,5 @@
 slow/async/genva-variadic.php
-slow/autoload/autoload-enum-hint-deprecated.php
 slow/autoload/autoload-fail.php
-slow/dict/mixed-to-dict-with-refs.php
 slow/ext_ipc/message_queue.php
 slow/ext_ipc/semaphore.php
 slow/ext_ipc/shared_memory.php
@@ -11,12 +9,11 @@ slow/ext_oauth/plaintext2.php
 slow/ext_oauth/rsa.php
 slow/ext_process/ext_process.php
 slow/ext_process/fork_log.php
+slow/ext_process/lwp.php
 slow/ext_socket/accept_block.php
 slow/ext_socket/persistent_socket.php
 slow/ext_watchman/ext_watchman.php
-slow/function/closure-default.php
 slow/hh_namespace_migration/hh_vector5.php
-slow/hhbbc/iteration.php
 slow/inout/autoloader.php
 slow/inout/bad-call-15.php
 slow/inout/closure.php

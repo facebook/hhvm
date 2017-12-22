@@ -1,13 +1,8 @@
-quick/bad_iter_warning.php
-quick/debugger/async_stack_traversal.php
 quick/debugger/flow.php
-quick/debugger/flow2.php
 quick/debugger/flow_excep.php
 quick/debugger/flow_gen_async_excep.php
 quick/debugger/flow_gen_excep.php
 quick/debugger/flow_small.php
-quick/debugger/info1.php
-quick/debugger/list.php
 quick/eval_noreturn.php
 quick/parser_massive_add_exp.php
 quick/parser_massive_concat_exp.php

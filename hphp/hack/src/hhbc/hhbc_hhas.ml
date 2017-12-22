@@ -1513,9 +1513,8 @@ let add_class_def buf class_def =
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
   B.add_string buf (Hhbc_id.Class.to_raw_string class_name);
-  (*if Hhbc_options.source_mapping !Hhbc_options.compiler_options
+  if Hhbc_options.source_mapping !Hhbc_options.compiler_options
   then B.add_string buf (" " ^ string_of_span (Hhas_class.span class_def));
-  *)
   add_extends buf (Hhas_class.base class_def);
   add_implements buf (Hhas_class.implements class_def);
   B.add_string buf " {";

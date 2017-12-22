@@ -18,20 +18,23 @@ let has_type_constraint ti =
   | _ -> false
 
 let emit_method_prolog ~pos ~params ~should_emit_init_this =
-  Emit_pos.emit_pos_then pos @@
-  gather (
+  let instr_list =
     (if should_emit_init_this
     then instr (IMisc (InitThisLoc (Local.Named "$this")))
     else empty)
     ::
     List.filter_map params (fun p ->
-    if Hhas_param.is_variadic p
-    then None else
-    let param_type_info = Hhas_param.type_info p in
-    let param_name = Hhas_param.name p in
-    if has_type_constraint param_type_info
-    then Some (instr (IMisc (VerifyParamType (Param_named param_name))))
-    else None))
+      if Hhas_param.is_variadic p
+      then None else
+      let param_type_info = Hhas_param.type_info p in
+      let param_name = Hhas_param.name p in
+      if has_type_constraint param_type_info
+      then Some (instr (IMisc (VerifyParamType (Param_named param_name))))
+      else None) in
+  if List.is_empty instr_list
+  then empty
+  else gather (Emit_pos.emit_pos pos :: instr_list)
+
 
 let tparams_to_strings tparams =
   List.map tparams (fun (_, (_, s), _) -> s)

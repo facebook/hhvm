@@ -125,7 +125,6 @@ let get_level p op e =
       p ("'" ^ op ^ "' with non-constant operand is not supported")
 
 let rec emit_stmt env (pos, st_) =
-  Emit_pos.emit_pos_then pos @@
   match st_ with
   | A.Expr (_, A.Yield_break) ->
     gather [
@@ -137,11 +136,13 @@ let rec emit_stmt env (pos, st_) =
   | A.Return (Some (_, A.Await e)) ->
     gather [
       emit_await env e;
+      Emit_pos.emit_pos pos;
       emit_return ~need_ref:false env;
     ]
   | A.Return (Some (_, A.Yield_from e)) ->
     gather [
       emit_yield_from_delegates env e;
+      Emit_pos.emit_pos pos;
       emit_return ~need_ref:false env;
     ]
   | A.Expr (_, A.Await e) ->
@@ -218,7 +219,7 @@ let rec emit_stmt env (pos, st_) =
         instr_popc;
       ]
   | A.Expr expr ->
-    emit_ignored_expr env expr
+    emit_ignored_expr ~pop_pos:pos env expr
   | A.Return None ->
     gather [
       instr_null;
@@ -238,7 +239,7 @@ let rec emit_stmt env (pos, st_) =
     TFR.emit_goto ~in_finally_epilogue:false env label
   | A.Block b -> emit_stmts env b
   | A.If (condition, consequence, alternative) ->
-    emit_if env condition consequence alternative
+    emit_if env pos condition consequence alternative
   | A.While (e, b) ->
     emit_while env e (pos, A.Block b)
   | A.Declare (is_block, e, b) ->
@@ -273,7 +274,7 @@ let rec emit_stmt env (pos, st_) =
   | A.Switch (e, cl) ->
     emit_switch env e cl
   | A.Foreach (collection, await_pos, iterator, block) ->
-    emit_foreach env collection await_pos iterator (pos, A.Block block)
+    emit_foreach env pos collection await_pos iterator (pos, A.Block block)
   | A.Def_inline def ->
     emit_def_inline def
   | A.Static_var es ->
@@ -293,7 +294,7 @@ and emit_break env pos level =
 and emit_continue env pos level =
   TFR.emit_break_or_continue ~is_break:false ~in_finally_epilogue:false env pos level
 
-and emit_if env condition consequence alternative =
+and emit_if env pos condition consequence alternative =
   match alternative with
   | []
   | [_, A.Noop] ->
@@ -311,6 +312,7 @@ and emit_if env condition consequence alternative =
     gather [
       emit_jmpz env condition alternative_label;
       consequence_instr;
+      Emit_pos.emit_pos pos;
       instr_jmp done_label;
       instr_label alternative_label;
       alternative_instr;
@@ -945,10 +947,10 @@ and wrap_non_empty_block_in_fault prefix block fault_block =
       (gather @@ prefix::block)
       fault_block
 
-and emit_foreach env collection await_pos iterator block =
+and emit_foreach env pos collection await_pos iterator block =
   Local.scope @@ fun () ->
     match await_pos with
-    | None -> emit_foreach_ env collection iterator block
+    | None -> emit_foreach_ env pos collection iterator block
     | Some pos -> emit_foreach_await env pos collection iterator block
 
 and emit_foreach_await env pos collection iterator block =
@@ -988,7 +990,7 @@ and emit_foreach_await env pos collection iterator block =
     instr_unsetl iter_temp_local;
   ]
 
-and emit_foreach_ env collection iterator block =
+and emit_foreach_ env pos collection iterator block =
   let iterator_number = Iterator.get_iterator () in
   let fault_label = Label.next_fault () in
   let loop_break_label = Label.next_regular () in
@@ -1045,6 +1047,7 @@ and emit_foreach_ env collection iterator block =
       ~iter:(mutable_iter, iterator_number) block emit_stmt in
   let result = gather [
     emit_expr ~need_ref:mutable_iter env collection;
+    Emit_pos.emit_pos pos;
     init;
     instr_try_fault
       fault_label
@@ -1053,6 +1056,7 @@ and emit_foreach_ env collection iterator block =
         preamble;
         body;
         instr_label loop_continue_label;
+        Emit_pos.emit_pos pos;
         next
       ])
       (* fault body *)

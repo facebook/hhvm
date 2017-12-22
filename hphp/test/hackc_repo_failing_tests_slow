@@ -10,13 +10,10 @@ slow/ext_oauth/plaintext2.php
 slow/ext_oauth/rsa.php
 slow/ext_process/ext_process.php
 slow/ext_process/fork_log.php
-slow/ext_process/lwp.php
 slow/ext_socket/accept_block.php
 slow/ext_socket/persistent_socket.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/inout/bad-call-15.php
-slow/inout/method-interop-dynamic.php
-slow/inout/method-interop-static.php
 slow/inout/side-effects.php
 slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-3.php

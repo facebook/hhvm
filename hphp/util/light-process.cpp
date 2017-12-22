@@ -658,7 +658,14 @@ void LightProcess::closeShadow() {
       handleException("closeShadow");
     }
     // removes the "zombie" process, so not to interfere with later waits
-    ::waitpid(m_shadowProcess, nullptr, 0);
+    while (true) {
+      auto r = ::waitpid(m_shadowProcess, nullptr, 0);
+      // retry on EINTR
+      if (r != -1 || errno != EINTR) {
+        break;
+      }
+    }
+
     m_shadowProcess = 0;
   }
   closeFiles();

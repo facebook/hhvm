@@ -1420,8 +1420,8 @@ let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
 
 
 let handle_idle_if_necessary (state: state) (event: event) : state =
-  match state, event with
-  | Main_loop menv, Tick -> Main_loop { menv with Main_env.needs_idle = true; }
+  match state with
+  | Main_loop menv when event <> Tick -> Main_loop { menv with Main_env.needs_idle = true; }
   | _ -> state
 
 

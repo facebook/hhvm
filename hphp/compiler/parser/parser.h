@@ -45,6 +45,10 @@
 #undef HPHP_PARSER_ERROR
 #endif
 
+#ifdef HPHP_PARSER_ERROR_AT
+#undef HPHP_PARSER_ERROR_AT
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -531,7 +535,8 @@ private:
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);
 
-  void checkThisContext(const std::string& var, ThisContextError error);
+  void checkThisContext(ExpressionPtr e,
+    const std::string& var, ThisContextError error);
   void checkThisContext(Token &var, ThisContextError error);
   void checkThisContext(ExpressionPtr e, ThisContextError error);
   void checkThisContext(ExpressionListPtr params, ThisContextError error);
@@ -671,6 +676,19 @@ inline void HPHP_PARSER_ERROR(const char* fmt,
 
 inline void HPHP_PARSER_ERROR(const char* msg, Parser* p) {
   throw ParseTimeFatalException(p->file(), p->line1(), "%s", msg);
+}
+
+template<typename... Args>
+inline void HPHP_PARSER_ERROR_AT(const char* fmt,
+                       Parser* p,
+                       int line,
+                       Args&&... args) {
+  throw ParseTimeFatalException(p->file(), line, fmt, args...);
+}
+
+inline void HPHP_PARSER_ERROR_AT(const char* msg, Parser* p,
+  int line) {
+  throw ParseTimeFatalException(p->file(), line, "%s", msg);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

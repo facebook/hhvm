@@ -1,7 +1,4 @@
 quick/bad_iter_warning.php
-quick/foreach-bad.php
-quick/keyref_error.php
 quick/ns_existing_names_class.php
 quick/parser_massive_add_exp.php
 quick/parser_massive_concat_exp.php
-quick/reassign_this2.php

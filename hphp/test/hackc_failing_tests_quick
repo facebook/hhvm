@@ -9,9 +9,6 @@ quick/debugger/flow_small.php
 quick/debugger/info1.php
 quick/debugger/list.php
 quick/eval_noreturn.php
-quick/foreach-bad.php
-quick/keyref_error.php
 quick/parser_massive_add_exp.php
 quick/parser_massive_concat_exp.php
-quick/reassign_this2.php
 quick/reflect-default.php

@@ -118,6 +118,8 @@
                         getRange(), ##__VA_ARGS__)
 
 #define PARSE_ERROR(fmt, ...)  HPHP_PARSER_ERROR(fmt, this, ##__VA_ARGS__)
+#define PARSE_ERROR_AT(c, fmt, ...)  \
+  HPHP_PARSER_ERROR_AT(fmt, this, c->line1(), ##__VA_ARGS__)
 
 using namespace HPHP::Compiler;
 
@@ -874,14 +876,14 @@ void Parser::checkAllowedInWriteContext(ExpressionPtr e) {
     if (e->is(Expression::KindOfObjectMethodExpression)) {
       auto om = static_pointer_cast<ObjectMethodExpression>(e);
       if (om->isXhpGetAttr()) {
-        PARSE_ERROR("Using ->: syntax in write context is not supported");
+        PARSE_ERROR_AT(e, "Using ->: syntax in write context is not supported");
       }
     }
-    PARSE_ERROR("Can't use return value in write context");
+    PARSE_ERROR_AT(e, "Can't use return value in write context");
   } if (e->is(Expression::KindOfObjectPropertyExpression)) {
     auto op = static_pointer_cast<ObjectPropertyExpression>(e);
     if (op->isNullSafe()) {
-      PARSE_ERROR(Strings::NULLSAFE_PROP_WRITE_ERROR);
+      PARSE_ERROR_AT(e, Strings::NULLSAFE_PROP_WRITE_ERROR);
     }
   }
 }
@@ -916,30 +918,31 @@ void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
   onExprListElem(out, list, out);
 }
 
-void Parser::checkThisContext(const std::string& var, ThisContextError error) {
+void Parser::checkThisContext(ExpressionPtr e,
+  const std::string& var, ThisContextError error) {
   if (var != "this") {
     return;
   }
 
   switch (error) {
     case ThisContextError::Assign:
-      PARSE_ERROR(Strings::ASSIGN_THIS_ERROR);
+      PARSE_ERROR_AT(e, Strings::ASSIGN_THIS_ERROR);
       break;
     case ThisContextError::NullSafeBase:
-      PARSE_ERROR(Strings::NULLSAFE_THIS_BASE_ERROR);
+      PARSE_ERROR_AT(e, Strings::NULLSAFE_THIS_BASE_ERROR);
       break;
   }
 }
 
 void Parser::checkThisContext(Token &var, ThisContextError error) {
   if (auto simp = dynamic_pointer_cast<SimpleVariable>(var.exp)) {
-    checkThisContext(simp->getName(), error);
+    checkThisContext(var.exp, simp->getName(), error);
   }
 }
 
 void Parser::checkThisContext(ExpressionPtr e, ThisContextError error) {
   if (auto simp = dynamic_pointer_cast<SimpleVariable>(e)) {
-    checkThisContext(simp->getName(), error);
+    checkThisContext(e, simp->getName(), error);
   }
 }
 
@@ -947,7 +950,7 @@ void Parser::checkThisContext(ExpressionListPtr params,
                               ThisContextError error) {
   for (int i = 0, count = params->getCount(); i < count; i++) {
     auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i]);
-    checkThisContext(param->getName(), error);
+    checkThisContext(param, param->getName(), error);
   }
 }
 
@@ -2137,11 +2140,12 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
   checkAllowedInWriteContext(name->exp);
   checkAllowedInWriteContext(value->exp);
   if (value->exp && name->num()) {
-    PARSE_ERROR("Key element cannot be a reference");
+    PARSE_ERROR_AT(value->exp, "Key element cannot be a reference");
   }
   if (awaitAs) {
     if (name->num() || value->num()) {
-      PARSE_ERROR("Value element cannot be a reference if await as is used");
+      PARSE_ERROR_AT(value->exp,
+        "Value element cannot be a reference if await as is used");
     }
     setIsAsync();
   }

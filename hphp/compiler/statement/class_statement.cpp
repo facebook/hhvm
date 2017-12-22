@@ -50,7 +50,7 @@ ClassStatement::ClassStatement
  TypeAnnotationPtr enumBaseTy)
   : InterfaceStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassStatement),
                        name, base, docComment, stmt, attrList),
-    m_type(type), m_ignored(false), m_enumBaseTy(enumBaseTy) {
+    m_type(type), m_enumBaseTy(enumBaseTy) {
   m_originalParent = parent;
 }
 
@@ -104,10 +104,7 @@ void ClassStatement::onParse(AnalysisResultConstRawPtr ar, FileScopePtr fs) {
     stmt, attrs);
 
   setBlockScope(classScope);
-  if (!fs->addClass(ar, classScope)) {
-    m_ignored = true;
-    return;
-  }
+  fs->addClass(ar, classScope);
 
   if (m_stmt) {
     MethodStatementPtr constructor = nullptr;

@@ -180,13 +180,9 @@ void FileScope::addFunction(AnalysisResultConstRawPtr ar,
   funcVec.push_back(funcScope);
 }
 
-bool FileScope::addClass(AnalysisResultConstRawPtr ar,
+void FileScope::addClass(AnalysisResultConstRawPtr ar,
                          ClassScopePtr classScope) {
-  if (ar->declareClass(classScope)) {
-    m_classes[classScope->getScopeName()].push_back(classScope);
-    return true;
-  }
-  return false;
+  m_classes[classScope->getScopeName()].push_back(classScope);
 }
 
 void FileScope::addAnonClass(ClassStatementPtr stmt) {

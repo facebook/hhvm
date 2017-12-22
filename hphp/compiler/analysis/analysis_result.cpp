@@ -260,20 +260,6 @@ int AnalysisResult::getClassCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool AnalysisResult::declareClass(ClassScopePtr classScope) const {
-  assert(m_phase < AnalyzeAll);
-
-  // System classes override
-  if (m_systemClasses.count(classScope->getScopeName())) {
-    // we need someone to hold on to a reference to it
-    // even though we're not going to do anything with it
-    this->lock()->m_ignoredScopes.push_back(classScope);
-    return false;
-  }
-
-  return true;
-}
-
 void AnalysisResult::declareUnknownClass(const std::string &name) {
   m_classDecs.operator[](name);
 }

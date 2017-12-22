@@ -224,7 +224,6 @@ public:
   /**
    * Declarations
    */
-  bool declareClass(ClassScopePtr classScope) const;
   void declareUnknownClass(const std::string &name);
   bool declareConst(FileScopePtr fs, const std::string &name);
 
@@ -304,8 +303,6 @@ public:
 
 private:
   Mutex m_mutex;
-
-  std::vector<BlockScopePtr> m_ignoredScopes;
 
   // Temporary vector of lambda expressions; populated
   // during analyzeProgram, and then processed at the end

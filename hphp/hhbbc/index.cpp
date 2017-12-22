@@ -1764,18 +1764,35 @@ void preresolve(IndexData& index, NamingEnv& env, SString clsName) {
   NamingEnv::Seen seen(env, clsName);
   {
     Trace::Indent indent;
-    for (auto& kv : find_range(index.classes, clsName)) {
-      if (kv.second->parentName) {
-        preresolve(index, env, kv.second->parentName);
+    auto process_one = [&] (const php::Class* cls) {
+      if (cls->parentName) {
+        preresolve(index, env, cls->parentName);
       }
-      for (auto& i : kv.second->interfaceNames) {
+      for (auto& i : cls->interfaceNames) {
         preresolve(index, env, i);
       }
-      for (auto& t : kv.second->usedTraitNames) {
+      for (auto& t : cls->usedTraitNames) {
         preresolve(index, env, t);
       }
-      resolve_combinations(index, env, kv.second);
-    }
+      resolve_combinations(index, env, cls);
+    };
+    auto const classRange = find_range(index.classes, clsName);
+    [&] {
+      if (begin(classRange) == end(classRange)) {
+        return;
+      }
+      if (std::next(begin(classRange)) == end(classRange)) {
+        return process_one(begin(classRange)->second);
+      }
+      for (auto& kv : classRange) {
+        if (is_systemlib_part(*kv.second->unit)) {
+          return process_one(kv.second);
+        }
+      }
+      for (auto& kv : classRange) {
+        process_one(kv.second);
+      }
+    }();
   }
   ITRACE(3, "preresolve: {} ({} resolutions)\n",
          clsName, index.classInfo.count(clsName));

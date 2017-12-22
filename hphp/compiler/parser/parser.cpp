@@ -1571,9 +1571,6 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
     cls->onParse(m_ar, m_file);
   }
   completeScope(cls->getClassScope());
-  if (cls->ignored()) {
-    result = NEW_STMT0(StatementList);
-  }
   m_clsContexts.pop();
   registerClassAlias(name);
 

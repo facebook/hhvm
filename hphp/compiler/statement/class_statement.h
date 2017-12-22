@@ -46,7 +46,6 @@ struct ClassStatement : InterfaceStatement {
 
   // implementing IParseHandler
   void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
-  bool ignored() const { return m_ignored;}
 
   std::string getName() const override;
   StatementPtr addClone(StatementPtr origStmt);
@@ -57,7 +56,6 @@ private:
   int m_type;
   int m_promotedParameterCount;
   std::string m_originalParent;
-  bool m_ignored;
   TypeAnnotationPtr m_enumBaseTy;
 };
 

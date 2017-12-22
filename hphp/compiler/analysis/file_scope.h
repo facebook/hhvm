@@ -104,7 +104,7 @@ public:
                       const std::string& msg, int line);
 
   void addFunction(AnalysisResultConstRawPtr ar, FunctionScopePtr funcScope);
-  bool addClass(AnalysisResultConstRawPtr ar, ClassScopePtr classScope);
+  void addClass(AnalysisResultConstRawPtr ar, ClassScopePtr classScope);
   const StringToFunctionScopePtrVecMap *getRedecFunctions() {
     return m_redeclaredFunctions;
   }

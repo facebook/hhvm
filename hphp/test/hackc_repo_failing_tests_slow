@@ -15,7 +15,6 @@ slow/ext_process/fork_log.php
 slow/ext_process/lwp.php
 slow/ext_socket/accept_block.php
 slow/ext_socket/persistent_socket.php
-slow/function/closure-default.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/hhbbc/iteration.php
 slow/inout/bad-call-15.php

@@ -861,7 +861,8 @@ and string_of_hint ~ns h =
       ~namespace:Namespace_env.empty_with_default_popt
       h
   in
-  if ns then h else SU.strip_ns h
+  let h = if ns then h else SU.strip_ns h in
+  Php_escaping.escape h
 
 and string_of_import_flavor = function
   | A.Include -> "include"
@@ -1234,7 +1235,7 @@ let add_doc buf indent doc_comment =
   match doc_comment with
   | Some cmt ->
     add_indented_line buf indent @@
-      Printf.sprintf ".doc \"\"\"%s\"\"\";" (Php_escaping.escape cmt)
+      Printf.sprintf ".doc %s;" (SU.triple_quote_string cmt)
   | None -> ()
 
 let add_body buf indent body =
@@ -1398,7 +1399,7 @@ let property_type_info p =
 let property_doc_comment p =
   match Hhas_property.doc_comment p with
   | None -> ""
-  | Some s -> Printf.sprintf "\"\"\"%s\"\"\" " (Php_escaping.escape s)
+  | Some s -> Printf.sprintf "%s " (SU.triple_quote_string s)
 
 let add_property class_def buf property =
   B.add_string buf "\n  .property ";

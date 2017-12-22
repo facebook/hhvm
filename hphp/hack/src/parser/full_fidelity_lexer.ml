@@ -14,7 +14,12 @@ module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 
 module Lexer : sig
-  type t
+  type t = {
+    text : SourceText.t;
+    start : int;  (* Both start and offset are absolute offsets in the text. *)
+    offset : int;
+    errors : SyntaxError.t list
+  }
   val make : SourceText.t -> t
   val start : t -> int
   val source : t -> SourceText.t
@@ -29,6 +34,10 @@ module Lexer : sig
   val with_start_offset : t -> int -> int -> t
 end = struct
 
+  let padding = String.make 100 '\x00'
+
+  (* text consists of a pair consisting of a string, padded by a certain, fixed
+   * amount of null bytes, and then the rest of the source text *)
   type t = {
     text : SourceText.t;
     start : int;  (* Both start and offset are absolute offsets in the text. *)
@@ -37,7 +46,8 @@ end = struct
   }
 
   let make text =
-    { text; start = 0; offset = 0; errors = [] }
+    let text' = SourceText.append_padding text padding in
+    { text = text'; start = 0; offset = 0; errors = [] }
 
   let start  x = x.start
   let source x = x.text
@@ -99,15 +109,10 @@ type string_literal_kind =
 (* Housekeeping *)
 
 let peek_char lexer index =
-  let i = offset lexer + index in
-  if i >= SourceText.length (source lexer) || i < 0 then invalid
-  else SourceText.get (source lexer) i
+  lexer.Lexer.text.SourceText.text.[offset lexer + index]
 
 let peek_string lexer size =
-  let r = (SourceText.length (source lexer)) - offset lexer in
-  if r < 0 then ""
-  else if r < size then SourceText.sub (source lexer) (offset lexer) r
-  else SourceText.sub (source lexer) (offset lexer) size
+  String.sub lexer.Lexer.text.SourceText.text (offset lexer) size
 
 let match_string lexer s =
   s = peek_string lexer (String.length s)

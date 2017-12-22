@@ -8,13 +8,22 @@
  *
  *)
 
-type t
+type t = {
+  file_path : Relative_path.t;
+  length : int;
+  text : string;
+  offset_map : Line_break_map.t
+}
 
 (** create a new source_text.t with a path and contents *)
 val make : Relative_path.t -> string -> t
 
 (** empty source_text.t located nowhere *)
 val empty : t
+
+(** given an initial Source_text.t, appending padding
+ * onto the underlying structure *)
+val append_padding : t -> string -> t
 
 (** read a relative path into a source_text.t with the contents at that path *)
 val from_file : Relative_path.t -> t

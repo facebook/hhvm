@@ -26,12 +26,14 @@ module OffsetMap = Line_break_map
 
 type t = {
   file_path : Relative_path.t;
+  length : int;
   text : string;
   offset_map : OffsetMap.t
 }
 
 let make file_path content =
-  { file_path; text = content; offset_map = OffsetMap.make content }
+  { file_path; text = content; offset_map = OffsetMap.make content;
+    length = String.length content; }
 
 let empty =
   make Relative_path.default ""
@@ -41,6 +43,8 @@ let from_file file =
     try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
   make file content
 
+let append_padding x pad = { x with text = x.text ^ pad }
+
 let text source_text =
   source_text.text
 
@@ -48,7 +52,7 @@ let file_path source_text =
   source_text.file_path
 
 let length source_text =
-  String.length source_text.text
+  source_text.length
 
 let get_text t =
   t.text

@@ -2852,10 +2852,12 @@ void add_node(const RCState& state,
 }
 
 struct NodeAdder {
-  explicit NodeAdder(Env& env, RCState& state, ChainProgress& chains)
+  explicit NodeAdder(Env& env, RCState& state,
+                     ChainProgress& chains, Block* curBlock)
     : env(env)
     , state(state)
     , chains(chains)
+    , curBlock(curBlock)
   {}
 
   template<class NodeT>
@@ -2875,6 +2877,19 @@ struct NodeAdder {
       FTRACE(2, "      {} += combining req {}\n", asetID, show(tail));
       return;
     }
+    // Any Req nodes we add after a sig, but in the same block, must
+    // belong to the same IRnstruction (we only create a sig for next
+    // and taken branches). In some cases (eg consumesReference) we'll
+    // reduce the lower bound after the sig, but before the next
+    // block. inc_pass_sig assumes that if it can move the inc past
+    // the sig in the rcgraph, then it can move it to the starts of
+    // the next and taken blocks - but if the lower bound was reduced
+    // prior to the next block, that may not be the case. Take care of
+    // that here.
+    if (tail->type == NT::Sig && to_sig(tail)->block == curBlock) {
+      to_sig(tail)->lower_bound = std::min(to_sig(tail)->lower_bound,
+                                           state.asets[asetID].lower_bound);
+    }
     add_node(state, chains, asetID, new (env.arena) NReq{req});
   }
 
@@ -2882,6 +2897,7 @@ private:
   Env& env;
   RCState& state;
   ChainProgress& chains;
+  Block* curBlock;
 };
 
 jit::vector<Node*> make_heads(Env& env) {
@@ -2954,7 +2970,7 @@ jit::vector<Node*> build_graphs(Env& env, const RCAnalysis& analysis) {
       }
     }
 
-    auto node_adder = NodeAdder{env, state, chains};
+    auto node_adder = NodeAdder{env, state, chains, blk};
     for (auto& inst : blk->instrs()) {
       auto propagate = [&] (Block* target) {
         add_node_all(env, state, chains, NSig{blk});

@@ -32,6 +32,7 @@ type test_case = {
   source: string;
   expected: string;
   test_function: string -> string;
+  value_mapper: string -> string;
 }
 
 let ident str = str
@@ -57,15 +58,15 @@ let cat_file name =
 
 (** Create a test_case by reading input from <cwd>/<test_files_dir>/name.php
  * and name.exp *)
-let make_test_case_from_files
-    ?preprocess_exp:(preprocess_exp=ident) name test_function =
+let make_test_case_from_files ?(value_mapper=ident) name test_function =
   let source = cat_file (name ^ ".php") in
-  let expected = preprocess_exp (cat_file (name ^ ".exp")) in
+  let expected = cat_file (name ^ ".exp") in
   {
     name = name;
     source = source;
     expected = expected;
     test_function = test_function;
+    value_mapper;
   }
 
 let remove_whitespace text =
@@ -86,7 +87,7 @@ let test_minimal source =
   let file_path = Relative_path.(create Dummy "<test_minimal>") in
   let source_text = SourceText.make file_path source in
   let syntax_tree = SyntaxTree.make source_text in
-  TestUtils.minimal_to_string (SyntaxTree.root syntax_tree)
+  TestUtils.minimal_to_formatted_sexp_string (SyntaxTree.root syntax_tree)
 
 let test_trivia source =
   let file_path = Relative_path.(create Dummy "<test_trivia>") in
@@ -131,7 +132,7 @@ let trivia_tests =
 let minimal_tests =
   let mapper testname =
     make_test_case_from_files
-      ~preprocess_exp:remove_whitespace testname test_minimal in
+      ~value_mapper:remove_whitespace testname test_minimal in
   List.map
     [
       "test_simple";
@@ -253,48 +254,55 @@ let test_data = minimal_tests @ trivia_tests @ error_tests @
                     source = "<?hh   ";
                     expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
                     test_function = test_mode;
+                    value_mapper = ident;
                   };
                   {
                     name = "test_mode_2";
                     source = "";
                     expected = "Lang:phpMode:Strict:falseHack:falsePhp:true";
                     test_function = test_mode;
+                    value_mapper = ident;
                   };
                   {
                     name = "test_mode_3";
                     source = "<?hh // strict ";
                     expected = "Lang:hhMode:strictStrict:trueHack:truePhp:false";
                     test_function = test_mode;
+                    value_mapper = ident;
                   };
                   {
                     name = "test_mode_4";
                     source = "<?php // strict "; (* Not strict! *)
                     expected = "Lang:phpMode:strictStrict:falseHack:falsePhp:true";
                     test_function = test_mode;
+                    value_mapper = ident;
                   };
                   {
                     name = "test_mode_5";
                     source = "<?hh/";
                     expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
                     test_function = test_mode;
+                    value_mapper = ident;
                   };
                   {
                     name = "test_mode_6";
                     source = "<?hh//";
                     expected = "Lang:hhMode:Strict:falseHack:truePhp:false";
                     test_function = test_mode;
+                    value_mapper = ident;
                   }
                 ]
 
-let assert_equal_or_write_file test_name expected actual =
-  if expected <> actual then
-    write_expectation_to_file test_name actual;
-
-  assert_equal expected actual
-
 let driver test () =
   let actual = test.test_function test.source in
-  assert_equal_or_write_file test.name test.expected actual
+  try
+    let expected = test.value_mapper test.expected in
+    let actual = test.value_mapper actual in
+    assert_equal expected actual
+  with
+    e ->
+      write_expectation_to_file test.name actual;
+      raise e
 
 let run_test test =
   test.name >:: (driver test)

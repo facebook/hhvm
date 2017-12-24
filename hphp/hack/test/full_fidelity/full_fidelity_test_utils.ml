@@ -89,35 +89,41 @@ let rewrite_tree_no_whitespace node =
     | _ -> Rewriter.Keep in
   Rewriter.rewrite_post rewrite node
 
-let minimal_trivia_to_string trivia =
+let minimal_trivia_to_sexp trivia =
   let name = TriviaKind.to_string (MinimalTrivia.kind trivia) in
-  Printf.sprintf "(%s)" name
+  Sexp.List [ Sexp.Atom name ]
 
-let minimal_trivia_list_to_string trivia_list =
-  String.concat "" (List.map trivia_list ~f:minimal_trivia_to_string)
+let minimal_trivia_list trivia_list =
+  List.map trivia_list ~f:minimal_trivia_to_sexp
 
-let minimal_token_to_string token =
-  let leading = minimal_trivia_list_to_string (MinimalToken.leading token) in
+let minimal_token_to_sexp token =
+  let leading = minimal_trivia_list (MinimalToken.leading token) in
   let name = TokenKind.to_string (MinimalToken.kind token) in
   let name =
     if name = "(" then "lparen"
     else if name = ")" then "rparen"
     else name in
-  let trailing = minimal_trivia_list_to_string (MinimalToken.trailing token) in
-  Printf.sprintf "(%s(%s)%s)" leading name trailing
+  let trailing = minimal_trivia_list (MinimalToken.trailing token) in
+  let name = Sexp.List [Sexp.Atom name] in
+  Sexp.List (leading @ [name] @ trailing)
 
-let rec minimal_to_string node =
+let rec minimal_to_sexp node =
   match MinimalSyntax.syntax node with
   | MinimalSyntax.Token token ->
-    minimal_token_to_string token
+    minimal_token_to_sexp token
   | _ ->
     let name = SyntaxKind.to_string (MinimalSyntax.kind node) in
     let children = MinimalSyntax.children node in
-    let children = List.map children ~f:minimal_to_string in
-    let children = String.concat "" children in
-    Printf.sprintf "(%s%s)" name children
+    let children = List.map children ~f:minimal_to_sexp in
+    Sexp.List ((Sexp.Atom name) :: children)
 
-let tree_to_string_ignore_trivia tree =
-  let root = SyntaxTree.root tree in
-  let new_root = rewrite_tree_no_trivia root in
-  minimal_to_string new_root
+let minimal_to_formatted_sexp_string node =
+  minimal_to_sexp node
+  |> Sexp.to_string_hum
+
+let tree_to_sexp_string_ignore_trivia tree =
+  tree
+  |> SyntaxTree.root
+  |> rewrite_tree_no_trivia
+  |> minimal_to_sexp
+  |> Sexp.to_string_mach

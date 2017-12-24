@@ -1,1 +1,9 @@
-(script(list(markup_section(missing)((markup))(markup_suffix((<?))((name)(end_of_line)))(missing))(expression_statement(binary_expression(variable((end_of_line)(variable)))((?:))(function_call_expression(qualified_name((name)))((lparen))(missing)((rparen))))((;)))))
+(script
+ (list
+  (markup_section (missing) ((markup))
+   (markup_suffix ((<?)) ((name) (end_of_line))) (missing))
+  (expression_statement
+   (binary_expression (variable ((end_of_line) (variable))) ((?:))
+    (function_call_expression (qualified_name ((name))) ((lparen)) (missing)
+     ((rparen))))
+   ((";")))))

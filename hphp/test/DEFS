@@ -47,26 +47,26 @@ def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
     command.append('--cli-server')
 
   deplist=[
-    '@/hphp/hhvm:hhvm',
-    '@/hphp/hhvm:hhvm_link',
-    '@/hphp/hhvm:symlinks',
+    '//hphp/hhvm:hhvm',
+    '//hphp/hhvm:hhvm_link',
+    '//hphp/hhvm:symlinks',
   ]
   runtimefiles = ['run', dir]
 
   if hhcodegen == True:
     command.extend(['-x', 'hphp/test/hhcodegen_failing_tests_' + suite])
-    deplist.extend(['@/hphp/hack/src:hh_single_compile'])
-    deplist.extend(['@/hphp/hack/src/hhbc/semdiff:semdiff'])
+    deplist.extend(['//hphp/hack/src:hh_single_compile'])
+    deplist.extend(['//hphp/hack/src/hhbc/semdiff:semdiff'])
     runtimefiles.extend(['hhcodegen_failing_tests_' + suite])
 
   elif use_hackc == True:
       command.extend(['-x', 'hphp/test/hackc_failing_tests_' + suite])
-      deplist.extend(['@/hphp/hack/src:hh_single_compile'])
+      deplist.extend(['//hphp/hack/src:hh_single_compile'])
       runtimefiles.extend(['hackc_failing_tests_' + suite])
 
   if use_php7 == True:
     command.extend(['-x', 'hphp/test/zend7/failures'])
-    deplist.extend(['@/hphp/php7:php7'])
+    deplist.extend(['//hphp/php7:php7'])
     runtimefiles.extend(['zend7/failures'])
 
   if hhcodegen == True:

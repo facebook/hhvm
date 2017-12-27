@@ -12,5 +12,18 @@
   extern "C" {
     hphp_type_scan_module_init;
     g_member_reflection_vtable_impl;
+    /* functions defined by jemalloc */
+    dallocx;
+    mallctl;
+    mallctlbymib;
+    mallctlnametomib;
+    malloc_stats_print;
+    mallocx;
+    nallocx;
+    nallocx;
+    rallocx;
+    sallocx;
+    sdallocx;
+    xallocx;
   };
 };

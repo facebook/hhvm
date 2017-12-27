@@ -1993,7 +1993,7 @@ and param_implicit_field vis p =
   ; cv_hint = p.param_hint
   ; cv_names = [span, cvname, None]
   ; cv_doc_comment = None
-  ; cv_user_attributes = []
+  ; cv_user_attributes = p.param_user_attributes
   } in
   (* Building the implicit assignment (for example: $this->x = $x;) *)
   let this = pos, "$this" in

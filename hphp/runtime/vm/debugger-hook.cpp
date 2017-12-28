@@ -186,7 +186,8 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   }
 
   // Check if we are hitting a line breakpoint.
-  if (UNLIKELY(req_data.m_lineBreakPointFilter.checkPC(pc))) {
+  if (UNLIKELY(active_line != line &&
+               req_data.m_lineBreakPointFilter.checkPC(pc))) {
     req_data.setActiveLineBreak(line);
     hook->onLineBreak(unit, line);
     return;
@@ -568,11 +569,29 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
 
   // Add to the breakpoint filter and the line filter.
   assertx(offsets.size() > 0);
-  auto bpOffset = offsets[0].base;
-  phpAddBreakPoint(unit, bpOffset);
+  bool containsEntryNop = false;
+  for (auto const offset : offsets) {
+    auto bpOffset = offset.base;
+    auto op = unit->getOp(bpOffset);
+    if (op == Op::EntryNop) {
+      containsEntryNop = true;
+    }
 
-  auto pc = unit->at(bpOffset);
-  RID().m_lineBreakPointFilter.addPC(pc);
+    if (containsEntryNop) {
+      phpAddBreakPoint(unit, offset.base);
+    }
+  }
+
+  if (containsEntryNop) {
+    RID().m_lineBreakPointFilter.addRanges(unit, offsets);
+  } else {
+    auto bpOffset = offsets[0].base;
+    phpAddBreakPoint(unit, bpOffset);
+
+    auto pc = unit->at(bpOffset);
+    RID().m_lineBreakPointFilter.addPC(pc);
+  }
+
   return true;
 }
 

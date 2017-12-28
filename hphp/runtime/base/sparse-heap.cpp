@@ -22,12 +22,8 @@ namespace HPHP {
 
 TRACE_SET_MOD(mm);
 
-SparseHeap::SparseHeap() {
+void SparseHeap::threadInit() {
   m_slabManager = SlabManager::get(s_numaNode);
-}
-
-SparseHeap::~SparseHeap() {
-  reset();
 }
 
 void SparseHeap::reset() {

@@ -2144,7 +2144,7 @@ void hphp_thread_init() {
   zend_get_bigint_data();
   zend_rand_init();
   get_server_note();
-  tl_heap.getCheck();
+  tl_heap.getCheck()->init();
 
   assert(ThreadInfo::s_threadInfo.isNull());
   ThreadInfo::s_threadInfo.getCheck()->init();

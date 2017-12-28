@@ -457,8 +457,8 @@ struct NativeNode : HeapObject,
  * Allocator for slabs and big blocks.
  */
 struct SparseHeap {
-  SparseHeap();
-  ~SparseHeap();
+  SparseHeap() = default;
+  ~SparseHeap() { reset(); }
 
   /*
    * Is the heap empty?
@@ -486,6 +486,11 @@ struct SparseHeap {
                     type_scan::Index tyindex, MemoryUsageStats& stats);
   MemBlock resizeBig(void* p, size_t size, MemoryUsageStats& stats);
   void freeBig(void*);
+
+  /*
+   * One-time initialization
+   */
+  void threadInit();
 
   /*
    * Free all slabs and big blocks.
@@ -584,6 +589,11 @@ struct ContiguousHeap {
   void freeBig(void*);
 
   /*
+   * One-time initialization
+   */
+  void threadInit() {}
+
+  /*
    * Free all chunks.
    */
   void reset();
@@ -654,6 +664,13 @@ struct MemoryManager {
   MemoryManager(const MemoryManager&) = delete;
   MemoryManager& operator=(const MemoryManager&) = delete;
   ~MemoryManager();
+
+  /*
+   * One-time initialization for the thread.
+   */
+  void init() {
+    m_heap.threadInit();
+  }
 
   /////////////////////////////////////////////////////////////////////////////
   // Allocation.

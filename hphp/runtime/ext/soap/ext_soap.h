@@ -132,8 +132,7 @@ struct SoapVar {
     if (str.isNull()) { \
       obj->setProp(nullptr, s_enc_##str_name.get(), make_tv<KindOfNull>()); \
     } else { \
-      obj->setProp(nullptr, s_enc_##str_name.get(), \
-                   make_tv<KindOfString>(str.get())); \
+      obj->setProp(nullptr, s_enc_##str_name.get(), str.asCell()); \
     } \
   } \
   static String getEnc##Name(ObjectData* obj) { \

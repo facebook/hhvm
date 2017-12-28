@@ -334,11 +334,11 @@ struct ActiveSubscription {
       String str_json_data(json_data.c_str());
       String str_socket_path(m_socketPath.c_str());
       TypedValue args[] = {
-        make_tv<KindOfString>(str_path.get()),
-        make_tv<KindOfString>(str_query.get()),
-        make_tv<KindOfString>(str_name.get()),
-        make_tv<KindOfString>(str_json_data.get()),
-        make_tv<KindOfString>(str_socket_path.get())
+        str_path.asCell(),
+        str_query.asCell(),
+        str_name.asCell(),
+        str_json_data.asCell(),
+        str_socket_path.asCell(),
       };
       tvDecRefGen(
           context->invokeFuncFew(func,

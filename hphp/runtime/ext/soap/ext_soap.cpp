@@ -3004,20 +3004,16 @@ void HHVM_METHOD(SoapVar, __construct,
   this_->setProp(nullptr, s_enc_type.get(), make_tv<KindOfInt64>(ntype));
   if (data.toBoolean()) this_->setProp(nullptr, s_enc_value.get(), *data.asCell());
   if (!type_name.empty()) {
-    this_->setProp(nullptr, s_enc_stype.get(),
-                   make_tv<KindOfString>(type_name.get()));
+    this_->setProp(nullptr, s_enc_stype.get(), type_name.asCell());
   }
   if (!type_namespace.empty()) {
-    this_->setProp(nullptr, s_enc_ns.get(),
-                   make_tv<KindOfString>(type_namespace.get()));
+    this_->setProp(nullptr, s_enc_ns.get(), type_namespace.asCell());
   }
   if (!node_name.empty()) {
-    this_->setProp(nullptr, s_enc_name.get(),
-                   make_tv<KindOfString>(node_name.get()));
+    this_->setProp(nullptr, s_enc_name.get(), node_name.asCell());
   }
   if (!node_namespace.empty()) {
-    this_->setProp(nullptr, s_enc_namens.get(),
-                   make_tv<KindOfString>(node_namespace.get()));
+    this_->setProp(nullptr, s_enc_namens.get(), node_namespace.asCell());
   }
 }
 
@@ -3076,8 +3072,8 @@ void HHVM_METHOD(SoapHeader, __construct,
   nativeData->m_data = data;
   nativeData->m_mustUnderstand = mustunderstand;
 
-  this_->setProp(nullptr, s_namespace.get(), make_tv<KindOfString>(ns.get()));
-  this_->setProp(nullptr, s_name.get(), make_tv<KindOfString>(name.get()));
+  this_->setProp(nullptr, s_namespace.get(), ns.asCell());
+  this_->setProp(nullptr, s_name.get(), name.asCell());
   this_->setProp(nullptr, s_data.get(), *data.asCell());
   this_->setProp(nullptr, s_mustUnderstand.get(),
                  make_tv<KindOfBoolean>(mustunderstand));

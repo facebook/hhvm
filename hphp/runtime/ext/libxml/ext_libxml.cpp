@@ -522,14 +522,13 @@ static Object create_libxmlerror(xmlError &error) {
   ret->setProp(nullptr, s_column.get(), make_tv<KindOfInt64>(error.int2));
   if (error.message) {
     String message(error.message);
-    ret->setProp(nullptr, s_message.get(),
-                 make_tv<KindOfString>(message.get()));
+    ret->setProp(nullptr, s_message.get(), message.asCell());
   } else {
     ret->setProp(nullptr, s_message.get(), make_tv<KindOfNull>());
   }
   if (error.file) {
     String file(error.file);
-    ret->setProp(nullptr, s_file.get(), make_tv<KindOfString>(file.get()));
+    ret->setProp(nullptr, s_file.get(), file.asCell());
   } else {
     ret->setProp(nullptr, s_file.get(), make_tv<KindOfNull>());
   }

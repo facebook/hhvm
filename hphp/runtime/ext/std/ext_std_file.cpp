@@ -2014,7 +2014,7 @@ Variant HHVM_FUNCTION(dir,
     return false;
   }
   auto d = SystemLib::AllocDirectoryObject();
-  d->setProp(nullptr, s_path.get(), make_tv<KindOfString>(directory.get()));
+  d->setProp(nullptr, s_path.get(), directory.asCell());
   d->setProp(nullptr, s_handle.get(), *dir.asCell());
   return d;
 }

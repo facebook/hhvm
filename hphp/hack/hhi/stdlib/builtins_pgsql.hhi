@@ -106,7 +106,7 @@ function pg_field_num(resource $result, string $field_name): int;
 function pg_field_prtlen(
   resource $result,
   mixed $row_number,
-  mixed $field = uninit_variant,
+  mixed $field = null,
 );
 function pg_field_size(resource $result, int $field_number);
 function pg_fieldsize(resource $result, int $field_number);

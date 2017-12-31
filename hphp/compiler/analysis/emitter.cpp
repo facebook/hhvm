@@ -9921,7 +9921,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   Label cacheMissNoClean;
 
   emitMethodPrologue(e, meth);
-  // We want to emit the depreciation warning on every call, even if its a cache
+  // We want to emit the deprecation warning on every call, even if its a cache
   // hit.
   if (meth->getFunctionScope()->userAttributes().count(attr_Deprecated)) {
     emitDeprecationWarning(e, meth);

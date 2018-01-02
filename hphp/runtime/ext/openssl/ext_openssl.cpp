@@ -2271,14 +2271,13 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
 
   s = String(data.size() + EVP_CIPHER_CTX_block_size(ctx), ReserveString);
   buf = (unsigned char *)s.mutableData();
-  if (!EVP_SealInit(ctx, cipher_type, eks, eksl, iv_buf, pkeys, nkeys) ||
-      !EVP_SealUpdate(
-          ctx, buf, &len1, (unsigned char*)data.data(), data.size())) {
+  if (EVP_SealInit(ctx, cipher_type, eks, eksl, iv_buf, pkeys, nkeys) <= 0 ||
+      !EVP_SealUpdate(ctx, buf, &len1, (unsigned char*)data.data(), data.size()) ||
+      !EVP_SealFinal(ctx, buf + len1, &len2)) {
     ret = false;
     goto clean_exit;
   }
 
-  EVP_SealFinal(ctx, buf + len1, &len2);
   if (len1 + len2 > 0) {
     sealed_data.assignIfRef(s.setSize(len1 + len2));
 

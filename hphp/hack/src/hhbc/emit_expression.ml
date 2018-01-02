@@ -271,7 +271,7 @@ let rec expr_and_new env instr_to_add_new instr_to_add = function
       if expr_starts_with_ref v then instr_add_elemv else instr_to_add
     in
     gather [
-      emit_two_exprs env k v;
+      emit_two_exprs env (fst k) k v;
       add_instr;
     ]
 
@@ -330,13 +330,23 @@ and emit_first_expr env (_, e as expr) =
     emit_expr_and_unbox_if_necessary ~need_ref:false env expr, false
 
 (* Special case for binary operations to make use of CGetL2 *)
-and emit_two_exprs env e1 e2 =
+and emit_two_exprs env outer_pos e1 e2 =
   let instrs1, is_under_top = emit_first_expr env e1 in
   let instrs2 = emit_expr_and_unbox_if_necessary ~need_ref:false env e2 in
+  let instrs2_is_var =
+    match e2 with
+    | _, A.Lvar _ -> true
+    | _ -> false in
   gather @@
     if is_under_top
-    then [instrs2; instrs1]
-    else [instrs1; instrs2]
+    then
+      if instrs2_is_var
+      then [Emit_pos.emit_pos outer_pos; instrs2; instrs1]
+      else [instrs2; Emit_pos.emit_pos outer_pos; instrs1]
+    else
+      if instrs2_is_var
+      then [instrs1; Emit_pos.emit_pos outer_pos; instrs2]
+      else [instrs1; instrs2; Emit_pos.emit_pos outer_pos]
 
 and emit_is_null env e =
   match e with
@@ -351,17 +361,17 @@ and emit_is_null env e =
 and emit_binop env expr op e1 e2 =
   let default () =
     gather [
-      emit_two_exprs env e1 e2;
+      emit_two_exprs env (fst expr) e1 e2;
       from_binop op
     ] in
   match op with
   | A.AMpamp | A.BArbar -> emit_short_circuit_op env expr
   | A.Eq None ->
-    emit_lval_op env LValOp.Set e1 (Some e2)
+    emit_lval_op env (fst expr) LValOp.Set e1 (Some e2)
   | A.Eq (Some obop) ->
     begin match binop_to_eqop obop with
     | None -> emit_nyi "illegal eq op"
-    | Some op -> emit_lval_op env (LValOp.SetOp op) e1 (Some e2)
+    | Some op -> emit_lval_op env (fst expr) (LValOp.SetOp op) e1 (Some e2)
     end
   | _ ->
     if not (optimize_null_check ())
@@ -779,7 +789,7 @@ and emit_string2 env exprs =
     ]
   | e1::e2::es ->
     gather @@ [
-      emit_two_exprs env e1 e2;
+      emit_two_exprs env (fst e1) e1 e2;
       instr (IOp Concat);
       gather (List.map es (fun e ->
         gather [emit_expr ~need_ref:false env e; instr (IOp Concat)]))
@@ -885,11 +895,12 @@ and emit_import env flavor e =
     import_instr;
   ]
 
-and emit_call_isset_expr env (pos, expr_ as expr) =
+and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
   match expr_ with
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
+      Emit_pos.emit_pos outer_pos;
       instr (IIsset IssetG)
     ]
   | A.Array_get (base_expr, opt_elem_expr) ->
@@ -951,12 +962,12 @@ and emit_call_empty_expr env (pos, expr_ as expr) =
     ]
 
 and emit_unset_expr env expr =
-  emit_lval_op_nonlist env LValOp.Unset expr empty 0
+  emit_lval_op_nonlist env (fst expr) LValOp.Unset expr empty 0
 
-and emit_call_isset_exprs env exprs =
+and emit_call_isset_exprs env pos exprs =
   match exprs with
   | [] -> emit_nyi "isset()"
-  | [expr] -> emit_call_isset_expr env expr
+  | [expr] -> emit_call_isset_expr env pos expr
   | _ ->
     let n = List.length exprs in
     let its_done = Label.next_regular () in
@@ -965,7 +976,7 @@ and emit_call_isset_exprs env exprs =
         List.mapi exprs
         begin fun i expr ->
           gather [
-            emit_call_isset_expr env expr;
+            emit_call_isset_expr env pos expr;
             if i < n-1 then
             gather [
               instr_dup;
@@ -1080,7 +1091,7 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Class_const (cid, id) ->
     emit_class_const env cid id
   | A.Unop (op, e) ->
-    emit_unop ~need_ref env op e
+    emit_unop ~need_ref env pos op e
   | A.Binop (op, e1, e2) ->
     emit_box_if_necessary need_ref @@ emit_binop env expr op e1 e2
   | A.Pipe (e1, e2) ->
@@ -1109,7 +1120,7 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     emit_obj_get ~need_ref env pos None query_op expr prop nullflavor
   | A.Call ((_, A.Id (_, "isset")), _, exprs, []) ->
-    emit_box_if_necessary need_ref @@ emit_call_isset_exprs env exprs
+    emit_box_if_necessary need_ref @@ emit_call_isset_exprs env pos exprs
   | A.Call ((_, A.Id (_, "empty")), _, [expr], []) ->
     emit_box_if_necessary need_ref @@ emit_call_empty_expr env expr
   (* Did you know that tuples are functions? *)
@@ -1976,7 +1987,6 @@ and emit_arg env i is_splatted expr =
     ]
   | A.Lvar ((_, str) as id)
     when not (is_local_this env str) || Emit_env.get_needs_local_this env ->
-    Emit_pos.emit_pos_then pos @@
     instr_fpassl i (get_local env id) hint
   | A.BracedExpr e ->
     emit_expr ~need_ref:false env e;
@@ -2594,7 +2604,7 @@ and emit_expr_and_unbox_if_necessary ~need_ref env e =
   gather [emit_expr ~need_ref env e; unboxing_instr]
 
 (* Emit code for an l-value operation *)
-and emit_lval_op env op expr1 opt_expr2 =
+and emit_lval_op env pos op expr1 opt_expr2 =
   let op =
     match op, opt_expr2 with
     | LValOp.Set, Some e when expr_starts_with_ref e -> LValOp.SetRef
@@ -2648,15 +2658,16 @@ and emit_lval_op env op expr1 opt_expr2 =
               pos "?-> is not allowed in write context"
           | Some e -> emit_expr_and_unbox_if_necessary ~need_ref:false env e, 1
         in
-        emit_lval_op_nonlist env op expr1 rhs_instrs rhs_stack_size
+        emit_lval_op_nonlist env pos op expr1 rhs_instrs rhs_stack_size
 
-and emit_lval_op_nonlist env op e rhs_instrs rhs_stack_size =
+and emit_lval_op_nonlist env pos op e rhs_instrs rhs_stack_size =
   let (lhs, rhs, setop) =
     emit_lval_op_nonlist_steps env op e rhs_instrs rhs_stack_size
   in
   gather [
     lhs;
     rhs;
+    Emit_pos.emit_pos pos;
     setop;
   ]
 
@@ -2696,7 +2707,6 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
   | A.Lvar id when not (is_local_this env (snd id)) || op = LValOp.Unset ->
     empty,
     rhs_instrs,
-    Emit_pos.emit_pos_then pos @@
     emit_final_local_op op (get_local env id)
 
   | A.Dollar e ->
@@ -2817,7 +2827,7 @@ and emit_lval_op_nonlist_steps env op (pos, expr_) rhs_instrs rhs_stack_size =
     empty,
     rhs_instrs,
     gather [
-      emit_lval_op_nonlist env op e empty rhs_stack_size;
+      emit_lval_op_nonlist env pos op e empty rhs_stack_size;
       from_unop uop;
     ]
 
@@ -2838,7 +2848,7 @@ and from_unop op =
 
 and emit_expr_as_ref env e = emit_expr ~need_ref:true env e
 
-and emit_unop ~need_ref env op e =
+and emit_unop ~need_ref env pos op e =
   let unop_instr = from_unop op in
   match op with
   | A.Utild ->
@@ -2863,7 +2873,7 @@ and emit_unop ~need_ref env op e =
     begin match unop_to_incdec_op op with
     | None -> emit_nyi "incdec"
     | Some incdec_op ->
-      let instr = emit_lval_op env (LValOp.IncDec incdec_op) e None in
+      let instr = emit_lval_op env pos (LValOp.IncDec incdec_op) e None in
       emit_box_if_necessary need_ref instr
     end
   | A.Uref -> emit_expr_as_ref env e

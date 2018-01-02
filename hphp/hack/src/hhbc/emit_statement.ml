@@ -207,7 +207,7 @@ let rec emit_stmt env (pos, st_) =
       emit_yield_from_delegates env e;
       instr_popc;
     ]
-  | A.Expr (_, A.Binop (A.Eq None, e_lhs, (_, A.Yield_from e))) ->
+  | A.Expr (pos, A.Binop (A.Eq None, e_lhs, (_, A.Yield_from e))) ->
     Local.scope @@ fun () ->
       let temp = Local.get_unnamed_local () in
       let rhs_instrs = instr_pushl temp in
@@ -215,7 +215,7 @@ let rec emit_stmt env (pos, st_) =
         emit_yield_from_delegates env e;
         instr_setl temp;
         instr_popc;
-        emit_lval_op_nonlist env LValOp.Set e_lhs rhs_instrs 1;
+        emit_lval_op_nonlist env pos LValOp.Set e_lhs rhs_instrs 1;
         instr_popc;
       ]
   | A.Expr expr ->
@@ -261,6 +261,7 @@ let rec emit_stmt env (pos, st_) =
   | A.Throw e ->
     gather [
       emit_expr ~need_ref:false env e;
+      Emit_pos.emit_pos pos;
       instr (IContFlow Throw);
     ]
   | A.Try (try_block, catch_list, finally_block) ->
@@ -598,7 +599,7 @@ and emit_switch env scrutinee_expr cl =
   ]
   end
 
-and emit_catch env end_label (catch_type, (_, catch_local), b) =
+and emit_catch env pos end_label (catch_type, (_, catch_local), b) =
     (* Note that this is a "regular" label; we're not going to branch to
     it directly in the event of an exception. *)
     let next_catch = Label.next_regular () in
@@ -611,12 +612,13 @@ and emit_catch env end_label (catch_type, (_, catch_local), b) =
       instr_setl (Local.Named catch_local);
       instr_popc;
       emit_stmt env (Pos.none, A.Block b);
+      Emit_pos.emit_pos pos;
       instr_jmp end_label;
       instr_label next_catch;
     ]
 
-and emit_catches env catch_list end_label =
-  gather (List.map catch_list ~f:(emit_catch env end_label))
+and emit_catches env pos catch_list end_label =
+  gather (List.map catch_list ~f:(emit_catch env pos end_label))
 
 and is_empty_block b =
   match b with
@@ -632,12 +634,14 @@ and emit_try_catch_ env try_block catch_list =
   if is_empty_block try_block then empty
   else
   let end_label = Label.next_regular () in
+  let (pos, _) = try_block in
   gather [
     instr_try_catch_begin;
     emit_stmt env try_block;
+    Emit_pos.emit_pos pos;
     instr_jmp end_label;
     instr_try_catch_middle;
-    emit_catches env catch_list end_label;
+    emit_catches env pos catch_list end_label;
     instr_throw;
     instr_try_catch_end;
     instr_label end_label;
@@ -803,8 +807,8 @@ and emit_load_list_element env path i v =
       instr_dim MemberOpMode.Warn (MemberKey.EI (Int64.of_int i))
     in
     emit_load_list_elements env (dim_instr::path) exprs
-  | _ ->
-    let set_instrs = emit_lval_op_nonlist env LValOp.Set v query_value 1 in
+  | pos, _ ->
+    let set_instrs = emit_lval_op_nonlist env pos LValOp.Set v query_value 1 in
     let load_value = [set_instrs; instr_popc] in
     [], [gather load_value]
 

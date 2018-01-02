@@ -1,8 +1,3 @@
-quick/debugger/flow.php
-quick/debugger/flow_excep.php
-quick/debugger/flow_gen_async_excep.php
-quick/debugger/flow_gen_excep.php
-quick/debugger/flow_small.php
 quick/eval_noreturn.php
 quick/parser_massive_add_exp.php
 quick/parser_massive_concat_exp.php

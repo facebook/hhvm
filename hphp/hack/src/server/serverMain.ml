@@ -432,26 +432,27 @@ let resolve_init_approach genv =
 
 let program_init genv =
   let load_mini_approach, approach_name = resolve_init_approach genv in
-  let env, init_type, state_distance =
+  let env, init_type, init_error, state_distance =
     match load_mini_approach with
     | None ->
       let env, _ = ServerInit.init genv in
-      env, "fresh", None
+      env, "fresh", None, None
     | Some load_mini_approach ->
       let env, init_result = ServerInit.init ~load_mini_approach genv in
       begin match init_result with
-        | ServerInit.Mini_load distance -> env, "mini_load", distance
-        | ServerInit.Mini_load_failed err -> env, err, None
+        | ServerInit.Mini_load distance -> env, "mini_load", None, distance
+        | ServerInit.Mini_load_failed err -> env, "mini_load_failed", Some err, None
       end
   in
   let timeout = genv.local_config.ServerLocalConfig.load_mini_script_timeout in
   EventLogger.set_init_type init_type;
-  HackEventLogger.init_end ~state_distance ~approach_name init_type timeout;
+  HackEventLogger.init_end ~state_distance ~approach_name ~init_error init_type timeout;
   Hh_logger.log "Waiting for daemon(s) to be ready...";
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
   let informant_use_xdb = genv.local_config.ServerLocalConfig.informant_use_xdb in
-  HackEventLogger.init_really_end ~informant_use_xdb ~state_distance ~approach_name init_type;
+  HackEventLogger.init_really_end ~informant_use_xdb ~state_distance ~approach_name
+    ~init_error init_type;
   env
 
 let setup_server ~informant_managed options handle =

@@ -62,14 +62,20 @@ module WithStatementAndDeclAndTypeParser
   type binary_expression_prefix_kind =
     | Prefix_byref_assignment | Prefix_assignment | Prefix_none
 
-  let parse_type_specifier parser =
+  let with_type_parser parser f =
     let type_parser = TypeParser.make
       parser.env parser.lexer parser.errors parser.context in
-    let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
+    let (type_parser, node) = f type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
     let parser = { parser with lexer; errors } in
     (parser, node)
+
+  let parse_type_specifier parser =
+    with_type_parser parser TypeParser.parse_type_specifier
+
+  let parse_remaining_type_specifier parser name =
+    with_type_parser parser (TypeParser.parse_remaining_type_specifier name)
 
   let parse_generic_type_arguments_opt parser =
     let type_parser = TypeParser.make
@@ -140,7 +146,10 @@ module WithStatementAndDeclAndTypeParser
        error. *)
     let (parser1, token) = next_token_as_name parser in
     match (Token.kind token) with
-    | Name -> parse_name_or_collection_literal_expression parser1 token
+    | Name ->
+      let (parser1, name) =
+        scan_remaining_qualified_name parser1 (make_token token) in
+      parse_name_or_collection_literal_expression parser1 name
     | kind when PrecedenceParser.expects_here parser kind ->
       (* ERROR RECOVERY: If we're encountering a token that matches a kind in
        * the previous scope of the expected stack, don't eat it--just mark the
@@ -157,7 +166,7 @@ module WithStatementAndDeclAndTypeParser
       (parser, make_token token)
 
   and parse_term parser =
-    let (parser1, token) = next_xhp_class_name_or_other parser in
+    let (parser1, token) = next_xhp_class_name_or_other_token parser in
     match (Token.kind token) with
     (* TODO: Make these an error in Hack *)
     | ExecutionStringLiteral
@@ -184,9 +193,16 @@ module WithStatementAndDeclAndTypeParser
       parse_double_quoted_like_string
         parser1 (make_token token) Lexer.Literal_execution_string
     | Variable -> parse_variable_or_lambda parser
-    | XHPClassName
-    | Name
-    | QualifiedName -> parse_name_or_collection_literal_expression parser1 token
+    | XHPClassName ->
+      parse_name_or_collection_literal_expression parser1 (make_token token)
+    | Name ->
+      let (parser1, qualified_name) =
+        scan_remaining_qualified_name parser1 (make_token token) in
+      parse_name_or_collection_literal_expression parser1 qualified_name
+    | Backslash ->
+      let (parser1, qualified_name) =
+        scan_qualified_name parser1 (make_token token) in
+      parse_name_or_collection_literal_expression parser1 qualified_name
     | Self
     | Parent -> parse_scope_resolution_or_name parser
     | Static ->
@@ -516,7 +532,7 @@ module WithStatementAndDeclAndTypeParser
       | (LeftBracket, Name, RightBracket) ->
         let expr = make_embedded_subscript_expression var_expr
           (make_token token1)
-          (make_qualified_name_expression (make_token token2))
+          (make_token token2)
           (make_token token3) in
         (parser3, expr)
       | (LeftBracket, Variable, RightBracket) ->
@@ -763,7 +779,8 @@ module WithStatementAndDeclAndTypeParser
 
   and can_term_take_type_args term =
     match kind term with
-    | SyntaxKind.QualifiedNameExpression
+    | SyntaxKind.Token -> is_name term
+    | SyntaxKind.QualifiedName
     | SyntaxKind.MemberSelectionExpression
     | SyntaxKind.SafeMemberSelectionExpression
     | SyntaxKind.ScopeResolutionExpression -> true
@@ -991,6 +1008,15 @@ module WithStatementAndDeclAndTypeParser
       parser, make_decorated_expression decorator expr
     | _ -> parse_expression parser
 
+  and parse_start_of_type_specifier parser start_token =
+    let (parser, name) =
+      if Token.kind start_token = Backslash
+      then scan_qualified_name parser (make_token start_token)
+      else scan_remaining_qualified_name parser (make_token start_token) in
+    match peek_token_kind parser with
+    | LeftParen | LessThan -> Some (parser, name)
+    | _ -> None
+
   and parse_designator parser =
     (* SPEC:
         class-type-designator:
@@ -1009,17 +1035,21 @@ TODO: This will need to be fixed to allow situations where the qualified name
       is also a non-reserved token.
     *)
     let (parser1, token) = next_token parser in
-    let kind = peek_token_kind parser1 in
     match Token.kind token with
     | Parent
     | Self
-    | Static when kind = LeftParen ->
+    | Static when peek_token_kind parser1 = LeftParen ->
       (parser1, make_token token)
     | Name
-    | QualifiedName when kind = LeftParen || kind = LessThan ->
-      (* We want to parse new C() and new C<int>() as types, but
-      new C::$x() as an expression. *)
-      parse_type_specifier parser
+    | Backslash ->
+      begin match parse_start_of_type_specifier parser1 token with
+      | Some (parser, name) ->
+        (* We want to parse new C() and new C<int>() as types, but
+        new C::$x() as an expression. *)
+        parse_remaining_type_specifier parser name
+      | None ->
+        parse_expression_with_operator_precedence parser Operator.NewOperator
+      end
     | _ ->
         parse_expression_with_operator_precedence parser Operator.NewOperator
         (* TODO: We need to verify in a later pass that the expression is a
@@ -1242,8 +1272,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Yield -> true
     (* Names that imply cast *)
     | Name
-    | NamespacePrefix
-    | QualifiedName
+    | Backslash
     | Variable -> true
     (* Symbols that imply cast *)
     | At
@@ -1836,8 +1865,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
       test question consequence colon alternative in
     (parser, result)
 
-  and parse_name_or_collection_literal_expression parser token =
-    let name = make_token token in
+  and parse_name_or_collection_literal_expression parser name =
     match peek_token_kind parser with
     | LeftBrace ->
       let name = make_simple_type_specifier name in
@@ -1851,9 +1879,9 @@ TODO: This will need to be fixed to allow situations where the qualified name
         let name = make_generic_type_specifier name type_arguments in
         parse_collection_literal_expression parser1 name
       else
-        (parser, make_qualified_name_expression name)
+        (parser, name)
     | _ ->
-      (parser, make_qualified_name_expression name)
+      (parser, name)
 
   and parse_collection_literal_expression parser name =
 

@@ -89,14 +89,14 @@ class EditableSyntax
       return EndOfFile.from_json(json, position, source);
     case 'script':
       return Script.from_json(json, position, source);
+    case 'qualified_name':
+      return QualifiedName.from_json(json, position, source);
     case 'simple_type_specifier':
       return SimpleTypeSpecifier.from_json(json, position, source);
     case 'literal':
       return LiteralExpression.from_json(json, position, source);
     case 'variable':
       return VariableExpression.from_json(json, position, source);
-    case 'qualified_name':
-      return QualifiedNameExpression.from_json(json, position, source);
     case 'pipe_variable':
       return PipeVariableExpression.from_json(json, position, source);
     case 'enum_declaration':
@@ -714,6 +714,8 @@ class EditableToken extends EditableSyntax
        return new AttributeToken(leading, trailing);
     case 'await':
        return new AwaitToken(leading, trailing);
+    case '\':
+       return new BackslashToken(leading, trailing);
     case 'bool':
        return new BoolToken(leading, trailing);
     case 'break':
@@ -1045,12 +1047,8 @@ class EditableToken extends EditableSyntax
        return new ErrorTokenToken(leading, trailing, token_text);
     case 'name':
        return new NameToken(leading, trailing, token_text);
-    case 'qualified_name':
-       return new QualifiedNameToken(leading, trailing, token_text);
     case 'variable':
        return new VariableToken(leading, trailing, token_text);
-    case 'namespace_prefix':
-       return new NamespacePrefixToken(leading, trailing, token_text);
     case 'decimal_literal':
        return new DecimalLiteralToken(leading, trailing, token_text);
     case 'octal_literal':
@@ -1219,6 +1217,13 @@ class AwaitToken extends EditableToken
   constructor(leading, trailing)
   {
     super('await', leading, trailing, 'await');
+  }
+}
+class BackslashToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('\', leading, trailing, '\');
   }
 }
 class BoolToken extends EditableToken
@@ -2387,18 +2392,6 @@ class NameToken extends EditableToken
   }
 
 }
-class QualifiedNameToken extends EditableToken
-{
-  constructor(leading, trailing, text)
-  {
-    super('qualified_name', leading, trailing, text);
-  }
-  with_text(text)
-  {
-    return new QualifiedNameToken(this.leading, this.trailing, text);
-  }
-
-}
 class VariableToken extends EditableToken
 {
   constructor(leading, trailing, text)
@@ -2408,18 +2401,6 @@ class VariableToken extends EditableToken
   with_text(text)
   {
     return new VariableToken(this.leading, this.trailing, text);
-  }
-
-}
-class NamespacePrefixToken extends EditableToken
-{
-  constructor(leading, trailing, text)
-  {
-    super('namespace_prefix', leading, trailing, text);
-  }
-  with_text(text)
-  {
-    return new NamespacePrefixToken(this.leading, this.trailing, text);
   }
 
 }
@@ -2997,6 +2978,53 @@ class Script extends EditableSyntax
     return Script._children_keys;
   }
 }
+class QualifiedName extends EditableSyntax
+{
+  constructor(
+    parts)
+  {
+    super('qualified_name', {
+      parts: parts });
+  }
+  get parts() { return this.children.parts; }
+  with_parts(parts){
+    return new QualifiedName(
+      parts);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var parts = this.parts.rewrite(rewriter, new_parents);
+    if (
+      parts === this.parts)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new QualifiedName(
+        parts), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let parts = EditableSyntax.from_json(
+      json.qualified_name_parts, position, source);
+    position += parts.width;
+    return new QualifiedName(
+        parts);
+  }
+  get children_keys()
+  {
+    if (QualifiedName._children_keys == null)
+      QualifiedName._children_keys = [
+        'parts'];
+    return QualifiedName._children_keys;
+  }
+}
 class SimpleTypeSpecifier extends EditableSyntax
 {
   constructor(
@@ -3136,53 +3164,6 @@ class VariableExpression extends EditableSyntax
       VariableExpression._children_keys = [
         'expression'];
     return VariableExpression._children_keys;
-  }
-}
-class QualifiedNameExpression extends EditableSyntax
-{
-  constructor(
-    expression)
-  {
-    super('qualified_name', {
-      expression: expression });
-  }
-  get expression() { return this.children.expression; }
-  with_expression(expression){
-    return new QualifiedNameExpression(
-      expression);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var expression = this.expression.rewrite(rewriter, new_parents);
-    if (
-      expression === this.expression)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new QualifiedNameExpression(
-        expression), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let expression = EditableSyntax.from_json(
-      json.qualified_name_expression, position, source);
-    position += expression.width;
-    return new QualifiedNameExpression(
-        expression);
-  }
-  get children_keys()
-  {
-    if (QualifiedNameExpression._children_keys == null)
-      QualifiedNameExpression._children_keys = [
-        'expression'];
-    return QualifiedNameExpression._children_keys;
   }
 }
 class PipeVariableExpression extends EditableSyntax
@@ -20052,6 +20033,7 @@ exports.AsToken = AsToken;
 exports.AsyncToken = AsyncToken;
 exports.AttributeToken = AttributeToken;
 exports.AwaitToken = AwaitToken;
+exports.BackslashToken = BackslashToken;
 exports.BoolToken = BoolToken;
 exports.BreakToken = BreakToken;
 exports.CaseToken = CaseToken;
@@ -20218,9 +20200,7 @@ exports.HaltCompilerToken = HaltCompilerToken;
 
 exports.ErrorTokenToken = ErrorTokenToken;
 exports.NameToken = NameToken;
-exports.QualifiedNameToken = QualifiedNameToken;
 exports.VariableToken = VariableToken;
-exports.NamespacePrefixToken = NamespacePrefixToken;
 exports.DecimalLiteralToken = DecimalLiteralToken;
 exports.OctalLiteralToken = OctalLiteralToken;
 exports.HexadecimalLiteralToken = HexadecimalLiteralToken;
@@ -20262,10 +20242,10 @@ exports.AfterHaltCompiler = AfterHaltCompiler;
 
 exports.EndOfFile = EndOfFile;
 exports.Script = Script;
+exports.QualifiedName = QualifiedName;
 exports.SimpleTypeSpecifier = SimpleTypeSpecifier;
 exports.LiteralExpression = LiteralExpression;
 exports.VariableExpression = VariableExpression;
-exports.QualifiedNameExpression = QualifiedNameExpression;
 exports.PipeVariableExpression = PipeVariableExpression;
 exports.EnumDeclaration = EnumDeclaration;
 exports.Enumerator = Enumerator;

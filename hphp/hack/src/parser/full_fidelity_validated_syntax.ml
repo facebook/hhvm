@@ -190,7 +190,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match Syntax.syntax x with
     | Syntax.LiteralExpression _ -> tag validate_literal_expression (fun x -> ExprLiteral x) x
     | Syntax.VariableExpression _ -> tag validate_variable_expression (fun x -> ExprVariable x) x
-    | Syntax.QualifiedNameExpression _ -> tag validate_qualified_name_expression (fun x -> ExprQualifiedName x) x
     | Syntax.PipeVariableExpression _ -> tag validate_pipe_variable_expression (fun x -> ExprPipeVariable x) x
     | Syntax.DecoratedExpression _ -> tag validate_decorated_expression (fun x -> ExprDecorated x) x
     | Syntax.InclusionExpression _ -> tag validate_inclusion_expression (fun x -> ExprInclusion x) x
@@ -242,7 +241,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match thing with
     | ExprLiteral                       thing -> invalidate_literal_expression             (value, thing)
     | ExprVariable                      thing -> invalidate_variable_expression            (value, thing)
-    | ExprQualifiedName                 thing -> invalidate_qualified_name_expression      (value, thing)
     | ExprPipeVariable                  thing -> invalidate_pipe_variable_expression       (value, thing)
     | ExprDecorated                     thing -> invalidate_decorated_expression           (value, thing)
     | ExprInclusion                     thing -> invalidate_inclusion_expression           (value, thing)
@@ -442,7 +440,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match Syntax.syntax x with
     | Syntax.LiteralExpression _ -> tag validate_literal_expression (fun x -> LambdaLiteral x) x
     | Syntax.VariableExpression _ -> tag validate_variable_expression (fun x -> LambdaVariable x) x
-    | Syntax.QualifiedNameExpression _ -> tag validate_qualified_name_expression (fun x -> LambdaQualifiedName x) x
     | Syntax.PipeVariableExpression _ -> tag validate_pipe_variable_expression (fun x -> LambdaPipeVariable x) x
     | Syntax.DecoratedExpression _ -> tag validate_decorated_expression (fun x -> LambdaDecorated x) x
     | Syntax.InclusionExpression _ -> tag validate_inclusion_expression (fun x -> LambdaInclusion x) x
@@ -495,7 +492,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match thing with
     | LambdaLiteral                       thing -> invalidate_literal_expression             (value, thing)
     | LambdaVariable                      thing -> invalidate_variable_expression            (value, thing)
-    | LambdaQualifiedName                 thing -> invalidate_qualified_name_expression      (value, thing)
     | LambdaPipeVariable                  thing -> invalidate_pipe_variable_expression       (value, thing)
     | LambdaDecorated                     thing -> invalidate_decorated_expression           (value, thing)
     | LambdaInclusion                     thing -> invalidate_inclusion_expression           (value, thing)
@@ -547,7 +543,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match Syntax.syntax x with
     | Syntax.LiteralExpression _ -> tag validate_literal_expression (fun x -> CExprLiteral x) x
     | Syntax.VariableExpression _ -> tag validate_variable_expression (fun x -> CExprVariable x) x
-    | Syntax.QualifiedNameExpression _ -> tag validate_qualified_name_expression (fun x -> CExprQualifiedName x) x
     | Syntax.PipeVariableExpression _ -> tag validate_pipe_variable_expression (fun x -> CExprPipeVariable x) x
     | Syntax.DecoratedExpression _ -> tag validate_decorated_expression (fun x -> CExprDecorated x) x
     | Syntax.InclusionExpression _ -> tag validate_inclusion_expression (fun x -> CExprInclusion x) x
@@ -600,7 +595,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match thing with
     | CExprLiteral                       thing -> invalidate_literal_expression             (value, thing)
     | CExprVariable                      thing -> invalidate_variable_expression            (value, thing)
-    | CExprQualifiedName                 thing -> invalidate_qualified_name_expression      (value, thing)
     | CExprPipeVariable                  thing -> invalidate_pipe_variable_expression       (value, thing)
     | CExprDecorated                     thing -> invalidate_decorated_expression           (value, thing)
     | CExprInclusion                     thing -> invalidate_inclusion_expression           (value, thing)
@@ -682,6 +676,13 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and invalidate_todo_aggregate : todo_aggregate invalidator = fun (value, thing) ->
     match thing with
     | TODOEndOfFile thing -> invalidate_end_of_file                    (value, thing)
+  and validate_name_aggregate : name_aggregate validator = fun x ->
+    match Syntax.syntax x with
+    | Syntax.QualifiedName _ -> tag validate_qualified_name (fun x -> NameQualifiedName x) x
+    | s -> aggregation_fail Def.Name s
+  and invalidate_name_aggregate : name_aggregate invalidator = fun (value, thing) ->
+    match thing with
+    | NameQualifiedName thing -> invalidate_qualified_name                 (value, thing)
 
   and validate_end_of_file : end_of_file validator = function
   | { Syntax.syntax = Syntax.EndOfFile x; value = v } -> v,
@@ -707,15 +708,27 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
+  and validate_qualified_name : qualified_name validator = function
+  | { Syntax.syntax = Syntax.QualifiedName x; value = v } -> v,
+    { qualified_name_parts = validate_list_with (validate_token) x.Syntax.qualified_name_parts
+    }
+  | s -> validation_fail SyntaxKind.QualifiedName s
+  and invalidate_qualified_name : qualified_name invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.QualifiedName
+      { Syntax.qualified_name_parts = invalidate_list_with (invalidate_token) x.qualified_name_parts
+      }
+    ; Syntax.value = v
+    }
   and validate_simple_type_specifier : simple_type_specifier validator = function
   | { Syntax.syntax = Syntax.SimpleTypeSpecifier x; value = v } -> v,
-    { simple_type_specifier = validate_token x.Syntax.simple_type_specifier
+    { simple_type_specifier = validate_name_aggregate x.Syntax.simple_type_specifier
     }
   | s -> validation_fail SyntaxKind.SimpleTypeSpecifier s
   and invalidate_simple_type_specifier : simple_type_specifier invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.SimpleTypeSpecifier
-      { Syntax.simple_type_specifier = invalidate_token x.simple_type_specifier
+      { Syntax.simple_type_specifier = invalidate_name_aggregate x.simple_type_specifier
       }
     ; Syntax.value = v
     }
@@ -740,18 +753,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.VariableExpression
       { Syntax.variable_expression = invalidate_token x.variable_expression
-      }
-    ; Syntax.value = v
-    }
-  and validate_qualified_name_expression : qualified_name_expression validator = function
-  | { Syntax.syntax = Syntax.QualifiedNameExpression x; value = v } -> v,
-    { qualified_name_expression = validate_token x.Syntax.qualified_name_expression
-    }
-  | s -> validation_fail SyntaxKind.QualifiedNameExpression s
-  and invalidate_qualified_name_expression : qualified_name_expression invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.QualifiedNameExpression
-      { Syntax.qualified_name_expression = invalidate_token x.qualified_name_expression
       }
     ; Syntax.value = v
     }
@@ -874,7 +875,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_namespace_declaration : namespace_declaration validator = function
   | { Syntax.syntax = Syntax.NamespaceDeclaration x; value = v } -> v,
     { namespace_body = validate_namespace_internals x.Syntax.namespace_body
-    ; namespace_name = validate_option_with (validate_token) x.Syntax.namespace_name
+    ; namespace_name = validate_option_with (validate_name_aggregate) x.Syntax.namespace_name
     ; namespace_keyword = validate_token x.Syntax.namespace_keyword
     }
   | s -> validation_fail SyntaxKind.NamespaceDeclaration s
@@ -882,7 +883,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.NamespaceDeclaration
       { Syntax.namespace_keyword = invalidate_token x.namespace_keyword
-      ; Syntax.namespace_name = invalidate_option_with (invalidate_token) x.namespace_name
+      ; Syntax.namespace_name = invalidate_option_with (invalidate_name_aggregate) x.namespace_name
       ; Syntax.namespace_body = invalidate_namespace_internals x.namespace_body
       }
     ; Syntax.value = v
@@ -939,7 +940,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; namespace_group_use_right_brace = validate_token x.Syntax.namespace_group_use_right_brace
     ; namespace_group_use_clauses = validate_list_with (validate_namespace_use_clause) x.Syntax.namespace_group_use_clauses
     ; namespace_group_use_left_brace = validate_token x.Syntax.namespace_group_use_left_brace
-    ; namespace_group_use_prefix = validate_token x.Syntax.namespace_group_use_prefix
+    ; namespace_group_use_prefix = validate_name_aggregate x.Syntax.namespace_group_use_prefix
     ; namespace_group_use_kind = validate_option_with (validate_token) x.Syntax.namespace_group_use_kind
     ; namespace_group_use_keyword = validate_token x.Syntax.namespace_group_use_keyword
     }
@@ -949,7 +950,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.NamespaceGroupUseDeclaration
       { Syntax.namespace_group_use_keyword = invalidate_token x.namespace_group_use_keyword
       ; Syntax.namespace_group_use_kind = invalidate_option_with (invalidate_token) x.namespace_group_use_kind
-      ; Syntax.namespace_group_use_prefix = invalidate_token x.namespace_group_use_prefix
+      ; Syntax.namespace_group_use_prefix = invalidate_name_aggregate x.namespace_group_use_prefix
       ; Syntax.namespace_group_use_left_brace = invalidate_token x.namespace_group_use_left_brace
       ; Syntax.namespace_group_use_clauses = invalidate_list_with (invalidate_namespace_use_clause) x.namespace_group_use_clauses
       ; Syntax.namespace_group_use_right_brace = invalidate_token x.namespace_group_use_right_brace
@@ -961,7 +962,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.NamespaceUseClause x; value = v } -> v,
     { namespace_use_alias = validate_option_with (validate_token) x.Syntax.namespace_use_alias
     ; namespace_use_as = validate_option_with (validate_token) x.Syntax.namespace_use_as
-    ; namespace_use_name = validate_token x.Syntax.namespace_use_name
+    ; namespace_use_name = validate_name_aggregate x.Syntax.namespace_use_name
     ; namespace_use_clause_kind = validate_option_with (validate_token) x.Syntax.namespace_use_clause_kind
     }
   | s -> validation_fail SyntaxKind.NamespaceUseClause s
@@ -969,7 +970,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.NamespaceUseClause
       { Syntax.namespace_use_clause_kind = invalidate_option_with (invalidate_token) x.namespace_use_clause_kind
-      ; Syntax.namespace_use_name = invalidate_token x.namespace_use_name
+      ; Syntax.namespace_use_name = invalidate_name_aggregate x.namespace_use_name
       ; Syntax.namespace_use_as = invalidate_option_with (invalidate_token) x.namespace_use_as
       ; Syntax.namespace_use_alias = invalidate_option_with (invalidate_token) x.namespace_use_alias
       }

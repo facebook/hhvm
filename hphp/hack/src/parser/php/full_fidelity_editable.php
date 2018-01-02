@@ -152,14 +152,14 @@ abstract class EditableSyntax implements ArrayAccess {
       return EndOfFile::from_json($json, $position, $source);
     case 'script':
       return Script::from_json($json, $position, $source);
+    case 'qualified_name':
+      return QualifiedName::from_json($json, $position, $source);
     case 'simple_type_specifier':
       return SimpleTypeSpecifier::from_json($json, $position, $source);
     case 'literal':
       return LiteralExpression::from_json($json, $position, $source);
     case 'variable':
       return VariableExpression::from_json($json, $position, $source);
-    case 'qualified_name':
-      return QualifiedNameExpression::from_json($json, $position, $source);
     case 'pipe_variable':
       return PipeVariableExpression::from_json($json, $position, $source);
     case 'enum_declaration':
@@ -819,6 +819,8 @@ abstract class EditableToken extends EditableSyntax {
        return new AttributeToken($leading, $trailing);
     case 'await':
        return new AwaitToken($leading, $trailing);
+    case '\':
+       return new BackslashToken($leading, $trailing);
     case 'bool':
        return new BoolToken($leading, $trailing);
     case 'break':
@@ -1150,12 +1152,8 @@ abstract class EditableToken extends EditableSyntax {
        return new ErrorTokenToken($leading, $trailing, $token_text);
     case 'name':
        return new NameToken($leading, $trailing, $token_text);
-    case 'qualified_name':
-       return new QualifiedNameToken($leading, $trailing, $token_text);
     case 'variable':
        return new VariableToken($leading, $trailing, $token_text);
-    case 'namespace_prefix':
-       return new NamespacePrefixToken($leading, $trailing, $token_text);
     case 'decimal_literal':
        return new DecimalLiteralToken($leading, $trailing, $token_text);
     case 'octal_literal':
@@ -1402,6 +1400,21 @@ final class AwaitToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): AwaitToken {
     return new AwaitToken($this->leading(), $trailing);
+  }
+}
+final class BackslashToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('\', $leading, $trailing, '\');
+  }
+
+  public function with_leading(EditableSyntax $leading): BackslashToken {
+    return new BackslashToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): BackslashToken {
+    return new BackslashToken($this->leading(), $trailing);
   }
 }
 final class BoolToken extends EditableToken {
@@ -3890,26 +3903,6 @@ final class NameToken extends EditableToken {
     return new NameToken($this->leading(), $trailing, $this->text());
   }
 }
-final class QualifiedNameToken extends EditableToken {
-  public function __construct(
-    EditableSyntax $leading,
-    EditableSyntax $trailing,
-    string $text) {
-    parent::__construct('qualified_name', $leading, $trailing, $text);
-  }
-
-  public function with_text(string $text): QualifiedNameToken {
-    return new QualifiedNameToken($this->leading(), $this->trailing(), $text);
-  }
-
-  public function with_leading(EditableSyntax $leading): QualifiedNameToken {
-    return new QualifiedNameToken($leading, $this->trailing(), $this->text());
-  }
-
-  public function with_trailing(EditableSyntax $trailing): QualifiedNameToken {
-    return new QualifiedNameToken($this->leading(), $trailing, $this->text());
-  }
-}
 final class VariableToken extends EditableToken {
   public function __construct(
     EditableSyntax $leading,
@@ -3928,26 +3921,6 @@ final class VariableToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): VariableToken {
     return new VariableToken($this->leading(), $trailing, $this->text());
-  }
-}
-final class NamespacePrefixToken extends EditableToken {
-  public function __construct(
-    EditableSyntax $leading,
-    EditableSyntax $trailing,
-    string $text) {
-    parent::__construct('namespace_prefix', $leading, $trailing, $text);
-  }
-
-  public function with_text(string $text): NamespacePrefixToken {
-    return new NamespacePrefixToken($this->leading(), $this->trailing(), $text);
-  }
-
-  public function with_leading(EditableSyntax $leading): NamespacePrefixToken {
-    return new NamespacePrefixToken($leading, $this->trailing(), $this->text());
-  }
-
-  public function with_trailing(EditableSyntax $trailing): NamespacePrefixToken {
-    return new NamespacePrefixToken($this->leading(), $trailing, $this->text());
   }
 }
 final class DecimalLiteralToken extends EditableToken {
@@ -4753,6 +4726,49 @@ final class Script extends EditableSyntax {
     yield break;
   }
 }
+final class QualifiedName extends EditableSyntax {
+  private EditableSyntax $_parts;
+  public function __construct(
+    EditableSyntax $parts) {
+    parent::__construct('qualified_name');
+    $this->_parts = $parts;
+  }
+  public function parts(): EditableSyntax {
+    return $this->_parts;
+  }
+  public function with_parts(EditableSyntax $parts): QualifiedName {
+    return new QualifiedName(
+      $parts);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $parts = $this->parts()->rewrite($rewriter, $new_parents);
+    if (
+      $parts === $this->parts()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new QualifiedName(
+        $parts), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $parts = EditableSyntax::from_json(
+      $json->qualified_name_parts, $position, $source);
+    $position += $parts->width();
+    return new QualifiedName(
+        $parts);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_parts;
+    yield break;
+  }
+}
 final class SimpleTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_specifier;
   public function __construct(
@@ -4875,49 +4891,6 @@ final class VariableExpression extends EditableSyntax {
       $json->variable_expression, $position, $source);
     $position += $expression->width();
     return new VariableExpression(
-        $expression);
-  }
-  public function children(): Generator<string, EditableSyntax, void> {
-    yield $this->_expression;
-    yield break;
-  }
-}
-final class QualifiedNameExpression extends EditableSyntax {
-  private EditableSyntax $_expression;
-  public function __construct(
-    EditableSyntax $expression) {
-    parent::__construct('qualified_name');
-    $this->_expression = $expression;
-  }
-  public function expression(): EditableSyntax {
-    return $this->_expression;
-  }
-  public function with_expression(EditableSyntax $expression): QualifiedNameExpression {
-    return new QualifiedNameExpression(
-      $expression);
-  }
-
-  public function rewrite(
-    ( function
-      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
-    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
-    $new_parents = $parents ?? [];
-    array_push($new_parents, $this);
-    $expression = $this->expression()->rewrite($rewriter, $new_parents);
-    if (
-      $expression === $this->expression()) {
-      return $rewriter($this, $parents ?? []);
-    } else {
-      return $rewriter(new QualifiedNameExpression(
-        $expression), $parents ?? []);
-    }
-  }
-
-  public static function from_json(mixed $json, int $position, string $source) {
-    $expression = EditableSyntax::from_json(
-      $json->qualified_name_expression, $position, $source);
-    $position += $expression->width();
-    return new QualifiedNameExpression(
         $expression);
   }
   public function children(): Generator<string, EditableSyntax, void> {

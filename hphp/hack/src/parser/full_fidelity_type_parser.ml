@@ -57,7 +57,7 @@ let parse_expression parser =
 let rec parse_type_specifier ?(allow_var=false) parser =
   (* Strictly speaking, "mixed" is a nullable type specifier. We parse it as
      a simple type specifier here. *)
-  let (parser1, token) = next_xhp_class_name_or_other parser in
+  let (parser1, token) = next_xhp_class_name_or_other_token parser in
   match Token.kind token with
   | Var when allow_var -> parser1, make_simple_type_specifier (make_token token)
   | This -> parse_simple_type_or_type_constant parser
@@ -77,11 +77,13 @@ let rec parse_type_specifier ?(allow_var=false) parser =
   | Object
   | Mixed
   | Name -> parse_simple_type_or_type_constant_or_generic parser
+  | Backslash ->
+    let (parser, name) = scan_qualified_name parser1 (make_token token) in
+    parse_remaining_simple_type_or_type_constant_or_generic parser name
   | Self
   | Parent -> parse_simple_type_or_type_constant parser
   | Category
-  | XHPClassName
-  | QualifiedName -> parse_possible_generic_specifier_or_type_const parser
+  | XHPClassName -> parse_possible_generic_specifier_or_type_const parser
   | Array -> parse_array_type_specifier parser
   | Darray -> parse_darray_type_specifier parser
   | Varray -> parse_varray_type_specifier parser
@@ -131,27 +133,39 @@ and parse_remaining_type_constant parser left =
 
 and parse_simple_type_or_type_constant parser =
   let (parser, name) = next_xhp_class_name_or_other parser in
+  parse_remaining_simple_type_or_type_constant parser name
+
+and parse_remaining_simple_type_or_type_constant parser name =
   let token = peek_token parser in
   match Token.kind token with
-  | ColonColon -> parse_remaining_type_constant parser (make_token name)
-  | _ -> (parser, make_simple_type_specifier (make_token name))
+  | ColonColon -> parse_remaining_type_constant parser name
+  | _ -> (parser, make_simple_type_specifier name)
 
 and parse_simple_type_or_type_constant_or_generic parser =
-  let (parser0, _) = next_xhp_class_name_or_other parser in
-  match peek_token_kind parser0 with
-  | LessThan -> parse_possible_generic_specifier_or_type_const parser
-  | _ -> parse_simple_type_or_type_constant parser
+  let (parser, name) = next_xhp_class_name_or_other parser in
+  parse_remaining_simple_type_or_type_constant_or_generic parser name
+
+and parse_remaining_type_specifier name parser =
+  parse_remaining_simple_type_or_type_constant_or_generic parser name
+
+and parse_remaining_simple_type_or_type_constant_or_generic parser name =
+  match peek_token_kind parser with
+  | LessThan -> parse_remaining_possible_generic_specifier_or_type_const parser name
+  | _ -> parse_remaining_simple_type_or_type_constant parser name
 
 and parse_possible_generic_specifier_or_type_const parser =
   let (parser, name) = next_xhp_class_name_or_other parser in
+  parse_remaining_possible_generic_specifier_or_type_const parser name
+
+and parse_remaining_possible_generic_specifier_or_type_const parser name =
   let (parser, arguments) = parse_generic_type_argument_list_opt parser in
   if (kind arguments) = SyntaxKind.Missing then
     let token = peek_token parser in
     match Token.kind token with
-    | ColonColon -> parse_remaining_type_constant parser (make_token name)
-    | _ -> (parser, make_simple_type_specifier (make_token name))
+    | ColonColon -> parse_remaining_type_constant parser name
+    | _ -> (parser, make_simple_type_specifier name)
   else
-    (parser, make_generic_type_specifier (make_token name) arguments)
+    (parser, make_generic_type_specifier name arguments)
 
 (* SPEC
   class-interface-trait-specifier:
@@ -161,9 +175,9 @@ and parse_possible_generic_specifier parser =
   let (parser, name) = next_xhp_class_name_or_other parser in
   let (parser, arguments) = parse_generic_type_argument_list_opt parser in
   if (kind arguments) = SyntaxKind.Missing then
-    (parser, make_simple_type_specifier (make_token name))
+    (parser, make_simple_type_specifier name)
   else
-    (parser, make_generic_type_specifier (make_token name) arguments)
+    (parser, make_generic_type_specifier name arguments)
 
 (* SPEC
     generic-type-constraint-list:

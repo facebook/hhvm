@@ -30,6 +30,7 @@ type t =
   | Async
   | Attribute
   | Await
+  | Backslash
   | Bool
   | Break
   | Case
@@ -196,9 +197,7 @@ type t =
   (* Variable text tokens *)
   | ErrorToken
   | Name
-  | QualifiedName
   | Variable
-  | NamespacePrefix
   | DecimalLiteral
   | OctalLiteral
   | HexadecimalLiteral
@@ -238,6 +237,7 @@ let from_string keyword =
   | "async"           -> Some Async
   | "attribute"       -> Some Attribute
   | "await"           -> Some Await
+  | "\\"             -> Some Backslash
   | "bool"            -> Some Bool
   | "break"           -> Some Break
   | "case"            -> Some Case
@@ -416,6 +416,7 @@ let to_string kind =
   | Async                         -> "async"
   | Attribute                     -> "attribute"
   | Await                         -> "await"
+  | Backslash                     -> "\\"
   | Bool                          -> "bool"
   | Break                         -> "break"
   | Case                          -> "case"
@@ -582,9 +583,7 @@ let to_string kind =
   (* Variable text tokens *)
   | ErrorToken                    -> "error_token"
   | Name                          -> "name"
-  | QualifiedName                 -> "qualified_name"
   | Variable                      -> "variable"
-  | NamespacePrefix               -> "namespace_prefix"
   | DecimalLiteral                -> "decimal_literal"
   | OctalLiteral                  -> "octal_literal"
   | HexadecimalLiteral            -> "hexadecimal_literal"

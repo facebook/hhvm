@@ -59,10 +59,10 @@ module WithToken(Token: TokenType) = struct
       | SyntaxList                        _ -> SyntaxKind.SyntaxList
       | EndOfFile                               _ -> SyntaxKind.EndOfFile
       | Script                                  _ -> SyntaxKind.Script
+      | QualifiedName                           _ -> SyntaxKind.QualifiedName
       | SimpleTypeSpecifier                     _ -> SyntaxKind.SimpleTypeSpecifier
       | LiteralExpression                       _ -> SyntaxKind.LiteralExpression
       | VariableExpression                      _ -> SyntaxKind.VariableExpression
-      | QualifiedNameExpression                 _ -> SyntaxKind.QualifiedNameExpression
       | PipeVariableExpression                  _ -> SyntaxKind.PipeVariableExpression
       | EnumDeclaration                         _ -> SyntaxKind.EnumDeclaration
       | Enumerator                              _ -> SyntaxKind.Enumerator
@@ -235,10 +235,10 @@ module WithToken(Token: TokenType) = struct
 
     let is_end_of_file                                  = has_kind SyntaxKind.EndOfFile
     let is_script                                       = has_kind SyntaxKind.Script
+    let is_qualified_name                               = has_kind SyntaxKind.QualifiedName
     let is_simple_type_specifier                        = has_kind SyntaxKind.SimpleTypeSpecifier
     let is_literal_expression                           = has_kind SyntaxKind.LiteralExpression
     let is_variable_expression                          = has_kind SyntaxKind.VariableExpression
-    let is_qualified_name_expression                    = has_kind SyntaxKind.QualifiedNameExpression
     let is_pipe_variable_expression                     = has_kind SyntaxKind.PipeVariableExpression
     let is_enum_declaration                             = has_kind SyntaxKind.EnumDeclaration
     let is_enumerator                                   = has_kind SyntaxKind.Enumerator
@@ -416,6 +416,19 @@ module WithToken(Token: TokenType) = struct
       | Token t -> Token.kind t = kind
       | _ -> false
 
+    let is_namespace_prefix node =
+      match syntax node with
+      | QualifiedName e ->
+        begin match Core_list.last (syntax_node_to_list e.qualified_name_parts) with
+        | None -> false
+        | Some p ->
+          begin match syntax p with
+          | ListItem p -> not (is_missing p.list_separator)
+          | _ -> false
+          end
+        end
+      | _ -> false
+
 
     let is_semicolon  = is_specific_token Full_fidelity_token_kind.Semicolon
     let is_name       = is_specific_token Full_fidelity_token_kind.Name
@@ -450,6 +463,12 @@ module WithToken(Token: TokenType) = struct
       script_declarations
     )
 
+    let get_qualified_name_children {
+      qualified_name_parts;
+    } = (
+      qualified_name_parts
+    )
+
     let get_simple_type_specifier_children {
       simple_type_specifier;
     } = (
@@ -466,12 +485,6 @@ module WithToken(Token: TokenType) = struct
       variable_expression;
     } = (
       variable_expression
-    )
-
-    let get_qualified_name_expression_children {
-      qualified_name_expression;
-    } = (
-      qualified_name_expression
     )
 
     let get_pipe_variable_expression_children {
@@ -2360,6 +2373,11 @@ module WithToken(Token: TokenType) = struct
       } ->
          let acc = f acc script_declarations in
          acc
+      | QualifiedName {
+        qualified_name_parts;
+      } ->
+         let acc = f acc qualified_name_parts in
+         acc
       | SimpleTypeSpecifier {
         simple_type_specifier;
       } ->
@@ -2374,11 +2392,6 @@ module WithToken(Token: TokenType) = struct
         variable_expression;
       } ->
          let acc = f acc variable_expression in
-         acc
-      | QualifiedNameExpression {
-        qualified_name_expression;
-      } ->
-         let acc = f acc qualified_name_expression in
          acc
       | PipeVariableExpression {
         pipe_variable_expression;
@@ -4111,6 +4124,11 @@ module WithToken(Token: TokenType) = struct
       } -> [
         script_declarations;
       ]
+      | QualifiedName {
+        qualified_name_parts;
+      } -> [
+        qualified_name_parts;
+      ]
       | SimpleTypeSpecifier {
         simple_type_specifier;
       } -> [
@@ -4125,11 +4143,6 @@ module WithToken(Token: TokenType) = struct
         variable_expression;
       } -> [
         variable_expression;
-      ]
-      | QualifiedNameExpression {
-        qualified_name_expression;
-      } -> [
-        qualified_name_expression;
       ]
       | PipeVariableExpression {
         pipe_variable_expression;
@@ -5863,6 +5876,11 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "script_declarations";
       ]
+      | QualifiedName {
+        qualified_name_parts;
+      } -> [
+        "qualified_name_parts";
+      ]
       | SimpleTypeSpecifier {
         simple_type_specifier;
       } -> [
@@ -5877,11 +5895,6 @@ module WithToken(Token: TokenType) = struct
         variable_expression;
       } -> [
         "variable_expression";
-      ]
-      | QualifiedNameExpression {
-        qualified_name_expression;
-      } -> [
-        "qualified_name_expression";
       ]
       | PipeVariableExpression {
         pipe_variable_expression;
@@ -7672,6 +7685,12 @@ module WithToken(Token: TokenType) = struct
         Script {
           script_declarations;
         }
+      | (SyntaxKind.QualifiedName, [
+          qualified_name_parts;
+        ]) ->
+        QualifiedName {
+          qualified_name_parts;
+        }
       | (SyntaxKind.SimpleTypeSpecifier, [
           simple_type_specifier;
         ]) ->
@@ -7689,12 +7708,6 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         VariableExpression {
           variable_expression;
-        }
-      | (SyntaxKind.QualifiedNameExpression, [
-          qualified_name_expression;
-        ]) ->
-        QualifiedNameExpression {
-          qualified_name_expression;
         }
       | (SyntaxKind.PipeVariableExpression, [
           pipe_variable_expression;
@@ -9631,6 +9644,15 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
+      let make_qualified_name
+        qualified_name_parts
+      =
+        let syntax = QualifiedName {
+          qualified_name_parts;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
       let make_simple_type_specifier
         simple_type_specifier
       =
@@ -9654,15 +9676,6 @@ module WithToken(Token: TokenType) = struct
       =
         let syntax = VariableExpression {
           variable_expression;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_qualified_name_expression
-        qualified_name_expression
-      =
-        let syntax = QualifiedNameExpression {
-          qualified_name_expression;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

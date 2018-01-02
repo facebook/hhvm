@@ -4,6 +4,5 @@
    (markup_suffix ((<?)) ((name) (end_of_line))) (missing))
   (expression_statement
    (binary_expression (variable ((end_of_line) (variable))) ((?:))
-    (function_call_expression (qualified_name ((name))) ((lparen)) (missing)
-     ((rparen))))
+    (function_call_expression ((name)) ((lparen)) (missing) ((rparen))))
    ((";")))))

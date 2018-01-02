@@ -115,7 +115,7 @@
        (list
         (expression_statement
          (binary_expression
-          (subscript_expression (variable ((whitespace) (variable)))
+          (subscript_expression (variable ((whitespace) (variable))) 
            (([)) (missing) ((]) (whitespace)))
           ((=) (whitespace)) (variable ((variable))))
          ((";") (end_of_line))))
@@ -170,7 +170,7 @@
          ((,) (whitespace)))
         (list_item
          (keyset_intrinsic_expression ((keyset)) (([))
-          (list (list_item (literal ((decimal_literal))) (missing)))
+          (list (list_item (literal ((decimal_literal))) (missing))) 
           ((])))
          (missing)))
        ((rparen)))
@@ -246,17 +246,7 @@
        ((=) (whitespace)) (literal ((boolean_literal))))
       ((";") (end_of_line)))
      (expression_statement
-      (function_call_expression
-       (qualified_name ((end_of_line) (whitespace) (name))) ((lparen))
-       (list
-        (list_item
-         (decorated_expression ((inout) (whitespace))
-          (variable ((variable))))
-         (missing)))
-       ((rparen)))
-      ((";") (end_of_line)))
-     (expression_statement
-      (function_call_expression (qualified_name ((whitespace) (name)))
+      (function_call_expression ((end_of_line) (whitespace) (name))
        ((lparen))
        (list
         (list_item
@@ -266,8 +256,17 @@
        ((rparen)))
       ((";") (end_of_line)))
      (expression_statement
-      (function_call_expression
-       (qualified_name ((end_of_line) (whitespace) (name))) ((lparen))
+      (function_call_expression ((whitespace) (name)) ((lparen))
+       (list
+        (list_item
+         (decorated_expression ((inout) (whitespace))
+          (variable ((variable))))
+         (missing)))
+       ((rparen)))
+      ((";") (end_of_line)))
+     (expression_statement
+      (function_call_expression ((end_of_line) (whitespace) (name))
+       ((lparen))
        (list
         (list_item
          (decorated_expression ((inout) (whitespace))
@@ -280,8 +279,7 @@
        ((rparen)))
       ((";") (end_of_line)))
      (expression_statement
-      (function_call_expression (qualified_name ((whitespace) (name)))
-       ((lparen))
+      (function_call_expression ((whitespace) (name)) ((lparen))
        (list
         (list_item (prefix_unary_expression ((&)) (variable ((variable))))
          ((,) (whitespace)))
@@ -292,8 +290,7 @@
        ((rparen)))
       ((";") (end_of_line)))
      (expression_statement
-      (function_call_expression (qualified_name ((whitespace) (name)))
-       ((lparen))
+      (function_call_expression ((whitespace) (name)) ((lparen))
        (list
         (list_item
          (decorated_expression ((inout) (whitespace))
@@ -304,8 +301,7 @@
        ((rparen)))
       ((";") (end_of_line)))
      (expression_statement
-      (function_call_expression (qualified_name ((whitespace) (name)))
-       ((lparen))
+      (function_call_expression ((whitespace) (name)) ((lparen))
        (list
         (list_item (prefix_unary_expression ((&)) (variable ((variable))))
          ((,) (whitespace)))
@@ -320,8 +316,7 @@
        (vector_intrinsic_expression ((vec)) (([)) (missing) ((]))))
       ((";") (end_of_line)))
      (expression_statement
-      (function_call_expression (qualified_name ((whitespace) (name)))
-       ((lparen))
+      (function_call_expression ((whitespace) (name)) ((lparen))
        (list
         (list_item
          (decorated_expression ((inout) (whitespace))
@@ -337,8 +332,7 @@
        ((rparen)))
       ((";") (end_of_line)))
      (expression_statement
-      (function_call_expression (qualified_name ((whitespace) (name)))
-       ((lparen))
+      (function_call_expression ((whitespace) (name)) ((lparen))
        (list
         (list_item (prefix_unary_expression ((&)) (variable ((variable))))
          ((,) (whitespace)))
@@ -360,11 +354,10 @@
        ((rparen)))
       ((";") (end_of_line)))
      (expression_statement
-      (function_call_expression (qualified_name ((whitespace) (name)))
-       ((lparen))
+      (function_call_expression ((whitespace) (name)) ((lparen))
        (list
         (list_item
-         (function_call_expression (qualified_name ((name))) ((lparen))
+         (function_call_expression ((name)) ((lparen))
           (list
            (list_item (literal ((single_quoted_string_literal))) (missing)))
           ((rparen)))
@@ -409,7 +402,7 @@
         ((==>) (whitespace)) (literal ((single_quoted_string_literal)))))
       ((";") (end_of_line)))
      (expression_statement
-      (function_call_expression (qualified_name ((whitespace) (name)))
+      (function_call_expression ((whitespace) (name))
        ((lparen) (end_of_line))
        (list
         (list_item (literal ((whitespace) (decimal_literal)))

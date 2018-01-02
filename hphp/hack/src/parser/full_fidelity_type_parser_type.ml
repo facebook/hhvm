@@ -28,6 +28,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val parse_generic_parameter_list_opt: t -> t * Syntax.t
       val parse_generic_type_argument_list_opt: t ->
         t * Syntax.t
+      val parse_remaining_type_specifier: Syntax.t -> t -> t * Syntax.t
     end (* TypeParser_S *)
   end (* WithLexer *)
 end (* WithSyntax *)

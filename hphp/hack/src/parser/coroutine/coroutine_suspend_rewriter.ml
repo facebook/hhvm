@@ -394,7 +394,7 @@ let rec might_be_spilled node parent
   (* do not spill tokens, literals or qualified names *)
   | Token _, _
   | LiteralExpression _, _
-  | QualifiedNameExpression _, _ ->
+  | QualifiedName _, _ ->
     false
   (* do not spill member accesses on $closure variable *)
   | MemberSelectionExpression {

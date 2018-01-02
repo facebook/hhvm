@@ -243,45 +243,13 @@ let skip_end_of_line lexer =
     if (peek_char lexer 1) = '\n' then advance lexer 2 else advance lexer 1
   | _ -> lexer
 
-(* A qualified name which ends with a backslash is a namespace prefix; this is
-   only legal in a "group use" declaration.
-   TODO: Consider detecting usages of namespace prefixes in places where names
-   and qualified names are expected; give a more meaningful error. *)
-let rec scan_qualified_name lexer =
-  assert ((peek_char lexer 0) = '\\');
-  let lexer = advance lexer 1 in
-  if is_name_nondigit (peek_char lexer 0) then
-    begin
-      let (lexer, token) = scan_name_or_qualified_name lexer in
-      if token = TokenKind.Name then
-        (lexer, TokenKind.QualifiedName)
-      else
-        (lexer, token)
-    end
-  else
-    (lexer, TokenKind.NamespacePrefix)
-and scan_name_or_qualified_name lexer =
-  if (peek_char lexer 0) = '\\' then
-    scan_qualified_name lexer
-  else
-    let lexer = scan_name_impl lexer in
-    if (peek_char lexer 0) = '\\' then
-      scan_qualified_name lexer
-    else
-      (lexer, TokenKind.Name)
-and scan_name lexer =
-  let lexer = scan_name_impl lexer in
-  if (peek_char lexer 0) = '\\' then
-    (* ERROR RECOVERY: Assume that a qualfied name was meant. *)
-    (* TODO: This is poor recovery for the case where we're scanning
-       the end of a local variable. *)
-    let lexer = with_error lexer SyntaxError.error0009 in
-    scan_qualified_name lexer
-  else
-    (lexer, TokenKind.Name)
-and scan_name_impl lexer =
+let scan_name_impl lexer =
   assert (is_name_nondigit (peek_char lexer 0));
   skip_name_end (advance lexer 1)
+
+let scan_name lexer =
+  let lexer = scan_name_impl lexer in
+  (lexer, TokenKind.Name)
 
 let scan_variable lexer =
   assert('$' = peek_char lexer 0);
@@ -1140,7 +1108,7 @@ let rec scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
   | '\'' -> scan_single_quote_string_literal lexer
   | '`' -> scan_double_quote_like_string_literal_from_start lexer '`'
   | '"' -> scan_double_quote_like_string_literal_from_start lexer '"'
-  | '\\' -> scan_qualified_name lexer
+  | '\\' -> (advance lexer 1, TokenKind.Backslash)
   | 'b' when let c = peek_char lexer 1 in c = '"' || c = '\'' ->
     let lexer = advance lexer 1 in scan_token_impl in_type lexer
   (* Names *)
@@ -1148,7 +1116,7 @@ let rec scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
     if ch0 = invalid && at_end lexer then
       (lexer, TokenKind.EndOfFile)
     else if is_name_nondigit ch0 then
-      scan_name_or_qualified_name lexer
+      scan_name lexer
     else
       let lexer = with_error lexer SyntaxError.error0006 in
       (advance lexer 1, TokenKind.ErrorToken)

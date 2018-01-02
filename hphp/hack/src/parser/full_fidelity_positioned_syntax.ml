@@ -327,6 +327,13 @@ module FromMinimal = struct
           Script
           { script_declarations
           }, results
+      | SyntaxKind.QualifiedName
+      , (  qualified_name_parts
+        :: results
+        ) ->
+          QualifiedName
+          { qualified_name_parts
+          }, results
       | SyntaxKind.SimpleTypeSpecifier
       , (  simple_type_specifier
         :: results
@@ -347,13 +354,6 @@ module FromMinimal = struct
         ) ->
           VariableExpression
           { variable_expression
-          }, results
-      | SyntaxKind.QualifiedNameExpression
-      , (  qualified_name_expression
-        :: results
-        ) ->
-          QualifiedNameExpression
-          { qualified_name_expression
           }, results
       | SyntaxKind.PipeVariableExpression
       , (  pipe_variable_expression
@@ -2425,6 +2425,12 @@ module FromMinimal = struct
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         convert offset todo results script_declarations
+    | { M.syntax = M.QualifiedName
+        { M.qualified_name_parts
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        convert offset todo results qualified_name_parts
     | { M.syntax = M.SimpleTypeSpecifier
         { M.simple_type_specifier
         }
@@ -2443,12 +2449,6 @@ module FromMinimal = struct
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         convert offset todo results variable_expression
-    | { M.syntax = M.QualifiedNameExpression
-        { M.qualified_name_expression
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results qualified_name_expression
     | { M.syntax = M.PipeVariableExpression
         { M.pipe_variable_expression
         }

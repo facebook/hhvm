@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-12-07-0001",
+  "version" : "2017-12-27-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -41,6 +41,8 @@
       "token_text" : "attribute" },
     { "token_kind" : "Await",
       "token_text" : "await" },
+    { "token_kind" : "Backslash",
+      "token_text" : "\" },
     { "token_kind" : "Bool",
       "token_text" : "bool" },
     { "token_kind" : "Break",
@@ -372,11 +374,7 @@
       "token_text" : null },
     { "token_kind" : "Name",
       "token_text" : null },
-    { "token_kind" : "QualifiedName",
-      "token_text" : null },
     { "token_kind" : "Variable",
-      "token_text" : null },
-    { "token_kind" : "NamespacePrefix",
       "token_text" : null },
     { "token_kind" : "DecimalLiteral",
       "token_text" : null },
@@ -446,6 +444,13 @@
       "fields" : [
         { "field_name" : "declarations" }
       ] },
+    { "kind_name" : "QualifiedName",
+      "type_name" : "qualified_name",
+      "description" : "qualified_name",
+      "prefix" : "qualified_name",
+      "fields" : [
+        { "field_name" : "parts" }
+      ] },
     { "kind_name" : "SimpleTypeSpecifier",
       "type_name" : "simple_type_specifier",
       "description" : "simple_type_specifier",
@@ -464,13 +469,6 @@
       "type_name" : "variable_expression",
       "description" : "variable",
       "prefix" : "variable",
-      "fields" : [
-        { "field_name" : "expression" }
-      ] },
-    { "kind_name" : "QualifiedNameExpression",
-      "type_name" : "qualified_name_expression",
-      "description" : "qualified_name",
-      "prefix" : "qualified_name",
       "fields" : [
         { "field_name" : "expression" }
       ] },

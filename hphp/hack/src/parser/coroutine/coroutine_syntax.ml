@@ -36,8 +36,39 @@ let make_token_syntax ?text token_kind =
   make_syntax @@
     Token (Token.synthesize_new token_kind text single_space single_space)
 
-let make_name_syntax text =
+let backslash_syntax =
+  make_token_syntax TokenKind.Backslash
+
+let make_name_token_syntax text =
   make_token_syntax TokenKind.Name ~text
+
+let make_qualified_name_part ?(has_backslash=false) name =
+  make_list_item
+    (make_name_token_syntax name)
+    (if has_backslash then backslash_syntax else make_missing ())
+
+let make_simple_name_syntax name =
+  make_name_token_syntax name
+
+let make_qualified_name_syntax ?(has_leading=false) parts =
+  let rec aux acc = function
+  | [] -> List.rev acc
+  | [x] -> aux (make_qualified_name_part ~has_backslash:false x :: acc) []
+  | x::xs -> aux (make_qualified_name_part ~has_backslash:true x :: acc) xs in
+  let parts = aux [] parts in
+  let parts =
+    if has_leading then
+      make_list_item (make_missing ()) backslash_syntax :: parts
+    else parts in
+  make_qualified_name (make_list parts)
+
+let make_name_syntax name =
+  let name, has_leading =
+    if String.get name 0 = '\\'
+    then String.sub name 1 (String.length name - 1), true
+    else name, false in
+  if has_leading then make_qualified_name_syntax [name] ~has_leading:true
+  else make_simple_name_syntax name
 
 let make_variable_syntax text =
   make_token_syntax TokenKind.Variable ~text
@@ -326,9 +357,6 @@ let rec make_int_literal_syntax value =
   else
     make_literal_expression
       (make_token_syntax TokenKind.DecimalLiteral ~text:(string_of_int value))
-
-let make_qualified_name_syntax name =
-  make_qualified_name_expression (make_name_syntax name)
 
 let make_expression_statement_syntax expression_syntax =
   make_expression_statement expression_syntax semicolon_syntax
@@ -737,7 +765,7 @@ let make_coroutine_result_type_syntax function_type =
   make_type_specifier_syntax "\\CoroutineResult" [ function_type; ]
 
 let suspended_coroutine_result_classname_syntax =
-  make_qualified_name_syntax "\\SuspendedCoroutineResult"
+  make_qualified_name_syntax ["SuspendedCoroutineResult"] ~has_leading:true
 
 let suspended_member_name =
   "create"
@@ -936,10 +964,10 @@ let make_state_machine_parameter_syntax context function_type =
     state_machine_variable_name
 
 let inst_meth_syntax =
-  make_qualified_name_syntax "inst_meth"
+  make_simple_name_syntax "inst_meth"
 
 let class_meth_syntax =
-  make_qualified_name_syntax "class_meth"
+  make_simple_name_syntax "class_meth"
 
 let make_member_with_unknown_type_declaration_syntax variable_name =
   let variable_syntax = make_variable_syntax variable_name in
@@ -948,7 +976,7 @@ let make_member_with_unknown_type_declaration_syntax variable_name =
   make_property_declaration_syntax (make_missing ()) declaration_syntax
 
 let coroutine_unit_classname_syntax =
-  make_qualified_name_syntax "\\CoroutineUnit"
+  make_qualified_name_syntax ["CoroutineUnit"] ~has_leading:true
 
 (* CoroutineUnit::create() *)
 let coroutine_unit_call_syntax =
@@ -1008,4 +1036,4 @@ let make_unset_statement_syntax unset_stmt =
   make_syntax (UnsetStatement unset_stmt)
 
 let boolval_syntax =
-  make_qualified_name_syntax "boolval"
+  make_simple_name_syntax "boolval"

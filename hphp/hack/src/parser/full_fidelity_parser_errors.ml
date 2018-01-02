@@ -1452,8 +1452,9 @@ let invalid_shape_initializer_name node errors =
       then make_error_from_node node SyntaxError.error2060 :: errors
       else errors
     end
-  | QualifiedNameExpression _
+  | QualifiedName _
   | ScopeResolutionExpression _ -> errors
+  | Token _ when is_name node -> errors
   | _ -> make_error_from_node node SyntaxError.error2059 :: errors
 
 let invalid_shape_field_check node errors =
@@ -1483,7 +1484,9 @@ let function_call_argument_errors node errors =
         match syntax expression with
         | BinaryExpression _ ->
           Some (true, SyntaxError.fun_arg_inout_set)
-        | QualifiedNameExpression _ ->
+        | QualifiedName _ ->
+          Some (true, SyntaxError.fun_arg_inout_const)
+        | Token _ when is_name expression ->
           Some (true, SyntaxError.fun_arg_inout_const)
         (* TODO: Maybe be more descriptive in error messages *)
         | ScopeResolutionExpression _
@@ -1639,8 +1642,9 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     ; _ } ->
       let is_dynamic_name =
         match syntax qualifier, token_kind qualifier with
-        | LiteralExpression _, _
-        | QualifiedNameExpression _, _ -> false
+        | (LiteralExpression _ | QualifiedName _), _ -> false
+        | _, Some TokenKind.Name
+        | _, Some TokenKind.XHPClassName
         | _, Some TokenKind.Self
         | _, Some TokenKind.Parent
         | _, Some TokenKind.Static -> false
@@ -1840,7 +1844,7 @@ let is_invalid_group_use_clause kind clause =
   | _ -> false
 
 let is_invalid_group_use_prefix prefix =
-  token_kind prefix <> Some TokenKind.NamespacePrefix
+  not (is_namespace_prefix prefix)
 
 let group_use_errors node errors =
   match syntax node with
@@ -1994,27 +1998,27 @@ let namespace_use_declaration_errors node is_hack is_global_namespace names erro
 let rec check_constant_expression errors node =
   let is_namey token =
     match Token.kind token with
-    | TokenKind.QualifiedName | TokenKind.Name -> true
+    TokenKind.Name -> true
     | _ -> false
   in
   let is_good_scope_resolution_qualifier node =
     match syntax node with
-    | QualifiedNameExpression _ -> true
+    | QualifiedName _ -> true
     | Token token ->
       let open TokenKind in
       (match Token.kind token with
-      | QualifiedName | Name | Self | Parent | Static -> true
+      | XHPClassName | Name | Self | Parent | Static -> true
       | _ -> false
       )
     | _ -> false
   in
   let is_good_scope_resolution_name node =
     match syntax node with
-    | QualifiedNameExpression _ -> true
+    | QualifiedName _ -> true
     | Token token ->
       let open TokenKind in
       (match Token.kind token with
-      | QualifiedName | Name | Trait | Extends | Implements | Static
+      | Name | Trait | Extends | Implements | Static
       | Abstract | Final | Private | Protected | Public | Or | And | Global
       | Goto | Instanceof | Insteadof | Interface | Namespace | New | Try | Use
       | Var | List | Clone | Include | Include_once | Throw | Array | Tuple
@@ -2029,7 +2033,7 @@ let rec check_constant_expression errors node =
   in
   match syntax node with
   | Missing
-  | QualifiedNameExpression _
+  | QualifiedName _
   | LiteralExpression _
     -> errors
   | Token token when is_namey token -> errors

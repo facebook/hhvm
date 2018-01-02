@@ -243,8 +243,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, namespace_token) = assert_token parser Namespace in
     let (parser1, token) = next_token parser in
     let (parser, name) = match Token.kind token with
-    | Name
-    | QualifiedName -> (parser1, make_token token)
+    | Name -> scan_remaining_qualified_name parser1 (make_token token)
     | LeftBrace -> (parser, make_missing parser)
     | Semicolon ->
       (* ERROR RECOVERY Plainly the name is missing. *)
@@ -324,10 +323,20 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, _) = parse_namespace_use_kind_opt parser in
     let (parser, token) = next_token parser in
     match Token.kind token with
-    | NamespacePrefix -> true
-    | Name
-    | QualifiedName ->
-      peek_token_kind parser = LeftBrace
+    | Backslash
+    | Name ->
+      let (parser, name) =
+        if Token.kind token = Backslash
+        then scan_qualified_name parser (make_token token)
+        else scan_remaining_qualified_name parser (make_token token) in
+      begin match syntax name with
+      | Token t when Token.kind t = Name ->
+        peek_token_kind parser = LeftBrace
+      | QualifiedName _ ->
+        Syntax.is_namespace_prefix name ||
+        peek_token_kind parser = LeftBrace
+      | _ -> false
+      end
     | _ -> false
 
   and parse_group_use parser =
@@ -336,8 +345,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, use_kind) = parse_namespace_use_kind_opt parser in
     (* We already know that this is a name, qualified name, or prefix. *)
     (* If this is not a prefix, it will be detected as an error in a later pass *)
-    let (parser, prefix) = next_token parser in
-    let prefix = make_token prefix in
+    let (parser, prefix) = scan_name_or_qualified_name parser in
     let (parser, left, clauses, right) =
       parse_braced_comma_list_opt_allow_trailing
       parser parse_namespace_use_clause in
@@ -456,7 +464,7 @@ module WithExpressionAndStatementAndTypeParser
     (parser, make_token implements_token, implements_list)
 
   and parse_special_type parser =
-    let (parser1, token) = next_xhp_class_name_or_other parser in
+    let (parser1, token) = next_xhp_class_name_or_other_token parser in
     match (Token.kind token) with
     | Comma ->
       (* ERROR RECOVERY. We expected a type but we got a comma.
@@ -467,9 +475,9 @@ module WithExpressionAndStatementAndTypeParser
       let comma = make_token token in
       let list_item = make_list_item item comma in
       (parser, list_item)
+    | Backslash
     | Name
-    | XHPClassName
-    | QualifiedName ->
+    | XHPClassName ->
       let (parser, item) = parse_type_specifier parser in
       let (parser, comma) = optional_token parser Comma in
       let list_item = make_list_item item comma in
@@ -862,16 +870,18 @@ module WithExpressionAndStatementAndTypeParser
     (* Here we're parsing a name followed by an optional generic type
        argument list; if we don't have a name, give an error. *)
     match peek_token_kind parser with
-    | Name
-    | QualifiedName -> parse_possible_generic_specifier parser
+    | Backslash
+    | Name ->
+      parse_possible_generic_specifier parser
     | _ -> require_qualified_name parser
 
   and parse_qualified_name_type_opt parser =
     (* Here we're parsing a name followed by an optional generic type
        argument list; if we don't have a name, give an error. *)
     match peek_token_kind parser with
-    | Name
-    | QualifiedName -> parse_possible_generic_specifier parser
+    | Backslash
+    | Name ->
+      parse_possible_generic_specifier parser
     | _ -> parser, make_missing parser
 
   and parse_require_clause parser =

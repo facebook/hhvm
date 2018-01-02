@@ -348,26 +348,80 @@ module WithParser(Parser : Parser_S) = struct
       (* TODO: Different error? *)
       (with_error parser SyntaxError.error1004, make_missing parser)
 
-  let next_xhp_class_name_or_other parser =
-    if is_next_xhp_class_name parser then next_xhp_class_name parser
-    else next_token parser
-
   let is_next_xhp_category_name parser =
     Lexer.is_next_xhp_category_name (Parser.lexer parser)
 
+  let rec scan_qualified_name_worker parser name_opt acc =
+    let parser1, token = next_token_as_name parser in
+    match name_opt, Token.kind token, acc with
+    | Some name, TokenKind.Backslash, _ ->
+      (* found backslash, create item and recurse *)
+      let part = make_list_item name (make_token token) in
+      scan_qualified_name_worker parser1 None (part :: acc)
+    | None, TokenKind.Name, _ ->
+      (* found a name, recurse to look for backslash *)
+      scan_qualified_name_worker parser1 (Some (make_token token)) acc
+    | Some name, _, [] ->
+      (* have not found anything - return [] to indicate failure *)
+      parser, []
+    | Some name, _, _ ->
+      (* next token is not part of qualified name but we've consume some
+         part of the input - create part for name with missing backslash
+         and return accumulated result *)
+      let part = make_list_item name (make_missing parser) in
+      parser, List.rev (part :: acc)
+    | _ ->
+      (* next token is not part of qualified name - return accumulated result *)
+      parser, List.rev acc
+
+  let scan_remaining_qualified_name parser name_token =
+    let parser, parts = scan_qualified_name_worker parser (Some name_token) [] in
+    match parts with
+    | [] ->
+      parser, name_token
+    | parts ->
+      parser, make_qualified_name (make_list parser parts)
+
+  let scan_qualified_name parser backslash =
+    let head = make_list_item (make_missing parser) backslash in
+    let parser, parts = scan_qualified_name_worker parser None [head] in
+    parser, make_qualified_name (make_list parser parts)
+
+  let scan_name_or_qualified_name parser =
+    let parser1, token = next_token parser in
+    begin match Token.kind token with
+    | TokenKind.Name -> scan_remaining_qualified_name parser1 (make_token token)
+    | TokenKind.Backslash -> scan_qualified_name parser1 (make_token token)
+    | _ -> parser, make_missing parser
+    end
+
+  let next_xhp_class_name_or_other_token parser =
+    if is_next_xhp_class_name parser then next_xhp_class_name parser
+    else next_token parser
+
+  let next_xhp_class_name_or_other parser =
+    let parser, token = next_xhp_class_name_or_other_token parser in
+    match Token.kind token with
+    | TokenKind.Name -> scan_remaining_qualified_name parser (make_token token)
+    | TokenKind.Backslash -> scan_qualified_name parser (make_token token)
+    | _ -> parser, make_token token
+
   let next_xhp_children_name_or_other parser =
     if is_next_xhp_category_name parser then
-      next_xhp_category_name parser
+      let parser, token = next_xhp_category_name parser in
+      parser, token
     else
-      next_xhp_class_name_or_other parser
+      next_xhp_class_name_or_other_token parser
 
   (* We accept either a Name or a QualifiedName token when looking for a
      qualified name. *)
   let require_qualified_name parser =
     let (parser1, name) = next_token_as_name parser in
     match Token.kind name with
-    | TokenKind.QualifiedName
-    | TokenKind.Name -> (parser1, make_token name)
+    | TokenKind.Backslash ->
+      scan_qualified_name parser1 (make_token name)
+    | TokenKind.Name ->
+      scan_remaining_qualified_name parser1 (make_token name)
     | _ ->
       (with_error parser SyntaxError.error1004, make_missing parser)
 
@@ -451,7 +505,7 @@ module WithParser(Parser : Parser_S) = struct
   let require_name_or_variable_or_error parser error =
     let (parser1, token) = next_token_as_name parser in
     match Token.kind token with
-    | TokenKind.Name
+    | TokenKind.Name -> scan_remaining_qualified_name parser1 (make_token token)
     | TokenKind.Variable -> (parser1, make_token token)
     | _ ->
       (* ERROR RECOVERY: Create a missing token for the expected token,
@@ -475,9 +529,8 @@ module WithParser(Parser : Parser_S) = struct
     else
       let (parser1, token) = next_token_as_name parser in
       match Token.kind token with
-      | TokenKind.Name
-      | TokenKind.QualifiedName
       | TokenKind.Variable -> (parser1, make_token token)
+      | TokenKind.Name -> scan_remaining_qualified_name parser1 (make_token token)
       | _ ->
         (* ERROR RECOVERY: Create a missing token for the expected token,
            and continue on from the current token. Don't skip it. *)

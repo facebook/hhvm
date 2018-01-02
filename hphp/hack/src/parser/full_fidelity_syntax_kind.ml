@@ -24,10 +24,10 @@ type t =
   | SyntaxList
   | EndOfFile
   | Script
+  | QualifiedName
   | SimpleTypeSpecifier
   | LiteralExpression
   | VariableExpression
-  | QualifiedNameExpression
   | PipeVariableExpression
   | EnumDeclaration
   | Enumerator
@@ -193,10 +193,10 @@ let to_string kind =
   | SyntaxList                        -> "list"
   | EndOfFile                               -> "end_of_file"
   | Script                                  -> "script"
+  | QualifiedName                           -> "qualified_name"
   | SimpleTypeSpecifier                     -> "simple_type_specifier"
   | LiteralExpression                       -> "literal"
   | VariableExpression                      -> "variable"
-  | QualifiedNameExpression                 -> "qualified_name"
   | PipeVariableExpression                  -> "pipe_variable"
   | EnumDeclaration                         -> "enum_declaration"
   | Enumerator                              -> "enumerator"

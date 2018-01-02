@@ -31,6 +31,9 @@ module type Syntax_S = sig
   and script =
     { script_declarations                                : t
     }
+  and qualified_name =
+    { qualified_name_parts                               : t
+    }
   and simple_type_specifier =
     { simple_type_specifier                              : t
     }
@@ -39,9 +42,6 @@ module type Syntax_S = sig
     }
   and variable_expression =
     { variable_expression                                : t
-    }
-  and qualified_name_expression =
-    { qualified_name_expression                          : t
     }
   and pipe_variable_expression =
     { pipe_variable_expression                           : t
@@ -984,10 +984,10 @@ module type Syntax_S = sig
   | SyntaxList                        of t list
   | EndOfFile                               of end_of_file
   | Script                                  of script
+  | QualifiedName                           of qualified_name
   | SimpleTypeSpecifier                     of simple_type_specifier
   | LiteralExpression                       of literal_expression
   | VariableExpression                      of variable_expression
-  | QualifiedNameExpression                 of qualified_name_expression
   | PipeVariableExpression                  of pipe_variable_expression
   | EnumDeclaration                         of enum_declaration
   | Enumerator                              of enumerator
@@ -1162,12 +1162,13 @@ module type Syntax_S = sig
   val get_token : t -> Token.t option
   val make_missing : Full_fidelity_source_text.t -> int -> t
   val make_list : Full_fidelity_source_text.t -> int -> t list -> t
+  val is_namespace_prefix : t -> bool
   val make_end_of_file : t -> t
   val make_script : t -> t
+  val make_qualified_name : t -> t
   val make_simple_type_specifier : t -> t
   val make_literal_expression : t -> t
   val make_variable_expression : t -> t
-  val make_qualified_name_expression : t -> t
   val make_pipe_variable_expression : t -> t
   val make_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_enumerator : t -> t -> t -> t -> t
@@ -1331,10 +1332,10 @@ module type Syntax_S = sig
   val is_list : t -> bool
   val is_end_of_file : t -> bool
   val is_script : t -> bool
+  val is_qualified_name : t -> bool
   val is_simple_type_specifier : t -> bool
   val is_literal_expression : t -> bool
   val is_variable_expression : t -> bool
-  val is_qualified_name_expression : t -> bool
   val is_pipe_variable_expression : t -> bool
   val is_enum_declaration : t -> bool
   val is_enumerator : t -> bool

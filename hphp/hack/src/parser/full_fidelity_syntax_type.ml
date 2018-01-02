@@ -82,6 +82,9 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and script =
     { script_declarations                                : t
     }
+  and qualified_name =
+    { qualified_name_parts                               : t
+    }
   and simple_type_specifier =
     { simple_type_specifier                              : t
     }
@@ -90,9 +93,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and variable_expression =
     { variable_expression                                : t
-    }
-  and qualified_name_expression =
-    { qualified_name_expression                          : t
     }
   and pipe_variable_expression =
     { pipe_variable_expression                           : t
@@ -1034,10 +1034,10 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | SyntaxList                        of t list
   | EndOfFile                               of end_of_file
   | Script                                  of script
+  | QualifiedName                           of qualified_name
   | SimpleTypeSpecifier                     of simple_type_specifier
   | LiteralExpression                       of literal_expression
   | VariableExpression                      of variable_expression
-  | QualifiedNameExpression                 of qualified_name_expression
   | PipeVariableExpression                  of pipe_variable_expression
   | EnumDeclaration                         of enum_declaration
   | Enumerator                              of enumerator
@@ -1247,7 +1247,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and expression =
   | ExprLiteral                       of literal_expression
   | ExprVariable                      of variable_expression
-  | ExprQualifiedName                 of qualified_name_expression
   | ExprPipeVariable                  of pipe_variable_expression
   | ExprDecorated                     of decorated_expression
   | ExprInclusion                     of inclusion_expression
@@ -1364,7 +1363,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and lambda_body =
   | LambdaLiteral                       of literal_expression
   | LambdaVariable                      of variable_expression
-  | LambdaQualifiedName                 of qualified_name_expression
   | LambdaPipeVariable                  of pipe_variable_expression
   | LambdaDecorated                     of decorated_expression
   | LambdaInclusion                     of inclusion_expression
@@ -1415,7 +1413,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and constructor_expression =
   | CExprLiteral                       of literal_expression
   | CExprVariable                      of variable_expression
-  | CExprQualifiedName                 of qualified_name_expression
   | CExprPipeVariable                  of pipe_variable_expression
   | CExprDecorated                     of decorated_expression
   | CExprInclusion                     of inclusion_expression
@@ -1474,23 +1471,25 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | NewConstructorCall of constructor_call
   and todo_aggregate =
   | TODOEndOfFile of end_of_file
+  and name_aggregate =
+  | NameQualifiedName of qualified_name
   and end_of_file =
     { end_of_file_token: Token.t value
     }
   and script =
     { script_declarations: top_level_declaration listesque value
     }
+  and qualified_name =
+    { qualified_name_parts: Token.t listesque value
+    }
   and simple_type_specifier =
-    { simple_type_specifier: Token.t value
+    { simple_type_specifier: name_aggregate value
     }
   and literal_expression =
     { literal_expression: expression listesque value
     }
   and variable_expression =
     { variable_expression: Token.t value
-    }
-  and qualified_name_expression =
-    { qualified_name_expression: Token.t value
     }
   and pipe_variable_expression =
     { pipe_variable_expression: Token.t value
@@ -1534,7 +1533,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and namespace_declaration =
     { namespace_keyword: Token.t value
-    ; namespace_name: Token.t option value
+    ; namespace_name: name_aggregate option value
     ; namespace_body: namespace_internals value
     }
   and namespace_body =
@@ -1554,7 +1553,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and namespace_group_use_declaration =
     { namespace_group_use_keyword: Token.t value
     ; namespace_group_use_kind: Token.t option value
-    ; namespace_group_use_prefix: Token.t value
+    ; namespace_group_use_prefix: name_aggregate value
     ; namespace_group_use_left_brace: Token.t value
     ; namespace_group_use_clauses: namespace_use_clause listesque value
     ; namespace_group_use_right_brace: Token.t value
@@ -1562,7 +1561,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and namespace_use_clause =
     { namespace_use_clause_kind: Token.t option value
-    ; namespace_use_name: Token.t value
+    ; namespace_use_name: name_aggregate value
     ; namespace_use_as: Token.t option value
     ; namespace_use_alias: Token.t option value
     }

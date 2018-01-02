@@ -4,6 +4,5 @@ slow/inout/bad-call-15.php
 slow/inout/side-effects.php
 slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-6.php
-slow/php7_backported/ns_093.php
 slow/reflection/param_tostring_zendcompat.php
 slow/using/goto.php

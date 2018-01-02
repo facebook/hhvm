@@ -17,8 +17,8 @@
           (list_item
            (element_initializer (variable ((variable) (whitespace)))
             ((=>) (whitespace))
-            (binary_expression (qualified_name ((name) (whitespace)))
-             ((*=) (whitespace)) (literal ((decimal_literal)))))
+            (binary_expression ((name) (whitespace)) ((*=) (whitespace))
+             (literal ((decimal_literal)))))
            (missing)))
          ((rparen)))))
       ((";") (end_of_line))))

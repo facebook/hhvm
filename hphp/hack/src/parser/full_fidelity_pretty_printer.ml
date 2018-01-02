@@ -226,7 +226,7 @@ let rec get_doc node =
     | _ -> get_doc x.literal_expression
     end
   | VariableExpression x -> get_doc x.variable_expression
-  | QualifiedNameExpression x -> get_doc x.qualified_name_expression
+  | QualifiedName n -> get_doc n.qualified_name_parts
   | PipeVariableExpression x -> get_doc x.pipe_variable_expression
   | ListItem x -> (get_doc x.list_item) ^^^ (get_doc x.list_separator)
   | EndOfFile { end_of_file_token } -> get_doc end_of_file_token

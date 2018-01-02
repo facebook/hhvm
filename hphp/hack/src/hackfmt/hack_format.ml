@@ -133,7 +133,6 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
     | MarkupSuffix _
     | SimpleTypeSpecifier _
     | VariableExpression _
-    | QualifiedNameExpression _
     | PipeVariableExpression _
     | PropertyDeclarator _
     | ConstantDeclarator _
@@ -151,6 +150,8 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
     | SoftTypeSpecifier _
     | ListItem _ ->
       transform_simple node
+    | QualifiedName { qualified_name_parts; } ->
+      handle_possible_list qualified_name_parts
     | ExpressionStatement _ ->
       transform_simple_statement node
     | EnumDeclaration x ->

@@ -22,6 +22,7 @@ type aggregate_type =
   | XHPAttribute
   | ObjectCreationWhat
   | TODO
+  | Name
 
 type child_spec =
   | Token (* Special case, since it's so common, synonym of `Just "Token"` *)
@@ -57,13 +58,22 @@ let schema : schema_node list =
     ; aggregates  = []
     ; fields = ["declarations", ZeroOrMore (Aggregate TopLevelDeclaration)]
     }
+  ; { kind_name   = "QualifiedName"
+    ; type_name   = "qualified_name"
+    ; func_name   = "qualified_name"
+    ; description = "qualified_name"
+    ; prefix      = "qualified_name"
+    ; aggregates  = [ Name ]
+    ; fields      =
+    [ "parts", ZeroOrMore Token ]
+    }
   ; { kind_name   = "SimpleTypeSpecifier"
     ; type_name   = "simple_type_specifier"
     ; func_name   = "simple_type_specifier"
     ; description = "simple_type_specifier"
     ; prefix      = "simple_type"
     ; aggregates  = [ Specifier ]
-    ; fields      = [ "specifier", Token ]
+    ; fields      = [ "specifier", Aggregate Name ]
     }
   ; { kind_name   = "LiteralExpression"
     ; type_name   = "literal_expression"
@@ -78,14 +88,6 @@ let schema : schema_node list =
     ; func_name   = "variable_expression"
     ; description = "variable"
     ; prefix      = "variable"
-    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
-    ; fields      = [ "expression", Token ]
-    }
-  ; { kind_name   = "QualifiedNameExpression"
-    ; type_name   = "qualified_name_expression"
-    ; func_name   = "qualified_name_expression"
-    ; description = "qualified_name"
-    ; prefix      = "qualified_name"
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields      = [ "expression", Token ]
     }
@@ -178,7 +180,7 @@ let schema : schema_node list =
     ; aggregates  = [ TopLevelDeclaration ]
     ; fields =
       [ "keyword", Token
-      ; "name", ZeroOrOne Token
+      ; "name", ZeroOrOne (Aggregate Name)
       ; "body", Aggregate NamespaceInternals
       ]
     }
@@ -224,7 +226,7 @@ let schema : schema_node list =
     ; fields =
       [ "keyword", Token
       ; "kind", ZeroOrOne Token
-      ; "prefix", Token
+      ; "prefix", Aggregate Name
       ; "left_brace", Token
       ; "clauses", ZeroOrMore (Just "NamespaceUseClause")
       ; "right_brace", Token
@@ -239,7 +241,7 @@ let schema : schema_node list =
     ; aggregates  = []
     ; fields =
       [ "clause_kind", ZeroOrOne Token
-      ; "name", Token
+      ; "name", Aggregate Name
       ; "as", ZeroOrOne Token
       ; "alias", ZeroOrOne Token
       ]
@@ -2131,6 +2133,7 @@ let generated_aggregate_types =
   ; XHPAttribute
   ; ObjectCreationWhat
   ; TODO
+  ; Name
   ]
 
 let string_of_aggregate_type = function
@@ -2147,6 +2150,7 @@ let string_of_aggregate_type = function
   | XHPAttribute           -> "XHPAttribute"
   | ObjectCreationWhat     -> "ObjectCreationWhat"
   | TODO                   -> "TODO"
+  | Name                   -> "Name"
 
 module AggregateKey = struct
   type t = aggregate_type
@@ -2181,6 +2185,8 @@ let aggregation_of_object_creation_what =
   List.filter (fun x -> List.mem ObjectCreationWhat    x.aggregates) schema
 let aggregation_of_todo_aggregate =
   List.filter (fun x -> List.mem TODO                  x.aggregates) schema
+let aggregation_of_name_aggregate =
+  List.filter (fun x -> List.mem Name                  x.aggregates) schema
 
 let aggregation_of = function
   | TopLevelDeclaration    -> aggregation_of_top_level_declaration
@@ -2196,6 +2202,7 @@ let aggregation_of = function
   | XHPAttribute           -> aggregation_of_xhp_attribute
   | ObjectCreationWhat     -> aggregation_of_object_creation_what
   | TODO                   -> aggregation_of_todo_aggregate
+  | Name                   -> aggregation_of_name_aggregate
 
 let aggregate_type_name = function
   | TopLevelDeclaration    -> "top_level_declaration"
@@ -2211,6 +2218,7 @@ let aggregate_type_name = function
   | XHPAttribute           -> "xhp_attribute"
   | ObjectCreationWhat     -> "object_creation_what"
   | TODO                   -> "todo_aggregate"
+  | Name                   -> "name_aggregate"
 
 let aggregate_type_pfx_trim = function
   | TopLevelDeclaration    -> "TLD",    "\\(Declaration\\|Statement\\)$"
@@ -2226,6 +2234,7 @@ let aggregate_type_pfx_trim = function
   | XHPAttribute           -> "XHPAttr",""
   | ObjectCreationWhat     -> "New",    ""
   | TODO                   -> "TODO",   ""
+  | Name                   -> "Name",   ""
 
 
 (******************************************************************************(

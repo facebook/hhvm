@@ -134,7 +134,26 @@ type expr_location =
 let in_string l =
   l = InDoubleQuotedString || l = InBacktickedString
 
-let pos_name node env =
+let pos_qualified_name node env =
+  let aux p =
+    match syntax p with
+    | ListItem li -> (text li.list_item) ^ (text li.list_separator)
+    | _ -> text p in
+  let p = pPos node env in
+  let name =
+    match syntax node with
+    | QualifiedName {
+        qualified_name_parts = { syntax = SyntaxList l; _ };
+      } ->
+      String.concat "" @@ List.map ~f:aux l
+    | _ -> missing_syntax "qualified name" node env in
+  p, name
+
+let rec pos_name node env =
+  match syntax node with
+  | QualifiedName _ -> pos_qualified_name node env
+  | SimpleTypeSpecifier { simple_type_specifier = s } -> pos_name s env
+  | _ ->
   let name = text node in
   let local_ignore_pos = env.ignore_pos in
   (* Special case for __LINE__; never ignore position for that special name *)
@@ -726,11 +745,7 @@ and pAField : afield parser = fun node env ->
 and pString2: expr_location -> node list -> env -> expr list =
   let rec convert_name_to_lvar location env n =
     match syntax n with
-    | Token { Token.kind = TK.Name; _ }
-    | QualifiedNameExpression {
-        qualified_name_expression = {
-          syntax = Token { Token.kind = TK.Name; _ }; _ }
-        ; _ } ->
+    | Token { Token.kind = TK.Name; _ } ->
       let pos, name = pos_name n env in
       let id = Lvar (pos, "$" ^ name) in
       Some (pos, id)
@@ -922,10 +937,11 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | _ -> missing_syntax "no type arguments for annotated function call" type_args env
         end in
       Call (pExpr recv env, hints, couldMap ~f:pExpr args env, [])
-    | QualifiedNameExpression { qualified_name_expression } ->
+    | QualifiedName _ ->
       if in_string location
-      then String (pos_name qualified_name_expression env)
-      else Id (pos_name qualified_name_expression env)
+      then String (pos_qualified_name node env)
+      else Id (pos_qualified_name node env)
+
     | VariableExpression { variable_expression } ->
       Lvar (pos_name variable_expression env)
 
@@ -1100,10 +1116,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
               missing_syntax "generic type arguments" generic_argument_list env
           in
           fst name, Id_type_arguments (name, hints)
-        | QualifiedNameExpression _
-        | SimpleTypeSpecifier _
-        | Token _
-          -> let name = pos_name constructor_call_type env in fst name, Id name
+        | SimpleTypeSpecifier _ ->
+          let name = pos_name constructor_call_type env in fst name, Id name
         | _ -> pExpr constructor_call_type env
         )
       , args
@@ -1610,7 +1624,7 @@ and pStmt : stmt parser = fun node env ->
       ( pPos node env
       , Call
         ( (match syntax kw with
-          | QualifiedNameExpression _
+          | QualifiedName _
           | SimpleTypeSpecifier _
           | Token _
             -> let name = pos_name kw env in fst name, Id name

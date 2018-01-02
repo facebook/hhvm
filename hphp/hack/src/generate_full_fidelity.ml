@@ -497,6 +497,7 @@ SYNTAX
   val get_token : t -> Token.t option
   val make_missing : Full_fidelity_source_text.t -> int -> t
   val make_list : Full_fidelity_source_text.t -> int -> t list -> t
+  val is_namespace_prefix : t -> bool
 CONSTRUCTOR_METHODS
 
   val position : Relative_path.t -> t -> Pos.t option
@@ -697,6 +698,19 @@ TYPE_TESTS
     let is_specific_token kind node =
       match syntax node with
       | Token t -> Token.kind t = kind
+      | _ -> false
+
+    let is_namespace_prefix node =
+      match syntax node with
+      | QualifiedName e ->
+        begin match Core_list.last (syntax_node_to_list e.qualified_name_parts) with
+        | None -> false
+        | Some p ->
+          begin match syntax p with
+          | ListItem p -> not (is_missing p.list_separator)
+          | _ -> false
+          end
+        end
       | _ -> false
 
 
@@ -2495,14 +2509,18 @@ module GenerateFFTokenKind = struct
   let to_kind_declaration x =
     sprintf "  | %s\n" x.token_kind
 
+  let escape_token_text t = if t = "\\" then "\\\\\\" else t
+
   let to_from_string x =
-    let spacer_width = given_text_width - String.length x.token_text in
+    let token_text = escape_token_text x.token_text in
+    let spacer_width = given_text_width - String.length token_text in
     let spacer = String.make spacer_width ' ' in
-    sprintf "  | \"%s\"%s -> Some %s\n" x.token_text spacer x.token_kind
+    sprintf "  | \"%s\"%s -> Some %s\n" token_text spacer x.token_kind
 
   let to_to_string x =
+    let token_text = escape_token_text x.token_text in
     sprintf ("  | " ^^ token_kind_fmt ^^ " -> \"%s\"\n")
-      x.token_kind x.token_text
+      x.token_kind token_text
 
   let full_fidelity_token_kind_template = make_header MLStyle "" ^ "
 

@@ -16,7 +16,6 @@ slow/hh_namespace_migration/hh_vector5.php
 slow/inout/bad-call-15.php
 slow/inout/side-effects.php
 slow/parser/hh-namespace-conflict-2.php
-slow/parser/hh-namespace-conflict-3.php
 slow/parser/hh-namespace-conflict-6.php
 slow/return_statement/finally-typecheck.php
 slow/traits/require_constraint_basic_error.php

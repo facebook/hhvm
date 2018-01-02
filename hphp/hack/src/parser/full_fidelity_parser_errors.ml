@@ -70,7 +70,7 @@ let combine_names n1 n2 =
   let len = String.length n1 in
   let has_trailing_slash = String.get n1 (len - 1) = '\\' in
   match has_leading_slash, has_trailing_slash with
-  | true, true -> n1 ^ (String.sub n2 1 (len - 1))
+  | true, true -> n1 ^ (String.sub n2 1 (String.length n2 - 1))
   | false, false -> n1 ^ "\\" ^ n2
   | _ -> n1 ^ n2
 
@@ -1693,7 +1693,8 @@ let require_errors node parents hhvm_compat_mode trait_use_clauses errors =
 
 let check_type_name name namespace_name name_text location names errors =
   begin match SMap.get name_text names.t_classes with
-  | Some { f_location = location; f_is_def = false; _ } ->
+  | Some { f_location = location; f_is_def = false; f_name }
+    when combine_names namespace_name name_text <> f_name ->
     let error =
       make_name_already_used_error name name_text name_text location
         SyntaxError.type_name_is_already_in_use in
@@ -1878,9 +1879,8 @@ let use_class_or_namespace_clause_errors
 
       let map = get_map names in
       match SMap.get short_name map with
-      | Some { f_location = location; f_is_def = is_definition; f_name } ->
-        if qualified_name <> f_name &&
-          (not is_definition
+      | Some { f_location = location; f_is_def = is_definition; _ } ->
+        if (not is_definition
            || (error_on_global_redefinition && is_global_namespace))
         then
           let error =
@@ -1940,8 +1940,8 @@ let use_class_or_namespace_clause_errors
       let names, errors =
         let location = make_location_of_node name in
         match SMap.get short_name names.t_classes with
-        | Some { f_location = loc; f_name; _ } ->
-          if qualified_name = f_name then names, errors
+        | Some { f_location = loc; f_name; f_is_def; _ } ->
+          if qualified_name = f_name && f_is_def then names, errors
           else
           let error =
             make_name_already_used_error name name_text short_name loc

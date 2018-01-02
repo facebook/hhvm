@@ -595,6 +595,10 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
       /* Never use any input */
     case 'X':
       size = -1;
+      if (arg < 0) {
+        throw_invalid_argument("Type %c: '*' ignored", type);
+        arg = 1;
+      }
       break;
 
     case '@':

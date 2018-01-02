@@ -164,25 +164,33 @@ let has_return_disposable_attribute attrs =
   List.exists attrs
     (fun { ua_name; _ } -> SN.UserAttributes.uaReturnDisposable = snd ua_name)
 
-(* Does ty implement IDisposable or IAsyncDisposable, directly or indirectly?
- * Return Some class_name if it does, None if it doesn't.
- *)
-let is_disposable_type env ty =
-  match Env.expand_type env ty with
+let is_disposable_visitor env =
+  object(this)
+  inherit [string option] Type_visitor.type_visitor
   (* Only bother looking at classish types. Other types can spuriously
    * claim to implement these interfaces. Ideally we should check
    * constrained generics, abstract types, etc.
    *)
-  | _env, (_, Tclass((_, class_name), _)) ->
+  method! on_tclass acc _ (_, class_name) tyl =
+    let default () =
+      List.fold_left tyl ~f:this#on_type ~init:acc in
     begin match Env.get_class env class_name with
-    | None -> None
+    | None -> default ()
     | Some c ->
       if c.tc_is_disposable
       then Some (strip_ns class_name)
-      else None
+      else default ()
     end
-  | _  ->
-    None
+  end
+
+(* Does ty (or a type embedded in ty) implement IDisposable
+ * or IAsyncDisposable, directly or indirectly?
+ * Return Some class_name if it does, None if it doesn't.
+ *)
+let is_disposable_type env ty =
+  match Env.expand_type env ty with
+  | _env, ety ->
+    (is_disposable_visitor env)#on_type None ety
 
 (* Check whether this is a function type that (a) either returns a disposable
  * or (b) has the <<__ReturnDisposable>> attribute
@@ -203,8 +211,16 @@ let enforce_param_not_disposable env param ty =
   | None ->
     ()
 
-let enforce_return_not_disposable env ty =
-  match is_disposable_type env ty with
+let strip_awaitable fun_kind env ty =
+  match Env.expand_type env ty with
+  | _env, (_, Tclass ((_, class_name), [ty]))
+    when fun_kind = Ast.FAsync && class_name = SN.Classes.cAwaitable ->
+    ty
+  | _, _ ->
+    ty
+
+let enforce_return_not_disposable fun_kind env ty =
+  match is_disposable_type env (strip_awaitable fun_kind env ty) with
   | Some class_name ->
     Errors.invalid_disposable_return_hint (Reason.to_pos (fst ty)) (strip_ns class_name)
   | None ->
@@ -378,7 +394,8 @@ and fun_def tcopt f =
         | Some ret ->
           let ty = TI.instantiable_hint env ret in
           let env, ty = Phase.localize_with_self env ty in
-          if not return_disposable then enforce_return_not_disposable env ty;
+          if not return_disposable
+          then enforce_return_not_disposable f.f_fun_kind env ty;
           env,
           Env.{ return_type = ty;
                 return_explicit = true;
@@ -1792,7 +1809,8 @@ and expr_
       let env = Env.forget_members env p in
       make_result env (T.Yield taf) (Reason.Ryield_send p, Toption send)
   | Await e ->
-      let env, te, rty = expr env e in
+      (* Await is permitted in a using clause e.g. using (await make_handle()) *)
+      let env, te, rty = expr ~is_using_clause env e in
       let env, ty = Async.overload_extract_from_awaitable env p rty in
       make_result env (T.Await te) ty
   | Suspend (e) ->
@@ -5813,7 +5831,8 @@ and method_def env m =
         { (Phase.env_with_self env) with
           from_class = Some CIstatic } in
       let env, ty = Phase.localize ~ety_env env ret in
-      if not return_disposable then enforce_return_not_disposable env ty;
+      if not return_disposable
+      then enforce_return_not_disposable m.m_fun_kind env ty;
       env,
       Env.{ return_type = ty;
             return_explicit = true;

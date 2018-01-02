@@ -39,3 +39,17 @@ function testit():void {
     }
   }
 }
+
+<<__ReturnDisposable>>
+async function async_make_handle(bool $b):Awaitable<Handle> {
+  if ($b) return new Handle("yes");
+  else return new Handle("no");
+}
+
+async function test_async():Awaitable<void> {
+  using ($x = await async_make_handle(false)) {
+    $x->foo();
+  }
+  using (await async_make_handle(true)) {
+  }
+}

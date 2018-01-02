@@ -20,8 +20,5 @@ slow/parser/hh-namespace-conflict-6.php
 slow/return_statement/finally-typecheck.php
 slow/traits/require_constraint_basic_error.php
 slow/traits/require_constraint_recurse.php
-slow/using/bad-async.php
-slow/using/bad-function3.php
-slow/using/bad-function4.php
 slow/using/bad-goto1.php
 slow/using/bad-goto2.php

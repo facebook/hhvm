@@ -30,6 +30,8 @@ type variables = {
 }
 
 type env = {
+  (* Span of function/method body *)
+  pos: Pos.t;
   (* What is the current context? *)
   scope : Scope.t;
   variable_scopes: variables list;
@@ -172,7 +174,7 @@ let get_parameter_names params =
     ~f:(fun s p -> SSet.add (snd p.Ast.param_id) s)
     params
 
-let env_with_function_like_ env e ~is_closure_body params body =
+let env_with_function_like_ env e ~is_closure_body params pos body =
   let scope = e :: env.scope in
   let all_vars =
     (get_vars scope
@@ -182,10 +184,12 @@ let env_with_function_like_ env e ~is_closure_body params body =
   let parameter_names = get_parameter_names params in
   { env with
       scope;
+      pos;
       variable_scopes = { all_vars; parameter_names } :: env.variable_scopes }
 
 let env_with_function_like env e ~is_closure_body fd =
-  env_with_function_like_ env e ~is_closure_body fd.Ast.f_params fd.Ast.f_body
+  env_with_function_like_ env e ~is_closure_body fd.Ast.f_params
+    fd.Ast.f_span fd.Ast.f_body
 
 let env_with_lambda env fd =
   env_with_function_like env ScopeItem.Lambda ~is_closure_body:true fd
@@ -227,6 +231,7 @@ let env_toplevel class_count function_count defs =
       []
       defs in
   { scope = scope;
+    pos = Pos.none;
     variable_scopes = [{ all_vars; parameter_names = SSet.empty }];
     defined_class_count = class_count;
     defined_function_count = function_count; }
@@ -237,6 +242,7 @@ let env_with_method env md =
     (ScopeItem.Method md)
     ~is_closure_body:false
     md.Ast.m_params
+    md.Ast.m_span
     md.Ast.m_body
 
 let env_with_class env cd =
@@ -432,17 +438,16 @@ let convert_id (env:env) p (pid, str as id) =
   | _ ->
     (p, Id id)
 
-let check_if_in_async_context { scope; _ } =
-  let p = Pos.none in
+let check_if_in_async_context { scope; pos; _ } =
   let check_valid_fun_kind (_, name) =
     function | FAsync | FAsyncGenerator -> ()
-             | _ -> Emit_fatal.raise_fatal_parse p @@
+             | _ -> Emit_fatal.raise_fatal_parse pos @@
     "Function '"
     ^ (SU.strip_global_ns name)
     ^ "' contains 'await' but is not declared as async."
   in
   match scope with
-  | [] -> Emit_fatal.raise_fatal_parse p
+  | [] -> Emit_fatal.raise_fatal_parse pos
             "'await' can only be used inside a function"
   | ScopeItem.Lambda :: _
   | ScopeItem.LongLambda _ :: _ ->

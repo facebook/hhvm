@@ -226,6 +226,7 @@ let emit_finally_epilogue
   | [] -> empty
   | [_, h] ->
     gather [
+      Emit_pos.emit_pos pos;
       instr_issetl (Local.get_label_id_local ());
       instr_jmpz finally_end;
       emit_instr h; ]
@@ -269,6 +270,7 @@ let emit_finally_epilogue
     let (labels, bodies) = aux max_id lst [] [] in
     let labels = labels in
     gather [
+      Emit_pos.emit_pos pos;
       instr_issetl (Local.get_label_id_local ());
       instr_jmpz finally_end;
       instr_cgetl (Local.get_label_id_local ());

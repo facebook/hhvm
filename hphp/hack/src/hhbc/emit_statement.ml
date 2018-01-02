@@ -249,7 +249,7 @@ let rec emit_stmt env (pos, st_) =
       Ast.us_expr = e; Ast.us_block = b;
       Ast.us_is_block_scoped = is_block_scoped
     } ->
-    emit_using env is_block_scoped has_await e (pos, A.Block b)
+    emit_using env pos is_block_scoped has_await e (pos, A.Block b)
   | A.Break level_opt ->
     emit_break env pos (get_level pos "break" level_opt)
   | A.Continue level_opt ->
@@ -270,7 +270,7 @@ let rec emit_stmt env (pos, st_) =
     else if catch_list <> [] then
       emit_try_catch env (pos, A.Block try_block) catch_list
     else
-      emit_try_finally env (pos, A.Block try_block) (pos, A.Block finally_block)
+      emit_try_finally env pos (pos, A.Block try_block) (pos, A.Block finally_block)
 
   | A.Switch (e, cl) ->
     emit_switch env e cl
@@ -403,7 +403,7 @@ and emit_declare env is_block (p, e) b =
   in
   gather [ errors; emit_stmts env b ]
 
-and emit_using env is_block_scoped has_await e b =
+and emit_using env pos is_block_scoped has_await e b =
   match snd e with
   | A.Expr_list es ->
     emit_stmt env @@ List.fold_right es
@@ -456,7 +456,7 @@ and emit_using env is_block_scoped has_await e b =
     in
     let finally_epilogue =
       TFR.emit_finally_epilogue
-        env Pos.none ~verify_return:!verify_return ~verify_out:!verify_out
+        env pos ~verify_return:!verify_return ~verify_out:!verify_out
         jump_instructions finally_end
     in
     let cleanup_local =
@@ -466,6 +466,7 @@ and emit_using env is_block_scoped has_await e b =
     let fault = gather [
       cleanup_local;
       finally;
+      Emit_pos.emit_pos pos;
       instr_unwind ] in
     let fault_label = Label.next_fault () in
     let middle =
@@ -647,11 +648,11 @@ and emit_try_catch_ env try_block catch_list =
     instr_label end_label;
   ]
 
-and emit_try_finally env try_block finally_block =
+and emit_try_finally env pos try_block finally_block =
   Local.scope @@ fun () ->
-    emit_try_finally_ env try_block finally_block
+    emit_try_finally_ env pos try_block finally_block
 
-and emit_try_finally_ env try_block finally_block =
+and emit_try_finally_ env pos try_block finally_block =
   let finally_body = Emit_env.do_in_finally_body env finally_block emit_stmt in
   if is_empty_block try_block then finally_body
   else
@@ -712,10 +713,9 @@ and emit_try_finally_ env try_block finally_block =
 
   (* (3) Finally epilogue *)
 
-  (* TODO: position *)
   let finally_epilogue =
     TFR.emit_finally_epilogue
-      env Pos.none ~verify_return:!verify_return ~verify_out:!verify_out
+      env pos ~verify_return:!verify_return ~verify_out:!verify_out
       jump_instructions finally_end
   in
 
@@ -741,6 +741,7 @@ and emit_try_finally_ env try_block finally_block =
   let fault_body = gather [
       cleanup_local;
       finally_body_for_fault;
+      Emit_pos.emit_pos pos;
       instr_unwind;
     ] in
   let fault_label = Label.next_fault () in
@@ -1067,7 +1068,7 @@ and emit_foreach_ env pos collection iterator block =
       (gather [
         if mutable_iter then instr_miterfree iterator_number
         else instr_iterfree iterator_number;
-
+        Emit_pos.emit_pos pos;
         instr_unwind ]);
     instr_label loop_break_label
   ] in

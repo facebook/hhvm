@@ -25,6 +25,5 @@ slow/inout/side-effects.php
 slow/inout/trait-magic.php
 slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-6.php
-slow/return_statement/finally-typecheck.php
 slow/using/bad-goto1.php
 slow/using/bad-goto2.php

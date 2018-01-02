@@ -682,7 +682,7 @@ and emit_class_expr_parts env cexpr prop =
 
 and emit_class_expr env cexpr prop =
   match cexpr with
-  | Class_expr ((_, (A.BracedExpr _ |
+  | Class_expr ((pos, (A.BracedExpr _ |
                      A.Dollar _ |
                      A.Call _ |
                      A.Lvar (_, "$this") |
@@ -710,6 +710,7 @@ and emit_class_expr env cexpr prop =
           (* fault block *)
           (gather [
             instr_unsetl temp;
+            Emit_pos.emit_pos pos;
             instr_unwind ]) in
       gather [
         cexpr_local;
@@ -2883,7 +2884,7 @@ and emit_unop ~need_ref env pos op e =
       let temp_local = Local.get_unnamed_local () in
       let cleanup = instr_silence_end temp_local in
       let body = gather [emit_expr ~need_ref:false env e; cleanup] in
-      let fault = gather [cleanup; instr_unwind] in
+      let fault = gather [cleanup; Emit_pos.emit_pos pos; instr_unwind] in
       gather [
         instr_silence_start temp_local;
         instr_try_fault fault_label body fault

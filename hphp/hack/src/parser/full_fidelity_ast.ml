@@ -645,6 +645,7 @@ let rec pHint : hint parser = fun node env ->
 type fun_hdr =
   { fh_suspension_kind : suspension_kind
   ; fh_name            : pstring
+  ; fh_constrs         : (hint * constraint_kind * hint) list
   ; fh_type_parameters : tparam list
   ; fh_parameters      : fun_param list
   ; fh_return_type     : hint option
@@ -655,6 +656,7 @@ type fun_hdr =
 let empty_fun_hdr =
   { fh_suspension_kind = SKSync
   ; fh_name            = Pos.none, "<ANONYMOUS>"
+  ; fh_constrs         = []
   ; fh_type_parameters = []
   ; fh_parameters      = []
   ; fh_return_type     = None
@@ -1713,13 +1715,13 @@ and pTParaml : tparam list parser = fun node env ->
     couldMap ~f:pTParam type_parameters_parameters env
   | _ -> missing_syntax "type parameter list" node env
 
-(* TODO: Translate the where clause *)
 and pFunHdr : fun_hdr parser = fun node env ->
   match syntax node with
   | FunctionDeclarationHeader
     { function_modifiers
     ; function_ampersand
     ; function_name
+    ; function_where_clause
     ; function_type_parameter_list
     ; function_parameter_list
     ; function_type
@@ -1730,6 +1732,33 @@ and pFunHdr : fun_hdr parser = fun node env ->
       let fh_suspension_kind =
         mk_suspension_kind_ modifiers.has_async modifiers.has_coroutine in
       let fh_name = pos_name function_name env in
+      let fh_constrs =
+        match syntax function_where_clause with
+        | Missing -> []
+        | WhereClause { where_clause_constraints; _ } ->
+          let rec f node =
+            match syntax node with
+            | ListItem { list_item; _ } -> f list_item
+            | WhereConstraint
+              { where_constraint_left_type
+              ; where_constraint_operator
+              ; where_constraint_right_type
+              } ->
+                let l = pHint where_constraint_left_type env in
+                let o =
+                  match syntax where_constraint_operator with
+                  | Token { Token.kind = TK.Equal; _ } -> Constraint_eq
+                  | Token { Token.kind = TK.As; _ } -> Constraint_as
+                  | Token { Token.kind = TK.Super; _ } -> Constraint_super
+                  | _ -> missing_syntax "constraint operator" where_constraint_operator env
+                in
+                let r = pHint where_constraint_right_type env in
+                (l,o,r)
+            | _ -> missing_syntax "where constraint" node env
+          in
+          List.map ~f (syntax_node_to_list where_clause_constraints)
+        | _ -> missing_syntax "function header constraints" node env
+      in
       let fh_type_parameters = pTParaml function_type_parameter_list env in
       let fh_param_modifiers =
         List.filter ~f:(fun p -> Option.is_some p.param_modifier) fh_parameters
@@ -1737,6 +1766,7 @@ and pFunHdr : fun_hdr parser = fun node env ->
       let fh_ret_by_ref = is_ret_by_ref function_ampersand in
       { fh_suspension_kind
       ; fh_name
+      ; fh_constrs
       ; fh_type_parameters
       ; fh_parameters
       ; fh_return_type
@@ -1932,7 +1962,7 @@ and pClassElt : class_elt list parser = fun node env ->
       member_def @ [Method
       { m_kind            = kind
       ; m_tparams         = hdr.fh_type_parameters
-      ; m_constrs         = []
+      ; m_constrs         = hdr.fh_constrs
       ; m_name            = hdr.fh_name
       ; m_params          = hdr.fh_parameters
       ; m_body            = body
@@ -2123,6 +2153,7 @@ and pDef : def list parser = fun node env ->
       { (fun_template yield node hdr.fh_suspension_kind env) with
         f_tparams         = hdr.fh_type_parameters
       ; f_ret             = hdr.fh_return_type
+      ; f_constrs         = hdr.fh_constrs
       ; f_name            = hdr.fh_name
       ; f_params          = hdr.fh_parameters
       ; f_ret_by_ref      = hdr.fh_ret_by_ref

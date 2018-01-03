@@ -77,6 +77,10 @@ let die str =
   close_out oc;
   exit 2
 
+let is_file_path_for_evaled_code s =
+  let s = Relative_path.to_absolute s in
+  String_utils.string_ends_with s ") : eval()'d code"
+
 let print_compiler_version () =
   let open Hh_json in
   let compiler_version_msg = json_to_string @@ JSON_Object
@@ -316,7 +320,10 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
       List.iter (Errors.get_error_list errors) (fun e ->
         P.printf "%s\n" (Errors.to_string (Errors.to_absolute e)));
       if Errors.is_empty errors
-      then Emit_program.from_ast parser_return.Parser_hack.is_hh_file ast
+      then Emit_program.from_ast
+        parser_return.Parser_hack.is_hh_file
+        (is_file_path_for_evaled_code filename)
+        ast
       else Emit_program.emit_fatal_program ~ignore_message:true
         Hhbc_ast.FatalOp.Parse Pos.none "Syntax error"
       in

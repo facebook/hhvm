@@ -11,7 +11,7 @@
 open Instruction_sequence
 open Hhbc_ast
 
-let emit_main defs =
+let emit_main is_evaled defs =
   let body, _is_generator, _is_pair_generator =
     Emit_body.emit_body
       ~pos:Pos.none
@@ -23,7 +23,7 @@ let emit_main defs =
       ~skipawaitable:false
       ~is_return_by_ref:false
       ~scope:Ast_scope.Scope.toplevel
-      ~return_value:(instr_int 1)
+      ~return_value:(if is_evaled then instr_null else instr_int 1)
       ~default_dropthrough:None
       ~doc_comment:None
       [] None defs
@@ -51,7 +51,7 @@ let emit_fatal_program ~ignore_message op pos message =
   in
     Hhas_program.make false [] [] [] [] body Emit_symbol_refs.empty_symbol_refs
 
-let from_ast is_hh_file ast =
+let from_ast ~is_hh_file ~is_evaled ast =
   Utils.try_finally
   ~f:begin fun () ->
     try
@@ -62,7 +62,7 @@ let from_ast is_hh_file ast =
         convert_toplevel_prog ast in
       Emit_env.set_global_state global_state;
       let flat_closed_ast = List.map snd closed_ast in
-      let compiled_defs = emit_main flat_closed_ast in
+      let compiled_defs = emit_main is_evaled flat_closed_ast in
       let compiled_funs = Emit_function.emit_functions_from_program closed_ast in
       let compiled_classes = Emit_class.emit_classes_from_program closed_ast in
       let compiled_typedefs = Emit_typedef.emit_typedefs_from_program flat_closed_ast in

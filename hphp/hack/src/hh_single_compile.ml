@@ -105,7 +105,7 @@ let parse_options () =
   let dump_symbol_refs = ref false in
   let dump_stats = ref false in
   let dump_config = ref false in
-  let usage = P.sprintf "Usage: %s filename\n" Sys.argv.(0) in
+  let usage = P.sprintf "Usage: hh_single_compile (%s) filename\n" Sys.argv.(0) in
   let options =
     [ ("--version"
           , Arg.Set want_version

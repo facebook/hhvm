@@ -167,6 +167,12 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
        message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.9 or greater.")
     endif()
 
+    # Warn about a GCC 4.9 bug leading to an incorrect refcounting issue
+    # https://github.com/facebook/hhvm/issues/8011
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+       message(WARNING "HHVM is known to trigger optimization bugs in GCC 4.9. Upgrading to GCC 5 is recommended. See https://github.com/facebook/hhvm/issues/8011 for more details.")
+    endif()
+
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0 OR
        CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 6.0)
      message(WARNING "HHVM is primarily tested on GCC 4.9 and 5. Using other versions may produce unexpected results, or may not even build at all.")

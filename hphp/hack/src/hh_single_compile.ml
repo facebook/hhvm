@@ -92,6 +92,7 @@ let assert_regular_file filename =
 
 let parse_options () =
   let fn_ref = ref None in
+  let want_version = ref false in
   let fallback = ref false in
   let debug_time = ref false in
   let parser = ref FFP in
@@ -106,7 +107,11 @@ let parse_options () =
   let dump_config = ref false in
   let usage = P.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
-    [ ("--fallback"
+    [ ("--version"
+          , Arg.Set want_version
+            , " print the version and do nothing"
+      );
+      ("--fallback"
           , Arg.Set fallback
             , " Enables fallback compilation"
       );
@@ -166,6 +171,7 @@ let parse_options () =
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
+  if !want_version then (print_compiler_version (); exit 0);
   if !mode = DAEMON then print_compiler_version ();
   let needs_file = Option.is_none !input_file_list in
   let fn =

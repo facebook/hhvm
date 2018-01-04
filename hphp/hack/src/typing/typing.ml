@@ -1897,10 +1897,6 @@ and expr_
         List.for_all f.f_params (fun param -> Option.is_some param.param_hint) in
       (* Is the return type declared? *)
       let is_explicit_ret = Option.is_some f.f_ret in
-      (* Is contextual inference switched on? *)
-      let contextual_inference =
-        TypecheckerOptions.experimental_feature_enabled
-          (Env.get_options env) TypecheckerOptions.experimental_contextual_inference in
       let check_body_under_known_params ?ret_ty ft =
         let (is_reactive, is_coroutine, anon) = anon_make env p f ft idl in
         let ft = { ft with ft_is_coroutine = is_coroutine } in
@@ -1919,12 +1915,9 @@ and expr_
           [Typing_log.Log_type ("ft", (Reason.Rwitness p, Tfun ft));
            Typing_log.Log_type ("inferred_ty", inferred_ty)])];
         env, tefun, inferred_ty in
-      (* If contextual inference is enabled, *and* we have a concrete function
-       * type as our expected type, then check the lambda just once with
-       * parameters bound to the concrete types from the function type *)
       let env, expected = expand_expected env expected in
       begin match expected with
-      | Some (_pos, _ur, (_, Tfun expected_ft)) when contextual_inference ->
+      | Some (_pos, _ur, (_, Tfun expected_ft)) ->
         (* First check that arities match up *)
         check_lambda_arity p expected_ft.ft_pos declared_ft.ft_arity expected_ft.ft_arity;
         (* Use declared types for parameters in preference to those determined
@@ -2367,24 +2360,17 @@ and check_expected_ty message env inferred_ty expected =
   | None ->
     env
   | Some (p, ur, expected_ty) ->
-    let contextual_inference =
-      TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env) TypecheckerOptions.experimental_contextual_inference in
-    if contextual_inference
-    then
-      (* Special case for returning from an async function *)
-      let inferred_ty =
-        if ur = Reason.URreturn
-        then make_return_type env p inferred_ty
-        else inferred_ty in
-      Typing_log.log_types 1 p env
-      [Typing_log.Log_sub
-        (Printf.sprintf "Typing.check_expected_ty %s" message,
-         [Typing_log.Log_type ("inferred_ty", inferred_ty);
-         Typing_log.Log_type ("expected_ty", expected_ty)])];
-      Type.sub_type p ur env inferred_ty expected_ty
-    else
-      env
+    (* Special case for returning from an async function *)
+    let inferred_ty =
+      if ur = Reason.URreturn
+      then make_return_type env p inferred_ty
+      else inferred_ty in
+    Typing_log.log_types 1 p env
+    [Typing_log.Log_sub
+      (Printf.sprintf "Typing.check_expected_ty %s" message,
+       [Typing_log.Log_type ("inferred_ty", inferred_ty);
+       Typing_log.Log_type ("expected_ty", expected_ty)])];
+    Type.sub_type p ur env inferred_ty expected_ty
 
 and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p env cid el uel =
   (* Obtain class info from the cid expression. We get multiple

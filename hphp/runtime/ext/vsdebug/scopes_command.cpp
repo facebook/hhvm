@@ -66,16 +66,18 @@ bool ScopesCommand::executeImpl(
   folly::dynamic body = folly::dynamic::object;
   folly::dynamic scopes = folly::dynamic::array;
 
-  scopes.push_back(getScopeDescription(session, "Locals", ScopeType::Locals));
-  scopes.push_back(getScopeDescription(session,
-                                       "Superglobals",
-                                       ScopeType::Superglobals));
-  scopes.push_back(getScopeDescription(session,
-                                       "User Defined Constants",
-                                       ScopeType::UserDefinedConstants));
-  scopes.push_back(getScopeDescription(session,
-                                       "System Constants",
-                                       ScopeType::CoreConstants));
+  if (getFrameObject(session) != nullptr) {
+    scopes.push_back(getScopeDescription(session, "Locals", ScopeType::Locals));
+    scopes.push_back(getScopeDescription(session,
+                                         "Superglobals",
+                                         ScopeType::Superglobals));
+    scopes.push_back(getScopeDescription(session,
+                                         "User Defined Constants",
+                                         ScopeType::UserDefinedConstants));
+    scopes.push_back(getScopeDescription(session,
+                                         "System Constants",
+                                         ScopeType::CoreConstants));
+  }
 
   body["scopes"] = scopes;
   (*responseMsg)["body"] = body;

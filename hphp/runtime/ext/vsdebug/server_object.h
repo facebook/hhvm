@@ -27,7 +27,8 @@ namespace VSDEBUG {
 enum ServerObjectType {
   Frame,
   Scope,
-  Variable
+  Variable,
+  SubScope
 };
 
 enum ScopeType {
@@ -93,6 +94,39 @@ struct VariableObject : public ServerObject {
   const int m_requestId;
 };
 
+enum ClassPropsType {
+  Constants,
+  StaticProps,
+  PrivateBaseProps
+};
+
+struct VariableSubScope : public ServerObject {
+  VariableSubScope(
+    unsigned int objectId,
+    const Variant& variable,
+    const Class* cls,
+    const std::string& className,
+    int reqId,
+    ClassPropsType type
+  ) : ServerObject(objectId),
+      m_variable(variable),
+      m_class(cls),
+      m_className(className),
+      m_requestId(reqId),
+      m_subScopeType(type) {
+  }
+
+  ServerObjectType objectType() override {
+    return ServerObjectType::SubScope;
+  }
+
+  const req::root<Variant> m_variable;
+  const Class* m_class;
+  const std::string m_className;
+  const int m_requestId;
+  const std::string m_scopeName;
+  const ClassPropsType m_subScopeType;
+};
 
 }
 }

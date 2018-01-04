@@ -190,6 +190,28 @@ unsigned int DebuggerSession::generateVariableId(
   return objectId;
 }
 
+unsigned int DebuggerSession::generateVariableSubScope(
+  int requestId,
+  const Variant& variable,
+  const Class* cls,
+  const std::string& className,
+  ClassPropsType type
+) {
+  const unsigned int objectId = ++s_nextObjectId;
+  VariableSubScope* varObj = new VariableSubScope(
+    objectId,
+    variable,
+    cls,
+    className,
+    requestId,
+    type
+  );
+
+  assert(requestId == m_debugger->getCurrentThreadId());
+  registerRequestObject(objectId, varObj);
+  return objectId;
+}
+
 ScopeObject* DebuggerSession::getScopeObject(unsigned int objectId) {
   auto object = getServerObject(objectId);
   if (object != nullptr) {

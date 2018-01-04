@@ -316,16 +316,101 @@ private:
     folly::dynamic* vars
   );
 
+  static void forEachInstanceProp(
+    const Variant& var,
+    std::function<bool(
+      const std::string& objectClassName,
+      const std::string& propName,
+      const std::string& propClassName,
+      const std::string& displayName,
+      const char* visibilityDescription,
+      folly::dynamic& presentationHint,
+      const Variant& propertyVariant
+    )> callback
+  );
+
+  // Adds object properties.
+  static int addObjectChildren(
+    DebuggerSession* session,
+    int64_t requestId,
+    int start,
+    int count,
+    const Variant& variable,
+    folly::dynamic* vars
+  );
+
+  // Adds constants defined on a class.
+  static int addClassConstants(
+    DebuggerSession* session,
+    int64_t requestId,
+    int start,
+    int count,
+    Class* cls,
+    const Variant& var,
+    folly::dynamic* vars
+  );
+
+  // Adds static properties defined on an object's class.
+  static int addClassStaticProps(
+    DebuggerSession* session,
+    int64_t requestId,
+    int start,
+    int count,
+    Class* cls,
+    const Variant& var,
+    folly::dynamic* vars
+  );
+
   // Serializes a variable to be sent over the VS Code debugger protocol.
   static folly::dynamic serializeVariable(
     DebuggerSession* session,
     int64_t requestId,
     const std::string& name,
     const Variant& variable,
-    bool childProp = false
+    bool doNotModifyName = false,
+    folly::dynamic* presentationHint = nullptr
+  );
+
+  // Adds private properties defined on one of an object's base classes.
+  static void addClassPrivateProps(
+    DebuggerSession* session,
+    int64_t requestId,
+    int start,
+    int count,
+    VariableSubScope* subScope,
+    const Variant& var,
+    folly::dynamic* vars
+  );
+
+  // Adds a sub scope to an object for each class in the object's parent
+  // chain (including itself) that has class constants or static props defined.
+  static int addClassSubScopes(
+    DebuggerSession* session,
+    ClassPropsType propType,
+    int requestId,
+    const Variant& var,
+    folly::dynamic* vars
+  );
+
+  // Adds a scope sub section to a complex variable.
+  static int addScopeSubSection(
+    DebuggerSession* session,
+    const char* displayName,
+    const std::string& displayValue,
+    const std::string& className,
+    const Class* currentClass,
+    int childCount,
+    ClassPropsType type,
+    int requestId,
+    const Variant& var,
+    folly::dynamic* vars
   );
 
   static const std::string getVariableValue(const Variant& variable);
+
+  static constexpr char* VisibilityPrivate = "private";
+  static constexpr char* VisibilityProtected = "protected";
+  static constexpr char* VisibilityPublic = "public";
 
   unsigned int m_objectId;
 };

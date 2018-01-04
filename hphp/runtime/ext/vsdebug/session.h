@@ -59,6 +59,14 @@ struct DebuggerSession final {
 
   unsigned int generateVariableId(int requestId, Variant& variable);
 
+  unsigned int generateVariableSubScope(
+    int requestId,
+    const Variant& variable,
+    const Class* cls,
+    const std::string& className,
+    ClassPropsType type
+  );
+
   ServerObject* getServerObject(unsigned int objectId);
 
   // Called by the debugger when a server object is removed from a request.

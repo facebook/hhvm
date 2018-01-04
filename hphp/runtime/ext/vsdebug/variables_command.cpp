@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/backtrace.h"
 #include "hphp/compiler/builtin_symbols.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-util.h"
@@ -49,7 +49,7 @@ VariablesCommand::~VariablesCommand() {
 int64_t VariablesCommand::targetThreadId(DebuggerSession* session) {
   ServerObject* obj = session->getServerObject(m_objectId);
   if (obj == nullptr) {
-    throw DebuggerCommandException("Invalid variablesReference specified.");
+    return 0;
   }
 
   if (obj->objectType() == ServerObjectType::Scope) {
@@ -58,6 +58,9 @@ int64_t VariablesCommand::targetThreadId(DebuggerSession* session) {
   } else if (obj->objectType() == ServerObjectType::Variable) {
     VariableObject* variable = static_cast<VariableObject*>(obj);
     return variable->m_requestId;
+  } else if (obj->objectType() == ServerObjectType::SubScope) {
+    VariableSubScope* subScope = static_cast<VariableSubScope*>(obj);
+    return subScope->m_requestId;
   }
 
   throw DebuggerCommandException("Unexpected server object type");
@@ -118,41 +121,97 @@ bool VariablesCommand::executeImpl(
   auto& args = tryGetObject(getMessage(), "arguments", s_emptyArgs);
 
   ServerObject* obj = session->getServerObject(m_objectId);
-  if (obj == nullptr) {
-    throw DebuggerCommandException("Invalid variablesReference specified.");
-  }
+  if (obj != nullptr) {
+    int start = tryGetInt(args, "start", 0);
+    int count = tryGetInt(args, "count", -1);
+    auto requestId = targetThreadId(session);
 
-  int start = tryGetInt(args, "start", 0);
-  int count = tryGetInt(args, "count", -1);
-  auto requestId = targetThreadId(session);
+    if (obj->objectType() == ServerObjectType::Scope) {
+      ScopeObject* scope = static_cast<ScopeObject*>(obj);
+      addScopeVariables(session, targetThreadId(session), scope, &variables);
+      sortVariablesInPlace(variables);
 
-  if (obj->objectType() == ServerObjectType::Scope) {
-    ScopeObject* scope = static_cast<ScopeObject*>(obj);
-    addScopeVariables(session, targetThreadId(session), scope, &variables);
-    sortVariablesInPlace(variables);
+      // Client can ask for a subsequence of the variables.
+      auto startIt = variables.begin() + start;
+      if (startIt != variables.begin() || count > 0) {
+        if (count <= 0) {
+          count = variables.size();
+        } else if (start + count >= variables.size()) {
+          count = variables.size() - start;
+        }
 
-    // Client can ask for a subsequence of the variables.
-    auto startIt = variables.begin() + start;
-    if (startIt != variables.begin() || count > 0) {
-      if (count <= 0) {
-        count = variables.size();
-      } else if (start + count >= variables.size()) {
-        count = variables.size() - start;
+        auto endIt = variables.begin() + start + count;
+        variables = folly::dynamic::array(startIt, endIt);
+      }
+    } else if (obj->objectType() == ServerObjectType::Variable) {
+      VariableObject* variable = static_cast<VariableObject*>(obj);
+      addComplexChildren(
+        session,
+        requestId,
+        start,
+        count,
+        variable,
+        &variables
+      );
+    } else if (obj->objectType() == ServerObjectType::SubScope) {
+      VariableSubScope* subScope = static_cast<VariableSubScope*>(obj);
+      const auto obj = subScope->m_variable.toObject().get();
+      if (obj == nullptr) {
+        throw DebuggerCommandException("Expected a server object.");
       }
 
-      auto endIt = variables.begin() + start + count;
-      variables = folly::dynamic::array(startIt, endIt);
+      const auto cls = obj->getVMClass();
+      if (cls == nullptr) {
+        throw DebuggerCommandException("Expected an object class.");
+      }
+
+      switch (subScope->m_subScopeType) {
+        case ClassPropsType::Constants: {
+          // Add all the constants for the specified class to the result array.
+          addClassConstants(
+            session,
+            requestId,
+            start,
+            count,
+            cls,
+            subScope->m_variable,
+            &variables
+          );
+          break;
+        }
+
+        case ClassPropsType::StaticProps: {
+          // Add all the static props for the specified class to the
+          // result array.
+          addClassStaticProps(
+            session,
+            requestId,
+            start,
+            count,
+            cls,
+            subScope->m_variable,
+            &variables
+          );
+          break;
+        }
+
+        case ClassPropsType::PrivateBaseProps: {
+          addClassPrivateProps(
+            session,
+            requestId,
+            start,
+            count,
+            subScope,
+            subScope->m_variable,
+            &variables
+          );
+          break;
+        }
+
+        default:
+          throw DebuggerCommandException("Unexpected sub scope type");
+      }
     }
-  } else if (obj->objectType() == ServerObjectType::Variable) {
-    VariableObject* variable = static_cast<VariableObject*>(obj);
-    addComplexChildren(
-      session,
-      requestId,
-      start,
-      count,
-      variable,
-      &variables
-    );
   }
 
   body["variables"] = variables;
@@ -261,7 +320,7 @@ int VariablesCommand::addConstants(
     const std::string name = iter.first().toString().toCppString();
     if (vars != nullptr) {
       vars->push_back(
-        serializeVariable(session, requestId, name, iter.second())
+        serializeVariable(session, requestId, name, iter.second(), true)
       );
     }
 
@@ -316,24 +375,28 @@ folly::dynamic VariablesCommand::serializeVariable(
   int64_t requestId,
   const std::string& name,
   const Variant& variable,
-  bool childProp /* = false */
+  bool doNotModifyName, /* = false */
+  folly::dynamic* presentationHint /* = nullptr */
 ) {
   folly::dynamic var = folly::dynamic::object;
-  const std::string variableName = childProp ? name : getPHPVarName(name);
+  const std::string variableName = doNotModifyName ? name : getPHPVarName(name);
 
   var["name"] = variableName;
   var["value"] = getVariableValue(variable);
   var["type"] = getTypeName(variable);
 
-  // If the variable is an array, register it as a server object and indicate
-  // how many indicies it has.
-  if (variable.isArray()) {
+  // If the variable is an array or object, register it as a server object and
+  // indicate how many children it has.
+  if (variable.isArray() || variable.isObject()) {
     unsigned int id = session->generateVariableId(
       requestId,
       const_cast<Variant&>(variable)
     );
 
-    if (variable.isDict() || variable.isKeyset()) {
+    if (variable.isObject()) {
+      var["namedVariables"] =
+        addObjectChildren(session, requestId, -1, -1, variable, nullptr);
+    } else if (variable.isDict() || variable.isKeyset()) {
       var["namedVariables"] = variable.toArray().size();
     } else {
       var["indexedVariables"] = variable.toArray().size();
@@ -342,7 +405,10 @@ folly::dynamic VariablesCommand::serializeVariable(
     var["variablesReference"] = id;
   }
 
-  //var["presentationHint"]  = ...  TODO
+  if (presentationHint != nullptr) {
+    var["presentationHint"]  = *presentationHint;
+  }
+
   return var;
 }
 
@@ -480,8 +546,11 @@ const std::string VariablesCommand::getVariableValue(const Variant& variable) {
       // Note: PHP references are not supported in Hack.
       return "reference";
 
-    // TODO: Implement serialization for complex types here.
-    default: return "TODO";
+    case KindOfObject:
+      return variable.toCObjRef()->getClassName().c_str();
+
+    default:
+      return "Unexpected variable type";
   }
 }
 
@@ -495,7 +564,45 @@ int VariablesCommand::addComplexChildren(
 ) {
   Variant& var = variable->m_variable;
 
-  if (var.isArray()) {
+  if (var.isObject()) {
+    int result = addObjectChildren(
+      session,
+      requestId,
+      start,
+      count,
+      variable->m_variable,
+      vars
+    );
+
+    if (vars != nullptr) {
+      sortVariablesInPlace(*vars);
+    }
+
+    // NOTE: These are added after the instance variables are added and sorted
+    // so that they appear at the end of the scope block in the UX.
+
+    // Constants defined on this object's class and all constants inherited
+    // from classes up the parent chain.
+    result += addClassSubScopes(
+      session,
+      ClassPropsType::Constants,
+      requestId,
+      var,
+      vars
+    );
+
+    // Static props defined on this object's class and all static props
+    // inherited from classes up the parent chain.
+    result += addClassSubScopes(
+      session,
+      ClassPropsType::StaticProps,
+      requestId,
+      var,
+      vars
+    );
+
+    return result;
+  } else if (var.isArray()) {
     return addArrayChildren(session, requestId, start, count, variable, vars);
   }
 
@@ -514,15 +621,21 @@ int VariablesCommand::addArrayChildren(
 
   assert(var.isArray());
 
-  int idx = 0;
+  int idx = -1;
   int added = 0;
 
   for (ArrayIter iter(var.toArray()); iter; ++iter) {
+    idx++;
+
     if (start >= 0 && idx < start) {
       continue;
     }
 
-    const std::string name = iter.first().toString().toCppString();
+    std::string name = iter.first().toString().toCppString();
+    if (!iter.first().isInteger()) {
+      name = "'" + name + "'";
+    }
+
     if (vars != nullptr) {
       vars->push_back(
         serializeVariable(session, requestId, name, iter.second(), true)
@@ -536,6 +649,523 @@ int VariablesCommand::addArrayChildren(
   }
 
   return added;
+}
+
+int VariablesCommand::addClassConstants(
+  DebuggerSession* session,
+  int64_t requestId,
+  int start,
+  int count,
+  Class* cls,
+  const Variant& var,
+  folly::dynamic* vars
+) {
+  Class* currentClass = cls;
+
+  std::unordered_set<std::string> constantNames;
+  while (currentClass != nullptr) {
+    for (Slot i = 0; i < currentClass->numConstants(); i++) {
+      auto& constant = currentClass->constants()[i];
+
+      folly::dynamic presentationHint = folly::dynamic::object;
+      folly::dynamic attribs = folly::dynamic::array;
+      attribs.push_back("constant");
+      attribs.push_back("readOnly");
+      presentationHint["attributes"] = attribs;
+
+      std::string name = constant.cls->name()->toCppString() +
+          "::" +
+          constant.name->toCppString();
+
+      if (constantNames.find(name) == constantNames.end()) {
+        constantNames.insert(name);
+        if (vars != nullptr) {
+          vars->push_back(
+            serializeVariable(
+              session,
+              requestId,
+              name,
+              tvAsVariant(const_cast<TypedValueAux*>(&constant.val)),
+              true,
+              &presentationHint
+            )
+          );
+        }
+      }
+    }
+
+    currentClass = currentClass->parent();
+  }
+
+  if (vars != nullptr) {
+    sortVariablesInPlace(*vars);
+
+    if (start > 0 && start < vars->size()) {
+      vars->erase(vars->begin(), vars->begin() + start);
+    }
+
+    if (count > 0) {
+      if (count > vars->size()) {
+        count = vars->size();
+      }
+      vars->erase(vars->begin() + count, vars->end());
+    }
+  }
+
+  return constantNames.size();
+}
+
+int VariablesCommand::addClassStaticProps(
+  DebuggerSession* session,
+  int64_t requestId,
+  int start,
+  int count,
+  Class* cls,
+  const Variant& var,
+  folly::dynamic* vars
+) {
+  const std::string className = cls->name()->toCppString();
+  const auto staticProperties = cls->staticProperties();
+  int propCount = 0;
+
+  for (Slot i = 0; i < cls->numStaticProperties(); i++) {
+    const auto& prop = staticProperties[i];
+    auto val = cls->getSPropData(i);
+
+    if (val != nullptr) {
+      Variant variant = tvAsVariant(val);
+
+      folly::dynamic presentationHint = folly::dynamic::object;
+      folly::dynamic attribs = folly::dynamic::array;
+      attribs.push_back("static");
+
+      if (prop.attrs & AttrInterface) {
+        attribs.push_back("interface");
+      }
+
+      if (prop.attrs & AttrPublic) {
+        presentationHint["visibility"] = "public";
+      } else if (prop.attrs & AttrProtected) {
+        presentationHint["visibility"] = "protected";
+      } else if (prop.attrs & AttrPrivate) {
+        presentationHint["visibility"] = "private";
+      }
+
+      if (variant.isObject()) {
+        presentationHint["kind"] = "class";
+      }
+
+      presentationHint["attributes"] = attribs;
+      std::string propName =
+        className + "::$" + prop.name.get()->toCppString();
+
+      propCount++;
+
+      if (vars != nullptr) {
+        vars->push_back(
+          serializeVariable(
+            session,
+            requestId,
+            propName,
+            variant,
+            true,
+            &presentationHint
+          )
+        );
+      }
+    }
+  }
+
+  if (vars != nullptr) {
+    sortVariablesInPlace(*vars);
+
+    if (start > 0 && start < vars->size()) {
+      vars->erase(vars->begin(), vars->begin() + start);
+    }
+
+    if (count > 0) {
+      if (count > vars->size()) {
+        count = vars->size();
+      }
+      vars->erase(vars->begin() + count, vars->end());
+    }
+  }
+
+  return propCount;
+}
+
+int VariablesCommand::addScopeSubSection(
+  DebuggerSession* session,
+  const char* displayName,
+  const std::string& displayValue,
+  const std::string& className,
+  const Class* currentClass,
+  int childCount,
+  ClassPropsType type,
+  int requestId,
+  const Variant& var,
+  folly::dynamic* vars
+) {
+  int constantScopeId =
+    session->generateVariableSubScope(
+      requestId,
+      var,
+      currentClass,
+      className,
+      type
+    );
+
+  folly::dynamic container = folly::dynamic::object;
+  folly::dynamic presentationHint = folly::dynamic::object;
+  folly::dynamic attribs = folly::dynamic::array;
+  attribs.push_back("constant");
+  attribs.push_back("readOnly");
+  presentationHint["attributes"] = attribs;
+
+  container["name"] = displayName;
+  container["value"] = displayValue;
+  container["namedVariables"] = childCount;
+  container["presentationHint"] = presentationHint;
+  container["variablesReference"] = constantScopeId;
+  vars->push_back(container);
+
+  return constantScopeId;
+}
+
+int VariablesCommand::addClassSubScopes(
+  DebuggerSession* session,
+  ClassPropsType propType,
+  int requestId,
+  const Variant& var,
+  folly::dynamic* vars
+) {
+  int subScopeCount = 0;
+  const auto obj = var.toObject().get();
+  if (obj == nullptr) {
+    return 0;
+  }
+
+  auto currentClass = obj->getVMClass();
+  if (currentClass == nullptr) {
+    return 0;
+  }
+
+  int count = 0;
+  const char* scopeTitle = nullptr;
+  std::string className = currentClass->name()->toCppString();
+
+  switch (propType) {
+    case ClassPropsType::Constants: {
+        count = addClassConstants(
+          session,
+          requestId,
+          0,
+          0,
+          currentClass,
+          var,
+          nullptr
+        );
+        scopeTitle = "Class Constants";
+        if (count > 0) {
+          subScopeCount++;
+          addScopeSubSection(
+            session,
+            scopeTitle,
+            "class " + className,
+            className,
+            currentClass,
+            count,
+            propType,
+            requestId,
+            var,
+            vars
+          );
+        }
+      }
+      break;
+    case ClassPropsType::StaticProps: {
+        className = currentClass->name()->toCppString();
+        count = addClassStaticProps(
+          session,
+          requestId,
+          0,
+          0,
+          currentClass,
+          var,
+          nullptr
+        );
+        scopeTitle = "Static Properties";
+        if (count > 0) {
+          subScopeCount++;
+          addScopeSubSection(
+            session,
+            scopeTitle,
+            "class " + className,
+            className,
+            currentClass,
+            count,
+            propType,
+            requestId,
+            var,
+            vars
+          );
+        }
+      }
+      break;
+    default:
+      assert(false);
+  }
+
+  return subScopeCount;
+}
+
+void VariablesCommand::forEachInstanceProp(
+  const Variant& var,
+  std::function<bool(
+    const std::string& objectClassName,
+    const std::string& propName,
+    const std::string& propClassName,
+    const std::string& displayName,
+    const char* visibilityDescription,
+    folly::dynamic& presentationHint,
+    const Variant& propertyVariant
+  )> callback
+) {
+  const auto obj = var.toObject().get();
+  if (obj == nullptr) {
+    return;
+  }
+
+  const auto cls = obj->getVMClass();
+  if (cls == nullptr) {
+    return;
+  }
+
+  // Instance properties on this object.
+  const Array instProps = obj->toArray();
+  const std::string className = cls->name()->toCppString();
+
+  for (ArrayIter iter(instProps); iter; ++iter) {
+    std::string propName = iter.first().toString().toCppString();
+    const Variant& propertyVariant = iter.second();
+
+    std::string propClassName = className;
+    const char* visibilityDescription;
+
+    // The object's property name can be encoded with info about the modifier
+    // and class. Decode it. (See HPHP::PreClass::manglePropName).
+    if (propName.size() < 3 || propName[0] != '\0') {
+      // This is a public property.
+      visibilityDescription = VisibilityPublic;
+    } else if (propName[1] == '*') {
+      // This is a protected property.
+      propName = propName.substr(3);
+      visibilityDescription = VisibilityProtected;
+    } else {
+      // This is a private property on this object class or one of its base
+      // classes.
+      visibilityDescription = VisibilityPrivate;
+      const unsigned long classNameEnd = propName.find('\0', 1);
+      propClassName = propName.substr(1, classNameEnd - 1);
+      propName = propName.substr(classNameEnd + 1);
+    }
+
+    const std::string displayName = "$" + propName;
+
+    folly::dynamic presentationHint = folly::dynamic::object;
+    presentationHint["visibility"] = visibilityDescription;
+
+    if (propertyVariant.isObject()) {
+      presentationHint["kind"] = "class";
+    }
+
+    bool continueLooping = callback(
+                             className,
+                             propName,
+                             propClassName,
+                             displayName,
+                             visibilityDescription,
+                             presentationHint,
+                             propertyVariant
+                           );
+
+    if (!continueLooping) {
+      break;
+    }
+  }
+}
+
+void VariablesCommand::addClassPrivateProps(
+  DebuggerSession* session,
+  int64_t requestId,
+  int start,
+  int count,
+  VariableSubScope* subScope,
+  const Variant& var,
+  folly::dynamic* vars
+) {
+  int propCount = 0;
+
+  forEachInstanceProp(
+    var,
+    [&](
+      const std::string& objectClassName,
+      const std::string& propName,
+      const std::string& propClassName,
+      const std::string& displayName,
+      const char* visibilityDescription,
+      folly::dynamic& presentationHint,
+      const Variant& propertyVariant
+    ) {
+
+      // Only looking for private properties.
+      if (visibilityDescription != VisibilityPrivate) {
+        return true;
+      }
+
+      // And only private properties on the specified class.
+      if (propClassName != subScope->m_className) {
+        return true;
+      }
+
+      propCount++;
+      if (start >= 0 && propCount < start) {
+        return true;
+      }
+
+      vars->push_back(
+        serializeVariable(
+          session,
+          requestId,
+          displayName,
+          propertyVariant,
+          true,
+          &presentationHint
+        )
+      );
+
+      if (count > 0 && propCount - start >= count) {
+        return false;
+      }
+
+      return true;
+  });
+}
+
+int VariablesCommand::addObjectChildren(
+  DebuggerSession* session,
+  int64_t requestId,
+  int start,
+  int count,
+  const Variant& var,
+  folly::dynamic* vars
+) {
+  assert(var.isObject());
+
+  int propCount = 0;
+
+  // The inheritance rules for public and protected properties are such that
+  // the first property with a given name encountered when walking up from
+  // the most-derived class type to the base-most class type, shadows all
+  // other instances, and is the only one that actually exists on the object,
+  // from any context.
+  std::unordered_set<std::string> properties;
+  std::unordered_map<std::string, int> privPropScopes;
+
+  forEachInstanceProp(
+    var,
+    [&](
+      const std::string& objectClassName,
+      const std::string& propName,
+      const std::string& propClassName,
+      const std::string& displayName,
+      const char* visibilityDescription,
+      folly::dynamic& presentationHint,
+      const Variant& propertyVariant
+    ) {
+      if (vars == nullptr) {
+        // We are only counting.
+        propCount++;
+        return true;
+      }
+
+      if (propClassName != objectClassName) {
+        // If this is a private member variable and the variable's declaring
+        // class name is not the same as the class name of the current object,
+        // this is a private member declared in a parent class. In this case,
+        // the private member is not accessible from code in the derived
+        // classes, but the property is not shadowed on the PHP object: it is
+        // visible and accessible from methods on the base class.
+        auto it = privPropScopes.find(propClassName);
+        if (it == privPropScopes.end()) {
+          // If this is the first private property encountered for this
+          // particular parent class, add a scope section for that class's
+          // private properties.
+          privPropScopes.emplace(propClassName, 1);
+        } else {
+          it->second++;
+        }
+
+        // Don't add the private property to this scope, add it to a child
+        // scope below.
+        return true;
+      }
+
+      if (properties.find(displayName) != properties.end()) {
+        // A property with this name has already been added by a derived class,
+        // since we're walking the class inheritance hierarchy from the object
+        // upwards, the derived property shadows this property.
+        return true;
+      }
+
+      properties.insert(displayName);
+      propCount++;
+
+      if (start >= 0 && propCount < start) {
+        return true;
+      }
+
+      vars->push_back(
+        serializeVariable(
+          session,
+          requestId,
+          displayName,
+          propertyVariant,
+          true,
+          &presentationHint
+        )
+      );
+
+      if (count > 0 && propCount - start >= count) {
+        return false;
+      }
+
+      return true;
+    });
+
+  if (vars == nullptr) {
+    return propCount;
+  }
+
+  // Create a scope for each base class that had shadowed private properties.
+  for (auto it = privPropScopes.begin(); it != privPropScopes.end(); it++) {
+    const std::string& propClassName = it->first;
+    int privPropCount = it->second;
+    addScopeSubSection(
+      session,
+      "Private props",
+      "class " + propClassName,
+      propClassName,
+      nullptr,
+      privPropCount,
+      ClassPropsType::PrivateBaseProps,
+      requestId,
+      var,
+      vars
+    );
+  }
+
+  return propCount;
 }
 
 }

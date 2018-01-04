@@ -25,7 +25,7 @@ namespace VSDEBUG {
 FILE* VSDebugLogger::s_logFile {nullptr};
 
 void VSDebugLogger::InitializeLogging(std::string& logFilePath) {
-  if (logFilePath == "") {
+  if (logFilePath.empty()) {
     return;
   }
 
@@ -36,7 +36,7 @@ void VSDebugLogger::InitializeLogging(std::string& logFilePath) {
   const char* path = logFilePath.c_str();
   s_logFile = fopen(path, "a");
   if (s_logFile == nullptr) {
-    raise_warning("VSDebugExtension could not open the log file: '%s'.", path);
+    return;
   }
 
   // Start with a visual delimiter so it's easy to see where

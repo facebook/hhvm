@@ -38,17 +38,19 @@ struct VSDebugExtension final : Extension {
   void requestShutdown() override;
   bool moduleEnabled() const override { return m_enabled; }
 
-  static constexpr int DefaultListenPort = 8999;
-  static bool s_configEnabled;
-  static std::string s_logFilePath;
-  static int s_attachListenPort;
+  static Debugger* getDebugger() { return s_debugger; }
 
 private:
 
   // The following members are set during module load and init and read only
   // after that. They can therefore be safely accessed lock-free.
   bool m_enabled {false};
-  Debugger* m_debugger {nullptr};
+  static Debugger* s_debugger;
+
+  static constexpr int DefaultListenPort = 8999;
+  static bool s_configEnabled;
+  static std::string s_logFilePath;
+  static int s_attachListenPort;
 };
 
 }

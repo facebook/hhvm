@@ -23,9 +23,9 @@ namespace VSDEBUG {
 
 VSDebugExtension::~VSDebugExtension() {
   VSDebugLogger::FinalizeLogging();
-  if (m_debugger != nullptr) {
-    delete m_debugger;
-    m_debugger = nullptr;
+  if (s_debugger != nullptr) {
+    delete s_debugger;
+    s_debugger = nullptr;
   }
 }
 
@@ -33,9 +33,6 @@ void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, const Hdf hdf) {
   // This extension is ** disabled ** by default, unless the configuration
   // says otherwise. When !m_enabled, the other hooks in this module no-op.
   Config::Bind(s_configEnabled, ini, hdf, "Eval.Debugger.VSDebugEnable", false);
-  if (!m_enabled) {
-    return;
-  }
 
   // Set up logging for the extension.
   // Note: Logging for the extension is disabled by default, unless
@@ -49,7 +46,7 @@ void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, const Hdf hdf) {
     "Eval.Debugger.VSDebugListenPort",
     DefaultListenPort);
 
-  bool commandLineEnabled = false;
+  bool commandLineEnabled = RuntimeOption::EnableVSDebugger;
   if (!s_configEnabled && !commandLineEnabled) {
    m_enabled = false;
    return;
@@ -66,7 +63,7 @@ void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, const Hdf hdf) {
 
 void VSDebugExtension::moduleInit() {
   SCOPE_EXIT {
-    // Memory barrier to ensure release semantics for our write of m_debugger
+    // Memory barrier to ensure release semantics for our write of s_debugger
     // and m_enabled in moduleLoad and this routine.
     std::atomic_thread_fence(std::memory_order_release);
     VSDebugLogger::LogFlush();
@@ -76,8 +73,8 @@ void VSDebugExtension::moduleInit() {
     return;
   }
 
-  m_debugger = new Debugger();
-  if (m_debugger == nullptr) {
+  s_debugger = new Debugger();
+  if (s_debugger == nullptr) {
     // Failed to allocate debugger, disable the extension.
     m_enabled = false;
     return;
@@ -92,14 +89,13 @@ void VSDebugExtension::moduleInit() {
   } else {
     // Otherwise, HHVM is running in script or interactive mode. Communicate
     // with the debugger client locally via known file descriptors.
-    VSDebugLogger::Log(VSDebugLogger::LogLevelInfo,
-                      "Extension started in SCRIPT mode");
-
-    // TODO: (Ericblue) For script mode, enable module only if -mode vsdebug was
-    // passed to HHVM on the command line.
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Extension started in SCRIPT mode."
+    );
 
     try {
-      transport = new FdTransport(m_debugger);
+      transport = new FdTransport(s_debugger);
     } catch (...) {
       assert(transport == nullptr);
     }
@@ -111,8 +107,8 @@ void VSDebugExtension::moduleInit() {
     return;
   }
 
-  assert(m_debugger != nullptr);
-  m_debugger->setTransport(transport);
+  assert(s_debugger != nullptr);
+  s_debugger->setTransport(transport);
 }
 
 void VSDebugExtension::requestInit() {
@@ -141,5 +137,8 @@ static VSDebugExtension s_vsdebug_extension;
 bool VSDebugExtension::s_configEnabled {false};
 std::string VSDebugExtension::s_logFilePath {""};
 int VSDebugExtension::s_attachListenPort {-1};
+
+Debugger* VSDebugExtension::s_debugger {nullptr};
+
 }
 }

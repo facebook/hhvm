@@ -628,6 +628,7 @@ std::string RuntimeOption::SandboxDirectoriesRoot;
 std::string RuntimeOption::SandboxLogsRoot;
 
 bool RuntimeOption::EnableHphpdDebugger = false;
+bool RuntimeOption::EnableVSDebugger = false;
 bool RuntimeOption::EnableDebuggerColor = true;
 bool RuntimeOption::EnableDebuggerPrompt = true;
 bool RuntimeOption::EnableDebuggerServer = false;

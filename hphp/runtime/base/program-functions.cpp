@@ -885,7 +885,7 @@ static bool set_execution_mode(folly::StringPiece mode) {
     Logger::Escape = true;
     return true;
   } else if (mode == "run" || mode == "debug" || mode == "translate" ||
-             mode == "dumphhas" || mode == "verify") {
+             mode == "dumphhas" || mode == "verify" || mode == "vsdebug") {
     // We don't run PHP in "translate" mode, so just treat it like cli mode.
     RuntimeOption::ServerMode = false;
     Logger::Escape = false;
@@ -1413,7 +1413,8 @@ static int execute_program_impl(int argc, char** argv) {
     ("compiler-id", "display the git hash for the compiler")
     ("repo-schema", "display the repository schema id")
     ("mode,m", value<std::string>(&po.mode)->default_value("run"),
-     "run | debug (d) | server (s) | daemon | replay | translate (t) | verify")
+     "run | debug (d) | vsdebug | server (s) | daemon | replay | "
+     "translate (t) | verify")
     ("interactive,a", "Shortcut for --mode debug") // -a is from PHP5
     ("config,c", value<std::vector<std::string>>(&po.config)->composing(),
      "load specified config file")
@@ -1634,7 +1635,10 @@ static int execute_program_impl(int argc, char** argv) {
   po.isTempFile = vm.count("temp-file");
 
   // forget the source for systemlib.php unless we are debugging
-  if (po.mode != "debug") SystemLib::s_source = "";
+  if (po.mode != "debug" && po.mode != "vsdebug") SystemLib::s_source = "";
+  if (po.mode == "vsdebug") {
+    RuntimeOption::EnableVSDebugger = true;
+  }
 
   // we need to initialize pcre cache table very early
   pcre_init();
@@ -1884,7 +1888,8 @@ static int execute_program_impl(int argc, char** argv) {
     return 0;
   }
 
-  if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
+  if (argc <= 1 || po.mode == "run" || po.mode == "debug" ||
+      po.mode == "vsdebug") {
     set_stack_size();
 
     if (po.isTempFile) {

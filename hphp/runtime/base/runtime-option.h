@@ -858,6 +858,7 @@ public:
 
   // Debugger options
   static bool EnableHphpdDebugger;
+  static bool EnableVSDebugger;
   static bool EnableDebuggerColor;
   static bool EnableDebuggerPrompt;
   static bool EnableDebuggerServer;

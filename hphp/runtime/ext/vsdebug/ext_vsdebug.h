@@ -41,6 +41,7 @@ struct VSDebugExtension final : Extension {
   bool moduleEnabled() const override { return m_enabled; }
 
   static Debugger* getDebugger() { return s_debugger; }
+  static bool s_launchMode;
 
 private:
 

@@ -130,6 +130,13 @@ void Debugger::setClientConnected(bool connected) {
       }
 
       m_clientInitialized = false;
+
+      // If we launched this request in debugger launch mode, detach of
+      // the client should terminate the request.
+      if (VSDebugExtension::s_launchMode) {
+        interruptAllThreads();
+      }
+
       resumeTarget();
     }
   }
@@ -333,6 +340,25 @@ void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
   {
     Lock lock(m_lock);
     pauseRequest = m_state != ProgramState::Running;
+
+    if (!clientConnected() && VSDebugExtension::s_launchMode) {
+      // If the debugger client launched this script in launch mode, and
+      // has detached while the request is still running, terminate the
+      // request by throwing a fatal PHP exception.
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelInfo,
+        "Debugger client detached and we launched this script. "
+          "Killing request with fatal error."
+      );
+
+      raise_fatal_error(
+        "Request terminated due to debugger client detaching.",
+        null_array,
+        false,
+        true,
+        true
+      );
+    }
   }
 
   if (pauseRequest) {

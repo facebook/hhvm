@@ -113,6 +113,7 @@ void VSDebugExtension::moduleInit() {
     } else {
       try {
         transport = new FdTransport(s_debugger);
+        s_launchMode = true;
       } catch (...) {
         assert(transport == nullptr);
       }
@@ -182,7 +183,7 @@ static VSDebugExtension s_vsdebug_extension;
 bool VSDebugExtension::s_configEnabled {false};
 std::string VSDebugExtension::s_logFilePath {""};
 int VSDebugExtension::s_attachListenPort {-1};
-
+bool VSDebugExtension::s_launchMode {false};
 Debugger* VSDebugExtension::s_debugger {nullptr};
 
 }

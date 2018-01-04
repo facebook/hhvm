@@ -15,11 +15,13 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     logging.cpp
     pause_command.cpp
     resolve_bps_command.cpp
+    scopes_command.cpp
     session.cpp
     socket_transport.cpp
     stack_trace_command.cpp
     step_command.cpp
     transport.cpp
+    variables_command.cpp
   HEADERS
     break_mode.h
     breakpoint.h
@@ -31,6 +33,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     fdtransport.h
     hook.h
     logging.h
+    server_object.h
     session.h
     socket_transport.h
     transport.h

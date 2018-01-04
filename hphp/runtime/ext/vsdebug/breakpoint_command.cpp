@@ -31,10 +31,6 @@ SetBreakpointsCommand::SetBreakpointsCommand(
 SetBreakpointsCommand::~SetBreakpointsCommand() {
 }
 
-int64_t SetBreakpointsCommand::targetThreadId() {
-  return -1;
-}
-
 bool SetBreakpointsCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
@@ -176,10 +172,6 @@ SetExceptionBreakpointsCommand::SetExceptionBreakpointsCommand(
 }
 
 SetExceptionBreakpointsCommand::~SetExceptionBreakpointsCommand() {
-}
-
-int64_t SetExceptionBreakpointsCommand::targetThreadId() {
-  return -1;
 }
 
 bool SetExceptionBreakpointsCommand::executeImpl(

@@ -143,5 +143,85 @@ ClientPreferences& DebuggerSession::getClientPreferences() {
   return m_clientPreferences;
 }
 
+unsigned int DebuggerSession::generateFrameId(int requestId, int frameDepth) {
+  const unsigned int objectId = ++s_nextObjectId;
+  FrameObject* frame = new FrameObject(objectId, requestId, frameDepth);
+
+  assert(requestId == m_debugger->getCurrentThreadId());
+  registerRequestObject(objectId, frame);
+  return objectId;
+}
+
+FrameObject* DebuggerSession::getFrameObject(unsigned int objectId) {
+  auto object = getServerObject(objectId);
+  if (object != nullptr) {
+    if (object->objectType() != ServerObjectType::Frame) {
+      throw DebuggerCommandException(
+        "Object with the specified ID is not a frame!"
+      );
+    }
+  }
+
+  return static_cast<FrameObject*>(object);
+}
+
+unsigned int DebuggerSession::generateScopeId(
+  int requestId,
+  int depth,
+  ScopeType scopeType
+) {
+  const unsigned int objectId = ++s_nextObjectId;
+  ScopeObject* scope = new ScopeObject(objectId, requestId, depth, scopeType);
+
+  assert(requestId == m_debugger->getCurrentThreadId());
+  registerRequestObject(objectId, scope);
+  return objectId;
+}
+
+ScopeObject* DebuggerSession::getScopeObject(unsigned int objectId) {
+  auto object = getServerObject(objectId);
+  if (object != nullptr) {
+    if (object->objectType() != ServerObjectType::Scope) {
+      throw DebuggerCommandException(
+        "Object with the specified ID is not a scope!"
+      );
+    }
+  }
+
+  return static_cast<ScopeObject*>(object);
+}
+
+void DebuggerSession::registerRequestObject(
+  unsigned int objectId,
+  ServerObject* obj
+) {
+  RequestInfo* ri = m_debugger->getRequestInfo();
+
+  // Add this object to the per-request list of objects.
+  std::unordered_map<unsigned int, ServerObject*>& objs = ri->m_serverObjects;
+  objs.emplace(objectId, obj);
+
+  // Add this object to the per-session global list of objects.
+  m_serverObjects.emplace(objectId, obj);
+}
+
+ServerObject* DebuggerSession::getServerObject(unsigned int objectId) {
+  auto it = m_serverObjects.find(objectId);
+  return it == m_serverObjects.end() ? nullptr : it->second;
+}
+
+void DebuggerSession::onServerObjectDestroyed(unsigned int objectId) {
+  // Remove the object from the global server object map.
+  // Note: it is possible for an object in a request's object list to not
+  // exist in m_serverObjects because m_serverObjects is cleared if a debugger
+  // client disconnects and reconnects - but requests that were paused
+  // during that time will clean up their server objects asynchronously.
+  auto serverIt = m_serverObjects.find(objectId);
+  if (serverIt != m_serverObjects.end()) {
+    m_serverObjects.erase(serverIt);
+  }
+}
+
+unsigned int DebuggerSession::s_nextObjectId {0};
 }
 }

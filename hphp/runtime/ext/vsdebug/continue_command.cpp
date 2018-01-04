@@ -33,10 +33,6 @@ ContinueCommand* ContinueCommand::createInstance(Debugger* debugger) {
   return new ContinueCommand(debugger, folly::dynamic::object);
 }
 
-int64_t ContinueCommand::targetThreadId() {
-  return -1;
-}
-
 bool ContinueCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg

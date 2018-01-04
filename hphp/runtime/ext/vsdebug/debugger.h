@@ -32,6 +32,7 @@
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/hook.h"
 #include "hphp/runtime/ext/vsdebug/client_preferences.h"
+#include "hphp/runtime/ext/vsdebug/server_object.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -71,6 +72,7 @@ struct RequestInfo {
   const char* m_stepReason;
   CommandQueue m_commandQueue;
   RequestBreakpointInfo* m_breakpointInfo;
+  std::unordered_map<unsigned int, ServerObject*> m_serverObjects;
 };
 
 // An exception to be thrown when a message from the client cannot be processed.
@@ -252,6 +254,9 @@ private:
   // Cleans up and frees the specified request info object and shuts down its
   // command queue, unblocking the waiting request thread (if any).
   static void cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri);
+
+  // Cleans up server objects for a request.
+  void cleanupServerObjectsForRequest(RequestInfo* ri);
 
   // Attaches the debugger to the specified request thread and installs the
   // debugger hook.

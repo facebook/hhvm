@@ -29,10 +29,6 @@ ConfigurationDoneCommand::ConfigurationDoneCommand(
 ConfigurationDoneCommand::~ConfigurationDoneCommand() {
 }
 
-int64_t ConfigurationDoneCommand::targetThreadId() {
-  return -1;
-}
-
 bool ConfigurationDoneCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg

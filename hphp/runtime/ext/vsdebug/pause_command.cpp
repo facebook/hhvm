@@ -29,10 +29,6 @@ PauseCommand::PauseCommand(
 PauseCommand::~PauseCommand() {
 }
 
-int64_t PauseCommand::targetThreadId() {
-  return -1;
-}
-
 bool PauseCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg

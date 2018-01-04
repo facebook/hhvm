@@ -24,8 +24,8 @@
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/breakpoint.h"
 #include "hphp/runtime/ext/vsdebug/client_preferences.h"
+#include "hphp/runtime/ext/vsdebug/server_object.h"
 #include "hphp/util/async-func.h"
-
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -47,7 +47,27 @@ struct DebuggerSession final {
 
   BreakpointManager* getBreakpointManager() { return m_breakpointMgr; }
 
+  unsigned int generateFrameId(int requestId, int frameDepth);
+  FrameObject* getFrameObject(unsigned int objectId);
+
+  unsigned int generateScopeId(
+    int requestId,
+    int depth,
+    ScopeType scopeType
+  );
+  ScopeObject* getScopeObject(unsigned int objectId);
+
+  ServerObject* getServerObject(unsigned int objectId);
+
+  // Called by the debugger when a server object is removed from a request.
+  void onServerObjectDestroyed(unsigned int objectId);
+
 private:
+
+  void registerRequestObject(
+    unsigned int objectId,
+    ServerObject* obj
+  );
 
   Debugger* const m_debugger;
   ClientPreferences m_clientPreferences;
@@ -67,6 +87,13 @@ private:
   CommandQueue m_dummyCommandQueue;
   AsyncFunc<DebuggerSession> m_dummyThread;
   std::string m_dummyStartupDoc;
+
+  // When a request is paused, the backend must maintain state about scopes,
+  // frames and variable IDs sent to the front end. The IDs are globally
+  // unique, and the objects to which they refer are valid per-request and
+  // only until that request resumes.
+  static unsigned int s_nextObjectId;
+  std::unordered_map<unsigned int, ServerObject*> m_serverObjects;
 };
 
 }

@@ -29,10 +29,6 @@ InitializeCommand::InitializeCommand(
 InitializeCommand::~InitializeCommand() {
 }
 
-int64_t InitializeCommand::targetThreadId() {
-  return -1;
-}
-
 bool InitializeCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg

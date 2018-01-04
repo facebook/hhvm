@@ -105,25 +105,35 @@ bool VSCommand::parseCommand(
     throw DebuggerCommandException("Invalid command.");
   }
 
-  if (cmdString == "initialize") {
+  if (cmdString == "attach" || cmdString == "launch") {
 
-    *command = new InitializeCommand(debugger, clientMessage);
+    *command = new LaunchAttachCommand(debugger, clientMessage);
 
   } else if (cmdString == "configurationDone") {
 
     *command = new ConfigurationDoneCommand(debugger, clientMessage);
 
-  } else if (cmdString == "launch" || cmdString == "attach") {
-
-    *command = new LaunchAttachCommand(debugger, clientMessage);
-
   } else if (cmdString == "continue") {
 
     *command = new ContinueCommand(debugger, clientMessage);
 
-  } else if (cmdString.compare("stackTrace") == 0) {
+  } else if (cmdString == "initialize") {
 
-    *command = new StackTraceCommand(debugger, clientMessage);
+    *command = new InitializeCommand(debugger, clientMessage);
+
+  } else if (cmdString == "next" ||
+             cmdString == "stepIn" ||
+             cmdString == "stepOut") {
+
+    *command = new StepCommand(debugger, clientMessage);
+
+  } else if (cmdString == "pause") {
+
+    *command = new PauseCommand(debugger, clientMessage);
+
+  } else if (cmdString == "scopes") {
+
+    *command = new ScopesCommand(debugger, clientMessage);
 
   } else if (cmdString == "setBreakpoints") {
 
@@ -133,15 +143,13 @@ bool VSCommand::parseCommand(
 
     *command = new SetExceptionBreakpointsCommand(debugger, clientMessage);
 
-  } else if (cmdString == "pause") {
+  } else if (cmdString.compare("stackTrace") == 0) {
 
-    *command = new PauseCommand(debugger, clientMessage);
+    *command = new StackTraceCommand(debugger, clientMessage);
 
-  } else if (cmdString == "next" ||
-             cmdString == "stepIn" ||
-             cmdString == "stepOut") {
+  } else if (cmdString.compare("variables") == 0) {
 
-    *command = new StepCommand(debugger, clientMessage);
+    *command = new VariablesCommand(debugger, clientMessage);
 
   } else {
     VSDebugLogger::Log(
@@ -163,7 +171,11 @@ bool VSCommand::execute() {
     });
 }
 
-int64_t VSCommand::defaultGetTargetThreadId() {
+int64_t VSCommand::targetThreadId(DebuggerSession* session) {
+  if (commandTarget() != CommandTarget::Request) {
+    return -1;
+  }
+
   const folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   return tryGetInt(args, "threadId", -1);

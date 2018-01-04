@@ -31,10 +31,6 @@ StackTraceCommand::StackTraceCommand(
 StackTraceCommand::~StackTraceCommand() {
 }
 
-int64_t StackTraceCommand::targetThreadId() {
-  return defaultGetTargetThreadId();
-}
-
 const StaticString s_file("file");
 const StaticString s_line("line");
 const StaticString s_function("function");
@@ -43,6 +39,7 @@ bool StackTraceCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
 ) {
+  const int requestId = m_debugger->getCurrentThreadId();
   const folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
 
@@ -83,8 +80,7 @@ bool StackTraceCommand::executeImpl(
 
     frames.push_back(folly::dynamic::object);
     folly::dynamic& stackFrame = frames[frames.size() - 1];
-
-    stackFrame["id"] = 0; // TODO need unique frame ID here for scopes request.
+    stackFrame["id"] = session->generateFrameId(requestId, depth);
     stackFrame["name"] = funcName;
 
     int64_t lineNumber = tvCastToInt64(line.tv());

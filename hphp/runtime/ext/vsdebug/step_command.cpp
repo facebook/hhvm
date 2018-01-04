@@ -29,10 +29,6 @@ StepCommand::StepCommand(
 StepCommand::~StepCommand() {
 }
 
-int64_t StepCommand::targetThreadId() {
-  return defaultGetTargetThreadId();
-}
-
 bool StepCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg

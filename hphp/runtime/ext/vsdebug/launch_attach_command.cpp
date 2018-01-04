@@ -29,10 +29,6 @@ LaunchAttachCommand::LaunchAttachCommand(
 LaunchAttachCommand::~LaunchAttachCommand() {
 }
 
-int64_t LaunchAttachCommand::targetThreadId() {
-  return -1;
-}
-
 bool LaunchAttachCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg

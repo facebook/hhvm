@@ -186,7 +186,31 @@ void Debugger::cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri) {
     delete ri->m_breakpointInfo;
   }
 
+  assert(ri->m_serverObjects.size() == 0);
   delete ri;
+}
+
+void Debugger::cleanupServerObjectsForRequest(RequestInfo* ri) {
+  m_lock.assertOwnedBySelf();
+
+  std::unordered_map<unsigned int, ServerObject*>& objs = ri->m_serverObjects;
+
+  for (auto it = objs.begin(); it != objs.end();) {
+    unsigned int objectId = it->first;
+
+    if (m_session != nullptr) {
+      m_session->onServerObjectDestroyed(objectId);
+    }
+
+    // Free the object. Note if the object is a variable in request memory,
+    // the destruction of ServerObject releases the GC root we're holding.
+    ServerObject* object = it->second;
+    delete object;
+
+    it = objs.erase(it);
+  }
+
+  assert(objs.size() == 0);
 }
 
 void Debugger::shutdown() {
@@ -394,6 +418,10 @@ void Debugger::processCommandQueue(
     m_pausedRequestCount--;
     sendContinuedEvent(threadId);
 
+    // Any server objects stored for the client for this request are invalid
+    // as soon as the thread is allowed to step.
+    cleanupServerObjectsForRequest(requestInfo);
+
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelInfo,
       "Thread %d resuming",
@@ -492,6 +520,7 @@ void Debugger::requestShutdown() {
     }
 
     if (requestInfo != nullptr) {
+      cleanupServerObjectsForRequest(requestInfo);
       cleanupRequestInfo(threadInfo, requestInfo);
     }
   };
@@ -768,7 +797,7 @@ void Debugger::onClientMessage(folly::dynamic& message) {
       case CommandTarget::Request:
         // Dispatch this command to the correct request.
         {
-          const auto threadId = command->targetThreadId();
+          const auto threadId = command->targetThreadId(m_session);
           auto it = m_requestIdMap.find(threadId);
           if (it != m_requestIdMap.end()) {
             const auto request = m_requests.find(it->second);

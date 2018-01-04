@@ -34,10 +34,6 @@ ResolveBreakpointsCommand::createInstance(Debugger* debugger) {
   return new ResolveBreakpointsCommand(debugger, folly::dynamic::object);
 }
 
-int64_t ResolveBreakpointsCommand::targetThreadId() {
-  return -1;
-}
-
 bool ResolveBreakpointsCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg

@@ -17,6 +17,10 @@
 #ifndef incl_HPHP_VSDEBUG_COMMAND_H_
 #define incl_HPHP_VSDEBUG_COMMAND_H_
 
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/ext/vsdebug/server_object.h"
+
 #include <folly/dynamic.h>
 #include <folly/json.h>
 
@@ -64,16 +68,12 @@ struct VSCommand {
   virtual bool requiresBreak() = 0;
 
   // Returns the ID of the request thread this command is directed at.
-  virtual int64_t targetThreadId() = 0;
+  virtual int64_t targetThreadId(DebuggerSession* session);
 
   // Executes the command. Returns true if the target thread should resume.
   bool execute();
 
   folly::dynamic& getMessage() { return m_message; }
-
-  // A default implementation of getting the request's target thread ID that
-  // applies to most types of request methods.
-  int64_t defaultGetTargetThreadId();
 
   // Takes in a JSON message from the attached debugger client, parses it and
   // returns an executable debugger command.
@@ -138,7 +138,6 @@ protected:
   const char* commandName() override { return #ClassName; }       \
   CommandTarget commandTarget() override { return Target; }       \
   bool requiresBreak() override { return RequiresBreak; }         \
-  int64_t targetThreadId() override;                              \
   ClassName(Debugger* debugger, folly::dynamic message);          \
 protected:                                                        \
   bool executeImpl(                                               \
@@ -191,7 +190,7 @@ struct SetExceptionBreakpointsCommand : public VSCommand {
 
 //////  Handles StackTraceRequest from the debugger client.          //////
 struct StackTraceCommand : public VSCommand {
-  VS_COMMAND_COMMON_IMPL(StackTraceCommand, CommandTarget::Request, true);
+  VS_COMMAND_COMMON_IMPL(StackTraceCommand, CommandTarget::Request, false);
 };
 
 //////  Handles ConfigurationDoneRequest from the debugger client.   //////
@@ -207,6 +206,94 @@ struct StepCommand : public VSCommand {
 //////  Handles async break requests from the debugger client.      //////
 struct PauseCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(PauseCommand, CommandTarget::None, false);
+};
+
+//////  Handles scopes requests from the debugger client.          //////
+struct ScopesCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(ScopesCommand, CommandTarget::Request, false);
+
+  int64_t targetThreadId(DebuggerSession* session) override;
+
+private:
+
+  FrameObject* getFrameObject(DebuggerSession* session);
+
+  unsigned int m_frameId;
+  FrameObject* m_frameObj {nullptr};
+
+  folly::dynamic getScopeDescription(
+    DebuggerSession* session,
+    const char* displayName,
+    ScopeType type
+  );
+};
+
+//////  Handles variables requests from the debugger client.      //////
+struct VariablesCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(VariablesCommand, CommandTarget::Request, false);
+
+  int64_t targetThreadId(DebuggerSession* session) override;
+
+public:
+
+  // Returns a count of variables that are first level children of the
+  // specified scope.
+  static int countScopeVariables(const ScopeObject* scope);
+
+  // Sorts a folly::dynamic::array of variable names in place by name.
+  static void sortVariablesInPlace(folly::dynamic& vars);
+
+  // Formats a variable's name into the PHP syntax the user expects, prepending
+  // $, ::, etc.
+  static const std::string getPHPVarName(const std::string& name);
+
+  static const char* getTypeName(const Variant& variable);
+
+private:
+
+  // Helper for sorting variable names - converts a variable name to uppercase
+  // for case-insensitive sort, and caches the result on the folly::dynamic
+  // object to avoid doing a UC conversion on each iteration of the sort loop.
+  static const std::string& getUcVariableName(
+    folly::dynamic& var,
+    const char* ucKey
+  );
+
+  // Returns true if the variable with the specified name is a super global.
+  static bool isSuperGlobal(const std::string& name);
+
+  // Adds scope variables to the specified folly::dynamic::array, or just
+  // returns a count of variables if vars == nullptr.
+  static int addScopeVariables(const ScopeObject* scope, folly::dynamic* vars);
+
+  // Adds local variables.
+  static int addLocals(
+    const ScopeObject* scope,
+    folly::dynamic* vars
+  );
+
+  // Adds the specified type of constants.
+  static int addConstants(
+    const ScopeObject* scope,
+    const StaticString& category,
+    folly::dynamic* vars
+  );
+
+  // Adds super global variables.
+  static int addSuperglobalVariables(
+    const ScopeObject* scope,
+    folly::dynamic* vars
+  );
+
+  // Serializes a variable to be sent over the VS Code debugger protocol.
+  static folly::dynamic serializeVariable(
+    const std::string& name,
+    const Variant& variable
+  );
+
+  static const std::string getVariableValue(const Variant& variable);
+
+  unsigned int m_objectId;
 };
 
 #undef VS_COMMAND_COMMON_IMPL

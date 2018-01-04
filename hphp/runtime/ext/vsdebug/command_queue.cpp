@@ -35,12 +35,12 @@ void CommandQueue::shutdown() {
     m_terminating = true;
     m_wakeWaiterCondition.notify_all();
 
-    if (m_threadProcessing) {
-      // If a thread is currently in processCommands(), wait for it to
-      // exit before returning.
+    // If a thread is currently in processCommands(), wait for it to
+    // exit before returning.
+    while (m_threadProcessing) {
       m_waiterLeftCondition.wait(lock);
-      assert(!m_threadProcessing);
     }
+    assert(!m_threadProcessing);
   }
 
   // Free any commands remaining in the queue.
@@ -70,9 +70,18 @@ void CommandQueue::processCommands() {
   };
 
   while (!m_terminating) {
-    m_wakeWaiterCondition.wait(lock);
+    while (m_commands.empty()) {
+      m_wakeWaiterCondition.wait(lock);
+      if (m_terminating) {
+        break;
+      }
+    }
 
-    while (!m_terminating && !m_commands.empty()) {
+    while (!m_commands.empty()) {
+      if (m_terminating) {
+        break;
+      }
+
       auto command = m_commands.front();
       m_commands.pop_front();
 

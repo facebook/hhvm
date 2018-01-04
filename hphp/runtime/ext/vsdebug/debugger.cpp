@@ -416,7 +416,9 @@ void Debugger::waitForClientConnection() {
     return;
   }
 
-  m_connectionNotifyCondition.wait(lock);
+  while (!clientConnected()) {
+    m_connectionNotifyCondition.wait(lock);
+  }
 }
 
 }

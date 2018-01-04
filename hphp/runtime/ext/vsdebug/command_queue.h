@@ -63,10 +63,10 @@ private:
 
   // Indicates the queue is terminating. Any thread waiting to process commands
   // should unblock and leave.
-  bool m_terminating;
+  std::atomic<bool> m_terminating;
 
   // Indicates if a thread is currently inside processCommands().
-  bool m_threadProcessing;
+  std::atomic<bool> m_threadProcessing;
 
   // Queue of commands waiting to be picked up and processed.
   std::list<VSCommand*> m_commands;

@@ -161,11 +161,10 @@ void DebugTransport::processOutgoingMessages() {
       // Take a local copy of any messages waiting to be sent under the
       // lock and clear the queue.
       std::unique_lock<std::mutex> lock(m_outgoingMsgLock);
-      if (m_terminating) {
-        return;
+      while (!m_terminating && m_outgoingMessages.size() == 0) {
+        m_outgoingMsgCondition.wait(lock);
       }
 
-      m_outgoingMsgCondition.wait(lock);
       if (m_terminating) {
         return;
       }
@@ -189,6 +188,7 @@ void DebugTransport::processOutgoingMessages() {
           errno
         );
         onClientDisconnected();
+        return;
       }
     }
   }

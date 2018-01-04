@@ -140,7 +140,7 @@ private:
   std::mutex m_outgoingMsgLock;
   std::list<std::string> m_outgoingMessages;
   std::condition_variable m_outgoingMsgCondition;
-  bool m_terminating {false};
+  std::atomic<bool> m_terminating {false};
 
   // A worker thread to process outgoing messages and send them to the client.
   AsyncFunc<DebugTransport> m_outputThread;

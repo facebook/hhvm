@@ -122,7 +122,7 @@ struct Debugger final {
   // Puts the current thread into the command queue for the specified request
   // info. This routine will block until the debugger is resumed by the client,
   // the client disconnects, or the extension is shut down.
-  void processCommandQueue(RequestInfo* requestInfo);
+  void processCommandQueue(int threadId, RequestInfo* requestInfo);
 
   // Called by the debugger transport when a new message is received from
   // a connected debugger client.
@@ -150,6 +150,19 @@ struct Debugger final {
 
   // Returns the synthetic request ID for the current request thread.
   int getCurrentThreadId();
+
+  // Sends a stopped event to the client.
+  void sendStoppedEvent(
+    const char* reason,
+    const char* displayDetails,
+    int64_t threadId
+  );
+
+  // Sends a thread continued event to the client.
+  void sendContinuedEvent(int64_t threadId);
+
+  // Sets the dummy thread ID.
+  void setDummyThreadId(int64_t threadId);
 
 private:
 
@@ -192,6 +205,10 @@ private:
   // Sends a thread event message to a debugger client.
   void sendThreadEventMessage(int64_t threadId, ThreadEventType eventType);
 
+  // Attempts to send the protocol terminated event if there is still a
+  // connected client.
+  void trySendTerminatedEvent();
+
   Mutex m_lock;
   DebugTransport* m_transport {nullptr};
 
@@ -212,7 +229,7 @@ private:
   bool m_clientInitialized {false};
 
   // State of the program.
-  ProgramState m_state {ProgramState::Running};
+  ProgramState m_state {ProgramState::LoaderBreakpoint};
 
   // Information about all the requests that the debugger is aware of.
   std::unordered_map<ThreadInfo*, RequestInfo*> m_requests;
@@ -238,6 +255,9 @@ private:
   // Indicates which request is the "active" request for debugger client
   // commands, or nullptr if there is no such request.
   ThreadInfo* m_activeRequest {nullptr};
+
+  // Tracks the thread ID of the dummy request.
+  int64_t m_dummyThreadId {-1};
 
   // Support for waiting for a client connection to arrive.
   std::mutex m_connectionNotifyLock;

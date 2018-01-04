@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -86,6 +87,13 @@ void DebuggerSession::invokeDummyStartupDocument() {
 const StaticString s_memory_limit("memory_limit");
 
 void DebuggerSession::runDummy() {
+
+  // The debugger needs to know which background thread is processing the dummy
+  // request. It should not attach to this request as it would a real request:
+  // it should not be included in operattions like async-break-all, nor should
+  // it be listed in any user-visible thread list.
+  m_debugger->setDummyThreadId((int64_t)Process::GetThreadId());
+
   hphp_session_init();
   SCOPE_EXIT {
     hphp_context_exit();

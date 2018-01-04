@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -40,11 +41,6 @@ void Debugger::setClientConnected(bool connected) {
 
   {
     Lock lock(m_lock);
-
-    if (connected == m_clientConnected.load()) {
-      // If the connected state didn't change, just return.
-      return;
-    }
 
     // Store connected first. New request threads will first check this value
     // to quickly determine if a debugger client is connected to avoid having
@@ -101,9 +97,6 @@ void Debugger::setClientConnected(bool connected) {
         std::unique_lock<std::mutex> lock(m_connectionNotifyLock);
         m_connectionNotifyCondition.notify_all();
       }
-
-      // TODO: (Ericblue) Set the program state to LoaderBreakpoint and wrangle
-      // all threads for the initial pause + breakpoint sync here.
     } else {
 
       // The client has detached. Walk through any requests we are currently
@@ -133,12 +126,21 @@ void Debugger::setClientInitialized() {
 
   m_clientInitialized = true;
 
+  // When the client connects, break the entire program to get it into a known
+  // state that matches the thread list being presented in the debugger. Once
+  // all threads are wrangled and the front-end is updated, the program can
+  // resume execution.
+  m_state = ProgramState::LoaderBreakpoint;
+
   // Send a thread start event for any thread that exists already at the point
   // the debugger client initializes communication so that they appear in the
   // client side thread list.
   for (auto it = m_requestIdMap.begin(); it != m_requestIdMap.end(); it++) {
     sendThreadEventMessage(it->first, ThreadEventType::ThreadStarted);
   }
+
+  // Send a stop event to indicate the initial loader break.
+  sendStoppedEvent("entry", "Initial Break", -1);
 }
 
 int Debugger::getCurrentThreadId() {
@@ -167,6 +169,8 @@ void Debugger::shutdown() {
     return;
   }
 
+  trySendTerminatedEvent();
+
   m_transport->shutdown();
   setClientConnected(false);
 
@@ -177,8 +181,53 @@ void Debugger::shutdown() {
   m_transport = nullptr;
 }
 
+void Debugger::trySendTerminatedEvent() {
+  Lock lock(m_lock);
+
+  folly::dynamic event = folly::dynamic::object;
+  sendEventMessage(event, "terminated");
+}
+
+void Debugger::sendStoppedEvent(
+  const char* reason,
+  const char* displayDetails,
+  int64_t threadId
+) {
+  Lock lock(m_lock);
+
+  folly::dynamic event = folly::dynamic::object;
+  event["allThreadsStopped"] = m_pausedRequestCount == m_requests.size();
+
+  if (reason != nullptr) {
+    event["reason"] = reason;
+  }
+
+  if (displayDetails != nullptr) {
+    event["description"] = displayDetails;
+  }
+
+  if (threadId > 0) {
+    event["threadId"] = threadId;
+  }
+
+  sendEventMessage(event, "stopped");
+}
+
+void Debugger::sendContinuedEvent(int64_t threadId) {
+  Lock lock(m_lock);
+  folly::dynamic event = folly::dynamic::object;
+  event["allThreadsContinued"] = m_pausedRequestCount == 0;
+  event["threadId"] = threadId;
+  sendEventMessage(event, "continued");
+}
+
 void Debugger::sendUserMessage(const char* message, const char* level) {
   Lock lock(m_lock);
+
+  if (!clientConnected()) {
+    return;
+  }
+
   if (m_transport != nullptr) {
     m_transport->enqueueOutgoingUserMessage(message, level);
   }
@@ -233,8 +282,15 @@ void Debugger::requestInit() {
 
   {
     Lock lock(m_lock);
-    requestInfo = attachToRequest(threadInfo);
-    pauseRequest = m_state != ProgramState::Running;
+
+    // Don't attach to the dummy request thread. DebuggerSession manages the
+    // dummy requests debugger hook state.
+    if ((int64_t)Process::GetThreadId() != m_dummyThreadId) {
+      requestInfo = attachToRequest(threadInfo);
+      pauseRequest = m_clientInitialized && m_state != ProgramState::Running;
+    } else {
+      pauseRequest = false;
+    }
   }
 
   // If the debugger was already paused when this request started, drop the lock
@@ -243,14 +299,19 @@ void Debugger::requestInit() {
   // is dropped above and entering the command queue, there will be a pending
   // Resume command in this queue, which will cause this thread to unblock.
   if (pauseRequest && requestInfo != nullptr) {
-    processCommandQueue(requestInfo);
+    processCommandQueue(getCurrentThreadId(), requestInfo);
   }
 }
 
-void Debugger::processCommandQueue(RequestInfo* requestInfo) {
+void Debugger::processCommandQueue(int threadId, RequestInfo* requestInfo) {
   {
     Lock lock(m_lock);
     m_pausedRequestCount++;
+
+    // TODO: Put proper stop reason here - if this is the thread that hit a
+    // bp/step/exn, say that. Otherwise indicate its paused due to stop one
+    // stop all semantics + an event on another thread.
+    sendStoppedEvent("pause", "pause", threadId);
   }
 
   requestInfo->m_commandQueue.processCommands();
@@ -258,6 +319,7 @@ void Debugger::processCommandQueue(RequestInfo* requestInfo) {
   {
     Lock lock(m_lock);
     m_pausedRequestCount--;
+    sendContinuedEvent(threadId);
   }
 }
 
@@ -550,6 +612,11 @@ void Debugger::startDummyRequest(const std::string& startupDoc) {
 
   assert(m_session != nullptr);
   m_session->startDummyRequest(startupDoc);
+}
+
+void Debugger::setDummyThreadId(int64_t threadId) {
+  Lock lock(m_lock);
+  m_dummyThreadId = threadId;
 }
 
 }

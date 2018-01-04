@@ -21,6 +21,8 @@
 #include <mutex>
 #include <list>
 
+#include "hphp/runtime/ext/vsdebug/command.h"
+
 namespace HPHP {
 namespace VSDEBUG {
 
@@ -42,18 +44,32 @@ struct CommandQueue {
   // Processes debugger commands that are in the queue for this request thread.
   // This call will block until the debugger client orders the target to resume,
   // or the debugger session shuts down.
-  // Returns true if any commands were processed, false otherwise.
-  bool processCommands();
+  void processCommands();
+
+  // Inserts the specified command into the queue for this thread.
+  void dispatchCommand(VSCommand* command);
 
 private:
 
   std::mutex m_lock;
-  std::condition_variable m_condition;
+
+  // Condition that is signaled when a command is available, or the queue
+  // is shutting down. A thread waiting in processCommands() should wake.
+  std::condition_variable m_wakeWaiterCondition;
+
+  // Condition that is signaled when a waiter has left processCommands(). A
+  // thread waiting to confirm the queue is shutdown should wake.
+  std::condition_variable m_waiterLeftCondition;
+
+  // Indicates the queue is terminating. Any thread waiting to process commands
+  // should unblock and leave.
   bool m_terminating;
 
-  // TODO: this is just a placeholder queue for commands. (VS commands aren't
-  // implemented yet).
-  std::list<int> m_commands;
+  // Indicates if a thread is currently inside processCommands().
+  bool m_threadProcessing;
+
+  // Queue of commands waiting to be picked up and processed.
+  std::list<VSCommand*> m_commands;
 };
 
 }

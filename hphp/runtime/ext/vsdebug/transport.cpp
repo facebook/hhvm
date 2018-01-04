@@ -353,7 +353,12 @@ bool DebugTransport::tryProcessMessage(
     try {
       *message = folly::parseJson(buffer);
       success = true;
-    } catch(const std::exception& exn) {
+    } catch (...) {
+      // Log the error and move on. Note that in this case we cannot even
+      // send a failure response to the debugger client because the protocol
+      // requires it to include a sequence ID and the command that failed -
+      // and request message was not well-formed enough for us to obtain that
+      // data from it.
       VSDebugLogger::Log(
         VSDebugLogger::LogLevelError,
         "Failed to parse debugger message: %s",

@@ -52,8 +52,25 @@ struct RequestInfo {
   CommandQueue m_commandQueue;
 };
 
+// An exception to be thrown when a message from the client cannot be processed.
+struct DebuggerCommandException : Exception {
+
+  DebuggerCommandException(const char* message) :
+    m_message(message) {
+  }
+
+  const char* what() const noexcept override {
+    return m_message;
+  }
+
+  EXCEPTION_COMMON_IMPL(DebuggerCommandException);
+
+private:
+  const char* m_message;
+};
+
 struct Debugger final {
-  Debugger() {}
+  Debugger();
   virtual ~Debugger() {
     shutdown();
   }
@@ -91,14 +108,54 @@ struct Debugger final {
   // Returns a pointer to the RequestInfo for the current thread.
   RequestInfo* getRequestInfo();
 
+  // Puts the current thread into the command queue for the specified request
+  // info. This routine will block until the debugger is resumed by the client,
+  // the client disconnects, or the extension is shut down.
+  void processCommandQueue(RequestInfo* requestInfo);
+
   // Called by the debugger transport when a new message is received from
   // a connected debugger client.
   void onClientMessage(folly::dynamic& message);
 
+  // Executes a command from the debugger client while holding the debugger
+  // lock.
+  bool executeClientCommand(
+    VSCommand* command,
+    std::function<bool(folly::dynamic& responseMsg)> callback
+  );
+
 private:
 
+  // Cleans up and frees the specified request info object and shuts down its
+  // command queue, unblocking the waiting request thread (if any).
   static void cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri);
+
+  // Attaches the debugger to the specified request thread and installs the
+  // debugger hook.
   RequestInfo* attachToRequest(ThreadInfo* ti);
+
+  // Checks if the specified command requires the target to be broken in before
+  // dispatching to a request queue and throws an exception if the condition is
+  // violated.
+  void enforceRequiresBreak(VSCommand* command) {
+    if (command->requiresBreak() && m_state == ProgramState::Running) {
+      throw DebuggerCommandException(
+        "The debugger issued a command that is only valid while the program is "
+        "broken in, but the target is currently running."
+      );
+    }
+  }
+
+  // Reports faiure to process a message from the debugger client to the
+  // front-end.
+  void reportClientMessageError(
+    folly::dynamic& clientMsg,
+    const char* errorMessage
+  );
+
+  // Sends a response message to a debugger client in response to a debugger
+  // client request.
+  void sendCommandResponse(VSCommand* command, folly::dynamic& responseMsg);
 
   Mutex m_lock;
   DebugTransport* m_transport {nullptr};
@@ -120,6 +177,9 @@ private:
   // Information about all the requests that the debugger is aware of.
   std::unordered_map<ThreadInfo*, RequestInfo*> m_requests;
 
+  // Map of thread ID to ThreadInfo*;
+  std::unordered_map<int64_t, ThreadInfo*> m_requestIds;
+
   // Keeps track of the number of requests that are currently blocked inside
   // the debugger extension due to being paused for any reason (breakpoint,
   // exception, loader break, etc...)
@@ -132,6 +192,9 @@ private:
   // Indicates which request is the "active" request for debugger client
   // commands, or nullptr if there is no such request.
   ThreadInfo* m_activeRequest {nullptr};
+
+  static constexpr char* InternalErrorMsg =
+    "An internal error occurred while processing a debugger command.";
 };
 
 }

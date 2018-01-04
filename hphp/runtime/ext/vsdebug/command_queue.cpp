@@ -15,12 +15,14 @@
 */
 
 #include "hphp/runtime/ext/vsdebug/command_queue.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
 
 namespace HPHP {
 namespace VSDEBUG {
 
 CommandQueue::CommandQueue() :
-  m_terminating(false) {
+  m_terminating(false),
+  m_threadProcessing(false) {
 }
 
 CommandQueue::~CommandQueue() {
@@ -28,10 +30,72 @@ CommandQueue::~CommandQueue() {
 }
 
 void CommandQueue::shutdown() {
-  std::lock_guard<std::mutex> lock(m_lock);
+  std::unique_lock<std::mutex> lock(m_lock);
   if (!m_terminating) {
     m_terminating = true;
-    m_condition.notify_all();
+    m_wakeWaiterCondition.notify_all();
+
+    if (m_threadProcessing) {
+      // If a thread is currently in processCommands(), wait for it to
+      // exit before returning.
+      m_waiterLeftCondition.wait(lock);
+      assert(!m_threadProcessing);
+    }
+  }
+
+  // Free any commands remaining in the queue.
+  for (auto it = m_commands.begin(); it != m_commands.end();) {
+    delete *it;
+    it = m_commands.erase(it);
+  }
+
+  assert(m_commands.empty());
+}
+
+void CommandQueue::processCommands() {
+  std::unique_lock<std::mutex> lock(m_lock);
+
+  // At most one thread is ever expected to be here at any given time.
+  assert(!m_threadProcessing);
+  m_threadProcessing = true;
+
+  SCOPE_EXIT {
+    assert(lock.owns_lock());
+    m_threadProcessing = false;
+
+    if (m_terminating) {
+      // Let the thread that is waiting for us in shutdown() proceed.
+      m_waiterLeftCondition.notify_all();
+    }
+  };
+
+  while (!m_terminating) {
+    m_wakeWaiterCondition.wait(lock);
+
+    while (!m_terminating && !m_commands.empty()) {
+      auto command = m_commands.front();
+      m_commands.pop_front();
+
+      // We must drop the lock before executing the command so that the
+      // client thread can enqueue additional commands while we process.
+      // Additionally, this is going to call back into Debugger and needs to
+      // be able to acquire the debugger lock.
+      lock.unlock();
+
+      bool resumeTarget = command->execute();
+
+      // Free the command.
+      delete command;
+
+      // Re-acquire the lock before proceeding.
+      lock.lock();
+
+      if (resumeTarget) {
+        // The command indicated we should resume the target. Release the
+        // current thread from this routine.
+        return;
+      }
+    }
   }
 }
 
@@ -40,22 +104,10 @@ void CommandQueue::clearPendingMessages() {
   m_commands.clear();
 }
 
-bool CommandQueue::processCommands() {
+void CommandQueue::dispatchCommand(VSCommand* command) {
   std::unique_lock<std::mutex> lock(m_lock);
-  bool commandProcessed = false;
-
-  while (!m_terminating && !commandProcessed) {
-    m_condition.wait(lock);
-    if (!m_terminating) {
-      for (auto const& command : m_commands) {
-        // NOT IMPLEMENTED YET: PROCESS COMMANDS...
-        (void)command;
-        commandProcessed = true;
-      }
-    }
-  }
-
-  return commandProcessed;
+  m_commands.push_back(command);
+  m_wakeWaiterCondition.notify_all();
 }
 
 }

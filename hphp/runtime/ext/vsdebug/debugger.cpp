@@ -14,10 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 namespace VSDEBUG {
+
+Debugger::Debugger() {
+}
 
 void Debugger::setTransport(DebugTransport* transport) {
   assert(m_transport == nullptr);
@@ -76,6 +82,7 @@ void Debugger::setClientConnected(bool connected) {
         VSDebugLogger::LogLevelError,
         "Failed to allocate debugger session!"
       );
+      m_clientConnected.store(false, std::memory_order_release);
     }
 
     // TODO: (Ericblue) Set the program state to LoaderBreakpoint and wrangle
@@ -84,14 +91,14 @@ void Debugger::setClientConnected(bool connected) {
 
     // The client has detached. Walk through any requests we are currently
     // attached to and release them if they are blocked in the debugger.
-    for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
+    for (auto it = m_requests.begin(); it != m_requests.end();) {
       // Shut down the request's command queue to unblock it if it's broken
       // in to the debugger and remove it from the map.
       // NOTE: The request's RequestInfo will be cleaned up and freed when the
       // request completes in requestShutdown. It is not safe to do that from
       // this thread.
       it->second->m_commandQueue.shutdown();
-      m_requests.erase(it);
+      it = m_requests.erase(it);
     }
 
     m_state = ProgramState::Running;
@@ -115,6 +122,7 @@ void Debugger::shutdown() {
     return;
   }
 
+  m_transport->shutdown();
   setClientConnected(false);
 
   // m_session is deleted and set to nullptr by setClientConnected(false).
@@ -147,9 +155,6 @@ void Debugger::requestInit() {
     Lock lock(m_lock);
     requestInfo = attachToRequest(threadInfo);
     pauseRequest = m_state != ProgramState::Running;
-    if (pauseRequest) {
-      m_pausedRequestCount++;
-    }
   }
 
   // If the debugger was already paused when this request started, drop the lock
@@ -158,12 +163,21 @@ void Debugger::requestInit() {
   // is dropped above and entering the command queue, there will be a pending
   // Resume command in this queue, which will cause this thread to unblock.
   if (pauseRequest && requestInfo != nullptr) {
-    requestInfo->m_commandQueue.processCommands();
+    processCommandQueue(requestInfo);
+  }
+}
 
-    {
-      Lock lock(m_lock);
-      m_pausedRequestCount--;
-    }
+void Debugger::processCommandQueue(RequestInfo* requestInfo) {
+  {
+    Lock lock(m_lock);
+    m_pausedRequestCount++;
+  }
+
+  requestInfo->m_commandQueue.processCommands();
+
+  {
+    Lock lock(m_lock);
+    m_pausedRequestCount--;
   }
 }
 
@@ -181,6 +195,9 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
     }
 
     m_requests.emplace(std::make_pair(ti, requestInfo));
+
+    auto const threadId = (int64_t)Process::GetThreadId();
+    m_requestIds.emplace(std::make_pair(threadId, ti));
   } else {
     requestInfo = it->second;
   }
@@ -214,6 +231,12 @@ void Debugger::requestShutdown() {
       requestInfo = it->second;
       m_requests.erase(it);
     }
+
+    auto const threadId = (int64_t)Process::GetThreadId();
+    auto idItr = m_requestIds.find(threadId);
+    if (idItr != m_requestIds.end()) {
+      m_requestIds.erase(idItr);
+    }
   }
 
   if (requestInfo != nullptr) {
@@ -231,8 +254,153 @@ RequestInfo* Debugger::getRequestInfo() {
   return nullptr;
 }
 
+bool Debugger::executeClientCommand(
+  VSCommand* command,
+  std::function<bool(folly::dynamic& responseMsg)> callback
+) {
+  Lock lock(m_lock);
+
+  // If there is no debugger client connected anymore, the client command
+  // should not be processed, and the target request thread should resume.
+  if (!clientConnected()) {
+    return true;
+  }
+
+  try {
+    enforceRequiresBreak(command);
+
+    // Invoke the command execute callback. It will return true if this thread
+    // should be resumed, or false if it should continue to block in its
+    // command queue.
+    folly::dynamic responseMsg = folly::dynamic::object;
+    bool resumeThread = callback(responseMsg);
+    sendCommandResponse(command, responseMsg);
+
+    return resumeThread;
+  } catch (DebuggerCommandException e) {
+    reportClientMessageError(command->getMessage(), e.what());
+  } catch (...) {
+    reportClientMessageError(command->getMessage(), InternalErrorMsg);
+  }
+
+  // On error, do not resume the request thread.
+  return false;
+}
+
+void Debugger::reportClientMessageError(
+  folly::dynamic& clientMsg,
+  const char* errorMessage
+) {
+  try {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Failed to process client message (%s): %s",
+      folly::toJson(clientMsg).c_str(),
+      errorMessage
+    );
+
+    folly::dynamic responseMsg = folly::dynamic::object;
+    responseMsg["success"] = false;
+    responseMsg["request_seq"] = clientMsg["seq"];
+    responseMsg["command"] = clientMsg["command"];
+    responseMsg["message"] = errorMessage;
+
+    m_transport->enqueueOutgoingMessageForClient(
+      responseMsg,
+      DebugTransport::MessageTypeResponse
+    );
+
+    // Print an error to the debugger console to inform the user as well.
+    sendUserMessage(errorMessage, DebugTransport::OutputLevelError);
+  } catch (...) {
+    // We tried.
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Unexpected failure while trying to send response to client."
+    );
+  }
+}
+
+void Debugger::sendCommandResponse(
+  VSCommand* command,
+  folly::dynamic& responseMsg
+) {
+  folly::dynamic& clientMsg = command->getMessage();
+  responseMsg["success"] = true;
+  responseMsg["request_seq"] = clientMsg["seq"];
+  responseMsg["command"] = clientMsg["command"];
+
+  m_transport->enqueueOutgoingMessageForClient(
+    responseMsg,
+    DebugTransport::MessageTypeResponse
+  );
+}
+
 void Debugger::onClientMessage(folly::dynamic& message) {
-  // TODO: not implemented.
+  Lock lock(m_lock);
+
+  // It's possible the client disconnected between the time the message was
+  // received and when the lock was acquired in this routine. If the client
+  // has gone, do not process the message.
+  if (!clientConnected()) {
+    return;
+  }
+
+  VSCommand* command = nullptr;
+
+  try {
+    if (!VSCommand::parseCommand(this, message, &command)) {
+      assert(command == nullptr);
+      throw DebuggerCommandException(
+        "The command was invalid or is not implemented in the debugger."
+      );
+    }
+
+    assert(command != nullptr);
+    enforceRequiresBreak(command);
+
+    switch(command->commandTarget()) {
+      case CommandTarget::None:
+        command->execute();
+        break;
+      case CommandTarget::Request:
+        // Dispatch this command to the correct request.
+        {
+          const auto threadId = command->targetThreadId();
+          auto it = m_requestIds.find(threadId);
+          if (it != m_requestIds.end()) {
+            const auto request = m_requests.find(it->second);
+            assert(request != m_requests.end());
+            request->second->m_commandQueue.dispatchCommand(command);
+
+            // Lifetime of command is now owned by the request thread's queue.
+            command = nullptr;
+          } else {
+            constexpr char* errorMsg =
+              "The requested thread ID does not exist in the target.";
+            reportClientMessageError(message, errorMsg);
+          }
+        }
+        break;
+      case CommandTarget::Dummy:
+        // Dispatch this command to the dummy thread.
+        m_session->enqueueDummyCommand(command);
+
+        // Lifetime of command is now owned by the dummy thread's queue.
+        command = nullptr;
+        break;
+      default:
+        assert(false);
+    }
+  } catch (DebuggerCommandException e) {
+    reportClientMessageError(message, e.what());
+  } catch (...) {
+    reportClientMessageError(message, InternalErrorMsg);
+  }
+
+  if (command != nullptr) {
+    delete command;
+  }
 }
 
 }

@@ -1,6 +1,7 @@
 HHVM_DEFINE_EXTENSION("vsdebug"
   SOURCES
     command_queue.cpp
+    command.cpp
     debugger.cpp
     ext_vsdebug.cpp
     fdtransport.cpp
@@ -11,6 +12,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     transport.cpp
   HEADERS
     command_queue.h
+    command.h
     debugger.h
     ext_vsdebug.h
     fdtransport.h

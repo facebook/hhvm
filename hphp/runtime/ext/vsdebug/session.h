@@ -26,7 +26,6 @@
 namespace HPHP {
 namespace VSDEBUG {
 
-// Forward declaration for debugger.
 struct Debugger;
 
 // This object represents a connected session with a single debugger client.
@@ -36,6 +35,8 @@ struct DebuggerSession final {
   virtual ~DebuggerSession();
 
   void startDummyRequest(const std::string& startupDoc);
+
+  void enqueueDummyCommand(VSCommand* command);
 
 private:
 

@@ -42,7 +42,7 @@ void DebuggerSession::startDummyRequest(const std::string& startupDoc) {
 
 void DebuggerSession::invokeDummyStartupDocument() {
   m_debugger->sendUserMessage(
-    "Preparing your PHP console. Please wait...",
+    "Preparing your Hack/PHP console. Please wait...",
     DebugTransport::OutputLevelWarning
   );
 
@@ -63,7 +63,7 @@ void DebuggerSession::invokeDummyStartupDocument() {
                          true);
   if (!ret || error) {
     std::string displayError =
-      std::string("Failed to prepare the PHP console: ") + errorMsg;
+      std::string("Failed to prepare the Hack/PHP console: ") + errorMsg;
 
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelError,
@@ -77,7 +77,7 @@ void DebuggerSession::invokeDummyStartupDocument() {
     );
   } else {
     m_debugger->sendUserMessage(
-      "The PHP console is now ready to use.",
+      "The Hack/PHP console is now ready to use.",
       DebugTransport::OutputLevelSuccess
     );
   }
@@ -87,9 +87,19 @@ const StaticString s_memory_limit("memory_limit");
 
 void DebuggerSession::runDummy() {
   hphp_session_init();
+  SCOPE_EXIT {
+    hphp_context_exit();
+    hphp_session_exit();
+  };
 
-  // TODO: (Ericblue) attach the debugger hook here too so the dummy can hit
-  //   breakpoints
+  if (!DebuggerHook::attach<VSDebugHook>()) {
+    m_debugger->sendUserMessage(
+      "Failed to attach the debugger to the Hack/PHP console: another debugger "
+      "is already attached!",
+      DebugTransport::OutputLevelError
+    );
+    return;
+  }
 
   // Remove the artificial memory limit for this request since there is a
   // debugger attached to it.
@@ -105,9 +115,11 @@ void DebuggerSession::runDummy() {
   }
 
   m_dummyCommandQueue.processCommands();
+  DebuggerHook::detach();
+}
 
-  hphp_context_exit();
-  hphp_session_exit();
+void DebuggerSession::enqueueDummyCommand(VSCommand* command) {
+  m_dummyCommandQueue.dispatchCommand(command);
 }
 
 }

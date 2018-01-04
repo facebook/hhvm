@@ -280,7 +280,7 @@ function curl_multi_select(resource $mh,
  *
  * @param $mh - A cURL multi handle returned from
  *              [`curl_multi_init`](http://php.net/manual/en/function.curl-multi-init.php).
- * @param $timeout - The time to wait for a response indicating some activity.
+ * @param $timeout - The time (in seconds) to wait for a response indicating some activity.
  *
  * @return Awaitable<int> - An `Awaitable` representing the `int` result of the
  *                          activity. If returned `int` is positive, that
@@ -291,12 +291,21 @@ function curl_multi_select(resource $mh,
  *
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
- *
- * See curl_exec() wrt NoFCallBuiltin.
  */
-<<__Native("NoFCallBuiltin")>>
-function curl_multi_await(resource $mh,
-                          float $timeout = 1.0): Awaitable<int>;
+async function curl_multi_await(
+  resource $mh,
+  float $timeout = 1.0,
+): Awaitable<int> {
+  $finish_by = \microtime(true) + $timeout;
+  do {
+    $result = \curl_multi_select($mh, 0.0);
+    if ($result !== 0) {
+      return $result;
+    }
+    await \HH\Asio\later();
+  } while (\microtime(true) < $finish_by);
+  return 0;
+}
 
 /**
  * Wait for activity on any curl_multi connection

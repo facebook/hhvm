@@ -2350,6 +2350,12 @@ and requires_consistent_construct = function
   | CIself -> false
   | CI _ -> false
 
+(* Caller will be looking for a particular form of expected type
+ * e.g. a function type (when checking lambdas) or tuple type (when checking
+ * tuples). First expand the expected type and elide single union; also
+ * strip nullables, so ?t becomes t, as context will always accept a t if a ?t
+ * is expected.
+ *)
 and expand_expected env expected =
   match expected with
   | None ->
@@ -2358,7 +2364,8 @@ and expand_expected env expected =
     let env, ty = Env.expand_type env ty in
     match ty with
     | _, Tany -> env, None
-    | (_, Tunresolved [ty]) -> env, Some (p, ur, ty)
+    | _, Tunresolved [ty] -> env, Some (p, ur, ty)
+    | _, Toption ty -> env, Some (p, ur, ty)
     | _ -> env, Some (p, ur, ty)
 
 (* Do a subtype check of inferred type against expected type *)

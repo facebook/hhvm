@@ -27,12 +27,8 @@ File "arithmetic_any.php--file2.php", line 76, characters 35-45:
 File "arithmetic_any.php--file2.php", line 76, characters 48-58:
   _
 File "arithmetic_any.php--file2.php", line 76, characters 35-45:[2]
-  _
-File "arithmetic_any.php--file2.php", line 76, characters 48-58:[2]
-  _
-File "arithmetic_any.php--file2.php", line 76, characters 35-45:[3]
   (_)
-File "arithmetic_any.php--file2.php", line 76, characters 48-58:[3]
+File "arithmetic_any.php--file2.php", line 76, characters 48-58:[2]
   (_)
 File "arithmetic_any.php--file2.php", line 85, characters 3-13:
   (int | ?int)

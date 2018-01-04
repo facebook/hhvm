@@ -46,15 +46,29 @@ enum ProgramState {
   Running
 };
 
+// Structure to represent breakpoint state for a particular request.
+struct RequestBreakpointInfo {
+  // Breakpoints that have been set in this request thread but not resolved
+  // to a loaded compilation unit.
+  std::unordered_set<int> m_unresolvedBreakpoints;
+
+  // Breakpoints set by the client that have not been synced to this request
+  // thread yet.
+  std::unordered_set<int> m_pendingBreakpoints;
+
+  // Map of loaded compilation units for this request by normalized file path.
+  std::map<std::string, const HPHP::Unit*> m_loadedUnits;
+};
+
 // Structure to represent the state of a single request.
 struct RequestInfo {
   struct {
     bool hookAttached;
     bool memoryLimitRemoved;
-    bool initialBreakpointsSynced;
     bool requestPaused;
   } m_flags;
   CommandQueue m_commandQueue;
+  RequestBreakpointInfo* m_breakpointInfo;
 };
 
 // An exception to be thrown when a message from the client cannot be processed.
@@ -174,6 +188,9 @@ struct Debugger final {
   // Sets the dummy thread ID.
   void setDummyThreadId(int64_t threadId);
 
+  // Called when a new breakpoint is added to sync it to all requests.
+  void onBreakpointAdded(int bpId);
+
 private:
 
   enum ThreadEventType {
@@ -239,6 +256,14 @@ private:
   // like ensure a breakpoint wasn't removed by the client during the previous
   // pause before triggering the breakpoint on a new request thread.
   void prepareToPauseTarget(RequestInfo* requestInfo);
+
+
+  // Returns a stop reason string for a breakpoint.
+  static std::string getStopReasonForBp(
+    const int id,
+    const std::string& path,
+    const int line
+  );
 
   Mutex m_lock;
   DebugTransport* m_transport {nullptr};

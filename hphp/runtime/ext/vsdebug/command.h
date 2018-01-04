@@ -167,6 +167,18 @@ public:
   static ContinueCommand* createInstance(Debugger* debugger);
 };
 
+//////  Handles SetBreakpoints commands from the debugger client.     //////
+struct SetBreakpointsCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(SetBreakpointsCommand, CommandTarget::None, false);
+};
+
+//////  Handles SetExceptionBreakpoints commands                     //////
+struct SetExceptionBreakpointsCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(SetExceptionBreakpointsCommand,    \
+                         CommandTarget::None,               \
+                         false);
+};
+//////  Handles ConfigurationDoneRequest from the debugger client.   //////
 struct ConfigurationDoneCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(ConfigurationDoneCommand, CommandTarget::None, false);
 };

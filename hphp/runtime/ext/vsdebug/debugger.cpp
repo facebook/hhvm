@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/util/process.h"
 
+#include <boost/filesystem.hpp>
 namespace HPHP {
 namespace VSDEBUG {
 
@@ -113,6 +114,16 @@ void Debugger::setClientConnected(bool connected) {
         // request completes in requestShutdown. It is not safe to do that from
         // this thread.
         it->second->m_commandQueue.clearPendingMessages();
+
+        // Clear the breakpoint info.
+        if (it->second->m_breakpointInfo != nullptr) {
+          delete it->second->m_breakpointInfo;
+          it->second->m_breakpointInfo = nullptr;
+        }
+
+        it->second->m_breakpointInfo = new RequestBreakpointInfo();
+        assert(it->second->m_breakpointInfo->m_pendingBreakpoints.empty());
+        assert(it->second->m_breakpointInfo->m_unresolvedBreakpoints.empty());
       }
 
       m_clientInitialized = false;
@@ -152,7 +163,7 @@ void Debugger::setClientInitialized() {
 int Debugger::getCurrentThreadId() {
   Lock lock(m_lock);
 
-  auto const threadInfo = &TI();
+  ThreadInfo* const threadInfo = &TI();
   const auto it = m_requestInfoMap.find(threadInfo);
   assert(it != m_requestInfoMap.end());
 
@@ -167,6 +178,11 @@ void Debugger::cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri) {
   // Shut down the request's command queue. This releases the thread if
   // it is waiting inside the queue.
   ri->m_commandQueue.shutdown();
+
+  if (ri->m_breakpointInfo != nullptr) {
+    delete ri->m_breakpointInfo;
+  }
+
   delete ri;
 }
 
@@ -281,7 +297,7 @@ void Debugger::requestInit() {
     return;
   }
 
-  auto const threadInfo = &TI();
+  ThreadInfo* const threadInfo = &TI();
   bool pauseRequest;
   RequestInfo* requestInfo;
 
@@ -348,6 +364,12 @@ void Debugger::processCommandQueue(
     m_pausedRequestCount--;
     sendContinuedEvent(threadId);
 
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Thread %d resuming",
+      threadId
+    );
+
     std::unique_lock<std::mutex> conditionLock(m_resumeMutex);
     if (m_pausedRequestCount == 0) {
       assert(m_state == ProgramState::Running);
@@ -378,6 +400,13 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
       return nullptr;
     }
 
+    requestInfo->m_breakpointInfo = new RequestBreakpointInfo();
+    if (requestInfo->m_breakpointInfo == nullptr) {
+      // Failed to allocate breakpoint info.
+      delete requestInfo;
+      return nullptr;
+    }
+
     m_requests.emplace(std::make_pair(ti, requestInfo));
     m_requestIdMap.emplace(std::make_pair(threadId, ti));
     m_requestInfoMap.emplace(std::make_pair(ti, threadId));
@@ -388,7 +417,7 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
     threadId = idIt->second;
   }
 
-  assert(requestInfo != nullptr);
+  assert(requestInfo != nullptr && requestInfo->m_breakpointInfo != nullptr);
 
   if (ti->m_executing == ThreadInfo::Executing::UserFunctions ||
       ti->m_executing == ThreadInfo::Executing::RuntimeFunctions) {
@@ -400,6 +429,13 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   if (!requestInfo->m_flags.hookAttached) {
     if (DebuggerHook::attach<VSDebugHook>(ti)) {
       requestInfo->m_flags.hookAttached = true;
+
+      // Install all breakpoints as pending for this request.
+      const std::unordered_set<int> breakpoints =
+        m_session->getBreakpointManager()->getAllBreakpointIds();
+      for (auto it = breakpoints.begin(); it != breakpoints.end(); it++) {
+        requestInfo->m_breakpointInfo->m_pendingBreakpoints.emplace(*it);
+      }
     } else {
       m_transport->enqueueOutgoingUserMessage(
         "Failed to attach to new HHVM request: another debugger is already "
@@ -753,6 +789,49 @@ void Debugger::setDummyThreadId(int64_t threadId) {
   m_dummyThreadId = threadId;
 }
 
+void Debugger::onBreakpointAdded(int bpId) {
+  Lock lock(m_lock);
+
+  assert(m_session != nullptr);
+
+  // Now to actually install the breakpoints, each request thread needs to
+  // process the bp and set it in some TLS data structures. If the program
+  // is already paused, then every request thread is blocking in its command
+  // loop: we'll put a work item to resolve the bp in each command queue.
+  //
+  // Otherwise, if the program is running, we need to gain control of each
+  // request thread by interrupting it. It will install the bp when it
+  // calls into the command hook on the next Hack opcode.
+  for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
+    ThreadInfo* ti = it->first;
+    RequestInfo* ri = it->second;
+
+    ti->m_reqInjectionData.setDebuggerIntr(true);
+    ri->m_breakpointInfo->m_pendingBreakpoints.emplace(bpId);
+
+    if (m_state != ProgramState::Running) {
+      // TODO: Resolve bp in each request here.
+    }
+  }
+}
+
+std::string Debugger::getStopReasonForBp(
+  const int id,
+  const std::string& path,
+  const int line
+) {
+  std::string description("Breakpoint " + std::to_string(id));
+  if (!path.empty()) {
+    const char* name = boost::filesystem::path(path.c_str()).filename().c_str();
+    description += " (";
+    description += name;
+    description += ":";
+    description += std::to_string(line);
+    description += ")";
+  }
+
+  return description;
+}
 
 void Debugger::interruptAllThreads() {
   for (auto it = m_requests.begin(); it != m_requests.end(); it++) {

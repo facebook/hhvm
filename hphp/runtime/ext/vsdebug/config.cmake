@@ -1,6 +1,7 @@
 HHVM_DEFINE_EXTENSION("vsdebug"
   SOURCES
     breakpoint.cpp
+    breakpoint_command.cpp
     command_queue.cpp
     command.cpp
     configuration_done_command.cpp

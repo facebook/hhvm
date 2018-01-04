@@ -121,6 +121,14 @@ bool VSCommand::parseCommand(
 
     *command = new ContinueCommand(debugger, clientMessage);
 
+  } else if (cmdString == "setBreakpoints") {
+
+    *command = new SetBreakpointsCommand(debugger, clientMessage);
+
+  } else if (cmdString == "setExceptionBreakpoints") {
+
+    *command = new SetExceptionBreakpointsCommand(debugger, clientMessage);
+
   } else {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelError,

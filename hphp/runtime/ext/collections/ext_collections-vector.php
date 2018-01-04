@@ -143,7 +143,7 @@ final class Vector implements \MutableVector {
    * @return bool
    */
   <<__Deprecated(
-    "Use Vector::containsKey() for key search or Vector::linearSearch() for value serach"
+    "Use Vector::containsKey() for key search or Vector::linearSearch() for value search"
   )>>
   public function contains(mixed $key): bool {
     if (!\is_int($key)) {

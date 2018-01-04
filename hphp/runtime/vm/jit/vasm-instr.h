@@ -931,7 +931,7 @@ struct addsd  { VregDbl s0, s1, d; };
 // and: s0 & {s1|m} => {d|m}, sf
 struct andb  { Vreg8 s0, s1, d; VregSF sf; Vflags fl; };
 struct andbi { Immed s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
-struct andbim { Immed s; Vptr m; VregSF sf; Vflags fl; };
+struct andbim { Immed s; Vptr8 m; VregSF sf; Vflags fl; };
 struct andl  { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct andli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct andq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
@@ -960,7 +960,7 @@ struct neg { Vreg64 s, d; VregSF sf; Vflags fl; };
 struct notb { Vreg8 s, d; };
 struct not { Vreg64 s, d; };
 // or: s0 | {s1|m} => {d|m}, sf
-struct orbim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct orbim { Immed s0; Vptr8 m; VregSF sf; Vflags fl; };
 struct orwim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
 struct orlim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
 struct orq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
@@ -993,8 +993,8 @@ struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // s1 - s0 => sf
 struct cmpb { Vreg8 s0; Vreg8 s1; VregSF sf; Vflags fl; };
 struct cmpbi { Immed s0; Vreg8 s1; VregSF sf; Vflags fl; };
-struct cmpbim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
-struct cmpbm { Vreg8 s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpbim { Immed s0; Vptr8 s1; VregSF sf; Vflags fl; };
+struct cmpbm { Vreg8 s0; Vptr8 s1; VregSF sf; Vflags fl; };
 struct cmpw { Vreg16 s0; Vreg16 s1; VregSF sf; Vflags fl; };
 struct cmpwi { Immed s0; Vreg16 s1; VregSF sf; Vflags fl; };
 struct cmpwim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
@@ -1012,7 +1012,7 @@ struct ucomisd { VregDbl s0, s1; VregSF sf; Vflags fl; };
 // s1 & s0 => sf
 struct testb { Vreg8 s0, s1; VregSF sf; Vflags fl; };
 struct testbi { Immed s0; Vreg8 s1; VregSF sf; Vflags fl; };
-struct testbim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testbim { Immed s0; Vptr8 s1; VregSF sf; Vflags fl; };
 struct testw { Vreg16 s0, s1; VregSF sf; Vflags fl; };
 struct testwi { Immed s0; Vreg16 s1; VregSF sf; Vflags fl; };
 struct testwim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
@@ -1070,7 +1070,7 @@ struct movtql { Vreg64 s; Vreg32 d; };
  * Loads and stores.
  */
 // loads
-struct loadb { Vptr s; Vreg8 d; };
+struct loadb { Vptr8 s; Vreg8 d; };
 struct loadw { Vptr s; Vreg16 d; };
 struct loadl { Vptr s; Vreg32 d; };
 struct loadqp { RIPRelativeRef s; Vreg64 d; };
@@ -1078,15 +1078,15 @@ struct loadqd { VdataPtr<uint64_t> s; Vreg64 d; };
 struct loadups { Vptr s; Vreg128 d; };
 struct loadsd { Vptr s; VregDbl d; };
 // zero-extended s to d
-struct loadzbl { Vptr s; Vreg32 d; };
+struct loadzbl { Vptr8 s; Vreg32 d; };
 struct loadzbq { Vptr s; Vreg64 d; };
 struct loadzlq { Vptr s; Vreg64 d; };
 // truncated s to d
 struct loadtqb { Vptr s; Vreg8 d; };
 struct loadtql { Vptr s; Vreg32 d; };
 // stores
-struct storeb { Vreg8 s; Vptr m; };
-struct storebi { Immed s; Vptr m; };
+struct storeb { Vreg8 s; Vptr8 m; };
+struct storebi { Immed s; Vptr8 m; };
 struct storew { Vreg16 s; Vptr m; };
 struct storewi { Immed s; Vptr m; };
 struct storel { Vreg32 s; Vptr m; };

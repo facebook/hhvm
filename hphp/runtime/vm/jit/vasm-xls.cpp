@@ -919,6 +919,10 @@ struct UseVisitor {
     if (m.base.isValid()) use(m.base);
     if (m.index.isValid()) use(m.index);
   }
+  void use(Vptr8 m) {
+    if (m.base.isValid()) use(m.base);
+    if (m.index.isValid()) use(m.index);
+  }
   void use(VcallArgsId /*id*/) {
     always_assert(false && "vcall unsupported in vxls");
   }
@@ -2337,6 +2341,7 @@ struct Renamer {
     if (m.base.isValid()) rename(m.base);
     if (m.index.isValid()) rename(m.index);
   }
+  void use(Vptr8& m) { use(static_cast<Vptr&>(m)); }
   void use(VcallArgsId) { always_assert(false && "vcall unsupported in vxls"); }
 
 private:

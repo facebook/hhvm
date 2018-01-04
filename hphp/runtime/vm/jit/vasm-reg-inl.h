@@ -61,16 +61,16 @@ inline Vptr Vreg::operator[](ScaledIndexDisp sid) const {
   return Vptr(*this, sid.si.index, sid.si.scale, sid.disp);
 }
 inline Vptr Vreg::operator[](Vptr p) const {
-  return Vptr(*this, p.base, 1, p.disp);
+  return Vptr(*this, p.base, 1, p.disp, p.width);
 }
 inline Vptr Vreg::operator[](DispReg rd) const {
   return Vptr(*this, rd.base, 1, rd.disp);
 }
 inline Vptr Vreg::operator[](Vscaled si) const {
-  return Vptr(*this, si.index, si.scale, 0);
+  return Vptr(*this, si.index, si.scale, 0 , si.width);
 }
 inline Vptr Vreg::operator[](VscaledDisp vd) const {
-  return Vptr(*this, vd.vs.index, vd.vs.scale, vd.disp);
+  return Vptr(*this, vd.vs.index, vd.vs.scale, vd.disp, vd.vs.width);
 }
 inline Vptr Vreg::operator[](Vreg index) const {
   return Vptr(*this, index, 1, 0);
@@ -80,7 +80,7 @@ inline Vptr Vreg::operator*() const {
   return Vptr(*this, 0);
 }
 inline Vscaled Vreg::operator*(int scale) const {
-  return Vscaled{*this, scale};
+  return Vscaled{*this, scale, Width::None};
 }
 
 inline Vptr Vreg::operator+(size_t d) const {
@@ -220,12 +220,17 @@ inline Vptr operator+(Vptr lhs, intptr_t d) {
   return lhs + safe_cast<int32_t>(d);
 }
 
-inline Vptr operator+(Vptr lhs, size_t d) {
+template<Width w>
+inline Vp<w> operator+(Vptr lhs, intptr_t d) {
   return lhs + safe_cast<int32_t>(d);
 }
 
 inline Vptr baseless(VscaledDisp vd) {
-  return Vptr(Vreg{}, vd.vs.index, vd.vs.scale, vd.disp);
+  return Vptr(Vreg{}, vd.vs.index, vd.vs.scale, vd.disp, vd.vs.width);
+}
+
+inline Vptr operator+(Vptr lhs, size_t d) {
+  return lhs + safe_cast<int32_t>(d);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,9 +27,11 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
+enum class Width : uint8_t;
 struct Vptr;
 struct Vscaled;
 struct VscaledDisp;
+template <Width w> struct Vp;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -173,9 +175,7 @@ struct Vr {
   Vptr operator[](ScaledIndexDisp) const;
   Vptr operator[](Vptr) const;
   Vptr operator[](DispReg) const;
-
   Vptr operator*() const;
-
   Vptr operator+(size_t) const;
   Vptr operator+(intptr_t) const;
 
@@ -255,6 +255,7 @@ std::string show(Width w);
 struct Vscaled {
   Vreg64 index;
   int scale;
+  Width width;
 };
 
 struct VscaledDisp {
@@ -272,26 +273,28 @@ VscaledDisp operator+(Vscaled, int32_t);
 struct Vptr {
   enum Segment : uint8_t { DS, FS, GS };
 
-  Vptr()
+  Vptr(Width w = Width::None)
     : base(Vreg{})
     , index(Vreg{})
     , disp(0)
-  {}
+    {
+      width = w;
+    }
 
-  template<class Base>
-  Vptr(Base b, int d)
+  Vptr(Vreg b, uint32_t d, Width w = Width::None)
     : base(b)
     , index(Vreg{})
-    , scale(1)
     , disp(d)
+    , scale(1)
+    , width(w)
   {}
 
-  template<class Base, class Index>
-  Vptr(Base b, Index i, int s, int d)
+  Vptr(Vreg b, Vreg i, uint8_t s, uint32_t d, Width w = Width::None)
     : base(b)
     , index(i)
-    , scale(s)
     , disp(d)
+    , scale(s)
+    , width(w)
   {
     validate();
   }
@@ -299,10 +302,22 @@ struct Vptr {
   /* implicit */ Vptr(MemoryRef m, Segment s = DS)
     : base(m.r.base)
     , index(m.r.index)
+    , disp(m.r.disp)
     , scale(m.r.scale)
     , seg(s)
-    , disp(m.r.disp)
   {
+    validate();
+  }
+
+  Vptr(MemoryRef m, Width w, Segment s = DS)
+    : base(m.r.base)
+    , index(m.r.index)
+    , disp(m.r.disp)
+    , scale(m.r.scale)
+    , seg(s)
+    , width(w)
+  {
+    std::string str;
     validate();
   }
 
@@ -322,10 +337,46 @@ struct Vptr {
 
   Vreg64 base;      // optional, for baseless mode
   Vreg64 index;     // optional
+  int32_t disp;
   uint8_t scale;    // 1,2,4,8
   Segment seg{DS};  // DS, FS or GS
-  int32_t disp;
+  Width width{Width::None};
 };
+
+template <Width w>
+struct Vp : Vptr {
+
+  Vp() : Vptr(w)
+  {
+    width = w;
+  }
+
+  Vp(Vreg b, uint32_t d) : Vptr(b, d, w)
+  {
+    width = w;
+  }
+
+  /* implicit */ Vp(MemoryRef m, Segment s = DS) : Vptr(m, w, s)
+  {
+    width = w;
+  }
+
+    Vp(Vreg b, Vreg i, uint8_t s, int32_t d) : Vptr(b, i, d, s, w)
+  {
+    width = w;
+  }
+
+  /* implicit */ Vp(const Vptr m) : Vptr(m)
+  {
+      width = w;
+  }
+
+  Vp(const Vp& o) = default;
+  Vp& operator=(const Vp& o) = default;
+
+};
+
+using Vptr8  = Vp<Width::Byte>;
 
 Vptr operator+(Vptr lhs, int32_t d);
 Vptr operator+(Vptr lhs, intptr_t d);

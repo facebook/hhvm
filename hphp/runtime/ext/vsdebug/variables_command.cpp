@@ -56,7 +56,8 @@ int64_t VariablesCommand::targetThreadId(DebuggerSession* session) {
     ScopeObject* scope = static_cast<ScopeObject*>(obj);
     return scope->m_requestId;
   } else if (obj->objectType() == ServerObjectType::Variable) {
-    return 1; //todo
+    VariableObject* variable = static_cast<VariableObject*>(obj);
+    return variable->m_requestId;
   }
 
   throw DebuggerCommandException("Unexpected server object type");
@@ -114,18 +115,46 @@ bool VariablesCommand::executeImpl(
 ) {
   folly::dynamic body = folly::dynamic::object;
   folly::dynamic variables = folly::dynamic::array;
+  auto& args = tryGetObject(getMessage(), "arguments", s_emptyArgs);
 
   ServerObject* obj = session->getServerObject(m_objectId);
   if (obj == nullptr) {
     throw DebuggerCommandException("Invalid variablesReference specified.");
   }
 
+  int start = tryGetInt(args, "start", 0);
+  int count = tryGetInt(args, "count", -1);
+  auto requestId = targetThreadId(session);
+
   if (obj->objectType() == ServerObjectType::Scope) {
     ScopeObject* scope = static_cast<ScopeObject*>(obj);
-    addScopeVariables(scope, &variables);
+    addScopeVariables(session, targetThreadId(session), scope, &variables);
+    sortVariablesInPlace(variables);
+
+    // Client can ask for a subsequence of the variables.
+    auto startIt = variables.begin() + start;
+    if (startIt != variables.begin() || count > 0) {
+      if (count <= 0) {
+        count = variables.size();
+      } else if (start + count >= variables.size()) {
+        count = variables.size() - start;
+      }
+
+      auto endIt = variables.begin() + start + count;
+      variables = folly::dynamic::array(startIt, endIt);
+    }
+  } else if (obj->objectType() == ServerObjectType::Variable) {
+    VariableObject* variable = static_cast<VariableObject*>(obj);
+    addComplexChildren(
+      session,
+      requestId,
+      start,
+      count,
+      variable,
+      &variables
+    );
   }
 
-  sortVariablesInPlace(variables);
   body["variables"] = variables;
   (*responseMsg)["body"] = body;
 
@@ -137,10 +166,12 @@ const StaticString s_user("user");
 const StaticString s_core("Core");
 
 int VariablesCommand::countScopeVariables(const ScopeObject* scope) {
-  return addScopeVariables(scope, nullptr);
+  return addScopeVariables(nullptr, -1, scope, nullptr);
 }
 
 int VariablesCommand::addScopeVariables(
+  DebuggerSession* session,
+  int64_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
@@ -148,16 +179,16 @@ int VariablesCommand::addScopeVariables(
 
   switch (scope->m_scopeType) {
     case Locals:
-      return addLocals(scope, vars);
+      return addLocals(session, requestId, scope, vars);
 
     case UserDefinedConstants:
-      return addConstants(scope, s_user, vars);
+      return addConstants(session, requestId, scope, s_user, vars);
 
     case CoreConstants:
-      return addConstants(scope, s_core, vars);
+      return addConstants(session, requestId, scope, s_core, vars);
 
     case Superglobals:
-      return addSuperglobalVariables(scope, vars);
+      return addSuperglobalVariables(session, requestId, scope, vars);
 
     default:
       assert(false);
@@ -167,6 +198,8 @@ int VariablesCommand::addScopeVariables(
 }
 
 int VariablesCommand::addLocals(
+  DebuggerSession* session,
+  int64_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
@@ -187,7 +220,7 @@ int VariablesCommand::addLocals(
     count++;
     if (vars != nullptr) {
       Variant this_(fp->getThis());
-      vars->push_back(serializeVariable("this", this_));
+      vars->push_back(serializeVariable(session, requestId, "this", this_));
     }
   }
 
@@ -200,7 +233,9 @@ int VariablesCommand::addLocals(
     }
 
     if (vars != nullptr) {
-      vars->push_back(serializeVariable(name, iter.second()));
+      vars->push_back(
+        serializeVariable(session, requestId, name, iter.second())
+      );
     }
 
     count++;
@@ -210,6 +245,8 @@ int VariablesCommand::addLocals(
 }
 
 int VariablesCommand::addConstants(
+  DebuggerSession* session,
+  int64_t requestId,
   const ScopeObject* scope,
   const StaticString& category,
   folly::dynamic* vars
@@ -223,7 +260,9 @@ int VariablesCommand::addConstants(
   for (ArrayIter iter(constants); iter; ++iter) {
     const std::string name = iter.first().toString().toCppString();
     if (vars != nullptr) {
-      vars->push_back(serializeVariable(name, iter.second()));
+      vars->push_back(
+        serializeVariable(session, requestId, name, iter.second())
+      );
     }
 
     count++;
@@ -237,6 +276,8 @@ bool VariablesCommand::isSuperGlobal(const std::string& name) {
 }
 
 int VariablesCommand::addSuperglobalVariables(
+  DebuggerSession* session,
+  int64_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
@@ -252,7 +293,9 @@ int VariablesCommand::addSuperglobalVariables(
     }
 
     if (vars != nullptr) {
-      vars->push_back(serializeVariable(name, iter.second()));
+      vars->push_back(
+        serializeVariable(session, requestId, name, iter.second())
+      );
     }
 
     count++;
@@ -269,20 +312,37 @@ const std::string VariablesCommand::getPHPVarName(const std::string& name) {
 }
 
 folly::dynamic VariablesCommand::serializeVariable(
+  DebuggerSession* session,
+  int64_t requestId,
   const std::string& name,
-  const Variant& variable
+  const Variant& variable,
+  bool childProp /* = false */
 ) {
   folly::dynamic var = folly::dynamic::object;
-  const std::string variableName = getPHPVarName(name);
+  const std::string variableName = childProp ? name : getPHPVarName(name);
 
   var["name"] = variableName;
   var["value"] = getVariableValue(variable);
   var["type"] = getTypeName(variable);
 
+  // If the variable is an array, register it as a server object and indicate
+  // how many indicies it has.
+  if (variable.isArray()) {
+    unsigned int id = session->generateVariableId(
+      requestId,
+      const_cast<Variant&>(variable)
+    );
+
+    if (variable.isDict() || variable.isKeyset()) {
+      var["namedVariables"] = variable.toArray().size();
+    } else {
+      var["indexedVariables"] = variable.toArray().size();
+    }
+
+    var["variablesReference"] = id;
+  }
+
   //var["presentationHint"]  = ...  TODO
-  //var["variablesReference"] = ...
-  //var["namedVariables"] = ...
-  //var["indexedVariables"] = ...
   return var;
 }
 
@@ -384,13 +444,98 @@ const std::string VariablesCommand::getVariableValue(const Variant& variable) {
       auto res = variable.toResource();
       std::string resourceDesc = "resource id='";
       resourceDesc += std::to_string(res->getId());
+      resourceDesc += "' type='";
       resourceDesc += res->o_getResourceName().data();
+      resourceDesc += "'";
       return resourceDesc;
     }
+
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentArray:
+    case KindOfArray: {
+      std::string arrayDesc = "array[";
+      arrayDesc += std::to_string(variable.toArray().size());
+      arrayDesc += "]";
+      return arrayDesc;
+    }
+
+    case KindOfPersistentDict:
+    case KindOfDict: {
+      std::string dictDisc = "dict[";
+      dictDisc += std::to_string(variable.toArray().size());
+      dictDisc += "]";
+      return dictDisc;
+    }
+
+    case KindOfPersistentKeyset:
+    case KindOfKeyset: {
+      std::string keysetDisc = "keyset[";
+      keysetDisc += std::to_string(variable.toArray().size());
+      keysetDisc += "]";
+      return keysetDisc;
+    }
+
+    case KindOfRef:
+      // Note: PHP references are not supported in Hack.
+      return "reference";
 
     // TODO: Implement serialization for complex types here.
     default: return "TODO";
   }
+}
+
+int VariablesCommand::addComplexChildren(
+  DebuggerSession* session,
+  int64_t requestId,
+  int start,
+  int count,
+  VariableObject* variable,
+  folly::dynamic* vars
+) {
+  Variant& var = variable->m_variable;
+
+  if (var.isArray()) {
+    return addArrayChildren(session, requestId, start, count, variable, vars);
+  }
+
+  return 0;
+}
+
+int VariablesCommand::addArrayChildren(
+  DebuggerSession* session,
+  int64_t requestId,
+  int start,
+  int count,
+  VariableObject* variable,
+  folly::dynamic* vars
+) {
+  Variant& var = variable->m_variable;
+
+  assert(var.isArray());
+
+  int idx = 0;
+  int added = 0;
+
+  for (ArrayIter iter(var.toArray()); iter; ++iter) {
+    if (start >= 0 && idx < start) {
+      continue;
+    }
+
+    const std::string name = iter.first().toString().toCppString();
+    if (vars != nullptr) {
+      vars->push_back(
+        serializeVariable(session, requestId, name, iter.second(), true)
+      );
+      added++;
+    }
+
+    if (count > 0 && added >= count) {
+      break;
+    }
+  }
+
+  return added;
 }
 
 }

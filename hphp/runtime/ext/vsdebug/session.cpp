@@ -178,6 +178,18 @@ unsigned int DebuggerSession::generateScopeId(
   return objectId;
 }
 
+unsigned int DebuggerSession::generateVariableId(
+  int requestId,
+  Variant& variable
+) {
+  const unsigned int objectId = ++s_nextObjectId;
+  VariableObject* varObj = new VariableObject(objectId, requestId, variable);
+
+  assert(requestId == m_debugger->getCurrentThreadId());
+  registerRequestObject(objectId, varObj);
+  return objectId;
+}
+
 ScopeObject* DebuggerSession::getScopeObject(unsigned int objectId) {
   auto object = getServerObject(objectId);
   if (object != nullptr) {

@@ -96,7 +96,7 @@ folly::dynamic ScopesCommand::getScopeDescription(
   int depth = frame->m_frameDepth;
 
   folly::dynamic scope = folly::dynamic::object;
-  uint64_t scopeId = session->generateScopeId(req, depth, type);
+  unsigned int scopeId = session->generateScopeId(req, depth, type);
 
   scope["name"] = displayName;
   scope["variablesReference"] = scopeId;

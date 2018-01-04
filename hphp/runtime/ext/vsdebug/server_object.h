@@ -17,6 +17,10 @@
 #ifndef incl_HPHP_VSDEBUG_SERVER_OBJ_H_
 #define incl_HPHP_VSDEBUG_SERVER_OBJ_H_
 
+#include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/req-root.h"
+
 namespace HPHP {
 namespace VSDEBUG {
 
@@ -69,16 +73,26 @@ struct ScopeObject : public ServerObject {
   const int m_frameDepth;
   const ScopeType m_scopeType;
 };
-/*
+
 struct VariableObject : public ServerObject {
   VariableObject(
     unsigned int objectId,
     int reqId,
-    int depth,
+    Variant& variable
+  ) : ServerObject(objectId),
+      m_variable(variable),
+      m_requestId(reqId) {}
 
-  ) {}
+  ServerObjectType objectType() override {
+    return ServerObjectType::Variable;
+  }
+
+  // The variable exists in a request's memory. req::root<T> tracks this
+  // as an explicit GC root to keep the variable alive.
+  req::root<Variant> m_variable;
+  const int m_requestId;
 };
-*/
+
 
 }
 }

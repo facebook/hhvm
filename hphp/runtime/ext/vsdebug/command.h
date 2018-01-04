@@ -264,16 +264,25 @@ private:
 
   // Adds scope variables to the specified folly::dynamic::array, or just
   // returns a count of variables if vars == nullptr.
-  static int addScopeVariables(const ScopeObject* scope, folly::dynamic* vars);
+  static int addScopeVariables(
+    DebuggerSession* session,
+    int64_t requestId,
+    const ScopeObject* scope,
+    folly::dynamic* vars
+  );
 
   // Adds local variables.
   static int addLocals(
+    DebuggerSession* session,
+    int64_t requestId,
     const ScopeObject* scope,
     folly::dynamic* vars
   );
 
   // Adds the specified type of constants.
   static int addConstants(
+    DebuggerSession* session,
+    int64_t requestId,
     const ScopeObject* scope,
     const StaticString& category,
     folly::dynamic* vars
@@ -281,14 +290,39 @@ private:
 
   // Adds super global variables.
   static int addSuperglobalVariables(
+    DebuggerSession* session,
+    int64_t requestId,
     const ScopeObject* scope,
+    folly::dynamic* vars
+  );
+
+  // Adds children of a complex object.
+  static int addComplexChildren(
+    DebuggerSession* session,
+    int64_t requestId,
+    int start,
+    int count,
+    VariableObject* variable,
+    folly::dynamic* vars
+  );
+
+  // Adds array indicies.
+  static int addArrayChildren(
+    DebuggerSession* session,
+    int64_t requestId,
+    int start,
+    int count,
+    VariableObject* variable,
     folly::dynamic* vars
   );
 
   // Serializes a variable to be sent over the VS Code debugger protocol.
   static folly::dynamic serializeVariable(
+    DebuggerSession* session,
+    int64_t requestId,
     const std::string& name,
-    const Variant& variable
+    const Variant& variable,
+    bool childProp = false
   );
 
   static const std::string getVariableValue(const Variant& variable);

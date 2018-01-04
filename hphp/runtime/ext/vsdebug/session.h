@@ -57,6 +57,8 @@ struct DebuggerSession final {
   );
   ScopeObject* getScopeObject(unsigned int objectId);
 
+  unsigned int generateVariableId(int requestId, Variant& variable);
+
   ServerObject* getServerObject(unsigned int objectId);
 
   // Called by the debugger when a server object is removed from a request.

@@ -158,16 +158,7 @@ void Debugger::setClientInitialized() {
         it->second->m_executing == ThreadInfo::Executing::RuntimeFunctions) {
       sendThreadEventMessage(it->first, ThreadEventType::ThreadStarted);
     }
-
-    auto requestIt = m_requests.find(it->second);
-    assert(requestIt != m_requests.end());
-    RequestInfo* ri = requestIt->second;
-    if (ri->m_flags.requestPaused) {
-      sendStoppedEvent("Initial Break", it->first);
-    }
   }
-
-  sendStoppedEvent("Initial Break", -1);
 }
 
 int Debugger::getCurrentThreadId() {
@@ -175,7 +166,9 @@ int Debugger::getCurrentThreadId() {
 
   ThreadInfo* const threadInfo = &TI();
   const auto it = m_requestInfoMap.find(threadInfo);
-  assert(it != m_requestInfoMap.end());
+  if (it == m_requestInfoMap.end()) {
+    return -1;
+  }
 
   return it->second;
 }
@@ -362,7 +355,15 @@ void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
   }
 
   if (pauseRequest) {
-    processCommandQueue(getCurrentThreadId(), requestInfo);
+    if (requestInfo->m_stepReason != nullptr) {
+      processCommandQueue(
+        getCurrentThreadId(),
+        requestInfo,
+        requestInfo->m_stepReason
+      );
+    } else {
+      processCommandQueue(getCurrentThreadId(), requestInfo);
+    }
   }
 }
 
@@ -622,6 +623,7 @@ void Debugger::resumeTarget() {
   // event when it exits its command loop.
   for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
     RequestInfo* ri = it->second;
+    ri->m_stepReason = nullptr;
 
     if (ri->m_flags.requestPaused) {
       VSCommand* resumeCommand = ContinueCommand::createInstance(this);
@@ -636,6 +638,13 @@ Debugger::PrepareToPauseResult
 Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
   m_lock.assertOwnedBySelf();
 
+  if (m_state == ProgramState::Paused && isStepInProgress(requestInfo)) {
+    // A step operation for a single request is still in the middle of
+    // handling whatever caused us to break execution of the other threads
+    // in the first place. We don't need to wait for resume here.
+    return clientConnected() ? ReadyToPause : ErrorNoClient;
+  }
+
   while (m_state != ProgramState::Running) {
     m_lock.assertOwnedBySelf();
 
@@ -647,10 +656,13 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
     while (m_pausedRequestCount > 0) {
       // Need to drop m_lock before waiting.
       m_lock.unlock();
+
       m_resumeCondition.wait(conditionLock);
+      conditionLock.unlock();
 
       // And re-acquire it before continuing.
       m_lock.lock();
+      conditionLock.lock();
     }
 
     // Between the time the resume condition was notified and the time this
@@ -659,7 +671,7 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
     // and service the other pause before we can raise a breakpoint for this
     // request thread.
     m_lock.assertOwnedBySelf();
-    if (m_state != ProgramState::Running) {
+    if (requestInfo != nullptr && m_state != ProgramState::Running) {
       // Drop the lock and enter the command queue.
       m_lock.unlock();
       processCommandQueue(getCurrentThreadId(), requestInfo);
@@ -670,18 +682,13 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
   }
 
   m_lock.assertOwnedBySelf();
-  assert(m_state == ProgramState::Running);
+  assert(requestInfo == nullptr || m_state == ProgramState::Running);
 
-  if (!clientConnected()) {
-    return ErrorNoClient;
-  }
-
-  return ReadyToPause;
+  return clientConnected() ? ReadyToPause : ErrorNoClient;
 }
 
 void Debugger::pauseTarget(const char* stopReason) {
   m_lock.assertOwnedBySelf();
-  assert(m_state == ProgramState::Running);
 
   m_state = ProgramState::Paused;
 
@@ -1135,6 +1142,8 @@ void Debugger::onLineBreakpointHit(
         // Breakpoint hit!
         pauseTarget(stopReason.c_str());
         bpMgr->onBreakpointHit(bpId);
+        clearStepOperation(ri);
+
         break;
       }
     }
@@ -1202,9 +1211,30 @@ void Debugger::onExceptionBreakpointHit(
     }
 
     pauseTarget(stopReason.c_str());
+    clearStepOperation(ri);
   }
 
   processCommandQueue(getCurrentThreadId(), ri, stopReason.c_str());
+}
+
+void Debugger::onAsyncBreak() {
+  Lock lock(m_lock);
+
+  if (m_state == ProgramState::Paused) {
+    // Already paused.
+    return;
+  }
+
+  if (prepareToPauseTarget(nullptr) != PrepareToPauseResult::ReadyToPause) {
+    return;
+  }
+
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Debugger paused due to async-break request from client."
+  );
+
+  pauseTarget("Async-break");
 }
 
 void Debugger::onError(

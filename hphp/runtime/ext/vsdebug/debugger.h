@@ -68,6 +68,7 @@ struct RequestInfo {
     bool requestPaused;
     bool compilationUnitsMapped;
   } m_flags;
+  const char* m_stepReason;
   CommandQueue m_commandQueue;
   RequestBreakpointInfo* m_breakpointInfo;
 };
@@ -223,6 +224,23 @@ struct Debugger final {
     int errnum,
     const std::string& message
   );
+
+  // Called when the client requests an async-break of all threads.
+  void onAsyncBreak();
+
+  // Checks if we are stepping for a particular request.
+  static bool isStepInProgress(RequestInfo* requestInfo) {
+    return requestInfo->m_stepReason != nullptr;
+  }
+
+  // Clears the state filters for a step operation on the specified request
+  // thread, if any step is currently in progress.
+  static void clearStepOperation(RequestInfo* requestInfo) {
+    if (isStepInProgress(requestInfo)) {
+      phpDebuggerContinue();
+      requestInfo->m_stepReason = nullptr;
+    }
+  }
 
 private:
 

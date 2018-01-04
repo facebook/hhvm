@@ -133,6 +133,16 @@ bool VSCommand::parseCommand(
 
     *command = new SetExceptionBreakpointsCommand(debugger, clientMessage);
 
+  } else if (cmdString == "pause") {
+
+    *command = new PauseCommand(debugger, clientMessage);
+
+  } else if (cmdString == "next" ||
+             cmdString == "stepIn" ||
+             cmdString == "stepOut") {
+
+    *command = new StepCommand(debugger, clientMessage);
+
   } else {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelError,

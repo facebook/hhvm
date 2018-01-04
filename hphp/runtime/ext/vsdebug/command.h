@@ -199,6 +199,16 @@ struct ConfigurationDoneCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(ConfigurationDoneCommand, CommandTarget::None, false);
 };
 
+//////  Handles next/step requests from the debugger client.        //////
+struct StepCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(StepCommand, CommandTarget::Request, true);
+};
+
+//////  Handles async break requests from the debugger client.      //////
+struct PauseCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(PauseCommand, CommandTarget::None, false);
+};
+
 #undef VS_COMMAND_COMMON_IMPL
 
 }

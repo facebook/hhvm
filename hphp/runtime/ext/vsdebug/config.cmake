@@ -13,10 +13,12 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     initialize_command.cpp
     launch_attach_command.cpp
     logging.cpp
+    pause_command.cpp
     resolve_bps_command.cpp
     session.cpp
     socket_transport.cpp
     stack_trace_command.cpp
+    step_command.cpp
     transport.cpp
   HEADERS
     break_mode.h

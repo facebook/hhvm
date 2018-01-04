@@ -23,6 +23,8 @@
 namespace HPHP {
 namespace VSDEBUG {
 
+struct RequestInfo;
+
 struct VSDebugHook final : DebuggerHook {
   void onRequestInit() override;
   void onRequestShutdown() override;
@@ -52,11 +54,15 @@ struct VSDebugHook final : DebuggerHook {
     return static_cast<DebuggerHook*>(hook);
   }
 
+  static void tryEnterDebugger(
+    Debugger* debugger,
+    RequestInfo* requestInfo,
+    bool breakNoStepOnly
+  );
+
 private:
   explicit VSDebugHook() {}
   ~VSDebugHook() {}
-
-  void tryEnterDebugger();
 
   static const StaticString s_memoryLimit;
   static const StaticString s_getMsg;

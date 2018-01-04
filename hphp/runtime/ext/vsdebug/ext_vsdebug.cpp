@@ -111,6 +111,13 @@ void VSDebugExtension::moduleInit() {
   s_debugger->setTransport(transport);
 }
 
+void VSDebugExtension::moduleShutdown() {
+  if (s_debugger != nullptr) {
+    delete s_debugger;
+    s_debugger = nullptr;
+  }
+}
+
 void VSDebugExtension::requestInit() {
   // Memory barrier to ensure acquire semantics for the read of m_enabled below.
   std::atomic_thread_fence(std::memory_order_acquire);

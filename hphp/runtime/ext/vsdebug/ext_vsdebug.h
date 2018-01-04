@@ -34,6 +34,7 @@ struct VSDebugExtension final : Extension {
 
   void moduleLoad(const IniSetting::Map& ini, const Hdf hdf) override;
   void moduleInit() override;
+  void moduleShutdown() override;
   void requestInit() override;
   void requestShutdown() override;
   bool moduleEnabled() const override { return m_enabled; }

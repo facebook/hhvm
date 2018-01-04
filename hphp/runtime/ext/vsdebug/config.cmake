@@ -1,15 +1,19 @@
 HHVM_DEFINE_EXTENSION("vsdebug"
   SOURCES
+    command_queue.cpp
     debugger.cpp
     ext_vsdebug.cpp
     fdtransport.cpp
     logging.cpp
+    session.cpp
     transport.cpp
   HEADERS
+    command_queue.h
     debugger.h
     ext_vsdebug.h
     fdtransport.h
     logging.h
+    session.h
     transport.h
   DEPENDS
     libFolly

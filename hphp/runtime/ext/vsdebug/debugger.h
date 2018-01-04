@@ -18,15 +18,21 @@
 #define incl_HPHP_VSDEBUG_DEBUGGER_H_
 
 #include <atomic>
+#include <unordered_map>
 
 #include "hphp/runtime/ext/vsdebug/logging.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
+#include "hphp/runtime/ext/vsdebug/session.h"
+#include "hphp/runtime/ext/vsdebug/command_queue.h"
 
 namespace HPHP {
 namespace VSDEBUG {
 
 // Forward declaration for transport.
 struct DebugTransport;
+
+// Forward declaration of debugger session.
+struct DebuggerSession;
 
 struct Debugger final {
   Debugger() {}
@@ -55,9 +61,20 @@ struct Debugger final {
     return m_clientConnected.load(std::memory_order_acquire);
   }
 
+  bool sendUserMessage(
+    const char* message,
+    const char* level = DebugTransport::OutputLevelLog
+  );
+
 private:
 
+  Mutex m_lock;
   DebugTransport* m_transport {nullptr};
+
+  // The DebuggerSession represents the connected debugger client. This object
+  // is nullptr if no client is connected, and never nullptr if a client is
+  // connected.
+  DebuggerSession* m_session {nullptr};
 
   // The following flag will indicate if there is any debugger client
   // connected to the extension. This allows us to return quickly from

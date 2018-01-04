@@ -39,8 +39,8 @@ FdTransport::FdTransport(Debugger* debugger) :
   }
 }
 
-int FdTransport::connectedClientCount() const {
-  return m_transportFd == nullptr ? 0 : 1;
+bool FdTransport::clientConnected() const {
+  return m_transportFd == nullptr ? false : true;
 }
 
 }

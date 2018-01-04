@@ -20,7 +20,6 @@
 #include <folly/dynamic.h>
 #include <folly/json.h>
 
-#include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
 #include "hphp/util/lock.h"
 
@@ -41,21 +40,46 @@ struct DebugTransport {
   }
 
   virtual int sendToClient(
-    const folly::dynamic& message,
+    folly::dynamic& message,
     const char* messageType
   );
 
-  virtual int readMessage(folly::dynamic& message);
-  virtual int connectedClientCount() const = 0;
+  virtual bool sendUserMessage(
+    const char* message,
+    const char* level = OutputLevelLog
+  );
 
+  virtual int readMessage(folly::dynamic& message);
+  virtual bool clientConnected() const = 0;
+
+  // VS Code protocol message types.
   static constexpr char* MessageTypeRequest = "request";
   static constexpr char* MessageTypeResponse = "response";
   static constexpr char* MessageTypeEvent = "event";
 
+  // VS Code protocol event types
+  static constexpr char* EventTypeOutput = "output";
+
+  // Message output levels to be displayed in the debugger console.
+  // NOTE: the protocol explicitly defines:
+  //    "console", "stdout", "stderr", "telemetry", with "console" being the
+  //    default.
+  //
+  //    Nuclide supports additional log levels which can be specified here.
+  //    Other VS Code Debug Protocol consumers should default to "console" if
+  //    they do not understand.
+  static constexpr char* OutputLevelSuccess = "success";
+  static constexpr char* OutputLevelInfo = "info";
+  static constexpr char* OutputLevelWarning = "warning";
+  static constexpr char* OutputLevelError = "error";
+  static constexpr char* OutputLevelLog = "console";
+  static constexpr char* OutputLevelStdout = "stdout";
+  static constexpr char* OutputLevelStderr = "stderr";
+
 protected:
 
   const std::string wrapOutgoingMessage(
-    const folly::dynamic& message,
+    folly::dynamic& message,
     const char* messageType
   ) const;
 
@@ -68,6 +92,11 @@ protected:
 private:
 
   static constexpr int ReadBufferDefaultSize = 1024;
+
+  bool sendEventMessage(
+    folly::dynamic& message,
+    const char* eventType
+  );
 
   // Input buffer for reading messages from the debugger client.
   int resizeBuffer();

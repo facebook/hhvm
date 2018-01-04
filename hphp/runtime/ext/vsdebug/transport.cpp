@@ -31,18 +31,16 @@ DebugTransport::DebugTransport(Debugger* debugger) :
 }
 
 const std::string DebugTransport::wrapOutgoingMessage(
-  const folly::dynamic& message,
+  folly::dynamic& message,
   const char* messageType
 ) const {
   // TODO: (Ericblue) output messages need to be encoded in UTF-8
-  folly::dynamic wrapped = folly::dynamic(message);
-  wrapped["type"] = messageType;
-  return folly::toJson(wrapped);
+  message["type"] = messageType;
+  return folly::toJson(message);
 }
 
-
 int DebugTransport::sendToClient(
-  const folly::dynamic& message,
+  folly::dynamic& message,
   const char* messageType
 ) {
   Lock lock(m_mutex);
@@ -66,6 +64,25 @@ int DebugTransport::sendToClient(
   }
 
   return 0;
+}
+
+bool DebugTransport::sendUserMessage(
+  const char* message,
+  const char* level
+) {
+  folly::dynamic userMessage = folly::dynamic::object;
+
+  userMessage["category"] = level;
+  userMessage["output"] = message;
+  return sendEventMessage(userMessage, EventTypeOutput);
+}
+
+bool DebugTransport::sendEventMessage(
+  folly::dynamic& message,
+  const char* eventType
+) {
+  message["event"] = eventType;
+  return sendToClient(message, MessageTypeEvent) == 0;
 }
 
 int DebugTransport::readMessage(folly::dynamic& message) {

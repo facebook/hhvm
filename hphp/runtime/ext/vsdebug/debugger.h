@@ -25,6 +25,8 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
+#include "hphp/runtime/ext/vsdebug/break_mode.h"
+#include "hphp/runtime/ext/vsdebug/breakpoint.h"
 #include "hphp/runtime/ext/vsdebug/session.h"
 #include "hphp/runtime/ext/vsdebug/command_queue.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
@@ -34,11 +36,9 @@
 namespace HPHP {
 namespace VSDEBUG {
 
-// Forward declaration for transport.
 struct DebugTransport;
-
-// Forward declaration of debugger session.
 struct DebuggerSession;
+struct Breakpoint;
 
 enum ProgramState {
   LoaderBreakpoint,
@@ -91,7 +91,6 @@ struct Debugger final {
   // connected to avoid impacting perf when there is no debugger client
   // attached.
   void setClientConnected(bool connected);
-  ClientPreferences getClientPreferences();
 
   // Shuts down the debugger session and cleans up any resources. This will also
   // unblock any requests that are broken in to the debugger.
@@ -125,11 +124,18 @@ struct Debugger final {
   // Puts the current thread into the command queue for the specified request
   // info. This routine will block until the debugger is resumed by the client,
   // the client disconnects, or the extension is shut down.
-  void processCommandQueue(int threadId, RequestInfo* requestInfo);
+  void processCommandQueue(
+    int threadId,
+    RequestInfo* requestInfo,
+    const char* reason = "execution paused"
+  );
 
   // Called by the debugger transport when a new message is received from
   // a connected debugger client.
   void onClientMessage(folly::dynamic& message);
+
+  // Enters the debugger if the program is paused.
+  void enterDebuggerIfPaused(RequestInfo* requestInfo);
 
   // Executes a command from the debugger client while holding the debugger
   // lock.
@@ -145,6 +151,7 @@ struct Debugger final {
 
   // Stores debugger client preferences.
   void setClientPreferences(ClientPreferences& preferences);
+  ClientPreferences getClientPreferences();
 
   // Starts the session's dummy request.
   void startDummyRequest(const std::string& startupDoc);
@@ -158,7 +165,6 @@ struct Debugger final {
   // Sends a stopped event to the client.
   void sendStoppedEvent(
     const char* reason,
-    const char* displayDetails,
     int64_t threadId
   );
 
@@ -213,7 +219,26 @@ private:
   // connected client.
   void trySendTerminatedEvent();
 
+  // Resumes execution of all request threads.
   void resumeTarget();
+
+  // Halts execution of all request threads.
+  void pauseTarget(const char* stopReason);
+
+  // Notifies all threads that they need to switch to interpreted mode so we
+  // can interrupt them.
+  void interruptAllThreads();
+
+  // Blocks until it is safe to pause the target. If any other threads are
+  // in the process of pausing or resuming target requests, waits until those
+  // operations are complete, and returns with the current thread holding
+  // m_lock, the program state == Running and no request threads paused
+  // in their command queues.
+  //
+  // Preparing to pause separately from pauseTarget() allows us to do things
+  // like ensure a breakpoint wasn't removed by the client during the previous
+  // pause before triggering the breakpoint on a new request thread.
+  void prepareToPauseTarget(RequestInfo* requestInfo);
 
   Mutex m_lock;
   DebugTransport* m_transport {nullptr};
@@ -264,6 +289,12 @@ private:
   // Support for waiting for a client connection to arrive.
   std::mutex m_connectionNotifyLock;
   std::condition_variable m_connectionNotifyCondition;
+
+  // Support for waiting for a resume to complete before executing another
+  // break of the target and a pause to complete before another thread can
+  // also issue a pause
+  std::mutex m_resumeMutex;
+  std::condition_variable m_resumeCondition;
 
   static constexpr char* InternalErrorMsg =
     "An internal error occurred while processing a debugger command.";

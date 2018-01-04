@@ -133,7 +133,8 @@ void Debugger::setClientInitialized() {
   // the debugger client initializes communication so that they appear in the
   // client side thread list.
   for (auto it = m_requestIdMap.begin(); it != m_requestIdMap.end(); it++) {
-    if (it->second->m_executing == ThreadInfo::Executing::UserFunctions) {
+    if (it->second->m_executing == ThreadInfo::Executing::UserFunctions ||
+        it->second->m_executing == ThreadInfo::Executing::RuntimeFunctions) {
       sendThreadEventMessage(it->first, ThreadEventType::ThreadStarted);
     }
 
@@ -141,11 +142,11 @@ void Debugger::setClientInitialized() {
     assert(requestIt != m_requests.end());
     RequestInfo* ri = requestIt->second;
     if (ri->m_flags.requestPaused) {
-      sendStoppedEvent("pause", "Initial Break", it->first);
+      sendStoppedEvent("Initial Break", it->first);
     }
   }
 
-  sendStoppedEvent("pause", "Initial Break", -1);
+  sendStoppedEvent("Initial Break", -1);
 }
 
 int Debugger::getCurrentThreadId() {
@@ -195,7 +196,6 @@ void Debugger::trySendTerminatedEvent() {
 
 void Debugger::sendStoppedEvent(
   const char* reason,
-  const char* displayDetails,
   int64_t threadId
 ) {
   Lock lock(m_lock);
@@ -205,10 +205,7 @@ void Debugger::sendStoppedEvent(
 
   if (reason != nullptr) {
     event["reason"] = reason;
-  }
-
-  if (displayDetails != nullptr) {
-    event["description"] = displayDetails;
+    event["description"] = reason;
   }
 
   if (threadId > 0) {
@@ -295,7 +292,7 @@ void Debugger::requestInit() {
     // dummy requests debugger hook state.
     if ((int64_t)Process::GetThreadId() != m_dummyThreadId) {
       requestInfo = attachToRequest(threadInfo);
-      pauseRequest = m_clientInitialized && m_state != ProgramState::Running;
+      pauseRequest = m_state != ProgramState::Running;
     } else {
       pauseRequest = false;
     }
@@ -311,16 +308,36 @@ void Debugger::requestInit() {
   }
 }
 
-void Debugger::processCommandQueue(int threadId, RequestInfo* requestInfo) {
+void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
+  bool pauseRequest = false;
+
+  {
+    Lock lock(m_lock);
+    pauseRequest = m_state != ProgramState::Running;
+  }
+
+  if (pauseRequest) {
+    processCommandQueue(getCurrentThreadId(), requestInfo);
+  }
+}
+
+void Debugger::processCommandQueue(
+  int threadId,
+  RequestInfo* requestInfo,
+  const char* reason /* = "pause" */
+) {
   {
     Lock lock(m_lock);
     m_pausedRequestCount++;
     requestInfo->m_flags.requestPaused = true;
 
-    // TODO: Put proper stop reason here - if this is the thread that hit a
-    // bp/step/exn, say that. Otherwise indicate its paused due to stop one
-    // stop all semantics + an event on another thread.
-    sendStoppedEvent("pause", "pause", threadId);
+    sendStoppedEvent(reason, threadId);
+
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Thread %d pausing",
+      threadId
+    );
   }
 
   requestInfo->m_commandQueue.processCommands();
@@ -330,7 +347,20 @@ void Debugger::processCommandQueue(int threadId, RequestInfo* requestInfo) {
     requestInfo->m_flags.requestPaused = false;
     m_pausedRequestCount--;
     sendContinuedEvent(threadId);
+
+    std::unique_lock<std::mutex> conditionLock(m_resumeMutex);
+    if (m_pausedRequestCount == 0) {
+      assert(m_state == ProgramState::Running);
+    }
+
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Thread %d resumed",
+      threadId
+    );
   }
+
+  m_resumeCondition.notify_all();
 }
 
 RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
@@ -360,7 +390,8 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
 
   assert(requestInfo != nullptr);
 
-  if (ti->m_executing == ThreadInfo::Executing::UserFunctions) {
+  if (ti->m_executing == ThreadInfo::Executing::UserFunctions ||
+      ti->m_executing == ThreadInfo::Executing::RuntimeFunctions) {
     sendThreadEventMessage(threadId, ThreadEventType::ThreadStarted);
   }
 
@@ -515,7 +546,7 @@ void Debugger::sendCommandResponse(
 }
 
 void Debugger::resumeTarget() {
-  // Note: caller must hold m_lock here.
+  m_lock.assertOwnedBySelf();
 
   m_state = ProgramState::Running;
 
@@ -531,6 +562,56 @@ void Debugger::resumeTarget() {
   }
 
   sendContinuedEvent(-1);
+}
+
+void Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
+  m_lock.assertOwnedBySelf();
+
+  while (m_state != ProgramState::Running) {
+    m_lock.assertOwnedBySelf();
+
+    // If a resume is currently in progress, we must wait for all threads
+    // to resume execution before breaking again. Otherwise, the client will
+    // see interleaved continue and stop events and the the state of the UX
+    // becomes undefined.
+    std::unique_lock<std::mutex> conditionLock(m_resumeMutex);
+    while (m_pausedRequestCount > 0) {
+      // Need to drop m_lock before waiting.
+      m_lock.unlock();
+      m_resumeCondition.wait(conditionLock);
+
+      // And re-acquire it before continuing.
+      m_lock.lock();
+    }
+
+    // Between the time the resume condition was notified and the time this
+    // thread re-acquired m_lock, it is possible another thread paused the
+    // target again. If that happens, we need to enter the command queue
+    // and service the other pause before we can raise a breakpoint for this
+    // request thread.
+    m_lock.assertOwnedBySelf();
+    if (m_state != ProgramState::Running) {
+      // Drop the lock and enter the command queue.
+      m_lock.unlock();
+      processCommandQueue(getCurrentThreadId(), requestInfo);
+
+      // Re-acquire before continuing.
+      m_lock.lock();
+    }
+  }
+
+  m_lock.assertOwnedBySelf();
+  assert(m_state == ProgramState::Running);
+}
+
+void Debugger::pauseTarget(const char* stopReason) {
+  m_lock.assertOwnedBySelf();
+  assert(m_state == ProgramState::Running);
+
+  m_state = ProgramState::Paused;
+
+  sendStoppedEvent(stopReason, getCurrentThreadId());
+  interruptAllThreads();
 }
 
 void Debugger::onClientMessage(folly::dynamic& message) {
@@ -670,6 +751,14 @@ void Debugger::startDummyRequest(const std::string& startupDoc) {
 void Debugger::setDummyThreadId(int64_t threadId) {
   Lock lock(m_lock);
   m_dummyThreadId = threadId;
+}
+
+
+void Debugger::interruptAllThreads() {
+  for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
+    ThreadInfo* ti = it->first;
+    ti->m_reqInjectionData.setDebuggerIntr(true);
+  }
 }
 
 }

@@ -415,6 +415,17 @@ private:
   unsigned int m_objectId;
 };
 
+//////  Handles run to location requests from the debugger client.      //////
+// A run to location request is very similar to just setting a temp breakpoint
+// at the specified location and removing it when it hits. However, the bp
+// is never sent to the front end so it does not appear in the debugger client
+// UX (no breakpoint added, removed or resolved events). Additionally, the bp
+// is only added to a single request thread, and all other request threads
+// remain paused.
+struct RunToLocationCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(RunToLocationCommand, CommandTarget::Request, true);
+};
+
 #undef VS_COMMAND_COMMON_IMPL
 
 }

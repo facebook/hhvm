@@ -117,6 +117,13 @@ bool VSCommand::parseCommand(
 
     *command = new ContinueCommand(debugger, clientMessage);
 
+  } else if (cmdString == "fb_continueToLocation") {
+
+    // NOTE: fb_continueToLocation is a Facebook addition to the VS Code
+    // debug protocol. Other clients are not expected to send this message
+    // since it's not standard, but Nuclide can send it.
+    *command = new RunToLocationCommand(debugger, clientMessage);
+
   } else if (cmdString == "initialize") {
 
     *command = new InitializeCommand(debugger, clientMessage);

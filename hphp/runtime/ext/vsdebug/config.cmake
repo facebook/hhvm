@@ -15,6 +15,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     logging.cpp
     pause_command.cpp
     resolve_bps_command.cpp
+    run_to_location_command.cpp
     scopes_command.cpp
     session.cpp
     socket_transport.cpp

@@ -424,17 +424,6 @@ void Debugger::processCommandQueue(
 
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelInfo,
-      "Thread %d resuming",
-      threadId
-    );
-
-    std::unique_lock<std::mutex> conditionLock(m_resumeMutex);
-    if (m_pausedRequestCount == 0) {
-      assert(m_state == ProgramState::Running);
-    }
-
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelInfo,
       "Thread %d resumed",
       threadId
     );
@@ -716,12 +705,17 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
   return clientConnected() ? ReadyToPause : ErrorNoClient;
 }
 
-void Debugger::pauseTarget(const char* stopReason) {
+void Debugger::pauseTarget(RequestInfo* ri, const char* stopReason) {
   m_lock.assertOwnedBySelf();
 
   m_state = ProgramState::Paused;
 
   sendStoppedEvent(stopReason, getCurrentThreadId());
+
+  if (ri != nullptr) {
+    clearStepOperation(ri);
+  }
+
   interruptAllThreads();
 }
 
@@ -1169,10 +1163,8 @@ void Debugger::onLineBreakpointHit(
         stopReason = getStopReasonForBp(matchingBpId, bp->m_path, bp->m_line);
 
         // Breakpoint hit!
-        pauseTarget(stopReason.c_str());
+        pauseTarget(ri, stopReason.c_str());
         bpMgr->onBreakpointHit(bpId);
-        clearStepOperation(ri);
-
         break;
       }
     }
@@ -1180,6 +1172,33 @@ void Debugger::onLineBreakpointHit(
 
   if (matchingBpId >= 0) {
     // If an active breakpoint was found at this location, enter the debugger.
+    processCommandQueue(getCurrentThreadId(), ri, stopReason.c_str());
+  } else if (ri->m_runToLocationInfo.path == filePath &&
+             line == ri->m_runToLocationInfo.line) {
+
+    // Hit our run to location destination!
+    stopReason = "Run to location";
+    ri->m_runToLocationInfo.path = "";
+    ri->m_runToLocationInfo.line = -1;
+
+    // phpRemoveBreakpointLine doesn't refcount or anything, so it's only
+    // safe to remove this if there is no real bp at the line.
+    bool realBp = false;
+    BreakpointManager* bpMgr = m_session->getBreakpointManager();
+    const auto bpIds = bpMgr->getBreakpointIdsByFile(filePath);
+    for (auto it = bpIds.begin(); it != bpIds.end(); it++) {
+      Breakpoint* bp = bpMgr->getBreakpointById(*it);
+      if (bp->m_line == line) {
+        realBp = true;
+        break;
+      }
+    }
+
+    if (!realBp) {
+      phpRemoveBreakPointLine(compilationUnit, line);
+    }
+
+    pauseTarget(ri, stopReason.c_str());
     processCommandQueue(getCurrentThreadId(), ri, stopReason.c_str());
   } else {
     // This breakpoint no longer exists. Remove it from the VM.
@@ -1239,8 +1258,7 @@ void Debugger::onExceptionBreakpointHit(
       return;
     }
 
-    pauseTarget(stopReason.c_str());
-    clearStepOperation(ri);
+    pauseTarget(ri, stopReason.c_str());
   }
 
   processCommandQueue(getCurrentThreadId(), ri, stopReason.c_str());
@@ -1263,7 +1281,7 @@ void Debugger::onAsyncBreak() {
     "Debugger paused due to async-break request from client."
   );
 
-  pauseTarget("Async-break");
+  pauseTarget(nullptr, "Async-break");
 }
 
 void Debugger::onError(

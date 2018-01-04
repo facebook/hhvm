@@ -73,6 +73,11 @@ struct RequestInfo {
   CommandQueue m_commandQueue;
   RequestBreakpointInfo* m_breakpointInfo;
   std::unordered_map<unsigned int, ServerObject*> m_serverObjects;
+
+  struct {
+    std::string path;
+    int line;
+  } m_runToLocationInfo;
 };
 
 // An exception to be thrown when a message from the client cannot be processed.
@@ -232,7 +237,9 @@ struct Debugger final {
 
   // Checks if we are stepping for a particular request.
   static bool isStepInProgress(RequestInfo* requestInfo) {
-    return requestInfo->m_stepReason != nullptr;
+    return requestInfo->m_stepReason != nullptr ||
+           (!requestInfo->m_runToLocationInfo.path.empty() &&
+            requestInfo->m_runToLocationInfo.line > 0);
   }
 
   // Clears the state filters for a step operation on the specified request
@@ -241,8 +248,16 @@ struct Debugger final {
     if (isStepInProgress(requestInfo)) {
       phpDebuggerContinue();
       requestInfo->m_stepReason = nullptr;
+      requestInfo->m_runToLocationInfo.path.clear();
     }
   }
+
+  // Adjusts a breakpoints source line based on the source mapping table in
+  // the specified complilation unit in which the breakpoint is being installed.
+  std::pair<int, int> calibrateBreakpointLineInUnit(
+    const Unit* unit,
+    int bpLine
+  );
 
 private:
 
@@ -296,7 +311,7 @@ private:
   void resumeTarget();
 
   // Halts execution of all request threads.
-  void pauseTarget(const char* stopReason);
+  void pauseTarget(RequestInfo* ri, const char* stopReason);
 
   // Attempts to resolve and install a breakpoint for the current request.
   // Returns true if the bp was resolved, false if it is unresolved and pending.
@@ -304,13 +319,6 @@ private:
     RequestInfo* ri,
     const int bpId,
     const Breakpoint* bp
-  );
-
-  // Adjusts a breakpoints source line based on the source mapping table in
-  // the specified complilation unit in which the breakpoint is being installed.
-  std::pair<int, int> calibrateBreakpointLineInUnit(
-    const Unit* unit,
-    int bpLine
   );
 
   // Attempts to resolve the breakpoint in the specified compilation unit.

@@ -19,6 +19,8 @@
 
 #include <atomic>
 #include <unordered_map>
+#include <condition_variable>
+#include <mutex>
 
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
@@ -124,6 +126,10 @@ struct Debugger final {
     std::function<bool(folly::dynamic& responseMsg)> callback
   );
 
+  // Blocks until a client is connected. Returns immediately if a client
+  // is already connected.
+  void waitForClientConnection();
+
 private:
 
   // Cleans up and frees the specified request info object and shuts down its
@@ -192,6 +198,10 @@ private:
   // Indicates which request is the "active" request for debugger client
   // commands, or nullptr if there is no such request.
   ThreadInfo* m_activeRequest {nullptr};
+
+  // Support for waiting for a client connection to arrive.
+  std::mutex m_connectionNotifyLock;
+  std::condition_variable m_connectionNotifyCondition;
 
   static constexpr char* InternalErrorMsg =
     "An internal error occurred while processing a debugger command.";

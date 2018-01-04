@@ -96,10 +96,26 @@ void VSDebugExtension::moduleInit() {
       "Extension started in SCRIPT mode."
     );
 
-    try {
-      transport = new FdTransport(s_debugger);
-    } catch (...) {
-      assert(transport == nullptr);
+    // If a listen port was specified on the command line, use the TCP socket
+    // transport even in script mode. Otherwise, fall back to using a pipe with
+    // our parent process.
+    if (RuntimeOption::VSDebuggerListenPort > 0) {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelInfo,
+        "Blocking script startup. Waiting for debugger to attach on port: %d",
+        RuntimeOption::VSDebuggerListenPort
+      );
+
+      transport = new SocketTransport(
+        s_debugger,
+        RuntimeOption::VSDebuggerListenPort
+      );
+    } else {
+      try {
+        transport = new FdTransport(s_debugger);
+      } catch (...) {
+        assert(transport == nullptr);
+      }
     }
   }
 
@@ -129,6 +145,24 @@ void VSDebugExtension::requestInit() {
   }
 
   assert(s_debugger != nullptr);
+
+  // If we're in SCRIPT mode and a TCP listen port was specified on the command
+  // line, we need to block starting the script until the debugger client
+  // connects.
+  if (!RuntimeOption::ServerExecutionMode() &&
+      RuntimeOption::VSDebuggerListenPort > 0) {
+
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Blocking script startup until debugger client connects..."
+    );
+    s_debugger->waitForClientConnection();
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Debugger client connected."
+    );
+  }
+
   s_debugger->requestInit();
 }
 

@@ -181,7 +181,7 @@ struct ProgramOptions {
   int xhprofFlags;
   std::string show;
   std::string parse;
-
+  int vsDebugPort;
   Eval::DebuggerClientOptions debugger_options;
 };
 
@@ -1474,6 +1474,8 @@ static int execute_program_impl(int argc, char** argv) {
      "unique identifier of server instance")
     ("xhprof-flags", value<int>(&po.xhprofFlags)->default_value(0),
      "Set XHProf flags")
+    ("vsDebugPort", value<int>(&po.vsDebugPort)->default_value(-1),
+      "Debugger port to listen on for the VS Code debug extension")
     ;
 
   positional_options_description p;
@@ -1638,6 +1640,7 @@ static int execute_program_impl(int argc, char** argv) {
   if (po.mode != "debug" && po.mode != "vsdebug") SystemLib::s_source = "";
   if (po.mode == "vsdebug") {
     RuntimeOption::EnableVSDebugger = true;
+    RuntimeOption::VSDebuggerListenPort = po.vsDebugPort;
   }
 
   // we need to initialize pcre cache table very early

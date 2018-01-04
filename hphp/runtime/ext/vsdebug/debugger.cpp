@@ -85,6 +85,13 @@ void Debugger::setClientConnected(bool connected) {
       m_clientConnected.store(false, std::memory_order_release);
     }
 
+    // If the script startup thread is waiting for a client connection, wake it
+    // up now.
+    {
+      std::unique_lock<std::mutex> lock(m_connectionNotifyLock);
+      m_connectionNotifyCondition.notify_all();
+    }
+
     // TODO: (Ericblue) Set the program state to LoaderBreakpoint and wrangle
     // all threads for the initial pause + breakpoint sync here.
   } else {
@@ -401,6 +408,15 @@ void Debugger::onClientMessage(folly::dynamic& message) {
   if (command != nullptr) {
     delete command;
   }
+}
+
+void Debugger::waitForClientConnection() {
+  std::unique_lock<std::mutex> lock(m_connectionNotifyLock);
+  if (clientConnected()) {
+    return;
+  }
+
+  m_connectionNotifyCondition.wait(lock);
 }
 
 }

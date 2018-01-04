@@ -1442,6 +1442,8 @@ and expr_
               ft_ret = fty.ft_ret;
               ft_ret_by_ref = fty.ft_ret_by_ref;
               ft_reactive = fty.ft_reactive;
+              ft_mutable = fty.ft_mutable;
+              ft_returns_mutable = fty.ft_returns_mutable;
               ft_return_disposable = fty.ft_return_disposable;
             } in
             make_result env (T.Method_caller(pos_cname, meth_name))
@@ -3174,6 +3176,8 @@ and is_abstract_ft fty = match fty with
                 ft_ret = tr;
                 ft_ret_by_ref = fty.ft_ret_by_ref;
                 ft_reactive = fty.ft_reactive;
+                ft_mutable = fty.ft_mutable;
+                ft_returns_mutable = fty.ft_returns_mutable;
                 ft_return_disposable = fty.ft_return_disposable;
               }
             ) in

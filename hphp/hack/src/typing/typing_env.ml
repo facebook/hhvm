@@ -97,6 +97,8 @@ let make_ft p reactive is_coroutine params ret_ty =
     ft_ret_by_ref = false;
     ft_reactive = reactive;
     ft_return_disposable = false;
+    ft_returns_mutable = false;
+    ft_mutable = false;
   }
 
 let get_shape_field_name = function

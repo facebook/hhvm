@@ -622,6 +622,7 @@ let default_fun_param ty : 'a fun_param = {
   fp_type = ty;
   fp_kind = FPnormal;
   fp_accept_disposable = false;
+  fp_mutable = false;
 }
 
 (*****************************************************************************)

@@ -132,6 +132,8 @@ module UserAttributes = struct
   let uaReturnDisposable    = "__ReturnDisposable"
   let uaReactive            = "__Rx"
   let uaLocalReactive       = "__RxLocal"
+  let uaMutable             = "__Mutable"
+  let uaMutableReturn       = "__MutableReturn"
 
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
@@ -148,6 +150,8 @@ module UserAttributes = struct
       uaReturnDisposable;
       uaReactive;
       uaLocalReactive;
+      uaMutable;
+      uaMutableReturn;
     ]
 end
 

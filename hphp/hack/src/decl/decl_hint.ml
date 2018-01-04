@@ -62,6 +62,7 @@ and hint_ p env = function
         fp_type = hint env x;
         fp_kind = get_param_mode ~is_ref:false k;
         fp_accept_disposable = false;
+        fp_mutable = false;
       }
     in
     let paraml = List.map (List.zip_exn hl kl) make_param in
@@ -85,6 +86,8 @@ and hint_ p env = function
       ft_ret_by_ref = false;
       ft_reactive = is_reactive;
       ft_return_disposable = false;
+      ft_mutable = false;
+      ft_returns_mutable = false;
     }
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->

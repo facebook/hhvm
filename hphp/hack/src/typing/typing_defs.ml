@@ -356,6 +356,8 @@ and 'phase fun_type = {
   ft_ret_by_ref : bool                ;
   ft_reactive   : bool                ;
   ft_return_disposable : bool         ;
+  ft_mutable : bool                   ;
+  ft_returns_mutable : bool          ;
 }
 
 (* Arity information for a fun_type; indicating the minimum number of
@@ -379,6 +381,7 @@ and 'phase fun_param = {
   fp_type : 'phase ty;
   fp_kind : param_mode;
   fp_accept_disposable : bool;
+  fp_mutable           : bool;
 }
 
 and 'phase fun_params = 'phase fun_param list

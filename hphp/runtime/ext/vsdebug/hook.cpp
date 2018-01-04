@@ -39,28 +39,32 @@ void VSDebugHook::onFuncExitBreak(const Func* func) {
   // TODO: (Ericblue) NOT IMPLEMENTED
 }
 
+// Common prologue code to set up context for all types of breaks.
+#define PREPARE_BREAK_CONTEXT(EnterDebugger)                     \
+  Debugger* debugger = VSDebugExtension::getDebugger();          \
+  RequestInfo* requestInfo = debugger->getRequestInfo();         \
+  if (debugger == nullptr || requestInfo == nullptr) {           \
+    return;                                                      \
+  }                                                              \
+  if (EnterDebugger) { tryEnterDebugger(); }                     \
+
 void VSDebugHook::onLineBreak(const Unit* unit, int line) {
-  // If the VM thinks this request has hit a line break, first try to enter
-  // the debugger if it is already paused due to another event (another
-  // request's bp, an exception, an async-break, etc) and handle that.
-  tryEnterDebugger();
-
-  // After resuming from that, service this breakpoint if it is still active.
-  Debugger* debugger = VSDebugExtension::getDebugger();
-  RequestInfo* requestInfo = debugger->getRequestInfo();
-  if (requestInfo == nullptr) {
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelError,
-      "Could not find request info for request!"
-    );
-    return;
-  }
-
+  PREPARE_BREAK_CONTEXT(true)
   debugger->onLineBreakpointHit(requestInfo, unit, line);
 }
 
 void VSDebugHook::onExceptionThrown(ObjectData* exception) {
-  // TODO: (Ericblue) NOT IMPLEMENTED
+  PREPARE_BREAK_CONTEXT(true)
+
+  const StringData* name = exception->getVMClass()->name();
+  const Variant msg = exception->o_invoke(s_getMsg, init_null(), false);
+  const HPHP::String msg_str = msg.isNull() ? empty_string() : msg.toString();
+
+  debugger->onExceptionBreakpointHit(
+    requestInfo,
+    name == nullptr ? std::string("Unknown Exception") : name->toCppString(),
+    msg_str.toCppString()
+  );
 }
 
 void VSDebugHook::onError(
@@ -68,7 +72,14 @@ void VSDebugHook::onError(
   int errnum,
   const std::string& message
 ) {
-  // TODO: (Ericblue) NOT IMPLEMENTED
+  PREPARE_BREAK_CONTEXT(true)
+
+  debugger->onError(
+    requestInfo,
+    extendedException,
+    errnum,
+    message
+  );
 }
 
 void VSDebugHook::onStepInBreak(const Unit* unit, int line) {
@@ -84,15 +95,7 @@ void VSDebugHook::onNextBreak(const Unit* unit, int line) {
 }
 
 void VSDebugHook::onFileLoad(Unit* efile) {
-  Debugger* debugger = VSDebugExtension::getDebugger();
-  RequestInfo* requestInfo = debugger->getRequestInfo();
-  if (requestInfo == nullptr) {
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelError,
-      "Could not find request info for request!"
-    );
-    return;
-  }
+  PREPARE_BREAK_CONTEXT(true)
 
   // Resolve any unresolved breakpoints that may be in this compilation unit.
   debugger->onCompilationUnitLoaded(requestInfo, efile);
@@ -108,19 +111,7 @@ void VSDebugHook::onDefFunc(const Func* func) {
 }
 
 void VSDebugHook::tryEnterDebugger() {
-  Debugger* debugger = VSDebugExtension::getDebugger();
-  if (!debugger->clientConnected()) {
-    return;
-  }
-
-  RequestInfo* requestInfo = debugger->getRequestInfo();
-  if (requestInfo == nullptr) {
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelError,
-      "Could not find request info for request!"
-    );
-    return;
-  }
+  PREPARE_BREAK_CONTEXT(false)
 
   // The first time this request enters the debugger, remove the artificial
   // memory limit since a debugger is attached.
@@ -135,7 +126,10 @@ void VSDebugHook::tryEnterDebugger() {
   debugger->tryInstallBreakpoints(requestInfo);
 }
 
+#undef PREPARE_BREAK_CONTEXT
+
 const StaticString VSDebugHook::s_memoryLimit {"memory_limit"};
+const StaticString VSDebugHook::s_getMsg {"getMessage"};
 
 }
 }

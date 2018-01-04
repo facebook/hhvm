@@ -606,7 +606,8 @@ void Debugger::resumeTarget() {
   sendContinuedEvent(-1);
 }
 
-void Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
+Debugger::PrepareToPauseResult
+Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
   m_lock.assertOwnedBySelf();
 
   while (m_state != ProgramState::Running) {
@@ -644,6 +645,12 @@ void Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
 
   m_lock.assertOwnedBySelf();
   assert(m_state == ProgramState::Running);
+
+  if (!clientConnected()) {
+    return ErrorNoClient;
+  }
+
+  return ReadyToPause;
 }
 
 void Debugger::pauseTarget(const char* stopReason) {
@@ -694,6 +701,19 @@ void Debugger::onClientMessage(folly::dynamic& message) {
 
     if (!VSCommand::parseCommand(this, message, &command)) {
       assert(command == nullptr);
+
+      try {
+        auto cmdName = message["command"];
+        if (cmdName.isString()) {
+          std::string commandName = cmdName.asString();
+          std::string errorMsg("The command \"");
+          errorMsg += commandName;
+          errorMsg += "\" was invalid or is not implemented in the debugger.";
+          throw DebuggerCommandException(errorMsg.c_str());
+        }
+      } catch (std::out_of_range e) {
+      }
+
       throw DebuggerCommandException(
         "The command was invalid or is not implemented in the debugger."
       );
@@ -1072,9 +1092,7 @@ void Debugger::onLineBreakpointHit(
   {
     Lock lock(m_lock);
 
-    prepareToPauseTarget(ri);
-
-    if (!clientConnected()) {
+    if (prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
       return;
     }
 
@@ -1109,6 +1127,103 @@ void Debugger::onLineBreakpointHit(
     );
     phpRemoveBreakPointLine(compilationUnit, line);
   }
+}
+
+void Debugger::onExceptionBreakpointHit(
+  RequestInfo* ri,
+  const std::string& exceptionName,
+  const std::string& exceptionMsg
+) {
+  std::string stopReason("Exception (");
+  stopReason += exceptionName;
+  stopReason += ") thrown";
+
+  std::string userMsg = "Request ";
+  userMsg += std::to_string(getCurrentThreadId());
+  userMsg += ": ";
+  userMsg += stopReason + ": ";
+  userMsg += exceptionMsg;
+
+  {
+    Lock lock(m_lock);
+
+    if (!clientConnected()) {
+      return;
+    }
+
+    BreakpointManager* bpMgr = m_session->getBreakpointManager();
+    ExceptionBreakMode breakMode = bpMgr->getExceptionBreakMode();
+
+    switch (breakMode) {
+      case BreakNone:
+        // Do not break on exceptions.
+        return;
+      case BreakUnhandled:
+      case BreakUserUnhandled:
+        // The PHP VM doesn't give us any way to distinguish between handled
+        // and unhandled exceptions. Print a message to the console but do
+        // not break.
+        sendUserMessage(userMsg.c_str(), DebugTransport::OutputLevelWarning);
+        return;
+      case BreakAll:
+        break;
+      default:
+        assert(false);
+    }
+
+    if (prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
+      return;
+    }
+
+    pauseTarget(stopReason.c_str());
+  }
+
+  processCommandQueue(getCurrentThreadId(), ri, stopReason.c_str());
+}
+
+void Debugger::onError(
+  RequestInfo* requestInfo,
+  const ExtendedException& extendedException,
+  int errnum,
+  const std::string& message
+) {
+  const char* phpError;
+  switch (static_cast<ErrorMode>(errnum)) {
+    case ErrorMode::ERROR:
+    case ErrorMode::CORE_ERROR:
+    case ErrorMode::COMPILE_ERROR:
+    case ErrorMode::USER_ERROR:
+      phpError = "Fatal error";
+      break;
+    case ErrorMode::RECOVERABLE_ERROR:
+      phpError = "Catchable fatal error";
+      break;
+    case ErrorMode::WARNING:
+    case ErrorMode::CORE_WARNING:
+    case ErrorMode::COMPILE_WARNING:
+    case ErrorMode::USER_WARNING:
+      phpError = "Warning";
+      break;
+    case ErrorMode::PARSE:
+      phpError = "Parse error";
+      break;
+    case ErrorMode::NOTICE:
+    case ErrorMode::USER_NOTICE:
+      phpError = "Notice";
+      break;
+    case ErrorMode::STRICT:
+      phpError = "Strict standards";
+      break;
+    case ErrorMode::PHP_DEPRECATED:
+    case ErrorMode::USER_DEPRECATED:
+      phpError = "Deprecated";
+      break;
+    default:
+      phpError = "Unknown error";
+      break;
+  }
+
+  onExceptionBreakpointHit(requestInfo, phpError, message);
 }
 
 std::string Debugger::getFilePathForUnit(const HPHP::Unit* compilationUnit) {

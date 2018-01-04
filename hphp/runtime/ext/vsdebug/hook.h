@@ -59,6 +59,7 @@ private:
   void tryEnterDebugger();
 
   static const StaticString s_memoryLimit;
+  static const StaticString s_getMsg;
 };
 
 }

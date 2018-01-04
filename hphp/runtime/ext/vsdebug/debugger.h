@@ -210,6 +210,20 @@ struct Debugger final {
     int line
   );
 
+  // Called when a request hits an exception.
+  void onExceptionBreakpointHit(
+    RequestInfo* ri,
+    const std::string& exceptionName,
+    const std::string& exceptionMsg
+  );
+
+  void onError(
+    RequestInfo* requestInfo,
+    const ExtendedException& extendedException,
+    int errnum,
+    const std::string& message
+  );
+
 private:
 
   enum ThreadEventType {
@@ -299,7 +313,11 @@ private:
   // Preparing to pause separately from pauseTarget() allows us to do things
   // like ensure a breakpoint wasn't removed by the client during the previous
   // pause before triggering the breakpoint on a new request thread.
-  void prepareToPauseTarget(RequestInfo* requestInfo);
+  enum PrepareToPauseResult {
+    ReadyToPause,
+    ErrorNoClient
+  };
+  PrepareToPauseResult prepareToPauseTarget(RequestInfo* requestInfo);
 
   // Normalizes the file path for a compilation unit.
   static std::string getFilePathForUnit(const HPHP::Unit* compilationUnit);

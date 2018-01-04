@@ -525,7 +525,10 @@ bool XDebugServer::createServer(Mode mode) {
 }
 
 bool XDebugServer::attach(Mode mode) {
-  assert(XDEBUG_GLOBAL(Server) != nullptr);
+  if (XDEBUG_GLOBAL(Server) == nullptr) {
+    return false;
+  }
+
   try {
     if (XDEBUG_GLOBAL(Server)->initDbgp()) {
       XDEBUG_GLOBAL(Server)->m_dbgpInitialized = true;

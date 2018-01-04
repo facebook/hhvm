@@ -14,44 +14,34 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_VSDEBUG_H_
-#define incl_HPHP_EXT_VSDEBUG_H_
+#ifndef incl_HPHP_VSDEBUG_FDTRANSPORT_H_
+#define incl_HPHP_VSDEBUG_FDTRANSPORT_H_
 
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
-#include "hphp/runtime/ext/vsdebug/fdtransport.h"
-#include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/base/req-malloc.h"
 
 namespace HPHP {
 namespace VSDEBUG {
 
-#define VSDEBUG_NAME "vsdebug"
-#define VSDEBUG_VERSION "1.0"
+// FdTransport transport speaks to the debugger client via a fd stream on a
+// known file descriptor.
+struct FdTransport : public DebugTransport {
+  FdTransport(Debugger* debugger);
+  virtual ~FdTransport() {
+    if (m_transportFd != nullptr) {
+      fclose(m_transportFd);
+      m_transportFd = nullptr;
+    }
+  }
 
-struct VSDebugExtension final : Extension {
-  VSDebugExtension() : Extension(VSDEBUG_NAME, VSDEBUG_VERSION) { }
-  ~VSDebugExtension();
-
-  void moduleLoad(const IniSetting::Map& ini, const Hdf hdf) override;
-  void moduleInit() override;
-  void requestInit() override;
-  void requestShutdown() override;
-  bool moduleEnabled() const override { return m_enabled; }
-
-  static constexpr int DefaultListenPort = 8999;
-  static bool s_configEnabled;
-  static std::string s_logFilePath;
-  static int s_attachListenPort;
+  int connectedClientCount() const override;
 
 private:
 
-  // The following members are set during module load and init and read only
-  // after that. They can therefore be safely accessed lock-free.
-  bool m_enabled {false};
-  Debugger* m_debugger {nullptr};
+  static constexpr int TransportFd = 3;
 };
 
 }
 }
 
-#endif // incl_HPHP_EXT_VSDEBUG_H_
+#endif // incl_HPHP_VSDEBUG_FDTRANSPORT_H_

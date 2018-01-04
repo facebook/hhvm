@@ -23,9 +23,13 @@ namespace VSDEBUG {
 
 VSDebugExtension::~VSDebugExtension() {
   VSDebugLogger::FinalizeLogging();
+  if (m_debugger != nullptr) {
+    delete m_debugger;
+    m_debugger = nullptr;
+  }
 }
 
-void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
+void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, const Hdf hdf) {
   // This extension is ** disabled ** by default, unless the configuration
   // says otherwise. When !m_enabled, the other hooks in this module no-op.
   Config::Bind(s_configEnabled, ini, hdf, "Eval.Debugger.VSDebugEnable", false);
@@ -61,10 +65,25 @@ void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
 }
 
 void VSDebugExtension::moduleInit() {
+  SCOPE_EXIT {
+    // Memory barrier to ensure release semantics for our write of m_debugger
+    // and m_enabled in moduleLoad and this routine.
+    std::atomic_thread_fence(std::memory_order_release);
+    VSDebugLogger::LogFlush();
+  };
+
   if (!m_enabled) {
     return;
   }
 
+  m_debugger = new Debugger();
+  if (m_debugger == nullptr) {
+    // Failed to allocate debugger, disable the extension.
+    m_enabled = false;
+    return;
+  }
+
+  DebugTransport* transport = nullptr;
   if (RuntimeOption::ServerExecutionMode()) {
     // If HHVM is running in server mode, start up the debugger socket server
     // and listen for debugger clients to connect.
@@ -75,12 +94,31 @@ void VSDebugExtension::moduleInit() {
     // with the debugger client locally via known file descriptors.
     VSDebugLogger::Log(VSDebugLogger::LogLevelInfo,
                       "Extension started in SCRIPT mode");
+
+    // TODO: (Ericblue) For script mode, enable module only if -mode vsdebug was
+    // passed to HHVM on the command line.
+
+    try {
+      transport = new FdTransport(m_debugger);
+    } catch (...) {
+      assert(transport == nullptr);
+    }
   }
 
-  VSDebugLogger::LogFlush();
+  if (transport == nullptr) {
+    // Failed to allocate transport, disable the extension.
+    m_enabled = false;
+    return;
+  }
+
+  assert(m_debugger != nullptr);
+  m_debugger->setTransport(transport);
 }
 
 void VSDebugExtension::requestInit() {
+  // Memory barrier to ensure acquire semantics for the read of m_enabled below.
+  std::atomic_thread_fence(std::memory_order_acquire);
+
   if (!m_enabled) {
     return;
   }

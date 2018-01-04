@@ -1,5 +1,5 @@
 (* @generated from aast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
-(* Copyright (c) 2018, Facebook, Inc. All rights reserved. *)
+(* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
 (* SourceShasum<<8170dd46e27ca70e49a8774fd295aa4756bb454e>> *)
 
 (* DO NOT EDIT MANUALLY. *)

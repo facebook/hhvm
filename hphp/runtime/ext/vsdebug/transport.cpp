@@ -232,11 +232,30 @@ void DebugTransport::processIncomingMessages() {
 
     // Out of space in the buffer. Attempt to resize it.
     if (bufferPosition == bufferSize) {
-      const size_t newSize = buffer == nullptr
+      size_t newSize = buffer == nullptr
         ? ReadBufferDefaultSize
         : bufferSize * 2;
 
-      buffer = (char*)realloc(buffer, newSize);
+      // Set a reasonable max size, no client message is ever expected to be
+      // this big.
+      constexpr int maxSize = 1024 * 1024;
+      if (newSize > maxSize) {
+        newSize = maxSize;
+      }
+
+      if (newSize == bufferSize) {
+        // The buffer is already as big as we're willing to go, and the
+        // message is bigger than that. Fail.
+        VSDebugLogger::Log(
+          VSDebugLogger::LogLevelError,
+          "Transport buffer is already at max size but requested size is %d!",
+          newSize
+        );
+        break;
+      } else {
+        buffer = (char*)realloc(buffer, newSize);
+      }
+
       if (buffer == nullptr) {
         VSDebugLogger::Log(
           VSDebugLogger::LogLevelError,

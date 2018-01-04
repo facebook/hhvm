@@ -1,0 +1,10 @@
+HHVM_DEFINE_EXTENSION("vsdebug"
+  SOURCES
+    ext_vsdebug.cpp
+    logging.cpp
+  HEADERS
+    ext_vsdebug.h
+    logging.h
+  DEPENDS
+    libFolly
+)

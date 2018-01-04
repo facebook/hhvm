@@ -33,7 +33,10 @@ int64_t InitializeCommand::targetThreadId() {
   return -1;
 }
 
-bool InitializeCommand::executeImpl(folly::dynamic* responseMsg) {
+bool InitializeCommand::executeImpl(
+  DebuggerSession* session,
+  folly::dynamic* responseMsg
+) {
   const folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   ClientPreferences preferences = {0};

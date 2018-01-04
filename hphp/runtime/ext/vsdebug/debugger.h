@@ -29,6 +29,7 @@
 #include "hphp/runtime/ext/vsdebug/command_queue.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/hook.h"
+#include "hphp/runtime/ext/vsdebug/client_preferences.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -90,6 +91,7 @@ struct Debugger final {
   // connected to avoid impacting perf when there is no debugger client
   // attached.
   void setClientConnected(bool connected);
+  ClientPreferences getClientPreferences();
 
   // Shuts down the debugger session and cleans up any resources. This will also
   // unblock any requests that are broken in to the debugger.
@@ -133,7 +135,8 @@ struct Debugger final {
   // lock.
   bool executeClientCommand(
     VSCommand* command,
-    std::function<bool(folly::dynamic& responseMsg)> callback
+    std::function<bool(DebuggerSession* session,
+                       folly::dynamic& responseMsg)> callback
   );
 
   // Blocks until a client is connected. Returns immediately if a client

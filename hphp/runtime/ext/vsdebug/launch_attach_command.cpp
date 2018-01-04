@@ -33,7 +33,10 @@ int64_t LaunchAttachCommand::targetThreadId() {
   return -1;
 }
 
-bool LaunchAttachCommand::executeImpl(folly::dynamic* responseMsg) {
+bool LaunchAttachCommand::executeImpl(
+  DebuggerSession* session,
+  folly::dynamic* responseMsg
+) {
   folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   const std::string noDocument = std::string("");

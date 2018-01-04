@@ -37,7 +37,10 @@ int64_t ContinueCommand::targetThreadId() {
   return -1;
 }
 
-bool ContinueCommand::executeImpl(folly::dynamic* responseMsg) {
+bool ContinueCommand::executeImpl(
+  DebuggerSession* session,
+  folly::dynamic* responseMsg
+) {
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelInfo,
     "Client sent continue command."

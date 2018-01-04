@@ -430,7 +430,8 @@ RequestInfo* Debugger::getRequestInfo() {
 
 bool Debugger::executeClientCommand(
   VSCommand* command,
-  std::function<bool(folly::dynamic& responseMsg)> callback
+  std::function<bool(DebuggerSession* session,
+                     folly::dynamic& responseMsg)> callback
 ) {
   Lock lock(m_lock);
 
@@ -447,7 +448,7 @@ bool Debugger::executeClientCommand(
     // should be resumed, or false if it should continue to block in its
     // command queue.
     folly::dynamic responseMsg = folly::dynamic::object;
-    bool resumeThread = callback(responseMsg);
+    bool resumeThread = callback(m_session, responseMsg);
 
     if (command->commandTarget() != CommandTarget::WorkItem) {
       sendCommandResponse(command, responseMsg);
@@ -643,6 +644,17 @@ void Debugger::setClientPreferences(ClientPreferences& preferences) {
 
   assert(m_session != nullptr);
   m_session->setClientPreferences(preferences);
+}
+
+ClientPreferences Debugger::getClientPreferences() {
+  Lock lock(m_lock);
+  if (!clientConnected()) {
+    ClientPreferences empty = {};
+    return empty;
+  }
+
+  assert(m_session != nullptr);
+  return m_session->getClientPreferences();
 }
 
 void Debugger::startDummyRequest(const std::string& startupDoc) {

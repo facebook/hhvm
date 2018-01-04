@@ -14,35 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/vsdebug/debugger.h"
-#include "hphp/runtime/ext/vsdebug/command.h"
+#ifndef incl_HPHP_VSDEBUG_EXN_MODE_H_
+#define incl_HPHP_VSDEBUG_EXN_MODE_H_
 
 namespace HPHP {
 namespace VSDEBUG {
 
-ConfigurationDoneCommand::ConfigurationDoneCommand(
-  Debugger* debugger,
-  folly::dynamic message
-) : VSCommand(debugger, message) {
-}
-
-ConfigurationDoneCommand::~ConfigurationDoneCommand() {
-}
-
-int64_t ConfigurationDoneCommand::targetThreadId() {
-  return -1;
-}
-
-bool ConfigurationDoneCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
-) {
-  m_debugger->setClientInitialized();
-
-  // Configuration done means all loader breakpoints have been set, it's time
-  // to resume the target.
-  return true;
-}
+enum ExceptionBreakMode {
+  BreakNone,
+  BreakAll,
+  BreakUnhandled,
+  BreakUserUnhandled
+};
 
 }
 }
+
+#endif // incl_HPHP_VSDEBUG_EXN_MODE_H_

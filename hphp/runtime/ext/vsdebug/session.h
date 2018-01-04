@@ -22,12 +22,16 @@
 #include "hphp/runtime/ext/vsdebug/transport.h"
 #include "hphp/runtime/ext/vsdebug/command_queue.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/runtime/ext/vsdebug/breakpoint.h"
+#include "hphp/runtime/ext/vsdebug/client_preferences.h"
 #include "hphp/util/async-func.h"
+
 
 namespace HPHP {
 namespace VSDEBUG {
 
 struct Debugger;
+struct BreakpointManager;
 
 // This object represents a connected session with a single debugger client.
 // It contains any data specific to the connected client's state.
@@ -41,10 +45,16 @@ struct DebuggerSession final {
   void setClientPreferences(ClientPreferences& preferences);
   ClientPreferences& getClientPreferences();
 
+  BreakpointManager* getBreakpointManager() { return m_breakpointMgr; }
+
 private:
 
   Debugger* const m_debugger;
   ClientPreferences m_clientPreferences;
+
+  // Support for breakpoints. Breakpoints are tied to a particular client
+  // sesson. When the client disconnects, its breakpoints disappear.
+  BreakpointManager* m_breakpointMgr;
 
   // The "dummy" request thread is a hidden request that provides an execution
   // context from which to execute any debugger command that is not directed at

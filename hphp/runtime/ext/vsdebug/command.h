@@ -25,6 +25,7 @@ namespace VSDEBUG {
 
 // Forward declaration of Debugger
 struct Debugger;
+struct DebuggerSession;
 
 // Enum describing the target to which a debugger command needs to
 // be dispatched for exection.
@@ -115,7 +116,10 @@ struct VSCommand {
 protected:
 
   // Implemented by subclasses of this object.
-  virtual bool executeImpl(folly::dynamic* responseMsg) = 0;
+  virtual bool executeImpl(
+    DebuggerSession* session,
+    folly::dynamic* responseMsg
+  ) = 0;
 
   // Copy of the original JSON object sent by the client.
   folly::dynamic m_message;
@@ -137,24 +141,13 @@ protected:
   int64_t targetThreadId() override;                              \
   ClassName(Debugger* debugger, folly::dynamic message);          \
 protected:                                                        \
-  bool executeImpl(folly::dynamic* responseMsg) override;         \
+  bool executeImpl(                                               \
+    DebuggerSession* session,                                     \
+    folly::dynamic* responseMsg                                   \
+  ) override;                                                     \
 
 
 ////// Represents an InitializeRequest command from the debugger client. //////
-enum PathFormat {
-  Path,
-  URI
-};
-
-struct ClientPreferences {
-  bool linesStartAt1;
-  bool columnsStartAt1;
-  bool supportsVariableType;
-  bool supportsVariablePaging;
-  bool supportsRunInTerminalRequest;
-  PathFormat pathFormat;
-};
-
 struct InitializeCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(InitializeCommand, CommandTarget::None, false);
 };

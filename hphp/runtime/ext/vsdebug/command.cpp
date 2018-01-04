@@ -136,8 +136,8 @@ bool VSCommand::execute() {
   assert(m_debugger != nullptr);
   return m_debugger->executeClientCommand(
     this,
-    [&](folly::dynamic& responseMsg) {
-      return executeImpl(&responseMsg);
+    [&](DebuggerSession* session, folly::dynamic& responseMsg) {
+      return executeImpl(session, &responseMsg);
     });
 }
 

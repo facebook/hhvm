@@ -25,6 +25,7 @@ namespace VSDEBUG {
 
 DebuggerSession::DebuggerSession(Debugger* debugger) :
   m_debugger(debugger),
+  m_breakpointMgr(new BreakpointManager(debugger)),
   m_dummyThread(this, &DebuggerSession::runDummy),
   m_dummyStartupDoc("") {
 
@@ -34,6 +35,10 @@ DebuggerSession::DebuggerSession(Debugger* debugger) :
 DebuggerSession::~DebuggerSession() {
   m_dummyCommandQueue.shutdown();
   m_dummyThread.waitForEnd();
+
+  if (m_breakpointMgr != nullptr) {
+    delete m_breakpointMgr;
+  }
 }
 
 void DebuggerSession::startDummyRequest(const std::string& startupDoc) {

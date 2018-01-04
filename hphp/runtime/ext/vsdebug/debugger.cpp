@@ -66,6 +66,20 @@ void Debugger::setClientConnected(bool connected) {
     if (connected) {
       // Create a new debugger session.
       assert(m_session == nullptr);
+      m_session = new DebuggerSession(this);
+      if (m_session == nullptr) {
+        VSDebugLogger::Log(
+          VSDebugLogger::LogLevelError,
+          "Failed to allocate debugger session!"
+        );
+        m_clientConnected.store(false, std::memory_order_release);
+      }
+
+      // When the client connects, break the entire program to get it into a
+      // known state that matches the thread list being presented in the
+      // debugger. Once all threads are wrangled and the front-end is updated,
+      // the program can resume execution.
+      m_state = ProgramState::LoaderBreakpoint;
 
       // Attach the debugger to any request threads that were already
       // running before the client connected. We did not attach to them if they
@@ -82,15 +96,6 @@ void Debugger::setClientConnected(bool connected) {
         });
       }
 
-      m_session = new DebuggerSession(this);
-      if (m_session == nullptr) {
-        VSDebugLogger::Log(
-          VSDebugLogger::LogLevelError,
-          "Failed to allocate debugger session!"
-        );
-        m_clientConnected.store(false, std::memory_order_release);
-      }
-
       // If the script startup thread is waiting for a client connection, wake
       // it up now.
       {
@@ -101,19 +106,17 @@ void Debugger::setClientConnected(bool connected) {
 
       // The client has detached. Walk through any requests we are currently
       // attached to and release them if they are blocked in the debugger.
-      for (auto it = m_requests.begin(); it != m_requests.end();) {
-        // Shut down the request's command queue to unblock it if it's broken
-        // in to the debugger and remove it from the map.
+      for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
+        // Clear any undelivered client messages in the request's command queue,
+        // since they apply to the debugger session that just ended.
         // NOTE: The request's RequestInfo will be cleaned up and freed when the
         // request completes in requestShutdown. It is not safe to do that from
         // this thread.
-        it->second->m_commandQueue.shutdown();
-        it = m_requests.erase(it);
+        it->second->m_commandQueue.clearPendingMessages();
       }
 
-      m_state = ProgramState::Running;
       m_clientInitialized = false;
-      assert(m_requests.empty());
+      resumeTarget();
     }
   }
 }
@@ -126,21 +129,23 @@ void Debugger::setClientInitialized() {
 
   m_clientInitialized = true;
 
-  // When the client connects, break the entire program to get it into a known
-  // state that matches the thread list being presented in the debugger. Once
-  // all threads are wrangled and the front-end is updated, the program can
-  // resume execution.
-  m_state = ProgramState::LoaderBreakpoint;
-
   // Send a thread start event for any thread that exists already at the point
   // the debugger client initializes communication so that they appear in the
   // client side thread list.
   for (auto it = m_requestIdMap.begin(); it != m_requestIdMap.end(); it++) {
-    sendThreadEventMessage(it->first, ThreadEventType::ThreadStarted);
+    if (it->second->m_executing == ThreadInfo::Executing::UserFunctions) {
+      sendThreadEventMessage(it->first, ThreadEventType::ThreadStarted);
+    }
+
+    auto requestIt = m_requests.find(it->second);
+    assert(requestIt != m_requests.end());
+    RequestInfo* ri = requestIt->second;
+    if (ri->m_flags.requestPaused) {
+      sendStoppedEvent("pause", "Initial Break", it->first);
+    }
   }
 
-  // Send a stop event to indicate the initial loader break.
-  sendStoppedEvent("entry", "Initial Break", -1);
+  sendStoppedEvent("pause", "Initial Break", -1);
 }
 
 int Debugger::getCurrentThreadId() {
@@ -217,7 +222,10 @@ void Debugger::sendContinuedEvent(int64_t threadId) {
   Lock lock(m_lock);
   folly::dynamic event = folly::dynamic::object;
   event["allThreadsContinued"] = m_pausedRequestCount == 0;
-  event["threadId"] = threadId;
+  if (threadId >= 0) {
+    event["threadId"] = threadId;
+  }
+
   sendEventMessage(event, "continued");
 }
 
@@ -307,6 +315,7 @@ void Debugger::processCommandQueue(int threadId, RequestInfo* requestInfo) {
   {
     Lock lock(m_lock);
     m_pausedRequestCount++;
+    requestInfo->m_flags.requestPaused = true;
 
     // TODO: Put proper stop reason here - if this is the thread that hit a
     // bp/step/exn, say that. Otherwise indicate its paused due to stop one
@@ -318,6 +327,7 @@ void Debugger::processCommandQueue(int threadId, RequestInfo* requestInfo) {
 
   {
     Lock lock(m_lock);
+    requestInfo->m_flags.requestPaused = false;
     m_pausedRequestCount--;
     sendContinuedEvent(threadId);
   }
@@ -327,10 +337,11 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   // Note: the caller of this routine must hold m_lock.
   RequestInfo* requestInfo = nullptr;
 
-  auto const threadId = ++m_nextThreadId;
+  int threadId;
   auto it = m_requests.find(ti);
   if (it == m_requests.end()) {
     // New request. Insert a request info object into our map.
+    threadId = ++m_nextThreadId;
     requestInfo = new RequestInfo();
     if (requestInfo == nullptr) {
       // Failed to allocate request info.
@@ -342,10 +353,17 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
     m_requestInfoMap.emplace(std::make_pair(ti, threadId));
   } else {
     requestInfo = it->second;
+    auto idIt = m_requestInfoMap.find(ti);
+    assert(idIt != m_requestInfoMap.end());
+    threadId = idIt->second;
   }
 
-  sendThreadEventMessage(threadId, ThreadEventType::ThreadStarted);
   assert(requestInfo != nullptr);
+
+  if (ti->m_executing == ThreadInfo::Executing::UserFunctions) {
+    sendThreadEventMessage(threadId, ThreadEventType::ThreadStarted);
+  }
+
 
   // Try to attach our debugger hook to the request.
   if (!requestInfo->m_flags.hookAttached) {
@@ -366,43 +384,37 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
 void Debugger::requestShutdown() {
   auto const threadInfo = &TI();
   RequestInfo* requestInfo = nullptr;
+  int threadId = -1;
+
+  SCOPE_EXIT {
+    if (clientConnected() && threadId >= 0) {
+      sendThreadEventMessage(threadId, ThreadEventType::ThreadExited);
+    }
+
+    if (requestInfo != nullptr) {
+      cleanupRequestInfo(threadInfo, requestInfo);
+    }
+  };
 
   {
     Lock lock(m_lock);
     auto it = m_requests.find(threadInfo);
-    if (it != m_requests.end()) {
-      requestInfo = it->second;
-      m_requests.erase(it);
+    if (it == m_requests.end()) {
+      return;
     }
 
-    int threadId = -1;
+    requestInfo = it->second;
+    m_requests.erase(it);
+
     auto infoItr = m_requestInfoMap.find(threadInfo);
-    if (infoItr != m_requestInfoMap.end()) {
-      threadId = infoItr->second;
-      auto idItr = m_requestIdMap.find(threadId);
-      if (idItr != m_requestIdMap.end()) {
-        m_requestIdMap.erase(idItr);
-      } else {
-        // m_requestInfoMap and m_requestIdMap should always be in sync,
-        // this indicates a bug.
-        assert(false);
-      }
+    assert(infoItr != m_requestInfoMap.end());
 
-      m_requestInfoMap.erase(infoItr);
-    } else {
-      VSDebugLogger::Log(
-        VSDebugLogger::LogLevelError,
-        "Failed to lookup request thread ID in request shutdown!"
-      );
-    }
+    threadId = infoItr->second;
+    auto idItr = m_requestIdMap.find(threadId);
+    assert(idItr != m_requestIdMap.end());
 
-    if (clientConnected() && threadId >= 0) {
-      sendThreadEventMessage(threadId, ThreadEventType::ThreadExited);
-    }
-  }
-
-  if (requestInfo != nullptr) {
-    cleanupRequestInfo(threadInfo, requestInfo);
+    m_requestIdMap.erase(idItr);
+    m_requestInfoMap.erase(infoItr);
   }
 }
 
@@ -436,7 +448,10 @@ bool Debugger::executeClientCommand(
     // command queue.
     folly::dynamic responseMsg = folly::dynamic::object;
     bool resumeThread = callback(responseMsg);
-    sendCommandResponse(command, responseMsg);
+
+    if (command->commandTarget() != CommandTarget::WorkItem) {
+      sendCommandResponse(command, responseMsg);
+    }
 
     return resumeThread;
   } catch (DebuggerCommandException e) {
@@ -498,6 +513,25 @@ void Debugger::sendCommandResponse(
   );
 }
 
+void Debugger::resumeTarget() {
+  // Note: caller must hold m_lock here.
+
+  m_state = ProgramState::Running;
+
+  // Resume every paused request. Each request will send a thread continued
+  // event when it exits its command loop.
+  for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
+    RequestInfo* ri = it->second;
+
+    if (ri->m_flags.requestPaused) {
+      VSCommand* resumeCommand = ContinueCommand::createInstance(this);
+      ri->m_commandQueue.dispatchCommand(resumeCommand);
+    }
+  }
+
+  sendContinuedEvent(-1);
+}
+
 void Debugger::onClientMessage(folly::dynamic& message) {
   Lock lock(m_lock);
 
@@ -509,6 +543,11 @@ void Debugger::onClientMessage(folly::dynamic& message) {
   }
 
   VSCommand* command = nullptr;
+  SCOPE_EXIT {
+    if (command != nullptr) {
+      delete command;
+    }
+  };
 
   try {
 
@@ -539,9 +578,15 @@ void Debugger::onClientMessage(folly::dynamic& message) {
     assert(command != nullptr);
     enforceRequiresBreak(command);
 
+    // Otherwise this is a normal command. Dispatch it to its target.
     switch(command->commandTarget()) {
       case CommandTarget::None:
-        command->execute();
+      case CommandTarget::WorkItem:
+        if (command->execute()) {
+          // The command requested that the target be resumed. A command with
+          // CommandTarget == None that does this resumes the entire program.
+          resumeTarget();
+        }
         break;
       case CommandTarget::Request:
         // Dispatch this command to the correct request.
@@ -576,10 +621,6 @@ void Debugger::onClientMessage(folly::dynamic& message) {
     reportClientMessageError(message, e.what());
   } catch (...) {
     reportClientMessageError(message, InternalErrorMsg);
-  }
-
-  if (command != nullptr) {
-    delete command;
   }
 }
 

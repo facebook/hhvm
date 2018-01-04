@@ -20,6 +20,8 @@
 namespace HPHP {
 namespace VSDEBUG {
 
+const folly::dynamic VSCommand::s_emptyArgs = folly::dynamic::object;
+
 VSCommand::VSCommand(Debugger* debugger, folly::dynamic message) :
   m_message(message),
   m_debugger(debugger) {
@@ -70,6 +72,20 @@ const folly::dynamic& VSCommand::tryGetObject(
   }
 }
 
+int64_t VSCommand::tryGetInt(
+  const folly::dynamic& message,
+  const char* key,
+  const int64_t defaultValue
+) {
+ try {
+   const auto& val = message[key];
+   return val.isInt() ? val.asInt() : defaultValue;
+ } catch (std::out_of_range e) {
+   // Value not present in dynamic.
+   return defaultValue;
+ }
+}
+
 bool VSCommand::parseCommand(
   Debugger* debugger,
   folly::dynamic& clientMessage,
@@ -93,9 +109,17 @@ bool VSCommand::parseCommand(
 
     *command = new InitializeCommand(debugger, clientMessage);
 
+  } else if (cmdString == "configurationDone") {
+
+    *command = new ConfigurationDoneCommand(debugger, clientMessage);
+
   } else if (cmdString == "launch" || cmdString == "attach") {
 
     *command = new LaunchAttachCommand(debugger, clientMessage);
+
+  } else if (cmdString == "continue") {
+
+    *command = new ContinueCommand(debugger, clientMessage);
 
   } else {
     VSDebugLogger::Log(
@@ -115,6 +139,12 @@ bool VSCommand::execute() {
     [&](folly::dynamic& responseMsg) {
       return executeImpl(&responseMsg);
     });
+}
+
+int64_t VSCommand::defaultGetTargetThreadId() {
+  const folly::dynamic& message = getMessage();
+  const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
+  return tryGetInt(args, "threadId", -1);
 }
 
 }

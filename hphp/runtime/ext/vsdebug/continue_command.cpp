@@ -20,40 +20,35 @@
 namespace HPHP {
 namespace VSDEBUG {
 
-LaunchAttachCommand::LaunchAttachCommand(
+ContinueCommand::ContinueCommand(
   Debugger* debugger,
   folly::dynamic message
 ) : VSCommand(debugger, message) {
 }
 
-LaunchAttachCommand::~LaunchAttachCommand() {
+ContinueCommand::~ContinueCommand() {
 }
 
-int64_t LaunchAttachCommand::targetThreadId() {
+ContinueCommand* ContinueCommand::createInstance(Debugger* debugger) {
+  return new ContinueCommand(debugger, folly::dynamic::object);
+}
+
+int64_t ContinueCommand::targetThreadId() {
   return -1;
 }
 
-bool LaunchAttachCommand::executeImpl(folly::dynamic* responseMsg) {
-  folly::dynamic& message = getMessage();
-  const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
-  const std::string noDocument = std::string("");
+bool ContinueCommand::executeImpl(folly::dynamic* responseMsg) {
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Client sent continue command."
+  );
 
-  const auto& startupDoc =
-    tryGetString(args, "startupDocumentPath", noDocument);
+  folly::dynamic body = folly::dynamic::object;
+  body["allThreadsContinued"] = true;
+  (*responseMsg)["body"] = body;
 
-  if (!startupDoc.empty()) {
-    m_debugger->startDummyRequest(startupDoc);
-  } else {
-    m_debugger->startDummyRequest(noDocument);
-  }
-
-  // Send the InitializedEvent to indicate to the front-end that we are up
-  // and ready for breakpoint requests.
-  folly::dynamic event = folly::dynamic::object;
-  m_debugger->sendEventMessage(event, "initialized");
-
-  // Completion of this command does not resume the target.
-  return false;
+  phpDebuggerContinue();
+  return true;
 }
 
 }

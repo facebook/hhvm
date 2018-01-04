@@ -20,40 +20,25 @@
 namespace HPHP {
 namespace VSDEBUG {
 
-LaunchAttachCommand::LaunchAttachCommand(
+ConfigurationDoneCommand::ConfigurationDoneCommand(
   Debugger* debugger,
   folly::dynamic message
 ) : VSCommand(debugger, message) {
 }
 
-LaunchAttachCommand::~LaunchAttachCommand() {
+ConfigurationDoneCommand::~ConfigurationDoneCommand() {
 }
 
-int64_t LaunchAttachCommand::targetThreadId() {
+int64_t ConfigurationDoneCommand::targetThreadId() {
   return -1;
 }
 
-bool LaunchAttachCommand::executeImpl(folly::dynamic* responseMsg) {
-  folly::dynamic& message = getMessage();
-  const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
-  const std::string noDocument = std::string("");
+bool ConfigurationDoneCommand::executeImpl(folly::dynamic* responseMsg) {
+  m_debugger->setClientInitialized();
 
-  const auto& startupDoc =
-    tryGetString(args, "startupDocumentPath", noDocument);
-
-  if (!startupDoc.empty()) {
-    m_debugger->startDummyRequest(startupDoc);
-  } else {
-    m_debugger->startDummyRequest(noDocument);
-  }
-
-  // Send the InitializedEvent to indicate to the front-end that we are up
-  // and ready for breakpoint requests.
-  folly::dynamic event = folly::dynamic::object;
-  m_debugger->sendEventMessage(event, "initialized");
-
-  // Completion of this command does not resume the target.
-  return false;
+  // Configuration done means all loader breakpoints have been set, it's time
+  // to resume the target.
+  return true;
 }
 
 }

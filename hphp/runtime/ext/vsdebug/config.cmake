@@ -2,6 +2,8 @@ HHVM_DEFINE_EXTENSION("vsdebug"
   SOURCES
     command_queue.cpp
     command.cpp
+    configuration_done_command.cpp
+    continue_command.cpp
     debugger.cpp
     ext_vsdebug.cpp
     fdtransport.cpp

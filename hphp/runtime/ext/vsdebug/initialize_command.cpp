@@ -35,8 +35,7 @@ int64_t InitializeCommand::targetThreadId() {
 
 bool InitializeCommand::executeImpl(folly::dynamic* responseMsg) {
   const folly::dynamic& message = getMessage();
-  const folly::dynamic emptyArgs = folly::dynamic::object;
-  const folly::dynamic& args = tryGetObject(message, "arguments", emptyArgs);
+  const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   ClientPreferences preferences = {0};
 
   preferences.linesStartAt1 = tryGetBool(args, "linesStartAt1", true);
@@ -87,8 +86,6 @@ bool InitializeCommand::executeImpl(folly::dynamic* responseMsg) {
   // capabilities["supportsCompletionsRequest"] = false;
 
   (*responseMsg)["body"] = capabilities;
-
-  m_debugger->setClientInitialized();
 
   // Completion of this command does not resume the target.
   return false;

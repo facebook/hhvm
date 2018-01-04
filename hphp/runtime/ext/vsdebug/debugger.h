@@ -51,6 +51,7 @@ struct RequestInfo {
     bool hookAttached;
     bool memoryLimitRemoved;
     bool initialBreakpointsSynced;
+    bool requestPaused;
   } m_flags;
   CommandQueue m_commandQueue;
 };
@@ -209,6 +210,8 @@ private:
   // connected client.
   void trySendTerminatedEvent();
 
+  void resumeTarget();
+
   Mutex m_lock;
   DebugTransport* m_transport {nullptr};
 
@@ -251,10 +254,6 @@ private:
   // Keeps track of the total number of requests attached to by this extension
   // since the server was started.
   std::atomic<uint64_t> m_totalRequestCount {0};
-
-  // Indicates which request is the "active" request for debugger client
-  // commands, or nullptr if there is no such request.
-  ThreadInfo* m_activeRequest {nullptr};
 
   // Tracks the thread ID of the dummy request.
   int64_t m_dummyThreadId {-1};

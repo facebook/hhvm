@@ -549,7 +549,7 @@ and ignore_toplevel attr_start ~attr acc env terminate =
   match L.token env.file env.lb with
   | x when terminate x || x = Teof ->
       L.back env.lb;
-      acc
+      List.rev acc
   | Tltlt ->
       (* Parsing attribute << .. >> *)
       (* TODO: error for repeated attribute list *)
@@ -621,7 +621,7 @@ and ignore_toplevel attr_start ~attr acc env terminate =
       )
   | Tclose_php ->
       error env "Hack does not allow the closing ?> tag";
-      acc
+      List.rev acc
   | _ ->
       (* All the other statements. *)
       ignore_toplevel None ~attr:[] acc env terminate

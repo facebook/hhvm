@@ -125,6 +125,11 @@ void DebugTransport::enqueueOutgoingMessageForClient(
   const char* messageType
 ) {
   if (!clientConnected()) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelWarning,
+      "Dropping message (no client is connected): %s\n",
+      folly::toJson(message).c_str()
+    );
     return;
   }
 

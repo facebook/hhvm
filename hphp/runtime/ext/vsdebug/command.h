@@ -188,6 +188,12 @@ struct SetExceptionBreakpointsCommand : public VSCommand {
                          CommandTarget::None,               \
                          false);
 };
+
+//////  Handles StackTraceRequest from the debugger client.          //////
+struct StackTraceCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(StackTraceCommand, CommandTarget::Request, true);
+};
+
 //////  Handles ConfigurationDoneRequest from the debugger client.   //////
 struct ConfigurationDoneCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(ConfigurationDoneCommand, CommandTarget::None, false);

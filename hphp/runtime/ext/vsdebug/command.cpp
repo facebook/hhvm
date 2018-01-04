@@ -121,6 +121,10 @@ bool VSCommand::parseCommand(
 
     *command = new ContinueCommand(debugger, clientMessage);
 
+  } else if (cmdString.compare("stackTrace") == 0) {
+
+    *command = new StackTraceCommand(debugger, clientMessage);
+
   } else if (cmdString == "setBreakpoints") {
 
     *command = new SetBreakpointsCommand(debugger, clientMessage);

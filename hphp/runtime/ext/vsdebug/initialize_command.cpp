@@ -79,7 +79,7 @@ bool InitializeCommand::executeImpl(
   capabilities["supportsValueFormattingOptions"] = true;
   capabilities["supportsExceptionInfoRequest"] = true;
   capabilities["supportTerminateDebuggee"] = false;
-  capabilities["supportsDelayedStackTraceLoading"] = false;
+  capabilities["supportsDelayedStackTraceLoading"] = true;
   capabilities["supportsLoadedSourcesRequest"] = false;
 
   // TODO (Ericblue) these caps aren't supported yet but are intended to

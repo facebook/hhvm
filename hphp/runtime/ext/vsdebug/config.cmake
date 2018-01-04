@@ -16,6 +16,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     resolve_bps_command.cpp
     session.cpp
     socket_transport.cpp
+    stack_trace_command.cpp
     transport.cpp
   HEADERS
     break_mode.h

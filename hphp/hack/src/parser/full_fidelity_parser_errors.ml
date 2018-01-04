@@ -1279,12 +1279,6 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
           make_error_from_node ~error_type:SyntaxError.RuntimeError
             node SyntaxError.inout_param_in_construct :: errors
           else errors in
-        let errors = match syntax p.parameter_name with
-          | DecoratedExpression { decorated_expression_decorator = {
-              syntax = Token token; _ }; _} when Token.kind token = TokenKind.DotDotDot ->
-              make_error_from_node node SyntaxError.error2073 :: errors
-          | _ -> errors
-        in
         let errors = if first_parent_function_attributes_contains
               parents SN.UserAttributes.uaMemoize then
           make_error_from_node ~error_type:SyntaxError.RuntimeError
@@ -1300,6 +1294,10 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
     params_errors anonymous_parameters is_hack hhvm_compat_mode errors
   | ClosureTypeSpecifier { closure_parameter_list; _ } ->
     params_errors closure_parameter_list is_hack hhvm_compat_mode errors
+  | LambdaExpression
+    { lambda_signature = {syntax = LambdaSignature { lambda_parameters; _ }; _}
+    ; _
+    } -> params_errors lambda_parameters is_hack hhvm_compat_mode errors
   | DecoratedExpression _ -> decoration_errors node errors
   | _ -> errors
 

@@ -19,14 +19,17 @@
 
 #include <folly/dynamic.h>
 #include <folly/json.h>
+#include <list>
+#include <condition_variable>
+#include <mutex>
 
 #include "hphp/runtime/ext/vsdebug/logging.h"
+#include "hphp/util/async-func.h"
 #include "hphp/util/lock.h"
 
 namespace HPHP {
 namespace VSDEBUG {
 
-// Forward declaration for Debugger
 struct Debugger;
 
 // Abstract base class for debug transports, which are responsible
@@ -34,22 +37,28 @@ struct Debugger;
 struct DebugTransport {
   DebugTransport(Debugger* debugger);
   virtual ~DebugTransport() {
-    if (m_buffer != nullptr) {
-      free(m_buffer);
-    }
+    shutdown();
   }
 
-  virtual int sendToClient(
+  virtual void shutdown();
+
+  // Enqueues an outgoing message to be sent to the client. This routine will
+  // put the message into the outgoing message queue and then return. A worker
+  // thread will process outgoing messages in order and send them to the client.
+  virtual void enqueueOutgoingMessageForClient(
     folly::dynamic& message,
     const char* messageType
   );
 
-  virtual bool sendUserMessage(
+  // Enqueues an outgoing user-facing message to be sent to the client.
+  // This routine will add the necessary protocol attributes for a user message,
+  // put the message into the outgoing message queue and then return. A worker
+  // thread will process outgoing messages in order and send them to the client.
+  virtual void enqueueOutgoingUserMessage(
     const char* message,
     const char* level = OutputLevelLog
   );
 
-  virtual int readMessage(folly::dynamic& message);
   virtual bool clientConnected() const = 0;
 
   // VS Code protocol message types.
@@ -83,29 +92,62 @@ protected:
     const char* messageType
   ) const;
 
-  FILE* m_transportFd {nullptr};
-
   // Pointer to the debugger object that owns this transport. The debugger
   // owns the lifetime of this object.
   Debugger* const m_debugger;
+
+  void setTransportFd(int fd);
+
+  inline int getTransportFd() const {
+    Lock lock(m_mutex);
+    return m_transportFd;
+  }
+
+  virtual void onClientDisconnected();
 
 private:
 
   static constexpr int ReadBufferDefaultSize = 1024;
 
-  bool sendEventMessage(
+  void enqueueOutgoingEventMessage(
     folly::dynamic& message,
     const char* eventType
   );
 
-  // Input buffer for reading messages from the debugger client.
-  int resizeBuffer();
-  bool processMessage(folly::dynamic& message);
+  static bool tryProcessMessage(
+    char* buffer,
+    size_t bufferSize,
+    size_t* bufferPosition,
+    folly::dynamic* message
+  );
 
-  Mutex m_mutex;
-  char* m_buffer {nullptr};
-  size_t m_bufferSize {0};
-  size_t m_bufferPosition {0};
+  void processOutgoingMessages();
+  void processIncomingMessages();
+
+  void shutdownInputThread();
+  void shutdownOutputThread();
+
+  // File descriptor to use for communication with the debugger client.
+  mutable Mutex m_mutex;
+  int m_transportFd {-1};
+
+  // The abort pipe pair of fds is a pipe that allows the main thread to
+  // signal the polling thread that its time to exit. We can use this to
+  // break it out of a blocking call to recv.
+  int m_abortPipeFd[2] {-1, -1};
+
+  // Queue of messages waiting to be sent to the debugger client.
+  std::mutex m_outgoingMsgLock;
+  std::list<std::string> m_outgoingMessages;
+  std::condition_variable m_outgoingMsgCondition;
+  bool m_terminating {false};
+
+  // A worker thread to process outgoing messages and send them to the client.
+  AsyncFunc<DebugTransport> m_outputThread;
+
+  // A worker thread to process incoming messages from the client and sends them
+  // to the debugger engine.
+  AsyncFunc<DebugTransport> m_inputThread;
 };
 
 }

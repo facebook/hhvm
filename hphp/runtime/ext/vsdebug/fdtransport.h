@@ -18,7 +18,6 @@
 #define incl_HPHP_VSDEBUG_FDTRANSPORT_H_
 
 #include "hphp/runtime/ext/vsdebug/transport.h"
-#include "hphp/runtime/base/req-malloc.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -28,10 +27,6 @@ namespace VSDEBUG {
 struct FdTransport : public DebugTransport {
   FdTransport(Debugger* debugger);
   virtual ~FdTransport() {
-    if (m_transportFd != nullptr) {
-      fclose(m_transportFd);
-      m_transportFd = nullptr;
-    }
   }
 
   bool clientConnected() const override;

@@ -79,7 +79,7 @@ struct Debugger final {
     return m_clientConnected.load(std::memory_order_acquire);
   }
 
-  bool sendUserMessage(
+  void sendUserMessage(
     const char* message,
     const char* level = DebugTransport::OutputLevelLog
   );
@@ -90,6 +90,10 @@ struct Debugger final {
 
   // Returns a pointer to the RequestInfo for the current thread.
   RequestInfo* getRequestInfo();
+
+  // Called by the debugger transport when a new message is received from
+  // a connected debugger client.
+  void onClientMessage(folly::dynamic& message);
 
 private:
 

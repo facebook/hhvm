@@ -85,9 +85,16 @@ void Debugger::setClientConnected(bool connected) {
     // The client has detached. Walk through any requests we are currently
     // attached to and release them if they are blocked in the debugger.
     for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
-      // TODO: (Ericblue) Issue resume to this request's command queue
+      // Shut down the request's command queue to unblock it if it's broken
+      // in to the debugger and remove it from the map.
+      // NOTE: The request's RequestInfo will be cleaned up and freed when the
+      // request completes in requestShutdown. It is not safe to do that from
+      // this thread.
+      it->second->m_commandQueue.shutdown();
+      m_requests.erase(it);
     }
 
+    m_state = ProgramState::Running;
     assert(m_requests.empty());
   }
 }
@@ -117,13 +124,11 @@ void Debugger::shutdown() {
   m_transport = nullptr;
 }
 
-bool Debugger::sendUserMessage(const char* message, const char* level) {
+void Debugger::sendUserMessage(const char* message, const char* level) {
   Lock lock(m_lock);
-  if (m_transport == nullptr) {
-    return false;
+  if (m_transport != nullptr) {
+    m_transport->enqueueOutgoingUserMessage(message, level);
   }
-
-  return m_transport->sendUserMessage(message, level);
 }
 
 void Debugger::requestInit() {
@@ -187,7 +192,7 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
     if (DebuggerHook::attach<VSDebugHook>(ti)) {
       requestInfo->m_flags.hookAttached = true;
     } else {
-      m_transport->sendUserMessage(
+      m_transport->enqueueOutgoingUserMessage(
         "Failed to attach to new HHVM request: another debugger is already "
           "attached.",
         DebugTransport::OutputLevelError
@@ -224,6 +229,10 @@ RequestInfo* Debugger::getRequestInfo() {
   }
 
   return nullptr;
+}
+
+void Debugger::onClientMessage(folly::dynamic& message) {
+  // TODO: not implemented.
 }
 
 }

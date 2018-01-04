@@ -14,20 +14,26 @@
    +----------------------------------------------------------------------+
 */
 
+#include <unistd.h>
+#include <fcntl.h>
+
 #include "hphp/runtime/ext/vsdebug/fdtransport.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
 
 namespace HPHP {
 namespace VSDEBUG {
 
 FdTransport::FdTransport(Debugger* debugger) :
   DebugTransport(debugger) {
-  m_transportFd = fdopen(TransportFd, "r+");
-  if (m_transportFd != nullptr) {
+
+  errno = 0;
+  if (fcntl(TransportFd, F_GETFL) != -1 && errno == 0) {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelInfo,
       "Opened transport via file descriptor %u.",
       TransportFd
     );
+    setTransportFd(TransportFd);
   } else {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelError,
@@ -40,7 +46,7 @@ FdTransport::FdTransport(Debugger* debugger) :
 }
 
 bool FdTransport::clientConnected() const {
-  return m_transportFd == nullptr ? false : true;
+  return getTransportFd() >= 0;
 }
 
 }

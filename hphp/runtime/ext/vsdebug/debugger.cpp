@@ -17,7 +17,6 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
-#include "hphp/util/process.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -137,9 +136,19 @@ void Debugger::setClientInitialized() {
   // Send a thread start event for any thread that exists already at the point
   // the debugger client initializes communication so that they appear in the
   // client side thread list.
-  for (auto it = m_requestIds.begin(); it != m_requestIds.end(); it++) {
+  for (auto it = m_requestIdMap.begin(); it != m_requestIdMap.end(); it++) {
     sendThreadEventMessage(it->first, ThreadEventType::ThreadStarted);
   }
+}
+
+int Debugger::getCurrentThreadId() {
+  Lock lock(m_lock);
+
+  auto const threadInfo = &TI();
+  const auto it = m_requestInfoMap.find(threadInfo);
+  assert(it != m_requestInfoMap.end());
+
+  return it->second;
 }
 
 void Debugger::cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri) {
@@ -256,7 +265,7 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   // Note: the caller of this routine must hold m_lock.
   RequestInfo* requestInfo = nullptr;
 
-  auto const threadId = (int64_t)Process::GetThreadId();
+  auto const threadId = ++m_nextThreadId;
   auto it = m_requests.find(ti);
   if (it == m_requests.end()) {
     // New request. Insert a request info object into our map.
@@ -267,7 +276,8 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
     }
 
     m_requests.emplace(std::make_pair(ti, requestInfo));
-    m_requestIds.emplace(std::make_pair(threadId, ti));
+    m_requestIdMap.emplace(std::make_pair(threadId, ti));
+    m_requestInfoMap.emplace(std::make_pair(ti, threadId));
   } else {
     requestInfo = it->second;
   }
@@ -303,13 +313,28 @@ void Debugger::requestShutdown() {
       m_requests.erase(it);
     }
 
-    auto const threadId = (int64_t)Process::GetThreadId();
-    auto idItr = m_requestIds.find(threadId);
-    if (idItr != m_requestIds.end()) {
-      m_requestIds.erase(idItr);
+    int threadId = -1;
+    auto infoItr = m_requestInfoMap.find(threadInfo);
+    if (infoItr != m_requestInfoMap.end()) {
+      threadId = infoItr->second;
+      auto idItr = m_requestIdMap.find(threadId);
+      if (idItr != m_requestIdMap.end()) {
+        m_requestIdMap.erase(idItr);
+      } else {
+        // m_requestInfoMap and m_requestIdMap should always be in sync,
+        // this indicates a bug.
+        assert(false);
+      }
+
+      m_requestInfoMap.erase(infoItr);
+    } else {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelError,
+        "Failed to lookup request thread ID in request shutdown!"
+      );
     }
 
-    if (clientConnected()) {
+    if (clientConnected() && threadId >= 0) {
       sendThreadEventMessage(threadId, ThreadEventType::ThreadExited);
     }
   }
@@ -460,8 +485,8 @@ void Debugger::onClientMessage(folly::dynamic& message) {
         // Dispatch this command to the correct request.
         {
           const auto threadId = command->targetThreadId();
-          auto it = m_requestIds.find(threadId);
-          if (it != m_requestIds.end()) {
+          auto it = m_requestIdMap.find(threadId);
+          if (it != m_requestIdMap.end()) {
             const auto request = m_requests.find(it->second);
             assert(request != m_requests.end());
             request->second->m_commandQueue.dispatchCommand(command);

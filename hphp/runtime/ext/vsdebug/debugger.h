@@ -148,6 +148,9 @@ struct Debugger final {
   // Sets the client initialized flag.
   void setClientInitialized();
 
+  // Returns the synthetic request ID for the current request thread.
+  int getCurrentThreadId();
+
 private:
 
   enum ThreadEventType {
@@ -214,8 +217,14 @@ private:
   // Information about all the requests that the debugger is aware of.
   std::unordered_map<ThreadInfo*, RequestInfo*> m_requests;
 
-  // Map of thread ID to ThreadInfo*;
-  std::unordered_map<int64_t, ThreadInfo*> m_requestIds;
+  // Map of synthetic thread ID to ThreadInfo*;
+  std::unordered_map<int, ThreadInfo*> m_requestIdMap;
+
+  // Map of ThreadInfo* to synthetic thread ID
+  std::unordered_map<ThreadInfo*, int> m_requestInfoMap;
+
+  // Next synthetic request ID to send to client as thread ID.
+  int m_nextThreadId {0};
 
   // Keeps track of the number of requests that are currently blocked inside
   // the debugger extension due to being paused for any reason (breakpoint,

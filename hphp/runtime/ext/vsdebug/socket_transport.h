@@ -14,49 +14,49 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/vsdebug/command_queue.h"
+#ifndef incl_HPHP_VSDEBUG_SOCKET_TRANSPORT_H_
+#define incl_HPHP_VSDEBUG_SOCKET_TRANSPORT_H_
+
+#include "hphp/runtime/ext/vsdebug/transport.h"
 
 namespace HPHP {
 namespace VSDEBUG {
 
-CommandQueue::CommandQueue() :
-  m_terminating(false) {
-}
+struct Debugger;
 
-CommandQueue::~CommandQueue() {
-  shutdown();
-}
+// SocketTransport transport speaks to the debugger client via a TCP socket
+// listening on a predetermined port.
+struct SocketTransport : public DebugTransport {
+  SocketTransport(Debugger* debugger, int listenPort);
+  virtual ~SocketTransport();
 
-void CommandQueue::shutdown() {
-  std::lock_guard<std::mutex> lock(m_lock);
-  if (!m_terminating) {
-    m_terminating = true;
-    m_condition.notify_all();
-  }
-}
+  void onClientDisconnected() override;
+  bool clientConnected() const override;
 
-void CommandQueue::clearPendingMessages() {
-  std::unique_lock<std::mutex> lock(m_lock);
-  m_commands.clear();
-}
+private:
 
-bool CommandQueue::processCommands() {
-  std::unique_lock<std::mutex> lock(m_lock);
-  bool commandProcessed = false;
+  void createAbortPipe();
+  void listenForClientConnection();
 
-  while (!m_terminating && !commandProcessed) {
-    m_condition.wait(lock);
-    if (!m_terminating) {
-      for (auto const& command : m_commands) {
-        // NOT IMPLEMENTED YET: PROCESS COMMANDS...
-        (void)command;
-        commandProcessed = true;
-      }
-    }
-  }
+  bool bindAndListen(
+    struct addrinfo* address,
+    std::vector<int>& socketFds
+  );
 
-  return commandProcessed;
-}
+  void waitForConnection(
+    std::vector<int>& socketFds,
+    int abortFd
+  );
+
+  mutable Mutex m_lock;
+  bool m_terminating;
+  bool m_clientConnected;
+  int m_listenPort;
+  int m_abortPipeFd[2] {-1, -1};
+  AsyncFunc<SocketTransport> m_connectThread;
+};
 
 }
 }
+
+#endif // incl_HPHP_VSDEBUG_SOCKET_TRANSPORT_H_

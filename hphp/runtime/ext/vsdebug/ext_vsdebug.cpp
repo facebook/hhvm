@@ -86,6 +86,8 @@ void VSDebugExtension::moduleInit() {
     // and listen for debugger clients to connect.
     VSDebugLogger::Log(VSDebugLogger::LogLevelInfo,
                        "Extension started in SERVER mode");
+
+    transport = new SocketTransport(s_debugger, s_attachListenPort);
   } else {
     // Otherwise, HHVM is running in script or interactive mode. Communicate
     // with the debugger client locally via known file descriptors.

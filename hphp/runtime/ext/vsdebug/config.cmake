@@ -7,6 +7,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     hook.cpp
     logging.cpp
     session.cpp
+    socket_transport.cpp
     transport.cpp
   HEADERS
     command_queue.h
@@ -16,6 +17,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     hook.h
     logging.h
     session.h
+    socket_transport.h
     transport.h
   DEPENDS
     libFolly

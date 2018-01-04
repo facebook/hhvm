@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
 #include "hphp/runtime/ext/vsdebug/fdtransport.h"
+#include "hphp/runtime/ext/vsdebug/socket_transport.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 
 namespace HPHP {

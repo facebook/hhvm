@@ -36,6 +36,9 @@ struct CommandQueue {
   // to process commands.
   void shutdown();
 
+  // Clears any pending messages for this request.
+  void clearPendingMessages();
+
   // Processes debugger commands that are in the queue for this request thread.
   // This call will block until the debugger client orders the target to resume,
   // or the debugger session shuts down.

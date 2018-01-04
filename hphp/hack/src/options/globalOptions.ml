@@ -48,10 +48,6 @@ let tco_experimental_stronger_shape_idx_ret =
 let tco_experimental_unresolved_fix =
   "unresolved_fix"
 
-(* Whether we use contextual type information to type lambdas etc *)
-let tco_experimental_contextual_inference =
-  "contextual_inference"
-
 (**
  * Allows parsing type hints for function calls, such as foo<int>(args);.
  *)
@@ -136,7 +132,6 @@ let tco_experimental_all =
      tco_experimental_stronger_shape_idx_ret;
      tco_experimental_annotate_function_calls;
      tco_experimental_unresolved_fix;
-     tco_experimental_contextual_inference;
      tco_experimental_generics_arity;
      tco_experimental_forbid_nullable_cast;
      tco_experimental_safe_pass_by_ref;

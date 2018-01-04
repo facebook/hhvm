@@ -271,6 +271,12 @@ void BreakpointManager::sendBreakpointEvent(
                         breakpoint->m_resolvedLocation.m_endCol,
                         true
                       );
+
+    bp["originalLine"] = adjustLineNumber(
+                           preferences,
+                           breakpoint->m_line,
+                           false
+                         );
   } else {
     bp["line"] = adjustLineNumber(
                    preferences,

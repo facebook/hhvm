@@ -133,9 +133,19 @@ bool SetBreakpointsCommand::executeImpl(
             // Update breakpoint conditions in case they've changed.
             bp->updateConditions(condition, hitCondition);
 
+            bool verified = bpMgr->isBreakpointResolved(bp->m_id);
+            int responseLine = line;
+            if (verified) {
+              responseLine = bp->m_resolvedLocation.m_startLine;
+              if (!prefs.linesStartAt1) {
+                responseLine--;
+              }
+            }
+
             folly::dynamic bpInfo = folly::dynamic::object;
             bpInfo["id"] = bp->m_id;
-            bpInfo["verified"] = bpMgr->isBreakpointResolved(bp->m_id);
+            bpInfo["line"] = responseLine;
+            bpInfo["verified"] = verified;
             responseBps.push_back(bpInfo);
 
             // Remove this bp from oldBpLines so that after processing this

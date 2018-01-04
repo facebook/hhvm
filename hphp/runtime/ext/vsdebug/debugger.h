@@ -66,6 +66,7 @@ struct RequestInfo {
     bool hookAttached;
     bool memoryLimitRemoved;
     bool requestPaused;
+    bool compilationUnitsMapped;
   } m_flags;
   CommandQueue m_commandQueue;
   RequestBreakpointInfo* m_breakpointInfo;
@@ -191,6 +192,24 @@ struct Debugger final {
   // Called when a new breakpoint is added to sync it to all requests.
   void onBreakpointAdded(int bpId);
 
+  // Attempts to resolve and install breakpoints for the current request thread.
+  // Will either install the breakpoint or add it to the request's unresolved
+  // list.
+  void tryInstallBreakpoints(RequestInfo* ri);
+
+  // Called when a request loads a new compilation unit.
+  void onCompilationUnitLoaded(
+    RequestInfo* ri,
+    const HPHP::Unit* compilationUnit
+  );
+
+  // Called when a request thinks it has hit a breakpoint.
+  void onLineBreakpointHit(
+    RequestInfo* ri,
+    const HPHP::Unit* compilationUnit,
+    int line
+  );
+
 private:
 
   enum ThreadEventType {
@@ -242,6 +261,31 @@ private:
   // Halts execution of all request threads.
   void pauseTarget(const char* stopReason);
 
+  // Attempts to resolve and install a breakpoint for the current request.
+  // Returns true if the bp was resolved, false if it is unresolved and pending.
+  bool tryResolveBreakpoint(
+    RequestInfo* ri,
+    const int bpId,
+    const Breakpoint* bp
+  );
+
+  // Adjusts a breakpoints source line based on the source mapping table in
+  // the specified complilation unit in which the breakpoint is being installed.
+  std::pair<int, int> calibrateBreakpointLineInUnit(
+    const Unit* unit,
+    int bpLine
+  );
+
+  // Attempts to resolve the breakpoint in the specified compilation unit.
+  // Returns true on success, false otherwise.
+  bool tryResolveBreakpointInUnit(
+    const RequestInfo* ri,
+    int bpId,
+    const Breakpoint* bp,
+    const std::string& unitFilePath,
+    const HPHP::Unit* compilationUnit
+  );
+
   // Notifies all threads that they need to switch to interpreted mode so we
   // can interrupt them.
   void interruptAllThreads();
@@ -257,6 +301,8 @@ private:
   // pause before triggering the breakpoint on a new request thread.
   void prepareToPauseTarget(RequestInfo* requestInfo);
 
+  // Normalizes the file path for a compilation unit.
+  static std::string getFilePathForUnit(const HPHP::Unit* compilationUnit);
 
   // Returns a stop reason string for a breakpoint.
   static std::string getStopReasonForBp(

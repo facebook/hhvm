@@ -13,6 +13,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     initialize_command.cpp
     launch_attach_command.cpp
     logging.cpp
+    resolve_bps_command.cpp
     session.cpp
     socket_transport.cpp
     transport.cpp

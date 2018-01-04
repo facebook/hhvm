@@ -56,7 +56,7 @@ private:
   explicit VSDebugHook() {}
   ~VSDebugHook() {}
 
-  bool shouldEnterDebugger();
+  void tryEnterDebugger();
 
   static const StaticString s_memoryLimit;
 };

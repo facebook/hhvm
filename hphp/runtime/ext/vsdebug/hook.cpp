@@ -20,20 +20,15 @@ namespace HPHP {
 namespace VSDEBUG {
 
 void VSDebugHook::onRequestInit() {
-  if (!shouldEnterDebugger()) {
-    return;
-  }
-
-  // TODO: (Ericblue) Any breakpoints that are already set need to be synced
-  // to the new request thread here.
-
+  tryEnterDebugger();
 }
 
 void VSDebugHook::onRequestShutdown() {
 }
 
 void VSDebugHook::onOpcode(PC pc) {
-  // TODO: (Ericblue) NOT IMPLEMENTED
+  RID().setDebuggerIntr(false);
+  tryEnterDebugger();
 }
 
 void VSDebugHook::onFuncEntryBreak(const Func* func) {
@@ -45,7 +40,23 @@ void VSDebugHook::onFuncExitBreak(const Func* func) {
 }
 
 void VSDebugHook::onLineBreak(const Unit* unit, int line) {
-  // TODO: (Ericblue) NOT IMPLEMENTED
+  // If the VM thinks this request has hit a line break, first try to enter
+  // the debugger if it is already paused due to another event (another
+  // request's bp, an exception, an async-break, etc) and handle that.
+  tryEnterDebugger();
+
+  // After resuming from that, service this breakpoint if it is still active.
+  Debugger* debugger = VSDebugExtension::getDebugger();
+  RequestInfo* requestInfo = debugger->getRequestInfo();
+  if (requestInfo == nullptr) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Could not find request info for request!"
+    );
+    return;
+  }
+
+  debugger->onLineBreakpointHit(requestInfo, unit, line);
 }
 
 void VSDebugHook::onExceptionThrown(ObjectData* exception) {
@@ -73,24 +84,43 @@ void VSDebugHook::onNextBreak(const Unit* unit, int line) {
 }
 
 void VSDebugHook::onFileLoad(Unit* efile) {
-  // TODO: (Ericblue) NOT IMPLEMENTED
+  Debugger* debugger = VSDebugExtension::getDebugger();
+  RequestInfo* requestInfo = debugger->getRequestInfo();
+  if (requestInfo == nullptr) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Could not find request info for request!"
+    );
+    return;
+  }
+
+  // Resolve any unresolved breakpoints that may be in this compilation unit.
+  debugger->onCompilationUnitLoaded(requestInfo, efile);
+  tryEnterDebugger();
 }
 
 void VSDebugHook::onDefClass(const Class* cls) {
-  // TODO: (Ericblue) NOT IMPLEMENTED
 }
 
 void VSDebugHook::onDefFunc(const Func* func) {
-  // TODO: (Ericblue) NOT IMPLEMENTED
+  // TODO: (Ericblue) This routine is not needed unless we add support for
+  // function entry breakpoints.
 }
 
-bool VSDebugHook::shouldEnterDebugger() {
+void VSDebugHook::tryEnterDebugger() {
   Debugger* debugger = VSDebugExtension::getDebugger();
   if (!debugger->clientConnected()) {
-    return false;
+    return;
   }
 
   RequestInfo* requestInfo = debugger->getRequestInfo();
+  if (requestInfo == nullptr) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Could not find request info for request!"
+    );
+    return;
+  }
 
   // The first time this request enters the debugger, remove the artificial
   // memory limit since a debugger is attached.
@@ -99,7 +129,10 @@ bool VSDebugHook::shouldEnterDebugger() {
     requestInfo->m_flags.memoryLimitRemoved = true;
   }
 
-  return true;
+  debugger->enterDebuggerIfPaused(requestInfo);
+
+  // Install any breakpoints that have not yet been set on this request.
+  debugger->tryInstallBreakpoints(requestInfo);
 }
 
 const StaticString VSDebugHook::s_memoryLimit {"memory_limit"};

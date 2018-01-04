@@ -14,12 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/util/process.h"
 
 #include <boost/filesystem.hpp>
+
 namespace HPHP {
 namespace VSDEBUG {
 
@@ -428,6 +431,9 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   // Try to attach our debugger hook to the request.
   if (!requestInfo->m_flags.hookAttached) {
     if (DebuggerHook::attach<VSDebugHook>(ti)) {
+      ti->m_reqInjectionData.setDebuggerIntr(true);
+      ti->m_reqInjectionData.setFlag(DebuggerSignalFlag);
+
       requestInfo->m_flags.hookAttached = true;
 
       // Install all breakpoints as pending for this request.
@@ -810,9 +816,305 @@ void Debugger::onBreakpointAdded(int bpId) {
     ri->m_breakpointInfo->m_pendingBreakpoints.emplace(bpId);
 
     if (m_state != ProgramState::Running) {
-      // TODO: Resolve bp in each request here.
+      const auto cmd = ResolveBreakpointsCommand::createInstance(this);
+      ri->m_commandQueue.dispatchCommand(cmd);
     }
   }
+}
+
+void Debugger::tryInstallBreakpoints(RequestInfo* ri) {
+  Lock lock(m_lock);
+
+  if (!clientConnected()) {
+    return;
+  }
+
+  // Create a map of the normalized file paths of all compilation units that
+  // have already been loaded by this request before the debugger attached to
+  // it to allow for quick lookup when resolving breakpoints. Any units loaded
+  // after this will be added to the map by onCompilationUnitLoaded().
+  if (!ri->m_flags.compilationUnitsMapped) {
+    ri->m_flags.compilationUnitsMapped = true;
+    const auto evaledFiles = g_context->m_evaledFiles;
+    for (auto it = evaledFiles.begin(); it != evaledFiles.end(); it++) {
+      const HPHP::Unit* compilationUnit = it->second.unit;
+      const std::string filePath = getFilePathForUnit(compilationUnit);
+      ri->m_breakpointInfo->m_loadedUnits[filePath] = compilationUnit;
+    }
+  }
+
+  // For any breakpoints that are pending for this request, try to resolve
+  // and install them, or mark them as unresolved.
+  BreakpointManager* bpMgr = m_session->getBreakpointManager();
+  auto& pendingBps = ri->m_breakpointInfo->m_pendingBreakpoints;
+  for (auto it = pendingBps.begin(); it != pendingBps.end();) {
+    const int breakpointId = *it;
+    const Breakpoint* bp = bpMgr->getBreakpointById(breakpointId);
+
+    // It's ok if bp was not found. The client could have removed the
+    // breakpoint before this request got a chance to install it.
+    if (bp != nullptr) {
+      bool resolved = tryResolveBreakpoint(ri, breakpointId, bp);
+
+      if (!resolved) {
+        if (!RuntimeOption::RepoAuthoritative) {
+          // It's possible this compilation unit just isn't loaded yet. Try
+          // to force a pre-load and compile of the unit and place the bp.
+          HPHP::String unitPath(bp->m_path.c_str());
+          const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr);
+
+          if (compilationUnit != nullptr) {
+            ri->m_breakpointInfo->m_loadedUnits[bp->m_path] = compilationUnit;
+            resolved = tryResolveBreakpoint(ri, breakpointId, bp);
+          }
+
+          if (!resolved) {
+            std::string resolveMsg = "Warning: request ";
+            resolveMsg += std::to_string(getCurrentThreadId());
+            resolveMsg += " could not resolve breakpoint #";
+            resolveMsg += std::to_string(breakpointId);
+            resolveMsg += ". The Hack/PHP file at ";
+            resolveMsg += bp->m_path;
+
+            if (compilationUnit == nullptr) {
+              resolveMsg += " could not be loaded, or failed to compile.";
+            } else {
+              resolveMsg += " was loaded, but the breakpoint did not resolve "
+                "to any executable instruction.";
+            }
+
+            sendUserMessage(
+              resolveMsg.c_str(),
+              DebugTransport::OutputLevelWarning
+            );
+          }
+        }
+
+        // This breakpoint could not be resolved yet. As new compilation units
+        // are loaded, we'll try again.
+        if (!resolved) {
+          ri->m_breakpointInfo->m_unresolvedBreakpoints.emplace(breakpointId);
+        }
+      }
+    }
+
+    it = pendingBps.erase(it);
+  }
+
+  assert(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
+}
+
+bool Debugger::tryResolveBreakpoint(
+  RequestInfo* ri,
+  const int bpId,
+  const Breakpoint* bp
+) {
+  // Search all compilation units loaded by this request for a matching location
+  // for this breakpoint.
+  const auto& loadedUnits = ri->m_breakpointInfo->m_loadedUnits;
+  for (auto it = loadedUnits.begin(); it != loadedUnits.end(); it++) {
+    if (tryResolveBreakpointInUnit(ri, bpId, bp, it->first, it->second)) {
+      // Found a match, and installed the breakpoint!
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool Debugger::tryResolveBreakpointInUnit(
+  const RequestInfo* ri,
+  int bpId,
+  const Breakpoint* bp,
+  const std::string& unitFilePath,
+  const HPHP::Unit* compilationUnit
+) {
+  if (bp->m_path != unitFilePath) {
+    return false;
+  }
+
+  std::pair<int,int> lines =
+    calibrateBreakpointLineInUnit(compilationUnit, bp->m_line);
+
+  if (lines.first > 0 && lines.second != lines.first) {
+    lines = calibrateBreakpointLineInUnit(compilationUnit, lines.first);
+  }
+
+  if (lines.first < 0) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "NOT installing bp ID %d in file %s. No source locations matching "
+        " line %d were found.",
+      bpId,
+      unitFilePath.c_str(),
+      bp->m_line
+    );
+    return false;
+  }
+
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Installing bp ID %d at line %d (original line was %d) of file %s.",
+    bpId,
+    lines.first,
+    bp->m_line,
+    unitFilePath.c_str()
+  );
+
+  if (!phpAddBreakPointLine(compilationUnit, lines.first)) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Installing %d at line %d of file %s FAILED in phpAddBreakPointLine!",
+      bpId,
+      lines.first,
+      unitFilePath.c_str()
+    );
+    return false;
+  }
+
+  m_session->getBreakpointManager()->onBreakpointResolved(
+    bpId,
+    lines.first,
+    lines.second,
+    0,
+    0,
+    unitFilePath
+  );
+
+  return true;
+}
+
+std::pair<int, int> Debugger::calibrateBreakpointLineInUnit(
+  const Unit* unit,
+  int bpLine
+) {
+  // Attempt to find a matching source location entry in the compilation unit
+  // that corresponds to the breakpoint's requested line number. Note that the
+  // line provided by the client could be in the middle of a multi-line
+  // statement, or could be on a line that contains multiple statements. It
+  // could also be in whitespace, or past the end of the file.
+  std::pair<int, int> bestLocation = {-1, -1};
+  int bestDistance = INT_MAX;
+
+  for (auto const& tableEntry : getSourceLocTable(unit)) {
+    const SourceLoc& sourceLocation = tableEntry.val();
+
+    // If this source location ends before the bp's line. No match.
+    if (!sourceLocation.valid() || sourceLocation.line1 < bpLine) {
+      continue;
+    }
+
+    // If we found a single line source location that begins at the bp's line,
+    // this is the ideal case, and is where the breakpoint should be placed.
+    if (sourceLocation.line0 == sourceLocation.line1 &&
+        sourceLocation.line0 == bpLine) {
+        bestLocation.first = sourceLocation.line0;
+        bestLocation.second = sourceLocation.line1;
+        break;
+    }
+
+    // Otherwise, choose the source line whose ending line is closest to the
+    // breakpoint's desired line.
+    int distance = sourceLocation.line1 - bpLine;
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestLocation.first = sourceLocation.line0;
+      bestLocation.second = sourceLocation.line1;
+    }
+  }
+
+  return bestLocation;
+}
+
+void Debugger::onCompilationUnitLoaded(
+  RequestInfo* ri,
+  const HPHP::Unit* compilationUnit
+) {
+  Lock lock(m_lock);
+
+  if (!clientConnected()) {
+    return;
+  }
+
+  const auto filePath = getFilePathForUnit(compilationUnit);
+  ri->m_breakpointInfo->m_loadedUnits[filePath] = compilationUnit;
+
+  // See if any unresolved breakpoints for this request can be placed in the
+  // compilation unit that just loaded.
+  BreakpointManager* bpMgr = m_session->getBreakpointManager();
+  auto& unresolvedBps = ri->m_breakpointInfo->m_unresolvedBreakpoints;
+  for (auto it = unresolvedBps.begin(); it != unresolvedBps.end();) {
+    const int bpId = *it;
+    const Breakpoint* bp = bpMgr->getBreakpointById(bpId);
+    if (bp == nullptr ||
+        tryResolveBreakpointInUnit(ri, bpId, bp, filePath, compilationUnit)) {
+
+      // If this breakpoint no longer exists (it was removed by the client),
+      // or it was successfully installed, then it is no longer unresolved.
+      it = unresolvedBps.erase(it);
+    } else {
+      // Otherwise, move on to the next unresolved breakpoint.
+      it++;
+    }
+  }
+}
+
+void Debugger::onLineBreakpointHit(
+  RequestInfo* ri,
+  const HPHP::Unit* compilationUnit,
+  int line
+) {
+
+  std::string stopReason;
+  int matchingBpId = -1;
+  const std::string filePath = getFilePathForUnit(compilationUnit);
+
+  {
+    Lock lock(m_lock);
+
+    prepareToPauseTarget(ri);
+
+    if (!clientConnected()) {
+      return;
+    }
+
+    BreakpointManager* bpMgr = m_session->getBreakpointManager();
+    const auto fileBps = bpMgr->getBreakpointIdsByFile(filePath);
+
+    for (auto it = fileBps.begin(); it != fileBps.end(); it++) {
+      const int bpId = *it;
+      const Breakpoint* bp = bpMgr->getBreakpointById(bpId);
+      if (line == bp->m_resolvedLocation.m_startLine) {
+        matchingBpId = bpId;
+        stopReason = getStopReasonForBp(matchingBpId, bp->m_path, bp->m_line);
+
+        // Breakpoint hit!
+        pauseTarget(stopReason.c_str());
+        bpMgr->onBreakpointHit(bpId);
+        break;
+      }
+    }
+  }
+
+  if (matchingBpId >= 0) {
+    // If an active breakpoint was found at this location, enter the debugger.
+    processCommandQueue(getCurrentThreadId(), ri, stopReason.c_str());
+  } else {
+    // This breakpoint no longer exists. Remove it from the VM.
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Request hit bp that no longer exists, removing from VM. %s:%d",
+      filePath.c_str(),
+      line
+    );
+    phpRemoveBreakPointLine(compilationUnit, line);
+  }
+}
+
+std::string Debugger::getFilePathForUnit(const HPHP::Unit* compilationUnit) {
+  const auto path =
+    HPHP::String(const_cast<StringData*>(compilationUnit->filepath()));
+  return File::TranslatePath(path).toCppString();
 }
 
 std::string Debugger::getStopReasonForBp(

@@ -172,6 +172,16 @@ struct SetBreakpointsCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(SetBreakpointsCommand, CommandTarget::None, false);
 };
 
+struct ResolveBreakpointsCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(
+    ResolveBreakpointsCommand,
+    CommandTarget::WorkItem,
+    false);
+
+public:
+  static ResolveBreakpointsCommand* createInstance(Debugger* debugger);
+};
+
 //////  Handles SetExceptionBreakpoints commands                     //////
 struct SetExceptionBreakpointsCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(SetExceptionBreakpointsCommand,    \

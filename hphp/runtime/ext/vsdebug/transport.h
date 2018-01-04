@@ -61,6 +61,12 @@ struct DebugTransport {
 
   virtual bool clientConnected() const = 0;
 
+  // Enqueues an outgoing event message to send to the debugger client.
+  void enqueueOutgoingEventMessage(
+    folly::dynamic& message,
+    const char* eventType
+  );
+
   // VS Code protocol message types.
   static constexpr char* MessageTypeRequest = "request";
   static constexpr char* MessageTypeResponse = "response";
@@ -108,11 +114,6 @@ protected:
 private:
 
   static constexpr int ReadBufferDefaultSize = 1024;
-
-  void enqueueOutgoingEventMessage(
-    folly::dynamic& message,
-    const char* eventType
-  );
 
   static bool tryProcessMessage(
     char* buffer,

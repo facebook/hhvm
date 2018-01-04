@@ -24,16 +24,12 @@ void VSDebugHook::onRequestInit() {
     return;
   }
 
-  // TODO: (Ericblue) Send new thread event to client here.
-
   // TODO: (Ericblue) Any breakpoints that are already set need to be synced
   // to the new request thread here.
 
 }
 
 void VSDebugHook::onRequestShutdown() {
-
-  // TODO: (Ericblue) Send thread exit event here.
 }
 
 void VSDebugHook::onOpcode(PC pc) {

@@ -28,19 +28,84 @@ VSCommand::VSCommand(Debugger* debugger, folly::dynamic message) :
 VSCommand::~VSCommand() {
 }
 
+bool VSCommand::tryGetBool(
+  const folly::dynamic& message,
+  const char* key,
+  bool defaultValue
+) {
+  try {
+    const auto& val = message[key];
+    return val.isBool() ? val.getBool() : defaultValue;
+  } catch (std::out_of_range e) {
+    // Value not present in dynamic.
+    return defaultValue;
+  }
+}
+
+const std::string& VSCommand::tryGetString(
+  const folly::dynamic& message,
+  const char* key,
+  const std::string& defaultValue
+) {
+  try {
+    const auto& val = message[key];
+    return val.isString() ? val.getString() : defaultValue;
+  } catch (std::out_of_range e) {
+    // Value not present in dynamic.
+    return defaultValue;
+  }
+}
+
+const folly::dynamic& VSCommand::tryGetObject(
+  const folly::dynamic& message,
+  const char* key,
+  const folly::dynamic& defaultValue
+) {
+  try {
+    const auto& val = message[key];
+    return val.isObject() ? val : defaultValue;
+  } catch (std::out_of_range e) {
+    // Value not present in dynamic.
+    return defaultValue;
+  }
+}
+
 bool VSCommand::parseCommand(
   Debugger* debugger,
   folly::dynamic& clientMessage,
   VSCommand** command
 ) {
+  assert(command != nullptr && *command == nullptr);
 
-  // TODO: Not implemented yet. Parse command message.
-  VSDebugLogger::Log(
-    VSDebugLogger::LogLevelError,
-    "No command implemented to process message: %s",
-    folly::toJson(clientMessage).c_str()
-  );
-  return false;
+  // Only VS Code debug protocol messages of type "request" are expected from
+  // the client.
+  const std::string& type = tryGetString(clientMessage, "type", "");
+  if (type != "request") {
+    throw DebuggerCommandException("Invalid message type.");
+  }
+
+  const std::string& cmdString = tryGetString(clientMessage, "command", "");
+  if (cmdString.empty()) {
+    throw DebuggerCommandException("Invalid command.");
+  }
+
+  if (cmdString == "initialize") {
+
+    *command = new InitializeCommand(debugger, clientMessage);
+
+  } else if (cmdString == "launch" || cmdString == "attach") {
+
+    *command = new LaunchAttachCommand(debugger, clientMessage);
+
+  } else {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "No command implemented to process message: %s",
+      folly::toJson(clientMessage).c_str()
+    );
+  }
+
+  return *command != nullptr;
 }
 
 bool VSCommand::execute() {

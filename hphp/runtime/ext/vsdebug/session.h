@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
 #include "hphp/runtime/ext/vsdebug/command_queue.h"
+#include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/util/async-func.h"
 
 namespace HPHP {
@@ -37,10 +38,13 @@ struct DebuggerSession final {
   void startDummyRequest(const std::string& startupDoc);
 
   void enqueueDummyCommand(VSCommand* command);
+  void setClientPreferences(ClientPreferences& preferences);
+  ClientPreferences& getClientPreferences();
 
 private:
 
   Debugger* const m_debugger;
+  ClientPreferences m_clientPreferences;
 
   // The "dummy" request thread is a hidden request that provides an execution
   // context from which to execute any debugger command that is not directed at

@@ -122,5 +122,13 @@ void DebuggerSession::enqueueDummyCommand(VSCommand* command) {
   m_dummyCommandQueue.dispatchCommand(command);
 }
 
+void DebuggerSession::setClientPreferences(ClientPreferences& preferences) {
+  m_clientPreferences = preferences;
+}
+
+ClientPreferences& DebuggerSession::getClientPreferences() {
+  return m_clientPreferences;
+}
+
 }
 }

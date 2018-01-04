@@ -27,6 +27,7 @@
 #include "hphp/runtime/ext/vsdebug/transport.h"
 #include "hphp/runtime/ext/vsdebug/session.h"
 #include "hphp/runtime/ext/vsdebug/command_queue.h"
+#include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/hook.h"
 
 namespace HPHP {
@@ -98,9 +99,17 @@ struct Debugger final {
     return m_clientConnected.load(std::memory_order_acquire);
   }
 
+  // Sends a message to the front-end to be displayed to the user in the
+  // debugger console.
   void sendUserMessage(
     const char* message,
     const char* level = DebugTransport::OutputLevelLog
+  );
+
+  // Sends a VS Code debug event message to the debugger client.
+  void sendEventMessage(
+    folly::dynamic& event,
+    const char* eventType
   );
 
   // Handle requests.
@@ -130,7 +139,21 @@ struct Debugger final {
   // is already connected.
   void waitForClientConnection();
 
+  // Stores debugger client preferences.
+  void setClientPreferences(ClientPreferences& preferences);
+
+  // Starts the session's dummy request.
+  void startDummyRequest(const std::string& startupDoc);
+
+  // Sets the client initialized flag.
+  void setClientInitialized();
+
 private:
+
+  enum ThreadEventType {
+    ThreadStarted,
+    ThreadExited
+  };
 
   // Cleans up and frees the specified request info object and shuts down its
   // command queue, unblocking the waiting request thread (if any).
@@ -163,6 +186,9 @@ private:
   // client request.
   void sendCommandResponse(VSCommand* command, folly::dynamic& responseMsg);
 
+  // Sends a thread event message to a debugger client.
+  void sendThreadEventMessage(int64_t threadId, ThreadEventType eventType);
+
   Mutex m_lock;
   DebugTransport* m_transport {nullptr};
 
@@ -176,6 +202,11 @@ private:
   // debugger hook operations when the debugger is "enabled" but not
   // actually in used due to no connected debugger clients.
   std::atomic<bool> m_clientConnected {false};
+
+  // This flag indicates if there is a connected debugger client, and the
+  // client is fully initialized. If true, it is okay to send the client
+  // thread events.
+  bool m_clientInitialized {false};
 
   // State of the program.
   ProgramState m_state {ProgramState::Running};

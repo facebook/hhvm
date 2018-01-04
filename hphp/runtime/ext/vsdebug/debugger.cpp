@@ -32,84 +32,113 @@ void Debugger::setTransport(DebugTransport* transport) {
 }
 
 void Debugger::setClientConnected(bool connected) {
-  Lock lock(m_lock);
+  DebuggerSession* sessionToDelete = nullptr;
+  SCOPE_EXIT {
+    if (sessionToDelete != nullptr) {
+      delete sessionToDelete;
+    }
+  };
 
-  if (connected == m_clientConnected.load()) {
-    // If the connected state didn't change, just return.
+  {
+    Lock lock(m_lock);
+
+    if (connected == m_clientConnected.load()) {
+      // If the connected state didn't change, just return.
+      return;
+    }
+
+    // Store connected first. New request threads will first check this value
+    // to quickly determine if a debugger client is connected to avoid having
+    // to grab a lock on the request init path in the case where this extension
+    // is enabled, but not in use by any client.
+    m_clientConnected.store(connected, std::memory_order_release);
+
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Debugger client connected: %s",
+      connected ? "YES" : "NO"
+    );
+
+    // Defer cleaning up the session until after we've dropped the lock.
+    // Shutting down the dummy request thread will cause the worker to call
+    // back into this extension since the HHVM context will call requestShutdown
+    // on the dummy request.
+    if (m_session != nullptr) {
+      sessionToDelete = m_session;
+      m_session = nullptr;
+    }
+
+    if (connected) {
+      // Create a new debugger session.
+      assert(m_session == nullptr);
+
+      // Attach the debugger to any request threads that were already
+      // running before the client connected. We did not attach to them if they
+      // were initialized when the client was disconnected to avoid taking a
+      // perf hit for a debugger hook that wasn't going to be used.
+      //
+      // Only do this after seeing at least 1 request via the requestInit path:
+      // on initial startup in script mode, the script request thread will have
+      // been created already in HHVM main, but is not ready for us to attach
+      // yet because extensions are still being initialized.
+      if (m_totalRequestCount.load() > 0) {
+        ThreadInfo::ExecutePerThread([this] (ThreadInfo* ti) {
+          this->attachToRequest(ti);
+        });
+      }
+
+      m_session = new DebuggerSession(this);
+      if (m_session == nullptr) {
+        VSDebugLogger::Log(
+          VSDebugLogger::LogLevelError,
+          "Failed to allocate debugger session!"
+        );
+        m_clientConnected.store(false, std::memory_order_release);
+      }
+
+      // If the script startup thread is waiting for a client connection, wake
+      // it up now.
+      {
+        std::unique_lock<std::mutex> lock(m_connectionNotifyLock);
+        m_connectionNotifyCondition.notify_all();
+      }
+
+      // TODO: (Ericblue) Set the program state to LoaderBreakpoint and wrangle
+      // all threads for the initial pause + breakpoint sync here.
+    } else {
+
+      // The client has detached. Walk through any requests we are currently
+      // attached to and release them if they are blocked in the debugger.
+      for (auto it = m_requests.begin(); it != m_requests.end();) {
+        // Shut down the request's command queue to unblock it if it's broken
+        // in to the debugger and remove it from the map.
+        // NOTE: The request's RequestInfo will be cleaned up and freed when the
+        // request completes in requestShutdown. It is not safe to do that from
+        // this thread.
+        it->second->m_commandQueue.shutdown();
+        it = m_requests.erase(it);
+      }
+
+      m_state = ProgramState::Running;
+      m_clientInitialized = false;
+      assert(m_requests.empty());
+    }
+  }
+}
+
+void Debugger::setClientInitialized() {
+  Lock lock(m_lock);
+  if (m_clientInitialized) {
     return;
   }
 
-  // Store connected first. New request threads will first check this value
-  // to quickly determine if a debugger client is connected to avoid having
-  // to grab a lock on the request init path in the case where this extension
-  // is enabled, but not in use by any client.
-  m_clientConnected.store(connected, std::memory_order_release);
+  m_clientInitialized = true;
 
-  VSDebugLogger::Log(
-    VSDebugLogger::LogLevelInfo,
-    "Debugger client connected: %s",
-    connected ? "YES" : "NO"
-  );
-
-  // Clean up and free the previous session, if any.
-  if (m_session != nullptr) {
-    delete m_session;
-    m_session = nullptr;
-  }
-
-  if (connected) {
-    // Create a new debugger session.
-    assert(m_session == nullptr);
-
-    // Attach the debugger to any request threads that were already
-    // running before the client connected. We did not attach to them if they
-    // were initialized when the client was disconnected to avoid taking a perf
-    // hit for a debugger hook that wasn't going to be used.
-    //
-    // Only do this after seeing at least one request via the requestInit path:
-    // on initial startup in script mode, the script request thread will have
-    // been created already in HHVM main, but is not ready for us to attach
-    // yet because extensions are still being initialized.
-    if (m_totalRequestCount.load() > 0) {
-      ThreadInfo::ExecutePerThread([this] (ThreadInfo* ti) {
-        this->attachToRequest(ti);
-      });
-    }
-
-    m_session = new DebuggerSession(this);
-    if (m_session == nullptr) {
-      VSDebugLogger::Log(
-        VSDebugLogger::LogLevelError,
-        "Failed to allocate debugger session!"
-      );
-      m_clientConnected.store(false, std::memory_order_release);
-    }
-
-    // If the script startup thread is waiting for a client connection, wake it
-    // up now.
-    {
-      std::unique_lock<std::mutex> lock(m_connectionNotifyLock);
-      m_connectionNotifyCondition.notify_all();
-    }
-
-    // TODO: (Ericblue) Set the program state to LoaderBreakpoint and wrangle
-    // all threads for the initial pause + breakpoint sync here.
-  } else {
-
-    // The client has detached. Walk through any requests we are currently
-    // attached to and release them if they are blocked in the debugger.
-    for (auto it = m_requests.begin(); it != m_requests.end();) {
-      // Shut down the request's command queue to unblock it if it's broken
-      // in to the debugger and remove it from the map.
-      // NOTE: The request's RequestInfo will be cleaned up and freed when the
-      // request completes in requestShutdown. It is not safe to do that from
-      // this thread.
-      it->second->m_commandQueue.shutdown();
-      it = m_requests.erase(it);
-    }
-
-    m_state = ProgramState::Running;
-    assert(m_requests.empty());
+  // Send a thread start event for any thread that exists already at the point
+  // the debugger client initializes communication so that they appear in the
+  // client side thread list.
+  for (auto it = m_requestIds.begin(); it != m_requestIds.end(); it++) {
+    sendThreadEventMessage(it->first, ThreadEventType::ThreadStarted);
   }
 }
 
@@ -144,6 +173,41 @@ void Debugger::sendUserMessage(const char* message, const char* level) {
   if (m_transport != nullptr) {
     m_transport->enqueueOutgoingUserMessage(message, level);
   }
+}
+
+void Debugger::sendEventMessage(folly::dynamic& event, const char* eventType) {
+  Lock lock(m_lock);
+  if (m_transport != nullptr) {
+    m_transport->enqueueOutgoingEventMessage(event, eventType);
+  }
+}
+
+void Debugger::sendThreadEventMessage(
+  int64_t threadId,
+  ThreadEventType eventType
+) {
+  Lock lock(m_lock);
+
+  if (!m_clientInitialized) {
+    // Don't start sending the client "thread started" and "thread exited"
+    // events before its finished its initialization flow.
+    // In this case, we'll send a thread started event for any threads that are
+    // currently running when initialization completes (and any threads that
+    // exit before that point, the debugger never needs to know about).
+    return;
+  }
+
+  folly::dynamic event = folly::dynamic::object;
+
+  event["reason"] = eventType == ThreadEventType::ThreadStarted
+    ? "started"
+    : "exited";
+
+  // TODO: Thread IDs can be 64 bit here, but the VS protocol is going to
+  // interpret this as a JavaScript number which has a smaller max value...
+  event["threadId"] = threadId;
+
+  sendEventMessage(event, "thread");
 }
 
 void Debugger::requestInit() {
@@ -192,6 +256,7 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   // Note: the caller of this routine must hold m_lock.
   RequestInfo* requestInfo = nullptr;
 
+  auto const threadId = (int64_t)Process::GetThreadId();
   auto it = m_requests.find(ti);
   if (it == m_requests.end()) {
     // New request. Insert a request info object into our map.
@@ -202,13 +267,12 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
     }
 
     m_requests.emplace(std::make_pair(ti, requestInfo));
-
-    auto const threadId = (int64_t)Process::GetThreadId();
     m_requestIds.emplace(std::make_pair(threadId, ti));
   } else {
     requestInfo = it->second;
   }
 
+  sendThreadEventMessage(threadId, ThreadEventType::ThreadStarted);
   assert(requestInfo != nullptr);
 
   // Try to attach our debugger hook to the request.
@@ -243,6 +307,10 @@ void Debugger::requestShutdown() {
     auto idItr = m_requestIds.find(threadId);
     if (idItr != m_requestIds.end()) {
       m_requestIds.erase(idItr);
+    }
+
+    if (clientConnected()) {
+      sendThreadEventMessage(threadId, ThreadEventType::ThreadExited);
     }
   }
 
@@ -356,6 +424,24 @@ void Debugger::onClientMessage(folly::dynamic& message) {
   VSCommand* command = nullptr;
 
   try {
+
+    // All valid client messages should have a sequence number and type.
+    try {
+      const auto& seq = message["seq"];
+      if (!seq.isInt()) {
+        throw DebuggerCommandException("Invalid message sequence number.");
+      }
+
+      const auto& type = message["type"];
+      if (!type.isString() || type.getString().empty()) {
+        throw DebuggerCommandException("Invalid command type.");
+      }
+    } catch (std::out_of_range e) {
+      throw DebuggerCommandException(
+        "Message is missing a required attribute."
+      );
+    }
+
     if (!VSCommand::parseCommand(this, message, &command)) {
       assert(command == nullptr);
       throw DebuggerCommandException(
@@ -419,6 +505,26 @@ void Debugger::waitForClientConnection() {
   while (!clientConnected()) {
     m_connectionNotifyCondition.wait(lock);
   }
+}
+
+void Debugger::setClientPreferences(ClientPreferences& preferences) {
+  Lock lock(m_lock);
+  if (!clientConnected()) {
+    return;
+  }
+
+  assert(m_session != nullptr);
+  m_session->setClientPreferences(preferences);
+}
+
+void Debugger::startDummyRequest(const std::string& startupDoc) {
+  Lock lock(m_lock);
+  if (!clientConnected()) {
+    return;
+  }
+
+  assert(m_session != nullptr);
+  m_session->startDummyRequest(startupDoc);
 }
 
 }

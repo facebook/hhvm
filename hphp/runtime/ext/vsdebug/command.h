@@ -74,6 +74,29 @@ struct VSCommand {
     folly::dynamic& clientMessage,
     VSCommand** command);
 
+
+  // Helper routines for getting values out of a possibly malformed client
+  // message. Each returns a value from the specified dynamic with the specified
+  // key, or the specified default value if the key does not exist or is not
+  // of the correct data type.
+  static bool tryGetBool(
+    const folly::dynamic& message,
+    const char* key,
+    bool defaultValue
+  );
+
+  static const std::string& tryGetString(
+    const folly::dynamic& message,
+    const char* key,
+    const std::string& defaultValue
+  );
+
+  static const folly::dynamic& tryGetObject(
+    const folly::dynamic& message,
+    const char* key,
+    const folly::dynamic& defaultValue
+  );
+
 protected:
 
   // Implemented by subclasses of this object.
@@ -82,11 +105,49 @@ protected:
   // Copy of the original JSON object sent by the client.
   folly::dynamic m_message;
 
-private:
-  VSCommand(Debugger* debugger, folly::dynamic message);
+  Debugger* const m_debugger;
 
-  Debugger* m_debugger;
+  VSCommand(Debugger* debugger, folly::dynamic message);
 };
+
+// Common implementation for all the subcommands of VSCommand so we don't have
+// to repeat it in every subclass.
+#define VS_COMMAND_COMMON_IMPL(ClassName, Target, RequiresBreak)  \
+  virtual ~ClassName();                                           \
+  const char* commandName() override { return #ClassName; }       \
+  CommandTarget commandTarget() override { return Target; }       \
+  bool requiresBreak() override { return RequiresBreak; }         \
+  int64_t targetThreadId() override;                              \
+  ClassName(Debugger* debugger, folly::dynamic message);          \
+protected:                                                        \
+  bool executeImpl(folly::dynamic* responseMsg) override;         \
+
+
+////// Represents an InitializeRequest command from the debugger client. //////
+enum PathFormat {
+  Path,
+  URI
+};
+
+struct ClientPreferences {
+  bool linesStartAt1;
+  bool columnsStartAt1;
+  bool supportsVariableType;
+  bool supportsVariablePaging;
+  bool supportsRunInTerminalRequest;
+  PathFormat pathFormat;
+};
+
+struct InitializeCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(InitializeCommand, CommandTarget::None, false);
+};
+
+//////  Handles both Attach/Launch commands from the debugger client. //////
+struct LaunchAttachCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(LaunchAttachCommand, CommandTarget::None, false);
+};
+
+#undef VS_COMMAND_COMMON_IMPL
 
 }
 }

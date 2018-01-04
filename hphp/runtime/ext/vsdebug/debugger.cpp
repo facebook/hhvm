@@ -54,6 +54,22 @@ void Debugger::setClientConnected(bool connected) {
   if (connected) {
     // Create a new debugger session.
     assert(m_session == nullptr);
+
+    // Attach the debugger to any request threads that were already
+    // running before the client connected. We did not attach to them if they
+    // were initialized when the client was disconnected to avoid taking a perf
+    // hit for a debugger hook that wasn't going to be used.
+    //
+    // Only do this after seeing at least one request via the requestInit path:
+    // on initial startup in script mode, the script request thread will have
+    // been created already in HHVM main, but is not ready for us to attach
+    // yet because extensions are still being initialized.
+    if (m_totalRequestCount.load() > 0) {
+      ThreadInfo::ExecutePerThread([this] (ThreadInfo* ti) {
+        this->attachToRequest(ti);
+      });
+    }
+
     m_session = new DebuggerSession(this);
     if (m_session == nullptr) {
       VSDebugLogger::Log(
@@ -61,7 +77,30 @@ void Debugger::setClientConnected(bool connected) {
         "Failed to allocate debugger session!"
       );
     }
+
+    // TODO: (Ericblue) Set the program state to LoaderBreakpoint and wrangle
+    // all threads for the initial pause + breakpoint sync here.
+  } else {
+
+    // The client has detached. Walk through any requests we are currently
+    // attached to and release them if they are blocked in the debugger.
+    for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
+      // TODO: (Ericblue) Issue resume to this request's command queue
+    }
+
+    assert(m_requests.empty());
   }
+}
+
+void Debugger::cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri) {
+  if (ri->m_flags.hookAttached) {
+    DebuggerHook::detach(ti);
+  }
+
+  // Shut down the request's command queue. This releases the thread if
+  // it is waiting inside the queue.
+  ri->m_commandQueue.shutdown();
+  delete ri;
 }
 
 void Debugger::shutdown() {
@@ -85,6 +124,106 @@ bool Debugger::sendUserMessage(const char* message, const char* level) {
   }
 
   return m_transport->sendUserMessage(message, level);
+}
+
+void Debugger::requestInit() {
+  m_totalRequestCount++;
+
+  if (!clientConnected()) {
+    // Don't pay for attaching to the thread if no debugger client is connected.
+    return;
+  }
+
+  auto const threadInfo = &TI();
+  bool pauseRequest;
+  RequestInfo* requestInfo;
+
+  {
+    Lock lock(m_lock);
+    requestInfo = attachToRequest(threadInfo);
+    pauseRequest = m_state != ProgramState::Running;
+    if (pauseRequest) {
+      m_pausedRequestCount++;
+    }
+  }
+
+  // If the debugger was already paused when this request started, drop the lock
+  // and block the request in its command queue until the debugger resumes.
+  // Note: if the debugger client issues a resume between the time the lock
+  // is dropped above and entering the command queue, there will be a pending
+  // Resume command in this queue, which will cause this thread to unblock.
+  if (pauseRequest && requestInfo != nullptr) {
+    requestInfo->m_commandQueue.processCommands();
+
+    {
+      Lock lock(m_lock);
+      m_pausedRequestCount--;
+    }
+  }
+}
+
+RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
+  // Note: the caller of this routine must hold m_lock.
+  RequestInfo* requestInfo = nullptr;
+
+  auto it = m_requests.find(ti);
+  if (it == m_requests.end()) {
+    // New request. Insert a request info object into our map.
+    requestInfo = new RequestInfo();
+    if (requestInfo == nullptr) {
+      // Failed to allocate request info.
+      return nullptr;
+    }
+
+    m_requests.emplace(std::make_pair(ti, requestInfo));
+  } else {
+    requestInfo = it->second;
+  }
+
+  assert(requestInfo != nullptr);
+
+  // Try to attach our debugger hook to the request.
+  if (!requestInfo->m_flags.hookAttached) {
+    if (DebuggerHook::attach<VSDebugHook>(ti)) {
+      requestInfo->m_flags.hookAttached = true;
+    } else {
+      m_transport->sendUserMessage(
+        "Failed to attach to new HHVM request: another debugger is already "
+          "attached.",
+        DebugTransport::OutputLevelError
+      );
+    }
+  }
+
+  return requestInfo;
+}
+
+void Debugger::requestShutdown() {
+  auto const threadInfo = &TI();
+  RequestInfo* requestInfo = nullptr;
+
+  {
+    Lock lock(m_lock);
+    auto it = m_requests.find(threadInfo);
+    if (it != m_requests.end()) {
+      requestInfo = it->second;
+      m_requests.erase(it);
+    }
+  }
+
+  if (requestInfo != nullptr) {
+    cleanupRequestInfo(threadInfo, requestInfo);
+  }
+}
+
+RequestInfo* Debugger::getRequestInfo() {
+  Lock lock(m_lock);
+  auto it = m_requests.find(&TI());
+  if (it != m_requests.end()) {
+    return it->second;
+  }
+
+  return nullptr;
 }
 
 }

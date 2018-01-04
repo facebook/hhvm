@@ -4,6 +4,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     debugger.cpp
     ext_vsdebug.cpp
     fdtransport.cpp
+    hook.cpp
     logging.cpp
     session.cpp
     transport.cpp
@@ -12,6 +13,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     debugger.h
     ext_vsdebug.h
     fdtransport.h
+    hook.h
     logging.h
     session.h
     transport.h

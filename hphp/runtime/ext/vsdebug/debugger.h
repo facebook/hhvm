@@ -20,10 +20,12 @@
 #include <atomic>
 #include <unordered_map>
 
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
 #include "hphp/runtime/ext/vsdebug/session.h"
 #include "hphp/runtime/ext/vsdebug/command_queue.h"
+#include "hphp/runtime/ext/vsdebug/hook.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -33,6 +35,22 @@ struct DebugTransport;
 
 // Forward declaration of debugger session.
 struct DebuggerSession;
+
+enum ProgramState {
+  LoaderBreakpoint,
+  Paused,
+  Running
+};
+
+// Structure to represent the state of a single request.
+struct RequestInfo {
+  struct {
+    bool hookAttached;
+    bool memoryLimitRemoved;
+    bool initialBreakpointsSynced;
+  } m_flags;
+  CommandQueue m_commandQueue;
+};
 
 struct Debugger final {
   Debugger() {}
@@ -66,7 +84,17 @@ struct Debugger final {
     const char* level = DebugTransport::OutputLevelLog
   );
 
+  // Handle requests.
+  void requestInit();
+  void requestShutdown();
+
+  // Returns a pointer to the RequestInfo for the current thread.
+  RequestInfo* getRequestInfo();
+
 private:
+
+  static void cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri);
+  RequestInfo* attachToRequest(ThreadInfo* ti);
 
   Mutex m_lock;
   DebugTransport* m_transport {nullptr};
@@ -81,6 +109,25 @@ private:
   // debugger hook operations when the debugger is "enabled" but not
   // actually in used due to no connected debugger clients.
   std::atomic<bool> m_clientConnected {false};
+
+  // State of the program.
+  ProgramState m_state {ProgramState::Running};
+
+  // Information about all the requests that the debugger is aware of.
+  std::unordered_map<ThreadInfo*, RequestInfo*> m_requests;
+
+  // Keeps track of the number of requests that are currently blocked inside
+  // the debugger extension due to being paused for any reason (breakpoint,
+  // exception, loader break, etc...)
+  uint64_t m_pausedRequestCount {0};
+
+  // Keeps track of the total number of requests attached to by this extension
+  // since the server was started.
+  std::atomic<uint64_t> m_totalRequestCount {0};
+
+  // Indicates which request is the "active" request for debugger client
+  // commands, or nullptr if there is no such request.
+  ThreadInfo* m_activeRequest {nullptr};
 };
 
 }

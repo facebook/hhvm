@@ -126,7 +126,8 @@ void VSDebugExtension::requestInit() {
     return;
   }
 
-  // TODO: (Ericblue) Notify debugger of new request thread.
+  assert(s_debugger != nullptr);
+  s_debugger->requestInit();
 }
 
 void VSDebugExtension::requestShutdown() {
@@ -134,7 +135,8 @@ void VSDebugExtension::requestShutdown() {
     return;
   }
 
-  // TODO: (Ericblue) Notify debugger that a thread has exited.
+  assert(s_debugger != nullptr);
+  s_debugger->requestShutdown();
 }
 
 // Linkage for the debugger extension.

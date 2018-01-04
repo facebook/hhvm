@@ -1,0 +1,120 @@
+Tuple provider ...$x
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(3)
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+  }
+}
+Tuple provider (int, int)...$x
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(3)
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+  }
+}
+Tuple provider ...
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(3)
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+  }
+}
+Tuple provider lambda1
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(3)
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+  }
+}
+Tuple provider lambda2
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(3)
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+  }
+}

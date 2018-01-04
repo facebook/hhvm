@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 function mymeth(string... $y):void {
   var_dump($y);

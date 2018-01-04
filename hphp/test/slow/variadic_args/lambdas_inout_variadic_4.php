@@ -1,0 +1,3 @@
+<?hh
+
+intProvider((inout ...$x) ==> {});

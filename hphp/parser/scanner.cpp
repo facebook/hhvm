@@ -280,11 +280,19 @@ bool Scanner::tryParseNonEmptyLambdaParams(TokenStore::iterator& pos) {
       nextLookahead(pos);
     }
     if (pos->t != T_VARIABLE) {
+      /* This is the (...) ==> {} and (...$x) ==> {} cases */
       if (!inout_param && pos->t == T_ELLIPSIS) {
         nextLookahead(pos);
+        if (pos->t == T_VARIABLE) {
+          nextLookahead(pos);
+        }
         return true;
       }
-      if (!tryParseNSType(pos)) return false;
+      if (!tryParseNSType(pos)) { return false; }
+      /* We may have an ellipsis now, e.g. for (int ...$x) ==> {} */
+      if (!inout_param && pos->t == T_ELLIPSIS) {
+        nextLookahead(pos);
+      }
       if (pos->t == '&') {
         nextLookahead(pos);
       }
@@ -400,6 +408,7 @@ void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
 
 bool Scanner::tryParseFuncTypeList(TokenStore::iterator& pos) {
   for (int parsed = 0;;parsed++) {
+    /* For cases such as function(...):void */
     if (pos->t == T_ELLIPSIS) {
       nextLookahead(pos);
       return true;
@@ -417,6 +426,11 @@ bool Scanner::tryParseFuncTypeList(TokenStore::iterator& pos) {
       }
     }
     pos = cpPos;
+    /* For cases such as function(int...):void */
+    if (pos->t == T_ELLIPSIS) {
+      nextLookahead(pos);
+      return true;
+    }
     if (pos->t != ',') return true;
     nextLookahead(pos);
   }

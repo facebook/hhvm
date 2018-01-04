@@ -6,7 +6,6 @@ slow/ext_ipc/semaphore.php
 slow/ext_ipc/shared_memory.php
 slow/ext_oauth/overflow_redir.php
 slow/ext_oauth/plaintext.php
-slow/ext_oauth/plaintext2.php
 slow/ext_oauth/rsa.php
 slow/ext_process/ext_process.php
 slow/ext_process/fork_log.php
@@ -20,4 +19,3 @@ slow/parser/hh-namespace-conflict-6.php
 slow/traits/require_constraint_basic_error.php
 slow/traits/require_constraint_recurse.php
 slow/using/bad-goto1.php
-slow/using/bad-goto2.php

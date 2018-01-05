@@ -144,7 +144,7 @@ let tco_migration_flags_all =
     ]
 
 let default = {
- tco_assume_php = true;
+ tco_assume_php = false;
  tco_safe_array = false;
  tco_safe_vector_array = false;
  tco_user_attrs = None;

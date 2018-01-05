@@ -24,6 +24,7 @@ namespace HPHP {
 namespace VSDEBUG {
 
 DebuggerSession::DebuggerSession(Debugger* debugger) :
+  m_dummyRequestInfo(Debugger::createRequestInfo()),
   m_debugger(debugger),
   m_breakpointMgr(new BreakpointManager(debugger)),
   m_dummyThread(this, &DebuggerSession::runDummy),
@@ -33,11 +34,15 @@ DebuggerSession::DebuggerSession(Debugger* debugger) :
 }
 
 DebuggerSession::~DebuggerSession() {
-  m_dummyCommandQueue.shutdown();
+  m_dummyRequestInfo->m_commandQueue.shutdown();
   m_dummyThread.waitForEnd();
 
   if (m_breakpointMgr != nullptr) {
     delete m_breakpointMgr;
+  }
+
+  if (m_dummyRequestInfo != nullptr) {
+    Debugger::cleanupRequestInfo(nullptr, m_dummyRequestInfo);
   }
 }
 
@@ -55,6 +60,12 @@ void DebuggerSession::invokeDummyStartupDocument() {
   // If a startup document was specified, invoke it now.
   bool error;
   std::string errorMsg;
+
+  // We must not hit any breakpoints in the dummy while it is initializing,
+  // the rest of the debugger is not prepared to deal with a bp yet and the
+  // dummy thread would get stuck.
+  m_dummyRequestInfo->m_flags.doNotBreak = true;
+
   bool ret = hphp_invoke(g_context.getCheck(),
                          m_dummyStartupDoc,
                          false,
@@ -67,6 +78,7 @@ void DebuggerSession::invokeDummyStartupDocument() {
                          true,
                          false,
                          true);
+
   if (!ret || error) {
     std::string displayError =
       std::string("Failed to prepare the Hack/PHP console: ") + errorMsg;
@@ -87,20 +99,58 @@ void DebuggerSession::invokeDummyStartupDocument() {
       DebugTransport::OutputLevelSuccess
     );
   }
+
+  m_dummyRequestInfo->m_flags.doNotBreak = false;
 }
 
 const StaticString s_memory_limit("memory_limit");
 
 void DebuggerSession::runDummy() {
-
   // The debugger needs to know which background thread is processing the dummy
   // request. It should not attach to this request as it would a real request:
   // it should not be included in operattions like async-break-all, nor should
   // it be listed in any user-visible thread list.
   m_debugger->setDummyThreadId((int64_t)Process::GetThreadId());
 
+  // While the main thread is starting up and preparing the system lib,
+  // the code emitter tags all newly compiled functions as "built in".
+  // If we pull in the startup document while this is happening, all functions
+  // in the startup doc get erroneously tagged as builtin, which breaks
+  // our stack traces later if any breakpoint is hit in a routine pulled in
+  // by the startup document (especially true of dummy evals with bps in them).
+  //
+  // Unfortunately there is no signal when this is complete, so we're going to
+  // have to poll here. Wait for a maximum time and then proceed anyway.
+  int pollCount = 0;
+  constexpr int pollTimePerIterUs = 100 * 1000;
+  constexpr int pollMaxTimeUs = 3 * 1000 * 1000;
+  while (!SystemLib::s_inited &&
+         pollCount * pollTimePerIterUs < pollMaxTimeUs) {
+
+    pollCount++;
+
+    // Wait 100ms and try again.
+    usleep(pollTimePerIterUs);
+
+    // Ensure this thread sees any writes to SystemLib::s_inited.
+    std::atomic_thread_fence(std::memory_order_acquire);
+  }
+
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Polled %d times waiting for SystemLib::s_inited to be true. "
+      "(SystemLib::s_inited = %s)",
+    pollCount,
+    SystemLib::s_inited ? "TRUE" : "FALSE"
+  );
+
   hphp_session_init();
   SCOPE_EXIT {
+    if (m_dummyRequestInfo->m_flags.hookAttached) {
+      DebuggerHook::detach();
+      m_dummyRequestInfo->m_flags.hookAttached = false;
+    }
+
     hphp_context_exit();
     hphp_session_exit();
   };
@@ -114,9 +164,12 @@ void DebuggerSession::runDummy() {
     return;
   }
 
+  m_dummyRequestInfo->m_flags.hookAttached = true;
+
   // Remove the artificial memory limit for this request since there is a
   // debugger attached to it.
   IniSetting::SetUser(s_memory_limit, std::numeric_limits<int64_t>::max());
+  m_dummyRequestInfo->m_flags.memoryLimitRemoved = true;
 
   if (!m_dummyStartupDoc.empty()) {
     invokeDummyStartupDocument();
@@ -127,12 +180,11 @@ void DebuggerSession::runDummy() {
     );
   }
 
-  m_dummyCommandQueue.processCommands();
-  DebuggerHook::detach();
+  m_dummyRequestInfo->m_commandQueue.processCommands();
 }
 
 void DebuggerSession::enqueueDummyCommand(VSCommand* command) {
-  m_dummyCommandQueue.dispatchCommand(command);
+  m_dummyRequestInfo->m_commandQueue.dispatchCommand(command);
 }
 
 void DebuggerSession::setClientPreferences(ClientPreferences& preferences) {

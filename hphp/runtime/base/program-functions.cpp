@@ -1737,6 +1737,9 @@ static int execute_program_impl(int argc, char** argv) {
     else RuntimeOption::EvalVerifyOnly = true;
     SystemLib::s_inited = true;
 
+    // Ensure write to SystemLib::s_inited is visible by other threads.
+    std::atomic_thread_fence(std::memory_order_release);
+
     auto compiled = compile_file(str.c_str(), str.size(), md5, file.c_str(),
                                  nullptr);
 

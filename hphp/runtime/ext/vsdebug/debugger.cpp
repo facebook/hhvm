@@ -100,6 +100,22 @@ void Debugger::setClientConnected(bool connected) {
         });
       }
 
+      executeForEachAttachedRequest(
+        [&](ThreadInfo* ti, RequestInfo* ri) {
+          if (ri->m_breakpointInfo == nullptr) {
+            ri->m_breakpointInfo = new RequestBreakpointInfo();
+          }
+
+          if (ri->m_breakpointInfo == nullptr) {
+            VSDebugLogger::Log(
+              VSDebugLogger::LogLevelError,
+              "Failed to allocate request breakpoint info!"
+            );
+          }
+        },
+        true /* includeDummyRequest */
+      );
+
       // If the script startup thread is waiting for a client connection, wake
       // it up now.
       {
@@ -110,24 +126,29 @@ void Debugger::setClientConnected(bool connected) {
 
       // The client has detached. Walk through any requests we are currently
       // attached to and release them if they are blocked in the debugger.
-      for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
-        // Clear any undelivered client messages in the request's command queue,
-        // since they apply to the debugger session that just ended.
-        // NOTE: The request's RequestInfo will be cleaned up and freed when the
-        // request completes in requestShutdown. It is not safe to do that from
-        // this thread.
-        it->second->m_commandQueue.clearPendingMessages();
+      executeForEachAttachedRequest(
+        [&](ThreadInfo* ti, RequestInfo* ri) {
+          // Clear any undelivered client messages in the request's command
+          // queue, since they apply to the debugger session that just ended.
+          // NOTE: The request's RequestInfo will be cleaned up and freed when
+          // the request completes in requestShutdown. It is not safe to do that
+          // from this thread.
+          ri->m_commandQueue.clearPendingMessages();
 
-        // Clear the breakpoint info.
-        if (it->second->m_breakpointInfo != nullptr) {
-          delete it->second->m_breakpointInfo;
-          it->second->m_breakpointInfo = nullptr;
-        }
+          // Clear the breakpoint info.
+          if (ri->m_breakpointInfo != nullptr) {
+            delete ri->m_breakpointInfo;
+            ri->m_breakpointInfo = nullptr;
+          }
 
-        it->second->m_breakpointInfo = new RequestBreakpointInfo();
-        assert(it->second->m_breakpointInfo->m_pendingBreakpoints.empty());
-        assert(it->second->m_breakpointInfo->m_unresolvedBreakpoints.empty());
-      }
+          ri->m_breakpointInfo = new RequestBreakpointInfo();
+          if (ri->m_breakpointInfo != nullptr) {
+            assert(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
+            assert(ri->m_breakpointInfo->m_unresolvedBreakpoints.empty());
+          }
+        },
+        true /* includeDummyRequest */
+      );
 
       m_clientInitialized = false;
 
@@ -164,6 +185,10 @@ void Debugger::setClientInitialized() {
 int Debugger::getCurrentThreadId() {
   Lock lock(m_lock);
 
+  if (isDummyRequest()) {
+    return kDummyTheadId;
+  }
+
   ThreadInfo* const threadInfo = &TI();
   const auto it = m_requestInfoMap.find(threadInfo);
   if (it == m_requestInfoMap.end()) {
@@ -174,7 +199,7 @@ int Debugger::getCurrentThreadId() {
 }
 
 void Debugger::cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri) {
-  if (ri->m_flags.hookAttached) {
+  if (ri->m_flags.hookAttached && ti != nullptr) {
     DebuggerHook::detach(ti);
   }
 
@@ -211,6 +236,25 @@ void Debugger::cleanupServerObjectsForRequest(RequestInfo* ri) {
   }
 
   assert(objs.size() == 0);
+}
+
+void Debugger::executeForEachAttachedRequest(
+  std::function<void(ThreadInfo* ti, RequestInfo* ri)> callback,
+  bool includeDummyRequest
+) {
+  m_lock.assertOwnedBySelf();
+
+  for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
+    assert(it->second != nullptr);
+    callback(it->first, it->second);
+  }
+
+  if (includeDummyRequest) {
+    RequestInfo* dummyRequestInfo = getDummyRequestInfo();
+    if (dummyRequestInfo != nullptr) {
+      callback(nullptr, dummyRequestInfo);
+    }
+  }
 }
 
 void Debugger::shutdown() {
@@ -251,7 +295,7 @@ void Debugger::sendStoppedEvent(
     event["description"] = reason;
   }
 
-  if (threadId > 0) {
+  if (threadId >= 0) {
     event["threadId"] = threadId;
   }
 
@@ -330,7 +374,7 @@ void Debugger::requestInit() {
 
   {
     Lock lock(m_lock);
-    bool dummy = (int64_t)Process::GetThreadId() == m_dummyThreadId;
+    bool dummy = isDummyRequest();
 
     // In server mode, attach logging hooks to redirect stdout and stderr
     // to the debugger client. This is not needed in launch mode, because
@@ -414,7 +458,10 @@ void Debugger::processCommandQueue(
 ) {
   {
     Lock lock(m_lock);
-    m_pausedRequestCount++;
+    if (requestInfo->m_pauseRecurseCount == 0) {
+      m_pausedRequestCount++;
+    }
+
     requestInfo->m_pauseRecurseCount++;
     requestInfo->m_totalPauseCount++;
 
@@ -432,7 +479,10 @@ void Debugger::processCommandQueue(
   {
     Lock lock(m_lock);
     requestInfo->m_pauseRecurseCount--;
-    m_pausedRequestCount--;
+    if (requestInfo->m_pauseRecurseCount == 0) {
+      m_pausedRequestCount--;
+    }
+
     sendContinuedEvent(threadId);
 
     // Any server objects stored for the client for this request are invalid
@@ -449,6 +499,23 @@ void Debugger::processCommandQueue(
   m_resumeCondition.notify_all();
 }
 
+RequestInfo* Debugger::createRequestInfo() {
+  RequestInfo* requestInfo = new RequestInfo();
+  if (requestInfo == nullptr) {
+    // Failed to allocate request info.
+    return nullptr;
+  }
+
+  requestInfo->m_breakpointInfo = new RequestBreakpointInfo();
+  if (requestInfo->m_breakpointInfo == nullptr) {
+    // Failed to allocate breakpoint info.
+    delete requestInfo;
+    return nullptr;
+  }
+
+  return requestInfo;
+}
+
 RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   // Note: the caller of this routine must hold m_lock.
   RequestInfo* requestInfo = nullptr;
@@ -457,17 +524,12 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   auto it = m_requests.find(ti);
   if (it == m_requests.end()) {
     // New request. Insert a request info object into our map.
-    threadId = ++m_nextThreadId;
-    requestInfo = new RequestInfo();
+    threadId = m_nextThreadId++;
+    assert(threadId > 0);
+
+    requestInfo = createRequestInfo();
     if (requestInfo == nullptr) {
       // Failed to allocate request info.
-      return nullptr;
-    }
-
-    requestInfo->m_breakpointInfo = new RequestBreakpointInfo();
-    if (requestInfo->m_breakpointInfo == nullptr) {
-      // Failed to allocate breakpoint info.
-      delete requestInfo;
       return nullptr;
     }
 
@@ -487,7 +549,6 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
       ti->m_executing == ThreadInfo::Executing::RuntimeFunctions) {
     sendThreadEventMessage(threadId, ThreadEventType::ThreadStarted);
   }
-
 
   // Try to attach our debugger hook to the request.
   if (!requestInfo->m_flags.hookAttached) {
@@ -556,11 +617,24 @@ void Debugger::requestShutdown() {
   }
 }
 
+RequestInfo* Debugger::getDummyRequestInfo() {
+  m_lock.assertOwnedBySelf();
+  if (!clientConnected()) {
+    return nullptr;
+  }
+
+  return m_session->m_dummyRequestInfo;
+}
+
 RequestInfo* Debugger::getRequestInfo(int threadId /* = -1 */) {
   Lock lock(m_lock);
 
   if (threadId != -1) {
     // Find the info for the requested thread ID.
+    if (threadId == kDummyTheadId) {
+      return getDummyRequestInfo();
+    }
+
     auto it = m_requestIdMap.find(threadId);
     if (it != m_requestIdMap.end()) {
       auto requestIt = m_requests.find(it->second);
@@ -570,6 +644,10 @@ RequestInfo* Debugger::getRequestInfo(int threadId /* = -1 */) {
     }
   } else {
     // Find the request info for the current request thread.
+    if (isDummyRequest()) {
+      return getDummyRequestInfo();
+    }
+
     auto it = m_requests.find(&TI());
     if (it != m_requests.end()) {
       return it->second;
@@ -682,15 +760,17 @@ void Debugger::resumeTarget() {
 
   // Resume every paused request. Each request will send a thread continued
   // event when it exits its command loop.
-  for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
-    RequestInfo* ri = it->second;
-    ri->m_stepReason = nullptr;
+  executeForEachAttachedRequest(
+    [&](ThreadInfo* ti, RequestInfo* ri) {
+      ri->m_stepReason = nullptr;
 
-    if (ri->m_pauseRecurseCount > 0) {
-      VSCommand* resumeCommand = ContinueCommand::createInstance(this);
-      ri->m_commandQueue.dispatchCommand(resumeCommand);
-    }
-  }
+      if (ri->m_pauseRecurseCount > 0) {
+        VSCommand* resumeCommand = ContinueCommand::createInstance(this);
+        ri->m_commandQueue.dispatchCommand(resumeCommand);
+      }
+    },
+    true /* includeDummyRequest */
+  );
 
   sendContinuedEvent(-1);
 }
@@ -834,19 +914,28 @@ void Debugger::onClientMessage(folly::dynamic& message) {
       case CommandTarget::Request:
         // Dispatch this command to the correct request.
         {
+          RequestInfo* ri = nullptr;
           const auto threadId = command->targetThreadId(m_session);
-          auto it = m_requestIdMap.find(threadId);
-          if (it != m_requestIdMap.end()) {
-            const auto request = m_requests.find(it->second);
-            assert(request != m_requests.end());
-            request->second->m_commandQueue.dispatchCommand(command);
-
-            // Lifetime of command is now owned by the request thread's queue.
-            command = nullptr;
+          if (threadId == kDummyTheadId) {
+            ri = getDummyRequestInfo();
           } else {
+            auto it = m_requestIdMap.find(threadId);
+            if (it != m_requestIdMap.end()) {
+              const auto request = m_requests.find(it->second);
+              assert(request != m_requests.end());
+              ri = request->second;
+            }
+          }
+
+          if (ri == nullptr) {
             constexpr char* errorMsg =
               "The requested thread ID does not exist in the target.";
             reportClientMessageError(message, errorMsg);
+          } else {
+            ri->m_commandQueue.dispatchCommand(command);
+
+            // Lifetime of command is now owned by the request thread's queue.
+            command = nullptr;
           }
         }
         break;
@@ -927,18 +1016,28 @@ void Debugger::onBreakpointAdded(int bpId) {
   // Otherwise, if the program is running, we need to gain control of each
   // request thread by interrupting it. It will install the bp when it
   // calls into the command hook on the next Hack opcode.
-  for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
-    ThreadInfo* ti = it->first;
-    RequestInfo* ri = it->second;
+  executeForEachAttachedRequest(
+    [&](ThreadInfo* ti, RequestInfo* ri) {
+      if (ti != nullptr) {
+        ti->m_reqInjectionData.setDebuggerIntr(true);
+      }
 
-    ti->m_reqInjectionData.setDebuggerIntr(true);
-    ri->m_breakpointInfo->m_pendingBreakpoints.emplace(bpId);
+      ri->m_breakpointInfo->m_pendingBreakpoints.emplace(bpId);
 
-    if (m_state != ProgramState::Running) {
-      const auto cmd = ResolveBreakpointsCommand::createInstance(this);
-      ri->m_commandQueue.dispatchCommand(cmd);
-    }
-  }
+      // If the program is running, the request thread will pick up and install
+      // the breakpoint the next time it calls into the opcode hook, except for
+      // the dummy thread, it's not running anything, so it won't ever call the
+      // opcode hook. Ask it to resolve the breakpoint.
+      //
+      // Per contract with executeForEachAttachedRequest, ti == nullptr if and
+      // only if RequestInfo points to the dummy's request info.
+      if (m_state != ProgramState::Running || ti == nullptr) {
+        const auto cmd = ResolveBreakpointsCommand::createInstance(this);
+        ri->m_commandQueue.dispatchCommand(cmd);
+      }
+    },
+    true /* includeDummyRequest */
+  );
 }
 
 void Debugger::tryInstallBreakpoints(RequestInfo* ri) {
@@ -1397,10 +1496,13 @@ std::string Debugger::getStopReasonForBp(
 }
 
 void Debugger::interruptAllThreads() {
-  for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
-    ThreadInfo* ti = it->first;
-    ti->m_reqInjectionData.setDebuggerIntr(true);
-  }
+  executeForEachAttachedRequest(
+    [&](ThreadInfo* ti, RequestInfo* ri) {
+      assert(ti != nullptr);
+      ti->m_reqInjectionData.setDebuggerIntr(true);
+    },
+    false /* includeDummyRequest */
+  );
 }
 
 void DebuggerStdoutHook::operator()(const char* str, int len) {

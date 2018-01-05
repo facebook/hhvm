@@ -35,10 +35,6 @@ EvaluateCommand::EvaluateCommand(
 
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   const int frameId = tryGetInt(args, "frameId", -1);
-  if (frameId <= 0) {
-    throw DebuggerCommandException("Invalid frameId specified.");
-  }
-
   m_frameId = frameId;
 }
 
@@ -57,7 +53,8 @@ FrameObject* EvaluateCommand::getFrameObject(DebuggerSession* session) {
 int64_t EvaluateCommand::targetThreadId(DebuggerSession* session) {
   FrameObject* frame = getFrameObject(session);
   if (frame == nullptr) {
-    throw DebuggerCommandException("Invalid frameId specified.");
+    // Execute the eval in the dummy context.
+    return Debugger::kDummyTheadId;
   }
 
   return frame->m_requestId;
@@ -95,6 +92,7 @@ bool EvaluateCommand::executeImpl(
   // Track if the evaluation command caused any opcode stepping to occur
   // so we know if we need to re-send a stop event after the evaluation.
   int previousPauseCount = ri->m_totalPauseCount;
+  bool isDummy = m_debugger->isDummyRequest();
 
   // Put everything back on scope exit.
   SCOPE_EXIT {
@@ -103,6 +101,21 @@ bool EvaluateCommand::executeImpl(
 
     ri->m_evaluateCommandDepth--;
     assert(ri->m_evaluateCommandDepth >= 0);
+
+    if (ri->m_evaluateCommandDepth == 0 && isDummy) {
+      // The dummy request only appears in the client UX while it is
+      // stopped at a breakpoint during an evaluation (because the user
+      // needs to see a call stack and scopes at that point). Otherwise,
+      // existance of the dummy is hiden from the user. If the dummy is
+      // no longer executing any evaluation, send a thread exited event
+      // to remove it from the front-end UX.
+      m_debugger->sendThreadEventMessage(
+        0,
+        Debugger::ThreadEventType::ThreadExited
+      );
+
+      g_context->exitDebuggerDummyEnv();
+    }
   };
 
   Unit* unit = compile_string(evalExpression.c_str(), evalExpression.size());
@@ -113,11 +126,20 @@ bool EvaluateCommand::executeImpl(
   }
 
   FrameObject* frameObj = getFrameObject(session);
-  if (frameObj == nullptr) {
-    throw DebuggerCommandException("Invalid frameId specified.");
-  }
+  int frameDepth = frameObj == nullptr ? 0 : frameObj->m_frameDepth;
 
-  int frameDepth = frameObj->m_frameDepth;
+  if (ri->m_evaluateCommandDepth == 1 && isDummy) {
+    // Set up the dummy evaluation environment unless we have recursively
+    // re-entered eval on the dummy thread, in which case it's already set.
+    g_context->enterDebuggerDummyEnv();
+
+    // Show the dummy thread while it is doing an evaluation so it can
+    // present a call stack if it hits a breakpoint during the eval.
+    m_debugger->sendThreadEventMessage(
+      0,
+      Debugger::ThreadEventType::ThreadStarted
+    );
+  }
 
   // We must drop the lock before calling evalPHPDebugger because the eval
   // is permitted to hit breakpoints, which can call back into Debugger and
@@ -130,7 +152,9 @@ bool EvaluateCommand::executeImpl(
       result = g_context->evalPHPDebugger(unit, frameDepth);
     });
 
-  if (previousPauseCount != ri->m_totalPauseCount) {
+  if (previousPauseCount != ri->m_totalPauseCount &&
+      ri->m_pauseRecurseCount > 0) {
+
     m_debugger->sendStoppedEvent(
       "Evaluation returned",
       threadId
@@ -179,7 +203,6 @@ bool EvaluateCommand::executeImpl(
   } catch (std::out_of_range e) {
   }
 
-  // Completion of this command does not resume the target.
   return false;
 }
 

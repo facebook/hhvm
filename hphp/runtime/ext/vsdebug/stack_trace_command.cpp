@@ -43,6 +43,19 @@ bool StackTraceCommand::executeImpl(
   const folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
 
+  (*responseMsg)["body"] = folly::dynamic::object;
+
+  folly::dynamic& stackTrace = (*responseMsg)["body"];
+  stackTrace["stackFrames"] = folly::dynamic::array();
+  folly::dynamic& frames = stackTrace["stackFrames"];
+
+  if (m_debugger->getRequestInfo()->m_pauseRecurseCount == 0) {
+    stackTrace["stackFrames"] = frames;
+    stackTrace["totalFrames"] = 0;
+    (*responseMsg)["body"] = stackTrace;
+    return false;
+  }
+
   int startFrame = tryGetInt(args, "startFrame", 0);
   int levels = tryGetInt(args, "levels", INT_MAX);
   int levelsAdded = 0;
@@ -54,11 +67,6 @@ bool StackTraceCommand::executeImpl(
                         .setParserFrame(nullptr);
 
   const Array backtrace = createBacktrace(backtraceArgs);
-
-  folly::dynamic stackTrace = folly::dynamic::object;
-  stackTrace["stackFrames"] = folly::dynamic::array();
-
-  folly::dynamic& frames = stackTrace["stackFrames"];
   int backtraceSize = backtrace.size();
   const ClientPreferences& prefs = m_debugger->getClientPreferences();
 
@@ -94,6 +102,7 @@ bool StackTraceCommand::executeImpl(
 
     folly::dynamic& source = stackFrame["source"];
     std::string fileName = tvCastToString(file.tv()).toCppString();
+
     if (fileName.empty()) {
       // Some routines like builtins and native extensions do not have
       // a PHP file path in their frame's file name field.
@@ -123,7 +132,6 @@ bool StackTraceCommand::executeImpl(
   }
 
   stackTrace["totalFrames"] = backtraceSize == 0 ? 0 : backtraceSize - 1;
-  (*responseMsg)["body"] = stackTrace;
 
   // Completion of this command does not resume the target.
   return false;

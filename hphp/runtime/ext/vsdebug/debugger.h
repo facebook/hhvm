@@ -33,6 +33,7 @@
 #include "hphp/runtime/ext/vsdebug/hook.h"
 #include "hphp/runtime/ext/vsdebug/client_preferences.h"
 #include "hphp/runtime/ext/vsdebug/server_object.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -68,6 +69,7 @@ struct RequestInfo {
     bool hookAttached;
     bool memoryLimitRemoved;
     bool compilationUnitsMapped;
+    bool doNotBreak;
   } m_flags;
   const char* m_stepReason;
   CommandQueue m_commandQueue;
@@ -176,6 +178,13 @@ struct Debugger final {
 
   // Returns a pointer to the RequestInfo for the current thread.
   RequestInfo* getRequestInfo(int threadId = -1);
+
+  // Allocates a new request info object.
+  static RequestInfo* createRequestInfo();
+
+  // Cleans up and frees the specified request info object and shuts down its
+  // command queue, unblocking the waiting request thread (if any).
+  static void cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri);
 
   // Puts the current thread into the command queue for the specified request
   // info. This routine will block until the debugger is resumed by the client,
@@ -298,16 +307,23 @@ struct Debugger final {
   // and re-acquire the lock before returning.
   void executeWithoutLock(std::function<void()> callback);
 
-private:
-
   enum ThreadEventType {
     ThreadStarted,
     ThreadExited
   };
 
-  // Cleans up and frees the specified request info object and shuts down its
-  // command queue, unblocking the waiting request thread (if any).
-  static void cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri);
+  static constexpr int kDummyTheadId = 0;
+
+  // Sends a thread event message to a debugger client.
+  void sendThreadEventMessage(int64_t threadId, ThreadEventType eventType);
+
+  // Returns true if the current thread is the dummy request thread, false
+  // otherwise.
+  bool isDummyRequest() {
+    return (int64_t)Process::GetThreadId() == m_dummyThreadId;
+  }
+
+private:
 
   // Cleans up server objects for a request.
   void cleanupServerObjectsForRequest(RequestInfo* ri);
@@ -338,9 +354,6 @@ private:
   // Sends a response message to a debugger client in response to a debugger
   // client request.
   void sendCommandResponse(VSCommand* command, folly::dynamic& responseMsg);
-
-  // Sends a thread event message to a debugger client.
-  void sendThreadEventMessage(int64_t threadId, ThreadEventType eventType);
 
   // Attempts to send the protocol terminated event if there is still a
   // connected client.
@@ -374,6 +387,20 @@ private:
   // can interrupt them.
   void interruptAllThreads();
 
+  // Executes the specified lambda function for each request the debugger
+  // is currently attached to.
+  void executeForEachAttachedRequest(
+    std::function<void(
+      // Supplies the ThreadInfo for the request thread.
+      // NOTE: This parameter will be nullptr for the dummy request.
+      ThreadInfo* ti,
+      // Supplies the request info for the request thread. This will
+      // never be nullptr.
+      RequestInfo* ri
+    )> callback,
+    bool includeDummyRequest
+  );
+
   // Blocks until it is safe to pause the target. If any other threads are
   // in the process of pausing or resuming target requests, waits until those
   // operations are complete, and returns with the current thread holding
@@ -398,6 +425,10 @@ private:
     const std::string& path,
     const int line
   );
+
+  // Returns the request info for the dummy, if one exists or nullptr
+  // if there is no client connected.
+  RequestInfo* getDummyRequestInfo();
 
   Mutex m_lock;
   DebugTransport* m_transport {nullptr};
@@ -431,7 +462,7 @@ private:
   std::unordered_map<ThreadInfo*, int> m_requestInfoMap;
 
   // Next synthetic request ID to send to client as thread ID.
-  int m_nextThreadId {0};
+  int m_nextThreadId {1};
 
   // Keeps track of the number of requests that are currently blocked inside
   // the debugger extension due to being paused for any reason (breakpoint,

@@ -159,6 +159,10 @@ void VSDebugHook::tryEnterDebugger(
   RequestInfo* requestInfo,
   bool breakNoStepOnly
 ) {
+  if (requestInfo->m_flags.doNotBreak) {
+    return;
+  }
+
   // The first time this request enters the debugger, remove the artificial
   // memory limit since a debugger is attached.
   if (!requestInfo->m_flags.memoryLimitRemoved) {

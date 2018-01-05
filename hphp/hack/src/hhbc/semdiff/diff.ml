@@ -485,9 +485,16 @@ let class_type_constants_comparer =
   wrap type_constants_alist (fun _ s -> s)
     (alist_comparer (option_comparer typed_value_comparer) (fun cname -> cname))
 
-let unmangled_name_comparer =
-  wrap Hhbc_string_utils.Closures.unmangle_closure
-    (fun _ s -> s) (option_comparer string_comparer)
+let unmangled_name_comparer = {
+  comparer = (fun s1 s2 ->
+    match Hhbc_string_utils.Closures.unmangle_closure s1,
+          Hhbc_string_utils.Closures.unmangle_closure s2 with
+    | None, None -> string_comparer.comparer s1 s2
+    | Some s1', Some s2' -> string_comparer.comparer s1' s2'
+    | _, _ -> (1,(1,substedit s1 s2)));
+  size_of = (fun _n -> 1);
+  string_of = fun s -> s;
+}
 
 let class_comparer =
   wrap Hhbc_id.Class.to_raw_string (fun _ s -> s) unmangled_name_comparer

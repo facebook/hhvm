@@ -3029,6 +3029,16 @@ and is_abstract_ft fty = match fty with
           end;
         | _ ->
           make_call_special env id tel (Reason.Rwitness p, Tprim Tvoid))
+  (* Special function `freeze` *)
+  | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.freeze ->
+      check_function_in_suspend SN.PseudoFunctions.freeze;
+      let env, tel, _ = exprs env el in
+      if uel <> [] then
+        Errors.unpacking_disallowed_builtin_function p pseudo_func;
+      if not (Env.env_local_reactive env) then
+        Errors.freeze_in_nonreactive_context p;
+      let env = Typing_mutability.freeze_local p env tel in
+      make_call_special env id tel (Reason.Rwitness p, Tprim Tvoid)
   (* Pseudo-function `get_called_class` *)
   | Id (cp, get_called_class) when
       get_called_class = SN.StdlibFunctions.get_called_class

@@ -39,6 +39,26 @@ let expr_is_mutable
     Env.is_mutable env (snd id)
  | _ -> expr_returns_owned_mutable env e
 
+let freeze_local (p : Pos.t) (env : Typing_env.env) (tel : T.expr list)
+: Typing_env.env =
+  match tel with
+  | [(_, T.Lvar (id_pos, id));] ->
+    let mut_env = Env.get_env_mutability env in
+    let mut_env =
+    match LMap.get id mut_env with
+    | Some (_, Mutable) ->
+      LMap.remove id mut_env
+    | Some x ->
+      Errors.invalid_freeze_target p id_pos (to_string x);
+      mut_env
+    | None ->
+      Errors.invalid_freeze_target p id_pos "immutable";
+      mut_env in
+    Env.env_with_mut env mut_env
+  | _ ->
+    (* Error, freeze takes a single local as an argument *)
+    Errors.invalid_freeze_use p;
+    env
 
 (* Checks for assignment errors as a pass on the TAST *)
 let handle_assignment_mutability

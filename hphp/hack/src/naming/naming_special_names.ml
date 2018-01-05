@@ -186,6 +186,7 @@ module PseudoFunctions = struct
   let empty = "\\empty"
   let isset = "\\isset"
   let unset = "\\unset"
+  let freeze = "\\freeze"
   let exit_ = "\\exit"
   let die = "\\die"
   let hh_show = "\\hh_show"

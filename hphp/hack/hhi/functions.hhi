@@ -21,6 +21,9 @@ function isset($x): bool;
 function empty($x): bool;
 function unset($x): void;
 
+// freeze is a special function for mutability
+function freeze($x) : void;
+
 //
 function array_fill<T>(int $start_index, int $num, T $value): array<T>;
 // TODO make non-nullable once Thrift files are fixed

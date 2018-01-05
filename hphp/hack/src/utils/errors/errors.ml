@@ -1011,6 +1011,10 @@ module Typing                               = struct
   let inout_argument_bad_type               = 4208 (* DONT MODIFY!!!! *)
   let frozen_in_incorrect_scope             = 4209 (* DONT MODIFY!!!! *)
   let reassign_mutable_var                  = 4210 (* DONT MODIFY!!!! *)
+  let invalid_freeze_target                 = 4211 (* DONT MODIFY!!!! *)
+  let invalid_freeze_use                    = 4212 (* DONT MODIFY!!!! *)
+  let freeze_in_nonreactive_context         = 4213 (* DONT MODIFY!!!! *)
+
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2484,6 +2488,21 @@ let frozen_in_incorrect_scope pos1 =
 let reassign_mutable_var pos1 =
   add Typing.reassign_mutable_var pos1
   ("This variable is mutable. You cannot create a new reference to it.")
+
+let freeze_in_nonreactive_context pos1 =
+  add Typing.freeze_in_nonreactive_context pos1
+  ("freeze only makes sense in reactive functions")
+
+let invalid_freeze_use pos1 =
+  add Typing.invalid_freeze_use pos1
+  ("freeze takes a single mutably-owned local variable as an argument")
+
+let invalid_freeze_target pos1 var_pos var_mutability_str =
+  add_list Typing.invalid_freeze_target
+  [
+    pos1, "Invalid argument - freeze() takes a single mutable variable";
+    var_pos, "This variable is "^var_mutability_str;
+  ]
 
 let discarded_awaitable pos1 pos2 =
   add_list Typing.discarded_awaitable [

@@ -438,6 +438,9 @@ module type S = sig
   val fun_reactivity_mismatch : bool -> Pos.t -> Pos.t -> unit
   val frozen_in_incorrect_scope : Pos.t -> unit
   val reassign_mutable_var : Pos.t -> unit 
+  val invalid_freeze_target : Pos.t -> Pos.t -> string -> unit
+  val invalid_freeze_use : Pos.t -> unit
+  val freeze_in_nonreactive_context : Pos.t -> unit
   val this_as_lexical_variable : Pos.t -> unit
   val dollardollar_lvalue : Pos.t -> unit
   val duplicate_using_var : Pos.t -> unit

@@ -330,10 +330,26 @@ void Debugger::requestInit() {
 
   {
     Lock lock(m_lock);
+    bool dummy = (int64_t)Process::GetThreadId() == m_dummyThreadId;
+
+    // In server mode, attach logging hooks to redirect stdout and stderr
+    // to the debugger client. This is not needed in launch mode, because
+    // the wrapper has the actual stdout and stderr pipes to use directly.
+    if (RuntimeOption::ServerExecutionMode()) {
+      g_context->setStdout(&m_stdoutHook);
+
+      if (dummy) {
+        // Attach to stderr in server mode only for the dummy thread (to show
+        // any error spew from evals, etc). Attaching to all requests produces
+        // way too much error spew for the client. Users see stderr output
+        // for the webserver via server logs.
+        Logger::SetThreadHook(&m_stderrHook);
+      }
+    }
 
     // Don't attach to the dummy request thread. DebuggerSession manages the
     // dummy requests debugger hook state.
-    if ((int64_t)Process::GetThreadId() != m_dummyThreadId) {
+    if (!dummy) {
       requestInfo = attachToRequest(threadInfo);
       pauseRequest = m_state != ProgramState::Running;
     } else {
@@ -533,6 +549,9 @@ void Debugger::requestShutdown() {
 
     m_requestIdMap.erase(idItr);
     m_requestInfoMap.erase(infoItr);
+
+    g_context->setStdout(nullptr);
+    Logger::SetThreadHook(nullptr);
   }
 }
 
@@ -1358,6 +1377,21 @@ void Debugger::interruptAllThreads() {
     ThreadInfo* ti = it->first;
     ti->m_reqInjectionData.setDebuggerIntr(true);
   }
+}
+
+void DebuggerStdoutHook::operator()(const char* str, int len) {
+  std::string output = std::string(str, len);
+  m_debugger->sendUserMessage(
+    output.c_str(),
+    DebugTransport::OutputLevelStdout);
+}
+
+void DebuggerStderrHook::operator()(
+  const char*,
+  const char* msg,
+  const char* ending
+) {
+  m_debugger->sendUserMessage(msg, DebugTransport::OutputLevelStderr);
 }
 
 }

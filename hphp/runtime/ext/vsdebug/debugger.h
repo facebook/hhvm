@@ -40,6 +40,7 @@ namespace VSDEBUG {
 struct DebugTransport;
 struct DebuggerSession;
 struct Breakpoint;
+struct Debugger;
 
 enum ProgramState {
   LoaderBreakpoint,
@@ -95,6 +96,29 @@ struct DebuggerCommandException : Exception {
 
 private:
   const char* m_message;
+};
+
+// Hooks for intercepting writes to STDOUT and STDERR in attach to server mode.
+struct DebuggerStdoutHook final : ExecutionContext::StdoutHook {
+  explicit DebuggerStdoutHook(Debugger* debugger)
+    : m_debugger(debugger) {
+  }
+
+  void operator()(const char* str, int len) override;
+
+private:
+  Debugger* m_debugger;
+};
+
+struct DebuggerStderrHook final : LoggerHook {
+  explicit DebuggerStderrHook(Debugger* debugger)
+    : m_debugger(debugger) {
+  }
+
+  void operator()(const char*, const char* msg, const char* ending) override;
+
+private:
+  Debugger* m_debugger;
 };
 
 struct Debugger final {
@@ -415,6 +439,10 @@ private:
   // also issue a pause
   std::mutex m_resumeMutex;
   std::condition_variable m_resumeCondition;
+
+  // Hooks for stdout and stderr redirection.
+  DebuggerStdoutHook m_stdoutHook {DebuggerStdoutHook(this)};
+  DebuggerStderrHook m_stderrHook {DebuggerStderrHook(this)};
 
   static constexpr char* InternalErrorMsg =
     "An internal error occurred while processing a debugger command.";

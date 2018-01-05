@@ -255,6 +255,7 @@ let parse_options () =
     | None -> die usage in
   let tcopt = {
     GlobalOptions.default with
+      GlobalOptions.tco_assume_php = true;
       GlobalOptions.tco_safe_array = !safe_array;
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;

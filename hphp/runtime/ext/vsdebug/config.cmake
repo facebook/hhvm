@@ -18,6 +18,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     run_to_location_command.cpp
     scopes_command.cpp
     session.cpp
+    set_variable_command.cpp
     socket_transport.cpp
     stack_trace_command.cpp
     step_command.cpp

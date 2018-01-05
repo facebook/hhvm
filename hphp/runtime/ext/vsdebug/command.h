@@ -113,6 +113,10 @@ struct VSCommand {
     const int64_t defaultValue
   );
 
+  static std::string trimString(const std::string str);
+
+  static std::string removeVariableNamePrefix(const std::string& str);
+
 protected:
 
   // Implemented by subclasses of this object.
@@ -249,6 +253,16 @@ public:
 
   static const char* getTypeName(const Variant& variable);
 
+  // Serializes a variable to be sent over the VS Code debugger protocol.
+  static folly::dynamic serializeVariable(
+    DebuggerSession* session,
+    int64_t requestId,
+    const std::string& name,
+    const Variant& variable,
+    bool doNotModifyName = false,
+    folly::dynamic* presentationHint = nullptr
+  );
+
 private:
 
   // Helper for sorting variable names - converts a variable name to uppercase
@@ -361,16 +375,6 @@ private:
     folly::dynamic* vars
   );
 
-  // Serializes a variable to be sent over the VS Code debugger protocol.
-  static folly::dynamic serializeVariable(
-    DebuggerSession* session,
-    int64_t requestId,
-    const std::string& name,
-    const Variant& variable,
-    bool doNotModifyName = false,
-    folly::dynamic* presentationHint = nullptr
-  );
-
   // Adds private properties defined on one of an object's base classes.
   static void addClassPrivateProps(
     DebuggerSession* session,
@@ -424,6 +428,59 @@ private:
 // remain paused.
 struct RunToLocationCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(RunToLocationCommand, CommandTarget::Request, true);
+};
+
+struct SetVariableCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(SetVariableCommand, CommandTarget::Request, true);
+
+  int64_t targetThreadId(DebuggerSession* session) override;
+
+private:
+
+  static bool setLocalVariable(
+    DebuggerSession* session,
+    const std::string& name,
+    const std::string& value,
+    ScopeObject* scope,
+    folly::dynamic* result
+  );
+
+  static bool setUserDefinedConstant(
+    DebuggerSession* session,
+    const std::string& name,
+    const std::string& value,
+    ScopeObject* scope,
+    folly::dynamic* result
+  );
+
+  static bool setArrayVariable(
+    DebuggerSession* session,
+    const std::string& name,
+    const std::string& value,
+    VariableObject* array,
+    folly::dynamic* result
+  );
+
+  static bool setObjectVariable(
+    DebuggerSession* session,
+    const std::string& name,
+    const std::string& value,
+    VariableObject* array,
+    folly::dynamic* result
+  );
+
+  static bool getBooleanValue(const std::string& str);
+
+  static void setVariableValue(
+    DebuggerSession* session,
+    const std::string& name,
+    const std::string& value,
+    TypedValue* typedVariable,
+    int requestId,
+    folly::dynamic* result
+  );
+
+  unsigned int m_objectId;
 };
 
 #undef VS_COMMAND_COMMON_IMPL

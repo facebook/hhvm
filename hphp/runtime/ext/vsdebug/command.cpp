@@ -86,6 +86,40 @@ int64_t VSCommand::tryGetInt(
  }
 }
 
+std::string VSCommand::trimString(const std::string str) {
+  auto firstPos = std::find_if_not(
+    str.begin(),
+    str.end(),
+    [](int c){
+      return std::isspace(c);
+    }
+  );
+
+  auto lastPos = std::find_if_not(
+    str.rbegin(),
+    str.rend(),
+    [](int c){
+      return std::isspace(c);
+    }
+  ).base();
+
+  std::string trimmed = firstPos > lastPos
+    ? std::string()
+    : std::string(firstPos, lastPos);
+
+  return trimmed;
+}
+
+std::string VSCommand::removeVariableNamePrefix(const std::string& str) {
+  if (str.find("$") == 0) {
+    return str.substr(1);
+  } else if (str.find("::$") == 0) {
+    return str.substr(3);
+  } else {
+    return str;
+  }
+}
+
 bool VSCommand::parseCommand(
   Debugger* debugger,
   folly::dynamic& clientMessage,
@@ -149,6 +183,10 @@ bool VSCommand::parseCommand(
   } else if (cmdString == "setExceptionBreakpoints") {
 
     *command = new SetExceptionBreakpointsCommand(debugger, clientMessage);
+
+  } else if (cmdString == "setVariable") {
+
+    *command = new SetVariableCommand(debugger, clientMessage);
 
   } else if (cmdString.compare("stackTrace") == 0) {
 

@@ -21,7 +21,7 @@
 
 namespace HPHP {
 
-TEST(SlabXmapTest, very_small_xmap) {
+TEST(SlabXmapTest, find) {
   auto slab = static_cast<Slab*>(aligned_alloc(kSlabSize, kSlabSize));
   SCOPE_EXIT { free(slab); };
   auto start = slab->init();
@@ -42,20 +42,20 @@ TEST(SlabXmapTest, very_small_xmap) {
 
   // ensure find doesn't walk off beginning or otherwise blow up if we
   // test addresses in the header area.
-  EXPECT_EQ(slab->find(slab).ptr, nullptr);
-  EXPECT_EQ(slab->find(start - 1).ptr, nullptr);
-  EXPECT_EQ(slab->find(start).ptr, large);
-  EXPECT_EQ(slab->find(start + 1).ptr, large);
+  EXPECT_EQ(slab->find(slab), nullptr);
+  EXPECT_EQ(slab->find(start - 1), nullptr);
+  EXPECT_EQ(slab->find(start), large);
+  EXPECT_EQ(slab->find(start + 1), large);
 
   // probe edge between large and small
-  EXPECT_EQ(slab->find((char*)small - 1).ptr, large);
-  EXPECT_EQ(slab->find((char*)small).ptr, small);
-  EXPECT_EQ(slab->find((char*)small + 1).ptr, small);
+  EXPECT_EQ(slab->find((char*)small - 1), large);
+  EXPECT_EQ(slab->find((char*)small), small);
+  EXPECT_EQ(slab->find((char*)small + 1), small);
 
   // probe edge between small and hole
-  EXPECT_EQ(slab->find((char*)hole - 1).ptr, small);
-  EXPECT_EQ(slab->find((char*)hole).ptr, nullptr);
-  EXPECT_EQ(slab->find((char*)hole + 1).ptr, nullptr);
+  EXPECT_EQ(slab->find((char*)hole - 1), small);
+  EXPECT_EQ(slab->find((char*)hole), nullptr);
+  EXPECT_EQ(slab->find((char*)hole + 1), nullptr);
 }
 
 }

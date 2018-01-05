@@ -100,7 +100,7 @@ struct alignas(kSmallSizeAlign) Slab : FreeNode {
     return count;
   }
 
-  HdrBlock find(const void* ptr) const;
+  HeapObject* find(const void* ptr) const;
 
   static Slab* fromHeader(HeapObject* h) {
     assert(h->kind() == HeaderKind::Slab);
@@ -443,23 +443,26 @@ void Slab::iter_starts(Fn fn) const {
 
 /*
  * Search from ptr backwards, for a HeapObject that contains ptr.
- * Returns the HdrBlock for the containing object, else {nullptr,0}.
+ * Returns the HeapObject* for the containing object, else nullptr.
  */
-inline HdrBlock Slab::find(const void* ptr) const {
+inline HeapObject* Slab::find(const void* ptr) const {
   auto const i = start_index(ptr);
-  auto const mask = ~0ull >> (B - 1 - i % B); // 0s at i+1 and higher
   auto cursor = starts_ + i/B;
+  if (*cursor & (1ull << (i % B))) {
+    return (HeapObject*)(uintptr_t(ptr) & ~(Q-1));
+  }
+  auto const mask = ~0ull >> (B - 1 - i % B); // 0s at i+1 and higher
   for (auto bits = *cursor & mask;; bits = *cursor) {
     if (bits) {
       auto k = fls64(bits);
       auto h = (HeapObject*)((char*)this + ((cursor - starts_)*B + k) * Q);
       auto size = allocSize(h);
       if ((char*)ptr >= (char*)h + size) break;
-      return {(HeapObject*)h, size};
+      return h;
     }
     if (--cursor < starts_) break;
   }
-  return {nullptr, 0};
+  return nullptr;
 }
 
 template<class OnBig, class OnSlab>

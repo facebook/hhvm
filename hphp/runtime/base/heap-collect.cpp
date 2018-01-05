@@ -124,7 +124,7 @@ struct Collector {
   template<bool apcgc> void checkedEnqueue(const void* p);
   void enqueueWeak(const WeakRefDataHandle* p);
   template<bool apcgc> void finish_typescan();
-  HdrBlock find(const void*);
+  HeapObject* find(const void*);
 
   void enqueue(const HeapObject* h) {
     assert(h && h->kind() <= HeaderKind::BigMalloc &&
@@ -138,7 +138,7 @@ struct Collector {
   HeapImpl& heap_;
   GCBits const mark_version_;
   size_t num_small_{0}, num_big_{0}, num_slabs_{0};
-  Counter marked_, pinned_, unknown_; // bytes
+  size_t marked_{0}, pinned_{0}, unknown_{0}; // object counts
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
   size_t init_ns_, initfree_ns_, roots_ns_, mark_ns_, sweep_ns_;
@@ -155,7 +155,7 @@ struct Collector {
 // are allocated/free. And it can efficiently find the start of an allocated
 // object using bit operations. So there is an opportunity to speed this up by
 // directly accessing the bitmap instead of using PtrMap.
-HdrBlock Collector::find(const void* ptr) {
+HeapObject* Collector::find(const void* ptr) {
   if (auto r = ptrs_.region(ptr)) {
     auto h = const_cast<HeapObject*>(r->first);
     if (h->kind() == HeaderKind::Slab) {
@@ -163,13 +163,12 @@ HdrBlock Collector::find(const void* ptr) {
     }
     if (h->kind() == HeaderKind::BigObj) {
       auto h2 = static_cast<MallocNode*>(h) + 1;
-      return ptr >= h2 ? HdrBlock{h2, r->second - sizeof(MallocNode)} :
-             HdrBlock{nullptr, 0};
+      return ptr >= h2 ? h2 : nullptr;
     }
     assert(h->kind() == HeaderKind::BigMalloc);
-    return {h, r->second};
+    return h;
   }
-  return {nullptr, 0};
+  return nullptr;
 }
 
 DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
@@ -228,15 +227,14 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
 
 template <bool apcgc>
 void Collector::checkedEnqueue(const void* p) {
-  auto r = find(p);
-  if (auto h = r.ptr) {
+  if (auto h = find(p)) {
     // enqueue h the first time. If it's an object with no pointers (eg String),
     // we'll skip it when we process the queue.
     auto old = h->marks();
     if (old != mark_version_) {
       h->setmarks(mark_version_);
-      marked_ += r.size;
-      pinned_ += r.size;
+      ++marked_;
+      ++pinned_;
       enqueue(h);
       assert(checkEnqueuedKind(h));
     }
@@ -302,7 +300,7 @@ NEVER_INLINE void Collector::init() {
       ptrs_.insert(h, size);
       if (h->kind() == HeaderKind::BigMalloc) {
         if (!type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
-          unknown_ += size;
+          ++unknown_;
           h->setmarks(mark_version_);
           enqueue(h);
         }
@@ -382,9 +380,9 @@ NEVER_INLINE void Collector::sweep() {
     weakRefs_.pop_back();
     auto type = wref->wr_data->pointee.m_type;
     if (type == KindOfObject) {
-      auto r = find(wref->wr_data->pointee.m_data.pobj);
-      if (!marked(r.ptr)) {
-        WeakRefData::invalidateWeakRef(uintptr_t(r.ptr));
+      auto h = find(wref->wr_data->pointee.m_data.pobj);
+      if (!marked(h)) {
+        WeakRefData::invalidateWeakRef(uintptr_t(h));
         mm.reinitFree();
       }
       continue;
@@ -395,10 +393,10 @@ NEVER_INLINE void Collector::sweep() {
   bool need_reinit_free = false;
   g_context->sweepDynPropTable([&](const ObjectData* obj) {
     if (need_reinit_free) mm.reinitFree();
-    auto r = find(obj);
+    auto h = find(obj);
     // if we return true, call reinitFree() before calling find() again,
     // to ensure the heap remains walkable.
-    return need_reinit_free = !r.ptr || !marked(r.ptr);
+    return need_reinit_free = !h || !marked(h);
   });
 
   mm.sweepApcArrays([&](APCLocalArray* a) {
@@ -475,15 +473,15 @@ void logCollection(const char* phase, const Collector& collector) {
                          collector.xscanned_roots_.bytes;
     Trace::traceRelease(
       "gc age %ldms mmUsage %luM trigger %luM init %lums mark %lums "
-      "marked %.1f%% pinned %.1f%% free %.1fM "
+      "marked %lu pinned %lu free %.1fM "
       "cscan-heap %.1fM xscan-heap %.1fM\n",
       t_req_age,
       t_pre_stats.mmUsage/MB,
       t_trigger/MB,
       collector.init_ns_/1000000,
       collector.mark_ns_/1000000,
-      100.0 * collector.marked_.bytes / t_pre_stats.mmUsage,
-      100.0 * collector.pinned_.bytes / t_pre_stats.mmUsage,
+      collector.marked_,
+      collector.pinned_,
       double(collector.freed_bytes_) / MB,
       double(cscanned_heap) / MB,
       double(xscanned_heap) / MB
@@ -507,9 +505,9 @@ void logCollection(const char* phase, const Collector& collector) {
   sample.setInt("big_count", collector.num_big_);
   // size metrics gathered during gc
   sample.setInt("allocd_span", collector.ptrs_.span().second);
-  sample.setInt("marked_bytes", collector.marked_.bytes);
-  sample.setInt("pinned_bytes", collector.pinned_.bytes);
-  sample.setInt("unknown_bytes", collector.unknown_.bytes);
+  sample.setInt("marked_count", collector.marked_);
+  sample.setInt("pinned_count", collector.pinned_);
+  sample.setInt("unknown_count", collector.unknown_);
   sample.setInt("freed_bytes", collector.freed_bytes_);
   sample.setInt("trigger_bytes", t_trigger);
   sample.setInt("cscanned_roots", collector.cscanned_roots_.bytes);

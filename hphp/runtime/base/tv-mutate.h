@@ -334,11 +334,10 @@ enable_if_lval_t<T&&, void> tvMoveIgnoreRef(const Cell fr, T&& to) {
   auto const old = as_tv(to);
   cellCopy(fr, to);
   tvDecRefGen(old);
-  // NB: If we're in a pseudo-main, the dec-ref on "old" may trigger a
-  // destructor which can bind or change the value in "to", so there's no
-  // guarantee that "from" and "to" contain the same value at this point (or
-  // that "to" is even still a cell).
-  assert(tvIsPlausible(as_tv(to)));
+  // NB: The dec-ref on "old" may trigger a destructor which may be
+  // able to bind or change the value in "to"; if to was the inner
+  // cell of a ref, there's no guarantee its even referring to valid
+  // memory any more. We can't do plausibility checks here.
 }
 
 /*
@@ -382,11 +381,10 @@ enable_if_lval_t<T&&, void> tvSetIgnoreRef(const Cell fr, T&& to) {
   auto const old = as_tv(to);
   cellDup(fr, to);
   tvDecRefGen(old);
-  // NB: If we're in a pseudo-main, the dec-ref on "old" may trigger a
-  // destructor which can bind or change the value in "to", so there's no
-  // guarantee that "from" and "to" contain the same value at this point (or
-  // that "to" is even still a cell).
-  assert(tvIsPlausible(as_tv(to)));
+  // NB: The dec-ref on "old" may trigger a destructor which may be
+  // able to bind or change the value in "to"; if to was the inner
+  // cell of a ref, there's no guarantee its even referring to valid
+  // memory any more. We can't do plausibility checks here.
 }
 
 /*

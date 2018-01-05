@@ -89,6 +89,7 @@ and genv = {
   static  : bool;
   fun_kind : Ast.fun_kind;
   fun_reactive : reactivity;
+  fun_mutable : bool;
   anons   : anon IMap.t;
   file    : Relative_path.t;
 }

@@ -29,7 +29,7 @@
              (AnnotatedAST.Expr
                 (([34:3-34:19], Some void),
                  (AnnotatedAST.Call (Cnormal,
-                    (([34:3-34:10], None),
+                    (([34:3-34:10], Some (function(\X $x): void)),
                      (AnnotatedAST.Obj_get (
                         (([34:3-34:5], Some \MyPhonyVector),
                          (AnnotatedAST.Lvar ([34:3-34:5], $x))),
@@ -46,7 +46,7 @@
              (AnnotatedAST.Expr
                 (([35:3-35:19], Some void),
                  (AnnotatedAST.Call (Cnormal,
-                    (([35:3-35:10], None),
+                    (([35:3-35:10], Some (function(\X $x): void)),
                      (AnnotatedAST.Obj_get (
                         (([35:3-35:5], Some \MyPhonyVector),
                          (AnnotatedAST.Lvar ([35:3-35:5], $x))),

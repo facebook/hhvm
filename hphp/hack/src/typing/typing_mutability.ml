@@ -13,6 +13,7 @@ module T = Tast
 module Env = Typing_env
 module LMap = Local_id.Map
 open Typing_defs
+open Hh_core
 
 let fun_returns_mutable (env : Typing_env.env) (id : Nast.sid) =
   match Env.get_fun env (snd id) with
@@ -25,12 +26,13 @@ let expr_returns_owned_mutable
  (env : Typing_env.env) (e : T.expr)
  : bool =
  match snd e with
- | (T.New _) -> true
+ | T.New _ -> true
  (* Function call *)
- | (T.Call (_, (_, T.Id id), _, _, _))
- | (T.Call (_, (_, T.Fun_id id), _, _, _)) ->
+ | T.Call (_, (_, T.Id id), _, _, _)
+ | T.Call (_, (_, T.Fun_id id), _, _, _) ->
    fun_returns_mutable env id
-  (* TODO(jjwu): $x->method() where method() returns mutable *)
+ | T.Call (_, ((_, (Some (_, Tfun fty))), T.Obj_get _), _, _, _) ->
+   fty.ft_returns_mutable
  | _ -> false
 
 (* Returns true if we can modify properties of the expression *)
@@ -39,6 +41,7 @@ let expr_is_mutable
  match snd e with
  | T.Lvar id ->
     Env.is_mutable env (snd id)
+ | T.This when Env.function_is_mutable env -> true
  | _ -> expr_returns_owned_mutable env e
 
 let freeze_local (p : Pos.t) (env : Typing_env.env) (tel : T.expr list)
@@ -57,10 +60,62 @@ let freeze_local (p : Pos.t) (env : Typing_env.env) (tel : T.expr list)
       Errors.invalid_freeze_target p id_pos "immutable";
       mut_env in
     Env.env_with_mut env mut_env
+  | [((id_pos, _), T.This);] ->
+      Errors.invalid_freeze_target p id_pos "the this type, which is mutably borrowed";
+      env
   | _ ->
     (* Error, freeze takes a single local as an argument *)
     Errors.invalid_freeze_use p;
     env
+
+(* Checks that each parameter that is marked mutable is mutable *)
+(* There's no List.iter2_shortest so I'm stuck with this *)
+(* Return the remaining expressions to check against the variadic argument *)
+let rec check_param_mutability (env : Typing_env.env)
+  (params : 'a fun_params ) (el : T.expr list) : T.expr list  =
+  match params, el with
+  | [], _
+  | _, [] -> el
+  | param::ps, e::es ->
+    if param.fp_mutable then
+      if not (expr_is_mutable env e) then
+        Errors.mutable_argument_mismatch (param.fp_pos) (T.get_position e)
+;
+    (* Check the rest *)
+    check_param_mutability env ps es
+
+let check_mutability_fun_params env fty el =
+  let params = fty.ft_params in
+  let remaining_exprs = check_param_mutability env params el in
+  begin match fty.ft_arity with
+  | Fvariadic (_, param) when param.fp_mutable ->
+    begin match List.find remaining_exprs
+      ~f:(fun e -> not (expr_is_mutable env e)) with
+    | Some expr ->
+        Errors.mutable_argument_mismatch (param.fp_pos) (T.get_position expr)
+    | None -> ()
+    end
+  | _ -> () end
+
+
+let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
+  match snd te with
+  | T.Call (_, (_, T.Id id), _, el, _)
+  | T.Call (_, (_, T.Fun_id id), _, el, _) ->
+    begin match Env.get_fun env (snd id) with
+    | Some fty ->
+      check_mutability_fun_params env fty el
+    | None -> ()
+    end
+  (* $x->method() where method is mutable *)
+  | T.Call (_, ((pos, (Some (r, Tfun fty))), T.Obj_get (expr, _, _)), _, el, _) ->
+    (if fty.ft_mutable && not (expr_is_mutable env expr) then
+      let fpos = Reason.to_pos r in
+      Errors.mutable_call_on_immutable fpos pos);
+    check_mutability_fun_params env fty el
+  (* TAny, T.Calls that don't have types, etc *)
+  | _ -> ()
+
 
 (* Checks for assignment errors as a pass on the TAST *)
 let handle_assignment_mutability

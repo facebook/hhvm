@@ -298,6 +298,7 @@ let empty tcopt file ~droot = {
     parent  = Reason.none, Tany;
     fun_kind = Ast.FSync;
     fun_reactive = Normal;
+    fun_mutable = false;
     anons   = IMap.empty;
     file    = file;
   };
@@ -314,6 +315,12 @@ let env_reactive env =
 (* Local reactivity *)
 let env_local_reactive env =
   env.genv.fun_reactive <> Normal
+
+let function_is_mutable env =
+  env.genv.fun_mutable
+
+let set_fun_mutable env mut =
+  { env with genv = {env.genv with fun_mutable = mut }}
 
 let lambda_reactive = ref None
 (* Takes in the typechecking function of a lambda

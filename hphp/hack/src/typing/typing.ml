@@ -376,8 +376,10 @@ and fun_def tcopt f =
   let dep = Typing_deps.Dep.Fun (snd f.f_name) in
   let env = Env.empty tcopt (Pos.filename pos) (Some dep) in
   let reactive = TUtils.fun_reactivity f.f_user_attributes in
+  let mut = TUtils.fun_mutable f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let env = Env.set_env_reactive env reactive in
+  let env = Env.set_fun_mutable env mut in
   NastCheck.fun_ env f nb;
   (* Fresh type environment is actually unnecessary, but I prefer to
    * have a guarantee that we are using a clean typing environment. *)
@@ -1598,7 +1600,10 @@ and expr_
           tel,
           [])) (Env.fresh_type())
   | Call (call_type, e, hl, el, uel) ->
-      check_call ~is_using_clause ~expected env p call_type e hl el uel ~in_suspend:false
+
+      let env, te, ty = check_call ~is_using_clause ~expected env p call_type e hl el uel ~in_suspend:false in
+      Typing_mutability.enforce_mutable_call env te;
+      env, te, ty
     (* For example, e1 += e2. This is typed and translated as if
      * written e1 = e1 + e2.
      * TODO TAST: is this right? e1 will get evaluated more than once
@@ -3506,14 +3511,15 @@ and is_abstract_ft fty = match fty with
           | OG_nullthrows -> None
           | OG_nullsafe -> Some p
         ) in
-      let tel = ref [] and tuel = ref [] in
+      let tel = ref [] and tuel = ref [] and tfty = ref (Reason.none, Tany) in
       let fn = (fun (env, fty, _) ->
         check_coroutine_call env fty;
         let env, tel_, tuel_, method_ = call ~expected p env fty el uel in
         tel := tel_; tuel := tuel_;
+        tfty := fty;
         env, method_, None) in
       let env, ty = obj_get ~is_method ~nullsafe ~explicit_tparams:hl env ty1 (CIexpr e1) m fn in
-      make_call env (T.make_implicitly_typed_expr fpos (T.Obj_get(te1,
+      make_call env (T.make_typed_expr fpos !tfty (T.Obj_get(te1,
         T.make_implicitly_typed_expr pos_id (T.Id m), nullflavor))) hl !tel !tuel ty
 
   (* Function invocation *)
@@ -5811,8 +5817,10 @@ and method_def env m =
     Env.env_with_locals env Typing_continuations.Map.empty Local_id.Map.empty
   in
   let reactive = TUtils.fun_reactivity m.m_user_attributes in
+  let mut = TUtils.fun_mutable m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let env = Env.set_env_reactive env reactive in
+  let env = Env.set_fun_mutable env mut in
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
   let env, constraints =

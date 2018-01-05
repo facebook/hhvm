@@ -635,3 +635,6 @@ let fun_reactivity user_attributes =
   | true, _ -> Env.Reactive
   | _, true -> Env.Local
   | _ -> Env.Normal
+
+let fun_mutable user_attributes =
+  Attributes.mem SN.UserAttributes.uaMutable user_attributes

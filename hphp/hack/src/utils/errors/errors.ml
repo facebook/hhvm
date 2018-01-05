@@ -1014,6 +1014,8 @@ module Typing                               = struct
   let invalid_freeze_target                 = 4211 (* DONT MODIFY!!!! *)
   let invalid_freeze_use                    = 4212 (* DONT MODIFY!!!! *)
   let freeze_in_nonreactive_context         = 4213 (* DONT MODIFY!!!! *)
+  let mutable_call_on_immutable             = 4214 (* DONT MODIFY!!!! *)
+  let mutable_argument_mismatch             = 4215 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -2488,6 +2490,21 @@ let frozen_in_incorrect_scope pos1 =
 let reassign_mutable_var pos1 =
   add Typing.reassign_mutable_var pos1
   ("This variable is mutable. You cannot create a new reference to it.")
+
+let mutable_call_on_immutable fpos pos1 =
+  add_list Typing.mutable_call_on_immutable
+  [
+    pos1, "Cannot call mutable function on immutable expression";
+    fpos, "This function is marked <<__Mutable>>, so it has a mutable $this.";
+  ]
+
+let mutable_argument_mismatch param_pos arg_pos =
+  add_list Typing.mutable_argument_mismatch
+  [
+    arg_pos, "Invalid argument";
+    param_pos, "This parameter is marked mutable";
+    arg_pos, "But this expression is not";
+  ]
 
 let freeze_in_nonreactive_context pos1 =
   add Typing.freeze_in_nonreactive_context pos1

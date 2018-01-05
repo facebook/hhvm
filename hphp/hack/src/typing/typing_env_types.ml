@@ -91,6 +91,7 @@ and genv = {
   fun_kind : Ast.fun_kind;
   (* Whether current function is reactive *)
   fun_reactive : reactivity;
+  fun_mutable : bool;
   (* Whether current function is marked <<__ReturnDisposable>> *)
   anons   : anon IMap.t;
   file    : Relative_path.t;

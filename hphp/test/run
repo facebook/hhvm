@@ -275,7 +275,6 @@ function hh_codegen_cmd($options, $config_file = null) {
     $cmd .= ' -c "'.$config_file.'"';
   }
   $cmd .= ' -v Hack.Compiler.SourceMapping=1 ';
-  $cmd .= ' -v Eval.CreateInOutWrapperFunctions=0 ';
   if (isset($options['compare-hh-codegen'])) {
     $cmd .= '-v Eval.DisableHphpcOpts=1';
   }

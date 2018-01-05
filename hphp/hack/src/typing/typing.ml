@@ -192,6 +192,10 @@ let is_disposable_type env ty =
   | _env, ety ->
     (is_disposable_visitor env)#on_type None ety
 
+let has_mutable_attribute param =
+  List.exists param.param_user_attributes
+    (fun { ua_name; _ } -> SN.UserAttributes.uaMutable = snd ua_name)
+
 (* Check whether this is a function type that (a) either returns a disposable
  * or (b) has the <<__ReturnDisposable>> attribute
  *)
@@ -330,6 +334,9 @@ let rec bind_param env (ty1, param) =
   let env = Env.set_param env id (ty1, mode) in
   let env = if has_accept_disposable_attribute param
             then Env.set_using_var env id else env in
+  let env = if has_mutable_attribute param
+            then Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.Borrowed)
+            else env in
   env, tparam
 
 (* In strict mode, we force you to give a type declaration on a parameter *)

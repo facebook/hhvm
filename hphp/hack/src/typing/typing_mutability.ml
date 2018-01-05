@@ -26,9 +26,11 @@ let expr_returns_owned_mutable
  : bool =
  match snd e with
  | (T.New _) -> true
+ (* Function call *)
  | (T.Call (_, (_, T.Id id), _, _, _))
  | (T.Call (_, (_, T.Fun_id id), _, _, _)) ->
    fun_returns_mutable env id
+  (* TODO(jjwu): $x->method() where method() returns mutable *)
  | _ -> false
 
 (* Returns true if we can modify properties of the expression *)

@@ -807,6 +807,11 @@ let unset_local env local =
 let is_mutable env local =
   Local_id.Map.mem local env.lenv.local_mutability
 
+let add_mutable_var env local mutability_type =
+env_with_mut
+  env
+  (Local_id.Map.add local mutability_type env.lenv.local_mutability)
+
 let get_local env x =
   let next_cont = LEnvC.get_cont Cont.Next env.lenv.local_types in
   let lcl = Local_id.Map.get x next_cont in

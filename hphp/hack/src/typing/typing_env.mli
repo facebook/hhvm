@@ -123,6 +123,7 @@ val set_env_reactive : env -> reactivity -> env
 val env_reactive  : env -> bool
 val env_local_reactive : env -> bool
 val is_mutable : env -> Local_id.t -> bool
+val add_mutable_var : env -> Local_id.t -> Typing_mutability_env.mutability -> env 
 val freeze_local_env : env -> env
 val env_with_locals :
   env -> local_types -> local_history Local_id.Map.t -> env

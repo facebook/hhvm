@@ -321,11 +321,11 @@ let lambda_reactive = ref None
 let check_lambda_reactive f =
   let old_lambda_reactive = !lambda_reactive in
   lambda_reactive := Some true;
-  Errors.ignore_ f;
+  let results = f () in
   let result = !lambda_reactive in
   lambda_reactive := old_lambda_reactive;
   match result with
-  | Some c -> c
+  | Some c -> c, results
   | None -> assert false
 
 let not_lambda_reactive () =

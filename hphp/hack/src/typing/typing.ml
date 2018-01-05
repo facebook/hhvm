@@ -1905,10 +1905,12 @@ and expr_
       (* Is the return type declared? *)
       let is_explicit_ret = Option.is_some f.f_ret in
       let check_body_under_known_params ?ret_ty ft =
-        let (is_reactive, is_coroutine, anon) = anon_make env p f ft idl in
+        let (is_coroutine, anon) = anon_make env p f ft idl in
         let ft = { ft with ft_is_coroutine = is_coroutine } in
+        let ft = { ft with ft_reactive = false } in
+        let is_reactive, (env, tefun, ty) =
+          Env.check_lambda_reactive (fun () -> anon ?ret_ty env ft.ft_params) in
         let ft = { ft with ft_reactive = is_reactive } in
-        let env, tefun, ty = anon ?ret_ty env ft.ft_params in
         (* Improve hover type experience for parameters with known types *)
         List.iter2_exn f.f_params ft.ft_params (fun param ft_param ->
           Typing_hooks.dispatch_infer_ty_hook ft_param.fp_type param.param_pos env);
@@ -1965,20 +1967,24 @@ and expr_
           ("Typing.expr Efun unknown params",
           [Typing_log.Log_type ("declared_ft", (Reason.Rwitness p, Tfun declared_ft))])];
         (* check for recursive function calls *)
-        let (is_reactive, is_coroutine, anon) as anon_fun = anon_make env p f declared_ft idl in
-        let env, anon_id = Env.add_anonymous env anon_fun in
-        let env, tefun, _ = Errors.try_with_error
+        let is_coroutine, anon = anon_make env p f declared_ft idl in
+        let env, tefun, _, anon_id = Errors.try_with_error
           (fun () ->
-            let _, tefun, ty = anon env declared_ft.ft_params in
-            env, tefun, ty)
+            let is_reactive, (_, tefun, ty)
+              = Env.check_lambda_reactive (fun () -> anon env declared_ft.ft_params) in
+            let anon_fun = is_reactive, is_coroutine, anon in
+            let env, anon_id = Env.add_anonymous env anon_fun in
+            env, tefun, ty, anon_id)
           (fun () ->
             (* If the anonymous function declaration has errors itself, silence
                them in any subsequent usages. *)
             let anon_ign ?el:_ ?ret_ty:_ env fun_params =
               Errors.ignore_ (fun () -> (anon env fun_params)) in
-            let _, tefun, ty = anon_ign env declared_ft.ft_params in
-            let env = Env.set_anonymous env anon_id (is_reactive, is_coroutine, anon_ign) in
-            env, tefun, ty) in
+            let is_reactive, (_, tefun, ty)
+              = Env.check_lambda_reactive (fun () -> anon_ign env declared_ft.ft_params) in
+            let anon_fun = is_reactive, is_coroutine, anon in
+            let env, anon_id = Env.add_anonymous env anon_fun in
+            env, tefun, ty, anon_id) in
           env, tefun, (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id))
         end
       end
@@ -2227,12 +2233,6 @@ and anon_make tenv p f ft idl =
   let is_typing_self = ref false in
   let nb = Nast.assert_named_body f.f_body in
   let is_coroutine = f.f_fun_kind = Ast.FCoroutine in
-  let block_fun = fun () ->
-    (* We don't care about anything except whether reactivity gets turned off *)
-    let tenv = Env.set_fn_kind tenv f.f_fun_kind in
-    ignore(block tenv nb.fnb_nast) in
-  let is_reactive = Env.check_lambda_reactive block_fun in
-  is_reactive,
   is_coroutine,
   fun ?el ?ret_ty env supplied_params ->
     let safe_pass_by_ref = TUtils.safe_pass_by_ref_enabled env in

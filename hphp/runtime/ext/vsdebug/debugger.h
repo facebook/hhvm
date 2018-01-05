@@ -67,7 +67,6 @@ struct RequestInfo {
   struct {
     bool hookAttached;
     bool memoryLimitRemoved;
-    bool requestPaused;
     bool compilationUnitsMapped;
   } m_flags;
   const char* m_stepReason;
@@ -79,6 +78,16 @@ struct RequestInfo {
     std::string path;
     int line;
   } m_runToLocationInfo;
+
+  // Number of evaluation frames on this request's stack right now.
+  int m_evaluateCommandDepth;
+
+  // Number of recursive calls into processCommandsQueue for this request
+  // right now.
+  int m_pauseRecurseCount;
+
+  // Number of times this request has entered the command queue since starting.
+  unsigned int m_totalPauseCount;
 };
 
 // An exception to be thrown when a message from the client cannot be processed.
@@ -166,7 +175,7 @@ struct Debugger final {
   void requestShutdown();
 
   // Returns a pointer to the RequestInfo for the current thread.
-  RequestInfo* getRequestInfo();
+  RequestInfo* getRequestInfo(int threadId = -1);
 
   // Puts the current thread into the command queue for the specified request
   // info. This routine will block until the debugger is resumed by the client,
@@ -263,7 +272,8 @@ struct Debugger final {
   static bool isStepInProgress(RequestInfo* requestInfo) {
     return requestInfo->m_stepReason != nullptr ||
            (!requestInfo->m_runToLocationInfo.path.empty() &&
-            requestInfo->m_runToLocationInfo.line > 0);
+            requestInfo->m_runToLocationInfo.line > 0) ||
+            requestInfo->m_evaluateCommandDepth > 0;
   }
 
   // Clears the state filters for a step operation on the specified request
@@ -282,6 +292,11 @@ struct Debugger final {
     const Unit* unit,
     int bpLine
   );
+
+  // Provides a mechanism for a command to execute code without the debugger
+  // lock held. This routine will drop the lock, execute the provided callback
+  // and re-acquire the lock before returning.
+  void executeWithoutLock(std::function<void()> callback);
 
 private:
 

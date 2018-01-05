@@ -37,13 +37,34 @@ bool ContinueCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
 ) {
+  const folly::dynamic& message = getMessage();
+  const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
+  int64_t threadId = tryGetInt(args, "threadId", -1);
+
+  if (threadId >= 0) {
+    // If a thread ID was specified, check if the thread with that ID is in
+    // the middle of an evaluation - if it was evaluating and hit another bp,
+    // resume just that thread. Otherwise, resume all threads.
+    RequestInfo* ri = m_debugger->getRequestInfo(threadId);
+    if (ri != nullptr && ri->m_pauseRecurseCount > 1) {
+      VSCommand* resumeCommand = ContinueCommand::createInstance(m_debugger);
+      ri->m_commandQueue.dispatchCommand(resumeCommand);
+      return false;
+    } else {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelWarning,
+        "Client asked to resume thread from eval, but thread was not evaluating"
+      );
+    }
+  }
+
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelInfo,
     "Client sent continue command."
   );
 
   folly::dynamic body = folly::dynamic::object;
-  body["allThreadsContinued"] = true;
+  body["allThreadsContinued"] = false;
   (*responseMsg)["body"] = body;
 
   phpDebuggerContinue();

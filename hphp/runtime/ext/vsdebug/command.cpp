@@ -151,6 +151,10 @@ bool VSCommand::parseCommand(
 
     *command = new ContinueCommand(debugger, clientMessage);
 
+  } else if (cmdString == "evaluate") {
+
+    *command = new EvaluateCommand(debugger, clientMessage);
+
   } else if (cmdString == "fb_continueToLocation") {
 
     // NOTE: fb_continueToLocation is a Facebook addition to the VS Code

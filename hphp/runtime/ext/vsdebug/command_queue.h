@@ -65,8 +65,10 @@ private:
   // should unblock and leave.
   std::atomic<bool> m_terminating;
 
-  // Indicates if a thread is currently inside processCommands().
-  std::atomic<bool> m_threadProcessing;
+  // Indicates if a thread is currently inside processCommands(). The same
+  // thread may enter processCommands multiple times recurisvely when it is
+  // evaluating an expression, if the eval hits a breakpoint.
+  std::atomic<int> m_threadProcessingCount {0};
 
   // Queue of commands waiting to be picked up and processed.
   std::list<VSCommand*> m_commands;

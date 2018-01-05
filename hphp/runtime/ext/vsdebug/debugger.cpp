@@ -415,7 +415,8 @@ void Debugger::processCommandQueue(
   {
     Lock lock(m_lock);
     m_pausedRequestCount++;
-    requestInfo->m_flags.requestPaused = true;
+    requestInfo->m_pauseRecurseCount++;
+    requestInfo->m_totalPauseCount++;
 
     sendStoppedEvent(reason, threadId);
 
@@ -430,7 +431,7 @@ void Debugger::processCommandQueue(
 
   {
     Lock lock(m_lock);
-    requestInfo->m_flags.requestPaused = false;
+    requestInfo->m_pauseRecurseCount--;
     m_pausedRequestCount--;
     sendContinuedEvent(threadId);
 
@@ -555,11 +556,24 @@ void Debugger::requestShutdown() {
   }
 }
 
-RequestInfo* Debugger::getRequestInfo() {
+RequestInfo* Debugger::getRequestInfo(int threadId /* = -1 */) {
   Lock lock(m_lock);
-  auto it = m_requests.find(&TI());
-  if (it != m_requests.end()) {
-    return it->second;
+
+  if (threadId != -1) {
+    // Find the info for the requested thread ID.
+    auto it = m_requestIdMap.find(threadId);
+    if (it != m_requestIdMap.end()) {
+      auto requestIt = m_requests.find(it->second);
+      if (requestIt != m_requests.end()) {
+        return requestIt->second;
+      }
+    }
+  } else {
+    // Find the request info for the current request thread.
+    auto it = m_requests.find(&TI());
+    if (it != m_requests.end()) {
+      return it->second;
+    }
   }
 
   return nullptr;
@@ -600,6 +614,16 @@ bool Debugger::executeClientCommand(
 
   // On error, do not resume the request thread.
   return false;
+}
+
+void Debugger::executeWithoutLock(std::function<void()> callback) {
+  m_lock.assertOwnedBySelf();
+  m_lock.unlock();
+
+  callback();
+
+  m_lock.lock();
+  m_lock.assertOwnedBySelf();
 }
 
 void Debugger::reportClientMessageError(
@@ -662,7 +686,7 @@ void Debugger::resumeTarget() {
     RequestInfo* ri = it->second;
     ri->m_stepReason = nullptr;
 
-    if (ri->m_flags.requestPaused) {
+    if (ri->m_pauseRecurseCount > 0) {
       VSCommand* resumeCommand = ContinueCommand::createInstance(this);
       ri->m_commandQueue.dispatchCommand(resumeCommand);
     }

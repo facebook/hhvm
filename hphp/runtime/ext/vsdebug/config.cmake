@@ -7,6 +7,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     configuration_done_command.cpp
     continue_command.cpp
     debugger.cpp
+    evaluate_command.cpp
     ext_vsdebug.cpp
     fdtransport.cpp
     hook.cpp

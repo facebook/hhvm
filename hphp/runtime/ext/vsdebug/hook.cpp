@@ -28,6 +28,7 @@ struct BreakContext {
     if (m_debugger == nullptr || m_requestInfo == nullptr) {
       return;
     }
+
     VSDebugHook::tryEnterDebugger(m_debugger, m_requestInfo, m_breakNoStepOnly);
   }
 

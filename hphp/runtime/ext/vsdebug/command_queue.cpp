@@ -21,8 +21,7 @@ namespace HPHP {
 namespace VSDEBUG {
 
 CommandQueue::CommandQueue() :
-  m_terminating(false),
-  m_threadProcessing(false) {
+  m_terminating(false) {
 }
 
 CommandQueue::~CommandQueue() {
@@ -37,10 +36,10 @@ void CommandQueue::shutdown() {
 
     // If a thread is currently in processCommands(), wait for it to
     // exit before returning.
-    while (m_threadProcessing) {
+    while (m_threadProcessingCount.load() > 0) {
       m_waiterLeftCondition.wait(lock);
     }
-    assert(!m_threadProcessing);
+    assert(m_threadProcessingCount.load() == 0);
   }
 
   // Free any commands remaining in the queue.
@@ -55,13 +54,15 @@ void CommandQueue::shutdown() {
 void CommandQueue::processCommands() {
   std::unique_lock<std::mutex> lock(m_lock);
 
-  // At most one thread is ever expected to be here at any given time.
-  assert(!m_threadProcessing);
-  m_threadProcessing = true;
+  if (m_terminating) {
+    return;
+  }
+
+  m_threadProcessingCount++;
 
   SCOPE_EXIT {
     assert(lock.owns_lock());
-    m_threadProcessing = false;
+    m_threadProcessingCount--;
 
     if (m_terminating) {
       // Let the thread that is waiting for us in shutdown() proceed.

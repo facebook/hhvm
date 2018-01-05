@@ -483,6 +483,22 @@ private:
   unsigned int m_objectId;
 };
 
+//////  Handles evaluate on call frame requests from the client      //////
+struct EvaluateCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(EvaluateCommand, CommandTarget::Request, false);
+  int64_t targetThreadId(DebuggerSession* session) override;
+
+  static void preparseEvalExpression(
+    std::string* expr
+  );
+
+private:
+
+  FrameObject* getFrameObject(DebuggerSession* session);
+  unsigned int m_frameId;
+  FrameObject* m_frameObj {nullptr};
+};
+
 #undef VS_COMMAND_COMMON_IMPL
 
 }

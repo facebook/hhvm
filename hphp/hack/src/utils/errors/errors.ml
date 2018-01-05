@@ -1009,6 +1009,8 @@ module Typing                               = struct
   let invalid_disposable_return_hint        = 4206 (* DONT MODIFY!!!! *)
   let return_disposable_mismatch            = 4207 (* DONT MODIFY!!!! *)
   let inout_argument_bad_type               = 4208 (* DONT MODIFY!!!! *)
+  let frozen_in_incorrect_scope             = 4209 (* DONT MODIFY!!!! *)
+  let reassign_mutable_var                  = 4210 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2474,6 +2476,15 @@ let fun_reactivity_mismatch pos1_is_coroutine pos1 pos2 =
       pos2, if pos1_is_coroutine then m2 else m1;
     ]
 
+let frozen_in_incorrect_scope pos1 =
+  add Typing.frozen_in_incorrect_scope pos1
+  ("This variable is frozen in one scope but not the other")
+
+
+let reassign_mutable_var pos1 =
+  add Typing.reassign_mutable_var pos1
+  ("This variable is mutable. You cannot create a new reference to it.")
+
 let discarded_awaitable pos1 pos2 =
   add_list Typing.discarded_awaitable [
   pos1, "This expression is of type Awaitable, but it's "^
@@ -2981,7 +2992,7 @@ let nonreactive_append pos =
   add Typing.nonreactive_append pos msg
 
 let obj_set_reactive pos =
-  let msg = ("This property is being mutated(used as an lvalue)" ^
+  let msg = ("This object's property is being mutated(used as an lvalue)" ^
   "\nYou cannot set non-mutable object properties in reactive functions") in
   add Typing.obj_set_reactive pos msg
 

@@ -1608,6 +1608,11 @@ and expr_
   | Binop (Ast.Eq None, e1, e2) ->
       let env, te2, ty2 = raw_expr in_cond env e2 in
       let env, te1, ty = assign p env e1 ty2 in
+      let env =
+        if Env.env_local_reactive env then
+        Typing_mutability.handle_assignment_mutability env te1 te2
+        else env
+      in
       (* If we are assigning a local variable to another local variable then
        * the expression ID associated with e2 is transferred to e1
        *)
@@ -2697,8 +2702,6 @@ and assign_ p ur env e1 ty2 =
 
   | _, Class_get _
   | _, Obj_get _ ->
-      if Env.env_local_reactive env then
-        Errors.obj_set_reactive p;
       Env.not_lambda_reactive ();
       let lenv = env.Env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in

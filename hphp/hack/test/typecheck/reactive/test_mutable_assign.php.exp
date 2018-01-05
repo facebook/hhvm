@@ -1,0 +1,2 @@
+File "test_mutable_assign.php", line 17, characters 8-9:
+This variable is mutable. You cannot create a new reference to it. (Typing[4210])

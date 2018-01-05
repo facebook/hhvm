@@ -109,6 +109,8 @@ val union_global_tpenv : tpenv -> tpenv -> tpenv
 val add_upper_bound_global : env -> string -> locl ty -> env
 val add_lower_bound_global : env -> string -> locl ty -> env
 val env_with_tpenv : env -> tpenv -> env
+val env_with_mut : env -> Typing_mutability_env.mutability_env -> env
+val get_env_mutability : env -> Typing_mutability_env.mutability_env
 val env_with_global_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val is_generic_parameter : env -> string -> bool
@@ -120,6 +122,7 @@ val get_tpenv_size : env -> int
 val set_env_reactive : env -> reactivity -> env
 val env_reactive  : env -> bool
 val env_local_reactive : env -> bool
+val is_mutable : env -> Local_id.t -> bool
 val freeze_local_env : env -> env
 val env_with_locals :
   env -> local_types -> local_history Local_id.Map.t -> env

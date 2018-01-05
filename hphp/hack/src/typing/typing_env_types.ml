@@ -40,6 +40,7 @@ type local_types = (local Local_id.Map.t) Typing_continuations.Map.t
 type local_env = {
   fake_members       : fake_members;
   local_types        : local_types;
+  local_mutability   : Typing_mutability_env.mutability_env;
   local_type_history : local_history Local_id.Map.t;
   (* Local variables that were assigned in a `using` clause *)
   local_using_vars   : Local_id.Set.t;

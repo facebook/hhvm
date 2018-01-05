@@ -266,6 +266,7 @@ let empty_local tpenv = {
   local_types = Typing_continuations.Map.empty;
   local_using_vars = Local_id.Set.empty;
   local_type_history = Local_id.Map.empty;
+  local_mutability = Local_id.Map.empty;
 }
 
 let empty tcopt file ~droot = {
@@ -362,6 +363,13 @@ let add_wclass env x =
   let dep = Dep.Class x in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
   ()
+
+
+let env_with_mut env local_mutability =
+  { env with lenv = { env.lenv with local_mutability } }
+
+let get_env_mutability env =
+  env.lenv.local_mutability
 
 (* When we want to type something with a fresh typing environment *)
 let fresh_tenv env f =
@@ -750,7 +758,8 @@ let unbind = unbind []
  * the last assignment to this local.
  *)
 let set_local env x new_type =
-  let {fake_members; local_types; local_type_history; local_using_vars; tpenv} = env.lenv in
+  let {fake_members; local_types; local_type_history; local_using_vars;
+       tpenv; local_mutability;} = env.lenv in
   let env, new_type = unbind env new_type in
   let next_cont = LEnvC.get_cont Cont.Next local_types in
   let all_types, expr_id =
@@ -771,7 +780,8 @@ let set_local env x new_type =
   let local_types = LEnvC.add_to_cont Cont.Next x local local_types in
   let local_type_history = Local_id.Map.add x all_types local_type_history in
   let env = { env with
-    lenv = {fake_members; local_types; local_type_history; local_using_vars; tpenv} }
+    lenv = {fake_members; local_types; local_type_history; local_using_vars;
+            tpenv; local_mutability;} }
   in
   env
 
@@ -783,14 +793,19 @@ let set_using_var env x =
     env.lenv with local_using_vars = Local_id.Set.add x env.lenv.local_using_vars } }
 
 let unset_local env local =
-  let {fake_members; local_types ; local_type_history; local_using_vars; tpenv} = env.lenv in
+  let {fake_members; local_types ; local_type_history; local_using_vars; tpenv; local_mutability;} = env.lenv in
   let local_types = LEnvC.remove_from_cont Cont.Next local local_types in
   let local_using_vars = Local_id.Set.remove local local_using_vars in
   let local_type_history = Local_id.Map.remove local local_type_history in
+  let local_mutability = Local_id.Map.remove local local_mutability in
   let env = { env with
-    lenv = {fake_members; local_types; local_type_history; local_using_vars; tpenv} }
+    lenv = {fake_members; local_types; local_type_history; local_using_vars; tpenv; local_mutability} }
   in
   env
+
+
+let is_mutable env local =
+  Local_id.Map.mem local env.lenv.local_mutability
 
 let get_local env x =
   let next_cont = LEnvC.get_cont Cont.Next env.lenv.local_types in

@@ -436,6 +436,8 @@ module type S = sig
   val coroutinness_mismatch : bool -> Pos.t -> Pos.t -> unit
   val return_disposable_mismatch : bool -> Pos.t -> Pos.t -> unit
   val fun_reactivity_mismatch : bool -> Pos.t -> Pos.t -> unit
+  val frozen_in_incorrect_scope : Pos.t -> unit
+  val reassign_mutable_var : Pos.t -> unit 
   val this_as_lexical_variable : Pos.t -> unit
   val dollardollar_lvalue : Pos.t -> unit
   val duplicate_using_var : Pos.t -> unit

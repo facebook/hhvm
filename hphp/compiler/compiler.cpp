@@ -522,9 +522,6 @@ int process(const CompilerOptions &po) {
                            RuntimeOption::LightProcessCount,
                            RuntimeOption::EvalRecordSubprocessTimes,
                            {});
-
-  // Initialize external compilers.
-  compilers_init();
 #endif
 
   if (po.coredump) {

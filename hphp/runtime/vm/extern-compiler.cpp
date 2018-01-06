@@ -61,12 +61,20 @@ struct CompilerOptions {
   bool inheritConfig;
 };
 
+constexpr int kInvalidPid = -1;
+
 struct ExternCompiler {
   explicit ExternCompiler(const CompilerOptions& options)
       : m_options(options)
     {}
   ExternCompiler(ExternCompiler&&) = default;
   ExternCompiler& operator=(ExternCompiler&&) = default;
+  void detach_from_process () {
+    // called from forked processes
+    // resets inherited  pid of compiler process to prevent it from being closed
+    // in case if child process exits
+    m_pid = kInvalidPid;
+  }
   ~ExternCompiler() { if (isRunning()) stop(); }
 
   std::unique_ptr<UnitEmitter> compile(
@@ -132,7 +140,7 @@ struct ExternCompiler {
 private:
   void start();
   void stop();
-  bool isRunning() const { return m_pid != -1; }
+  bool isRunning() const { return m_pid != kInvalidPid; }
 
   void writeMessage(folly::dynamic& header, folly::StringPiece body);
   void writeConfig();
@@ -150,9 +158,6 @@ private:
   const CompilerOptions& m_options;
 };
 
-int s_delegate = -1;
-std::mutex s_delegateLock;
-
 struct CompilerPool {
   explicit CompilerPool(CompilerOptions&& options)
     : m_options(options)
@@ -162,18 +167,16 @@ struct CompilerPool {
   std::pair<size_t, ExternCompiler*> getCompiler();
   void releaseCompiler(size_t id, ExternCompiler* ptr);
   void start();
-  void shutdown();
+  void shutdown(bool detach_compilers);
   CompilerResult compile(const char* code,
                          int len,
                          const char* filename,
                          const MD5& md5,
                          AsmCallbacks* callbacks);
   std::string getVersionString() { return m_version; }
-  bool started() const { return m_started.load(std::memory_order_relaxed); }
 
  private:
   CompilerOptions m_options;
-  std::atomic<bool> m_started{false};
   std::atomic<size_t> m_freeCount{0};
   std::mutex m_compilerLock;
   std::condition_variable m_compilerCv;
@@ -203,8 +206,6 @@ private:
 };
 
 std::pair<size_t, ExternCompiler*> CompilerPool::getCompiler() {
-  assert(started());
-
   std::unique_lock<std::mutex> l(m_compilerLock);
 
   m_compilerCv.wait(l, [&] {
@@ -238,17 +239,16 @@ void CompilerPool::start() {
         std::memory_order_relaxed);
   }
 
-  m_started.store(true, std::memory_order_relaxed);
-
   CompilerGuard g(*this);
   m_version = g->getVersionString();
 }
 
-void CompilerPool::shutdown() {
-  assert(started());
-
+void CompilerPool::shutdown(bool detach_compilers) {
   for (int i = 0; i < m_compilers.size(); ++i) {
     auto c = m_compilers.exchange(i, nullptr);
+    if (detach_compilers) {
+      c->detach_from_process();
+    }
     delete c;
   }
 }
@@ -259,8 +259,6 @@ CompilerResult CompilerPool::compile(const char* code,
                                      const MD5& md5,
                                      AsmCallbacks* callbacks
 ) {
-  assert(started());
-
   CompilerGuard compiler(*this);
   std::stringstream err;
 
@@ -293,10 +291,6 @@ CompilerResult CompilerPool::compile(const char* code,
 
   return err.str();
 }
-
-std::unique_ptr<CompilerPool> s_hackc_pool = nullptr;
-std::unique_ptr<CompilerPool> s_php7_pool = nullptr;
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -387,10 +381,34 @@ void ExternCompiler::writeProgram(
   writeMessage(header, code);
 }
 
+struct CompilerManager final {
+  int get_delegate() { return m_delegate; }
+  std::mutex& get_delegate_lock() { return m_delegateLock; }
+  void set_username(const std::string& username) { m_username = username; }
+  void ensure_started();
+  void shutdown();
+  void detach_after_fork();
+  bool hackc_enabled() { return (bool)m_hackc_pool; }
+  CompilerPool& get_hackc_pool();
+  bool php7_enabled() { return (bool)m_php7_pool; }
+  CompilerPool& get_php7_pool();
+private:
+  void stop(bool detach_compilers);
+  int m_delegate{kInvalidPid};
+  std::mutex m_delegateLock;
+
+  std::unique_ptr<CompilerPool> m_hackc_pool;
+  std::unique_ptr<CompilerPool> m_php7_pool;
+
+  std::atomic<bool> m_started{false};
+  std::mutex m_compilers_start_lock;
+  folly::Optional<std::string> m_username;
+} s_manager;
+
 struct UseLightDelegate final {
   UseLightDelegate()
-    : m_lock(s_delegateLock)
-    , m_prev(LightProcess::setThreadLocalAfdtOverride(s_delegate))
+    : m_lock(s_manager.get_delegate_lock())
+    , m_prev(LightProcess::setThreadLocalAfdtOverride(s_manager.get_delegate()))
   {}
 
   UseLightDelegate(UseLightDelegate&&) = delete;
@@ -405,13 +423,13 @@ private:
 };
 
 void ExternCompiler::stop() {
-  if (m_pid == -1) return;
+  if (m_pid == kInvalidPid) return;
 
   SCOPE_EXIT {
     if (m_in) fclose(m_in);
     if (m_out) fclose(m_out);
     m_in = m_out = nullptr;
-    m_pid = -1;
+    m_pid = kInvalidPid;
   };
 
   m_compilations = 0;
@@ -471,7 +489,7 @@ struct Pipe final {
 };
 
 void ExternCompiler::start() {
-  if (m_pid != -1) return;
+  if (m_pid != kInvalidPid) return;
 
   // For now we dump stderr to /dev/null, we should probably start logging this
   // at some point.
@@ -495,7 +513,7 @@ void ExternCompiler::start() {
     );
   }
 
-  if (m_pid == -1) {
+  if (m_pid == kInvalidPid) {
     throw BadCompilerException(
       folly::to<std::string>(
         "Unable to start external compiler with command: ",
@@ -571,51 +589,92 @@ HackcMode hackc_mode() {
   return HackcMode::kFatal;
 }
 
-void compilers_init() {
+void CompilerManager::ensure_started() {
 #ifdef __APPLE__
-  return;
+    return;
 #endif
+
+  if (m_started.load(std::memory_order_acquire)) {
+    return;
+  }
+  std::unique_lock<std::mutex> l(m_compilers_start_lock);
+  if (m_started.load(std::memory_order_relaxed)) {
+    return;
+  }
   auto php7Config = php7Configuration();
   auto hackConfig = hackcConfiguration();
 
   if (php7Config || hackConfig) {
-    s_delegate = LightProcess::createDelegate();
+    m_delegate = LightProcess::createDelegate();
   }
 
   if (hackConfig) {
-    s_hackc_pool = std::make_unique<CompilerPool>(std::move(*hackConfig));
+    m_hackc_pool = std::make_unique<CompilerPool>(std::move(*hackConfig));
   }
 
   if (php7Config) {
-    s_php7_pool = std::make_unique<CompilerPool>(std::move(*php7Config));
+    m_php7_pool = std::make_unique<CompilerPool>(std::move(*php7Config));
   }
+
+  if (m_delegate != kInvalidPid && m_username) {
+    std::unique_lock<std::mutex> lock(m_delegateLock);
+    LightProcess::ChangeUser(m_delegate, m_username.value());
+  }
+
+  if (m_hackc_pool) m_hackc_pool->start();
+  if (m_php7_pool) m_php7_pool->start();
+
+  m_started.store(true, std::memory_order_release);
+}
+
+void CompilerManager::stop(bool detach_compilers) {
+  if (m_hackc_pool) {
+    m_hackc_pool->shutdown(detach_compilers);
+    m_hackc_pool = nullptr;
+  }
+
+  if (m_php7_pool) {
+    m_php7_pool->shutdown(detach_compilers);
+    m_php7_pool = nullptr;
+  }
+
+  close(m_delegate);
+  m_delegate = kInvalidPid;
+  m_started.store(false, std::memory_order_relaxed);
+}
+
+void CompilerManager::shutdown() {
+  stop(false);
+}
+
+void CompilerManager::detach_after_fork() {
+  stop(true);
+}
+
+CompilerPool& CompilerManager::get_hackc_pool() {
+  ensure_started();
+  return *m_hackc_pool;
+}
+
+CompilerPool& CompilerManager::get_php7_pool() {
+  ensure_started();
+  return *m_php7_pool;
 }
 
 void compilers_start() {
-  if (s_hackc_pool) s_hackc_pool->start();
-  if (s_php7_pool) s_php7_pool->start();
+  s_manager.ensure_started();
 }
 
 void compilers_set_user(const std::string& username) {
-  if (s_delegate == -1) return;
-
-  assert(!s_hackc_pool || !s_hackc_pool->started());
-  assert(!s_php7_pool || !s_php7_pool->started());
-
-  std::unique_lock<std::mutex> lock(s_delegateLock);
-  LightProcess::ChangeUser(s_delegate, username);
+  s_manager.set_username(username);
 }
 
 void compilers_shutdown() {
-  if (s_hackc_pool) {
-    s_hackc_pool->shutdown();
-  }
+  s_manager.shutdown();
+}
 
-  if (s_php7_pool) {
-    s_php7_pool->shutdown();
-  }
-
-  close(s_delegate);
+void compilers_detach_after_fork() {
+  s_manager.detach_after_fork();
 }
 
 CompilerResult hackc_compile(
@@ -625,8 +684,7 @@ CompilerResult hackc_compile(
   const MD5& md5,
   AsmCallbacks* callbacks
 ) {
-  always_assert(s_hackc_pool);
-  return s_hackc_pool->compile(code, len, filename, md5, callbacks);
+  return s_manager.get_hackc_pool().compile(code, len, filename,md5, callbacks);
 }
 
 CompilerResult php7_compile(
@@ -636,18 +694,15 @@ CompilerResult php7_compile(
   const MD5& md5,
   AsmCallbacks* callbacks
 ) {
-  always_assert(s_php7_pool);
-  return s_php7_pool->compile(code, len, filename, md5, callbacks);
+  return s_manager.get_php7_pool().compile(code, len, filename, md5, callbacks);
 }
 
 std::string hackc_version() {
-  always_assert(s_hackc_pool);
-  return s_hackc_pool->getVersionString();
+  return s_manager.get_hackc_pool().getVersionString();
 }
 
 std::string php7c_version() {
-  always_assert(s_php7_pool);
-  return s_php7_pool->getVersionString();
+  return s_manager.get_php7_pool().getVersionString();
 }
 
 bool startsWith(const char* big, const char* small) {
@@ -677,19 +732,17 @@ std::unique_ptr<UnitCompiler> UnitCompiler::create(const char* code,
                                                    const char* filename,
                                                    const MD5& md5
 ) {
+  s_manager.ensure_started();
   if (SystemLib::s_inited) {
     auto const hcMode = hackc_mode();
     if (!RuntimeOption::EnableHipHopSyntax && !isFileHack(code, codeLen)) {
       if (RuntimeOption::EvalPHP7CompilerEnabled &&
-          s_php7_pool &&
-          s_php7_pool->started()) {
+          s_manager.php7_enabled()) {
         return std::make_unique<Php7UnitCompiler>
           (code, codeLen, filename, md5);
       }
       return nullptr;
-    } else if (hcMode != HackcMode::kNever &&
-               s_hackc_pool &&
-               s_hackc_pool->started()) {
+    } else if (hcMode != HackcMode::kNever && s_manager.hackc_enabled()) {
       return std::make_unique<HackcUnitCompiler>(
         code, codeLen, filename, md5, hcMode);
     }

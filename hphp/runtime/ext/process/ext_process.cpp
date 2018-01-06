@@ -48,6 +48,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
 
 #if !defined(_NSIG) && defined(NSIG)
@@ -256,6 +257,9 @@ int64_t HHVM_FUNCTION(pcntl_fork) {
   std::cerr.flush();
   pid_t pid = fork();
   Repo::postfork(pid);
+  if (pid == 0) {
+    compilers_detach_after_fork();
+  }
   return pid;
 }
 

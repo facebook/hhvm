@@ -45,6 +45,7 @@ void compilers_init();
 void compilers_start();
 void compilers_shutdown();
 void compilers_set_user(const std::string& username);
+void compilers_detach_after_fork();
 
 // On success return a verified unit, and on failure return a string stating the
 // type of error encountered

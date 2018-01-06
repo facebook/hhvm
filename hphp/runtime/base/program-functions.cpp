@@ -1807,11 +1807,6 @@ static int execute_program_impl(int argc, char** argv) {
                              RuntimeOption::LightProcessCount,
                              RuntimeOption::EvalRecordSubprocessTimes,
                              inherited_fds);
-
-    // HackC initialization should happen immediately prior to LightProcess
-    // configuration as it will create a private delegate process to deal with
-    // hackc instances.
-    compilers_init();
   }
 #endif
 #ifdef USE_JEMALLOC_EXTENT_HOOKS

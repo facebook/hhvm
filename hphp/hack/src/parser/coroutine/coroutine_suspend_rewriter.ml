@@ -727,6 +727,7 @@ let rewrite_suspends_in_statement
           let temp_data_member_selection =
             make_closure_result_data_member_name_syntax next_temp in
 
+          (* return test : consequence ? alternative; *)
           let is_top_level_in_return =
                context <> EnclosedByOtherStatement
             && Core_list.is_empty parents in
@@ -735,7 +736,13 @@ let rewrite_suspends_in_statement
             if is_missing value
             then make_missing ()
             else if is_top_level_in_return
-            then make_return_actual_coroutine_result_syntax value
+            then
+              begin
+                (* If we make a tail call of a suspend coroutine *)
+                if value_extra_info.is_tail_call
+                then make_return_statement_syntax value
+                else make_return_actual_coroutine_result_syntax value
+              end
             else
               make_assignment_or_return_syntax
                 temp_data_member_selection

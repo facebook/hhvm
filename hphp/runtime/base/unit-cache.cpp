@@ -496,6 +496,7 @@ bool findFileWrapper(const String& file, void* ctx) {
       context->path = file;
       return true;
     }
+    return false;
   }
 
   // handle file://

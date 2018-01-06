@@ -481,29 +481,47 @@ void tryReplaceInstruction(
   IRInstruction* inst,
   ValueNumberTable& table
 ) {
+  if (inst->hasDst()) {
+    auto const dst = inst->dst();
+    auto const valueNumber = table[dst].value;
+    if (valueNumber &&
+        valueNumber != dst &&
+        is_tmp_usable(idoms, valueNumber, inst->block())) {
+      if (inst->producesReference()) {
+        auto const block = valueNumber->inst()->block();
+        auto const iter = std::next(block->iteratorTo(valueNumber->inst()));
+        block->insert(
+          iter, unit.gen(IncRef, valueNumber->inst()->bcctx(), valueNumber));
+      }
+      if (!(valueNumber->type() <= dst->type())) {
+        FTRACE(1,
+               "replacing {} with AssertType({})\n",
+               inst->toString(),
+               dst->type().toString()
+              );
+        unit.replace(inst, AssertType, dst->type(), valueNumber);
+      }
+    }
+  }
+
   for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
     auto s = inst->src(i);
     auto valueNumber = table[s].value;
-    auto valueInst = valueNumber->inst();
     if (valueNumber == s) continue;
     if (!valueNumber) continue;
     if (!is_tmp_usable(idoms, valueNumber, inst->block())) continue;
 
-    // Don't replace a value with one that has a less refined type.
-    if (s->type() < valueNumber->type()) continue;
-
-    FTRACE(1,
-      "instruction {}\n"
-      "replacing src {} with dst of {}\n",
-      *inst,
-      i,
-      *valueInst
-    );
-    inst->setSrc(i, valueNumber);
-    if (valueInst->producesReference()) {
-      auto block = valueInst->block();
-      auto iter = block->iteratorTo(valueInst);
-      block->insert(++iter, unit.gen(IncRef, valueInst->bcctx(), valueNumber));
+    // If the replacement is at least as refined as the source type,
+    // just substitute it directly
+    if (valueNumber->type() <= s->type()) {
+      FTRACE(1,
+             "instruction {}\n"
+             "replacing src {} with dst of {}\n",
+             *inst,
+             i,
+             *valueNumber->inst()
+            );
+      inst->setSrc(i, valueNumber);
     }
   }
 }

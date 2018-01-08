@@ -954,7 +954,7 @@ SSATmp* shiftImpl(State& env, const IRInstruction* inst, Oper op) {
     }
 
     if (src2->hasConstVal()) {
-      return cns(env, op(src1->intVal(), src2->intVal()));
+      return cns(env, op(src1->intVal(), src2->intVal() & 63));
     }
   }
 

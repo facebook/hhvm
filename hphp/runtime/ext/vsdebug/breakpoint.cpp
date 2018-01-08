@@ -14,7 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/ext/vsdebug/breakpoint.h"
+#include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -41,7 +44,8 @@ Breakpoint::Breakpoint(
     m_column(column),
     m_path(path),
     m_resolvedLocation({0}),
-    m_hitCount(0) {
+    m_hitCount(0),
+    m_conditionUnit(nullptr) {
 
   updateConditions(condition, hitCondition);
 }
@@ -52,7 +56,22 @@ void Breakpoint::updateConditions(
 ) {
   m_condition = condition;
   m_hitCondition = hitCondition;
-  // TODO: compile condition and hitCondition here.
+
+  // TODO: Deal with hit condition breakpoints.
+
+  if (!m_condition.empty()) {
+    try {
+      EvaluateCommand::preparseEvalExpression(&m_condition);
+      if (!m_condition.empty()) {
+        m_conditionUnit =
+          compile_string(m_condition.c_str(), m_condition.size());
+      }
+    } catch (...) {
+      // Errors will be printed to stderr already, and we'll err on the side
+      // of breaking when the bp is hit.
+      m_conditionUnit = nullptr;
+    }
+  }
 }
 
 BreakpointManager::BreakpointManager(Debugger* debugger) :
@@ -339,6 +358,83 @@ void BreakpointManager::onBreakpointHit(int id) {
     Breakpoint* bp = &it->second;
     bp->m_hitCount++;
     sendBreakpointEvent(id, ReasonChanged);
+  }
+}
+
+void BreakpointManager::sendBpError(
+  int bpId,
+  const char* error,
+  const std::string& condition
+) {
+  std::string errorMsg = "The condition for breakpoint ";
+  errorMsg += std::to_string(bpId);
+  errorMsg += " (";
+  errorMsg += condition;
+  errorMsg += ") ";
+  errorMsg += error;
+  m_debugger->sendUserMessage(
+    errorMsg.c_str(),
+    DebugTransport::OutputLevelWarning
+  );
+}
+
+bool BreakpointManager::isBreakConditionSatisified(
+  RequestInfo* ri,
+  const Breakpoint* bp
+) {
+  const std::string condition = bp->getCondition();
+  if (condition.size() == 0) {
+    // This breakpoint has no condition.
+    return true;
+  }
+
+  Unit* unit = bp->getConditionUnit();
+  if (unit == nullptr) {
+    // This means the condition is invalid: it failed to compile.
+    // Bother the user, and break anyway.
+    sendBpError(bp->m_id, "did not compile.", condition);
+    return true;
+  }
+
+  // We should not hit any breakpoints or execute any flow operations while
+  // evaluating a breakpoint condition.
+  PCFilter savedFlowFilter;
+  PCFilter savedBpFilter;
+  RequestInjectionData& rid = RID();
+
+  ri->m_flags.doNotBreak = true;
+  g_context->debuggerSettings.bypassCheck = true;
+  savedFlowFilter.swap(rid.m_flowFilter);
+  savedBpFilter.swap(rid.m_breakPointFilter);
+
+  SCOPE_EXIT {
+    ri->m_flags.doNotBreak = false;
+    g_context->debuggerSettings.bypassCheck = false;
+    savedFlowFilter.swap(rid.m_flowFilter);
+    savedBpFilter.swap(rid.m_breakPointFilter);
+  };
+
+  // Go ahead and evaluate the condition, and the current frame depth.
+  const auto& result = g_context->evalPHPDebugger(unit, 0);
+  if (result.failed) {
+    // The condition compiled but didn't run.
+    // Bother the user, and break anyway.
+    sendBpError(bp->m_id, "failed to execute.", condition);
+    return true;
+  }
+
+  const Variant& resultData = result.result;
+  if (resultData.isBoolean()) {
+    return resultData.asBooleanVal();
+  } else {
+    // The condition ran but returned something other than a bool.
+    // Break anyway and tell the user.
+    sendBpError(
+      bp->m_id,
+      "returned a value that was not a Boolean.",
+      condition
+    );
+    return true;
   }
 }
 

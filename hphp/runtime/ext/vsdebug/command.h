@@ -488,6 +488,7 @@ struct EvaluateCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(EvaluateCommand, CommandTarget::Request, false);
   int64_t targetThreadId(DebuggerSession* session) override;
 
+public:
   static void preparseEvalExpression(
     std::string* expr
   );

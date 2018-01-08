@@ -62,7 +62,7 @@ bool InitializeCommand::executeImpl(
   folly::dynamic capabilities = folly::dynamic::object;
   capabilities["supportsConfigurationDoneRequest"] = true;
   capabilities["supportsConditionalBreakpoints"] = true;
-  capabilities["supportsHitConditionalBreakpoints"] = true;
+  capabilities["supportsHitConditionalBreakpoints"] = false;
   capabilities["supportsEvaluateForHovers"] = true;
   capabilities["supportsStepBack"] = false;
   capabilities["supportsSetVariable"] = true;

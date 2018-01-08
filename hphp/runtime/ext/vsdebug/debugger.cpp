@@ -1300,7 +1300,10 @@ void Debugger::onLineBreakpointHit(
     for (auto it = fileBps.begin(); it != fileBps.end(); it++) {
       const int bpId = *it;
       const Breakpoint* bp = bpMgr->getBreakpointById(bpId);
-      if (line == bp->m_resolvedLocation.m_startLine) {
+      if (line >= bp->m_resolvedLocation.m_startLine &&
+          line <= bp->m_resolvedLocation.m_endLine &&
+          bpMgr->isBreakConditionSatisified(ri, bp)) {
+
         matchingBpId = bpId;
         stopReason = getStopReasonForBp(matchingBpId, bp->m_path, bp->m_line);
 

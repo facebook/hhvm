@@ -29,6 +29,7 @@ namespace HPHP {
 namespace VSDEBUG {
 
 struct ClientPreferences;
+struct RequestInfo;
 
 enum BreakpointType {
   Source,
@@ -66,16 +67,22 @@ struct Breakpoint {
   ResolvedLocation m_resolvedLocation;
   int m_hitCount;
 
-  std::string getCondition() { return m_condition; }
+  std::string getCondition() const { return m_condition; }
+  Unit* getConditionUnit() const { return m_conditionUnit; }
+
   std::string getHitCondition() { return m_hitCondition; }
 
 private:
+
   // Evaluation condition for a conditional breakpoint.
   std::string m_condition;
 
   // Hit condition, specified separately in the protocol. This is used for
   // comparison to the number of times the breakpoint has been hit.
   std::string m_hitCondition;
+
+  // Compiled unit for the breakpoint condition.
+  Unit* m_conditionUnit;
 };
 
 struct ExceptionBreakpointSettings {
@@ -121,6 +128,11 @@ struct BreakpointManager {
     const std::string& sourcePath
   ) const;
 
+  bool isBreakConditionSatisified(
+    RequestInfo* ri,
+    const Breakpoint* bp
+  );
+
 private:
 
   static constexpr char* ReasonNew = "new";
@@ -128,6 +140,12 @@ private:
   static constexpr char* ReasonRemoved = "removed";
 
   void sendBreakpointEvent(int breakpointId, const char* reason);
+
+  void sendBpError(
+    int bpId,
+    const char* error,
+    const std::string& condition
+  );
 
   // Helper to honor client's lines start at 0 or 1 preference.
   static int adjustLineNumber(

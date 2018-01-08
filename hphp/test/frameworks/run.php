@@ -117,7 +117,7 @@ function prepare(Set $available_frameworks, Set $framework_class_overrides,
   // vector, and then append those tests to a tests vector and then foreach the
   // test vector to bucketize them, this will allow us to basically run the
   // framework tests alphabetically.
-  sort($passed_frameworks);
+  sort(&$passed_frameworks);
   $frameworks = Vector {};
   foreach ($passed_frameworks as $name) {
     $name = trim(strtolower($name));
@@ -167,7 +167,7 @@ function fork_buckets(Traversable $data, (function(array):int) $callback): int {
   $thread_ret_val = 0;
   $status = -1;
   foreach($children as $child) {
-    pcntl_waitpid($child, $status);
+    pcntl_waitpid($child, &$status);
     $thread_ret_val |= pcntl_wexitstatus($status);
   }
 
@@ -478,7 +478,7 @@ function print_summary_information(string $summary_file): void {
   if (file_exists($summary_file)
       && ($contents = file_get_contents($summary_file)) !== "") {
     $decoded_results = json_decode($contents, true);
-    ksort($decoded_results);
+    ksort(&$decoded_results);
 
     switch (Options::$output_format) {
       case OutputFormat::CSV:

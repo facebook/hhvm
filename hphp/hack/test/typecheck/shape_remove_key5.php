@@ -10,5 +10,5 @@ type s = shape(
 );
 
 function test(s $s, string $k): void {
-  Shapes::removeKey($s, $k);
+  Shapes::removeKey(&$s, $k);
 }

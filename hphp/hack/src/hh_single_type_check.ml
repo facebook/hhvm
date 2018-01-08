@@ -130,7 +130,6 @@ let parse_options () =
   let safe_array = ref false in
   let safe_vector_array = ref false in
   let forbid_nullable_cast = ref false in
-  let safe_pass_by_ref = ref false in
   let deregister_attributes = ref false in
   let disable_optional_and_unknown_shape_fields = ref false in
   let options = [
@@ -237,10 +236,6 @@ let parse_options () =
     "--forbid_nullable_cast",
       Arg.Set forbid_nullable_cast,
       " Forbid casting from nullable values.";
-    "--safe-pass-by-ref",
-      Arg.Set safe_pass_by_ref,
-      " Require call-time pass-by-ref annotations to match function"^
-      " definitions.";
     "--infer-return-types",
       Arg.Unit (set_mode Infer_return_types),
       " Infers return types of functions and methods.";
@@ -264,8 +259,6 @@ let parse_options () =
       GlobalOptions.tco_experimental_features = SSet.filter begin fun x ->
         if x = GlobalOptions.tco_experimental_forbid_nullable_cast
         then !forbid_nullable_cast
-        else if x = GlobalOptions.tco_experimental_safe_pass_by_ref
-        then !safe_pass_by_ref
         else if x = GlobalOptions.tco_experimental_disable_optional_and_unknown_shape_fields
         then !disable_optional_and_unknown_shape_fields
         else true

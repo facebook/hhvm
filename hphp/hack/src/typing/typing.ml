@@ -2228,7 +2228,7 @@ and anon_make tenv p f ft idl =
   is_reactive,
   is_coroutine,
   fun ?el ?ret_ty env supplied_params ->
-    let safe_pass_by_ref = TUtils.safe_pass_by_ref_enabled env in
+    let safe_pass_by_ref = true in
     if !is_typing_self
     then begin
       Errors.anonymous_recursive p;
@@ -4533,7 +4533,7 @@ and call ~expected pos env fty el uel =
   env, tel, tuel, ty
 
 and call_ ~expected pos env fty el uel =
-  let safe_pass_by_ref = TUtils.safe_pass_by_ref_enabled env in
+  let safe_pass_by_ref = true in
   let env, efty = Env.expand_type env fty in
   (match efty with
   | _, (Terr | Tany | Tunresolved []) ->

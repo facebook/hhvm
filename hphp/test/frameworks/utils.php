@@ -250,7 +250,7 @@ function get_subclasses_of(string $parent): Vector {
       $result[] = strtolower($class);
     }
   }
-  sort($result);
+  sort(&$result);
   return $result;
 }
 
@@ -406,7 +406,7 @@ function run_install_impl(string $proc, string $path, ?Map $env): ?int
   }
 
   $pipes = null;
-  $process = proc_open($proc, $descriptorspec, $pipes, $path, $env_arr);
+  $process = proc_open($proc, $descriptorspec, &$pipes, $path, $env_arr);
   assert($pipes !== null);
   if (is_resource($process)) {
     fclose($pipes[0]);
@@ -420,7 +420,7 @@ function run_install_impl(string $proc, string $path, ?Map $env): ?int
     while ($done_by > time()) {
       $remaining = $done_by - time();
       $ready = stream_select(
-        $read, $write, $except,
+        &$read, &$write, &$except,
         $remaining > 0 ? $remaining : 1
       );
       if ($ready === 0) {

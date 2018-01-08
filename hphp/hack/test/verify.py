@@ -14,11 +14,6 @@ max_workers = 48
 verbose = False
 dump_on_failure = False
 
-# remove "b" (backtrace) from OCAMLRUNPARAM.
-# It changes the messages written to stderr and causes spurious test failures
-os.environ["OCAMLRUNPARAM"] = ",".join(
-    x for x in os.environ.get("OCAMLRUNPARAM", "").split(",") if x != "b"
-)
 
 Failure = namedtuple('Failure', ['fname', 'expected', 'output'])
 

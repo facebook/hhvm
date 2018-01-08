@@ -800,6 +800,11 @@ module NastCheck                            = struct
   let const_attribute_prohibited            = 3048 (* DONT MODIFY!!!! *)
   let global_in_reactive_context            = 3049 (* DONT MODIFY!!!! *)
   let inout_argument_bad_expr               = 3050 (* DONT MODIFY!!!! *)
+  let mutable_params_outside_of_sync        = 3051 (* DONT MODIFY!!!! *)
+  let mutable_async_method                  = 3052 (* DONT MODIFY!!!! *)
+  let mutable_methods_must_be_reactive      = 3053(* DONT MODIFY!!!! *)
+  let mutable_attribute_on_function         = 3054 (* DONT MODIFY!!!! *)
+
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1665,6 +1670,30 @@ let inout_params_outside_of_sync pos =
   add NastCheck.inout_params_outside_of_sync pos (
     "Inout parameters cannot be defined on async functions, "^
     "generators or coroutines."
+  )
+
+let mutable_params_outside_of_sync pos fpos name fname =
+  add_list NastCheck.mutable_params_outside_of_sync [
+    pos, "Mutable parameters are not allowed on async functions";
+    pos, "This parameter "^ (strip_ns name) ^" is marked mutable.";
+    fpos, "The function "^ (strip_ns fname) ^" is marked async.";
+  ]
+
+let mutable_async_method pos =
+  add NastCheck.mutable_async_method pos (
+    "Mutable methods must be synchronous. Try removing the async tag from the function."
+  )
+
+let mutable_attribute_on_function pos =
+  add NastCheck.mutable_attribute_on_function pos (
+    "<<__Mutable>> only makes sense on methods, or parameters on functions or methods."
+  )
+
+
+let mutable_methods_must_be_reactive pos name =
+  add NastCheck.mutable_methods_must_be_reactive pos (
+    "The method " ^ (strip_ns name) ^ " has a mutable parameter" ^
+    " (or mutable this), so it must be marked reactive with <<__Rx>>."
   )
 
 let inout_params_special pos =

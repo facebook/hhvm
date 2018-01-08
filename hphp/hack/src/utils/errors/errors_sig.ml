@@ -440,6 +440,10 @@ module type S = sig
   val reassign_mutable_var : Pos.t -> unit
   val mutable_call_on_immutable : Pos.t -> Pos.t -> unit
   val mutable_argument_mismatch : Pos.t -> Pos.t -> unit
+  val mutable_params_outside_of_sync : Pos.t -> Pos.t -> string -> string -> unit
+  val mutable_async_method : Pos.t -> unit
+  val mutable_attribute_on_function : Pos.t -> unit
+  val mutable_methods_must_be_reactive : Pos.t -> string ->  unit
   val invalid_freeze_target : Pos.t -> Pos.t -> string -> unit
   val invalid_freeze_use : Pos.t -> unit
   val freeze_in_nonreactive_context : Pos.t -> unit

@@ -369,6 +369,9 @@ and func env f named_body =
     is_reactive = fun_is_reactive f.f_user_attributes;
   } in
   maybe hint env f.f_ret;
+  (* Functions can't be mutable, only methods can *)
+  if Attributes.mem SN.UserAttributes.uaMutable f.f_user_attributes then
+    Errors.mutable_attribute_on_function p;
   List.iter f.f_tparams (tparam env);
   let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
   List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
@@ -822,7 +825,7 @@ and method_ (env, is_static) m =
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
 
-  let p, _ = m.m_name in
+  let p, name = m.m_name in
   check_coroutines_enabled (m.m_fun_kind = Ast.FCoroutine) env p;
   (* Add method type parameters to environment and localize the bounds *)
   let tenv, constraints =
@@ -830,6 +833,15 @@ and method_ (env, is_static) m =
                ~ety_env:(Phase.env_with_self env.tenv) in
   let tenv = add_constraints (fst m.m_name) tenv constraints in
   let env = { env with tenv = tenv } in
+  (* Mutable async methods are not allowed *)
+  if m.m_fun_kind <> Ast.FSync
+    && Attributes.mem SN.UserAttributes.uaMutable m.m_user_attributes then
+    Errors.mutable_async_method p;
+  (* Mutable methods must be reactive *)
+  if Attributes.mem SN.UserAttributes.uaMutable m.m_user_attributes
+    && not (Attributes.mem SN.UserAttributes.uaReactive m.m_user_attributes) then
+    Errors.mutable_methods_must_be_reactive p name;
+
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
   List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
   let inout = List.find m.m_params ~f:(
@@ -872,9 +884,17 @@ and require_inout_params_enabled env p =
   if not (inout_params_enabled env)
   then Errors.experimental_feature p "inout parameters"
 
-and fun_param env (_, name) f_type byref param =
+and param_is_mutable p =
+  Attributes.mem SN.UserAttributes.uaMutable p.param_user_attributes
+
+and fun_param env (pos, name) f_type byref param =
   maybe hint env param.param_hint;
   maybe expr env param.param_expr;
+  if param_is_mutable param && f_type <> Ast.FSync then
+    Errors.mutable_params_outside_of_sync
+      param.param_pos pos param.param_name name;
+  if param_is_mutable param && not env.is_reactive then
+    Errors.mutable_methods_must_be_reactive param.param_pos name;
   match param.param_callconv with
   | None -> ()
   | Some Ast.Pinout ->

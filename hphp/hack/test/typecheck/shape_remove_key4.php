@@ -10,5 +10,5 @@ class C {
 }
 
 function test(C $c): void {
-  Shapes::removeKey($c->s, 'x');
+  Shapes::removeKey(&$c->s, 'x');
 }

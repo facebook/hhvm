@@ -552,7 +552,7 @@ and unify_accept_disposable param1 param2 =
   | _, _ -> ()
 
 and unify_params env l1 l2 var1_opt =
-  let safe_pass_by_ref = TUtils.safe_pass_by_ref_enabled env in
+  let safe_pass_by_ref = true in
   match l1, l2, var1_opt with
   | [], l, None -> env, l
   | [], x2 :: rl2, Some (name1, v1) ->

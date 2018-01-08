@@ -19,7 +19,7 @@ function test(bool $b, s $s, t $t): void {
   }
 
   Shapes::idx($st, 'x'); // no error
-  Shapes::removeKey($st, 'x');
+  Shapes::removeKey(&$st, 'x');
   Shapes::idx($st, 'y'); // no error
   Shapes::idx($st, 'x'); // this will always return null, but it's safe from
   // type checking perspective, so no error

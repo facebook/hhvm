@@ -427,13 +427,13 @@ class Framework {
       while (($line = fgets($handle)) !== false) {
         $line = rtrim($line, PHP_EOL);
         if (preg_match(PHPUnitPatterns::TESTS_OK_PATTERN,
-                       $line, $match) === 1) {
+                       $line, &$match) === 1) {
           // We have ths pattern: OK (364 tests, 590 assertions)
           // We want the first match of digits
-          preg_match("/[0-9]+(?= )/", $line, $match);
+          preg_match("/[0-9]+(?= )/", $line, &$match);
           $num_tests += (int) $match[0];
         } else if (preg_match(PHPUnitPatterns::TESTS_FAILURE_PATTERN,
-                       $line, $match) === 1) {
+                       $line, &$match) === 1) {
           // We have this pattern: Tests: 364, Assertions: 585, Errors: 5.
           // Break out each type into an array
           $results_arr = str_getcsv($match[0]);
@@ -519,10 +519,10 @@ class Framework {
       if ($line === false) {
         break;
       }
-      if (preg_match($stop_parsing_pattern, $line, $matches) === 1) {
+      if (preg_match($stop_parsing_pattern, $line, &$matches) === 1) {
         break;
       }
-      if (preg_match($this->test_name_pattern, $line, $matches) === 1) {
+      if (preg_match($this->test_name_pattern, $line, &$matches) === 1) {
         // Get the next line for the expected status for that test
         $status = rtrim(fgets($file), PHP_EOL);
         $tests[$matches[0]] = $status;
@@ -563,7 +563,7 @@ class Framework {
           $results[$test] = $status;
         }
       }
-      if (!ksort($results)) { return false; }
+      if (!ksort(&$results)) { return false; }
       fclose($handle);
       $contents = "";
       foreach ($results as $test => $status) {
@@ -803,11 +803,11 @@ class Framework {
       $pipes = array();
       verbose("Command used to find the test files and tests for ".$this->name.
               ": ".$find_tests_command."\n");
-      $proc = proc_open($find_tests_command, $descriptorspec, $pipes, __DIR__);
+      $proc = proc_open($find_tests_command, $descriptorspec, &$pipes, __DIR__);
       if (is_resource($proc)) {
         $pid = proc_get_status($proc)["pid"];
         $child_status = null;
-        pcntl_waitpid($pid, $child_status);
+        pcntl_waitpid($pid, &$child_status);
         fclose($pipes[0]);
         fclose($pipes[1]);
         fclose($pipes[2]);
@@ -999,6 +999,6 @@ class Framework {
     $contents = file_get_contents($testfile);
     $matches = null;
     return preg_match_all(PHPUnitPatterns::TEST_METHOD_NAME_PATTERN,
-                          $contents, $matches);
+                          $contents, &$matches);
   }
 }

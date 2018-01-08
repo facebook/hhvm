@@ -39,8 +39,6 @@ let experimental_generics_arity =
   GlobalOptions.tco_experimental_generics_arity
 let experimental_forbid_nullable_cast =
   GlobalOptions.tco_experimental_forbid_nullable_cast
-let experimental_safe_pass_by_ref =
-  GlobalOptions.tco_experimental_safe_pass_by_ref
 let experimental_coroutines =
   GlobalOptions.tco_experimental_coroutines
 let experimental_inout_params = GlobalOptions.tco_experimental_inout_params

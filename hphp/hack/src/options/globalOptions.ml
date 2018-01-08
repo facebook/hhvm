@@ -67,11 +67,6 @@ let tco_experimental_generics_arity =
  *)
 let tco_experimental_forbid_nullable_cast = "forbid_nullable_cast"
 
-(**
- * Require call-time pass-by-ref annotations to match function definitions.
- *)
-let tco_experimental_safe_pass_by_ref = "safe_pass_by_ref"
-
 (*
 * Disallow static memoized functions in non-final classes
 *)
@@ -134,7 +129,6 @@ let tco_experimental_all =
      tco_experimental_unresolved_fix;
      tco_experimental_generics_arity;
      tco_experimental_forbid_nullable_cast;
-     tco_experimental_safe_pass_by_ref;
      tco_experimental_coroutines;
      tco_experimental_disallow_static_memoized;
      tco_experimental_inout_params;

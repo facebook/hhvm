@@ -136,7 +136,8 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
     m_data = reinterpret_cast<TypedValueAux*>(newData);
     assert(m_data);
   }
-  cellDup(v, m_data[m_size++]);
+  cellDup(v, m_data[m_size]);
+  m_data[m_size++].deepInit() = false;
 }
 
 
@@ -785,12 +786,12 @@ void Class::initProps() const {
   Slot slot = 0;
   for (auto it = propVec->begin(); it != propVec->end(); ++it, ++slot) {
     TypedValueAux* tv = &(*it);
+    assertx(!tv->deepInit());
     // Set deepInit if the property requires "deep" initialization.
     if (m_declProperties[slot].attrs & AttrDeepInit) {
       tv->deepInit() = true;
     } else {
       tvAsVariant(tv).setEvalScalar();
-      tv->deepInit() = false;
     }
   }
 }

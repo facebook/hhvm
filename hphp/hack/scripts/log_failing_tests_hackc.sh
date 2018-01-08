@@ -25,6 +25,13 @@ else
   FAIL_COMPARE_SLOW=0
 fi
 
+if [ -e hphp/hack/test/facebook/hhbc/tests/hhcodegen_failing_tests ]
+then
+  FAIL_COMPARE_HHBC=$(grep -c '^' hphp/hack/test/facebook/hhbc/tests/hhcodegen_failing_tests || true)
+else
+  FAIL_COMPARE_HHBC=0
+fi
+
 if [ -e hphp/test/hackc_failing_tests_quick ]
 then
   FAIL_RUN_QUICK=$(grep -c '^' hphp/test/hackc_failing_tests_quick || true)
@@ -55,6 +62,7 @@ fi
 
 SAMPLE_COMPARE_QUICK="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_COMPARE_QUICK }, \"normal\": {\"type\": \"compare_quick\"}}"
 SAMPLE_COMPARE_SLOW="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_COMPARE_SLOW }, \"normal\": {\"type\": \"compare_slow\"}}"
+SAMPLE_COMPARE_HHBC="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_COMPARE_HHBC }, \"normal\": {\"type\": \"compare_hhbc\"}}"
 SAMPLE_RUN_QUICK="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_RUN_QUICK }, \"normal\": {\"type\": \"run_quick\"}}"
 SAMPLE_RUN_SLOW="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_RUN_SLOW }, \"normal\": {\"type\": \"run_slow\"}}"
 SAMPLE_RUN_REPO_QUICK="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_RUN_REPO_QUICK }, \"normal\": {\"type\": \"run_repo_quick\"}}"
@@ -62,6 +70,7 @@ SAMPLE_RUN_REPO_SLOW="{ \"int\": { \"time\": $(date +'%s'), \"fail\": $FAIL_RUN_
 
 scribe_cat "$TABLE_NAME" "$SAMPLE_COMPARE_QUICK"
 scribe_cat "$TABLE_NAME" "$SAMPLE_COMPARE_SLOW"
+scribe_cat "$TABLE_NAME" "$SAMPLE_COMPARE_HHBC"
 scribe_cat "$TABLE_NAME" "$SAMPLE_RUN_QUICK"
 scribe_cat "$TABLE_NAME" "$SAMPLE_RUN_SLOW"
 scribe_cat "$TABLE_NAME" "$SAMPLE_RUN_REPO_QUICK"

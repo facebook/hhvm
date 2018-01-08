@@ -66,22 +66,23 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
       TUtils.flatten_unresolved env rty rtyl
     end tyl ~init:(env, []) in
     env, (r, Tunresolved rtyl)
-  | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
+  | _, Toption ty ->
+    (* We want to try to avoid easy double nullables here, so we handle Toption
+     * with some special logic. *)
+    let env, ty = overload_extract_from_awaitable env p ty in
+    let env, ty = TUtils.non_null env ty in
+    env, (r, Toption ty)
+  | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _
     | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
     | Tanon (_, _) | Tobject | Tshape _) ->
-    let expected_opt_type = r, Toption (r, Tclass ((p, SN.Classes.cAwaitable), [type_var])) in
-    let expected_non_opt_type = r, Tclass ((p, SN.Classes.cAwaitable), [type_var]) in
-    let expected_type, return_type = (match e_opt_ty with
-      | _, Toption _ ->
-        expected_opt_type, (r, Toption type_var)
-      | _, Tany ->
-        expected_non_opt_type, (r, Tany)
-      | _, Terr ->
-        expected_non_opt_type, (r, Terr)
+    let expected_type = r, Tclass ((p, SN.Classes.cAwaitable), [type_var]) in
+    let return_type = match e_opt_ty with
+      | _, Tany -> r, Tany
+      | _, Terr -> r, Terr
       | _, (Tmixed | Tarraykind _ | Tprim _ | Tvar _ | Tfun _
         | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
-        | Tunresolved _ | Tobject | Tshape _)->
-        expected_non_opt_type, type_var) in
+        | Toption _ | Tunresolved _ | Tobject | Tshape _) -> type_var
+    in
     let env = Type.sub_type p Reason.URawait env opt_ty_maybe expected_type in
     env, return_type
   )
@@ -222,6 +223,7 @@ and gen_array_va_rec env p tyl =
     (match snd (TUtils.fold_unresolved env ty) with
     | r, Toption opt_ty ->
       let env, opt_ty = gen_array_va_rec' env opt_ty in
+      let env, opt_ty = TUtils.non_null env opt_ty in
       env, (r, Toption opt_ty)
     | _, Tarraykind _ -> gen_array_rec env p ty
     | _, Ttuple tyl -> genva env p tyl

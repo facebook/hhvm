@@ -1056,7 +1056,7 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
   let env = condition env true c in
   let env, te1, ty1 = match e1 with
     | None ->
-        let env, ty = non_null env tyc in
+        let env, ty = TUtils.non_null env tyc in
         env, None, ty
     | Some e1 ->
         let env, te1, ty1 = expr env e1 in
@@ -3075,7 +3075,7 @@ and is_abstract_ft fty = match fty with
         let env, tv =
           if List.length el > 1
           then env, tv
-          else non_null env tv in
+          else TUtils.non_null env tv in
         env, explain_array_filter tv in
       let rec get_array_filter_return_type env ty =
         let env, ety = Env.expand_type env ty in
@@ -4238,7 +4238,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ?(explicit_tparams=[])
     | Some p1 ->
         let k' (env, fty, x) = begin
           let env, method_, x = k (env, fty, x) in
-          let env, method_ = non_null env method_ in
+          let env, method_ = TUtils.non_null env method_ in
           env, (Reason.Rnullsafe_op p1, Toption method_), x
         end in
         obj_get_ ~is_method ~nullsafe ~valkind ~explicit_tparams env ty cid id k' k_lhs
@@ -4990,45 +4990,11 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast.Eq _ ->
       assert false
 
-and non_null env ty =
-  let env, ty = Env.expand_type env ty in
-  match ty with
-  | _, Toption ty ->
-      (* When "??T" appears in the typing environment due to implicit
-       * typing, the recursion here ensures that it's treated as
-       * isomorphic to "?T"; that is, all nulls are created equal.
-       *)
-      non_null env ty
-  | r, Tunresolved tyl ->
-      let env, tyl = List.map_env env tyl
-        (fun env e -> non_null env e) in
-      (* We need to flatten the unresolved types, otherwise we could
-       * end up with "Tunresolved[Tunresolved _]" which is not supposed
-       * to happen.
-      *)
-      let tyl = List.fold_right tyl ~f:begin fun ty tyl ->
-        match ty with
-        | _, Tunresolved l -> l @ tyl
-        | x -> x :: tyl
-      end ~init:[] in
-      env, (r, Tunresolved tyl)
-
-  | r, Tabstract (ak, _) ->
-    begin match TUtils.get_concrete_supertypes env ty with
-      | env, [ty] -> let env, ty = non_null env ty in
-        env, (r, Tabstract (ak, Some ty))
-      | env, _ -> env, ty
-    end
-  | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Tvar _
-    | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tobject | Tshape _) ->
-      env, ty
-
 and condition_var_non_null env = function
   | _, Lvar x
   | _, Dollardollar x ->
       let x_ty = Env.get_local env (snd x) in
-      let env, x_ty = non_null env x_ty in
+      let env, x_ty = TUtils.non_null env x_ty in
       set_local env x x_ty
   | p, Class_get (cname, (_, member_name)) as e ->
       let env, _te, ty = expr env e in

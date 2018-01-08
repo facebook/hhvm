@@ -20,8 +20,7 @@ let from_variadic_param_hint_opt ho =
   | Some h -> Some (p, A.Happly ((p, "array"), [h]))
 
 let resolve_class_id ~scope cid =
-  let cexpr = expr_to_class_expr ~resolve_self:true
-    scope cid in
+  let cexpr = expr_to_class_expr ~resolve_self:false scope cid in
   match cexpr with
   | Class_id ((p, _) as cid) -> p, A.Id cid
   | Class_parent | Class_self | Class_static | Class_expr _

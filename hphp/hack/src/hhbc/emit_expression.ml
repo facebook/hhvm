@@ -491,12 +491,16 @@ and emit_conditional_expression env etest etrue efalse =
   | Some etrue ->
     let false_label = Label.next_regular () in
     let end_label = Label.next_regular () in
+    let opt_b, jmp_instrs = emit_jmpz_aux env etest false_label in
     gather [
-      emit_jmpz env etest false_label;
-      emit_expr ~need_ref:false env etrue;
-      instr_jmp end_label;
+      jmp_instrs;
+      (* Don't emit code for true branch if statically we know condition is false *)
+      optional (opt_b <> Some false)
+        [emit_expr ~need_ref:false env etrue; instr_jmp end_label];
       instr_label false_label;
-      emit_expr ~need_ref:false env efalse;
+      (* Don't emit code for false branch if statically we know condition is true *)
+      optional (opt_b <> Some true)
+        [emit_expr ~need_ref:false env efalse];
       instr_label end_label;
     ]
   | None ->
@@ -1435,14 +1439,17 @@ and emit_pipe env e1 e2 =
  * Generate specialized code in case expr is statically known, and for
  * !, && and || expressions
  *)
-and emit_jmpz env (pos, expr_ as expr) label =
+and emit_jmpz_aux env (pos, expr_ as expr) label =
   let opt = optimize_null_check () in
-  Emit_pos.emit_pos_then pos @@
   match Ast_constant_folder.expr_to_opt_typed_value (Emit_env.get_namespace env) expr with
   | Some v ->
-    if Typed_value.to_bool v then empty else instr_jmp label
+    let b = Typed_value.to_bool v in
+    Some b, Emit_pos.emit_pos_then pos @@
+      (if b then empty else instr_jmp label)
   | None ->
-    match expr_ with
+    None,
+    Emit_pos.emit_pos_then pos @@
+    begin match expr_ with
     | A.Unop(A.Unot, e) ->
       emit_jmpnz env e label
     | A.Binop(A.BArbar, e1, e2) ->
@@ -1474,6 +1481,10 @@ and emit_jmpz env (pos, expr_ as expr) label =
         emit_expr ~need_ref:false env expr;
         instr_jmpz label
       ]
+    end
+
+and emit_jmpz env expr label =
+  snd (emit_jmpz_aux env expr label)
 
 (* Emit code that is equivalent to
  *   <code for expr>

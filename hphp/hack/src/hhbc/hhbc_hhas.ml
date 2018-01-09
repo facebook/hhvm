@@ -1020,6 +1020,13 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
     let e2 = string_of_param_default_value e2 in
     e1 ^ s ^ e2
   in
+  let escape_char_for_printing = function
+    | '\\' | '$' | '"' -> "\\\\"
+    | '\n' | '\r' | '\t' -> "\\"
+    | c when not (Php_escaping.is_lit_printable c) -> "\\"
+    | _ -> ""
+  in
+  let escape_fn c = escape_char_for_printing c ^ Php_escaping.escape_char c in
   match snd expr with
   | A.Id (_, litstr)
   | A.Id_type_arguments ((_, litstr), _)
@@ -1028,8 +1035,8 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
   | A.Int (_, litstr) -> SU.Integer.to_decimal litstr
   | A.String (_, litstr) ->
     if use_single_quote
-    then SU.single_quote_string_with_escape litstr
-    else SU.quote_string_with_escape litstr
+    then SU.single_quote_string_with_escape ~f:escape_fn litstr
+    else SU.quote_string_with_escape ~f:escape_fn litstr
   | A.Null -> "NULL"
   | A.True -> "true"
   | A.False -> "false"

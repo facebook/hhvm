@@ -104,14 +104,19 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
   ue = s + length;
 
   /* parse scheme */
-  if ((e = (const char*) memchr(s, ':', length)) && (e - s)) {
+  if ((e = (const char*) memchr(s, ':', length)) && e != s) {
     /* validate scheme */
     p = s;
     while (p < e) {
       /* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
       if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
-        if (e + 1 < ue) {
+        if (e + 1 < ue && e < s + strcspn(s, "?#")) {
           goto parse_port;
+        } else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') {
+          /* relative-scheme URL */
+          s += 2;
+          e = nullptr;
+          goto parse_host;
         } else {
           goto just_path;
         }
@@ -119,10 +124,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
       p++;
     }
 
-    if (*(e + 1) == '\0') { /* only scheme is available */
+    if (e + 1 == ue) { /* only scheme is available */
       ret->scheme = estrndup(s, (e - s));
       php_replace_controlchars_ex(ret->scheme, (e - s));
-      goto end;
+      return ret;
     }
 
     /*
@@ -134,46 +139,39 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
        * correctly parse things like a.com:80
        */
       p = e + 1;
-      while (isdigit(*p)) {
+      while (p < ue && isdigit(*p)) {
         p++;
       }
 
-      if ((*p == '\0' || *p == '/') && (p - e) < 7) {
+      if ((p == ue || *p == '/') && (p - e) < 7) {
         goto parse_port;
       }
 
       ret->scheme = estrndup(s, (e-s));
       php_replace_controlchars_ex(ret->scheme, (e - s));
 
-      length -= ++e - s;
-      s = e;
+      s = e + 1;
       goto just_path;
     } else {
       ret->scheme = estrndup(s, (e-s));
       php_replace_controlchars_ex(ret->scheme, (e - s));
 
-      if (*(e+2) == '/') {
+      if (e + 2 < ue && *(e + 2) == '/') {
         s = e + 3;
         if (!strncasecmp("file", ret->scheme, sizeof("file"))) {
-          if (*(e + 3) == '/') {
+          if (e + 3 < ue && *(e + 3) == '/') {
             /* support windows drive letters as in:
                file:///c:/somedir/file.txt
             */
-            if (*(e + 5) == ':') {
+            if (e + 5 < ue && *(e + 5) == ':') {
               s = e + 4;
             }
-            goto nohost;
+            goto just_path;
           }
         }
       } else {
-        if (!strncasecmp("file", ret->scheme, sizeof("file"))) {
-          s = e + 1;
-          goto nohost;
-        } else {
-          length -= ++e - s;
-          s = e;
-          goto just_path;
-        }
+        s = e + 1;
+        goto just_path;
       }
     }
   } else if (e) { /* no scheme; starts with colon: look for port */
@@ -181,75 +179,65 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
     p = e + 1;
     pp = p;
 
-    while (pp-p < 6 && isdigit(*pp)) {
+    while (pp < ue && pp - p < 6 && isdigit(*pp)) {
       pp++;
     }
 
-    if (pp - p > 0 && pp - p < 6 && (*pp == '/' || *pp == '\0')) {
+    if (pp - p > 0 && pp - p < 6 && (pp == ue || *pp == '/')) {
       long port;
       memcpy(port_buf, p, (pp - p));
       port_buf[pp - p] = '\0';
       port = strtol(port_buf, NULL, 10);
       if (port > 0 && port <= 65535) {
         ret->port = (unsigned short) port;
+        if (s + 1 < ue && *s == '/' && *(s + 1) == '/') {
+          /* relative-scheme URL */
+          s += 2;
+        }
       } else {
         STR_FREE(ret->scheme);
         efree(ret);
         return NULL;
       }
-    } else if (p == pp && *pp == '\0') {
+    } else if (p == pp && pp == ue) {
       STR_FREE(ret->scheme);
       efree(ret);
       return NULL;
-    } else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+    } else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') {
+      /* relative-scheme URL */
       s += 2;
     } else {
       goto just_path;
     }
-  } else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+  } else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') {
+    /* relative-scheme URL */
     s += 2;
   } else {
-    just_path:
-    ue = s + length;
-    goto nohost;
+    goto just_path;
   }
 
+  parse_host:
+  /* Binary-safe strcspn(s, "/?#") */
   e = ue;
-
-  if (!(p = (const char*) memchr(s, '/', (ue - s)))) {
-    char *query, *fragment;
-
-    query = (char*) memchr(s, '?', (ue - s));
-    fragment = (char*) memchr(s, '#', (ue - s));
-
-    if (query && fragment) {
-      if (query > fragment) {
-        e = fragment;
-      } else {
-        e = query;
-      }
-    } else if (query) {
-      e = query;
-    } else if (fragment) {
-      e = fragment;
-    }
-  } else {
+  if ((p = (const char*) memchr(s, '/', e - s))) {
+    e = p;
+  }
+  if ((p = (const char*) memchr(s, '?', e - s))) {
+    e = p;
+  }
+  if ((p = (const char*) memchr(s, '#', e - s))) {
     e = p;
   }
 
   /* check for login and password */
   if ((p = (const char*) zend_memrchr(s, '@', (e-s)))) {
     if ((pp = (const char*) memchr(s, ':', (p-s)))) {
-      if ((pp-s) > 0) {
-        ret->user = estrndup(s, (pp-s));
-        php_replace_controlchars_ex(ret->user, (pp - s));
-      }
+      ret->user = estrndup(s, (pp-s));
+      php_replace_controlchars_ex(ret->user, (pp - s));
 
       pp++;
-      if (p-pp > 0) {
-        ret->pass = estrndup(pp, (p-pp));
-        php_replace_controlchars_ex(ret->pass, (p-pp));
-      }
+      ret->pass = estrndup(pp, (p-pp));
+      php_replace_controlchars_ex(ret->pass, (p-pp));
     } else {
       ret->user = estrndup(s, (p-s));
       php_replace_controlchars_ex(ret->user, (p-s));
@@ -259,16 +247,16 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
   }
 
   /* check for port */
-  if (*s == '[' && *(e-1) == ']') {
+  if (s < ue && *s == '[' && *(e-1) == ']') {
     /* Short circuit portscan,
        we're dealing with an
        IPv6 embedded address */
-    p = s;
+    p = nullptr;
   } else {
-    p = (const char*)zend_memrchr(s, ':', (e - s + 1));
+    p = (const char*)  zend_memrchr(s, ':', (e-s));
   }
 
-  if (p >= s && *p == ':') {
+  if (p) {
     if (!ret->port) {
       p++;
       if (e-p > 5) { /* port cannot be longer then 5 characters */
@@ -316,54 +304,34 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 
   s = e;
 
-  nohost:
+  just_path:
 
-  if ((p = (const char*) memchr(s, '?', (ue - s)))) {
-    pp = (const char*)memchr(s, '#', (ue - s));
-
-    if (pp && pp < p) {
-      if (pp - s) {
-        ret->path = estrndup(s, (pp-s));
-        php_replace_controlchars_ex(ret->path, (pp - s));
-      }
-      p = pp;
-      goto label_parse;
-    }
-
-    if (p - s) {
-      ret->path = estrndup(s, (p-s));
-      php_replace_controlchars_ex(ret->path, (p - s));
-    }
-
-    if (pp) {
-      if (pp - ++p) {
-        ret->query = estrndup(p, (pp-p));
-        php_replace_controlchars_ex(ret->query, (pp - p));
-      }
-      p = pp;
-      goto label_parse;
-    } else if (++p - ue) {
-      ret->query = estrndup(p, (ue-p));
-      php_replace_controlchars_ex(ret->query, (ue - p));
-    }
-  } else if ((p = (const char*) memchr(s, '#', (ue - s)))) {
-    if (p - s) {
-      ret->path = estrndup(s, (p-s));
-      php_replace_controlchars_ex(ret->path, (p - s));
-    }
-
-    label_parse:
+  e = ue;
+  p = (const char*) memchr(s, '#', (e - s));
+  if (p) {
     p++;
-
-    if (ue - p) {
-      ret->fragment = estrndup(p, (ue-p));
-      php_replace_controlchars_ex(ret->fragment, (ue - p));
+    if (p < e) {
+      ret->fragment = estrndup(p, (e - p));
+      php_replace_controlchars_ex(ret->fragment, (e - p));
     }
-  } else {
-    ret->path = estrndup(s, (ue-s));
-    php_replace_controlchars_ex(ret->path, (ue - s));
+    e = p-1;
   }
-end:
+
+  p = (const char*) memchr(s, '?', (e - s));
+  if (p) {
+    p++;
+    if (p < e) {
+      ret->query = estrndup(p, (e - p));
+      php_replace_controlchars_ex(ret->query, (e - p));
+    }
+    e = p-1;
+  }
+
+  if (s < e || s == ue) {
+    ret->path = estrndup(s, (e - s));
+    php_replace_controlchars_ex(ret->path, (e - s));
+  }
+
   return ret;
 }
 /* }}} */

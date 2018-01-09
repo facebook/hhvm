@@ -1,0 +1,20 @@
+array(4) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(11) "example.com"
+  ["port"]=>
+  int(80)
+  ["fragment"]=>
+  string(12) "@google.com/"
+}
+array(4) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(11) "example.com"
+  ["port"]=>
+  int(80)
+  ["query"]=>
+  string(12) "@google.com/"
+}

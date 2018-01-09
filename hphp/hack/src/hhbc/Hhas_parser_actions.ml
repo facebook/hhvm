@@ -776,6 +776,8 @@ let makeunaryinst s arg = match s with
         (ILitConst(NewStructArray (listofshapefieldsofiarg arg)))
    | "NewStructDArray" ->
         (ILitConst(NewStructDArray (listofshapefieldsofiarg arg)))
+   | "NewStructDict" ->
+        (ILitConst(NewStructDict (listofshapefieldsofiarg arg)))
    | "NewVecArray" -> (match arg with
        | IAInt64 n -> ILitConst (NewVecArray (Int64.to_int n))
        | _ -> report_error "bad array size")

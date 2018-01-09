@@ -312,6 +312,10 @@ void cgNewStructDArray(IRLS& env, const IRInstruction* inst) {
   newStructImpl(env, inst, MixedArray::MakeStructDArray);
 }
 
+void cgNewStructDict(IRLS& env, const IRInstruction* inst) {
+  newStructImpl(env, inst, MixedArray::MakeStructDict);
+}
+
 void cgNewKeysetArray(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<NewKeysetArray>();

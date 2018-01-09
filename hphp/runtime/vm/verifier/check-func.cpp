@@ -821,6 +821,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::NewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewStructArray:  // ONE(VSA),     SMANY,   ONE(CV)
   case Op::NewStructDArray: // ONE(VSA),     SMANY,   ONE(CV)
+  case Op::NewStructDict:   // ONE(VSA),     SMANY,   ONE(CV)
   case Op::NewVecArray:     // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewKeysetArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewVArray:       // ONE(IVA),     CMANY,   ONE(CV)

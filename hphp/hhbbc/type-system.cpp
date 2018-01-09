@@ -1910,6 +1910,10 @@ Type dict_val(SArray val) {
 Type dict_empty()         { return Type { BSDictE }; }
 Type some_dict_empty()    { return Type { BDictE }; }
 
+Type dict_map(MapElems m) {
+  return map_impl(BDictN, std::move(m));
+}
+
 Type dict_n(Type k, Type v) {
   return mapn_impl(BDictN, std::move(k), std::move(v));
 }

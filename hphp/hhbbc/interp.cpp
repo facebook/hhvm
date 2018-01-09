@@ -408,6 +408,15 @@ void in(ISS& env, const bc::NewStructDArray& op) {
   constprop(env);
 }
 
+void in(ISS& env, const bc::NewStructDict& op) {
+  auto map = MapElems{};
+  for (auto it = op.keys.end(); it != op.keys.begin(); ) {
+    map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
+  }
+  push(env, dict_map(std::move(map)));
+  constprop(env);
+}
+
 void in(ISS& env, const bc::NewVecArray& op) {
   auto elems = std::vector<Type>{};
   elems.reserve(op.arg1);

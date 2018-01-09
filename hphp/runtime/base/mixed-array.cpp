@@ -178,16 +178,19 @@ ALWAYS_INLINE
 MixedArray* MixedArray::MakeStructImpl(uint32_t size,
                                        const StringData* const* keys,
                                        const TypedValue* values,
+                                       HeaderKind hk,
                                        ArrayData::DVArray dvArray) {
-  assert(size > 0);
-  assert(dvArray == ArrayData::kNotDVArray ||
-         dvArray == ArrayData::kDArray);
+  assertx(size > 0);
+  assertx(hk == HeaderKind::Mixed || hk == HeaderKind::Dict);
+  assertx(dvArray == ArrayData::kNotDVArray ||
+          dvArray == ArrayData::kDArray);
+  assertx(hk != HeaderKind::Dict || dvArray == ArrayData::kNotDVArray);
 
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
 
   ad->m_sizeAndPos       = size; // pos=0
-  ad->initHeader_16(HeaderKind::Mixed, OneReference, dvArray);
+  ad->initHeader_16(hk, OneReference, dvArray);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -210,28 +213,40 @@ MixedArray* MixedArray::MakeStructImpl(uint32_t size,
     *ei = i;
   }
 
-  assert(ad->m_size == size);
-  assert(ad->dvArray() == dvArray);
-  assert(ad->m_pos == 0);
-  assert(ad->kind() == kMixedKind);
-  assert(ad->m_scale == scale);
-  assert(ad->hasExactlyOneRef());
-  assert(ad->m_used == size);
-  assert(ad->m_nextKI == 0);
-  assert(ad->checkInvariants());
+  assertx(ad->m_size == size);
+  assertx(ad->dvArray() == dvArray);
+  assertx(ad->m_pos == 0);
+  assertx(ad->m_kind == hk);
+  assertx(ad->m_scale == scale);
+  assertx(ad->hasExactlyOneRef());
+  assertx(ad->m_used == size);
+  assertx(ad->m_nextKI == 0);
+  assertx(ad->checkInvariants());
   return ad;
 }
 
 MixedArray* MixedArray::MakeStruct(uint32_t size,
                                    const StringData* const* keys,
                                    const TypedValue* values) {
-  return MakeStructImpl(size, keys, values, ArrayData::kNotDVArray);
+  return MakeStructImpl(size, keys, values,
+                        HeaderKind::Mixed,
+                        ArrayData::kNotDVArray);
+}
+
+MixedArray* MixedArray::MakeStructDict(uint32_t size,
+                                       const StringData* const* keys,
+                                       const TypedValue* values) {
+  return MakeStructImpl(size, keys, values,
+                        HeaderKind::Dict,
+                        ArrayData::kNotDVArray);
 }
 
 MixedArray* MixedArray::MakeStructDArray(uint32_t size,
                                          const StringData* const* keys,
                                          const TypedValue* values) {
-  return MakeStructImpl(size, keys, values, ArrayData::kDArray);
+  return MakeStructImpl(size, keys, values,
+                        HeaderKind::Mixed,
+                        ArrayData::kDArray);
 }
 
 MixedArray* MixedArray::MakeMixed(uint32_t size,

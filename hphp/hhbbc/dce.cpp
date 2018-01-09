@@ -1104,7 +1104,6 @@ void dce(Env& env, const bc::NullUninit&)    { pushRemovable(env); }
 void dce(Env& env, const bc::File&)          { pushRemovable(env); }
 void dce(Env& env, const bc::Dir&)           { pushRemovable(env); }
 void dce(Env& env, const bc::NewArray&)      { pushRemovable(env); }
-void dce(Env& env, const bc::NewDictArray&)  { pushRemovable(env); }
 void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
 void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }
 
@@ -1335,6 +1334,16 @@ void dce(Env& env, const bc::NewMixedArray&) {
     });
 }
 
+void dce(Env& env, const bc::NewDictArray&) {
+  stack_ops(env,[] (const UseInfo& ui) {
+      if (ui.usage == Use::AddElemC || allUnused(ui)) {
+        return PushFlags::MarkUnused;
+      }
+
+      return PushFlags::MarkLive;
+    });
+}
+
 void dce(Env& env, const bc::NewDArray&) {
   stack_ops(env,[] (const UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
@@ -1420,6 +1429,16 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
         } else {
           return PushFlags::MarkLive;
         }
+        env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+        ui.actions[env.id] = DceAction::Replace;
+        return PushFlags::AddElemC;
+      }
+
+      if (arrPost.strictSubtypeOf(TDictN) &&
+          cat.cat == Type::ArrayCat::Struct &&
+          *postSize <= ArrayData::MaxElemsOnStack) {
+        CompactVector<Bytecode> bcs;
+        bcs.emplace_back(bc::NewStructDict { get_string_keys(arrPost) });
         env.dceState.replaceMap.emplace(env.id, std::move(bcs));
         ui.actions[env.id] = DceAction::Replace;
         return PushFlags::AddElemC;

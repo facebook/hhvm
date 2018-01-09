@@ -447,6 +447,7 @@ bool canDCE(IRInstruction* inst) {
   case NewKeysetArray:
   case NewStructArray:
   case NewStructDArray:
+  case NewStructDict:
   case Clone:
   case InlineReturn:
   case CallArray:

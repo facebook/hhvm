@@ -410,6 +410,10 @@ void emitNewStructDArray(IRGS& env, const ImmVector& immVec) {
   newStructImpl(env, immVec, NewStructDArray);
 }
 
+void emitNewStructDict(IRGS& env, const ImmVector& immVec) {
+  newStructImpl(env, immVec, NewStructDict);
+}
+
 void emitAddElemC(IRGS& env) {
   // This is just to peek at the types; they'll be consumed for real down below
   // and we don't want to constrain it if we're just going to InterpOne.

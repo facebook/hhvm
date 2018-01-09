@@ -983,6 +983,13 @@ Type vec_n(Type);
 Type svec_n(Type);
 
 /*
+ * Struct-like dicts.
+ *
+ * Pre: !m.empty()
+ */
+Type dict_map(MapElems m);
+
+/*
  * Dict with key/value types.
  */
 Type dict_n(Type, Type);

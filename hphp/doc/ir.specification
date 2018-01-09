@@ -1558,6 +1558,12 @@ To string conversions:
   elements off the stack given by S0, at `offset'. This instruction assumes it
   can take the values from the stack without increfing them.
 
+| NewStructDict<offset,keys...>, D(Dict), S(StkPtr), PRc|CRc
+
+  Allocate a new key/value dict array, given N immediate keys and taking N
+  elements off the stack given by S0, at `offset'. This instruction assumes it
+  can take the values from the stack without increfing them.
+
 | NewCol<type>, DCol, NA, PRc
 
   Create an empty new collection of `type'. `type' cannot be Pair.

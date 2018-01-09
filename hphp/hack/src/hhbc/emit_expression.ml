@@ -1311,7 +1311,7 @@ and is_packed_init ?(hack_arr_compat=true) es =
   && not has_references
   && (List.length es) > 0
 
-and is_struct_init es =
+and is_struct_init es allow_numerics =
   let has_references =
     (* Reference can only exist as a value *)
     List.exists es
@@ -1335,7 +1335,7 @@ and is_struct_init es =
   let limit =
     Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options
   in
-  are_all_keys_non_numeric_strings
+  (allow_numerics || are_all_keys_non_numeric_strings)
   && not has_duplicate_keys
   && not has_references
   && num_keys <= limit
@@ -1350,17 +1350,28 @@ and emit_dynamic_collection env expr es =
     emit_value_only_collection env es (fun n -> NewVecArray n)
   | A.Collection ((_, "keyset"), _) ->
     emit_value_only_collection env es (fun n -> NewKeysetArray n)
+  | A.Collection ((_, "dict"), _) ->
+     if is_struct_init es true then
+       emit_struct_array env es instr_newstructdict
+     else
+       emit_keyvalue_collection "dict" env es (NewDictArray count)
   | A.Collection ((_, name), _)
-    when SU.strip_ns name = "dict"
-      || SU.strip_ns name = "Set"
+     when SU.strip_ns name = "Set"
       || SU.strip_ns name = "ImmSet"
       || SU.strip_ns name = "Map"
       || SU.strip_ns name = "ImmMap" ->
-    emit_keyvalue_collection name env es (NewDictArray count)
+     if is_struct_init es true then
+       gather [
+           emit_struct_array env es instr_newstructdict;
+           instr_colfromarray (collection_type (SU.strip_ns name));
+         ]
+     else
+       emit_keyvalue_collection name env es (NewDictArray count)
+
   | A.Varray _ ->
     emit_value_only_collection env es (fun n -> NewVArray n)
   | A.Darray _ ->
-     if is_struct_init es then
+     if is_struct_init es false then
        emit_struct_array env es instr_newstructdarray
      else
        emit_keyvalue_collection "array" env es (NewDArray count)
@@ -1368,7 +1379,7 @@ and emit_dynamic_collection env expr es =
   (* From here on, we're only dealing with PHP arrays *)
   if is_packed_init es then
     emit_value_only_collection env es (fun n -> NewPackedArray n)
-  else if is_struct_init es then
+  else if is_struct_init es false then
     emit_struct_array env es instr_newstructarray
   else if is_packed_init ~hack_arr_compat:false es then
     emit_keyvalue_collection "array" env es (NewArray count)

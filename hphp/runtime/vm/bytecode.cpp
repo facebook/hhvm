@@ -2031,7 +2031,7 @@ OPTBLD_INLINE void iopNewPackedArray(intva_t n) {
 namespace {
 
 template <typename F>
-void newStructArrayImpl(int32_t n, imm_array<int32_t> ids, F f) {
+ArrayData* newStructArrayImpl(int32_t n, imm_array<int32_t> ids, F f) {
   assert(n > 0 && n <= ArrayData::MaxElemsOnStack);
   req::vector<const StringData*> names;
   names.reserve(n);
@@ -2042,19 +2042,26 @@ void newStructArrayImpl(int32_t n, imm_array<int32_t> ids, F f) {
   }
 
   // This constructor moves values, no inc/decref is necessary.
-  auto a = f(n, names.data(), vmStack().topC())->asArrayData();
+  auto const a = f(n, names.data(), vmStack().topC())->asArrayData();
   vmStack().ndiscard(n);
-  vmStack().pushArrayNoRc(a);
+  return a;
 }
 
 }
 
 OPTBLD_INLINE void iopNewStructArray(int32_t n, imm_array<int32_t> ids) {
-  newStructArrayImpl(n, ids, MixedArray::MakeStruct);
+  auto const a = newStructArrayImpl(n, ids, MixedArray::MakeStruct);
+  vmStack().pushArrayNoRc(a);
 }
 
 OPTBLD_INLINE void iopNewStructDArray(int32_t n, imm_array<int32_t> ids) {
-  newStructArrayImpl(n, ids, MixedArray::MakeStructDArray);
+  auto const a = newStructArrayImpl(n, ids, MixedArray::MakeStructDArray);
+  vmStack().pushArrayNoRc(a);
+}
+
+OPTBLD_INLINE void iopNewStructDict(int32_t n, imm_array<int32_t> ids) {
+  auto const a = newStructArrayImpl(n, ids, MixedArray::MakeStructDict);
+  vmStack().pushDictNoRc(a);
 }
 
 OPTBLD_INLINE void iopNewVecArray(intva_t n) {

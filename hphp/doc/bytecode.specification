@@ -1119,6 +1119,17 @@ NewStructDArray <litstr id vector>    [C..C]  ->  [C]
 
     NewStructDArray < "a" "b" >  [ 1 2 ]  ->  [ darray("a"=>1, "b"=>2) ]
 
+NewStructDict <litstr id vector>    [C..C]  ->  [C:Dict]
+
+  New dict array. Creates a new dict array from the names given in %1 and
+  values from the stack. The vector of litstr ids gives the element names, one
+  value for each name is popped from the stack. Names are in array insertion
+  order, and values were pushed onto the stack in insertion order, so are added
+  to the array in reverse order (the topmost value will become the last element
+  in the array). For example:
+
+    NewStructDict < "a" "b" >  [ 1 2 ]  ->  [ dict("a"=>1, "b"=>2) ]
+
 NewVecArray <num elems>   [C..C]  ->  [C:Vec]
 
   New vec. Creates a new vec from the top %1 cells on the stack, pops those

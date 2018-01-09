@@ -118,6 +118,8 @@ let string_of_lit_const instruction =
       sep ["NewStructArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | NewStructDArray l  ->
       sep ["NewStructDArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
+    | NewStructDict l  ->
+      sep ["NewStructDict"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | NewPair -> "NewPair"
     | ClsCns (cnsid, cr) ->
       sep ["ClsCns"; string_of_const_id cnsid; string_of_classref cr]

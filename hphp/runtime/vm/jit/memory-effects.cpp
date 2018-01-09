@@ -1185,6 +1185,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case NewStructArray:
   case NewStructDArray:
+  case NewStructDict:
     {
       // NewStructArray is reading elements from the stack, but writes to a
       // completely new array, so we can treat the store set as empty.

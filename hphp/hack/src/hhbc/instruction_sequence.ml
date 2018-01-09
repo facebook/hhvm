@@ -179,6 +179,7 @@ let instr_cuf_safe_return = instr (ICall CufSafeReturn)
 let instr_clone = instr (IOp Clone)
 let instr_newstructarray keys = instr (ILitConst (NewStructArray keys))
 let instr_newstructdarray keys = instr (ILitConst (NewStructDArray keys))
+let instr_newstructdict keys = instr (ILitConst (NewStructDict keys))
 let instr_newcol collection_type = instr (ILitConst (NewCol collection_type))
 let instr_colfromarray collection_type =
   instr (ILitConst (ColFromArray collection_type))
@@ -706,7 +707,7 @@ let get_input_output_count i =
     | CnsU _ | ClsCns _ | ClsCnsD _ | File | Dir | Method | NewCol _ -> (0, 1)
     | NewVArray c | NewVecArray c | NewKeysetArray c
     | NewPackedArray c -> (c, 1)
-    | NewStructArray l | NewStructDArray l -> (List.length l, 1)
+    | NewStructArray l | NewStructDArray l | NewStructDict l -> (List.length l, 1)
     | AddElemC | AddElemV -> (3, 1)
     | NewPair | AddNewElemC | AddNewElemV -> (2, 1)
     | ColFromArray _ -> (1, 1)

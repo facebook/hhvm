@@ -125,6 +125,7 @@ static const struct {
   { OpNewPackedArray, {StackN,        Stack1,       OutArray        }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray        }},
   { OpNewStructDArray,{StackN,        Stack1,       OutArray        }},
+  { OpNewStructDict,  {StackN,        Stack1,       OutDict         }},
   { OpNewVecArray,    {StackN,        Stack1,       OutVec          }},
   { OpNewKeysetArray, {StackN,        Stack1,       OutKeyset       }},
   { OpNewVArray,   {StackN,           Stack1,       OutArray        }},
@@ -585,6 +586,7 @@ int64_t getStackPopped(PC pc) {
 
     case Op::NewStructArray:
     case Op::NewStructDArray:
+    case Op::NewStructDict:
       return getImmVector(pc).size();
 
     default:             break;
@@ -870,6 +872,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FCallBuiltin:
   case Op::NewStructArray:
   case Op::NewStructDArray:
+  case Op::NewStructDict:
   case Op::Switch:
   case Op::SSwitch:
   case Op::Lt:

@@ -672,7 +672,8 @@ let check_instruct_lit_const asn i i' =
   | NYI _, _ | Null, _ | True, _ | False, _ | NullUninit, _ | Int _, _
   | String _, _ | TypedValue _, _ | NewArray _, _
   | NewMixedArray _, _ | NewDictArray _, _ | NewPackedArray _, _
-  | NewStructArray _, _ | NewVecArray _, _ | NewKeysetArray _, _
+  | NewStructArray _, _ | NewStructDict _, _
+  | NewVecArray _, _ | NewKeysetArray _, _
   | NewVArray _, _ | NewDArray _, _ | NewStructDArray _, _ | NewPair, _
   | AddElemC, _ | AddElemV, _ | AddNewElemC, _ | AddNewElemV, _ | NewCol _, _
   | ColFromArray _, _ | Cns _, _ | CnsE _, _ | CnsU _, _

@@ -201,6 +201,7 @@ type instruct_lit_const =
   | NewPackedArray of int
   | NewStructArray of Litstr.id list
   | NewStructDArray of Litstr.id list
+  | NewStructDict of Litstr.id list
   | NewVArray of int
   | NewVecArray of int
   | NewKeysetArray of int

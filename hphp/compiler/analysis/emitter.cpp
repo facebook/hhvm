@@ -4515,7 +4515,9 @@ bool isPackedInit(ExpressionPtr init_expr, bool hack_arr_compat = true) {
  * isStructInit() is like isPackedInit(), but returns true if the keys are
  * all static strings with no duplicates.
  */
-bool isStructInit(ExpressionPtr init_expr, std::vector<std::string>& keys) {
+bool isStructInit(ExpressionPtr init_expr,
+                  std::vector<std::string>& keys,
+                  bool allowNumericKeys) {
   return checkKeys(
     init_expr,
     ArrayData::MaxElemsOnStack,
@@ -4523,10 +4525,13 @@ bool isStructInit(ExpressionPtr init_expr, std::vector<std::string>& keys) {
       auto key = ap->getName();
       if (key == nullptr || !key->isLiteralString()) return false;
       auto name = key->getLiteralString();
-      int64_t ival;
-      double dval;
-      auto kind = is_numeric_string(name.data(), name.size(), &ival, &dval, 0);
-      if (kind != KindOfNull) return false; // don't allow numeric keys
+      if (!allowNumericKeys) {
+        int64_t ival;
+        double dval;
+        auto const kind =
+          is_numeric_string(name.data(), name.size(), &ival, &dval, 0);
+        if (kind != KindOfNull) return false;
+      }
       if (std::find(keys.begin(), keys.end(), name) != keys.end()) return false;
       keys.push_back(name);
       return true;
@@ -11751,24 +11756,26 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  if (type == ArrayType::Dict) {
-    e.NewDictArray(capacityHint);
-    visit(el);
-    return;
-  }
-
-  if (type == ArrayType::DArray) {
+  if (type == ArrayType::Dict || type == ArrayType::DArray) {
     std::vector<std::string> keys;
-    if (isStructInit(el, keys)) {
+    if (isStructInit(el, keys, type == ArrayType::Dict)) {
       for (int i = 0, n = keys.size(); i < n; i++) {
         auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
         visit(ap->getValue());
         emitConvertToCell(e);
       }
-      e.NewStructDArray(keys);
+      if (type == ArrayType::Dict) {
+        e.NewStructDict(keys);
+      } else {
+        e.NewStructDArray(keys);
+      }
       return;
     }
-    e.NewDArray(capacityHint);
+    if (type == ArrayType::Dict) {
+      e.NewDictArray(capacityHint);
+    } else {
+      e.NewDArray(capacityHint);
+    }
     visit(el);
     return;
   }
@@ -11777,7 +11784,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
   assertx(type == ArrayType::Array);
 
   std::vector<std::string> keys;
-  if (isStructInit(el, keys)) {
+  if (isStructInit(el, keys, false)) {
     for (int i = 0, n = keys.size(); i < n; i++) {
       auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
       visit(ap->getValue());

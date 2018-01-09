@@ -2509,8 +2509,6 @@ module GenerateFFTokenKind = struct
   let to_kind_declaration x =
     sprintf "  | %s\n" x.token_kind
 
-  let escape_token_text t = if t = "\\" then "\\\\\\" else t
-
   let to_from_string x =
     let token_text = escape_token_text x.token_text in
     let spacer_width = given_text_width - String.length token_text in

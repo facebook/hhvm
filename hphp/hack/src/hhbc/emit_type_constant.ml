@@ -41,6 +41,7 @@ let get_kind_num ~tparams p =
   | "hh\\dict" -> 19
   | "hh\\vec" -> 20
   | "hh\\keyset" -> 21
+  | "hh\\vec_or_dict" -> 22
   | "typeaccess" -> 102
   | "xhp" -> 103
   | "unresolved"
@@ -57,7 +58,8 @@ and is_prim = function
 and is_resolved_classname = function
   | "HH\\darray" | "HH\\varray" | "HH\\varray_or_darray"
   | "array" | "HH\\vec"
-  | "HH\\dict" | "HH\\keyset" -> true
+  | "HH\\dict" | "HH\\keyset"
+  | "HH\\vec_or_dict" -> true
   | _ -> false
 
 let shape_field_name = function

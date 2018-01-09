@@ -80,7 +80,8 @@ const std::string
   s_shape("HH\\shape"),
   s_dict("HH\\dict"),
   s_vec("HH\\vec"),
-  s_keyset("HH\\keyset")
+  s_keyset("HH\\keyset"),
+  s_vec_or_dict("HH\\vec_or_dict")
 ;
 
 std::string fullName(const Array& arr);
@@ -276,6 +277,12 @@ std::string fullName(const Array& arr) {
       break;
     case TypeStructure::Kind::T_keyset:
       name += s_keyset;
+      if (arr.exists(s_generic_types)) {
+        genericTypeName(arr, name);
+      }
+      break;
+    case TypeStructure::Kind::T_vec_or_dict:
+      name += s_vec_or_dict;
       if (arr.exists(s_generic_types)) {
         genericTypeName(arr, name);
       }
@@ -545,7 +552,8 @@ Array resolveTS(const Array& arr,
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec:
-    case TypeStructure::Kind::T_keyset: {
+    case TypeStructure::Kind::T_keyset:
+    case TypeStructure::Kind::T_vec_or_dict: {
       if (arr.exists(s_generic_types)) {
         newarr.add(s_generic_types,
                    Variant(resolveGenerics(arr, typeCns, typeCnsCls,

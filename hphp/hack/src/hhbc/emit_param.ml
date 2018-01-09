@@ -48,6 +48,7 @@ let get_hint_display_name hint =
     |  "HH\\varray"              ->   "HH\\varray"
     |  "HH\\darray"              ->   "HH\\darray"
     |  "HH\\varray_or_darray"    ->   "HH\\varray_or_darray"
+    |  "HH\\vec_or_dict"         ->   "HH\\vec_or_dict"
     |  "HH\\int"                 ->   "int"
     |  "HH\\num"                 ->   "num"
     |  "HH\\arraykey"            ->   "arraykey"

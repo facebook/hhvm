@@ -1488,6 +1488,7 @@ void Parser::checkClassDeclName(const std::string& name) {
       case AnnotType::VArray:
       case AnnotType::DArray:
       case AnnotType::VArrOrDArr:
+      case AnnotType::VecOrDict:
       case AnnotType::Self:
       case AnnotType::This:
       case AnnotType::Parent:
@@ -2665,6 +2666,7 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     HH_ONLY_TYPE(noreturn),
     HH_ONLY_TYPE(this),
     HH_ONLY_TYPE(varray_or_darray),
+    HH_ONLY_TYPE(vec_or_dict),
     HH_ALIAS(classname, string),
     HH_ALIAS(typename, string),
 

@@ -2644,10 +2644,13 @@ Type from_hni_constraint(SString s) {
   if (!strcasecmp(p, "HH\\keyset"))   return union_of(ret, TKeyset);
   if (!strcasecmp(p, "HH\\varray"))   return union_of(ret, TArr);
   if (!strcasecmp(p, "HH\\darray"))   return union_of(ret, TArr);
-  if (!strcasecmp(p, "HH\\varray_or_darray"))   return union_of(ret, TArr);
+  if (!strcasecmp(p, "HH\\varray_or_darray")) return union_of(ret, TArr);
   if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
   if (!strcasecmp(p, "HH\\arraykey")) return union_of(ret, TArrKey);
   if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
+  if (!strcasecmp(p, "HH\\vec_or_dict")) {
+    return union_of(ret, union_of(TVec, TDict));
+  }
 
   // It might be an object, or we might want to support type aliases in HNI at
   // some point.  For now just be conservative.

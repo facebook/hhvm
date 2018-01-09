@@ -208,6 +208,7 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
                                       strcasecmp(hint, "HH\\varray") &&
                                       strcasecmp(hint, "HH\\darray") &&
                                       strcasecmp(hint, "HH\\varray_or_darray") &&
+                                      strcasecmp(hint, "HH\\vec_or_dict") &&
                                       strcasecmp(hint, "array"));
 
   // Normally a named type like 'int' is compatible with Int but not integer
@@ -252,12 +253,16 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
 
       case KindOfPersistentVec:
       case KindOfVec:
-        compat = (acceptAny || !strcasecmp(hint, "HH\\vec"));
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\vec") ||
+                  !strcasecmp(hint, "HH\\vec_or_dict"));
         return;
 
       case KindOfPersistentDict:
       case KindOfDict:
-        compat = (acceptAny || !strcasecmp(hint, "HH\\dict"));
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\dict") ||
+                  !strcasecmp(hint, "HH\\vec_or_dict"));
         return;
 
       case KindOfPersistentKeyset:

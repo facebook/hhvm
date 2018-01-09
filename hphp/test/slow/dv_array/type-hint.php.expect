@@ -14,6 +14,10 @@ PASSES
 string(100) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, null given"
 ================ takes_nullable_varray_or_darray ============================
 PASSES
+================ takes_vec_or_dict ============================
+string(90) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, null given"
+================ takes_nullable_vec_or_dict ============================
+PASSES
 ================ takes_varray2 ============================
 string(81) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, null given"
 ================ takes_darray2 ============================
@@ -34,6 +38,10 @@ PASSES
 string(103) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, null given"
 ================ returns_nullable_varray_or_darray ============================
 PASSES
+================ returns_vec_or_dict ============================
+string(93) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, null given"
+================ returns_nullable_vec_or_dict ============================
+PASSES
 ================ takes_array ============================
 string(75) "Argument 1 passed to takes_array() must be an instance of array, bool given"
 ================ takes_nullable_array ============================
@@ -50,6 +58,10 @@ string(76) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, bo
 string(100) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, bool given"
 ================ takes_nullable_varray_or_darray ============================
 string(96) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, bool given"
+================ takes_vec_or_dict ============================
+string(90) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, bool given"
+================ takes_nullable_vec_or_dict ============================
+string(86) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, bool given"
 ================ takes_varray2 ============================
 string(81) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, bool given"
 ================ takes_darray2 ============================
@@ -70,6 +82,10 @@ string(93) "Value returned from function returns_nullable_darray() must be of ty
 string(103) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, bool given"
 ================ returns_nullable_varray_or_darray ============================
 string(113) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, bool given"
+================ returns_vec_or_dict ============================
+string(93) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, bool given"
+================ returns_nullable_vec_or_dict ============================
+string(103) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, bool given"
 ================ takes_array ============================
 string(75) "Argument 1 passed to takes_array() must be an instance of array, bool given"
 ================ takes_nullable_array ============================
@@ -86,6 +102,10 @@ string(76) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, bo
 string(100) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, bool given"
 ================ takes_nullable_varray_or_darray ============================
 string(96) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, bool given"
+================ takes_vec_or_dict ============================
+string(90) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, bool given"
+================ takes_nullable_vec_or_dict ============================
+string(86) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, bool given"
 ================ takes_varray2 ============================
 string(81) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, bool given"
 ================ takes_darray2 ============================
@@ -106,6 +126,10 @@ string(93) "Value returned from function returns_nullable_darray() must be of ty
 string(103) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, bool given"
 ================ returns_nullable_varray_or_darray ============================
 string(113) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, bool given"
+================ returns_vec_or_dict ============================
+string(93) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, bool given"
+================ returns_nullable_vec_or_dict ============================
+string(103) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, bool given"
 ================ takes_array ============================
 string(77) "Argument 1 passed to takes_array() must be an instance of array, string given"
 ================ takes_nullable_array ============================
@@ -122,6 +146,10 @@ string(78) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, st
 string(102) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, string given"
 ================ takes_nullable_varray_or_darray ============================
 string(98) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, string given"
+================ takes_vec_or_dict ============================
+string(92) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, string given"
+================ takes_nullable_vec_or_dict ============================
+string(88) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, string given"
 ================ takes_varray2 ============================
 string(83) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, string given"
 ================ takes_darray2 ============================
@@ -142,6 +170,10 @@ string(95) "Value returned from function returns_nullable_darray() must be of ty
 string(105) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, string given"
 ================ returns_nullable_varray_or_darray ============================
 string(115) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, string given"
+================ returns_vec_or_dict ============================
+string(95) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, string given"
+================ returns_nullable_vec_or_dict ============================
+string(105) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, string given"
 ================ takes_array ============================
 string(74) "Argument 1 passed to takes_array() must be an instance of array, int given"
 ================ takes_nullable_array ============================
@@ -158,6 +190,10 @@ string(75) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, in
 string(99) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, int given"
 ================ takes_nullable_varray_or_darray ============================
 string(95) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, int given"
+================ takes_vec_or_dict ============================
+string(89) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, int given"
+================ takes_nullable_vec_or_dict ============================
+string(85) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, int given"
 ================ takes_varray2 ============================
 string(80) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, int given"
 ================ takes_darray2 ============================
@@ -178,6 +214,10 @@ string(92) "Value returned from function returns_nullable_darray() must be of ty
 string(102) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, int given"
 ================ returns_nullable_varray_or_darray ============================
 string(112) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, int given"
+================ returns_vec_or_dict ============================
+string(92) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, int given"
+================ returns_nullable_vec_or_dict ============================
+string(102) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, int given"
 ================ takes_array ============================
 string(76) "Argument 1 passed to takes_array() must be an instance of array, float given"
 ================ takes_nullable_array ============================
@@ -194,6 +234,10 @@ string(77) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, fl
 string(101) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, float given"
 ================ takes_nullable_varray_or_darray ============================
 string(97) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, float given"
+================ takes_vec_or_dict ============================
+string(91) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, float given"
+================ takes_nullable_vec_or_dict ============================
+string(87) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, float given"
 ================ takes_varray2 ============================
 string(82) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, float given"
 ================ takes_darray2 ============================
@@ -214,6 +258,10 @@ string(94) "Value returned from function returns_nullable_darray() must be of ty
 string(104) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, float given"
 ================ returns_nullable_varray_or_darray ============================
 string(114) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, float given"
+================ returns_vec_or_dict ============================
+string(94) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, float given"
+================ returns_nullable_vec_or_dict ============================
+string(104) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, float given"
 ================ takes_array ============================
 string(77) "Argument 1 passed to takes_array() must be an instance of array, HH\vec given"
 ================ takes_nullable_array ============================
@@ -230,6 +278,10 @@ string(78) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH
 string(102) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\vec given"
 ================ takes_nullable_varray_or_darray ============================
 string(98) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\vec given"
+================ takes_vec_or_dict ============================
+PASSES
+================ takes_nullable_vec_or_dict ============================
+PASSES
 ================ takes_varray2 ============================
 string(83) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\vec given"
 ================ takes_darray2 ============================
@@ -250,6 +302,10 @@ string(95) "Value returned from function returns_nullable_darray() must be of ty
 string(105) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\vec given"
 ================ returns_nullable_varray_or_darray ============================
 string(115) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\vec given"
+================ returns_vec_or_dict ============================
+PASSES
+================ returns_nullable_vec_or_dict ============================
+PASSES
 ================ takes_array ============================
 string(77) "Argument 1 passed to takes_array() must be an instance of array, HH\vec given"
 ================ takes_nullable_array ============================
@@ -266,6 +322,10 @@ string(78) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH
 string(102) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\vec given"
 ================ takes_nullable_varray_or_darray ============================
 string(98) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\vec given"
+================ takes_vec_or_dict ============================
+PASSES
+================ takes_nullable_vec_or_dict ============================
+PASSES
 ================ takes_varray2 ============================
 string(83) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\vec given"
 ================ takes_darray2 ============================
@@ -286,6 +346,10 @@ string(95) "Value returned from function returns_nullable_darray() must be of ty
 string(105) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\vec given"
 ================ returns_nullable_varray_or_darray ============================
 string(115) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\vec given"
+================ returns_vec_or_dict ============================
+PASSES
+================ returns_nullable_vec_or_dict ============================
+PASSES
 ================ takes_array ============================
 string(78) "Argument 1 passed to takes_array() must be an instance of array, HH\dict given"
 ================ takes_nullable_array ============================
@@ -302,6 +366,10 @@ string(79) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH
 string(103) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\dict given"
 ================ takes_nullable_varray_or_darray ============================
 string(99) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\dict given"
+================ takes_vec_or_dict ============================
+PASSES
+================ takes_nullable_vec_or_dict ============================
+PASSES
 ================ takes_varray2 ============================
 string(84) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\dict given"
 ================ takes_darray2 ============================
@@ -322,6 +390,10 @@ string(96) "Value returned from function returns_nullable_darray() must be of ty
 string(106) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\dict given"
 ================ returns_nullable_varray_or_darray ============================
 string(116) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\dict given"
+================ returns_vec_or_dict ============================
+PASSES
+================ returns_nullable_vec_or_dict ============================
+PASSES
 ================ takes_array ============================
 string(78) "Argument 1 passed to takes_array() must be an instance of array, HH\dict given"
 ================ takes_nullable_array ============================
@@ -338,6 +410,10 @@ string(79) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH
 string(103) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\dict given"
 ================ takes_nullable_varray_or_darray ============================
 string(99) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\dict given"
+================ takes_vec_or_dict ============================
+PASSES
+================ takes_nullable_vec_or_dict ============================
+PASSES
 ================ takes_varray2 ============================
 string(84) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\dict given"
 ================ takes_darray2 ============================
@@ -358,6 +434,10 @@ string(96) "Value returned from function returns_nullable_darray() must be of ty
 string(106) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\dict given"
 ================ returns_nullable_varray_or_darray ============================
 string(116) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\dict given"
+================ returns_vec_or_dict ============================
+PASSES
+================ returns_nullable_vec_or_dict ============================
+PASSES
 ================ takes_array ============================
 string(80) "Argument 1 passed to takes_array() must be an instance of array, HH\keyset given"
 ================ takes_nullable_array ============================
@@ -374,6 +454,10 @@ string(81) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH
 string(105) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\keyset given"
 ================ takes_nullable_varray_or_darray ============================
 string(101) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\keyset given"
+================ takes_vec_or_dict ============================
+string(95) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, HH\keyset given"
+================ takes_nullable_vec_or_dict ============================
+string(91) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, HH\keyset given"
 ================ takes_varray2 ============================
 string(86) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\keyset given"
 ================ takes_darray2 ============================
@@ -394,6 +478,10 @@ string(98) "Value returned from function returns_nullable_darray() must be of ty
 string(108) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\keyset given"
 ================ returns_nullable_varray_or_darray ============================
 string(118) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\keyset given"
+================ returns_vec_or_dict ============================
+string(98) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, HH\keyset given"
+================ returns_nullable_vec_or_dict ============================
+string(108) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, HH\keyset given"
 ================ takes_array ============================
 string(80) "Argument 1 passed to takes_array() must be an instance of array, HH\keyset given"
 ================ takes_nullable_array ============================
@@ -410,6 +498,10 @@ string(81) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH
 string(105) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\keyset given"
 ================ takes_nullable_varray_or_darray ============================
 string(101) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\keyset given"
+================ takes_vec_or_dict ============================
+string(95) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, HH\keyset given"
+================ takes_nullable_vec_or_dict ============================
+string(91) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, HH\keyset given"
 ================ takes_varray2 ============================
 string(86) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\keyset given"
 ================ takes_darray2 ============================
@@ -430,6 +522,10 @@ string(98) "Value returned from function returns_nullable_darray() must be of ty
 string(108) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\keyset given"
 ================ returns_nullable_varray_or_darray ============================
 string(118) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\keyset given"
+================ returns_vec_or_dict ============================
+string(98) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, HH\keyset given"
+================ returns_nullable_vec_or_dict ============================
+string(108) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, HH\keyset given"
 ================ takes_array ============================
 string(74) "Argument 1 passed to takes_array() must be an instance of array, xml given"
 ================ takes_nullable_array ============================
@@ -446,6 +542,10 @@ string(75) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, xm
 string(99) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, xml given"
 ================ takes_nullable_varray_or_darray ============================
 string(95) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, xml given"
+================ takes_vec_or_dict ============================
+string(89) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, xml given"
+================ takes_nullable_vec_or_dict ============================
+string(85) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, xml given"
 ================ takes_varray2 ============================
 string(80) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, xml given"
 ================ takes_darray2 ============================
@@ -466,6 +566,10 @@ string(92) "Value returned from function returns_nullable_darray() must be of ty
 string(102) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, xml given"
 ================ returns_nullable_varray_or_darray ============================
 string(112) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, xml given"
+================ returns_vec_or_dict ============================
+string(92) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, xml given"
+================ returns_nullable_vec_or_dict ============================
+string(102) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, xml given"
 ================ takes_array ============================
 string(79) "Argument 1 passed to takes_array() must be an instance of array, stdClass given"
 ================ takes_nullable_array ============================
@@ -482,6 +586,10 @@ string(80) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, st
 string(104) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, stdClass given"
 ================ takes_nullable_varray_or_darray ============================
 string(100) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, stdClass given"
+================ takes_vec_or_dict ============================
+string(94) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, stdClass given"
+================ takes_nullable_vec_or_dict ============================
+string(90) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, stdClass given"
 ================ takes_varray2 ============================
 string(85) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, stdClass given"
 ================ takes_darray2 ============================
@@ -502,6 +610,10 @@ string(97) "Value returned from function returns_nullable_darray() must be of ty
 string(107) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, stdClass given"
 ================ returns_nullable_varray_or_darray ============================
 string(117) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, stdClass given"
+================ returns_vec_or_dict ============================
+string(97) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, stdClass given"
+================ returns_nullable_vec_or_dict ============================
+string(107) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, stdClass given"
 ================ takes_array ============================
 PASSES
 ================ takes_nullable_array ============================
@@ -518,6 +630,10 @@ PASSES
 PASSES
 ================ takes_nullable_varray_or_darray ============================
 PASSES
+================ takes_vec_or_dict ============================
+string(91) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, array given"
+================ takes_nullable_vec_or_dict ============================
+string(87) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_varray2 ============================
 PASSES
 ================ takes_darray2 ============================
@@ -538,6 +654,10 @@ PASSES
 PASSES
 ================ returns_nullable_varray_or_darray ============================
 PASSES
+================ returns_vec_or_dict ============================
+string(94) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, array given"
+================ returns_nullable_vec_or_dict ============================
+string(104) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_array ============================
 PASSES
 ================ takes_nullable_array ============================
@@ -554,6 +674,10 @@ PASSES
 PASSES
 ================ takes_nullable_varray_or_darray ============================
 PASSES
+================ takes_vec_or_dict ============================
+string(91) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, array given"
+================ takes_nullable_vec_or_dict ============================
+string(87) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_varray2 ============================
 PASSES
 ================ takes_darray2 ============================
@@ -574,6 +698,10 @@ PASSES
 PASSES
 ================ returns_nullable_varray_or_darray ============================
 PASSES
+================ returns_vec_or_dict ============================
+string(94) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, array given"
+================ returns_nullable_vec_or_dict ============================
+string(104) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_array ============================
 PASSES
 ================ takes_nullable_array ============================
@@ -590,6 +718,10 @@ PASSES
 PASSES
 ================ takes_nullable_varray_or_darray ============================
 PASSES
+================ takes_vec_or_dict ============================
+string(91) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, array given"
+================ takes_nullable_vec_or_dict ============================
+string(87) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_varray2 ============================
 PASSES
 ================ takes_darray2 ============================
@@ -610,6 +742,10 @@ PASSES
 PASSES
 ================ returns_nullable_varray_or_darray ============================
 PASSES
+================ returns_vec_or_dict ============================
+string(94) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, array given"
+================ returns_nullable_vec_or_dict ============================
+string(104) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_array ============================
 PASSES
 ================ takes_nullable_array ============================
@@ -626,6 +762,10 @@ PASSES
 PASSES
 ================ takes_nullable_varray_or_darray ============================
 PASSES
+================ takes_vec_or_dict ============================
+string(91) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, array given"
+================ takes_nullable_vec_or_dict ============================
+string(87) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_varray2 ============================
 PASSES
 ================ takes_darray2 ============================
@@ -646,6 +786,10 @@ PASSES
 PASSES
 ================ returns_nullable_varray_or_darray ============================
 PASSES
+================ returns_vec_or_dict ============================
+string(94) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, array given"
+================ returns_nullable_vec_or_dict ============================
+string(104) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_array ============================
 PASSES
 ================ takes_nullable_array ============================
@@ -662,6 +806,10 @@ PASSES
 PASSES
 ================ takes_nullable_varray_or_darray ============================
 PASSES
+================ takes_vec_or_dict ============================
+string(91) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, array given"
+================ takes_nullable_vec_or_dict ============================
+string(87) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_varray2 ============================
 PASSES
 ================ takes_darray2 ============================
@@ -682,6 +830,10 @@ PASSES
 PASSES
 ================ returns_nullable_varray_or_darray ============================
 PASSES
+================ returns_vec_or_dict ============================
+string(94) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, array given"
+================ returns_nullable_vec_or_dict ============================
+string(104) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_array ============================
 PASSES
 ================ takes_nullable_array ============================
@@ -698,6 +850,10 @@ PASSES
 PASSES
 ================ takes_nullable_varray_or_darray ============================
 PASSES
+================ takes_vec_or_dict ============================
+string(91) "Argument 1 passed to takes_vec_or_dict() must be an instance of HH\vec_or_dict, array given"
+================ takes_nullable_vec_or_dict ============================
+string(87) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_varray2 ============================
 PASSES
 ================ takes_darray2 ============================
@@ -718,6 +874,10 @@ PASSES
 PASSES
 ================ returns_nullable_varray_or_darray ============================
 PASSES
+================ returns_vec_or_dict ============================
+string(94) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, array given"
+================ returns_nullable_vec_or_dict ============================
+string(104) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
 ================ takes_bool ============================
 string(74) "Argument 1 passed to takes_bool() must be an instance of bool, array given"
 ================ takes_int ============================

@@ -20,6 +20,8 @@ function takes_darray(darray $a) {}
 function takes_nullable_darray(?darray $a) {}
 function takes_varray_or_darray(varray_or_darray $a) {}
 function takes_nullable_varray_or_darray(?varray_or_darray $a) {}
+function takes_vec_or_dict(vec_or_dict $a) {}
+function takes_nullable_vec_or_dict(?vec_or_dict $a) {}
 
 function takes_varray2(varray<int> $a) {}
 function takes_darray2(darray<int, string> $a) {}
@@ -32,6 +34,8 @@ function returns_darray($a): darray { return $a; }
 function returns_nullable_darray($a): ?darray { return $a; }
 function returns_varray_or_darray($a): varray_or_darray { return $a; }
 function returns_nullable_varray_or_darray($a): ?varray_or_darray { return $a; }
+function returns_vec_or_dict($a): vec_or_dict { return $a; }
+function returns_nullable_vec_or_dict($a): ?vec_or_dict { return $a; }
 
 class Foo {};
 function takes_bool(bool $v) {}
@@ -101,6 +105,8 @@ function test1() {
       'takes_nullable_darray',
       'takes_varray_or_darray',
       'takes_nullable_varray_or_darray',
+      'takes_vec_or_dict',
+      'takes_nullable_vec_or_dict',
 
       'takes_varray2',
       'takes_darray2',
@@ -112,7 +118,9 @@ function test1() {
       'returns_darray',
       'returns_nullable_darray',
       'returns_varray_or_darray',
-      'returns_nullable_varray_or_darray'
+      'returns_nullable_varray_or_darray',
+      'returns_vec_or_dict',
+      'returns_nullable_vec_or_dict'
     ]
   );
 

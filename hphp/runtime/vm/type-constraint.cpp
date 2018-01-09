@@ -137,6 +137,7 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/,
       case AnnotType::VArray:   str = "varray"; break;
       case AnnotType::DArray:   str = "darray"; break;
       case AnnotType::VArrOrDArr: str = "varray_or_darray"; break;
+      case AnnotType::VecOrDict: str = "vec_or_dict"; break;
       case AnnotType::Self:
       case AnnotType::This:
       case AnnotType::Parent:
@@ -374,6 +375,7 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
     case AnnotMetaType::VArray:
     case AnnotMetaType::DArray:
     case AnnotMetaType::VArrOrDArr:
+    case AnnotMetaType::VecOrDict:
       // Self and Parent should never happen, because type
       // aliases are not allowed to use those MetaTypes
       return false;
@@ -439,6 +441,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
         case MetaType::VArray:
         case MetaType::DArray:
         case MetaType::VArrOrDArr:
+        case MetaType::VecOrDict:
           return false;
         case MetaType::Mixed:
           // We assert'd at the top of this function that the
@@ -836,6 +839,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::VArray:
     case AnnotMetaType::DArray:
     case AnnotMetaType::VArrOrDArr:
+    case AnnotMetaType::VecOrDict:
       return MK::None;
   }
   not_reached();

@@ -3395,6 +3395,10 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
       return TDArr;
     case AnnotMetaType::VArrOrDArr:
       return TArr;
+    case AnnotMetaType::VecOrDict:
+      if (candidate.subtypeOf(TVec)) return TVec;
+      if (candidate.subtypeOf(TDict)) return TDict;
+      break;
     }
     return folly::none;
   }();

@@ -57,6 +57,7 @@ enum class Kind : uint8_t {
   T_dict = 19,
   T_vec = 20,
   T_keyset = 21,
+  T_vec_or_dict = 22,
 
   /* The following kinds needs class/alias resolution, and
    * are not exposed to the users. */

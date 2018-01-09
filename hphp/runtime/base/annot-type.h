@@ -45,6 +45,7 @@ enum class AnnotMetaType : uint8_t {
   VArray = 8,
   DArray = 9,
   VArrOrDArr = 10,
+  VecOrDict = 11,
 };
 
 enum class AnnotType : uint16_t {
@@ -61,16 +62,17 @@ enum class AnnotType : uint16_t {
   Vec      = (uint8_t)KindOfVec      | (uint16_t)AnnotMetaType::Precise << 8,
   Keyset   = (uint8_t)KindOfKeyset   | (uint16_t)AnnotMetaType::Precise << 8,
   // Precise is intentionally excluded
-  Mixed    = (uint16_t)AnnotMetaType::Mixed << 8    | (uint8_t)KindOfUninit,
-  Self     = (uint16_t)AnnotMetaType::Self << 8     | (uint8_t)KindOfUninit,
-  Parent   = (uint16_t)AnnotMetaType::Parent << 8   | (uint8_t)KindOfUninit,
-  Callable = (uint16_t)AnnotMetaType::Callable << 8 | (uint8_t)KindOfUninit,
-  Number   = (uint16_t)AnnotMetaType::Number << 8   | (uint8_t)KindOfUninit,
-  ArrayKey = (uint16_t)AnnotMetaType::ArrayKey << 8 | (uint8_t)KindOfUninit,
-  This     = (uint16_t)AnnotMetaType::This << 8     | (uint8_t)KindOfUninit,
-  VArray   = (uint16_t)AnnotMetaType::VArray << 8   | (uint8_t)KindOfUninit,
-  DArray   = (uint16_t)AnnotMetaType::DArray << 8   | (uint8_t)KindOfUninit,
+  Mixed    = (uint16_t)AnnotMetaType::Mixed << 8        | (uint8_t)KindOfUninit,
+  Self     = (uint16_t)AnnotMetaType::Self << 8         | (uint8_t)KindOfUninit,
+  Parent   = (uint16_t)AnnotMetaType::Parent << 8       | (uint8_t)KindOfUninit,
+  Callable = (uint16_t)AnnotMetaType::Callable << 8     | (uint8_t)KindOfUninit,
+  Number   = (uint16_t)AnnotMetaType::Number << 8       | (uint8_t)KindOfUninit,
+  ArrayKey = (uint16_t)AnnotMetaType::ArrayKey << 8     | (uint8_t)KindOfUninit,
+  This     = (uint16_t)AnnotMetaType::This << 8         | (uint8_t)KindOfUninit,
+  VArray   = (uint16_t)AnnotMetaType::VArray << 8       | (uint8_t)KindOfUninit,
+  DArray   = (uint16_t)AnnotMetaType::DArray << 8       | (uint8_t)KindOfUninit,
   VArrOrDArr = (uint16_t)AnnotMetaType::VArrOrDArr << 8 | (uint8_t)KindOfUninit,
+  VecOrDict  = (uint16_t)AnnotMetaType::VecOrDict << 8  | (uint8_t)KindOfUninit,
 };
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
@@ -199,6 +201,9 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
         ? AnnotAction::Fail
         : AnnotAction::Pass;
+    case AnnotMetaType::VecOrDict:
+      return (isVecType(dt) || isDictType(dt))
+        ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::Precise:
       if (UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices) &&
           at == AnnotType::Array && isArrayType(dt)) {

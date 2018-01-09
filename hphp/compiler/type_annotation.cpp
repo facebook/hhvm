@@ -95,6 +95,7 @@ MaybeDataType TypeAnnotation::dataType() const {
     if (!strcasecmp(m_name.c_str(), "HH\\varray")) return KindOfArray;
     if (!strcasecmp(m_name.c_str(), "HH\\darray")) return KindOfArray;
     if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) return KindOfArray;
+    if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) return folly::none;
     return KindOfObject;
   }
   if (m_nullable || m_soft) {
@@ -117,6 +118,7 @@ MaybeDataType TypeAnnotation::dataType() const {
   if (!strcasecmp(m_name.c_str(), "HH\\varray"))   return KindOfArray;
   if (!strcasecmp(m_name.c_str(), "HH\\darray"))   return KindOfArray;
   if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) return KindOfArray;
+  if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) return folly::none;
   if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;
   if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return folly::none;
 
@@ -314,6 +316,9 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
   }
   if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) {
     return TypeStructure::Kind::T_array;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) {
+    return TypeStructure::Kind::T_vec_or_dict;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\dict")) {
     return TypeStructure::Kind::T_dict;

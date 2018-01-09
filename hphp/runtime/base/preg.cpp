@@ -2014,6 +2014,7 @@ String preg_quote(const String& str,
     case '[': case '^':  case ']': case '$': case '(':
     case ')': case '{':  case '}': case '=': case '!':
     case '>': case '<':  case '|': case ':': case '-':
+    case '#':
       *q++ = '\\';
       *q++ = c;
       break;

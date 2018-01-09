@@ -3339,6 +3339,11 @@ and is_abstract_ft fty = match fty with
         let env, fty = Phase.localize_ft ~use_pos:p ~ety_env env fty in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
         let env, tel, _tuel, ty = call ~expected p env tfun el [] in
+        let env, ty = match ty with
+          | r, Toption ty ->
+            let env, ty = TUtils.non_null env ty in
+            env, (r, Toption ty)
+          | _ -> env, ty in
         make_call_special env id tel ty
       | None -> unbound_name env id)
 

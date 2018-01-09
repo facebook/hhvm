@@ -74,6 +74,7 @@ struct HashTableCommon {
   static constexpr uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
   static constexpr uint32_t MaxMakeSize = 4 * SmallSize;
   static constexpr uint32_t MaxStructMakeSize = 64;
+  static constexpr uint32_t MaxScale = MaxHashSize / LoadScale;
 
   constexpr static uint32_t HashSize(uint32_t scale) { return 4 * scale; }
   constexpr static uint32_t Capacity(uint32_t scale) { return 3 * scale; }

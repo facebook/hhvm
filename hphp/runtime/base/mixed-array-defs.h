@@ -399,7 +399,9 @@ private:
 
 ALWAYS_INLINE
 uint32_t computeScaleFromSize(uint32_t n) {
-  assert(n <= 0x7fffffffU);
+  if (n >= MixedArray::MaxSize) {
+    return MixedArray::MaxScale;
+  }
   auto scale = MixedArray::SmallScale;
   while (MixedArray::Capacity(scale) < n) scale *= 2;
   return scale;

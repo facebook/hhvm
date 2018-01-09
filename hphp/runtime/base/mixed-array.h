@@ -479,6 +479,7 @@ public:
   static constexpr uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
   static constexpr uint32_t MaxMakeSize = 4 * SmallSize;
   static constexpr uint32_t MaxStructMakeSize = 64;
+  static constexpr uint32_t MaxScale = MaxHashSize / LoadScale;
 
   uint32_t iterLimit() const { return m_used; }
 

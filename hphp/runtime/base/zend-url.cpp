@@ -58,7 +58,7 @@ bool url_parse(Url &output, const char *str, size_t length) {
       /* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
       if (!isalpha(*p) && !isdigit(*p) &&
           *p != '+' && *p != '.' && *p != '-') {
-        if (e + 1 < ue) {
+        if (e + 1 < ue && e < s + strcspn(s, "?#")) {
           goto parse_port;
         } else {
           goto just_path;
@@ -157,25 +157,20 @@ bool url_parse(Url &output, const char *str, size_t length) {
     goto nohost;
   }
 
-  e = ue;
-
-  if (!(p = (const char *)memchr(s, '/', (ue - s)))) {
-    const char *query = (const char *)memchr(s, '?', (ue - s));
-    const char *fragment = (const char *)memchr(s, '#', (ue - s));
-
-    if (query && fragment) {
-      e = (query > fragment) ? fragment : query;
-    } else if (query) {
-      e = query;
-    } else if (fragment) {
-      e = fragment;
-    }
-  } else {
-    e = p;
-  }
+  e = s + strcspn(s, "/?#");
 
   /* check for login and password */
   if ((p = (const char *)memrchr(s, '@', (e-s)))) {
+    /* check for invalid chars inside login/pass */
+    pp = s;
+    while (pp < p) {
+      if (!isalnum(*pp) && *pp != ':' && *pp != ';' && *pp != '=' &&
+          !(*pp >= '!' && *pp <= ',')) {
+        return false;
+      }
+      pp++;
+    }
+
     if ((pp = (const char *)memchr(s, ':', (p-s)))) {
       if ((pp-s) > 0) {
         replace_controlchars(output.user, s, (pp - s));
@@ -241,7 +236,7 @@ bool url_parse(Url &output, const char *str, size_t length) {
   nohost:
 
   if ((p = (const char *)memchr(s, '?', (ue - s)))) {
-    pp = strchr(s, '#');
+    pp = (const char*)memchr(s, '#', (ue - s));
 
     if (pp && pp < p) {
       if (pp - s) {

@@ -42,7 +42,7 @@
     { "token_kind" : "Await",
       "token_text" : "await" },
     { "token_kind" : "Backslash",
-      "token_text" : "\" },
+      "token_text" : "\\" },
     { "token_kind" : "Bool",
       "token_text" : "bool" },
     { "token_kind" : "Break",

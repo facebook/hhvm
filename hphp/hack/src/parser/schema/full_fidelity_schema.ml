@@ -318,6 +318,11 @@ let trivia_kinds = List.map trivia_node_from_list [
   [ "ExtraTokenError"; "extra_token_error"];
   [ "AfterHaltCompiler"; "after_halt_compiler" ]]
 
+let escape_token_text t =
+  (* add one extra backslash because
+     it is removed by Str.replace_first downstream *)
+  if t = "\\" then "\\\\\\" else t
+
 let map_and_concat_separated separator f items =
   String.concat separator (List.map f items)
 
@@ -384,7 +389,7 @@ module GenerateFFJSONSchema = struct
 "    { \"token_kind\" : \"%s\",
       \"token_text\" : \"%s\" },
 "
-    x.token_kind x.token_text
+    x.token_kind (escape_token_text x.token_text)
 
   let to_json_variable_text x =
     Printf.sprintf

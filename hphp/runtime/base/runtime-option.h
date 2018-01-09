@@ -477,6 +477,7 @@ struct RuntimeOption {
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(uint64_t, JitMatureSize,           25 << 20)                        \
+  F(bool, JitMatureAfterWarmup,        false)                           \
   F(double, JitMaturityExponent,       1.)                              \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(int, JitConcurrently,              1)                               \
@@ -611,7 +612,7 @@ struct RuntimeOption {
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitPseudomain,               true)                            \
   F(uint32_t, JitWarmupStatusBytes,    ((25 << 10) + 1))                \
-  F(uint32_t, JitWarmupMaxCodeGenRate, 100)                             \
+  F(uint32_t, JitWarmupMaxCodeGenRate, 20000)                           \
   F(uint32_t, JitWarmupRateSeconds,    64)                              \
   F(uint32_t, JitWriteLeaseExpiration, 1500) /* in microseconds */      \
   F(int, JitRetargetJumps,             1)                               \

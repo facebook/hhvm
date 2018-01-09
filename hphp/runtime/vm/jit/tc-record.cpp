@@ -167,8 +167,13 @@ void reportJitMaturity(const CodeCache& code) {
   // code that will give us full performance, so recover the "fully mature"
   // size with some math.
   auto const fullSize = RuntimeOption::EvalJitMatureSize * 5;
+  // If EvalJitMatureAfterWarmup is set, we consider the JIT to be mature once
+  // warmupStatusString() is empty, which indicates that the JIT is warmed up
+  // based on the rate in which JITed code is being produced.
+  const bool warmedUp = RuntimeOption::EvalJitMatureAfterWarmup &&
+                        warmupStatusString().empty();
   int64_t after;
-  if (codeSize >= fullSize) {
+  if (warmedUp || codeSize >= fullSize) {
     after = 100;
   } else {
     after = std::pow(codeSize / static_cast<double>(fullSize),
@@ -178,7 +183,9 @@ void reportJitMaturity(const CodeCache& code) {
     }
   }
   // Make sure jit maturity is less than 100 before the JIT stops.
-  if (after > 99 && code.main().used() < CodeCache::AMaxUsage) after = 99;
+  if (after > 99 && code.main().used() < CodeCache::AMaxUsage && !warmedUp) {
+    after = 99;
+  }
 
   auto const before = jitMaturityCounter->getValue();
   if (after > before) {

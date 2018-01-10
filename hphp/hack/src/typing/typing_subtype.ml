@@ -393,6 +393,8 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
   then Errors.coroutinness_mismatch ft_super.ft_is_coroutine p_super p_sub;
   if ft_sub.ft_return_disposable <> ft_super.ft_return_disposable
   then Errors.return_disposable_mismatch ft_super.ft_return_disposable p_super p_sub;
+  if ft_sub.ft_returns_mutable <> ft_super.ft_returns_mutable
+  then Errors.mutable_return_result_mismatch ft_super.ft_returns_mutable p_super p_sub;
   if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)
   then Errors.fun_too_many_args p_sub p_super;
   (match ft_sub.ft_arity, ft_super.ft_arity with

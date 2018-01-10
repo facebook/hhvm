@@ -42,24 +42,20 @@ let intersect_mutability
       Errors.frozen_in_incorrect_scope p;
     | _ -> ()
   end parent_mut;
-  LMap.fold
-  begin fun id (p1, mut1) acc ->
-    match LMap.get id m2 with
-    (* This means it's mutable in one scope but not the other.
-    We raise errors previously if it was frozen in one scope but not the other.
-    1. If the variable was defined in one scope but not the other, and also
-    not defined in the parent, then we can safely ignore it.
-    2. If the varibale was defined in the parent scope, and somehow disappeared
-    from scope in one scope but not the other, we raised an error already.
-    In all cases, we can just ignore it here. *)
-    | None -> acc
-    | Some (_, mut2) ->
-      match mut1, mut2 with
-      | _ when mut1 = mut2 ->
-        LMap.add id (p1, mut1) acc
-      (* It's not possible for two variables to both be mutable AND have different
-        mutabilities in the same scope: Owned, Borrowed, and Const persist
-        for the rest of the function body.
-      *)
-      | _ -> assert false
-  end parent_mut m1
+  let merge ~keep_left _id v1_opt v2_opt =
+    match v1_opt, v2_opt with
+    | Some (p1, mut1), Some (_, mut2) ->
+      let assumed_mut =
+        (* do a conservative merge for mutability values *)
+        begin match mut1, mut2 with
+        | Mutable, Borrowed | Borrowed, Mutable -> Borrowed
+        | _ -> if mut1 = mut2 then mut1 else Const
+        end in
+      Some (p1, assumed_mut)
+    | Some l, None when keep_left -> Some l
+    | _ -> None in
+  (* intersect variables in child maps, keep only entries that exists in both *)
+  let acc = LMap.merge (merge ~keep_left:false) m1 m2 in
+  (* combine result with parent env preserving items from parent *)
+  let acc = LMap.merge (merge ~keep_left:true) parent_mut acc in
+  acc

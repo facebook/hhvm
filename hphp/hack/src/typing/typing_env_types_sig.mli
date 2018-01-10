@@ -54,6 +54,8 @@
  }
 
  type env = {
+   (* position of the function/method being checked *)
+   function_pos: Pos.t  ;
    pos     : Pos.t      ;
    (* Position and reason information on entry to a subtype or unification check *)
    outer_pos : Pos.t;
@@ -73,6 +75,7 @@ and reactivity = Normal | Local | Reactive
 and return_info = {
   return_type : locl ty;
   return_disposable : bool;
+  return_mutable: bool;
   return_explicit : bool;
 }
 and genv = {

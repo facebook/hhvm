@@ -372,6 +372,10 @@ and func env f named_body =
   (* Functions can't be mutable, only methods can *)
   if Attributes.mem SN.UserAttributes.uaMutable f.f_user_attributes then
     Errors.mutable_attribute_on_function p;
+  if Attributes.mem SN.UserAttributes.uaMutableReturn f.f_user_attributes
+    && not env.is_reactive then
+    Errors.mutable_return_annotated_decls_must_be_reactive "function" p fname;
+
   List.iter f.f_tparams (tparam env);
   let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
   List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
@@ -837,10 +841,16 @@ and method_ (env, is_static) m =
   if m.m_fun_kind <> Ast.FSync
     && Attributes.mem SN.UserAttributes.uaMutable m.m_user_attributes then
     Errors.mutable_async_method p;
+
   (* Mutable methods must be reactive *)
   if Attributes.mem SN.UserAttributes.uaMutable m.m_user_attributes
-    && not (Attributes.mem SN.UserAttributes.uaReactive m.m_user_attributes) then
+    && not env.is_reactive then
     Errors.mutable_methods_must_be_reactive p name;
+
+  (*Methods annotated with MutableReturn attribute must be reactive *)
+  if Attributes.mem SN.UserAttributes.uaMutableReturn m.m_user_attributes
+    && not env.is_reactive then
+    Errors.mutable_return_annotated_decls_must_be_reactive "method" p name;
 
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
   List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);

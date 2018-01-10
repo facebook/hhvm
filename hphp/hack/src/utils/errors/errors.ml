@@ -804,6 +804,7 @@ module NastCheck                            = struct
   let mutable_async_method                  = 3052 (* DONT MODIFY!!!! *)
   let mutable_methods_must_be_reactive      = 3053(* DONT MODIFY!!!! *)
   let mutable_attribute_on_function         = 3054 (* DONT MODIFY!!!! *)
+  let mutable_return_annotated_decls_must_be_reactive = 3055 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1021,6 +1022,8 @@ module Typing                               = struct
   let freeze_in_nonreactive_context         = 4213 (* DONT MODIFY!!!! *)
   let mutable_call_on_immutable             = 4214 (* DONT MODIFY!!!! *)
   let mutable_argument_mismatch             = 4215 (* DONT MODIFY!!!! *)
+  let invalid_mutable_return_result         = 4216 (* DONT MODIFY!!!! *)
+  let mutable_return_result_mismatch        = 4217 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1694,6 +1697,12 @@ let mutable_methods_must_be_reactive pos name =
   add NastCheck.mutable_methods_must_be_reactive pos (
     "The method " ^ (strip_ns name) ^ " has a mutable parameter" ^
     " (or mutable this), so it must be marked reactive with <<__Rx>>."
+  )
+
+let mutable_return_annotated_decls_must_be_reactive kind pos name =
+  add NastCheck.mutable_return_annotated_decls_must_be_reactive pos (
+    "The " ^ kind ^ " " ^ (strip_ns name) ^ " is annotated with <<__MutableReturn>>, " ^
+    " so it must be marked reactive with <<__Rx>>."
   )
 
 let inout_params_special pos =
@@ -2535,6 +2544,14 @@ let mutable_argument_mismatch param_pos arg_pos =
     arg_pos, "But this expression is not";
   ]
 
+let invalid_mutable_return_result error_pos function_pos value_kind =
+  add_list Typing.invalid_mutable_return_result
+  [
+    error_pos, "Functions marked <<__MutableReturn>> must return mutably owned values";
+    function_pos, "This function is marked <<__MutableReturn>>";
+    error_pos, "This expression is (" ^ value_kind ^ ")"
+  ]
+
 let freeze_in_nonreactive_context pos1 =
   add Typing.freeze_in_nonreactive_context pos1
   ("freeze only makes sense in reactive functions")
@@ -2768,6 +2785,16 @@ let overriding_prop_const_mismatch parent_pos parent_const child_pos child_const
     parent_pos, if parent_const then m1 else m2;
     child_pos, if child_const then m1 else m2;
   ]
+
+let mutable_return_result_mismatch pos1_has_mutable_return pos1 pos2 =
+  let m1 = "This is marked <<__MutableReturn>>." in
+  let m2 = "This is not marked <<__MutableReturn>>." in
+  add_list
+    Typing.mutable_return_result_mismatch
+    [
+      pos1, if pos1_has_mutable_return then m1 else m2;
+      pos2, if pos1_has_mutable_return then m2 else m1;
+    ]
 
 (*****************************************************************************)
 (* Typing decl errors *)

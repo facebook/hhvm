@@ -120,6 +120,7 @@ val not_lambda_reactive : unit -> unit
 val add_fresh_generic_parameter : env -> string -> env * string
 val get_tpenv_size : env -> int
 val set_env_reactive : env -> reactivity -> env
+val set_env_function_pos: env -> Pos.t -> env
 val env_reactive  : env -> bool
 val env_local_reactive : env -> bool
 val is_mutable : env -> Local_id.t -> bool

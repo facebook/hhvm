@@ -270,6 +270,7 @@ let empty_local tpenv = {
 }
 
 let empty tcopt file ~droot = {
+  function_pos = Pos.none;
   pos     = Pos.none;
   outer_pos = Pos.none;
   outer_reason = Reason.URnone;
@@ -289,7 +290,8 @@ let empty tcopt file ~droot = {
     return  = {
       return_type = fresh_type ();
       return_explicit = false;
-      return_disposable = false };
+      return_disposable = false;
+      return_mutable = false };
     params  = Local_id.Map.empty;
     self_id = "";
     self    = Reason.none, Tany;
@@ -307,6 +309,9 @@ let empty tcopt file ~droot = {
 
 let set_env_reactive env reactive =
   { env with genv = {env.genv with fun_reactive = reactive }}
+
+let set_env_function_pos env function_pos =
+  { env with function_pos }
 
 (* Full reactivity *)
 let env_reactive env =

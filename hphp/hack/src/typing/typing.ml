@@ -160,9 +160,15 @@ let has_accept_disposable_attribute param =
   List.exists param.param_user_attributes
     (fun { ua_name; _ } -> SN.UserAttributes.uaAcceptDisposable = snd ua_name)
 
+let has_attribute attr l =
+  List.exists l (fun { ua_name; _ } -> attr = snd ua_name)
+
 let has_return_disposable_attribute attrs =
-  List.exists attrs
-    (fun { ua_name; _ } -> SN.UserAttributes.uaReturnDisposable = snd ua_name)
+  has_attribute SN.UserAttributes.uaReturnDisposable attrs
+
+let has_mutable_return_attribute attrs =
+  has_attribute SN.UserAttributes.uaMutableReturn attrs
+
 
 let is_disposable_visitor env =
   object(this)
@@ -375,9 +381,11 @@ and fun_def tcopt f =
   let nb = TNBody.func_body tcopt f in
   let dep = Typing_deps.Dep.Fun (snd f.f_name) in
   let env = Env.empty tcopt (Pos.filename pos) (Some dep) in
+  let env = Env.set_env_function_pos env pos in
   let reactive = TUtils.fun_reactivity f.f_user_attributes in
   let mut = TUtils.fun_mutable f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
+  let return_mutable = has_mutable_return_attribute f.f_user_attributes in
   let env = Env.set_env_reactive env reactive in
   let env = Env.set_fun_mutable env mut in
   NastCheck.fun_ env f nb;
@@ -399,7 +407,8 @@ and fun_def tcopt f =
           env,
           Env.{ return_type = (Reason.Rwitness pos, Tany);
                 return_explicit = false;
-                return_disposable = return_disposable }
+                return_disposable = return_disposable;
+                return_mutable; }
         | Some ret ->
           let ty = TI.instantiable_hint env ret in
           let env, ty = Phase.localize_with_self env ty in
@@ -408,7 +417,8 @@ and fun_def tcopt f =
           env,
           Env.{ return_type = ty;
                 return_explicit = true;
-                return_disposable = return_disposable }
+                return_disposable = return_disposable;
+                return_mutable; }
       in
       TI.check_params_instantiable env f.f_params;
       TI.check_tparams_instantiable env f.f_tparams;
@@ -577,6 +587,9 @@ and enforce_return_disposable _env e =
   | p, _ ->
     Errors.invalid_return_disposable p
 
+and enforce_mutable_return env e =
+  Typing_mutability.verify_valid_mutable_return_value env env.Env.function_pos e
+
 and stmt env = function
   | Fallthrough ->
       env, T.Fallthrough
@@ -640,13 +653,15 @@ and stmt env = function
   | Return (p, Some e) ->
       let env = check_inout_return env in
       let pos = fst e in
-      let Env.{ return_type; return_explicit; return_disposable } = Env.get_return env in
+      let Env.{ return_type; return_explicit; return_disposable; return_mutable; } =
+        Env.get_return env in
       let expected =
         if return_explicit
         then Some (pos, Reason.URreturn, return_type)
         else None in
       if return_disposable then enforce_return_disposable env e;
       let env, te, rty = expr ~is_using_clause:return_disposable ?expected:expected env e in
+      if return_mutable then enforce_mutable_return env te;
       let rty = make_return_type env p rty in
       (match snd (Env.expand_type env return_type) with
       | r, Tprim Tvoid ->
@@ -2290,7 +2305,8 @@ and anon_make tenv p f ft idl =
         let env = Env.set_return env
           Env.{ return_type = hret;
                 return_disposable = false;
-                return_explicit = Option.is_some ret_ty } in
+                return_mutable = false;
+                return_explicit = Option.is_some ret_ty; } in
         let env = Env.set_fn_kind env f.f_fun_kind in
         let env, tb = block env nb.fnb_nast in
         let env =
@@ -5787,9 +5803,11 @@ and method_def env m =
   let env =
     Env.env_with_locals env Typing_continuations.Map.empty Local_id.Map.empty
   in
+  let env = Env.set_env_function_pos env pos in
   let reactive = TUtils.fun_reactivity m.m_user_attributes in
   let mut = TUtils.fun_mutable m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
+  let return_mutable = has_mutable_return_attribute m.m_user_attributes in
   let env = Env.set_env_reactive env reactive in
   let env = Env.set_fun_mutable env mut in
   let ety_env =
@@ -5817,7 +5835,8 @@ and method_def env m =
       env,
       Env.{ return_type = make_default_return m.m_name;
             return_explicit = false;
-            return_disposable = return_disposable }
+            return_disposable = return_disposable;
+            return_mutable; }
     | Some ret ->
       let ret = TI.instantiable_hint env ret in
       (* If a 'this' type appears it needs to be compatible with the
@@ -5832,7 +5851,8 @@ and method_def env m =
       env,
       Env.{ return_type = ty;
             return_explicit = true;
-            return_disposable = return_disposable } in
+            return_disposable = return_disposable;
+            return_mutable; } in
   TI.check_params_instantiable env m.m_params;
   let env, param_tys = List.map_env env m.m_params make_param_local_ty in
   if Env.is_strict env then begin

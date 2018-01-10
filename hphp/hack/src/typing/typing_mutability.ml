@@ -22,7 +22,7 @@ let fun_returns_mutable (env : Typing_env.env) (id : Nast.sid) =
     fty.ft_returns_mutable
 
 (* Returns true if the expression returns a new owned mutable *)
-let expr_returns_owned_mutable
+let rec expr_returns_owned_mutable
  (env : Typing_env.env) (e : T.expr)
  : bool =
  match snd e with
@@ -33,7 +33,69 @@ let expr_returns_owned_mutable
    fun_returns_mutable env id
  | T.Call (_, ((_, (Some (_, Tfun fty))), T.Obj_get _), _, _, _) ->
    fty.ft_returns_mutable
+ (* conditional operator returns owned mutable if both consequence and alternative
+    return owned mutable *)
+ | T.Eif (_, e1_opt, e2) ->
+   Option.value_map e1_opt ~default:true ~f:(expr_returns_owned_mutable env) &&
+   expr_returns_owned_mutable env e2
+ (* ?? operator returns owned mutable if both left hand side and right hand side
+    return owned mutable *)
+ | T.NullCoalesce (l, r) ->
+   expr_returns_owned_mutable env l && expr_returns_owned_mutable env r
+ (* cast returns owned mutable if its expression part is owned mutable *)
+ | T.Cast (_, e) ->
+   expr_returns_owned_mutable env e
+ (* XHP expression is considered owned mutable *)
+ | T.Xml _ -> true
+ (* l |> r returns owned mutable if r yields owned mutable *)
+ | T.Pipe (_, _, r) ->
+   expr_returns_owned_mutable env r
  | _ -> false
+
+let verify_valid_mutable_return_value (env: Typing_env.env) fun_pos (e: T.expr) =
+  let error e mut_opt =
+    let kind =
+      match mut_opt with
+      | None -> "non-mutable"
+      | Some Const -> "const"
+      | Some Borrowed -> "borrowed"
+      | Some Mutable -> assert false in
+    Errors.invalid_mutable_return_result (T.get_position e) fun_pos kind in
+  let rec aux e =
+    match snd e with
+    | T.Lvar (_, id) ->
+      let mut_env = Env.get_env_mutability env in
+      begin match LMap.get id mut_env with
+      | Some (_, Mutable) -> ()
+      | Some (_, mut) -> error e (Some mut)
+      | _ -> error e None
+      end
+    | T.Eif (_, e1_opt, e2) ->
+      Option.iter e1_opt ~f:aux;
+      aux e2
+      (* ?? operator returns owned mutable if both left hand side and right hand side
+      return owned mutable *)
+    | T.NullCoalesce (l, r) ->
+      aux l;
+      aux r;
+    (* cast returns owned mutable if its expression part is owned mutable *)
+    | T.Cast (_, e) ->
+      aux e
+    (* XHP expression is considered owned mutable *)
+    | T.Xml _ -> ()
+    (* l |> r returns owned mutable if r yields owned mutable *)
+    | T.Pipe (_, _, r) ->
+      aux r
+      (* NOTE: we only consider mutable objects as legal return values so
+      literals, arrays/varrays/darrays/collections, unary/binary expressions
+      that does not yield objects, ints/floats are not considered valid
+
+      CONSIDER: We might consider to report special error message for scenarios when
+      return value is known to be literal\primitive\value with immutable semantics.
+      *)
+    | _ ->
+      if not (expr_returns_owned_mutable env e) then error e None in
+ aux e
 
 (* Returns true if we can modify properties of the expression *)
 let expr_is_mutable

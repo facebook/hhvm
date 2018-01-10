@@ -25,6 +25,9 @@
 #include <sys/types.h>
 #include <sys/vfs.h>
 #include <fcntl.h>
+#ifdef HAVE_NUMA
+#include <numaif.h>
+#endif
 #include <unistd.h>
 
 #include "hphp/util/kernel-version.h"
@@ -142,30 +145,66 @@ bool find_hugetlbfs_path() {
   return false;
 }
 
-static int readNumFrom(const char* fileName) {
-  int result = 0;
-  auto file = fopen(fileName, "r");
-  if (file == nullptr) return 0;
-  fscanf(file, "%d", &result);
-  fclose(file);
-  return result;
-}
-
-HugePageInfo read_hugepage_info(uint32_t pagesizekb, int node /* = -1 */) {
+HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
   int nr_huge = 0, free_huge = 0;
+  if (pagesize != size2m && pagesize != size1g) { // only 2M and 1G supported
+    return HugePageInfo{0, 0};
+  }
 #ifdef __linux__
-  char fileName[256];
   if (node >= 0) {
-    snprintf(fileName, sizeof(fileName),
-             "/sys/devices/system/node/node%d/hugepages/"
-             "hugepages-%dkB/nr_hugepages",
-             node, pagesizekb);
+    auto const readNumFrom = [] (const char* path) {
+      int result = 0;
+      char buffer[32];
+      memset(buffer, 0, sizeof(buffer));
+      int fd = open(path, O_RDONLY);
+      if (fd < 0) return result;
+      bool done = false;
+      do {
+        ssize_t bytes = read(fd, buffer, 20);
+        if (bytes == 0) break;          // EOF
+        if (bytes < 0) {
+          if (errno == EINTR) continue; // try again
+          break;                        // totally failed
+        }
+        for (ssize_t i = 0; i < bytes; ++i) {
+          char c = buffer[i];
+          // only read numbers, and stop on white space, etc.
+          if (c < '0' || c > '9') {
+            done = true;
+            break;
+          }
+          result = result * 10 + c - '0';
+        }
+      } while (!done);
+      close(fd);
+      return result;
+    };
+
+    char fileName[256];
+    memcpy(fileName, "/sys/devices/system/node/node", 29);
+    assert(strlen("/sys/devices/system/node/node") == 29);
+    char* p = fileName + 29;
+    // We support at most 32 NUMA node, so at most two bytes.
+    if (node >= 10) *p++ = '0' + node / 10;
+    *p++ = '0' + node % 10;
+    if (pagesize == size2m) {
+      memcpy(p, "/hugepages/hugepages-2048kB/", 28);
+      assert(strlen("/hugepages/hugepages-2048kB/") == 28);
+      p += 28;
+    } else {
+      memcpy(p, "/hugepages/hugepages-1048576kB/", 31);
+      assert(strlen("/hugepages/hugepages-1048576kB/") == 31);
+      p += 31;
+    }
+
+    memcpy(p, "nr_hugepages", 13);
+    assert(strlen("nr_hugepages") == 12); // extra \0 byte
     nr_huge = readNumFrom(fileName);
-    snprintf(fileName, sizeof(fileName),
-             "/sys/devices/system/node/node%d/hugepages/"
-             "hugepages-%dkB/free_hugepages",
-             node, pagesizekb);
+
+    memcpy(p, "free_hugepages", 15);
+    assert(strlen("free_hugepages") == 14); // extra \0 byte
     free_huge = readNumFrom(fileName);
+
     return HugePageInfo{nr_huge, free_huge};
   }
   // All nodes
@@ -177,7 +216,7 @@ HugePageInfo read_hugepage_info(uint32_t pagesizekb, int node /* = -1 */) {
   for (int i = 0; i <= MAX_NUMA_NODE; ++i) {
     // Skip nodes we are not allowed to allocate on.
     if (!numa_node_allowed(i)) continue;
-    auto const info = read_hugepage_info(pagesizekb, i);
+    auto const info = read_hugepage_info(pagesize, i);
     nr_huge += info.nr_hugepages;
     free_huge += info.free_hugepages;
   }
@@ -186,11 +225,11 @@ HugePageInfo read_hugepage_info(uint32_t pagesizekb, int node /* = -1 */) {
 }
 
 HugePageInfo get_huge1g_info(int node /* = -1 */) {
-  return read_hugepage_info(1024 * 1024 /* kB */, node);
+  return read_hugepage_info(size1g, node);
 }
 
 HugePageInfo get_huge2m_info(int node /* = -1 */) {
-  return read_hugepage_info(2048 /* kB */, node);
+  return read_hugepage_info(size2m, node);
 }
 
 bool auto_mount_hugetlbfs() {
@@ -339,37 +378,47 @@ inline void* mmap_1g_impl(void* addr) {
 }
 #endif
 
+#ifdef HAVE_NUMA
+namespace {
+// We support at most 32 NUMA nodes (numa_node_set in 32-bit), so a single
+// unsigned long is more than enough for the mask.  This can be used in jemalloc
+// allocation hooks, so it is wise to avoid calling malloc/free here, even
+// though jemalloc might still be able to handle reentrance correctly.  Thus, we
+// bypass libnuma and do the syscalls directly here.
+struct SavedNumaPolicy {
+  bool needRestore{false};
+  int oldPolicy{0};
+  unsigned long oldMask{0};
+
+  // Save NUMA policy for the current thread.
+  void save() {
+    needRestore = !get_mempolicy(&oldPolicy, &oldMask, sizeof(oldMask),
+                                 nullptr, 0);
+  }
+  ~SavedNumaPolicy() {
+    if (needRestore) {
+      set_mempolicy(oldPolicy, &oldMask, sizeof(oldMask));
+    }
+  }
+};
+}
+#endif
+
 void* mmap_2m(void* addr, int prot, int node /* = -1 */,
               bool map_shared /* = false */, bool map_fixed /* = false */) {
 #ifdef __linux__
   if (get_huge2m_info(node).free_hugepages <= 0) return nullptr;
+  if (node >= 0 && !numa_node_allowed(node)) return nullptr;
 #ifdef HAVE_NUMA
-  bitmask* memMask = nullptr;
-  bitmask* interleaveMask = nullptr;
+  SavedNumaPolicy numaPolicy;
   if (node >= 0 && numa_num_nodes > 1) {
-    assert(numa_node_set != 0);
-    if ((numa_node_set & (1u << node)) == 0) {
-      // Numa policy forbids allocation on the node.
-      return nullptr;
-    }
-    memMask = numa_get_membind();
-    interleaveMask = numa_get_interleave_mask();
-    bitmask* mask = numa_allocate_nodemask();
-    numa_bitmask_setbit(mask, node);
-    numa_set_membind(mask);
-    numa_bitmask_free(mask);
+    numaPolicy.save();
+    unsigned long singleNodeMask = 1ul << node;
+    set_mempolicy(MPOL_BIND, &singleNodeMask, sizeof(singleNodeMask));
   }
 #endif
   void* ret = mmap_2m_impl(addr, prot, map_shared, map_fixed);
   s_num2MPages += !!ret;
-#ifdef HAVE_NUMA
-  if (memMask) {
-    numa_set_membind(memMask);
-    numa_set_interleave_mask(interleaveMask);
-    numa_bitmask_free(memMask);
-    numa_bitmask_free(interleaveMask);
-  }
-#endif
   return ret;
 #else  // not linux
   return nullptr;
@@ -385,14 +434,11 @@ size_t remap_interleaved_2m_pages(void* addr, size_t pages, int prot,
   if (pages == 0) return 0;
 
 #ifdef HAVE_NUMA
+  SavedNumaPolicy numaPolicy;
   const int maxNode = numa_max_node();
-  bitmask* memMask = nullptr;
-  bitmask* interleaveMask = nullptr;
-  bitmask* mask = nullptr;
+  unsigned long singleNodeMask;
   if (maxNode > 0) {
-    memMask = numa_get_membind();
-    interleaveMask = numa_get_interleave_mask();
-    mask = numa_allocate_nodemask();
+    numaPolicy.save();
   }
 #else
   constexpr int maxNode = 0;
@@ -409,9 +455,8 @@ size_t remap_interleaved_2m_pages(void* addr, size_t pages, int prot,
         if (++failed > maxNode) break;
         continue;
       }
-      numa_bitmask_setbit(mask, node);
-      numa_set_membind(mask);
-      numa_bitmask_clearbit(mask, node);
+      singleNodeMask = 1ul << node;
+      set_mempolicy(MPOL_BIND, &singleNodeMask, sizeof(singleNodeMask));
     }
 #endif
     // Fail early if we don't have huge pages reserved.
@@ -426,15 +471,6 @@ size_t remap_interleaved_2m_pages(void* addr, size_t pages, int prot,
     if (++failed > maxNode) break;
   } while (mapped_count < pages);
 
-#ifdef HAVE_NUMA
-  if (mask) {
-    numa_set_membind(memMask);
-    numa_set_interleave_mask(interleaveMask);
-    numa_bitmask_free(mask);
-    numa_bitmask_free(interleaveMask);
-    numa_bitmask_free(memMask);
-  }
-#endif
   return mapped_count;
 #else  // not linux
   return 0;
@@ -447,30 +483,17 @@ void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
   if (get_huge1g_info(node).free_hugepages <= 0) return nullptr;
   if (node >= 0 && !numa_node_allowed(node)) return nullptr;
 #ifdef HAVE_NUMA
-  bitmask* memMask = nullptr;
-  bitmask* interleaveMask = nullptr;
+  SavedNumaPolicy numaPolicy;
   if (node >= 0 && numa_num_nodes > 1) {
-    memMask = numa_get_membind();
-    interleaveMask = numa_get_interleave_mask();
-    bitmask* mask = numa_allocate_nodemask();
-    numa_bitmask_setbit(mask, node);
-    numa_set_membind(mask);
-    numa_bitmask_free(mask);
+    numaPolicy.save();
+    unsigned long singleNodeMask = 1ul << node;
+    set_mempolicy(MPOL_BIND, &singleNodeMask, sizeof(singleNodeMask));
   }
 #endif
   void* ret = mmap_1g_impl(addr);
   if (ret != nullptr) {
     s_1GPages[s_num1GPages++] = ret;
   }
-#ifdef HAVE_NUMA
-  if (memMask) {
-    assert(interleaveMask);
-    numa_set_membind(memMask);
-    numa_set_interleave_mask(interleaveMask);
-    numa_bitmask_free(memMask);
-    numa_bitmask_free(interleaveMask);
-  }
-#endif
   return ret;
 #else
   return nullptr;

@@ -66,7 +66,6 @@ LookupFuncFunction()
 # `lookup litstr' command.
 
 def lookup_litstr(litstr_id, u):
-    table = None
     gloff = V('HPHP::kGlobalLitstrOffset')
 
     if litstr_id >= gloff:
@@ -75,7 +74,7 @@ def lookup_litstr(litstr_id, u):
 
     val = u['m_namedInfo']
     # get the base type
-    ty = val.type.fields()[0].type;
+    ty = val.type.fields()[0].type
     val = val.address.cast(ty.pointer()).dereference()
     return idx.compact_vector_at(val, litstr_id)
 

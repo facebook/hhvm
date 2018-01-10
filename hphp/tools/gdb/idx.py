@@ -211,16 +211,20 @@ def tread_hash_map_at(thm, key, hasher=None):
         if idx == capac:
             idx = 0
 
+
 def compact_vector_at(vec, idx):
     if vec['m_data'] == nullptr():
         return None
-    len = vec['m_data']['m_len']
-    if idx >= len:
+
+    sz = vec['m_data']['m_len']
+    if idx >= sz:
         return None
+
     inner = vec.type.template_argument(0)
     elems = (vec['m_data'].cast(T('char').pointer()) +
              vec['elems_offset']).cast(inner.pointer())
-    return elems[idx];
+    return elems[idx]
+
 
 #------------------------------------------------------------------------------
 # PHP value accessors.

@@ -74,7 +74,7 @@ def php_line_number_from_repo(func, pc):
     decoder = repo.Decoder(buf)
     size = decoder.decode()
 
-    for i in xrange(size):
+    for _i in xrange(size):
         line_table.append({
             'm_pastOffset': decoder.decode(),
             'm_val':        decoder.decode(),
@@ -102,7 +102,7 @@ def php_line_number(func, pc):
     line_map = unit['m_lineMap']['val']
 
     if line_map is not None:
-        i = 0;
+        i = 0
         while True:
             r = idxs.compact_vector_at(line_map, i)
             if r is None:

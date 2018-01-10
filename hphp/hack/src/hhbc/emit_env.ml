@@ -21,7 +21,7 @@ type global_state =
 ; global_closure_namespaces: Namespace_env.env SMap.t
 ; global_closure_enclosing_classes: Ast.class_ SMap.t
 ; global_functions_with_finally: SSet.t
-; global_function_to_labels_map: SSet.t SMap.t
+; global_function_to_labels_map: (bool SMap.t) SMap.t
 }
 
 let empty_global_state =

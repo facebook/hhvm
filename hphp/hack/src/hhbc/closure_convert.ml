@@ -39,16 +39,18 @@ type env = {
   defined_class_count : int;
   (* How many existing functions are there? *)
   defined_function_count : int;
+  (* if we are immediately in using statement *)
+  in_using: bool;
 }
 
 type function_goto_state = {
   has_goto: bool;
-  labels: SSet.t
+  labels: bool SMap.t
 }
 
 let empty_goto_state = {
   has_goto = false;
-  labels = SSet.empty
+  labels = SMap.empty
 }
 
 let to_empty_state_if_no_goto s =
@@ -94,8 +96,8 @@ type state = {
   (* accumulated information about goto statements in current function *)
   goto_state: function_goto_state;
   (* maps name of function that has at least one goto statement
-     to a set of labels in function *)
-  function_to_labels_map: SSet.t SMap.t;
+     to labels in function (bool value denotes whether label appear in using) *)
+  function_to_labels_map: (bool SMap.t) SMap.t;
 }
 
 let initial_state =
@@ -121,6 +123,12 @@ let initial_state =
 
 let total_class_count env st =
   List.length st.hoisted_classes + env.defined_class_count
+
+let set_in_using env =
+  if env.in_using then env else { env with in_using = true }
+
+let reset_in_using env =
+  if env.in_using then { env with in_using = false } else env
 
 let is_in_lambda scope =
   match scope with
@@ -234,7 +242,8 @@ let env_toplevel class_count function_count defs =
     pos = Pos.none;
     variable_scopes = [{ all_vars; parameter_names = SSet.empty }];
     defined_class_count = class_count;
-    defined_function_count = function_count; }
+    defined_function_count = function_count;
+    in_using = false }
 
 let env_with_method env md =
   env_with_function_like_
@@ -744,22 +753,22 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
     let st, b2 = convert_block env st b2 in
     st, (p, If(e, b1, b2))
   | Do (b, e) ->
-    let st, b = convert_block env st b in
+    let st, b = convert_block (reset_in_using env) st b in
     let st, e = convert_expr env st e in
     st, (p, Do (b, e))
   | While (e, b) ->
     let st, e = convert_expr env st e in
-    let st, b = convert_block env st b in
+    let st, b = convert_block (reset_in_using env) st b in
     st, (p, While (e, b))
   | For (e1, e2, e3, b) ->
     let st, e1 = convert_expr env st e1 in
     let st, e2 = convert_expr env st e2 in
     let st, e3 = convert_expr env st e3 in
-    let st, b = convert_block env st b in
+    let st, b = convert_block (reset_in_using env) st b in
     st, (p, For(e1, e2, e3, b))
   | Switch (e, cl) ->
     let st, e = convert_expr env st e in
-    let st, cl = List.map_env st cl (convert_case env) in
+    let st, cl = List.map_env st cl (convert_case (reset_in_using env)) in
     st, (p, Switch (e, cl))
   | Foreach (e, p_opt, ae, b) ->
     if p_opt <> None then check_if_in_async_context env;
@@ -770,13 +779,13 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
   | Try (b1, cl, b2) ->
     let st, b1 = convert_block env st b1 in
     let st, cl = List.map_env st cl (convert_catch env) in
-    let st, b2 = convert_block env st b2 in
+    let st, b2 = convert_block (reset_in_using env) st b2 in
     let st = if List.is_empty b2 then st else { st with has_finally = true } in
     st, (p, Try (b1, cl, b2))
   | Using s ->
     if s.us_has_await then check_if_in_async_context env;
     let st, us_expr = convert_expr env st s.us_expr in
-    let st, us_block = convert_block env st s.us_block in
+    let st, us_block = convert_block (set_in_using env) st s.us_block in
     let st = if st.has_finally then st else { st with has_finally = true } in
     st, (p, Using { s with us_expr; us_block })
   | Def_inline d ->
@@ -805,7 +814,7 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
     process_inline_defs st defs
   | GotoLabel (_, l) ->
     (* record known label in function *)
-    let labels = SSet.add l st.goto_state.labels in
+    let labels = SMap.add l env.in_using st.goto_state.labels in
     let st = { st with goto_state = { st.goto_state with labels } } in
     st, stmt
   | Goto _ ->

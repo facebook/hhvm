@@ -377,7 +377,7 @@ let emit_body
     Jump_targets.set_labels_in_function s;
   | None ->
     Jump_targets.set_function_has_goto false;
-    Jump_targets.set_labels_in_function SSet.empty;
+    Jump_targets.set_labels_in_function SMap.empty;
   end;
 
   Local.reset_local (List.length params + List.length decl_vars);

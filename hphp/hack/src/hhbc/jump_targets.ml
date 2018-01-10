@@ -12,7 +12,7 @@ open Hh_core
 
 module A = Ast
 
-let labels_in_function_ = ref SSet.empty
+let labels_in_function_: (bool SMap.t) ref = ref SMap.empty
 let function_has_goto_ = ref false
 
 let get_labels_in_function () = !labels_in_function_

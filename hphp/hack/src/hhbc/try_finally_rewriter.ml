@@ -62,43 +62,46 @@ let emit_save_label_id id =
   ]
 
 let emit_goto ~in_finally_epilogue env label =
-  if not (SSet.mem label @@ JT.get_labels_in_function ())
-  then
+  match SMap.get label @@ JT.get_labels_in_function () with
+  | None ->
     Emit_fatal.raise_fatal_parse
       Pos.none @@ "'goto' to undefined label '" ^ label ^ "'"
-  else
-  let named_label = Label.named label in
-  let jump_targets = Emit_env.get_jump_targets env in
-  begin match JT.find_goto_target jump_targets label with
-  | JT.ResolvedGoto_label iters ->
-    let preamble =
-      if not in_finally_epilogue then empty
-      else instr_unsetl @@ Local.get_label_id_local () in
-    gather [
-      preamble;
-      emit_jump_to_label named_label iters
-    ]
-  | JT.ResolvedGoto_finally {
-      JT.rgf_finally_start_label;
-      JT.rgf_iterators_to_release;
-    } ->
-    let preamble =
-      if in_finally_epilogue then empty
-      else emit_save_label_id (JT.get_id_for_label named_label) in
-    gather [
-      preamble;
-      emit_jump_to_label rgf_finally_start_label rgf_iterators_to_release;
-      (* emit goto as an indicator for try/finally rewriter to generate
-        finally epilogue, try/finally rewriter will remove it. *)
-      instr_goto label;
-    ]
-  | JT.ResolvedGoto_goto_from_finally ->
-    Emit_fatal.raise_fatal_runtime
-      Pos.none "Goto to a label outside a finally block is not supported"
-  | JT.ResolvedGoto_goto_invalid_label ->
-    Emit_fatal.raise_fatal_parse
-      Pos.none "'goto' into loop, switch or using statement is disallowed"
-  end
+  | Some in_using ->
+    let named_label = Label.named label in
+    let jump_targets = Emit_env.get_jump_targets env in
+    begin match JT.find_goto_target jump_targets label with
+    | JT.ResolvedGoto_label iters ->
+      let preamble =
+        if not in_finally_epilogue then empty
+        else instr_unsetl @@ Local.get_label_id_local () in
+      gather [
+        preamble;
+        emit_jump_to_label named_label iters
+      ]
+    | JT.ResolvedGoto_finally {
+        JT.rgf_finally_start_label;
+        JT.rgf_iterators_to_release;
+      } ->
+      let preamble =
+        if in_finally_epilogue then empty
+        else emit_save_label_id (JT.get_id_for_label named_label) in
+      gather [
+        preamble;
+        emit_jump_to_label rgf_finally_start_label rgf_iterators_to_release;
+        (* emit goto as an indicator for try/finally rewriter to generate
+          finally epilogue, try/finally rewriter will remove it. *)
+        instr_goto label;
+      ]
+    | JT.ResolvedGoto_goto_from_finally ->
+      Emit_fatal.raise_fatal_runtime
+        Pos.none "Goto to a label outside a finally block is not supported"
+    | JT.ResolvedGoto_goto_invalid_label ->
+      let message =
+        if in_using
+        then "'goto' into or across using statement is disallowed"
+        else "'goto' into loop or switch statement is disallowed" in
+      Emit_fatal.raise_fatal_parse Pos.none message
+    end
 
 let emit_return
   ~need_ref ~verify_return ~verify_out ~in_finally_epilogue env =

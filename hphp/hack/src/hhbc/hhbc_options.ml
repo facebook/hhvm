@@ -55,7 +55,7 @@ let default = {
   option_hack_arr_compat_notices = false;
   option_dynamic_invoke_functions = SSet.empty;
   option_repo_authoritative = false;
-  option_jit_enable_rename_function = true;
+  option_jit_enable_rename_function = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax

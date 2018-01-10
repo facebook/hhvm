@@ -34,7 +34,6 @@ namespace HPHP {
   X(EmptyArray)\
   X(APCLocalArray)\
   X(GlobalsArray)\
-  X(ProxyArray)\
   /* other php types */\
   X(StringData)\
   X(ObjectData)\

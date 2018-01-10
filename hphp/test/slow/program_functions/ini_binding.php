@@ -15,7 +15,6 @@ var_dump(ini_get("hhvm.server.type"));
 var_dump(ini_get("hhvm.server.port"));
 var_dump(ini_get("hhvm.log.use_log_file"));
 var_dump(ini_get("hhvm.log.file"));
-var_dump(ini_get("hhvm.enable_zend_compat"));
 var_dump(ini_get("hhvm.mysql.connect_timeout"));
 var_dump(ini_get("hhvm.server.apc.load_thread"));
 var_dump(ini_get("hhvm.server.apc.file_storage.prefix"));
@@ -25,5 +24,4 @@ var_dump(ini_get("hhvm.hhir_licm"));
 // all return false
 var_dump(ini_get("hhvm.this_should_not_work"));
 var_dump(ini_get("hhvm.jit_ahot_size"));
-var_dump(ini_get("hhvm.ext_zend_compat"));
 var_dump(ini_get("hhvm.hhirlicm"));

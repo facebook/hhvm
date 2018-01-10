@@ -72,7 +72,6 @@ void cgInitStaticLoc(IRLS& env, const IRInstruction* inst) {
   auto mem = rvmtl()[link.handle() + rds::StaticLocalData::ref_offset()];
   storeTV(v, mem + RefData::tvOffset(), srcLoc(env, inst, 0), inst->src(0));
   emitStoreRefCount(v, OneReference, mem);
-  v << storebi{0, mem + RefData::cowZOffset()};
   v << storebi{uint8_t(HeaderKind::Ref), mem + (int)HeaderKindOffset};
   markRDSHandleInitialized(v, link.handle());
 

@@ -328,14 +328,6 @@ private:
  * If m_ref points to a non-array value, iteration terminates.
  */
 struct MArrayIter {
-  // this constructor only exists for the benefit of ext_zend_compat
-  MArrayIter()
-    : m_data(nullptr)
-    , m_pos(0)
-    , m_container(nullptr)
-    , m_resetFlag(false)
-  {}
-
   explicit MArrayIter(RefData* ref);
   explicit MArrayIter(ArrayData* data);
   ~MArrayIter();

@@ -8,10 +8,6 @@ endif ()
 auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")
 HHVM_PUBLIC_HEADERS(system ${files})
 
-if (ENABLE_ZEND_COMPAT)
-  add_dependencies(hphp_ext_zend_compat hphp_system)
-endif()
-
 add_dependencies(hphp_runtime_static hphp_system)
 add_dependencies(hphp_runtime_ext hphp_system)
 add_dependencies(hphp_analysis hphp_system)

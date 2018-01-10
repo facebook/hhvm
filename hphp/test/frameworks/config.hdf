@@ -3,7 +3,6 @@ Eval {
   JitAColdSize = 4194304 # 4 MB
   JitAFrozenSize = 6291456 # 6 MB
   JitGlobalDataSize = 2097152 # 2 MB
-  EnableZendCompat = true
 }
 
 MySQL {

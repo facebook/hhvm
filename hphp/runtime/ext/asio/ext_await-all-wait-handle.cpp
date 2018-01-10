@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/proxy-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -168,7 +167,6 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
   assertx(ad->isPHPArray());
   if (!ad->size()) return Object{returnEmpty()};
 
-retry:
   switch (ad->kind()) {
     case ArrayData::kPackedKind:
       return c_AwaitAllWaitHandle::Create<true>([=](auto fn) {
@@ -179,10 +177,6 @@ retry:
       return c_AwaitAllWaitHandle::Create<true>([=](auto fn) {
         MixedArray::IterateV(MixedArray::asMixed(ad), fn);
       });
-
-    case ArrayData::kProxyKind:
-      ad = ProxyArray::innerArr(ad);
-      goto retry;
 
     case ArrayData::kApcKind:
     case ArrayData::kGlobalsKind:

@@ -50,7 +50,6 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::Keyset:
     case HeaderKind::Apc:
     case HeaderKind::Globals:
-    case HeaderKind::Proxy:
       out << "[" << static_cast<const ArrayData*>(h)->size() << "]";
       break;
     case HeaderKind::String:

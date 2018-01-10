@@ -9334,7 +9334,7 @@ Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   int nativeAttrs = fe->parseNativeAttributes(attributes);
   BuiltinFunction bif = nullptr, nif = nullptr;
   Native::getFunctionPointers(info, nativeAttrs, bif, nif);
-  if (nif && !(nativeAttrs & Native::AttrZendCompat)) {
+  if (nif) {
     if (retType) {
       fe->retTypeConstraint =
         determine_type_constraint_from_annot(retType, true, false);

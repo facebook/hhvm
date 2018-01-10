@@ -409,7 +409,6 @@ struct RuntimeOption {
   static bool CheckSymLink;
   static bool EnableArgsInBacktraces;
   static bool EnableContextInErrorHandler;
-  static bool EnableZendCompat;
   static bool EnableZendSorting;
   static bool EnableZendIniCompat;
   static bool TimeoutsUseWallTime;

@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/class.h"
@@ -302,9 +301,6 @@ bool record_request_heap_mem_event(const void* addr,
       break;
     case HeaderKind::Globals:
       try_member(static_cast<const GlobalsArray*>(hdr), addr, record);
-      break;
-    case HeaderKind::Proxy:
-      try_member(static_cast<const ProxyArray*>(hdr), addr, record);
       break;
     case HeaderKind::Empty:
       break;

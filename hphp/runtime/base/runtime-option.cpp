@@ -101,7 +101,6 @@ bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableContextInErrorHandler = true;
-bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::EnableZendSorting = false;
 bool RuntimeOption::EnableZendIniCompat = true;
 bool RuntimeOption::TimeoutsUseWallTime = true;
@@ -1166,8 +1165,6 @@ void RuntimeOption::Load(
     Config::Bind(EnableShortTags, ini, config, "Eval.EnableShortTags", true);
     Config::Bind(EnableAspTags, ini, config, "Eval.EnableAspTags");
     Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", EnableXHP);
-    Config::Bind(EnableZendCompat, ini, config, "Eval.EnableZendCompat",
-                 EnableZendCompat);
     Config::Bind(EnableZendSorting, ini, config, "Eval.EnableZendSorting",
                  false);
     Config::Bind(TimeoutsUseWallTime, ini, config, "Eval.TimeoutsUseWallTime",

@@ -1779,8 +1779,7 @@ static inline Class* lookupClsRef(Cell* input) {
 
 static UNUSED int innerCount(const TypedValue* tv) {
   if (isRefcountedType(tv->m_type)) {
-    return tv->m_type == KindOfRef ? tv->m_data.pref->getRealCount() :
-           tvGetCount(*tv);
+    return tvGetCount(*tv);
   }
   return -1;
 }

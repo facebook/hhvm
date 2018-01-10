@@ -66,11 +66,10 @@ struct ArrayData : MaybeCountable {
     kEmptyKind = 2,   // The singleton static empty array
     kApcKind = 3,     // APCLocalArray
     kGlobalsKind = 4, // GlobalsArray
-    kProxyKind = 5,   // ProxyArray
-    kDictKind = 6,    // Hack dict
-    kVecKind = 7,     // Hack vec
-    kKeysetKind = 8,  // Hack keyset
-    kNumKinds = 9     // insert new values before kNumKinds.
+    kDictKind = 5,    // Hack dict
+    kVecKind = 6,     // Hack vec
+    kKeysetKind = 7,  // Hack keyset
+    kNumKinds = 8     // insert new values before kNumKinds.
   };
 
   /*
@@ -202,7 +201,7 @@ public:
   /*
    * Fast-path number of elements.
    *
-   * Only valid for arrays that aren't GlobalsArray or ProxyArray.
+   * Only valid for arrays that aren't GlobalsArray.
    */
   size_t getSize() const;
 
@@ -230,7 +229,6 @@ public:
   bool isMixed() const;
   bool isApcArray() const;
   bool isGlobalsArray() const;
-  bool isProxyArray() const;
   bool isEmptyArray() const;
   bool isDict() const;
   bool isVecArray() const;
@@ -807,7 +805,6 @@ static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
 static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
 static_assert(ArrayData::kApcKind == uint8_t(HeaderKind::Apc), "");
 static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
-static_assert(ArrayData::kProxyKind == uint8_t(HeaderKind::Proxy), "");
 static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
 static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::VecArray), "");
 
@@ -860,7 +857,7 @@ struct ArrayFunctions {
   /*
    * NK stands for number of array kinds.
    */
-  static auto const NK = size_t{9};
+  static auto const NK = size_t{8};
 
   void (*release[NK])(ArrayData*);
   member_rval::ptr_u (*nvGetInt[NK])(const ArrayData*, int64_t k);

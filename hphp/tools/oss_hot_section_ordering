@@ -3609,7 +3609,6 @@
 .text._ZN4HPHP10MixedArray10ToDictDictEPNS_9ArrayDataEb*
 .text._ZN4HPHP10MixedArray10ToPHPArrayEPNS_9ArrayDataEb*
 .text._ZN4HPHP10MixedArray8EscalateEPKNS_9ArrayDataE*
-.text._ZN4HPHP10ProxyArray10ToPHPArrayEPNS_9ArrayDataEb*
 .text._ZN4HPHP11PackedArray10ToPHPArrayEPNS_9ArrayDataEb*
 .text._ZN4HPHP11PackedArray8EscalateEPKNS_9ArrayDataE*
 .text._ZN4HPHP11PackedArray8ToVecVecEPNS_9ArrayDataEb*

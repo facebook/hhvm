@@ -192,7 +192,7 @@ class LowPtrPrinter(PtrPrinter):
 # ArrayData.
 
 class ArrayDataPrinter(object):
-    RECOGNIZE = '^HPHP::(ArrayData|MixedArray|ProxyArray)$'
+    RECOGNIZE = '^HPHP::(ArrayData|MixedArray)$'
 
     class _packed_iterator(_BaseIterator):
         def __init__(self, begin, end):
@@ -252,8 +252,6 @@ class ArrayDataPrinter(object):
 
         if self.kind == self._kind('Mixed'):
             self.val = val.cast(T('HPHP::MixedArray'))
-        elif self.kind == self._kind('Proxy'):
-            self.val = val.cast(T('HPHP::ProxyArray'))
         else:
             self.val = val
 
@@ -262,11 +260,6 @@ class ArrayDataPrinter(object):
 
         if kind_int > 9:
             return 'Invalid ArrayData (kind=%d)' % kind_int
-
-        if self.kind == self._kind('Proxy'):
-            return 'ProxyArray { %s }' % (
-                self.val['m_ref'].dereference()['m_tv']
-                        ['m_data']['parr'].dereference())
 
         kind = str(self.kind)[len('HPHP::ArrayData::'):]
 

@@ -216,7 +216,6 @@ inline bool allowFCallBuiltinDoubles() {
 enum Attr {
   AttrNone = 0,
   AttrActRec = 1 << 0,
-  AttrZendCompat = 1 << 1,
   AttrOpCodeImpl = 1 << 2, //Methods whose implementation is in the emitter
 };
 
@@ -269,10 +268,7 @@ const StringData* getInvokeName(ActRec* ar);
   X(This,       ObjectData*,          ObjectData*)    \
   X(Class,      const Class*,         const Class*)   \
   X(Void,       void,                 void)           \
-  X(Zend,       ZendFuncType,         ZendFuncType)   \
   /**/
-
-enum class ZendFuncType {};
 
 template <class T>
 struct NativeArg {
@@ -310,7 +306,6 @@ struct NativeSig {
 #undef X
   };
 
-  explicit NativeSig(ZendFuncType) : ret(Type::Zend) {}
   NativeSig() : ret(Type::Void) {}
 
   NativeSig(Type _ret, const std::vector<Type>& _args)
@@ -473,34 +468,6 @@ registerBuiltinFunction(const String& name, Fun func) {
     "Arguments on builtin function were not understood types"
   );
   s_builtinFunctions[makeStaticString(name)] = BuiltinFunctionInfo(func);
-}
-
-template <class Fun> typename
-  std::enable_if<!std::is_member_function_pointer<Fun>::value, void>::type
-registerBuiltinZendFunction(const char* name, Fun func) {
-  static_assert(
-    std::is_pointer<Fun>::value &&
-    std::is_function<typename std::remove_pointer<Fun>::type>::value,
-    "You can only register pointers to functions."
-  );
-  auto bfi = BuiltinFunctionInfo();
-  bfi.ptr = (BuiltinFunction)func;
-  bfi.sig = NativeSig(ZendFuncType{});
-  s_builtinFunctions[makeStaticString(name)] = bfi;
-}
-
-template <class Fun> typename
-  std::enable_if<!std::is_member_function_pointer<Fun>::value, void>::type
-registerBuiltinZendFunction(const String& name, Fun func) {
-  static_assert(
-    std::is_pointer<Fun>::value &&
-    std::is_function<typename std::remove_pointer<Fun>::type>::value,
-    "You can only register pointers to function."
-  );
-  auto bfi = BuiltinFunctionInfo();
-  bfi.ptr = (BuiltinFunction)func;
-  bfi.sig = NativeSig(ZendFuncType{});
-  s_builtinFunctions[makeStaticString(name)] = bfi;
 }
 
 // Specializations of registerBuiltinFunction for taking

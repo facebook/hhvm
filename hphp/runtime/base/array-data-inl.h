@@ -139,7 +139,6 @@ inline bool ArrayData::isPacked() const { return kind() == kPackedKind; }
 inline bool ArrayData::isMixed() const { return kind() == kMixedKind; }
 inline bool ArrayData::isApcArray() const { return kind() == kApcKind; }
 inline bool ArrayData::isGlobalsArray() const { return kind() == kGlobalsKind; }
-inline bool ArrayData::isProxyArray() const { return kind() == kProxyKind; }
 inline bool ArrayData::isEmptyArray() const { return kind() == kEmptyKind; }
 inline bool ArrayData::isDict() const { return kind() == kDictKind; }
 inline bool ArrayData::isVecArray() const { return kind() == kVecKind; }

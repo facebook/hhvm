@@ -1211,13 +1211,6 @@ def walk(filename, dest_subdir):
         if '/tests/lang/bug24908.php' in full_dest_filename or \
            '/ext/spl/tests/spl_autoload_011.php' in full_dest_filename:
             ini = ini + '\n' + 'hhvm.enable_obj_destruct_call = true'
-        if '/ext/calendar/tests/cal_info.php' in full_dest_filename or \
-           '/ext/calendar/tests/easter_date.php' in full_dest_filename or \
-           '/ext/calendar/tests/jdtounix.php' in full_dest_filename or \
-           '/ext/date/tests/cal_days_in_month_invalid_date.php' in full_dest_filename or \
-           '/ext/date/tests/cal_days_in_month_invalid_calendar.php' in full_dest_filename or \
-           '/ext/soap/tests/bugs/bug36999.php' in full_dest_filename:
-            ini = ini + '\n' + 'hhvm.enable_zend_compat = true'
 
         open(full_dest_filename + '.ini', 'w').write(ini)
 

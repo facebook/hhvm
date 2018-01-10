@@ -294,7 +294,6 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       case HeaderKind::ImmMap:
       case HeaderKind::Empty:
       case HeaderKind::Globals:
-      case HeaderKind::Proxy:
       case HeaderKind::String:
       case HeaderKind::Resource:
       case HeaderKind::BigMalloc:

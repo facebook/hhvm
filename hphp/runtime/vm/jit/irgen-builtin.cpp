@@ -43,8 +43,6 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
 
-#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
-
 #include "hphp/util/text-util.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -1572,7 +1570,7 @@ void emitNativeImpl(IRGS& env) {
     gen(env, RetCtrl, data, sp(env), fp(env), retVal);
   };
 
-  if (!callee->nativeFuncPtr() || callee->builtinFuncPtr() == zend_wrap_func) {
+  if (!callee->nativeFuncPtr()) {
     genericNativeImpl();
     return;
   }

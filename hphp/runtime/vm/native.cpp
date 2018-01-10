@@ -22,8 +22,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 
-#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
-
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
@@ -525,10 +523,6 @@ void getFunctionPointers(const BuiltinFunctionInfo& info,
     bif = unimplementedWrapper;
     return;
   }
-  if (nativeAttrs & AttrZendCompat) {
-    bif = zend_wrap_func;
-    return;
-  }
   if (nativeAttrs & AttrActRec) {
     bif = nif;
     nif = nullptr;
@@ -612,9 +606,6 @@ const char* kNeedStaticContextMessage =
   "Static class functions must take a Class* as their first argument";
 const char* kNeedObjectContextMessage =
   "Instance methods must take an ObjectData* as their first argument";
-const char* kInvalidZendFuncMessage =
-  "PHP5 compatibility layer functions must be registered using "
-  "registerBuiltinZendFunction";
 const char* kInvalidActRecFuncMessage =
   "Functions declared as ActRec must return a TypedValue* and take an ActRec* "
   "as their sole argument";
@@ -623,12 +614,6 @@ const char* checkTypeFunc(const NativeSig& sig,
                           const TypeConstraint& retType,
                           const Func* func) {
   using T = NativeSig::Type;
-
-  if (sig.ret == T::Zend) {
-    return sig.args.empty()
-      ? nullptr
-      : kInvalidZendFuncMessage;
-  }
 
   if (!func->nativeFuncPtr()) {
     return
@@ -708,7 +693,6 @@ static std::string nativeTypeString(NativeSig::Type ty) {
   case T::This:       return "this";
   case T::Class:      return "class";
   case T::Void:       return "void";
-  case T::Zend:       return "[zend]";
   }
   not_reached();
 }

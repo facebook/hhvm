@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/ref-data.h"
-#include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -49,10 +48,6 @@
 #include "hphp/runtime/ext/generator/ext_generator.h"
 
 #include "hphp/util/hphp-config.h"
-
-#ifdef ENABLE_ZEND_COMPAT
-#include "hphp/runtime/ext_zend_compat/php-src/TSRM/TSRM.h"
-#endif
 
 #include "hphp/util/type-scan.h"
 
@@ -92,8 +87,6 @@ inline void scanAFWH(const c_WaitHandle* wh, type_scan::Scanner& scanner) {
 
 inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
   switch (h->kind()) {
-    case HeaderKind::Proxy:
-      return static_cast<const ProxyArray*>(h)->scan(scanner);
     case HeaderKind::Empty:
       return;
     case HeaderKind::Packed:
@@ -314,11 +307,6 @@ template<class Fn> void iterateRoots(Fn fn) {
 
   // Root handles & sweep lists
   tl_heap->iterateRoots(fn);
-
-  // Zend compat resources
-#ifdef ENABLE_ZEND_COMPAT
-  ts_iterate_resources(fn);
-#endif
 }
 
 }

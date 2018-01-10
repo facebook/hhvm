@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/vm/globals-array.h"
@@ -229,7 +228,6 @@ inline size_t allocSize(const HeapObject* h) {
     sizeClass<ArrayData>(), /* Empty */
     0, /* APCLocalArray */
     sizeClass<GlobalsArray>(),
-    sizeClass<ProxyArray>(),
     0, /* Dict */
     0, /* VecArray */
     0, /* KeySet */
@@ -262,7 +260,6 @@ inline size_t allocSize(const HeapObject* h) {
   static_assert(kind_sizes[(int)HeaderKind::knd] == sizeClass<type>(), #knd);
   CHECKSIZE(Empty, ArrayData)
   CHECKSIZE(Globals, GlobalsArray)
-  CHECKSIZE(Proxy, ProxyArray)
   CHECKSIZE(Ref, RefData)
   CHECKSIZE(AsyncFuncWH, c_AsyncFunctionWaitHandle)
   CHECKSIZE(Vector, c_Vector)
@@ -396,7 +393,6 @@ inline size_t allocSize(const HeapObject* h) {
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::Empty:
     case HeaderKind::Globals:
-    case HeaderKind::Proxy:
     case HeaderKind::Vector:
     case HeaderKind::Map:
     case HeaderKind::Set:

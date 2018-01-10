@@ -134,9 +134,6 @@ if (RUNTIME_TEST_BIN)
   add_subdirectory(runtime/test)
 endif ()
 
-if (ENABLE_ZEND_COMPAT)
-  add_subdirectory(runtime/ext_zend_compat)
-endif()
 add_subdirectory(system)
 add_subdirectory(util)
 add_subdirectory(ppc64-asm)
@@ -151,6 +148,8 @@ if (TEST_BIN)
 endif ()
 
 add_subdirectory(tools/gdb)
+
+include(test/dso_test/dso_test.cmake)
 
 # Keep this last
 add_subdirectory(tools/hphpize)

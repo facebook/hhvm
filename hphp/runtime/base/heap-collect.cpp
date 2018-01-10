@@ -175,7 +175,6 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
   switch (h->kind()) {
     case HeaderKind::Apc:
     case HeaderKind::Globals:
-    case HeaderKind::Proxy:
     case HeaderKind::Ref:
     case HeaderKind::Resource:
     case HeaderKind::Packed:

@@ -288,8 +288,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       ex->m_nativeFuncPtr
     );
 
-    if (ex->m_nativeFuncPtr &&
-        !(nativeAttributes & Native::AttrZendCompat)) {
+    if (ex->m_nativeFuncPtr) {
       if (info.sig.ret == Native::NativeSig::Type::MixedTV) {
         ex->m_returnByValue = true;
       }
@@ -479,7 +478,6 @@ void FuncEmitter::setEHTabIsSorted() {
  *  "NoFCallBuiltin": Prevent FCallBuiltin optimization
  *      Effectively forces functions to generate an ActRec
  *  "NoInjection": Do not include this frame in backtraces
- *  "ZendCompat": Use zend compat wrapper
  *  "ReadsCallerFrame": Function might read from the caller's frame
  *  "WritesCallerFrame": Function might write to the caller's frame
  *
@@ -491,7 +489,6 @@ static const StaticString
   s_nofcallbuiltin("NoFCallBuiltin"),
   s_variadicbyref("VariadicByRef"),
   s_noinjection("NoInjection"),
-  s_zendcompat("ZendCompat"),
   s_numargs("NumArgs"),
   s_opcodeimpl("OpCodeImpl"),
   s_readsCallerFrame("ReadsCallerFrame"),
@@ -517,11 +514,6 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
         attrs_ |= AttrVariadicByRef;
       } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
         attrs_ |= AttrNoInjection;
-      } else if (userAttrStrVal.get()->isame(s_zendcompat.get())) {
-        ret |= Native::AttrZendCompat;
-        // ZendCompat implies ActRec, no FCallBuiltin
-        attrs_ |= AttrMayUseVV | AttrNoFCallBuiltin;
-        ret |= Native::AttrActRec;
       } else if (userAttrStrVal.get()->isame(s_numargs.get())) {
         attrs_ |= AttrNumArgs;
       } else if (userAttrStrVal.get()->isame(s_opcodeimpl.get())) {

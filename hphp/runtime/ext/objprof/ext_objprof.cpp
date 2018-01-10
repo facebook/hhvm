@@ -178,7 +178,6 @@ bool isObjprofRoot(
  * These are not measured:
  * kApcKind     // APCArray
  * kGlobalsKind // GlobalsArray
- * kProxyKind   // ProxyArray
  */
 std::pair<int, double> sizeOfArray(
   const ArrayData* ad,
@@ -194,8 +193,7 @@ std::pair<int, double> sizeOfArray(
   auto arrKind = ad->kind();
   if (
     arrKind == ArrayData::ArrayKind::kApcKind ||
-    arrKind == ArrayData::ArrayKind::kGlobalsKind ||
-    arrKind == ArrayData::ArrayKind::kProxyKind
+    arrKind == ArrayData::ArrayKind::kGlobalsKind
   ) {
     return std::make_pair(0, 0);
   }
@@ -422,7 +420,6 @@ void stringsOfArray(
  * kEmptyKind   // The singleton static empty array
  * kSharedKind  // SharedArray
  * kGlobalsKind // GlobalsArray
- * kProxyKind   // ProxyArray
  */
 std::pair<int, double> tvGetSize(
   TypedValue tv,
@@ -551,11 +548,11 @@ std::pair<int, double> tvGetSize(
       break;
     }
     case KindOfRef: {
+      auto ref_ref_count = tvGetCount(tv) + ref_adjust;
       RefData* ref = tv.m_data.pref;
       size += sizeof(*ref);
       sized += sizeof(*ref);
 
-      auto ref_ref_count = ref->getRealCount() + ref_adjust;
       FTRACE(3, " RefData tv at {} that with ref count {} after adjust {}\n",
         (void*)ref,
         ref_ref_count,

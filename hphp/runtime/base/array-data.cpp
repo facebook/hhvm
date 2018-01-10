@@ -31,7 +31,6 @@
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/vm/globals-array.h"
-#include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -252,7 +251,6 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
     GlobalsArray::entry,                        \
-    ProxyArray::entry,                          \
     MixedArray::entry##Dict,   /* Dict */       \
     PackedArray::entry##Vec,   /* Vec */        \
     SetArray::entry,           /* Keyset */     \
@@ -376,15 +374,13 @@ const ArrayFunctions g_array_funcs = {
   /*
    * size_t Vsize(const ArrayData*)
    *
-   *   This entry point essentially is only for GlobalsArray and ProxyArray;
+   *   This entry point essentially is only for GlobalsArray;
    *   all the other cases are not_reached().
    *
    *   Because of particulars of how GlobalsArray works,
    *   determining the size of the array is an O(N) operation---we set
    *   the size field in the generic ArrayData header to -1 in that
-   *   case and dispatch through this entry point.  ProxyArray also
-   *   always involves virtual size, because of the possibility that
-   *   it could be proxying a GlobalsArray.
+   *   case and dispatch through this entry point.
    */
   DISPATCH(Vsize)
 
@@ -773,7 +769,6 @@ const ArrayFunctions g_array_funcs = {
     &ZSetIntThrow,
     &ZSetIntThrow,
     &ZSetIntThrow,
-    &ProxyArray::ZSetInt,
     &MixedArray::ZSetInt,
     &ZSetIntThrow,
     &ZSetIntThrow,
@@ -785,7 +780,6 @@ const ArrayFunctions g_array_funcs = {
     &ZSetStrThrow,
     &ZSetStrThrow,
     &ZSetStrThrow,
-    &ProxyArray::ZSetStr,
     &MixedArray::ZSetStr,
     &ZSetStrThrow,
     &ZSetStrThrow,
@@ -797,7 +791,6 @@ const ArrayFunctions g_array_funcs = {
     &ZAppendThrow,
     &ZAppendThrow,
     &ZAppendThrow,
-    &ProxyArray::ZAppend,
     &MixedArray::ZAppend,
     &ZAppendThrow,
     &ZAppendThrow,
@@ -1215,13 +1208,12 @@ member_rval ArrayData::getNotFound(const StringData* k, bool error) const {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,9> names = {{
+  std::array<const char*,8> names = {{
     "PackedKind",
     "MixedKind",
     "EmptyKind",
     "ApcKind",
     "GlobalsKind",
-    "ProxyKind",
     "DictKind",
     "VecKind",
     "KeysetKind"

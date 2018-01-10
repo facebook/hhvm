@@ -1061,7 +1061,11 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
 
     | ScopeResolutionExpression
       { scope_resolution_qualifier; scope_resolution_name; _ } ->
-      let qual = pExpr scope_resolution_qualifier env in
+      let qual =
+        match pExpr scope_resolution_qualifier env with
+        | p, Lvar v when not env.codegen -> p, Id v
+        | qual -> qual
+      in
       begin match syntax scope_resolution_name with
       | Token { Token.kind = TK.Variable; _ } ->
         let name =

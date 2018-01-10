@@ -27,6 +27,7 @@ type env = {
   exit_on_failure : bool;
   ai_mode : string option;
   debug_port: Unix.file_descr option;
+  ignore_hh_version : bool;
 }
 
 let start_server env =
@@ -54,6 +55,7 @@ let start_server env =
        * Note: Yes, the FD is available in the monitor process as well, but
        * it doesn't, and shouldn't, use it. *)
       [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
+      if env.ignore_hh_version then [| "--ignore-hh-version" |] else [||];
       match env.debug_port with
         | None -> [| |]
         | Some fd ->

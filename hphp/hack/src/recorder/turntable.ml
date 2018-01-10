@@ -31,6 +31,7 @@ let start_server root =
     no_load = false;
     profile_log = false;
     ai_mode = None;
+    ignore_hh_version = false;
   } in
   match ClientCheck.main check_env with
   | Exit_status.No_error ->

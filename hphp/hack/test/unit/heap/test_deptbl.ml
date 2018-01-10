@@ -23,8 +23,8 @@ let get_sqlite = hh_get_dep_sqlite
 
 (* Function to save and load deptable *)
 
-external save_dep_table_sqlite: string -> int = "hh_save_dep_table_sqlite"
-external load_dep_table_sqlite: string -> int = "hh_load_dep_table_sqlite"
+external save_dep_table_sqlite: string -> string -> int = "hh_save_dep_table_sqlite"
+external load_dep_table_sqlite: string -> bool -> int = "hh_load_dep_table_sqlite"
 
 let expect ~msg bool =
   if bool then () else begin
@@ -104,15 +104,20 @@ let run_daemon fn =
       fn
       ()
   in
-  ignore @@ Unix.waitpid [] (handle.Daemon.pid)
+  let _ : (int * Unix.process_status) = Unix.waitpid [] (handle.Daemon.pid) in ()
 
 
-let save_in_daemon filename =
+let save_in_daemon ?buildRevision filename =
   run_daemon
     begin fun () _ ->
       init_shared_mem ();
       populate_deptable ();
-      ignore @@ save_dep_table_sqlite filename
+      Printf.printf "Saved as %s" filename;
+      let revision = match buildRevision with
+        | None -> Build_id.build_revision
+        | Some revision -> revision
+      in
+      let _ : int = save_dep_table_sqlite filename revision in ()
     end
 
 let test_deps_in_memory () =
@@ -126,16 +131,33 @@ let test_deptable_sql () =
   let deptable_name = Filename.temp_file "test_deptable" ".sql" in
   save_in_daemon deptable_name;
   init_shared_mem ();
-  ignore @@ load_dep_table_sqlite deptable_name;
+  let _ : int = load_dep_table_sqlite deptable_name false in
   List.iter
     (List.append data data_empty)
     ~f:(fun (key, values) -> expect_equals_list key (get_sqlite key) values);
   Sys.remove deptable_name
 
+let test_ignore_hh_version () =
+  let deptable_name = Filename.temp_file "test_ignore_hh_version" ".sql" in
+  save_in_daemon deptable_name ~buildRevision:"test_build_revision";
+  init_shared_mem ();
+  try
+    let _ : int = load_dep_table_sqlite deptable_name false in
+    print_endline "Should not have been able to load this deptable with hh version checking.";
+    exit 1
+  with
+  | e ->
+    let _ : int = load_dep_table_sqlite deptable_name true in
+    List.iter
+      (List.append data data_empty)
+      ~f:(fun (key, values) -> expect_equals_list key (get_sqlite key) values);
+    Sys.remove deptable_name
+
 let tests handle =
   let test_list = [
     "test_in_memory", test_deps_in_memory;
-    "test_sql", test_deptable_sql
+    "test_sql", test_deptable_sql;
+    "test_ignore_hh_version", test_ignore_hh_version
   ] in
   let setup_test (name, test) = name, fun () ->
     test ();

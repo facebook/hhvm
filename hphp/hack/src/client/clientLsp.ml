@@ -1135,6 +1135,7 @@ let rec connect_client
       ai_mode = None; (* only relevant when autostart=true *)
       progress_callback = ClientConnect.null_progress_reporter; (* we're fast! *)
       do_post_handoff_handshake = false;
+      ignore_hh_version = false;
     } in
   try
     let (ic, oc) = ClientConnect.connect env_connect in
@@ -1207,6 +1208,7 @@ let start_server (root: Path.t) : unit =
       silent = true;
       exit_on_failure = false;
       debug_port = None;
+      ignore_hh_version = false;
     } in
   let _exit_status = ClientStart.main env_start in
   ()

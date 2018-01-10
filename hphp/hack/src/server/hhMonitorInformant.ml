@@ -83,13 +83,15 @@ module Revision_map = struct
           (** is tiny state *) bool *
           (** Prefetcher *) (unit Future.t) option ref)) Hashtbl.t;
         use_xdb : bool;
+        ignore_hh_version : bool;
       }
 
-    let create use_xdb =
+    let create use_xdb ignore_hh_version =
       {
         svn_queries = Hashtbl.create 200;
         xdb_queries = Hashtbl.create 200;
         use_xdb;
+        ignore_hh_version;
       }
 
     let add_query ~hg_rev root t =
@@ -146,11 +148,14 @@ module Revision_map = struct
                * Just return a fake empty list of XDB results. *)
               Future.of_value []
             | Some hhconfig_hash ->
+              let hh_version = if t.ignore_hh_version
+                then None
+                else Some Build_id.build_revision in
               Xdb.find_nearest
                 ~db:Xdb.hack_db_name
                 ~db_table:Xdb.mini_saved_states_table
                 ~svn_rev
-                ~hh_version:Build_id.build_revision
+                ~hh_version
                 ~hhconfig_hash
                 ~tiny
           end in
@@ -295,6 +300,7 @@ module Revision_tracker = struct
     prefetcher : State_prefetcher.t;
     min_distance_restart : int;
     use_xdb : bool;
+    ignore_hh_version : bool;
   }
 
   type env = {
@@ -337,13 +343,14 @@ module Revision_tracker = struct
    * make it responsible for maintaining its own instance. *)
   type t = instance ref
 
-  let init ~min_distance_restart ~use_xdb watchman prefetcher root =
+  let init ~min_distance_restart ~use_xdb ~ignore_hh_version watchman prefetcher root =
     let init_settings = {
       watchman = ref watchman;
       prefetcher;
       root;
       min_distance_restart;
       use_xdb;
+      ignore_hh_version;
   } in
     ref @@ Initializing (init_settings,
       Hg.current_working_copy_base_rev (Path.to_string root))
@@ -359,7 +366,9 @@ module Revision_tracker = struct
     {
       inits = init_settings;
       current_base_revision = ref base_svn_rev;
-      rev_map = Revision_map.create init_settings.use_xdb;
+      rev_map = Revision_map.create
+        init_settings.use_xdb
+        init_settings.ignore_hh_version;
       state_changes = Queue.create() ;
     }
 
@@ -678,6 +687,7 @@ let init {
   use_dummy;
   min_distance_restart;
   use_xdb;
+  ignore_hh_version;
 } =
   if use_dummy then
     let () = Printf.eprintf "Informant using dummy - resigning\n" in
@@ -704,6 +714,7 @@ let init {
         revision_tracker = Revision_tracker.init
           ~min_distance_restart
           ~use_xdb
+          ~ignore_hh_version
           (Watchman.Watchman_alive watchman_env)
           (** TODO: Put the prefetcher here. *)
           state_prefetcher root;
@@ -741,6 +752,9 @@ let should_start_first_server t = match t with
       HackEventLogger.informant_watcher_settled_state ();
       true
   end
+
+let should_ignore_hh_version init_env =
+  init_env.ignore_hh_version
 
 let is_managing = function
   | Resigned -> false

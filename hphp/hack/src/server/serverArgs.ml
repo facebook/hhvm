@@ -30,6 +30,7 @@ type options = {
   use_gen_deps     : bool;
   waiting_client   : Unix.file_descr option;
   debug_client     : Handle.handle option;
+  ignore_hh_version : bool;
 }
 
 (*****************************************************************************)
@@ -78,6 +79,7 @@ module Messages = struct
   let waiting_client= " send message to fd/handle when server has begun \
                       \ starting and again when it's done starting"
   let debug_client  = " send significant server events to this file descriptor"
+  let ignore_hh_version = " ignore hh_version check when loading saved states"
 end
 
 let print_json_version () =
@@ -174,6 +176,7 @@ let parse_options () =
   let version       = ref false in
   let waiting_client= ref None in
   let debug_client  = ref None in
+  let ignore_hh     = ref false in
   let cdir          = fun s -> convert_dir := Some s in
   let set_ai        = fun s ->
     ai_mode := Some (Ai_options.prepare ~server:true s) in
@@ -207,6 +210,7 @@ let parse_options () =
      "--version"       , Arg.Set version       , "";
      "--waiting-client", Arg.Int set_wait      , Messages.waiting_client;
      "--debug-client"  , Arg.Int set_debug     , Messages.debug_client;
+     "--ignore-hh-version", Arg.Set ignore_hh  , Messages.ignore_hh_version;
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -255,6 +259,7 @@ let parse_options () =
     save_filename = !save;
     waiting_client= !waiting_client;
     debug_client  = !debug_client;
+    ignore_hh_version = !ignore_hh;
   }
 
 (* useful in testing code *)
@@ -274,6 +279,7 @@ let default_options ~root = {
   use_gen_deps = false;
   waiting_client = None;
   debug_client = None;
+  ignore_hh_version = false;
 }
 
 (*****************************************************************************)
@@ -295,6 +301,7 @@ let save_filename options = options.save_filename
 let use_gen_deps options = options.use_gen_deps
 let waiting_client options = options.waiting_client
 let debug_client options = options.debug_client
+let ignore_hh_version options = options.ignore_hh_version
 
 (*****************************************************************************)
 (* Setters *)

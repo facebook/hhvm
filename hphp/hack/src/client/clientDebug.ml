@@ -24,6 +24,7 @@ let main env =
     profile_log = false;
     progress_callback = ClientConnect.tty_progress_reporter;
     do_post_handoff_handshake = true;
+    ignore_hh_version = false;
   } in
   ServerCommand.connect_debug oc;
   (* Exit this via ctrl-C *)

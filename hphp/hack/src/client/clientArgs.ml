@@ -79,6 +79,7 @@ let parse_check_args cmd =
   let refactor_before = ref "" in
   let format_from = ref 0 in
   let ai_mode = ref None in
+  let ignore_hh_version = ref false in
 
   (* custom behaviors *)
   let set_from x () = from := x in
@@ -360,6 +361,9 @@ let parse_check_args cmd =
       Arg.String (fun s -> ai_mode :=
          Some (ignore (Ai_options.prepare ~server:true s); s)),
       " run AI module with provided options\n";
+    "--ignore-hh-version",
+      Arg.Set ignore_hh_version,
+      " ignore hh_version check when loading saved states (default: false)";
 
     (* deprecated *)
     "--retry-if-init",
@@ -424,6 +428,7 @@ let parse_check_args cmd =
     no_load = !no_load;
     profile_log = !profile_log;
     ai_mode = !ai_mode;
+    ignore_hh_version = !ignore_hh_version;
   }
 
 let parse_start_env command =
@@ -436,6 +441,7 @@ let parse_start_env command =
   let no_load = ref false in
   let profile_log = ref false in
   let ai_mode = ref None in
+  let ignore_hh_version = ref false in
   let wait_deprecation_msg () = Printf.eprintf
     "WARNING: --wait is deprecated, does nothing, and will be going away \
      soon!\n%!" in
@@ -448,6 +454,8 @@ let parse_start_env command =
     " enable profile logging";
     "--ai", Arg.String (fun x -> ai_mode := Some x),
     "  run ai with options ";
+    "--ignore-hh-version", Arg.Set ignore_hh_version,
+      " ignore hh_version check when loading saved states (default: false)";
   ] in
   let args = parse_without_command options usage command in
   let root =
@@ -466,6 +474,7 @@ let parse_start_env command =
     silent = false;
     exit_on_failure = true;
     debug_port = None;
+    ignore_hh_version = !ignore_hh_version;
   }
 
 let parse_start_args () =

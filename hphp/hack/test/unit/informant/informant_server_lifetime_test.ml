@@ -65,6 +65,7 @@ module Tools = struct
     use_dummy = false;
     min_distance_restart = 100;
     use_xdb = true;
+    ignore_hh_version = false;
   }
 end;;
 

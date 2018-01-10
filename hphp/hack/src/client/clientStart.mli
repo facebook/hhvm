@@ -16,6 +16,7 @@ type env = {
   exit_on_failure: bool;
   ai_mode: string option;
   debug_port: Unix.file_descr option;
+  ignore_hh_version: bool;
 }
 
 val main : env -> Exit_status.t

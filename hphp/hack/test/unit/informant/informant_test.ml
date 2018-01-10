@@ -62,6 +62,7 @@ let test_informant_restarts_significant_move temp_dir =
     min_distance_restart = 100;
     use_dummy = false;
     use_xdb = true;
+    ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
     informant Informant_sig.Server_alive in
@@ -172,6 +173,7 @@ let test_informant_restarts_significant_move_delayed temp_dir =
     min_distance_restart = 100;
     use_dummy = false;
     use_xdb = false;
+    ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
     informant Informant_sig.Server_alive in
@@ -223,6 +225,7 @@ let test_informant_no_saved_state_no_restart temp_dir =
     min_distance_restart = 100;
     use_dummy = false;
     use_xdb = true;
+    ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
     informant Informant_sig.Server_alive in
@@ -256,6 +259,7 @@ let test_informant_xdb_saved_state_too_far temp_dir =
     min_distance_restart = 100;
     use_dummy = false;
     use_xdb = true;
+    ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
     informant Informant_sig.Server_alive in
@@ -288,6 +292,7 @@ let test_repo_starts_midupdate temp_dir =
     allow_subscriptions = true;
     use_dummy = false;
     use_xdb = false;
+    ignore_hh_version = false;
   } in
   let should_start_first_server =
     HhMonitorInformant.should_start_first_server informant in
@@ -320,6 +325,7 @@ let test_watcher_in_unknown_state temp_dir =
     allow_subscriptions = true;
     use_dummy = false;
     use_xdb = false;
+    ignore_hh_version = false;
   } in
   let should_start_first_server =
     HhMonitorInformant.should_start_first_server informant in

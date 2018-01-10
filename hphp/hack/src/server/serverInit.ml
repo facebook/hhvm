@@ -57,13 +57,13 @@ let load_mini_exn_to_string err = match err with
 
 module ServerInitCommon = struct
 
-  let lock_and_load_deptable fn =
+  let lock_and_load_deptable fn ~ignore_hh_version =
     (* The sql deptable must be loaded in the master process *)
     try
       (* Take a lock on the info file for the sql *)
       LoadScriptUtils.lock_saved_state fn;
       let read_deptable_time =
-        SharedMem.load_dep_table_sqlite fn
+        SharedMem.load_dep_table_sqlite fn ignore_hh_version
       in
       Hh_logger.log
         "Reading the dependency file took (sec): %d" read_deptable_time;
@@ -168,7 +168,7 @@ module ServerInitCommon = struct
    * It then waits for the load script to send it the list of files that
    * have changed since the state was downloaded.
    *)
-  let mk_state_future root cmd =
+  let mk_state_future root cmd ~ignore_hh_version =
     let start_time = Unix.gettimeofday () in
     Core_result.try_with @@ fun () ->
     let log_file =
@@ -189,7 +189,7 @@ module ServerInitCommon = struct
         end_time,
         deptable_fn,
         state_distance) ->
-        lock_and_load_deptable deptable_fn;
+        lock_and_load_deptable deptable_fn ~ignore_hh_version;
         HackEventLogger.load_mini_worker_end ~is_cached start_time end_time;
         let time_taken = end_time -. start_time in
         Hh_logger.log "Loading mini-state took %.2fs" time_taken;
@@ -237,12 +237,14 @@ module ServerInitCommon = struct
       handle, is_tiny
     end in
     let native_load_error e = raise (Native_loader_failure (State_loader.error_string e)) in
+    let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
     State_loader.mk_state_future ~config:genv.local_config.SLC.state_loader_timeouts
       ~use_canary ?mini_state_handle
       ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny
+      ~ignore_hh_version
       |> Core_result.map_error ~f:native_load_error
       >>= fun result ->
-    lock_and_load_deptable result.State_loader.deptable_fn;
+    lock_and_load_deptable result.State_loader.deptable_fn ~ignore_hh_version;
     let old_saved = open_in result.State_loader.saved_state_fn
       |> Marshal.from_channel in
     let get_dirty_files = (fun () ->
@@ -265,12 +267,14 @@ module ServerInitCommon = struct
     ) in
     Ok get_dirty_files
 
-  let invoke_approach genv root approach ~tiny = match approach with
+  let invoke_approach genv root approach ~tiny =
+    let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
+    match approach with
     | Load_mini_script cmd ->
-      mk_state_future root cmd
+      mk_state_future root cmd ~ignore_hh_version
     | Precomputed { ServerArgs.saved_state_fn;
       corresponding_base_revision; deptable_fn; changes } ->
-      lock_and_load_deptable deptable_fn;
+      lock_and_load_deptable deptable_fn ~ignore_hh_version;
       let changes = Relative_path.set_of_list changes in
       let chan = open_in saved_state_fn in
       let old_saved = Marshal.from_channel chan in
@@ -1029,7 +1033,7 @@ let save_state env fn =
   let saved = FileInfo.info_to_saved env.files_info in
   Marshal.to_channel chan saved [];
   Sys_utils.close_out_no_fail fn chan;
-  let sqlite_save_t = SharedMem.save_dep_table_sqlite (fn^".sql") in
+  let sqlite_save_t = SharedMem.save_dep_table_sqlite (fn^".sql") Build_id.build_revision in
   Hh_logger.log "Saving deptable using sqlite took(seconds): %d" sqlite_save_t;
   ignore @@ Hh_logger.log_duration "Saving" t
 

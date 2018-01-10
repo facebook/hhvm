@@ -49,6 +49,7 @@ module type S = sig
   val use_gen_deps        : options -> bool
   val waiting_client      : options -> Unix.file_descr option
   val debug_client        : options -> Handle.handle option
+  val ignore_hh_version   : options -> bool
 
   (****************************************************************************)
   (* Setters *)

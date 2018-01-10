@@ -65,6 +65,7 @@ type client_check_env = {
   no_load: bool;
   profile_log: bool;
   ai_mode: string option;
+  ignore_hh_version: bool;
 }
 
 let mode_to_string = function

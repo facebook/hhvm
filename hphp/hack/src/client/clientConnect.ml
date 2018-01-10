@@ -23,6 +23,7 @@ type env = {
   ai_mode : string option;
   progress_callback: string option -> unit;
   do_post_handoff_handshake: bool;
+  ignore_hh_version : bool;
 }
 
 let tty_progress_reporter (status: string option) : unit =
@@ -243,6 +244,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           exit_on_failure = true;
           ai_mode = env.ai_mode;
           debug_port = None;
+          ignore_hh_version = env.ignore_hh_version;
         };
         connect env retries start_time tail_env
       end else begin

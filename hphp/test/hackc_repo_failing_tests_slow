@@ -1,5 +1,4 @@
 slow/async/genva-variadic.php
-slow/autoload/autoload-fail.php
 slow/dict/mixed-to-dict-with-refs.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/inout/bad-call-15.php

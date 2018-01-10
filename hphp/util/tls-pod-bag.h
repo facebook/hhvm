@@ -134,6 +134,12 @@ struct TlsPodBag {
     if (!m_population) deallocate();
   }
 
+  void clear() {
+    if (!m_population) return;
+    m_population = 0;
+    deallocate();
+  }
+
 private:
   bool unpopulated(const T* t) const {
     return *reinterpret_cast<const uint64_t*>(t) == 0;

@@ -252,9 +252,7 @@ void MIterTable::clear() {
   if (!tl_miter_table) return;
   auto t = tl_miter_table.get();
   t->ents.fill({nullptr, nullptr});
-  if (!t->extras.empty()) {
-    t->extras.release_if([](const MIterTable::Ent& /*e*/) { return true; });
-  }
+  t->extras.clear();
 }
 
 namespace {

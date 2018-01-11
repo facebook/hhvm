@@ -318,12 +318,15 @@ public:
   static constexpr auto NvTryGetInt = &NvGetInt;
   static constexpr auto NvTryGetStr = &NvGetStr;
   static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+    assertx(ad->isMixed());
     return member_rval { ad, NvTryGetInt(ad, k) };
   }
   static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+    assertx(ad->isMixed());
     return member_rval { ad, NvTryGetStr(ad, k) };
   }
   static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+    assertx(ad->isMixed());
     return member_rval { ad, GetValueRef(ad, pos) };
   }
   static bool ExistsInt(const ArrayData*, int64_t k);
@@ -392,16 +395,20 @@ public:
                                             const StringData*);
   static constexpr auto NvGetStrDict = &NvGetStr;
   static member_rval RvalIntDict(const ArrayData* ad, int64_t k) {
+    assertx(ad->isDict());
     return member_rval { ad, NvGetIntDict(ad, k) };
   }
   static member_rval RvalIntStrictDict(const ArrayData* ad, int64_t k) {
+    assertx(ad->isDict());
     return member_rval { ad, NvTryGetIntDict(ad, k) };
   }
   static member_rval RvalStrDict(const ArrayData* ad, const StringData* k) {
+    assertx(ad->isDict());
     return member_rval { ad, NvGetStrDict(ad, k) };
   }
   static member_rval RvalStrStrictDict(const ArrayData* ad,
                                        const StringData* k) {
+    assertx(ad->isDict());
     return member_rval { ad, NvTryGetStrDict(ad, k) };
   }
   static constexpr auto ReleaseDict = &Release;

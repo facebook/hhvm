@@ -68,18 +68,23 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static member_rval::ptr_u NvGetStr(const ArrayData*, const StringData*);
   static constexpr auto NvTryGetStr = &NvGetStr;
   static member_rval RvalInt(const ArrayData* ad, int64_t k) {
+    assertx(ad->isPacked());
     return member_rval { ad, NvGetInt(ad, k) };
   }
   static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+    assertx(ad->isPacked());
     return member_rval { ad, NvTryGetInt(ad, k) };
   }
   static member_rval RvalStr(const ArrayData* ad, const StringData* k) {
+    assertx(ad->isPacked());
     return member_rval { ad, NvGetStr(ad, k) };
   }
   static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+    assertx(ad->isPacked());
     return member_rval { ad, NvTryGetStr(ad, k) };
   }
   static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+    assertx(ad->isPacked());
     return member_rval { ad, GetValueRef(ad, pos) };
   }
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
@@ -210,9 +215,11 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto ToDArrayVec = &ToDArray;
 
   static member_rval RvalIntVec(const ArrayData* ad, int64_t k) {
+    assertx(ad->isVecArray());
     return member_rval { ad, NvGetIntVec(ad, k) };
   }
   static member_rval RvalIntStrictVec(const ArrayData* ad, int64_t k) {
+    assertx(ad->isVecArray());
     return member_rval { ad, NvTryGetIntVec(ad, k) };
   }
 

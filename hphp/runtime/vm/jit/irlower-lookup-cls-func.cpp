@@ -367,8 +367,13 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
       return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
     }
 
-    auto const elem0 = PackedArray::RvalInt(arr, 0).unboxed();
-    auto const elem1 = PackedArray::RvalInt(arr, 1).unboxed();
+    auto const rval = [&] (int64_t idx) {
+      return arr->isPacked()
+        ? PackedArray::RvalInt(arr, idx).unboxed()
+        : PackedArray::RvalIntVec(arr, idx).unboxed();
+    };
+    auto const elem0 = rval(0);
+    auto const elem1 = rval(1);
 
     if (UNLIKELY(elem0.type() != KindOfObject ||
                  !isStringType(elem1.type()))) {

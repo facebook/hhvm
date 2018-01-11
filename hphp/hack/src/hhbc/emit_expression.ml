@@ -514,7 +514,7 @@ and emit_conditional_expression env etest etrue efalse =
       instr_label end_label;
     ]
 
-and emit_new env expr args uargs =
+and emit_new env pos expr args uargs =
   let nargs = List.length args + List.length uargs in
   let cexpr = expr_to_class_expr ~resolve_self:true
     (Emit_env.get_scope env) expr in
@@ -525,41 +525,41 @@ and emit_new env expr args uargs =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
     gather [
       instr_fpushctord nargs fq_id;
-      emit_args_and_call env args uargs;
+      emit_args_and_call env pos args uargs;
       instr_popr
       ]
   | Class_static ->
     gather [
       instr_fpushctors nargs SpecialClsRef.Static;
-      emit_args_and_call env args uargs;
+      emit_args_and_call env pos args uargs;
       instr_popr
       ]
   | Class_self ->
     gather [
       instr_fpushctors nargs SpecialClsRef.Self;
-      emit_args_and_call env args uargs;
+      emit_args_and_call env pos args uargs;
       instr_popr
       ]
   | Class_parent ->
     gather [
       instr_fpushctors nargs SpecialClsRef.Parent;
-      emit_args_and_call env args uargs;
+      emit_args_and_call env pos args uargs;
       instr_popr
       ]
   | _ ->
     gather [
       emit_load_class_ref env cexpr;
       instr_fpushctor nargs 0;
-      emit_args_and_call env args uargs;
+      emit_args_and_call env pos args uargs;
       instr_popr
     ]
 
-and emit_new_anon env cls_idx args uargs =
+and emit_new_anon env pos cls_idx args uargs =
   let nargs = List.length args + List.length uargs in
   gather [
     instr_defcls cls_idx;
     instr_fpushctori nargs cls_idx;
-    emit_args_and_call env args uargs;
+    emit_args_and_call env pos args uargs;
     instr_popr
     ]
 
@@ -1151,10 +1151,10 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
   | A.Execution_operator _ ->
     emit_call_expr ~need_ref env expr
   | A.New (typeexpr, args, uargs) ->
-    emit_box_if_necessary need_ref @@ emit_new env typeexpr args uargs
+    emit_box_if_necessary need_ref @@ emit_new env pos typeexpr args uargs
   | A.NewAnonClass (args, uargs, { A.c_name = (_, cls_name); _ }) ->
     let cls_idx = int_of_string cls_name in
-    emit_box_if_necessary need_ref @@ emit_new_anon env cls_idx args uargs
+    emit_box_if_necessary need_ref @@ emit_new_anon env pos cls_idx args uargs
   | A.Array es ->
     emit_box_if_necessary need_ref @@ emit_collection env expr es
   | A.Darray es ->
@@ -1968,7 +1968,7 @@ and strip_ref e =
   | A.Unop (A.Uref, e) -> e
   | _ -> e
 
-and emit_arg env i is_splatted expr =
+and emit_arg env call_pos i is_splatted expr =
   let is_inout, (pos, _ as expr) =
     match snd expr with
     | A.Callconv (A.Pinout, e) -> true, e
@@ -1991,7 +1991,7 @@ and emit_arg env i is_splatted expr =
     in
     gather [
       instrs;
-      Emit_pos.emit_pos pos;
+      Emit_pos.emit_pos call_pos;
       fpass_kind;
     ] in
   if is_splatted then default ()
@@ -2005,7 +2005,7 @@ and emit_arg env i is_splatted expr =
   | A.Lvar _ when is_inout ->
     gather [
       emit_expr ~need_ref:false env expr;
-      Emit_pos.emit_pos pos;
+      Emit_pos.emit_pos call_pos;
       instr_fpassc i hint;
     ]
   | A.Lvar ((_, str) as id)
@@ -2066,13 +2066,14 @@ and emit_ignored_expr env ?(pop_pos = Pos.none) e =
     ]
 
 (* Emit code to construct the argument frame and then make the call *)
-and emit_args_and_call env args uargs =
+and emit_args_and_call env pos args uargs =
   let args_count = List.length args in
   let all_args = args @ uargs in
   let is_splatted =  not (List.is_empty uargs) in
   let nargs = List.length all_args in
   gather [
-    gather (List.mapi all_args (fun i e -> emit_arg env i (i >= args_count) e));
+    gather (List.mapi all_args (fun i e ->
+      emit_arg env pos i (i >= args_count) e));
     if uargs = [] && not is_splatted
     then instr (ICall (FCall nargs))
     else instr (ICall (FCallUnpack nargs));
@@ -2449,7 +2450,7 @@ and emit_call env pos (_, expr_ as expr) args uargs =
     gather [
       emit_call_lhs
         env expr nargs (not (List.is_empty uargs)) inout_arg_positions;
-      emit_args_and_call env args uargs;
+      emit_args_and_call env pos args uargs;
     ], flavor in
 
   match expr_, args with

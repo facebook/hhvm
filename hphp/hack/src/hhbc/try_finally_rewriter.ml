@@ -61,11 +61,35 @@ let emit_save_label_id id =
     instr_popc;
   ]
 
+let get_pos_for_error env =
+  let aux_pos p =
+    let pos_file, line = match p with
+      | None -> Relative_path.default, 1
+      | Some p -> Pos.filename p, Pos.line p in
+    (* Drop column info *)
+    let pos_start = File_pos.of_line_column_offset ~line ~column:0 ~offset:0 in
+    let pos_end = pos_start in
+    Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
+  in
+  let rec aux_scope = function
+    | Ast_scope.ScopeItem.Function fd :: _ ->
+      aux_pos @@ Some fd.Ast.f_span
+    (* For methods, it points to class not the method.. weird *)
+    | Ast_scope.ScopeItem.Class cd :: _ ->
+      aux_pos @@ Some cd.Ast.c_span
+    | Ast_scope.ScopeItem.Method _ :: scope
+    | Ast_scope.ScopeItem.Lambda :: scope
+    | Ast_scope.ScopeItem.LongLambda _ :: scope -> aux_scope scope
+    | _ -> aux_pos None
+  in
+  aux_scope @@ Emit_env.get_scope env
+
 let emit_goto ~in_finally_epilogue env label =
+  let err_pos = get_pos_for_error env in
   match SMap.get label @@ JT.get_labels_in_function () with
   | None ->
     Emit_fatal.raise_fatal_parse
-      Pos.none @@ "'goto' to undefined label '" ^ label ^ "'"
+      err_pos @@ "'goto' to undefined label '" ^ label ^ "'"
   | Some in_using ->
     let named_label = Label.named label in
     let jump_targets = Emit_env.get_jump_targets env in
@@ -94,13 +118,14 @@ let emit_goto ~in_finally_epilogue env label =
       ]
     | JT.ResolvedGoto_goto_from_finally ->
       Emit_fatal.raise_fatal_runtime
-        Pos.none "Goto to a label outside a finally block is not supported"
+        err_pos
+        "Goto to a label outside a finally block is not supported"
     | JT.ResolvedGoto_goto_invalid_label ->
       let message =
         if in_using
         then "'goto' into or across using statement is disallowed"
         else "'goto' into loop or switch statement is disallowed" in
-      Emit_fatal.raise_fatal_parse Pos.none message
+      Emit_fatal.raise_fatal_parse err_pos message
     end
 
 let emit_return

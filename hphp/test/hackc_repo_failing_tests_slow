@@ -6,5 +6,3 @@ slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-6.php
 slow/traits/require_constraint_basic_error.php
 slow/traits/require_constraint_recurse.php
-slow/using/bad-goto1.php
-slow/using/bad-goto2.php

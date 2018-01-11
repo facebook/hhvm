@@ -195,8 +195,17 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 }
 #endif
 
+#define __RETURN_OR_OUT_OF_MEM(fn) \
+  { \
+    void *p = fn; \
+    if (p) { return p; } \
+    fprintf(stderr, "Out of memory\n"); \
+    _exit(1); \
+  }
+
+
 ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
-  return HPHP::req::malloc_untyped(size);
+  __RETURN_OR_OUT_OF_MEM(HPHP::req::malloc_untyped(size));
 }
 
 ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
@@ -216,13 +225,13 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
 }
 
 ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
-  return HPHP::req::calloc_untyped(nmemb, size);
+  __RETURN_OR_OUT_OF_MEM(HPHP::req::calloc_untyped(nmemb, size));
 }
 
 ZEND_API void*
 _erealloc(void* ptr, size_t size,
           int /*allow_failure*/ ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
-  return HPHP::req::realloc_untyped(ptr, size);
+  __RETURN_OR_OUT_OF_MEM(HPHP::req::realloc_untyped(ptr, size));
 }
 
 ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {

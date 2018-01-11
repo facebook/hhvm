@@ -107,6 +107,17 @@ bool(false)
 ============== test_varray =========================
 Exception: ThrowIterableObj
 ============== test_varray =========================
+array(3) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+  [2]=>
+  string(3) "ghi"
+}
+bool(true)
+bool(false)
+============== test_varray =========================
 array(2) {
   [0]=>
   string(3) "abc"
@@ -317,6 +328,17 @@ bool(false)
 bool(true)
 ============== test_darray =========================
 Exception: ThrowIterableObj
+============== test_darray =========================
+array(3) {
+  [100]=>
+  string(3) "abc"
+  [200]=>
+  string(3) "def"
+  [300]=>
+  string(3) "ghi"
+}
+bool(false)
+bool(true)
 ============== test_darray =========================
 array(1) {
   [100]=>
@@ -525,6 +547,17 @@ bool(false)
 ============== test_indirect (HH\varray) ==================
 Exception: ThrowIterableObj
 ============== test_indirect (HH\varray) ==================
+array(3) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+  [2]=>
+  string(3) "ghi"
+}
+bool(true)
+bool(false)
+============== test_indirect (HH\varray) ==================
 array(2) {
   [0]=>
   string(3) "abc"
@@ -735,6 +768,17 @@ bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
 Exception: ThrowIterableObj
+============== test_indirect (HH\darray) ==================
+array(3) {
+  [100]=>
+  string(3) "abc"
+  [200]=>
+  string(3) "def"
+  [300]=>
+  string(3) "ghi"
+}
+bool(false)
+bool(true)
 ============== test_indirect (HH\darray) ==================
 array(1) {
   [100]=>

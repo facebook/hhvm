@@ -616,13 +616,6 @@ void tvCastToArrayInPlace(TypedValue* tv) {
   assert(cellIsPlausible(*tv));
 }
 
-static Array arrayFromCollection(ObjectData* obj) {
-  if (auto ad = collections::asArray(obj)) {
-    return ArrNR{ad}.asArray();
-  }
-  return collections::toArray(obj);
-}
-
 void tvCastToVecInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
@@ -696,24 +689,11 @@ void tvCastToVecInPlace(TypedValue* tv) {
         assert(tv->m_data.parr->isVecArray());
         return;
 
-      case KindOfObject: {
-        auto* obj = tv->m_data.pobj;
-        if (obj->isCollection()) {
-          a = arrayFromCollection(obj).toVec().detach();
-        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
-          auto arr = Array::CreateVec();
-          for (ArrayIter iter(obj); iter; ++iter) {
-            arr.append(iter.second());
-          }
-          a = arr.detach();
-        } else {
-          SystemLib::throwInvalidOperationExceptionObject(
-            "Non-iterable object to vec conversion"
-          );
-        }
-        decRefObj(obj);
+      case KindOfObject:
+        a = castObjToVec(tv->m_data.pobj);
+        // We might have re-entered, so tv may not contain the object anymore.
+        tvDecRefGen(tv);
         continue;
-      }
 
       case KindOfRef:
         break;
@@ -798,24 +778,11 @@ void tvCastToDictInPlace(TypedValue* tv) {
         assert(tv->m_data.parr->isDict());
         return;
 
-      case KindOfObject: {
-        auto* obj = tv->m_data.pobj;
-        if (obj->isCollection()) {
-          a = arrayFromCollection(obj).toDict().detach();
-        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
-          auto arr = Array::CreateDict();
-          for (ArrayIter iter(obj); iter; ++iter) {
-            arr.set(iter.first(), iter.second());
-          }
-          a = arr.detach();
-        } else {
-          SystemLib::throwInvalidOperationExceptionObject(
-            "Non-iterable object to dict conversion"
-          );
-        }
-        decRefObj(obj);
+      case KindOfObject:
+        a = castObjToDict(tv->m_data.pobj);
+        // We might have re-entered, so tv may not contain the object anymore.
+        tvDecRefGen(tv);
         continue;
-      }
 
       case KindOfRef:
         break;
@@ -900,24 +867,11 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
         assert(tv->m_data.parr->isKeyset());
         return;
 
-      case KindOfObject: {
-        auto* obj = tv->m_data.pobj;
-        if (obj->isCollection()) {
-          a = arrayFromCollection(obj).toKeyset().detach();
-        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
-          auto arr = Array::CreateKeyset();
-          for (ArrayIter iter(obj); iter; ++iter) {
-            arr.append(iter.second());
-          }
-          a = arr.detach();
-        } else {
-          SystemLib::throwInvalidOperationExceptionObject(
-            "Non-iterable object to keyset conversion"
-          );
-        }
-        decRefObj(obj);
+      case KindOfObject:
+        a = castObjToKeyset(tv->m_data.pobj);
+        // We might have re-entered, so tv may not contain the object anymore.
+        tvDecRefGen(tv);
         continue;
-      }
 
       case KindOfRef:
         break;
@@ -1011,26 +965,11 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
         continue;
       }
 
-      case KindOfObject: {
-        auto* obj = tv->m_data.pobj;
-        if (obj->isCollection()) {
-          a = arrayFromCollection(obj).toVArray().detach();
-        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
-          // This assumes that appending to an initially empty array will never
-          // promote to mixed.
-          auto arr = Array::CreateVArray();
-          for (ArrayIter iter(obj); iter; ++iter) {
-            arr.append(iter.second());
-          }
-          a = arr.detach();
-        } else {
-          SystemLib::throwInvalidOperationExceptionObject(
-            "Non-iterable object to varray conversion"
-          );
-        }
-        decRefObj(obj);
+      case KindOfObject:
+        a = castObjToVArray(tv->m_data.pobj);
+        // We might have re-entered, so tv may not contain the object anymore.
+        tvDecRefGen(tv);
         continue;
-      }
 
       case KindOfRef:
         break;
@@ -1127,24 +1066,11 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
         continue;
       }
 
-      case KindOfObject: {
-        auto* obj = tv->m_data.pobj;
-        if (obj->isCollection()) {
-          a = arrayFromCollection(obj).toDArray().detach();
-        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
-          auto arr = Array::CreateDArray();
-          for (ArrayIter iter(obj); iter; ++iter) {
-            arr.set(iter.first(), iter.second());
-          }
-          a = arr.detach();
-        } else {
-          SystemLib::throwInvalidOperationExceptionObject(
-            "Non-iterable object to darray conversion"
-          );
-        }
-        decRefObj(obj);
+      case KindOfObject:
+        a = castObjToDArray(tv->m_data.pobj);
+        // We might have re-entered, so tv may not contain the object anymore.
+        tvDecRefGen(tv);
         continue;
-      }
 
       case KindOfRef:
         break;

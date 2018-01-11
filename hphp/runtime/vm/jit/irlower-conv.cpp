@@ -340,35 +340,11 @@ static ArrayData* convKeysetToVArrImpl(ArrayData* adIn) {
 }
 
 static ArrayData* convObjToVArrImpl(ObjectData* obj) {
-  if (obj->isCollection()) {
-    auto a = [&]{
-      if (auto ad = collections::asArray(obj)) {
-        return ArrNR{ad}.asArray().toVArray();
-      }
-      return collections::toArray(obj).toVArray();
-    }();
-    assertx(a->isPacked());
-    assertx(a->isVArray());
-    decRefObj(obj);
-    return a.detach();
-  }
-
-  if (obj->instanceof(SystemLib::s_IteratorClass)) {
-    // This assumes that appending to an initially empty array will never
-    // promote to mixed.
-    auto arr = Array::CreateVArray();
-    for (ArrayIter iter(obj); iter; ++iter) {
-      arr.append(iter.second());
-    }
-    decRefObj(obj);
-    assertx(arr->isPacked());
-    assertx(arr->isVArray());
-    return arr.detach();
-  }
-
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Non-iterable object to varray conversion"
-  );
+  auto a = castObjToVArray(obj);
+  assertx(a->isPacked());
+  assertx(a->isVArray());
+  decRefObj(obj);
+  return a;
 }
 
 namespace {
@@ -450,33 +426,11 @@ static ArrayData* convKeysetToDArrImpl(ArrayData* adIn) {
 }
 
 static ArrayData* convObjToDArrImpl(ObjectData* obj) {
-  if (obj->isCollection()) {
-    auto a = [&]{
-      if (auto ad = collections::asArray(obj)) {
-        return ArrNR{ad}.asArray().toDArray();
-      }
-      return collections::toArray(obj).toDArray();
-    }();
-    assertx(a->isMixed());
-    assertx(a->isDArray());
-    decRefObj(obj);
-    return a.detach();
-  }
-
-  if (obj->instanceof(SystemLib::s_IteratorClass)) {
-    auto arr = Array::CreateDArray();
-    for (ArrayIter iter(obj); iter; ++iter) {
-      arr.set(iter.first(), iter.second());
-    }
-    decRefObj(obj);
-    assertx(arr->isMixed());
-    assertx(arr->isDArray());
-    return arr.detach();
-  }
-
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Non-iterable object to darray conversion"
-  );
+  auto a = castObjToDArray(obj);
+  assertx(a->isMixed());
+  assertx(a->isDArray());
+  decRefObj(obj);
+  return a;
 }
 
 namespace {

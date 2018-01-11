@@ -40,6 +40,12 @@ class ThrowIterableObj implements Iterator {
   public function valid() { return $this->position < 3; }
 }
 
+class AggregateObj implements IteratorAggregate {
+  public function getIterator() {
+    return new IterableObj();
+  }
+}
+
 function test_varray($v) {
   echo "============== test_varray =========================\n";
   try {
@@ -110,6 +116,7 @@ $values = vec[
   new stdclass,
   new IterableObj,
   new ThrowIterableObj,
+  new AggregateObj,
   dict[100 => 'abc', '100' => 'def'],
   keyset[100, '100'],
   Vector{100, 200, 300},

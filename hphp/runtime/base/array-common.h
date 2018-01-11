@@ -23,6 +23,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct ArrayData;
+struct ObjectData;
 struct MArrayIter;
 struct Variant;
 
@@ -68,6 +69,14 @@ struct ArrayCommon {
   };
   static RefCheckResult CheckForRefs(const ArrayData*);
 };
+
+//////////////////////////////////////////////////////////////////////
+
+ArrayData* castObjToVec(ObjectData*);
+ArrayData* castObjToDict(ObjectData*);
+ArrayData* castObjToKeyset(ObjectData*);
+ArrayData* castObjToVArray(ObjectData*);
+ArrayData* castObjToDArray(ObjectData*);
 
 //////////////////////////////////////////////////////////////////////
 

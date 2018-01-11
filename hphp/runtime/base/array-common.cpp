@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -174,6 +175,91 @@ ArrayCommon::CheckForRefs(const ArrayData* ad) {
     }
   );
   return result;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+template <typename E, typename C, typename A>
+ALWAYS_INLINE
+ArrayData* castObjToHackArrImpl(ObjectData* obj,
+                                E empty,
+                                C cast,
+                                A add,
+                                const char* msg) {
+  if (LIKELY(obj->isCollection())) {
+    if (auto ad = collections::asArray(obj)) {
+      return cast(ArrNR{ad}.asArray()).detach();
+    }
+    return cast(collections::toArray(obj)).detach();
+  }
+
+  // iterableObject can re-enter, so bump the ref-count to prevent it from
+  // possibly being freed.
+  obj->incRefCount();
+  SCOPE_EXIT { decRefObj(obj); };
+
+  bool isIter;
+  auto iterObj = obj->iterableObject(isIter);
+  if (!isIter) SystemLib::throwInvalidOperationExceptionObject(msg);
+
+  auto arr = empty();
+  for (ArrayIter iter(iterObj); iter; ++iter) add(arr, iter);
+  return arr.detach();
+}
+
+}
+
+ArrayData* castObjToVec(ObjectData* obj) {
+  return castObjToHackArrImpl(
+    obj,
+    Array::CreateVec,
+    [](const Array& arr) { return arr.toVec(); },
+    [](Array& arr, ArrayIter& iter) { arr.append(iter.second()); },
+    "Non-iterable object to vec conversion"
+  );
+}
+
+ArrayData* castObjToDict(ObjectData* obj) {
+  return castObjToHackArrImpl(
+    obj,
+    Array::CreateDict,
+    [](const Array& arr) { return arr.toDict(); },
+    [](Array& arr, ArrayIter& iter) { arr.set(iter.first(), iter.second()); },
+    "Non-iterable object to dict conversion"
+  );
+}
+
+ArrayData* castObjToKeyset(ObjectData* obj) {
+  return castObjToHackArrImpl(
+    obj,
+    Array::CreateKeyset,
+    [](const Array& arr) { return arr.toKeyset(); },
+    [](Array& arr, ArrayIter& iter) { arr.append(iter.second()); },
+    "Non-iterable object to keyset conversion"
+  );
+}
+
+ArrayData* castObjToVArray(ObjectData* obj) {
+  return castObjToHackArrImpl(
+    obj,
+    Array::CreateVArray,
+    [](const Array& arr) { return arr.toVArray(); },
+    [](Array& arr, ArrayIter& iter) { arr.append(iter.second()); },
+    "Non-iterable object to varray conversion"
+  );
+}
+
+
+ArrayData* castObjToDArray(ObjectData* obj) {
+  return castObjToHackArrImpl(
+    obj,
+    Array::CreateDArray,
+    [](const Array& arr) { return arr.toDArray(); },
+    [](Array& arr, ArrayIter& iter) { arr.set(iter.first(), iter.second()); },
+    "Non-iterable object to darray conversion"
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

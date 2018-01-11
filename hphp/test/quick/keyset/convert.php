@@ -40,6 +40,12 @@ class ThrowIterableObj implements Iterator {
   public function valid() { return $this->position < 3; }
 }
 
+class AggregateObj implements IteratorAggregate {
+  public function getIterator() {
+    return new IterableObj();
+  }
+}
+
 function convert_from($ks) {
   echo "====================================================\n";
   var_dump($ks);
@@ -124,6 +130,7 @@ function main() {
   convert_to(Pair{'a', 'b'});
   convert_to(Pair{null, false});
   convert_to(Set{5, 4, 3, 2, 1});
+  convert_to(new AggregateObj);
 
   convert_from(keyset[]);
   convert_from(keyset[1, 2, 3, 4]);

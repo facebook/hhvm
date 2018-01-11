@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
+#include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -295,32 +296,11 @@ ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
   return a;
 }
 
-static Array arrayFromCollection(ObjectData* obj) {
-  if (auto ad = collections::asArray(obj)) {
-    return ArrNR{ad}.asArray();
-  }
-  return collections::toArray(obj);
-}
-
 ArrayData* convObjToVecHelper(ObjectData* obj) {
-  if (obj->isCollection()) {
-    auto a = arrayFromCollection(obj).toVec();
-    decRefObj(obj);
-    return a.detach();
-  }
-
-  if (obj->instanceof(SystemLib::s_IteratorClass)) {
-    auto arr = Array::CreateVec();
-    for (ArrayIter iter(obj); iter; ++iter) {
-      arr.append(iter.second());
-    }
-    decRefObj(obj);
-    return arr.detach();
-  }
-
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Non-iterable object to vec conversion"
-  );
+  auto a = castObjToVec(obj);
+  assertx(a->isVecArray());
+  decRefObj(obj);
+  return a;
 }
 
 ArrayData* convArrToDictHelper(ArrayData* adIn) {
@@ -346,24 +326,10 @@ ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
 }
 
 ArrayData* convObjToDictHelper(ObjectData* obj) {
-  if (obj->isCollection()) {
-    auto a = arrayFromCollection(obj).toDict();
-    decRefObj(obj);
-    return a.detach();
-  }
-
-  if (obj->instanceof(SystemLib::s_IteratorClass)) {
-    auto arr = Array::CreateDict();
-    for (ArrayIter iter(obj); iter; ++iter) {
-      arr.set(iter.first(), iter.second());
-    }
-    decRefObj(obj);
-    return arr.detach();
-  }
-
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Non-iterable object to dict conversion"
-  );
+  auto a = castObjToDict(obj);
+  assertx(a->isDict());
+  decRefObj(obj);
+  return a;
 }
 
 ArrayData* convArrToKeysetHelper(ArrayData* adIn) {
@@ -389,24 +355,10 @@ ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
 }
 
 ArrayData* convObjToKeysetHelper(ObjectData* obj) {
-  if (obj->isCollection()) {
-    auto a = arrayFromCollection(obj).toKeyset();
-    decRefObj(obj);
-    return a.detach();
-  }
-
-  if (obj->instanceof(SystemLib::s_IteratorClass)) {
-    auto arr = Array::CreateKeyset();
-    for (ArrayIter iter(obj); iter; ++iter) {
-      arr.append(iter.second());
-    }
-    decRefObj(obj);
-    return arr.detach();
-  }
-
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Non-iterable object to keyset conversion"
-  );
+  auto a = castObjToKeyset(obj);
+  assertx(a->isKeyset());
+  decRefObj(obj);
+  return a;
 }
 
 int64_t convObjToDblHelper(const ObjectData* o) {

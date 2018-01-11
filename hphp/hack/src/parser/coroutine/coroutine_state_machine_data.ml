@@ -16,7 +16,13 @@ module Syntax = Full_fidelity_editable_positioned_syntax
 (**
  * Data extracted during the state machine generation step.
  *)
+
+type parameter = {
+  parameter_name: Syntax.t;
+  parameter_declaration: Syntax.syntax;
+}
+
 type t = {
   properties: string list;
-  parameters: Syntax.parameter_declaration list;
+  parameters: parameter list;
 }

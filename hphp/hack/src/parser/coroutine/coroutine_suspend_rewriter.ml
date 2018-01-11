@@ -241,13 +241,13 @@ type rewrite_suspend_result =
  *   }
  *)
 let rewrite_suspend
-  suspend_function_call_expression
+  function_call_receiver
+  function_call_left_paren
+  function_call_argument_list
+  function_call_right_paren
   next_label
   next_temp
   in_tail_position =
-
-  let _, _, function_call_argument_list, _ =
-    get_function_call_expression_children suspend_function_call_expression in
 
   if in_tail_position
   then
@@ -260,7 +260,10 @@ let rewrite_suspend
 
     let invoke_coroutine =
       FunctionCallExpression {
-        suspend_function_call_expression with function_call_argument_list
+        function_call_receiver;
+        function_call_left_paren;
+        function_call_argument_list;
+        function_call_right_paren;
       } in
 
     let invoke_coroutine_syntax = make_syntax invoke_coroutine in
@@ -279,7 +282,10 @@ let rewrite_suspend
       function_call_argument_list in
   let invoke_coroutine =
     FunctionCallExpression {
-      suspend_function_call_expression with function_call_argument_list
+        function_call_receiver;
+        function_call_left_paren;
+        function_call_argument_list;
+        function_call_right_paren;
     } in
   let invoke_coroutine_syntax = make_syntax invoke_coroutine in
 
@@ -625,7 +631,11 @@ let rewrite_suspends_in_statement
           syntax = Token { Token.kind = TokenKind.Suspend; _; };
           _ };
         prefix_unary_operand = {
-          syntax = FunctionCallExpression function_call_expression;
+          syntax = FunctionCallExpression {
+            function_call_receiver;
+            function_call_left_paren;
+            function_call_argument_list;
+            function_call_right_paren;};
           _ };
       _ } ->
 
@@ -643,7 +653,10 @@ let rewrite_suspends_in_statement
 
       let { next_label; next_temp; expression = new_node; extra_info } =
         rewrite_suspend
-          function_call_expression
+          function_call_receiver
+          function_call_left_paren
+          function_call_argument_list
+          function_call_right_paren
           next_label
           next_temp
           is_tail_call in
@@ -1157,7 +1170,7 @@ let rewrite_suspends ?(only_tail_call_suspends = false) node =
           temp_count
           ~is_argument_to_unset:false
           (fun if_condition ->
-            make_if_statement_syntax { node with if_condition })
+            make_syntax (IfStatement { node with if_condition }))
 
       | ExpressionStatement { expression_statement_expression; _ } ->
         rewrite_suspends_in_non_return_context
@@ -1174,7 +1187,7 @@ let rewrite_suspends ?(only_tail_call_suspends = false) node =
           temp_count
           ~is_argument_to_unset:false
           (fun switch_expression ->
-            make_switch_statement_syntax { node with switch_expression })
+            make_syntax (SwitchStatement { node with switch_expression }))
 
       | ThrowStatement { throw_expression; _ } ->
         rewrite_suspends_in_non_return_context
@@ -1191,7 +1204,7 @@ let rewrite_suspends ?(only_tail_call_suspends = false) node =
           temp_count
           ~is_argument_to_unset:false
           (fun foreach_collection ->
-            make_foreach_statement_syntax { node with foreach_collection })
+            make_syntax (ForeachStatement { node with foreach_collection }))
 
       | EchoStatement ({ echo_expressions; _ } as node) ->
         rewrite_suspends_in_non_return_context
@@ -1200,7 +1213,7 @@ let rewrite_suspends ?(only_tail_call_suspends = false) node =
           temp_count
           ~is_argument_to_unset:false
           (fun echo_expressions ->
-            make_echo_statement_syntax { node with echo_expressions })
+            make_syntax (EchoStatement { node with echo_expressions }))
 
       | UnsetStatement ({ unset_variables; _ } as node) ->
         rewrite_suspends_in_non_return_context
@@ -1209,7 +1222,7 @@ let rewrite_suspends ?(only_tail_call_suspends = false) node =
           temp_count
           ~is_argument_to_unset:true
           (fun unset_variables ->
-            make_unset_statement_syntax { node with unset_variables })
+            make_syntax (UnsetStatement { node with unset_variables }))
 
       (* while-condition constructs should have already been rewritten into
          while-true-with-if-condition constructs. *)

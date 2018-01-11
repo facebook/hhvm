@@ -24,13 +24,8 @@ let make_parameters_public_and_untyped
   parameters
     |> Core_list.map ~f:
       begin
-      fun p ->
-        make_syntax
-          (ParameterDeclaration {
-            p with
-              parameter_visibility = public_syntax;
-              parameter_type = make_missing ();
-          })
+      fun { CoroutineStateMachineData.parameter_declaration; _ } ->
+        make_syntax parameter_declaration
       end
 
 let generate_constructor_method
@@ -92,7 +87,7 @@ let generate_clone_body { CoroutineStateMachineData.parameters; properties; } =
     make_function_call_expression_syntax select_continuation_clone_syntax [] in
   (* [ $this->arg1; $this->arg2; ... ] *)
   let arg_list =
-    let get_parameter_as_member_variable { parameter_name; _; } =
+    let get_parameter_as_member_variable { CoroutineStateMachineData.parameter_name; _; } =
       parameter_name
         |> string_of_variable_token
         |> fun var -> String_utils.lstrip var "$"

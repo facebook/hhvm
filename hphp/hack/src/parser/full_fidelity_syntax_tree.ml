@@ -40,17 +40,17 @@ let strip_comment_start s =
   else
     s
 
-let first_section script =
-  match syntax script.script_declarations with
+let first_section script_declarations =
+  match syntax script_declarations with
   | SyntaxList (h :: _) ->
     begin match syntax h with
-    | MarkupSection ms -> ms
+    | MarkupSection ms -> (ms.markup_prefix, ms.markup_text, ms.markup_suffix)
     | _ -> failwith "unexpected: first element in a script should be markup"
     end
   | _ -> failwith "unexpected: script content should be list"
 
 let analyze_header text script =
-  let { markup_prefix; markup_text; markup_suffix; _ } = first_section script in
+  let (markup_prefix, markup_text, markup_suffix) = first_section script in
   match syntax markup_suffix with
   | MarkupSuffix {
     markup_suffix_less_than_question;
@@ -83,7 +83,7 @@ let analyze_header text script =
 
 let get_language_and_mode text root =
   match syntax root with
-  | Script s -> analyze_header text s
+  | Script s -> analyze_header text s.script_declarations
   | _ -> failwith "unexpected missing script node"
     (* The parser never produces a missing script, even if the file is empty *)
 

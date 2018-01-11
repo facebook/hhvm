@@ -41,7 +41,7 @@ let remove_coroutine_modifier_from_modifiers_list modifiers =
  * parameter list and return type as necessary to implement the coroutine.
  *)
 let rewrite_function_decl_header header_node =
-  let make_syntax node = make_syntax (FunctionDeclarationHeader node) in
+  let make_syntax node = make_syntax (from_function_declaration_header node) in
   let function_type =
     make_coroutine_result_type_syntax header_node.function_type in
   let function_parameter_list = compute_parameter_list
@@ -188,10 +188,11 @@ let rewrite_methodish_declaration
       function_type
       rewritten_body in
   let method_node = context.Coroutine_context.original_node in
-  let methodish_declaration_node = get_methodish_declaration method_node in
+  let methodish_declaration_node =
+    get_methodish_declaration (syntax method_node) in
   Syntax.synthesize_from
     method_node
-    (MethodishDeclaration { methodish_declaration_node with
+    (from_methodish_declaration { methodish_declaration_node with
       methodish_function_decl_header =
         rewrite_function_decl_header header_node;
       methodish_function_body;
@@ -209,8 +210,8 @@ let rewrite_function_declaration
   let function_node = context.Coroutine_context.original_node in
   Syntax.synthesize_from
     function_node
-    (FunctionDeclaration
-      { (get_function_declaration function_node) with
+    (from_function_declaration
+      { (get_function_declaration (syntax function_node)) with
         function_declaration_header = rewrite_function_decl_header header_node;
         function_body;
       })
@@ -218,7 +219,7 @@ let rewrite_function_declaration
 let rewrite_anon context anon_node =
   (* TODO: redundant to context *)
   let ({ anonymous_parameters; anonymous_type; anonymous_body; _; } as anon) =
-    get_anonymous_function anon_node in
+    get_anonymous_function (syntax anon_node) in
   let anonymous_body = rewrite_coroutine_body
     context anonymous_parameters anonymous_type anonymous_body in
   let anonymous_parameters = compute_parameter_list
@@ -230,15 +231,16 @@ let rewrite_anon context anon_node =
       anonymous_parameters;
       anonymous_type;
       anonymous_body } in
-  Syntax.synthesize_from anon_node (AnonymousFunction anon)
+  Syntax.synthesize_from anon_node (from_anonymous_function anon)
 
 let rewrite_lambda
     context
     ({ lambda_parameters; lambda_type; _; } as lambda_signature)
     lambda_node =
-  let ({ lambda_body; _; } as lambda) = get_lambda_expression lambda_node in
+  let ({ lambda_body; _; } as lambda) =
+    get_lambda_expression (syntax lambda_node) in
   let make_sig node =
-    make_syntax (LambdaSignature node) in
+    make_syntax (from_lambda_signature node) in
   let lambda_body = rewrite_coroutine_body
     context lambda_parameters lambda_type lambda_body in
   let lambda_parameters = compute_parameter_list
@@ -255,4 +257,4 @@ let rewrite_lambda
       lambda_signature;
       lambda_body
     } in
-  Syntax.synthesize_from lambda_node (LambdaExpression lambda)
+  Syntax.synthesize_from lambda_node (from_lambda_expression lambda)

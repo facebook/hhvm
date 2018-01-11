@@ -63,22 +63,22 @@ let make_from_context original_node parents lambda_count =
   let folder acc h =
     match Syntax.syntax h with
     | Syntax.ClassishDeclaration {
-        Syntax.classish_name;
-        Syntax.classish_type_parameters; _; } ->
+        classish_name;
+        classish_type_parameters; _; } ->
       { acc with classish_name; classish_type_parameters; }
     | Syntax.MethodishDeclaration {
-      Syntax.methodish_function_decl_header = {
+      methodish_function_decl_header = {
         Syntax.syntax = Syntax.FunctionDeclarationHeader {
-          Syntax.function_name;
-          Syntax.function_type_parameter_list; _; };
+          function_name;
+          function_type_parameter_list; _; };
         _; }; _; } ->
       { acc with
         function_name; function_type_parameter_list }
     | Syntax.FunctionDeclaration {
-      Syntax.function_declaration_header = {
+      function_declaration_header = {
         Syntax.syntax = Syntax.FunctionDeclarationHeader {
-          Syntax.function_name;
-          Syntax.function_type_parameter_list; _; };
+          function_name;
+          function_type_parameter_list; _; };
         _; }; _; } ->
       { acc with
         function_name; function_type_parameter_list }

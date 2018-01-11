@@ -271,30 +271,10 @@ let get_list_item node =
   | ListItem { list_item; _; } -> list_item
   | _ -> failwith "get_list_item: Was not a ListItem"
 
-let get_function_declaration node =
+let get_type_parameter_type_name node =
   match syntax node with
-  | FunctionDeclaration function_declaration -> function_declaration
-  | _ -> failwith "get_function_declaration: Was not a FunctionDeclaration"
-
-let get_lambda_expression node =
-  match syntax node with
-  | LambdaExpression lambda_expression -> lambda_expression
-  | _ -> failwith "get_lambda_expression: Was not a LambdaExpression"
-
-let get_anonymous_function node =
-  match syntax node with
-  | AnonymousFunction anonymous_function -> anonymous_function
-  | _ -> failwith "get_anonymous_function: Was not an AnonymousFunction"
-
-let get_methodish_declaration node =
-  match syntax node with
-  | MethodishDeclaration methodish_declaration -> methodish_declaration
-  | _ -> failwith "get_methodish_declaration: Was not a MethodishDeclaration"
-
-let get_type_parameter node =
-  match syntax node with
-  | TypeParameter type_parameter -> type_parameter
-  | _ -> failwith "get_type_parameter: Was not a TypeParameter"
+  | TypeParameter x -> x.type_name
+  | _ -> failwith "get_type_parameter_type_name: Was not a TypeParameter"
 
 let get_type_parameter_list node =
   match syntax node with
@@ -308,9 +288,8 @@ let get_type_parameter_list node =
 let get_type_arguments node =
   node
     |> get_type_parameter_list
-    |> Core_list.map ~f:get_type_parameter
-    |> Core_list.map
-      ~f:(fun { type_name; _; } -> make_simple_type_specifier type_name)
+    |> Core_list.map ~f:get_type_parameter_type_name
+    |> Core_list.map ~f:make_simple_type_specifier
 
 let is_static_method { methodish_function_decl_header = header; _; } =
   match syntax header with
@@ -1019,21 +998,6 @@ let make_label_declaration_syntax label =
 
 let make_goto_statement_syntax label =
   make_goto_statement_syntax (get_label_name label)
-
-let make_if_statement_syntax if_stmt =
-  make_syntax (IfStatement if_stmt)
-
-let make_switch_statement_syntax switch_stmt =
-  make_syntax (SwitchStatement switch_stmt)
-
-let make_foreach_statement_syntax foreach_stmt =
-  make_syntax (ForeachStatement foreach_stmt)
-
-let make_echo_statement_syntax echo_stmt =
-  make_syntax (EchoStatement echo_stmt)
-
-let make_unset_statement_syntax unset_stmt =
-  make_syntax (UnsetStatement unset_stmt)
 
 let boolval_syntax =
   make_simple_name_syntax "boolval"

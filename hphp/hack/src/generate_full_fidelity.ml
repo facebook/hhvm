@@ -66,6 +66,18 @@ let type_name_fmt   = align_fmt (fun x -> x.type_name  ) schema
 let trivia_kind_fmt = align_fmt (fun x -> x.trivia_kind) trivia_kinds
 let token_kind_fmt  = align_fmt (fun x -> x.token_kind ) all_tokens
 
+let omit_syntax_record =
+  let names = SSet.of_list [
+    "anonymous_function";
+    "closure_type_specifier";
+    "function_declaration";
+    "function_declaration_header";
+    "lambda_expression";
+    "lambda_signature";
+    "methodish_declaration"]
+  in
+  fun x -> not (SSet.mem x.type_name names)
+
 module GenerateFFValidatedSyntax = struct
 
   let to_validate_functions x =
@@ -84,7 +96,7 @@ module GenerateFFValidatedSyntax = struct
       | ZeroOrOne  s -> sprintf "%s_option_with (%s)" n (validator_of ~n s)
       in
       let mapper (f,t) =
-        sprintf "%s_%s = %s x.Syntax.%s_%s"
+        sprintf "%s_%s = %s x.%s_%s"
           x.prefix f
           (validator_of t)
           x.prefix f
@@ -92,7 +104,7 @@ module GenerateFFValidatedSyntax = struct
       let fields = List.rev_map mapper x.fields in
 
       let mapper (f,t) =
-        sprintf "Syntax.%s_%s = %s x.%s_%s"
+        sprintf "%s_%s = %s x.%s_%s"
           x.prefix f
           (validator_of ~n:"invalidate" t)
           x.prefix f
@@ -217,7 +229,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     fun validate node ->
       let validate_item i =
         match Syntax.syntax i with
-        | Syntax.ListItem { Syntax.list_item; list_separator } ->
+        | Syntax.ListItem { list_item ; list_separator } ->
           let item = validate list_item in
           let separator = validate_option_with validate_token list_separator in
           i.Syntax.value, (item, separator)
@@ -248,7 +260,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
           let inode = invalidate node in
           let iseparator = invalidate_option_with invalidate_token separator in
           { Syntax.syntax = Syntax.ListItem
-            { Syntax.list_item = inode; list_separator = iseparator }
+            { list_item = inode; list_separator = iseparator }
           ; value
           }
         in
@@ -287,16 +299,23 @@ end (* ValidatedSyntax *)
 
 module GenerateFFSyntaxType = struct
   let to_parse_tree x =
+    if omit_syntax_record x then "" else
+    begin
+      let field_width = 50 - String.length x.prefix in
+      let fmt = sprintf "%s_%%-%ds: t\n" x.prefix field_width in
+      let mapper (f,_) = sprintf (Scanf.format_from_string fmt "%-1s") f in
+      let fields = map_and_concat_separated "    ; " mapper x.fields in
+      sprintf "  and %s =\n    { %s    }\n"
+        x.type_name fields
+    end
+
+  let to_syntax x =
     let field_width = 50 - String.length x.prefix in
     let fmt = sprintf "%s_%%-%ds: t\n" x.prefix field_width in
     let mapper (f,_) = sprintf (Scanf.format_from_string fmt "%-1s") f in
     let fields = map_and_concat_separated "    ; " mapper x.fields in
-    sprintf "  and %s =\n    { %s    }\n"
-      x.type_name fields
-
-  let to_syntax x =
-    sprintf ("  | " ^^ kind_name_fmt ^^ " of %s\n")
-      x.kind_name x.type_name
+    sprintf ("  | " ^^ kind_name_fmt ^^ " of\n    { %s    }\n")
+      x.kind_name fields
 
   let to_aggregate_type x =
     let aggregated_types = aggregation_of x in
@@ -402,7 +421,7 @@ end
 module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   type value = SyntaxValue.t
   type t = { syntax : syntax ; value : value }
-PARSE_TREE  and syntax =
+PARSE_TREE   and syntax =
   | Token                             of Token.t
   | Missing
   | SyntaxList                        of t list
@@ -453,17 +472,13 @@ module GenerateFFSyntaxSig = struct
   let to_type_tests x =
     sprintf ("  val is_%s : t -> bool\n") x.type_name
 
-  let to_parse_tree x =
+  let to_syntax x =
     let field_width = 50 - String.length x.prefix in
     let fmt = sprintf "%s_%%-%ds: t\n" x.prefix field_width in
     let mapper (f,_) = sprintf (Scanf.format_from_string fmt "%-1s") f in
     let fields = map_and_concat_separated "    ; " mapper x.fields in
-    sprintf "  and %s =\n    { %s    }\n"
-      x.type_name fields
-
-  let to_syntax x =
-    sprintf ("  | " ^^ kind_name_fmt ^^ " of %s\n")
-      x.kind_name x.type_name
+    sprintf ("  | " ^^ kind_name_fmt ^^ " of\n    { %s    }\n")
+      x.kind_name fields
 
   let full_fidelity_syntax_template : string = (make_header MLStyle "
 * This module contains a signature which can be used to describe the public
@@ -474,7 +489,6 @@ module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
   type value
   type t = { syntax : syntax ; value : value }
-PARSE_TREE
   and syntax =
   | Token                             of Token.t
   | Missing
@@ -536,7 +550,6 @@ end (* Syntax_S *)
     filename = full_fidelity_path_prefix ^ "syntax_sig.ml";
     template = full_fidelity_syntax_template;
     transformations = [
-      { pattern = "PARSE_TREE"; func = to_parse_tree };
       { pattern = "SYNTAX"; func = to_syntax };
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
       { pattern = "TYPE_TESTS"; func = to_type_tests };
@@ -550,13 +563,6 @@ end (* Syntax_S *)
 end (* GenerateFFSyntaxSig *)
 
 module GenerateFFSyntax = struct
-
-  let to_parse_tree x =
-    let mapper (f,_) = sprintf "      %s_%s: t;\n" x.prefix f in
-    let fields = map_and_concat mapper x.fields in
-    sprintf "    and %s = {\n%s    }\n"
-      x.type_name fields
-
   let to_syntax x =
     sprintf ("    | " ^^ kind_name_fmt ^^ " of %s\n")
       x.kind_name x.type_name
@@ -568,15 +574,6 @@ module GenerateFFSyntax = struct
   let to_type_tests x =
     sprintf ("    let is_" ^^ type_name_fmt ^^ " = has_kind SyntaxKind.%s\n")
       x.type_name x.kind_name
-
-  let to_child_list_from_type x =
-    let mapper1 (f,_) = sprintf "      %s_%s;\n" x.prefix f in
-    let mapper2 (f,_) = sprintf "      %s_%s" x.prefix f in
-    let fields1 = map_and_concat mapper1 x.fields in
-    let fields2 = String.concat ",\n" (List.map mapper2 x.fields) in
-    sprintf "    let get_%s_children {\n%s    } = (\n%s\n    )\n\n"
-      x.type_name fields1 fields2
-
   let to_children x =
     let mapper (f,_) = sprintf "        %s_%s;\n" x.prefix f in
     let fields = map_and_concat mapper x.fields in
@@ -623,6 +620,31 @@ module GenerateFFSyntax = struct
 
 "
     x.type_name fields1 x.kind_name fields2
+
+  let to_from_methods x =
+    if omit_syntax_record x then "" else
+    begin
+      let mapper (f,_) = sprintf "          %s_%s;\n" x.prefix f in
+      let fields = map_and_concat mapper x.fields in
+      sprintf "     let from_%s {
+%s       } = %s {
+%s       }
+"
+        x.type_name fields x.kind_name fields
+    end
+
+  let to_get_methods x =
+    if omit_syntax_record x then "" else
+    begin
+      let mapper (f,_) = sprintf "          %s_%s;\n" x.prefix f in
+      let fields = map_and_concat mapper x.fields in
+      sprintf "     let get_%s x =
+        match x with
+        | %s {\n%s            } -> {\n%s           }
+        | _ -> failwith \"get_%s: not a %s\"
+"
+        x.type_name x.kind_name fields fields x.type_name x.kind_name
+    end
 
   let full_fidelity_syntax_template = make_header MLStyle "
  * With these factory methods, nodes can be built up from their child nodes. A
@@ -735,8 +757,6 @@ TYPE_TESTS
     let is_ampersand  = is_specific_token Full_fidelity_token_kind.Ampersand
     let is_inout      = is_specific_token Full_fidelity_token_kind.Inout
 
-CHILD_LIST_FROM_TYPE
-
     let fold_over_children f acc syntax =
       match syntax with
       | Missing -> acc
@@ -785,7 +805,7 @@ CHILDREN_NAMES
       JSON_Object (k :: v)
 
     let binary_operator_kind b =
-      match syntax b.binary_operator with
+      match syntax b with
       | Token token ->
         let kind = Token.kind token in
         if Operator.is_trailing_operator_token kind then
@@ -878,6 +898,10 @@ SYNTAX_FROM_CHILDREN      | (SyntaxKind.Missing, []) -> Missing
 
 CONSTRUCTOR_METHODS
 
+FROM_METHODS
+
+GET_METHODS
+
     end (* WithValueBuilder *)
   end (* WithSyntaxValue *)
 end (* WithToken *)
@@ -890,12 +914,13 @@ end (* WithToken *)
     transformations = [
       { pattern = "TO_KIND"; func = to_to_kind };
       { pattern = "TYPE_TESTS"; func = to_type_tests };
-      { pattern = "CHILD_LIST_FROM_TYPE"; func = to_child_list_from_type };
       { pattern = "CHILDREN"; func = to_children };
       { pattern = "FOLD_FROM_SYNTAX"; func = to_fold_from_syntax };
       { pattern = "CHILDREN_NAMES"; func = to_children_names };
       { pattern = "SYNTAX_FROM_CHILDREN"; func = to_syntax_from_children };
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
+      { pattern = "FROM_METHODS"; func = to_from_methods };
+      { pattern = "GET_METHODS"; func = to_get_methods };
     ];
     token_no_text_transformations = [];
     token_given_text_transformations = [];
@@ -2930,24 +2955,17 @@ let from_tree tree =
       | (first :: other) as fields -> fields, first, other
       | _ -> raise (No_fields_in_schema_node x)
     in
-    let fields =
-      String.concat "\n        ; " @@
-        List.map (fun (f,_) -> sprintf "M.%s_%s" x.prefix f) x.fields
-    in
     let todos =
       String.concat "" @@
-        List.rev_map (sprintf "let todo = Convert (%s, todo) in\n        ") other
+        List.rev_map (sprintf "let todo = Convert (x.%s, todo) in\n        ") other
     in
     sprintf
-"    | { M.syntax = M.%s
-        { %s
-        }
+"    | { M.syntax = M.%s x
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
-        %sconvert offset todo results %s
+        %sconvert offset todo results x.%s
 "
       x.kind_name
-      fields
       todos
       first
 

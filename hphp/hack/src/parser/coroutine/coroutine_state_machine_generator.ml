@@ -236,7 +236,7 @@ let rewrite_while node =
  *   4) end_of_loop_exprs as a list of ExpressionStatements
  *)
 let extract_expressions_from_for_statement
-    { for_initializer; for_control; for_end_of_loop; _; } =
+    for_initializer for_control for_end_of_loop =
   let make_expression_statement_from_list_item node =
     make_expression_statement_syntax (get_list_item node) in
   let make_expression_statements list_syntax =
@@ -284,13 +284,13 @@ let extract_expressions_from_for_statement
 let rewrite_for next_loop_label node =
   let rewrite node next_loop_label =
     match syntax node with
-    | ForStatement ({ for_body; _; } as node) ->
+    | ForStatement { for_body; for_initializer; for_control; for_end_of_loop; _; } ->
         let
           initializer_exprs,
           control_exprs,
           condition_expr,
           end_of_loop_exprs =
-            extract_expressions_from_for_statement node in
+            extract_expressions_from_for_statement for_initializer for_control for_end_of_loop in
         let loop_label = LoopLabel next_loop_label in
         let next_loop_label = next_loop_label + 1 in
 
@@ -341,12 +341,25 @@ let get_token node =
       }
     }
    } *)
-let rec rewrite_if_statement if_stmt =
-  let { if_condition; if_elseif_clauses; if_else_clause; _; } = if_stmt in
+let rec rewrite_if_statement
+    if_keyword
+    if_left_paren
+    if_condition
+    if_right_paren
+    if_statement
+    if_elseif_clauses
+    if_else_clause =
   match syntax_node_to_list if_elseif_clauses with
   | [] ->
     (* no elseif blocks - keep if statement *)
-    make_if_statement_syntax if_stmt
+    make_syntax (IfStatement {
+      if_keyword;
+      if_left_paren;
+      if_condition;
+      if_right_paren;
+      if_statement;
+      if_elseif_clauses;
+      if_else_clause ;})
   | h :: t ->
 
   (* We have, say
@@ -382,21 +395,24 @@ let rec rewrite_if_statement if_stmt =
       let child_if_keyword =
         Token.synthesize_from child_if_keyword TokenKind.If "if" in
       let child_if_keyword = make_token child_if_keyword in
-      let child_if = {
-        if_keyword = child_if_keyword;
-        if_left_paren = elseif_left_paren;
-        if_condition = elseif_condition;
-        if_right_paren = elseif_right_paren;
-        if_statement = elseif_statement;
-        if_elseif_clauses = make_list t;
-        if_else_clause } in
-      let child_if = rewrite_if_statement child_if in
+      let child_if = rewrite_if_statement
+        child_if_keyword
+        elseif_left_paren
+        elseif_condition
+        elseif_right_paren
+        elseif_statement
+        (make_list t)
+        if_else_clause in
       let new_else_clause = make_else_clause else_keyword_syntax child_if in
-      let new_if = { if_stmt with
+      make_syntax (IfStatement {
+        if_keyword = if_keyword;
+        if_left_paren = if_left_paren;
+        if_condition = if_condition;
+        if_right_paren = if_right_paren;
+        if_statement = if_statement;
         if_elseif_clauses = make_missing();
         if_else_clause = new_else_clause
-      } in
-      make_if_statement_syntax new_if
+      })
     | _ ->
       failwith "Malformed elseif clause"
     end
@@ -406,8 +422,21 @@ let rec rewrite_if_statement if_stmt =
 let rewrite_if node =
   let rewrite node =
     match syntax node with
-    | IfStatement if_stmt ->
-      Rewriter.Result.Replace (rewrite_if_statement if_stmt)
+    | IfStatement {
+      if_keyword;
+      if_left_paren;
+      if_condition;
+      if_right_paren;
+      if_statement;
+      if_elseif_clauses;
+      if_else_clause;} ->
+      Rewriter.Result.Replace (rewrite_if_statement if_keyword
+    if_left_paren
+    if_condition
+    if_right_paren
+    if_statement
+    if_elseif_clauses
+    if_else_clause)
     | _ ->
       Rewriter.Result.Keep
   in
@@ -556,19 +585,31 @@ let extract_parameter_declarations function_parameter_list =
     |> Core_list.map ~f:
       begin
       function
-      | ListItem { list_item = { syntax = ParameterDeclaration p; _; }; _; } ->
-          p
+      | ListItem { list_item = { syntax = ParameterDeclaration x; _; }; _; } ->
+          {
+            CoroutineStateMachineData.parameter_name = x.parameter_name;
+            CoroutineStateMachineData.parameter_declaration = ParameterDeclaration {
+              x with
+                parameter_visibility = public_syntax;
+                parameter_type = make_missing ();
+            }
+          }
       | _ -> failwith "Parameter had unexpected type."
       end
 
 let make_outer_param outer_variable =
+  let name = make_variable_syntax outer_variable
+  in
   {
-    parameter_attribute = make_missing();
-    parameter_visibility = public_syntax;
-    parameter_call_convention = make_missing();
-    parameter_type = make_missing();
-    parameter_name = make_variable_syntax outer_variable;
-    parameter_default_value = make_missing();
+    CoroutineStateMachineData.parameter_name = name;
+    CoroutineStateMachineData.parameter_declaration = ParameterDeclaration {
+      parameter_attribute = make_missing();
+      parameter_visibility = public_syntax;
+      parameter_call_convention = make_missing();
+      parameter_type = make_missing();
+      parameter_name = name;
+      parameter_default_value = make_missing();
+    }
   }
 
 let make_outer_params outer_variables =

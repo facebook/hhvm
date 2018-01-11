@@ -451,1910 +451,6 @@ module WithToken(Token: TokenType) = struct
     let is_ampersand  = is_specific_token Full_fidelity_token_kind.Ampersand
     let is_inout      = is_specific_token Full_fidelity_token_kind.Inout
 
-    let get_end_of_file_children {
-      end_of_file_token;
-    } = (
-      end_of_file_token
-    )
-
-    let get_script_children {
-      script_declarations;
-    } = (
-      script_declarations
-    )
-
-    let get_qualified_name_children {
-      qualified_name_parts;
-    } = (
-      qualified_name_parts
-    )
-
-    let get_simple_type_specifier_children {
-      simple_type_specifier;
-    } = (
-      simple_type_specifier
-    )
-
-    let get_literal_expression_children {
-      literal_expression;
-    } = (
-      literal_expression
-    )
-
-    let get_variable_expression_children {
-      variable_expression;
-    } = (
-      variable_expression
-    )
-
-    let get_pipe_variable_expression_children {
-      pipe_variable_expression;
-    } = (
-      pipe_variable_expression
-    )
-
-    let get_enum_declaration_children {
-      enum_attribute_spec;
-      enum_keyword;
-      enum_name;
-      enum_colon;
-      enum_base;
-      enum_type;
-      enum_left_brace;
-      enum_enumerators;
-      enum_right_brace;
-    } = (
-      enum_attribute_spec,
-      enum_keyword,
-      enum_name,
-      enum_colon,
-      enum_base,
-      enum_type,
-      enum_left_brace,
-      enum_enumerators,
-      enum_right_brace
-    )
-
-    let get_enumerator_children {
-      enumerator_name;
-      enumerator_equal;
-      enumerator_value;
-      enumerator_semicolon;
-    } = (
-      enumerator_name,
-      enumerator_equal,
-      enumerator_value,
-      enumerator_semicolon
-    )
-
-    let get_alias_declaration_children {
-      alias_attribute_spec;
-      alias_keyword;
-      alias_name;
-      alias_generic_parameter;
-      alias_constraint;
-      alias_equal;
-      alias_type;
-      alias_semicolon;
-    } = (
-      alias_attribute_spec,
-      alias_keyword,
-      alias_name,
-      alias_generic_parameter,
-      alias_constraint,
-      alias_equal,
-      alias_type,
-      alias_semicolon
-    )
-
-    let get_property_declaration_children {
-      property_modifiers;
-      property_type;
-      property_declarators;
-      property_semicolon;
-    } = (
-      property_modifiers,
-      property_type,
-      property_declarators,
-      property_semicolon
-    )
-
-    let get_property_declarator_children {
-      property_name;
-      property_initializer;
-    } = (
-      property_name,
-      property_initializer
-    )
-
-    let get_namespace_declaration_children {
-      namespace_keyword;
-      namespace_name;
-      namespace_body;
-    } = (
-      namespace_keyword,
-      namespace_name,
-      namespace_body
-    )
-
-    let get_namespace_body_children {
-      namespace_left_brace;
-      namespace_declarations;
-      namespace_right_brace;
-    } = (
-      namespace_left_brace,
-      namespace_declarations,
-      namespace_right_brace
-    )
-
-    let get_namespace_empty_body_children {
-      namespace_semicolon;
-    } = (
-      namespace_semicolon
-    )
-
-    let get_namespace_use_declaration_children {
-      namespace_use_keyword;
-      namespace_use_kind;
-      namespace_use_clauses;
-      namespace_use_semicolon;
-    } = (
-      namespace_use_keyword,
-      namespace_use_kind,
-      namespace_use_clauses,
-      namespace_use_semicolon
-    )
-
-    let get_namespace_group_use_declaration_children {
-      namespace_group_use_keyword;
-      namespace_group_use_kind;
-      namespace_group_use_prefix;
-      namespace_group_use_left_brace;
-      namespace_group_use_clauses;
-      namespace_group_use_right_brace;
-      namespace_group_use_semicolon;
-    } = (
-      namespace_group_use_keyword,
-      namespace_group_use_kind,
-      namespace_group_use_prefix,
-      namespace_group_use_left_brace,
-      namespace_group_use_clauses,
-      namespace_group_use_right_brace,
-      namespace_group_use_semicolon
-    )
-
-    let get_namespace_use_clause_children {
-      namespace_use_clause_kind;
-      namespace_use_name;
-      namespace_use_as;
-      namespace_use_alias;
-    } = (
-      namespace_use_clause_kind,
-      namespace_use_name,
-      namespace_use_as,
-      namespace_use_alias
-    )
-
-    let get_function_declaration_children {
-      function_attribute_spec;
-      function_declaration_header;
-      function_body;
-    } = (
-      function_attribute_spec,
-      function_declaration_header,
-      function_body
-    )
-
-    let get_function_declaration_header_children {
-      function_modifiers;
-      function_keyword;
-      function_ampersand;
-      function_name;
-      function_type_parameter_list;
-      function_left_paren;
-      function_parameter_list;
-      function_right_paren;
-      function_colon;
-      function_type;
-      function_where_clause;
-    } = (
-      function_modifiers,
-      function_keyword,
-      function_ampersand,
-      function_name,
-      function_type_parameter_list,
-      function_left_paren,
-      function_parameter_list,
-      function_right_paren,
-      function_colon,
-      function_type,
-      function_where_clause
-    )
-
-    let get_where_clause_children {
-      where_clause_keyword;
-      where_clause_constraints;
-    } = (
-      where_clause_keyword,
-      where_clause_constraints
-    )
-
-    let get_where_constraint_children {
-      where_constraint_left_type;
-      where_constraint_operator;
-      where_constraint_right_type;
-    } = (
-      where_constraint_left_type,
-      where_constraint_operator,
-      where_constraint_right_type
-    )
-
-    let get_methodish_declaration_children {
-      methodish_attribute;
-      methodish_function_decl_header;
-      methodish_function_body;
-      methodish_semicolon;
-    } = (
-      methodish_attribute,
-      methodish_function_decl_header,
-      methodish_function_body,
-      methodish_semicolon
-    )
-
-    let get_classish_declaration_children {
-      classish_attribute;
-      classish_modifiers;
-      classish_keyword;
-      classish_name;
-      classish_type_parameters;
-      classish_extends_keyword;
-      classish_extends_list;
-      classish_implements_keyword;
-      classish_implements_list;
-      classish_body;
-    } = (
-      classish_attribute,
-      classish_modifiers,
-      classish_keyword,
-      classish_name,
-      classish_type_parameters,
-      classish_extends_keyword,
-      classish_extends_list,
-      classish_implements_keyword,
-      classish_implements_list,
-      classish_body
-    )
-
-    let get_classish_body_children {
-      classish_body_left_brace;
-      classish_body_elements;
-      classish_body_right_brace;
-    } = (
-      classish_body_left_brace,
-      classish_body_elements,
-      classish_body_right_brace
-    )
-
-    let get_trait_use_precedence_item_children {
-      trait_use_precedence_item_name;
-      trait_use_precedence_item_keyword;
-      trait_use_precedence_item_removed_names;
-    } = (
-      trait_use_precedence_item_name,
-      trait_use_precedence_item_keyword,
-      trait_use_precedence_item_removed_names
-    )
-
-    let get_trait_use_alias_item_children {
-      trait_use_alias_item_aliasing_name;
-      trait_use_alias_item_keyword;
-      trait_use_alias_item_modifiers;
-      trait_use_alias_item_aliased_name;
-    } = (
-      trait_use_alias_item_aliasing_name,
-      trait_use_alias_item_keyword,
-      trait_use_alias_item_modifiers,
-      trait_use_alias_item_aliased_name
-    )
-
-    let get_trait_use_conflict_resolution_children {
-      trait_use_conflict_resolution_keyword;
-      trait_use_conflict_resolution_names;
-      trait_use_conflict_resolution_left_brace;
-      trait_use_conflict_resolution_clauses;
-      trait_use_conflict_resolution_right_brace;
-    } = (
-      trait_use_conflict_resolution_keyword,
-      trait_use_conflict_resolution_names,
-      trait_use_conflict_resolution_left_brace,
-      trait_use_conflict_resolution_clauses,
-      trait_use_conflict_resolution_right_brace
-    )
-
-    let get_trait_use_children {
-      trait_use_keyword;
-      trait_use_names;
-      trait_use_semicolon;
-    } = (
-      trait_use_keyword,
-      trait_use_names,
-      trait_use_semicolon
-    )
-
-    let get_require_clause_children {
-      require_keyword;
-      require_kind;
-      require_name;
-      require_semicolon;
-    } = (
-      require_keyword,
-      require_kind,
-      require_name,
-      require_semicolon
-    )
-
-    let get_const_declaration_children {
-      const_abstract;
-      const_keyword;
-      const_type_specifier;
-      const_declarators;
-      const_semicolon;
-    } = (
-      const_abstract,
-      const_keyword,
-      const_type_specifier,
-      const_declarators,
-      const_semicolon
-    )
-
-    let get_constant_declarator_children {
-      constant_declarator_name;
-      constant_declarator_initializer;
-    } = (
-      constant_declarator_name,
-      constant_declarator_initializer
-    )
-
-    let get_type_const_declaration_children {
-      type_const_abstract;
-      type_const_keyword;
-      type_const_type_keyword;
-      type_const_name;
-      type_const_type_parameters;
-      type_const_type_constraint;
-      type_const_equal;
-      type_const_type_specifier;
-      type_const_semicolon;
-    } = (
-      type_const_abstract,
-      type_const_keyword,
-      type_const_type_keyword,
-      type_const_name,
-      type_const_type_parameters,
-      type_const_type_constraint,
-      type_const_equal,
-      type_const_type_specifier,
-      type_const_semicolon
-    )
-
-    let get_decorated_expression_children {
-      decorated_expression_decorator;
-      decorated_expression_expression;
-    } = (
-      decorated_expression_decorator,
-      decorated_expression_expression
-    )
-
-    let get_parameter_declaration_children {
-      parameter_attribute;
-      parameter_visibility;
-      parameter_call_convention;
-      parameter_type;
-      parameter_name;
-      parameter_default_value;
-    } = (
-      parameter_attribute,
-      parameter_visibility,
-      parameter_call_convention,
-      parameter_type,
-      parameter_name,
-      parameter_default_value
-    )
-
-    let get_variadic_parameter_children {
-      variadic_parameter_call_convention;
-      variadic_parameter_type;
-      variadic_parameter_ellipsis;
-    } = (
-      variadic_parameter_call_convention,
-      variadic_parameter_type,
-      variadic_parameter_ellipsis
-    )
-
-    let get_attribute_specification_children {
-      attribute_specification_left_double_angle;
-      attribute_specification_attributes;
-      attribute_specification_right_double_angle;
-    } = (
-      attribute_specification_left_double_angle,
-      attribute_specification_attributes,
-      attribute_specification_right_double_angle
-    )
-
-    let get_attribute_children {
-      attribute_name;
-      attribute_left_paren;
-      attribute_values;
-      attribute_right_paren;
-    } = (
-      attribute_name,
-      attribute_left_paren,
-      attribute_values,
-      attribute_right_paren
-    )
-
-    let get_inclusion_expression_children {
-      inclusion_require;
-      inclusion_filename;
-    } = (
-      inclusion_require,
-      inclusion_filename
-    )
-
-    let get_inclusion_directive_children {
-      inclusion_expression;
-      inclusion_semicolon;
-    } = (
-      inclusion_expression,
-      inclusion_semicolon
-    )
-
-    let get_compound_statement_children {
-      compound_left_brace;
-      compound_statements;
-      compound_right_brace;
-    } = (
-      compound_left_brace,
-      compound_statements,
-      compound_right_brace
-    )
-
-    let get_expression_statement_children {
-      expression_statement_expression;
-      expression_statement_semicolon;
-    } = (
-      expression_statement_expression,
-      expression_statement_semicolon
-    )
-
-    let get_markup_section_children {
-      markup_prefix;
-      markup_text;
-      markup_suffix;
-      markup_expression;
-    } = (
-      markup_prefix,
-      markup_text,
-      markup_suffix,
-      markup_expression
-    )
-
-    let get_markup_suffix_children {
-      markup_suffix_less_than_question;
-      markup_suffix_name;
-    } = (
-      markup_suffix_less_than_question,
-      markup_suffix_name
-    )
-
-    let get_unset_statement_children {
-      unset_keyword;
-      unset_left_paren;
-      unset_variables;
-      unset_right_paren;
-      unset_semicolon;
-    } = (
-      unset_keyword,
-      unset_left_paren,
-      unset_variables,
-      unset_right_paren,
-      unset_semicolon
-    )
-
-    let get_using_statement_block_scoped_children {
-      using_block_await_keyword;
-      using_block_using_keyword;
-      using_block_left_paren;
-      using_block_expressions;
-      using_block_right_paren;
-      using_block_body;
-    } = (
-      using_block_await_keyword,
-      using_block_using_keyword,
-      using_block_left_paren,
-      using_block_expressions,
-      using_block_right_paren,
-      using_block_body
-    )
-
-    let get_using_statement_function_scoped_children {
-      using_function_await_keyword;
-      using_function_using_keyword;
-      using_function_expression;
-      using_function_semicolon;
-    } = (
-      using_function_await_keyword,
-      using_function_using_keyword,
-      using_function_expression,
-      using_function_semicolon
-    )
-
-    let get_declare_directive_statement_children {
-      declare_directive_keyword;
-      declare_directive_left_paren;
-      declare_directive_expression;
-      declare_directive_right_paren;
-      declare_directive_semicolon;
-    } = (
-      declare_directive_keyword,
-      declare_directive_left_paren,
-      declare_directive_expression,
-      declare_directive_right_paren,
-      declare_directive_semicolon
-    )
-
-    let get_declare_block_statement_children {
-      declare_block_keyword;
-      declare_block_left_paren;
-      declare_block_expression;
-      declare_block_right_paren;
-      declare_block_body;
-    } = (
-      declare_block_keyword,
-      declare_block_left_paren,
-      declare_block_expression,
-      declare_block_right_paren,
-      declare_block_body
-    )
-
-    let get_while_statement_children {
-      while_keyword;
-      while_left_paren;
-      while_condition;
-      while_right_paren;
-      while_body;
-    } = (
-      while_keyword,
-      while_left_paren,
-      while_condition,
-      while_right_paren,
-      while_body
-    )
-
-    let get_if_statement_children {
-      if_keyword;
-      if_left_paren;
-      if_condition;
-      if_right_paren;
-      if_statement;
-      if_elseif_clauses;
-      if_else_clause;
-    } = (
-      if_keyword,
-      if_left_paren,
-      if_condition,
-      if_right_paren,
-      if_statement,
-      if_elseif_clauses,
-      if_else_clause
-    )
-
-    let get_elseif_clause_children {
-      elseif_keyword;
-      elseif_left_paren;
-      elseif_condition;
-      elseif_right_paren;
-      elseif_statement;
-    } = (
-      elseif_keyword,
-      elseif_left_paren,
-      elseif_condition,
-      elseif_right_paren,
-      elseif_statement
-    )
-
-    let get_else_clause_children {
-      else_keyword;
-      else_statement;
-    } = (
-      else_keyword,
-      else_statement
-    )
-
-    let get_if_endif_statement_children {
-      if_endif_keyword;
-      if_endif_left_paren;
-      if_endif_condition;
-      if_endif_right_paren;
-      if_endif_colon;
-      if_endif_statement;
-      if_endif_elseif_colon_clauses;
-      if_endif_else_colon_clause;
-      if_endif_endif_keyword;
-      if_endif_semicolon;
-    } = (
-      if_endif_keyword,
-      if_endif_left_paren,
-      if_endif_condition,
-      if_endif_right_paren,
-      if_endif_colon,
-      if_endif_statement,
-      if_endif_elseif_colon_clauses,
-      if_endif_else_colon_clause,
-      if_endif_endif_keyword,
-      if_endif_semicolon
-    )
-
-    let get_elseif_colon_clause_children {
-      elseif_colon_keyword;
-      elseif_colon_left_paren;
-      elseif_colon_condition;
-      elseif_colon_right_paren;
-      elseif_colon_colon;
-      elseif_colon_statement;
-    } = (
-      elseif_colon_keyword,
-      elseif_colon_left_paren,
-      elseif_colon_condition,
-      elseif_colon_right_paren,
-      elseif_colon_colon,
-      elseif_colon_statement
-    )
-
-    let get_else_colon_clause_children {
-      else_colon_keyword;
-      else_colon_colon;
-      else_colon_statement;
-    } = (
-      else_colon_keyword,
-      else_colon_colon,
-      else_colon_statement
-    )
-
-    let get_try_statement_children {
-      try_keyword;
-      try_compound_statement;
-      try_catch_clauses;
-      try_finally_clause;
-    } = (
-      try_keyword,
-      try_compound_statement,
-      try_catch_clauses,
-      try_finally_clause
-    )
-
-    let get_catch_clause_children {
-      catch_keyword;
-      catch_left_paren;
-      catch_type;
-      catch_variable;
-      catch_right_paren;
-      catch_body;
-    } = (
-      catch_keyword,
-      catch_left_paren,
-      catch_type,
-      catch_variable,
-      catch_right_paren,
-      catch_body
-    )
-
-    let get_finally_clause_children {
-      finally_keyword;
-      finally_body;
-    } = (
-      finally_keyword,
-      finally_body
-    )
-
-    let get_do_statement_children {
-      do_keyword;
-      do_body;
-      do_while_keyword;
-      do_left_paren;
-      do_condition;
-      do_right_paren;
-      do_semicolon;
-    } = (
-      do_keyword,
-      do_body,
-      do_while_keyword,
-      do_left_paren,
-      do_condition,
-      do_right_paren,
-      do_semicolon
-    )
-
-    let get_for_statement_children {
-      for_keyword;
-      for_left_paren;
-      for_initializer;
-      for_first_semicolon;
-      for_control;
-      for_second_semicolon;
-      for_end_of_loop;
-      for_right_paren;
-      for_body;
-    } = (
-      for_keyword,
-      for_left_paren,
-      for_initializer,
-      for_first_semicolon,
-      for_control,
-      for_second_semicolon,
-      for_end_of_loop,
-      for_right_paren,
-      for_body
-    )
-
-    let get_foreach_statement_children {
-      foreach_keyword;
-      foreach_left_paren;
-      foreach_collection;
-      foreach_await_keyword;
-      foreach_as;
-      foreach_key;
-      foreach_arrow;
-      foreach_value;
-      foreach_right_paren;
-      foreach_body;
-    } = (
-      foreach_keyword,
-      foreach_left_paren,
-      foreach_collection,
-      foreach_await_keyword,
-      foreach_as,
-      foreach_key,
-      foreach_arrow,
-      foreach_value,
-      foreach_right_paren,
-      foreach_body
-    )
-
-    let get_switch_statement_children {
-      switch_keyword;
-      switch_left_paren;
-      switch_expression;
-      switch_right_paren;
-      switch_left_brace;
-      switch_sections;
-      switch_right_brace;
-    } = (
-      switch_keyword,
-      switch_left_paren,
-      switch_expression,
-      switch_right_paren,
-      switch_left_brace,
-      switch_sections,
-      switch_right_brace
-    )
-
-    let get_switch_section_children {
-      switch_section_labels;
-      switch_section_statements;
-      switch_section_fallthrough;
-    } = (
-      switch_section_labels,
-      switch_section_statements,
-      switch_section_fallthrough
-    )
-
-    let get_switch_fallthrough_children {
-      fallthrough_keyword;
-      fallthrough_semicolon;
-    } = (
-      fallthrough_keyword,
-      fallthrough_semicolon
-    )
-
-    let get_case_label_children {
-      case_keyword;
-      case_expression;
-      case_colon;
-    } = (
-      case_keyword,
-      case_expression,
-      case_colon
-    )
-
-    let get_default_label_children {
-      default_keyword;
-      default_colon;
-    } = (
-      default_keyword,
-      default_colon
-    )
-
-    let get_return_statement_children {
-      return_keyword;
-      return_expression;
-      return_semicolon;
-    } = (
-      return_keyword,
-      return_expression,
-      return_semicolon
-    )
-
-    let get_goto_label_children {
-      goto_label_name;
-      goto_label_colon;
-    } = (
-      goto_label_name,
-      goto_label_colon
-    )
-
-    let get_goto_statement_children {
-      goto_statement_keyword;
-      goto_statement_label_name;
-      goto_statement_semicolon;
-    } = (
-      goto_statement_keyword,
-      goto_statement_label_name,
-      goto_statement_semicolon
-    )
-
-    let get_throw_statement_children {
-      throw_keyword;
-      throw_expression;
-      throw_semicolon;
-    } = (
-      throw_keyword,
-      throw_expression,
-      throw_semicolon
-    )
-
-    let get_break_statement_children {
-      break_keyword;
-      break_level;
-      break_semicolon;
-    } = (
-      break_keyword,
-      break_level,
-      break_semicolon
-    )
-
-    let get_continue_statement_children {
-      continue_keyword;
-      continue_level;
-      continue_semicolon;
-    } = (
-      continue_keyword,
-      continue_level,
-      continue_semicolon
-    )
-
-    let get_function_static_statement_children {
-      static_static_keyword;
-      static_declarations;
-      static_semicolon;
-    } = (
-      static_static_keyword,
-      static_declarations,
-      static_semicolon
-    )
-
-    let get_static_declarator_children {
-      static_name;
-      static_initializer;
-    } = (
-      static_name,
-      static_initializer
-    )
-
-    let get_echo_statement_children {
-      echo_keyword;
-      echo_expressions;
-      echo_semicolon;
-    } = (
-      echo_keyword,
-      echo_expressions,
-      echo_semicolon
-    )
-
-    let get_global_statement_children {
-      global_keyword;
-      global_variables;
-      global_semicolon;
-    } = (
-      global_keyword,
-      global_variables,
-      global_semicolon
-    )
-
-    let get_simple_initializer_children {
-      simple_initializer_equal;
-      simple_initializer_value;
-    } = (
-      simple_initializer_equal,
-      simple_initializer_value
-    )
-
-    let get_anonymous_class_children {
-      anonymous_class_class_keyword;
-      anonymous_class_left_paren;
-      anonymous_class_argument_list;
-      anonymous_class_right_paren;
-      anonymous_class_extends_keyword;
-      anonymous_class_extends_list;
-      anonymous_class_implements_keyword;
-      anonymous_class_implements_list;
-      anonymous_class_body;
-    } = (
-      anonymous_class_class_keyword,
-      anonymous_class_left_paren,
-      anonymous_class_argument_list,
-      anonymous_class_right_paren,
-      anonymous_class_extends_keyword,
-      anonymous_class_extends_list,
-      anonymous_class_implements_keyword,
-      anonymous_class_implements_list,
-      anonymous_class_body
-    )
-
-    let get_anonymous_function_children {
-      anonymous_static_keyword;
-      anonymous_async_keyword;
-      anonymous_coroutine_keyword;
-      anonymous_function_keyword;
-      anonymous_left_paren;
-      anonymous_parameters;
-      anonymous_right_paren;
-      anonymous_colon;
-      anonymous_type;
-      anonymous_use;
-      anonymous_body;
-    } = (
-      anonymous_static_keyword,
-      anonymous_async_keyword,
-      anonymous_coroutine_keyword,
-      anonymous_function_keyword,
-      anonymous_left_paren,
-      anonymous_parameters,
-      anonymous_right_paren,
-      anonymous_colon,
-      anonymous_type,
-      anonymous_use,
-      anonymous_body
-    )
-
-    let get_php7_anonymous_function_children {
-      php7_anonymous_static_keyword;
-      php7_anonymous_async_keyword;
-      php7_anonymous_coroutine_keyword;
-      php7_anonymous_function_keyword;
-      php7_anonymous_left_paren;
-      php7_anonymous_parameters;
-      php7_anonymous_right_paren;
-      php7_anonymous_use;
-      php7_anonymous_colon;
-      php7_anonymous_type;
-      php7_anonymous_body;
-    } = (
-      php7_anonymous_static_keyword,
-      php7_anonymous_async_keyword,
-      php7_anonymous_coroutine_keyword,
-      php7_anonymous_function_keyword,
-      php7_anonymous_left_paren,
-      php7_anonymous_parameters,
-      php7_anonymous_right_paren,
-      php7_anonymous_use,
-      php7_anonymous_colon,
-      php7_anonymous_type,
-      php7_anonymous_body
-    )
-
-    let get_anonymous_function_use_clause_children {
-      anonymous_use_keyword;
-      anonymous_use_left_paren;
-      anonymous_use_variables;
-      anonymous_use_right_paren;
-    } = (
-      anonymous_use_keyword,
-      anonymous_use_left_paren,
-      anonymous_use_variables,
-      anonymous_use_right_paren
-    )
-
-    let get_lambda_expression_children {
-      lambda_async;
-      lambda_coroutine;
-      lambda_signature;
-      lambda_arrow;
-      lambda_body;
-    } = (
-      lambda_async,
-      lambda_coroutine,
-      lambda_signature,
-      lambda_arrow,
-      lambda_body
-    )
-
-    let get_lambda_signature_children {
-      lambda_left_paren;
-      lambda_parameters;
-      lambda_right_paren;
-      lambda_colon;
-      lambda_type;
-    } = (
-      lambda_left_paren,
-      lambda_parameters,
-      lambda_right_paren,
-      lambda_colon,
-      lambda_type
-    )
-
-    let get_cast_expression_children {
-      cast_left_paren;
-      cast_type;
-      cast_right_paren;
-      cast_operand;
-    } = (
-      cast_left_paren,
-      cast_type,
-      cast_right_paren,
-      cast_operand
-    )
-
-    let get_scope_resolution_expression_children {
-      scope_resolution_qualifier;
-      scope_resolution_operator;
-      scope_resolution_name;
-    } = (
-      scope_resolution_qualifier,
-      scope_resolution_operator,
-      scope_resolution_name
-    )
-
-    let get_member_selection_expression_children {
-      member_object;
-      member_operator;
-      member_name;
-    } = (
-      member_object,
-      member_operator,
-      member_name
-    )
-
-    let get_safe_member_selection_expression_children {
-      safe_member_object;
-      safe_member_operator;
-      safe_member_name;
-    } = (
-      safe_member_object,
-      safe_member_operator,
-      safe_member_name
-    )
-
-    let get_embedded_member_selection_expression_children {
-      embedded_member_object;
-      embedded_member_operator;
-      embedded_member_name;
-    } = (
-      embedded_member_object,
-      embedded_member_operator,
-      embedded_member_name
-    )
-
-    let get_yield_expression_children {
-      yield_keyword;
-      yield_operand;
-    } = (
-      yield_keyword,
-      yield_operand
-    )
-
-    let get_yield_from_expression_children {
-      yield_from_yield_keyword;
-      yield_from_from_keyword;
-      yield_from_operand;
-    } = (
-      yield_from_yield_keyword,
-      yield_from_from_keyword,
-      yield_from_operand
-    )
-
-    let get_prefix_unary_expression_children {
-      prefix_unary_operator;
-      prefix_unary_operand;
-    } = (
-      prefix_unary_operator,
-      prefix_unary_operand
-    )
-
-    let get_postfix_unary_expression_children {
-      postfix_unary_operand;
-      postfix_unary_operator;
-    } = (
-      postfix_unary_operand,
-      postfix_unary_operator
-    )
-
-    let get_binary_expression_children {
-      binary_left_operand;
-      binary_operator;
-      binary_right_operand;
-    } = (
-      binary_left_operand,
-      binary_operator,
-      binary_right_operand
-    )
-
-    let get_instanceof_expression_children {
-      instanceof_left_operand;
-      instanceof_operator;
-      instanceof_right_operand;
-    } = (
-      instanceof_left_operand,
-      instanceof_operator,
-      instanceof_right_operand
-    )
-
-    let get_is_expression_children {
-      is_left_operand;
-      is_operator;
-      is_right_operand;
-    } = (
-      is_left_operand,
-      is_operator,
-      is_right_operand
-    )
-
-    let get_conditional_expression_children {
-      conditional_test;
-      conditional_question;
-      conditional_consequence;
-      conditional_colon;
-      conditional_alternative;
-    } = (
-      conditional_test,
-      conditional_question,
-      conditional_consequence,
-      conditional_colon,
-      conditional_alternative
-    )
-
-    let get_eval_expression_children {
-      eval_keyword;
-      eval_left_paren;
-      eval_argument;
-      eval_right_paren;
-    } = (
-      eval_keyword,
-      eval_left_paren,
-      eval_argument,
-      eval_right_paren
-    )
-
-    let get_empty_expression_children {
-      empty_keyword;
-      empty_left_paren;
-      empty_argument;
-      empty_right_paren;
-    } = (
-      empty_keyword,
-      empty_left_paren,
-      empty_argument,
-      empty_right_paren
-    )
-
-    let get_define_expression_children {
-      define_keyword;
-      define_left_paren;
-      define_argument_list;
-      define_right_paren;
-    } = (
-      define_keyword,
-      define_left_paren,
-      define_argument_list,
-      define_right_paren
-    )
-
-    let get_halt_compiler_expression_children {
-      halt_compiler_keyword;
-      halt_compiler_left_paren;
-      halt_compiler_argument_list;
-      halt_compiler_right_paren;
-    } = (
-      halt_compiler_keyword,
-      halt_compiler_left_paren,
-      halt_compiler_argument_list,
-      halt_compiler_right_paren
-    )
-
-    let get_isset_expression_children {
-      isset_keyword;
-      isset_left_paren;
-      isset_argument_list;
-      isset_right_paren;
-    } = (
-      isset_keyword,
-      isset_left_paren,
-      isset_argument_list,
-      isset_right_paren
-    )
-
-    let get_function_call_expression_children {
-      function_call_receiver;
-      function_call_left_paren;
-      function_call_argument_list;
-      function_call_right_paren;
-    } = (
-      function_call_receiver,
-      function_call_left_paren,
-      function_call_argument_list,
-      function_call_right_paren
-    )
-
-    let get_function_call_with_type_arguments_expression_children {
-      function_call_with_type_arguments_receiver;
-      function_call_with_type_arguments_type_args;
-      function_call_with_type_arguments_left_paren;
-      function_call_with_type_arguments_argument_list;
-      function_call_with_type_arguments_right_paren;
-    } = (
-      function_call_with_type_arguments_receiver,
-      function_call_with_type_arguments_type_args,
-      function_call_with_type_arguments_left_paren,
-      function_call_with_type_arguments_argument_list,
-      function_call_with_type_arguments_right_paren
-    )
-
-    let get_parenthesized_expression_children {
-      parenthesized_expression_left_paren;
-      parenthesized_expression_expression;
-      parenthesized_expression_right_paren;
-    } = (
-      parenthesized_expression_left_paren,
-      parenthesized_expression_expression,
-      parenthesized_expression_right_paren
-    )
-
-    let get_braced_expression_children {
-      braced_expression_left_brace;
-      braced_expression_expression;
-      braced_expression_right_brace;
-    } = (
-      braced_expression_left_brace,
-      braced_expression_expression,
-      braced_expression_right_brace
-    )
-
-    let get_embedded_braced_expression_children {
-      embedded_braced_expression_left_brace;
-      embedded_braced_expression_expression;
-      embedded_braced_expression_right_brace;
-    } = (
-      embedded_braced_expression_left_brace,
-      embedded_braced_expression_expression,
-      embedded_braced_expression_right_brace
-    )
-
-    let get_list_expression_children {
-      list_keyword;
-      list_left_paren;
-      list_members;
-      list_right_paren;
-    } = (
-      list_keyword,
-      list_left_paren,
-      list_members,
-      list_right_paren
-    )
-
-    let get_collection_literal_expression_children {
-      collection_literal_name;
-      collection_literal_left_brace;
-      collection_literal_initializers;
-      collection_literal_right_brace;
-    } = (
-      collection_literal_name,
-      collection_literal_left_brace,
-      collection_literal_initializers,
-      collection_literal_right_brace
-    )
-
-    let get_object_creation_expression_children {
-      object_creation_new_keyword;
-      object_creation_object;
-    } = (
-      object_creation_new_keyword,
-      object_creation_object
-    )
-
-    let get_constructor_call_children {
-      constructor_call_type;
-      constructor_call_left_paren;
-      constructor_call_argument_list;
-      constructor_call_right_paren;
-    } = (
-      constructor_call_type,
-      constructor_call_left_paren,
-      constructor_call_argument_list,
-      constructor_call_right_paren
-    )
-
-    let get_array_creation_expression_children {
-      array_creation_left_bracket;
-      array_creation_members;
-      array_creation_right_bracket;
-    } = (
-      array_creation_left_bracket,
-      array_creation_members,
-      array_creation_right_bracket
-    )
-
-    let get_array_intrinsic_expression_children {
-      array_intrinsic_keyword;
-      array_intrinsic_left_paren;
-      array_intrinsic_members;
-      array_intrinsic_right_paren;
-    } = (
-      array_intrinsic_keyword,
-      array_intrinsic_left_paren,
-      array_intrinsic_members,
-      array_intrinsic_right_paren
-    )
-
-    let get_darray_intrinsic_expression_children {
-      darray_intrinsic_keyword;
-      darray_intrinsic_left_bracket;
-      darray_intrinsic_members;
-      darray_intrinsic_right_bracket;
-    } = (
-      darray_intrinsic_keyword,
-      darray_intrinsic_left_bracket,
-      darray_intrinsic_members,
-      darray_intrinsic_right_bracket
-    )
-
-    let get_dictionary_intrinsic_expression_children {
-      dictionary_intrinsic_keyword;
-      dictionary_intrinsic_left_bracket;
-      dictionary_intrinsic_members;
-      dictionary_intrinsic_right_bracket;
-    } = (
-      dictionary_intrinsic_keyword,
-      dictionary_intrinsic_left_bracket,
-      dictionary_intrinsic_members,
-      dictionary_intrinsic_right_bracket
-    )
-
-    let get_keyset_intrinsic_expression_children {
-      keyset_intrinsic_keyword;
-      keyset_intrinsic_left_bracket;
-      keyset_intrinsic_members;
-      keyset_intrinsic_right_bracket;
-    } = (
-      keyset_intrinsic_keyword,
-      keyset_intrinsic_left_bracket,
-      keyset_intrinsic_members,
-      keyset_intrinsic_right_bracket
-    )
-
-    let get_varray_intrinsic_expression_children {
-      varray_intrinsic_keyword;
-      varray_intrinsic_left_bracket;
-      varray_intrinsic_members;
-      varray_intrinsic_right_bracket;
-    } = (
-      varray_intrinsic_keyword,
-      varray_intrinsic_left_bracket,
-      varray_intrinsic_members,
-      varray_intrinsic_right_bracket
-    )
-
-    let get_vector_intrinsic_expression_children {
-      vector_intrinsic_keyword;
-      vector_intrinsic_left_bracket;
-      vector_intrinsic_members;
-      vector_intrinsic_right_bracket;
-    } = (
-      vector_intrinsic_keyword,
-      vector_intrinsic_left_bracket,
-      vector_intrinsic_members,
-      vector_intrinsic_right_bracket
-    )
-
-    let get_element_initializer_children {
-      element_key;
-      element_arrow;
-      element_value;
-    } = (
-      element_key,
-      element_arrow,
-      element_value
-    )
-
-    let get_subscript_expression_children {
-      subscript_receiver;
-      subscript_left_bracket;
-      subscript_index;
-      subscript_right_bracket;
-    } = (
-      subscript_receiver,
-      subscript_left_bracket,
-      subscript_index,
-      subscript_right_bracket
-    )
-
-    let get_embedded_subscript_expression_children {
-      embedded_subscript_receiver;
-      embedded_subscript_left_bracket;
-      embedded_subscript_index;
-      embedded_subscript_right_bracket;
-    } = (
-      embedded_subscript_receiver,
-      embedded_subscript_left_bracket,
-      embedded_subscript_index,
-      embedded_subscript_right_bracket
-    )
-
-    let get_awaitable_creation_expression_children {
-      awaitable_async;
-      awaitable_coroutine;
-      awaitable_compound_statement;
-    } = (
-      awaitable_async,
-      awaitable_coroutine,
-      awaitable_compound_statement
-    )
-
-    let get_xhp_children_declaration_children {
-      xhp_children_keyword;
-      xhp_children_expression;
-      xhp_children_semicolon;
-    } = (
-      xhp_children_keyword,
-      xhp_children_expression,
-      xhp_children_semicolon
-    )
-
-    let get_xhp_children_parenthesized_list_children {
-      xhp_children_list_left_paren;
-      xhp_children_list_xhp_children;
-      xhp_children_list_right_paren;
-    } = (
-      xhp_children_list_left_paren,
-      xhp_children_list_xhp_children,
-      xhp_children_list_right_paren
-    )
-
-    let get_xhp_category_declaration_children {
-      xhp_category_keyword;
-      xhp_category_categories;
-      xhp_category_semicolon;
-    } = (
-      xhp_category_keyword,
-      xhp_category_categories,
-      xhp_category_semicolon
-    )
-
-    let get_xhp_enum_type_children {
-      xhp_enum_optional;
-      xhp_enum_keyword;
-      xhp_enum_left_brace;
-      xhp_enum_values;
-      xhp_enum_right_brace;
-    } = (
-      xhp_enum_optional,
-      xhp_enum_keyword,
-      xhp_enum_left_brace,
-      xhp_enum_values,
-      xhp_enum_right_brace
-    )
-
-    let get_xhp_required_children {
-      xhp_required_at;
-      xhp_required_keyword;
-    } = (
-      xhp_required_at,
-      xhp_required_keyword
-    )
-
-    let get_xhp_class_attribute_declaration_children {
-      xhp_attribute_keyword;
-      xhp_attribute_attributes;
-      xhp_attribute_semicolon;
-    } = (
-      xhp_attribute_keyword,
-      xhp_attribute_attributes,
-      xhp_attribute_semicolon
-    )
-
-    let get_xhp_class_attribute_children {
-      xhp_attribute_decl_type;
-      xhp_attribute_decl_name;
-      xhp_attribute_decl_initializer;
-      xhp_attribute_decl_required;
-    } = (
-      xhp_attribute_decl_type,
-      xhp_attribute_decl_name,
-      xhp_attribute_decl_initializer,
-      xhp_attribute_decl_required
-    )
-
-    let get_xhp_simple_class_attribute_children {
-      xhp_simple_class_attribute_type;
-    } = (
-      xhp_simple_class_attribute_type
-    )
-
-    let get_xhp_simple_attribute_children {
-      xhp_simple_attribute_name;
-      xhp_simple_attribute_equal;
-      xhp_simple_attribute_expression;
-    } = (
-      xhp_simple_attribute_name,
-      xhp_simple_attribute_equal,
-      xhp_simple_attribute_expression
-    )
-
-    let get_xhp_spread_attribute_children {
-      xhp_spread_attribute_left_brace;
-      xhp_spread_attribute_spread_operator;
-      xhp_spread_attribute_expression;
-      xhp_spread_attribute_right_brace;
-    } = (
-      xhp_spread_attribute_left_brace,
-      xhp_spread_attribute_spread_operator,
-      xhp_spread_attribute_expression,
-      xhp_spread_attribute_right_brace
-    )
-
-    let get_xhp_open_children {
-      xhp_open_left_angle;
-      xhp_open_name;
-      xhp_open_attributes;
-      xhp_open_right_angle;
-    } = (
-      xhp_open_left_angle,
-      xhp_open_name,
-      xhp_open_attributes,
-      xhp_open_right_angle
-    )
-
-    let get_xhp_expression_children {
-      xhp_open;
-      xhp_body;
-      xhp_close;
-    } = (
-      xhp_open,
-      xhp_body,
-      xhp_close
-    )
-
-    let get_xhp_close_children {
-      xhp_close_left_angle;
-      xhp_close_name;
-      xhp_close_right_angle;
-    } = (
-      xhp_close_left_angle,
-      xhp_close_name,
-      xhp_close_right_angle
-    )
-
-    let get_type_constant_children {
-      type_constant_left_type;
-      type_constant_separator;
-      type_constant_right_type;
-    } = (
-      type_constant_left_type,
-      type_constant_separator,
-      type_constant_right_type
-    )
-
-    let get_vector_type_specifier_children {
-      vector_type_keyword;
-      vector_type_left_angle;
-      vector_type_type;
-      vector_type_trailing_comma;
-      vector_type_right_angle;
-    } = (
-      vector_type_keyword,
-      vector_type_left_angle,
-      vector_type_type,
-      vector_type_trailing_comma,
-      vector_type_right_angle
-    )
-
-    let get_keyset_type_specifier_children {
-      keyset_type_keyword;
-      keyset_type_left_angle;
-      keyset_type_type;
-      keyset_type_trailing_comma;
-      keyset_type_right_angle;
-    } = (
-      keyset_type_keyword,
-      keyset_type_left_angle,
-      keyset_type_type,
-      keyset_type_trailing_comma,
-      keyset_type_right_angle
-    )
-
-    let get_tuple_type_explicit_specifier_children {
-      tuple_type_keyword;
-      tuple_type_left_angle;
-      tuple_type_types;
-      tuple_type_right_angle;
-    } = (
-      tuple_type_keyword,
-      tuple_type_left_angle,
-      tuple_type_types,
-      tuple_type_right_angle
-    )
-
-    let get_varray_type_specifier_children {
-      varray_keyword;
-      varray_left_angle;
-      varray_type;
-      varray_trailing_comma;
-      varray_right_angle;
-    } = (
-      varray_keyword,
-      varray_left_angle,
-      varray_type,
-      varray_trailing_comma,
-      varray_right_angle
-    )
-
-    let get_vector_array_type_specifier_children {
-      vector_array_keyword;
-      vector_array_left_angle;
-      vector_array_type;
-      vector_array_right_angle;
-    } = (
-      vector_array_keyword,
-      vector_array_left_angle,
-      vector_array_type,
-      vector_array_right_angle
-    )
-
-    let get_type_parameter_children {
-      type_variance;
-      type_name;
-      type_constraints;
-    } = (
-      type_variance,
-      type_name,
-      type_constraints
-    )
-
-    let get_type_constraint_children {
-      constraint_keyword;
-      constraint_type;
-    } = (
-      constraint_keyword,
-      constraint_type
-    )
-
-    let get_darray_type_specifier_children {
-      darray_keyword;
-      darray_left_angle;
-      darray_key;
-      darray_comma;
-      darray_value;
-      darray_trailing_comma;
-      darray_right_angle;
-    } = (
-      darray_keyword,
-      darray_left_angle,
-      darray_key,
-      darray_comma,
-      darray_value,
-      darray_trailing_comma,
-      darray_right_angle
-    )
-
-    let get_map_array_type_specifier_children {
-      map_array_keyword;
-      map_array_left_angle;
-      map_array_key;
-      map_array_comma;
-      map_array_value;
-      map_array_right_angle;
-    } = (
-      map_array_keyword,
-      map_array_left_angle,
-      map_array_key,
-      map_array_comma,
-      map_array_value,
-      map_array_right_angle
-    )
-
-    let get_dictionary_type_specifier_children {
-      dictionary_type_keyword;
-      dictionary_type_left_angle;
-      dictionary_type_members;
-      dictionary_type_right_angle;
-    } = (
-      dictionary_type_keyword,
-      dictionary_type_left_angle,
-      dictionary_type_members,
-      dictionary_type_right_angle
-    )
-
-    let get_closure_type_specifier_children {
-      closure_outer_left_paren;
-      closure_coroutine;
-      closure_function_keyword;
-      closure_inner_left_paren;
-      closure_parameter_list;
-      closure_inner_right_paren;
-      closure_colon;
-      closure_return_type;
-      closure_outer_right_paren;
-    } = (
-      closure_outer_left_paren,
-      closure_coroutine,
-      closure_function_keyword,
-      closure_inner_left_paren,
-      closure_parameter_list,
-      closure_inner_right_paren,
-      closure_colon,
-      closure_return_type,
-      closure_outer_right_paren
-    )
-
-    let get_closure_parameter_type_specifier_children {
-      closure_parameter_call_convention;
-      closure_parameter_type;
-    } = (
-      closure_parameter_call_convention,
-      closure_parameter_type
-    )
-
-    let get_classname_type_specifier_children {
-      classname_keyword;
-      classname_left_angle;
-      classname_type;
-      classname_trailing_comma;
-      classname_right_angle;
-    } = (
-      classname_keyword,
-      classname_left_angle,
-      classname_type,
-      classname_trailing_comma,
-      classname_right_angle
-    )
-
-    let get_field_specifier_children {
-      field_question;
-      field_name;
-      field_arrow;
-      field_type;
-    } = (
-      field_question,
-      field_name,
-      field_arrow,
-      field_type
-    )
-
-    let get_field_initializer_children {
-      field_initializer_name;
-      field_initializer_arrow;
-      field_initializer_value;
-    } = (
-      field_initializer_name,
-      field_initializer_arrow,
-      field_initializer_value
-    )
-
-    let get_shape_type_specifier_children {
-      shape_type_keyword;
-      shape_type_left_paren;
-      shape_type_fields;
-      shape_type_ellipsis;
-      shape_type_right_paren;
-    } = (
-      shape_type_keyword,
-      shape_type_left_paren,
-      shape_type_fields,
-      shape_type_ellipsis,
-      shape_type_right_paren
-    )
-
-    let get_shape_expression_children {
-      shape_expression_keyword;
-      shape_expression_left_paren;
-      shape_expression_fields;
-      shape_expression_right_paren;
-    } = (
-      shape_expression_keyword,
-      shape_expression_left_paren,
-      shape_expression_fields,
-      shape_expression_right_paren
-    )
-
-    let get_tuple_expression_children {
-      tuple_expression_keyword;
-      tuple_expression_left_paren;
-      tuple_expression_items;
-      tuple_expression_right_paren;
-    } = (
-      tuple_expression_keyword,
-      tuple_expression_left_paren,
-      tuple_expression_items,
-      tuple_expression_right_paren
-    )
-
-    let get_generic_type_specifier_children {
-      generic_class_type;
-      generic_argument_list;
-    } = (
-      generic_class_type,
-      generic_argument_list
-    )
-
-    let get_nullable_type_specifier_children {
-      nullable_question;
-      nullable_type;
-    } = (
-      nullable_question,
-      nullable_type
-    )
-
-    let get_soft_type_specifier_children {
-      soft_at;
-      soft_type;
-    } = (
-      soft_at,
-      soft_type
-    )
-
-    let get_type_arguments_children {
-      type_arguments_left_angle;
-      type_arguments_types;
-      type_arguments_right_angle;
-    } = (
-      type_arguments_left_angle,
-      type_arguments_types,
-      type_arguments_right_angle
-    )
-
-    let get_type_parameters_children {
-      type_parameters_left_angle;
-      type_parameters_parameters;
-      type_parameters_right_angle;
-    } = (
-      type_parameters_left_angle,
-      type_parameters_parameters,
-      type_parameters_right_angle
-    )
-
-    let get_tuple_type_specifier_children {
-      tuple_left_paren;
-      tuple_types;
-      tuple_right_paren;
-    } = (
-      tuple_left_paren,
-      tuple_types,
-      tuple_right_paren
-    )
-
-    let get_error_children {
-      error_error;
-    } = (
-      error_error
-    )
-
-    let get_list_item_children {
-      list_item;
-      list_separator;
-    } = (
-      list_item,
-      list_separator
-    )
-
 
 
     let fold_over_children f acc syntax =
@@ -7631,7 +5727,7 @@ module WithToken(Token: TokenType) = struct
       JSON_Object (k :: v)
 
     let binary_operator_kind b =
-      match syntax b.binary_operator with
+      match syntax b with
       | Token token ->
         let kind = Token.kind token in
         if Operator.is_trailing_operator_token kind then
@@ -12016,6 +10112,265 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
+
+
+     let from_function_declaration {
+          function_attribute_spec;
+          function_declaration_header;
+          function_body;
+       } = FunctionDeclaration {
+          function_attribute_spec;
+          function_declaration_header;
+          function_body;
+       }
+     let from_function_declaration_header {
+          function_modifiers;
+          function_keyword;
+          function_ampersand;
+          function_name;
+          function_type_parameter_list;
+          function_left_paren;
+          function_parameter_list;
+          function_right_paren;
+          function_colon;
+          function_type;
+          function_where_clause;
+       } = FunctionDeclarationHeader {
+          function_modifiers;
+          function_keyword;
+          function_ampersand;
+          function_name;
+          function_type_parameter_list;
+          function_left_paren;
+          function_parameter_list;
+          function_right_paren;
+          function_colon;
+          function_type;
+          function_where_clause;
+       }
+     let from_methodish_declaration {
+          methodish_attribute;
+          methodish_function_decl_header;
+          methodish_function_body;
+          methodish_semicolon;
+       } = MethodishDeclaration {
+          methodish_attribute;
+          methodish_function_decl_header;
+          methodish_function_body;
+          methodish_semicolon;
+       }
+     let from_anonymous_function {
+          anonymous_static_keyword;
+          anonymous_async_keyword;
+          anonymous_coroutine_keyword;
+          anonymous_function_keyword;
+          anonymous_left_paren;
+          anonymous_parameters;
+          anonymous_right_paren;
+          anonymous_colon;
+          anonymous_type;
+          anonymous_use;
+          anonymous_body;
+       } = AnonymousFunction {
+          anonymous_static_keyword;
+          anonymous_async_keyword;
+          anonymous_coroutine_keyword;
+          anonymous_function_keyword;
+          anonymous_left_paren;
+          anonymous_parameters;
+          anonymous_right_paren;
+          anonymous_colon;
+          anonymous_type;
+          anonymous_use;
+          anonymous_body;
+       }
+     let from_lambda_expression {
+          lambda_async;
+          lambda_coroutine;
+          lambda_signature;
+          lambda_arrow;
+          lambda_body;
+       } = LambdaExpression {
+          lambda_async;
+          lambda_coroutine;
+          lambda_signature;
+          lambda_arrow;
+          lambda_body;
+       }
+     let from_lambda_signature {
+          lambda_left_paren;
+          lambda_parameters;
+          lambda_right_paren;
+          lambda_colon;
+          lambda_type;
+       } = LambdaSignature {
+          lambda_left_paren;
+          lambda_parameters;
+          lambda_right_paren;
+          lambda_colon;
+          lambda_type;
+       }
+     let from_closure_type_specifier {
+          closure_outer_left_paren;
+          closure_coroutine;
+          closure_function_keyword;
+          closure_inner_left_paren;
+          closure_parameter_list;
+          closure_inner_right_paren;
+          closure_colon;
+          closure_return_type;
+          closure_outer_right_paren;
+       } = ClosureTypeSpecifier {
+          closure_outer_left_paren;
+          closure_coroutine;
+          closure_function_keyword;
+          closure_inner_left_paren;
+          closure_parameter_list;
+          closure_inner_right_paren;
+          closure_colon;
+          closure_return_type;
+          closure_outer_right_paren;
+       }
+
+
+     let get_function_declaration x =
+        match x with
+        | FunctionDeclaration {
+          function_attribute_spec;
+          function_declaration_header;
+          function_body;
+            } -> {
+          function_attribute_spec;
+          function_declaration_header;
+          function_body;
+           }
+        | _ -> failwith "get_function_declaration: not a FunctionDeclaration"
+     let get_function_declaration_header x =
+        match x with
+        | FunctionDeclarationHeader {
+          function_modifiers;
+          function_keyword;
+          function_ampersand;
+          function_name;
+          function_type_parameter_list;
+          function_left_paren;
+          function_parameter_list;
+          function_right_paren;
+          function_colon;
+          function_type;
+          function_where_clause;
+            } -> {
+          function_modifiers;
+          function_keyword;
+          function_ampersand;
+          function_name;
+          function_type_parameter_list;
+          function_left_paren;
+          function_parameter_list;
+          function_right_paren;
+          function_colon;
+          function_type;
+          function_where_clause;
+           }
+        | _ -> failwith "get_function_declaration_header: not a FunctionDeclarationHeader"
+     let get_methodish_declaration x =
+        match x with
+        | MethodishDeclaration {
+          methodish_attribute;
+          methodish_function_decl_header;
+          methodish_function_body;
+          methodish_semicolon;
+            } -> {
+          methodish_attribute;
+          methodish_function_decl_header;
+          methodish_function_body;
+          methodish_semicolon;
+           }
+        | _ -> failwith "get_methodish_declaration: not a MethodishDeclaration"
+     let get_anonymous_function x =
+        match x with
+        | AnonymousFunction {
+          anonymous_static_keyword;
+          anonymous_async_keyword;
+          anonymous_coroutine_keyword;
+          anonymous_function_keyword;
+          anonymous_left_paren;
+          anonymous_parameters;
+          anonymous_right_paren;
+          anonymous_colon;
+          anonymous_type;
+          anonymous_use;
+          anonymous_body;
+            } -> {
+          anonymous_static_keyword;
+          anonymous_async_keyword;
+          anonymous_coroutine_keyword;
+          anonymous_function_keyword;
+          anonymous_left_paren;
+          anonymous_parameters;
+          anonymous_right_paren;
+          anonymous_colon;
+          anonymous_type;
+          anonymous_use;
+          anonymous_body;
+           }
+        | _ -> failwith "get_anonymous_function: not a AnonymousFunction"
+     let get_lambda_expression x =
+        match x with
+        | LambdaExpression {
+          lambda_async;
+          lambda_coroutine;
+          lambda_signature;
+          lambda_arrow;
+          lambda_body;
+            } -> {
+          lambda_async;
+          lambda_coroutine;
+          lambda_signature;
+          lambda_arrow;
+          lambda_body;
+           }
+        | _ -> failwith "get_lambda_expression: not a LambdaExpression"
+     let get_lambda_signature x =
+        match x with
+        | LambdaSignature {
+          lambda_left_paren;
+          lambda_parameters;
+          lambda_right_paren;
+          lambda_colon;
+          lambda_type;
+            } -> {
+          lambda_left_paren;
+          lambda_parameters;
+          lambda_right_paren;
+          lambda_colon;
+          lambda_type;
+           }
+        | _ -> failwith "get_lambda_signature: not a LambdaSignature"
+     let get_closure_type_specifier x =
+        match x with
+        | ClosureTypeSpecifier {
+          closure_outer_left_paren;
+          closure_coroutine;
+          closure_function_keyword;
+          closure_inner_left_paren;
+          closure_parameter_list;
+          closure_inner_right_paren;
+          closure_colon;
+          closure_return_type;
+          closure_outer_right_paren;
+            } -> {
+          closure_outer_left_paren;
+          closure_coroutine;
+          closure_function_keyword;
+          closure_inner_left_paren;
+          closure_parameter_list;
+          closure_inner_right_paren;
+          closure_colon;
+          closure_return_type;
+          closure_outer_right_paren;
+           }
+        | _ -> failwith "get_closure_type_specifier: not a ClosureTypeSpecifier"
 
 
     end (* WithValueBuilder *)

@@ -382,57 +382,75 @@ let methodish_multiple_visibility hhvm_compat_mode node =
 let class_constructor_has_static hhvm_compat_mode node parents =
   if hhvm_compat_mode then false
   else
-  let label = node.function_name in
-  (is_construct label) && (matches_first methodish_contains_static parents)
+  match node with
+  | FunctionDeclarationHeader node ->
+    let label = node.function_name in
+    (is_construct label) && (matches_first methodish_contains_static parents)
+  | _ -> false
 
 (* Given a function declaration header, confirm that it is NOT a constructor
  * and that the header containing it has visibility modifiers in parameters
  *)
 let class_non_constructor_has_visibility_param node parents =
-  let has_visibility node =
-    match syntax node with
-    | ParameterDeclaration { parameter_visibility; _ } ->
-      parameter_visibility |> is_missing |> not
-    | _ -> false
-  in
-  let label = node.function_name in
-  let params = syntax_to_list_no_separators node.function_parameter_list in
-  (not (is_construct label)) && (List.exists has_visibility params)
+  match node with
+  | FunctionDeclarationHeader node ->
+    let has_visibility node =
+      match syntax node with
+      | ParameterDeclaration { parameter_visibility; _ } ->
+        parameter_visibility |> is_missing |> not
+      | _ -> false
+    in
+    let label = node.function_name in
+    let params = syntax_to_list_no_separators node.function_parameter_list in
+    (not (is_construct label)) && (List.exists has_visibility params)
+  | _ -> false
 
 (* Given a function declaration header, confirm that it is a destructor
  * and that the methodish containing it has non-empty parameters *)
 let class_destructor_has_param hhvm_compat_mode node parents =
-  let label = node.function_name in
-  let param = node.function_parameter_list in
-  not hhvm_compat_mode && (is_destruct label) && not (is_missing param)
+  match node with
+  | FunctionDeclarationHeader node ->
+    let label = node.function_name in
+    let param = node.function_parameter_list in
+    not hhvm_compat_mode && (is_destruct label) && not (is_missing param)
+  | _ -> false
 
 (* Given a function declaration header, confirm that it is a destructor
  * and that the methodish containing it has non-visibility modifiers *)
 let class_destructor_has_non_visibility_modifier hhvm_compat_mode node parents =
-  let label = node.function_name in
-  not hhvm_compat_mode &&
-  (is_destruct label) &&
-  (matches_first (methodish_contains_non_visibility hhvm_compat_mode) parents)
+  match node with
+  | FunctionDeclarationHeader node ->
+    let label = node.function_name in
+    not hhvm_compat_mode &&
+    (is_destruct label) &&
+    (matches_first (methodish_contains_non_visibility hhvm_compat_mode) parents)
+  | _ -> false
 
-let async_magic_method { function_modifiers; function_name; _} parents =
-  SSet.mem (String.lowercase_ascii @@ text function_name) SN.Members.as_set &&
-  list_contains_predicate is_async function_modifiers
+let async_magic_method node parents =
+  match node with
+  | FunctionDeclarationHeader node ->
+    SSet.mem (String.lowercase_ascii @@ text node.function_name) SN.Members.as_set &&
+    list_contains_predicate is_async node.function_modifiers
+  | _ -> false
 
 (* check that a constructor or a destructor is type annotated *)
 let class_constructor_destructor_has_non_void_type hhvm_compat_node node parents =
   if hhvm_compat_node then false
   else
-  let label = node.function_name in
-  let type_ano = node.function_type in
-  let function_colon = node.function_colon in
-  let is_missing = is_missing type_ano && is_missing function_colon in
-  let is_void = match syntax type_ano with
-    | SimpleTypeSpecifier spec ->
-      is_void spec.simple_type_specifier
-    | _ -> false
-  in
-  (is_construct label || is_destruct label) &&
-  not (is_missing || is_void)
+  match node with
+  | FunctionDeclarationHeader node ->
+    let label = node.function_name in
+    let type_ano = node.function_type in
+    let function_colon = node.function_colon in
+    let is_missing = is_missing type_ano && is_missing function_colon in
+    let is_void = match syntax type_ano with
+      | SimpleTypeSpecifier spec ->
+        is_void spec.simple_type_specifier
+      | _ -> false
+    in
+    (is_construct label || is_destruct label) &&
+    not (is_missing || is_void)
+  | _ -> false
 
 (* whether a methodish has duplicate modifiers *)
 let methodish_duplicate_modifier hhvm_compat_mode node =
@@ -610,40 +628,11 @@ let produce_error_parents acc check node parents error error_node =
 
 (* use [check] to check properties of function *)
 let function_header_check_helper check node parents =
-  match syntax node with
-  | FunctionDeclarationHeader node -> check node parents
-  | _ -> false
+  check (syntax node) parents
 
 let produce_error_for_header acc check node error error_node =
   produce_error_parents acc (function_header_check_helper check) node
     error error_node
-
-(* Given a ClassishDeclaration node, test whether or not it contains
- * an invalid use of 'implements'. *)
-let classish_invalid_implements_keyword hhvm_compat_mode cd_node =
-  (* Invalid if uses 'implements' and isn't a class. *)
-  not hhvm_compat_mode &&
-  token_kind cd_node.classish_implements_keyword = Some TokenKind.Implements &&
-    token_kind cd_node.classish_keyword <> Some TokenKind.Class
-
-(* Given a ClassishDeclaration node, test whether or not it's a trait
- * invoking the 'extends' keyword. *)
-let classish_invalid_extends_keyword hhvm_compat_mode cd_node =
-  (* Invalid if uses 'extends' and is a trait. *)
-  not hhvm_compat_mode &&
-  token_kind cd_node.classish_extends_keyword = Some TokenKind.Extends &&
-    token_kind cd_node.classish_keyword = Some TokenKind.Trait
-
-(* Given a ClassishDeclaration node, test whether or not length of
- * extends_list is appropriate for the classish_keyword. *)
-let classish_invalid_extends_list  hhvm_compat_mode cd_node =
-  (* Invalid if is a class and has list of length greater than one. *)
-  not hhvm_compat_mode &&
-  token_kind cd_node.classish_keyword = Some TokenKind.Class &&
-    token_kind cd_node.classish_extends_keyword = Some TokenKind.Extends &&
-    match syntax_to_list_no_separators cd_node.classish_extends_list with
-    | [x1] -> false
-    | _ -> true (* General bc empty list case is already caught by error1007 *)
 
 (* Given a particular TokenKind.(Trait/Interface/Class), tests if a given
  * classish_declaration node is both of that kind and declared abstract. *)
@@ -781,7 +770,7 @@ let first_parent_function_declaration parents =
     | FunctionDeclaration { function_declaration_header = header; _ }
     | MethodishDeclaration { methodish_function_decl_header = header; _ } ->
       begin match syntax header with
-      | FunctionDeclarationHeader fdh -> Some fdh
+      | FunctionDeclarationHeader fdh -> Some (fdh.function_parameter_list, fdh.function_modifiers)
       | _ -> None
       end
     | _ -> None
@@ -816,14 +805,14 @@ let is_parameter_with_callconv param =
 
 let has_inout_params parents =
   match first_parent_function_declaration parents with
-  | Some { function_parameter_list; _ } ->
+  | Some (function_parameter_list, _) ->
     let params = syntax_to_list_no_separators function_parameter_list in
     Hh_core.List.exists params ~f:is_parameter_with_callconv
   | _ -> false
 
 let is_inside_async_method parents =
   match first_parent_function_declaration parents with
-  | Some { function_modifiers = m; _ } ->
+  | Some (_,m) ->
     syntax_to_list_no_separators m
     |> Hh_core.List.exists ~f:is_async
   | None -> false
@@ -923,7 +912,7 @@ let is_abstract_const declaration =
 
 (* Given a ConstDeclarator node, test whether it is concrete, but has no
    initializer. *)
-let concrete_no_initializer hhvm_compat_mode cd_node parents =
+let concrete_no_initializer hhvm_compat_mode init parents =
   if hhvm_compat_mode then false
   else
   let is_concrete =
@@ -932,19 +921,19 @@ let concrete_no_initializer hhvm_compat_mode cd_node parents =
     | _ -> false
     in
   let has_no_initializer =
-    is_missing cd_node.constant_declarator_initializer in
+    is_missing init in
   is_concrete && has_no_initializer
 
 (* Given a ConstDeclarator node, test whether it is abstract, but has an
    initializer. *)
-let abstract_with_initializer cd_node parents =
+let abstract_with_initializer init parents =
   let is_abstract =
     match parents with
     | _ :: _ :: p3 :: _ when is_abstract_const p3 -> true
     | _ -> false
     in
   let has_initializer =
-    not (is_missing cd_node.constant_declarator_initializer) in
+    not (is_missing init) in
   is_abstract && has_initializer
 
 (* Tests if Property contains a modifier p *)
@@ -1172,9 +1161,9 @@ let is_in_construct_method parents =
   | _ -> false
 
 (* Test if the parameter is missing a type annotation but one is required *)
-let missing_param_type_check is_strict hhvm_compat_mode p parents =
+let missing_param_type_check is_strict hhvm_compat_mode parameter_type parents =
   let is_required = parameter_type_is_required parents in
-  not hhvm_compat_mode && is_strict && is_missing p.parameter_type && is_required
+  not hhvm_compat_mode && is_strict && is_missing parameter_type && is_required
 
 (* If a variadic parameter has a default value, return it *)
 let variadic_param_with_default_value params =
@@ -1259,7 +1248,7 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
   | ParameterDeclaration p ->
     let errors =
       produce_error_parents errors (missing_param_type_check is_strict hhvm_compat_mode)
-      p parents SyntaxError.error2001 node in
+      p.parameter_type parents SyntaxError.error2001 node in
     let callconv_text = Option.value (extract_callconv_node node) ~default:node
       |> text in
     let errors =
@@ -1301,22 +1290,22 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
   | DecoratedExpression _ -> decoration_errors node errors
   | _ -> errors
 
-let missing_type_annot_check is_strict hhvm_compat_mode f =
-  let label = f.function_name in
-  let is_function = not (is_construct label) && not (is_destruct label) in
-  not hhvm_compat_mode && is_strict && is_missing f.function_type && is_function
-
-let function_reference_check is_strict hhvm_compat_mode f =
-  not hhvm_compat_mode && is_strict && not (is_missing f.function_ampersand)
-
 let function_errors node parents is_strict hhvm_compat_mode errors =
   match syntax node with
   | FunctionDeclarationHeader f ->
+    let missing_type_annot_check is_strict hhvm_compat_mode _ =
+      let label = f.function_name in
+      let is_function = not (is_construct label) && not (is_destruct label) in
+      not hhvm_compat_mode && is_strict && is_missing f.function_type && is_function in
+
+    let function_reference_check is_strict hhvm_compat_mode _ =
+      not hhvm_compat_mode && is_strict && not (is_missing f.function_ampersand) in
+
     let errors =
-      produce_error errors (missing_type_annot_check is_strict hhvm_compat_mode) f
+      produce_error errors (missing_type_annot_check is_strict hhvm_compat_mode) ()
       SyntaxError.error2001 f.function_right_paren in
     let errors =
-      produce_error errors (function_reference_check is_strict hhvm_compat_mode) f
+      produce_error errors (function_reference_check is_strict hhvm_compat_mode) ()
       SyntaxError.error2064 f.function_ampersand in
     errors
   | _ -> errors
@@ -1383,20 +1372,20 @@ let statement_errors node parents hhvm_compat_mode errors =
   | Some (error_node, error_message) ->
     make_error_from_node error_node error_message :: errors
 
-let missing_property_check is_strict hhvm_compat_mode p =
-  not hhvm_compat_mode && is_strict && is_missing (p.property_type)
-
-let invalid_var_check is_hack hhvm_compat_mode p =
-  not hhvm_compat_mode && is_hack && (is_var p.property_modifiers)
-
 let property_errors node is_strict is_hack hhvm_compat_mode errors =
   match syntax node with
   | PropertyDeclaration p ->
+      let missing_property_check is_strict hhvm_compat_mode _ =
+        not hhvm_compat_mode && is_strict && is_missing (p.property_type) in
+
+      let invalid_var_check is_hack hhvm_compat_mode _ =
+        not hhvm_compat_mode && is_hack && (is_var p.property_modifiers) in
+
       let errors =
-        produce_error errors (missing_property_check is_strict hhvm_compat_mode) p
+        produce_error errors (missing_property_check is_strict hhvm_compat_mode) ()
         SyntaxError.error2001 node in
       let errors =
-        produce_error errors (invalid_var_check is_hack hhvm_compat_mode) p
+        produce_error errors (invalid_var_check is_hack hhvm_compat_mode) ()
         SyntaxError.error2053 p.property_modifiers in
       errors
   | _ -> errors
@@ -1713,20 +1702,47 @@ let check_type_name name namespace_name name_text location names errors =
 let classish_errors node parents is_hack hhvm_compat_mode namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
+    (* Given a ClassishDeclaration node, test whether or not it contains
+     * an invalid use of 'implements'. *)
+    let classish_invalid_implements_keyword hhvm_compat_mode _ =
+      (* Invalid if uses 'implements' and isn't a class. *)
+      not hhvm_compat_mode &&
+      token_kind cd.classish_implements_keyword = Some TokenKind.Implements &&
+        token_kind cd.classish_keyword <> Some TokenKind.Class in
+
+    (* Given a ClassishDeclaration node, test whether or not it's a trait
+     * invoking the 'extends' keyword. *)
+    let classish_invalid_extends_keyword hhvm_compat_mode _ =
+      (* Invalid if uses 'extends' and is a trait. *)
+      not hhvm_compat_mode &&
+      token_kind cd.classish_extends_keyword = Some TokenKind.Extends &&
+        token_kind cd.classish_keyword = Some TokenKind.Trait in
+
+    (* Given a ClassishDeclaration node, test whether or not length of
+     * extends_list is appropriate for the classish_keyword. *)
+    let classish_invalid_extends_list  hhvm_compat_mode _ =
+      (* Invalid if is a class and has list of length greater than one. *)
+      not hhvm_compat_mode &&
+      token_kind cd.classish_keyword = Some TokenKind.Class &&
+        token_kind cd.classish_extends_keyword = Some TokenKind.Extends &&
+        match syntax_to_list_no_separators cd.classish_extends_list with
+        | [x1] -> false
+        | _ -> true (* General bc empty list case is already caught by error1007 *) in
+
     let errors =
       produce_error errors
       (classish_duplicate_modifiers hhvm_compat_mode) cd.classish_modifiers
       SyntaxError.error2031 cd.classish_modifiers in
     let errors =
       produce_error errors
-      (classish_invalid_implements_keyword hhvm_compat_mode) cd
+      (classish_invalid_implements_keyword hhvm_compat_mode) ()
       SyntaxError.error2035 cd.classish_implements_keyword in
     let errors =
       produce_error errors
-      (classish_invalid_extends_keyword hhvm_compat_mode) cd
+      (classish_invalid_extends_keyword hhvm_compat_mode) ()
       SyntaxError.error2036 cd.classish_extends_keyword in
     let errors =
-      produce_error errors (classish_invalid_extends_list hhvm_compat_mode) cd
+      produce_error errors (classish_invalid_extends_list hhvm_compat_mode) ()
       SyntaxError.error2037 cd.classish_extends_list in
     let errors =
       (* Extra setup for the the customized error message. *)
@@ -2120,10 +2136,10 @@ let const_decl_errors node parents hhvm_compat_mode namespace_name names errors 
   | ConstantDeclarator cd ->
     let errors =
       produce_error_parents errors
-      (concrete_no_initializer hhvm_compat_mode) cd parents
+      (concrete_no_initializer hhvm_compat_mode) cd.constant_declarator_initializer parents
       SyntaxError.error2050 cd.constant_declarator_initializer in
     let errors =
-      produce_error_parents errors abstract_with_initializer cd parents
+      produce_error_parents errors abstract_with_initializer cd.constant_declarator_initializer parents
       SyntaxError.error2051 cd.constant_declarator_initializer in
     let errors =
       produce_error errors is_global_in_const_decl cd.constant_declarator_initializer

@@ -2413,1910 +2413,1120 @@ module FromMinimal = struct
       let todo = Build (minimal_t, offset, todo) in
       let todo = List.fold_right ~f:(fun n t -> Convert (n,t)) l ~init:todo in
       dispatch offset todo results
-    | { M.syntax = M.EndOfFile
-        { M.end_of_file_token
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results end_of_file_token
-    | { M.syntax = M.Script
-        { M.script_declarations
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results script_declarations
-    | { M.syntax = M.QualifiedName
-        { M.qualified_name_parts
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results qualified_name_parts
-    | { M.syntax = M.SimpleTypeSpecifier
-        { M.simple_type_specifier
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results simple_type_specifier
-    | { M.syntax = M.LiteralExpression
-        { M.literal_expression
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results literal_expression
-    | { M.syntax = M.VariableExpression
-        { M.variable_expression
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results variable_expression
-    | { M.syntax = M.PipeVariableExpression
-        { M.pipe_variable_expression
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results pipe_variable_expression
-    | { M.syntax = M.EnumDeclaration
-        { M.enum_attribute_spec
-        ; M.enum_keyword
-        ; M.enum_name
-        ; M.enum_colon
-        ; M.enum_base
-        ; M.enum_type
-        ; M.enum_left_brace
-        ; M.enum_enumerators
-        ; M.enum_right_brace
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (enum_right_brace, todo) in
-        let todo = Convert (enum_enumerators, todo) in
-        let todo = Convert (enum_left_brace, todo) in
-        let todo = Convert (enum_type, todo) in
-        let todo = Convert (enum_base, todo) in
-        let todo = Convert (enum_colon, todo) in
-        let todo = Convert (enum_name, todo) in
-        let todo = Convert (enum_keyword, todo) in
-        convert offset todo results enum_attribute_spec
-    | { M.syntax = M.Enumerator
-        { M.enumerator_name
-        ; M.enumerator_equal
-        ; M.enumerator_value
-        ; M.enumerator_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (enumerator_semicolon, todo) in
-        let todo = Convert (enumerator_value, todo) in
-        let todo = Convert (enumerator_equal, todo) in
-        convert offset todo results enumerator_name
-    | { M.syntax = M.AliasDeclaration
-        { M.alias_attribute_spec
-        ; M.alias_keyword
-        ; M.alias_name
-        ; M.alias_generic_parameter
-        ; M.alias_constraint
-        ; M.alias_equal
-        ; M.alias_type
-        ; M.alias_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (alias_semicolon, todo) in
-        let todo = Convert (alias_type, todo) in
-        let todo = Convert (alias_equal, todo) in
-        let todo = Convert (alias_constraint, todo) in
-        let todo = Convert (alias_generic_parameter, todo) in
-        let todo = Convert (alias_name, todo) in
-        let todo = Convert (alias_keyword, todo) in
-        convert offset todo results alias_attribute_spec
-    | { M.syntax = M.PropertyDeclaration
-        { M.property_modifiers
-        ; M.property_type
-        ; M.property_declarators
-        ; M.property_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (property_semicolon, todo) in
-        let todo = Convert (property_declarators, todo) in
-        let todo = Convert (property_type, todo) in
-        convert offset todo results property_modifiers
-    | { M.syntax = M.PropertyDeclarator
-        { M.property_name
-        ; M.property_initializer
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (property_initializer, todo) in
-        convert offset todo results property_name
-    | { M.syntax = M.NamespaceDeclaration
-        { M.namespace_keyword
-        ; M.namespace_name
-        ; M.namespace_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (namespace_body, todo) in
-        let todo = Convert (namespace_name, todo) in
-        convert offset todo results namespace_keyword
-    | { M.syntax = M.NamespaceBody
-        { M.namespace_left_brace
-        ; M.namespace_declarations
-        ; M.namespace_right_brace
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (namespace_right_brace, todo) in
-        let todo = Convert (namespace_declarations, todo) in
-        convert offset todo results namespace_left_brace
-    | { M.syntax = M.NamespaceEmptyBody
-        { M.namespace_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results namespace_semicolon
-    | { M.syntax = M.NamespaceUseDeclaration
-        { M.namespace_use_keyword
-        ; M.namespace_use_kind
-        ; M.namespace_use_clauses
-        ; M.namespace_use_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (namespace_use_semicolon, todo) in
-        let todo = Convert (namespace_use_clauses, todo) in
-        let todo = Convert (namespace_use_kind, todo) in
-        convert offset todo results namespace_use_keyword
-    | { M.syntax = M.NamespaceGroupUseDeclaration
-        { M.namespace_group_use_keyword
-        ; M.namespace_group_use_kind
-        ; M.namespace_group_use_prefix
-        ; M.namespace_group_use_left_brace
-        ; M.namespace_group_use_clauses
-        ; M.namespace_group_use_right_brace
-        ; M.namespace_group_use_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (namespace_group_use_semicolon, todo) in
-        let todo = Convert (namespace_group_use_right_brace, todo) in
-        let todo = Convert (namespace_group_use_clauses, todo) in
-        let todo = Convert (namespace_group_use_left_brace, todo) in
-        let todo = Convert (namespace_group_use_prefix, todo) in
-        let todo = Convert (namespace_group_use_kind, todo) in
-        convert offset todo results namespace_group_use_keyword
-    | { M.syntax = M.NamespaceUseClause
-        { M.namespace_use_clause_kind
-        ; M.namespace_use_name
-        ; M.namespace_use_as
-        ; M.namespace_use_alias
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (namespace_use_alias, todo) in
-        let todo = Convert (namespace_use_as, todo) in
-        let todo = Convert (namespace_use_name, todo) in
-        convert offset todo results namespace_use_clause_kind
-    | { M.syntax = M.FunctionDeclaration
-        { M.function_attribute_spec
-        ; M.function_declaration_header
-        ; M.function_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (function_body, todo) in
-        let todo = Convert (function_declaration_header, todo) in
-        convert offset todo results function_attribute_spec
-    | { M.syntax = M.FunctionDeclarationHeader
-        { M.function_modifiers
-        ; M.function_keyword
-        ; M.function_ampersand
-        ; M.function_name
-        ; M.function_type_parameter_list
-        ; M.function_left_paren
-        ; M.function_parameter_list
-        ; M.function_right_paren
-        ; M.function_colon
-        ; M.function_type
-        ; M.function_where_clause
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (function_where_clause, todo) in
-        let todo = Convert (function_type, todo) in
-        let todo = Convert (function_colon, todo) in
-        let todo = Convert (function_right_paren, todo) in
-        let todo = Convert (function_parameter_list, todo) in
-        let todo = Convert (function_left_paren, todo) in
-        let todo = Convert (function_type_parameter_list, todo) in
-        let todo = Convert (function_name, todo) in
-        let todo = Convert (function_ampersand, todo) in
-        let todo = Convert (function_keyword, todo) in
-        convert offset todo results function_modifiers
-    | { M.syntax = M.WhereClause
-        { M.where_clause_keyword
-        ; M.where_clause_constraints
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (where_clause_constraints, todo) in
-        convert offset todo results where_clause_keyword
-    | { M.syntax = M.WhereConstraint
-        { M.where_constraint_left_type
-        ; M.where_constraint_operator
-        ; M.where_constraint_right_type
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (where_constraint_right_type, todo) in
-        let todo = Convert (where_constraint_operator, todo) in
-        convert offset todo results where_constraint_left_type
-    | { M.syntax = M.MethodishDeclaration
-        { M.methodish_attribute
-        ; M.methodish_function_decl_header
-        ; M.methodish_function_body
-        ; M.methodish_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (methodish_semicolon, todo) in
-        let todo = Convert (methodish_function_body, todo) in
-        let todo = Convert (methodish_function_decl_header, todo) in
-        convert offset todo results methodish_attribute
-    | { M.syntax = M.ClassishDeclaration
-        { M.classish_attribute
-        ; M.classish_modifiers
-        ; M.classish_keyword
-        ; M.classish_name
-        ; M.classish_type_parameters
-        ; M.classish_extends_keyword
-        ; M.classish_extends_list
-        ; M.classish_implements_keyword
-        ; M.classish_implements_list
-        ; M.classish_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (classish_body, todo) in
-        let todo = Convert (classish_implements_list, todo) in
-        let todo = Convert (classish_implements_keyword, todo) in
-        let todo = Convert (classish_extends_list, todo) in
-        let todo = Convert (classish_extends_keyword, todo) in
-        let todo = Convert (classish_type_parameters, todo) in
-        let todo = Convert (classish_name, todo) in
-        let todo = Convert (classish_keyword, todo) in
-        let todo = Convert (classish_modifiers, todo) in
-        convert offset todo results classish_attribute
-    | { M.syntax = M.ClassishBody
-        { M.classish_body_left_brace
-        ; M.classish_body_elements
-        ; M.classish_body_right_brace
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (classish_body_right_brace, todo) in
-        let todo = Convert (classish_body_elements, todo) in
-        convert offset todo results classish_body_left_brace
-    | { M.syntax = M.TraitUsePrecedenceItem
-        { M.trait_use_precedence_item_name
-        ; M.trait_use_precedence_item_keyword
-        ; M.trait_use_precedence_item_removed_names
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (trait_use_precedence_item_removed_names, todo) in
-        let todo = Convert (trait_use_precedence_item_keyword, todo) in
-        convert offset todo results trait_use_precedence_item_name
-    | { M.syntax = M.TraitUseAliasItem
-        { M.trait_use_alias_item_aliasing_name
-        ; M.trait_use_alias_item_keyword
-        ; M.trait_use_alias_item_modifiers
-        ; M.trait_use_alias_item_aliased_name
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (trait_use_alias_item_aliased_name, todo) in
-        let todo = Convert (trait_use_alias_item_modifiers, todo) in
-        let todo = Convert (trait_use_alias_item_keyword, todo) in
-        convert offset todo results trait_use_alias_item_aliasing_name
-    | { M.syntax = M.TraitUseConflictResolution
-        { M.trait_use_conflict_resolution_keyword
-        ; M.trait_use_conflict_resolution_names
-        ; M.trait_use_conflict_resolution_left_brace
-        ; M.trait_use_conflict_resolution_clauses
-        ; M.trait_use_conflict_resolution_right_brace
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (trait_use_conflict_resolution_right_brace, todo) in
-        let todo = Convert (trait_use_conflict_resolution_clauses, todo) in
-        let todo = Convert (trait_use_conflict_resolution_left_brace, todo) in
-        let todo = Convert (trait_use_conflict_resolution_names, todo) in
-        convert offset todo results trait_use_conflict_resolution_keyword
-    | { M.syntax = M.TraitUse
-        { M.trait_use_keyword
-        ; M.trait_use_names
-        ; M.trait_use_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (trait_use_semicolon, todo) in
-        let todo = Convert (trait_use_names, todo) in
-        convert offset todo results trait_use_keyword
-    | { M.syntax = M.RequireClause
-        { M.require_keyword
-        ; M.require_kind
-        ; M.require_name
-        ; M.require_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (require_semicolon, todo) in
-        let todo = Convert (require_name, todo) in
-        let todo = Convert (require_kind, todo) in
-        convert offset todo results require_keyword
-    | { M.syntax = M.ConstDeclaration
-        { M.const_abstract
-        ; M.const_keyword
-        ; M.const_type_specifier
-        ; M.const_declarators
-        ; M.const_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (const_semicolon, todo) in
-        let todo = Convert (const_declarators, todo) in
-        let todo = Convert (const_type_specifier, todo) in
-        let todo = Convert (const_keyword, todo) in
-        convert offset todo results const_abstract
-    | { M.syntax = M.ConstantDeclarator
-        { M.constant_declarator_name
-        ; M.constant_declarator_initializer
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (constant_declarator_initializer, todo) in
-        convert offset todo results constant_declarator_name
-    | { M.syntax = M.TypeConstDeclaration
-        { M.type_const_abstract
-        ; M.type_const_keyword
-        ; M.type_const_type_keyword
-        ; M.type_const_name
-        ; M.type_const_type_parameters
-        ; M.type_const_type_constraint
-        ; M.type_const_equal
-        ; M.type_const_type_specifier
-        ; M.type_const_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (type_const_semicolon, todo) in
-        let todo = Convert (type_const_type_specifier, todo) in
-        let todo = Convert (type_const_equal, todo) in
-        let todo = Convert (type_const_type_constraint, todo) in
-        let todo = Convert (type_const_type_parameters, todo) in
-        let todo = Convert (type_const_name, todo) in
-        let todo = Convert (type_const_type_keyword, todo) in
-        let todo = Convert (type_const_keyword, todo) in
-        convert offset todo results type_const_abstract
-    | { M.syntax = M.DecoratedExpression
-        { M.decorated_expression_decorator
-        ; M.decorated_expression_expression
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (decorated_expression_expression, todo) in
-        convert offset todo results decorated_expression_decorator
-    | { M.syntax = M.ParameterDeclaration
-        { M.parameter_attribute
-        ; M.parameter_visibility
-        ; M.parameter_call_convention
-        ; M.parameter_type
-        ; M.parameter_name
-        ; M.parameter_default_value
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (parameter_default_value, todo) in
-        let todo = Convert (parameter_name, todo) in
-        let todo = Convert (parameter_type, todo) in
-        let todo = Convert (parameter_call_convention, todo) in
-        let todo = Convert (parameter_visibility, todo) in
-        convert offset todo results parameter_attribute
-    | { M.syntax = M.VariadicParameter
-        { M.variadic_parameter_call_convention
-        ; M.variadic_parameter_type
-        ; M.variadic_parameter_ellipsis
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (variadic_parameter_ellipsis, todo) in
-        let todo = Convert (variadic_parameter_type, todo) in
-        convert offset todo results variadic_parameter_call_convention
-    | { M.syntax = M.AttributeSpecification
-        { M.attribute_specification_left_double_angle
-        ; M.attribute_specification_attributes
-        ; M.attribute_specification_right_double_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (attribute_specification_right_double_angle, todo) in
-        let todo = Convert (attribute_specification_attributes, todo) in
-        convert offset todo results attribute_specification_left_double_angle
-    | { M.syntax = M.Attribute
-        { M.attribute_name
-        ; M.attribute_left_paren
-        ; M.attribute_values
-        ; M.attribute_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (attribute_right_paren, todo) in
-        let todo = Convert (attribute_values, todo) in
-        let todo = Convert (attribute_left_paren, todo) in
-        convert offset todo results attribute_name
-    | { M.syntax = M.InclusionExpression
-        { M.inclusion_require
-        ; M.inclusion_filename
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (inclusion_filename, todo) in
-        convert offset todo results inclusion_require
-    | { M.syntax = M.InclusionDirective
-        { M.inclusion_expression
-        ; M.inclusion_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (inclusion_semicolon, todo) in
-        convert offset todo results inclusion_expression
-    | { M.syntax = M.CompoundStatement
-        { M.compound_left_brace
-        ; M.compound_statements
-        ; M.compound_right_brace
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (compound_right_brace, todo) in
-        let todo = Convert (compound_statements, todo) in
-        convert offset todo results compound_left_brace
-    | { M.syntax = M.ExpressionStatement
-        { M.expression_statement_expression
-        ; M.expression_statement_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (expression_statement_semicolon, todo) in
-        convert offset todo results expression_statement_expression
-    | { M.syntax = M.MarkupSection
-        { M.markup_prefix
-        ; M.markup_text
-        ; M.markup_suffix
-        ; M.markup_expression
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (markup_expression, todo) in
-        let todo = Convert (markup_suffix, todo) in
-        let todo = Convert (markup_text, todo) in
-        convert offset todo results markup_prefix
-    | { M.syntax = M.MarkupSuffix
-        { M.markup_suffix_less_than_question
-        ; M.markup_suffix_name
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (markup_suffix_name, todo) in
-        convert offset todo results markup_suffix_less_than_question
-    | { M.syntax = M.UnsetStatement
-        { M.unset_keyword
-        ; M.unset_left_paren
-        ; M.unset_variables
-        ; M.unset_right_paren
-        ; M.unset_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (unset_semicolon, todo) in
-        let todo = Convert (unset_right_paren, todo) in
-        let todo = Convert (unset_variables, todo) in
-        let todo = Convert (unset_left_paren, todo) in
-        convert offset todo results unset_keyword
-    | { M.syntax = M.UsingStatementBlockScoped
-        { M.using_block_await_keyword
-        ; M.using_block_using_keyword
-        ; M.using_block_left_paren
-        ; M.using_block_expressions
-        ; M.using_block_right_paren
-        ; M.using_block_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (using_block_body, todo) in
-        let todo = Convert (using_block_right_paren, todo) in
-        let todo = Convert (using_block_expressions, todo) in
-        let todo = Convert (using_block_left_paren, todo) in
-        let todo = Convert (using_block_using_keyword, todo) in
-        convert offset todo results using_block_await_keyword
-    | { M.syntax = M.UsingStatementFunctionScoped
-        { M.using_function_await_keyword
-        ; M.using_function_using_keyword
-        ; M.using_function_expression
-        ; M.using_function_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (using_function_semicolon, todo) in
-        let todo = Convert (using_function_expression, todo) in
-        let todo = Convert (using_function_using_keyword, todo) in
-        convert offset todo results using_function_await_keyword
-    | { M.syntax = M.DeclareDirectiveStatement
-        { M.declare_directive_keyword
-        ; M.declare_directive_left_paren
-        ; M.declare_directive_expression
-        ; M.declare_directive_right_paren
-        ; M.declare_directive_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (declare_directive_semicolon, todo) in
-        let todo = Convert (declare_directive_right_paren, todo) in
-        let todo = Convert (declare_directive_expression, todo) in
-        let todo = Convert (declare_directive_left_paren, todo) in
-        convert offset todo results declare_directive_keyword
-    | { M.syntax = M.DeclareBlockStatement
-        { M.declare_block_keyword
-        ; M.declare_block_left_paren
-        ; M.declare_block_expression
-        ; M.declare_block_right_paren
-        ; M.declare_block_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (declare_block_body, todo) in
-        let todo = Convert (declare_block_right_paren, todo) in
-        let todo = Convert (declare_block_expression, todo) in
-        let todo = Convert (declare_block_left_paren, todo) in
-        convert offset todo results declare_block_keyword
-    | { M.syntax = M.WhileStatement
-        { M.while_keyword
-        ; M.while_left_paren
-        ; M.while_condition
-        ; M.while_right_paren
-        ; M.while_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (while_body, todo) in
-        let todo = Convert (while_right_paren, todo) in
-        let todo = Convert (while_condition, todo) in
-        let todo = Convert (while_left_paren, todo) in
-        convert offset todo results while_keyword
-    | { M.syntax = M.IfStatement
-        { M.if_keyword
-        ; M.if_left_paren
-        ; M.if_condition
-        ; M.if_right_paren
-        ; M.if_statement
-        ; M.if_elseif_clauses
-        ; M.if_else_clause
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (if_else_clause, todo) in
-        let todo = Convert (if_elseif_clauses, todo) in
-        let todo = Convert (if_statement, todo) in
-        let todo = Convert (if_right_paren, todo) in
-        let todo = Convert (if_condition, todo) in
-        let todo = Convert (if_left_paren, todo) in
-        convert offset todo results if_keyword
-    | { M.syntax = M.ElseifClause
-        { M.elseif_keyword
-        ; M.elseif_left_paren
-        ; M.elseif_condition
-        ; M.elseif_right_paren
-        ; M.elseif_statement
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (elseif_statement, todo) in
-        let todo = Convert (elseif_right_paren, todo) in
-        let todo = Convert (elseif_condition, todo) in
-        let todo = Convert (elseif_left_paren, todo) in
-        convert offset todo results elseif_keyword
-    | { M.syntax = M.ElseClause
-        { M.else_keyword
-        ; M.else_statement
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (else_statement, todo) in
-        convert offset todo results else_keyword
-    | { M.syntax = M.IfEndIfStatement
-        { M.if_endif_keyword
-        ; M.if_endif_left_paren
-        ; M.if_endif_condition
-        ; M.if_endif_right_paren
-        ; M.if_endif_colon
-        ; M.if_endif_statement
-        ; M.if_endif_elseif_colon_clauses
-        ; M.if_endif_else_colon_clause
-        ; M.if_endif_endif_keyword
-        ; M.if_endif_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (if_endif_semicolon, todo) in
-        let todo = Convert (if_endif_endif_keyword, todo) in
-        let todo = Convert (if_endif_else_colon_clause, todo) in
-        let todo = Convert (if_endif_elseif_colon_clauses, todo) in
-        let todo = Convert (if_endif_statement, todo) in
-        let todo = Convert (if_endif_colon, todo) in
-        let todo = Convert (if_endif_right_paren, todo) in
-        let todo = Convert (if_endif_condition, todo) in
-        let todo = Convert (if_endif_left_paren, todo) in
-        convert offset todo results if_endif_keyword
-    | { M.syntax = M.ElseifColonClause
-        { M.elseif_colon_keyword
-        ; M.elseif_colon_left_paren
-        ; M.elseif_colon_condition
-        ; M.elseif_colon_right_paren
-        ; M.elseif_colon_colon
-        ; M.elseif_colon_statement
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (elseif_colon_statement, todo) in
-        let todo = Convert (elseif_colon_colon, todo) in
-        let todo = Convert (elseif_colon_right_paren, todo) in
-        let todo = Convert (elseif_colon_condition, todo) in
-        let todo = Convert (elseif_colon_left_paren, todo) in
-        convert offset todo results elseif_colon_keyword
-    | { M.syntax = M.ElseColonClause
-        { M.else_colon_keyword
-        ; M.else_colon_colon
-        ; M.else_colon_statement
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (else_colon_statement, todo) in
-        let todo = Convert (else_colon_colon, todo) in
-        convert offset todo results else_colon_keyword
-    | { M.syntax = M.TryStatement
-        { M.try_keyword
-        ; M.try_compound_statement
-        ; M.try_catch_clauses
-        ; M.try_finally_clause
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (try_finally_clause, todo) in
-        let todo = Convert (try_catch_clauses, todo) in
-        let todo = Convert (try_compound_statement, todo) in
-        convert offset todo results try_keyword
-    | { M.syntax = M.CatchClause
-        { M.catch_keyword
-        ; M.catch_left_paren
-        ; M.catch_type
-        ; M.catch_variable
-        ; M.catch_right_paren
-        ; M.catch_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (catch_body, todo) in
-        let todo = Convert (catch_right_paren, todo) in
-        let todo = Convert (catch_variable, todo) in
-        let todo = Convert (catch_type, todo) in
-        let todo = Convert (catch_left_paren, todo) in
-        convert offset todo results catch_keyword
-    | { M.syntax = M.FinallyClause
-        { M.finally_keyword
-        ; M.finally_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (finally_body, todo) in
-        convert offset todo results finally_keyword
-    | { M.syntax = M.DoStatement
-        { M.do_keyword
-        ; M.do_body
-        ; M.do_while_keyword
-        ; M.do_left_paren
-        ; M.do_condition
-        ; M.do_right_paren
-        ; M.do_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (do_semicolon, todo) in
-        let todo = Convert (do_right_paren, todo) in
-        let todo = Convert (do_condition, todo) in
-        let todo = Convert (do_left_paren, todo) in
-        let todo = Convert (do_while_keyword, todo) in
-        let todo = Convert (do_body, todo) in
-        convert offset todo results do_keyword
-    | { M.syntax = M.ForStatement
-        { M.for_keyword
-        ; M.for_left_paren
-        ; M.for_initializer
-        ; M.for_first_semicolon
-        ; M.for_control
-        ; M.for_second_semicolon
-        ; M.for_end_of_loop
-        ; M.for_right_paren
-        ; M.for_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (for_body, todo) in
-        let todo = Convert (for_right_paren, todo) in
-        let todo = Convert (for_end_of_loop, todo) in
-        let todo = Convert (for_second_semicolon, todo) in
-        let todo = Convert (for_control, todo) in
-        let todo = Convert (for_first_semicolon, todo) in
-        let todo = Convert (for_initializer, todo) in
-        let todo = Convert (for_left_paren, todo) in
-        convert offset todo results for_keyword
-    | { M.syntax = M.ForeachStatement
-        { M.foreach_keyword
-        ; M.foreach_left_paren
-        ; M.foreach_collection
-        ; M.foreach_await_keyword
-        ; M.foreach_as
-        ; M.foreach_key
-        ; M.foreach_arrow
-        ; M.foreach_value
-        ; M.foreach_right_paren
-        ; M.foreach_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (foreach_body, todo) in
-        let todo = Convert (foreach_right_paren, todo) in
-        let todo = Convert (foreach_value, todo) in
-        let todo = Convert (foreach_arrow, todo) in
-        let todo = Convert (foreach_key, todo) in
-        let todo = Convert (foreach_as, todo) in
-        let todo = Convert (foreach_await_keyword, todo) in
-        let todo = Convert (foreach_collection, todo) in
-        let todo = Convert (foreach_left_paren, todo) in
-        convert offset todo results foreach_keyword
-    | { M.syntax = M.SwitchStatement
-        { M.switch_keyword
-        ; M.switch_left_paren
-        ; M.switch_expression
-        ; M.switch_right_paren
-        ; M.switch_left_brace
-        ; M.switch_sections
-        ; M.switch_right_brace
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (switch_right_brace, todo) in
-        let todo = Convert (switch_sections, todo) in
-        let todo = Convert (switch_left_brace, todo) in
-        let todo = Convert (switch_right_paren, todo) in
-        let todo = Convert (switch_expression, todo) in
-        let todo = Convert (switch_left_paren, todo) in
-        convert offset todo results switch_keyword
-    | { M.syntax = M.SwitchSection
-        { M.switch_section_labels
-        ; M.switch_section_statements
-        ; M.switch_section_fallthrough
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (switch_section_fallthrough, todo) in
-        let todo = Convert (switch_section_statements, todo) in
-        convert offset todo results switch_section_labels
-    | { M.syntax = M.SwitchFallthrough
-        { M.fallthrough_keyword
-        ; M.fallthrough_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (fallthrough_semicolon, todo) in
-        convert offset todo results fallthrough_keyword
-    | { M.syntax = M.CaseLabel
-        { M.case_keyword
-        ; M.case_expression
-        ; M.case_colon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (case_colon, todo) in
-        let todo = Convert (case_expression, todo) in
-        convert offset todo results case_keyword
-    | { M.syntax = M.DefaultLabel
-        { M.default_keyword
-        ; M.default_colon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (default_colon, todo) in
-        convert offset todo results default_keyword
-    | { M.syntax = M.ReturnStatement
-        { M.return_keyword
-        ; M.return_expression
-        ; M.return_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (return_semicolon, todo) in
-        let todo = Convert (return_expression, todo) in
-        convert offset todo results return_keyword
-    | { M.syntax = M.GotoLabel
-        { M.goto_label_name
-        ; M.goto_label_colon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (goto_label_colon, todo) in
-        convert offset todo results goto_label_name
-    | { M.syntax = M.GotoStatement
-        { M.goto_statement_keyword
-        ; M.goto_statement_label_name
-        ; M.goto_statement_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (goto_statement_semicolon, todo) in
-        let todo = Convert (goto_statement_label_name, todo) in
-        convert offset todo results goto_statement_keyword
-    | { M.syntax = M.ThrowStatement
-        { M.throw_keyword
-        ; M.throw_expression
-        ; M.throw_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (throw_semicolon, todo) in
-        let todo = Convert (throw_expression, todo) in
-        convert offset todo results throw_keyword
-    | { M.syntax = M.BreakStatement
-        { M.break_keyword
-        ; M.break_level
-        ; M.break_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (break_semicolon, todo) in
-        let todo = Convert (break_level, todo) in
-        convert offset todo results break_keyword
-    | { M.syntax = M.ContinueStatement
-        { M.continue_keyword
-        ; M.continue_level
-        ; M.continue_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (continue_semicolon, todo) in
-        let todo = Convert (continue_level, todo) in
-        convert offset todo results continue_keyword
-    | { M.syntax = M.FunctionStaticStatement
-        { M.static_static_keyword
-        ; M.static_declarations
-        ; M.static_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (static_semicolon, todo) in
-        let todo = Convert (static_declarations, todo) in
-        convert offset todo results static_static_keyword
-    | { M.syntax = M.StaticDeclarator
-        { M.static_name
-        ; M.static_initializer
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (static_initializer, todo) in
-        convert offset todo results static_name
-    | { M.syntax = M.EchoStatement
-        { M.echo_keyword
-        ; M.echo_expressions
-        ; M.echo_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (echo_semicolon, todo) in
-        let todo = Convert (echo_expressions, todo) in
-        convert offset todo results echo_keyword
-    | { M.syntax = M.GlobalStatement
-        { M.global_keyword
-        ; M.global_variables
-        ; M.global_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (global_semicolon, todo) in
-        let todo = Convert (global_variables, todo) in
-        convert offset todo results global_keyword
-    | { M.syntax = M.SimpleInitializer
-        { M.simple_initializer_equal
-        ; M.simple_initializer_value
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (simple_initializer_value, todo) in
-        convert offset todo results simple_initializer_equal
-    | { M.syntax = M.AnonymousClass
-        { M.anonymous_class_class_keyword
-        ; M.anonymous_class_left_paren
-        ; M.anonymous_class_argument_list
-        ; M.anonymous_class_right_paren
-        ; M.anonymous_class_extends_keyword
-        ; M.anonymous_class_extends_list
-        ; M.anonymous_class_implements_keyword
-        ; M.anonymous_class_implements_list
-        ; M.anonymous_class_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (anonymous_class_body, todo) in
-        let todo = Convert (anonymous_class_implements_list, todo) in
-        let todo = Convert (anonymous_class_implements_keyword, todo) in
-        let todo = Convert (anonymous_class_extends_list, todo) in
-        let todo = Convert (anonymous_class_extends_keyword, todo) in
-        let todo = Convert (anonymous_class_right_paren, todo) in
-        let todo = Convert (anonymous_class_argument_list, todo) in
-        let todo = Convert (anonymous_class_left_paren, todo) in
-        convert offset todo results anonymous_class_class_keyword
-    | { M.syntax = M.AnonymousFunction
-        { M.anonymous_static_keyword
-        ; M.anonymous_async_keyword
-        ; M.anonymous_coroutine_keyword
-        ; M.anonymous_function_keyword
-        ; M.anonymous_left_paren
-        ; M.anonymous_parameters
-        ; M.anonymous_right_paren
-        ; M.anonymous_colon
-        ; M.anonymous_type
-        ; M.anonymous_use
-        ; M.anonymous_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (anonymous_body, todo) in
-        let todo = Convert (anonymous_use, todo) in
-        let todo = Convert (anonymous_type, todo) in
-        let todo = Convert (anonymous_colon, todo) in
-        let todo = Convert (anonymous_right_paren, todo) in
-        let todo = Convert (anonymous_parameters, todo) in
-        let todo = Convert (anonymous_left_paren, todo) in
-        let todo = Convert (anonymous_function_keyword, todo) in
-        let todo = Convert (anonymous_coroutine_keyword, todo) in
-        let todo = Convert (anonymous_async_keyword, todo) in
-        convert offset todo results anonymous_static_keyword
-    | { M.syntax = M.Php7AnonymousFunction
-        { M.php7_anonymous_static_keyword
-        ; M.php7_anonymous_async_keyword
-        ; M.php7_anonymous_coroutine_keyword
-        ; M.php7_anonymous_function_keyword
-        ; M.php7_anonymous_left_paren
-        ; M.php7_anonymous_parameters
-        ; M.php7_anonymous_right_paren
-        ; M.php7_anonymous_use
-        ; M.php7_anonymous_colon
-        ; M.php7_anonymous_type
-        ; M.php7_anonymous_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (php7_anonymous_body, todo) in
-        let todo = Convert (php7_anonymous_type, todo) in
-        let todo = Convert (php7_anonymous_colon, todo) in
-        let todo = Convert (php7_anonymous_use, todo) in
-        let todo = Convert (php7_anonymous_right_paren, todo) in
-        let todo = Convert (php7_anonymous_parameters, todo) in
-        let todo = Convert (php7_anonymous_left_paren, todo) in
-        let todo = Convert (php7_anonymous_function_keyword, todo) in
-        let todo = Convert (php7_anonymous_coroutine_keyword, todo) in
-        let todo = Convert (php7_anonymous_async_keyword, todo) in
-        convert offset todo results php7_anonymous_static_keyword
-    | { M.syntax = M.AnonymousFunctionUseClause
-        { M.anonymous_use_keyword
-        ; M.anonymous_use_left_paren
-        ; M.anonymous_use_variables
-        ; M.anonymous_use_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (anonymous_use_right_paren, todo) in
-        let todo = Convert (anonymous_use_variables, todo) in
-        let todo = Convert (anonymous_use_left_paren, todo) in
-        convert offset todo results anonymous_use_keyword
-    | { M.syntax = M.LambdaExpression
-        { M.lambda_async
-        ; M.lambda_coroutine
-        ; M.lambda_signature
-        ; M.lambda_arrow
-        ; M.lambda_body
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (lambda_body, todo) in
-        let todo = Convert (lambda_arrow, todo) in
-        let todo = Convert (lambda_signature, todo) in
-        let todo = Convert (lambda_coroutine, todo) in
-        convert offset todo results lambda_async
-    | { M.syntax = M.LambdaSignature
-        { M.lambda_left_paren
-        ; M.lambda_parameters
-        ; M.lambda_right_paren
-        ; M.lambda_colon
-        ; M.lambda_type
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (lambda_type, todo) in
-        let todo = Convert (lambda_colon, todo) in
-        let todo = Convert (lambda_right_paren, todo) in
-        let todo = Convert (lambda_parameters, todo) in
-        convert offset todo results lambda_left_paren
-    | { M.syntax = M.CastExpression
-        { M.cast_left_paren
-        ; M.cast_type
-        ; M.cast_right_paren
-        ; M.cast_operand
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (cast_operand, todo) in
-        let todo = Convert (cast_right_paren, todo) in
-        let todo = Convert (cast_type, todo) in
-        convert offset todo results cast_left_paren
-    | { M.syntax = M.ScopeResolutionExpression
-        { M.scope_resolution_qualifier
-        ; M.scope_resolution_operator
-        ; M.scope_resolution_name
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (scope_resolution_name, todo) in
-        let todo = Convert (scope_resolution_operator, todo) in
-        convert offset todo results scope_resolution_qualifier
-    | { M.syntax = M.MemberSelectionExpression
-        { M.member_object
-        ; M.member_operator
-        ; M.member_name
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (member_name, todo) in
-        let todo = Convert (member_operator, todo) in
-        convert offset todo results member_object
-    | { M.syntax = M.SafeMemberSelectionExpression
-        { M.safe_member_object
-        ; M.safe_member_operator
-        ; M.safe_member_name
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (safe_member_name, todo) in
-        let todo = Convert (safe_member_operator, todo) in
-        convert offset todo results safe_member_object
-    | { M.syntax = M.EmbeddedMemberSelectionExpression
-        { M.embedded_member_object
-        ; M.embedded_member_operator
-        ; M.embedded_member_name
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (embedded_member_name, todo) in
-        let todo = Convert (embedded_member_operator, todo) in
-        convert offset todo results embedded_member_object
-    | { M.syntax = M.YieldExpression
-        { M.yield_keyword
-        ; M.yield_operand
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (yield_operand, todo) in
-        convert offset todo results yield_keyword
-    | { M.syntax = M.YieldFromExpression
-        { M.yield_from_yield_keyword
-        ; M.yield_from_from_keyword
-        ; M.yield_from_operand
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (yield_from_operand, todo) in
-        let todo = Convert (yield_from_from_keyword, todo) in
-        convert offset todo results yield_from_yield_keyword
-    | { M.syntax = M.PrefixUnaryExpression
-        { M.prefix_unary_operator
-        ; M.prefix_unary_operand
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (prefix_unary_operand, todo) in
-        convert offset todo results prefix_unary_operator
-    | { M.syntax = M.PostfixUnaryExpression
-        { M.postfix_unary_operand
-        ; M.postfix_unary_operator
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (postfix_unary_operator, todo) in
-        convert offset todo results postfix_unary_operand
-    | { M.syntax = M.BinaryExpression
-        { M.binary_left_operand
-        ; M.binary_operator
-        ; M.binary_right_operand
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (binary_right_operand, todo) in
-        let todo = Convert (binary_operator, todo) in
-        convert offset todo results binary_left_operand
-    | { M.syntax = M.InstanceofExpression
-        { M.instanceof_left_operand
-        ; M.instanceof_operator
-        ; M.instanceof_right_operand
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (instanceof_right_operand, todo) in
-        let todo = Convert (instanceof_operator, todo) in
-        convert offset todo results instanceof_left_operand
-    | { M.syntax = M.IsExpression
-        { M.is_left_operand
-        ; M.is_operator
-        ; M.is_right_operand
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (is_right_operand, todo) in
-        let todo = Convert (is_operator, todo) in
-        convert offset todo results is_left_operand
-    | { M.syntax = M.ConditionalExpression
-        { M.conditional_test
-        ; M.conditional_question
-        ; M.conditional_consequence
-        ; M.conditional_colon
-        ; M.conditional_alternative
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (conditional_alternative, todo) in
-        let todo = Convert (conditional_colon, todo) in
-        let todo = Convert (conditional_consequence, todo) in
-        let todo = Convert (conditional_question, todo) in
-        convert offset todo results conditional_test
-    | { M.syntax = M.EvalExpression
-        { M.eval_keyword
-        ; M.eval_left_paren
-        ; M.eval_argument
-        ; M.eval_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (eval_right_paren, todo) in
-        let todo = Convert (eval_argument, todo) in
-        let todo = Convert (eval_left_paren, todo) in
-        convert offset todo results eval_keyword
-    | { M.syntax = M.EmptyExpression
-        { M.empty_keyword
-        ; M.empty_left_paren
-        ; M.empty_argument
-        ; M.empty_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (empty_right_paren, todo) in
-        let todo = Convert (empty_argument, todo) in
-        let todo = Convert (empty_left_paren, todo) in
-        convert offset todo results empty_keyword
-    | { M.syntax = M.DefineExpression
-        { M.define_keyword
-        ; M.define_left_paren
-        ; M.define_argument_list
-        ; M.define_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (define_right_paren, todo) in
-        let todo = Convert (define_argument_list, todo) in
-        let todo = Convert (define_left_paren, todo) in
-        convert offset todo results define_keyword
-    | { M.syntax = M.HaltCompilerExpression
-        { M.halt_compiler_keyword
-        ; M.halt_compiler_left_paren
-        ; M.halt_compiler_argument_list
-        ; M.halt_compiler_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (halt_compiler_right_paren, todo) in
-        let todo = Convert (halt_compiler_argument_list, todo) in
-        let todo = Convert (halt_compiler_left_paren, todo) in
-        convert offset todo results halt_compiler_keyword
-    | { M.syntax = M.IssetExpression
-        { M.isset_keyword
-        ; M.isset_left_paren
-        ; M.isset_argument_list
-        ; M.isset_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (isset_right_paren, todo) in
-        let todo = Convert (isset_argument_list, todo) in
-        let todo = Convert (isset_left_paren, todo) in
-        convert offset todo results isset_keyword
-    | { M.syntax = M.FunctionCallExpression
-        { M.function_call_receiver
-        ; M.function_call_left_paren
-        ; M.function_call_argument_list
-        ; M.function_call_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (function_call_right_paren, todo) in
-        let todo = Convert (function_call_argument_list, todo) in
-        let todo = Convert (function_call_left_paren, todo) in
-        convert offset todo results function_call_receiver
-    | { M.syntax = M.FunctionCallWithTypeArgumentsExpression
-        { M.function_call_with_type_arguments_receiver
-        ; M.function_call_with_type_arguments_type_args
-        ; M.function_call_with_type_arguments_left_paren
-        ; M.function_call_with_type_arguments_argument_list
-        ; M.function_call_with_type_arguments_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (function_call_with_type_arguments_right_paren, todo) in
-        let todo = Convert (function_call_with_type_arguments_argument_list, todo) in
-        let todo = Convert (function_call_with_type_arguments_left_paren, todo) in
-        let todo = Convert (function_call_with_type_arguments_type_args, todo) in
-        convert offset todo results function_call_with_type_arguments_receiver
-    | { M.syntax = M.ParenthesizedExpression
-        { M.parenthesized_expression_left_paren
-        ; M.parenthesized_expression_expression
-        ; M.parenthesized_expression_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (parenthesized_expression_right_paren, todo) in
-        let todo = Convert (parenthesized_expression_expression, todo) in
-        convert offset todo results parenthesized_expression_left_paren
-    | { M.syntax = M.BracedExpression
-        { M.braced_expression_left_brace
-        ; M.braced_expression_expression
-        ; M.braced_expression_right_brace
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (braced_expression_right_brace, todo) in
-        let todo = Convert (braced_expression_expression, todo) in
-        convert offset todo results braced_expression_left_brace
-    | { M.syntax = M.EmbeddedBracedExpression
-        { M.embedded_braced_expression_left_brace
-        ; M.embedded_braced_expression_expression
-        ; M.embedded_braced_expression_right_brace
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (embedded_braced_expression_right_brace, todo) in
-        let todo = Convert (embedded_braced_expression_expression, todo) in
-        convert offset todo results embedded_braced_expression_left_brace
-    | { M.syntax = M.ListExpression
-        { M.list_keyword
-        ; M.list_left_paren
-        ; M.list_members
-        ; M.list_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (list_right_paren, todo) in
-        let todo = Convert (list_members, todo) in
-        let todo = Convert (list_left_paren, todo) in
-        convert offset todo results list_keyword
-    | { M.syntax = M.CollectionLiteralExpression
-        { M.collection_literal_name
-        ; M.collection_literal_left_brace
-        ; M.collection_literal_initializers
-        ; M.collection_literal_right_brace
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (collection_literal_right_brace, todo) in
-        let todo = Convert (collection_literal_initializers, todo) in
-        let todo = Convert (collection_literal_left_brace, todo) in
-        convert offset todo results collection_literal_name
-    | { M.syntax = M.ObjectCreationExpression
-        { M.object_creation_new_keyword
-        ; M.object_creation_object
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (object_creation_object, todo) in
-        convert offset todo results object_creation_new_keyword
-    | { M.syntax = M.ConstructorCall
-        { M.constructor_call_type
-        ; M.constructor_call_left_paren
-        ; M.constructor_call_argument_list
-        ; M.constructor_call_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (constructor_call_right_paren, todo) in
-        let todo = Convert (constructor_call_argument_list, todo) in
-        let todo = Convert (constructor_call_left_paren, todo) in
-        convert offset todo results constructor_call_type
-    | { M.syntax = M.ArrayCreationExpression
-        { M.array_creation_left_bracket
-        ; M.array_creation_members
-        ; M.array_creation_right_bracket
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (array_creation_right_bracket, todo) in
-        let todo = Convert (array_creation_members, todo) in
-        convert offset todo results array_creation_left_bracket
-    | { M.syntax = M.ArrayIntrinsicExpression
-        { M.array_intrinsic_keyword
-        ; M.array_intrinsic_left_paren
-        ; M.array_intrinsic_members
-        ; M.array_intrinsic_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (array_intrinsic_right_paren, todo) in
-        let todo = Convert (array_intrinsic_members, todo) in
-        let todo = Convert (array_intrinsic_left_paren, todo) in
-        convert offset todo results array_intrinsic_keyword
-    | { M.syntax = M.DarrayIntrinsicExpression
-        { M.darray_intrinsic_keyword
-        ; M.darray_intrinsic_left_bracket
-        ; M.darray_intrinsic_members
-        ; M.darray_intrinsic_right_bracket
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (darray_intrinsic_right_bracket, todo) in
-        let todo = Convert (darray_intrinsic_members, todo) in
-        let todo = Convert (darray_intrinsic_left_bracket, todo) in
-        convert offset todo results darray_intrinsic_keyword
-    | { M.syntax = M.DictionaryIntrinsicExpression
-        { M.dictionary_intrinsic_keyword
-        ; M.dictionary_intrinsic_left_bracket
-        ; M.dictionary_intrinsic_members
-        ; M.dictionary_intrinsic_right_bracket
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (dictionary_intrinsic_right_bracket, todo) in
-        let todo = Convert (dictionary_intrinsic_members, todo) in
-        let todo = Convert (dictionary_intrinsic_left_bracket, todo) in
-        convert offset todo results dictionary_intrinsic_keyword
-    | { M.syntax = M.KeysetIntrinsicExpression
-        { M.keyset_intrinsic_keyword
-        ; M.keyset_intrinsic_left_bracket
-        ; M.keyset_intrinsic_members
-        ; M.keyset_intrinsic_right_bracket
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (keyset_intrinsic_right_bracket, todo) in
-        let todo = Convert (keyset_intrinsic_members, todo) in
-        let todo = Convert (keyset_intrinsic_left_bracket, todo) in
-        convert offset todo results keyset_intrinsic_keyword
-    | { M.syntax = M.VarrayIntrinsicExpression
-        { M.varray_intrinsic_keyword
-        ; M.varray_intrinsic_left_bracket
-        ; M.varray_intrinsic_members
-        ; M.varray_intrinsic_right_bracket
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (varray_intrinsic_right_bracket, todo) in
-        let todo = Convert (varray_intrinsic_members, todo) in
-        let todo = Convert (varray_intrinsic_left_bracket, todo) in
-        convert offset todo results varray_intrinsic_keyword
-    | { M.syntax = M.VectorIntrinsicExpression
-        { M.vector_intrinsic_keyword
-        ; M.vector_intrinsic_left_bracket
-        ; M.vector_intrinsic_members
-        ; M.vector_intrinsic_right_bracket
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (vector_intrinsic_right_bracket, todo) in
-        let todo = Convert (vector_intrinsic_members, todo) in
-        let todo = Convert (vector_intrinsic_left_bracket, todo) in
-        convert offset todo results vector_intrinsic_keyword
-    | { M.syntax = M.ElementInitializer
-        { M.element_key
-        ; M.element_arrow
-        ; M.element_value
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (element_value, todo) in
-        let todo = Convert (element_arrow, todo) in
-        convert offset todo results element_key
-    | { M.syntax = M.SubscriptExpression
-        { M.subscript_receiver
-        ; M.subscript_left_bracket
-        ; M.subscript_index
-        ; M.subscript_right_bracket
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (subscript_right_bracket, todo) in
-        let todo = Convert (subscript_index, todo) in
-        let todo = Convert (subscript_left_bracket, todo) in
-        convert offset todo results subscript_receiver
-    | { M.syntax = M.EmbeddedSubscriptExpression
-        { M.embedded_subscript_receiver
-        ; M.embedded_subscript_left_bracket
-        ; M.embedded_subscript_index
-        ; M.embedded_subscript_right_bracket
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (embedded_subscript_right_bracket, todo) in
-        let todo = Convert (embedded_subscript_index, todo) in
-        let todo = Convert (embedded_subscript_left_bracket, todo) in
-        convert offset todo results embedded_subscript_receiver
-    | { M.syntax = M.AwaitableCreationExpression
-        { M.awaitable_async
-        ; M.awaitable_coroutine
-        ; M.awaitable_compound_statement
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (awaitable_compound_statement, todo) in
-        let todo = Convert (awaitable_coroutine, todo) in
-        convert offset todo results awaitable_async
-    | { M.syntax = M.XHPChildrenDeclaration
-        { M.xhp_children_keyword
-        ; M.xhp_children_expression
-        ; M.xhp_children_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_children_semicolon, todo) in
-        let todo = Convert (xhp_children_expression, todo) in
-        convert offset todo results xhp_children_keyword
-    | { M.syntax = M.XHPChildrenParenthesizedList
-        { M.xhp_children_list_left_paren
-        ; M.xhp_children_list_xhp_children
-        ; M.xhp_children_list_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_children_list_right_paren, todo) in
-        let todo = Convert (xhp_children_list_xhp_children, todo) in
-        convert offset todo results xhp_children_list_left_paren
-    | { M.syntax = M.XHPCategoryDeclaration
-        { M.xhp_category_keyword
-        ; M.xhp_category_categories
-        ; M.xhp_category_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_category_semicolon, todo) in
-        let todo = Convert (xhp_category_categories, todo) in
-        convert offset todo results xhp_category_keyword
-    | { M.syntax = M.XHPEnumType
-        { M.xhp_enum_optional
-        ; M.xhp_enum_keyword
-        ; M.xhp_enum_left_brace
-        ; M.xhp_enum_values
-        ; M.xhp_enum_right_brace
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_enum_right_brace, todo) in
-        let todo = Convert (xhp_enum_values, todo) in
-        let todo = Convert (xhp_enum_left_brace, todo) in
-        let todo = Convert (xhp_enum_keyword, todo) in
-        convert offset todo results xhp_enum_optional
-    | { M.syntax = M.XHPRequired
-        { M.xhp_required_at
-        ; M.xhp_required_keyword
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_required_keyword, todo) in
-        convert offset todo results xhp_required_at
-    | { M.syntax = M.XHPClassAttributeDeclaration
-        { M.xhp_attribute_keyword
-        ; M.xhp_attribute_attributes
-        ; M.xhp_attribute_semicolon
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_attribute_semicolon, todo) in
-        let todo = Convert (xhp_attribute_attributes, todo) in
-        convert offset todo results xhp_attribute_keyword
-    | { M.syntax = M.XHPClassAttribute
-        { M.xhp_attribute_decl_type
-        ; M.xhp_attribute_decl_name
-        ; M.xhp_attribute_decl_initializer
-        ; M.xhp_attribute_decl_required
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_attribute_decl_required, todo) in
-        let todo = Convert (xhp_attribute_decl_initializer, todo) in
-        let todo = Convert (xhp_attribute_decl_name, todo) in
-        convert offset todo results xhp_attribute_decl_type
-    | { M.syntax = M.XHPSimpleClassAttribute
-        { M.xhp_simple_class_attribute_type
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results xhp_simple_class_attribute_type
-    | { M.syntax = M.XHPSimpleAttribute
-        { M.xhp_simple_attribute_name
-        ; M.xhp_simple_attribute_equal
-        ; M.xhp_simple_attribute_expression
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_simple_attribute_expression, todo) in
-        let todo = Convert (xhp_simple_attribute_equal, todo) in
-        convert offset todo results xhp_simple_attribute_name
-    | { M.syntax = M.XHPSpreadAttribute
-        { M.xhp_spread_attribute_left_brace
-        ; M.xhp_spread_attribute_spread_operator
-        ; M.xhp_spread_attribute_expression
-        ; M.xhp_spread_attribute_right_brace
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_spread_attribute_right_brace, todo) in
-        let todo = Convert (xhp_spread_attribute_expression, todo) in
-        let todo = Convert (xhp_spread_attribute_spread_operator, todo) in
-        convert offset todo results xhp_spread_attribute_left_brace
-    | { M.syntax = M.XHPOpen
-        { M.xhp_open_left_angle
-        ; M.xhp_open_name
-        ; M.xhp_open_attributes
-        ; M.xhp_open_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_open_right_angle, todo) in
-        let todo = Convert (xhp_open_attributes, todo) in
-        let todo = Convert (xhp_open_name, todo) in
-        convert offset todo results xhp_open_left_angle
-    | { M.syntax = M.XHPExpression
-        { M.xhp_open
-        ; M.xhp_body
-        ; M.xhp_close
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_close, todo) in
-        let todo = Convert (xhp_body, todo) in
-        convert offset todo results xhp_open
-    | { M.syntax = M.XHPClose
-        { M.xhp_close_left_angle
-        ; M.xhp_close_name
-        ; M.xhp_close_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (xhp_close_right_angle, todo) in
-        let todo = Convert (xhp_close_name, todo) in
-        convert offset todo results xhp_close_left_angle
-    | { M.syntax = M.TypeConstant
-        { M.type_constant_left_type
-        ; M.type_constant_separator
-        ; M.type_constant_right_type
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (type_constant_right_type, todo) in
-        let todo = Convert (type_constant_separator, todo) in
-        convert offset todo results type_constant_left_type
-    | { M.syntax = M.VectorTypeSpecifier
-        { M.vector_type_keyword
-        ; M.vector_type_left_angle
-        ; M.vector_type_type
-        ; M.vector_type_trailing_comma
-        ; M.vector_type_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (vector_type_right_angle, todo) in
-        let todo = Convert (vector_type_trailing_comma, todo) in
-        let todo = Convert (vector_type_type, todo) in
-        let todo = Convert (vector_type_left_angle, todo) in
-        convert offset todo results vector_type_keyword
-    | { M.syntax = M.KeysetTypeSpecifier
-        { M.keyset_type_keyword
-        ; M.keyset_type_left_angle
-        ; M.keyset_type_type
-        ; M.keyset_type_trailing_comma
-        ; M.keyset_type_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (keyset_type_right_angle, todo) in
-        let todo = Convert (keyset_type_trailing_comma, todo) in
-        let todo = Convert (keyset_type_type, todo) in
-        let todo = Convert (keyset_type_left_angle, todo) in
-        convert offset todo results keyset_type_keyword
-    | { M.syntax = M.TupleTypeExplicitSpecifier
-        { M.tuple_type_keyword
-        ; M.tuple_type_left_angle
-        ; M.tuple_type_types
-        ; M.tuple_type_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (tuple_type_right_angle, todo) in
-        let todo = Convert (tuple_type_types, todo) in
-        let todo = Convert (tuple_type_left_angle, todo) in
-        convert offset todo results tuple_type_keyword
-    | { M.syntax = M.VarrayTypeSpecifier
-        { M.varray_keyword
-        ; M.varray_left_angle
-        ; M.varray_type
-        ; M.varray_trailing_comma
-        ; M.varray_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (varray_right_angle, todo) in
-        let todo = Convert (varray_trailing_comma, todo) in
-        let todo = Convert (varray_type, todo) in
-        let todo = Convert (varray_left_angle, todo) in
-        convert offset todo results varray_keyword
-    | { M.syntax = M.VectorArrayTypeSpecifier
-        { M.vector_array_keyword
-        ; M.vector_array_left_angle
-        ; M.vector_array_type
-        ; M.vector_array_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (vector_array_right_angle, todo) in
-        let todo = Convert (vector_array_type, todo) in
-        let todo = Convert (vector_array_left_angle, todo) in
-        convert offset todo results vector_array_keyword
-    | { M.syntax = M.TypeParameter
-        { M.type_variance
-        ; M.type_name
-        ; M.type_constraints
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (type_constraints, todo) in
-        let todo = Convert (type_name, todo) in
-        convert offset todo results type_variance
-    | { M.syntax = M.TypeConstraint
-        { M.constraint_keyword
-        ; M.constraint_type
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (constraint_type, todo) in
-        convert offset todo results constraint_keyword
-    | { M.syntax = M.DarrayTypeSpecifier
-        { M.darray_keyword
-        ; M.darray_left_angle
-        ; M.darray_key
-        ; M.darray_comma
-        ; M.darray_value
-        ; M.darray_trailing_comma
-        ; M.darray_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (darray_right_angle, todo) in
-        let todo = Convert (darray_trailing_comma, todo) in
-        let todo = Convert (darray_value, todo) in
-        let todo = Convert (darray_comma, todo) in
-        let todo = Convert (darray_key, todo) in
-        let todo = Convert (darray_left_angle, todo) in
-        convert offset todo results darray_keyword
-    | { M.syntax = M.MapArrayTypeSpecifier
-        { M.map_array_keyword
-        ; M.map_array_left_angle
-        ; M.map_array_key
-        ; M.map_array_comma
-        ; M.map_array_value
-        ; M.map_array_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (map_array_right_angle, todo) in
-        let todo = Convert (map_array_value, todo) in
-        let todo = Convert (map_array_comma, todo) in
-        let todo = Convert (map_array_key, todo) in
-        let todo = Convert (map_array_left_angle, todo) in
-        convert offset todo results map_array_keyword
-    | { M.syntax = M.DictionaryTypeSpecifier
-        { M.dictionary_type_keyword
-        ; M.dictionary_type_left_angle
-        ; M.dictionary_type_members
-        ; M.dictionary_type_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (dictionary_type_right_angle, todo) in
-        let todo = Convert (dictionary_type_members, todo) in
-        let todo = Convert (dictionary_type_left_angle, todo) in
-        convert offset todo results dictionary_type_keyword
-    | { M.syntax = M.ClosureTypeSpecifier
-        { M.closure_outer_left_paren
-        ; M.closure_coroutine
-        ; M.closure_function_keyword
-        ; M.closure_inner_left_paren
-        ; M.closure_parameter_list
-        ; M.closure_inner_right_paren
-        ; M.closure_colon
-        ; M.closure_return_type
-        ; M.closure_outer_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (closure_outer_right_paren, todo) in
-        let todo = Convert (closure_return_type, todo) in
-        let todo = Convert (closure_colon, todo) in
-        let todo = Convert (closure_inner_right_paren, todo) in
-        let todo = Convert (closure_parameter_list, todo) in
-        let todo = Convert (closure_inner_left_paren, todo) in
-        let todo = Convert (closure_function_keyword, todo) in
-        let todo = Convert (closure_coroutine, todo) in
-        convert offset todo results closure_outer_left_paren
-    | { M.syntax = M.ClosureParameterTypeSpecifier
-        { M.closure_parameter_call_convention
-        ; M.closure_parameter_type
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (closure_parameter_type, todo) in
-        convert offset todo results closure_parameter_call_convention
-    | { M.syntax = M.ClassnameTypeSpecifier
-        { M.classname_keyword
-        ; M.classname_left_angle
-        ; M.classname_type
-        ; M.classname_trailing_comma
-        ; M.classname_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (classname_right_angle, todo) in
-        let todo = Convert (classname_trailing_comma, todo) in
-        let todo = Convert (classname_type, todo) in
-        let todo = Convert (classname_left_angle, todo) in
-        convert offset todo results classname_keyword
-    | { M.syntax = M.FieldSpecifier
-        { M.field_question
-        ; M.field_name
-        ; M.field_arrow
-        ; M.field_type
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (field_type, todo) in
-        let todo = Convert (field_arrow, todo) in
-        let todo = Convert (field_name, todo) in
-        convert offset todo results field_question
-    | { M.syntax = M.FieldInitializer
-        { M.field_initializer_name
-        ; M.field_initializer_arrow
-        ; M.field_initializer_value
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (field_initializer_value, todo) in
-        let todo = Convert (field_initializer_arrow, todo) in
-        convert offset todo results field_initializer_name
-    | { M.syntax = M.ShapeTypeSpecifier
-        { M.shape_type_keyword
-        ; M.shape_type_left_paren
-        ; M.shape_type_fields
-        ; M.shape_type_ellipsis
-        ; M.shape_type_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (shape_type_right_paren, todo) in
-        let todo = Convert (shape_type_ellipsis, todo) in
-        let todo = Convert (shape_type_fields, todo) in
-        let todo = Convert (shape_type_left_paren, todo) in
-        convert offset todo results shape_type_keyword
-    | { M.syntax = M.ShapeExpression
-        { M.shape_expression_keyword
-        ; M.shape_expression_left_paren
-        ; M.shape_expression_fields
-        ; M.shape_expression_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (shape_expression_right_paren, todo) in
-        let todo = Convert (shape_expression_fields, todo) in
-        let todo = Convert (shape_expression_left_paren, todo) in
-        convert offset todo results shape_expression_keyword
-    | { M.syntax = M.TupleExpression
-        { M.tuple_expression_keyword
-        ; M.tuple_expression_left_paren
-        ; M.tuple_expression_items
-        ; M.tuple_expression_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (tuple_expression_right_paren, todo) in
-        let todo = Convert (tuple_expression_items, todo) in
-        let todo = Convert (tuple_expression_left_paren, todo) in
-        convert offset todo results tuple_expression_keyword
-    | { M.syntax = M.GenericTypeSpecifier
-        { M.generic_class_type
-        ; M.generic_argument_list
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (generic_argument_list, todo) in
-        convert offset todo results generic_class_type
-    | { M.syntax = M.NullableTypeSpecifier
-        { M.nullable_question
-        ; M.nullable_type
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (nullable_type, todo) in
-        convert offset todo results nullable_question
-    | { M.syntax = M.SoftTypeSpecifier
-        { M.soft_at
-        ; M.soft_type
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (soft_type, todo) in
-        convert offset todo results soft_at
-    | { M.syntax = M.TypeArguments
-        { M.type_arguments_left_angle
-        ; M.type_arguments_types
-        ; M.type_arguments_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (type_arguments_right_angle, todo) in
-        let todo = Convert (type_arguments_types, todo) in
-        convert offset todo results type_arguments_left_angle
-    | { M.syntax = M.TypeParameters
-        { M.type_parameters_left_angle
-        ; M.type_parameters_parameters
-        ; M.type_parameters_right_angle
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (type_parameters_right_angle, todo) in
-        let todo = Convert (type_parameters_parameters, todo) in
-        convert offset todo results type_parameters_left_angle
-    | { M.syntax = M.TupleTypeSpecifier
-        { M.tuple_left_paren
-        ; M.tuple_types
-        ; M.tuple_right_paren
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (tuple_right_paren, todo) in
-        let todo = Convert (tuple_types, todo) in
-        convert offset todo results tuple_left_paren
-    | { M.syntax = M.ErrorSyntax
-        { M.error_error
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        convert offset todo results error_error
-    | { M.syntax = M.ListItem
-        { M.list_item
-        ; M.list_separator
-        }
-      ; _ } as minimal_t ->
-        let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (list_separator, todo) in
-        convert offset todo results list_item
+    | { M.syntax = M.EndOfFile x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        convert offset todo results x.end_of_file_token
+    | { M.syntax = M.Script x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        convert offset todo results x.script_declarations
+    | { M.syntax = M.QualifiedName x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        convert offset todo results x.qualified_name_parts
+    | { M.syntax = M.SimpleTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        convert offset todo results x.simple_type_specifier
+    | { M.syntax = M.LiteralExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        convert offset todo results x.literal_expression
+    | { M.syntax = M.VariableExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        convert offset todo results x.variable_expression
+    | { M.syntax = M.PipeVariableExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        convert offset todo results x.pipe_variable_expression
+    | { M.syntax = M.EnumDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.enum_right_brace, todo) in
+        let todo = Convert (x.enum_enumerators, todo) in
+        let todo = Convert (x.enum_left_brace, todo) in
+        let todo = Convert (x.enum_type, todo) in
+        let todo = Convert (x.enum_base, todo) in
+        let todo = Convert (x.enum_colon, todo) in
+        let todo = Convert (x.enum_name, todo) in
+        let todo = Convert (x.enum_keyword, todo) in
+        convert offset todo results x.enum_attribute_spec
+    | { M.syntax = M.Enumerator x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.enumerator_semicolon, todo) in
+        let todo = Convert (x.enumerator_value, todo) in
+        let todo = Convert (x.enumerator_equal, todo) in
+        convert offset todo results x.enumerator_name
+    | { M.syntax = M.AliasDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.alias_semicolon, todo) in
+        let todo = Convert (x.alias_type, todo) in
+        let todo = Convert (x.alias_equal, todo) in
+        let todo = Convert (x.alias_constraint, todo) in
+        let todo = Convert (x.alias_generic_parameter, todo) in
+        let todo = Convert (x.alias_name, todo) in
+        let todo = Convert (x.alias_keyword, todo) in
+        convert offset todo results x.alias_attribute_spec
+    | { M.syntax = M.PropertyDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.property_semicolon, todo) in
+        let todo = Convert (x.property_declarators, todo) in
+        let todo = Convert (x.property_type, todo) in
+        convert offset todo results x.property_modifiers
+    | { M.syntax = M.PropertyDeclarator x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.property_initializer, todo) in
+        convert offset todo results x.property_name
+    | { M.syntax = M.NamespaceDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.namespace_body, todo) in
+        let todo = Convert (x.namespace_name, todo) in
+        convert offset todo results x.namespace_keyword
+    | { M.syntax = M.NamespaceBody x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.namespace_right_brace, todo) in
+        let todo = Convert (x.namespace_declarations, todo) in
+        convert offset todo results x.namespace_left_brace
+    | { M.syntax = M.NamespaceEmptyBody x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        convert offset todo results x.namespace_semicolon
+    | { M.syntax = M.NamespaceUseDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.namespace_use_semicolon, todo) in
+        let todo = Convert (x.namespace_use_clauses, todo) in
+        let todo = Convert (x.namespace_use_kind, todo) in
+        convert offset todo results x.namespace_use_keyword
+    | { M.syntax = M.NamespaceGroupUseDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.namespace_group_use_semicolon, todo) in
+        let todo = Convert (x.namespace_group_use_right_brace, todo) in
+        let todo = Convert (x.namespace_group_use_clauses, todo) in
+        let todo = Convert (x.namespace_group_use_left_brace, todo) in
+        let todo = Convert (x.namespace_group_use_prefix, todo) in
+        let todo = Convert (x.namespace_group_use_kind, todo) in
+        convert offset todo results x.namespace_group_use_keyword
+    | { M.syntax = M.NamespaceUseClause x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.namespace_use_alias, todo) in
+        let todo = Convert (x.namespace_use_as, todo) in
+        let todo = Convert (x.namespace_use_name, todo) in
+        convert offset todo results x.namespace_use_clause_kind
+    | { M.syntax = M.FunctionDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.function_body, todo) in
+        let todo = Convert (x.function_declaration_header, todo) in
+        convert offset todo results x.function_attribute_spec
+    | { M.syntax = M.FunctionDeclarationHeader x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.function_where_clause, todo) in
+        let todo = Convert (x.function_type, todo) in
+        let todo = Convert (x.function_colon, todo) in
+        let todo = Convert (x.function_right_paren, todo) in
+        let todo = Convert (x.function_parameter_list, todo) in
+        let todo = Convert (x.function_left_paren, todo) in
+        let todo = Convert (x.function_type_parameter_list, todo) in
+        let todo = Convert (x.function_name, todo) in
+        let todo = Convert (x.function_ampersand, todo) in
+        let todo = Convert (x.function_keyword, todo) in
+        convert offset todo results x.function_modifiers
+    | { M.syntax = M.WhereClause x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.where_clause_constraints, todo) in
+        convert offset todo results x.where_clause_keyword
+    | { M.syntax = M.WhereConstraint x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.where_constraint_right_type, todo) in
+        let todo = Convert (x.where_constraint_operator, todo) in
+        convert offset todo results x.where_constraint_left_type
+    | { M.syntax = M.MethodishDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.methodish_semicolon, todo) in
+        let todo = Convert (x.methodish_function_body, todo) in
+        let todo = Convert (x.methodish_function_decl_header, todo) in
+        convert offset todo results x.methodish_attribute
+    | { M.syntax = M.ClassishDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.classish_body, todo) in
+        let todo = Convert (x.classish_implements_list, todo) in
+        let todo = Convert (x.classish_implements_keyword, todo) in
+        let todo = Convert (x.classish_extends_list, todo) in
+        let todo = Convert (x.classish_extends_keyword, todo) in
+        let todo = Convert (x.classish_type_parameters, todo) in
+        let todo = Convert (x.classish_name, todo) in
+        let todo = Convert (x.classish_keyword, todo) in
+        let todo = Convert (x.classish_modifiers, todo) in
+        convert offset todo results x.classish_attribute
+    | { M.syntax = M.ClassishBody x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.classish_body_right_brace, todo) in
+        let todo = Convert (x.classish_body_elements, todo) in
+        convert offset todo results x.classish_body_left_brace
+    | { M.syntax = M.TraitUsePrecedenceItem x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.trait_use_precedence_item_removed_names, todo) in
+        let todo = Convert (x.trait_use_precedence_item_keyword, todo) in
+        convert offset todo results x.trait_use_precedence_item_name
+    | { M.syntax = M.TraitUseAliasItem x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.trait_use_alias_item_aliased_name, todo) in
+        let todo = Convert (x.trait_use_alias_item_modifiers, todo) in
+        let todo = Convert (x.trait_use_alias_item_keyword, todo) in
+        convert offset todo results x.trait_use_alias_item_aliasing_name
+    | { M.syntax = M.TraitUseConflictResolution x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.trait_use_conflict_resolution_right_brace, todo) in
+        let todo = Convert (x.trait_use_conflict_resolution_clauses, todo) in
+        let todo = Convert (x.trait_use_conflict_resolution_left_brace, todo) in
+        let todo = Convert (x.trait_use_conflict_resolution_names, todo) in
+        convert offset todo results x.trait_use_conflict_resolution_keyword
+    | { M.syntax = M.TraitUse x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.trait_use_semicolon, todo) in
+        let todo = Convert (x.trait_use_names, todo) in
+        convert offset todo results x.trait_use_keyword
+    | { M.syntax = M.RequireClause x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.require_semicolon, todo) in
+        let todo = Convert (x.require_name, todo) in
+        let todo = Convert (x.require_kind, todo) in
+        convert offset todo results x.require_keyword
+    | { M.syntax = M.ConstDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.const_semicolon, todo) in
+        let todo = Convert (x.const_declarators, todo) in
+        let todo = Convert (x.const_type_specifier, todo) in
+        let todo = Convert (x.const_keyword, todo) in
+        convert offset todo results x.const_abstract
+    | { M.syntax = M.ConstantDeclarator x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.constant_declarator_initializer, todo) in
+        convert offset todo results x.constant_declarator_name
+    | { M.syntax = M.TypeConstDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.type_const_semicolon, todo) in
+        let todo = Convert (x.type_const_type_specifier, todo) in
+        let todo = Convert (x.type_const_equal, todo) in
+        let todo = Convert (x.type_const_type_constraint, todo) in
+        let todo = Convert (x.type_const_type_parameters, todo) in
+        let todo = Convert (x.type_const_name, todo) in
+        let todo = Convert (x.type_const_type_keyword, todo) in
+        let todo = Convert (x.type_const_keyword, todo) in
+        convert offset todo results x.type_const_abstract
+    | { M.syntax = M.DecoratedExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.decorated_expression_expression, todo) in
+        convert offset todo results x.decorated_expression_decorator
+    | { M.syntax = M.ParameterDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.parameter_default_value, todo) in
+        let todo = Convert (x.parameter_name, todo) in
+        let todo = Convert (x.parameter_type, todo) in
+        let todo = Convert (x.parameter_call_convention, todo) in
+        let todo = Convert (x.parameter_visibility, todo) in
+        convert offset todo results x.parameter_attribute
+    | { M.syntax = M.VariadicParameter x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.variadic_parameter_ellipsis, todo) in
+        let todo = Convert (x.variadic_parameter_type, todo) in
+        convert offset todo results x.variadic_parameter_call_convention
+    | { M.syntax = M.AttributeSpecification x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.attribute_specification_right_double_angle, todo) in
+        let todo = Convert (x.attribute_specification_attributes, todo) in
+        convert offset todo results x.attribute_specification_left_double_angle
+    | { M.syntax = M.Attribute x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.attribute_right_paren, todo) in
+        let todo = Convert (x.attribute_values, todo) in
+        let todo = Convert (x.attribute_left_paren, todo) in
+        convert offset todo results x.attribute_name
+    | { M.syntax = M.InclusionExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.inclusion_filename, todo) in
+        convert offset todo results x.inclusion_require
+    | { M.syntax = M.InclusionDirective x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.inclusion_semicolon, todo) in
+        convert offset todo results x.inclusion_expression
+    | { M.syntax = M.CompoundStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.compound_right_brace, todo) in
+        let todo = Convert (x.compound_statements, todo) in
+        convert offset todo results x.compound_left_brace
+    | { M.syntax = M.ExpressionStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.expression_statement_semicolon, todo) in
+        convert offset todo results x.expression_statement_expression
+    | { M.syntax = M.MarkupSection x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.markup_expression, todo) in
+        let todo = Convert (x.markup_suffix, todo) in
+        let todo = Convert (x.markup_text, todo) in
+        convert offset todo results x.markup_prefix
+    | { M.syntax = M.MarkupSuffix x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.markup_suffix_name, todo) in
+        convert offset todo results x.markup_suffix_less_than_question
+    | { M.syntax = M.UnsetStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.unset_semicolon, todo) in
+        let todo = Convert (x.unset_right_paren, todo) in
+        let todo = Convert (x.unset_variables, todo) in
+        let todo = Convert (x.unset_left_paren, todo) in
+        convert offset todo results x.unset_keyword
+    | { M.syntax = M.UsingStatementBlockScoped x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.using_block_body, todo) in
+        let todo = Convert (x.using_block_right_paren, todo) in
+        let todo = Convert (x.using_block_expressions, todo) in
+        let todo = Convert (x.using_block_left_paren, todo) in
+        let todo = Convert (x.using_block_using_keyword, todo) in
+        convert offset todo results x.using_block_await_keyword
+    | { M.syntax = M.UsingStatementFunctionScoped x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.using_function_semicolon, todo) in
+        let todo = Convert (x.using_function_expression, todo) in
+        let todo = Convert (x.using_function_using_keyword, todo) in
+        convert offset todo results x.using_function_await_keyword
+    | { M.syntax = M.DeclareDirectiveStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.declare_directive_semicolon, todo) in
+        let todo = Convert (x.declare_directive_right_paren, todo) in
+        let todo = Convert (x.declare_directive_expression, todo) in
+        let todo = Convert (x.declare_directive_left_paren, todo) in
+        convert offset todo results x.declare_directive_keyword
+    | { M.syntax = M.DeclareBlockStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.declare_block_body, todo) in
+        let todo = Convert (x.declare_block_right_paren, todo) in
+        let todo = Convert (x.declare_block_expression, todo) in
+        let todo = Convert (x.declare_block_left_paren, todo) in
+        convert offset todo results x.declare_block_keyword
+    | { M.syntax = M.WhileStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.while_body, todo) in
+        let todo = Convert (x.while_right_paren, todo) in
+        let todo = Convert (x.while_condition, todo) in
+        let todo = Convert (x.while_left_paren, todo) in
+        convert offset todo results x.while_keyword
+    | { M.syntax = M.IfStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.if_else_clause, todo) in
+        let todo = Convert (x.if_elseif_clauses, todo) in
+        let todo = Convert (x.if_statement, todo) in
+        let todo = Convert (x.if_right_paren, todo) in
+        let todo = Convert (x.if_condition, todo) in
+        let todo = Convert (x.if_left_paren, todo) in
+        convert offset todo results x.if_keyword
+    | { M.syntax = M.ElseifClause x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.elseif_statement, todo) in
+        let todo = Convert (x.elseif_right_paren, todo) in
+        let todo = Convert (x.elseif_condition, todo) in
+        let todo = Convert (x.elseif_left_paren, todo) in
+        convert offset todo results x.elseif_keyword
+    | { M.syntax = M.ElseClause x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.else_statement, todo) in
+        convert offset todo results x.else_keyword
+    | { M.syntax = M.IfEndIfStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.if_endif_semicolon, todo) in
+        let todo = Convert (x.if_endif_endif_keyword, todo) in
+        let todo = Convert (x.if_endif_else_colon_clause, todo) in
+        let todo = Convert (x.if_endif_elseif_colon_clauses, todo) in
+        let todo = Convert (x.if_endif_statement, todo) in
+        let todo = Convert (x.if_endif_colon, todo) in
+        let todo = Convert (x.if_endif_right_paren, todo) in
+        let todo = Convert (x.if_endif_condition, todo) in
+        let todo = Convert (x.if_endif_left_paren, todo) in
+        convert offset todo results x.if_endif_keyword
+    | { M.syntax = M.ElseifColonClause x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.elseif_colon_statement, todo) in
+        let todo = Convert (x.elseif_colon_colon, todo) in
+        let todo = Convert (x.elseif_colon_right_paren, todo) in
+        let todo = Convert (x.elseif_colon_condition, todo) in
+        let todo = Convert (x.elseif_colon_left_paren, todo) in
+        convert offset todo results x.elseif_colon_keyword
+    | { M.syntax = M.ElseColonClause x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.else_colon_statement, todo) in
+        let todo = Convert (x.else_colon_colon, todo) in
+        convert offset todo results x.else_colon_keyword
+    | { M.syntax = M.TryStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.try_finally_clause, todo) in
+        let todo = Convert (x.try_catch_clauses, todo) in
+        let todo = Convert (x.try_compound_statement, todo) in
+        convert offset todo results x.try_keyword
+    | { M.syntax = M.CatchClause x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.catch_body, todo) in
+        let todo = Convert (x.catch_right_paren, todo) in
+        let todo = Convert (x.catch_variable, todo) in
+        let todo = Convert (x.catch_type, todo) in
+        let todo = Convert (x.catch_left_paren, todo) in
+        convert offset todo results x.catch_keyword
+    | { M.syntax = M.FinallyClause x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.finally_body, todo) in
+        convert offset todo results x.finally_keyword
+    | { M.syntax = M.DoStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.do_semicolon, todo) in
+        let todo = Convert (x.do_right_paren, todo) in
+        let todo = Convert (x.do_condition, todo) in
+        let todo = Convert (x.do_left_paren, todo) in
+        let todo = Convert (x.do_while_keyword, todo) in
+        let todo = Convert (x.do_body, todo) in
+        convert offset todo results x.do_keyword
+    | { M.syntax = M.ForStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.for_body, todo) in
+        let todo = Convert (x.for_right_paren, todo) in
+        let todo = Convert (x.for_end_of_loop, todo) in
+        let todo = Convert (x.for_second_semicolon, todo) in
+        let todo = Convert (x.for_control, todo) in
+        let todo = Convert (x.for_first_semicolon, todo) in
+        let todo = Convert (x.for_initializer, todo) in
+        let todo = Convert (x.for_left_paren, todo) in
+        convert offset todo results x.for_keyword
+    | { M.syntax = M.ForeachStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.foreach_body, todo) in
+        let todo = Convert (x.foreach_right_paren, todo) in
+        let todo = Convert (x.foreach_value, todo) in
+        let todo = Convert (x.foreach_arrow, todo) in
+        let todo = Convert (x.foreach_key, todo) in
+        let todo = Convert (x.foreach_as, todo) in
+        let todo = Convert (x.foreach_await_keyword, todo) in
+        let todo = Convert (x.foreach_collection, todo) in
+        let todo = Convert (x.foreach_left_paren, todo) in
+        convert offset todo results x.foreach_keyword
+    | { M.syntax = M.SwitchStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.switch_right_brace, todo) in
+        let todo = Convert (x.switch_sections, todo) in
+        let todo = Convert (x.switch_left_brace, todo) in
+        let todo = Convert (x.switch_right_paren, todo) in
+        let todo = Convert (x.switch_expression, todo) in
+        let todo = Convert (x.switch_left_paren, todo) in
+        convert offset todo results x.switch_keyword
+    | { M.syntax = M.SwitchSection x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.switch_section_fallthrough, todo) in
+        let todo = Convert (x.switch_section_statements, todo) in
+        convert offset todo results x.switch_section_labels
+    | { M.syntax = M.SwitchFallthrough x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.fallthrough_semicolon, todo) in
+        convert offset todo results x.fallthrough_keyword
+    | { M.syntax = M.CaseLabel x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.case_colon, todo) in
+        let todo = Convert (x.case_expression, todo) in
+        convert offset todo results x.case_keyword
+    | { M.syntax = M.DefaultLabel x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.default_colon, todo) in
+        convert offset todo results x.default_keyword
+    | { M.syntax = M.ReturnStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.return_semicolon, todo) in
+        let todo = Convert (x.return_expression, todo) in
+        convert offset todo results x.return_keyword
+    | { M.syntax = M.GotoLabel x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.goto_label_colon, todo) in
+        convert offset todo results x.goto_label_name
+    | { M.syntax = M.GotoStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.goto_statement_semicolon, todo) in
+        let todo = Convert (x.goto_statement_label_name, todo) in
+        convert offset todo results x.goto_statement_keyword
+    | { M.syntax = M.ThrowStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.throw_semicolon, todo) in
+        let todo = Convert (x.throw_expression, todo) in
+        convert offset todo results x.throw_keyword
+    | { M.syntax = M.BreakStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.break_semicolon, todo) in
+        let todo = Convert (x.break_level, todo) in
+        convert offset todo results x.break_keyword
+    | { M.syntax = M.ContinueStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.continue_semicolon, todo) in
+        let todo = Convert (x.continue_level, todo) in
+        convert offset todo results x.continue_keyword
+    | { M.syntax = M.FunctionStaticStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.static_semicolon, todo) in
+        let todo = Convert (x.static_declarations, todo) in
+        convert offset todo results x.static_static_keyword
+    | { M.syntax = M.StaticDeclarator x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.static_initializer, todo) in
+        convert offset todo results x.static_name
+    | { M.syntax = M.EchoStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.echo_semicolon, todo) in
+        let todo = Convert (x.echo_expressions, todo) in
+        convert offset todo results x.echo_keyword
+    | { M.syntax = M.GlobalStatement x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.global_semicolon, todo) in
+        let todo = Convert (x.global_variables, todo) in
+        convert offset todo results x.global_keyword
+    | { M.syntax = M.SimpleInitializer x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.simple_initializer_value, todo) in
+        convert offset todo results x.simple_initializer_equal
+    | { M.syntax = M.AnonymousClass x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.anonymous_class_body, todo) in
+        let todo = Convert (x.anonymous_class_implements_list, todo) in
+        let todo = Convert (x.anonymous_class_implements_keyword, todo) in
+        let todo = Convert (x.anonymous_class_extends_list, todo) in
+        let todo = Convert (x.anonymous_class_extends_keyword, todo) in
+        let todo = Convert (x.anonymous_class_right_paren, todo) in
+        let todo = Convert (x.anonymous_class_argument_list, todo) in
+        let todo = Convert (x.anonymous_class_left_paren, todo) in
+        convert offset todo results x.anonymous_class_class_keyword
+    | { M.syntax = M.AnonymousFunction x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.anonymous_body, todo) in
+        let todo = Convert (x.anonymous_use, todo) in
+        let todo = Convert (x.anonymous_type, todo) in
+        let todo = Convert (x.anonymous_colon, todo) in
+        let todo = Convert (x.anonymous_right_paren, todo) in
+        let todo = Convert (x.anonymous_parameters, todo) in
+        let todo = Convert (x.anonymous_left_paren, todo) in
+        let todo = Convert (x.anonymous_function_keyword, todo) in
+        let todo = Convert (x.anonymous_coroutine_keyword, todo) in
+        let todo = Convert (x.anonymous_async_keyword, todo) in
+        convert offset todo results x.anonymous_static_keyword
+    | { M.syntax = M.Php7AnonymousFunction x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.php7_anonymous_body, todo) in
+        let todo = Convert (x.php7_anonymous_type, todo) in
+        let todo = Convert (x.php7_anonymous_colon, todo) in
+        let todo = Convert (x.php7_anonymous_use, todo) in
+        let todo = Convert (x.php7_anonymous_right_paren, todo) in
+        let todo = Convert (x.php7_anonymous_parameters, todo) in
+        let todo = Convert (x.php7_anonymous_left_paren, todo) in
+        let todo = Convert (x.php7_anonymous_function_keyword, todo) in
+        let todo = Convert (x.php7_anonymous_coroutine_keyword, todo) in
+        let todo = Convert (x.php7_anonymous_async_keyword, todo) in
+        convert offset todo results x.php7_anonymous_static_keyword
+    | { M.syntax = M.AnonymousFunctionUseClause x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.anonymous_use_right_paren, todo) in
+        let todo = Convert (x.anonymous_use_variables, todo) in
+        let todo = Convert (x.anonymous_use_left_paren, todo) in
+        convert offset todo results x.anonymous_use_keyword
+    | { M.syntax = M.LambdaExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.lambda_body, todo) in
+        let todo = Convert (x.lambda_arrow, todo) in
+        let todo = Convert (x.lambda_signature, todo) in
+        let todo = Convert (x.lambda_coroutine, todo) in
+        convert offset todo results x.lambda_async
+    | { M.syntax = M.LambdaSignature x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.lambda_type, todo) in
+        let todo = Convert (x.lambda_colon, todo) in
+        let todo = Convert (x.lambda_right_paren, todo) in
+        let todo = Convert (x.lambda_parameters, todo) in
+        convert offset todo results x.lambda_left_paren
+    | { M.syntax = M.CastExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.cast_operand, todo) in
+        let todo = Convert (x.cast_right_paren, todo) in
+        let todo = Convert (x.cast_type, todo) in
+        convert offset todo results x.cast_left_paren
+    | { M.syntax = M.ScopeResolutionExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.scope_resolution_name, todo) in
+        let todo = Convert (x.scope_resolution_operator, todo) in
+        convert offset todo results x.scope_resolution_qualifier
+    | { M.syntax = M.MemberSelectionExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.member_name, todo) in
+        let todo = Convert (x.member_operator, todo) in
+        convert offset todo results x.member_object
+    | { M.syntax = M.SafeMemberSelectionExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.safe_member_name, todo) in
+        let todo = Convert (x.safe_member_operator, todo) in
+        convert offset todo results x.safe_member_object
+    | { M.syntax = M.EmbeddedMemberSelectionExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.embedded_member_name, todo) in
+        let todo = Convert (x.embedded_member_operator, todo) in
+        convert offset todo results x.embedded_member_object
+    | { M.syntax = M.YieldExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.yield_operand, todo) in
+        convert offset todo results x.yield_keyword
+    | { M.syntax = M.YieldFromExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.yield_from_operand, todo) in
+        let todo = Convert (x.yield_from_from_keyword, todo) in
+        convert offset todo results x.yield_from_yield_keyword
+    | { M.syntax = M.PrefixUnaryExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.prefix_unary_operand, todo) in
+        convert offset todo results x.prefix_unary_operator
+    | { M.syntax = M.PostfixUnaryExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.postfix_unary_operator, todo) in
+        convert offset todo results x.postfix_unary_operand
+    | { M.syntax = M.BinaryExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.binary_right_operand, todo) in
+        let todo = Convert (x.binary_operator, todo) in
+        convert offset todo results x.binary_left_operand
+    | { M.syntax = M.InstanceofExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.instanceof_right_operand, todo) in
+        let todo = Convert (x.instanceof_operator, todo) in
+        convert offset todo results x.instanceof_left_operand
+    | { M.syntax = M.IsExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.is_right_operand, todo) in
+        let todo = Convert (x.is_operator, todo) in
+        convert offset todo results x.is_left_operand
+    | { M.syntax = M.ConditionalExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.conditional_alternative, todo) in
+        let todo = Convert (x.conditional_colon, todo) in
+        let todo = Convert (x.conditional_consequence, todo) in
+        let todo = Convert (x.conditional_question, todo) in
+        convert offset todo results x.conditional_test
+    | { M.syntax = M.EvalExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.eval_right_paren, todo) in
+        let todo = Convert (x.eval_argument, todo) in
+        let todo = Convert (x.eval_left_paren, todo) in
+        convert offset todo results x.eval_keyword
+    | { M.syntax = M.EmptyExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.empty_right_paren, todo) in
+        let todo = Convert (x.empty_argument, todo) in
+        let todo = Convert (x.empty_left_paren, todo) in
+        convert offset todo results x.empty_keyword
+    | { M.syntax = M.DefineExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.define_right_paren, todo) in
+        let todo = Convert (x.define_argument_list, todo) in
+        let todo = Convert (x.define_left_paren, todo) in
+        convert offset todo results x.define_keyword
+    | { M.syntax = M.HaltCompilerExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.halt_compiler_right_paren, todo) in
+        let todo = Convert (x.halt_compiler_argument_list, todo) in
+        let todo = Convert (x.halt_compiler_left_paren, todo) in
+        convert offset todo results x.halt_compiler_keyword
+    | { M.syntax = M.IssetExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.isset_right_paren, todo) in
+        let todo = Convert (x.isset_argument_list, todo) in
+        let todo = Convert (x.isset_left_paren, todo) in
+        convert offset todo results x.isset_keyword
+    | { M.syntax = M.FunctionCallExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.function_call_right_paren, todo) in
+        let todo = Convert (x.function_call_argument_list, todo) in
+        let todo = Convert (x.function_call_left_paren, todo) in
+        convert offset todo results x.function_call_receiver
+    | { M.syntax = M.FunctionCallWithTypeArgumentsExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.function_call_with_type_arguments_right_paren, todo) in
+        let todo = Convert (x.function_call_with_type_arguments_argument_list, todo) in
+        let todo = Convert (x.function_call_with_type_arguments_left_paren, todo) in
+        let todo = Convert (x.function_call_with_type_arguments_type_args, todo) in
+        convert offset todo results x.function_call_with_type_arguments_receiver
+    | { M.syntax = M.ParenthesizedExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.parenthesized_expression_right_paren, todo) in
+        let todo = Convert (x.parenthesized_expression_expression, todo) in
+        convert offset todo results x.parenthesized_expression_left_paren
+    | { M.syntax = M.BracedExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.braced_expression_right_brace, todo) in
+        let todo = Convert (x.braced_expression_expression, todo) in
+        convert offset todo results x.braced_expression_left_brace
+    | { M.syntax = M.EmbeddedBracedExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.embedded_braced_expression_right_brace, todo) in
+        let todo = Convert (x.embedded_braced_expression_expression, todo) in
+        convert offset todo results x.embedded_braced_expression_left_brace
+    | { M.syntax = M.ListExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.list_right_paren, todo) in
+        let todo = Convert (x.list_members, todo) in
+        let todo = Convert (x.list_left_paren, todo) in
+        convert offset todo results x.list_keyword
+    | { M.syntax = M.CollectionLiteralExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.collection_literal_right_brace, todo) in
+        let todo = Convert (x.collection_literal_initializers, todo) in
+        let todo = Convert (x.collection_literal_left_brace, todo) in
+        convert offset todo results x.collection_literal_name
+    | { M.syntax = M.ObjectCreationExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.object_creation_object, todo) in
+        convert offset todo results x.object_creation_new_keyword
+    | { M.syntax = M.ConstructorCall x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.constructor_call_right_paren, todo) in
+        let todo = Convert (x.constructor_call_argument_list, todo) in
+        let todo = Convert (x.constructor_call_left_paren, todo) in
+        convert offset todo results x.constructor_call_type
+    | { M.syntax = M.ArrayCreationExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.array_creation_right_bracket, todo) in
+        let todo = Convert (x.array_creation_members, todo) in
+        convert offset todo results x.array_creation_left_bracket
+    | { M.syntax = M.ArrayIntrinsicExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.array_intrinsic_right_paren, todo) in
+        let todo = Convert (x.array_intrinsic_members, todo) in
+        let todo = Convert (x.array_intrinsic_left_paren, todo) in
+        convert offset todo results x.array_intrinsic_keyword
+    | { M.syntax = M.DarrayIntrinsicExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.darray_intrinsic_right_bracket, todo) in
+        let todo = Convert (x.darray_intrinsic_members, todo) in
+        let todo = Convert (x.darray_intrinsic_left_bracket, todo) in
+        convert offset todo results x.darray_intrinsic_keyword
+    | { M.syntax = M.DictionaryIntrinsicExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.dictionary_intrinsic_right_bracket, todo) in
+        let todo = Convert (x.dictionary_intrinsic_members, todo) in
+        let todo = Convert (x.dictionary_intrinsic_left_bracket, todo) in
+        convert offset todo results x.dictionary_intrinsic_keyword
+    | { M.syntax = M.KeysetIntrinsicExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.keyset_intrinsic_right_bracket, todo) in
+        let todo = Convert (x.keyset_intrinsic_members, todo) in
+        let todo = Convert (x.keyset_intrinsic_left_bracket, todo) in
+        convert offset todo results x.keyset_intrinsic_keyword
+    | { M.syntax = M.VarrayIntrinsicExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.varray_intrinsic_right_bracket, todo) in
+        let todo = Convert (x.varray_intrinsic_members, todo) in
+        let todo = Convert (x.varray_intrinsic_left_bracket, todo) in
+        convert offset todo results x.varray_intrinsic_keyword
+    | { M.syntax = M.VectorIntrinsicExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.vector_intrinsic_right_bracket, todo) in
+        let todo = Convert (x.vector_intrinsic_members, todo) in
+        let todo = Convert (x.vector_intrinsic_left_bracket, todo) in
+        convert offset todo results x.vector_intrinsic_keyword
+    | { M.syntax = M.ElementInitializer x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.element_value, todo) in
+        let todo = Convert (x.element_arrow, todo) in
+        convert offset todo results x.element_key
+    | { M.syntax = M.SubscriptExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.subscript_right_bracket, todo) in
+        let todo = Convert (x.subscript_index, todo) in
+        let todo = Convert (x.subscript_left_bracket, todo) in
+        convert offset todo results x.subscript_receiver
+    | { M.syntax = M.EmbeddedSubscriptExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.embedded_subscript_right_bracket, todo) in
+        let todo = Convert (x.embedded_subscript_index, todo) in
+        let todo = Convert (x.embedded_subscript_left_bracket, todo) in
+        convert offset todo results x.embedded_subscript_receiver
+    | { M.syntax = M.AwaitableCreationExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.awaitable_compound_statement, todo) in
+        let todo = Convert (x.awaitable_coroutine, todo) in
+        convert offset todo results x.awaitable_async
+    | { M.syntax = M.XHPChildrenDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_children_semicolon, todo) in
+        let todo = Convert (x.xhp_children_expression, todo) in
+        convert offset todo results x.xhp_children_keyword
+    | { M.syntax = M.XHPChildrenParenthesizedList x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_children_list_right_paren, todo) in
+        let todo = Convert (x.xhp_children_list_xhp_children, todo) in
+        convert offset todo results x.xhp_children_list_left_paren
+    | { M.syntax = M.XHPCategoryDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_category_semicolon, todo) in
+        let todo = Convert (x.xhp_category_categories, todo) in
+        convert offset todo results x.xhp_category_keyword
+    | { M.syntax = M.XHPEnumType x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_enum_right_brace, todo) in
+        let todo = Convert (x.xhp_enum_values, todo) in
+        let todo = Convert (x.xhp_enum_left_brace, todo) in
+        let todo = Convert (x.xhp_enum_keyword, todo) in
+        convert offset todo results x.xhp_enum_optional
+    | { M.syntax = M.XHPRequired x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_required_keyword, todo) in
+        convert offset todo results x.xhp_required_at
+    | { M.syntax = M.XHPClassAttributeDeclaration x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_attribute_semicolon, todo) in
+        let todo = Convert (x.xhp_attribute_attributes, todo) in
+        convert offset todo results x.xhp_attribute_keyword
+    | { M.syntax = M.XHPClassAttribute x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_attribute_decl_required, todo) in
+        let todo = Convert (x.xhp_attribute_decl_initializer, todo) in
+        let todo = Convert (x.xhp_attribute_decl_name, todo) in
+        convert offset todo results x.xhp_attribute_decl_type
+    | { M.syntax = M.XHPSimpleClassAttribute x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        convert offset todo results x.xhp_simple_class_attribute_type
+    | { M.syntax = M.XHPSimpleAttribute x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_simple_attribute_expression, todo) in
+        let todo = Convert (x.xhp_simple_attribute_equal, todo) in
+        convert offset todo results x.xhp_simple_attribute_name
+    | { M.syntax = M.XHPSpreadAttribute x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_spread_attribute_right_brace, todo) in
+        let todo = Convert (x.xhp_spread_attribute_expression, todo) in
+        let todo = Convert (x.xhp_spread_attribute_spread_operator, todo) in
+        convert offset todo results x.xhp_spread_attribute_left_brace
+    | { M.syntax = M.XHPOpen x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_open_right_angle, todo) in
+        let todo = Convert (x.xhp_open_attributes, todo) in
+        let todo = Convert (x.xhp_open_name, todo) in
+        convert offset todo results x.xhp_open_left_angle
+    | { M.syntax = M.XHPExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_close, todo) in
+        let todo = Convert (x.xhp_body, todo) in
+        convert offset todo results x.xhp_open
+    | { M.syntax = M.XHPClose x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.xhp_close_right_angle, todo) in
+        let todo = Convert (x.xhp_close_name, todo) in
+        convert offset todo results x.xhp_close_left_angle
+    | { M.syntax = M.TypeConstant x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.type_constant_right_type, todo) in
+        let todo = Convert (x.type_constant_separator, todo) in
+        convert offset todo results x.type_constant_left_type
+    | { M.syntax = M.VectorTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.vector_type_right_angle, todo) in
+        let todo = Convert (x.vector_type_trailing_comma, todo) in
+        let todo = Convert (x.vector_type_type, todo) in
+        let todo = Convert (x.vector_type_left_angle, todo) in
+        convert offset todo results x.vector_type_keyword
+    | { M.syntax = M.KeysetTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.keyset_type_right_angle, todo) in
+        let todo = Convert (x.keyset_type_trailing_comma, todo) in
+        let todo = Convert (x.keyset_type_type, todo) in
+        let todo = Convert (x.keyset_type_left_angle, todo) in
+        convert offset todo results x.keyset_type_keyword
+    | { M.syntax = M.TupleTypeExplicitSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.tuple_type_right_angle, todo) in
+        let todo = Convert (x.tuple_type_types, todo) in
+        let todo = Convert (x.tuple_type_left_angle, todo) in
+        convert offset todo results x.tuple_type_keyword
+    | { M.syntax = M.VarrayTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.varray_right_angle, todo) in
+        let todo = Convert (x.varray_trailing_comma, todo) in
+        let todo = Convert (x.varray_type, todo) in
+        let todo = Convert (x.varray_left_angle, todo) in
+        convert offset todo results x.varray_keyword
+    | { M.syntax = M.VectorArrayTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.vector_array_right_angle, todo) in
+        let todo = Convert (x.vector_array_type, todo) in
+        let todo = Convert (x.vector_array_left_angle, todo) in
+        convert offset todo results x.vector_array_keyword
+    | { M.syntax = M.TypeParameter x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.type_constraints, todo) in
+        let todo = Convert (x.type_name, todo) in
+        convert offset todo results x.type_variance
+    | { M.syntax = M.TypeConstraint x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.constraint_type, todo) in
+        convert offset todo results x.constraint_keyword
+    | { M.syntax = M.DarrayTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.darray_right_angle, todo) in
+        let todo = Convert (x.darray_trailing_comma, todo) in
+        let todo = Convert (x.darray_value, todo) in
+        let todo = Convert (x.darray_comma, todo) in
+        let todo = Convert (x.darray_key, todo) in
+        let todo = Convert (x.darray_left_angle, todo) in
+        convert offset todo results x.darray_keyword
+    | { M.syntax = M.MapArrayTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.map_array_right_angle, todo) in
+        let todo = Convert (x.map_array_value, todo) in
+        let todo = Convert (x.map_array_comma, todo) in
+        let todo = Convert (x.map_array_key, todo) in
+        let todo = Convert (x.map_array_left_angle, todo) in
+        convert offset todo results x.map_array_keyword
+    | { M.syntax = M.DictionaryTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.dictionary_type_right_angle, todo) in
+        let todo = Convert (x.dictionary_type_members, todo) in
+        let todo = Convert (x.dictionary_type_left_angle, todo) in
+        convert offset todo results x.dictionary_type_keyword
+    | { M.syntax = M.ClosureTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.closure_outer_right_paren, todo) in
+        let todo = Convert (x.closure_return_type, todo) in
+        let todo = Convert (x.closure_colon, todo) in
+        let todo = Convert (x.closure_inner_right_paren, todo) in
+        let todo = Convert (x.closure_parameter_list, todo) in
+        let todo = Convert (x.closure_inner_left_paren, todo) in
+        let todo = Convert (x.closure_function_keyword, todo) in
+        let todo = Convert (x.closure_coroutine, todo) in
+        convert offset todo results x.closure_outer_left_paren
+    | { M.syntax = M.ClosureParameterTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.closure_parameter_type, todo) in
+        convert offset todo results x.closure_parameter_call_convention
+    | { M.syntax = M.ClassnameTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.classname_right_angle, todo) in
+        let todo = Convert (x.classname_trailing_comma, todo) in
+        let todo = Convert (x.classname_type, todo) in
+        let todo = Convert (x.classname_left_angle, todo) in
+        convert offset todo results x.classname_keyword
+    | { M.syntax = M.FieldSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.field_type, todo) in
+        let todo = Convert (x.field_arrow, todo) in
+        let todo = Convert (x.field_name, todo) in
+        convert offset todo results x.field_question
+    | { M.syntax = M.FieldInitializer x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.field_initializer_value, todo) in
+        let todo = Convert (x.field_initializer_arrow, todo) in
+        convert offset todo results x.field_initializer_name
+    | { M.syntax = M.ShapeTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.shape_type_right_paren, todo) in
+        let todo = Convert (x.shape_type_ellipsis, todo) in
+        let todo = Convert (x.shape_type_fields, todo) in
+        let todo = Convert (x.shape_type_left_paren, todo) in
+        convert offset todo results x.shape_type_keyword
+    | { M.syntax = M.ShapeExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.shape_expression_right_paren, todo) in
+        let todo = Convert (x.shape_expression_fields, todo) in
+        let todo = Convert (x.shape_expression_left_paren, todo) in
+        convert offset todo results x.shape_expression_keyword
+    | { M.syntax = M.TupleExpression x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.tuple_expression_right_paren, todo) in
+        let todo = Convert (x.tuple_expression_items, todo) in
+        let todo = Convert (x.tuple_expression_left_paren, todo) in
+        convert offset todo results x.tuple_expression_keyword
+    | { M.syntax = M.GenericTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.generic_argument_list, todo) in
+        convert offset todo results x.generic_class_type
+    | { M.syntax = M.NullableTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.nullable_type, todo) in
+        convert offset todo results x.nullable_question
+    | { M.syntax = M.SoftTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.soft_type, todo) in
+        convert offset todo results x.soft_at
+    | { M.syntax = M.TypeArguments x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.type_arguments_right_angle, todo) in
+        let todo = Convert (x.type_arguments_types, todo) in
+        convert offset todo results x.type_arguments_left_angle
+    | { M.syntax = M.TypeParameters x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.type_parameters_right_angle, todo) in
+        let todo = Convert (x.type_parameters_parameters, todo) in
+        convert offset todo results x.type_parameters_left_angle
+    | { M.syntax = M.TupleTypeSpecifier x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.tuple_right_paren, todo) in
+        let todo = Convert (x.tuple_types, todo) in
+        convert offset todo results x.tuple_left_paren
+    | { M.syntax = M.ErrorSyntax x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        convert offset todo results x.error_error
+    | { M.syntax = M.ListItem x
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (x.list_separator, todo) in
+        convert offset todo results x.list_item
     in
     convert 0 Done [] node
 end

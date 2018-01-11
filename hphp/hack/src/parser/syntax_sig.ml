@@ -25,28 +25,32 @@ module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
   type value
   type t = { syntax : syntax ; value : value }
-  and end_of_file =
+  and syntax =
+  | Token                             of Token.t
+  | Missing
+  | SyntaxList                        of t list
+  | EndOfFile                               of
     { end_of_file_token                                  : t
     }
-  and script =
+  | Script                                  of
     { script_declarations                                : t
     }
-  and qualified_name =
+  | QualifiedName                           of
     { qualified_name_parts                               : t
     }
-  and simple_type_specifier =
+  | SimpleTypeSpecifier                     of
     { simple_type_specifier                              : t
     }
-  and literal_expression =
+  | LiteralExpression                       of
     { literal_expression                                 : t
     }
-  and variable_expression =
+  | VariableExpression                      of
     { variable_expression                                : t
     }
-  and pipe_variable_expression =
+  | PipeVariableExpression                  of
     { pipe_variable_expression                           : t
     }
-  and enum_declaration =
+  | EnumDeclaration                         of
     { enum_attribute_spec                                : t
     ; enum_keyword                                       : t
     ; enum_name                                          : t
@@ -57,13 +61,13 @@ module type Syntax_S = sig
     ; enum_enumerators                                   : t
     ; enum_right_brace                                   : t
     }
-  and enumerator =
+  | Enumerator                              of
     { enumerator_name                                    : t
     ; enumerator_equal                                   : t
     ; enumerator_value                                   : t
     ; enumerator_semicolon                               : t
     }
-  and alias_declaration =
+  | AliasDeclaration                        of
     { alias_attribute_spec                               : t
     ; alias_keyword                                      : t
     ; alias_name                                         : t
@@ -73,36 +77,36 @@ module type Syntax_S = sig
     ; alias_type                                         : t
     ; alias_semicolon                                    : t
     }
-  and property_declaration =
+  | PropertyDeclaration                     of
     { property_modifiers                                 : t
     ; property_type                                      : t
     ; property_declarators                               : t
     ; property_semicolon                                 : t
     }
-  and property_declarator =
+  | PropertyDeclarator                      of
     { property_name                                      : t
     ; property_initializer                               : t
     }
-  and namespace_declaration =
+  | NamespaceDeclaration                    of
     { namespace_keyword                                  : t
     ; namespace_name                                     : t
     ; namespace_body                                     : t
     }
-  and namespace_body =
+  | NamespaceBody                           of
     { namespace_left_brace                               : t
     ; namespace_declarations                             : t
     ; namespace_right_brace                              : t
     }
-  and namespace_empty_body =
+  | NamespaceEmptyBody                      of
     { namespace_semicolon                                : t
     }
-  and namespace_use_declaration =
+  | NamespaceUseDeclaration                 of
     { namespace_use_keyword                              : t
     ; namespace_use_kind                                 : t
     ; namespace_use_clauses                              : t
     ; namespace_use_semicolon                            : t
     }
-  and namespace_group_use_declaration =
+  | NamespaceGroupUseDeclaration            of
     { namespace_group_use_keyword                        : t
     ; namespace_group_use_kind                           : t
     ; namespace_group_use_prefix                         : t
@@ -111,18 +115,18 @@ module type Syntax_S = sig
     ; namespace_group_use_right_brace                    : t
     ; namespace_group_use_semicolon                      : t
     }
-  and namespace_use_clause =
+  | NamespaceUseClause                      of
     { namespace_use_clause_kind                          : t
     ; namespace_use_name                                 : t
     ; namespace_use_as                                   : t
     ; namespace_use_alias                                : t
     }
-  and function_declaration =
+  | FunctionDeclaration                     of
     { function_attribute_spec                            : t
     ; function_declaration_header                        : t
     ; function_body                                      : t
     }
-  and function_declaration_header =
+  | FunctionDeclarationHeader               of
     { function_modifiers                                 : t
     ; function_keyword                                   : t
     ; function_ampersand                                 : t
@@ -135,22 +139,22 @@ module type Syntax_S = sig
     ; function_type                                      : t
     ; function_where_clause                              : t
     }
-  and where_clause =
+  | WhereClause                             of
     { where_clause_keyword                               : t
     ; where_clause_constraints                           : t
     }
-  and where_constraint =
+  | WhereConstraint                         of
     { where_constraint_left_type                         : t
     ; where_constraint_operator                          : t
     ; where_constraint_right_type                        : t
     }
-  and methodish_declaration =
+  | MethodishDeclaration                    of
     { methodish_attribute                                : t
     ; methodish_function_decl_header                     : t
     ; methodish_function_body                            : t
     ; methodish_semicolon                                : t
     }
-  and classish_declaration =
+  | ClassishDeclaration                     of
     { classish_attribute                                 : t
     ; classish_modifiers                                 : t
     ; classish_keyword                                   : t
@@ -162,52 +166,52 @@ module type Syntax_S = sig
     ; classish_implements_list                           : t
     ; classish_body                                      : t
     }
-  and classish_body =
+  | ClassishBody                            of
     { classish_body_left_brace                           : t
     ; classish_body_elements                             : t
     ; classish_body_right_brace                          : t
     }
-  and trait_use_precedence_item =
+  | TraitUsePrecedenceItem                  of
     { trait_use_precedence_item_name                     : t
     ; trait_use_precedence_item_keyword                  : t
     ; trait_use_precedence_item_removed_names            : t
     }
-  and trait_use_alias_item =
+  | TraitUseAliasItem                       of
     { trait_use_alias_item_aliasing_name                 : t
     ; trait_use_alias_item_keyword                       : t
     ; trait_use_alias_item_modifiers                     : t
     ; trait_use_alias_item_aliased_name                  : t
     }
-  and trait_use_conflict_resolution =
+  | TraitUseConflictResolution              of
     { trait_use_conflict_resolution_keyword              : t
     ; trait_use_conflict_resolution_names                : t
     ; trait_use_conflict_resolution_left_brace           : t
     ; trait_use_conflict_resolution_clauses              : t
     ; trait_use_conflict_resolution_right_brace          : t
     }
-  and trait_use =
+  | TraitUse                                of
     { trait_use_keyword                                  : t
     ; trait_use_names                                    : t
     ; trait_use_semicolon                                : t
     }
-  and require_clause =
+  | RequireClause                           of
     { require_keyword                                    : t
     ; require_kind                                       : t
     ; require_name                                       : t
     ; require_semicolon                                  : t
     }
-  and const_declaration =
+  | ConstDeclaration                        of
     { const_abstract                                     : t
     ; const_keyword                                      : t
     ; const_type_specifier                               : t
     ; const_declarators                                  : t
     ; const_semicolon                                    : t
     }
-  and constant_declarator =
+  | ConstantDeclarator                      of
     { constant_declarator_name                           : t
     ; constant_declarator_initializer                    : t
     }
-  and type_const_declaration =
+  | TypeConstDeclaration                    of
     { type_const_abstract                                : t
     ; type_const_keyword                                 : t
     ; type_const_type_keyword                            : t
@@ -218,11 +222,11 @@ module type Syntax_S = sig
     ; type_const_type_specifier                          : t
     ; type_const_semicolon                               : t
     }
-  and decorated_expression =
+  | DecoratedExpression                     of
     { decorated_expression_decorator                     : t
     ; decorated_expression_expression                    : t
     }
-  and parameter_declaration =
+  | ParameterDeclaration                    of
     { parameter_attribute                                : t
     ; parameter_visibility                               : t
     ; parameter_call_convention                          : t
@@ -230,57 +234,57 @@ module type Syntax_S = sig
     ; parameter_name                                     : t
     ; parameter_default_value                            : t
     }
-  and variadic_parameter =
+  | VariadicParameter                       of
     { variadic_parameter_call_convention                 : t
     ; variadic_parameter_type                            : t
     ; variadic_parameter_ellipsis                        : t
     }
-  and attribute_specification =
+  | AttributeSpecification                  of
     { attribute_specification_left_double_angle          : t
     ; attribute_specification_attributes                 : t
     ; attribute_specification_right_double_angle         : t
     }
-  and attribute =
+  | Attribute                               of
     { attribute_name                                     : t
     ; attribute_left_paren                               : t
     ; attribute_values                                   : t
     ; attribute_right_paren                              : t
     }
-  and inclusion_expression =
+  | InclusionExpression                     of
     { inclusion_require                                  : t
     ; inclusion_filename                                 : t
     }
-  and inclusion_directive =
+  | InclusionDirective                      of
     { inclusion_expression                               : t
     ; inclusion_semicolon                                : t
     }
-  and compound_statement =
+  | CompoundStatement                       of
     { compound_left_brace                                : t
     ; compound_statements                                : t
     ; compound_right_brace                               : t
     }
-  and expression_statement =
+  | ExpressionStatement                     of
     { expression_statement_expression                    : t
     ; expression_statement_semicolon                     : t
     }
-  and markup_section =
+  | MarkupSection                           of
     { markup_prefix                                      : t
     ; markup_text                                        : t
     ; markup_suffix                                      : t
     ; markup_expression                                  : t
     }
-  and markup_suffix =
+  | MarkupSuffix                            of
     { markup_suffix_less_than_question                   : t
     ; markup_suffix_name                                 : t
     }
-  and unset_statement =
+  | UnsetStatement                          of
     { unset_keyword                                      : t
     ; unset_left_paren                                   : t
     ; unset_variables                                    : t
     ; unset_right_paren                                  : t
     ; unset_semicolon                                    : t
     }
-  and using_statement_block_scoped =
+  | UsingStatementBlockScoped               of
     { using_block_await_keyword                          : t
     ; using_block_using_keyword                          : t
     ; using_block_left_paren                             : t
@@ -288,34 +292,34 @@ module type Syntax_S = sig
     ; using_block_right_paren                            : t
     ; using_block_body                                   : t
     }
-  and using_statement_function_scoped =
+  | UsingStatementFunctionScoped            of
     { using_function_await_keyword                       : t
     ; using_function_using_keyword                       : t
     ; using_function_expression                          : t
     ; using_function_semicolon                           : t
     }
-  and declare_directive_statement =
+  | DeclareDirectiveStatement               of
     { declare_directive_keyword                          : t
     ; declare_directive_left_paren                       : t
     ; declare_directive_expression                       : t
     ; declare_directive_right_paren                      : t
     ; declare_directive_semicolon                        : t
     }
-  and declare_block_statement =
+  | DeclareBlockStatement                   of
     { declare_block_keyword                              : t
     ; declare_block_left_paren                           : t
     ; declare_block_expression                           : t
     ; declare_block_right_paren                          : t
     ; declare_block_body                                 : t
     }
-  and while_statement =
+  | WhileStatement                          of
     { while_keyword                                      : t
     ; while_left_paren                                   : t
     ; while_condition                                    : t
     ; while_right_paren                                  : t
     ; while_body                                         : t
     }
-  and if_statement =
+  | IfStatement                             of
     { if_keyword                                         : t
     ; if_left_paren                                      : t
     ; if_condition                                       : t
@@ -324,18 +328,18 @@ module type Syntax_S = sig
     ; if_elseif_clauses                                  : t
     ; if_else_clause                                     : t
     }
-  and elseif_clause =
+  | ElseifClause                            of
     { elseif_keyword                                     : t
     ; elseif_left_paren                                  : t
     ; elseif_condition                                   : t
     ; elseif_right_paren                                 : t
     ; elseif_statement                                   : t
     }
-  and else_clause =
+  | ElseClause                              of
     { else_keyword                                       : t
     ; else_statement                                     : t
     }
-  and if_endif_statement =
+  | IfEndIfStatement                        of
     { if_endif_keyword                                   : t
     ; if_endif_left_paren                                : t
     ; if_endif_condition                                 : t
@@ -347,7 +351,7 @@ module type Syntax_S = sig
     ; if_endif_endif_keyword                             : t
     ; if_endif_semicolon                                 : t
     }
-  and elseif_colon_clause =
+  | ElseifColonClause                       of
     { elseif_colon_keyword                               : t
     ; elseif_colon_left_paren                            : t
     ; elseif_colon_condition                             : t
@@ -355,18 +359,18 @@ module type Syntax_S = sig
     ; elseif_colon_colon                                 : t
     ; elseif_colon_statement                             : t
     }
-  and else_colon_clause =
+  | ElseColonClause                         of
     { else_colon_keyword                                 : t
     ; else_colon_colon                                   : t
     ; else_colon_statement                               : t
     }
-  and try_statement =
+  | TryStatement                            of
     { try_keyword                                        : t
     ; try_compound_statement                             : t
     ; try_catch_clauses                                  : t
     ; try_finally_clause                                 : t
     }
-  and catch_clause =
+  | CatchClause                             of
     { catch_keyword                                      : t
     ; catch_left_paren                                   : t
     ; catch_type                                         : t
@@ -374,11 +378,11 @@ module type Syntax_S = sig
     ; catch_right_paren                                  : t
     ; catch_body                                         : t
     }
-  and finally_clause =
+  | FinallyClause                           of
     { finally_keyword                                    : t
     ; finally_body                                       : t
     }
-  and do_statement =
+  | DoStatement                             of
     { do_keyword                                         : t
     ; do_body                                            : t
     ; do_while_keyword                                   : t
@@ -387,7 +391,7 @@ module type Syntax_S = sig
     ; do_right_paren                                     : t
     ; do_semicolon                                       : t
     }
-  and for_statement =
+  | ForStatement                            of
     { for_keyword                                        : t
     ; for_left_paren                                     : t
     ; for_initializer                                    : t
@@ -398,7 +402,7 @@ module type Syntax_S = sig
     ; for_right_paren                                    : t
     ; for_body                                           : t
     }
-  and foreach_statement =
+  | ForeachStatement                        of
     { foreach_keyword                                    : t
     ; foreach_left_paren                                 : t
     ; foreach_collection                                 : t
@@ -410,7 +414,7 @@ module type Syntax_S = sig
     ; foreach_right_paren                                : t
     ; foreach_body                                       : t
     }
-  and switch_statement =
+  | SwitchStatement                         of
     { switch_keyword                                     : t
     ; switch_left_paren                                  : t
     ; switch_expression                                  : t
@@ -419,77 +423,77 @@ module type Syntax_S = sig
     ; switch_sections                                    : t
     ; switch_right_brace                                 : t
     }
-  and switch_section =
+  | SwitchSection                           of
     { switch_section_labels                              : t
     ; switch_section_statements                          : t
     ; switch_section_fallthrough                         : t
     }
-  and switch_fallthrough =
+  | SwitchFallthrough                       of
     { fallthrough_keyword                                : t
     ; fallthrough_semicolon                              : t
     }
-  and case_label =
+  | CaseLabel                               of
     { case_keyword                                       : t
     ; case_expression                                    : t
     ; case_colon                                         : t
     }
-  and default_label =
+  | DefaultLabel                            of
     { default_keyword                                    : t
     ; default_colon                                      : t
     }
-  and return_statement =
+  | ReturnStatement                         of
     { return_keyword                                     : t
     ; return_expression                                  : t
     ; return_semicolon                                   : t
     }
-  and goto_label =
+  | GotoLabel                               of
     { goto_label_name                                    : t
     ; goto_label_colon                                   : t
     }
-  and goto_statement =
+  | GotoStatement                           of
     { goto_statement_keyword                             : t
     ; goto_statement_label_name                          : t
     ; goto_statement_semicolon                           : t
     }
-  and throw_statement =
+  | ThrowStatement                          of
     { throw_keyword                                      : t
     ; throw_expression                                   : t
     ; throw_semicolon                                    : t
     }
-  and break_statement =
+  | BreakStatement                          of
     { break_keyword                                      : t
     ; break_level                                        : t
     ; break_semicolon                                    : t
     }
-  and continue_statement =
+  | ContinueStatement                       of
     { continue_keyword                                   : t
     ; continue_level                                     : t
     ; continue_semicolon                                 : t
     }
-  and function_static_statement =
+  | FunctionStaticStatement                 of
     { static_static_keyword                              : t
     ; static_declarations                                : t
     ; static_semicolon                                   : t
     }
-  and static_declarator =
+  | StaticDeclarator                        of
     { static_name                                        : t
     ; static_initializer                                 : t
     }
-  and echo_statement =
+  | EchoStatement                           of
     { echo_keyword                                       : t
     ; echo_expressions                                   : t
     ; echo_semicolon                                     : t
     }
-  and global_statement =
+  | GlobalStatement                         of
     { global_keyword                                     : t
     ; global_variables                                   : t
     ; global_semicolon                                   : t
     }
-  and simple_initializer =
+  | SimpleInitializer                       of
     { simple_initializer_equal                           : t
     ; simple_initializer_value                           : t
     }
-  and anonymous_class =
+  | AnonymousClass                          of
     { anonymous_class_class_keyword                      : t
     ; anonymous_class_left_paren                         : t
     ; anonymous_class_argument_list                      : t
@@ -500,7 +504,7 @@ module type Syntax_S = sig
     ; anonymous_class_implements_list                    : t
     ; anonymous_class_body                               : t
     }
-  and anonymous_function =
+  | AnonymousFunction                       of
     { anonymous_static_keyword                           : t
     ; anonymous_async_keyword                            : t
     ; anonymous_coroutine_keyword                        : t
@@ -513,7 +517,7 @@ module type Syntax_S = sig
     ; anonymous_use                                      : t
     ; anonymous_body                                     : t
     }
-  and php7_anonymous_function =
+  | Php7AnonymousFunction                   of
     { php7_anonymous_static_keyword                      : t
     ; php7_anonymous_async_keyword                       : t
     ; php7_anonymous_coroutine_keyword                   : t
@@ -526,349 +530,349 @@ module type Syntax_S = sig
     ; php7_anonymous_type                                : t
     ; php7_anonymous_body                                : t
     }
-  and anonymous_function_use_clause =
+  | AnonymousFunctionUseClause              of
     { anonymous_use_keyword                              : t
     ; anonymous_use_left_paren                           : t
     ; anonymous_use_variables                            : t
     ; anonymous_use_right_paren                          : t
     }
-  and lambda_expression =
+  | LambdaExpression                        of
     { lambda_async                                       : t
     ; lambda_coroutine                                   : t
     ; lambda_signature                                   : t
     ; lambda_arrow                                       : t
     ; lambda_body                                        : t
     }
-  and lambda_signature =
+  | LambdaSignature                         of
     { lambda_left_paren                                  : t
     ; lambda_parameters                                  : t
     ; lambda_right_paren                                 : t
     ; lambda_colon                                       : t
     ; lambda_type                                        : t
     }
-  and cast_expression =
+  | CastExpression                          of
     { cast_left_paren                                    : t
     ; cast_type                                          : t
     ; cast_right_paren                                   : t
     ; cast_operand                                       : t
     }
-  and scope_resolution_expression =
+  | ScopeResolutionExpression               of
     { scope_resolution_qualifier                         : t
     ; scope_resolution_operator                          : t
     ; scope_resolution_name                              : t
     }
-  and member_selection_expression =
+  | MemberSelectionExpression               of
     { member_object                                      : t
     ; member_operator                                    : t
     ; member_name                                        : t
     }
-  and safe_member_selection_expression =
+  | SafeMemberSelectionExpression           of
     { safe_member_object                                 : t
     ; safe_member_operator                               : t
     ; safe_member_name                                   : t
     }
-  and embedded_member_selection_expression =
+  | EmbeddedMemberSelectionExpression       of
     { embedded_member_object                             : t
     ; embedded_member_operator                           : t
     ; embedded_member_name                               : t
     }
-  and yield_expression =
+  | YieldExpression                         of
     { yield_keyword                                      : t
     ; yield_operand                                      : t
     }
-  and yield_from_expression =
+  | YieldFromExpression                     of
     { yield_from_yield_keyword                           : t
     ; yield_from_from_keyword                            : t
     ; yield_from_operand                                 : t
     }
-  and prefix_unary_expression =
+  | PrefixUnaryExpression                   of
     { prefix_unary_operator                              : t
     ; prefix_unary_operand                               : t
     }
-  and postfix_unary_expression =
+  | PostfixUnaryExpression                  of
     { postfix_unary_operand                              : t
     ; postfix_unary_operator                             : t
     }
-  and binary_expression =
+  | BinaryExpression                        of
     { binary_left_operand                                : t
     ; binary_operator                                    : t
     ; binary_right_operand                               : t
     }
-  and instanceof_expression =
+  | InstanceofExpression                    of
     { instanceof_left_operand                            : t
     ; instanceof_operator                                : t
     ; instanceof_right_operand                           : t
     }
-  and is_expression =
+  | IsExpression                            of
     { is_left_operand                                    : t
     ; is_operator                                        : t
     ; is_right_operand                                   : t
     }
-  and conditional_expression =
+  | ConditionalExpression                   of
     { conditional_test                                   : t
     ; conditional_question                               : t
     ; conditional_consequence                            : t
     ; conditional_colon                                  : t
     ; conditional_alternative                            : t
     }
-  and eval_expression =
+  | EvalExpression                          of
     { eval_keyword                                       : t
     ; eval_left_paren                                    : t
     ; eval_argument                                      : t
     ; eval_right_paren                                   : t
     }
-  and empty_expression =
+  | EmptyExpression                         of
     { empty_keyword                                      : t
     ; empty_left_paren                                   : t
     ; empty_argument                                     : t
     ; empty_right_paren                                  : t
     }
-  and define_expression =
+  | DefineExpression                        of
     { define_keyword                                     : t
     ; define_left_paren                                  : t
     ; define_argument_list                               : t
     ; define_right_paren                                 : t
     }
-  and halt_compiler_expression =
+  | HaltCompilerExpression                  of
     { halt_compiler_keyword                              : t
     ; halt_compiler_left_paren                           : t
     ; halt_compiler_argument_list                        : t
     ; halt_compiler_right_paren                          : t
     }
-  and isset_expression =
+  | IssetExpression                         of
     { isset_keyword                                      : t
     ; isset_left_paren                                   : t
     ; isset_argument_list                                : t
     ; isset_right_paren                                  : t
     }
-  and function_call_expression =
+  | FunctionCallExpression                  of
     { function_call_receiver                             : t
     ; function_call_left_paren                           : t
     ; function_call_argument_list                        : t
     ; function_call_right_paren                          : t
     }
-  and function_call_with_type_arguments_expression =
+  | FunctionCallWithTypeArgumentsExpression of
     { function_call_with_type_arguments_receiver         : t
     ; function_call_with_type_arguments_type_args        : t
     ; function_call_with_type_arguments_left_paren       : t
     ; function_call_with_type_arguments_argument_list    : t
     ; function_call_with_type_arguments_right_paren      : t
     }
-  and parenthesized_expression =
+  | ParenthesizedExpression                 of
     { parenthesized_expression_left_paren                : t
     ; parenthesized_expression_expression                : t
     ; parenthesized_expression_right_paren               : t
     }
-  and braced_expression =
+  | BracedExpression                        of
     { braced_expression_left_brace                       : t
     ; braced_expression_expression                       : t
     ; braced_expression_right_brace                      : t
     }
-  and embedded_braced_expression =
+  | EmbeddedBracedExpression                of
     { embedded_braced_expression_left_brace              : t
     ; embedded_braced_expression_expression              : t
     ; embedded_braced_expression_right_brace             : t
     }
-  and list_expression =
+  | ListExpression                          of
     { list_keyword                                       : t
     ; list_left_paren                                    : t
     ; list_members                                       : t
     ; list_right_paren                                   : t
     }
-  and collection_literal_expression =
+  | CollectionLiteralExpression             of
     { collection_literal_name                            : t
     ; collection_literal_left_brace                      : t
     ; collection_literal_initializers                    : t
     ; collection_literal_right_brace                     : t
     }
-  and object_creation_expression =
+  | ObjectCreationExpression                of
     { object_creation_new_keyword                        : t
     ; object_creation_object                             : t
     }
-  and constructor_call =
+  | ConstructorCall                         of
     { constructor_call_type                              : t
     ; constructor_call_left_paren                        : t
     ; constructor_call_argument_list                     : t
     ; constructor_call_right_paren                       : t
     }
-  and array_creation_expression =
+  | ArrayCreationExpression                 of
     { array_creation_left_bracket                        : t
     ; array_creation_members                             : t
     ; array_creation_right_bracket                       : t
     }
-  and array_intrinsic_expression =
+  | ArrayIntrinsicExpression                of
     { array_intrinsic_keyword                            : t
     ; array_intrinsic_left_paren                         : t
     ; array_intrinsic_members                            : t
     ; array_intrinsic_right_paren                        : t
     }
-  and darray_intrinsic_expression =
+  | DarrayIntrinsicExpression               of
     { darray_intrinsic_keyword                           : t
     ; darray_intrinsic_left_bracket                      : t
     ; darray_intrinsic_members                           : t
     ; darray_intrinsic_right_bracket                     : t
     }
-  and dictionary_intrinsic_expression =
+  | DictionaryIntrinsicExpression           of
     { dictionary_intrinsic_keyword                       : t
     ; dictionary_intrinsic_left_bracket                  : t
     ; dictionary_intrinsic_members                       : t
     ; dictionary_intrinsic_right_bracket                 : t
     }
-  and keyset_intrinsic_expression =
+  | KeysetIntrinsicExpression               of
     { keyset_intrinsic_keyword                           : t
     ; keyset_intrinsic_left_bracket                      : t
     ; keyset_intrinsic_members                           : t
     ; keyset_intrinsic_right_bracket                     : t
     }
-  and varray_intrinsic_expression =
+  | VarrayIntrinsicExpression               of
     { varray_intrinsic_keyword                           : t
     ; varray_intrinsic_left_bracket                      : t
     ; varray_intrinsic_members                           : t
     ; varray_intrinsic_right_bracket                     : t
     }
-  and vector_intrinsic_expression =
+  | VectorIntrinsicExpression               of
     { vector_intrinsic_keyword                           : t
     ; vector_intrinsic_left_bracket                      : t
     ; vector_intrinsic_members                           : t
     ; vector_intrinsic_right_bracket                     : t
     }
-  and element_initializer =
+  | ElementInitializer                      of
     { element_key                                        : t
     ; element_arrow                                      : t
     ; element_value                                      : t
     }
-  and subscript_expression =
+  | SubscriptExpression                     of
     { subscript_receiver                                 : t
     ; subscript_left_bracket                             : t
     ; subscript_index                                    : t
     ; subscript_right_bracket                            : t
     }
-  and embedded_subscript_expression =
+  | EmbeddedSubscriptExpression             of
     { embedded_subscript_receiver                        : t
     ; embedded_subscript_left_bracket                    : t
     ; embedded_subscript_index                           : t
     ; embedded_subscript_right_bracket                   : t
     }
-  and awaitable_creation_expression =
+  | AwaitableCreationExpression             of
     { awaitable_async                                    : t
     ; awaitable_coroutine                                : t
     ; awaitable_compound_statement                       : t
     }
-  and xhp_children_declaration =
+  | XHPChildrenDeclaration                  of
     { xhp_children_keyword                               : t
     ; xhp_children_expression                            : t
     ; xhp_children_semicolon                             : t
     }
-  and xhp_children_parenthesized_list =
+  | XHPChildrenParenthesizedList            of
     { xhp_children_list_left_paren                       : t
     ; xhp_children_list_xhp_children                     : t
     ; xhp_children_list_right_paren                      : t
     }
-  and xhp_category_declaration =
+  | XHPCategoryDeclaration                  of
     { xhp_category_keyword                               : t
     ; xhp_category_categories                            : t
     ; xhp_category_semicolon                             : t
     }
-  and xhp_enum_type =
+  | XHPEnumType                             of
     { xhp_enum_optional                                  : t
     ; xhp_enum_keyword                                   : t
     ; xhp_enum_left_brace                                : t
     ; xhp_enum_values                                    : t
     ; xhp_enum_right_brace                               : t
     }
-  and xhp_required =
+  | XHPRequired                             of
     { xhp_required_at                                    : t
     ; xhp_required_keyword                               : t
     }
-  and xhp_class_attribute_declaration =
+  | XHPClassAttributeDeclaration            of
     { xhp_attribute_keyword                              : t
     ; xhp_attribute_attributes                           : t
     ; xhp_attribute_semicolon                            : t
     }
-  and xhp_class_attribute =
+  | XHPClassAttribute                       of
     { xhp_attribute_decl_type                            : t
     ; xhp_attribute_decl_name                            : t
     ; xhp_attribute_decl_initializer                     : t
     ; xhp_attribute_decl_required                        : t
     }
-  and xhp_simple_class_attribute =
+  | XHPSimpleClassAttribute                 of
     { xhp_simple_class_attribute_type                    : t
     }
-  and xhp_simple_attribute =
+  | XHPSimpleAttribute                      of
     { xhp_simple_attribute_name                          : t
     ; xhp_simple_attribute_equal                         : t
     ; xhp_simple_attribute_expression                    : t
     }
-  and xhp_spread_attribute =
+  | XHPSpreadAttribute                      of
     { xhp_spread_attribute_left_brace                    : t
     ; xhp_spread_attribute_spread_operator               : t
     ; xhp_spread_attribute_expression                    : t
     ; xhp_spread_attribute_right_brace                   : t
     }
-  and xhp_open =
+  | XHPOpen                                 of
     { xhp_open_left_angle                                : t
     ; xhp_open_name                                      : t
     ; xhp_open_attributes                                : t
     ; xhp_open_right_angle                               : t
     }
-  and xhp_expression =
+  | XHPExpression                           of
     { xhp_open                                           : t
     ; xhp_body                                           : t
     ; xhp_close                                          : t
     }
-  and xhp_close =
+  | XHPClose                                of
     { xhp_close_left_angle                               : t
     ; xhp_close_name                                     : t
     ; xhp_close_right_angle                              : t
     }
-  and type_constant =
+  | TypeConstant                            of
     { type_constant_left_type                            : t
     ; type_constant_separator                            : t
     ; type_constant_right_type                           : t
     }
-  and vector_type_specifier =
+  | VectorTypeSpecifier                     of
     { vector_type_keyword                                : t
     ; vector_type_left_angle                             : t
     ; vector_type_type                                   : t
     ; vector_type_trailing_comma                         : t
     ; vector_type_right_angle                            : t
     }
-  and keyset_type_specifier =
+  | KeysetTypeSpecifier                     of
     { keyset_type_keyword                                : t
     ; keyset_type_left_angle                             : t
     ; keyset_type_type                                   : t
     ; keyset_type_trailing_comma                         : t
     ; keyset_type_right_angle                            : t
     }
-  and tuple_type_explicit_specifier =
+  | TupleTypeExplicitSpecifier              of
     { tuple_type_keyword                                 : t
     ; tuple_type_left_angle                              : t
     ; tuple_type_types                                   : t
     ; tuple_type_right_angle                             : t
     }
-  and varray_type_specifier =
+  | VarrayTypeSpecifier                     of
     { varray_keyword                                     : t
     ; varray_left_angle                                  : t
     ; varray_type                                        : t
     ; varray_trailing_comma                              : t
     ; varray_right_angle                                 : t
     }
-  and vector_array_type_specifier =
+  | VectorArrayTypeSpecifier                of
     { vector_array_keyword                               : t
     ; vector_array_left_angle                            : t
     ; vector_array_type                                  : t
     ; vector_array_right_angle                           : t
     }
-  and type_parameter =
+  | TypeParameter                           of
     { type_variance                                      : t
     ; type_name                                          : t
     ; type_constraints                                   : t
     }
-  and type_constraint =
+  | TypeConstraint                          of
     { constraint_keyword                                 : t
     ; constraint_type                                    : t
     }
-  and darray_type_specifier =
+  | DarrayTypeSpecifier                     of
     { darray_keyword                                     : t
     ; darray_left_angle                                  : t
     ; darray_key                                         : t
@@ -877,7 +881,7 @@ module type Syntax_S = sig
     ; darray_trailing_comma                              : t
     ; darray_right_angle                                 : t
     }
-  and map_array_type_specifier =
+  | MapArrayTypeSpecifier                   of
     { map_array_keyword                                  : t
     ; map_array_left_angle                               : t
     ; map_array_key                                      : t
@@ -885,13 +889,13 @@ module type Syntax_S = sig
     ; map_array_value                                    : t
     ; map_array_right_angle                              : t
     }
-  and dictionary_type_specifier =
+  | DictionaryTypeSpecifier                 of
     { dictionary_type_keyword                            : t
     ; dictionary_type_left_angle                         : t
     ; dictionary_type_members                            : t
     ; dictionary_type_right_angle                        : t
     }
-  and closure_type_specifier =
+  | ClosureTypeSpecifier                    of
     { closure_outer_left_paren                           : t
     ; closure_coroutine                                  : t
     ; closure_function_keyword                           : t
@@ -902,248 +906,81 @@ module type Syntax_S = sig
     ; closure_return_type                                : t
     ; closure_outer_right_paren                          : t
     }
-  and closure_parameter_type_specifier =
+  | ClosureParameterTypeSpecifier           of
     { closure_parameter_call_convention                  : t
     ; closure_parameter_type                             : t
     }
-  and classname_type_specifier =
+  | ClassnameTypeSpecifier                  of
     { classname_keyword                                  : t
     ; classname_left_angle                               : t
     ; classname_type                                     : t
     ; classname_trailing_comma                           : t
     ; classname_right_angle                              : t
     }
-  and field_specifier =
+  | FieldSpecifier                          of
     { field_question                                     : t
     ; field_name                                         : t
     ; field_arrow                                        : t
     ; field_type                                         : t
     }
-  and field_initializer =
+  | FieldInitializer                        of
     { field_initializer_name                             : t
     ; field_initializer_arrow                            : t
     ; field_initializer_value                            : t
     }
-  and shape_type_specifier =
+  | ShapeTypeSpecifier                      of
     { shape_type_keyword                                 : t
     ; shape_type_left_paren                              : t
     ; shape_type_fields                                  : t
     ; shape_type_ellipsis                                : t
     ; shape_type_right_paren                             : t
     }
-  and shape_expression =
+  | ShapeExpression                         of
     { shape_expression_keyword                           : t
     ; shape_expression_left_paren                        : t
     ; shape_expression_fields                            : t
     ; shape_expression_right_paren                       : t
     }
-  and tuple_expression =
+  | TupleExpression                         of
     { tuple_expression_keyword                           : t
     ; tuple_expression_left_paren                        : t
     ; tuple_expression_items                             : t
     ; tuple_expression_right_paren                       : t
     }
-  and generic_type_specifier =
+  | GenericTypeSpecifier                    of
     { generic_class_type                                 : t
     ; generic_argument_list                              : t
     }
-  and nullable_type_specifier =
+  | NullableTypeSpecifier                   of
     { nullable_question                                  : t
     ; nullable_type                                      : t
     }
-  and soft_type_specifier =
+  | SoftTypeSpecifier                       of
     { soft_at                                            : t
     ; soft_type                                          : t
     }
-  and type_arguments =
+  | TypeArguments                           of
     { type_arguments_left_angle                          : t
     ; type_arguments_types                               : t
     ; type_arguments_right_angle                         : t
     }
-  and type_parameters =
+  | TypeParameters                          of
     { type_parameters_left_angle                         : t
     ; type_parameters_parameters                         : t
     ; type_parameters_right_angle                        : t
     }
-  and tuple_type_specifier =
+  | TupleTypeSpecifier                      of
     { tuple_left_paren                                   : t
     ; tuple_types                                        : t
     ; tuple_right_paren                                  : t
     }
-  and error =
+  | ErrorSyntax                             of
     { error_error                                        : t
     }
-  and list_item =
+  | ListItem                                of
     { list_item                                          : t
     ; list_separator                                     : t
     }
-
-  and syntax =
-  | Token                             of Token.t
-  | Missing
-  | SyntaxList                        of t list
-  | EndOfFile                               of end_of_file
-  | Script                                  of script
-  | QualifiedName                           of qualified_name
-  | SimpleTypeSpecifier                     of simple_type_specifier
-  | LiteralExpression                       of literal_expression
-  | VariableExpression                      of variable_expression
-  | PipeVariableExpression                  of pipe_variable_expression
-  | EnumDeclaration                         of enum_declaration
-  | Enumerator                              of enumerator
-  | AliasDeclaration                        of alias_declaration
-  | PropertyDeclaration                     of property_declaration
-  | PropertyDeclarator                      of property_declarator
-  | NamespaceDeclaration                    of namespace_declaration
-  | NamespaceBody                           of namespace_body
-  | NamespaceEmptyBody                      of namespace_empty_body
-  | NamespaceUseDeclaration                 of namespace_use_declaration
-  | NamespaceGroupUseDeclaration            of namespace_group_use_declaration
-  | NamespaceUseClause                      of namespace_use_clause
-  | FunctionDeclaration                     of function_declaration
-  | FunctionDeclarationHeader               of function_declaration_header
-  | WhereClause                             of where_clause
-  | WhereConstraint                         of where_constraint
-  | MethodishDeclaration                    of methodish_declaration
-  | ClassishDeclaration                     of classish_declaration
-  | ClassishBody                            of classish_body
-  | TraitUsePrecedenceItem                  of trait_use_precedence_item
-  | TraitUseAliasItem                       of trait_use_alias_item
-  | TraitUseConflictResolution              of trait_use_conflict_resolution
-  | TraitUse                                of trait_use
-  | RequireClause                           of require_clause
-  | ConstDeclaration                        of const_declaration
-  | ConstantDeclarator                      of constant_declarator
-  | TypeConstDeclaration                    of type_const_declaration
-  | DecoratedExpression                     of decorated_expression
-  | ParameterDeclaration                    of parameter_declaration
-  | VariadicParameter                       of variadic_parameter
-  | AttributeSpecification                  of attribute_specification
-  | Attribute                               of attribute
-  | InclusionExpression                     of inclusion_expression
-  | InclusionDirective                      of inclusion_directive
-  | CompoundStatement                       of compound_statement
-  | ExpressionStatement                     of expression_statement
-  | MarkupSection                           of markup_section
-  | MarkupSuffix                            of markup_suffix
-  | UnsetStatement                          of unset_statement
-  | UsingStatementBlockScoped               of using_statement_block_scoped
-  | UsingStatementFunctionScoped            of using_statement_function_scoped
-  | DeclareDirectiveStatement               of declare_directive_statement
-  | DeclareBlockStatement                   of declare_block_statement
-  | WhileStatement                          of while_statement
-  | IfStatement                             of if_statement
-  | ElseifClause                            of elseif_clause
-  | ElseClause                              of else_clause
-  | IfEndIfStatement                        of if_endif_statement
-  | ElseifColonClause                       of elseif_colon_clause
-  | ElseColonClause                         of else_colon_clause
-  | TryStatement                            of try_statement
-  | CatchClause                             of catch_clause
-  | FinallyClause                           of finally_clause
-  | DoStatement                             of do_statement
-  | ForStatement                            of for_statement
-  | ForeachStatement                        of foreach_statement
-  | SwitchStatement                         of switch_statement
-  | SwitchSection                           of switch_section
-  | SwitchFallthrough                       of switch_fallthrough
-  | CaseLabel                               of case_label
-  | DefaultLabel                            of default_label
-  | ReturnStatement                         of return_statement
-  | GotoLabel                               of goto_label
-  | GotoStatement                           of goto_statement
-  | ThrowStatement                          of throw_statement
-  | BreakStatement                          of break_statement
-  | ContinueStatement                       of continue_statement
-  | FunctionStaticStatement                 of function_static_statement
-  | StaticDeclarator                        of static_declarator
-  | EchoStatement                           of echo_statement
-  | GlobalStatement                         of global_statement
-  | SimpleInitializer                       of simple_initializer
-  | AnonymousClass                          of anonymous_class
-  | AnonymousFunction                       of anonymous_function
-  | Php7AnonymousFunction                   of php7_anonymous_function
-  | AnonymousFunctionUseClause              of anonymous_function_use_clause
-  | LambdaExpression                        of lambda_expression
-  | LambdaSignature                         of lambda_signature
-  | CastExpression                          of cast_expression
-  | ScopeResolutionExpression               of scope_resolution_expression
-  | MemberSelectionExpression               of member_selection_expression
-  | SafeMemberSelectionExpression           of safe_member_selection_expression
-  | EmbeddedMemberSelectionExpression       of embedded_member_selection_expression
-  | YieldExpression                         of yield_expression
-  | YieldFromExpression                     of yield_from_expression
-  | PrefixUnaryExpression                   of prefix_unary_expression
-  | PostfixUnaryExpression                  of postfix_unary_expression
-  | BinaryExpression                        of binary_expression
-  | InstanceofExpression                    of instanceof_expression
-  | IsExpression                            of is_expression
-  | ConditionalExpression                   of conditional_expression
-  | EvalExpression                          of eval_expression
-  | EmptyExpression                         of empty_expression
-  | DefineExpression                        of define_expression
-  | HaltCompilerExpression                  of halt_compiler_expression
-  | IssetExpression                         of isset_expression
-  | FunctionCallExpression                  of function_call_expression
-  | FunctionCallWithTypeArgumentsExpression of function_call_with_type_arguments_expression
-  | ParenthesizedExpression                 of parenthesized_expression
-  | BracedExpression                        of braced_expression
-  | EmbeddedBracedExpression                of embedded_braced_expression
-  | ListExpression                          of list_expression
-  | CollectionLiteralExpression             of collection_literal_expression
-  | ObjectCreationExpression                of object_creation_expression
-  | ConstructorCall                         of constructor_call
-  | ArrayCreationExpression                 of array_creation_expression
-  | ArrayIntrinsicExpression                of array_intrinsic_expression
-  | DarrayIntrinsicExpression               of darray_intrinsic_expression
-  | DictionaryIntrinsicExpression           of dictionary_intrinsic_expression
-  | KeysetIntrinsicExpression               of keyset_intrinsic_expression
-  | VarrayIntrinsicExpression               of varray_intrinsic_expression
-  | VectorIntrinsicExpression               of vector_intrinsic_expression
-  | ElementInitializer                      of element_initializer
-  | SubscriptExpression                     of subscript_expression
-  | EmbeddedSubscriptExpression             of embedded_subscript_expression
-  | AwaitableCreationExpression             of awaitable_creation_expression
-  | XHPChildrenDeclaration                  of xhp_children_declaration
-  | XHPChildrenParenthesizedList            of xhp_children_parenthesized_list
-  | XHPCategoryDeclaration                  of xhp_category_declaration
-  | XHPEnumType                             of xhp_enum_type
-  | XHPRequired                             of xhp_required
-  | XHPClassAttributeDeclaration            of xhp_class_attribute_declaration
-  | XHPClassAttribute                       of xhp_class_attribute
-  | XHPSimpleClassAttribute                 of xhp_simple_class_attribute
-  | XHPSimpleAttribute                      of xhp_simple_attribute
-  | XHPSpreadAttribute                      of xhp_spread_attribute
-  | XHPOpen                                 of xhp_open
-  | XHPExpression                           of xhp_expression
-  | XHPClose                                of xhp_close
-  | TypeConstant                            of type_constant
-  | VectorTypeSpecifier                     of vector_type_specifier
-  | KeysetTypeSpecifier                     of keyset_type_specifier
-  | TupleTypeExplicitSpecifier              of tuple_type_explicit_specifier
-  | VarrayTypeSpecifier                     of varray_type_specifier
-  | VectorArrayTypeSpecifier                of vector_array_type_specifier
-  | TypeParameter                           of type_parameter
-  | TypeConstraint                          of type_constraint
-  | DarrayTypeSpecifier                     of darray_type_specifier
-  | MapArrayTypeSpecifier                   of map_array_type_specifier
-  | DictionaryTypeSpecifier                 of dictionary_type_specifier
-  | ClosureTypeSpecifier                    of closure_type_specifier
-  | ClosureParameterTypeSpecifier           of closure_parameter_type_specifier
-  | ClassnameTypeSpecifier                  of classname_type_specifier
-  | FieldSpecifier                          of field_specifier
-  | FieldInitializer                        of field_initializer
-  | ShapeTypeSpecifier                      of shape_type_specifier
-  | ShapeExpression                         of shape_expression
-  | TupleExpression                         of tuple_expression
-  | GenericTypeSpecifier                    of generic_type_specifier
-  | NullableTypeSpecifier                   of nullable_type_specifier
-  | SoftTypeSpecifier                       of soft_type_specifier
-  | TypeArguments                           of type_arguments
-  | TypeParameters                          of type_parameters
-  | TupleTypeSpecifier                      of tuple_type_specifier
-  | ErrorSyntax                             of error
-  | ListItem                                of list_item
 
 
   val to_json : ?with_value:bool -> t -> Hh_json.json

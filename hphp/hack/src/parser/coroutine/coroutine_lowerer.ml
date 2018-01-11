@@ -63,7 +63,7 @@ let rewrite_coroutine_annotation
   let coroutine_return_type =
     make_coroutine_result_type_syntax new_return_type in
   make_syntax (
-    ClosureTypeSpecifier {
+    from_closure_type_specifier {
       original_type with
         closure_coroutine = make_missing ();
         closure_parameter_list = new_parameter_list;
@@ -76,7 +76,7 @@ let lower_coroutine_anon
     context
     anon_node =
   let ({ anonymous_body; anonymous_parameters; _; } as anon) =
-    get_anonymous_function anon_node in
+    get_anonymous_function (syntax anon_node) in
   let ({anonymous_type; _;} as anon) =
     rewrite_anon_function_return_type anon in
   let anonymous_body, closure_syntax =
@@ -86,7 +86,7 @@ let lower_coroutine_anon
       anonymous_type
       anonymous_parameters in
   let anon = { anon with anonymous_body } in
-  let anon = Syntax.synthesize_from anon_node (AnonymousFunction anon) in
+  let anon = Syntax.synthesize_from anon_node (from_anonymous_function anon) in
   let anon = CoroutineMethodLowerer.rewrite_anon context anon in
   (anon, closure_syntax)
 
@@ -95,7 +95,7 @@ let lower_coroutine_lambda
     ({ lambda_parameters; _; } as lambda_signature)
     lambda_body
     lambda_node =
-  let lambda = get_lambda_expression lambda_node in
+  let lambda = get_lambda_expression (syntax lambda_node) in
   let ({lambda_type; _;} as lambda_signature) =
     rewrite_lambda_return_type lambda_signature in
   let lambda_body, closure_syntax =
@@ -105,7 +105,7 @@ let lower_coroutine_lambda
       lambda_type
       lambda_parameters in
   let lambda = { lambda with lambda_body } in
-  let lambda = Syntax.synthesize_from lambda_node (LambdaExpression lambda) in
+  let lambda = Syntax.synthesize_from lambda_node (from_lambda_expression lambda) in
   let lambda = CoroutineMethodLowerer.rewrite_lambda
     context lambda_signature lambda in
   (lambda, closure_syntax)
@@ -147,21 +147,21 @@ let lower_coroutine_functions_and_types
   match syntax current_node with
   | FunctionDeclaration {
       function_declaration_header = {
-        syntax = FunctionDeclarationHeader ({
+        syntax = FunctionDeclarationHeader {
           function_modifiers = m; _;
-        } as header_node); _;
+        } as header_node; _;
       };
       function_body; _;
     } when has_coroutine_modifier m ->
       let context = Coroutine_context.make_from_context
         current_node parents None in
       let (closure_syntax, new_function_syntax) = lower_coroutine_function
-        context header_node function_body in
+        context (get_function_declaration_header header_node) function_body in
       (((Option.to_list closure_syntax) @ closures, lambda_count),
         Rewriter.Result.Replace new_function_syntax)
   | LambdaExpression {
     lambda_coroutine;
-    lambda_signature = { syntax = LambdaSignature lambda_signature; _; };
+    lambda_signature = { syntax = LambdaSignature _ as lambda_signature; _; };
     lambda_body;
     _;
     } when not @@ is_missing lambda_coroutine ->
@@ -171,7 +171,7 @@ let lower_coroutine_functions_and_types
     let (lambda, closure_syntax) =
       lower_coroutine_lambda
         context
-        lambda_signature
+        (get_lambda_signature lambda_signature)
         lambda_body
         current_node in
     (((Option.to_list closure_syntax) @ closures, (lambda_count + 1)),
@@ -187,9 +187,9 @@ let lower_coroutine_functions_and_types
         Rewriter.Result.Replace anon)
   | MethodishDeclaration {
       methodish_function_decl_header = {
-        syntax = FunctionDeclarationHeader ({
+        syntax = FunctionDeclarationHeader {
           function_modifiers = m; _;
-        } as header_node); _;
+        } as header_node; _;
       };
       methodish_function_body; _;
     } when has_coroutine_modifier m ->
@@ -198,7 +198,7 @@ let lower_coroutine_functions_and_types
     let (new_header_node, new_body, closure_syntax) =
       rewrite_method_or_function
         context
-        header_node
+        (get_function_declaration_header header_node)
         methodish_function_body in
     let new_method_syntax =
       CoroutineMethodLowerer.rewrite_methodish_declaration
@@ -207,9 +207,9 @@ let lower_coroutine_functions_and_types
         new_body in
     (((Option.to_list closure_syntax) @ closures, lambda_count),
       Rewriter.Result.Replace new_method_syntax)
-  | ClosureTypeSpecifier ({ closure_coroutine; _; } as type_node)
+  | ClosureTypeSpecifier { closure_coroutine; _; } as type_node
     when not @@ is_missing closure_coroutine ->
-      let new_type_node = rewrite_coroutine_annotation type_node in
+      let new_type_node = rewrite_coroutine_annotation (get_closure_type_specifier type_node) in
       (current_acc, Rewriter.Result.Replace new_type_node)
   | _ ->
     (current_acc, Rewriter.Result.Keep)

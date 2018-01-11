@@ -44,6 +44,7 @@
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/interp-internal.h"
 #include "hphp/hhbbc/interp.h"
+#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/representation.h"

@@ -25,6 +25,7 @@
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/context.h"
 
 namespace HPHP { namespace HHBBC {
 

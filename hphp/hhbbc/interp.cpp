@@ -1219,8 +1219,23 @@ Type memoizeImplRetType(ISS& env) {
     args[i] = locAsCell(env, i);
   }
 
+  // Determine the context the wrapped function will be called on.
+  auto const ctxType = [&]() -> Type {
+    if (env.ctx.func->cls) {
+      if (env.ctx.func->attrs & AttrStatic) {
+        // The class context for static methods will be the method's class.
+        auto const clsTy = selfClsExact(env);
+        return clsTy ? *clsTy : TCls;
+      } else {
+        auto const s = thisType(env);
+        return s ? *s : TObj;
+      }
+    }
+    return TBottom;
+  }();
+
   auto retTy = env.index.lookup_return_type(
-    CallContext { env.ctx, args },
+    CallContext { env.ctx, args, ctxType },
     memo_impl_func
   );
   // Regardless of anything we know the return type will be an InitCell (this is
@@ -2307,12 +2322,16 @@ void in(ISS& env, const bc::FPushFuncD& op) {
   auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
   if (auto const func = rfunc.exactFunc()) {
     if (can_emit_builtin(func, op.arg1, op.has_unpack)) {
-      fpiPush(env, ActRec { FPIKind::Builtin, folly::none, rfunc },
-              op.arg1, false);
+      fpiPush(
+        env,
+        ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc },
+        op.arg1,
+        false
+      );
       return reduce(env, bc::Nop {});
     }
   }
-  if (fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc },
+  if (fpiPush(env, ActRec { FPIKind::Func, TBottom, folly::none, rfunc },
               op.arg1, false)) {
     return reduce(env, bc::Nop {});
   }
@@ -2338,18 +2357,21 @@ void in(ISS& env, const bc::FPushFunc& op) {
     }
   }
   popC(env);
-  if (t1.subtypeOf(TObj)) return fpiPush(env, ActRec { FPIKind::ObjInvoke });
-  if (t1.subtypeOf(TArr)) return fpiPush(env, ActRec { FPIKind::CallableArr });
+  if (t1.subtypeOf(TObj)) {
+    return fpiPush(env, ActRec { FPIKind::ObjInvoke, t1 });
+  }
+  if (t1.subtypeOf(TArr)) {
+    return fpiPush(env, ActRec { FPIKind::CallableArr, TTop });
+  }
   if (t1.subtypeOf(TStr)) {
     fpiPush(
       env,
-      ActRec { FPIKind::Func, folly::none, rfunc },
+      ActRec { FPIKind::Func, TTop, folly::none, rfunc },
       op.arg1,
-      true
-    );
+      true);
     return;
   }
-  fpiPush(env, ActRec { FPIKind::Unknown });
+  fpiPush(env, ActRec { FPIKind::Unknown, TTop });
 }
 
 void in(ISS& env, const bc::FPushFuncU& op) {
@@ -2363,7 +2385,13 @@ void in(ISS& env, const bc::FPushFuncU& op) {
   }
   fpiPush(
     env,
-    ActRec { FPIKind::Func, folly::none, rfuncPair.first, rfuncPair.second }
+    ActRec {
+      FPIKind::Func,
+      TBottom,
+      folly::none,
+      rfuncPair.first,
+      rfuncPair.second
+    }
   );
 }
 
@@ -2371,7 +2399,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto t1 = topC(env);
   if (op.subop3 == ObjMethodOp::NullThrows) {
     if (!t1.couldBe(TObj)) {
-      fpiPush(env, ActRec { FPIKind::ObjMeth }, op.arg1, false);
+      fpiPush(env, ActRec { FPIKind::ObjMeth, t1 }, op.arg1, false);
       popC(env);
       return unreachable(env);
     }
@@ -2379,7 +2407,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
       t1 = unopt(std::move(t1));
     }
   } else if (!t1.couldBe(TOptObj)) {
-    fpiPush(env, ActRec { FPIKind::ObjMeth }, op.arg1, false);
+    fpiPush(env, ActRec { FPIKind::ObjMeth, t1 }, op.arg1, false);
     popC(env);
     return unreachable(env);
   }
@@ -2393,6 +2421,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
         env,
         ActRec {
           FPIKind::ObjMeth,
+            t1,
             rcls,
             env.index.resolve_method(env.ctx, clsTy, op.str2)
             },
@@ -2440,11 +2469,11 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
     }
   }
   popC(env);
-  popC(env);
   fpiPush(
     env,
     ActRec {
       FPIKind::ObjMeth,
+      popC(env),
       is_specialized_cls(clsTy)
         ? folly::Optional<res::Class>(dcls_of(clsTy).cls)
         : folly::none,
@@ -2457,23 +2486,30 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
 
 void in(ISS& env, const bc::FPushClsMethodD& op) {
   auto const rcls = env.index.resolve_class(env.ctx, op.str3);
+  auto clsType = rcls ? clsExact(*rcls) : TCls;
   auto const rfun = env.index.resolve_method(
     env.ctx,
-    rcls ? clsExact(*rcls) : TCls,
+    clsType,
     op.str2
   );
-  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun }, op.arg1, false)) {
+  if (fpiPush(env, ActRec { FPIKind::ClsMeth, clsType, rcls, rfun }, op.arg1,
+              false)) {
     return reduce(env, bc::Nop {});
   }
 }
 
 namespace {
 
+Type ctxCls(ISS& env) {
+  auto const s = selfCls(env);
+  return setctx(s ? *s : TCls);
+}
+
 Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
   if (!env.ctx.cls) return TCls;
-  auto const op = [&]{
+  auto const op = [&]()-> folly::Optional<Type> {
     switch (ref) {
-      case SpecialClsRef::Static: return selfCls(env);
+      case SpecialClsRef::Static: return ctxCls(env);
       case SpecialClsRef::Self:   return selfClsExact(env);
       case SpecialClsRef::Parent: return parentClsExact(env);
     }
@@ -2510,7 +2546,8 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
       );
     }
   }
-  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc }, op.arg1, true)) {
+  if (fpiPush(env, ActRec { FPIKind::ClsMeth, t1, rcls, rfunc }, op.arg1,
+              true)) {
     return reduce(env,
                   bc::DiscardClsRef { op.slot },
                   bc::PopC {});
@@ -2539,8 +2576,12 @@ void in(ISS& env, const bc::FPushClsMethodS& op) {
   auto const rcls = is_specialized_cls(cls)
     ? folly::Optional<res::Class>{dcls_of(cls).cls}
     : folly::none;
-  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc },
-              op.arg1, true)) {
+  if (fpiPush(env, ActRec {
+                FPIKind::ClsMeth,
+                ctxCls(env),
+                rcls,
+                rfunc
+              }, op.arg1, true)) {
     return reduce(env, bc::PopC {});
   }
   popC(env);
@@ -2567,7 +2608,12 @@ void in(ISS& env, const bc::FPushClsMethodSD& op) {
   }
 
   auto const rfun = env.index.resolve_method(env.ctx, cls, op.str3);
-  if (fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun }, op.arg1, false)) {
+  if (fpiPush(env, ActRec {
+                FPIKind::ClsMeth,
+                ctxCls(env),
+                rcls,
+                rfun
+              }, op.arg1, false)) {
     return reduce(env, bc::Nop {});
   }
 }
@@ -2576,8 +2622,23 @@ void ctorHelper(ISS& env, SString name, int32_t nargs) {
   auto const rcls = env.index.resolve_class(env.ctx, name);
   auto const rfunc = rcls ?
     env.index.resolve_ctor(env.ctx, *rcls, true) : folly::none;
-  fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc }, nargs, false);
-  push(env, rcls ? objExact(*rcls) : TObj);
+  auto ctxType = false;
+  if (rcls && env.ctx.cls && rcls->same(env.index.resolve_class(env.ctx.cls)) &&
+      !rcls->couldBeOverriden()) {
+    ctxType = true;
+  }
+  fpiPush(
+    env,
+    ActRec {
+      FPIKind::Ctor,
+      setctx(rcls ? clsExact(*rcls) : TCls, ctxType),
+      rcls,
+      rfunc
+    },
+    nargs,
+    false
+  );
+  push(env, setctx(rcls ? objExact(*rcls) : TObj, ctxType));
 }
 
 void in(ISS& env, const bc::FPushCtorD& op) {
@@ -2593,19 +2654,24 @@ void in(ISS& env, const bc::FPushCtorS& op) {
   auto const cls = specialClsRefToCls(env, op.subop2);
   if (is_specialized_cls(cls)) {
     auto const dcls = dcls_of(cls);
-    if (dcls.type == DCls::Exact) {
+    if (dcls.type == DCls::Exact
+        && (!dcls.cls.couldBeOverriden()
+            || equivalently_refined(cls, unctx(cls)))) {
       return reduce(
         env,
         bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack }
       );
     }
     auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, false);
-    push(env, subObj(dcls.cls));
-    fpiPush(env, ActRec { FPIKind::Ctor, dcls.cls, rfunc }, op.arg1, false);
+    push(env, toobj(cls));
+    // PHP doesn't forward the context to constructors.
+    fpiPush(env, ActRec { FPIKind::Ctor, unctx(cls), dcls.cls, rfunc },
+            op.arg1,
+            false);
     return;
   }
   push(env, TObj);
-  fpiPush(env, ActRec { FPIKind::Ctor }, op.arg1, false);
+  fpiPush(env, ActRec { FPIKind::Ctor, TCls }, op.arg1, false);
 }
 
 void in(ISS& env, const bc::FPushCtor& op) {
@@ -2617,35 +2683,36 @@ void in(ISS& env, const bc::FPushCtor& op) {
       return reduce(env, bc::DiscardClsRef { op.slot },
                     bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack });
     }
-    takeClsRefSlot(env, op.slot);
-    push(env, dcls.type == DCls::Exact ? objExact(dcls.cls) : subObj(dcls.cls));
-    fpiPush(env, ActRec { FPIKind::Ctor, dcls.cls, rfunc });
+
+    auto const& t2 = takeClsRefSlot(env, op.slot);
+    push(env, toobj(t2));
+    fpiPush(env, ActRec { FPIKind::Ctor, t2, dcls.cls, rfunc });
     return;
   }
   takeClsRefSlot(env, op.slot);
   push(env, TObj);
-  fpiPush(env, ActRec { FPIKind::Ctor });
+  fpiPush(env, ActRec { FPIKind::Ctor, TCls });
 }
 
 void in(ISS& env, const bc::FPushCufIter&) {
   nothrow(env);
-  fpiPush(env, ActRec { FPIKind::Unknown });
+  fpiPush(env, ActRec { FPIKind::Unknown, TTop });
 }
 
 void in(ISS& env, const bc::FPushCuf&) {
   popC(env);
-  fpiPush(env, ActRec { FPIKind::Unknown });
+  fpiPush(env, ActRec { FPIKind::Unknown, TTop });
 }
 void in(ISS& env, const bc::FPushCufF&) {
   popC(env);
-  fpiPush(env, ActRec { FPIKind::Unknown });
+  fpiPush(env, ActRec { FPIKind::Unknown, TTop });
 }
 
 void in(ISS& env, const bc::FPushCufSafe&) {
   auto t1 = popC(env);
   popC(env);
   push(env, std::move(t1));
-  fpiPush(env, ActRec { FPIKind::Unknown });
+  fpiPush(env, ActRec { FPIKind::Unknown, TTop });
   push(env, TBool);
 }
 
@@ -2956,7 +3023,7 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs) {
   }
 
   auto ty = env.index.lookup_return_type(
-    CallContext { env.ctx, args },
+    CallContext { env.ctx, args, ar.context },
     *ar.func
   );
   if (!ar.fallbackFunc) {
@@ -2964,7 +3031,7 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs) {
     return;
   }
   auto ty2 = env.index.lookup_return_type(
-    CallContext { env.ctx, args },
+    CallContext { env.ctx, args, ar.context },
     *ar.fallbackFunc
   );
   pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)));
@@ -3403,7 +3470,7 @@ void in(ISS& env, const bc::This&) {
 
 void in(ISS& env, const bc::LateBoundCls& op) {
   auto const ty = selfCls(env);
-  putClsRefSlot(env, op.slot, ty ? *ty : TCls);
+  putClsRefSlot(env, op.slot, setctx(ty ? *ty : TCls));
 }
 
 void in(ISS& env, const bc::CheckThis&) {
@@ -3590,6 +3657,16 @@ void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
     return;
   }
 
+  // In cases where we have a `this` hint where stackT is an TOptObj known to
+  // be this, we can replace the check with a non null check.  These cases are
+  // likely from a BareThis that could return Null.  Since the runtime will
+  // split these translations, it will rarely in practice return null.
+  if (constraint.isThis() && !constraint.isNullable() && is_opt(stackT) &&
+      env.index.satisfies_constraint(env.ctx, unopt(stackT), constraint)) {
+    reduce(env, bc::VerifyRetNonNullC {});
+    return;
+  }
+
   // If we reach here, then CheckReturnTypeHints >= 3 AND the constraint
   // is not soft.  We can safely assume that either VerifyRetTypeC will
   // throw or it will produce a value whose type is compatible with the
@@ -3623,6 +3700,24 @@ void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
   push(env, std::move(retT));
 }
 
+void in(ISS& env, const bc::VerifyRetNonNullC& op) {
+  auto const constraint = env.ctx.func->retTypeConstraint;
+  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft()
+      || (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis())) {
+    return;
+  }
+
+  auto stackT = topC(env);
+
+  if (!is_opt(stackT)) {
+    reduce(env, bc::Nop {});
+    return;
+  }
+
+  popC(env);
+  push(env, unopt(std::move(stackT)));
+}
+
 void in(ISS& env, const bc::Self& op) {
   auto self = selfClsExact(env);
   putClsRefSlot(env, op.slot, self ? *self : TCls);
@@ -3647,7 +3742,7 @@ void in(ISS& env, const bc::CreateCl& op) {
   if (nargs) {
     std::vector<Type> usedVars(nargs);
     for (auto i = uint32_t{0}; i < nargs; ++i) {
-      usedVars[nargs - i - 1] = popT(env);
+      usedVars[nargs - i - 1] = unctx(popT(env));
     }
     merge_closure_use_vars_into(
       env.collect.closureUseTypes,

@@ -3989,6 +3989,13 @@ VerifyRetTypeV    [V] -> [V]
   is compatible with the current function's return type annotation and raises
   a warning if there is a mismatch, and then it pushes $1 back onto the stack.
 
+VerifyRetNonNullC [C] -> [C]
+  
+  This is intended to provide the same behavior as VerifyRetTypeC, except in
+  only checks that $1 is non null. This should only be emitted by HHBBC if it
+  can statically verify that return value will pass the function's type
+  annotation if it is non null.
+
 Self <class-ref slot>    []  ->  []
 
   Creates a classref that refers to the class in which the current function is

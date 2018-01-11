@@ -414,6 +414,8 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoCommit          = false;
   RuntimeOption::EvalJit             = false;
 
+  RuntimeOption::EvalThisTypeHintLevel = gd.ThisTypeHintLevel;
+
   register_process_init();
 
   hphp_process_init();

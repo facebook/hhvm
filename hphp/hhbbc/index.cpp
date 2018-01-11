@@ -54,6 +54,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/parallel.h"
@@ -232,7 +233,8 @@ struct CallContextHashCompare {
   size_t hash(const CallContext& c) const {
     auto ret = folly::hash::hash_combine(
       c.caller.func,
-      c.args.size()
+      c.args.size(),
+      c.context.hash()
     );
     for (auto& t : c.args) {
       ret = folly::hash::hash_combine(ret, t.hash());
@@ -2362,20 +2364,17 @@ void check_invariants(IndexData& data) {
 Type context_sensitive_return_type(const Index& index,
                                    borrowed_ptr<FuncInfo> finfo,
                                    CallContext callCtx) {
-  auto const callInsensitiveType = finfo->returnTy;
-
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
 
-  // TODO(#3788877): more heuristics here would be useful.  (And even
-  // functions without params might be worth interpreting in a
-  // context-sensitive way once the context includes the type of
-  // $this.)
+  auto const returnType = return_with_context(finfo->returnTy, callCtx.context);
+
+  // TODO(#3788877): more heuristics here would be useful.
   bool const tryContextSensitive = [&] {
     if (!options.ContextSensitiveInterp ||
         finfo->func->params.empty() ||
         interp_nesting_level + 1 >= max_interp_nexting_level ||
-        callInsensitiveType == TBottom) {
+        returnType == TBottom) {
       return false;
     }
 
@@ -2391,8 +2390,8 @@ Type context_sensitive_return_type(const Index& index,
         if (constraint.hasConstraint() && !constraint.isTypeVar() &&
             !constraint.isTypeConstant()) {
           auto t = loosen_dvarrayness(index.lookup_constraint(ctx, constraint));
-          if (!callCtx.args[i].subtypeOf(t)) return true;
-          if (callCtx.args[i] != t) return true;
+          if (!callCtx.args[i].moreRefined(t)) return true;
+          if (!callCtx.args[i].equivalentlyRefined(t)) return true;
           continue;
         }
       }
@@ -2402,11 +2401,11 @@ Type context_sensitive_return_type(const Index& index,
   }();
 
   if (!tryContextSensitive) {
-    return callInsensitiveType;
+    return returnType;
   }
 
   auto maybe_loosen_staticness = [&] (const Type& ty) {
-    return callInsensitiveType.subtypeOf(TUnc) ? ty : loosen_staticness(ty);
+    return returnType.subtypeOf(TUnc) ? ty : loosen_staticness(ty);
   };
 
   if (index.frozen()) {
@@ -2414,7 +2413,7 @@ Type context_sensitive_return_type(const Index& index,
     if (finfo->contextualReturnTypes.find(acc, callCtx)) {
       return maybe_loosen_staticness(acc->second);
     }
-    return callInsensitiveType;
+    return returnType;
   }
 
   ContextRetTyMap::accessor acc;
@@ -2433,17 +2432,19 @@ Type context_sensitive_return_type(const Index& index,
       const_cast<borrowed_ptr<php::Func>>(finfo->func),
       finfo->func->cls
     };
-    return analyze_func_inline(index, calleeCtx, callCtx.args).inferredReturn;
+    auto const ty =
+      analyze_func_inline(index, calleeCtx, callCtx.args).inferredReturn;
+    return return_with_context(ty, callCtx.context);
   }();
 
   if (!interp_nesting_level) {
     FTRACE(3,
            "Context sensitive type: {}\n"
            "Context insensitive type: {}\n",
-           show(contextType), show(callInsensitiveType));
+           show(contextType), show(returnType));
   }
 
-  auto ret = intersection_of(std::move(callInsensitiveType),
+  auto ret = intersection_of(std::move(returnType),
                              std::move(contextType));
 
   if (ret.strictSubtypeOf(acc->second)) {
@@ -2875,7 +2876,6 @@ folly::Optional<res::Class> Index::parentCls(const Context& ctx) const {
   if (auto const parent = resolve_class(ctx.cls).parent()) return parent;
   return resolve_class(ctx, ctx.cls->parentName);
 }
-
 
 Index::ResolvedInfo Index::resolve_type_name(SString inName) const {
   folly::Optional<std::unordered_set<const void*>> seen;
@@ -3369,11 +3369,7 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
        */
       return TGen;
     case AnnotMetaType::This:
-      if (auto s = selfCls(ctx)) {
-        if (!(*s).couldBeOverriden()) {
-          return subObj(*s);
-        }
-      }
+      if (auto s = selfCls(ctx)) return setctx(subObj(*s));
       break;
     case AnnotMetaType::Self:
       if (auto s = selfCls(ctx)) return subObj(*s);
@@ -3416,7 +3412,7 @@ Type Index::lookup_constraint(Context ctx,
 bool Index::satisfies_constraint(Context ctx, const Type& t,
                                  const TypeConstraint& tc) const {
   auto const tcType = get_type_for_constraint<false>(ctx, tc, t);
-  if (t.subtypeOf(loosen_dvarrayness(tcType))) {
+  if (t.moreRefined(loosen_dvarrayness(tcType))) {
     // For d/varrays, we might satisfy the constraint, but still not want to
     // optimize away the type-check (because we'll raise a notice on a d/varray
     // mismatch), so do some additional checking here to rule that out.
@@ -3619,13 +3615,13 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
     [&](res::Func::MethodName /*s*/) { return TInitGen; },
     [&](borrowed_ptr<FuncInfo> finfo) {
       add_dependency(*m_data, finfo->func, ctx, Dep::ReturnTy);
-      return finfo->returnTy;
+      return unctx(finfo->returnTy);
     },
     [&](borrowed_ptr<const MethTabEntryPair> mte) {
       add_dependency(*m_data, mte->second.func, ctx, Dep::ReturnTy);
       auto const finfo = func_info(*m_data, mte->second.func);
       if (!finfo->func) return TInitGen;
-      return finfo->returnTy;
+      return unctx(finfo->returnTy);
     },
     [&](borrowed_ptr<FuncFamily> fam) {
       auto ret = TBottom;
@@ -3633,7 +3629,7 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
         add_dependency(*m_data, pf->second.func, ctx, Dep::ReturnTy);
         auto const finfo = func_info(*m_data, pf->second.func);
         if (!finfo->func) return TInitGen;
-        ret |= finfo->returnTy;
+        ret |= unctx(finfo->returnTy);
       }
       return ret;
     });
@@ -3658,9 +3654,17 @@ Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
       if (!finfo->func) return TInitGen;
       return context_sensitive_return_type(*this, finfo, callCtx);
     },
-    [&](borrowed_ptr<FuncFamily> /*fam*/) {
-      return lookup_return_type(callCtx.caller, rfunc);
-    });
+    [&] (borrowed_ptr<FuncFamily> fam) {
+      auto ret = TBottom;
+      for (auto& pf : fam->possibleFuncs) {
+        add_dependency(*m_data, pf->second.func, callCtx.caller, Dep::ReturnTy);
+        auto const finfo = func_info(*m_data, pf->second.func);
+        if (!finfo->func) ret |= TInitGen;
+        else ret |= return_with_context(finfo->returnTy, callCtx.context);
+      }
+      return ret;
+    }
+  );
 }
 
 std::vector<Type>
@@ -3877,6 +3881,8 @@ void Index::refine_constants(const FuncAnalysis& fa,
     auto t = it.second.m_type == KindOfUninit ?
       TInitCell : from_cell(it.second);
 
+    assertx(t.equivalentlyRefined(unctx(t)));
+
     auto const res = m_data->constants.emplace(it.first, ConstInfo {func, t});
 
     if (res.second || res.first->second.system) continue;
@@ -3894,8 +3900,8 @@ void Index::refine_constants(const FuncAnalysis& fa,
       continue;
     }
 
-    assert(t.subtypeOf(res.first->second.type));
-    if (t != res.first->second.type) {
+    assertx(t.moreRefined(res.first->second.type));
+    if (!t.equivalentlyRefined(res.first->second.type)) {
       res.first->second.type = t;
       find_deps(*m_data, func, Dep::ConstVal, deps);
     }
@@ -3946,9 +3952,9 @@ void Index::refine_local_static_types(
   finfo->localStaticTypes.resize(localStaticTypes.size(), TTop);
   for (auto i = size_t{0}; i < localStaticTypes.size(); i++) {
     auto& indexTy = finfo->localStaticTypes[i];
-    auto const& newTy = localStaticTypes[i];
+    auto const& newTy = unctx(localStaticTypes[i]);
     always_assert_flog(
-      newTy.subtypeOf(indexTy),
+      newTy.moreRefined(indexTy),
       "Index local static type invariant violated in {} {}{}.\n"
       "   Static Local {}: {} is not a subtype of {}\n",
       func->unit->filename,
@@ -3959,7 +3965,7 @@ void Index::refine_local_static_types(
       show(newTy),
       show(indexTy)
     );
-    if (!newTy.strictSubtypeOf(indexTy)) continue;
+    if (!newTy.strictlyMoreRefined(indexTy)) continue;
     indexTy = newTy;
   }
 }
@@ -4019,7 +4025,7 @@ void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,
   auto const finfo = create_func_info(*m_data, func);
 
   always_assert_flog(
-    t.subtypeOf(finfo->returnTy),
+    t.moreRefined(finfo->returnTy),
     "Index return type invariant violated in {} {}{}.\n"
     "   {} is not a subtype of {}\n",
     func->unit->filename->data(),
@@ -4030,7 +4036,7 @@ void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,
     show(finfo->returnTy)
   );
 
-  if (!t.strictSubtypeOf(finfo->returnTy)) return;
+  if (!t.strictlyMoreRefined(finfo->returnTy)) return;
   if (finfo->returnRefinments + 1 < options.returnTypeRefineLimit) {
     finfo->returnTy = t;
     ++finfo->returnRefinments;
@@ -4044,6 +4050,13 @@ void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,
 bool Index::refine_closure_use_vars(borrowed_ptr<const php::Class> cls,
                                     const std::vector<Type>& vars) {
   assert(is_closure(*cls));
+
+  for (auto i = uint32_t{0}; i < vars.size(); ++i) {
+    always_assert_flog(
+      vars[i].equivalentlyRefined(unctx(vars[i])),
+      "Closure cannot have a used var with a context dependent type"
+    );
+  }
 
   auto& current = m_data->closureUseVars[cls];
   always_assert(current.empty() || current.size() == vars.size());
@@ -4065,9 +4078,9 @@ bool Index::refine_closure_use_vars(borrowed_ptr<const php::Class> cls,
 }
 
 template<class Container>
-void refine_propstate(Container& cont,
-                      borrowed_ptr<const php::Class> cls,
-                      const PropState& state) {
+void refine_private_propstate(Container& cont,
+                              borrowed_ptr<const php::Class> cls,
+                              const PropState& state) {
   assertx(!is_used_trait(*cls));
   auto it = cont.find(cls);
   if (it == end(cont)) {
@@ -4077,7 +4090,7 @@ void refine_propstate(Container& cont,
   for (auto& kv : state) {
     auto& target = it->second[kv.first];
     always_assert_flog(
-      kv.second.subtypeOf(target),
+      kv.second.moreRefined(target),
       "PropState refinement failed on {}::${} -- {} was not a subtype of {}\n",
       cls->name->data(),
       kv.first->data(),
@@ -4090,12 +4103,19 @@ void refine_propstate(Container& cont,
 
 void Index::refine_private_props(borrowed_ptr<const php::Class> cls,
                                  const PropState& state) {
-  refine_propstate(m_data->privatePropInfo, cls, state);
+  refine_private_propstate(m_data->privatePropInfo, cls, state);
 }
 
 void Index::refine_private_statics(borrowed_ptr<const php::Class> cls,
                                    const PropState& state) {
-  refine_propstate(m_data->privateStaticPropInfo, cls, state);
+  // We can't store context dependent types in private statics since they
+  // could be accessed using different contexts.
+  auto cleanedState = PropState{};
+  for (auto& prop : state) {
+    cleanedState[prop.first] = unctx(prop.second);
+  }
+
+  refine_private_propstate(m_data->privateStaticPropInfo, cls, cleanedState);
 }
 
 /*
@@ -4117,30 +4137,33 @@ void Index::refine_public_statics(const PublicSPropIndexer& indexer) {
   m_data->publicSPropState = PublicSPropState::Valid;
 
   for (auto& kv : indexer.m_unknown) {
+    // We can't keep context dependent types in public properties.
+    auto const newType = unctx(kv.second);
     auto it = m_data->unknownClassSProps.find(kv.first);
     if (it == end(m_data->unknownClassSProps)) {
-      m_data->unknownClassSProps.emplace(kv.first, kv.second);
+      m_data->unknownClassSProps.emplace(kv.first, newType);
       continue;
     }
 
     assert(!firstRefinement);
     always_assert_flog(
-      kv.second.subtypeOf(it->second),
+      newType.subtypeOf(it->second),
       "Static property index invariant violated for name {}:\n"
       "  {} was not a subtype of {}",
       kv.first->data(),
-      show(kv.second),
+      show(newType),
       show(it->second)
     );
 
-    it->second = kv.second;
+    it->second = newType;
   }
 
   for (auto& knownInfo : indexer.m_known) {
     auto const cinfo   = knownInfo.first.cinfo;
     auto const name    = knownInfo.first.prop;
-    auto const newType = knownInfo.second;
     auto const it      = cinfo->publicStaticProps.find(name);
+    // We can't keep context dependent types in public properties.
+    auto const newType = unctx(knownInfo.second);
 
     FTRACE(2, "refine_public_statics: {} {} <-- {}\n",
       cinfo->cls->name,

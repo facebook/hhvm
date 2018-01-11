@@ -134,7 +134,8 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
     gen(env, ExtendsClass, ExtendsClassData{ knownCls }, objClass) : nullptr;
 }
 
-void verifyTypeImpl(IRGS& env, int32_t const id) {
+void verifyTypeImpl(IRGS& env, int32_t const id,
+                    bool onlyCheckNullability = false) {
   const bool isReturnType = (id == HPHP::TypeConstraint::ReturnId);
   if (isReturnType && !RuntimeOption::EvalCheckReturnTypeHints) return;
 
@@ -224,6 +225,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
       break;
   }
   assertx(result == AnnotAction::ObjectCheck);
+  if (onlyCheckNullability) return;
 
   if (!(valType <= TObj)) {
     if (tc.isResolved()) {
@@ -519,6 +521,13 @@ void emitVerifyRetTypeC(IRGS& env) {
 
 void emitVerifyRetTypeV(IRGS& env) {
   verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId);
+}
+
+void emitVerifyRetNonNullC(IRGS& env) {
+  auto func = curFunc(env);
+  auto const& tc = func->returnTypeConstraint();
+  always_assert(!tc.isNullable());
+  verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId, true);
 }
 
 void emitVerifyParamType(IRGS& env, int32_t paramId) {

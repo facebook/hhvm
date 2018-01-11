@@ -22,6 +22,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
@@ -381,6 +382,24 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
       return false;
   }
   not_reached();
+}
+
+
+void TypeConstraint::verifyReturnNonNull(TypedValue* tv, const Func* func,
+                                         bool useStrictTypes) const {
+  const auto DEBUG_ONLY tc = func->returnTypeConstraint();
+  assertx(!tc.isNullable());
+  if (UNLIKELY(cellIsNull(tv))) {
+    verifyReturnFail(func, tv, useStrictTypes);
+  } else if (debug) {
+    auto vm = &*g_context;
+    always_assert_flog(
+      check(tv, func),
+      "HHBBC incorrectly converted VerifyRetTypeC to VerifyRetNonNull in {}:{}",
+      vm->getContainingFileName()->data(),
+      vm->getLine()
+    );
+  }
 }
 
 bool TypeConstraint::check(TypedValue* tv, const Func* func) const {

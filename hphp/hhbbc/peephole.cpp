@@ -21,6 +21,7 @@
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/context.h"
 
 namespace HPHP { namespace HHBBC {
 

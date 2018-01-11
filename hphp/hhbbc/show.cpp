@@ -31,6 +31,7 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/context.h"
 
 #include "hphp/util/text-util.h"
 
@@ -476,6 +477,9 @@ std::string show(const Type& t) {
       folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
       break;
     }
+    if (t.m_data.dobj.isCtx) {
+      folly::toAppend(" this", &ret);
+    }
     break;
   case DataTag::Cls:
     switch (t.m_data.dcls.type) {
@@ -485,6 +489,9 @@ std::string show(const Type& t) {
     case DCls::Sub:
       folly::toAppend("<=", show(t.m_data.dcls.cls), &ret);
       break;
+    }
+    if (t.m_data.dcls.isCtx) {
+      folly::toAppend(" this", &ret);
     }
     break;
   case DataTag::RefInner:

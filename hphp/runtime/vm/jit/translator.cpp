@@ -398,6 +398,8 @@ static const struct {
                    {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpVerifyRetTypeC,
                    {Stack1,           Stack1,       OutSameAsInput1  }},
+  { OpVerifyRetNonNullC,
+                   {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpVerifyOutType,
                    {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpOODeclExists,
@@ -1053,6 +1055,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::VGetS:
   case Op::VerifyParamType:
   case Op::VerifyRetTypeC:
+  case Op::VerifyRetNonNullC:
   case Op::VerifyRetTypeV:
   case Op::VerifyOutType:
   case Op::WHResult:

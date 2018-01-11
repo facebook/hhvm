@@ -5839,6 +5839,16 @@ OPTBLD_INLINE void iopVerifyRetTypeV() {
   implVerifyRetType();
 }
 
+OPTBLD_INLINE void iopVerifyRetNonNullC() {
+  if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
+    return;
+  }
+  const auto func = vmfp()->m_func;
+  const auto tc = func->returnTypeConstraint();
+  bool useStrictTypes = func->unit()->useStrictTypes();
+  tc.verifyReturnNonNull(vmStack().topTV(), func, useStrictTypes);
+}
+
 OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
   auto const jitReturn = jitReturnPre(vmfp());
 

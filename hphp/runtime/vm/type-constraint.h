@@ -269,6 +269,8 @@ struct TypeConstraint {
       verifyReturnFail(func, tv, useStrictTypes);
     }
   }
+  void verifyReturnNonNull(TypedValue* tv, const Func* func,
+                           bool useStrictTypes = true) const;
   void verifyOutParam(TypedValue* tv, const Func* func, int paramNum) const {
     if (UNLIKELY(!check(tv, func))) {
       verifyOutParamFail(func, tv, paramNum);

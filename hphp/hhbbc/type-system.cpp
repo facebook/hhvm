@@ -595,25 +595,27 @@ folly::Optional<DArrLikeMapN> toDArrLikeMapN(SArray ar) {
 
 //////////////////////////////////////////////////////////////////////
 
+template<bool contextSensitive>
 bool subtypePacked(const DArrLikePacked& a, const DArrLikePacked& b) {
   auto const asz = a.elems.size();
   auto const bsz = b.elems.size();
   if (asz != bsz) return false;
   for (auto i = size_t{0}; i < asz; ++i) {
-    if (!a.elems[i].subtypeOf(b.elems[i])) {
+    if (!a.elems[i].subtypeOfImpl<contextSensitive>(b.elems[i])) {
       return false;
     }
   }
   return true;
 }
 
+template<bool contextSensitive>
 bool subtypeMap(const DArrLikeMap& a, const DArrLikeMap& b) {
   if (a.map.size() != b.map.size()) return false;
   auto aIt = begin(a.map);
   auto bIt = begin(b.map);
   for (; aIt != end(a.map); ++aIt, ++bIt) {
     if (!cellSame(aIt->first, bIt->first)) return false;
-    if (!aIt->second.subtypeOf(bIt->second)) return false;
+    if (!aIt->second.subtypeOfImpl<contextSensitive>(bIt->second)) return false;
   }
   return true;
 }
@@ -706,6 +708,7 @@ struct Commute : InnerFn {
   }
 };
 
+template<bool contextSensitive>
 struct DualDispatchEqImpl {
   static constexpr bool disjoint = true;
   using result_type = bool;
@@ -715,13 +718,24 @@ struct DualDispatchEqImpl {
   bool operator()(const DArrLikePacked& a, SArray b) const {
     if (a.elems.size() != b->size()) return false;
     auto const p = toDArrLikePacked(b);
-    return p && a.elems == p->elems;
+    if (!p) return false;
+    for (auto i = 0; i < a.elems.size(); i++) {
+      if (!a.elems[i].equivImpl<contextSensitive>(p->elems[i])) return false;
+    }
+    return true;
   }
 
   bool operator()(const DArrLikeMap& a, SArray b) const {
     if (a.map.size() != b->size()) return false;
     auto const m = toDArrLikeMap(b);
-    return m && a.map == m->map;
+    if (!m) return false;
+    auto it = m->map.begin();
+    for (auto const& kv : a.map) {
+      if (!ArrayLikeMapEqual{}(kv.first, it->first)) return false;
+      if (!kv.second.equivImpl<contextSensitive>(it->second)) return false;
+      ++it;
+    }
+    return true;
   }
 
   bool operator()(const DArrLikePackedN& /*a*/, SArray /*b*/) const {
@@ -1074,6 +1088,7 @@ private:
  * Subtype is not a commutative relation, so this is the only
  * dualDispatchDataFn helper that doesn't use Commute<>.
  */
+template<bool contextSensitive>
 struct DualDispatchSubtype {
   static constexpr bool disjoint = true;
   using result_type = bool;
@@ -1083,43 +1098,45 @@ struct DualDispatchSubtype {
   bool operator()(const DArrLikeMap& a, SArray b) const {
     if (a.map.size() != b->size()) return false;
     auto const m = toDArrLikeMap(b);
-    return m && subtypeMap(a, *m);
+    return m && subtypeMap<contextSensitive>(a, *m);
   }
 
   bool operator()(SArray a, const DArrLikeMap& b) const {
     if (a->size() != b.map.size()) return false;
     auto const m = toDArrLikeMap(a);
-    return m && subtypeMap(*m, b);
+    return m && subtypeMap<contextSensitive>(*m, b);
   }
 
   bool operator()(SArray a, const DArrLikePacked& b) const {
     if (a->size() != b.elems.size()) return false;
     auto const p = toDArrLikePacked(a);
-    return p && subtypePacked(*p, b);
+    return p && subtypePacked<contextSensitive>(*p, b);
   }
 
   bool operator()(const DArrLikePacked& a, SArray b) const {
     if (a.elems.size() != b->size()) return false;
     auto const p = toDArrLikePacked(b);
-    return p && subtypePacked(a, *p);
+    return p && subtypePacked<contextSensitive>(a, *p);
   }
 
   bool operator()(const DArrLikePackedN& a, const DArrLikeMapN& b) const {
-    return b.key.couldBe(TInt) && a.type.subtypeOf(b.val);
+    return b.key.couldBe(TInt) && a.type.subtypeOfImpl<contextSensitive>(b.val);
   }
 
   bool operator()(const DArrLikePacked& a, const DArrLikeMapN& b) const {
     if (!b.key.couldBe(TInt)) return false;
     for (auto const& v : a.elems) {
-      if (!v.subtypeOf(b.val)) return false;
+      if (!v.subtypeOfImpl<contextSensitive>(b.val)) return false;
     }
     return true;
   }
 
   bool operator()(const DArrLikeMap& a, const DArrLikeMapN& b) const {
     for (auto const& kv : a.map) {
-      if (!from_cell(kv.first).subtypeOf(b.key)) return false;
-      if (!kv.second.subtypeOf(b.val)) return false;
+      if (!from_cell(kv.first).subtypeOfImpl<contextSensitive>(b.key)) {
+        return false;
+      }
+      if (!kv.second.subtypeOfImpl<contextSensitive>(b.val)) return false;
     }
     return true;
   }
@@ -1139,14 +1156,14 @@ struct DualDispatchSubtype {
 
   bool operator()(const DArrLikePacked& a, const DArrLikePackedN& b) const {
     for (auto const& t : a.elems) {
-      if (!t.subtypeOf(b.type)) return false;
+      if (!t.subtypeOfImpl<contextSensitive>(b.type)) return false;
     }
     return true;
   }
 
   bool operator()(SArray a, const DArrLikePackedN& b) const {
     auto p = toDArrLikePackedN(a);
-    return p && p->type.subtypeOf(b.type);
+    return p && p->type.subtypeOfImpl<contextSensitive>(b.type);
   }
 
   bool operator()(const DArrLikePackedN&, const DArrLikePacked&) const {
@@ -1201,7 +1218,8 @@ struct DualDispatchSubtype {
   }
 };
 
-using DualDispatchEq           = Commute<DualDispatchEqImpl>;
+template<bool contextSensitive>
+using DualDispatchEq           = Commute<DualDispatchEqImpl<contextSensitive>>;
 using DualDispatchCouldBe      = Commute<DualDispatchCouldBeImpl>;
 using DualDispatchUnion        = Commute<DualDispatchUnionImpl>;
 using DualDispatchIntersection = Commute<DualDispatchIntersectionImpl>;
@@ -1279,6 +1297,100 @@ struct KeysetAppendInit : KeysetInit {
 
 //////////////////////////////////////////////////////////////////////
 
+}
+
+//////////////////////////////////////////////////////////////////////
+// Helpers for managing context types.
+
+Type Type::unctxHelper(Type t, bool& changed) {
+  assertx(t.checkInvariants());
+  changed = false;
+  switch (t.m_dataTag) {
+  case DataTag::Obj:
+    if (auto const whType = t.m_data.dobj.whType.get()) {
+      auto ty = unctxHelper(*whType, changed);
+      if (changed) {
+        *t.m_data.dobj.whType.mutate() = ty;
+      }
+    }
+    if (t.m_data.dobj.isCtx) {
+      t.m_data.dobj.isCtx = false;
+      changed = true;
+    }
+    break;
+  case DataTag::Cls:
+    if (t.m_data.dcls.isCtx) {
+      t.m_data.dcls.isCtx = false;
+      changed = true;
+    }
+    break;
+  case DataTag::ArrLikePacked: {
+    auto const packed = t.m_data.packed.get();
+    HPHP::HHBBC::DArrLikePacked* mutated = nullptr;
+    for (size_t i = 0; i < packed->elems.size(); ++i) {
+      bool c;
+      const auto ty = unctxHelper(packed->elems[i], c);
+      if (c) {
+        if (!mutated) {
+          changed = true;
+          mutated = t.m_data.packed.mutate();
+        }
+        mutated->elems[i] = ty;
+      }
+    }
+    break;
+  }
+  case DataTag::ArrLikePackedN: {
+    auto const packedn = t.m_data.packedn.get();
+    auto ty = unctxHelper(packedn->type, changed);
+    if (changed) {
+      t.m_data.packedn.mutate()->type = ty;
+    }
+    break;
+  }
+  case DataTag::ArrLikeMap: {
+    auto const map = t.m_data.map.get();
+    size_t offset = 0;
+    HPHP::HHBBC::DArrLikeMap* mutated = nullptr;
+    for (auto it = map->map.begin(); it != map->map.end(); ++it) {
+      auto const ty = unctxHelper(it->second, changed);
+      if (changed) {
+        offset = std::distance(it, map->map.begin());
+        mutated = t.m_data.map.mutate();
+        break;
+      }
+    }
+    if (mutated) {
+      auto it = mutated->map.begin();
+      for (std::advance(it, offset);
+           it != mutated->map.end();
+           ++it) {
+        bool c;
+        auto const ty = unctxHelper(it->second, c);
+        if (c) {
+          mutated->map.update(it, ty);
+        }
+      }
+    }
+    break;
+  }
+  case DataTag::ArrLikeMapN: {
+    auto const mapn = t.m_data.mapn.get();
+    auto ty = unctxHelper(mapn->val, changed);
+    if (changed) {
+      t.m_data.mapn.mutate()->val = ty;
+    }
+    break;
+  }
+  case DataTag::None:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Str:
+  case DataTag::RefInner:
+  case DataTag::ArrLikeVal:
+    break;
+  }
+  return t;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1447,10 +1559,16 @@ bool Type::hasData() const {
   return m_dataTag != DataTag::None;
 }
 
+template<bool contextSensitive>
 bool Type::equivData(const Type& o) const {
   if (m_dataTag != o.m_dataTag) {
-    return dualDispatchDataFn(o, DualDispatchEq{});
+    return dualDispatchDataFn(o, DualDispatchEq<contextSensitive>{});
   }
+
+  auto contextSensitiveCheck = [&](auto a, auto b) {
+    if (contextSensitive && a.isCtx != b.isCtx) return false;
+    return true;
+  };
 
   switch (m_dataTag) {
   case DataTag::None:
@@ -1469,38 +1587,69 @@ bool Type::equivData(const Type& o) const {
       (std::isnan(m_data.dval) && std::isnan(o.m_data.dval));
   case DataTag::Obj:
     if (!m_data.dobj.whType != !o.m_data.dobj.whType) return false;
-    if (m_data.dobj.whType && *m_data.dobj.whType != *o.m_data.dobj.whType) {
+    if (m_data.dobj.whType &&
+        !m_data.dobj.whType
+          ->equivImpl<contextSensitive>(*o.m_data.dobj.whType)) {
       return false;
     }
     return m_data.dobj.type == o.m_data.dobj.type &&
-           m_data.dobj.cls.same(o.m_data.dobj.cls);
+           m_data.dobj.cls.same(o.m_data.dobj.cls) &&
+           contextSensitiveCheck(m_data.dobj, o.m_data.dobj);
   case DataTag::Cls:
     return m_data.dcls.type == o.m_data.dcls.type &&
-           m_data.dcls.cls.same(o.m_data.dcls.cls);
+           m_data.dcls.cls.same(o.m_data.dcls.cls) &&
+           contextSensitiveCheck(m_data.dcls, o.m_data.dcls);
   case DataTag::RefInner:
-    return *m_data.inner == *o.m_data.inner;
+    return m_data.inner->equivImpl<contextSensitive>(*o.m_data.inner);
   case DataTag::ArrLikePacked:
-    return m_data.packed->elems == o.m_data.packed->elems;
+    if (m_data.packed->elems.size() != o.m_data.packed->elems.size()) {
+      return false;
+    }
+    for (auto i = 0; i <  m_data.packed->elems.size(); i++) {
+      if (!m_data.packed->elems[i]
+             .equivImpl<contextSensitive>(o.m_data.packed->elems[i])) {
+        return false;
+      }
+    }
+    return true;
   case DataTag::ArrLikePackedN:
-    return m_data.packedn->type == o.m_data.packedn->type;
-  case DataTag::ArrLikeMap:
-    return m_data.map->map == o.m_data.map->map;
+    return m_data.packedn->type
+             .equivImpl<contextSensitive>(o.m_data.packedn->type);
+  case DataTag::ArrLikeMap: {
+    if (m_data.map->map.size() != o.m_data.map->map.size()) {
+      return false;
+    }
+    auto it = o.m_data.map->map.begin();
+    for (auto const& kv : m_data.map->map) {
+      if (!ArrayLikeMapEqual{}(kv.first, it->first)) return false;
+      if (!kv.second.equivImpl<contextSensitive>(it->second)) return false;
+      ++it;
+    }
+    return true;
+  }
   case DataTag::ArrLikeMapN:
-    return m_data.mapn->key == o.m_data.mapn->key &&
-           m_data.mapn->val == o.m_data.mapn->val;
+    return m_data.mapn->key.equivImpl<contextSensitive>(o.m_data.mapn->key) &&
+           m_data.mapn->val.equivImpl<contextSensitive>(o.m_data.mapn->val);
   }
   not_reached();
 }
 
+template<bool contextSensitive>
 bool Type::subtypeData(const Type& o) const {
   if (m_dataTag != o.m_dataTag) {
-    return dualDispatchDataFn(o, DualDispatchSubtype{});
+    return dualDispatchDataFn(o, DualDispatchSubtype<contextSensitive>{});
   }
+
+  auto contextSensitiveCheck = [&](auto self, auto other) {
+    if (contextSensitive && !self.isCtx && other.isCtx) return false;
+    return true;
+  };
 
   switch (m_dataTag) {
   case DataTag::Obj:
   {
     auto const outer_ok = [&] {
+      if (!contextSensitiveCheck(m_data.dobj, o.m_data.dobj)) return false;
       if (m_data.dobj.type == o.m_data.dobj.type &&
           m_data.dobj.cls.same(o.m_data.dobj.cls)) {
         return true;
@@ -1513,9 +1662,11 @@ bool Type::subtypeData(const Type& o) const {
     if (!outer_ok) return false;
     if (!o.m_data.dobj.whType) return true;
     if (!m_data.dobj.whType) return false;
-    return m_data.dobj.whType->subtypeOf(*o.m_data.dobj.whType);
+    return m_data.dobj.whType
+             ->subtypeOfImpl<contextSensitive>(*o.m_data.dobj.whType);
   }
   case DataTag::Cls:
+    if (!contextSensitiveCheck(m_data.dcls, o.m_data.dcls)) return false;
     if (m_data.dcls.type == o.m_data.dcls.type &&
         m_data.dcls.cls.same(o.m_data.dcls.cls)) {
       return true;
@@ -1529,18 +1680,21 @@ bool Type::subtypeData(const Type& o) const {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::None:
-    return equivData(o);
+    // Context sensitivity should not matter here.
+    return equivData<contextSensitive>(o);
   case DataTag::RefInner:
-    return m_data.inner->subtypeOf(*o.m_data.inner);
+    return m_data.inner->subtypeOfImpl<contextSensitive>(*o.m_data.inner);
   case DataTag::ArrLikePacked:
-    return subtypePacked(*m_data.packed, *o.m_data.packed);
+    return subtypePacked<contextSensitive>(*m_data.packed, *o.m_data.packed);
   case DataTag::ArrLikePackedN:
-    return m_data.packedn->type.subtypeOf(o.m_data.packedn->type);
+    return m_data.packedn->type
+            .subtypeOfImpl<contextSensitive>(o.m_data.packedn->type);
   case DataTag::ArrLikeMap:
-    return subtypeMap(*m_data.map, *o.m_data.map);
+    return subtypeMap<contextSensitive>(*m_data.map, *o.m_data.map);
   case DataTag::ArrLikeMapN:
-    return m_data.mapn->key.subtypeOf(o.m_data.mapn->key) &&
-           m_data.mapn->val.subtypeOf(o.m_data.mapn->val);
+    return m_data.mapn->key
+             .subtypeOfImpl<contextSensitive>(o.m_data.mapn->key) &&
+           m_data.mapn->val.subtypeOfImpl<contextSensitive>(o.m_data.mapn->val);
   }
   not_reached();
 }
@@ -1590,7 +1744,7 @@ bool Type::couldBeData(const Type& o) const {
   case DataTag::ArrLikeVal:
   case DataTag::Int:
   case DataTag::Dbl:
-    return equivData(o);
+    return equivData<false>(o);
   case DataTag::ArrLikePacked:
     return couldBePacked(*m_data.packed, *o.m_data.packed);
   case DataTag::ArrLikePackedN:
@@ -1604,7 +1758,8 @@ bool Type::couldBeData(const Type& o) const {
   not_reached();
 }
 
-bool Type::operator==(const Type& o) const {
+template<bool contextSensitive>
+bool Type::equivImpl(const Type& o) const {
   // NB: We don't assert checkInvariants() here because this can be called from
   // checkInvariants() and it all takes too long if the type is deeply nested.
 
@@ -1612,7 +1767,15 @@ bool Type::operator==(const Type& o) const {
   if (hasData() != o.hasData()) return false;
   if (!hasData()) return true;
 
-  return equivData(o);
+  return equivData<contextSensitive>(o);
+}
+
+bool Type::equivalentlyRefined(const Type& o) const {
+  return equivImpl<true>(o);
+}
+
+bool Type::operator==(const Type& o) const {
+  return equivImpl<false>(o);
 }
 
 size_t Type::hash() const {
@@ -1623,7 +1786,8 @@ size_t Type::hash() const {
   return folly::hash::hash_combine(rawBits, rawTag);
 }
 
-bool Type::subtypeOf(const Type& o) const {
+template<bool contextSensitive>
+bool Type::subtypeOfImpl(const Type& o) const {
   // NB: We don't assert checkInvariants() here because this can be called from
   // checkInvariants() and it all takes too long if the type is deeply nested.
 
@@ -1635,7 +1799,20 @@ bool Type::subtypeOf(const Type& o) const {
   if (!hasData()) return !mayHaveData(m_bits);
 
   // Both have data, so it depends on what the data says.
-  return subtypeData(o);
+  return subtypeData<contextSensitive>(o);
+}
+
+bool Type::moreRefined(const Type& o) const {
+  return subtypeOfImpl<true>(o);
+}
+
+bool Type::strictlyMoreRefined(const Type& o) const {
+  return subtypeOfImpl<true>(o) &&
+         !equivImpl<true>(o);
+}
+
+bool Type::subtypeOf(const Type& o) const {
+  return subtypeOfImpl<false>(o);
 }
 
 bool Type::strictSubtypeOf(const Type& o) const {
@@ -2184,6 +2361,41 @@ bool is_opt(const Type& t) {
   return isPredefined(nonNullBits) && canBeOptional(nonNullBits);
 }
 
+Type return_with_context(Type t, Type context) {
+  assertx(t.subtypeOf(TGen));
+  // We don't assert the context is a TCls of TObj because sometimes we set it
+  // to TTop when handling dynamic calls.
+  if (((is_specialized_obj(t) && t.m_data.dobj.isCtx) ||
+        (is_specialized_cls(t) && t.m_data.dcls.isCtx)) &&
+      context.subtypeOfAny(TCls, TObj) && context != TBottom) {
+    bool o = is_opt(t);
+    t = intersection_of(unctx(t), toobj(context));
+    // We must preserve optional typing, as this is not included in the
+    // context type.
+    return (o && canBeOptional(t.m_bits)) ? opt(t) : t;
+  }
+  return unctx(t);
+}
+
+Type setctx(Type t, bool to) {
+  if (is_specialized_obj(t)) {
+    t.m_data.dobj.isCtx = to;
+  }
+  if (is_specialized_cls(t)) {
+    t.m_data.dcls.isCtx = to;
+  }
+  return t;
+}
+
+Type unctx(Type t) {
+  bool c;
+  return Type::unctxHelper(t, c);
+}
+
+bool equivalently_refined(const Type& a, const Type& b) {
+  return a.equivalentlyRefined(b);
+}
+
 bool is_specialized_obj(const Type& t) {
   return t.m_dataTag == DataTag::Obj;
 }
@@ -2192,12 +2404,30 @@ bool is_specialized_cls(const Type& t) {
   return t.m_dataTag == DataTag::Cls;
 }
 
-Type objcls(const Type& t) {
-  if (t.subtypeOf(TObj) && is_specialized_obj(t)) {
-    auto const d = dobj_of(t);
-    return d.type == DObj::Exact ? clsExact(d.cls) : subCls(d.cls);
+Type toobj(const Type& t) {
+  if (t.subtypeOf(TCls) && is_specialized_cls(t)) {
+    auto const d = dcls_of(t);
+    return setctx(d.type == DCls::Exact ? objExact(d.cls) : subObj(d.cls),
+                  d.isCtx);
+  } else if (t.subtypeOf(TObj)) {
+    return t;
   }
-  return TCls;
+  always_assert(t == TCls);
+  return TObj;
+}
+
+Type objcls(const Type& t) {
+  if (t.subtypeOf(TObj)) {
+    if (is_specialized_obj(t)) {
+      auto const d = dobj_of(t);
+      return setctx(d.type == DObj::Exact ? clsExact(d.cls) : subCls(d.cls),
+                    d.isCtx);
+    } else {
+      return TCls;
+    }
+  }
+  // We can sometimes be given TTop or Class types.
+  return t;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2666,10 +2896,10 @@ Type intersection_of(Type a, Type b) {
     return std::move(t);
   };
 
-  if (!b.hasData())     return fix(a);
-  if (!a.hasData())     return fix(b);
-  if (a.subtypeData(b)) return fix(a);
-  if (b.subtypeData(a)) return fix(b);
+  if (!b.hasData())           return fix(a);
+  if (!a.hasData())           return fix(b);
+  if (a.subtypeData<true>(b)) return fix(a);
+  if (b.subtypeData<true>(a)) return fix(b);
 
   auto t = [&] {
     if (a.m_dataTag == b.m_dataTag) {
@@ -2689,6 +2919,7 @@ Type intersection_of(Type a, Type b) {
               if (whType == TBottom) return TBottom;
               *t.m_data.dobj.whType.mutate() = whType;
             }
+            t = setctx(t, a.m_data.dobj.isCtx || b.m_data.dobj.isCtx);
             return fix(t);
           };
           if (a.m_data.dobj.type == b.m_data.dobj.type &&
@@ -2718,6 +2949,17 @@ Type intersection_of(Type a, Type b) {
           return TBottom;
         }
         case DataTag::Cls:
+          // We need to handle cases where one is tagged as the context and the
+          // other isn't.
+          if (a.subtypeData<false>(b)) {
+            auto t = setctx(a);
+            return fix(t);
+          }
+          if (b.subtypeData<false>(a)) {
+            auto t = setctx(b);
+            return fix(t);
+          }
+          return TBottom;
         case DataTag::Str:
         case DataTag::ArrLikeVal:
         case DataTag::Int:
@@ -2750,14 +2992,18 @@ Type intersection_of(Type a, Type b) {
 
 Type Type::unionArrLike(Type a, Type b) {
   auto const newBits = combine_arr_like_bits(a.m_bits, b.m_bits);
-  if (a.subtypeData(b)) return set_trep(b, newBits);
-  if (b.subtypeData(a)) return set_trep(a, newBits);
+  if (a.subtypeData<true>(b)) {
+    return set_trep(b, newBits);
+  }
+  if (b.subtypeData<true>(a)) {
+    return set_trep(a, newBits);
+  }
   return a.dualDispatchDataFn(b, DualDispatchUnion{ newBits });
 }
 
 Type union_of(Type a, Type b) {
-  if (a.subtypeOf(b)) return b;
-  if (b.subtypeOf(a)) return a;
+  if (a.subtypeOfImpl<true>(b)) return b;
+  if (b.subtypeOfImpl<true>(a)) return a;
 
   /*
    * We need to check this before specialized objects, including the case where
@@ -2784,13 +3030,15 @@ Type union_of(Type a, Type b) {
     // We need not to distinguish between Obj<=T and Obj=T, and always
     // return an Obj<=Ancestor, because that is the single type that
     // includes both children.
-    if (t) return keepOpt ? opt(subObj(*t)) : subObj(*t);
-    return keepOpt ? TOptObj : TObj;
+    auto const isCtx = a.m_data.dobj.isCtx && b.m_data.dobj.isCtx;
+    if (t) return setctx(keepOpt ? opt(subObj(*t)) : subObj(*t), isCtx);
+    return setctx(keepOpt ? TOptObj : TObj, isCtx);
   }
   if (a.strictSubtypeOf(TCls) && b.strictSubtypeOf(TCls)) {
     auto t = a.m_data.dcls.cls.commonAncestor(dcls_of(b).cls);
     // Similar to above, this must always return an Obj<=Ancestor.
-    return t ? subCls(*t) : TCls;
+    auto const isCtx = a.m_data.dcls.isCtx && b.m_data.dcls.isCtx;
+    return setctx(t ? subCls(*t) : TCls, isCtx);
   }
 
   if (is_specialized_array(a)) {

@@ -44,6 +44,9 @@ struct Type;
 struct Index;
 struct PublicSPropIndexer;
 struct FuncAnalysis;
+struct Context;
+struct ContextHash;
+struct CallContext;
 
 extern const Type TTop;
 
@@ -70,33 +73,6 @@ struct Program;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * A Context is a (unit, func, class) triple, where cls and func
- * fields may be null in some situations.  Most queries to the Index
- * need a "context", to allow recording dependencies.
- */
-struct Context {
-  borrowed_ptr<const php::Unit> unit;
-  borrowed_ptr<php::Func> func;
-  borrowed_ptr<const php::Class> cls;
-
-  struct Hash {
-    size_t operator()(const Context& c) const {
-      return pointer_hash<void>{}(c.func ? (void*)c.func :
-                                  c.cls ? (void*)c.cls : (void*)c.unit);
-    }
-  };
-};
-
-inline bool operator==(Context a, Context b) {
-  return a.unit == b.unit && a.func == b.func && a.cls == b.cls;
-}
-
-inline bool operator<(Context a, Context b) {
-  return std::make_tuple(a.unit, a.func, a.cls) <
-         std::make_tuple(b.unit, b.func, b.cls);
-}
-
-/*
  * A DependencyContext encodes enough of the context to record a
  * dependency - either a php::Func, or, if we're doing private
  * property analysis and its a suitable class, a php::Class
@@ -119,26 +95,11 @@ struct DependencyContextHash {
 
 using DependencyContextSet = std::unordered_set<DependencyContext,
                                                 DependencyContextHash>;
+using ContextSet = std::unordered_set<Context, ContextHash>;
 
 std::string show(Context);
 
 using ConstantMap = std::unordered_map<SString, Cell>;
-/*
- * Context for a call to a function.  This means the types and number
- * of arguments, and where it is being called from.
- *
- * TODO(#3788877): add type of $this if it is going to be an object
- * method, and the LSB class type if static.
- */
-struct CallContext {
-  Context caller;
-  std::vector<Type> args;
-};
-
-inline bool operator==(const CallContext& a, const CallContext& b) {
-  return a.caller == b.caller &&
-         a.args == b.args;
-}
 
 /*
  * State of properties on a class.  Map from property name to its

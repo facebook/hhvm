@@ -27,6 +27,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 
+#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
@@ -2355,6 +2356,354 @@ TEST(Type, LoosenDVArrayness) {
     EXPECT_EQ(loosen_dvarrayness(p.first), p.second);
     EXPECT_EQ(loosen_dvarrayness(opt(p.first)), opt(p.second));
   }
+}
+
+TEST(Type, ContextDependent) {
+  // This only covers basic cases involving objects.  More testing should
+  // be added for non object types, and nested types.
+  auto const program = make_program();
+  auto const unit = borrow(program->units.back());
+  auto const func = [&]() -> borrowed_ptr<php::Func> {
+    for (auto& f : unit->funcs) {
+      if (f->name->isame(s_test.get())) return borrow(f);
+    }
+    return nullptr;
+  }();
+  EXPECT_TRUE(func != nullptr);
+
+  auto const ctx = Context { unit, func };
+  Index idx{borrow(program)};
+
+  // load classes in hierarchy  Base -> B -> BB
+  auto const clsBase = idx.resolve_class(ctx, s_Base.get());
+  if (!clsBase) ADD_FAILURE();
+  auto const clsB = idx.resolve_class(ctx, s_B.get());
+  if (!clsB) ADD_FAILURE();
+  auto const clsBB = idx.resolve_class(ctx, s_BB.get());
+  if (!clsBB) ADD_FAILURE();
+  // Unrelated class.
+  auto const clsUn = idx.resolve_class(ctx, s_TestClass.get());
+  if (!clsUn) ADD_FAILURE();
+
+  auto const objExactBaseTy     = objExact(*clsBase);
+  auto const thisObjExactBaseTy = setctx(objExact(*clsBase));
+  auto const subObjBaseTy       = subObj(*clsBase);
+  auto const thisSubObjBaseTy   = setctx(subObj(*clsBase));
+
+  auto const objExactBTy        = objExact(*clsB);
+  auto const thisObjExactBTy    = setctx(objExact(*clsB));
+  auto const subObjBTy          = subObj(*clsB);
+  auto const thisSubObjBTy      = setctx(subObj(*clsB));
+  auto const clsExactBTy        = clsExact(*clsB);
+  auto const thisClsExactBTy    = setctx(clsExact(*clsB));
+  auto const subClsBTy          = subCls(*clsB);
+  auto const thisSubClsBTy      = setctx(subCls(*clsB));
+
+  auto const objExactBBTy       = objExact(*clsBB);
+  auto const thisObjExactBBTy   = setctx(objExact(*clsBB));
+  auto const subObjBBTy         = subObj(*clsBB);
+  auto const thisSubObjBBTy     = setctx(subObj(*clsBB));
+  auto const clsExactBBTy       = clsExact(*clsBB);
+  auto const thisClsExactBBTy   = setctx(clsExact(*clsBB));
+  auto const subClsBBTy         = subCls(*clsBB);
+  auto const thisSubClsBBTy     = setctx(subCls(*clsBB));
+
+  auto const objExactUnTy       = objExact(*clsUn);
+  auto const thisObjExactUnTy   = setctx(objExact(*clsUn));
+  auto const subObjUnTy         = subObj(*clsUn);
+  auto const thisSubObjUnTy     = setctx(subObj(*clsUn));
+
+#define REFINE_EQ(A, B) \
+  EXPECT_TRUE((A).equivalentlyRefined((B)))
+#define REFINE_NEQ(A, B) \
+  EXPECT_FALSE((A).equivalentlyRefined((B)))
+
+  // check that improving any non context dependent type does not change the
+  // type whether or not the context is related.
+  REFINE_EQ(return_with_context(objExactBaseTy, objExactBTy),
+            objExactBaseTy);
+  REFINE_EQ(return_with_context(subObjBaseTy, objExactBTy),
+            subObjBaseTy);
+  REFINE_EQ(return_with_context(objExactBTy, objExactBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(subObjBTy, objExactBTy),
+            subObjBTy);
+  REFINE_EQ(return_with_context(objExactBBTy, objExactBTy),
+            objExactBBTy);
+  REFINE_EQ(return_with_context(subObjBBTy, objExactBTy),
+            subObjBBTy);
+  REFINE_EQ(return_with_context(objExactUnTy, objExactBTy),
+            objExactUnTy);
+  REFINE_EQ(return_with_context(subObjUnTy, objExactBTy),
+            subObjUnTy);
+  REFINE_EQ(return_with_context(objExactBaseTy, clsExactBTy),
+            objExactBaseTy);
+  REFINE_EQ(return_with_context(subObjBaseTy, clsExactBTy),
+            subObjBaseTy);
+  REFINE_EQ(return_with_context(objExactBTy, clsExactBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(subObjBTy, clsExactBTy),
+            subObjBTy);
+  REFINE_EQ(return_with_context(objExactBBTy, clsExactBTy),
+            objExactBBTy);
+  REFINE_EQ(return_with_context(subObjBBTy, clsExactBTy),
+            subObjBBTy);
+  REFINE_EQ(return_with_context(objExactUnTy, clsExactBTy),
+            objExactUnTy);
+  REFINE_EQ(return_with_context(subObjUnTy, clsExactBTy),
+            subObjUnTy);
+
+  // With sub.
+  REFINE_EQ(return_with_context(objExactBaseTy, subObjBTy),
+            objExactBaseTy);
+  REFINE_EQ(return_with_context(subObjBaseTy, subObjBTy),
+            subObjBaseTy);
+  REFINE_EQ(return_with_context(objExactBTy, subObjBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(subObjBTy, subObjBTy),
+            subObjBTy);
+  REFINE_EQ(return_with_context(objExactBBTy, subObjBTy),
+            objExactBBTy);
+  REFINE_EQ(return_with_context(subObjBBTy, subObjBTy),
+            subObjBBTy);
+  REFINE_EQ(return_with_context(objExactUnTy, subObjBTy),
+            objExactUnTy);
+  REFINE_EQ(return_with_context(subObjUnTy, subObjBTy),
+            subObjUnTy);
+  REFINE_EQ(return_with_context(objExactBaseTy, subClsBTy),
+            objExactBaseTy);
+  REFINE_EQ(return_with_context(subObjBaseTy, subClsBTy),
+            subObjBaseTy);
+  REFINE_EQ(return_with_context(objExactBTy, subClsBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(subObjBTy, subClsBTy),
+            subObjBTy);
+  REFINE_EQ(return_with_context(objExactBBTy, subClsBTy),
+            objExactBBTy);
+  REFINE_EQ(return_with_context(subObjBBTy, subClsBTy),
+            subObjBBTy);
+  REFINE_EQ(return_with_context(objExactUnTy, subClsBTy),
+            objExactUnTy);
+  REFINE_EQ(return_with_context(subObjUnTy, subClsBTy),
+            subObjUnTy);
+
+  // Improvements (exact)
+  REFINE_EQ(return_with_context(thisObjExactBaseTy, objExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBaseTy, objExactBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(thisObjExactBTy, objExactBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(thisSubObjBTy, objExactBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(thisObjExactBBTy, objExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBBTy, objExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisObjExactUnTy, objExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjUnTy, objExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisObjExactBaseTy, clsExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBaseTy, clsExactBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(thisObjExactBTy, clsExactBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(thisSubObjBTy, clsExactBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(thisObjExactBBTy, clsExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBBTy, clsExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisObjExactUnTy, clsExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjUnTy, clsExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisObjExactBaseTy, thisObjExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBaseTy, thisObjExactBTy),
+            thisObjExactBTy);
+  REFINE_EQ(return_with_context(thisObjExactBTy, thisObjExactBTy),
+            thisObjExactBTy);
+  REFINE_EQ(return_with_context(thisSubObjBTy, thisObjExactBTy),
+            thisObjExactBTy);
+  REFINE_EQ(return_with_context(thisObjExactBBTy, thisObjExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBBTy, thisObjExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisObjExactUnTy, thisObjExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjUnTy, thisObjExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisObjExactBaseTy, thisClsExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBaseTy, thisClsExactBTy),
+            thisObjExactBTy);
+  REFINE_EQ(return_with_context(thisObjExactBTy, thisClsExactBTy),
+            thisObjExactBTy);
+  REFINE_EQ(return_with_context(thisSubObjBTy, thisClsExactBTy),
+            thisObjExactBTy);
+  REFINE_EQ(return_with_context(thisObjExactBBTy, thisClsExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBBTy, thisClsExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisObjExactUnTy, thisClsExactBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjUnTy, thisClsExactBTy),
+            TBottom);
+
+  // Improvements (sub)
+  REFINE_EQ(return_with_context(thisObjExactBaseTy, subObjBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBaseTy, subObjBTy),
+            subObjBTy);
+  REFINE_EQ(return_with_context(thisObjExactBTy, subObjBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(thisSubObjBTy, subObjBTy),
+            subObjBTy);
+  REFINE_EQ(return_with_context(thisObjExactBBTy, subObjBTy),
+            objExactBBTy);
+  REFINE_EQ(return_with_context(thisSubObjBBTy, subObjBTy),
+            subObjBBTy);
+  REFINE_EQ(return_with_context(thisObjExactUnTy, subObjBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjUnTy, subObjBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisObjExactBaseTy, subClsBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBaseTy, subClsBTy),
+            subObjBTy);
+  REFINE_EQ(return_with_context(thisObjExactBTy, subClsBTy),
+            objExactBTy);
+  REFINE_EQ(return_with_context(thisSubObjBTy, subClsBTy),
+            subObjBTy);
+  REFINE_EQ(return_with_context(thisObjExactBBTy, subClsBTy),
+            objExactBBTy);
+  REFINE_EQ(return_with_context(thisSubObjBBTy, subClsBTy),
+            subObjBBTy);
+  REFINE_EQ(return_with_context(thisObjExactUnTy, subClsBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjUnTy, subClsBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisObjExactBaseTy, thisSubObjBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBaseTy, thisSubObjBTy),
+            thisSubObjBTy);
+  REFINE_EQ(return_with_context(thisObjExactBTy, thisSubObjBTy),
+            thisObjExactBTy);
+  REFINE_EQ(return_with_context(thisSubObjBTy, thisSubObjBTy),
+            thisSubObjBTy);
+  REFINE_EQ(return_with_context(thisObjExactBBTy, thisSubObjBTy),
+            thisObjExactBBTy);
+  REFINE_EQ(return_with_context(thisSubObjBBTy, thisSubObjBTy),
+            thisSubObjBBTy);
+  REFINE_EQ(return_with_context(thisObjExactUnTy, thisSubObjBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjUnTy, thisSubObjBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisObjExactBaseTy, thisSubClsBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjBaseTy, thisSubClsBTy),
+            thisSubObjBTy);
+  REFINE_EQ(return_with_context(thisObjExactBTy, thisSubClsBTy),
+            thisObjExactBTy);
+  REFINE_EQ(return_with_context(thisSubObjBTy, thisSubClsBTy),
+            thisSubObjBTy);
+  REFINE_EQ(return_with_context(thisObjExactBBTy, thisSubClsBTy),
+            thisObjExactBBTy);
+  REFINE_EQ(return_with_context(thisSubObjBBTy, thisSubClsBTy),
+            thisSubObjBBTy);
+  REFINE_EQ(return_with_context(thisObjExactUnTy, thisSubClsBTy),
+            TBottom);
+  REFINE_EQ(return_with_context(thisSubObjUnTy, thisSubClsBTy),
+            TBottom);
+
+  // Optional type preservation.
+  REFINE_EQ(return_with_context(opt(subObjBaseTy), objExactBTy),
+            opt(subObjBaseTy));
+  REFINE_EQ(return_with_context(opt(subObjBaseTy), clsExactBTy),
+            opt(subObjBaseTy));
+  REFINE_EQ(return_with_context(opt(subObjBaseTy), subObjBTy),
+            opt(subObjBaseTy));
+  REFINE_EQ(return_with_context(opt(subObjBaseTy), subClsBTy),
+            opt(subObjBaseTy));
+  REFINE_EQ(return_with_context(opt(thisSubObjBaseTy), objExactBTy),
+            opt(objExactBTy));
+  REFINE_EQ(return_with_context(opt(thisSubObjBaseTy), clsExactBTy),
+            opt(objExactBTy));
+  REFINE_EQ(return_with_context(opt(thisSubObjBaseTy), thisObjExactBTy),
+            opt(thisObjExactBTy));
+  REFINE_EQ(return_with_context(opt(thisSubObjBaseTy), thisClsExactBTy),
+            opt(thisObjExactBTy));
+
+
+  // Refinedness operators.
+  REFINE_EQ(objExactBTy, objExactBTy);
+  REFINE_EQ(subObjBTy, subObjBTy);
+  REFINE_EQ(clsExactBTy, clsExactBTy);
+  REFINE_EQ(subClsBTy, subClsBTy);
+  REFINE_EQ(thisObjExactBTy, thisObjExactBTy);
+  REFINE_EQ(thisSubObjBTy, thisSubObjBTy);
+  REFINE_EQ(thisClsExactBTy, thisClsExactBTy);
+  REFINE_EQ(thisSubClsBTy, thisSubClsBTy);
+
+  REFINE_NEQ(objExactBTy, thisObjExactBTy);
+  REFINE_NEQ(subObjBTy, thisSubObjBTy);
+  REFINE_NEQ(clsExactBTy, thisClsExactBTy);
+  REFINE_NEQ(subClsBTy, thisSubClsBTy);
+  REFINE_NEQ(thisObjExactBTy, objExactBTy);
+  REFINE_NEQ(thisSubObjBTy, subObjBTy);
+  REFINE_NEQ(thisClsExactBTy, clsExactBTy);
+  REFINE_NEQ(thisSubClsBTy, subClsBTy);
+
+  EXPECT_FALSE(objExactBTy.moreRefined(thisObjExactBTy));
+  EXPECT_FALSE(subObjBTy.moreRefined(thisSubObjBTy));
+  EXPECT_FALSE(clsExactBTy.moreRefined(thisClsExactBTy));
+  EXPECT_FALSE(subClsBTy.moreRefined(thisSubClsBTy));
+
+  EXPECT_TRUE(thisObjExactBTy.moreRefined(objExactBTy));
+  EXPECT_TRUE(thisSubObjBTy.moreRefined(subObjBTy));
+  EXPECT_TRUE(thisClsExactBTy.moreRefined(clsExactBTy));
+  EXPECT_TRUE(thisSubClsBTy.moreRefined(subClsBTy));
+
+  EXPECT_TRUE(thisObjExactBTy.moreRefined(thisObjExactBTy));
+  EXPECT_TRUE(thisSubObjBTy.moreRefined(thisSubObjBTy));
+  EXPECT_TRUE(thisClsExactBTy.moreRefined(thisClsExactBTy));
+  EXPECT_TRUE(thisSubClsBTy.moreRefined(thisSubClsBTy));
+
+  EXPECT_FALSE(thisObjExactBTy.strictlyMoreRefined(thisObjExactBTy));
+  EXPECT_FALSE(thisSubObjBTy.strictlyMoreRefined(thisSubObjBTy));
+  EXPECT_FALSE(thisClsExactBTy.strictlyMoreRefined(thisClsExactBTy));
+  EXPECT_FALSE(thisSubClsBTy.strictlyMoreRefined(thisSubClsBTy));
+
+  EXPECT_FALSE(thisObjExactBBTy.strictlyMoreRefined(thisObjExactBTy));
+  EXPECT_TRUE(thisSubObjBBTy.strictlyMoreRefined(thisSubObjBTy));
+  EXPECT_FALSE(thisClsExactBBTy.strictlyMoreRefined(thisClsExactBTy));
+  EXPECT_TRUE(thisSubClsBBTy.strictlyMoreRefined(thisSubClsBTy));
+
+  EXPECT_FALSE(thisObjExactBTy.strictlyMoreRefined(thisObjExactBBTy));
+  EXPECT_FALSE(thisSubObjBTy.strictlyMoreRefined(thisSubObjBBTy));
+  EXPECT_FALSE(thisClsExactBTy.strictlyMoreRefined(thisClsExactBBTy));
+  EXPECT_FALSE(thisSubClsBTy.strictlyMoreRefined(thisSubClsBBTy));
+
+  EXPECT_FALSE(objExactBBTy.strictlyMoreRefined(thisObjExactBTy));
+  EXPECT_FALSE(subObjBBTy.strictlyMoreRefined(thisSubObjBTy));
+  EXPECT_FALSE(clsExactBBTy.strictlyMoreRefined(thisClsExactBTy));
+  EXPECT_FALSE(subClsBBTy.strictlyMoreRefined(thisSubClsBTy));
+
+  // Normal equality should still hold.
+  EXPECT_EQ(objExactBTy, thisObjExactBTy);
+  EXPECT_EQ(subObjBTy, thisSubObjBTy);
+  EXPECT_EQ(clsExactBTy, thisClsExactBTy);
+  EXPECT_EQ(subClsBTy, thisSubClsBTy);
+  EXPECT_EQ(thisObjExactBTy, objExactBTy);
+  EXPECT_EQ(thisSubObjBTy, subObjBTy);
+  EXPECT_EQ(thisClsExactBTy, clsExactBTy);
+  EXPECT_EQ(thisSubClsBTy, subClsBTy);
+
+#undef REFINE_NEQ
+#undef REFINE_EQ
 }
 
 //////////////////////////////////////////////////////////////////////

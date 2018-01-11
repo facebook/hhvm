@@ -415,7 +415,7 @@ enum class DataTag : uint8_t {
  * subtype of the supplied class.
  */
 struct DCls {
-  enum Tag { Exact, Sub };
+  enum Tag : uint16_t { Exact, Sub };
 
   DCls(Tag type, res::Class cls)
     : type(type)
@@ -423,6 +423,7 @@ struct DCls {
   {}
 
   Tag type;
+  bool isCtx = false;
   res::Class cls;
 };
 
@@ -434,7 +435,7 @@ struct DCls {
  * the wait handle will produce.
  */
 struct DObj {
-  enum Tag { Exact, Sub };
+  enum Tag : uint16_t { Exact, Sub };
 
   DObj(Tag type, res::Class cls)
     : type(type)
@@ -442,6 +443,7 @@ struct DObj {
   {}
 
   Tag type;
+  bool isCtx = false;
   res::Class cls;
   copy_ptr<Type> whType;
 };
@@ -497,6 +499,16 @@ struct Type {
   const Type& operator &= (Type&& other);
 
   /*
+   * Returns true if this type is equivalently refined, more refined or strictly
+   * more refined than `o`.  This is similar to the `==` and subtype operations
+   * defined below, except they take into account if a type is tagged as a
+   * context.
+   */
+  bool equivalentlyRefined(const Type& o) const;
+  bool moreRefined(const Type& o) const;
+  bool strictlyMoreRefined(const Type& o) const;
+
+  /*
    * Returns true if this type is definitely going to be a subtype or a strict
    * subtype of `o' at runtime.  If this function returns false, this may
    * still be a subtype of `o' at runtime, it just may not be known.
@@ -512,6 +524,11 @@ struct Type {
     return subtypeOf(t) || subtypeOfAny(ts...);
   }
   bool subtypeOfAny() const { return false; }
+
+  template<bool contextSensitive>
+  bool equivImpl(const Type& o) const;
+  template<bool contextSensitive>
+  bool subtypeOfImpl(const Type& o) const;
 
   /*
    * Returns whether there are any values of this type that are also
@@ -578,6 +595,9 @@ private:
   template<typename R>
   friend R tvImpl(const Type&);
   friend Type scalarize(Type t);
+  friend Type return_with_context(Type, Type);
+  friend Type setctx(Type, bool);
+  friend Type unctx(Type);
   friend std::string show(const Type&);
   friend ArrKey disect_array_key(const Type&);
   friend std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key);
@@ -635,6 +655,7 @@ private:
   struct DDHelperFn;
 
 private:
+  static Type unctxHelper(Type, bool&);
   static Type unionArrLike(Type a, Type b);
   template<class Ret, class T, class Function>
   DDHelperFn<Ret,T,Function> ddbind(const Function& f, const T& t) const;
@@ -643,7 +664,9 @@ private:
   template<class Function> typename Function::result_type
   dualDispatchDataFn(const Type&, Function) const;
   bool hasData() const;
+  template<bool contextSensitive>
   bool equivData(const Type&) const;
+  template<bool contextSensitive>
   bool subtypeData(const Type&) const;
   bool couldBeData(const Type&) const;
   bool checkInvariants() const;
@@ -1028,6 +1051,47 @@ Type unopt(Type t);
 bool is_opt(const Type& t);
 
 /*
+ * Improves the type `t` given the current context.  This returns the
+ * intersection of the type `t` with the `context` if the `context` is a valid
+ * class or object, and `t` is tagged as being the context.  If `context` is
+ * a class we will first convert it to an object.  This returns an optional type
+ * if `t` was optional.
+ */
+Type return_with_context(Type t, Type context);
+
+/*
+ * If `to` is false.  This is an identity operation.  If `to` is true, and
+ * `t` is a specialized object or class, this will return `t` tagged as a
+ * context.
+ */
+Type setctx(Type t, bool to = true);
+
+/*
+ * This removes any context tags in the type `t`, even if nested inside other
+ * types.
+ */
+Type unctx(Type t);
+
+/*
+ * Refinedness equivalence checks.
+ */
+bool equivalently_refined(const Type&, const Type&);
+
+template<
+  typename Iterable,
+  typename = std::enable_if<
+    std::is_same<typename Iterable::value_type, Type>::value
+  >
+>
+bool equivalently_refined(const Iterable& a, const Iterable& b) {
+  if (a.size() != b.size()) return false;
+  for (auto ita = a.begin(), itb = b.begin(); ita != a.end(); ++ita, ++itb) {
+    if (!equivalently_refined(*ita, *itb)) return false;
+  }
+  return true;
+}
+
+/*
  * Returns true if type 't' represents a "specialized" object, that is an
  * object of a known class, or an optional object of a known class.
  */
@@ -1058,9 +1122,16 @@ bool is_specialized_dict(const Type& t);
 bool is_specialized_keyset(const Type& t);
 
 /*
- * Returns the best known TCls subtype for an object type.
+ * Returns the best known instantiation of a class type.  Or returns the
+ * provided object.
  *
- * Pre: t.subtypeOf(TObj)
+ * Pre: t.subypeOfAny(TObj, TCls)
+ */
+Type toobj(const Type& t);
+
+/*
+ * Returns the best known TCls subtype for an object type.  Otherwise return
+ * the passed in type.
  */
 Type objcls(const Type& t);
 

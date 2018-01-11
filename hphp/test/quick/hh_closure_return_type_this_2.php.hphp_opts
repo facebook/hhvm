@@ -1,1 +1,2 @@
 -vHardReturnTypeHints=1
+-vRuntime.Eval.ThisTypeHintLevel=2

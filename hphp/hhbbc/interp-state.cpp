@@ -25,6 +25,7 @@
 #include "hphp/util/match.h"
 #include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/interp-internal.h"
+#include "hphp/hhbbc/context.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -130,21 +131,10 @@ bool operator==(const ActRec& a, const ActRec& b) {
     a.fallbackFunc.hasValue() != b.fallbackFunc.hasValue() ? false :
     a.fallbackFunc.hasValue() ? a.fallbackFunc->same(*b.fallbackFunc) :
     true;
-  return a.kind == b.kind && fsame && fsame2;
+  return a.kind == b.kind && fsame && fsame2 &&
+         equivalently_refined(a.context, b.context);
 }
-
-bool operator==(const State& a, const State& b) {
-  return a.initialized == b.initialized &&
-    a.thisAvailable == b.thisAvailable &&
-    a.thisLocToKill == b.thisLocToKill &&
-    a.locals == b.locals &&
-    a.clsRefSlots == b.clsRefSlots &&
-    a.stack == b.stack &&
-    a.fpiStack == b.fpiStack;
-}
-
 bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }
-bool operator!=(const State& a, const State& b)   { return !(a == b); }
 
 State without_stacks(const State& src) {
   auto ret          = State{};
@@ -247,9 +237,9 @@ void widen_props(PropState& props) {
 bool merge_into(ActRec& dst, const ActRec& src) {
   if (dst != src) {
     if (dst.kind != src.kind) {
-      dst = ActRec { FPIKind::Unknown };
+      dst = ActRec { FPIKind::Unknown, TTop };
     } else {
-      dst = ActRec { src.kind };
+      dst = ActRec { src.kind, union_of(dst.context, src.context) };
     }
     return true;
   }
@@ -457,6 +447,7 @@ std::string show(const ActRec& a) {
     a.func ? show(*a.func) : "",
     a.fallbackFunc ? show(*a.fallbackFunc) : "",
     a.foldable ? " (foldable)" : "",
+    " ", show(a.context),
     " }"
   );
 }

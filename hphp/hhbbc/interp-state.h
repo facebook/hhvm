@@ -60,6 +60,7 @@ enum class FPIKind {
  */
 struct ActRec {
   explicit ActRec(FPIKind kind,
+                  Type calledOn,
                   folly::Optional<res::Class> c = folly::none,
                   folly::Optional<res::Func> f = folly::none,
                   folly::Optional<res::Func> f2 = folly::none)
@@ -67,6 +68,7 @@ struct ActRec {
     , cls(std::move(c))
     , func(std::move(f))
     , fallbackFunc(std::move(f2))
+    , context(std::move(calledOn))
   {}
 
   FPIKind kind;
@@ -76,6 +78,7 @@ struct ActRec {
   folly::Optional<res::Func> func;
   // Possible fallback func if we cannot determine which will be called.
   folly::Optional<res::Func> fallbackFunc;
+  Type context;
 };
 
 /*
@@ -295,8 +298,6 @@ struct State {
  */
 bool operator==(const ActRec&, const ActRec&);
 bool operator!=(const ActRec&, const ActRec&);
-bool operator==(const State&, const State&);
-bool operator!=(const State&, const State&);
 
 /*
  * Return a copy of a State without copying either the evaluation

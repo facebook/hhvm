@@ -27,6 +27,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/context.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -1003,7 +1004,7 @@ folly::Optional<Type> thisTypeHelper(const Index& index, Context ctx) {
     return folly::none;
   }
 
-  if (auto rcls = index.selfCls(ctx)) return subObj(*rcls);
+  if (auto rcls = index.selfCls(ctx)) return setctx(subObj(*rcls));
   return folly::none;
 }
 
@@ -1018,6 +1019,11 @@ folly::Optional<Type> selfCls(ISS& env) {
 
 folly::Optional<Type> selfClsExact(ISS& env) {
   if (auto rcls = env.index.selfCls(env.ctx)) return clsExact(*rcls);
+  return folly::none;
+}
+
+folly::Optional<Type> parentCls(ISS& env) {
+  if (auto rcls = env.index.parentCls(env.ctx)) return subCls(*rcls);
   return folly::none;
 }
 
@@ -1187,7 +1193,8 @@ folly::Optional<Type> selfPropAsCell(ISS& env, SString name) {
 void mergeSelfProp(ISS& env, SString name, Type type) {
   auto const t = selfPropRaw(env, name);
   if (!t) return;
-  *t |= type;
+  // Context types might escape to other contexts here.
+  *t |= unctx(type);
 }
 
 /*

@@ -81,17 +81,31 @@ let autoimport_set =
   let autoimport_list
     = autoimport_classes @ autoimport_funcs @ autoimport_types in
   List.fold_left autoimport_list ~init:SSet.empty ~f:(fun s e -> SSet.add e s)
+
+(* Return the namespace (or None if the global one) into which id is auto imported.
+ * Return false as first value if it is not auto imported
+ *)
+let get_autoimport_name_namespace id =
+  if Naming_special_names.Typehints.is_reserved_global_name id
+  then (true, None)
+  else
+  if Naming_special_names.Typehints.is_reserved_hh_name id ||
+     SSet.mem id autoimport_set
+  then (true, Some "HH")
+  else (false, None)
+
 (* NOTE that the runtime is able to distinguish between class and
    function names when auto-importing *)
 let is_autoimport_name id =
-  Naming_special_names.Typehints.is_reserved_global_name id ||
-  Naming_special_names.Typehints.is_reserved_hh_name id ||
-  SSet.mem id autoimport_set
+  fst (get_autoimport_name_namespace id)
+
+let elaborate_into_ns ns_name id =
+match ns_name with
+  | None -> "\\" ^ id
+  | Some ns -> "\\" ^ ns ^ "\\" ^ id
 
 let elaborate_into_current_ns nsenv id =
-  match nsenv.ns_name with
-    | None -> "\\" ^ id
-    | Some ns -> "\\" ^ ns ^ "\\" ^ id
+  elaborate_into_ns nsenv.ns_name id
 
 (* Walks over the namespace map and checks if any source
  * matches the given id.
@@ -191,8 +205,16 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
       begin
       match SMap.get prefix uses with
         | None ->
-          if autoimport && is_autoimport_name id
-          then false, "\\" ^ id
+          if autoimport
+          then
+            match get_autoimport_name_namespace id with
+            | true, ns_name ->
+              false,
+              if ParserOptions.enable_hh_syntax_for_hhvm nsenv.ns_popt && kind = ElaborateClass
+              then elaborate_into_ns ns_name id
+              else "\\" ^ id
+            | false, _ ->
+              false, elaborate_into_current_ns nsenv id
           else false, elaborate_into_current_ns nsenv id
         | Some use -> begin
           (* Strip off the "use" from id, but *not* the backslash after that
@@ -352,7 +374,6 @@ let elaborate_toplevel_defs popt ast =
 
 let elaborate_map_toplevel_defs popt ast map_def =
   elaborate_toplevel_defs_ ~map_def popt ast
-
 
 let elaborate_def nsenv def =
   ElaborateDefs.def noop nsenv def

@@ -2574,7 +2574,9 @@ let make_env
                                                         )
     ; lower_coroutines
     ; enable_hh_syntax
-    ; parser_options
+    ; parser_options =
+      ParserOptions.with_hh_syntax_for_hhvm parser_options
+        (codegen && (enable_hh_syntax || is_hh_file))
     ; file
     ; fi_mode
     ; stats
@@ -2681,6 +2683,13 @@ let from_text (env : env) (source_text : SourceText.t) : result =
   in
   let env = if env.fi_mode = fi_mode then env else { env with fi_mode } in
   let env = { env with is_hh_file = is_hack tree } in
+  (* If we are generating code and this is an hh file or hh syntax is enabled,
+   * then we want to inject auto import types into HH namespace during namespace
+   * resolution.
+   *)
+  let env = { env with parser_options =
+    ParserOptions.with_hh_syntax_for_hhvm env.parser_options
+      (env.codegen && (ParserOptions.enable_hh_syntax_for_hhvm env.parser_options || env.is_hh_file)) } in
   lower
     env
     ~source_text

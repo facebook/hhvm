@@ -63,6 +63,9 @@ type t = {
  (* Namespace aliasing map *)
  po_auto_namespace_map : (string * string) list;
 
+ (* Should we auto import into the HH namespace? *)
+ po_enable_hh_syntax_for_hhvm : bool;
+
  (* Flag for disabling functions in HHI files with the __PHPStdLib attribute *)
  po_deregister_php_stdlib : bool;
 
@@ -88,6 +91,7 @@ val tco_migration_flag_enabled : t -> SSet.elt -> bool
 val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool
+val po_enable_hh_syntax_for_hhvm : t -> bool
 val default : t
 val make_permissive : t -> t
 val tco_experimental_instanceof : string

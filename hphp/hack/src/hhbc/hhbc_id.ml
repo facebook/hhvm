@@ -58,9 +58,10 @@ module Class = struct
     let stripped_mangled_name = SU.strip_global_ns mangled_name in
     let was_renamed, id, fallback_id =
       elaborate_id ns Namespaces.ElaborateClass (fst id, mangled_name) in
-    if was_renamed
+    if was_renamed || mangled_name.[0] = '\\'
     then id, fallback_id
-    else match Hhbc_alias.opt_normalize stripped_mangled_name with
+    else
+    match Hhbc_alias.opt_normalize stripped_mangled_name with
     | None -> id, fallback_id
     | Some s -> s, None
 

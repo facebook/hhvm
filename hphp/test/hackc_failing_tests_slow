@@ -1,6 +1,5 @@
 slow/async/genva-variadic.php
 slow/ext_watchman/ext_watchman.php
-slow/hh_namespace_migration/hh_vector5.php
 slow/inout/bad-call-15.php
 slow/inout/side-effects.php
 slow/parser/hh-namespace-conflict-2.php

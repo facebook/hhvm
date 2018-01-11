@@ -106,13 +106,12 @@ struct Collector {
   explicit Collector(HeapImpl& heap, APCGCManager* apcgc, GCBits mark_version)
     : heap_(heap), mark_version_{mark_version}, apcgc_(apcgc)
   {}
+  template<bool apcgc> void collect();
   void init();
-  template<bool apcgc> void traceRoots();
-  template<bool apcgc> void trace();
   void sweep();
-
-  // drain the scanner, enqueue pointers
-  void finish_scan();
+  template<bool apcgc> void traceAll();
+  template<bool apcgc> void traceConservative();
+  template<bool apcgc> void traceExact();
 
   // mark ambiguous pointers in the range [start,start+len)
   template<bool apcgc>
@@ -123,17 +122,8 @@ struct Collector {
   }
   template<bool apcgc> void checkedEnqueue(const void* p);
   void enqueueWeak(const WeakRefDataHandle* p);
-  template<bool apcgc> void finish_typescan();
+  template<bool apcgc> void exactEnqueue(const void* p);
   HeapObject* find(const void*);
-
-  void enqueue(const HeapObject* h) {
-    assert(h && h->kind() <= HeaderKind::BigMalloc &&
-           h->kind() != HeaderKind::AsyncFuncWH &&
-           h->kind() != HeaderKind::Closure);
-    assert(!isObjectKind(h->kind()) || !hasNativeData(h));
-    work_.push_back(h);
-    max_worklist_ = std::max(max_worklist_, work_.size());
-  }
 
   HeapImpl& heap_;
   GCBits const mark_version_;
@@ -141,12 +131,12 @@ struct Collector {
   size_t marked_{0}, pinned_{0}, unknown_{0}; // object counts
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
-  size_t init_ns_, initfree_ns_, roots_ns_, mark_ns_, sweep_ns_;
-  size_t max_worklist_{0}; // max size of work_
+  size_t init_ns_, initfree_ns_, roots_ns_{0}, mark_ns_{0}, sweep_ns_;
+  size_t max_worklist_{0}; // max size of cwork_ + xwork_
   size_t freed_bytes_{0};
   PtrMap<const HeapObject*> ptrs_;
   type_scan::Scanner type_scanner_;
-  std::vector<const HeapObject*> work_;
+  std::vector<const HeapObject*> cwork_, xwork_;
   std::vector<const WeakRefDataHandle*> weakRefs_;
   APCGCManager* const apcgc_;
 };
@@ -224,6 +214,14 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
   return true;
 }
 
+bool willScanConservative(const HeapObject* h) {
+  return (h->kind() == HeaderKind::SmallMalloc ||
+          h->kind() == HeaderKind::BigMalloc) &&
+         type_scan::hasConservativeScanner(
+             static_cast<const MallocNode*>(h)->typeIndex()
+         );
+}
+
 template <bool apcgc>
 void Collector::checkedEnqueue(const void* p) {
   if (auto h = find(p)) {
@@ -233,8 +231,39 @@ void Collector::checkedEnqueue(const void* p) {
     if (old != mark_version_) {
       h->setmarks(mark_version_);
       ++marked_;
-      ++pinned_;
-      enqueue(h);
+      auto& work = willScanConservative(h) ? cwork_ : xwork_;
+      work.push_back(h);
+      max_worklist_ = std::max(max_worklist_, cwork_.size() + xwork_.size());
+      assert(checkEnqueuedKind(h));
+    }
+  } else if (apcgc) {
+    // If p doesn't belong to any APC data, APCGCManager won't do anything
+    apcgc_->mark(p);
+  }
+}
+
+template <bool apcgc>
+void Collector::exactEnqueue(const void* p) {
+  if (auto h = find(p)) {
+    if (willScanConservative(h)) {
+      // exact->conservative ptr (p). Safe to ignore in phase 2 because:
+      // * target is !type_scan::isKnownType, making it an "unknown" root,
+      // and scanned & pinned in phase 1; OR
+      // * target is a pinned req::container buffer, found in phase 1,
+      // so we can disregard this pointer to it, since it won't move; OR
+      // * target is an unmarked req::container buffer. p is an interior
+      // pointer into it. p shouldn't keep the buffer alive, since whoever
+      // owns it, will scan it; OR
+      // * p could be a stale pointer of any interesting type, that randomly
+      // is pointing to recycled memory. ignoring it is actually desireable.
+      return;
+    }
+    auto old = h->marks();
+    if (old != mark_version_) {
+      h->setmarks(mark_version_);
+      ++marked_;
+      xwork_.push_back(h);
+      max_worklist_ = std::max(max_worklist_, xwork_.size());
       assert(checkEnqueuedKind(h));
     }
   } else if (apcgc) {
@@ -301,7 +330,7 @@ NEVER_INLINE void Collector::init() {
         if (!type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
           ++unknown_;
           h->setmarks(mark_version_);
-          enqueue(h);
+          cwork_.push_back(h);
         }
       }
     },
@@ -315,45 +344,140 @@ NEVER_INLINE void Collector::init() {
   ptrs_.prepare();
 }
 
+// Collect the heap using mark/sweep.
+//
+// Init: prepare object-start bitmaps, and mark/enqueue unknown allocations.
+//
+// Trace (two-phase):
+// 1. scan all conservative roots, or hybrid roots which might have
+//    conservative fields. Also scan any conservative heap objects reached
+//    via conservative scanning. After phase 1, all conservative scanning is
+//    done and it's safe to move objects while tracing.
+// 2. scan all exact roots and exact heap objects. Ignore any exactly scanned
+//    pointers to conservatively scanned objects (see comments in exactEnqueue()
+//    this is safe).
+//
+// Trace (one-phase). This is used if no exact type_scanners are available.
+// 1. scan all roots, then the transitive closures of all heap objects,
+//    with no moving.
+//
+// Sweep:
+// 1. iterate through any tables holding "weak" pointers, clearing entries
+//    if the target(s) aren't marked, including nulling out WeakRef objects.
+// 2. free all unmarked objects, except SmallMalloc/BigMalloc nodes: We don't
+//    sweep "unknown" allocations or req::container buffers, because we don't
+//    expect to have found all pointers to them. Any other objects allocated
+//    this way are treated similarly.
+
+template <bool apcgc> void Collector::collect() {
+  init();
+  if (type_scan::hasNonConservative()) {
+    traceConservative<apcgc>();
+    traceExact<apcgc>();
+  } else {
+    traceAll<apcgc>();
+  }
+  sweep();
+}
+
+// Phase 1: Scan only conservative or mixed conservative/exact roots, plus any
+// malloc'd heap objects that are themselves fully conservatively scanned.
 template <bool apcgc>
-void Collector::finish_typescan() {
-  type_scanner_.finish(
-    [this](const void* p, std::size_t size) {
-      // we could extract the addresses of ambiguous ptrs, if desired.
-      conservativeScan<apcgc>(p, size);
-    },
-    [this](const void** addr) {
+NEVER_INLINE void Collector::traceConservative() {
+  auto finish = [&] {
+    for (auto r : type_scanner_.m_conservative) {
+      conservativeScan<apcgc>(r.first, r.second);
+    }
+    type_scanner_.m_conservative.clear();
+    // Accumulate m_addrs and m_weak until phase 2.
+  };
+  auto const t0 = cpu_ns();
+  iterateConservativeRoots(
+    [&](const void* p, size_t size, type_scan::Index tyindex) {
+      type_scanner_.scanByIndex(tyindex, p, size);
+      finish();
+    });
+  auto const t1 = cpu_ns();
+  roots_ns_ += t1 - t0;
+  cscanned_roots_ = cscanned_;
+  while (!cwork_.empty()) {
+    auto h = cwork_.back();
+    cwork_.pop_back();
+    scanHeapObject(h, type_scanner_);
+    finish();
+  }
+  mark_ns_ += cpu_ns() - t1;
+  pinned_ = marked_;
+}
+
+// Phase 2: Scan pointers deferred from phase 1, exact roots, and the remainder
+// of the heap, which is expected to be fully exactly-scannable. Assert if
+// any conservatively-scanned regions are found in this phase. Any unmarked
+// objects found in this phase may be safely copied.
+template <bool apcgc>
+NEVER_INLINE void Collector::traceExact() {
+  auto finish = [&] {
+    assert(cwork_.empty() && type_scanner_.m_conservative.empty());
+    for (auto addr : type_scanner_.m_addrs) {
+      xscanned_ += sizeof(*addr);
+      exactEnqueue<apcgc>(*addr);
+    }
+    for (auto weak : type_scanner_.m_weak) {
+      enqueueWeak(static_cast<const WeakRefDataHandle*>(weak));
+    }
+    type_scanner_.m_addrs.clear();
+    type_scanner_.m_weak.clear();
+  };
+  auto const t0 = cpu_ns();
+  finish(); // from phase 1
+  iterateExactRoots(
+    [&](const void* p, size_t size, type_scan::Index tyindex) {
+      type_scanner_.scanByIndex(tyindex, p, size);
+      finish();
+    });
+  auto const t1 = cpu_ns();
+  roots_ns_ += t1 - t0;
+  xscanned_roots_ = xscanned_;
+  while (!xwork_.empty()) {
+    auto h = xwork_.back();
+    xwork_.pop_back();
+    scanHeapObject(h, type_scanner_);
+    finish();
+  }
+  mark_ns_ += cpu_ns() - t1;
+}
+
+// Scan all roots & heap in one pass because exact-scanning was disabled.
+template <bool apcgc>
+NEVER_INLINE void Collector::traceAll() {
+  auto finish = [&] {
+    type_scanner_.finish([&](const void* start, size_t size) {
+      conservativeScan<apcgc>(start, size);
+    }, [&](const void** addr) {
       xscanned_ += sizeof(*addr);
       checkedEnqueue<apcgc>(*addr);
-    },
-    [this](const void* weak) {
-      enqueueWeak(reinterpret_cast<const WeakRefDataHandle*>(weak));
-    }
-  );
-}
-
-template <bool apcgc>
-NEVER_INLINE void Collector::traceRoots() {
+    }, [&](const void* weak) {
+      enqueueWeak(static_cast<const WeakRefDataHandle*>(weak));
+    });
+  };
   auto const t0 = cpu_ns();
-  SCOPE_EXIT { roots_ns_ = cpu_ns() - t0; };
   iterateRoots([&](const void* p, size_t size, type_scan::Index tyindex) {
     type_scanner_.scanByIndex(tyindex, p, size);
-    finish_typescan<apcgc>();
+    finish();
   });
+  auto const t1 = cpu_ns();
+  roots_ns_ += t1 - t0;
   cscanned_roots_ = cscanned_;
   xscanned_roots_ = xscanned_;
-}
-
-template <bool apcgc>
-NEVER_INLINE void Collector::trace() {
-  auto const t0 = cpu_ns();
-  SCOPE_EXIT { mark_ns_ = cpu_ns() - t0; };
-  while (!work_.empty()) {
-    auto h = work_.back();
-    work_.pop_back();
+  while (!cwork_.empty() || !xwork_.empty()) {
+    auto& work = !cwork_.empty() ? cwork_ : xwork_;
+    auto h = work.back();
+    work.pop_back();
     scanHeapObject(h, type_scanner_);
-    finish_typescan<apcgc>();
+    finish();
   }
+  mark_ns_ += cpu_ns() - t1;
+  pinned_ = marked_;
 }
 
 // another pass through the heap, this time using the PtrMap we computed
@@ -556,15 +680,11 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
     RuntimeOption::EvalGCForAPC ? &APCGCManager::getInstance() : nullptr,
     mark_version
   );
-  collector.init();
   if (RuntimeOption::EvalGCForAPC) {
-    collector.traceRoots<true>();
-    collector.trace<true>();
+    collector.collect<true>();
   } else {
-    collector.traceRoots<false>();
-    collector.trace<false>();
+    collector.collect<false>();
   }
-  collector.sweep();
   if (t_enable_samples) {
     logCollection(phase, collector);
   }

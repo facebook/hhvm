@@ -1372,21 +1372,6 @@ bool PackedArray::Uasort(ArrayData* ad, const Variant&) {
   return true;
 }
 
-ArrayData* PackedArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
-  assert(checkInvariants(ad));
-  return MixedArray::ZSetInt(ToMixedCopy(ad), k, v);
-}
-
-ArrayData* PackedArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
-  assert(checkInvariants(ad));
-  return MixedArray::ZSetStr(ToMixedCopy(ad), k, v);
-}
-
-ArrayData* PackedArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
-  assert(checkInvariants(ad));
-  return MixedArray::ZAppend(ToMixedCopy(ad), v, key_ptr);
-}
-
 ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
   assert(checkInvariants(array));
   assert(!array->empty());

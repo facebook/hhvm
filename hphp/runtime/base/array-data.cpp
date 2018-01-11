@@ -225,23 +225,6 @@ ArrayData* ArrayData::GetScalarArray(Variant&& arr) {
 
 //////////////////////////////////////////////////////////////////////
 
-static ArrayData*
-ZSetIntThrow(ArrayData* /*ad*/, int64_t /*k*/, RefData* /*v*/) {
-  raise_fatal_error("Unimplemented ArrayData::ZSetInt");
-}
-
-static ArrayData*
-ZSetStrThrow(ArrayData* /*ad*/, StringData* /*k*/, RefData* /*v*/) {
-  raise_fatal_error("Unimplemented ArrayData::ZSetStr");
-}
-
-static ArrayData*
-ZAppendThrow(ArrayData* /*ad*/, RefData* /*v*/, int64_t* /*key_ptr*/) {
-  raise_fatal_error("Unimplemented ArrayData::ZAppend");
-}
-
-//////////////////////////////////////////////////////////////////////
-
 static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
               "add new kinds here");
 
@@ -755,46 +738,6 @@ const ArrayFunctions g_array_funcs = {
    *      - AdvanceMArrayIter
    */
   DISPATCH(Escalate)
-
-  /*
-   * ArrayData* ZSet{Int,Str}
-   * ArrayData* ZAppend
-   *
-   *   These functions are part of the zend compat layer but their
-   *   effects currently aren't documented.
-   */
-  {
-    &PackedArray::ZSetInt,
-    &MixedArray::ZSetInt,
-    &ZSetIntThrow,
-    &ZSetIntThrow,
-    &ZSetIntThrow,
-    &MixedArray::ZSetInt,
-    &ZSetIntThrow,
-    &ZSetIntThrow,
-  },
-
-  {
-    &PackedArray::ZSetStr,
-    &MixedArray::ZSetStr,
-    &ZSetStrThrow,
-    &ZSetStrThrow,
-    &ZSetStrThrow,
-    &MixedArray::ZSetStr,
-    &ZSetStrThrow,
-    &ZSetStrThrow,
-  },
-
-  {
-    &PackedArray::ZAppend,
-    &MixedArray::ZAppend,
-    &ZAppendThrow,
-    &ZAppendThrow,
-    &ZAppendThrow,
-    &MixedArray::ZAppend,
-    &ZAppendThrow,
-    &ZAppendThrow,
-  },
 
    /*
    * ArrayData* ToPHPArray(ArrayData*, bool)

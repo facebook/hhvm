@@ -242,18 +242,6 @@ inline ArrayData* ArrayData::appendRef(member_lval v, bool copy) {
   return g_array_funcs.appendRef[kind()](this, v, copy);
 }
 
-inline ArrayData* ArrayData::zSet(int64_t k, RefData* v) {
-  return g_array_funcs.zSetInt[kind()](this, k, v);
-}
-
-inline ArrayData* ArrayData::zSet(StringData* k, RefData* v) {
-  return g_array_funcs.zSetStr[kind()](this, k, v);
-}
-
-inline ArrayData* ArrayData::zAppend(RefData* v, int64_t* key_ptr) {
-  return g_array_funcs.zAppend[kind()](this, v, key_ptr);
-}
-
 inline ssize_t ArrayData::iter_begin() const {
   return g_array_funcs.iterBegin[kind()](this);
 }

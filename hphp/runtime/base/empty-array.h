@@ -145,9 +145,6 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static constexpr auto Dequeue = &PopOrDequeue;
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* ZSetInt(ArrayData* ad, int64_t k, RefData* v);
-  static ArrayData* ZSetStr(ArrayData* ad, StringData* k, RefData* v);
-  static ArrayData* ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr);
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, member_lval v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);

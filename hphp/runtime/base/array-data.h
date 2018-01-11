@@ -484,13 +484,6 @@ public:
   ArrayData* appendRef(member_lval v, bool copy);
   ArrayData* appendRef(Variant& v, bool copy);
 
-  /*
-   * Do some undocumented Zend-compat nonsense.
-   */
-  ArrayData* zSet(int64_t k, RefData* r);
-  ArrayData* zSet(StringData* k, RefData* r);
-  ArrayData* zAppend(RefData* r, int64_t* key_ptr);
-
   /////////////////////////////////////////////////////////////////////////////
   // Iteration.
 
@@ -917,9 +910,6 @@ struct ArrayFunctions {
   void (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);
-  ArrayData* (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
-  ArrayData* (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
-  ArrayData* (*zAppend[NK])(ArrayData*, RefData* v, int64_t* key_ptr);
   ArrayData* (*toPHPArray[NK])(ArrayData*, bool);
   ArrayData* (*toDict[NK])(ArrayData*, bool);
   ArrayData* (*toVec[NK])(ArrayData*, bool);

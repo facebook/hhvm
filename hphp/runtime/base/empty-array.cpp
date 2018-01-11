@@ -368,28 +368,4 @@ ArrayData* EmptyArray::ToKeyset(ArrayData*, bool) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* EmptyArray::ZSetInt(ArrayData* /*ad*/, int64_t k, RefData* v) {
-  auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
-  DEBUG_ONLY auto const tmp = arr->zSet(k, v);
-  assert(tmp == arr);
-  return arr;
-}
-
-ArrayData* EmptyArray::ZSetStr(ArrayData* /*ad*/, StringData* k, RefData* v) {
-  auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
-  DEBUG_ONLY auto const tmp = arr->zSet(k, v);
-  assert(tmp == arr);
-  return arr;
-}
-
-ArrayData*
-EmptyArray::ZAppend(ArrayData* /*ad*/, RefData* v, int64_t* key_ptr) {
-  auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
-  DEBUG_ONLY auto const tmp = arr->zAppend(v, key_ptr);
-  assert(tmp == arr);
-  return arr;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }

@@ -706,13 +706,6 @@ bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
 // Append/insert/update.
 
 ALWAYS_INLINE
-ArrayData* MixedArray::zInitVal(TypedValue& tv, RefData* v) {
-  tv.m_type = KindOfRef;
-  tv.m_data.pref = v;
-  return this;
-}
-
-ALWAYS_INLINE
 MixedArray* MixedArray::initRef(TypedValue& tv, member_lval v) {
   tvBoxIfNeeded(v);
   refDup(v.tv(), tv);
@@ -729,16 +722,6 @@ MixedArray* MixedArray::initWithRef(TypedValue& tv, TypedValue v) {
 ALWAYS_INLINE
 MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
   return initWithRef(tv, *v.asTypedValue());
-}
-
-ALWAYS_INLINE
-ArrayData* MixedArray::zSetVal(TypedValue& tv, RefData* v) {
-  // Dec ref the old value
-  tvDecRefGen(tv);
-  // Store the RefData but do not increment the refcount
-  tv.m_type = KindOfRef;
-  tv.m_data.pref = v;
-  return this;
 }
 
 /*
@@ -1018,33 +1001,6 @@ ArrayData* MixedArray::update(K k, Cell data) {
   return this;
 }
 
-template <class K> ALWAYS_INLINE
-ArrayData* MixedArray::zSetImpl(K k, RefData* data) {
-  auto p = insert(k);
-  if (p.found) {
-    return zSetVal(p.tv, data);
-  }
-  return zInitVal(p.tv, data);
-}
-
-ALWAYS_INLINE
-ArrayData* MixedArray::zAppendImpl(RefData* data, int64_t* key_ptr) {
-  if (UNLIKELY(m_nextKI < 0)) {
-    raise_warning("Cannot add element to the array as the next element is "
-                  "already occupied");
-    return this;
-  }
-  int64_t ki = m_nextKI;
-  auto h = hash_int64(ki);
-  auto ei = findForNewInsert(h);
-  assert(!isValidPos(ei));
-  auto e = allocElm(ei);
-  e->setIntKey(ki, h);
-  m_nextKI = ki + 1;
-  *key_ptr = ki;
-  return zInitVal(e->data, data);
-}
-
 member_lval MixedArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   return asMixed(ad)->prepareForInsert(copy)->addLvalImpl<true>(k);
 }
@@ -1153,21 +1109,6 @@ ArrayData*
 MixedArray::AddStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
   assert(!ad->exists(k));
   return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
-}
-
-ArrayData*
-MixedArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
-  return asMixed(ad)->prepareForInsert(false)->zSetImpl(k, v);
-}
-
-ArrayData*
-MixedArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
-  return asMixed(ad)->prepareForInsert(false)->zSetImpl(k, v);
-}
-
-ArrayData*
-MixedArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
-  return asMixed(ad)->prepareForInsert(false)->zAppendImpl(v, key_ptr);
 }
 
 //=============================================================================

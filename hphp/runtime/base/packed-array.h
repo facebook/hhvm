@@ -126,9 +126,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool Uksort(ArrayData*, const Variant&);
   static bool Usort(ArrayData*, const Variant&);
   static bool Uasort(ArrayData*, const Variant&);
-  static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
-  static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
-  static ArrayData* ZAppend(ArrayData*, RefData* v, int64_t* key_ptr);
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, member_lval v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);

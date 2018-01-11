@@ -340,10 +340,6 @@ public:
                                   TypedValue v, bool copy);
   static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
                                   TypedValue v, bool copy);
-  // TODO(t4466630) Do we want to raise warnings in zend compatibility mode?
-  static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
-  static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
-  static ArrayData* ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr);
   static ArrayData* SetRefInt(ArrayData* ad, int64_t k,
                               member_lval v, bool copy);
   static ArrayData* SetRefStr(ArrayData* ad, StringData* k,
@@ -645,9 +641,6 @@ private:
   template <class K> ArrayData* updateWithRef(K k, TypedValue data);
   template <class K> ArrayData* updateRef(K k, member_lval data);
 
-  template <class K> ArrayData* zSetImpl(K k, RefData* data);
-  ArrayData* zAppendImpl(RefData* data, int64_t* key_ptr);
-
   void adjustMArrayIter(ssize_t pos);
   void eraseNoCompact(ssize_t pos);
   void erase(ssize_t pos) {
@@ -664,9 +657,6 @@ private:
   MixedArray* initWithRef(TypedValue& tv, TypedValue v);
   MixedArray* initWithRef(TypedValue& tv, const Variant& v);
   MixedArray* moveVal(TypedValue& tv, TypedValue v);
-
-  ArrayData* zInitVal(TypedValue& tv, RefData* v);
-  ArrayData* zSetVal(TypedValue& tv, RefData* v);
 
   /*
    * Helper routine for inserting elements into a new array

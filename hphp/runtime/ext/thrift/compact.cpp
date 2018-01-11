@@ -558,8 +558,8 @@ struct CompactReader {
       }
 
       // TODO: we eventually want to return seqid to the caller
-      /*uint32_t seqid =*/ readVarint(); // unused
-      /*Variant name =*/ readString(); // unused
+      readVarint(); // seqid (unused)
+      skip(T_STRING); // name (unused)
 
       if (type == T_REPLY) {
         Object ret = create_object(resultClassName, Array());

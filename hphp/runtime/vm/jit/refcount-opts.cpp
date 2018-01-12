@@ -1520,30 +1520,31 @@ RCState entry_rc_state(Env& env) {
   return ret;
 }
 
-bool pessimize_for_merge(ASetInfo& dset, const ASetInfo& sset) {
-  auto const lower_bound = std::min(dset.lower_bound, sset.lower_bound);
-  if (dset.lower_bound == lower_bound &&
-      dset.unsupported_refs == lower_bound &&
-      dset.memory_support.none()) {
-    return false;
-  }
-  dset.lower_bound = dset.unsupported_refs = lower_bound;
-  dset.memory_support.reset();
-  return true;
-}
-
 bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   auto changed = false;
 
-  // Catch any issues with this early, instead of waiting for the full check
-  // function.
-  assertx(src.lower_bound >= 0);
-  assertx(dst.lower_bound >= 0);
-  assertx(dst.unsupported_refs >= 0 && dst.unsupported_refs <= dst.lower_bound);
-  assertx(src.unsupported_refs >= 0 && src.unsupported_refs <= src.lower_bound);
   auto const lower_bound = std::min(dst.lower_bound, src.lower_bound);
+
+  /*
+   * We're going to reduce the memory support to the intersection of
+   * src and dst's memory support. to avoid worrying about a single
+   * location supporting multiple alias sets.
+   *
+   * When we do that, we have to (logically) increase both src and
+   * dst's unsupported_refs by the numberof support locations removed.
+   */
+  auto const new_memory_support = dst.memory_support & src.memory_support;
+  auto const dst_count = dst.memory_support.count();
+  auto const src_count = src.memory_support.count();
+  auto const new_count = new_memory_support.count();
+  auto const dst_delta = dst_count - new_count;
+  auto const src_delta = src_count - new_count;
+
+  const int dst_unsupported_refs = dst.unsupported_refs + dst_delta;
+  const int src_unsupported_refs = src.unsupported_refs + src_delta;
+
   auto const unsupported_refs =
-    std::min(std::max(dst.unsupported_refs, src.unsupported_refs),
+    std::min(std::max(dst_unsupported_refs, src_unsupported_refs),
              lower_bound);
 
   if (dst.lower_bound != lower_bound) {
@@ -1556,59 +1557,10 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
     changed = true;
   }
 
-  return changed;
-}
-
-bool merge_memory_support(RCState& dstState, const RCState& srcState) {
-  auto changed = false;
-  for (auto asetID = uint32_t{0}; asetID < dstState.asets.size(); ++asetID) {
-    auto& dst = dstState.asets[asetID];
-    auto& src = srcState.asets[asetID];
-    /*
-     * If both the src and dst sets have enough memory support for
-     * their lower bound, merge memory support by keeping the
-     * intersection of support locations, and increasing
-     * unsupported_refs to compensate for the other ones.  Since they
-     * both have enough lower bound for their support, we know we can
-     * account for everything here.
-     *
-     * On the other hand, if one or both of them has more memory support bits
-     * than lower bound, we just pessimize everything.
-     *
-     * We do all of this conservative merging to simplify things during each
-     * block's analysis.  If we weren't merging this way, we would have to
-     * union the incoming memory bits, which easily leads to situations where
-     * more than one must alias set is supported by the same memory location.
-     * But we want our state structures to have support_map pointing to at most
-     * one must-alias-set for each location.
-     */
-    if (dst.lower_bound - dst.unsupported_refs >= dst.memory_support.count() &&
-        src.lower_bound - src.unsupported_refs >= src.memory_support.count()) {
-      auto const new_memory_support = dst.memory_support & src.memory_support;
-      if (dst.memory_support != new_memory_support) {
-        auto const old_count = dst.memory_support.count();
-        auto const new_count = new_memory_support.count();
-        auto const delta     = old_count - new_count;
-        assertx(delta > 0);
-
-        dst.unsupported_refs += delta;
-        dst.memory_support = new_memory_support;
-        changed = true;
-
-        assertx(dst.lower_bound >= dst.unsupported_refs);
-        assertx(dst.lower_bound - dst.unsupported_refs >=
-                dst.memory_support.count());
-      }
-      continue;
-    }
-
-    FTRACE(5, "     {} pessimizing during merge\n", asetID);
-    for (auto other = uint32_t{0}; other < dstState.asets.size(); ++other) {
-      if (pessimize_for_merge(dstState.asets[other], srcState.asets[other])) {
-        changed = true;
-      }
-    }
-    break;
+  if (dst_delta) {
+    assertx(dst.memory_support != new_memory_support);
+    dst.memory_support = new_memory_support;
+    changed = true;
   }
 
   return changed;
@@ -1626,11 +1578,6 @@ bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
   dst.support_map.fill(-1);
 
   auto changed = false;
-
-  // First merge memory support information.  This is a separate step, because
-  // this merge can cause changes to other may-alias sets at each stage (it may
-  // pessimize all the sets in some situations).
-  if (merge_memory_support(dst, src)) changed = true;
 
   dst.has_unsupported_refs = false;
   for (auto asetID = uint32_t{0}; asetID < dst.asets.size(); ++asetID) {

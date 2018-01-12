@@ -8720,6 +8720,7 @@ FuncEmitter* EmitterVisitor::createInOutWrapper(MethodStatementPtr m,
     scope->hasRefParams() &&
     !scope->isAsync() &&
     !scope->isGenerator() &&
+    !scope->isAbstract() &&
     !m->isRef();
 
   // InOut functions must always have a wrapper created for them, however, ref

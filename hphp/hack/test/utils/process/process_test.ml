@@ -9,6 +9,17 @@ let test_echo () =
   | _ ->
     false
 
+let test_echo_in_a_loop () =
+  let rec loop acc = function
+  | 0 -> acc
+  | n ->
+    let acc = acc && (test_echo ()) in
+    loop acc (n-1)
+  in
+  (* There was a bug leaking 2 file descriptors per Process execution, and
+   * running it over 500 times would run out of FDs *)
+  loop true 600
+
 let test_process_read_idempotent () =
   let process = Process.exec "echo" [ "hello world"; ] in
   let result = Process.read_and_wait_pid ~timeout:2 process in
@@ -131,6 +142,7 @@ let test_chdir () =
 
 let tests = [
   ("test_echo", test_echo);
+  ("test_echo_in_a_loop", test_echo_in_a_loop);
   ("test_process_read_idempotent", test_process_read_idempotent);
   ("test_env_variable", test_env_variable);
   ("test_process_timeout", test_process_timeout);

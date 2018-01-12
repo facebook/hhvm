@@ -58,10 +58,11 @@ let rec maybe_consume ?(max_time=0.0) fd_ref acc =
       | [], _, _ -> ()
       | _ ->
         let bytes_read = Unix.read fd buffer 0 chunk_size in
-        if bytes_read = 0 then
+        if bytes_read = 0 then begin
           (** EOF reached. *)
+          Unix.close fd;
           fd_ref := None
-        else
+        end else
           let chunk = String.sub buffer 0 bytes_read in
           Stack.push chunk acc;
           let consumed_t = Unix.time () -. start_t in

@@ -1287,66 +1287,6 @@ bool irrelevant_inst(const IRInstruction& inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Walk through each block, and remove nearby IncRef/DecRef[NZ] pairs that
- * operate on the same must-alias-set, if there are obviously no instructions
- * in between them that could read the reference count of that object.
- *
- * Then run the same pass, but backwards, which removes nearby DecRef[NZ]/IncRef
- * likewise.
- */
-void remove_trivial_incdecs(Env& env) {
-  FTRACE(2, "remove_trivial_incdecs ---------------------------------\n");
-  auto incs = jit::vector<IRInstruction*>{};
-  for (auto& blk : env.rpoBlocks) {
-    auto process = [&] (IRInstruction& inst) {
-      if (inst.is(IncRef)) {
-        incs.push_back(&inst);
-        return;
-      }
-
-      if (inst.is(DecRef, DecRefNZ)) {
-        if (incs.empty()) return;
-        auto const setID = env.asetMap[inst.src(0)];
-        auto const to_rm = [&] () -> IRInstruction* {
-          for (auto it = begin(incs); it != end(incs); ++it) {
-            auto const candidate = *it;
-            if (env.asetMap[candidate->src(0)] == setID) {
-              incs.erase(it);
-              return candidate;
-            }
-          }
-          // This DecRef may rely on one of the IncRefs, since we aren't
-          // handling may-alias stuff here.
-          incs.clear();
-          return nullptr;
-        }();
-        if (to_rm == nullptr) return;
-
-        FTRACE(3, "    ** trivial pair: {}, {}\n", *to_rm, inst);
-        remove_helper(env, to_rm);
-        remove_helper(env, &inst);
-        return;
-      }
-
-      if (!irrelevant_inst(inst)) {
-        incs.clear();
-      }
-    };
-
-    incs.clear();
-    for (auto& inst : *blk) {
-      process(inst);
-    }
-    incs.clear();
-    for (auto iter = blk->rbegin(); iter != blk->rend(); ++iter) {
-      process(*iter);
-    }
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
 struct LdStaticLocHashEqual {
   size_t operator()(const IRInstruction* inst) const {
     return inst->extra<LdStaticLoc>()->hash();
@@ -1400,7 +1340,6 @@ void find_alias_sets(Env& env) {
       auto const res = ldStaticLocs.insert(canon->inst());
       if (!res.second) canon = (*res.first)->dst();
     }
-
 
     if (env.asetMap[canon] != -1) {
       id = env.asetMap[canon];
@@ -3590,6 +3529,714 @@ void sink_incs(Env& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// Partial redundancy elimination of IncRef/DecRef pairs
+//
+// This pass chooses a direction - either look for Incs followed by
+// Decs or Decs followed by Incs. It then computes availability for
+// the kind that comes first, and anticipability for the kind that
+// comes second. Lets assume we're doing Incs follwed by Decs.
+//
+// An I is partially redundant if it's locally available, and
+// partially anticipated out, because on some of the paths from here
+// to the exit of the region there is a D with no interference in
+// between. Similarly a D is partially redundant if it's locally
+// anticipated, and partially available in.
+//
+// Note that being partially redundant doesn't necessarily mean we can
+// improve things - eg in the following case, both I and D are
+// partially redundant, but there's nowhere we can insert Is or Ds to
+// make them redundant:
+//
+//  AntLoc +---+     +---+
+//  AntIn  | D |     |   |
+//  PavlIn +---+     +---+ PavlIn
+//           ^         ^
+//            \       /
+//             \     /
+//              \   /
+//      PantOut +---+
+//      PantIn  |   |
+//      PavlIn  +---+
+//                |
+//      PantOut +---+
+//      PantIn  |   |
+//      PavlIn  +---+
+//               ^ ^
+//              /   \
+//             /     \
+//            /       \
+// PantOut +---+     +---+ PantOut
+// AvlOut  | I |     |   |
+// AvlLoc  +---+     +---+
+//
+// Generally, if we have a partially redundant D we can recursively
+// walk its predecessors stopping when we find a place where its fully
+// redundant, or where we can insert a D that isn't partially
+// redundant, or where we can't insert the D because the SSATmp isn't
+// defined, or the D isn't anticipated. If we hit the last case, we
+// have to give up on that D, and mark it altered, and not AntIn in
+// its block, propagate the attributes again, and start over (which
+// may then cause previously redundant Is to be no longer
+// redundant). Otherwise the walk must bottom out somewhere in one of
+// the other two cases. Anywhere its fully redundant there's nothing
+// to do; if its AntOut and PavlIn in at least one successor, we can
+// insert a copy.
+//
+// A couple of examples:
+//
+// AntLoc +---+     +---+ AntLoc        The Ds are partially redundant,
+// AntIn  | D |     | D | AntIn    <--  and we can insert a D to make
+// PavlIn +---+     +---+ PavlIn        them fully redundant, so we can
+//          ^         ^                 delete them.
+//           \       /
+//            \     /
+//             \   /
+//      AntOut +---+
+//      AntIn  |   |
+//      PavlIn +---+
+//               |
+//      AntOut +---+
+//      AntIn  |   |
+//      PavlIn +---+
+//              ^ ^
+//             /   \
+//            /     \
+//           /       \
+// AntOut +---+     +---+ AntOut      D is AntOut, and I is PavlIn
+// AvlOut | I |     |   |         <-- in its successor, so insert D
+// AvlLoc +---+     +---+             here. The I is already fully
+//                                    redundant, so delete it.
+//
+//
+// AntLoc  +---+
+// AntIn   | D |   <-- D is fully redundant, so delete it.
+// AvlIn   +---+
+//           ^          +---+          I is AvlIn, and D is PantOut
+//           |        ->|   |     <--  in its predecessor, so insert
+//           |      /   +---+ AvlIn    I here.
+//           |    /
+//           |  /
+// PantOut +-+-+
+// PantIn  |   |        +---+          I is AvlIn, and D is PantOut
+// AvlIn   +---+      ->|   |     <--  in its predecessor, so insert
+//           ^      /   +---+ AvlIn    I here.
+//           |    /
+//           |  /
+// PantOut +-+-+
+// PantIn  |   |
+// AvlIn   +---+
+//           ^
+//           |
+//           |
+// PantOut +-+-+        I is partially redundant, and can be
+// AvlOut  | I |   <--  made fully redundant by inserting above,
+// AvlLoc  +---+        so delete it.
+
+using IncDecBits = boost::dynamic_bitset<>;
+
+struct PreBlockInfo {
+  explicit PreBlockInfo(uint32_t sz) :
+      rpoId(0),
+      altLoc(sz),
+      avlLoc(sz),
+      antLoc(sz),
+      avlIn(sz),
+      avlOut(sz),
+      pavlIn(sz),
+      pavlOut(sz),
+      antIn(sz),
+      antOut(sz),
+      pantIn(sz),
+      pantOut(sz)
+    {}
+
+  uint32_t   rpoId;
+  uint32_t   genId;
+
+  // Bits set here block Incs and Decs of the corresponding ASetID
+  IncDecBits altLoc;
+  // We can either pair Incs followed by Decs, or Decs followed by Incs.
+  // avlLoc indicates that the leader is locally available, and antLoc
+  // indicates that the follower is locally anticipated.
+  IncDecBits avlLoc;
+  IncDecBits antLoc;
+
+  IncDecBits avlIn;
+  IncDecBits avlOut;
+  IncDecBits pavlIn;
+  IncDecBits pavlOut;
+
+  IncDecBits antIn;
+  IncDecBits antOut;
+  IncDecBits pantIn;
+  IncDecBits pantOut;
+};
+
+using BlockState = StateVector<Block, PreBlockInfo>;
+
+struct PreEnv {
+  using IncDecKey = std::tuple<Block*,uint32_t,bool>; /* blk, id, at front */
+  using InsertMap = std::unordered_map<IncDecKey, SSATmp*>;
+
+  explicit PreEnv(Env& env) :
+      env(env), state(env.unit, PreBlockInfo(env.asets.size())), curGen(0),
+      avlQ(env.rpoBlocks.size()),
+      antQ(env.rpoBlocks.size()) {
+    uint32_t id = 0;
+    for (auto const blk : env.rpoBlocks) {
+      auto& s = state[blk];
+      s.genId = 0;
+      s.rpoId = id;
+      avlQ.push(id);
+      antQ.push(id);
+      ++id;
+    }
+  }
+
+  Env& env;
+  BlockState state;
+  uint32_t  curGen;
+  InsertMap insMap;
+  std::vector<std::pair<Block*, SSATmp*>> to_insert;
+
+  std::set<uint32_t> reprocess;
+  dataflow_worklist<uint32_t, std::greater<uint32_t>> avlQ;
+  dataflow_worklist<uint32_t, std::less<uint32_t>> antQ;
+};
+
+void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
+  FTRACE(3, "Blk(B{}) <-{}\n", blk->id(),
+         [&] {
+           std::string ret;
+           blk->forEachPred([&] (Block* pred) {
+               folly::format(&ret, " B{}", pred->id());
+             });
+           return ret;
+         }());
+  auto& s = penv.state[blk];
+  bool again;
+  do {
+    again = false;
+    for (auto iter = blk->begin(); iter != blk->end(); ++iter) {
+      auto& inst = *iter;
+      auto remove = [&] {
+        auto const id = penv.env.asetMap[inst.src(0)];
+        auto it = iter;
+        while (true) {
+          auto& i2 = *--it;
+          if (i2.is(IncRef, DecRef, DecRefNZ) &&
+              penv.env.asetMap[i2.src(0)] == id) {
+            assertx(incDec == i2.is(IncRef));
+            FTRACE(3, "    ** trivial pair: {}, {}\n", inst, i2);
+            remove_helper(penv.env, &i2);
+            remove_helper(penv.env, &inst);
+            s.avlLoc.reset(id);
+            return;
+          }
+          assertx(it != blk->begin());
+        }
+      };
+      FTRACE(4, "    inst: {}\n", inst.toString());
+      auto setAvlAnt = [&] (bool avl) {
+        auto const id = penv.env.asetMap[inst.src(0)];
+        if (id < 0) {
+          assertx(inst.src(0)->type() <= TUncounted);
+          FTRACE(3, "    ** kill uncounted inc/dec: {}\n", inst);
+          remove_helper(penv.env, &inst);
+          return;
+        }
+        if (avl) {
+          if (inst.is(DecRef)) {
+            s.altLoc.set();
+            // a DecRef could run arbitrary code, and we're not
+            // tracking may alias sets, so we have to give up on all
+            // preceding DecRef/DecRefNZ's
+            s.avlLoc.reset();
+            FTRACE(4, "     Altered-decref\n");
+          }
+          FTRACE(4, "     avlLoc: {}\n", id);
+          s.avlLoc.set(id);
+          // also set altLoc, so that this block isn't transparent for ANT
+          s.altLoc.set(id);
+          return;
+        }
+        if (s.avlLoc.test(id)) {
+          remove();
+          s.avlLoc.reset();
+          s.antLoc.reset();
+          s.altLoc.reset();
+          again = true;
+        } else {
+          auto cur = s.altLoc.test(id);
+          if (inst.is(DecRef)) {
+            s.altLoc.set();
+            // see the comments above, in the avl case
+            s.avlLoc.reset();
+            FTRACE(4, "     Altered-decref\n");
+          }
+          if (!cur) {
+            FTRACE(4, "     antLoc: {}\n", id);
+            s.antLoc.set(id);
+            // also set altLoc, so that this block isn't transparent for AVL
+            s.altLoc.set(id);
+          }
+        }
+      };
+
+      if (inst.is(IncRef)) {
+        setAvlAnt(incDec);
+        if (again) break;
+        continue;
+      }
+
+      if (inst.is(DecRef, DecRefNZ)) {
+        setAvlAnt(!incDec);
+        if (again) break;
+        continue;
+      }
+
+      if (!irrelevant_inst(inst)) {
+        FTRACE(4, "     Altered-all\n");
+        s.altLoc.set();
+        s.avlLoc.reset();
+      }
+    }
+  } while (again);
+
+  if (blk->next()) {
+    FTRACE(4, "    -> B{}\n", blk->next()->id());
+  }
+}
+
+void pre_compute_available(PreEnv& penv) {
+  while (!penv.avlQ.empty()) {
+    auto& blk = penv.env.rpoBlocks[penv.avlQ.pop()];
+    auto& s = penv.state[blk];
+    auto first = true;
+    blk->forEachPred(
+      [&] (Block* pred) {
+        auto &ps = penv.state[pred];
+        if (first) {
+          s.avlIn = ps.avlOut;
+          s.pavlIn = ps.pavlOut;
+        } else {
+          s.avlIn &= ps.avlOut;
+          s.pavlIn |= ps.pavlOut;
+        }
+        first = false;
+      }
+    );
+    auto avlOut = (s.avlIn - s.altLoc) | s.avlLoc;
+    auto pavlOut = (s.pavlIn - s.altLoc) | s.avlLoc;
+    auto changed = false;
+    if (s.avlOut != avlOut) {
+      s.avlOut = std::move(avlOut);
+      changed = true;
+    }
+    if (s.pavlOut != pavlOut) {
+      s.pavlOut = std::move(pavlOut);
+      changed = true;
+    }
+    if (changed) {
+      auto propagate = [&] (Block* succ) {
+        if (!succ) return;
+        penv.avlQ.push(penv.state[succ].rpoId);
+      };
+      propagate(blk->next());
+      propagate(blk->taken());
+    }
+  }
+}
+
+void pre_compute_anticipated(PreEnv& penv) {
+  while (!penv.antQ.empty()) {
+    auto& blk = penv.env.rpoBlocks[penv.antQ.pop()];
+    auto& s = penv.state[blk];
+    auto first = true;
+    blk->forEachSucc(
+      [&] (Block* succ) {
+        auto &ss = penv.state[succ];
+        if (first) {
+          s.antOut = ss.antIn;
+          s.pantOut = ss.pantIn;
+        } else {
+          s.antOut &= ss.antIn;
+          s.pantOut |= ss.pantIn;
+        }
+        first = false;
+      }
+    );
+    auto antIn = (s.antOut - s.altLoc) | s.antLoc;
+    auto pantIn = (s.pantOut - s.altLoc) | s.antLoc;
+    auto changed = false;
+    if (s.antIn != antIn) {
+      s.antIn = std::move(antIn);
+      changed = true;
+    }
+    if (s.pantIn != pantIn) {
+      s.pantIn = std::move(pantIn);
+      changed = true;
+    }
+    if (changed) {
+      blk->forEachPred(
+        [&] (Block* pred) {
+          penv.antQ.push(penv.state[pred].rpoId);
+        }
+      );
+    }
+  }
+}
+
+void pre_insert(PreEnv& penv, bool incDec) {
+  for (auto& elm : penv.insMap) {
+    auto const tmp = elm.second;
+    auto const blk = std::get<0>(elm.first);
+    auto const id DEBUG_ONLY = std::get<1>(elm.first);
+    auto const atFront = std::get<2>(elm.first);
+    auto const op = atFront == incDec ? IncRef : DecRef;
+    FTRACE(3, "insert: {}({}) at {} in blk({})\n",
+           op == IncRef ? "IncRef" : "DecRef",
+           id,
+           atFront ? "front" : "back",
+           blk->id());
+    auto const bcctx = (atFront ? blk->begin() : blk->backIter())->bcctx();
+    auto const inst = op == IncRef ?
+      penv.env.unit.gen(op, bcctx, tmp) :
+      penv.env.unit.gen(op, bcctx, DecRefData(-1), tmp);
+    if (atFront) {
+      blk->prepend(inst);
+    } else if (blk->taken()) {
+      auto const back = blk->backIter();
+      assertx(irrelevant_inst(*back));
+      blk->insert(back, inst);
+    } else {
+      blk->push_back(inst);
+    }
+    penv.reprocess.insert(penv.state[blk].rpoId);
+  }
+}
+
+bool pre_find_insertions(PreEnv& penv, Block* blk, bool atFront, SSATmp* tmp);
+
+bool pre_find_insertions_helper(PreEnv& penv,
+                                Block* blk, bool atFront, SSATmp* tmp) {
+  auto& s = penv.state[blk];
+  if (s.genId == penv.curGen) return true;
+  s.genId = penv.curGen;
+  auto id = penv.env.asetMap[tmp];
+  assertx(id >= 0);
+  if (atFront) {
+    // If its not available in, there's nothing we can do.
+    if (!s.avlIn.test(id)) return false;
+    // If its anticipated in, its dead on this path, and we're done.
+    if (s.antIn.test(id)) return true;
+  } else {
+    // If its not anticipated out, there's nothing we can do.
+    if (!s.antOut.test(id)) return false;
+    // If its available out, its dead on this path, and we're done.
+    if (s.avlOut.test(id)) return true;
+  }
+
+  auto const insertHere = [&] {
+    // If its not partially {anticipated in|available out}, we need to
+    // insert it.
+    if (!(atFront ? s.pantIn : s.pavlOut).test(id)) {
+      // id was pantOut/pavlIn in our predecessor/successor, so it must
+      // have had multiple successors/predecessors, and we've split
+      // critical edges, so...
+      assertx((atFront ? blk->numPreds() : blk->numSuccs()) == 1);
+      return true;
+    }
+    // If it was altered locally, then it would either be
+    // antLoc/avlLoc (and hence antIn/avlOut) or it would be
+    // !pantIn/pavlOut, both of which were checked above.
+    assertx(!s.altLoc.test(id));
+    if (atFront) {
+      if (blk->numSuccs() == 1) {
+        auto const succ = blk->next() ? blk->next() : blk->taken();
+        // When succ.avlIn is false, its ok to insert at the end of
+        // this block, but its not ok to insert at the start of the
+        // next one. Logically, we should insert at the end of this
+        // block; but we know its not altLoc, so its ok to insert at
+        // the start.
+        return !penv.state[succ].avlIn.test(id);
+      }
+    } else {
+      if (blk->numPreds() == 1) {
+        auto const pred = blk->preds().back().from();
+        // When pred.antOut is false, ts ok to insert at the start of
+        // this block, but its not ok to insert at the end of the
+        // previous one. Logically, we should insert at the front of
+        // this block; but we know its not altLoc, so its ok to insert
+        // at the end.
+        return !penv.state[pred].antOut.test(id);
+      }
+    }
+    return false;
+  }();
+
+  if (insertHere) {
+    while (true) {
+      auto const defBlock = findDefiningBlock(tmp, penv.env.idoms);
+      if (dominates(defBlock, blk, penv.env.idoms)) {
+        break;
+      }
+      // If tmp doesn't dominate this block, we can try a passthrough;
+      // otherwise we're done.
+      if (!tmp->inst()->isPassthrough()) return false;
+      tmp = tmp->inst()->getPassthroughValue();
+      assertx(penv.env.asetMap[tmp] == id);
+    }
+    penv.to_insert.push_back({blk, tmp});
+    return true;
+  }
+
+  if (atFront) {
+    // Its pantIn but not antIn, and not altered, so
+    assertx(s.pantOut.test(id) && !s.antOut.test(id));
+  } else {
+    // Its pavlOut but not avlOut, and not altered, so
+    assertx(s.pavlIn.test(id) && !s.avlIn.test(id));
+  }
+  return pre_find_insertions(penv, blk, atFront, tmp);
+}
+
+bool pre_find_insertions(PreEnv& penv, Block* blk, bool atFront, SSATmp* tmp) {
+  auto ret = true;
+  auto helper = [&] (Block* blk) {
+    if (ret && !pre_find_insertions_helper(penv, blk, atFront, tmp)) {
+      ret = false;
+    }
+  };
+  if (atFront) {
+    blk->forEachSucc(helper);
+  } else {
+    blk->forEachPred(helper);
+  }
+  return ret;
+}
+
+// Try to find places to insert copies of incOrDec that would make
+// it redundant.
+bool pre_insertions_for_delete(PreEnv& penv,
+                               IRInstruction* incOrDec, bool insertAtFront) {
+  auto const tmp = incOrDec->src(0);
+  auto const id = penv.env.asetMap[tmp];
+  auto const blk = incOrDec->block();
+  auto& s = penv.state[blk];
+
+  // We're going to do a recursive walk looking for the boundaries of
+  // the region we can move incOrDec to; that region could contain
+  // loops, so we need to prevent infinite recursion.
+  s.genId = ++penv.curGen;
+
+  penv.to_insert.clear();
+  // If incOrDec was fully redundant, there's nothing to do.  Note
+  // that when we're moving incOrDec forward, insertAtFront will be
+  // true, and when we're moving it backward it will be false. So when
+  // we're moving forward, we care about AntOut, and backward we care
+  // about AvlIn.
+  if ((insertAtFront ? s.antOut : s.avlIn).test(id)) return true;
+
+  if (!pre_find_insertions(penv, blk, insertAtFront, tmp)) return false;
+
+  for (auto const& elm : penv.to_insert) {
+    auto const key = std::make_tuple(elm.first,
+                                     penv.env.asetMap[elm.second],
+                                     insertAtFront);
+    penv.insMap[key] = elm.second;
+  }
+
+  return true;
+}
+
+// pre_apply does two separate iterations to convergence.
+//
+// First it iterates, removing partially redundant incs or decs that
+// can't be made redundant from the set, and then repropagating the
+// block state. When its done, all the partially redundant incs and
+// decs can be removed, and the incs and decs in penv.insMap need to
+// be inserted to compensate.
+//
+// Then, if it did anything, it will recompute the transfer function
+// for each changed block, repropagate the block state, and run again,
+// since any incs or decs it removed could have prevented other
+// optimizations.
+bool pre_apply(PreEnv& penv, bool incDec) {
+  penv.insMap.clear();
+  for (auto& blk : penv.env.rpoBlocks) {
+    auto& s = penv.state[blk];
+    auto delBack = s.avlLoc & s.pantOut;
+    auto delFront = s.antLoc & s.pavlIn;
+
+    auto remove = [&] (IncDecBits& del, IRInstruction& inst,
+                       bool removeDec, bool insertAtFront) {
+      if (removeDec ? inst.is(DecRef, DecRefNZ) : inst.is(IncRef)) {
+        auto const id = penv.env.asetMap[inst.src(0)];
+        if (del.test(id)) {
+          if (!pre_insertions_for_delete(penv, &inst, insertAtFront)) {
+            FTRACE(3, "No insertion for {} ({}) in B{}\n",
+                   id, inst.toString(), blk->id());
+            if (insertAtFront) {
+              s.avlLoc.reset(id);
+              penv.avlQ.push(s.rpoId);
+            } else {
+              s.antLoc.reset(id);
+              penv.antQ.push(s.rpoId);
+            }
+            s.altLoc.set(id);
+          }
+          del.reset(id);
+          return del.none();
+        }
+      }
+      return false;
+    };
+
+    if (delFront.any()) {
+      for (auto& inst : *blk) {
+        if (remove(delFront, inst, incDec, false)) break;
+      }
+      always_assert(delFront.none());
+    }
+
+    if (delBack.any()) {
+      for (auto it = blk->end(); it != blk->begin(); ) {
+        if (remove(delBack, *--it, !incDec, true)) break;
+      }
+      always_assert(delBack.none());
+    }
+  }
+
+  // If there were any partially redundant ops that couldn't be made
+  // redundant, there will be blocks in at least one of the queues
+  // that need reprocessing, so return here, and do that.
+  if (!penv.avlQ.empty() || !penv.antQ.empty()) {
+    return false;
+  }
+
+  // We now know that every partially redundant inc/dec can be
+  // removed, and have a list of incs and decs to insert in
+  // penv.insMap. So go ahead and delete/insert everything as
+  // necessary.
+  for (auto& blk : penv.env.rpoBlocks) {
+    auto& s = penv.state[blk];
+    auto delBack = s.avlLoc & s.pantOut;
+    auto delFront = s.antLoc & s.pavlIn;
+
+    FTRACE(delBack.any() || delFront.any() ? 3 : 4,
+           "PREApply Blk(B{}) <-{}\n"
+           "    antIn   : {}\n"
+           "    pantIn  : {}\n"
+           "    avlIn   : {}\n"
+           "    pavlIn  : {}\n"
+           "    antLoc  : {}\n"
+           "    altered : {}\n"
+           "    avlLoc  : {}\n"
+           "    antOut  : {}\n"
+           "    pantOut : {}\n"
+           "    avlOut  : {}\n"
+           "    pavlOut : {}\n"
+           "  ->{}\n",
+           blk->id(),
+           [&] {
+             std::string ret;
+             blk->forEachPred([&] (Block* pred) {
+                 folly::format(&ret, " B{}", pred->id());
+               });
+             return ret;
+           }(),
+           show(s.antIn),
+           show(s.pantIn),
+           show(s.avlIn),
+           show(s.pavlIn),
+           show(s.antLoc),
+           show(s.altLoc),
+           show(s.avlLoc),
+           show(s.antOut),
+           show(s.pantOut),
+           show(s.avlOut),
+           show(s.pavlOut),
+           [&] {
+             std::string ret;
+             blk->forEachSucc([&] (Block* succ) {
+                 folly::format(&ret, " B{}", succ->id());
+               });
+             return ret;
+           }());
+
+    auto remove = [&] (IncDecBits& del, IRInstruction& inst,
+                       bool removeDec, bool insertAtFront) {
+      if (removeDec ? inst.is(DecRef, DecRefNZ) : inst.is(IncRef)) {
+        auto const id = penv.env.asetMap[inst.src(0)];
+        if (del.test(id)) {
+          FTRACE(3, "delete: {} = {}\n", id, inst.toString());
+          remove_helper(penv.env, &inst);
+          del.reset(id);
+          return del.none();
+        }
+      }
+      return false;
+    };
+
+    if (delFront.any()) {
+      for (auto& inst : *blk) {
+        if (remove(delFront, inst, incDec, false)) break;
+      }
+      always_assert(delFront.none());
+      penv.reprocess.insert(penv.state[blk].rpoId);
+    }
+
+    if (delBack.any()) {
+      for (auto it = blk->end(); it != blk->begin(); ) {
+        if (remove(delBack, *--it, !incDec, true)) break;
+      }
+      always_assert(delBack.none());
+      penv.reprocess.insert(penv.state[blk].rpoId);
+    }
+  }
+
+  pre_insert(penv, incDec);
+  // If we didn't do anything, we're done...
+  if (!penv.reprocess.size()) return true;
+  // ... otherwise recompute the transfer functions for all modified
+  // blocks, repropagate the block state, and restart the optimization.
+  for (auto rpoId : penv.reprocess) {
+    auto const blk = penv.env.rpoBlocks[rpoId];
+    auto& s = penv.state[blk];
+    s.avlLoc.reset();
+    s.antLoc.reset();
+    s.altLoc.reset();
+    pre_local_transfer(penv, incDec, blk);
+    penv.avlQ.push(rpoId);
+    penv.antQ.push(rpoId);
+  }
+  penv.reprocess.clear();
+  return false;
+}
+
+/*
+ * Partial redundancy elimination for IncRef/DecRef pairs.
+ *
+ * When incDec is true, we're going to remove incs followed by decs;
+ * otherwise decs followed by incs.
+ */
+void pre_incdecs(Env& env, bool incDec) {
+  FTRACE(2, "pre_incdecs ({})---------------------------------\n",
+         incDec ? "Inc->Dec" : "Dec->Inc");
+
+  PreEnv penv{env};
+  for (auto blk : env.rpoBlocks) {
+    pre_local_transfer(penv, incDec, blk);
+  }
+
+  do {
+    pre_compute_available(penv);
+    pre_compute_anticipated(penv);
+  } while (!pre_apply(penv, incDec));
+}
+
+//////////////////////////////////////////////////////////////////////
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3607,7 +4254,8 @@ void optimizeRefcounts(IRUnit& unit) {
   populate_mrinfo(env);
   weaken_decrefs(env);
   rcgraph_opts(env);
-  remove_trivial_incdecs(env);
+  pre_incdecs(env, true);
+  pre_incdecs(env, false);
   sink_incs(env);
 
   // We may have pushed IncRefs past CheckTypes, which could allow us to

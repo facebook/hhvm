@@ -20,7 +20,9 @@ namespace array {
 
 ALWAYS_INLINE
 uint32_t HashTableCommon::computeScaleFromSize(uint32_t n) {
-  assert(n <= 0x7fffffffU);
+  if (n >= MaxSize) {
+    return MaxScale;
+  }
   auto scale = SmallScale;
   while (Capacity(scale) < n) scale *= 2;
   return scale;

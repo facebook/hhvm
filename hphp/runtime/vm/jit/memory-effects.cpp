@@ -1403,6 +1403,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case NewArray:
   case NewCol:
+  case NewColFromArray:
   case NewPair:
   case NewInstanceRaw:
   case NewMixedArray:
@@ -1672,7 +1673,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ContStartedCheck:
   case ConvArrToBool:
   case ConvArrToDbl:
-  case NewColFromArray:
   case CountArray:
   case CountArrayFast:
   case CountVec:

@@ -126,23 +126,26 @@ void IRInstruction::become(IRUnit& unit, const IRInstruction* other) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool IRInstruction::consumesReference(int srcNo) const {
-  if (!consumesReferences()) {
+template<bool move>
+bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
+  if (!inst->consumesReferences()) {
     return false;
   }
 
-  switch (op()) {
+  switch (inst->op()) {
     case ConcatStrStr:
     case ConcatStrInt:
     case ConcatStr3:
     case ConcatStr4:
       // Call a helper that decrefs the first argument
-      return srcNo == 0;
+      return !move && srcNo == 0;
 
     case StClosureArg:
     case StClosureCtx:
     case StContArValue:
     case StContArKey:
+      return srcNo == 1;
+
     case AFWHBlockOn:
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;
@@ -157,17 +160,17 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case AddNewElemKeyset:
     case AddNewElemVec:
       // Only consumes the reference to its input array
-      return srcNo == 0;
+      return !move && srcNo == 0;
 
     case CheckNullptr:
-      return srcNo == 0;
+      return !move && srcNo == 0;
 
     case CreateAFWH:
     case CreateAFWHNoVV:
-      return srcNo == 4;
+      return !move && srcNo == 4;
 
     case CreateAGWH:
-      return srcNo == 3;
+      return !move && srcNo == 3;
 
     case InitPackedLayoutArray:
       return srcNo == 1;
@@ -175,9 +178,21 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case InitPackedLayoutArrayLoop:
       return srcNo > 0;
 
-    default:
+    case NewPair:
+    case NewColFromArray:
       return true;
+
+    default:
+      return !move;
   }
+}
+
+bool IRInstruction::consumesReference(int srcNo) const {
+  return consumesRefImpl<false>(this, srcNo);
+}
+
+bool IRInstruction::movesReference(int srcNo) const {
+  return consumesRefImpl<true>(this, srcNo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

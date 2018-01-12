@@ -2200,9 +2200,11 @@ bool consumes_reference_next_not_taken(const IRInstruction& inst,
  * specific argument.
  */
 bool observes_reference(const IRInstruction& inst, uint32_t srcID) {
-  return consumes_reference_next_not_taken(inst, srcID) ||
-         consumes_reference_taken(inst, srcID) ||
-         (inst.op() == CheckArrayCOW && srcID == 0);
+  return
+    (consumes_reference_next_not_taken(inst, srcID) &&
+     !inst.movesReference(srcID)) ||
+    consumes_reference_taken(inst, srcID) ||
+    (inst.op() == CheckArrayCOW && srcID == 0);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2310,7 +2312,18 @@ void rc_analyze_inst(Env& env,
     if (consumes_reference_next_not_taken(inst, srcID)) {
       assertx(!consumes_reference_taken(inst, srcID));
       for_aset(env, state, inst.src(srcID), [&] (ASetID asetID) {
-        may_decref(env, state, asetID, add_node);
+          if (inst.movesReference(srcID)) {
+            auto& aset = state.asets[asetID];
+            if (!aset.lower_bound) {
+              aset.lower_bound = aset.unsupported_refs = 1;
+              state.has_unsupported_refs = true;
+            } else if (aset.lower_bound > aset.unsupported_refs) {
+              aset.unsupported_refs++;
+              state.has_unsupported_refs = true;
+            }
+            return;
+          }
+          may_decref(env, state, asetID, add_node);
       });
     }
   }

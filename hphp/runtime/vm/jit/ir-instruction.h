@@ -136,6 +136,7 @@ struct IRInstruction {
    * a reference.
    */
   bool consumesReference(int srcNo) const;
+  bool movesReference(int srcNo) const;
   bool producesReference() const;
 
   /*

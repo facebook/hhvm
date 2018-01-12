@@ -1575,11 +1575,9 @@ To string conversions:
 
 | NewColFromArray<type>, DCol, S(Vec|Dict), PRc|CRc
 
-  Create a collection of `type` from an array with vec or dict kind. `type`
-  cannot be Pair. The array will be used to back the new collection without
-  duplication or conversion, so it must not contain references. In addition,
-  the array must be vec kind when `type` is Vector or ImmVector, and must be
-  dict kind otherwise. Ownership of the array is transferred from $1 to the
+  Create a collection of `type` from a Vec or Dict kind. `type` cannot be
+  Pair. S0 must be vec kind when `type` is Vector or ImmVector, and must be
+  dict kind otherwise. Ownership of S0 is transferred from $1 to the
   collection, without manipulating the refcount.
 
 | Clone, DofS(0), S(Obj), PRc|Er
@@ -2105,7 +2103,7 @@ To string conversions:
 
 | AddNewElemVec, D(Vec), S(Vec) S(Cell), CRc|PRc
 
-  Add S1 as a new element to the array/keyser/vec S0.  (Note: S1 must actually
+  Add S1 as a new element to the array/keyset/vec S0.  (Note: S1 must actually
   be a subtype of InitCell for array invariants, but we can't assert this yet
   in the IR because many eval stack slots are not entirely typed wrt initness
   right now.)

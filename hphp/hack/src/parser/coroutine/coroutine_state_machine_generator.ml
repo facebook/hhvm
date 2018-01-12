@@ -88,27 +88,6 @@ let add_missing_return body =
   else
     body
 
-(* This gives the names of all local variables and parameters in a body:
-* locals and parameters occurring only in lambdas are not included.
-* Unused parameters are not included.
-* Locals are stripped of their initial $
-* TODO: We could further filter these down to only locals that are used
-        across a suspend. If we do, rename this method, as it will then
-        no longer do what it says on the tin.
-* TODO: Locals used in PHP style constructs like "${x}" are not captured.
-*)
-let all_used_locals node =
-  let folder acc node =
-    match syntax node with
-    | Token ({ Token.kind = TokenKind.Variable; _; } as token) ->
-      let text = Token.text token in
-      (* "$this" is treated as a local, but obviously we don't want to copy
-      it in or out. *)
-      if text = "$this" then acc else SSet.add text acc
-    | _ -> acc in
-  let locals = Lambda_analyzer.fold_no_lambdas folder SSet.empty node in
-  locals (* TODO: Return a list *)
-
 (* $closure->name = $name *)
 let copy_in_syntax variable =
   let field_name = String_utils.lstrip variable "$" in
@@ -530,7 +509,7 @@ let unnest_compound_statements node =
 
 let lower_body body =
   if is_missing body then (body, []) else
-  let used_locals = all_used_locals body in
+  let used_locals = Lambda_analyzer.all_locals body in
   let body = add_missing_return body in
   let (next_loop_label, body) = rewrite_do 0 body in
   let body = rewrite_while body in

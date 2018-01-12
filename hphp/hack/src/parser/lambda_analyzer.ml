@@ -11,6 +11,7 @@ module List = Core_list
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Token = Syntax.Token
+module TokenKind = Full_fidelity_token_kind
 module SyntaxKind = Full_fidelity_syntax_kind
 module Utils = Full_fidelity_syntax_utilities.WithSyntax(Syntax)
 open Syntax
@@ -123,10 +124,19 @@ let get_body node =
 (* TODO: This does not consider situations like "${x}" as the use of a local.*)
 let add_local acc node =
   match syntax node with
-  | VariableExpression { variable_expression =
-      { syntax = Token token; _ } } ->
+  | Token ({ Token.kind = TokenKind.Variable; _; } as token) ->
     SSet.add (Token.text token) acc
   | _ -> acc
+
+(**
+ * Returns a set of all local variables and parameters in a body
+ * Excluded variables and parameters in lambdas
+ * Locals are stripped of their initial `$`
+ * Excludes `$this`
+ *)
+let all_locals node =
+  fold_no_lambdas add_local SSet.empty node
+  |> SSet.remove "$this"
 
 let outer_from_use use_clause =
   match syntax use_clause with
@@ -177,8 +187,7 @@ let compute_outer_variables parents node =
 let partition_used_locals parents node =
   let params = get_params_list node in
   let body = get_body node in
-  let all_used = fold_no_lambdas add_local SSet.empty body in
-  let all_used = SSet.remove "$this" all_used in
+  let all_used = all_locals body in
   let decls = syntax_node_to_list params in
   let all_params = List.filter_map decls ~f:param_name in
   let all_params = SSet.of_list all_params in

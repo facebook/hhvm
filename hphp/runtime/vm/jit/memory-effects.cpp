@@ -1796,11 +1796,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       auto const src = inst.src(0);
       // It could decref the inner ref.
-      auto const maybeRef = src->isA(TBoxedCell) ? ARef { src } :
-                            src->type().maybe(TBoxedCell) ? ARefAny : AEmpty;
-      // Need to add maybeRef to the `store' set. See comments about
+      auto affected = src->isA(TBoxedCell) ? ARef { src } :
+                      src->type().maybe(TBoxedCell) ? ARefAny : AEmpty;
+      if (src->type().maybe(TKeyset | TBoxedKeyset)) {
+        // TKeyset can't re-enter, but it will decref any contained
+        // strings. Without this, an incref of a string contained in
+        // a Keyset could be sunk past the decref of the Keyset.
+        affected |= AHeapAny;
+      }
+      // Need to add affected to the `store' set. See comments about
       // `GeneralEffects' in memory-effects.h.
-      auto const effect = may_load_store(maybeRef, maybeRef);
+      auto const effect = may_load_store(affected, affected);
       if (src->type().maybe(TArr | TVec | TDict | TObj | TRes |
                             TBoxedArr | TBoxedVec | TBoxedDict |
                             TBoxedObj | TBoxedRes)) {

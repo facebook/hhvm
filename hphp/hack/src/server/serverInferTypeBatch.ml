@@ -56,11 +56,7 @@ let helper tcopt acc pos_infos =
       |> Core_result.of_option ~error:"No such file or directory"
       |> Core_result.map ~f:begin fun tast ->
         ServerInferType.type_at_pos tast line char
-        |> Option.map ~f:begin fun (saved_env, ty) ->
-          let env = Typing_env.empty tcopt fn ~droot:None in
-          let env = Tast_expand.restore_saved_env env saved_env in
-          Typing_print.to_json env ty
-        end
+        |> Option.map ~f:(fun (env, ty) -> Typing_print.to_json env ty)
       end
     in
     result_to_string result pos :: acc

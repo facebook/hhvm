@@ -72,7 +72,7 @@ let type_at_pos tast line char =
       let (pos, ty) = fst e in
       let acc =
         if Pos.inside pos line char
-        then ty >>| fun ty -> pos, self#saved_env, ty
+        then ty >>| fun ty -> pos, env, ty
         else None
       in
       self#plus acc (super#on_expr env e)
@@ -91,22 +91,17 @@ let type_at_pos tast line char =
       then super#on_expr env e >>| fun (p, env, ty) -> p, env, return_type ty
       else super#on_Call env ct e hl el uel
   end in
-  visitor#on_program () tast >>| fun (_, env, ty) -> env, ty
-
-let make_result tcopt (saved_env, ty) =
-  let file = Relative_path.create Relative_path.Dummy "<file>" in
-  let env = Typing_env.empty tcopt file ~droot:None in
-  let env = Tast_expand.restore_saved_env env saved_env in
-  Typing_print.full_strip_ns env ty,
-  Typing_print.to_json env ty |> Hh_json.json_to_string
+  visitor#go tast >>| fun (_, env, ty) -> env, ty
 
 let go:
   ServerEnv.env ->
   (ServerUtils.file_input * int * int) ->
   (string * string) option =
-fun env pos ->
-  let file, line, char = pos in
-  let {ServerEnv.tcopt; files_info; _} = env in
+fun env (file, line, char) ->
+  let ServerEnv.{tcopt; files_info; _} = env in
   let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
   type_at_pos tast line char
-  |> Option.map ~f:(make_result tcopt)
+  |> Option.map ~f:begin fun (env, ty) ->
+    Typing_print.full_strip_ns env ty,
+    Typing_print.to_json env ty |> Hh_json.json_to_string
+  end

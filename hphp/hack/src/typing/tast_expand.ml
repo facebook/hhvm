@@ -107,8 +107,8 @@ let restore_saved_env env saved_env =
   let module Env = Typing_env in
   {env with
     Env.genv = {env.Env.genv with Env.tcopt = saved_env.Tast.tcopt};
-    Env.tenv = IMap.union saved_env.Tast.tenv env.Env.tenv;
-    Env.subst = IMap.union saved_env.Tast.subst env.Env.subst;
+    Env.tenv = saved_env.Tast.tenv;
+    Env.subst = saved_env.Tast.subst;
   }
 
 module ExpandAST =

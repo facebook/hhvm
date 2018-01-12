@@ -91,47 +91,6 @@ can prevent the rest of this analysis from assuming some DecRefs can re-enter
 that actually can't.
 
 
--- RC Flowgraphs --
-
-Other optimizations in this file are performed on "RC flowgraphs", which are an
-abstract representation of only the effects of the IR program that matter for
-the optimization, on a single must-alias-set at a time.  The RC graphs contain
-explicit control flow nodes ("phi" nodes for joins, "sigma" nodes for splits),
-as well as nodes for things like decref instructions, incref instructions, and
-"req" nodes that indicate that the reference count of an object may be observed
-at that point up to some level.  Nodes in an RC graph each come with a "lower
-bound" on the reference count for the graph's must-alias-set at that program
-point (more about lower bounds below)---these lower bounds are the lower bound
-before that node in the flowgraph.  We build independent graphs for each
-must-alias-set, and they do not need to contain specific nodes relating to
-possible cross-set effects (based on May-Alias relationships)---that
-information is available in these graphs through the "req" nodes and lower
-bound information.
-
-The graphs are constructed after first computing information that allows us to
-process each must-alias-set independently.  Then they are processed one at a
-time with a set of "legal transformation rules".  The rules are applied in a
-single pass over the flowgraph, going forwards, but potentially backtracking
-when certain rules apply, since they may enable more rules to apply to previous
-nodes.  At this point it might help to go look at one or two of the
-transformation rule examples below (e.g. rule_inc_dec_fold), but that
-documentation is not duplicated here.
-
-The intention is that these rules are smaller and easier to understand the
-correctness of than trying to do these transformations without an explicit data
-structure, but a disadvantage is that this pass needs to allocate a lot of
-temporary information in these graphs.  The backtracking also seemed a bit
-convoluted to do directly on the IR.  We may eventually change this to work
-without the extra data structure, but that's how it works right now.
-
-Most of the analysis code in this module is about computing the information we
-need to build these flowgraphs, before we do the actual optimizations on them.
-The rest of this doc-comment talks primarily about that analysis---see the
-comments near the rule_* functions for more about the flowgraph optimizations
-themselves, and the comments near the Node structure for a description of the
-node types in these graphs.
-
-
 -- RC "lower bounds" --
 
 A lower bound on the reference count of a must-alias-set indicates a known
@@ -155,10 +114,9 @@ ref counts of untracked memory locations, we have to drop its unsupported_refs.
 The first utility of this information is pretty obvious: if a DecRef
 instruction is encountered when the lower bound of must-alias-set is greater
 than one, that DecRef instruction can be converted to DecRefNZ, since it can't
-possibly free the object.  (See the flowgraph rule_decnz.)  Knowledge of the
-lower bound is also required for folding unobservable incref/decref pairs, and
-generally this information is inspected by most of the things done as RC
-flowgraph transformations.
+possibly free the object.  Knowledge of the lower bound is also required for
+folding unobservable incref/decref pairs, and generally this information is
+inspected by most of the things done as RC flowgraph transformations.
 
 The lower bound must be tracked conservatively to ensure that our
 transformations are correct.  This means we can increase a lower bound only
@@ -1541,6 +1499,23 @@ bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
   return changed;
 }
 
+bool is_same(const RCState &dstState, const RCState& srcState) {
+  assertx(srcState.initialized);
+  if (!dstState.initialized) return false;
+  for (auto asetID = uint32_t{0}; asetID < dstState.asets.size(); ++asetID) {
+    auto& dst = dstState.asets[asetID];
+    auto& src = srcState.asets[asetID];
+
+    if (dst.lower_bound != src.lower_bound ||
+        dst.unsupported_refs != src.unsupported_refs ||
+        dst.memory_support != src.memory_support) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 template<class Fn>
@@ -2024,9 +1999,18 @@ void analyze_mem_effects(Env& env,
       // anymore, because nothing can load that pointer (and then decref it)
       // anymore without storing over the location first.
       drop_support_bits(env, state, env.ainfo.expand(x.kills));
-      // Locations in the stores set may be stored to with a 'normal write
-      // barrier', decreffing the pointer that used to be there.
-      reduce_support(env, state, x.stores, true, add_node);
+      // Locations in the stores set may be stored to with a 'normal
+      // write barrier', decreffing the pointer that used to be there.
+      // Various inline related instructions have non-empty stores to
+      // prevent store sinking, but don't actually change any
+      // refcounts, so we don't need to reduce lower bounds.
+      auto const may_decref = !inst.is(BeginInlining,
+                                       DefInlineFP,
+                                       InlineReturn,
+                                       InlineReturnNoFrame,
+                                       SyncReturnBC
+                                      );
+      reduce_support(env, state, x.stores, may_decref, add_node);
       // For the moves set, we have no way to track where the pointers may be
       // moved to, so we need to account for it, via unsupported_refs.
       reduce_support(env, state, x.moves, false, add_node);
@@ -2288,6 +2272,65 @@ struct EmptyAdder {
   template<class T> void operator()(ASetID, const T&) const {}
 };
 
+/*
+ * Find the fixed point. If reprocess is non-null, add each block we
+ * process to it.
+ */
+void rc_analyze_worklist(Env& env,
+                         RCAnalysis& rca,
+                         dataflow_worklist<uint32_t>& incompleteQ,
+                         std::set<uint32_t>* reprocess) {
+  std::set<const Block*> reinited;
+  do {
+    auto const id = incompleteQ.pop();
+    if (reprocess) reprocess->insert(id);
+    auto const blk = env.rpoBlocks[id];
+    FTRACE(2, "B{}:\n", blk->id());
+    auto state = rca.info[blk].state_in;
+
+    auto propagate = [&] (Block* target) {
+      FTRACE(2, "   -> {}\n", target->id());
+      auto& tinfo = rca.info[target];
+      if (target->numPreds() == 1) {
+        // With a single predecessor tinfo.state_in should always
+        // simply be a copy of state. Special casing this will give
+        // better results than merging when we've made changes to blk
+        // or its preds.
+        if (!is_same(tinfo.state_in, state)) {
+          tinfo.state_in = state;
+          incompleteQ.push(tinfo.rpoId);
+        }
+        return;
+      }
+
+      if (reprocess && reinited.insert(target).second) {
+        // When we're reprocessing a set of blocks that have been
+        // modified, we need to restart the analysis of their
+        // successors, to ensure they get the most refined info
+        // possible. We could optimize this by storing the out states
+        // for each block - but that would cost a lot of memory
+        // (potentially two out states for each block).
+        FTRACE(2, "   re-init B{}\n", target->id());
+        tinfo.state_in = state;
+        incompleteQ.push(tinfo.rpoId);
+        target->forEachPred(
+          [&] (Block* pred) {
+            if (pred != blk) incompleteQ.push(rca.info[pred].rpoId);
+          }
+        );
+        return;
+      }
+      auto const changed = merge_into(env, tinfo.state_in, state);
+      if (changed) incompleteQ.push(tinfo.rpoId);
+    };
+
+    for (auto& inst : blk->instrs()) {
+      rc_analyze_step(env, inst, state, propagate, EmptyAdder{});
+    }
+    if (auto const next = blk->next()) propagate(next);
+  } while (!incompleteQ.empty());
+}
+
 RCAnalysis rc_analyze(Env& env) {
   FTRACE(1, "rc_analyze -----------------------------------------\n");
 
@@ -2310,26 +2353,7 @@ RCAnalysis rc_analyze(Env& env) {
    */
   ret.info[env.rpoBlocks[0]].state_in = entry_rc_state(env);
 
-  /*
-   * Find fixed point.
-   */
-  do {
-    auto const blk = env.rpoBlocks[incompleteQ.pop()];
-    FTRACE(2, "B{}:\n", blk->id());
-    auto state = ret.info[blk].state_in;
-
-    auto propagate = [&] (Block* target) {
-      FTRACE(2, "   -> {}\n", target->id());
-      auto& tinfo = ret.info[target];
-      auto const changed = merge_into(env, tinfo.state_in, state);
-      if (changed) incompleteQ.push(tinfo.rpoId);
-    };
-
-    for (auto& inst : blk->instrs()) {
-      rc_analyze_step(env, inst, state, propagate, EmptyAdder{});
-    }
-    if (auto const next = blk->next()) propagate(next);
-  } while (!incompleteQ.empty());
+  rc_analyze_worklist(env, ret, incompleteQ, nullptr);
 
   return ret;
 }
@@ -2361,1089 +2385,6 @@ DEBUG_ONLY std::string show_analysis(Env& env, const RCAnalysis& analysis) {
 
 //////////////////////////////////////////////////////////////////////
 
-DEBUG_ONLY bool direct_successor(Node* n, Node* succ) {
-  return n->next == succ || (n->type == NT::Sig && to_sig(n)->taken == succ);
-}
-
-bool is_phi_pred(const NPhi* phi, Node* pred) {
-  auto const last = phi->pred_list + phi->pred_list_sz;
-  return std::find(phi->pred_list, last, pred) != last;
-}
-
-void add_phi_pred(Env& env, NPhi* nphi, Node* pred) {
-  assertx(direct_successor(pred, nphi));
-  auto const phi = to_phi(nphi);
-  if (phi->pred_list_sz + 1 >= phi->pred_list_cap) {
-    ++phi->pred_list_cap;
-    auto const new_list = new (env.arena) Node*[phi->pred_list_cap];
-    std::copy(phi->pred_list, phi->pred_list + phi->pred_list_sz, new_list);
-    phi->pred_list = new_list;
-  }
-  phi->pred_list[phi->pred_list_sz++] = pred;
-}
-
-void rm_phi_pred(NPhi* phi, Node* n) {
-  assertx(is_phi_pred(phi, n));
-
-  // Only remove the first occurance of "n".  (A Sig node may be a predecessor
-  // of the same Phi more than once.)
-  auto const last = phi->pred_list + phi->pred_list_sz;
-  auto const it = std::find(phi->pred_list, last, n);
-  *it = last[-1];  // may self-assign if size is 1, but that's ok.
-  --phi->pred_list_sz;
-}
-
-/*
- * Replace one of the `first' Node's successor pointers to `current' with
- * `replace'
- *
- * Pre: direct_successor(first, current)
- */
-void rechain_forward(Node* first, Node* current, Node* replace) {
-  assertx(direct_successor(first, current));
-  if (first->next == current) {
-    first->next = replace;
-    return;
-  }
-  always_assert(first->type == NT::Sig && to_sig(first)->taken == current);
-  to_sig(first)->taken = replace;
-}
-
-/*
- * Given a sequence of nodes in the graph:
- *
- *     pred  --->  middle  --->  last
- *
- * Mutate the pointers so that middle is unlinked, and last succeeds pred in
- * the same way that middle did.  (That is to say, if pred->next is middle,
- * pred->next will become last, and if pred->taken is middle, pred->taken will
- * become last.)  Handles Phi nodes in any of the three positions.
- *
- * Note that the number of predecessors of both types (backedge or normal) on a
- * Phi node in last or pred is conserved under this operation.
- *
- * Requires that middle has no other nodes attached to it.  (I.e. it has no
- * predecessors other than `pred', and no successors other than `last'.)  This
- * means middle can't be a Sig unless one of it's next or taken pointers is
- * nullptr.
- *
- * Pre:  direct_successor(pred, middle)
- *       direct_successor(middle, last)
- *
- * Post: direct_successor(pred, last) and middle is unlinked entirely
- */
-void node_skip_over(Env& env, Node* pred, Node* middle, Node* last) {
-  assertx(direct_successor(pred, middle));
-  assertx(direct_successor(middle, last));
-  assertx(middle->type != NT::Sig ||
-    (middle->next == nullptr || to_sig(middle)->taken == nullptr));
-
-  // Unlink middle node.
-  if (last) {
-    if (last->type == NT::Phi) {
-      rm_phi_pred(to_phi(last), middle);
-    } else {
-      if (debug) last->prev = nullptr;
-    }
-  }
-  if (middle->type == NT::Phi) {
-    rm_phi_pred(to_phi(middle), pred);
-  } else {
-    middle->prev = nullptr;
-    middle->next = nullptr;
-  }
-
-  // Rechain prev's forward pointer from pred to last.
-  rechain_forward(pred, middle, last);
-
-  // Set backward pointers from last to pred.
-  if (last) {
-    if (last->type == NT::Phi) {
-      add_phi_pred(env, to_phi(last), pred);
-    } else {
-      last->prev = pred;
-    }
-  }
-}
-
-/*
- * Allocate and insert a new node between two adjacent nodes, returning the new
- * node, handling backlinking appropriately.  Either node may be an NT::Phi,
- * but the new node may not be a Phi.
- *
- * Pre: direct_successor(pred, succ)
- */
-template<class T>
-Node* add_between(Env& env,
-                  Node* pred,
-                  Node* succ,
-                  const T& new_data) {
-  assertx(direct_successor(pred, succ));
-  auto const new_node = new (env.arena) T(new_data);
-  assertx(new_node->type != NT::Phi);
-
-  // Unlink backward pointers.
-  if (succ != nullptr) {
-    if (succ->type == NT::Phi) {
-      rm_phi_pred(to_phi(succ), pred);
-    } else {
-      if (debug) succ->prev = nullptr;
-    }
-  }
-
-  // Add forward pointers.
-  rechain_forward(pred, succ, new_node);
-  new_node->next = succ;
-
-  // Add backward pointers.
-  if (succ != nullptr) {
-    if (succ->type == NT::Phi) {
-      add_phi_pred(env, to_phi(succ), new_node);
-    } else {
-      succ->prev = new_node;
-    }
-  }
-  new_node->prev = pred;
-
-  return new_node;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-std::string show(const Node* node) {
-  using folly::sformat;
-  return sformat(
-    "{} - {}",
-    [&] () -> std::string {
-      switch (node->type) {
-      case NT::Empty:   return "empty";
-      case NT::Sig:     return u8"\u03c3";
-      case NT::Dec:     return sformat("dec({})", to_dec(node)->inst->id());
-      case NT::Phi:
-        return sformat(u8"\u03c6({},{})", to_phi(node)->pred_list_sz,
-          to_phi(node)->back_edge_preds);
-      case NT::Inc:
-        return sformat("inc({})", to_inc(node)->inst->id());
-      case NT::Req:
-        return to_req(node)->level == std::numeric_limits<int32_t>::max()
-          ? "req!"
-          : sformat("req{}", to_req(node)->level);
-      }
-      not_reached();
-    }(),
-    node->lower_bound
-  );
-}
-
-void find_nodes(jit::vector<Node*>& accum,
-                jit::hash_set<Node*>& seen,
-                Node* n) {
-  if (n == nullptr || seen.count(n)) return;
-  accum.push_back(n);
-  seen.insert(n);
-  if (n->type == NT::Sig) find_nodes(accum, seen, to_sig(n)->taken);
-  find_nodes(accum, seen, n->next);
-}
-
-std::string graph_dot_nodes(SSATmp* representative, size_t graph_id, Node* g) {
-  auto ret = std::string{};
-  auto nodes = jit::vector<Node*>{};
-  auto seen = jit::hash_set<Node*>{};
-  find_nodes(nodes, seen, g);
-
-  static const bool debug_back_links = getenv("RC_GRAPH_BACKLINKS");
-  constexpr int node_id_shift = 8;
-
-  jit::hash_map<Node*,uint32_t> node_to_id;
-  for (auto idx = uint32_t{0}; idx < nodes.size(); ++idx) {
-    node_to_id[nodes[idx]] = (idx + 1) << node_id_shift | graph_id;
-  }
-
-  folly::format(
-    &ret,
-    "N{} [shape=box,label=\"t{} :: {}\"]; "
-      "node [shape=plaintext]; N{} -> N{};\n",
-    graph_id,
-    representative->id(),
-    representative->type().toString(),
-    graph_id,
-    1 << node_id_shift | graph_id
-  );
-
-  for (auto idx = uint32_t{0}; idx < nodes.size(); ++idx) {
-    auto const n = nodes[idx];
-    auto const node_num = (idx + 1) << node_id_shift | graph_id;
-
-    folly::format(&ret, "N{} [label=\"{}\"];", node_num, show(n));
-
-    if (n->next) {
-      folly::format(&ret, " N{} -> N{};", node_num, node_to_id[n->next]);
-      assertx(n->next->type == NT::Phi || n->next->prev == n);
-    }
-
-    if (debug_back_links && n->prev) {
-      folly::format(&ret, " N{} -> N{} [color=cyan];", node_num,
-        node_to_id[n->prev]);
-    }
-
-    if (n->type == NT::Sig && to_sig(n)->taken) {
-      folly::format(&ret, " N{} -> N{} [color=green]", node_num,
-        node_to_id[to_sig(n)->taken]);
-    }
-
-    if (debug_back_links && n->type == NT::Phi) {
-      for (auto pred_i = uint32_t{0};
-           pred_i < to_phi(n)->pred_list_sz;
-           ++pred_i) {
-        auto const pred = to_phi(n)->pred_list[pred_i];
-        if (debug_back_links) {
-          folly::format(&ret, "N{} -> N{} [color=red];\n",
-            node_num, node_to_id[pred]);
-        }
-      }
-    }
-
-    folly::format(&ret, "\n");
-  }
-
-  return ret;
-}
-
-std::string graphs_dot_string(const jit::vector<MustAliasSet>& asets,
-                              const jit::vector<Node*>& heads) {
-  assertx(asets.size() == heads.size());
-  auto ret = std::string{};
-  ret = "digraph G {\n";
-  for (auto graph_id = size_t{0}; graph_id < heads.size(); ++graph_id) {
-    ret += graph_dot_nodes(
-      asets[graph_id].representative,
-      graph_id,
-      heads[graph_id]
-    );
-  }
-  ret.push_back('}');
-  ret.push_back('\n');
-  return ret;
-}
-
-DEBUG_ONLY std::string show_graphs(const jit::vector<MustAliasSet>& asets,
-                        const jit::vector<Node*>& heads) {
-  char fileBuf[] = "/tmp/hhvmXXXXXX";
-  int fd = mkstemp(fileBuf);
-  if (fd == -1) {
-    return folly::sformat("couldn't open temporary file: {}\n",
-      folly::errnoStr(errno));
-  }
-  SCOPE_EXIT { close(fd); };
-  auto file = fdopen(fd, "w");
-  std::fprintf(file, "%s", graphs_dot_string(asets, heads).c_str());
-  std::fflush(file);
-  return folly::sformat("dot -T xlib < {} &\n", fileBuf);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-bool check_graph(Node* graph) {
-  auto nodes = jit::vector<Node*>{};
-  auto seen = jit::hash_set<Node*>{};
-  find_nodes(nodes, seen, graph);
-
-  for (auto& n : nodes) {
-    always_assert(n->lower_bound >= 0);
-
-    if (n->prev) {
-      always_assert(direct_successor(n->prev, n));
-    }
-
-    if (n->next) {
-      if (n->next->type == NT::Phi) {
-        always_assert(is_phi_pred(to_phi(n->next), n));
-      } else {
-        always_assert(n->next->prev == n);
-      }
-    }
-
-    switch (n->type) {
-    case NT::Inc:
-      always_assert(to_inc(n)->inst->is(IncRef));
-      break;
-    case NT::Dec:
-      always_assert(to_dec(n)->inst->is(DecRef, DecRefNZ));
-      break;
-    case NT::Phi:
-      always_assert(to_phi(n)->block != nullptr);
-      // At least one predecessor.  Normally there's two, but some of the
-      // clean_graphs code can create single predecessor phis (it also has
-      // rules to clean those up, but we'd rather have cleaning those up be
-      // optional instead of required as an invariant).
-      always_assert(to_phi(n)->pred_list_sz >= 1);
-      // At least one non-back edge predecessor.
-      always_assert(to_phi(n)->back_edge_preds < to_phi(n)->pred_list_sz);
-      // Size is always <= capacity.
-      always_assert(to_phi(n)->pred_list_sz <= to_phi(n)->pred_list_cap);
-      // Each pred has a forward link to the phi.
-      for (auto i = uint32_t{0}; i < to_phi(n)->pred_list_sz; ++i) {
-        auto const pred = to_phi(n)->pred_list[i];
-        always_assert(pred != nullptr);
-        always_assert(direct_successor(pred, n));
-      }
-      break;
-    case NT::Sig:
-      always_assert(to_sig(n)->block != nullptr);
-      if (auto const taken = to_sig(n)->taken) {
-        if (taken->type == NT::Phi) {
-          always_assert(is_phi_pred(to_phi(taken), n));
-        } else {
-          always_assert(taken->prev == n);
-        }
-      }
-      break;
-    case NT::Req:
-      // We should never have Req{0} nodes.
-      always_assert(to_req(n)->level >= 1);
-      break;
-    case NT::Empty:
-      break;
-    }
-  }
-  return true;
-}
-
-DEBUG_ONLY bool check_graphs(const jit::vector<Node*>& graphs) {
-  for (auto& g : graphs) always_assert(check_graph(g));
-  return true;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void do_clean_graph(Env& env,
-                    jit::queue<std::pair<Node*,Node*>>& workQ,
-                    jit::hash_set<Node*>& seen_set,
-                    bool& changed,
-                    Node* prev,
-                    Node* cur) {
-  while (cur != nullptr) {
-    switch (cur->type) {
-    case NT::Req:
-    case NT::Inc:
-    case NT::Dec:
-      // Normal nodes that we just keep
-      prev = cur;
-      cur = cur->next;
-      continue;
-
-    case NT::Phi:
-      if (seen_set.count(cur)) {
-        // Don't reprocess the phi.
-        return;
-      }
-      if (to_phi(cur)->pred_list_sz == 1 &&
-          to_phi(cur)->back_edge_preds == 0) {
-        auto const next = cur->next;
-        node_skip_over(env, prev, cur, next);
-        changed = true;
-        cur = next;
-        continue;
-      }
-      seen_set.insert(cur);
-      prev = cur;
-      cur = cur->next;
-      continue;
-
-    case NT::Sig:
-      {
-        auto const next = cur->next;
-        auto const taken = to_sig(cur)->taken;
-        if (next == nullptr && taken != nullptr) {
-          node_skip_over(env, prev, cur, taken);
-          changed = true;
-          cur = taken;
-          continue;
-        }
-        if (next != nullptr && taken == nullptr) {
-          node_skip_over(env, prev, cur, next);
-          changed = true;
-          cur = next;
-          continue;
-        }
-        if (next == taken && next != nullptr) {
-          assertx(next->type == NT::Phi);
-          auto const phi = to_phi(next);
-          // We only apply this rule when it isn't a back_edge_preds because we
-          // always want a Phi involved in loops.
-          if (phi->pred_list_sz == 2 && phi->back_edge_preds == 0) {
-            rm_phi_pred(phi, cur); // Leaving one of the preds.
-            assertx(is_phi_pred(phi, cur));
-            static_assert(sizeof(NEmpty) < sizeof(NPhi), "");
-            cur->type = NT::Empty;          // Let the empty rule remove it.
-            changed = true;
-            continue;
-          }
-        }
-
-        // Schedule taken for later, and continue doing the next path now.
-        assertx(taken && next);
-        workQ.emplace(cur, taken);
-        prev = cur;
-        cur = next;
-        continue;
-      }
-
-    case NT::Empty:
-      if (prev && cur->next) {
-        auto const next = cur->next;
-        node_skip_over(env, prev, cur, next);
-        changed = true;
-        cur = next;
-        continue;
-      }
-      prev = cur;
-      cur = cur->next;
-      continue;
-    }
-
-    always_assert(0);
-  }
-}
-
-Node* clean_graph(Env& env, Node* head) {
-  // Only used for phi nodes, to avoid processing them more than once.
-  auto seen_set = jit::hash_set<Node*>{};
-
-  // When we see control flow splits, we need want to process both paths.  We
-  // use this workQ containing (prev, cur) to delay one side.
-  auto workQ = jit::queue<std::pair<Node*,Node*>>{};
-
-  bool changed;
-  do {
-    changed = false;
-    assertx(workQ.empty());
-    workQ.emplace(nullptr, head);
-    do {
-      Node* prev;
-      Node* cur;
-      std::tie(prev, cur) = workQ.front();
-      workQ.pop();
-      do_clean_graph(env, workQ, seen_set, changed, prev, cur);
-    } while (!workQ.empty());
-  } while (changed);
-
-  return head;
-}
-
-jit::vector<Node*> clean_graphs(Env& env, jit::vector<Node*> heads) {
-  for (auto& h : heads) h = clean_graph(env, h);
-  return heads;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-using ChainProgress = jit::vector<Node*>;
-using Incoming      = jit::vector<ChainProgress>;
-
-void add_node(const RCState& state,
-              ChainProgress& chains,
-              int32_t asetID,
-              Node* node) {
-  node->lower_bound = state.asets[asetID].lower_bound;
-  if (node->type != NT::Phi && node->type != NT::Sig) {
-    FTRACE(2, "      {} += {}\n", asetID, show(node));
-  }
-  auto& tail = chains[asetID];
-  tail->next = node;
-  node->prev = tail;
-  tail = node;
-}
-
-struct NodeAdder {
-  explicit NodeAdder(Env& env, RCState& state,
-                     ChainProgress& chains, Block* curBlock)
-    : env(env)
-    , state(state)
-    , chains(chains)
-    , curBlock(curBlock)
-  {}
-
-  template<class NodeT>
-  void operator()(ASetID asetID, const NodeT& n) const {
-    add_node(state, chains, asetID, new (env.arena) NodeT{n});
-  }
-
-  void operator()(ASetID asetID, const NReq& req) const {
-    auto& tail = chains[asetID];
-    if (tail->type == NT::Req) {
-      // Combine adjacent Req nodes.
-      to_req(tail)->level = std::max(to_req(tail)->level, req.level);
-      tail->lower_bound = std::min(
-        tail->lower_bound,
-        state.asets[asetID].lower_bound
-      );
-      FTRACE(2, "      {} += combining req {}\n", asetID, show(tail));
-      return;
-    }
-    // Any Req nodes we add after a sig, but in the same block, must
-    // belong to the same IRnstruction (we only create a sig for next
-    // and taken branches). In some cases (eg consumesReference) we'll
-    // reduce the lower bound after the sig, but before the next
-    // block. inc_pass_sig assumes that if it can move the inc past
-    // the sig in the rcgraph, then it can move it to the starts of
-    // the next and taken blocks - but if the lower bound was reduced
-    // prior to the next block, that may not be the case. Take care of
-    // that here.
-    if (tail->type == NT::Sig && to_sig(tail)->block == curBlock) {
-      to_sig(tail)->lower_bound = std::min(to_sig(tail)->lower_bound,
-                                           state.asets[asetID].lower_bound);
-    }
-    add_node(state, chains, asetID, new (env.arena) NReq{req});
-  }
-
-private:
-  Env& env;
-  RCState& state;
-  ChainProgress& chains;
-  Block* curBlock;
-};
-
-jit::vector<Node*> make_heads(Env& env) {
-  auto ret = ChainProgress{};
-  ret.resize(env.asets.size());
-  for (auto& n : ret) {
-    n = new (env.arena) NEmpty{};
-  }
-  return ret;
-}
-
-ChainProgress merge_incoming(Env& env,
-                             const RCState& state,
-                             Block* blk,
-                             const Incoming& incoming) {
-  assertx(!incoming.empty());
-  auto ret = ChainProgress{};
-  ret.resize(env.asets.size());
-  auto const incoming_sz = safe_cast<uint32_t>(incoming.size());
-  for (auto asetID = uint32_t{0}; asetID < env.asets.size(); ++asetID) {
-    auto const phi = new (env.arena) NPhi{blk};
-    phi->pred_list = new (env.arena) Node*[incoming_sz];
-    phi->pred_list_cap = incoming_sz;
-    phi->lower_bound = state.asets[asetID].lower_bound;
-    ret[asetID] = phi;
-    for (auto& inc : incoming) {
-      inc[asetID]->next = phi;
-      add_phi_pred(env, phi, inc[asetID]);
-    }
-  }
-  return ret;
-}
-
-template<class T>
-void add_node_all(Env& env,
-                  const RCState& state,
-                  ChainProgress& chains,
-                  const T& data) {
-  for (auto asetID = uint32_t{0}; asetID < env.asets.size(); ++asetID) {
-    add_node(state, chains, asetID, new (env.arena) T(data));
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-jit::vector<Node*> build_graphs(Env& env, const RCAnalysis& analysis) {
-  FTRACE(1, "build_graphs -----------------------------------------\n");
-
-  StateVector<Block,Incoming> incoming(env.unit, Incoming{});
-  auto pending_phis = sparse_idptr_map<Block,ChainProgress>(
-    env.unit.numBlocks()
-  );
-
-  auto heads = make_heads(env);
-
-  for (auto& blk : env.rpoBlocks) {
-    FTRACE(2, "B{}:\n", blk->id());
-
-    bool const missing_back_edges = incoming[blk].size() != blk->numPreds();
-    auto state = analysis.info[blk].state_in;
-    auto chains =
-      blk == env.rpoBlocks.front() ? heads :
-      !missing_back_edges &&
-        incoming[blk].size() == 1 ? incoming[blk].front() :
-      merge_incoming(env, state, blk, incoming[blk]);
-    if (missing_back_edges) {
-      pending_phis[blk] = chains;
-      if (debug) {
-        for (auto& n : pending_phis[blk]) always_assert(n->type == NT::Phi);
-      }
-    }
-
-    auto node_adder = NodeAdder{env, state, chains, blk};
-    for (auto& inst : blk->instrs()) {
-      auto propagate = [&] (Block* target) {
-        add_node_all(env, state, chains, NSig{blk});
-
-        if (!pending_phis.contains(target)) {
-          incoming[target].push_back(chains);
-          auto asetID = uint32_t{0};
-          for (auto& ch : incoming[target].back()) {
-            auto const sig = ch;
-            auto const empty = new (env.arena) NEmpty{};
-            to_sig(sig)->taken = empty;
-            empty->prev = sig;
-            empty->lower_bound = state.asets[asetID].lower_bound;
-            ch = empty;
-            ++asetID;
-          }
-          return;
-        }
-
-        auto const& phis = pending_phis[target];
-        for (auto asetID = uint32_t{0}; asetID < chains.size(); ++asetID) {
-          auto const phi = phis[asetID];
-          to_sig(chains[asetID])->taken = phi;
-          ++to_phi(phi)->back_edge_preds;
-          add_phi_pred(env, to_phi(phi), chains[asetID]);
-        }
-      };
-
-      rc_analyze_step(env, inst, state, propagate, node_adder);
-    }
-
-    if (auto const next = blk->next()) {
-      if (!pending_phis.contains(next)) {
-        incoming[next].emplace_back(std::move(chains));
-      } else {
-        auto const& phis = pending_phis[next];
-        for (auto asetID = uint32_t{0}; asetID < chains.size(); ++asetID) {
-          auto const phi = phis[asetID];
-          chains[asetID]->next = phi;
-          ++to_phi(phi)->back_edge_preds;
-          add_phi_pred(env, to_phi(phi), chains[asetID]);
-        }
-      }
-    }
-  }
-
-  return heads;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * RC flowgraph rules.  ("rule_foo" functions)
- *
- * Each transformation on the RC flowgraph has a shape of the graph it matches
- * against, set of preconditions, and a "reprocess" point if it makes a
- * transformation.  Each rule has a diagram explaining the graph transformation
- * it makes, the changes it makes to the underlying IR, the preconditions for
- * the rule applying, and where it tries to reprocess.
- *
- * Often, the rules will want to "reprocess" by backing up a node.  This means
- * the transformations work with backtracking and infinite lookahead---but
- * because of the set of applicable rules, the infinite lookahead is limited to
- * sections of the graph that contain no control flow nodes.  Also, no
- * backtracking will occur unless a rule applies.
- *
- * The reason to allow back-tracking is easily shown by a series of foldable
- * incs and decs.  Consider the graph fragment:
- *
- *  ... ->  inc-2  -->  inc-3  -->  inc-4  -->  dec-5  -->  dec-4  --> ...
- *
- * Which we should be able to turn into just "inc-2".  The rule_inc_dec_fold
- * will first apply when we're pointing to the "inc-4" node, removing "inc-4"
- * and "dec-5".  Instead of proceeding to "dec-4" after it applies, it moves
- * back to reprocess at "inc-3", which lets the rule apply again to remove
- * "inc-3" and "dec-4".
- *
- * When scheduling reprocess nodes these functions use `reprocess_helper',
- * which prevent scheduling sigma nodes an extra time, since it's not
- * profitable and can cause us to get to phi nodes before we've processed their
- * predecessors (which can miss optimization opportunities).
- */
-
-Node* reprocess_helper(Node* pred, Node* succ) {
-  return pred->type == NT::Sig ? succ : pred;
-}
-
-bool can_sink(Env& env, const IRInstruction* inst, const Block* block) {
-  assertx(inst->is(IncRef));
-  if (!block->taken() || !block->next()) return false;
-  if (inst->src(0)->inst()->is(DefConst)) return true;
-  // We've split critical edges, so `next' and 'taken' blocks can't
-  // have other predecessors.
-  assertx(block->taken()->numPreds() == 1);
-  assertx(block->next()->numPreds() == 1);
-  auto const defBlock = findDefiningBlock(inst->src(0), env.idoms);
-  return dominates(defBlock, block->taken(), env.idoms) &&
-         dominates(defBlock, block->next(), env.idoms);
-}
-
-bool all_preds_are_sinkable_incs(const NPhi& phi) {
-  return std::all_of(
-    phi.pred_list,
-    phi.pred_list + phi.pred_list_sz,
-    [&] (const Node* n) {
-      return n->type == NT::Inc && n->lower_bound >= 1;
-    }
-  );
-}
-
-IRInstruction* find_sinkable_pred(const Env& env, const NPhi& phi) {
-  assertx(all_preds_are_sinkable_incs(phi));
-  auto const block = phi.block;
-  auto const it = std::find_if(
-    phi.pred_list,
-    phi.pred_list + phi.pred_list_sz,
-    [&] (const Node* pred) {
-      auto const defBlock = findDefiningBlock(to_inc(pred)->inst->src(0),
-                                              env.idoms);
-      return dominates(defBlock, block, env.idoms);
-    }
-  );
-  if (it == phi.pred_list + phi.pred_list_sz) return nullptr;
-  return to_inc(*it)->inst;
-}
-
-/*
- * Rule "inc_dec_fold":
- *
- *      [ A ]  |  x >= 1
- *        |    |  y >= 2
- *      inc-x  |
- *        |    |
- *      dec-y  |
- *        |    |
- *      [ B ]  |
- *     -----------------
- *
- *           [ A ]  <-- reprocess
- *             |
- *           [ B ]
- *
- * The IncRef and DecRef{NZ,} instructions in the underlying program are
- * removed.
- */
-Node* rule_inc_dec_fold(Env& env, Node* node) {
-  bool const applies =
-    node->type == NT::Inc && node->next &&
-    node->next->type == NT::Dec &&
-    node->next->lower_bound >= 2 &&
-    node->lower_bound >= 1;
-  if (!applies) return node;
-  auto const ninc  = node;
-  auto const ndec  = node->next;
-  auto const nprev = ninc->prev;
-  auto const nsucc = ndec->next;
-  FTRACE(2, "    ** inc_dec_fold: {}, {}\n", *to_inc(ninc)->inst,
-    *to_dec(ndec)->inst);
-  remove_helper(env, to_inc(ninc)->inst);
-  remove_helper(env, to_dec(ndec)->inst);
-  node_skip_over(env, ninc, ndec, ndec->next);
-  node_skip_over(env, nprev, ninc, ninc->next);
-  return reprocess_helper(nprev, nsucc);
-}
-
-/*
- * Rule "inc_pass_req":
- *
- *      [ A ]   |  x >= 1
- *        |     |  y - 1 >= N
- *      inc-x   |
- *        |     |
- *     reqN-y   |
- *        |     |
- *      [ B ]   |
- *   ---------------------
- *
- *         [ A ]     <--- reprocess
- *           |
- *        reqN-(y-1)
- *           |
- *         inc-(y-1)
- *           |
- *         [ B ]
- *
- * No change to the underlying IR program.
- */
-Node* rule_inc_pass_req(Env& env, Node* node) {
-  bool const applies =
-    node->type == NT::Inc && node->next &&
-    node->next->type == NT::Req &&
-    (node->next->lower_bound - 1) >= to_req(node->next)->level &&
-    node->lower_bound >= 1;
-  if (!applies) return node;
-  FTRACE(2, "    ** inc_pass_req\n");
-  auto const ninc  = node;
-  auto const nreq  = node->next;
-  auto const nprev = ninc->prev;
-  node_skip_over(env, ninc, nreq, nreq->next);
-  rechain_forward(nprev, ninc, nreq);
-  ninc->prev = nreq;
-  nreq->prev = nprev;
-  nreq->next = ninc;
-  ninc->lower_bound = std::max(nreq->lower_bound - 1, 0);
-  nreq->lower_bound = std::max(nreq->lower_bound - 1, 0);
-  return reprocess_helper(nprev, ninc);
-}
-
-/*
- * Rule "inc_pass_sig":
- *
- *      [ A ]    |  x >= 1
- *        |      |  y >= 2
- *      inc-x    |
- *        |      |  the inc'd tmp is defined in B and C
- *     sigma-y   |
- *      /   \    |  B != C (normally removed by clean)
- *   [ B ] [ C ] |
- *  -----------------------------------------------
- *
- *            [ A ]      <--- reprocess
- *              |
- *         sigma-(y-1)
- *           /     \
- *     inc-(y-1)  inc-(y-1)
- *         |        |
- *       [ B ]    [ C ]
- *
- * The change to the RC graph is reflected in the underlying IR program.  We
- * remove the IncRef before the control flow split, and insert new copies on
- * the next and taken sides.
- */
-Node* rule_inc_pass_sig(Env& env, Node* node) {
-  bool const applies =
-    node->type == NT::Inc && node->next &&
-    node->next->type == NT::Sig &&
-    node->next->next != nullptr &&
-    to_sig(node->next)->taken != nullptr &&
-    node->next->next != to_sig(node->next)->taken &&
-    can_sink(env, to_inc(node)->inst, to_sig(node->next)->block) &&
-    node->lower_bound >= 1 &&
-    node->next->lower_bound >= 2;
-  if (!applies) return node;
-
-  auto const nold_inc = to_inc(node);
-  auto const nprev    = nold_inc->prev;
-  auto const nsig     = to_sig(node->next);
-
-  auto const value     = nold_inc->inst->src(0);
-  auto const bcctx     = nold_inc->inst->bcctx();
-  auto const new_taken = env.unit.gen(IncRef, bcctx, value);
-  auto const new_next  = env.unit.gen(IncRef, bcctx, value);
-
-  FTRACE(2, "    ** inc_pass_sig: {} -> {}, {}\n",
-    *nold_inc->inst, *new_taken, *new_next);
-
-  node_skip_over(env, nprev, nold_inc, nsig);
-  auto const ntaken = add_between(env, nsig, nsig->taken, NInc{new_taken});
-  auto const nnext  = add_between(env, nsig, nsig->next, NInc{new_next});
-
-  nnext->lower_bound  = std::max(nsig->lower_bound - 1, 0);
-  ntaken->lower_bound = std::max(nsig->lower_bound - 1, 0);
-  nsig->lower_bound   = std::max(nsig->lower_bound - 1, 0);
-
-  remove_helper(env, nold_inc->inst);
-  nsig->block->taken()->prepend(new_taken);
-  nsig->block->next()->prepend(new_next);
-
-  return reprocess_helper(nprev, nsig);
-}
-
-/*
- * Rule "inc_pass_phi":
- *
- *     [ A ]  [ B ] ... |  all pred lower_bounds x, y, ... >= 1
- *       |      |       |  z >= 2
- *     inc-x  inc-y     |
- *        \   /         |
- *        phi-z         |
- *          |           |
- *        [ C ]         |
- *  --------------------------------
- *
- *          [ A ]  [ B ] ...
- *             \    /
- *            phi-(z-1)    <--- reprocess
- *               |
- *            inc-(z-1)
- *               |
- *             [ C ]
- *
- * The change to the RC graph is reflected in the underlying IR program.  We
- * remove the IncRefs for each incoming node, and insert a new one after the
- * join point.
- *
- * Note: it may seem like we should need a precondition on this rule that each
- * incoming node is distinct, since Phi nodes don't necessarily have unique
- * predecessor pointers.  However, only Sig nodes can have multiple successors,
- * so this situation doesn't apply.
- */
-Node* rule_inc_pass_phi(Env& env, Node* node) {
-  bool const applies =
-    node->type == NT::Phi &&
-    node->lower_bound >= 2 &&
-    all_preds_are_sinkable_incs(*to_phi(node));
-  if (!applies) return node;
-  auto const nphi = to_phi(node);
-  auto const* sink = find_sinkable_pred(env, *nphi);
-  auto block = nphi->block;
-  auto insertAt = block->skipHeader();
-  auto const src = [&] () -> SSATmp* {
-    if (sink) return sink->src(0);
-    // We need an SSATmp which is valid in this block; try to find one
-    // with the same id, which we determine from one of the preceding
-    // incs.
-    auto const id = env.asetMap[to_inc(nphi->pred_list[0])->inst->src(0)];
-    for (auto it = block->begin(); it != block->end(); ) {
-      auto& inst = *it;
-      for (auto const s : inst.srcs()) {
-        if (env.asetMap[s] == id) {
-          insertAt = it;
-          sink = &inst;
-          return s;
-        }
-      }
-      if (!irrelevant_inst(inst)) return nullptr;
-      ++it;
-      for (auto const d : inst.dsts()) {
-        if (env.asetMap[d] == id) {
-          insertAt = it;
-          sink = &inst;
-          return d;
-        }
-      }
-    }
-    return nullptr;
-  }();
-  if (!src) return node;
-
-  auto const new_inc  = env.unit.gen(IncRef, sink->bcctx(), src);
-  auto const nnew_inc = add_between(env, nphi, nphi->next, NInc{new_inc});
-
-  nnew_inc->lower_bound = std::max(nphi->lower_bound - 1, 0);
-  nphi->lower_bound     = std::max(nphi->lower_bound - 1, 0);
-
-  FTRACE(2, "    ** inc_pass_phi: {}\n", *new_inc);
-  nphi->block->insert(insertAt, new_inc);
-
-  assertx(nphi->prev == nullptr);
-  for (auto i = uint32_t{0}; i < nphi->pred_list_sz; ++i) {
-    auto& pred_ptr = nphi->pred_list[i];
-    auto const inc = to_inc(pred_ptr);
-    auto const inc_pred = inc->prev;
-    rechain_forward(inc_pred, inc, nphi);
-    inc->prev = nullptr;
-    inc->next = nullptr;
-    remove_helper(env, inc->inst);
-    pred_ptr = inc_pred;
-  }
-
-  return nphi;
-}
-
-/*
- * Rule "decnz":
- *
- *     [ A ]   | x >= 2
- *       |     |
- *     dec-x   |
- *       |     |
- *     [ B ]   |
- *  ----------------------
- *
- *  Convert DecRef to DecRefNZ in the underlying IR program---no change to
- *  the RC flowgraph.
- */
-Node* rule_decnz(Env& /*env*/, Node* node) {
-  bool const applies =
-    node->type == NT::Dec &&
-    node->lower_bound >= 2 &&
-    to_dec(node)->inst->is(DecRef);
-  if (!applies) return node;
-  FTRACE(2, "    ** decnz:  {}\n", *to_dec(node)->inst);
-  auto inst = to_dec(node)->inst;
-  inst->setOpcode(DecRefNZ);
-  inst->clearExtra();
-  return node->next;
-}
-
-Node* optimize_node(Env& env, Node* node, jit::queue<Node*>& workQ) {
-  if (node->type == NT::Phi) {
-    ++node->visit_counter;
-    if (node->visit_counter !=
-        to_phi(node)->pred_list_sz - to_phi(node)->back_edge_preds) {
-      // Wait until we've processed all the forward predecessors before looking
-      // at the Phi node.
-      return nullptr;
-    }
-  }
-
-  for (;;) {
-    auto const orig_node = node;
-    FTRACE(3, "  {}\n", show(node));
-
-    node = rule_inc_dec_fold(env, node);
-    node = rule_inc_pass_req(env, node);
-    node = rule_inc_pass_sig(env, node);
-    node = rule_inc_pass_phi(env, node);
-    node = rule_decnz(env, node);
-
-    if (node == nullptr || node == orig_node) break;
-  }
-
-  if (!node) return nullptr;
-  if (node->type == NT::Sig) {
-    if (auto const t = to_sig(node)->taken) {
-      workQ.push(t);
-    }
-  }
-  // Return the next, or nullptr if it doesn't have a next:
-  return node->next;
-}
-
-void optimize_graph(Env& env, Node* head) {
-  auto workQ = jit::queue<Node*>{};
-  workQ.push(head);
-  do {
-    auto current = workQ.front();
-    workQ.pop();
-    do {
-      current = optimize_node(env, current, workQ);
-    } while (current != nullptr);
-  } while (!workQ.empty());
-}
-
-void optimize_graphs(Env& env, const jit::vector<Node*>& graphs) {
-  FTRACE(1, "optimize_graphs -----------------------------------------\n");
-  for (auto asetID = uint32_t{0}; asetID < graphs.size(); ++asetID) {
-    FTRACE(2, "{} {}\n", asetID, *env.asets[asetID].representative);
-    optimize_graph(env, graphs[asetID]);
-  }
-  FTRACE(1, "{}", show_graphs(env.asets, graphs));
-}
-
-void rcgraph_opts(Env& env) {
-  // Get analysis results that let us build the rc flowgraphs.
-  auto const rcAnalysis = rc_analyze(env);
-  FTRACE(1, "\nRCAnalysis:\n\n{}\n", show_analysis(env, rcAnalysis));
-
-  // Build the graphs.
-  auto graphs = build_graphs(env, rcAnalysis);
-  FTRACE(1, "rc arena size: {}\n", env.arena.size());
-  assertx(check_graphs(graphs));
-  FTRACE(1, "{}", show_graphs(env.asets, graphs));
-
-  // Clean the graphs up, so they're easier to pattern match against in the
-  // optimize pass.
-  graphs = clean_graphs(env, std::move(graphs));
-  assertx(check_graphs(graphs));
-  FTRACE(1, "{}", show_graphs(env.asets, graphs));
-
-  // Optimize each graph.
-  optimize_graphs(env, graphs);
-  assertx(check_graphs(graphs));
-  FTRACE(1, "rc arena size: {}\n", env.arena.size());
-}
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * sink_incs() is a simple pass that sinks IncRefs of values that may
  * be uncount past some safe instructions.  These are instructions
@@ -3470,6 +2411,19 @@ bool can_sink_inc_through(const IRInstruction& inst) {
 
     default:         return false;
   }
+}
+
+bool can_sink(Env& env, const IRInstruction* inst, const Block* block) {
+  assertx(inst->is(IncRef));
+  if (!block->taken() || !block->next()) return false;
+  if (inst->src(0)->inst()->is(DefConst)) return true;
+  // We've split critical edges, so `next' and 'taken' blocks can't
+  // have other predecessors.
+  assertx(block->taken()->numPreds() == 1);
+  assertx(block->next()->numPreds() == 1);
+  auto const defBlock = findDefiningBlock(inst->src(0), env.idoms);
+  return dominates(defBlock, block->taken(), env.idoms) &&
+         dominates(defBlock, block->next(), env.idoms);
 }
 
 void sink_incs(Env& env) {
@@ -3678,8 +2632,11 @@ struct PreEnv {
   using IncDecKey = std::tuple<Block*,uint32_t,bool>; /* blk, id, at front */
   using InsertMap = std::unordered_map<IncDecKey, SSATmp*>;
 
-  explicit PreEnv(Env& env) :
-      env(env), state(env.unit, PreBlockInfo(env.asets.size())), curGen(0),
+  explicit PreEnv(Env& env, RCAnalysis& rca) :
+      env(env),
+      rca(rca),
+      state(env.unit, PreBlockInfo(env.asets.size())),
+      curGen(0),
       avlQ(env.rpoBlocks.size()),
       antQ(env.rpoBlocks.size()) {
     uint32_t id = 0;
@@ -3694,6 +2651,7 @@ struct PreEnv {
   }
 
   Env& env;
+  RCAnalysis& rca;
   BlockState state;
   uint32_t  curGen;
   InsertMap insMap;
@@ -3702,6 +2660,112 @@ struct PreEnv {
   std::set<uint32_t> reprocess;
   dataflow_worklist<uint32_t, std::greater<uint32_t>> avlQ;
   dataflow_worklist<uint32_t, std::less<uint32_t>> antQ;
+};
+
+struct PreAdderInfo {
+  PreAdderInfo(PreEnv& penv,
+               PreBlockInfo& blkInfo,
+               RCState& state,
+               bool incDec) :
+      penv{penv}, blkInfo{blkInfo}, state{state}, incDec{incDec} {}
+
+  void remove(Block::iterator iter) {
+    auto& inst = *iter;
+    auto const id = penv.env.asetMap[inst.src(0)];
+    auto it = iter;
+    while (true) {
+      auto& i2 = *--it;
+      if (i2.is(IncRef, DecRef, DecRefNZ) &&
+          penv.env.asetMap[i2.src(0)] == id) {
+        assertx(incDec == i2.is(IncRef));
+        FTRACE(3, "    ** trivial pair: {}, {}\n", inst, i2);
+        remove_helper(penv.env, &i2);
+        remove_helper(penv.env, &inst);
+        blkInfo.avlLoc.reset(id);
+        penv.reprocess.insert(blkInfo.rpoId);
+        modified = true;
+        return;
+      }
+      assertx(it != inst.block()->begin());
+    }
+  };
+  void setAvlAnt(Block::iterator iter, bool avl) {
+    auto& inst = *iter;
+    auto const id = penv.env.asetMap[inst.src(0)];
+    if (id < 0) {
+      assertx(inst.src(0)->type() <= TUncounted);
+      FTRACE(3, "    ** kill uncounted inc/dec: {}\n", inst);
+      remove_helper(penv.env, &inst);
+      return;
+    }
+    if (avl) {
+      FTRACE(4, "     avlLoc: {}\n", id);
+      blkInfo.avlLoc.set(id);
+      // also set altLoc, so that this block isn't transparent for ANT
+      blkInfo.altLoc.set(id);
+      return;
+    }
+    if (blkInfo.avlLoc.test(id)) {
+      remove(iter);
+      return;
+    }
+    auto alt = blkInfo.altLoc.test(id);
+    if (!alt) {
+      FTRACE(4, "     antLoc: {}\n", id);
+      blkInfo.antLoc.set(id);
+      // also set altLoc, so that this block isn't transparent for AVL
+      blkInfo.altLoc.set(id);
+    }
+    return;
+  }
+
+  PreEnv& penv;
+  PreBlockInfo& blkInfo;
+  RCState& state;
+  bool modified{false};
+  bool incDec;
+};
+
+struct PreAdder {
+  void operator()(ASetID asetID, const NPhi& n) const {}
+  void operator()(ASetID asetID, const NSig& n) const {}
+  void operator()(ASetID asetID, const NEmpty& n) const {}
+
+  void operator()(ASetID asetID, const NInc& n) const {
+    auto const blk = n.inst->block();
+    auto const iter = blk->iteratorTo(n.inst);
+    if (info.incDec && info.state.asets[asetID].lower_bound < 1) {
+      info.blkInfo.altLoc.set(asetID);
+      return;
+    }
+    info.setAvlAnt(iter, info.incDec);
+  }
+  void operator()(ASetID asetID, const NDec& n) const {
+    auto const blk = n.inst->block();
+    auto const iter = blk->iteratorTo(n.inst);
+    if (info.state.asets[asetID].lower_bound <= 1) {
+      info.blkInfo.altLoc.set(asetID);
+      return;
+    }
+    info.setAvlAnt(iter, !info.incDec);
+  }
+  void operator()(ASetID asetID, const NReq& n) const {
+    /*
+     * An NReq requires that the refcount at this point in the code be
+     * at least n.level. If we remove an inc/dec pair, we'll reduce
+     * the refcount here by 1, so unless lb - 1 >= n.level, we can't
+     * remove it. The situation for dec/inc pairs is less clear, and
+     * we might even be able to ignore NReqs unless n.level==INT_MAX
+     * in that case - but that requires some investigation.
+     */
+    auto const lb = info.state.asets[asetID].lower_bound;
+    if (lb - (info.incDec ? 1 : 0) >= n.level) return;
+    FTRACE(4, "     altLoc: {}\n", asetID);
+    info.blkInfo.altLoc.set(asetID);
+    info.blkInfo.avlLoc.reset(asetID);
+  }
+
+  PreAdderInfo& info;
 };
 
 void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
@@ -3714,94 +2778,36 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
            return ret;
          }());
   auto& s = penv.state[blk];
-  bool again;
-  do {
-    again = false;
+  auto process = [&] (RCState state) {
+    PreAdderInfo adder{penv, s, state, incDec};
+    PreAdder preAdder{adder};
     for (auto iter = blk->begin(); iter != blk->end(); ++iter) {
       auto& inst = *iter;
-      auto remove = [&] {
-        auto const id = penv.env.asetMap[inst.src(0)];
-        auto it = iter;
-        while (true) {
-          auto& i2 = *--it;
-          if (i2.is(IncRef, DecRef, DecRefNZ) &&
-              penv.env.asetMap[i2.src(0)] == id) {
-            assertx(incDec == i2.is(IncRef));
-            FTRACE(3, "    ** trivial pair: {}, {}\n", inst, i2);
-            remove_helper(penv.env, &i2);
-            remove_helper(penv.env, &inst);
-            s.avlLoc.reset(id);
-            return;
-          }
-          assertx(it != blk->begin());
-        }
-      };
-      FTRACE(4, "    inst: {}\n", inst.toString());
-      auto setAvlAnt = [&] (bool avl) {
+      if (inst.is(DecRef)) {
         auto const id = penv.env.asetMap[inst.src(0)];
         if (id < 0) {
           assertx(inst.src(0)->type() <= TUncounted);
           FTRACE(3, "    ** kill uncounted inc/dec: {}\n", inst);
           remove_helper(penv.env, &inst);
-          return;
+          continue;
         }
-        if (avl) {
-          if (inst.is(DecRef)) {
-            s.altLoc.set();
-            // a DecRef could run arbitrary code, and we're not
-            // tracking may alias sets, so we have to give up on all
-            // preceding DecRef/DecRefNZ's
-            s.avlLoc.reset();
-            FTRACE(4, "     Altered-decref\n");
-          }
-          FTRACE(4, "     avlLoc: {}\n", id);
-          s.avlLoc.set(id);
-          // also set altLoc, so that this block isn't transparent for ANT
-          s.altLoc.set(id);
-          return;
+        if (state.asets[id].lower_bound >= 2) {
+          FTRACE(2, "    ** decnz:  {}\n", inst);
+          inst.setOpcode(DecRefNZ);
+          inst.clearExtra();
         }
-        if (s.avlLoc.test(id)) {
-          remove();
-          s.avlLoc.reset();
-          s.antLoc.reset();
-          s.altLoc.reset();
-          again = true;
-        } else {
-          auto cur = s.altLoc.test(id);
-          if (inst.is(DecRef)) {
-            s.altLoc.set();
-            // see the comments above, in the avl case
-            s.avlLoc.reset();
-            FTRACE(4, "     Altered-decref\n");
-          }
-          if (!cur) {
-            FTRACE(4, "     antLoc: {}\n", id);
-            s.antLoc.set(id);
-            // also set altLoc, so that this block isn't transparent for AVL
-            s.altLoc.set(id);
-          }
-        }
-      };
-
-      if (inst.is(IncRef)) {
-        setAvlAnt(incDec);
-        if (again) break;
-        continue;
       }
-
-      if (inst.is(DecRef, DecRefNZ)) {
-        setAvlAnt(!incDec);
-        if (again) break;
-        continue;
-      }
-
-      if (!irrelevant_inst(inst)) {
-        FTRACE(4, "     Altered-all\n");
-        s.altLoc.set();
-        s.avlLoc.reset();
-      }
+      rc_analyze_step(penv.env, inst, state, [&] (Block*) {}, preAdder);
+      if (adder.modified) return true;
     }
-  } while (again);
+    return false;
+  };
+
+  while (process(penv.rca.info[blk].state_in)) {
+    s.avlLoc.reset();
+    s.antLoc.reset();
+    s.altLoc.reset();
+  }
 
   if (blk->next()) {
     FTRACE(4, "    -> B{}\n", blk->next()->id());
@@ -4112,6 +3118,7 @@ bool pre_apply(PreEnv& penv, bool incDec) {
   // redundant, there will be blocks in at least one of the queues
   // that need reprocessing, so return here, and do that.
   if (!penv.avlQ.empty() || !penv.antQ.empty()) {
+    FTRACE(4, "Recompute bit vectors after removing pre candidates\n");
     return false;
   }
 
@@ -4198,10 +3205,25 @@ bool pre_apply(PreEnv& penv, bool incDec) {
 
   pre_insert(penv, incDec);
   // If we didn't do anything, we're done...
-  if (!penv.reprocess.size()) return true;
-  // ... otherwise recompute the transfer functions for all modified
-  // blocks, repropagate the block state, and restart the optimization.
+  if (!penv.reprocess.size()) {
+    FTRACE(4, "No changes... done\n");
+    return true;
+  }
+  // ... otherwise update the RCAnalysis for the modified blocks
+  assertx(penv.avlQ.empty());
   for (auto rpoId : penv.reprocess) {
+    penv.avlQ.push(rpoId);
+  }
+  FTRACE(3, "re-analyze after modifications\n");
+  rc_analyze_worklist(penv.env, penv.rca, penv.avlQ, &penv.reprocess);
+  // ... then update the local transfer functions for any blocks where
+  // it might have changed, and setup the work queues to propagate the
+  // changes
+  assertx(penv.antQ.empty());
+  assertx(penv.avlQ.empty());
+  FTRACE(3, "re-compute local transfer after modifications\n");
+  auto reprocess = std::move(penv.reprocess);
+  for (auto rpoId : reprocess) {
     auto const blk = penv.env.rpoBlocks[rpoId];
     auto& s = penv.state[blk];
     s.avlLoc.reset();
@@ -4211,7 +3233,7 @@ bool pre_apply(PreEnv& penv, bool incDec) {
     penv.avlQ.push(rpoId);
     penv.antQ.push(rpoId);
   }
-  penv.reprocess.clear();
+  FTRACE(4, "Redo pre-apply\n");
   return false;
 }
 
@@ -4221,17 +3243,19 @@ bool pre_apply(PreEnv& penv, bool incDec) {
  * When incDec is true, we're going to remove incs followed by decs;
  * otherwise decs followed by incs.
  */
-void pre_incdecs(Env& env, bool incDec) {
+void pre_incdecs(Env& env, RCAnalysis& rca, bool incDec) {
   FTRACE(2, "pre_incdecs ({})---------------------------------\n",
          incDec ? "Inc->Dec" : "Dec->Inc");
 
-  PreEnv penv{env};
+  PreEnv penv{env, rca};
   for (auto blk : env.rpoBlocks) {
     pre_local_transfer(penv, incDec, blk);
   }
 
   do {
+    FTRACE(4, "pre_compute_available\n");
     pre_compute_available(penv);
+    FTRACE(4, "pre_compute_anticipated\n");
     pre_compute_anticipated(penv);
   } while (!pre_apply(penv, incDec));
 }
@@ -4253,9 +3277,11 @@ void optimizeRefcounts(IRUnit& unit) {
 
   populate_mrinfo(env);
   weaken_decrefs(env);
-  rcgraph_opts(env);
-  pre_incdecs(env, true);
-  pre_incdecs(env, false);
+  {
+    auto rca = rc_analyze(env);
+    pre_incdecs(env, rca, true);
+    pre_incdecs(env, rca, false);
+  }
   sink_incs(env);
 
   // We may have pushed IncRefs past CheckTypes, which could allow us to

@@ -817,13 +817,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Token _ -> ([param_template lambda_signature env], None)
         | _ -> missing_syntax "lambda signature" lambda_signature env
       in
-      let pBody node env =
-        try mk_noop (pPos node env) (pBlock node env) with
-        | _ ->
-          let (p,r) = pExpr node env in
-          [ p, Return (Some (p, r)) ]
-      in
-      let f_body, yield = mpYielding pBody lambda_body env in
+      let f_body, yield = mpYielding pFunctionBody lambda_body env in
       Lfun
       { (fun_template yield node suspension_kind env) with
         f_ret
@@ -1281,7 +1275,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           mk_suspension_kind
             anonymous_async_keyword
             anonymous_coroutine_keyword in
-        let body, yield = mpYielding pBlock anonymous_body env in
+        let body, yield = mpYielding pFunctionBody anonymous_body env in
         Efun
         ( { (fun_template yield node suspension_kind env) with
             f_ret    = mpOptional pHint anonymous_type env
@@ -1339,9 +1333,14 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       let pAttr = fun node env ->
         match syntax node with
         | XHPSimpleAttribute { xhp_simple_attribute_name; xhp_simple_attribute_expression; _ } ->
-          Xhp_simple ( pos_name xhp_simple_attribute_name env
-          , pEmbedded unesc_xhp_attr xhp_simple_attribute_expression env
-          )
+          let name = pos_name xhp_simple_attribute_name env in
+          let expr =
+            if is_braced_expression xhp_simple_attribute_expression
+            && env.fi_mode = FileInfo.Mdecl && not env.hhvm_compat_mode
+            then Pos.none, Null
+            else pEmbedded unesc_xhp_attr xhp_simple_attribute_expression env
+          in
+          Xhp_simple (name, expr)
         | XHPSpreadAttribute { xhp_spread_attribute_expression; _ } ->
           Xhp_spread ( pEmbedded unesc_xhp_attr xhp_spread_attribute_expression env )
         | _ -> missing_syntax "XHP attribute" node env
@@ -1411,6 +1410,16 @@ and pBlock : block parser = fun node env ->
    in
    let stmt = pStmtUnsafe node env in
    fix_last [] stmt
+and pFunctionBody : block parser = fun node env ->
+  match syntax node with
+  | Missing -> []
+  | _ when env.fi_mode = FileInfo.Mdecl && not env.hhvm_compat_mode
+        || env.quick_mode ->
+    [ Pos.none, Noop ]
+  | CompoundStatement _ -> pBlock node env
+  | _ ->
+    let p, r = pExpr node env in
+    [p, Return (Some (p, r))]
 and pStmtUnsafe : stmt list parser = fun node env ->
   let stmt = pStmt node env in
   match leading_token node with
@@ -1955,18 +1964,10 @@ and pClassElt : class_elt list parser = fun node env ->
           )
       in
       let pBody = fun node env ->
-        if is_missing node then [] else
-          let body = pBlock node env in
-          (* TODO: Give parse error when not abstract, but body is missing *)
-          List.rev member_init @ body
+        let body = pFunctionBody node env in
+        List.rev member_init @ body
       in
       let body, body_has_yield = mpYielding pBody methodish_function_body env in
-      let body =
-        (* Drop it on the floor in quick mode; we still need to process the body
-         * to know, e.g. whether it contains a yield.
-         *)
-        if env.quick_mode then [Pos.none, Noop] else body
-      in
       let kind = pKinds h.function_modifiers env in
       member_def @ [Method
       { m_kind            = kind
@@ -2157,7 +2158,7 @@ and pDef : def list parser = fun node env ->
   | FunctionDeclaration
     { function_attribute_spec; function_declaration_header; function_body } ->
       let hdr = pFunHdr function_declaration_header env in
-      let block, yield = mpYielding (mpOptional pBlock) function_body env in
+      let block, yield = mpYielding pFunctionBody function_body env in
       [ Fun
       { (fun_template yield node hdr.fh_suspension_kind env) with
         f_tparams         = hdr.fh_type_parameters
@@ -2167,9 +2168,7 @@ and pDef : def list parser = fun node env ->
       ; f_params          = hdr.fh_parameters
       ; f_ret_by_ref      = hdr.fh_ret_by_ref
       ; f_body            =
-        if env.quick_mode
-        then [Pos.none, Noop]
-        else begin
+        begin
           (* FIXME: Filthy hack to catch UNSAFE *)
           let containsUNSAFE =
             let re = Str.regexp_string "UNSAFE" in
@@ -2177,10 +2176,8 @@ and pDef : def list parser = fun node env ->
             | Not_found -> false
           in
           match block with
-          | Some [p, Noop] when containsUNSAFE -> [p, Unsafe]
-          | Some [] -> [Pos.none, Noop]
-          | None -> []
-          | Some b -> b
+          | [p, Noop] when containsUNSAFE -> [p, Unsafe]
+          | b -> b
         end
       ; f_user_attributes =
         List.concat @@ couldMap ~f:pUserAttribute function_attribute_spec env

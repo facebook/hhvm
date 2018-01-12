@@ -686,18 +686,6 @@ struct ASetInfo {
    * for the whole conflict set.
    */
   ALocBits memory_support;
-
-  /*
-   * Sometimes we lose too much track of what's going on to do anything useful.
-   * In this situation, all the sets get flagged as `pessimized', we don't do
-   * anything to them anymore, and a Halt node is added to all graphs.
-   *
-   * Note: right now this state is per-ASetInfo, but we must pessimize
-   * everything at once if we pessimize anything, because of how the analyzer
-   * will lose track of aliasing effects.  (We will probably either change it to
-   * be per-RCState later or fix the alias handling.)
-   */
-  bool pessimized{false};
 };
 
 // State structure for rc_analyze.
@@ -762,7 +750,7 @@ struct Env {
 /*
  * Nodes in the RC flowgraphs.
  */
-enum class NT : uint8_t { Inc, Dec, Req, Phi, Sig, Halt, Empty };
+enum class NT : uint8_t { Inc, Dec, Req, Phi, Sig, Empty };
 struct Node {
   Node* next{nullptr};
   Node* prev{nullptr};  // unused for Phi nodes; as they may have >1 preds
@@ -809,23 +797,6 @@ struct NSig : Node {
 };
 
 /*
- * Halt means to stop processing along this control flow path---something
- * during analysis had to pessimize and we can't continue.
- *
- * When we've pessimized a set, we also guarantee that all successors have a
- * lower_bound of zero, which will block all rcfg transformation rules from
- * applying, so it's actually not necessary to halt---it just prevents
- * processing parts of the graph unnecessarily.
- *
- * For the case of join points which were halted on one side, optimize_graph
- * will not process through the join because the visit_counter will never be
- * high enough.  In the case of back edges, it may process through the loop
- * unnecessarily, but it won't make any illegal transformations because the
- * lower_bound will be zero.
- */
-struct NHalt : Node { explicit NHalt() : Node(NT::Halt) {} };
-
-/*
  * Empty nodes are useful for building graphs, since not every node type can
  * have control flow edges, but it has no meaning later.
  */
@@ -856,7 +827,6 @@ X(Dec, dec)
 X(Req, req)
 X(Phi, phi)
 X(Sig, sig)
-X(Halt, halt)
 X(Empty, empty)
 
 #undef X
@@ -1495,11 +1465,6 @@ DEBUG_ONLY bool check_state(const RCState& state) {
       set.memory_support,
       [&](size_t id) { always_assert(state.support_map[id] == asetID); }
     );
-
-    if (set.pessimized) {
-      always_assert(set.lower_bound == 0);
-      always_assert(set.memory_support.none());
-    }
   }
 
   // Check other direction on the support_map.
@@ -1530,8 +1495,7 @@ RCState entry_rc_state(Env& env) {
 }
 
 bool pessimize_for_merge(ASetInfo& aset) {
-  if (aset.pessimized) return false;
-  aset.pessimized = true;
+  if (!aset.lower_bound && aset.memory_support.none()) return false;
   aset.lower_bound = 0;
   aset.memory_support.reset();
   return true;
@@ -1548,14 +1512,6 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   auto const new_lower_bound = std::min(dst.lower_bound, src.lower_bound);
   if (dst.lower_bound != new_lower_bound) {
     dst.lower_bound = new_lower_bound;
-    changed = true;
-  }
-
-  auto const new_pessimized = dst.pessimized || src.pessimized;
-  if (dst.pessimized != new_pessimized) {
-    assertx(new_pessimized);
-    DEBUG_ONLY auto pess_changed = pessimize_for_merge(dst);
-    assertx(pess_changed);
     changed = true;
   }
 
@@ -1659,7 +1615,6 @@ template<class Fn>
 void for_aset(Env& env, RCState& state, SSATmp* tmp, Fn fn) {
   auto const asetID = env.asetMap[tmp];
   if (asetID == -1) { assertx(!tmp->type().maybe(TCounted)); return; }
-  if (state.asets[asetID].pessimized) return;
   fn(asetID);
 }
 
@@ -1669,11 +1624,26 @@ void reduce_lower_bound(Env& /*env*/, RCState& state, uint32_t asetID) {
   aset.lower_bound = std::max(aset.lower_bound - 1, 0);
 }
 
+/*
+ * Note that its ok to clear the memory support and continue in
+ * pessimize situations. If later, after increasing the lower bound,
+ * we see an event that could DecRef a memory location that was
+ * previously in the support, there are two possibilities:
+ *
+ * - the location really is still in the support, and the event
+ *   decreases the refcount; but in that case, our lower_bound doesn't
+ *   include the reference coming from that location, so it was
+ *   previously at least one too low, and so there's nothing for us to
+ *   do.
+ *
+ * - the location was no longer in the support, and the event has no
+ *   effect; again there's nothing for us to do.
+ */
 template <class NAdder>
 void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
                    NAdder add_node) {
   auto& aset = state.asets[asetID];
-  if (aset.pessimized) return;
+  if (!aset.lower_bound && aset.memory_support.none()) return;
   FTRACE(2, "      {} pessimized\n", asetID);
   aset.lower_bound = 0;
   bitset_for_each_set(
@@ -1681,8 +1651,7 @@ void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
     [&](size_t id) { state.support_map[id] = -1; }
   );
   aset.memory_support.reset();
-  aset.pessimized = true;
-  add_node(asetID, NHalt{});
+  add_node(asetID, NReq{std::numeric_limits<int32_t>::max()});
 }
 
 template<class NAdder>
@@ -2500,7 +2469,6 @@ std::string show(const Node* node) {
     [&] () -> std::string {
       switch (node->type) {
       case NT::Empty:   return "empty";
-      case NT::Halt:    return "halt";
       case NT::Sig:     return u8"\u03c3";
       case NT::Dec:     return sformat("dec({})", to_dec(node)->inst->id());
       case NT::Phi:
@@ -2687,7 +2655,6 @@ bool check_graph(Node* graph) {
       always_assert(to_req(n)->level >= 1);
       break;
     case NT::Empty:
-    case NT::Halt:
       break;
     }
   }
@@ -2712,7 +2679,6 @@ void do_clean_graph(Env& env,
     case NT::Req:
     case NT::Inc:
     case NT::Dec:
-    case NT::Halt:
       // Normal nodes that we just keep
       prev = cur;
       cur = cur->next;
@@ -3364,7 +3330,6 @@ Node* optimize_node(Env& env, Node* node, jit::queue<Node*>& workQ) {
   for (;;) {
     auto const orig_node = node;
     FTRACE(3, "  {}\n", show(node));
-    if (node->type == NT::Halt) return nullptr;
 
     node = rule_inc_dec_fold(env, node);
     node = rule_inc_pass_req(env, node);

@@ -65,87 +65,86 @@ namespace HPHP {
 struct c_WaitableWaitHandle;
 
 struct Xenon final {
+  enum SampleType {
+    // Sample was taken during I/O wait and thus does not represent CPU time.
+    IOWaitSample,
 
-    enum SampleType {
-      // Sample was taken during I/O wait and thus does not represent CPU time.
-      IOWaitSample,
+    // Sample was taken to trace loading of new units.
+    UnitLoadEvent,
 
-      // Sample was taken to trace loading of new units.
-      UnitLoadEvent,
+    // Sample was taken before an async function was resumed at await opcode.
+    // The CPU time is attributed to the resumed async function, because the
+    // CPU time was spent by the scheduler on the behalf of the resumed
+    // function (preparing for reentry, unserializing result of external
+    // thread event, etc.).
+    ResumeAwaitSample,
 
-      // Sample was taken before an async function was resumed at await opcode.
-      // The CPU time is attributed to the resumed async function, because the
-      // CPU time was spent by the scheduler on the behalf of the resumed
-      // function (preparing for reentry, unserializing result of external
-      // thread event, etc.).
-      ResumeAwaitSample,
+    // Sample was taken before a function was called or a generator was
+    // resumed at yield opcode.
+    // The CPU time is attributed to the caller of the entered function.
+    // Inlined frames are skipped as they did not trigger EnterSample events
+    // to properly attribute their parent's cost.
+    EnterSample,
 
-      // Sample was taken before a function was called or a generator was
-      // resumed at yield opcode.
-      // The CPU time is attributed to the caller of the entered function.
-      // Inlined frames are skipped as they did not trigger EnterSample events
-      // to properly attribute their parent's cost.
-      EnterSample,
+    // Sample was taken before a function returned, suspended or failed
+    // with an exception.
+    // The CPU time is attributed to the exited function.
+    ExitSample,
+  };
 
-      // Sample was taken before a function returned, suspended or failed
-      // with an exception.
-      // The CPU time is attributed to the exited function.
-      ExitSample,
-    };
-
-    static bool isCPUTime(SampleType t) {
-      switch (t) {
-        case IOWaitSample:
-        case UnitLoadEvent:
-          return false;
-        case ResumeAwaitSample:
-        case EnterSample:
-        case ExitSample:
-          return true;
-      }
-      always_assert(false);
+  static bool isCPUTime(SampleType t) {
+    switch (t) {
+      case IOWaitSample:
+      case UnitLoadEvent:
+        return false;
+      case ResumeAwaitSample:
+      case EnterSample:
+      case ExitSample:
+        return true;
     }
+    always_assert(false);
+  }
 
-    static const char* show(SampleType t) {
-      switch (t) {
-        case IOWaitSample: return "IOWait";
-        case UnitLoadEvent: return "UnitLoad";
-        case ResumeAwaitSample: return "ResumeAwait";
-        case EnterSample: return "Enter";
-        case ExitSample: return "Exit";
-      }
-      always_assert(false);
+  static const char* show(SampleType t) {
+    switch (t) {
+      case IOWaitSample: return "IOWait";
+      case UnitLoadEvent: return "UnitLoad";
+      case ResumeAwaitSample: return "ResumeAwait";
+      case EnterSample: return "Enter";
+      case ExitSample: return "Exit";
     }
+    always_assert(false);
+  }
 
-    static Xenon& getInstance(void) noexcept;
+  static Xenon& getInstance(void) noexcept;
 
-    Xenon() noexcept;
-    ~Xenon() noexcept {};
-    Xenon(const Xenon&) = delete;
-    void operator=(const Xenon&) = delete;
+  Xenon() noexcept;
+  ~Xenon() noexcept {};
+  Xenon(const Xenon&) = delete;
+  void operator=(const Xenon&) = delete;
 
-    void start(uint64_t msec);
-    void stop();
-    void incrementMissedSampleCount(ssize_t val);
-    int64_t getAndClearMissedSampleCount();
-    // Log a sample if XenonSignalFlag is set. Also clear it, unless
-    // in always-on mode.
-    void log(SampleType t, c_WaitableWaitHandle* wh = nullptr) const;
-    // Like `log' but does not check or reset XenonSignalFlag. `info' may be
-    // brief description of why sample was logged, or nullptr.
-    void logNoSurprise(SampleType t,
-                       const char* info,
-                       c_WaitableWaitHandle* wh = nullptr) const;
-    void surpriseAll();
-    void onTimer();
+  void start(uint64_t msec);
+  void stop();
+  void incrementMissedSampleCount(ssize_t val);
+  int64_t getAndClearMissedSampleCount();
+  // Log a sample if XenonSignalFlag is set. Also clear it, unless
+  // in always-on mode.
+  void log(SampleType t, c_WaitableWaitHandle* wh = nullptr) const;
+  // Like `log' but does not check or reset XenonSignalFlag. `info' may be
+  // brief description of why sample was logged, or nullptr.
+  void logNoSurprise(SampleType t,
+                     const char* info,
+                     c_WaitableWaitHandle* wh = nullptr) const;
+  void surpriseAll();
+  void onTimer();
 
-    bool      m_stopping;
-  private:
-    std::atomic<int64_t> m_missedSampleCount;
-    sem_t     m_timerTriggered;
+  bool      m_stopping;
+ private:
+  std::atomic<int64_t> m_missedSampleCount;
+  sem_t     m_timerTriggered;
 #if !defined(__APPLE__) && !defined(_MSC_VER)
-    pthread_t m_triggerThread;
-    timer_t   m_timerid;
+  pthread_t m_triggerThread;
+  timer_t   m_timerid;
 #endif
 };
 }

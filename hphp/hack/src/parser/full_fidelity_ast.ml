@@ -1015,7 +1015,12 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.Suspend                 -> Suspend expr
         | Some TK.Clone                   -> Clone expr
         | Some TK.Print                   ->
-          Call ((pos, Id (pos, "echo")), [], [expr], [])
+          let fname =
+            if env.codegen || not (is_parenthesized_expression operand)
+            then "echo"
+            else "print"
+          in
+          Call ((pos, Id (pos, fname)), [], [expr], [])
         | Some TK.Dollar                  ->
           (match snd expr with
           | String (p, s) -> Lvar (p, "$" ^ s)

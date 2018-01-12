@@ -17,6 +17,7 @@ type ty = Typing_defs.locl Typing_defs.ty
 let pp_ty fmt _ = Format.pp_print_string fmt "<type>"
 
 type saved_env = {
+  tcopt : TypecheckerOptions.t;
   tenv : ty IMap.t;
   subst : int IMap.t;
 }

@@ -149,7 +149,7 @@ let try_over_concrete_supertypes env ty f =
   iter_over_types env [] tyl
 
 let save_env env =
-  T.{tenv = env.Env.tenv; subst = env.Env.subst}
+  T.{tcopt = Env.get_tcopt env; tenv = env.Env.tenv; subst = env.Env.subst}
 
 
 (*****************************************************************************)

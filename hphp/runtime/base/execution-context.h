@@ -582,9 +582,7 @@ public:
   req::vector<Unit*> m_createdFuncs;
   req::vector<Fault> m_faults;
   int m_lambdaCounter;
-  using VMStateVec = req::TinyVector<VMState, 32>;
-  VMStateVec m_nestedVMs;
-  TYPE_SCAN_IGNORE_FIELD(m_nestedVMs); // handled explicitly in heap-scan.h
+  req::TinyVector<VMState, 32> m_nestedVMs;
   int m_nesting;
   bool m_dbgNoBreak;
   bool m_unwindingCppException;

@@ -86,8 +86,7 @@ RingBufferEntry* g_ring_ptr;
 std::atomic<int> g_ringIdx(0);
 std::atomic<uint32_t> g_seqnum(0);
 
-RingBufferEntry*
-allocEntry(RingBufferType t) {
+RingBufferEntry* allocEntry(RingBufferType t) {
   assert(folly::isPowTwo(kMaxRBEntries));
   RingBufferEntry* rb;
   int newRingPos, oldRingPos;
@@ -106,44 +105,42 @@ allocEntry(RingBufferType t) {
     newRingPos = (oldRingPos + 1) % kMaxRBEntries;
   } while (!g_ringIdx.compare_exchange_weak(oldRingPos, newRingPos,
                                             std::memory_order_acq_rel));
-  rb->m_seq = g_seqnum.fetch_add(1, std::memory_order_relaxed);
-  rb->m_type = t;
-  rb->m_threadId = (uint32_t)((int64_t)pthread_self() & 0xFFFFFFFF);
-  return rb;
-}
-
-static inline RingBufferEntry*
-initEntry(RingBufferType t) {
-  RingBufferEntry* rb = allocEntry(t);
-  return rb;
-}
-
-static inline RingBufferEntry*
-initEntry(RingBufferType t, uint64_t sk, uint64_t data) {
-  RingBufferEntry* rb = allocEntry(t);
-  rb->m_sk = sk;
-  rb->m_data = data;
+  rb->seq = g_seqnum.fetch_add(1, std::memory_order_relaxed);
+  rb->type = t;
+  rb->threadId = (uint32_t)((int64_t)pthread_self() & 0xFFFFFFFF);
   return rb;
 }
 
 void
 ringbufferMsg(const char* msg, size_t msgLen, RingBufferType t) {
-  RingBufferEntry* rb = initEntry(t);
-  rb->m_msg = msg;
-  rb->m_len = msgLen;
-  rb->m_truncatedRip = static_cast<uint32_t>(
+  auto& info = allocEntry(t)->msg;
+  info.msg = msg;
+  info.len = msgLen;
+  info.truncatedRip = static_cast<uint32_t>(
     reinterpret_cast<uintptr_t>(__builtin_return_address(0)));
 }
 
 void
 ringbufferEntry(RingBufferType t, uint64_t sk, uint64_t data) {
-  initEntry(t, sk, data);
+  auto& info = allocEntry(t)->vmPoint;
+  info.sk = sk;
+  info.data = data;
 }
 
 void
 ringbufferEntryRip(RingBufferType t, uint64_t sk) {
   auto rip = reinterpret_cast<uint64_t>(__builtin_return_address(0));
   ringbufferEntry(t, sk, rip);
+}
+
+void ringbufferGeneric(const char* name, uint64_t data) {
+  auto& info = allocEntry(RBTypeGeneric)->generic;
+  info.name = name;
+  info.data = data;
+}
+
+void ringbufferGeneric(const char* name, const void* data) {
+  ringbufferGeneric(name, reinterpret_cast<uint64_t>(data));
 }
 
 }

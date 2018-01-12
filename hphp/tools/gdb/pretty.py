@@ -6,10 +6,12 @@ from compatibility import *
 
 import gdb
 import re
+
 from gdbutils import *
-import idx
+from lookup import lookup_func
 from nameof import nameof
 from sizeof import sizeof
+import idx
 
 
 #------------------------------------------------------------------------------
@@ -412,6 +414,39 @@ class CompactVectorPrinter(object):
         else:
             return self._iterator(self.elems, self.elems + self.len)
 
+
+#------------------------------------------------------------------------------
+# SrcKey.
+
+class SrcKeyPrinter(object):
+    RECOGNIZE = '^HPHP::SrcKey$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        func_id = self.val['m_funcID']
+        if func_id == -1:
+            return '<invalid SrcKey>'
+
+        func = nameof(lookup_func(func_id))
+        offset = self.val['m_offset']
+        this = 't' if self.val['m_hasThis'] else ''
+
+        rmp = self.val['m_resumeModeAndPrologue']
+        resume = prologue = ''
+        if rmp == 0:
+            # ResumeMode::None
+            pass
+        elif rmp == 1:
+            resume = 'ra'
+        elif rmp == 2:
+            resume = 'rg'
+        elif rmp == 3:
+            prologue = 'p'
+
+        return '%s@%d%s%s%s' % (func, offset, resume, this, prologue)
+
 #------------------------------------------------------------------------------
 # Lookup function.
 
@@ -429,6 +464,7 @@ printer_classes = [
     RefDataPrinter,
     HhbbcBytecodePrinter,
     CompactVectorPrinter,
+    SrcKeyPrinter,
 ]
 type_printers = {(re.compile(cls.RECOGNIZE), cls)
                   for cls in printer_classes}

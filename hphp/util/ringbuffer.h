@@ -40,7 +40,8 @@ namespace Trace {
   RBTYPE(BytecodeStart) \
   RBTYPE(ServiceReq) \
   RBTYPE(DispatchBB) \
-  RBTYPE(InterpOne)
+  RBTYPE(InterpOne) \
+  RBTYPE(Generic)
 
 enum RingBufferType : uint8_t {
 #define RBTYPE(x) RBType ## x,
@@ -49,31 +50,42 @@ enum RingBufferType : uint8_t {
 };
 
 /*
- * Thread-shared, binary ringbuffer. Includes thread-private ASCII ringbuffers
- * by reference. Beware that very old ASCII entries can be corrupt; still, this
- * is better than nothing.
+ * Thread-shared, binary ringbuffer.
  */
 struct RingBufferEntry {
   // 0 - 15
   union {
+    // Used by ringbufferEntry() and ringbufferEntryRip()
     struct {
-      uint64_t m_sk;
-      uint64_t m_data;
-    };
+      uint64_t sk;
+      uint64_t data;
+    } vmPoint;
+
+    // Used by ringbufferMsg()
     struct {
-      const char* m_msg;
-      uint32_t m_len;
-      uint32_t m_truncatedRip; // Bottom 32 bits of rip from the caller, which
-                               // is usually enough in practice.
-    };
+      // msg references thread-private ASCII ringbuffers. Beware that very old
+      // entries can be corrupt; still, this is better than nothing.
+      const char* msg;
+      uint32_t len;
+
+      // Bottom 32 bits of rip from the caller, which is usually enough in
+      // practice.
+      uint32_t truncatedRip;
+    } msg;
+
+    // Used by ringbufferGeneric()
+    struct {
+      const char* name;
+      uint64_t data;
+    } generic;
   };
 
   // 16-23
-  uint32_t m_threadId;
-  uint32_t m_seq; // sequence number
+  uint32_t threadId;
+  uint32_t seq; // sequence number
 
   // 24 - 31
-  RingBufferType m_type;
+  RingBufferType type;
 };
 
 static_assert(sizeof(RingBufferEntry) == 32,
@@ -91,7 +103,8 @@ void ringbufferMsg(const char* msg, size_t msgLen,
                    RingBufferType t = RBTypeMsg);
 void ringbufferEntry(RingBufferType t, uint64_t sk, uint64_t data);
 void ringbufferEntryRip(RingBufferType t, uint64_t sk);
-
+void ringbufferGeneric(const char* name, uint64_t data = 0);
+void ringbufferGeneric(const char* name, const void* data);
 }
 }
 

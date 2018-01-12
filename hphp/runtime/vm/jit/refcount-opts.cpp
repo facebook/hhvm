@@ -1520,11 +1520,15 @@ RCState entry_rc_state(Env& env) {
   return ret;
 }
 
-bool pessimize_for_merge(ASetInfo& aset) {
-  if (!aset.lower_bound && aset.memory_support.none()) return false;
-  aset.lower_bound = 0;
-  aset.unsupported_refs = 0;
-  aset.memory_support.reset();
+bool pessimize_for_merge(ASetInfo& dset, const ASetInfo& sset) {
+  auto const lower_bound = std::min(dset.lower_bound, sset.lower_bound);
+  if (dset.lower_bound == lower_bound &&
+      dset.unsupported_refs == lower_bound &&
+      dset.memory_support.none()) {
+    return false;
+  }
+  dset.lower_bound = dset.unsupported_refs = lower_bound;
+  dset.memory_support.reset();
   return true;
 }
 
@@ -1561,13 +1565,12 @@ bool merge_memory_support(RCState& dstState, const RCState& srcState) {
     auto& dst = dstState.asets[asetID];
     auto& src = srcState.asets[asetID];
     /*
-     * If both the src and dst sets have enough memory support for their lower
-     * bound, merge memory support by keeping the intersection of support
-     * locations, and dropping the lower bound to compensate for the other ones
-     * (i.e. we're acting like it might have been decref'd right here through
-     * any memory locations that aren't in the intersection).  Since they both
-     * have enough lower bound for their support, we know we can account for
-     * everything here.
+     * If both the src and dst sets have enough memory support for
+     * their lower bound, merge memory support by keeping the
+     * intersection of support locations, and increasing
+     * unsupported_refs to compensate for the other ones.  Since they
+     * both have enough lower bound for their support, we know we can
+     * account for everything here.
      *
      * On the other hand, if one or both of them has more memory support bits
      * than lower bound, we just pessimize everything.
@@ -1601,7 +1604,7 @@ bool merge_memory_support(RCState& dstState, const RCState& srcState) {
 
     FTRACE(5, "     {} pessimizing during merge\n", asetID);
     for (auto other = uint32_t{0}; other < dstState.asets.size(); ++other) {
-      if (pessimize_for_merge(dstState.asets[other])) {
+      if (pessimize_for_merge(dstState.asets[other], srcState.asets[other])) {
         changed = true;
       }
     }
@@ -1709,6 +1712,19 @@ void pessimize_all(Env& env, RCState& state, NAdder add_node) {
   }
 }
 
+void unsupport_all(Env& env, RCState& state) {
+  FTRACE(3, "    unsupport_all\n");
+  for (auto& aset : state.asets) {
+    aset.unsupported_refs = aset.lower_bound;
+    if (aset.unsupported_refs) state.has_unsupported_refs = true;
+    bitset_for_each_set(
+      aset.memory_support,
+      [&](size_t id) { state.support_map[id] = -1; }
+    );
+    aset.memory_support.reset();
+  }
+}
+
 template<class NAdder>
 void observe(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   auto constexpr level = 2;
@@ -1774,7 +1790,8 @@ void may_decref(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   auto const tracked_lower_bound = aset.lower_bound - aset.unsupported_refs;
   reduce_lower_bound(env, state, asetID);
   add_node(asetID, NReq{1});
-  FTRACE(3, "    {} lb: {}\n", asetID, aset.lower_bound);
+  FTRACE(3, "    {} lb: {}({})\n",
+         asetID, aset.lower_bound, aset.unsupported_refs);
 
   if (!tracked_lower_bound) {
     FTRACE(4, "    unbalanced decref:\n");
@@ -1797,7 +1814,8 @@ void may_decref(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
       if (may_set.unsupported_refs) {
         may_set.unsupported_refs--;
         may_set.lower_bound--;
-        FTRACE(5, "      {} lb: {}\n", may_id, may_set.lower_bound);
+        FTRACE(5, "      {} lb: {}({})\n",
+               may_id, may_set.lower_bound, may_set.unsupported_refs);
         add_node(may_id, NReq{1});
       }
     }
@@ -1813,7 +1831,7 @@ void kill_unsupported_refs(RCState& state) {
         assertx(aset.unsupported_refs <= aset.lower_bound);
         aset.lower_bound -= aset.unsupported_refs;
         aset.unsupported_refs = 0;
-        FTRACE(5, "      {} : lb -> {}\n", id, aset.lower_bound);
+        FTRACE(5, "      {} lb: {}(0)\n", id, aset.lower_bound);
       }
       id++;
     }
@@ -1821,40 +1839,58 @@ void kill_unsupported_refs(RCState& state) {
   }
 }
 
-// Returns true if we actually removed the support (i.e. we accounted for it by
-// reducing a lower bound, or the location wasn't actually supporting anything
-// right now).
+// Returns true if we actually removed the support (i.e. we accounted
+// for it by reducing a lower bound, or increasing unsupported_refs,
+// or the location wasn't actually supporting anything right now).
 template<class NAdder>
 bool reduce_support_bit(Env& env,
                         RCState& state,
                         uint32_t locID,
+                        bool may_decref,
                         NAdder add_node) {
   auto const current_set = state.support_map[locID];
   if (current_set == -1) return true;
   FTRACE(3, "      {} removing support\n", current_set);
   auto& aset = state.asets[current_set];
   if (aset.lower_bound == aset.unsupported_refs) {
+    // If decrefs can actually occur here, we should have killed the
+    // unsupported refs first.
+    assertx(!may_decref || !aset.unsupported_refs);
     /*
      * We can't remove the support bit, and we have no way to account for the
-     * reduction in lower bound.  There're two cases to consider:
+     * reduction in lower bound.  There are three cases to consider:
      *
-     *   o If the event we're processing actually DecRef'd this must-alias-set
-     *     through this memory location, the lower bound is still zero, and
-     *     leaving the bit set conservatively is not incorrect.
+     *   o If may_decref is false (we're trying to move the support
+     *     from this aset to another, but no refcounts are changing)
+     *     we simply need to report that we failed.
      *
-     *   o If the event we're processing did not actually DecRef this object
-     *     through this memory location, then we must not remove the bit,
-     *     because something in the future (after we've seen other IncRefs)
+     *   o If the event we're processing actually DecRef'd this
+     *     must-alias-set through this memory location (only possible
+     *     when may_decref is true implying a zero lower bound), the
+     *     lower bound will remain zero, and leaving the bit set
+     *     conservatively is not incorrect.
+     *
+     *   o If the event we're processing did not actually DecRef this
+     *     object through this memory location, because it stored
+     *     elsewhere, then we must not remove the bit, because
+     *     something in the future (after we've seen other IncRefs)
      *     still may decref it through this location.
      *
-     * So in this case we leave the lower bound alone, and also must not remove
-     * the bit.
+     * So in this case we leave the lower bound alone, and also must
+     * not remove the bit.
      */
     return false;
   }
   aset.memory_support.reset(locID);
   state.support_map[locID] = -1;
-  reduce_lower_bound(env, state, current_set);
+  if (may_decref) {
+    reduce_lower_bound(env, state, current_set);
+  } else {
+    aset.unsupported_refs++;
+    state.has_unsupported_refs = true;
+    FTRACE(5, "    {} lb: {}({})\n",
+           current_set, aset.lower_bound, aset.unsupported_refs);
+  }
   // Because our old lower bound is non-zero (from the memory support), we
   // don't need to deal with the possibility of may-alias observes or may-alias
   // decrefs here.
@@ -1868,13 +1904,16 @@ template<class NAdder>
 bool reduce_support_bits(Env& env,
                          RCState& state,
                          ALocBits set,
+                         bool may_decref,
                          NAdder add_node) {
   FTRACE(2, "    remove: {}\n", show(set));
   auto ret = true;
   bitset_for_each_set(
     set,
     [&](uint32_t locID) {
-      if (!reduce_support_bit(env, state, locID, add_node)) ret = false;
+      if (!reduce_support_bit(env, state, locID, may_decref, add_node)) {
+        ret = false;
+      }
     }
   );
   return ret;
@@ -1887,11 +1926,16 @@ template<class NAdder>
 bool reduce_support(Env& env,
                     RCState& state,
                     AliasClass aclass,
+                    bool may_decref,
                     NAdder add_node) {
   if (aclass == AEmpty) return true;
-  FTRACE(3, "    reduce support {}\n", show(aclass));
+  FTRACE(3, "    reduce support {}{}\n",
+         std::string{may_decref ? "(may_decref) " : ""}, show(aclass));
+  if (may_decref && state.has_unsupported_refs) {
+    kill_unsupported_refs(state);
+  }
   auto const alias = env.ainfo.may_alias(aclass);
-  return reduce_support_bits(env, state, alias, add_node);
+  return reduce_support_bits(env, state, alias, may_decref, add_node);
 }
 
 void drop_support_bit(Env& /*env*/, RCState& state, uint32_t bit) {
@@ -1923,12 +1967,6 @@ void create_store_support(Env& env,
     auto& aset = state.asets[asetID];
 
     auto const meta = env.ainfo.find(dst);
-    if (!meta && aset.lower_bound == 0) {
-      FTRACE(3, "    {} causing pessimize\n", asetID);
-      pessimize_all(env, state, add_node);
-      return;
-    }
-
     if (meta) {
       FTRACE(3, "    {} adding support in {}\n", asetID, show(dst));
 
@@ -1957,15 +1995,15 @@ void create_store_support(Env& env,
       return;
     }
 
-    if (aset.lower_bound > aset.unsupported_refs) {
-      FTRACE(3, "    {} store adds an unsupported_ref\n", asetID);
-      aset.unsupported_refs++;
-      state.has_unsupported_refs = true;
+    if (aset.lower_bound == aset.unsupported_refs) {
+      FTRACE(3, "    {} causing unsupport_all\n", asetID);
+      unsupport_all(env, state);
       return;
     }
 
-    FTRACE(3, "    {} treating store as may_decref\n", asetID);
-    may_decref(env, state, asetID, add_node);
+    FTRACE(3, "    {} store adds an unsupported_ref\n", asetID);
+    aset.unsupported_refs++;
+    state.has_unsupported_refs = true;
   });
 }
 
@@ -1980,6 +2018,9 @@ void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
   // balanced.
   observe_all(env, state, add_node);
 
+  // The call can affect any unsupported_refs
+  kill_unsupported_refs(state);
+
   // Figure out locations the call may cause stores to, then remove any memory
   // support on those locations.
   auto bset = ALocBits{};
@@ -1987,7 +2028,7 @@ void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
   bset |= env.ainfo.may_alias(e.stack);
   bset |= env.ainfo.may_alias(AHeapAny);
   bset &= ~env.ainfo.expand(e.kills);
-  reduce_support_bits(env, state, bset, add_node);
+  reduce_support_bits(env, state, bset, true, add_node);
 }
 
 template<class NAdder>
@@ -2008,7 +2049,7 @@ void pure_load(Env& env,
    * because it could violate the exclusivity rule.
    */
   FTRACE(2, "    load: {}\n", show(src));
-  if (!reduce_support(env, state, src, add_node)) {
+  if (!reduce_support(env, state, src, false, add_node)) {
     FTRACE(2, "    couldn't remove all pre-existing support\n");
     return;
   }
@@ -2089,6 +2130,7 @@ void analyze_mem_effects(Env& env,
 
     [&] (GeneralEffects x)  {
       if (inst.is(CallBuiltin)) {
+        kill_unsupported_refs(state);
         observe_for_is_referenced(env, state, add_node);
       }
 
@@ -2098,11 +2140,10 @@ void analyze_mem_effects(Env& env,
       drop_support_bits(env, state, env.ainfo.expand(x.kills));
       // Locations in the stores set may be stored to with a 'normal write
       // barrier', decreffing the pointer that used to be there.
-      reduce_support(env, state, x.stores, add_node);
+      reduce_support(env, state, x.stores, true, add_node);
       // For the moves set, we have no way to track where the pointers may be
-      // moved to, so we need to account for it, conservatively, as if it were
-      // a decref right now.
-      reduce_support(env, state, x.moves, add_node);
+      // moved to, so we need to account for it, via unsupported_refs.
+      reduce_support(env, state, x.moves, false, add_node);
     },
 
     [&] (ReturnEffects)     { observe_all(env, state, add_node); },
@@ -2186,7 +2227,8 @@ void rc_analyze_inst(Env& env,
       }
       add_node(asetID, NInc{&inst});
       ++aset.lower_bound;
-      FTRACE(3, "    {} lb: {}\n", asetID, aset.lower_bound);
+      FTRACE(3, "    {} lb: {}({})\n",
+             asetID, aset.lower_bound, aset.unsupported_refs);
     });
     return;
   case DecRef:
@@ -2207,10 +2249,7 @@ void rc_analyze_inst(Env& env,
         old_lb = aset.lower_bound;
         may_decref(env, state, asetID, add_node);
       });
-      if (old_lb <= 1) {
-        kill_unsupported_refs(state);
-        analyze_mem_effects(env, inst, state, add_node);
-      }
+      if (old_lb <= 1) analyze_mem_effects(env, inst, state, add_node);
     }
     return;
   case DefInlineFP:
@@ -2223,10 +2262,6 @@ void rc_analyze_inst(Env& env,
     break;
   default:
     break;
-  }
-
-  if (state.has_unsupported_refs && !irrelevant_inst(inst)) {
-    kill_unsupported_refs(state);
   }
 
   /*
@@ -2321,7 +2356,8 @@ void rc_analyze_inst(Env& env,
     for_aset(env, state, inst.dst(), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
       aset.lower_bound = std::max(aset.lower_bound, 1);
-      FTRACE(3, "    {} lb: {}\n", asetID, aset.lower_bound);
+      FTRACE(3, "    {} lb: {}({})\n",
+             asetID, aset.lower_bound, aset.unsupported_refs);
     });
   }
 }

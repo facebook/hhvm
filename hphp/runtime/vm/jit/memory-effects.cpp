@@ -158,8 +158,7 @@ AliasClass pointee(
     // The result of ElemArray{,W,U} is either the address of an array element,
     // or &immutable_null_base.
     if (typeNR <= TPtrToMembGen) {
-      if (sinst->is(ElemArray, ElemArrayW, ElemDict,
-                    ElemDictW, ElemKeyset, ElemKeysetW)) return elem();
+      if (sinst->is(ElemArrayX, ElemDictX, ElemKeysetX)) return elem();
 
       // Takes a PtrToGen as its first operand, so we can't easily grab an array
       // base.
@@ -1940,12 +1939,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VecSetRef:
   case DictSet:
   case DictSetRef:
-  case ElemArray:
-  case ElemArrayW:
-  case ElemDict:
-  case ElemDictW:
-  case ElemKeyset:
-  case ElemKeysetW:
+  case ElemArrayX:
+  case ElemDictX:
+  case ElemKeysetX:
   case LdClsCtor:
   case ConcatStrStr:
   case PrintStr:

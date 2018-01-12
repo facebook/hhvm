@@ -596,20 +596,17 @@ bool canDCE(IRInstruction* inst) {
   case CheckDictOffset:
   case ProfileKeysetOffset:
   case CheckKeysetOffset:
-  case ElemArray:
+  case ElemArrayX:
   case ElemArrayD:
-  case ElemArrayW:
   case ElemArrayU:
   case ElemMixedArrayK:
   case ElemVecD:
   case ElemVecU:
-  case ElemDict:
+  case ElemDictX:
   case ElemDictD:
-  case ElemDictW:
   case ElemDictU:
   case ElemDictK:
-  case ElemKeyset:
-  case ElemKeysetW:
+  case ElemKeysetX:
   case ElemKeysetU:
   case ElemKeysetK:
   case ElemDX:

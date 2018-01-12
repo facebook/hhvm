@@ -2008,13 +2008,15 @@ To string conversions:
 
   Raises a notice with the text in S0 as its message.
 
-| RaiseArrayIndexNotice, ND, S(Int), Er
+| RaiseArrayIndexNotice<isInOut>, ND, S(Int), Er
 
-  Raises a notice that S0 is an undefined index for an array.
+  Raises a notice that S0 is an undefined index for an array. The isInOut option
+  indicates that the access was for an inout parameter.
 
-| RaiseArrayKeyNotice, ND, S(StaticStr), Er
+| RaiseArrayKeyNotice<isInOut>, ND, S(StaticStr), Er
 
-  Raises a notice that S0 is an undefined key for an array.
+  Raises a notice that S0 is an undefined key for an array. The isInOut option
+  indicates that the access was for an inout parameter.
 
 | RaiseMissingThis, ND, S(Func), Er
 
@@ -2769,17 +2771,15 @@ fields of that struct for holding intermediate values.
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
   fail, branch to B.  This check is allowed to have false negatives.
 
-| ElemArray,  D(PtrToMembGen), S(Arr) S(Int,Str), Er
-
-| ElemArrayW, D(PtrToMembGen), S(Arr) S(Int,Str), Er
+| ElemArrayX<M>, D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
 | ElemArrayD<T>, D(PtrToElemGen), S(PtrToGen) S(Int,Str), MElem|Er
 
 | ElemArrayU<T>, D(PtrToMembGen), S(PtrToGen) S(Int,Str), MElem|Er
 
   Similar to ElemX, but the base S0 is an array and the key S1 is an int/str.
-  ElemArrayW is for Warn member instrs, ElemArrayD is for Define member instrs,
-  and ElemArrayU is for Unset.
+  ElemArrayD is for Define member instrs, ElemArrayU is for Unset, and
+  ElemArrayX is for InOut, Warn, and None instrs (where the mode is M).
 
   ElemArray{D,U} both take a PtrToGen for the base operand, but expect it to be
   a PtrToArr or PtrToBoxedArr.  T is the type of the base array.
@@ -2799,17 +2799,15 @@ fields of that struct for holding intermediate values.
   ElemVec{D,U} both take a PtrToGen for the base operand, but expect it to be a
   PtrToVec or PtrToBoxedVec. T is the type of the base vec.
 
-| ElemDict,  D(PtrToMembCell), S(Dict) S(Int,Str), Er
-
-| ElemDictW, D(PtrToMembCell), S(Dict) S(Int,Str), Er
+| ElemDictX<M>, D(PtrToMembCell), S(Dict) S(Int,Str), Er
 
 | ElemDictD<T>, D(PtrToElemCell), S(PtrToGen) S(Int,Str), MElem|Er
 
 | ElemDictU<T>, D(PtrToMembCell), S(PtrToGen) S(Int,Str), MElem|Er
 
   Similar to ElemX, but the base S0 is a dict and the key S1 is an int/str.
-  ElemDictW is for Warn member instrs, ElemDictD is for Define member instrs,
-  and ElemDictU is for Unset.
+  ElemDictD is for Define member instrs, ElemDictU is for Unset, and
+  ElemDictX is for InOut, Warn, and None instrs (where the mode is M).
 
   ElemDict{D,U} both take a PtrToGen for the base operand, but expect it to be
   a PtrToDict or PtrToBoxedDict.  T is the type of the base array.
@@ -2818,14 +2816,13 @@ fields of that struct for holding intermediate values.
 
   Like ElemDict, but the element for S1 is at a known position `pos' in S0.
 
-| ElemKeyset,  D(PtrToMembCell), S(Keyset) S(Int,Str), Er
-
-| ElemKeysetW, D(PtrToMembCell), S(Keyset) S(Int,Str), Er
+| ElemKeysetX<M>, D(PtrToMembCell), S(Keyset) S(Int,Str), Er
 
 | ElemKeysetU<T>, D(PtrToMembCell), S(PtrToGen) S(Int,Str), MElem|Er
 
   Similar to ElemX, but the base S0 is a keyset and the key S1 is an int/str.
-  ElemKeysetW is for Warn member instrs and ElemKeysetU is for Unset.
+  ElemKeysetU is for Unset instrs and ElemKeysetX is for InOut, Warn and None
+  instrs (where the mode is M).
 
   ElemKeysetU both take a PtrToGen for the base operand, but expect it to be
   a PtrToKeyset or PtrToBoxedKeyset.  T is the type of the base array.

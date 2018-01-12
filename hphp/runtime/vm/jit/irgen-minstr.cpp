@@ -494,7 +494,7 @@ void checkBounds(IRGS& env, SSATmp* base, SSATmp* idx, SSATmp* limit) {
 }
 
 template<class Finish>
-SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
+SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
                            Finish finish) {
   assertx(base->isA(TArr) &&
           base->type().arrSpec().kind() == ArrayData::kPackedKind &&
@@ -515,12 +515,17 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
     return finishMe(pres);
   };
 
+  auto const inout = mode == MOpMode::InOut;
+
   if (key->hasConstVal()) {
     int64_t idx = key->intVal();
     if (base->hasConstVal()) {
       const ArrayData* arr = base->arrVal();
       if (idx < 0 || idx >= arr->size()) {
-        gen(env, RaiseArrayIndexNotice, key);
+        if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
+          gen(env, RaiseArrayIndexNotice,
+              RaiseArrayIndexNoticeData { inout }, key);
+        }
         return cns(env, TInitNull);
       }
       auto const value = arr->at(idx);
@@ -531,7 +536,10 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
     case PackedBounds::In:
       return doLdElem();
     case PackedBounds::Out:
-      gen(env, RaiseArrayIndexNotice, key);
+      if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
+        gen(env, RaiseArrayIndexNotice,
+            RaiseArrayIndexNoticeData { inout }, key);
+      }
       return cns(env, TInitNull);
     case PackedBounds::Unknown:
       break;
@@ -548,7 +556,10 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
     },
     [&] { // Taken:
       hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseArrayIndexNotice, key);
+      if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
+        gen(env, RaiseArrayIndexNotice,
+            RaiseArrayIndexNoticeData { inout }, key);
+      }
       return cns(env, TInitNull);
     }
   );
@@ -645,13 +656,14 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
 }
 
 template<class Finish>
-SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
+SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
+                     Finish finish) {
   auto const elem = profiledArrayAccess(env, base, key,
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
       return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
     },
     [&] (SSATmp* key) {
-      return gen(env, ArrayGet, base, key);
+      return gen(env, ArrayGet, MOpModeData { mode }, base, key);
     }
   );
   auto finishMe = [&](SSATmp* element) {
@@ -665,13 +677,13 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
 
 template<class Finish>
 SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
-                                   Finish finish) {
+                                   MOpMode mode, Finish finish) {
   TargetProfile<ArrayKindProfile> prof(env.context,
                                        env.irb->curMarker(),
                                        s_ArrayKindProfile.get());
   if (prof.profiling()) {
     gen(env, ProfileArrayKind, RDSHandleData{prof.handle()}, base);
-    return emitArrayGet(env, base, key, finish);
+    return emitArrayGet(env, base, key, mode, finish);
   }
 
   if (prof.optimizing()) {
@@ -689,12 +701,12 @@ SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
         base,
         TypeConstraint(DataTypeSpecialized).setWantArrayKind()
       );
-      return emitPackedArrayGet(env, base, key, finish);
+      return emitPackedArrayGet(env, base, key, mode, finish);
     }
   }
 
   // Fall back to a generic array get.
-  return emitArrayGet(env, base, key, finish);
+  return emitArrayGet(env, base, key, mode, finish);
 }
 
 SSATmp* emitVectorGet(IRGS& env, SSATmp* base, SSATmp* key) {
@@ -915,11 +927,11 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
   assertx(mode == MOpMode::Warn || mode == MOpMode::InOut);
   switch (simpleOp) {
     case SimpleOp::Array:
-      return emitArrayGet(env, base, key, finish);
+      return emitArrayGet(env, base, key, mode, finish);
     case SimpleOp::PackedArray:
-      return emitPackedArrayGet(env, base, key, finish);
+      return emitPackedArrayGet(env, base, key, mode, finish);
     case SimpleOp::ProfiledPackedArray:
-      return emitProfiledPackedArrayGet(env, base, key, finish);
+      return emitProfiledPackedArrayGet(env, base, key, mode, finish);
     case SimpleOp::VecArray:
       return emitVecArrayGet(env, base, key, finish);
     case SimpleOp::Dict:
@@ -956,12 +968,16 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
     case SimpleOp::Keyset:
       return emitDictKeysetGet(env, base, key, true, false, finish);
     case SimpleOp::Array:
+      return emitArrayGet(env, base, key, mode, finish);
     case SimpleOp::PackedArray:
+      return emitPackedArrayGet(env, base, key, mode, finish);
     case SimpleOp::ProfiledPackedArray:
+      return emitProfiledPackedArrayGet(env, base, key, mode, finish);
     case SimpleOp::String:
     case SimpleOp::Vector:
     case SimpleOp::Pair:
     case SimpleOp::Map:
+      assertx(mode != MOpMode::InOut);
     case SimpleOp::None:
       return gen(env, CGetElem, MOpModeData{mode}, ldMBase(env), key);
   }
@@ -1284,7 +1300,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   assertx(key->isA(TInt) || key->isA(TStr) ||
           !key->type().maybe(TInt | TStr));
 
-  auto const warn = mode == MOpMode::Warn;
+  auto const warn = mode == MOpMode::Warn || mode == MOpMode::InOut;
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
 
@@ -1339,7 +1355,6 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   assertx(baseType <= TDict);
 
-  auto const warn = mode == MOpMode::Warn;
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
 
@@ -1360,7 +1375,12 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
         return gen(env, unset ? ElemDictU : ElemDictD,
                    baseType, ldMBase(env), key);
       }
-      return gen(env, warn ? ElemDictW : ElemDict, base, key);
+      assertx(
+        mode == MOpMode::Warn ||
+        mode == MOpMode::None ||
+        mode == MOpMode::InOut
+      );
+      return gen(env, ElemDictX, MOpModeData { mode }, base, key);
     },
     define || unset // cow check
   );
@@ -1369,7 +1389,6 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   assertx(baseType <= TKeyset);
 
-  auto const warn = mode == MOpMode::Warn;
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
 
@@ -1396,7 +1415,12 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     },
     [&] (SSATmp* key) {
       if (unset) return gen(env, ElemKeysetU, baseType, ldMBase(env), key);
-      return gen(env, warn ? ElemKeysetW : ElemKeyset, base, key);
+      assertx(
+        mode == MOpMode::Warn ||
+        mode == MOpMode::None ||
+        mode == MOpMode::InOut
+      );
+      return gen(env, ElemKeysetX, MOpModeData { mode }, base, key);
     },
     unset // cow check
   );
@@ -1405,7 +1429,7 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 const StaticString s_OP_NOT_SUPPORTED_STRING(Strings::OP_NOT_SUPPORTED_STRING);
 
 SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
-  auto const warn = mode == MOpMode::Warn;
+  DEBUG_ONLY auto const warn = mode == MOpMode::Warn;
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
 
@@ -1430,7 +1454,12 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
           return gen(env, unset ? ElemArrayU : ElemArrayD,
                      base->type(), ldMBase(env), key);
         }
-        return gen(env, warn ? ElemArrayW : ElemArray, base, key);
+        assertx(
+          mode == MOpMode::Warn ||
+          mode == MOpMode::None ||
+          mode == MOpMode::InOut
+        );
+        return gen(env, ElemArrayX, MOpModeData { mode }, base, key);
       },
       define || unset // cow check
     );

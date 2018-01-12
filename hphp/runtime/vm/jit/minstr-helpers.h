@@ -530,6 +530,9 @@ const TypedValue* elemArrayNotFound(int64_t k) {
   if (mode == MOpMode::Warn) {
     raise_notice("Undefined index: %" PRId64, k);
   }
+  if (mode == MOpMode::InOut) {
+    raise_inout_undefined_index(k);
+  }
   return &immutable_uninit_base;
 }
 
@@ -538,6 +541,9 @@ NEVER_INLINE
 const TypedValue* elemArrayNotFound(const StringData* k) {
   if (mode == MOpMode::Warn) {
     raise_notice("Undefined index: %s", k->data());
+  }
+  if (mode == MOpMode::InOut) {
+    raise_inout_undefined_index(k);
   }
   return &immutable_uninit_base;
 }
@@ -584,20 +590,26 @@ inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {       \
 ELEM_ARRAY_U_HELPER_TABLE(X)
 #undef X
 
-#define ELEM_ARRAY_HELPER_TABLE(m)                                           \
-  /* name               keyType   checkForInt   mode           intishWarn */ \
-  m(elemArrayS,     KeyType::Str,       false,  MOpMode::None, false)        \
-  m(elemArraySi,    KeyType::Str,        true,  MOpMode::None, false)        \
-  m(elemArrayI,     KeyType::Int,       false,  MOpMode::None, false)        \
-  m(elemArraySW,    KeyType::Str,       false,  MOpMode::Warn, false)        \
-  m(elemArraySiW,   KeyType::Str,        true,  MOpMode::Warn, false)        \
-  m(elemArrayIW,    KeyType::Int,       false,  MOpMode::Warn, false)        \
-  m(elemArrayS_W,   KeyType::Str,       false,  MOpMode::None, true)         \
-  m(elemArraySi_W,  KeyType::Str,        true,  MOpMode::None, true)         \
-  m(elemArrayI_W,   KeyType::Int,       false,  MOpMode::None, true)         \
-  m(elemArraySW_W,  KeyType::Str,       false,  MOpMode::Warn, true)         \
-  m(elemArraySiW_W, KeyType::Str,        true,  MOpMode::Warn, true)         \
-  m(elemArrayIW_W,  KeyType::Int,       false,  MOpMode::Warn, true)         \
+#define ELEM_ARRAY_HELPER_TABLE(m)                                             \
+  /* name             keyType       checkForInt  mode            intishWarn */ \
+  m(elemArrayS,       KeyType::Str, false,       MOpMode::None,  false)        \
+  m(elemArraySi,      KeyType::Str, true,        MOpMode::None,  false)        \
+  m(elemArrayI,       KeyType::Int, false,       MOpMode::None,  false)        \
+  m(elemArraySW,      KeyType::Str, false,       MOpMode::Warn,  false)        \
+  m(elemArraySiW,     KeyType::Str, true,        MOpMode::Warn,  false)        \
+  m(elemArrayIW,      KeyType::Int, false,       MOpMode::Warn,  false)        \
+  m(elemArraySW_IO,   KeyType::Str, false,       MOpMode::InOut, false)        \
+  m(elemArraySiW_IO,  KeyType::Str, true,        MOpMode::InOut, false)        \
+  m(elemArrayIW_IO,   KeyType::Int, false,       MOpMode::InOut, false)        \
+  m(elemArrayS_W,     KeyType::Str, false,       MOpMode::None,  true)         \
+  m(elemArraySi_W,    KeyType::Str, true,        MOpMode::None,  true)         \
+  m(elemArrayI_W,     KeyType::Int, false,       MOpMode::None,  true)         \
+  m(elemArraySW_W,    KeyType::Str, false,       MOpMode::Warn,  true)         \
+  m(elemArraySiW_W,   KeyType::Str, true,        MOpMode::Warn,  true)         \
+  m(elemArrayIW_W,    KeyType::Int, false,       MOpMode::Warn,  true)         \
+  m(elemArraySW_WIO,  KeyType::Str, false,       MOpMode::InOut, true)         \
+  m(elemArraySiW_WIO, KeyType::Str, true,        MOpMode::InOut, true)         \
+  m(elemArrayIW_WIO,  KeyType::Int, false,       MOpMode::InOut, true)         \
 
 #define X(nm, keyType, checkForInt, mode, intishWarn)                     \
 inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) {       \
@@ -612,27 +624,45 @@ ELEM_ARRAY_HELPER_TABLE(X)
 TypedValue arrayGetNotFound(int64_t k);
 TypedValue arrayGetNotFound(const StringData* k);
 
-template<KeyType keyType, bool checkForInt, bool intishWarn>
+template<KeyType keyType, bool checkForInt, MOpMode mode, bool intishWarn>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   auto ret = checkForInt
     ? checkedGet<true, intishWarn>(a, key)
     : a->rvalStrict(key);
   if (ret) return ret.tv();
+  if (mode == MOpMode::None) return make_tv<KindOfNull>();
+  if (mode == MOpMode::InOut) {
+    raise_inout_undefined_index(key);
+    return make_tv<KindOfNull>();
+  }
+  assert(mode == MOpMode::Warn);
   return arrayGetNotFound(key);
 }
 
-#define ARRAYGET_HELPER_TABLE(m)                            \
-  /* name        keyType         checkForInt intishWarn */  \
-  m(arrayGetS,   KeyType::Str,   false,      false)         \
-  m(arrayGetSi,  KeyType::Str,    true,      false)         \
-  m(arrayGetI,   KeyType::Int,   false,      false)         \
-  m(arrayGetSW,  KeyType::Str,   false,      true)          \
-  m(arrayGetSiW, KeyType::Str,    true,      true)          \
-  m(arrayGetIW,  KeyType::Int,   false,      true)          \
+#define ARRAYGET_HELPER_TABLE(m)                                              \
+  /* name           keyType        checkForInt mode            intishWarn */  \
+  m(arrayGetS,      KeyType::Str,  false,      MOpMode::None,  false)         \
+  m(arrayGetSi,     KeyType::Str,  true,       MOpMode::None,  false)         \
+  m(arrayGetI,      KeyType::Int,  false,      MOpMode::None,  false)         \
+  m(arrayGetSW,     KeyType::Str,  false,      MOpMode::None,  true)          \
+  m(arrayGetSiW,    KeyType::Str,  true,       MOpMode::None,  true)          \
+  m(arrayGetIW,     KeyType::Int,  false,      MOpMode::None,  true)          \
+  m(arrayGetS_W,    KeyType::Str,  false,      MOpMode::Warn,  false)         \
+  m(arrayGetSi_W,   KeyType::Str,  true,       MOpMode::Warn,  false)         \
+  m(arrayGetI_W,    KeyType::Int,  false,      MOpMode::Warn,  false)         \
+  m(arrayGetSW_W,   KeyType::Str,  false,      MOpMode::Warn,  true)          \
+  m(arrayGetSiW_W,  KeyType::Str,  true,       MOpMode::Warn,  true)          \
+  m(arrayGetIW_W,   KeyType::Int,  false,      MOpMode::Warn,  true)          \
+  m(arrayGetS_IO,   KeyType::Str,  false,      MOpMode::InOut, false)         \
+  m(arrayGetSi_IO,  KeyType::Str,  true,       MOpMode::InOut, false)         \
+  m(arrayGetI_IO,   KeyType::Int,  false,      MOpMode::InOut, false)         \
+  m(arrayGetSW_IO,  KeyType::Str,  false,      MOpMode::InOut, true)          \
+  m(arrayGetSiW_IO, KeyType::Str,  true,       MOpMode::InOut, true)          \
+  m(arrayGetIW_IO,  KeyType::Int,  false,      MOpMode::InOut, true)          \
 
-#define X(nm, keyType, checkForInt, intishWarn)                         \
+#define X(nm, keyType, checkForInt, mode, intishWarn)                   \
 inline TypedValue nm(ArrayData* a, key_type<keyType> key) {             \
-  return arrayGetImpl<keyType, checkForInt, intishWarn>(a, key);        \
+  return arrayGetImpl<keyType, checkForInt, mode, intishWarn>(a, key);  \
 }
 ARRAYGET_HELPER_TABLE(X)
 #undef X
@@ -673,6 +703,8 @@ ELEM_DICT_U_HELPER_TABLE(X)
   m(elemDictI,     KeyType::Int,       MOpMode::None)          \
   m(elemDictSW,    KeyType::Str,       MOpMode::Warn)          \
   m(elemDictIW,    KeyType::Int,       MOpMode::Warn)          \
+  m(elemDictSIO,   KeyType::Str,       MOpMode::InOut)         \
+  m(elemDictIIO,   KeyType::Int,       MOpMode::InOut)         \
 
 #define X(nm, keyType, mode) \
 inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) { \
@@ -703,6 +735,8 @@ ELEM_KEYSET_U_HELPER_TABLE(X)
   m(elemKeysetI,     KeyType::Int,       MOpMode::None)          \
   m(elemKeysetSW,    KeyType::Str,       MOpMode::Warn)          \
   m(elemKeysetIW,    KeyType::Int,       MOpMode::Warn)          \
+  m(elemKeysetSIO,   KeyType::Str,       MOpMode::InOut)         \
+  m(elemKeysetIIO,   KeyType::Int,       MOpMode::InOut)         \
 
 #define X(nm, keyType, mode) \
 inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) { \

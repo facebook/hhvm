@@ -1312,6 +1312,28 @@ struct RaiseHackArrParamNoticeData : IRExtraData {
   AnnotType type;
 };
 
+struct RaiseArrayIndexNoticeData : IRExtraData {
+  explicit RaiseArrayIndexNoticeData(bool isInOut) : isInOut(isInOut) {}
+
+  std::string show() const {
+    if (isInOut) return "inout";
+    return "none";
+  }
+
+  bool isInOut;
+};
+
+struct RaiseArrayKeyNoticeData : IRExtraData {
+  explicit RaiseArrayKeyNoticeData(bool isInOut) : isInOut(isInOut) {}
+
+  std::string show() const {
+    if (isInOut) return "inout";
+    return "none";
+  }
+
+  bool isInOut;
+};
+
 struct AssertReason : IRExtraData {
   explicit AssertReason(Reason r) : reason{r.file, r.line} {}
 
@@ -1440,6 +1462,8 @@ X(LdFuncCachedU,                LdFuncCachedUData);
 X(LdObjMethod,                  LdObjMethodData);
 X(RaiseMissingArg,              FuncArgData);
 X(RaiseParamRefMismatch,        RaiseParamRefMismatchData);
+X(RaiseArrayIndexNotice,        RaiseArrayIndexNoticeData);
+X(RaiseArrayKeyNotice,          RaiseArrayKeyNoticeData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureArg,                 ByteOffsetData);
@@ -1479,8 +1503,12 @@ X(PropDX,                       MOpModeData);
 X(ElemX,                        MOpModeData);
 X(ElemDX,                       MOpModeData);
 X(ElemUX,                       MOpModeData);
+X(ElemArrayX,                   MOpModeData);
+X(ElemDictX,                    MOpModeData);
+X(ElemKeysetX,                  MOpModeData);
 X(CGetProp,                     MOpModeData);
 X(CGetElem,                     MOpModeData);
+X(ArrayGet,                     MOpModeData);
 X(MemoGet,                      MemoData);
 X(MemoSet,                      MemoData);
 X(SetOpProp,                    SetOpData);

@@ -623,20 +623,6 @@ void cgCheckArrayCOW(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-void implElemArray(IRLS& env, const IRInstruction* inst) {
-  auto const arr = inst->src(0);
-  auto const key = inst->src(1);
-  auto const mode = inst->op() == ElemArrayW ? MOpMode::Warn : MOpMode::None;
-  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
-  BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
-              keyInfo.type, keyInfo.checkForInt, mode,
-              RuntimeOption::EvalHackArrCompatNotices);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, arrArgs(env, inst, keyInfo));
-}
-
 void implArraySet(IRLS& env, const IRInstruction* inst) {
   bool const setRef  = inst->op() == ArraySetRef;
   auto const arr     = inst->src(0);
@@ -660,8 +646,19 @@ void implArraySet(IRLS& env, const IRInstruction* inst) {
 
 }
 
-void cgElemArray(IRLS& env, const IRInstruction* i)  { implElemArray(env, i); }
-void cgElemArrayW(IRLS& env, const IRInstruction* i) { implElemArray(env, i); }
+void cgElemArrayX(IRLS& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const mode = inst->extra<ElemArrayX>()->mode;
+  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
+  BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
+              keyInfo.type, keyInfo.checkForInt, mode,
+              RuntimeOption::EvalHackArrCompatNotices);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, arrArgs(env, inst, keyInfo));
+}
 
 void cgElemArrayD(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
@@ -700,8 +697,9 @@ void cgElemMixedArrayK(IRLS& env, const IRInstruction* inst) {
 void cgArrayGet(IRLS& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
+  auto const mode = inst->extra<ArrayGet>()->mode;
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
-  BUILD_OPTAB(ARRAYGET_HELPER_TABLE, keyInfo.type, keyInfo.checkForInt,
+  BUILD_OPTAB(ARRAYGET_HELPER_TABLE, keyInfo.type, keyInfo.checkForInt, mode,
                       RuntimeOption::EvalHackArrCompatNotices);
 
   auto& v = vmain(env);
@@ -980,18 +978,6 @@ void cgReservePackedArrayDataNewElem(IRLS& env, const IRInstruction* i) {
 
 namespace {
 
-void implElemDict(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  auto const mode = inst->op() == ElemDictW ? MOpMode::Warn : MOpMode::None;
-  BUILD_OPTAB(ELEM_DICT_HELPER_TABLE, getKeyType(key), mode);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, args);
-}
-
 void implDictGet(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   auto const mode =
@@ -1035,8 +1021,17 @@ void implDictIsset(IRLS& env, const IRInstruction* inst) {
 
 }
 
-void cgElemDict(IRLS& env, const IRInstruction* i)  { implElemDict(env, i); }
-void cgElemDictW(IRLS& env, const IRInstruction* i) { implElemDict(env, i); }
+void cgElemDictX(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  auto const mode = inst->extra<ElemDictX>()->mode;
+  BUILD_OPTAB(ELEM_DICT_HELPER_TABLE, getKeyType(key), mode);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
 
 void cgElemDictD(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
@@ -1117,20 +1112,6 @@ void cgDictIdx(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-void implElemKeyset(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  auto const mode = inst->op() == ElemKeysetW
-    ? MOpMode::Warn
-    : MOpMode::None;
-  BUILD_OPTAB(ELEM_KEYSET_HELPER_TABLE, getKeyType(key), mode);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, args);
-}
-
 void implKeysetGet(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   auto const mode = inst->op() == KeysetGetQuiet
@@ -1159,8 +1140,17 @@ void implKeysetIsset(IRLS& env, const IRInstruction* inst) {
 
 }
 
-void cgElemKeyset(IRLS& e, const IRInstruction* i)  { implElemKeyset(e, i); }
-void cgElemKeysetW(IRLS& e, const IRInstruction* i) { implElemKeyset(e, i); }
+void cgElemKeysetX(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  auto const mode = inst->extra<ElemKeysetX>()->mode;
+  BUILD_OPTAB(ELEM_KEYSET_HELPER_TABLE, getKeyType(key), mode);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
 
 void cgElemKeysetU(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);

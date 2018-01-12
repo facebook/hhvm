@@ -2815,11 +2815,20 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst, bool& skip) {
 
 SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
+    auto const mode = inst->extra<ArrayGet>()->mode;
     if (inst->src(1)->type() <= TInt) {
       if (auto const result = arrIntKeyImpl(env, inst)) {
         return result;
       }
-      gen(env, RaiseArrayIndexNotice, inst->taken(), inst->src(1));
+      if (mode == MOpMode::InOut || mode == MOpMode::Warn) {
+        gen(
+          env,
+          RaiseArrayIndexNotice,
+          RaiseArrayIndexNoticeData { mode == MOpMode::InOut },
+          inst->taken(),
+          inst->src(1)
+        );
+      }
       return cns(env, TInitNull);
     }
     if (inst->src(1)->type() <= TStr) {
@@ -2828,7 +2837,15 @@ SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
         return result;
       }
       if (skip) return nullptr;
-      gen(env, RaiseArrayKeyNotice, inst->taken(), inst->src(1));
+      if (mode == MOpMode::InOut || mode == MOpMode::Warn) {
+        gen(
+          env,
+          RaiseArrayKeyNotice,
+          RaiseArrayKeyNoticeData { mode == MOpMode::InOut },
+          inst->taken(),
+          inst->src(1)
+        );
+      }
       return cns(env, TInitNull);
     }
   }

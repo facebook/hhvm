@@ -228,12 +228,14 @@ void raiseNotice(const StringData* sd) {
   raise_notice("%s", sd->data());
 }
 
-void raiseArrayIndexNotice(const int64_t index) {
-  raise_notice("Undefined index: %" PRId64, index);
+void raiseArrayIndexNotice(const int64_t index, bool isInOut) {
+  raise_notice("Undefined index%s: %" PRId64,
+               isInOut ? " on inout parameter" : "", index);
 }
 
-void raiseArrayKeyNotice(const StringData* key) {
-  raise_notice("Undefined index: %s", key->data());
+void raiseArrayKeyNotice(const StringData* key, bool isInOut) {
+  raise_notice("Undefined index%s: %s",
+               isInOut ? " on inout parameter" : "", key->data());
 }
 
 std::string formatParamRefMismatch(const char* fname, uint32_t index,

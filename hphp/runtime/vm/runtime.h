@@ -50,8 +50,8 @@ std::string formatParamRefMismatch(const char* fname, uint32_t index,
 
 void raiseWarning(const StringData* sd);
 void raiseNotice(const StringData* sd);
-void raiseArrayIndexNotice(int64_t index);
-void raiseArrayKeyNotice(const StringData* key);
+void raiseArrayIndexNotice(int64_t index, bool isInOut);
+void raiseArrayKeyNotice(const StringData* key, bool isInOut);
 void raiseParamRefMismatch(uint32_t index, const Func* func);
 
 inline intptr_t frame_clsref_offset(const Func* f, uint32_t slot) {

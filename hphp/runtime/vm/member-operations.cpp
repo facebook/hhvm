@@ -202,6 +202,23 @@ void throw_cannot_use_newelem_for_lval_read_keyset() {
   );
 }
 
+void raise_inout_undefined_index(TypedValue tv) {
+  if (tv.m_type == KindOfInt64) {
+    raise_inout_undefined_index(tv.m_data.num);
+    return;
+  }
+  assert(isStringType(tv.m_type));
+  raise_inout_undefined_index(tv.m_data.pstr);
+}
+
+void raise_inout_undefined_index(int64_t i) {
+  raise_notice("Undefined index on inout parameter: %li", i);
+}
+
+void raise_inout_undefined_index(const StringData* sd) {
+  raise_notice("Undefined index on inout parameter: %s", sd->data());
+}
+
 Cell incDecBodySlow(IncDecOp op, Cell* fr) {
   assert(cellIsPlausible(*fr));
   assert(fr->m_type != KindOfUninit);

@@ -167,6 +167,10 @@ void objOffsetUnset(ObjectData* base, TypedValue offset);
 
 [[noreturn]] void unknownBaseType(const TypedValue*);
 
+void raise_inout_undefined_index(TypedValue);
+void raise_inout_undefined_index(int64_t i);
+void raise_inout_undefined_index(const StringData* sd);
+
 namespace detail {
 
 ALWAYS_INLINE void checkPromotion(const TypedValue* base) {
@@ -237,6 +241,9 @@ inline member_rval ElemArray(ArrayData* base, key_type<keyType> key) {
       raise_notice(Strings::UNDEFINED_INDEX,
                    tvAsCVarRef(&scratch).toString().data());
     }
+    if (mode == MOpMode::InOut) {
+      raise_inout_undefined_index(initScratchKey(key));
+    }
     return ElemEmptyish();
   }
 
@@ -249,14 +256,16 @@ inline member_rval ElemArray(ArrayData* base, key_type<keyType> key) {
  */
 template<MOpMode mode>
 inline member_rval ElemVecPre(ArrayData* base, int64_t key) {
-  return mode == MOpMode::Warn
+  return mode == MOpMode::Warn || mode == MOpMode::InOut
     ? PackedArray::RvalIntStrictVec(base, key)
     : PackedArray::RvalIntVec(base, key);
 }
 
 template<MOpMode mode>
 inline member_rval ElemVecPre(ArrayData* base, StringData* key) {
-  if (mode == MOpMode::Warn) throwInvalidArrayKeyException(key, base);
+  if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
+    throwInvalidArrayKeyException(key, base);
+  }
   return member_rval{};
 }
 
@@ -272,7 +281,7 @@ template<MOpMode mode, KeyType keyType>
 inline member_rval ElemVec(ArrayData* base, key_type<keyType> key) {
   assertx(base->isVecArray());
   auto result = ElemVecPre<mode>(base, key);
-  if (mode != MOpMode::Warn) {
+  if (mode != MOpMode::Warn && mode != MOpMode::InOut) {
     if (UNLIKELY(!result)) return ElemEmptyish();
   }
   assertx(result.type() != KindOfUninit);
@@ -284,14 +293,14 @@ inline member_rval ElemVec(ArrayData* base, key_type<keyType> key) {
  */
 template<MOpMode mode>
 inline member_rval ElemDictPre(ArrayData* base, int64_t key) {
-  return mode == MOpMode::Warn
+  return mode == MOpMode::Warn || mode == MOpMode::InOut
     ? MixedArray::RvalIntStrictDict(base, key)
     : MixedArray::RvalIntDict(base, key);
 }
 
 template<MOpMode mode>
 inline member_rval ElemDictPre(ArrayData* base, StringData* key) {
-  return mode == MOpMode::Warn
+  return mode == MOpMode::Warn || mode == MOpMode::InOut
     ? MixedArray::RvalStrStrictDict(base, key)
     : MixedArray::RvalStrDict(base, key);
 }
@@ -308,7 +317,7 @@ template<MOpMode mode, KeyType keyType>
 inline member_rval ElemDict(ArrayData* base, key_type<keyType> key) {
   assertx(base->isDict());
   auto result = ElemDictPre<mode>(base, key);
-  if (mode != MOpMode::Warn) {
+  if (mode != MOpMode::Warn && mode != MOpMode::InOut) {
     if (UNLIKELY(!result)) return ElemEmptyish();
   }
   assertx(result.type() != KindOfUninit);
@@ -320,14 +329,14 @@ inline member_rval ElemDict(ArrayData* base, key_type<keyType> key) {
  */
 template<MOpMode mode>
 inline member_rval ElemKeysetPre(ArrayData* base, int64_t key) {
-  return mode == MOpMode::Warn
+  return mode == MOpMode::Warn || mode == MOpMode::InOut
     ? SetArray::RvalIntStrict(base, key)
     : SetArray::RvalInt(base, key);
 }
 
 template<MOpMode mode>
 inline member_rval ElemKeysetPre(ArrayData* base, StringData* key) {
-  return mode == MOpMode::Warn
+  return mode == MOpMode::Warn || mode == MOpMode::InOut
     ? SetArray::RvalStrStrict(base, key)
     : SetArray::RvalStr(base, key);
 }
@@ -344,7 +353,7 @@ template<MOpMode mode, KeyType keyType>
 inline member_rval ElemKeyset(ArrayData* base, key_type<keyType> key) {
   assertx(base->isKeyset());
   auto result = ElemKeysetPre<mode>(base, key);
-  if (mode != MOpMode::Warn) {
+  if (mode != MOpMode::Warn && mode != MOpMode::InOut) {
     if (UNLIKELY(!result)) return ElemEmptyish();
   }
   assertx(isIntType(result.type()) || isStringType(result.type()));

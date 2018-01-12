@@ -138,7 +138,19 @@ A lower bound on the reference count of a must-alias-set indicates a known
 minimum for the value of its object's count field at that program point.  This
 minimum value can be interpreted as a minimum value of the actual integer in
 memory at each point, if the program were not modified by this pass.  A lower
-bound is therefore always non-negative.
+bound is therefore always non-negative. The lower bound has two components; a
+supported component, which is known to be exclusive to this must-alias-set (in
+the sense that refcount operations on other must-alias-sets will not affect
+this one), and an unsupported component, which might be shared between multiple
+must-alias sets. For example, if we have two must-alias-sets a and b which may
+alias, with lower bound zero, and we see an incref for each, we now know that
+they each have a lower bound of at least 2. But a DecRef of either could reduce
+both lower bounds to 1 (if they happen to refer to the same thing). We can also
+use the unsupported component to account for references held by memory which we
+don't track; eg if an SSATmp is stored into an object property, we no longer
+attempt to track what happens to that property, so we have to give it an
+unsupported_ref; the next time we see an instruction that might affect the
+ref counts of untracked memory locations, we have to drop its unsupported_refs.
 
 The first utility of this information is pretty obvious: if a DecRef
 instruction is encountered when the lower bound of must-alias-set is greater
@@ -194,15 +206,17 @@ situation comes up with loads and is discussed further in "About Loads".)
 This exclusivity principle provides the following rule for dealing with
 instructions that may decrease reference counts because of May-Alias
 relationships: when we need to decrease the lower bound of a must-alias-set, if
-its lower bound is currently non-zero, we have no obligation to decrement the
-lower bound in any other must-alias-set, regardless of May-Alias relationships.
-The exclusivity of the lower bound means we know we're just cancelling out
-something that raised the lower bound on this set and no other, so the state on
-other sets can't be affected.
+its lower bound is currently greater than its unsupported_refs, we have no
+obligation to decrement the lower bound in any other must-alias-set, regardless
+of May-Alias relationships. The exclusivity of the supported component of the
+lower bound means we know we're just cancelling out something that raised the
+lower bound on this set and no other, so the state on other sets can't be
+affected.
 
 The pessimistic case still applies, however, if you need to reduce the lower
-bound on a must-alias-set S that currently has a lower bound of zero.  Then all
-the other sets that May-Alias S must have their lower bound reduced as well.
+bound on a must-alias-set S that currently has a lower bound equal to its
+unsupported component.  Then all the other sets that May-Alias S must have
+their lower bound reduced as well.
 
 
 -- Memory Support --
@@ -237,11 +251,11 @@ forever in this situation, which is also conceptually necessary for this to
 work as may-information.
 
 However, if we see an instruction that could DecRef one of these objects
-through a pointer in memory and its lower_bound is currently non-zero, we can
-be sure we've accounted for that may-DecRef by balancing it with a IncRef of
-some sort that we've already observed.  In this situation, we can remove the
-memory support bit to avoid futher reductions in the lower bound of that set
-via that memory location.
+through a pointer in memory and its lower_bound is currently above its
+unsupported component, we can be sure we've accounted for that may-DecRef
+by balancing it with a IncRef of some sort that we've already observed.
+In this situation, we can remove the memory support bit to avoid futher
+reductions in the lower bound of that set via that memory location.
 
 Since this is may-information that makes analysis more conservative, the memory
 support bits should conceptually be or'd at merge points.  It is fine to think
@@ -669,6 +683,16 @@ struct ASetInfo {
   int32_t lower_bound{0};
 
   /*
+   * Sometimes we know the refcount is higher than we've been able to
+   * prove; eg when we IncRef something with a lower_bound of zero, we
+   * know that the actual lower_bound is 2. When we have
+   * unsupported_refs, we have to account for DecRef or DecRefNZ on
+   * anything that mayalias this one, and anything other than an
+   * irrelevant_inst or an IncRef will kill the unsupported_refs.
+   */
+  int32_t unsupported_refs{0};
+
+  /*
    * Set of memory location ids that are being used to support the lower bound
    * of this object.  The purpose of this set is to reduce lower bounds when we
    * see memory events that might decref a pointer: this means it's never
@@ -691,6 +715,7 @@ struct ASetInfo {
 // State structure for rc_analyze.
 struct RCState {
   bool initialized{false};
+  bool has_unsupported_refs{false};
   jit::vector<ASetInfo> asets;
 
   /*
@@ -1457,7 +1482,8 @@ DEBUG_ONLY bool check_state(const RCState& state) {
     auto& set = state.asets[asetID];
 
     // All reference count bounds are non-negative.
-    always_assert(set.lower_bound >= 0);
+    always_assert(set.unsupported_refs >= 0);
+    always_assert(set.lower_bound >= set.unsupported_refs);
 
     // If this set has support bits, then the reverse map in the state is
     // consistent with it.
@@ -1497,6 +1523,7 @@ RCState entry_rc_state(Env& env) {
 bool pessimize_for_merge(ASetInfo& aset) {
   if (!aset.lower_bound && aset.memory_support.none()) return false;
   aset.lower_bound = 0;
+  aset.unsupported_refs = 0;
   aset.memory_support.reset();
   return true;
 }
@@ -1508,10 +1535,20 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   // function.
   assertx(src.lower_bound >= 0);
   assertx(dst.lower_bound >= 0);
+  assertx(dst.unsupported_refs >= 0 && dst.unsupported_refs <= dst.lower_bound);
+  assertx(src.unsupported_refs >= 0 && src.unsupported_refs <= src.lower_bound);
+  auto const lower_bound = std::min(dst.lower_bound, src.lower_bound);
+  auto const unsupported_refs =
+    std::min(std::max(dst.unsupported_refs, src.unsupported_refs),
+             lower_bound);
 
-  auto const new_lower_bound = std::min(dst.lower_bound, src.lower_bound);
-  if (dst.lower_bound != new_lower_bound) {
-    dst.lower_bound = new_lower_bound;
+  if (dst.lower_bound != lower_bound) {
+    dst.lower_bound = lower_bound;
+    changed = true;
+  }
+
+  if (dst.unsupported_refs != unsupported_refs) {
+    dst.unsupported_refs = unsupported_refs;
     changed = true;
   }
 
@@ -1542,8 +1579,8 @@ bool merge_memory_support(RCState& dstState, const RCState& srcState) {
      * But we want our state structures to have support_map pointing to at most
      * one must-alias-set for each location.
      */
-    if (dst.lower_bound >= dst.memory_support.count() &&
-        src.lower_bound >= src.memory_support.count()) {
+    if (dst.lower_bound - dst.unsupported_refs >= dst.memory_support.count() &&
+        src.lower_bound - src.unsupported_refs >= src.memory_support.count()) {
       auto const new_memory_support = dst.memory_support & src.memory_support;
       if (dst.memory_support != new_memory_support) {
         auto const old_count = dst.memory_support.count();
@@ -1551,12 +1588,13 @@ bool merge_memory_support(RCState& dstState, const RCState& srcState) {
         auto const delta     = old_count - new_count;
         assertx(delta > 0);
 
-        dst.lower_bound -= delta;
+        dst.unsupported_refs += delta;
         dst.memory_support = new_memory_support;
         changed = true;
 
-        assertx(dst.lower_bound >= 0);
-        assertx(dst.lower_bound >= dst.memory_support.count());
+        assertx(dst.lower_bound >= dst.unsupported_refs);
+        assertx(dst.lower_bound - dst.unsupported_refs >=
+                dst.memory_support.count());
       }
       continue;
     }
@@ -1567,6 +1605,7 @@ bool merge_memory_support(RCState& dstState, const RCState& srcState) {
         changed = true;
       }
     }
+    break;
   }
 
   return changed;
@@ -1590,13 +1629,17 @@ bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
   // pessimize all the sets in some situations).
   if (merge_memory_support(dst, src)) changed = true;
 
+  dst.has_unsupported_refs = false;
   for (auto asetID = uint32_t{0}; asetID < dst.asets.size(); ++asetID) {
-    if (merge_into(dst.asets[asetID], src.asets[asetID])) {
+    auto &daset = dst.asets[asetID];
+    if (merge_into(daset, src.asets[asetID])) {
       changed = true;
     }
 
+    if (daset.unsupported_refs) dst.has_unsupported_refs = true;
+
     bitset_for_each_set(
-      dst.asets[asetID].memory_support,
+      daset.memory_support,
       [&](size_t loc) {
         assertx(dst.support_map[loc] == -1);
         dst.support_map[loc] = asetID;
@@ -1622,6 +1665,9 @@ void reduce_lower_bound(Env& /*env*/, RCState& state, uint32_t asetID) {
   FTRACE(5, "      reduce_lower_bound {}\n", asetID);
   auto& aset = state.asets[asetID];
   aset.lower_bound = std::max(aset.lower_bound - 1, 0);
+  if (aset.unsupported_refs > aset.lower_bound) {
+    aset.unsupported_refs = aset.lower_bound;
+  }
 }
 
 /*
@@ -1646,6 +1692,7 @@ void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
   if (!aset.lower_bound && aset.memory_support.none()) return;
   FTRACE(2, "      {} pessimized\n", asetID);
   aset.lower_bound = 0;
+  aset.unsupported_refs = 0;
   bitset_for_each_set(
     aset.memory_support,
     [&](size_t id) { state.support_map[id] = -1; }
@@ -1724,16 +1771,53 @@ template<class NAdder>
 void may_decref(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   auto& aset = state.asets[asetID];
 
-  auto const old_lower_bound = aset.lower_bound;
+  auto const tracked_lower_bound = aset.lower_bound - aset.unsupported_refs;
   reduce_lower_bound(env, state, asetID);
   add_node(asetID, NReq{1});
   FTRACE(3, "    {} lb: {}\n", asetID, aset.lower_bound);
 
-  if (old_lower_bound >= 1) return;
-  FTRACE(4, "    unbalanced decref:\n");
+  if (!tracked_lower_bound) {
+    FTRACE(4, "    unbalanced decref:\n");
+  } else if (state.has_unsupported_refs) {
+    // We don't have exclusivity for unsupported_refs (eg two must
+    // alias sets that both refer to the same thing could each have an
+    // unsupported_ref for the same reason), so we have to reduce them
+    // all on any decref.
+    FTRACE(4, "    decref may_alias unsupported_refs\n");
+  } else {
+    return;
+  }
+
   for (auto may_id : env.asets[asetID].may_alias) {
-    reduce_lower_bound(env, state, may_id);
-    add_node(may_id, NReq{1});
+    if (!tracked_lower_bound) {
+      reduce_lower_bound(env, state, may_id);
+      add_node(may_id, NReq{1});
+    } else {
+      auto& may_set = state.asets[may_id];
+      if (may_set.unsupported_refs) {
+        may_set.unsupported_refs--;
+        may_set.lower_bound--;
+        FTRACE(5, "      {} lb: {}\n", may_id, may_set.lower_bound);
+        add_node(may_id, NReq{1});
+      }
+    }
+  }
+}
+
+void kill_unsupported_refs(RCState& state) {
+  if (state.has_unsupported_refs) {
+    FTRACE(3, "    killing all unsupported refs\n");
+    auto id = 0;
+    for (auto& aset : state.asets) {
+      if (aset.unsupported_refs) {
+        assertx(aset.unsupported_refs <= aset.lower_bound);
+        aset.lower_bound -= aset.unsupported_refs;
+        aset.unsupported_refs = 0;
+        FTRACE(5, "      {} : lb -> {}\n", id, aset.lower_bound);
+      }
+      id++;
+    }
+    state.has_unsupported_refs = false;
   }
 }
 
@@ -1749,7 +1833,7 @@ bool reduce_support_bit(Env& env,
   if (current_set == -1) return true;
   FTRACE(3, "      {} removing support\n", current_set);
   auto& aset = state.asets[current_set];
-  if (aset.lower_bound == 0) {
+  if (aset.lower_bound == aset.unsupported_refs) {
     /*
      * We can't remove the support bit, and we have no way to account for the
      * reduction in lower bound.  There're two cases to consider:
@@ -1870,6 +1954,13 @@ void create_store_support(Env& env,
 
       state.support_map[meta->index] = asetID;
       aset.memory_support.set(meta->index);
+      return;
+    }
+
+    if (aset.lower_bound > aset.unsupported_refs) {
+      FTRACE(3, "    {} store adds an unsupported_ref\n", asetID);
+      aset.unsupported_refs++;
+      state.has_unsupported_refs = true;
       return;
     }
 
@@ -2086,8 +2177,14 @@ void rc_analyze_inst(Env& env,
   switch (inst.op()) {
   case IncRef:
     for_aset(env, state, inst.src(0), [&] (ASetID asetID) {
-      add_node(asetID, NInc{&inst});
       auto& aset = state.asets[asetID];
+      if (!aset.lower_bound) {
+        FTRACE(3, "    {} unsupported_refs += 1\n", asetID);
+        assertx(!aset.unsupported_refs);
+        aset.lower_bound = aset.unsupported_refs = 1;
+        state.has_unsupported_refs = true;
+      }
+      add_node(asetID, NInc{&inst});
       ++aset.lower_bound;
       FTRACE(3, "    {} lb: {}\n", asetID, aset.lower_bound);
     });
@@ -2097,11 +2194,23 @@ void rc_analyze_inst(Env& env,
     {
       auto old_lb = int32_t{0};
       for_aset(env, state, inst.src(0), [&] (ASetID asetID) {
+        auto& aset = state.asets[asetID];
+        if (inst.op() == DecRefNZ && aset.lower_bound < 2) {
+          FTRACE(3, "    {} unsupported_refs += {}\n",
+                 asetID, 2 - aset.lower_bound);
+          assertx(aset.unsupported_refs <= aset.lower_bound);
+          aset.unsupported_refs += 2 - aset.lower_bound;
+          aset.lower_bound = 2;
+          state.has_unsupported_refs = true;
+        }
         add_node(asetID, NDec{&inst});
-        old_lb = state.asets[asetID].lower_bound;
+        old_lb = aset.lower_bound;
         may_decref(env, state, asetID, add_node);
       });
-      if (old_lb <= 1) analyze_mem_effects(env, inst, state, add_node);
+      if (old_lb <= 1) {
+        kill_unsupported_refs(state);
+        analyze_mem_effects(env, inst, state, add_node);
+      }
     }
     return;
   case DefInlineFP:
@@ -2114,6 +2223,10 @@ void rc_analyze_inst(Env& env,
     break;
   default:
     break;
+  }
+
+  if (state.has_unsupported_refs && !irrelevant_inst(inst)) {
+    kill_unsupported_refs(state);
   }
 
   /*

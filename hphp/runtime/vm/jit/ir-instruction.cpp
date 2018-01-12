@@ -139,18 +139,12 @@ bool IRInstruction::consumesReference(int srcNo) const {
       // Call a helper that decrefs the first argument
       return srcNo == 0;
 
-    case StRef:
     case StClosureArg:
     case StClosureCtx:
     case StContArValue:
     case StContArKey:
-    case StLoc:
     case AFWHBlockOn:
       // Consume the value being stored, not the thing it's being stored into
-      return srcNo == 1;
-
-    case StMem:
-      // StMem <base>, <value>
       return srcNo == 1;
 
     case ArraySet:
@@ -164,10 +158,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case AddNewElemVec:
       // Only consumes the reference to its input array
       return srcNo == 0;
-
-    case SpillFrame:
-      // Consumes the $this/Class or invName field of the ActRec
-      return srcNo == 2 || srcNo == 3;
 
     case CheckNullptr:
       return srcNo == 0;

@@ -2091,17 +2091,7 @@ bool consumes_reference_taken(const IRInstruction& inst, uint32_t srcID) {
  */
 bool consumes_reference_next_not_taken(const IRInstruction& inst,
                                        uint32_t srcID) {
-  switch (inst.op()) {
-  // The following have the old CRc flag, but don't observe or consume from
-  // this module's perspective.  We'll clean this up when the old pass is gone.
-  case StLoc:
-  case StStk:
-  case SpillFrame:
-  case StMem:
-    return false;
-  default:
-    return inst.consumesReference(srcID);
-  }
+  return inst.consumesReference(srcID);
 }
 
 /*

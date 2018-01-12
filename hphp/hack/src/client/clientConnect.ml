@@ -246,6 +246,11 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           debug_port = None;
           ignore_hh_version = env.ignore_hh_version;
         };
+        (* work around race condition: hh_client sometimes hangs if it's
+         * starting the server, especially on mac. Given the server takes
+         * a while to start and we're waiting for it anyway, this doesn't
+         * really hurt *)
+        Unix.sleep 1;
         connect env retries start_time tail_env
       end else begin
         Printf.eprintf begin

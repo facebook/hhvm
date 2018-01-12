@@ -202,6 +202,17 @@ static Exception* generate_memory_exceeded_exception(c_WaitableWaitHandle* wh) {
     "request has exceeded memory limit", exceptionStack);
 }
 
+static Exception* generate_cli_client_terminated_exception(
+  c_WaitableWaitHandle* wh
+) {
+  auto exceptionStack = createBacktrace(BacktraceArgs()
+                                        .fromWaitHandle(wh)
+                                        .withSelf()
+                                        .withThis()
+                                        .withMetadata());
+  return new FatalErrorException("CLI client terminated", exceptionStack);
+}
+
 // suppress certain callbacks when we're running a user error handler;
 // to reduce the chances that a subsequent error occurs in the callback
 // and obscures the effect that the first handler would have had.
@@ -259,6 +270,13 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       setSurpriseFlag(MemExceededFlag);
     } else {
       pendingException = generate_memory_exceeded_exception(wh);
+    }
+  }
+  if (flags & CLIClientTerminated) {
+    if (pendingException) {
+      setSurpriseFlag(CLIClientTerminated);
+    } else {
+      pendingException = generate_cli_client_terminated_exception(wh);
     }
   }
   if (flags & PendingGCFlag) {

@@ -167,6 +167,66 @@ TRACE_SET_MOD(clisrv);
 
 namespace HPHP {
 
+struct CLIClientGuardedFile : PlainFile {
+  explicit CLIClientGuardedFile(int fd) :
+    PlainFile(fd)
+  { }
+
+  int64_t readImpl(char *buffer, int64_t length) override {
+    assertClientAlive();
+    return PlainFile::readImpl(buffer, length);
+  }
+  int getc() override {
+    assertClientAlive();
+    return PlainFile::getc();
+  }
+  String read() override {
+    assertClientAlive();
+    return PlainFile::read();
+  }
+  String read(int64_t length) override {
+    assertClientAlive();
+    return PlainFile::read(length);
+  }
+  int64_t writeImpl(const char *buffer, int64_t length) override {
+    assertClientAlive();
+    return PlainFile::writeImpl(buffer, length);
+  }
+  bool seek(int64_t offset, int whence = SEEK_SET) override {
+    assertClientAlive();
+    return PlainFile::seek(offset, whence);
+  }
+  int64_t tell() override {
+    assertClientAlive();
+    return PlainFile::tell();
+  }
+  bool eof() override {
+    assertClientAlive();
+    return PlainFile::eof();
+  }
+  bool rewind() override {
+    assertClientAlive();
+    return PlainFile::rewind();
+  }
+  bool flush() override {
+    assertClientAlive();
+    return PlainFile::flush();
+  }
+  bool truncate(int64_t size) override {
+    assertClientAlive();
+    return PlainFile::truncate(size);
+  }
+
+ private:
+  void assertClientAlive() {
+    if (stackLimitAndSurprise().load() & CLIClientTerminated) {
+      raise_fatal_error("File I/O blocked as CLI client terminated");
+    }
+  }
+};
+static_assert(sizeof(CLIClientGuardedFile) == sizeof(PlainFile),
+              "CLIClientGuardedFile inherits PlainFile::heapSize()");
+
 namespace {
 
 template<class... Args>
@@ -534,7 +594,9 @@ struct CliStdoutHook final : ExecutionContext::StdoutHook {
   int fd;
   explicit CliStdoutHook(int fd) : fd(fd) {}
   void operator()(const char* s, int len) override {
-    write(fd, s, len);
+    if (!(stackLimitAndSurprise().load() & CLIClientTerminated)) {
+      write(fd, s, len);
+    }
   }
 };
 
@@ -543,8 +605,10 @@ struct CliLoggerHook final : LoggerHook {
   explicit CliLoggerHook(int fd) : fd(fd) {}
   void operator()(const char* /*hdr*/, const char* msg, const char* ending)
        override {
-    write(fd, msg, strlen(msg));
-    if (ending) write(fd, ending, strlen(ending));
+    if (!(stackLimitAndSurprise().load() & CLIClientTerminated)) {
+      write(fd, msg, strlen(msg));
+      if (ending) write(fd, ending, strlen(ending));
+    }
   }
 };
 
@@ -851,7 +915,8 @@ MonitorThread::MonitorThread(int client) {
                  client);
           Logger::Info("CLIWorker::doJob(%i): monitor thread aborting request",
                        client);
-          break;
+          flags->fetch_or(CLIClientTerminated);
+          return;
         }
         if (pfd[1].revents) {
           FTRACE(2, "CLIWorker::doJob({}): monitor got request completed\n",
@@ -859,16 +924,10 @@ MonitorThread::MonitorThread(int client) {
           return;
         }
       }
-      if (ret == -1) {
-        Logger::Warning("CLIWorker::doJob(%i): monitor thread terminated: %s",
-                        client, folly::errnoStr(errno).c_str());
-        FTRACE(2, "CLIWorker::doJob({}): got error in monitor thread: {}",
-               client, folly::errnoStr(errno));
-        return;
-      }
-
-      flags->fetch_or(TimedOutFlag);
-      FTRACE(2, "CLIWorker::doJob({}): monitor exiting...\n", client);
+      Logger::Warning("CLIWorker::doJob(%i): monitor thread terminated: %s",
+                      client, folly::errnoStr(errno).c_str());
+      FTRACE(2, "CLIWorker::doJob({}): got error in monitor thread: {}",
+             client, folly::errnoStr(errno));
     });
   } catch (const std::system_error& err) {
     close(rpipe);
@@ -1035,7 +1094,7 @@ CLIWrapper::open(const String& filename, const String& mode, int options,
     return nullptr;
   }
 
-  return req::make<PlainFile>(cli_read_fd(m_cli_fd));
+  return req::make<CLIClientGuardedFile>(cli_read_fd(m_cli_fd));
 }
 
 req::ptr<Directory> CLIWrapper::opendir(const String& path) {

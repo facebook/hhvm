@@ -64,6 +64,9 @@ enum SurpriseFlag : size_t {
    */
   PendingPerfEventFlag = 1ull << 62,
 
+  /* Set when executing a CLI-server request and the client has vanished. */
+  CLIClientTerminated = 1ull << 63,
+
   /*
    * Flags that shouldn't be cleared by fetchAndClearSurpriseFlags, because
    * fetchAndClearSurpriseFlags is only supposed to touch flags related to
@@ -84,6 +87,7 @@ enum SurpriseFlag : size_t {
     XenonSignalFlag |
     IntervalTimerFlag |
     MemThresholdFlag |
+    CLIClientTerminated |
     ResourceFlags,
 
   /*

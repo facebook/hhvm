@@ -705,6 +705,7 @@ struct RuntimeOption {
   F(double, GCTriggerPct,              0.5)                             \
   F(bool, GCForAPC,                    false)                           \
   F(int64_t, GCForAPCTrigger,          1024*1024*1024)                  \
+  F(bool, TwoPhaseGC,                  false)                           \
   /* End of GC Options */                                               \
   F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \

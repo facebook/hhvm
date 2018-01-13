@@ -192,6 +192,12 @@ inline bool hasScanner(Index index) {
          detail::g_metadata_table[kIndexUnknownNoPtrs].m_scan;
 }
 
+inline bool hasConservativeScanner(Index index) {
+  assert(index < detail::g_metadata_table_size);
+  return detail::g_metadata_table[index].m_scan ==
+         detail::g_metadata_table[kIndexUnknown].m_scan;
+}
+
 // Initialize the type scanner infrastructure. Before this is done,
 // getIndexForMalloc() will always return kIndexUnknown and any attempts to scan
 // will use conservative scanning. For this reason, its important to call init()

@@ -238,32 +238,6 @@ inline void ObjectData::scan(type_scan::Scanner& scanner) const {
 struct PhpStack    { TYPE_SCAN_CONSERVATIVE_ALL; void* dummy; };
 struct CppStack    { TYPE_SCAN_CONSERVATIVE_ALL; void* dummy; };
 
-// call fn(ptr,size,tyindex) for each thing in RDS, including the php stack
-// and the rds local segment. The RDS shared part cannot contain pointers.
-template<class Fn>
-inline void iterateRds(rds::Header* rds, Fn fn) {
-  // header and normal section
-  fn(rds, sizeof(*rds), type_scan::getIndexForScan<rds::Header>());
-
-  // Normal section.
-  rds::forEachNormalAlloc(fn);
-
-  // Local section (mainly static properties).
-  // static properties have a per-class, versioned, bool in rds::Normal,
-  // tracked by Class::m_sPropCacheInit, plus one TypedValue in rds::Local
-  // for each property, tracked in Class::m_sPropCache. Just scan the
-  // properties in rds::Local. We ignore the state of the bool, because it
-  // is not initialized until after all sprops are initialized, and it's
-  // necessary to scan static properties *during* initialization.
-  rds::forEachLocalAlloc(fn);
-
-  // php stack TODO #6509338 exactly scan the php stack.
-  auto stack_end = rds->vmRegs.stack.getStackHighAddress();
-  auto sp = rds->vmRegs.stack.top();
-  fn(sp, uintptr_t(stack_end) - uintptr_t(sp),
-     type_scan::getIndexForScan<PhpStack>());
-}
-
 template<class Fn>
 void MemoryManager::iterateRoots(Fn fn) const {
   fn(&m_sweepables, sizeof(m_sweepables),
@@ -291,9 +265,24 @@ template<class Fn> void ThreadLocalManager::iterate(Fn fn) const {
 // Visit request-local roots. Each invocation of fn represents one root
 // instance of a given type and size, containing potentially several
 // pointers.
-template<class Fn> void iterateRoots(Fn fn) {
-  if (auto rds = rds::header()) {
-    iterateRds(rds, fn);
+template<class Fn> void iterateConservativeRoots(Fn fn) {
+  auto rds = rds::header();
+
+  // php header and stack
+  // TODO #6509338 exactly scan the php stack.
+  if (rds) {
+    fn(rds, sizeof(*rds), type_scan::getIndexForScan<rds::Header>());
+    auto stack_end = rds->vmRegs.stack.getStackHighAddress();
+    auto sp = rds->vmRegs.stack.top();
+    fn(sp, uintptr_t(stack_end) - uintptr_t(sp),
+       type_scan::getIndexForScan<PhpStack>());
+  }
+
+  if (!g_context.isNull()) {
+    // m_nestedVMs contains MInstrState, which has a conservatively-scanned
+    // fields. Scan it now, then ignore when ExecutionContext is scanned.
+    fn(&g_context->m_nestedVMs, sizeof(g_context->m_nestedVMs),
+       type_scan::getIndexForScan<ExecutionContext::VMStateVec>());
   }
 
   // cpp stack. ensure stack contains callee-saved registers.
@@ -301,12 +290,38 @@ template<class Fn> void iterateRoots(Fn fn) {
   auto sp = stack_top_ptr();
   fn(sp, s_stackLimit + s_stackSize - uintptr_t(sp),
      type_scan::getIndexForScan<CppStack>());
+}
 
-  // ThreadLocal nodes
-  ThreadLocalManager::GetManager().iterate(fn);
+template<class Fn> void iterateExactRoots(Fn fn) {
+  auto rds = rds::header();
+
+  // normal section
+  if (rds) {
+    rds::forEachNormalAlloc(fn);
+  }
+
+  // Local section (mainly static properties).
+  // static properties have a per-class, versioned, bool in rds::Normal,
+  // tracked by Class::m_sPropCacheInit, plus one TypedValue in rds::Local
+  // for each property, tracked in Class::m_sPropCache. Just scan the
+  // properties in rds::Local. We ignore the state of the bool, because it
+  // is not initialized until after all sprops are initialized, and it's
+  // necessary to scan static properties *during* initialization.
+  if (rds) {
+    rds::forEachLocalAlloc(fn);
+  }
 
   // Root handles & sweep lists
   tl_heap->iterateRoots(fn);
+
+  // ThreadLocal nodes (but skip MemoryManager). These are mostly exact
+  // but EZC roots point to conservatve junk.
+  ThreadLocalManager::GetManager().iterate(fn);
+}
+
+template<class Fn> void iterateRoots(Fn fn) {
+  iterateConservativeRoots(fn);
+  iterateExactRoots(fn);
 }
 
 }

@@ -341,6 +341,11 @@ void loadPerfEvents() {
       entries.push_back(std::pair<TCA,std::string>(addr, line));
     }
 
+    // Strip :p+ PEBS suffix.
+    if (auto pos = strchr(eventCaption, ':')) {
+      *pos = '\0';
+    }
+
     if (strncmp(program, "hhvm", 4) == 0) {
       eventType = perfScriptOutputToEventType(eventCaption);
       if (eventType == NUM_EVENT_TYPES) {

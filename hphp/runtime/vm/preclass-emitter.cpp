@@ -30,14 +30,17 @@
 
 namespace HPHP {
 
+std::string NewAnonymousClassName(const std::string& name) {
+  static std::atomic<uint32_t> next_anon_class;
+  return folly::sformat("{};{}", name, next_anon_class.fetch_add(1));
+}
+
 namespace {
 
 const StringData* preClassName(const std::string& name) {
-  static std::atomic<uint32_t> next_anon_class;
   if (ParserBase::IsAnonymousClassName(name)) {
     if (name.find(';') == std::string::npos) {
-      return makeStaticString(
-        folly::sformat("{};{}", name, next_anon_class.fetch_add(1)));
+      return makeStaticString(NewAnonymousClassName(name));
     }
   }
   return makeStaticString(name);

@@ -89,6 +89,7 @@
 
 #include "hphp/util/md5.h"
 
+#include "hphp/parser/parser.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -2603,6 +2604,15 @@ void parse_class(AsmState& as) {
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".class must have a name");
+  }
+  if (ParserBase::IsAnonymousClassName(name)) {
+    // refresh names of anonymous classes
+    // to make sure they are unique
+    auto p = name.find(';');
+    if (p != std::string::npos) {
+      name = name.substr(0, p);
+      name = HPHP::NewAnonymousClassName(name);
+    }
   }
 
   int line0;

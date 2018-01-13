@@ -1,2 +1,4 @@
+quick/compiler_frontend_constant_php.php
+quick/no_hh/nullsafe-call-no-hh.php
 quick/parser_massive_add_exp.php
 quick/parser_massive_concat_exp.php

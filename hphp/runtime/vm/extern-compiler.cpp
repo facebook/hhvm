@@ -735,13 +735,12 @@ std::unique_ptr<UnitCompiler> UnitCompiler::create(const char* code,
   s_manager.ensure_started();
   if (SystemLib::s_inited) {
     auto const hcMode = hackc_mode();
-    if (!RuntimeOption::EnableHipHopSyntax && !isFileHack(code, codeLen)) {
-      if (RuntimeOption::EvalPHP7CompilerEnabled &&
-          s_manager.php7_enabled()) {
-        return std::make_unique<Php7UnitCompiler>
-          (code, codeLen, filename, md5);
-      }
-      return nullptr;
+    if (!isFileHack(code, codeLen) &&
+        !RuntimeOption::EnableHipHopSyntax &&
+        RuntimeOption::EvalPHP7CompilerEnabled &&
+        s_manager.php7_enabled()) {
+        return std::make_unique<Php7UnitCompiler> (
+          code, codeLen, filename, md5);
     } else if (hcMode != HackcMode::kNever && s_manager.hackc_enabled()) {
       return std::make_unique<HackcUnitCompiler>(
         code, codeLen, filename, md5, hcMode);

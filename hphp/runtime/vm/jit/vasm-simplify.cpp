@@ -994,6 +994,61 @@ bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Try to do constant folding on Vptr operands.
+
+struct SimplifyVptrVisit {
+  explicit SimplifyVptrVisit(Env& env) : env{env} {}
+  template<class T> void def(T) {}
+  template<class T> void imm(const T&) {}
+  template<class T> void across(T) {}
+  template<class T, class H> void defHint(T, H) {}
+  template<class T, class H> void useHint(T r, H) { use(r); }
+  template <typename T> void use(T) {}
+
+  void use(Vptr& ptr) {
+    // If the base is a constant, we can fold it into the displacement (if it
+    // fits).
+    if (ptr.base.isValid()) {
+      auto const it = env.unit.regToConst.find(ptr.base);
+      if (it != env.unit.regToConst.end()) {
+        auto const newDisp = static_cast<int64_t>(ptr.disp) + it->second.val;
+        if (deltaFits(newDisp, sz::dword)) {
+          ptr.disp = newDisp;
+          ptr.base = Vreg{};
+          changed = true;
+        }
+      }
+    }
+
+    // If the index is a constant, we can fold it into the displacement (if it
+    // fits).
+    if (ptr.index.isValid()) {
+      auto const it = env.unit.regToConst.find(ptr.index);
+      if (it != env.unit.regToConst.end()) {
+        auto const newDisp =
+          static_cast<int64_t>(ptr.disp) + it->second.val * ptr.scale;
+        if (deltaFits(newDisp, sz::dword)) {
+          ptr.disp = newDisp;
+          ptr.index = Vreg{};
+          ptr.scale = 1;
+          changed = true;
+        }
+      }
+    }
+  }
+
+  Env& env;
+  bool changed = false;
+};
+
+bool simplify_vptr(Env& env, Vinstr& inst) {
+  SimplifyVptrVisit v{env};
+  visitOperands(inst, v);
+  return v.changed;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Perform peephole simplification at instruction `i' of block `b'.
  *
@@ -1001,12 +1056,14 @@ bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
  */
 bool simplify(Env& env, Vlabel b, size_t i) {
   assertx(i <= env.unit.blocks[b].code.size());
-  auto const& inst = env.unit.blocks[b].code[i];
+  auto& inst = env.unit.blocks[b].code[i];
+
+  auto const changed = simplify_vptr(env, inst);
 
   switch (inst.op) {
 #define O(name, ...)    \
     case Vinstr::name:  \
-      return simplify(env, inst.name##_, b, i); \
+      return simplify(env, inst.name##_, b, i) || changed; \
 
     VASM_OPCODES
 #undef O

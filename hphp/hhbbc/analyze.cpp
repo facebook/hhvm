@@ -117,7 +117,11 @@ State entry_state(const Index& index, Context const ctx,
         continue;
       }
     }
-    ret.locals[locId] = param.byRef ? TGen : TCell;
+    ret.locals[locId] = param.byRef
+      ? TGen
+      : ctx.func->params[locId].isVariadic
+        ? TVArr
+        : TCell;
   }
 
   /*

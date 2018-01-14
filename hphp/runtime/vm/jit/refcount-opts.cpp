@@ -1648,38 +1648,21 @@ template<class NAdder>
 void may_decref(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   auto& aset = state.asets[asetID];
 
-  auto const tracked_lower_bound = aset.lower_bound - aset.unsupported_refs;
+  auto const balanced = aset.lower_bound > aset.unsupported_refs;
   reduce_lower_bound(env, state, asetID);
   add_node(asetID, NReq{1});
   FTRACE(3, "    {} lb: {}({})\n",
          asetID, aset.lower_bound, aset.unsupported_refs);
 
-  if (!tracked_lower_bound) {
-    FTRACE(4, "    unbalanced decref:\n");
-  } else if (state.has_unsupported_refs) {
-    // We don't have exclusivity for unsupported_refs (eg two must
-    // alias sets that both refer to the same thing could each have an
-    // unsupported_ref for the same reason), so we have to reduce them
-    // all on any decref.
-    FTRACE(4, "    decref may_alias unsupported_refs\n");
-  } else {
-    return;
-  }
+  if (balanced) return;
+  FTRACE(4, "    unbalanced decref:\n");
 
   for (auto may_id : env.asets[asetID].may_alias) {
-    if (!tracked_lower_bound) {
-      reduce_lower_bound(env, state, may_id);
-      add_node(may_id, NReq{1});
-    } else {
-      auto& may_set = state.asets[may_id];
-      if (may_set.unsupported_refs) {
-        may_set.unsupported_refs--;
-        may_set.lower_bound--;
-        FTRACE(5, "      {} lb: {}({})\n",
-               may_id, may_set.lower_bound, may_set.unsupported_refs);
-        add_node(may_id, NReq{1});
-      }
-    }
+    reduce_lower_bound(env, state, may_id);
+    DEBUG_ONLY auto& may_set = state.asets[may_id];
+    FTRACE(5, "      {} lb: {}({})\n",
+           may_id, may_set.lower_bound, may_set.unsupported_refs);
+    add_node(may_id, NReq{1});
   }
 }
 

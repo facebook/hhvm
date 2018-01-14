@@ -647,6 +647,23 @@ static std::pair<const Vptr *, size_t> storeq(Env& env, Vreg64 reg,
   return std::make_pair(nullptr,0);
 }
 
+bool is_reg_const(Env& env, Vreg reg) {
+  return env.unit.regToConst.find(reg) != env.unit.regToConst.end();
+}
+
+template <typename Op>
+bool flip_operands_helper(Env& env, const Op& op, Vlabel b, size_t i) {
+  // We want any constant register to be in the first operand, and any foldable
+  // load to be in the second.
+  if (!(is_reg_const(env, op.s0) || foldable_load(env, op.s1, b, i)) &&
+      (is_reg_const(env, op.s1) || foldable_load(env, op.s0, b, i))) {
+    if (flip_ordered_uses(env, op.sf, b, i)) {
+      return simplify_impl(env, b, i, Op { op.s1, op.s0, op.sf });
+    }
+  }
+  return false;
+}
+
 bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
   if (arch_any(Arch::ARM, Arch::PPC64)) return false;
   auto stPair = storeq(env, vadd.d, b, i);
@@ -677,6 +694,8 @@ bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
+  if (flip_operands_helper(env, vcmp, b, i)) return true;
+
   if (!arch_any(Arch::ARM, Arch::PPC64)) {
     if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
       return simplify_impl(env, b, i, cmpqm { vcmp.s0, *vptr, vcmp.sf });
@@ -687,6 +706,7 @@ bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
       }
     }
   }
+
   auto const sz0 = value_width(env, vcmp.s0);
   if (sz0 == sz::qword) return false;
   auto const sz1 = value_width(env, vcmp.s1);
@@ -702,6 +722,8 @@ bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const cmpl& vcmp, Vlabel b, size_t i) {
+  if (flip_operands_helper(env, vcmp, b, i)) return true;
+
   if (arch() == Arch::ARM) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
@@ -711,6 +733,8 @@ bool simplify(Env& env, const cmpl& vcmp, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const cmpw& vcmp, Vlabel b, size_t i) {
+  if (flip_operands_helper(env, vcmp, b, i)) return true;
+
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmpwm { vcmp.s0, *vptr, vcmp.sf });
@@ -719,6 +743,8 @@ bool simplify(Env& env, const cmpw& vcmp, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const cmpb& vcmp, Vlabel b, size_t i) {
+  if (flip_operands_helper(env, vcmp, b, i)) return true;
+
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmpbm { vcmp.s0, *vptr, vcmp.sf });

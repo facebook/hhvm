@@ -219,16 +219,7 @@ void implVerifyCls(IRLS& env, const IRInstruction* inst) {
   auto const rconstraint = srcLoc(env, inst, 1).reg();
   auto const sf = v.makeReg();
 
-  if (!constraint->hasConstVal(TCls) && cls->hasConstVal()) {
-    // This is an arch-agnostic API bleed.  On x64, cmpq can only have an
-    // immediate in the first operand, and the imm-folder currently doesn't do
-    // any liveness analysis on the flags dst for cmpq to determine whether the
-    // arguments can commute (nor does it, e.g., try to invert the condition
-    // code at all uses of the flag).
-    v << cmpq{rcls, rconstraint, sf};
-  } else {
-    v << cmpq{rconstraint, rcls, sf};
-  }
+  v << cmpq{rconstraint, rcls, sf};
 
   // The native call for this instruction is the slow path that does proper
   // subtype checking.  The comparisons above are just to short-circuit the

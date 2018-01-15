@@ -43,6 +43,10 @@ SocketTransport::~SocketTransport() {
     m_terminating = true;
   }
 
+  stopConnectionThread();
+}
+
+void SocketTransport::stopConnectionThread() {
   char value = '\0';
   write(m_abortPipeFd[1], &value, 1);
   close(m_abortPipeFd[1]);
@@ -86,7 +90,7 @@ void SocketTransport::onClientDisconnected() {
     Lock lock(m_lock);
 
     if (!m_terminating && m_clientConnected) {
-      m_connectThread.waitForEnd();
+      stopConnectionThread();
       m_clientConnected = false;
       createAbortPipe();
       m_connectThread.start();
@@ -231,6 +235,84 @@ bool SocketTransport::bindAndListen(
   return true;
 }
 
+void SocketTransport::rejectClientWithMsg(int newFd, int abortFd) {
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "SocketTransport: new client connection rejected because another "
+      "client is already connected."
+  );
+
+  folly::dynamic rejectMsg = folly::dynamic::object;
+  rejectMsg["category"] = OutputLevelError;
+  rejectMsg["output"] = "Could not attach to HHVM: another debugger "
+    "client is already attached!";
+
+  folly::dynamic response = folly::dynamic::object;
+  response["event"] = EventTypeOutput;
+  response["body"] = rejectMsg;
+  response["type"] = MessageTypeEvent;
+
+  // Send the user an error message.
+  std::string serialized =  folly::toJson(response);
+  const char* output = serialized.c_str();
+  write(newFd, output, strlen(output) + 1);
+
+  // Perform an orderly shutdown of the socket so that the message is actually
+  // sent and received. This requires us to shutdown the write end of the socket
+  // and then drain the receive buffer before closing the socket. If abortFd
+  // is signalled before this is complete, we just close the socket and bail.
+  ::shutdown(newFd, SHUT_WR);
+
+  int result;
+  size_t size = sizeof(struct pollfd) * 2;
+  struct pollfd* fds = (struct pollfd*)malloc(size);
+  char* buffer = (char*)malloc(1024);
+  SCOPE_EXIT {
+    if (fds != nullptr) {
+      free(fds);
+    }
+
+    close(newFd);
+
+    if (buffer != nullptr) {
+      free(buffer);
+    }
+  };
+
+  if (buffer == nullptr || fds == nullptr) {
+    return;
+  }
+
+  int eventMask = POLLIN | POLLERR | POLLHUP;
+  constexpr int abortIdx = 0;
+  constexpr int readIdx = 1;
+
+  memset(fds, 0, size);
+  fds[abortIdx].fd = abortFd;
+  fds[abortIdx].events = eventMask;
+  fds[readIdx].fd = newFd;
+  fds[readIdx].events = eventMask;
+
+  while (true) {
+    result = poll(fds, 2, -1);
+    if (result == -EINTR) {
+      continue;
+    } else if (result < 0 ||
+               fds[abortIdx].revents != 0 ||
+               fds[readIdx].revents & POLLERR ||
+               fds[readIdx].revents & POLLHUP
+               ) {
+
+      break;
+    } else if (fds[readIdx].revents & POLLIN) {
+      result = read(newFd, buffer, 1024);
+      if (result <= 0) {
+        break;
+      }
+    }
+  }
+}
+
 void SocketTransport::waitForConnection(
   std::vector<int>& socketFds,
   int abortFd
@@ -292,10 +374,6 @@ void SocketTransport::waitForConnection(
     }
 
     if (fds[0].revents != 0) {
-      {
-        Lock lock(m_lock);
-        assert(m_terminating);
-      }
       VSDebugLogger::Log(
         VSDebugLogger::LogLevelInfo,
         "Socket polling thread terminating due to shutdown request."
@@ -318,18 +396,22 @@ void SocketTransport::waitForConnection(
         } else {
           Lock lock(m_lock);
 
-          VSDebugLogger::Log(
-            VSDebugLogger::LogLevelInfo,
-            "SocketTransport: new client connection accepted."
-          );
+          if (m_clientConnected) {
+            // A client is already connected!
+            m_lock.unlock();
+            rejectClientWithMsg(newFd, abortFd);
+            m_lock.lock();
+          } else {
+            VSDebugLogger::Log(
+              VSDebugLogger::LogLevelInfo,
+              "SocketTransport: new client connection accepted."
+            );
 
-          // We have established a connection with a client.
-          m_clientConnected = true;
-          setTransportFd(newFd);
-          m_debugger->setClientConnected(true);
-
-          // Return from this routine to stop listening for more connections.
-          return;
+            // We have established a connection with a client.
+            m_clientConnected = true;
+            setTransportFd(newFd);
+            m_debugger->setClientConnected(true);
+          }
         }
       }
 

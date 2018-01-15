@@ -48,6 +48,10 @@ private:
     int abortFd
   );
 
+  void stopConnectionThread();
+
+  static void rejectClientWithMsg(int newFd, int abortFd);
+
   mutable Mutex m_lock;
   bool m_terminating;
   bool m_clientConnected;

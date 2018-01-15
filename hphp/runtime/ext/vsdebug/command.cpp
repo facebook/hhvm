@@ -143,6 +143,10 @@ bool VSCommand::parseCommand(
 
     *command = new LaunchAttachCommand(debugger, clientMessage);
 
+  } if (cmdString == "completions") {
+
+    *command = new CompletionsCommand(debugger, clientMessage);
+
   } else if (cmdString == "configurationDone") {
 
     *command = new ConfigurationDoneCommand(debugger, clientMessage);

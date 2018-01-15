@@ -521,6 +521,112 @@ struct ThreadsCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(ThreadsCommand, CommandTarget::None, false);
 };
 
+//////  Handles completions requests from the client                //////
+struct CompletionsCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(CompletionsCommand, CommandTarget::Request, true);
+  int64_t targetThreadId(DebuggerSession* session) override;
+
+private:
+
+  enum SuggestionType {
+    None,
+    Variable,
+    Member,
+    ClassStatic,
+    ClassConstant,
+    FuncsAndConsts
+  };
+
+  struct SuggestionContext {
+    SuggestionType type;
+    std::string matchPrefix;
+    std::string matchContext;
+  };
+
+  struct TokenEntry {
+    int tokenType;
+    std::string tokenValue;
+    int tokenPosition;
+  };
+
+  // Parses the specified expression using the PHP tokenizer and examines the
+  // trailing tokens to determine what types of suggestions should be made.
+  SuggestionContext parseCompletionExpression(const std::string& expr);
+
+  // Adds the specified completion text and type to a list of completions
+  // to be sent to the client in a CompletionsResponse message.
+  static void addCompletionTarget(
+    folly::dynamic& completions,
+    const char* completionText,
+    const char* completionType,
+    int charsToOverwrite
+  );
+
+  // Returns the expression of tokens leading up to the context for a completion
+  // For example, given the string $foo->bar->ba, the context for a completion
+  // is "$foo->bar".
+  static std::string getCompletionContext(
+    std::string& text,
+    std::vector<TokenEntry>& processedTokens
+  );
+
+  // Adds completions based on the specified SuggestionContext for local
+  // variables, and globals visible at the current VM frame for this request.
+  void addVariableCompletions(
+    SuggestionContext& context,
+    folly::dynamic& targets
+  );
+
+  // Adds completions based on the specified SuggestionContext for properties
+  // of an object obtained by evaluating the SuggestionContext's match context.
+  void addMemberCompletions(
+    SuggestionContext& context,
+    folly::dynamic& targets
+  );
+
+  // Adds completions based on constants defined on a class whose name is the
+  // SuggestionContext's match context, and any class in inherits from.
+  void addClassConstantCompletions(
+    SuggestionContext& context,
+    folly::dynamic& targets
+  );
+
+  // Adds completions based on static members defined on a class whose name is
+  // the SuggestionContext's match context, and any class in inherits from.
+  void addClassStaticCompletions(
+    SuggestionContext& context,
+    folly::dynamic& targets
+  );
+
+  // Adds completions based on system and user defined functions visible at
+  // the current fp.
+  void addFuncConstantCompletions(
+    SuggestionContext& context,
+    folly::dynamic& targets
+  );
+
+  // Adds the specified name as a completion option to targets if the name
+  // has 1+ prefix characters in common with matchPrefix.
+  void addIfMatch(
+    const std::string& name,
+    const std::string& matchPrefix,
+    const char* type,
+    folly::dynamic& targets
+  );
+
+  // Completion suggestion types, from protocol.
+  static constexpr char* CompletionTypeFn = "function";
+  static constexpr char* CompletionTypeVar = "variable";
+  static constexpr char* CompletionTypeClass = "class";
+  static constexpr char* CompletionTypeProp = "property";
+  static constexpr char* CompletionTypeKeyword = "keyword";
+  static constexpr char* CompletionTypeValue = "value";
+
+  FrameObject* getFrameObject(DebuggerSession* session);
+  unsigned int m_frameId;
+  FrameObject* m_frameObj {nullptr};
+};
+
 #undef VS_COMMAND_COMMON_IMPL
 
 }

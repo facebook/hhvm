@@ -60,8 +60,10 @@ bool InitializeCommand::executeImpl(
 
   // Prepare a response for the client.
   folly::dynamic capabilities = folly::dynamic::object;
+  capabilities["supportsCompletionsRequest"] = true;
   capabilities["supportsConfigurationDoneRequest"] = true;
   capabilities["supportsConditionalBreakpoints"] = true;
+  // capabilities["supportsFunctionBreakpoints"] = false;
   capabilities["supportsHitConditionalBreakpoints"] = false;
   capabilities["supportsEvaluateForHovers"] = true;
   capabilities["supportsStepBack"] = false;
@@ -77,12 +79,6 @@ bool InitializeCommand::executeImpl(
   capabilities["supportTerminateDebuggee"] = false;
   capabilities["supportsDelayedStackTraceLoading"] = true;
   capabilities["supportsLoadedSourcesRequest"] = false;
-
-  // TODO (Ericblue) these caps aren't supported yet but are intended to
-  // be supported soon.
-  // capabilities["exceptionBreakpointFilters"] = ...
-  // capabilities["supportsFunctionBreakpoints"] = false;
-  // capabilities["supportsCompletionsRequest"] = false;
 
   (*responseMsg)["body"] = capabilities;
 

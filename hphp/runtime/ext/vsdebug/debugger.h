@@ -326,6 +326,14 @@ struct Debugger final {
   // Populates the specified folly::dynamic array with a list of thread IDs.
   void getAllThreadInfo(folly::dynamic& threads);
 
+  bool isPaused() { return m_state != ProgramState::Running; }
+
+  // Returns the current stdout hook if one is installed, or nullptr otherwise.
+  DebuggerStdoutHook* getStdoutHook() {
+    // Only installed for server execution mode.
+    return RuntimeOption::ServerExecutionMode() ? nullptr : &m_stdoutHook;
+  }
+
 private:
 
   // Cleans up server objects for a request.
@@ -495,6 +503,38 @@ private:
 
   static constexpr char* InternalErrorMsg =
     "An internal error occurred while processing a debugger command.";
+};
+
+// A stdout hook that no-ops all writes to stdout.
+struct NoOpStdoutHook final : ExecutionContext::StdoutHook {
+  explicit NoOpStdoutHook() {}
+  void operator()(const char* str, int len) override {}
+};
+
+// When performing an evaluation on behalf of part of the debugger engine
+// that should not be shown to the user in any way (such as for completions,
+// or conditional breakpoints), we want to suppress all output from the VM,
+// and prevent breaks of any kind. This class provides those semantics, and
+// then disables them when it is destroyed.
+struct SilentEvaluationContext {
+  SilentEvaluationContext(
+    Debugger* debugger,
+    RequestInfo* ri,
+    bool suppressOutput = true
+  );
+
+  ~SilentEvaluationContext();
+
+private:
+  RequestInfo* m_ri;
+  bool m_suppressOutput;
+  int m_errorLevel;
+  StringBuffer* m_savedOutputBuffer;
+  NoOpStdoutHook m_noOpHook;
+  ExecutionContext::StdoutHook* m_oldHook;
+
+  PCFilter m_savedFlowFilter;
+  PCFilter m_savedBpFilter;
 };
 
 }

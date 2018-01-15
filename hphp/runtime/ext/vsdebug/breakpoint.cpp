@@ -404,22 +404,13 @@ bool BreakpointManager::isBreakConditionSatisified(
     return true;
   }
 
-  // We should not hit any breakpoints or execute any flow operations while
-  // evaluating a breakpoint condition.
-  PCFilter savedFlowFilter;
-  PCFilter savedBpFilter;
-  RequestInjectionData& rid = RID();
+  // SilentEvaluationContext suppresses all breakpoints and flow stepping
+  // behavior during the evaluation, and re-enables it when it is destroyed.
+  SilentEvaluationContext silentContext(m_debugger, ri, false);
 
-  ri->m_flags.doNotBreak = true;
   g_context->debuggerSettings.bypassCheck = true;
-  savedFlowFilter.swap(rid.m_flowFilter);
-  savedBpFilter.swap(rid.m_breakPointFilter);
-
   SCOPE_EXIT {
-    ri->m_flags.doNotBreak = false;
     g_context->debuggerSettings.bypassCheck = false;
-    savedFlowFilter.swap(rid.m_flowFilter);
-    savedBpFilter.swap(rid.m_breakPointFilter);
   };
 
   // Go ahead and evaluate the condition, and the current frame depth.

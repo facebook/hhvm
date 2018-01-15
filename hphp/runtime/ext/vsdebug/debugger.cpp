@@ -1545,5 +1545,48 @@ void DebuggerStderrHook::operator()(
   m_debugger->sendUserMessage(msg, DebugTransport::OutputLevelStderr);
 }
 
+SilentEvaluationContext::SilentEvaluationContext(
+  Debugger* debugger,
+  RequestInfo* ri,
+  bool suppressOutput /* = true */
+) : m_ri(ri), m_suppressOutput(suppressOutput) {
+  // Disable hitting breaks of any kind due to this eval.
+  m_ri->m_flags.doNotBreak = true;
+  g_context->m_dbgNoBreak = true;
+
+  RequestInjectionData& rid = RID();
+
+  if (m_suppressOutput) {
+    // Disable raising of PHP errors during this eval.
+    m_errorLevel = rid.getErrorReportingLevel();
+    rid.setErrorReportingLevel(0);
+
+    // Disable all sorts of output during this eval.
+    m_oldHook = debugger->getStdoutHook();
+    m_savedOutputBuffer = g_context->swapOutputBuffer(nullptr);
+    g_context->setStdout(&m_noOpHook);
+  }
+
+  // Set aside the flow filters to disable all stepping and bp filtering.
+  m_savedFlowFilter.swap(rid.m_flowFilter);
+  m_savedBpFilter.swap(rid.m_breakPointFilter);
+}
+
+SilentEvaluationContext::~SilentEvaluationContext() {
+  m_ri->m_flags.doNotBreak = false;
+  g_context->m_dbgNoBreak = false;
+
+  RequestInjectionData& rid = RID();
+
+  if (m_suppressOutput) {
+    rid.setErrorReportingLevel(m_errorLevel);
+    g_context->swapOutputBuffer(m_savedOutputBuffer);
+    g_context->setStdout(m_oldHook);
+  }
+
+  m_savedFlowFilter.swap(rid.m_flowFilter);
+  m_savedBpFilter.swap(rid.m_breakPointFilter);
+}
+
 }
 }

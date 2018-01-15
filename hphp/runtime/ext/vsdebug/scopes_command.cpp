@@ -30,10 +30,6 @@ ScopesCommand::ScopesCommand(
 
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   const int frameId = tryGetInt(args, "frameId", -1);
-  if (frameId <= 0) {
-    throw DebuggerCommandException("Invalid frameId specified.");
-  }
-
   m_frameId = frameId;
 }
 
@@ -52,7 +48,7 @@ FrameObject* ScopesCommand::getFrameObject(DebuggerSession* session) {
 int64_t ScopesCommand::targetThreadId(DebuggerSession* session) {
   FrameObject* frame = getFrameObject(session);
   if (frame == nullptr) {
-    return 0;
+    return Debugger::kDummyTheadId;
   }
 
   return frame->m_requestId;

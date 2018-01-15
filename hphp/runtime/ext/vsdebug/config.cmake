@@ -4,6 +4,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     breakpoint_command.cpp
     command_queue.cpp
     command.cpp
+    completions_command.cpp
     configuration_done_command.cpp
     continue_command.cpp
     debugger.cpp

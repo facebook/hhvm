@@ -102,12 +102,12 @@ $testProcess = vsDebugLaunch(
   true,
   [$setBreakpointsCommand],
   [
+    // Response event
+    $setBreakpointsRepsponse,
+
     // New BP event for each breakpoint
     bpEvent($path, 9, 1, "new", false),
     bpEvent($path, 13, 1, "new", false),
-
-    // Response event
-    $setBreakpointsRepsponse,
 
     // Resolved BP event for each bp
     bpEvent($path, 9, 1, "changed", true),

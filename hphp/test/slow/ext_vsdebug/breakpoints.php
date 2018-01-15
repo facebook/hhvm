@@ -52,13 +52,13 @@ $testProcess = vsDebugLaunch(
   true,
   [$setBreakpointsCommand],
   [
+    // Response event
+    $setBreakpointsRepsponse,
+
     // New BP event for each breakpoint
     bpEvent($path, 9, 1, "new", false),
     bpEvent($path, 10, 2, "new", false),
     bpEvent($path, 12, 3, "new", false),
-
-    // Response event
-    $setBreakpointsRepsponse,
 
     // Resolved BP event for each bp
     bpEvent($path, 9, 1, "changed", true),
@@ -112,8 +112,6 @@ sendVsCommand(array(
       array("line" => 200, "condition" => ""),
     ])));
 
-$msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, bpEvent($path, 200, 4, "new", false));
 
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, array(
@@ -126,6 +124,9 @@ checkObjEqualRecursively($msg, array(
         array("id" => 4, "verified" => false),
       ]
   )));
+
+$msg = json_decode(getNextVsDebugMessage(), true);
+checkObjEqualRecursively($msg, bpEvent($path, 200, 4, "new", false));
 
 // Setting a breakpoint after the end of the file should generate a warning.
 // Two warnings: one when the bp is set, one when the request tries to resolve
@@ -193,13 +194,6 @@ $setBreakpointsCommand = array(
   ));
 sendVsCommand($setBreakpointsCommand);
 
-// Expect calibrated new bp events.
-$msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, bpEvent($path, 19, 5, "new", false));
-
-$msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, bpEvent($path, 26, 6, "new", false));
-
 // Expect a set breakpoints response.
 $setBreakpointsRepsponse = array(
   "type" => "response",
@@ -213,6 +207,13 @@ $setBreakpointsRepsponse = array(
     )));
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, $setBreakpointsRepsponse);
+
+// Expect calibrated new bp events.
+$msg = json_decode(getNextVsDebugMessage(), true);
+checkObjEqualRecursively($msg, bpEvent($path, 19, 5, "new", false));
+
+$msg = json_decode(getNextVsDebugMessage(), true);
+checkObjEqualRecursively($msg, bpEvent($path, 26, 6, "new", false));
 
 // Expect calibrated breakpoint verified events.
 $msg = json_decode(getNextVsDebugMessage(), true);
@@ -298,7 +299,7 @@ resumeTarget();
 
 // Verify hard break was hit.
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObj($msg, array(
+checkObjEqualRecursively($msg, array(
   "type" => "event",
   "event" => "stopped",
   "body" => array(
@@ -308,7 +309,7 @@ checkObj($msg, array(
   )));
 
 $msg = json_decode(getNextVsDebugMessage(), true);
-checkObj($msg, array(
+checkObjEqualRecursively($msg, array(
   "type" => "event",
   "event" => "stopped",
   "body" => array(

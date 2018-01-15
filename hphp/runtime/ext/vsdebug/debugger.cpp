@@ -299,7 +299,7 @@ void Debugger::trySendTerminatedEvent() {
   Lock lock(m_lock);
 
   folly::dynamic event = folly::dynamic::object;
-  sendEventMessage(event, "terminated");
+  sendEventMessage(event, "terminated", true);
 }
 
 void Debugger::sendStoppedEvent(
@@ -346,10 +346,37 @@ void Debugger::sendUserMessage(const char* message, const char* level) {
   }
 }
 
-void Debugger::sendEventMessage(folly::dynamic& event, const char* eventType) {
+void Debugger::sendEventMessage(
+  folly::dynamic& event,
+  const char* eventType,
+  bool sendImmediately /* = false */
+) {
   Lock lock(m_lock);
-  if (m_transport != nullptr) {
-    m_transport->enqueueOutgoingEventMessage(event, eventType);
+
+  // Deferred events are sent after the response to the current debugger client
+  // request is sent, except in the case where we're hitting a nested breakpoint
+  // during an evaluation: that we must send immediately because the evaluation
+  // response won't happen until the client resumes from the inner breakpoint.
+  RequestInfo* ri = getRequestInfo();
+  if (ri != nullptr &&
+      (ri->m_evaluateCommandDepth > 0 || ri-> m_pauseRecurseCount > 0)) {
+
+    sendImmediately = true;
+  }
+
+  if (!sendImmediately && m_processingClientCommand) {
+    // If an outgoing client event is generated while the debugger is processing
+    // a command for the client, keep it in a queue and send it after the
+    // response is sent for the current client command.
+    PendingEventMessage pendingEvent;
+    pendingEvent.m_message = event;
+    pendingEvent.m_eventType = eventType;
+    m_pendingEventMessages.push_back(pendingEvent);
+  } else {
+    // Otherwise, go ahead and send it immediately.
+    if (m_transport != nullptr) {
+      m_transport->enqueueOutgoingEventMessage(event, eventType);
+    }
   }
 }
 
@@ -374,11 +401,9 @@ void Debugger::sendThreadEventMessage(
     ? "started"
     : "exited";
 
-  // TODO: Thread IDs can be 64 bit here, but the VS protocol is going to
-  // interpret this as a JavaScript number which has a smaller max value...
   event["threadId"] = threadId;
 
-  sendEventMessage(event, "thread");
+  sendEventMessage(event, "thread", true);
 }
 
 void Debugger::requestInit() {
@@ -716,12 +741,22 @@ bool Debugger::executeClientCommand(
     // should be resumed, or false if it should continue to block in its
     // command queue.
     folly::dynamic responseMsg = folly::dynamic::object;
-    bool resumeThread = callback(m_session, responseMsg);
 
+    m_processingClientCommand = true;
+    SCOPE_EXIT {
+      m_processingClientCommand = false;
+
+      for (PendingEventMessage& message : m_pendingEventMessages) {
+        sendEventMessage(message.m_message, message.m_eventType);
+      }
+
+      m_pendingEventMessages.clear();
+    };
+
+    bool resumeThread = callback(m_session, responseMsg);
     if (command->commandTarget() != CommandTarget::WorkItem) {
       sendCommandResponse(command, responseMsg);
     }
-
     return resumeThread;
   } catch (DebuggerCommandException e) {
     reportClientMessageError(command->getMessage(), e.what());

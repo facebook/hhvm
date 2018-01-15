@@ -180,7 +180,8 @@ struct Debugger final {
   // Sends a VS Code debug event message to the debugger client.
   void sendEventMessage(
     folly::dynamic& event,
-    const char* eventType
+    const char* eventType,
+    bool sendImmediately = false
   );
 
   // Handle requests.
@@ -333,7 +334,10 @@ struct Debugger final {
   static constexpr int kDummyTheadId = 0;
 
   // Sends a thread event message to a debugger client.
-  void sendThreadEventMessage(request_id_t threadId, ThreadEventType eventType);
+  void sendThreadEventMessage(
+    request_id_t threadId,
+    ThreadEventType eventType
+  );
 
   // Returns true if the current thread is the dummy request thread, false
   // otherwise.
@@ -533,6 +537,15 @@ private:
   // also issue a pause
   std::mutex m_resumeMutex;
   std::condition_variable m_resumeCondition;
+
+  // Pending event messages that are queued to be sent after the current
+  // client command is processed and responded to.
+  struct PendingEventMessage {
+    folly::dynamic m_message;
+    const char* m_eventType;
+  };
+  std::vector<PendingEventMessage> m_pendingEventMessages;
+  bool m_processingClientCommand {false};
 
   // Hooks for stdout and stderr redirection.
   DebuggerStdoutHook m_stdoutHook {DebuggerStdoutHook(this)};

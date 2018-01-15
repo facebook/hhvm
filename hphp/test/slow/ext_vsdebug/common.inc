@@ -234,13 +234,13 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $startupCommands = 
 
     sendVsCommand($launchCommand);
 
-    // Expect an initialized event
-    $msg = json_decode(getNextVsDebugMessage(), true);
-    checkObjEqualRecursively($msg, array("type" => "event", "event" => "initialized"));
-
     // Expect a launch response
     $msg = json_decode(getNextVsDebugMessage(), true);
     checkObjEqualRecursively($msg, array("type" => "response", "command" => "launch", "success" => true, "request_seq" => 2));
+
+    // Expect an initialized event
+    $msg = json_decode(getNextVsDebugMessage(), true);
+    checkObjEqualRecursively($msg, array("type" => "event", "event" => "initialized"));
 
     // There will be messages about the PHP/Hack console being prepared, skip those
     // since we don't care about them here. There is a test that checks those

@@ -502,6 +502,12 @@ private:
   FrameObject* m_frameObj {nullptr};
 };
 
+
+//////  Handles threads requests from the client                    //////
+struct ThreadsCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(ThreadsCommand, CommandTarget::None, false);
+};
+
 #undef VS_COMMAND_COMMON_IMPL
 
 }

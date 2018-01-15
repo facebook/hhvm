@@ -23,6 +23,7 @@ HHVM_DEFINE_EXTENSION("vsdebug"
     socket_transport.cpp
     stack_trace_command.cpp
     step_command.cpp
+    threads_command.cpp
     transport.cpp
     variables_command.cpp
   HEADERS

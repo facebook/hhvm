@@ -323,6 +323,9 @@ struct Debugger final {
     return (int64_t)Process::GetThreadId() == m_dummyThreadId;
   }
 
+  // Populates the specified folly::dynamic array with a list of thread IDs.
+  void getAllThreadInfo(folly::dynamic& threads);
+
 private:
 
   // Cleans up server objects for a request.

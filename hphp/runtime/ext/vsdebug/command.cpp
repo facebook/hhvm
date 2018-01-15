@@ -196,6 +196,10 @@ bool VSCommand::parseCommand(
 
     *command = new StackTraceCommand(debugger, clientMessage);
 
+  } else if (cmdString.compare("threads") == 0) {
+
+    *command = new ThreadsCommand(debugger, clientMessage);
+
   } else if (cmdString.compare("variables") == 0) {
 
     *command = new VariablesCommand(debugger, clientMessage);

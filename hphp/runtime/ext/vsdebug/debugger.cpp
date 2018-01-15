@@ -259,6 +259,25 @@ void Debugger::executeForEachAttachedRequest(
   }
 }
 
+void Debugger::getAllThreadInfo(folly::dynamic& threads) {
+  assert(threads.isArray());
+  executeForEachAttachedRequest(
+    [&](ThreadInfo* ti, RequestInfo* ri) {
+      threads.push_back(folly::dynamic::object);
+      folly::dynamic& threadInfo = threads[threads.size() - 1];
+
+      auto it = m_requestInfoMap.find(ti);
+      if (it != m_requestInfoMap.end()) {
+        int requestId = it->second;
+        threadInfo["id"] = requestId;
+        threadInfo["name"] = std::string("Request ") +
+                             std::to_string(requestId);
+      }
+    },
+    false /* includeDummyRequest */
+  );
+}
+
 void Debugger::shutdown() {
   if (m_transport == nullptr) {
     return;

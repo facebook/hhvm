@@ -33,6 +33,7 @@
 #include "hphp/runtime/ext/vsdebug/hook.h"
 #include "hphp/runtime/ext/vsdebug/client_preferences.h"
 #include "hphp/runtime/ext/vsdebug/server_object.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {
@@ -63,6 +64,12 @@ struct RequestBreakpointInfo {
   std::map<std::string, const HPHP::Unit*> m_loadedUnits;
 };
 
+struct StepNextFilterInfo {
+  const Unit* stepStartUnit;
+  int skipLine0;
+  int skipLine1;
+};
+
 // Structure to represent the state of a single request.
 struct RequestInfo {
   struct {
@@ -80,6 +87,10 @@ struct RequestInfo {
     std::string path;
     int line;
   } m_runToLocationInfo;
+
+  // Info for allowing us to step over multi-line statements without hitting
+  // the statement multiple times.
+  std::vector<StepNextFilterInfo> m_nextFilterInfo;
 
   // Number of evaluation frames on this request's stack right now.
   int m_evaluateCommandDepth;
@@ -292,6 +303,7 @@ struct Debugger final {
       phpDebuggerContinue();
       requestInfo->m_stepReason = nullptr;
       requestInfo->m_runToLocationInfo.path.clear();
+      requestInfo->m_nextFilterInfo.clear();
     }
   }
 
@@ -332,6 +344,22 @@ struct Debugger final {
   DebuggerStdoutHook* getStdoutHook() {
     // Only installed for server execution mode.
     return RuntimeOption::ServerExecutionMode() ? nullptr : &m_stdoutHook;
+  }
+
+  // Gets the current VM location, returns a pair of Unit* and current line.
+  static std::pair<const Unit*, HPHP::SourceLoc> getVmLocation() {
+    VMRegAnchor regAnchor;
+    const ActRec* fp = g_context->getStackFrame();
+    const Func* func = fp != nullptr ? fp->func() : nullptr;
+    const Unit* unit = func != nullptr ? func->unit() : nullptr;
+    HPHP::SourceLoc loc;
+    if (unit != nullptr) {
+      bool success = unit->getSourceLoc(pcOff(), loc);
+      if (success) {
+        return std::pair<const Unit*, HPHP::SourceLoc>(unit, loc);
+      }
+    }
+    return std::pair<const Unit*, HPHP::SourceLoc> (nullptr, loc);
   }
 
 private:

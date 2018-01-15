@@ -42,6 +42,19 @@ bool StepCommand::executeImpl(
     // Step over.
     phpDebuggerNext();
     ri->m_stepReason = "step";
+
+    // When next stepping, setup filter info so that we don't land on the
+    // same line multiple times when stepping over a multi-line statement.
+    auto currentLocation = Debugger::getVmLocation();
+    const Unit* unit = currentLocation.first;
+    const HPHP::SourceLoc& loc = currentLocation.second;
+    if (unit != nullptr && loc.line0 != loc.line1) {
+      StepNextFilterInfo info;
+      info.stepStartUnit = unit;
+      info.skipLine0 = loc.line0;
+      info.skipLine1 = loc.line1;
+      ri->m_nextFilterInfo.push_back(std::move(info));
+    }
   } else if (command == "stepIn") {
     // Step in.
     phpDebuggerStepIn();

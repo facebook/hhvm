@@ -123,11 +123,58 @@ void VSDebugHook::onStepOutBreak(const Unit* unit, int line) {
 }
 
 void VSDebugHook::onNextBreak(const Unit* unit, int line) {
-  BreakContext breakContext(false);
+  BreakContext breakContext(true);
+
+  if (breakContext.m_debugger == nullptr ||
+      breakContext.m_requestInfo == nullptr) {
+    return;
+  }
+
+  // When stepping over a multiline statement like a function call,
+  // we might be filtering a particular line to avoid hitting it multiple times.
+  auto ri = breakContext.m_requestInfo;
+  while (!ri->m_nextFilterInfo.empty()) {
+    auto currentLocation = Debugger::getVmLocation();
+    const Unit* unit = currentLocation.first;
+    const HPHP::SourceLoc& loc = currentLocation.second;
+
+    const StepNextFilterInfo& filter = ri->m_nextFilterInfo.back();
+    int skipLine0 = filter.skipLine0;
+    int skipLine1 = filter.skipLine1;
+
+    if (unit != filter.stepStartUnit ||
+        loc.line0 < skipLine0 ||
+        loc.line0 > skipLine1) {
+
+      // We stepped into another unit or out of the source range that the
+      // statement we're avoiding covers. Pop off the filter.
+      ri->m_nextFilterInfo.pop_back();
+
+      // Check the next filter in case we're inside a multi-line statement
+      // that is inside a multi-line statement...
+      continue;
+    } else if (loc.line0 == skipLine0 || loc.line1 == skipLine1) {
+      // If this location is filtered out, skip stopping at this PC.
+      // Re-enable interrupts so we get invoked again on the next opcode.
+      RID().setDebuggerIntr(true);
+      phpDebuggerNext();
+      return;
+    } else {
+      // Still in the range of the current filter, but we didn't decide
+      // to skip this line. Enter the debugger.
+      break;
+    }
+  }
+
+  VSDebugHook::tryEnterDebugger(
+    breakContext.m_debugger,
+    breakContext.m_requestInfo,
+    false
+  );
 }
 
 void VSDebugHook::onFileLoad(Unit* efile) {
-  BreakContext breakContext(false);
+  BreakContext breakContext(true);
 
   // Resolve any unresolved breakpoints that may be in this compilation unit.
   if (breakContext.m_debugger != nullptr &&
@@ -141,7 +188,7 @@ void VSDebugHook::onFileLoad(Unit* efile) {
     tryEnterDebugger(
       breakContext.m_debugger,
       breakContext.m_requestInfo,
-      false
+      true
     );
   }
 }

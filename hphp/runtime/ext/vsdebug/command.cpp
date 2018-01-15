@@ -238,5 +238,31 @@ request_id_t VSCommand::targetThreadId(DebuggerSession* session) {
   return tryGetInt(args, "threadId", -1);
 }
 
+const folly::dynamic VSCommand::getDebuggerCapabilities() {
+  folly::dynamic capabilities = folly::dynamic::object;
+
+  capabilities["supportsCompletionsRequest"] = true;
+  capabilities["supportsConfigurationDoneRequest"] = true;
+  capabilities["supportsConditionalBreakpoints"] = true;
+  // capabilities["supportsFunctionBreakpoints"] = false;
+  capabilities["supportsHitConditionalBreakpoints"] = false;
+  capabilities["supportsEvaluateForHovers"] = true;
+  capabilities["supportsStepBack"] = false;
+  capabilities["supportsSetVariable"] = true;
+  capabilities["supportsRestartFrame"] = false;
+  capabilities["supportsGotoTargetsRequest"] = false;
+  capabilities["supportsStepInTargetsRequest"] = false;
+  capabilities["supportsModulesRequest"] = false;
+  capabilities["supportsRestartRequest"] = false;
+  capabilities["supportsExceptionOptions"] = true;
+  capabilities["supportsValueFormattingOptions"] = true;
+  capabilities["supportsExceptionInfoRequest"] = true;
+  capabilities["supportTerminateDebuggee"] = false;
+  capabilities["supportsDelayedStackTraceLoading"] = true;
+  capabilities["supportsLoadedSourcesRequest"] = false;
+
+  return capabilities;
+}
+
 }
 }

@@ -59,6 +59,12 @@ bool LaunchAttachCommand::executeImpl(
   folly::dynamic event = folly::dynamic::object;
   m_debugger->sendEventMessage(event, "initialized");
 
+  // Re-send debugger capabilities in the launch / attach command response.
+  // Note: while this is not documented in the protocol, VS Code uses this
+  // to update capabilities after attaching in case they change after knowing
+  // what version of the engine is launched.
+  (*responseMsg)["body"] = getDebuggerCapabilities();
+
   // Completion of this command does not resume the target.
   return false;
 }

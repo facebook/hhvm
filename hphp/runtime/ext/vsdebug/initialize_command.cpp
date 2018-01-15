@@ -59,28 +59,7 @@ bool InitializeCommand::executeImpl(
   m_debugger->setClientPreferences(preferences);
 
   // Prepare a response for the client.
-  folly::dynamic capabilities = folly::dynamic::object;
-  capabilities["supportsCompletionsRequest"] = true;
-  capabilities["supportsConfigurationDoneRequest"] = true;
-  capabilities["supportsConditionalBreakpoints"] = true;
-  // capabilities["supportsFunctionBreakpoints"] = false;
-  capabilities["supportsHitConditionalBreakpoints"] = false;
-  capabilities["supportsEvaluateForHovers"] = true;
-  capabilities["supportsStepBack"] = false;
-  capabilities["supportsSetVariable"] = true;
-  capabilities["supportsRestartFrame"] = false;
-  capabilities["supportsGotoTargetsRequest"] = false;
-  capabilities["supportsStepInTargetsRequest"] = false;
-  capabilities["supportsModulesRequest"] = false;
-  capabilities["supportsRestartRequest"] = false;
-  capabilities["supportsExceptionOptions"] = true;
-  capabilities["supportsValueFormattingOptions"] = true;
-  capabilities["supportsExceptionInfoRequest"] = true;
-  capabilities["supportTerminateDebuggee"] = false;
-  capabilities["supportsDelayedStackTraceLoading"] = true;
-  capabilities["supportsLoadedSourcesRequest"] = false;
-
-  (*responseMsg)["body"] = capabilities;
+  (*responseMsg)["body"] = getDebuggerCapabilities();
 
   // Completion of this command does not resume the target.
   return false;

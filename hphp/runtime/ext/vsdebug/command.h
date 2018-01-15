@@ -119,6 +119,8 @@ struct VSCommand {
 
   static std::string removeVariableNamePrefix(const std::string& str);
 
+  static const folly::dynamic getDebuggerCapabilities();
+
 protected:
 
   // Implemented by subclasses of this object.

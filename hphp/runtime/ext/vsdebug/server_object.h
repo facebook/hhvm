@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/req-root.h"
 
+typedef unsigned int request_id_t;
+
 namespace HPHP {
 namespace VSDEBUG {
 
@@ -45,7 +47,7 @@ struct ServerObject {
 };
 
 struct FrameObject : public ServerObject {
-  FrameObject(unsigned int objectId, int requestId, int frameDepth)
+  FrameObject(unsigned int objectId, request_id_t requestId, int frameDepth)
     : ServerObject(objectId),
       m_requestId(requestId),
       m_frameDepth(frameDepth) {}
@@ -54,12 +56,17 @@ struct FrameObject : public ServerObject {
     return ServerObjectType::Frame;
   }
 
-  const int m_requestId;
+  const request_id_t m_requestId;
   const int m_frameDepth;
 };
 
 struct ScopeObject : public ServerObject {
-  ScopeObject(unsigned int objectId, int reqId, int depth, ScopeType scopeType)
+  ScopeObject(
+    unsigned int objectId,
+    request_id_t reqId,
+    int depth,
+    ScopeType scopeType
+)
     : ServerObject(objectId),
       m_requestId(reqId),
       m_frameDepth(depth),
@@ -69,7 +76,7 @@ struct ScopeObject : public ServerObject {
     return ServerObjectType::Scope;
   }
 
-  const int m_requestId;
+  const request_id_t m_requestId;
   const int m_frameDepth;
   const ScopeType m_scopeType;
 };
@@ -77,7 +84,7 @@ struct ScopeObject : public ServerObject {
 struct VariableObject : public ServerObject {
   VariableObject(
     unsigned int objectId,
-    int reqId,
+    request_id_t reqId,
     Variant& variable
   ) : ServerObject(objectId),
       m_variable(variable),
@@ -90,7 +97,7 @@ struct VariableObject : public ServerObject {
   // The variable exists in a request's memory. req::root<T> tracks this
   // as an explicit GC root to keep the variable alive.
   req::root<Variant> m_variable;
-  const int m_requestId;
+  const request_id_t m_requestId;
 };
 
 enum ClassPropsType {
@@ -107,7 +114,7 @@ struct VariableSubScope : public ServerObject {
     const Variant& variable,
     const Class* cls,
     const std::string& className,
-    int reqId,
+    request_id_t reqId,
     ClassPropsType type
   ) : ServerObject(objectId),
       m_variable(variable),
@@ -124,7 +131,7 @@ struct VariableSubScope : public ServerObject {
   const req::root<Variant> m_variable;
   const Class* m_class;
   const std::string m_className;
-  const int m_requestId;
+  const request_id_t m_requestId;
   const std::string m_scopeName;
   const ClassPropsType m_subScopeType;
 };

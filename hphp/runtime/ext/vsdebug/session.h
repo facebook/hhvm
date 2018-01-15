@@ -48,20 +48,20 @@ struct DebuggerSession final {
 
   BreakpointManager* getBreakpointManager() { return m_breakpointMgr; }
 
-  unsigned int generateFrameId(int requestId, int frameDepth);
+  unsigned int generateFrameId(request_id_t requestId, int frameDepth);
   FrameObject* getFrameObject(unsigned int objectId);
 
   unsigned int generateScopeId(
-    int requestId,
+    request_id_t requestId,
     int depth,
     ScopeType scopeType
   );
   ScopeObject* getScopeObject(unsigned int objectId);
 
-  unsigned int generateVariableId(int requestId, Variant& variable);
+  unsigned int generateVariableId(request_id_t requestId, Variant& variable);
 
   unsigned int generateVariableSubScope(
-    int requestId,
+    request_id_t requestId,
     const Variant& variable,
     const Class* cls,
     const std::string& className,

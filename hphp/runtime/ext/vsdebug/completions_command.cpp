@@ -47,7 +47,7 @@ FrameObject* CompletionsCommand::getFrameObject(DebuggerSession* session) {
   return m_frameObj;
 }
 
-int64_t CompletionsCommand::targetThreadId(DebuggerSession* session) {
+request_id_t CompletionsCommand::targetThreadId(DebuggerSession* session) {
   FrameObject* frame = getFrameObject(session);
   if (frame == nullptr) {
     // Execute the completion in the dummy context.

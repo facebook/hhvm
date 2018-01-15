@@ -45,7 +45,7 @@ FrameObject* ScopesCommand::getFrameObject(DebuggerSession* session) {
   return m_frameObj;
 }
 
-int64_t ScopesCommand::targetThreadId(DebuggerSession* session) {
+request_id_t ScopesCommand::targetThreadId(DebuggerSession* session) {
   FrameObject* frame = getFrameObject(session);
   if (frame == nullptr) {
     return Debugger::kDummyTheadId;
@@ -87,7 +87,7 @@ folly::dynamic ScopesCommand::getScopeDescription(
   FrameObject* frame = getFrameObject(session);
   assert (frame != nullptr);
 
-  int req = frame->m_requestId;
+  request_id_t req = frame->m_requestId;
   int depth = frame->m_frameDepth;
 
   folly::dynamic scope = folly::dynamic::object;

@@ -49,7 +49,7 @@ VariablesCommand::VariablesCommand(
 VariablesCommand::~VariablesCommand() {
 }
 
-int64_t VariablesCommand::targetThreadId(DebuggerSession* session) {
+request_id_t VariablesCommand::targetThreadId(DebuggerSession* session) {
   ServerObject* obj = session->getServerObject(m_objectId);
   if (obj == nullptr) {
     return 0;
@@ -179,14 +179,14 @@ bool VariablesCommand::executeImpl(
 int VariablesCommand::countScopeVariables(
   DebuggerSession* session,
   const ScopeObject* scope,
-  int requestId
+  request_id_t requestId
 ) {
   return addScopeVariables(session, requestId, scope, nullptr);
 }
 
 int VariablesCommand::addScopeVariables(
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
@@ -241,7 +241,7 @@ int VariablesCommand::addScopeVariables(
 void VariablesCommand::addSubScopes(
   VariableSubScope* subScope,
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   int start,
   int count,
   folly::dynamic* variables
@@ -315,7 +315,7 @@ void VariablesCommand::addSubScopes(
 
 int VariablesCommand::addLocals(
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
@@ -362,7 +362,7 @@ int VariablesCommand::addLocals(
 
 int VariablesCommand::addConstants(
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   const StaticString& category,
   folly::dynamic* vars
 ) {
@@ -389,7 +389,7 @@ bool VariablesCommand::isSuperGlobal(const std::string& name) {
 
 int VariablesCommand::addSuperglobalVariables(
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
@@ -425,7 +425,7 @@ const std::string VariablesCommand::getPHPVarName(const std::string& name) {
 
 folly::dynamic VariablesCommand::serializeVariable(
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   const std::string& name,
   const Variant& variable,
   bool doNotModifyName, /* = false */
@@ -609,7 +609,7 @@ const std::string VariablesCommand::getVariableValue(const Variant& variable) {
 
 int VariablesCommand::addComplexChildren(
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   int start,
   int count,
   VariableObject* variable,
@@ -664,7 +664,7 @@ int VariablesCommand::addComplexChildren(
 
 int VariablesCommand::addArrayChildren(
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   int start,
   int count,
   VariableObject* variable,
@@ -706,7 +706,7 @@ int VariablesCommand::addArrayChildren(
 
 int VariablesCommand::addClassConstants(
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   int start,
   int count,
   Class* cls,
@@ -770,7 +770,7 @@ int VariablesCommand::addClassConstants(
 
 int VariablesCommand::addClassStaticProps(
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   int start,
   int count,
   Class* cls,
@@ -855,7 +855,7 @@ int VariablesCommand::addScopeSubSection(
   const Class* currentClass,
   int childCount,
   ClassPropsType type,
-  int requestId,
+  request_id_t requestId,
   const Variant& var,
   folly::dynamic* vars
 ) {
@@ -890,7 +890,7 @@ int VariablesCommand::addScopeSubSection(
 int VariablesCommand::addClassSubScopes(
   DebuggerSession* session,
   ClassPropsType propType,
-  int requestId,
+  request_id_t requestId,
   const Variant& var,
   folly::dynamic* vars
 ) {
@@ -1052,7 +1052,7 @@ void VariablesCommand::forEachInstanceProp(
 
 void VariablesCommand::addClassPrivateProps(
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   int start,
   int count,
   VariableSubScope* subScope,
@@ -1109,7 +1109,7 @@ void VariablesCommand::addClassPrivateProps(
 
 int VariablesCommand::addObjectChildren(
   DebuggerSession* session,
-  int64_t requestId,
+  request_id_t requestId,
   int start,
   int count,
   const Variant& var,

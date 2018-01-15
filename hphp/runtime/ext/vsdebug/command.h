@@ -70,7 +70,7 @@ struct VSCommand {
   virtual bool requiresBreak() = 0;
 
   // Returns the ID of the request thread this command is directed at.
-  virtual int64_t targetThreadId(DebuggerSession* session);
+  virtual request_id_t targetThreadId(DebuggerSession* session);
 
   // Executes the command. Returns true if the target thread should resume.
   bool execute();
@@ -218,7 +218,7 @@ struct PauseCommand : public VSCommand {
 struct ScopesCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(ScopesCommand, CommandTarget::Request, false);
 
-  int64_t targetThreadId(DebuggerSession* session) override;
+  request_id_t targetThreadId(DebuggerSession* session) override;
 
 private:
 
@@ -238,7 +238,7 @@ private:
 struct VariablesCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(VariablesCommand, CommandTarget::Request, false);
 
-  int64_t targetThreadId(DebuggerSession* session) override;
+  request_id_t targetThreadId(DebuggerSession* session) override;
 
 public:
 
@@ -247,7 +247,7 @@ public:
   static int countScopeVariables(
     DebuggerSession* session,
     const ScopeObject* scope,
-    int requestId
+    request_id_t requestId
   );
 
   // Sorts a folly::dynamic::array of variable names in place by name.
@@ -262,7 +262,7 @@ public:
   // Serializes a variable to be sent over the VS Code debugger protocol.
   static folly::dynamic serializeVariable(
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     const std::string& name,
     const Variant& variable,
     bool doNotModifyName = false,
@@ -286,7 +286,7 @@ private:
   // returns a count of variables if vars == nullptr.
   static int addScopeVariables(
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     const ScopeObject* scope,
     folly::dynamic* vars
   );
@@ -295,7 +295,7 @@ private:
   void addSubScopes(
     VariableSubScope* subScope,
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     int start,
     int count,
     folly::dynamic* vars
@@ -304,7 +304,7 @@ private:
   // Adds local variables.
   static int addLocals(
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     const ScopeObject* scope,
     folly::dynamic* vars
   );
@@ -312,7 +312,7 @@ private:
   // Adds the specified type of constants.
   static int addConstants(
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     const StaticString& category,
     folly::dynamic* vars
   );
@@ -320,7 +320,7 @@ private:
   // Adds super global variables.
   static int addSuperglobalVariables(
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     const ScopeObject* scope,
     folly::dynamic* vars
   );
@@ -328,7 +328,7 @@ private:
   // Adds children of a complex object.
   static int addComplexChildren(
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     int start,
     int count,
     VariableObject* variable,
@@ -338,7 +338,7 @@ private:
   // Adds array indicies.
   static int addArrayChildren(
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     int start,
     int count,
     VariableObject* variable,
@@ -361,7 +361,7 @@ private:
   // Adds object properties.
   static int addObjectChildren(
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     int start,
     int count,
     const Variant& variable,
@@ -371,7 +371,7 @@ private:
   // Adds constants defined on a class.
   static int addClassConstants(
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     int start,
     int count,
     Class* cls,
@@ -382,7 +382,7 @@ private:
   // Adds static properties defined on an object's class.
   static int addClassStaticProps(
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     int start,
     int count,
     Class* cls,
@@ -393,7 +393,7 @@ private:
   // Adds private properties defined on one of an object's base classes.
   static void addClassPrivateProps(
     DebuggerSession* session,
-    int64_t requestId,
+    request_id_t requestId,
     int start,
     int count,
     VariableSubScope* subScope,
@@ -406,7 +406,7 @@ private:
   static int addClassSubScopes(
     DebuggerSession* session,
     ClassPropsType propType,
-    int requestId,
+    request_id_t requestId,
     const Variant& var,
     folly::dynamic* vars
   );
@@ -420,7 +420,7 @@ private:
     const Class* currentClass,
     int childCount,
     ClassPropsType type,
-    int requestId,
+    request_id_t requestId,
     const Variant& var,
     folly::dynamic* vars
   );
@@ -448,7 +448,7 @@ struct RunToLocationCommand : public VSCommand {
 struct SetVariableCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(SetVariableCommand, CommandTarget::Request, true);
 
-  int64_t targetThreadId(DebuggerSession* session) override;
+  request_id_t targetThreadId(DebuggerSession* session) override;
 
 private:
 
@@ -491,7 +491,7 @@ private:
     const std::string& name,
     const std::string& value,
     TypedValue* typedVariable,
-    int requestId,
+    request_id_t requestId,
     folly::dynamic* result
   );
 
@@ -501,7 +501,7 @@ private:
 //////  Handles evaluate on call frame requests from the client      //////
 struct EvaluateCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(EvaluateCommand, CommandTarget::Request, false);
-  int64_t targetThreadId(DebuggerSession* session) override;
+  request_id_t targetThreadId(DebuggerSession* session) override;
 
 public:
   static void preparseEvalExpression(
@@ -524,7 +524,7 @@ struct ThreadsCommand : public VSCommand {
 //////  Handles completions requests from the client                //////
 struct CompletionsCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(CompletionsCommand, CommandTarget::Request, true);
-  int64_t targetThreadId(DebuggerSession* session) override;
+  request_id_t targetThreadId(DebuggerSession* session) override;
 
 private:
 

@@ -50,7 +50,7 @@ FrameObject* EvaluateCommand::getFrameObject(DebuggerSession* session) {
   return m_frameObj;
 }
 
-int64_t EvaluateCommand::targetThreadId(DebuggerSession* session) {
+request_id_t EvaluateCommand::targetThreadId(DebuggerSession* session) {
   FrameObject* frame = getFrameObject(session);
   if (frame == nullptr) {
     // Execute the eval in the dummy context.

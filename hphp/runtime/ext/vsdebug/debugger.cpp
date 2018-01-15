@@ -184,7 +184,7 @@ void Debugger::setClientInitialized() {
   }
 }
 
-int Debugger::getCurrentThreadId() {
+request_id_t Debugger::getCurrentThreadId() {
   Lock lock(m_lock);
 
   if (isDummyRequest()) {
@@ -268,7 +268,7 @@ void Debugger::getAllThreadInfo(folly::dynamic& threads) {
 
       auto it = m_requestInfoMap.find(ti);
       if (it != m_requestInfoMap.end()) {
-        int requestId = it->second;
+        request_id_t requestId = it->second;
         threadInfo["id"] = requestId;
         threadInfo["name"] = std::string("Request ") +
                              std::to_string(requestId);
@@ -304,7 +304,7 @@ void Debugger::trySendTerminatedEvent() {
 
 void Debugger::sendStoppedEvent(
   const char* reason,
-  int64_t threadId
+  request_id_t threadId
 ) {
   Lock lock(m_lock);
 
@@ -323,7 +323,7 @@ void Debugger::sendStoppedEvent(
   sendEventMessage(event, "stopped");
 }
 
-void Debugger::sendContinuedEvent(int64_t threadId) {
+void Debugger::sendContinuedEvent(request_id_t threadId) {
   Lock lock(m_lock);
   folly::dynamic event = folly::dynamic::object;
   event["allThreadsContinued"] = m_pausedRequestCount == 0;
@@ -354,7 +354,7 @@ void Debugger::sendEventMessage(folly::dynamic& event, const char* eventType) {
 }
 
 void Debugger::sendThreadEventMessage(
-  int64_t threadId,
+  request_id_t threadId,
   ThreadEventType eventType
 ) {
   Lock lock(m_lock);
@@ -473,7 +473,7 @@ void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
 }
 
 void Debugger::processCommandQueue(
-  int threadId,
+  request_id_t threadId,
   RequestInfo* requestInfo,
   const char* reason /* = "pause" */
 ) {
@@ -537,15 +537,32 @@ RequestInfo* Debugger::createRequestInfo() {
   return requestInfo;
 }
 
+request_id_t Debugger::nextThreadId() {
+  request_id_t threadId = m_nextThreadId++;
+
+  // Unlikely: handle rollver. Id 0 is reserved for the dummy, and then
+  // in the very unlikley event that there's a very long running request
+  // we need to ensure we don't reuse its id.
+  if (threadId == 0) {
+    threadId++;
+  }
+
+  while (m_requestIdMap.find(threadId) != m_requestIdMap.end()) {
+    threadId++;
+  }
+
+  return threadId;
+}
+
 RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   // Note: the caller of this routine must hold m_lock.
   RequestInfo* requestInfo = nullptr;
 
-  int threadId;
+  request_id_t threadId;
   auto it = m_requests.find(ti);
   if (it == m_requests.end()) {
     // New request. Insert a request info object into our map.
-    threadId = m_nextThreadId++;
+    threadId = nextThreadId();
     assert(threadId > 0);
 
     requestInfo = createRequestInfo();
@@ -600,7 +617,7 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
 void Debugger::requestShutdown() {
   auto const threadInfo = &TI();
   RequestInfo* requestInfo = nullptr;
-  int threadId = -1;
+  request_id_t threadId = -1;
 
   SCOPE_EXIT {
     if (clientConnected() && threadId >= 0) {
@@ -648,7 +665,7 @@ RequestInfo* Debugger::getDummyRequestInfo() {
   return m_session->m_dummyRequestInfo;
 }
 
-RequestInfo* Debugger::getRequestInfo(int threadId /* = -1 */) {
+RequestInfo* Debugger::getRequestInfo(request_id_t threadId /* = -1 */) {
   Lock lock(m_lock);
 
   if (threadId != -1) {

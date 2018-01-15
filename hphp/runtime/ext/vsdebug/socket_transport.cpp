@@ -151,7 +151,6 @@ void SocketTransport::listenForClientConnection() {
   };
 
   // Share existing DebuggerDisableIPv6 configuration with hphpd.
-  // TODO: Do we need our own separate config item for this?
   if (RuntimeOption::DebuggerDisableIPv6) {
     hint.ai_family = AF_INET;
   }

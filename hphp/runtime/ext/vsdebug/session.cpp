@@ -195,7 +195,10 @@ ClientPreferences& DebuggerSession::getClientPreferences() {
   return m_clientPreferences;
 }
 
-unsigned int DebuggerSession::generateFrameId(int requestId, int frameDepth) {
+unsigned int DebuggerSession::generateFrameId(
+  request_id_t requestId,
+  int frameDepth
+) {
   const unsigned int objectId = ++s_nextObjectId;
   FrameObject* frame = new FrameObject(objectId, requestId, frameDepth);
 
@@ -218,7 +221,7 @@ FrameObject* DebuggerSession::getFrameObject(unsigned int objectId) {
 }
 
 unsigned int DebuggerSession::generateScopeId(
-  int requestId,
+  request_id_t requestId,
   int depth,
   ScopeType scopeType
 ) {
@@ -231,7 +234,7 @@ unsigned int DebuggerSession::generateScopeId(
 }
 
 unsigned int DebuggerSession::generateVariableId(
-  int requestId,
+  request_id_t requestId,
   Variant& variable
 ) {
   const unsigned int objectId = ++s_nextObjectId;
@@ -243,7 +246,7 @@ unsigned int DebuggerSession::generateVariableId(
 }
 
 unsigned int DebuggerSession::generateVariableSubScope(
-  int requestId,
+  request_id_t requestId,
   const Variant& variable,
   const Class* cls,
   const std::string& className,

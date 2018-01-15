@@ -39,7 +39,7 @@ bool ContinueCommand::executeImpl(
 ) {
   const folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
-  int64_t threadId = tryGetInt(args, "threadId", -1);
+  request_id_t threadId = tryGetInt(args, "threadId", -1);
 
   if (threadId >= 0) {
     // If a thread ID was specified, check if the thread with that ID is in

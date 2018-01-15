@@ -188,7 +188,7 @@ struct Debugger final {
   void requestShutdown();
 
   // Returns a pointer to the RequestInfo for the current thread.
-  RequestInfo* getRequestInfo(int threadId = -1);
+  RequestInfo* getRequestInfo(request_id_t threadId = (request_id_t)-1);
 
   // Allocates a new request info object.
   static RequestInfo* createRequestInfo();
@@ -201,7 +201,7 @@ struct Debugger final {
   // info. This routine will block until the debugger is resumed by the client,
   // the client disconnects, or the extension is shut down.
   void processCommandQueue(
-    int threadId,
+    request_id_t threadId,
     RequestInfo* requestInfo,
     const char* reason = "execution paused"
   );
@@ -236,16 +236,16 @@ struct Debugger final {
   void setClientInitialized();
 
   // Returns the synthetic request ID for the current request thread.
-  int getCurrentThreadId();
+  request_id_t getCurrentThreadId();
 
   // Sends a stopped event to the client.
   void sendStoppedEvent(
     const char* reason,
-    int64_t threadId
+    request_id_t threadId
   );
 
   // Sends a thread continued event to the client.
-  void sendContinuedEvent(int64_t threadId);
+  void sendContinuedEvent(request_id_t threadId);
 
   // Sets the dummy thread ID.
   void setDummyThreadId(int64_t threadId);
@@ -327,7 +327,7 @@ struct Debugger final {
   static constexpr int kDummyTheadId = 0;
 
   // Sends a thread event message to a debugger client.
-  void sendThreadEventMessage(int64_t threadId, ThreadEventType eventType);
+  void sendThreadEventMessage(request_id_t threadId, ThreadEventType eventType);
 
   // Returns true if the current thread is the dummy request thread, false
   // otherwise.
@@ -469,6 +469,9 @@ private:
   // if there is no client connected.
   RequestInfo* getDummyRequestInfo();
 
+  // Returns the next unused synthetic request thread ID.
+  request_id_t nextThreadId();
+
   Mutex m_lock;
   DebugTransport* m_transport {nullptr};
 
@@ -495,13 +498,13 @@ private:
   std::unordered_map<ThreadInfo*, RequestInfo*> m_requests;
 
   // Map of synthetic thread ID to ThreadInfo*;
-  std::unordered_map<int, ThreadInfo*> m_requestIdMap;
+  std::unordered_map<request_id_t, ThreadInfo*> m_requestIdMap;
 
   // Map of ThreadInfo* to synthetic thread ID
-  std::unordered_map<ThreadInfo*, int> m_requestInfoMap;
+  std::unordered_map<ThreadInfo*, request_id_t> m_requestInfoMap;
 
   // Next synthetic request ID to send to client as thread ID.
-  int m_nextThreadId {1};
+  request_id_t m_nextThreadId {1};
 
   // Keeps track of the number of requests that are currently blocked inside
   // the debugger extension due to being paused for any reason (breakpoint,

@@ -26,10 +26,6 @@
 namespace HPHP {
 namespace VSDEBUG {
 
-// TODO: (Ericblue T23098242) Consider having multiple verbosity levels
-// configured in config. For now, I'm going to want all Logging
-// statements.
-
 // Log will be flushed approximately this often.
 static constexpr int kLogFlushIntervalSec = 10;
 

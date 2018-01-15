@@ -46,7 +46,7 @@ SetVariableCommand::SetVariableCommand(
 SetVariableCommand::~SetVariableCommand() {
 }
 
-int64_t SetVariableCommand::targetThreadId(DebuggerSession* session) {
+request_id_t SetVariableCommand::targetThreadId(DebuggerSession* session) {
   ServerObject* obj = session->getServerObject(m_objectId);
   if (obj == nullptr) {
     throw DebuggerCommandException("Invalid variablesReference specified.");
@@ -321,7 +321,7 @@ void SetVariableCommand::setVariableValue(
   const std::string& name,
   const std::string& value,
   TypedValue* typedVariable,
-  int requestId,
+  request_id_t requestId,
   folly::dynamic* result
 ) {
   switch (typedVariable->m_type) {

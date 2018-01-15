@@ -39,7 +39,7 @@ bool StackTraceCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
 ) {
-  const int requestId = m_debugger->getCurrentThreadId();
+  const request_id_t requestId = m_debugger->getCurrentThreadId();
   const folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
 

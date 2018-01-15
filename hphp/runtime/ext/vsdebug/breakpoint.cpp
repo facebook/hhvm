@@ -44,8 +44,7 @@ Breakpoint::Breakpoint(
     m_column(column),
     m_path(path),
     m_resolvedLocation({0}),
-    m_hitCount(0),
-    m_conditionUnit(nullptr) {
+    m_hitCount(0) {
 
   updateConditions(condition, hitCondition);
 }
@@ -56,22 +55,9 @@ void Breakpoint::updateConditions(
 ) {
   m_condition = condition;
   m_hitCondition = hitCondition;
+  m_unitCache.clear();
 
   // TODO: Deal with hit condition breakpoints.
-
-  if (!m_condition.empty()) {
-    try {
-      EvaluateCommand::preparseEvalExpression(&m_condition);
-      if (!m_condition.empty()) {
-        m_conditionUnit =
-          compile_string(m_condition.c_str(), m_condition.size());
-      }
-    } catch (...) {
-      // Errors will be printed to stderr already, and we'll err on the side
-      // of breaking when the bp is hit.
-      m_conditionUnit = nullptr;
-    }
-  }
 }
 
 BreakpointManager::BreakpointManager(Debugger* debugger) :
@@ -378,17 +364,39 @@ void BreakpointManager::sendBpError(
   );
 }
 
+void BreakpointManager::onRequestShutdown(request_id_t requestId) {
+  for (auto it = m_breakpoints.begin(); it != m_breakpoints.end(); it++) {
+    Breakpoint& bp = it->second;
+    bp.clearCachedConditionUnit(requestId);
+  }
+}
+
 bool BreakpointManager::isBreakConditionSatisified(
   RequestInfo* ri,
-  const Breakpoint* bp
+  Breakpoint* bp
 ) {
-  const std::string condition = bp->getCondition();
+  std::string condition = std::string(bp->getCondition());
   if (condition.size() == 0) {
     // This breakpoint has no condition.
     return true;
   }
 
-  Unit* unit = bp->getConditionUnit();
+  request_id_t requestId = m_debugger->getCurrentThreadId();
+  HPHP::Unit* unit = bp->getCachedConditionUnit(requestId);
+  if (unit == nullptr && !condition.empty()) {
+    try {
+      EvaluateCommand::preparseEvalExpression(&condition);
+      if (!condition.empty()) {
+        unit = compile_string(condition.c_str(), condition.size());
+        bp->cacheConditionUnit(requestId, unit);
+      }
+    } catch (...) {
+      // Errors will be printed to stderr already, and we'll err on the side
+      // of breaking when the bp is hit.
+      unit = nullptr;
+    }
+  }
+
   if (unit == nullptr) {
     // This means the condition is invalid: it failed to compile.
     // Bother the user, and break anyway.

@@ -46,6 +46,8 @@ void Debugger::setClientConnected(bool connected) {
   {
     Lock lock(m_lock);
 
+    VSDebugLogger::SetLogRotationEnabled(connected);
+
     // Store connected first. New request threads will first check this value
     // to quickly determine if a debugger client is connected to avoid having
     // to grab a lock on the request init path in the case where this extension
@@ -584,6 +586,7 @@ void Debugger::requestShutdown() {
   SCOPE_EXIT {
     if (clientConnected() && threadId >= 0) {
       sendThreadEventMessage(threadId, ThreadEventType::ThreadExited);
+      m_session->getBreakpointManager()->onRequestShutdown(threadId);
     }
 
     if (requestInfo != nullptr) {
@@ -1299,7 +1302,7 @@ void Debugger::onLineBreakpointHit(
 
     for (auto it = fileBps.begin(); it != fileBps.end(); it++) {
       const int bpId = *it;
-      const Breakpoint* bp = bpMgr->getBreakpointById(bpId);
+      Breakpoint* bp = bpMgr->getBreakpointById(bpId);
       if (line >= bp->m_resolvedLocation.m_startLine &&
           line <= bp->m_resolvedLocation.m_endLine &&
           bpMgr->isBreakConditionSatisified(ri, bp)) {

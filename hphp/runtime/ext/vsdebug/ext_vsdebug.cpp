@@ -22,7 +22,6 @@ namespace HPHP {
 namespace VSDEBUG {
 
 VSDebugExtension::~VSDebugExtension() {
-  VSDebugLogger::FinalizeLogging();
   if (s_debugger != nullptr) {
     delete s_debugger;
     s_debugger = nullptr;
@@ -135,6 +134,8 @@ void VSDebugExtension::moduleShutdown() {
     delete s_debugger;
     s_debugger = nullptr;
   }
+
+  VSDebugLogger::FinalizeLogging();
 }
 
 void VSDebugExtension::requestInit() {

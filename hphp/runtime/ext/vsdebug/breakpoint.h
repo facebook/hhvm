@@ -18,6 +18,7 @@
 #define incl_HPHP_VSDEBUG_BREAKPOINT_MGR_H_
 
 #include "hphp/runtime/ext/vsdebug/break_mode.h"
+#include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 
 #include <string>
@@ -68,9 +69,23 @@ struct Breakpoint {
   int m_hitCount;
 
   std::string getCondition() const { return m_condition; }
-  Unit* getConditionUnit() const { return m_conditionUnit; }
-
   std::string getHitCondition() { return m_hitCondition; }
+
+  void cacheConditionUnit(request_id_t requestId, HPHP::Unit* unit) {
+    m_unitCache.emplace(requestId, unit);
+  }
+
+  HPHP::Unit* getCachedConditionUnit(request_id_t requestId) {
+    auto it = m_unitCache.find(requestId);
+    return it == m_unitCache.end() ? nullptr : it->second;
+  }
+
+  void clearCachedConditionUnit(request_id_t requestId) {
+    auto it = m_unitCache.find(requestId);
+    if (it != m_unitCache.end()) {
+      m_unitCache.erase(it);
+    }
+  }
 
 private:
 
@@ -81,8 +96,9 @@ private:
   // comparison to the number of times the breakpoint has been hit.
   std::string m_hitCondition;
 
-  // Compiled unit for the breakpoint condition.
-  Unit* m_conditionUnit;
+  // Cache of compilation units for breakpoint conditions, per request
+  // thread.
+  std::unordered_map<request_id_t, HPHP::Unit*> m_unitCache;
 };
 
 struct ExceptionBreakpointSettings {
@@ -130,8 +146,10 @@ struct BreakpointManager {
 
   bool isBreakConditionSatisified(
     RequestInfo* ri,
-    const Breakpoint* bp
+    Breakpoint* bp
   );
+
+  void onRequestShutdown(request_id_t requestId);
 
 private:
 

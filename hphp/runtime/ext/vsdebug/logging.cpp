@@ -14,57 +14,177 @@
    +----------------------------------------------------------------------+
 */
 
+#include <chrono>
 #include <time.h>
 #include <string>
+#include <sys/stat.h>
+
 #include "hphp/runtime/ext/vsdebug/logging.h"
 
 namespace HPHP {
 namespace VSDEBUG {
 
-// Linkage for the log file pointer, this is a singleton for the extension.
-FILE* VSDebugLogger::s_logFile {nullptr};
+// Singleton logger.
+static VSDebugLogger s_logger;
+bool VSDebugLogger::s_loggerDestroyed {false};
 
 void VSDebugLogger::InitializeLogging(std::string& logFilePath) {
+  std::unique_lock<std::recursive_mutex> lock(s_logger.m_lock);
+
   if (logFilePath.empty()) {
     return;
   }
 
-  // This is only expected to be invoked once, when the extension is loaded.
-  assert(s_logFile == nullptr);
+  if (!s_logger.m_logFilePath.empty()) {
+    LogFlush();
+    if (s_logger.m_logFile != nullptr) {
+      fclose(s_logger.m_logFile);
+    }
+    s_logger.m_logFile = nullptr;
+  }
 
-  // TODO: (Ericblue) Add logic for max file size, log file rotation, etc.
-  const char* path = logFilePath.c_str();
-  s_logFile = fopen(path, "a");
-  if (s_logFile == nullptr) {
+  s_logger.m_logFilePath = logFilePath;
+
+  OpenLogFile();
+}
+
+void VSDebugLogger::OpenLogFile() {
+  const char* path = s_logger.m_logFilePath.c_str();
+  s_logger.m_logFile = fopen(path, "a");
+  if (s_logger.m_logFile == nullptr) {
     return;
   }
 
   // Start with a visual delimiter so it's easy to see where
   // the session started.
   Log(VSDebugLogger::LogLevelInfo, "-------------------------------");
+  Log(VSDebugLogger::LogLevelInfo, "Created new log file.");
+}
+
+void VSDebugLogger::SetLogRotationEnabled(bool enabled) {
+  std::unique_lock<std::recursive_mutex> lock(s_logger.m_lock);
+  s_logger.m_logRotationEnabled = enabled;
+
+  // Regardless of whether the client just connected or disconnected,
+  // this is a good time to do a flush of the log.
+  VSDebugLogger::LogFlush();
+
+  if (enabled) {
+    VSDebugLogger::TryRotateLogs();
+  }
+
+  if (!s_logger.m_taskStarted) {
+    s_logger.m_loggerTaskThread.start();
+    s_logger.m_taskStarted = true;
+  }
+}
+
+bool VSDebugLogger::GetLogRotationEnabled() {
+  std::unique_lock<std::recursive_mutex> lock(s_logger.m_lock);
+  return s_logger.m_logRotationEnabled;
 }
 
 void VSDebugLogger::FinalizeLogging() {
-  if (s_logFile == nullptr) {
+  std::atomic_thread_fence(std::memory_order_acquire);
+  if (s_loggerDestroyed) {
     return;
   }
 
-  Log(VSDebugLogger::LogLevelInfo, "VSDebugExtension shutting down.");
-  Log(VSDebugLogger::LogLevelInfo, "-------------------------------");
+  {
+    std::unique_lock<std::mutex> condLock(s_logger.m_condLock);
+    std::unique_lock<std::recursive_mutex> lock(s_logger.m_lock);
+    s_loggerDestroyed = true;
+
+    if (s_logger.m_logFile != nullptr) {
+      Log(VSDebugLogger::LogLevelInfo, "VSDebugExtension shutting down.");
+      Log(VSDebugLogger::LogLevelInfo, "-------------------------------");
+      LogFlush();
+      if (s_logger.m_logFile != nullptr) {
+        fclose(s_logger.m_logFile);
+      }
+      s_logger.m_logFile = nullptr;
+    }
+
+    s_logger.m_terminate = true;
+    s_logger.m_cond.notify_all();
+    std::atomic_thread_fence(std::memory_order_release);
+  }
+
+  s_logger.m_loggerTaskThread.waitForEnd();
+}
+
+void VSDebugLogger::loggerMaintenanceTask() {
+  // Periodically flush the log file stream, and rotate log files when needed.
+  std::unique_lock<std::mutex> lock(s_logger.m_condLock);
+
+  while (!m_terminate) {
+    auto now = std::chrono::system_clock::now();
+    auto dueTime = now + std::chrono::seconds(kLogFlushIntervalSec);
+    if (m_cond.wait_until(lock, dueTime) == std::cv_status::timeout) {
+      if (m_terminate) {
+        break;
+      }
+
+      // Flush and rotate the logs if needed. We don't do any flushing or
+      // log rotating if there's no debugger client connected.
+      if (VSDebugLogger::GetLogRotationEnabled()) {
+        VSDebugLogger::LogFlush();
+        VSDebugLogger::TryRotateLogs();
+      }
+    }
+  }
+}
+
+void VSDebugLogger::TryRotateLogs() {
+  std::unique_lock<std::recursive_mutex> lock(s_logger.m_lock);
+
+  if (s_logger.m_logFilePath.empty()) {
+    return;
+  }
+
+  struct stat statBuffer;
+  if (stat(s_logger.m_logFilePath.c_str(), &statBuffer) != 0) {
+    return;
+  }
+
+  struct tm* timeInfo = gmtime(&statBuffer.st_ctime);
+  double diff = difftime(mktime(timeInfo), std::time(nullptr));
+  if (diff < kLogRotateIntervalSec) {
+    return;
+  }
+
+  Log(VSDebugLogger::LogLevelInfo, "Rotating log file.");
   LogFlush();
-  fclose(s_logFile);
-  s_logFile = nullptr;
+  fclose(s_logger.m_logFile);
+  s_logger.m_logFile = nullptr;
+
+  // Rotate the files.
+  for (int i = kLogHistoryMaxDays - 1; i >= 0; i--) {
+    // Try to rename the file if it exists, ignore return code.
+    const std::string fromFile = i > 0
+      ? s_logger.m_logFilePath + std::to_string(i)
+      : s_logger.m_logFilePath;
+
+    const std::string toFile = s_logger.m_logFilePath + std::to_string(i+1);
+    std::remove(toFile.c_str());
+    std::rename(fromFile.c_str(), toFile.c_str());
+  }
+
+  // Open a new log file.
+  OpenLogFile();
 }
 
 void VSDebugLogger::Log(const char* level, const char* fmt, ...) {
-  if (s_logFile == nullptr) {
+  std::unique_lock<std::recursive_mutex> lock(s_logger.m_lock);
+
+  if (s_logger.m_logFile == nullptr) {
     return;
   }
 
   time_t t = time(NULL);
   struct tm tm = *localtime(&t);
 
-  fprintf(s_logFile,
+  fprintf(s_logger.m_logFile,
     "[%d-%d-%d %d:%d:%d]",
     tm.tm_year + 1900,
     tm.tm_mon + 1,
@@ -73,22 +193,24 @@ void VSDebugLogger::Log(const char* level, const char* fmt, ...) {
     tm.tm_min,
     tm.tm_sec
   );
-  fprintf(s_logFile, "[%s]\t", level);
+  fprintf(s_logger.m_logFile, "[%s]\t", level);
 
   va_list args;
   va_start(args, fmt);
-  vfprintf(s_logFile, fmt, args);
+  vfprintf(s_logger.m_logFile, fmt, args);
   va_end(args);
 
-  fprintf(s_logFile, "\n");
+  fprintf(s_logger.m_logFile, "\n");
 }
 
 void VSDebugLogger::LogFlush() {
-  if (s_logFile == nullptr) {
+  std::unique_lock<std::recursive_mutex> lock(s_logger.m_lock);
+
+  if (s_logger.m_logFile == nullptr) {
     return;
   }
 
-  fflush(s_logFile);
+  fflush(s_logger.m_logFile);
 }
 
 }

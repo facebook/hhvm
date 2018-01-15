@@ -18,7 +18,10 @@
 #define incl_HPHP_VSDEBUG_LOGGING_H_
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/util/async-func.h"
+
 #include <string>
+#include <condition_variable>
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -27,19 +30,52 @@ namespace VSDEBUG {
 // configured in config. For now, I'm going to want all Logging
 // statements.
 
+// Log will be flushed approximately this often.
+static constexpr int kLogFlushIntervalSec = 10;
 
 struct VSDebugLogger final {
   static void Log(const char* level, const char* fmt, ...);
   static void LogFlush();
   static void InitializeLogging(std::string& logFilePath);
   static void FinalizeLogging();
+  static void TryRotateLogs();
+
+  static void SetLogRotationEnabled(bool enabled);
+  static bool GetLogRotationEnabled();
 
   static constexpr char* LogLevelError = "ERROR";
   static constexpr char* LogLevelWarning = "WARNING";
   static constexpr char* LogLevelInfo = "INFO";
 
+  VSDebugLogger() :
+    m_loggerTaskThread(this, &VSDebugLogger::loggerMaintenanceTask) {
+  }
+
+  ~VSDebugLogger() {
+    FinalizeLogging();
+  }
+
 private:
-  static FILE* s_logFile;
+
+  void loggerMaintenanceTask();
+
+  static bool s_loggerDestroyed;
+  static void OpenLogFile();
+
+  std::string m_logFilePath {""};
+  FILE* m_logFile {nullptr};
+  std::recursive_mutex m_lock;
+  bool m_logRotationEnabled {false};
+  bool m_taskStarted {false};
+
+  bool m_terminate;
+  AsyncFunc<VSDebugLogger> m_loggerTaskThread;
+  std::condition_variable m_cond;
+  std::mutex m_condLock;
+
+  // Log will be rotated approximately this often.
+  static constexpr int kLogRotateIntervalSec = 24 * 60;
+  static constexpr int kLogHistoryMaxDays = 5;
 };
 
 }

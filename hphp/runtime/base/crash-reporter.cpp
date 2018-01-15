@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/ext/xdebug/server.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
@@ -116,6 +118,13 @@ static void bt_handler(int sig, siginfo_t* info, void*) {
     if (RuntimeOption::EnableHphpdDebugger) {
       return Eval::Debugger::CountConnectedProxy();
     }
+
+    HPHP::VSDEBUG::Debugger* vspDebugger =
+      HPHP::VSDEBUG::VSDebugExtension::getDebugger();
+    if (vspDebugger != nullptr && vspDebugger->clientConnected()) {
+      return 1;
+    }
+
     // We don't have a count of xdebug clients across all requests, so just
     // check the current request.
     if (XDebugServer::isAttached()) {

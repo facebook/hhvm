@@ -123,6 +123,7 @@ struct AsyncMysqlConnectionOptions {
   static const StaticString s_className;
 
   am::ConnectionOptions m_conn_opts;
+  TYPE_SCAN_IGNORE_FIELD(m_conn_opts);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,15 @@
+<?hh
+
+function foo() {
+  $x = 1;
+  $y = 2;
+  $z = 3;
+}
+
+echo "hello world 1\n";
+foo();
+foo();
+echo "hello world 2\n";
+echo "hello world 3\n";
+echo "hello world 4\n";
+echo "hello world 5\n";

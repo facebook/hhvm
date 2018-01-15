@@ -4,3 +4,12 @@ slow/objprof/objprof.php
 slow/objprof/strings.php
 slow/dict/crash-10884951.php
 slow/collection_classes/pair-clone.php
+slow/ext_vsdebug/breakpoints.php
+slow/ext_vsdebug/conditional_bp.php
+slow/ext_vsdebug/context.php
+slow/ext_vsdebug/dummy.php
+slow/ext_vsdebug/exception_bp.php
+slow/ext_vsdebug/initialize.php
+slow/ext_vsdebug/launch.php
+slow/ext_vsdebug/set_variable.php
+slow/ext_vsdebug/step.php

@@ -290,8 +290,18 @@ function vsDebugCleanup($process, $pipes, $client, $expectedExitCode = 0) {
     fclose($pipe);
   }
 
-  $status = proc_get_status($process);
-  $pid = $status{'pid'};
+  $tries = 0;
+  $status = null;
+
+  while ($tries < 10) {
+    $status = proc_get_status($process);
+    if ($status{'running'} !== false) {
+      sleep(1);
+    } else {
+      break;
+    }
+    $tries++;
+  }
 
   if ($status{'running'} !== false) {
     throw new UnexpectedValueException("Expected child process to have exited!");

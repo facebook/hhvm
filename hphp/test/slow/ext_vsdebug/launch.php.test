@@ -1,0 +1,2 @@
+<?hh
+echo "Script launched.\n";

@@ -36,17 +36,18 @@ def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
     command.extend(['-r'])
   if relocate != 0:
     command.extend(['--relocate', '%d' % relocate,
-                    '--exclude-pattern', '=/debugger/='])
+                    '--exclude-pattern', '=/debugger|ext_vsdebug/='])
   if recycle_tc != 0:
     command.extend(['--recycle-tc', '%d' % recycle_tc,
-                    '--exclude-pattern', '=/debugger/='])
+                    '--exclude-pattern', '=/debugger|ext_vsdebug/='])
   if hhas_roundtrip:
-    command.extend(['--hhas-round-trip', '--exclude-pattern', '=/debugger/='])
+    command.extend(['--hhas-round-trip', '--exclude-pattern', '=/debugger|ext_vsdebug/='])
 
   if cli_server != 0:
     command.append('--cli-server')
 
-  command.extend(['--exclude-pattern', '=/ext_debug/='])
+  if 'jit' in target_name:
+    command.extend(['--exclude-pattern', '=/debugger|ext_vsdebug/='])
 
   deplist=[
     '//hphp/hhvm:hhvm',
@@ -74,7 +75,7 @@ def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
   if hhcodegen == True:
     command.extend(['--compare-hh-codegen'])
   elif use_hackc == True:
-    command.extend(['--hackc', '--exclude-pattern', '=/debugger/='])
+    command.extend(['--hackc', '--exclude-pattern', '=/debugger|ext_vsdebug/='])
   elif use_php7 == True:
     command.append('--php7')
 

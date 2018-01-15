@@ -403,7 +403,7 @@ void Debugger::requestInit() {
     if (RuntimeOption::ServerExecutionMode()) {
       g_context->setStdout(&m_stdoutHook);
 
-      if (dummy) {
+      if (isDummyRequest()) {
         // Attach to stderr in server mode only for the dummy thread (to show
         // any error spew from evals, etc). Attaching to all requests produces
         // way too much error spew for the client. Users see stderr output

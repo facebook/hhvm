@@ -154,15 +154,17 @@ void VSDebugExtension::requestInit() {
   if (!RuntimeOption::ServerExecutionMode() &&
       RuntimeOption::VSDebuggerListenPort > 0) {
 
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelInfo,
-      "Blocking script startup until debugger client connects..."
-    );
-    s_debugger->waitForClientConnection();
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelInfo,
-      "Debugger client connected."
-    );
+    if (!RuntimeOption::VSDebuggerNoWait) {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelInfo,
+        "Blocking script startup until debugger client connects..."
+      );
+      s_debugger->waitForClientConnection();
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelInfo,
+        "Debugger client connected."
+      );
+    }
   }
 
   s_debugger->requestInit();

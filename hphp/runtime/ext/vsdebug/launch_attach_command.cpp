@@ -46,6 +46,14 @@ bool LaunchAttachCommand::executeImpl(
     m_debugger->startDummyRequest(noDocument);
   }
 
+  const auto& logFilePath =
+    tryGetString(args, "logFilePath", noDocument);
+
+  if (!logFilePath.empty()) {
+    // Re-open logging using the file path specified by the client.
+    VSDebugLogger::InitializeLogging(logFilePath);
+  }
+
   // Send the InitializedEvent to indicate to the front-end that we are up
   // and ready for breakpoint requests.
   folly::dynamic event = folly::dynamic::object;

@@ -32,7 +32,7 @@ static constexpr int kLogFlushIntervalSec = 10;
 struct VSDebugLogger final {
   static void Log(const char* level, const char* fmt, ...);
   static void LogFlush();
-  static void InitializeLogging(std::string& logFilePath);
+  static void InitializeLogging(const std::string& logFilePath);
   static void FinalizeLogging();
   static void TryRotateLogs();
 

@@ -28,7 +28,7 @@ namespace VSDEBUG {
 static VSDebugLogger s_logger;
 bool VSDebugLogger::s_loggerDestroyed {false};
 
-void VSDebugLogger::InitializeLogging(std::string& logFilePath) {
+void VSDebugLogger::InitializeLogging(const std::string& logFilePath) {
   std::unique_lock<std::recursive_mutex> lock(s_logger.m_lock);
 
   if (logFilePath.empty()) {
@@ -148,7 +148,8 @@ void VSDebugLogger::TryRotateLogs() {
   }
 
   struct tm* timeInfo = gmtime(&statBuffer.st_ctime);
-  double diff = difftime(mktime(timeInfo), std::time(nullptr));
+  auto now = std::time(nullptr);
+  double diff = difftime(mktime(timeInfo), mktime(gmtime(&now)));
   if (diff < kLogRotateIntervalSec) {
     return;
   }

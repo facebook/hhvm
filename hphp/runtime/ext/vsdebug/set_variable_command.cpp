@@ -92,7 +92,7 @@ bool SetVariableCommand::executeImpl(
       ScopeObject* scope = static_cast<ScopeObject*>(obj);
 
       switch (scope->m_scopeType) {
-        case Locals:
+        case ScopeType::Locals:
           success = setLocalVariable(
             session,
             name,
@@ -102,8 +102,8 @@ bool SetVariableCommand::executeImpl(
           );
           break;
 
-        case UserDefinedConstants:
-          success = setUserDefinedConstant(
+        case ScopeType::ServerConstants:
+          success = setConstant(
             session,
             name,
             strValue,
@@ -116,18 +116,9 @@ bool SetVariableCommand::executeImpl(
         // context, rather than trying to overwrite them here, defer to the PHP
         // console, which will let the runtime enforce whatever policies are
         // appropriate.
-        case Superglobals:
+        case ScopeType::Superglobals:
           m_debugger->sendUserMessage(
             "Could not directly set value of superglobal variable, you may "
-              "be able to set this value by running a Hack/PHP command in the "
-              " console.",
-            DebugTransport::OutputLevelError
-          );
-          break;
-
-        case CoreConstants:
-          m_debugger->sendUserMessage(
-            "Could not directly set value of core constant variable, you may "
               "be able to set this value by running a Hack/PHP command in the "
               " console.",
             DebugTransport::OutputLevelError
@@ -202,14 +193,14 @@ bool SetVariableCommand::setLocalVariable(
 
 const StaticString s_user("user");
 
-bool SetVariableCommand::setUserDefinedConstant(
+bool SetVariableCommand::setConstant(
   DebuggerSession* session,
   const std::string& name,
   const std::string& value,
   ScopeObject* scope,
   folly::dynamic* result
 ) {
-  const auto& constants = lookupDefinedConstants(true)[s_user].toArray();
+  const auto& constants = lookupDefinedConstants(false);
   for (ArrayIter iter(constants); iter; ++iter) {
     const std::string constantName = iter.first().toString().toCppString();
     if (constantName == name) {

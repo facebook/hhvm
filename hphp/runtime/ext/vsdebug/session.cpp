@@ -259,7 +259,6 @@ unsigned int DebuggerSession::generateVariableSubScope(
     type
   );
 
-  assert(requestId == m_debugger->getCurrentThreadId());
   registerRequestObject(objectId, varObj);
   return objectId;
 }

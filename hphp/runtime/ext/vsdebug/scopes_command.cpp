@@ -72,11 +72,8 @@ bool ScopesCommand::executeImpl(
                                          "Superglobals",
                                          ScopeType::Superglobals));
     scopes.push_back(getScopeDescription(session,
-                                         "User Defined Constants",
-                                         ScopeType::UserDefinedConstants));
-    scopes.push_back(getScopeDescription(session,
-                                         "System Constants",
-                                         ScopeType::CoreConstants));
+                                         "Constants",
+                                         ScopeType::ServerConstants));
   }
 
   body["scopes"] = scopes;
@@ -105,7 +102,8 @@ folly::dynamic ScopesCommand::getScopeDescription(
   scope["expensive"] = true;
 
   const ScopeObject* scopeObj = session->getScopeObject(scopeId);
-  scope["namedVariables"] = VariablesCommand::countScopeVariables(scopeObj);
+  scope["namedVariables"] =
+    VariablesCommand::countScopeVariables(session, scopeObj, req);
 
   return scope;
 }

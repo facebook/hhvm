@@ -33,8 +33,7 @@ enum ServerObjectType {
 
 enum ScopeType {
   Locals,
-  UserDefinedConstants,
-  CoreConstants,
+  ServerConstants,
   Superglobals
 };
 
@@ -97,7 +96,9 @@ struct VariableObject : public ServerObject {
 enum ClassPropsType {
   Constants,
   StaticProps,
-  PrivateBaseProps
+  PrivateBaseProps,
+  UserDefinedConstants,
+  SystemDefinedConstants
 };
 
 struct VariableSubScope : public ServerObject {

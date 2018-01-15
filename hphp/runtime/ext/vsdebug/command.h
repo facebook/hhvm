@@ -244,7 +244,11 @@ public:
 
   // Returns a count of variables that are first level children of the
   // specified scope.
-  static int countScopeVariables(const ScopeObject* scope);
+  static int countScopeVariables(
+    DebuggerSession* session,
+    const ScopeObject* scope,
+    int requestId
+  );
 
   // Sorts a folly::dynamic::array of variable names in place by name.
   static void sortVariablesInPlace(folly::dynamic& vars);
@@ -287,6 +291,16 @@ private:
     folly::dynamic* vars
   );
 
+  // Adds sub scope values.
+  void addSubScopes(
+    VariableSubScope* subScope,
+    DebuggerSession* session,
+    int64_t requestId,
+    int start,
+    int count,
+    folly::dynamic* vars
+  );
+
   // Adds local variables.
   static int addLocals(
     DebuggerSession* session,
@@ -299,7 +313,6 @@ private:
   static int addConstants(
     DebuggerSession* session,
     int64_t requestId,
-    const ScopeObject* scope,
     const StaticString& category,
     folly::dynamic* vars
   );
@@ -447,7 +460,7 @@ private:
     folly::dynamic* result
   );
 
-  static bool setUserDefinedConstant(
+  static bool setConstant(
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,

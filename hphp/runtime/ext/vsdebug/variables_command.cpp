@@ -28,6 +28,9 @@
 namespace HPHP {
 namespace VSDEBUG {
 
+const StaticString s_user("user");
+const StaticString s_core("Core");
+
 VariablesCommand::VariablesCommand(
   Debugger* debugger,
   folly::dynamic message
@@ -155,62 +158,14 @@ bool VariablesCommand::executeImpl(
       );
     } else if (obj->objectType() == ServerObjectType::SubScope) {
       VariableSubScope* subScope = static_cast<VariableSubScope*>(obj);
-      const auto obj = subScope->m_variable.toObject().get();
-      if (obj == nullptr) {
-        throw DebuggerCommandException("Expected a server object.");
-      }
-
-      const auto cls = obj->getVMClass();
-      if (cls == nullptr) {
-        throw DebuggerCommandException("Expected an object class.");
-      }
-
-      switch (subScope->m_subScopeType) {
-        case ClassPropsType::Constants: {
-          // Add all the constants for the specified class to the result array.
-          addClassConstants(
-            session,
-            requestId,
-            start,
-            count,
-            cls,
-            subScope->m_variable,
-            &variables
-          );
-          break;
-        }
-
-        case ClassPropsType::StaticProps: {
-          // Add all the static props for the specified class to the
-          // result array.
-          addClassStaticProps(
-            session,
-            requestId,
-            start,
-            count,
-            cls,
-            subScope->m_variable,
-            &variables
-          );
-          break;
-        }
-
-        case ClassPropsType::PrivateBaseProps: {
-          addClassPrivateProps(
-            session,
-            requestId,
-            start,
-            count,
-            subScope,
-            subScope->m_variable,
-            &variables
-          );
-          break;
-        }
-
-        default:
-          throw DebuggerCommandException("Unexpected sub scope type");
-      }
+      addSubScopes(
+        subScope,
+        session,
+        requestId,
+        start,
+        count,
+        &variables
+      );
     }
   }
 
@@ -221,11 +176,12 @@ bool VariablesCommand::executeImpl(
   return false;
 }
 
-const StaticString s_user("user");
-const StaticString s_core("Core");
-
-int VariablesCommand::countScopeVariables(const ScopeObject* scope) {
-  return addScopeVariables(nullptr, -1, scope, nullptr);
+int VariablesCommand::countScopeVariables(
+  DebuggerSession* session,
+  const ScopeObject* scope,
+  int requestId
+) {
+  return addScopeVariables(session, requestId, scope, nullptr);
 }
 
 int VariablesCommand::addScopeVariables(
@@ -237,16 +193,42 @@ int VariablesCommand::addScopeVariables(
   assert(vars == nullptr || vars->isArray());
 
   switch (scope->m_scopeType) {
-    case Locals:
+    case ScopeType::Locals:
       return addLocals(session, requestId, scope, vars);
 
-    case UserDefinedConstants:
-      return addConstants(session, requestId, scope, s_user, vars);
+    case ScopeType::ServerConstants: {
+      Variant v;
+      int count = addConstants(session, requestId, s_user, nullptr);
+      addScopeSubSection(
+        session,
+        "User Defined Constants",
+        "[" + std::to_string(count) + "]",
+        "",
+        nullptr,
+        count,
+        ClassPropsType::UserDefinedConstants,
+        requestId,
+        v,
+        vars
+      );
 
-    case CoreConstants:
-      return addConstants(session, requestId, scope, s_core, vars);
+      count = addConstants(session, requestId, s_core, nullptr);
+      addScopeSubSection(
+        session,
+        "System Defined Constants",
+        "[" + std::to_string(count) + "]",
+        "",
+        nullptr,
+        count,
+        ClassPropsType::SystemDefinedConstants,
+        requestId,
+        v,
+        vars
+      );
 
-    case Superglobals:
+      return 2;
+    }
+    case ScopeType::Superglobals:
       return addSuperglobalVariables(session, requestId, scope, vars);
 
     default:
@@ -254,6 +236,81 @@ int VariablesCommand::addScopeVariables(
   }
 
   return 0;
+}
+
+void VariablesCommand::addSubScopes(
+  VariableSubScope* subScope,
+  DebuggerSession* session,
+  int64_t requestId,
+  int start,
+  int count,
+  folly::dynamic* variables
+) {
+  if (subScope->m_subScopeType == ClassPropsType::UserDefinedConstants) {
+    addConstants(session, requestId, s_user, variables);
+    sortVariablesInPlace(*variables);
+  } else if (subScope->m_subScopeType ==
+              ClassPropsType::SystemDefinedConstants) {
+    addConstants(session, requestId, s_core, variables);
+    sortVariablesInPlace(*variables);
+  } else {
+    const auto obj = subScope->m_variable.toObject().get();
+    if (obj == nullptr) {
+      throw DebuggerCommandException("Expected a server object.");
+    }
+
+    const auto cls = obj->getVMClass();
+    if (cls == nullptr) {
+      throw DebuggerCommandException("Expected an object class.");
+    }
+
+    switch (subScope->m_subScopeType) {
+      case ClassPropsType::Constants: {
+        // Add all the constants for the specified class to the result array
+        addClassConstants(
+          session,
+          requestId,
+          start,
+          count,
+          cls,
+          subScope->m_variable,
+          variables
+        );
+        break;
+      }
+
+      case ClassPropsType::StaticProps: {
+        // Add all the static props for the specified class to the
+        // result array.
+        addClassStaticProps(
+          session,
+          requestId,
+          start,
+          count,
+          cls,
+          subScope->m_variable,
+          variables
+        );
+        break;
+      }
+
+      case ClassPropsType::PrivateBaseProps: {
+        addClassPrivateProps(
+          session,
+          requestId,
+          start,
+          count,
+          subScope,
+          subScope->m_variable,
+          variables
+        );
+        break;
+      }
+
+      default:
+        throw DebuggerCommandException("Unexpected sub scope type");
+    }
+  }
 }
 
 int VariablesCommand::addLocals(
@@ -306,13 +363,9 @@ int VariablesCommand::addLocals(
 int VariablesCommand::addConstants(
   DebuggerSession* session,
   int64_t requestId,
-  const ScopeObject* scope,
   const StaticString& category,
   folly::dynamic* vars
 ) {
-  assert(scope->m_scopeType == ScopeType::UserDefinedConstants ||
-         scope->m_scopeType == ScopeType::CoreConstants);
-
   int count = 0;
 
   const auto& constants = lookupDefinedConstants(true)[category].toArray();
@@ -815,19 +868,21 @@ int VariablesCommand::addScopeSubSection(
       type
     );
 
-  folly::dynamic container = folly::dynamic::object;
-  folly::dynamic presentationHint = folly::dynamic::object;
-  folly::dynamic attribs = folly::dynamic::array;
-  attribs.push_back("constant");
-  attribs.push_back("readOnly");
-  presentationHint["attributes"] = attribs;
+  if (vars != nullptr) {
+    folly::dynamic container = folly::dynamic::object;
+    folly::dynamic presentationHint = folly::dynamic::object;
+    folly::dynamic attribs = folly::dynamic::array;
+    attribs.push_back("constant");
+    attribs.push_back("readOnly");
+    presentationHint["attributes"] = attribs;
 
-  container["name"] = displayName;
-  container["value"] = displayValue;
-  container["namedVariables"] = childCount;
-  container["presentationHint"] = presentationHint;
-  container["variablesReference"] = constantScopeId;
-  vars->push_back(container);
+    container["name"] = displayName;
+    container["value"] = displayValue;
+    container["namedVariables"] = childCount;
+    container["presentationHint"] = presentationHint;
+    container["variablesReference"] = constantScopeId;
+    vars->push_back(container);
+  }
 
   return constantScopeId;
 }

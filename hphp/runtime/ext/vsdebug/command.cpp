@@ -143,7 +143,7 @@ bool VSCommand::parseCommand(
 
     *command = new LaunchAttachCommand(debugger, clientMessage);
 
-  } if (cmdString == "completions") {
+  } else if (cmdString == "completions") {
 
     *command = new CompletionsCommand(debugger, clientMessage);
 

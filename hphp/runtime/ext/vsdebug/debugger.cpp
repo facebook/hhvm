@@ -407,6 +407,8 @@ void Debugger::sendThreadEventMessage(
 }
 
 void Debugger::requestInit() {
+  Lock lock(m_lock);
+
   m_totalRequestCount++;
 
   if (!clientConnected()) {
@@ -418,73 +420,62 @@ void Debugger::requestInit() {
   bool pauseRequest;
   RequestInfo* requestInfo;
 
-  {
-    Lock lock(m_lock);
-    bool dummy = isDummyRequest();
+  bool dummy = isDummyRequest();
 
-    // In server mode, attach logging hooks to redirect stdout and stderr
-    // to the debugger client. This is not needed in launch mode, because
-    // the wrapper has the actual stdout and stderr pipes to use directly.
-    if (RuntimeOption::ServerExecutionMode()) {
-      g_context->setStdout(&m_stdoutHook);
+  // In server mode, attach logging hooks to redirect stdout and stderr
+  // to the debugger client. This is not needed in launch mode, because
+  // the wrapper has the actual stdout and stderr pipes to use directly.
+  if (RuntimeOption::ServerExecutionMode()) {
+    g_context->setStdout(&m_stdoutHook);
 
-      if (isDummyRequest()) {
-        // Attach to stderr in server mode only for the dummy thread (to show
-        // any error spew from evals, etc). Attaching to all requests produces
-        // way too much error spew for the client. Users see stderr output
-        // for the webserver via server logs.
-        Logger::SetThreadHook(&m_stderrHook);
-      }
-    }
-
-    // Don't attach to the dummy request thread. DebuggerSession manages the
-    // dummy requests debugger hook state.
-    if (!dummy) {
-      requestInfo = attachToRequest(threadInfo);
-      pauseRequest = m_state != ProgramState::Running;
-    } else {
-      pauseRequest = false;
+    if (isDummyRequest()) {
+      // Attach to stderr in server mode only for the dummy thread (to show
+      // any error spew from evals, etc). Attaching to all requests produces
+      // way too much error spew for the client. Users see stderr output
+      // for the webserver via server logs.
+      Logger::SetThreadHook(&m_stderrHook);
     }
   }
 
-  // If the debugger was already paused when this request started, drop the lock
-  // and block the request in its command queue until the debugger resumes.
-  // Note: if the debugger client issues a resume between the time the lock
-  // is dropped above and entering the command queue, there will be a pending
-  // Resume command in this queue, which will cause this thread to unblock.
+  // Don't attach to the dummy request thread. DebuggerSession manages the
+  // dummy requests debugger hook state.
+  if (!dummy) {
+    requestInfo = attachToRequest(threadInfo);
+    pauseRequest = m_state != ProgramState::Running;
+  } else {
+    pauseRequest = false;
+  }
+
+  // If the debugger was already paused when this request started, block the
+  // request in its command queue until the debugger resumes.
   if (pauseRequest && requestInfo != nullptr) {
     processCommandQueue(getCurrentThreadId(), requestInfo);
   }
 }
 
 void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
-  bool pauseRequest = false;
+  Lock lock(m_lock);
 
-  {
-    Lock lock(m_lock);
-    pauseRequest = m_state != ProgramState::Running;
+  if (!clientConnected() && VSDebugExtension::s_launchMode) {
+    // If the debugger client launched this script in launch mode, and
+    // has detached while the request is still running, terminate the
+    // request by throwing a fatal PHP exception.
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Debugger client detached and we launched this script. "
+        "Killing request with fatal error."
+    );
 
-    if (!clientConnected() && VSDebugExtension::s_launchMode) {
-      // If the debugger client launched this script in launch mode, and
-      // has detached while the request is still running, terminate the
-      // request by throwing a fatal PHP exception.
-      VSDebugLogger::Log(
-        VSDebugLogger::LogLevelInfo,
-        "Debugger client detached and we launched this script. "
-          "Killing request with fatal error."
-      );
-
-      raise_fatal_error(
-        "Request terminated due to debugger client detaching.",
-        null_array,
-        false,
-        true,
-        true
-      );
-    }
+    raise_fatal_error(
+      "Request terminated due to debugger client detaching.",
+      null_array,
+      false,
+      true,
+      true
+    );
   }
 
-  if (pauseRequest) {
+  if (m_state != ProgramState::Running) {
     if (requestInfo->m_stepReason != nullptr) {
       processCommandQueue(
         getCurrentThreadId(),
@@ -502,45 +493,45 @@ void Debugger::processCommandQueue(
   RequestInfo* requestInfo,
   const char* reason /* = "pause" */
 ) {
-  {
-    Lock lock(m_lock);
-    if (requestInfo->m_pauseRecurseCount == 0) {
-      m_pausedRequestCount++;
-    }
+  m_lock.assertOwnedBySelf();
 
-    requestInfo->m_pauseRecurseCount++;
-    requestInfo->m_totalPauseCount++;
-
-    sendStoppedEvent(reason, threadId);
-
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelInfo,
-      "Thread %d pausing",
-      threadId
-    );
+  if (requestInfo->m_pauseRecurseCount == 0) {
+    m_pausedRequestCount++;
   }
 
+  requestInfo->m_pauseRecurseCount++;
+  requestInfo->m_totalPauseCount++;
+
+  sendStoppedEvent(reason, threadId);
+
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Thread %d pausing",
+    threadId
+  );
+
+  // Drop the lock before entering the command queue and re-acquire it
+  // when leaving the command queue.
+  m_lock.unlock();
   requestInfo->m_commandQueue.processCommands();
+  m_lock.lock();
 
-  {
-    Lock lock(m_lock);
-    requestInfo->m_pauseRecurseCount--;
-    if (requestInfo->m_pauseRecurseCount == 0) {
-      m_pausedRequestCount--;
-    }
-
-    sendContinuedEvent(threadId);
-
-    // Any server objects stored for the client for this request are invalid
-    // as soon as the thread is allowed to step.
-    cleanupServerObjectsForRequest(requestInfo);
-
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelInfo,
-      "Thread %d resumed",
-      threadId
-    );
+  requestInfo->m_pauseRecurseCount--;
+  if (requestInfo->m_pauseRecurseCount == 0) {
+    m_pausedRequestCount--;
   }
+
+  sendContinuedEvent(threadId);
+
+  // Any server objects stored for the client for this request are invalid
+  // as soon as the thread is allowed to step.
+  cleanupServerObjectsForRequest(requestInfo);
+
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Thread %d resumed",
+    threadId
+  );
 
   m_resumeCondition.notify_all();
 }
@@ -860,15 +851,39 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
     return clientConnected() ? ReadyToPause : ErrorNoClient;
   }
 
-  while (m_state != ProgramState::Running) {
+  // Wait here until the program is in a consistent state, and this thread
+  // is ready to pause the target: this is the case when the current thread
+  // is holding m_lock, the program is running (m_state == Running), and no
+  // threads are still in the process of resuming from the previous break
+  // (m_pausedRequestCount == 0).
+  while (m_state != ProgramState::Running || m_pausedRequestCount > 0) {
     m_lock.assertOwnedBySelf();
 
-    // If a resume is currently in progress, we must wait for all threads
-    // to resume execution before breaking again. Otherwise, the client will
-    // see interleaved continue and stop events and the the state of the UX
-    // becomes undefined.
-    std::unique_lock<std::mutex> conditionLock(m_resumeMutex);
-    while (m_pausedRequestCount > 0) {
+    if (m_state != ProgramState::Running) {
+      // The target is paused by another thread. Process this thread's
+      // command queue to service the current break.
+      // NOTE: processCommandQueue drops and re-acquires m_lock.
+      if (requestInfo != nullptr) {
+        processCommandQueue(getCurrentThreadId(), requestInfo);
+      } else {
+        // This is true only in the case of async-break, which is not
+        // specific to any request. Ok to proceed here, async-break just
+        // wants to break the target, and it is broken.
+        break;
+      }
+    } else {
+      assert(m_state == ProgramState::Running && m_pausedRequestCount > 0);
+
+      // The target is running, but at least one thread is still paused.
+      // This means a resume is in progress, drop the lock and wait for
+      // all threads to finish resuming.
+      //
+      // If a resume is currently in progress, we must wait for all threads
+      // to resume execution before breaking again. Otherwise, the client will
+      // see interleaved continue and stop events and the the state of the UX
+      // becomes undefined.
+      std::unique_lock<std::mutex> conditionLock(m_resumeMutex);
+
       // Need to drop m_lock before waiting.
       m_lock.unlock();
 
@@ -878,21 +893,6 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
       // And re-acquire it before continuing.
       m_lock.lock();
       conditionLock.lock();
-    }
-
-    // Between the time the resume condition was notified and the time this
-    // thread re-acquired m_lock, it is possible another thread paused the
-    // target again. If that happens, we need to enter the command queue
-    // and service the other pause before we can raise a breakpoint for this
-    // request thread.
-    m_lock.assertOwnedBySelf();
-    if (requestInfo != nullptr && m_state != ProgramState::Running) {
-      // Drop the lock and enter the command queue.
-      m_lock.unlock();
-      processCommandQueue(getCurrentThreadId(), requestInfo);
-
-      // Re-acquire before continuing.
-      m_lock.lock();
     }
   }
 
@@ -1356,36 +1356,32 @@ void Debugger::onLineBreakpointHit(
   const HPHP::Unit* compilationUnit,
   int line
 ) {
-
+  Lock lock(m_lock);
   std::string stopReason;
   int matchingBpId = -1;
   const std::string filePath = getFilePathForUnit(compilationUnit);
 
-  {
-    Lock lock(m_lock);
+  if (prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
+    return;
+  }
 
-    if (prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
-      return;
-    }
+  BreakpointManager* bpMgr = m_session->getBreakpointManager();
+  const auto fileBps = bpMgr->getBreakpointIdsByFile(filePath);
 
-    BreakpointManager* bpMgr = m_session->getBreakpointManager();
-    const auto fileBps = bpMgr->getBreakpointIdsByFile(filePath);
+  for (auto it = fileBps.begin(); it != fileBps.end(); it++) {
+    const int bpId = *it;
+    Breakpoint* bp = bpMgr->getBreakpointById(bpId);
+    if (line >= bp->m_resolvedLocation.m_startLine &&
+        line <= bp->m_resolvedLocation.m_endLine &&
+        bpMgr->isBreakConditionSatisified(ri, bp)) {
 
-    for (auto it = fileBps.begin(); it != fileBps.end(); it++) {
-      const int bpId = *it;
-      Breakpoint* bp = bpMgr->getBreakpointById(bpId);
-      if (line >= bp->m_resolvedLocation.m_startLine &&
-          line <= bp->m_resolvedLocation.m_endLine &&
-          bpMgr->isBreakConditionSatisified(ri, bp)) {
+      matchingBpId = bpId;
+      stopReason = getStopReasonForBp(matchingBpId, bp->m_path, bp->m_line);
 
-        matchingBpId = bpId;
-        stopReason = getStopReasonForBp(matchingBpId, bp->m_path, bp->m_line);
-
-        // Breakpoint hit!
-        pauseTarget(ri, stopReason.c_str());
-        bpMgr->onBreakpointHit(bpId);
-        break;
-      }
+      // Breakpoint hit!
+      pauseTarget(ri, stopReason.c_str());
+      bpMgr->onBreakpointHit(bpId);
+      break;
     }
   }
 
@@ -1446,48 +1442,47 @@ void Debugger::onExceptionBreakpointHit(
   userMsg += stopReason + ": ";
   userMsg += exceptionMsg;
 
-  {
-    Lock lock(m_lock);
+  Lock lock(m_lock);
 
-    if (!clientConnected()) {
-      return;
-    }
-
-    BreakpointManager* bpMgr = m_session->getBreakpointManager();
-    ExceptionBreakMode breakMode = bpMgr->getExceptionBreakMode();
-
-    switch (breakMode) {
-      case BreakNone:
-        // Do not break on exceptions.
-        return;
-      case BreakUnhandled:
-      case BreakUserUnhandled:
-        // The PHP VM doesn't give us any way to distinguish between handled
-        // and unhandled exceptions. Print a message to the console but do
-        // not break.
-        sendUserMessage(userMsg.c_str(), DebugTransport::OutputLevelWarning);
-        return;
-      case BreakAll:
-        break;
-      default:
-        assert(false);
-    }
-
-    if (prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
-      return;
-    }
-
-    pauseTarget(ri, stopReason.c_str());
+  if (!clientConnected()) {
+    return;
   }
 
+  BreakpointManager* bpMgr = m_session->getBreakpointManager();
+  ExceptionBreakMode breakMode = bpMgr->getExceptionBreakMode();
+
+  switch (breakMode) {
+    case BreakNone:
+      // Do not break on exceptions.
+      return;
+    case BreakUnhandled:
+    case BreakUserUnhandled:
+      // The PHP VM doesn't give us any way to distinguish between handled
+      // and unhandled exceptions. Print a message to the console but do
+      // not break.
+      sendUserMessage(userMsg.c_str(), DebugTransport::OutputLevelWarning);
+      return;
+    case BreakAll:
+      break;
+    default:
+      assert(false);
+  }
+
+  if (prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
+    return;
+  }
+
+  pauseTarget(ri, stopReason.c_str());
   processCommandQueue(getCurrentThreadId(), ri, stopReason.c_str());
 }
 
 bool Debugger::onHardBreak() {
   static constexpr char* stopReason = "hphp_debug_break()";
 
+  Lock lock(m_lock);
   VMRegAnchor regAnchor;
   RequestInfo* ri = getRequestInfo();
+
   if (ri == nullptr) {
     return false;
   }
@@ -1496,22 +1491,17 @@ bool Debugger::onHardBreak() {
     enterDebuggerIfPaused(ri);
   }
 
-  {
-    Lock lock(m_lock);
-
-    if (g_context->m_dbgNoBreak || ri->m_flags.doNotBreak) {
-      return false;
-    }
-
-    if (!clientConnected() ||
-        prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
-
-      return false;
-    }
-
-    pauseTarget(ri, stopReason);
+  if (g_context->m_dbgNoBreak || ri->m_flags.doNotBreak) {
+    return false;
   }
 
+  if (!clientConnected() ||
+      prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
+
+    return false;
+  }
+
+  pauseTarget(ri, stopReason);
   processCommandQueue(getCurrentThreadId(), ri, stopReason);
 
   // We actually need to step out here, because as far as the PC filter is

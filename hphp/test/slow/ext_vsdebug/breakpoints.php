@@ -296,6 +296,28 @@ sendVsCommand(array(
 $msg = json_decode(getNextVsDebugMessage(), true);
 resumeTarget();
 
+// Verify hard break was hit.
+$msg = json_decode(getNextVsDebugMessage(), true);
+checkObj($msg, array(
+  "type" => "event",
+  "event" => "stopped",
+  "body" => array(
+      "threadId" => 1,
+      "reason" => "hphp_debug_break()",
+      "allThreadsStopped" => false
+  )));
+
+$msg = json_decode(getNextVsDebugMessage(), true);
+checkObj($msg, array(
+  "type" => "event",
+  "event" => "stopped",
+  "body" => array(
+      "threadId" => 1,
+      "reason" => "hphp_debug_break()",
+      "allThreadsStopped" => true
+  )));
+resumeTarget();
+
 // Verify that the script exited.
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, array(

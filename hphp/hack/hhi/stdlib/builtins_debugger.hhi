@@ -13,6 +13,7 @@ function hphpd_install_user_command($cmd, $clsname);
 function hphpd_auth_token(): string;
 function hphpd_get_user_commands();
 function hphpd_break(bool $condition = true): void;
+function hphp_debug_break(bool $condition = true): bool;
 function hphp_debugger_attached(): bool;
 function hphpd_get_client($name = null);
 function hphpd_client_ctrl($name, $op);

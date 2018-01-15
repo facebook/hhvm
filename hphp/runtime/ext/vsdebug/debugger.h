@@ -288,6 +288,12 @@ struct Debugger final {
   // Called when the client requests an async-break of all threads.
   void onAsyncBreak();
 
+  // Called when the user code includes a hard breakpoint, via a call
+  // to hphp_debug_break().
+  // Returns true if the debugger successfully broke in (and then resumed,
+  // since the thread is returning) or false if no debugger was attached.
+  bool onHardBreak();
+
   // Checks if we are stepping for a particular request.
   static bool isStepInProgress(RequestInfo* requestInfo) {
     return requestInfo->m_stepReason != nullptr ||

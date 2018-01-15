@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -35,6 +37,7 @@ struct DebuggerExtension final : Extension {
     HHVM_FE(hphpd_auth_token);
     HHVM_FE(hphpd_break);
     HHVM_FE(hphp_debugger_attached);
+    HHVM_FE(hphp_debug_break);
     loadSystemlib();
   }
 } s_debugger_extension;
@@ -67,10 +70,28 @@ void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
   TRACE(5, "out f_hphpd_break()\n");
 }
 
+// Hard breakpoint for the VSDebug extension debugger.
+bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
+  if (!condition) {
+    return false;
+  }
+
+  auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
+  if (debugger == nullptr) {
+    return false;
+  }
+
+  return debugger->onHardBreak();
+}
+
 // Quickly determine if a debugger is attached to the current thread.
 bool HHVM_FUNCTION(hphp_debugger_attached) {
-  return (RuntimeOption::EnableHphpdDebugger &&
-          (Debugger::GetProxy() != nullptr));
+  if (RuntimeOption::EnableHphpdDebugger && (Debugger::GetProxy() != nullptr)) {
+    return true;
+  }
+
+  auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
+  return (debugger != nullptr && debugger->clientConnected());
 }
 
 const StaticString

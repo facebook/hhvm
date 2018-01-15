@@ -1448,6 +1448,45 @@ void Debugger::onExceptionBreakpointHit(
   processCommandQueue(getCurrentThreadId(), ri, stopReason.c_str());
 }
 
+bool Debugger::onHardBreak() {
+  static constexpr char* stopReason = "hphp_debug_break()";
+
+  VMRegAnchor regAnchor;
+  RequestInfo* ri = getRequestInfo();
+  if (ri == nullptr) {
+    return false;
+  }
+
+  if (!Debugger::isStepInProgress(ri)) {
+    enterDebuggerIfPaused(ri);
+  }
+
+  {
+    Lock lock(m_lock);
+
+    if (g_context->m_dbgNoBreak || ri->m_flags.doNotBreak) {
+      return false;
+    }
+
+    if (!clientConnected() ||
+        prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
+
+      return false;
+    }
+
+    pauseTarget(ri, stopReason);
+  }
+
+  processCommandQueue(getCurrentThreadId(), ri, stopReason);
+
+  // We actually need to step out here, because as far as the PC filter is
+  // concerned, hphp_debug_break() was a function call that increased the
+  // stack depth.
+  phpDebuggerStepOut();
+
+  return true;
+}
+
 void Debugger::onAsyncBreak() {
   Lock lock(m_lock);
 

@@ -36,4 +36,14 @@ namespace {
   <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
   function hphp_debugger_attached(): bool;
 
+  /* Invokes a hard breakpoint. This routine will break into the debugger if
+   * and only if the debugger is enabled and a debugger client is currently
+   * attached.
+   * @param bool $condition - Optional condition. If specified, the debugger
+   *  will only break if the condition evaluates to true.
+   * @return bool - TRUE if the program successfully broke in (and has since
+   *   resumed), FALSE if no debugger was attached.
+   */
+  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  function hphp_debug_break(bool $condition = true): bool;
 }

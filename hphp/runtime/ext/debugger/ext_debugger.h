@@ -25,6 +25,7 @@ namespace HPHP {
 
 String HHVM_FUNCTION(hphpd_auth_token);
 void HHVM_FUNCTION(hphpd_break, bool condition = true);
+bool HHVM_FUNCTION(hphp_debug_break, bool condition = true);
 bool HHVM_FUNCTION(hphp_debugger_attached);
 Array HHVM_FUNCTION(debugger_get_info);
 

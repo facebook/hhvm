@@ -1527,6 +1527,26 @@ let equiv prog prog' startlabelpairs =
           donext (add_assumption (pc,pc') asn assumed) todo
       ) in
 
+    (* Isset and branch where we know statically that a variable is
+      unset. This should morally be in one_side_x, but we don't currently do
+      any non-trivial pattern-matching there, so I'm putting it here, even
+      though it then can't participate in the loop-detecting code *)
+    let issetl_jmpz_pattern varset =
+      ((unnamed_filter uIssetL) $$ uJmpZ)
+      $? (fun (n, _lab) -> not (VarSet.mem (Local.Unnamed n) varset)) in
+
+    let issetl_jmpz_action_left =
+      ((issetl_jmpz_pattern vs) $*$ parse_any)
+     $>> (fun ((_local,lab),_) (_,_) ->
+           let newpc = (hs_of_pc pc, LabelMap.find lab labelmap) in
+           check newpc pc' asn (add_assumption (pc,pc') asn assumed) todo) in
+
+    let issetl_jmpz_action_right =
+      (parse_any $*$ (issetl_jmpz_pattern vs'))
+     $>> (fun (_, (_local',lab')) (_,_) ->
+           let newpc' = (hs_of_pc pc', LabelMap.find lab' labelmap') in
+           check pc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
+
     (* last, failure, case for use in bigmatch *)
     let failure_pattern_action =
       parse_any
@@ -1547,6 +1567,8 @@ let equiv prog prog' startlabelpairs =
       two_vget_cget_bind_action;
       two_vget_retv_pattern_action;
       two_vget_binds_action;
+      issetl_jmpz_action_left;
+      issetl_jmpz_action_right;
       failure_pattern_action;
       ] in
     bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))

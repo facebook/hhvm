@@ -719,6 +719,7 @@ module Naming                               = struct
   let dynamic_class_name_in_strict_mode     = 2078 (* DONT MODIFY!!!! *)
   let xhp_optional_required_attr            = 2079 (* DONT MODIFY!!!! *)
   let xhp_required_with_default             = 2080 (* DONT MODIFY!!!! *)
+  let variable_variables_disallowed         = 2081 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1441,6 +1442,10 @@ let xhp_required_with_default pos id =
   add Naming.xhp_required_with_default
     pos
     ("XHP attribute " ^ id ^ " cannot be marked as required and provide a default")
+
+let variable_variables_disallowed pos =
+  add Naming.variable_variables_disallowed pos
+    "Variable variables are not legal; all variable identifiers must be static strings."
 
 (*****************************************************************************)
 (* Init check errors *)

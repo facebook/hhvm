@@ -5,6 +5,6 @@ function f(inout string $s): void {}
 function test(): void {
   $foo = 'bar';
   $baz = 'foo';
-  /* HH_FIXME[1002] ignore the parse error */
+  /* HH_FIXME[2081] ignore the variable-variable error and pretend it's legal */
   f(inout $$baz);
 }

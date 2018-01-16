@@ -72,6 +72,7 @@ module type S = sig
   val dynamic_new_in_strict_mode : Pos.t -> unit
   val xhp_optional_required_attr : Pos.t -> string -> unit
   val xhp_required_with_default : Pos.t -> string -> unit
+  val variable_variables_disallowed : Pos.t -> unit
   val void_cast: Pos.t -> unit
   val object_cast: Pos.t -> string -> unit
   val unset_cast: Pos.t -> unit

@@ -2460,6 +2460,7 @@ module Make (GetLocals : GetLocals) = struct
     | BracedExpr _ ->
       N.Any
     | Dollar _ ->
+      Errors.variable_variables_disallowed p;
       N.Any
     | Yield_from _ ->
       Errors.unimplemented_feature p "yield from expressions";

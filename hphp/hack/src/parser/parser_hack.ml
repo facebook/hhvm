@@ -3218,15 +3218,7 @@ and expr_atomic ~allow_class ~class_const env =
         else
           let rec make n =
             if n = 0 then Lvar (pos, var_id) else Dollar (pos, make (n-1)) in
-          let e = make dollars in
-          if dollars < 1 || env.mode = FileInfo.Mdecl then
-            e
-          else begin
-            error_at env pos ("A valid variable name starts with a " ^
-            "letter or underscore, followed by any number of letters, " ^
-            "numbers, or underscores");
-            e
-          end
+          make dollars
   | Tcolon ->
       L.back env.lb;
       let name = identifier env in

@@ -82,6 +82,8 @@ and fmt_hints ~tparams ~namespace hints =
   String.concat ", " (List.map hints (fmt_hint ~tparams ~namespace))
 
 let can_be_nullable h =
+  not (Emit_env.is_hh_syntax_enabled ())
+  ||
   match snd h with
   | A.Hfun (_, _, _, _, _)
   | A.Hoption (_, A.Hfun (_, _, _, _, _))
@@ -97,10 +99,15 @@ let rec hint_to_type_constraint
   ~kind ~tparams ~skipawaitable ~namespace (_, h) =
   match h with
   | A.Happly ((_, "mixed"), []) ->
-    TC.make None []
+    if Emit_env.is_hh_syntax_enabled ()
+    then TC.make None []
+    else TC.make (Some "mixed") []
 
   | A.Happly ((_, "void"), []) when kind <> TypeDef ->
-    TC.make None []
+    if Emit_env.is_hh_syntax_enabled ()
+    || Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options
+    then TC.make None []
+    else TC.make (Some "void") [TC.HHType; TC.ExtendedHint]
 
   | A.Hfun _ ->
     TC.make None []

@@ -119,7 +119,8 @@ std::pair<String, int> ExtendedException::getFileAndLine() const {
 void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
   Array bt = createBacktrace(BacktraceArgs()
                           .skipTop(skipFrame)
-                          .withSelf());
+                          .withSelf()
+                          .withMetadata());
   m_btp = bt.get();
 }
 

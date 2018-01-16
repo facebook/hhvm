@@ -31,9 +31,8 @@ let print_patch filename tcopt (line, kind, type_)  =
 (*****************************************************************************)
 
 let add_file env fn =
-  let disk_needs_parsing =
-    Relative_path.Set.add env.ServerEnv.disk_needs_parsing fn in
-  { env with ServerEnv.disk_needs_parsing = disk_needs_parsing }
+  let failed_parsing = Relative_path.Set.add env.ServerEnv.failed_parsing fn in
+  { env with ServerEnv.failed_parsing = failed_parsing }
 
 (* Maps filenames to the contents of those files, split into lines. Each line
  * is numbered with the line number of the *original* line in the file, before

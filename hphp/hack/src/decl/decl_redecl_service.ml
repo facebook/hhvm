@@ -23,7 +23,7 @@ open Typing_deps
 (*****************************************************************************)
 (* The neutral element of declaration (cf procs/multiWorker.mli) *)
 (*****************************************************************************)
-let otf_neutral =  Errors.empty
+let otf_neutral =  Errors.empty, Relative_path.Set.empty
 let compute_deps_neutral = DepSet.empty, DepSet.empty
 
 (*****************************************************************************)
@@ -44,11 +44,30 @@ end)
 (* Re-declaring the types in a file *)
 (*****************************************************************************)
 
-let on_the_fly_decl_file tcopt errors fn =
-  let decl_errors, () = Errors.do_with_context fn Errors.Decl begin fun () ->
+(* Returns a list of files that are considered to have failed decl and must
+ * be redeclared every time the typechecker discovers a file change *)
+let get_decl_failures decl_errors fn =
+  List.fold_left decl_errors ~f:begin fun failed error ->
+    (* It is important to add the file that is the cause of the failure.
+     * What can happen is that during a declaration phase, we realize
+     * that a parent class is outdated. When this happens, we redeclare
+     * the class, even if it is in a different file. Therefore, the file
+     * where the error occurs might be different from the file we
+     * are declaring right now.
+     *)
+    let file_with_error = Pos.filename (Errors.get_pos error) in
+    assert (file_with_error <> Relative_path.default);
+    let failed = Relative_path.Set.add failed file_with_error in
+    let failed = Relative_path.Set.add failed fn in
+    failed
+  end ~init:Relative_path.Set.empty
+
+let on_the_fly_decl_file tcopt (errors, failed) fn =
+  let decl_errors, (), _ = Errors.do_with_context fn Errors.Decl begin fun () ->
     Decl.make_env tcopt fn
   end in
-  Errors.merge decl_errors errors
+  let failed' = get_decl_failures (Errors.get_error_list decl_errors) fn in
+  Errors.merge decl_errors errors, Relative_path.Set.union failed failed'
 
 (*****************************************************************************)
 (* Given a set of classes, compare the old and the new type and deduce
@@ -111,12 +130,13 @@ let compute_gconsts_deps old_gconsts (to_redecl, to_recheck) gconsts =
 let redeclare_files tcopt filel =
   List.fold_left filel
     ~f:(on_the_fly_decl_file tcopt)
-    ~init:Errors.empty
+    ~init:(Errors.empty, Relative_path.Set.empty)
 
 let otf_decl_files tcopt filel =
   SharedMem.invalidate_caches();
   (* Redeclaring the files *)
-  redeclare_files tcopt filel
+  let errors, failed = redeclare_files tcopt filel in
+  errors, failed
 
 let compute_deps fast filel =
   let infol =
@@ -168,8 +188,8 @@ let load_and_compute_deps _acc filel =
 (* Merges the results coming back from the different workers *)
 (*****************************************************************************)
 
-let merge_on_the_fly errorl1 errorl2 =
-  Errors.merge errorl1 errorl2
+let merge_on_the_fly (errorl1, failed1) (errorl2, failed2) =
+  Errors.merge errorl1 errorl2, Relative_path.Set.union failed1 failed2
 
 let merge_compute_deps (to_redecl1, to_recheck1) (to_redecl2, to_recheck2) =
   DepSet.union to_redecl1 to_redecl2, DepSet.union to_recheck1 to_recheck2
@@ -180,7 +200,7 @@ let merge_compute_deps (to_redecl1, to_recheck1) (to_redecl2, to_recheck2) =
 let parallel_otf_decl workers bucket_size tcopt fast fnl =
   try
     OnTheFlyStore.store (tcopt, fast);
-    let errors =
+    let errors, failed =
       MultiWorker.call
         workers
         ~job:load_and_otf_decl_files
@@ -197,7 +217,7 @@ let parallel_otf_decl workers bucket_size tcopt fast fnl =
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
     OnTheFlyStore.clear();
-    errors, to_redecl, to_recheck
+    errors, failed, to_redecl, to_recheck
   with e ->
     if SharedMem.is_heap_overflow () then
       Exit_status.exit Exit_status.Redecl_heap_overflow
@@ -354,9 +374,9 @@ let redo_type_decl workers ~bucket_size tcopt all_oldified_defs fast defs =
   let result =
     if List.length fnl < 10
     then
-      let errors = otf_decl_files tcopt fnl in
+      let errors, failed = otf_decl_files tcopt fnl in
       let to_redecl, to_recheck = compute_deps fast fnl in
-      errors, to_redecl, to_recheck
+      errors, failed, to_redecl, to_recheck
     else parallel_otf_decl workers bucket_size tcopt fast fnl
   in
   remove_old_defs defs all_elems;

@@ -21,7 +21,11 @@ module TypeCheckStore = GlobalStorage.Make(struct
   type t = TypecheckerOptions.t
 end)
 
-let neutral = Errors.empty
+let neutral = Errors.empty,
+  {
+    Decl_service.errs = Relative_path.Set.empty;
+    lazy_decl_errs = Relative_path.Set.empty;
+  }
 
 (*****************************************************************************)
 (* The job that will be run on the workers *)
@@ -57,7 +61,7 @@ let check_const opts fn x =
     let cst = Naming.global_const opts cst in
     Some (Typing.gconst_def opts cst)
 
-let check_file opts errors (fn, file_infos) =
+let check_file opts (errors, failed, decl_failed) (fn, file_infos) =
   let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in
   let ignore_type_fun opts fn name =
     ignore(type_fun opts fn name) in
@@ -67,17 +71,33 @@ let check_file opts errors (fn, file_infos) =
     ignore(check_typedef opts fn name) in
   let ignore_check_const opts fn name =
     ignore(check_const opts fn name) in
-  let errors', () = Errors.do_with_context fn Errors.Typing
+  let errors', (), err_flags = Errors.do_with_context fn Errors.Typing
       begin fun () ->
     SSet.iter (ignore_type_fun opts fn) n_funs;
     SSet.iter (ignore_type_class opts fn) n_classes;
     SSet.iter (ignore_check_typedef opts fn) n_types;
     SSet.iter (ignore_check_const opts fn) n_consts;
   end in
-  Errors.merge errors' errors
+  let lazy_decl_err = Errors.get_lazy_decl_flag err_flags in
+  let errors = Errors.merge errors' errors in
+  let failed =
+    if not (Errors.is_empty errors')
+    then Relative_path.Set.add failed fn
+    else failed in
+  let decl_failed =
+    match lazy_decl_err with
+    | Some file ->  Relative_path.Set.add
+                      (Relative_path.Set.add decl_failed fn)
+                      file
+    | None -> decl_failed in
+  errors, failed, decl_failed
 
-let check_files opts errors fnl =
+let check_files opts (errors, err_info) fnl =
   SharedMem.invalidate_caches();
+  let { Decl_service.
+    errs = failed;
+    lazy_decl_errs = decl_failed;
+  } = err_info in
   let check_file =
     if !Utils.profile
     then (fun acc fn ->
@@ -90,9 +110,15 @@ let check_files opts errors fnl =
         !Utils.log (Printf.sprintf "%f %s [type-check]" duration filepath);
         result)
     else check_file opts in
-  let errors = List.fold_left fnl ~f:check_file ~init:errors in
+  let errors, failed, decl_failed = List.fold_left fnl
+    ~f:check_file ~init:(errors, failed, decl_failed) in
   TypingLogger.flush_buffer ();
-  errors
+
+  let error_record = { Decl_service.
+    errs = failed;
+    lazy_decl_errs = decl_failed;
+  } in
+  errors, error_record
 
 let load_and_check_files acc fnl =
   let opts = TypeCheckStore.load() in

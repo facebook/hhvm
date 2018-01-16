@@ -337,7 +337,7 @@ module ServerInitCommon = struct
 
   let parsing ~lazy_parse genv env ~get_next t =
     let quick = lazy_parse in
-    let files_info, errorl, _=
+    let files_info, errorl, failed =
       Parsing_service.go
         ~quick
         genv.workers
@@ -353,6 +353,7 @@ module ServerInitCommon = struct
     let env = { env with
       files_info;
       errorl = Errors.merge errorl env.errorl;
+      failed_parsing = Relative_path.Set.union env.failed_parsing failed;
     } in
     env, (Hh_logger.log_duration "Parsing" t)
 
@@ -366,11 +367,10 @@ module ServerInitCommon = struct
   let naming env t =
     let env =
       Relative_path.Map.fold env.files_info ~f:begin fun k v env ->
-        let errorl, failed_naming = NamingGlobal.ndecl_file env.tcopt k v in
+        let errorl, failed = NamingGlobal.ndecl_file env.tcopt k v in
         { env with
           errorl = Errors.merge errorl env.errorl;
-          failed_naming =
-            Relative_path.Set.union env.failed_naming failed_naming;
+          failed_naming = Relative_path.Set.union env.failed_naming failed;
         }
       end ~init:env
     in
@@ -381,7 +381,7 @@ module ServerInitCommon = struct
 
   let type_decl genv env fast t =
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
-    let errorl =
+    let errorl, failed_decl =
       Decl_service.go ~bucket_size genv.workers env.tcopt fast in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
@@ -391,6 +391,7 @@ module ServerInitCommon = struct
     let env = {
       env with
       errorl = Errors.merge errorl env.errorl;
+      failed_decl;
     } in
     env, t
 
@@ -438,13 +439,19 @@ module ServerInitCommon = struct
     if ServerArgs.ai_mode genv.options = None
     then begin
       let count = Relative_path.Map.cardinal fast in
-      let errorl =
+      let errorl, err_info =
         Typing_check_service.go genv.workers env.tcopt fast in
+      let { Decl_service.
+        errs = failed;
+        lazy_decl_errs = lazy_decl_failed;
+      } = err_info in
       let hs = SharedMem.heap_size () in
       Hh_logger.log "Heap size: %d" hs;
       HackEventLogger.type_check_end count t;
       let env = { env with
         errorl = Errors.merge errorl env.errorl;
+        failed_decl = Relative_path.Set.union env.failed_decl lazy_decl_failed;
+        failed_check = failed;
       } in
       env, (Hh_logger.log_duration "Type-check" t)
     end else env, t
@@ -588,8 +595,7 @@ module ServerInitCommon = struct
       let t = update_files genv env.files_info t in
       let env, t = naming env t in
       let fast = FileInfo.simplify_fast env.files_info in
-      let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing  in
-      let fast = Relative_path.Set.fold failed_parsing
+      let fast = Relative_path.Set.fold env.failed_parsing
         ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
       type_check genv env fast t
 
@@ -666,8 +672,7 @@ module ServerEagerInit : InitKind = struct
     let t = update_files genv env.files_info t in
     let env, t = naming env t in
     let fast = FileInfo.simplify_fast env.files_info in
-    let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-    let fast = Relative_path.Set.fold failed_parsing
+    let fast = Relative_path.Set.fold env.failed_parsing
       ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
     let env, t =
       if lazy_level <> Off then env, t
@@ -711,8 +716,8 @@ module ServerEagerInit : InitKind = struct
       (* But we still want to keep it in the set of things that need to be
        * reparsed in the next round of incremental updates. *)
       let env = { env with
-        disk_needs_parsing =
-          Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
+        failed_parsing =
+          Relative_path.Set.union env.failed_parsing changed_while_parsing;
       } in
       type_check_dirty genv env old_fast fast dirty_files Relative_path.Set.empty t, state
     | Error err ->
@@ -844,16 +849,16 @@ module ServerIncrementalInit : InitKind = struct
       (* Declare the types of just the dirty files *)
       let env, t = type_decl genv env fast t in
       let env = { env with
-        disk_needs_parsing =
-          Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
+        failed_parsing =
+          Relative_path.Set.union env.failed_parsing changed_while_parsing;
       } in
       let env = { env with
         files_info= old_info;
       } in
       (* The original dirty files and build targets need to be rechecked *)
       let env = { env with
-        disk_needs_parsing = Relative_path.Set.union
-          env.disk_needs_parsing dirty_files_and_build_targets
+        failed_parsing =
+        Relative_path.Set.union env.failed_parsing dirty_files_and_build_targets
       } in
       let t = update_files genv env.files_info t in
       let t = delete_tmp_directory t in
@@ -944,13 +949,12 @@ module ServerLazyInit : InitKind = struct
 
       (* Add all files from fast to the files_info object *)
       let fast = FileInfo.simplify_fast env.files_info in
-      let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-      let fast = Relative_path.Set.fold failed_parsing
+      let fast = Relative_path.Set.fold env.failed_parsing
         ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
 
       let env = { env with
-        disk_needs_parsing =
-          Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
+        failed_parsing =
+          Relative_path.Set.union env.failed_parsing changed_while_parsing;
       } in
 
       (* Separate the dirty files from the files whose decl only changed *)
@@ -992,13 +996,8 @@ end
 let ai_check genv files_info env t =
   match ServerArgs.ai_mode genv.options with
   | Some ai_opt ->
-    let failed_parsing, failed_decl, failed_check =
-      Errors.get_failed_files env.errorl Errors.Parsing,
-      Errors.get_failed_files env.errorl Errors.Decl,
-      Errors.get_failed_files env.errorl Errors.Typing
-    in
     let all_passed = List.for_all
-      [failed_parsing; failed_decl; failed_check;]
+      [env.failed_parsing; env.failed_decl; env.failed_check;]
       (fun m -> Relative_path.Set.is_empty m) in
     if not all_passed then begin
       Hh_logger.log "Cannot run AI because of errors in source";
@@ -1006,11 +1005,12 @@ let ai_check genv files_info env t =
     end
     else begin
       let check_mode = ServerArgs.check_mode genv.options in
-      let errorl = Ai.go
+      let errorl, failed = Ai.go
           Typing_check_utils.check_defs genv.workers files_info
           env.tcopt ai_opt check_mode in
       let env = { env with
                   errorl = Errors.merge errorl env.errorl;
+                  failed_check = Relative_path.Set.union failed env.failed_check;
                 } in
       env, (Hh_logger.log_duration "Ai" t)
     end

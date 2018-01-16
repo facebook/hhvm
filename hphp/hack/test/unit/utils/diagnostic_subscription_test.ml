@@ -34,12 +34,12 @@ let test_update () =
   let a_path = create_path "A" in
   let b_path = create_path "B" in
 
-  let foo_error_a, () =
+  let foo_error_a, (), _ =
   Errors.do_with_context a_path Errors.Parsing begin fun () ->
     error_in a_path "foo";
     ()
   end in
-  let bar_error_a, () =
+  let bar_error_a, (), _ =
     Errors.do_with_context a_path Errors.Parsing begin fun () ->
     error_in a_path "bar";
     ()
@@ -51,7 +51,7 @@ let test_update () =
     Errors.Parsing
   in
 
-  let baz_error_b, () =
+  let baz_error_b, (), _ =
     Errors.do_with_context b_path Errors.Parsing begin fun () ->
     error_in b_path "baz";
     ()
@@ -148,7 +148,7 @@ let test_error_sources () =
   let a_path = create_path "A" in
   let b_path = create_path "B" in
 
-  let errors, () =
+  let errors, (), _ =
     Errors.do_ begin fun () ->
       Errors.run_in_context a_path Errors.Typing begin fun () ->
         error_in a_path "error from a";

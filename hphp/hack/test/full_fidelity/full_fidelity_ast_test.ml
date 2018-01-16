@@ -24,7 +24,7 @@ type test_case = {
 
 (** This actually uses the classic parser, not the full-fidelity parser. *)
 let sanity_test_classic_parser source =
-  let errorl, result =
+  let errorl, result, _ =
     Errors.do_ begin fun () ->
       Parser_hack.program_with_default_popt
         (Relative_path.default)
@@ -48,7 +48,7 @@ let full_fidelity_to_classic source =
   str
 
 let comment_compare source =
-  let errorl, legacy =
+  let errorl, legacy, _ =
     Errors.do_ begin fun () ->
       Parser_hack.program_with_default_popt
         (Relative_path.default)
@@ -65,7 +65,7 @@ let comment_compare source =
     exit (-1);
   end;
 
-  let errorl, result =
+  let errorl, result, _ =
     let path = Relative_path.default in
     let env = Lowerer.make_env ~include_line_comments:true path in
     let source_text = SourceText.make path source in

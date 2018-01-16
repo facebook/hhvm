@@ -32,7 +32,7 @@ let debug () fnl =
   List.iter fnl begin fun (filepath : Path.t) ->
     try
       (* Checking that we can parse the output *)
-      let parsing_errors1, parser_output1 = Errors.do_ begin fun () ->
+      let parsing_errors1, parser_output1, _ = Errors.do_ begin fun () ->
         let rp =
           Relative_path.create Relative_path.Dummy (filepath :> string) in
         Full_fidelity_ast.(from_file_with_legacy (make_env rp))
@@ -92,7 +92,7 @@ let debug () fnl =
       end;
 
       (* Checking that we can parse the output *)
-      let parsing_errors2, _parser_output2 = Errors.do_ begin fun () ->
+      let parsing_errors2, _parser_output2, _ = Errors.do_ begin fun () ->
         let rp = Relative_path.(create Dummy (filepath :> string)) in
         Parser_hack.program_with_default_popt rp content
       end in

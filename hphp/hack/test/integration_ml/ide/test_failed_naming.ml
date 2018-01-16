@@ -66,13 +66,11 @@ let () =
 
   (* Files with parsing errors are not redeclared during lazy recheck, so
    * failed_naming should remain unchanged *)
-
-  let failed_naming = Errors.get_failed_files env.ServerEnv.errorl Errors.Naming in
   let found =
     Relative_path.Set.mem
-      failed_naming (Relative_path.from_root foo1_name) ||
+      env.ServerEnv.failed_naming (Relative_path.from_root foo1_name) ||
     Relative_path.Set.mem
-      failed_naming (Relative_path.from_root foo2_name)
+      env.ServerEnv.failed_naming (Relative_path.from_root foo2_name)
   in
   if not found then Test.fail "File missing from failed_naming";
 

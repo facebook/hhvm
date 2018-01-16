@@ -574,7 +574,7 @@ let test_decl_compare filename popt files_contents tcopt files_info =
       ~collect_garbage:false;
 
   let files_contents = Relative_path.Map.map files_contents ~f:add_newline in
-  let _, _= parse_name_and_decl popt files_contents tcopt in
+  let _, _, _ = parse_name_and_decl popt files_contents tcopt in
 
   let typedefs2, funs2, classes2 = get_decls defs in
 
@@ -823,7 +823,7 @@ let decl_and_run_mode {filename; mode; no_builtins; tcopt} popt =
     ~init:files_contents
   in
 
-  let errors, files_info =
+  let errors, files_info, _ =
     parse_name_and_decl popt files_contents_with_builtins tcopt in
 
   handle_mode mode filename tcopt popt files_contents files_info

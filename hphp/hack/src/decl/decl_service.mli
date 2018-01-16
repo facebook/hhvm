@@ -13,11 +13,16 @@
 (* Module declaring the types in parallel *)
 (*****************************************************************************)
 
+(* The set of files that failed *)
+type failed = Relative_path.Set.t
 (* The result expected from the service *)
-type result = Errors.t
-
+type result = Errors.t * failed
+type error_info = {
+  errs : failed;
+  lazy_decl_errs: failed;
+}
 (* Used for lazy typechecking *)
-type lazy_decl_result = Errors.t
+type lazy_decl_result = Errors.t * error_info
 
 (*****************************************************************************)
 (* Starts the process *)

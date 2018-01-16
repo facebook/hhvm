@@ -472,7 +472,10 @@ module FullCheckKind : CheckKindType = struct
       tcopt = old_env.tcopt;
       popt = old_env.popt;
       errorl = errorl;
-      failed_naming = failed_naming;
+      failed_parsing = old_env.failed_parsing;
+      failed_naming;
+      failed_decl = old_env.failed_decl;
+      failed_check = old_env.failed_check;
       persistent_client = old_env.persistent_client;
       ide_idle = old_env.ide_idle;
       last_command_time = old_env.last_command_time;
@@ -564,7 +567,7 @@ module LazyCheckKind : CheckKindType = struct
     { old_env with
        files_info;
        errorl;
-       failed_naming = failed_naming;
+       failed_naming;
        ide_needs_parsing = Relative_path.Set.empty;
        needs_phase2_redecl;
        needs_recheck;
@@ -620,8 +623,7 @@ end = functor(CheckKind:CheckKindType) -> struct
      * heap as we progress with redeclaration *)
     let oldified_defs = get_oldified_defs env in
 
-    let files_to_parse, stop_at_errors =
-      CheckKind.get_files_to_parse env in
+    let files_to_parse, stop_at_errors = CheckKind.get_files_to_parse env in
 
     let reparse_count = Relative_path.Set.cardinal files_to_parse in
     Hh_logger.log "Files to recompute: %d" reparse_count;
@@ -678,7 +680,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
     debug_print_fast_keys genv "to_redecl_phase1" fast;
     let defs_to_redecl = get_defs fast in
-    let _, to_redecl_phase2_deps, to_recheck1 =
+    let _, _, to_redecl_phase2_deps, to_recheck1 =
       Decl_redecl_service.redo_type_decl
         ~bucket_size genv.workers env.tcopt oldified_defs fast defs_to_redecl in
 
@@ -710,7 +712,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
 
     let defs_to_redecl_phase2 = get_defs fast_redecl_phase2_now in
-    let errorl', _to_redecl2, to_recheck2 =
+    let errorl', _, _to_redecl2, to_recheck2 =
       Decl_redecl_service.redo_type_decl ~bucket_size genv.workers
         env.tcopt oldified_defs fast_redecl_phase2_now defs_to_redecl_phase2 in
 
@@ -744,13 +746,13 @@ end = functor(CheckKind:CheckKindType) -> struct
     ServerCheckpoint.process_updates fast;
     debug_print_fast_keys genv "to_recheck" fast;
     debug_print_path_set genv "lazy_check_later" lazy_check_later;
-    let errorl'=
+    let errorl', _ =
       Typing_check_service.go genv.workers env.tcopt fast in
     let errorl' = match ServerArgs.ai_mode genv.options with
       | None -> errorl'
       | Some ai_opt ->
         let fast_infos = reparse_infos files_info fast in
-        let ae = Ai.go_incremental
+        let ae, _ = Ai.go_incremental
           Typing_check_utils.check_defs
           genv.workers fast_infos env.tcopt ai_opt in
         (Errors.merge errorl' ae)

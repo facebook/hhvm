@@ -12,7 +12,7 @@ open Hh_core
 
 let type_file tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
   let open Option.Monad_infix in
-  let errors, tast = Errors.do_with_context fn Errors.Typing begin fun () ->
+  let errors, tast, _ = Errors.do_with_context fn Errors.Typing begin fun () ->
     let fs = List.filter_map funs begin fun (_, x) ->
       Typing_check_service.type_fun tcopt fn x
       >>| fun f -> Tast.Fun f

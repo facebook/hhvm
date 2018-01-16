@@ -12,6 +12,7 @@ module type S = sig
   type 'a error_
   type error = Pos.t error_
   type applied_fixme = Pos.t * int
+  type error_flags
 
   (* The analysis phase that the error is coming from. *)
   type phase = Parsing | Naming | Decl | Typing
@@ -370,12 +371,13 @@ module type S = sig
   (* The type of collections of errors *)
   type t
 
-  val do_ : (unit -> 'a) -> t * 'a
+  val do_ : (unit -> 'a) -> t * 'a * error_flags
   val do_with_context :
-    Relative_path.t -> phase ->  (unit -> 'a) -> t * 'a
+    Relative_path.t -> phase ->  (unit -> 'a) -> t * 'a * error_flags
 
   val run_in_context : Relative_path.t -> phase ->  (unit -> 'a) -> 'a
   val run_in_decl_mode : Relative_path.t -> (unit -> 'a) -> 'a
+  val get_lazy_decl_flag : error_flags -> Relative_path.t option
   val ignore_ : (unit -> 'a) -> 'a
   val try_when :
     (unit -> 'a) -> when_:(unit -> bool) -> do_:(error -> unit) -> 'a

@@ -274,7 +274,7 @@ let ndecl_file_fast fn ~funs ~classes ~typedefs ~consts =
 let ndecl_file popt fn
               { FileInfo.file_mode = _; funs; classes; typedefs; consts;
                 comments = _; hash = _} =
-  let errors, _ = Errors.do_with_context fn Errors.Naming begin fun () ->
+  let errors, _, _ = Errors.do_with_context fn Errors.Naming begin fun () ->
     dn ("Naming decl: "^Relative_path.to_absolute fn);
     make_env popt ~funs ~classes ~typedefs ~consts
   end in

@@ -48,6 +48,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const StaticString s___MockClass;
+
 struct Class;
 struct ClassInfo;
 struct EnumValues;

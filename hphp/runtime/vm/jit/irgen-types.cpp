@@ -179,10 +179,29 @@ void verifyTypeImpl(IRGS& env, int32_t const id, bool isReturnType,
       curUnit(env)->isHHFile() ||
       !RuntimeOption::PHP7_ScalarTypes;
 
+    auto const thisFailsHard = [&] {
+      switch (RuntimeOption::EvalThisTypeHintLevel) {
+        case 0:
+          // We are not checking this typehints.
+        case 2:
+          // We are warning on this typehint failures.
+          return false;
+        case 1:
+          // We are checking this typehints like self typehints.
+          return true;
+        case 3:
+          // If we know there are no mock classes for the current class, it is
+          // okay to fail hard.  Otherwise, mock objects may still pass, and we
+          // have to be ready for execution to resume.
+          return !tc.couldSeeMockObject();
+      }
+      always_assert(false);
+    };
+
     auto const failHard = strictTypes
       && RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
-      && !(tc.isThis() && RuntimeOption::EvalThisTypeHintLevel == 2)
+      && (!tc.isThis() || thisFailsHard())
       // If we're warning on d/varray mismatches, any array type-hint will
       // always fail, so regardless of other settings, we can't assume its a
       // hard failure.

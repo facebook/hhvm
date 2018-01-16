@@ -58,6 +58,7 @@ const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s___destruct("__destruct");
 const StaticString s___OptionalDestruct("__OptionalDestruct");
+const StaticString s___MockClass("__MockClass");
 
 Mutex g_classesMutex;
 
@@ -1331,7 +1332,6 @@ void Class::setInstanceBitsImpl() {
 //
 // These are mostly for the class creation path.
 
-static const StaticString s___MockClass("__MockClass");
 void Class::setParent() {
   // Cache m_preClass->attrs()
   m_attrCopy = m_preClass->attrs();

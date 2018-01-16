@@ -851,6 +851,13 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
   }
 
   auto fixTypeConstraint = [&] (TypeConstraint& tc, const Type& candidate) {
+    auto t = index.lookup_constraint(ainfo.ctx, tc, candidate);
+
+    if (is_specialized_obj(t) &&
+        !dobj_of(t).cls.couldHaveMockedDerivedClass()) {
+      tc.setNoMockObjects();
+    }
+
     if (!tc.hasConstraint() ||
         tc.isSoft() ||
         tc.isTypeVar() ||
@@ -860,7 +867,6 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
       return;
     }
 
-    auto t = index.lookup_constraint(ainfo.ctx, tc, candidate);
     auto const nullable = is_opt(t);
     if (nullable) t = unopt(std::move(t));
 

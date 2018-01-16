@@ -519,7 +519,7 @@ void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
                                      int paramNum, bool useStrictTypes) const {
   verifyFail(func, tv, paramNum, useStrictTypes);
   assertx(
-    isSoft() || !RuntimeOption::EvalHardTypeHints ||
+    isSoft() || !RuntimeOption::EvalHardTypeHints || (isThis() && couldSeeMockObject()) ||
     (RuntimeOption::EvalHackArrCompatTypeHintNotices &&
      isArrayType(tv->m_type)) ||
     check(tv, func)
@@ -635,6 +635,16 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     return false;
   }();
   if (done) return;
+
+  if (UNLIKELY(isThis() && c->m_type == KindOfObject)) {
+    Class* cls = c->m_data.pobj->getVMClass();
+    const Class* thisClass = nullptr;
+    thisToClass(&thisClass);
+    if (cls->preClass()->userAttributes().count(s___MockClass.get()) &&
+        cls->parent() == thisClass) {
+      return;
+    }
+  }
 
   if (UNLIKELY(!useStrictTypes)) {
     if (auto dt = underlyingDataType()) {

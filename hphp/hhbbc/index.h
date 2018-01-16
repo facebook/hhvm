@@ -192,6 +192,17 @@ struct Class {
   bool couldHaveMagicBool() const;
 
   /*
+   * Whether this class could possibly have a derived class that is mocked.
+   * Including itself.
+   */
+  bool couldHaveMockedDerivedClass() const;
+
+  /*
+   * Whether this class could possibly be mocked.
+   */
+  bool couldBeMocked() const;
+
+  /*
    * Returns the Class that is the first common ancestor between 'this' and 'o'.
    * If there is no common ancestor folly::none is returned
    */

@@ -3589,6 +3589,19 @@ void in(ISS& env, const bc::OODeclExists& op) {
     } ());
 }
 
+namespace {
+bool couldBeMocked(const Type& t) {
+  if (is_specialized_cls(t)) {
+    return dcls_of(t).cls.couldBeMocked();
+  } else if (is_specialized_obj(t)) {
+    return dobj_of(t).cls.couldBeMocked();
+  }
+  // In practice this should not occur since this is used mostly on the result
+  // of looked up type constraints.
+  return true;
+}
+}
+
 void in(ISS& env, const bc::VerifyParamType& op) {
   if (env.ctx.func->isMemoizeImpl &&
       !locCouldBeRef(env, op.loc1) &&
@@ -3628,6 +3641,9 @@ void in(ISS& env, const bc::VerifyParamType& op) {
       !constraint.isTypeConstant()) {
     auto t =
       loosen_dvarrayness(env.index.lookup_constraint(env.ctx, constraint));
+    if (constraint.isThis() && couldBeMocked(t)) {
+      t = unctx(std::move(t));
+    }
     if (t.subtypeOf(TBottom)) unreachable(env);
     FTRACE(2, "     {} ({})\n", constraint.fullName(), show(t));
     setLoc(env, op.loc1, std::move(t));

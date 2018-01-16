@@ -93,7 +93,13 @@ struct TypeConstraint {
      * and the actual type is in m_type. When set, Object is guaranteed
      * to be an object, not a type-alias.
      */
-    Resolved = 0x40
+    Resolved = 0x40,
+
+    /*
+     * Indicates that no mock object can satisfy this constraint.  This is
+     * resolved by HHBBC.
+     */
+    NoMockObjects = 0x80
   };
 
   /*
@@ -149,6 +155,11 @@ struct TypeConstraint {
     m_type = t;
   }
 
+  void setNoMockObjects() {
+    auto flags = m_flags | Flags::NoMockObjects;
+    m_flags = static_cast<Flags>(flags);
+  }
+
   /*
    * Returns: whether this constraint implies any runtime checking at
    * all.  If this function returns false, it means the
@@ -197,6 +208,7 @@ struct TypeConstraint {
   bool isTypeVar()  const { return m_flags & TypeVar; }
   bool isTypeConstant() const { return m_flags & TypeConstant; }
   bool isResolved() const { return m_flags & Resolved; }
+  bool couldSeeMockObject() const { return !(m_flags & NoMockObjects); }
 
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
   bool isMixed()    const { return m_type == Type::Mixed; }

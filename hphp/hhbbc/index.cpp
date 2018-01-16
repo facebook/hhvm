@@ -471,6 +471,14 @@ struct ClassInfo {
    */
   std::unordered_map<SString,PublicSPropEntry> publicStaticProps;
 
+
+  /*
+   * Flags to track if this class is mocked, or if any of its dervied classes
+   * are mocked.
+   */
+  bool isMocked{false};
+  bool isDerivedMocked{false};
+
   /*
    * Flags about the existence of various magic methods, or whether
    * any derived classes may have those methods.  The non-derived
@@ -613,6 +621,24 @@ bool Class::couldHaveMagicBool() const {
     [] (SString) { return true; },
     [] (borrowed_ptr<ClassInfo> cinfo) {
       return cinfo->magicBool.derivedHas;
+    }
+  );
+}
+
+bool Class::couldHaveMockedDerivedClass() const {
+  return val.match(
+    [] (SString) { return true;},
+    [] (borrowed_ptr<ClassInfo> cinfo) {
+      return cinfo->isDerivedMocked;
+    }
+  );
+}
+
+bool Class::couldBeMocked() const {
+  return val.match(
+    [] (SString) { return true;},
+    [] (borrowed_ptr<ClassInfo> cinfo) {
+      return cinfo->isMocked;
     }
   );
 }
@@ -2189,6 +2215,17 @@ void find_magic_methods(IndexData& index) {
   }
 }
 
+void find_mocked_classes(IndexData& index) {
+  for (auto& cinfo : index.allClassInfos) {
+    if (is_mock_class(cinfo->cls) && cinfo->parent) {
+      cinfo->parent->isMocked = true;
+      for (auto c = cinfo->parent; c; c = c->parent) {
+        c->isDerivedMocked = true;
+      }
+    }
+  }
+}
+
 void mark_no_override_classes(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     auto const set = [&] {
@@ -2676,6 +2713,7 @@ Index::Index(borrowed_ptr<php::Program> program,
   mark_no_override_methods(*m_data);    // uses AttrUnique
   define_func_families(*m_data);        // uses AttrNoOverride functions
   find_magic_methods(*m_data);          // uses the subclass lists
+  find_mocked_classes(*m_data);
   compute_iface_vtables(*m_data);
 
   check_invariants(*m_data);

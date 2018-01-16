@@ -2368,8 +2368,13 @@ Type return_with_context(Type t, Type context) {
   if (((is_specialized_obj(t) && t.m_data.dobj.isCtx) ||
         (is_specialized_cls(t) && t.m_data.dcls.isCtx)) &&
       context.subtypeOfAny(TCls, TObj) && context != TBottom) {
+    context = toobj(context);
+    if (is_specialized_obj(context) && dobj_of(context).type == DObj::Exact &&
+        dobj_of(context).cls.couldBeMocked()) {
+      context = subObj(dobj_of(context).cls);
+    }
     bool o = is_opt(t);
-    t = intersection_of(unctx(t), toobj(context));
+    t = intersection_of(unctx(std::move(t)), context);
     // We must preserve optional typing, as this is not included in the
     // context type.
     return (o && canBeOptional(t.m_bits)) ? opt(t) : t;

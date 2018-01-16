@@ -128,11 +128,13 @@ void markCovered(const TransCFG& cfg, const RegionDescPtr region,
 
   // Mark all outgoing arcs from the region to a head node as covered.
   for (auto& b : region->blocks()) {
-    for (auto arc : cfg.outArcs(b->id())) {
-      if (heads.count(arc->dst())) {
-        auto dstRegionEntryId = headToRegion[arc->dst()]->entry()->id();
-        markCoveredArc(arc->src(), dstRegionEntryId, cfg,
-                       *headToRegion[arc->dst()], coveredArcs);
+    for (auto srcId : findRetransSet(*region, b->id())) {
+      for (auto arc : cfg.outArcs(srcId)) {
+        if (heads.count(arc->dst())) {
+          auto dstRegionEntryId = headToRegion[arc->dst()]->entry()->id();
+          markCoveredArc(arc->src(), dstRegionEntryId, cfg,
+                         *headToRegion[arc->dst()], coveredArcs);
+        }
       }
     }
   }

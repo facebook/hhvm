@@ -145,12 +145,13 @@ void VerifyParamTypeSlow(const Class* cls,
                          int param);
 void VerifyParamTypeCallable(TypedValue value, int param);
 void VerifyParamTypeFail(int param);
-void VerifyRetTypeSlow(const Class* cls,
+void VerifyRetTypeSlow(int32_t id,
+                       const Class* cls,
                        const Class* constraint,
                        const HPHP::TypeConstraint* expected,
                        const TypedValue value);
-void VerifyRetTypeCallable(TypedValue value);
-void VerifyRetTypeFail(TypedValue* value);
+void VerifyRetTypeCallable(int32_t id, TypedValue value);
+void VerifyRetTypeFail(int32_t id, TypedValue* value);
 
 void raise_error_sd(const StringData* sd);
 

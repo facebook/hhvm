@@ -1442,7 +1442,7 @@ void checkFPassHint(IRGS& env, uint32_t paramId, int off, FPassHint hint,
   gen(
     env,
     RaiseParamRefMismatch,
-    RaiseParamRefMismatchData { paramId },
+    ParamData { (int32_t)paramId },
     funcptr
   );
 }

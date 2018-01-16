@@ -648,32 +648,39 @@ void VerifyParamTypeFail(int paramNum) {
   tc.verifyParamFail(func, tv, paramNum, useStrictTypes);
 }
 
-void VerifyRetTypeSlow(const Class* cls,
+void VerifyRetTypeSlow(int32_t id,
+                       const Class* cls,
                        const Class* constraint,
                        const HPHP::TypeConstraint* expected,
                        TypedValue tv) {
   if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
-    VerifyRetTypeFail(&tv);
+    VerifyRetTypeFail(id, &tv);
   }
 }
 
-void VerifyRetTypeCallable(TypedValue value) {
+void VerifyRetTypeCallable(int32_t id, TypedValue value) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    VerifyRetTypeFail(&value);
+    VerifyRetTypeFail(id, &value);
   }
 }
 
-void VerifyRetTypeFail(TypedValue* tv) {
+void VerifyRetTypeFail(int32_t id, TypedValue* tv) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
-  const HPHP::TypeConstraint& tc = func->returnTypeConstraint();
-  auto unit = func->unit();
-  bool useStrictTypes =
-    RuntimeOption::EnableHipHopSyntax || func->isBuiltin() ||
-    unit->useStrictTypes();
-  assertx(!tc.check(tv, func));
-  tc.verifyReturnFail(func, tv, useStrictTypes);
+  if (id == HPHP::TypeConstraint::ReturnId) {
+    auto const& tc = func->returnTypeConstraint();
+    auto unit = func->unit();
+    bool useStrictTypes =
+      RuntimeOption::EnableHipHopSyntax || func->isBuiltin() ||
+      unit->useStrictTypes();
+    assertx(!tc.check(tv, func));
+    tc.verifyReturnFail(func, tv, useStrictTypes);
+  } else {
+    auto const& tc = func->params()[id].typeConstraint;
+    assertx(!tc.check(tv, func));
+    tc.verifyOutParamFail(func, tv, id);
+  }
 }
 
 namespace {

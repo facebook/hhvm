@@ -3634,11 +3634,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
   }
 }
 
-void in(ISS& /*env*/, const bc::VerifyRetTypeV& /*op*/) {}
-void in(ISS& /*env*/, const bc::VerifyOutType& /*op*/) {}
-
-void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
-  auto const constraint = env.ctx.func->retTypeConstraint;
+void verifyRetImpl(ISS& env, TypeConstraint& constraint, bool reduce_this) {
   auto stackT = topC(env);
 
   // If there is no return type constraint, or if the return type
@@ -3663,8 +3659,10 @@ void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
   // split these translations, it will rarely in practice return null.
   if (constraint.isThis() && !constraint.isNullable() && is_opt(stackT) &&
       env.index.satisfies_constraint(env.ctx, unopt(stackT), constraint)) {
-    reduce(env, bc::VerifyRetNonNullC {});
-    return;
+    if (reduce_this) {
+      reduce(env, bc::VerifyRetNonNullC {});
+      return;
+    }
   }
 
   // If we reach here, then CheckReturnTypeHints >= 3 AND the constraint
@@ -3698,6 +3696,15 @@ void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
 
   popC(env);
   push(env, std::move(retT));
+}
+
+void in(ISS& /*env*/, const bc::VerifyRetTypeV& /*op*/) {}
+void in(ISS& env, const bc::VerifyOutType& op) {
+  verifyRetImpl(env, env.ctx.func->params[op.arg1].typeConstraint, false);
+}
+
+void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
+  verifyRetImpl(env, env.ctx.func->retTypeConstraint, true);
 }
 
 void in(ISS& env, const bc::VerifyRetNonNullC& op) {

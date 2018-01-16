@@ -134,14 +134,14 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
     gen(env, ExtendsClass, ExtendsClassData{ knownCls }, objClass) : nullptr;
 }
 
-void verifyTypeImpl(IRGS& env, int32_t const id,
+void verifyTypeImpl(IRGS& env, int32_t const id, bool isReturnType,
                     bool onlyCheckNullability = false) {
-  const bool isReturnType = (id == HPHP::TypeConstraint::ReturnId);
   if (isReturnType && !RuntimeOption::EvalCheckReturnTypeHints) return;
 
   auto func = curFunc(env);
-  auto const& tc = isReturnType ? func->returnTypeConstraint()
-                                : func->params()[id].typeConstraint;
+  auto const& tc = id == HPHP::TypeConstraint::ReturnId
+    ? func->returnTypeConstraint()
+    : func->params()[id].typeConstraint;
   if (tc.isMixed() || (RuntimeOption::EvalThisTypeHintLevel == 0
                        && tc.isThis())) {
     return;
@@ -194,9 +194,11 @@ void verifyTypeImpl(IRGS& env, int32_t const id,
       updateMarker(env);
       env.irb->exceptionStackBoundary();
       if (failHard && RuntimeOption::EvalCheckReturnTypeHints >= 3) {
-        gen(env, VerifyRetFailHard, ldStkAddr(env, BCSPRelOffset{0}));
+        gen(env, VerifyRetFailHard, ParamData { id },
+            ldStkAddr(env, BCSPRelOffset{0}));
       } else {
-        gen(env, VerifyRetFail, ldStkAddr(env, BCSPRelOffset{0}));
+        gen(env, VerifyRetFail, ParamData { id },
+            ldStkAddr(env, BCSPRelOffset{0}));
       }
       return;
     }
@@ -216,7 +218,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id,
     case AnnotAction::Fail: return genFail();
     case AnnotAction::CallableCheck:
       if (isReturnType) {
-        gen(env, VerifyRetCallable, val);
+        gen(env, VerifyRetCallable, ParamData { id }, val);
       } else {
         gen(env, VerifyParamCallable, val, cns(env, id));
       }
@@ -329,7 +331,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id,
 
   auto const objClass = gen(env, LdObjClass, val);
   if (isReturnType) {
-    gen(env, VerifyRetCls, objClass, checkCls,
+    gen(env, VerifyRetCls, ParamData { id }, objClass, checkCls,
         cns(env, uintptr_t(&tc)), val);
   } else {
     gen(env, VerifyParamCls, objClass, checkCls,
@@ -516,22 +518,26 @@ void emitInstanceOf(IRGS& env) {
 }
 
 void emitVerifyRetTypeC(IRGS& env) {
-  verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId);
+  verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId, true);
 }
 
 void emitVerifyRetTypeV(IRGS& env) {
-  verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId);
+  verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId, true);
 }
 
 void emitVerifyRetNonNullC(IRGS& env) {
   auto func = curFunc(env);
   auto const& tc = func->returnTypeConstraint();
   always_assert(!tc.isNullable());
-  verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId, true);
+  verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId, true, true);
 }
 
 void emitVerifyParamType(IRGS& env, int32_t paramId) {
-  verifyTypeImpl(env, paramId);
+  verifyTypeImpl(env, paramId, false);
+}
+
+void emitVerifyOutType(IRGS& env, uint32_t paramId) {
+  verifyTypeImpl(env, paramId, true);
 }
 
 void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {

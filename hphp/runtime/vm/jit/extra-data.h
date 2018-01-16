@@ -1286,16 +1286,14 @@ struct BeginInliningData : IRExtraData {
   int cost;
 };
 
-struct RaiseParamRefMismatchData : IRExtraData {
-  explicit RaiseParamRefMismatchData(uint32_t paramId)
-    : paramId(paramId)
-  {}
+struct ParamData : IRExtraData {
+  explicit ParamData(int32_t paramId) : paramId(paramId) {}
 
   std::string show() const {
     return folly::to<std::string>(paramId);
   }
 
-  uint32_t paramId;
+  int32_t paramId;
 };
 
 struct RaiseHackArrParamNoticeData : IRExtraData {
@@ -1461,7 +1459,7 @@ X(LdFuncCachedSafe,             LdFuncCachedData);
 X(LdFuncCachedU,                LdFuncCachedUData);
 X(LdObjMethod,                  LdObjMethodData);
 X(RaiseMissingArg,              FuncArgData);
-X(RaiseParamRefMismatch,        RaiseParamRefMismatchData);
+X(RaiseParamRefMismatch,        ParamData);
 X(RaiseArrayIndexNotice,        RaiseArrayIndexNoticeData);
 X(RaiseArrayKeyNotice,          RaiseArrayKeyNoticeData);
 X(InterpOne,                    InterpOneData);
@@ -1547,6 +1545,10 @@ X(RaiseHackArrParamNotice,      RaiseHackArrParamNoticeData);
 X(DbgAssertRefCount,            AssertReason);
 X(Unreachable,                  AssertReason);
 X(EndBlock,                     AssertReason);
+X(VerifyRetCallable,            ParamData);
+X(VerifyRetCls,                 ParamData);
+X(VerifyRetFail,                ParamData);
+X(VerifyRetFailHard,            ParamData);
 
 #undef X
 

@@ -236,3 +236,4 @@ val class_with_abstract_method : string -> string
 val interface_has_non_public_method : string
 val redeclaration_of_function : name:string -> loc:string -> string
 val redeclaration_of_method : name:string -> string
+val self_or_parent_colon_colon_class_outside_of_class : string -> string

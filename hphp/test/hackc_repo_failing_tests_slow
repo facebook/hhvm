@@ -26,8 +26,6 @@ slow/namespace/double_use3.php
 slow/namespace/hashbang_2.php
 slow/parser/afl5934248.php
 slow/parser/backquote-fail.php
-slow/parser/colon_colon_class_include_parent.php
-slow/parser/colon_colon_class_include_self.php
 slow/parser/colon_colon_class_var.php
 slow/parser/empty-files/empty-invalid.php
 slow/parser/hh-namespace-conflict-2.php

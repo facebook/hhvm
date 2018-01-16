@@ -678,6 +678,14 @@ let first_parent_function_name parents =
     | _ -> None
   end
 
+(* Returns the whether the current context is in an active class scope *)
+let is_in_active_class_scope parents =
+  Hh_core.List.exists parents ~f:begin fun node ->
+  match syntax node with
+  | ClassishDeclaration cd -> true
+  | _ -> false
+  end
+
 (* Returns the first ClassishDeclaration node in the list of parents,
  * or None if there isn't one. *)
 let first_parent_classish_node classish_kind parents =
@@ -1627,20 +1635,26 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
     { scope_resolution_qualifier = qualifier
     ; scope_resolution_name = name
     ; _ } ->
-      let is_dynamic_name =
+      let is_dynamic_name, is_self_or_parent =
         match syntax qualifier, token_kind qualifier with
-        | (LiteralExpression _ | QualifiedName _), _ -> false
+        | (LiteralExpression _ | QualifiedName _), _ -> false, false
         | _, Some TokenKind.Name
         | _, Some TokenKind.XHPClassName
+        | _, Some TokenKind.Static -> false, false
         | _, Some TokenKind.Self
-        | _, Some TokenKind.Parent
-        | _, Some TokenKind.Static -> false
-        | _ -> true
+        | _, Some TokenKind.Parent -> false, true
+        | _ -> true, false
       in
       let is_name_class = String.lowercase_ascii @@ text name = "class" in
       let errors = if is_dynamic_name && is_name_class then
         make_error_from_node
           node SyntaxError.coloncolonclass_on_dynamic :: errors
+        else errors in
+      let errors = if is_self_or_parent && is_name_class &&
+          not @@ is_in_active_class_scope parents
+        then make_error_from_node ~error_type:SyntaxError.RuntimeError
+          node (SyntaxError.self_or_parent_colon_colon_class_outside_of_class
+            @@ text qualifier) :: errors
         else errors in
       errors
   | PrefixUnaryExpression { prefix_unary_operator; prefix_unary_operand }

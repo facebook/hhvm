@@ -369,3 +369,5 @@ let redeclaration_of_function ~name ~loc =
   "Cannot redeclare " ^ name ^ "() (previously declared in " ^ loc ^ ")"
 let redeclaration_of_method ~name =
   "Redeclared method " ^ name
+let self_or_parent_colon_colon_class_outside_of_class name =
+  "Cannot access " ^ name ^ "::class when no class scope is active"

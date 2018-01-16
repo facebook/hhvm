@@ -1145,8 +1145,11 @@ and expr_
    * Given a list of types, computes their supertype. If any of the types are
    * unknown (e.g., comes from PHP), the supertype will be Tany.
    *)
-  let compute_supertype env tys =
-    let env, supertype = Env.fresh_unresolved_type env in
+  let compute_supertype ~expected env tys =
+    let env, supertype =
+      match expected with
+      | None -> Env.fresh_unresolved_type env
+      | Some (_, _, ty) -> env, ty in
     let has_unknown = List.exists tys (fun (_, ty) -> ty = Tany) in
     let env, tys = List.rev_map_env env tys TUtils.unresolved in
     let subtype_value env ty =
@@ -1164,10 +1167,10 @@ and expr_
    * function extracts a list of exprs from the list, and computes the supertype
    * of all of the expressions' tys.
    *)
-  let compute_exprs_and_supertype env l extract_expr_and_ty =
-    let env, exprs_and_tys = List.map_env env l extract_expr_and_ty in
+  let compute_exprs_and_supertype ~expected env l extract_expr_and_ty =
+    let env, exprs_and_tys = List.map_env env l (extract_expr_and_ty ~expected) in
     let exprs, tys = List.unzip exprs_and_tys in
-    let env, supertype = compute_supertype env tys in
+    let env, supertype = compute_supertype ~expected env tys in
     env, exprs, supertype in
 
   let shape_and_tuple_arrays_enabled =
@@ -1206,6 +1209,17 @@ and expr_
         | Nast.AFvalue _ -> true
         | Nast.AFkvalue _ -> false in
       if fields_consistent && is_vec then
+        (* Use expected type to determine expected element type *)
+        let env, elem_expected =
+          match expand_expected env expected with
+          | env, Some (pos, ur, (_, Tclass ((_, c), [ty])))
+            when (c = SN.Collections.cTraversable ||
+                  c = SN.Collections.cContainer) ->
+            env, Some (pos, ur, ty)
+          | env, Some (pos, ur, (_, Tarraykind (AKvec ty))) ->
+            env, Some ( pos,ur, ty)
+          | _ ->
+            env, None in
         let env, tel, arraykind =
           if shape_and_tuple_arrays_enabled then
             let env, tel, fields =
@@ -1216,23 +1230,23 @@ and expr_
             env, tel, AKtuple fields
           else
             let env, tel, value_ty =
-              compute_exprs_and_supertype env l array_field_value in
+              compute_exprs_and_supertype ~expected:elem_expected env l array_field_value in
             env, tel, AKvec value_ty in
         make_result env
           (T.Array (List.map tel (fun e -> T.AFvalue e)))
           (Reason.Rwitness p, Tarraykind arraykind)
       else
-      let env, value_exprs_and_tys = List.rev_map_env env l array_field_value in
+      let env, value_exprs_and_tys = List.rev_map_env env l (array_field_value ~expected:None) in
       let tvl, value_tys = List.unzip value_exprs_and_tys in
-      let env, value = compute_supertype env value_tys in
+      let env, value = compute_supertype ~expected:None env value_tys in
       (* TODO TAST: produce a typed expression here *)
       if is_vec then
         make_result env T.Any
           (Reason.Rwitness p, Tarraykind (AKvec value))
       else
-        let env, key_exprs_and_tys = List.rev_map_env env l array_field_key in
+        let env, key_exprs_and_tys = List.rev_map_env env l (array_field_key ~expected:None) in
         let tkl, key_tys = List.unzip key_exprs_and_tys in
-        let env, key = compute_supertype env key_tys in
+        let env, key = compute_supertype ~expected:None env key_tys in
         make_result env
           (T.Array (List.map (List.rev (List.zip_exn tkl tvl))
             (fun (tek, tev) -> T.AFkvalue (tek, tev))))
@@ -1240,12 +1254,10 @@ and expr_
 
   | Darray l ->
       let keys, values = List.unzip l in
-
       let env, value_exprs, value_ty =
-        compute_exprs_and_supertype env values array_value in
+        compute_exprs_and_supertype ~expected:None env values array_value in
       let env, key_exprs, key_ty =
-        compute_exprs_and_supertype env keys array_value in
-
+        compute_exprs_and_supertype ~expected:None env keys array_value in
       let field_exprs = List.zip_exn key_exprs value_exprs in
       make_result env
         (T.Darray field_exprs)
@@ -1253,7 +1265,7 @@ and expr_
 
   | Varray values ->
       let env, value_exprs, value_ty =
-        compute_exprs_and_supertype env values array_value in
+        compute_exprs_and_supertype ~expected:None env values array_value in
       make_result env
         (T.Varray value_exprs)
         (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
@@ -1262,40 +1274,59 @@ and expr_
       (* Use expected type to determine expected element type *)
       let env, elem_expected =
         match expand_expected env expected with
-        | env, Some (pos, ur, (_, Tclass ((_, k), [ty]))) when is_vc_kind k ->
+        | env, Some (pos, ur, (_, Tclass ((_, k), [ty]))) when is_vc_kind k
+          || k = SN.Collections.cTraversable || k = SN.Collections.cContainer ->
           env, Some (pos, ur, ty)
         | _ -> env, None in
-      let env, x = Env.fresh_unresolved_type env in
       let env, tel, tyl = exprs ?expected:elem_expected env el in
       let env, tyl = List.map_env env tyl Typing_env.unbind in
-      let env, tyl = List.map_env env tyl TUtils.unresolved in
+      let env, elem_ty, tyl =
+        match elem_expected with
+        | Some (_, _, ty) -> env, ty, tyl
+        | None ->
+          let env, elem_ty = Env.fresh_unresolved_type env in
+          let env, tyl = List.map_env env tyl TUtils.unresolved in
+          env, elem_ty, tyl in
       let subtype_val env ty =
-        Type.sub_type p Reason.URvector env ty x in
+        Type.sub_type p Reason.URvector env ty elem_ty in
       let env =
         List.fold_left tyl ~init:env ~f:subtype_val in
-      let tvector = Tclass ((p, vc_kind_to_name kind), [x]) in
+      let tvector = Tclass ((p, vc_kind_to_name kind), [elem_ty]) in
       let ty = Reason.Rwitness p, tvector in
       make_result env (T.ValCollection (kind, tel)) ty
   | KeyValCollection (kind, l) ->
       (* Use expected type to determine expected key and value types *)
       let env, kexpected, vexpected =
         match expand_expected env expected with
-        | env, Some (pos, ur, (_, Tclass ((_, k), [kty; vty]))) when is_kvc_kind k ->
+        | env, Some (pos, ur, (_, Tclass ((_, k), [kty; vty]))) when is_kvc_kind k
+          || k = SN.Collections.cKeyedTraversable
+               || k = SN.Collections.cKeyedContainer
+               || k = SN.Collections.cIndexish->
           env, Some (pos, ur, kty), Some (pos, ur, vty)
         | _ -> env, None, None in
       let kl, vl = List.unzip l in
       let env, tkl, kl = exprs ?expected:kexpected env kl in
-      let env, kl = List.map_env env kl Typing_env.unbind in
       let env, tvl, vl = exprs ?expected:vexpected env vl in
+      let env, kl = List.map_env env kl Typing_env.unbind in
+      let env, k, kl =
+        match kexpected with
+        | Some (_, _, k) -> env, k, kl
+        | None ->
+          let env, k = Env.fresh_unresolved_type env in
+          let env, kl = List.map_env env kl TUtils.unresolved in
+          env, k, kl in
       let env, vl = List.map_env env vl Typing_env.unbind in
-      let env, k = Env.fresh_unresolved_type env in
-      let env, v = Env.fresh_unresolved_type env in
-      let env, kl = List.map_env env kl TUtils.unresolved in
+      let env, v, vl =
+        match vexpected with
+        | Some (_, _, v) -> env, v, vl
+        | None ->
+          let env, v = Env.fresh_unresolved_type env in
+          let env, vl = List.map_env env vl TUtils.unresolved in
+          env, v, vl in
       let subtype_key env ty = Type.sub_type p Reason.URkey env ty k in
       let env =
         List.fold_left kl ~init:env ~f:subtype_key in
       let subtype_val env ty = Type.sub_type p Reason.URvalue env ty v in
-      let env, vl = List.map_env env vl TUtils.unresolved in
       let env =
         List.fold_left vl ~init:env ~f:subtype_val in
       let ty = Tclass ((p, kvc_kind_to_name kind), [k; v])
@@ -2823,23 +2854,23 @@ and array_field env = function
       let env, tv = Typing_env.unbind env tv in
       env, (T.AFkvalue (tke, tve), Some tk, tv)
 
-and array_value env x =
-  let env, te, ty = expr env x in
+and array_value ~expected env x =
+  let env, te, ty = expr ?expected env x in
   let env, ty = Typing_env.unbind env ty in
   env, (te, ty)
 
-and array_field_value env = function
+and array_field_value ~expected env = function
   | Nast.AFvalue x
   | Nast.AFkvalue (_, x) ->
-      array_value env x
+      array_value ~expected env x
 
-and array_field_key env = function
+and array_field_key ~expected env = function
   (* This shouldn't happen *)
   | Nast.AFvalue (p, _) ->
       env, (T.make_implicitly_typed_expr p T.Any,
         (Reason.Rwitness p, Tprim Tint))
   | Nast.AFkvalue (x, _) ->
-      array_value env x
+      array_value ~expected env x
 
 and akshape_field env = function
   | Nast.AFkvalue (k, v) ->

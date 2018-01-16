@@ -49,8 +49,6 @@ slow/php7_backported/scalar-types/scalar_strict_basic.php
 slow/php7_backported/scalar-types/strict_call_weak.php
 slow/php7_backported/scalar-types/strict_call_weak_explicit.php
 slow/php7_backported/scalar-types/weak_include_strict.php
-slow/php7_bcbreak/7/ltr_eval/complex.php
-slow/php7_bcbreak/7/ltr_eval/simple.php
 slow/reflection/1352.php
 slow/reflection_classes/default_value_with_namespace.php
 slow/reflection_classes/default_value_with_namespace2.php

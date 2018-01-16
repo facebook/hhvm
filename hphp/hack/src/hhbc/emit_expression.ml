@@ -76,6 +76,9 @@ let optimize_cuf () =
 let hack_arr_compat_notices () =
   Hhbc_options.hack_arr_compat_notices !Hhbc_options.compiler_options
 
+let php7_ltr_assign () =
+  Hhbc_options.php7_ltr_assign !Hhbc_options.compiler_options
+
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
   instr (IComment (H.nyi ^ ": " ^ description))
@@ -2585,13 +2588,15 @@ and can_use_as_rhs_in_list_assignment expr =
  * here f() should be invoked before b()
  *)
  and emit_lval_op_list env local indices expr =
+  let is_ltr = php7_ltr_assign () in
   match snd expr with
   | A.List exprs ->
     let lhs_instrs, set_instrs =
-      List.mapi exprs (fun i expr -> emit_lval_op_list env local (i::indices) expr)
+      List.mapi exprs (fun i expr ->
+        emit_lval_op_list env local (i::indices) expr)
       |> List.unzip in
     gather lhs_instrs,
-    gather (List.rev set_instrs)
+    gather (if not is_ltr then List.rev set_instrs else set_instrs)
   | A.Omitted -> empty, empty
   | _ ->
     (* Generate code to access the element from the array *)
@@ -2604,12 +2609,16 @@ and can_use_as_rhs_in_list_assignment expr =
     (* Return pair: side effects to initialize lhs + assignment *)
     let lhs_instrs, rhs_instrs, set_op =
       emit_lval_op_nonlist_steps env LValOp.Set expr access_instrs 1 in
-    lhs_instrs,
-    gather [
-      rhs_instrs;
-      set_op;
-      instr_popc
-    ]
+    let lhs = if is_ltr then empty else lhs_instrs in
+    let rest =
+      gather [
+        if is_ltr then lhs_instrs else empty;
+        rhs_instrs;
+        set_op;
+        instr_popc
+      ]
+    in
+    lhs, rest
 
 and expr_starts_with_ref = function
   | _, A.Unop (A.Uref, _) -> true
@@ -2643,7 +2652,8 @@ and emit_lval_op env pos op expr1 opt_expr2 =
           | _ -> true)
       in
       if has_elements then
-        stash_in_local_with_prefix ~leave_on_stack:true env expr2
+        stash_in_local_with_prefix
+          ~always_stash:(php7_ltr_assign ()) ~leave_on_stack:true env expr2
         begin fun local _break_label ->
           let local =
             if can_use_as_rhs_in_list_assignment (snd expr2) then

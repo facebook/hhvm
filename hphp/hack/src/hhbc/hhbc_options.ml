@@ -26,6 +26,7 @@ type t = {
   option_source_mapping                   : bool;
   option_relabel                          : bool;
   option_php7_uvs                         : bool;
+  option_php7_ltr_assign                  : bool;
   option_create_inout_wrapper_functions   : bool;
   option_reffiness_invariance             : bool;
   option_hack_arr_compat_notices          : bool;
@@ -46,6 +47,7 @@ let default = {
   option_aliased_namespaces = None;
   option_source_mapping = false;
   option_php7_uvs = false;
+  option_php7_ltr_assign = false;
   (* If true, then renumber labels after generating code for a method
    * body. Semantic diff doesn't care about labels, but for visual diff against
    * HHVM it's helpful to renumber in order that the labels match more closely *)
@@ -70,6 +72,7 @@ let aliased_namespaces o = o.option_aliased_namespaces
 let source_mapping o = o.option_source_mapping
 let relabel o = o.option_relabel
 let enable_uniform_variable_syntax o = o.option_php7_uvs
+let php7_ltr_assign o = o.option_php7_ltr_assign
 let create_inout_wrapper_functions o = o.option_create_inout_wrapper_functions
 let reffiness_invariance o = o.option_reffiness_invariance
 let hack_arr_compat_notices o = o.option_hack_arr_compat_notices
@@ -93,6 +96,7 @@ let to_string o =
     ; Printf.sprintf "relabel: %B" @@ relabel o
     ; Printf.sprintf "enable_uniform_variable_syntax: %B"
       @@ enable_uniform_variable_syntax o
+    ; Printf.sprintf "php7_ltr_assign: %B" @@ php7_ltr_assign o
     ; Printf.sprintf "create_inout_wrapper_functions: %B"
       @@ create_inout_wrapper_functions o
     ; Printf.sprintf "reffiness_invariance: %B" @@ reffiness_invariance o
@@ -132,6 +136,8 @@ let set_option options name value =
     { options with option_source_mapping = as_bool value }
   | "hhvm.php7.scalar_types" ->
     { options with option_php7_scalar_types = as_bool value }
+  | "hhvm.php7.ltr_assign" ->
+    { options with option_php7_ltr_assign = as_bool value }
   | "hhvm.enable_xhp" ->
     { options with option_enable_xhp = as_bool value }
   | "hack.compiler.relabel" ->
@@ -216,6 +222,8 @@ let value_setters = [
     fun opts v -> { opts with option_optimize_cuf = (v = 1) });
   (set_value "hhvm.php7.uvs" get_value_from_config_int @@
     fun opts v -> { opts with option_php7_uvs = (v = 1) });
+  (set_value "hhvm.php7.ltr_assign" get_value_from_config_int @@
+    fun opts v -> { opts with option_php7_ltr_assign = (v = 1) });
   (set_value "hhvm.create_in_out_wrapper_functions" get_value_from_config_int @@
     fun opts v -> { opts with option_create_inout_wrapper_functions = (v = 1)});
   (set_value "hhvm.reffiness_invariance" get_value_from_config_int @@

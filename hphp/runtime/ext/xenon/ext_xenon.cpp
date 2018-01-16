@@ -19,15 +19,16 @@
 
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/request-injection-data.h"
-#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/util/struct-log.h"
+#include "hphp/util/thread-local.h"
 
 #include <signal.h>
 #include <time.h>
@@ -67,7 +68,7 @@ void *s_waitThread(void *arg) {
 // allocated when a web request begins (if Xenon is enabled)
 // grab snapshots of the php and async stack when log is called
 // detach itself from its snapshots when the request is ending.
-struct XenonRequestLocalData final : RequestEventHandler  {
+struct XenonRequestLocalData final {
   XenonRequestLocalData();
   ~XenonRequestLocalData();
   void log(Xenon::SampleType t,
@@ -75,14 +76,16 @@ struct XenonRequestLocalData final : RequestEventHandler  {
            c_WaitableWaitHandle* wh = nullptr);
   Array createResponse();
 
-  // implement RequestEventHandler
-  void requestInit() override;
-  void requestShutdown() override;
+  void requestInit();
+  void requestShutdown();
 
   // an array of php stacks
   Array m_stackSnapshots;
+
+  // Set to true while a request is active and it's safe to record samples.
+  bool m_inRequest{false};
 };
-IMPLEMENT_STATIC_REQUEST_LOCAL(XenonRequestLocalData, s_xenonData);
+static THREAD_LOCAL(XenonRequestLocalData, s_xenonData);
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics used by the Xenon classes
@@ -275,6 +278,7 @@ XenonRequestLocalData::~XenonRequestLocalData() {
 // Creates an array to respond to the Xenon PHP extension;
 // builds the data into the format neeeded.
 Array XenonRequestLocalData::createResponse() {
+  assertx(m_inRequest);
   PackedArrayInit stacks(m_stackSnapshots.size());
   for (ArrayIter it(m_stackSnapshots); it; ++it) {
     const auto& frame = it.second().toArray();
@@ -291,6 +295,8 @@ Array XenonRequestLocalData::createResponse() {
 void XenonRequestLocalData::log(Xenon::SampleType t,
                                 const char* info,
                                 c_WaitableWaitHandle* wh) {
+  if (!m_inRequest) return;
+
   TRACE(1, "XenonRequestLocalData::log\n");
   time_t now = time(nullptr);
   auto bt = createBacktrace(BacktraceArgs()
@@ -321,7 +327,9 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
 
 void XenonRequestLocalData::requestInit() {
   TRACE(1, "XenonRequestLocalData::requestInit\n");
-  m_stackSnapshots = Array::Create();
+
+  assertx(!m_inRequest);
+  assertx(m_stackSnapshots.get() == nullptr);
   if (RuntimeOption::XenonForceAlwaysOn) {
     setSurpriseFlag(XenonSignalFlag);
   } else {
@@ -329,10 +337,13 @@ void XenonRequestLocalData::requestInit() {
     // not have a bias towards the first function.
     clearSurpriseFlag(XenonSignalFlag);
   }
+  m_inRequest = true;
 }
 
 void XenonRequestLocalData::requestShutdown() {
   TRACE(1, "XenonRequestLocalData::requestShutdown\n");
+
+  m_inRequest = false;
   clearSurpriseFlag(XenonSignalFlag);
   Xenon::getInstance().incrementMissedSampleCount(m_stackSnapshots.size());
   m_stackSnapshots.reset();
@@ -376,6 +387,14 @@ struct xenonExtension final : Extension {
     HHVM_FALIAS(HH\\xenon_get_and_clear_missed_sample_count,
                 xenon_get_and_clear_missed_sample_count);
     loadSystemlib();
+  }
+
+  void requestInit() override {
+    s_xenonData->requestInit();
+  }
+
+  void requestShutdown() override {
+    s_xenonData->requestShutdown();
   }
 } s_xenon_extension;
 

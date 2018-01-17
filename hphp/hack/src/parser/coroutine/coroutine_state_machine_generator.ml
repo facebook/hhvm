@@ -88,16 +88,16 @@ let add_missing_return body =
   else
     body
 
-(* $closure->name = $name *)
+(* $closure->saved_name = $name *)
 let copy_in_syntax variable =
-  let field_name = String_utils.lstrip variable "$" in
+  let field_name = make_saved_field variable in
   make_assignment_syntax_variable
     (closure_name_syntax field_name)
     (make_variable_expression_syntax variable)
 
-(* $name = $closure->name *)
+(* $name = $closure->saved_name *)
 let copy_out_syntax variable =
-  let field_name = String_utils.lstrip variable "$" in
+  let field_name = make_saved_field variable in
   make_assignment_syntax variable (closure_name_syntax field_name)
 
 let add_try_finally used_locals body =
@@ -557,25 +557,6 @@ let make_closure_lambda_signature_from_method
     ]
     (make_coroutine_result_type_syntax function_type)
 
-let extract_parameter_declarations function_parameter_list =
-  function_parameter_list
-    |> syntax_node_to_list
-    |> Core_list.map ~f:syntax
-    |> Core_list.map ~f:
-      begin
-      function
-      | ListItem { list_item = { syntax = ParameterDeclaration x; _; }; _; } ->
-          {
-            CoroutineStateMachineData.parameter_name = x.parameter_name;
-            CoroutineStateMachineData.parameter_declaration = ParameterDeclaration {
-              x with
-                parameter_visibility = public_syntax;
-                parameter_type = make_missing ();
-            }
-          }
-      | _ -> failwith "Parameter had unexpected type."
-      end
-
 let make_outer_param outer_variable =
   let name = make_variable_syntax outer_variable
   in
@@ -596,17 +577,20 @@ let make_outer_params outer_variables =
 
 let compute_state_machine_data
     context
-    coroutine_result_data_variables
-    function_parameter_list =
+    coroutine_result_data_variables =
   (* TODO: Add a test case for "..." param. *)
-  let inner_variables = context.Coroutine_context.inner_variables in
-  let outer_variables = context.Coroutine_context.outer_variables in
-  let outer_variables = SSet.elements outer_variables in
-  let properties = SSet.elements inner_variables in
-  let properties = properties @ coroutine_result_data_variables in
-  let parameters = extract_parameter_declarations function_parameter_list in
-  let outer_variable_params = make_outer_params outer_variables in
-  let parameters = outer_variable_params @ parameters in
+  let inner_variables =
+    SSet.elements context.Coroutine_context.inner_variables in
+  let saved_inner_variables =
+    Core_list.map ~f:make_saved_variable inner_variables in
+  let properties = saved_inner_variables @ coroutine_result_data_variables in
+  let outer_variables =
+    SSet.elements context.Coroutine_context.outer_variables in
+  let function_parameters =
+    SSet.elements context.Coroutine_context.function_parameters in
+  let parameters = outer_variables @ function_parameters
+  |> Core_list.map ~f:make_saved_variable
+  |> make_outer_params in
   CoroutineStateMachineData.{ properties; parameters; }
 
 (**
@@ -617,8 +601,7 @@ let compute_state_machine_data
 let generate_coroutine_state_machine
     context
     original_body
-    function_type
-    function_parameter_list =
+    function_type =
   if SuspendRewriter.only_tail_call_suspends original_body
     then lower_synchronous_body original_body, None
     else
@@ -626,8 +609,7 @@ let generate_coroutine_state_machine
         lower_body original_body in
       let state_machine_data = compute_state_machine_data
         context
-        coroutine_result_data_variables
-        function_parameter_list in
+        coroutine_result_data_variables in
       let closure_syntax =
         CoroutineClosureGenerator.generate_coroutine_closure
           context

@@ -71,11 +71,10 @@ let rewrite_coroutine_annotation
     }
   )
 
-(* TODO: Rename anonymous_parameters / function_parameter_list to match. *)
 let lower_coroutine_anon
     context
     anon_node =
-  let ({ anonymous_body; anonymous_parameters; _; } as anon) =
+  let ({ anonymous_body; _; } as anon) =
     get_anonymous_function (syntax anon_node) in
   let ({anonymous_type; _;} as anon) =
     rewrite_anon_function_return_type anon in
@@ -83,8 +82,7 @@ let lower_coroutine_anon
     CoroutineStateMachineGenerator.generate_coroutine_state_machine
       context
       anonymous_body
-      anonymous_type
-      anonymous_parameters in
+      anonymous_type in
   let anon = { anon with anonymous_body } in
   let anon = Syntax.synthesize_from anon_node (from_anonymous_function anon) in
   let anon = CoroutineMethodLowerer.rewrite_anon context anon in
@@ -92,7 +90,7 @@ let lower_coroutine_anon
 
 let lower_coroutine_lambda
     context
-    ({ lambda_parameters; _; } as lambda_signature)
+    lambda_signature
     lambda_body
     lambda_node =
   let lambda = get_lambda_expression (syntax lambda_node) in
@@ -102,8 +100,7 @@ let lower_coroutine_lambda
     CoroutineStateMachineGenerator.generate_coroutine_state_machine
       context
       lambda_body
-      lambda_type
-      lambda_parameters in
+      lambda_type in
   let lambda = { lambda with lambda_body } in
   let lambda = Syntax.synthesize_from lambda_node (from_lambda_expression lambda) in
   let lambda = CoroutineMethodLowerer.rewrite_lambda
@@ -112,7 +109,7 @@ let lower_coroutine_lambda
 
 let rewrite_method_or_function
     context
-    ({function_parameter_list; _;} as original_header_node)
+    original_header_node
     original_body =
   let ({function_type; _;} as new_header_node) =
     rewrite_function_header_return_type original_header_node in
@@ -120,8 +117,7 @@ let rewrite_method_or_function
     CoroutineStateMachineGenerator.generate_coroutine_state_machine
       context
       original_body
-      function_type
-      function_parameter_list in
+      function_type in
   (new_header_node, new_body, closure_syntax)
 
 let lower_coroutine_function

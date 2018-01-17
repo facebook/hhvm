@@ -185,14 +185,15 @@ let compute_outer_variables parents node =
     List.fold_left parents ~f:local_variables ~init:SSet.empty
 
 let partition_used_locals parents node =
-  let params = get_params_list node in
-  let body = get_body node in
-  let all_used = all_locals body in
-  let decls = syntax_node_to_list params in
-  let all_params = List.filter_map decls ~f:param_name in
-  let all_params = SSet.of_list all_params in
-  let used_params = SSet.inter all_used all_params in
+  (* Set of function parameters *)
+  let params = get_params_list node
+  |> syntax_node_to_list
+  |> List.filter_map ~f:param_name
+  |> SSet.of_list in
+  (* Set of all variables referenced in the body except for $this *)
+  let all_used = fold_no_lambdas add_local SSet.empty (get_body node)
+  |> SSet.remove "$this" in
   let all_outer = compute_outer_variables parents node in
   let used_outer = SSet.inter all_used all_outer in
-  let inner = SSet.diff all_used (SSet.union used_params used_outer) in
-  (inner, used_outer, used_params)
+  let inner = SSet.diff all_used (SSet.union params used_outer) in
+  (inner, used_outer, params)

@@ -90,7 +90,7 @@ let generate_clone_body { CoroutineStateMachineData.parameters; properties; } =
     let get_parameter_as_member_variable { CoroutineStateMachineData.parameter_name; _; } =
       parameter_name
         |> string_of_variable_token
-        |> fun var -> String_utils.lstrip var "$"
+        |> strip_dollar_sign
         |> make_name_syntax
         |> make_member_selection_expression_syntax this_syntax in
     Core_list.map ~f:get_parameter_as_member_variable parameters in
@@ -117,7 +117,7 @@ let generate_clone_body { CoroutineStateMachineData.parameters; properties; } =
     let make_copy_property_syntax property_name_string =
       let property_member_name =
         property_name_string
-          |> fun var -> String_utils.lstrip var "$"
+          |> strip_dollar_sign
           |> make_name_syntax in
       let this_member_syntax =
         make_member_selection_expression_syntax

@@ -1060,41 +1060,47 @@ void CLIWorker::doJob(int client) {
 
 req::ptr<File>
 CLIWrapper::open(const String& filename, const String& mode, int options,
-                 const req::ptr<StreamContext>& /*context*/) {
-  String fname;
-  if (StringUtil::IsFileUrl(filename)) {
-    fname = StringUtil::DecodeFileUrl(filename);
-    if (fname.empty()) {
-      raise_warning("invalid file:// URL");
-      return nullptr;
-    }
-  } else {
-    fname = filename;
-  }
-
-  if (options & File::USE_INCLUDE_PATH) {
-    struct stat s;
-    String resolved_fname = resolveVmInclude(fname.get(), "", &s);
-    if (!resolved_fname.isNull()) {
-      fname = resolved_fname;
-    }
-  }
-
-  bool res;
-  std::string error;
-  FTRACE(3, "CLIWrapper({})::open({}, {}, {}): calling remote...\n",
-         m_cli_fd, fname.data(), mode.data(), options);
-  cli_write(m_cli_fd, "open", fname.data(), mode.data());
-  cli_read(m_cli_fd, res, error);
-  FTRACE(3, "{} = CLIWrapper({})::open(...) [err = {}]\n",
-         res, m_cli_fd, error);
-
-  if (!res) {
-    raise_warning("%s", error.c_str());
+                 const req::ptr<StreamContext>& context) {
+  mode_t md = static_cast<mode_t>(-1);
+  int fl = 0;
+  switch (mode[0]) {
+   case 'x':
+     md = 0666;
+     fl = O_CREAT|O_EXCL;
+     fl |= (mode.find('+') == -1) ? O_WRONLY : O_RDWR;
+     break;
+   case 'c':
+     md = 0666;
+     fl = O_CREAT;
+     fl |= (mode.find('+') == -1) ? O_WRONLY : O_RDWR;
+     break;
+   case 'r':
+     fl = (mode.find('+') == -1) ? O_RDONLY : O_RDWR;
+     break;
+   case 'w':
+     md = 0666;
+     fl = O_CREAT | O_TRUNC;
+     fl |= (mode.find('+') == -1) ? O_WRONLY : O_RDWR;
+     break;
+   case 'a':
+     md = 0666;
+     fl = O_CREAT | O_APPEND;
+     fl |= (mode.find('+') == -1) ? O_WRONLY : O_RDWR;
+     break;
+   default:
+    raise_warning("Invalid mode string");
     return nullptr;
   }
-
-  return req::make<CLIClientGuardedFile>(cli_read_fd(m_cli_fd));
+  auto fd = cli_openfd_unsafe(
+    filename,
+    fl,
+    md,
+    options & File::USE_INCLUDE_PATH,
+    /* quiet */ false);
+  if (fd == -1) {
+    return nullptr;
+  }
+  return req::make<CLIClientGuardedFile>(fd);
 }
 
 req::ptr<Directory> CLIWrapper::opendir(const String& path) {
@@ -1277,43 +1283,13 @@ void cli_process_command_loop(int fd) {
 
     if (cmd == "open") {
       std::string name;
-      std::string mode;
-      cli_read(fd, name, mode);
-      int md = -1;
-      int fl = 0;
+      int flags;
+      mode_t mode;
+      cli_read(fd, name, flags, mode);
 
-      switch (mode[0]) {
-        case 'x':
-          md = 0666;
-          fl = O_CREAT|O_EXCL;
-          fl |= (mode.find('+') == -1) ? O_WRONLY : O_RDWR;
-          break;
-        case 'c':
-          md = 0666;
-          fl = O_CREAT;
-          fl |= (mode.find('+') == -1) ? O_WRONLY : O_RDWR;
-          break;
-        case 'r':
-          fl = (mode.find('+') == -1) ? O_RDONLY : O_RDWR;
-          break;
-        case 'w':
-          md = 0666;
-          fl = O_CREAT | O_TRUNC;
-          fl |= (mode.find('+') == -1) ? O_WRONLY : O_RDWR;
-          break;
-        case 'a':
-          md = 0666;
-          fl = O_CREAT | O_APPEND;
-          fl |= (mode.find('+') == -1) ? O_WRONLY : O_RDWR;
-          break;
-        default:
-          cli_write(fd, false, "Invalid mode string");
-          continue;
-      }
-
-      int new_fd = md != -1
-        ? open(name.c_str(), fl, md)
-        : open(name.c_str(), fl);
+      int new_fd = mode != static_cast<unsigned int>(-1)
+        ? open(name.c_str(), flags, mode)
+        : open(name.c_str(), flags);
 
       FTRACE(2, "cli_process_command_loop({}): {} = open({}, {})\n",
              fd, new_fd, name, mode);
@@ -1585,6 +1561,46 @@ bool cli_mkstemp(char* buf) {
   if (!status) return false;
   memcpy(buf, path.c_str(), std::min(strlen(buf), path.size()));
   return true;
+}
+
+int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
+                      bool use_include_path, bool quiet) {
+  String fname;
+  if (StringUtil::IsFileUrl(filename)) {
+    fname = StringUtil::DecodeFileUrl(filename);
+    if (fname.empty()) {
+      raise_warning("invalid file:// URL");
+      return -1;
+    }
+  } else {
+    fname = filename;
+  }
+
+  if (use_include_path) {
+    struct stat s;
+    String resolved_fname = resolveVmInclude(fname.get(), "", &s);
+    if (!resolved_fname.isNull()) {
+      fname = resolved_fname;
+    }
+  }
+
+  bool res;
+  std::string error;
+  FTRACE(3, "cli_openfd[{}]({}, {}, {}): calling remote...\n",
+         tl_cliSock, fname.data(), flags, mode);
+  cli_write(tl_cliSock, "open", fname.data(), flags, mode);
+  cli_read(tl_cliSock, res, error);
+  FTRACE(3, "{} = cli_openfd[{}](...) [err = {}]\n",
+         res, tl_cliSock, error);
+
+  if (!res) {
+    if (!quiet) {
+      raise_warning("%s", error.c_str());
+    }
+    return -1;
+  }
+
+  return cli_read_fd(tl_cliSock);
 }
 
 Array cli_env() {

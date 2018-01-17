@@ -49,9 +49,11 @@ let emit_return ~need_ref env =
 let emit_def_inline = function
   | A.Fun fd ->
     let has_inout_params =
-      List.exists fd.Ast.f_params
-        ~f:(fun p -> p.Ast.param_callconv = Some Ast.Pinout
-          || (create_inout_wrapper_functions () && p.Ast.param_is_reference)) in
+      let r, _ =
+        Emit_inout_helpers.extract_inout_or_ref_param_locations
+          ~is_closure_or_func:true
+          fd.Ast.f_params in
+      Option.is_some r in
     Emit_pos.emit_pos_then (fst fd.Ast.f_name) @@
     let n = int_of_string (snd fd.Ast.f_name) in
     gather [

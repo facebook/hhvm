@@ -13,20 +13,8 @@ module A = Ast
 open Hh_core
 
 let extract_inout_or_ref_param_locations params =
-  let inout_param_locations = List.filter_mapi params
-    ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout
-                   then None else Some i) in
-  let ref_param_locations = List.filter_mapi params
-    ~f:(fun i p -> if not p.Ast.param_is_reference
-                   then None else Some i) in
-  if List.length inout_param_locations <> 0 then
-    Some (Emit_inout_helpers.InoutWrapper), inout_param_locations
-  else if List.length ref_param_locations <> 0 &&
-    Hhbc_options.create_inout_wrapper_functions !Hhbc_options.compiler_options
-  then
-    Some (Emit_inout_helpers.RefWrapper), ref_param_locations
-  else
-    None, []
+  let module EIOH = Emit_inout_helpers in
+  EIOH.extract_inout_or_ref_param_locations ~is_closure_or_func:true params
 
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,
  * a wrapper function

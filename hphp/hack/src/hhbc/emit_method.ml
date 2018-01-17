@@ -50,20 +50,10 @@ let rec hint_uses_tparams tparam_names (_, hint)  =
  * Or ref params only if the function is a closure
  *)
 let extract_inout_or_ref_param_locations is_closure params =
-  let inout_param_locations = List.filter_mapi params
-    ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout
-                   then None else Some i) in
-  if List.length inout_param_locations <> 0 then
-    inout_param_locations
-  else
-    let module O = Hhbc_options in
-    let need_wrapper =
-      O.create_inout_wrapper_functions !O.compiler_options
-      && (Emit_env.is_hh_syntax_enabled ())
-      && (O.reffiness_invariance !O.compiler_options || is_closure) in
-    if need_wrapper
-    then List.filter_mapi params ~f:(fun i p -> Option.some_if p.Ast.param_is_reference i)
-    else []
+  let module EIOH = Emit_inout_helpers in
+  let _, l =
+    EIOH.extract_inout_or_ref_param_locations ~is_closure_or_func:is_closure params in
+  l
 
 let has_kind m k = List.mem m.Ast.m_kind k
 

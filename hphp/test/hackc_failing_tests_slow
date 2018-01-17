@@ -19,7 +19,6 @@ slow/function_no_param_modifier.php
 slow/goto/label_out_finally.php
 slow/goto/try_goto_in_finally2.php
 slow/goto/try_goto_out_finally.php
-slow/hack_arr_compat/variadic-by-ref.php
 slow/inout/bad-call-15.php
 slow/inout/side-effects.php
 slow/keyset/hh-only1.php
@@ -65,7 +64,6 @@ slow/typecheck/type_coersion_7strict.php
 slow/typecheck/type_coersion_7strict_include.php
 slow/unpack_args/unpack_call_error.php
 slow/unpack_args/unpack_call_multi.php
-slow/variadic_args/by_reference.php
 slow/variadic_args/by_reference_typehints.php
 slow/variadic_args/typehints.php
 slow/vec/hh-only1.php

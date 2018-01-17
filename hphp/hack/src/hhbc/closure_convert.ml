@@ -19,9 +19,6 @@ module SU = Hhbc_string_utils
 let constant_folding () =
   Hhbc_options.constant_folding !Hhbc_options.compiler_options
 
-let create_inout_wrapper_functions () =
-  Hhbc_options.create_inout_wrapper_functions !Hhbc_options.compiler_options
-
 type variables = {
   (* all variables declared/used in the scope*)
   all_vars: SSet.t;
@@ -803,9 +800,10 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
       | Fun fd :: _defs ->
         let st, fd = convert_fun env st fd in
         let has_inout_params =
-          List.exists fd.Ast.f_params
-            ~f:(fun p -> p.Ast.param_callconv = Some Ast.Pinout
-              || (create_inout_wrapper_functions () && p.Ast.param_is_reference)) in
+          let wrapper, _ = Emit_inout_helpers.extract_inout_or_ref_param_locations
+            ~is_closure_or_func:true
+            fd.Ast.f_params in
+          Option.is_some wrapper in
         let st, stub_fd =
           add_function ~has_inout_params:has_inout_params env st fd in
         st, (p, Def_inline (Fun stub_fd))

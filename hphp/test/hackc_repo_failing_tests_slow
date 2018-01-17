@@ -1,10 +1,8 @@
 slow/async/genva-variadic.php
 slow/autoload/autoload-fail-hoist.php
-slow/break_statement/badexp.php
 slow/class_constant/1619.php
 slow/compilation/1238.php
 slow/compilation/switch-default-multiple.php
-slow/continue_statement/badexp.php
 slow/ctor_param_promotion_bad_mod.php
 slow/dict/hh-only1.php
 slow/dv_array/hh-only1.php
@@ -20,10 +18,6 @@ slow/keyset/hh-only1.php
 slow/labels/72.php
 slow/lang/redefine_function.php
 slow/list_assignment/assignment-to-this.php
-slow/namespace/double_use1.php
-slow/namespace/double_use2.php
-slow/namespace/double_use3.php
-slow/namespace/hashbang_2.php
 slow/parser/afl5934248.php
 slow/parser/backquote-fail.php
 slow/parser/colon_colon_class_var.php
@@ -32,7 +26,6 @@ slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-6.php
 slow/parser/memory_exhaust.php
 slow/parser/php-namespace-conflict-4.php
-slow/parser/php-namespace-conflict-5.php
 slow/parser/php-reserved-name-array-1.php
 slow/parser/php-reserved-name-array-2.php
 slow/parser/php-reserved-name-callable-1.php

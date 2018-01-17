@@ -8,6 +8,8 @@
  *
  *)
 
+open Hh_core
+
 (** Return the type of the smallest typed expression node whose associated span
  * (the Pos.t in its Tast.ExprAnnotation.t) contains the given position.
  * "Smallest" here refers to the size of the node's associated span, in terms of
@@ -82,13 +84,35 @@ let type_at_pos tast line char =
      * for IDE hover (at present, since full function types are presented in a
      * way which makes them difficult to read). *)
     method! on_Call env ct e hl el uel =
+      let open Typing_defs in
+      (* If the function has a Tanon or Tunresolved type, it is easier to use
+       * the type of the containing expression (which is the return type of this
+       * usage of the anonymous function, or a supertype of the return types
+       * of the members of the unresolved union), so we return None. *)
+      let rec use_containing_type env ty =
+        match snd ty with
+        | Tvar _ -> use_containing_type env (Typing_expand.fully_expand env ty)
+        | Tanon _ | Tunresolved [] -> ty, true
+        | Tunresolved [ty] -> use_containing_type env ty
+        | Tunresolved tys ->
+          let results = List.map tys (use_containing_type env) in
+          let ty = (fst ty, Tunresolved (List.map results fst)) in
+          let is_fun = function (_, Tfun _) -> true | _ -> false in
+          let use_containing =
+            List.exists results (fun (ty, uc) -> is_fun ty || uc) in
+          ty, use_containing
+        | _ -> ty, false
+      in
       let return_type ty =
-        let open Typing_defs in
         match snd ty with Tfun ft -> ft.ft_ret | _ -> ty
       in
       let (receiver_pos, _) = fst e in
       if Pos.inside receiver_pos line char
-      then super#on_expr env e >>| fun (p, env, ty) -> p, env, return_type ty
+      then begin
+        self#on_expr env e >>= fun (p, env, ty) ->
+        let ty, use_containing = use_containing_type env ty in
+        if use_containing then None else Some (p, env, return_type ty)
+      end
       else super#on_Call env ct e hl el uel
   end in
   visitor#go tast >>| fun (_, env, ty) -> env, ty

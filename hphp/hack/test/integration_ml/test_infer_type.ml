@@ -175,6 +175,37 @@ let nullthrows_cases = [
   ("nullthrows.php", 5, 10), "T";
 ]
 
+let curried = "<?hh // strict
+function curried(): (function(int): (function(bool): string)) {
+  return $i ==> $b ==> $i > 0 && $b ? 'true' : 'false';
+}
+function test_curried(bool $cond): void {
+  $f = () ==> curried();
+  $f()(5)(true);
+//^7:3
+}
+"
+
+let curried_cases = [
+  ("curried.php", 6, 3), "(function(): (function(int): (function(bool): string)))";
+  ("curried.php", 7, 3), "string";
+]
+
+let multiple_type = "<?hh // strict
+class C1 { public function foo(): int { return 5; } }
+class C2 { public function foo(): string { return 's'; } }
+function test_multiple_type(C1 $c1, C2 $c2, bool $cond): arraykey {
+  $x = $cond ? $c1 : $c2;
+  return $x->foo();
+//       ^6:10
+}
+"
+
+let multiple_type_cases = [
+  ("multiple_type.php", 6, 10), "(C1 | C2)";
+  ("multiple_type.php", 6, 14), "string"; (* Should be (int | string) *)
+]
+
 let files = [
   "id.php", id;
   "A.php", class_A;
@@ -185,6 +216,8 @@ let files = [
   "callback.php", callback;
   "invariant_violation.php", invariant_violation;
   "nullthrows.php", nullthrows;
+  "curried.php", curried;
+  "multiple_type.php", multiple_type;
 ]
 
 let cases =
@@ -195,6 +228,8 @@ let cases =
   @ lambda_cases
   @ callback_cases
   @ nullthrows_cases
+  @ curried_cases
+  @ multiple_type_cases
 
 let () =
   let env = Test.setup_server () in

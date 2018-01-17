@@ -2372,6 +2372,27 @@ bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
                      false /* richErrorMsg */);
 }
 
+const StaticString s_slash("/");
+
+static void run_prelude(std::string prelude, String cmd,
+                        const char* currentDir) {
+  prelude = "/" + prelude;
+  struct stat s;
+  auto cwd = resolveVmInclude(cmd.get(), currentDir, &s);
+  if (cwd.isNull()) return;
+  auto const w = Stream::getWrapperFromURI(cwd, nullptr, false);
+  do {
+    cwd = f_dirname(cwd);
+    auto const f = String::attach(
+      StringData::Make(cwd.data(), prelude.data())
+    );
+    if (w->access(f, R_OK) == 0) {
+      require(f.data(), false, currentDir, true);
+      break;
+    }
+  } while (!cwd.empty() && !cwd.equal(s_slash));
+}
+
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, const Array& funcParams, VRefParam funcRet,
                  const std::string &reqInitFunc, const std::string &reqInitDoc,
@@ -2409,6 +2430,10 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
           RuntimeOption::AutoPrependFile != "none") {
         require(RuntimeOption::AutoPrependFile, false,
                 context->getCwd().data(), true);
+      }
+      auto const& prelude = RuntimeOption::EvalPreludePath;
+      if (!prelude.empty()) {
+        run_prelude(prelude, String(cmd, CopyString), context->getCwd().data());
       }
       if (func) {
         funcRet.assignIfRef(invoke(cmd.c_str(), funcParams));

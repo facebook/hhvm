@@ -124,7 +124,6 @@ struct Collector {
     return h->marks() == mark_version_;
   }
   template<bool apcgc> void checkedEnqueue(const void* p);
-  void enqueueWeak(const WeakRefDataHandle* p);
   template<bool apcgc> void exactEnqueue(const void* p);
   HeapObject* find(const void*);
 
@@ -140,7 +139,6 @@ struct Collector {
   PtrMap<const HeapObject*> ptrs_;
   type_scan::Scanner type_scanner_;
   std::vector<const HeapObject*> cwork_, xwork_;
-  std::vector<const WeakRefDataHandle*> weakRefs_;
   APCGCManager* const apcgc_;
 };
 
@@ -275,11 +273,6 @@ void Collector::exactEnqueue(const void* p) {
   }
 }
 
-// Enqueue a weak pointer for possible clearing at the end of scanning.
-void Collector::enqueueWeak(const WeakRefDataHandle* weak) {
-  weakRefs_.emplace_back(weak);
-}
-
 // mark ambigous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
 template <bool apcgc>
@@ -392,7 +385,8 @@ NEVER_INLINE void Collector::traceConservative() {
       conservativeScan<apcgc>(r.first, r.second);
     }
     type_scanner_.m_conservative.clear();
-    // Accumulate m_addrs and m_weak until phase 2.
+    // Accumulate m_addrs until traceExact()
+    // Accumulate m_weak until sweep()
   };
   auto const t0 = cpu_ns();
   iterateConservativeRoots(
@@ -425,11 +419,8 @@ NEVER_INLINE void Collector::traceExact() {
       xscanned_ += sizeof(*addr);
       exactEnqueue<apcgc>(*addr);
     }
-    for (auto weak : type_scanner_.m_weak) {
-      enqueueWeak(static_cast<const WeakRefDataHandle*>(weak));
-    }
     type_scanner_.m_addrs.clear();
-    type_scanner_.m_weak.clear();
+    // Accumulate m_weak until sweep()
   };
   auto const t0 = cpu_ns();
   finish(); // from phase 1
@@ -454,14 +445,16 @@ NEVER_INLINE void Collector::traceExact() {
 template <bool apcgc>
 NEVER_INLINE void Collector::traceAll() {
   auto finish = [&] {
-    type_scanner_.finish([&](const void* start, size_t size) {
-      conservativeScan<apcgc>(start, size);
-    }, [&](const void** addr) {
+    for (auto r : type_scanner_.m_conservative) {
+      conservativeScan<apcgc>(r.first, r.second);
+    }
+    type_scanner_.m_conservative.clear();
+    for (auto addr : type_scanner_.m_addrs) {
       xscanned_ += sizeof(*addr);
       checkedEnqueue<apcgc>(*addr);
-    }, [&](const void* weak) {
-      enqueueWeak(static_cast<const WeakRefDataHandle*>(weak));
-    });
+    }
+    type_scanner_.m_addrs.clear();
+    // Accumulate m_weak until sweep()
   };
   auto const t0 = cpu_ns();
   iterateRoots([&](const void* p, size_t size, type_scan::Index tyindex) {
@@ -499,11 +492,10 @@ NEVER_INLINE void Collector::sweep() {
   };
 
   // Clear weak references as needed.
-  while (!weakRefs_.empty()) {
-    auto wref = weakRefs_.back();
+  for (auto w : type_scanner_.m_weak) {
+    auto wref = static_cast<const WeakRefDataHandle*>(w);
     assert(wref->acquire_count == 0);
     assert(wref->wr_data);
-    weakRefs_.pop_back();
     auto type = wref->wr_data->pointee.m_type;
     if (type == KindOfObject) {
       auto h = find(wref->wr_data->pointee.m_data.pobj);
@@ -515,6 +507,7 @@ NEVER_INLINE void Collector::sweep() {
     }
     assert(type == KindOfNull || type == KindOfUninit);
   }
+  type_scanner_.m_weak.clear();
 
   bool need_reinit_free = false;
   g_context->sweepDynPropTable([&](const ObjectData* obj) {

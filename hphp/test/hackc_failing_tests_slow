@@ -55,7 +55,6 @@ slow/php7_backported/scalar-types/scalar_strict_basic.php
 slow/php7_backported/scalar-types/strict_call_weak.php
 slow/php7_backported/scalar-types/strict_call_weak_explicit.php
 slow/php7_backported/scalar-types/weak_include_strict.php
-slow/php7_bcbreak/7/uvs/array_indirect_ref.php
 slow/preg-file-mode.php
 slow/reflection/1352.php
 slow/reflection_classes/default_value_with_namespace.php

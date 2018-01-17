@@ -140,6 +140,8 @@ let set_option options name value =
     { options with option_php7_ltr_assign = as_bool value }
   | "hhvm.enable_xhp" ->
     { options with option_enable_xhp = as_bool value }
+  | "hhvm.php7.uvs" ->
+    { options with option_php7_uvs = as_bool value }
   | "hack.compiler.relabel" ->
     { options with option_relabel = as_bool value }
   | "eval.createinoutwrapperfunctions" ->

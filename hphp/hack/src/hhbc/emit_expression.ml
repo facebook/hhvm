@@ -1937,10 +1937,14 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (pos, expr_ 
      1
    | A.Dollar (_, A.Lvar id as e) ->
      check_non_pipe_local e;
+     let local = get_local env id in
      empty,
      empty,
      Emit_pos.emit_pos_then pos @@
-     instr_basenl (get_local env id) base_mode,
+     (match param_num_opt with
+       | None -> instr_basenl local base_mode
+       | Some i -> instr (IBase (FPassBaseNL (i, local)))
+     ),
      0
    | A.Dollar e ->
      let base_expr_instrs = emit_expr ~need_ref:false env e in

@@ -38,11 +38,16 @@ enum class APCHandleLevel {
 enum class APCKind: uint8_t {
   Uninit, Null, Bool,  // see APCHandle::isSingletonKind before updating
   Int, Double,
-  StaticString, UncountedString,
-  StaticArray, UncountedArray,
-  StaticVec, UncountedVec,
-  StaticDict, UncountedDict,
-  StaticKeyset, UncountedKeyset,
+  UncountedString,
+  UncountedArray,
+  UncountedVec,
+  UncountedDict,
+  UncountedKeyset,
+  StaticString,
+  StaticArray,
+  StaticVec,
+  StaticDict,
+  StaticKeyset,
   SharedString, SharedArray,
   SharedPackedArray, SharedVec,
   SharedDict, SharedKeyset,
@@ -95,8 +100,8 @@ enum class APCKind: uint8_t {
  *  Bool              APCTypedValue   KindOfBool
  *  Int               APCTypedValue   KindOfInt64
  *  Double            APCTypedValue   KindOfDouble
- *  StaticString      APCTypedValue   KindOfStaticString
- *  UncountedString   APCTypedValue   KindOfString
+ *  StaticString      APCTypedValue   KindOfPersistentString
+ *  UncountedString   APCTypedValue   KindOfPersistentString
  *  StaticArray       APCTypedValue   KindOfPersistentArray
  *  UncountedArray    APCTypedValue   KindOfPersistentArray
  *  StaticVec         APCTypedValue   KindOfPersistentVec
@@ -108,17 +113,18 @@ enum class APCKind: uint8_t {
  *  SharedString      APCString       kInvalidDataType
  *  SharedArray       APCArray        kInvalidDataType
  *  SharedPackedArray APCArray        kInvalidDataType
- *  SharedVArray      APCArray        kInvalidDataType
  *  SharedVec         APCArray        kInvalidDataType
  *  SharedDict        APCArray        kInvalidDataType
  *  SharedKeyset      APCArray        kInvalidDataType
+ *  SharedDArray      APCArray        kInvalidDataType
+ *  SharedVArray      APCArray        kInvalidDataType
  *  SharedObject      APCObject       kInvalidDataType
+ *  SharedCollection  APCObject       kInvalidDataType
  *  SerializedArray   APCString       kInvalidDataType
  *  SerializedVec     APCString       kInvalidDataType
  *  SerializedDict    APCString       kInvalidDataType
  *  SerializedKeyset  APCString       kInvalidDataType
  *  SerializedObject  APCString       kInvalidDataType
- *  Collection        APCObject       kInvalidDataType
  *
  * Thread safety:
  *
@@ -247,6 +253,15 @@ struct APCHandle {
    * string or array; (not static or refcounted).
    */
   bool isUncounted() const {
+    static_assert(APCKind::UncountedString < APCKind::UncountedArray &&
+                  APCKind::UncountedArray < APCKind::UncountedVec &&
+                  APCKind::UncountedVec < APCKind::UncountedDict &&
+                  APCKind::UncountedDict < APCKind::UncountedKeyset &&
+                  static_cast<int>(APCKind::UncountedKeyset) -
+                  static_cast<int>(APCKind::UncountedString) == 4,
+                  "The Uncounted APCKinds must be consecutive, and "
+                  "in the following order so that gcc can optimize "
+                  "this to a range check.");
     return m_kind == APCKind::UncountedString ||
            m_kind == APCKind::UncountedArray ||
            m_kind == APCKind::UncountedVec ||
@@ -258,6 +273,10 @@ struct APCHandle {
    * If true, this handle and value are allocated on startup and never deleted.
    */
   bool isSingletonKind() const {
+    static_assert(APCKind::Uninit <= APCKind::Bool &&
+                  APCKind::Null <= APCKind::Bool &&
+                  static_cast<int>(APCKind::Bool) == 2,
+                  "Uninit, Null and Bool must be the first three APCKinds");
     return m_kind <= APCKind::Bool;
   }
 

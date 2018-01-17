@@ -45,8 +45,8 @@ inline void APCHandle::unreferenceRoot(size_t size) {
 }
 
 inline bool APCHandle::isAtomicCounted() const {
-  return m_kind >= APCKind::SharedString &&
-         m_type == kInvalidDataType;
+  assertx(m_kind < APCKind::SharedString || m_type == kInvalidDataType);
+  return m_kind >= APCKind::SharedString;
 }
 
 inline void APCHandle::atomicIncRef() const {

@@ -92,6 +92,10 @@ let emit_goto ~in_finally_epilogue env label =
       err_pos @@ "'goto' to undefined label '" ^ label ^ "'"
   | Some in_using ->
     let named_label = Label.named label in
+    (* CONSIDER: we don't need to assign state id for label
+      for cases when it is not necessary, i.e. when jump target is in the same
+      scope. HHVM does not do this today, do the same for compatibility reasons *)
+    let label_id = JT.get_id_for_label named_label in
     let jump_targets = Emit_env.get_jump_targets env in
     begin match JT.find_goto_target jump_targets label with
     | JT.ResolvedGoto_label iters ->
@@ -108,7 +112,7 @@ let emit_goto ~in_finally_epilogue env label =
       } ->
       let preamble =
         if in_finally_epilogue then empty
-        else emit_save_label_id (JT.get_id_for_label named_label) in
+        else emit_save_label_id label_id in
       gather [
         preamble;
         emit_jump_to_label rgf_finally_start_label rgf_iterators_to_release;

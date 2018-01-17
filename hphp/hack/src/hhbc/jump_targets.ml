@@ -204,7 +204,7 @@ let release_id l =
 
 (* runs a given function and then released label ids that were possibly assigned
    to labels at the head of the list *)
-let run_and_release_ids labels f s t =
+let run_and_release_ids _labels f s t =
   let r = f t s in
   begin match t with
   | Loop ({ label_break; label_continue; _ }, _) ::_ ->
@@ -215,7 +215,10 @@ let run_and_release_ids labels f s t =
   | (Function _ | Finally _) :: _ -> ()
   | [] -> failwith "impossible"
   end;
-  SSet.iter (fun l -> release_id (Label.Named l)) labels;
+  (* CONSIDER: now HHVM does not release state ids for named labels
+     even after leaving the scope where labels are accessible
+     Do the same for now for compatibility reasons *)
+  (* SSet.iter (fun l -> release_id (Label.Named l)) labels; *)
   r
 
 let with_loop is_hh_file label_break label_continue iterator t s f =

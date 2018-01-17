@@ -31,11 +31,22 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
       Nothing
     | Token x ->
       let open EditableToken in
+      let token_kind = kind x in
       Concat [
-        transform_leading_trivia (leading x);
+        begin
+          match token_kind with
+          | TokenKind.EndOfFile ->
+            let leading_trivia = leading x in
+            let trivia_without_trailing_invisibles =
+              let reversed = List.rev leading_trivia in
+              List.rev (List.drop_while reversed ~f:is_invisible)
+            in
+            transform_leading_trivia trivia_without_trailing_invisibles
+          | _ -> transform_leading_trivia (leading x)
+        end;
         begin
           let open TokenKind in
-          match kind x with
+          match token_kind with
           | SingleQuotedStringLiteral
           | DoubleQuotedStringLiteral
           | DoubleQuotedStringLiteralHead
@@ -305,6 +316,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         namespace_use_alias = alias } ->
       Concat [
         t use_kind;
+        when_present use_kind space;
         t name;
         when_present as_kw space;
         t as_kw;
@@ -1008,7 +1020,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         if List.is_empty upto_fallthrough
         then transform_leading_trivia after_fallthrough
         else Concat [
-          BlockNest [transform_leading_trivia upto_fallthrough];
+          BlockNest [transform_leading_trivia upto_fallthrough; Newline];
           transform_trailing_trivia after_fallthrough;
         ];
         handle_list labels ~after_each:begin fun is_last_label ->
@@ -1852,7 +1864,8 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         t variance;
         t name;
         when_present constraints space;
-        handle_possible_list constraints;
+        handle_possible_list constraints
+          ~after_each:(fun is_last -> if is_last then Nothing else Space);
       ]
     | TypeConstraint {
         constraint_keyword = kw;
@@ -2735,13 +2748,15 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
     List.exists trivia_list
       ~f:(fun trivia -> Trivia.kind trivia = TriviaKind.EndOfLine)
 
+  and is_invisible trivia =
+    match Trivia.kind trivia with
+    | TriviaKind.WhiteSpace | TriviaKind.EndOfLine -> true
+    | _ -> false
+
   (* True if the trivia list contains any "invisible" trivia, meaning spaces,
    * tabs, or newlines. *)
   and has_invisibles trivia_list =
-    List.exists trivia_list ~f:begin fun trivia ->
-      Trivia.kind trivia = TriviaKind.WhiteSpace ||
-      Trivia.kind trivia = TriviaKind.EndOfLine
-    end
+    List.exists trivia_list ~f:is_invisible
 
   and transform_leading_trivia t = transform_trivia ~is_leading:true t
   and transform_trailing_trivia t = transform_trivia ~is_leading:false t
@@ -2767,14 +2782,11 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
           transform_leading_invisibles (List.rev !leading_invisibles);
           Option.value !last_comment ~default:Nothing;
           ignore_trailing_invisibles (List.rev !trailing_invisibles);
-          if !last_comment_was_delimited then begin
-            if !whitespace_followed_last_comment then Space
-            else if !newline_followed_last_comment then Newline
+          if !last_comment_was_delimited && !whitespace_followed_last_comment
+            then Space
+          else if !newline_followed_last_comment
+            then Newline
             else Nothing
-          end
-          else if Option.is_some !last_comment
-            then Newline (* Always add a newline after a single-line comment *)
-            else Nothing;
         ])
         :: !comments;
       last_comment := None;

@@ -80,9 +80,6 @@ let list_to_files_t = function
       (PhaseMap.singleton Typing x)
 
 module Common = struct
-  type error_flags = {
-    lazy_decl_err: Relative_path.t option;
-  }
 
   (* Get most recently-ish added error. *)
   let get_last error_map =
@@ -113,25 +110,21 @@ module Common = struct
     | None -> result
     | Some l -> f2 result l
 
-  let do_ f error_map accumulate_errors applied_fixmes has_lazy_decl_error  =
+  let do_ f error_map accumulate_errors applied_fixmes  =
     let error_map_copy = !error_map in
     let accumulate_errors_copy = !accumulate_errors in
     let applied_fixmes_copy = !applied_fixmes in
-    let has_lazy_decl_error_copy = !has_lazy_decl_error in
     error_map := Relative_path.Map.empty;
     applied_fixmes := Relative_path.Map.empty;
     accumulate_errors := true;
-    has_lazy_decl_error := None;
     let result = f () in
     let out_errors = !error_map in
     let out_applied_fixmes = !applied_fixmes in
-    let lazy_decl_err = !has_lazy_decl_error in
     error_map := error_map_copy;
     applied_fixmes := applied_fixmes_copy;
     accumulate_errors := accumulate_errors_copy;
-    has_lazy_decl_error := has_lazy_decl_error_copy;
     let out_errors = files_t_map ~f:(List.rev) out_errors in
-    (out_errors, out_applied_fixmes), result, {lazy_decl_err;}
+    (out_errors, out_applied_fixmes), result
 
   let run_in_context path phase f =
     let context_copy = !current_context in
@@ -139,9 +132,6 @@ module Common = struct
     let res = f () in
     current_context := context_copy;
     res
-
-  let get_lazy_decl_flag err_flags =
-    err_flags.lazy_decl_err
 
   (* Log important data if lazy_decl triggers a crash *)
   let lazy_decl_error_logging error error_map to_absolute to_string =
@@ -219,14 +209,13 @@ module type Errors_modes = sig
   type 'a error_
   type error = Pos.t error_
   type applied_fixme = Pos.t * int
-  type error_flags = Common.error_flags
 
   val applied_fixmes: applied_fixme files_t ref
 
   val try_with_result: (unit -> 'a) -> ('a -> error -> 'a) -> 'a
-  val do_: (unit -> 'a) -> (error files_t * applied_fixme files_t) * 'a * error_flags
+  val do_: (unit -> 'a) -> (error files_t * applied_fixme files_t) * 'a
   val do_with_context: Relative_path.t -> error_phase ->
-    (unit -> 'a) -> (error files_t * applied_fixme files_t) * 'a * error_flags
+    (unit -> 'a) -> (error files_t * applied_fixme files_t) * 'a
   val run_in_context: Relative_path.t -> error_phase -> (unit -> 'a) -> 'a
   val run_in_decl_mode: Relative_path.t -> (unit -> 'a) -> 'a
   val add_error: error -> unit
@@ -249,21 +238,18 @@ module NonTracingErrors: Errors_modes = struct
   type 'a error_ = error_code * 'a message list
   type error = Pos.t error_
   type applied_fixme = Pos.t * int
-  type error_flags = Common.error_flags
 
   let applied_fixmes: applied_fixme files_t ref = ref Relative_path.Map.empty
   let (error_map: error files_t ref) = ref Relative_path.Map.empty
   let accumulate_errors = ref false
   (* Some filename when declaring *)
   let in_lazy_decl = ref None
-  (* Some filename = in_lazy_decl if there's an error in the file *)
-  let has_lazy_decl_error = ref None
 
   let try_with_result f1 f2 =
     Common.try_with_result f1 f2 error_map accumulate_errors
 
   let do_ f =
-    Common.do_ f error_map accumulate_errors applied_fixmes has_lazy_decl_error
+    Common.do_ f error_map accumulate_errors applied_fixmes
 
   let do_with_context path phase f =
     Common.run_in_context path phase (fun () -> do_ f)
@@ -324,13 +310,7 @@ module NonTracingErrors: Errors_modes = struct
       let error_list = Common.get_current_list !error_map in
       match error_list with
       | old_error :: _ when error = old_error -> ()
-      | _ ->
-        begin
-          Common.set_current_list error_map (error :: error_list);
-          has_lazy_decl_error := match !in_lazy_decl with
-          | Some fn -> Some fn
-          | None -> !has_lazy_decl_error
-        end
+      | _ -> Common.set_current_list error_map (error :: error_list)
     else
       (* We have an error, but haven't handled it in any way *)
       let msg = error |> to_absolute |> to_string in
@@ -346,20 +326,18 @@ module TracingErrors: Errors_modes = struct
   type 'a error_ = (Printexc.raw_backtrace * error_code * 'a message list)
   type error = Pos.t error_
   type applied_fixme = Pos.t * int
-  type error_flags = Common.error_flags
 
   let applied_fixmes: applied_fixme files_t ref = ref Relative_path.Map.empty
   let (error_map: error files_t ref) = ref Relative_path.Map.empty
 
   let accumulate_errors = ref false
   let in_lazy_decl = ref None
-  let has_lazy_decl_error = ref None
 
   let try_with_result f1 f2 =
     Common.try_with_result f1 f2 error_map accumulate_errors
 
   let do_ f =
-    Common.do_ f error_map accumulate_errors applied_fixmes has_lazy_decl_error
+    Common.do_ f error_map accumulate_errors applied_fixmes
 
   let run_in_context = Common.run_in_context
 
@@ -422,10 +400,7 @@ module TracingErrors: Errors_modes = struct
     if !accumulate_errors then
       begin
         let error_list = Common.get_current_list !error_map in
-        Common.set_current_list error_map (error :: error_list);
-        has_lazy_decl_error := match !in_lazy_decl with
-        | Some fn -> Some fn
-        | None -> !has_lazy_decl_error
+        Common.set_current_list error_map (error :: error_list)
       end
     else
     (* We have an error, but haven't handled it in any way *)
@@ -453,7 +428,6 @@ type 'a error_ = 'a M.error_
 type error = Pos.t error_
 type applied_fixme = M.applied_fixme
 type t = error files_t * applied_fixme files_t
-type error_flags = Common.error_flags
 
 type phase = error_phase = Parsing | Naming | Decl | Typing
 
@@ -3159,7 +3133,7 @@ let run_in_context = M.run_in_context
 let run_in_decl_mode = M.run_in_decl_mode
 
 let ignore_ f =
-  let _, result, _ =  (do_ f) in
+  let _, result =  (do_ f) in
   result
 
 let try_when f ~when_ ~do_ =
@@ -3169,8 +3143,6 @@ let try_when f ~when_ ~do_ =
     else add_error error;
     result
   end
-
-let get_lazy_decl_flag = Common.get_lazy_decl_flag
 
 (* Runs the first function that is expected to produce an error. If it doesn't
  * then we run the second function we are given

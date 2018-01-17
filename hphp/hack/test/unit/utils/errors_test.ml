@@ -27,7 +27,7 @@ let expect_error_in =
     "File \"/%s\", line 0, characters 0--1:\n (Parsing[1002])\n\n"
 
 let test_do () =
-  let errors, (), _ = Errors.do_ begin fun () ->
+  let errors, () = Errors.do_ begin fun () ->
     error_in "A";
     error_in "B";
     ()
@@ -42,7 +42,7 @@ let test_do () =
   true
 
 let test_get_sorted_error_list () =
-  let errors, (), _ = Errors.do_ begin fun () ->
+  let errors, () = Errors.do_ begin fun () ->
     error_in "B";
     error_in "A";
     ()
@@ -81,12 +81,12 @@ let test_try () =
   true
 
 let test_merge () =
-  let errors1, (), _ = Errors.do_ begin fun () ->
+  let errors1, () = Errors.do_ begin fun () ->
     error_in "A";
     error_in "B";
     ()
   end in
-  let errors2, (), _ = Errors.do_ begin fun () ->
+  let errors2, () = Errors.do_ begin fun () ->
     error_in "C";
     error_in "D";
     ()
@@ -101,7 +101,7 @@ let test_merge () =
   true
 
 let test_from_error_list () =
-  let errors, (), _ = Errors.do_ begin fun () ->
+  let errors, () = Errors.do_ begin fun () ->
     error_in "A";
     error_in "B";
     ()
@@ -119,7 +119,7 @@ let test_from_error_list () =
 
 let test_phases () =
   let a_path = create_path "A" in
-  let errors, (), _ = Errors.do_ begin fun () ->
+  let errors, () = Errors.do_ begin fun () ->
     Errors.run_in_context a_path Errors.Parsing begin fun () ->
       Errors.parsing_error (Pos.make_from a_path, "");
     end;
@@ -141,17 +141,17 @@ let test_incremental_update () =
   let a_path = create_path "A" in
   let b_path = create_path "B" in
 
-  let foo_error_a, (), _ =
+  let foo_error_a, () =
   Errors.do_with_context a_path Errors.Parsing begin fun () ->
     error_in "foo";
     ()
   end in
-  let bar_error_a, (), _ =
+  let bar_error_a, () =
     Errors.do_with_context a_path Errors.Parsing begin fun () ->
     error_in "bar";
     ()
   end in
-  let baz_error_b, (), _ =
+  let baz_error_b, () =
     Errors.do_with_context b_path Errors.Parsing begin fun () ->
     error_in "baz";
     ()

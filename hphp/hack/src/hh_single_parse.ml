@@ -55,7 +55,7 @@ let handle_errors : Errors.t -> unit = fun errorl ->
 
 let run_ast ?(quick=false) file =
   let parse_call () = Parser_hack.from_file ParserOptions.default ~quick file in
-  let errorl, result, _ = Errors.do_ parse_call in
+  let errorl, result = Errors.do_ parse_call in
   handle_errors errorl;
   result
 

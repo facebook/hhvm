@@ -18,7 +18,7 @@ let print_error error = error
 
 
 let parse_with_regular file content =
-  let errorl, parser_ret, _ =
+  let errorl, parser_ret =
     Errors.do_ begin fun () ->
       Parser_hack.program ParserOptions.default file content
     end
@@ -40,7 +40,7 @@ let parse_and_print filename =
   let content =
     try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
   if !verbose then Printf.printf "File contents:\n%s\n" content;
-  let errorl, result, _ =
+  let errorl, result =
     Errors.do_ begin fun () ->
       Fileinfo_parser.program ParserOptions.default file content
     end

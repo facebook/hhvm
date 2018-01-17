@@ -218,7 +218,7 @@ let handle_existing_file args filename =
   let editable = Full_fidelity_editable_syntax.from_tree minimal_tree in
 
   (* Parse with the original parser *)
-  let (original_errors, original_parse, _) = Errors.do_
+  let (original_errors, original_parse) = Errors.do_
     begin
       fun () -> Parser_hack.from_file ParserOptions.default file
     end in

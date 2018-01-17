@@ -16,18 +16,11 @@
 open Hh_core
 open Utils
 
-(* The set of files that failed *)
-type failed = Relative_path.Set.t
-
 (* The result expected from the service *)
-type result = Errors.t * failed
+type result = Errors.t
 
-type error_info = {
-  errs : failed;
-  lazy_decl_errs: failed;
-}
 (* Used for lazy typechecking *)
-type lazy_decl_result = Errors.t * error_info
+type lazy_decl_result = Errors.t
 
 (*****************************************************************************)
 (* The place where we store the shared data in cache *)
@@ -45,38 +38,29 @@ end)
 (* The job that will be run on the workers *)
 (*****************************************************************************)
 
-let decl_file tcopt (errorl, failed) fn =
-  let errorl', (), _ = Errors.do_with_context fn Errors.Decl begin fun () ->
+let decl_file tcopt errorl fn =
+  let errorl', () = Errors.do_with_context fn Errors.Decl begin fun () ->
     d ("Typing decl: "^Relative_path.to_absolute fn);
     Decl.make_env tcopt fn;
     dn "OK";
   end
   in
-  let failed =
-    if Errors.is_empty errorl' then failed
-    else Relative_path.Set.add failed fn in
-  let errorl = Errors.merge errorl' errorl in
-  errorl, failed
+  Errors.merge errorl' errorl
 
-let decl_files (errors, failed) fnl =
+let decl_files errors fnl =
   let tcopt = TypeDeclarationStore.load() in
-  List.fold_left fnl ~f:(decl_file tcopt) ~init:(errors, failed)
+  List.fold_left fnl ~f:(decl_file tcopt) ~init:errors
 
 (*****************************************************************************)
 (* Merges the results (used by the master) *)
 (*****************************************************************************)
 
-let merge_decl (errors1, failed1) (errors2, failed2) =
-  Errors.merge errors1 errors2,
-  Relative_path.Set.union failed1 failed2
+let merge_decl errors1 errors2 =
+  Errors.merge errors1 errors2
 
-let merge_lazy_decl
-    (errors1, {errs = failed1; lazy_decl_errs = failed_decl1})
-    (errors2, {errs = failed2; lazy_decl_errs = failed_decl2}) =
-  Errors.merge errors1 errors2,
-    { errs = Relative_path.Set.union failed1 failed2;
-      lazy_decl_errs = Relative_path.Set.union failed_decl1 failed_decl2;
-    }
+let merge_lazy_decl errors1 errors2 =
+  Errors.merge errors1 errors2
+
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
 (*****************************************************************************)
@@ -85,7 +69,7 @@ let go (workers:Worker.t list option) ~bucket_size tcopt fast =
   TypeDeclarationStore.store tcopt;
   let fast_l =
     Relative_path.Map.fold fast ~init:[] ~f:(fun x _ y -> x :: y) in
-  let neutral = Errors.empty, Relative_path.Set.empty in
+  let neutral = Errors.empty in
   dn "Declaring the types";
   let result =
     MultiWorker.call

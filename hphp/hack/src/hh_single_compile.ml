@@ -315,7 +315,7 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
         SourceText.relative_pos filename source_text
           (SyntaxError.start_offset e) (SyntaxError.end_offset e) in
       Emit_program.emit_fatal_program ~ignore_message:false error_t pos s
-    | `ParseResult (errors, parser_return, _) ->
+    | `ParseResult (errors, parser_return) ->
       let ast = parser_return.Parser_hack.ast in
       List.iter (Errors.get_error_list errors) (fun e ->
         P.printf "%s\n" (Errors.to_string (Errors.to_absolute e)));

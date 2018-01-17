@@ -40,7 +40,7 @@
              (AnnotatedAST.Return ([18:3-18:20],
                 (Some (([18:10-18:19], Some (int | string)),
                        (AnnotatedAST.Call (Cnormal,
-                          (([18:10-18:17], Some (function(): string)),
+                          (([18:10-18:17], Some ((function(): string) | (function(): int))),
                            (AnnotatedAST.Obj_get (
                               (([18:10-18:12], Some (\C1 | \C2)),
                                (AnnotatedAST.Lvar ([18:10-18:12], $x))),

@@ -3563,15 +3563,20 @@ and is_abstract_ft fty = match fty with
           | OG_nullthrows -> None
           | OG_nullsafe -> Some p
         ) in
-      let tel = ref [] and tuel = ref [] and tfty = ref (Reason.none, Tany) in
+      let tel = ref [] and tuel = ref [] and tftyl = ref [] in
       let fn = (fun (env, fty, _) ->
         check_coroutine_call env fty;
         let env, tel_, tuel_, method_ = call ~expected p env fty el uel in
         tel := tel_; tuel := tuel_;
-        tfty := fty;
+        tftyl := fty :: !tftyl;
         env, method_, None) in
       let env, ty = obj_get ~is_method ~nullsafe ~explicit_tparams:hl env ty1 (CIexpr e1) m fn in
-      make_call env (T.make_typed_expr fpos !tfty (T.Obj_get(te1,
+      let tfty =
+        match !tftyl with
+        | [fty] -> fty
+        | tftyl -> (Reason.none, Tunresolved tftyl)
+      in
+      make_call env (T.make_typed_expr fpos tfty (T.Obj_get(te1,
         T.make_implicitly_typed_expr pos_id (T.Id m), nullflavor))) hl !tel !tuel ty
 
   (* Function invocation *)

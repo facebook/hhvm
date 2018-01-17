@@ -203,7 +203,7 @@ function test_multiple_type(C1 $c1, C2 $c2, bool $cond): arraykey {
 
 let multiple_type_cases = [
   ("multiple_type.php", 6, 10), "(C1 | C2)";
-  ("multiple_type.php", 6, 14), "string"; (* Should be (int | string) *)
+  ("multiple_type.php", 6, 14), "(int | string)";
 ]
 
 let files = [

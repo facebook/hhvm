@@ -2546,7 +2546,7 @@ SSATmp* simplifyDefLabel(State& env, const IRInstruction* inst) {
 
 SSATmp* decRefImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!src->type().maybe(TCounted)) {
+  if (noop_decref || !src->type().maybe(TCounted)) {
     return gen(env, Nop);
   }
   return nullptr;
@@ -2557,6 +2557,8 @@ SSATmp* simplifyDecRef(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyDecRefNZ(State& env, const IRInstruction* inst) {
+  if (one_bit_refcount) return gen(env, Nop);
+
   return decRefImpl(env, inst);
 }
 

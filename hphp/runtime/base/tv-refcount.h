@@ -46,6 +46,7 @@ extern RawDestructor g_destructors[kDestrTableSize];
  * returns true but tvDecRefWillRelease() will return false.
  */
 ALWAYS_INLINE bool tvDecRefWillCallHelper(const TypedValue tv) {
+  if (noop_decref) return false;
   return isRefcountedType(tv.m_type) && tv.m_data.pcnt->decWillRelease();
 }
 
@@ -55,6 +56,7 @@ ALWAYS_INLINE bool tvDecRefWillCallHelper(const TypedValue tv) {
  * Always returns false for non-refcounted types.
  */
 ALWAYS_INLINE bool tvDecRefWillRelease(TypedValue tv) {
+  if (noop_decref) return false;
   if (!isRefcountedType(tv.m_type)) {
     return false;
   }
@@ -82,6 +84,8 @@ ALWAYS_INLINE RefCount tvGetCount(TypedValue tv) {
 ALWAYS_INLINE void tvDecRefCountable(TypedValue tv) {
   assertx(isRefcountedType(tv.m_type));
 
+  if (noop_decref) return;
+
   if (tv.m_data.pcnt->decReleaseCheck()) {
     g_destructors[typeToDestrIdx(tv.m_type)](
       reinterpret_cast<void*>(tv.m_data.pcnt)
@@ -96,11 +100,15 @@ ALWAYS_INLINE void tvDecRefCountable(const TypedValue* tv) {
  * Decref `tv', or do nothing if it's not refcounted.
  */
 ALWAYS_INLINE void tvDecRefGen(TypedValue tv) {
+  if (noop_decref) return;
+
   if (isRefcountedType(tv.m_type)) {
     tvDecRefCountable(tv);
   }
 }
 ALWAYS_INLINE void tvDecRefGen(TypedValue* tv) {
+  if (noop_decref) return;
+
   if (isRefcountedType(tv->m_type)) {
     tvDecRefCountable(tv);
     // If we're in debug mode, turn the entry into null so that the GC doesn't
@@ -113,6 +121,8 @@ ALWAYS_INLINE void tvDecRefGen(TypedValue* tv) {
  * Same as tvDecRefGen(), except the decref branch is marked unlikely.
  */
 ALWAYS_INLINE void tvDecRefGenUnlikely(TypedValue tv) {
+  if (noop_decref) return;
+
   if (UNLIKELY(isRefcountedType(tv.m_type))) {
     tvDecRefCountable(tv);
   }
@@ -123,6 +133,7 @@ ALWAYS_INLINE void tvDecRefGenUnlikely(TypedValue tv) {
  */
 ALWAYS_INLINE void tvDecRefGenNZ(TypedValue tv) {
   assert(!tvDecRefWillCallHelper(tv));
+  if (noop_decref) return;
   if (isRefcountedType(tv.m_type)) {
     tv.m_data.pcnt->decRefCount();
   }

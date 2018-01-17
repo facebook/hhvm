@@ -607,6 +607,8 @@ void emitDecRefTypeStat(Vout& v, IRLS& env, const IRInstruction* inst) {
  *
  */
 void cgDecRef(IRLS& env, const IRInstruction *inst) {
+  if (noop_decref) return;
+
   // This is redundant with a check in ifRefCounted, but we check anyway to
   // avoid emitting profiling code in this case.
   auto const ty = inst->src(0)->type();

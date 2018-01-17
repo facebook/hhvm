@@ -47,6 +47,13 @@ auto constexpr FAST_REFCOUNT_OFFSET = HeapObject::count_offset();
  */
 auto constexpr unconditional_one_bit_incref = true;
 
+/*
+ * When true, all DecRef operations will be no-ops. Enabling this when
+ * one_bit_refcount == false will visibly affect program behavior; use with
+ * caution.
+ */
+auto constexpr noop_decref = false;
+
 extern __thread bool tl_sweeping;
 
 /*
@@ -202,16 +209,17 @@ ALWAYS_INLINE void Countable::decRefCount() const {
 }
 
 ALWAYS_INLINE bool MaybeCountable::decWillRelease() const {
-  return !hasMultipleRefs();
+  return !noop_decref && !hasMultipleRefs();
 }
 
 ALWAYS_INLINE bool Countable::decWillRelease() const {
-  return !hasMultipleRefs();
+  return !noop_decref && !hasMultipleRefs();
 }
 
 ALWAYS_INLINE bool MaybeCountable::decReleaseCheck() {
   assert(!tl_sweeping);
   assert(checkCount());
+  if (noop_decref) return false;
   if (one_bit_refcount) return m_count == OneReference;
 
   if (m_count == 1) return true;
@@ -222,6 +230,7 @@ ALWAYS_INLINE bool MaybeCountable::decReleaseCheck() {
 ALWAYS_INLINE bool Countable::decReleaseCheck() {
   assert(!tl_sweeping);
   assert(checkCount());
+  if (noop_decref) return false;
   if (one_bit_refcount) return m_count == OneReference;
 
   if (m_count == 1) return true;

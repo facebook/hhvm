@@ -31,6 +31,12 @@ namespace VSDEBUG {
 const StaticString s_user("user");
 const StaticString s_core("Core");
 
+static bool isArrayObjectType(const std::string className) {
+  // HH\Vector is special in that its an object but its children should
+  // look like array indicies.
+  return className == "HH\\Vector";
+};
+
 VariablesCommand::VariablesCommand(
   Debugger* debugger,
   folly::dynamic message
@@ -627,7 +633,17 @@ int VariablesCommand::addComplexChildren(
       vars
     );
 
-    if (vars != nullptr) {
+    bool isArrayLikeObject = false;
+    const auto obj = var.toObject().get();
+    if (obj != nullptr) {
+      auto currentClass = obj->getVMClass();
+      if (currentClass != nullptr) {
+        const std::string className = currentClass->name()->toCppString();
+        isArrayLikeObject = isArrayObjectType(className);
+      }
+    }
+
+    if (vars != nullptr && !isArrayLikeObject) {
       sortVariablesInPlace(*vars);
     }
 
@@ -949,7 +965,7 @@ int VariablesCommand::addClassSubScopes(
           var,
           nullptr
         );
-        scopeTitle = "Static Properties";
+        scopeTitle = "Static Props";
         if (count > 0) {
           subScopeCount++;
           addScopeSubSection(
@@ -1025,7 +1041,9 @@ void VariablesCommand::forEachInstanceProp(
       propName = propName.substr(classNameEnd + 1);
     }
 
-    const std::string displayName = "$" + propName;
+    const std::string displayName = isArrayObjectType(className)
+      ? propName
+      : "$" + propName;
 
     folly::dynamic presentationHint = folly::dynamic::object;
     presentationHint["visibility"] = visibilityDescription;

@@ -696,7 +696,6 @@ struct RuntimeOption {
   F(int64_t, ContiguousHeapWindowSize, 5 * 1000000)                     \
   F(uint64_t,ContiguousHeapThreshold,  128 * 1024 * 1024)               \
   /* GC Options: See heap-collect.cpp for more details */               \
-  F(bool, EnableGC,                    eagerGcDefault())                \
   F(bool, EagerGC,                     eagerGcDefault())                \
   F(bool, FilterGCPoints,              true)                            \
   F(bool, Quarantine,                  eagerGcDefault())                \
@@ -706,6 +705,7 @@ struct RuntimeOption {
   F(bool, GCForAPC,                    false)                           \
   F(int64_t, GCForAPCTrigger,          1024*1024*1024)                  \
   F(bool, TwoPhaseGC,                  false)                           \
+  F(bool, EnableGC,                    enableGcDefault())               \
   /* End of GC Options */                                               \
   F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \

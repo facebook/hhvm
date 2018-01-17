@@ -486,6 +486,10 @@ static inline bool eagerGcDefault() {
 #endif
 }
 
+static inline bool enableGcDefault() {
+  return RuntimeOption::EvalEagerGC || one_bit_refcount;
+}
+
 static inline uint64_t pgoThresholdDefault() {
   return debug ? 2 : 2000;
 }

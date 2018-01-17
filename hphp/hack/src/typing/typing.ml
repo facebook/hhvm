@@ -4093,10 +4093,6 @@ and member_not_found pos ~is_method class_ member_name r =
     | Some (def_pos, v) ->
         error (`did_you_mean (def_pos, v))
 
-(* The type of the object member is passed into the continuation k. This is
- * useful for typing nullsafed method calls. Consider `$x?->f()`: obj_get will
- * pass `k` the type of f, and `k` will typecheck the method call and return
- * the method's return type. obj_get then wraps that type in a Toption. *)
 and obj_get ~is_method ~nullsafe ?(valkind = `other) ?(explicit_tparams=[]) env ty1 cid id k =
   let env =
     match nullsafe with
@@ -4288,12 +4284,10 @@ and obj_get_ ~is_method ~nullsafe ~valkind ?(explicit_tparams=[])
 
   | _, Toption ty -> begin match nullsafe with
     | Some p1 ->
-        let k' (env, fty, x) = begin
-          let env, method_, x = k (env, fty, x) in
-          let env, method_ = TUtils.non_null env method_ in
-          env, (Reason.Rnullsafe_op p1, Toption method_), x
-        end in
-        obj_get_ ~is_method ~nullsafe ~valkind ~explicit_tparams env ty cid id k' k_lhs
+        let env, method_, x = obj_get_ ~is_method ~nullsafe ~valkind
+          ~explicit_tparams env ty cid id k k_lhs in
+        let env, method_ = TUtils.non_null env method_ in
+        env, (Reason.Rnullsafe_op p1, Toption method_), x
     | None ->
         Errors.null_member id_str id_pos
           (Reason.to_string

@@ -198,7 +198,7 @@ HeapObject* ContiguousHeap::allocSlab(MemoryUsageStats& stats) {
 
 //
 // [MallocNode][usable memory]
-// ^n          ^ptr          ^ptr+size == n+n->nbytes
+// ^n          ^ptr          ^ptr+size (aligned to ChunkSize)
 //
 // malloc:    [MallocNode/BigMalloc][data...]
 // objMalloc: [MallocNode/BigObj   ][header...]
@@ -212,26 +212,25 @@ HeapObject* ContiguousHeap::allocSlab(MemoryUsageStats& stats) {
 // And we should also figure out that how small can we make ChunkSize before
 // performance starts to get really bad (in normal operation, and with
 // m_bypassSlabAlloc=true)
-MemBlock ContiguousHeap::allocBig(size_t bytes, HeaderKind kind,
-                                  type_scan::Index tyindex,
-                                  MemoryUsageStats& stats) {
+void* ContiguousHeap::allocBig(size_t bytes, HeaderKind kind,
+                               type_scan::Index tyindex,
+                               MemoryUsageStats& stats) {
   // Round up to the nearest multiple of ChunkSize
   auto cap = (bytes + sizeof(MallocNode) + ChunkSize - 1) & ~(ChunkSize - 1);
   auto n = (MallocNode*)raw_alloc(cap);
   n->initHeader_32_16(kind, 0, tyindex);
-  n->nbytes = cap;
+  n->nbytes = bytes + sizeof(MallocNode);
   stats.mmUsage += cap;
   stats.mmap_cap += cap;
   stats.mmap_volume += cap;
-  return {n + 1, cap - sizeof(MallocNode)};
+  return n + 1;
 }
 
-MemBlock ContiguousHeap::callocBig(size_t bytes, HeaderKind kind,
-                                   type_scan::Index tyindex,
-                                   MemoryUsageStats& stats) {
-  auto b = allocBig(bytes, kind, tyindex, stats);
-  memset(b.ptr, 0, b.size);
-  return b;
+void* ContiguousHeap::callocBig(size_t bytes, HeaderKind kind,
+                                type_scan::Index tyindex,
+                                MemoryUsageStats& stats) {
+  void* b = allocBig(bytes, kind, tyindex, stats);
+  return memset(b, 0, bytes);
 }
 
 // Return true if the pointer is in the range and has not been freed
@@ -241,27 +240,31 @@ bool ContiguousHeap::contains(void* ptr) const {
   return p >= m_base && p < m_front && !m_freebits.test(index);
 }
 
-void ContiguousHeap::freeBig(void* ptr) {
+void ContiguousHeap::freeBig(void* ptr, MemoryUsageStats& stats) {
   auto n = static_cast<MallocNode*>(ptr) - 1;
-  raw_free((char*)n, n->nbytes);
+  auto cap = (n->nbytes + sizeof(MallocNode) + ChunkSize-1) & ~(ChunkSize-1);
+  stats.mmUsage -= cap;
+  stats.mmap_cap -= cap;
+  raw_free((char*)n, cap);
 }
 
-MemBlock ContiguousHeap::resizeBig(void* ptr, size_t newsize,
-                                   MemoryUsageStats& stats) {
-  auto newcap = (newsize + sizeof(MallocNode) + ChunkSize-1) & ~(ChunkSize-1);
+void* ContiguousHeap::resizeBig(void* ptr, size_t newsize,
+                                MemoryUsageStats& stats) {
   auto n = static_cast<MallocNode*>(ptr) - 1;
-  if (newcap == n->nbytes) {
+  auto oldcap = (n->nbytes + ChunkSize-1) & ~(ChunkSize-1);
+  auto newcap = (newsize + sizeof(MallocNode) + ChunkSize-1) & ~(ChunkSize-1);
+  if (newcap == oldcap) {
     // capacity and mmap_volume don't change
-    return {n + 1, newcap - sizeof(MallocNode)};
+    return n + 1;
   }
-  auto old_size = n->nbytes;
   auto b = allocBig(newsize, n->kind(), n->typeIndex(), stats);
-  memcpy(b.ptr, ptr, std::min(newcap, n->nbytes) - sizeof(MallocNode));
-  raw_free((char*)n, n->nbytes);
+  auto oldsize = n->nbytes - sizeof(MallocNode);
+  memcpy(b, ptr, std::min(newsize, oldsize));
+  raw_free((char*)n, oldcap);
   // Already add the stats in allocBig(), so just subtract the old stats
-  stats.mmUsage -= old_size;
-  stats.mmap_cap -= old_size;
-  stats.mmap_volume -= old_size;
+  stats.mmUsage -= oldcap;
+  stats.mmap_cap -= oldcap;
+  stats.mmap_volume -= oldcap;
   return b;
 }
 

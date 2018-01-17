@@ -363,8 +363,8 @@ constexpr size_t kSizeClassesPerDoubling = (1u << kLgSizeClassesPerDoubling);
  * We want kMaxSmallSize to be the largest size-class less than kSlabSize.
  */
 constexpr size_t kNumSmallSizes = 63;
-static_assert(kNumSmallSizes <= (1 << 6),
-              "only 6 bits available in HeapObject");
+static_assert(kNumSizeClasses < 256,
+              "size class index must fit in 8 bits in HeapObject header");
 static_assert(kNumSmallSizes < kNumSizeClasses,
               "small sizes should be a proper subset of all sizes");
 static_assert(kNumSizeClasses <= (sizeof(kSizeIndex2Size) / sizeof(size_t)),
@@ -415,8 +415,9 @@ static_assert(std::numeric_limits<type_scan::Index>::max() <=
 // This is the header MemoryManager uses to remember large allocations
 // so they can be auto-freed in MemoryManager::reset(), as well as large/small
 // req::malloc()'d blocks, which must track their size internally.
+// The size recorded here must be the requested size for type_scan correctness.
 struct MallocNode : HeapObject {
-  size_t nbytes;
+  size_t nbytes; // requested bytes + sizeof(MallocNode)
   uint32_t& index() { return m_aux32; }
   uint16_t& typeIndex() { return m_aux16; }
   uint16_t typeIndex() const { return m_aux16; }
@@ -478,12 +479,12 @@ struct SparseHeap {
   /*
    * Allocation API for big blocks.
    */
-  MemBlock allocBig(size_t size, HeaderKind kind,
-                    type_scan::Index tyindex, MemoryUsageStats& stats);
-  MemBlock callocBig(size_t size, HeaderKind kind,
-                    type_scan::Index tyindex, MemoryUsageStats& stats);
-  MemBlock resizeBig(void* p, size_t size, MemoryUsageStats& stats);
-  void freeBig(void*);
+  void* allocBig(size_t size, HeaderKind kind,
+                 type_scan::Index tyindex, MemoryUsageStats& stats);
+  void* callocBig(size_t size, HeaderKind kind,
+                  type_scan::Index tyindex, MemoryUsageStats& stats);
+  void* resizeBig(void* p, size_t size, MemoryUsageStats& stats);
+  void freeBig(void*, MemoryUsageStats& stats);
 
   /*
    * One-time initialization
@@ -579,12 +580,12 @@ struct ContiguousHeap {
   /*
    * Allocation API for big blocks.
    */
-  MemBlock allocBig(size_t size, HeaderKind kind,
-                    type_scan::Index tyindex, MemoryUsageStats& stats);
-  MemBlock callocBig(size_t size, HeaderKind kind,
-                    type_scan::Index tyindex, MemoryUsageStats& stats);
-  MemBlock resizeBig(void* p, size_t size, MemoryUsageStats& stats);
-  void freeBig(void*);
+  void* allocBig(size_t size, HeaderKind kind,
+                 type_scan::Index tyindex, MemoryUsageStats& stats);
+  void* callocBig(size_t size, HeaderKind kind,
+                  type_scan::Index tyindex, MemoryUsageStats& stats);
+  void* resizeBig(void* p, size_t size, MemoryUsageStats& stats);
+  void freeBig(void*, MemoryUsageStats& stats);
 
   /*
    * One-time initialization
@@ -712,7 +713,7 @@ struct MemoryManager {
   enum MBS { Unzeroed, Zeroed };
   template<MBS Mode>
   void* mallocBigSize(size_t size, HeaderKind kind = HeaderKind::BigObj,
-                      type_scan::Index tyindex = 0);
+                      type_scan::Index tyindex = type_scan::kIndexUnknown);
   void freeBigSize(void* vp);
   void* resizeBig(MallocNode* n, size_t nbytes);
 

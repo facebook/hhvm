@@ -112,38 +112,40 @@ void SparseHeap::enlist(MallocNode* n, HeaderKind kind,
   m_bigs.push_back(n);
 }
 
-MemBlock SparseHeap::allocBig(size_t bytes, HeaderKind kind,
-                              type_scan::Index tyindex,
-                              MemoryUsageStats& stats) {
+void* SparseHeap::allocBig(size_t bytes, HeaderKind kind,
+                           type_scan::Index tyindex,
+                           MemoryUsageStats& stats) {
 #ifdef USE_JEMALLOC
   auto n = static_cast<MallocNode*>(mallocx(bytes + sizeof(MallocNode), 0));
   auto cap = sallocx(n, 0);
 #else
-  auto cap = bytes + sizeof(MallocNode);
-  auto n = static_cast<MallocNode*>(safe_malloc(cap));
+  auto n = static_cast<MallocNode*>(safe_malloc(bytes + sizeof(MallocNode)));
+  auto cap = malloc_usable_size(n);
 #endif
-  enlist(n, kind, cap, tyindex);
+  enlist(n, kind, bytes + sizeof(MallocNode), tyindex);
   stats.mmUsage += cap;
   stats.malloc_cap += cap;
-  return {n + 1, cap - sizeof(MallocNode)};
+  return n + 1;
 }
 
-MemBlock SparseHeap::callocBig(size_t nbytes, HeaderKind kind,
-                               type_scan::Index tyindex,
-                               MemoryUsageStats& stats) {
+void* SparseHeap::callocBig(size_t nbytes, HeaderKind kind,
+                            type_scan::Index tyindex,
+                            MemoryUsageStats& stats) {
 #ifdef USE_JEMALLOC
   auto n = static_cast<MallocNode*>(
       mallocx(nbytes + sizeof(MallocNode), MALLOCX_ZERO)
   );
   auto cap = sallocx(n, 0);
 #else
-  auto cap = nbytes + sizeof(MallocNode);
-  auto const n = static_cast<MallocNode*>(safe_calloc(cap, 1));
+  auto n = static_cast<MallocNode*>(
+      safe_calloc(nbytes + sizeof(MallocNode), 1)
+  );
+  auto cap = malloc_usable_size(n);
 #endif
-  enlist(n, kind, cap, tyindex);
+  enlist(n, kind, nbytes + sizeof(MallocNode), tyindex);
   stats.mmUsage += cap;
   stats.malloc_cap += cap;
-  return {n + 1, cap - sizeof(MallocNode)};
+  return n + 1;
 }
 
 bool SparseHeap::contains(void* ptr) const {
@@ -157,7 +159,7 @@ bool SparseHeap::contains(void* ptr) const {
   return it != std::end(m_slabs);
 }
 
-void SparseHeap::freeBig(void* ptr) {
+void SparseHeap::freeBig(void* ptr, MemoryUsageStats& stats) {
   auto n = static_cast<MallocNode*>(ptr) - 1;
   auto i = n->index();
   auto last = m_bigs.back();
@@ -165,35 +167,44 @@ void SparseHeap::freeBig(void* ptr) {
   m_bigs[i] = last;
   m_bigs.pop_back();
 #ifdef USE_JEMALLOC
+  auto cap = sallocx(n, 0);
   dallocx(n, 0);
 #else
+  auto cap = malloc_usable_size(n);
   free(n);
 #endif
+  // Since we account for these direct allocations in our usage and adjust for
+  // them on allocation, we also need to adjust for them negatively on free.
+  stats.mmUsage -= cap;
+  stats.malloc_cap -= cap;
 }
 
-MemBlock SparseHeap::resizeBig(void* ptr, size_t newsize,
-                               MemoryUsageStats& stats) {
+void* SparseHeap::resizeBig(void* ptr, size_t nbytes,
+                            MemoryUsageStats& stats) {
   // Since we don't know how big it is (i.e. how much data we should memcpy),
   // we have no choice but to ask malloc to realloc for us.
   auto const n = static_cast<MallocNode*>(ptr) - 1;
-  auto old_size = n->nbytes;
+  auto new_size = nbytes + sizeof(MallocNode);
 #ifdef USE_JEMALLOC
+  auto old_cap = sallocx(n, 0);
   auto const newNode = static_cast<MallocNode*>(
-    rallocx(n, newsize + sizeof(MallocNode), 0)
+    rallocx(n, new_size, 0)
   );
-  newNode->nbytes = sallocx(newNode, 0);
+  auto new_cap = sallocx(newNode, 0);
 #else
+  auto old_cap = malloc_usable_size(n);
   auto const newNode = static_cast<MallocNode*>(
-    safe_realloc(n, newsize + sizeof(MallocNode))
+    safe_realloc(n, new_size)
   );
-  newNode->nbytes = newsize + sizeof(MallocNode);
+  auto new_cap = malloc_usable_size(n);
 #endif
+  newNode->nbytes = new_size;
   if (newNode != n) {
     m_bigs[newNode->index()] = newNode;
   }
-  stats.mmUsage += newsize - old_size;
-  stats.malloc_cap += newsize - old_size;
-  return {newNode + 1, newNode->nbytes - sizeof(MallocNode)};
+  stats.mmUsage += new_cap - old_cap;
+  stats.malloc_cap += new_cap - old_cap;
+  return newNode + 1;
 }
 
 void SparseHeap::sort() {

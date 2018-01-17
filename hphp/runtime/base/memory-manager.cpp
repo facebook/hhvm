@@ -771,12 +771,11 @@ template<MemoryManager::MBS Mode> NEVER_INLINE
 void* MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
                                    type_scan::Index ty) {
   if (debug) tl_heap->requestEagerGC();
-  auto block = Mode == Zeroed ? m_heap.callocBig(bytes, kind, ty, m_stats) :
-               m_heap.allocBig(bytes, kind, ty, m_stats);
+  auto ptr = Mode == Zeroed ? m_heap.callocBig(bytes, kind, ty, m_stats) :
+             m_heap.allocBig(bytes, kind, ty, m_stats);
   updateBigStats();
-  FTRACE(3, "mallocBigSize: {} ({} requested, {} usable)\n",
-         block.ptr, bytes, block.size);
-  return block.ptr;
+  FTRACE(3, "mallocBigSize: {} ({} requested)\n", ptr, bytes);
+  return ptr;
 }
 
 template NEVER_INLINE
@@ -792,18 +791,14 @@ void* MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
   assert(n->kind() == HeaderKind::BigMalloc);
   auto block = m_heap.resizeBig(n + 1, nbytes, m_stats);
   updateBigStats();
-  return block.ptr;
+  return block;
 }
 
 NEVER_INLINE
 void MemoryManager::freeBigSize(void* vp) {
-  // Since we account for these direct allocations in our usage and adjust for
-  // them on allocation, we also need to adjust for them negatively on free.
-  auto bytes = static_cast<MallocNode*>(vp)[-1].nbytes;
-  m_stats.mmUsage -= bytes;
-  m_stats.malloc_cap -= bytes;
-  FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
-  m_heap.freeBig(vp);
+  FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp,
+         static_cast<MallocNode*>(vp)[-1].nbytes);
+  m_heap.freeBig(vp, m_stats);
 }
 
 // req::malloc api entry points, with support for malloc/free corner cases.

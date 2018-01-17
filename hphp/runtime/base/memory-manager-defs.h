@@ -381,17 +381,20 @@ inline size_t allocSize(const HeapObject* h) {
       size = native->obj_offset + Native::obj(native)->heapSize();
       break;
     }
-    // the following sizes are intentionally not rounded up to size class.
     case HeaderKind::BigObj:    // [MallocNode][HeapObject...]
     case HeaderKind::BigMalloc: // [MallocNode][raw bytes...]
       size = static_cast<const MallocNode*>(h)->nbytes;
       assert(size != 0);
+      // not rounded up to size class, because we never need to iterate over
+      // more than one allocated block. avoid calling nallocx().
       return size;
     case HeaderKind::Free:
     case HeaderKind::Hole:
     case HeaderKind::Slab:
       size = static_cast<const FreeNode*>(h)->size();
       assert(size != 0);
+      // Free and Slab are guaranteed to be already size-class aligned.
+      // Holes are not size-class aligned.
       return size;
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::Empty:
@@ -572,7 +575,8 @@ HeapObject* ContiguousHeap::find_if(bool wholeSlab, Fn fn) {
     auto hdr    = m_base + usedStart * ChunkSize;
     auto endPtr = m_base + usedEnd * ChunkSize;
     while (hdr < endPtr) {
-      if (((HeapObject*)hdr)->kind() == HeaderKind::Slab) {
+      auto kind = reinterpret_cast<HeapObject*>(hdr)->kind();
+      if (kind == HeaderKind::Slab) {
         if (wholeSlab) {
           size = kSlabSize;
         } else{
@@ -581,6 +585,9 @@ HeapObject* ContiguousHeap::find_if(bool wholeSlab, Fn fn) {
         }
       } else {
         size = allocSize((HeapObject*)hdr);
+        if (kind == HeaderKind::BigObj || kind == HeaderKind::BigMalloc) {
+          size = (size + ChunkSize - 1) & ~(ChunkSize - 1);
+        }
       }
       assert(hdr + size <= endPtr);
       if (fn((HeapObject*)hdr, size)) return (HeapObject*)hdr;

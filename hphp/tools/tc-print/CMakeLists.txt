@@ -9,6 +9,7 @@ if(IS_X64)
                             "repo-wrapper.cpp"  "tc-print.cpp"
                             "../../hhvm/process-init.cpp" "std-logger.cpp")
     link_object_libraries(tc-print ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
+    target_link_libraries(tc-print ${LibXed_LIBRARY})
     target_link_libraries(tc-print ${HHVM_LINK_LIBRARIES})
     embed_all_systemlibs(tc-print "${CMAKE_CURRENT_BINARY_DIR}/../.."
                                   "${CMAKE_CURRENT_BINARY_DIR}/tc-print")

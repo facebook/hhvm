@@ -595,4 +595,8 @@ int main() {
       target_link_libraries(${target} ${ATOMIC_LIBRARY})
   endif()
   set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
+
+  if (LibXed_LIBRARY)
+      target_link_libraries(${target} ${LibXed_LIBRARY})
+  endif()
 endmacro()

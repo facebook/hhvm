@@ -60,6 +60,25 @@ request_id_t EvaluateCommand::targetThreadId(DebuggerSession* session) {
   return frame->m_requestId;
 }
 
+ExecutionContext::EvaluationResult evaluate(
+  Debugger* debugger,
+  RequestInfo* ri,
+  HPHP::Unit* unit,
+  int frameDepth,
+  bool silent
+) {
+  ExecutionContext::EvaluationResult result;
+
+  if (silent) {
+    SilentEvaluationContext silentContext(debugger, ri);
+    result = g_context->evalPHPDebugger(unit, frameDepth);
+  } else {
+    result = g_context->evalPHPDebugger(unit, frameDepth);
+  }
+
+  return result;
+}
+
 bool EvaluateCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
@@ -147,9 +166,14 @@ bool EvaluateCommand::executeImpl(
   // holding the debugger lock, because we would be unable to processes more
   // commands from the client: there'd be no way to resume the blocked request.
   ExecutionContext::EvaluationResult result;
+
+  // If the client indicates this evaluation is for a watch expression, or
+  // hover evaluation, silence all errors.
+  const std::string evalContext = tryGetString(args, "context", "");
+  bool evalSilent = evalContext == "watch" || evalContext == "hover";
   m_debugger->executeWithoutLock(
     [&]() {
-      result = g_context->evalPHPDebugger(unit, frameDepth);
+        result = evaluate(m_debugger, ri, unit, frameDepth, evalSilent);
     });
 
   if (previousPauseCount != ri->m_totalPauseCount &&

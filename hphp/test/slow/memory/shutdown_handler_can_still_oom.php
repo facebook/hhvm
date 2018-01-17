@@ -1,6 +1,6 @@
 <?php
 
-ini_set('memory_limit', '5M');
+ini_set('memory_limit', '18M');
 $rep = 'x';
 
 register_shutdown_function(function () {

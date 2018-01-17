@@ -1,6 +1,6 @@
 <?php
 
-ini_set('memory_limit', '1M');
+ini_set('memory_limit', '18M');
 function foo() {
   $x = array();
   while (true) {

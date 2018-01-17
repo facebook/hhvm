@@ -87,20 +87,22 @@ TEST(MemoryManager, LookupSmallSize2Index) {
 
 TEST(MemoryManager, SmallSize2Index) {
   EXPECT_EQ(MemoryManager::size2Index(1), 0);
-  for (size_t index = 0; index < kNumSmallSizes - 1; index++) {
+  for (size_t index = 0; index + 1 < kNumSmallSizes; index++) {
     auto allocSize = kSizeIndex2Size[index];
     EXPECT_EQ(MemoryManager::size2Index(allocSize - 1), index);
     EXPECT_EQ(MemoryManager::size2Index(allocSize), index);
     EXPECT_EQ(MemoryManager::size2Index(allocSize + 1), index + 1);
   }
-  EXPECT_EQ(
-    MemoryManager::size2Index(kSizeIndex2Size[kNumSmallSizes - 1] - 1),
-    kNumSmallSizes - 1
-  );
-  EXPECT_EQ(
-    MemoryManager::size2Index(kSizeIndex2Size[kNumSmallSizes - 1]),
-    kNumSmallSizes - 1
-  );
+  if (kMaxSmallSize > 0) {
+    EXPECT_EQ(
+      MemoryManager::size2Index(kMaxSmallSize - 1),
+      kNumSmallSizes - 1
+    );
+    EXPECT_EQ(
+      MemoryManager::size2Index(kMaxSmallSize),
+      kNumSmallSizes - 1
+    );
+  }
 }
 
 TEST(MemoryManager, Size2Index) {
@@ -125,20 +127,22 @@ TEST(MemoryManager, SmallSizeClass) {
   // this test starts by requesting 2 bytes because sizeClass() does not
   // support inputs < 2; the others support inputs >= 1
   EXPECT_EQ(MemoryManager::sizeClass(2), kSmallSizeAlign);
-  for (size_t index = 0; index < kNumSmallSizes - 1; index++) {
+  for (size_t index = 0; index + 1 < kNumSmallSizes; index++) {
     auto allocSize = kSizeIndex2Size[index];
     EXPECT_EQ(MemoryManager::sizeClass(allocSize - 1), allocSize);
     EXPECT_EQ(MemoryManager::sizeClass(allocSize), allocSize);
     EXPECT_GT(MemoryManager::sizeClass(allocSize + 1), allocSize);
   }
-  EXPECT_EQ(
-    MemoryManager::sizeClass(kSizeIndex2Size[kNumSmallSizes - 1] - 1),
-    kSizeIndex2Size[kNumSmallSizes - 1]
-  );
-  EXPECT_EQ(
-    MemoryManager::sizeClass(kSizeIndex2Size[kNumSmallSizes - 1]),
-    kSizeIndex2Size[kNumSmallSizes - 1]
-  );
+  if (kMaxSmallSize > 0) {
+    EXPECT_EQ(
+      MemoryManager::sizeClass(kMaxSmallSize - 1),
+      kMaxSmallSize
+    );
+    EXPECT_EQ(
+      MemoryManager::sizeClass(kMaxSmallSize),
+      kMaxSmallSize
+    );
+  }
 }
 
 TEST(MemoryManager, realloc) {

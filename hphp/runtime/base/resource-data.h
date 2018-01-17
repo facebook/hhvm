@@ -272,7 +272,7 @@ ALWAYS_INLINE void decRefRes(ResourceHdr* res) {
     constexpr auto size = sizeof(ResourceHdr) + sizeof(T);      \
     auto h = static_cast<ResourceData*>(p)->hdr();              \
     assert(h->heapSize() == size);                              \
-    tl_heap->freeSmallSize(h, size);                            \
+    tl_heap->objFree(h, size);                                  \
   }
 
 #define DECLARE_RESOURCE_ALLOCATION(T)                          \
@@ -295,9 +295,9 @@ typename std::enable_if<
   req::ptr<T>
 >::type make(Args&&... args) {
   constexpr auto size = sizeof(ResourceHdr) + sizeof(T);
-  static_assert(uint16_t(size) == size && size < kMaxSmallSize, "");
+  static_assert(uint16_t(size) == size, "size must fit in 16 bits");
   static_assert(std::is_convertible<T*,ResourceData*>::value, "");
-  auto const b = static_cast<ResourceHdr*>(tl_heap->mallocSmallSize(size));
+  auto const b = static_cast<ResourceHdr*>(tl_heap->objMalloc(size));
   // initialize HeapObject
   b->init(size, type_scan::getIndexForMalloc<T>());
   try {
@@ -305,7 +305,7 @@ typename std::enable_if<
     assert(r->hasExactlyOneRef());
     return req::ptr<T>::attach(r);
   } catch (...) {
-    tl_heap->freeSmallSize(b, size);
+    tl_heap->objFree(b, size);
     throw;
   }
 }

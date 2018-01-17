@@ -134,6 +134,9 @@ private:
   uint64_t starts_[NumStarts];
 };
 
+static_assert(kMaxSmallSize < kSlabSize - sizeof(Slab),
+              "kMaxSmallSize must fit in Slab");
+
 inline const Resumable* resumable(const HeapObject* h) {
   assert(h->kind() == HeaderKind::AsyncFuncFrame);
   auto native = static_cast<const NativeNode*>(h);

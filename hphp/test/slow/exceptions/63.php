@@ -1,14 +1,12 @@
 <?php
 
-ini_set('memory_limit','4M');
+ini_set('memory_limit','18M');
 function test() {
-  for ($i = 0;
- $i < 4000;
- $i++) {
+  for ($i = 0; $i < 4000; $i++) {
     try {
       call_user_func('bar');
     }
- catch (Exception $e) {
+    catch (Exception $e) {
     }
   }
   var_dump('ok');

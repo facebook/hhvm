@@ -1,1 +1,1 @@
-pass\n
+pass

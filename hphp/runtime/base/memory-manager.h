@@ -370,10 +370,8 @@ static_assert(kNumSmallSizes < kNumSizeClasses,
 static_assert(kNumSizeClasses <= (sizeof(kSizeIndex2Size) / sizeof(size_t)),
               "Extend SIZE_CLASSES macro");
 
-constexpr size_t kMaxSmallSize = kSizeIndex2Size[kNumSmallSizes-1];
-static_assert(kMaxSmallSize > kSmallSizeAlign * 2,
-              "Too few size classes");
-static_assert(kMaxSmallSize < kSlabSize, "fix kNumSmallSizes or kLgSlabSize");
+constexpr size_t kMaxSmallSize =
+  kNumSmallSizes >= 1 ? kSizeIndex2Size[kNumSmallSizes-1] : 0;
 
 constexpr size_t kMaxSizeClass = kSizeIndex2Size[kNumSizeClasses-1];
 static_assert(kMaxSmallSize < kMaxSizeClass,
@@ -799,14 +797,12 @@ struct MemoryManager {
   bool empty() const;
 
   /*
-   * Whether `p' points into memory owned by `m_heap'.  checkContains() will
-   * assert that it does.
+   * Whether `p' points into memory owned by `m_heap'.
    *
    * Note that this explicitly excludes allocations that are made through the
    * big alloc API.
    */
   bool contains(void* p) const;
-  bool checkContains(void* p) const;
 
   /*
    * Heap iterator methods.  `fn' takes a HeapObject* argument.

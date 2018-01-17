@@ -373,13 +373,6 @@ inline bool MemoryManager::contains(void* p) const {
   return m_heap.contains(p);
 }
 
-inline bool MemoryManager::checkContains(DEBUG_ONLY void* p) const {
-  // Be conservative if the small-block allocator is disabled.
-   assert(RuntimeOption::DisableSmallAllocator || m_bypassSlabAlloc ||
-          contains(p));
-  return true;
-}
-
 inline HeapObject* MemoryManager::find(const void* p) {
   initFree();
   return m_heap.find(p);

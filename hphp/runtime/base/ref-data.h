@@ -55,7 +55,7 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
    * Create a RefData, allocated in the request local heap.
    */
   static RefData* Make(TypedValue tv) {
-    return new (tl_heap->mallocSmallSize(sizeof(RefData)))
+    return new (tl_heap->objMalloc(sizeof(RefData)))
       RefData(tv.m_type, tv.m_data.num);
   }
 
@@ -67,12 +67,8 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   void release() noexcept {
     assert(kindIsValid());
     this->~RefData();
-    tl_heap->freeSmallSize(this, sizeof(RefData));
+    tl_heap->objFree(this, sizeof(RefData));
     AARCH64_WALKABLE_FRAME();
-  }
-
-  void releaseMem() const {
-    tl_heap->freeSmallSize(const_cast<RefData*>(this), sizeof(RefData));
   }
 
   ALWAYS_INLINE void decRefAndRelease() {

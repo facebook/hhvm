@@ -1642,15 +1642,21 @@ let add_program_content ?path dump_symbol_refs buf hhas_prog =
   end
 
 let add_program ?path dump_symbol_refs buf hhas_prog =
+  let strict_types =
+    match Hhas_program.strict_types hhas_prog with
+    | Some true -> ".strict 1;\n\n"
+    | Some false -> ".strict 0;\n\n"
+    | None -> "" in
   match path with
   | Some p ->
     let p = Relative_path.to_absolute p in
     B.add_string buf
-      (Printf.sprintf "# %s starts here\n\n.filepath \"%s\";\n" p p);
+      (Printf.sprintf "# %s starts here\n\n%s.filepath \"%s\";\n" p strict_types p);
     add_program_content ~path:p dump_symbol_refs buf hhas_prog;
     B.add_string buf (Printf.sprintf "\n# %s ends here\n" p)
   | None ->
       B.add_string buf "#starts here\n";
+      B.add_string buf strict_types;
       add_program_content dump_symbol_refs buf hhas_prog;
       B.add_string buf "\n#ends here\n"
 

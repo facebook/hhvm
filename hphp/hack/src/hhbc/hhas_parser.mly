@@ -54,7 +54,7 @@ open Hhas_parser_actions
 %type <Instruction_sequence.t> functionbody
 %%
 program:
-    nl decllist nl EOF { split_decl_list $2 false [] [] None [] [] Hhas_symbol_refs.IncludePathSet.empty SSet.empty SSet.empty SSet.empty}
+    nl decllist nl EOF { split_decl_list $2 false false [] [] None [] [] Hhas_symbol_refs.IncludePathSet.empty SSet.empty SSet.empty SSet.empty}
 ;
 decl:
     | maindecl {Main_decl $1}
@@ -547,7 +547,7 @@ decllist:
     /* empty */ { [] }
     | decl nl decllist {$1 :: $3}
     | FILEPATHDIRECTIVE STRING SEMI nl decllist {$5}
-    | STRICTDIRECTIVE INT SEMI nl decllist {$5}
+    | STRICTDIRECTIVE INT SEMI nl decllist { StrictTypes_decl ($2 = 1L) :: $5}
     | HHFILE INT SEMI nl decllist { HHFile_decl ($2 = 1L) :: $5 }
 ;
 includesdecl:

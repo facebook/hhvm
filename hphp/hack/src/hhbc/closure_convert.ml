@@ -19,6 +19,12 @@ module SU = Hhbc_string_utils
 let constant_folding () =
   Hhbc_options.constant_folding !Hhbc_options.compiler_options
 
+type convert_result = {
+  ast_defs: (bool * Ast.def) list;
+  global_state: Emit_env.global_state;
+  strict_types: bool option;
+}
+
 type variables = {
   (* all variables declared/used in the scope*)
   all_vars: SSet.t;
@@ -95,6 +101,7 @@ type state = {
   (* maps name of function that has at least one goto statement
      to labels in function (bool value denotes whether label appear in using) *)
   function_to_labels_map: (bool SMap.t) SMap.t;
+  seen_strict_types: bool option;
 }
 
 let initial_state =
@@ -116,6 +123,7 @@ let initial_state =
   has_finally = false;
   goto_state = empty_goto_state;
   function_to_labels_map = SMap.empty;
+  seen_strict_types = None;
 }
 
 let total_class_count env st =
@@ -821,6 +829,9 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
       if st.goto_state.has_goto then st
       else { st with goto_state = { st.goto_state with has_goto = true } } in
     st, stmt
+  | Declare (_, (_, Binop (Eq None, (_, Id (_, "strict_types")), (_, Int (_, v)))), _) ->
+    let st = { st with seen_strict_types = Some (v = "1") } in
+    st, stmt
   | _ ->
     st, stmt
 
@@ -1047,11 +1058,16 @@ let convert_toplevel_prog defs =
   let original_defs = hoist_toplevel_functions original_defs in
   let fun_defs = List.rev_map st.hoisted_functions (fun fd -> false, Fun fd) in
   let class_defs = List.rev_map st.hoisted_classes (fun cd -> false, Class cd) in
-  (fun_defs @ original_defs @ class_defs,
+  let ast_defs = fun_defs @ original_defs @ class_defs in
+  let global_state =
     Emit_env.(
       { global_explicit_use_set = st.explicit_use_set
       ; global_closure_namespaces = st.closure_namespaces
       ; global_closure_enclosing_classes = st.closure_enclosing_classes
       ; global_functions_with_finally = st.functions_with_finally
-      ; global_function_to_labels_map = st.function_to_labels_map })
-  )
+      ; global_function_to_labels_map = st.function_to_labels_map }) in
+  {
+    ast_defs;
+    global_state;
+    strict_types = st.seen_strict_types;
+  }

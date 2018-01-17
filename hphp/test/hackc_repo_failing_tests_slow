@@ -41,14 +41,6 @@ slow/parser/php-reserved-name-parent-2.php
 slow/parser/php-reserved-name-self-2.php
 slow/parser/static_call_access_const_expr.php
 slow/parser/unicode-literal-error.php
-slow/php7_backported/scalar-types/explicit_weak_include_strict.php
-slow/php7_backported/scalar-types/internal_function_strict_mode.php
-slow/php7_backported/scalar-types/scalar_strict.php
-slow/php7_backported/scalar-types/scalar_strict_64bit.php
-slow/php7_backported/scalar-types/scalar_strict_basic.php
-slow/php7_backported/scalar-types/strict_call_weak.php
-slow/php7_backported/scalar-types/strict_call_weak_explicit.php
-slow/php7_backported/scalar-types/weak_include_strict.php
 slow/reflection/1352.php
 slow/reflection_classes/default_value_with_namespace.php
 slow/reflection_classes/default_value_with_namespace2.php
@@ -56,8 +48,6 @@ slow/reflection_classes/default_value_with_namespace3.php
 slow/reflection_classes/default_value_with_self.php
 slow/traits/require_constraint_basic_error.php
 slow/traits/require_constraint_recurse.php
-slow/typecheck/type_coersion_7strict.php
-slow/typecheck/type_coersion_7strict_include.php
 slow/unpack_args/unpack_call_error.php
 slow/unpack_args/unpack_call_multi.php
 slow/variadic_args/by_reference.php

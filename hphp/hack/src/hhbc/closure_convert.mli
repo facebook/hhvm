@@ -8,7 +8,11 @@
  *
 *)
 
+type convert_result = {
+  ast_defs: (bool * Ast.def) list;
+  global_state: Emit_env.global_state;
+  strict_types: bool option;
+}
+
 (* Convert entire program *)
-val convert_toplevel_prog :
-  Ast.program ->
-  (bool * Ast.def) list * Emit_env.global_state
+val convert_toplevel_prog : Ast.program -> convert_result

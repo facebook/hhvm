@@ -49,7 +49,7 @@ let emit_fatal_program ~ignore_message op pos message =
     [] (* static_inits static_inits  *)
     None (* doc *)
   in
-    Hhas_program.make false [] [] [] [] body Emit_symbol_refs.empty_symbol_refs
+    Hhas_program.make false [] [] [] [] body Emit_symbol_refs.empty_symbol_refs None
 
 let from_ast ~is_hh_file ~is_evaled ast =
   Utils.try_finally
@@ -58,8 +58,13 @@ let from_ast ~is_hh_file ~is_evaled ast =
       Emit_env.set_is_hh_file is_hh_file;
       (* Convert closures to top-level classes;
        * also hoist inner classes and functions *)
-      let closed_ast, global_state =
+      let { ast_defs = closed_ast; global_state; strict_types } =
         convert_toplevel_prog ast in
+      let strict_types =
+        (* is scalar_types is set - always assume strict_types to have value *)
+        if Hhbc_options.php7_scalar_types !(Hhbc_options.compiler_options)
+        then if strict_types = None then Some false else strict_types
+        else None in
       Emit_env.set_global_state global_state;
       let flat_closed_ast = List.map snd closed_ast in
       let compiled_defs = emit_main is_evaled flat_closed_ast in
@@ -71,7 +76,7 @@ let from_ast ~is_hh_file ~is_evaled ast =
       let hhas = Hhas_program.make
         is_hh_file
         adata compiled_funs compiled_classes
-        compiled_typedefs compiled_defs symbol_refs in
+        compiled_typedefs compiled_defs symbol_refs strict_types in
       hhas
     with Emit_fatal.IncludeTimeFatalException (op, pos, message) ->
       emit_fatal_program ~ignore_message:false op pos message

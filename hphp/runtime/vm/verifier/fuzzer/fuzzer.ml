@@ -828,7 +828,8 @@ let mutate_metadata (input : HP.t)  =
       (prog |> HP.classes   |> delete_map (mutate_class_data ids))
       (prog |> HP.typedefs  |> delete_map mutate_typedef)
       (prog |> HP.main      |> mutate_body_data)
-      Emit_symbol_refs.empty_symbol_refs in
+      Emit_symbol_refs.empty_symbol_refs
+      (prog |> HP.strict_types |> option_lift mutate_bool) in
   let open Nondet in
   return input |> num_fold
     (fun a -> mut_data input |> add_event a) !metadata_reps

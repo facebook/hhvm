@@ -919,10 +919,8 @@ struct UseVisitor {
     if (m.base.isValid()) use(m.base);
     if (m.index.isValid()) use(m.index);
   }
-  void use(Vptr8 m) {
-    if (m.base.isValid()) use(m.base);
-    if (m.index.isValid()) use(m.index);
-  }
+template<Width w> void use(Vp<w> m) { use(static_cast<Vptr>(m)); }
+
   void use(VcallArgsId /*id*/) {
     always_assert(false && "vcall unsupported in vxls");
   }
@@ -940,6 +938,7 @@ struct UseVisitor {
     if (m.base.isValid()) across(m.base);
     if (m.index.isValid()) across(m.index);
   }
+  template<Width w> void across(Vp<w> m) { across(static_cast<Vptr>(m)); }
 
 private:
   void use(Vreg r, Constraint kind, unsigned end, Vreg hint = Vreg{}) {
@@ -2334,6 +2333,7 @@ struct Renamer {
     if (m.base.isValid()) rename(m.base);
     if (m.index.isValid()) rename(m.index);
   }
+  template<Width w> void across(Vp<w>& m) { across(static_cast<Vptr&>(m)); }
 
   void def(RegSet) {}
   void use(RegSet /*r*/) {}
@@ -2341,7 +2341,8 @@ struct Renamer {
     if (m.base.isValid()) rename(m.base);
     if (m.index.isValid()) rename(m.index);
   }
-  void use(Vptr8& m) { use(static_cast<Vptr&>(m)); }
+  template<Width w> void use(Vp<w>& m) { use(static_cast<Vptr&>(m)); }
+
   void use(VcallArgsId) { always_assert(false && "vcall unsupported in vxls"); }
 
 private:

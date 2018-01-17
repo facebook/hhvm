@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/vasm-info.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -262,6 +263,25 @@ DEBUG_ONLY bool compatible(Width w1, Width w2) {
   return (w1 & w2) != Width::None;
 }
 
+struct VisitOp {
+  template<class T> void imm(T) {}
+  template<class T> void across(T) {}
+  template<class T, class H> void useHint(T,H) {}
+  template<class T, class H> void defHint(T,H) {}
+  void def(Vptr8 m) { memWidth = Width::Byte; }
+  void def(Vptr m) { memWidth = m.width; }
+  template<Width w> void def(Vp<w> m) { memWidth = w; }
+  template<Width w> void use(Vp<w> m) { memWidth = w; }
+  template<class T> void use(T) {}
+  template<class T> void def(T) {}
+  void use(Vreg r) { useWidth = width(r); }
+  void def(Vreg r) { defWidth = width(r); }
+
+  Width memWidth = Width::None;
+  Width useWidth = Width::None;
+  Width defWidth = Width::None;
+};
+
 DEBUG_ONLY bool
 checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
   auto widths = jit::vector<Width>(unit.next_vr, Width::Any);
@@ -323,6 +343,61 @@ checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
                       "width mismatch for %{}: def {}, use {}\n{}",
                       size_t(r), show(dw), show(uw), show(unit));
         });
+        if (touchesMemory(inst.op) && !isCall(inst)) {
+          switch (inst.op) {
+            case Vinstr::loadzbl:
+              static_assert(
+                  std::is_same<decltype(inst.loadzbl_.s),Vptr8>::value,
+                  "loadzbl should load a byte\n");
+              static_assert(
+                  std::is_same<decltype(inst.loadzbl_.d),Vreg32>::value,
+                  "loadzbl should write a long\n");
+                  break;
+            case Vinstr::loadzbq:
+              static_assert(
+                  std::is_same<decltype(inst.loadzbq_.s),Vptr8>::value,
+                  "loadzbq should load a byte\n");
+              static_assert(
+                  std::is_same<decltype(inst.loadzbq_.d),Vreg64>::value,
+                  "loadzbq should write a quad\n");
+                  break;
+            case Vinstr::loadzlq:
+              static_assert(
+                  std::is_same<decltype(inst.loadzlq_.s),Vptr32>::value,
+                  "loadzlq should load a long\n");
+              static_assert(
+                  std::is_same<decltype(inst.loadzlq_.d),Vreg64>::value,
+                  "loadzlq should write a quad\n");
+            case Vinstr::loadtqb:
+              static_assert(
+                  std::is_same<decltype(inst.loadtqb_.s),Vptr64>::value,
+                  "loadtqb should load a quad\n");
+              static_assert(
+                  std::is_same<decltype(inst.loadtqb_.d),Vreg8>::value,
+                  "loadtqb should write a byte\n");
+                  break;
+            case Vinstr::loadtql:
+              static_assert(
+                  std::is_same<decltype(inst.loadtql_.s),Vptr64>::value,
+                  "loadtql should load a quad\n");
+              static_assert(
+                  std::is_same<decltype(inst.loadtql_.d),Vreg32>::value,
+                  "loadtql should write a long\n");
+                  break;
+            default:
+              VisitOp vo;
+              visitOperands(inst, vo);
+              DEBUG_ONLY Width mw = vo.memWidth & Width::AnyNF;
+              DEBUG_ONLY Width rw = vo.useWidth & Width::AnyNF;
+              DEBUG_ONLY Width dw = vo.defWidth & Width::AnyNF;
+              assert_flog(dw == Width::None || compatible(dw, mw),
+                "width mismatch : def {}, mem {} \n {} \n{}",
+                show(dw), show(mw), show(unit,inst), show(unit));
+              assert_flog(rw == Width::None || compatible(rw, mw),
+                "width mismatch : use {}, mem {} \n {}\n{}",
+                show(rw), show(mw), show(unit,inst), show(unit));
+          }
+        }
       }
     }
   }

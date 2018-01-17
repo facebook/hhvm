@@ -61,8 +61,16 @@ template<typename M>
 constexpr bool useMemory() { return false; }
 template<>
 constexpr bool useMemory<Vptr>() { return true; }
-template <>
+template<>
 constexpr bool useMemory<Vptr8>() { return true; }
+template<>
+constexpr bool useMemory<Vptr16>() { return true; }
+template<>
+constexpr bool useMemory<Vptr32>() { return true; }
+template<>
+constexpr bool useMemory<Vptr64>() { return true; }
+template<>
+constexpr bool useMemory<Vptr128>() { return true; }
 
 ///////////////////////////////////////////////////////////////////////////////
 

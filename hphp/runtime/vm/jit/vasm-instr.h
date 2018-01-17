@@ -501,8 +501,8 @@ struct ldimmq { Immed64 s; Vreg d; };
 /*
  * Memory operand load and store.
  */
-struct load { Vptr s; Vreg d; };
-struct store { Vreg s; Vptr d; };
+struct load { Vptr64 s; Vreg d; };
+struct store { Vreg s; Vptr64 d; };
 
 /*
  * Method cache smashable prime data.
@@ -920,13 +920,13 @@ struct vregunrestrict {};
 // add: s0 + {s1|m} => {d|m}, sf
 struct addl   { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct addli  { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
-struct addlm  { Vreg32 s0; Vptr m; VregSF sf; Vflags fl; };
-struct addlim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct addlm  { Vreg32 s0; Vptr32 m; VregSF sf; Vflags fl; };
+struct addlim { Immed s0; Vptr32 m; VregSF sf; Vflags fl; };
 struct addq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct addqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
-struct addqmr { Vptr m; Vreg64 s1; Vreg64 d; VregSF sf; Vflags fl; };
-struct addqrm { Vreg64 s1; Vptr m; VregSF sf; Vflags fl; };
-struct addqim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct addqmr { Vptr64 m; Vreg64 s1; Vreg64 d; VregSF sf; Vflags fl; };
+struct addqrm { Vreg64 s1; Vptr64 m; VregSF sf; Vflags fl; };
+struct addqim { Immed s0; Vptr64 m; VregSF sf; Vflags fl; };
 struct addsd  { VregDbl s0, s1, d; };
 // and: s0 & {s1|m} => {d|m}, sf
 struct andb  { Vreg8 s0, s1, d; VregSF sf; Vflags fl; };
@@ -938,17 +938,17 @@ struct andq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // dec: {s|m} - 1 => {d|m}, sf
 struct decl { Vreg32 s, d; VregSF sf; Vflags fl; };
-struct declm { Vptr m; VregSF sf; Vflags fl; };
+struct declm { Vptr32 m; VregSF sf; Vflags fl; };
 struct decq { Vreg64 s, d; VregSF sf; Vflags fl; };
-struct decqm { Vptr m; VregSF sf; Vflags fl; };
+struct decqm { Vptr64 m; VregSF sf; Vflags fl; };
 struct decqmlock { Vptr m; VregSF sf; Vflags fl; };
 // inc: {s|m} + 1 => {d|m}, sf
 struct incw { Vreg16 s, d; VregSF sf; Vflags fl; };
-struct incwm { Vptr m; VregSF sf; Vflags fl; };
+struct incwm { Vptr16 m; VregSF sf; Vflags fl; };
 struct incl { Vreg32 s, d; VregSF sf; Vflags fl; };
-struct inclm { Vptr m; VregSF sf;  Vflags fl;};
+struct inclm { Vptr32 m; VregSF sf;  Vflags fl;};
 struct incq { Vreg64 s, d; VregSF sf; Vflags fl; };
-struct incqm { Vptr m; VregSF sf; Vflags fl; };
+struct incqm { Vptr64 m; VregSF sf; Vflags fl; };
 // mul: s0 * s1 => d, sf
 struct imul { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 // div/mod: s0 / s1 => d
@@ -961,11 +961,11 @@ struct notb { Vreg8 s, d; };
 struct not { Vreg64 s, d; };
 // or: s0 | {s1|m} => {d|m}, sf
 struct orbim { Immed s0; Vptr8 m; VregSF sf; Vflags fl; };
-struct orwim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
-struct orlim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct orwim { Immed s0; Vptr16 m; VregSF sf; Vflags fl; };
+struct orlim { Immed s0; Vptr32 m; VregSF sf; Vflags fl; };
 struct orq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
-struct orqim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct orqim { Immed s0; Vptr64 m; VregSF sf; Vflags fl; };
 // shift: s1 << s0 => d, sf
 struct sar { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct shl { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
@@ -997,16 +997,16 @@ struct cmpbim { Immed s0; Vptr8 s1; VregSF sf; Vflags fl; };
 struct cmpbm { Vreg8 s0; Vptr8 s1; VregSF sf; Vflags fl; };
 struct cmpw { Vreg16 s0; Vreg16 s1; VregSF sf; Vflags fl; };
 struct cmpwi { Immed s0; Vreg16 s1; VregSF sf; Vflags fl; };
-struct cmpwim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
-struct cmpwm { Vreg16 s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpwim { Immed s0; Vptr16 s1; VregSF sf; Vflags fl; };
+struct cmpwm { Vreg16 s0; Vptr16 s1; VregSF sf; Vflags fl; };
 struct cmpl { Vreg32 s0; Vreg32 s1; VregSF sf; Vflags fl; };
 struct cmpli { Immed s0; Vreg32 s1; VregSF sf; Vflags fl; };
-struct cmplm { Vreg32 s0; Vptr s1; VregSF sf; Vflags fl; };
-struct cmplim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmplm { Vreg32 s0; Vptr32 s1; VregSF sf; Vflags fl; };
+struct cmplim { Immed s0; Vptr32 s1; VregSF sf; Vflags fl; };
 struct cmpq { Vreg64 s0; Vreg64 s1; VregSF sf; Vflags fl; };
 struct cmpqi { Immed s0; Vreg64 s1; VregSF sf; Vflags fl; };
-struct cmpqm { Vreg64 s0; Vptr s1; VregSF sf; Vflags fl; };
-struct cmpqim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpqm { Vreg64 s0; Vptr64 s1; VregSF sf; Vflags fl; };
+struct cmpqim { Immed s0; Vptr64 s1; VregSF sf; Vflags fl; };
 struct cmpsd { ComparisonPred pred; VregDbl s0, s1, d; };
 struct ucomisd { VregDbl s0, s1; VregSF sf; Vflags fl; };
 // s1 & s0 => sf
@@ -1015,20 +1015,20 @@ struct testbi { Immed s0; Vreg8 s1; VregSF sf; Vflags fl; };
 struct testbim { Immed s0; Vptr8 s1; VregSF sf; Vflags fl; };
 struct testw { Vreg16 s0, s1; VregSF sf; Vflags fl; };
 struct testwi { Immed s0; Vreg16 s1; VregSF sf; Vflags fl; };
-struct testwim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testwim { Immed s0; Vptr16 s1; VregSF sf; Vflags fl; };
 struct testl { Vreg32 s0, s1; VregSF sf; Vflags fl; };
 struct testli { Immed s0; Vreg32 s1; VregSF sf; Vflags fl; };
-struct testlim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testlim { Immed s0; Vptr32 s1; VregSF sf; Vflags fl; };
 struct testq { Vreg64 s0, s1; VregSF sf; Vflags fl; };
 struct testqi { Immed s0; Vreg64 s1; VregSF sf; Vflags fl; };
-struct testqm { Vreg64 s0; Vptr s1; VregSF sf; Vflags fl; };
-struct testqim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testqm { Vreg64 s0; Vptr64 s1; VregSF sf; Vflags fl; };
+struct testqim { Immed s0; Vptr64 s1; VregSF sf; Vflags fl; };
 
 /*
  * Conditional operations.
  */
 // t1 = load t; d = condition ? t1 : f
-struct cloadq { ConditionCode cc; VregSF sf; Vreg64 f; Vptr t; Vreg64 d; };
+struct cloadq { ConditionCode cc; VregSF sf; Vreg64 f; Vptr64 t; Vreg64 d; };
 // d = condition ? t : f
 struct cmovb { ConditionCode cc; VregSF sf; Vreg8 f, t, d; };
 struct cmovw { ConditionCode cc; VregSF sf; Vreg16 f, t, d; };
@@ -1071,29 +1071,29 @@ struct movtql { Vreg64 s; Vreg32 d; };
  */
 // loads
 struct loadb { Vptr8 s; Vreg8 d; };
-struct loadw { Vptr s; Vreg16 d; };
-struct loadl { Vptr s; Vreg32 d; };
+struct loadw { Vptr16 s; Vreg16 d; };
+struct loadl { Vptr32 s; Vreg32 d; };
 struct loadqp { RIPRelativeRef s; Vreg64 d; };
 struct loadqd { VdataPtr<uint64_t> s; Vreg64 d; };
-struct loadups { Vptr s; Vreg128 d; };
-struct loadsd { Vptr s; VregDbl d; };
+struct loadups { Vptr128 s; Vreg128 d; };
+struct loadsd { Vptr64 s; VregDbl d; };
 // zero-extended s to d
 struct loadzbl { Vptr8 s; Vreg32 d; };
-struct loadzbq { Vptr s; Vreg64 d; };
-struct loadzlq { Vptr s; Vreg64 d; };
+struct loadzbq { Vptr8 s; Vreg64 d; };
+struct loadzlq { Vptr32 s; Vreg64 d; };
 // truncated s to d
-struct loadtqb { Vptr s; Vreg8 d; };
-struct loadtql { Vptr s; Vreg32 d; };
+struct loadtqb { Vptr64 s; Vreg8 d; };
+struct loadtql { Vptr64 s; Vreg32 d; };
 // stores
 struct storeb { Vreg8 s; Vptr8 m; };
 struct storebi { Immed s; Vptr8 m; };
-struct storew { Vreg16 s; Vptr m; };
-struct storewi { Immed s; Vptr m; };
-struct storel { Vreg32 s; Vptr m; };
-struct storeli { Immed s; Vptr m; };
-struct storeqi { Immed s; Vptr m; };
-struct storeups { Vreg128 s; Vptr m; };
-struct storesd { VregDbl s; Vptr m; };
+struct storew { Vreg16 s; Vptr16 m; };
+struct storewi { Immed s; Vptr16 m; };
+struct storel { Vreg32 s; Vptr32 m; };
+struct storeli { Immed s; Vptr32 m; };
+struct storeqi { Immed s; Vptr64 m; };
+struct storeups { Vreg128 s; Vptr128 m; };
+struct storesd { VregDbl s; Vptr64 m; };
 
 /*
  * Branch instructions.

@@ -277,9 +277,8 @@ struct Vptr {
     : base(Vreg{})
     , index(Vreg{})
     , disp(0)
-    {
-      width = w;
-    }
+    , width(w)
+  {}
 
   Vptr(Vreg b, uint32_t d, Width w = Width::None)
     : base(b)
@@ -317,7 +316,6 @@ struct Vptr {
     , seg(s)
     , width(w)
   {
-    std::string str;
     validate();
   }
 
@@ -346,11 +344,6 @@ struct Vptr {
 template <Width w>
 struct Vp : Vptr {
 
-  Vp() : Vptr(w)
-  {
-    width = w;
-  }
-
   Vp(Vreg b, uint32_t d) : Vptr(b, d, w)
   {
     width = w;
@@ -368,21 +361,29 @@ struct Vp : Vptr {
 
   /* implicit */ Vp(const Vptr m) : Vptr(m)
   {
-      width = w;
+    width = w;
   }
-
-  Vp(const Vp& o) = default;
-  Vp& operator=(const Vp& o) = default;
 
 };
 
-using Vptr8  = Vp<Width::Byte>;
+using Vptr8 = Vp<Width::Byte>;
+using Vptr16 = Vp<Width::Word>;
+using Vptr32 = Vp<Width::Long>;
+using Vptr64 = Vp<Width::Quad>;
+using Vptr128 = Vp<Width::Octa>;
 
 Vptr operator+(Vptr lhs, int32_t d);
 Vptr operator+(Vptr lhs, intptr_t d);
 Vptr operator+(Vptr lhr, size_t d);
 
 Vptr baseless(VscaledDisp);
+
+inline Width width(Vptr8)   { return Width::Byte; }
+inline Width width(Vptr16)  { return Width::Word; }
+inline Width width(Vptr32)  { return Width::Long; }
+inline Width width(Vptr64)  { return Width::Quad; }
+inline Width width(Vptr128) { return Width::Octa; }
+inline Width width(Vptr m)  { return m.width; }
 
 ///////////////////////////////////////////////////////////////////////////////
 

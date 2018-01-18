@@ -94,23 +94,29 @@ const char *json_get_last_error_msg() {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant json_object_to_variant(json_object *new_obj, const bool assoc,
-                               const bool stable_maps, const bool collections);
+                               const JSONContainerType container_type);
 
 Variant json_type_array_to_variant(json_object *new_obj, const bool assoc,
-                                   const bool stable_maps,
-                                   const bool collections) {
+                                   const JSONContainerType container_type) {
   int i, nb;
   Variant var, tmpvar;
   nb = json_object_array_length(new_obj);
-  if (collections) {
-    var = req::make<c_Vector>();
-  } else {
-    var = Array::Create();
+  switch (container_type) {
+    case JSONContainerType::COLLECTIONS:
+      var = req::make<c_Vector>();
+      break;
+    case JSONContainerType::HACK_ARRAYS:
+      var = Array::CreateVec();
+      break;
+    case JSONContainerType::PHP_ARRAYS:
+      var = Array::Create();
+      break;
   }
+
   for (i=0; i<nb; i++) {
     tmpvar = json_object_to_variant(json_object_array_get_idx(new_obj, i),
-                                    assoc, stable_maps, collections);
-    if (collections) {
+                                    assoc, container_type);
+    if (container_type == JSONContainerType::COLLECTIONS) {
       collections::append(var.getObjectData(), tmpvar.asCell());
     } else {
       var.asArrRef().append(tmpvar);
@@ -120,18 +126,25 @@ Variant json_type_array_to_variant(json_object *new_obj, const bool assoc,
 }
 
 Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
-                                    const bool stable_maps,
-                                    const bool collections) {
+                                    const JSONContainerType container_type) {
     struct json_object_iterator it, itEnd;
     json_object  *jobj;
     Variant       var, tmpvar;
 
-  if (collections) {
-    var = req::make<c_Map>();
-  } else if (assoc) {
-    var = Array::Create();
-  } else {
+  if (!assoc) {
     var = SystemLib::AllocStdClassObject();
+  } else {
+    switch (container_type) {
+      case JSONContainerType::COLLECTIONS:
+        var = req::make<c_Map>();
+        break;
+      case JSONContainerType::HACK_ARRAYS:
+        var = Array::CreateDict();
+        break;
+      case JSONContainerType::PHP_ARRAYS:
+        var = Array::Create();
+        break;
+    }
   }
 
   it = json_object_iter_begin(new_obj);
@@ -140,7 +153,7 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
   while (!json_object_iter_equal(&it, &itEnd)) {
     String key(json_object_iter_peek_name(&it), CopyString);
     jobj = json_object_iter_peek_value(&it);
-    tmpvar = json_object_to_variant(jobj, assoc, stable_maps, collections);
+    tmpvar = json_object_to_variant(jobj, assoc, container_type);
 
     if (!assoc) {
       if (key.empty()) {
@@ -149,11 +162,18 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
         var.getObjectData()->o_set(key, tmpvar);
       }
     } else {
-      if (collections) {
-        auto keyTV = make_tv<KindOfString>(key.get());
-        collections::set(var.getObjectData(), &keyTV, tmpvar.asCell());
-      } else {
-        forceToArray(var).set(key, tmpvar);
+      switch (container_type) {
+        case JSONContainerType::COLLECTIONS: {
+          auto keyTV = make_tv<KindOfString>(key.get());
+          collections::set(var.getObjectData(), &keyTV, tmpvar.asCell());
+          break;
+        }
+        case JSONContainerType::HACK_ARRAYS:
+          forceToDict(var).set(key, tmpvar);
+          break;
+        case JSONContainerType::PHP_ARRAYS:
+          forceToArray(var).set(key, tmpvar);
+          break;
       }
     }
     json_object_iter_next(&it);
@@ -162,7 +182,7 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
 }
 
 Variant json_object_to_variant(json_object *new_obj, const bool assoc,
-                               const bool stable_maps, const bool collections) {
+                               const JSONContainerType container_type) {
     json_type type;
     int64_t i64;
 
@@ -177,7 +197,7 @@ Variant json_object_to_variant(json_object *new_obj, const bool assoc,
         if (!(i64==INT64_MAX || i64==INT64_MIN)) {
           return Variant(i64);
         }
-        FOLLY_FALLTHROUGH
+        FOLLY_FALLTHROUGH;
 
     case json_type_double:
         return Variant(json_object_get_double(new_obj));
@@ -198,12 +218,10 @@ Variant json_object_to_variant(json_object *new_obj, const bool assoc,
         return Variant(Variant::NullInit());
 
     case json_type_array:
-        return json_type_array_to_variant(new_obj, assoc, stable_maps,
-                                          collections);
+        return json_type_array_to_variant(new_obj, assoc, container_type);
 
     case json_type_object:
-        return json_type_object_to_variant(new_obj, assoc, stable_maps,
-                                           collections);
+        return json_type_object_to_variant(new_obj, assoc, container_type);
 
     default:
         // warning type <type> not yet implemented
@@ -229,9 +247,13 @@ bool JSON_parser(Variant &return_value, const char *data, int data_len,
     //if (!(options & k_JSON_FB_LOOSE)) {
     //    json_tokener_set_flags(tok, JSON_TOKENER_STRICT);
     //}
-
-    bool const stable_maps = options & k_JSON_FB_STABLE_MAPS;
-    bool const collections = stable_maps || options & k_JSON_FB_COLLECTIONS;
+    JSONContainerType container_type = JSONContainerType::PHP_ARRAYS;
+    if (options & (k_JSON_FB_STABLE_MAPS | k_JSON_FB_COLLECTIONS)) {
+      assoc = true;
+      container_type = JSONContainerType::COLLECTIONS;
+    } else if (options & k_JSON_FB_HACK_ARRAYS) {
+      container_type = JSONContainerType::HACK_ARRAYS;
+    }
 
     new_obj = json_tokener_parse_ex(tok, data, data_len);
     if (json_tokener_get_error(tok)==json_tokener_continue) {
@@ -239,8 +261,7 @@ bool JSON_parser(Variant &return_value, const char *data, int data_len,
     }
 
     if (new_obj) {
-        return_value = json_object_to_variant(new_obj, assoc, stable_maps,
-                                              collections);
+        return_value = json_object_to_variant(new_obj, assoc, container_type);
         json_object_put(new_obj);
         retval = true;
     } else {

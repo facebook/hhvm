@@ -2272,12 +2272,12 @@ void mark_no_override_methods(IndexData& index) {
       if (ancestor == cinfo.get()) continue;
 
       auto removeNoOverride = [] (auto it) {
-        if (it->second.attrs & AttrNoOverride) {
+        if ((it->second.attrs | it->second.func->attrs) & AttrNoOverride) {
           FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
                  it->second.func->cls->name, it->first);
-          attribute_setter(it->second.attrs, false, AttrNoOverride);
-          attribute_setter(it->second.func->attrs, false, AttrNoOverride);
         }
+        attribute_setter(it->second.attrs, false, AttrNoOverride);
+        attribute_setter(it->second.func->attrs, false, AttrNoOverride);
       };
 
       for (auto& derivedMethod : cinfo->methods) {

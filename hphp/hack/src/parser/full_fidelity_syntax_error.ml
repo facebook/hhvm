@@ -259,9 +259,14 @@ let strict_namespace_not_hh =
 
 let original_definition = "Original definition"
 
-let name_is_already_in_use ~name ~short_name =
+let name_is_already_in_use_php ~name ~short_name =
   "Cannot use " ^ name ^ " as " ^ short_name ^
   " because the name is already in use"
+
+let name_is_already_in_use_hh ~line_num ~name ~short_name =
+  "Cannot use " ^ name ^ " as " ^ short_name ^
+  " because the name was explicitly used earlier via a `use' statement on line "
+  ^ (string_of_int line_num)
 
 let namespace_name_is_already_in_use ~name ~short_name =
   "Cannot use namespace " ^ name ^ " as " ^ short_name ^

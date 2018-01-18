@@ -1892,7 +1892,8 @@ let group_use_errors node errors =
   | _ -> errors
 
 let use_class_or_namespace_clause_errors
-  is_hack is_global_namespace namespace_prefix kind (names, errors) cl =
+  is_hack is_global_namespace namespace_prefix
+  kind syntax_tree (names, errors) cl =
 
   match syntax cl with
   | NamespaceUseClause {
@@ -1975,9 +1976,17 @@ let use_class_or_namespace_clause_errors
         | Some { f_location = loc; f_name; f_is_def; _ } ->
           if qualified_name = f_name && f_is_def then names, errors
           else
-          let error =
-            make_name_already_used_error name name_text short_name loc
-              SyntaxError.name_is_already_in_use in
+            let err_msg =
+              if is_hack && not f_is_def then
+                let text = SyntaxTree.text syntax_tree in
+                let line_num, _ =
+                  Full_fidelity_source_text.offset_to_position
+                    text loc.start_offset in
+                SyntaxError.name_is_already_in_use_hh ~line_num
+              else SyntaxError.name_is_already_in_use_php
+            in
+            let error = make_name_already_used_error
+              name name_text short_name loc err_msg in
             names, error :: errors
         | None ->
           let new_use =
@@ -2006,20 +2015,23 @@ let is_global_in_const_decl init =
     end
   | _ -> false
 
-let namespace_use_declaration_errors node is_hack is_global_namespace names errors =
+let namespace_use_declaration_errors
+  node is_hack is_global_namespace syntax_tree names errors =
   match syntax node with
   | NamespaceUseDeclaration {
       namespace_use_kind = kind;
       namespace_use_clauses = clauses; _ } ->
     let f =
-      use_class_or_namespace_clause_errors is_hack is_global_namespace None kind in
+      use_class_or_namespace_clause_errors
+        is_hack is_global_namespace None kind syntax_tree in
     List.fold_left f (names, errors) (syntax_to_list_no_separators clauses)
   | NamespaceGroupUseDeclaration {
       namespace_group_use_kind = kind;
       namespace_group_use_clauses = clauses;
       namespace_group_use_prefix = prefix; _ } ->
     let f =
-      use_class_or_namespace_clause_errors is_hack is_global_namespace (Some (text prefix)) kind in
+      use_class_or_namespace_clause_errors
+        is_hack is_global_namespace (Some (text prefix)) kind syntax_tree in
     List.fold_left f (names, errors) (syntax_to_list_no_separators clauses)
   | _ -> names, errors
 
@@ -2442,7 +2454,7 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
       mixed_namespace_errors node parents namespace_type errors in
     let names, errors =
       namespace_use_declaration_errors node is_hack
-        (namespace_name = global_namespace_name) names errors in
+        (namespace_name = global_namespace_name) syntax_tree names errors in
     let errors = enum_errors node errors in
     let errors = assignment_errors node errors in
     let errors = declare_errors node parents hhvm_compatibility_mode errors in

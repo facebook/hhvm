@@ -906,7 +906,15 @@ struct Index::IndexData {
    */
   ISStringToMany<ClassInfo> classInfo;
 
-  std::vector<std::unique_ptr<ClassInfo>>  allClassInfos;
+  /*
+   * All the ClassInfos, sorted topologically (ie all the parents,
+   * interfaces and traits used by the ClassInfo at index K will have
+   * indices less than K). This mostly drops out of the way ClassInfos
+   * are created; it would be hard to create the ClassInfos for the
+   * php::Class X (or even know how many to create) without knowing
+   * all the ClassInfos that were created for X's dependencies.
+   */
+  std::vector<std::unique_ptr<ClassInfo>> allClassInfos;
   std::vector<std::unique_ptr<FuncFamily>> funcFamilies;
 
   std::vector<FuncInfo> funcInfo;
@@ -2251,7 +2259,7 @@ void mark_no_override_classes(IndexData& index) {
 
 void mark_no_override_methods(IndexData& index) {
   // We removed any AttrNoOverride flags from all methods while adding
-  // the units to the index.  Now start by, marking every
+  // the units to the index.  Now start by marking every
   // (non-interface, non-special) method as AttrNoOverride.
   for (auto& cinfo : index.allClassInfos) {
     if (cinfo->cls->attrs & AttrInterface) continue;
@@ -2259,6 +2267,8 @@ void mark_no_override_methods(IndexData& index) {
 
     for (auto& m : cinfo->methods) {
       if (!(is_special_method_name(m.first))) {
+        FTRACE(9, "Pre-setting AttrNoOverride on {}::{}\n",
+               m.second.func->cls->name, m.first);
         attribute_setter(m.second.attrs, true, AttrNoOverride);
         attribute_setter(m.second.func->attrs, true, AttrNoOverride);
       }
@@ -2272,6 +2282,8 @@ void mark_no_override_methods(IndexData& index) {
       if (ancestor == cinfo.get()) continue;
 
       auto removeNoOverride = [] (auto it) {
+        assertx(it->second.attrs & AttrNoOverride ||
+                !(it->second.func->attrs & AttrNoOverride));
         if (it->second.attrs & AttrNoOverride) {
           FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
                  it->second.func->cls->name, it->first);
@@ -2690,17 +2702,30 @@ Index::Index(borrowed_ptr<php::Program> program,
                            !m_data->classAliases.count(ta->name),
                            AttrUnique);
                        });
-  // Use classInfo, rather than classes, because we can't mark a
-  // uniquely named class as unique, if eg a parent was non-unique.
-  mark_unique_entities(m_data->classInfo,
-                       [&] (ClassInfo* cinfo, bool flag) {
-                         attribute_setter(
-                           cinfo->cls->attrs,
-                           flag &&
-                           !m_data->typeAliases.count(cinfo->cls->name) &&
-                           !m_data->classAliases.count(cinfo->cls->name),
-                           AttrUnique);
-                       });
+
+  // Iterate allClassInfos so that we visit parent classes before
+  // child classes.
+  for (auto& cinfo : m_data->allClassInfos) {
+    auto const set = [&] {
+      if (m_data->classInfo.count(cinfo->cls->name) != 1 ||
+          m_data->typeAliases.count(cinfo->cls->name) ||
+          m_data->classAliases.count(cinfo->cls->name)) {
+        return false;
+      }
+      if (cinfo->parent && !(cinfo->parent->cls->attrs & AttrUnique)) {
+        return false;
+      }
+      for (auto const i : cinfo->declInterfaces) {
+        if (!(i->cls->attrs & AttrUnique)) return false;
+      }
+      for (auto const t : cinfo->usedTraits) {
+        if (!(t->cls->attrs & AttrUnique)) return false;
+      }
+      return true;
+    }();
+    attribute_setter(cinfo->cls->attrs, set, AttrUnique);
+  }
+
   mark_unique_entities(m_data->funcs,
                        [&] (const php::Func* func, bool flag) {
                          attribute_setter(func->attrs, flag, AttrUnique);

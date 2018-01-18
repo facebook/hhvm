@@ -817,7 +817,7 @@ let make_closure_type_syntax context =
     (make_closure_type_arguments context)
 
 let closure_variable =
-  "$closure"
+  "$__closure"
 
 (* $closure *)
 let closure_variable_syntax =
@@ -858,13 +858,13 @@ let clone_member_name_syntax =
   make_name_syntax clone_member_name
 
 let coroutine_data_variable =
-  "$coroutineData"
+  "$__coroutineData"
 
 let coroutine_data_variable_syntax =
   make_variable_expression_syntax coroutine_data_variable
 
 let coroutine_result_variable =
-  "$coroutineResult"
+  "$__coroutineResult"
 
 let coroutine_result_variable_syntax =
   make_variable_expression_syntax coroutine_result_variable
@@ -890,7 +890,7 @@ let coroutine_data_parameter_syntax =
     coroutine_data_variable
 
 let exception_variable =
-  "$exception_generated"
+  "$__exception_generated"
 
 let exception_variable_syntax =
   make_variable_expression_syntax exception_variable

@@ -1,0 +1,1 @@
+((Fatal error\: syntax error, unexpected ',', expecting '\]' in [^\r\n]+ on line \d+)|(Fatal error\: Hack standard library is only allowed in Hack files in [^\r\n]+\/vec\/hh\-only1\.php on line 5))

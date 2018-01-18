@@ -1,0 +1,1 @@
+((Fatal error\: syntax error, unexpected T_DOUBLE_ARROW, expecting '\]' in [^\r\n]+ on line \d+)|(Fatal error\: Hack standard library is only allowed in Hack files in [^\r\n]+\/dict\/hh\-only1\.php on line 5))

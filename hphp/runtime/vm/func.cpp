@@ -234,6 +234,9 @@ void Func::rename(const StringData* name) {
 // Initialization.
 
 void Func::init(int numParams) {
+#ifdef DEBUG
+  m_magic = kMagic;
+#endif
   // For methods, we defer setting the full name until m_cls is initialized
   m_maybeIntercepted = -1;
   if (!preClass()) {
@@ -253,9 +256,6 @@ void Func::init(int numParams) {
      */
     m_attrs = m_attrs | AttrNoInjection;
   }
-#ifdef DEBUG
-  m_magic = kMagic;
-#endif
   assert(m_name);
   initPrologues(numParams);
 }

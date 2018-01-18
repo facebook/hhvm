@@ -307,6 +307,17 @@ let function_is_generator_comparer = wrap Hhas_function.is_generator
     (fun _f s -> s) (flag_comparer "isGenerator")
 let function_is_pair_generator_comparer = wrap Hhas_function.is_pair_generator
     (fun _f s -> s) (flag_comparer "isPairGenerator")
+let function_is_top_comparer = wrap Hhas_function.is_top
+    (fun _f s -> s) (flag_comparer "isTop")
+let function_no_injection_comparer = wrap Hhas_function.no_injection
+    (fun _f s -> s) (flag_comparer "noInjection")
+let function_inout_wrapper_comparer = wrap Hhas_function.inout_wrapper
+    (fun _f s -> s) (flag_comparer "inoutWrapper")
+let function_is_return_by_ref_comparer = wrap Hhas_function.is_return_by_ref
+    (fun _f s -> s) (flag_comparer "isReturnByRef")
+let function_is_interceptable_comparer = wrap Hhas_function.is_interceptable
+        (fun _f s -> s) (flag_comparer "isInterceptable")
+
 let method_is_abstract_comparer = wrap Hhas_method.is_abstract
     (fun _f s -> s) (flag_comparer "isAbstract")
 let method_is_protected_comparer = wrap Hhas_method.is_protected
@@ -329,6 +340,10 @@ let method_is_closure_body_comparer = wrap Hhas_method.is_closure_body
     (fun _f s -> s) (flag_comparer "isClosureBody")
 let method_no_injection_comparer = wrap Hhas_method.no_injection
     (fun _f s -> s) (flag_comparer "noInjection")
+let method_is_return_by_ref_comparer = wrap Hhas_method.is_return_by_ref
+    (fun _f s -> s) (flag_comparer "isReturnByRef")
+let method_is_interceptable_comparer = wrap Hhas_method.is_interceptable
+    (fun _f s -> s) (flag_comparer "isInterceptable")
 
 (* Could have used fold earlier here *)
 let method_flags_comparer =
@@ -337,14 +352,15 @@ let method_flags_comparer =
      method_is_static_comparer; method_is_final_comparer; method_is_async_comparer;
      method_is_generator_comparer; method_is_pair_generator_comparer;
      method_is_closure_body_comparer; method_is_abstract_comparer;
-     method_no_injection_comparer]
+     method_no_injection_comparer; method_is_return_by_ref_comparer;
+     method_is_interceptable_comparer]
 
 let function_flags_comparer =
-  join (fun s1 s2 -> s1 ^ " " ^ s2)
-    function_is_async_comparer
-    (join (fun s1 s2 -> s1 ^ " " ^ s2)
-       function_is_generator_comparer
-       function_is_pair_generator_comparer)
+  List.fold_left (join (fun s1 s2 -> s1 ^ s2)) function_is_async_comparer
+    [function_is_generator_comparer; function_is_pair_generator_comparer;
+     function_is_top_comparer; function_no_injection_comparer;
+     function_inout_wrapper_comparer; function_is_return_by_ref_comparer;
+     function_is_interceptable_comparer]
 
 let params_to_string ps = "(" ^ (concatstrs (List.map Hhas_param.name ps)) ^ ")"
 

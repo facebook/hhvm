@@ -130,6 +130,73 @@ let unbound_name env (pos, name) =
   | FileInfo.Mdecl | FileInfo.Mpartial | FileInfo.Mphp ->
     expr_any env Reason.Rnone
 
+(* Is this type Traversable<vty> or Container<vty> for some vty? *)
+let get_value_collection_inst ty =
+  match ty with
+  | (_, Tclass ((_, c), [vty])) when
+      c = SN.Collections.cTraversable ||
+      c = SN.Collections.cContainer ->
+    Some vty
+  | _ ->
+    None
+
+(* Is this type KeyedTraversable<kty,vty>
+ *           or KeyedContainer<kty,vty>
+ *           or Indexish<kty,vty>
+ * for some kty, vty?
+ *)
+let get_key_value_collection_inst ty =
+  match ty with
+  | (_, Tclass ((_, c), [kty; vty])) when
+      c = SN.Collections.cKeyedTraversable ||
+      c = SN.Collections.cKeyedContainer ||
+      c = SN.Collections.cIndexish ->
+    Some (kty, vty)
+  | _ ->
+    None
+
+(* Is this type varray<vty> or a supertype for some vty? *)
+let get_varray_inst ty =
+  match ty with
+  (* It's varray<vty> *)
+  | (_, Tarraykind (AKvarray vty)) -> Some vty
+  | _ -> get_value_collection_inst ty
+
+(* Is this type one of the value collection types with element type vty? *)
+let get_vc_inst vc_kind ty =
+  match ty with
+  | (_, Tclass ((_, c), [vty]))
+    when c = vc_kind_to_name vc_kind -> Some vty
+  | _ ->  get_value_collection_inst ty
+
+(* Is this type array<vty> or a supertype for some vty? *)
+let get_akvec_inst ty =
+  match ty with
+  | (_, Tarraykind (AKvec vty)) -> Some vty
+  | _ -> get_value_collection_inst ty
+
+(* Is this type array<kty,vty> or a supertype for some kty and vty? *)
+let get_akmap_inst ty =
+  match ty with
+  | (_, Tarraykind (AKmap (kty, vty))) -> Some (kty, vty)
+  | _ -> get_key_value_collection_inst ty
+
+(* Is this type one of the three key-value collection types
+ * e.g. dict<kty,vty> or a supertype for some kty and vty? *)
+let get_kvc_inst kvc_kind ty =
+  match ty with
+  | (_, Tclass ((_, c), [kty; vty]))
+    when c = kvc_kind_to_name kvc_kind -> Some (kty, vty)
+  | _ -> get_key_value_collection_inst ty
+
+(* Is this type darray<kty, vty> or a supertype for some kty and vty? *)
+let get_darray_inst ty =
+  match ty with
+  (* It's darray<kty, vty> *)
+  | (_, Tarraykind (AKdarray (kty, vty))) -> Some (kty, vty)
+  | _ -> get_key_value_collection_inst ty
+
+
 (* Try running function on each concrete supertype in turn. Return all
  * successful results
  *)
@@ -1151,7 +1218,7 @@ and expr_
       | None -> Env.fresh_unresolved_type env
       | Some (_, _, ty) -> env, ty in
     let has_unknown = List.exists tys (fun (_, ty) -> ty = Tany) in
-    let env, tys = List.rev_map_env env tys TUtils.unresolved in
+    let env, tys = List.map_env env tys TUtils.unresolved in
     let subtype_value env ty =
       Type.sub_type p Reason.URarray_value env ty supertype in
     if has_unknown then
@@ -1204,6 +1271,7 @@ and expr_
         (Reason.Rwitness p, Tarraykind (AKshape fdm))
 
   | Array (x :: rl as l) ->
+      (* True if all fields are values, or all fields are key => value *)
       let fields_consistent = check_consistent_fields x rl in
       let is_vec = match x with
         | Nast.AFvalue _ -> true
@@ -1212,12 +1280,11 @@ and expr_
         (* Use expected type to determine expected element type *)
         let env, elem_expected =
           match expand_expected env expected with
-          | env, Some (pos, ur, (_, Tclass ((_, c), [ty])))
-            when (c = SN.Collections.cTraversable ||
-                  c = SN.Collections.cContainer) ->
-            env, Some (pos, ur, ty)
-          | env, Some (pos, ur, (_, Tarraykind (AKvec ty))) ->
-            env, Some ( pos,ur, ty)
+          | env, Some (pos, ur, ety) ->
+            begin match get_akvec_inst ety with
+            | Some vty -> env, Some (pos, ur, vty)
+            | None -> env, None
+            end
           | _ ->
             env, None in
         let env, tel, arraykind =
@@ -1236,36 +1303,85 @@ and expr_
           (T.Array (List.map tel (fun e -> T.AFvalue e)))
           (Reason.Rwitness p, Tarraykind arraykind)
       else
-      let env, value_exprs_and_tys = List.rev_map_env env l (array_field_value ~expected:None) in
-      let tvl, value_tys = List.unzip value_exprs_and_tys in
-      let env, value = compute_supertype ~expected:None env value_tys in
+
       (* TODO TAST: produce a typed expression here *)
-      if is_vec then
+      if is_vec
+      then
+        (* Use expected type to determine expected element type *)
+        let env, vexpected =
+          match expand_expected env expected with
+          | env, Some (pos, ur, ety) ->
+            begin match get_akvec_inst ety with
+            | Some vty -> env, Some (pos, ur, vty)
+            | None -> env, None
+            end
+          | _ ->
+            env, None in
+        let env, _value_exprs, value_ty =
+          compute_exprs_and_supertype ~expected:vexpected env l array_field_value in
         make_result env T.Any
-          (Reason.Rwitness p, Tarraykind (AKvec value))
+          (Reason.Rwitness p, Tarraykind (AKvec value_ty))
       else
-        let env, key_exprs_and_tys = List.rev_map_env env l (array_field_key ~expected:None) in
-        let tkl, key_tys = List.unzip key_exprs_and_tys in
-        let env, key = compute_supertype ~expected:None env key_tys in
+        (* Use expected type to determine expected element type *)
+        let env, kexpected, vexpected =
+          match expand_expected env expected with
+          | env, Some (pos, ur, ety) ->
+            begin match get_akmap_inst ety with
+            | Some (kty, vty) -> env, Some (pos, ur, kty), Some (pos, ur, vty)
+            | None -> env, None, None
+            end
+          | _ ->
+            env, None, None in
+        let env, key_exprs, key_ty =
+          compute_exprs_and_supertype ~expected:kexpected env l array_field_key in
+        let env, value_exprs, value_ty =
+          compute_exprs_and_supertype ~expected:vexpected env l array_field_value in
         make_result env
-          (T.Array (List.map (List.rev (List.zip_exn tkl tvl))
+          (T.Array (List.map (List.zip_exn key_exprs value_exprs)
             (fun (tek, tev) -> T.AFkvalue (tek, tev))))
-          (Reason.Rwitness p, Tarraykind (AKmap (key, value)))
+          (Reason.Rwitness p, Tarraykind (AKmap (key_ty, value_ty)))
 
   | Darray l ->
+      (* Use expected type to determine expected key and value types *)
+      let env, kexpected, vexpected =
+        match expand_expected env expected with
+        | env, Some (pos, ur, ety) ->
+          begin match get_darray_inst ety with
+          | Some (kty, vty) ->
+            env, Some (pos, ur, kty), Some (pos, ur, vty)
+          | None ->
+            env, None, None
+          end
+        | _ ->
+          env, None, None in
       let keys, values = List.unzip l in
+
       let env, value_exprs, value_ty =
-        compute_exprs_and_supertype ~expected:None env values array_value in
+        compute_exprs_and_supertype ~expected:vexpected env values array_value in
       let env, key_exprs, key_ty =
-        compute_exprs_and_supertype ~expected:None env keys array_value in
+        compute_exprs_and_supertype ~expected:kexpected env keys array_value in
+
       let field_exprs = List.zip_exn key_exprs value_exprs in
       make_result env
         (T.Darray field_exprs)
         (Reason.Rwitness p, Tarraykind (AKdarray (key_ty, value_ty)))
 
   | Varray values ->
+      (* Use expected type to determine expected element type *)
+      let env, elem_expected =
+        match expand_expected env expected with
+        | env, Some (pos, ur, ety) ->
+          begin match get_varray_inst ety with
+          | Some vty ->
+            env, Some (pos, ur, vty)
+          | _ ->
+            env, None
+          end
+        | _ ->
+          env, None
+        in
       let env, value_exprs, value_ty =
-        compute_exprs_and_supertype ~expected:None env values array_value in
+        compute_exprs_and_supertype ~expected:elem_expected env values array_value in
       make_result env
         (T.Varray value_exprs)
         (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
@@ -1274,9 +1390,13 @@ and expr_
       (* Use expected type to determine expected element type *)
       let env, elem_expected =
         match expand_expected env expected with
-        | env, Some (pos, ur, (_, Tclass ((_, k), [ty]))) when is_vc_kind k
-          || k = SN.Collections.cTraversable || k = SN.Collections.cContainer ->
-          env, Some (pos, ur, ty)
+        | env, Some (pos, ur, ety) ->
+          begin match get_vc_inst kind ety with
+          | Some vty ->
+            env, Some (pos, ur, vty)
+          | None ->
+            env, None
+          end
         | _ -> env, None in
       let env, tel, tyl = exprs ?expected:elem_expected env el in
       let env, tyl = List.map_env env tyl Typing_env.unbind in
@@ -1298,11 +1418,13 @@ and expr_
       (* Use expected type to determine expected key and value types *)
       let env, kexpected, vexpected =
         match expand_expected env expected with
-        | env, Some (pos, ur, (_, Tclass ((_, k), [kty; vty]))) when is_kvc_kind k
-          || k = SN.Collections.cKeyedTraversable
-               || k = SN.Collections.cKeyedContainer
-               || k = SN.Collections.cIndexish->
-          env, Some (pos, ur, kty), Some (pos, ur, vty)
+        | env, Some (pos, ur, ety) ->
+          begin match get_kvc_inst kind ety with
+          | Some (kty, vty) ->
+            env, Some (pos, ur, kty), Some (pos, ur, vty)
+          | None ->
+            env, None, None
+          end
         | _ -> env, None, None in
       let kl, vl = List.unzip l in
       let env, tkl, kl = exprs ?expected:kexpected env kl in

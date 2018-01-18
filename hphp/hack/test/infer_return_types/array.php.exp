@@ -2,6 +2,6 @@
 \g : \Awaitable<array<string, int>> try \Awaitable<array<string, int>>
 \h : array<int> try array<int>
 \i : array<string, (int | bool)> try array<string, (int | bool)>
-\j : array<(bool | int)> try array<(bool | int)>
+\j : array<(int | bool)> try array<(int | bool)>
 \k : shape-like-array(a => int) try shape-like-array(a => int)
 No errors

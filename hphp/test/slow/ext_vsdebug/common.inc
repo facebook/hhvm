@@ -184,7 +184,13 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $startupCommands = 
   socket_close($sock);
 
   $addr = gethostbyname("localhost");
-  $cmd = getHhvmPath() . " --mode vsdebug --vsDebugPort $port " . $scriptPath;
+  $cmd = vec[
+    getHhvmPath(),
+    '-d', 'hhvm.hack.lang.look_for_typechecker=0',
+    '--mode', 'vsdebug',
+    '--vsDebugPort', (string) $port,
+    $scriptPath,
+  ] |> array_map($x ==> escapeshellarg($x), $$) |> implode(' ', $$);
   $process = proc_open($cmd, $descriptorspec, $pipes);
   if (!is_resource($process)) {
     throw new UnexpectedValueException("Failed to open child process!");

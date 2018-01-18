@@ -46,9 +46,6 @@ def verify_unittest(suite, mode, repo, dir, relocate=0, recycle_tc=0,
   if cli_server != 0:
     command.append('--cli-server')
 
-  if 'jit' in target_name:
-    command.extend(['--exclude-pattern', '=/debugger|ext_vsdebug/='])
-
   deplist=[
     '//hphp/hhvm:hhvm',
     '//hphp/hhvm:hhvm_link',

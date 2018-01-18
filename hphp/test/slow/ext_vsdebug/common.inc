@@ -26,6 +26,9 @@ function getNextVsDebugMessage() {
     }
 
     if ($pos == 0 && $vsDebugData === "") {
+      if (feof($client)) {
+        throw new ErrorException("Target has exited.");
+      }
       throw new UnexpectedValueException($vsDebugData);
     }
 
@@ -52,6 +55,10 @@ function checkArrayEqualRecursively($a1, $a2) {
 }
 
 function checkObjEqualRecursively($msg, $expected) {
+  if ($msg === '' && feof($GLOBALS['client'])) {
+    throw new ErrorException("Target has exited.");
+  }
+
   foreach ($expected as $key => $value) {
     $expectedValue = $value;
     $actualValue = $msg{$key};
@@ -276,6 +283,35 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $startupCommands = 
   }
 
   return [$process, $pipes, $client];
+}
+
+function resumeAndCleanup($testProcess) {
+  // Once we issue the final resume, HHVM may exit before we read any more
+  // messages. If they arrive, check they are well-formed. If HHVM tears down
+  // without sending these messages, the client is OK with that - the wrapper
+  // will cleanup the debug session automatically.
+  try {
+    resumeTarget();
+
+    // Verify that the script exited.
+    $msg = json_decode(getNextVsDebugMessage(), true);
+    checkObjEqualRecursively($msg, array(
+      "type" => "event",
+      "event" => "thread",
+      "body" => array(
+        "threadId" => 1,
+        "reason" => "exited"
+      )));
+  } catch (ErrorException $e) {
+    // Target exited.
+  }
+
+  // Read anything left it stdout and stderr and echo it.
+  $stdout = $testProcess[1][1];
+  $stderr = $testProcess[1][2];
+  echo stream_get_contents($stdout);
+  echo stream_get_contents($stderr);
+  vsDebugCleanup($testProcess[0], $testProcess[1], $testProcess[2]);
 }
 
 function vsDebugCleanup($process, $pipes, $client, $expectedExitCode = 0) {

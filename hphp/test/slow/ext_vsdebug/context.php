@@ -890,21 +890,4 @@ if (count($msg{"body"}{"variables"}) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
-resumeTarget();
-
-// Verify that the script exited.
-$msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
-  "type" => "event",
-  "event" => "thread",
-  "body" => array(
-    "threadId" => 1,
-    "reason" => "exited"
-  )));
-
-// Read anything left it stdout and stderr and echo it.
-$stdout = $testProcess[1][1];
-$stderr = $testProcess[1][2];
-echo stream_get_contents($stdout);
-echo stream_get_contents($stderr);
-vsDebugCleanup($testProcess[0], $testProcess[1], $testProcess[2]);
+resumeAndCleanup($testProcess);

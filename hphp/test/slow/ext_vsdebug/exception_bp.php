@@ -178,16 +178,4 @@ checkObjEqualRecursively($msg, $exnBpResp);
 
 // Resume the target, break on exn is not enabled so the target should
 // throw and exit.
-resumeTarget();
-
-// Verify that the script exited.
-$msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
-  "type" => "event",
-  "event" => "thread",
-  "body" => array(
-    "threadId" => 1,
-    "reason" => "exited"
-  )));
-
-vsDebugCleanup($testProcess[0], $testProcess[1], $testProcess[2], 255);
+resumeAndCleanup($testProcess);

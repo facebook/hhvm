@@ -71,8 +71,16 @@ void DebugTransport::shutdownOutputThread() {
 }
 
 void DebugTransport::shutdown() {
-  shutdownInputThread();
-  shutdownOutputThread();
+  {
+    Lock lock(m_mutex);
+
+    if (m_terminating) {
+      return;
+    }
+
+    shutdownInputThread();
+    shutdownOutputThread();
+  }
 
   // Wait for both threads to exit.
   m_inputThread.waitForEnd();

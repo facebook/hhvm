@@ -1,6 +1,11 @@
 <?hh
 require(__DIR__ . '/common.inc');
-$testProcess = vsDebugLaunch(__DIR__ . '/launch.php.test');
+
+try {
+  $testProcess = vsDebugLaunch(__DIR__ . '/launch.php.test');
+} catch (ErrorException $e) {
+  // Target exited.
+}
 
 /*
  * Launch script test: just launch a script with no breakpoints set.

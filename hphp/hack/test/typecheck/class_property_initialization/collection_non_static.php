@@ -5,5 +5,5 @@ function get(): int {
 }
 
 class Foo {
-  public Vector<int> $vec = Vector {get(), 2};
+  public Vector<int> $vec = Vector { get(), 2 };
 }

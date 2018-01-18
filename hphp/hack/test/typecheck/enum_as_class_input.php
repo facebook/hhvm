@@ -9,7 +9,7 @@
  *
  */
 
-enum NumbahsEnum : int as int {
+enum NumbahsEnum: int as int {
   value1 = 1;
   value2 = 2;
   lifeValue = 42;

@@ -6,7 +6,7 @@ function test(): void {
   hh_show($x);
   switch ($x) {
     case 0:
-      // This is a noop fallthrough so we should not do an intersect
+    // This is a noop fallthrough so we should not do an intersect
     case 1:
       // $x should be int, that isn't wrapped in an unresolved
       hh_show($x);

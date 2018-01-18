@@ -9,6 +9,6 @@
  *
  */
 function f(): int {
-  $t = Pair {1, 'foo'};
+  $t = Pair { 1, 'foo' };
   return $t[1];
 }

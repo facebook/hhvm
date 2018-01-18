@@ -17,7 +17,7 @@ function generic_int_not<T as int>(T $a): int {
   return ~$a;
 }
 
-enum Colour : int as int {
+enum Colour: int as int {
   Red = 0;
   Blue = 1;
 }

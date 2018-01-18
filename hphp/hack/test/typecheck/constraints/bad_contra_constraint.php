@@ -15,7 +15,7 @@ class Derived<Td> extends Base<Td> {
     }
     // So here, $el has type Base<Tb#1>
     // So $args has type Vector<Pair<Base<Tb#1>,float>>
-    $args->add(Pair {$el, 3.4});
+    $args->add(Pair { $el, 3.4 });
     // We need Base<Tb#1> <: Base<Td>
     // So by contravariance we require Td <: Tb#1
     // Why would these be related??

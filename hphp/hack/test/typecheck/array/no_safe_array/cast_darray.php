@@ -1,7 +1,7 @@
 <?hh
 
 function darray<Tk, Tv>(mixed $x): darray<Tk, Tv> {
-  return (array) $x;
+  return (array)$x;
 }
 
 function testDarray($x): darray<int, int> {

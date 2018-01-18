@@ -1,5 +1,5 @@
 <?hh
 
 function f(array $arr): string {
-  return (strING) $arr;
+  return (strING)$arr;
 }

@@ -1,7 +1,7 @@
 <?hh // strict
 
 function multiply(inout num $n, num $m): void {
-  $n *= (float) $m;
+  $n *= (float)$m;
 }
 
 function test(): int {

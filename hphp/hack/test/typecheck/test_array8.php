@@ -10,6 +10,6 @@
  */
 
 function test($x): array<int, A> {
-  $v = (array) 0;
+  $v = (array)0;
   return $v;
 }

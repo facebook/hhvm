@@ -14,6 +14,6 @@ class A {}
 class B implements I {}
 
 function foo(): Vector<I> {
-  $x = Vector {new A(), new B()};
+  $x = Vector { new A(), new B() };
   return $x;
 }

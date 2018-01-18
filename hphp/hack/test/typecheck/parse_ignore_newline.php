@@ -10,8 +10,11 @@
  */
 
 function f1(): void {
-  invariant(true, 'error\
-    on a new line');
+  invariant(
+    true,
+    'error\
+    on a new line',
+  );
 }
 
 function f2(): void {

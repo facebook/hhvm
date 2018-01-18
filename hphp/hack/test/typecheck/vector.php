@@ -10,7 +10,7 @@
  */
 
 function f1(): Vector<string> {
-  return Vector {'hello', 'world'};
+  return Vector { 'hello', 'world' };
 }
 
 function f2(): Vector<int> {
@@ -18,5 +18,5 @@ function f2(): Vector<int> {
 }
 
 function f3(): Vector<Vector<string>> {
-  return Vector {f1(), Vector {'a', 'b', 'c'}, Vector {}};
+  return Vector { f1(), Vector { 'a', 'b', 'c' }, Vector {} };
 }

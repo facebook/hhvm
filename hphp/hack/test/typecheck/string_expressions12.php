@@ -14,4 +14,3 @@ class Dude {
     return <fbt project="blah">Some Text</fbt>;
   }
 }
-

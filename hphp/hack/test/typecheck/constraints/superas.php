@@ -36,7 +36,7 @@ class MyString implements IMem {
 
 class Test {
   public function Doit(): MySet<MyString> {
-    $x = new MySet(Vector {new MyString('a'), new MyString('b')});
+    $x = new MySet(Vector { new MyString('a'), new MyString('b') });
     return $x;
   }
 }

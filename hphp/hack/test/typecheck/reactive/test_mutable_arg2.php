@@ -6,7 +6,7 @@ class Foo {
 }
 // variadic argument
 <<__Rx>>
-function foo(<<__Mutable>> Foo $x, <<__Mutable>> Foo ...$ys): void {
+function foo(<<__Mutable>>Foo $x, <<__Mutable>>Foo ...$ys): void {
   $x->value = 5;
 }
 

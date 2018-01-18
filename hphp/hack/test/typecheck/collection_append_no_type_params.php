@@ -13,7 +13,7 @@ function foo3(Map $c, Pair<int, string> $p): void {
 }
 /* HH_FIXME[4101] */
 function foo4(Map $c): void {
-  $c[] = Pair {42, 'b'};
+  $c[] = Pair { 42, 'b' };
 }
 /* HH_FIXME[4101] */
 function foo5(Set $c): void {

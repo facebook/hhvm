@@ -9,12 +9,12 @@
  *
  */
 
-enum DerpyEnum : string as string {
+enum DerpyEnum: string as string {
   test1 = "haha";
   test2 = "DERP";
 }
 
-enum BaitEnum : string as string {
+enum BaitEnum: string as string {
   test1 = "haha";
   test2 = "DERP";
 }

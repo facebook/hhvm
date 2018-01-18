@@ -23,7 +23,7 @@ function demo(): bool {
 
   $val1 = special_array_map($fun1, $array);
 
-  return (bool) $val1;
+  return (bool)$val1;
 }
 
 /* HH_FIXME[1002] Just a demo */

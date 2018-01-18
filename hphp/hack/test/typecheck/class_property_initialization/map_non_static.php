@@ -5,5 +5,5 @@ function get(): string {
 }
 
 class Foo {
-  public Map<int, string> $vec = Map {3 => get(), 4 => 'world'};
+  public Map<int, string> $vec = Map { 3 => get(), 4 => 'world' };
 }

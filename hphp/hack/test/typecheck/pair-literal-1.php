@@ -9,5 +9,5 @@
  *
  */
 function f(): Pair<int, string> {
-  return Pair {1, 'foo'};
+  return Pair { 1, 'foo' };
 }

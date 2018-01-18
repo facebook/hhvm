@@ -2,7 +2,7 @@
 
 /* Check that the right operand of 'instanceof' is not an enum */
 
-enum Foo : int {
+enum Foo: int {
   bar = 1;
   baz = 2;
 }

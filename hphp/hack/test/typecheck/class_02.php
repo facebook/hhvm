@@ -14,4 +14,3 @@ class A {}
 interface I {}
 
 class B implements I, A {}
-

@@ -20,6 +20,6 @@ function foo(Vector<I> $x): void {
 function callA(A $x): void {}
 
 function bar(): void {
-  $x = Vector {new A()};
+  $x = Vector { new A() };
   foo($x);
 }

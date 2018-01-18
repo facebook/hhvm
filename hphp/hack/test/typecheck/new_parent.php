@@ -21,4 +21,3 @@ class A extends B {
     echo 'test';
   }
 }
-

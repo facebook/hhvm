@@ -12,7 +12,7 @@
 // Test that we can't append to a FV.
 
 function bad() {
-  $fv = ImmVector {1, 2, 3};
+  $fv = ImmVector { 1, 2, 3 };
   $fv[] = 42;
 }
 

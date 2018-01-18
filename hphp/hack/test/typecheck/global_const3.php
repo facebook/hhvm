@@ -1,4 +1,3 @@
 <?hh
 
 const X = shape();
-

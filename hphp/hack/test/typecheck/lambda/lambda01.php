@@ -22,6 +22,6 @@ function foo(): void {
   $func = $y ==> {
     return $y - 2;
   };
-  $x = Vector {1, 2, 3};
+  $x = Vector { 1, 2, 3 };
   mapp($x, $func);
 }

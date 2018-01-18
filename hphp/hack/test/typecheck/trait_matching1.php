@@ -36,4 +36,4 @@ function broken(): void {
   takes_int($c->getInt());
 }
 
-// broken();
+/* broken(); */

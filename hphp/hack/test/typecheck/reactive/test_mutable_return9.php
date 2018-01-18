@@ -3,7 +3,7 @@
 class C {}
 
 <<__Rx, __MutableReturn>>
-function make(bool $b, <<__Mutable>> C $c): C {
+function make(bool $b, <<__Mutable>>C $c): C {
   if ($b) {
     $c = new C();
   } else {

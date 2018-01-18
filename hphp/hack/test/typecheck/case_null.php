@@ -1,7 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-enum Enum : int {
+enum Enum: int {
   A = 0;
   B = 1;
   C = 2;

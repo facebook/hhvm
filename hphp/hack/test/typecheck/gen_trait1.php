@@ -20,6 +20,6 @@ class A {
   use MyTrait<int>;
 
   public function __construct(int $x) {
-    $this->a = Vector {$x};
+    $this->a = Vector { $x };
   }
 }

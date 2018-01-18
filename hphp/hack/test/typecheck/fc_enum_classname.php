@@ -6,7 +6,7 @@ class Foo {
 
 class Bar extends Foo {}
 
-enum E : classname<Foo> as classname<Foo> {
+enum E: classname<Foo> as classname<Foo> {
   FOO = Foo::class;
   Bar = Bar::class;
 }

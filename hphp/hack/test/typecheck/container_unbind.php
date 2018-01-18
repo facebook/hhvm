@@ -13,8 +13,8 @@ class MyContainer<Tv> {
 function take_int(int $_): void {}
 
 function testPair(): void {
-  $x = Vector {4};
-  $y = Vector {'zzz'};
+  $x = Vector { 4 };
+  $y = Vector { 'zzz' };
 
   $m = new MyContainer();
 
@@ -23,15 +23,15 @@ function testPair(): void {
   // two lines they would be unified with Tv type variable of $m, and
   // transitively with each other. Putting element inside a container should
   // not affect it's type.
-  $m->setPair(Pair {'x', $x[0]});
-  $m->setPair(Pair {'x', $y[0]});
+  $m->setPair(Pair { 'x', $x[0] });
+  $m->setPair(Pair { 'x', $y[0] });
 
   take_int($x[0]);
 }
 
 function testTuple(): void {
-  $x = Vector {4};
-  $y = Vector {'zzz'};
+  $x = Vector { 4 };
+  $y = Vector { 'zzz' };
 
   $m = new MyContainer();
 
@@ -42,32 +42,32 @@ function testTuple(): void {
 }
 
 function testVector(): void {
-  $x = Vector {4};
-  $y = Vector {'zzz'};
+  $x = Vector { 4 };
+  $y = Vector { 'zzz' };
 
   $m = new MyContainer();
 
-  $m->setVector(Vector {$x[0]});
-  $m->setVector(Vector {$y[0]});
+  $m->setVector(Vector { $x[0] });
+  $m->setVector(Vector { $y[0] });
 
   take_int($x[0]);
 }
 
 function testMap(): void {
-  $x = Vector {4};
-  $y = Vector {'zzz'};
+  $x = Vector { 4 };
+  $y = Vector { 'zzz' };
 
   $m = new MyContainer();
 
-  $m->setMap(Map {'x' => $x[0]});
-  $m->setMap(Map {'x' => $y[0]});
+  $m->setMap(Map { 'x' => $x[0] });
+  $m->setMap(Map { 'x' => $y[0] });
 
   take_int($x[0]);
 }
 
 function testMapArray(string $key): void {
-  $x = Vector {4};
-  $y = Vector {'zzz'};
+  $x = Vector { 4 };
+  $y = Vector { 'zzz' };
 
   $m = new MyContainer();
 
@@ -78,8 +78,8 @@ function testMapArray(string $key): void {
 }
 
 function testVectorArray(): void {
-  $x = Vector {4};
-  $y = Vector {'zzz'};
+  $x = Vector { 4 };
+  $y = Vector { 'zzz' };
 
   $m = new MyContainer();
 
@@ -90,8 +90,8 @@ function testVectorArray(): void {
 }
 
 function testShape(): void {
-  $x = Vector {4};
-  $y = Vector {'zzz'};
+  $x = Vector { 4 };
+  $y = Vector { 'zzz' };
 
   $m = new MyContainer();
 
@@ -102,8 +102,8 @@ function testShape(): void {
 }
 
 function testShapeLikeArray(): void {
-  $x = Vector {4};
-  $y = Vector {'zzz'};
+  $x = Vector { 4 };
+  $y = Vector { 'zzz' };
 
   $m = new MyContainer();
 

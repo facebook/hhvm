@@ -1,5 +1,7 @@
 <?hh // strict
 
 class :foo {
-  attribute int foo @required, ?int bar @required;
+  attribute
+    int foo @required,
+    ?int bar @required;
 }

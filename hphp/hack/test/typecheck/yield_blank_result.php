@@ -67,10 +67,8 @@ async function wfvrr(): Awaitable<array<array<int>>> {
 }
 
 async function wfvrr_outer_tuple(): Awaitable<(array<int>, array<string>)> {
-  $deps = tuple(
-    array(wfr(), wfr(), wfr()),
-    array(rstring(), rstring(), rstring()),
-  );
+  $deps =
+    tuple(array(wfr(), wfr(), wfr()), array(rstring(), rstring(), rstring()));
   return await gen_array_rec($deps);
 }
 

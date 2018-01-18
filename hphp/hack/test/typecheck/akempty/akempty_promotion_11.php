@@ -5,7 +5,7 @@
  * intermediate assignment
  */
 function test(): ConstVector<array<string, string>> {
-  $v = Vector {array()};
+  $v = Vector { array() };
   $a = $v[0];
   $a['aaa'] = 4;
   // no error "$a =" assignment created a copy of an array inside $v, and

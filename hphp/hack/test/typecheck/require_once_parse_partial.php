@@ -14,4 +14,3 @@ require_once "/help/me/rhonda";
 function blah(): void {
   print "blah";
 }
-

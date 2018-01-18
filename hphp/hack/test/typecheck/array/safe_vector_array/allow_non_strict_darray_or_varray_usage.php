@@ -9,9 +9,7 @@ abstract class Class {
   public abstract function takesDarrayOrVarrayOfString(
     varray_or_darray<string> $x,
   ): void;
-  public abstract function takesDarrayOrVarrayOfTany(
-    varray_or_darray $x,
-  ): void;
+  public abstract function takesDarrayOrVarrayOfTany(varray_or_darray $x): void;
 
   public function test() {
     $this->takesDarrayOrVarrayOfString($this->providesDarrayOfString());

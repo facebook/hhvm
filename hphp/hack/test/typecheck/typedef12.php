@@ -11,4 +11,3 @@
 
 interface X {}
 type A<T as X> = T;
-

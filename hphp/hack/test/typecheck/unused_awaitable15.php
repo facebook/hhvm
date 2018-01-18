@@ -5,7 +5,7 @@ async function f(): Awaitable<?float> {
 }
 
 function g(): (float, float) {
-  $a = (float) f();
-  $b = (float) f();
+  $a = (float)f();
+  $b = (float)f();
   return tuple($a, $b);
 }

@@ -2,5 +2,5 @@ File "pair-literal-5.php", line 13, characters 10-14:
 Invalid return type (Typing[4110])
 File "pair-literal-5.php", line 11, characters 15-17:
 This is an int
-File "pair-literal-5.php", line 12, characters 17-21:
+File "pair-literal-5.php", line 12, characters 18-22:
 It is incompatible with a string

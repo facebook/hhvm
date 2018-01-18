@@ -10,7 +10,7 @@
  */
 
 function sum(): int {
-  $v = Vector {1, 2, 3, 4, 5};
+  $v = Vector { 1, 2, 3, 4, 5 };
   $s = 0;
   foreach ($v as $k) {
     $s += $k;

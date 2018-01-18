@@ -10,5 +10,5 @@
  */
 
 function foo(Map<int, string> $map) {
-  $map[] = Pair {'a', 42};
+  $map[] = Pair { 'a', 42 };
 }

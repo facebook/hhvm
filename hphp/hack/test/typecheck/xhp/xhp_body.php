@@ -12,11 +12,22 @@ class A {
 
 function test(): void {
   <foo />;
-  <foo></foo>;
-  <foo><bar /></foo>;
-  <foo>{null}</foo>;
-  <foo>{3}</foo>;
+  <foo>
+  </foo>;
+  <foo>
+    <bar />
+  </foo>;
+  <foo>
+    {null}
+  </foo>;
+  <foo>
+    {3}
+  </foo>;
   <foo>test!</foo>;
-  <foo>{new A()}</foo>;
-  <bar><foo>{array(vec[<bar />])}</foo></bar>;
+  <foo>
+    {new A()}
+  </foo>;
+  <bar>
+    <foo>{array(vec[<bar />])}</foo>
+  </bar>;
 }

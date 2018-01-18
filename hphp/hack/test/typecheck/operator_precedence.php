@@ -12,4 +12,3 @@
 function f1(): bool {
   return "foo" == "abc"."xyz";
 }
-

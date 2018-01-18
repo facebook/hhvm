@@ -31,13 +31,14 @@ class CondExp<T> extends Exp<T> {
 
   public function evaluate(): T {
     if ($this->cond->evaluate())
-      return $this->then->evaluate(); else
+      return $this->then->evaluate();
+    else
       return $this->else->evaluate();
   }
 }
 
 // Binary numeric operators
-enum BinOp : int {
+enum BinOp: int {
   Add = 0;
   Sub = 1;
   Mul = 2;

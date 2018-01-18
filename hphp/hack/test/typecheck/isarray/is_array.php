@@ -8,9 +8,7 @@ function test_is_array(array $m): ?varray_or_darray<mixed> {
   return null;
 }
 
-function test_is_array_traversable<T>(
-  Traversable<T> $m,
-): ?varray_or_darray<T> {
+function test_is_array_traversable<T>(Traversable<T> $m): ?varray_or_darray<T> {
   if (is_array($m)) {
     return $m;
   }

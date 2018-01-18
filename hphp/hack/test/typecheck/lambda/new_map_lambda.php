@@ -1,7 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-enum MyEnum : string as string {
+enum MyEnum: string as string {
   GENDER = 'gender';
   INTEREST = 'interest';
 }

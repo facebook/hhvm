@@ -10,6 +10,6 @@ interface IMarked {
 
 class C extends Super implements IMarked {
   public function __construct(int $x) {
-    parent::__construct((string) $x);
+    parent::__construct((string)$x);
   }
 }

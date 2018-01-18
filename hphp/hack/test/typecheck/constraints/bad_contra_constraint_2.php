@@ -14,7 +14,8 @@ class ConfigChooser<-TContextProvider, +TResult> {
 
 interface IConfigChooserProcessor<-TContextProvider, +TResult> {}
 function getProductionModelID(
-  IConfigChooserProcessor<KeyedTraversable<string, string>, string> $model_id_config_processor,
+  IConfigChooserProcessor<KeyedTraversable<string, string>, string>
+    $model_id_config_processor,
   ConstMap<string, mixed> $processor_map,
 ): string {
   $c = new ConfigChooser($model_id_config_processor);

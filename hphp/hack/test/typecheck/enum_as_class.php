@@ -9,7 +9,7 @@
  *
  */
 
-enum SomeEnum : string as string {
+enum SomeEnum: string as string {
   test1 = "testString1";
   test2 = "testString2";
 }

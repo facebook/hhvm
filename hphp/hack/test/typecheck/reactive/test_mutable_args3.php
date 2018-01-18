@@ -7,7 +7,7 @@ class Test {
 
 class Foo {
   <<__Rx>>
-  public function bar(<<__Mutable>> Test $x, <<__Mutable>> Test $y): void {
+  public function bar(<<__Mutable>>Test $x, <<__Mutable>>Test $y): void {
     $x->val = 5;
   }
 }

@@ -6,7 +6,7 @@ class Foo {
 }
 
 <<__Rx>>
-function foo(<<__Mutable>> Foo $x): void {
+function foo(<<__Mutable>>Foo $x): void {
   $x->value = 5;
 }
 

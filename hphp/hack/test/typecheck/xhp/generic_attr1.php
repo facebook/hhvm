@@ -5,7 +5,7 @@ class :my-xhp<T> {
 }
 
 function test(): int {
-  $x = <my-xhp foo={Vector {"1"}} />;
+  $x = <my-xhp foo={Vector { "1" }} />;
 
   return $x->:foo[0];
 }

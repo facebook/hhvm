@@ -15,5 +15,5 @@ class :x:dumb {}
 
 function foo(mixed $x): void {
   // Almost anything goes in XHP
-  $x = <x:dumb>{0} {'hello'} {$x} {new A()}</x:dumb>;
+  $x = <x:dumb>{0}{'hello'}{$x}{new A()}</x:dumb>;
 }

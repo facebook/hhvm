@@ -37,4 +37,3 @@ class EntUser extends Ent {
 class EntPhoto extends Ent {}
 
 class BoxEnt extends Box<Ent> {}
-

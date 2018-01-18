@@ -5,7 +5,7 @@ Class BadDerived1 does not correctly implement all required methods  (Typing[418
 Read the following to see why:
   File "using_bad_override.php", line 14, characters 19-21:
   Member foo has the wrong type
-  File "using_bad_override.php", line 10, characters 52-53:
+  File "using_bad_override.php", line 10, characters 51-52:
   This parameter is marked <<__AcceptDisposable>>
   File "using_bad_override.php", line 14, characters 29-30:
   This parameter is not marked <<__AcceptDisposable>>
@@ -16,7 +16,7 @@ Class BadDerived2 does not correctly implement all required methods  (Typing[418
 Read the following to see why:
   File "using_bad_override.php", line 19, characters 19-21:
   Member bar has the wrong type
-  File "using_bad_override.php", line 19, characters 52-53:
+  File "using_bad_override.php", line 19, characters 51-52:
   This parameter is marked <<__AcceptDisposable>>
   File "using_bad_override.php", line 11, characters 29-30:
   This parameter is not marked <<__AcceptDisposable>>

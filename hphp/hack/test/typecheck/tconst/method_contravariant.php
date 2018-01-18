@@ -14,12 +14,8 @@ class X {
   }
 
   private function test(this::T $x): (this, X, X, Y) {
-    return tuple(
-      static::create($x),
-      self::create(''),
-      X::create(''),
-      Y::create(0),
-    );
+    return
+      tuple(static::create($x), self::create(''), X::create(''), Y::create(0));
   }
 }
 

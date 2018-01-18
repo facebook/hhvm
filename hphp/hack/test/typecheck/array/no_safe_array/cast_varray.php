@@ -2,7 +2,7 @@
 
 function varray<T>(mixed $x): varray<T> {
   $result = varray[];
-  foreach ((array) $x as $v) {
+  foreach ((array)$x as $v) {
     $result[] = $v;
   }
   return $result;

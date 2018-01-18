@@ -19,4 +19,3 @@ class A {
 function test(A $x): void {
   $x = "$x->x->x";
 }
-

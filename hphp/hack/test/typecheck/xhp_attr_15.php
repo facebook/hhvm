@@ -1,7 +1,11 @@
 <?hh // strict
 
 class :foo {
-  attribute int myint, string mystring, float myfloat, bool mybool;
+  attribute
+    int myint,
+    string mystring,
+    float myfloat,
+    bool mybool;
 }
 
 function main(): void {

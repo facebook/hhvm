@@ -95,9 +95,12 @@ std::string format_line_pair(T* ptr) {
 
 //////////////////////////////////////////////////////////////////////
 
+std::string escaped(const folly::StringPiece str) {
+  return folly::format("\"{}\"", folly::cEscape<std::string>(str)).str();
+}
+
 std::string escaped(const StringData* sd) {
-  auto const sl = sd->slice();
-  return folly::format("\"{}\"", folly::cEscape<std::string>(sl)).str();
+  return escaped(sd->slice());
 }
 
 /*
@@ -417,7 +420,11 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
   if (func->numNamedLocals() > func->numParams()) {
     std::vector<std::string> locals;
     for (int i = func->numParams(); i < func->numNamedLocals(); i++) {
-      locals.push_back(loc_name(finfo, i));
+      auto local = loc_name(finfo, i);
+      if (!std::all_of(local.begin(), local.end(), is_bareword())) {
+        local = escaped(local);
+      }
+      locals.push_back(local);
     }
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }

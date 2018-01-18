@@ -390,11 +390,6 @@ struct Input {
   }
 
 private:
-  struct is_bareword {
-    bool operator()(int i) const {
-      return isalnum(i) || i == '_' || i == '.' || i == '$' || i == '\\';
-    }
-  };
   // whether a character is a valid part of the extended sorts of
   // names that HHVM uses for certain generated constructs
   // (closures, __Memoize implementations, etc)
@@ -1621,9 +1616,15 @@ void parse_numclsrefslots(AsmState& as) {
  * the exact assignment matters (like for closures).
  */
 void parse_declvars(AsmState& as) {
-  std::string var;
-  while (as.in.readword(var)) {
-    as.getLocalId(var);
+  while (true) {
+    as.in.skipWhitespace();
+    std::string var;
+    if (as.in.readQuotedStr(var) || as.in.readword(var)) {
+      as.getLocalId(var);
+    }
+    else {
+      break;
+    }
   }
   as.in.expectWs(';');
 }

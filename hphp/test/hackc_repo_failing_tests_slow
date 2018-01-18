@@ -9,7 +9,6 @@ slow/goto/try_goto_out_finally.php
 slow/hack_arr_compat/variadic-by-ref.php
 slow/inout/bad-call-15.php
 slow/inout/side-effects.php
-slow/labels/72.php
 slow/lang/redefine_function.php
 slow/parser/afl5934248.php
 slow/parser/empty-files/empty-invalid.php

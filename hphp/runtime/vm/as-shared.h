@@ -79,7 +79,11 @@ std::string type_flags_to_string(TypeConstraint::Flags flags);
 folly::Optional<TypeConstraint::Flags> string_to_type_flag(
     const std::string& name);
 //////////////////////////////////////////////////////////////////////
-
+struct is_bareword {
+  bool operator()(int i) const {
+    return isalnum(i) || i == '_' || i == '.' || i == '$' || i == '\\';
+  }
+};
 }
 
 #endif

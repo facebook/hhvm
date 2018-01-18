@@ -1223,7 +1223,22 @@ let add_num_cls_ref_slots buf indent num_cls_ref_slots =
   then add_indented_line buf indent
     (Printf.sprintf ".numclsrefslots %d;" num_cls_ref_slots)
 
+let is_bareword_char c =
+  match Char.lowercase_ascii c with
+  | '_' | '.' | '$' | '\\' -> true
+  | c -> (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')
+
+let is_bareword_string s =
+  let rec aux i =
+    i >= String.length s || (is_bareword_char (String.get s i) && aux (i + 1)) in
+  aux 0
+
 let add_decl_vars buf indent decl_vars =
+  let decl_vars = List.map (fun s ->
+    if is_bareword_string s
+    then s
+    else "\"" ^ (Php_escaping.escape s) ^ "\""
+  ) decl_vars in
   if decl_vars <> []
   then add_indented_line buf indent
     (".declvars " ^ String.concat " " decl_vars ^ ";")

@@ -153,7 +153,9 @@ ismemoizewrapper:
     | ISMEMOIZEWRAPPERDIRECTIVE SEMI nl {true}
 ;
 declvarlist:
+    | STRING {[$1]}
     | vname  {[$1]}
+    | STRING declvarlist {$1 :: $2}
     | vname declvarlist {$1 :: $2}
 ;
 functionflags:

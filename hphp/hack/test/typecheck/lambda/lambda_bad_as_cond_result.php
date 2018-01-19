@@ -24,20 +24,19 @@ function expectsMyClosureRunnerMyClass(
   return $x;
 }
 function getThing1(bool $b): MyClosureRunner<MyClass> {
-  return
-    $b
-      ? new MyClosureRunner(
-        function($arg) {
-          $arg->missing_method();
-          return "ok";
-        },
-      )
-      : new MyClosureRunner(
-        function($arg) {
-          $arg->another_missing_methodO();
-          return "ok";
-        },
-      );
+  return $b
+    ? new MyClosureRunner(
+      function($arg) {
+        $arg->missing_method();
+        return "ok";
+      },
+    )
+    : new MyClosureRunner(
+      function($arg) {
+        $arg->another_missing_methodO();
+        return "ok";
+      },
+    );
 }
 
 function breakIt(): void {

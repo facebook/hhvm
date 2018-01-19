@@ -1,4 +1,4 @@
-File "lambda_bad_as_cond_result.php", line 31, characters 17-30:
+File "lambda_bad_as_cond_result.php", line 30, characters 15-28:
 Could not find method missing_method in an object of type MyClass (Typing[4053])
 File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
 This is why I think it is an object of type MyClass

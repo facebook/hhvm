@@ -58,7 +58,7 @@ let expand_path file =
     if Path.file_exists path
     then Path.to_string path
     else begin
-      Printf.printf "File not found\n";
+      Printf.printf "File not found: %s\n" file;
       exit 2
     end
 

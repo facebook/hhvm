@@ -1,4 +1,3 @@
-slow/class_type_constant/type_constant.php
 slow/inout/bad-call-15.php
 slow/inout/side-effects.php
 slow/parser/hh-namespace-conflict-2.php

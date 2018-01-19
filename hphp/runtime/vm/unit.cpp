@@ -152,6 +152,16 @@ using LineTableStash = tbb::concurrent_hash_map<
 >;
 LineTableStash s_lineTables;
 
+struct LineCacheEntry {
+  LineCacheEntry(const Unit* unit, LineTable&& table)
+    : unit{unit}
+    , table{std::move(table)}
+  {}
+  const Unit* unit;
+  LineTable table;
+};
+std::array<std::atomic<LineCacheEntry*>, 512> s_lineCache;
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -190,6 +200,16 @@ Unit::~Unit() {
 
   s_extendedLineInfo.erase(this);
   s_lineTables.erase(this);
+
+  auto const hash = pointer_hash<Unit>{}(this) % s_lineCache.size();
+  auto& entry = s_lineCache[hash];
+  if (auto lce = entry.load(std::memory_order_acquire)) {
+    if (lce->unit == this &&
+        entry.compare_exchange_strong(lce, nullptr,
+                                      std::memory_order_release)) {
+      Treadmill::enqueue([lce] { delete lce; });
+    }
+  }
 
   if (!RuntimeOption::RepoAuthoritative) {
     if (debug) {
@@ -405,15 +425,7 @@ static const LineTable& loadLineTable(const Unit* unit) {
     return empty;
   }
 
-  struct LineCacheEntry {
-    LineCacheEntry(const Unit* unit, LineTable&& table) :
-        unit{unit}, table{std::move(table)} {}
-    const Unit* unit;
-    LineTable table;
-  };
-  static std::array<std::atomic<LineCacheEntry*>, 512> s_lineCache;
-
-  auto hash = pointer_hash<Unit>{}(unit) % s_lineCache.size();
+  auto const hash = pointer_hash<Unit>{}(unit) % s_lineCache.size();
   auto& entry = s_lineCache[hash];
   if (auto const p = entry.load(std::memory_order_acquire)) {
     if (p->unit == unit) return p->table;
@@ -508,7 +520,7 @@ int Unit::getLineNumber(Offset pc) const {
         return a.first.base < b.first.past;
       }
     );
-    assertx(it == copy.end() || (it->first.past > pc && it->first.base >= pc));
+    assertx(it == copy.end() || (it->first.past > pc && it->first.base > pc));
     copy.insert(it, info);
     auto old = m_lineMap.update_and_unlock(std::move(copy));
     Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });

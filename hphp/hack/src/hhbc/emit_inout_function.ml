@@ -87,7 +87,7 @@ let emit_body_instrs ~wrapper_type ~verify_ret env params call_instrs =
   ]
 
 (* Construct the wrapper function body *)
-let make_wrapper_body decl_vars return_type params instrs =
+let make_wrapper_body env decl_vars return_type params instrs =
   Emit_body.make_body
     instrs
     decl_vars
@@ -96,6 +96,7 @@ let make_wrapper_body decl_vars return_type params instrs =
     (Some return_type)
     [] (* static_inits: this is intentionally empty *)
     None (* doc *)
+    (Some env)
 
 let emit_wrapper_function
   ~decl_vars ~is_top ~wrapper_type ~original_id ~renamed_id ast_fun =
@@ -136,7 +137,8 @@ let emit_wrapper_function
   let fault_instrs = extract_fault_instructions body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
   let body =
-    make_wrapper_body decl_vars return_type_info modified_params body_instrs in
+    make_wrapper_body
+      env decl_vars return_type_info modified_params body_instrs in
   let return_by_ref = ast_fun.Ast.f_ret_by_ref in
   let is_interceptable = Interceptable.is_function_interceptable
     ~is_generated:true namespace ast_fun in
@@ -231,7 +233,8 @@ let emit_wrapper_method
     else
       List.map ~f:Hhas_param.switch_reference_to_inout params
   in
-  let body = make_wrapper_body decl_vars return_type_info params body_instrs in
+  let body =
+    make_wrapper_body env decl_vars return_type_info params body_instrs in
   let method_is_interceptable = Interceptable.is_method_interceptable
     ~is_generated:true namespace ast_class original_id in
   Hhas_method.make

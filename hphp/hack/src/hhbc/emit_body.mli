@@ -16,6 +16,7 @@ val make_body:
   Hhas_type_info.t option ->
   string list ->
   string option ->
+  Emit_env.t option ->
   Hhas_body.t
 
 val emit_body:

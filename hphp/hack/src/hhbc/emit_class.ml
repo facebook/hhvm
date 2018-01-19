@@ -65,6 +65,7 @@ let make_86method
   let method_doc_comment = None in
   let method_is_return_by_ref = false in
   let method_is_interceptable = false in
+  let method_env = None in
   let method_body = Emit_body.make_body
     instrs
     method_decl_vars
@@ -72,7 +73,8 @@ let make_86method
     params
     method_return_type
     method_static_inits
-    method_doc_comment in
+    method_doc_comment
+    method_env in
   Hhas_method.make
     method_attributes
     method_is_protected

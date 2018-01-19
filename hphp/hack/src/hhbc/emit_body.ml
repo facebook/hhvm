@@ -135,7 +135,7 @@ and emit_defs env defs =
   emit_markup env defs
 
 let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info
-              static_inits doc_comment =
+              static_inits doc_comment env =
   let body_instrs = rewrite_user_labels body_instrs in
   let body_instrs = rewrite_class_refs body_instrs in
   let params, body_instrs =
@@ -154,6 +154,7 @@ let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info
     return_type_info
     static_inits
     doc_comment
+    env
 
 let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
   let tparams =
@@ -440,6 +441,7 @@ let emit_body
     params
     (Some return_type_info)
     svar_instrs
-    doc_comment,
+    doc_comment
+    (Some env),
     is_generator,
     is_pair_generator

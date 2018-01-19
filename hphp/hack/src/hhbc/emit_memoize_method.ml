@@ -348,7 +348,7 @@ let make_memoize_instance_method_code ~pos ~non_null_return env info index metho
   else make_memoize_instance_method_with_params_code ~pos env info method_id params index
 
 (* Construct the wrapper function *)
-let make_wrapper return_type params instrs =
+let make_wrapper env return_type params instrs =
   Emit_body.make_body
     instrs
     [] (* decl_vars *)
@@ -357,6 +357,7 @@ let make_wrapper return_type params instrs =
     (Some return_type)
     [] (* static_inits *)
     None (* doc *)
+    (Some env)
 
 let emit ~pos ~non_null_return env info index return_type_info params is_static method_id =
   let instrs =
@@ -364,7 +365,7 @@ let emit ~pos ~non_null_return env info index return_type_info params is_static 
     then make_memoize_static_method_code ~pos ~non_null_return env info method_id params
     else make_memoize_instance_method_code ~pos ~non_null_return env info index method_id params
   in
-  make_wrapper return_type_info params instrs
+  make_wrapper env return_type_info params instrs
 
 let emit_memoize_wrapper_body env memoize_info index ast_method
     ~scope ~namespace params ret =

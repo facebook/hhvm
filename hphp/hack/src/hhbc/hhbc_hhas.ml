@@ -799,17 +799,17 @@ let string_of_type_info_option tio =
   | None -> ""
   | Some ti -> string_of_type_info ti ^ " "
 
-let rec string_of_afield = function
+let rec string_of_afield ~env = function
   | A.AFvalue e ->
-    string_of_param_default_value e
+    string_of_param_default_value ~env e
   | A.AFkvalue (k, v) ->
-    string_of_param_default_value k ^
-    " => " ^ string_of_param_default_value v
+    string_of_param_default_value ~env k ^
+    " => " ^ string_of_param_default_value ~env v
 
-and string_of_afield_list afl =
+and string_of_afield_list ~env afl =
   if List.length afl = 0
   then ""
-  else String.concat ", " @@ List.map string_of_afield afl
+  else String.concat ", " @@ List.map (string_of_afield ~env) afl
 
 and shape_field_name_to_expr = function
   | A.SFlit (pos, s)
@@ -877,7 +877,7 @@ and string_of_is_variadic b =
 and string_of_is_reference b =
   if b then "&" else ""
 
-and string_of_fun f use_list =
+and string_of_fun ~env f use_list =
   let string_of_args p =
     match snd @@ p.A.param_id with
     | "" | "..." -> None
@@ -890,7 +890,7 @@ and string_of_fun f use_list =
       Option.value_map
         p.A.param_expr
         ~default:""
-        ~f:(fun e -> " = " ^ (string_of_param_default_value e)) in
+        ~f:(fun e -> " = " ^ (string_of_param_default_value ~env e)) in
     let param_text =
       inout ^ string_of_is_variadic p.A.param_is_variadic ^ hint in
     let param_text =
@@ -915,44 +915,47 @@ and string_of_fun f use_list =
   ^ args
   ^ ") "
   ^ use_statement
-  ^ (string_of_statement ~indent:"" (Pos.none, A.Block f.A.f_body))
+  ^ (string_of_statement ~env ~indent:"" (Pos.none, A.Block f.A.f_body))
 
-and string_of_optional_expr e =
-  string_of_optional_value string_of_expression e
+and string_of_optional_expr ~env e =
+  string_of_optional_value (string_of_expression ~env) e
 
-and string_of_block_ ~start_indent ~block_indent ~end_indent block =
+and string_of_block_ ~env ~start_indent ~block_indent ~end_indent block =
   let lines =
-    (String.concat "" @@ List.map (string_of_statement ~indent:block_indent) block) in
+    (String.concat "" @@
+      List.map (string_of_statement ~env ~indent:block_indent) block) in
   start_indent ^ "{\\n" ^ lines ^ end_indent ^ "}\\n"
 
-and string_of_block ~indent (block:A.stmt list) =
+and string_of_block ~env ~indent (block:A.stmt list) =
   match block with
   | [] | [_, A.Noop] -> ""
   | [(_, A.Block ([_] as block))]
   | (_::_::_ as block)->
     string_of_block_
+      ~env
       ~start_indent:""
       ~block_indent:(indent ^ indent_text)
       ~end_indent:indent
       block
   | [stmt] ->
-    string_of_statement ~indent:"" stmt
+    string_of_statement ~env ~indent:"" stmt
 
-and string_of_statement ~indent ((_, stmt_) : A.stmt) =
+and string_of_statement ~env ~indent ((_, stmt_) : A.stmt) =
   let text, is_single_line =
     match stmt_ with
     | A.Return e ->
-      "return" ^ (string_of_optional_expr e), true
+      "return" ^ (string_of_optional_expr ~env e), true
     | A.Expr e ->
-      string_of_expression e, true
+      string_of_expression ~env e, true
     | A.Break level_opt ->
-      "break" ^ (string_of_optional_expr level_opt), true
+      "break" ^ (string_of_optional_expr ~env level_opt), true
     | A.Continue level_opt ->
-      "continue" ^ (string_of_optional_expr level_opt), true
+      "continue" ^ (string_of_optional_expr ~env level_opt), true
     | A.Throw e ->
-      "throw " ^ (string_of_expression e), true
+      "throw " ^ (string_of_expression ~env e), true
     | A.Block block ->
       string_of_block_
+        ~env
         ~start_indent:indent
         ~block_indent:(indent ^ indent_text)
         ~end_indent:indent
@@ -960,20 +963,23 @@ and string_of_statement ~indent ((_, stmt_) : A.stmt) =
       false
     | A.While (cond, body) ->
       let header_text =
-        indent ^ "while (" ^ (string_of_expression cond) ^ ") " in
+        indent ^ "while (" ^ (string_of_expression ~env cond) ^ ") " in
       let body_text =
         string_of_block
+        ~env
         ~indent
         body in
       header_text ^ body_text, false
 
     | A.If (cond, then_block, else_block) ->
       let header_text =
-        indent ^ "if (" ^ (string_of_expression cond) ^ ") " in
+        indent ^ "if (" ^ (string_of_expression ~env cond) ^ ") " in
       let then_text = string_of_block
+        ~env
         ~indent
         then_block in
       let else_text = string_of_block
+        ~env
         ~indent
         else_block in
       header_text ^ then_text ^
@@ -986,17 +992,17 @@ and string_of_statement ~indent ((_, stmt_) : A.stmt) =
     else text in
   text
 
-and string_of_expression e =
-  string_of_param_default_value ~use_single_quote:true e
+and string_of_expression ~env e =
+  string_of_param_default_value ~env ~use_single_quote:true e
 
-and string_of_xml (_, id) attributes children =
+and string_of_xml ~env (_, id) attributes children =
   let p = Pos.none in
   let name = SU.Xhp.mangle id in
   let _, attributes =
     List.fold_right (string_of_xhp_attr p) attributes (0, [])
   in
-  let attributes = string_of_param_default_value (p, A.Array attributes) in
-  let children = string_of_param_default_value
+  let attributes = string_of_param_default_value ~env (p, A.Array attributes) in
+  let children = string_of_param_default_value ~env
    (p, A.Array (List.map (fun e -> A.AFvalue e) children))
   in
   "new "
@@ -1013,13 +1019,15 @@ and string_of_xhp_attr p attr (spread_id, attrs) = match attr with
     let id = (p, "...$" ^ (string_of_int spread_id)) in
     (spread_id + 1, (A.AFkvalue ((p, A.String id), e))::attrs)
 
-and string_of_param_default_value ?(use_single_quote=false) expr =
+and string_of_param_default_value ?(use_single_quote=false) ~env expr =
   let p = Pos.none in
   let middle_aux e1 s e2 =
-    let e1 = string_of_param_default_value e1 in
-    let e2 = string_of_param_default_value e2 in
+    let e1 = string_of_param_default_value ~env e1 in
+    let e2 = string_of_param_default_value ~env e2 in
     e1 ^ s ^ e2
   in
+  let fmt_class_name cn =
+    "\\\\" ^ (Php_escaping.escape (SU.strip_global_ns cn)) in
   let escape_char_for_printing = function
     | '\\' | '$' | '"' -> "\\\\"
     | '\n' | '\r' | '\t' -> "\\"
@@ -1028,7 +1036,17 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
   in
   let escape_fn c = escape_char_for_printing c ^ Php_escaping.escape_char c in
   match snd expr with
-  | A.Id (_, litstr)
+  | A.Id (p, id) ->
+    let id = match env with
+      | Some env when SU.has_ns id ->
+        let id, _, _ =
+          Hhbc_id.Const.elaborate_id
+            (Emit_env.get_namespace env) (p, id)
+        in
+        "\\" ^ Hhbc_id.Const.to_raw_string id
+      | _ -> id
+    in
+    Php_escaping.escape id
   | A.Id_type_arguments ((_, litstr), _)
   | A.Lvar (_, litstr) -> Php_escaping.escape litstr
   | A.Float (_, litstr) -> SU.Float.with_scientific_notation litstr
@@ -1044,16 +1062,16 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
    * match HHMV has HHVM's emitter has inconsistencies in the pretty printer
    * https://fburl.com/tzom2qoe *)
   | A.Array afl ->
-    "array(" ^ string_of_afield_list afl ^ ")"
+    "array(" ^ string_of_afield_list ~env afl ^ ")"
   | A.Collection ((_, name), afl) when
     name = "vec" || name = "dict" || name = "keyset" ->
-    name ^ "[" ^ string_of_afield_list afl ^ "]"
+    name ^ "[" ^ string_of_afield_list ~env afl ^ "]"
   | A.Collection ((_, name), afl) ->
     let name = SU.Types.fix_casing @@ SU.strip_ns name in
     begin match name with
     | "Set" | "Pair" | "Vector" | "Map"
     | "ImmSet" | "ImmVector" | "ImmMap" ->
-      "HH\\\\" ^ name ^ " {" ^ string_of_afield_list afl ^ "}"
+      "HH\\\\" ^ name ^ " {" ^ string_of_afield_list ~env afl ^ "}"
     | _ ->
       nyi ^ " - Default value for an unknown collection - " ^ name
     end
@@ -1064,16 +1082,16 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
           A.AFkvalue (shape_field_name_to_expr f_name, e))
         fl
     in
-    string_of_param_default_value (fst expr, A.Array fl)
+    string_of_param_default_value ~env (fst expr, A.Array fl)
   | A.Binop (bop, e1, e2) ->
     let bop = string_of_bop bop in
-    let e1 = string_of_param_default_value e1 in
-    let e2 = string_of_param_default_value e2 in
+    let e1 = string_of_param_default_value ~env e1 in
+    let e2 = string_of_param_default_value ~env e2 in
     e1 ^ " " ^ bop ^ " " ^ e2
   | A.New (e, es, ues)
   | A.Call (e, _, es, ues) ->
-    let e = String_utils.lstrip (string_of_param_default_value e) "\\\\" in
-    let es = List.map string_of_param_default_value (es @ ues) in
+    let e = String_utils.lstrip (string_of_param_default_value ~env e) "\\\\" in
+    let es = List.map (string_of_param_default_value ~env) (es @ ues) in
     let prefix = match snd expr with A.New (_, _, _) -> "new " | _ -> "" in
     prefix
     ^ e
@@ -1081,7 +1099,7 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
     ^ String.concat ", " es
     ^ ")"
   | A.NewAnonClass (es, ues, _) ->
-    let es = List.map string_of_param_default_value (es @ ues) in
+    let es = List.map (string_of_param_default_value ~env) (es @ ues) in
     "new class"
     ^ "("
     ^ String.concat ", " es
@@ -1090,83 +1108,103 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
     when s1 = SN.Classes.cSelf ||
          s1 = SN.Classes.cParent ||
          s1 = SN.Classes.cStatic ->
-    let s2 = string_of_param_default_value e2 in
+    let s2 = string_of_param_default_value ~env e2 in
+    s1 ^ "::" ^ s2
+  | A.Class_get ((_, A.Id (_, s1)), e2) ->
+    let s2 = string_of_param_default_value ~env e2 in
+    fmt_class_name s1 ^ "::" ^ s2
+  | A.Class_get (e1, e2) ->
+    let s1 = string_of_param_default_value ~env e1 in
+    let s2 = string_of_param_default_value ~env e2 in
     s1 ^ "::" ^ s2
   | A.Class_const ((_, A.Id (_, s1)), (_, s2))
     when s1 = SN.Classes.cSelf ||
          s1 = SN.Classes.cParent ||
          s1 = SN.Classes.cStatic ->
-    s1 ^ "::" ^ s2
-  | A.Class_get ((_, A.Id (_, s1)), e2) ->
-    let s2 = string_of_param_default_value e2 in
-    "\\\\" ^ (Php_escaping.escape (SU.strip_global_ns s1)) ^ "::" ^ s2
-  | A.Class_get (e1, e2) ->
-    let s1 = string_of_param_default_value e1 in
-    let s2 = string_of_param_default_value e2 in
-    s1 ^ "::" ^ s2
-  | A.Class_const ((_, A.Id (_, s1)), (_, s2)) ->
-    "\\\\" ^ (Php_escaping.escape (SU.strip_global_ns s1)) ^ "::" ^ s2
+    let scope = match env with
+      | None -> Ast_scope.Scope.toplevel
+      | Some env -> Emit_env.get_scope env in
+    let s1 = match Ast_scope.Scope.get_class scope with
+      | Some cd when s1 = SN.Classes.cSelf -> snd cd.A.c_name
+      | Some cd when s1 = SN.Classes.cParent ->
+        begin match cd.A.c_extends with
+        | [(_, A.Happly((_, parent_cid), _))] -> parent_cid
+        | _ -> s1
+        end
+      | _ -> s1 in
+    fmt_class_name s1 ^ "::" ^ s2
+  | A.Class_const ((_, A.Id (p, s1)), (_, s2)) ->
+    let s1 = match env with
+      | Some env ->
+        Hhbc_id.Class.to_raw_string @@ fst @@
+          Hhbc_id.Class.elaborate_id
+            (Emit_env.get_namespace env) (p, SU.strip_global_ns s1)
+      | _ -> s1
+    in
+    fmt_class_name s1 ^ "::" ^ s2
   | A.Class_const (e1, (_, s2)) ->
-    let s1 = string_of_param_default_value e1 in
+    let s1 = string_of_param_default_value ~env e1 in
     s1 ^ "::" ^ s2
   | A.Unop (uop, e) -> begin
-    let e = string_of_param_default_value e in
+    let e = string_of_param_default_value ~env e in
     match uop with
     | A.Upincr -> e ^ "++"
     | A.Updecr -> e ^ "--"
     | _ -> string_of_uop uop ^ e
     end
   | A.Obj_get (e1, e2, f) ->
-    let e1 = string_of_param_default_value e1 in
-    let e2 = string_of_param_default_value e2 in
+    let e1 = string_of_param_default_value ~env e1 in
+    let e2 = string_of_param_default_value ~env e2 in
     let f = match f with A.OG_nullthrows -> "->" | A.OG_nullsafe -> "?->" in
     e1 ^ f ^ e2
-  | A.Clone e -> "clone " ^ string_of_param_default_value e
+  | A.Clone e -> "clone " ^ string_of_param_default_value ~env e
   | A.Array_get (e, eo) ->
-    let e = string_of_param_default_value e in
-    let eo = Option.value_map eo ~default:"" ~f:string_of_param_default_value in
+    let e = string_of_param_default_value ~env e in
+    let eo =
+      Option.value_map eo ~default:"" ~f:(string_of_param_default_value ~env) in
     e ^ "[" ^ eo ^ "]"
   | A.String2 es ->
-    String.concat " . " @@ List.map string_of_param_default_value es
+    String.concat " . " @@ List.map (string_of_param_default_value ~env) es
   | A.Execution_operator es ->
-    let s = String.concat " . " @@ List.map string_of_param_default_value es in
+    let s =
+      String.concat " . " @@ List.map (string_of_param_default_value ~env) es in
     "shell_exec(" ^ s ^ ")"
   | A.Eif (cond, etrue, efalse) ->
-    let cond = string_of_param_default_value cond in
+    let cond = string_of_param_default_value ~env cond in
     let etrue =
-      Option.value_map etrue ~default:"" ~f:string_of_param_default_value
+      Option.value_map etrue ~default:"" ~f:(string_of_param_default_value ~env)
     in
-    let efalse = string_of_param_default_value efalse in
+    let efalse = string_of_param_default_value ~env efalse in
     cond ^ " \\? " ^ etrue ^ " : " ^ efalse
-  | A.Unsafeexpr e -> string_of_param_default_value e
-  | A.BracedExpr e -> "{" ^ string_of_param_default_value e ^ "}"
-  | A.Dollar e -> "$" ^ string_of_param_default_value e
-  | A.ParenthesizedExpr e -> "(" ^ string_of_param_default_value e ^ ")"
+  | A.Unsafeexpr e -> string_of_param_default_value~env  e
+  | A.BracedExpr e -> "{" ^ string_of_param_default_value ~env e ^ "}"
+  | A.Dollar e -> "$" ^ string_of_param_default_value ~env e
+  | A.ParenthesizedExpr e -> "(" ^ string_of_param_default_value ~env e ^ ")"
   | A.Cast (h, e) ->
     let h = string_of_hint ~ns: false h in
-    let e = string_of_param_default_value e in
+    let e = string_of_param_default_value ~env e in
     "(" ^ h ^ ")" ^ e
   | A.Pipe (e1, e2) -> middle_aux e1 " |> " e2
   | A.NullCoalesce (e1, e2) -> middle_aux e1 " \\?\\? " e2
   | A.InstanceOf (e1, e2) -> middle_aux e1 " instanceof " e2
   | A.Is (e, h) ->
-    let e = string_of_param_default_value e in
+    let e = string_of_param_default_value ~env e in
     let h = string_of_hint ~ns:true h in
       e ^ " is " ^ h
   | A.Varray es ->
     let index i = p, A.Int (p, string_of_int i) in
-    string_of_param_default_value @@
+    string_of_param_default_value ~env @@
      (p, A.Array (List.mapi (fun i e -> A.AFkvalue (index i, e)) es))
   | A.Darray es ->
-    string_of_param_default_value @@
+    string_of_param_default_value ~env @@
      (p, A.Array (List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es))
   | A.Import (fl, e) ->
     let fl = string_of_import_flavor fl in
-    let e = string_of_param_default_value e in
+    let e = string_of_param_default_value ~env e in
     fl ^ " " ^ e
   | A.Xml (id, attributes, children) ->
-    string_of_xml id attributes children
-  | A.Efun (f, use_list) -> string_of_fun f use_list
+    string_of_xml ~env id attributes children
+  | A.Efun (f, use_list) -> string_of_fun ~env f use_list
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Yield _
@@ -1179,13 +1217,13 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
   | A.Callconv _
   | A.Expr_list _ -> failwith "illegal default value"
 
-let string_of_param_default_value_option = function
+let string_of_param_default_value_option env = function
   | None -> ""
   | Some (label, expr) ->
     " = "
     ^ (string_of_label label)
     ^ "(\"\"\""
-    ^ (string_of_param_default_value expr)
+    ^ (string_of_param_default_value ~env expr)
     ^ "\"\"\")"
 
 let string_of_param_user_attributes p =
@@ -1197,7 +1235,7 @@ let string_of_param_user_attributes p =
 
 let string_of_is_inout b = if b then "inout " else ""
 
-let string_of_param p =
+let string_of_param env p =
   let param_type_info = Hhas_param.type_info p in
   let param_name = Hhas_param.name p in
   let param_default_value = Hhas_param.default_value p in
@@ -1207,10 +1245,10 @@ let string_of_param p =
   ^ string_of_type_info_option param_type_info
   ^ string_of_is_reference (Hhas_param.is_reference p)
   ^ param_name
-  ^ string_of_param_default_value_option param_default_value
+  ^ string_of_param_default_value_option env param_default_value
 
-let string_of_params ps =
-  "(" ^ String.concat ", " (List.map string_of_param ps) ^ ")"
+let string_of_params env ps =
+  "(" ^ String.concat ", " (List.map (string_of_param env) ps) ^ ")"
 
 let add_indent buf indent = B.add_string buf (String.make indent ' ')
 let add_indented_line buf indent str =
@@ -1295,6 +1333,7 @@ let add_fun_def buf fun_def =
   let function_body = Hhas_function.body fun_def in
   let function_span = Hhas_function.span fun_def in
   let function_return_type = Hhas_body.return_type function_body in
+  let env = Hhas_body.env function_body in
   let function_params = Hhas_body.params function_body in
   let function_is_async = Hhas_function.is_async fun_def in
   let function_is_generator = Hhas_function.is_generator fun_def in
@@ -1305,7 +1344,7 @@ let add_fun_def buf fun_def =
   then B.add_string buf (string_of_span function_span ^ " ");
   B.add_string buf (string_of_type_info_option function_return_type);
   B.add_string buf (Hhbc_id.Function.to_raw_string function_name);
-  B.add_string buf (string_of_params function_params);
+  B.add_string buf (string_of_params env function_params);
   if function_is_generator then B.add_string buf " isGenerator";
   if function_is_async then B.add_string buf " isAsync";
   if function_is_pair_generator then B.add_string buf " isPairGenerator";
@@ -1343,6 +1382,7 @@ let add_method_def buf method_def =
   let method_body = Hhas_method.body method_def in
   let method_return_type = Hhas_body.return_type method_body in
   let method_params = Hhas_body.params method_body in
+  let env = Hhas_body.env method_body in
   let method_span = Hhas_method.span method_def in
   let method_is_async = Hhas_method.is_async method_def in
   let method_is_generator = Hhas_method.is_generator method_def in
@@ -1354,7 +1394,7 @@ let add_method_def buf method_def =
   then B.add_string buf (string_of_span method_span ^ " ");
   B.add_string buf (string_of_type_info_option method_return_type);
   B.add_string buf (Hhbc_id.Method.to_raw_string method_name);
-  B.add_string buf (string_of_params method_params);
+  B.add_string buf (string_of_params env method_params);
   if method_is_generator then B.add_string buf " isGenerator";
   if method_is_async then B.add_string buf " isAsync";
   if method_is_pair_generator then B.add_string buf " isPairGenerator";

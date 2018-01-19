@@ -48,8 +48,10 @@ let emit_fatal_program ~ignore_message op pos message =
     None (* return_type_info *)
     [] (* static_inits static_inits  *)
     None (* doc *)
+    None (* env *)
   in
-    Hhas_program.make false [] [] [] [] body Emit_symbol_refs.empty_symbol_refs None
+  Hhas_program.make
+    false [] [] [] [] body Emit_symbol_refs.empty_symbol_refs None
 
 let from_ast ~is_hh_file ~is_evaled ast =
   Utils.try_finally

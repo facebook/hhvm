@@ -81,7 +81,8 @@ maindecl:
       {Hhas_body.make $11(*instrs*)
         $8(*declvars*) $5(*numiters*)
         $7(*numclsrefslots*) $6(*ismemoizewrapper*)
-        [](*params*) None(*return type*) $9 (*static_inits*) None (* doc *)}
+        [](*params*) None(*return type*) $9 (*static_inits*)
+        None (* doc *) None (* env *)}
 ;
 numiters:
     | /* empty */ {0}
@@ -113,6 +114,7 @@ fundecl:
               $4 (*typeinfo*)
               $14 (*static_inits*)
               None (* doc *)
+              None (* env *)
             )
             $3
             (isasync $7)
@@ -268,6 +270,7 @@ methoddecl:
       $4 (* return type *)
       $14 (* static_inits *)
       None (* doc *)
+      None (* env *)
       )
     $3
     (List.mem "isAsync" $7)

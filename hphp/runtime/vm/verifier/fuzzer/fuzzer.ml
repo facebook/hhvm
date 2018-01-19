@@ -718,7 +718,8 @@ let mutate_metadata (input : HP.t)  =
       (body |> Hhas_body.params             |> delete_map mutate_param)
       (body |> Hhas_body.return_type        |> option_lift mutate_type_info)
       (body |> Hhas_body.static_inits       |> delete_map mutate_static_init)
-      (body |> Hhas_body.doc_comment) in
+      (body |> Hhas_body.doc_comment)
+      (body |> Hhas_body.env) in
   let mutate_class_data (ids : Hhbc_id.Class.t list) (cls : Hhas_class.t) =
     let module HC = Hhas_class in
     let mutate_cls_id (id : Hhbc_id.Class.t) : Hhbc_id.Class.t =

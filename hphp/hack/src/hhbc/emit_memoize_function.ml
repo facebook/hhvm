@@ -128,7 +128,7 @@ let make_memoize_function_code
         ~pos ~deprecation_info env params renamed_method_id
 
 (* Construct the wrapper function body *)
-let make_wrapper_body return_type params instrs =
+let make_wrapper_body env return_type params instrs =
   Emit_body.make_body
     instrs
     [] (* decl_vars *)
@@ -137,6 +137,7 @@ let make_wrapper_body return_type params instrs =
     (Some return_type)
     [] (* static_inits: this is intentionally empty *)
     None (* doc *)
+    (Some env)
 
 let emit_wrapper_function
   ~original_id ~renamed_id ~is_method ~deprecation_info ast_fun =
@@ -168,7 +169,7 @@ let emit_wrapper_function
       ~pos ~non_null_return ~deprecation_info env params renamed_id
   in
   let memoized_body =
-    make_wrapper_body return_type_info params body_instrs in
+    make_wrapper_body env return_type_info params body_instrs in
   let is_interceptable = Interceptable.is_function_interceptable
     ~is_generated:true namespace ast_fun in
   Hhas_function.make

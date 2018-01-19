@@ -24,6 +24,8 @@ let strip_global_ns s =
 let strip_ns s =
   (* strip zero or more chars followed by a backslash *)
   Str.replace_first (Str.regexp {|.*\\|}) "" s
+let has_ns s =
+  Str.string_match (Str.regexp {|.+\\.+|}) s 0
 
 let cmp ?(case_sensitive=true) ?(ignore_ns=false) s1 s2 =
   let s1, s2 =

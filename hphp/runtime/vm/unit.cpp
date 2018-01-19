@@ -1239,20 +1239,22 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-const TypeAliasReq* Unit::loadTypeAlias(const StringData* name) {
+const TypeAliasReq* Unit::loadTypeAlias(const StringData* name,
+                                        bool* persistent) {
   auto ne = NamedEntity::get(name);
-  if (auto target = ne->getCachedTypeAlias()) {
-    return target;
-  }
-  if (AutoloadHandler::s_instance->autoloadClassOrType(
-        StrNR(const_cast<StringData*>(name))
-      )) {
-    if (auto target = ne->getCachedTypeAlias()) {
-      return target;
+  auto target = ne->getCachedTypeAlias();
+  if (!target) {
+    if (AutoloadHandler::s_instance->autoloadClassOrType(
+          StrNR(const_cast<StringData*>(name))
+        )) {
+      target = ne->getCachedTypeAlias();
+    } else {
+      return nullptr;
     }
   }
 
-  return nullptr;
+  if (persistent) *persistent = ne->isPersistentTypeAlias();
+  return target;
 }
 
 bool Unit::defTypeAlias(Id id) {

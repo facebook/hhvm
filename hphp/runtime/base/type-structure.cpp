@@ -348,16 +348,19 @@ std::string resolveContextMsg(const Class::Const& typeCns,
 }
 
 /* returns the unresolved TypeStructure; if aliasName is not an alias,
- * return nullptr. */
-Array getAlias(const String& aliasName) {
+ * return an empty Array. */
+Array getAlias(const String& aliasName, bool& persistent) {
   if (aliasName.same(s_this) || Unit::lookupClass(aliasName.get())) {
     return Array::CreateDArray();
   }
-  auto typeAliasReq = Unit::loadTypeAlias(aliasName.get());
+
+  auto persistentTA = true;
+  auto typeAliasReq = Unit::loadTypeAlias(aliasName.get(), &persistentTA);
   if (!typeAliasReq) return Array::CreateDArray();
 
   // this returned type structure is unresolved.
   assertx(typeAliasReq->typeStructure.isDArray());
+  persistent &= persistentTA;
   return typeAliasReq->typeStructure;
 }
 
@@ -397,7 +400,7 @@ const Class* getClass(const String& clsName,
   }
 
   auto name = clsName;
-  auto ts = getAlias(name);
+  auto ts = getAlias(name, persistent);
   while (!ts.empty()) {
     assert(ts.exists(s_kind));
     if (!ts.exists(s_classname)) {
@@ -408,7 +411,7 @@ const Class* getClass(const String& clsName,
         name.data());
     }
     name = ts[s_classname].toCStrRef();
-    ts = getAlias(name);
+    ts = getAlias(name, persistent);
   }
 
   auto const cls = Unit::loadClass(name.get());
@@ -570,7 +573,7 @@ Array resolveTS(const Array& arr,
     case TypeStructure::Kind::T_unresolved: {
       assert(arr.exists(s_classname));
       auto const clsName = arr[s_classname].toCStrRef();
-      auto ts = getAlias(clsName);
+      auto ts = getAlias(clsName, persistent);
       if (!ts.empty()) {
         if (ts.exists(s_typevars) && arr.exists(s_generic_types)) {
           std::vector<std::string> typevars;

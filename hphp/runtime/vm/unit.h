@@ -677,7 +677,15 @@ public:
   folly::Range<TypeAlias*> typeAliases();
   folly::Range<const TypeAlias*> typeAliases() const;
 
-  static const TypeAliasReq* loadTypeAlias(const StringData* name);
+  /*
+   * Look up or attempt to autoload a type alias named `name'. Returns nullptr
+   * if one cannot be found or autoloaded.
+   *
+   * If the type alias is found and `persistent' is provided, it will be set to
+   * whether or not the TypeAliasReq's RDS handle is persistent.
+   */
+  static const TypeAliasReq* loadTypeAlias(const StringData* name,
+                                           bool* persistent = nullptr);
 
   /*
    * Define the type alias given by `id', binding it to the appropriate

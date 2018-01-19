@@ -139,7 +139,7 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
             literals.erase(oops);
             if (lit->Mask(LoadLiteralMask) == LDR_x_lit) {
               literals.erase(oops->NextInstruction());
-	    }
+            }
           }
         }
       };
@@ -205,17 +205,17 @@ bool relocateSmashable(Env& env, TCA srcAddr, TCA destAddr,
 
   auto adjusted = env.rel.adjustedAddressAfter(target);
   if (!adjusted) adjusted = target;
-  int imm = (adjusted - destAddr) >> vixl::kInstructionSizeLog2;
+  int imm = (adjusted - destAddr) >> kInstructionSizeLog2;
 
   if (!is_int26(imm)) return false;
 
   vixl::MacroAssembler a { env.destBlock };
   env.destBlock.setFrontier(destAddr);
   a.b(imm);
-  srcCount = smashableJmpLen() >> vixl::kInstructionSizeLog2;
+  srcCount = smashableJmpLen() >> kInstructionSizeLog2;
   destCount = 1;
   for (auto i = src;
-       i < src + srcCount * kInstructionSize;
+       i < src + (srcCount << kInstructionSizeLog2);
        i = i->NextInstruction()) {
     env.rewrites.insert(i);
   }
@@ -283,7 +283,8 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         auto const dst = vixl::Register(src->Rd(), 64);
         a.Mov(dst, src->ImmPCOffsetTarget(srcFrom));
 
-        destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
+        destCount += (env.destBlock.frontier() - destAddr)
+                     >> kInstructionSizeLog2;
         isRelative = false;
       }
     } else if (src->IsLoadLiteral()) {
@@ -300,11 +301,12 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         a.Ldr(dst, vixl::MemOperand(tmp));
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 
-        destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
+        destCount += (env.destBlock.frontier() - destAddr)
+                     >> kInstructionSizeLog2;
         isRelative = false;
       }
     } else if (src->IsCondBranchImm()) {
-      imm >>= vixl::kInstructionSizeLog2;
+      imm >>= kInstructionSizeLog2;
       if (!is_int19(imm) || env.far.count(src)) {
         env.destBlock.setFrontier(destAddr);
         destCount--;
@@ -320,11 +322,12 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         a.bind(&end);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 
-        destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
+        destCount += (env.destBlock.frontier() - destAddr)
+                     >> kInstructionSizeLog2;
         isRelative = false;
       }
     } else if (src->IsUncondBranchImm()) {
-      imm >>= vixl::kInstructionSizeLog2;
+      imm >>= kInstructionSizeLog2;
       if (!is_int26(imm) || env.far.count(src)) {
         env.destBlock.setFrontier(destAddr);
         destCount--;
@@ -336,11 +339,12 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         a.Br(tmp);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 
-        destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
+        destCount += (env.destBlock.frontier() - destAddr)
+                     >> kInstructionSizeLog2;
         isRelative = false;
       }
     } else if (src->IsCompareBranch()) {
-      imm >>= vixl::kInstructionSizeLog2;
+      imm >>= kInstructionSizeLog2;
       if (!is_int19(imm) || env.far.count(src)) {
         env.destBlock.setFrontier(destAddr);
         destCount--;
@@ -360,11 +364,12 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         a.bind(&end);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 
-        destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
+        destCount += (env.destBlock.frontier() - destAddr)
+                     >> kInstructionSizeLog2;
         isRelative = false;
       }
     } else if (src->IsTestBranch()) {
-      imm >>= vixl::kInstructionSizeLog2;
+      imm >>= kInstructionSizeLog2;
       if (!is_int14(imm) || env.far.count(src)) {
         env.destBlock.setFrontier(destAddr);
         destCount--;
@@ -385,7 +390,8 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         a.bind(&end);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 
-        destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
+        destCount += (env.destBlock.frontier() - destAddr)
+                     >> kInstructionSizeLog2;
         isRelative = false;
       }
     }
@@ -424,8 +430,8 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
  * destCount, srcCount and rewrites are updated to reflect when an
  * instruction(s) is rewritten to a different instruction sequence.
  */
-size_t relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
-                         size_t& srcCount, size_t& destCount) {
+bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
+                       size_t& srcCount, size_t& destCount) {
 
   auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
   auto const destAddrActual = env.destBlock.toDestAddress(destAddr);
@@ -476,8 +482,9 @@ size_t relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
       a.bind(&target);
       env.destBlock.setFrontier(savedFrontier);
 
-      destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
-      srcCount = (next - src) / kInstructionSize + 1;
+      destCount += (env.destBlock.frontier() - destAddr)
+                   >> kInstructionSizeLog2;
+      srcCount = ((next - src) >> kInstructionSizeLog2) + 1;
       isAbsolute = false;
 
       // Add range of source instructions to rewrites (MOV/MOVKs/LDR)
@@ -488,7 +495,7 @@ size_t relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
       }
     }
   } else if (next->IsUncondBranchReg() && next->Rn() == rd) {
-    imm >>= vixl::kInstructionSizeLog2;
+    imm >>= kInstructionSizeLog2;
     // Only transform if the MOV/MOVK sequence def'd a vixl scratch,
     // otherwise we run the risk of not def'ing a live register.
     auto const dst = vixl::Register(rd, 64);
@@ -504,8 +511,9 @@ size_t relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
           a.bl(imm);
         }
 
-        destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
-        srcCount = (next - src) / kInstructionSize + 1;
+        destCount += (env.destBlock.frontier() - destAddr)
+                     >> kInstructionSizeLog2;
+        srcCount = ((next - src) >> kInstructionSizeLog2) + 1;
         isAbsolute = false;
 
         // Add range of source instructions to rewrites (MOV/MOVKs/B<L>)
@@ -527,8 +535,9 @@ size_t relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
       auto const dst = vixl::Register(rd, 64);
       a.adr(dst, imm);
 
-      destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
-      srcCount = (next - src) / kInstructionSize;
+      destCount += (env.destBlock.frontier() - destAddr)
+                   >> kInstructionSizeLog2;
+      srcCount = (next - src) >> kInstructionSizeLog2;
       isAbsolute = false;
 
       // Add range of source instructions to rewrites (MOV/MOVKs)
@@ -548,8 +557,9 @@ size_t relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
       auto const dst = vixl::Register(rd, 64);
       a.Mov(dst, adjusted);
 
-      destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
-      srcCount = (next - src) / kInstructionSize;
+      destCount += (env.destBlock.frontier() - destAddr)
+                   >> kInstructionSizeLog2;
+      srcCount = (next - src) >> kInstructionSizeLog2;
 
       // Add range of source instructions to rewrites (MOV/MOVKs)
       for (auto i = src; i < next; i = i->NextInstruction()) {
@@ -593,7 +603,7 @@ size_t relocateImpl(Env& env) {
     size_t srcCount, destCount;
     for (auto srcAddr = env.start;
          srcAddr < env.end;
-         srcAddr += srcCount * kInstructionSize) {
+         srcAddr += srcCount << kInstructionSizeLog2) {
       auto const src = Instruction::Cast(env.srcBlock.toDestAddress(srcAddr));
       auto destAddr = env.destBlock.frontier();
       srcCount = 1;
@@ -632,7 +642,7 @@ size_t relocateImpl(Env& env) {
       }
 
       // Update the destAddr and reset the frontier
-      destAddr += destCount * kInstructionSize;
+      destAddr += destCount << kInstructionSizeLog2;
       assertx(destAddr <= env.destBlock.frontier());
       env.destBlock.setFrontier(destAddr);
 
@@ -694,13 +704,13 @@ size_t relocateImpl(Env& env) {
             if ((src->IsPCRelAddressing() && !is_int21(imm)) ||
                 (src->IsLoadLiteral() && !is_int19(imm)) ||
                 (src->IsCondBranchImm() &&
-                 !is_int19(imm >> vixl::kInstructionSizeLog2)) ||
+                 !is_int19(imm >> kInstructionSizeLog2)) ||
                 (src->IsUncondBranchImm() &&
-                 !is_int26(imm >> vixl::kInstructionSizeLog2)) ||
+                 !is_int26(imm >> kInstructionSizeLog2)) ||
                 (src->IsCompareBranch() &&
-                 !is_int19(imm >> vixl::kInstructionSizeLog2)) ||
+                 !is_int19(imm >> kInstructionSizeLog2)) ||
                 (src->IsTestBranch() &&
-                 !is_int14(imm >> vixl::kInstructionSizeLog2))) {
+                 !is_int14(imm >> kInstructionSizeLog2))) {
               FTRACE(3,
                      "relocate: PC relative instruction at {} has",
                      "internal reference 0x{:08x} which can't be adjusted.",
@@ -724,10 +734,10 @@ size_t relocateImpl(Env& env) {
               auto addr = reinterpret_cast<uint32_t*>(dest->LiteralAddress());
               auto target = *addr;
               auto adjusted =
-		env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
+                env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
               if (adjusted) {
-		patchTarget32(reinterpret_cast<TCA>(addr), adjusted);
-	      }
+                patchTarget32(reinterpret_cast<TCA>(addr), adjusted);
+              }
             } else {
               auto addr = reinterpret_cast<TCA*>(dest->LiteralAddress());
               auto target = *addr;
@@ -737,13 +747,13 @@ size_t relocateImpl(Env& env) {
                 target = reinterpret_cast<TCA>((uint64_t(target) >> 1));
                 adjusted = env.rel.adjustedAddressAfter(target);
                 if (adjusted) {
-		  adjusted = reinterpret_cast<TCA>(
-		    (uint64_t(adjusted) << 1) | 1
-		  );
-		}
-		if (adjusted) {
-		  patchTarget64(reinterpret_cast<TCA>(addr), adjusted);
-		}
+                  adjusted = reinterpret_cast<TCA>(
+                    (uint64_t(adjusted) << 1) | 1
+                  );
+                }
+                if (adjusted) {
+                  patchTarget64(reinterpret_cast<TCA>(addr), adjusted);
+                }
               }
             }
           } else if (src->IsMovz()) {
@@ -775,7 +785,7 @@ size_t relocateImpl(Env& env) {
               // If the new sequence is longer than the original, then we must
               // gracefully fail.
               length -= (env.destBlock.frontier() - destAddr)
-                      / kInstructionSize;
+                        >> kInstructionSizeLog2;
               if (length < 0) {
                 ok = false;
                 env.far.insert(src);
@@ -847,19 +857,19 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
         always_assert_flog(is_int19(imm),
           "Can't adjust LDR literal, imm won't fit in 19 bits.\n");
       } else if (instr->IsCondBranchImm()) {
-        imm >>= vixl::kInstructionSizeLog2;
+        imm >>= kInstructionSizeLog2;
         always_assert_flog(is_int19(imm),
           "Can't adjust B.<cc>, imm won't fit in 19 bits.\n");
       } else if (instr->IsUncondBranchImm()) {
-        imm >>= vixl::kInstructionSizeLog2;
+        imm >>= kInstructionSizeLog2;
         always_assert_flog(is_int26(imm),
           "Can't adjust B, imm won't fit in 26 bits.\n");
       } else if (instr->IsCompareBranch()) {
-        imm >>= vixl::kInstructionSizeLog2;
+        imm >>= kInstructionSizeLog2;
         always_assert_flog(is_int19(imm),
           "Can't adjust CB[N]Z, imm won't fit in 19 bits.\n");
       } else if (instr->IsTestBranch()) {
-        imm >>= vixl::kInstructionSizeLog2;
+        imm >>= kInstructionSizeLog2;
         always_assert_flog(is_int14(imm),
           "Can't adjust TB[N]Z, imm won't fit in 14 bits.\n");
       }
@@ -867,7 +877,7 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
       // Update offset
       instr->SetImmPCOffsetTarget(Instruction::Cast(adjusted));
       auto const begin = reinterpret_cast<TCA>(instr);
-      DataBlock::syncDirect(begin, begin + vixl::kInstructionSize);
+      DataBlock::syncDirect(begin, begin + kInstructionSize);
     }
   }
 

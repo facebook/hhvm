@@ -1130,7 +1130,7 @@ and is_pseudo_function s =
 (* $x ?? 0 is handled similarly to $x ?: 0, except that the latter will also
  * look for sketchy null checks in the condition. *)
 (* TODO TAST: type refinement should be made explicit in the typed AST *)
-and eif env ~coalesce ~in_cond p c e1 e2 =
+and eif env ~expected ~coalesce ~in_cond p c e1 e2 =
   let condition = condition ~lhs_of_null_coalesce:coalesce in
   let env, tc, tyc = raw_expr ~in_cond ~lhs_of_null_coalesce:coalesce env c in
   let parent_lenv = env.Env.lenv in
@@ -1141,13 +1141,13 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
         let env, ty = TUtils.non_null env tyc in
         env, None, ty
     | Some e1 ->
-        let env, te1, ty1 = expr env e1 in
+        let env, te1, ty1 = expr ?expected env e1 in
         env, Some te1, ty1
     in
   let lenv1 = env.Env.lenv in
   let env = { env with Env.lenv = parent_lenv } in
   let env = condition env false c in
-  let env, te2, ty2 = expr env e2 in
+  let env, te2, ty2 = expr ?expected env e2 in
   let lenv2 = env.Env.lenv in
   let fake_members =
     LEnv.intersect_fake lenv1.Env.fake_members lenv2.Env.fake_members in
@@ -1158,6 +1158,7 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
   (* This is a shortened form of what we do in Typing_lenv.intersect. The
    * latter takes local environments as arguments, but our types here
    * aren't assigned to local variables in an environment *)
+  (* TODO: Omit if expected type is present and checked in calls to expr *)
   let env, ty1 = TUtils.unresolved env ty1 in
   let env, ty2 = TUtils.unresolved env ty2 in
   let env, ty = Unify.unify env ty1 ty2 in
@@ -1857,8 +1858,8 @@ and expr_
   | Unop (uop, e) ->
       let env, te, ty = raw_expr in_cond env e in
       unop ?allow_uref p env uop te ty
-  | Eif (c, e1, e2) -> eif env ~coalesce:false ~in_cond p c e1 e2
-  | NullCoalesce (e1, e2) -> eif env ~coalesce:true ~in_cond p e1 None e2
+  | Eif (c, e1, e2) -> eif env ~expected ~coalesce:false ~in_cond p c e1 e2
+  | NullCoalesce (e1, e2) -> eif env ~expected ~coalesce:true ~in_cond p e1 None e2
   | Typename sid ->
       begin match Env.get_typedef env (snd sid) with
         | Some {td_tparams = tparaml; _} ->

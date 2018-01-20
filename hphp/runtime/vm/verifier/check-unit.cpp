@@ -269,7 +269,8 @@ bool UnitChecker::checkPreClasses() {
       std::transform(className.begin(), className.end(), className.begin(),
                       ::tolower);
 
-      if (name == std::string("__construct") || name == className) {
+      if (name == std::string("__construct") ||
+          (name == className && !(classAttrs & AttrTrait))) {
         ok &= checkStructor(method, preclass.get());
       }
 

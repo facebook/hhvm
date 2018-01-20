@@ -314,8 +314,7 @@ template<class Fn> void iterateExactRoots(Fn fn) {
   // Root handles & sweep lists
   tl_heap->iterateRoots(fn);
 
-  // ThreadLocal nodes (but skip MemoryManager). These are mostly exact
-  // but EZC roots point to conservatve junk.
+  // ThreadLocal nodes (but skip MemoryManager).
   ThreadLocalManager::GetManager().iterate(fn);
 }
 

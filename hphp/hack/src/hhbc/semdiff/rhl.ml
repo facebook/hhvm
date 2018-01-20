@@ -377,6 +377,7 @@ let readswrites asn l l' =
 let check_instruct_mutator asn i i' =
   match i, i' with
   | SetL l, SetL l'
+  | PopL l, PopL l'
   | BindL l, BindL l'
     -> writes asn l l'
   | UnsetL l, UnsetL l'
@@ -385,7 +386,8 @@ let check_instruct_mutator asn i i' =
     if op=op' then readswrites asn l l' else None
   | IncDecL (l,op), IncDecL (l',op') ->
     if op=op' then readswrites asn l l' else None
-  | SetL _, _ | BindL _, _ | UnsetL _, _ | SetOpL _, _ | IncDecL _, _ -> None
+  | SetL _, _ | PopL _ , _ | BindL _, _ | UnsetL _, _ | SetOpL _, _
+  | IncDecL _, _ -> None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
   | SetN, _ | SetG, _ | SetS _, _ | SetOpN _, _ | SetOpG _, _ | SetOpS _, _

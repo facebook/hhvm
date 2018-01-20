@@ -375,6 +375,8 @@ type initprop_op =
 
 type instruct_mutator =
   | SetL of local_id
+  (* PopL is put in mutators since it behaves as SetL + PopC *)
+  | PopL of Local.t
   | SetN
   | SetG
   | SetS of classref_id

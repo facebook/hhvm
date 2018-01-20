@@ -152,6 +152,7 @@ let instr_popu = instr (IBasic PopU)
 let instr_popr = instr (IBasic PopR)
 let instr_popc = instr (IBasic PopC)
 let instr_popv = instr (IBasic PopV)
+let instr_popl l = instr (IMutator (PopL l))
 let instr_pop flavor =
   match flavor with
   | Flavor.Ref -> instr_popv
@@ -794,7 +795,7 @@ let get_input_output_count i =
     end
   | IMutator i ->
     begin match i with
-    | SetL _ | SetOpL _ | IncDecN _ | IncDecG _ | IncDecS _
+    | SetL _ | PopL _ | SetOpL _ | IncDecN _ | IncDecG _ | IncDecS _
     | BindL _ -> (1, 1)
     | SetN | SetG | SetS _ | SetOpN _ | SetOpG _ | SetOpS _ | BindN
     | BindG | BindS _ -> (2, 1)

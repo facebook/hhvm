@@ -284,6 +284,7 @@ let string_of_initprop_op op =
 let string_of_mutator x =
   match x with
   | SetL id -> sep ["SetL"; string_of_local_id id]
+  | PopL id -> sep ["PopL"; string_of_local_id id]
   | SetN -> "SetN"
   | SetG -> "SetG"
   | SetS id -> sep ["SetS"; string_of_classref id]

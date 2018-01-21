@@ -212,7 +212,7 @@ def tread_hash_map_at(thm, key, hasher=None):
             idx = 0
 
 
-def compact_vector_at(vec, idx):
+def compact_vector_at(vec, idx, hasher=None):
     if vec['m_data'] == nullptr():
         return None
 

@@ -286,6 +286,10 @@ void EvaluateCommand::preparseEvalExpression(
     return;
   }
 
+  if (statements->getCount() == 0) {
+    throw DebuggerCommandException("No expression provided to evaluate.");
+  }
+
   // In the case of a single statement, if it is an expression, we need to
   // prepend "return" to it so that we get back the expression value the
   // user is likely expecting. Otherwise, we'll evaluate the expression,

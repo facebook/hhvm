@@ -343,27 +343,10 @@ struct Vptr {
 
 template <Width w>
 struct Vp : Vptr {
-
-  Vp(Vreg b, uint32_t d) : Vptr(b, d, w)
-  {
-    width = w;
-  }
-
-  /* implicit */ Vp(MemoryRef m, Segment s = DS) : Vptr(m, w, s)
-  {
-    width = w;
-  }
-
-    Vp(Vreg b, Vreg i, uint8_t s, int32_t d) : Vptr(b, i, d, s, w)
-  {
-    width = w;
-  }
-
-  /* implicit */ Vp(const Vptr m) : Vptr(m)
-  {
-    width = w;
-  }
-
+  Vp(Vreg b, uint32_t d) : Vptr(b, d, w) {}
+  /* implicit */ Vp(MemoryRef m, Segment s = DS) : Vptr(m, w, s) {}
+  Vp(Vreg b, Vreg i, uint8_t s, int32_t d) : Vptr(b, i, d, s, w) {}
+  /* implicit */ Vp(const Vptr& m) : Vptr(m) { width = w; }
 };
 
 using Vptr8 = Vp<Width::Byte>;

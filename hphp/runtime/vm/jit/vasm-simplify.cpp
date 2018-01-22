@@ -39,79 +39,89 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum class resValid : uint8_t {
-  empty,
-  valid,
-  invalid
+enum class ResValid : uint8_t {
+  Empty,
+  Valid,
+  Invalid
 };
 
-struct getMemOp {
-  getMemOp() {
-    mr.disp = 0;
-    rv = resValid::empty;
-  }
+struct GetMemOp {
   template<class T> void imm (T) {}
   template<class T> void def (T) {}
   template<class T> void use (T) {}
   void def (Vptr mem) {
-    if (rv != resValid::empty) {
-      rv = resValid::invalid;
+    if (rv != ResValid::Empty) {
+      rv = ResValid::Invalid;
     } else {
       mr = mem;
-      rv = resValid::valid;
+      rv = ResValid::Valid;
     }
   }
-  void use (Vptr mem) {
-    def(mem);
-  }
+  void use (Vptr mem) { def(mem); }
   template<class T> void across (T) {}
   template<class T, class H> void useHint(T,H) {}
   template<class T, class H> void defHint(T,H) {}
-  bool isValid() { return rv == resValid::valid;}
+
+  bool isValid() { return rv == ResValid::Valid;}
+
   Vptr mr;
-  resValid rv;
+  ResValid rv{ResValid::Empty};
 };
 
-// return the Vptr and size for simple insts that read/ write memory.
-// return a size zero to indicate a non simple insts, e.g. a call
-std::pair<Vptr, uint8_t> getMemOpAndSize(const Vinstr inst) {
-  getMemOp g;
+/*
+ * Return the Vptr and size for simple insts that read/write memory.
+ *
+ * Return a size zero to indicate a non-simple inst, e.g. a call.
+ */
+std::pair<Vptr, uint8_t> getMemOpAndSize(const Vinstr& inst) {
+  GetMemOp g;
   visitOperands(inst, g);
-  Vptr vop = g.mr;
+
+  auto const vop = g.mr;
   if (!g.isValid()) return {vop, 0};
+
   auto sz = width(inst.op);
   // workaround: load and store opcodes report a width of Octa,
-  // while in reality they are quad.
+  // while in reality they are Quad.
   if (inst.op == Vinstr::load || inst.op == Vinstr::store) {
     sz = Width::Quad;
   }
-  int size;
   sz &= Width::AnyNF;
-  switch (sz) {
-    case Width::Byte:
-      size = 1; break;
-    case Width::Word: case Width::WordN:
-      size = 2; break;
-    case Width::Long: case Width::LongN:
-      size = 4; break;
-    case Width::Quad: case Width::QuadN:
-      size = 8; break;
-    case Width::Octa: case Width::AnyNF:
-      size = 16; break;
-    default: size = 0;
-  }
+
+  auto const size = [&] {
+    switch (sz) {
+      case Width::Byte:
+        return sz::byte;
+      case Width::Word: case Width::WordN:
+        return sz::word;
+      case Width::Long: case Width::LongN:
+        return sz::dword;
+      case Width::Quad: case Width::QuadN:
+        return sz::qword;
+      case Width::Octa: case Width::AnyNF:
+        return 16;
+      default: return 0;
+    }
+  }();
   return {vop, size};
 }
 
-bool triviallyDifferent(const Vinstr inst1, const Vinstr inst2) {
+/*
+ * Return true if we are sure that `inst1' does not write to the same memory
+ * location that `inst2' reads or writes (and vice versa).
+ *
+ * (Note that a false return does /not/ make any positive indication about
+ * aliasing.)
+ */
+bool cannot_alias_write(const Vinstr& inst1, const Vinstr& inst2) {
   if (!writesMemory(inst1.op) && !writesMemory(inst2.op)) return true;
   auto const p1 = getMemOpAndSize(inst1);
   auto const p2 = getMemOpAndSize(inst2);
   if (p1.second == 0 || p2.second == 0) return false;
   auto const v1 = p1.first;
   auto const v2 = p2.first;
-  const int size1 = p1.second;
-  const int size2 = p2.second;
+  auto const size1 = p1.second;
+  auto const size2 = p2.second;
   if (v1.base != v2.base || v1.seg != v2.seg) return false;
   if ((v1.index != v2.index) ||
       (v1.index.isValid() && (v1.scale != v2.scale))) {
@@ -126,21 +136,40 @@ bool triviallyDifferent(const Vinstr inst1, const Vinstr inst2) {
 }
 
 /*
- * If reg is defined by a load in b with index j < i, and there are no
- * interfering stores between j and i, return a pointer to its Vptr
- * argument.
- *
- * Note that during simplification, we can end up with mismatched
- * register sizes, so that a loadzbq feeds a byte sized
- * instruction. In that case, its ok to treat the loadzbq as if it
- * were a loadb, provided we're expecting a byte sized operand. Since
- * Vreg doesn't carry a register-width around, we pass it in via the
- * size param, so that we can verify the zero-extend variants.
+ * Metadata about a potentially-foldable load Vinstr.
  */
-using namespace std;
-std::tuple<const Vptr*, size_t, bool>
-foldable_load_helper(Env& env, Vreg reg, int size, Vlabel b, size_t i, bool mw) {
-  if (!i || env.use_counts[reg] != 1) return make_tuple(nullptr, 0, false);
+struct FoldableLoadInfo {
+  /*
+   * Source memory location of the load.
+   */
+  const Vptr* operand;
+  /*
+   * Index into the instruction stream.
+   *
+   * Note that this makes FoldableLoadInfo block-context-sensitive.
+   */
+  size_t idx;
+  /*
+   * Whether we need to check for interfering writes to the same location.
+   */
+  bool check_writes;
+};
+
+/*
+ * If reg is defined by a load in b with index j < i, and there are no
+ * interfering stores between j and i, return a pointer to its Vptr argument.
+ *
+ * Note that during simplification, we can end up with mismatched register
+ * sizes, so that a loadzbq feeds a byte sized instruction. In that case, its
+ * ok to treat the loadzbq as if it were a loadb, provided we're expecting a
+ * byte sized operand. Since Vreg doesn't carry a register-width around, we
+ * pass it in via the `size' param, so that we can verify the zero-extend
+ * variants.
+ */
+FoldableLoadInfo foldable_load_helper(Env& env, Vreg reg, int size,
+                                      Vlabel b, size_t i, bool mw) {
+  if (!i || env.use_counts[reg] != 1) return { nullptr, 0, false };
+
   auto const def_inst = env.def_insts[reg];
   switch (def_inst) {
     case Vinstr::loadb:
@@ -150,23 +179,21 @@ foldable_load_helper(Env& env, Vreg reg, int size, Vlabel b, size_t i, bool mw) 
       break;
     case Vinstr::loadzbq:
     case Vinstr::loadzbl:
-      if (size != sz::byte) return make_tuple(nullptr, 0, false);
+      if (size != sz::byte) return { nullptr, 0, false };
       break;
     case Vinstr::loadzlq:
-      if (size != sz::dword) return make_tuple(nullptr, 0, false);
+      if (size != sz::dword) return { nullptr, 0, false };
       break;
     case Vinstr::copy:
       break;
     default:
-      return make_tuple(nullptr, 0, false);
+      return { nullptr, 0, false };
   }
-
-  bool memWrite = mw;
 
 #define CHECK_LOAD(load)                        \
   case Vinstr::load:                            \
     if (inst.load##_.d != reg) break;           \
-    return make_tuple(&inst.load##_.s, i, memWrite);
+    return { &inst.load##_.s, i, mw };
 
   while (i--) {
     auto const& inst = env.unit.blocks[b].code[i];
@@ -181,34 +208,33 @@ foldable_load_helper(Env& env, Vreg reg, int size, Vlabel b, size_t i, bool mw) 
         CHECK_LOAD(loadzlq);
         case Vinstr::copy:
           if (inst.copy_.d != reg) break;
-          return foldable_load_helper(env, inst.copy_.s, size, b, i, memWrite);
+          return foldable_load_helper(env, inst.copy_.s, size, b, i, mw);
         default:
           not_reached();
       }
     }
-    auto inst2 = env.unit.blocks[b].code[i];
-    if (writesMemory(inst2.op)) memWrite = true;
+    auto const op = env.unit.blocks[b].code[i].op;
+    mw |= writesMemory(op);
   }
 
-  return make_tuple(nullptr, 0 , false);
+  return { nullptr, 0, false };
 }
 
 const Vptr* foldable_load(Env& env, Vreg reg, int size,
                           Vlabel b, size_t i) {
   auto const info = foldable_load_helper(env, reg, size, b, i, false);
-  auto const loadOper = std::get<0>(info);
-  auto const loadIdx = std::get<1>(info);
-  auto const needsMemCheck = std::get<2>(info);
-  if (!loadOper || loadIdx + 1 == i) return loadOper;
+  if (!info.operand || info.idx + 1 == i) return info.operand;
+
   std::vector<Vreg> nonSSARegs;
-  visit(env.unit, *loadOper, [&] (Vreg r, Width) {
+  visit(env.unit, *info.operand, [&] (Vreg r, Width) {
     if (r.isPhys()) nonSSARegs.push_back(r);
   });
-  if (nonSSARegs.empty() && !needsMemCheck) return loadOper;
+  if (nonSSARegs.empty() && !info.check_writes) return info.operand;
+
   // The Vptr contains non-ssa regs, so we need to check that they're
   // not modified between the load and the use.
-  auto const loadInst = env.unit.blocks[b].code[loadIdx];
-  for (auto ix = loadIdx; ++ix < i; ) {
+  auto const loadInst = env.unit.blocks[b].code[info.idx];
+  for (auto ix = info.idx; ++ix < i; ) {
     auto const& inst = env.unit.blocks[b].code[ix];
     if (isCall(inst)) return nullptr;
     bool ok = true;
@@ -220,12 +246,12 @@ const Vptr* foldable_load(Env& env, Vreg reg, int size,
       });
       if (!ok) return nullptr;
     }
-    if (needsMemCheck && writesMemory(inst.op) &&
-        !triviallyDifferent(loadInst, inst)) {
+    if (info.check_writes && writesMemory(inst.op) &&
+        !cannot_alias_write(loadInst, inst)) {
       return nullptr;
     }
   }
-  return loadOper;
+  return info.operand;
 }
 
 const Vptr* foldable_load(Env& env, Vreg8 reg, Vlabel b, size_t i) {
@@ -630,21 +656,24 @@ bool fix_signed_uses(Env& env, Vreg sf, Vlabel b, size_t i) {
   );
 }
 
-// reg is a dest of an arithmetic inst. Look if it is used as a source
-// of a store within b. The width of the store has to match that of the
-// inst. The store has to be the only use of reg.
-static std::pair<const Vptr *, size_t> storeq(Env& env, Vreg64 reg,
-    Vlabel b, size_t i) {
-  if (env.use_counts[reg] != 1) {
-    return std::make_pair(nullptr,0);
-  }
+/*
+ * Return a (Vptr*, idx in `b') handle to the first store of `reg' within block
+ * `b' after position `i'.
+ *
+ * Returns { nullptr, 0 } if no such store is found, or if that store is not
+ * the only use of `reg'.
+ */
+std::pair<const Vptr*, size_t>
+storeq(Env& env, Vreg64 reg, Vlabel b, size_t i) {
+  if (env.use_counts[reg] != 1) return { nullptr, 0 };
+
   while (++i < env.unit.blocks[b].code.size()) {
     auto const& inst = env.unit.blocks[b].code[i];
     if (inst.op == Vinstr::store && inst.store_.s == reg) {
-      return std::make_pair(&(inst.store_.d), i);
+      return { &(inst.store_.d), i };
     }
   }
-  return std::make_pair(nullptr,0);
+  return { nullptr, 0 };
 }
 
 bool is_reg_const(Env& env, Vreg reg) {
@@ -666,9 +695,11 @@ bool flip_operands_helper(Env& env, const Op& op, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
   if (arch_any(Arch::ARM, Arch::PPC64)) return false;
+
   auto stPair = storeq(env, vadd.d, b, i);
   auto const vptrs = stPair.first;
-  size_t stIdx = stPair.second;
+  auto const stIdx = stPair.second;
+
   if (vptrs) {
     auto const vptrl = foldable_load(env, vadd.s0, b, stIdx);
     if (vptrl && (*vptrl == *vptrs)) {

@@ -337,22 +337,32 @@ ConditionCode smashableJccCond(TCA inst) {
  *       sequence is a full jcc even though a jcc actually uses the same
  *       sequence as a jmp in its implementation.
  */
-TCA getSmashableFromTargetAddr(TCA addr) {
+std::array<vixl::Instruction*, 3> getSmashablesFromTargetAddr(TCA addr) {
+  using InstrSet = std::unordered_set<vixl::Instruction*>;
   using namespace vixl;
+
+  std::array<vixl::Instruction*, 3> smashables;
+  auto i = 0;
 
   const uint32_t target32 = *reinterpret_cast<uint32_t*>(addr);
   auto target = reinterpret_cast<TCA>(target32);
 
-  auto inst = addr - 3 * kInstructionSize;
-  if (smashableJccTarget(inst) == target) return inst;
+  addr -= 3 << kInstructionSizeLog2;
+  if (smashableJccTarget(addr) == target) {
+    smashables[i++] = Instruction::Cast(addr);
+  }
 
-  inst = addr - 2 * kInstructionSize;
-  if (smashableJmpTarget(inst) == target) return inst;
+  addr += kInstructionSize;
+  if (smashableJmpTarget(addr) == target) {
+    smashables[i++] = Instruction::Cast(addr);
+  }
 
-  inst = addr - 1 * kInstructionSize;
-  if (smashableCallTarget(inst) == target) return inst;
+  addr += kInstructionSize;
+  if (smashableCallTarget(addr) == target) {
+    smashables[i++] = Instruction::Cast(addr);
+  }
 
-  return nullptr;
+  return smashables;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

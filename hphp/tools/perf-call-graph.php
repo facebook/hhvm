@@ -93,14 +93,15 @@ Usage:
 
 $script_name [symbol]
 
-This script expects the output of "perf script -f comm,ip,sym" on stdin. If the
-optional symbol argument is present, a call graph of all frames containing that
-symbol will be output, with the root of the frame truncated at the highest
-frame containing the symbol. Note that the symbol may appear anywhere in the
-function name, so using 'Foo::translate' will match both 'Foo::translate' and
-'Foo::translateFrob'. If you just want Foo::translate, use 'Foo::translate('.
-If symbol is not present, the total number of samples present will be printed
-along with the number of samples that contain a few hardcoded functions.
+This script expects the output of "perf script --fields comm,ip,sym" on stdin.
+If the optional symbol argument is present, a call graph of all frames
+containing that symbol will be output, with the root of the frame truncated at
+the highest frame containing the symbol. Note that the symbol may appear
+anywhere in the function name, so using 'Foo::translate' will match both
+'Foo::translate' and 'Foo::translateFrob'. If you just want Foo::translate, use
+'Foo::translate('. If symbol is not present, the total number of samples present
+will be printed along with the number of samples that contain a few hardcoded
+functions.
 
 
 EOT;
@@ -113,7 +114,7 @@ function main($argv) {
     return 1;
   }
 
-  $samples = read_perf_samples(STDIN);
+  $samples = read_perf_samples(STDIN, 'hhvm');
 
   if (count($argv) == 2) {
     $functions = Set { $argv[1] };

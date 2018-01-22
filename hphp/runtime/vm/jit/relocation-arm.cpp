@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 
@@ -581,6 +582,62 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
   return true;
 }
 
+/*
+ * Relocates padding. Service request stubs are padded out so that
+ * they are always a fixed size. However, the relocation feature can
+ * request that a large swath of instructions be translated and there can
+ * be multiple service request stubs within. This helper function detects
+ * padding in the source translation and then finds the boundaries of its
+ * service request stub. It then determines how much padding is required
+ * in the output. This may sound like a trivial problem, but on ARM service
+ * requests stubs can grow/shrink due to branch distances. Therfore the
+ * destination may contain a different amount of padding.
+ */
+bool relocatePadding(Env& env, TCA srcAddr, TCA destAddr,
+                     size_t& srcCount, size_t& destCount,
+                     TCA destStart) {
+
+  auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
+  auto src = Instruction::Cast(srcAddrActual);
+
+  if (src->Mask(ExceptionMask) != BRK) return false;
+
+  // Check to see if this is a stub and determine its start.
+  auto const srcAddrBegin = [&] {
+    for (auto addr : env.meta.reusedStubs) {
+      if ((srcAddr >= addr) && (srcAddr < (addr + svcreq::stub_size()))) {
+        return addr;
+      }
+    }
+    return (TCA)nullptr;
+  }();
+  if (!srcAddrBegin) return false;
+
+  // Add the src padding to the rewrites.
+  src = src->NextInstruction();
+  env.rewrites.insert(src);
+  while (src->Mask(ExceptionMask) == BRK) {
+    src = src->NextInstruction();
+    env.rewrites.insert(src);
+    srcCount++;
+  }
+
+  // Pad out the remainder of the dest service request stub
+  auto const destAddrBegin = srcAddrBegin == env.start ?
+    destStart : env.rel.adjustedAddressAfter(srcAddrBegin);
+  assertx(destAddrBegin);
+
+  destAddr += kInstructionSize;
+  vixl::MacroAssembler a { env.destBlock };
+  while ((destAddr - destAddrBegin) < svcreq::stub_size()) {
+    a.Brk(1);
+    destAddr += kInstructionSize;
+    destCount++;
+  }
+
+  return true;
+}
+
 size_t relocateImpl(Env& env) {
   auto destStart = env.destBlock.frontier();
   size_t asmCount{0};
@@ -617,7 +674,9 @@ size_t relocateImpl(Env& env) {
       if (!literals.count(src) &&
           !relocateSmashable(env, srcAddr, destAddr, srcCount, destCount) &&
           !relocatePCRelative(env, srcAddr, destAddr, srcCount, destCount) &&
-          !relocateImmediate(env, srcAddr, destAddr, srcCount, destCount)) {
+          !relocateImmediate(env, srcAddr, destAddr, srcCount, destCount) &&
+          !relocatePadding(env, srcAddr, destAddr, srcCount, destCount,
+                           destStart)) {
         // Do nothing, as the instruction word was initially copied above
       }
 

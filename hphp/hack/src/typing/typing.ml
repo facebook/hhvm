@@ -3642,7 +3642,8 @@ and is_abstract_ft fty = match fty with
       TUtils.process_static_find_ref e1 m;
       let env, te1, ty1 = static_class_id p env e1 in
       let env, fty, _ =
-        class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m e1 in
+        class_get ~is_method:true ~is_const:false ~explicit_tparams:hl
+        ~pos_params:el env ty1 m e1 in
       let () = match e1 with
         | CIself when is_abstract_ft fty ->
           (match Env.get_self env with
@@ -4066,7 +4067,8 @@ and class_contains_smethod env cty (_pos, mid) =
   let _env, tyl = TUtils.get_concrete_supertypes env cty in
   List.exists tyl ~f:lookup_member
 
-and class_get ~is_method ~is_const ?(explicit_tparams=[]) ?(incl_tc=false) env cty (p, mid) cid =
+and class_get ~is_method ~is_const ?(explicit_tparams=[]) ?(incl_tc=false)
+              ?(pos_params : expr list option) env cty (p, mid) cid =
   let env, this_ty =
     if is_method then
       this_for_method env cid cty
@@ -4078,9 +4080,11 @@ and class_get ~is_method ~is_const ?(explicit_tparams=[]) ?(incl_tc=false) env c
     substs = SMap.empty;
     from_class = Some cid;
   } in
-  class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc env cid cty (p, mid)
+  class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
+             ~pos_params env cid cty (p, mid)
 
-and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[]) ?(incl_tc=false) env cid cty
+and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
+               ?(incl_tc=false) ~pos_params env cid cty
 (p, mid) =
   let env, cty = Env.expand_type env cty in
   match cty with
@@ -4089,7 +4093,8 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[]) ?(incl_tc=fa
   | _, Tunresolved tyl ->
       let env, tyl = List.map_env env tyl begin fun env ty ->
       let env, ty, _ =
-        class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc env cid ty (p, mid)
+        class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
+                   ~pos_params env cid ty (p, mid)
           in env, ty
       end in
       let env, method_ = TUtils.in_var env (fst cty, Tunresolved tyl) in
@@ -4098,7 +4103,8 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[]) ?(incl_tc=fa
   | _, Tabstract _ ->
       begin match TUtils.get_concrete_supertypes env cty with
       | env, [cty] ->
-        class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc env cid cty (p, mid)
+        class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
+                   ~pos_params env cid cty (p, mid)
       | env, _ ->
         env, (Reason.Rnone, Tany), None
       end

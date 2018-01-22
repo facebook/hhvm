@@ -4113,8 +4113,8 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
       (match class_ with
       | None -> env, (Reason.Rnone, Tany), None
       | Some class_ ->
-        Typing_hooks.dispatch_smethod_hook class_ paraml (p, mid) env
-          ety_env.from_class ~is_method ~is_const;
+        Typing_hooks.dispatch_smethod_hook class_ paraml ~pos_params (p, mid)
+          env ety_env.from_class ~is_method ~is_const;
         (* We need to instantiate generic parameters in the method signature *)
         let ety_env =
           { ety_env with
@@ -4269,8 +4269,8 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
               (fun _ -> Reason.Rwitness id_pos, Tany)
           else paraml in
         let member_info = Env.get_member is_method env class_info id_str in
-        Typing_hooks.dispatch_cmethod_hook class_info paraml id env
-          (Some class_id) ~is_method;
+        Typing_hooks.dispatch_cmethod_hook class_info paraml ~pos_params:None id
+          env (Some class_id) ~is_method;
 
         match member_info with
         | None when not is_method ->

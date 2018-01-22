@@ -158,13 +158,15 @@ let dispatch_binop_hook p bop ty1 ty2 =
 let dispatch_id_hook id env =
   List.iter !id_hooks begin fun hook -> hook id env end
 
-let dispatch_smethod_hook class_ targs id env cid ~is_method ~is_const=
+let dispatch_smethod_hook class_ targs ~pos_params id env cid ~is_method
+                            ~is_const =
   List.iter !smethod_hooks
-    (fun hook -> hook class_ ~targs ~pos_params:None id env cid ~is_method ~is_const)
+    (fun hook -> hook class_ ~targs ~pos_params id env cid ~is_method ~is_const)
 
-let dispatch_cmethod_hook class_ targs id env cid ~is_method =
+let dispatch_cmethod_hook class_ targs ~pos_params id env cid ~is_method =
   List.iter !cmethod_hooks
-    (fun hook -> hook class_ ~targs ~pos_params:None id env cid ~is_method ~is_const:false)
+    (fun hook -> hook class_ ~targs ~pos_params id env cid ~is_method
+                   ~is_const:false)
 
 let dispatch_taccess_hook class_ typeconst pos =
   List.iter !taccess_hooks (fun hook -> hook class_ typeconst pos)

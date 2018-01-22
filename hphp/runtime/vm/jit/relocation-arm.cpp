@@ -820,11 +820,11 @@ size_t relocateImpl(Env& env) {
             const auto rd = src->Rd();
             uint64_t target = src->ImmMoveWide() << (16 * src->ShiftMoveWide());
             auto next = src->NextInstruction();
-            while (next->IsMovk()) {
-              if (next->Rd() == rd) {
+            while ((next->IsMovk() && (next->Rd() == rd)) || next->IsNop()) {
+              if (next->IsMovk()) {
                 target |= next->ImmMoveWide() << (16 * next->ShiftMoveWide());
-                length++;
               }
+              length++;
               next = next->NextInstruction();
             }
             // Adjust the mov/movk sequence if necessary
@@ -965,11 +965,11 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
     uint64_t target = instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
     auto next = instr->NextInstruction();
     size_t length = 1;
-    while (next->IsMovk()) {
-      if (next->Rd() == rd) {
+    while ((next->IsMovk() && (next->Rd() == rd)) || next->IsNop()) {
+      if (next->IsMovk()) {
         target |= next->ImmMoveWide() << (16 * next->ShiftMoveWide());
-        length++;
       }
+      length++;
       next = next->NextInstruction();
     }
     auto adjusted = (uint64_t)rel.adjustedAddressAfter(
@@ -978,35 +978,25 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
     if (adjusted) {
       always_assert_flog(!live, "Can't adjust MOV/MOVK for a live region.\n");
 
-      // Rewrite each MOV/MOVK immediate
-      auto tmp = adjusted;
-      next = instr;
-      size_t adjLength = 0, shift = 0;
-      do {
-        if (tmp & 0xffff) {
-          Instr bits = next->InstructionBits();
-          bits &= ~(Assembler::ImmMoveWide(0xffff) |
-                    Assembler::ShiftMoveWide(0x3));
-          bits |= (Assembler::ImmMoveWide(tmp & 0xffff) |
-                   Assembler::ShiftMoveWide(adjLength));
-          next->SetInstructionBits(bits);
-          adjLength++;
-        }
-        always_assert_flog(length >= adjLength,
-                           "Can't adjust MOV/MOVK, new sequence is longer.\n");
-        shift++;
-        next = next->NextInstruction();
-        tmp >>= 16;
-      } while (tmp);
+      // Create a temporary CodeBlock over the mov/movk sequence
+      CodeBlock movBlock;
+      auto const movStart = reinterpret_cast<TCA>(instr);
+      movBlock.init(movStart, length << kInstructionSizeLog2, "mov/movk");
 
-      // Pad out with nops.
-      while (adjLength < length) {
-        next->SetInstructionBits(HINT |
-                                 Assembler::ImmHint(NOP) |
-                                 Assembler::Rt(xzr));
-        next = next->NextInstruction();
-        adjLength++;
+      // Write the new mov/movk sequence
+      vixl::MacroAssembler a { movBlock };
+      auto const dst = vixl::Register(rd, 64);
+      a.Mov(dst, adjusted);
+
+      // If the sequence is shorter, then pad with nops
+      length -= (movBlock.frontier() - movStart) >> kInstructionSizeLog2;
+      while (length > 0) {
+        a.nop();
+        length--;
       }
+
+      // Sync the region
+      movBlock.sync();
     }
   }
 }

@@ -28,12 +28,14 @@ let (id_hooks: (Pos.t * string -> Typing_env.env -> unit) list ref) = ref []
  * same hook for both *)
 let (smethod_hooks: (Typing_defs.class_type ->
                      targs:Typing_defs.locl Typing_defs.ty list ->
+                     pos_params:Nast.expr list option ->
                      Pos.t * string ->
                      Typing_env.env -> Nast.class_id option -> is_method:bool ->
                      is_const:bool -> unit) list ref) = ref []
 
 let (cmethod_hooks: (Typing_defs.class_type ->
                      targs:Typing_defs.locl Typing_defs.ty list ->
+                     pos_params:Nast.expr list option ->
                      Pos.t * string ->
                      Typing_env.env -> Nast.class_id option -> is_method:bool ->
                      is_const:bool -> unit) list ref) = ref []
@@ -158,11 +160,11 @@ let dispatch_id_hook id env =
 
 let dispatch_smethod_hook class_ targs id env cid ~is_method ~is_const=
   List.iter !smethod_hooks
-    (fun hook -> hook class_ ~targs id env cid ~is_method ~is_const)
+    (fun hook -> hook class_ ~targs ~pos_params:None id env cid ~is_method ~is_const)
 
 let dispatch_cmethod_hook class_ targs id env cid ~is_method =
   List.iter !cmethod_hooks
-    (fun hook -> hook class_ ~targs id env cid ~is_method ~is_const:false)
+    (fun hook -> hook class_ ~targs ~pos_params:None id env cid ~is_method ~is_const:false)
 
 let dispatch_taccess_hook class_ typeconst pos =
   List.iter !taccess_hooks (fun hook -> hook class_ typeconst pos)

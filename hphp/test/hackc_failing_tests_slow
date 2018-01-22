@@ -17,8 +17,6 @@ slow/parser/empty-files/empty-invalid.php
 slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-6.php
 slow/parser/memory_exhaust.php
-slow/parser/php-reserved-name-parent-2.php
-slow/parser/php-reserved-name-self-2.php
 slow/parser/unicode-literal-error.php
 slow/preg-file-mode.php
 slow/reflection/1352.php

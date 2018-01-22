@@ -209,14 +209,15 @@ let validate_class_name ns (p, class_name) =
     is_hh_namespace ns ||
     Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options in
   let name = SU.strip_ns class_name in
+  let is_reserved_global_name = SN.Typehints.is_reserved_global_name name in
   let name_is_reserved =
-    SN.Typehints.is_reserved_global_name name ||
+    is_reserved_global_name ||
     (check_hh_name && SN.Typehints.is_reserved_hh_name name) in
   if name_is_reserved
   then
     let message =
       Printf.sprintf "Cannot use '%s' as class name as it is reserved"
-        (Utils.strip_ns class_name) in
+        (if is_reserved_global_name then name else Utils.strip_ns class_name) in
     Emit_fatal.raise_fatal_parse p message
 
 let emit_class : A.class_ * bool -> Hhas_class.t =

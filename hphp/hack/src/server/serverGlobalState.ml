@@ -16,6 +16,7 @@ type t = {
     fuzzy : bool;
     profile_log : bool;
     fixme_codes : ISet.t;
+    paths_to_ignore : Str.regexp list;
   }
 
 let save () = {
@@ -26,6 +27,7 @@ let save () = {
     fuzzy = !HackSearchService.fuzzy;
     profile_log = !Utils.profile;
     fixme_codes = !Errors.ignored_fixme_codes;
+    paths_to_ignore = FilesToIgnore.get_paths_to_ignore ();
   }
 
 let restore state =
@@ -35,7 +37,8 @@ let restore state =
   Typing_deps.trace := state.trace;
   HackSearchService.fuzzy := state.fuzzy;
   Utils.profile := state.profile_log;
-  Errors.ignored_fixme_codes := state.fixme_codes
+  Errors.ignored_fixme_codes := state.fixme_codes;
+  FilesToIgnore.set_paths_to_ignore state.paths_to_ignore
 
 
 let get_hhi_path state = state.saved_hhi
@@ -49,4 +52,5 @@ let fake_state = {
     fuzzy = false;
     profile_log = false;
     fixme_codes = ISet.empty;
+    paths_to_ignore = [];
   }

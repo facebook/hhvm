@@ -162,6 +162,7 @@ let from_minimal source_text minimal_token offset =
 
 let to_json token =
   let open Hh_json in
+  let (line_number, _) = start_position token in
   JSON_Object [
     ("kind", JSON_String (TokenKind.to_string token.kind));
     ("text", JSON_String (text token));
@@ -170,5 +171,6 @@ let to_json token =
     ("width", int_ token.width);
     ("trailing_width", int_ token.trailing_width);
     ("leading", JSON_Array (List.map Trivia.to_json token.leading));
-    ("trailing", JSON_Array (List.map Trivia.to_json token.trailing))
+    ("trailing", JSON_Array (List.map Trivia.to_json token.trailing));
+    ("line_number", int_ line_number);
     ]

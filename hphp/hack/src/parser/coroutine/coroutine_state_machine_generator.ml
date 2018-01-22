@@ -586,8 +586,7 @@ let compute_state_machine_data
   let properties = saved_inner_variables @ coroutine_result_data_variables in
   let outer_variables =
     SSet.elements context.Coroutine_context.outer_variables in
-  let function_parameters =
-    SSet.elements context.Coroutine_context.function_parameters in
+  let function_parameters = context.Coroutine_context.function_parameters in
   let parameters = outer_variables @ function_parameters
   |> Core_list.map ~f:make_saved_variable
   |> make_outer_params in

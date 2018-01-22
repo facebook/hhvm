@@ -188,12 +188,12 @@ let partition_used_locals parents node =
   (* Set of function parameters *)
   let params = get_params_list node
   |> syntax_node_to_list
-  |> List.filter_map ~f:param_name
-  |> SSet.of_list in
+  |> List.filter_map ~f:param_name in
+  let param_set = SSet.of_list params in
   (* Set of all variables referenced in the body except for $this *)
   let all_used = fold_no_lambdas add_local SSet.empty (get_body node)
   |> SSet.remove "$this" in
   let all_outer = compute_outer_variables parents node in
   let used_outer = SSet.inter all_used all_outer in
-  let inner = SSet.diff all_used (SSet.union params used_outer) in
+  let inner = SSet.diff all_used (SSet.union param_set used_outer) in
   (inner, used_outer, params)

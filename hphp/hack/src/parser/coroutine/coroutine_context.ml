@@ -37,7 +37,8 @@ type t = {
   inner_variables : SSet.t;
   (* Variables referenced in the function that were declared externally. *)
   outer_variables : SSet.t;
-  function_parameters : SSet.t;
+  (* Uses list to retain parameter ordering *)
+  function_parameters : string list;
   (* TODO: Fix naming in parse tree schema; why is it "class type parameters"
   but "function type parameter list"? *)
 }
@@ -53,7 +54,7 @@ let empty =
     parents = [];
     inner_variables = SSet.empty;
     outer_variables = SSet.empty;
-    function_parameters = SSet.empty;
+    function_parameters = [];
   }
 
 (* Note that the code below assumes that the parents list contains

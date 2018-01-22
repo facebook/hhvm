@@ -157,7 +157,7 @@ let load_ fn ~silent =
     ~default:default.use_dummy_informant config in
   let informant_min_distance_restart = int_ "informant_min_distance_restart"
     ~default:default.informant_min_distance_restart config in
-  let informant_use_xdb = bool_ "informant_use_xdb_v4"
+  let informant_use_xdb = bool_ "informant_use_xdb_v5"
     ~default:default.informant_use_xdb config in
   let type_decl_bucket_size = int_ "type_decl_bucket_size"
     ~default:default.type_decl_bucket_size config in

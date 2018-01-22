@@ -571,6 +571,36 @@ TRACE_SET_MOD(hhir_refcount);
 
 //////////////////////////////////////////////////////////////////////
 
+// Helper for removing instructions in the rest of this file---if a debugging
+// mode is enabled, it will replace it with a debugging instruction if
+// appropriate instead of removing it.
+void remove_helper(IRUnit& unit, IRInstruction* inst) {
+  if (!RuntimeOption::EvalHHIRGenerateAsserts) {
+    inst->convertToNop();
+    return;
+  }
+
+  switch (inst->op()) {
+  case IncRef:
+  case DecRef:
+  case DecRefNZ: {
+    inst->setOpcode(DbgAssertRefCount);
+    inst->clearExtra();
+    auto extra = ASSERT_REASON;
+    inst->setExtra(cloneExtra(DbgAssertRefCount, &extra, unit.arena()));
+    break;
+  }
+  default:
+    always_assert_flog(
+      false,
+      "Unsupported remove_helper instruction: {}\n",
+      *inst
+    );
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Id's of must-alias-sets.  We use -1 as an invalid id.
  */
@@ -692,8 +722,7 @@ struct RCState {
   std::array<ASetID,kMaxTrackedALocs> support_map;
 };
 
-// The analysis result structure for rc_analyze.  This structure gets fed into
-// build_graphs to create our RC graphs.
+// The analysis result structure for rc_analyze.
 struct RCAnalysis {
   struct BlockInfo {
     uint32_t rpoId;
@@ -728,6 +757,146 @@ struct Env {
   jit::vector<MustAliasSet> asets;
 };
 
+using IncDecBits = boost::dynamic_bitset<>;
+
+struct PreBlockInfo {
+  explicit PreBlockInfo(uint32_t sz) :
+      rpoId(0),
+      altLoc(sz),
+      avlLoc(sz),
+      antLoc(sz),
+      avlIn(sz),
+      avlOut(sz),
+      pavlIn(sz),
+      pavlOut(sz),
+      antIn(sz),
+      antOut(sz),
+      pantIn(sz),
+      pantOut(sz)
+    {}
+
+  uint32_t   rpoId;
+  uint32_t   genId;
+
+  // Bits set here block Incs and Decs of the corresponding ASetID
+  IncDecBits altLoc;
+  // We can either pair Incs followed by Decs, or Decs followed by Incs.
+  // avlLoc indicates that the leader is locally available, and antLoc
+  // indicates that the follower is locally anticipated.
+  IncDecBits avlLoc;
+  IncDecBits antLoc;
+
+  IncDecBits avlIn;
+  IncDecBits avlOut;
+  IncDecBits pavlIn;
+  IncDecBits pavlOut;
+
+  IncDecBits antIn;
+  IncDecBits antOut;
+  IncDecBits pantIn;
+  IncDecBits pantOut;
+};
+
+using BlockState = StateVector<Block, PreBlockInfo>;
+
+struct PreEnv {
+  using IncDecKey = std::tuple<Block*,uint32_t,bool>; /* blk, id, at front */
+  using InsertMap = std::unordered_map<IncDecKey, SSATmp*>;
+
+  explicit PreEnv(Env& env, RCAnalysis& rca) :
+      env(env),
+      rca(rca),
+      state(env.unit, PreBlockInfo(env.asets.size())),
+      curGen(0),
+      avlQ(env.rpoBlocks.size()),
+      antQ(env.rpoBlocks.size()) {
+    uint32_t id = 0;
+    for (auto const blk : env.rpoBlocks) {
+      auto& s = state[blk];
+      s.genId = 0;
+      s.rpoId = id;
+      avlQ.push(id);
+      antQ.push(id);
+      ++id;
+    }
+  }
+
+  Env& env;
+  RCAnalysis& rca;
+  BlockState state;
+  uint32_t  curGen;
+  InsertMap insMap;
+  std::vector<std::pair<Block*, SSATmp*>> to_insert;
+
+  std::set<uint32_t> reprocess;
+  dataflow_worklist<uint32_t, std::greater<uint32_t>> avlQ;
+  dataflow_worklist<uint32_t, std::less<uint32_t>> antQ;
+};
+
+struct PreAdderInfo {
+  PreAdderInfo(PreEnv& penv,
+               PreBlockInfo& blkInfo,
+               RCState& state,
+               bool incDec) :
+      penv{penv}, blkInfo{blkInfo}, state{state}, incDec{incDec} {}
+
+  void remove(Block::iterator iter) {
+    auto& inst = *iter;
+    auto const id = penv.env.asetMap[inst.src(0)];
+    auto it = iter;
+    while (true) {
+      auto& i2 = *--it;
+      if (i2.is(IncRef, DecRef, DecRefNZ) &&
+          penv.env.asetMap[i2.src(0)] == id) {
+        assertx(incDec == i2.is(IncRef));
+        FTRACE(3, "    ** trivial pair: {}, {}\n", inst, i2);
+        remove_helper(penv.env.unit, &i2);
+        remove_helper(penv.env.unit, &inst);
+        blkInfo.avlLoc.reset(id);
+        penv.reprocess.insert(blkInfo.rpoId);
+        modified = true;
+        return;
+      }
+      assertx(it != inst.block()->begin());
+    }
+  };
+  void setAvlAnt(Block::iterator iter, bool avl) {
+    auto& inst = *iter;
+    auto const id = penv.env.asetMap[inst.src(0)];
+    if (id < 0) {
+      assertx(inst.src(0)->type() <= TUncounted);
+      FTRACE(3, "    ** kill uncounted inc/dec: {}\n", inst);
+      remove_helper(penv.env.unit, &inst);
+      return;
+    }
+    if (avl) {
+      FTRACE(4, "     avlLoc: {}\n", id);
+      blkInfo.avlLoc.set(id);
+      // also set altLoc, so that this block isn't transparent for ANT
+      blkInfo.altLoc.set(id);
+      return;
+    }
+    if (blkInfo.avlLoc.test(id)) {
+      remove(iter);
+      return;
+    }
+    auto alt = blkInfo.altLoc.test(id);
+    if (!alt) {
+      FTRACE(4, "     antLoc: {}\n", id);
+      blkInfo.antLoc.set(id);
+      // also set altLoc, so that this block isn't transparent for AVL
+      blkInfo.altLoc.set(id);
+    }
+    return;
+  }
+
+  PreEnv& penv;
+  PreBlockInfo& blkInfo;
+  RCState& state;
+  bool modified{false};
+  bool incDec;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -751,6 +920,50 @@ struct NDec {
 struct NReq {
   explicit NReq(int32_t level) : level(level) {}
   int32_t level;
+};
+
+struct PreAdder {
+  PreAdder() = default;
+  explicit PreAdder(PreAdderInfo* info) : info{info} {}
+
+  void operator()(ASetID asetID, const NInc& n) const {
+    if (!info) return;
+    auto const blk = n.inst->block();
+    auto const iter = blk->iteratorTo(n.inst);
+    if (info->incDec && info->state.asets[asetID].lower_bound < 1) {
+      info->blkInfo.altLoc.set(asetID);
+      return;
+    }
+    info->setAvlAnt(iter, info->incDec);
+  }
+  void operator()(ASetID asetID, const NDec& n) const {
+    if (!info) return;
+    auto const blk = n.inst->block();
+    auto const iter = blk->iteratorTo(n.inst);
+    if (info->state.asets[asetID].lower_bound <= 1) {
+      info->blkInfo.altLoc.set(asetID);
+      return;
+    }
+    info->setAvlAnt(iter, !info->incDec);
+  }
+  void operator()(ASetID asetID, const NReq& n) const {
+    if (!info) return;
+    /*
+     * An NReq requires that the refcount at this point in the code be
+     * at least n.level. If we remove an inc/dec pair, we'll reduce
+     * the refcount here by 1, so unless lb - 1 >= n.level, we can't
+     * remove it. The situation for dec/inc pairs is less clear, and
+     * we might even be able to ignore NReqs unless n.level==INT_MAX
+     * in that case - but that requires some investigation.
+     */
+    auto const lb = info->state.asets[asetID].lower_bound;
+    if (lb - (info->incDec ? 1 : 0) >= n.level) return;
+    FTRACE(4, "     altLoc: {}\n", asetID);
+    info->blkInfo.altLoc.set(asetID);
+    info->blkInfo.avlLoc.reset(asetID);
+  }
+
+  PreAdderInfo* info = nullptr;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1112,34 +1325,6 @@ void weaken_decrefs(Env& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-// Helper for removing instructions in the rest of this file---if a debugging
-// mode is enabled, it will replace it with a debugging instruction if
-// appropriate instead of removing it.
-void remove_helper(Env& env, IRInstruction* inst) {
-  if (!RuntimeOption::EvalHHIRGenerateAsserts) {
-    inst->convertToNop();
-    return;
-  }
-
-  switch (inst->op()) {
-  case IncRef:
-  case DecRef:
-  case DecRefNZ: {
-    inst->setOpcode(DbgAssertRefCount);
-    inst->clearExtra();
-    auto extra = ASSERT_REASON;
-    inst->setExtra(cloneExtra(DbgAssertRefCount, &extra, env.unit.arena()));
-    break;
-  }
-  default:
-    always_assert_flog(
-      false,
-      "Unsupported remove_helper instruction: {}\n",
-      *inst
-    );
-  }
-}
-
 // Helper to determine whether an inc/dec can be moved across
 // an instruction.
 bool irrelevant_inst(const IRInstruction& inst) {
@@ -1488,9 +1673,8 @@ void reduce_lower_bound(Env& /*env*/, RCState& state, uint32_t asetID) {
  * - the location was no longer in the support, and the event has no
  *   effect; again there's nothing for us to do.
  */
-template <class NAdder>
 void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
-                   NAdder add_node) {
+                   PreAdder add_node) {
   auto& aset = state.asets[asetID];
   if (!aset.lower_bound && aset.memory_support.none()) return;
   FTRACE(2, "      {} pessimized\n", asetID);
@@ -1504,8 +1688,7 @@ void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
   add_node(asetID, NReq{std::numeric_limits<int32_t>::max()});
 }
 
-template<class NAdder>
-void pessimize_all(Env& env, RCState& state, NAdder add_node) {
+void pessimize_all(Env& env, RCState& state, PreAdder add_node) {
   FTRACE(3, "    pessimize_all\n");
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     pessimize_one(env, state, asetID, add_node);
@@ -1525,8 +1708,7 @@ void unsupport_all(Env& env, RCState& state) {
   }
 }
 
-template<class NAdder>
-void observe(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
+void observe(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
   auto constexpr level = 2;
   add_node(asetID, NReq{level});
   auto const diff = level - state.asets[asetID].lower_bound;
@@ -1547,8 +1729,7 @@ void observe(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   }
 }
 
-template <class NAdder>
-void observe_all(Env& /*env*/, RCState& state, NAdder add_node) {
+void observe_all(Env& /*env*/, RCState& state, PreAdder add_node) {
   FTRACE(3, "    observe_all\n");
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     add_node(asetID, NReq{std::numeric_limits<int32_t>::max()});
@@ -1573,8 +1754,7 @@ void observe_all(Env& /*env*/, RCState& state, NAdder add_node) {
  * possibly-boxed args, even though they can't decref the pointer through the
  * memory locations for those args.
  */
-template<class NAdder>
-void observe_for_is_referenced(Env& env, RCState& state, NAdder add_node) {
+void observe_for_is_referenced(Env& env, RCState& state, PreAdder add_node) {
   FTRACE(3, "    observe_for_is_referenced\n");
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     if (env.asets[asetID].widestType.maybe(TBoxedCell)) {
@@ -1583,8 +1763,7 @@ void observe_for_is_referenced(Env& env, RCState& state, NAdder add_node) {
   }
 }
 
-template<class NAdder>
-void may_decref(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
+void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
   auto& aset = state.asets[asetID];
 
   auto const balanced = aset.lower_bound > aset.unsupported_refs;
@@ -1625,12 +1804,11 @@ void kill_unsupported_refs(RCState& state) {
 // Returns true if we actually removed the support (i.e. we accounted
 // for it by reducing a lower bound, or increasing unsupported_refs,
 // or the location wasn't actually supporting anything right now).
-template<class NAdder>
 bool reduce_support_bit(Env& env,
                         RCState& state,
                         uint32_t locID,
                         bool may_decref,
-                        NAdder add_node) {
+                        PreAdder add_node) {
   auto const current_set = state.support_map[locID];
   if (current_set == -1) return true;
   FTRACE(3, "      {} removing support\n", current_set);
@@ -1683,12 +1861,11 @@ bool reduce_support_bit(Env& env,
 
 // Returns true if reduce_support_bit succeeded on every support bit in the
 // set.
-template<class NAdder>
 bool reduce_support_bits(Env& env,
                          RCState& state,
                          ALocBits set,
                          bool may_decref,
-                         NAdder add_node) {
+                         PreAdder add_node) {
   FTRACE(2, "    remove: {}\n", show(set));
   auto ret = true;
   bitset_for_each_set(
@@ -1705,12 +1882,11 @@ bool reduce_support_bits(Env& env,
 // Returns true if we completely accounted for removing the support.  If it
 // returns false, the support bits may still be marked on some must-alias-sets.
 // (See pure_load.)
-template<class NAdder>
 bool reduce_support(Env& env,
                     RCState& state,
                     AliasClass aclass,
                     bool may_decref,
-                    NAdder add_node) {
+                    PreAdder add_node) {
   if (aclass == AEmpty) return true;
   FTRACE(3, "    reduce support {}{}\n",
          std::string{may_decref ? "(may_decref) " : ""}, show(aclass));
@@ -1740,12 +1916,11 @@ void drop_support_bits(Env& env, RCState& state, ALocBits bits) {
   );
 }
 
-template<class NAdder>
 void create_store_support(Env& env,
                           RCState& state,
                           AliasClass dst,
                           SSATmp* tmp,
-                          NAdder add_node) {
+                          PreAdder add_node) {
   for_aset(env, state, tmp, [&] (ASetID asetID) {
     auto& aset = state.asets[asetID];
 
@@ -1792,9 +1967,8 @@ void create_store_support(Env& env,
 
 //////////////////////////////////////////////////////////////////////
 
-template <class NAdder>
 void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
-                 CallEffects e, NAdder add_node) {
+                 CallEffects e, PreAdder add_node) {
   // We have to block all incref motion through a PHP call, by observing at the
   // max.  This is fundamentally required because the callee can side-exit or
   // throw an exception without a catch trace, so everything needs to be
@@ -1814,12 +1988,11 @@ void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
   reduce_support_bits(env, state, bset, true, add_node);
 }
 
-template<class NAdder>
 void pure_load(Env& env,
                RCState& state,
                AliasClass src,
                SSATmp* dst,
-               NAdder add_node) {
+               PreAdder add_node) {
   auto const meta = env.ainfo.find(src);
   if (!meta) return;
   if (!state.avail.test(meta->index)) return;
@@ -1846,12 +2019,11 @@ void pure_load(Env& env,
   });
 }
 
-template<class NAdder>
 void pure_store(Env& env,
                 RCState& state,
                 AliasClass dst,
                 SSATmp* tmp,
-                NAdder add_node) {
+                PreAdder add_node) {
   /*
    * First, handle the effects of the store on memory support.  See the docs
    * above in "Effects of Pure Stores on Memory Support" for an explanation.
@@ -1867,12 +2039,11 @@ void pure_store(Env& env,
   create_store_support(env, state, dst, tmp, add_node);
 }
 
-template<class NAdder>
 void pure_spill_frame(Env& env,
                       RCState& state,
                       PureSpillFrame psf,
                       SSATmp* ctx,
-                      NAdder add_node) {
+                      PreAdder add_node) {
   /*
    * First, the effects of PureStores on memory support.  A SpillFrame will
    * store over kNumActRecCells stack slots, and just like normal PureStores we
@@ -1900,11 +2071,10 @@ void pure_spill_frame(Env& env,
 
 //////////////////////////////////////////////////////////////////////
 
-template<class NAdder>
 void analyze_mem_effects(Env& env,
                          IRInstruction& inst,
                          RCState& state,
-                         NAdder add_node) {
+                         PreAdder add_node) {
   auto const effects = canonicalize(memory_effects(inst));
   FTRACE(4, "    mem: {}\n", show(effects));
   match<void>(
@@ -2001,12 +2171,12 @@ bool observes_reference(const IRInstruction& inst, uint32_t srcID) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Propagate, class NAdder>
+template<typename Propagate>
 void rc_analyze_inst(Env& env,
                      IRInstruction& inst,
                      RCState& state,
                      Propagate propagate,
-                     NAdder add_node) {
+                     PreAdder add_node) {
   FTRACE(2, "  {}\n", inst);
 
   switch (inst.op()) {
@@ -2169,17 +2339,14 @@ void rc_analyze_inst(Env& env,
 
 /*
  * This is the per-instruction analyze routine for rc_analyze, also used for
- * build_graphs.
- *
- * The NAdder function controls whether it's actually building a graph or just
- * performing analysis.
+ * pre_local_transfer.
  */
-template<class Propagate, class NAdder>
+template<class Propagate>
 void rc_analyze_step(Env& env,
                      IRInstruction& inst,
                      RCState& state,
                      Propagate propagate,
-                     NAdder add_node) {
+                     PreAdder add_node) {
   rc_analyze_inst(env, inst, state, propagate, add_node);
   // Note: we could use the gen set here to remove support entries when we step
   // the mrinfo, but it's not useful because only CallEffects causes it right
@@ -2189,10 +2356,6 @@ void rc_analyze_step(Env& env,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-struct EmptyAdder {
-  template<class T> void operator()(ASetID, const T&) const {}
-};
 
 /*
  * Find the fixed point. If reprocess is non-null, add each block we
@@ -2247,7 +2410,7 @@ void rc_analyze_worklist(Env& env,
     };
 
     for (auto& inst : blk->instrs()) {
-      rc_analyze_step(env, inst, state, propagate, EmptyAdder{});
+      rc_analyze_step(env, inst, state, propagate, PreAdder{});
     }
     if (auto const next = blk->next()) propagate(next);
   } while (!incompleteQ.empty());
@@ -2392,14 +2555,14 @@ void sink_incs(Env& env) {
       incs.push_back(new_next);
       FTRACE(2, "    ** sink_incs: {} -> {}, {}\n",
              *inc, *new_taken, *new_next);
-      remove_helper(env, inc);
+      remove_helper(env.unit, inc);
 
     } else if (iter != iterOrigSucc) {
       // insert the inc right before succ if we advanced any instruction
       auto const new_inc = env.unit.gen(IncRef, bcctx, tmp);
       block->insert(iter, new_inc);
       FTRACE(2, "    ** sink_incs: {} -> {}\n", *inc, *new_inc);
-      remove_helper(env, inc);
+      remove_helper(env.unit, inc);
     }
   }
 }
@@ -2508,184 +2671,6 @@ void sink_incs(Env& env) {
 // AvlOut  | I |   <--  made fully redundant by inserting above,
 // AvlLoc  +---+        so delete it.
 
-using IncDecBits = boost::dynamic_bitset<>;
-
-struct PreBlockInfo {
-  explicit PreBlockInfo(uint32_t sz) :
-      rpoId(0),
-      altLoc(sz),
-      avlLoc(sz),
-      antLoc(sz),
-      avlIn(sz),
-      avlOut(sz),
-      pavlIn(sz),
-      pavlOut(sz),
-      antIn(sz),
-      antOut(sz),
-      pantIn(sz),
-      pantOut(sz)
-    {}
-
-  uint32_t   rpoId;
-  uint32_t   genId;
-
-  // Bits set here block Incs and Decs of the corresponding ASetID
-  IncDecBits altLoc;
-  // We can either pair Incs followed by Decs, or Decs followed by Incs.
-  // avlLoc indicates that the leader is locally available, and antLoc
-  // indicates that the follower is locally anticipated.
-  IncDecBits avlLoc;
-  IncDecBits antLoc;
-
-  IncDecBits avlIn;
-  IncDecBits avlOut;
-  IncDecBits pavlIn;
-  IncDecBits pavlOut;
-
-  IncDecBits antIn;
-  IncDecBits antOut;
-  IncDecBits pantIn;
-  IncDecBits pantOut;
-};
-
-using BlockState = StateVector<Block, PreBlockInfo>;
-
-struct PreEnv {
-  using IncDecKey = std::tuple<Block*,uint32_t,bool>; /* blk, id, at front */
-  using InsertMap = std::unordered_map<IncDecKey, SSATmp*>;
-
-  explicit PreEnv(Env& env, RCAnalysis& rca) :
-      env(env),
-      rca(rca),
-      state(env.unit, PreBlockInfo(env.asets.size())),
-      curGen(0),
-      avlQ(env.rpoBlocks.size()),
-      antQ(env.rpoBlocks.size()) {
-    uint32_t id = 0;
-    for (auto const blk : env.rpoBlocks) {
-      auto& s = state[blk];
-      s.genId = 0;
-      s.rpoId = id;
-      avlQ.push(id);
-      antQ.push(id);
-      ++id;
-    }
-  }
-
-  Env& env;
-  RCAnalysis& rca;
-  BlockState state;
-  uint32_t  curGen;
-  InsertMap insMap;
-  std::vector<std::pair<Block*, SSATmp*>> to_insert;
-
-  std::set<uint32_t> reprocess;
-  dataflow_worklist<uint32_t, std::greater<uint32_t>> avlQ;
-  dataflow_worklist<uint32_t, std::less<uint32_t>> antQ;
-};
-
-struct PreAdderInfo {
-  PreAdderInfo(PreEnv& penv,
-               PreBlockInfo& blkInfo,
-               RCState& state,
-               bool incDec) :
-      penv{penv}, blkInfo{blkInfo}, state{state}, incDec{incDec} {}
-
-  void remove(Block::iterator iter) {
-    auto& inst = *iter;
-    auto const id = penv.env.asetMap[inst.src(0)];
-    auto it = iter;
-    while (true) {
-      auto& i2 = *--it;
-      if (i2.is(IncRef, DecRef, DecRefNZ) &&
-          penv.env.asetMap[i2.src(0)] == id) {
-        assertx(incDec == i2.is(IncRef));
-        FTRACE(3, "    ** trivial pair: {}, {}\n", inst, i2);
-        remove_helper(penv.env, &i2);
-        remove_helper(penv.env, &inst);
-        blkInfo.avlLoc.reset(id);
-        penv.reprocess.insert(blkInfo.rpoId);
-        modified = true;
-        return;
-      }
-      assertx(it != inst.block()->begin());
-    }
-  };
-  void setAvlAnt(Block::iterator iter, bool avl) {
-    auto& inst = *iter;
-    auto const id = penv.env.asetMap[inst.src(0)];
-    if (id < 0) {
-      assertx(inst.src(0)->type() <= TUncounted);
-      FTRACE(3, "    ** kill uncounted inc/dec: {}\n", inst);
-      remove_helper(penv.env, &inst);
-      return;
-    }
-    if (avl) {
-      FTRACE(4, "     avlLoc: {}\n", id);
-      blkInfo.avlLoc.set(id);
-      // also set altLoc, so that this block isn't transparent for ANT
-      blkInfo.altLoc.set(id);
-      return;
-    }
-    if (blkInfo.avlLoc.test(id)) {
-      remove(iter);
-      return;
-    }
-    auto alt = blkInfo.altLoc.test(id);
-    if (!alt) {
-      FTRACE(4, "     antLoc: {}\n", id);
-      blkInfo.antLoc.set(id);
-      // also set altLoc, so that this block isn't transparent for AVL
-      blkInfo.altLoc.set(id);
-    }
-    return;
-  }
-
-  PreEnv& penv;
-  PreBlockInfo& blkInfo;
-  RCState& state;
-  bool modified{false};
-  bool incDec;
-};
-
-struct PreAdder {
-  void operator()(ASetID asetID, const NInc& n) const {
-    auto const blk = n.inst->block();
-    auto const iter = blk->iteratorTo(n.inst);
-    if (info.incDec && info.state.asets[asetID].lower_bound < 1) {
-      info.blkInfo.altLoc.set(asetID);
-      return;
-    }
-    info.setAvlAnt(iter, info.incDec);
-  }
-  void operator()(ASetID asetID, const NDec& n) const {
-    auto const blk = n.inst->block();
-    auto const iter = blk->iteratorTo(n.inst);
-    if (info.state.asets[asetID].lower_bound <= 1) {
-      info.blkInfo.altLoc.set(asetID);
-      return;
-    }
-    info.setAvlAnt(iter, !info.incDec);
-  }
-  void operator()(ASetID asetID, const NReq& n) const {
-    /*
-     * An NReq requires that the refcount at this point in the code be
-     * at least n.level. If we remove an inc/dec pair, we'll reduce
-     * the refcount here by 1, so unless lb - 1 >= n.level, we can't
-     * remove it. The situation for dec/inc pairs is less clear, and
-     * we might even be able to ignore NReqs unless n.level==INT_MAX
-     * in that case - but that requires some investigation.
-     */
-    auto const lb = info.state.asets[asetID].lower_bound;
-    if (lb - (info.incDec ? 1 : 0) >= n.level) return;
-    FTRACE(4, "     altLoc: {}\n", asetID);
-    info.blkInfo.altLoc.set(asetID);
-    info.blkInfo.avlLoc.reset(asetID);
-  }
-
-  PreAdderInfo& info;
-};
-
 void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
   FTRACE(3, "Blk(B{}) <-{}\n", blk->id(),
          [&] {
@@ -2698,7 +2683,7 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
   auto& s = penv.state[blk];
   auto process = [&] (RCState state) {
     PreAdderInfo adder{penv, s, state, incDec};
-    PreAdder preAdder{adder};
+    PreAdder preAdder{&adder};
     for (auto iter = blk->begin(); iter != blk->end(); ++iter) {
       auto& inst = *iter;
       if (inst.is(DecRef)) {
@@ -2706,7 +2691,7 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
         if (id < 0) {
           assertx(inst.src(0)->type() <= TUncounted);
           FTRACE(3, "    ** kill uncounted inc/dec: {}\n", inst);
-          remove_helper(penv.env, &inst);
+          remove_helper(penv.env.unit, &inst);
           continue;
         }
         if (state.asets[id].lower_bound >= 2) {
@@ -3096,7 +3081,7 @@ bool pre_apply(PreEnv& penv, bool incDec) {
         auto const id = penv.env.asetMap[inst.src(0)];
         if (del.test(id)) {
           FTRACE(3, "delete: {} = {}\n", id, inst.toString());
-          remove_helper(penv.env, &inst);
+          remove_helper(penv.env.unit, &inst);
           del.reset(id);
           return del.none();
         }

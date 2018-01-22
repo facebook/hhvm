@@ -178,22 +178,25 @@ let test_decorated_expression_child ~f node =
     | _ -> false
   end
 
-let is_reference_expression node =
-  is_decorated_expression ~f:is_ampersand node
+(* Test two levels in case ...& or &... hiding under *)
+let rec is_reference_expression node =
+  is_decorated_expression ~f:is_ampersand node ||
+  test_decorated_expression_child node ~f:is_reference_expression
 
-let is_variadic_expression node =
-  is_decorated_expression ~f:is_ellipsis node
+let rec is_variadic_expression node =
+  is_decorated_expression ~f:is_ellipsis node ||
+  test_decorated_expression_child node ~f:is_variadic_expression
 
 let is_reference_variadic node =
-  is_variadic_expression node &&
+  is_decorated_expression ~f:is_ellipsis node &&
   test_decorated_expression_child node ~f:is_reference_expression
 
 let is_double_variadic node =
-  is_variadic_expression node &&
+  is_decorated_expression ~f:is_ellipsis node &&
   test_decorated_expression_child node ~f:is_variadic_expression
 
 let is_double_reference node =
-  is_reference_expression node &&
+  is_decorated_expression ~f:is_ampersand node &&
   test_decorated_expression_child node ~f:is_reference_expression
 
 let is_variadic_parameter_variable node =
@@ -1246,7 +1249,6 @@ let params_errors params is_hack hhvm_compat_mode errors =
   errors
 
 let decoration_errors node errors =
-  let errors = produce_error errors is_reference_variadic node SyntaxError.variadic_reference node in
   let errors = produce_error errors is_double_variadic node SyntaxError.double_variadic node in
   let errors = produce_error errors is_double_reference node SyntaxError.double_reference node in
   errors
@@ -1284,6 +1286,21 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
         errors
       end else errors
     in
+    let errors =
+      if not is_hack &&
+         is_variadic_expression p.parameter_name &&
+         not (is_missing p.parameter_type) then
+        (* Strip & and ..., reference will always come before variadic *)
+        let name = String_utils.lstrip (text p.parameter_name) "&" in
+        let name = String_utils.lstrip name "..." in
+        let type_ = text p.parameter_type in
+        make_error_from_node node
+          (SyntaxError.variadic_param_with_type_in_php name type_) :: errors
+      else errors in
+    let errors =
+      if is_reference_variadic p.parameter_name then
+        make_error_from_node node SyntaxError.variadic_reference :: errors
+      else errors in
     errors
   | FunctionDeclarationHeader { function_parameter_list; _ } ->
     params_errors function_parameter_list is_hack hhvm_compat_mode errors

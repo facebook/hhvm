@@ -19,5 +19,3 @@ slow/reflection/1352.php
 slow/traits/require_constraint_basic_error.php
 slow/traits/require_constraint_recurse.php
 slow/variadic_args/by_reference.php
-slow/variadic_args/by_reference_typehints.php
-slow/variadic_args/typehints.php

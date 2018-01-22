@@ -284,7 +284,7 @@ let type_name_is_already_in_use ~name ~short_name =
   "Cannot use type " ^ name ^ " as " ^ short_name ^
   " because the name is already in use"
 
-let variadic_reference = "Found '...&'. Did you mean '&...'?"
+let variadic_reference = "Variadic '...' should be followed by a '$variable'"
 let double_variadic = "Parameter redundantly marked as variadic ('...')."
 let double_reference = "Parameter redundantly marked as reference ('&')."
 let global_in_const_decl = "Cannot have globals in constant declaration"
@@ -376,3 +376,7 @@ let redeclaration_of_method ~name =
   "Redeclared method " ^ name
 let self_or_parent_colon_colon_class_outside_of_class name =
   "Cannot access " ^ name ^ "::class when no class scope is active"
+let variadic_param_with_type_in_php name type_ =
+  "Parameter " ^ name ^ " is variadic and has a type constraint ("
+  ^ type_ ^ "); variadic params with type constraints are not "
+  ^ "supported in non-Hack files"

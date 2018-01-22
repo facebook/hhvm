@@ -17,7 +17,8 @@ module Env = Format_env
 open Hh_core
 open Printf
 
-let get_line_boundaries lines =
+let get_line_boundaries text =
+  let lines = String_utils.split_on_newlines text in
   let bytes_seen = ref 0 in
   Array.of_list @@ List.map lines (fun line -> begin
     let line_start = !bytes_seen in
@@ -36,8 +37,7 @@ let expand_to_line_boundaries ?ranges source_text range =
   (* Ensure that start_offset and end_offset fall on line boundaries *)
   let ranges = match ranges with
     | Some ranges -> ranges
-    | None -> get_line_boundaries
-      (SourceText.text source_text |> String_utils.split_on_newlines)
+    | None -> get_line_boundaries (SourceText.text source_text)
   in
   Array.fold_left (fun (st, ed) (line_start, line_end) ->
     let st = if st > line_start && st < line_end then line_start else st in
@@ -146,7 +146,6 @@ let format_range ?config range tree =
 let format_intervals ?config intervals tree =
   let source_text = SyntaxTree.text tree in
   let text = SourceText.text source_text in
-  let lines = String_utils.split_on_newlines text in
   let env = env_from_tree config tree in
   let chunk_groups =
     tree
@@ -154,7 +153,7 @@ let format_intervals ?config intervals tree =
     |> Hack_format.transform env
     |> Chunk_builder.build
   in
-  let line_boundaries = get_line_boundaries lines in
+  let line_boundaries = get_line_boundaries text in
   let atom_boundaries = get_atom_boundaries chunk_groups in
   let ranges =
     intervals

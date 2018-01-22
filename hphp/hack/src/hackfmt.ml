@@ -20,7 +20,11 @@ open Hackfmt_error
 open Ocaml_overrides
 
 type filename = string
-type range = int * int
+
+type range =
+  | Byte of Interval.t (* 0-based byte offsets; half-open/inclusive-exclusive *)
+  | Line of Interval.t (* 1-based line numbers; inclusive *)
+
 type text_source =
   | File of filename
   | Stdin of filename option (* Optional filename for logging. *)
@@ -47,6 +51,8 @@ let parse_options () =
   let filename_for_logging = ref None in
   let start_char = ref None in
   let end_char = ref None in
+  let start_line = ref None in
+  let end_line = ref None in
   let at_char = ref None in
   let inplace = ref false in
   let indent_width = ref FEnv.(default.indent_width) in
@@ -65,6 +71,13 @@ let parse_options () =
         Arg.Int (fun x -> end_char := Some x);
       ]),
       "[start end]  Range of character positions to be formatted (1 indexed)";
+
+    "--line-range",
+      Arg.Tuple ([
+        Arg.Int (fun x -> start_line := Some x);
+        Arg.Int (fun x -> end_line := Some x);
+      ]),
+      "[start end]  Range of lines to be formatted (1 indexed, inclusive)";
 
     "--at-char",
       Arg.Int (fun x -> at_char := Some x),
@@ -112,8 +125,11 @@ let parse_options () =
   ] in
   Arg.parse_dynamic options (fun file -> files := file :: !files) usage;
   let range =
-    match !start_char, !end_char with
-    | Some s, Some e -> Some (s - 1, e - 1)
+    match !start_char, !end_char, !start_line, !end_line with
+    | Some s, Some e, None,   None   -> Some (Byte (s - 1, e - 1))
+    | None,   None,   Some s, Some e -> Some (Line (s, e))
+    | Some _, Some _, Some _, Some _ ->
+      raise (InvalidCliArg "Cannot use --range with --line-range")
     | _ -> None
   in
   let config = FEnv.{default with
@@ -257,12 +273,28 @@ let logging_time_taken env logger thunk =
       ~root:env.Env.root;
   res
 
+(* If the range is a byte range, expand it to line boundaries.
+ * If the range is a line range, convert it to a byte range. *)
+let expand_or_convert_range ?ranges source_text range =
+  match range with
+  | Byte range -> expand_to_line_boundaries ?ranges source_text range
+  | Line (st, ed) ->
+    let line_boundaries =
+      match ranges with
+      | Some ranges -> ranges
+      | None -> get_line_boundaries (SourceText.text source_text)
+    in
+    let st = max st 1 in
+    let ed = min ed (Array.length line_boundaries) in
+    try line_interval_to_offset_range line_boundaries (st, ed) with
+    | Invalid_argument msg -> raise (InvalidCliArg msg)
+
 let format ?config ?range ?ranges env tree =
   let source_text = SyntaxTree.text tree in
   match range with
   | None -> logging_time_taken env Logger.format_tree_end (fun () -> format_tree ?config tree)
   | Some range ->
-    let range = expand_to_line_boundaries ?ranges source_text range in
+    let range = expand_or_convert_range ?ranges source_text range in
     logging_time_taken env Logger.format_range_end (fun () ->
       let formatted = format_range ?config range tree in
       (* This is a bit of a hack to deal with situations where a newline exists
@@ -319,7 +351,7 @@ let debug_print ?range ?config text_source =
   let module EditableSyntax = Full_fidelity_editable_syntax in
   let tree = parse text_source in
   let source_text = SyntaxTree.text tree in
-  let range = Option.map range (expand_to_line_boundaries source_text) in
+  let range = Option.map range (expand_or_convert_range source_text) in
   let env = Libhackfmt.env_from_config config in
   let doc = Hack_format.transform env (EditableSyntax.from_tree tree) in
   let chunk_groups = Chunk_builder.build doc in
@@ -354,7 +386,7 @@ let main (env: Env.t) (options: format_options) =
           (fun () -> format_at_offset ~config tree pos)
       with
       | Invalid_argument s -> raise (InvalidCliArg s) in
-    if env.Env.debug then debug_print text_source ~range ~config;
+    if env.Env.debug then debug_print text_source ~range:(Byte range) ~config;
     Printf.printf "%d %d\n" (fst range) (snd range);
     output formatted;
   | Diff {root; dry; config} ->

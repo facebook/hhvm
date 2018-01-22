@@ -731,59 +731,16 @@ struct Env {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Nodes in the RC flowgraphs.
- */
-enum class NT : uint8_t { Inc, Dec, Req, Phi, Sig, Empty };
-struct Node {
-  Node* next{nullptr};
-  Node* prev{nullptr};  // unused for Phi nodes; as they may have >1 preds
-  int32_t lower_bound{0};
-  NT type;
-
-  // Counter used by optimize pass to wait to visit Phis until after
-  // non-backedge predecessors.
-  int16_t visit_counter{0};
-
-protected:
-  explicit Node(NT type) : type(type) {}
-  Node(const Node&) = default;
-  Node& operator=(const Node&) = default;
-};
-
-/*
  * IncRef and DecRef{NZ,} nodes.
  */
-struct NInc : Node {
-  explicit NInc(IRInstruction* inst) : Node(NT::Inc), inst(inst) {}
+struct NInc {
+  explicit NInc(IRInstruction* inst) : inst(inst) {}
   IRInstruction* inst;
 };
-struct NDec : Node {
-  explicit NDec(IRInstruction* inst) : Node(NT::Dec), inst(inst) {}
+struct NDec {
+  explicit NDec(IRInstruction* inst) : inst(inst) {}
   IRInstruction* inst;
 };
-
-/*
- * Control flow splits and joins.
- */
-struct NPhi : Node {
-  explicit NPhi(Block* block) : Node(NT::Phi), block(block) {}
-  Block* block;
-  Node** pred_list{0};
-  uint32_t pred_list_cap{0};
-  uint32_t pred_list_sz{0};
-  uint32_t back_edge_preds{0};
-};
-struct NSig : Node {
-  explicit NSig(Block* block) : Node(NT::Sig), block(block) {}
-  Block* block;
-  Node* taken{nullptr};
-};
-
-/*
- * Empty nodes are useful for building graphs, since not every node type can
- * have control flow edges, but it has no meaning later.
- */
-struct NEmpty : Node { explicit NEmpty() : Node(NT::Empty) {} };
 
 /*
  * Req nodes mean the reference count of the object may be observed, up to some
@@ -791,28 +748,10 @@ struct NEmpty : Node { explicit NEmpty() : Node(NT::Empty) {} };
  * avoid changing program behavior.  It will be INT32_MAX on exits from the
  * compilation unit.
  */
-struct NReq : Node {
-  explicit NReq(int32_t level) : Node(NT::Req), level(level) {}
+struct NReq {
+  explicit NReq(int32_t level) : level(level) {}
   int32_t level;
 };
-
-#define X(Kind, kind)                               \
-  UNUSED N##Kind* to_##kind(Node* n) {              \
-    assertx(n->type == NT::Kind);                    \
-    return static_cast<N##Kind*>(n);                \
-  }                                                 \
-  UNUSED const N##Kind* to_##kind(const Node* n) {  \
-    return to_##kind(const_cast<Node*>(n));         \
-  }
-
-X(Inc, inc)
-X(Dec, dec)
-X(Req, req)
-X(Phi, phi)
-X(Sig, sig)
-X(Empty, empty)
-
-#undef X
 
 //////////////////////////////////////////////////////////////////////
 
@@ -2710,10 +2649,6 @@ struct PreAdderInfo {
 };
 
 struct PreAdder {
-  void operator()(ASetID asetID, const NPhi& n) const {}
-  void operator()(ASetID asetID, const NSig& n) const {}
-  void operator()(ASetID asetID, const NEmpty& n) const {}
-
   void operator()(ASetID asetID, const NInc& n) const {
     auto const blk = n.inst->block();
     auto const iter = blk->iteratorTo(n.inst);

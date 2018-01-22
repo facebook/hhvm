@@ -339,11 +339,14 @@ let () =
         "Which diff tool to compare different S-Expressions with [def: vimdiff]"
       )
     ; ("--hash", Set hash,
-      "Get the decl level parsing hash of a given file "
+        "Get the decl level parsing hash of a given file "
       )
     ; ("--sorted", Unit (fun () -> dumper := Debug.dump_sorted_ast),
         "When using the `compare` parser, the (lexicographically) sort the " ^
         "S-Expressions before diffing"
+      )
+    ; ("--show-pos", Unit (fun () -> Sof.show_pos := true),
+        "Show positional information on the AST"
       )
     ]) (fun fn -> filename := fn) usage;
   let parse_function = match !use_parser with

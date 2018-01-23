@@ -289,6 +289,37 @@ let rewrite_all_declarations declaration_list =
   rewritten_declarations
 
 (**
+ * Because there are many instances in the lowered code where we are unable
+ * to annotate types, files with // strict in them will not pass typechecking
+ * when lowered, so we need to strip the strict mode when lowering the files
+ *
+ * We only strip the trailing text if the trailing text doesn't match // decl
+ *)
+let remove_strict_mode hh_decl =
+  let remove_strict_trailing_text node =
+    match syntax node with
+    | MarkupSuffix ({
+        markup_suffix_name = ({
+          syntax = Token name;
+          _ ;
+        } as suffix_name);
+        _ ;
+      } as markup_suffix) ->
+      if matches_decl name
+      then Rewriter.Result.Keep
+      else
+        let new_suffix = Token.with_trailing_text single_space name in
+        let markup_suffix_name =
+          Syntax.synthesize_from suffix_name (Token new_suffix) in
+        let new_node =
+          Syntax.synthesize_from
+            node
+            (MarkupSuffix { markup_suffix with markup_suffix_name; }) in
+        Rewriter.Result.Replace new_node
+    | _ -> Rewriter.Result.Keep in
+  Rewriter.rewrite_post remove_strict_trailing_text hh_decl
+
+(**
  Lowers all coroutines found in a script
 
  We are working around a significant shortcoming of HHVM here.  We are supposed
@@ -320,6 +351,7 @@ let lower_coroutines root =
     let declarations = syntax_node_to_list script_declarations in
     begin match declarations with
     | hh_decl :: declarations ->
+      let hh_decl = remove_strict_mode hh_decl in
       let rewritten_declarations = rewrite_all_declarations declarations in
       let rewritten_declarations = hh_decl :: rewritten_declarations in
       make_script (make_list rewritten_declarations)

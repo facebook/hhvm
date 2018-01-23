@@ -1018,3 +1018,9 @@ let make_goto_statement_syntax label =
 
 let boolval_syntax =
   make_simple_name_syntax "boolval"
+
+(* To detect whether a file's first token is marked with // decl *)
+let matches_decl token =
+  let trailing_text = Token.trailing_text token in
+  let decl_regexp = Str.regexp "^\\([ \\t]*//[ \\t]*decl\\)" in
+  Str.string_match decl_regexp trailing_text 0

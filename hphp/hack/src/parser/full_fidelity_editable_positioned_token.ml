@@ -175,6 +175,9 @@ let with_updated_original_source_data token update_original_source_data =
 let with_leading leading token =
   with_updated_original_source_data token (SourceData.with_leading leading)
 
+let with_trailing_text trailing_text token =
+  { token with trailing_text }
+
 let with_kind token kind =
   { token with kind }
 

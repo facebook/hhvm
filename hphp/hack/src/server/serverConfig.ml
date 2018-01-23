@@ -22,8 +22,6 @@ type t = {
   load_script      : Path.t option;
   load_script_timeout : int; (* in seconds *)
 
-  load_mini_script : Path.t option;
-
   (** Script to call to prefetch a saved state. Expected invocation is:
     *   state_prefetcher_script <svn revision number>
     *
@@ -203,8 +201,6 @@ let load config_filename options =
   (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
    * to wait indefinitely *)
   let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
-  let load_mini_script =
-    Option.map (SMap.get config "load_mini_script") maybe_relative_path in
   let state_prefetcher_script =
     Option.map (SMap.get config "state_prefetcher_script") maybe_relative_path in
   let formatter_override =
@@ -226,7 +222,6 @@ let load config_filename options =
     version = version;
     load_script = load_script;
     load_script_timeout = load_script_timeout;
-    load_mini_script = load_mini_script;
     state_prefetcher_script = state_prefetcher_script;
     gc_control = make_gc_control config;
     sharedmem_config = make_sharedmem_config config options local_config;
@@ -242,7 +237,6 @@ let default_config = {
   version = None;
   load_script = None;
   load_script_timeout = 0;
-  load_mini_script = None;
   state_prefetcher_script = None;
   gc_control = GlobalConfig.gc_control;
   sharedmem_config = GlobalConfig.default_sharedmem_config;
@@ -257,7 +251,6 @@ let set_parser_options config popt = { config with parser_options = popt }
 let set_tc_options config tcopt = { config with tc_options = tcopt }
 let load_script config = config.load_script
 let load_script_timeout config = config.load_script_timeout
-let load_mini_script config = config.load_mini_script
 let gc_control config = config.gc_control
 let sharedmem_config config = config.sharedmem_config
 let state_prefetcher_script config = config.state_prefetcher_script

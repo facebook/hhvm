@@ -28,7 +28,6 @@ exception No_loader
 exception Loader_timeout of string
 
 type load_mini_approach =
-  | Load_mini_script of Path.t
   | Precomputed of ServerArgs.mini_state_target_info
   | Load_state_natively of bool
   | Load_state_natively_with_target of ServerMonitorUtils.target_mini_state
@@ -93,136 +92,10 @@ module ServerInitCommon = struct
       in
       Bucket.of_list next
 
-  let read_json_line ic =
-    let output = input_line ic in
-    try Hh_json.json_of_string output
-    with Hh_json.Syntax_error _ as e ->
-      Hh_logger.log "Failed to parse JSON: %s" output;
-      raise e
-
-  let check_json_obj_error kv =
-    match List.Assoc.find kv "error" with
-    | Some (Hh_json.JSON_String s) -> failwith s
-    | _ -> ()
-
-  (* Expected output from script:
-   * Two lines of JSON.
-   * The first line indicates the path to the state file plus some metadata
-   * The second line is a list of the files that have changed since the state
-   * was built
-   *)
-  let load_state root cmd (_ic, oc) =
-    try
-      let load_script_log_file = ServerFiles.load_log root in
-      let cmd =
-        Printf.sprintf
-          "%s %s %s %s"
-          (Filename.quote (Path.to_string cmd))
-          (Filename.quote (Path.to_string root))
-          (Filename.quote (Build_id.build_revision))
-          (Filename.quote load_script_log_file) in
-      Hh_logger.log "Running load_mini script: %s\n%!" cmd;
-      let ic = Unix.open_process_in cmd in
-      let json = read_json_line ic in
-      let kv = Hh_json.get_object_exn json in
-      check_json_obj_error kv;
-      let state_fn = Hh_json.get_string_exn @@ List.Assoc.find_exn kv "state" in
-      let corresponding_rev = Hh_json.get_string_exn @@
-        List.Assoc.find_exn kv "corresponding_base_revision" in
-      let is_cached =
-        Hh_json.get_bool_exn @@ List.Assoc.find_exn kv "is_cached" in
-      let deptable_fn =
-        Hh_json.get_string_exn @@ List.Assoc.find_exn kv "deptable" in
-      let end_time = Unix.gettimeofday () in
-      let open Hh_json.Access in
-      let state_distance = (return json) >>=
-        get_number_int "distance" |>
-        to_option
-      in
-      Daemon.to_channel oc
-        @@ Ok (`Fst (
-          state_fn,
-          Hg.Svn_rev (int_of_string corresponding_rev),
-          is_cached,
-          end_time,
-          deptable_fn,
-          state_distance));
-      let json = read_json_line ic in
-      assert (Unix.close_process_in ic = Unix.WEXITED 0);
-      let kv = Hh_json.get_object_exn json in
-      check_json_obj_error kv;
-      let to_recheck =
-        Hh_json.get_array_exn @@ List.Assoc.find_exn kv "changes" in
-      let to_recheck = List.map to_recheck Hh_json.get_string_exn in
-      Daemon.to_channel oc @@ Ok (`Snd to_recheck)
-    with e ->
-      Hh_logger.exc ~prefix:"Failed to load state: " e;
-      Daemon.to_channel oc @@ Error e
-
   let with_loader_timeout timeout stage f =
     Core_result.join @@ Core_result.try_with @@ fun () ->
     Timeout.with_timeout ~timeout ~do_:(fun _ -> f ())
       ~on_timeout:(fun _ -> raise @@ Loader_timeout stage)
-
-  (* This generator-like function first runs the load script to download state.
-   * It then waits for the load script to send it the list of files that
-   * have changed since the state was downloaded.
-   *)
-  let mk_state_future root cmd ~ignore_hh_version =
-    let start_time = Unix.gettimeofday () in
-    Core_result.try_with @@ fun () ->
-    let log_file =
-      Sys_utils.make_link_of_timestamped (ServerFiles.load_log root) in
-    let log_fd = Daemon.fd_of_path log_file in
-    let {Daemon.channels = (ic, _oc); pid} as daemon =
-      Daemon.fork (log_fd, log_fd) (load_state root) cmd
-    (** The first generator in the future, which gets the results from the
-     * process. *)
-    in fun () ->
-    try
-      Daemon.from_channel ic >>= function
-      | `Snd _ -> assert false
-      | `Fst (
-        fn,
-        corresponding_rev,
-        is_cached,
-        end_time,
-        deptable_fn,
-        state_distance) ->
-        lock_and_load_deptable deptable_fn ~ignore_hh_version;
-        HackEventLogger.load_mini_worker_end ~is_cached start_time end_time;
-        let time_taken = end_time -. start_time in
-        Hh_logger.log "Loading mini-state took %.2fs" time_taken;
-        let t = Unix.gettimeofday () in
-        (** The second future, which fetches the dirty files. *)
-        let get_dirty_files = fun () -> begin
-        Daemon.from_channel ic >>= function
-          | `Fst _ -> assert false
-          | `Snd dirty_files ->
-            let _, status = Unix.waitpid [] pid in
-            assert (status = Unix.WEXITED 0);
-            let chan = open_in fn in
-            let old_saved = Marshal.from_channel chan in
-            let dirty_files =
-            List.map dirty_files Relative_path.from_root in
-            HackEventLogger.vcs_changed_files_end t (List.length dirty_files);
-            let _ = Hh_logger.log_duration "Finding changed files" t in
-            Ok (
-              fn,
-              corresponding_rev,
-              Relative_path.set_of_list dirty_files,
-              old_saved,
-              state_distance)
-        end in
-        Ok get_dirty_files
-    with e ->
-      (* We have failed to load the saved state in the allotted time. Kill
-       * the daemon so it doesn't write to shared memory while the type-decl
-       * / type-check phases are running. The kill may fail if e.g. the
-       * daemon exited just after the timeout but before the kill signal goes
-       * through *)
-      (try Daemon.kill daemon with e -> Hh_logger.exc e);
-      raise e
 
   let invoke_loading_state_natively ~tiny ?(use_canary=false) ?target genv root =
     let mini_state_handle, tiny = begin match target with
@@ -270,8 +143,6 @@ module ServerInitCommon = struct
   let invoke_approach genv root approach ~tiny =
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
     match approach with
-    | Load_mini_script cmd ->
-      mk_state_future root cmd ~ignore_hh_version
     | Precomputed { ServerArgs.saved_state_fn;
       corresponding_base_revision; deptable_fn; changes } ->
       lock_and_load_deptable deptable_fn ~ignore_hh_version;

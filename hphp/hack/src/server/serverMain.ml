@@ -408,27 +408,19 @@ let resolve_init_approach genv =
     None, "Server_args_saving_state"
   else
     match
-      (ServerConfig.load_mini_script genv.config),
       (genv.local_config.ServerLocalConfig.load_state_natively),
       (ServerArgs.with_mini_state genv.options) with
-      | None, _, None ->
-        None, "No_mini_script_or_precomputed"
-      | Some _, true, None ->
+      | false, None ->
+        None, "No_native_loading_or_precomputed"
+      | true, None ->
         (** Use native loading only if the config specifies a load script,
          * and the local config prefers native. *)
         let use_canary = ServerArgs.load_state_canary genv.options in
         Some (ServerInit.Load_state_natively use_canary), "Load_state_natively"
-      | _, _, Some (ServerArgs.Informant_induced_mini_state_target target) ->
+      | _, Some (ServerArgs.Informant_induced_mini_state_target target) ->
         Some (ServerInit.Load_state_natively_with_target target), "Load_state_natively_with_target"
-      | Some load_mini_script, false, None ->
-        Some (ServerInit.Load_mini_script load_mini_script), "Load_mini_script"
-      | None, _, Some (ServerArgs.Mini_state_target_info target) ->
+      | _, Some (ServerArgs.Mini_state_target_info target) ->
         Some (ServerInit.Precomputed target), "Precomputed"
-      | Some _, _, Some (ServerArgs.Mini_state_target_info target) ->
-        Hh_logger.log "Warning - Both a mini script in the server config %s"
-          "and a mini state target in server args are configured";
-        Hh_logger.log "Ignoring the script and using precomputed target";
-        Some (ServerInit.Precomputed target), "Precompute_override"
 
 let program_init genv =
   let load_mini_approach, approach_name = resolve_init_approach genv in

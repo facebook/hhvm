@@ -20,7 +20,6 @@ val default_config : t
 
 val load_script         : t -> Path.t option
 val load_script_timeout : t -> int
-val load_mini_script    : t -> Path.t option
 val ignored_paths       : t -> string list
 val gc_control          : t -> Gc.control
 val sharedmem_config    : t -> SharedMem.config

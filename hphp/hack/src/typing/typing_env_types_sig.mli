@@ -71,7 +71,6 @@
    (* A set of constraints that are global to a given method *)
    global_tpenv : tpenv ;
  }
-and reactivity = Normal | Local | Reactive
 and return_info = {
   return_type : locl ty;
   return_disposable : bool;
@@ -104,7 +103,7 @@ and genv = {
  * - the expected return type of the body (optional)
  *)
 and anon =
-  Nast.is_reactive *
+  reactivity *
   Nast.is_coroutine *
   (?el:Nast.expr list ->
   ?ret_ty: locl ty ->

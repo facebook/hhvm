@@ -325,6 +325,15 @@ and subtype_params_with_variadic env subl variadic_ty =
     let env = sub_type env sub variadic_ty in
     subtype_params_with_variadic env subl variadic_ty
 
+and subtype_reactivity r_sub r_super =
+  match r_sub, r_super with
+  (* Reactive functions are a subtype of non reactive ones, but not vice versa *)
+  | _, Nonreactive
+  | (Reactive | Shallow), Local
+  | Reactive, Shallow -> true
+  | sub, super -> sub = super
+
+
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super.
  *
@@ -386,9 +395,10 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
     r_sub ft_sub r_super ft_super =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
-  (* Reactive functions are a subtype of non reactive ones, but not vice versa *)
-  if not ft_sub.ft_reactive && ft_super.ft_reactive then
-    Errors.fun_reactivity_mismatch ft_super.ft_reactive p_super p_sub;
+  if not (subtype_reactivity ft_sub.ft_reactive ft_super.ft_reactive) then
+    Errors.fun_reactivity_mismatch
+      p_super (reactivity_to_string ft_super.ft_reactive)
+      p_sub (reactivity_to_string ft_sub.ft_reactive);
   if ft_sub.ft_is_coroutine <> ft_super.ft_is_coroutine
   then Errors.coroutinness_mismatch ft_super.ft_is_coroutine p_super p_sub;
   if ft_sub.ft_return_disposable <> ft_super.ft_return_disposable
@@ -947,11 +957,13 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       | None ->
           Errors.anonymous_recursive_call (Reason.to_pos r_sub);
           env
-      | Some (is_reactive, is_coroutine, anon) ->
+      | Some (reactivity, is_coroutine, anon) ->
           let p_super = Reason.to_pos r_super in
           let p_sub = Reason.to_pos r_sub in
-          if not is_reactive && ft.ft_reactive
-          then Errors.fun_reactivity_mismatch ft.ft_reactive p_super p_sub;
+          if not (subtype_reactivity reactivity ft.ft_reactive)
+          then Errors.fun_reactivity_mismatch
+            p_super (reactivity_to_string reactivity)
+            p_sub (reactivity_to_string ft.ft_reactive);
           if is_coroutine <> ft.ft_is_coroutine
           then Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub;
           if not (Unify.unify_arities

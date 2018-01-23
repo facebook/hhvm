@@ -434,7 +434,7 @@ module type S = sig
   val function_is_not_coroutine : Pos.t -> string -> unit
   val coroutinness_mismatch : bool -> Pos.t -> Pos.t -> unit
   val return_disposable_mismatch : bool -> Pos.t -> Pos.t -> unit
-  val fun_reactivity_mismatch : bool -> Pos.t -> Pos.t -> unit
+  val fun_reactivity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
   val frozen_in_incorrect_scope : Pos.t -> unit
   val reassign_mutable_var : Pos.t -> unit
   val mutable_call_on_immutable : Pos.t -> Pos.t -> unit
@@ -474,4 +474,5 @@ module type S = sig
   val nonreactive_append : Pos.t -> unit
   val inout_argument_bad_expr : Pos.t -> unit
   val inout_argument_bad_type : Pos.t -> (Pos.t * string) list -> unit
+  val nonreactive_call_from_shallow : Pos.t -> unit
 end

@@ -183,9 +183,6 @@ let has_accept_disposable_attribute user_attributes =
 let has_return_disposable_attribute user_attributes =
   Attributes.mem SN.UserAttributes.uaReturnDisposable user_attributes
 
-let fun_is_reactive user_attributes =
-  Attributes.mem SN.UserAttributes.uaReactive user_attributes
-
 let fun_returns_mutable user_attributes =
   Attributes.mem SN.UserAttributes.uaMutableReturn user_attributes
 
@@ -252,7 +249,7 @@ and ret_from_fun_kind pos kind =
 
 and fun_decl_in_env env f =
   check_params env f.f_params;
-  let reactivity = fun_is_reactive f.f_user_attributes in
+  let reactivity = fun_reactivity f.f_user_attributes in
   let returns_mutable = fun_returns_mutable f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let arity_min = minimum_arity f.f_params in
@@ -788,7 +785,7 @@ and typeconst_decl env c (acc, acc2) {
 
 and method_decl env m =
   check_params env m.m_params;
-  let reactivity = fun_is_reactive m.m_user_attributes in
+  let reactivity = fun_reactivity m.m_user_attributes in
   let mut = has_mutable_attribute m.m_user_attributes in
   let returns_mutable = fun_returns_mutable m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in

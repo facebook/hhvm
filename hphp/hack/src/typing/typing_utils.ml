@@ -659,16 +659,5 @@ let default_fun_param ty : 'a fun_param = {
   fp_mutable = false;
 }
 
-(*****************************************************************************)
-(* Reactivity *)
-(*****************************************************************************)
-
-let fun_reactivity user_attributes =
-  match Attributes.mem SN.UserAttributes.uaReactive user_attributes,
-        Attributes.mem SN.UserAttributes.uaLocalReactive user_attributes with
-  | true, _ -> Env.Reactive
-  | _, true -> Env.Local
-  | _ -> Env.Normal
-
 let fun_mutable user_attributes =
   Attributes.mem SN.UserAttributes.uaMutable user_attributes

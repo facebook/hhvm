@@ -132,6 +132,7 @@ module UserAttributes = struct
   let uaReturnDisposable    = "__ReturnDisposable"
   let uaReactive            = "__Rx"
   let uaLocalReactive       = "__RxLocal"
+  let uaShallowReactive     = "__RxShallow"
   let uaMutable             = "__Mutable"
   let uaMutableReturn       = "__MutableReturn"
 
@@ -152,6 +153,7 @@ module UserAttributes = struct
       uaLocalReactive;
       uaMutable;
       uaMutableReturn;
+      uaShallowReactive;
     ]
 end
 

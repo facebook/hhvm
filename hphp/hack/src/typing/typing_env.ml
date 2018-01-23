@@ -82,7 +82,7 @@ let expand_type env x =
   | r, Tvar x -> get_type env r x
   | x -> env, x
 
-let make_ft p reactive is_coroutine params ret_ty =
+let make_ft p reactivity is_coroutine params ret_ty =
   let arity = List.length params in
   {
     ft_pos      = p;
@@ -95,7 +95,7 @@ let make_ft p reactive is_coroutine params ret_ty =
     ft_params   = params;
     ft_ret      = ret_ty;
     ft_ret_by_ref = false;
-    ft_reactive = reactive;
+    ft_reactive = reactivity;
     ft_return_disposable = false;
     ft_returns_mutable = false;
     ft_mutable = false;
@@ -299,7 +299,7 @@ let empty tcopt file ~droot = {
     parent_id = "";
     parent  = Reason.none, Tany;
     fun_kind = Ast.FSync;
-    fun_reactive = Normal;
+    fun_reactive = Nonreactive;
     fun_mutable = false;
     anons   = IMap.empty;
     file    = file;
@@ -313,13 +313,12 @@ let set_env_reactive env reactive =
 let set_env_function_pos env function_pos =
   { env with function_pos }
 
-(* Full reactivity *)
-let env_reactive env =
-  env.genv.fun_reactive = Reactive
+let env_reactivity env =
+  env.genv.fun_reactive
 
-(* Local reactivity *)
+(* Some form (strict/shallow/local) of reactivity *)
 let env_local_reactive env =
-  env.genv.fun_reactive <> Normal
+  env.genv.fun_reactive <> Nonreactive
 
 let function_is_mutable env =
   env.genv.fun_mutable
@@ -332,7 +331,7 @@ let lambda_reactive = ref None
   block and checks if it breaks reactivity rules *)
 let check_lambda_reactive f =
   let old_lambda_reactive = !lambda_reactive in
-  lambda_reactive := Some true;
+  lambda_reactive := Some Reactive;
   let results = f () in
   let result = !lambda_reactive in
   lambda_reactive := old_lambda_reactive;
@@ -342,7 +341,7 @@ let check_lambda_reactive f =
 
 let not_lambda_reactive () =
   lambda_reactive := (match !lambda_reactive with
-  | Some _ -> Some false
+  | Some _ -> Some Nonreactive
   | None -> None)
 
 let add_wclass env x =

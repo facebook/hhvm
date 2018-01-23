@@ -999,6 +999,7 @@ module Typing                               = struct
   let mutable_argument_mismatch             = 4215 (* DONT MODIFY!!!! *)
   let invalid_mutable_return_result         = 4216 (* DONT MODIFY!!!! *)
   let mutable_return_result_mismatch        = 4217 (* DONT MODIFY!!!! *)
+  let nonreactive_call_from_shallow         = 4217 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -2489,14 +2490,13 @@ let fun_arity_mismatch pos1 pos2 =
   pos2, "Because of this definition";
 ]
 
-let fun_reactivity_mismatch pos1_is_coroutine pos1 pos2 =
-  let m1 = "This function is reactive." in
-  let m2 = "This function is not." in
+let fun_reactivity_mismatch pos1 kind1 pos2 kind2 =
+  let f k = "This function is " ^ k ^ "." in
   add_list
     Typing.fun_reactivity_mismatch
     [
-      pos1, if pos1_is_coroutine then m1 else m2;
-      pos2, if pos1_is_coroutine then m2 else m1;
+      pos1, f kind1;
+      pos2, f kind2
     ]
 
 let frozen_in_incorrect_scope pos1 =
@@ -3057,6 +3057,11 @@ let nonreactive_function_call pos =
   let msg =
     "Reactive functions can only call other reactive functions" in
   add Typing.nonreactive_function_call pos msg
+
+let nonreactive_call_from_shallow pos =
+  let msg =
+    "Shallow reactive functions cannot call non-reactive functions" in
+  add Typing.nonreactive_call_from_shallow pos msg
 
 let nonreactive_append pos =
   let msg = "Cannot append to a Hack Collection types in a reactive context" in

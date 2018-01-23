@@ -449,7 +449,7 @@ and fun_def tcopt f =
   let dep = Typing_deps.Dep.Fun (snd f.f_name) in
   let env = Env.empty tcopt (Pos.filename pos) (Some dep) in
   let env = Env.set_env_function_pos env pos in
-  let reactive = TUtils.fun_reactivity f.f_user_attributes in
+  let reactive = fun_reactivity f.f_user_attributes in
   let mut = TUtils.fun_mutable f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let return_mutable = has_mutable_return_attribute f.f_user_attributes in
@@ -2088,7 +2088,7 @@ and expr_
       let check_body_under_known_params ?ret_ty ft =
         let (is_coroutine, anon) = anon_make env p f ft idl in
         let ft = { ft with ft_is_coroutine = is_coroutine } in
-        let ft = { ft with ft_reactive = false } in
+        let ft = { ft with ft_reactive = Nonreactive } in
         let is_reactive, (env, tefun, ty) =
           Env.check_lambda_reactive (fun () -> anon ?ret_ty env ft.ft_params) in
         let ft = { ft with ft_reactive = is_reactive } in
@@ -2151,9 +2151,9 @@ and expr_
         let is_coroutine, anon = anon_make env p f declared_ft idl in
         let env, tefun, _, anon_id = Errors.try_with_error
           (fun () ->
-            let is_reactive, (_, tefun, ty)
+            let reactivity, (_, tefun, ty)
               = Env.check_lambda_reactive (fun () -> anon env declared_ft.ft_params) in
-            let anon_fun = is_reactive, is_coroutine, anon in
+            let anon_fun = reactivity, is_coroutine, anon in
             let env, anon_id = Env.add_anonymous env anon_fun in
             env, tefun, ty, anon_id)
           (fun () ->
@@ -2161,9 +2161,9 @@ and expr_
                them in any subsequent usages. *)
             let anon_ign ?el:_ ?ret_ty:_ env fun_params =
               Errors.ignore_ (fun () -> (anon env fun_params)) in
-            let is_reactive, (_, tefun, ty)
+            let reactivity, (_, tefun, ty)
               = Env.check_lambda_reactive (fun () -> anon_ign env declared_ft.ft_params) in
-            let anon_fun = is_reactive, is_coroutine, anon in
+            let anon_fun = reactivity, is_coroutine, anon in
             let env, anon_id = Env.add_anonymous env anon_fun in
             env, tefun, ty, anon_id) in
           env, tefun, (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id))
@@ -4777,14 +4777,23 @@ and call_ ~expected pos env fty el uel =
     let pos_def = Reason.to_pos r2 in
     let env, var_param = variadic_param env ft in
 
-    (* Reactive functions can only call reactive functions *)
-    (match Env.env_reactive env, ft.ft_reactive with
-    | true, false ->
-      Env.not_lambda_reactive ();
+    (* mark current lambda as non-reactive
+       since it is trying to call non-reactive function *)
+    if ft.ft_reactive = Nonreactive
+    then Env.not_lambda_reactive ();
+
+    (* Strictly reactive functions can only call stricly reactive functions *)
+    (* Shallow reactive functions can call strictly/shallow/local reactive functions *)
+    (* Local reactive functions can call anything *)
+    begin match Env.env_reactivity env, ft.ft_reactive with
+    (* error if reactive function is calling into something non-strictly-reactive *)
+    | Reactive, (Shallow | Local | Nonreactive) ->
       Errors.nonreactive_function_call pos
-    | _, false ->
-      Env.not_lambda_reactive ()
-    | _ -> ());
+    (* error if shallow reactive function is calling into non-reactive *)
+    | Shallow, Nonreactive ->
+      Errors.nonreactive_call_from_shallow pos
+    | _ -> ()
+    end;
 
     (* Force subtype with expected result *)
     let env = check_expected_ty "Call result" env ft.ft_ret expected in
@@ -5963,7 +5972,7 @@ and method_def env m =
     Env.env_with_locals env Typing_continuations.Map.empty Local_id.Map.empty
   in
   let env = Env.set_env_function_pos env pos in
-  let reactive = TUtils.fun_reactivity m.m_user_attributes in
+  let reactive = fun_reactivity m.m_user_attributes in
   let mut = TUtils.fun_mutable m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let return_mutable = has_mutable_return_attribute m.m_user_attributes in

@@ -23,7 +23,7 @@ val add : env -> int -> locl ty -> env
 val get_type : env -> Reason.t -> int -> env * locl ty
 val get_type_unsafe : env -> int -> env * locl ty
 val expand_type : env -> locl ty -> env * locl ty
-val make_ft : Pos.t -> bool ->  bool -> decl fun_params -> decl ty -> decl fun_type
+val make_ft : Pos.t -> reactivity -> bool -> decl fun_params -> decl ty -> decl fun_type
 val get_shape_field_name : Nast.shape_field_name -> string
 val empty_fake_members : fake_members
 val empty_local : tpenv -> local_env
@@ -115,13 +115,13 @@ val env_with_global_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val is_generic_parameter : env -> string -> bool
 val get_generic_parameters : env -> string list
-val check_lambda_reactive : (unit -> 'a) -> bool * 'a
+val check_lambda_reactive : (unit -> 'a) -> reactivity * 'a
 val not_lambda_reactive : unit -> unit
 val add_fresh_generic_parameter : env -> string -> env * string
 val get_tpenv_size : env -> int
 val set_env_reactive : env -> reactivity -> env
 val set_env_function_pos: env -> Pos.t -> env
-val env_reactive  : env -> bool
+val env_reactivity: env -> reactivity
 val env_local_reactive : env -> bool
 val is_mutable : env -> Local_id.t -> bool
 val add_mutable_var : env -> Local_id.t -> Typing_mutability_env.mutability -> env

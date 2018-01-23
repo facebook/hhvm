@@ -3,4 +3,4 @@ Invalid return type (Typing[4203])
 File "test_lambda_reactive.php", line 23, characters 19-20:
 This function is reactive.
 File "test_lambda_reactive.php", line 24, characters 8-15:
-This function is not.
+This function is non-reactive.

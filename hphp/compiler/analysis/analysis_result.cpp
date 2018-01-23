@@ -68,7 +68,7 @@ using namespace HPHP;
 AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
     m_package(nullptr), m_parseOnDemand(false), m_phase(ParseAllFiles),
-    m_asmCallbacks(this) {
+    m_asmCallbacks(AnalysisResultConstRawPtr{this}) {
 }
 
 AnalysisResult::~AnalysisResult() {

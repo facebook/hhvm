@@ -281,6 +281,8 @@ bool Package::parse(bool check) {
   auto const threadCount = Option::ParserThreadCount <= 0 ?
     1 : Option::ParserThreadCount;
 
+  // If we're using the hack compiler, make sure it agrees on the thread count.
+  RuntimeOption::EvalHackCompilerWorkers = threadCount;
   ParserDispatcher dispatcher { threadCount, 0, false, this };
 
   m_dispatcher = &dispatcher;
@@ -353,8 +355,10 @@ bool Package::parseImpl(const std::string* fileName) {
     }
   }
 
-  {
-    std::ifstream s(*fileName);
+  if ((RuntimeOption::EvalHackCompilerDefault &&
+      !RuntimeOption::EvalHackCompilerCommand.empty()) ||
+      RuntimeOption::EvalPHP7CompilerEnabled) {
+    std::ifstream s(fullPath);
     std::string content {
       std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
     MD5 md5{string_md5(content)};
@@ -366,8 +370,8 @@ bool Package::parseImpl(const std::string* fileName) {
     if (auto uc = UnitCompiler::create(
           content.data(), content.size(), fileName->c_str(), md5)) {
       try {
-        Lock lock(m_ar->getMutex());
         if (auto ue = uc->compile(m_ar->getParseOnDemandCallBacks())) {
+          Lock lock(m_ar->getMutex());
           m_ar->addHhasFile(std::move(ue));
           return true;
         } else {

@@ -114,7 +114,7 @@ struct AnalysisResult : BlockScope, FunctionContainer {
   };
 
   struct ParseOnDemandCalbacks : AsmCallbacks {
-    explicit ParseOnDemandCalbacks(AnalysisResult* ar) : m_ar(ar) {}
+    explicit ParseOnDemandCalbacks(AnalysisResultConstRawPtr ar) : m_ar(ar) {}
 
     virtual void onInclude(const std::string& include) override {
       m_ar->parseOnDemand(include);
@@ -130,7 +130,7 @@ struct AnalysisResult : BlockScope, FunctionContainer {
     }
 
    private:
-    AnalysisResult* m_ar;
+    AnalysisResultConstRawPtr m_ar;
   };
 
 public:

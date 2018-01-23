@@ -811,8 +811,25 @@ void print_hh_file(Output& out, const Unit* unit) {
 
 void print_unit_metadata(Output& out, const Unit* unit) {
   out.nl();
+
   out.fmtln(".filepath {};", escaped(unit->filepath()));
   print_hh_file(out, unit);
+  auto const metaData = unit->metaData();
+  for (auto kv : metaData) {
+    if (isStringType(kv.second.m_type)) {
+      auto isBareWord = true;
+      auto isQuoted = true;
+      auto const str = kv.second.m_data.pstr;
+      for (auto ch : str->slice()) {
+        if (!is_bareword()(ch)) isBareWord = false;
+        if (ch < ' ' || ch == '"' || ch >= 0x7f) isQuoted = false;
+      }
+      out.fmtln(".metadata {} = {};",
+                kv.first,
+                isBareWord ? str->toCppString() :
+                isQuoted ? escaped(str) : escaped_long(str));
+    }
+  }
   for (auto i = size_t{0}; i < unit->numArrays(); ++i) {
     auto const ad = unit->lookupArrayId(i);
     out.fmtln(".adata A_{} = {};", i, escaped_long(ad));

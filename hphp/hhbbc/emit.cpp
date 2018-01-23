@@ -1333,6 +1333,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   ue->m_isHHFile = unit.isHHFile;
   ue->m_useStrictTypes = unit.useStrictTypes;
   ue->m_useStrictTypesForBuiltins = unit.useStrictTypesForBuiltins;
+  ue->m_metaData = unit.metaData;
 
   EmitUnitState state { index, &unit };
   state.classOffsets.resize(unit.classes.size(), kInvalidOffset);

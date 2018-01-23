@@ -2858,6 +2858,38 @@ void parse_class_refs(AsmState& as) {
 }
 
 /*
+ * directive-metadata : name = bareword ';'
+ *                    | name = quoted-string-literal ';'
+ *                    | name = long-string-literal ';'
+ *                    ;
+ */
+void parse_metadata(AsmState& as) {
+  std::string key;
+  if (as.in.readname(key)) {
+    as.in.expectWs('=');
+    as.in.skipWhitespace();
+    auto const value = [&] () -> const StringData* {
+      auto ret = parse_maybe_long_string(as);
+      if (!ret.empty()) return makeStaticString(ret);
+      std::string tmp;
+      if (as.in.readQuotedStr(tmp) || as.in.readword(tmp)) {
+        return makeStaticString(tmp);
+      }
+      return nullptr;
+    }();
+    if (value) {
+      as.in.expect(';');
+      as.ue->m_metaData.emplace(
+        makeStaticString(key),
+        make_tv<KindOfPersistentString>(value)
+      );
+      return;
+    }
+  }
+  as.error(".metadata expects a key = value pair");
+}
+
+/*
  * asm-file : asm-tld* <EOF>
  *          ;
  *
@@ -2872,6 +2904,7 @@ void parse_class_refs(AsmState& as) {
  *         |    ".constant_refs directive-symbols
  *         |    ".function_refs directive-symbols
  *         |    ".class_refs    directive-symbols
+ *         |    ".metadata      directive-meta-data
  *         ;
  */
 void parse(AsmState& as) {
@@ -2901,6 +2934,7 @@ void parse(AsmState& as) {
     if (directive == ".constant_refs") { parse_constant_refs(as) ; continue; }
     if (directive == ".function_refs") { parse_function_refs(as) ; continue; }
     if (directive == ".class_refs")    { parse_class_refs(as)    ; continue; }
+    if (directive == ".metadata")      { parse_metadata(as)      ; continue; }
 
     as.error("unrecognized top-level directive `" + directive + "'");
   }

@@ -384,6 +384,7 @@ public:
   bool m_returnSeen{false};
   int m_preloadPriority{0};
   TypedValue m_mainReturn;
+  UserAttributeMap m_metaData;
 
 private:
   MD5 m_md5;

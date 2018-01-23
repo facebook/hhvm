@@ -377,5 +377,9 @@ inline bool Unit::useStrictTypesForBuiltins() const {
   return m_useStrictTypesForBuiltins;
 }
 
+inline UserAttributeMap Unit::metaData() const {
+  return m_metaData;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

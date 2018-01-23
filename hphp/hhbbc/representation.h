@@ -592,6 +592,7 @@ struct Unit {
   CompactVector<std::unique_ptr<TypeAlias>> typeAliases;
   CompactVector<std::pair<SString,SString>> classAliases;
   CompactVector<SrcLoc> srcLocs;
+  UserAttributeMap metaData;
 };
 
 /*

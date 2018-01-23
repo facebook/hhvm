@@ -564,6 +564,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
   }
   u->m_typeAliases = m_typeAliases;
+  u->m_metaData = m_metaData;
 
   size_t ix = m_fes.size() + m_hoistablePceIdList.size();
   if (m_mergeOnly && !m_allClassesHoistable) {
@@ -761,6 +762,7 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_typeAliases)
     (m_useStrictTypes)
     (m_useStrictTypesForBuiltins)
+    (m_metaData)
     ;
 
   if (RuntimeOption::EvalLoadFilepathFromUnitCache) {

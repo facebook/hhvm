@@ -834,6 +834,8 @@ public:
    * files or force_hh */
   bool useStrictTypesForBuiltins() const;
 
+  UserAttributeMap metaData() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -889,6 +891,7 @@ private:
   FixedVector<const ArrayData*> m_arrays;
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
   mutable LockFreePtrWrapper<CompactVector<LineInfo>> m_lineMap;
+  UserAttributeMap m_metaData;
 };
 
 struct UnitExtended : Unit {

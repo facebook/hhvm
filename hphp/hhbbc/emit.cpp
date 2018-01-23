@@ -505,15 +505,17 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto ret_assert = [&] { assert(currentStackDepth == 1); };
 
-    auto defcls_impl = [&] (const uint32_t& id) {
-      always_assert(euState.classOffsets[id] == kInvalidOffset);
+    auto defcls_impl = [&] (const uint32_t& id, bool closure) {
+      if (euState.classOffsets[id] != kInvalidOffset) {
+        always_assert(closure);
+        return;
+      }
       euState.classOffsets[id] = startOffset;
-
       const_cast<uint32_t&>(id) = recordClass(euState, ue, id);
     };
-    auto defcls    = [&] { defcls_impl(inst.DefCls.arg1); };
-    auto defclsnop = [&] { defcls_impl(inst.DefClsNop.arg1); };
-    auto createcl  = [&] { defcls_impl(inst.CreateCl.arg2); };
+    auto defcls    = [&] { defcls_impl(inst.DefCls.arg1, false); };
+    auto defclsnop = [&] { defcls_impl(inst.DefClsNop.arg1, false); };
+    auto createcl  = [&] { defcls_impl(inst.CreateCl.arg2, true); };
     auto deffun    = [&] {
       const_cast<uint32_t&>(inst.DefFunc.arg1) =
         recordFunc(euState, ue, inst.DefFunc.arg1);

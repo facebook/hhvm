@@ -246,6 +246,7 @@ let error_tests =
     "test_inout_params_errors";
     "test_variadic_ref_decorators";
     "test_lambda_variadic_errors";
+    "test_lambda_no_typehints_errors";
   ] ~f:mapper
 
 let test_data = minimal_tests @ trivia_tests @ error_tests @

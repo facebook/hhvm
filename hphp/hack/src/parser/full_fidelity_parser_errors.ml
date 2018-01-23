@@ -527,7 +527,7 @@ let methodish_abstract_conflict_with_final hhvm_compat_mode node =
 let rec parameter_type_is_required parents =
   match parents with
   | h :: _ when is_function_declaration h -> true
-  | h :: _ when is_anonymous_function h -> false (* TODO: Lambda? *)
+  | h :: _ when (is_anonymous_function h) || (is_lambda_expression h) -> false
   | _ :: t -> parameter_type_is_required t
   | [] -> false
 

@@ -124,7 +124,6 @@ let file_filter f =
   (* Filter the relative path *)
   let f = Relative_path.strip_root_if_possible f in
   (FindUtils.is_php f && not (FilesToIgnore.should_ignore f))
-  || FindUtils.is_js f
 
 let list_files env oc =
   let acc = List.fold_right

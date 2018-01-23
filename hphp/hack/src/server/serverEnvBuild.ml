@@ -28,11 +28,6 @@ let watchman_expression_terms = [
       J.strlist ["suffix"; "hh"];
       J.strlist ["suffix"; "hhi"];
       J.strlist ["suffix"; "xhp"];
-      (* FIXME: This is clearly wrong, but we do it to match the
-       * behavior on the server-side. We need to investigate if
-       * tracking js files is truly necessary.
-       *)
-      J.strlist ["suffix"; "js"];
     ];
   ];
   J.pred "not" @@ [

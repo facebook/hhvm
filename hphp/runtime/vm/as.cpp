@@ -2780,6 +2780,11 @@ void parse_alias(AsmState& as) {
   as.in.expectWs(';');
 }
 
+/*
+ * directive-hh-file : '1' ';'
+ *                   | '0' ';'
+ *                   ;
+ */
 void parse_hh_file(AsmState& as) {
   as.in.skipWhitespace();
   std::string word;
@@ -2795,6 +2800,11 @@ void parse_hh_file(AsmState& as) {
   as.in.expectWs(';');
 }
 
+/*
+ * directive-strict : '1' ';'
+ *                  | '0' ';'
+ *                  ;
+ */
 void parse_strict(AsmState& as) {
   as.in.skipWhitespace();
   std::string word;
@@ -2814,6 +2824,9 @@ void parse_strict(AsmState& as) {
   as.in.expectWs(';');
 }
 
+/*
+ * directive-symbols : '{' identifier identifier* '}'
+ */
 void parse_symbol_refs(
   AsmState& as,
   void (AsmCallbacks::*onSymbol)(const std::string&)
@@ -2841,6 +2854,9 @@ void parse_symbol_refs(
   as.in.expect('}');
 }
 
+/*
+ * directive-filepaths : '{' string string* '}'
+ */
 void parse_includes(AsmState& as) {
   parse_symbol_refs(as, &AsmCallbacks::onInclude);
 }
@@ -2858,9 +2874,9 @@ void parse_class_refs(AsmState& as) {
 }
 
 /*
- * directive-metadata : name = bareword ';'
- *                    | name = quoted-string-literal ';'
- *                    | name = long-string-literal ';'
+ * directive-metadata : identifier = identifier ';'
+ *                    | identifier = quoted-string-literal ';'
+ *                    | identifier = long-string-literal ';'
  *                    ;
  */
 void parse_metadata(AsmState& as) {
@@ -2900,6 +2916,7 @@ void parse_metadata(AsmState& as) {
  *         |    ".class"        directive-class
  *         |    ".alias"        directive-alias
  *         |    ".strict"       directive-strict
+ *         |    ".hh_file"      directive-hh-file
  *         |    ".includes      directive-filepaths
  *         |    ".constant_refs directive-symbols
  *         |    ".function_refs directive-symbols

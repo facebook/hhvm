@@ -51,9 +51,10 @@ let rec parse_attribute c =
                               | _ -> None)
            | 'd' -> Scanf.bscanf c "d:%0c"
                    (fun ch -> match ch with
-                               | 'N' -> Scanf.bscanf c "NAN;" (Some (Typed_value.Float nan))
-                               | 'I' -> Scanf.bscanf c "INF;" (Some (Typed_value.Float infinity))
-                               | _   -> Scanf.bscanf c "%g;" (fun f -> Some (Typed_value.Float f)))
+                            | 'N' -> Scanf.bscanf c "NAN;" (Some (Typed_value.Float nan))
+                            | 'I' -> Scanf.bscanf c "INF;" (Some (Typed_value.Float infinity))
+                            | '-' -> Scanf.bscanf c "-INF;" (Some (Typed_value.Float neg_infinity))
+                            | _   -> Scanf.bscanf c "%g;" (fun f -> Some (Typed_value.Float f)))
            | 's' -> Scanf.bscanf c "s:%d:\""
                    (fun n -> let myfmt =
                                  Scanf.format_from_string

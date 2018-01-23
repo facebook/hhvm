@@ -3762,6 +3762,7 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
     mstate.base = [&] {
       if (LIKELY(value->m_type != KindOfRef)) {
+        SuppressHackArrCompatNotices shacn;
         return ElemD<MOpMode::Define, false, true>(
           mstate.tvRef, mstate.base, key
         );

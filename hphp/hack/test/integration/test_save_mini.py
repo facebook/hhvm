@@ -70,67 +70,19 @@ class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
     """
     template_repo = 'hphp/hack/test/integration/data/simple_repo'
 
-    def test_no_state_found(self):
-        error_msg = 'No such rev'
-        with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
-            f.write("#! /bin/sh\n")
-            write_echo_json(f, {'error': error_msg, })
-            os.fchmod(f.fileno(), 0o700)
-
-        self.write_local_conf()
-        self.write_hhconfig('server_options.sh')
-        self.write_watchman_config()
-
-        (output, _, _) = self.run_check()
-
-        self.assertEqual(output.strip(), 'No errors!')
-
-        logs = self.get_server_logs()
-        self.assertIn('Could not load mini state', logs)
-        self.assertIn(error_msg, logs)
-
-    def test_get_changes_failure(self):
-        error_msg = 'hg is not playing nice today'
-        with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
-            f.write("#! /bin/sh\n")
-            write_echo_json(
-                f, {
-                    'state': self.saved_state_path(),
-                    'corresponding_base_revision': '1',
-                    'is_cached': True,
-                    'deptable': self.saved_state_path() + '.sql',
-                }
-            )
-            write_echo_json(f, {'error': error_msg, })
-            os.fchmod(f.fileno(), 0o700)
-
-        self.write_local_conf()
-        self.write_hhconfig('server_options.sh')
-        self.write_watchman_config()
-
-        (output, _, _) = self.run_check()
-
-        self.assertEqual(output.strip(), 'No errors!')
-
-        logs = self.get_server_logs()
-        self.assertIn('Could not load mini state', logs)
-        self.assertIn(error_msg, logs)
-
     def test_hhconfig_change(self):
         """
         Start hh_server, then change .hhconfig and check that the server
         restarts itself
         """
-        self.write_load_config()
+        self.start_hh_server()
         self.check_cmd(['No errors!'])
         with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
             f.write(
                 r"""
 # some comment
 assume_php = true
-load_mini_script = %s
-""" % os.path.join(self.repo_dir, 'server_options.sh')
-            )
+""")
 
         # Server may take some time to kill itself.
         time.sleep(2)
@@ -146,8 +98,6 @@ load_mini_script = %s
             self.assertIn('.hhconfig changed in an incompatible way', logs)
 
     def test_watchman_timeout(self):
-        self.write_load_config()
-
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'a') as f:
             f.write(r"""
 watchman_init_timeout = 1

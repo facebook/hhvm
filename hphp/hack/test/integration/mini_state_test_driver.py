@@ -34,7 +34,7 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
 
     @classmethod
     def tearDownClass(cls):
-        # super().tearDownClass()
+        super().tearDownClass()
         shutil.rmtree(cls.saved_state_dir)
 
     @classmethod
@@ -61,14 +61,13 @@ use_watchman = true
 watchman_subscribe_v2 = true
 """)
 
-    def write_hhconfig(self, script_name):
+    def write_hhconfig(self):
         with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
             f.write(r"""
 # some comment
 assume_php = false
-load_mini_script = %s
 auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
-""" % os.path.join(self.repo_dir, script_name))
+""")
 
     def write_watchman_config(self):
         with open(os.path.join(self.repo_dir, '.watchmanconfig'), 'w') as f:
@@ -76,30 +75,43 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 
         os.mkdir(os.path.join(self.repo_dir, '.hg'))
 
-    def write_load_config(self, *changed_files):
-        with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
-            f.write("#! /bin/sh\n")
-            os.fchmod(f.fileno(), 0o700)
-            write_echo_json(
-                f,
-                {
-                    'state': self.saved_state_path(),
-                    'corresponding_base_revision': '1',
-                    'is_cached': True,
-                    'deptable': self.saved_state_path() + '.sql',
-                })
-            write_echo_json(
-                f,
-                {
-                    'changes': changed_files,
-                })
-            os.fchmod(f.fileno(), 0o700)
-
+    def setUp(self):
+        super(MiniStateTestDriver, self).setUp()
         self.write_local_conf()
-        self.write_hhconfig('server_options.sh')
+        self.write_hhconfig()
         self.write_watchman_config()
 
-    def check_cmd(self, expected_output, stdin=None, options=None):
+    def start_hh_server(self, *changed_files):
+        state = {
+            'state': self.saved_state_path(),
+            'corresponding_base_revision': '1',
+            'is_cached': True,
+            'deptable': self.saved_state_path() + '.sql',
+        }
+        if changed_files:
+            state['changes'] = changed_files
+        else:
+            state['changes'] = []
+        with_state_arg = {
+            'data_dump': state
+        }
+        cmd = [
+            hh_server,
+            '--daemon',
+            '--with-mini-state',
+            json.dumps(with_state_arg),
+            self.repo_dir
+        ]
+        self.proc_call(cmd)
+        self.wait_until_server_ready()
+
+    def check_cmd(
+        self,
+        expected_output,
+        stdin=None,
+        options=None,
+        assert_loaded_mini_state=True
+    ):
         result = super(MiniStateTestDriver, self).check_cmd(
             expected_output,
             stdin,
@@ -107,7 +119,8 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         )
         logs = self.get_server_logs()
         self.assertIn('Using watchman', logs)
-        self.assertIn('Successfully loaded mini-state', logs)
+        if assert_loaded_mini_state:
+            self.assertIn('Successfully loaded mini-state', logs)
         return result
 
     def assertEqualString(self, first, second, msg=None):

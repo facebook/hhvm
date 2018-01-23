@@ -35,9 +35,10 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
             return self.check_cmd(expected_output, stdin, options, retries - 1)
         self.assertIn(retcode, [0, 2])
 
-        self.assertCountEqual(
-            map(lambda x: x.format(root=root), expected_output),
-            output.splitlines())
+        if expected_output is not None:
+            self.assertCountEqual(
+                map(lambda x: x.format(root=root), expected_output),
+                output.splitlines())
         return err
 
     def assertEqualString(self, first, second, msg=None):

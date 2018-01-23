@@ -432,6 +432,7 @@ let resolve_init_approach genv =
 
 let program_init genv =
   let load_mini_approach, approach_name = resolve_init_approach genv in
+  Hh_logger.log "Initing with approach: %s" approach_name;
   let env, init_type, init_error, state_distance =
     match load_mini_approach with
     | None ->

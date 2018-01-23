@@ -56,7 +56,7 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
                 msg)
 
     def test_record_with_no_dirty_files(self):
-        self.write_load_config()
+        self.start_hh_server()
         self.run_check()
         logs = self.get_server_logs()
         self.assertIn('start_with_recorder_on = true', logs)

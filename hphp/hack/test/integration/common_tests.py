@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import json
 import os
 import re
+import select
 import shutil
 import signal
 import subprocess
@@ -56,18 +57,53 @@ class CommonTestDriver(object):
         """
         raise NotImplementedError()
 
-    def start_hh_server(self):
-        cmd = [hh_server, self.repo_dir]
-        print(" ".join(cmd), file=sys.stderr)
-        return subprocess.Popen(
-                cmd,
-                stderr=subprocess.PIPE,
-                env=self.test_env)
+    def wait_until_server_ready(self, max_wait_s=30):
+        # We don't want to grab the old log-file, so we wait 2 seconds for the monitor
+        # to start up the new server first.
+        time.sleep(2)
+        log_file = self.proc_call([
+            hh_client, '--logname', self.repo_dir])[0].strip()
+        f = subprocess.Popen(
+            ['tail', '-f', log_file],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        p = select.poll()
+        p.register(f.stdout)
+        while True:
+            if max_wait_s <= 0:
+                print(
+                    "Warning: waiting for server ready took too long",
+                    file=sys.stderr
+                )
+                print("Moving along", file=sys.stderr)
+                return
+            if p.poll(1):
+                line = f.stdout.readline()
+                if b"Server is READY" in line:
+                    return
+                else:
+                    continue
+            else:
+                max_wait_s -= 1
+                time.sleep(1)
+
+    def start_hh_server(self, *changed_files_ignored):
+        cmd = [hh_server, "--daemon", self.repo_dir]
+        self.proc_call(cmd)
+        self.wait_until_server_ready()
 
     def get_server_logs(self):
         time.sleep(2)  # wait for logs to be written
         log_file = self.proc_call([
             hh_client, '--logname', self.repo_dir])[0].strip()
+        with open(log_file) as f:
+            return f.read()
+
+    def get_monitor_logs(self):
+        time.sleep(2)  # wait for logs to be written
+        log_file = self.proc_call([
+            hh_client, '--monitor-logname', self.repo_dir])[0].strip()
         with open(log_file) as f:
             return f.read()
 
@@ -147,12 +183,23 @@ class CommonTestDriver(object):
 
     # Runs `hh_client check` asserting the stdout is equal the expected.
     # Returns stderr.
-    def check_cmd(self, expected_output, stdin=None, options=None):
-        (output, err, _) = self.run_check(stdin, options)
+    # Note: assert_laoded_mini_state is ignored here and only used
+    # in some derived classes.
+    def check_cmd(
+            self,
+            expected_output,
+            stdin=None,
+            options=None,
+            assert_loaded_mini_state=False
+    ):
+        (output, err, retcode) = self.run_check(stdin, options)
         root = self.repo_dir + os.path.sep
-        self.assertCountEqual(
-            map(lambda x: x.format(root=root), expected_output),
-            output.splitlines())
+        if retcode != 0:
+            print("check returned non-zero code: " + str(retcode), file=sys.stderr)
+        if expected_output is not None:
+            self.assertCountEqual(
+                map(lambda x: x.format(root=root), expected_output),
+                output.splitlines())
         return err
 
     def check_cmd_and_json_cmd(
@@ -360,7 +407,7 @@ class CommonTests(object):
 
     # hh should should work with 0 retries.
     def test_responsiveness(self):
-        self.write_load_config()
+        self.start_hh_server()
         self.check_cmd(['No errors!'])
         self.check_cmd(['No errors!'], options=['--retries', '0'])
 
@@ -370,7 +417,7 @@ class CommonTests(object):
         output. Changing this will break the tools that depend on it (like
         editor plugins), and this test is here to remind you about it.
         """
-        self.write_load_config()
+        self.start_hh_server()
 
         stderr = self.check_cmd([], options=["--json"])
         last_line = stderr.splitlines()[-1]
@@ -394,7 +441,7 @@ class CommonTests(object):
                   }
                 }
             """)
-        self.write_load_config('class_1.php')
+        self.start_hh_server('class_1.php')
         self.check_cmd([
             '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
             '  {root}class_3.php:4:28,30: This is an int',
@@ -413,7 +460,7 @@ class CommonTests(object):
             }
             """)
 
-        self.write_load_config('foo_2.php')
+        self.start_hh_server('foo_2.php')
 
         self.check_cmd([
             '{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])',
@@ -433,7 +480,7 @@ class CommonTests(object):
             }
             """)
 
-        self.write_load_config('foo_4.php')
+        self.start_hh_server('foo_4.php')
 
         self.check_cmd([
             '{root}foo_4.php:4:24,26: Invalid return type (Typing[4110])',
@@ -452,7 +499,7 @@ class CommonTests(object):
             function H () {}
             """)
 
-        self.write_load_config('foo_4.php')
+        self.start_hh_server('foo_4.php')
 
         self.check_cmd([
             '{root}foo_4.php:3:19,21: Could not find FOO (Naming[2006])',
@@ -472,7 +519,7 @@ class CommonTests(object):
         """
         os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
 
-        self.write_load_config('foo_2.php')
+        self.start_hh_server('foo_2.php')
 
         self.check_cmd([
             '{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])',
@@ -484,7 +531,7 @@ class CommonTests(object):
         Delete a file that still has dangling references after restoring from
         a saved state.
         """
-        self.write_load_config()
+        self.start_hh_server()
         self.check_cmd(['No errors!'])
         debug_sub = self.subscribe_debug()
 
@@ -500,7 +547,7 @@ class CommonTests(object):
             ])
 
     def test_duplicated_file(self):
-        self.write_load_config('foo_2.php')
+        self.start_hh_server('foo_2.php')
         self.check_cmd(['No errors!'])
 
         shutil.copyfile(
@@ -520,7 +567,7 @@ class CommonTests(object):
         Check that the new file name is displayed in the error.
         """
 
-        self.write_load_config(
+        self.start_hh_server(
             'foo_1.php', 'foo_2.php', 'bar_2.php',
         )
 
@@ -548,7 +595,7 @@ class CommonTests(object):
         """
         Test hh_client --find-refs, --find-class-refs
         """
-        self.write_load_config()
+        self.start_hh_server()
 
         self.check_cmd_and_json_cmd([
             'File "{root}foo_3.php", line 11, characters 13-13: h',
@@ -572,7 +619,7 @@ class CommonTests(object):
             ], options=['--find-class-refs', 'Foo'])
 
     def test_ide_find_refs(self):
-        self.write_load_config()
+        self.start_hh_server()
 
         self.check_cmd_and_json_cmd(
             [
@@ -587,7 +634,7 @@ class CommonTests(object):
             stdin='<?hh function test(Foo $foo) { new Foo(); }')
 
     def test_ide_highlight_refs(self):
-        self.write_load_config()
+        self.start_hh_server()
 
         self.check_cmd_and_json_cmd(
             [
@@ -606,7 +653,7 @@ class CommonTests(object):
         Test hh_client --search
         """
 
-        self.write_load_config()
+        self.start_hh_server()
 
         self.check_cmd_and_json_cmd([
             'File "{root}foo_3.php", line 9, characters 18-40: some_long_function_name, function'
@@ -619,7 +666,7 @@ class CommonTests(object):
         Test that global search is not case sensitive
         """
         self.maxDiff = None
-        self.write_load_config()
+        self.start_hh_server()
 
         self.check_cmd([
             'File "{root}foo_4.php", line 4, characters 10-24: '
@@ -632,7 +679,7 @@ class CommonTests(object):
         """
         Test that global search is not case sensitive
         """
-        self.write_load_config()
+        self.start_hh_server()
 
         self.check_cmd([
             'File "{root}foo_4.php", line 4, characters 10-24: '
@@ -646,7 +693,7 @@ class CommonTests(object):
         Test hh_client --auto-complete
         """
 
-        self.write_load_config()
+        self.start_hh_server()
 
         self.check_cmd_and_json_cmd([
             'some_long_function_name (function(): _)'
@@ -671,7 +718,7 @@ class CommonTests(object):
         Test hh_client --list-files
         """
         os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
-        self.write_load_config('foo_2.php')
+        self.start_hh_server('foo_2.php')
         self.check_cmd_and_json_cmd([
             '{root}foo_1.php',
             ], [
@@ -682,7 +729,7 @@ class CommonTests(object):
         """
         Test hh_client --type-at-pos
         """
-        self.write_load_config()
+        self.start_hh_server()
 
         self.check_cmd_and_json_cmd([
             'string'
@@ -696,7 +743,7 @@ class CommonTests(object):
         """
         Test hh_client --ide-get-definition
         """
-        self.write_load_config()
+        self.start_hh_server()
 
         self.check_cmd_and_json_cmd([
             'name: \\bar, kind: function, span: line 1, characters 42-44, '
@@ -725,7 +772,7 @@ class CommonTests(object):
         """
         Test hh_client --ide-outline
         """
-        self.write_load_config()
+        self.start_hh_server()
 
         """
         This call is here to ensure that server is running. Outline command
@@ -758,7 +805,7 @@ class CommonTests(object):
         Test hh_client --ide-get-definition when definition we look for is
         in file different from input file
         """
-        self.write_load_config()
+        self.start_hh_server()
 
         self.check_cmd_and_json_cmd([
             'name: \\ClassToBeIdentified::methodToBeIdentified, kind: method,'
@@ -791,7 +838,7 @@ class CommonTests(object):
         """
         Test --format
         """
-        self.write_load_config()
+        self.start_hh_server()
         self.check_cmd_and_json_cmd([
             'function test1(int $x) {{',
             '  $x = $x * x + 3;',
@@ -814,31 +861,22 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         exits abnormally.
         """
 
-        self.write_load_config()
-        # Start a fresh server and monitor.
-        launch_logs = self.check_cmd(['No errors!'])
-        self.assertIn('Server launched with the following command', launch_logs)
-        self.assertIn('Logs will go to', launch_logs)
-        log_file_pattern = re.compile('Logs will go to (.*)')
-        monitor_log_match = log_file_pattern.search(launch_logs)
-        self.assertIsNotNone(monitor_log_match)
-        monitor_log_path = monitor_log_match.group(1)
-        self.assertIsNotNone(monitor_log_path)
-        with open(monitor_log_path) as f:
-            monitor_logs = f.read()
-            m = re.search(
-                    'Just started typechecker server with pid: ([0-9]+)',
-                    monitor_logs)
-            self.assertIsNotNone(m)
-            pid = m.group(1)
-            self.assertIsNotNone(pid)
-            os.kill(int(pid), signal.SIGTERM)
-            # For some reason, waitpid in the monitor after the kill signal
-            # sent above doesn't preserve ordering - maybe because they're
-            # in separate processes? Give it some time.
-            time.sleep(1)
-            client_error = self.check_cmd(['No errors!'])
-            self.assertIn('Last server killed by signal', client_error)
+        self.start_hh_server()
+        monitor_logs = self.get_monitor_logs()
+        m = re.search(
+            'Just started typechecker server with pid: ([0-9]+)',
+            monitor_logs
+        )
+        self.assertIsNotNone(m)
+        pid = m.group(1)
+        self.assertIsNotNone(pid)
+        os.kill(int(pid), signal.SIGTERM)
+        # For some reason, waitpid in the monitor after the kill signal
+        # sent above doesn't preserve ordering - maybe because they're
+        # in separate processes? Give it some time.
+        time.sleep(1)
+        client_error = self.check_cmd(['No errors!'], assert_loaded_mini_state=False)
+        self.assertIn('Last server killed by signal', client_error)
 
     def test_duplicate_parent(self):
         """
@@ -863,7 +901,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
                 return $a::$y;
             }
             """)
-        self.write_load_config('foo_4.php', 'foo_5.php')
+        self.start_hh_server('foo_4.php', 'foo_5.php')
         self.check_cmd([
             '{root}foo_4.php:3:19,21: Name already bound: Foo (Naming[2012])',
             '  {root}foo_3.php:7:15,17: Previous definition is here',
@@ -902,7 +940,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
                 }
             }
             """)
-        self.write_load_config('foo_4.php')
+        self.start_hh_server('foo_4.php')
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
@@ -974,7 +1012,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
             function wat() {}
             """)
-        self.write_load_config('foo_4.php')
+        self.start_hh_server('foo_4.php')
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
@@ -1028,7 +1066,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
                 }
             }
             """)
-        self.write_load_config('foo_4.php')
+        self.start_hh_server('foo_4.php')
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
         ['[{{"filename":"{root}foo_4.php","patches":[{{'
@@ -1066,12 +1104,11 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         """
         Test multiple exit status of "hh_client ide"
         """
-
-        self.write_load_config()
         # Test the exit status of ide call under no hh_server
         (_, _, exit_code) = self.proc_call([hh_client, 'ide', self.repo_dir])
         self.assertEqual(exit_code, 202, msg="Test IDE_no_server status failed")
 
+        self.start_hh_server()
         # Test the exit status of ide call when another ide client exists
         self.check_cmd(['No errors!'])
         first_ide_con = self.connect_ide()
@@ -1103,7 +1140,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         Add namespace alias and check if it is still good
         """
 
-        self.write_load_config()
+        self.start_hh_server()
         self.check_cmd(['No errors!'])
 
         with open(os.path.join(self.repo_dir, 'auto_ns_2.php'), 'w') as f:
@@ -1118,7 +1155,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         self.check_cmd(['No errors!'])
 
     def test_json_rpc(self):
-        self.write_load_config()
+        self.start_hh_server()
         self.check_cmd(['No errors!'])
         ide_con = self.connect_ide()
         cmd = (

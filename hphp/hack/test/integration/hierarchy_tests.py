@@ -10,7 +10,7 @@ class HierarchyTests(object):
         """
         Test --inheritance-ancestors and --inheritance-children
         """
-        self.write_load_config()
+        self.start_hh_server()
         self.check_cmd([
             'File "{root}foo.php", line 3, characters 7-9: Foo',
 
@@ -34,7 +34,7 @@ class HierarchyTests(object):
             options=['--inheritance-ancestors', 'Baz'])
 
     def test_inheritance_filter(self):
-        self.write_load_config()
+        self.start_hh_server()
         self.check_cmd([
             'File "{root}filter.php", line 15, characters 7-12: Filter',
             '    inherited from File "{root}filter.php", line 3, characters 7-13: CFilter',
@@ -64,7 +64,7 @@ class Qux {
   }
 }
 ''')
-        self.write_load_config('qux.php')
+        self.start_hh_server('qux.php')
         self.check_cmd(['No errors!'])
         debug_sub = self.subscribe_debug()
         with open(os.path.join(self.repo_dir, 'foo.php'), 'w') as f:

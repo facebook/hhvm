@@ -219,7 +219,7 @@ struct Vgen {
     , catches(env.catches)
   {}
   ~Vgen() {
-    env.cb->sync();
+    env.cb->sync(base);
   }
 
   static void patch(Venv& env);

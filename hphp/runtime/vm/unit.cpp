@@ -1191,9 +1191,7 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
    * If the right hand side was a class, we need to autoload and
    * ensure it exists at this point.
    */
-  if (thisType->type != AnnotType::Object &&
-      thisType->type != AnnotType::Self &&
-      thisType->type != AnnotType::Parent) {
+  if (thisType->type != AnnotType::Object) {
     return TypeAliasReq::From(*thisType);
   }
 

@@ -144,42 +144,12 @@ public:
            ModifierExpressionPtr modifiers);
 
   /**
-   * Called to note whether a class variable overrides
-   * a definition in a base class. Returns whether or not there
-   * was an error in marking as override.
-   */
-  bool markOverride(AnalysisResultConstRawPtr ar, const std::string &name);
-
-  /**
    * Called when a variable is used or being evaluated (r-value).
    */
   void checkVariable(const std::string &name,
                      AnalysisResultConstRawPtr ar, ConstructPtr construct);
   void checkVariable(Symbol *sym,
                      AnalysisResultConstRawPtr ar, ConstructPtr construct);
-  /**
-   * Find the class which contains the property, and return
-   * its Symbol
-   */
-  Symbol *findProperty(ClassScopePtr &cls,
-                       const std::string &name,
-                       AnalysisResultConstRawPtr ar);
-
-  /**
-   * Walk up to find first parent that has the specified symbol.
-   */
-  ClassScopePtr findParent(AnalysisResultConstRawPtr ar,
-                           const std::string &name,
-                           const Symbol *&sym) const;
-
-  ClassScopePtr findParent(AnalysisResultConstRawPtr ar,
-                           const std::string &name,
-                           Symbol *&sym) {
-    const Symbol *ss;
-    ClassScopePtr p = findParent(ar, name, ss); // const version
-    sym = const_cast<Symbol*>(ss);
-    return p;
-  }
 
   /**
    * Helper for static variable default value

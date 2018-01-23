@@ -80,8 +80,6 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
   FileScopeRawPtr getContainingFile();
   AnalysisResultRawPtr getContainingProgram();
 
-  ClassScopeRawPtr findExactClass(ClassScopeRawPtr cls);
-
   const std::string &getDocComment() const { return m_docComment;}
   void setDocComment(const std::string &doc) { m_docComment = doc;}
 
@@ -92,10 +90,6 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
 
   virtual bool inPseudoMain() const {
     return false;
-  }
-
-  virtual ClassScopePtr getParentScope(AnalysisResultConstRawPtr /*ar*/) const {
-    return ClassScopePtr();
   }
 
   void setOuterScope(BlockScopePtr o) { m_outerScope = o; }

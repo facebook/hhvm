@@ -88,51 +88,6 @@ void ConstantTable::setValue(AnalysisResultConstRawPtr /*ar*/,
   sym->setValue(value);
 }
 
-bool ConstantTable::isRecursivelyDeclared(AnalysisResultConstRawPtr ar,
-                                          const std::string &name) const {
-  if (const Symbol *sym ATTRIBUTE_UNUSED = getSymbol(name)) {
-    assert(sym->isPresent() && sym->valueSet());
-    return true;
-  }
-  ClassScopePtr parent = findParent(ar, name);
-  if (parent) {
-    return parent->getConstants()->isRecursivelyDeclared(ar, name);
-  }
-  return false;
-}
-
-ConstructPtr ConstantTable::getValueRecur(AnalysisResultConstRawPtr ar,
-                                          const std::string &name,
-                                          ClassScopePtr &defClass) const {
-  if (const Symbol *sym = getSymbol(name)) {
-    assert(sym->isPresent() && sym->valueSet());
-    if (sym->isDynamic()) return ConstructPtr();
-    if (auto val = sym->getValue()) return val;
-  }
-  ClassScopePtr parent = findParent(ar, name);
-  if (parent) {
-    defClass = parent;
-    return parent->getConstants()->getValueRecur(ar, name, defClass);
-  }
-  return ConstructPtr();
-}
-
-ConstructPtr ConstantTable::getDeclarationRecur(AnalysisResultConstRawPtr ar,
-                                                const std::string &name,
-                                                ClassScopePtr &defClass)
-const {
-  if (const Symbol *sym = getSymbol(name)) {
-    assert(sym->isPresent() && sym->valueSet());
-    if (sym->getDeclaration()) return sym->getDeclaration();
-  }
-  ClassScopePtr parent = findParent(ar, name);
-  if (parent) {
-    defClass = parent;
-    return parent->getConstants()->getDeclarationRecur(ar, name, defClass);
-  }
-  return ConstructPtr();
-}
-
 void ConstantTable::cleanupForError(AnalysisResultConstRawPtr ar) {
   AnalysisResult::Locker lock(ar);
 
@@ -144,32 +99,6 @@ void ConstantTable::cleanupForError(AnalysisResultConstRawPtr ar) {
       sym->setValue(ConstructPtr());
     }
   }
-}
-
-ClassScopePtr ConstantTable::findParent(AnalysisResultConstRawPtr ar,
-                                        const std::string &name) const {
-  for (ClassScopePtr parent = m_blockScope.getParentScope(ar);
-       parent && !parent->isRedeclaring();
-       parent = parent->getParentScope(ar)) {
-    if (parent->hasConst(name)) {
-      return parent;
-    }
-  }
-  return ClassScopePtr();
-}
-
-ClassScopeRawPtr ConstantTable::findBase(
-  AnalysisResultConstRawPtr ar, const std::string &name,
-  const std::vector<std::string> &bases) const {
-  for (int i = bases.size(); i--; ) {
-    ClassScopeRawPtr p = ar->findClass(bases[i]);
-    if (!p || p->isRedeclaring()) continue;
-    if (p->hasConst(name)) return p;
-    ConstantTablePtr constants = p->getConstants();
-    p = constants->findBase(ar, name, p->getBases());
-    if (p) return p;
-  }
-  return ClassScopeRawPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

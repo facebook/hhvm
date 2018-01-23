@@ -75,25 +75,10 @@ struct ConstantTable : SymbolTable {
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 
-  bool isRecursivelyDeclared(AnalysisResultConstRawPtr ar,
-                             const std::string &name) const;
-  ConstructPtr getValueRecur(AnalysisResultConstRawPtr ar,
-                             const std::string &name,
-                             ClassScopePtr &defClass) const;
-  ConstructPtr getDeclarationRecur(AnalysisResultConstRawPtr ar,
-                                   const std::string &name,
-                                   ClassScopePtr &defClass) const;
-
   void cleanupForError(AnalysisResultConstRawPtr ar);
 
 private:
   bool m_hasDynamic;
-
-  ClassScopePtr findParent(AnalysisResultConstRawPtr ar,
-                           const std::string &name) const;
-  ClassScopeRawPtr findBase(AnalysisResultConstRawPtr ar,
-                            const std::string &name,
-                            const std::vector<std::string> &bases) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

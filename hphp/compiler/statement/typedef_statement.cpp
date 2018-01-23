@@ -59,7 +59,6 @@ void TypedefStatement::outputPHP(CodeGenerator& /*cg*/,
 
 void TypedefStatement::onParse(AnalysisResultConstRawPtr /*ar*/,
                                FileScopePtr scope) {
-  scope->addTypeAliasName(name);
 }
 
 //////////////////////////////////////////////////////////////////////

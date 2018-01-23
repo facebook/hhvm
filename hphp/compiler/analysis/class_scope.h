@@ -49,11 +49,6 @@ DECLARE_BOOST_TYPES(FileScope);
 
 struct Symbol;
 
-enum class Derivation {
-  Normal,
-  Redeclaring,    // At least one ancestor class or interface is redeclared.
-};
-
 /**
  * A class scope corresponds to a class declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
@@ -139,7 +134,6 @@ public:
    */
   std::string getUnmangledScopeName() const;
 
-  void checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen);
   const std::string &getOriginalParent() const { return m_parent; }
 
   /**
@@ -157,16 +151,6 @@ public:
   ModifierExpressionPtr getModifiers() { return m_modifiers;}
 
   /**
-   * Whether this class name was declared twice or more.
-   */
-  void setRedeclaring(AnalysisResultConstRawPtr ar, int redecId);
-  bool isRedeclaring() const { return m_redeclaring >= 0;}
-
-  Derivation derivesFromRedeclaring() const {
-    return m_derivesFromRedeclaring;
-  }
-
-  /**
    * Get/set attributes.
    */
   void setSystem();
@@ -176,83 +160,16 @@ public:
   bool getAttribute(Attribute attr) const {
     return m_attribute & attr;
   }
-  bool hasAttribute(Attribute attr, AnalysisResultConstRawPtr ar) const {
-    if (getAttribute(attr)) return true;
-    ClassScopePtr parent = getParentScope(ar);
-    return parent && !parent->isRedeclaring() && parent->hasAttribute(attr, ar);
-  }
   KindOf getKind() {
     return m_kindOf;
   }
 
-  /**
-   * Called by ClassScope to prepare name => method/property map.
-   */
-  void collectMethods(AnalysisResultPtr ar,
-                      StringToFunctionScopePtrMap &func,
-                      bool collectPrivate);
+  std::vector<std::string> const& getBases() const { return m_bases; }
 
-  /**
-   * Whether or not we can directly call ObjectData::o_invoke() when lookup
-   * in this class fails. If false, we need to call parent::o_invoke(), which
-   * may be redeclared or may have private methods that need to check class
-   * context.
-   */
-  bool needsInvokeParent(AnalysisResultConstRawPtr ar,
-                         bool considerSelf = true);
-
-  /*
-    void collectProperties(AnalysisResultPtr ar,
-    std::set<std::string> &names,
-    bool collectPrivate = true) const;
-
-  */
-  /**
-   * Testing whether this class derives from another.
-   */
-  bool derivesDirectlyFrom(const std::string &base) const;
-  bool derivesFrom(AnalysisResultConstRawPtr ar, const std::string &base,
-                   bool strict, bool def) const;
-
- /**
-  * Find a common parent of two classes; returns "" if there is no such.
-  */
-  static ClassScopePtr FindCommonParent(AnalysisResultConstRawPtr ar,
-                                        const std::string &cn1,
-                                        const std::string &cn2);
-
-  /**
-   * Look up function by name.
-   */
-  FunctionScopePtr findFunction(AnalysisResultConstRawPtr ar,
-                                const std::string &name,
-                                bool recursive,
-                                bool exclIntfBase = false);
-
-  /**
-   * Look up constructor, both __construct and class-name constructor.
-   */
-  FunctionScopePtr findConstructor(AnalysisResultConstRawPtr ar,
-                                   bool recursive);
-
-  Symbol *findProperty(ClassScopePtr &cls, const std::string &name,
-                       AnalysisResultConstRawPtr ar);
-
-  /**
-   * Collect parent class names.
-   */
-  void getInterfaces(AnalysisResultConstRawPtr ar,
-                     std::vector<std::string> &names,
-                     bool recursive = true) const;
-
-  std::vector<std::string> &getBases() { return m_bases;}
-
-  typedef hphp_hash_map<std::string, ExpressionPtr, string_hashi,
-    string_eqstri> UserAttributeMap;
+  using UserAttributeMap = hphp_hash_map<std::string, ExpressionPtr,
+                                         string_hashi, string_eqstri>;
 
   UserAttributeMap& userAttributes() { return m_userAttributes;}
-
-  ClassScopePtr getParentScope(AnalysisResultConstRawPtr ar) const override;
 
   void addUsedTraits(const std::vector<std::string> &names) {
     for (unsigned i = 0; i < names.size(); i++) {
@@ -350,9 +267,7 @@ private:
   boost::container::flat_set<std::string> m_requiredImplements;
 
   mutable int m_attribute;
-  int m_redeclaring; // multiple definition of the same class
   KindOf m_kindOf;
-  Derivation m_derivesFromRedeclaring;
   int32_t m_numDeclMethods{-1};
 
   // holds the fact that accessing this class declaration is a fatal error

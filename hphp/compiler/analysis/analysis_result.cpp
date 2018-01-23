@@ -195,52 +195,6 @@ BlockScopePtr AnalysisResult::findConstantDeclarer(
   return BlockScopePtr();
 }
 
-ClassScopePtr AnalysisResult::findClass(const std::string &name) const {
-  auto const lname = toLower(name);
-  auto const sysIter = m_systemClasses.find(lname);
-  if (sysIter != m_systemClasses.end()) return sysIter->second;
-
-  auto const iter = m_classDecs.find(lname);
-  if (iter != m_classDecs.end() && iter->second.size()) {
-    return iter->second.back();
-  }
-  return ClassScopePtr();
-}
-
-const std::vector<ClassScopePtr>&
-AnalysisResult::findRedeclaredClasses(const std::string &name) const {
-  auto iter = m_classDecs.find(name);
-  if (iter == m_classDecs.end()) {
-    static std::vector<ClassScopePtr> empty;
-    empty.clear();
-    return empty;
-  }
-  return iter->second;
-}
-
-std::vector<ClassScopePtr> AnalysisResult::findClasses(
-  const std::string &name
-) const {
-  auto const sysIter = m_systemClasses.find(name);
-  if (sysIter != m_systemClasses.end()) {
-    return {sysIter->second};
-  }
-
-  return findRedeclaredClasses(name);
-}
-
-ClassScopePtr AnalysisResult::findExactClass(ConstructPtr cs,
-                                             const std::string &name) const {
-  ClassScopePtr cls = findClass(name);
-  if (!cls || !cls->isRedeclaring()) return cls;
-  if (ClassScopePtr currentCls = cs->getClassScope()) {
-    if (cls->isNamed(currentCls->getScopeName())) {
-      return currentCls;
-    }
-  }
-  return ClassScopePtr();
-}
-
 int AnalysisResult::getFunctionCount() const {
   int total = 0;
   for (auto& pair : m_files) {
@@ -259,10 +213,6 @@ int AnalysisResult::getClassCount() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void AnalysisResult::declareUnknownClass(const std::string &name) {
-  m_classDecs.operator[](name);
-}
 
 bool AnalysisResult::declareConst(FileScopePtr fs, const std::string &name) {
   if (getConstants()->isPresent(name) ||
@@ -286,42 +236,6 @@ static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
 void AnalysisResult::canonicalizeSymbolOrder() {
   getConstants()->canonicalizeSymbolOrder();
   getVariables()->canonicalizeSymbolOrder();
-}
-
-void AnalysisResult::markRedeclaringClasses() {
-  auto const ar = AnalysisResultConstRawPtr{this};
-  for (auto& pair : m_classDecs) {
-    auto& classes = pair.second;
-    if (classes.size() > 1) {
-      sort(classes.begin(), classes.end(), by_source);
-      for (size_t i = 0; i < classes.size(); i++) {
-        classes[i]->setRedeclaring(ar, i);
-      }
-    }
-  }
-
-  auto markRedeclaring = [&] (const std::string& name) {
-    auto it = m_classDecs.find(name);
-    if (it != m_classDecs.end()) {
-      auto& classes = it->second;
-      for (size_t i = 0; i < classes.size(); ++i) {
-        auto cls = classes[i];
-        cls->setRedeclaring(ar, i);
-      }
-    }
-  };
-
-  /*
-   * When a type alias is declared with the same name as a class in
-   * the program, we need to make sure the class is marked
-   * redeclaring.  It is possible in some requests that things like
-   * 'instanceof Foo' will not mean the same thing.
-   */
-  for (auto& name : m_typeAliasNames) {
-    assert(toLower(name) == name);
-    // unlike class_alias, you can't extend a type alias
-    markRedeclaring(name);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -359,29 +273,6 @@ void AnalysisResult::addSystemClass(ClassScopeRawPtr cs) {
   ClassScopePtr& entry = m_systemClasses[cs->getScopeName()];
   assert(!entry);
   entry = cs;
-}
-
-void AnalysisResult::checkClassDerivations() {
-  auto const ar = shared_from_this();
-  {
-    Timer timer(Timer::WallTime, "checkDerivation");
-    for (auto& pair : m_classDecs) {
-      for (ClassScopePtr cls : pair.second) {
-        hphp_string_iset seen;
-        cls->checkDerivation(ar, seen);
-      }
-    }
-  }
-}
-
-void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
-  for (const auto& iter : fs->getClasses()) {
-    auto& clsVec = m_classDecs[iter.first];
-    clsVec.insert(clsVec.end(), iter.second.begin(), iter.second.end());
-  }
-
-  m_typeAliasNames.insert(fs->getTypeAliasNames().begin(),
-                          fs->getTypeAliasNames().end());
 }
 
 static bool by_filename(const FileScopePtr &f1, const FileScopePtr &f2) {
@@ -462,46 +353,13 @@ void AnalysisResult::analyzeProgram() {
   // Analyze Includes
   Logger::Verbose("Analyzing Includes");
   sort(m_fileScopes.begin(), m_fileScopes.end(), by_filename); // fixed order
-  for (auto& scope : m_fileScopes) {
-    collectFunctionsAndClasses(scope);
-  }
 
   // Keep generated code identical without randomness
   canonicalizeSymbolOrder();
 
-  markRedeclaringClasses();
-
-  checkClassDerivations();
-
   // Analyze All
   Logger::Verbose("Analyzing All");
   analyzeProgram(AnalysisResult::AnalyzeAll);
-
-  /*
-    Note that cls->collectMethods() can add entries to m_classDecs,
-    which can invalidate iterators. So we have to create an array
-    and then iterate over that.
-    The new entries added to m_classDecs are always empty, so it
-    doesnt matter that we dont include them in the iteration
-  */
-  std::vector<ClassScopePtr> classes;
-  classes.reserve(m_classDecs.size());
-  for (auto& pair : m_classDecs) {
-    for (auto cls : pair.second) {
-      classes.push_back(cls);
-    }
-  }
-
-  // Collect methods
-  for (auto cls : classes) {
-    StringToFunctionScopePtrMap methods;
-    cls->collectMethods(ar, methods, true /* include privates */);
-  }
-
-  for (auto& item : m_systemClasses) {
-    StringToFunctionScopePtrMap methods;
-    item.second->collectMethods(ar, methods, true /* include privates */);
-  }
 }
 
 void AnalysisResult::analyzeProgramFinal() {
@@ -509,10 +367,6 @@ void AnalysisResult::analyzeProgramFinal() {
 
   // Keep generated code identical without randomness
   canonicalizeSymbolOrder();
-
-  // XXX: this is only here because canonicalizeSymbolOrder used to do
-  // it---is it necessary to repeat at this phase?  (Probably not ...)
-  markRedeclaringClasses();
 
   setPhase(AnalysisResult::CodeGen);
 }

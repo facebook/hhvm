@@ -70,8 +70,7 @@ ClassScope::ClassScope(FileScopeRawPtr fs,
                        const std::string &docComment, StatementPtr stmt,
                        const std::vector<UserAttributePtr> &attrs)
   : BlockScope(originalName, docComment, stmt, BlockScope::ClassScope),
-    m_parent(parent), m_bases(bases), m_attribute(0), m_redeclaring(-1),
-    m_kindOf(kindOf), m_derivesFromRedeclaring(Derivation::Normal) {
+    m_parent(parent), m_bases(bases), m_attribute(0), m_kindOf(kindOf) {
 
   for (unsigned i = 0; i < attrs.size(); ++i) {
     if (m_userAttributes.find(attrs[i]->getName()) != m_userAttributes.end()) {
@@ -94,9 +93,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
                        const std::vector<FunctionScopePtr>& methods)
   : BlockScope(originalName, "", StatementPtr(), BlockScope::ClassScope),
     m_parent(parent), m_bases(bases),
-    m_attribute(0), m_redeclaring(-1),
-    m_kindOf(KindOf::ObjectClass),
-    m_derivesFromRedeclaring(Derivation::Normal) {
+    m_attribute(0), m_kindOf(KindOf::ObjectClass) {
   for (auto f : methods) {
     if (f->isNamed("__construct")) setAttribute(HasConstructor);
     else if (f->isNamed("__destruct")) setAttribute(HasDestructor);
@@ -125,11 +122,7 @@ const std::string &ClassScope::getOriginalName() const {
 }
 
 std::string ClassScope::getDocName() const {
-  auto const& name = getOriginalName();
-  if (m_redeclaring < 0) {
-    return name;
-  }
-  return name + Option::IdPrefix + folly::to<std::string>(m_redeclaring);
+  return getOriginalName();
 }
 
 std::string ClassScope::getUnmangledScopeName() const {
@@ -224,109 +217,6 @@ void ClassScope::inheritedMagicMethods(ClassScopePtr super) {
   }
 }
 
-void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen) {
-  seen.insert(m_scopeName);
-
-  hphp_string_iset bases;
-  for (int i = m_bases.size() - 1; i >= 0; i--) {
-    auto const& base = m_bases[i];
-
-    if (seen.find(base) != seen.end() || bases.find(base) != bases.end()) {
-      Compiler::Error(
-        Compiler::InvalidDerivation,
-        m_stmt,
-        "The class hierarchy contains a circular reference involving " + base);
-      if (i == 0 && !m_parent.empty()) {
-        assert(base == m_parent);
-        m_parent.clear();
-      }
-      m_bases.erase(m_bases.begin() + i);
-      continue;
-    }
-    bases.insert(base);
-
-    auto parents = ar->findClasses(base);
-    for (auto& parent : parents) {
-      parent->checkDerivation(ar, seen);
-    }
-  }
-
-  seen.erase(m_scopeName);
-}
-
-void ClassScope::collectMethods(AnalysisResultPtr ar,
-                                StringToFunctionScopePtrMap &funcs,
-                                bool collectPrivate) {
-  // add all functions this class has
-  for (const auto& fs : m_functionsVec) {
-    if (!collectPrivate && fs->isPrivate()) continue;
-
-    FunctionScopePtr &func = funcs[fs->getScopeName()];
-    if (!func) {
-      func = fs;
-    } else {
-      func->setVirtual();
-      fs->setVirtual();
-      fs->setHasOverride();
-      if (fs->isFinal()) {
-        std::string s__MockClass = "__MockClass";
-        ClassScopePtr derivedClass = func->getContainingClass();
-        if (derivedClass->m_userAttributes.find(s__MockClass) ==
-            derivedClass->m_userAttributes.end()) {
-          Compiler::Error(Compiler::InvalidOverride,
-                          fs->getStmt(), func->getStmt());
-        }
-      }
-    }
-  }
-
-  int n = m_bases.size();
-  for (int i = 0; i < n; i++) {
-    auto const& base = m_bases[i];
-    ClassScopePtr super = ar->findClass(base);
-    if (super) {
-      if (super->isRedeclaring()) {
-        const auto& classes = ar->findRedeclaredClasses(base);
-        StringToFunctionScopePtrMap pristine(funcs);
-
-        for (auto& cls : classes) {
-          StringToFunctionScopePtrMap cur(pristine);
-          derivedMagicMethods(cls);
-          cls->collectMethods(ar, cur, false);
-          inheritedMagicMethods(cls);
-          funcs.insert(cur.begin(), cur.end());
-        }
-
-        m_derivesFromRedeclaring = Derivation::Redeclaring;
-      } else {
-        derivedMagicMethods(super);
-        super->collectMethods(ar, funcs, false);
-        inheritedMagicMethods(super);
-        if (super->derivesFromRedeclaring() == Derivation::Redeclaring) {
-          m_derivesFromRedeclaring = Derivation::Redeclaring;
-        }
-      }
-    } else {
-      Compiler::Error(Compiler::UnknownBaseClass, m_stmt, base);
-      if (base == m_parent) {
-        ar->declareUnknownClass(m_parent);
-        m_derivesFromRedeclaring = Derivation::Redeclaring;
-      } else {
-        /*
-         * TODO(#3685260): this should not be removing interfaces from
-         * the base list.
-         */
-        if (isInterface()) {
-          m_derivesFromRedeclaring = Derivation::Redeclaring;
-        }
-        m_bases.erase(m_bases.begin() + i);
-        n--;
-        i--;
-      }
-    }
-  }
-}
-
 bool ClassScope::addClassRequirement(const std::string &requiredName,
                                      bool isExtends) {
   assert(isTrait() || (isInterface() && isExtends)
@@ -357,129 +247,6 @@ bool ClassScope::usesTrait(const std::string &traitName) const {
   return false;
 }
 
-bool ClassScope::needsInvokeParent(AnalysisResultConstRawPtr ar,
-                                   bool considerSelf /* = true */) {
-  // check all functions this class has
-  if (considerSelf) {
-    for (const auto& func : m_functionsVec) {
-      if (func->isPrivate()) return true;
-    }
-  }
-
-  // walk up
-  if (!m_parent.empty()) {
-    ClassScopePtr super = ar->findClass(m_parent);
-    return !super || super->isRedeclaring() || super->needsInvokeParent(ar);
-  }
-  return false;
-}
-
-bool ClassScope::derivesDirectlyFrom(const std::string &base) const {
-  for (auto const& base_i: m_bases) {
-    if (strcasecmp(base_i.c_str(), base.c_str()) == 0) return true;
-  }
-  return false;
-}
-
-bool ClassScope::derivesFrom(AnalysisResultConstRawPtr ar,
-                             const std::string &base,
-                             bool strict, bool def) const {
-
-  if (derivesDirectlyFrom(base)) return true;
-
-  for (auto const& base_i: m_bases) {
-    ClassScopePtr cl = ar->findClass(base_i);
-    if (cl) {
-      if (strict && cl->isRedeclaring()) {
-        if (def) return true;
-        continue;
-      }
-      if (cl->derivesFrom(ar, base, strict, def)) return true;
-    }
-  }
-  return false;
-}
-
-ClassScopePtr ClassScope::FindCommonParent(AnalysisResultConstRawPtr ar,
-                                           const std::string &cn1,
-                                           const std::string &cn2) {
-
-  ClassScopePtr cls1 = ar->findClass(cn1);
-  ClassScopePtr cls2 = ar->findClass(cn2);
-
-  if (!cls1 || !cls2) return ClassScopePtr();
-  if (cls1->isNamed(cls2->getScopeName()))  return cls1;
-  if (cls1->derivesFrom(ar, cn2, true, false)) return cls2;
-  if (cls2->derivesFrom(ar, cn1, true, false)) return cls1;
-
-  // walk up the class hierarchy.
-  for (auto const& base1: cls1->m_bases) {
-    for (auto const& base2: cls2->m_bases) {
-      ClassScopePtr parent = FindCommonParent(ar, base1, base2);
-      if (parent) return parent;
-    }
-  }
-
-  return ClassScopePtr();
-}
-
-FunctionScopePtr ClassScope::findFunction(AnalysisResultConstRawPtr ar,
-                                          const std::string &name,
-                                          bool recursive,
-                                          bool exclIntfBase /* = false */) {
-  auto iter = m_functions.find(name);
-  if (iter != m_functions.end()) {
-    assert(iter->second);
-    return iter->second;
-  }
-
-  // walk up
-  if (recursive) {
-    for (auto const& base : m_bases) {
-      auto super = ar->findClass(base);
-      if (!super) continue;
-      if (exclIntfBase && super->isInterface()) break;
-      if (super->isRedeclaring()) {
-        if (base == m_parent) {
-          m_derivesFromRedeclaring = Derivation::Redeclaring;
-          break;
-        }
-        continue;
-      }
-      auto func = super->findFunction(ar, name, true, exclIntfBase);
-      if (func) return func;
-    }
-  }
-
-  return FunctionScopePtr();
-}
-
-FunctionScopePtr ClassScope::findConstructor(AnalysisResultConstRawPtr ar,
-                                             bool recursive) {
-  std::string name;
-  if (classNameCtor()) {
-    name = getScopeName();
-  } else {
-    name = "__construct";
-  }
-  auto iter = m_functions.find(name);
-  if (iter != m_functions.end()) {
-    assert(iter->second);
-    return iter->second;
-  }
-
-  // walk up
-  if (recursive && derivesFromRedeclaring() != Derivation::Redeclaring) {
-    const auto super = ar->findClass(m_parent);
-    if (super) {
-      auto func = super->findConstructor(ar, true);
-      if (func) return func;
-    }
-  }
-
-  return FunctionScopePtr();
-}
-
 void ClassScope::setSystem() {
   setAttribute(ClassScope::System);
   for (const auto& func : m_functionsVec) {
@@ -491,48 +258,6 @@ bool ClassScope::hasConst(const std::string &name) const {
   const Symbol *sym = m_constants->getSymbol(name);
   assert(!sym || sym->isPresent());
   return sym;
-}
-
-Symbol *ClassScope::findProperty(ClassScopePtr &cls,
-                                 const std::string &name,
-                                 AnalysisResultConstRawPtr ar) {
-  return getVariables()->findProperty(cls, name, ar);
-}
-
-void ClassScope::getInterfaces(AnalysisResultConstRawPtr ar,
-                               std::vector<std::string> &names,
-                               bool recursive /* = true */) const {
-  ClassScope *self = const_cast<ClassScope*>(this);
-  if (recursive && !m_parent.empty()) {
-    ClassScopePtr cls(ar->findClass(m_parent));
-    if (cls && cls->isRedeclaring()) {
-      cls = self->findExactClass(cls);
-    }
-    if (cls) cls->getInterfaces(ar, names, true);
-  }
-  if (!m_bases.empty()) {
-    for (auto const& base : m_bases) {
-      if (base == m_parent) continue;
-      ClassScopePtr cls(ar->findClass(base));
-      if (cls && cls->isRedeclaring()) {
-        cls = self->findExactClass(cls);
-      }
-      if (cls && recursive) {
-        names.push_back(cls ? cls->getDocName() : base);
-        cls->getInterfaces(ar, names, true);
-      } else if (std::find_if(names.begin(), names.end(),
-                              [base](std::string& b) {
-                                return string_eqstri()(base,b);
-                              }) == names.end()) {
-        names.push_back(base);
-      }
-    }
-  }
-}
-
-ClassScopePtr ClassScope::getParentScope(AnalysisResultConstRawPtr ar) const {
-  if (m_parent.empty()) return ClassScopePtr();
-  return ar->findClass(m_parent);
 }
 
 void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
@@ -561,36 +286,7 @@ void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
   ms.done();
 }
 
-static inline std::string GetDocName(AnalysisResultPtr ar,
-                                     BlockScopeRawPtr scope,
-                                     const std::string &name) {
-  ClassScopePtr c(ar->findClass(name));
-  if (c && c->isRedeclaring()) {
-    ClassScopePtr exact(scope->findExactClass(c));
-    return exact ?
-      exact->getDocName() :
-      c->getScopeName(); // if we can't tell which redec class,
-                            // then don't use the redec name
-  }
-  // TODO: pick a better way of signaling unknown?
-  return c ? c->getDocName() : "UnknownClass";
-}
-
-struct GetDocNameFunctor {
-  GetDocNameFunctor(AnalysisResultPtr ar, BlockScopeRawPtr scope) :
-    m_ar(ar), m_scope(scope) {}
-  std::string operator()(const std::string &name) const {
-    return GetDocName(m_ar, m_scope, name);
-  }
-private:
-  AnalysisResultPtr m_ar;
-  BlockScopeRawPtr  m_scope;
-};
-
 void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
-  // TODO(stephentu): fix this hack
-  ClassScopeRawPtr self(const_cast<ClassScope*>(this));
-
   JSON::DocTarget::MapStream ms(out);
 
   ms.add("name", getDocName());
@@ -601,16 +297,15 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
   if (m_parent.empty()) {
     out << JSON::Null();
   } else {
-    out << GetDocName(out.analysisResult(), self, m_parent);
+    out << m_parent;
   }
 
+  auto const& bases = getBases();
   std::vector<std::string> ifaces;
-  getInterfaces(out.analysisResult(), ifaces, true);
-  std::vector<std::string> origIfaces;
-  origIfaces.resize(ifaces.size());
-  transform(ifaces.begin(), ifaces.end(), origIfaces.begin(),
-            GetDocNameFunctor(out.analysisResult(), self));
-  ms.add("interfaces", origIfaces);
+  for (auto& base : bases) {
+    if (base != m_parent) ifaces.push_back(base);
+  }
+  ms.add("interfaces", ifaces);
 
   int mods = 0;
   switch (m_kindOf) {
@@ -656,13 +351,6 @@ bool ClassScope::hasProperty(const std::string &name) const {
   const Symbol *sym = m_variables->getSymbol(name);
   assert(!sym || sym->isPresent());
   return sym;
-}
-
-void ClassScope::setRedeclaring(AnalysisResultConstRawPtr /*ar*/, int redecId) {
-  if (isTrait()) {
-    Compiler::Error(Compiler::RedeclaredTrait, m_stmt);
-  }
-  m_redeclaring = redecId;
 }
 
 bool ClassScope::addFunction(AnalysisResultConstRawPtr /*ar*/,

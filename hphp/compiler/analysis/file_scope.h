@@ -119,14 +119,6 @@ public:
    */
   void declareConstant(AnalysisResultPtr ar, const std::string &name);
 
-  void addTypeAliasName(const std::string& name) {
-    m_typeAliasNames.emplace(toLower(name));
-  }
-
-  std::set<std::string> const& getTypeAliasNames() const {
-    return m_typeAliasNames;
-  }
-
   void setSystem();
   bool isSystem() const { return m_system; }
 
@@ -182,11 +174,6 @@ private:
 
   std::string m_pseudoMainName;
   std::set<std::string> m_redecBases;
-
-  // Set of names that are on the left hand side of type alias
-  // declarations.  We need this to make sure we don't mark classes
-  // with the same name Unique.
-  std::set<std::string> m_typeAliasNames;
 
   // Temporary vector of lambda expressions; populated
   // during analyzeProgram, and then processed at the end

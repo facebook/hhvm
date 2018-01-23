@@ -160,7 +160,6 @@ void ClassVariable::analyzeProgram(AnalysisResultConstRawPtr ar) {
   auto scope = getClassScope();
   for (int i = 0; i < m_declaration->getCount(); i++) {
     auto exp = (*m_declaration)[i];
-    bool error;
     if (exp->is(Expression::KindOfAssignmentExpression)) {
       auto assignment =
         dynamic_pointer_cast<AssignmentExpression>(exp);
@@ -168,15 +167,10 @@ void ClassVariable::analyzeProgram(AnalysisResultConstRawPtr ar) {
         dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
       auto value = assignment->getValue();
       scope->getVariables()->setClassInitVal(var->getName(), value);
-      error = scope->getVariables()->markOverride(ar, var->getName());
     } else {
       auto var = dynamic_pointer_cast<SimpleVariable>(exp);
-      error = scope->getVariables()->markOverride(ar, var->getName());
       scope->getVariables()->setClassInitVal(var->getName(),
                                              makeConstant(ar, "null"));
-    }
-    if (error) {
-      Compiler::Error(Compiler::InvalidOverride, exp);
     }
   }
 }

@@ -195,28 +195,6 @@ std::string ClassStatement::getName() const {
   return std::string("Class ") + getOriginalName();
 }
 
-void ClassStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
-  if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
-
-  std::vector<std::string> bases;
-  auto const hasParent = !m_originalParent.empty();
-  if (hasParent) bases.push_back(m_originalParent);
-  if (m_base) m_base->getStrings(bases);
-
-  for (unsigned int i = 0; i < bases.size(); i++) {
-    ClassScopePtr cls = ar->findClass(bases[i]);
-    if (cls) {
-      auto const expectClass = hasParent && i == 0;
-      if (expectClass == cls->isInterface() || cls->isTrait()) {
-        Compiler::Error(Compiler::InvalidDerivation,
-                        shared_from_this(),
-                        "You are extending " + cls->getOriginalName() +
-                          " which is an interface or a trait");
-      }
-    }
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

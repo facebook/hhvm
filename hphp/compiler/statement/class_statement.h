@@ -38,7 +38,6 @@ struct ClassStatement : InterfaceStatement {
                  TypeAnnotationPtr enumBaseTy);
 
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
-  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
   void setPromotedParameterCount(int count) {
     m_promotedParameterCount = count;

@@ -143,23 +143,6 @@ std::string InterfaceStatement::getName() const {
   return std::string("Interface ") + m_originalName;
 }
 
-void InterfaceStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
-  if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
-  std::vector<std::string> bases;
-  if (m_base) m_base->getStrings(bases);
-  for (unsigned int i = 0; i < bases.size(); i++) {
-    ClassScopePtr cls = ar->findClass(bases[i]);
-    if (cls) {
-      if (!cls->isInterface()) {
-        Compiler::Error(
-          Compiler::InvalidDerivation,
-          shared_from_this(),
-          cls->getOriginalName() + " must be an interface");
-      }
-    }
-  }
-}
-
 ConstructPtr InterfaceStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

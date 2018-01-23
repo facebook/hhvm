@@ -224,23 +224,8 @@ public:
   /**
    * Declarations
    */
-  void declareUnknownClass(const std::string &name);
   bool declareConst(FileScopePtr fs, const std::string &name);
 
-  ClassScopePtr findClass(const std::string &className) const;
-
-  /**
-   * Find all the redeclared classes by the name, excluding system classes.
-   * Note that system classes cannot be redeclared.
-   */
-  const std::vector<ClassScopePtr>& findRedeclaredClasses(
-    const std::string &className) const;
-
-  /**
-   * Find all the classes by the name, including system classes.
-   */
-  std::vector<ClassScopePtr> findClasses(const std::string &className) const;
-  ClassScopePtr findExactClass(ConstructPtr cs, const std::string &name) const;
   BlockScopeConstPtr findConstantDeclarer(const std::string &constName) const {
     return const_cast<AnalysisResult*>(this)->findConstantDeclarer(constName);
   }
@@ -280,12 +265,8 @@ private:
   std::map<std::string, std::string> m_extraCodes;
 
   StringToClassScopePtrMap m_systemClasses;
-  StringToClassScopePtrVecMap m_classDecs;
   StringToFileScopePtrMap m_constDecs;
   std::set<std::string> m_constRedeclared;
-
-  // Names of type aliases.
-  std::set<std::string> m_typeAliasNames;
 
   std::vector<StatementPtr> m_stmts;
   StatementPtr m_stmt;
@@ -314,31 +295,11 @@ private:
    */
   bool inParseOnDemandDirs(const std::string &filename) const;
 
-  /*
-   * Find the names of all functions and classes in the program; mark
-   * functions with duplicate names as redeclaring, but duplicate
-   * classes aren't yet marked.  See markRedeclaringClasses.
-   */
-  void collectFunctionsAndClasses(FileScopePtr fs);
-
   /**
    * Making sure symbol orders are not different even with multithreading, so
    * to make sure generated code are consistent every time.
    */
   void canonicalizeSymbolOrder();
-
-  /*
-   * After all the class names have been collected and symbol order is
-   * canonicalized, this passes through and marks duplicate class
-   * names as redeclaring.
-   */
-  void markRedeclaringClasses();
-
-  /**
-   * Checks circular class derivations that can cause stack overflows for
-   * subsequent analysis. Also checks to make sure no two redundant parents.
-   */
-  void checkClassDerivations();
 
   int getFileSize(FileScopePtr fs);
 };

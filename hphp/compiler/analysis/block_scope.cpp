@@ -93,15 +93,6 @@ ClassScopeRawPtr BlockScope::getContainingClass() {
   return ClassScopeRawPtr((HPHP::ClassScope*)bs);
 }
 
-ClassScopeRawPtr BlockScope::findExactClass(ClassScopeRawPtr cls) {
-  if (ClassScopeRawPtr currentCls = getContainingClass()) {
-    if (cls->isNamed(currentCls->getOriginalName())) {
-      return currentCls;
-    }
-  }
-  return ClassScopeRawPtr();
-}
-
 void BlockScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_constants->outputPHP(cg, ar);
   m_variables->outputPHP(cg, ar);

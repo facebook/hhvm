@@ -206,35 +206,6 @@ void VariableTable::addStaticVariable(Symbol *sym,
 
 void VariableTable::cleanupForError(AnalysisResultConstRawPtr /*ar*/) {}
 
-bool VariableTable::markOverride(AnalysisResultConstRawPtr ar,
-                                 const std::string &name) {
-  Symbol *sym = getSymbol(name);
-  assert(sym && sym->isPresent());
-  bool ret = false;
-  if (!sym->isStatic() ||
-      (sym->isPublic() && !sym->getClassInitVal())) {
-    Symbol *s2;
-    ClassScopePtr parent = findParent(ar, name, s2);
-    if (parent) {
-      assert(s2 && s2->isPresent());
-      if (!s2->isPrivate()) {
-        if (!sym->isStatic() || s2->isProtected()) {
-          if (sym->isPrivate() || sym->isStatic()) {
-            // don't mark the symbol as overridden
-            return true;
-          }
-          if (sym->isProtected() && s2->isPublic()) {
-            // still mark the symbol as overridden
-            ret = true;
-          }
-          sym->setOverride();
-        }
-      }
-    }
-  }
-  return ret;
-}
-
 void VariableTable::add(const std::string &name,
                         bool implicit, AnalysisResultConstRawPtr ar,
                         ConstructPtr construct,
@@ -315,52 +286,12 @@ void VariableTable::checkVariable(Symbol *sym,
   }
 }
 
-Symbol *VariableTable::findProperty(ClassScopePtr &cls,
-                                    const std::string &name,
-                                    AnalysisResultConstRawPtr ar) {
-  Symbol *sym = getSymbol(name);
-  if (sym) {
-    assert(sym->declarationSet());
-    if (!sym->isOverride()) {
-      return sym;
-    }
-    assert(!sym->isStatic());
-    sym = nullptr;
-  }
-
-  if (!sym) {
-    if (ClassScopePtr parent = findParent(ar, name, sym)) {
-      sym = parent->findProperty(parent, name, ar);
-      if (sym) {
-        cls = parent;
-        return sym;
-      }
-    }
-  }
-
-  return sym;
-}
-
 void VariableTable::addSuperGlobal(const std::string &name) {
   addSymbol(name)->setSuperGlobal();
 }
 
 bool VariableTable::isConvertibleSuperGlobal(const std::string &name) const {
   return !getAttribute(ContainsDynamicVariable) && isSuperGlobal(name);
-}
-
-ClassScopePtr VariableTable::findParent(AnalysisResultConstRawPtr ar,
-                                        const std::string &name,
-                                        const Symbol *&sym) const {
-  sym = nullptr;
-  for (ClassScopePtr parent = m_blockScope.getParentScope(ar);
-       parent && !parent->isRedeclaring();
-       parent = parent->getParentScope(ar)) {
-    sym = parent->getVariables()->getSymbol(name);
-    assert(!sym || sym->isPresent());
-    if (sym) return parent;
-  }
-  return ClassScopePtr();
 }
 
 bool VariableTable::isGlobalTable(AnalysisResultConstRawPtr ar) const {

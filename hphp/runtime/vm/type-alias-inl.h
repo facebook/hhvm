@@ -31,16 +31,20 @@ ArrayData* resolve(const StringData* aliasName, const ArrayData* arr);
 ///////////////////////////////////////////////////////////////////////////////
 // Static constructors.
 
-inline TypeAliasReq TypeAliasReq::Invalid() {
+inline TypeAliasReq TypeAliasReq::Invalid(Unit* unit) {
+  assertx(unit);
   TypeAliasReq req;
+  req.unit = unit;
   req.invalid = true;
   return req;
 }
 
-inline TypeAliasReq TypeAliasReq::From(const TypeAlias& alias) {
+inline TypeAliasReq TypeAliasReq::From(Unit* unit, const TypeAlias& alias) {
   assert(alias.type != AnnotType::Object);
+  assertx(unit);
 
   TypeAliasReq req;
+  req.unit = unit;
   req.name = alias.name;
   req.type = alias.type;
   req.nullable = alias.nullable;
@@ -50,9 +54,12 @@ inline TypeAliasReq TypeAliasReq::From(const TypeAlias& alias) {
   return req;
 }
 
-inline TypeAliasReq TypeAliasReq::From(TypeAliasReq req,
+inline TypeAliasReq TypeAliasReq::From(Unit* unit, TypeAliasReq req,
                                        const TypeAlias& alias) {
   assert(alias.type == AnnotType::Object);
+  assertx(unit);
+
+  req.unit = unit;
   if (req.invalid) {
     return req; // Do nothing.
   }

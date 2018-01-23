@@ -2465,6 +2465,12 @@ class ReflectionTypeAlias implements Reflector {
     return $this->name;
   }
 
+  /**
+   * Get the name of the file in which the type alias was defined.
+   */
+  <<__Native>>
+  public function getFileName(): string;
+
   // Prevent cloning
   final public function __clone() {
     throw new BadMethodCallException(

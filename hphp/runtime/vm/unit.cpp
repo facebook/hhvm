@@ -1158,8 +1158,11 @@ bool Unit::defNativeConstantCallback(const StringData* cnsName,
 
 namespace {
 
-TypeAliasReq typeAliasFromClass(const TypeAlias* thisType, Class *klass) {
+TypeAliasReq typeAliasFromClass(Unit* unit, const TypeAlias* thisType,
+                                Class *klass) {
+  assertx(unit);
   TypeAliasReq req;
+  req.unit = unit;
   req.name = thisType->name;
   req.nullable = thisType->nullable;
   if (isEnum(klass)) {
@@ -1179,7 +1182,7 @@ TypeAliasReq typeAliasFromClass(const TypeAlias* thisType, Class *klass) {
   return req;
 }
 
-TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
+TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
   /*
    * If this type alias is a KindOfObject and the name on the right
    * hand side was another type alias, we will bind the name to the
@@ -1192,7 +1195,7 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
    * ensure it exists at this point.
    */
   if (thisType->type != AnnotType::Object) {
-    return TypeAliasReq::From(*thisType);
+    return TypeAliasReq::From(unit, *thisType);
   }
 
   /*
@@ -1213,25 +1216,25 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
   auto targetNE = NamedEntity::get(typeName);
 
   if (auto klass = Unit::lookupClass(targetNE)) {
-    return typeAliasFromClass(thisType, klass);
+    return typeAliasFromClass(unit, thisType, klass);
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
-    return TypeAliasReq::From(*targetTd, *thisType);
+    return TypeAliasReq::From(unit, *targetTd, *thisType);
   }
 
   if (AutoloadHandler::s_instance->autoloadClassOrType(
         StrNR(const_cast<StringData*>(typeName))
       )) {
     if (auto klass = Unit::lookupClass(targetNE)) {
-      return typeAliasFromClass(thisType, klass);
+      return typeAliasFromClass(unit, thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
-      return TypeAliasReq::From(*targetTd, *thisType);
+      return TypeAliasReq::From(unit, *targetTd, *thisType);
     }
   }
 
-  return TypeAliasReq::Invalid();
+  return TypeAliasReq::Invalid(unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1273,7 +1276,7 @@ bool Unit::defTypeAlias(Id id) {
     };
     if (nameList->isPersistentTypeAlias()) {
       // We may have cached the fully resolved type in a previous request.
-      if (resolveTypeAlias(thisType) != *current) {
+      if (resolveTypeAlias(this, thisType) != *current) {
         raiseIncompatible();
       }
       return true;
@@ -1292,7 +1295,7 @@ bool Unit::defTypeAlias(Id id) {
     not_reached();
   }
 
-  auto resolved = resolveTypeAlias(thisType);
+  auto resolved = resolveTypeAlias(this, thisType);
   if (resolved.invalid) {
     FrameRestore _(this, Op::DefTypeAlias, id);
     raise_error("Unknown type or class %s", typeName->data());

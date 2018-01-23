@@ -29,9 +29,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ArrayData;
 struct Class;
 struct StringData;
-struct ArrayData;
+struct Unit;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -100,9 +101,10 @@ struct TypeAliasReq {
   /////////////////////////////////////////////////////////////////////////////
   // Static constructors.
 
-  static TypeAliasReq Invalid();
-  static TypeAliasReq From(const TypeAlias& alias);
-  static TypeAliasReq From(TypeAliasReq req, const TypeAlias& alias);
+  static TypeAliasReq Invalid(Unit* unit);
+  static TypeAliasReq From(Unit* unit, const TypeAlias& alias);
+  static TypeAliasReq From(Unit* unit, TypeAliasReq req,
+                           const TypeAlias& alias);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -127,6 +129,7 @@ struct TypeAliasReq {
   LowStringPtr name{nullptr};
   Array typeStructure{Array::CreateDArray()};
   UserAttributeMap userAttrs;
+  Unit* unit{nullptr};
 };
 
 bool operator==(const TypeAliasReq& l, const TypeAliasReq& r);

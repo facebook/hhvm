@@ -1974,6 +1974,18 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getAttributes) {
   return ai.toArray();
 }
 
+static String HHVM_METHOD(ReflectionTypeAlias, getFileName) {
+  auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
+  assert(req);
+  auto file = req->unit->filepath()->data();
+  if (!file) { file = ""; }
+  if (file[0] != '/') {
+    return String(RuntimeOption::SourceRoot + file);
+  } else {
+    return String(file);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 struct ReflectionExtension final : Extension {
   ReflectionExtension() : Extension("reflection", "$Id$") { }
@@ -2039,6 +2051,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionTypeAlias, getTypeStructure);
     HHVM_ME(ReflectionTypeAlias, getAttributes);
     HHVM_ME(ReflectionTypeAlias, getAssignedTypeText);
+    HHVM_ME(ReflectionTypeAlias, getFileName);
 
     HHVM_ME(ReflectionClass, __init);
     HHVM_ME(ReflectionClass, getName);

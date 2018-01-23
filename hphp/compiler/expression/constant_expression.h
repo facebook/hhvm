@@ -33,7 +33,6 @@ struct ConstantExpression : Expression, private IParseHandler {
                      const std::string &docComment = "");
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
   void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
   bool isScalar() const override;
   bool isLiteralNull() const override;
@@ -65,7 +64,6 @@ struct ConstantExpression : Expression, private IParseHandler {
   bool hadBackslash() const { return m_hadBackslash; }
 private:
 
-  Symbol *resolveNS(AnalysisResultConstRawPtr ar);
   std::string m_name;
   std::string m_origName;
   bool m_hadBackslash;

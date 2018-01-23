@@ -37,7 +37,6 @@ public:
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
   void deepCopy(SimpleFunctionCallPtr exp);
 
-  bool isDefineWithoutImpl(AnalysisResultConstRawPtr ar);
   void setValid() { m_valid = true; }
   void setThrowFatal() { m_type = FunType::ThrowFatal; }
   void setThrowParseFatal() { m_type = FunType::ThrowParseFatal; }

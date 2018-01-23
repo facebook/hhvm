@@ -187,14 +187,6 @@ FileScopePtr AnalysisResult::findFileScope(const std::string &name) const {
   return FileScopePtr();
 }
 
-BlockScopePtr AnalysisResult::findConstantDeclarer(
-  const std::string &name) {
-  if (getConstants()->isPresent(name)) return shared_from_this();
-  auto iter = m_constDecs.find(name);
-  if (iter != m_constDecs.end()) return iter->second;
-  return BlockScopePtr();
-}
-
 int AnalysisResult::getFunctionCount() const {
   int total = 0;
   for (auto& pair : m_files) {
@@ -214,17 +206,6 @@ int AnalysisResult::getClassCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool AnalysisResult::declareConst(FileScopePtr fs, const std::string &name) {
-  if (getConstants()->isPresent(name) ||
-      m_constDecs.find(name) != m_constDecs.end()) {
-    m_constRedeclared.insert(name);
-    return false;
-  } else {
-    m_constDecs[name] = fs;
-    return true;
-  }
-}
-
 static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
   if (auto d = b1->getStmt()->getRange().compare(b2->getStmt()->getRange())) {
     return d < 0;
@@ -236,28 +217,6 @@ static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
 void AnalysisResult::canonicalizeSymbolOrder() {
   getConstants()->canonicalizeSymbolOrder();
   getVariables()->canonicalizeSymbolOrder();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Dependencies
-
-bool AnalysisResult::isConstantDeclared(const std::string &constName) const {
-  if (m_constants->isPresent(constName)) return true;
-  auto const iter = m_constDecs.find(constName);
-  if (iter == m_constDecs.end()) return false;
-  FileScopePtr fileScope = iter->second;
-  ConstantTablePtr constants = fileScope->getConstants();
-  ConstructPtr decl = constants->getValue(constName);
-  if (decl) return true;
-  return false;
-}
-
-bool AnalysisResult::isConstantRedeclared(const std::string &constName) const {
-  return m_constRedeclared.find(constName) != m_constRedeclared.end();
-}
-
-bool AnalysisResult::isSystemConstant(const std::string &constName) const {
-  return m_constants->isSystem(constName);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

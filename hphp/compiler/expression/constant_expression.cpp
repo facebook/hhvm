@@ -101,40 +101,6 @@ bool ConstantExpression::getScalarValue(Variant &value) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-///////////////////////////////////////////////////////////////////////////////
-// static analysis functions
-
-Symbol *ConstantExpression::resolveNS(AnalysisResultConstRawPtr ar) {
-  BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
-  if (!block) {
-    if (!hadBackslash() && Option::WholeProgram) {
-      int pos = m_name.rfind('\\');
-      m_name = m_name.substr(pos + 1);
-      block = ar->findConstantDeclarer(m_name);
-    }
-    if (!block) return 0;
-  }
-  Symbol *sym = const_cast<Symbol*>(block->getConstants()->getSymbol(m_name));
-  always_assert(sym);
-  return sym;
-}
-
-void ConstantExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    Symbol *sym = resolveNS(ar);
-    if (!(m_context & LValue) && !m_dynamic) {
-      if (sym && !sym->isSystem()) {
-        if (sym->isDynamic()) {
-          m_dynamic = true;
-        }
-      }
-    }
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ConstantExpression::outputPHP(CodeGenerator& cg,

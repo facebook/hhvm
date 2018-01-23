@@ -175,20 +175,6 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstRawPtr ar,
           m_params->removeElement(0);
           m_params->insertElement(ename);
         }
-        auto name = dynamic_pointer_cast<ScalarExpression>(ename);
-        if (name) {
-          auto const varName = name->getIdentifier();
-          if (varName.empty()) break;
-          AnalysisResult::Locker lock(ar);
-          fs->declareConstant(lock.get(), varName);
-          // handling define("CONSTANT", ...);
-          ExpressionPtr value = (*m_params)[1];
-          BlockScopePtr block = lock->findConstantDeclarer(varName);
-          ConstantTablePtr constants = block->getConstants();
-          if (constants != ar->getConstants()) {
-            constants->add(varName, value, ar, self);
-          }
-        }
       }
       break;
 
@@ -273,70 +259,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
     // Look up the corresponding FunctionScope and ClassScope
     // for this function call
     setupScopes(ar);
-
-    // check for dynamic constant and volatile function/class
-    if (!m_class && !hasStaticClass() &&
-        (m_type == FunType::Define ||
-         m_type == FunType::Defined ||
-         m_type == FunType::FunctionExists ||
-         m_type == FunType::ClassExists ||
-         m_type == FunType::InterfaceExists) &&
-        m_params && m_params->getCount() >= 1) {
-      ExpressionPtr value = (*m_params)[0];
-      if (value->isScalar()) {
-        auto name = dynamic_pointer_cast<ScalarExpression>(value);
-        if (name && name->isLiteralString()) {
-          auto const symbol = name->getLiteralString();
-          switch (m_type) {
-            case FunType::Define: {
-              // system constant
-              if (ar->getConstants()->isPresent(symbol)) {
-                break;
-              }
-              // user constant
-              auto const arv = ar->lock();
-              auto const block = ar->findConstantDeclarer(symbol);
-              // not found (i.e., undefined)
-              if (!block) break;
-              auto const constants = block->getConstants();
-              const Symbol *sym = constants->getSymbol(symbol);
-              always_assert(sym);
-              if (!sym->isDynamic()) {
-                if (FunctionScopeRawPtr fsc = getFunctionScope()) {
-                  if (!fsc->inPseudoMain()) {
-                    const_cast<Symbol*>(sym)->setDynamic();
-                  }
-                }
-              }
-              break;
-            }
-            case FunType::Defined: {
-              if (!ar->getConstants()->isPresent(symbol)) {
-                auto const arv = ar->lock();
-                // user constant
-                auto const block = arv->findConstantDeclarer(symbol);
-                if (block) { // found the constant
-                  auto const constants = block->getConstants();
-                  // set to be dynamic
-                  if (m_type == FunType::Defined) {
-                    constants->setDynamic(ar, symbol);
-                  }
-                }
-              }
-              break;
-            }
-            case FunType::FunctionExists:
-              break;
-            case FunType::InterfaceExists:
-            case FunType::ClassExists:
-              break;
-            default:
-              assert(false);
-          }
-        }
-      }
-    }
-
     if (m_params) m_params->markParams();
   }
 }
@@ -402,31 +324,6 @@ bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
     *outValue = *v.asTypedValue();
   }
   return true;
-}
-
-bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstRawPtr ar) {
-  if (m_class || hasStaticClass()) return false;
-  if (m_type == FunType::Define && m_params &&
-      unsigned(m_params->getCount() - 2) <= 1u) {
-    if (m_dynamicConstant) return false;
-    auto name = dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
-    if (!name) return false;
-    auto const varName = name->getIdentifier();
-    if (varName.empty()) return false;
-    if (!SystemLib::s_inited || ar->isSystemConstant(varName)) {
-      return true;
-    }
-    ExpressionPtr value = (*m_params)[1];
-    if (ar->isConstantRedeclared(varName)) {
-      return false;
-    }
-    Variant scalarValue;
-    return (value->isScalar() &&
-            value->getScalarValue(scalarValue) &&
-            scalarValue.isAllowedAsConstantValue());
-  } else {
-    return false;
-  }
 }
 
 const StaticString

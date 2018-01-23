@@ -222,20 +222,6 @@ public:
   void addFileScope(FileScopePtr fileScope);
 
   /**
-   * Declarations
-   */
-  bool declareConst(FileScopePtr fs, const std::string &name);
-
-  BlockScopeConstPtr findConstantDeclarer(const std::string &constName) const {
-    return const_cast<AnalysisResult*>(this)->findConstantDeclarer(constName);
-  }
-  BlockScopePtr findConstantDeclarer(const std::string &constName);
-
-  bool isConstantDeclared(const std::string &constName) const;
-  bool isConstantRedeclared(const std::string &constName) const;
-  bool isSystemConstant(const std::string &constName) const;
-
-  /**
    * For function declaration parsing.
    */
   static std::string prepareFile(const char *root, const std::string &fileName,
@@ -265,8 +251,6 @@ private:
   std::map<std::string, std::string> m_extraCodes;
 
   StringToClassScopePtrMap m_systemClasses;
-  StringToFileScopePtrMap m_constDecs;
-  std::set<std::string> m_constRedeclared;
 
   std::vector<StatementPtr> m_stmts;
   StatementPtr m_stmt;

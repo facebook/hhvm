@@ -111,14 +111,6 @@ public:
   void addAnonClass(ClassStatementPtr stmt);
   const std::vector<ClassStatementPtr>& getAnonClasses() const;
 
-  /**
-   * For separate compilation
-   * These add edges between filescopes in the other dep graph and
-   * save the symbols for our iface.
-   * This stuff only happens in the filechanged state.
-   */
-  void declareConstant(AnalysisResultPtr ar, const std::string &name);
-
   void setSystem();
   bool isSystem() const { return m_system; }
 

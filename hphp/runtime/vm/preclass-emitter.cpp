@@ -236,7 +236,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_traitPrecRules = m_traitPrecRules;
   pc->m_traitAliasRules = m_traitAliasRules;
   pc->m_enumBaseTy = m_enumBaseTy;
-  pc->m_numDeclMethods = m_numDeclMethods;
+  pc->m_numDeclMethods = -1;
   pc->m_ifaceVtableSlot = m_ifaceVtableSlot;
 
   // Set user attributes.
@@ -268,6 +268,13 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   for (MethodVec::const_iterator it = m_methods.begin();
        it != m_methods.end(); ++it) {
     Func* f = (*it)->create(unit, pc.get());
+    if (f->attrs() & AttrTrait) {
+      if (pc->m_numDeclMethods == -1) {
+        pc->m_numDeclMethods = it - m_methods.begin();
+      }
+    } else if (!f->isGenerated()) {
+      assertx(pc->m_numDeclMethods == -1);
+    }
     methodBuild.add(f->name(), f);
   }
   pc->m_methods.create(methodBuild);
@@ -327,7 +334,6 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     (m_attrs)
     (m_parent)
     (m_docComment)
-    (m_numDeclMethods)
     (m_ifaceVtableSlot)
 
     (m_interfaces)

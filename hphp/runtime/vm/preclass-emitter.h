@@ -172,8 +172,6 @@ struct PreClassEmitter {
   void setEnumBaseTy(TypeConstraint ty) { m_enumBaseTy = ty; }
   const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
   Id id() const { return m_id; }
-  int32_t numDeclMethods() const { return m_numDeclMethods; }
-  void setNumDeclMethods(uint32_t n) { m_numDeclMethods = n; }
   void setIfaceVtableSlot(Slot s) { m_ifaceVtableSlot = s; }
   const MethodVec& methods() const { return m_methods; }
   FuncEmitter* findMethod(const StringData* name) { return m_methodMap[name]; }
@@ -263,7 +261,6 @@ struct PreClassEmitter {
   TypeConstraint m_enumBaseTy;
   Id m_id;
   PreClass::Hoistable m_hoistable;
-  int32_t m_numDeclMethods{-1};
   Slot m_ifaceVtableSlot{kInvalidSlot};
   int m_memoizeInstanceSerial{0};
 

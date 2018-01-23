@@ -1005,8 +1005,6 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   copy(ret->traitAliasRules, pce.traitAliasRules());
   copy(ret->requirements,    pce.requirements());
 
-  ret->numDeclMethods = pce.numDeclMethods();
-
   parse_methods(puState, borrow(ret), unit, pce);
   add_stringish(borrow(ret));
 

@@ -145,6 +145,10 @@ inline bool PreClass::ClassRequirement::is_same(
   return m_word == other->m_word;
 }
 
+inline size_t PreClass::ClassRequirement::hash() const {
+  return m_word;
+}
+
 /*
  * Deserialization.
  */

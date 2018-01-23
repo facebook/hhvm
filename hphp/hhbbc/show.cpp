@@ -551,6 +551,9 @@ std::string show(Context ctx) {
   }
   if (ctx.cls) {
     ret = ctx.cls->name->data();
+    if (ctx.cls != ctx.func->cls) {
+      folly::format(&ret, "({})", ctx.func->cls->name);
+    }
     ret += "::";
   }
   ret += ctx.func->name->data();

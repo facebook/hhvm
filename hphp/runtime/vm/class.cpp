@@ -2414,7 +2414,8 @@ void Class::setProperties() {
   m_declPropNumAccessible = m_declProperties.size() - numInaccessible;
 }
 
-bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
+bool Class::compatibleTraitPropInit(const TypedValue& tv1,
+                                    const TypedValue& tv2) {
   if (tv1.m_type != tv2.m_type) return false;
 
   switch (tv1.m_type) {
@@ -2426,7 +2427,7 @@ bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
-      return same(tvAsVariant(&tv1), tvAsVariant(&tv2));
+      return same(tvAsCVarRef(&tv1), tvAsCVarRef(&tv2));
 
     case KindOfUninit:
     case KindOfPersistentVec:

@@ -29,8 +29,6 @@ namespace {
 const StaticString
   s_SimpleXMLElement("SimpleXMLElement"),
   s_Closure("Closure"),
-  s_86pinit("86pinit"),
-  s_86sinit("86sinit"),
   s_MockClass("__MockClass");
 }
 
@@ -78,6 +76,22 @@ bool is_unused_trait(const php::Class& c) {
 bool is_used_trait(const php::Class& c) {
   return
     (c.attrs & (AttrTrait | AttrNoOverride)) == AttrTrait;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace php {
+
+//////////////////////////////////////////////////////////////////////
+
+ClassBase::ClassBase(const ClassBase& other) {
+  for (auto& m : other.methods) {
+    methods.push_back(std::make_unique<php::Func>(*m));
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 //////////////////////////////////////////////////////////////////////

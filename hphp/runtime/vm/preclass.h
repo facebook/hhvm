@@ -247,6 +247,7 @@ struct PreClass : AtomicCountable {
     bool is_extends() const;
     bool is_implements() const;
     bool is_same(const ClassRequirement* other) const;
+    size_t hash() const;
 
     template<class SerDe>
     typename std::enable_if<SerDe::deserializing>::type serde(SerDe& sd);

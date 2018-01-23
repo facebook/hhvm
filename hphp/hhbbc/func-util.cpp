@@ -66,4 +66,129 @@ bool check_nargs_in_range(borrowed_ptr<const php::Func> func, uint32_t nArgs) {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
+using ExnNode = php::ExnNode;
+
+std::unique_ptr<ExnNode> cloneExnTree(
+  borrowed_ptr<ExnNode> in,
+  BlockId delta,
+  std::unordered_map<borrowed_ptr<ExnNode>, borrowed_ptr<ExnNode>>& processed) {
+
+  auto clone = std::make_unique<ExnNode>();
+  always_assert(!processed.count(in));
+  processed[in] = borrow(clone);
+
+  clone->id = in->id;
+  clone->depth = in->depth;
+  clone->parent = in->parent ? processed[in->parent] : nullptr;
+  clone->info = in->info;
+  for (auto& child : in->children) {
+    clone->children.push_back(cloneExnTree(borrow(child), delta, processed));
+  }
+  if (delta) {
+    match<void>(clone->info,
+                [&](php::FaultRegion& fr) {
+                  fr.faultEntry += delta;
+                },
+                [&](php::CatchRegion& cr) {
+                  cr.catchEntry += delta;
+                });
+  }
+  return clone;
+}
+
+void fixupSwitch(SwitchTab& s, BlockId delta) {
+  for (auto& id : s) id += delta;
+}
+
+void fixupSwitch(SSwitchTab& s, BlockId delta) {
+  for (auto& ent : s) ent.second += delta;
+}
+
+// generic do-nothing function, thats an inexact match
+template<typename Opcode>
+void fixupBlockIds(const Opcode& op, bool) {}
+
+// exact match if there's a targets field with matching fixupSwitch
+template<typename Opcode>
+auto fixupBlockIds(Opcode& op, BlockId delta) ->
+  decltype(fixupSwitch(op.targets, delta)) {
+  return fixupSwitch(op.targets, delta);
+}
+
+// exact match if there's a target field
+template<typename Opcode>
+auto fixupBlockIds(Opcode& op, BlockId delta) -> decltype(op.target, void()) {
+  op.target += delta;
+}
+
+void fixupBlockIds(Bytecode& bc, BlockId delta) {
+#define O(opcode, ...) case Op::opcode: return fixupBlockIds(bc.opcode, delta);
+  switch (bc.op) { OPCODES }
+#undef O
+}
+
+void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
+  std::unordered_map<borrowed_ptr<ExnNode>, borrowed_ptr<ExnNode>> processed;
+
+  BlockId delta = dst->blocks.size();
+  for (auto& theirs : other.exnNodes) {
+    auto ours = cloneExnTree(borrow(theirs), delta, processed);
+    dst->exnNodes.push_back(std::move(ours));
+  }
+
+  for (auto& theirs : other.blocks) {
+    auto ours = std::make_unique<php::Block>(*theirs);
+    if (theirs->exnNode) {
+      ours->exnNode = processed[theirs->exnNode];
+      assertx(ours->exnNode);
+    }
+    if (delta) {
+      ours->id += delta;
+      if (ours->fallthrough != NoBlockId) ours->fallthrough += delta;
+      for (auto &id : ours->factoredExits) id += delta;
+      for (auto& bc : ours->hhbcs) {
+        // When merging functions (used for 86xints) we have to drop
+        // the src info, because it might reference a different unit
+        // (and as a generated function, the src info isn't very
+        // meaningful anyway).
+        bc.srcLoc = -1;
+        fixupBlockIds(bc, delta);
+      }
+    }
+    dst->blocks.push_back(std::move(ours));
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool append_func(php::Func* dst, const php::Func& src) {
+  if (src.numIters || src.locals.size()) return false;
+  if (src.exnNodes.size() && dst->exnNodes.size()) return false;
+
+  bool ok = false;
+  for (auto& b : dst->blocks) {
+    if (b->hhbcs.back().op != Op::RetC) continue;
+    b->hhbcs.back() = bc::PopC {};
+    b->fallthrough = dst->blocks.size();
+    ok = true;
+  }
+  if (!ok) return false;
+  copy_into(dst, src);
+  return true;
+}
+
+php::FuncBase::FuncBase(const FuncBase& other) {
+  copy_into(this, other);
+
+  assertx(!other.nativeInfo);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}

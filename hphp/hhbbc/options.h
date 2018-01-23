@@ -228,6 +228,12 @@ struct Options {
   bool ElideAutoloadInvokes = true;
 
   /*
+   * Whether to flatten trait methods and properties into the classes
+   * that use them.
+   */
+  bool FlattenTraits = true;
+
+  /*
    * The filepath where to save the stats file.  If the path is empty, then we
    * save the stats file to a temporary file.
    */

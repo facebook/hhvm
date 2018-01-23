@@ -110,7 +110,9 @@ Id recordFunc(EmitUnitState& euState, UnitEmitter& ue, Id id) {
 //////////////////////////////////////////////////////////////////////
 
 php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
-  return ix >= 0 ? func.unit->srcLocs[ix] : php::SrcLoc{};
+  if (ix < 0) return php::SrcLoc{};
+  auto const unit = func.originalUnit ? func.originalUnit : func.unit;
+  return unit->srcLocs[ix];
 }
 
 /*
@@ -1096,7 +1098,9 @@ void emit_finish_func(EmitUnitState& state,
 
   fe.userAttributes = func.userAttributes;
   fe.retUserType = func.returnUserType;
-  fe.originalFilename = func.originalFilename;
+  fe.originalFilename =
+    func.originalFilename ? func.originalFilename :
+    func.originalUnit ? func.originalUnit->filename : nullptr;
   fe.isClosureBody = func.isClosureBody;
   fe.isAsync = func.isAsync;
   fe.isGenerator = func.isGenerator;
@@ -1210,7 +1214,6 @@ void emit_class(EmitUnitState& state,
   for (auto& x : cls.requirements)       pce->addClassRequirement(x);
   for (auto& x : cls.traitPrecRules)     pce->addTraitPrecRule(x);
   for (auto& x : cls.traitAliasRules)    pce->addTraitAliasRule(x);
-  pce->setNumDeclMethods(cls.numDeclMethods);
 
   pce->setIfaceVtableSlot(state.index.lookup_iface_vtable_slot(&cls));
 

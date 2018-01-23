@@ -269,9 +269,46 @@ struct NativeInfo {
 };
 
 /*
+ * Separate out the fields that need special attention when copying,
+ * so that Func can just have default copy/move semantics.
+ */
+struct FuncBase {
+  FuncBase() = default;
+  FuncBase(const FuncBase&);
+  FuncBase(FuncBase&&) = delete;
+  FuncBase& operator=(const FuncBase&) = delete;
+
+  /*
+   * All owning pointers to blocks are in this vector, which has the
+   * blocks in an unspecified order.  Blocks use BlockIds
+   * to represent control flow arcs. The id of a block is its
+   * index in this vector.
+   */
+  CompactVector<std::unique_ptr<Block>> blocks;
+
+  /*
+   * Try and fault regions form a tree structure.  The tree is hanging
+   * off the func here, with children pointers.  Each block that is
+   * within a try or fault region has a pointer to the inner-most
+   * ExnNode protecting it.
+   *
+   * Note that this, together with the Blocks' factoredExits are updated
+   * during the concurrent analyze pass.
+   */
+  CompactVector<std::unique_ptr<ExnNode>> exnNodes;
+
+  /*
+   * For HNI-based extensions, additional information for functions
+   * with a native-implementation is here.  If this isn't a function
+   * with an HNI-based native implementation, this will be nullptr.
+   */
+  std::unique_ptr<NativeInfo> nativeInfo;
+};
+
+/*
  * Representation of a function, class method, or pseudomain function.
  */
-struct Func {
+struct Func : FuncBase {
   /*
    * An index, so we can lookup auxiliary structures efficiently
    */
@@ -305,25 +342,6 @@ struct Func {
   borrowed_ptr<Class> cls;
 
   /*
-   * All owning pointers to blocks are in this vector, which has the
-   * blocks in an unspecified order.  Blocks use BlockIds
-   * to represent control flow arcs. The id of a block is its
-   * index in this vector.
-   */
-  CompactVector<std::unique_ptr<Block>> blocks;
-
-  /*
-   * Try and fault regions form a tree structure.  The tree is hanging
-   * off the func here, with children pointers.  Each block that is
-   * within a try or fault region has a pointer to the inner-most
-   * ExnNode protecting it.
-   *
-   * Note that this, together with the Blocks' factoredExits are updated
-   * during the concurrent analyze pass.
-   */
-  CompactVector<std::unique_ptr<ExnNode>> exnNodes;
-
-  /*
    * Entry point blocks for default value initializers.
    *
    * Note that in PHP you can declare functions where some of the
@@ -348,8 +366,12 @@ struct Func {
    * If traits are being flattened by hphpc, we keep the original
    * filename of a function (the file that defined the trait) so
    * backtraces and things work correctly.  Otherwise this is nullptr.
+   * Similarly, if hhbbc did the flattening itself, we need the original
+   * unit, to get to the srcLocs. Once we stop flattening in hphpc, we can
+   * drop the originalFilename.
    */
   LSString originalFilename;
+  borrowed_ptr<Unit> originalUnit{};
 
   /*
    * Whether or not this function is a top-level function.  (Defined
@@ -394,13 +416,6 @@ struct Func {
    * User attribute list.
    */
   UserAttributeMap userAttributes;
-
-  /*
-   * For HNI-based extensions, additional information for functions
-   * with a native-implementation is here.  If this isn't a function
-   * with an HNI-based native implementation, this will be nullptr.
-   */
-  std::unique_ptr<NativeInfo> nativeInfo;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -457,9 +472,25 @@ struct Const {
 };
 
 /*
+ * Similar to FuncBase - separate the fields that need special
+ * attention when copying.
+ */
+struct ClassBase {
+  ClassBase() = default;
+  ClassBase(const ClassBase&);
+  ClassBase(ClassBase&&) = delete;
+  ClassBase& operator=(const ClassBase&) = delete;
+
+  /*
+   * Methods on the class. If there's an 86cinit, it must be last.
+   */
+  CompactVector<std::unique_ptr<php::Func>> methods;
+};
+
+/*
  * Representation of a php class declaration.
  */
-struct Class {
+struct Class : ClassBase {
   /*
    * Basic information about the class.
    */
@@ -516,11 +547,6 @@ struct Class {
   CompactVector<PreClass::ClassRequirement> requirements;
   CompactVector<PreClass::TraitPrecRule> traitPrecRules;
   CompactVector<PreClass::TraitAliasRule> traitAliasRules;
-  int32_t numDeclMethods;
-  /*
-   * Methods on the class. If there's an 86cinit, it must be last.
-   */
-  CompactVector<std::unique_ptr<php::Func>> methods;
 
   /*
    * Properties defined on this class.

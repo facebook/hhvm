@@ -263,7 +263,6 @@ let init_watchman root =
   Watchman.init {
     Watchman.subscribe_mode = Some Watchman.All_changes;
     init_timeout = 30;
-    sync_directory = "";
     expression_terms = watchman_expression_terms;
     root;
   }

@@ -700,7 +700,6 @@ let init {
     let watchman = Watchman.init {
       Watchman.subscribe_mode = Some Watchman.Scm_aware;
       init_timeout = 30;
-      sync_directory = "";
       expression_terms = watchman_expression_terms;
       root;
     } in

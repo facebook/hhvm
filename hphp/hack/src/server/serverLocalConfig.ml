@@ -15,9 +15,6 @@ type t = {
   use_watchman: bool;
   watchman_init_timeout: int; (* in seconds *)
   watchman_subscribe: bool;
-  (** The directory (relative path) for touching temporary files
-   * meant for synchronized watchman queries. *)
-  watchman_sync_directory: string;
   use_mini_state: bool;
   use_hackfmt: bool;
   load_mini_script_timeout: int; (* in seconds *)
@@ -55,7 +52,6 @@ let default = {
   (* Buck and hgwatchman use a 10 second timeout too *)
   watchman_init_timeout = 10;
   watchman_subscribe = false;
-  watchman_sync_directory = "";
   use_mini_state = false;
   use_hackfmt = false;
   load_mini_script_timeout = 20;
@@ -86,14 +82,6 @@ let default = {
 let path =
   let dir = try Sys.getenv "HH_LOCALCONF_PATH" with _ -> "/etc" in
   Filename.concat dir "hh.conf"
-
-let warn_dir_not_exist dir = match dir with
-  | None ->
-    Hh_logger.log "%s" ("Watchman sync directory not specified. We will be " ^
-      "using the repo root.");
-    default.watchman_sync_directory
-  | Some dir ->
-    dir
 
 let state_loader_timeouts_ ~default config =
   let open State_loader_config in
@@ -165,14 +153,6 @@ let load_ fn ~silent =
     ~default:default.watchman_init_timeout config in
   let watchman_subscribe = bool_ "watchman_subscribe_v2"
     ~default:default.watchman_subscribe config in
-  let watchman_sync_directory_opt =
-    string_opt "watchman_sync_directory" config in
-  let watchman_sync_directory =
-    if use_watchman
-    then warn_dir_not_exist watchman_sync_directory_opt
-    else
-      ""
-  in
   let io_priority = int_ "io_priority"
     ~default:default.io_priority config in
   let cpu_priority = int_ "cpu_priority"
@@ -198,7 +178,6 @@ let load_ fn ~silent =
     use_watchman;
     watchman_init_timeout;
     watchman_subscribe;
-    watchman_sync_directory;
     use_mini_state;
     use_hackfmt;
     load_mini_script_timeout;

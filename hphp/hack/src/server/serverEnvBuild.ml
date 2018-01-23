@@ -32,8 +32,7 @@ let watchman_expression_terms = [
   ];
   J.pred "not" @@ [
     J.pred "anyof" @@ [
-      (** We don't exclude the .hg directory, because we touch unique
-       * files there to support synchronous queries. *)
+      J.strlist ["dirname"; ".hg"];
       J.strlist ["dirname"; ".git"];
       J.strlist ["dirname"; ".svn"];
     ]
@@ -70,7 +69,6 @@ let make_genv options config local_config handle =
       subscribe_mode = if local_config.SLC.watchman_subscribe
         then Some Watchman.Defer_changes
         else None;
-      sync_directory = local_config.SLC.watchman_sync_directory;
       expression_terms = watchman_expression_terms;
       root = root;
     }

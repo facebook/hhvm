@@ -3225,6 +3225,7 @@ void EmitterVisitor::emitReturnTrampoline(Emitter& e,
           e.VerifyRetTypeC();
         }
         emitInOutReturn(e);
+        emitIterFree(e, iters);
         e.RetC();
       } else {
         assert(sym == StackSym::V);
@@ -3232,6 +3233,7 @@ void EmitterVisitor::emitReturnTrampoline(Emitter& e,
         if (shouldEmitVerifyRetType()) {
           e.VerifyRetTypeV();
         }
+        emitIterFree(e, iters);
         e.RetV();
       }
       return;

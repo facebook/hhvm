@@ -18,6 +18,10 @@ module SLC = ServerLocalConfig
 
 module J = Hh_json_helpers
 
+let hg_dirname = J.strlist ["dirname"; ".hg"]
+let git_dirname = J.strlist ["dirname"; ".git"]
+let svn_dirname = J.strlist ["dirname"; ".svn"]
+
 let watchman_expression_terms = [
   J.strlist ["type"; "f"];
   J.pred "anyof" @@ [
@@ -32,9 +36,9 @@ let watchman_expression_terms = [
   ];
   J.pred "not" @@ [
     J.pred "anyof" @@ [
-      J.strlist ["dirname"; ".hg"];
-      J.strlist ["dirname"; ".git"];
-      J.strlist ["dirname"; ".svn"];
+      hg_dirname;
+      git_dirname;
+      svn_dirname;
     ]
   ]
 ]
@@ -94,7 +98,6 @@ let make_genv options config local_config handle =
   in
   let max_bucket_size = local_config.SLC.max_bucket_size in
   Bucket.set_max_bucket_size max_bucket_size;
-
   let indexer, notifier_async, notifier, wait_until_ready =
     match watchman_env with
     | Some watchman_env ->

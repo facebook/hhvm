@@ -89,8 +89,6 @@ std::string Option::Tab = "  ";
 
 const char *Option::UserFilePrefix = "php/";
 
-bool Option::FlattenTraits = false;
-
 bool Option::KeepStatementsWithNoEffect = false;
 
 std::string Option::ProgramName;
@@ -161,7 +159,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                ini, config, "DynamicInvokeFunctions",
                RuntimeOption::DynamicInvokeFunctions);
   Config::Bind(VolatileClasses, ini, config, "VolatileClasses");
-  Config::Bind(FlattenTraits, ini, config, "FlattenTraits", true);
+
+  Config::GetBool(ini, config, "FlattenTraits");
 
   for (auto& str : Config::GetVector(ini, config, "ConstantFunctions")) {
     std::string func;

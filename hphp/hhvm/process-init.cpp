@@ -79,13 +79,11 @@ void ProcessInit() {
   bool sf = RuntimeOption::SafeFileAccess;
   bool ah = RuntimeOption::EvalAllowHhas;
   bool wp = Option::WholeProgram;
-  bool ft = Option::FlattenTraits;
   RuntimeOption::EvalDumpBytecode &= ~1;
   RuntimeOption::AlwaysUseRelativePath = false;
   RuntimeOption::SafeFileAccess = false;
   RuntimeOption::EvalAllowHhas = true;
   Option::WholeProgram = false;
-  Option::FlattenTraits = false;
 
   if (RuntimeOption::RepoAuthoritative) {
     LitstrTable::init();
@@ -176,7 +174,6 @@ void ProcessInit() {
   RuntimeOption::EvalDumpBytecode = db;
   RuntimeOption::EvalAllowHhas = ah;
   Option::WholeProgram = wp;
-  Option::FlattenTraits = ft;
 
   tweak_variant_dtors();
 }

@@ -120,8 +120,6 @@ struct FunctionScope : BlockScope,
   void setGenerator(bool f) { m_generator = f; }
   bool isAsync() const { return m_async; }
   void setAsync(bool f) { m_async = f; }
-  bool isFromTrait() const { return m_fromTrait; }
-  void setFromTrait(bool f) { m_fromTrait = f; }
 
   bool usesLSB() const { return !m_noLSB; }
   bool nextLSB() const { return m_nextLSB; }
@@ -259,7 +257,6 @@ private:
   unsigned m_noLSB : 1;
   unsigned m_nextLSB : 1;
   unsigned m_localRedeclaring : 1;
-  unsigned m_fromTrait : 1;
 
   // holds the fact that defining this function is a fatal error
   const StringData* m_fatal_error_msg = nullptr;

@@ -71,8 +71,7 @@ FunctionScope::FunctionScope(AnalysisResultConstRawPtr ar, bool method,
       m_containsThis(false), m_containsBareThis(0),
       m_generator(false),
       m_async(false),
-      m_noLSB(false), m_nextLSB(false), m_localRedeclaring(false),
-      m_fromTrait(false) {
+      m_noLSB(false), m_nextLSB(false), m_localRedeclaring(false) {
   init(ar);
 
   for (unsigned i = 0; i < attrs.size(); ++i) {
@@ -121,8 +120,7 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_generator(orig->m_generator),
       m_async(orig->m_async),
       m_noLSB(orig->m_noLSB),
-      m_nextLSB(orig->m_nextLSB), m_localRedeclaring(orig->m_localRedeclaring),
-      m_fromTrait(orig->m_fromTrait) {
+      m_nextLSB(orig->m_nextLSB), m_localRedeclaring(orig->m_localRedeclaring) {
   init(ar);
   setParamCounts(ar, m_minParam, m_numDeclParams);
 }
@@ -179,8 +177,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_containsThis(false), m_containsBareThis(0),
       m_generator(false),
       m_async(false),
-      m_noLSB(false), m_nextLSB(false), m_localRedeclaring(false),
-      m_fromTrait(false) {
+      m_noLSB(false), m_nextLSB(false), m_localRedeclaring(false) {
   m_dynamicInvoke = false;
   if (!method && RuntimeOption::DynamicInvokeFunctions.count(name)) {
     setDynamicInvoke();

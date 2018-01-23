@@ -96,11 +96,6 @@ struct Option {
   static hphp_string_imap<std::string> ConstantFunctions;
 
   /**
-   * Optimization flags
-   */
-  static bool FlattenTraits;
-
-  /**
    * CodeGenerator options for PHP.
    */
   static bool GeneratePickledPHP;

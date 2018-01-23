@@ -8866,12 +8866,6 @@ buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe, bool /*top*/) {
     attrs |= AttrBuiltin;
   }
 
-  if (Option::WholeProgram) {
-    if (funcScope->isFromTrait()) {
-      attrs = attrs | AttrTrait;
-    }
-  }
-
   // For closures, the MethodStatement didn't have real attributes; enforce
   // that the __invoke method is public here
   if (fe->isClosureBody) {
@@ -10715,12 +10709,6 @@ Id EmitterVisitor::emitClass(Emitter& e,
     attr = attr | AttrFinal;
   }
 
-  if (Option::FlattenTraits) {
-    if (cNode->getUsedTraitNames().size()) {
-      attr = attr | AttrNoExpandTrait;
-    }
-  }
-
   if (!SystemLib::s_inited || cNode->isSystem()) {
     // we're building systemlib. everything is unique
     attr |= AttrBuiltin | AttrUnique | AttrPersistent;
@@ -10810,7 +10798,6 @@ Id EmitterVisitor::emitClass(Emitter& e,
         ModifierExpressionPtr mod(cv->getModifiers());
         ExpressionListPtr el(cv->getVarList());
         Attr declAttrs = buildAttrs(mod);
-        if (cv->isFromTrait()) declAttrs |= AttrTrait;
         StringData* typeConstraint = makeStaticString(
           cv->getTypeConstraint());
         int nVars = el->getCount();

@@ -181,49 +181,6 @@ void ClassVariable::analyzeProgram(AnalysisResultConstRawPtr ar) {
   }
 }
 
-void ClassVariable::addTraitPropsToScope(AnalysisResultPtr ar,
-                                         ClassScopePtr scope) {
-  ModifierExpressionPtr modifiers = scope->setModifiers(m_modifiers);
-  VariableTablePtr variables = scope->getVariables();
-
-  for (int i = 0; i < m_declaration->getCount(); i++) {
-    ExpressionPtr exp = (*m_declaration)[i];
-
-    SimpleVariablePtr var;
-    ExpressionPtr value;
-    if (exp->is(Expression::KindOfAssignmentExpression)) {
-      auto assignment = dynamic_pointer_cast<AssignmentExpression>(exp);
-      var = dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-      value = assignment->getValue();
-    } else {
-      var = dynamic_pointer_cast<SimpleVariable>(exp);
-      value = makeConstant(ar, "null");
-    }
-
-    auto const& name = var->getName();
-    Symbol *sym;
-    ClassScopePtr prevScope = variables->isPresent(name) ? scope :
-      scope->getVariables()->findParent(ar, name, sym);
-
-    if (prevScope &&
-        !isEquivRedecl(name, exp, m_modifiers,
-                       prevScope->getVariables()->getSymbol(name))) {
-      Compiler::Error(Compiler::DeclaredVariableTwice, exp);
-      m_declaration->removeElement(i--);
-    } else {
-      if (prevScope != scope) { // Property is new or override, so add it
-        variables->add(name, false, ar, exp, m_modifiers);
-        variables->getSymbol(name)->setValue(exp);
-        variables->setClassInitVal(name, value);
-        variables->markOverride(ar, name);
-      } else {
-        m_declaration->removeElement(i--);
-      }
-    }
-  }
-  scope->setModifiers(modifiers);
-}
-
 ConstructPtr ClassVariable::getNthKid(int n) const {
   switch (n) {
     case 0:

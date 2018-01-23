@@ -726,14 +726,17 @@ and toplevel_word def_start ~attr env = function
       let consts = class_const_def env in
       (match consts with
       | Const (h, cstl) ->
-          List.map cstl begin fun (x, y) -> Constant {
-            cst_mode = env.mode;
-            cst_kind = Cst_const;
-            cst_name = x;
-            cst_type = h;
-            cst_value = y;
-            cst_namespace = Namespace_env.empty env.popt;
-          } end
+        let span_end = Pos.make env.file env.lb in
+        let span = Pos.btw def_start span_end in
+        List.map cstl begin fun (x, y) -> Constant {
+          cst_mode = env.mode;
+          cst_kind = Cst_const;
+          cst_name = x;
+          cst_type = h;
+          cst_value = y;
+          cst_namespace = Namespace_env.empty env.popt;
+          cst_span = span;
+        } end
       | _ -> assert false)
   | r when is_import r ->
       let pos = Pos.make env.file env.lb in
@@ -748,7 +751,7 @@ and toplevel_word def_start ~attr env = function
       [define_or_stmt env stmt]
 
 and define_or_stmt env = function
-  | _, Expr (_, Call ((_, Id (_, "define")), _, [(_, String name); value], [])) ->
+  | _, Expr (pos, Call ((_, Id (_, "define")), _, [(_, String name); value], [])) ->
     Constant {
       cst_mode = env.mode;
       cst_kind = Cst_define;
@@ -756,6 +759,7 @@ and define_or_stmt env = function
       cst_type = None;
       cst_value = value;
       cst_namespace = Namespace_env.empty env.popt;
+      cst_span = pos;
     }
   | stmt ->
       Stmt stmt

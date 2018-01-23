@@ -1,6 +1,6 @@
 (* @generated from ast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<0b820dac859a98e6511a3c62380e4186046f2028>> *)
+(* SourceShasum<<c51276e77467498002c4b788d183ab6288eafc15>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -63,7 +63,8 @@ and gconst =
   cst_name: id ;
   cst_type: hint option ;
   cst_value: expr ;
-  cst_namespace: nsenv }
+  cst_namespace: nsenv ;
+  cst_span: pos }
 and tparam = (variance * id * (constraint_kind * hint) list)
 and tconstraint = hint option
 and typedef_kind =
@@ -500,7 +501,9 @@ and show_typedef : typedef -> Ppx_deriving_runtime.string =
   fun x  -> Format.asprintf "%a" pp_typedef x
 
 and pp_gconst : Format.formatter -> gconst -> Ppx_deriving_runtime.unit =
-  let __5 () = pp_nsenv
+  let __6 () = pp_pos
+  
+  and __5 () = pp_nsenv
   
   and __4 () = pp_expr
   
@@ -516,33 +519,37 @@ and pp_gconst : Format.formatter -> gconst -> Ppx_deriving_runtime.unit =
       fun fmt  ->
         fun x  ->
           Format.fprintf fmt "@[<2>{ ";
-          ((((((Format.fprintf fmt "@[%s =@ " "cst_mode";
-                ((__0 ()) fmt) x.cst_mode;
+          (((((((Format.fprintf fmt "@[%s =@ " "cst_mode";
+                 ((__0 ()) fmt) x.cst_mode;
+                 Format.fprintf fmt "@]");
+                Format.fprintf fmt ";@ ";
+                Format.fprintf fmt "@[%s =@ " "cst_kind";
+                ((__1 ()) fmt) x.cst_kind;
                 Format.fprintf fmt "@]");
                Format.fprintf fmt ";@ ";
-               Format.fprintf fmt "@[%s =@ " "cst_kind";
-               ((__1 ()) fmt) x.cst_kind;
+               Format.fprintf fmt "@[%s =@ " "cst_name";
+               ((__2 ()) fmt) x.cst_name;
                Format.fprintf fmt "@]");
               Format.fprintf fmt ";@ ";
-              Format.fprintf fmt "@[%s =@ " "cst_name";
-              ((__2 ()) fmt) x.cst_name;
+              Format.fprintf fmt "@[%s =@ " "cst_type";
+              ((function
+                | None  -> Format.pp_print_string fmt "None"
+                | Some x ->
+                    (Format.pp_print_string fmt "(Some ";
+                     ((__3 ()) fmt) x;
+                     Format.pp_print_string fmt ")"))) x.cst_type;
               Format.fprintf fmt "@]");
              Format.fprintf fmt ";@ ";
-             Format.fprintf fmt "@[%s =@ " "cst_type";
-             ((function
-               | None  -> Format.pp_print_string fmt "None"
-               | Some x ->
-                   (Format.pp_print_string fmt "(Some ";
-                    ((__3 ()) fmt) x;
-                    Format.pp_print_string fmt ")"))) x.cst_type;
+             Format.fprintf fmt "@[%s =@ " "cst_value";
+             ((__4 ()) fmt) x.cst_value;
              Format.fprintf fmt "@]");
             Format.fprintf fmt ";@ ";
-            Format.fprintf fmt "@[%s =@ " "cst_value";
-            ((__4 ()) fmt) x.cst_value;
+            Format.fprintf fmt "@[%s =@ " "cst_namespace";
+            ((__5 ()) fmt) x.cst_namespace;
             Format.fprintf fmt "@]");
            Format.fprintf fmt ";@ ";
-           Format.fprintf fmt "@[%s =@ " "cst_namespace";
-           ((__5 ()) fmt) x.cst_namespace;
+           Format.fprintf fmt "@[%s =@ " "cst_span";
+           ((__6 ()) fmt) x.cst_span;
            Format.fprintf fmt "@]");
           Format.fprintf fmt "@ }@]")
     [@ocaml.warning "-A"])
@@ -3245,6 +3252,7 @@ include
           let _visitors_r4 = self#on_expr env _visitors_this.cst_value  in
           let _visitors_r5 = self#on_nsenv env _visitors_this.cst_namespace
              in
+          let _visitors_r6 = self#on_pos env _visitors_this.cst_span  in
           if
             Pervasives.(&&)
               (Pervasives.(==) _visitors_this.cst_mode _visitors_r0)
@@ -3257,8 +3265,11 @@ include
                        (Pervasives.(&&)
                           (Pervasives.(==) _visitors_this.cst_value
                              _visitors_r4)
-                          (Pervasives.(==) _visitors_this.cst_namespace
-                             _visitors_r5)))))
+                          (Pervasives.(&&)
+                             (Pervasives.(==) _visitors_this.cst_namespace
+                                _visitors_r5)
+                             (Pervasives.(==) _visitors_this.cst_span
+                                _visitors_r6))))))
           then _visitors_this
           else
             {
@@ -3267,7 +3278,8 @@ include
               cst_name = _visitors_r2;
               cst_type = _visitors_r3;
               cst_value = _visitors_r4;
-              cst_namespace = _visitors_r5
+              cst_namespace = _visitors_r5;
+              cst_span = _visitors_r6
             }
         method on_tparam env
           ((_visitors_c0,_visitors_c1,_visitors_c2) as _visitors_this) =
@@ -5110,11 +5122,14 @@ include
           let _visitors_s4 = self#on_expr env _visitors_this.cst_value  in
           let _visitors_s5 = self#on_nsenv env _visitors_this.cst_namespace
              in
+          let _visitors_s6 = self#on_pos env _visitors_this.cst_span  in
           self#plus
             (self#plus
                (self#plus
-                  (self#plus (self#plus _visitors_s0 _visitors_s1)
-                     _visitors_s2) _visitors_s3) _visitors_s4) _visitors_s5
+                  (self#plus
+                     (self#plus (self#plus _visitors_s0 _visitors_s1)
+                        _visitors_s2) _visitors_s3) _visitors_s4)
+               _visitors_s5) _visitors_s6
         method on_tparam env (_visitors_c0,_visitors_c1,_visitors_c2) =
           let _visitors_s0 = self#on_variance env _visitors_c0  in
           let _visitors_s1 = self#on_id env _visitors_c1  in
@@ -6149,13 +6164,15 @@ include
           let _visitors_r4 = self#on_expr env _visitors_this.cst_value  in
           let _visitors_r5 = self#on_nsenv env _visitors_this.cst_namespace
              in
+          let _visitors_r6 = self#on_pos env _visitors_this.cst_span  in
           {
             cst_mode = _visitors_r0;
             cst_kind = _visitors_r1;
             cst_name = _visitors_r2;
             cst_type = _visitors_r3;
             cst_value = _visitors_r4;
-            cst_namespace = _visitors_r5
+            cst_namespace = _visitors_r5;
+            cst_span = _visitors_r6
           }
         method on_tparam env (_visitors_c0,_visitors_c1,_visitors_c2) =
           let _visitors_r0 = self#on_variance env _visitors_c0  in
@@ -7208,7 +7225,7 @@ include
           let _visitors_r4 = self#on_expr env _visitors_this.cst_value  in
           let _visitors_r5 = self#on_nsenv env _visitors_this.cst_namespace
              in
-          ()
+          let _visitors_r6 = self#on_pos env _visitors_this.cst_span  in ()
         method on_tparam env (_visitors_c0,_visitors_c1,_visitors_c2) =
           let _visitors_r0 = self#on_variance env _visitors_c0  in
           let _visitors_r1 = self#on_id env _visitors_c1  in

@@ -71,6 +71,7 @@ and gconst = {
   cst_type: hint option;
   cst_value: expr;
   cst_namespace: nsenv;
+  cst_span: pos;
 }
 
 and tparam = variance * id * (constraint_kind * hint) list

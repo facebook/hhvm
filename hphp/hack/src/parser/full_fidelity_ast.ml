@@ -2254,6 +2254,7 @@ and pDef : def list parser = fun node env ->
             ; cst_type      = mpOptional pHint ty env
             ; cst_value     = pSimpleInitializer init env
             ; cst_namespace = Namespace_env.empty env.parser_options
+            ; cst_span      = pPos node env
             }
         | _ -> missing_syntax "constant declaration" decls env
       in
@@ -2375,7 +2376,7 @@ let pProgram : program parser = fun node env ->
       Namespace (n, post_process il) :: post_process el
     | (Stmt _ :: el) when env.quick_mode -> post_process el
     | (Stmt (_, Noop) :: el) -> post_process el
-    | ((Stmt (_, Expr (_, (Call
+    | ((Stmt (_, Expr (pos, (Call
         ( (_, (Id (_, "define")))
         , []
         , [ (_, (String name))
@@ -2390,6 +2391,7 @@ let pProgram : program parser = fun node env ->
         ; cst_type      = None
         ; cst_value     = value
         ; cst_namespace = Namespace_env.empty env.parser_options
+        ; cst_span      = pos
         } :: post_process el
     | (e::el) -> e :: post_process el
   in
@@ -2415,7 +2417,7 @@ let pProgram : program parser = fun node env ->
           { define_keyword; define_argument_list = args; _ }
         ; _ }
       ; _ }
-    ; _ } :: nodel when not env.quick_mode ->
+    ; _ } as cur_node :: nodel when not env.quick_mode ->
       let def =
         match List.map ~f:(fun x -> pExpr x env) (as_list args) with
         | [ _, String name; e ] -> Constant
@@ -2425,10 +2427,12 @@ let pProgram : program parser = fun node env ->
           ; cst_type      = None
           ; cst_value     = e
           ; cst_namespace = Namespace_env.empty env.parser_options
+          ; cst_span      = pPos cur_node env
           }
         | args ->
           let name = pos_name define_keyword env in
-          Stmt (pPos node env, Expr (fst name, Call ((fst name, Id name), [], args, [])))
+          Stmt (pPos cur_node env,
+            Expr (fst name, Call ((fst name, Id name), [], args, [])))
       in
       aux env ([def] :: acc) nodel
   | node :: nodel ->

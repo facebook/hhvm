@@ -1606,6 +1606,14 @@ void Debugger::interruptAllThreads() {
 }
 
 void DebuggerStdoutHook::operator()(const char* str, int len) {
+  fflush(stdout);
+  write(fileno(stdout), str, len);
+
+  // Quickly no-op if there's no client.
+  if (!m_debugger->clientConnected()) {
+    return;
+  }
+
   std::string output = std::string(str, len);
   m_debugger->sendUserMessage(
     output.c_str(),
@@ -1617,6 +1625,11 @@ void DebuggerStderrHook::operator()(
   const char* msg,
   const char* ending
 ) {
+  // Quickly no-op if there's no client.
+  if (!m_debugger->clientConnected()) {
+    return;
+  }
+
   m_debugger->sendUserMessage(msg, DebugTransport::OutputLevelStderr);
 }
 

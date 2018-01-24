@@ -171,10 +171,24 @@ void SocketTransport::listenForClientConnection() {
   // Attempt to listen on the specified port on each of this host's available
   // addresses.
   struct addrinfo* address;
+  bool anyInterfaceBound = false;
   for (address = ai; address != nullptr; address = address->ai_next) {
-    if (!bindAndListen(address, socketFds)) {
-      return;
+    if (bindAndListen(address, socketFds)) {
+      anyInterfaceBound = true;
     }
+  }
+
+  if (!anyInterfaceBound) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelWarning,
+      "Debugger failed to bind to any interface!"
+    );
+    return;
+  } else {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Debugger bound to at least one interface."
+    );
   }
 
   waitForConnection(socketFds, abortFd);

@@ -313,12 +313,14 @@ let set_env_reactive env reactive =
 let set_env_function_pos env function_pos =
   { env with function_pos }
 
+let lambda_reactive = ref None
+
 let env_reactivity env =
-  env.genv.fun_reactive
+  Option.value !lambda_reactive ~default:env.genv.fun_reactive
 
 (* Some form (strict/shallow/local) of reactivity *)
 let env_local_reactive env =
-  env.genv.fun_reactive <> Nonreactive
+  env_reactivity env <> Nonreactive
 
 let function_is_mutable env =
   env.genv.fun_mutable
@@ -326,7 +328,6 @@ let function_is_mutable env =
 let set_fun_mutable env mut =
   { env with genv = {env.genv with fun_mutable = mut }}
 
-let lambda_reactive = ref None
 (* Takes in the typechecking function of a lambda
   block and checks if it breaks reactivity rules *)
 let check_lambda_reactive f =

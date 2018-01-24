@@ -197,6 +197,12 @@ let add_int i1 i2 =
   then Some (Int (Int64.add i1 i2))
   else None
 
+let neg i =
+  match i with
+  | Int i -> Some (Int (Int64.sub 0L i))
+  | Float f -> Some (Float (0.0 -. f))
+  | _ -> None
+
 let sub_int i1 i2 =
   if ints_overflow_to_ints ()
   then Some (Int (Int64.sub i1 i2))

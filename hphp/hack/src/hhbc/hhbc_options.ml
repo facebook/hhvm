@@ -155,7 +155,9 @@ let set_option options name value =
   | "hhvm.jit_enable_rename_function" ->
     { options with option_jit_enable_rename_function = as_bool value }
   | "eval.disablehphpcopts" ->
-    { options with option_optimize_cuf = not (as_bool value) }
+    let v = not (as_bool value) in
+    { options with option_optimize_cuf = v;
+                   option_constant_folding = v}
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -219,7 +221,8 @@ let value_setters = [
   (set_value "hack.compiler.optimize_null_checks" get_value_from_config_int @@
     fun opts v -> { opts with option_optimize_null_check = (v = 1) });
   (set_value "hhvm.disable_hphpc_opts" get_value_from_config_int @@
-    fun opts v -> { opts with option_optimize_cuf = (v = 0) });
+    fun opts v -> { opts with option_optimize_cuf = (v = 0);
+                              option_constant_folding = (v = 0) });
   (set_value "hack.compiler.optimize_cuf" get_value_from_config_int @@
     fun opts v -> { opts with option_optimize_cuf = (v = 1) });
   (set_value "hhvm.php7.uvs" get_value_from_config_int @@

@@ -100,6 +100,7 @@ module Float = struct
     match Printf.sprintf "%0.17g" f with
     | "nan" -> "NAN"
     | "inf" -> "INF"
+    | "-inf" -> "-INF"
     | s -> s
 
   (* Unfortunately the g flag does not provide enough of a match with hhvm,

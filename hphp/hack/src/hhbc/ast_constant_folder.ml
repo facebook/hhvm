@@ -78,11 +78,19 @@ let int64_of_octal_opt (s : string) (truncate : bool) : Int64.t option =
 (* Return None if this overflows *)
 let try_type_intlike (s : string) : TV.t option =
   match radix s with
-  | `Bin | `Hex | `Dec -> begin
+  | `Dec ->
+    (* Ocaml source: ints.c: parse_sign_and_base treat
+       dec form as signed so overflows are properly detected and reported *)
+    Option.map (Int64.of_string_opt s) ~f:(fun v -> TV.Int v)
+  | `Bin | `Hex -> begin
+    (* Ocaml source: ints.c: parse_sign_and_base interprets hex/bin forms as
+       unsigned so if the input exceeds Int64.max_int it is converted
+       to the signed integer Int64.min_int + input - Int64.max_int - 1.*)
     match Int64.of_string s with
     | i ->
-      if i < 0L then None
-      else Some (TV.Int i)
+      let input_is_negative = String.get s 0 = '-' in
+      (* treat as overflow if result has changed the sign comparing to input *)
+      if input_is_negative = (i < 0L) then Some (TV.Int i) else None
     | exception _ -> None
   end
   | `Oct ->
@@ -336,7 +344,7 @@ let unop_on_value unop v =
   match unop with
   | A.Unot -> TV.not v
   | A.Uplus -> TV.add TV.zero v
-  | A.Uminus -> TV.sub TV.zero v
+  | A.Uminus -> TV.neg v
   | A.Utild -> TV.bitwise_not v
   | A.Usilence -> Some v
   | _ -> None
@@ -345,7 +353,8 @@ let unop_on_value unop v =
 let binop_on_values binop v1 v2 =
   match binop with
   | A.Dot -> TV.concat v1 v2
-  | A.Plus -> TV.add v1 v2
+  (* temporarily disabled *)
+  (* | A.Plus -> TV.add v1 v2
   | A.Minus -> TV.sub v1 v2
   | A.Star -> TV.mul v1 v2
   | A.Slash -> TV.div v1 v2
@@ -365,7 +374,7 @@ let binop_on_values binop v1 v2 =
   | A.Gt -> TV.greater_than v1 v2
   | A.Gte -> TV.greater_than_equals v1 v2
   | A.Lt -> TV.less_than v1 v2
-  | A.Lte -> TV.less_than_equals v1 v2
+  | A.Lte -> TV.less_than_equals v1 v2 *)
   | _ -> None
 
 (* try to apply type cast to a value *)
@@ -373,7 +382,10 @@ let cast_value hint v =
   match hint with
   | A.Happly((_, id), []) ->
     if id = SN.Typehints.int || id = SN.Typehints.integer
-    then TV.cast_to_int v
+    then
+      (* temporarily disabled *)
+      (* TV.cast_to_int v *)
+      None
     else
     if id = SN.Typehints.bool || id = SN.Typehints.boolean
     then TV.cast_to_bool v

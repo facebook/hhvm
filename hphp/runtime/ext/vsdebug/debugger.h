@@ -77,6 +77,7 @@ struct RequestInfo {
     bool memoryLimitRemoved;
     bool compilationUnitsMapped;
     bool doNotBreak;
+    bool outputHooked;
   } m_flags;
   const char* m_stepReason;
   CommandQueue m_commandQueue;
@@ -350,10 +351,18 @@ struct Debugger final {
 
   bool isPaused() { return m_state != ProgramState::Running; }
 
+  static bool hasSameTty() {
+    return !RuntimeOption::ServerExecutionMode() &&
+      RuntimeOption::VSDebuggerListenPort <= 0;
+  }
+
   // Returns the current stdout hook if one is installed, or nullptr otherwise.
   DebuggerStdoutHook* getStdoutHook() {
-    // Only installed for server execution mode.
-    return RuntimeOption::ServerExecutionMode() ? nullptr : &m_stdoutHook;
+    return clientConnected() && !hasSameTty() ? &m_stdoutHook : nullptr;
+  }
+
+  DebuggerStderrHook* getStderrHook() {
+    return clientConnected() ? &m_stderrHook : nullptr;
   }
 
   // Gets the current VM location, returns a pair of Unit* and current line.

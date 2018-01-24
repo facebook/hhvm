@@ -217,6 +217,33 @@ void VSDebugHook::tryEnterDebugger(
     requestInfo->m_flags.memoryLimitRemoved = true;
   }
 
+  // Check if we need to update the hook stdout and stderr for the request
+  // thread.
+  if (!requestInfo->m_flags.outputHooked) {
+    requestInfo->m_flags.outputHooked = true;
+
+    // In server mode, attach logging hooks to redirect stdout and stderr
+    // to the debugger client. This is not needed in launch mode, because
+    // the wrapper has the actual stdout and stderr pipes to use directly,
+    // except for the case where we attached to an already-running script,
+    // which behaves like server mode.
+    bool scriptAttachMode = RuntimeOption::VSDebuggerListenPort > 0;
+    if (!Debugger::hasSameTty()) {
+      if (!g_context.isNull()) {
+        g_context->setStdout(debugger->getStdoutHook());
+      }
+
+      if (scriptAttachMode || debugger->isDummyRequest()) {
+        // Attach to stderr in server mode only for the dummy thread (to show
+        // any error spew from evals, etc) or in script attach mode.
+        // Attaching to all requests in server mode produces way too much error
+        // spew for the client. Users see stderr output for the webserver via
+        // web server logs.
+        Logger::SetThreadHook(debugger->getStderrHook());
+      }
+    }
+  }
+
   if (!breakNoStepOnly || !Debugger::isStepInProgress(requestInfo)) {
     debugger->enterDebuggerIfPaused(requestInfo);
   }

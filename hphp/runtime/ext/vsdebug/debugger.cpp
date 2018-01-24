@@ -92,11 +92,13 @@ void Debugger::setClientConnected(bool connected) {
       // were initialized when the client was disconnected to avoid taking a
       // perf hit for a debugger hook that wasn't going to be used.
       //
-      // Only do this after seeing at least 1 request via the requestInit path:
-      // on initial startup in script mode, the script request thread will have
+      // Only do this after seeing at least 1 request via the requestInit path
+      // in script mode: on initial startup the script request thread will have
       // been created already in HHVM main, but is not ready for us to attach
       // yet because extensions are still being initialized.
-      if (m_totalRequestCount.load() > 0) {
+      if (RuntimeOption::ServerExecutionMode() ||
+          m_totalRequestCount.load() > 0) {
+
         ThreadInfo::ExecutePerThread([this] (ThreadInfo* ti) {
           this->attachToRequest(ti);
         });
@@ -136,6 +138,10 @@ void Debugger::setClientConnected(bool connected) {
           // the request completes in requestShutdown. It is not safe to do that
           // from this thread.
           ri->m_commandQueue.clearPendingMessages();
+
+          // Have the debugger hook update the output hook on next interrupt.
+          ri->m_flags.outputHooked = false;
+          ti->m_reqInjectionData.setDebuggerIntr(true);
 
           // Clear the breakpoint info.
           if (ri->m_breakpointInfo != nullptr) {
@@ -422,21 +428,6 @@ void Debugger::requestInit() {
 
   bool dummy = isDummyRequest();
 
-  // In server mode, attach logging hooks to redirect stdout and stderr
-  // to the debugger client. This is not needed in launch mode, because
-  // the wrapper has the actual stdout and stderr pipes to use directly.
-  if (RuntimeOption::ServerExecutionMode()) {
-    g_context->setStdout(&m_stdoutHook);
-
-    if (isDummyRequest()) {
-      // Attach to stderr in server mode only for the dummy thread (to show
-      // any error spew from evals, etc). Attaching to all requests produces
-      // way too much error spew for the client. Users see stderr output
-      // for the webserver via server logs.
-      Logger::SetThreadHook(&m_stderrHook);
-    }
-  }
-
   // Don't attach to the dummy request thread. DebuggerSession manages the
   // dummy requests debugger hook state.
   if (!dummy) {
@@ -599,6 +590,10 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
 
   assert(requestInfo != nullptr && requestInfo->m_breakpointInfo != nullptr);
 
+  // Have the debugger hook update the output hook on next interrupt.
+  requestInfo->m_flags.outputHooked = false;
+  ti->m_reqInjectionData.setDebuggerIntr(true);
+
   if (ti->m_executing == ThreadInfo::Executing::UserFunctions ||
       ti->m_executing == ThreadInfo::Executing::RuntimeFunctions) {
     sendThreadEventMessage(threadId, ThreadEventType::ThreadStarted);
@@ -607,7 +602,6 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   // Try to attach our debugger hook to the request.
   if (!requestInfo->m_flags.hookAttached) {
     if (DebuggerHook::attach<VSDebugHook>(ti)) {
-      ti->m_reqInjectionData.setDebuggerIntr(true);
       ti->m_reqInjectionData.setFlag(DebuggerSignalFlag);
 
       requestInfo->m_flags.hookAttached = true;

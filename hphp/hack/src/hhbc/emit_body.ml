@@ -410,23 +410,26 @@ let emit_body
   let should_emit_init_this = not is_in_static_method && (needs_local_this ||
     (is_toplevel && List.exists ~f:(fun x -> x = "$this") decl_vars))
   in
-  let header = gather [
-        begin_label;
-        emit_method_prolog ~pos ~params ~should_emit_init_this;
-        emit_deprecation_warning scope deprecation_info;
-        generator_instr;
-      ]
-  in
-  (* per comment in emitter.cpp there should be no
-   * jumps to the base of the function - inject EntryNop
-   * if first instruction in the statement list is label
-   * and prologue is empty *)
   let header =
-    if first_instruction_is_label
-      && Instruction_sequence.is_empty header
-    then instr_entrynop
-    else header
-  in
+    (* per comment in emitter.cpp there should be no
+     * jumps to the base of the function - inject EntryNop
+     * if first instruction in the statement list is label
+     * and header content is empty *)
+    let header_content = gather [
+      emit_method_prolog ~pos ~params ~should_emit_init_this;
+      emit_deprecation_warning scope deprecation_info;
+      generator_instr;
+    ] in
+    if first_instruction_is_label &&
+       Instruction_sequence.is_empty header_content
+    then gather [
+      begin_label;
+      instr_entrynop;
+    ]
+    else gather [
+      begin_label;
+      header_content;
+    ] in
   let svar_instrs = SMap.ordered_keys svar_map in
   let body_instrs = gather [
     header;

@@ -200,7 +200,7 @@ let emit_param_default_value_setter env params =
         instr_popc;
       ]) )
   in
-  if List.length setters = 0
+  if List.is_empty setters
   then empty, empty
   else
     let l = Label.next_regular () in

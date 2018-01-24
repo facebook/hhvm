@@ -1692,7 +1692,11 @@ Variant openssl_pkcs7_verify_core(
   if (ignore_cert_expiration) {
 #if (OPENSSL_VERSION_NUMBER >= 0x10000000)
     // make sure no other callback is specified
+  #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+    assert(!X509_STORE_get_verify_cb(store));
+  #else
     assert(!store->verify_cb);
+  #endif
     // ignore expired certs
     X509_STORE_set_verify_cb(store, pkcs7_ignore_expiration);
 #else

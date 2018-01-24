@@ -27,7 +27,8 @@
 namespace HPHP {
 
 constexpr unsigned kLgSlabSize = 21;
-constexpr uint32_t kSlabSize = uint32_t{1} << kLgSlabSize;
+constexpr size_t kSlabSize = 1ull << kLgSlabSize;
+constexpr size_t kSlabAlign = kSlabSize;
 
 // To mitigate the ABA problem (i.e., a slab is allocated and returned to the
 // list without another thread noticing), we tag the pointers on the lower 16

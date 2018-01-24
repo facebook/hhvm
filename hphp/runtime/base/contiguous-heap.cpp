@@ -60,18 +60,35 @@ TRACE_SET_MOD(mm);
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace {
-void* alloc_heap(size_t size) {
-  void* mem = mmap(nullptr, size, PROT_READ|PROT_WRITE,
-                   MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+void* alloc_heap(size_t size, size_t align) {
+  always_assert((align & (align - 1)) == 0); // align must be power of 2
+  always_assert(align != 0 && size % align == 0);
+  auto map_size = size + align;
+  auto mem = mmap(nullptr, map_size, PROT_READ|PROT_WRITE,
+                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (mem == MAP_FAILED) {
     std::string buffer = folly::sformat("Failed to mmap a region of size {}\n",
-                                        size);
+                                        map_size);
     log_native_stack(buffer.c_str());
   }
   always_assert(mem != MAP_FAILED);
+  if (uintptr_t(mem) % align) {
+    // align mem to ChunkSize
+    auto aligned = (void*)((uintptr_t(mem) + align-1) & ~(align-1));
+    munmap(mem, (char*)aligned - (char*)mem);
+    map_size -= (char*)aligned - (char*)mem;
+    mem = aligned;
+  }
+  if (auto extra_size = map_size % align) {
+    // trim remainder
+    auto end = (char*)mem + map_size - extra_size;
+    munmap(end, extra_size);
+    map_size -= extra_size;
+  }
+  always_assert(map_size >= size);
   // TODO(T20460380): Investigate what kind of madvise is better in
   // contiguous heap, MADV_DONTNEED or MADV_FREE
-  madvise(mem, size, MADV_DONTNEED); // decommit all
+  madvise(mem, map_size, MADV_DONTNEED); // decommit all
   return mem;
 }
 
@@ -83,9 +100,9 @@ thread_local Purger purger;
 }
 
 ContiguousHeap::ContiguousHeap()
-  : m_base((char*)alloc_heap(ContiguousHeap::HeapCap))
-  , m_limit(m_base + ContiguousHeap::HeapCap)
-  , m_front(m_base){
+  : m_base((char*)alloc_heap(HeapCap, ChunkSize))
+  , m_limit(m_base + HeapCap)
+  , m_front(m_base) {
 }
 
 ContiguousHeap::~ContiguousHeap() {

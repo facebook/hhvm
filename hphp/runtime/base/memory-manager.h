@@ -530,18 +530,13 @@ struct SparseHeap {
   void enlist(MallocNode*, HeaderKind kind, size_t size, type_scan::Index);
 
  protected:
-  enum FirstSlabT { FirstSlab };
-  enum PooledSlabT { PooledSlab };
   struct SlabInfo {
     SlabInfo(void* p, size_t s) : ptr(p), size(s) {}
-    SlabInfo(void* p, size_t s, FirstSlabT)
-      : ptr(p), size(s), contains_stack(true) {}
-    SlabInfo(void* p, size_t s, uint16_t v, PooledSlabT)
+    SlabInfo(void* p, size_t s, uint16_t v)
       : ptr(p), size(s), pooled(true), version(v) {}
 
     void* ptr;
     uint32_t size;
-    bool contains_stack{false};         // first slab share a page with stack
     bool pooled{false};                 // from SlabManager
     uint16_t version{0};                // tag used with SlabManager
   };

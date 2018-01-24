@@ -672,10 +672,10 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   requestGC();
   storeTail(m_freelists, m_front, (char*)m_limit - (char*)m_front);
   auto mem = m_heap.allocSlab(m_stats);
-  assert((uintptr_t(mem) & kSmallSizeAlignMask) == 0);
+  assert(reinterpret_cast<uintptr_t>(mem) % kSlabAlign == 0);
   auto slab = static_cast<Slab*>(mem);
   auto slab_start = slab->init();
-  m_front = (void*)(slab_start + nbytes); // allocate requested object
+  m_front = slab_start + nbytes; // allocate requested object
   // we can't use any space after slab->end() even if the allocator allows
   // (indiciated by mem.size), because of the fixed-sized crossing map.
   m_limit = slab->end();

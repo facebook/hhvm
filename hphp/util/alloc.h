@@ -301,6 +301,12 @@ inline void safe_free(void* ptr) {
   return free(ptr);
 }
 
+inline void* safe_aligned_alloc(size_t align, size_t size) {
+  auto p = aligned_alloc(align, size);
+  if (!p) throw OutOfMemoryException(size);
+  return p;
+}
+
 /**
  * Instruct low level memory allocator to free memory back to system. Called
  * when thread's been idle and predicted to continue to be idle for a while.

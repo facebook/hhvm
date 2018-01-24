@@ -56,9 +56,14 @@ type namespace_type =
   | Bracketed of location
   | Unbracketed of location
 
+type name_kind =
+  | Name_use    (* `use` construct *)
+  | Name_def (* definition e.g. `class` or `trait` *)
+  | Name_implicit_use (* implicit `use` e.g. HH type in type hint *)
+
 type first_use_or_def = {
   f_location: location;
-  f_is_def: bool;
+  f_kind: name_kind;
   f_name: string;
 }
 
@@ -74,8 +79,8 @@ let combine_names n1 n2 =
   | false, false -> n1 ^ "\\" ^ n2
   | _ -> n1 ^ n2
 
-let make_first_use_or_def ~is_def location namespace_name name =
-  { f_location = location; f_is_def = is_def; f_name = combine_names namespace_name name }
+let make_first_use_or_def ~kind location namespace_name name =
+  { f_location = location; f_kind = kind; f_name = combine_names namespace_name name }
 
 type used_names = {
   t_classes: first_use_or_def SMap.t;
@@ -841,6 +846,27 @@ let make_name_already_used_error node name short_name original_location
   SyntaxError.make
     ~child:(Some original_location_error) s e (report_error ~name ~short_name)
 
+let check_type_name_reference name_text location is_hack names errors =
+  if not (is_hack && Hh_autoimport.is_hh_autoimport name_text) || SMap.mem name_text names.t_classes
+  then names, errors
+  else
+    let def = make_first_use_or_def ~kind:Name_implicit_use location "HH" name_text in
+    let names = { names with t_classes = SMap.add name_text def names.t_classes} in
+    names, errors
+
+let check_type_hint node is_hack names errors =
+  let rec check (names, errors) node =
+    let names, errors =
+      Core_list.fold_left (Syntax.children node) ~f:check ~init:(names, errors) in
+    match syntax node with
+    | SimpleTypeSpecifier { simple_type_specifier = s; _ }
+    | GenericTypeSpecifier { generic_class_type = s; _ } ->
+      check_type_name_reference (text s) (make_location_of_node node) is_hack names errors
+    | _ ->
+      names, errors
+  in
+    check (names, errors) node
+
 (* Given a node and its parents, tests if the node declares a method that is
  * both abstract and async. *)
 let is_abstract_and_async_method md_node parents =
@@ -1214,7 +1240,7 @@ let is_param_by_ref node =
     is_byref_parameter_variable parameter_name
   | _ -> false
 
-let params_errors params is_hack hhvm_compat_mode errors =
+let params_errors params is_hack hhvm_compat_mode namespace_name names errors =
   let errors =
     produce_error_from_check errors (default_value_params is_hack hhvm_compat_mode)
     params SyntaxError.error2066 in
@@ -1246,14 +1272,14 @@ let params_errors params is_hack hhvm_compat_mode errors =
       params SyntaxError.fn_with_inout_and_ref_params :: errors
     else errors
   in
-  errors
+  names, errors
 
 let decoration_errors node errors =
   let errors = produce_error errors is_double_variadic node SyntaxError.double_variadic node in
   let errors = produce_error errors is_double_reference node SyntaxError.double_reference node in
   errors
 
-let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
+let parameter_errors node parents is_strict is_hack hhvm_compat_mode namespace_name names errors =
   match syntax node with
   | ParameterDeclaration p ->
     let errors =
@@ -1267,6 +1293,8 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
     let errors =
       produce_error_from_check errors param_with_callconv_is_byref
       node (SyntaxError.error2075 callconv_text) in
+    let names, errors =
+      check_type_hint p.parameter_type is_hack names errors in
     let errors = if is_parameter_with_callconv node then
       begin
         let errors = if is_inside_async_method parents then
@@ -1301,19 +1329,17 @@ let parameter_errors node parents is_strict is_hack hhvm_compat_mode errors =
       if is_reference_variadic p.parameter_name then
         make_error_from_node node SyntaxError.variadic_reference :: errors
       else errors in
-    errors
-  | FunctionDeclarationHeader { function_parameter_list; _ } ->
-    params_errors function_parameter_list is_hack hhvm_compat_mode errors
-  | AnonymousFunction { anonymous_parameters; _ } ->
-    params_errors anonymous_parameters is_hack hhvm_compat_mode errors
-  | ClosureTypeSpecifier { closure_parameter_list; _ } ->
-    params_errors closure_parameter_list is_hack hhvm_compat_mode errors
+    names, errors
+  | FunctionDeclarationHeader { function_parameter_list = params; _ }
+  | AnonymousFunction { anonymous_parameters = params; _ }
+  | ClosureTypeSpecifier { closure_parameter_list = params; _ } ->
+    params_errors params is_hack hhvm_compat_mode namespace_name names errors
   | LambdaExpression
     { lambda_signature = {syntax = LambdaSignature { lambda_parameters; _ }; _}
     ; _
-    } -> params_errors lambda_parameters is_hack hhvm_compat_mode errors
-  | DecoratedExpression _ -> decoration_errors node errors
-  | _ -> errors
+    } -> params_errors lambda_parameters is_hack hhvm_compat_mode namespace_name names errors
+  | DecoratedExpression _ -> names, decoration_errors node errors
+  | _ -> names, errors
 
 let function_errors node parents is_strict hhvm_compat_mode errors =
   match syntax node with
@@ -1346,11 +1372,10 @@ let redeclaration_errors node parents syntax_tree namespace_name names errors =
         let function_name = text f.function_name in
         let location = make_location_of_node f.function_name in
         let def = make_first_use_or_def
-          ~is_def:true location namespace_name function_name in
+          ~kind:Name_def location namespace_name function_name in
         let errors =
           match SMap.get function_name names.t_functions with
-          | Some { f_location = { start_offset; _}; f_is_def; _}
-            when f_is_def ->
+          | Some { f_location = { start_offset; _}; f_kind = Name_def; _} ->
             let text = SyntaxTree.text syntax_tree in
             let line, _ =
               Full_fidelity_source_text.offset_to_position text start_offset in
@@ -1713,24 +1738,32 @@ let require_errors node parents hhvm_compat_mode trait_use_clauses errors =
     trait_use_clauses, errors
   | _ -> trait_use_clauses, errors
 
-let check_type_name name namespace_name name_text location names errors =
+let check_type_name syntax_tree name namespace_name name_text location names errors =
   begin match SMap.get name_text names.t_classes with
-  | Some { f_location = location; f_is_def = false; f_name }
-    when combine_names namespace_name name_text <> f_name ->
+  | Some { f_location = location; f_kind; f_name }
+    when combine_names namespace_name name_text <> f_name && f_kind <> Name_def ->
+    let text = SyntaxTree.text syntax_tree in
+    let line_num, _ =
+      Full_fidelity_source_text.offset_to_position
+        text location.start_offset in
+    let long_name_text = combine_names namespace_name name_text in
     let error =
-      make_name_already_used_error name name_text name_text location
-        SyntaxError.type_name_is_already_in_use in
+      make_name_already_used_error name long_name_text name_text location
+        (match f_kind with
+          | Name_implicit_use -> SyntaxError.declared_name_is_already_in_use_implicit_hh ~line_num
+          | Name_use -> SyntaxError.declared_name_is_already_in_use ~line_num
+          | Name_def -> SyntaxError.type_name_is_already_in_use) in
     names, error :: errors
   | _ ->
     let def =
-      make_first_use_or_def ~is_def:true location namespace_name name_text in
+      make_first_use_or_def ~kind:Name_def location namespace_name name_text in
     let names =
       { names with
         t_classes = SMap.add name_text def names.t_classes} in
     names, errors
   end
 
-let classish_errors node parents is_hack hhvm_compat_mode namespace_name names errors =
+let classish_errors node parents syntax_tree is_hack hhvm_compat_mode namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
     (* Given a ClassishDeclaration node, test whether or not it contains
@@ -1840,7 +1873,7 @@ let classish_errors node parents is_hack hhvm_compat_mode namespace_name names e
       | Some TokenKind.Class | Some TokenKind.Trait
         when not (is_missing cd.classish_name)->
         let location = make_location_of_node cd.classish_name in
-        check_type_name cd.classish_name namespace_name name location names errors
+        check_type_name syntax_tree cd.classish_name namespace_name name location names errors
       | _ ->
         names, errors in
     names, errors
@@ -1859,7 +1892,7 @@ let type_errors node parents is_strict hhvm_compat_mode errors =
     t.simple_type_specifier SyntaxError.error2032 t.simple_type_specifier
   | _ -> errors
 
-let alias_errors node namespace_name names errors =
+let alias_errors syntax_tree node namespace_name names errors =
   match syntax node with
   | AliasDeclaration ad ->
     let errors =
@@ -1871,7 +1904,7 @@ let alias_errors node namespace_name names errors =
     else
     let name = text ad.alias_name in
     let location = make_location_of_node ad.alias_name in
-    check_type_name ad.alias_name namespace_name name location names errors
+    check_type_name syntax_tree ad.alias_name namespace_name name location names errors
   | _ -> names, errors
 
 let is_invalid_group_use_clause kind clause =
@@ -1929,8 +1962,8 @@ let use_class_or_namespace_clause_errors
 
       let map = get_map names in
       match SMap.get short_name map with
-      | Some { f_location = location; f_is_def = is_definition; _ } ->
-        if (not is_definition
+      | Some { f_location = location; f_kind; _ } ->
+        if (f_kind <> Name_def
            || (error_on_global_redefinition && is_global_namespace))
         then
           let error =
@@ -1942,7 +1975,7 @@ let use_class_or_namespace_clause_errors
       | None ->
         let new_use =
           make_first_use_or_def
-            ~is_def:false
+            ~kind:Name_use
             (make_location_of_node name)
             global_namespace_name qualified_name in
         update_map names (SMap.add short_name new_use map), errors in
@@ -1990,16 +2023,18 @@ let use_class_or_namespace_clause_errors
       let names, errors =
         let location = make_location_of_node name in
         match SMap.get short_name names.t_classes with
-        | Some { f_location = loc; f_name; f_is_def; _ } ->
-          if qualified_name = f_name && f_is_def then names, errors
+        | Some { f_location = loc; f_name; f_kind; _ } ->
+          if qualified_name = f_name && f_kind = Name_def then names, errors
           else
             let err_msg =
-              if is_hack && not f_is_def then
+              if is_hack && f_kind <> Name_def then
                 let text = SyntaxTree.text syntax_tree in
                 let line_num, _ =
                   Full_fidelity_source_text.offset_to_position
                     text loc.start_offset in
-                SyntaxError.name_is_already_in_use_hh ~line_num
+                if f_kind = Name_implicit_use
+                then SyntaxError.name_is_already_in_use_implicit_hh ~line_num
+                else SyntaxError.name_is_already_in_use_hh ~line_num
               else SyntaxError.name_is_already_in_use_php
             in
             let error = make_name_already_used_error
@@ -2007,7 +2042,7 @@ let use_class_or_namespace_clause_errors
             names, error :: errors
         | None ->
           let new_use =
-            make_first_use_or_def ~is_def:false location global_namespace_name qualified_name in
+            make_first_use_or_def ~kind:Name_use location global_namespace_name qualified_name in
           let t_classes = SMap.add short_name new_use names.t_classes in
           let t_namespaces =
             if SMap.mem short_name names.t_namespaces
@@ -2203,7 +2238,7 @@ let const_decl_errors node parents hhvm_compat_mode namespace_name names errors 
     let constant_name = text cd.constant_declarator_name in
     let location = make_location_of_node cd.constant_declarator_name in
     let def =
-      make_first_use_or_def ~is_def:true location namespace_name constant_name in
+      make_first_use_or_def ~kind:Name_def location namespace_name constant_name in
     let errors =
       match SMap.get constant_name names.t_constants with
       | None -> errors
@@ -2435,8 +2470,8 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
         } = acc in
     let errors =
       markup_errors node is_hack_file hhvm_compatibility_mode errors in
-    let errors =
-      parameter_errors node parents is_strict is_hack hhvm_compatibility_mode errors in
+    let names, errors =
+      parameter_errors node parents is_strict is_hack hhvm_compatibility_mode namespace_name names errors in
     let errors =
       function_errors node parents is_strict hhvm_compatibility_mode errors in
     let names, errors =
@@ -2454,12 +2489,12 @@ let find_syntax_errors ~enable_hh_syntax hhvm_compatibility_mode syntax_tree =
     let trait_require_clauses, errors =
       require_errors node parents hhvm_compatibility_mode trait_require_clauses errors in
     let names, errors =
-      classish_errors node parents is_hack hhvm_compatibility_mode namespace_name names errors in
+      classish_errors node parents syntax_tree is_hack hhvm_compatibility_mode namespace_name names errors in
     let errors =
       class_element_errors node parents errors in
     let errors =
       type_errors node parents is_strict hhvm_compatibility_mode errors in
-    let names, errors = alias_errors node namespace_name names errors in
+    let names, errors = alias_errors syntax_tree node namespace_name names errors in
     let errors = group_use_errors node errors in
     let names, errors =
       const_decl_errors node parents hhvm_compatibility_mode namespace_name names errors in

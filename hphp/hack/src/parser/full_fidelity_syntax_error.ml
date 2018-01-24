@@ -268,6 +268,23 @@ let name_is_already_in_use_hh ~line_num ~name ~short_name =
   " because the name was explicitly used earlier via a `use' statement on line "
   ^ (string_of_int line_num)
 
+let name_is_already_in_use_implicit_hh ~line_num ~name ~short_name =
+  "Cannot use " ^ name ^ " as " ^ short_name ^ " because the name was implicitly used on line "
+  ^ (string_of_int line_num) ^
+  "; implicit use of names from the HH namespace can be suppressed by adding \
+   an explicit `use' statement earlier in the current namespace block"
+
+let declared_name_is_already_in_use_implicit_hh ~line_num ~name ~short_name =
+  "Cannot declare class " ^ name ^ " because the name was implicitly used on line "
+  ^ (string_of_int line_num) ^
+  "; implicit use of names from the HH namespace can be suppressed by adding \
+   an explicit `use' statement earlier in the current namespace block"
+
+let declared_name_is_already_in_use ~line_num ~name ~short_name =
+  "Cannot declare class " ^ name ^
+  " because the name was explicitly used earlier via a `use' statement on line "
+  ^ (string_of_int line_num)
+
 let namespace_name_is_already_in_use ~name ~short_name =
   "Cannot use namespace " ^ name ^ " as " ^ short_name ^
   " because the name is already in use"

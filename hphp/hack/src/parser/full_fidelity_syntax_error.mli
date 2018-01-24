@@ -188,8 +188,15 @@ val const_in_trait : string
 val strict_namespace_hh : string
 val strict_namespace_not_hh : string
 val original_definition : string
-val name_is_already_in_use_php : name:string -> short_name:string -> string
+val name_is_already_in_use_php :
+  name:string -> short_name:string -> string
 val name_is_already_in_use_hh :
+  line_num:int -> name:string -> short_name:string -> string
+val name_is_already_in_use_implicit_hh :
+  line_num:int -> name:string -> short_name:string -> string
+val declared_name_is_already_in_use_implicit_hh :
+  line_num:int -> name:string -> short_name:string -> string
+val declared_name_is_already_in_use :
   line_num:int -> name:string -> short_name:string -> string
 val namespace_name_is_already_in_use : name:string -> short_name:string -> string
 val function_name_is_already_in_use : name:string -> short_name:string -> string

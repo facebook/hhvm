@@ -50,7 +50,10 @@ module Class = struct
   type t = string
 
   let from_ast_name s =
-    Hhbc_alias.normalize (SU.strip_global_ns s)
+    Hh_autoimport.normalize
+      ~is_hack:(Emit_env.is_hh_syntax_enabled ())
+      ~php7_scalar_types:(Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options)
+      (SU.strip_global_ns s)
   let from_raw_string s = s
   let to_raw_string s = s
   let elaborate_id ns id =
@@ -61,7 +64,10 @@ module Class = struct
     if was_renamed || mangled_name.[0] = '\\'
     then id, fallback_id
     else
-    match Hhbc_alias.opt_normalize stripped_mangled_name with
+    match Hh_autoimport.opt_normalize
+      ~is_hack:(Emit_env.is_hh_syntax_enabled ())
+      ~php7_scalar_types:(Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options)
+      stripped_mangled_name with
     | None -> id, fallback_id
     | Some s -> s, None
 

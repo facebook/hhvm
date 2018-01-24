@@ -1,0 +1,2 @@
+
+Fatal error: Cannot declare class Blah\string because the name was explicitly used earlier via a `use' statement on line 3%s on line 4

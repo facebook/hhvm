@@ -13,7 +13,6 @@
  *)
 
 open Hh_core
-open Hhbc_string_utils
 
 type alias =
 | HH_ONLY_TYPE of string
@@ -26,9 +25,9 @@ let add_alias m a =
     SMap.add (String.lowercase_ascii k) v m in
   match a with
   | HH_ONLY_TYPE s ->
-    add s (prefix_namespace "HH" s, false)
+    add s ("HH\\" ^ s, false)
   | SCALAR_TYPE s ->
-    add s (prefix_namespace "HH" s, true)
+    add s ("HH\\" ^ s, true)
   | HH_ALIAS (s, alias) ->
     add s (alias, false)
 
@@ -109,30 +108,30 @@ let alias_map = List.fold_left ~f:add_alias ~init:SMap.empty
   *)
 ]
 
-let rec normalize s =
-  if not (Emit_env.is_hh_syntax_enabled ()
-  || Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options)
+let rec normalize ~is_hack ~php7_scalar_types s =
+  if not (is_hack || php7_scalar_types)
   then s
   else
   match SMap.get (String.lowercase_ascii s) alias_map with
   | None -> s
   | Some (a, is_scalar_type) ->
-    if Emit_env.is_hh_syntax_enabled () || is_scalar_type
-    then normalize a
+    if is_hack || is_scalar_type
+    then normalize ~is_hack ~php7_scalar_types a
     else s
 
-let opt_normalize s =
+let opt_normalize ~is_hack ~php7_scalar_types s =
   match String.lowercase_ascii s with
   | "callable" -> Some "callable"
   | "array" -> Some "array"
   | s ->
-    if not (Emit_env.is_hh_syntax_enabled ()
-         || Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options)
+    if not (is_hack || php7_scalar_types)
     then None
     else
     match SMap.get s alias_map with
     | None -> None
     | Some (a, is_scalar_type) ->
-      if Emit_env.is_hh_syntax_enabled () || is_scalar_type
-      then Some (normalize a)
+      if is_hack || is_scalar_type
+      then Some (normalize ~is_hack ~php7_scalar_types a)
       else None
+
+let is_hh_autoimport s = SMap.mem (String.lowercase_ascii s) alias_map

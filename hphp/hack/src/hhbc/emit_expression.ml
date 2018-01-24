@@ -2507,11 +2507,9 @@ and emit_args_and_call env call_pos args uargs =
           instr_fpassl i local hint;
         ]
       | A.Call _ when expr_starts_with_ref expr ->
-        let instrs, _ = emit_flavored_expr env (pos, expr_) in
-        next @@ gather [
-          instrs;
-          instr_fpassr i hint;
-        ]
+        (* pass expression with a stripped reference but
+           use hint from the original expression *)
+        next @@ default_emit i (pos, expr_) hint
       | _ ->
         next @@ default_emit i expr hint
   in

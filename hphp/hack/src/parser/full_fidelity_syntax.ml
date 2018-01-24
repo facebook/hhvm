@@ -451,8 +451,6 @@ module WithToken(Token: TokenType) = struct
     let is_ampersand  = is_specific_token Full_fidelity_token_kind.Ampersand
     let is_inout      = is_specific_token Full_fidelity_token_kind.Inout
 
-
-
     let fold_over_children f acc syntax =
       match syntax with
       | Missing -> acc

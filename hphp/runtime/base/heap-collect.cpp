@@ -582,30 +582,35 @@ StructuredLogEntry logCommon() {
   return sample;
 }
 
+void traceCollection(const Collector& collector) {
+  constexpr auto MB = 1024 * 1024;
+  auto const cscanned_heap = collector.cscanned_.bytes -
+    collector.cscanned_roots_.bytes;
+  auto const xscanned_heap = collector.xscanned_.bytes -
+    collector.xscanned_roots_.bytes;
+  auto const total_ns = collector.init_ns_ + collector.initfree_ns_ +
+    collector.roots_ns_ + collector.mark_ns_ + collector.sweep_ns_;
+  Trace::ftraceRelease(
+    "gc age {}ms mmUsage {}M trigger {}M "
+    "init {}ms mark {}ms sweep {}ms total {}ms "
+    "marked {} pinned {} free {:.1f}M "
+    "cscan-heap {:.1f}M xscan-heap {:.1f}M\n",
+    t_req_age,
+    t_pre_stats.mmUsage / MB,
+    t_trigger / MB,
+    collector.init_ns_ / 1000000,
+    collector.mark_ns_ / 1000000,
+    collector.sweep_ns_ / 1000000,
+    total_ns / 1000000,
+    collector.marked_,
+    collector.pinned_,
+    double(collector.freed_bytes_) / MB,
+    double(cscanned_heap) / MB,
+    double(xscanned_heap) / MB
+  );
+}
+
 void logCollection(const char* phase, const Collector& collector) {
-  // log stuff
-  constexpr auto MB = 1024*1024;
-  if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
-    auto cscanned_heap = collector.cscanned_.bytes -
-                         collector.cscanned_roots_.bytes;
-    auto xscanned_heap = collector.xscanned_.bytes -
-                         collector.xscanned_roots_.bytes;
-    Trace::traceRelease(
-      "gc age %ldms mmUsage %luM trigger %luM init %lums mark %lums "
-      "marked %lu pinned %lu free %.1fM "
-      "cscan-heap %.1fM xscan-heap %.1fM\n",
-      t_req_age,
-      t_pre_stats.mmUsage/MB,
-      t_trigger/MB,
-      collector.init_ns_/1000000,
-      collector.mark_ns_/1000000,
-      collector.marked_,
-      collector.pinned_,
-      double(collector.freed_bytes_) / MB,
-      double(cscanned_heap) / MB,
-      double(xscanned_heap) / MB
-    );
-  }
   auto sample = logCommon();
   sample.setStr("phase", phase);
   std::string scanner(type_scan::hasNonConservative() ? "typescan" : "ts-cons");
@@ -666,9 +671,7 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   if (t_gc_num == 0) {
     t_enable_samples = StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
   }
-  if (t_enable_samples) {
-    t_pre_stats = tl_heap->getStatsCopy(); // don't check or trigger OOM
-  }
+  t_pre_stats = tl_heap->getStatsCopy(); // don't check or trigger OOM
   mark_version = (mark_version == MaxMark) ? MinMark :
                  GCBits(uint8_t(mark_version) + 1);
   Collector collector(
@@ -680,6 +683,9 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
     collector.collect<true>();
   } else {
     collector.collect<false>();
+  }
+  if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
+    traceCollection(collector);
   }
   if (t_enable_samples) {
     logCollection(phase, collector);

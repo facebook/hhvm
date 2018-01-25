@@ -695,6 +695,7 @@ and emit_new env pos expr args uargs =
   | Class_id id ->
     let fq_id, _id_opt =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
+    Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
     gather [
       instr_fpushctord nargs fq_id;
       emit_args_and_call env pos args uargs;
@@ -770,6 +771,7 @@ and emit_call_expr ~need_ref env expr =
 
 and emit_known_class_id env id =
   let fq_id, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
+  Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
   gather [
     instr_string (Hhbc_id.Class.to_raw_string fq_id);
     instr_clsrefgetc;
@@ -2583,6 +2585,7 @@ and emit_call_lhs env (_, expr_ as expr) nargs has_splat inout_arg_positions =
     (* Statically known *)
     | Class_id cid ->
       let fq_cid, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
+      Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_cid);
       instr_fpushclsmethodd nargs method_id fq_cid
     | Class_static -> instr_fpushclsmethodsd nargs SpecialClsRef.Static method_id
     | Class_self -> instr_fpushclsmethodsd nargs SpecialClsRef.Self method_id

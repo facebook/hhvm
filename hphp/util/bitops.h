@@ -161,11 +161,18 @@ inline size_t ffs64(size_t x) {
            : "r"(x)    // Inputs.
            );
   return ret;
+#elif defined(__aarch64__)
+  size_t ret;
+  __asm__ ("rbit %0, %1\n\t"
+           "clz %0, %0"
+           : "=r"(ret) // Outputs.
+           : "r"(x)    // Inputs.
+           );
+  return ret;
 #else
   return __builtin_ffsll(x) - 1;
 #endif
 }
-
 } // HPHP
 
 #endif

@@ -507,8 +507,15 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto defcls_impl = [&] (const uint32_t& id, bool closure) {
       if (euState.classOffsets[id] != kInvalidOffset) {
-        always_assert(closure);
-        return;
+        if (closure) {
+          for (auto const& elm : euState.pceInfo) {
+            if (elm.origId == id) {
+              const_cast<uint32_t&>(id) = elm.pce->id();
+              return;
+            }
+          }
+        }
+        always_assert(false);
       }
       euState.classOffsets[id] = startOffset;
       const_cast<uint32_t&>(id) = recordClass(euState, ue, id);

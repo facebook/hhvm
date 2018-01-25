@@ -1902,7 +1902,7 @@ and expr_
           | CI x -> T.CI x, env
           | CIexpr _ -> assert false
         end in
-        make_result env (T.Class_get (((), cid), (py, y))) ty
+        make_result env (T.Class_get ((None, cid), (py, y))) ty
   | Class_get (((), cid), mid) ->
       Env.not_lambda_reactive ();
       TUtils.process_static_find_ref cid mid;
@@ -3587,7 +3587,7 @@ and is_abstract_ft fty = match fty with
       Typing_hooks.dispatch_parent_construct_hook env callee_pos;
       let env, tel, tuel, ty = call_parent_construct p env el uel in
       make_call env (T.make_implicitly_typed_expr fpos
-        (T.Class_const (((), T.CIparent), id))) hl tel tuel ty
+        (T.Class_const ((None, T.CIparent), id))) hl tel tuel ty
 
   (* Calling parent method *)
   | Class_const (((), CIparent), m) ->
@@ -3602,7 +3602,7 @@ and is_abstract_ft fty = match fty with
         check_coroutine_call env fty;
         let env, tel, tuel, ty = call ~expected p env fty el uel in
         make_call env (T.make_typed_expr fpos fty
-          (T.Class_const (((), T.CIparent), m))) hl tel tuel ty
+          (T.Class_const ((None, T.CIparent), m))) hl tel tuel ty
       end
       else begin
         (* in instance context, you can call parent:foo() on static
@@ -3627,7 +3627,7 @@ and is_abstract_ft fty = match fty with
               k_lhs
             in
             make_call env (T.make_typed_expr fpos this_ty
-              (T.Class_const (((), T.CIparent), m))) hl [] [] method_
+              (T.Class_const ((None, T.CIparent), m))) hl [] [] method_
         else
             let env, fty, _ =
               class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
@@ -3635,7 +3635,7 @@ and is_abstract_ft fty = match fty with
             check_coroutine_call env fty;
             let env, tel, tuel, ty = call ~expected p env fty el uel in
             make_call env (T.make_typed_expr fpos fty
-              (T.Class_const (((), T.CIparent), m))) hl tel tuel ty
+              (T.Class_const ((None, T.CIparent), m))) hl tel tuel ty
       end
   (* Call class method *)
   | Class_const(((), e1), m) ->
@@ -4556,7 +4556,7 @@ and this_for_method env cid default_ty = match cid with
 
 and static_class_id p env =
   let make_result env te ty =
-    env, ((), te), ty in
+    env, (None, te), ty in
   function
   | CIparent ->
     (match Env.get_self env with

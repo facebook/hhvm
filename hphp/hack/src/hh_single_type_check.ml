@@ -23,7 +23,7 @@ end
 module StringNASTAnnotations = struct
   module ExprAnnotation = StringAnnotation
   module EnvAnnotation = Nast.UnitAnnotation
-  module ClassIdAnnotation = Nast.UnitAnnotation
+  module ClassIdAnnotation = StringAnnotation
 end
 
 module StringNAST = Nast.AnnotatedAST(StringNASTAnnotations)
@@ -743,13 +743,18 @@ let handle_mode mode filename tcopt popt files_contents files_info errors =
     let stringify_types =
       TASTStringMapper.map_program
         ~map_env_annotation:(fun _ -> ())
-        ~map_class_id_annotation:(fun _ _ -> ())
         ~map_expr_annotation:begin fun saved_env (pos, ty) ->
           let env = Tast_expand.restore_saved_env env saved_env in
           match ty with
           | None -> Format.asprintf "(%a, None)" Pos.pp pos
           | Some ty ->
             Format.asprintf "(%a, Some %s)" Pos.pp pos (Typing_print.full env ty)
+        end
+        ~map_class_id_annotation:begin fun saved_env ty ->
+          let env = Tast_expand.restore_saved_env env saved_env in
+          match ty with
+          | None -> "(None)"
+          | Some ty -> Printf.sprintf "(Some %s)" (Typing_print.full env ty)
         end
     in
     let string_ast = stringify_types tast in

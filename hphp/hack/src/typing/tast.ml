@@ -16,6 +16,13 @@
 type ty = Typing_defs.locl Typing_defs.ty
 let pp_ty fmt _ = Format.pp_print_string fmt "<type>"
 
+let pp_ty_option fmt = function
+  | None -> Format.pp_print_string fmt "None"
+  | Some ty ->
+    Format.pp_print_string fmt "(Some ";
+    pp_ty fmt ty;
+    Format.pp_print_string fmt ")"
+
 type saved_env = {
   tcopt : TypecheckerOptions.t;
   tenv : ty IMap.t;
@@ -42,12 +49,7 @@ let pp_saved_env fmt _ = Format.pp_print_string fmt "<env>"
 module Annotations = struct
   module ExprAnnotation = struct
     type t = Pos.t * ty option
-    let pp fmt (_, ty) = match ty with
-      | None -> Format.pp_print_string fmt "None"
-      | Some ty ->
-        Format.pp_print_string fmt "(Some ";
-        pp_ty fmt ty;
-        Format.pp_print_string fmt ")"
+    let pp fmt (_, ty) = pp_ty_option fmt ty
   end
 
   module EnvAnnotation = struct
@@ -58,7 +60,10 @@ module Annotations = struct
       Format.pp_print_string fmt ")"
   end
 
-  module ClassIdAnnotation = Nast.UnitAnnotation
+  module ClassIdAnnotation = struct
+    type t = ty option
+    let pp = pp_ty_option
+  end
 end
 
 module TypeAndPosAnnotatedAST = Nast.AnnotatedAST(Annotations)

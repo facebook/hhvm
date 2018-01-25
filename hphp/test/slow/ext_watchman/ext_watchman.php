@@ -71,7 +71,7 @@ class WatchmanInstance {
   }
   private function openSock() {
     $sockname = $this->getFullSockName();
-    $deadline = time() + 5;
+    $deadline = time() + 60;
     do {
       if (!file_exists($sockname)) {
         usleep(30000);

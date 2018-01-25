@@ -59,7 +59,7 @@ let rec expand_with_env ety_env env reason root ids =
 
 and expand_with_env_ ety_env env reason root ids =
   let env = empty_env env ety_env ids in
-  let env, (root_r, root_ty) = expand_ env root in
+  let env, (root_r, root_ty) = expand env root in
   let trail = List.rev_map env.trail (compose strip_ns ExprDepTy.to_string) in
   let reason_func r =
     let r = match r with
@@ -71,12 +71,6 @@ and expand_with_env_ ety_env env reason root ids =
   let deps = List.map env.dep_tys (fun (x, y) -> reason_func x, y) in
   let tenv, ty = ExprDepTy.apply env.tenv deps ty in
   tenv, env, ty
-
-and expand env r (root, ids) =
-  let ety_env = Phase.env_with_self env in
-  let env, (ety_env, root) = Phase.localize_with_env ~ety_env env root in
-  let env, (_, ty) = expand_with_env ety_env env r root ids in
-  env, ty
 
 and referenced_typeconsts tenv ety_env r (root, ids) =
   let tenv, (ety_env, root) = Phase.localize_with_env ~ety_env tenv root in
@@ -90,19 +84,19 @@ and referenced_typeconsts tenv ety_env r (root, ids) =
  * We also need to track what expansions have already taken place to make sure
  * we do not recurse infinitely.
  *)
-and expand_ env (root_reason, root_ty as root) =
+and expand env (root_reason, root_ty as root) =
   match env.ids with
   | [] ->
       env, root
   | head::tail -> begin match root_ty with
       | Tany | Terr -> env, root
       | Tabstract (AKdependent (`cls _, []), Some ty)
-      | Tabstract (AKnewtype (_, _), Some ty) | Toption ty -> expand_ env ty
+      | Tabstract (AKnewtype (_, _), Some ty) | Toption ty -> expand env ty
       | Tclass ((class_pos, class_name), _) ->
           let env, ty =
             create_root_from_type_constant
               env class_pos class_name root head in
-          expand_ { env with ids = tail } ty
+          expand { env with ids = tail } ty
       | Tabstract (AKgeneric s, _) ->
         let dep_ty = generic_to_dep_ty s in
         let env =
@@ -120,7 +114,7 @@ and expand_ env (root_reason, root_ty as root) =
             List.for_all env.gen_seen
             ~f:(fun ty2 -> not (ty_equal ty ty2))) upper_bounds in
         let env, tyl = List.map_env env upper_bounds begin fun prev_env ty ->
-          let env, ty = expand_ env ty in
+          let env, ty = expand env ty in
           (* If ty here involves a type access, we have to use
             the current environment's dependent types. Otherwise,
             we throw away type access information.
@@ -141,10 +135,10 @@ and expand_ env (root_reason, root_ty as root) =
           let env =
             { env with
               dep_tys = (root_reason, dep_ty)::env.dep_tys } in
-          expand_ env ty
+          expand env ty
       | Tunresolved tyl ->
           let env, tyl = List.map_env env tyl begin fun prev_env ty ->
-            let env, ty = expand_ env ty in
+            let env, ty = expand env ty in
             (* If ty here involves a type access, we have to use
               the current environment's dependent types. Otherwise,
               we throw away type access information.
@@ -157,7 +151,7 @@ and expand_ env (root_reason, root_ty as root) =
           let tenv, ty =
             Env.expand_type env.tenv root in
           let env = { env with tenv = tenv } in
-          expand_ env ty
+          expand env ty
       | Tanon _ | Tobject | Tmixed | Tprim _ | Tshape _ | Ttuple _
       | Tarraykind _ | Tfun _ | Tabstract (_, _) ->
           let pos, tconst = head in

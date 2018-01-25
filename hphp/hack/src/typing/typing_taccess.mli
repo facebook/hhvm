@@ -10,13 +10,6 @@
 
 open Typing_defs
 
-(* Expands a type access to underlying type *)
-val expand:
-  Typing_env.env ->
-  Typing_reason.t ->
-  taccess_type ->
-  Typing_env.env * locl ty
-
 (* Returns (class_name, tconst_name, tconst_reference_position) for each type
  * constant referenced in a type access. *)
 val referenced_typeconsts:

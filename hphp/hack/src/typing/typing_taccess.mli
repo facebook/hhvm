@@ -16,3 +16,12 @@ val expand:
   Typing_reason.t ->
   taccess_type ->
   Typing_env.env * locl ty
+
+(* Returns (class_name, tconst_name, tconst_reference_position) for each type
+ * constant referenced in a type access. *)
+val referenced_typeconsts:
+  Typing_env.env ->
+  expand_env ->
+  Typing_reason.t ->
+  taccess_type ->
+  (string * string * Pos.t) list

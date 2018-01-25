@@ -36,7 +36,11 @@ type env = {
   ids : Nast.sid list;
 
   (* A list of generics we've seen while expanding. *)
-  gen_seen : locl ty list
+  gen_seen : locl ty list;
+
+  (* The identifiers for each class and typeconst pair seen while expanding,
+   * along with the location where the typeconst was referenced. *)
+  typeconsts_seen : (string * string * Pos.t) list;
 }
 
 let empty_env env ety_env ids = {
@@ -46,9 +50,14 @@ let empty_env env ety_env ids = {
   dep_tys = [];
   ids = ids;
   gen_seen = [];
+  typeconsts_seen = [];
 }
 
 let rec expand_with_env ety_env env reason root ids =
+  let tenv, env, ty = expand_with_env_ ety_env env reason root ids in
+  tenv, (env.ety_env, ty)
+
+and expand_with_env_ ety_env env reason root ids =
   let env = empty_env env ety_env ids in
   let env, (root_r, root_ty) = expand_ env root in
   let trail = List.rev_map env.trail (compose strip_ns ExprDepTy.to_string) in
@@ -61,13 +70,18 @@ let rec expand_with_env ety_env env reason root ids =
   let ty = reason_func root_r, root_ty in
   let deps = List.map env.dep_tys (fun (x, y) -> reason_func x, y) in
   let tenv, ty = ExprDepTy.apply env.tenv deps ty in
-  tenv, (env.ety_env, ty)
+  tenv, env, ty
 
 and expand env r (root, ids) =
   let ety_env = Phase.env_with_self env in
   let env, (ety_env, root) = Phase.localize_with_env ~ety_env env root in
   let env, (_, ty) = expand_with_env ety_env env r root ids in
   env, ty
+
+and referenced_typeconsts tenv ety_env r (root, ids) =
+  let tenv, (ety_env, root) = Phase.localize_with_env ~ety_env tenv root in
+  let _, env, _ = expand_with_env_ ety_env tenv r root ids in
+  List.rev env.typeconsts_seen
 
 (* The root of a type access is a type. When expanding a type access this type
  * needs to resolve to the name of a class so we can look up if a given type
@@ -223,6 +237,8 @@ and get_typeconst env class_pos class_name pos tconst =
             `class_typeconst pos (class_.tc_pos, class_name) tconst `no_hint;
           raise Exit
       | Some tc -> tc in
+    let tc_tuple = (class_.tc_name, snd typeconst.ttc_name, pos) in
+    let env = {env with typeconsts_seen = tc_tuple :: env.typeconsts_seen} in
     Typing_hooks.dispatch_taccess_hook class_ typeconst pos;
     (* Check for cycles. We do this by combining the name of the current class
      * with the remaining ids that we need to expand. If we encounter the same

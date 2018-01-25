@@ -14,6 +14,7 @@ open Sys_utils
 module P = Printf
 module SyntaxError = Full_fidelity_syntax_error
 module SourceText = Full_fidelity_source_text
+module Logger = HackcEventLogger
 
 (*****************************************************************************)
 (* Types, constants *)
@@ -40,6 +41,7 @@ type options = {
   dump_symbol_refs : bool;
   dump_stats       : bool;
   dump_config      : bool;
+  log_stats        : bool;
 }
 
 type message_handler = Hh_json.json -> string -> unit
@@ -109,6 +111,7 @@ let parse_options () =
   let dump_symbol_refs = ref false in
   let dump_stats = ref false in
   let dump_config = ref false in
+  let log_stats = ref true in
   let usage = P.sprintf "Usage: hh_single_compile (%s) filename\n" Sys.argv.(0) in
   let options =
     [ ("--version"
@@ -172,6 +175,10 @@ let parse_options () =
       , Arg.Set dump_config
       , " Dump configuration settings"
       );
+      ("--stop-logging-stats"
+      , Arg.Unit (fun () -> log_stats := false)
+      , " Stop logging stats"
+      );
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -199,6 +206,7 @@ let parse_options () =
   ; dump_symbol_refs   = !dump_symbol_refs
   ; dump_stats         = !dump_stats
   ; dump_config        = !dump_config
+  ; log_stats          = !log_stats
   }
 
 let fail_daemon file error =
@@ -299,6 +307,25 @@ let print_debug_time_info filename debug_time =
   P.eprintf "MinorWords: %0.3f\n" stat.Gc.minor_words;
   P.eprintf "PromotedWords: %0.3f\n" stat.Gc.promoted_words)
 
+let mode_to_string = function
+  | CLI -> "CLI"
+  | DAEMON -> "DAEMON"
+
+let log_success compiler_options filename debug_time =
+  Logger.success
+    ~filename:(Relative_path.to_absolute filename)
+    ~parsing_t:!(debug_time.parsing_t)
+    ~codegen_t:!(debug_time.codegen_t)
+    ~printing_t:!(debug_time.printing_t)
+    ~mode:(mode_to_string compiler_options.mode)
+
+let log_fail compiler_options filename exc =
+  Logger.fail
+    ~filename:(Relative_path.to_absolute filename)
+    ~mode:(mode_to_string compiler_options.mode)
+    ~exc:(Printexc.to_string exc)
+
+
 let do_compile filename compiler_options text fail_or_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
@@ -335,6 +362,8 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
   ignore @@ add_to_time_ref debug_time.printing_t t;
   if compiler_options.debug_time
   then print_debug_time_info filename debug_time;
+  if compiler_options.log_stats
+  then log_success compiler_options filename debug_time;
   hhas_text
 
 
@@ -351,6 +380,8 @@ let process_single_source_unit compiler_options popt handle_output handle_except
     let output = do_compile filename compiler_options source_text fail_or_ast debug_time in
     handle_output filename output
   with exc ->
+    if compiler_options.log_stats
+    then log_fail compiler_options filename exc;
     handle_exception filename exc
 
 let decl_and_run_mode compiler_options popt =
@@ -492,7 +523,8 @@ let decl_and_run_mode compiler_options popt =
 
 let main_hack opts =
   let popt = ParserOptions.default in
-  EventLogger.init EventLogger.Event_logger_fake 0.0;
+  let start_time = Unix.gettimeofday () in
+  if opts.log_stats then Logger.init start_time;
   let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   let tmp_hhi = Path.concat (Path.make Sys_utils.temp_dir_name) "hhi" in
   Hhi.set_hhi_root_for_unit_test tmp_hhi;

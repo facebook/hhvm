@@ -144,6 +144,10 @@ void TypeAnnotation::shapeTypeName(std::string& name) const {
   while (shapeField) {
     name += sep;
 
+    if (shapeField->isOptionalShapeField()) {
+      folly::toAppend("?", &name);
+    }
+
     if (shapeField->isClsCnsShapeField()) {
       folly::toAppend(shapeField->m_name, &name);
     } else {

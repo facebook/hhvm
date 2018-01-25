@@ -71,8 +71,9 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
       | A.SFclass_const (cid, (_, s2)) ->
         fmt_name_or_prim ~tparams ~namespace cid ^ "::" ^ s2
     in
-    let format_shape_field ({ A.sf_name; A.sf_hint; _ }) =
-      fmt_field sf_name ^ "=>" ^ fmt_hint ~tparams ~namespace sf_hint in
+    let format_shape_field ({ A.sf_name; A.sf_hint; A.sf_optional }) =
+      let prefix = if sf_optional then "?" else "" in
+      prefix ^ fmt_field sf_name ^ "=>" ^ fmt_hint ~tparams ~namespace sf_hint in
     let shape_fields =
       List.map ~f:format_shape_field si_shape_field_list in
     prefix_namespace "HH" "shape(" ^

@@ -14,6 +14,7 @@ module T = Tast
 module ExpandedTypeAnnotations = struct
   module ExprAnnotation = T.Annotations.ExprAnnotation
   module EnvAnnotation = Nast.UnitAnnotation
+  module ClassIdAnnotation = T.Annotations.ClassIdAnnotation
 end
 
 module ExpandedTypeAnnotatedAST = Nast.AnnotatedAST(ExpandedTypeAnnotations)
@@ -118,6 +119,7 @@ module ExpandAST =
 let expand_program env =
   ExpandAST.map_program
     ~map_env_annotation:(fun _ -> ())
+    ~map_class_id_annotation:(fun _ _ -> ())
     ~map_expr_annotation:begin fun saved_env annotation ->
       let env = restore_saved_env env saved_env in
       expand_annotation env annotation

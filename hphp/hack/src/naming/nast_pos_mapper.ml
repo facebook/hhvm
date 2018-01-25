@@ -107,7 +107,9 @@ and special_func f = function
   | Genva el -> Genva (List.map el (expr f))
   | Gen_array_rec e -> Gen_array_rec (expr f e)
 
-and class_id f = function
+and class_id f ((), ci) = (), class_id_ f ci
+
+and class_id_ f = function
   | CIparent -> CIparent
   | CIself -> CIself
   | CIstatic -> CIstatic

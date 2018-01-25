@@ -522,7 +522,7 @@ type expand_env = {
   (* The class that the type is extracted from. Used for creating expression
    * dependent types for type constants.
    *)
-  from_class : Nast.class_id option;
+  from_class : Nast.class_id_ option;
 }
 
 type ety = expand_env * locl ty

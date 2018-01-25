@@ -1,6 +1,6 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<5d77d0f06489b2e7f8677bf131d2ca5bd39bb5b3>> *)
+(* SourceShasum<<62d52bec361a362a46dcd7be0dd835d1595471fa>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -35,6 +35,7 @@ module Annotations =
   struct
     module ExprAnnotation = PosAnnotation
     module EnvAnnotation = UnitAnnotation
+    module ClassIdAnnotation = UnitAnnotation
   end
 module PosAnnotatedAST = (AnnotatedAST)(Annotations)
 include PosAnnotatedAST

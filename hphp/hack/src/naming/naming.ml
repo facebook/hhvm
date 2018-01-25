@@ -2186,7 +2186,7 @@ module Make (GetLocals : GetLocals) = struct
             (match (expr env e1), (expr env e2) with
             | (_, N.String cl), (_, N.String meth) ->
               N.Method_caller (Env.type_name env cl ~allow_typedef:false, meth)
-            | (_, N.Class_const (N.CI (cl, _), (_, mem))), (_, N.String meth)
+            | (_, N.Class_const (((), N.CI (cl, _)), (_, mem))), (_, N.String meth)
               when mem = SN.Members.mClass ->
               N.Method_caller (Env.type_name env cl ~allow_typedef:false, meth)
             | (p, _), (_) ->
@@ -2216,10 +2216,10 @@ module Make (GetLocals : GetLocals) = struct
               (match (fst env).current_cls with
                 | Some (cid, _) -> N.Smethod_id (cid, meth)
                 | None -> Errors.illegal_class_meth p; N.Any)
-            | (_, N.Class_const (N.CI (cl, _), (_, mem))), (_, N.String meth)
+            | (_, N.Class_const (((), N.CI (cl, _)), (_, mem))), (_, N.String meth)
               when mem = SN.Members.mClass ->
               N.Smethod_id (Env.type_name env cl ~allow_typedef:false, meth)
-            | (p, N.Class_const ((N.CIself|N.CIstatic), (_, mem))),
+            | (p, N.Class_const (((), (N.CIself|N.CIstatic)), (_, mem))),
                 (_, N.String meth) when mem = SN.Members.mClass ->
               (match (fst env).current_cls with
                 | Some (cid, _) -> N.Smethod_id (cid, meth)
@@ -2383,11 +2383,11 @@ module Make (GetLocals : GetLocals) = struct
         | _ ->
           N.CI (Env.type_name env x ~allow_typedef:false, [])
       in
-      N.InstanceOf (expr env e, id)
+      N.InstanceOf (expr env e, ((), id))
     | InstanceOf (e1, (_,
         (Lvar _ | Obj_get _ | Class_get _ | Class_const _
         | Array_get _ | Call _) as e2)) ->
-      N.InstanceOf (expr env e1, N.CIexpr (expr env e2))
+      N.InstanceOf (expr env e1, ((), N.CIexpr (expr env e2)))
     | InstanceOf (_e1, (p, _)) ->
       Errors.invalid_instanceof p;
       N.Any
@@ -2504,6 +2504,7 @@ module Make (GetLocals : GetLocals) = struct
     }
 
   and make_class_id env (p, x as cid) hl =
+    (),
     match x with
       | x when x = SN.Classes.cParent ->
         if (fst env).current_cls = None then

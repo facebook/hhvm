@@ -12,13 +12,16 @@ struct
   module T = AnnotatedAST(Target)
   module SourceExpr = Source.ExprAnnotation
   module SourceEnv = Source.EnvAnnotation
+  module SourceCI = Source.ClassIdAnnotation
   module TargetExpr = Target.ExprAnnotation
   module TargetEnv = Target.EnvAnnotation
+  module TargetCI = Target.ClassIdAnnotation
 
   type mapping_env = {
     env : SourceEnv.t;
     map_expr_annotation : SourceEnv.t -> SourceExpr.t -> TargetExpr.t;
     map_env_annotation : SourceEnv.t -> TargetEnv.t;
+    map_class_id_annotation : SourceEnv.t -> SourceCI.t -> TargetCI.t;
   }
 
   let rec map_expr menv (p,e) =
@@ -32,13 +35,15 @@ struct
     | S.Gena e -> T.Gena (map_expr menv e)
     | S.Genva el -> T.Genva (map_exprl menv el)
     | S.Gen_array_rec e -> T.Gen_array_rec (map_expr menv e) in
-  let map_class_id ci =
+  let map_class_id_ ci =
     match ci with
     | S.CIparent -> T.CIparent
     | S.CIself -> T.CIself
     | S.CIstatic -> T.CIstatic
     | S.CIexpr e -> T.CIexpr (map_expr menv e)
     | S.CI x -> T.CI x in
+  let map_class_id (ca, ci) =
+    (menv.map_class_id_annotation menv.env ca, map_class_id_ ci) in
   let e' =
     match e with
     | S.Array afl -> T.Array (List.map afl map_afield)
@@ -294,6 +299,7 @@ struct
   let map_def
     ~map_expr_annotation
     ~map_env_annotation
+    ~map_class_id_annotation
     d =
     let env =
       match d with
@@ -306,6 +312,7 @@ struct
       env;
       map_expr_annotation;
       map_env_annotation;
+      map_class_id_annotation;
     } in
     match d with
     | S.Fun fd -> T.Fun (map_fun menv fd)
@@ -316,6 +323,7 @@ struct
   let map_program
     ~map_expr_annotation
     ~map_env_annotation
+    ~map_class_id_annotation
     dl =
-    List.map dl (map_def ~map_expr_annotation ~map_env_annotation)
+    List.map dl (map_def ~map_expr_annotation ~map_env_annotation ~map_class_id_annotation)
 end

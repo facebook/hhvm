@@ -19,6 +19,7 @@ module UnitAnnotation = struct type t = unit [@@deriving show] end
 module Annotations = struct
   module ExprAnnotation = PosAnnotation
   module EnvAnnotation = UnitAnnotation
+  module ClassIdAnnotation = UnitAnnotation
 end
 
 module PosAnnotatedAST = AnnotatedAST(Annotations)

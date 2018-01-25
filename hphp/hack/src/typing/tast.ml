@@ -57,6 +57,8 @@ module Annotations = struct
       pp_saved_env fmt env;
       Format.pp_print_string fmt ")"
   end
+
+  module ClassIdAnnotation = Nast.UnitAnnotation
 end
 
 module TypeAndPosAnnotatedAST = Nast.AnnotatedAST(Annotations)

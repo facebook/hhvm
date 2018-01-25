@@ -23,6 +23,7 @@ end
 module StringNASTAnnotations = struct
   module ExprAnnotation = StringAnnotation
   module EnvAnnotation = Nast.UnitAnnotation
+  module ClassIdAnnotation = Nast.UnitAnnotation
 end
 
 module StringNAST = Nast.AnnotatedAST(StringNASTAnnotations)
@@ -281,7 +282,7 @@ let compute_least_type tcopt popt fn =
         Nast.(List.fold fnb_nast ~init:[]
           ~f:begin fun acc stmt ->
             match stmt with
-            | Expr (_, New (CI ((_, "\\least_upper_bound"), hints), _, _)) ->
+            | Expr (_, New (((), CI ((_, "\\least_upper_bound"), hints)), _, _)) ->
               (List.map hints
                 (fun h -> snd (Typing_infer_return.type_from_hint tcopt fn h)))
               :: acc
@@ -742,6 +743,7 @@ let handle_mode mode filename tcopt popt files_contents files_info errors =
     let stringify_types =
       TASTStringMapper.map_program
         ~map_env_annotation:(fun _ -> ())
+        ~map_class_id_annotation:(fun _ _ -> ())
         ~map_expr_annotation:begin fun saved_env (pos, ty) ->
           let env = Tast_expand.restore_saved_env env saved_env in
           match ty with
@@ -757,6 +759,7 @@ let handle_mode mode filename tcopt popt files_contents files_info errors =
     let strip_types =
       TASTTypeStripper.map_program
         ~map_env_annotation:(fun _ -> ())
+        ~map_class_id_annotation:(fun _ _ -> ())
         ~map_expr_annotation:(fun _ (p, _) -> p)
     in
     let nast = strip_types tast in

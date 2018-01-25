@@ -1,6 +1,6 @@
 (* @generated from aast.src.ml by hphp/hack/tools/ppx/facebook:generate_ppx *)
 (* Copyright (c) 2004-present, Facebook, Inc. All rights reserved. *)
-(* SourceShasum<<8170dd46e27ca70e49a8774fd295aa4756bb454e>> *)
+(* SourceShasum<<de1a0f1ad036abdb1eeca6eea9ce3c6765a223cd>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -12,11 +12,13 @@ module type ASTAnnotationTypes  =
   sig
     module ExprAnnotation : AnnotationType
     module EnvAnnotation : AnnotationType
+    module ClassIdAnnotation : AnnotationType
   end
 module AnnotatedAST(Annotations:ASTAnnotationTypes) =
   struct
     module ExprAnnotation = Annotations.ExprAnnotation
     module EnvAnnotation = Annotations.EnvAnnotation
+    module ClassIdAnnotation = Annotations.ClassIdAnnotation
     type program = def list[@@deriving
                              (show,
                                (visitors
@@ -49,6 +51,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                                   }))]
     and expr_annotation = ((ExprAnnotation.t)[@visitors.opaque ])
     and env_annotation = ((EnvAnnotation.t)[@visitors.opaque ])
+    and class_id_annotation = ((ClassIdAnnotation.t)[@visitors.opaque ])
     and stmt =
       | Fallthrough 
       | Expr of expr 
@@ -75,7 +78,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
       | Await_as_v of pos * expr 
       | Await_as_kv of pos * expr * expr 
     and block = stmt list
-    and class_id =
+    and class_id = (class_id_annotation * class_id_)
+    and class_id_ =
       | CIparent 
       | CIself 
       | CIstatic 
@@ -315,6 +319,16 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     
     and show_env_annotation : env_annotation -> Ppx_deriving_runtime.string =
       fun x  -> Format.asprintf "%a" pp_env_annotation x
+    
+    and pp_class_id_annotation :
+      Format.formatter -> class_id_annotation -> Ppx_deriving_runtime.unit =
+      let __0 () = ClassIdAnnotation.pp  in
+      ((let open! Ppx_deriving_runtime in fun fmt  -> (__0 ()) fmt)
+        [@ocaml.warning "-A"])
+    
+    and show_class_id_annotation :
+      class_id_annotation -> Ppx_deriving_runtime.string =
+      fun x  -> Format.asprintf "%a" pp_class_id_annotation x
     
     and pp_stmt : Format.formatter -> stmt -> Ppx_deriving_runtime.unit =
       let __31 () = pp_block
@@ -604,6 +618,23 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
     
     and pp_class_id :
       Format.formatter -> class_id -> Ppx_deriving_runtime.unit =
+      let __1 () = pp_class_id_
+      
+      and __0 () = pp_class_id_annotation
+       in
+      ((let open! Ppx_deriving_runtime in
+          fun fmt  ->
+            fun (a0,a1)  ->
+              Format.fprintf fmt "(@[";
+              (((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
+              Format.fprintf fmt "@])")
+        [@ocaml.warning "-A"])
+    
+    and show_class_id : class_id -> Ppx_deriving_runtime.string =
+      fun x  -> Format.asprintf "%a" pp_class_id x
+    
+    and pp_class_id_ :
+      Format.formatter -> class_id_ -> Ppx_deriving_runtime.unit =
       let __1 () = pp_instantiated_sid
       
       and __0 () = pp_expr
@@ -624,8 +655,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                  Format.fprintf fmt "@])"))
         [@ocaml.warning "-A"])
     
-    and show_class_id : class_id -> Ppx_deriving_runtime.string =
-      fun x  -> Format.asprintf "%a" pp_class_id x
+    and show_class_id_ : class_id_ -> Ppx_deriving_runtime.string =
+      fun x  -> Format.asprintf "%a" pp_class_id_ x
     
     and pp_expr : Format.formatter -> expr -> Ppx_deriving_runtime.unit =
       let __1 () = pp_expr_
@@ -2468,6 +2499,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method on_program env = self#on_list self#on_def env
             method on_expr_annotation env _visitors_this = ()
             method on_env_annotation env _visitors_this = ()
+            method on_class_id_annotation env _visitors_this = ()
             method on_Fallthrough env = ()
             method on_Expr env _visitors_c0 =
               let _visitors_r0 = self#on_expr env _visitors_c0  in ()
@@ -2588,6 +2620,10 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   self#on_Await_as_kv env _visitors_c0 _visitors_c1
                     _visitors_c2
             method on_block env = self#on_list self#on_stmt env
+            method on_class_id env (_visitors_c0,_visitors_c1) =
+              let _visitors_r0 = self#on_class_id_annotation env _visitors_c0
+                 in
+              let _visitors_r1 = self#on_class_id_ env _visitors_c1  in ()
             method on_CIparent env = ()
             method on_CIself env = ()
             method on_CIstatic env = ()
@@ -2597,7 +2633,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_r0 = self#on_instantiated_sid env _visitors_c0
                  in
               ()
-            method on_class_id env _visitors_this =
+            method on_class_id_ env _visitors_this =
               match _visitors_this with
               | CIparent  -> self#on_CIparent env
               | CIself  -> self#on_CIself env
@@ -3201,6 +3237,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method on_program env = self#on_list self#on_def env
             method on_expr_annotation env _visitors_this = self#zero
             method on_env_annotation env _visitors_this = self#zero
+            method on_class_id_annotation env _visitors_this = self#zero
             method on_Fallthrough env = self#zero
             method on_Expr env _visitors_c0 =
               let _visitors_s0 = self#on_expr env _visitors_c0  in
@@ -3340,6 +3377,11 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   self#on_Await_as_kv env _visitors_c0 _visitors_c1
                     _visitors_c2
             method on_block env = self#on_list self#on_stmt env
+            method on_class_id env (_visitors_c0,_visitors_c1) =
+              let _visitors_s0 = self#on_class_id_annotation env _visitors_c0
+                 in
+              let _visitors_s1 = self#on_class_id_ env _visitors_c1  in
+              self#plus _visitors_s0 _visitors_s1
             method on_CIparent env = self#zero
             method on_CIself env = self#zero
             method on_CIstatic env = self#zero
@@ -3350,7 +3392,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_s0 = self#on_instantiated_sid env _visitors_c0
                  in
               _visitors_s0
-            method on_class_id env _visitors_this =
+            method on_class_id_ env _visitors_this =
               match _visitors_this with
               | CIparent  -> self#on_CIparent env
               | CIself  -> self#on_CIself env
@@ -4105,6 +4147,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method on_program env = self#on_list self#on_def env
             method on_expr_annotation env _visitors_this = _visitors_this
             method on_env_annotation env _visitors_this = _visitors_this
+            method on_class_id_annotation env _visitors_this = _visitors_this
             method on_Fallthrough env = Fallthrough
             method on_Expr env _visitors_c0 =
               let _visitors_r0 = self#on_expr env _visitors_c0  in
@@ -4242,6 +4285,11 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   self#on_Await_as_kv env _visitors_c0 _visitors_c1
                     _visitors_c2
             method on_block env = self#on_list self#on_stmt env
+            method on_class_id env (_visitors_c0,_visitors_c1) =
+              let _visitors_r0 = self#on_class_id_annotation env _visitors_c0
+                 in
+              let _visitors_r1 = self#on_class_id_ env _visitors_c1  in
+              (_visitors_r0, _visitors_r1)
             method on_CIparent env = CIparent
             method on_CIself env = CIself
             method on_CIstatic env = CIstatic
@@ -4252,7 +4300,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let _visitors_r0 = self#on_instantiated_sid env _visitors_c0
                  in
               CI _visitors_r0
-            method on_class_id env _visitors_this =
+            method on_class_id_ env _visitors_this =
               match _visitors_this with
               | CIparent  -> self#on_CIparent env
               | CIself  -> self#on_CIself env
@@ -5012,6 +5060,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method on_program env = self#on_list self#on_def env
             method on_expr_annotation env _visitors_this = _visitors_this
             method on_env_annotation env _visitors_this = _visitors_this
+            method on_class_id_annotation env _visitors_this = _visitors_this
             method on_Fallthrough env _visitors_this =
               if true then _visitors_this else Fallthrough
             method on_Expr env _visitors_this _visitors_c0 =
@@ -5257,6 +5306,16 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
                   self#on_Await_as_kv env _visitors_this _visitors_c0
                     _visitors_c1 _visitors_c2
             method on_block env = self#on_list self#on_stmt env
+            method on_class_id env
+              ((_visitors_c0,_visitors_c1) as _visitors_this) =
+              let _visitors_r0 = self#on_class_id_annotation env _visitors_c0
+                 in
+              let _visitors_r1 = self#on_class_id_ env _visitors_c1  in
+              if
+                Pervasives.(&&) (Pervasives.(==) _visitors_c0 _visitors_r0)
+                  (Pervasives.(==) _visitors_c1 _visitors_r1)
+              then _visitors_this
+              else (_visitors_r0, _visitors_r1)
             method on_CIparent env _visitors_this =
               if true then _visitors_this else CIparent
             method on_CIself env _visitors_this =
@@ -5274,7 +5333,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               if Pervasives.(==) _visitors_c0 _visitors_r0
               then _visitors_this
               else CI _visitors_r0
-            method on_class_id env _visitors_this =
+            method on_class_id_ env _visitors_this =
               match _visitors_this with
               | CIparent  as _visitors_this ->
                   self#on_CIparent env _visitors_this
@@ -6762,6 +6821,7 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
             method  on_instanceOf : 'a -> expr -> class_id -> 'a
             method  on_is : 'a -> expr -> hint -> 'a
             method  on_class_id : 'a -> class_id -> 'a
+            method  on_class_id_ : 'a -> class_id_ -> 'a
             method  on_new : 'a -> class_id -> expr list -> expr list -> 'a
             method  on_efun : 'a -> fun_ -> id list -> 'a
             method  on_xml :
@@ -6997,7 +7057,8 @@ module AnnotatedAST(Annotations:ASTAnnotationTypes) =
               let acc = this#on_expr acc e1  in
               let acc = this#on_class_id acc e2  in acc
             method on_is acc e _ = this#on_expr acc e
-            method on_class_id acc =
+            method on_class_id acc (_,cid) = this#on_class_id_ acc cid
+            method on_class_id_ acc =
               function | CIexpr e -> this#on_expr acc e | _ -> acc
             method on_new acc cid el uel =
               let acc = this#on_class_id acc cid  in

@@ -22,8 +22,9 @@
                     (AnnotatedAST.Lvar ([33:3-33:5], $x))),
                    (([33:8-33:27], Some \MyPhonyVector),
                     (AnnotatedAST.New (
-                       (AnnotatedAST.CI
-                          (([33:12-33:25], "\\MyPhonyVector"), [])),
+                       ((),
+                        (AnnotatedAST.CI
+                           (([33:12-33:25], "\\MyPhonyVector"), []))),
                        [], [])))
                    ))));
              (AnnotatedAST.Expr
@@ -39,7 +40,7 @@
                     [],
                     [(([34:11-34:18], Some \B),
                       (AnnotatedAST.New (
-                         (AnnotatedAST.CI (([34:15-34:16], "\\B"), [])), 
+                         ((), (AnnotatedAST.CI (([34:15-34:16], "\\B"), []))),
                          [], [])))
                       ],
                     []))));
@@ -56,7 +57,7 @@
                     [],
                     [(([35:11-35:18], Some \A),
                       (AnnotatedAST.New (
-                         (AnnotatedAST.CI (([35:15-35:16], "\\A"), [])), 
+                         ((), (AnnotatedAST.CI (([35:15-35:16], "\\A"), []))),
                          [], [])))
                       ],
                     []))));

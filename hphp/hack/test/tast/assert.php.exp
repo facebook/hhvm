@@ -23,7 +23,8 @@
                        (AnnotatedAST.InstanceOf (
                           (([15:10-15:12], Some ?\A),
                            (AnnotatedAST.Lvar ([15:10-15:12], $x))),
-                          (AnnotatedAST.CI (([15:24-15:25], "\\A"), [])))))))))
+                          ((), (AnnotatedAST.CI (([15:24-15:25], "\\A"), [])))
+                          )))))))
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });

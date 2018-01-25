@@ -18,6 +18,7 @@ end
 module type ASTAnnotationTypes = sig
   module ExprAnnotation : AnnotationType
   module EnvAnnotation : AnnotationType
+  module ClassIdAnnotation : AnnotationType
 end
 
 module AnnotatedAST(Annotations: ASTAnnotationTypes) =
@@ -25,6 +26,7 @@ struct
 
 module ExprAnnotation = Annotations.ExprAnnotation
 module EnvAnnotation = Annotations.EnvAnnotation
+module ClassIdAnnotation = Annotations.ClassIdAnnotation
 
 type program = def list
 [@@deriving
@@ -56,6 +58,7 @@ type program = def list
 
 and expr_annotation = ExprAnnotation.t [@visitors.opaque]
 and env_annotation = EnvAnnotation.t [@visitors.opaque]
+and class_id_annotation = ClassIdAnnotation.t [@visitors.opaque]
 
 and stmt =
   | Fallthrough
@@ -91,7 +94,8 @@ and as_expr =
 and block = stmt list
 
 (* This is not in AST *)
-and class_id =
+and class_id = class_id_annotation * class_id_
+and class_id_ =
   | CIparent
   | CIself
   | CIstatic
@@ -493,6 +497,7 @@ class type ['a] visitor_type = object
   method on_instanceOf : 'a -> expr -> class_id -> 'a
   method on_is : 'a -> expr -> hint -> 'a
   method on_class_id : 'a -> class_id -> 'a
+  method on_class_id_ : 'a -> class_id_ -> 'a
   method on_new : 'a -> class_id -> expr list -> expr list -> 'a
   method on_efun : 'a -> fun_ -> id list -> 'a
   method on_xml : 'a -> sid -> xhp_attribute list -> expr list -> 'a
@@ -814,7 +819,9 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
 
   method on_is acc e _ = this#on_expr acc e
 
-  method on_class_id acc = function
+  method on_class_id acc (_, cid) = this#on_class_id_ acc cid
+
+  method on_class_id_ acc = function
     | CIexpr e -> this#on_expr acc e
     | _ -> acc
 

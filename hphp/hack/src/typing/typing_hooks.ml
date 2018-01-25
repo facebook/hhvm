@@ -30,14 +30,14 @@ let (smethod_hooks: (Typing_defs.class_type ->
                      targs:Typing_defs.locl Typing_defs.ty list ->
                      pos_params:Nast.expr list option ->
                      Pos.t * string ->
-                     Typing_env.env -> Nast.class_id option -> is_method:bool ->
+                     Typing_env.env -> Nast.class_id_ option -> is_method:bool ->
                      is_const:bool -> unit) list ref) = ref []
 
 let (cmethod_hooks: (Typing_defs.class_type ->
                      targs:Typing_defs.locl Typing_defs.ty list ->
                      pos_params:Nast.expr list option ->
                      Pos.t * string ->
-                     Typing_env.env -> Nast.class_id option -> is_method:bool ->
+                     Typing_env.env -> Nast.class_id_ option -> is_method:bool ->
                      is_const:bool -> unit) list ref) = ref []
 
 let (taccess_hooks: (Typing_defs.class_type -> Typing_defs.typeconst_type ->
@@ -49,7 +49,7 @@ let (lvar_hooks: (Pos.t * Local_id.t -> Typing_env.env ->
 let (fun_call_hooks: (Typing_defs.locl Typing_defs.fun_params ->
                       Pos.t list -> Typing_env.env -> unit) list ref) = ref []
 
-let (new_id_hooks: (Nast.class_id -> Typing_env.env ->
+let (new_id_hooks: (Nast.class_id_ -> Typing_env.env ->
                     Pos.t -> unit) list ref) = ref []
 
 let (fun_id_hooks: (Pos.t * string -> unit) list ref) = ref []

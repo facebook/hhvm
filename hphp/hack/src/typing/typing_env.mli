@@ -83,13 +83,13 @@ val forget_members : env -> Pos.t -> env
 module FakeMembers :
   sig
     val make_id : Nast.expr -> string -> string
-    val make_static_id : Nast.class_id -> string -> string
+    val make_static_id : Nast.class_id_ -> string -> string
     val get : env -> Nast.expr -> string -> int option
     val is_invalid : env -> Nast.expr -> string -> bool
-    val get_static : env -> Nast.class_id -> string -> int option
-    val is_static_invalid : env -> Nast.class_id -> string -> bool
+    val get_static : env -> Nast.class_id_ -> string -> int option
+    val is_static_invalid : env -> Nast.class_id_ -> string -> bool
     val make : Pos.t -> env -> Nast.expr -> string -> env * Local_id.t
-    val make_static : Pos.t -> env -> Nast.class_id -> string ->
+    val make_static : Pos.t -> env -> Nast.class_id_ -> string ->
       env * Local_id.t
   end
 val unbind : env -> locl ty -> env * locl ty

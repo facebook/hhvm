@@ -11,14 +11,14 @@
 open Typing_defs
 
 val check_class_access:
-  Pos.t -> Typing_env.env -> (Pos.t * visibility) -> Nast.class_id ->
+  Pos.t -> Typing_env.env -> (Pos.t * visibility) -> Nast.class_id_ ->
   class_type -> unit
 
 val check_obj_access:
   Pos.t -> Typing_env.env -> (Pos.t * visibility) -> unit
 
 val is_visible:
-  Typing_env.env -> visibility -> Nast.class_id option -> class_type -> bool
+  Typing_env.env -> visibility -> Nast.class_id_ option -> class_type -> bool
 
 val min_vis_opt:
   (Pos.t * visibility) option -> (Pos.t * visibility) option ->

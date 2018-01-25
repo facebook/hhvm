@@ -294,7 +294,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 
   for (auto i = size_t{0}; i < dst.stack.size(); ++i) {
     auto newT = join(dst.stack[i].type, src.stack[i].type);
-    if (dst.stack[i].type != newT) {
+    if (!equivalently_refined(dst.stack[i].type, newT)) {
       changed = true;
       dst.stack[i].type = std::move(newT);
     }
@@ -306,7 +306,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 
   for (auto i = size_t{0}; i < dst.locals.size(); ++i) {
     auto newT = join(dst.locals[i], src.locals[i]);
-    if (dst.locals[i] != newT) {
+    if (!equivalently_refined(dst.locals[i], newT)) {
       changed = true;
       dst.locals[i] = std::move(newT);
     }
@@ -315,7 +315,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   for (auto i = size_t{0}; i < dst.clsRefSlots.size(); ++i) {
     auto newT = join(dst.clsRefSlots[i], src.clsRefSlots[i]);
     assert(newT.subtypeOf(TCls));
-    if (dst.clsRefSlots[i] != newT) {
+    if (!equivalently_refined(dst.clsRefSlots[i], newT)) {
       changed = true;
       dst.clsRefSlots[i] = std::move(newT);
     }

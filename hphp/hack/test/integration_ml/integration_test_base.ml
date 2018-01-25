@@ -342,7 +342,7 @@ let assert_autocomplete loop_output expected =
     | Some res -> res
     | _ -> fail "Expected autocomplete response"
   in
-  let results = results |> List.map ~f:(fun x -> x.AutocompleteService.res_name) in
+  let results = results |> List.map ~f:(fun x -> x.AutocompleteTypes.res_name) in
   (* The autocomplete results out of hack are unsorted *)
   let results_as_string = results |> List.sort ~cmp:compare |> list_to_string in
   let expected_as_string = expected |> List.sort ~cmp:compare |> list_to_string in
@@ -353,8 +353,8 @@ let assert_ide_autocomplete loop_output expected =
     | Some res -> res
     | _ -> fail "Expected autocomplete response"
   in
-  let results = List.map results.AutocompleteService.completions
-    ~f:(fun x -> x.AutocompleteService.res_name) in
+  let results = List.map results.AutocompleteTypes.completions
+    ~f:(fun x -> x.AutocompleteTypes.res_name) in
   let results_as_string = list_to_string results in
   let expected_as_string = list_to_string expected in
   assertEqual expected_as_string results_as_string

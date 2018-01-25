@@ -19,8 +19,8 @@ let go results output_json =
     print_endline (Hh_json.json_to_string (Hh_json.JSON_Array results))
   end else begin
     List.iter results begin fun res ->
-      let name = res.AutocompleteService.res_name in
-      let ty = res.AutocompleteService.res_ty in
+      let name = res.AutocompleteTypes.res_name in
+      let ty = res.AutocompleteTypes.res_ty in
       print_endline (name^" "^ty)
     end
   end

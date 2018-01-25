@@ -22,6 +22,24 @@ let ac_env = ref None
 let autocomplete_results : autocomplete_result list ref = ref []
 let autocomplete_is_complete : bool ref = ref true
 
+(* The position we're autocompleting at. This is used so when we reach this
+ * position in typing, we can recognize it and store types. Set in naming. *)
+let (auto_complete_pos: Pos.t option ref) = ref None
+(* A map of variable names to ident at the autocomplete point. This is
+ * set in naming. When we reach this point in typing, variable names are
+ * not available, but we can use this map to relate names to types *)
+let auto_complete_vars = ref (SMap.empty: Local_id.t SMap.t)
+
+type autocomplete_type =
+  | Acid
+  | Acnew
+  | Actype
+  | Acclass_get
+  | Acprop
+
+let (argument_global_type: autocomplete_type option ref) = ref None
+let auto_complete_for_global = ref ""
+
 let auto_complete_suffix = "AUTO332"
 let suffix_len = String.length auto_complete_suffix
 let strip_suffix s = String.sub s 0 (String.length s - suffix_len)
@@ -96,18 +114,18 @@ let autocomplete_token ac_type env x =
   if is_auto_complete (snd x)
   then begin
     ac_env := env;
-    Autocomplete.auto_complete_pos := Some (fst x);
-    Autocomplete.argument_global_type := Some ac_type;
-    Autocomplete.auto_complete_for_global := snd x
+    auto_complete_pos := Some (fst x);
+    argument_global_type := Some ac_type;
+    auto_complete_for_global := snd x
   end
 
-let autocomplete_id id env = autocomplete_token Autocomplete.Acid (Some env) id
+let autocomplete_id id env = autocomplete_token Acid (Some env) id
 
-let autocomplete_hint = autocomplete_token Autocomplete.Actype None
+let autocomplete_hint = autocomplete_token Actype None
 
 let autocomplete_new cid env _ =
   match cid with
-  | Nast.CI (sid, _) -> autocomplete_token Autocomplete.Acnew (Some env) sid
+  | Nast.CI (sid, _) -> autocomplete_token Acnew (Some env) sid
   | _ -> ()
 
 let get_class_elt_types env class_ cid elts =
@@ -121,8 +139,8 @@ let autocomplete_method is_static class_ ~targs:_ ~pos_params:_ id env cid
   if is_auto_complete (snd id)
   then begin
     ac_env := Some env;
-    Autocomplete.auto_complete_pos := Some (fst id);
-    Autocomplete.argument_global_type := Some Autocomplete.Acclass_get;
+    auto_complete_pos := Some (fst id);
+    argument_global_type := Some Acclass_get;
     let add kind name ty = add_partial_result name (Phase.decl ty) kind in
     if is_static then begin
       SMap.iter (get_class_elt_types env class_ cid class_.tc_smethods) ~f:(add Method_kind);
@@ -141,23 +159,23 @@ let autocomplete_cmethod = autocomplete_method false
 let autocomplete_lvar_naming _ id locals =
   if is_auto_complete (snd id)
   then begin
-    Autocomplete.argument_global_type := Some Autocomplete.Acprop;
+    argument_global_type := Some Acprop;
     (* Store the position and a map of name to ident so we can add
      * types at this point later *)
-    Autocomplete.auto_complete_pos := Some (fst id);
-    Autocomplete.auto_complete_vars := SMap.map locals snd
+    auto_complete_pos := Some (fst id);
+    auto_complete_vars := SMap.map locals snd
   end
 
 let autocomplete_lvar_typing id env =
-  if Some (fst id)= !(Autocomplete.auto_complete_pos)
+  if Some (fst id)= !(auto_complete_pos)
   then begin
     (* The typechecker might call this hook more than once (loops) so we
      * need to clear the list of results first or we could have repeat locals *)
     autocomplete_results := [];
     ac_env := Some env;
-    Autocomplete.auto_complete_pos := Some (fst id);
+    auto_complete_pos := Some (fst id);
     (* Get the types of all the variables in scope at this point *)
-    SMap.iter !Autocomplete.auto_complete_vars begin fun x ident ->
+    SMap.iter !auto_complete_vars begin fun x ident ->
       let ty = Typing_env.get_local env ident in
       add_partial_result x (Phase.locl ty) Variable_kind
     end;
@@ -170,14 +188,14 @@ let autocomplete_lvar_typing id env =
 
 let should_complete_class completion_type class_kind =
   match completion_type, class_kind with
-  | Some Autocomplete.Acid, Some Ast.Cnormal
-  | Some Autocomplete.Acid, Some Ast.Cabstract
-  | Some Autocomplete.Acnew, Some Ast.Cnormal
-  | Some Autocomplete.Actype, Some _ -> true
+  | Some Acid, Some Ast.Cnormal
+  | Some Acid, Some Ast.Cabstract
+  | Some Acnew, Some Ast.Cnormal
+  | Some Actype, Some _ -> true
   | _ -> false
 
 let should_complete_fun completion_type =
-  completion_type=Some Autocomplete.Acid
+  completion_type=Some Acid
 
 let get_constructor_ty c =
   let pos = c.Typing_defs.tc_pos in
@@ -229,8 +247,8 @@ let compute_complete_global
   ~(content_funs: Reordered_argument_collections.SSet.t)
   ~(content_classes: Reordered_argument_collections.SSet.t)
   : unit =
-  let completion_type = !Autocomplete.argument_global_type in
-  let gname = Utils.strip_ns !Autocomplete.auto_complete_for_global in
+  let completion_type = !argument_global_type in
+  let gname = Utils.strip_ns !auto_complete_for_global in
   let gname = strip_suffix gname in
 
   (* Objective: given "fo|", we should suggest functions in both the current *)
@@ -268,7 +286,7 @@ let compute_complete_global
      * "gname" that corresponds to, and see if it has a '\'. Since fully
      * qualifying a name will always prepend, this all works.
      *)
-    match !Autocomplete.auto_complete_pos with
+    match !auto_complete_pos with
       | None -> None
       | Some p ->
           let len = (Pos.length p) - suffix_len in
@@ -316,7 +334,7 @@ let compute_complete_global
     if not (should_complete_class completion_type target_kind) then None else
     Option.map target ~f:(fun c ->
       incr result_count;
-      if completion_type = Some Autocomplete.Acnew then
+      if completion_type = Some Acnew then
         get_partial_result
           (string_to_replace_prefix name) (Phase.decl (get_constructor_ty c)) Constructor_kind
       else
@@ -480,10 +498,10 @@ let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
 
 let get_results ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes =
   Errors.ignore_ begin fun () ->
-    let completion_type = !Autocomplete.argument_global_type in
-    if completion_type = Some Autocomplete.Acid ||
-       completion_type = Some Autocomplete.Acnew ||
-       completion_type = Some Autocomplete.Actype
+    let completion_type = !argument_global_type in
+    if completion_type = Some Acid ||
+       completion_type = Some Acnew ||
+       completion_type = Some Actype
     then compute_complete_global ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes;
     let env = match !ac_env with
       | Some e -> e
@@ -501,10 +519,10 @@ let get_results ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes =
 end
 
 let reset () =
-  Autocomplete.auto_complete_for_global := "";
-  Autocomplete.argument_global_type := None;
-  Autocomplete.auto_complete_pos := None;
-  Autocomplete.auto_complete_vars := SMap.empty;
+  auto_complete_for_global := "";
+  argument_global_type := None;
+  auto_complete_pos := None;
+  auto_complete_vars := SMap.empty;
   ac_env := None;
   autocomplete_results := [];
   autocomplete_is_complete := true

@@ -80,7 +80,6 @@ let path = Relative_path.default
 let declare_and_check content ~f tcopt =
   let tcopt = TypecheckerOptions.make_permissive tcopt in
   Autocomplete.auto_complete := false;
-  Autocomplete.auto_complete_for_global := "";
   Errors.ignore_ @@ make_then_revert_local_changes begin fun () ->
     Fixmes.HH_FIXMES.(remove_batch @@ KeySet.singleton path);
     let {Parser_hack.file_mode = _; comments = _; content = _; ast; is_hh_file = _ } =

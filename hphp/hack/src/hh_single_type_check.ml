@@ -598,7 +598,7 @@ let handle_mode mode filename tcopt popt files_contents files_info errors =
       let result =
         ServerAutoComplete.auto_complete ~tcopt ~delimit_on_namespaces:false file in
       List.iter ~f: begin fun r ->
-        let open AutocompleteService in
+        let open AutocompleteTypes in
         Printf.printf "%s %s\n" r.res_name r.res_ty
       end result.Utils.With_complete_flag.value
   | Ffp_autocomplete ->

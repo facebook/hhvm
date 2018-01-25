@@ -1891,18 +1891,8 @@ and expr_
         let env, local = Env.FakeMembers.make_static p env x y in
         let local = p, Lvar (p, local) in
         let env, _, ty = expr env local in
-        let cid, env = begin match x with
-          | CIparent -> T.CIparent, env
-          | CIself -> T.CIself, env
-          | CIstatic -> T.CIstatic, env
-          | CIexpr ((_, This) as e)
-          | CIexpr ((_, Lvar (_, _)) as e) ->
-            let env, te, _ = expr env e in
-            T.CIexpr te, env
-          | CI x -> T.CI x, env
-          | CIexpr _ -> assert false
-        end in
-        make_result env (T.Class_get ((None, cid), (py, y))) ty
+        let env, te, _ = static_class_id p env x in
+        make_result env (T.Class_get (te, (py, y))) ty
   | Class_get (((), cid), mid) ->
       Env.not_lambda_reactive ();
       TUtils.process_static_find_ref cid mid;

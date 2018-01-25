@@ -211,7 +211,8 @@ bool relocateSmashable(Env& env, TCA srcAddr, TCA destAddr,
 
   auto adjusted = env.rel.adjustedAddressAfter(target);
   if (!adjusted) adjusted = target;
-  int imm = (adjusted - destAddr) >> kInstructionSizeLog2;
+  auto const imm =
+    static_cast<int64_t>(adjusted - destAddr) >> kInstructionSizeLog2;
 
   if (!is_int26(imm)) return false;
 
@@ -278,7 +279,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
      *       scope is just a single macroassembler directive, whereas
      *       the scope of rAsm is an entire vasm instruction.
      */
-    int imm = src->ImmPCOffsetTarget(srcFrom) - dest;
+    auto imm = static_cast<int64_t>(src->ImmPCOffsetTarget(srcFrom) - dest);
     bool isRelative = true;
     if (src->IsPCRelAddressing()) {
       if (!is_int21(imm) || env.far.count(src)) {
@@ -458,7 +459,7 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
 
   auto adjusted = env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
   if (!adjusted) { adjusted = reinterpret_cast<TCA>(target); }
-  int imm = Instruction::Cast(adjusted) - dest;
+  auto imm = static_cast<int64_t>(Instruction::Cast(adjusted) - dest);
   bool isAbsolute = true;
 
   /*
@@ -764,7 +765,8 @@ size_t relocateImpl(Env& env) {
              * that would change the code size. Our only recourse is to mark it
              * as far and then retry the entire relocation again.
              */
-            int imm = Instruction::Cast(new_target) - dest;
+            auto const imm =
+              static_cast<int64_t>(Instruction::Cast(new_target) - dest);
             if ((src->IsPCRelAddressing() && !is_int21(imm)) ||
                 (src->IsLoadLiteral() && !is_int19(imm)) ||
                 (src->IsCondBranchImm() &&
@@ -913,7 +915,7 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
        * We're adjusting, not relocating. So if the offset can't be
        * encoded, our only recourse is to assert.
        */
-      int imm = Instruction::Cast(adjusted) - instr;
+      auto imm = static_cast<int64_t>(Instruction::Cast(adjusted) - instr);
       if (instr->IsPCRelAddressing()) {
         always_assert_flog(is_int21(imm),
           "Can't adjust ADR, imm won't fit in 21 bits.\n");

@@ -238,6 +238,8 @@ inline void* MemoryManager::mallocSmallIndex(size_t index) {
 inline void* MemoryManager::mallocSmallSize(size_t bytes) {
   assert(bytes > 0);
   assert(bytes <= kMaxSmallSize);
+  // mallocSmallIndex() converts the size index back to a size to track the
+  // size class's actual size, rather than the requested size.
   return mallocSmallIndex(size2Index(bytes));
 }
 

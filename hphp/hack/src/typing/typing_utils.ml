@@ -176,6 +176,25 @@ let rec get_base_type env ty =
     end
   | _ -> ty
 
+
+(*****************************************************************************)
+(* Given some class type or unresolved union of class types, return the
+ * identifiers of all classes the type may represent.
+ *
+ * Intended for uses like constructing call graphs and finding references, where
+ * we have the statically known class type of some runtime value or class ID and
+ * we would like the name of that class. *)
+(*****************************************************************************)
+let get_class_ids env ty =
+  let rec aux acc = function
+    | _, Tclass ((_, cid), _) -> cid::acc
+    | _, (Toption ty | Tabstract (_, Some ty)) -> aux acc ty
+    | _, Tunresolved tys -> List.fold tys ~init:acc ~f:aux
+    | _ -> acc
+  in
+  List.rev (aux [] (Typing_expand.fully_expand env ty))
+
+
 (*****************************************************************************)
 (* Unification error *)
 (*****************************************************************************)

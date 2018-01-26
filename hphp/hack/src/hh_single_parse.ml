@@ -13,7 +13,7 @@ module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_minimal_syntax)
+  .WithSyntax(Syntax)
 
 let purpose = "Read a single Hack file and produce the resulting S-Expression."
 let extra   = "(Options for development / parser selection and comparisson.)"
@@ -67,7 +67,7 @@ let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
   let open SyntaxTree in
   let source_text = SourceText.from_file file in
   let tree        = make source_text in
-  let script      = Syntax.from_tree tree in
+  let script      = root tree in
   let validated   =
     try
       Syntax.Validated.validate_script script

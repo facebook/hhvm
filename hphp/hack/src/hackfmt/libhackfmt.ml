@@ -9,7 +9,7 @@
  *)
 
 module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_minimal_syntax)
+  .WithSyntax(Full_fidelity_positioned_syntax)
 module EditableSyntax = Full_fidelity_editable_syntax
 module SourceText = Full_fidelity_source_text
 module Env = Format_env
@@ -195,7 +195,7 @@ let format_intervals ?config intervals tree =
  * is returned along with the formatted text of the node.
  *
  * Designed to be suitable for as-you-type-formatting. *)
-let format_at_offset ?config tree offset =
+let format_at_offset ?config (tree : SyntaxTree.t) offset =
   let source_text = SyntaxTree.text tree in
   let env = env_from_tree config tree in
   let chunk_groups =
@@ -211,7 +211,7 @@ let format_at_offset ?config tree offset =
    * at the closing brace). *)
   let token, node =
     let module SK = Full_fidelity_syntax_kind in
-    match PS.parentage (PS.from_tree tree) offset with
+    match PS.parentage (SyntaxTree.root tree) offset with
     | token :: parent :: grandparent :: _
       when PS.kind parent = SK.CompoundStatement
         && PS.kind grandparent <> SK.SyntaxList ->

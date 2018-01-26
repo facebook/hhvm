@@ -8,16 +8,15 @@
  *
  *)
 
+module Syntax = Full_fidelity_positioned_syntax
+module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
+module Token = Syntax.Token
+module Trivia = Token.Trivia
 module SourceText = Full_fidelity_source_text
 module SyntaxKind = Full_fidelity_syntax_kind
-module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_minimal_syntax)
 module TriviaKind = Full_fidelity_trivia_kind
 module TokenKind = Full_fidelity_token_kind
-module MinimalSyntax = Full_fidelity_minimal_syntax
-module MinimalToken = Full_fidelity_minimal_token
-module MinimalTrivia = Full_fidelity_minimal_trivia
-module Rewriter = Full_fidelity_rewriter.WithSyntax(MinimalSyntax)
+module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 
 module EditableSyntax = Full_fidelity_editable_syntax
 module EditableToken = Full_fidelity_editable_token
@@ -45,12 +44,12 @@ let rewrite_editable_tree_no_trivia node =
 
 let rewrite_tree_no_trivia node =
   let rewrite n =
-    match MinimalSyntax.syntax n with
-    | MinimalSyntax.Token t ->
-      let kind = MinimalToken.kind t in
-      let width = MinimalToken.width t in
-      let token = MinimalToken.make kind SourceText.empty 0 width [] [] in
-      Rewriter.Replace (MinimalSyntax.make_token token)
+    match Syntax.syntax n with
+    | Syntax.Token t ->
+      let kind = Token.kind t in
+      let width = Token.width t in
+      let token = Token.make kind SourceText.empty 0 width [] [] in
+      Rewriter.Replace (Syntax.make_token token)
     | _ -> Rewriter.Keep in
   Rewriter.rewrite_post rewrite node
 
@@ -59,7 +58,7 @@ let rewrite_tree_no_whitespace node =
     List.filter
       trivia_list
       ~f:(fun t ->
-        match MinimalTrivia.kind t with
+        match Trivia.kind t with
           | TriviaKind.ExtraTokenError
           | TriviaKind.FallThrough
           | TriviaKind.Unsafe
@@ -75,9 +74,9 @@ let rewrite_tree_no_whitespace node =
   in
 
   let rewrite n =
-    match MinimalSyntax.syntax n with
-    | MinimalSyntax.Token t ->
-      let token = MinimalToken.(make
+    match Syntax.syntax n with
+    | Syntax.Token t ->
+      let token = Token.(make
         (kind t)
         SourceText.empty
         0
@@ -85,45 +84,45 @@ let rewrite_tree_no_whitespace node =
         (filter_whitespace (leading t))
         (filter_whitespace (trailing t))
       ) in
-      Rewriter.Replace (MinimalSyntax.make_token token)
+      Rewriter.Replace (Syntax.make_token token)
     | _ -> Rewriter.Keep in
   Rewriter.rewrite_post rewrite node
 
-let minimal_trivia_to_sexp trivia =
-  let name = TriviaKind.to_string (MinimalTrivia.kind trivia) in
+let trivia_to_sexp trivia =
+  let name = TriviaKind.to_string (Trivia.kind trivia) in
   Sexp.List [ Sexp.Atom name ]
 
-let minimal_trivia_list trivia_list =
-  List.map trivia_list ~f:minimal_trivia_to_sexp
+let trivia_list trivia_list =
+  List.map trivia_list ~f:trivia_to_sexp
 
-let minimal_token_to_sexp token =
-  let leading = minimal_trivia_list (MinimalToken.leading token) in
-  let name = TokenKind.to_string (MinimalToken.kind token) in
+let token_to_sexp token =
+  let leading = trivia_list (Token.leading token) in
+  let name = TokenKind.to_string (Token.kind token) in
   let name =
     if name = "(" then "lparen"
     else if name = ")" then "rparen"
     else name in
-  let trailing = minimal_trivia_list (MinimalToken.trailing token) in
+  let trailing = trivia_list (Token.trailing token) in
   let name = Sexp.List [Sexp.Atom name] in
   Sexp.List (leading @ [name] @ trailing)
 
-let rec minimal_to_sexp node =
-  match MinimalSyntax.syntax node with
-  | MinimalSyntax.Token token ->
-    minimal_token_to_sexp token
+let rec to_sexp node =
+  match Syntax.syntax node with
+  | Syntax.Token token ->
+    token_to_sexp token
   | _ ->
-    let name = SyntaxKind.to_string (MinimalSyntax.kind node) in
-    let children = MinimalSyntax.children node in
-    let children = List.map children ~f:minimal_to_sexp in
+    let name = SyntaxKind.to_string (Syntax.kind node) in
+    let children = Syntax.children node in
+    let children = List.map children ~f:to_sexp in
     Sexp.List ((Sexp.Atom name) :: children)
 
-let minimal_to_formatted_sexp_string node =
-  minimal_to_sexp node
+let to_formatted_sexp_string node =
+  to_sexp node
   |> Sexp.to_string_hum
 
 let tree_to_sexp_string_ignore_trivia tree =
   tree
   |> SyntaxTree.root
   |> rewrite_tree_no_trivia
-  |> minimal_to_sexp
+  |> to_sexp
   |> Sexp.to_string_mach

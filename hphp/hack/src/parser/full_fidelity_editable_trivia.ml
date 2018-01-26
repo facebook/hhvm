@@ -10,11 +10,11 @@
 
 (**
  * An editable trivia contains the text of the trivia; these trivia are not
- * backed by a source text, like the minimal trivia are.
+ * backed by a source text, like the positioned trivia are.
  *)
 
 module TriviaKind = Full_fidelity_trivia_kind
-module MinimalTrivia = Full_fidelity_minimal_trivia
+module PositionedTrivia = Full_fidelity_positioned_trivia
 module SourceText = Full_fidelity_source_text
 
 type t = {
@@ -52,19 +52,19 @@ let text_from_trivia_list trivia_list =
     str ^ (text trivia) in
   List.fold_left folder "" trivia_list
 
-let from_minimal source_text minimal_trivia offset =
-  let kind = MinimalTrivia.kind minimal_trivia in
-  let width = MinimalTrivia.width minimal_trivia in
+let from_positioned source_text positioned_trivia offset =
+  let kind = PositionedTrivia.kind positioned_trivia in
+  let width = PositionedTrivia.width positioned_trivia in
   let text = SourceText.sub source_text offset width in
   { kind; text }
 
-let from_minimal_list source_text ts offset =
+let from_positioned_list source_text ts offset =
   let rec aux acc ts offset =
     match ts with
     | [] -> acc
     | h :: t ->
-      let et = from_minimal source_text h offset in
-      aux (et :: acc) t (offset + (MinimalTrivia.width h)) in
+      let et = from_positioned source_text h offset in
+      aux (et :: acc) t (offset + (PositionedTrivia.width h)) in
   List.rev (aux [] ts offset)
 
 let to_json trivia =

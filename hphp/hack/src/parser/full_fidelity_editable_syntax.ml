@@ -15,14 +15,14 @@
  *)
 
 module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_minimal_syntax)
+  .WithSyntax(Full_fidelity_positioned_syntax)
 module EditableToken = Full_fidelity_editable_token
-module MinimalSyntax = Full_fidelity_minimal_syntax
+module PositionedSyntax = Full_fidelity_positioned_syntax
 module SyntaxWithEditableToken = Full_fidelity_syntax.WithToken(EditableToken)
 
 (**
  * Ironically, an editable syntax tree needs even less per-node information
- * than the "minimal" syntax tree, which needs to know the width of the node.
+ * than the "positioned" syntax tree, which needs to know the width of the node.
  **)
 
 module EditableSyntaxValue = struct
@@ -49,26 +49,26 @@ end
 include EditableSyntax
 include EditableSyntax.WithValueBuilder(EditableValueBuilder)
 
-let rec from_minimal text minimal_node offset =
-  match MinimalSyntax.syntax minimal_node with
-  | MinimalSyntax.Token token ->
-    let editable_token = EditableToken.from_minimal text token offset in
+let rec from_positioned text positioned_node offset =
+  match PositionedSyntax.syntax positioned_node with
+  | PositionedSyntax.Token token ->
+    let editable_token = EditableToken.from_positioned text token offset in
     let syntax = Token editable_token in
     make syntax EditableSyntaxValue.NoValue
   | _ ->
     let folder (acc, offset) child =
-      let new_child = from_minimal text child offset in
-      let w = MinimalSyntax.full_width child in
+      let new_child = from_positioned text child offset in
+      let w = PositionedSyntax.full_width child in
       (new_child :: acc, offset + w) in
-    let kind = MinimalSyntax.kind minimal_node in
-    let minimals = MinimalSyntax.children minimal_node in
-    let (editables, _) = List.fold_left folder ([], offset) minimals in
+    let kind = PositionedSyntax.kind positioned_node in
+    let positioneds = PositionedSyntax.children positioned_node in
+    let (editables, _) = List.fold_left folder ([], offset) positioneds in
     let editables = List.rev editables in
     let syntax = syntax_from_children kind editables in
     make syntax EditableSyntaxValue.NoValue
 
 let from_tree tree =
-  from_minimal (SyntaxTree.text tree) (SyntaxTree.root tree) 0
+  from_positioned (SyntaxTree.text tree) (SyntaxTree.root tree) 0
 
 let text node =
   let buffer = Buffer.create 100 in

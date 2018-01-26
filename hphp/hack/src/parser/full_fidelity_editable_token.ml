@@ -10,10 +10,10 @@
 
 (**
  * An editable token contains the text of the token; these tokens are not
- * backed by a source text, like the minimal tokens are.
+ * backed by a source text, like the positioned tokens are.
  *)
 
-module MinimalToken = Full_fidelity_minimal_token
+module PositionedToken = Full_fidelity_positioned_token
 module EditableTrivia = Full_fidelity_editable_trivia
 module SourceText = Full_fidelity_source_text
 module TokenKind = Full_fidelity_token_kind
@@ -83,15 +83,15 @@ let trailing_text token =
 let full_text token =
   (leading_text token) ^ (text token) ^ (trailing_text token)
 
-let from_minimal source_text minimal_token offset =
-  let lw = MinimalToken.leading_width minimal_token in
-  let w = MinimalToken.width minimal_token in
-  let leading = EditableTrivia.from_minimal_list source_text
-    (MinimalToken.leading minimal_token) offset in
+let from_positioned source_text positioned_token offset =
+  let lw = PositionedToken.leading_width positioned_token in
+  let w = PositionedToken.width positioned_token in
+  let leading = EditableTrivia.from_positioned_list source_text
+    (PositionedToken.leading positioned_token) offset in
   let text = SourceText.sub source_text (offset + lw) w in
-  let trailing = EditableTrivia.from_minimal_list source_text
-    (MinimalToken.trailing minimal_token) (offset + lw + w) in
-  make (MinimalToken.kind minimal_token) text leading trailing
+  let trailing = EditableTrivia.from_positioned_list source_text
+    (PositionedToken.trailing positioned_token) (offset + lw + w) in
+  make (PositionedToken.kind positioned_token) text leading trailing
 
 let to_json token =
   let open Hh_json in

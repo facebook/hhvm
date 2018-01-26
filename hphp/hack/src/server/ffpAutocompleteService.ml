@@ -11,8 +11,7 @@
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module SourceText = Full_fidelity_source_text
 module SyntaxKind = Full_fidelity_syntax_kind
-module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_minimal_syntax)
+module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(PositionedSyntax)
 module TokenKind = Full_fidelity_token_kind
 
 open Hh_core
@@ -52,7 +51,7 @@ let auto_complete
   let source_text = SourceText.make dummy_path new_file_content in
   let offset = SourceText.position_to_offset source_text (pos.line, pos.column) in
   let syntax_tree = SyntaxTree.make source_text in
-  let positioned_tree = PositionedSyntax.from_tree syntax_tree in
+  let positioned_tree = SyntaxTree.root syntax_tree in
 
   let (context, stub) = FfpAutocompleteContextParser.get_context_and_stub positioned_tree offset in
   (* If we are running a test, filter the keywords and local variables based on

@@ -29,9 +29,8 @@
 module Schema = Full_fidelity_schema
 module SyntaxError = Full_fidelity_syntax_error
 module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_minimal_syntax)
+  .WithSyntax(Full_fidelity_positioned_syntax)
 module SourceText = Full_fidelity_source_text
-module PositionedSyntax = Full_fidelity_positioned_syntax
 module ParserErrors = Full_fidelity_parser_errors
   .WithSyntax(Full_fidelity_positioned_syntax)
 
@@ -212,10 +211,8 @@ let handle_existing_file args filename =
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
-  let minimal_tree = SyntaxTree.make source_text in
-  let syntax_tree =
-    Syntax_tree_utilities.positioned_from_minimal minimal_tree in
-  let editable = Full_fidelity_editable_syntax.from_tree minimal_tree in
+  let syntax_tree = SyntaxTree.make source_text in
+  let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
 
   (* Parse with the original parser *)
   let (original_errors, original_parse) = Errors.do_
@@ -246,7 +243,7 @@ let handle_existing_file args filename =
         ~level:ParserErrors.Maximum
   end;
   if args.full_fidelity_s_expr then begin
-    let str = Debug.dump_full_fidelity minimal_tree in
+    let str = Debug.dump_full_fidelity syntax_tree in
     Printf.printf "%s" str
   end;
   if args.original_parser_errors then begin
@@ -258,7 +255,7 @@ let handle_existing_file args filename =
     Printf.printf "%s\n" str
   end;
   if args.full_fidelity_json then begin
-    let json = SyntaxTree.to_json minimal_tree in
+    let json = SyntaxTree.to_json syntax_tree in
     let str = Hh_json.json_to_string json in
     Printf.printf "%s\n" str
   end;

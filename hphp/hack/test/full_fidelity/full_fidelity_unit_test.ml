@@ -11,7 +11,7 @@
 module EditableTrivia = Full_fidelity_editable_trivia
 module SourceText = Full_fidelity_source_text
 module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_minimal_syntax)
+  .WithSyntax(Full_fidelity_positioned_syntax)
 module PositionedTree = Full_fidelity_syntax_tree
   .WithSyntax(Full_fidelity_positioned_syntax)
 module ParserErrors = Full_fidelity_parser_errors
@@ -87,7 +87,7 @@ let test_minimal source =
   let file_path = Relative_path.(create Dummy "<test_minimal>") in
   let source_text = SourceText.make file_path source in
   let syntax_tree = SyntaxTree.make source_text in
-  TestUtils.minimal_to_formatted_sexp_string (SyntaxTree.root syntax_tree)
+  TestUtils.to_formatted_sexp_string (SyntaxTree.root syntax_tree)
 
 let test_trivia source =
   let file_path = Relative_path.(create Dummy "<test_trivia>") in

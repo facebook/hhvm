@@ -2797,12 +2797,10 @@ and assign_ p ur env e1 ty2 =
             || x = SN.Collections.cConstVector ->
             (* Vector assignment is illegal in a reactive context
                 but vec assignment is okay *)
-            (match x <> SN.Collections.cVec, Env.env_local_reactive env with
-            | true, true ->
+            if x <> SN.Collections.cVec
+            then Env.error_if_reactive_context env @@ begin fun () ->
               Errors.nonreactive_append p
-            | true, _ ->
-              Env.not_lambda_reactive ()
-            | _ -> ());
+            end;
             let env, tel = List.map_env env el begin fun env e ->
               let env, te, _ = assign (fst e) env e elt_type in
               env, te
@@ -3979,17 +3977,14 @@ and array_append p env ty1 =
         (* No reactive append on vector and set *)
         | Tclass ((_, n), [ty])
             when (n = SN.Collections.cVector
-            || n = SN.Collections.cSet) &&
-            Env.env_local_reactive env ->
-            Env.not_lambda_reactive ();
-            Errors.nonreactive_append p;
+            || n = SN.Collections.cSet) ->
+            Env.error_if_reactive_context env @@ begin fun () ->
+              Errors.nonreactive_append p;
+            end;
             env, ty
 
         | Tclass ((_, n), [ty])
-            when n = SN.Collections.cVector
-            || n = SN.Collections.cSet
-            || n = SN.Collections.cVec
-            || n = SN.Collections.cKeyset ->
+            when  n = SN.Collections.cVec || n = SN.Collections.cKeyset ->
             env, ty
         | Tclass ((_, n), [])
             when n = SN.Collections.cVector || n = SN.Collections.cSet ->
@@ -3997,16 +3992,16 @@ and array_append p env ty1 =
                without type parameters *)
             env, (Reason.Rnone, Tany)
         | Tclass ((_, n), [tkey; tvalue]) when n = SN.Collections.cMap ->
-            if Env.env_local_reactive env then
+            Env.error_if_reactive_context env @@ begin fun () ->
               Errors.nonreactive_append p;
-            Env.not_lambda_reactive ();
+            end;
               (* You can append a pair to a map *)
             env, (Reason.Rmap_append p, Tclass ((p, SN.Collections.cPair),
                 [tkey; tvalue]))
         | Tclass ((_, n), []) when n = SN.Collections.cMap ->
-            if Env.env_local_reactive env then
+            Env.error_if_reactive_context env @@ begin fun () ->
               Errors.nonreactive_append p;
-            Env.not_lambda_reactive ();
+            end;
             (* Handle the case where "Map" was used as a typehint without
                type parameters *)
             env, (Reason.Rmap_append p,

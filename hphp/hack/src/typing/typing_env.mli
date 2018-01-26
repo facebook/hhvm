@@ -117,6 +117,7 @@ val is_generic_parameter : env -> string -> bool
 val get_generic_parameters : env -> string list
 val check_lambda_reactive : (unit -> 'a) -> reactivity * 'a
 val not_lambda_reactive : unit -> unit
+val error_if_reactive_context : env -> (unit -> unit) -> unit
 val add_fresh_generic_parameter : env -> string -> env * string
 val get_tpenv_size : env -> int
 val set_env_reactive : env -> reactivity -> env

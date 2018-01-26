@@ -107,6 +107,12 @@ struct Repo::GlobalData {
   bool PHP7_IntSemantics = false;
 
   /*
+   * Indicates whether hex strings (e.g. "0x20") can be used for numeric
+   * operations, e.g. ("0x20" + 1)
+   */
+  bool PHP7_NoHexNumerics = false;
+
+  /*
    * Indicates whether the repo was compiled with PHP7 scalar type hint support.
    * In this mode non hh units will default to weak types and scalar types will
    * be available outside the HH namespace.
@@ -186,6 +192,7 @@ struct Repo::GlobalData {
       (DisallowDynamicVarEnvFuncs)
       (ElideAutoloadInvokes)
       (PHP7_IntSemantics)
+      (PHP7_NoHexNumerics)
       (PHP7_ScalarTypes)
       (PHP7_Substr)
       (PHP7_Builtins)

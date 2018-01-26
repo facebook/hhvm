@@ -1,1 +1,1 @@
--dhhvm.php7.scalar_types=true
+-dhhvm.php7.scalar_types=true -d hhvm.php7.all=0

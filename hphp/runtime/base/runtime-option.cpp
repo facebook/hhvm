@@ -428,12 +428,17 @@ HackStrictOption
 bool RuntimeOption::LookForTypechecker = true;
 bool RuntimeOption::AutoTypecheck = true;
 
+#ifdef FACEBOOK
+const static bool s_PHP7_default = false;
+#else
+const static bool s_PHP7_default = true;
+#endif
 // PHP7 is off by default (false). s_PHP7_master is not a static member of
 // RuntimeOption so that it's private to this file and not exposed -- it's a
 // master switch only, and not to be used for any actual gating, use the more
 // granular options instead. (It can't be a local since Config::Bind will take
 // and store a pointer to it.)
-static bool s_PHP7_master = false;
+static bool s_PHP7_master = s_PHP7_default;
 bool RuntimeOption::PHP7_DeprecationWarnings = false;
 bool RuntimeOption::PHP7_EngineExceptions = false;
 bool RuntimeOption::PHP7_IntSemantics = false;
@@ -1375,7 +1380,7 @@ void RuntimeOption::Load(
     // these may want to be per-file. We originally planned to do this from the
     // get-go, but threading that through turns out to be kind of annoying and
     // of questionable value, so just doing this for now.
-    Config::Bind(s_PHP7_master, ini, config, "PHP7.all", false);
+    Config::Bind(s_PHP7_master, ini, config, "PHP7.all", s_PHP7_default);
     Config::Bind(PHP7_DeprecationWarnings, ini, config,
                  "PHP7.DeprecationWarnings", s_PHP7_master);
     Config::Bind(PHP7_EngineExceptions, ini, config, "PHP7.EngineExceptions",

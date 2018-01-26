@@ -1,2 +1,2 @@
--vHardReturnTypeHints=1
--vThisTypeHintLevel=3
+-vHardReturnTypeHints=1 -d hhvm.php7.all=0
+-vThisTypeHintLevel=3 -d hhvm.php7.all=0

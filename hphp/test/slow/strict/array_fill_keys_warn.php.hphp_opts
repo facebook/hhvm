@@ -1,1 +1,1 @@
--vHack.Lang.StrictArrayFillKeys=warn
+-vHack.Lang.StrictArrayFillKeys=warn -d hhvm.php7.all=0

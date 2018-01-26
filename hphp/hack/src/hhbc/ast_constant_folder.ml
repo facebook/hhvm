@@ -245,9 +245,9 @@ and darray_to_typed_value ns fields =
            | _ ->
               (expr_to_typed_value ns v1, expr_to_typed_value ns v2)
            | exception Failure _ ->
-              (expr_to_typed_value ns v1, expr_to_typed_value ns v2)
+              (key_expr_to_typed_value ns v1, expr_to_typed_value ns v2)
            end
-        | _ -> (expr_to_typed_value ns v1, expr_to_typed_value ns v2))
+        | _ -> (key_expr_to_typed_value ns v1, expr_to_typed_value ns v2))
   in
   TV.DArray (update_duplicates_in_map fields)
 

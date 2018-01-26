@@ -40,3 +40,27 @@ array(3) {
   ["path"]=>
   string(30) "/sites/default/files/drums.mp3"
 }
+array(6) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(12) "www.test.com"
+  ["port"]=>
+  int(12345)
+  ["user"]=>
+  string(7) "xx23124"
+  ["pass"]=>
+  string(11) "__ffdfdef__"
+  ["path"]=>
+  string(4) "/dir"
+}
+array(1) {
+  ["path"]=>
+  string(9) "127.0.0.1"
+}
+array(2) {
+  ["host"]=>
+  string(9) "127.0.0.1"
+  ["port"]=>
+  int(1234)
+}

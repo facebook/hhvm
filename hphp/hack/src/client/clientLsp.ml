@@ -1263,6 +1263,9 @@ let rec connect (state: state) : state =
     (*   running, or there's some other reason why the connection was refused *)
     (*   or timed-out and no lockfile is present; (2) the server was dormant  *)
     (*   and had already received too many pending connection requests.       *)
+    (* Exit_with Monitor_connection_failure: raised when the lockfile is      *)
+    (*   present but connection-attempt to the monitor times out - maybe it's *)
+    (*   under DDOS, or maybe it's declining to answer new connections.       *)
     let stack = Printexc.get_backtrace () in
     let (code, message, _data) = Lsp_fmt.get_error_info e in
     let longMessage = Printf.sprintf "connect failed: %s [%i]\n%s" message code stack in
@@ -1326,8 +1329,16 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
   let open Lost_env in
 
   let no_op = match p.explanation, state with
-    | Wait_required _, Lost_server { p = { explanation = Wait_required _; _ }; _ } -> true
+    | Wait_required _, Lost_server { progress; _ }
+      when progress <> Progress.None -> true
+    | Action_required _, Lost_server { actionRequired; _ }
+      when actionRequired <> ActionRequired.None -> true
     | _ -> false in
+  (* If we already display a progress indicator, and call do_lost_server     *)
+  (* to display a progress indicator, then we won't do anything. Likewise,   *)
+  (* if we already display an error dialog with ANY TEXT and Restart button, *)
+  (* and call do_lost_server to display any other text in the error dialog,  *)
+  (* it makes for a nicer UI to simply leave the old text up.                *)
   if no_op then state else
 
   let state = dismiss_ui state in
@@ -1342,9 +1353,19 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
   in
 
   (* These helper functions are for the dialog *)
+  let dialog_ref : ShowMessageRequest.t ref = ref ShowMessageRequest.None in
   let clear_dialog_flag (state: state) : state =
     match state with
-    | Lost_server lenv -> Lost_server { lenv with dialog = ShowMessageRequest.None; }
+    | Lost_server lenv ->
+      (* TODO(ljw): The following != test is "implementation-specific".      *)
+      (* Goal is so that if we had one dialog up, then dismiss_ui it which   *)
+      (* sends $/cancelRequest, then put up another dialog, then the editor  *)
+      (* sends back a RequestCancelled error in response to the first dialog,*)
+      (* we don't want to clear the flag that's now there for the second     *)
+      (* dialog. This != test achieves that. But ocaml only guarantees       *)
+      (* behavior of != on mutable things, which ours is not...              *)
+      if lenv.dialog != !dialog_ref then Lost_server lenv
+      else Lost_server { lenv with dialog = ShowMessageRequest.None; }
     | _ -> state
   in
   let handle_error ~code:_ ~message:_ ~data:_ state =
@@ -1390,6 +1411,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
           MessageType.ErrorMessage msg ["Restart"] in
         Progress.None, actionRequired, dialog
     in
+    dialog_ref := dialog;
     Lost_server { Lost_env.
       p;
       uris_with_unsaved_changes;

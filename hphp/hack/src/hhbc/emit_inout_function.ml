@@ -13,19 +13,24 @@ open Hh_core
 
 module H = Hhbc_ast
 
-let emit_body_instrs_inout ~verify_ret params call_instrs =
+let emit_body_instrs_inout params call_instrs =
   let param_count = List.length params in
   let param_instrs = gather @@
     List.mapi params ~f:(fun i p ->
         gather [
-          instr_cgetquietl (Local.Named (Hhas_param.name p));
-          instr_fpass H.PassByRefKind.AllowCell i H.Cell
+          if Hhas_param.is_inout p
+          then gather [
+            instr_cgetquietl (Local.Named (Hhas_param.name p));
+            instr_null;
+            instr_popl (Local.Named (Hhas_param.name p))
+          ]
+          else instr_pushl (Local.Named (Hhas_param.name p));
+          instr_fpass H.PassByRefKind.AllowCell i H.Any
         ]) in
   let inout_params = List.filter_map params ~f:(fun p ->
       if not @@ Hhas_param.is_inout p then None else
         Some (instr_setl @@ Local.Named (Hhas_param.name p))) in
   let local = Local.get_unnamed_local () in
-  let verify_ret_instr = if verify_ret then instr_verifyRetTypeC else empty in
   let last_p = List.nth_exn params (param_count - 1) in
   let has_variadic = Hhas_param.is_variadic last_p in
   gather [
@@ -36,7 +41,6 @@ let emit_body_instrs_inout ~verify_ret params call_instrs =
       else instr_fcall param_count;
     instr_unboxr_nop;
     Emit_inout_helpers.emit_list_set_for_inout_call local inout_params;
-    verify_ret_instr;
     instr_retc
   ]
 
@@ -48,12 +52,12 @@ let emit_body_instrs_ref params call_instrs =
       if Hhas_param.is_reference p then
         gather [
           instr_vgetl local;
-          instr_fpassvnop i H.Ref
+          instr_fpassvnop i H.Any
         ]
       else
         gather [
-          instr_cgetquietl local;
-          instr_fpassc i H.Cell
+          instr_pushl local;
+          instr_fpassc i H.Any
         ]) in
   let param_get_instrs =
     List.filter_map params ~f:(fun p ->
@@ -70,11 +74,11 @@ let emit_body_instrs_ref params call_instrs =
     instr_retc;
   ]
 
-let emit_body_instrs ~wrapper_type ~verify_ret env params call_instrs =
+let emit_body_instrs ~wrapper_type env params call_instrs =
   let body =
     match wrapper_type with
     | Emit_inout_helpers.InoutWrapper ->
-      emit_body_instrs_inout ~verify_ret params call_instrs
+      emit_body_instrs_inout params call_instrs
     | Emit_inout_helpers.RefWrapper ->
       emit_body_instrs_ref params call_instrs
   in
@@ -88,6 +92,10 @@ let emit_body_instrs ~wrapper_type ~verify_ret env params call_instrs =
 
 (* Construct the wrapper function body *)
 let make_wrapper_body env decl_vars return_type params instrs =
+  let params = List.map params ~f:Hhas_param.without_type in
+  let return_user_type = Hhas_type_info.user_type return_type in
+  let return_tc = Hhas_type_constraint.make None [] in
+  let return_type = Hhas_type_info.make return_user_type return_tc in
   Emit_body.make_body
     instrs
     decl_vars
@@ -117,9 +125,6 @@ let emit_wrapper_function
   let return_type_info =
     Emit_body.emit_return_type_info
       ~scope ~skipawaitable:false ~namespace ast_fun.Ast.f_ret in
-  let verify_ret =
-    return_type_info.Hhas_type_info.type_info_user_type <> Some "" &&
-    Hhas_type_info.has_type_constraint return_type_info in
   let param_count = List.length params in
   let modified_params, name, call_instrs =
     if wrapper_type = Emit_inout_helpers.InoutWrapper then
@@ -133,7 +138,7 @@ let emit_wrapper_function
   in
   Local.reset_local @@ List.length decl_vars + List.length params;
   let body_instrs =
-    emit_body_instrs ~wrapper_type ~verify_ret env params call_instrs in
+    emit_body_instrs ~wrapper_type env params call_instrs in
   let fault_instrs = extract_fault_instructions body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
   let body =
@@ -192,9 +197,6 @@ let emit_wrapper_method
   let return_type_info =
     Emit_body.emit_return_type_info
       ~scope ~skipawaitable:false ~namespace ast_method.Ast.m_ret in
-  let verify_ret =
-    return_type_info.Hhas_type_info.type_info_user_type <> Some "" &&
-    Hhas_type_info.has_type_constraint return_type_info in
   let method_is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let param_count = List.length params in
   let class_name = Hhbc_id.Class.from_ast_name @@ snd ast_class.A.c_name in
@@ -224,7 +226,7 @@ let emit_wrapper_method
   in
   Local.reset_local @@ List.length decl_vars + List.length params;
   let body_instrs =
-    emit_body_instrs ~wrapper_type ~verify_ret env params call_instrs in
+    emit_body_instrs ~wrapper_type env params call_instrs in
   let fault_instrs = extract_fault_instructions body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
   let params =

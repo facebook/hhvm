@@ -638,9 +638,10 @@ and emit_try_catch_ env try_block catch_list =
   else
   let end_label = Label.next_regular () in
   let (pos, _) = try_block in
+  let try_env = Emit_env.with_try env in
   gather [
     instr_try_catch_begin;
-    emit_stmt env try_block;
+    emit_stmt try_env try_block;
     Emit_pos.emit_pos pos;
     instr_jmp end_label;
     instr_try_catch_middle;
@@ -682,8 +683,9 @@ and emit_try_finally_ env pos try_block finally_block =
   let finally_start = Label.next_regular () in
   let finally_end = Label.next_regular () in
 
+  let try_env = Emit_env.with_try env in
   let try_body =
-    Emit_env.do_in_try_body finally_start env try_block emit_stmt in
+    Emit_env.do_in_try_body finally_start try_env try_block emit_stmt in
   let jump_instructions =
     TFR.collect_jump_instructions try_body env
   in

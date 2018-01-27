@@ -49,10 +49,11 @@ module InoutLocals = struct
   type alias_info = {
     first_inout: int;
     last_write: int;
+    num_uses: int;
   }
 
   let not_aliased =
-    { first_inout = max_int; last_write = min_int }
+    { first_inout = max_int; last_write = min_int; num_uses = 0; }
 
   let add_inout i r =
     if i < r.first_inout then { r with first_inout = i } else r
@@ -60,7 +61,11 @@ module InoutLocals = struct
   let add_write i r =
     if i > r.last_write then { r with last_write = i } else r
 
+  let add_use _i r =
+    { r with num_uses = r.num_uses + 1 }
+
   let in_range i r = i > r.first_inout || i <= r.last_write
+  let has_single_ref r = r.num_uses < 2
 
   let update name i f m =
     let r =
@@ -71,6 +76,7 @@ module InoutLocals = struct
 
   let add_write name i m = update name i add_write m
   let add_inout name i m = update name i add_inout m
+  let add_use name i m = update name i add_use m
 
   let collect_written_variables env args =
     (* check value of the argument *)
@@ -79,12 +85,15 @@ module InoutLocals = struct
       (* inout $v *)
       | A.Callconv (A.Pinout, (_, A.Lvar (_, id)))
         when not (is_local_this env id) ->
+        let acc = add_use id i acc in
         if is_top then add_inout id i acc else add_write id i acc
       (* &$v *)
       | A.Unop (A.Uref, (_, A.Lvar (_, id))) ->
+        let acc = add_use id i acc in
         add_write id i acc
       (* $v *)
-      | A.Lvar _ ->
+      | A.Lvar (_, id) ->
+        let acc = add_use id i acc in
         acc
       | _ ->
       (* dive into argument value *)
@@ -94,6 +103,7 @@ module InoutLocals = struct
     and collect_lvars_lhs i acc e =
       match snd e with
       | A.Lvar (_, id) when not (is_local_this env id) ->
+        let acc = add_use id i acc in
         add_write id i acc
       | A.List exprs ->
         List.fold_left exprs ~f:(collect_lvars_lhs i) ~init:acc
@@ -130,6 +140,8 @@ module InoutLocals = struct
      should be saved to local because it might be overwritten later *)
   let should_save_local_value name i aliases =
     Option.value_map ~default:false ~f:(in_range i) (SMap.get name aliases)
+  let should_move_local_value name aliases =
+    Option.value_map ~default:true ~f:has_single_ref (SMap.get name aliases)
 end
 
 (* Describes what kind of value is intended to be stored in local *)
@@ -2434,11 +2446,17 @@ and emit_args_and_call env call_pos args uargs =
           instr_string (SU.Locals.strip_dollar x);
           instr_fpassg i hint;
         ]
-      | A.Lvar (_, s) when is_inout ->
+      | A.Lvar ((_, s) as id) when is_inout ->
         let inout_setters =
           (instr_setl @@ Local.Named s) :: inout_setters in
+        let not_in_try = not (Emit_env.is_in_try env) in
+        let move_instrs =
+          if not_in_try && (InoutLocals.should_move_local_value s aliases)
+            then gather [ instr_null; instr_popl (get_local env id) ]
+            else empty in
         gather [
           emit_expr ~need_ref:false env expr;
+          move_instrs;
           Emit_pos.emit_pos call_pos;
           instr_fpassc i hint;
           aux (i + 1) rest inout_setters

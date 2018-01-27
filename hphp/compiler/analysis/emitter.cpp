@@ -962,6 +962,9 @@ private:
   // stack of nested unnamed pipe variables
   std::stack<Id> m_pipeVars;
 
+  // Set if currently inside a try block
+  bool m_inTry{false};
+
 public:
   bool checkIfStackEmpty(const char* forInstruction) const;
   void unexpectedStackSym(char sym, const char* where) const;
@@ -1041,7 +1044,8 @@ public:
   bool isInChain(const MInstrChain& chain, int off);
 
   MInstrChain emitInOutArg(Emitter& e, ExpressionPtr exp, int paramId,
-                           LocalAliasMap* vars);
+                           LocalAliasMap* vars,
+                           std::unordered_map<Id, uint64_t>& seen);
 
   int scanStackForLocation(int iLast);
 
@@ -1114,7 +1118,7 @@ public:
   void emitConvertSecondToCell(Emitter& e);
   void emitConvertToVar(Emitter& e);
   void emitFPass(Emitter& e, int paramID, PassByRefKind passByRefKind,
-                 FPassHint hint, bool isInOut = false);
+                 FPassHint hint, bool isInOut = false, bool canMove = false);
   Offset emitFPushClsMethod(Emitter& e, ExpressionListPtr params);
   void emitVirtualLocal(int localId);
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
@@ -3003,7 +3007,13 @@ bool EmitterVisitor::emitTryCatch(
     );
   }
 
-  visit(body);
+  {
+    auto const prevTry = m_inTry;
+    m_inTry = true;
+    SCOPE_EXIT { m_inTry = prevTry; };
+    visit(body);
+  }
+
   auto const try_end = m_ue.bcPos();
 
   if (!m_evalStack.empty()) {
@@ -4565,7 +4575,8 @@ static void collect_written_variables(
   ConstructPtr node,
   int param_id,
   FuncEmitter* fe,
-  EmitterVisitor::LocalAliasMap& map
+  EmitterVisitor::LocalAliasMap& map,
+  std::unordered_map<Id, uint64_t>& seen
 ) {
   if (!node) return;
 
@@ -4575,14 +4586,15 @@ static void collect_written_variables(
       Expression::InOutParameter |
       Expression::RefParameter
     );
-    if (is_write && !sv->isThis()) {
+    if (!sv->isThis() && !sv->isSuperGlobal()) {
       auto const var_id = fe->lookupVarId(makeStaticString(sv->getName()));
-      map[var_id].write(param_id);
+      if (is_write) map[var_id].write(param_id);
+      seen[var_id]++;
     }
     return;
   }
   for (int i = 0; i < node->getKidCount(); ++i) {
-    collect_written_variables(node->getNthKid(i), param_id, fe, map);
+    collect_written_variables(node->getNthKid(i), param_id, fe, map, seen);
   }
 }
 
@@ -4605,6 +4617,7 @@ void EmitterVisitor::emitCall(Emitter& e,
   }();
 
   std::vector<MInstrChain> chains;
+  std::unordered_map<Id, uint64_t> seen;
   LocalAliasMap varMap;
 
   if (anyInOut) {
@@ -4621,9 +4634,10 @@ void EmitterVisitor::emitCall(Emitter& e,
           } else if (sv->hasContext(Expression::RefParameter)) {
             varMap[id].write(i);
           }
+          seen[id]++;
         }
       } else {
-        collect_written_variables(param, i, m_curFunc, varMap);
+        collect_written_variables(param, i, m_curFunc, varMap, seen);
       }
     }
   }
@@ -4637,9 +4651,9 @@ void EmitterVisitor::emitCall(Emitter& e,
       } else if (dynamic_pointer_cast<SimpleVariable>(param)) {
         // If the param writes directly to a local then it doesn't need to be
         // shadowed. If it gets shadowed that's fine, the final write will win.
-        chains.push_back(emitInOutArg(e, param, i, nullptr));
+        chains.push_back(emitInOutArg(e, param, i, nullptr, seen));
       } else {
-        chains.push_back(emitInOutArg(e, param, i, &varMap));
+        chains.push_back(emitInOutArg(e, param, i, &varMap, seen));
       }
     }
   }
@@ -7850,7 +7864,8 @@ EmitterVisitor::MInstrChain EmitterVisitor::emitInOutArg(
   Emitter& e,
   ExpressionPtr exp,
   int paramId,
-  LocalAliasMap* vars
+  LocalAliasMap* vars,
+  std::unordered_map<Id, uint64_t>& seen
 ) {
   m_minstrChains.push_back(
     MInstrChain{vars, paramId, m_evalStack.size()}
@@ -7872,14 +7887,29 @@ EmitterVisitor::MInstrChain EmitterVisitor::emitInOutArg(
     );
   }
 
-  emitFPass(e, paramId, getPassByRefKind(exp), getPassByRefHint(exp), true);
+  auto const canMove = [&] {
+    if (auto sv = dynamic_pointer_cast<SimpleVariable>(exp)) {
+      if (!sv->isThis() && !sv->isSuperGlobal()) {
+        auto const var_id =
+          m_curFunc->lookupVarId(makeStaticString(sv->getName()));
+        // If more than one reference to this parameter exists in the argument
+        // list then it isn't safe to "move" it by unsetting the local.
+        return seen[var_id] < 2;
+      }
+    }
+    return false;
+  }();
+
+  emitFPass(e, paramId, getPassByRefKind(exp), getPassByRefHint(exp), true,
+            canMove);
   return chain;
 }
 
 void EmitterVisitor::emitFPass(Emitter& e, int paramId,
                                PassByRefKind passByRefKind,
                                FPassHint hint,
-                               bool isInOut) {
+                               bool isInOut,
+                               bool canMove) {
   if (checkIfStackEmpty("FPass*")) return;
   LocationGuard locGuard(e, m_tempLoc);
   m_tempLoc.clear();
@@ -7898,7 +7928,13 @@ void EmitterVisitor::emitFPass(Emitter& e, int paramId,
           "Parameters marked inout must be contained in locals, vecs, dicts, "
           "keysets, and arrays");
       }
-      e.CGetL(m_evalStack.getLoc(i));
+      auto const loc = m_evalStack.getLoc(i);
+      emitCGet(e);
+      if (!m_inTry && canMove) {
+        emitVirtualLocal(loc);
+        e.Null();
+        e.PopL(loc);
+      }
       e.FPassC(paramId, hint);
       return;
     }
@@ -9019,9 +9055,10 @@ void EmitterVisitor::emitFuncWrapper(PostponedMeth& p, FuncEmitter* fe,
   }
 
   {
+    fe->retTypeConstraint = TypeConstraint{};
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     for (int i = 0; i < fe->params.size(); i++) {
-      emitVirtualLocal(i);
+      fe->params[i].typeConstraint = TypeConstraint{};
       getParam(e, i);
     }
   }
@@ -9051,11 +9088,13 @@ void EmitterVisitor::emitInOutToRefWrapper(PostponedMeth& p,
         fe->params[i].byRef = false;
         fe->params[i].inout = true;
         inoutParams.push_back(i);
+        emitVirtualLocal(i);
         emitVGet(e);
-        e.FPassVNop(i, FPassHint::Ref);
+        e.FPassVNop(i, FPassHint::Any);
       } else {
-        emitCGetQuiet(e);
-        e.FPassC(i, FPassHint::Cell);
+        emitVirtualLocal(i);
+        e.PushL(i);
+        e.FPassC(i, FPassHint::Any);
       }
     },
     [&] (Emitter& e) {
@@ -9082,9 +9121,17 @@ void EmitterVisitor::emitRefToInOutWrapper(PostponedMeth& p,
         fe->params[i].byRef = true;
         fe->params[i].inout = false;
         refParams.push_back(i);
+        emitVirtualLocal(i);
+        emitCGetQuiet(e);
+        // Set the bound local to null to drop a reference to it
+        emitVirtualLocal(i);
+        e.Null();
+        e.PopL(i);
+      } else {
+        emitVirtualLocal(i);
+        e.PushL(i);
       }
-      emitCGetQuiet(e);
-      e.FPassC(i, FPassHint::Cell);
+      e.FPassC(i, FPassHint::Any);
     },
     [&] (Emitter& e) {
       emitUnpackInOutCall(
@@ -9092,9 +9139,6 @@ void EmitterVisitor::emitRefToInOutWrapper(PostponedMeth& p,
         refParams.size(),
         [&] (uint32_t i) { emitVirtualLocal(refParams[i]); }
       );
-      if (shouldEmitVerifyRetType()) {
-        e.VerifyRetTypeC();
-      }
     },
     false
   );

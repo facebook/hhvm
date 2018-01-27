@@ -848,6 +848,7 @@ let makeunaryinst s arg = match s with
 
    (* instruct_mutator *)
    | "SetL" -> IMutator (SetL (localidofiarg arg))
+   | "PopL" -> IMutator (PopL (localidofiarg arg))
    | "SetS" -> IMutator (SetS (intofiarg arg))
    | "SetOpN" -> IMutator(SetOpN (eqopofiarg arg))
    | "SetOpG" -> IMutator(SetOpG (eqopofiarg arg))

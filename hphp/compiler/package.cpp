@@ -355,6 +355,24 @@ bool Package::parseImpl(const std::string* fileName) {
     }
   }
 
+  auto report = [&] (int lines) {
+    struct stat fst;
+    // @lint-ignore HOWTOEVEN1
+    stat(fullPath.c_str(), &fst);
+
+    Lock lock(m_mutex);
+    m_lineCount += lines;
+    m_charCount += fst.st_size;
+    if (!m_extraStaticFiles.count(*fileName) &&
+        !m_discoveredStaticFiles.count(*fileName)) {
+      if (Option::CachePHPFile) {
+        m_discoveredStaticFiles[*fileName] = fullPath;
+      } else {
+        m_discoveredStaticFiles[*fileName] = "";
+      }
+    }
+  };
+
   if ((RuntimeOption::EvalHackCompilerDefault &&
       !RuntimeOption::EvalHackCompilerCommand.empty()) ||
       RuntimeOption::EvalPHP7CompilerEnabled) {
@@ -371,8 +389,8 @@ bool Package::parseImpl(const std::string* fileName) {
           content.data(), content.size(), fileName->c_str(), md5)) {
       try {
         if (auto ue = uc->compile(m_ar->getParseOnDemandCallBacks())) {
-          Lock lock(m_ar->getMutex());
-          m_ar->addHhasFile(std::move(ue));
+          m_ar->lock()->addHhasFile(std::move(ue));
+          report(0);
           return true;
         } else {
           Logger::Error(
@@ -400,20 +418,7 @@ bool Package::parseImpl(const std::string* fileName) {
     return false;
   }
 
-  struct stat fst;
-  stat(fullPath.c_str(), &fst);
-
-  Lock lock(m_mutex);
-  m_lineCount += lines;
-  m_charCount += fst.st_size;
-  if (!m_extraStaticFiles.count(*fileName) &&
-      !m_discoveredStaticFiles.count(*fileName)) {
-    if (Option::CachePHPFile) {
-      m_discoveredStaticFiles[*fileName] = fullPath;
-    } else {
-      m_discoveredStaticFiles[*fileName] = "";
-    }
-  }
+  report(lines);
   return true;
 }
 

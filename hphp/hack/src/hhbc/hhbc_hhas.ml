@@ -1027,8 +1027,35 @@ and string_of_param_default_value ?(use_single_quote=false) ~env expr =
     let e2 = string_of_param_default_value ~env e2 in
     e1 ^ s ^ e2
   in
-  let fmt_class_name cn =
-    "\\\\" ^ (Php_escaping.escape (SU.strip_global_ns cn)) in
+  let fmt_class_name ~is_class_constant cn =
+    let cn = (Php_escaping.escape (SU.strip_global_ns cn)) in
+    if is_class_constant then "\\\\" ^ cn else cn in
+  let get_special_class_name ~is_class_constant ~env id =
+    let scope = match env with
+      | None -> Ast_scope.Scope.toplevel
+      | Some env -> Emit_env.get_scope env in
+    let module ACE = Ast_class_expr in
+    let e =
+      let p0 = Pos.none in
+      (p0, (A.Id (p0, id))) in
+    match ACE.expr_to_class_expr ~check_traits:true ~resolve_self:true scope e with
+    | ACE.Class_id (_, name) -> fmt_class_name ~is_class_constant name
+    | _ -> id
+  in
+  let get_class_name_from_id ~is_class_constant ~env id =
+    if id = SN.Classes.cSelf || id = SN.Classes.cParent || id = SN.Classes.cStatic
+    then get_special_class_name ~env ~is_class_constant id
+    else
+    let id =
+      match env with
+      | Some env ->
+        Hhbc_id.Class.to_raw_string @@ fst @@
+          Hhbc_id.Class.elaborate_id
+            (Emit_env.get_namespace env) (p, SU.strip_global_ns id)
+      | _ -> id
+    in
+    fmt_class_name ~is_class_constant id
+  in
   let escape_char_for_printing = function
     | '\\' | '$' | '"' -> "\\\\"
     | '\n' | '\r' | '\t' -> "\\"
@@ -1105,44 +1132,17 @@ and string_of_param_default_value ?(use_single_quote=false) ~env expr =
     ^ "("
     ^ String.concat ", " es
     ^ ")"
-  | A.Class_get ((_, A.Id (_, s1)), e2)
-    when s1 = SN.Classes.cSelf ||
-         s1 = SN.Classes.cParent ||
-         s1 = SN.Classes.cStatic ->
+  | A.Class_get ((_, A.Id (_, s1)), e2) ->
+    let s1 = get_class_name_from_id ~env ~is_class_constant:false s1 in
     let s2 = string_of_param_default_value ~env e2 in
     s1 ^ "::" ^ s2
-  | A.Class_get ((_, A.Id (_, s1)), e2) ->
-    let s2 = string_of_param_default_value ~env e2 in
-    fmt_class_name s1 ^ "::" ^ s2
   | A.Class_get (e1, e2) ->
     let s1 = string_of_param_default_value ~env e1 in
     let s2 = string_of_param_default_value ~env e2 in
     s1 ^ "::" ^ s2
-  | A.Class_const ((_, A.Id (_, s1)), (_, s2))
-    when s1 = SN.Classes.cSelf ||
-         s1 = SN.Classes.cParent ||
-         s1 = SN.Classes.cStatic ->
-    let scope = match env with
-      | None -> Ast_scope.Scope.toplevel
-      | Some env -> Emit_env.get_scope env in
-    let s1 = match Ast_scope.Scope.get_class scope with
-      | Some cd when s1 = SN.Classes.cSelf -> snd cd.A.c_name
-      | Some cd when s1 = SN.Classes.cParent ->
-        begin match cd.A.c_extends with
-        | [(_, A.Happly((_, parent_cid), _))] -> parent_cid
-        | _ -> s1
-        end
-      | _ -> s1 in
-    fmt_class_name s1 ^ "::" ^ s2
-  | A.Class_const ((_, A.Id (p, s1)), (_, s2)) ->
-    let s1 = match env with
-      | Some env ->
-        Hhbc_id.Class.to_raw_string @@ fst @@
-          Hhbc_id.Class.elaborate_id
-            (Emit_env.get_namespace env) (p, SU.strip_global_ns s1)
-      | _ -> s1
-    in
-    fmt_class_name s1 ^ "::" ^ s2
+  | A.Class_const ((_, A.Id (_, s1)), (_, s2)) ->
+    let s1 = get_class_name_from_id ~env ~is_class_constant:true s1 in
+    s1 ^ "::" ^ s2
   | A.Class_const (e1, (_, s2)) ->
     let s1 = string_of_param_default_value ~env e1 in
     s1 ^ "::" ^ s2

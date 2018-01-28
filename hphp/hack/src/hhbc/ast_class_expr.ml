@@ -21,11 +21,11 @@ type class_expr =
 | Class_expr of Ast.expr
 | Class_unnamed_local of Local.t
 
-let get_original_class_name ~resolve_self scope =
+let get_original_class_name ~resolve_self ~check_traits scope =
   match Ast_scope.Scope.get_class scope with
   | None ->  None
   | Some cd ->
-    if cd.Ast.c_kind = Ast.Ctrait || not resolve_self
+    if (cd.Ast.c_kind = Ast.Ctrait && not check_traits) || not resolve_self
     then None
     else
     let class_name = snd cd.Ast.c_name in
@@ -44,11 +44,11 @@ let get_parent_class_name cd =
   | [(_, A.Happly((_, parent_cid), _))] -> Some parent_cid
   | _ -> None
 
-let get_original_parent_class_name ~resolve_self scope =
+let get_original_parent_class_name ~check_traits ~resolve_self scope =
   match Ast_scope.Scope.get_class scope with
   | None -> None
   | Some cd ->
-    if cd.Ast.c_kind = Ast.Ctrait || not resolve_self
+    if (cd.Ast.c_kind = Ast.Ctrait && not check_traits) || not resolve_self
     then None
     else
     let class_name = snd cd.Ast.c_name in
@@ -59,16 +59,16 @@ let get_original_parent_class_name ~resolve_self scope =
     | None -> get_parent_class_name cd
 
 (* Return true in second component if this is a forwarding reference *)
-let expr_to_class_expr ~resolve_self scope (_, expr_ as expr) =
+let expr_to_class_expr ?(check_traits=false) ~resolve_self scope (_, expr_ as expr) =
   match expr_ with
   | A.Id (_, id) when SU.is_static id -> Class_static
   | A.Id (pos, id) when SU.is_parent id ->
-    begin match get_original_parent_class_name ~resolve_self scope with
+    begin match get_original_parent_class_name ~resolve_self ~check_traits scope with
     | Some name -> Class_id (pos, name)
     | None -> Class_parent
     end
   | A.Id (pos, id) when SU.is_self id ->
-    begin match get_original_class_name ~resolve_self scope with
+    begin match get_original_class_name ~resolve_self ~check_traits scope with
     | Some name -> Class_id (pos, name)
     | None -> Class_self
     end

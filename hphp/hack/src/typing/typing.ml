@@ -5972,8 +5972,9 @@ and method_def env m =
   let env = add_constraints pos env constraints in
   let env =
     localize_where_constraints ~ety_env env m.m_where_constraints in
-  let this_type = Env.get_self env in
-  let env = Env.set_local env this this_type in
+  let env =
+    if Env.is_static env then env
+    else Env.set_local env this (Env.get_self env) in
   let env =
     match Env.get_class env (Env.get_self_id env) with
     | None -> env

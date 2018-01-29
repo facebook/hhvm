@@ -97,6 +97,7 @@ val set_local : env -> Local_id.t -> locl ty -> env
 val is_using_var : env -> Local_id.t -> bool
 val set_using_var : env -> Local_id.t -> env
 val unset_local : env -> Local_id.t -> env
+val get_locals : env -> local Local_id.Map.t
 val get_local : env -> Local_id.t -> locl ty
 val set_local_expr_id : env -> Local_id.t -> expression_id -> env
 val get_local_expr_id : env -> Local_id.t -> expression_id option

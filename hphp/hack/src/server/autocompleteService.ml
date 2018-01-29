@@ -22,13 +22,9 @@ let ac_env = ref None
 let autocomplete_results : autocomplete_result list ref = ref []
 let autocomplete_is_complete : bool ref = ref true
 
-(* The position we're autocompleting at. This is used so when we reach this
- * position in typing, we can recognize it and store types. Set in naming. *)
+(* The position we're autocompleting at. This is used when computing completions
+ * for global identifiers. *)
 let (auto_complete_pos: Pos.t option ref) = ref None
-(* A map of variable names to ident at the autocomplete point. This is
- * set in naming. When we reach this point in typing, variable names are
- * not available, but we can use this map to relate names to types *)
-let auto_complete_vars = ref (SMap.empty: Local_id.t SMap.t)
 
 type autocomplete_type =
   | Acid
@@ -156,34 +152,19 @@ let autocomplete_smethod = autocomplete_method true
 
 let autocomplete_cmethod = autocomplete_method false
 
-let autocomplete_lvar_naming _ id locals =
-  if is_auto_complete (snd id)
+let autocomplete_lvar id env =
+  if is_auto_complete (Local_id.get_name (snd id))
   then begin
     argument_global_type := Some Acprop;
-    (* Store the position and a map of name to ident so we can add
-     * types at this point later *)
-    auto_complete_pos := Some (fst id);
-    auto_complete_vars := SMap.map locals snd
-  end
-
-let autocomplete_lvar_typing id env =
-  if Some (fst id)= !(auto_complete_pos)
-  then begin
     (* The typechecker might call this hook more than once (loops) so we
      * need to clear the list of results first or we could have repeat locals *)
     autocomplete_results := [];
     ac_env := Some env;
     auto_complete_pos := Some (fst id);
     (* Get the types of all the variables in scope at this point *)
-    SMap.iter !auto_complete_vars begin fun x ident ->
-      let ty = Typing_env.get_local env ident in
-      add_partial_result x (Phase.locl ty) Variable_kind
-    end;
-    (* Add $this if we're in a instance method *)
-    let ty = Typing_env.get_self env in
-    if not (Typing_env.is_static env) && (fst ty) <> Reason.Rnone
-    then add_partial_result
-      Naming_special_names.SpecialIdents.this (Phase.locl ty) Variable_kind
+    Local_id.Map.iter begin fun x (ty, _) ->
+      add_partial_result (Local_id.get_name x) (Phase.locl ty) Variable_kind
+    end (Typing_env.get_locals env);
   end
 
 let should_complete_class completion_type class_kind =
@@ -522,7 +503,6 @@ let reset () =
   auto_complete_for_global := "";
   argument_global_type := None;
   auto_complete_pos := None;
-  auto_complete_vars := SMap.empty;
   ac_env := None;
   autocomplete_results := [];
   autocomplete_is_complete := true
@@ -533,10 +513,9 @@ let attach_hooks () =
   Typing_hooks.attach_id_hook autocomplete_id;
   Typing_hooks.attach_smethod_hook autocomplete_smethod;
   Typing_hooks.attach_cmethod_hook autocomplete_cmethod;
-  Typing_hooks.attach_lvar_hook autocomplete_lvar_typing;
+  Typing_hooks.attach_lvar_hook autocomplete_lvar;
   Typing_hooks.attach_new_id_hook autocomplete_new;
-  Naming_hooks.attach_hint_hook autocomplete_hint;
-  Naming_hooks.attach_lvar_hook autocomplete_lvar_naming
+  Naming_hooks.attach_hint_hook autocomplete_hint
 
 let detach_hooks () =
   reset();

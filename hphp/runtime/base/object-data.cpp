@@ -785,7 +785,7 @@ ObjectData* ObjectData::clone() {
     clone->setAttribute(HasDynPropArr);
     g_context->dynPropTable.emplace(clone.get(), dynPropArray().get());
   }
-  if (getAttribute(HasClone)) {
+  if (m_cls->rtAttribute(Class::HasClone)) {
     assertx(!isCppBuiltin());
     auto const method = clone->m_cls->lookupMethod(s_clone.get());
     assertx(method);
@@ -1332,7 +1332,7 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
   }
 
   // First see if native getter is implemented.
-  if (getAttribute(HasNativePropHandler)) {
+  if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
     if (auto r = invokeNativeGetProp(key)) {
       tvCopy(r.val, *tvRef);
       return tvRef;
@@ -1394,7 +1394,7 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
     return prop.unboxed().type() != KindOfNull;
   }
 
-  if (getAttribute(HasNativePropHandler)) {
+  if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
     if (auto r = invokeNativeIssetProp(key)) {
       tvCastToBooleanInPlace(&r.val);
       return r.val.m_data.num;
@@ -1414,7 +1414,7 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
     return !cellToBool(prop.unboxed().tv());
   }
 
-  if (getAttribute(HasNativePropHandler)) {
+  if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
     if (auto r = invokeNativeIssetProp(key)) {
       tvCastToBooleanInPlace(&r.val);
       if (!r.val.m_data.num) return true;
@@ -1470,7 +1470,8 @@ void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
   }
 
   // First see if native setter is implemented.
-  if (getAttribute(HasNativePropHandler) && invokeNativeSetProp(key, val)) {
+  if (m_cls->rtAttribute(Class::HasNativePropHandler) &&
+      invokeNativeSetProp(key, val)) {
     return;
   }
 
@@ -1532,7 +1533,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   if (UNLIKELY(!*key->data())) throw_invalid_property_name(StrNR(key));
 
   // Native accessors.
-  if (getAttribute(HasNativePropHandler)) {
+  if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
     if (auto r = invokeNativeGetProp(key)) {
       tvCopy(r.val, tvRef);
       setopBody(tvToCell(&tvRef), op, val);
@@ -1628,7 +1629,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   if (UNLIKELY(!*key->data())) throw_invalid_property_name(StrNR(key));
 
   // Native accessors.
-  if (getAttribute(HasNativePropHandler)) {
+  if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
     if (auto r = invokeNativeGetProp(key)) {
       SCOPE_EXIT { tvDecRefGen(r.val); };
       tvUnboxIfNeeded(r.val);
@@ -1698,7 +1699,8 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   }
 
   // Native unset first.
-  if (getAttribute(HasNativePropHandler) && invokeNativeUnsetProp(key)) {
+  if (m_cls->rtAttribute(Class::HasNativePropHandler) &&
+      invokeNativeUnsetProp(key)) {
     return;
   }
 

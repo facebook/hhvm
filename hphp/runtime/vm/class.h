@@ -119,6 +119,20 @@ struct Class : AtomicCountable {
   };
 
   /*
+   * Attributes computed at runtime class init time, used to short
+   * circuit more expensive checks. Not to be confused with enum Attr,
+   * which are a-priori attributes computed by the compiler.
+   */
+  enum RuntimeAttribute : uint16_t {
+    HasSleep      = 0x0001, // __sleep()
+    HasClone      = 0x0002, // defines __clone PHP method
+                            // only valid when !isCppBuiltin()
+    HasNativePropHandler    // class has native magic props handler
+                  = 0x0004
+  };
+
+
+  /*
    * Instance property information.
    */
   struct Prop {
@@ -490,6 +504,12 @@ public:
    * ObjectData attributes, to be set during instance initialization.
    */
   int getODAttrs() const;
+
+  /*
+   * Runtime class attributes, computed during class initialization.
+   */
+  bool rtAttribute(RuntimeAttribute) const;
+  void initRTAttributes(uint16_t);
 
   /*
    * Whether we can load this class once and persist it across requests.
@@ -1254,7 +1274,7 @@ private:
   void setParent();
   void setSpecial();
   void setMethods();
-  void setODAttributes();
+  void setRTAttributes();
   void setConstants();
   void setProperties();
   void setInitializers();
@@ -1323,8 +1343,13 @@ private:
    * to the closure's context class.
    */
   std::atomic<bool> m_scoped{false};
+  // NB: 8 bits available here (in USE_LOWPTR builds).
 
-  // NB: 24 bytes available here (in USE_LOWPTR builds).
+  /*
+   * runtime attributes computed at runtime init time. Not to be confused with
+   * m_attrs which are compile-time and stored in the repo.
+   */
+  uint16_t m_RTAttrs;
 
   /*
    * Vector of 86pinit() methods that need to be called to complete instance

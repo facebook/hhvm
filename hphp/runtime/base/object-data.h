@@ -82,14 +82,11 @@ struct InvokeResult {
 struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
-    HasSleep      = 0x0002, // __sleep()
     UseSet        = 0x0004, // __set()
     UseGet        = 0x0008, // __get()
     UseIsset      = 0x0010, // __isset()
     UseUnset      = 0x0020, // __unset()
     IsWeakRefed   = 0x0080, // Is pointed to by at least one WeakRef
-    HasClone      = 0x0100, // defines __clone PHP method
-                            // only valid when !isCppBuiltin()
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasNativeData = 0x0400, // HNI Class with <<__NativeData("T")>>
     HasDynPropArr = 0x0800, // has a dynamic properties array
@@ -99,8 +96,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                             // class has immutable properties (to temporarily
                             // allow writing to them).
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
-    HasNativePropHandler    // class has native magic props handler
-                  = 0x8000
   };
 
  private:

@@ -1715,8 +1715,8 @@ Class::Class(PreClass* preClass, Class* parent,
   }
   setParent();
   setMethods();
-  setSpecial();       // must run before setODAttributes
-  setODAttributes();
+  setSpecial();       // must run before setRTAttributes
+  setRTAttributes();
   setInterfaces();
   setConstants();
   setProperties();
@@ -1934,14 +1934,19 @@ void Class::setMethods() {
   setFuncVec(builder);
 }
 
-void Class::setODAttributes() {
+/*
+ * Initialize m_RTAttrs and m_ODAttrs by inspecting the class methods
+ * and parents.
+ */
+void Class::setRTAttributes() {
+  m_RTAttrs = 0;
   m_ODAttrs = 0;
-  if (lookupMethod(s_sleep.get()     )) { m_ODAttrs |= ObjectData::HasSleep; }
+  if (lookupMethod(s_sleep.get()     )) { m_RTAttrs |= Class::HasSleep; }
   if (markNonStatic(this, s_get      )) { m_ODAttrs |= ObjectData::UseGet;   }
   if (markNonStatic(this, s_set      )) { m_ODAttrs |= ObjectData::UseSet;   }
   if (markNonStatic(this, s_isset    )) { m_ODAttrs |= ObjectData::UseIsset; }
   if (markNonStatic(this, s_unset    )) { m_ODAttrs |= ObjectData::UseUnset; }
-  if (markNonStatic(this, s_clone    )) { m_ODAttrs |= ObjectData::HasClone; }
+  if (markNonStatic(this, s_clone    )) { m_RTAttrs |= Class::HasClone; }
 
   markNonStatic(this, s_call);
   markNonStatic(this, s_debugInfo);
@@ -1953,7 +1958,7 @@ void Class::setODAttributes() {
 
   if ((isBuiltin() && Native::getNativePropHandler(name())) ||
       (m_parent && m_parent->hasNativePropHandler())) {
-    m_ODAttrs |= ObjectData::HasNativePropHandler;
+    m_RTAttrs |= Class::HasNativePropHandler;
   }
 }
 
@@ -2961,7 +2966,7 @@ void Class::setNativeDataInfo() {
 }
 
 bool Class::hasNativePropHandler() const {
-  return m_ODAttrs & ObjectData::HasNativePropHandler;
+  return m_RTAttrs & Class::HasNativePropHandler;
 }
 
 const Native::NativePropHandler* Class::getNativePropHandler() const {

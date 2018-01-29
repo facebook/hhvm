@@ -1693,7 +1693,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       serializeVariant(placeholder);
       return;
     }
-    if (obj->getAttribute(ObjectData::HasSleep)) {
+    if (obj->getVMClass()->rtAttribute(Class::HasSleep)) {
       handleSleep = true;
       ret = const_cast<ObjectData*>(obj)->invokeSleep();
     }

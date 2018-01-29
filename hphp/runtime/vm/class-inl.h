@@ -163,6 +163,14 @@ inline int Class::getODAttrs() const {
   return m_ODAttrs;
 }
 
+inline bool Class::rtAttribute(RuntimeAttribute a) const {
+  return m_RTAttrs & a;
+}
+
+inline void Class::initRTAttributes(uint16_t a) {
+  m_RTAttrs |= a;
+}
+
 inline bool Class::isPersistent() const {
   return attrs() & AttrPersistent;
 }

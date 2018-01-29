@@ -80,15 +80,14 @@ struct InvokeResult {
 #pragma pack(push, 1)
 #endif
 struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
-  enum Attribute : uint16_t {
-    NoDestructor  = 0x0001, // __destruct()
-    IsWeakRefed   = 0x0080, // Is pointed to by at least one WeakRef
-    HasDynPropArr = 0x0800, // has a dynamic properties array
-    IsBeingConstructed
-                  = 0x1000, // Constructor for most derived class has not
-                            // finished. Only set during construction when the
-                            // class has immutable properties (to temporarily
-                            // allow writing to them).
+  enum Attribute : uint8_t {
+    NoDestructor       = 0x01, // __destruct()
+    IsWeakRefed        = 0x02, // Is pointed to by at least one WeakRef
+    HasDynPropArr      = 0x04, // has a dynamic properties array
+    IsBeingConstructed = 0x08, // Constructor for most derived class has not
+                               // finished. Only set during construction when
+                               // the class has immutable properties (to
+                               // temporarily allow writing to them).
   };
 
  private:
@@ -97,7 +96,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
  public:
   static void resetMaxId();
 
-  explicit ObjectData(Class*, uint16_t flags = 0,
+  explicit ObjectData(Class*, uint8_t flags = 0,
                       HeaderKind = HeaderKind::Object);
   ~ObjectData();
 
@@ -110,11 +109,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   enum class InitRaw {};
 
   // for JIT-generated instantiation with inlined property init
-  explicit ObjectData(Class* cls, InitRaw, uint16_t flags = 0,
+  explicit ObjectData(Class* cls, InitRaw, uint8_t flags = 0,
                       HeaderKind = HeaderKind::Object) noexcept;
 
   // for C++ subclasses with no declared properties
-  explicit ObjectData(Class* cls, NoInit, uint16_t flags = 0,
+  explicit ObjectData(Class* cls, NoInit, uint8_t flags = 0,
                       HeaderKind = HeaderKind::Object) noexcept;
 
  public:
@@ -168,11 +167,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    *
    * The initial ref-count will be set to one.
    */
-  static const uint16_t DefaultAttrs = NoDestructor;
+  static const uint8_t DefaultAttrs = NoDestructor;
   template<bool Big>
   static ObjectData* newInstanceRaw(Class*, size_t);
   template<bool Big>
-  static ObjectData* newInstanceRawAttrs(Class*, size_t, uint16_t attrs);
+  static ObjectData* newInstanceRawAttrs(Class*, size_t, uint8_t attrs);
 
   void release() noexcept;
   void releaseNoObjDestructCheck() noexcept;
@@ -433,9 +432,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   static constexpr ptrdiff_t getVMClassOffset() {
     return offsetof(ObjectData, m_cls);
-  }
-  static constexpr ptrdiff_t attributeOff() {
-    return offsetof(ObjectData, m_aux16);
   }
   const char* classname_cstr() const;
 

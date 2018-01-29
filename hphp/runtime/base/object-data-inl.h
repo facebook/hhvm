@@ -28,7 +28,7 @@ inline void ObjectData::resetMaxId() {
   os_max_id = 0;
 }
 
-inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
+inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
   : m_cls(cls)
 {
   initHeader_16(kind, OneReference, flags | cls->getODAttrs());
@@ -39,18 +39,18 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   instanceInit(cls);
 }
 
-inline ObjectData::ObjectData(Class* cls, InitRaw, uint16_t flags,
+inline ObjectData::ObjectData(Class* cls, InitRaw, uint8_t flags,
                               HeaderKind kind) noexcept
   : m_cls(cls)
 {
   initHeader_16(kind, OneReference, flags);
   assert(isObjectKind(m_kind));
   assert(!cls->needInitialization() || cls->initialized());
-  assert(!(cls->getODAttrs() & ~static_cast<uint16_t>(flags)));
+  assert(!(cls->getODAttrs() & ~static_cast<uint8_t>(flags)));
   o_id = ++os_max_id;
 }
 
-inline ObjectData::ObjectData(Class* cls, NoInit, uint16_t flags,
+inline ObjectData::ObjectData(Class* cls, NoInit, uint8_t flags,
                               HeaderKind kind) noexcept
   : ObjectData(cls, InitRaw{}, flags, kind)
 {

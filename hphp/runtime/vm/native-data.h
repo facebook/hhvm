@@ -35,7 +35,7 @@ struct NativeDataInfo {
   typedef void (*WakeupFunc)(ObjectData *wakeup, const Variant& data);
 
   size_t sz;
-  uint16_t rt_attrs;
+  uint8_t rt_attrs;
   type_scan::Index tyindex;
   InitFunc init; // new Object
   CopyFunc copy; // clone $obj
@@ -92,7 +92,7 @@ void registerNativeDataInfo(const StringData* name,
                             NativeDataInfo::SleepFunc sleep,
                             NativeDataInfo::WakeupFunc wakeup,
                             type_scan::Index tyindex,
-                            uint16_t rt_attrs = 0);
+                            uint8_t rt_attrs = 0);
 
 template<class T>
 void nativeDataInfoInit(ObjectData* obj) {
@@ -228,7 +228,7 @@ typename std::enable_if<
   !std::is_base_of<Sweepable, T>::value,
   void
 >::type registerNativeDataInfo(const StringData* name,
-                               int64_t flags = 0, uint16_t rt_attrs = 0) {
+                               int64_t flags = 0, uint8_t rt_attrs = 0) {
   auto ndic = &nativeDataInfoCopy<T>;
   auto ndisw = getNativeDataInfoSweep<T>();
   auto ndisl = &nativeDataInfoSleep<T>;

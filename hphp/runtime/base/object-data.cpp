@@ -920,7 +920,7 @@ ObjectData* ObjectData::newInstanceRaw(Class* cls, size_t size) {
 // called from jit code
 template<bool Big>
 ObjectData* ObjectData::newInstanceRawAttrs(Class* cls, size_t size,
-                                            uint16_t attrs) {
+                                            uint8_t attrs) {
   assert(Big || size <= kMaxSmallSize);
   auto mem = Big ? tl_heap->mallocBigSize<MemoryManager::Unzeroed>(size) :
              tl_heap->mallocSmallSize(size);
@@ -931,9 +931,9 @@ ObjectData* ObjectData::newInstanceRawAttrs(Class* cls, size_t size,
 template ObjectData* ObjectData::newInstanceRaw<false>(Class*, size_t);
 template ObjectData* ObjectData::newInstanceRaw<true>(Class*, size_t);
 template ObjectData*
-ObjectData::newInstanceRawAttrs<false>(Class*, size_t, uint16_t);
+ObjectData::newInstanceRawAttrs<false>(Class*, size_t, uint8_t);
 template ObjectData*
-ObjectData::newInstanceRawAttrs<true>(Class*, size_t, uint16_t);
+ObjectData::newInstanceRawAttrs<true>(Class*, size_t, uint8_t);
 
 // Note: the normal object destruction path does not actually call this
 // destructor.  See ObjectData::release.

@@ -123,16 +123,16 @@ struct Class : AtomicCountable {
    * circuit more expensive checks. Not to be confused with enum Attr,
    * which are a-priori attributes computed by the compiler.
    */
-  enum RuntimeAttribute : uint16_t {
-    CallToImpl    = 0x0001, // call to{Boolean,Int64,Double}Impl
-    HasSleep      = 0x0002, // __sleep()
-    HasClone      = 0x0004, // defines __clone PHP method
-                            // only valid when !isCppBuiltin()
-    HasNativePropHandler = 0x0008, // class has native magic props handler
-    UseSet        = 0x0010, // __set()
-    UseGet        = 0x0020, // __get()
-    UseIsset      = 0x0040, // __isset()
-    UseUnset      = 0x0080, // __unset()
+  enum RuntimeAttribute : uint8_t {
+    CallToImpl           = 0x01, // call to{Boolean,Int64,Double}Impl
+    HasSleep             = 0x02, // __sleep()
+    HasClone             = 0x04, // defines __clone PHP method; only valid
+                                 // when !isCppBuiltin()
+    HasNativePropHandler = 0x08, // class has native magic props handler
+    UseSet               = 0x10, // __set()
+    UseGet               = 0x20, // __get()
+    UseIsset             = 0x40, // __isset()
+    UseUnset             = 0x80, // __unset()
   };
 
   /*
@@ -512,7 +512,7 @@ public:
    * Runtime class attributes, computed during class initialization.
    */
   bool rtAttribute(RuntimeAttribute) const;
-  void initRTAttributes(uint16_t);
+  void initRTAttributes(uint8_t);
 
   /*
    * Whether we can load this class once and persist it across requests.
@@ -1347,13 +1347,7 @@ private:
    * to the closure's context class.
    */
   std::atomic<bool> m_scoped{false};
-  // NB: 8 bits available here (in USE_LOWPTR builds).
-
-  /*
-   * runtime attributes computed at runtime init time. Not to be confused with
-   * m_attrs which are compile-time and stored in the repo.
-   */
-  uint16_t m_RTAttrs;
+  // NB: 24 bits available here (in USE_LOWPTR builds).
 
   /*
    * Vector of 86pinit() methods that need to be called to complete instance
@@ -1412,7 +1406,18 @@ private:
   PropMap m_declProperties;
 
   MaybeDataType m_enumBaseTy;
-  uint16_t m_ODAttrs;
+
+  /*
+   * runtime attributes computed at runtime init time. Not to be confused with
+   * m_attrCopy which are compile-time and stored in the repo.
+   */
+  uint8_t m_RTAttrs;
+
+  /*
+   * Default ObjectData::Attribute bits for new instances
+   */
+  uint8_t m_ODAttrs;
+
   mutable rds::Link<PropInitVec*, true /* normal_only */>
     m_propDataCache{rds::kUninitHandle};
 

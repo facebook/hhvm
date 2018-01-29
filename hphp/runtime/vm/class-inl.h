@@ -167,7 +167,7 @@ inline bool Class::rtAttribute(RuntimeAttribute a) const {
   return m_RTAttrs & a;
 }
 
-inline void Class::initRTAttributes(uint16_t a) {
+inline void Class::initRTAttributes(uint8_t a) {
   m_RTAttrs |= a;
 }
 

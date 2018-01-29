@@ -341,7 +341,7 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
     return Variant::wrap(tvToCell(prop.tv()));
   }
 
-  if (getAttribute(UseGet)) {
+  if (m_cls->rtAttribute(Class::UseGet)) {
     if (auto r = invokeGet(propName.get())) {
       return std::move(tvAsVariant(&r.val));
     }
@@ -376,7 +376,7 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   // invoke __set and fail due to recursion, setProp will fall back to writing
   // the property normally, but o_set will just skip writing and return :-(
 
-  bool useSet = getAttribute(UseSet);
+  bool useSet = m_cls->rtAttribute(Class::UseSet);
 
   auto const lookup = getPropImpl<true>(ctx, propName.get());
   auto prop = lookup.prop;
@@ -1090,19 +1090,19 @@ struct PropAccessInfo {
   struct Hash;
 
   bool operator==(const PropAccessInfo& o) const {
-    return obj == o.obj && attr == o.attr && key->same(o.key);
+    return obj == o.obj && rt_attr == o.rt_attr && key->same(o.key);
   }
 
   ObjectData* obj;
   const StringData* key;      // note: not necessarily static
-  ObjectData::Attribute attr;
+  Class::RuntimeAttribute rt_attr;
 };
 
 struct PropAccessInfo::Hash {
   size_t operator()(PropAccessInfo const& info) const {
     return hash_int64_pair(reinterpret_cast<intptr_t>(info.obj),
                            info.key->hash() |
-                           (static_cast<int64_t>(info.attr) << 32));
+                           (static_cast<int64_t>(info.rt_attr) << 32));
   }
 };
 
@@ -1188,7 +1188,7 @@ struct MagicInvoker {
 }
 
 bool ObjectData::invokeSet(const StringData* key, Cell val) {
-  auto const info = PropAccessInfo { this, key, UseSet };
+  auto const info = PropAccessInfo { this, key, Class::UseSet };
   auto r = magic_prop_impl(key, info, [&] {
     auto const meth = m_cls->lookupMethod(s___set.get());
     TypedValue args[2] = {
@@ -1202,7 +1202,7 @@ bool ObjectData::invokeSet(const StringData* key, Cell val) {
 }
 
 InvokeResult ObjectData::invokeGet(const StringData* key) {
-  auto const info = PropAccessInfo { this, key, UseGet };
+  auto const info = PropAccessInfo { this, key, Class::UseGet };
   return magic_prop_impl(
     key,
     info,
@@ -1211,7 +1211,7 @@ InvokeResult ObjectData::invokeGet(const StringData* key) {
 }
 
 InvokeResult ObjectData::invokeIsset(const StringData* key) {
-  auto const info = PropAccessInfo { this, key, UseIsset };
+  auto const info = PropAccessInfo { this, key, Class::UseIsset };
   return magic_prop_impl(
     key,
     info,
@@ -1220,7 +1220,7 @@ InvokeResult ObjectData::invokeIsset(const StringData* key) {
 }
 
 bool ObjectData::invokeUnset(const StringData* key) {
-  auto const info = PropAccessInfo { this, key, UseUnset };
+  auto const info = PropAccessInfo { this, key, Class::UseUnset };
   auto r = magic_prop_impl(key, info,
                            MagicInvoker{s___unset.get(), info});
   if (r) tvDecRefGen(r.val);
@@ -1297,7 +1297,7 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
       if (prop->m_type != KindOfUninit) return checkImmutable();
 
       // Property is unset, try __get.
-      if (getAttribute(UseGet)) {
+      if (m_cls->rtAttribute(Class::UseGet)) {
         if (auto r = invokeGet(key)) {
           tvCopy(r.val, *tvRef);
           return tvRef;
@@ -1310,7 +1310,7 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
     }
 
     // Property is not accessible, try __get.
-    if (getAttribute(UseGet)) {
+    if (m_cls->rtAttribute(Class::UseGet)) {
       if (auto r = invokeGet(key)) {
         tvCopy(r.val, *tvRef);
         return tvRef;
@@ -1340,7 +1340,7 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
   }
 
   // Next try calling user-level `__get` if it's used.
-  if (getAttribute(UseGet)) {
+  if (m_cls->rtAttribute(Class::UseGet)) {
     if (auto r = invokeGet(key)) {
       tvCopy(r.val, *tvRef);
       return tvRef;
@@ -1401,7 +1401,7 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
     }
   }
 
-  if (!getAttribute(UseIsset)) return false;
+  if (!m_cls->rtAttribute(Class::UseIsset)) return false;
   auto r = invokeIsset(key);
   if (!r) return false;
   tvCastToBooleanInPlace(&r.val);
@@ -1427,14 +1427,14 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
     }
   }
 
-  if (!getAttribute(UseIsset)) return true;
+  if (!m_cls->rtAttribute(Class::UseIsset)) return true;
   auto r = invokeIsset(key);
   if (!r) return true;
 
   tvCastToBooleanInPlace(&r.val);
   if (!r.val.m_data.num) return true;
 
-  if (getAttribute(UseGet)) {
+  if (m_cls->rtAttribute(Class::UseGet)) {
     if (auto r = invokeGet(key)) {
       auto const emptyResult = !cellToBool(*tvToCell(&r.val));
       tvDecRefGen(&r.val);
@@ -1459,7 +1459,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
 
   if (prop && lookup.accessible) {
     if (prop->m_type != KindOfUninit ||
-        !getAttribute(UseSet) ||
+        !m_cls->rtAttribute(Class::UseSet) ||
         !invokeSet(key, val)) {
       if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
         throwMutateImmutable(prop);
@@ -1476,7 +1476,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
   }
 
   // Then go to user-level `__set`.
-  if (!getAttribute(UseSet) || !invokeSet(key, val)) {
+  if (!m_cls->rtAttribute(Class::UseSet) || !invokeSet(key, val)) {
     if (prop) {
       /*
        * Note: this differs from Zend right now in the case of a
@@ -1502,13 +1502,13 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   auto prop = lookup.prop;
 
   if (prop && lookup.accessible) {
-    if (prop->m_type == KindOfUninit && getAttribute(UseGet)) {
+    if (prop->m_type == KindOfUninit && m_cls->rtAttribute(Class::UseGet)) {
       if (auto r = invokeGet(key)) {
         SCOPE_EXIT { tvDecRefGen(r.val); };
         // don't unbox until after setopBody; see longer comment below
         setopBody(tvToCell(&r.val), op, val);
         tvUnboxIfNeeded(r.val);
-        if (getAttribute(UseSet)) {
+        if (m_cls->rtAttribute(Class::UseSet)) {
           cellDup(tvAssertCell(r.val), tvRef);
           if (invokeSet(key, tvAssertCell(tvRef))) {
             return &tvRef;
@@ -1544,8 +1544,8 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
     // XXX else, write tvRef = null?
   }
 
-  auto const useSet = getAttribute(UseSet);
-  auto const useGet = getAttribute(UseGet);
+  auto const useSet = m_cls->rtAttribute(Class::UseSet);
+  auto const useGet = m_cls->rtAttribute(Class::UseGet);
 
   if (useGet && !useSet) {
     auto r = invokeGet(key);
@@ -1598,12 +1598,12 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   auto prop = lookup.prop;
 
   if (prop && lookup.accessible) {
-    if (prop->m_type == KindOfUninit && getAttribute(UseGet)) {
+    if (prop->m_type == KindOfUninit && m_cls->rtAttribute(Class::UseGet)) {
       if (auto r = invokeGet(key)) {
         SCOPE_EXIT { tvDecRefGen(r.val); };
         tvUnboxIfNeeded(r.val);
         auto const dest = IncDecBody(op, tvAssertCell(&r.val));
-        if (getAttribute(UseSet)) {
+        if (m_cls->rtAttribute(Class::UseSet)) {
           invokeSet(key, tvAssertCell(r.val));
           return dest;
         }
@@ -1640,8 +1640,8 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     }
   }
 
-  auto const useSet = getAttribute(UseSet);
-  auto const useGet = getAttribute(UseGet);
+  auto const useSet = m_cls->rtAttribute(Class::UseSet);
+  auto const useGet = m_cls->rtAttribute(Class::UseGet);
 
   if (useGet && !useSet) {
     auto r = invokeGet(key);
@@ -1704,7 +1704,7 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     return;
   }
 
-  auto const tryUnset = getAttribute(UseUnset);
+  auto const tryUnset = m_cls->rtAttribute(Class::UseUnset);
 
   if (prop && !lookup.accessible && !tryUnset) {
     // Defined property that is not accessible.

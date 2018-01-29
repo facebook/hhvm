@@ -44,11 +44,7 @@ extern const StaticString
 constexpr ObjectData::Attribute objectFlags =
   static_cast<ObjectData::Attribute>(
     ObjectData::CallToImpl |
-    ObjectData::NoDestructor |
-    ObjectData::UseGet |
-    ObjectData::UseSet |
-    ObjectData::UseIsset |
-    ObjectData::UseUnset
+    ObjectData::NoDestructor
   );
 
 /**
@@ -109,6 +105,12 @@ struct CollectionsExtension : Extension {
     cls->allocExtraData();
     cls->m_extra.raw()->m_instanceCtor = T::instanceCtor;
     cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
+    cls->initRTAttributes(
+        Class::UseGet |
+        Class::UseSet |
+        Class::UseIsset |
+        Class::UseUnset
+    );
   }
 };
 

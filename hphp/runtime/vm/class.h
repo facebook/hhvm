@@ -127,8 +127,11 @@ struct Class : AtomicCountable {
     HasSleep      = 0x0001, // __sleep()
     HasClone      = 0x0002, // defines __clone PHP method
                             // only valid when !isCppBuiltin()
-    HasNativePropHandler    // class has native magic props handler
-                  = 0x0004
+    HasNativePropHandler = 0x0004, // class has native magic props handler
+    UseSet        = 0x0008, // __set()
+    UseGet        = 0x0010, // __get()
+    UseIsset      = 0x0020, // __isset()
+    UseUnset      = 0x0040, // __unset()
   };
 
 

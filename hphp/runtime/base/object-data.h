@@ -82,10 +82,6 @@ struct InvokeResult {
 struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
-    UseSet        = 0x0004, // __set()
-    UseGet        = 0x0008, // __get()
-    UseIsset      = 0x0010, // __isset()
-    UseUnset      = 0x0020, // __unset()
     IsWeakRefed   = 0x0080, // Is pointed to by at least one WeakRef
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasNativeData = 0x0400, // HNI Class with <<__NativeData("T")>>

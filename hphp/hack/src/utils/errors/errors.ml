@@ -999,7 +999,7 @@ module Typing                               = struct
   let mutable_argument_mismatch             = 4215 (* DONT MODIFY!!!! *)
   let invalid_mutable_return_result         = 4216 (* DONT MODIFY!!!! *)
   let mutable_return_result_mismatch        = 4217 (* DONT MODIFY!!!! *)
-  let nonreactive_call_from_shallow         = 4217 (* DONT MODIFY!!!! *)
+  let nonreactive_call_from_shallow         = 4218 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end

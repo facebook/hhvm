@@ -11,12 +11,15 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
   module WithLexer(Lexer : Lexer_S) = struct
     module type DeclarationParser_S = sig
+      module SC : Full_fidelity_smart_constructors_sig.SmartConstructors_S
       type t
       val make : Full_fidelity_parser_env.t
         -> Lexer.t
         -> Full_fidelity_syntax_error.t list
         -> Full_fidelity_parser_context.WithToken(Syntax.Token).t
+        -> SC.t
         -> t
+      val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
       val lexer : t -> Lexer.t
       val errors : t -> Full_fidelity_syntax_error.t list
       val parse_script : t -> t * Syntax.t

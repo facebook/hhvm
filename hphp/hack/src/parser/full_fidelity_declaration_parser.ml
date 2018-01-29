@@ -25,6 +25,7 @@ module ParserHelperSyntax = Full_fidelity_parser_helpers.WithSyntax(Syntax)
 module ParserHelper = ParserHelperSyntax
   .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
 
+module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
 module type ExpressionParser_S = Full_fidelity_expression_parser_type
   .WithSyntax(Syntax)
   .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
@@ -48,14 +49,17 @@ module type DeclarationParser_S = Full_fidelity_declaration_parser_type
 open TokenKind
 open Syntax
 
-module WithExpressionAndStatementAndTypeParser
-  (ExpressionParser : ExpressionParser_S)
-  (StatementParser : StatementParser_S)
-  (TypeParser : TypeParser_S) :
-  DeclarationParser_S = struct
+module WithSmartConstructors (SCI : SC_S with type token = Token.t) = struct
 
-  include SimpleParser
-  include ParserHelper.WithParser(SimpleParser)
+module WithExpressionAndStatementAndTypeParser
+  (ExpressionParser : ExpressionParser_S with module SC = SCI)
+  (StatementParser : StatementParser_S with module SC = SCI)
+  (TypeParser : TypeParser_S with module SC = SCI)
+  : (DeclarationParser_S with module SC = SCI) = struct
+
+  module Parser = SimpleParser.WithSmartConstructors(SCI)
+  include Parser
+  include ParserHelper.WithParser(Parser)
 
   (* Tokens *)
 
@@ -67,7 +71,7 @@ module WithExpressionAndStatementAndTypeParser
 
   let parse_in_type_parser parser type_parser_function =
     let type_parser = TypeParser.make
-      parser.env parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context parser.sc_state in
     let (type_parser, node) = type_parser_function type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
@@ -92,7 +96,7 @@ module WithExpressionAndStatementAndTypeParser
   (* Expressions *)
   let parse_in_expression_parser parser expression_parser_function =
     let expr_parser = ExpressionParser.make
-      parser.env parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context parser.sc_state in
     let (expr_parser, node) = expression_parser_function expr_parser in
     let lexer = ExpressionParser.lexer expr_parser in
     let errors = ExpressionParser.errors expr_parser in
@@ -105,7 +109,7 @@ module WithExpressionAndStatementAndTypeParser
   (* Statements *)
   let parse_in_statement_parser parser statement_parser_function =
     let statement_parser = StatementParser.make
-      parser.env parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context parser.sc_state in
     let (statement_parser, node) = statement_parser_function
        statement_parser in
     let lexer = StatementParser.lexer statement_parser in
@@ -639,7 +643,7 @@ module WithExpressionAndStatementAndTypeParser
       so as to give an error later. *)
       let (parser, var) = assert_token parser Var in
       parse_property_declaration parser var
-    | kind when SimpleParser.expects parser kind ->
+    | kind when Parser.expects parser kind ->
       let missing = make_missing parser in
       (parser, missing)
     | _ ->
@@ -658,10 +662,10 @@ module WithExpressionAndStatementAndTypeParser
     (* ERROR RECOVERY: we're in the body of a classish, so we add visibility
      * modifiers to our context. *)
     let recovery_tokens = [Public; Protected; Private] in
-    let parser = SimpleParser.expect_in_new_scope parser recovery_tokens in
+    let parser = Parser.expect_in_new_scope parser recovery_tokens in
     let (parser, element_list) =
       parse_terminated_list parser parse_classish_element RightBrace in
-    let parser = SimpleParser.pop_scope parser recovery_tokens in
+    let parser = Parser.pop_scope parser recovery_tokens in
     (parser, element_list)
 
   and parse_xhp_children_paren parser =
@@ -1295,7 +1299,8 @@ module WithExpressionAndStatementAndTypeParser
     let kind = Token.kind open_angle in
     if kind = LessThan then
         let type_parser = TypeParser.make
-          parser.env parser.lexer parser.errors parser.context in
+          parser.env parser.lexer parser.errors parser.context parser.sc_state
+        in
         let (type_parser, node) =
           TypeParser.parse_generic_type_parameter_list type_parser in
         let lexer = TypeParser.lexer type_parser in
@@ -1730,7 +1735,7 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_declaration parser =
     let recovery_tokens = [ Class; Trait; Interface ] in
-    let parser = SimpleParser.expect_in_new_scope parser recovery_tokens in
+    let parser = Parser.expect_in_new_scope parser recovery_tokens in
     let (parser1, token) = next_token parser in
     let (parser, result) =
       match (Token.kind token) with
@@ -1774,7 +1779,7 @@ module WithExpressionAndStatementAndTypeParser
         parse_statement parser in
         (* TODO: What if it's not a legal statement? Do we still make progress
         here? *)
-    let parser1 = SimpleParser.pop_scope parser recovery_tokens in
+    let parser1 = Parser.pop_scope parser recovery_tokens in
     (parser1, result)
 
   let parse_leading_markup_section parser =
@@ -1830,5 +1835,6 @@ module WithExpressionAndStatementAndTypeParser
     assert ((peek_token_kind parser) = TokenKind.EndOfFile);
     (parser, result)
 
-end
+end (* WithExpressionAndStatementAndTypeParser *)
+end (* WithSmartConstructors *)
 end (* WithSyntax *)

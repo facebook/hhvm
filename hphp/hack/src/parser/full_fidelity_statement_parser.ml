@@ -21,6 +21,7 @@ module SimpleParser = SimpleParserSyntax.WithLexer(
 module ParserHelperSyntax = Full_fidelity_parser_helpers.WithSyntax(Syntax)
 module ParserHelper = ParserHelperSyntax
   .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
+module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
 
 module type ExpressionParser_S = Full_fidelity_expression_parser_type
   .WithSyntax(Syntax)
@@ -45,14 +46,17 @@ module type StatementParser_S = Full_fidelity_statement_parser_type
 open TokenKind
 open Syntax
 
-module WithExpressionAndDeclAndTypeParser
-  (ExpressionParser : ExpressionParser_S)
-  (DeclParser : DeclarationParser_S)
-  (TypeParser : TypeParser_S) :
-  StatementParser_S = struct
+module WithSmartConstructors (SCI : SC_S with type token = Token.t) = struct
 
-  include SimpleParser
-  include ParserHelper.WithParser(SimpleParser)
+module WithExpressionAndDeclAndTypeParser
+  (ExpressionParser : ExpressionParser_S with module SC = SCI)
+  (DeclParser : DeclarationParser_S with module SC = SCI)
+  (TypeParser : TypeParser_S with module SC = SCI) :
+  (StatementParser_S with module SC = SCI) = struct
+
+  module Parser = SimpleParser.WithSmartConstructors (SCI)
+  include Parser
+  include ParserHelper.WithParser(Parser)
 
   let rec parse_statement parser =
     match peek_token_kind parser with
@@ -111,7 +115,7 @@ module WithExpressionAndDeclAndTypeParser
      * context says is expected later, make the whole statement missing
      * and continue on, starting at the unexpected token. *)
     (* TODO T20390825: Make sure this this won't cause premature recovery. *)
-    | kind when SimpleParser.expects parser kind ->
+    | kind when Parser.expects parser kind ->
       let missing = make_missing parser in
       (parser, missing)
     | _ -> parse_expression_statement parser
@@ -208,7 +212,7 @@ module WithExpressionAndDeclAndTypeParser
       (f : DeclParser.t -> DeclParser.t * Syntax.t)
       parser =
     let decl_parser = DeclParser.make
-      parser.env parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context parser.sc_state in
     let decl_parser, node = f decl_parser in
     let lexer = DeclParser.lexer decl_parser in
     let errors = DeclParser.errors decl_parser in
@@ -263,7 +267,7 @@ module WithExpressionAndDeclAndTypeParser
     let parser, as_token = require_as parser in
     (* let (parser1, token) = next_token parser in *)
     let (parser, after_as) = parse_expression parser in
-    let parser = SimpleParser.expect_in_new_scope parser [ RightParen ] in
+    let parser = Parser.expect_in_new_scope parser [ RightParen ] in
     let (parser, foreach_key, foreach_arrow, foreach_value) =
     match Token.kind (peek_token parser) with
       | RightParen ->
@@ -282,7 +286,7 @@ module WithExpressionAndDeclAndTypeParser
         (parser, after_as, make_error (make_token token), foreach_value)
     in
     let parser, right_paren_token = require_right_paren parser in
-    let parser = SimpleParser.pop_scope parser [ RightParen ] in
+    let parser = Parser.pop_scope parser [ RightParen ] in
     let parser, foreach_statement = parse_statement parser in
     let syntax =
       make_foreach_statement foreach_keyword_token foreach_left_paren
@@ -622,7 +626,7 @@ module WithExpressionAndDeclAndTypeParser
         | _ ->
           let type_parser =
             TypeParser.make
-            parser.env parser.lexer parser.errors parser.context
+            parser.env parser.lexer parser.errors parser.context parser.sc_state
           in
           let (type_parser, node) =
             TypeParser.parse_type_specifier type_parser
@@ -897,7 +901,7 @@ module WithExpressionAndDeclAndTypeParser
       let expr_stmt = make_expression_statement missing token in
       (parser1, expr_stmt)
     | _ ->
-      let parser = SimpleParser.expect_in_new_scope parser [ Semicolon ] in
+      let parser = Parser.expect_in_new_scope parser [ Semicolon ] in
       let (parser, expression) = parse_expression parser in
       let (parser, token) = require_semicolon parser in
       let (parser, token) =
@@ -906,7 +910,7 @@ module WithExpressionAndDeclAndTypeParser
           let parser, token = rescan_halt_compiler parser t in
           parser, make_token token
         | _ -> parser, token in
-      let parser = SimpleParser.pop_scope parser [ Semicolon ] in
+      let parser = Parser.pop_scope parser [ Semicolon ] in
       (parser, make_expression_statement expression token)
 
   and parse_compound_statement parser =
@@ -934,7 +938,7 @@ module WithExpressionAndDeclAndTypeParser
 
   and with_expression_parser parser f =
     let expression_parser = ExpressionParser.make
-      parser.env parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context parser.sc_state in
     let (expression_parser, node) = f expression_parser in
     let lexer = ExpressionParser.lexer expression_parser in
     let errors = ExpressionParser.errors expression_parser in
@@ -942,4 +946,5 @@ module WithExpressionAndDeclAndTypeParser
     (parser, node)
 
 end
+end (* WithSmartConstructors *)
 end (* WithSyntax *)

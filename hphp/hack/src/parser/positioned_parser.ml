@@ -7,4 +7,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-include Full_fidelity_parser.WithSyntax(Full_fidelity_positioned_syntax)
+
+module Syntax = Full_fidelity_positioned_syntax
+module SyntaxParser = Full_fidelity_parser.WithSyntax(Syntax)
+module SC = Full_fidelity_syntax_smart_constructors.WithSyntax(Syntax)
+include SyntaxParser.WithSmartConstructors(SC)

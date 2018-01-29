@@ -22,6 +22,7 @@ module PrecedenceSyntax = Full_fidelity_precedence_parser
   .WithSyntax(Syntax)
 module PrecedenceParser = PrecedenceSyntax
   .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
+module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
 
 module type StatementParser_S = Full_fidelity_statement_parser_type
   .WithSyntax(Syntax)
@@ -47,24 +48,28 @@ module ParserHelperSyntax = Full_fidelity_parser_helpers.WithSyntax(Syntax)
 module ParserHelper =
   ParserHelperSyntax.WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
 
+module WithSmartConstructors (SCI : SC_S with type token = Token.t) = struct
+
 module WithStatementAndDeclAndTypeParser
-  (StatementParser : StatementParser_S)
-  (DeclParser : DeclarationParser_S)
-  (TypeParser : TypeParser_S) :
-  ExpressionParser_S = struct
+  (StatementParser : StatementParser_S with module SC = SCI)
+  (DeclParser : DeclarationParser_S with module SC = SCI)
+  (TypeParser : TypeParser_S with module SC = SCI)
+  : (ExpressionParser_S with module SC = SCI)
+  = struct
 
   open TokenKind
   open Syntax
 
-  include PrecedenceParser
-  include ParserHelper.WithParser(PrecedenceParser)
+  module Parser = PrecedenceParser.WithSmartConstructors (SCI)
+  include Parser
+  include ParserHelper.WithParser(Parser)
 
   type binary_expression_prefix_kind =
     | Prefix_byref_assignment | Prefix_assignment | Prefix_none
 
   let with_type_parser parser f =
     let type_parser = TypeParser.make
-      parser.env parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context parser.sc_state in
     let (type_parser, node) = f type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
@@ -79,7 +84,7 @@ module WithStatementAndDeclAndTypeParser
 
   let parse_generic_type_arguments_opt parser =
     let type_parser = TypeParser.make
-      parser.env parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context parser.sc_state in
     let (type_parser, node) =
       TypeParser.parse_generic_type_argument_list_opt type_parser
     in
@@ -95,7 +100,7 @@ module WithStatementAndDeclAndTypeParser
 
   let parse_return_type parser =
     let type_parser = TypeParser.make
-      parser.env parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context parser.sc_state in
     let (type_parser, node) = TypeParser.parse_return_type type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
@@ -104,7 +109,7 @@ module WithStatementAndDeclAndTypeParser
 
   let parse_parameter_list_opt parser =
     let decl_parser = DeclParser.make
-      parser.env parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context parser.sc_state in
     let (decl_parser, right, params, left ) =
       DeclParser.parse_parameter_list_opt decl_parser in
     let lexer = DeclParser.lexer decl_parser in
@@ -114,7 +119,7 @@ module WithStatementAndDeclAndTypeParser
 
   let parse_compound_statement parser =
     let statement_parser = StatementParser.make
-      parser.env parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context parser.sc_state in
     let (statement_parser, node) =
       StatementParser.parse_compound_statement statement_parser in
     let lexer = StatementParser.lexer statement_parser in
@@ -150,7 +155,7 @@ module WithStatementAndDeclAndTypeParser
       let (parser1, name) =
         scan_remaining_qualified_name parser1 (make_token token) in
       parse_name_or_collection_literal_expression parser1 name
-    | kind when PrecedenceParser.expects_here parser kind ->
+    | kind when Parser.expects_here parser kind ->
       (* ERROR RECOVERY: If we're encountering a token that matches a kind in
        * the previous scope of the expected stack, don't eat it--just mark the
        * name missing and continue parsing, starting from the offending token. *)
@@ -251,7 +256,7 @@ module WithStatementAndDeclAndTypeParser
     | Define -> parse_define_expression parser
     | HaltCompiler -> parse_halt_compiler_expression parser
     | Eval -> parse_eval_expression parser
-    | kind when PrecedenceParser.expects parser kind ->
+    | kind when Parser.expects parser kind ->
       (* ERROR RECOVERY: if we've prematurely found a token we're expecting
        * later, mark the expression missing, throw an error, and do not advance
        * the parser. *)
@@ -1105,7 +1110,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
         (parser, missing1, missing2, missing3)
     in
     let decl_parser = DeclParser.make
-      parser.env parser.lexer parser.errors parser.context in
+      parser.env parser.lexer parser.errors parser.context parser.sc_state in
     let (decl_parser, classish_extends, classish_extends_list) =
       DeclParser.parse_classish_extends_opt decl_parser in
     let (decl_parser, classish_implements, classish_implements_list) =
@@ -2546,4 +2551,5 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let result = make_scope_resolution_expression qualifier op name in
     (parser, result)
 end
+end (* WithSmartConstructors *)
 end (* WithSyntax *)

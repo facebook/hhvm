@@ -565,7 +565,8 @@ end (* GenerateFFSyntaxSig *)
 module GenerateFFSmartConstructorsSig = struct
   let to_constructor_methods x =
     let args = map_and_concat_separated " -> " (fun _ -> "r") x.fields in
-    sprintf "  val make_%s : t -> %s -> t * r\n" x.type_name args
+    (* We put state as the last argument to use currying *)
+    sprintf "  val make_%s : %s -> t -> t * r\n" x.type_name args
 
   let full_fidelity_smart_constructors_sig_template: string =
   (make_header MLStyle "
@@ -574,11 +575,14 @@ module GenerateFFSmartConstructorsSig = struct
   ") ^ "
 
 module type SmartConstructors_S = sig
+  type token
   type t (* state *)
   type r (* smart constructor return type *)
 
-  val make_missing : t -> t * r
-  val make_list : t -> r list -> t * r
+  val initial_state : unit -> t
+  val make_token : token -> t -> t * r
+  val make_missing : Full_fidelity_source_text.t -> int -> t -> t * r
+  val make_list : Full_fidelity_source_text.t -> int -> r list -> t -> t * r
 CONSTRUCTOR_METHODS
 end (* SmartConstructors_S *)
 "
@@ -586,7 +590,7 @@ end (* SmartConstructors_S *)
   let full_fidelity_smart_constructors_sig =
   {
     filename = full_fidelity_path_prefix ^
-      "full_fidelity_smart_constructors_sig.ml";
+      "smart_constructors/full_fidelity_smart_constructors_sig.ml";
     template = full_fidelity_smart_constructors_sig_template;
     transformations = [
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
@@ -601,17 +605,15 @@ end (* GenerateFFSmartConstructorsSig *)
 
 module GenerateFFVerifySmartConstructors = struct
   let to_constructor_methods x =
-    let fields = List.rev @@ snd @@ List.fold_left
-      (fun (n, acc) _ -> (n + 1, ("arg" ^ string_of_int n) :: acc))
-      (0, []) x.fields in
+    let fields = Core_list.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
+    in
     let units = map_and_concat_separated " " (fun _ -> "()") fields in
     let stack_rev = String.concat " :: " (List.rev fields) in
     let stack = String.concat " " fields in
     sprintf "
-  let make_%s stack %s =
-    match stack with
-      | %s :: rem -> Syntax.make_%s %s :: rem, ()
-      | _ -> failwith \"Unexpected stack state\"
+  let make_%s %s = function
+    | %s :: rem -> Syntax.make_%s %s :: rem, ()
+    | _ -> failwith \"Unexpected stack state\"
   " x.type_name units stack_rev x.type_name stack
 
   let full_fidelity_verify_smart_constructors_template: string =
@@ -620,15 +622,20 @@ module GenerateFFVerifySmartConstructors = struct
  * build AST.
  ") ^ "
 
-module SCSig = Full_fidelity_smart_constructors_sig
+module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
 
-module WithSyntax(Syntax: Syntax_sig.Syntax_S): SCSig.SmartConstructors_S =
-struct
+module WithSyntax(Syntax : Syntax_sig.Syntax_S)
+: (SC_S with type token = Syntax.Token.t) = struct
+  type token = Syntax.Token.t
   type t = Syntax.t list
   type r = unit
 
-  let make_missing stack = stack, ()
-  let make_list stack _ = stack, ()
+  let initial_state () = []
+  let make_token token stack = (Syntax.make_token token) :: stack, ()
+  let make_missing s o stack = (Syntax.make_missing s o) :: stack, ()
+  let make_list s o items stack =
+    let (h, t) = Core_list.split_n stack (List.length items) in
+    (Syntax.make_list s o h) :: t, ()
 CONSTRUCTOR_METHODS
 end (* WithSyntax *)
 "
@@ -636,7 +643,7 @@ end (* WithSyntax *)
   let full_fidelity_verify_smart_constructors =
   {
     filename = full_fidelity_path_prefix ^
-      "full_fidelity_verify_smart_constructors.ml";
+      "smart_constructors/facebook/full_fidelity_verify_smart_constructors.ml";
     template = full_fidelity_verify_smart_constructors_template;
     transformations = [
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
@@ -648,6 +655,54 @@ end (* WithSyntax *)
     aggregate_transformations = [];
   }
 end (* GenerateFFVerifySmartConstructors *)
+
+module GenerateFFSyntaxSmartConstructors = struct
+  let to_constructor_methods x =
+    let fields = Core_list.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
+    in
+    let stack = String.concat " " fields in
+    sprintf "
+  let make_%s %s () = (), Syntax.make_%s %s
+  " x.type_name stack x.type_name stack
+
+  let full_fidelity_syntax_smart_constructors_template: string =
+    (make_header MLStyle "
+ * This module contains smart constructors implementation that can be used to
+ * build AST.
+ ") ^ "
+
+module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
+module SourceText = Full_fidelity_source_text
+
+module WithSyntax(Syntax : Syntax_sig.Syntax_S)
+: (SC_S with type token = Syntax.Token.t) = struct
+  type token = Syntax.Token.t
+  type t = unit
+  type r = Syntax.t
+
+  let initial_state () = ()
+  let make_token token () = (), Syntax.make_token token
+  let make_missing s o () = (), Syntax.make_missing s o
+  let make_list s o items () = (), Syntax.make_list s o items
+CONSTRUCTOR_METHODS
+end (* WithSyntax *)
+"
+
+  let full_fidelity_syntax_smart_constructors =
+  {
+    filename = full_fidelity_path_prefix ^
+      "smart_constructors/full_fidelity_syntax_smart_constructors.ml";
+    template = full_fidelity_syntax_smart_constructors_template;
+    transformations = [
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+end (* GenerateFFSyntaxSmartConstructors *)
 
 module GenerateFFSyntax = struct
   let to_syntax x =
@@ -2695,4 +2750,6 @@ let () =
   generate_file
     GenerateFFSmartConstructorsSig.full_fidelity_smart_constructors_sig;
   generate_file
-    GenerateFFVerifySmartConstructors.full_fidelity_verify_smart_constructors
+    GenerateFFVerifySmartConstructors.full_fidelity_verify_smart_constructors;
+  generate_file
+    GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors

@@ -11,19 +11,29 @@
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
 module Context = Full_fidelity_parser_context.WithToken(Syntax.Token)
+module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
 
 module WithLexer(Lexer : Lexer_S) = struct
   module Lexer = Lexer
+
+  module WithSmartConstructors (SC : SC_S with type token = Syntax.Token.t)
+  = struct
+    module SC = SC
 
   type t = {
     lexer : Lexer.t;
     errors : Full_fidelity_syntax_error.t list;
     context : Context.t;
     env : Full_fidelity_parser_env.t;
+    sc_state : SC.t;
   }
 
-  let make env lexer errors context =
-    { lexer; errors; context; env }
+  let sc_call parser f =
+    let (sc_state, result) = f parser.sc_state in
+    ({parser with sc_state}, result)
+
+  let make env lexer errors context sc_state =
+    { lexer; errors; context; env; sc_state}
 
   let errors parser =
     parser.errors @ (Lexer.errors parser.lexer)
@@ -81,5 +91,6 @@ module WithLexer(Lexer : Lexer_S) = struct
   let print_expected parser =
     Context.print_expected parser.context
 
+end (* WithSmartConstructors *)
 end (* WithLexer *)
 end (* WithSyntax *)

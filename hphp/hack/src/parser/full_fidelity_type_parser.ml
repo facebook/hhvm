@@ -18,6 +18,7 @@ module SyntaxError = Full_fidelity_syntax_error
 module SimpleParserSyntax = Full_fidelity_simple_parser.WithSyntax(Syntax)
 module SimpleParser = SimpleParserSyntax.WithLexer(
   Full_fidelity_type_lexer.WithToken(Syntax.Token))
+module type SC_S = Full_fidelity_smart_constructors_sig.SmartConstructors_S
 
 module type ExpressionParser_S = Full_fidelity_expression_parser_type
   .WithSyntax(Syntax)
@@ -36,15 +37,19 @@ module ParserHelper = ParserHelperSyntax
 open TokenKind
 open Syntax
 
-module WithExpressionParser (ExpressionParser : ExpressionParser_S) :
-  TypeParser_S = struct
+module WithSmartConstructors (SCI : SC_S with type token = Token.t) = struct
 
-include SimpleParser
-include ParserHelper.WithParser(SimpleParser)
+module WithExpressionParser
+  (ExpressionParser : ExpressionParser_S with module SC = SCI) :
+  (TypeParser_S with module SC = SCI) = struct
+
+module Parser = SimpleParser.WithSmartConstructors (SCI)
+include Parser
+include ParserHelper.WithParser(Parser)
 
 let parse_expression parser =
   let expr_parser = ExpressionParser.make
-    parser.env parser.lexer parser.errors parser.context in
+    parser.env parser.lexer parser.errors parser.context parser.sc_state in
   let (expr_parser, node) = ExpressionParser.parse_expression expr_parser in
   let lexer = ExpressionParser.lexer expr_parser in
   let errors = ExpressionParser.errors expr_parser in
@@ -804,4 +809,5 @@ and parse_return_type parser =
     parse_type_specifier parser
 
 end
+end (* WithSmartConstructors *)
 end (* WithSyntax *)

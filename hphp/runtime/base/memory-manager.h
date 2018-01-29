@@ -526,6 +526,12 @@ struct SparseHeap {
    */
   void sort();
 
+  /*
+   * Return the (likely sparse) address range that contains every slab.
+   * Requires that sort() has been called, so m_slabs is in address order.
+   */
+  MemBlock slab_range() const;
+
  protected:
   void enlist(MallocNode*, HeaderKind kind, size_t size, type_scan::Index);
 
@@ -616,6 +622,11 @@ struct ContiguousHeap {
    * Sorts both slabs and big blocks.
    */
   void sort() {}
+
+  /*
+   * Return the (likely sparse) address range that contains every slab.
+   */
+  MemBlock slab_range() const;
 
 private:
   char* raw_alloc(size_t size);

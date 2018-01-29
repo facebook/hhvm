@@ -110,6 +110,14 @@ struct alignas(kSmallSizeAlign) Slab : FreeNode {
     assertx(s_firstSlab.size <= kSlabSize);
     return (this == s_firstSlab.ptr) ? s_firstSlab.size : kSlabSize;
   }
+
+  static Slab* fromPtr(const void* p) {
+    static_assert(kSlabAlign == kSlabSize, "");
+    auto slab = reinterpret_cast<Slab*>(uintptr_t(p) & ~(kSlabAlign - 1));
+    assert(slab->kind() == HeaderKind::Slab);
+    return slab;
+  }
+
   char* start() { return (char*)(this + 1); }
   char* end() { return (char*)this + size(); }
   const char* start() const { return (const char*)(this + 1); }

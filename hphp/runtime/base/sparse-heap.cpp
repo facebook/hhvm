@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/safe-cast.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
@@ -270,6 +271,16 @@ HeapObject* SparseHeap::find(const void* p) {
     return p >= sub ? sub : hdr;
   }
   return nullptr;
+}
+
+MemBlock SparseHeap::slab_range() const {
+  // requires sort() first
+  return m_slabs.empty() ? MemBlock{nullptr,0} :
+         MemBlock{
+           m_slabs.front().ptr,
+           safe_cast<size_t>((char*)m_slabs.back().ptr -
+                             (char*)m_slabs.front().ptr) + kSlabSize
+         };
 }
 
 }

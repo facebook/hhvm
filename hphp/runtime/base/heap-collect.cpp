@@ -34,10 +34,11 @@
 #include "hphp/util/type-scan.h"
 
 #include <algorithm>
+#include <boost/dynamic_bitset.hpp>
+#include <folly/portability/Unistd.h>
+#include <folly/Range.h>
 #include <iterator>
 #include <vector>
-#include <folly/Range.h>
-#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 TRACE_SET_MOD(gc);
@@ -127,6 +128,12 @@ struct Collector {
   template<bool apcgc> void exactEnqueue(const void* p);
   HeapObject* find(const void*);
 
+  size_t slab_index(const void* h) {
+    assert((char*)h >= (char*)slabs_range_.ptr &&
+           (char*)h < (char*)slabs_range_.ptr + slabs_range_.size);
+    return (uintptr_t(h) - uintptr_t(slabs_range_.ptr)) >> kLgSlabSize;
+  }
+
   HeapImpl& heap_;
   GCBits const mark_version_;
   size_t num_small_{0}, num_big_{0}, num_slabs_{0};
@@ -137,6 +144,8 @@ struct Collector {
   size_t max_worklist_{0}; // max size of cwork_ + xwork_
   size_t freed_bytes_{0};
   PtrMap<const HeapObject*> ptrs_;
+  MemBlock slabs_range_;
+  boost::dynamic_bitset<> slab_map_; // 1 bit per 2M
   type_scan::Scanner type_scanner_;
   std::vector<const HeapObject*> cwork_, xwork_;
   APCGCManager* const apcgc_;
@@ -147,19 +156,11 @@ struct Collector {
 // object using bit operations. So there is an opportunity to speed this up by
 // directly accessing the bitmap instead of using PtrMap.
 HeapObject* Collector::find(const void* ptr) {
-  if (auto r = ptrs_.region(ptr)) {
-    auto h = const_cast<HeapObject*>(r->first);
-    if (h->kind() == HeaderKind::Slab) {
-      return Slab::fromHeader(h)->find(ptr);
-    }
-    if (h->kind() == HeaderKind::BigObj) {
-      auto h2 = static_cast<MallocNode*>(h) + 1;
-      return ptr >= h2 ? h2 : nullptr;
-    }
-    assert(h->kind() == HeaderKind::BigMalloc);
-    return h;
+  if (uintptr_t(ptr) - uintptr_t(slabs_range_.ptr) < slabs_range_.size &&
+      slab_map_.test(slab_index(ptr))) {
+    return Slab::fromPtr(ptr)->find(ptr);
   }
-  return nullptr;
+  return const_cast<HeapObject*>(ptrs_.start(ptr));
 }
 
 DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
@@ -315,26 +316,32 @@ inline int64_t cpu_ns() {
 NEVER_INLINE void Collector::init() {
   auto const t0 = cpu_ns();
   SCOPE_EXIT { init_ns_ = cpu_ns() - t0; };
-  tl_heap->initFree();
+  tl_heap->initFree(); // calls HeapImpl::sort(), required below
   initfree_ns_ = cpu_ns() - t0;
+
+  slabs_range_ = heap_.slab_range();
+  slab_map_.resize((slabs_range_.size + kSlabSize - 1) >> kLgSlabSize);
 
   heap_.iterate(
     [&](HeapObject* h, size_t size) { // onBig
       ++num_big_;
-      ptrs_.insert(h, size);
       if (h->kind() == HeaderKind::BigMalloc) {
+        ptrs_.insert(h, size);
         if (!type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
           ++unknown_;
           h->setmarks(mark_version_);
           cwork_.push_back(h);
         }
+      } else {
+        // put the inner big object in ptrs_ without the BigObj header
+        assert(h->kind() == HeaderKind::BigObj);
+        ptrs_.insert(static_cast<MallocNode*>(h)+1, size - sizeof(MallocNode));
       }
     },
     [&](HeapObject* h, size_t size) { // onSlab
       ++num_slabs_;
-      ptrs_.insert(h, size);
-      auto slab = Slab::fromHeader(h);
-      num_small_ += slab->initStartBits();
+      num_small_ += Slab::fromHeader(h)->initStartBits();
+      slab_map_.set(slab_index(h));
     }
   );
   ptrs_.prepare();

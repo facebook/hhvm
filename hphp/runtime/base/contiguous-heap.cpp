@@ -36,6 +36,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/safe-cast.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
@@ -322,5 +323,9 @@ bool ContiguousHeap::check_invariants() const {
     assert(!m_freebits.test(i));
   }
   return true;
+}
+
+MemBlock ContiguousHeap::slab_range() const {
+  return {m_base, safe_cast<size_t>(m_front - m_base)};
 }
 }

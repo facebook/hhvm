@@ -135,7 +135,6 @@ struct Class : AtomicCountable {
     UseUnset      = 0x0080, // __unset()
   };
 
-
   /*
    * Instance property information.
    */

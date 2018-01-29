@@ -89,7 +89,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                             // finished. Only set during construction when the
                             // class has immutable properties (to temporarily
                             // allow writing to them).
-    HasPropEmpty  = 0x4000, // has custom propEmpty logic
   };
 
  private:

@@ -1445,8 +1445,10 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
 }
 
 bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
-  if (UNLIKELY(getAttribute(HasPropEmpty))) {
-    if (instanceof(SimpleXMLElement_classof())) {
+  if (UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
+    // We only get here for SimpleXMLElement or collections
+    if (LIKELY(!isCollection())) {
+      assert(instanceof(SimpleXMLElement_classof()));
       return SimpleXMLElement_propEmpty(this, key);
     }
   }

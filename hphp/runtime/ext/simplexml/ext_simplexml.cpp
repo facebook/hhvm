@@ -63,9 +63,8 @@ const Class* SimpleXMLIterator_classof() {
 
 struct SimpleXMLElement {
   SimpleXMLElement() {
-    auto obj = Native::object<SimpleXMLElement>(this);
-    assert(obj->getVMClass()->rtAttribute(Class::CallToImpl));
-    obj->setAttribute(ObjectData::HasPropEmpty);
+    assert(Native::object<SimpleXMLElement>(this)->getVMClass()->
+           rtAttribute(Class::CallToImpl));
   }
   SimpleXMLElement& operator=(const SimpleXMLElement &src) {
     iter.isprefix = src.iter.isprefix;

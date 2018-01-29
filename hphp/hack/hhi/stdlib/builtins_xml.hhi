@@ -41,13 +41,17 @@ const XML_SAX_IMPL = "expat";
 
 <<__PHPStdLib>>
 function xml_parser_create($encoding = null) { }
+<<__PHPStdLib>>
 function xml_parser_free($parser) { }
 <<__PHPStdLib>>
 function xml_parse($parser, $data, $is_final = true) { }
+<<__PHPStdLib>>
 function xml_parse_into_struct($parser, $data, &$values, &$index = null) { }
+<<__PHPStdLib>>
 function xml_parser_create_ns($encoding = null, $separator = null) { }
 <<__PHPStdLib>>
 function xml_parser_get_option($parser, $option) { }
+<<__PHPStdLib>>
 function xml_parser_set_option($parser, $option, $value) { }
 <<__PHPStdLib>>
 function xml_set_character_data_handler($parser, $handler) { }
@@ -79,5 +83,7 @@ function xml_get_current_line_number($parser) { }
 function xml_get_error_code($parser) { }
 <<__PHPStdLib>>
 function xml_error_string($code) { }
+<<__PHPStdLib>>
 function utf8_decode($data) { }
+<<__PHPStdLib>>
 function utf8_encode($data) { }

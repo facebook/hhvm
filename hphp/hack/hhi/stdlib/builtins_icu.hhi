@@ -16,5 +16,7 @@ define('UREGEX_UWORD', 0);
 define('UREGEX_OFFSET_CAPTURE', 0);
 <<__PHPStdLib>>
 function icu_match($pattern, $subject, &$matches = null, $flags = 0) { }
+<<__PHPStdLib>>
 function icu_transliterate($str, $remove_accents) { }
+<<__PHPStdLib>>
 function icu_tokenize($text) { }

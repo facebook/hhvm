@@ -28,6 +28,7 @@ function memcache_increment($memcache, $key, $offset = 1) { }
 function memcache_decrement($memcache, $key, $offset = 1) { }
 <<__PHPStdLib>>
 function memcache_close($memcache) { }
+<<__PHPStdLib>>
 function memcache_debug($onoff) { }
 <<__PHPStdLib>>
 function memcache_get_version($memcache) { }

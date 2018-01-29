@@ -10,11 +10,13 @@
  */
 <<__PHPStdLib>>
 function hphp_get_extension_info($name) { }
+<<__PHPStdLib>>
 function hphp_get_class_constant($cls, $name) { }
 <<__PHPStdLib>>
 function hphp_invoke($name, $params) { }
 <<__PHPStdLib>>
 function hphp_invoke_method($obj, $cls, $name, $params) { }
+<<__PHPStdLib>>
 function hphp_instanceof($obj, $name) { }
 <<__PHPStdLib>>
 function hphp_create_object_without_constructor($name) { }
@@ -26,4 +28,5 @@ function hphp_set_property($obj, $cls, $prop, $value) { }
 function hphp_get_static_property($cls, $prop, $force) { }
 <<__PHPStdLib>>
 function hphp_set_static_property($cls, $prop, $value, $force) { }
+<<__PHPStdLib>>
 function hphp_scalar_typehints_enabled() { }

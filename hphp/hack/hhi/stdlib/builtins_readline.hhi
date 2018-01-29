@@ -34,4 +34,5 @@ function readline_read_history(?string $filename = null): bool;
 function readline_write_history(?string $filename = null): bool;
 
 // Reads a line
+<<__PHPStdLib>>
 function readline(string $prompt): string;

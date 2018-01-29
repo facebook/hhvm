@@ -8,12 +8,21 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+<<__PHPStdLib>>
 function override_function($name, $args, $code) { }
+<<__PHPStdLib>>
 function rename_function($orig_name, $new_name) { }
+<<__PHPStdLib>>
 function apd_set_browser_trace() { }
+<<__PHPStdLib>>
 function apd_set_pprof_trace($dumpdir = null, $frament = null) { }
+<<__PHPStdLib>>
 function apd_set_session_trace_socket($ip_or_filename, $domain, $port, $mask) { }
+<<__PHPStdLib>>
 function apd_stop_trace() { }
+<<__PHPStdLib>>
 function apd_breakpoint() { }
+<<__PHPStdLib>>
 function apd_continue() { }
+<<__PHPStdLib>>
 function apd_echo($output) { }

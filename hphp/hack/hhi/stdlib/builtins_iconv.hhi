@@ -25,6 +25,7 @@ function iconv_mime_decode_headers($encoded_headers, $mode = 0, $charset = null)
 function iconv_get_encoding($type = "all");
 <<__PHPStdLib>>
 function iconv_set_encoding($type, $charset);
+<<__PHPStdLib>>
 function iconv($in_charset, $out_charset, $str);
 <<__PHPStdLib>>
 function iconv_strlen($str, $charset = null);

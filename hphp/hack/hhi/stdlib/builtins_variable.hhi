@@ -17,6 +17,7 @@ function is_long($var): bool;
 <<__Deprecated('Use is_float().')>>
 function is_double($var): bool;
 function is_float($var): bool;
+<<__PHPStdLib>>
 function is_numeric($var): bool;
 <<__Deprecated('Use is_float().')>>
 function is_real($var): bool;
@@ -25,16 +26,23 @@ function is_scalar($var): bool;
 function is_object($var): bool;
 function is_resource($var): bool;
 function is_null($var): bool;
+<<__PHPStdLib>>
 function gettype($v);
 <<__PHPStdLib>>
 function get_resource_type($handle);
+<<__PHPStdLib>>
 function settype(&$var, $type);
+<<__PHPStdLib>>
 function print_r($expression, $ret = false);
+<<__PHPStdLib>>
 function var_export($expression, $ret = false);
+<<__PHPStdLib>>
 function var_dump(<<__AcceptDisposable>> $expression, <<__AcceptDisposable>> ...$rest);
 <<__PHPStdLib>>
 function debug_zval_dump(<<__AcceptDisposable>> $variable);
+<<__PHPStdLib>>
 function serialize($value);
+<<__PHPStdLib>>
 function unserialize($str, $class_whitelist = array());
 function get_defined_vars();
 <<__PHPStdLib>>

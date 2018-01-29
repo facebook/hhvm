@@ -10,19 +10,23 @@
  */
 <<__PHPStdLib>>
 function spl_classes();
+<<__PHPStdLib>>
 function spl_object_hash($obj);
 <<__PHPStdLib>>
 function hphp_object_pointer($obj);
 <<__PHPStdLib>>
 function hphp_get_this();
+<<__PHPStdLib>>
 function class_implements($obj, $autoload = true);
 <<__PHPStdLib>>
 function class_parents($obj, $autoload = true);
+<<__PHPStdLib>>
 function class_uses($obj, $autoload = true);
 <<__PHPStdLib>>
 function iterator_apply($obj, $func, $params = null);
 <<__PHPStdLib>>
 function iterator_count($obj);
+<<__PHPStdLib>>
 function iterator_to_array($obj, $use_keys = true);
 <<__PHPStdLib>>
 function spl_autoload_call($class_name);

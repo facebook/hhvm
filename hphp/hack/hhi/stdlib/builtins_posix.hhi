@@ -18,9 +18,11 @@ function posix_get_last_error() { }
 function posix_getcwd() { }
 <<__PHPStdLib>>
 function posix_getegid() { }
+<<__PHPStdLib>>
 function posix_geteuid() { }
 <<__PHPStdLib>>
 function posix_getgid() { }
+<<__PHPStdLib>>
 function posix_getgrgid($gid) { }
 <<__PHPStdLib>>
 function posix_getgrnam($name) { }
@@ -32,19 +34,25 @@ function posix_getlogin() { }
 function posix_getpgid($pid) { }
 <<__PHPStdLib>>
 function posix_getpgrp() { }
+<<__PHPStdLib>>
 function posix_getpid() { }
+<<__PHPStdLib>>
 function posix_getppid() { }
 <<__PHPStdLib>>
 function posix_getpwnam($username) { }
+<<__PHPStdLib>>
 function posix_getpwuid($uid) { }
 <<__PHPStdLib>>
 function posix_getrlimit() { }
 <<__PHPStdLib>>
 function posix_getsid($pid) { }
+<<__PHPStdLib>>
 function posix_getuid() { }
 <<__PHPStdLib>>
 function posix_initgroups($name, $base_group_id) { }
+<<__PHPStdLib>>
 function posix_isatty($fd) { }
+<<__PHPStdLib>>
 function posix_kill($pid, $sig) { }
 <<__PHPStdLib>>
 function posix_mkfifo($pathname, $mode) { }

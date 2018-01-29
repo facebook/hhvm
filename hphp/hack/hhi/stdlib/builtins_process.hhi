@@ -22,11 +22,16 @@ function pcntl_fork();
 function pcntl_getpriority($pid = 0, $process_identifier = 0);
 <<__PHPStdLib>>
 function pcntl_setpriority($priority, $pid = 0, $process_identifier = 0);
+<<__PHPStdLib>>
 function pcntl_signal($signo, $handler, $restart_syscalls = true);
 
+<<__PHPStdLib>>
 function pcntl_wait(&$status, $options = 0);
+<<__PHPStdLib>>
 function pcntl_waitpid($pid, &$status, $options = 0);
+<<__PHPStdLib>>
 function pcntl_wexitstatus($status);
+<<__PHPStdLib>>
 function pcntl_wifexited($status);
 <<__PHPStdLib>>
 function pcntl_wifsignaled($status);
@@ -38,17 +43,25 @@ function pcntl_wstopsig($status);
 function pcntl_wtermsig($status);
 <<__PHPStdLib>>
 function pcntl_signal_dispatch();
+<<__PHPStdLib>>
 function shell_exec($cmd);
+<<__PHPStdLib>>
 function exec($command, &$output = null, &$return_var = null);
+<<__PHPStdLib>>
 function passthru($command, &$return_var = null);
+<<__PHPStdLib>>
 function system($command, &$return_var = null);
+<<__PHPStdLib>>
 function proc_open($cmd, $descriptorspec, &$pipes, $cwd = null, $env = null, $other_options = null);
 <<__PHPStdLib>>
 function proc_terminate($process, $signal = 0);
+<<__PHPStdLib>>
 function proc_close($process);
+<<__PHPStdLib>>
 function proc_get_status($process);
 <<__PHPStdLib>>
 function proc_nice($increment);
+<<__PHPStdLib>>
 function escapeshellarg($arg);
 <<__PHPStdLib>>
 function escapeshellcmd($command);

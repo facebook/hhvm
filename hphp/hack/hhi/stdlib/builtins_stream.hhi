@@ -87,14 +87,19 @@ const int STREAM_USE_PATH = 1;
 
 <<__PHPStdLib>>
 function stream_await(resource $fp, int $events, float $timeout = 0.0): Awaitable<int>;
+<<__PHPStdLib>>
 function stream_context_create($options = null, $params = null);
 <<__PHPStdLib>>
 function stream_context_get_default($options = null);
 <<__PHPStdLib>>
 function stream_context_get_options($stream_or_context);
+<<__PHPStdLib>>
 function stream_context_set_option($stream_or_context, $wrapper, $option = null, $value = null);
+<<__PHPStdLib>>
 function stream_context_set_param($stream_or_context, $params);
+<<__PHPStdLib>>
 function stream_copy_to_stream($source, $dest, $maxlength = -1, $offset = 0);
+<<__PHPStdLib>>
 function stream_encoding($stream, $encoding = null);
 <<__PHPStdLib>>
 function stream_bucket_append($brigade, $bucket);
@@ -112,10 +117,13 @@ function stream_filter_remove($stream_filter);
 function stream_filter_append($stream, $filtername, $read_write = 0, $params = null);
 <<__PHPStdLib>>
 function stream_filter_prepend($stream, $filtername, $read_write = 0, $params = null);
+<<__PHPStdLib>>
 function stream_get_contents($handle, $maxlen = 0, $offset = 0);
 <<__PHPStdLib>>
 function stream_get_filters();
+<<__PHPStdLib>>
 function stream_get_line($handle, $length = 0, $ending = null);
+<<__PHPStdLib>>
 function stream_get_meta_data($stream);
 <<__PHPStdLib>>
 function stream_get_transports();
@@ -131,19 +139,25 @@ function stream_wrapper_restore($protocol);
 function stream_wrapper_unregister($protocol);
 <<__PHPStdLib>>
 function stream_resolve_include_path($filename, $context = null);
+<<__PHPStdLib>>
 function stream_select(&$read, &$write, &$except, $vtv_sec, $tv_usec = 0);
+<<__PHPStdLib>>
 function stream_set_blocking($stream, $mode);
+<<__PHPStdLib>>
 function stream_set_timeout($stream, $seconds, $microseconds = 0);
 <<__PHPStdLib>>
 function stream_set_write_buffer($stream, $buffer);
 <<__PHPStdLib>>
 function set_file_buffer($stream, $buffer);
+<<__PHPStdLib>>
 function stream_socket_accept($server_socket, $timeout = 0.0, &$peername = null);
+<<__PHPStdLib>>
 function stream_socket_server($local_socket, &$errnum = null, &$errstr = null, $flags = 0, $context = null);
 <<__PHPStdLib>>
 function stream_socket_client($remote_socket, &$errnum = null, &$errstr = null, $timeout = 0.0, $flags = 0, $context = null);
 <<__PHPStdLib>>
 function stream_socket_enable_crypto($stream, $enable, $crypto_type = 0, $session_stream = null);
+<<__PHPStdLib>>
 function stream_socket_get_name($handle, $want_peer);
 <<__PHPStdLib>>
 function stream_socket_pair($domain, $type, $protocol);

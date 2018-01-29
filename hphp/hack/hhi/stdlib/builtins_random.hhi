@@ -9,6 +9,8 @@
  *
  */
 
+<<__PHPStdLib>>
 function random_bytes(int $length): string;
 
+<<__PHPStdLib>>
 function random_int(int $min, int $max): int;

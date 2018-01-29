@@ -8,8 +8,11 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+<<__PHPStdLib>>
 function get_defined_functions(): array<string, array<string>>;
+<<__PHPStdLib>>
 function function_exists(string $function_name, $autoload = true): bool;
+<<__PHPStdLib>>
 function is_callable($v, $syntax = false, &$name = null): bool;
 function call_user_func_array<T>($function, Container<T> $params);
 function call_user_func($function, ...);
@@ -21,5 +24,7 @@ function get_called_class(): string; // false if called from outside class
 function create_function($args, $code);
 function func_get_arg(int $arg_num);
 function func_num_args(): int;
+<<__PHPStdLib>>
 function register_postsend_function($function, ...);
+<<__PHPStdLib>>
 function register_shutdown_function($function, ...);

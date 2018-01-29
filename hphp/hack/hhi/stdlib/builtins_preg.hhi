@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+<<__PHPStdLib>>
 function preg_grep($pattern, $input, $flags = 0) { }
 /*
  * `preg_match` can actually return false if the regex fails to compile.
@@ -18,28 +19,36 @@ function preg_grep($pattern, $input, $flags = 0) { }
  *
  * This will eventually be fixed with more type inference magic.
  */
+<<__PHPStdLib>>
 function preg_match($pattern, $subject, &$matches = array(), $flags = 0,
                     $offset = 0): int { }
+<<__PHPStdLib>>
 function preg_match_all($pattern, $subject, &$matches = array(), $flags = 0,
                         $offset = 0) { }
+<<__PHPStdLib>>
 function preg_replace($pattern, $replacement, $subject, $limit = -1,
                       &$count = null) { }
+<<__PHPStdLib>>
 function preg_replace_callback($pattern, $callback, $subject, $limit = -1,
                                &$count = null) { }
 <<__PHPStdLib>>
 function preg_replace_callback_array($patterns_and_callbacks, $subject,
                                      $limit = -1, &$count = null) { }
+<<__PHPStdLib>>
 function preg_split($pattern, $subject, $limit = -1, $flags = 0) { }
+<<__PHPStdLib>>
 function preg_quote($str, $delimiter = null) { }
+<<__PHPStdLib>>
 function preg_last_error() { }
 <<__PHPStdLib>>
 function ereg_replace($pattern, $replacement, $str) { }
 <<__PHPStdLib>>
 function eregi_replace($pattern, $replacement, $str) { }
+<<__PHPStdLib>>
 function ereg($pattern, $str, &$regs = null) { }
 <<__PHPStdLib>>
 function eregi($pattern, $str, &$regs = null) { }
-<<__Deprecated('Use explode() or preg_split().')>>
+<<__Deprecated('Use explode() or preg_split().'), __PHPStdLib>>
 function split($pattern, $str, $limit = -1) { }
 <<__PHPStdLib>>
 function spliti($pattern, $str, $limit = -1) { }

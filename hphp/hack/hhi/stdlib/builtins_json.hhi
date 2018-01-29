@@ -42,7 +42,11 @@ const int JSON_FB_EXTRA_ESCAPES = 0;
 const int JSON_FB_COLLECTIONS = 0;
 const int JSON_FB_HACK_ARRAYS = 0;
 
+<<__PHPStdLib>>
 function json_encode($value, $options = 0, $depth = 512);
+<<__PHPStdLib>>
 function json_decode($json, $assoc = false, $depth = 512, $options = 0);
+<<__PHPStdLib>>
 function json_last_error();
+<<__PHPStdLib>>
 function json_last_error_msg();

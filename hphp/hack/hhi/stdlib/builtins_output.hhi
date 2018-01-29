@@ -8,23 +8,31 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+<<__PHPStdLib>>
 function ob_start($output_callback = null, $chunk_size = 0, $erase = true) { }
 <<__PHPStdLib>>
 function ob_clean() { }
+<<__PHPStdLib>>
 function ob_flush() { }
+<<__PHPStdLib>>
 function ob_end_clean() { }
 <<__PHPStdLib>>
 function ob_end_flush() { }
+<<__PHPStdLib>>
 function flush() { }
+<<__PHPStdLib>>
 function ob_get_clean() { }
+<<__PHPStdLib>>
 function ob_get_contents() { }
 <<__PHPStdLib>>
 function ob_get_flush() { }
 <<__PHPStdLib>>
 function ob_get_length() { }
+<<__PHPStdLib>>
 function ob_get_level() { }
 <<__PHPStdLib>>
 function ob_get_status($full_status = false) { }
+<<__PHPStdLib>>
 function ob_gzhandler($buffer, $mode) { }
 <<__PHPStdLib>>
 function ob_implicit_flush($flag = true) { }
@@ -50,6 +58,7 @@ function hphp_set_iostatus_address($name) { }
 function hphp_get_timers($get_as_float = true) { }
 <<__PHPStdLib>>
 function hphp_output_global_state($serialize = true) { }
+<<__PHPStdLib>>
 function hphp_instruction_counter() { }
 <<__PHPStdLib>>
 function hphp_get_hardware_counters() { }

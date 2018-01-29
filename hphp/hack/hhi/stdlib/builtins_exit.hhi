@@ -10,5 +10,7 @@
  */
 
 // exit and die terminate the request
+<<__PHPStdLib>>
 function exit($exit_code_or_message = 0): noreturn;
+<<__PHPStdLib>>
 function die($exit_code_or_message = 0): noreturn;

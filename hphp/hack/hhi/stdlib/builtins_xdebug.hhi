@@ -9,6 +9,7 @@
  *
  */
 
+<<__PHPStdLib>>
 function xdebug_break(): bool;
 
 <<__PHPStdLib>>

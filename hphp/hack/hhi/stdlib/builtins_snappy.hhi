@@ -15,4 +15,5 @@ function sncompress($data);
 function snuncompress($data);
 <<__PHPStdLib>>
 function snappy_compress(string $data): mixed;
+<<__PHPStdLib>>
 function snappy_uncompress(string $data): mixed;

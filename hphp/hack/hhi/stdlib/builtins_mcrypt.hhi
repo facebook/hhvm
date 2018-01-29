@@ -49,7 +49,9 @@ define('MCRYPT_MODE_ECB', 'ecb');
 define('MCRYPT_MODE_NOFB', 'nofb');
 define('MCRYPT_MODE_OFB', 'ofb');
 define('MCRYPT_MODE_STREAM', 'stream');
+<<__PHPStdLib>>
 function mcrypt_module_open($algorithm, $algorithm_directory, $mode, $mode_directory) { }
+<<__PHPStdLib>>
 function mcrypt_module_close($td) { }
 <<__PHPStdLib>>
 function mcrypt_list_algorithms($lib_dir = null) { }
@@ -71,7 +73,9 @@ function mcrypt_module_is_block_mode($mode, $lib_dir = null) { }
 function mcrypt_module_self_test($algorithm, $lib_dir = null) { }
 <<__PHPStdLib>>
 function mcrypt_create_iv($size, $source = 0) { }
+<<__PHPStdLib>>
 function mcrypt_encrypt($cipher, $key, $data, $mode, $iv = null) { }
+<<__PHPStdLib>>
 function mcrypt_decrypt($cipher, $key, $data, $mode, $iv = null) { }
 <<__PHPStdLib>>
 function mcrypt_cbc($cipher, $key, $data, $mode, $iv = null) { }
@@ -85,6 +89,7 @@ function mcrypt_ofb($cipher, $key, $data, $mode, $iv = null) { }
 function mcrypt_get_block_size($cipher, $module = null) { }
 <<__PHPStdLib>>
 function mcrypt_get_cipher_name($cipher) { }
+<<__PHPStdLib>>
 function mcrypt_get_iv_size($cipher, $mode) { }
 <<__PHPStdLib>>
 function mcrypt_get_key_size($cipher, $module) { }
@@ -92,6 +97,7 @@ function mcrypt_get_key_size($cipher, $module) { }
 function mcrypt_enc_get_algorithms_name($td) { }
 <<__PHPStdLib>>
 function mcrypt_enc_get_block_size($td) { }
+<<__PHPStdLib>>
 function mcrypt_enc_get_iv_size($td) { }
 <<__PHPStdLib>>
 function mcrypt_enc_get_key_size($td) { }
@@ -107,10 +113,13 @@ function mcrypt_enc_is_block_algorithm($td) { }
 function mcrypt_enc_is_block_mode($td) { }
 <<__PHPStdLib>>
 function mcrypt_enc_self_test($td) { }
+<<__PHPStdLib>>
 function mcrypt_generic($td, $data) { }
+<<__PHPStdLib>>
 function mcrypt_generic_init($td, $key, $iv) { }
 <<__PHPStdLib>>
 function mdecrypt_generic($td, $data) { }
+<<__PHPStdLib>>
 function mcrypt_generic_deinit($td) { }
 <<__PHPStdLib>>
 function mcrypt_generic_end($td) { }

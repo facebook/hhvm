@@ -58,8 +58,11 @@ const int LOG_USER = 8;
 const int LOG_UUCP = 64;
 const int LOG_WARNING = 4;
 
+<<__PHPStdLib>>
 function gethostname();
+<<__PHPStdLib>>
 function gethostbyaddr($ip_address);
+<<__PHPStdLib>>
 function gethostbyname($hostname);
 <<__PHPStdLib>>
 function gethostbynamel($hostname);
@@ -71,20 +74,27 @@ function getprotobynumber($number);
 function getservbyname($service, $protocol);
 <<__PHPStdLib>>
 function getservbyport($port, $protocol);
+<<__PHPStdLib>>
 function inet_ntop($in_addr);
+<<__PHPStdLib>>
 function inet_pton($address);
+<<__PHPStdLib>>
 function ip2long($ip_address);
+<<__PHPStdLib>>
 function long2ip($proper_address);
 <<__PHPStdLib>>
 function dns_check_record($host, $type = null);
 <<__PHPStdLib>>
 function checkdnsrr($host, $type = null);
+<<__PHPStdLib>>
 function dns_get_record($hostname, $type = -1, &$authns = null, &$addtl = null);
 <<__PHPStdLib>>
 function dns_get_mx($hostname, &$mxhosts, &$weights = null);
 <<__PHPStdLib>>
 function getmxrr($hostname, &$mxhosts, &$weight = null);
+<<__PHPStdLib>>
 function fsockopen($hostname, $port = -1, &$errnum = null, &$errstr = null, $timeout = 0.0);
+<<__PHPStdLib>>
 function pfsockopen($hostname, $port = -1, &$errnum = null, &$errstr = null, $timeout = 0.0);
 <<__PHPStdLib>>
 function socket_get_status($stream);
@@ -92,22 +102,29 @@ function socket_get_status($stream);
 function socket_set_blocking($stream, $mode);
 <<__PHPStdLib>>
 function socket_set_timeout($stream, $seconds, $microseconds = 0);
+<<__PHPStdLib>>
 function header($str, $replace = true, $http_response_code = 0);
+<<__PHPStdLib>>
 function http_response_code($response_code = 0);
 <<__PHPStdLib>>
 function headers_list();
 <<__PHPStdLib>>
 function get_http_request_size();
+<<__PHPStdLib>>
 function headers_sent(&$file = null, &$line = null);
 <<__PHPStdLib>>
 function header_register_callback($callback);
 <<__PHPStdLib>>
 function header_remove($name = null);
+<<__PHPStdLib>>
 function setcookie($name, $value = null, $expire = 0, $path = null, $domain = null, $secure = false, $httponly = false);
 <<__PHPStdLib>>
 function setrawcookie($name, $value = null, $expire = 0, $path = null, $domain = null, $secure = false, $httponly = false);
 <<__PHPStdLib>>
 function define_syslog_variables();
+<<__PHPStdLib>>
 function openlog($ident, $option, $facility);
+<<__PHPStdLib>>
 function closelog();
+<<__PHPStdLib>>
 function syslog(int $priority, string $message): bool;

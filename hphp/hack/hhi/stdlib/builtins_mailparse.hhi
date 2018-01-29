@@ -8,6 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+<<__PHPStdLib>>
 function mail($to, $subject, $message, $additional_headers = null, $additional_parameters = null) { }
 <<__PHPStdLib>>
 function ezmlm_hash($addr) { }

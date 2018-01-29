@@ -10,4 +10,5 @@
  */
 <<__PHPStdLib>>
 function hphp_get_thread_id(): int;
+<<__PHPStdLib>>
 function hphp_gettid(): int;

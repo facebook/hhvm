@@ -12,6 +12,7 @@ const int PAGELET_NOT_READY = 0;
 const int PAGELET_READY = 0;
 const int PAGELET_DONE = 0;
 
+<<__PHPStdLib>>
 function dangling_server_proxy_old_request();
 <<__PHPStdLib>>
 function pagelet_server_is_enabled();

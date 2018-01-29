@@ -75,5 +75,6 @@ function filter_input(int $type, string $variable_name, int $filter = FILTER_DEF
 function filter_list(): array<string> {}
 <<__PHPStdLib>>
 function filter_var_array(array $data, mixed $definition = null, bool $add_empty = true) {}
+<<__PHPStdLib>>
 function filter_var(mixed $value, int $filter = FILTER_DEFAULT, mixed $options = null) {}
 

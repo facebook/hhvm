@@ -226,6 +226,7 @@ function collator_sort($obj, &$arr, $sort_flag = null) {}
 function idn_to_ascii($domain, $options = 0, $variant = 0, &$idna_info = null) {}
 <<__PHPStdLib>>
 function idn_to_unicode($domain, $options = 0, $variant = 0, &$idna_info = null) {}
+<<__PHPStdLib>>
 function idn_to_utf8($domain, $options = 0, $variant = 0, &$idna_info = null) {}
 <<__PHPStdLib>>
 function datefmt_create($locale, $date_type, $time_type, $timezone_str = null, $calendar = null, $pattern = null) {}

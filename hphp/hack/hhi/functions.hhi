@@ -25,30 +25,41 @@ function unset($x): void;
 function freeze($x) : void;
 
 //
+<<__PHPStdLib>>
 function array_fill<T>(int $start_index, int $num, T $value): array<T>;
 // TODO make non-nullable once Thrift files are fixed
+<<__PHPStdLib>>
 function chr(int $ascii): string;
+<<__PHPStdLib>>
 function count(mixed $x, int $mode = COUNT_NORMAL): int; // count takes Countable or array. We'll need to hardcode this...
+<<__PHPStdLib>>
 function dechex(int $number): string;
 function func_get_args(): array;
+<<__PHPStdLib>>
 function implode(string $glue, $pieces): string; // could be Container<Stringish>
+<<__PHPStdLib>>
 function explode(string $delimiter, ?Stringish $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
 function is_array(mixed $arg): bool;
 function is_vec(mixed $arg): bool;
 function is_dict(mixed $arg): bool;
 function is_keyset(mixed $arg): bool;
+<<__PHPStdLib>>
 function ord(string $string): int;
+<<__PHPStdLib>>
 function strip_tags(string $str, string $allowable_tags = ''): string;
 
+<<__PHPStdLib>>
 function intval($v, $base = 10): int;
 <<__PHPStdLib>>
 function doubleval($v): float;
 <<__PHPStdLib>>
 function floatval($v): float;
+<<__PHPStdLib>>
 function strval($v): string;
 <<__PHPStdLib>>
 function boolval($v): bool;
 
+<<__PHPStdLib>>
 function get_class_constants($class_name): array;
 
 // the return value is an instance with class $class

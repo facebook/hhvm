@@ -14,22 +14,34 @@
  *
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
+<<__PHPStdLib>>
 function array_key_exists<Tk, Tv>(mixed $key, ?KeyedContainer<Tk, Tv> $search): bool;
 
+<<__PHPStdLib>>
 function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;
+<<__PHPStdLib>>
 function array_product/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 
+<<__PHPStdLib>>
 function sort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+<<__PHPStdLib>>
 function rsort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+<<__PHPStdLib>>
 function asort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+<<__PHPStdLib>>
 function arsort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+<<__PHPStdLib>>
 function ksort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
+<<__PHPStdLib>>
 function krsort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 // $c is a callable of type (function(Tv,Tv): bool)
+<<__PHPStdLib>>
 function usort<Tv>(Container<Tv> &$arg, mixed $c): bool;
 // $c is a callable of type (function(Tv,Tv): bool)
+<<__PHPStdLib>>
 function uasort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
 // $c is a callable of type (function(Tk,Tk): bool)
+<<__PHPStdLib>>
 function uksort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
 
 /**

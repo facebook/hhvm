@@ -21,15 +21,23 @@ const int PHP_URL_FRAGMENT = 7;
 const int PHP_QUERY_RFC1738 = 1;
 const int PHP_QUERY_RFC3986 = 2;
 
+<<__PHPStdLib>>
 function base64_decode($data, $strict = false);
+<<__PHPStdLib>>
 function base64_encode($data);
 <<__PHPStdLib>>
 function get_headers($url, $format = 0);
 <<__PHPStdLib>>
 function get_meta_tags($filename, $use_include_path = false);
+<<__PHPStdLib>>
 function http_build_query($formdata, $numeric_prefix = null, $arg_separator = null, $enc_type = PHP_QUERY_RFC1738): string;
+<<__PHPStdLib>>
 function parse_url($url, $component = -1);
+<<__PHPStdLib>>
 function rawurldecode($str);
+<<__PHPStdLib>>
 function rawurlencode($str);
+<<__PHPStdLib>>
 function urldecode($str);
+<<__PHPStdLib>>
 function urlencode($str);

@@ -34,6 +34,7 @@ function gmp_and(mixed $a,
 function gmp_clrbit(mixed &$a,
                     int $index): void;
 
+<<__PHPStdLib>>
 function gmp_cmp(mixed $a,
                  mixed $b): mixed;
 
@@ -160,6 +161,7 @@ function gmp_setbit(mixed &$a,
                     int $index,
                     bool $bit_on = true): void;
 
+<<__PHPStdLib>>
 function gmp_sign(mixed $a): mixed;
 
 <<__PHPStdLib>>

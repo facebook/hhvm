@@ -8,9 +8,13 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+<<__PHPStdLib>>
 function apc_add($key, $var, $ttl = 0, $cache_id = 0) { }
+<<__PHPStdLib>>
 function apc_store($key, $var, $ttl = 0, $cache_id = 0) { }
+<<__PHPStdLib>>
 function apc_fetch($key, &$success = null, $cache_id = 0) { }
+<<__PHPStdLib>>
 function apc_delete($key, $cache_id = 0) { }
 <<__PHPStdLib>>
 function apc_cache_info($cache_type = "", $limited = false) { }
@@ -18,9 +22,13 @@ function apc_cache_info($cache_type = "", $limited = false) { }
 function apc_clear_cache($cache_id = 0) { }
 <<__PHPStdLib>>
 function apc_sma_info($limited = false) { }
+<<__PHPStdLib>>
 function apc_inc($key, $step = 1, &$success = null, $cache_id = 0) { }
+<<__PHPStdLib>>
 function apc_dec($key, $step = 1, &$success = null, $cache_id = 0) { }
+<<__PHPStdLib>>
 function apc_cas($key, $old_cas, $new_cas, $cache_id = 0) { }
+<<__PHPStdLib>>
 function apc_exists($key, $cache_id = 0) { }
 
 // The following are php std lib functions not supported by HHVM:

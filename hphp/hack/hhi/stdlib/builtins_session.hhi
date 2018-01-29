@@ -36,6 +36,7 @@ function session_cache_expire($new_cache_expire = null) { }
 function session_encode() { }
 <<__PHPStdLib>>
 function session_decode($data) { }
+<<__PHPStdLib>>
 function session_start() { }
 <<__PHPStdLib>>
 function session_destroy() { }
@@ -45,9 +46,11 @@ function session_unset() { }
 function session_commit() { }
 <<__PHPStdLib>>
 function session_write_close() { }
+<<__PHPStdLib>>
 function session_register($var_names, ...) { }
 <<__PHPStdLib>>
 function session_register_shutdown() { }
+<<__PHPStdLib>>
 function session_is_registered($varname) { }
 <<__PHPStdLib>>
 function session_status() { }

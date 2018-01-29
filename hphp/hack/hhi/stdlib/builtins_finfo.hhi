@@ -18,13 +18,17 @@ const FILEINFO_CONTINUE = 32;
 const FILEINFO_PRESERVE_ATIME = 128;
 const FILEINFO_RAW = 256;
 
+<<__PHPStdLib>>
 function finfo_open($options = null, $magic_file = null) {}
+<<__PHPStdLib>>
 function finfo_close($finfo) {}
 <<__PHPStdLib>>
 function finfo_set_flags($finfo, $options) {}
+<<__PHPStdLib>>
 function finfo_file($finfo, $file_name, $options = null, $context = null) {}
 <<__PHPStdLib>>
 function finfo_buffer($finfo ,$string, $options = FILEINFO_NONE, $context = NULL) {}
+<<__PHPStdLib>>
 function mime_content_type($filename) {}
 
 class finfo {

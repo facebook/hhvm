@@ -85,7 +85,9 @@ interface SprintfQuote {
   public function format_0x3d() : PlainSprintf;
 }
 
+<<__PHPStdLib>>
 function sprintf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): string;
+<<__PHPStdLib>>
 function printf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): int;
 
 // Results in an \HH\InvariantException whose message is the result of

@@ -502,6 +502,7 @@ const int CURLSHOPT_SHARE = 0;
 const int CURLSHOPT_UNSHARE = 0;
 
 
+<<__PHPStdLib>>
 function curl_init($url = null);
 <<__PHPStdLib>>
 function curl_init_pooled($pool_name, $url = null);
@@ -509,26 +510,41 @@ function curl_init_pooled($pool_name, $url = null);
 function curl_copy_handle($ch);
 <<__PHPStdLib>>
 function curl_version($uversion = CURLVERSION_NOW);
+<<__PHPStdLib>>
 function curl_setopt($ch, $option, $value);
+<<__PHPStdLib>>
 function curl_setopt_array($ch, $options);
+<<__PHPStdLib>>
 function curl_exec($ch);
+<<__PHPStdLib>>
 function curl_getinfo($ch, $opt = 0);
+<<__PHPStdLib>>
 function curl_errno($ch);
+<<__PHPStdLib>>
 function curl_error($ch);
 <<__PHPStdLib>>
 function curl_strerror($code);
+<<__PHPStdLib>>
 function curl_close($ch);
+<<__PHPStdLib>>
 function curl_multi_init();
 <<__PHPStdLib>>
 function curl_multi_strerror($errornum);
+<<__PHPStdLib>>
 function curl_multi_add_handle($mh, $ch);
+<<__PHPStdLib>>
 function curl_multi_remove_handle($mh, $ch);
+<<__PHPStdLib>>
 function curl_multi_exec($mh, &$still_running);
+<<__PHPStdLib>>
 function curl_multi_select($mh, $timeout = 1.0);
 <<__PHPStdLib>>
 function curl_multi_await($mh, float $timeout = 1.0): Awaitable<int>;
+<<__PHPStdLib>>
 function curl_multi_getcontent($ch);
+<<__PHPStdLib>>
 function curl_multi_info_read($mh, &$msgs_in_queue = null);
+<<__PHPStdLib>>
 function curl_multi_close($mh);
 <<__PHPStdLib>>
 function curl_share_init();

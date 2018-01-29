@@ -233,6 +233,12 @@ void emitCmpLowPtr(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
  */
 void emitCmpVecLen(Vout& v, Vreg sf, Immed val, Vptr mem);
 
+/*
+ * emit an isCollection(obj) range check. The returned status
+ * flags can be tested; CC_BE means true
+ */
+Vreg emitIsCollection(Vout& v, Vreg obj);
+
 ///////////////////////////////////////////////////////////////////////////////
 // VM intrinsics.
 

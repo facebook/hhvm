@@ -51,7 +51,8 @@ enum class HeaderKind : uint8_t {
 
   // Valid kinds for an ObjectData; all but Object are isCppBuiltin()
   Object, WaitHandle, AsyncFuncWH, AwaitAllWH, Closure,
-  // Collections
+  // Collections. Vector and ImmSet are used for range checks; be careful
+  // when adding new collection kinds.
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
 
   // other kinds, not used for countable objects.

@@ -43,7 +43,6 @@ extern const StaticString
 
 constexpr ObjectData::Attribute objectFlags =
   static_cast<ObjectData::Attribute>(
-    ObjectData::IsCollection |
     ObjectData::CallToImpl |
     ObjectData::NoDestructor |
     ObjectData::UseGet |

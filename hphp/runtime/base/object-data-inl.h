@@ -34,7 +34,7 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   initHeader_16(kind, OneReference, flags | cls->getODAttrs());
   assert(isObjectKind(m_kind));
   assert(!cls->needInitialization() || cls->initialized());
-  assert(!getAttribute(IsCollection)); // collections use NoInit{}
+  assert(!isCollection()); // collections use NoInit{}
   o_id = ++os_max_id;
   instanceInit(cls);
 }
@@ -148,7 +148,7 @@ inline bool ObjectData::isBeingConstructed() const {
 }
 
 inline bool ObjectData::isCollection() const {
-  return getAttribute(Attribute::IsCollection);
+  return m_kind >= HeaderKind::Vector && m_kind <= HeaderKind::ImmSet;
 }
 
 inline bool ObjectData::isCppBuiltin() const {

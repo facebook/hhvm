@@ -146,14 +146,8 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
 
   unlikelyCond(v, vcold(env), CC_NZ, sf, dst,
     [&] (Vout& v) {
-      auto const sf = v.makeReg();
-      v << testwim{
-        ObjectData::IsCollection,
-        src[ObjectData::attributeOff()],
-        sf
-      };
-
-      return cond(v, CC_NZ, sf, v.makeReg(),
+      auto const sf = emitIsCollection(v, src);
+      return cond(v, CC_BE, sf, v.makeReg(),
         [&] (Vout& v) { // src points to native collection
           auto const d = v.makeReg();
           auto const sf = v.makeReg();

@@ -74,9 +74,8 @@ void cgIsCol(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  auto const sf = v.makeReg();
-  v << testwim{ObjectData::IsCollection, src[ObjectData::attributeOff()], sf};
-  v << setcc{CC_NE, sf, dst};
+  auto const sf = emitIsCollection(v, src);
+  v << setcc{CC_BE, sf, dst};
 }
 
 void cgColIsEmpty(IRLS& env, const IRInstruction* inst) {

@@ -98,8 +98,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                             // finished. Only set during construction when the
                             // class has immutable properties (to temporarily
                             // allow writing to them).
-    IsCollection  = 0x2000, // it's a collection (and the specific type is
-                            // one of the CollectionType HeaderKind values
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
     HasNativePropHandler    // class has native magic props handler
                   = 0x8000

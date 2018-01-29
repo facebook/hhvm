@@ -437,6 +437,22 @@ void emitCmpVecLen(Vout& v, Vreg sf, Immed val, Vptr mem) {
   }
 }
 
+/*
+ * Generate range check for isCollection:
+ * set CC_BE if obj->m_kind - HeaderKind::Vector <= HeaderKind::ImmSet
+ */
+Vreg emitIsCollection(Vout& v, Vreg obj) {
+  auto const sf = v.makeReg();
+  auto const mincol = static_cast<int>(HeaderKind::Vector);
+  auto const maxcol = static_cast<int>(HeaderKind::ImmSet);
+  auto const kind = v.makeReg();
+  auto const col_kind = v.makeReg();
+  v << loadzbl{obj[HeaderKindOffset], kind};
+  v << subli{mincol, kind, col_kind, v.makeReg()};
+  v << cmpli{maxcol - mincol, col_kind, sf};
+  return sf;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp) {

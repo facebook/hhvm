@@ -50,11 +50,14 @@ let rec parse_attribute c =
                               | 1 -> Some (Typed_value.Bool true)
                               | _ -> None)
            | 'd' -> Scanf.bscanf c "d:%0c"
-                   (fun ch -> match ch with
+                   ( let read_float c =
+                       Scanf.bscanf c "%g;" (fun f -> Some (Typed_value.Float f)) in
+                     fun ch -> match ch with
                             | 'N' -> Scanf.bscanf c "NAN;" (Some (Typed_value.Float nan))
                             | 'I' -> Scanf.bscanf c "INF;" (Some (Typed_value.Float infinity))
-                            | '-' -> Scanf.bscanf c "-INF;" (Some (Typed_value.Float neg_infinity))
-                            | _   -> Scanf.bscanf c "%g;" (fun f -> Some (Typed_value.Float f)))
+                            | _ ->
+                                (try Scanf.bscanf c "-INF;" (Some (Typed_value.Float neg_infinity))
+                                with _ -> read_float c))
            | 's' -> Scanf.bscanf c "s:%d:\""
                    (fun n -> let myfmt =
                                  Scanf.format_from_string

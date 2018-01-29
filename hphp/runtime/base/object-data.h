@@ -87,7 +87,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     UseGet        = 0x0008, // __get()
     UseIsset      = 0x0010, // __isset()
     UseUnset      = 0x0020, // __unset()
-    IsWaitHandle  = 0x0040, // This is a c_WaitHandle or derived
     IsWeakRefed   = 0x0080, // Is pointed to by at least one WeakRef
     HasClone      = 0x0100, // defines __clone PHP method
                             // only valid when !isCppBuiltin()
@@ -230,6 +229,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   bool isImmutableCollection() const;
   CollectionType collectionType() const; // asserts(isCollection())
   HeaderKind headerKind() const;
+
+  // True if this is a c_WaitHandle or derived
+  bool isWaitHandle() const;
 
   bool getAttribute(Attribute) const;
   void setAttribute(Attribute);

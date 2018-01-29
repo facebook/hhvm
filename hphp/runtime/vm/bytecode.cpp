@@ -6443,7 +6443,7 @@ OPTBLD_INLINE TCA iopAwaitAll(PC& pc, LocalRange locals) {
   auto obj = Object::attach(c_AwaitAllWaitHandle::fromFrameNoCheck(
     locals.restCount + 1, cnt, frame_local(vmfp(), locals.first)
   ));
-  assert(obj->getAttribute(ObjectData::IsWaitHandle));
+  assert(obj->isWaitHandle());
   assert(!static_cast<c_WaitHandle*>(obj.get())->isFinished());
 
   vmStack().pushObjectNoRc(obj.detach());

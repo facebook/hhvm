@@ -251,9 +251,9 @@ inline bool isHackArrayKind(HeaderKind k) {
 }
 
 inline bool isWaithandleKind(HeaderKind k) {
-  return k == HeaderKind::WaitHandle ||
-         k == HeaderKind::AwaitAllWH ||
-         k == HeaderKind::AsyncFuncWH;
+  return k >= HeaderKind::WaitHandle && k <= HeaderKind::AwaitAllWH;
+  static_assert((int)HeaderKind::AwaitAllWH - (int)HeaderKind::WaitHandle == 2,
+                "isWaithandleKind requires updating");
 }
 
 inline bool isBigKind(HeaderKind k) {

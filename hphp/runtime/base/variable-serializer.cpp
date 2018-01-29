@@ -1686,7 +1686,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
     // as they contain internal state via non-NativeData means.
     auto cls = obj->getVMClass();
     if ((cls->instanceCtor() && !cls->isCppSerializable()) ||
-        obj->getAttribute(ObjectData::IsWaitHandle)) {
+        obj->isWaitHandle()) {
       raise_warning("Attempted to serialize unserializable builtin class %s",
                     obj->getVMClass()->preClass()->name()->data());
       Variant placeholder = init_null();

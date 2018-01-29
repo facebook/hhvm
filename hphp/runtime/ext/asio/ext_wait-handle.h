@@ -84,7 +84,7 @@ struct c_ExternalThreadEventWaitHandle;
 template<class T>
 T* wait_handle(const ObjectData* obj) {
   assert(obj->instanceof(T::classof()));
-  assert(obj->getAttribute(ObjectData::IsWaitHandle));
+  assert(obj->isWaitHandle());
   return static_cast<T*>(const_cast<ObjectData*>(obj));
 }
 
@@ -105,9 +105,7 @@ struct c_WaitHandle : ObjectData {
 
   explicit c_WaitHandle(Class* cls, HeaderKind kind,
                         type_scan::Index tyindex) noexcept
-    : ObjectData(cls, NoInit{},
-                 ObjectData::IsWaitHandle | ObjectData::NoDestructor,
-                 kind),
+    : ObjectData(cls, NoInit{}, ObjectData::NoDestructor, kind),
       m_tyindex(tyindex)
   {
     assert(type_scan::isKnownType(tyindex));
@@ -126,13 +124,12 @@ struct c_WaitHandle : ObjectData {
 
   static c_WaitHandle* fromCell(Cell cell) {
     return (
-        cell.m_type == KindOfObject &&
-        cell.m_data.pobj->getAttribute(ObjectData::IsWaitHandle)
+        cell.m_type == KindOfObject && cell.m_data.pobj->isWaitHandle()
       ) ? static_cast<c_WaitHandle*>(cell.m_data.pobj) : nullptr;
   }
   static c_WaitHandle* fromCellAssert(Cell cell) {
     assert(cell.m_type == KindOfObject);
-    assert(cell.m_data.pobj->getAttribute(ObjectData::IsWaitHandle));
+    assert(cell.m_data.pobj->isWaitHandle());
     return static_cast<c_WaitHandle*>(cell.m_data.pobj);
   }
   bool isFinished() const { return getState() <= STATE_FAILED; }

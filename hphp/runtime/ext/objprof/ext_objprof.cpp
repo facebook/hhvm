@@ -723,7 +723,7 @@ std::pair<int, double> getObjSize(
     obj
   );
   int size;
-  if (UNLIKELY(obj->getAttribute(ObjectData::IsWaitHandle))) {
+  if (UNLIKELY(obj->isWaitHandle())) {
     size = asio_object_size(obj);
   } else {
     size = sizeof(ObjectData);

@@ -155,6 +155,10 @@ inline bool ObjectData::isCppBuiltin() const {
   return HPHP::isCppBuiltin(m_kind);
 }
 
+inline bool ObjectData::isWaitHandle() const {
+  return isWaithandleKind(m_kind);
+}
+
 inline bool ObjectData::isMutableCollection() const {
   return isCollection() && HPHP::isMutableCollection(collectionType());
 }

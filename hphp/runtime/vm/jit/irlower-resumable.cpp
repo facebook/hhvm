@@ -397,16 +397,18 @@ void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
 void cgIsWaitHandle(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const obj = srcLoc(env, inst, 0).reg();
-
-  static_assert(
-    ObjectData::IsWaitHandle < 0xff,
-    "We use byte instructions for IsWaitHandle."
-  );
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
-  v << testwim{ObjectData::IsWaitHandle, obj[ObjectData::attributeOff()], sf};
-  v << setcc{CC_NZ, sf, dst};
+  auto const kind = v.makeReg();
+  auto const wh_index = v.makeReg();
+  auto constexpr minwh = (int)HeaderKind::WaitHandle;
+  auto constexpr maxwh = (int)HeaderKind::AwaitAllWH;
+  v << loadzbl{obj[HeaderKindOffset], kind};
+  v << subli{minwh, kind, wh_index, v.makeReg()};
+  v << cmpli{maxwh - minwh, wh_index, sf};
+  v << setcc{CC_BE, sf, dst};
+  static_assert(maxwh - minwh == 2, "WH range check needs updating");
 }
 
 void cgLdWHState(IRLS& env, const IRInstruction* inst) {

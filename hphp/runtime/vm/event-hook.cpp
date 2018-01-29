@@ -591,7 +591,7 @@ void EventHook::onFunctionSuspendAwaitEG(ActRec* suspending) {
 void EventHook::onFunctionSuspendAwaitR(ActRec* suspending, ObjectData* child) {
   assertx(suspending->func()->isAsync());
   assertx(suspending->resumed());
-  assertx(child->getAttribute(ObjectData::IsWaitHandle));
+  assertx(child->isWaitHandle());
 
   auto const flags = handle_request_surprise();
   onFunctionExit(suspending, nullptr, false, nullptr, flags, true);

@@ -820,7 +820,6 @@ let decl_and_run_mode {filename; mode; no_builtins; tcopt} popt =
   if mode = Dump_deps then Typing_deps.debug_trace := Typing_deps.Full
   else if mode = Dump_bazooka_deps
     then Typing_deps.debug_trace := Typing_deps.Bazooka;
-  Local_id.track_names := true;
   Ident.track_names := true;
   let builtins = if no_builtins then Relative_path.Map.empty else builtins in
   let filename = Relative_path.create Relative_path.Dummy filename in

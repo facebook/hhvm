@@ -397,7 +397,6 @@ let decl_and_run_mode compiler_options popt =
 
   set_compiler_options ini_config_json;
   let dumped_options = lazy (Hhbc_options.to_string !Hhbc_options.compiler_options) in
-  Local_id.track_names := true;
   Ident.track_names := true;
 
   match compiler_options.mode with

@@ -84,7 +84,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     NoDestructor  = 0x0001, // __destruct()
     IsWeakRefed   = 0x0080, // Is pointed to by at least one WeakRef
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
-    HasNativeData = 0x0400, // HNI Class with <<__NativeData("T")>>
     HasDynPropArr = 0x0800, // has a dynamic properties array
     IsBeingConstructed
                   = 0x1000, // Constructor for most derived class has not
@@ -225,6 +224,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   bool getAttribute(Attribute) const;
   void setAttribute(Attribute);
   bool hasInstanceDtor() const;
+  bool hasNativeData() const;
   bool noDestruct() const;
   void setNoDestruct();
   void clearNoDestruct();

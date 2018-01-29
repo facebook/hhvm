@@ -201,7 +201,11 @@ inline void ObjectData::clearNoDestruct() {
 }
 
 inline bool ObjectData::hasInstanceDtor() const {
-  return getAttribute(HasNativeData) || isCppBuiltin();
+  return HPHP::hasInstanceDtor(m_kind);
+}
+
+inline bool ObjectData::hasNativeData() const {
+  return m_kind == HeaderKind::NativeObject;
 }
 
 inline uint32_t ObjectData::getId() const {

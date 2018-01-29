@@ -264,7 +264,6 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
         break;
 
       // cases that have explicit pointer name
-      case HeaderKind::AsyncFuncWH:
       case HeaderKind::AsyncFuncFrame:
       case HeaderKind::ClosureHdr:
       case HeaderKind::Closure:
@@ -286,6 +285,8 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
         break;
       }
 
+      case HeaderKind::NativeObject:
+      case HeaderKind::AsyncFuncWH:
       case HeaderKind::Vector:
       case HeaderKind::ImmVector:
       case HeaderKind::Set:

@@ -97,7 +97,7 @@ struct BaseGenerator {
     auto const tyindex = type_scan::getIndexForMalloc<T>();
     node->obj_offset = obj_offset;
     node->initHeader_32_16(HeaderKind::NativeData, ar_off, tyindex);
-    auto const obj = new (objmem) ObjectData(cls, ObjectData::HasNativeData);
+    auto const obj = new (objmem) ObjectData(cls, 0, HeaderKind::NativeObject);
     assert((void*)obj == (void*)objmem);
     assert(obj->hasExactlyOneRef());
     assert(obj->noDestruct());

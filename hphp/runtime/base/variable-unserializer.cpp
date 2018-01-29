@@ -1096,7 +1096,7 @@ void VariableUnserializer::unserializeVariant(
           // already unserialized. We also ensure that nativeDataWakeup is
           // invoked regardless of whether or not serialized native data exists
           // within the serialized content.
-          if (obj->getAttribute(ObjectData::HasNativeData) &&
+          if (obj->hasNativeData() &&
               obj->getVMClass()->getNativeDataInfo()->isSerializable()) {
             Native::nativeDataWakeup(obj.get(), serializedNativeData);
           } else if (hasSerializedNativeData) {

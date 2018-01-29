@@ -49,8 +49,9 @@ enum class HeaderKind : uint8_t {
   // Other ordinary refcounted heap objects
   String, Resource, Ref,
 
-  // Valid kinds for an ObjectData; all but Object are isCppBuiltin()
-  Object, WaitHandle, AsyncFuncWH, AwaitAllWH, Closure,
+  // Valid kinds for an ObjectData; all but Object and NativeObject are
+  // isCppBuiltin()
+  Object, NativeObject, WaitHandle, AsyncFuncWH, AwaitAllWH, Closure,
   // Collections. Vector and ImmSet are used for range checks; be careful
   // when adding new collection kinds.
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
@@ -236,12 +237,20 @@ namespace detail {
 // pass the isCppBuiltin() predicate.
 constexpr auto FirstCppBuiltin = HeaderKind::WaitHandle;
 constexpr auto LastCppBuiltin = HeaderKind::ImmSet;
-static_assert((int)LastCppBuiltin - (int)FirstCppBuiltin == 10,
+static_assert(uint8_t(LastCppBuiltin) - uint8_t(FirstCppBuiltin) == 10,
               "keep predicate in sync with enum");
 }
 
+// legacy CppBuiltins have custom C++ types (not plain ObjectData layouts)
+// are not considered HNI objects, and do not have NativeData headers.
 inline bool isCppBuiltin(HeaderKind k) {
   return k >= detail::FirstCppBuiltin && k <= detail::LastCppBuiltin;
+}
+
+inline bool hasInstanceDtor(HeaderKind k) {
+  static_assert(uint8_t(HeaderKind::NativeObject) + 1 ==
+                uint8_t(detail::FirstCppBuiltin), "");
+  return k >= HeaderKind::NativeObject && k <= detail::LastCppBuiltin;
 }
 
 inline bool isHackArrayKind(HeaderKind k) {

@@ -75,7 +75,7 @@ inline void scanNative(const NativeNode* node, type_scan::Scanner& scanner) {
 }
 
 inline void scanAFWH(const c_WaitHandle* wh, type_scan::Scanner& scanner) {
-  assert(!wh->getAttribute(ObjectData::HasNativeData));
+  assert(!wh->hasNativeData());
   // scan ResumableHeader before object
   auto r = Resumable::FromObj(wh);
   if (!wh->isFinished()) {
@@ -104,26 +104,17 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::Closure:
       scanner.scan(*static_cast<const c_Closure*>(h)->hdr());
       return static_cast<const c_Closure*>(h)->scan(scanner);
-    case HeaderKind::Object: {
-      // native objects should hit the NativeData case below.
-      auto obj = static_cast<const ObjectData*>(h);
-      assert(!obj->getAttribute(ObjectData::HasNativeData));
-      return obj->scan(scanner);
-    }
-    case HeaderKind::WaitHandle: {
+    case HeaderKind::Object:
+      // NativeObject should hit the NativeData case below.
+      return static_cast<const ObjectData*>(h)->scan(scanner);
+    case HeaderKind::WaitHandle:
       // scan C++ properties after [ObjectData] header. should pick up
       // unioned and bit-packed fields
-      auto wh = static_cast<const c_WaitHandle*>(h);
-      assert(!wh->getAttribute(ObjectData::HasNativeData));
-      return wh->scan(scanner);
-    }
-    case HeaderKind::AwaitAllWH: {
+      return static_cast<const c_WaitHandle*>(h)->scan(scanner);
+    case HeaderKind::AwaitAllWH:
       // scan C++ properties after [ObjectData] header. should pick up
       // unioned and bit-packed fields
-      auto aawh = static_cast<const c_AwaitAllWaitHandle*>(h);
-      assert(!aawh->getAttribute(ObjectData::HasNativeData));
-      return aawh->scan(scanner);
-    }
+      return static_cast<const c_AwaitAllWaitHandle*>(h)->scan(scanner);
     case HeaderKind::AsyncFuncWH:
       return scanAFWH(static_cast<const c_WaitHandle*>(h), scanner);
     case HeaderKind::NativeData: {
@@ -165,6 +156,9 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       // these don't have pointers. some clients might generically
       // scan them even if they aren't interesting.
       return;
+    case HeaderKind::NativeObject:
+      // should have scanned the NativeData header.
+      break;
     case HeaderKind::BigObj:
     case HeaderKind::Slab:
     case HeaderKind::Hole:

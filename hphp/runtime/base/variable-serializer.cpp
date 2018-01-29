@@ -1697,7 +1697,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       handleSleep = true;
       ret = const_cast<ObjectData*>(obj)->invokeSleep();
     }
-    if (obj->getAttribute(ObjectData::HasNativeData)) {
+    if (obj->hasNativeData()) {
       auto* ndi = cls->getNativeDataInfo();
       if (ndi->isSerializable()) {
         serializableNativeData = Native::nativeDataSleep(obj);

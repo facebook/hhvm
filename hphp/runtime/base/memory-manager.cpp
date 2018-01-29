@@ -432,8 +432,8 @@ const std::array<char*,NumHeaderKinds> header_names = {{
   "PackedArray", "MixedArray", "EmptyArray", "ApcArray",
   "GlobalsArray", "DictArray", "VecArray", "KeysetArray",
   "String", "Resource", "Ref",
-  "Object", "WaitHandle", "AsyncFuncWH", "AwaitAllWH", "Closure",
-  "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
+  "Object", "NativeObject", "WaitHandle", "AsyncFuncWH", "AwaitAllWH",
+  "Closure", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
   "AsyncFuncFrame", "NativeData", "ClosureHdr",
   "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole", "Slab"
@@ -525,6 +525,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::Keyset:
       case HeaderKind::Globals:
       case HeaderKind::Object:
+      case HeaderKind::NativeObject:
       case HeaderKind::WaitHandle:
       case HeaderKind::AsyncFuncWH:
       case HeaderKind::AwaitAllWH:

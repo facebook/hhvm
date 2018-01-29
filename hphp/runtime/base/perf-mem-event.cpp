@@ -306,6 +306,7 @@ bool record_request_heap_mem_event(const void* addr,
       break;
 
     case HeaderKind::Object:
+    case HeaderKind::NativeObject:
     case HeaderKind::Closure:
     case HeaderKind::WaitHandle:
     case HeaderKind::AsyncFuncWH:

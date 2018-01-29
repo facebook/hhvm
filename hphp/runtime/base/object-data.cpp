@@ -746,7 +746,7 @@ ObjectData* ObjectData::clone() {
   // clone prevents a leak if something throws before clone() returns
   Object clone;
   auto const nProps = m_cls->numDeclProperties();
-  if (getAttribute(HasNativeData)) {
+  if (hasNativeData()) {
     assertx(m_cls->instanceCtor() == Native::nativeDataInstanceCtor);
     clone = Object::attach(
       Native::nativeDataInstanceCopyCtor(this, m_cls, nProps)

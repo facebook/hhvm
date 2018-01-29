@@ -55,10 +55,7 @@ struct Counter {
 };
 
 bool hasNativeData(const HeapObject* h) {
-  assert(isObjectKind(h->kind()));
-  return static_cast<const ObjectData*>(h)->getAttribute(
-      ObjectData::HasNativeData
-  );
+  return h->kind() == HeaderKind::NativeObject;
 }
 
 constexpr auto MinMark = GCBits(1);
@@ -188,9 +185,8 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::ImmSet:
     case HeaderKind::WaitHandle:
     case HeaderKind::AwaitAllWH:
-      // Object kinds. None of these should have native-data, because if they
+      // Object kinds. None of these have native-data, because if they
       // do, the mapped header should be for the NativeData prefix.
-      assert(!hasNativeData(h));
       break;
     case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
@@ -202,8 +198,9 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
       break;
     case HeaderKind::Closure:
     case HeaderKind::AsyncFuncWH:
-      // These header types should not be found during heap or slab iteration
-      // because they are appended to ClosureHdr or AsyncFuncFrame.
+    case HeaderKind::NativeObject:
+      // These headers shouldn't be found during heap or slab iteration because
+      // they are appended to ClosureHdr, AsyncFuncFrame, or NativeData.
     case HeaderKind::BigObj:
     case HeaderKind::Slab:
     case HeaderKind::Free:

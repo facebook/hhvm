@@ -246,6 +246,7 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* Resource */
     sizeClass<RefData>(),
     0, /* Object */
+    0, /* NativeObject */
     0, /* WaitHandle */
     sizeClass<c_AsyncFunctionWaitHandle>(),
     0, /* AwaitAllWH */
@@ -292,6 +293,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(String)
   CHECKSIZE(Resource)
   CHECKSIZE(Object)
+  CHECKSIZE(NativeObject)
   CHECKSIZE(WaitHandle)
   CHECKSIZE(AwaitAllWH)
   CHECKSIZE(Closure)
@@ -404,6 +406,7 @@ inline size_t allocSize(const HeapObject* h) {
       // Free and Slab are guaranteed to be already size-class aligned.
       // Holes are not size-class aligned.
       return size;
+    case HeaderKind::NativeObject:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::Empty:
     case HeaderKind::Globals:
@@ -415,7 +418,6 @@ inline size_t allocSize(const HeapObject* h) {
     case HeaderKind::ImmMap:
     case HeaderKind::ImmSet:
     case HeaderKind::Ref:
-      // these have a constant size in kind_sizes[]
       not_reached();
   }
   return MemoryManager::sizeClass(size);

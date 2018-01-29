@@ -35,7 +35,6 @@ struct NativeDataInfo {
   typedef void (*WakeupFunc)(ObjectData *wakeup, const Variant& data);
 
   size_t sz;
-  uint16_t odattrs;
   type_scan::Index tyindex;
   InitFunc init; // new Object
   CopyFunc copy; // clone $obj
@@ -249,8 +248,7 @@ inline ObjectData* obj(NativeNode* node) {
   auto obj = reinterpret_cast<ObjectData*>(
     reinterpret_cast<char*>(node) + node->obj_offset
   );
-  assert(isObjectKind(obj->headerKind()));
-  assert(obj->getAttribute(ObjectData::HasNativeData));
+  assert(obj->hasNativeData());
   return obj;
 }
 
@@ -259,8 +257,7 @@ inline const ObjectData* obj(const NativeNode* node) {
   auto obj = reinterpret_cast<const ObjectData*>(
     reinterpret_cast<const char*>(node) + node->obj_offset
   );
-  assert(isObjectKind(obj->headerKind()));
-  assert(obj->getAttribute(ObjectData::HasNativeData));
+  assert(obj->hasNativeData());
   return obj;
 }
 

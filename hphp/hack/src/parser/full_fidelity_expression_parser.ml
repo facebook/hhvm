@@ -1039,10 +1039,27 @@ TODO: Update the spec to allow qualified-name < type arguments >
 TODO: This will need to be fixed to allow situations where the qualified name
       is also a non-reserved token.
     *)
+    let default parser =
+      parse_expression_with_operator_precedence parser Operator.NewOperator in
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Parent
-    | Self
+    | Self ->
+      begin match peek_token_kind parser1 with
+      | LeftParen -> (parser1, make_token token)
+      | LessThan ->
+        let parser1, type_arguments =
+          parse_generic_type_arguments_opt parser1 in
+        if is_valid_type_argument_list type_arguments parser parser1
+        then
+          let type_specifier =
+            make_generic_type_specifier (make_token token) type_arguments in
+          parser1, type_specifier
+        else
+          default parser
+      | _ ->
+        default parser
+      end
     | Static when peek_token_kind parser1 = LeftParen ->
       (parser1, make_token token)
     | Name
@@ -1053,13 +1070,13 @@ TODO: This will need to be fixed to allow situations where the qualified name
         new C::$x() as an expression. *)
         parse_remaining_type_specifier parser name
       | None ->
-        parse_expression_with_operator_precedence parser Operator.NewOperator
+        default parser
       end
     | _ ->
-        parse_expression_with_operator_precedence parser Operator.NewOperator
-        (* TODO: We need to verify in a later pass that the expression is a
-        scope resolution (that does not end in class!), a member selection,
-        a name, a variable, a property, or an array subscript expression. *)
+      default parser
+      (* TODO: We need to verify in a later pass that the expression is a
+      scope resolution (that does not end in class!), a member selection,
+      a name, a variable, a property, or an array subscript expression. *)
 
   and parse_object_creation_expression parser =
     (* SPEC

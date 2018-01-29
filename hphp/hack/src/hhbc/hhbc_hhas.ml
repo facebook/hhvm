@@ -1132,13 +1132,13 @@ and string_of_param_default_value ?(use_single_quote=false) ~env expr =
     ^ "("
     ^ String.concat ", " es
     ^ ")"
-  | A.Class_get ((_, A.Id (_, s1)), e2) ->
-    let s1 = get_class_name_from_id ~env ~is_class_constant:false s1 in
-    let s2 = string_of_param_default_value ~env e2 in
-    s1 ^ "::" ^ s2
   | A.Class_get (e1, e2) ->
-    let s1 = string_of_param_default_value ~env e1 in
-    let s2 = string_of_param_default_value ~env e2 in
+    let s1 = match snd e1 with
+      | A.Id (_, s1) -> get_class_name_from_id ~env ~is_class_constant:false s1
+      | _ -> string_of_param_default_value ~env e1 in
+    let s2 = match snd e2 with
+      | A.Dollar e -> "$" ^ string_of_param_default_value ~env e
+      | _ -> string_of_param_default_value ~env e2 in
     s1 ^ "::" ^ s2
   | A.Class_const ((_, A.Id (_, s1)), (_, s2)) ->
     let s1 = get_class_name_from_id ~env ~is_class_constant:true s1 in
@@ -1177,9 +1177,10 @@ and string_of_param_default_value ?(use_single_quote=false) ~env expr =
     in
     let efalse = string_of_param_default_value ~env efalse in
     cond ^ " \\? " ^ etrue ^ " : " ^ efalse
-  | A.Unsafeexpr e -> string_of_param_default_value~env  e
+  | A.Unsafeexpr e -> string_of_param_default_value ~env  e
   | A.BracedExpr e -> "{" ^ string_of_param_default_value ~env e ^ "}"
-  | A.Dollar e -> "$" ^ string_of_param_default_value ~env e
+  | A.Dollar e ->
+    "${" ^ string_of_param_default_value ~env e ^ "}"
   | A.ParenthesizedExpr e -> "(" ^ string_of_param_default_value ~env e ^ ")"
   | A.Cast (h, e) ->
     let h = string_of_hint ~ns: false h in

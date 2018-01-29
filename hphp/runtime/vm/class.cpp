@@ -2948,6 +2948,7 @@ void Class::setNativeDataInfo() {
       m_extra.raw()->m_nativeDataInfo = ndi;
       m_extra.raw()->m_instanceCtor = Native::nativeDataInstanceCtor;
       m_extra.raw()->m_instanceDtor = Native::nativeDataInstanceDtor;
+      m_RTAttrs |= ndi->rt_attrs;
       break;
     }
   }

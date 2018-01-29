@@ -213,14 +213,14 @@ inline uint32_t ObjectData::getId() const {
 }
 
 inline bool ObjectData::toBoolean() const {
-  if (UNLIKELY(getAttribute(CallToImpl))) {
+  if (UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     return toBooleanImpl();
   }
   return true;
 }
 
 inline int64_t ObjectData::toInt64() const {
-  if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
+  if (!isCollection() && UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     return toInt64Impl();
   }
   raiseObjToIntNotice(classname_cstr());
@@ -228,7 +228,7 @@ inline int64_t ObjectData::toInt64() const {
 }
 
 inline double ObjectData::toDouble() const {
-  if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
+  if (!isCollection() && UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     return toDoubleImpl();
   }
   raiseObjToDoubleNotice(classname_cstr());

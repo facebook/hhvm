@@ -64,8 +64,8 @@ const Class* SimpleXMLIterator_classof() {
 struct SimpleXMLElement {
   SimpleXMLElement() {
     auto obj = Native::object<SimpleXMLElement>(this);
+    assert(obj->getVMClass()->rtAttribute(Class::CallToImpl));
     obj->setAttribute(ObjectData::HasPropEmpty);
-    obj->setAttribute(ObjectData::CallToImpl);
   }
   SimpleXMLElement& operator=(const SimpleXMLElement &src) {
     iter.isprefix = src.iter.isprefix;
@@ -1858,7 +1858,7 @@ static struct SimpleXMLExtension : Extension {
     HHVM_ME(SimpleXMLElement, offsetUnset);
 
     Native::registerNativeDataInfo<SimpleXMLElement>(
-      s_SimpleXMLElement.get()
+      s_SimpleXMLElement.get(), 0, Class::CallToImpl
     );
 
     /* SimpleXMLElementIterator */
@@ -1884,7 +1884,7 @@ static struct SimpleXMLExtension : Extension {
     HHVM_ME(SimpleXMLIterator, hasChildren);
 
     Native::registerNativeDataInfo<SimpleXMLIterator>(
-      s_SimpleXMLIterator.get()
+      s_SimpleXMLIterator.get(), 0, Class::CallToImpl
     );
 
     loadSystemlib();

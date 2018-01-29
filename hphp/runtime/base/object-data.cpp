@@ -476,7 +476,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
   // checking for each class in turn if it's not one.
   if (isCollection()) {
     return collections::toArray(this);
-  } else if (UNLIKELY(getAttribute(CallToImpl))) {
+  } else if (UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
     assert(instanceof(SimpleXMLElement_classof()));

@@ -124,14 +124,15 @@ struct Class : AtomicCountable {
    * which are a-priori attributes computed by the compiler.
    */
   enum RuntimeAttribute : uint16_t {
-    HasSleep      = 0x0001, // __sleep()
-    HasClone      = 0x0002, // defines __clone PHP method
+    CallToImpl    = 0x0001, // call to{Boolean,Int64,Double}Impl
+    HasSleep      = 0x0002, // __sleep()
+    HasClone      = 0x0004, // defines __clone PHP method
                             // only valid when !isCppBuiltin()
-    HasNativePropHandler = 0x0004, // class has native magic props handler
-    UseSet        = 0x0008, // __set()
-    UseGet        = 0x0010, // __get()
-    UseIsset      = 0x0020, // __isset()
-    UseUnset      = 0x0040, // __unset()
+    HasNativePropHandler = 0x0008, // class has native magic props handler
+    UseSet        = 0x0010, // __set()
+    UseGet        = 0x0020, // __get()
+    UseIsset      = 0x0040, // __isset()
+    UseUnset      = 0x0080, // __unset()
   };
 
 
@@ -1057,6 +1058,7 @@ public:
   OFF(vtableVecLen)
   OFF(vtableVec)
   OFF(funcVecLen)
+  OFF(RTAttrs)
 #undef OFF
 
   static constexpr ptrdiff_t constantsVecOff() {

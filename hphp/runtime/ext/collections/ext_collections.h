@@ -41,11 +41,7 @@ extern const StaticString
     return req::make<c_##name>().detach();                  \
   }
 
-constexpr ObjectData::Attribute objectFlags =
-  static_cast<ObjectData::Attribute>(
-    ObjectData::CallToImpl |
-    ObjectData::NoDestructor
-  );
+constexpr ObjectData::Attribute objectFlags = ObjectData::NoDestructor;
 
 /**
  * The "materialization" methods have the form "to[CollectionName]()" and
@@ -109,7 +105,8 @@ struct CollectionsExtension : Extension {
         Class::UseGet |
         Class::UseSet |
         Class::UseIsset |
-        Class::UseUnset
+        Class::UseUnset |
+        Class::CallToImpl
     );
   }
 };

@@ -678,7 +678,7 @@ bool supportsToArray(const ObjectData* obj) {
     // we never want to toArray on a collection; if we're asking if we can,
     // then something has gone horribly wrong
     always_assert(false);
-  } else if (UNLIKELY(obj->getAttribute(ObjectData::CallToImpl))) {
+  } else if (UNLIKELY(obj->getVMClass()->rtAttribute(Class::CallToImpl))) {
     return obj->instanceof(SimpleXMLElement_classof());
   } else if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayObjectClass))) {
     return true;

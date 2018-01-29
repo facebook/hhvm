@@ -52,12 +52,14 @@ void registerNativeDataInfo(const StringData* name,
                             NativeDataInfo::SweepFunc sweep,
                             NativeDataInfo::SleepFunc sleep,
                             NativeDataInfo::WakeupFunc wakeup,
-                            type_scan::Index tyindex) {
+                            type_scan::Index tyindex,
+                            uint16_t rt_attrs) {
   assert(s_nativedatainfo.find(name) == s_nativedatainfo.end());
   assert((sleep == nullptr && wakeup == nullptr) ||
          (sleep != nullptr && wakeup != nullptr));
   NativeDataInfo info;
   info.sz = sz;
+  info.rt_attrs = rt_attrs;
   info.tyindex = tyindex;
   info.init = init;
   info.copy = copy;

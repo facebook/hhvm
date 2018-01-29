@@ -83,7 +83,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
     IsWeakRefed   = 0x0080, // Is pointed to by at least one WeakRef
-    CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasDynPropArr = 0x0800, // has a dynamic properties array
     IsBeingConstructed
                   = 0x1000, // Constructor for most derived class has not

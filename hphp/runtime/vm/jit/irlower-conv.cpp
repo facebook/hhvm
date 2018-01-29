@@ -142,7 +142,9 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
-  v << testwim{ObjectData::CallToImpl, src[ObjectData::attributeOff()], sf};
+  auto const cls = v.makeReg();
+  emitLdObjClass(v, src, cls);
+  v << testwim{Class::CallToImpl, cls[Class::RTAttrsOff()], sf};
 
   unlikelyCond(v, vcold(env), CC_NZ, sf, dst,
     [&] (Vout& v) {

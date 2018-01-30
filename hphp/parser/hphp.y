@@ -1785,13 +1785,13 @@ class_statement_list:
   |                                    { $$.reset();}
 ;
 class_statement:
-    variable_modifiers                 { _p->onClassVariableModifer($1);}
+    variable_modifiers
     class_variable_declaration ';'     { _p->onClassVariableStart
-                                         ($$,&$1,$3,NULL);}
+                                         ($$,&$1,$2,NULL);}
   | non_empty_member_modifiers
-    hh_type                            { _p->onClassVariableModifer($1);}
+    hh_type
     class_variable_declaration ';'     { _p->onClassVariableStart
-                                         ($$,&$1,$4,&$2);}
+                                         ($$,&$1,$3,&$2);}
   | class_constant_declaration ';'     { _p->onClassVariableStart
                                          ($$,NULL,$1,NULL);}
   | class_abstract_constant_declaration ';'

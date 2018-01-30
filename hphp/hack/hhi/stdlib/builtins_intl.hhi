@@ -13,6 +13,9 @@ const int INTL_MAX_LOCALE_LEN = 80;
 const string INTL_ICU_VERSION = '52.1';
 const string INTL_ICU_DATA_VERSION = '52.1';
 
+const int INTL_IDNA_VARIANT_2003 = 0;
+const int INTL_IDNA_VARIANT_UTS46 = 1;
+
 const int IDNA_ALLOW_UNASSIGNED = 1;
 const int IDNA_CHECK_BIDI = 4;
 const int IDNA_CHECK_CONTEXTJ = 8;

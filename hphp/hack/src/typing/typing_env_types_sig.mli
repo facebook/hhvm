@@ -100,6 +100,7 @@ and genv = {
  * Parameters are
  * - the environment
  * - types of the parameters under which the body should be checked
+ * - the arity of the function
  * - the expected return type of the body (optional)
  *)
 and anon =
@@ -109,6 +110,7 @@ and anon =
   ?ret_ty: locl ty ->
   env ->
   locl fun_params ->
+  locl fun_arity ->
   env * Tast.expr * locl ty)
 
 (* A deferred check; return true if the check should now be removed from the list *)

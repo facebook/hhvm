@@ -29,10 +29,10 @@ function test(): void {
   hint_multiple_int($lambda);
   hint_variadic_int($lambda);
 
-  $lambda_inferred = (...$y) ==> {
+  $lambda = (...$y) ==> {
   };
-  hint_no_args($lambda_inferred);
-  hint_single_int($lambda_inferred);
-  hint_multiple_int($lambda_inferred);
-  hint_variadic_int($lambda_inferred);
+  hint_no_args($lambda);
+  hint_single_int($lambda);
+  hint_multiple_int($lambda);
+  hint_variadic_int($lambda);
 }

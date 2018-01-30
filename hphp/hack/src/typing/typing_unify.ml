@@ -331,7 +331,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
         then Errors.coroutinness_mismatch is_coroutine p1 p2;
         if not (unify_arities ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
         then Errors.fun_arity_mismatch p1 p2;
-        let env, _, ret = anon env ft.ft_params in
+        let env, _, ret = anon env ft.ft_params ft.ft_arity in
         let env, _ = unify env ft.ft_ret ret in
         env, Tfun ft)
   | Tobject, Tobject
@@ -483,9 +483,10 @@ and unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
        * anonymous function types to match named variadic arguments
        * of the "...$args" form as well as unnamed ones *)
       a_min = f_min
+    | Fvariadic (a_min, _), Fstandard (f_min, _)
     | Fvariadic (a_min, _), Fvariadic (f_min, _)
     | Fellipsis a_min, Fellipsis f_min ->
-      a_min = f_min
+      a_min <= f_min
     | Fstandard (a_min, a_max), Fstandard (f_min, f_max) ->
       a_min = f_min && a_max = f_max
     | _, _ -> false

@@ -1,5 +1,5 @@
 <?hh // strict
 
-function foo(): (function(int, string, ...): int) {
-  return (int $x, $y, ...) ==> $x;
+function foo(): (function(int, string, mixed...): int) {
+  return (int $x, $y, ...$args) ==> $x;
 }

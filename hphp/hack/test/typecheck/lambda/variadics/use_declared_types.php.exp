@@ -1,0 +1,12 @@
+File "use_declared_types.php", line 35, characters 23-24:
+Invalid argument (Typing[4110])
+  File "use_declared_types.php", line 11, characters 28-29:
+  This is an object of type B (variadic argument)
+  File "use_declared_types.php", line 34, characters 11-12:
+  It is incompatible with an object of type A (variadic argument)
+File "use_declared_types.php", line 40, characters 21-22:
+Invalid argument (Typing[4110])
+  File "use_declared_types.php", line 11, characters 28-29:
+  This is an object of type B (variadic argument)
+  File "use_declared_types.php", line 39, characters 19-20:
+  It is incompatible with an object of type A (variadic argument)

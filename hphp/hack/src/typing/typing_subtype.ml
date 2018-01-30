@@ -969,7 +969,7 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
           if not (Unify.unify_arities
                     ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
           then Errors.fun_arity_mismatch p_super p_sub;
-          let env, _, ret = anon env ft.ft_params in
+          let env, _, ret = anon env ft.ft_params ft.ft_arity in
           let env = sub_type env ret ft.ft_ret in
           env
       )

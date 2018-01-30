@@ -2070,9 +2070,6 @@ and expr_
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
       let env, declared_ft = Phase.localize_ft ~use_pos:p ~ety_env env declared_ft in
       List.iter idl (check_escaping_var env);
-      (* Are all parameters annotated with explicit types? *)
-      let all_explicit_params =
-        List.for_all f.f_params (fun param -> Option.is_some param.param_hint) in
       (* Is the return type declared? *)
       let is_explicit_ret = Option.is_some f.f_ret in
       let check_body_under_known_params ?ret_ty ft =
@@ -2080,11 +2077,8 @@ and expr_
         let ft = { ft with ft_is_coroutine = is_coroutine } in
         let ft = { ft with ft_reactive = Nonreactive } in
         let is_reactive, (env, tefun, ty) =
-          Env.check_lambda_reactive (fun () -> anon ?ret_ty env ft.ft_params) in
+          Env.check_lambda_reactive (fun () -> anon ?ret_ty env ft.ft_params ft.ft_arity) in
         let ft = { ft with ft_reactive = is_reactive } in
-        (* Improve hover type experience for parameters with known types *)
-        List.iter2_exn f.f_params ft.ft_params (fun param ft_param ->
-          Typing_hooks.dispatch_infer_ty_hook ft_param.fp_type param.param_pos env);
         let inferred_ty =
           if is_explicit_ret
           then (Reason.Rwitness p, Tfun { ft with ft_ret = declared_ft.ft_ret })
@@ -2112,8 +2106,27 @@ and expr_
             else { declared_ft_param with fp_type = expected_ft_param.fp_type } in
           resolved_ft_param :: rest
         | _, _, _ ->
-          declared_ft_params
+          (* This means the expected_ft params list can have more parameters
+           * than declared parameters in the lambda. For variadics, this is OK,
+           * for non-variadics, this will be caught elsewhere in arity checks.
+           *)
+          expected_ft_params
         in
+      let replace_non_declared_arity variadic declared_arity expected_arity =
+          match variadic with
+          | FVvariadicArg {param_hint = Some(_); _} -> declared_arity
+          | FVvariadicArg _ ->
+              begin
+                match declared_arity, expected_arity with
+                | Fvariadic (min_arity, declared), Fvariadic (_, expected) ->
+                  Fvariadic (min_arity, { declared with fp_type = expected.fp_type})
+                | _, _ -> declared_arity
+              end
+          | _ -> declared_arity
+        in
+        let expected_ft = { expected_ft with ft_arity =
+          replace_non_declared_arity
+            f.f_variadic declared_ft.ft_arity expected_ft.ft_arity } in
         let expected_ft = { expected_ft with ft_params =
           replace_non_declared_types f.f_params declared_ft.ft_params expected_ft.ft_params } in
         (* Don't bother passing in `void` if there is no explicit return *)
@@ -2124,9 +2137,18 @@ and expr_
         Measure.sample "Lambda [contextual params]" 1.0;
         check_body_under_known_params ?ret_ty expected_ft
       | _ ->
+        let explicit_variadic_param_or_non_variadic =
+          begin match f.f_variadic with
+          | FVvariadicArg {param_hint; _} -> Option.is_some param_hint
+          | FVellipsis -> false
+          | _ -> true
+          end
+        in
         (* If all parameters are annotated with explicit types, then type-check
          * the body under those assumptions and pick up the result type *)
-        if all_explicit_params
+        let all_explicit_params =
+          List.for_all f.f_params (fun param -> Option.is_some param.param_hint) in
+        if all_explicit_params && explicit_variadic_param_or_non_variadic
         then begin
           Measure.sample "Lambda [explicit params]" 1.0;
           check_body_under_known_params declared_ft
@@ -2141,8 +2163,9 @@ and expr_
         let is_coroutine, anon = anon_make env p f declared_ft idl in
         let env, tefun, _, anon_id = Errors.try_with_error
           (fun () ->
-            let reactivity, (_, tefun, ty)
-              = Env.check_lambda_reactive (fun () -> anon env declared_ft.ft_params) in
+            let reactivity, (_, tefun, ty) =
+              Env.check_lambda_reactive
+                (fun () -> anon env declared_ft.ft_params declared_ft.ft_arity) in
             let anon_fun = reactivity, is_coroutine, anon in
             let env, anon_id = Env.add_anonymous env anon_fun in
             env, tefun, ty, anon_id)
@@ -2152,7 +2175,7 @@ and expr_
             let anon_ign ?el:_ ?ret_ty:_ env fun_params =
               Errors.ignore_ (fun () -> (anon env fun_params)) in
             let reactivity, (_, tefun, ty)
-              = Env.check_lambda_reactive (fun () -> anon_ign env declared_ft.ft_params) in
+              = Env.check_lambda_reactive (fun () -> anon_ign env declared_ft.ft_params declared_ft.ft_arity) in
             let anon_fun = reactivity, is_coroutine, anon in
             let env, anon_id = Env.add_anonymous env anon_fun in
             env, tefun, ty, anon_id) in
@@ -2376,6 +2399,34 @@ and anon_bind_param params (env, t_params) ty : Env.env * Tast.fun_param list =
         let env, t_param = bind_param env (ty, param) in
         env, t_params @ [t_param]
 
+and anon_bind_variadic env vparam variadic_ty =
+  let env, ty, pos =
+    match vparam.param_hint with
+    | None ->
+      (* if the hint is missing, use the type we expect *)
+      env, variadic_ty, Reason.to_pos (fst variadic_ty)
+    | Some hint ->
+      let h = Decl_hint.hint env.Env.decl_env hint in
+      let ety_env =
+        { (Phase.env_with_self env) with from_class = Some CIstatic; } in
+      let env, h = Phase.localize ~ety_env env h in
+      let pos = Reason.to_pos (fst variadic_ty) in
+      let env = anon_sub_type pos Reason.URparam env variadic_ty h in
+      env, h, vparam.param_pos
+  in
+  let r = Reason.Rvar_param pos in
+  let arr_values = r, (snd ty) in
+  let akind =
+    if TypecheckerOptions.experimental_feature_enabled
+      (Env.get_options env)
+      TypecheckerOptions.experimental_darray_and_varray
+    then AKvarray arr_values
+    else AKvec arr_values in
+  let ty = r, Tarraykind akind in
+  let env, t_variadic = bind_param env (ty, vparam) in
+  env, t_variadic
+
+
 and anon_bind_opt_param env param : Env.env =
   match param.param_expr with
   | None ->
@@ -2405,7 +2456,7 @@ and anon_make tenv p f ft idl =
   let nb = Nast.assert_named_body f.f_body in
   let is_coroutine = f.f_fun_kind = Ast.FCoroutine in
   is_coroutine,
-  fun ?el ?ret_ty env supplied_params ->
+  fun ?el ?ret_ty env supplied_params supplied_arity ->
     let safe_pass_by_ref = true in
     if !is_typing_self
     then begin
@@ -2416,6 +2467,39 @@ and anon_make tenv p f ft idl =
       is_typing_self := true;
       Env.anon anon_lenv env begin fun env ->
         let env = Env.clear_params env in
+        let make_variadic_arg env varg tyl =
+          let remaining_types =
+            (* It's possible the variadic arg will capture the variadic
+             * parameter of the supplied arity (if arity is Fvariadic)
+             * and additional supplied params.
+             *
+             * For example in cases such as:
+             *  lambda1 = (int $a, string...$c) ==> {};
+             *  lambda1(1, "hello", ...$y); (where $y is a variadic string)
+             *  lambda1(1, "hello", "world");
+             * then ...$c will contain "hello" and everything in $y in the first
+             * example, and "hello" and "world" in the second example.
+             *
+             * To account for a mismatch in arity, we take the remaining supplied
+             * parameters and return a list of all their types. We'll use this
+             * to create a union type when creating the typed variadic arg.
+             *)
+            let remaining_params = List.drop supplied_params (List.length f.f_params) in
+            List.map ~f:(fun param -> param.fp_type) remaining_params
+          in
+          let r = Reason.Rvar_param (varg.param_pos) in
+          let union = Tunresolved (tyl @ remaining_types) in
+          let env, t_param = anon_bind_variadic env varg (r, union) in
+          env, T.FVvariadicArg t_param
+        in
+        let env, t_variadic =
+          begin match f.f_variadic, supplied_arity with
+          | FVvariadicArg arg, Fvariadic (_, variadic) ->
+            make_variadic_arg env arg [variadic.fp_type]
+          | FVvariadicArg arg, Fstandard _ ->
+            make_variadic_arg env arg []
+          | _, _ -> env, T.FVnonVariadic
+          end in
         let params = ref f.f_params in
         let env, t_params = List.fold_left ~f:(anon_bind_param params) ~init:(env, [])
           (List.map supplied_params (fun x -> x.fp_type)) in
@@ -2474,7 +2558,7 @@ and anon_make tenv p f ft idl =
             T.fnb_unsafe = nb.fnb_unsafe;
           };
           T.f_params = t_params;
-          T.f_variadic = T.FVnonVariadic; (* TODO TAST: Variadic efuns *)
+          T.f_variadic = t_variadic; (* TODO TAST: Variadic efuns *)
           T.f_ret_by_ref = f.f_ret_by_ref;
         } in
         let te = T.make_typed_expr p hret (T.Efun (tfun_, idl)) in
@@ -4736,6 +4820,10 @@ and call ~expected pos env fty el uel =
 
 and call_ ~expected pos env fty el uel =
   let safe_pass_by_ref = true in
+  let make_unpacked_traversable_ty pos ty =
+    let unpack_r = Reason.Runpack_param pos in
+    unpack_r, Tclass ((pos, SN.Collections.cTraversable), [ty])
+  in
   let env, efty = Env.expand_type env fty in
   (match efty with
   | _, (Terr | Tany | Tunresolved []) ->
@@ -4855,21 +4943,18 @@ and call_ ~expected pos env fty el uel =
           let env = check_elements env tyl paraml in
           env, [te], List.length el + List.length tyl, true
         | _ ->
-          let pos = fst e in
-          let unpack_r = Reason.Runpack_param pos in
           let param_tyl = List.map paraml (fun param -> param.fp_type) in
           let add_variadic_param_ty param_tyl =
             match var_param with
             | Some param -> param.fp_type :: param_tyl
             | None -> param_tyl in
           let param_tyl = add_variadic_param_ty param_tyl in
-          let make_subtype_of_container ty container_param_ty env =
-            let container_ty = (unpack_r, Tclass (
-              (pos, SN.Collections.cTraversable),
-              [container_param_ty])) in
-            Type.sub_type pos Reason.URparam env ty container_ty in
-          let env = List.fold_right param_tyl
-            ~f:(make_subtype_of_container ety) ~init:env in
+          let pos = fst e in
+          let env = List.fold_right param_tyl ~init:env
+            ~f:(fun param_ty env ->
+            let traversable_ty = make_unpacked_traversable_ty pos param_ty in
+            Type.sub_type pos Reason.URparam env ety traversable_ty)
+          in
           env, [te], List.length el + 1, false in
     (* If we unpacked an array, we don't check arity exactly. Since each
      * unpacked array consumes 1 or many parameters, it is nonsensical to say
@@ -4881,19 +4966,66 @@ and call_ ~expected pos env fty el uel =
     Typing_hooks.dispatch_fun_call_hooks
       ft.ft_params (List.map (el @ uel) fst) env;
     env, tel, tuel, ft.ft_ret
-  | r2, Tanon (arity, id) when uel = [] ->
+  | r2, Tanon (arity, id) ->
     let env, tel, tyl = exprs ~allow_uref:true env el in
+    let expr_for_unpacked_expr_list env = function
+      | [] -> env, [], None, Pos.none
+      | (pos, _) as e :: _ ->
+        let env, te, ety = expr env e in
+        env, [te], Some ety, pos
+    in
+    let append_tuple_types tyl = function
+      | Some (_, Ttuple tuple_tyl) -> tyl @ tuple_tyl
+      | _ -> tyl
+    in
+    let determine_arity env min_arity pos = function
+      | None
+      | Some (_, Ttuple _) ->
+        env, Fstandard (min_arity, min_arity)
+      | Some (ety) ->
+        (* We need to figure out the underlying type of the unpacked expr type.
+         *
+         * For example, assume the call is:
+         *    $lambda(...$y);
+         * where $y is a variadic or collection of strings.
+         *
+         * $y may have the type Tarraykind or Traversable, however we need to
+         * pass Fvariadic a param of type string.
+         *
+         * Assuming $y has type Tarraykind, in order to get the underlying type
+         * we create a fresh_type(), wrap it in a Traversable and make that
+         * Traversable a super type of the expr type (Tarraykind). This way
+         * we can infer the underlying type and create the correct param for
+         * Fvariadic.
+         *)
+        let ty = Env.fresh_type() in
+        let traversable_ty = make_unpacked_traversable_ty pos ty in
+        let env = Type.sub_type pos Reason.URparam env ety traversable_ty in
+        let param =
+           { fp_pos = pos;
+             fp_name = None;
+             fp_type = ty;
+             fp_kind = FPnormal;
+             fp_accept_disposable = false;
+             fp_mutable = false;
+           }
+         in
+         env, Fvariadic (min_arity, param)
+    in
+    let env, tuel, uety_opt, uepos = expr_for_unpacked_expr_list env uel in
+    let tyl = append_tuple_types tyl uety_opt in
+    let env, call_arity = determine_arity env (List.length tyl) uepos uety_opt in
     let anon = Env.get_anonymous env id in
     let fpos = Reason.to_pos r2 in
     (match anon with
       | None ->
         Errors.anonymous_recursive_call pos;
-        env, tel, [], err_none
+        env, tel, tuel, err_none
       | Some (_, _, anon) ->
-        let () = check_arity pos fpos (List.length tyl) arity in
+        let () = check_arity pos fpos (Typing_defs.arity_min call_arity) arity in
         let tyl = List.map tyl TUtils.default_fun_param in
-        let env, _, ty = anon ~el env tyl in
-        env, tel, [], ty)
+        let env, _, ty = anon ~el env tyl call_arity in
+        env, tel, tuel, ty)
   | _, Tarraykind _ when not (Env.is_strict env) ->
     (* Relaxing call_user_func to work with an array in partial mode *)
     env, [], [], (Reason.Rnone, Tany)

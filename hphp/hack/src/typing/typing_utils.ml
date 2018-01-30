@@ -209,7 +209,7 @@ let uerror r1 ty1 r2 ty2 =
  * explained without referring to dependent types.
  *)
 let simplified_uerror env ty1 ty2 =
-  (* Need this check to ensure we don't enter an infiinite loop *)
+  (* Need this check to ensure we don't enter an infinite loop *)
   let simplify = match snd ty1, snd ty2 with
     | Tabstract (AKdependent (`static, []), _), Tclass _
     | Tclass _, Tabstract (AKdependent (`static, []), _) -> false

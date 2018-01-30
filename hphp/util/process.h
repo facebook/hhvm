@@ -41,8 +41,9 @@ struct MemInfo {
   int64_t freeMb{-1};
   int64_t cachedMb{-1};
   int64_t buffersMb{-1};
+  int64_t availableMb{-1};
   bool valid() const {
-    return freeMb >= 0 && cachedMb >= 0 && buffersMb >= 0;
+    return (freeMb | cachedMb | buffersMb | availableMb) >= 0;
   }
 };
 

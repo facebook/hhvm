@@ -152,7 +152,16 @@ bool Process::GetMemoryInfo(MemInfo& info) {
       info.freeMb = std::max(info.freeMb, parseLine("MemFree", buf));
       info.buffersMb = std::max(info.buffersMb, parseLine("Buffers", buf));
       info.cachedMb = std::max(info.cachedMb, parseLine("Cached", buf));
+      info.availableMb =
+        std::max(info.availableMb, parseLine("MemAvailable", buf));
       if (info.valid()) return true;
+    }
+    // If MemAvailable isn't available, which shouldn't be the case for kernel
+    // versions later than 3.14, we get a rough esitmation.
+    if (info.availableMb < 0 && info.freeMb >= 0 &&
+        info.cachedMb >= 0 && info.buffersMb >= 0) {
+      info.availableMb = info.freeMb + info.cachedMb;
+      return true;
     }
   }
   return false;

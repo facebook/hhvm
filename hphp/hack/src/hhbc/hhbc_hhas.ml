@@ -1229,7 +1229,9 @@ and string_of_param_default_value ~env expr =
 let string_of_param_default_value_option env = function
   | None -> ""
   | Some (label, expr) ->
-    let env = { codegen_env = env; use_single_quote = false } in
+    let use_single_quote =
+      match snd expr with A.String _ -> false | _ -> true in
+    let env = { codegen_env = env; use_single_quote } in
     " = "
     ^ (string_of_label label)
     ^ "(\"\"\""

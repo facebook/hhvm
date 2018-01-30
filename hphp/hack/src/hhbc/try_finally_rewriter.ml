@@ -84,6 +84,28 @@ let get_pos_for_error env =
   in
   aux_scope @@ Emit_env.get_scope env
 
+let fail_if_goto_from_try_to_finally try_block finally_block =
+  let find_gotos_in block =
+    let visitor =
+      object inherit [_] Ast_visitor.ast_visitor
+        method! on_goto goto_labels label = label :: goto_labels
+      end in
+    visitor#on_block [] block in
+  let goto_labels = find_gotos_in try_block in
+  let fail_if_find_any_label_in block goto_labels =
+    let visitor =
+      object inherit [_] A.iter
+        method! on_GotoLabel goto_labels (_, label) =
+          let label_opt = List.find goto_labels
+            (fun (_, label_in_list) -> label_in_list = label) in
+          match label_opt with
+          | Some (p, _label) -> Emit_fatal.raise_fatal_parse p
+            "'goto' into finally statement is disallowed"
+          | None -> ()
+      end in
+    visitor#on_block goto_labels block in
+  fail_if_find_any_label_in finally_block goto_labels
+
 let emit_goto ~in_finally_epilogue env label =
   let err_pos = get_pos_for_error env in
   match SMap.get label @@ JT.get_labels_in_function () with

@@ -8,7 +8,6 @@ slow/eval/syntaxerror_string.php
 slow/ext_watchman/ext_watchman.php
 slow/ext_xdebug/xdebug/coverage.php
 slow/goto/label_out_finally.php
-slow/goto/try_goto_in_finally2.php
 slow/goto/try_goto_out_finally.php
 slow/lang/redefine_function.php
 slow/parser/afl5934248.php

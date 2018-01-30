@@ -267,6 +267,8 @@ let rec emit_stmt env (pos, st_) =
       instr (IContFlow Throw);
     ]
   | A.Try (try_block, catch_list, finally_block) ->
+    if (JT.get_function_has_goto ()) then
+      TFR.fail_if_goto_from_try_to_finally try_block finally_block;
     if catch_list <> [] && finally_block <> [] then
       emit_stmt env (pos, A.Try([pos, A.Try (try_block, catch_list, [])], [], finally_block))
     else if catch_list <> [] then

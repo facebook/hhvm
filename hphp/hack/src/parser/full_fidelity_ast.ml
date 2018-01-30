@@ -80,8 +80,9 @@ let pPos : Pos.t parser = fun node env ->
   end
 
 exception Lowerer_invariant_failure of string * string
-let invariant_failure where what =
-  raise (Lowerer_invariant_failure (where, what))
+let invariant_failure node msg env =
+  let pos = Pos.string (Pos.to_absolute (pPos node env)) in
+  raise (Lowerer_invariant_failure (pos, msg))
 
 exception API_Missing_syntax of string * env * node
 let missing_syntax : string -> node -> env -> 'a = fun s n env ->
@@ -610,12 +611,11 @@ let rec pHint : hint parser = fun node env ->
       in
       let hd_variadic_hint hints =
         if List.length hints > 1 then begin
-          let pos = Pos.string (Pos.to_absolute (pPos node env)) in
           let msg = Printf.sprintf
             "%d variadic parameters found. There should be no more than one."
             (List.length hints)
           in
-          invariant_failure pos msg
+          invariant_failure node msg env
         end;
         match List.hd hints with
         | Some h -> h
@@ -843,7 +843,20 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       { vector_intrinsic_keyword = kw
       ; vector_intrinsic_members = members
       ; _ }
-      -> Collection (pos_name kw env, couldMap ~f:pAField members env)
+      ->
+      if env.is_hh_file || env.enable_hh_syntax then
+        Collection (pos_name kw env, couldMap ~f:pAField members env)
+      else
+        (* If php, this is a subscript expression, not a collection. *)
+        let subscript_receiver = pExpr kw env in
+        let members = couldMap ~f:pExpr members env in
+        let subscript_index = match members with
+        | [] -> None
+        | [x] -> Some x
+        | _ ->
+          let msg = "Hack keyword " ^ (text kw) ^ " used improperly in php." in
+          invariant_failure node msg env in
+        Array_get (subscript_receiver, subscript_index)
     | CollectionLiteralExpression
       { collection_literal_name         = collection_name
       ; collection_literal_initializers = members

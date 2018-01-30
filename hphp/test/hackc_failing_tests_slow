@@ -1,7 +1,6 @@
 slow/async/genva-variadic.php
 slow/comparisons/double-hexstring.php
 slow/compilation/switch-default-multiple.php
-slow/create_function/file-mode.php
 slow/ctor_param_promotion_bad_mod.php
 slow/eval/no_exit.php
 slow/eval/syntaxerror_string.php

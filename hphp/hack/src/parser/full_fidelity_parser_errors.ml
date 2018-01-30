@@ -1641,11 +1641,13 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
   | VectorIntrinsicExpression { vector_intrinsic_members = m; _ }
   | DictionaryIntrinsicExpression { dictionary_intrinsic_members = m; _ }
   | KeysetIntrinsicExpression { keyset_intrinsic_members = m; _ } ->
-    let errors =
-      if not is_hack
-      then make_error_from_node node SyntaxError.hsl_in_php :: errors
-      else errors in
-    check_collection_members m errors
+    if not is_hack then
+      (* In php, vec[0] would be a subscript, where vec would be a constant *)
+      match syntax_to_list_no_separators m with
+      | _ :: _ :: _ -> (* 2 elements or more *)
+        make_error_from_node node SyntaxError.list_as_subscript :: errors
+      | _ -> errors
+    else check_collection_members m errors
   | VarrayIntrinsicExpression { varray_intrinsic_members = m; _ }
   | DarrayIntrinsicExpression { darray_intrinsic_members = m; _ } ->
     let errors =

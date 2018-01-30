@@ -1436,12 +1436,12 @@ let scan_assert_progress tokenizer lexer  =
       "failed to make progress at %d\n" (offset lexer)
   end
 
-let scan_next_token as_name scanner lexer =
+let scan_next_token ~as_name scanner lexer =
   let tokenizer = scan_token_and_trivia scanner as_name in
   scan_assert_progress tokenizer lexer
 
-let scan_next_token_as_name = scan_next_token true
-let scan_next_token_as_keyword = scan_next_token false
+let scan_next_token_as_name = scan_next_token ~as_name:true
+let scan_next_token_as_keyword = scan_next_token ~as_name:false
 
 (* Entrypoints *)
 (* TODO: Instead of passing Boolean flags, create a flags enum? *)

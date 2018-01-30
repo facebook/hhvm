@@ -17,8 +17,11 @@
 
 // isset, empty, and unset only look like functions to static analysis, but
 // in fact act as special expression subtypes within the runtime
+<<__Rx>>
 function isset($x): bool;
+<<__Rx>>
 function empty($x): bool;
+<<__Rx>>
 function unset($x): void;
 
 // freeze is a special function for mutability
@@ -34,14 +37,19 @@ function chr(int $ascii): string;
 function count(mixed $x, int $mode = COUNT_NORMAL): int; // count takes Countable or array. We'll need to hardcode this...
 <<__PHPStdLib>>
 function dechex(int $number): string;
+<<__Rx>>
 function func_get_args(): array;
 <<__PHPStdLib>>
 function implode(string $glue, $pieces): string; // could be Container<Stringish>
 <<__PHPStdLib>>
 function explode(string $delimiter, ?Stringish $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
+<<__Rx>>
 function is_array(mixed $arg): bool;
+<<__Rx>>
 function is_vec(mixed $arg): bool;
+<<__Rx>>
 function is_dict(mixed $arg): bool;
+<<__Rx>>
 function is_keyset(mixed $arg): bool;
 <<__PHPStdLib>>
 function ord(string $string): int;

@@ -91,6 +91,7 @@ newtype TypeStructure<T> as shape(
 /*
  * returns the shape associated with the type constant.
  */
+<<__Rx>>
 function type_structure(mixed $cls_or_obj, string $cns_name);
 // becomes:
 // type_structure(C::class or new C, 'type_const_name')

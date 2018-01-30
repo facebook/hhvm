@@ -26,7 +26,9 @@ function trait_exists(string $trait_name, bool $autoload = true): bool;
 function get_class_methods($class_or_object): ?array<string>;
 <<__PHPStdLib>>
 function get_class_vars(string $class_name);
+<<__Rx>>
 function get_class($object = null);
+<<__Rx>>
 function get_parent_class($object = null);
 <<__PHPStdLib>>
 function is_a($class_or_object, string $class_name, bool $allow_string = false): bool;
@@ -36,6 +38,7 @@ function is_subclass_of($class_or_object, string $class_name, bool $allow_string
 function method_exists($class_or_object, string $method_name): bool;
 <<__PHPStdLib>>
 function property_exists($class_or_object, string $property): ?bool;
+<<__Rx>>
 function get_object_vars($object): ?array;
 function call_user_method_array(string $method_name, &$obj, array $paramarr);
 function call_user_method(string $method_name, &$obj, ...);

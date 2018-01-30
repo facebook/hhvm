@@ -19,5 +19,6 @@
 // NB: the typechecker relies on the exact format of this signature and rewrites
 // parts of it in place during each call. Changes to the signature need to be
 // done in tandem with changes to the ocaml code that munges it.
+<<__Rx>>
 function idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $collection, $index,
   $default = null) {}

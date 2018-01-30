@@ -19,10 +19,13 @@ function call_user_func($function, ...);
 function forward_static_call_array<T>($function, Container<T> $params);
 function forward_static_call($function, ...);
 /* A get_called_class is treated at static::class */
+<<__Rx>>
 function get_called_class(): string; // false if called from outside class
 <<__Deprecated('Use an anonymous function instead.')>>
 function create_function($args, $code);
+<<__Rx>>
 function func_get_arg(int $arg_num);
+<<__Rx>>
 function func_num_args(): int;
 <<__PHPStdLib>>
 function register_postsend_function($function, ...);

@@ -8,7 +8,9 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+ <<__Rx>>
 function is_bool($var): bool;
+<<__Rx>>
 function is_int($var): bool;
 <<__Deprecated('Use is_int().')>>
 function is_integer($var): bool;
@@ -16,15 +18,21 @@ function is_integer($var): bool;
 function is_long($var): bool;
 <<__Deprecated('Use is_float().')>>
 function is_double($var): bool;
+<<__Rx>>
 function is_float($var): bool;
 <<__PHPStdLib>>
 function is_numeric($var): bool;
 <<__Deprecated('Use is_float().')>>
 function is_real($var): bool;
+<<__Rx>>
 function is_string($var): bool;
+<<__Rx>>
 function is_scalar($var): bool;
+<<__Rx>>
 function is_object($var): bool;
+<<__Rx>>
 function is_resource($var): bool;
+<<__Rx>>
 function is_null($var): bool;
 <<__PHPStdLib>>
 function gettype($v);
@@ -44,6 +52,7 @@ function debug_zval_dump(<<__AcceptDisposable>> $variable);
 function serialize($value);
 <<__PHPStdLib>>
 function unserialize($str, $class_whitelist = array());
+<<__Rx>>
 function get_defined_vars();
 <<__PHPStdLib>>
 function import_request_variables($types, $prefix = "");

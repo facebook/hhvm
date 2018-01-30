@@ -1324,14 +1324,14 @@ bool build_class_properties(BuildClsInfo& info,
       return true;
     }
 
-    if ((prevProp.attrs ^ p.attrs) & AttrStatic) {
-      ITRACE(2,
-             "build_class_properties failed for `{}' because "
-             "`{}' was defined both static and non-static\n",
-             info.rleaf->cls->name, p.name);
-      return false;
-    }
     if (!(prevProp.attrs & AttrPrivate)) {
+      if ((prevProp.attrs ^ p.attrs) & AttrStatic) {
+        ITRACE(2,
+               "build_class_properties failed for `{}' because "
+               "`{}' was defined both static and non-static\n",
+               info.rleaf->cls->name, p.name);
+        return false;
+      }
       if (p.attrs & AttrPrivate) {
         ITRACE(2,
                "build_class_properties failed for `{}' because "

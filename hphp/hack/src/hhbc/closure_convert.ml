@@ -518,14 +518,19 @@ let rec convert_expr env st (p, expr_ as expr) =
       ~trait:false
       ~fallback_to_empty_string:false
       env p pe
-  | Call ((_, (Class_const ((_, Id (_, cid)), _) | Class_get ((_, Id (_, cid)), _))) as e,
+  | Call ((_, (Class_const ((_, Id (_, cid)), _)
+             | Class_get ((_, Id (_, cid)), _))) as e,
     el1, el2, el3)
-  when cid = "parent" ->
+    when SU.is_parent cid ->
     let st = add_var env st "$this" in
     let st, e = convert_expr env st e in
     let st, el2 = convert_exprs env st el2 in
     let st, el3 = convert_exprs env st el3 in
     st, (p, Call(e, el1, el2, el3))
+  | Call ((_, Id (_, id)), _, es, _)
+    when String.lowercase_ascii id = "tuple" &&
+      Emit_env.is_hh_syntax_enabled () ->
+    convert_expr env st (p, Varray es)
   | Call (e, el1, el2, el3) ->
     let st, e = convert_expr env st e in
     let st, el2 = convert_exprs env st el2 in
@@ -912,30 +917,46 @@ and convert_xhp_attr env st = function
       st, Xhp_spread e
 
 and convert_params env st param_list =
-  let convert_param env st param = match param.param_expr with
-    | None -> st, param
-    | Some e ->
-      let st, e = convert_expr env st e in
-      st, { param with param_expr = Some e }
+  let convert_param env st param =
+    let st, param_user_attributes =
+      convert_user_attributes env st param.param_user_attributes in
+    let st, param_expr =
+      match param.param_expr with
+      | None -> st, None
+      | Some e ->
+        let st, e = convert_expr env st e in
+        st, Some e
+    in
+    st, { param with param_expr; param_user_attributes }
   in
   List.map_env st param_list (convert_param env)
+
+and convert_user_attributes env st ual =
+  List.map_env st ual
+    (fun st ua ->
+      let st, ua_params = convert_exprs env st ua.ua_params in
+      st, { ua with ua_params })
 
 and convert_fun env st fd =
   let env = env_with_function env fd in
   let st = reset_function_counts st in
-  let st, block, function_state =
+  let st, f_body, function_state =
     convert_function_like_body env st fd.f_body in
   let st =
     record_function_state
       (Emit_env.get_unique_id_for_function fd) function_state st in
-  let st, params = convert_params env st fd.f_params in
-  st, { fd with f_body = block; f_params = params }
+  let st, f_params = convert_params env st fd.f_params in
+  let st, f_user_attributes =
+    convert_user_attributes env st fd.f_user_attributes in
+  st, { fd with f_body; f_params; f_user_attributes }
 
 and convert_class env st cd =
   let env = env_with_class env cd in
   let st = reset_function_counts st in
   let st, c_body = List.map_env st cd.c_body (convert_class_elt env) in
-  st, { cd with c_body = c_body }
+  let st, c_user_attributes =
+    convert_user_attributes env st cd.c_user_attributes in
+  st, { cd with c_body = c_body; c_user_attributes }
 
 and convert_class_var env st (pos, id, expr_opt) =
   match expr_opt with
@@ -958,17 +979,21 @@ and convert_class_elt env st ce =
       | _ -> failwith "unexpected scope shape - method is not inside the class" in
     let env = env_with_method env md in
     let st = reset_function_counts st in
-    let st, block, function_state =
+    let st, m_body, function_state =
       convert_function_like_body env st md.m_body in
     let st =
       record_function_state
         (Emit_env.get_unique_id_for_method cls md) function_state st in
-    let st, params = convert_params env st md.m_params in
-    st, Method { md with m_body = block; m_params = params }
+    let st, m_params = convert_params env st md.m_params in
+    let st, m_user_attributes =
+      convert_user_attributes env st md.m_user_attributes in
+    st, Method { md with m_body; m_params; m_user_attributes }
 
   | ClassVars cv ->
-    let st, cvl = List.map_env st cv.cv_names (convert_class_var env) in
-    st, ClassVars { cv with cv_names = cvl }
+    let st, cv_names = List.map_env st cv.cv_names (convert_class_var env) in
+    let st, cv_user_attributes =
+      convert_user_attributes env st cv.cv_user_attributes in
+    st, ClassVars { cv with cv_names; cv_user_attributes }
 
   | Const (ho, iel) ->
     let st, iel = List.map_env st iel (convert_class_const env) in
@@ -1010,6 +1035,9 @@ and convert_defs env class_count typedef_count st dl =
     st, (true, Stmt stmt) :: dl
   | Typedef td :: dl ->
     let st, dl = convert_defs env class_count (typedef_count + 1) st dl in
+    let st, t_user_attributes =
+      convert_user_attributes env st td.t_user_attributes in
+    let td = { td with t_user_attributes } in
     let stub_td = { td with t_id =
       (fst td.t_id, string_of_int (typedef_count)) } in
     st, (true, Typedef td) :: (true, Stmt (Pos.none, Def_inline (Typedef stub_td))) :: dl

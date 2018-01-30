@@ -235,7 +235,6 @@ let is_special_function env e args =
     match s with
     | "isset" -> n > 0
     | "empty" -> n = 1
-    | "tuple" when Emit_env.is_hh_syntax_enabled () -> true
     | "define" when is_global_namespace env ->
       begin match args with
       | [_, A.String _; _] -> true
@@ -763,9 +762,6 @@ and emit_shape env expr fl =
   in
   emit_expr ~need_ref:false env (p, A.Darray fl)
 
-and emit_tuple env p es =
-  emit_expr ~need_ref:false env (p, A.Varray es)
-
 and emit_call_expr ~need_ref env expr =
   let instrs, flavor = emit_flavored_expr env expr in
   gather [
@@ -1289,10 +1285,6 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     emit_box_if_necessary need_ref @@ emit_call_isset_exprs env pos exprs
   | A.Call ((_, A.Id (_, "empty")), _, [expr], []) ->
     emit_box_if_necessary need_ref @@ emit_call_empty_expr env expr
-  (* Did you know that tuples are functions? *)
-  | A.Call ((p, A.Id (_, "tuple")), _, es, _)
-    when Emit_env.is_hh_syntax_enabled () ->
-    emit_box_if_necessary need_ref @@ emit_tuple env p es
   | A.Call ((_, A.Id (_, "idx")), _, es, _) ->
     emit_box_if_necessary need_ref @@ emit_idx env es
   | A.Call ((_, A.Id (_, "define")), _, [(_, A.String (_, s)); e], _)

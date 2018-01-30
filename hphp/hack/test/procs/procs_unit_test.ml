@@ -73,11 +73,8 @@ let cleanup _ =
 
 let () =
   Daemon.check_entry_point (); (* this call might not return *)
-  let config = ServerConfig.default_config in
-  let shared_config = ServerConfig.(sharedmem_config config) in
-  let handle = SharedMem.init shared_config in
-  let workers = Worker.make handle entry 10
-      ServerConfig.(gc_control config) handle
+  let handle = SharedMem.init GlobalConfig.default_sharedmem_config in
+  let workers = Worker.make handle entry 10 GlobalConfig.gc_control handle
   in
   SharedMem.connect handle ~is_master:true;
   try_finalize

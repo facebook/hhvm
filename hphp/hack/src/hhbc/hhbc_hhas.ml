@@ -800,6 +800,11 @@ let string_of_type_info_option tio =
   | None -> ""
   | Some ti -> string_of_type_info ti ^ " "
 
+type default_value_printing_env = {
+  codegen_env      : Emit_env.t option;
+  use_single_quote : bool;
+}
+
 let rec string_of_afield ~env = function
   | A.AFvalue e ->
     string_of_param_default_value ~env e
@@ -994,7 +999,7 @@ and string_of_statement ~env ~indent ((_, stmt_) : A.stmt) =
   text
 
 and string_of_expression ~env e =
-  string_of_param_default_value ~env ~use_single_quote:true e
+  string_of_param_default_value ~env:{ env with use_single_quote = true } e
 
 and string_of_xml ~env (_, id) attributes children =
   let p = Pos.none in
@@ -1020,7 +1025,7 @@ and string_of_xhp_attr p attr (spread_id, attrs) = match attr with
     let id = (p, "...$" ^ (string_of_int spread_id)) in
     (spread_id + 1, (A.AFkvalue ((p, A.String id), e))::attrs)
 
-and string_of_param_default_value ?(use_single_quote=false) ~env expr =
+and string_of_param_default_value ~env expr =
   let p = Pos.none in
   let middle_aux e1 s e2 =
     let e1 = string_of_param_default_value ~env e1 in
@@ -1065,7 +1070,7 @@ and string_of_param_default_value ?(use_single_quote=false) ~env expr =
   let escape_fn c = escape_char_for_printing c ^ Php_escaping.escape_char c in
   match snd expr with
   | A.Id (p, id) ->
-    let id = match env with
+    let id = match env.codegen_env with
       | Some env when SU.has_ns id ->
         let id, _, _ =
           Hhbc_id.Const.elaborate_id
@@ -1080,7 +1085,7 @@ and string_of_param_default_value ?(use_single_quote=false) ~env expr =
   | A.Float (_, litstr) -> SU.Float.with_scientific_notation litstr
   | A.Int (_, litstr) -> SU.Integer.to_decimal litstr
   | A.String (_, litstr) ->
-    if use_single_quote
+    if env.use_single_quote
     then SU.single_quote_string_with_escape ~f:escape_fn litstr
     else SU.quote_string_with_escape ~f:escape_fn litstr
   | A.Null -> "NULL"
@@ -1134,14 +1139,16 @@ and string_of_param_default_value ?(use_single_quote=false) ~env expr =
     ^ ")"
   | A.Class_get (e1, e2) ->
     let s1 = match snd e1 with
-      | A.Id (_, s1) -> get_class_name_from_id ~env ~is_class_constant:false s1
+      | A.Id (_, s1) ->
+        get_class_name_from_id ~env:env.codegen_env ~is_class_constant:false s1
       | _ -> string_of_param_default_value ~env e1 in
     let s2 = match snd e2 with
       | A.Dollar e -> "$" ^ string_of_param_default_value ~env e
       | _ -> string_of_param_default_value ~env e2 in
     s1 ^ "::" ^ s2
   | A.Class_const ((_, A.Id (_, s1)), (_, s2)) ->
-    let s1 = get_class_name_from_id ~env ~is_class_constant:true s1 in
+    let s1 = get_class_name_from_id
+      ~env:env.codegen_env ~is_class_constant:true s1 in
     s1 ^ "::" ^ s2
   | A.Class_const (e1, (_, s2)) ->
     let s1 = string_of_param_default_value ~env e1 in
@@ -1222,6 +1229,7 @@ and string_of_param_default_value ?(use_single_quote=false) ~env expr =
 let string_of_param_default_value_option env = function
   | None -> ""
   | Some (label, expr) ->
+    let env = { codegen_env = env; use_single_quote = false } in
     " = "
     ^ (string_of_label label)
     ^ "(\"\"\""

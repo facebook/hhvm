@@ -837,6 +837,13 @@ and method_ (env, is_static) m =
                ~ety_env:(Phase.env_with_self env.tenv) in
   let tenv = add_constraints (fst m.m_name) tenv constraints in
   let env = { env with tenv = tenv } in
+
+  (* If this is a destructor make sure it is allowed *)
+  if name = SN.Members.__destruct
+    && TypecheckerOptions.disallow_destruct (Env.get_options env.tenv)
+    && not (Attributes.mem SN.UserAttributes.uaOptionalDestruct m.m_user_attributes)
+  then Errors.illegal_destructor p;
+
   (* Mutable async methods are not allowed *)
   if m.m_fun_kind <> Ast.FSync
     && Attributes.mem SN.UserAttributes.uaMutable m.m_user_attributes then

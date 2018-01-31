@@ -780,6 +780,7 @@ module NastCheck                            = struct
   let mutable_methods_must_be_reactive      = 3053(* DONT MODIFY!!!! *)
   let mutable_attribute_on_function         = 3054 (* DONT MODIFY!!!! *)
   let mutable_return_annotated_decls_must_be_reactive = 3055 (* DONT MODIFY!!!! *)
+  let illegal_destructor                    = 3056 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1722,6 +1723,11 @@ let inout_argument_bad_expr pos =
   add NastCheck.inout_argument_bad_expr pos (
     "Arguments for inout parameters must be local variables or simple " ^
     "subscript expressions on vecs, dicts, keysets, or arrays"
+  )
+
+let illegal_destructor pos =
+  add NastCheck.illegal_destructor pos (
+    "Cannot have a destructor unless it is marked with <<__OptionalDestruct>>"
   )
 
 (*****************************************************************************)

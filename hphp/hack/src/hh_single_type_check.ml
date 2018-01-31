@@ -133,6 +133,7 @@ let parse_options () =
   let forbid_nullable_cast = ref false in
   let deregister_attributes = ref false in
   let disable_optional_and_unknown_shape_fields = ref false in
+  let disallow_destruct = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -237,6 +238,9 @@ let parse_options () =
     "--forbid_nullable_cast",
       Arg.Set forbid_nullable_cast,
       " Forbid casting from nullable values.";
+    "--disallow-destruct",
+      Arg.Set disallow_destruct,
+      " Disallow definition of destructors without __OptionalDestruct.";
     "--infer-return-types",
       Arg.Unit (set_mode Infer_return_types),
       " Infers return types of functions and methods.";
@@ -255,6 +259,7 @@ let parse_options () =
       GlobalOptions.tco_safe_array = !safe_array;
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;
+      GlobalOptions.tco_disallow_destruct = !disallow_destruct;
   } in
   let tcopt = {
     tcopt with

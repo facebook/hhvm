@@ -69,6 +69,12 @@ type t = {
  (* Flag for disabling functions in HHI files with the __PHPStdLib attribute *)
  po_deregister_php_stdlib : bool;
 
+ (**
+  * Flag to disallow the definition of destructors unless the
+  * __OptionalDestruct attribute is added to the __destruct method.
+  *)
+ tco_disallow_destruct : bool;
+
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
 }
@@ -81,6 +87,7 @@ val make :
   tco_experimental_features: SSet.t ->
   tco_migration_flags: SSet.t ->
   po_auto_namespace_map: (string * string) list ->
+  tco_disallow_destruct: bool ->
   ignored_fixme_codes: ISet.t -> t
 val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
@@ -92,6 +99,7 @@ val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool
 val po_enable_hh_syntax_for_hhvm : t -> bool
+val tco_disallow_destruct : t -> bool
 val default : t
 val make_permissive : t -> t
 val tco_experimental_instanceof : string

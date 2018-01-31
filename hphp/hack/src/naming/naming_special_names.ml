@@ -135,7 +135,7 @@ module UserAttributes = struct
   let uaShallowReactive     = "__RxShallow"
   let uaMutable             = "__Mutable"
   let uaMutableReturn       = "__MutableReturn"
-
+  let uaOptionalDestruct    = "__OptionalDestruct"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -154,6 +154,7 @@ module UserAttributes = struct
       uaMutable;
       uaMutableReturn;
       uaShallowReactive;
+      uaOptionalDestruct;
     ]
 end
 

@@ -1080,7 +1080,6 @@ function hphp_cmd($options, $test, $timeout_prefix, $hackc) {
     $program = "hackc";
     $hh_single_compile = hh_codegen_path();
     $hackc_args = implode(" ", array(
-      "-vFlattenTraits=false",
       "-vRuntime.Eval.HackCompilerReset=1",
       "-vRuntime.Eval.HackCompilerDefault=true",
       "-vRuntime.Eval.HackCompilerInheritConfig=true",

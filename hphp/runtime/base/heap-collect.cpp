@@ -702,7 +702,7 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
 void MemoryManager::resetGC() {
   t_req_num = ++g_req_num;
   t_gc_num = 0;
-  updateNextGc();
+  if (rds::header()) updateNextGc();
 }
 
 void MemoryManager::resetEagerGC() {
@@ -718,12 +718,10 @@ void MemoryManager::requestEagerGC() {
   }
 }
 
+NEVER_INLINE
 void MemoryManager::requestGC() {
-  if (this->isGCEnabled() && rds::header()) {
-    if (m_stats.mmUsage > m_nextGc) {
-      setSurpriseFlag(PendingGCFlag);
-    }
-  }
+  assertx(rds::header());
+  setSurpriseFlag(PendingGCFlag);
 }
 
 /*
@@ -733,21 +731,26 @@ void MemoryManager::requestGC() {
  * auxUsage from the heap limit, before our calculations.
  *
  * GC will then be triggered the next time we notice mmUsage > m_nextGc
- * (see requestGC(), above).
+ * (see checkGC() in memory-manager-inl.h).
  */
 void MemoryManager::updateNextGc() {
+  if (!isGCEnabled()) {
+    m_nextGC = kNoNextGC;
+    return;
+  }
+
   auto stats = getStatsCopy();
   auto mm_limit = m_usageLimit - stats.auxUsage();
   int64_t delta = (mm_limit - stats.mmUsage) *
                   RuntimeOption::EvalGCTriggerPct;
   delta = std::max(delta, RuntimeOption::EvalGCMinTrigger);
-  m_nextGc = stats.mmUsage + delta;
+  m_nextGC = stats.mmUsage + delta;
 }
 
 void MemoryManager::collect(const char* phase) {
   if (empty()) return;
   t_req_age = cpu_ns()/1000 - m_req_start_micros;
-  t_trigger = m_nextGc;
+  t_trigger = m_nextGC;
   collectImpl(m_heap, phase, m_mark_version);
   updateNextGc();
 }

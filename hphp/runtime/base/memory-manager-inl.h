@@ -365,6 +365,10 @@ inline void MemoryManager::forceOOM() {
   }
 }
 
+inline void MemoryManager::checkGC() {
+  if (UNLIKELY(m_stats.mmUsage > m_nextGC)) requestGC();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool MemoryManager::empty() const {

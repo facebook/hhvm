@@ -2132,7 +2132,9 @@ void hphp_thread_init() {
   ExtensionRegistry::threadInit();
   InitFiniNode::ThreadInit();
 
-  // ensure that there's no request-allocated memory
+  // Ensure that there's no request-allocated memory. This call must happen at
+  // least once after RDS has been initialized by ThreadInfo::init(), to ensure
+  // MemoryManager::resetGC() sets a proper trigger threshold.
   hphp_memory_cleanup();
 }
 

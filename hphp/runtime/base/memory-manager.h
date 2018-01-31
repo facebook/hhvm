@@ -1088,6 +1088,7 @@ private:
 
   void requestEagerGC();
   void resetEagerGC();
+  void checkGC();
   void requestGC();
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1095,12 +1096,14 @@ private:
 private:
   TRACE_SET_MOD(mm);
 
+  static auto constexpr kNoNextGC = std::numeric_limits<int64_t>::max();
+
   void* m_front{nullptr};
   void* m_limit{nullptr};
   FreelistArray m_freelists;
   StringDataNode m_strings; // in-place node is head of circular list
   std::vector<APCLocalArray*> m_apc_arrays;
-  int64_t m_nextGc; // request gc when heap usage reaches this size
+  int64_t m_nextGC{kNoNextGC}; // request gc when heap usage reaches this size
   int64_t m_usageLimit; // OOM when m_stats.usage() > m_usageLimit
   MemoryUsageStats m_stats;
   HeapImpl m_heap;

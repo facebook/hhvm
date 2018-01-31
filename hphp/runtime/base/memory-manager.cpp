@@ -116,7 +116,7 @@ MemoryManager::MemoryManager() {
   m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
   m_req_start_micros = HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "zend.enable_gc",
-      &m_gc_enabled);
+                   &m_gc_enabled);
 }
 
 MemoryManager::~MemoryManager() {
@@ -670,7 +670,7 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
  */
 NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   refreshStats();
-  requestGC();
+  checkGC();
   storeTail(m_freelists, m_front, (char*)m_limit - (char*)m_front);
   auto mem = m_heap.allocSlab(m_stats);
   assert(reinterpret_cast<uintptr_t>(mem) % kSlabAlign == 0);
@@ -1050,6 +1050,7 @@ bool MemoryManager::isGCEnabled() {
 
 void MemoryManager::setGCEnabled(bool isGCEnabled) {
   m_gc_enabled = isGCEnabled;
+  updateNextGc();
 }
 
 void MemoryManager::publishStats(const char* name,

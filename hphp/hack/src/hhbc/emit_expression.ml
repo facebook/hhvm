@@ -1713,6 +1713,11 @@ and emit_short_circuit_op env expr =
 
 and emit_quiet_expr env (pos, expr_ as expr) =
   match expr_ with
+  | A.Lvar (_, name) when name = SN.Superglobals.globals ->
+    gather [
+      instr_string (SU.Locals.strip_dollar name);
+      instr (IGet CGetQuietG)
+    ]
   | A.Lvar ((_, name) as id) when not (is_local_this env name) ->
     instr_cgetquietl (get_local env id)
   | A.Dollar e ->

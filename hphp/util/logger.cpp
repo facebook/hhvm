@@ -25,6 +25,8 @@
 #include <folly/portability/Syslog.h>
 #include <folly/portability/Unistd.h>
 
+#include <typeinfo>
+
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                    \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
@@ -310,6 +312,12 @@ void Logger::SetTheLogger(const std::string &name, Logger* newLogger) {
   } else {
     s_loggers.erase(name);
   }
+}
+
+bool Logger::IsDefaultLogger(const std::string &name) {
+  auto it = s_loggers.find(name);
+  if (it == s_loggers.end()) return true;
+  return typeid(*it->second) == typeid(Logger);
 }
 
 void Logger::UnlimitThreadMessages() {

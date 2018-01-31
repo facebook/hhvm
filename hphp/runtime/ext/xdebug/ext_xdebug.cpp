@@ -871,17 +871,12 @@ void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
   if (Enable) {
     constexpr auto key = "Eval.Debugger.XDebugDefaultEnable";
     if (Config::GetBool(ini, xdebug_hdf, key, true)) {
-#ifdef FACEBOOK
-      if (RuntimeOption::UseThriftLogger) {
-        Logger::Warning("ThriftLogger enabled, won't use ExtendedLogger");
+      if (!Logger::IsDefaultLogger(Logger::DEFAULT)) {
+        Logger::Warning("XDebug: Not overriding a non-default logger");
       } else {
         Logger::SetTheLogger(Logger::DEFAULT, new ExtendedLogger());
         ExtendedLogger::EnabledByDefault = true;
       }
-#else
-      Logger::SetTheLogger(Logger::DEFAULT, new ExtendedLogger());
-      ExtendedLogger::EnabledByDefault = true;
-#endif
     }
   }
 }

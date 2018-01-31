@@ -1123,17 +1123,6 @@ static int start_server(const std::string &username, int xhprof) {
     BootStats::mark("enable_numa");
   }
 
-#ifdef FACEBOOK
-  // we're serving real traffic now, start batching log output
-  if (RuntimeOption::UseThriftLogger) {
-    Logger::Info("Turning logger batching on, batch size %ld",
-                 RuntimeOption::LoggerBatchSize);
-    Logger::SetBatchSize(RuntimeOption::LoggerBatchSize);
-    Logger::SetFlushTimeout(
-      std::chrono::milliseconds(RuntimeOption::LoggerFlushTimeout));
-  }
-#endif
-
   HttpServer::CheckMemAndWait(true); // Final wait
   if (readaheadThread.get()) {
     readaheadThread->join();

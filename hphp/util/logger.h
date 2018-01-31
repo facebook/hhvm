@@ -112,6 +112,7 @@ struct Logger {
 
   static constexpr const char *DEFAULT = "Default";
   static void SetTheLogger(const std::string &name, Logger* newLogger);
+  static bool IsDefaultLogger(const std::string& name);
 
   static char *EscapeString(const std::string &msg);
 

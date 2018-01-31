@@ -91,11 +91,6 @@ struct RuntimeOption {
   static std::string DeploymentId; // ID for set of instances deployed at once
   static std::string PidFile;
 
-#ifdef FACEBOOK
-  static bool UseThriftLogger;
-  static size_t LoggerBatchSize;
-  static size_t LoggerFlushTimeout;
-#endif
   static std::map<std::string, ErrorLogFileData> ErrorLogs;
   static std::string LogFile;
   static std::string LogFileSymLink;

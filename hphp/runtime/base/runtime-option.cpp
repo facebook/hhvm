@@ -56,9 +56,6 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/server/files-match.h"
 #include "hphp/runtime/server/access-log.h"
-#ifdef FACEBOOK
-#include "hphp/facebook/runtime/server/thrift-logger.h"
-#endif
 
 #include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -112,11 +109,6 @@ uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
 
-#ifdef FACEBOOK
-bool RuntimeOption::UseThriftLogger = false;
-size_t RuntimeOption::LoggerBatchSize = 100;
-size_t RuntimeOption::LoggerFlushTimeout = 0;
-#endif
 std::map<std::string, ErrorLogFileData> RuntimeOption::ErrorLogs = {
   {Logger::DEFAULT, ErrorLogFileData()},
 };
@@ -926,48 +918,13 @@ void RuntimeOption::Load(
     Config::Bind(LogFileSymLink, ini, config, "Log.SymLink");
     Config::Bind(LogFilePeriodMultiplier, ini,
                  config, "Log.PeriodMultiplier", 0);
-#ifdef FACEBOOK
-    Config::Bind(UseThriftLogger, ini, config, "Log.UseThriftLogger");
-    Config::Bind(LoggerBatchSize, ini, config, "Log.BatchSize", 100);
-    Config::Bind(LoggerFlushTimeout, ini, config, "Log.FlushTimeout", 0);
-    if (UseThriftLogger) {
-      fprintf(stderr,
-              "WARNING: Log.UseThriftLogger overrides other logger options.\n"
-              "WARNING: Log.UseThriftLogger ignores logger's thread-hook.\n");
-      Logger::UseLogFile = true;
-      // replace default logger with thrift-logger
+    if (Logger::UseLogFile && RuntimeOption::ServerExecutionMode()) {
       RuntimeOption::ErrorLogs[Logger::DEFAULT] =
-          ErrorLogFileData(LogFile, LogFileSymLink, LogFilePeriodMultiplier);
-      Logger::SetTheLogger(Logger::DEFAULT, new ThriftLogger());
-      // mirror thrift log in plain text
-      if (Config::GetBool(ini, config, "Log.TextMirror.Enable", false)) {
-        auto logFile = Config::GetString(ini, config, "Log.TextMirror.File",
-                                         "");
-        auto symLink = Config::GetString(ini, config, "Log.TextMirror.SymLink",
-                                         "");
-        auto periodMultiplier = Config::GetUInt16(
-            ini, config, "Log.TextMirror.PeriodMultiplier", 0);
-        RuntimeOption::ErrorLogs["TextMirror"] =
-            ErrorLogFileData(logFile, symLink, periodMultiplier);
-        if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
-          Logger::SetTheLogger("TextMirror", new ExtendedLogger());
-          ExtendedLogger::EnabledByDefault = true;
-        } else {
-          Logger::SetTheLogger("TextMirror", new Logger());
-        }
-      }
-#else
-    if (false) {
-#endif
-    } else {
-      if (Logger::UseLogFile && RuntimeOption::ServerExecutionMode()) {
-        RuntimeOption::ErrorLogs[Logger::DEFAULT] =
-            ErrorLogFileData(LogFile, LogFileSymLink, LogFilePeriodMultiplier);
-      }
-      if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
-        Logger::SetTheLogger(Logger::DEFAULT, new ExtendedLogger());
-        ExtendedLogger::EnabledByDefault = true;
-      }
+        ErrorLogFileData(LogFile, LogFileSymLink, LogFilePeriodMultiplier);
+    }
+    if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
+      Logger::SetTheLogger(Logger::DEFAULT, new ExtendedLogger());
+      ExtendedLogger::EnabledByDefault = true;
     }
 
     Config::Bind(Logger::LogHeader, ini, config, "Log.Header");

@@ -32,6 +32,9 @@ module LValOp = struct
   | Unset
 end
 
+let jit_enable_rename_function () =
+  Hhbc_options.jit_enable_rename_function !Hhbc_options.compiler_options
+
 let is_local_this env id =
   let scope = Emit_env.get_scope env in
   id = SN.SpecialIdents.this
@@ -241,7 +244,7 @@ let is_special_function env e args =
       | _ -> false
       end
     | "eval" -> n = 1
-    | "idx" -> n = 2 || n = 3
+    | "idx" -> not (jit_enable_rename_function ()) && (n = 2 || n = 3)
     | "class_alias" ->
       begin
         match args with
@@ -1285,7 +1288,8 @@ and emit_expr env (pos, expr_ as expr) ~need_ref =
     emit_box_if_necessary need_ref @@ emit_call_isset_exprs env pos exprs
   | A.Call ((_, A.Id (_, "empty")), _, [expr], []) ->
     emit_box_if_necessary need_ref @@ emit_call_empty_expr env expr
-  | A.Call ((_, A.Id (_, "idx")), _, es, _) ->
+  | A.Call ((_, A.Id (_, "idx")), _, ([_; _] | [_; _; _] as es), _)
+    when not (jit_enable_rename_function ()) ->
     emit_box_if_necessary need_ref @@ emit_idx env es
   | A.Call ((_, A.Id (_, "define")), _, [(_, A.String (_, s)); e], _)
     when is_global_namespace env ->
@@ -2786,7 +2790,7 @@ and emit_special_function env pos id args uargs default =
   | "array_slice", [
     _, A.Call ((_, A.Id (_, "func_get_args")), _, [], []);
     (_, A.Int _ as count)
-    ] when not (Hhbc_options.jit_enable_rename_function !Hhbc_options.compiler_options) ->
+    ] when not (jit_enable_rename_function ()) ->
     let p = Pos.none in
     Some (emit_call env pos (p,
         A.Id (p, "\\__SystemLib\\func_slice_args")) [count] [])

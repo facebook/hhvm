@@ -152,7 +152,7 @@ let set_option options name value =
     { options with option_hack_arr_compat_notices = as_bool value }
   | "hhvm.repo_authoritative" ->
     { options with option_repo_authoritative = as_bool value }
-  | "hhvm.jit_enable_rename_function" ->
+  | "eval.jitenablerenamefunction" ->
     { options with option_jit_enable_rename_function = as_bool value }
   | "eval.disablehphpcopts" ->
     let v = not (as_bool value) in

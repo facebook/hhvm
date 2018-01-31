@@ -79,6 +79,25 @@ let pPos : Pos.t parser = fun node env ->
     SourceText.relative_pos pos_file text start_offset end_offset
   end
 
+(* HHVM starts range of function declaration from the 'function' keyword *)
+let pFunction node env =
+  let p = pPos node env in
+  match syntax node with
+  | FunctionDeclaration  { function_declaration_header = h; _ }
+  | MethodishDeclaration { methodish_function_decl_header = h; _ }
+    when env.hhvm_compat_mode ->
+    begin match syntax h with
+    | FunctionDeclarationHeader { function_keyword = f; _ }
+      when not (is_missing f) ->
+      let pos_start = Pos.pos_start @@ pPos f env in
+      let pos_end = Pos.pos_end p in
+      let pos_file = env.file in
+      Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
+    | _ -> p
+    end
+  | _ -> p
+
+
 exception Lowerer_invariant_failure of string * string
 let invariant_failure node msg env =
   let pos = Pos.string (Pos.to_absolute (pPos node env)) in
@@ -455,7 +474,7 @@ let mk_fun_kind suspension_kind yield =
   | SKCoroutine, true -> raise (Failure "Couroutine functions may not yield")
 
 let fun_template yielding node suspension_kind env =
-  let p = pPos node env in
+  let p = pFunction node env in
   { f_mode            = mode_annotation env.fi_mode
   ; f_tparams         = []
   ; f_constrs         = []
@@ -1993,7 +2012,7 @@ and pClassElt : class_elt list parser = fun node env ->
         couldMap ~f:pUserAttribute methodish_attribute env
       ; m_ret             = hdr.fh_return_type
       ; m_ret_by_ref      = hdr.fh_ret_by_ref
-      ; m_span            = pPos node env
+      ; m_span            = pFunction node env
       ; m_fun_kind        = mk_fun_kind hdr.fh_suspension_kind body_has_yield
       ; m_doc_comment     = doc_comment_opt
       }]

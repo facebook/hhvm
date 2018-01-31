@@ -1296,24 +1296,28 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
               pos_name v env, token_kind op = Some TK.Ampersand
           | Token _ -> pos_name node env, false
           | _ -> missing_syntax "use variable" node env
-        in
+          in
         let pUse node =
           match syntax node with
           | AnonymousFunctionUseClause { anonymous_use_variables; _ } ->
             couldMap ~f:pArg anonymous_use_variables
           | _ -> fun _env -> []
-        in
+          in
         let suspension_kind =
           mk_suspension_kind
             anonymous_async_keyword
             anonymous_coroutine_keyword in
         let body, yield = mpYielding pFunctionBody anonymous_body env in
+        let doc_comment = match extract_docblock node with
+          | Some _ as doc_comment -> doc_comment
+          | None -> top_docblock() in
         Efun
         ( { (fun_template yield node suspension_kind env) with
-            f_ret    = mpOptional pHint anonymous_type env
-          ; f_params = couldMap ~f:pFunParam anonymous_parameters env
-          ; f_body   = mk_noop (pPos anonymous_body env) body
-          ; f_static = not (is_missing anonymous_static_keyword)
+            f_ret         = mpOptional pHint anonymous_type env
+          ; f_params      = couldMap ~f:pFunParam anonymous_parameters env
+          ; f_body        = mk_noop (pPos anonymous_body env) body
+          ; f_static      = not (is_missing anonymous_static_keyword)
+          ; f_doc_comment = doc_comment
           }
         , try pUse anonymous_use env with _ -> []
         )
@@ -1458,8 +1462,9 @@ and pStmtUnsafe : stmt list parser = fun node env ->
   | Some t when Token.has_trivia_kind t TriviaKind.Unsafe -> [Pos.none, Unsafe; stmt]
   | _ -> [stmt]
 and pStmt : stmt parser = fun node env ->
+  extract_and_push_docblock node;
   let pos = pPos node env in
-  match syntax node with
+  let result = match syntax node with
   | SwitchStatement { switch_expression; switch_sections; _ } ->
     let pSwitchLabel : (block -> case) parser = fun node env cont ->
       match syntax node with
@@ -1708,7 +1713,9 @@ and pStmt : stmt parser = fun node env ->
     in
     let () = env.max_depth <- outer_max_depth in
     result
-  | _ -> missing_syntax "statement" node env
+  | _ -> missing_syntax "statement" node env in
+  pop_docblock ();
+  result
 
 and pMarkup node env =
   match syntax node with
@@ -1831,6 +1838,8 @@ and pFunHdr : fun_hdr parser = fun node env ->
   | Token _ -> empty_fun_hdr
   | _ -> missing_syntax "function header" node env
 
+and docblock_stack = Stack.create ()
+
 and extract_docblock = fun node ->
   let source_text = leading_text node in
   let parse (str : string) : string option =
@@ -1881,6 +1890,22 @@ and extract_docblock = fun node ->
   in (* Now that we have a parser *)
   parse (leading_text node)
 
+and extract_and_push_docblock node =
+  let docblock = extract_docblock node in
+  Stack.push docblock docblock_stack
+
+and pop_docblock () =
+  try
+    let _ = Stack.pop docblock_stack in ()
+  with
+  | Stack.Empty -> ()
+
+and top_docblock () =
+  try
+    Stack.top docblock_stack
+  with
+  | Stack.Empty -> None
+
 and pClassElt : class_elt list parser = fun node env ->
   let doc_comment_opt = extract_docblock node in
   match syntax node with
@@ -1927,7 +1952,7 @@ and pClassElt : class_elt list parser = fun node env ->
   | PropertyDeclaration
     { property_modifiers; property_type; property_declarators; _ } ->
       (* TODO: doc comments do not have to be at the beginning, they can go in
-       * the middle of the decleration, to be associated with individual
+       * the middle of the declaration, to be associated with individual
        * properties, right now we don't handle this *)
       let doc_comment_opt = extract_docblock node in
       [ ClassVars

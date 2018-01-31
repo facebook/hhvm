@@ -1035,7 +1035,7 @@ and string_of_param_default_value ~env expr =
   let fmt_class_name ~is_class_constant cn =
     let cn = (Php_escaping.escape (SU.strip_global_ns cn)) in
     if is_class_constant then "\\\\" ^ cn else cn in
-  let get_special_class_name ~is_class_constant ~env id =
+  let get_special_class_name ~env ~is_class_constant id =
     let scope = match env with
       | None -> Ast_scope.Scope.toplevel
       | Some env -> Emit_env.get_scope env in
@@ -1043,11 +1043,12 @@ and string_of_param_default_value ~env expr =
     let e =
       let p0 = Pos.none in
       (p0, (A.Id (p0, id))) in
-    match ACE.expr_to_class_expr ~check_traits:true ~resolve_self:true scope e with
-    | ACE.Class_id (_, name) -> fmt_class_name ~is_class_constant name
-    | _ -> id
+    fmt_class_name ~is_class_constant @@
+      match ACE.expr_to_class_expr ~check_traits:true ~resolve_self:true scope e with
+      | ACE.Class_id (_, name) -> name
+      | _ -> id
   in
-  let get_class_name_from_id ~is_class_constant ~env id =
+  let get_class_name_from_id ~env ~should_format ~is_class_constant id =
     if id = SN.Classes.cSelf || id = SN.Classes.cParent || id = SN.Classes.cStatic
     then get_special_class_name ~env ~is_class_constant id
     else
@@ -1059,7 +1060,20 @@ and string_of_param_default_value ~env expr =
             (Emit_env.get_namespace env) (p, SU.strip_global_ns id)
       | _ -> id
     in
-    fmt_class_name ~is_class_constant id
+    if should_format then fmt_class_name ~is_class_constant id else id
+  in
+  let handle_possible_colon_colon_class_expr ~env ~is_array_get = function
+    | _, A.Class_const ((_, A.Id (p, s1)), (_, s2))
+      when SU.is_class s2 && not
+        (SU.is_self s1 || SU.is_parent s1 || SU.is_static s1) ->
+
+      let s1 = get_class_name_from_id
+        ~env:env.codegen_env ~should_format:false ~is_class_constant:false s1 in
+      let e =
+        (fst expr, if is_array_get then A.Id (p, s1) else A.String (p, s1)) in
+      let env = { env with use_single_quote = false } in
+      Some (string_of_param_default_value ~env e)
+    | _ -> None
   in
   let escape_char_for_printing = function
     | '\\' | '$' | '"' -> "\\\\"
@@ -1140,19 +1154,26 @@ and string_of_param_default_value ~env expr =
   | A.Class_get (e1, e2) ->
     let s1 = match snd e1 with
       | A.Id (_, s1) ->
-        get_class_name_from_id ~env:env.codegen_env ~is_class_constant:false s1
+        get_class_name_from_id
+          ~env:env.codegen_env ~should_format:true ~is_class_constant:false s1
       | _ -> string_of_param_default_value ~env e1 in
     let s2 = match snd e2 with
       | A.Dollar e -> "$" ^ string_of_param_default_value ~env e
       | _ -> string_of_param_default_value ~env e2 in
     s1 ^ "::" ^ s2
-  | A.Class_const ((_, A.Id (_, s1)), (_, s2)) ->
-    let s1 = get_class_name_from_id
-      ~env:env.codegen_env ~is_class_constant:true s1 in
-    s1 ^ "::" ^ s2
   | A.Class_const (e1, (_, s2)) ->
-    let s1 = string_of_param_default_value ~env e1 in
-    s1 ^ "::" ^ s2
+    let cexpr_o =
+      handle_possible_colon_colon_class_expr ~env ~is_array_get:false expr in
+    begin match snd e1, cexpr_o with
+    | _, Some cexpr_o -> cexpr_o
+    | A.Id (_, s1), _ ->
+      let s1 = get_class_name_from_id
+        ~env:env.codegen_env ~should_format:true ~is_class_constant:true s1 in
+      s1 ^ "::" ^ s2
+    | _ ->
+      let s1 = string_of_param_default_value ~env e1 in
+      s1 ^ "::" ^ s2
+    end
   | A.Unop (uop, e) -> begin
     let e = string_of_param_default_value ~env e in
     match uop with
@@ -1169,7 +1190,15 @@ and string_of_param_default_value ~env expr =
   | A.Array_get (e, eo) ->
     let e = string_of_param_default_value ~env e in
     let eo =
-      Option.value_map eo ~default:"" ~f:(string_of_param_default_value ~env) in
+      Option.value_map eo ~default:""
+        ~f:(fun e ->
+              let cexpr_o =
+                handle_possible_colon_colon_class_expr
+                  ~env ~is_array_get:true e in
+              match cexpr_o with
+              | Some s -> s
+              | None -> string_of_param_default_value ~env e)
+    in
     e ^ "[" ^ eo ^ "]"
   | A.String2 es ->
     String.concat " . " @@ List.map (string_of_param_default_value ~env) es

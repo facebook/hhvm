@@ -654,7 +654,10 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         inclusion_filename = expr; } ->
       Concat [
         t kw;
-        Space;
+        (match syntax expr with
+        | ParenthesizedExpression _ -> Nothing
+        | _ -> Space
+        );
         SplitWith Cost.Base;
         t expr;
       ]
@@ -1104,7 +1107,18 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         echo_keyword = kw;
         echo_expressions = expr_list;
         echo_semicolon = semi; } ->
-      transform_keyword_expr_list_statement kw expr_list semi
+      (match syntax expr_list with
+      | SyntaxList [{ syntax = ListItem { list_item = expr; _ }; _ }]
+        when kind expr = SyntaxKind.ParenthesizedExpression ->
+        Concat [
+          t kw;
+          t expr;
+          t semi;
+          Newline;
+        ]
+      | _ ->
+        transform_keyword_expr_list_statement kw expr_list semi
+      )
     | GlobalStatement {
         global_keyword = kw;
         global_variables = var_list;
@@ -1264,12 +1278,17 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         t operator;
         (match syntax operator with
           | Token x ->
-            let open EditableToken in
-            if   kind x = TokenKind.Await
-              || kind x = TokenKind.Clone
-              || kind x = TokenKind.Print
-              || kind x = TokenKind.Suspend  then Space
-            else Nothing
+            let is_parenthesized =
+              match syntax operand with
+              | ParenthesizedExpression _ -> true
+              | _ -> false
+            in
+            let open EditableToken.TokenKind in
+            (match EditableToken.kind x with
+            | Await | Clone | Suspend -> Space
+            | Print -> if is_parenthesized then Nothing else Space
+            | _ -> Nothing
+            )
           | _ -> Nothing
         );
         t operand;

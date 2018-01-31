@@ -10,5 +10,5 @@
  */
 
 function bar(Awaitable<string> $x): void {
-  print (await $x);
+  print(await $x);
 }

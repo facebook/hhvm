@@ -8,7 +8,7 @@ class A {
     $this->x = $y;
   }
   public function foo(A $z): void {
-    print ($this->x);
+    print($this->x);
   }
 }
 

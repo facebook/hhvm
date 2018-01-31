@@ -725,7 +725,7 @@ and stmt env = function
       let expected =
         if return_explicit
         then Some (pos, Reason.URreturn, return_type)
-        else None in
+        else Some (pos, Reason.URreturn, (Reason.Rwitness p, Tany)) in
       if return_disposable then enforce_return_disposable env e;
       let env, te, rty = expr ~is_using_clause:return_disposable ?expected:expected env e in
       if return_mutable then enforce_mutable_return env te;
@@ -2089,8 +2089,8 @@ and expr_
           [Typing_log.Log_type ("ft", (Reason.Rwitness p, Tfun ft));
            Typing_log.Log_type ("inferred_ty", inferred_ty)])];
         env, tefun, inferred_ty in
-      let env, expected = expand_expected env expected in
-      begin match expected with
+      let env, eexpected = expand_expected env expected in
+      begin match eexpected with
       | Some (_pos, _ur, (_, Tfun expected_ft)) ->
         (* First check that arities match up *)
         check_lambda_arity p expected_ft.ft_pos declared_ft.ft_arity expected_ft.ft_arity;
@@ -2150,11 +2150,20 @@ and expr_
           List.for_all f.f_params (fun param -> Option.is_some param.param_hint) in
         if all_explicit_params && explicit_variadic_param_or_non_variadic
         then begin
-          Measure.sample "Lambda [explicit params]" 1.0;
+          if List.is_empty f.f_params
+          then Measure.sample "Lambda [no params]" 1.0
+          else Measure.sample "Lambda [explicit params]" 1.0;
           check_body_under_known_params declared_ft
         end
         else begin
-        Measure.sample "Lambda [untyped params]" 1.0;
+        match expected with
+        | Some (_, _, (_, Tany)) ->
+          (* If the expected type is Tany then we're passing a lambda to an untyped
+           * function and we just assume every parameter has type Tany *)
+          Measure.sample "Lambda [untyped context]" 1.0;
+          check_body_under_known_params declared_ft
+        | _ ->
+        Measure.sample "Lambda [unknown params]" 1.0;
         Typing_log.log_types 1 p env
           [Typing_log.Log_sub
           ("Typing.expr Efun unknown params",

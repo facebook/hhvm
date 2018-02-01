@@ -89,8 +89,8 @@ let go genv ?filename ~content from to_ =
 (* This is signified by a range that starts at column 1 on one row,     *)
 (* and ends at column 1 on another (because it's half-open).            *)
 (* Nuclide always provides correct ranges, but other editors might not. *)
-let expand_range_to_whole_rows content range =
-  let open Ide_api_types in
+let expand_range_to_whole_rows content (range: File_content.range)
+  : (File_content.range * int * int) =
   let open File_content in
   (* It's easy to expand the start of the range if necessary, but to expand *)
   (* the end of the range requres more work... *)
@@ -120,12 +120,11 @@ let go_ide
   (action: ServerFormatTypes.ide_action)
   : ServerFormatTypes.ide_result =
   let open File_content in
-  let open Ide_api_types in
   let open ServerFormatTypes in
   let filename = match action with
     | Document filename -> filename
-    | Range range -> range.range_filename
-    | Position position -> position.filename
+    | Range range -> range.Ide_api_types.range_filename
+    | Position position -> position.Ide_api_types.filename
   in
   let content =
     ServerFileSync.get_file_content (ServerUtils.FileName filename)
@@ -133,8 +132,9 @@ let go_ide
 
   let convert_to_ide_result
     (old_format_result: ServerFormatTypes.result)
-    ~(range : Ide_api_types.range)
+    ~(range : File_content.range)
     : ServerFormatTypes.ide_result =
+    let range = Ide_api_types.ide_range_from_fc range in
     old_format_result
       |> Core_result.map ~f:(fun new_text -> {new_text; range;})
   in
@@ -151,14 +151,16 @@ let go_ide
       |> convert_to_ide_result ~range
 
   | Range range ->
+    let file_range = range.Ide_api_types.file_range |> Ide_api_types.ide_range_to_fc in
     let (range, from0, to0) =
-      expand_range_to_whole_rows content range.file_range in
+      expand_range_to_whole_rows content file_range in
     go genv ~filename ~content (from0 + 1) (to0 + 1)
       |> convert_to_ide_result ~range
 
-  | Position {position; _} ->
+  | Position { Ide_api_types.position; _} ->
     (* `get_offset` returns a zero-based index, and `--at-char` takes a
        zero-based index. *)
+    let position = position |> Ide_api_types.ide_pos_to_fc in
     let offset = get_offset content position in
     let args = ["--at-char"; string_of_int offset] in
     go_hackfmt genv ~filename ~content args >>= fun lines ->
@@ -191,6 +193,6 @@ let go_ide
     let range = {
       st = offset_to_position content from0;
       ed = offset_to_position content to0;
-    } in
+    } |> Ide_api_types.ide_range_from_fc in
     let new_text = String.concat "\n" lines in
     Ok {new_text; range;}

@@ -9,7 +9,6 @@
 *)
 
 open Hh_core
-open Ide_api_types
 open File_content
 
 let expect_has_content fc content =

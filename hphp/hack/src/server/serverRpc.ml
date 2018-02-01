@@ -120,10 +120,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | CLOSE_FILE path ->
         ServerFileSync.close_file env path, ()
     | EDIT_FILE (path, edits) ->
+        let edits = List.map edits ~f:Ide_api_types.ide_text_edit_to_fc in
         ServerFileSync.edit_file env path edits, ()
     | IDE_AUTOCOMPLETE (path, pos, delimit_on_namespaces) ->
-        let open Ide_api_types in
+        let open File_content in
         let open With_complete_flag in
+        let pos = pos |> Ide_api_types.ide_pos_to_fc in
         let fc = ServerFileSync.get_file_content (ServerUtils.FileName path) in
         let offset = File_content.get_offset fc pos in (* will raise if out of bounds *)
         let char_at_pos = File_content.get_char fc offset in
@@ -135,6 +137,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let is_complete = results.is_complete in
         env, { AutocompleteTypes.completions; char_at_pos; is_complete; }
     | IDE_FFP_AUTOCOMPLETE (path, pos) ->
+        let pos = pos |> Ide_api_types.ide_pos_to_fc in
         let content = ServerFileSync.get_file_content (ServerUtils.FileName path) in
         let offset = File_content.get_offset content pos in (* will raise if out of bounds *)
         let char_at_pos = File_content.get_char content offset in

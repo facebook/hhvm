@@ -30,10 +30,10 @@ let auto_complete ~(tcopt:TypecheckerOptions.t) ~(delimit_on_namespaces:bool) (c
 
 let auto_complete_at_position
   ~(file_content:string)
-  ~(pos:Ide_api_types.position)
+  ~(pos:File_content.position)
   ~(tcopt:TypecheckerOptions.t)
   : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t=
-  let open Ide_api_types in
+  let open File_content in
   (* TODO: Avoid doing the "AUTO332" thing by modifying autocomplete service to accept a position *)
   let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
   let content = File_content.edit_file_unsafe file_content edits in

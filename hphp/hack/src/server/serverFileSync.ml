@@ -98,7 +98,7 @@ let close_file env path =
   let new_env = try_relativize_path path >>| close_relative_path env in
   Option.value new_env ~default:env
 
-let edit_file env path edits =
+let edit_file env path (edits: File_content.text_edit list) =
   let new_env = try_relativize_path path >>= fun path ->
     ServerBusyStatus.send env ServerCommandTypes.Needs_local_typecheck;
     let fc = match FileHeap.get path with

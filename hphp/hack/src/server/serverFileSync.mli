@@ -13,7 +13,7 @@ val open_file : ServerEnv.env -> string -> string -> ServerEnv.env
 val edit_file :
   ServerEnv.env ->
   string ->
-  Ide_api_types.text_edit list ->
+  File_content.text_edit list ->
   ServerEnv.env
 
 val close_file : ServerEnv.env -> string -> ServerEnv.env

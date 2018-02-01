@@ -28,8 +28,8 @@ let make_keyword_completion (keyword_name:string) =
     func_details = None;
   }
 
-let handle_empty_autocomplete pos file_content =
-  let open Ide_api_types in
+let handle_empty_autocomplete (pos: File_content.position) file_content =
+  let open File_content in
   let offset = File_content.get_offset file_content pos in
   let prev_char = File_content.get_char file_content (offset-1) in
   let next_char = File_content.get_char file_content offset in
@@ -43,9 +43,9 @@ let handle_empty_autocomplete pos file_content =
 let auto_complete
   (tcopt:TypecheckerOptions.t)
   (file_content:string)
-  (pos:Ide_api_types.position)
+  (pos:File_content.position)
   ~(filter_by_token:bool) : result =
-  let open Ide_api_types in
+  let open File_content in
   let new_file_content = handle_empty_autocomplete pos file_content in
   let dummy_path = Relative_path.(create Dummy "<autocomplete>") in
   let source_text = SourceText.make dummy_path new_file_content in

@@ -9,7 +9,7 @@
  *)
 
 open Hh_core
-open Ide_api_types
+open File_content
 open String_utils
 open Sys_utils
 
@@ -386,6 +386,7 @@ let file_to_files file =
 
 (* Make readable test output *)
 let replace_color input =
+  let open Ide_api_types in
   match input with
   | (Some Unchecked, str) -> "<unchecked>"^str^"</unchecked>"
   | (Some Checked, str) -> "<checked>"^str^"</checked>"
@@ -610,7 +611,6 @@ let handle_mode mode filename tcopt popt files_contents files_info errors =
       let file_text = cat (Relative_path.to_absolute filename) in
       (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
       let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
-      let open Ide_api_types in
       let position = try
         let _ = Str.search_forward args_regex file_text 0 in
         let raw_flags = Str.matched_string file_text in

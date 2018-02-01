@@ -31,7 +31,7 @@ let run
   ~(context:context)
   ~(file_content:string)
   ~(stub:string)
-  ~(pos:Ide_api_types.position)
+  ~(pos:File_content.position)
   ~(tcopt:TypecheckerOptions.t)
   : AutocompleteTypes.complete_autocomplete_result list =
   if local_variable_valid_in_context context stub ||

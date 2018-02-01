@@ -22,7 +22,6 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
 
@@ -109,8 +108,6 @@ void FileScope::cleanupForError(AnalysisResultConstRawPtr ar) {
       cls->getVariables()->cleanupForError(ar);
     }
   }
-
-  getConstants()->cleanupForError(ar);
 
   StringToFunctionScopePtrMap().swap(m_functions);
   delete m_redeclaredFunctions;

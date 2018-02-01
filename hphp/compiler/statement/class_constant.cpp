@@ -19,7 +19,6 @@
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/class_constant_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
@@ -57,8 +56,6 @@ StatementPtr ClassConstant::clone() {
 void ClassConstant::onParseRecur(AnalysisResultConstRawPtr ar,
                                  FileScopeRawPtr fs,
                                  ClassScopePtr scope) {
-  ConstantTablePtr constants = scope->getConstants();
-
   if (scope->isTrait()) {
     parseTimeFatal(fs,
                    Compiler::InvalidTraitStatement,
@@ -69,7 +66,7 @@ void ClassConstant::onParseRecur(AnalysisResultConstRawPtr ar,
     for (int i = 0; i < m_exp->getCount(); i++) {
       auto exp = dynamic_pointer_cast<ConstantExpression>((*m_exp)[i]);
       const std::string &name = exp->getName();
-      if (constants->isPresent(name)) {
+      if (!scope->addConstant(name)) {
         exp->parseTimeFatal(fs,
                             Compiler::DeclaredConstantTwice,
                             "Cannot redeclare %s::%s",
@@ -80,9 +77,6 @@ void ClassConstant::onParseRecur(AnalysisResultConstRawPtr ar,
       // HACK: break attempts to write global constants here;
       // see ConstantExpression::preOptimize
       exp->setContext(Expression::LValue);
-
-      // Unlike with assignment expression below, nothing needs to be added
-      // to the scope's constant table
     }
   } else {
     for (int i = 0; i < m_exp->getCount(); i++) {
@@ -91,23 +85,12 @@ void ClassConstant::onParseRecur(AnalysisResultConstRawPtr ar,
       auto var = assignment->getVariable();
       const auto& name =
         dynamic_pointer_cast<ConstantExpression>(var)->getName();
-      if (constants->isPresent(name)) {
+      if (!scope->addConstant(name)) {
         assignment->parseTimeFatal(fs,
                                    Compiler::DeclaredConstantTwice,
                                    "Cannot redeclare %s::%s",
                                    scope->getOriginalName().c_str(),
                                    name.c_str());
-      } else {
-        if (isTypeconst()) {
-          // We do not want type constants to be available at run time.
-          // To ensure this we do not want them to be added to the constants
-          // table. The constants table is used to inline values for expressions
-          // See ClassConstantExpression::preOptimize.
-          // AssignmentExpression::onParseRecur essentially adds constants to
-          // the constant table so we skip it.
-          continue;
-        }
-        assignment->onParseRecur(ar, fs, scope);
       }
     }
   }

@@ -27,7 +27,6 @@
 #include "hphp/compiler/statement/method_statement.h"
 #include "hphp/compiler/statement/class_variable.h"
 #include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/statement/interface_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"

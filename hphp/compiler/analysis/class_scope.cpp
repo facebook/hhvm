@@ -18,7 +18,6 @@
 
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
@@ -252,12 +251,6 @@ void ClassScope::setSystem() {
   for (const auto& func : m_functionsVec) {
     func->setSystem();
   }
-}
-
-bool ClassScope::hasConst(const std::string &name) const {
-  const Symbol *sym = m_constants->getSymbol(name);
-  assert(!sym || sym->isPresent());
-  return sym;
 }
 
 void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {

@@ -59,15 +59,10 @@ struct Symbol {
   const std::string &getName() const { return m_name; }
 
   bool isPresent() const { return m_flags.m_declaration_set; }
-  bool checkDefined();
   bool declarationSet() const { return m_flags.m_declaration_set; }
-  bool isReplaced() const { return m_flags.m_replaced; }
-  void setReplaced() { m_flags.m_replaced = true; }
   bool valueSet() const { return m_flags.m_value_set; }
   bool isSystem() const { return m_flags.m_system; }
   void setSystem() { m_flags.m_system = true; }
-  bool isConstant() const { return m_flags.m_constant; }
-  void setConstant() { m_flags.m_constant = true; }
 
   ConstructPtr getValue() const { return m_value; }
   ConstructPtr getDeclaration() const { return m_declaration; }
@@ -79,10 +74,6 @@ struct Symbol {
     m_flags.m_declaration_set = true;
     m_declaration = declaration;
   }
-
-  /* ConstantTable */
-  bool isDynamic() const { return m_flags.m_dynamic; }
-  void setDynamic() { m_flags.m_dynamic = true; }
 
   /* VariableTable */
   bool isParameter() const { return m_parameter >= 0; }
@@ -145,14 +136,9 @@ private:
       unsigned m_value_set : 1;
       unsigned m_hasStaticInit : 1;
       unsigned m_hasClassInit : 1;
-      unsigned m_constant : 1;
 
       /* common */
       unsigned m_system : 1;
-
-      /* ConstantTable */
-      unsigned m_dynamic : 1;
-      unsigned m_replaced : 1;
 
       /* VariableTable */
       unsigned m_protected : 1;
@@ -199,7 +185,7 @@ private:
 };
 
 /**
- * Base class of VariableTable and ConstantTable.
+ * Base class of VariableTable.
  */
 struct SymbolTable : std::enable_shared_from_this<SymbolTable>,
                      JSON::CodeError::ISerializable {
@@ -223,11 +209,6 @@ public:
    * Whether it's declared.
    */
   bool isPresent(const std::string &name) const;
-
-  /**
-   * Whether a symbol is defined.
-   */
-  bool checkDefined(const std::string &name);
 
   /**
    * Whether a symbol is a system symbol.
@@ -265,9 +246,8 @@ public:
   ClassScopeRawPtr getClassScope();
   FileScopeRawPtr getFileScope();
 protected:
-  Symbol *genSymbol(const std::string &name, bool konst);
-  Symbol *genSymbol(const std::string &name, bool konst,
-                    ConstructPtr construct);
+  Symbol *genSymbol(const std::string &name);
+  Symbol *genSymbol(const std::string &name, ConstructPtr construct);
   typedef std::map<std::string,Symbol> StringToSymbolMap;
   BlockScope &m_blockScope;     // owner
 

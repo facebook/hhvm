@@ -116,11 +116,11 @@ public:
                 bool collectPrivate = true) const;
 
   Symbol *addSymbol(const std::string &name) {
-    return genSymbol(name, false);
+    return genSymbol(name);
   }
 
   Symbol *addDeclaredSymbol(const std::string &name, ConstructPtr construct) {
-    return genSymbol(name, false, construct);
+    return genSymbol(name, construct);
   }
 
   /**

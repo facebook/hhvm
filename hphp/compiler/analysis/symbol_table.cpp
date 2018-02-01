@@ -50,25 +50,6 @@ void Symbol::import(BlockScopeRawPtr scope, const Symbol &src_sym) {
     if (sc) sc->resetScope(scope);
     setValue(sc);
   }
-  if (src_sym.isDynamic()) {
-    setDynamic();
-  }
-  if (src_sym.isConstant()) {
-    setConstant();
-  }
-}
-
-bool Symbol::checkDefined() {
-  if (isSystem()) return true;
-  always_assert(m_flags.m_declaration_set);
-  if (!m_declaration) return false;
-  if (!m_declaration.unique()) return true;
-  if (!m_flags.m_replaced) {
-    Lock lock(BlockScope::s_constMutex);
-    setDynamic();
-    return false;
-  }
-  return true;
 }
 
 static inline
@@ -202,13 +183,6 @@ bool SymbolTable::isPresent(const std::string &name) const {
   return false;
 }
 
-bool SymbolTable::checkDefined(const std::string &name) {
-  if (Symbol *sym = getSymbol(name)) {
-    return sym->checkDefined();
-  }
-  return false;
-}
-
 bool SymbolTable::isSystem(const std::string &name) const {
   if (const Symbol *sym = getSymbol(name)) {
     return sym->isSystem();
@@ -234,22 +208,20 @@ const Symbol *SymbolTable::getSymbol(const std::string &name) const {
   return getSymbolImpl(name);
 }
 
-Symbol *SymbolTable::genSymbol(const std::string &name, bool konst) {
+Symbol *SymbolTable::genSymbol(const std::string &name) {
   std::map<std::string,Symbol>::iterator it = m_symbolMap.find(name);
   if (it != m_symbolMap.end()) {
-    assert(konst == it->second.isConstant());
     return &it->second;
   }
 
   Symbol *sym = &m_symbolMap[name];
   sym->setName(name);
-  if (konst) sym->setConstant();
   return sym;
 }
 
-Symbol *SymbolTable::genSymbol(const std::string &name, bool konst,
+Symbol *SymbolTable::genSymbol(const std::string &name,
                                ConstructPtr construct) {
-  Symbol *sym = genSymbol(name, konst);
+  Symbol *sym = genSymbol(name);
   if (!sym->declarationSet() && construct) {
     m_symbolVec.push_back(sym);
     sym->setDeclaration(construct);

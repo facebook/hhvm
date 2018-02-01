@@ -19,7 +19,6 @@
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
@@ -73,36 +72,18 @@ ExpressionPtr AssignmentExpression::clone() {
 void AssignmentExpression::onParseRecur(AnalysisResultConstRawPtr ar,
                                         FileScopeRawPtr /*fs*/,
                                         ClassScopePtr scope) {
-  if (m_variable->is(Expression::KindOfConstantExpression)) {
-    // ...as in ClassConstant statement
-    // We are handling this one here, not in ClassConstant, purely because
-    // we need "value" to store in constant table.
-    auto exp = dynamic_pointer_cast<ConstantExpression>(m_variable);
-    scope->getConstants()->add(exp->getName(), m_value, ar, m_variable);
-  } else if (m_variable->is(Expression::KindOfSimpleVariable)) {
+  if (m_variable->is(Expression::KindOfSimpleVariable)) {
     auto var = dynamic_pointer_cast<SimpleVariable>(m_variable);
     scope->getVariables()->add(var->getName(), true, ar,
                                shared_from_this(), scope->getModifiers());
     var->clearContext(Declaration); // to avoid wrong CodeError
   } else {
-    assert(false); // parse phase shouldn't handle anything else
+    always_assert(false); // parse phase shouldn't handle anything else
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void AssignmentExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
-  if (m_variable->is(Expression::KindOfConstantExpression)) {
-    auto exp = dynamic_pointer_cast<ConstantExpression>(m_variable);
-    if (!m_value->isScalar()) {
-      auto constants = getScope()->getConstants();
-      if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-        constants->setDynamic(ar, exp->getName());
-      }
-    }
-  }
-}
 
 ConstructPtr AssignmentExpression::getNthKid(int n) const {
   switch (m_rhsFirst ? 1 - n : n) {

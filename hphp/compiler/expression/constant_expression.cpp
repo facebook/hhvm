@@ -20,7 +20,6 @@
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/util/hash.h"

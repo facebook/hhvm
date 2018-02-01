@@ -30,7 +30,6 @@
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/statement/method_statement.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"

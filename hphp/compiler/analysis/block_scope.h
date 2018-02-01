@@ -37,7 +37,6 @@ struct CodeGenerator;
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(VariableTable);
-DECLARE_BOOST_TYPES(ConstantTable);
 DECLARE_BOOST_TYPES(ModifierExpression);
 DECLARE_BOOST_TYPES(IncludeExpression);
 DECLARE_BOOST_TYPES(StatementList);
@@ -68,9 +67,7 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
   virtual bool isBuiltin() const { return false; }
   StatementPtr getStmt() const { return m_stmt;}
   VariableTableConstPtr getVariables() const { return m_variables;}
-  ConstantTableConstPtr getConstants() const { return m_constants;}
   VariableTablePtr getVariables() { return m_variables;}
-  ConstantTablePtr getConstants() { return m_constants;}
   ClassScopeRawPtr getContainingClass();
   FunctionScopeRawPtr getContainingNonClosureFunction();
   FunctionScopeRawPtr getContainingFunction() const {
@@ -105,7 +102,6 @@ protected:
   StatementPtr m_stmt;
   KindOf m_kind;
   VariableTablePtr m_variables;
-  ConstantTablePtr m_constants;
   BlockScopeRawPtr m_outerScope;
 
   int m_pass;

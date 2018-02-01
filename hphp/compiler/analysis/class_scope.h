@@ -219,7 +219,6 @@ public:
   bool isEnum() const { return m_kindOf == KindOf::Enum; }
   bool isStaticUtil() const { return m_kindOf == KindOf::UtilClass; }
   bool hasProperty(const std::string &name) const;
-  bool hasConst(const std::string &name) const;
 
   void inheritedMagicMethods(ClassScopePtr super);
   void derivedMagicMethods(ClassScopePtr super);
@@ -245,6 +244,9 @@ public:
     return m_functionsVec;
   }
 
+  bool addConstant(const std::string& name) {
+    return m_constants.insert(name).second;
+  }
 private:
 
   bool hasMethod(const std::string &methodName) const;
@@ -265,6 +267,8 @@ private:
   std::vector<std::string> m_usedTraitNames;
   boost::container::flat_set<std::string> m_requiredExtends;
   boost::container::flat_set<std::string> m_requiredImplements;
+
+  std::unordered_set<std::string> m_constants;
 
   mutable int m_attribute;
   KindOf m_kindOf;

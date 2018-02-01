@@ -18,7 +18,6 @@
 #include <set>
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/text-util.h"

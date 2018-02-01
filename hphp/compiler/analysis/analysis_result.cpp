@@ -29,7 +29,6 @@
 
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/exceptions.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -215,7 +214,6 @@ static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
 }
 
 void AnalysisResult::canonicalizeSymbolOrder() {
-  getConstants()->canonicalizeSymbolOrder();
   getVariables()->canonicalizeSymbolOrder();
 }
 

@@ -4866,9 +4866,9 @@ and call_ ~expected pos env fty el uel =
     let pos_def = Reason.to_pos r2 in
     let env, var_param = variadic_param env ft in
 
-    (* mark current lambda as non-reactive
-       since it is trying to call non-reactive function *)
-    if ft.ft_reactive = Nonreactive
+    (* if lambda is trying to call function that is not
+       strictly reactive - mark lambda as non-reactive *)
+    if ft.ft_reactive <> Reactive
     then Env.not_lambda_reactive ();
 
     (* Strictly reactive functions can only call stricly reactive functions *)

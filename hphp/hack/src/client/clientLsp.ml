@@ -101,11 +101,12 @@ type state =
   (* notifies us that we can exit.                                       *)
   | Post_shutdown
 
-module Jsonrpc = Jsonrpc.Make (struct type t = state end)
-module Lsp_helpers = Lsp_helpers.Make (Jsonrpc)
+type on_result = result:Hh_json.json option -> state -> state
+type on_error = code:int -> message:string -> data:Hh_json.json option -> state -> state
 let initialize_params_ref: Lsp.Initialize.params option ref = ref None
 let hhconfig_version: string ref = ref "[NotYetInitialized]"
 let can_autostart_after_mismatch: bool ref = ref true
+let callbacks_outstanding: (on_result * on_error) IdMap.t ref = ref IdMap.empty
 
 let initialize_params_exc () : Lsp.Initialize.params =
   match !initialize_params_ref with
@@ -314,6 +315,37 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
     Lsp_helpers.telemetry_error to_stdout (Printf.sprintf "%s [%i]\n%s" message code stack)
 
 
+(* request_showMessage: pops up a dialog *)
+let request_showMessage
+    (on_result: on_result)
+    (on_error: on_error)
+    (type_: MessageType.t)
+    (message: string)
+    (titles: string list)
+  : ShowMessageRequest.t =
+  (* send the request *)
+  let id = NumberId (Jsonrpc.get_next_request_id ()) in
+  let actions = List.map titles ~f:(fun title -> { ShowMessageRequest.title; }) in
+  let request = ShowMessageRequestRequest { ShowMessageRequest.type_; message;  actions; } in
+  let json = Lsp_fmt.print_lsp (RequestMessage (id, request)) in
+  to_stdout json;
+  (* save the callback-handlers *)
+  callbacks_outstanding := IdMap.add id (on_result, on_error) !callbacks_outstanding;
+  (* return a token *)
+  ShowMessageRequest.Some { id; }
+
+(* dismiss_showMessageRequest: sends a cancellation-request for the dialog *)
+let dismiss_showMessageRequest (dialog: ShowMessageRequest.t) : ShowMessageRequest.t =
+  begin match dialog with
+    | ShowMessageRequest.None -> ()
+    | ShowMessageRequest.Some { id; _ } ->
+      let notification = CancelRequestNotification { CancelRequest.id; } in
+      let json = Lsp_fmt.print_lsp (NotificationMessage notification) in
+      to_stdout json
+  end;
+  ShowMessageRequest.None
+
+
 (* dismiss_ui: dismisses all dialogs, progress- and action-required           *)
 (* indicators and diagnostics in a state.                                     *)
 let dismiss_ui (state: state) : state =
@@ -324,21 +356,21 @@ let dismiss_ui (state: state) : state =
     Option.iter ~f:Tail.close_env ienv.tail_env;
     In_init { ienv with
       tail_env = None;
-      dialog = Lsp_helpers.dismiss_showMessageRequest ienv.dialog;
+      dialog = dismiss_showMessageRequest ienv.dialog;
       progress = Lsp_helpers.notify_progress p to_stdout ienv.progress None;
     }
   | Main_loop menv ->
     let open Main_env in
     Main_loop { menv with
       uris_with_diagnostics = Lsp_helpers.dismiss_diagnostics to_stdout menv.uris_with_diagnostics;
-      dialog = Lsp_helpers.dismiss_showMessageRequest menv.dialog;
+      dialog = dismiss_showMessageRequest menv.dialog;
       progress = Lsp_helpers.notify_progress p to_stdout menv.progress None;
       actionRequired = Lsp_helpers.notify_actionRequired p to_stdout menv.actionRequired None;
     }
   | Lost_server lenv ->
     let open Lost_env in
     Lost_server { lenv with
-      dialog = Lsp_helpers.dismiss_showMessageRequest lenv.dialog;
+      dialog = dismiss_showMessageRequest lenv.dialog;
       actionRequired = Lsp_helpers.notify_actionRequired p to_stdout lenv.actionRequired None;
       progress = Lsp_helpers.notify_progress p to_stdout lenv.progress None;
     }
@@ -1020,7 +1052,7 @@ let report_connect_start
     | In_init ienv -> In_init {ienv with In_init_env.dialog = ShowMessageRequest.None}
     | _ -> state in
   let handle_error ~code:_ ~message:_ ~data:_ state = handle_result "" state in
-  let dialog = Lsp_helpers.request_showMessage to_stdout handle_result handle_error
+  let dialog = request_showMessage handle_result handle_error
     MessageType.InfoMessage "Waiting for hh_server to be ready..." [] in
 
   (* progress indicator... *)
@@ -1081,7 +1113,7 @@ let report_connect_end
       | Main_loop menv -> Main_loop {menv with Main_env.dialog = ShowMessageRequest.None}
       | _ -> state in
     let handle_error ~code:_ ~message:_ ~data:_ state = handle_result "" state in
-    let dialog = Lsp_helpers.request_showMessage to_stdout handle_result handle_error
+    let dialog = request_showMessage handle_result handle_error
       MessageType.InfoMessage msg [] in
     Main_loop {menv with Main_env.dialog;}
   else
@@ -1419,7 +1451,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
       | Action_required msg ->
         let actionRequired = Lsp_helpers.notify_actionRequired initialize_params to_stdout
           ActionRequired.None (Some msg) in
-        let dialog = Lsp_helpers.request_showMessage to_stdout handle_result handle_error
+        let dialog = request_showMessage handle_result handle_error
           MessageType.ErrorMessage msg ["Restart"] in
         Progress.None, actionRequired, dialog
     in
@@ -1447,7 +1479,7 @@ let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
         state
       | Client_message _
       | Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
-        let dialog = Lsp_helpers.dismiss_showMessageRequest menv.dialog in
+        let dialog = dismiss_showMessageRequest menv.dialog in
         Main_loop { menv with dialog; }
       | _ ->
         state
@@ -1562,7 +1594,21 @@ let handle_event
   match !state, event with
   (* response *)
   | _, Client_message c when c.kind = Jsonrpc.Response ->
-    state := Jsonrpc.dispatch_response c !state
+    let id = match c.id with
+      | Some (Hh_json.JSON_Number id) -> NumberId (int_of_string id)
+      | Some (Hh_json.JSON_String id) -> StringId id
+      | _ -> failwith "malformed response id" in
+    let on_result, on_error = match IdMap.get id !callbacks_outstanding with
+      | Some callbacks -> callbacks
+      | None -> failwith "response id doesn't correspond to an outstanding request" in
+    if Option.is_some c.error then
+      let open Lsp_fmt in
+      let code = Jget.int_exn c.error "code" in
+      let message = Jget.string_exn c.error "message" in
+      let data = Jget.val_opt c.error "data" in
+      state := on_error code message data !state
+    else
+      state := on_result c.result !state
 
   (* shutdown request *)
   | _, Client_message c when c.method_ = "shutdown" ->

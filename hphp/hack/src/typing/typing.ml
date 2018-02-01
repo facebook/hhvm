@@ -4849,6 +4849,7 @@ and call_ ~expected pos env fty el uel =
       let env, _arg_ty = check_valid_rvalue pos env arg_ty in
       env, te
     end in
+    let env = call_untyped_unpack env uel in
     Typing_hooks.dispatch_fun_call_hooks [] (List.map (el @ uel) fst) env;
     env, tel, [], (Reason.Rnone, Tany)
   | r, Tunresolved tyl ->
@@ -5044,9 +5045,11 @@ and call_ ~expected pos env fty el uel =
         env, tel, tuel, ty)
   | _, Tarraykind _ when not (Env.is_strict env) ->
     (* Relaxing call_user_func to work with an array in partial mode *)
+    let env = call_untyped_unpack env uel in
     env, [], [], (Reason.Rnone, Tany)
   | _, ty ->
     bad_call pos ty;
+    let env = call_untyped_unpack env uel in
     env, [], [], err_none
   )
 
@@ -5066,6 +5069,24 @@ and call_param ~safe_pass_by_ref env param ((pos, _ as e), arg_ty) =
     | Lvar _ -> ExprDepTy.make env (CIexpr e) arg_ty
     | _ -> env, arg_ty in
   Type.sub_type pos Reason.URparam env dep_ty param.fp_type
+
+and call_untyped_unpack env uel = match uel with
+  (* In the event that we don't have a known function call type, we can still
+   * verify that any unpacked arguments (`...$args`) are something that can
+   * be actually unpacked. *)
+  | [] -> env
+  | e::_ -> begin
+    let env, _, ety = expr env e in
+    match ety with
+    | _, Ttuple _ -> env (* tuples are always fine *)
+    | _ -> begin
+      let pos = fst e in
+      let ty = Env.fresh_type () in
+      let unpack_r = Reason.Runpack_param pos in
+      let unpack_ty = unpack_r, Tclass ((pos, SN.Collections.cTraversable), [ty]) in
+      Type.sub_type pos Reason.URparam env ety unpack_ty
+    end
+  end
 
 and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)

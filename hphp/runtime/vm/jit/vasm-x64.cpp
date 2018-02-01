@@ -171,7 +171,11 @@ struct Vgen {
   void emit(const declm& i) { a.decl(i.m); }
   void emit(decq i) { unary(i); a.decq(i.d); }
   void emit(const decqm& i) { a.decq(i.m); }
+  #ifdef HAVE_LIBXED
+  void emit(const decqmlock& i) { a.decqlock(i.m); }
+  #else
   void emit(const decqmlock& i) { a.lock(); a.decq(i.m); }
+  #endif
   void emit(divsd i) { noncommute(i); a.divsd(i.s0, i.d); }
   void emit(imul i) { commuteSF(i); a.imul(i.s0, i.d); }
   void emit(const idiv& i) { a.idiv(i.s); }

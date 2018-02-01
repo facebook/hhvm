@@ -21,7 +21,6 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/hash.h"

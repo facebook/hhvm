@@ -26,7 +26,6 @@
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/parser/parser.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/runtime/base/file-util.h"
 
@@ -230,8 +229,8 @@ void IncludeExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
     }
   }
 
-  VariableTablePtr var = getScope()->getVariables();
-  var->setAttribute(VariableTable::ContainsLDynamicVariable);
+  auto const func = getScope()->getContainingFunction();
+  func->setContainsDynamicVar();
 }
 
 ExpressionPtr IncludeExpression::preOptimize(AnalysisResultConstRawPtr ar) {

@@ -30,8 +30,6 @@
 #include <folly/portability/Unistd.h>
 
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/symbol_table.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/json.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/parser/parser.h"

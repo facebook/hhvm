@@ -23,7 +23,6 @@
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/statement/static_statement.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 
@@ -154,8 +153,7 @@ void ClosureExpression::processLambda(AnalysisResultConstRawPtr ar) {
     auto const closureFuncScope = m_func->getFunctionScope();
 
     auto const paramNames = collectParamNames();
-    std::set<std::string> mentioned;
-    closureFuncScope->getVariables()->getNames(mentioned);
+    auto const& mentioned = closureFuncScope->getLocals();
 
     std::set<std::string> toCapture;
 
@@ -172,7 +170,7 @@ void ClosureExpression::processLambda(AnalysisResultConstRawPtr ar) {
         always_assert(scope);
         always_assert(!FileScope::getCurrent() ||
                       scope->getContainingFile() == FileScope::getCurrent());
-        if (scope->getVariables()->getSymbol(m)) {
+        if (scope->hasLocal(m)) {
           toCapture.insert(m);
           break;
         }
@@ -227,24 +225,20 @@ void ClosureExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
 }
 
 void ClosureExpression::analyzeVarsForClosure(AnalysisResultConstRawPtr ar) {
-  // closure function's variable table (not containing function's)
-  auto const variables = m_func->getFunctionScope()->getVariables();
-  for (auto var : *m_vars) {
-    auto param = dynamic_pointer_cast<ParameterExpression>(var);
-    auto const& name = param->getName();
-    auto const sym = variables->addDeclaredSymbol(name, param);
-    sym->setClosureVar();
-    sym->setDeclaration(ConstructPtr());
+  // closure function (not containing function)
+  auto const func = m_func->getFunctionScope();
+  for (auto const& var : *m_vars) {
+    auto const param = dynamic_pointer_cast<ParameterExpression>(var);
+    func->addLocal(param->getName());
   }
 }
 
 void ClosureExpression::analyzeVarsForClosureExpression(
   AnalysisResultConstRawPtr ar) {
-  auto const containing = getFunctionScope()->getVariables();
-  for (auto var : *m_vars) {
-    auto param = dynamic_pointer_cast<ParameterExpression>(var);
-    auto const& name = param->getName();
-    containing->addDeclaredSymbol(name, param);
+  auto const containing = getFunctionScope();
+  for (auto const& var : *m_vars) {
+    auto const param = dynamic_pointer_cast<ParameterExpression>(var);
+    containing->addLocal(param->getName());
   }
 }
 

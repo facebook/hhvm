@@ -4179,12 +4179,9 @@ void EmitterVisitor::visitIfCondition(
 // nice property that all named local variables will be assigned ids
 // 0 through k-1, while any unnamed local variable will have an id >= k.
 void EmitterVisitor::assignLocalVariableIds(FunctionScopePtr fs) {
-  VariableTablePtr variables = fs->getVariables();
-  std::vector<std::string> localNames;
-  variables->getLocalVariableNames(localNames);
-  for (int i = 0; i < (int)localNames.size(); ++i) {
-    StringData* nLiteral = makeStaticString(localNames[i].c_str());
-    m_curFunc->allocVarId(nLiteral);
+  auto const localNames = fs->getLocalVariableNames();
+  for (auto const& local : localNames) {
+    m_curFunc->allocVarId(makeStaticString(local));
   }
 }
 

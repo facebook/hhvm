@@ -30,7 +30,6 @@
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/statement/method_statement.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_variable.h"
@@ -273,18 +272,14 @@ bool SimpleFunctionCall::writesLocals() const {
 
 void SimpleFunctionCall::updateVtFlags() {
   if (m_type != FunType::Unknown) {
-    VariableTablePtr vt = getScope()->getVariables();
+    auto const func = getScope()->getContainingFunction();
+    if (!func) return;
     switch (m_type) {
       case FunType::Extract:
-        vt->setAttribute(VariableTable::ContainsLDynamicVariable);
-        break;
       case FunType::Assert:
-        vt->setAttribute(VariableTable::ContainsLDynamicVariable);
       case FunType::Compact:
-        vt->setAttribute(VariableTable::ContainsDynamicVariable);
-        break;
       case FunType::GetDefinedVars:
-        vt->setAttribute(VariableTable::ContainsDynamicVariable);
+        func->setContainsDynamicVar();
         break;
       default:
         break;

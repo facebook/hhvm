@@ -21,7 +21,6 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/statement/statement_list.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -37,7 +36,6 @@ BlockScope::BlockScope(const std::string &name, const std::string &docComment,
                        StatementPtr stmt, KindOf kind)
   : m_docComment(docComment), m_stmt(stmt), m_kind(kind), m_pass(0) {
   m_scopeName = name;
-  m_variables = std::make_shared<VariableTable>(*this);
 }
 
 FileScopeRawPtr BlockScope::getContainingFile() {
@@ -92,5 +90,4 @@ ClassScopeRawPtr BlockScope::getContainingClass() {
 }
 
 void BlockScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  m_variables->outputPHP(cg, ar);
 }

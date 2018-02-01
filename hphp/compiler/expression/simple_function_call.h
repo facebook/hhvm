@@ -19,7 +19,6 @@
 
 #include "hphp/compiler/expression/function_call.h"
 #include <map>
-#include "hphp/compiler/analysis/variable_table.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

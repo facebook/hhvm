@@ -47,8 +47,6 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FileScope);
 
-struct Symbol;
-
 /**
  * A class scope corresponds to a class declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
@@ -218,7 +216,6 @@ public:
   bool isTrait() const { return m_kindOf == KindOf::Trait; }
   bool isEnum() const { return m_kindOf == KindOf::Enum; }
   bool isStaticUtil() const { return m_kindOf == KindOf::UtilClass; }
-  bool hasProperty(const std::string &name) const;
 
   void inheritedMagicMethods(ClassScopePtr super);
   void derivedMagicMethods(ClassScopePtr super);
@@ -247,6 +244,10 @@ public:
   bool addConstant(const std::string& name) {
     return m_constants.insert(name).second;
   }
+
+  bool addProperty(const std::string& name) {
+    return m_properties.insert(name).second;
+  }
 private:
 
   bool hasMethod(const std::string &methodName) const;
@@ -269,6 +270,7 @@ private:
   boost::container::flat_set<std::string> m_requiredImplements;
 
   std::unordered_set<std::string> m_constants;
+  std::unordered_set<std::string> m_properties;
 
   mutable int m_attribute;
   KindOf m_kindOf;

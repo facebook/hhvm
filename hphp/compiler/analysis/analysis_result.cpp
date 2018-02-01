@@ -32,8 +32,6 @@
 #include "hphp/compiler/analysis/exceptions.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/symbol_table.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
@@ -213,10 +211,6 @@ static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
     b2->getContainingFile()->getName();
 }
 
-void AnalysisResult::canonicalizeSymbolOrder() {
-  getVariables()->canonicalizeSymbolOrder();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Program
 
@@ -304,15 +298,9 @@ void AnalysisResult::analyzeProgram(AnalysisResult::Phase phase) {
 void AnalysisResult::analyzeProgram() {
   AnalysisResultPtr ar = shared_from_this();
 
-  getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
-  getVariables()->setAttribute(VariableTable::ForceGlobal);
-
   // Analyze Includes
   Logger::Verbose("Analyzing Includes");
   sort(m_fileScopes.begin(), m_fileScopes.end(), by_filename); // fixed order
-
-  // Keep generated code identical without randomness
-  canonicalizeSymbolOrder();
 
   // Analyze All
   Logger::Verbose("Analyzing All");
@@ -321,9 +309,6 @@ void AnalysisResult::analyzeProgram() {
 
 void AnalysisResult::analyzeProgramFinal() {
   analyzeProgram(AnalysisResult::AnalyzeFinal);
-
-  // Keep generated code identical without randomness
-  canonicalizeSymbolOrder();
 
   setPhase(AnalysisResult::CodeGen);
 }

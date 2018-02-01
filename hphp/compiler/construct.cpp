@@ -149,9 +149,7 @@ void Construct::dumpNode(int spc) {
     }
 
     int c = e->getContext();
-    if ((c & Expression::Declaration) == Expression::Declaration) {
-      scontext += "|Declaration";
-    } else if (c & Expression::LValue) {
+    if (c & Expression::LValue) {
       scontext += "|LValue";
     }
     if (c & Expression::RefValue) {

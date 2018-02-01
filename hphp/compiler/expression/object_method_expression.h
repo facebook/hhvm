@@ -44,8 +44,6 @@ private:
   bool m_nullsafe;
   bool m_xhpGetAttr;
 
-  // for avoiding code generate toObject(Variant)
-  bool directVariantProxy(AnalysisResultPtr ar);
   bool m_bindClass;
 };
 

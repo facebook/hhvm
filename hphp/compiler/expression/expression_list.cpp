@@ -23,7 +23,6 @@
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/runtime/base/array-init.h"

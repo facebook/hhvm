@@ -22,7 +22,6 @@
 #include "hphp/util/hash.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
 

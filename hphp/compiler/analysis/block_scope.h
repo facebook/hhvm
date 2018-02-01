@@ -36,7 +36,6 @@ namespace HPHP {
 struct CodeGenerator;
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(AnalysisResult);
-DECLARE_BOOST_TYPES(VariableTable);
 DECLARE_BOOST_TYPES(ModifierExpression);
 DECLARE_BOOST_TYPES(IncludeExpression);
 DECLARE_BOOST_TYPES(StatementList);
@@ -66,8 +65,6 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
   const std::string &getScopeName() const { return m_scopeName;}
   virtual bool isBuiltin() const { return false; }
   StatementPtr getStmt() const { return m_stmt;}
-  VariableTableConstPtr getVariables() const { return m_variables;}
-  VariableTablePtr getVariables() { return m_variables;}
   ClassScopeRawPtr getContainingClass();
   FunctionScopeRawPtr getContainingNonClosureFunction();
   FunctionScopeRawPtr getContainingFunction() const {
@@ -101,7 +98,6 @@ protected:
   std::string m_docComment;
   StatementPtr m_stmt;
   KindOf m_kind;
-  VariableTablePtr m_variables;
   BlockScopeRawPtr m_outerScope;
 
   int m_pass;

@@ -18,6 +18,7 @@
 
 #include "hphp/compiler/type_annotation.h"
 #include "hphp/parser/hphp.tab.hpp"
+#include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 
 #include "hphp/compiler/expression/expression_list.h"

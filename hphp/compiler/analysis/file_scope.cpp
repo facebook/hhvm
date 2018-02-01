@@ -23,7 +23,6 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 
 #include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
@@ -103,12 +102,6 @@ FunctionScopePtr FileScope::setTree(AnalysisResultConstRawPtr ar,
 }
 
 void FileScope::cleanupForError(AnalysisResultConstRawPtr ar) {
-  for (auto iter = m_classes.begin(); iter != m_classes.end(); ++iter) {
-    for (ClassScopePtr cls: iter->second) {
-      cls->getVariables()->cleanupForError(ar);
-    }
-  }
-
   StringToFunctionScopePtrMap().swap(m_functions);
   delete m_redeclaredFunctions;
   m_redeclaredFunctions = 0;

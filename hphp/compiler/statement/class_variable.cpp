@@ -20,7 +20,6 @@
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/option.h"
@@ -50,31 +49,6 @@ StatementPtr ClassVariable::clone() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
-
-static bool isEquivRedecl(const std::string &name,
-                          ExpressionPtr exp,
-                          ModifierExpressionPtr modif,
-                          Symbol * symbol) {
-  assert(exp);
-  assert(modif);
-  assert(symbol);
-  if (symbol->getName()     != name                 ||
-      symbol->isProtected() != modif->isProtected() ||
-      symbol->isPrivate()   != modif->isPrivate()   ||
-      symbol->isPublic()    != modif->isPublic()    ||
-      symbol->isStatic()    != modif->isStatic())
-    return false;
-
-  auto symDeclExp =
-    dynamic_pointer_cast<Expression>(symbol->getDeclaration());
-  if (!exp) return !symDeclExp;
-  Variant v1, v2;
-  auto s1 = exp->getScalarValue(v1);
-  auto s2 = symDeclExp->getScalarValue(v2);
-  if (s1 != s2) return false;
-  if (s1) return same(v1, v2);
-  return exp->getText() == symDeclExp->getText();
-}
 
 void ClassVariable::onParseRecur(AnalysisResultConstRawPtr ar,
                                  FileScopeRawPtr fs,
@@ -117,31 +91,26 @@ void ClassVariable::onParseRecur(AnalysisResultConstRawPtr ar,
   }
 
   for (int i = 0; i < m_declaration->getCount(); i++) {
-    VariableTablePtr variables = scope->getVariables();
     ExpressionPtr exp = (*m_declaration)[i];
     if (exp->is(Expression::KindOfAssignmentExpression)) {
       auto assignment = dynamic_pointer_cast<AssignmentExpression>(exp);
       ExpressionPtr var = assignment->getVariable();
       const auto& name =
         dynamic_pointer_cast<SimpleVariable>(var)->getName();
-      if (variables->isPresent(name)) {
+      if (!scope->addProperty(name)) {
         exp->parseTimeFatal(fs,
                             Compiler::DeclaredVariableTwice,
                             "Cannot redeclare %s::$%s",
                             scope->getOriginalName().c_str(), name.c_str());
-      } else {
-        assignment->onParseRecur(ar, fs, scope);
       }
     } else {
       const std::string &name =
         dynamic_pointer_cast<SimpleVariable>(exp)->getName();
-      if (variables->isPresent(name)) {
+      if (!scope->addProperty(name)) {
         exp->parseTimeFatal(fs,
                             Compiler::DeclaredVariableTwice,
                             "Cannot redeclare %s::$%s",
                             scope->getOriginalName().c_str(), name.c_str());
-      } else {
-        variables->add(name, false, ar, exp, m_modifiers);
       }
     }
   }
@@ -151,29 +120,6 @@ void ClassVariable::onParseRecur(AnalysisResultConstRawPtr ar,
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void ClassVariable::analyzeProgram(AnalysisResultConstRawPtr ar) {
-  auto phase = ar->getPhase();
-  if (phase != AnalysisResult::AnalyzeAll) {
-    return;
-  }
-  auto scope = getClassScope();
-  for (int i = 0; i < m_declaration->getCount(); i++) {
-    auto exp = (*m_declaration)[i];
-    if (exp->is(Expression::KindOfAssignmentExpression)) {
-      auto assignment =
-        dynamic_pointer_cast<AssignmentExpression>(exp);
-      auto var =
-        dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-      auto value = assignment->getValue();
-      scope->getVariables()->setClassInitVal(var->getName(), value);
-    } else {
-      auto var = dynamic_pointer_cast<SimpleVariable>(exp);
-      scope->getVariables()->setClassInitVal(var->getName(),
-                                             makeConstant(ar, "null"));
-    }
-  }
-}
 
 ConstructPtr ClassVariable::getNthKid(int n) const {
   switch (n) {

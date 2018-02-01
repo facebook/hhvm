@@ -19,7 +19,6 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/emitter.h"
-#include "hphp/compiler/analysis/symbol_table.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/json.h"
 #include "hphp/compiler/option.h"

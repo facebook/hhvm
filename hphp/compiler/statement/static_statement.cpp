@@ -19,7 +19,6 @@
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/analysis/block_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/assignment_expression.h"
@@ -66,16 +65,6 @@ void StaticStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
                                     false));
         (*m_exp)[i] = exp;
       }
-      always_assert(exp->is(Expression::KindOfAssignmentExpression));
-      auto assignment_exp = dynamic_pointer_cast<AssignmentExpression>(exp);
-      variable = assignment_exp->getVariable();
-      value = assignment_exp->getValue();
-      auto var = dynamic_pointer_cast<SimpleVariable>(variable);
-      // set the Declaration context here instead of all over this
-      // file - this phase is the first to run
-      var->setContext(Expression::Declaration);
-      Symbol *sym = var->getSymbol();
-      sym->setStaticInitVal(value);
     }
   }
 }

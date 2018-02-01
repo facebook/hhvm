@@ -24,7 +24,6 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 
 #include "hphp/parser/scanner.h"
 
@@ -63,7 +62,6 @@ hphp_string_imap<std::string> Option::ConstantFunctions;
 bool Option::GeneratePickledPHP = false;
 bool Option::GenerateInlinedPHP = false;
 bool Option::GenerateTrimmedPHP = false;
-bool Option::ConvertSuperGlobals = false;
 std::string Option::ProgramPrologue;
 std::string Option::TrimmedPrologue;
 std::set<std::string> Option::VolatileClasses;

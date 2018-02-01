@@ -25,16 +25,12 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(AssignmentExpression);
 struct TypedValue;
 
-struct AssignmentExpression : Expression, IParseHandler {
+struct AssignmentExpression : Expression {
   AssignmentExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                        ExpressionPtr variable, ExpressionPtr value,
                        bool ref, bool rhsFirst = false);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-
-  // implementing IParseHandler
-  void onParseRecur(AnalysisResultConstRawPtr ar, FileScopeRawPtr fs,
-                    ClassScopePtr scope) override;
 
   bool isRefable(bool checkError = false) const override {
     if (checkError) return true;

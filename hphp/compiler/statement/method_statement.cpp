@@ -39,7 +39,6 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 
@@ -201,9 +200,6 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstRawPtr ar,
                                     stmt, m_ref, minParam, numDeclParam,
                                     m_modifiers, m_attribute, m_docComment,
                                     fs, attrs);
-  if (!m_stmt) {
-    funcScope->setVirtual();
-  }
   setBlockScope(funcScope);
 
   funcScope->setParamCounts(ar, -1, -1);

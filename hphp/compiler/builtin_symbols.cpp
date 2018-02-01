@@ -24,7 +24,6 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -75,11 +74,6 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
   Loaded = true;
 
   if (g_context.isNull()) hphp_thread_init();
-
-  for (int i = 0, n = NumGlobalNames(); i < n; ++i) {
-    ar->getVariables()->add(GlobalNames[i], false, ar,
-                            ConstructPtr(), ModifierExpressionPtr());
-  }
 
   // Systemlib files were all parsed by hphp_process_init
 

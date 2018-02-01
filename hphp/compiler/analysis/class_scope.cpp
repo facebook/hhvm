@@ -20,7 +20,6 @@
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/construct.h"
 #include "hphp/compiler/expression/class_constant_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
@@ -255,25 +254,12 @@ void ClassScope::setSystem() {
 
 void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
   JSON::CodeError::MapStream ms(out);
-  std::map<std::string, int> propMap;
-  std::set<std::string> names;
-  m_variables->getNames(names);
-  for (auto const& name: names) {
-    int pm = 0;
-    if (m_variables->isPublic(name)) pm |= ClassScope::Public;
-    else if (m_variables->isPrivate(name)) pm |= ClassScope::Private;
-    else if (m_variables->isProtected(name)) pm |= ClassScope::Protected;
-    if (m_variables->isStatic(name)) pm |= ClassScope::Static;
-    propMap[name] = pm;
-  }
-  names.clear();
 
   // What's a mod again?
   ms.add("attributes", m_attribute)
     .add("kind", (int) m_kindOf)
     .add("parent", m_parent)
     .add("bases", m_bases)
-    .add("properties", propMap)
     .add("functions", m_functions);
 
   ms.done();
@@ -327,23 +313,7 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
   getFunctionsFlattened(0, funcs);
   ms.add("methods", funcs);
 
-  std::vector<Symbol*> rawSymbols;
-  getVariables()->getSymbols(rawSymbols, true);
-  std::vector<SymClassVarWrapper> wrappedSymbols;
-  for (auto it = rawSymbols.begin(); it != rawSymbols.end(); ++it) {
-    wrappedSymbols.push_back(SymClassVarWrapper(*it));
-  }
-  ms.add("properties", wrappedSymbols);
-
-  // TODO: constants
-
   ms.done();
-}
-
-bool ClassScope::hasProperty(const std::string &name) const {
-  const Symbol *sym = m_variables->getSymbol(name);
-  assert(!sym || sym->isPresent());
-  return sym;
 }
 
 bool ClassScope::addFunction(AnalysisResultConstRawPtr /*ar*/,

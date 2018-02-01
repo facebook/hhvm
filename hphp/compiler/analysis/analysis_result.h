@@ -21,7 +21,6 @@
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/analysis/block_scope.h"
-#include "hphp/compiler/analysis/symbol_table.h"
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/package.h"
 #include "hphp/compiler/hphp.h"
@@ -278,12 +277,6 @@ private:
    * Checks whether the file is in one of the on-demand parsing directories.
    */
   bool inParseOnDemandDirs(const std::string &filename) const;
-
-  /**
-   * Making sure symbol orders are not different even with multithreading, so
-   * to make sure generated code are consistent every time.
-   */
-  void canonicalizeSymbolOrder();
 
   int getFileSize(FileScopePtr fs);
 };

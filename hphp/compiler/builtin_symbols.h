@@ -29,7 +29,6 @@ DECLARE_EXTENDED_BOOST_TYPES(Type);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_EXTENDED_BOOST_TYPES(FunctionScope);
 DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
-DECLARE_BOOST_TYPES(VariableTable);
 
 struct BuiltinSymbols {
   static bool Loaded;

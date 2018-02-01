@@ -101,7 +101,6 @@ struct Option {
   static bool GeneratePickledPHP;
   static bool GenerateInlinedPHP;
   static bool GenerateTrimmedPHP;
-  static bool ConvertSuperGlobals;    // $GLOBALS['var'] => global $var
   static std::string ProgramPrologue;
   static std::string TrimmedPrologue;
   static std::set<std::string> VolatileClasses;

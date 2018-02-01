@@ -21,7 +21,6 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/util/hash.h"
@@ -37,9 +36,8 @@ ObjectPropertyExpression::ObjectPropertyExpression
  ExpressionPtr object, ExpressionPtr property, PropAccessType propAccessType)
   : Expression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ObjectPropertyExpression)),
-    m_object(object), m_property(property), m_propSym(nullptr) {
+    m_object(object), m_property(property) {
   m_valid = false;
-  m_propSymValid = false;
   m_object->setContext(Expression::ObjectContext);
   m_object->setContext(Expression::AccessContext);
   m_nullsafe = (propAccessType == PropAccessType::NullSafe);
@@ -58,23 +56,6 @@ ExpressionPtr ObjectPropertyExpression::clone() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-bool ObjectPropertyExpression::isNonPrivate(AnalysisResultPtr /*ar*/) {
-  // To tell whether a property is declared as private in the context
-  ClassScopePtr cls = getClassScope();
-  if (!cls || !cls->getVariables()->hasNonStaticPrivate()) return true;
-  if (m_property->getKindOf() != Expression::KindOfScalarExpression) {
-    return false;
-  }
-  auto name = dynamic_pointer_cast<ScalarExpression>(m_property);
-  auto const propName = name->getLiteralString();
-  if (propName.empty()) {
-    return false;
-  }
-  Symbol *sym = cls->getVariables()->getSymbol(propName);
-  if (!sym || sym->isStatic() || !sym->isPrivate()) return true;
-  return false;
-}
 
 void ObjectPropertyExpression::setContext(Context context) {
   m_context |= context;

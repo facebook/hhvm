@@ -32,7 +32,6 @@
 #include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/function_call.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/util/hash.h"

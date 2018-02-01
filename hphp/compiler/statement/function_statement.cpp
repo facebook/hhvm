@@ -23,7 +23,6 @@
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/modifier_expression.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include <sstream>
 

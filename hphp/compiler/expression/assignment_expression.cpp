@@ -21,7 +21,6 @@
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/class_constant_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
@@ -64,22 +63,6 @@ ExpressionPtr AssignmentExpression::clone() {
   exp->m_variable = Clone(m_variable);
   exp->m_value = Clone(m_value);
   return exp;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-void AssignmentExpression::onParseRecur(AnalysisResultConstRawPtr ar,
-                                        FileScopeRawPtr /*fs*/,
-                                        ClassScopePtr scope) {
-  if (m_variable->is(Expression::KindOfSimpleVariable)) {
-    auto var = dynamic_pointer_cast<SimpleVariable>(m_variable);
-    scope->getVariables()->add(var->getName(), true, ar,
-                               shared_from_this(), scope->getModifiers());
-    var->clearContext(Declaration); // to avoid wrong CodeError
-  } else {
-    always_assert(false); // parse phase shouldn't handle anything else
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -69,7 +69,6 @@ public:
     NoContext    = 0,
     RValue       = 0,
     LValue       = 1,            // assignment exp; foreach stmt
-    Declaration  = LValue | 2,   // global or static stmt, or delayed var
     RefValue  = 8,               // &exp
     InOutParameter = 0x10,       // inout exp
     ObjectContext = 0x20,        // $obj->
@@ -129,12 +128,6 @@ public:
     return (m_context & context) == context;
   }
   bool hasAnyContext(int context) const {
-    if ((context & Declaration) == Declaration) {
-      // special case Declaration because it is 2 bit fields
-      if (hasContext(Declaration)) return true;
-      // clear Declaration since we already checked for it
-      context &= ~Declaration;
-    }
     return m_context & context;
   }
   bool hasAllContext(int context) const {

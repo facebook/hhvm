@@ -121,10 +121,6 @@ struct FunctionScope : BlockScope,
   bool isAsync() const { return m_async; }
   void setAsync(bool f) { m_async = f; }
 
-  bool usesLSB() const { return !m_noLSB; }
-  bool nextLSB() const { return m_nextLSB; }
-  void setNextLSB(bool f) { m_nextLSB = f; }
-
   bool needsLocalThis() const;
   bool hasInOutParams() const;
   bool hasRefParams() const;
@@ -184,16 +180,11 @@ struct FunctionScope : BlockScope,
     return hasVariadicParam() ? (m_numDeclParams-1) : m_numDeclParams;
   }
 
-  /**
-   * Whether this is a virtual function that needs dynamic dispatch
-   */
-  void setVirtual() { m_virtual = true;}
-  bool isVirtual() const { return m_virtual;}
-  void setHasOverride() { m_hasOverride = true; }
-  bool hasOverride() const { return m_hasOverride; }
-
   void setLocalRedeclaring() { m_localRedeclaring = true; }
   bool isLocalRedeclaring() const { return m_localRedeclaring; }
+
+  void setContainsDynamicVar() { m_containsDynamicVar = true; }
+  bool containsDynamicVar() const { return m_containsDynamicVar; }
 
   typedef hphp_hash_map<std::string, ExpressionPtr, string_hashi,
     string_eqstri> UserAttributeMap;
@@ -228,6 +219,15 @@ struct FunctionScope : BlockScope,
   }
 
   void recordParams();
+
+  void addLocal(const std::string& name);
+  bool hasLocal(const std::string& name) const {
+    return m_localsSet.count(name);
+  }
+  const std::unordered_set<std::string>& getLocals() const {
+    return m_localsSet;
+  }
+  std::vector<std::string> getLocalVariableNames();
 private:
   void init(AnalysisResultConstRawPtr ar);
 
@@ -240,12 +240,11 @@ private:
   boost::dynamic_bitset<> m_inOuts;
   ModifierExpressionPtr m_modifiers;
   UserAttributeMap m_userAttributes;
+  std::vector<std::string> m_localsVec;
+  std::unordered_set<std::string> m_localsSet;
 
-  unsigned m_hasVoid : 1;
   unsigned m_method : 1;
   unsigned m_refReturn : 1; // whether it's "function &get_reference()"
-  unsigned m_virtual : 1;
-  unsigned m_hasOverride : 1;
   unsigned m_dynamicInvoke : 1;
   unsigned m_pseudoMain : 1;
   unsigned m_system : 1;
@@ -254,9 +253,8 @@ private:
                                    // 2 if in reference context
   unsigned m_generator : 1;
   unsigned m_async : 1;
-  unsigned m_noLSB : 1;
-  unsigned m_nextLSB : 1;
   unsigned m_localRedeclaring : 1;
+  unsigned m_containsDynamicVar : 1;
 
   // holds the fact that defining this function is a fatal error
   const StringData* m_fatal_error_msg = nullptr;

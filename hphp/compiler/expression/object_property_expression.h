@@ -26,7 +26,6 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ObjectPropertyExpression);
 DECLARE_BOOST_TYPES(ClassScope);
-struct Symbol;
 
 struct ObjectPropertyExpression : Expression {
   ObjectPropertyExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
@@ -44,22 +43,13 @@ struct ObjectPropertyExpression : Expression {
   ExpressionPtr getProperty() { return m_property;}
   bool isNullSafe() const { return m_nullsafe; }
 
-  bool isNonPrivate(AnalysisResultPtr ar);
   bool isValid() const { return m_valid; }
 private:
   ExpressionPtr m_object;
   ExpressionPtr m_property;
 
   unsigned m_valid : 1;
-  unsigned m_propSymValid : 1;
   unsigned m_nullsafe : 1;
-
-  Symbol *m_propSym;
-  ClassScopeRawPtr m_objectClass;
-  ClassScopeRawPtr m_symOwner;
-
-  // for avoiding code generate toObject(Variant)
-  bool directVariantProxy(AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

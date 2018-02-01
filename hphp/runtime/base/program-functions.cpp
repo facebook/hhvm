@@ -191,6 +191,7 @@ struct StartTime {
   time_t startTime;
 };
 
+static bool registrationComplete = false;
 static StartTime s_startTime;
 static std::string tempFile;
 std::vector<std::string> s_config_files;
@@ -928,6 +929,10 @@ static bool readahead_rate(const char* path, int64_t mbPerSec) {
 }
 
 static int start_server(const std::string &username, int xhprof) {
+  if (!registrationComplete) {
+    folly::SingletonVault::singleton()->registrationComplete();
+    registrationComplete = true;
+  }
   BootStats::start();
   HttpServer::CheckMemAndWait();
   InitFiniNode::ServerPreInit();
@@ -2200,11 +2205,14 @@ void hphp_process_init() {
   g_context.getCheck();
   // Some event handlers are registered during the startup process.
   g_context->acceptRequestEventHandlers(true);
+  if (!registrationComplete) {
+    folly::SingletonVault::singleton()->registrationComplete();
+    registrationComplete = true;
+  }
   InitFiniNode::ProcessPreInit();
   // TODO(9795696): Race in thread map may trigger spurious logging at
   // thread exit, so for now, only spawn threads if we're a server.
   const uint32_t maxWorkers = RuntimeOption::ServerExecutionMode() ? 3 : 0;
-  folly::SingletonVault::singleton()->registrationComplete();
   InitFiniNode::ProcessInitConcurrentStart(maxWorkers);
   SCOPE_EXIT {
     InitFiniNode::ProcessInitConcurrentWaitForEnd();

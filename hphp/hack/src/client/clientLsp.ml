@@ -101,12 +101,16 @@ type state =
   (* notifies us that we can exit.                                       *)
   | Post_shutdown
 
-let initialize_params: Hh_json.json option ref = ref None
+module Jsonrpc = Jsonrpc.Make (struct type t = state end)
+module Lsp_helpers = Lsp_helpers.Make (Jsonrpc)
+let initialize_params_ref: Lsp.Initialize.params option ref = ref None
 let hhconfig_version: string ref = ref "[NotYetInitialized]"
 let can_autostart_after_mismatch: bool ref = ref true
 
-module Jsonrpc = Jsonrpc.Make (struct type t = state end)
-module Lsp_helpers = Lsp_helpers.Make (Jsonrpc) (struct let get () = !initialize_params end)
+let initialize_params_exc () : Lsp.Initialize.params =
+  match !initialize_params_ref with
+  | None -> failwith "initialize_params not yet received"
+  | Some initialize_params -> initialize_params
 
 let to_stdout (json: Hh_json.json) : unit =
   let s = (Hh_json.json_to_string json) ^ "\r\n\r\n" in
@@ -155,16 +159,17 @@ let state_to_string (state: state) : string =
   | Post_shutdown -> "Post_shutdown"
 
 
-let get_root () : Path.t option =
-  let path_opt = Lsp_helpers.get_root () in
-  if Option.is_none path_opt then
-    None (* None for us means "haven't yet received initialize so we don't know" *)
-  else
-    Some (ClientArgsUtils.get_root path_opt) (* None for ClientArgsUtils means "." *)
+let get_root_opt () : Path.t option =
+  match !initialize_params_ref with
+  | None ->
+    None (* haven't yet received initialize so we don't know *)
+  | Some initialize_params ->
+    let path = Some (Lsp_helpers.get_root initialize_params) in
+    Some (ClientArgsUtils.get_root path)
 
 
 let read_hhconfig_version () : string =
-  match get_root () with
+  match get_root_opt () with
   | None ->
     "[NoRoot]"
   | Some root ->
@@ -312,6 +317,7 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
 (* dismiss_ui: dismisses all dialogs, progress- and action-required           *)
 (* indicators and diagnostics in a state.                                     *)
 let dismiss_ui (state: state) : state =
+  let p = initialize_params_exc () in
   match state with
   | In_init ienv ->
     let open In_init_env in
@@ -319,22 +325,22 @@ let dismiss_ui (state: state) : state =
     In_init { ienv with
       tail_env = None;
       dialog = Lsp_helpers.dismiss_showMessageRequest ienv.dialog;
-      progress = Lsp_helpers.notify_progress to_stdout ienv.progress None;
+      progress = Lsp_helpers.notify_progress p to_stdout ienv.progress None;
     }
   | Main_loop menv ->
     let open Main_env in
     Main_loop { menv with
       uris_with_diagnostics = Lsp_helpers.dismiss_diagnostics to_stdout menv.uris_with_diagnostics;
       dialog = Lsp_helpers.dismiss_showMessageRequest menv.dialog;
-      progress = Lsp_helpers.notify_progress to_stdout menv.progress None;
-      actionRequired = Lsp_helpers.notify_actionRequired to_stdout menv.actionRequired None;
+      progress = Lsp_helpers.notify_progress p to_stdout menv.progress None;
+      actionRequired = Lsp_helpers.notify_actionRequired p to_stdout menv.actionRequired None;
     }
   | Lost_server lenv ->
     let open Lost_env in
     Lost_server { lenv with
       dialog = Lsp_helpers.dismiss_showMessageRequest lenv.dialog;
-      actionRequired = Lsp_helpers.notify_actionRequired to_stdout lenv.actionRequired None;
-      progress = Lsp_helpers.notify_progress to_stdout lenv.progress None;
+      actionRequired = Lsp_helpers.notify_actionRequired p to_stdout lenv.actionRequired None;
+      progress = Lsp_helpers.notify_progress p to_stdout lenv.progress None;
     }
   | Pre_init -> Pre_init
   | Post_shutdown -> Post_shutdown
@@ -468,7 +474,7 @@ let do_shutdown (state: state) : state =
 
 let do_rage (state: state) : Rage.result =
   let open Rage in
-  let logItems = match get_root () with
+  let logItems = match get_root_opt () with
     | None -> []
     | Some root ->
       let monitor_log_link = ServerFiles.monitor_log_link root in
@@ -604,6 +610,7 @@ let make_ide_completion_response (result:AutocompleteTypes.ide_result) =
   (* method calls e.g. "$c->|" ==> "$c->foo($arg1)". But we'll only do this   *)
   (* there's nothing after the caret: no "$c->|(1)" -> "$c->foo($arg1)(1)"    *)
   let is_caret_followed_by_lparen = result.char_at_pos = '(' in
+  let p = initialize_params_exc () in
 
   let rec hack_completion_to_lsp (completion: complete_autocomplete_result)
     : Completion.completionItem =
@@ -661,7 +668,7 @@ let make_ide_completion_response (result:AutocompleteTypes.ide_result) =
       Printf.sprintf "(%s)" params
   and hack_to_insert (completion: complete_autocomplete_result) : (string * insertTextFormat) =
     match completion.func_details with
-    | Some details when Lsp_helpers.supports_snippets () && not is_caret_followed_by_lparen ->
+    | Some details when Lsp_helpers.supports_snippets p && not is_caret_followed_by_lparen ->
       (* "method(${1:arg1}, ...)" but for args we just use param names. *)
       let f i param = Printf.sprintf "${%i:%s}" (i + 1) param.param_name in
       let params = String.concat ", " (List.mapi details.params ~f) in
@@ -931,6 +938,7 @@ let do_documentFormatting
 let do_server_busy (state: state) (status: ServerCommandTypes.busy_status) : state =
   let open ServerCommandTypes in
   let open Main_env in
+  let p = initialize_params_exc () in
   let (progress, action) = match status with
     | Needs_local_typecheck -> (Some "Hack: preparing to check edits", None)
     | Doing_local_typecheck -> (Some "Hack: checking edits", None)
@@ -944,8 +952,8 @@ let do_server_busy (state: state) (status: ServerCommandTypes.busy_status) : sta
   match state with
   | Main_loop menv ->
     Main_loop { menv with
-      progress = Lsp_helpers.notify_progress to_stdout menv.progress progress;
-      actionRequired = Lsp_helpers.notify_actionRequired to_stdout menv.actionRequired action;
+      progress = Lsp_helpers.notify_progress p to_stdout menv.progress progress;
+      actionRequired = Lsp_helpers.notify_actionRequired p to_stdout menv.actionRequired action;
     }
   | _ ->
     state
@@ -962,7 +970,7 @@ let do_diagnostics
   (* figure out which file to report. In this case we'll report on the root.  *)
   (* Nuclide and VSCode both display this fine, though they obviously don't   *)
   (* let you click-to-go-to-file on it.                                       *)
-  let default_path = match get_root () with
+  let default_path = match get_root_opt () with
     | None -> failwith "expected root"
     | Some root -> Path.to_string root in
   let file_reports = match SMap.get "" file_reports with
@@ -998,6 +1006,7 @@ let report_connect_start
   assert (not ienv.has_reported_progress);
   assert (ienv.dialog = ShowMessageRequest.None);
   assert (ienv.progress = Progress.None);
+  let p = initialize_params_exc () in
   (* Our goal behind progress reporting is to let the user know when things   *)
   (* won't be instantaneous, and to show that things are working as expected. *)
   (* Upon connection, if it connects immediately (before we've had 1s idle)   *)
@@ -1015,8 +1024,8 @@ let report_connect_start
     MessageType.InfoMessage "Waiting for hh_server to be ready..." [] in
 
   (* progress indicator... *)
-  let progress = Lsp_helpers.notify_progress
-    to_stdout Progress.None (Some "hh_server initializing") in
+  let progress = Lsp_helpers.notify_progress p to_stdout
+    Progress.None (Some "hh_server initializing") in
 
   In_init { ienv with has_reported_progress = true; dialog; progress; }
 
@@ -1026,6 +1035,7 @@ let report_connect_progress
   : state =
   let open In_init_env in
   assert ienv.has_reported_progress;
+  let p = initialize_params_exc () in
   let tail_env = Option.value_exn ienv.tail_env in
   let time = Unix.time () in
   let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
@@ -1042,7 +1052,7 @@ let report_connect_progress
       tail_msg delay_in_secs
   in
   In_init { ienv with
-    progress = Lsp_helpers.notify_progress to_stdout ienv.progress (Some msg);
+    progress = Lsp_helpers.notify_progress p to_stdout ienv.progress (Some msg);
   }
 
 
@@ -1220,7 +1230,7 @@ let start_server (root: Path.t) : unit =
 (* Lost_server states, obviously. But you can also call it from In_init state *)
 (* if you want to give up on the prior attempt at connection and try again.   *)
 let rec connect (state: state) : state =
-  let root = match get_root () with
+  let root = match get_root_opt () with
     | Some root -> root
     | None -> assert false in
   begin match state with
@@ -1327,6 +1337,7 @@ and reconnect_from_lost_if_necessary
 (* of getting the server back.                                                *)
 and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_env.params) : state =
   let open Lost_env in
+  let initialize_params = initialize_params_exc () in
 
   let no_op = match p.explanation, state with
     | Wait_required _, Lost_server { progress; _ }
@@ -1344,7 +1355,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
   let state = dismiss_ui state in
   let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
 
-  let lock_file = match get_root () with
+  let lock_file = match get_root_opt () with
     | None -> assert false
     | Some root -> ServerFiles.lock_file root
   in
@@ -1377,7 +1388,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
     match result, state with
     | "Restart", Lost_server _ ->
       if p.start_on_click then begin
-        let root = match get_root () with
+        let root = match get_root_opt () with
           | None -> failwith "we should have root by now"
           | Some root -> root
         in
@@ -1402,11 +1413,12 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
   else
     let progress, actionRequired, dialog = match p.explanation with
       | Wait_required msg ->
-        let progress = Lsp_helpers.notify_progress to_stdout Progress.None (Some msg) in
+        let progress = Lsp_helpers.notify_progress initialize_params to_stdout
+          Progress.None (Some msg) in
         progress, ActionRequired.None, ShowMessageRequest.None
       | Action_required msg ->
-        let actionRequired = Lsp_helpers.notify_actionRequired
-          to_stdout ActionRequired.None (Some msg) in
+        let actionRequired = Lsp_helpers.notify_actionRequired initialize_params to_stdout
+          ActionRequired.None (Some msg) in
         let dialog = Lsp_helpers.request_showMessage to_stdout handle_result handle_error
           MessageType.ErrorMessage msg ["Restart"] in
         Progress.None, actionRequired, dialog
@@ -1491,7 +1503,7 @@ let log_response_if_necessary
       | Some json -> json |> Hh_json.json_truncate |> Hh_json.json_to_string
     in
     HackEventLogger.client_lsp_method_handled
-      ~root:(get_root ())
+      ~root:(get_root_opt ())
       ~method_:(if c.kind = Response then "[response]" else c.method_)
       ~kind:(kind_to_string c.kind)
       ~start_queue_t:c.timestamp
@@ -1508,7 +1520,7 @@ let hack_log_error
     (source: string)
     (start_handle_t: float)
   : unit =
-  let root = get_root () in
+  let root = get_root_opt () in
   match event with
   | Some Client_message c ->
     let open Jsonrpc in
@@ -1572,7 +1584,8 @@ let handle_event
 
   (* initialize request *)
   | Pre_init, Client_message c when c.method_ = "initialize" ->
-    initialize_params := c.params;
+    let initialize_params = c.params |> parse_initialize in
+    initialize_params_ref := Some initialize_params;
     hhconfig_version := read_hhconfig_version ();
     state := connect !state;
     do_initialize () |> print_initialize |> Jsonrpc.respond to_stdout c;

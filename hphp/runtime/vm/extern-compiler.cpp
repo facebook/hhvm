@@ -70,12 +70,11 @@ struct ExternCompiler {
   ExternCompiler(ExternCompiler&&) = default;
   ExternCompiler& operator=(ExternCompiler&&) = default;
   void detach_from_process () {
-    // called from forked processes
-    // resets inherited  pid of compiler process to prevent it from being closed
-    // in case if child process exits
+    // Called from forked processes. Resets inherited pid of compiler process to
+    // prevent it being closed in case child process exits
     m_pid = kInvalidPid;
   }
-  ~ExternCompiler() { if (isRunning()) stop(); }
+  ~ExternCompiler() { stop(); }
 
   std::unique_ptr<UnitEmitter> compile(
     const char* filename,
@@ -141,6 +140,7 @@ private:
   void start();
   void stop();
   bool isRunning() const { return m_pid != kInvalidPid; }
+  void stopLogStderrThread();
 
   void writeMessage(folly::dynamic& header, folly::StringPiece body);
   void writeConfig();
@@ -149,10 +149,13 @@ private:
   std::string readVersion() const;
   std::string readProgram() const;
 
-  pid_t m_pid{-1};
+  pid_t m_pid{kInvalidPid};
   FILE* m_in{nullptr};
   FILE* m_out{nullptr};
   std::string m_version;
+
+  FILE* m_err{nullptr};
+  std::thread m_logStderrThread;
 
   unsigned m_compilations{0};
   const CompilerOptions& m_options;
@@ -328,7 +331,7 @@ std::string ExternCompiler::readProgram() const {
     }
     return program;
   } else if (type == "error") {
-    // We don't need to restart the pipe-- the compiler just wasn't able to
+    // We don't need to restart the pipe -- the compiler just wasn't able to
     // build this file...
     throw std::runtime_error(
       header.getDefault("error", "[no 'error' field]").asString());
@@ -339,15 +342,26 @@ std::string ExternCompiler::readProgram() const {
   not_reached();
 }
 
+void ExternCompiler::stopLogStderrThread() {
+  SCOPE_EXIT { m_err = nullptr; };
+  if (m_err) {
+    fclose(m_err);   // need to unblock getline()
+  }
+  if (m_logStderrThread.joinable()) {
+    m_logStderrThread.join();
+  }
+}
+
 void ExternCompiler::writeMessage(
   folly::dynamic& header,
   folly::StringPiece body
 ) {
-  header["bytes"] = body.size();
+  const auto bytes = body.size();
+  header["bytes"] = bytes;
   const auto jsonHeader = folly::toJson(header);
   if (
     fprintf(m_in, "%s\n", jsonHeader.data()) == -1 ||
-    (body.size() > 0 && fwrite(body.begin(), body.size(), 1, m_in) != 1)
+    (bytes > 0 && fwrite(body.begin(), bytes, 1, m_in) != 1)
   ) {
     throwErrno("error writing message");
   }
@@ -423,6 +437,17 @@ private:
 };
 
 void ExternCompiler::stop() {
+  // This is super-gross: it's possible we're in a forked child -- but fork()
+  // doesn't -- can't -- copy over threads, so m_logStderrThread is rubbish --
+  // but joinable() in the child. When the child's ~ExternCompiler() destructor
+  // is called, it will call m_logStderrThread's destructor, terminating a
+  // joinable but unjoined thread, which causes a panic. We really shouldn't be
+  // mixing threads with forking, but we should just about get away with it
+  // here.
+  SCOPE_EXIT {
+    stopLogStderrThread();
+  };
+
   if (m_pid == kInvalidPid) return;
 
   SCOPE_EXIT {
@@ -491,13 +516,8 @@ struct Pipe final {
 void ExternCompiler::start() {
   if (m_pid != kInvalidPid) return;
 
-  // For now we dump stderr to /dev/null, we should probably start logging this
-  // at some point.
-  auto const err = open("/dev/null", O_WRONLY);
-  SCOPE_EXIT { close(err); };
-
-  Pipe in, out;
-  std::vector<int> created = {in.remoteIn(), out.remoteOut(), err};
+  Pipe in, out, err;
+  std::vector<int> created = {in.remoteIn(), out.remoteOut(), err.remoteOut()};
   std::vector<int> wanted = {STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO};
   std::vector<std::string> env;
 
@@ -522,6 +542,26 @@ void ExternCompiler::start() {
 
   m_in = in.detach("w");
   m_out = out.detach("r");
+  m_err = err.detach("r");
+
+  m_logStderrThread = std::thread([&]() {
+      auto pid = m_pid;
+      try {
+        while (true) {
+          const auto line = readline(m_err);
+          Logger::FError("[external compiler {}]: {}", pid, line);
+        }
+      } catch (const std::exception& exc) {
+        // The stderr output messes with expected test output, which presumably
+        // come from non-server runs.
+        if (RuntimeOption::ServerMode) {
+          Logger::FVerbose(
+            "Ceasing to log stderr from external compiler ({}): {}",
+            pid,
+            exc.what());
+        }
+      }
+    });
 
   // Here we expect the very first communication from the external compiler
   // process to be a single line of JSON representing the compiler version.

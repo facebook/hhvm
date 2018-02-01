@@ -74,9 +74,7 @@ let new_debug_time () =
 (*****************************************************************************)
 
 let die str =
-  let oc = stderr in
-  output_string oc str;
-  close_out oc;
+  prerr_endline str;
   exit 2
 
 let is_file_path_for_evaled_code s =
@@ -218,7 +216,7 @@ let fail_daemon file error =
     ; ("error", JSON_String error)
     ] in
   P.printf "%s\n%!" msg;
-  failwith error
+  die error
 
 let rec dispatch_loop handlers =
   let open Hh_json in
@@ -345,7 +343,7 @@ let do_compile filename compiler_options text fail_or_ast debug_time =
     | `ParseResult (errors, parser_return) ->
       let ast = parser_return.Parser_hack.ast in
       List.iter (Errors.get_error_list errors) (fun e ->
-        P.printf "%s\n" (Errors.to_string (Errors.to_absolute e)));
+        P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
       if Errors.is_empty errors
       then Emit_program.from_ast
         parser_return.Parser_hack.is_hh_file
@@ -403,10 +401,11 @@ let decl_and_run_mode compiler_options popt =
     | DAEMON ->
       let handle_output filename output =
         let abs_path = Relative_path.to_absolute filename in
+        let bytes = String.length output in
         let msg = json_to_string @@ JSON_Object
           [ ("type", JSON_String "hhas")
           ; ("file", JSON_String abs_path)
-          ; ("bytes", int_ (String.length output))
+          ; ("bytes", int_ bytes)
           ] in
         P.printf "%s\n%s%!" msg output in
       let handle_exception filename exc =
@@ -531,13 +530,18 @@ let main_hack opts =
 
 (* command line driver *)
 let _ =
-  if ! Sys.interactive
-  then ()
-  else
+  Printexc.record_backtrace true;
+  try
+    if ! Sys.interactive
+    then ()
+    else
     (* On windows, setting 'binary mode' avoids to output CRLF on
        stdout.  The 'text mode' would not hurt the user in general, but
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
-    set_binary_mode_out stdout true;
+      set_binary_mode_out stdout true;
     let options = parse_options () in
-    Unix.handle_unix_error main_hack options
+    main_hack options
+  with exc ->
+    Printexc.get_backtrace () |> prerr_endline;
+    die (Printexc.to_string exc)

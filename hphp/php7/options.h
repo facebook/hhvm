@@ -22,6 +22,7 @@ namespace HPHP {
 struct Options {
   bool daemonEnabled{false};
   bool linenoEnabled{false};
+  bool dumpAst{false};
 };
 extern Options g_opts;
 

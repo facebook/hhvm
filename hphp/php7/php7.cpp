@@ -102,9 +102,12 @@ zend_ast* runParser(const folly::IOBuf& buffer) {
   CG(ast_arena) = zend_arena_create(256);
 
   zendparse();
-  // dump AST to stderr
-  HPHP::php7::dump_ast(std::cerr, CG(ast));
-  std::cerr << std::endl;
+
+  if (HPHP::g_opts.dumpAst) {
+    HPHP::php7::dump_ast(std::cerr, CG(ast));
+    std::cerr << std::endl;
+  }
+
   return CG(ast);
 }
 
@@ -217,6 +220,8 @@ void parseFlags(int argc, char** argv) {
       HPHP::g_opts.daemonEnabled = true;
     } else if (strcmp(s, "--lineno") == 0) {
       HPHP::g_opts.linenoEnabled = true;
+    } else if (strcmp(s, "--dump-ast") == 0) {
+      HPHP::g_opts.dumpAst = true;
     } else {
       throw std::runtime_error(folly::sformat("Unrecognized flag: {}", s));
     }

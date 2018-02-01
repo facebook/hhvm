@@ -115,6 +115,8 @@ bool TestParserExpr::TestDynamicFunctionCall() {
 bool TestParserExpr::TestSimpleFunctionCall() {
   V("<?php test();",       "test();\n");
   V("<?php Test::test();", "Test::test();\n");
+
+  WithOpt w0(RuntimeOption::EnableHipHopSyntax);
   V("<?php test(&$a);",    "test(&$a);\n");
   return true;
 }
@@ -422,41 +424,41 @@ bool TestParserExpr::TestAwaitExpression() {
 bool TestParserExpr::TestXHP() {
   // basics
   V("<?hh $x = <thing />;",
-    "$x = new xhp_thing(array(), array(), __FILE__, __LINE__);\n");
+    "$x = new xhp_thing(darray[], varray[], __FILE__, __LINE__);\n");
 
   // white spaces
   V("<?hh $x = <x> a{ 'b' }c </x>;",
-    "$x = new xhp_x(array(), array(' a', 'b', 'c '), __FILE__, __LINE__);\n");
+    "$x = new xhp_x(darray[], varray[' a', 'b', 'c '], __FILE__, __LINE__);\n");
   V("<?hh $x = <x> a { 'b' } c </x>;",
-    "$x = new xhp_x(array(), array(' a ', 'b', ' c '), __FILE__, __LINE__);\n");
+    "$x = new xhp_x(darray[], varray[' a ', 'b', ' c '], __FILE__, __LINE__);\n");
   V("<?hh $x = <x>\n    foo\n   </x>;",
-    "$x = new xhp_x(array(), array(' foo '), __FILE__, __LINE__);\n");
+    "$x = new xhp_x(darray[], varray[' foo '], __FILE__, __LINE__);\n");
   V("<?hh $x = <x>\n    foo\n   bar\n   </x>;",
-    "$x = new xhp_x(array(), array(' foo bar '), __FILE__, __LINE__);\n");
+    "$x = new xhp_x(darray[], varray[' foo bar '], __FILE__, __LINE__);\n");
 
   // attributes
   V("<?hh $x = <x:y attr={:tag::CONSTANT} />;",
-    "$x = new xhp_x__y(array('attr' => \\xhp_tag::CONSTANT), array(), __FILE__, __LINE__);\n");
+    "$x = new xhp_x__y(darray['attr' => \\xhp_tag::CONSTANT], varray[], __FILE__, __LINE__);\n");
   V("<?hh $x = <a b=\"&nbsp;\">c</a>;",
-    "$x = new xhp_a(array('b' => '\xC2\xA0'), array('c'), __FILE__, __LINE__);\n");
+    "$x = new xhp_a(darray['b' => '\xC2\xA0'], varray['c'], __FILE__, __LINE__);\n");
   V("<?hh $x = <a b=\"\" />;",
-    "$x = new xhp_a(array('b' => ''), array(), __FILE__, __LINE__);\n");
+    "$x = new xhp_a(darray['b' => ''], varray[], __FILE__, __LINE__);\n");
 
   // children
   V("<?hh $x = <x> <x /> {'a'} </x>;",
-    "$x = new xhp_x(array(), array(new xhp_x(array(), array(), __FILE__, __LINE__), 'a'), __FILE__, __LINE__);\n");
+    "$x = new xhp_x(darray[], varray[new xhp_x(darray[], varray[], __FILE__, __LINE__), 'a'], __FILE__, __LINE__);\n");
   V("<?hh $x = <x> {'a'}<x /></x>;",
-    "$x = new xhp_x(array(), array('a', new xhp_x(array(), array(), __FILE__, __LINE__)), __FILE__, __LINE__);");
+    "$x = new xhp_x(darray[], varray['a', new xhp_x(darray[], varray[], __FILE__, __LINE__)], __FILE__, __LINE__);");
   V("<?hh $x = <x>\n<x>\n</x>.\n</x>;",
-    "$x = new xhp_x(array(), array(new xhp_x(array(), array(), __FILE__, __LINE__), '. '), __FILE__, __LINE__);\n");
+    "$x = new xhp_x(darray[], varray[new xhp_x(darray[], varray[], __FILE__, __LINE__), '. '], __FILE__, __LINE__);\n");
   V("<?hh <div><a />=<a /></div>;",
-    "new xhp_div(array(), array(new xhp_a(array(), array(), __FILE__, __LINE__), '=', "
-    "new xhp_a(array(), array(), __FILE__, __LINE__)), __FILE__, __LINE__);\n");
+    "new xhp_div(darray[], varray[new xhp_a(darray[], varray[], __FILE__, __LINE__), '=', "
+    "new xhp_a(darray[], varray[], __FILE__, __LINE__)], __FILE__, __LINE__);\n");
 
   // closing tag
   V("<?hh $x = <a><a><a>hi</a></></a>;",
-    "$x = new xhp_a(array(), array(new xhp_a(array(), "
-    "array(new xhp_a(array(), array('hi'), __FILE__, __LINE__)), __FILE__, __LINE__)), __FILE__, __LINE__);\n");
+    "$x = new xhp_a(darray[], varray[new xhp_a(darray[], "
+    "varray[new xhp_a(darray[], varray['hi'], __FILE__, __LINE__)], __FILE__, __LINE__)], __FILE__, __LINE__);\n");
 
   // class name with PHP keyword
   V("<?hh class :a:b:switch-links { }",
@@ -470,11 +472,11 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = -1;\n"
-    "if ($_ === -1) {\n"
-    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
-    "array('a' => array(5, 'Thing', null, 0), "
-    "'b' => array(5, 'Thing', null, 0)));\n"
+    "static $_ = null;\n"
+    "if ($_ === null) {\n"
+    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
+    "darray['a' => varray[5, 'Thing', null, 0], "
+    "'b' => varray[5, 'Thing', null, 0]]);\n"
     "}\n"
     "return $_;\n"
     "}\n"
@@ -485,10 +487,10 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = -1;\n"
-    "if ($_ === -1) {\n"
-    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
-    "array('a' => array(7, array(123, 456), null, 0)));\n"
+    "static $_ = null;\n"
+    "if ($_ === null) {\n"
+    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
+    "darray['a' => varray[7, varray[123, 456], null, 0]]);\n"
     "}\n"
     "return $_;\n"
     "}\n"
@@ -500,22 +502,22 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_foo {\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = -1;\n"
-    "if ($_ === -1) {\n"
-    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
-    "array('foo' => array(1, null, null, 0)));\n"
+    "static $_ = null;\n"
+    "if ($_ === null) {\n"
+    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
+    "darray['foo' => varray[1, null, null, 0]]);\n"
     "}\n"
     "return $_;\n"
     "}\n"
     "}\n"
     "class xhp_bar {\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = -1;\n"
-    "if ($_ === -1) {\n"
-    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
+    "static $_ = null;\n"
+    "if ($_ === null) {\n"
+    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
     "xhp_foo::__xhpAttributeDeclaration(), "
     "xhp_foo::__xhpAttributeDeclaration(), "
-    "array('bar' => array(1, null, null, 0)));\n"
+    "darray['bar' => varray[1, null, null, 0]]);\n"
     "}\n"
     "return $_;\n"
     "}\n"
@@ -526,10 +528,10 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = -1;\n"
-    "if ($_ === -1) {\n"
-    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
-    "array('a' => array(3, null, 123, 1), 'b' => array(6, null, null, 0)));\n"
+    "static $_ = null;\n"
+    "if ($_ === null) {\n"
+    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
+    "darray['a' => varray[3, null, 123, 1], 'b' => varray[6, null, null, 0]]);\n"
     "}\n"
     "return $_;\n"
     "}\n"
@@ -540,7 +542,7 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected function __xhpCategoryDeclaration() {\n"
-    "static $_ = array('a:foo' => 1, 'b' => 1);\n"
+    "static $_ = darray['a:foo' => 1, 'b' => 1];\n"
     "return $_;\n"
     "}\n"
     "}\n");
@@ -550,8 +552,8 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected function __xhpChildrenDeclaration() {\n"
-    "static $_ = array(0, 5, array(4, array(0, 1, null), "
-    "array(0, 1, null)));\n"
+    "static $_ = varray[0, 5, varray[4, varray[0, 1, null], "
+    "varray[0, 1, null]]];\n"
     "return $_;\n"
     "}\n"
     "}\n");
@@ -569,9 +571,9 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected function __xhpChildrenDeclaration() {\n"
-    "static $_ = array(0, 5, array(4, array(3, 5, "
-    "array(5, array(0, 3, 'xhp_a__foo'), array(0, 4, 'b__bar'))), "
-    "array(0, 2, null)));\n"
+    "static $_ = varray[0, 5, varray[4, varray[3, 5, "
+    "varray[5, varray[0, 3, 'xhp_a__foo'], varray[0, 4, 'b__bar']]], "
+    "varray[0, 2, null]]];\n"
     "return $_;\n"
     "}\n"
     "}\n");
@@ -583,7 +585,7 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected function __xhpCategoryDeclaration() {\n"
-    "static $_ = array('a:foo' => 1, 'b' => 1);\n"
+    "static $_ = darray['a:foo' => 1, 'b' => 1];\n"
     "return $_;\n"
     "}\n"
     "protected function __xhpChildrenDeclaration() {\n"
@@ -603,7 +605,7 @@ bool TestParserExpr::TestXHP() {
 
     "class xhp_thing {\n"
     "protected function __xhpCategoryDeclaration() {\n"
-    "static $_ = array('a' => 1);\n"
+    "static $_ = darray['a' => 1];\n"
     "return $_;\n"
     "}\n"
     "protected function __xhpChildrenDeclaration() {\n"
@@ -615,11 +617,11 @@ bool TestParserExpr::TestXHP() {
     "public function bar() {\n"
     "}\n"
     "protected static function __xhpAttributeDeclaration() {\n"
-    "static $_ = -1;\n"
-    "if ($_ === -1) {\n"
-    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
-    "array('a' => array(5, 'Thing', null, 0), "
-    "'b' => array(5, 'Thing', null, 0)));\n"
+    "static $_ = null;\n"
+    "if ($_ === null) {\n"
+    "$_ = __SystemLib\\merge_xhp_attr_declarations(parent::__xhpAttributeDeclaration(), "
+    "darray['a' => varray[5, 'Thing', null, 0], "
+    "'b' => varray[5, 'Thing', null, 0]]);\n"
     "}\n"
     "return $_;\n"
     "}\n"

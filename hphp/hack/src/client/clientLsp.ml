@@ -813,11 +813,11 @@ let do_findReferences
     List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename)
 
 
-let do_documentHighlights
+let do_documentHighlight
     (conn: server_conn)
-    (params: DocumentHighlights.params)
-  : DocumentHighlights.result =
-  let open DocumentHighlights in
+    (params: DocumentHighlight.params)
+  : DocumentHighlight.result =
+  let open DocumentHighlight in
 
   let (file, line, column) = lsp_file_position_to_hack params in
   let command = ServerCommandTypes.IDE_HIGHLIGHT_REFS (ServerUtils.FileName file, line, column) in
@@ -1682,8 +1682,8 @@ let handle_event
   (* textDocument/documentHighlight *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/documentHighlight" ->
     cancel_if_stale client c short_timeout;
-    parse_documentHighlights c.params |> do_documentHighlights menv.conn
-    |> print_documentHighlights |> Jsonrpc.respond to_stdout c
+    parse_documentHighlight c.params |> do_documentHighlight menv.conn
+    |> print_documentHighlight |> Jsonrpc.respond to_stdout c
 
   (* textDocument/typeCoverage *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/typeCoverage" ->

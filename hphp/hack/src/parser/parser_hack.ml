@@ -729,7 +729,7 @@ and toplevel_word def_start ~attr env = function
       | Const (h, cstl) ->
         let span_end = Pos.make env.file env.lb in
         let span = Pos.btw def_start span_end in
-        List.map cstl begin fun (x, y) -> Constant {
+        List.rev_map cstl begin fun (x, y) -> Constant {
           cst_mode = env.mode;
           cst_kind = Cst_const;
           cst_name = x;

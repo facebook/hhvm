@@ -38,7 +38,6 @@
 
 namespace HPHP {
 
-using apache::thrift::transport::TTransportException;
 using folly::SocketAddress;
 using folly::AsyncServerSocket;
 using wangle::Acceptor;
@@ -282,7 +281,7 @@ void ProxygenServer::start() {
         m_httpsServerSocket->setReusePortEnabled(RuntimeOption::StopOldServer);
         m_httpsServerSocket->bind(m_httpsConfig.bindAddress);
       }
-    } catch (const TTransportException& ex) {
+    } catch (const std::system_error& ex) {
       failedToListen(ex, m_httpsConfig.bindAddress);
     }
 

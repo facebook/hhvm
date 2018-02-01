@@ -834,12 +834,7 @@ bool HttpServer::startServer(bool pageServer) {
       StopOldServer();
 
       if (errno == EACCES) {
-        if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
-          Logger::Error("Permission denied opening socket at %s",
-                        RuntimeOption::ServerFileSocket.c_str());
-        } else {
-          Logger::Error("Permission denied listening on port %d", port);
-        }
+        Logger::Error("%s: Permission denied.", e.what());
         return false;
       }
 

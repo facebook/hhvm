@@ -2208,6 +2208,9 @@ and statement_word env = function
           "Parse error: declarations are not supported outside global scope";
       ignore (ignore_toplevel None ~attr:[] [] env (fun _ -> true));
       Noop
+  | "public" | "private" ->
+      ignore_statement env;
+      Noop
   | x when peek env = Tcolon ->
     (* Unfortunately, some XHP elements allow for expressions to look like goto
      * label declarations. For example,

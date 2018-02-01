@@ -613,8 +613,9 @@ and ignore_toplevel attr_start ~attr acc env terminate =
         ignore (namespace_use env);
         env.errors := error_state;
         ignore_toplevel attr_start ~attr (acc) env terminate
-      | _ ->
+      | _word ->
           begin
+            L.back env.lb;
             ignore_statement env;
             ignore_toplevel attr_start ~attr (acc) env terminate
           end

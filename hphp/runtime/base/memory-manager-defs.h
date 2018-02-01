@@ -63,10 +63,10 @@ extern __thread MemBlock s_firstSlab;
  * (a pointer to somewhere in the body). The start-bit map marks the location
  * of the start of each object. One bit represents kSmallSizeAlign bytes.
  */
-struct alignas(kSmallSizeAlign) Slab : FreeNode {
+struct alignas(kSmallSizeAlign) Slab : HeapObject {
 
   char* init() {
-    initHeader_32(HeaderKind::Slab, sizeof(*this));
+    initHeader_32(HeaderKind::Slab, 0);
     return start();
     static_assert(sizeof(*this) % kSmallSizeAlign == 0, "");
   }
@@ -91,7 +91,7 @@ struct alignas(kSmallSizeAlign) Slab : FreeNode {
   size_t initStartBits() {
     clearStarts();
     size_t count = 0;
-    find_if((HeapObject*)this, [&](HeapObject* h, size_t size) {
+    find_if((HeapObject*)start(), [&](HeapObject* h, size_t size) {
       ++count;
       if (!isFreeKind(h->kind())) setStart(h);
       return false;
@@ -266,7 +266,7 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* BigObj */
     0, /* Free */
     0, /* Hole */
-    0, /* Slab */
+    sizeof(Slab), /* Slab */
   };
 #define CHECKSIZE(knd, type) \
   static_assert(kind_sizes[(int)HeaderKind::knd] == sizeClass<type>(), #knd);
@@ -281,6 +281,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(ImmVector, c_ImmVector)
   CHECKSIZE(ImmMap, c_ImmMap)
   CHECKSIZE(ImmSet, c_ImmSet)
+  static_assert(kind_sizes[(int)HeaderKind::Slab] == sizeof(Slab), "");
 #undef CHECKSIZE
 #define CHECKSIZE(knd)\
   static_assert(kind_sizes[(int)HeaderKind::knd] == 0, #knd);
@@ -305,12 +306,10 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(BigObj)
   CHECKSIZE(Free)
   CHECKSIZE(Hole)
-  CHECKSIZE(Slab)
 #undef CHECKSIZE
 
   auto kind = h->kind();
   if (auto size = kind_sizes[(int)kind]) {
-    assert(size == MemoryManager::sizeClass(size));
     return size;
   }
 
@@ -400,12 +399,12 @@ inline size_t allocSize(const HeapObject* h) {
       return size;
     case HeaderKind::Free:
     case HeaderKind::Hole:
-    case HeaderKind::Slab:
       size = static_cast<const FreeNode*>(h)->size();
       assert(size != 0);
-      // Free and Slab are guaranteed to be already size-class aligned.
-      // Holes are not size-class aligned.
+      // Free objects are guaranteed to be already size-class aligned.
+      // Holes are not size-class aligned, so neither need to be rounded up.
       return size;
+    case HeaderKind::Slab:
     case HeaderKind::NativeObject:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::Empty:

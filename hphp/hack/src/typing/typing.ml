@@ -2466,7 +2466,6 @@ and anon_make tenv p f ft idl =
   let is_coroutine = f.f_fun_kind = Ast.FCoroutine in
   is_coroutine,
   fun ?el ?ret_ty env supplied_params supplied_arity ->
-    let safe_pass_by_ref = true in
     if !is_typing_self
     then begin
       Errors.anonymous_recursive p;
@@ -2516,11 +2515,10 @@ and anon_make tenv p f ft idl =
         let env = List.fold_left ~f:anon_check_param ~init:env f.f_params in
         let env = match el with
           | None ->
-            iter2_shortest (Unify.unify_param_modes ~safe_pass_by_ref)
-              ft.ft_params supplied_params;
+            iter2_shortest Unify.unify_param_modes ft.ft_params supplied_params;
             env
           | Some x ->
-            iter2_shortest (param_modes ~safe_pass_by_ref) ft.ft_params x;
+            iter2_shortest param_modes ft.ft_params x;
             wfold_left2 inout_write_back env ft.ft_params x in
         let env, hret =
           match f.f_ret with
@@ -4787,7 +4785,7 @@ and variadic_param env ft =
     | Fvariadic (_, p_ty) -> env, Some p_ty
     | Fellipsis _ | Fstandard _ -> env, None
 
-and param_modes ~safe_pass_by_ref { fp_pos; fp_kind; _ } (pos, e) =
+and param_modes { fp_pos; fp_kind; _ } (pos, e) =
   match fp_kind, e with
   | FPnormal, Unop (Ast.Uref, _) ->
     Errors.pass_by_ref_annotation_unexpected pos fp_pos
@@ -4801,8 +4799,7 @@ and param_modes ~safe_pass_by_ref { fp_pos; fp_kind; _ } (pos, e) =
     | Ast.Pinout -> ()
     )
   | FPref, _ ->
-    if safe_pass_by_ref
-    then Errors.pass_by_ref_annotation_missing pos fp_pos
+    Errors.pass_by_ref_annotation_missing pos fp_pos
   (* HHVM also allows '&' on arguments to inout parameters via interop layer. *)
   | FPinout, Unop (Ast.Uref, _)
   | FPinout, Callconv (Ast.Pinout, _) -> ()
@@ -4835,7 +4832,6 @@ and call ~expected pos env fty el uel =
   env, tel, tuel, ty
 
 and call_ ~expected pos env fty el uel =
-  let safe_pass_by_ref = true in
   let make_unpacked_traversable_ty pos ty =
     let unpack_r = Reason.Runpack_param pos in
     unpack_r, Tclass ((pos, SN.Collections.cTraversable), [ty])
@@ -4914,7 +4910,7 @@ and call_ ~expected pos env fty el uel =
               let env, te, ty =
                 expr ~allow_uref:true ~accept_using_var:param.fp_accept_disposable
                   ~expected:(pos, Reason.URparam, param.fp_type) env e in
-              let env = call_param ~safe_pass_by_ref env param (e, ty) in
+              let env = call_param env param (e, ty) in
               env, Some (te, ty)
             | None ->
               let env, te, ty = expr ~allow_uref:true env e in
@@ -4955,7 +4951,7 @@ and call_ ~expected pos env fty el uel =
               match opt_param with
               | None -> env
               | Some param ->
-                let env = call_param ~safe_pass_by_ref env param (e, ty) in
+                let env = call_param env param (e, ty) in
                 check_elements env tyl paraml in
           let env = check_elements env tyl paraml in
           env, [te], List.length el + List.length tyl, true
@@ -5053,12 +5049,12 @@ and call_ ~expected pos env fty el uel =
     env, [], [], err_none
   )
 
-and call_param ~safe_pass_by_ref env param ((pos, _ as e), arg_ty) =
+and call_param env param ((pos, _ as e), arg_ty) =
   (match param.fp_name with
   | None -> ()
   | Some name -> Typing_suggest.save_param name env param.fp_type arg_ty
   );
-  param_modes ~safe_pass_by_ref param e;
+  param_modes param e;
   let env, arg_ty = check_valid_rvalue pos env arg_ty in
 
   (* When checking params the type 'x' may be expression dependent. Since

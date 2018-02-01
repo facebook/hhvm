@@ -303,8 +303,8 @@ let rec subtype_params env subl superl variadic_ty =
     let { fp_type = ty_super; _ } = super in
     (* Check that the calling conventions of the params are compatible.
      * We don't currently raise an error for reffiness because function
-     * hints don't support '&' annotations (safe_pass_by_ref = false). *)
-    Unify.unify_param_modes ~safe_pass_by_ref:false sub super;
+     * hints don't support '&' annotations (enforce_ctpbr = false). *)
+    Unify.unify_param_modes ~enforce_ctpbr:false sub super;
     Unify.unify_accept_disposable sub super;
     let env = { env with Env.pos = Reason.to_pos (fst ty_sub) } in
     let env = match sub.fp_kind, super.fp_kind with

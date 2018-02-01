@@ -530,15 +530,16 @@ and unify_funs env r1 ft1 r2 ft2 =
     ft_ret = ret;
   }
 
-and unify_param_modes ~safe_pass_by_ref param1 param2 =
+and unify_param_modes ?(enforce_ctpbr=true) param1 param2 =
+  (* ctpbr = call-time pass-by-reference i.e. & annotation *)
   let { fp_pos = pos1; fp_kind = mode1; _ } = param1 in
   let { fp_pos = pos2; fp_kind = mode2; _ } = param2 in
   match mode1, mode2 with
   | FPnormal, FPnormal | FPref, FPref | FPinout, FPinout -> ()
   | FPnormal, FPref ->
-    if safe_pass_by_ref then Errors.reffiness_invariant pos2 pos1 `normal
+    if enforce_ctpbr then Errors.reffiness_invariant pos2 pos1 `normal
   | FPref, FPnormal ->
-    if safe_pass_by_ref then Errors.reffiness_invariant pos1 pos2 `normal
+    if enforce_ctpbr then Errors.reffiness_invariant pos1 pos2 `normal
   | FPnormal, FPinout ->
     Errors.inoutness_mismatch pos2 pos1
   | FPinout, FPnormal ->
@@ -557,7 +558,6 @@ and unify_accept_disposable param1 param2 =
   | _, _ -> ()
 
 and unify_params env l1 l2 var1_opt =
-  let safe_pass_by_ref = true in
   match l1, l2, var1_opt with
   | [], l, None -> env, l
   | [], x2 :: rl2, Some (name1, v1) ->
@@ -572,7 +572,7 @@ and unify_params env l1 l2 var1_opt =
     let { fp_name = name1; fp_type = ty1; _ } = x1 in
     let { fp_name = name2; fp_type = ty2; _ } = x2 in
     let name = if name1 = name2 then name1 else None in
-    unify_param_modes ~safe_pass_by_ref x1 x2;
+    unify_param_modes x1 x2;
     unify_accept_disposable x1 x2;
     let env = { env with Env.pos = Reason.to_pos (fst ty1) } in
     let env, _ = unify env ty2 ty1 in

@@ -428,59 +428,6 @@ void FunctionScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   BlockScope::outputPHP(cg, ar);
 }
 
-void FunctionScope::serialize(JSON::CodeError::OutputStream &out) const {
-  JSON::CodeError::MapStream ms(out);
-  int vis = 0;
-  if (isPublic()) vis = ClassScope::Public;
-  else if (isProtected()) vis = ClassScope::Protected;
-  else if (isPrivate()) vis = ClassScope::Protected;
-
-  int mod = 0;
-  if (isAbstract()) mod = ClassScope::Abstract;
-  else if (isFinal()) mod = ClassScope::Final;
-
-  auto toVec = [] (const boost::dynamic_bitset<>& b) {
-    std::vector<bool> r(b.size(), false);
-    for (auto i = b.find_first();
-         i != boost::dynamic_bitset<>::npos;
-         i = b.find_next(i)) {
-      r[i] = true;
-    }
-    return r;
-  };
-
-  ms.add("minArgs", m_minParam)
-    .add("maxArgs", m_numDeclParams)
-    .add("varArgs", allowsVariableArguments())
-    .add("static", isStatic())
-    .add("modifier", mod)
-    .add("visibility", vis)
-    .add("argIsRef", toVec(m_refs))
-    .add("argIsInOut", toVec(m_inOuts))
-    .done();
-}
-
-void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
-  JSON::DocTarget::MapStream ms(out);
-
-  ms.add("name", getDocName());
-  ms.add("line", getStmt() ? getStmt()->line0() : 0);
-  ms.add("docs", m_docComment);
-
-  int mods = 0;
-  if (isPublic())    mods |= AttrPublic;
-  if (isProtected()) mods |= AttrProtected;
-  if (isPrivate())   mods |= AttrPrivate;
-  if (isStatic())    mods |= AttrStatic;
-  if (isFinal())     mods |= AttrFinal;
-  if (isAbstract())  mods |= AttrAbstract;
-  ms.add("modifiers", mods);
-
-  ms.add("refreturn", isRefReturn());
-
-  ms.done();
-}
-
 void FunctionScope::addLocal(const std::string& name) {
   if (m_localsSet.insert(name).second) {
     m_localsVec.push_back(name);

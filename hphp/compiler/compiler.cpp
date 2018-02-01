@@ -20,7 +20,6 @@
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/emitter.h"
 #include "hphp/compiler/builtin_symbols.h"
-#include "hphp/compiler/json.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/package.h"
 #include "hphp/compiler/parser/parser.h"
@@ -887,7 +886,7 @@ int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr&& ar,
 
   // check error
   if (Compiler::HasError() && !po.force) {
-    Compiler::DumpErrors(ar);
+    Compiler::DumpErrors();
     return 1;
   }
 

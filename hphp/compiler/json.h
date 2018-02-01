@@ -26,11 +26,7 @@
 
 #include "hphp/util/hash-map-typedefs.h"
 
-namespace HPHP {
-
-struct AnalysisResult;
-
-namespace JSON {
+namespace HPHP { namespace JSON {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename T> struct _OutputStream;
@@ -47,7 +43,6 @@ template <typename T> struct _ISerializable;
   }
 
 DEFINE_JSON_OUTPUT_TYPE(CodeError);
-DEFINE_JSON_OUTPUT_TYPE(DocTarget);
 
 std::string Escape(const char *s);
 
@@ -81,8 +76,7 @@ enum class Null {};
 
 template <typename Type>
 struct _OutputStream {
-  _OutputStream(std::ostream &out,
-                std::shared_ptr<AnalysisResult> ar) : m_out(out), m_ar(ar) {}
+  explicit _OutputStream(std::ostream &out) : m_out(out) {}
 
   _OutputStream &operator<< (unsigned int v) { m_out << v; return *this; }
 
@@ -182,11 +176,8 @@ struct _OutputStream {
     return *this;
   }
 
-  std::shared_ptr<AnalysisResult> analysisResult() const { return m_ar; }
-
 private:
   std::ostream      &m_out;
-  std::shared_ptr<AnalysisResult>  m_ar;
 
   std::ostream &raw() { return m_out;}
 

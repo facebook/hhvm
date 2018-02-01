@@ -25,7 +25,6 @@
 #include <boost/dynamic_bitset.hpp>
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/json.h"
 
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/parser/parser.h"
@@ -63,9 +62,7 @@ typedef std::vector< ParameterExpressionPtrIdxPair >
  * A FunctionScope corresponds to a function declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
  */
-struct FunctionScope : BlockScope,
-                       JSON::CodeError::ISerializable,
-                       JSON::DocTarget::ISerializable {
+struct FunctionScope : BlockScope {
   /**
    * User defined functions.
    */
@@ -198,11 +195,6 @@ struct FunctionScope : BlockScope,
    * Override BlockScope::outputPHP() to generate return type.
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) override;
-  /**
-   * Serialize the iface, not everything.
-   */
-  void serialize(JSON::CodeError::OutputStream &out) const override;
-  void serialize(JSON::DocTarget::OutputStream &out) const override;
 
   bool inPseudoMain() const override {
     return m_pseudoMain;

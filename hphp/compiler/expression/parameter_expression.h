@@ -19,7 +19,6 @@
 
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
-#include "hphp/compiler/json.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/parser/scanner.h"
 

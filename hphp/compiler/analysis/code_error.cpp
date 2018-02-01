@@ -23,11 +23,10 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/construct.h"
+#include "hphp/compiler/json.h"
 #include "hphp/compiler/option.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/lock.h"
-
-using namespace HPHP::JSON;
 
 namespace HPHP { namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,9 +58,6 @@ struct CodeErrors : JSON::CodeError::ISerializable {
   void record(ErrorInfoPtr errorInfo);
   bool exists(ErrorType type) const;
   bool exists() const;
-
-  void saveToFile(AnalysisResultPtr ar,
-                  const char *filename, bool varWrapper) const;
 
 private:
   static std::vector<const char *> ErrorTexts;
@@ -161,19 +157,6 @@ void CodeErrors::serialize(JSON::CodeError::OutputStream &out) const {
   ls.done();
 }
 
-void CodeErrors::saveToFile(AnalysisResultPtr ar,
-                            const char *filename,
-                            bool varWrapper) const {
-  std::ofstream f(filename);
-  if (f) {
-    JSON::CodeError::OutputStream o(f, ar);
-    if (varWrapper) f << "var CodeErrors = ";
-    serialize(o);
-    if (varWrapper) f << ";\n\n";
-    f.close();
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClearErrors() {
@@ -208,18 +191,8 @@ void Error(ErrorType error, ConstructPtr construct, const std::string &data) {
   s_code_errors.record(errorInfo);
 }
 
-void SaveErrors(JSON::CodeError::OutputStream &out) {
-  s_code_errors.serialize(out);
-}
-
-void SaveErrors(AnalysisResultPtr ar,
-                const char *filename,
-                bool varWrapper /* = false */) {
-  s_code_errors.saveToFile(ar, filename, varWrapper);
-}
-
-void DumpErrors(AnalysisResultPtr ar) {
-  JSON::CodeError::OutputStream o(std::cerr, ar);
+void DumpErrors() {
+  JSON::CodeError::OutputStream o(std::cerr);
   s_code_errors.serialize(o);
 }
 

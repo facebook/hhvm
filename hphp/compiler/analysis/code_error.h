@@ -18,7 +18,6 @@
 #define incl_HPHP_COMPILER_ERROR_H_
 
 #include "hphp/compiler/hphp.h"
-#include "hphp/compiler/json.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,17 +57,9 @@ void Error(ErrorType error, ConstructPtr construct1, ConstructPtr construct2);
 void Error(ErrorType error, ConstructPtr construct, const std::string &data);
 
 /**
- * Save JavaScript output to specified file.
- */
-void SaveErrors(JSON::CodeError::OutputStream &out);
-void SaveErrors(AnalysisResultPtr ar,
-                const char *filename,
-                bool varWrapper = false);
-
-/**
  * Write errors to stderr.
  */
-void DumpErrors(AnalysisResultPtr ar); // stderr
+void DumpErrors(); // stderr
 
 /**
  * Whether specified type of error is present. Written for unit test.

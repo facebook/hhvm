@@ -265,29 +265,4 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstRawPtr ar) {
   return pseudoMain;
 }
 
-void FileScope::getClassesFlattened(std::vector<ClassScopePtr>& classes) const {
-  for (const auto& clsVec : m_classes) {
-    for (auto cls : clsVec.second) {
-      classes.push_back(cls);
-    }
-  }
-}
-
-void FileScope::serialize(JSON::DocTarget::OutputStream &out) const {
-  JSON::DocTarget::MapStream ms(out);
-  ms.add("name", getName());
-
-  std::vector<ClassScopePtr> classes;
-  getClassesFlattened(classes);
-  ms.add("classes", classes);
-
-  std::vector<FunctionScopePtr> funcs;
-  getFunctionsFlattened(m_redeclaredFunctions, funcs, true);
-  ms.add("functions", funcs);
-
-  // TODO(stephentu): constants
-
-  ms.done();
-}
-
 }

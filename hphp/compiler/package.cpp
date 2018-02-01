@@ -425,7 +425,7 @@ bool Package::parseImpl(const std::string* fileName) {
 void Package::saveStatsToFile(const char *filename, int totalSeconds) const {
   std::ofstream f(filename);
   if (f) {
-    JSON::CodeError::OutputStream o(f, m_ar);
+    JSON::CodeError::OutputStream o(f);
     JSON::CodeError::MapStream ms(o);
 
     ms.add("FileCount", getFileCount())

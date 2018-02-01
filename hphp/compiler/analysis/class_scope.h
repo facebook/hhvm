@@ -21,7 +21,6 @@
 #include "hphp/compiler/analysis/exceptions.h"
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/expression/user_attribute.h"
-#include "hphp/compiler/json.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/statement/class_statement.h"
 #include "hphp/compiler/statement/method_statement.h"
@@ -51,9 +50,7 @@ DECLARE_BOOST_TYPES(FileScope);
  * A class scope corresponds to a class declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
  */
-struct ClassScope : BlockScope, FunctionContainer,
-                    JSON::CodeError::ISerializable,
-                    JSON::DocTarget::ISerializable {
+struct ClassScope : BlockScope, FunctionContainer {
   enum class KindOf : int {
     ObjectClass,
     AbstractClass,
@@ -198,12 +195,6 @@ public:
   bool addClassRequirement(const std::string &requiredName, bool isExtends);
 
   void importUsedTraits(AnalysisResultPtr ar);
-
-  /**
-   * Serialize the iface, not everything.
-   */
-  void serialize(JSON::CodeError::OutputStream& out) const override;
-  void serialize(JSON::DocTarget::OutputStream& out) const override;
 
   bool isInterface() const { return m_kindOf == KindOf::Interface; }
   bool isFinal() const { return m_kindOf == KindOf::FinalClass ||

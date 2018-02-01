@@ -26,7 +26,6 @@
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/hphp.h"
-#include "hphp/compiler/json.h"
 
 #include "hphp/compiler/statement/class_statement.h"
 
@@ -50,8 +49,7 @@ DECLARE_BOOST_TYPES(ClosureExpression);
  * AnalysisResult objects to grab statements, functions and classes from
  * FileScope objects to form execution paths.
  */
-struct FileScope : BlockScope, FunctionContainer,
-                   JSON::DocTarget::ISerializable {
+struct FileScope : BlockScope, FunctionContainer {
   enum Attribute {
     ContainsDynamicVariable  = 0x0001,
     ContainsLDynamicVariable = 0x0002,
@@ -81,7 +79,6 @@ public:
   const StringToClassScopePtrVecMap &getClasses() const {
     return m_classes;
   }
-  void getClassesFlattened(std::vector<ClassScopePtr>& classes) const;
 
   int getFunctionCount() const;
   int getClassCount() const { return m_classes.size();}
@@ -89,8 +86,6 @@ public:
   void pushAttribute();
   void setAttribute(Attribute attr);
   int popAttribute();
-
-  void serialize(JSON::DocTarget::OutputStream& out) const override;
 
   /**
    * Parser functions. Parser only deals with a FileScope object, and these

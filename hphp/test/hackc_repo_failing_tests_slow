@@ -9,5 +9,4 @@ slow/parser/afl5934248.php
 slow/parser/empty-files/empty-invalid.php
 slow/parser/memory_exhaust.php
 slow/parser/unicode-literal-error.php
-slow/reflection/1352.php
 slow/variadic_args/by_reference.php

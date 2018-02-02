@@ -1185,7 +1185,7 @@ and string_of_param_default_value ~env expr =
   | A.Obj_get (e1, e2, f) ->
     let e1 = string_of_param_default_value ~env e1 in
     let e2 = string_of_param_default_value ~env e2 in
-    let f = match f with A.OG_nullthrows -> "->" | A.OG_nullsafe -> "?->" in
+    let f = match f with A.OG_nullthrows -> "->" | A.OG_nullsafe -> "\\?->" in
     e1 ^ f ^ e2
   | A.Clone e -> "clone " ^ string_of_param_default_value ~env e
   | A.Array_get (e, eo) ->

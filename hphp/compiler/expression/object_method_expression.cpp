@@ -86,6 +86,9 @@ void ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
 void ObjectMethodExpression::outputPHP(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
   m_object->outputPHP(cg, ar);
+  if (m_nullsafe) {
+    cg_printf("?");
+  }
   cg_printf("->");
   if (m_nameExp->getKindOf() == Expression::KindOfScalarExpression) {
     m_nameExp->outputPHP(cg, ar);

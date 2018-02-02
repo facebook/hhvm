@@ -133,6 +133,9 @@ void ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
 void ObjectPropertyExpression::outputPHP(CodeGenerator &cg,
                                          AnalysisResultPtr ar) {
   m_object->outputPHP(cg, ar);
+  if (m_nullsafe) {
+    cg_printf("?");
+  }
   cg_printf("->");
   if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
     m_property->outputPHP(cg, ar);

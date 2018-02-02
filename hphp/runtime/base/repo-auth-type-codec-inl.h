@@ -50,18 +50,6 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptSStr:
   case T::Str:
   case T::OptStr:
-  case T::SVec:
-  case T::OptSVec:
-  case T::Vec:
-  case T::OptVec:
-  case T::SDict:
-  case T::OptSDict:
-  case T::Dict:
-  case T::OptDict:
-  case T::SKeyset:
-  case T::OptSKeyset:
-  case T::Keyset:
-  case T::OptKeyset:
   case T::Obj:
   case T::OptObj:
   case T::UncArrKey:
@@ -89,6 +77,18 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptSDArr:
   case T::DArr:
   case T::OptDArr:
+  case T::SVec:
+  case T::OptSVec:
+  case T::Vec:
+  case T::OptVec:
+  case T::SDict:
+  case T::OptSDict:
+  case T::Dict:
+  case T::OptDict:
+  case T::SKeyset:
+  case T::OptSKeyset:
+  case T::Keyset:
+  case T::OptKeyset:
     return highBitSet ? 5 : 1;
   case T::ExactObj:
   case T::SubObj:

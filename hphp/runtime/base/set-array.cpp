@@ -576,8 +576,25 @@ member_rval::ptr_u SetArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   return a->tvOfPos(pos);
 }
 
-bool SetArray::IsVectorData(const ArrayData*) {
-  return false;
+bool SetArray::IsVectorData(const ArrayData* ad) {
+  auto a = asSet(ad);
+  if (a->m_size == 0) {
+    // any 0-length array is "vector-like" for the sake of this function.
+    return true;
+  }
+  auto const elms = a->data();
+  int64_t i = 0;
+  for (uint32_t pos = 0, limit = a->m_used; pos < limit; ++pos) {
+    auto const& elm = elms[pos];
+    if (elm.isTombstone()) {
+      continue;
+    }
+    if (elm.hasStrKey() || elm.intKey() != i) {
+      return false;
+    }
+    ++i;
+  }
+  return true;
 }
 
 bool SetArray::ExistsInt(const ArrayData* ad, int64_t k) {

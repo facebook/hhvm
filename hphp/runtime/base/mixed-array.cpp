@@ -610,8 +610,7 @@ member_rval::ptr_u MixedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
 bool MixedArray::IsVectorData(const ArrayData* ad) {
   auto a = asMixed(ad);
   if (a->m_size == 0) {
-    // any 0-length array is "vector-like" for the sake of this
-    // function, even if kind != kVector.
+    // any 0-length array is "vector-like" for the sake of this function.
     return true;
   }
   auto const elms = a->data();

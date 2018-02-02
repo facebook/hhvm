@@ -183,9 +183,13 @@ struct RepoAuthType {
 
   bool mayHaveArrData() const {
     switch (tag()) {
-    case Tag::OptArr:  case Tag::OptSArr: case Tag::Arr: case Tag::SArr:
+    case Tag::OptArr:  case Tag::OptSArr:  case Tag::Arr:  case Tag::SArr:
     case Tag::OptVArr: case Tag::OptSVArr: case Tag::VArr: case Tag::SVArr:
     case Tag::OptDArr: case Tag::OptSDArr: case Tag::DArr: case Tag::SDArr:
+    case Tag::OptVec:  case Tag::OptSVec:  case Tag::Vec:  case Tag::SVec:
+    case Tag::OptDict: case Tag::OptSDict: case Tag::Dict: case Tag::SDict:
+    case Tag::OptKeyset: case Tag::OptSKeyset:
+    case Tag::Keyset:    case Tag::SKeyset:
       return true;
     default:
       return false;

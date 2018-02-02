@@ -362,11 +362,23 @@ inline Type Type::Array(const RepoAuthType::Array* rat) {
 }
 
 inline Type Type::Array(ArrayData::ArrayKind kind,
-                              const RepoAuthType::Array* rat) {
+                        const RepoAuthType::Array* rat) {
   assertx(kind != ArrayData::kVecKind &&
           kind != ArrayData::kDictKind &&
           kind != ArrayData::kKeysetKind);
   return Type(TArr, ArraySpec(kind, rat));
+}
+
+inline Type Type::Vec(const RepoAuthType::Array* rat) {
+  return Type(TVec, ArraySpec(rat));
+}
+
+inline Type Type::Dict(const RepoAuthType::Array* rat) {
+  return Type(TDict, ArraySpec(rat));
+}
+
+inline Type Type::Keyset(const RepoAuthType::Array* rat) {
+  return Type(TKeyset, ArraySpec(rat));
 }
 
 inline Type Type::StaticArray(ArrayData::ArrayKind kind) {
@@ -386,6 +398,18 @@ inline Type Type::StaticArray(ArrayData::ArrayKind kind,
           kind != ArrayData::kDictKind &&
           kind != ArrayData::kKeysetKind);
   return Type(TStaticArr, ArraySpec(kind, rat));
+}
+
+inline Type Type::StaticVec(const RepoAuthType::Array* rat) {
+  return Type(TStaticVec, ArraySpec(rat));
+}
+
+inline Type Type::StaticDict(const RepoAuthType::Array* rat) {
+  return Type(TStaticDict, ArraySpec(rat));
+}
+
+inline Type Type::StaticKeyset(const RepoAuthType::Array* rat) {
+  return Type(TStaticKeyset, ArraySpec(rat));
 }
 
 inline Type Type::SubObj(const Class* cls) {

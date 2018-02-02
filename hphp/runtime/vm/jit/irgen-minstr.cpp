@@ -1283,8 +1283,11 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     if (key->isA(TInt)) {
       auto const base = extractBase(env);
       checkVecBounds(env, base, key);
-      auto const elemType =
-        vecElemType(base->type(), key->type()).first.ptr(Ptr::Elem);
+      auto const elemType = vecElemType(
+        base->type(),
+        key->type(),
+        curClass(env)
+      ).first.ptr(Ptr::Elem);
       return gen(env, LdPackedArrayDataElemAddr, elemType, base, key);
     }
     return invalid_key();
@@ -1298,8 +1301,11 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
         gen(env, CheckPackedArrayDataBounds, taken, base, key);
       },
       [&] {
-        auto const elemType =
-          vecElemType(base->type(), key->type()).first.ptr(Ptr::Elem);
+        auto const elemType = vecElemType(
+          base->type(),
+          key->type(),
+          curClass(env)
+        ).first.ptr(Ptr::Elem);
         return gen(env, LdPackedArrayDataElemAddr, elemType, base, key);
       },
       [&] { return ptrToInitNull(env); }

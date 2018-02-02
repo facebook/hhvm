@@ -595,18 +595,24 @@ public:
   // Specialized type creation.                                  [const/static]
 
   /*
-   * Return a specialized TArr.
+   * Return a specialized TArr/TVec/TDict/TKeyset.
    */
   static Type Array(ArrayData::ArrayKind kind);
   static Type Array(const RepoAuthType::Array* rat);
   static Type Array(ArrayData::ArrayKind, const RepoAuthType::Array*);
+  static Type Vec(const RepoAuthType::Array*);
+  static Type Dict(const RepoAuthType::Array*);
+  static Type Keyset(const RepoAuthType::Array*);
 
   /*
-   * Return a specialized TStaticArr.
+   * Return a specialized TStaticArr/TStaticVec/TStaticDict/TStaticKeyset.
    */
   static Type StaticArray(ArrayData::ArrayKind kind);
   static Type StaticArray(const RepoAuthType::Array* rat);
   static Type StaticArray(ArrayData::ArrayKind, const RepoAuthType::Array*);
+  static Type StaticVec(const RepoAuthType::Array*);
+  static Type StaticDict(const RepoAuthType::Array*);
+  static Type StaticKeyset(const RepoAuthType::Array*);
 
   /*
    * Return a specialized TObj.

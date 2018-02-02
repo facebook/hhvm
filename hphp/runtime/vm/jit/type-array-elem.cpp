@@ -165,7 +165,7 @@ std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
   return {type, false};
 }
 
-std::pair<Type, bool> vecElemType(Type arr, Type idx) {
+std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
   assertx(arr <= TVec);
   assertx(idx <= TInt);
 
@@ -197,7 +197,38 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx) {
   }
 
   // Vecs always contain initialized cells
-  auto const type = (arr <= TPersistentVec) ? TUncountedInit : TInitCell;
+  auto type = (arr <= TPersistentVec) ? TUncountedInit : TInitCell;
+
+  auto const arrTy = arr.arrSpec().type();
+  if (!arrTy) return {type, false};
+
+  using E = RepoAuthType::Array::Empty;
+  using T = RepoAuthType::Array::Tag;
+  auto const maybeEmpty = arrTy->emptiness() == E::Maybe;
+
+  switch (arrTy->tag()) {
+    case T::Packed: {
+      if (idx.hasConstVal(TInt)) {
+        auto const intIdx = idx.intVal();
+        if (intIdx < 0 || intIdx >= arrTy->size()) return {TBottom, false};
+        type &= typeFromRAT(arrTy->packedElem(intIdx), ctx);
+        return {type, !maybeEmpty};
+      }
+      auto all = TBottom;
+      for (auto i = 0; i < arrTy->size(); ++i) {
+        all |= typeFromRAT(arrTy->packedElem(i), ctx);
+      }
+      type &= all;
+      break;
+    }
+    case T::PackedN: {
+      auto const present =
+        idx.hasConstVal(TInt) && !maybeEmpty && idx.intVal() == 0;
+      type &= typeFromRAT(arrTy->elemType(), ctx);
+      return {type, present};
+    }
+  }
+
   return {type, false};
 }
 

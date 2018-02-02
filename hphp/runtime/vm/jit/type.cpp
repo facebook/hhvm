@@ -390,8 +390,6 @@ Type Type::modified() const {
 
 // Return true if the array satisfies requirement on the ArraySpec.
 static bool arrayFitsSpec(const ArrayData* arr, const ArraySpec spec) {
-  assertx(arr->isPHPArray());
-
   if (spec == ArraySpec::Top) return true;
 
   if (auto const spec_kind = spec.kind()) {
@@ -666,9 +664,21 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
 
     case T::SArr:           return X(TStaticArr, StaticArray);
     case T::Arr:            return X(TArr, Array);
+    case T::SVec:           return X(TStaticVec, StaticVec);
+    case T::Vec:            return X(TVec, Vec);
+    case T::SDict:          return X(TStaticDict, StaticDict);
+    case T::Dict:           return X(TDict, Dict);
+    case T::SKeyset:        return X(TStaticKeyset, StaticKeyset);
+    case T::Keyset:         return X(TKeyset, Keyset);
 
     case T::OptSArr:        return X(TStaticArr, StaticArray) | TInitNull;
     case T::OptArr:         return X(TArr, Array)             | TInitNull;
+    case T::OptSVec:        return X(TStaticVec, StaticVec)   | TInitNull;
+    case T::OptVec:         return X(TVec, Vec)               | TInitNull;
+    case T::OptSDict:       return X(TStaticDict, StaticDict) | TInitNull;
+    case T::OptDict:        return X(TDict, Dict)             | TInitNull;
+    case T::OptSKeyset:     return X(TStaticKeyset, StaticKeyset) | TInitNull;
+    case T::OptKeyset:      return X(TKeyset, Keyset)         | TInitNull;
 #undef X
 
 #define X(A, B)                                                         \
@@ -693,20 +703,6 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::OptDArr:        return X(ArrayData::kMixedKind, Array)
                                    | TInitNull;
 #undef X
-
-    case T::SVec:           return TStaticVec;
-    case T::Vec:            return TVec;
-    case T::SDict:          return TStaticDict;
-    case T::Dict:           return TDict;
-    case T::SKeyset:        return TStaticKeyset;
-    case T::Keyset:         return TKeyset;
-
-    case T::OptSVec:        return TStaticVec    | TInitNull;
-    case T::OptVec:         return TVec          | TInitNull;
-    case T::OptSDict:       return TStaticDict   | TInitNull;
-    case T::OptDict:        return TDict         | TInitNull;
-    case T::OptSKeyset:     return TStaticKeyset | TInitNull;
-    case T::OptKeyset:      return TKeyset       | TInitNull;
 
     case T::SubObj:
     case T::ExactObj:

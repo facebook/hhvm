@@ -4611,8 +4611,10 @@ std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val) {
 
 RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
                                 const Type& t) {
-  auto const emptiness  = TArrE.couldBe(t) ? RepoAuthType::Array::Empty::Maybe
-                                           : RepoAuthType::Array::Empty::No;
+  auto const emptiness = (TArrE.couldBe(t) || TVecE.couldBe(t) ||
+                          TDictE.couldBe(t) || TKeysetE.couldBe(t))
+    ? RepoAuthType::Array::Empty::Maybe
+    : RepoAuthType::Array::Empty::No;
 
   auto const arr = [&]() -> const RepoAuthType::Array* {
     switch (t.m_dataTag) {
@@ -4628,15 +4630,10 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     case DataTag::ArrLikeMapN:
       return nullptr;
     case DataTag::ArrLikePackedN:
-      // TODO(#4205897): we need to use this before it's worth putting
-      // in the repo.
-      if (false) {
-        return arrTable.packedn(
-          emptiness,
-          make_repo_type(arrTable, t.m_data.packedn->type)
-        );
-      }
-      return nullptr;
+      return arrTable.packedn(
+        emptiness,
+        make_repo_type(arrTable, t.m_data.packedn->type)
+      );
     case DataTag::ArrLikePacked:
       {
         std::vector<RepoAuthType> repoTypes;
@@ -4665,6 +4662,22 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     if (t.subtypeOf(TArr))      return RepoAuthType::Tag::Arr;
     if (t.subtypeOf(TOptSArr))  return RepoAuthType::Tag::OptSArr;
     if (t.subtypeOf(TOptArr))   return RepoAuthType::Tag::OptArr;
+
+    if (t.subtypeOf(TSVec))     return RepoAuthType::Tag::SVec;
+    if (t.subtypeOf(TVec))      return RepoAuthType::Tag::Vec;
+    if (t.subtypeOf(TOptSVec))  return RepoAuthType::Tag::OptSVec;
+    if (t.subtypeOf(TOptVec))   return RepoAuthType::Tag::OptVec;
+
+    if (t.subtypeOf(TSDict))    return RepoAuthType::Tag::SDict;
+    if (t.subtypeOf(TDict))     return RepoAuthType::Tag::Dict;
+    if (t.subtypeOf(TOptSDict)) return RepoAuthType::Tag::OptSDict;
+    if (t.subtypeOf(TOptDict))  return RepoAuthType::Tag::OptDict;
+
+    if (t.subtypeOf(TSKeyset))    return RepoAuthType::Tag::SKeyset;
+    if (t.subtypeOf(TKeyset))     return RepoAuthType::Tag::Keyset;
+    if (t.subtypeOf(TOptSKeyset)) return RepoAuthType::Tag::OptSKeyset;
+    if (t.subtypeOf(TOptKeyset))  return RepoAuthType::Tag::OptKeyset;
+
     not_reached();
   }();
 
@@ -4685,7 +4698,8 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
     return RepoAuthType { tag, dobj.cls.name() };
   }
 
-  if (t.strictSubtypeOf(TArr) || (is_opt(t) && t.strictSubtypeOf(TOptArr))) {
+  if (t.strictSubtypeOf(TArr) || (is_opt(t) && t.strictSubtypeOf(TOptArr)) ||
+      t.strictSubtypeOf(TVec) || (is_opt(t) && t.strictSubtypeOf(TOptVec))) {
     return make_repo_type_arr(arrTable, t);
   }
 

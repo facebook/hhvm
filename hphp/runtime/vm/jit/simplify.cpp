@@ -3232,18 +3232,58 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCountVec(State& env, const IRInstruction* inst) {
   auto const vec = inst->src(0);
-  return vec->hasConstVal(TVec) ? cns(env, vec->vecVal()->size()) : nullptr;
+  if (vec->hasConstVal(TVec)) return cns(env, vec->vecVal()->size());
+
+  auto const arrSpec = vec->type().arrSpec();
+  auto const at = arrSpec.type();
+  if (!at) return nullptr;
+  using A = RepoAuthType::Array;
+  switch (at->tag()) {
+  case A::Tag::Packed:
+    if (at->emptiness() == A::Empty::No) return cns(env, at->size());
+    break;
+  case A::Tag::PackedN:
+    break;
+  }
+  return nullptr;
 }
 
 SSATmp* simplifyCountDict(State& env, const IRInstruction* inst) {
   auto const dict = inst->src(0);
-  return dict->hasConstVal(TDict) ? cns(env, dict->dictVal()->size()) : nullptr;
+  if (dict->hasConstVal(TDict)) return cns(env, dict->dictVal()->size());
+
+  auto const arrSpec = dict->type().arrSpec();
+  auto const at = arrSpec.type();
+  if (!at) return nullptr;
+  using A = RepoAuthType::Array;
+  switch (at->tag()) {
+  case A::Tag::Packed:
+    if (at->emptiness() == A::Empty::No) return cns(env, at->size());
+    break;
+  case A::Tag::PackedN:
+    break;
+  }
+  return nullptr;
 }
 
 SSATmp* simplifyCountKeyset(State& env, const IRInstruction* inst) {
   auto const keyset = inst->src(0);
-  return keyset->hasConstVal(TKeyset)
-    ? cns(env, keyset->keysetVal()->size()) : nullptr;
+  if (keyset->hasConstVal(TKeyset)) {
+    return cns(env, keyset->keysetVal()->size());
+  }
+
+  auto const arrSpec = keyset->type().arrSpec();
+  auto const at = arrSpec.type();
+  if (!at) return nullptr;
+  using A = RepoAuthType::Array;
+  switch (at->tag()) {
+  case A::Tag::Packed:
+    if (at->emptiness() == A::Empty::No) return cns(env, at->size());
+    break;
+  case A::Tag::PackedN:
+    break;
+  }
+  return nullptr;
 }
 
 SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {

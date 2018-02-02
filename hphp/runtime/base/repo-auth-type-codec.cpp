@@ -48,18 +48,6 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::OptSStr:
   case T::Str:
   case T::OptStr:
-  case T::SVec:
-  case T::OptSVec:
-  case T::Vec:
-  case T::OptVec:
-  case T::SDict:
-  case T::OptSDict:
-  case T::Dict:
-  case T::OptDict:
-  case T::SKeyset:
-  case T::OptSKeyset:
-  case T::Keyset:
-  case T::OptKeyset:
   case T::Obj:
   case T::OptObj:
   case T::UncArrKey:
@@ -88,6 +76,18 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::OptSDArr:
   case T::DArr:
   case T::OptDArr:
+  case T::SVec:
+  case T::OptSVec:
+  case T::Vec:
+  case T::OptVec:
+  case T::SDict:
+  case T::OptSDict:
+  case T::Dict:
+  case T::OptDict:
+  case T::SKeyset:
+  case T::OptSKeyset:
+  case T::Keyset:
+  case T::OptKeyset:
     if (highBitSet) {
       uint32_t id;
       std::memcpy(&id, pc, sizeof id);
@@ -149,18 +149,6 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptSStr:
   case T::Str:
   case T::OptStr:
-  case T::SVec:
-  case T::OptSVec:
-  case T::Vec:
-  case T::OptVec:
-  case T::SDict:
-  case T::OptSDict:
-  case T::Dict:
-  case T::OptDict:
-  case T::SKeyset:
-  case T::OptSKeyset:
-  case T::Keyset:
-  case T::OptKeyset:
   case T::Obj:
   case T::OptObj:
   case T::UncArrKey:
@@ -189,6 +177,18 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptSDArr:
   case T::DArr:
   case T::OptDArr:
+  case T::SVec:
+  case T::OptSVec:
+  case T::Vec:
+  case T::OptVec:
+  case T::SDict:
+  case T::OptSDict:
+  case T::Dict:
+  case T::OptDict:
+  case T::SKeyset:
+  case T::OptSKeyset:
+  case T::Keyset:
+  case T::OptKeyset:
     {
       auto tagByte = static_cast<uint8_t>(rat.tag());
       if (rat.hasArrData()) tagByte |= kRATArrayDataBit;

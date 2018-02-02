@@ -297,7 +297,7 @@ Type vecElemReturn(const IRInstruction* inst) {
   assertx(inst->src(1)->isA(TInt));
 
   auto resultType =
-    vecElemType(inst->src(0)->type(), inst->src(1)->type()).first;
+    vecElemType(inst->src(0)->type(), inst->src(1)->type(), inst->ctx()).first;
   if (inst->hasTypeParam()) resultType &= inst->typeParam();
   return resultType;
 }

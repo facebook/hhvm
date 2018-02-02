@@ -183,12 +183,12 @@ let rec emit_xhp_children_decl_expr ~unary = function
       (A.Int (p, unary))
       (A.Int (p, "5"))
       (emit_xhp_children_decl_expr ~unary:"0" l)
-  | [A.ChildName (_, "any")] ->
+  | [A.ChildName (_, name)] when String.lowercase_ascii name = "any" ->
     get_array3
       (A.Int (p, unary))
       (A.Int (p, "1"))
       (A.Null)
-  | [A.ChildName (_, "pcdata")] ->
+  | [A.ChildName (_, name)] when String.lowercase_ascii name = "pcdata"->
     get_array3
       (A.Int (p, unary))
       (A.Int (p, "2"))

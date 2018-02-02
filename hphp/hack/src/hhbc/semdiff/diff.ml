@@ -169,7 +169,18 @@ let typed_value_to_string v = SS.seq_to_string @@ EA.adata_to_string_seq v
 let typed_value_comparer = primitive_comparer typed_value_to_string
 
 let int_comparer = primitive_comparer string_of_int
+
 let string_comparer = primitive_comparer (fun s -> s)
+
+let string_no_whitespace_no_casing_comparer =
+  (* TODO(T25624348): Remove this shortcut for arrays *)
+  let contains_array_like_element s =
+    String_utils.is_substring "array" s ||
+    String_utils.is_substring "vec" s ||
+    String_utils.is_substring "dict" s in
+  primitive_comparer (fun s -> if contains_array_like_element s then "" else
+      Str.global_replace (Str.regexp {|[\n\t\r\v ]|}) "" @@
+      String.lowercase_ascii s)
 let bool_comparer = primitive_comparer string_of_bool
 
 let int_list_comparer = list_comparer int_comparer "; "
@@ -399,7 +410,7 @@ let type_info_user_type_comparer = wrap Hhas_type_info.user_type
 let type_info_type_constraint_comparer = wrap Hhas_type_info.type_constraint
     (fun _ti s -> s)
     type_constraint_comparer
-let type_info_comparer = join (fun s1 s2 -> "<" ^ s1 ^ " " ^s2 ^ ">")
+let type_info_comparer = join (fun s1 s2 -> "<" ^ s1 ^ " " ^ s2 ^ ">")
     type_info_user_type_comparer
     type_info_type_constraint_comparer
 
@@ -432,14 +443,20 @@ let param_ti_name_reference_comparer =
   join (fun s1 s2 -> s1 ^ s2)
     param_variadic_type_info_comparer
     param_name_reference_comparer
-(* Lifting the above to work on the first component of a pair *)
-let param_ti_name_reference_comparer_lifted =
-  wrap fst (fun (_param, (_instrs : Hhbc_ast.instruct list)) s -> s)
+let param_default_value_expression_comparer =
+  wrap (function (_, (_, Ast.String (_, s))) -> s | _ -> "")
+    (fun _e s -> s) string_no_whitespace_no_casing_comparer
+let param_default_value_comparer = wrap Hhas_param.default_value
+    (fun _p s -> s)
+    (option_comparer param_default_value_expression_comparer)
+let param_ti_name_reference_default_value_comparer =
+  join (fun s1 s2 -> s1 ^ s2)
     param_ti_name_reference_comparer
-
+    param_default_value_comparer
 
 (* fix this *)
-let params_comparer = list_comparer param_ti_name_reference_comparer ", "
+let params_comparer =
+  list_comparer param_ti_name_reference_default_value_comparer ", "
 
 let function_params_comparer =
   wrap Hhas_function.params

@@ -1743,7 +1743,6 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
            * handle the next token's leading trivia with
            * transform_xhp_leading_trivia, which treats all trivia up to the
            * first newline as trailing trivia. *)
-          let prev_token_scanned_trailing_trivia = ref false in
           let prev_token_was_xhpbody = ref false in
           let transformed_body = Concat (List.map xs ~f:begin fun node ->
             let leading, node = remove_leading_trivia node in
@@ -1758,28 +1757,17 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
                * trailing_whitespace, so if the previous token was an XHPBody
                * token, we don't need to do anything. *)
               if !prev_token_was_xhpbody
-                then Nothing
-                else begin
-                  match syntax node with
-                  | Token _ -> if has_invisibles leading then Split else Nothing
-                  | _ -> Split
-                end;
-              if !prev_token_scanned_trailing_trivia
                 then transform_leading_trivia leading
-                else transform_xhp_leading_trivia leading;
+                else begin
+                  let v =
+                    match syntax node with
+                    | Token _ -> if has_invisibles leading then Split else Nothing
+                    | _ -> Split in
+                  Concat [v; transform_xhp_leading_trivia leading]
+                end;
               t node;
             ] in
-            (* XHPExpressions currently have trailing trivia when in an XHPBody,
-             * but they shouldn't--see T16787398. Once that issue is resolved,
-             * prev_token_scanned_trailing_trivia and prev_token_was_xhpbody
-             * will be equivalent and one can be removed. *)
             let open EditableToken in
-            prev_token_scanned_trailing_trivia := begin
-              match syntax node with
-              | XHPExpression _ -> true
-              | Token t -> kind t = TokenKind.XHPBody
-              | _ -> false
-            end;
             prev_token_was_xhpbody := begin
               match syntax node with
               | Token t -> kind t = TokenKind.XHPBody

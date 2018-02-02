@@ -230,7 +230,7 @@ module WithStatementAndDeclAndTypeParser
     | Print
     | At -> parse_prefix_unary_expression parser
     | LeftParen -> parse_cast_or_parenthesized_or_lambda_expression parser
-    | LessThan -> parse_possible_xhp_expression parser
+    | LessThan -> parse_possible_xhp_expression ~consume_trailing_trivia:true parser
     | List  -> parse_list_expression parser
     | New -> parse_object_creation_expression parser
     | Array -> parse_array_intrinsic_expression parser
@@ -2399,17 +2399,19 @@ TODO: This will need to be fixed to allow situations where the qualified name
       tooling can flag it as suspicious. *)
       (parser1, Some (make_token token))
     | LessThan ->
-      let (parser, expr) = parse_possible_xhp_expression parser in
+      let (parser, expr) =
+        parse_possible_xhp_expression ~consume_trailing_trivia:false  parser in
       (parser, Some expr)
     | _ -> (parser, None)
 
-  and parse_xhp_close parser _ =
+  and parse_xhp_close ~consume_trailing_trivia parser _ =
     let (parser1, less_than_slash, _) = next_xhp_element_token parser in
     if (Token.kind less_than_slash) = LessThanSlash then
       let (parser2, name, name_text) = next_xhp_element_token parser1 in
       if (Token.kind name) = XHPElementName then
         (* TODO: Check that the given and name_text are the same. *)
-        let (parser3, greater_than, _) = next_xhp_element_token parser2 in
+        let (parser3, greater_than, _) =
+          next_xhp_element_token ~no_trailing:(not consume_trailing_trivia) parser2 in
         if (Token.kind greater_than) = GreaterThan then
           (parser3, make_xhp_close (make_token less_than_slash)
             (make_token name) (make_token greater_than))
@@ -2437,7 +2439,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
       let missing2 = make_missing parser in
       (parser, make_xhp_close less_than_slash_token missing1 missing2)
 
-  and parse_xhp_expression parser left_angle name name_text =
+  and parse_xhp_expression ~consume_trailing_trivia parser left_angle name name_text =
     let (parser, attrs) = parse_list_until_none parser parse_xhp_attribute in
     let (parser1, token, _) = next_xhp_element_token ~no_trailing:true parser in
     match (Token.kind token) with
@@ -2451,7 +2453,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
       let xhp_open = make_xhp_open left_angle name attrs (make_token token) in
       let (parser, xhp_body) =
         parse_list_until_none parser1 parse_xhp_body_element in
-      let (parser, xhp_close) = parse_xhp_close parser name_text in
+      let (parser, xhp_close) = parse_xhp_close ~consume_trailing_trivia parser name_text in
       let xhp = make_xhp_expression xhp_open xhp_body xhp_close in
       (parser, xhp)
     | _ ->
@@ -2465,12 +2467,13 @@ TODO: This will need to be fixed to allow situations where the qualified name
       let parser = with_error parser SyntaxError.error1013 in
       (parser, xhp)
 
-  and parse_possible_xhp_expression parser =
+  and parse_possible_xhp_expression ~consume_trailing_trivia parser =
     (* We got a < token where an expression was expected. *)
     let (parser, less_than) = assert_token parser LessThan in
     let (parser1, name, text) = next_xhp_element_token parser in
     if (Token.kind name) = XHPElementName then
-      parse_xhp_expression parser1 less_than (make_token name) text
+      parse_xhp_expression
+        ~consume_trailing_trivia parser1 less_than (make_token name) text
     else
       (* ERROR RECOVERY
       Hard to say what to do here. We are expecting an expression;

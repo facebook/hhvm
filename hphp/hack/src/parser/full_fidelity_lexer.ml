@@ -1508,7 +1508,8 @@ let next_xhp_element_token ~no_trailing lexer =
        an XHP body then we want any whitespace or newlines to be leading trivia
        of the body token. *)
     match kind with
-    | TokenKind.GreaterThan when no_trailing ->
+    | TokenKind.GreaterThan
+    | TokenKind.SlashGreaterThan when no_trailing ->
       (lexer, Token.make kind (source lexer) token_start w leading [])
     | _ ->
       let (lexer, trailing) = scan_trailing_php_trivia lexer in

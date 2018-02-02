@@ -1,4 +1,4 @@
-let entry = Worker.register_entry_point ~restore:(fun _ -> ())
+open Procs_test_utils
 
 let sum acc elements =
   List.fold_left (fun acc elem -> acc + elem) acc elements
@@ -63,20 +63,9 @@ let tests =
     "multi_worker_of_n_buckets", multi_worker_of_n_buckets;
   ]
 
-let try_finalize f x finally y =
-  let res = try f x with exn -> finally y; raise exn in
-  finally y;
-  res
-
-let cleanup _ =
-  Worker.killall ()
-
 let () =
   Daemon.check_entry_point (); (* this call might not return *)
-  let handle = SharedMem.init GlobalConfig.default_sharedmem_config in
-  let workers = Worker.make handle entry 10 GlobalConfig.gc_control handle
-  in
-  SharedMem.connect handle ~is_master:true;
+  let workers = make_workers 10 in
   try_finalize
     Unit_test.run_all (List.map (fun (n, t) -> n, t workers) tests)
-    cleanup handle
+    cleanup ()

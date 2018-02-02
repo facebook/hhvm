@@ -1710,6 +1710,15 @@ let expression_errors node parents is_hack is_hack_file hhvm_compat_mode errors 
           SyntaxError.reference_to_static_scope_resolution :: errors
       | _ -> errors
     end
+  (* TODO(T21285960): Remove this bug-port, stemming from T22184312 *)
+  | LambdaExpression { lambda_async; lambda_coroutine; lambda_signature; _ }
+    when hhvm_compat_mode
+      && not (is_missing lambda_async)
+      && trailing_width lambda_async = 0
+      && full_width lambda_coroutine = 0
+      && leading_width lambda_signature = 0
+      -> failwith "syntax error, unexpected T_LAMBDA_ARROW";
+    (* End of bug-port *)
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents hhvm_compat_mode trait_use_clauses errors =

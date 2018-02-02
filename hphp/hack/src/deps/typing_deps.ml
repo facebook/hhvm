@@ -91,6 +91,12 @@ module Graph = struct
   external hh_get_dep: int -> int list = "hh_get_dep"
   external hh_get_dep_sqlite: int -> int list = "hh_get_dep_sqlite"
 
+  let hh_add_dep x =
+    SharedMem.with_worker_exit (fun () -> hh_add_dep x)
+
+  let hh_get_dep x =
+    SharedMem.with_worker_exit (fun () -> hh_get_dep x)
+
   let add x y = hh_add_dep ((x lsl 31) lor y)
 
   let union_deps l1 l2 = List.dedup (List.append l1 l2)

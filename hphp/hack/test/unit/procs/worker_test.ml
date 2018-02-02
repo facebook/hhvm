@@ -10,7 +10,7 @@ let make_worker ?call_wrapper heap_handle =
     ~heap_handle
 
 let rec wait_until_ready handle =
-  let { Worker.readys; waiters } = Worker.select [handle] in
+  let { Worker.readys; waiters; ready_fds = _ } = Worker.select [handle] [] in
   match readys with
   | [] -> wait_until_ready handle
   | ready :: _ ->

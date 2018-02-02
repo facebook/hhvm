@@ -219,6 +219,10 @@ class ReflectionParameter implements Reflector {
   public function isVariadic();
   public function hasType(): bool;
   public function getType(): ?ReflectionType;
+  final public function getAttribute(string $name);
+  final public function getAttributes();
+  final public function getAttributeRecursive(string $name);
+  final public function getAttributesRecursive();
 }
 
 class ReflectionProperty implements Reflector {

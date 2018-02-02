@@ -477,21 +477,21 @@ class ReflectionParameter implements Reflector {
     return $this->info['index'];
   }
 
-  public function getAttribute($name) {
+  final public function getAttribute(string $name) {
     $attrs = $this->info['attributes'];
     return isset($attrs[$name]) ? $attrs[$name] : null;
   }
 
-  public function getAttributes() {
+  final public function getAttributes() {
     return $this->info['attributes'];
   }
 
-  public function getAttributeRecursive($name) {
+  final public function getAttributeRecursive(string $name) {
     $attrs = $this->getAttributesRecursive();
     return isset($attrs[$name]) ? $attrs[$name] : null;
   }
 
-  public function getAttributesRecursive() {
+  final public function getAttributesRecursive() {
     if (!isset($this->info['class'])) {
       return $this->getAttributes();
     }

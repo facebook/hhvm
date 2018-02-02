@@ -444,6 +444,9 @@ let emit_wrapper_methods env info ast_class ast_methods =
     List.fold_left ast_methods ~init:(0, []) ~f:(fun (count,acc) ast_method ->
       if Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes
       then
+        let scope = Ast_scope.ScopeItem.Method ast_method ::
+          Emit_env.get_scope env in
+        let env = Emit_env.with_scope scope env in
         let hhas_method =
           make_memoize_wrapper_method env info count ast_class ast_method in
         let newcount =

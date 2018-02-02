@@ -21,7 +21,6 @@
 
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/function_scope.h"
 
 #include "hphp/compiler/expression/closure_expression.h"

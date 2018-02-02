@@ -16,7 +16,6 @@
 
 #include "hphp/compiler/statement/unset_statement.h"
 #include "hphp/compiler/expression/expression_list.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/statement/statement.h"

@@ -17,7 +17,6 @@
 #include "hphp/compiler/expression/include_expression.h"
 #include <map>
 #include "hphp/parser/hphp.tab.hpp"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/statement/statement_list.h"
@@ -173,9 +172,6 @@ std::string IncludeExpression::CheckInclude(ConstructPtr includeExp,
 
   auto included = get_include_file_path(container, var, lit, documentRoot);
   if (!included.empty()) {
-    if (included == container) {
-      Compiler::Error(Compiler::BadPHPIncludeFile, includeExp);
-    }
     included = FileUtil::canonicalize(included).toCppString();
     if (!var.empty()) documentRoot = true;
   }
@@ -214,7 +210,6 @@ bool IncludeExpression::analyzeInclude(AnalysisResultConstRawPtr ar,
   ConstructPtr self = shared_from_this();
   FileScopePtr file = ar->findFileScope(include);
   if (!file) {
-    Compiler::Error(Compiler::PHPIncludeFileNotFound, self);
     return false;
   }
 

@@ -18,7 +18,6 @@
 
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/expression/array_element_expression.h"
@@ -47,10 +46,8 @@ AssignmentExpression::AssignmentExpression
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(AssignmentExpression)),
     m_variable(variable), m_value(value), m_ref(ref), m_rhsFirst(rhsFirst) {
   assert(!m_ref || !m_rhsFirst);
-  m_variable->setContext(Expression::DeepAssignmentLHS);
   m_variable->setContext(Expression::AssignmentLHS);
   m_variable->setContext(Expression::LValue);
-  m_value->setContext(Expression::AssignmentRHS);
   if (ref) {
     m_variable->setContext(Expression::RefAssignmentLHS);
     m_value->setContext(Expression::RefValue);

@@ -21,7 +21,6 @@
 #include "hphp/compiler/json.h"
 #include <memory>
 #include "hphp/compiler/code_generator.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/block_scope.h"
 
 namespace HPHP {
@@ -234,9 +233,7 @@ public:
     return m_blockScope->getContainingClass();
   }
   void resetScope(BlockScopeRawPtr scope);
-  void parseTimeFatal(FileScopeRawPtr fs, Compiler::ErrorType error,
-    ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(4,5);
-  void analysisTimeFatal(Compiler::ErrorType error,
+  void parseTimeFatal(FileScopeRawPtr fs,
     ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
   virtual bool kidUnused(int /*i*/) const { return false; }
 

@@ -120,7 +120,6 @@ void InterfaceStatement::checkArgumentsToPromote(
           if (param->getModifier() != 0) {
             if (type == T_TRAIT || type == T_INTERFACE) {
               param->parseTimeFatal(scope,
-                                    Compiler::InvalidAttribute,
                                     "Constructor parameter promotion "
                                     "not allowed on traits or interfaces");
             }

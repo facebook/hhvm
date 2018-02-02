@@ -13,21 +13,6 @@ auto_sources(files "*.h" "{$SOURCE_SUBDIRS}")
 list(APPEND HEADER_SOURCES ${files})
 HHVM_PUBLIC_HEADERS(compiler ${files})
 
-
-set(ERROR_INC "analysis/core_code_error.inc")
-
-set(ERROR_INC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/analysis/code_error.inc")
-
-file(REMOVE "${ERROR_INC_FILE}")
-
-file(WRITE "${ERROR_INC_FILE}" "/* This file is auto generated */")
-
-foreach (error_file ${ERROR_INC})
-  file(READ ${error_file} file_contents)
-
-  file(APPEND "${ERROR_INC_FILE}" "${file_contents}")
-endforeach (error_file ${ERROR_INC})
-
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../")
 
 set(CMAKE_CURRENT_BINARY_DIR "${CMAKE_SOURCE_DIR}/bin")

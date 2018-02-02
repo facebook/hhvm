@@ -212,7 +212,6 @@ void ParserBase::addLabel(const std::string &label,
   if (info.labels.find(label) != info.labels.end()) {
     error("Label '%s' already defined: %s", label.c_str(),
           getMessage().c_str());
-    invalidateLabel(extractStatement(stmt));
     return;
   }
   assert(!info.scopes.empty());
@@ -250,7 +249,6 @@ void ParserBase::popLabelInfo() {
     const GotoInfo &gotoInfo = info.gotos[i];
     LabelMap::const_iterator iter = info.labels.find(gotoInfo.label);
     if (iter == info.labels.end()) {
-      invalidateGoto(gotoInfo.stmt, UndefLabel);
       error("'goto' to undefined label '%s': %s",
             gotoInfo.label.c_str(), getMessage(gotoInfo.loc).c_str());
       continue;
@@ -265,7 +263,6 @@ void ParserBase::popLabelInfo() {
       }
     }
     if (!found) {
-      invalidateGoto(gotoInfo.stmt, InvalidBlock);
       error("'goto' %s statement is disallowed: %s",
             labelScopeName(labelInfo.scopeInfo.kind),
             getMessage(gotoInfo.loc).c_str());
@@ -273,13 +270,6 @@ void ParserBase::popLabelInfo() {
     } else {
       labels.erase(gotoInfo.label);
     }
-  }
-
-  // now invalidate all un-used labels
-  for (LabelMap::const_iterator it(labels.begin());
-       it != labels.end();
-       ++it) {
-    invalidateLabel(it->second.stmt);
   }
 
   m_labelInfos.pop_back();

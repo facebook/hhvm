@@ -15,7 +15,6 @@
 */
 
 #include "hphp/compiler/expression/qop_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
 
 #include "hphp/runtime/base/type-variant.h"
 

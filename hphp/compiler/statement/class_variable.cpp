@@ -58,20 +58,17 @@ void ClassVariable::onParseRecur(AnalysisResultConstRawPtr ar,
 
   if (m_modifiers->isAbstract()) {
     m_modifiers->parseTimeFatal(fs,
-                                Compiler::InvalidAttribute,
                                 "Properties cannot be declared abstract");
   }
 
   if (m_modifiers->isFinal()) {
     m_modifiers->parseTimeFatal(fs,
-                                Compiler::InvalidAttribute,
                                 "Properties cannot be declared final");
   }
 
   if (!m_modifiers->isStatic() && scope->isStaticUtil()) {
     m_modifiers->parseTimeFatal(
       fs,
-      Compiler::InvalidAttribute,
       "Class %s contains non-static property declaration and "
       "therefore cannot be declared 'abstract final'",
       scope->getOriginalName().c_str()
@@ -83,7 +80,6 @@ void ClassVariable::onParseRecur(AnalysisResultConstRawPtr ar,
        m_modifiers->isPrivate()) > 1) {
     m_modifiers->parseTimeFatal(
       fs,
-      Compiler::InvalidAttribute,
       "%s: properties of %s",
       Strings::PICK_ACCESS_MODIFIER,
       scope->getOriginalName().c_str()

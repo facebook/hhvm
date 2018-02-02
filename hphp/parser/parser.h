@@ -190,9 +190,6 @@ public:
     InvalidBlock,
   };
 
-  virtual void invalidateGoto(TStatementPtr expr, GotoError error) = 0;
-  virtual void invalidateLabel(TStatementPtr expr) = 0;
-
   virtual TStatementPtr extractStatement(ScannerToken *stmt) = 0;
 
 protected:

@@ -690,10 +690,6 @@ void Parser::useFunction(const std::string& /*fn*/, const std::string& /*as*/) {
 
 void Parser::useConst(const std::string& /*cnst*/, const std::string& /*as*/) {}
 
-void Parser::invalidateGoto(TStatementPtr /*stmt*/, GotoError /*error*/) {}
-
-void Parser::invalidateLabel(TStatementPtr /*stmt*/) {}
-
 void Parser::onXhpAttributesStart() {}
 
 void Parser::onXhpAttributeSpread(Token& out, Token* pairs, Token& expr) {}

@@ -17,7 +17,6 @@
 #include "hphp/compiler/analysis/class_scope.h"
 
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/construct.h"
@@ -73,7 +72,6 @@ ClassScope::ClassScope(FileScopeRawPtr fs,
   for (unsigned i = 0; i < attrs.size(); ++i) {
     if (m_userAttributes.find(attrs[i]->getName()) != m_userAttributes.end()) {
       attrs[i]->parseTimeFatal(fs,
-                               Compiler::DeclaredAttributeTwice,
                                "Redeclared attribute %s",
                                attrs[i]->getName().c_str());
     }
@@ -258,7 +256,6 @@ bool ClassScope::addFunction(AnalysisResultConstRawPtr /*ar*/,
   FunctionScopePtr &func = m_functions[funcScope->getScopeName()];
   if (func) {
     func->getStmt()->parseTimeFatal(fileScope,
-                                    Compiler::DeclaredMethodTwice,
                                     "Redeclared method %s::%s",
                                     getScopeName().c_str(),
                                     func->getScopeName().c_str());

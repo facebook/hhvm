@@ -157,21 +157,18 @@ void ClassStatement::onParse(AnalysisResultConstRawPtr ar, FileScopePtr fs) {
     }
     if (constructor && constructor->getModifiers()->isStatic()) {
       constructor->parseTimeFatal(fs,
-                                  Compiler::InvalidAttribute,
                                   "Constructor %s::%s() cannot be static",
                                   classScope->getOriginalName().c_str(),
                                   constructor->getOriginalName().c_str());
     }
     if (destructor && destructor->getModifiers()->isStatic()) {
       destructor->parseTimeFatal(fs,
-                                 Compiler::InvalidAttribute,
                                  "Destructor %s::%s() cannot be static",
                                  classScope->getOriginalName().c_str(),
                                  destructor->getOriginalName().c_str());
     }
     if (clone && clone->getModifiers()->isStatic()) {
       clone->parseTimeFatal(fs,
-                            Compiler::InvalidAttribute,
                             "Clone method %s::%s() cannot be static",
                             classScope->getOriginalName().c_str(),
                             clone->getOriginalName().c_str());

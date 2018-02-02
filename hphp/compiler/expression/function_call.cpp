@@ -18,7 +18,6 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
 #include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/statement/statement.h"
@@ -128,7 +127,6 @@ void FunctionCall::onParse(AnalysisResultConstRawPtr ar, FileScopePtr fs) {
   if (!checkUnpackParams()) {
     parseTimeFatal(
       fs,
-      Compiler::NoError,
       "Only the last parameter in a function call is allowed to use ...");
   }
 }

@@ -18,7 +18,6 @@
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/constant_expression.h"
@@ -306,8 +305,7 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
 
     auto const& name = getName();
     auto const tdefault = HPHP::tname(defaultType);
-    parseTimeFatal(file,
-                   Compiler::BadDefaultValueType, msg,
+    parseTimeFatal(file, msg,
                    name.c_str(), tdefault.c_str(),
                    getTypeHintDisplayName().c_str());
   }

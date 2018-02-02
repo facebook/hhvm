@@ -24,7 +24,6 @@ hphp.log
 /hphp/test/vm/perf/*.diff
 /hphp/test/vm/perf/*.perf
 /hphp/runtime/ext_hhvm/ext_noinline.cpp
-/hphp/compiler/analysis/code_error.inc
 /hphp/runtime/ext/*/CMakeLists.txt
 /hphp/runtime/ext/*/*.so
 

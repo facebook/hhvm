@@ -420,9 +420,6 @@ public:
    */
   void pushActiveUsing();
 
-  void invalidateGoto(TStatementPtr stmt, GotoError error) override;
-  void invalidateLabel(TStatementPtr stmt) override;
-
   TStatementPtr extractStatement(ScannerToken* stmt) override;
 
   FileScopePtr getFileScope() { return m_file; }
@@ -506,10 +503,8 @@ private:
 
   void setHasNonEmptyReturn(ConstructPtr blame);
 
-  void invalidYield();
   void setIsGenerator();
 
-  void invalidAwait();
   void setIsAsync();
 
   static bool canBeAsyncOrGenerator(const std::string& funcName,

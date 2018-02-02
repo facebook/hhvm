@@ -22,7 +22,6 @@
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/class_scope.h"
 
 using namespace HPHP;
@@ -34,7 +33,6 @@ ReturnStatement::ReturnStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ReturnStatement)),
     m_exp(exp) {
-  if (exp) exp->setContext(Expression::ReturnContext);
 }
 
 StatementPtr ReturnStatement::clone() {

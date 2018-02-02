@@ -46,13 +46,11 @@ void ClassRequireStatement::onParseRecur(AnalysisResultConstRawPtr ar,
                                          ClassScopePtr scope) {
   if (!scope->isTrait() && !scope->isInterface()) {
     parseTimeFatal(fs,
-                   Compiler::InvalidTraitStatement,
                    "Only traits and interfaces may use 'require' in class scope");
   }
   if (scope->isInterface() && !m_extends) {
     parseTimeFatal(
       fs,
-      Compiler::InvalidTraitStatement,
       "'require implements' may not be used in interface scope"
       "; instead, use interface inheritance");
   }
@@ -61,7 +59,6 @@ void ClassRequireStatement::onParseRecur(AnalysisResultConstRawPtr ar,
   if (!scope->addClassRequirement(m_required, m_extends)) {
     parseTimeFatal(
       fs,
-      Compiler::InvalidTraitStatement,
       "Conflicting requirements for '%s'",
       m_required.c_str()
     );

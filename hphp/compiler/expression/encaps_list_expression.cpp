@@ -17,7 +17,6 @@
 #include "hphp/compiler/expression/encaps_list_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
 using namespace HPHP;

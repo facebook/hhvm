@@ -76,23 +76,14 @@ public:
     ExistContext = 0x80,         // isset(...) or empty(...) recursively
     UnsetContext = 0x100,        // Within unset(...), arr el recursively
     AssignmentLHS = 0x200,       // LHS in assignment
-    DeepAssignmentLHS = 0x400,   // LHS in assignment, deep
     InvokeArgument = 0x800,      // Invoke arguments
     RefParameter   = 0x1000,     // eg f(&$x)
-    OprLValue = 0x2000,          // Lhs of op=, or operand of ++,--
-    DeepOprLValue = 0x4000,      // LHS of op=, or operand of ++,--, deep
-    DeadStore = 0x8000,          // This is an assignment, op=, or ++/--
-                                 // which can be killed
-    CondExpr = 0x10000,          // Used by alias manager to track expressions
-                                 // which are conditionally executed
-    AssignmentRHS = 0x20000,     // RHS in assignment
     DeepReference = 0x40000,     // Value is not available for copy propagation
                                  // because it is referenced in some way
                                  // eg $b in &$b['foo']
     AccessContext = 0x80000,     // ArrayElementExpression::m_variable or
                                  // ObjectPropertyExpression::m_object
     RefAssignmentLHS = 0x100000, // LHS of a reference assignment
-    ReturnContext = 0x200000,    // Return expression
   };
 
   enum Order {
@@ -144,7 +135,6 @@ public:
   int getError() const { return m_error;}
   bool hasError(Error error) const { return m_error & error; }
 
-  ExprClass getExprClass() const;
   virtual ExpressionPtr getStoreVariable() const { return ExpressionPtr(); }
   void setArgNum(int n);
 
@@ -203,7 +193,6 @@ protected:
 private:
   bool m_unused;
   mutable int m_error;
-  static ExprClass Classes[];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

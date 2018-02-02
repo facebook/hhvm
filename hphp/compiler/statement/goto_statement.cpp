@@ -25,31 +25,13 @@ using namespace HPHP;
 GotoStatement::GotoStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(GotoStatement)),
-    m_label(label), m_error((ParserBase::GotoError)0) {
+    m_label(label) {
 }
 
 StatementPtr GotoStatement::clone() {
   GotoStatementPtr stmt(new GotoStatement(*this));
   stmt->m_label = m_label;
-  stmt->m_error = m_error;
   return stmt;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// parser functions
-void GotoStatement::invalidate(ParserBase::GotoError error) {
-  m_error = error;
-  switch (m_error) {
-  case ParserBase::UndefLabel:
-    Compiler::Error(Compiler::GotoUndefLabel, shared_from_this());
-    break;
-  case ParserBase::InvalidBlock:
-    Compiler::Error(Compiler::GotoInvalidBlock, shared_from_this());
-    break;
-  default:
-    assert(false);
-    break;
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

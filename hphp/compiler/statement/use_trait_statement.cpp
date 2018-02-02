@@ -50,7 +50,6 @@ void UseTraitStatement::onParseRecur(AnalysisResultConstRawPtr ar,
                                      ClassScopePtr scope) {
   if (scope->isInterface()) {
     parseTimeFatal(fs,
-                   Compiler::InvalidTraitStatement,
                    "Interfaces cannot use traits");
   }
   std::vector<std::string> usedTraits;

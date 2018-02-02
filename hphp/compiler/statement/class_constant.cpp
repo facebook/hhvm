@@ -58,7 +58,6 @@ void ClassConstant::onParseRecur(AnalysisResultConstRawPtr ar,
                                  ClassScopePtr scope) {
   if (scope->isTrait()) {
     parseTimeFatal(fs,
-                   Compiler::InvalidTraitStatement,
                    "Traits cannot have constants");
   }
 }

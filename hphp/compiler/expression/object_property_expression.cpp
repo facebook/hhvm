@@ -17,7 +17,6 @@
 #include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -65,8 +64,6 @@ void ObjectPropertyExpression::setContext(Context context) {
         m_object->setContext(Expression::LValue);
       }
       break;
-    case Expression::DeepAssignmentLHS:
-    case Expression::DeepOprLValue:
     case Expression::ExistContext:
     case Expression::UnsetContext:
     case Expression::DeepReference:
@@ -85,8 +82,6 @@ void ObjectPropertyExpression::clearContext(Context context) {
   m_context &= ~context;
   switch (context) {
     case Expression::LValue:
-    case Expression::DeepOprLValue:
-    case Expression::DeepAssignmentLHS:
     case Expression::UnsetContext:
     case Expression::DeepReference:
     case Expression::InvokeArgument:

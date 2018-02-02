@@ -20,7 +20,6 @@
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/expression/modifier_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/option.h"
 

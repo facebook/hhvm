@@ -31,10 +31,8 @@ struct LabelStatement : Statement {
 
   const std::string &label() { return m_label; }
 
-  void invalidate() { m_isValid = false; }
 private:
   std::string m_label;
-  bool m_isValid;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

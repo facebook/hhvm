@@ -17,7 +17,6 @@
 #include "hphp/compiler/compiler.h"
 
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/emitter.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/option.h"
@@ -881,12 +880,6 @@ int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr&& ar,
                    AsyncFileCacheSaver &fcThread) {
   // generate code
   if (hhbcTarget(po, std::move(ar), fcThread)) {
-    return 1;
-  }
-
-  // check error
-  if (Compiler::HasError() && !po.force) {
-    Compiler::DumpErrors();
     return 1;
   }
 

@@ -93,7 +93,6 @@
 
 #include "hphp/compiler/analysis/function_scope.h"
 
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 
 #include "hphp/util/lock.h"
@@ -1191,7 +1190,6 @@ void Parser::checkFunctionContext(const std::string& funcName,
                                   int returnsRef) {
   // let async modifier be mandatory
   if (funcContext.isAsync && !modifiers->isAsync()) {
-    invalidAwait();
     PARSE_ERROR("Function '%s' contains 'await' but is not declared as async.",
                 funcName.c_str());
   }
@@ -1218,13 +1216,11 @@ void Parser::prepareConstructorParameters(StatementListPtr stmts,
 
     if (isAbstract) {
       param->parseTimeFatal(getFileScope(),
-                            Compiler::InvalidAttribute,
                             "parameter modifiers not allowed on "
                             "abstract __construct");
     }
     if (!stmts) {
       param->parseTimeFatal(getFileScope(),
-                            Compiler::InvalidAttribute,
                             "parameter modifiers not allowed on "
                             "__construct without a body");
     }
@@ -1234,7 +1230,6 @@ void Parser::prepareConstructorParameters(StatementListPtr stmts,
       for (auto& typeName : typeNames) {
         if (isTypeVarInImmediateScope(typeName)) {
           param->parseTimeFatal(getFileScope(),
-                                Compiler::InvalidAttribute,
                                 "parameter modifiers not supported with "
                                 "type variable annotation");
         }
@@ -1959,13 +1954,6 @@ void Parser::onReturn(Token &out, Token *expr) {
   }
 }
 
-void Parser::invalidYield() {
-  ExpressionPtr exp = std::make_shared<SimpleFunctionCall>(
-    BlockScopePtr(), getRange(), "yield", false,
-    ExpressionListPtr(), ExpressionPtr());
-  Compiler::Error(Compiler::InvalidYield, exp);
-}
-
 bool Parser::canBeAsyncOrGenerator(const std::string& funcName,
                                    const std::string& clsName) {
   if (clsName.empty()) {
@@ -1993,12 +1981,10 @@ bool Parser::canBeAsyncOrGenerator(const std::string& funcName,
 
 void Parser::setIsGenerator() {
   if (m_funcContexts.empty()) {
-    invalidYield();
     PARSE_ERROR("Yield can only be used inside a function");
   }
 
   if (!canBeAsyncOrGenerator(funcName(), clsName())) {
-    invalidYield();
     PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
                 "magic methods");
   }
@@ -2028,21 +2014,12 @@ void Parser::onYieldBreak(Token &out) {
   out->stmt = NEW_STMT(ReturnStatement, ExpressionPtr());
 }
 
-void Parser::invalidAwait() {
-  auto exp = std::make_shared<SimpleFunctionCall>(
-    BlockScopePtr(), getRange(), "async", false,
-    ExpressionListPtr(), ExpressionPtr());
-  Compiler::Error(Compiler::InvalidAwait, exp);
-}
-
 void Parser::setIsAsync() {
   if (m_funcContexts.empty()) {
-    invalidAwait();
     PARSE_ERROR("'await' can only be used inside a function");
   }
 
   if (!canBeAsyncOrGenerator(funcName(), clsName())) {
-    invalidAwait();
     PARSE_ERROR("'await' is not allowed in constructors, destructors, or "
                     "magic methods.");
   }
@@ -3055,18 +3032,6 @@ std::string Parser::resolve(const std::string &ns, bool cls) {
     return ns;
   }
   return nsDecl(ns);
-}
-
-void Parser::invalidateGoto(TStatementPtr stmt, GotoError error) {
-  GotoStatement *gs = (GotoStatement*) stmt;
-  assert(gs);
-  gs->invalidate(error);
-}
-
-void Parser::invalidateLabel(TStatementPtr stmt) {
-  LabelStatement *ls = (LabelStatement*) stmt;
-  assert(ls);
-  ls->invalidate();
 }
 
 TStatementPtr Parser::extractStatement(ScannerToken *stmt) {

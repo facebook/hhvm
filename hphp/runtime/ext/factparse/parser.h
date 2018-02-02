@@ -395,9 +395,6 @@ struct Parser : ParserBase {
   void closeActiveUsings();
   void onCompleteLabelScope(bool fresh);
 
-  virtual void invalidateGoto(TStatementPtr stmt, GotoError error);
-  virtual void invalidateLabel(TStatementPtr stmt);
-
   virtual TStatementPtr extractStatement(ScannerToken *stmt);
 
  private:

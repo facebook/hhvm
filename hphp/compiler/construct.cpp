@@ -179,26 +179,11 @@ void Construct::dumpNode(int spc) {
     if (c & Expression::RefAssignmentLHS) {
       scontext += "|RefAssignmentLHS";
     }
-    if (c & Expression::DeepAssignmentLHS) {
-      scontext += "|DeepAssignmentLHS";
-    }
-    if (c & Expression::AssignmentRHS) {
-      scontext += "|AssignmentRHS";
-    }
     if (c & Expression::InvokeArgument) {
       scontext += "|InvokeArgument";
     }
-    if (c & Expression::OprLValue) {
-      scontext += "|OprLValue";
-    }
-    if (c & Expression::DeepOprLValue) {
-      scontext += "|DeepOprLValue";
-    }
     if (c & Expression::AccessContext) {
       scontext += "|AccessContext";
-    }
-    if (c & Expression::ReturnContext) {
-      scontext += "|ReturnContext";
     }
 
     if (scontext != "") {
@@ -251,29 +236,13 @@ void Construct::dump(int spc, AnalysisResultConstRawPtr ar) {
   }
 }
 
-void Construct::parseTimeFatal(FileScopeRawPtr fs,
-                               Compiler::ErrorType err, const char *fmt, ...) {
+void Construct::parseTimeFatal(FileScopeRawPtr fs, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   std::string msg;
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
-  if (err != Compiler::NoError) Compiler::Error(err, shared_from_this());
   throw ParseTimeFatalException(fs->getName(), m_r.line0,
                                 "%s", msg.c_str());
-}
-
-void Construct::analysisTimeFatal(Compiler::ErrorType err,
-                                  const char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  std::string msg;
-  string_vsnprintf(msg, fmt, ap);
-  va_end(ap);
-
-  assert(err != Compiler::NoError);
-  Compiler::Error(err, shared_from_this());
-  throw AnalysisTimeFatalException(getFileScope()->getName(), m_r.line0,
-                                   "%s [analysis]", msg.c_str());
 }

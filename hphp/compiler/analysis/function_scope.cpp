@@ -18,7 +18,6 @@
 
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
@@ -75,7 +74,6 @@ FunctionScope::FunctionScope(AnalysisResultConstRawPtr ar, bool method,
   for (unsigned i = 0; i < attrs.size(); ++i) {
     if (m_userAttributes.find(attrs[i]->getName()) != m_userAttributes.end()) {
       attrs[i]->parseTimeFatal(file,
-                               Compiler::DeclaredAttributeTwice,
                                "Redeclared attribute %s",
                                attrs[i]->getName().c_str());
     }

@@ -40,7 +40,6 @@
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/expression/array_element_expression.h"
@@ -12443,8 +12442,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     /* same for TypeConstraint */
     TypeConstraint tc;
   }
-
-  Compiler::ClearErrors();
 
   JobQueueDispatcher<EmitterWorker>
     dispatcher(threadCount, 0, false, ar.get());

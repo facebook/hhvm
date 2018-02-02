@@ -17,7 +17,6 @@
 #include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -73,8 +72,6 @@ void ArrayElementExpression::setContext(Context context) {
         m_variable->setContext(Expression::LValue);
       }
       break;
-    case Expression::DeepAssignmentLHS:
-    case Expression::DeepOprLValue:
     case Expression::ExistContext:
     case Expression::UnsetContext:
     case Expression::DeepReference:
@@ -95,8 +92,6 @@ void ArrayElementExpression::clearContext(Context context) {
   m_context &= ~context;
   switch (context) {
     case Expression::LValue:
-    case Expression::DeepOprLValue:
-    case Expression::DeepAssignmentLHS:
     case Expression::UnsetContext:
     case Expression::DeepReference:
       m_variable->clearContext(context);

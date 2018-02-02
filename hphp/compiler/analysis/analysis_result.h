@@ -18,7 +18,6 @@
 #define incl_HPHP_ANALYSIS_RESULT_H_
 
 #include "hphp/compiler/code_generator.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/function_container.h"

@@ -24,13 +24,12 @@ using namespace HPHP;
 LabelStatement::LabelStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(LabelStatement)),
-    m_label(label), m_isValid(true) {
+    m_label(label) {
 }
 
 StatementPtr LabelStatement::clone() {
   LabelStatementPtr stmt(new LabelStatement(*this));
   stmt->m_label   = m_label;
-  stmt->m_isValid = m_isValid;
   return stmt;
 }
 

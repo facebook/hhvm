@@ -64,8 +64,6 @@ BinaryOpExpression::BinaryOpExpression
   case T_SR_EQUAL:
     m_assign = true;
     m_exp1->setContext(Expression::LValue);
-    m_exp1->setContext(Expression::OprLValue);
-    m_exp1->setContext(Expression::DeepOprLValue);
     break;
   case T_COLLECTION: {
     std::string s = m_exp1->getLiteralString();

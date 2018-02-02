@@ -20,7 +20,6 @@
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 

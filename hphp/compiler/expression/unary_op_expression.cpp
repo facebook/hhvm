@@ -16,7 +16,6 @@
 
 #include "hphp/compiler/expression/unary_op_expression.h"
 
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
@@ -45,8 +44,6 @@ inline void UnaryOpExpression::ctorInit() {
   switch (m_op) {
   case T_INC:
   case T_DEC:
-    m_exp->setContext(Expression::OprLValue);
-    m_exp->setContext(Expression::DeepOprLValue);
     // this is hacky, what we need is LValueWrapper
     if (!m_exp->is(Expression::KindOfSimpleVariable)) {
       m_exp->setContext(Expression::LValue);
@@ -353,7 +350,6 @@ void UnaryOpExpression::onParse(AnalysisResultConstRawPtr /*ar*/,
                                 FileScopePtr scope) {
   if (m_op == T_EVAL) {
     ConstructPtr self = shared_from_this();
-    Compiler::Error(Compiler::UseEvaluation, self);
     scope->setAttribute(FileScope::ContainsLDynamicVariable);
   }
 }

@@ -76,7 +76,6 @@ void FunctionStatement::onParse(AnalysisResultConstRawPtr ar,
   if (isNamed("__autoload")) {
     if (m_params && m_params->getCount() != 1) {
       parseTimeFatal(scope,
-                     Compiler::InvalidMagicMethod,
                      "__autoload() must take exactly 1 argument");
     }
   }
@@ -84,7 +83,6 @@ void FunctionStatement::onParse(AnalysisResultConstRawPtr ar,
   if (fs->isNative()) {
     if (getStmts()) {
       parseTimeFatal(scope,
-                     Compiler::InvalidAttribute,
                      "Native functions must not have an implementation body");
     }
     if (m_params) {
@@ -95,7 +93,6 @@ void FunctionStatement::onParse(AnalysisResultConstRawPtr ar,
         auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
         if (!param->hasUserType() && !param->isVariadic()) {
           parseTimeFatal(scope,
-                         Compiler::InvalidAttribute,
                          "Native function calls must have type hints "
                          "on all args");
         }
@@ -103,13 +100,11 @@ void FunctionStatement::onParse(AnalysisResultConstRawPtr ar,
     }
     if (getReturnTypeConstraint().empty()) {
       parseTimeFatal(scope,
-                     Compiler::InvalidAttribute,
                      "Native function %s() must have a return type hint",
                      getOriginalName().c_str());
     }
   } else if (!getStmts()) {
     parseTimeFatal(scope,
-                   Compiler::InvalidAttribute,
                    "Global function %s() must contain a body",
                     getOriginalName().c_str());
   }

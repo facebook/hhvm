@@ -16,7 +16,6 @@
 
 #include "hphp/compiler/expression/expression.h"
 #include <vector>
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/util/text-util.h"
@@ -55,12 +54,6 @@ const char* Expression::nameOfKind(Construct::KindOf kind) {
   return Names[idx];
 }
 
-#define DEC_EXPR_CLASSES(x,t) Expression::t,
-Expression::ExprClass Expression::Classes[] = {
-  DECLARE_EXPRESSION_TYPES(DEC_EXPR_CLASSES)
-};
-#undef DEC_EXPR_CLASSES
-
 Expression::Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS)
     : Construct(scope, r, kindOf), m_context(RValue),
       m_unused(false), m_error(0) {
@@ -77,14 +70,13 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep, bool noWarn) {
       getScope(), getRange(), noWarn ?
       ExpressionList::ListKindWrappedNoWarn : ExpressionList::ListKindWrapped);
     el->addElement(rep);
-    rep->clearContext(AssignmentRHS);
     rep = el;
   }
   if (rep->is(KindOfSimpleVariable) && !is(KindOfSimpleVariable)) {
     static_pointer_cast<SimpleVariable>(rep)->setAlwaysStash();
   }
   if (isUnpack()) rep->setIsUnpack();
-  rep->copyContext(m_context & ~(DeadStore|AccessContext));
+  rep->copyContext(m_context & ~(AccessContext));
 
   if (rep->getScope() != getScope()) {
     rep->resetScope(getScope());
@@ -135,19 +127,6 @@ bool Expression::hasSubExpr(ExpressionPtr sub) const {
     if (kid && kid->hasSubExpr(sub)) return true;
   }
   return false;
-}
-
-Expression::ExprClass Expression::getExprClass() const {
-  assert(m_kindOf > Construct::KindOfExpression);
-  auto const idx = static_cast<int32_t>(m_kindOf) -
-    static_cast<int32_t>(Construct::KindOfExpression);
-  assert(idx > 0);
-  ExprClass cls = Classes[idx];
-  if (cls == Update) {
-    ExpressionPtr k = getStoreVariable();
-    if (!k || !(k->hasContext(OprLValue))) cls = Expression::None;
-  }
-  return cls;
 }
 
 bool Expression::getEffectiveScalar(Variant &v) {

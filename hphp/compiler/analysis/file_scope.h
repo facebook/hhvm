@@ -23,7 +23,6 @@
 #include <vector>
 
 #include "hphp/compiler/analysis/block_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/hphp.h"
 

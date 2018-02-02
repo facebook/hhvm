@@ -32,11 +32,9 @@ struct GotoStatement : Statement {
 
   const std::string &label() { return m_label; }
 
-  void invalidate(ParserBase::GotoError error);
   void setLabel(const std::string &label) { m_label = label; }
 private:
   std::string m_label;
-  ParserBase::GotoError m_error;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

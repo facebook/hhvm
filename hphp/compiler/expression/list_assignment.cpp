@@ -185,7 +185,6 @@ void ListAssignment::setLValue() {
           sublist->setLValue();
         } else {
           // Magic contexts I took from assignment expression
-          exp->setContext(Expression::DeepAssignmentLHS);
           exp->setContext(Expression::AssignmentLHS);
           exp->setContext(Expression::LValue);
         }

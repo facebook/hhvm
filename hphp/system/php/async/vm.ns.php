@@ -29,15 +29,12 @@ namespace HH\Asio {
 async function m<Tk, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
 ): Awaitable<Map<Tk, Tv>> {
-  $wait_handles = Map {};
-  foreach ($awaitables as $index => $awaitable) {
-    $wait_handles[$index] = $awaitable->getWaitHandle();
-  }
-  await AwaitAllWaitHandle::fromMap($wait_handles);
+  $awaitables = new Map($awaitables);
+  await AwaitAllWaitHandle::fromMap($awaitables);
   // TODO: When systemlib supports closures
-  // return $wait_handles->map($o ==> $o->result());
+  // return $awaitables->map($o ==> $o->result());
   $ret = Map {};
-  foreach($wait_handles as $key => $value) {
+  foreach ($awaitables as $key => $value) {
     $ret[$key] = \HH\Asio\result($value);
   }
   return $ret;
@@ -67,16 +64,12 @@ async function m<Tk, Tv>(
 async function v<Tv>(
   Traversable<Awaitable<Tv>> $awaitables,
 ): Awaitable<Vector<Tv>> {
-  $wait_handles = Vector {};
-  $wait_handles->reserve(count($awaitables));
-  foreach ($awaitables as $awaitable) {
-    $wait_handles[] = $awaitable->getWaitHandle();
-  }
-  await AwaitAllWaitHandle::fromVector($wait_handles);
+  $awaitables = new Vector($awaitables);
+  await AwaitAllWaitHandle::fromVector($awaitables);
   // TODO: When systemlib supports closures
-  // return $wait_handles->map($o ==> $o->result());
+  // return $awaitables->map($o ==> $o->result());
   $ret = Vector {};
-  foreach($wait_handles as $value) {
+  foreach ($awaitables as $value) {
     $ret[] = \HH\Asio\result($value);
   }
   return $ret;
@@ -96,14 +89,10 @@ async function v<Tv>(
  * @deprecated Use `Tuple\from_async()` instead.
  * @fbdeprecated Use `genva()` instead.
  */
-async function va(...$args): Awaitable/*<(...)>*/ {
-  $wait_handles = array();
-  foreach ($args as $value) {
-    $wait_handles[] = $value->getWaitHandle();
-  }
-  await AwaitAllWaitHandle::fromArray($wait_handles);
+async function va(...$awaitables): Awaitable/*<(...)>*/ {
+  await AwaitAllWaitHandle::fromArray($awaitables);
   $ret = array();
-  foreach ($wait_handles as $value) {
+  foreach ($awaitables as $value) {
     $ret[] = \HH\Asio\result($value);
   }
   return $ret;

@@ -7,25 +7,16 @@ function block() {
   );
 };
 
-class F implements Awaitable {
-  function __construct(){
-    $this->val = 1;
-  }
-
-  function getWaitHandle() {
-    $a = async function(){
-      return $this->val;
-    };
-    return $a();
-  }
+async function f() {
+  return 1;
 }
 
 async function foo() {
-  $f = new F;
+  $f = f();
   $a = await $f;
   var_dump($a);
   await block();
-  $f = new F;
+  $f = f();
   $a = await $f;
   var_dump($a);
 }

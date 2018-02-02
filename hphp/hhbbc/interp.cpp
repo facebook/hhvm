@@ -3832,7 +3832,7 @@ void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
 void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
 void in(ISS& env, const bc::ContGetReturn&) { push(env, TInitCell); }
 
-void pushTypeFromWH(ISS& env, const Type t) {
+void pushTypeFromWH(ISS& env, Type t) {
   if (!t.couldBe(TObj)) {
     // These opcodes require an object descending from WaitHandle.
     // Exceptions will be thrown for any non-object.
@@ -3840,10 +3840,13 @@ void pushTypeFromWH(ISS& env, const Type t) {
     unreachable(env);
     return;
   }
+
+  // Throw away non-obj component.
+  t &= TObj;
+
   // If we aren't even sure this is a wait handle, there's nothing we can
-  // infer here.  (This can happen if a user declares a class with a
-  // getWaitHandle method that returns non-WaitHandle garbage.)
-  if (!t.subtypeOf(TObj) || !is_specialized_wait_handle(t)) {
+  // infer here.
+  if (!is_specialized_wait_handle(t)) {
     return push(env, TInitCell);
   }
 

@@ -1,25 +1,20 @@
 <?hh
-async function gen_null<T>(): Awaitable<?T> {
-  return null;
-}
 
 async function genva(...$args): Awaitable/*<(...)>*/ {
-  $wait_handles = varray[];
+  $awaitables = varray[];
   foreach ($args as $value) {
     if ($value === null) {
-      $wait_handles[] = gen_null()->getWaitHandle();
+      $awaitables[] = async { return null; };
     } else {
-      $wait_handles[] = $value instanceof WaitHandle
-        ? $value
-        : $value->getWaitHandle();
+      $awaitables[] = $value;
     }
   }
   unset($args);
-  await AwaitAllWaitHandle::fromArray($wait_handles);
-  foreach ($wait_handles as $index => $value) {
-    $wait_handles[$index] = \HH\Asio\result($value);
+  await AwaitAllWaitHandle::fromArray($awaitables);
+  foreach ($awaitables as $index => $value) {
+    $awaitables[$index] = \HH\Asio\result($value);
   }
-  return $wait_handles;
+  return $awaitables;
 }
 
 async function gena<Tk, Tv>(
@@ -31,16 +26,10 @@ async function gena<Tk, Tv>(
   if (func_num_args() != 1) {
     trigger_error("Call to undefined function gena()", E_USER_ERROR);
   }
-  $wait_handles = darray[];
+  $awaitables = darray($awaitables);
+  await AwaitAllWaitHandle::fromDArray($awaitables);
   foreach ($awaitables as $index => $value) {
-    $wait_handles[$index] = $value instanceof WaitHandle
-      ? $value
-      : $value->getWaitHandle();
+    $awaitables[$index] = \HH\Asio\result($value);
   }
-  unset($awaitables);
-  await @AwaitAllWaitHandle::fromArray($wait_handles);
-  foreach ($wait_handles as $index => $value) {
-    $wait_handles[$index] = \HH\Asio\result($value);
-  }
-  return $wait_handles;
+  return $awaitables;
 }

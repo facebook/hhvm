@@ -188,7 +188,6 @@ const StaticString s___call("__call");
 const StaticString s___callStatic("__callStatic");
 const StaticString s_file("file");
 const StaticString s_line("line");
-const StaticString s_getWaitHandle("getWaitHandle");
 const StaticString s_construct("__construct");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -6401,22 +6400,7 @@ OPTBLD_INLINE TCA iopAwait(PC& pc) {
   auto const awaitable = vmStack().topC();
   auto wh = c_WaitHandle::fromCell(*awaitable);
   if (UNLIKELY(wh == nullptr)) {
-    if (LIKELY(awaitable->m_type == KindOfObject)) {
-      auto const obj = awaitable->m_data.pobj;
-      auto const cls = obj->getVMClass();
-      auto const func = cls->lookupMethod(s_getWaitHandle.get());
-      if (func && !(func->attrs() & AttrStatic)) {
-        auto ret = Variant::attach(
-            g_context->invokeFuncFew(func, obj, nullptr, 0, nullptr)
-        );
-        cellSet(*tvToCell(ret.asTypedValue()), *vmStack().topC());
-        wh = c_WaitHandle::fromCell(*vmStack().topC());
-      }
-    }
-
-    if (UNLIKELY(wh == nullptr)) {
-      SystemLib::throwBadMethodCallExceptionObject("Await on a non-WaitHandle");
-    }
+    SystemLib::throwBadMethodCallExceptionObject("Await on a non-WaitHandle");
   }
   if (LIKELY(wh->isFailed())) {
     throw req::root<Object>{wh->getException()};

@@ -60,10 +60,9 @@ $required_functions = array(
 $optional_functions = array(
   'include',
   'count',
-  Vector::class.'::reserve',
+  Vector::class.'::__construct',
   AwaitAllWaitHandle::class.'::fromVector',
   RescheduleWaitHandle::class.'::create',
-  WaitHandle::class.'::getWaitHandle',
 );
 
 verifyTestRun($stacks, $required_functions, $optional_functions);

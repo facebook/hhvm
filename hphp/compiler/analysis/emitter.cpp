@@ -6875,20 +6875,15 @@ bool EmitterVisitor::emitInlineGenva(
     return false;
   }
   for (auto i = int{0}; i < num_params; i++) {
-    Label gwh, have_wh;
+    Label done;
 
     visit((*params)[i]);
     emitConvertToCell(e);
 
-    // if we already have a WaitHandle, we can skip the getWaitHandle call
-    e.Dup();
-    e.InstanceOfD(s_WaitHandle.get());
-    e.JmpNZ(have_wh);
-
-    // if $_ is null, create a HH\Asio\null() instead of calling getWaitHandle
+    // if $_ is null, create a HH\Asio\null()
     e.Dup();
     emitIsType(e, IsTypeOp::Null);
-    e.JmpZ(gwh);
+    e.JmpZ(done);
     emitPop(e);
 
     Offset fpiStart = m_ue.bcPos();
@@ -6898,11 +6893,8 @@ bool EmitterVisitor::emitInlineGenva(
     }
     e.FCall(0);
     e.UnboxR();
-    e.Jmp(have_wh);
 
-    gwh.set(e);
-    emitConstMethodCallNoParams(e, "getWaitHandle");
-    have_wh.set(e);
+    done.set(e);
   }
 
   std::vector<Id> waithandles(num_params);
@@ -7001,7 +6993,6 @@ bool EmitterVisitor::emitInlineGena(
     const auto iterStart = m_ue.bcPos();
     {
       Label loop(e);
-      Label have_wh;
 
       emitVirtualLocal(array); // for Set below
       emitVirtualLocal(key); // for Set below
@@ -7010,14 +7001,7 @@ bool EmitterVisitor::emitInlineGena(
       emitVirtualLocal(item);
       emitCGet(e);
 
-      // call getWaitHandle if we don't already have a WaitHandle
-      e.Dup();
-      e.InstanceOfD(s_WaitHandle.get());
-      e.JmpNZ(have_wh);
-      emitConstMethodCallNoParams(e, "getWaitHandle");
-      have_wh.set(e);
-
-      emitSet(e);   // array[$key] = $item->getWaitHandle();
+      emitSet(e);   // array[$key] = $item;
       emitPop(e);
 
       emitVirtualLocal(key);

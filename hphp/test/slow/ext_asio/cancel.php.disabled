@@ -31,7 +31,7 @@ class CatWrapper {
     fflush($this->pipes[0]);
   }
 
-  public function getWaitHandle(): Awaitable<int> {
+  public function runAsync(): Awaitable<int> {
     return stream_await($this->pipes[1], STREAM_AWAIT_READ, 10.0);
   }
 }
@@ -62,7 +62,7 @@ function testCancelInvalidAwaitables() {
 async function testCancelExternalThreadEventBeforeAwait(): Awaitable<void> {
   echo "=== testCancelExternalThreadEventBeforeAwait ===\n";
   $cat = new CatWrapper();
-  $wh = $cat->getWaitHandle();
+  $wh = $cat->runAsync();
   var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == true);
   $completion = async {
     await reschedule();
@@ -88,7 +88,7 @@ async function testCancelExternalThreadEventBeforeAwait(): Awaitable<void> {
 async function testCancelExternalThreadEventAfterAwait(): Awaitable<void> {
   echo "=== testCancelExternalThreadEventAfterAwait ===\n";
   $cat = new CatWrapper();
-  $wh = $cat->getWaitHandle();
+  $wh = $cat->runAsync();
   $completion = async {
     await reschedule();
     $cat->complete();
@@ -114,7 +114,7 @@ async function testCancelExternalThreadEventAfterAwait(): Awaitable<void> {
 async function testCancelExternalThreadEventDuringAwait(): Awaitable<void> {
   echo "=== testCancelExternalThreadEventDuringAwait ===\n";
   $cat = new CatWrapper();
-  $wh = $cat->getWaitHandle();
+  $wh = $cat->runAsync();
   $completion = async {
     await reschedule(1);        // after $cancelation
     $cat->complete();
@@ -143,7 +143,7 @@ async function testCancelExternalThreadEventDuringAwait(): Awaitable<void> {
 async function testCancelExternalThreadEventFromBeginIOWait(): Awaitable<void> {
   echo "=== testCancelExternalThreadEventFromBeginIOWait ===\n";
   $cat = new CatWrapper();
-  $wh = $cat->getWaitHandle();
+  $wh = $cat->runAsync();
 
   WaitHandle::setOnIOWaitEnterCallback(function() use ($wh) {
       echo "io wait enter\n";
@@ -168,7 +168,7 @@ async function testCancelExternalThreadEventFromBeginIOWait(): Awaitable<void> {
   // this is still wrong, since libevent 1.4 (used by hphp) does not support
   // multiple events for same FD. But it gets us to predictable state.
   $cat->complete();
-  await $cat->getWaitHandle();
+  await $cat->runAsync();
   $cat->close();
 }
 

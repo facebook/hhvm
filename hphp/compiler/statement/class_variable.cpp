@@ -90,31 +90,6 @@ void ClassVariable::onParseRecur(AnalysisResultConstRawPtr ar,
     );
   }
 
-  for (int i = 0; i < m_declaration->getCount(); i++) {
-    ExpressionPtr exp = (*m_declaration)[i];
-    if (exp->is(Expression::KindOfAssignmentExpression)) {
-      auto assignment = dynamic_pointer_cast<AssignmentExpression>(exp);
-      ExpressionPtr var = assignment->getVariable();
-      const auto& name =
-        dynamic_pointer_cast<SimpleVariable>(var)->getName();
-      if (!scope->addProperty(name)) {
-        exp->parseTimeFatal(fs,
-                            Compiler::DeclaredVariableTwice,
-                            "Cannot redeclare %s::$%s",
-                            scope->getOriginalName().c_str(), name.c_str());
-      }
-    } else {
-      const std::string &name =
-        dynamic_pointer_cast<SimpleVariable>(exp)->getName();
-      if (!scope->addProperty(name)) {
-        exp->parseTimeFatal(fs,
-                            Compiler::DeclaredVariableTwice,
-                            "Cannot redeclare %s::$%s",
-                            scope->getOriginalName().c_str(), name.c_str());
-      }
-    }
-  }
-
   scope->setModifiers(modifiers);
 }
 

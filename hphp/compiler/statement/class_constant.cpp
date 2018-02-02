@@ -61,39 +61,6 @@ void ClassConstant::onParseRecur(AnalysisResultConstRawPtr ar,
                    Compiler::InvalidTraitStatement,
                    "Traits cannot have constants");
   }
-
-  if (isAbstract()) {
-    for (int i = 0; i < m_exp->getCount(); i++) {
-      auto exp = dynamic_pointer_cast<ConstantExpression>((*m_exp)[i]);
-      const std::string &name = exp->getName();
-      if (!scope->addConstant(name)) {
-        exp->parseTimeFatal(fs,
-                            Compiler::DeclaredConstantTwice,
-                            "Cannot redeclare %s::%s",
-                            scope->getOriginalName().c_str(),
-                            name.c_str());
-      }
-
-      // HACK: break attempts to write global constants here;
-      // see ConstantExpression::preOptimize
-      exp->setContext(Expression::LValue);
-    }
-  } else {
-    for (int i = 0; i < m_exp->getCount(); i++) {
-      auto assignment =
-        dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
-      auto var = assignment->getVariable();
-      const auto& name =
-        dynamic_pointer_cast<ConstantExpression>(var)->getName();
-      if (!scope->addConstant(name)) {
-        assignment->parseTimeFatal(fs,
-                                   Compiler::DeclaredConstantTwice,
-                                   "Cannot redeclare %s::%s",
-                                   scope->getOriginalName().c_str(),
-                                   name.c_str());
-      }
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -232,13 +232,6 @@ public:
     return m_functionsVec;
   }
 
-  bool addConstant(const std::string& name) {
-    return m_constants.insert(name).second;
-  }
-
-  bool addProperty(const std::string& name) {
-    return m_properties.insert(name).second;
-  }
 private:
 
   bool hasMethod(const std::string &methodName) const;
@@ -259,9 +252,6 @@ private:
   std::vector<std::string> m_usedTraitNames;
   boost::container::flat_set<std::string> m_requiredExtends;
   boost::container::flat_set<std::string> m_requiredImplements;
-
-  std::unordered_set<std::string> m_constants;
-  std::unordered_set<std::string> m_properties;
 
   mutable int m_attribute;
   KindOf m_kindOf;

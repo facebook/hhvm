@@ -10883,10 +10883,14 @@ Id EmitterVisitor::emitClass(Emitter& e,
           } else {
             tvWriteNull(tvVal);
           }
-          bool added UNUSED =
-            pce->addProperty(propName, propAttrs, typeConstraint,
-                             propDoc, &tvVal, RepoAuthType{});
-          assert(added);
+          if (!pce->addProperty(propName, propAttrs, typeConstraint,
+                                propDoc, &tvVal, RepoAuthType{})) {
+            auto exn = EmitterVisitor::IncludeTimeFatalException(
+              var, "Cannot redeclare %s::$%s",
+              pce->name()->data(), propName->data());
+            exn.setParseFatal(true);
+            throw exn;
+          }
         }
       } else if (auto cc = dynamic_pointer_cast<ClassConstant>((*stmts)[i])) {
 
@@ -10895,22 +10899,24 @@ Id EmitterVisitor::emitClass(Emitter& e,
           makeStaticString(cc->getTypeConstraint());
         int nCons = el->getCount();
 
-        if (cc->isAbstract()) {
-          for (int ii = 0; ii < nCons; ii++) {
-            auto con = static_pointer_cast<ConstantExpression>((*el)[ii]);
-            StringData* constName = makeStaticString(con->getName());
-            bool added UNUSED =
-              pce->addAbstractConstant(constName, typeConstraint,
-                                       cc->isTypeconst());
-            assert(added);
+        auto const badConst = [&] () -> ConstantExpressionPtr {
+          if (cc->isAbstract()) {
+            for (int ii = 0; ii < nCons; ii++) {
+              auto con = static_pointer_cast<ConstantExpression>((*el)[ii]);
+              auto const constName = makeStaticString(con->getName());
+              if (!pce->addAbstractConstant(constName, typeConstraint,
+                                            cc->isTypeconst())) {
+                return con;
+              }
+            }
+            return nullptr;
           }
-        } else {
           for (int ii = 0; ii < nCons; ii++) {
             auto ae = static_pointer_cast<AssignmentExpression>((*el)[ii]);
             auto con =
               static_pointer_cast<ConstantExpression>(ae->getVariable());
             auto vNode = ae->getValue();
-            StringData* constName = makeStaticString(con->getName());
+            auto const constName = makeStaticString(con->getName());
             assert(vNode);
             TypedValue tvVal;
             if (vNode->isCollection()) {
@@ -10930,13 +10936,21 @@ Id EmitterVisitor::emitClass(Emitter& e,
             CodeGenerator cg(&os, CodeGenerator::PickledPHP);
             auto ar = std::make_shared<AnalysisResult>();
             vNode->outputPHP(cg, ar);
-            bool added UNUSED = pce->addConstant(
-              constName, typeConstraint, &tvVal,
-              makeStaticString(os.str()),
-              cc->isTypeconst(),
-              cc->getTypeStructure());
-            assert(added);
+            if (!pce->addConstant(constName, typeConstraint, &tvVal,
+                                  makeStaticString(os.str()),
+                                  cc->isTypeconst(),
+                                  cc->getTypeStructure())) {
+              return con;
+            }
           }
+          return nullptr;
+        }();
+        if (badConst) {
+          auto exn = EmitterVisitor::IncludeTimeFatalException(
+            badConst, "Cannot redeclare %s::%s",
+            pce->name()->data(), badConst->getName().c_str());
+          exn.setParseFatal(true);
+          throw exn;
         }
       } else if (auto useStmt =
                  dynamic_pointer_cast<UseTraitStatement>((*stmts)[i])) {

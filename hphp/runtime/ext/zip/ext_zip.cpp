@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
-#include "hphp/runtime/server/cli-server.h"
 
 namespace HPHP {
 
@@ -36,24 +35,6 @@ static String to_full_path(const String& filename) {
 // A wrapper for `zip_open` that prepares a full path
 // file name to consider current working directory.
 static zip* _zip_open(const String& filename, int _flags, int* zep) {
-  if (is_cli_mode()) {
-    int open_flags =
-      (_flags & ZIP_EXCL ? O_EXCL : 0)
-      | (_flags & ZIP_TRUNCATE ? O_TRUNC : 0)
-      | (_flags & ZIP_CREATE ? O_CREAT : 0)
-      | (_flags & ZIP_RDONLY ? O_RDONLY : O_RDWR);
-    auto fd = cli_openfd_unsafe(
-      filename,
-      open_flags,
-      static_cast<mode_t>(-1),
-      /* use_include_path */ false,
-      /* quiet */ true);
-    if (fd == -1) {
-      *zep = ZIP_ER_OPEN;
-      return nullptr;
-    }
-    return zip_fdopen(fd, _flags & ZIP_CHECKCONS, zep);
-  }
   return zip_open(to_full_path(filename).c_str(), _flags, zep);
 }
 
@@ -769,12 +750,7 @@ static bool extractFileTo(zip* zip, const std::string &file, std::string& to,
   auto zipFile = zip_fopen_index(zip, zipStat.index, 0);
   FAIL_IF_INVALID_PTR(zipFile);
 
-  auto stream = Stream::getWrapperFromURI(to);
-  if (stream == nullptr) {
-    zip_fclose(zipFile);
-    return false;
-  }
-  auto outFile = stream->open(to, "wb", 0, nullptr);
+  auto outFile = fopen(to.c_str(), "wb");
   if (outFile == nullptr) {
     zip_fclose(zipFile);
     return false;
@@ -782,17 +758,20 @@ static bool extractFileTo(zip* zip, const std::string &file, std::string& to,
 
   for (auto n = zip_fread(zipFile, buf, len); n != 0;
        n = zip_fread(zipFile, buf, len)) {
-    if (n < 0
-        || outFile->write(String(buf, n, CopyStringMode::CopyString)) != n) {
+    if (n < 0 || fwrite(buf, sizeof(char), n, outFile) != n) {
       zip_fclose(zipFile);
-      outFile->close();
+      fclose(outFile);
       remove(to.c_str());
       return false;
     }
   }
 
   zip_fclose(zipFile);
-  return outFile->close();
+  if (fclose(outFile) != 0) {
+    return false;
+  }
+
+  return true;
 }
 
 static bool HHVM_METHOD(ZipArchive, extractTo, const String& destination,

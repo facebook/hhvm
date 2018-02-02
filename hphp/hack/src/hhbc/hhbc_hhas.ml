@@ -273,6 +273,7 @@ let string_of_istype_op op =
   | OpVec -> "Vec"
   | OpDict -> "Dict"
   | OpKeyset -> "Keyset"
+  | OpArrLike -> "ArrLike"
   | OpVArray -> "VArray"
   | OpDArray -> "DArray"
 

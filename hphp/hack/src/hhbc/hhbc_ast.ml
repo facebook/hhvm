@@ -326,6 +326,7 @@ type istype_op =
   | OpKeyset
   | OpDict
   | OpVec
+  | OpArrLike (* Arr or Vec or Dict or Keyset *)
   | OpVArray
   | OpDArray
 

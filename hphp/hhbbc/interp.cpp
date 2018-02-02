@@ -1109,7 +1109,9 @@ void isTypeHelper(ISS& env,
                   IsTypeOp typeOp, LocalId location,
                   const IsType& istype, const JmpOp& jmp) {
 
-  if (typeOp == IsTypeOp::Scalar) return impl(env, istype, jmp);
+  if (typeOp == IsTypeOp::Scalar || typeOp == IsTypeOp::ArrLike) {
+    return impl(env, istype, jmp);
+  }
 
   auto const val = istype.op == Op::IsTypeC ?
     topT(env) : locRaw(env, location);
@@ -1899,6 +1901,12 @@ void isTypeObj(ISS& env, const Type& ty) {
   push(env, TBool);
 }
 
+void isTypeArrLike(ISS& env, const Type& ty) {
+  if (ty.subtypeOfAny(TArr, TVec, TDict, TKeyset)) return push(env, TTrue);
+  if (!ty.couldBeAny(TArr, TVec, TDict, TKeyset)) return push(env, TFalse);
+  push(env, TBool);
+}
+
 template<class Op>
 void isTypeLImpl(ISS& env, const Op& op) {
   if (!locCouldBeUninit(env, op.loc1)) { nothrow(env); constprop(env); }
@@ -1906,6 +1914,7 @@ void isTypeLImpl(ISS& env, const Op& op) {
   switch (op.subop2) {
   case IsTypeOp::Scalar: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, loc);
+  case IsTypeOp::ArrLike: return isTypeArrLike(env, loc);
   default: return isTypeImpl(env, loc, type_of_istype(op.subop2));
   }
 }
@@ -1917,6 +1926,7 @@ void isTypeCImpl(ISS& env, const Op& op) {
   switch (op.subop1) {
   case IsTypeOp::Scalar: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, t1);
+  case IsTypeOp::ArrLike: return isTypeArrLike(env, t1);
   default: return isTypeImpl(env, t1, type_of_istype(op.subop1));
   }
 }

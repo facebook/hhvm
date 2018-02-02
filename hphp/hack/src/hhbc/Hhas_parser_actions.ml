@@ -523,6 +523,7 @@ match arg with
                | "Keyset" -> OpKeyset
                | "Dict" -> OpDict
                | "Vec" -> OpVec
+               | "ArrLike" -> OpArrLike
                | "VArray" -> OpVArray
                | "DArray" -> OpDArray
                | _ -> report_error ("bad istype_op" ^ s))

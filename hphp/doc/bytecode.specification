@@ -1809,18 +1809,22 @@ EmptyS <class-ref slot>    [C]  ->  [C:Bool]
 
 IsTypeC  <op>                     [C]  ->  [C:Bool]
 
-  Is type. This instruction first loads a type into t based on the operand op,
-  according to the following table:
+  Is type. This instruction checks the type of a value on the stack, according
+  to the following table:
 
     operand        t
     -----------+------
       Null     | Null
       Bool     | Bool
-      Int      |  Int
-      Dbl      |  Dbl
-      Str      |  Str
-      Arr      |  Arr
-      Obj      |  Obj
+      Int      | Int
+      Dbl      | Dbl
+      Str      | Str
+      Arr      | Arr
+      Vec      | Vec
+      Dict     | Dict
+      Keyset   | Keyset
+      Obj      | Obj
+      ArrLike  | Arr or Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
 
   If t is Obj, this instruction checks if the operand in an object.
@@ -1832,26 +1836,32 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
 
 IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
 
-  Is type. This instruction first loads a type into t and a value into x as
-  given by the following table:
+  Is type. This instruction checks the type of a local, according to the
+  following table:
 
-    operand        t                           x
-    -----------+----------------------------+-------
-      Null     | Null                       |  true
-      Bool     | Bool                       | false
-      Int      |  Int                       | false
-      Dbl      |  Dbl                       | false
-      Str      |  Str                       | false
-      Arr      |  Arr                       | false
-      Obj      |  Obj                       | false
-      Scalar   |  Int or Dbl or Str or Bool | false
+    operand        t
+    -----------+------
+      Null     | Null
+      Bool     | Bool
+      Int      | Int
+      Dbl      | Dbl
+      Str      | Str
+      Arr      | Arr
+      Vec      | Vec
+      Dict     | Dict
+      Keyset   | Keyset
+      Obj      | Obj
+      ArrLike  | Arr or Vec or Dict or Keyset
+      Scalar   | Int or Dbl or Str or Bool
 
   If the local variable given by %1 is defined, the logic is the same as for
     IsTypeC (see above).
   If the local is of kind reference, then the inner value is used to determine
     the type.
   If the local variable given by %1 is not defined, this instruction raises a
-  warning and pushes x onto the stack.
+  warning and pushes false onto the stack, unless if the operand is Null, in
+  which case it pushes true.
+
 
 IsUninit                        [C|U:<T>]  ->  [C|U:<T> C:Bool]
 
@@ -3990,7 +4000,7 @@ VerifyRetTypeV    [V] -> [V]
   a warning if there is a mismatch, and then it pushes $1 back onto the stack.
 
 VerifyRetNonNullC [C] -> [C]
-  
+
   This is intended to provide the same behavior as VerifyRetTypeC, except in
   only checks that $1 is non null. This should only be emitted by HHBBC if it
   can statically verify that return value will pass the function's type

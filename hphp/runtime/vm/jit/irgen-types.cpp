@@ -358,19 +358,20 @@ void verifyTypeImpl(IRGS& env, int32_t const id, bool isReturnType,
   }
 }
 
-DataType typeOpToDataType(IsTypeOp op) {
+Type typeOpToType(IsTypeOp op) {
   switch (op) {
-  case IsTypeOp::Uninit: return KindOfUninit;
-  case IsTypeOp::Null:   return KindOfNull;
-  case IsTypeOp::Int:    return KindOfInt64;
-  case IsTypeOp::Dbl:    return KindOfDouble;
-  case IsTypeOp::Bool:   return KindOfBoolean;
-  case IsTypeOp::Str:    return KindOfString;
-  case IsTypeOp::Vec:    return KindOfVec;
-  case IsTypeOp::Dict:   return KindOfDict;
-  case IsTypeOp::Keyset: return KindOfKeyset;
-  case IsTypeOp::Arr:    return KindOfArray;
-  case IsTypeOp::Obj:    return KindOfObject;
+  case IsTypeOp::Uninit:  return TUninit;
+  case IsTypeOp::Null:    return TInitNull;
+  case IsTypeOp::Int:     return TInt;
+  case IsTypeOp::Dbl:     return TDbl;
+  case IsTypeOp::Bool:    return TBool;
+  case IsTypeOp::Str:     return TStr;
+  case IsTypeOp::Vec:     return TVec;
+  case IsTypeOp::Dict:    return TDict;
+  case IsTypeOp::Keyset:  return TKeyset;
+  case IsTypeOp::Arr:     return TArr;
+  case IsTypeOp::Obj:     return TObj;
+  case IsTypeOp::ArrLike: return TArrLike;
   case IsTypeOp::VArray:
   case IsTypeOp::DArray:
   case IsTypeOp::Scalar: not_reached();
@@ -613,11 +614,11 @@ void emitIsTypeC(IRGS& env, IsTypeOp subop) {
   } else if (subop == IsTypeOp::Arr) {
     push(env, isArrayImpl(env, src));
   } else {
-    auto const t = typeOpToDataType(subop);
-    if (t == KindOfObject) {
+    auto const t = typeOpToType(subop);
+    if (t <= TObj) {
       push(env, optimizedCallIsObject(env, src));
     } else {
-      push(env, gen(env, IsType, Type(t), src));
+      push(env, gen(env, IsType, t, src));
     }
   }
   decRef(env, src);
@@ -636,11 +637,11 @@ void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
   } else if (subop == IsTypeOp::Arr) {
     push(env, isArrayImpl(env, val));
   } else {
-    auto const t = typeOpToDataType(subop);
-    if (t == KindOfObject) {
+    auto const t = typeOpToType(subop);
+    if (t <= TObj) {
       push(env, optimizedCallIsObject(env, val));
     } else {
-      push(env, gen(env, IsType, Type(t), val));
+      push(env, gen(env, IsType, t, val));
     }
   }
 }

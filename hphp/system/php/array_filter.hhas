@@ -20,7 +20,7 @@ warning:  Cns "E_WARNING"
           Null
           RetC
 
-start:          IsTypeL $arr Arr
+start:          IsTypeL $arr ArrLike
                 JmpZ not_array
 
                 IssetL $func

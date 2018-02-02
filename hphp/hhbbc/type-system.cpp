@@ -2768,6 +2768,7 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Obj:    return TObj;
   case IsTypeOp::VArray: return TVArr;
   case IsTypeOp::DArray: return TDArr;
+  case IsTypeOp::ArrLike:
   case IsTypeOp::Scalar: always_assert(0);
   }
   not_reached();

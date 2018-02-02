@@ -31,7 +31,7 @@ check_collection:
 two_args: Null
           SetL $res
           PopC
-got_args: IsTypeL $input Arr
+got_args: IsTypeL $input ArrLike
           JmpZ check_collection
 check_func:
           IssetL $func

@@ -89,7 +89,7 @@ endloop_kt:
 # if we get here, there was only one array,
 # so we use the fast, php version
 one_array:
-          IsTypeL $arr Arr
+          IsTypeL $arr ArrLike
           JmpZ not_array
           IssetL $func
           JmpZ ident
